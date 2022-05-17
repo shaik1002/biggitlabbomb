@@ -33,8 +33,7 @@ GitLab Inc engineers should refer to the [engineering workflow document](https:/
 
 ## Security vulnerability disclosure
 
-Report suspected security vulnerabilities in private to
-`support@gitlab.com`, also see the
+Report suspected security vulnerabilities in private by using one of the methods described in the
 [disclosure section on the GitLab.com website](https://about.gitlab.com/security/disclosure/).
 
 WARNING:
