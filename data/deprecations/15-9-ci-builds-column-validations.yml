@@ -22,9 +22,9 @@
   stage: Verify  # (required) String value of the stage that the feature was created in. e.g., Growth
   issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/372770  # (required) Link to the deprecation issue in GitLab
   body: |  # (required) Do not modify this line, instead modify the lines below.
-    It is [documented](https://docs.gitlab.com/ee/ci/jobs/index.html#job-name-limitations) that job name must be 255 characters or less but this limit is not enforced in the database.
+    Job name character limits are [documented](https://docs.gitlab.com/ee/ci/jobs/index.html#job-name-limitations) as 255 characters or less but this limit is not enforced in the database for self-managed instances today.
 
-    In the 16.0 milestone the job name limit will be enforced at 255 for new database entries.
+    In the 16.0 milestone the job name limit will be enforced at 255 for new database entries in the `ci_build` table. Users on self-maanged instances that use job names longer than that will need to alter the job names in pipelines. After this change existing data will not be truncated in the database. 
     
     <!-- START OF BODY COMMENT
 
