@@ -12,7 +12,7 @@
 #
 # REQUIRED FIELDS
 #
-- title: "Enforced validation of job and stage name lengths"  # (required) Clearly explain the change. For example, "The `confidential` field for a `Note` is removed" or "CI/CD job names are limited to 250 characters."
+- title: "Enforced validation of stage name lengths"  # (required) Clearly explain the change. For example, "The `confidential` field for a `Note` is removed" or "CI/CD job names are limited to 250 characters."
   announcement_milestone: "15.9"  # (required) The milestone when this feature was deprecated.
   announcement_date: "2023-02-22"  # (required) The date of the milestone release when this feature was deprecated. This should almost always be the 22nd of a month (YYYY-MM-DD), unless you did an out of band blog post.
   removal_milestone: "16.0"  # (required) The milestone when this feature is being removed.
@@ -22,9 +22,9 @@
   stage: Verify  # (required) String value of the stage that the feature was created in. e.g., Growth
   issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/372770  # (required) Link to the deprecation issue in GitLab
   body: |  # (required) Do not modify this line, instead modify the lines below.
-    Job name character limits are [documented](https://docs.gitlab.com/ee/ci/jobs/index.html#job-name-limitations) as 255 characters or fewer, but this limit is not currently enforced in the database for self-managed instances.
-
-    In the 16.0 milestone, the job name limit will be enforced at 255 characters for new database entries in the `ci_build` table. Users on self-managed instances that use job names longer than 255 characters will need to shorten the job names in pipelines. After this change, existing data will not be truncated in the database. 
+    Stage names are not limited like [job names](https://docs.gitlab.com/ee/ci/jobs/index.html#job-name-limitations) which have a limit of 255 characters or fewer.
+    
+    In the 16.0 milestone, the stage name limit will be enforced at 255 characters along with other text fields for new database entries in the `ci_builds` table. Users on self-managed instances that use stage names longer than 255 characters will need to shorten the job names in pipelines. After this change, existing data will not be truncated in the database. 
     
     <!-- START OF BODY COMMENT
 
@@ -46,6 +46,6 @@
 # OPTIONAL FIELDS
 #
   tiers:  # (optional - may be required in the future) An array of tiers that the feature is available in currently.  e.g., [Free, Silver, Gold, Core, Premium, Ultimate]
-  documentation_url: "https://docs.gitlab.com/ee/ci/jobs/" # (optional) This is a link to the current documentation page
+  documentation_url: "https://docs.gitlab.com/ee/ci/yaml/#stages" # (optional) This is a link to the current documentation page
   image_url:  # (optional) This is a link to a thumbnail image depicting the feature
   video_url:  # (optional) Use the youtube thumbnail URL with the structure of https://img.youtube.com/vi/UNIQUEID/hqdefault.jpg
