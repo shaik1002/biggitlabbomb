@@ -23,9 +23,9 @@
   issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/372770  # (required) Link to the deprecation issue in GitLab
   body: |  # (required) Do not modify this line, instead modify the lines below.
     Stage names are not limited like [job names](https://docs.gitlab.com/ee/ci/jobs/index.html#job-name-limitations) which have a limit of 255 characters or fewer.
-    
-    In the 16.0 milestone, the stage name limit will be enforced at 255 characters along with other text fields for new database entries in the `ci_builds` table. Users on self-managed instances that use stage names longer than 255 characters will need to shorten the job names in pipelines. After this change, existing data will not be truncated in the database. 
-    
+
+    In the 16.0 milestone, the stage name limit will be enforced at 255 characters along with other text fields for new database entries in the `ci_builds` table. Users on self-managed instances that use stage names longer than 255 characters will need to shorten the job names in pipelines. After this change, existing data will not be truncated in the database.
+
     <!-- START OF BODY COMMENT
 
     Be clear and concise. Give a brief explanation of the details or reasons for the change.
