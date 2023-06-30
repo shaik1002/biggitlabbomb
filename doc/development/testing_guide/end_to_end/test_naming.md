@@ -4,7 +4,7 @@ group: unassigned
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
-# Test Naming
+# Naming
 
 Test names should form a readable sentence defining the purpose of the test. Our [testing guide](index.md) extends the [Thoughtbot testing style guide](https://github.com/thoughtbot/guides/tree/master/testing-rspec). This page clarifies the guidelines, along with input from [https://www.betterspecs.org/](https://www.betterspecs.org/) and [the RSpec naming guide](https://rspec.rubystyle.guide/#naming.)
 
@@ -77,7 +77,7 @@ graph TB
   sub_names -- no --> context_correct
   context_correct -- no --> fix_context
   fix_context --> test_name
-  
+
   context_correct -- yes --> if_test
   if_test -- yes --> test_name_complete
   if_test -- no --> fix_if
