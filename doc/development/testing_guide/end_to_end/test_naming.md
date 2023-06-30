@@ -36,7 +36,7 @@ This diagram shows conceptually how the elements used in creating a test name ar
 
 An example:
 
-```
+``` ruby
 RSpec.describe 'Plan', product_group: :knowledge do
   describe 'wiki content creation' do
     context 'when inside a project'
