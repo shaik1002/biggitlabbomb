@@ -277,6 +277,7 @@ Continued reading:
 
 - [Beginner's Guide](beginners_guide.md)
 - [Style Guide](style_guide.md)
+- [Test Naming Guide](testing_naming.md)
 - [Best Practices](best_practices.md)
 - [Testing with feature flags](feature_flags.md)
 - [Flows](flows.md)
