@@ -9,6 +9,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 Test names should form a readable sentence defining the purpose of the test. Our [testing guide](index.md) extends the [Thoughtbot testing style guide](https://github.com/thoughtbot/guides/tree/master/testing-rspec). This page clarifies the guidelines, along with input from [https://www.betterspecs.org/](https://www.betterspecs.org/) and [the RSpec naming guide](https://rspec.rubystyle.guide/#naming.)
 
 ## Recommended Approach
+
 The following block generates a test named `Plan wiki content creation when inside a project successfully adds a home page`
 
 ``` ruby
@@ -44,6 +45,7 @@ end
     1. A `specify` block can be used instead of a named `it` block if the test is simple enough
 
 ### Conventions flowchart
+
 ```mermaid
 graph TB
   rspec_describe{`RSpec.describe`\nis\nDevOps Stage Name?}
@@ -84,4 +86,3 @@ graph TB
   fix_if --> test_name
 
 ```
-
