@@ -13,13 +13,13 @@ Test names should form a readable sentence defining the purpose of the test. Our
 The following block generates a test named `Plan wiki content creation when inside a project successfully adds a home page`
 
 ``` ruby
-# RSpec.describe is the DevOps Stage being covered 
+# `RSpec.describe` is the DevOps Stage being covered 
 RSpec.describe 'Plan', product_group: :knowledge do
-  # describe is the feature being tested
+  # `describe` is the feature being tested
   describe 'wiki content creation' do
-    # contexts provide the conditions being covered
+    # `context` provides the condition being covered
     context 'when inside a project'
-      # it defines the actual result of the test
+      # `it` defines the actual result of the test
       it 'successfully adds a home page'
       ...
       end
