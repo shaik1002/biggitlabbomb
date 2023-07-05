@@ -30,7 +30,6 @@ RSpec.describe 'Plan', product_group: :knowledge do
 end
 ```
 
-### Naming Conventions 
 
 1. Every `describe`, `context`, and `it` blocks should have a short description attached
 1. Keep individual description shorter than 40 characters.
