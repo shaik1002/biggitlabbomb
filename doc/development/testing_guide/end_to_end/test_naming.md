@@ -10,7 +10,7 @@ Test names should form a readable sentence defining the purpose of the test. Our
 
 ## Recommended Approach
 
-The following block generates a test named `Plan wiki content creation when inside a project successfully adds a home page`
+The following block generates a test named `Plan wiki content creation when inside a project adds a home page`
 
 ``` ruby
 # `RSpec.describe` is the DevOps Stage being covered 
@@ -20,7 +20,7 @@ RSpec.describe 'Plan', product_group: :knowledge do
     # `context` provides the condition being covered
     context 'when inside a project'
       # `it` defines the expected result of the test
-      it 'successfully adds a home page'
+      it 'adds a home page'
       ...
       end
     ...
