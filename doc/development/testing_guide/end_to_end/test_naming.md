@@ -30,7 +30,6 @@ RSpec.describe 'Plan', product_group: :knowledge do
 end
 ```
 
-
 1. Every `describe`, `context`, and `it` blocks should have a short description attached
 1. Keep individual description shorter than 40 characters.
     1. if it is longer or you have multiple conditionals, that is a sign it should be split up (additional `context` blocks)
