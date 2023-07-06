@@ -19,7 +19,7 @@ RSpec.describe 'Plan', product_group: :knowledge do
   describe 'wiki content creation' do
     # `context` provides the condition being covered
     context 'when inside a project'
-      # `it` defines the actual result of the test
+      # `it` defines the expected result of the test
       it 'successfully adds a home page'
       ...
       end
