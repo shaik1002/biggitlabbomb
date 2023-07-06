@@ -39,8 +39,8 @@ end
 1. Inside that block are `context` blocks with names that define what the conditions being tested are
     1. `context` blocks descriptions should begin with `when`, `with`, `without`, `for`, `and`, `on`, `in`, `as`, or `if` to match the [rubocop rule](https://www.rubydoc.info/gems/rubocop-rspec/RuboCop/Cop/RSpec/ContextWording)
     1. if the test is simple enough and does not need conditional blocks, `context` blocks may not be needed
-1. the innermost is the `it` block with a name that defines the pass/fail criteria for the test
-    1. A `specify` block can be used instead of a named `it` block if the test is simple enough
+1. The innermost `it` block describes the pass/fail criteria for the test
+  1. In `shared_examples` with a single example a `specify` block can be used instead of a named `it` block
 
 ### Conventions flowchart
 
