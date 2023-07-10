@@ -31,9 +31,8 @@ end
 ```
 
 1. Every `describe`, `context`, and `it` blocks should have a short description attached
-1. Keep individual description shorter than 40 characters.
-    1. if it is longer or you have multiple conditionals, that is a sign it should be split up (additional `context` blocks)
-    1. The full test name should be less than 60 characters
+1. Keep descriptions as concise as possible.
+    1. Long descriptions or multiple conditionals could be a sign it should be split up (additional `context` blocks)
 1. The outermost `Rspec.describe` block should be [the DevOps stage name](https://about.gitlab.com/handbook/product/categories/#devops-stages)
 1. Inside that block is a `describe` block with the name of the feature being tested
 1. Inside that block are optional `context` blocks with names that define what the conditions being tested are
