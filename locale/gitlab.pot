@@ -58247,6 +58247,9 @@ msgstr ""
 msgid "ciReport|Dependency scanning"
 msgstr ""
 
+msgid "ciReport|Detects known vulnerabilities in your software dependencies."
+msgstr ""
+
 msgid "ciReport|Detects known vulnerabilities in your source code's dependencies."
 msgstr ""
 
@@ -58299,6 +58302,9 @@ msgid "ciReport|License Compliance failed loading results"
 msgstr ""
 
 msgid "ciReport|License Compliance test metrics results are being parsed"
+msgstr ""
+
+msgid "ciReport|License scan results"
 msgstr ""
 
 msgid "ciReport|Load Performance"
