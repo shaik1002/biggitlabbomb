@@ -510,9 +510,10 @@ rspec:coverage:
     name: coverage
     expire_in: 31d
     paths:
-      - coverage/index.html
-      - coverage/assets/
-      - coverage/lcov/
+      # - coverage/index.html
+      # - coverage/assets/
+      # - coverage/lcov/
+      - coverage
     reports:
       coverage_report:
         coverage_format: cobertura

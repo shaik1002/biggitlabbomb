@@ -18578,9 +18578,6 @@ msgstr ""
 msgid "DownloadCommit|Plain Diff"
 msgstr ""
 
-msgid "DownloadSource|Download"
-msgstr ""
-
 msgid "Downloads"
 msgstr ""
 
@@ -46470,9 +46467,6 @@ msgid "See vulnerability %{vulnerability_link} for any Solution details."
 msgstr ""
 
 msgid "Select"
-msgstr ""
-
-msgid "Select Archive Format"
 msgstr ""
 
 msgid "Select Git revision"
