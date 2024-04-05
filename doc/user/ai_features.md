@@ -55,8 +55,6 @@ For other features:
 - [Code Suggestions](project/repository/code_suggestions/index.md) is enabled when you purchase the
   GitLab Duo Pro add-on and assign seats to users.
 - [Chat](gitlab_duo_chat.md)
-  - View [how to enable for self-managed](gitlab_duo_chat.md#for-self-managed-and-gitlab-dedicated).
-  - View [how to enable for GitLab.com](gitlab_duo_chat.md#for-gitlabcom).
 
 ### Disable GitLab Duo features
 

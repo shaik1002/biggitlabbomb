@@ -9,18 +9,22 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 DETAILS:
 **Tier:** Premium, Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
-**Status:** Beta
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/117695) as an [Experiment](../policy/experiment-beta-support.md#experiment) for SaaS in GitLab 16.0.
 > - Changed to [Beta](../policy/experiment-beta-support.md#beta) for SaaS in GitLab 16.6.
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/11251) as a [Beta](../policy/experiment-beta-support.md#beta) for self-managed in GitLab 16.8.
 > - Changed from Ultimate to [Premium](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/142808) tier in GitLab 16.9.
+> - Generally available in GitLab xx.x
+> - Free for Ultimate and Premium group members until 29 April, 2024
+> - Subscription to GitLab Duo Pro required as of 29 April, 2024.
 
 GitLab Duo Chat is your personal AI-powered assistant for boosting productivity.
 It can assist various tasks of your daily work with the AI-generated content.
 
 NOTE:
-GitLab Duo Chat is a Beta feature. We're continuously extending the capabilities and reliability of the responses.
+Until 29 April, 2024, users who are members of an Ultimate or Premium group will have free access to GitLab Duo Chat.
+
+As of 29 April, 2024, a GitLab Duo Pro seat license will be required for continued GitLab Duo Chat access.
 
 Here are examples of common use cases:
 
@@ -38,6 +42,8 @@ Here are examples of common use cases:
 **Footnotes:**
 
 1. GitLab Duo Chat is not available in the Web IDE on self-managed.
+1. Until 29 April, 2024, users who are members of an Ultimate or Premium group will have free access to GitLab Duo Chat.
+1. As of 29 April, 2024, a GitLab Duo Pro seat license will be required for continued GitLab Duo Chat access.
 
 ## Watch a demo and get tips
 
@@ -252,13 +258,16 @@ you must enable GitLab Duo Chat.
 
 To enable GitLab Duo Chat on GitLab.com:
 
-- At least one group that you're a member of must
-  have the [Experiment and Beta features setting](group/manage.md#enable-experiment-and-beta-features) enabled.
 - You must belong to a group that has a Premium or Ultimate subscription.
 
-You can ask questions only about resources that belong to groups where the experiment and beta features setting is enabled.
+You can ask questions only about resources that belong to groups that has a Premium or Ultimate subscription.
 
 ### For self-managed and GitLab Dedicated
+
+NOTE:
+Usage of GitLab Duo Chat is governed by GitLabs Testing Agreement Subscription agreement as Free Software.
+
+### For self-managed users
 
 Prerequisites:
 
@@ -275,7 +284,6 @@ To enable GitLab Duo Chat for your self-managed GitLab instance:
 
 1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Settings > General**.
-1. Expand **AI-powered features** and select **Enable Experiment and Beta AI-powered features**.
 1. Select **Save changes**.
 1. To make sure GitLab Duo Chat works immediately, you must
    [manually synchronize your subscription](#manually-synchronize-your-subscription).
