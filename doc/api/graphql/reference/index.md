@@ -35581,7 +35581,7 @@ see the associated mutation type above.
 | ---- | ---- | ----------- |
 | <a id="aichatinputagentversionid"></a>`agentVersionId` | [`AiAgentVersionID`](#aiagentversionid) | Global ID of the agent version to answer the chat. |
 | <a id="aichatinputcontent"></a>`content` | [`String!`](#string) | Content of the message. |
-| <a id="aichatinputcurrentfile"></a>`currentFile` **{warning-solid}** | [`AiCurrentFileInput`](#aicurrentfileinput) | **Deprecated:** **Status**: Experiment. Introduced in GitLab 16.6. |
+| <a id="aichatinputcurrentfile"></a>`currentFile` | [`AiCurrentFileInput`](#aicurrentfileinput) | Information about currently selected text which can be passed for additional context. |
 | <a id="aichatinputnamespaceid"></a>`namespaceId` | [`NamespaceID`](#namespaceid) | Global ID of the namespace the user is acting on. |
 | <a id="aichatinputresourceid"></a>`resourceId` | [`AiModelID`](#aimodelid) | Global ID of the resource to mutate. |
 
