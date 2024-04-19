@@ -4,7 +4,6 @@ module FeatureFlags
   class CreateService < FeatureFlags::BaseService
     def execute
       return error('Access Denied', 403) unless can_create?
-      return error('Version is invalid', :bad_request) unless valid_version?
 
       ApplicationRecord.transaction do
         feature_flag = project.operations_feature_flags.new(params)
@@ -43,10 +42,6 @@ module FeatureFlags
 
     def can_create?
       Ability.allowed?(current_user, :create_feature_flag, project)
-    end
-
-    def valid_version?
-      !params.key?(:version) || Operations::FeatureFlag.versions.key?(params[:version])
     end
   end
 end

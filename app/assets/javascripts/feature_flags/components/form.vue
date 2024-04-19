@@ -11,7 +11,6 @@ import {
   ROLLOUT_STRATEGY_PERCENT_ROLLOUT,
   ROLLOUT_STRATEGY_USER_ID,
   ALL_ENVIRONMENTS_NAME,
-  NEW_VERSION_FLAG,
 } from '../constants';
 import Strategy from './strategy.vue';
 
@@ -132,7 +131,6 @@ export default {
         name: this.formName,
         description: this.formDescription,
         active: this.active,
-        version: NEW_VERSION_FLAG,
         strategies: this.formStrategies,
       };
 

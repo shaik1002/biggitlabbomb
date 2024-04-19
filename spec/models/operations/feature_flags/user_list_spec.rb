@@ -83,7 +83,7 @@ RSpec.describe Operations::FeatureFlags::UserList do
     it 'does not delete the model if it is associated with a feature flag strategy' do
       project = create(:project)
       user_list = described_class.create!(project: project, name: 'My User List', user_xids: 'user1,user2')
-      feature_flag = create(:operations_feature_flag, :new_version_flag, project: project)
+      feature_flag = create(:operations_feature_flag, project: project)
       strategy = create(:operations_strategy, feature_flag: feature_flag, name: 'gitlabUserList', user_list: user_list)
 
       user_list.destroy # rubocop:disable Rails/SaveBang

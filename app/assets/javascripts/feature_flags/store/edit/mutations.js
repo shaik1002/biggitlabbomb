@@ -1,4 +1,3 @@
-import { LEGACY_FLAG } from '../../constants';
 import { mapStrategiesToViewModel } from '../helpers';
 import * as types from './mutation_types';
 
@@ -15,7 +14,6 @@ export default {
     state.iid = response.iid;
     state.active = response.active;
     state.strategies = mapStrategiesToViewModel(response.strategies);
-    state.version = response.version || LEGACY_FLAG;
   },
   [types.RECEIVE_FEATURE_FLAG_ERROR](state) {
     state.isLoading = false;

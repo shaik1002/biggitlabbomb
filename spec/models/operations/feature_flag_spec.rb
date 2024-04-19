@@ -18,7 +18,6 @@ RSpec.describe Operations::FeatureFlag do
 
   describe 'default values' do
     it { expect(described_class.new).to be_active }
-    it { expect(described_class.new.version).to eq('new_version_flag') }
   end
 
   describe '.reference_pattern' do
@@ -54,16 +53,13 @@ RSpec.describe Operations::FeatureFlag do
     it { is_expected.to validate_presence_of(:project) }
     it { is_expected.to validate_presence_of(:name) }
     it { is_expected.to validate_uniqueness_of(:name).scoped_to(:project_id) }
-    it { is_expected.to define_enum_for(:version).with_values(new_version_flag: 2) }
 
-    context 'a version 2 feature flag' do
-      it 'is valid if associated with Operations::FeatureFlags::Strategy models' do
-        project = create(:project)
-        feature_flag = described_class.create!({ name: 'test', project: project, version: 2,
-                                                 strategies_attributes: [{ name: 'default', parameters: {} }] })
+    it 'is valid if associated with Operations::FeatureFlags::Strategy models' do
+      project = create(:project)
+      feature_flag = described_class.create!({ name: 'test', project: project,
+                                                strategies_attributes: [{ name: 'default', parameters: {} }] })
 
-        expect(feature_flag).to be_valid
-      end
+      expect(feature_flag).to be_valid
     end
 
     it_behaves_like 'AtomicInternalId', validate_presence: true do
@@ -119,7 +115,7 @@ RSpec.describe Operations::FeatureFlag do
     let_it_be(:project) { create(:project) }
 
     let!(:feature_flag) do
-      create(:operations_feature_flag, project: project, name: 'feature1', active: true, version: 2)
+      create(:operations_feature_flag, project: project, name: 'feature1', active: true)
     end
 
     let!(:strategy) do
@@ -144,7 +140,7 @@ RSpec.describe Operations::FeatureFlag do
 
     it 'returns feature flags ordered by id' do
       create(:operations_scope, strategy: strategy, environment_scope: 'production')
-      feature_flag_b = create(:operations_feature_flag, project: project, name: 'feature2', active: true, version: 2)
+      feature_flag_b = create(:operations_feature_flag, project: project, name: 'feature2', active: true)
       strategy_b = create(:operations_strategy, feature_flag: feature_flag_b, name: 'default', parameters: {})
       create(:operations_scope, strategy: strategy_b, environment_scope: '*')
 

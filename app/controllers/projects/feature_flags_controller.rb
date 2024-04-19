@@ -101,7 +101,6 @@ class Projects::FeatureFlagsController < Projects::ApplicationController
       :name,
       :description,
       :active,
-      :version,
       scopes_attributes: [
         :environment_scope, :active,
         strategies: [:name, parameters: [:groupId, :percentage, :userIds]]

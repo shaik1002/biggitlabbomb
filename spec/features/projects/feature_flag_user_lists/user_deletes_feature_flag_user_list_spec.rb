@@ -30,7 +30,7 @@ RSpec.describe 'User deletes feature flag user list', :js, feature_category: :gr
   context 'with a list that is in use' do
     before do
       list = create(:operations_feature_flag_user_list, project: project, name: 'My List')
-      feature_flag = create(:operations_feature_flag, :new_version_flag, project: project)
+      feature_flag = create(:operations_feature_flag, project: project)
       create(:operations_strategy, feature_flag: feature_flag, name: 'gitlabUserList', user_list: list)
     end
 

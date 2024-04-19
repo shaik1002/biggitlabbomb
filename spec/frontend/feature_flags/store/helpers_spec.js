@@ -1,4 +1,3 @@
-import { NEW_VERSION_FLAG } from '~/feature_flags/constants';
 import { mapStrategiesToViewModel, mapStrategiesToRails } from '~/feature_flags/store/helpers';
 
 describe('feature flags helpers spec', () => {
@@ -77,7 +76,6 @@ describe('feature flags helpers spec', () => {
           name: 'test',
           description: 'test description',
           active: true,
-          version: NEW_VERSION_FLAG,
           strategies_attributes: [
             {
               id: '1',
@@ -117,7 +115,6 @@ describe('feature flags helpers spec', () => {
           name: 'test',
           description: 'test description',
           active: true,
-          version: NEW_VERSION_FLAG,
           strategies_attributes: [
             {
               id: '1',

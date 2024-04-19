@@ -393,7 +393,7 @@ RSpec.describe API::FeatureFlagsUserLists, feature_category: :feature_flags do
 
     it 'does not delete the list if it is associated with a strategy' do
       list = create_list
-      feature_flag = create(:operations_feature_flag, :new_version_flag, project: project)
+      feature_flag = create(:operations_feature_flag, project: project)
       create(:operations_strategy, feature_flag: feature_flag, name: 'gitlabUserList', user_list: list)
 
       delete api("/projects/#{project.id}/feature_flags_user_lists/#{list.iid}", developer)

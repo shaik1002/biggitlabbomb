@@ -47,7 +47,6 @@ RSpec.describe FeatureFlags::CreateService, feature_category: :feature_flags do
         {
           name: 'feature_flag',
           description: 'description',
-          version: 'new_version_flag',
           strategies_attributes: [{ name: 'default', scopes_attributes: [{ environment_scope: '*' }], parameters: {} },
                                   { name: 'default', parameters: {}, scopes_attributes: [{ environment_scope: 'production' }] }]
         }

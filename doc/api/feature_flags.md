@@ -47,7 +47,6 @@ Example response:
       "name":"merge_train",
       "description":"This feature is about merge train",
       "active": true,
-      "version": "new_version_flag",
       "created_at":"2019-11-04T08:13:51.423Z",
       "updated_at":"2019-11-04T08:13:51.423Z",
       "scopes":[],
@@ -72,7 +71,6 @@ Example response:
       "name":"new_live_trace",
       "description":"This is a new live trace feature",
       "active": true,
-      "version": "new_version_flag",
       "created_at":"2019-11-04T08:13:10.507Z",
       "updated_at":"2019-11-04T08:13:10.507Z",
       "scopes":[],
@@ -95,7 +93,6 @@ Example response:
       "name":"user_list",
       "description":"This feature is about user list",
       "active": true,
-      "version": "new_version_flag",
       "created_at":"2019-11-04T08:13:10.507Z",
       "updated_at":"2019-11-04T08:13:10.507Z",
       "scopes":[],
@@ -146,7 +143,6 @@ Example response:
   "name": "awesome_feature",
   "description": null,
   "active": true,
-  "version": "new_version_flag",
   "created_at": "2020-05-13T19:56:33.119Z",
   "updated_at": "2020-05-13T19:56:33.119Z",
   "scopes": [],
@@ -179,7 +175,6 @@ POST /projects/:id/feature_flags
 | ------------------- | ---------------- | ---------- |------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `id`                | integer/string   | yes        | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding).                                                                                                                                                                                                     |
 | `name`              | string           | yes        | The name of the feature flag.                                                                                                                                                                                                                                                            |
-| `version`           | string           | yes        | **Deprecated** The version of the feature flag. Must be `new_version_flag`. Omit to create a Legacy feature flag.                                                                                                                                                                        |
 | `description`       | string           | no         | The description of the feature flag.                                                                                                                                                                                                                                                     |
 | `active`            | boolean          | no         | The active state of the flag. Defaults to true. [Supported](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/38350) in GitLab 13.3 and later.                                                                                                                                       |
 | `strategies`        | array of strategy JSON objects | no         | The feature flag [strategies](../operations/feature_flags.md#feature-flag-strategies).                                                                                                                                                                                                   |
@@ -196,7 +191,6 @@ curl "https://gitlab.example.com/api/v4/projects/1/feature_flags" \
      --data @- << EOF
 {
   "name": "awesome_feature",
-  "version": "new_version_flag",
   "strategies": [{ "name": "default", "parameters": {}, "scopes": [{ "environment_scope": "production" }] }]
 }
 EOF
@@ -209,7 +203,6 @@ Example response:
   "name": "awesome_feature",
   "description": null,
   "active": true,
-  "version": "new_version_flag",
   "created_at": "2020-05-13T19:56:33.119Z",
   "updated_at": "2020-05-13T19:56:33.119Z",
   "scopes": [],
@@ -273,7 +266,6 @@ Example response:
   "name": "awesome_feature",
   "description": null,
   "active": true,
-  "version": "new_version_flag",
   "created_at": "2020-05-13T20:10:32.891Z",
   "updated_at": "2020-05-13T20:10:32.891Z",
   "scopes": [],

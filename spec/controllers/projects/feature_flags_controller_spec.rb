@@ -137,7 +137,7 @@ RSpec.describe Projects::FeatureFlagsController do
 
     context 'with version 1 and 2 feature flags' do
       let!(:new_version_feature_flag) do
-        create(:operations_feature_flag, :new_version_flag, project: project, name: 'feature_flag_c')
+        create(:operations_feature_flag, project: project, name: 'feature_flag_c')
       end
 
       it 'returns all feature flags as json response' do
@@ -178,7 +178,6 @@ RSpec.describe Projects::FeatureFlagsController do
 
       expect(json_response['name']).to eq(feature_flag.name)
       expect(json_response['active']).to eq(feature_flag.active)
-      expect(json_response['version']).to eq('new_version_flag')
     end
 
     it 'matches json schema' do
@@ -227,7 +226,7 @@ RSpec.describe Projects::FeatureFlagsController do
 
     context 'with a version 2 feature flag' do
       let!(:new_version_feature_flag) do
-        create(:operations_feature_flag, :new_version_flag, project: project)
+        create(:operations_feature_flag, project: project)
       end
 
       let(:params) do
@@ -243,7 +242,6 @@ RSpec.describe Projects::FeatureFlagsController do
 
         expect(json_response['name']).to eq(new_version_feature_flag.name)
         expect(json_response['active']).to eq(new_version_feature_flag.active)
-        expect(json_response['version']).to eq('new_version_flag')
       end
 
       it 'returns strategies ordered by id' do
@@ -369,7 +367,6 @@ RSpec.describe Projects::FeatureFlagsController do
 
         expect(json_response['name']).to eq('my_feature_flag')
         expect(json_response['active']).to be_truthy
-        expect(json_response['version']).to eq('new_version_flag')
       end
     end
 
@@ -519,28 +516,6 @@ RSpec.describe Projects::FeatureFlagsController do
         })])
       end
     end
-
-    context 'when version parameter is invalid' do
-      let(:params) do
-        {
-          namespace_id: project.namespace,
-          project_id: project,
-          operations_feature_flag: {
-            name: 'my_feature_flag',
-            active: true,
-            version: 'bad_version'
-          }
-        }
-      end
-
-      it 'returns a 400' do
-        subject
-
-        expect(response).to have_gitlab_http_status(:bad_request)
-        expect(json_response).to eq({ 'message' => 'Version is invalid' })
-        expect(Operations::FeatureFlag.count).to eq(0)
-      end
-    end
   end
 
   describe 'DELETE destroy.json' do
@@ -591,7 +566,7 @@ RSpec.describe Projects::FeatureFlagsController do
     end
 
     context 'with a version 2 flag' do
-      let!(:new_version_flag) { create(:operations_feature_flag, :new_version_flag, project: project) }
+      let!(:new_version_flag) { create(:operations_feature_flag, project: project) }
       let(:params) do
         {
           namespace_id: project.namespace,

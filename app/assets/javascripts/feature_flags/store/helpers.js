@@ -1,4 +1,4 @@
-import { ROLLOUT_STRATEGY_GITLAB_USER_LIST, NEW_VERSION_FLAG } from '../constants';
+import { ROLLOUT_STRATEGY_GITLAB_USER_LIST } from '../constants';
 
 const mapStrategyScopesToRails = (scopes) =>
   scopes.length === 0
@@ -63,6 +63,5 @@ export const mapStrategiesToRails = (params) => ({
     description: params.description,
     active: params.active,
     strategies_attributes: (params.strategies || []).map(mapStrategyToRails),
-    version: NEW_VERSION_FLAG,
   },
 });

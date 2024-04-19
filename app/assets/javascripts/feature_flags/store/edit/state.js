@@ -1,5 +1,3 @@
-import { LEGACY_FLAG } from '../../constants';
-
 export default ({ path, endpoint }) => ({
   endpoint,
   path,
@@ -14,5 +12,4 @@ export default ({ path, endpoint }) => ({
   iid: null,
   active: true,
   strategies: [],
-  version: LEGACY_FLAG,
 });

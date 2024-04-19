@@ -7,6 +7,7 @@ module Operations
     include IidRoutes
     include Limitable
     include Referable
+    include IgnorableColumns
 
     self.table_name = 'operations_feature_flags'
     self.limit_scope = :project
@@ -17,9 +18,9 @@ module Operations
     has_internal_id :iid, scope: :project
 
     attribute :active, default: true
-    attribute :version, default: :new_version_flag
 
-    # strategies exists only for the second version
+    ignore_column :version, remove_with: '17.2', remove_after: '2024-06-20'
+
     has_many :strategies, class_name: 'Operations::FeatureFlags::Strategy'
     has_many :feature_flag_issues
     has_many :issues, through: :feature_flag_issues, inverse_of: :feature_flags
@@ -43,12 +44,6 @@ module Operations
 
     scope :enabled, -> { where(active: true) }
     scope :disabled, -> { where(active: false) }
-
-    scope :new_version_only, -> { where(version: :new_version_flag) }
-
-    enum version: {
-      new_version_flag: 2
-    }
 
     class << self
       def preload_relations

@@ -60,7 +60,6 @@ module API
           requires :name, type: String, desc: 'The name of the feature flag'
           optional :description, type: String, desc: 'The description of the feature flag'
           optional :active, type: Boolean, desc: 'The active state of the flag. Defaults to `true`. Supported in GitLab 13.3 and later'
-          optional :version, type: String, desc: 'The version of the feature flag. Must be `new_version_flag`. Omit to create a Legacy feature flag.'
           optional :strategies, type: Array do
             requires :name, type: String, desc: 'The strategy name. Can be `default`, `gradualRolloutUserId`, `userWithId`, or `gitlabUserList`. In GitLab 13.5 and later, can be `flexibleRollout`'
             optional :parameters, type: JSON, desc: 'The strategy parameters as a JSON-formatted string e.g. `{"userIds":"user1"}`', documentation: { type: 'String' }
@@ -75,7 +74,6 @@ module API
 
           attrs = declared_params(include_missing: false)
 
-          rename_key(attrs, :scopes, :scopes_attributes)
           rename_key(attrs, :strategies, :strategies_attributes)
           update_value(attrs, :strategies_attributes) do |strategies|
             strategies.map { |s| rename_key(s, :scopes, :scopes_attributes) }
@@ -108,7 +106,6 @@ module API
         end
         get do
           authorize_read_feature_flag!
-          exclude_legacy_flags_check!
 
           present_entity(feature_flag)
         end
@@ -143,8 +140,6 @@ module API
         end
         put do
           authorize_update_feature_flag!
-          exclude_legacy_flags_check!
-          render_api_error!('PUT operations are not supported for legacy feature flags', :unprocessable_entity) unless feature_flag.new_version_flag?
 
           attrs = declared_params(include_missing: false)
 
@@ -224,10 +219,6 @@ module API
         @project ||= feature_flag.project
       end
 
-      def new_version_flag_present?
-        user_project.operations_feature_flags.new_version_flag.find_by_name(params[:name]).present?
-      end
-
       def rename_key(hash, old_key, new_key)
         hash[new_key] = hash.delete(old_key) if hash.key?(old_key)
         hash
@@ -236,12 +227,6 @@ module API
       def update_value(hash, key)
         hash[key] = yield(hash[key]) if hash.key?(key)
         hash
-      end
-
-      def exclude_legacy_flags_check!
-        unless feature_flag.new_version_flag?
-          not_found!
-        end
       end
     end
   end
