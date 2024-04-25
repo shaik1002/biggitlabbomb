@@ -4,7 +4,11 @@ require 'spec_helper'
 
 RSpec.describe API::ProjectStatistics, feature_category: :source_code_management do
   let_it_be(:reporter) { create(:user) }
-  let_it_be(:public_project) { create(:project, :public, reporters: reporter) }
+  let_it_be(:public_project) { create(:project, :public) }
+
+  before do
+    public_project.add_reporter(reporter)
+  end
 
   describe 'GET /projects/:id/statistics' do
     let_it_be(:fetch_statistics1) { create(:project_daily_statistic, project: public_project, fetch_count: 30, date: 29.days.ago) }

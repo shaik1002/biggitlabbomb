@@ -298,11 +298,6 @@ module.exports = {
         use: [],
       },
       {
-        test: /(@gitlab\/web-ide).*\.js?$/,
-        include: /node_modules/,
-        loader: 'babel-loader',
-      },
-      {
         test: /(@cubejs-client\/(vue|core)).*\.(js)?$/,
         include: /node_modules/,
         loader: 'babel-loader',

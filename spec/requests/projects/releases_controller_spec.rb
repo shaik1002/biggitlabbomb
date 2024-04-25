@@ -4,7 +4,11 @@ require 'spec_helper'
 
 RSpec.describe 'Projects::ReleasesController', feature_category: :release_orchestration do
   let_it_be(:project) { create(:project, :repository) }
-  let_it_be(:user) { create(:user, developer_of: project) }
+  let_it_be(:user) { create(:user) }
+
+  before do
+    project.add_developer(user)
+  end
 
   # Added as a request spec because of https://gitlab.com/gitlab-org/gitlab/-/issues/232386
   describe 'GET #downloads' do
