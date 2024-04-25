@@ -83,6 +83,9 @@
 .if-merge-request-labels-run-all-jest: &if-merge-request-labels-run-all-jest
   if: '$CI_MERGE_REQUEST_LABELS =~ /pipeline:run-all-jest/'
 
+.if-merge-request-labels-run-all-jest-vue3: &if-merge-request-labels-run-all-vue3
+  if: '$CI_MERGE_REQUEST_LABELS =~ /pipeline:run-all-jest-vue3/'
+
 .if-merge-request-labels-run-all-e2e: &if-merge-request-labels-run-all-e2e
   if: '$CI_MERGE_REQUEST_LABELS =~ /pipeline:run-all-e2e/'
 
@@ -1486,6 +1489,7 @@
 .frontend:rules:jest-vue3:
   rules:
     - <<: *if-default-branch-schedule-nightly
+    - <<: *if-merge-request-labels-run-all-vue3
 
 ################
 # Memory rules #

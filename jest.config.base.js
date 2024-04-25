@@ -22,7 +22,7 @@ module.exports = (path, options = {}) => {
     rootsJH: extRootsJH = [],
   } = options;
 
-  const reporters = ['default'];
+  const reporters = [['<rootDir>/spec/frontend/jest_reporter.js', {}]];
   const VUE_JEST_TRANSFORMER = USE_VUE_3 ? '@vue/vue3-jest' : '@vue/vue2-jest';
   const setupFilesAfterEnv = [`<rootDir>/${path}/test_setup.js`, 'jest-canvas-mock'];
   const vueModuleNameMappers = {};

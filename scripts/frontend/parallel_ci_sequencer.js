@@ -1,4 +1,10 @@
+const fs = require('node:fs');
+const { join } = require('node:path');
+
 const Sequencer = require('@jest/test-sequencer').default;
+
+const tmpPath = join(__dirname, '../../tmp/tests/frontend/');
+const targetFile = join(tmpPath, 'ci_jest_spec_sequence.txt');
 
 const sortByPath = (test1, test2) => {
   if (test1.path < test2.path) {
@@ -25,6 +31,10 @@ class ParallelCISequencer extends Sequencer {
     console.log(`CI_NODE_TOTAL: ${this.ciNodeTotal}`);
     console.log(`Total number of tests: ${tests.length}`);
     console.log(`Total number of tests for this runner: ${testsForThisRunner.length}`);
+
+    fs.mkdirSync(tmpPath, { recursive: true });
+    fs.writeFileSync(targetFile, `${testsForThisRunner.map((x) => x.path).join('\n')}\n`, 'utf-8');
+    console.log(`Wrote out sequence of specs to ${targetFile}`);
 
     return testsForThisRunner;
   }

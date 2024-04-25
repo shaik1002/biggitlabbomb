@@ -281,6 +281,8 @@ jest vue3:
     - jest
     - .frontend:rules:jest-vue3
     - .vue3
+  parallel: 18
+  timeout: 35m
 
 jest predictive:
   extends:

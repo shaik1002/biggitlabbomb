@@ -14,6 +14,7 @@ import createMockApollo from 'helpers/mock_apollo_helper';
 import getModelsQuery from '~/ml/model_registry/graphql/queries/get_models.query.graphql';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import waitForPromises from 'helpers/wait_for_promises';
+import { describeSkipVue3, SkipReason } from 'helpers/vue3_conditional';
 import { modelsQuery, modelWithOneVersion, modelWithoutVersion } from '../graphql_mock_data';
 
 Vue.use(VueApollo);
@@ -24,7 +25,13 @@ const defaultProps = {
   canWriteModelRegistry: false,
 };
 
-describe('ml/model_registry/apps/index_ml_models', () => {
+const skipReason = new SkipReason({
+  name: 'ml/model_registry/apps/index_ml_models',
+  reason: 'OOM on the worker',
+  issue: 'TBA',
+});
+
+describeSkipVue3(skipReason, () => {
   let wrapper;
   let apolloProvider;
 
