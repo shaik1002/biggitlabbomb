@@ -76,19 +76,6 @@ describe('Job Sidebar Details Container', () => {
     });
   });
 
-  describe('when code coverage exists but is zero', () => {
-    it('renders the coverage value', async () => {
-      createWrapper();
-
-      await store.dispatch('receiveJobSuccess', {
-        ...job,
-        coverage: 0,
-      });
-
-      expect(findAllDetailsRow().at(6).text()).toBe('Coverage: 0%');
-    });
-  });
-
   describe('when all the info are available', () => {
     it('renders all the details components', async () => {
       createWrapper();

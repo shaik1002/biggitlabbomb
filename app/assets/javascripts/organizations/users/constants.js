@@ -1,1 +1,0 @@
-export const ORGANIZATION_USERS_PER_PAGE = 20;

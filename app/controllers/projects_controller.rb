@@ -3,6 +3,7 @@
 class ProjectsController < Projects::ApplicationController
   include API::Helpers::RelatedResourcesHelpers
   include IssuableCollections
+  include ExtractsPath
   include PreviewMarkdown
   include SendFileUpload
   include RecordUserLastActivity
@@ -162,8 +163,7 @@ class ProjectsController < Projects::ApplicationController
   end
 
   def show
-    @id = @ref = repository_root
-    @path = ''
+    @id, @ref, @path = extract_ref_path
 
     if @project.import_in_progress?
       redirect_to project_import_path(@project, custom_import_params)
@@ -540,7 +540,15 @@ class ProjectsController < Projects::ApplicationController
     false
   end
 
-  def repository_root
+  # Override extract_ref from ExtractsPath, which returns the branch and file path
+  # for the blob/tree, which in this case is just the root of the default branch.
+  # This way we avoid to access the repository.ref_names.
+  def extract_ref(_id)
+    [get_id, '']
+  end
+
+  # Override get_id from ExtractsPath in this case is just the root of the default branch.
+  def get_id
     project.repository.root_ref
   rescue Gitlab::Git::CommandError
     # Empty string is intentional and prevent the @ref reload

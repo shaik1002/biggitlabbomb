@@ -49,7 +49,7 @@ item in group **Settings > SAML Group Links**.
 To link the SAML groups:
 
 1. In **SAML Group Name**, enter the value of the relevant `saml:AttributeValue`. The value entered here must exactly match the value sent in the SAML response. For some IdPs, this may be a group ID or object ID (Azure AD) instead of a friendly group name.
-1. Choose a [default role](../../permissions.md) or [custom role](../../custom_roles.md) in **Access Level**.
+1. Choose a [default role](../../permissions.md) or [custom role](../../custom_roles.md) in **Access Level**. 
 1. Select **Save**.
 1. Repeat to add additional group links if required.
 
@@ -138,14 +138,6 @@ Microsoft has [announced](https://azure.microsoft.com/en-us/updates/azure-ad-is-
 
 Azure AD sends up to 150 groups in the groups claim. When users are members of more than 150 groups Azure AD sends a
 group overage claim attribute in the SAML response. Then group memberships must be obtained using the Microsoft Graph API.
-
-The [Graph API endpoint](https://learn.microsoft.com/en-us/graph/api/user-list-transitivememberof?view=graph-rest-1.0&tabs=http#http-request) supports only a
-[user object ID](https://learn.microsoft.com/en-us/partner-center/find-ids-and-domain-names#find-the-user-object-id) or
-[userPrincipalName](https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/plan-connect-userprincipalname#what-is-userprincipalname)
-as the [configured](../../../user/group/saml_sso/index.md#azure) Unique User Identifier (Name identifier) attribute. 
-
-When the integration processes Group Sync, only Group Links configured with
-group unique identifiers (like `12345678-9abc-def0-1234-56789abcde`) are supported.
 
 To integrate Microsoft Azure AD, you:
 

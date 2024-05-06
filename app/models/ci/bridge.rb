@@ -19,10 +19,13 @@ module Ci
     self.allow_legacy_sti_class = true
 
     belongs_to :project
+    belongs_to :trigger_request
 
     has_one :downstream_pipeline, through: :sourced_pipeline, source: :pipeline
 
     validates :ref, presence: true
+
+    delegate :trigger_short_token, to: :trigger_request, allow_nil: true
 
     # rubocop:disable Cop/ActiveRecordSerialize
     serialize :options
@@ -34,6 +37,10 @@ module Ci
         bridge.run_after_commit do
           Ci::TriggerDownstreamPipelineService.new(bridge).execute # rubocop: disable CodeReuse/ServiceClass
         end
+      end
+
+      event :canceling do
+        transition CANCELABLE_STATUSES.map(&:to_sym) => :canceling
       end
 
       event :pending do
@@ -50,14 +57,6 @@ module Ci
 
       event :actionize do
         transition created: :manual
-      end
-
-      event :start_cancel do
-        transition CANCELABLE_STATUSES.map(&:to_sym) + [:manual] => :canceling
-      end
-
-      event :finish_cancel do
-        transition CANCELABLE_STATUSES.map(&:to_sym) + [:manual, :canceling] => :canceled
       end
     end
 
@@ -87,7 +86,7 @@ module Ci
       when 'success'
         success!
       when 'canceled'
-        finish_cancel!
+        cancel!
       when 'failed', 'skipped'
         drop!
       else

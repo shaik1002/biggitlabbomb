@@ -74,8 +74,6 @@ describe('PipelineFailedJobsWidget component', () => {
     });
   });
 
-  const CSS_BORDER_CLASSES = 'gl-border-white gl-hover-border-gray-100';
-
   describe('when the job button is clicked', () => {
     beforeEach(async () => {
       createComponent();
@@ -87,7 +85,9 @@ describe('PipelineFailedJobsWidget component', () => {
     });
 
     it('removes the CSS border classes', () => {
-      expect(findFailedJobsCard().attributes('class')).not.toContain(CSS_BORDER_CLASSES);
+      expect(findFailedJobsCard().attributes('class')).not.toContain(
+        'gl-border-white gl-hover-border-gray-100',
+      );
     });
   });
 
@@ -97,7 +97,9 @@ describe('PipelineFailedJobsWidget component', () => {
     });
 
     it('has the CSS border classes', () => {
-      expect(findFailedJobsCard().attributes('class')).toContain(CSS_BORDER_CLASSES);
+      expect(findFailedJobsCard().attributes('class')).toContain(
+        'gl-border-white gl-hover-border-gray-100',
+      );
     });
   });
 

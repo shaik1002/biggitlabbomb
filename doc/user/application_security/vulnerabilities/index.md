@@ -55,7 +55,7 @@ Prerequisites:
 - You must be a member of the project.
 - The vulnerability must be a SAST finding.
 
-Learn more about [how to enable all GitLab Duo features](../../ai_features_enable.md).
+Learn more about [how to enable all GitLab Duo features](../../ai_features.md#enabling-beta-and-experimental-ai-powered-features).
 
 To explain the vulnerability:
 
@@ -110,7 +110,7 @@ Prerequisites:
 - You must be a member of the project.
 - The vulnerability must be a SAST finding.
 
-Learn more about [how to enable all GitLab Duo features](../../ai_features_enable.md).
+Learn more about [how to enable all GitLab Duo features](../../ai_features.md#enabling-beta-and-experimental-ai-powered-features).
 
 To resolve the vulnerability:
 
@@ -165,8 +165,9 @@ When dismissing a vulnerability, one of the following reasons must be chosen to 
 
 Prerequisites:
 
-- You must have at least the Maintainer role for the project, or a custom role with the
-  `admin_vulnerability` permission.
+- You must have at least the Maintainer role for the project.
+- To add the ability to change a vulnerability status, add the `admin_vulnerability`
+  permission to a custom role.
 
 To change a vulnerability's status from its Vulnerability Page:
 
@@ -259,13 +260,8 @@ Be aware of the following conditions between a vulnerability and a linked Jira i
 
 ## Resolve a vulnerability
 
-For some vulnerabilities a solution is already known but needs to be implemented manually. The
-**Solution** field in the Vulnerability page is provided by the security scanning tool that
-reported the security finding, or entered during the [manual creation of a vulnerability](../vulnerability_report/index.md#manually-add-a-vulnerability).
-The GitLab tools utilize information from the [GitLab Advisory Database](../gitlab_advisory_database/index.md).
-
-Additionally, some tools may include a software patch to apply the suggested solution. In those instances,
-a vulnerability's page includes a **Resolve with merge request** option.
+For some vulnerabilities a solution is already known. In those instances, a vulnerability's page
+includes a **Resolve with merge request** option.
 
 The following scanners are supported by this feature:
 
@@ -309,6 +305,8 @@ To manually apply the patch that GitLab generated for a vulnerability:
 
 ## Enable security training for vulnerabilities
 
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/6176) in GitLab 14.9.
+
 NOTE:
 Security training is not accessible in an environment that is offline, meaning computers that are isolated from the public internet as a security measure. Specifically, the GitLab server needs the ability to query the API endpoints for any training provider you choose to enable. Some third-party training vendors may require you to sign up for a _free_ account. Sign up for an account by going to
 any of [Secure Code Warrior](https://www.securecodewarrior.com/), [Kontra](https://application.security/), or [SecureFlag](https://www.secureflag.com/).
@@ -326,6 +324,8 @@ To enable security training for vulnerabilities in your project:
 Each integration submits the Vulnerability identifier, for example CWE or OWASP, and the language to the security training vendor. The resulting link to the vendor training is what appears in a GitLab Vulnerability.
 
 ## View security training for a vulnerability
+
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/6176) in GitLab 14.9.
 
 The vulnerability page may include a training link relevant to the detected vulnerability if security training is enabled.
 The availability of training depends on whether the enabled training vendor has content matching the particular vulnerability.

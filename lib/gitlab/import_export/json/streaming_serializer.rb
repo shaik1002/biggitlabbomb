@@ -227,7 +227,8 @@ module Gitlab
                 order_expression: order_expression,
                 reversed_order_expression: reverse_order_expression,
                 order_direction: direction,
-                nullable: nulls_position
+                nullable: nulls_position,
+                distinct: false
               ),
               ::Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
                 attribute_name: klass.primary_key,

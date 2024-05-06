@@ -1,62 +1,51 @@
 import { nextTick } from 'vue';
-import { GlDisclosureDropdownItem, GlModal } from '@gitlab/ui';
+import { GlModal } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import CreateWorkItem from '~/work_items/components/create_work_item.vue';
 import CreateWorkItemModal from '~/work_items/components/create_work_item_modal.vue';
+import { visitUrl } from '~/lib/utils/url_utility';
 
-const showToast = jest.fn();
+jest.mock('~/lib/utils/url_utility', () => ({
+  visitUrl: jest.fn(),
+}));
 
 describe('CreateWorkItemModal', () => {
   let wrapper;
 
   const findTrigger = () => wrapper.find('[data-testid="new-epic-button"]');
-  const findDropdownItem = () => wrapper.findComponent(GlDisclosureDropdownItem);
   const findModal = () => wrapper.findComponent(GlModal);
   const findForm = () => wrapper.findComponent(CreateWorkItem);
 
-  const createComponent = (propsData = {}) => {
+  const createComponent = ({ workItemType } = {}) => {
     wrapper = shallowMount(CreateWorkItemModal, {
-      propsData,
-      mocks: {
-        $toast: {
-          show: showToast,
-        },
+      propsData: {
+        workItemType,
       },
     });
   };
 
-  it('passes workItemTypeName to CreateWorkItem', () => {
-    createComponent({ workItemTypeName: 'issue' });
+  it('passes workItemType to CreateWorkItem', () => {
+    createComponent({ workItemType: 'issue' });
 
-    expect(findForm().props('workItemTypeName')).toBe('issue');
+    expect(findForm().props('workItemType')).toBe('issue');
   });
 
-  it('shows toast on workItemCreated', () => {
+  it('calls visitUrl on workItemCreated', () => {
     createComponent();
 
     findForm().vm.$emit('workItemCreated', { webUrl: '/' });
 
-    expect(showToast).toHaveBeenCalledWith('Item created', expect.any(Object));
+    expect(visitUrl).toHaveBeenCalledWith('/');
   });
 
-  describe('default trigger', () => {
-    it('opens modal on trigger click', async () => {
-      createComponent();
+  it('opens modal on trigger click', async () => {
+    createComponent();
 
-      findTrigger().vm.$emit('click');
+    findTrigger().vm.$emit('click');
 
-      await nextTick();
+    await nextTick();
 
-      expect(findModal().props('visible')).toBe(true);
-    });
-  });
-
-  describe('dropdown item trigger', () => {
-    it('renders a dropdown item component', () => {
-      createComponent({ asDropdownItem: true });
-
-      expect(findDropdownItem().exists()).toBe(true);
-    });
+    expect(findModal().props('visible')).toBe(true);
   });
 
   it('closes modal on cancel event from form', () => {

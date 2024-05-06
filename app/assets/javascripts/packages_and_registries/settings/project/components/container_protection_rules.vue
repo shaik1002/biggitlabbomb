@@ -7,9 +7,7 @@ import {
   GlLoadingIcon,
   GlModal,
   GlModalDirective,
-  GlTooltipDirective,
   GlTable,
-  GlSprintf,
 } from '@gitlab/ui';
 import protectionRulesQuery from '~/packages_and_registries/settings/project/graphql/queries/get_container_protection_rules.query.graphql';
 import SettingsBlock from '~/packages_and_registries/shared/components/settings_block.vue';
@@ -41,11 +39,9 @@ export default {
     GlModal,
     GlTable,
     SettingsBlock,
-    GlSprintf,
   },
   directives: {
     GlModal: GlModalDirective,
-    GlTooltip: GlTooltipDirective,
   },
   inject: ['projectPath'],
   i18n: {
@@ -54,12 +50,11 @@ export default {
       'ContainerRegistry|When a container is protected then only certain user roles are able to push and delete the protected container image. This helps to avoid tampering with the container image.',
     ),
     protectionRuleDeletionConfirmModal: {
-      title: s__('ContainerRegistry|Delete container protection rule?'),
-      descriptionWarning: s__(
-        'ContainerRegistry|You are about to delete the container protection rule for %{repositoryPathPattern}.',
+      title: s__(
+        'ContainerRegistry|Are you sure you want to delete the container protection rule?',
       ),
-      descriptionConsequence: s__(
-        'ContainerRegistry|Users with at least the Developer role for this project will be able to push and delete container images to this repository path.',
+      description: s__(
+        'ContainerRegistry|Users with at least the Developer role for this project will be able to push and delete container images.',
       ),
     },
   },
@@ -124,7 +119,7 @@ export default {
     },
     modalActionPrimary() {
       return {
-        text: s__('ContainerRegistry|Delete container protection rule'),
+        text: __('Delete'),
         attributes: {
           variant: 'danger',
         },
@@ -223,7 +218,7 @@ export default {
     },
     {
       key: 'rowActions',
-      label: __('Actions'),
+      label: '',
       thClass: 'gl-display-none',
       tdClass: '!gl-align-middle gl-text-right',
     },
@@ -291,15 +286,14 @@ export default {
 
             <template #cell(rowActions)="{ item }">
               <gl-button
-                v-gl-tooltip
                 v-gl-modal="$options.modal.id"
-                category="tertiary"
-                icon="remove"
-                :title="__('Delete')"
-                :aria-label="__('Delete')"
+                category="secondary"
+                variant="danger"
+                size="small"
                 :disabled="isProtectionRuleDeleteButtonDisabled(item)"
                 @click="showProtectionRuleDeletionConfirmModal(item)"
-              />
+                >{{ s__('ContainerRegistry|Delete rule') }}</gl-button
+              >
             </template>
           </gl-table>
 
@@ -307,6 +301,7 @@ export default {
             <gl-keyset-pagination
               v-bind="protectionRulesQueryPageInfo"
               class="gl-mb-3"
+              :prev-text="__('Previous')"
               @prev="onPrevPage"
               @next="onNextPage"
             />
@@ -315,7 +310,6 @@ export default {
       </gl-card>
 
       <gl-modal
-        v-if="protectionRuleMutationItem"
         :modal-id="$options.modal.id"
         size="sm"
         :title="$options.i18n.protectionRuleDeletionConfirmModal.title"
@@ -323,16 +317,7 @@ export default {
         :action-cancel="modalActionCancel"
         @primary="deleteProtectionRule(protectionRuleMutationItem)"
       >
-        <p>
-          <gl-sprintf
-            :message="$options.i18n.protectionRuleDeletionConfirmModal.descriptionWarning"
-          >
-            <template #repositoryPathPattern>
-              <strong>{{ protectionRuleMutationItem.repositoryPathPattern }}</strong>
-            </template>
-          </gl-sprintf>
-        </p>
-        <p>{{ $options.i18n.protectionRuleDeletionConfirmModal.descriptionConsequence }}</p>
+        <p>{{ $options.i18n.protectionRuleDeletionConfirmModal.description }}</p>
       </gl-modal>
     </template>
   </settings-block>

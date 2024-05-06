@@ -7,7 +7,7 @@ import groupWorkItemTypesQueryResponse from 'test_fixtures/graphql/work_items/gr
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import CreateWorkItem from '~/work_items/components/create_work_item.vue';
-import WorkItemTitle from '~/work_items/components/work_item_title.vue';
+import WorkItemTitleWithEdit from '~/work_items/components/work_item_title_with_edit.vue';
 import { WORK_ITEM_TYPE_ENUM_EPIC } from '~/work_items/constants';
 import groupWorkItemTypesQuery from '~/work_items/graphql/group_work_item_types.query.graphql';
 import projectWorkItemTypesQuery from '~/work_items/graphql/project_work_item_types.query.graphql';
@@ -39,11 +39,9 @@ describe('Create work item component', () => {
   const createWorkItemSuccessHandler = jest.fn().mockResolvedValue(createWorkItemMutationResponse);
   const errorHandler = jest.fn().mockRejectedValue('Houston, we have a problem');
 
-  const findFormTitle = () => wrapper.find('h1');
   const findAlert = () => wrapper.findComponent(GlAlert);
-  const findTitleInput = () => wrapper.findComponent(WorkItemTitle);
+  const findTitleInput = () => wrapper.findComponent(WorkItemTitleWithEdit);
   const findSelect = () => wrapper.findComponent(GlFormSelect);
-  const findConfidentialCheckbox = () => wrapper.find('[data-testid="confidential-checkbox"]');
 
   const findCreateButton = () => wrapper.find('[data-testid="create-button"]');
   const findCancelButton = () => wrapper.find('[data-testid="cancel-button"]');
@@ -85,8 +83,13 @@ describe('Create work item component', () => {
   it('does not render error by default', () => {
     createComponent();
 
-    expect(findTitleInput().props('isValid')).toBe(true);
     expect(findAlert().exists()).toBe(false);
+  });
+
+  it('renders a disabled Create button when title input is empty', () => {
+    createComponent();
+
+    expect(findCreateButton().props('disabled')).toBe(true);
   });
 
   it('emits event on Cancel button click', () => {
@@ -108,35 +111,6 @@ describe('Create work item component', () => {
     expect(wrapper.emitted('workItemCreated')).toEqual([
       [createWorkItemMutationResponse.data.workItemCreate.workItem],
     ]);
-  });
-
-  it('emits workItemCreated for confidential work item', async () => {
-    createComponent();
-
-    findTitleInput().vm.$emit('updateDraft', 'Test title');
-    findConfidentialCheckbox().vm.$emit('change', true);
-
-    wrapper.find('form').trigger('submit');
-    await waitForPromises();
-
-    expect(createWorkItemSuccessHandler).toHaveBeenCalledWith({
-      input: expect.objectContaining({
-        title: 'Test title',
-        confidential: true,
-      }),
-    });
-  });
-
-  it('does not commit when title is empty', async () => {
-    createComponent();
-
-    findTitleInput().vm.$emit('updateDraft', ' ');
-
-    wrapper.find('form').trigger('submit');
-    await waitForPromises();
-
-    expect(findTitleInput().props('isValid')).toBe(false);
-    expect(wrapper.emitted('workItemCreated')).toEqual(undefined);
   });
 
   it('displays a loading icon inside dropdown when work items query is loading', () => {
@@ -190,7 +164,7 @@ describe('Create work item component', () => {
   it('filters types by workItemType', async () => {
     createComponent({
       props: {
-        workItemTypeName: WORK_ITEM_TYPE_ENUM_EPIC,
+        workItemType: WORK_ITEM_TYPE_ENUM_EPIC,
       },
     });
 
@@ -232,14 +206,6 @@ describe('Create work item component', () => {
     expect(findTitleInput().props('title')).toBe(initialTitle);
   });
 
-  it('hides title if set', () => {
-    createComponent({
-      props: { hideFormTitle: true },
-    });
-
-    expect(findFormTitle().exists()).toBe(false);
-  });
-
   describe('when title input field has a text', () => {
     beforeEach(async () => {
       const mockTitle = 'Test title';
@@ -248,7 +214,11 @@ describe('Create work item component', () => {
       findTitleInput().vm.$emit('updateDraft', mockTitle);
     });
 
-    it('renders Create button when work item type is selected', async () => {
+    it('renders a disabled Create button', () => {
+      expect(findCreateButton().props('disabled')).toBe(true);
+    });
+
+    it('renders a non-disabled Create button when work item type is selected', async () => {
       findSelect().vm.$emit('input', 'work-item-1');
       await nextTick();
       expect(findCreateButton().props('disabled')).toBe(false);

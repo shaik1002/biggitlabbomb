@@ -41,7 +41,7 @@ export default {
 </script>
 
 <template>
-  <ul class="gl-p-0 gl-m-0 gl-pt-2 gl-list-none">
+  <ul class="gl-p-0 gl-m-0 gl-pt-2 gl-list-style-none">
     <component
       :is="componentFromName(name)"
       v-for="(name, index) in componentNames"

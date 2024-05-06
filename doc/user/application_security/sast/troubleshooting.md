@@ -134,7 +134,7 @@ To try to resolve this issue you can:
 
 - Choose a lower [level of effort](index.md#security-scanner-configuration).
 - Set the CI/CD variable `JAVA_OPTS` to replace the default `-XX:MaxRAMPercentage=80`, e.g. `-XX:MaxRAMPercentage=90`.
-- [Tag a larger runner](../../../ci/runners/hosted_runners/linux.md#machine-types-available-for-linux---x86-64) in your `spotbugs-sast` job.
+- [Tag a larger runner](../../../ci/runners/hosted_runners/linux.md#machine-types-available-for-linux-x86-64) in your `spotbugs-sast` job.
 
 #### Related topics
 
@@ -179,4 +179,4 @@ scan_execution_policy:
 
 ## Semgrep slowness, unexpected results, or other errors
 
-If Semgrep is slow, reports too many false positives or false negatives, crashes, fails, or is otherwise broken, see the Semgrep docs for [troubleshooting GitLab SAST](https://semgrep.dev/docs/troubleshooting/semgrep-ci#troubleshooting-gitlab-sast).
+If Semgrep is slow, reports too many false positives or false negatives, crashes, fails, or is otherwise broken, see the Semgrep docs for [troubleshooting GitLab SAST](https://semgrep.dev/docs/troubleshooting/semgrep-ci/#troubleshooting-gitlab-sast).

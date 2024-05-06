@@ -138,10 +138,6 @@ module Integrations
 
     field :jira_issue_transition_id, api_only: true
 
-    field :issues_enabled,
-      required: false,
-      api_only: true
-
     field :project_keys,
       required: false,
       api_only: true
@@ -151,6 +147,7 @@ module Integrations
     # These fields are API only, so no field definition is required.
     data_field :jira_issue_transition_automatic
     data_field :project_key
+    data_field :issues_enabled
     data_field :vulnerabilities_enabled
     data_field :vulnerabilities_issuetype
 

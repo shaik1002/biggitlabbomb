@@ -1,3 +1,5 @@
+import '../webpack';
+
 import { isEmpty } from 'lodash';
 import Vue from 'vue';
 import axios from '~/lib/utils/axios_utils';

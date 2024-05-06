@@ -15,7 +15,6 @@ import { toNounSeriesText } from '~/lib/utils/grammar';
 import { cleanLeadingSeparator } from '~/lib/utils/url_utility';
 import Markdown from '~/vue_shared/components/markdown/non_gfm_markdown.vue';
 import { CI_RESOURCE_DETAILS_PAGE_NAME } from '../../router/constants';
-import { VERIFICATION_LEVEL_UNVERIFIED } from '../../constants';
 import CiVerificationBadge from '../shared/ci_verification_badge.vue';
 
 export default {
@@ -87,7 +86,7 @@ export default {
       return Boolean(this.latestVersion?.createdAt);
     },
     isVerified() {
-      return this.resource?.verificationLevel !== VERIFICATION_LEVEL_UNVERIFIED;
+      return this.resource?.verificationLevel !== 'UNVERIFIED';
     },
     latestVersion() {
       return this.resource?.versions?.nodes[0] || [];
@@ -140,7 +139,7 @@ export default {
     data-testid="catalog-resource-item"
   >
     <gl-avatar
-      class="gl-mr-4 gl-align-self-start"
+      class="gl-mr-4"
       :entity-id="entityId"
       :entity-name="resource.name"
       shape="rect"
@@ -167,9 +166,7 @@ export default {
           <b> {{ resource.name }}</b>
         </gl-link>
         <div class="gl-display-flex gl-flex-grow-1 gl-md-justify-content-space-between">
-          <gl-badge size="sm" class="gl-h-5 gl-align-self-center" variant="info">{{
-            name
-          }}</gl-badge>
+          <gl-badge size="sm" class="gl-h-5 gl-align-self-center">{{ name }}</gl-badge>
           <gl-button
             v-gl-tooltip.top
             data-testid="stats-favorites"

@@ -1,8 +1,9 @@
-import { GlTable } from '@gitlab/ui';
+import { GlPagination, GlTable } from '@gitlab/ui';
 import Vue from 'vue';
 // eslint-disable-next-line no-restricted-imports
 import Vuex from 'vuex';
-import { mountExtended } from 'helpers/vue_test_utils_helper';
+import setWindowLocation from 'helpers/set_window_location_helper';
+import { mountExtended, extendedWrapper } from 'helpers/vue_test_utils_helper';
 import CreatedAt from '~/members/components/table/created_at.vue';
 import ExpirationDatepicker from '~/members/components/table/expiration_datepicker.vue';
 import MemberActions from '~/members/components/table/member_actions.vue';
@@ -10,7 +11,6 @@ import MemberAvatar from '~/members/components/table/member_avatar.vue';
 import MemberSource from '~/members/components/table/member_source.vue';
 import MemberActivity from '~/members/components/table/member_activity.vue';
 import MembersTable from '~/members/components/table/members_table.vue';
-import MembersPagination from '~/members/components/table/members_pagination.vue';
 import MaxRole from '~/members/components/table/max_role.vue';
 import {
   MEMBER_TYPES,
@@ -34,7 +34,6 @@ import {
 Vue.use(Vuex);
 
 describe('MembersTable', () => {
-  /** @type {import('helpers/vue_test_utils_helper').ExtendedWrapper} */
   let wrapper;
 
   const createStore = (state = {}) => {
@@ -82,11 +81,21 @@ describe('MembersTable', () => {
     });
   };
 
+  const url = 'https://localhost/foo-bar/-/project_members?tab=invited';
+
   const findTable = () => wrapper.findComponent(GlTable);
   const findTableCellByMemberId = (tableCellLabel, memberId) =>
     wrapper
       .findByTestId(`members-table-row-${memberId}`)
       .find(`[data-label="${tableCellLabel}"][role="cell"]`);
+
+  const findPagination = () => extendedWrapper(wrapper.findComponent(GlPagination));
+
+  const expectCorrectLinkToPage2 = () => {
+    expect(findPagination().findByText('2', { selector: 'a' }).attributes('href')).toBe(
+      `${url}&invited_members_page=2`,
+    );
+  };
 
   describe('fields', () => {
     const memberCanUpdate = {
@@ -272,13 +281,75 @@ describe('MembersTable', () => {
     expect(findTable().find('tbody tr').attributes('data-testid')).toBe('member-row');
   });
 
-  it('renders `members-pagination` component with correct props', () => {
-    createComponent();
-    const membersPagination = wrapper.findComponent(MembersPagination);
+  describe('when required pagination data is provided', () => {
+    it('renders `gl-pagination` component with correct props', () => {
+      setWindowLocation(url);
 
-    expect(membersPagination.props()).toMatchObject({
-      pagination,
-      tabQueryParamValue: TAB_QUERY_PARAM_VALUES.invite,
+      createComponent();
+
+      const glPagination = findPagination();
+
+      expect(glPagination.exists()).toBe(true);
+      expect(glPagination.props()).toMatchObject({
+        value: pagination.currentPage,
+        perPage: pagination.perPage,
+        totalItems: pagination.totalItems,
+        prevText: 'Prev',
+        nextText: 'Next',
+        labelNextPage: 'Go to next page',
+        labelPrevPage: 'Go to previous page',
+        align: 'center',
+      });
+    });
+
+    it('uses `pagination.paramName` to generate the pagination links', () => {
+      setWindowLocation(url);
+
+      createComponent({
+        pagination: {
+          currentPage: 1,
+          perPage: 5,
+          totalItems: 10,
+          paramName: 'invited_members_page',
+        },
+      });
+
+      expectCorrectLinkToPage2();
+    });
+
+    it('removes any url params defined as `null` in the `params` attribute', () => {
+      setWindowLocation(`${url}&search_groups=foo`);
+
+      createComponent({
+        pagination: {
+          currentPage: 1,
+          perPage: 5,
+          totalItems: 10,
+          paramName: 'invited_members_page',
+          params: { search_groups: null },
+        },
+      });
+
+      expectCorrectLinkToPage2();
+    });
+  });
+
+  describe.each`
+    attribute        | value
+    ${'paramName'}   | ${null}
+    ${'currentPage'} | ${null}
+    ${'perPage'}     | ${null}
+    ${'totalItems'}  | ${0}
+  `('when pagination.$attribute is $value', ({ attribute, value }) => {
+    it('does not render `gl-pagination`', () => {
+      createComponent({
+        pagination: {
+          ...pagination,
+          [attribute]: value,
+        },
+      });
+
+      expect(findPagination().exists()).toBe(false);
     });
   });
 });

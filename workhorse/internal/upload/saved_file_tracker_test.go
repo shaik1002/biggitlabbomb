@@ -34,7 +34,7 @@ func TestSavedFileTracking(t *testing.T) {
 	require.NoError(t, err)
 
 	rewrittenFields := token.Claims.(*MultipartClaims).RewrittenFields
-	require.Len(t, rewrittenFields, 1)
+	require.Equal(t, 1, len(rewrittenFields))
 
 	require.Contains(t, rewrittenFields, "test")
 }

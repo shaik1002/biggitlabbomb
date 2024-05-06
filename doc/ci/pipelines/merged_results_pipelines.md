@@ -33,7 +33,7 @@ and is labeled as `merge request`.
 
 To use merged results pipelines:
 
-- Your project's `.gitlab-ci.yml` file must be configured to
+- Your project's [`.gitlab-ci.yml` file](../index.md#the-gitlab-ciyml-file) must be configured to
   [run jobs in merge request pipelines](merge_request_pipelines.md#prerequisites).
 - Your repository must be a GitLab repository, not an
   [external repository](../ci_cd_for_external_repos/index.md).
@@ -67,6 +67,6 @@ on your GitLab instance.
 ### Successful merged results pipeline overrides a failed branch pipeline
 
 A failed branch pipeline is sometimes ignored when the
-[**Pipelines must succeed** setting](../../user/project/merge_requests/auto_merge.md#require-a-successful-pipeline-for-merge)
+[**Pipelines must succeed** setting](../../user/project/merge_requests/merge_when_pipeline_succeeds.md#require-a-successful-pipeline-for-merge)
 is activated.
 [Issue 385841](https://gitlab.com/gitlab-org/gitlab/-/issues/385841) is open to track this.

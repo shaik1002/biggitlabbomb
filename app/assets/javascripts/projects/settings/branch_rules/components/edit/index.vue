@@ -39,7 +39,7 @@ export default {
       <branch-dropdown
         id="branches"
         v-model="branch"
-        class="gl-w-1/2"
+        class="gl-w-half"
         :project-path="projectPath"
         @createWildcard="branch = $event"
       />

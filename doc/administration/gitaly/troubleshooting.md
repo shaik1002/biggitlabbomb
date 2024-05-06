@@ -554,13 +554,7 @@ If you find that `fapolicyd` is denying execution, consider the following:
    allow perm=any all : ftype=application/x-executable dir=/var/opt/gitlab/gitaly/
    ```
 
-1. Restart the services:
-
-   ```shell
-   sudo systemctl restart fapolicyd
-
-   sudo gitlab-ctl restart gitaly
-   ```
+1. Restart the service.
 
 ## `Pre-receive hook declined` error when pushing to RHEL instance with `fapolicyd` enabled
 

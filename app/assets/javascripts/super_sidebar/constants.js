@@ -71,5 +71,3 @@ export const FIFTEEN_MINUTES_IN_MS = 900000;
 export const STORAGE_KEY = {
   projects: 'frequent-projects',
 };
-
-export const CONTEXT_NAMESPACE_GROUPS = 'groups';

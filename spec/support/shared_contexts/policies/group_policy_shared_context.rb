@@ -3,8 +3,7 @@
 RSpec.shared_context 'GroupPolicy context' do
   let_it_be(:organization) { create(:organization) }
   let_it_be(:group, refind: true) do
-    create(:group, :private, :owner_subgroup_creation_only, :allow_runner_registration_token,
-      organization: organization)
+    create(:group, :private, :owner_subgroup_creation_only, organization: organization)
   end
 
   let_it_be(:guest) { create(:user, guest_of: group) }

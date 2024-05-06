@@ -61,7 +61,7 @@
 #
 module CounterAttribute
   extend ActiveSupport::Concern
-  include AfterCommitQueue
+  extend AfterCommitQueue
   include Gitlab::ExclusiveLeaseHelpers
   include Gitlab::Utils::StrongMemoize
 

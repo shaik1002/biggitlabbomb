@@ -3,8 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Ci::RunningBuild, feature_category: :continuous_integration do
-  let_it_be(:group) { create(:group) }
-  let_it_be(:project) { create(:project, group: group) }
+  let_it_be(:project) { create(:project) }
   let_it_be(:pipeline) { create(:ci_pipeline, project: project) }
 
   let(:runner) { create(:ci_runner, :instance_type) }
@@ -31,16 +30,17 @@ RSpec.describe Ci::RunningBuild, feature_category: :continuous_integration do
     end
 
     context 'when build has been picked by a group runner' do
+      let_it_be(:group) { create(:group) }
       let_it_be(:runner) { create(:ci_runner, :group, groups: [group]) }
 
       it 'returns a build id as a result' do
         expect(upsert_build.rows.dig(0, 0)).to eq build.id
       end
 
-      it 'upserts a running build with a runner_owner_namespace_xid' do
+      it 'returns a build id as a result' do
         upsert_build
 
-        expect(described_class.find_by_build_id(build.id).runner_owner_namespace_xid).to eq group.id
+        expect(described_class.find_by_build_id(build.id)&.runner_owner_namespace_xid).to eq(group.id)
       end
     end
 

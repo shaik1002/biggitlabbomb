@@ -1,4 +1,4 @@
-import { GlModal, GlForm } from '@gitlab/ui';
+import { GlModal } from '@gitlab/ui';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import setWindowLocation from 'helpers/set_window_location_helper';
@@ -48,7 +48,6 @@ describe('BoardForm', () => {
   const findFormWrapper = () => wrapper.findByTestId('board-form-wrapper');
   const findDeleteConfirmation = () => wrapper.findByTestId('delete-confirmation-message');
   const findInput = () => wrapper.find('#board-new-name');
-  const findInputFormWrapper = () => wrapper.findComponent(GlForm);
 
   const defaultHandlers = {
     createBoardMutationHandler: jest.fn().mockResolvedValue({
@@ -95,9 +94,6 @@ describe('BoardForm', () => {
         ...provide,
       },
       attachTo: document.body,
-      stubs: {
-        GlForm,
-      },
     });
   };
 
@@ -179,14 +175,14 @@ describe('BoardForm', () => {
       const fillForm = () => {
         findInput().value = 'Test name';
         findInput().trigger('input');
-        findInputFormWrapper().trigger('submit');
+        findInput().trigger('keyup.enter', { metaKey: true });
       };
 
       it('does not call API if board name is empty', async () => {
         createComponent({
           props: { canAdminBoard: true, currentPage: formType.new },
         });
-        findInputFormWrapper().trigger('submit');
+        findInput().trigger('keyup.enter', { metaKey: true });
 
         await waitForPromises();
 
@@ -269,7 +265,7 @@ describe('BoardForm', () => {
         props: { canAdminBoard: true, currentPage: formType.edit },
       });
 
-      findInputFormWrapper().trigger('submit');
+      findInput().trigger('keyup.enter', { metaKey: true });
 
       await waitForPromises();
 
@@ -298,7 +294,7 @@ describe('BoardForm', () => {
         props: { canAdminBoard: true, currentPage: formType.edit },
       });
 
-      findInputFormWrapper().trigger('submit');
+      findInput().trigger('keyup.enter', { metaKey: true });
 
       await waitForPromises();
 
@@ -321,7 +317,7 @@ describe('BoardForm', () => {
         },
       });
 
-      findInputFormWrapper().trigger('submit');
+      findInput().trigger('keyup.enter', { metaKey: true });
 
       await waitForPromises();
 

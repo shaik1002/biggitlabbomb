@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class ProjectStatistics < ApplicationRecord
+  include AfterCommitQueue
   include CounterAttribute
 
   belongs_to :project

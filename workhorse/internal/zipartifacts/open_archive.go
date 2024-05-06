@@ -83,7 +83,7 @@ func openHTTPArchive(ctx context.Context, archivePath string) (*archive, error) 
 		return nil, fmt.Errorf("HTTP GET %q: %d: %v", scrubbedArchivePath, resp.StatusCode, resp.Status)
 	}
 
-	rs := httprs.NewHTTPReadSeeker(resp, httpClient)
+	rs := httprs.NewHttpReadSeeker(resp, httpClient)
 
 	go func() {
 		<-ctx.Done()

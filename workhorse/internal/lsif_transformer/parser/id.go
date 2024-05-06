@@ -7,15 +7,13 @@ import (
 )
 
 const (
-	minID = 1
-	maxID = 20 * 1000 * 1000
+	minId = 1
+	maxId = 20 * 1000 * 1000
 )
 
-// ID represents a unique identifier used in the parser
-type ID int32
+type Id int32
 
-// UnmarshalJSON parses the JSON-encoded data
-func (id *ID) UnmarshalJSON(b []byte) error {
+func (id *Id) UnmarshalJSON(b []byte) error {
 	if len(b) > 0 && b[0] != '"' {
 		if err := id.unmarshalInt(b); err != nil {
 			return err
@@ -26,18 +24,18 @@ func (id *ID) UnmarshalJSON(b []byte) error {
 		}
 	}
 
-	if *id < minID || *id > maxID {
+	if *id < minId || *id > maxId {
 		return errors.New("json: id is invalid")
 	}
 
 	return nil
 }
 
-func (id *ID) unmarshalInt(b []byte) error {
+func (id *Id) unmarshalInt(b []byte) error {
 	return json.Unmarshal(b, (*int32)(id))
 }
 
-func (id *ID) unmarshalString(b []byte) error {
+func (id *Id) unmarshalString(b []byte) error {
 	var s string
 	if err := json.Unmarshal(b, &s); err != nil {
 		return err
@@ -48,7 +46,7 @@ func (id *ID) unmarshalString(b []byte) error {
 		return err
 	}
 
-	*id = ID(i)
+	*id = Id(i)
 
 	return nil
 }

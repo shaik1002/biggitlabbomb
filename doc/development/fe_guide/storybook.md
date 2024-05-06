@@ -127,7 +127,7 @@ const Template = (_, { argTypes, createVueApollo }) => {
 
 export default {
   component: WorkspacesList,
-  title: 'ee/workspaces/workspaces_list',
+  title: 'ee/remote_development/workspaces_list',
   decorators: [withGitLabAPIAccess],
 };
 

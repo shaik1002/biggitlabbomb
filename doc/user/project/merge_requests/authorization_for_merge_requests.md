@@ -2,7 +2,6 @@
 stage: Create
 group: Code Review
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
-description: "The most common merge request flows in GitLab use forks, protected branches, or both."
 ---
 
 # Merge request workflows

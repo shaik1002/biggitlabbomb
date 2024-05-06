@@ -20,7 +20,6 @@ query getPackageDetails($id: PackagesPackageID!) {
     pypiSetupUrl
     composerUrl
     composerConfigRepositoryUrl
-    packageProtectionRuleExists
     project {
       id
       path

@@ -26,7 +26,7 @@ It can assist various tasks of your daily work with the AI-generated content.
 > - GitLab self-managed users with a Premium or Ultimate subscription.
 > - GitLab Dedicated users.
 >
-> Eventually a subscription add-on will be required for continued access to GitLab Duo Chat.
+> Eventually a subscription add-on will be required for continued access to GitLab Duo Chat. 
 > Learn more about [Duo Pro and Duo Enterprise pricing](https://about.gitlab.com/gitlab-duo/#pricing).
 
 Here are examples of common use cases:
@@ -168,7 +168,7 @@ This feature is available in VS Code, JetBrains IDEs, and the Web IDE only.
 
 `/tests` is a special command to generate a testing suggestion for the selected code in your editor.
 You can also add additional instructions to be considered, for example: `/tests using the Boost.Test framework`
-See [Use GitLab Duo Chat in VS Code](#use-gitlab-duo-chat-in-vs-code) for more information.
+See [Use GitLab Duo Chat in the VS Code](#use-gitlab-duo-chat-in-vs-code) for more information.
 
 - Use a specific test framework, for example `/tests using the Boost.test framework` (C++) or `/tests using Jest` (JavaScript).
 - Focus on extreme test cases, for example `/tests focus on extreme cases, force regression testing`.
@@ -268,9 +268,12 @@ Prerequisites:
 
 - You must have GitLab version 16.8 or later. You should use the latest GitLab version to benefit from the latest improvements to GitLab Duo Chat. The generally available version of GitLab Duo Chat in GitLab 16.11 has significant improvements in the quality of the answers.
 - You must have a Premium or Ultimate subscription that is [synchronized with GitLab](https://about.gitlab.com/pricing/licensing-faq/cloud-licensing/). To make sure GitLab Duo Chat works immediately, administrators can
-  [manually synchronize your subscription](#manually-synchronize-your-subscription).
-- You must have [enabled network connectivity](ai_features_enable.md#enable-gitlab-duo-on-self-managed-instances).
-- All of the users in your instance must have the latest version of their IDE extension.
+   [manually synchronize your subscription](#manually-synchronize-your-subscription).
+- Your firewalls and HTTP proxy servers must allow outbound connections
+  to `cloud.gitlab.com`. To use an HTTP proxy, both
+  `gitLab _workhorse` and `gitLab_rails` have the necessary
+  [web proxy environment variables](https://docs.gitlab.com/omnibus/settings/environment-variables.html) set.
+- All of the users in your instance have the latest version of their IDE extension.
 
 Then, depending on the version of GitLab you have, you can enable GitLab Duo Chat.
 
@@ -314,20 +317,15 @@ In GitLab 16.8, 16.9, and 16.10, on GitLab Dedicated, GitLab Duo Chat is availab
 
 ## Disable GitLab Duo Chat
 
-If you have a Premium or Ultimate subscription, the **GitLab Duo Chat** button
-is always displayed in the upper-right corner of the UI, and on the left sidebar under **Help**.
+To disable GitLab Duo Chat, follow the instructions for
+[disabling GitLab Duo features](ai_features.md#disable-gitlab-duo-features-for-specific-groups-or-projects-or-an-entire-instance).
 
-You do, however, have an option for changing the availability of GitLab Duo Chat.
+When you disable GitLab Duo features, GitLab Duo Chat no longer uses your organization's
+data when responding to questions. For example, you can no longer ask about your issues or epics.
 
-### Change the data used by GitLab Duo Chat
-
-To limit the data that Duo Chat has access to, follow the instructions for
-[disabling GitLab Duo features](ai_features_enable.md).
-
-When you make this change, the button is not removed. Instead,
-GitLab Duo Chat no longer uses your organization's data when responding to questions.
-For example, you can no longer ask about your issues or epics. You can, however,
-continue to ask generic questions about GitLab.
+However, the **GitLab Duo Chat** button continues to be displayed in the upper-right corner
+and on the left sidebar under **Help**, and
+you can continue to ask generic questions about GitLab.
 
 ## Use GitLab Duo Chat in the GitLab UI
 
@@ -433,13 +431,9 @@ To use GitLab Duo Chat in the GitLab Duo plugin for JetBrains IDEs:
 1. In a JetBrains IDE, open a project.
 1. Open Chat by using one of the following methods:
    - On the right tool window bar, select **GitLab Duo Chat**.
-   - Use a keyboard shortcut: <kbd>ALT</kbd> + <kbd>d</kbd> on Windows and Linux, or
-     <kbd>Option</kbd> + <kbd>d</kbd> on macOS.
-   - In the file that you have open in the editor:
-     1. Optional. Select some code.
+   - In the file that you have open in the editor, select some code.
      1. Right-click and select **GitLab Duo Chat**.
-     1. Select **Open Chat Window**.
-     1. Select **Explain Code**, **Generate Tests**, or **Refactor Code**.
+     1. Select **Explain Code** or **Generate Tests** or **Refactor Code**.
    - Add keyboard or mouse shortcuts for each action under **Keymap** in the **Settings**.
 1. In the message box, enter your question and press **Enter** or select **Send**.
 
@@ -462,7 +456,7 @@ ensure GitLab Duo Chat [is enabled](#enable-gitlab-duo-chat).
 
 The **GitLab Duo Chat** button is not displayed on personal projects,
 as well as
-[groups and projects with GitLab Duo features disabled](ai_features_enable.md).
+[groups and projects with GitLab Duo features disabled](ai_features.md#disable-gitlab-duo-features-for-specific-groups-or-projects-or-an-entire-instance).
 
 After you enable GitLab Duo Chat, it might take a few minutes for the
 button to appear.
@@ -470,7 +464,7 @@ button to appear.
 ### `This feature is only allowed in groups or projects that enable this feature`
 
 This error occurs when you ask about resources that do have
-GitLab Duo [disabled](ai_features_enable.md).
+GitLab Duo [disabled](ai_features.md#disable-gitlab-duo-features-for-specific-groups-or-projects-or-an-entire-instance).
 
 If any of the settings are not enabled, information about resources
 (like issues, epics, and merge requests) in the group or project

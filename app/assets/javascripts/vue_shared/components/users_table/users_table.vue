@@ -35,32 +35,32 @@ export default {
     {
       key: 'name',
       label: __('Name'),
-      thClass: 'gl-w-8/20',
+      thClass: 'gl-w-40p',
     },
     {
       key: 'projectsCount',
       label: __('Projects'),
-      thClass: 'gl-w-2/20',
+      thClass: 'gl-w-10p',
     },
     {
       key: 'groupCount',
       label: __('Groups'),
-      thClass: 'gl-w-2/20',
+      thClass: 'gl-w-10p',
     },
     {
       key: 'createdAt',
       label: __('Created on'),
-      thClass: 'gl-w-3/20',
+      thClass: 'gl-w-15p',
     },
     {
       key: 'lastActivityOn',
       label: __('Last activity'),
-      thClass: 'gl-w-3/20',
+      thClass: 'gl-w-15p',
     },
     {
       key: 'settings',
       label: '',
-      thClass: 'gl-w-2/20',
+      thClass: 'gl-w-10p',
     },
   ],
 };

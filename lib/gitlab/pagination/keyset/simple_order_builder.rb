@@ -139,7 +139,8 @@ module Gitlab
           Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
             attribute_name: attribute_name,
             order_expression: order_value,
-            nullable: nullability(order_value, attribute_name)
+            nullable: nullability(order_value, attribute_name),
+            distinct: false
           )
         end
 
@@ -152,7 +153,8 @@ module Gitlab
             order_expression: order_value,
             reversed_order_expression: order_value.reverse,
             order_direction: order_value.expr.direction,
-            nullable: order_value.is_a?(Arel::Nodes::NullsLast) ? :nulls_last : :nulls_first
+            nullable: order_value.is_a?(Arel::Nodes::NullsLast) ? :nulls_last : :nulls_first,
+            distinct: false
           )
         end
 
@@ -163,7 +165,8 @@ module Gitlab
             attribute_name: attribute_name,
             column_expression: Arel::Nodes::NamedFunction.new("LOWER", [model_class.arel_table[attribute_name]]),
             order_expression: order_value,
-            nullable: nullability(order_value, attribute_name)
+            nullable: nullability(order_value, attribute_name),
+            distinct: false
           )
         end
 

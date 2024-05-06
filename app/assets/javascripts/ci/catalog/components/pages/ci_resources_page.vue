@@ -2,8 +2,6 @@
 import { createAlert } from '~/alert';
 import { s__ } from '~/locale';
 import { ciCatalogResourcesItemsCount } from '~/ci/catalog/graphql/settings';
-import { historyPushState } from '~/lib/utils/common_utils';
-import { setUrlParams, getParameterByName } from '~/lib/utils/url_utility';
 import CatalogSearch from '../list/catalog_search.vue';
 import CatalogTabs from '../list/catalog_tabs.vue';
 import CiResourcesList from '../list/ci_resources_list.vue';
@@ -30,15 +28,13 @@ export default {
     EmptyState,
   },
   data() {
-    const searchTerm = getParameterByName('search');
-
     return {
       catalogResources: [],
       catalogResourcesCount: { all: 0, namespaces: 0 },
       currentPage: 1,
       pageInfo: {},
       scope: SCOPE.all,
-      searchTerm,
+      searchTerm: null,
       sortValue: DEFAULT_SORT_VALUE,
     };
   },
@@ -160,8 +156,6 @@ export default {
     onUpdateSearchTerm(searchTerm) {
       this.searchTerm = !searchTerm.length ? null : searchTerm;
       this.resetPageCount();
-
-      historyPushState(setUrlParams({ search: this.searchTerm }));
     },
     onUpdateSorting(sortValue) {
       this.sortValue = sortValue;
@@ -184,7 +178,6 @@ export default {
     />
     <catalog-search
       class="gl-py-2"
-      :initial-search-term="searchTerm"
       @update-search-term="onUpdateSearchTerm"
       @update-sorting="onUpdateSorting"
     />

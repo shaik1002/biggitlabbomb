@@ -14,10 +14,7 @@ module Ci
     has_one :resource, class_name: 'Ci::Resource', foreign_key: 'build_id', inverse_of: :processable
     has_one :sourced_pipeline, class_name: 'Ci::Sources::Pipeline', foreign_key: :source_job_id, inverse_of: :source_job
 
-    belongs_to :trigger_request
     belongs_to :resource_group, class_name: 'Ci::ResourceGroup', inverse_of: :processables
-
-    delegate :trigger_short_token, to: :trigger_request, allow_nil: true
 
     accepts_nested_attributes_for :needs
 
@@ -89,7 +86,6 @@ module Ci
       end
 
       after_transition any => [:failed] do |processable|
-        next if processable.allow_failure?
         next unless processable.can_auto_cancel_pipeline_on_job_failure?
 
         processable.run_after_commit do
@@ -232,14 +228,6 @@ module Ci
       strong_memoize(:all_dependencies) do
         dependencies.all
       end
-    end
-
-    def manual_job?
-      self.when == 'manual'
-    end
-
-    def manual_confirmation_message
-      options[:manual_confirmation] if manual_job?
     end
 
     private

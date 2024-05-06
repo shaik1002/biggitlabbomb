@@ -41,25 +41,10 @@ RSpec.describe Users::ActivityService, feature_category: :user_profile do
                 .to(Date.today)
       end
 
-      context 'for ExclusiveLease' do
-        context 'when the feature flag `do_not_use_exclusive_lease_for_user_activity_service` is turned off' do
-          before do
-            stub_feature_flags(do_not_use_exclusive_lease_for_user_activity_service: false)
-          end
+      it 'tries to obtain ExclusiveLease' do
+        expect(Gitlab::ExclusiveLease).to receive(:new).with("activity_service:#{user.id}", anything).and_call_original
 
-          it 'tries to obtain ExclusiveLease' do
-            expect(Gitlab::ExclusiveLease).to receive(:new).with("activity_service:#{user.id}", anything)
-              .and_call_original
-
-            subject.execute
-          end
-        end
-
-        it 'does not try to obtain ExclusiveLease' do
-          expect(Gitlab::ExclusiveLease).not_to receive(:new).with("activity_service:#{user.id}", anything)
-
-          subject.execute
-        end
+        subject.execute
       end
 
       it 'tracks RedisHLL event' do
@@ -123,22 +108,14 @@ RSpec.describe Users::ActivityService, feature_category: :user_profile do
       it_behaves_like 'does not update last_activity_on'
     end
 
-    context 'for ExclusiveLease' do
-      context 'when the feature flag `do_not_use_exclusive_lease_for_user_activity_service` is turned off' do
-        before do
-          stub_feature_flags(do_not_use_exclusive_lease_for_user_activity_service: false)
-        end
+    context 'when a lease could not be obtained' do
+      let(:last_activity_on) { nil }
 
-        context 'when a lease could not be obtained' do
-          let(:last_activity_on) { nil }
-
-          before do
-            stub_exclusive_lease_taken("activity_service:#{user.id}", timeout: 1.minute.to_i)
-          end
-
-          it_behaves_like 'does not update last_activity_on'
-        end
+      before do
+        stub_exclusive_lease_taken("activity_service:#{user.id}", timeout: 1.minute.to_i)
       end
+
+      it_behaves_like 'does not update last_activity_on'
     end
   end
 

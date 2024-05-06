@@ -13,9 +13,6 @@ import {
 } from '../utils/trigger_successful_invite_alert';
 
 import {
-  BLOCKED_SEAT_OVERAGES_ERROR_REASON,
-  BLOCKED_SEAT_OVERAGES_BODY,
-  BLOCKED_SEAT_OVERAGES_CTA,
   PROJECT_SELECT_LABEL_ID,
   IMPORT_PROJECT_MEMBERS_MODAL_TRACKING_CATEGORY,
   IMPORT_PROJECT_MEMBERS_MODAL_TRACKING_LABEL,
@@ -45,11 +42,6 @@ export default {
       label: IMPORT_PROJECT_MEMBERS_MODAL_TRACKING_LABEL,
     }),
   ],
-  inject: {
-    addSeatsHref: {
-      default: '',
-    },
-  },
   props: {
     projectId: {
       type: String,
@@ -72,7 +64,6 @@ export default {
   },
   data() {
     return {
-      errorReason: '',
       projectToBeImported: {},
       invalidFeedbackMessage: '',
       totalMembersCount: 0,
@@ -146,9 +137,6 @@ export default {
         count: this.errorsExpanded.length,
       });
     },
-    shouldShowSeatOverageNotification() {
-      return this.errorReason === BLOCKED_SEAT_OVERAGES_ERROR_REASON && this.addSeatsHref;
-    },
   },
   mounted() {
     if (this.reloadPageOnSubmit) {
@@ -190,9 +178,8 @@ export default {
           this.onInviteSuccess();
         }
       } catch (error) {
-        const { message, reason } = error.response.data || {};
+        const message = error.response.data?.message;
 
-        this.errorReason = reason;
         this.showErrorAlert(message);
       } finally {
         this.isLoading = false;
@@ -226,7 +213,6 @@ export default {
       this.track('click_x');
     },
     clearValidation() {
-      this.errorReason = '';
       this.invalidFeedbackMessage = '';
       this.invalidMembers = {};
     },
@@ -254,8 +240,6 @@ export default {
     modalCancelButton: __('Cancel'),
     defaultError: s__('ImportAProjectModal|Unable to import project members'),
     successMessage: s__('ImportAProjectModal|Successfully imported'),
-    BLOCKED_SEAT_OVERAGES_BODY,
-    BLOCKED_SEAT_OVERAGES_CTA,
   },
   errorsLimit: 2,
   projectSelectLabelId: PROJECT_SELECT_LABEL_ID,
@@ -345,18 +329,6 @@ export default {
     >
       <project-select v-model="projectToBeImported" />
     </gl-form-group>
-    <gl-alert
-      v-if="shouldShowSeatOverageNotification"
-      id="import-project-members-seat-overages-alert"
-      class="gl-mb-4"
-      dismissable
-      data-testid="import-project-members-seat-overages-alert"
-      :primary-button-link="addSeatsHref"
-      :primary-button-text="$options.i18n.BLOCKED_SEAT_OVERAGES_CTA"
-      @dismiss="errorReason = false"
-    >
-      {{ $options.i18n.BLOCKED_SEAT_OVERAGES_BODY }}
-    </gl-alert>
     <p>{{ $options.i18n.modalHelpText }}</p>
   </gl-modal>
 </template>

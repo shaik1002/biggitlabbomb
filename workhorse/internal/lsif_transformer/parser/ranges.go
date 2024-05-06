@@ -8,33 +8,33 @@ import (
 )
 
 type Ranges struct {
-	DefRefs    map[ID]Item
+	DefRefs    map[Id]Item
 	References *References
 	ResultSet  *ResultSet
 	Cache      *cache
 }
 
 type RawRange struct {
-	Id   ID    `json:"id"`
+	Id   Id    `json:"id"`
 	Data Range `json:"start"`
 }
 
 type Range struct {
 	Line        int32 `json:"line"`
 	Character   int32 `json:"character"`
-	ResultSetId ID
+	ResultSetId Id
 }
 
 type RawItem struct {
 	Property string `json:"property"`
-	RefId    ID     `json:"outV"`
-	RangeIds []ID   `json:"inVs"`
-	DocId    ID     `json:"document"`
+	RefId    Id     `json:"outV"`
+	RangeIds []Id   `json:"inVs"`
+	DocId    Id     `json:"document"`
 }
 
 type Item struct {
 	Line  int32
-	DocId ID
+	DocId Id
 }
 
 type SerializedRange struct {
@@ -62,7 +62,7 @@ func NewRanges() (*Ranges, error) {
 	}
 
 	return &Ranges{
-		DefRefs:    make(map[ID]Item),
+		DefRefs:    make(map[Id]Item),
 		References: references,
 		Cache:      cache,
 		ResultSet:  resultSet,
@@ -86,7 +86,7 @@ func (r *Ranges) Read(label string, line []byte) error {
 	return nil
 }
 
-func (r *Ranges) Serialize(f io.Writer, rangeIds []ID, docs map[ID]string) error {
+func (r *Ranges) Serialize(f io.Writer, rangeIds []Id, docs map[Id]string) error {
 	encoder := json.NewEncoder(f)
 	n := len(rangeIds)
 
@@ -137,7 +137,7 @@ func (r *Ranges) Close() error {
 	return nil
 }
 
-func (r *Ranges) definitionPathFor(docs map[ID]string, refId ID) string {
+func (r *Ranges) definitionPathFor(docs map[Id]string, refId Id) string {
 	defRef, ok := r.DefRefs[refId]
 	if !ok {
 		return ""
@@ -209,7 +209,7 @@ func (r *Ranges) addItem(line []byte) error {
 	return nil
 }
 
-func (r *Ranges) getRange(rangeId ID) (*Range, error) {
+func (r *Ranges) getRange(rangeId Id) (*Range, error) {
 	var rg Range
 	if err := r.Cache.Entry(rangeId, &rg); err != nil {
 		return nil, err

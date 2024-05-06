@@ -8,18 +8,11 @@ export default {
     GlSearchBoxByClick,
     GlSorting,
   },
-  props: {
-    initialSearchTerm: {
-      default: '',
-      required: false,
-      type: String,
-    },
-  },
   data() {
     return {
       currentSortOption: SORT_OPTION_RELEASED,
       isAscending: false,
-      searchTerm: this.initialSearchTerm,
+      searchTerm: '',
     };
   },
   computed: {

@@ -5,7 +5,7 @@ exports[`Merge request dashboard merge request component renders template 1`] = 
   class="gl-bg-white gl-p-5 gl-rounded-base"
 >
   <div
-    class="gl-display-flex"
+    class="gl-display-flex gl-mb-2"
   >
     <div
       class="gl-display-flex gl-flex-direction-column"
@@ -15,6 +15,7 @@ exports[`Merge request dashboard merge request component renders template 1`] = 
       >
         <gl-link-stub
           class="gl-hover-text-gray-900 gl-text-body"
+          href="#"
         >
           Merge request title
         </gl-link-stub>
@@ -31,11 +32,9 @@ exports[`Merge request dashboard merge request component renders template 1`] = 
       class="gl-display-flex gl-flex-direction-column gl-ml-auto"
     >
       <ul
-        class="gl-display-flex gl-justify-content-end gl-list-none gl-m-0 gl-p-0"
+        class="gl-display-flex gl-justify-content-end gl-list-style-none gl-m-0 gl-p-0"
       >
-        <li
-          class="gl-ml-4"
-        >
+        <li>
           <user-avatar-link-stub
             imgalt=""
             imgcssclasses=""
@@ -93,7 +92,7 @@ exports[`Merge request dashboard merge request component renders template 1`] = 
         </li>
       </ul>
       <div
-        class="gl-font-sm gl-mt-2 gl-text-right gl-text-secondary"
+        class="gl-font-sm gl-mt-2 gl-text-secondary"
       >
         <gl-sprintf-stub
           message="Updated at %{updatedAt}"

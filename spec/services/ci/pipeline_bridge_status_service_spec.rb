@@ -36,9 +36,7 @@ RSpec.describe Ci::PipelineBridgeStatusService, feature_category: :continuous_in
             .with(
               instance_of(Ci::Bridge::InvalidTransitionError),
               bridge_id: bridge.id,
-              downstream_pipeline_id: pipeline.id) do |error|
-            expect(error.backtrace).to be_present
-          end
+              downstream_pipeline_id: pipeline.id)
 
           subject
         end

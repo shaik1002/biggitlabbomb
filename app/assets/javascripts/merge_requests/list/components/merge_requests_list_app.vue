@@ -1,5 +1,4 @@
 <script>
-import { GlFilteredSearchToken } from '@gitlab/ui';
 import { isEmpty } from 'lodash';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import { STATUS_ALL, STATUS_CLOSED, STATUS_OPEN, STATUS_MERGED } from '~/issues/constants';
@@ -15,8 +14,6 @@ import {
   OPERATORS_IS,
   TOKEN_TITLE_AUTHOR,
   TOKEN_TYPE_AUTHOR,
-  TOKEN_TITLE_DRAFT,
-  TOKEN_TYPE_DRAFT,
 } from '~/vue_shared/components/filtered_search_bar/constants';
 import {
   convertToApiParams,
@@ -172,21 +169,6 @@ export default {
           recentSuggestionsStorageKey: `${this.fullPath}-merge-requests-recent-tokens-author`,
           preloadedUsers,
           multiselect: false,
-        },
-        {
-          type: TOKEN_TYPE_DRAFT,
-          title: TOKEN_TITLE_DRAFT,
-          icon: 'pencil-square',
-          token: GlFilteredSearchToken,
-          operators: OPERATORS_IS,
-          fullPath: this.fullPath,
-          isProject: true,
-          multiselect: false,
-          options: [
-            { value: 'yes', title: this.$options.i18n.yes },
-            { value: 'no', title: this.$options.i18n.no },
-          ],
-          unique: true,
         },
       ];
     },

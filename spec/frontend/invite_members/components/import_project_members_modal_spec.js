@@ -12,7 +12,7 @@ import eventHub from '~/invite_members/event_hub';
 import ImportProjectMembersModal from '~/invite_members/components/import_project_members_modal.vue';
 import ProjectSelect from '~/invite_members/components/project_select.vue';
 import axios from '~/lib/utils/axios_utils';
-import { HTTP_STATUS_CREATED, HTTP_STATUS_UNPROCESSABLE_ENTITY } from '~/lib/utils/http_status';
+import { HTTP_STATUS_CREATED } from '~/lib/utils/http_status';
 
 import {
   displaySuccessfulInvitationAlert,
@@ -54,11 +54,8 @@ const triggerOpenModal = async () => {
   await nextTick();
 };
 
-const createComponent = ({ props = {}, provide = {} } = {}) => {
+const createComponent = ({ props = {} } = {}) => {
   wrapper = shallowMountExtended(ImportProjectMembersModal, {
-    provide: {
-      ...provide,
-    },
     propsData: {
       projectId,
       projectName,
@@ -105,8 +102,6 @@ describe('ImportProjectMembersModal', () => {
   const findMoreInviteErrorsButton = () => wrapper.findByTestId('accordion-button');
   const findAccordion = () => wrapper.findComponent(GlCollapse);
   const findErrorsIcon = () => wrapper.findComponent(GlIcon);
-  const findSeatOveragesAlert = () =>
-    wrapper.findByTestId('import-project-members-seat-overages-alert');
   const findMemberErrorMessage = (element) =>
     `@${Object.keys(importProjectMembersApiResponse.EXPANDED_IMPORT_ERRORS.message)[element]}: ${
       Object.values(importProjectMembersApiResponse.EXPANDED_IMPORT_ERRORS.message)[element]
@@ -390,41 +385,6 @@ describe('ImportProjectMembersModal', () => {
 
         expect(findAccordion().exists()).toBe(false);
         expect(findMoreInviteErrorsButton().exists()).toBe(false);
-      });
-    });
-
-    describe('when the import fails due to a seat overage', () => {
-      const mockInvitationsApi = (code, data) => {
-        mock.onPost(IMPORT_PROJECT_MEMBERS_PATH).reply(code, data);
-      };
-
-      beforeEach(() => {
-        createComponent({ provide: { addSeatsHref: 'add_seats_url' } });
-        findProjectSelect().vm.$emit('input', projectToBeImported);
-      });
-
-      it('clears the error when the modal is closed', async () => {
-        mockInvitationsApi(
-          HTTP_STATUS_UNPROCESSABLE_ENTITY,
-          importProjectMembersApiResponse.SEAT_OVERAGE_IMPORT_ERRORS,
-        );
-
-        clickImportButton();
-        await waitForPromises();
-
-        expect(formGroupInvalidFeedback()).toBe(
-          'There are not enough available seats to invite this many users.',
-        );
-        expect(formGroupErrorState()).toBe(false);
-        expect(findSeatOveragesAlert().exists()).toBe(true);
-
-        closeModal();
-
-        await nextTick();
-
-        expect(formGroupInvalidFeedback()).toBe('');
-        expect(formGroupErrorState()).not.toBe(false);
-        expect(findSeatOveragesAlert().exists()).toBe(false);
       });
     });
   });

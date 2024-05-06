@@ -1,4 +1,3 @@
-// Package rejectmethods provides middleware to reject HTTP requests with unknown methods
 package rejectmethods
 
 import (

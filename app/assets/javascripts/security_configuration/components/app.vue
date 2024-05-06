@@ -10,12 +10,10 @@ import {
   AUTO_DEVOPS_ENABLED_ALERT_DISMISSED_STORAGE_KEY,
   TAB_VULNERABILITY_MANAGEMENT_INDEX,
   i18n,
-  PRE_RECEIVE_SECRET_DETECTION,
 } from '../constants';
 import AutoDevOpsAlert from './auto_dev_ops_alert.vue';
 import AutoDevOpsEnabledAlert from './auto_dev_ops_enabled_alert.vue';
 import FeatureCard from './feature_card.vue';
-import PreReceiveSecretDetectionFeatureCard from './pre_receive_secret_detection_feature_card.vue';
 import TrainingProviderList from './training_provider_list.vue';
 
 export default {
@@ -24,7 +22,6 @@ export default {
     AutoDevOpsAlert,
     AutoDevOpsEnabledAlert,
     FeatureCard,
-    PreReceiveSecretDetectionFeatureCard,
     GlAlert,
     GlLink,
     GlSprintf,
@@ -98,12 +95,6 @@ export default {
     },
   },
   methods: {
-    getComponentName(feature) {
-      if (feature.type === PRE_RECEIVE_SECRET_DETECTION) {
-        return 'pre-receive-secret-detection-feature-card';
-      }
-      return 'feature-card';
-    },
     dismissAutoDevopsEnabledAlert() {
       const dismissedProjects = new Set(this.autoDevopsEnabledAlertDismissedProjects);
       dismissedProjects.add(this.projectFullPath);
@@ -201,8 +192,7 @@ export default {
           </template>
 
           <template #features>
-            <component
-              :is="getComponentName(feature)"
+            <feature-card
               v-for="feature in augmentedSecurityFeatures"
               :id="feature.anchor"
               :key="feature.type"

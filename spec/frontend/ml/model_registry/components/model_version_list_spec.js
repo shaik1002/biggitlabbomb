@@ -36,7 +36,7 @@ describe('ModelVersionList', () => {
     wrapper = mountExtended(ModelVersionList, {
       apolloProvider,
       propsData: {
-        modelId: 'gid://gitlab/Ml::Model/2',
+        modelId: 2,
         ...props,
       },
     });

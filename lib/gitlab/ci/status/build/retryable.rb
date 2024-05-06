@@ -29,10 +29,6 @@ module Gitlab
             :post
           end
 
-          def confirmation_message
-            subject.manual_confirmation_message
-          end
-
           def self.matches?(build, user)
             build.retryable?
           end

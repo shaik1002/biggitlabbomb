@@ -25,7 +25,6 @@
 - build_artifacts
 - capacity_planning
 - cell
-- ci_scaling
 - cloud_connector
 - cloud_native_installation
 - code_quality

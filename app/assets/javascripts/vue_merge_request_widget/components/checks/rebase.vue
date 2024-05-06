@@ -52,13 +52,13 @@ export default {
   },
   data() {
     return {
-      state: null,
+      state: {},
       isMakingRequest: false,
     };
   },
   computed: {
     isLoading() {
-      return this.$apollo.queries.state.loading || !this.state;
+      return this.$apollo.queries.state.loading;
     },
     rebaseInProgress() {
       return this.state.rebaseInProgress;

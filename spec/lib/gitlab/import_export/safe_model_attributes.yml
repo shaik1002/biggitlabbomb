@@ -35,7 +35,6 @@ Issue:
 - issue_type
 - email_message_id
 - imported
-- imported_from
 Event:
 - id
 - target_type
@@ -47,7 +46,6 @@ Event:
 - author_id
 - fingerprint
 - imported
-- imported_from
 WikiPage::Meta:
 - id
 - title
@@ -92,7 +90,6 @@ Note:
 - last_edited_at
 - internal
 - imported
-- imported_from
 Notes::NoteMetadata:
 - note_id
 - email_participant
@@ -140,7 +137,6 @@ ProjectSnippet:
 - type
 - visibility_level
 - imported
-- imported_from
 Release:
 - id
 - name
@@ -226,7 +222,6 @@ MergeRequest:
 - merge_ref_sha
 - draft
 - imported
-- imported_from
 MergeRequestDiff:
 - id
 - state
@@ -1007,7 +1002,6 @@ Epic:
   - total_opened_issue_count
   - total_closed_issue_count
   - imported
-  - imported_from
 EpicIssue:
   - id
   - relative_position

@@ -57,8 +57,6 @@ export default {
     RunnerTypeTabs,
     RunnerActionsCell,
     RunnerJobStatusBadge,
-    RunnerDashboardLink: () =>
-      import('ee_component/ci/runner/components/runner_dashboard_link.vue'),
   },
   mixins: [glFeatureFlagMixin()],
   props: {
@@ -221,7 +219,6 @@ export default {
     <runner-list-header>
       <template #title>{{ s__('Runners|Runners') }}</template>
       <template #actions>
-        <runner-dashboard-link />
         <gl-button
           v-if="newRunnerPath"
           :href="newRunnerPath"
@@ -234,6 +231,7 @@ export default {
           :allow-registration-token="allowRegistrationToken"
           :registration-token="registrationToken"
           :type="$options.GROUP_TYPE"
+          placement="right"
         />
       </template>
     </runner-list-header>

@@ -72,12 +72,6 @@ module Types
           extras: [:lookahead],
           resolver: ::Resolvers::Achievements::AchievementsResolver
 
-    field :achievements_path, GraphQL::Types::String,
-          null: true,
-          alpha: { milestone: '17.0' },
-          description: "Path for the namespace's achievements. " \
-                       "Returns `null` if the namespace is not a group, or the `achievements` feature flag is disabled."
-
     field :work_item, Types::WorkItemType,
           null: true,
           resolver: Resolvers::Namespaces::WorkItemResolver,
@@ -85,18 +79,7 @@ module Types
           description: 'Find a work item by IID directly associated with the namespace(project or group).  Returns ' \
                        '`null` for group level work items if the `namespace_level_work_items` feature flag is disabled.'
 
-    field :pages_deployments, Types::PagesDeploymentType.connection_type, null: true,
-          resolver: Resolvers::PagesDeploymentsResolver,
-          connection: true,
-          description: "List of the namespaces's Pages Deployments."
-
     markdown_field :description_html, null: true
-
-    def achievements_path
-      return unless Feature.enabled?(:achievements)
-
-      ::Gitlab::Routing.url_helpers.group_achievements_path(object) if object.is_a?(Group)
-    end
 
     def timelog_categories
       object.timelog_categories if Feature.enabled?(:timelog_categories)

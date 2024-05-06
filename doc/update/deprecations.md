@@ -455,20 +455,6 @@ From GitLab 18.0 and later, the runner registration methods implemented by the n
 
 <div class="deprecation breaking-change" data-milestone="18.0">
 
-### The GitLab legacy requirement IID is deprecated in favor of work item IID
-
-<div class="deprecation-notes">
-- Announced in GitLab <span class="milestone">15.9</span>
-- Removal in GitLab <span class="milestone">18.0</span> ([breaking change](https://docs.gitlab.com/ee/update/terminology.html#breaking-change))
-- To discuss this change or learn more, see the [deprecation issue](https://gitlab.com/gitlab-org/gitlab/-/issues/390263).
-</div>
-
-We will be transitioning to a new IID as a result of moving requirements to a [work item type](https://docs.gitlab.com/ee/development/work_items.html#work-items-and-work-item-types). Users should begin using the new IID as support for the legacy IID and existing formatting will end in GitLab 18.0. The legacy requirement IID remains available until its removal in GitLab 18.0.
-
-</div>
-
-<div class="deprecation breaking-change" data-milestone="18.0">
-
 ### The `Project.services` GraphQL field is deprecated
 
 <div class="deprecation-notes">
@@ -588,26 +574,6 @@ We encourage GitLab administrators to switch to the webhook delivery method for
 
 [Issue 393157](https://gitlab.com/gitlab-org/gitlab/-/issues/393157) tracks improving email ingestion in general.
 We hope this will simplify infrastructure setup and add several improvements to how you manage GitLab in the near future.
-
-</div>
-</div>
-
-<div class="milestone-wrapper" data-milestone="17.3">
-
-## GitLab 17.3
-
-<div class="deprecation " data-milestone="17.3">
-
-### Group vulnerability report by OWASP top 10 2017 is deprecated
-
-<div class="deprecation-notes">
-- Announced in GitLab <span class="milestone">17.0</span>
-- Removal in GitLab <span class="milestone">17.3</span>
-- To discuss this change or learn more, see the [deprecation issue](https://gitlab.com/gitlab-org/gitlab/-/issues/458835).
-</div>
-
-Grouping the vulnerability report by OWASP top 10 2017 is deprecated, replaced by grouping by OWASP top 10 2021.
-In the future we will support the most recent version of OWASP top 10 for grouping on the vulnerability report.
 
 </div>
 </div>
@@ -1188,6 +1154,32 @@ This breaking change could disrupt user workflows that depend on expanding a fil
 
 <div class="deprecation breaking-change" data-milestone="17.0">
 
+### Filepath field in Releases and Release Links APIs
+
+<div class="deprecation-notes">
+- Announced in GitLab <span class="milestone">15.9</span>
+- Removal in GitLab <span class="milestone">17.0</span> ([breaking change](https://docs.gitlab.com/ee/update/terminology.html#breaking-change))
+- To discuss this change or learn more, see the [deprecation issue](https://gitlab.com/groups/gitlab-org/-/epics/9661).
+</div>
+
+Support for specifying a `filepath` for a direct asset link in the [Releases API](https://docs.gitlab.com/ee/api/releases)
+and [Release Links API](https://docs.gitlab.com/ee/api/releases/links.html) is deprecated in GitLab 15.9 and will be
+removed in GitLab 17.0. GitLab introduced a new field called `direct_asset_path` in GitLab 15.9 to replace `filepath`
+until it is finally removed.
+
+To avoid any disruptions, you should replace `filepath` with `direct_asset_path` in your calls to the following endpoints:
+
+- Releases API:
+  - [Create a release](https://docs.gitlab.com/ee/api/releases/#create-a-release)
+  - [Download a release asset](https://docs.gitlab.com/ee/api/releases/#download-a-release-asset)
+- Release Links API:
+  - [Create a release link](https://docs.gitlab.com/ee/api/releases/links.html#create-a-release-link)
+  - [Update a release link](https://docs.gitlab.com/ee/api/releases/links.html#update-a-release-link)
+
+</div>
+
+<div class="deprecation breaking-change" data-milestone="17.0">
+
 ### Geo: Legacy replication details routes for designs and projects deprecated
 
 <div class="deprecation-notes">
@@ -1237,23 +1229,6 @@ Because the new values provide a streamlined, comprehensive method to enable TLS
 </div>
 
 Runners generate provenance metadata and currently defaults to generating statements that adhere to SLSA v0.2. Because SLSA v1.0 has been released and is now supported by GitLab, the v0.2 statement is now deprecated and removal is planned in GitLab 17.0. The SLSA v1.0 statement is planned to become the new default statement format in GitLab 17.0.
-
-</div>
-
-<div class="deprecation breaking-change" data-milestone="17.0">
-
-### GraphQL API access through unsupported methods
-
-<div class="deprecation-notes">
-- Announced in GitLab <span class="milestone">17.0</span>
-- Removal in GitLab <span class="milestone">17.0</span> ([breaking change](https://docs.gitlab.com/ee/update/terminology.html#breaking-change))
-- To discuss this change or learn more, see the [deprecation issue](https://gitlab.com/gitlab-org/gitlab/-/issues/442520).
-</div>
-
-From GitLab 17.0, we limiting access to GraphQL to only through the
-[already documented supported token types](https://docs.gitlab.com/ee/api/graphql/#token-authentication).
-
-For customers already using documented and supported token types, there are no breaking changes.
 
 </div>
 
@@ -2017,6 +1992,20 @@ In GitLab 16.6 the [GitHub importer Rake task](https://docs.gitlab.com/ee/admini
 In GitLab 17.0, the Rake task will be removed.
 
 Instead, GitHub repositories can be imported by using the [API](https://docs.gitlab.com/ee/api/import.html#import-repository-from-github) or the [UI](https://docs.gitlab.com/ee/user/project/import/github.html).
+
+</div>
+
+<div class="deprecation breaking-change" data-milestone="17.0">
+
+### The GitLab legacy requirement IID is deprecated in favor of work item IID
+
+<div class="deprecation-notes">
+- Announced in GitLab <span class="milestone">15.9</span>
+- Removal in GitLab <span class="milestone">17.0</span> ([breaking change](https://docs.gitlab.com/ee/update/terminology.html#breaking-change))
+- To discuss this change or learn more, see the [deprecation issue](https://gitlab.com/gitlab-org/gitlab/-/issues/390263).
+</div>
+
+We will be transitioning to a new IID as a result of moving requirements to a [work item type](https://docs.gitlab.com/ee/development/work_items.html#work-items-and-work-item-types). Users should begin using the new IID as support for the legacy IID and existing formatting will end in GitLab 17.0. The legacy requirement IID remains available until its removal in GitLab 17.0.
 
 </div>
 
@@ -5732,5 +5721,6 @@ DISCLAIMER:
 This page contains information related to upcoming products, features, and functionality.
 It is important to note that the information presented is for informational purposes only.
 Please do not rely on this information for purchasing or planning purposes.
-The development, release, and timing of any products, features, or functionality may be subject to change or delay and remain at the
+As with all projects, the items mentioned on this page are subject to change or delay.
+The development, release, and timing of any products, features, or functionality remain at the
 sole discretion of GitLab Inc.

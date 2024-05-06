@@ -336,12 +336,6 @@ RSpec.configure do |config|
       # Disable license requirement for duo chat (self managed), which is subject to change.
       # See https://gitlab.com/gitlab-org/gitlab/-/issues/457283
       stub_feature_flags(duo_chat_requires_licensed_seat_sm: false)
-
-      # Experimental merge request dashboard
-      stub_feature_flags(merge_request_dashboard: false)
-
-      # Disable new Vue breadcrumbs while feature flag is still in wip state
-      stub_feature_flags(vue_page_breadcrumbs: false)
     else
       unstub_all_feature_flags
     end
@@ -404,12 +398,6 @@ RSpec.configure do |config|
     end
   end
 
-  config.around(:example, :allow_unrouted_sidekiq_calls) do |example|
-    ::Gitlab::SidekiqSharding::Validator.allow_unrouted_sidekiq_calls do
-      example.run
-    end
-  end
-
   # previous test runs may have left some resources throttled
   config.before do
     ::Gitlab::ExclusiveLease.reset_all!("el:throttle:*")
@@ -442,12 +430,6 @@ RSpec.configure do |config|
       chain.add DisableQueryLimit
       chain.insert_after ::Gitlab::SidekiqMiddleware::RequestStoreMiddleware, IsolatedRequestStore
 
-      example.run
-    end
-  end
-
-  config.around do |example|
-    Gitlab::SidekiqSharding::Validator.enabled do
       example.run
     end
   end

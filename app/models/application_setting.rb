@@ -13,7 +13,6 @@ class ApplicationSetting < MainClusterwide::ApplicationRecord
   ignore_column :web_ide_clientside_preview_enabled, remove_with: '15.11', remove_after: '2023-04-22'
   ignore_columns %i[instance_administration_project_id instance_administrators_group_id], remove_with: '16.2', remove_after: '2023-06-22'
   ignore_columns %i[repository_storages], remove_with: '16.8', remove_after: '2023-12-21'
-  ignore_column :required_instance_ci_template, remove_with: '17.1', remove_after: '2024-05-10'
 
   INSTANCE_REVIEW_MIN_USERS = 50
   GRAFANA_URL_ERROR_MESSAGE = 'Please check your Grafana URL setting in ' \
@@ -32,8 +31,6 @@ class ApplicationSetting < MainClusterwide::ApplicationRecord
 
   # matches the size set in the database constraint
   DEFAULT_BRANCH_PROTECTIONS_DEFAULT_MAX_SIZE = 1.kilobyte
-
-  PACKAGE_REGISTRY_SETTINGS = [:nuget_skip_metadata_url_validation].freeze
 
   enum whats_new_variant: { all_tiers: 0, current_tier: 1, disabled: 2 }, _prefix: true
   enum email_confirmation_setting: { off: 0, soft: 1, hard: 2 }, _prefix: true
@@ -85,6 +82,7 @@ class ApplicationSetting < MainClusterwide::ApplicationRecord
   serialize :asset_proxy_allowlist, Array # rubocop:disable Cop/ActiveRecordSerialize
   serialize :asset_proxy_whitelist, Array # rubocop:disable Cop/ActiveRecordSerialize
 
+  cache_markdown_field :sign_in_text
   cache_markdown_field :help_page_text
   cache_markdown_field :shared_runners_text, pipeline: :plain_markdown
   cache_markdown_field :after_sign_up_text
@@ -622,10 +620,6 @@ class ApplicationSetting < MainClusterwide::ApplicationRecord
     throttle_unauthenticated_git_http_period_in_seconds: [:integer, { default: 3600 }]
 
   validates :rate_limits, json_schema: { filename: "application_setting_rate_limits" }
-
-  jsonb_accessor :package_registry, nuget_skip_metadata_url_validation: [:boolean, { default: false }]
-
-  validates :package_registry, json_schema: { filename: 'application_setting_package_registry' }
 
   validates :search_rate_limit_allowlist,
     length: { maximum: 100, message: N_('is too long (maximum is 100 entries)') },

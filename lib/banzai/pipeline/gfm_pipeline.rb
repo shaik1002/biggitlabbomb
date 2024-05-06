@@ -28,7 +28,7 @@ module Banzai
           Filter::AudioLinkFilter,
           Filter::ImageLazyLoadFilter,
           Filter::ImageLinkFilter,
-          Filter::TableOfContentsLegacyFilter,
+          Filter::TableOfContentsFilter,
           Filter::TableOfContentsTagFilter,
           Filter::AutolinkFilter,
           Filter::ExternalLinkFilter,

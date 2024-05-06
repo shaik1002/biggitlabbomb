@@ -87,10 +87,6 @@ module Gitlab
         def badge_tooltip
           subject.status
         end
-
-        def confirmation_message
-          nil
-        end
       end
     end
   end

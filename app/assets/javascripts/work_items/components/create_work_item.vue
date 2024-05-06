@@ -1,12 +1,5 @@
 <script>
-import {
-  GlButton,
-  GlAlert,
-  GlLoadingIcon,
-  GlFormCheckbox,
-  GlFormGroup,
-  GlFormSelect,
-} from '@gitlab/ui';
+import { GlButton, GlAlert, GlLoadingIcon, GlFormSelect } from '@gitlab/ui';
 import { TYPENAME_PROJECT } from '~/graphql_shared/constants';
 import { getPreferredLocales, s__ } from '~/locale';
 import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
@@ -22,21 +15,15 @@ import projectWorkItemTypesQuery from '../graphql/project_work_item_types.query.
 import groupWorkItemByIidQuery from '../graphql/group_work_item_by_iid.query.graphql';
 import workItemByIidQuery from '../graphql/work_item_by_iid.query.graphql';
 
-import WorkItemTitle from './work_item_title.vue';
-import WorkItemAttributesWrapper from './work_item_attributes_wrapper.vue';
-import WorkItemDescription from './work_item_description.vue';
+import WorkItemTitleWithEdit from './work_item_title_with_edit.vue';
 
 export default {
   components: {
     GlButton,
     GlAlert,
     GlLoadingIcon,
-    GlFormGroup,
-    GlFormCheckbox,
+    WorkItemTitleWithEdit,
     GlFormSelect,
-    WorkItemAttributesWrapper,
-    WorkItemDescription,
-    WorkItemTitle,
   },
   inject: ['fullPath', 'isGroup'],
   props: {
@@ -45,28 +32,19 @@ export default {
       required: false,
       default: '',
     },
-    workItemTypeName: {
+    workItemType: {
       type: String,
       required: false,
       default: null,
     },
-    hideFormTitle: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
   data() {
     return {
-      draft: {
-        title: this.initialTitle,
-        description: '',
-      },
-      isTitleValid: true,
-      isConfidential: false,
+      title: this.initialTitle,
+      editingTitle: false,
       error: null,
       workItemTypes: [],
-      selectedWorkItemTypeId: null,
+      selectedWorkItemType: null,
       loading: false,
       showWorkItemTypeSelect: false,
     };
@@ -79,15 +57,18 @@ export default {
       variables() {
         return {
           fullPath: this.fullPath,
-          name: this.workItemTypeName,
+          name: this.workItemType,
         };
       },
       update(data) {
-        return data.workspace?.workItemTypes?.nodes;
+        return data.workspace?.workItemTypes?.nodes.map((node) => ({
+          value: node.id,
+          text: capitalizeFirstCharacter(node.name.toLocaleLowerCase(getPreferredLocales()[0])),
+        }));
       },
       result() {
         if (this.workItemTypes.length === 1) {
-          this.selectedWorkItemTypeId = this.workItemTypes[0].id;
+          this.selectedWorkItemType = this.workItemTypes[0].value;
         } else {
           this.showWorkItemTypeSelect = true;
         }
@@ -98,64 +79,28 @@ export default {
     },
   },
   computed: {
-    hasWidgets() {
-      return this.draft.widgets?.length > 0;
-    },
-    workItemTypesForSelect() {
-      return this.workItemTypes.map((node) => ({
-        value: node.id,
-        text: capitalizeFirstCharacter(node.name.toLocaleLowerCase(getPreferredLocales()[0])),
-      }));
-    },
-    selectedWorkItemType() {
-      return this.workItemTypes.find((item) => item.id === this.selectedWorkItemTypeId);
-    },
     formOptions() {
-      return [{ value: null, text: s__('WorkItem|Select type') }, ...this.workItemTypesForSelect];
+      return [{ value: null, text: s__('WorkItem|Select type') }, ...this.workItemTypes];
+    },
+    isButtonDisabled() {
+      return this.title.trim().length === 0 || !this.selectedWorkItemType;
     },
     createErrorText() {
-      const workItemType = this.selectedWorkItemType?.name;
+      const workItemType = this.workItemTypes.find(
+        (item) => item.value === this.selectedWorkItemType,
+      )?.text;
+
       return sprintfWorkItem(I18N_WORK_ITEM_ERROR_CREATING, workItemType);
     },
     createWorkItemText() {
-      const workItemType = this.selectedWorkItemType?.name;
+      const workItemType = this.workItemTypes.find(
+        (item) => item.value === this.selectedWorkItemType,
+      )?.text;
       return sprintfWorkItem(I18N_WORK_ITEM_CREATE_BUTTON_LABEL, workItemType);
-    },
-    makeConfidentialText() {
-      return sprintfWorkItem(
-        s__(
-          'WorkItem|This %{workItemType} is confidential and should only be visible to users having at least Reporter access.',
-        ),
-        this.selectedWorkItemType?.name,
-      );
-    },
-
-    titleText() {
-      return sprintfWorkItem(s__('WorkItem|New %{workItemType}'), this.selectedWorkItemType?.name);
     },
   },
   methods: {
-    validate() {
-      this.isTitleValid = Boolean(this.draft.title.trim());
-    },
-    updateDraftData(type, value) {
-      this.draft = {
-        ...this.draft,
-        [type]: value,
-      };
-      this.$emit(`updateDraft`, { type, value });
-
-      if (type === 'title') {
-        this.validate();
-      }
-    },
     async createWorkItem() {
-      this.validate();
-
-      if (!this.isTitleValid) {
-        return;
-      }
-
       this.loading = true;
 
       try {
@@ -163,13 +108,9 @@ export default {
           mutation: createWorkItemMutation,
           variables: {
             input: {
-              title: this.draft.title,
-              workItemTypeId: this.selectedWorkItemTypeId,
-              namespacePath: this.fullPath,
-              confidential: this.draft.confidential,
-              descriptionWidget: {
-                description: this.draft.description,
-              },
+              title: this.title,
+              projectPath: this.fullPath,
+              workItemTypeId: this.selectedWorkItemType,
             },
           },
           update: (store, { data: { workItemCreate } }) => {
@@ -201,6 +142,9 @@ export default {
         this.loading = false;
       }
     },
+    handleTitleInput(title) {
+      this.title = title;
+    },
     handleCancelClick() {
       this.$emit('cancel');
     },
@@ -211,85 +155,42 @@ export default {
 <template>
   <form @submit.prevent="createWorkItem">
     <gl-alert v-if="error" variant="danger" @dismiss="error = null">{{ error }}</gl-alert>
-    <h1 v-if="!hideFormTitle" class="page-title gl-text-xl gl-pb-5">{{ titleText }}</h1>
-    <div class="gl-mb-5">
-      <gl-loading-icon
-        v-if="$apollo.queries.workItemTypes.loading"
-        size="lg"
-        data-testid="loading-types"
+    <div data-testid="content">
+      <work-item-title-with-edit
+        ref="title"
+        data-testid="title-input"
+        is-editing
+        :title="title"
+        @updateDraft="handleTitleInput"
+        @updateWorkItem="createWorkItem"
       />
-      <gl-form-group
-        v-else-if="showWorkItemTypeSelect"
-        :label="__('Type')"
-        label-for="work-item-type"
-      >
+      <div>
+        <gl-loading-icon
+          v-if="$apollo.queries.workItemTypes.loading"
+          size="lg"
+          data-testid="loading-types"
+        />
         <gl-form-select
-          id="work-item-type"
-          v-model="selectedWorkItemTypeId"
+          v-else-if="showWorkItemTypeSelect"
+          v-model="selectedWorkItemType"
           :options="formOptions"
           class="gl-max-w-26"
         />
-      </gl-form-group>
-    </div>
-    <work-item-title
-      ref="title"
-      data-testid="title-input"
-      is-editing
-      :is-valid="isTitleValid"
-      :title="draft.title"
-      @updateDraft="updateDraftData('title', $event)"
-      @updateWorkItem="createWorkItem"
-    />
-    <div data-testid="work-item-overview" class="work-item-overview">
-      <section>
-        <work-item-description
-          edit-mode
-          disable-inline-editing
-          :autofocus="false"
-          :full-path="fullPath"
-          :show-buttons-below-field="false"
-          @error="updateError = $event"
-          @updateDraft="updateDraftData('description', $event)"
-        />
-        <gl-form-group :label="__('Confidentiality')" label-for="work-item-confidential">
-          <gl-form-checkbox
-            id="work-item-confidential"
-            v-model="isConfidential"
-            data-testid="confidential-checkbox"
-            @change="updateDraftData('confidential', $event)"
-          >
-            {{ makeConfidentialText }}
-          </gl-form-checkbox>
-        </gl-form-group>
-      </section>
-      <aside
-        v-if="hasWidgets"
-        data-testid="work-item-overview-right-sidebar"
-        class="work-item-overview-right-sidebar gl-block"
-        :class="{ 'is-modal': true }"
-      >
-        <work-item-attributes-wrapper
-          is-create-view
-          :full-path="fullPath"
-          :work-item="draft"
-          @error="updateError = $event"
-          @updateWorkItem="updateDraftData"
-          @updateWorkItemAttribute="updateDraftData"
-        />
-      </aside>
-      <div class="gl-py-3 gl-flex gl-gap-3 gl-col-start-1">
-        <gl-button
-          variant="confirm"
-          :loading="loading"
-          data-testid="create-button"
-          @click="createWorkItem"
-        >
-          {{ createWorkItemText }}
-        </gl-button>
-        <gl-button type="button" data-testid="cancel-button" @click="handleCancelClick">
-          {{ __('Cancel') }}
-        </gl-button>
       </div>
+    </div>
+    <div class="gl-py-5 gl-mt-4 gl-display-flex gl-justify-content-end gl-gap-3">
+      <gl-button type="button" data-testid="cancel-button" @click="handleCancelClick">
+        {{ __('Cancel') }}
+      </gl-button>
+      <gl-button
+        variant="confirm"
+        :disabled="isButtonDisabled"
+        :loading="loading"
+        data-testid="create-button"
+        type="submit"
+      >
+        {{ createWorkItemText }}
+      </gl-button>
     </div>
   </form>
 </template>

@@ -66,8 +66,17 @@ Prerequisites:
 
 #### Configure network and proxy settings
 
-For self-managed instances, to enable GitLab Duo features,
-You must [enable network connectivity](../user/ai_features_enable.md#enable-gitlab-duo-on-self-managed-instances).
+For self-managed instances, to enable AI-powered features:
+
+- Your firewalls and HTTP/S proxy servers must allow outbound connections
+  to `cloud.gitlab.com` and `customers.gitlab.com` on port `443` both with `https://` and `wws://`.
+- Both `HTTP2` and the `'upgrade'` header must be allowed, because GitLab Duo
+  uses both REST and WebSockets.
+- To use an HTTP/S proxy, both `gitLab_workhorse` and `gitLab_rails` must have the necessary
+  [web proxy environment variables](https://docs.gitlab.com/omnibus/settings/environment-variables.html) set.
+- Check for restrictions on WebSocket (`wss://`) traffic to `wss://gitlab.com/-/cable` and other `.com` domains.
+  Network policy restrictions on `wss://` traffic can cause issues with some GitLab Duo Chat
+  services. Consider policy updates to allow these services.
 
 ## Assign and remove seats in bulk
 
@@ -79,7 +88,7 @@ You can assign or remove seats in bulk for multiple users.
 1. Select **Settings > Usage Quotas**.
 1. Select the **GitLab Duo Pro** tab.
 1. Select the users to assign or remove seats for:
-   - To select multiple users, to the left of each user, select the checkbox.
+   - To select multiple users, to the left of each user, select the checkbox. 
    - To select all, select the checkbox at the top of the table.
 1. Assign or remove seats:
    - To assign seats, select **Assign seat**, then **Assign seats** to confirm.
@@ -151,7 +160,7 @@ Prerequisites:
 - You must have an active paid Premium or Ultimate subscription.
 - You must have GitLab 16.8 or later and your instance must be able to [synchronize your subscription data](self_managed/index.md#subscription-data-synchronization) with GitLab.
 
-1. Go to the [GitLab Duo Pro trial page](https://about.gitlab.com/solutions/gitlab-duo-pro/self-managed-and-gitlab-dedicated-trial/).
+1. Go to the [GitLab Duo Pro trial page](http://about.gitlab.com/solutions/gitlab-duo-pro/self-managed-and-gitlab-dedicated-trial).
 1. Complete the fields.
 
    - To find your subscription name:
@@ -163,18 +172,3 @@ Prerequisites:
 1. Select **Submit**.
 
 The trial automatically syncs to your instance within 24 hours. After the trial has synced, [assign seats](#assign-gitlab-duo-pro-seats) to users that you want to access GitLab Duo Pro.
-
-## Automatic seat removal for seat overages
-
-If your quantity of purchased GitLab Duo Pro seats is reduced, seat assignments are automatically removed to match the seat quantity available in the subscription.
-
-For example:
-
-- You have a 50 seat GitLab Duo Pro subscription with all seats assigned.
-- You renew the subscription for 30 seats. The 20 users over subscription are automatically removed from GitLab Duo Pro seat assignment.
-- If only 20 users were assigned a GitLab Duo Pro seat before renewal, then no removal of seats would occur.
-
-Seats are selected for removal based on the following criteria, in this order:
-
-1. Users who have not yet used Code Suggestions, ordered by most recently assigned.
-1. Users who have used Code Suggestions, ordered by least recent usage of Code Suggestions.

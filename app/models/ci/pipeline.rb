@@ -228,7 +228,7 @@ module Ci
         transition any => :success
       end
 
-      event :start_cancel do
+      event :canceling do
         transition any - [:canceling, :canceled] => :canceling
       end
 
@@ -409,7 +409,6 @@ module Ci
 
     scope :with_unlockable_status, -> { with_status(*UNLOCKABLE_STATUSES) }
     scope :internal, -> { where(source: internal_sources) }
-    scope :no_tag, -> { where(tag: false) }
     scope :no_child, -> { where.not(source: :parent_pipeline) }
     scope :ci_sources, -> { where(source: Enums::Ci::Pipeline.ci_sources.values) }
     scope :ci_branch_sources, -> { where(source: Enums::Ci::Pipeline.ci_branch_sources.values) }
@@ -587,6 +586,10 @@ module Ci
 
     def self.object_hierarchy(relation, options = {})
       ::Gitlab::Ci::PipelineObjectHierarchy.new(relation, options: options)
+    end
+
+    def self.use_partition_id_filter?
+      true
     end
 
     def uses_needs?
@@ -883,7 +886,7 @@ module Ci
         when 'running' then run
         when 'success' then succeed
         when 'failed' then drop
-        when 'canceling' then start_cancel
+        when 'canceling' then canceling
         when 'canceled' then cancel
         when 'skipped' then skip
         when 'manual' then block

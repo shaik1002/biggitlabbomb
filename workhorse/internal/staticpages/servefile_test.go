@@ -14,15 +14,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	nonExistingDir = "/path/to/non/existing/directory"
-)
-
 func TestServingNonExistingFile(t *testing.T) {
+	dir := "/path/to/non/existing/directory"
 	httpRequest, _ := http.NewRequest("GET", "/file", nil)
 
 	w := httptest.NewRecorder()
-	st := &Static{DocumentRoot: nonExistingDir}
+	st := &Static{DocumentRoot: dir}
 	st.ServeExisting("/", CacheDisabled, nil).ServeHTTP(w, httpRequest)
 	require.Equal(t, 404, w.Code)
 }
@@ -38,19 +35,21 @@ func TestServingDirectory(t *testing.T) {
 }
 
 func TestServingMalformedUri(t *testing.T) {
+	dir := "/path/to/non/existing/directory"
 	httpRequest, _ := http.NewRequest("GET", "/../../../static/file", nil)
 
 	w := httptest.NewRecorder()
-	st := &Static{DocumentRoot: nonExistingDir}
+	st := &Static{DocumentRoot: dir}
 	st.ServeExisting("/", CacheDisabled, nil).ServeHTTP(w, httpRequest)
 	require.Equal(t, 404, w.Code)
 }
 
 func TestExecutingHandlerWhenNoFileFound(t *testing.T) {
+	dir := "/path/to/non/existing/directory"
 	httpRequest, _ := http.NewRequest("GET", "/file", nil)
 
 	executed := false
-	st := &Static{DocumentRoot: nonExistingDir}
+	st := &Static{DocumentRoot: dir}
 	st.ServeExisting("/", CacheDisabled, http.HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
 		executed = (r == httpRequest)
 	})).ServeHTTP(nil, httpRequest)

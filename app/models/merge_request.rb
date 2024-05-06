@@ -407,6 +407,7 @@ class MergeRequest < ApplicationRecord
           reversed_order_expression: column_expression_with_direction.reverse.nulls_first,
           order_direction: direction,
           nullable: :nulls_last,
+          distinct: false,
           add_to_projections: true
         ),
         Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
@@ -460,9 +461,9 @@ class MergeRequest < ApplicationRecord
     where(reviewers_subquery.exists.not)
   end
 
-  scope :review_requested_to, ->(user, states = nil) do
+  scope :review_requested_to, ->(user, state = nil) do
     scope = reviewers_subquery.where(Arel::Table.new("#{to_ability_name}_reviewers")[:user_id].eq(user.id))
-    scope = scope.where(Arel::Table.new("#{to_ability_name}_reviewers")[:state].in(states)) if states
+    scope = scope.where(Arel::Table.new("#{to_ability_name}_reviewers")[:state].eq(MergeRequestReviewer.states[state])) if state
 
     where(scope.exists)
   end
@@ -476,10 +477,10 @@ class MergeRequest < ApplicationRecord
     )
   end
 
-  scope :review_states, ->(states) do
+  scope :review_state, ->(state) do
     where(
       reviewers_subquery
-        .where(Arel::Table.new("#{to_ability_name}_reviewers")[:state].in(states))
+        .where(Arel::Table.new("#{to_ability_name}_reviewers")[:state].eq(MergeRequestReviewer.states[state]))
         .exists
     )
   end
@@ -816,7 +817,7 @@ class MergeRequest < ApplicationRecord
   def merge_participants
     participants = [author]
 
-    if auto_merge_enabled? && participants.exclude?(merge_user)
+    if auto_merge_enabled? && !participants.include?(merge_user)
       participants << merge_user
     end
 
@@ -1133,7 +1134,7 @@ class MergeRequest < ApplicationRecord
   end
 
   def create_merge_request_diff
-    fetch_ref!
+    fetch_ref! unless skip_fetch_ref
 
     # n+1: https://gitlab.com/gitlab-org/gitlab/-/issues/19377
     Gitlab::GitalyClient.allow_n_plus_1_calls do
@@ -2239,25 +2240,20 @@ class MergeRequest < ApplicationRecord
     merge_request_diff.get_patch_id_sha
   end
 
-  def diff_head_pipeline_considered_in_progress?
+  def auto_merge_available_when_pipeline_succeeds?
     pipeline = diff_head_pipeline
-    return false unless pipeline
+    return unless pipeline
 
-    # We allow auto-merge on blocked pipelines when "Pipelines must succeed" is
-    # enabled, because in that case the pipeline blocks the merge. When
-    # "Pipelines must succeed" is disabled, immediate merges are neither blocked
-    # nor discouraged on blocked pipelines, so auto merge should not wait for
-    # the pipeline to finish.
     if auto_merge_when_incomplete_pipeline_succeeds_enabled?
-      if only_allow_merge_if_pipeline_succeeds?
-        !pipeline.complete?
-      else
-        pipeline.active? || pipeline.created?
-      end
+      !pipeline.complete?
     else
       pipeline.active?
     end
   end
+
+  private
+
+  attr_accessor :skip_fetch_ref
 
   def auto_merge_when_incomplete_pipeline_succeeds_enabled?
     Feature.enabled?(
@@ -2266,8 +2262,6 @@ class MergeRequest < ApplicationRecord
       type: :gitlab_com_derisk
     )
   end
-
-  private
 
   def check_mergeability_states(checks:, execute_all: false, **params)
     execute_merge_checks(

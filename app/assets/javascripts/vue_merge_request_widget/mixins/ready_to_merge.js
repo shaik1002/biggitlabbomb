@@ -39,13 +39,7 @@ export default {
         title: __('Merge when pipeline succeeds'),
       };
     },
-    shouldDisplayMergeImmediatelyDropdownOptions() {
-      return false;
-    },
     shouldShowMergeImmediatelyDropdown() {
-      if (window.gon?.features?.autoMergeWhenIncompletePipelineSucceeds) {
-        return this.isAutoMergeAvailable && this.isMergeAllowed;
-      }
       return this.isPipelineActive && !this.state.onlyAllowMergeIfPipelineSucceeds;
     },
     isMergeImmediatelyDangerous() {

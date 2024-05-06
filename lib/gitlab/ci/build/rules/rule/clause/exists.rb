@@ -13,25 +13,34 @@ module Gitlab
         WILDCARD_NESTED_PATTERN = "**/*"
 
         def initialize(clause)
-          @globs = Array(clause[:paths])
-          @project_path = clause[:project]
-          @ref = clause[:ref]
+          # Remove this variable when FF `ci_support_rules_exists_paths_and_project` is removed
+          @clause = clause
+
+          if complex_exists_enabled?
+            @globs = Array(clause[:paths])
+            @project_path = clause[:project]
+            @ref = clause[:ref]
+          else
+            @globs = Array(clause)
+          end
 
           @top_level_only = @globs.all?(&method(:top_level_glob?))
         end
 
         def satisfied_by?(_pipeline, context)
-          # Return early to avoid redundant Gitaly calls
-          return false unless @globs.any?
+          if complex_exists_enabled? && @project_path
+            # Return early to avoid redundant Gitaly calls
+            return false unless @globs.any?
 
-          context = change_context(context) if @project_path
+            context = change_context(context)
+          end
 
           paths = worktree_paths(context)
           exact_globs, extension_globs, pattern_globs = separate_globs(context)
 
           exact_matches?(paths, exact_globs) ||
             matches_extension?(paths, extension_globs) ||
-            pattern_matches?(paths, pattern_globs, context)
+            pattern_matches?(paths, pattern_globs)
         end
 
         private
@@ -45,7 +54,8 @@ module Gitlab
 
         def expand_globs(context)
           @globs.map do |glob|
-            expand_value(glob, context)
+            # TODO: Replace w/ `expand_value(glob, context)` when FF `ci_support_rules_exists_paths_and_project` removed
+            ExpandVariables.expand_existing(glob, -> { context.variables_hash })
           end
         end
 
@@ -85,24 +95,7 @@ module Gitlab
           end
         end
 
-        def pattern_matches?(paths, pattern_globs, context)
-          if ::Feature.disabled?(:ci_rules_exists_pattern_matches_cache, context.project)
-            return legacy_pattern_matches?(paths, pattern_globs)
-          end
-
-          comparisons = 0
-
-          pattern_globs.any? do |glob|
-            Gitlab::SafeRequestStore.fetch("ci_rules_exists_pattern_matches_#{context.project&.id}_#{glob}") do
-              paths.any? do |path|
-                comparisons += 1
-                comparisons > MAX_PATTERN_COMPARISONS || pattern_match?(glob, path)
-              end
-            end
-          end
-        end
-
-        def legacy_pattern_matches?(paths, pattern_globs)
+        def pattern_matches?(paths, pattern_globs)
           comparisons = 0
 
           pattern_globs.any? do |glob|
@@ -200,6 +193,15 @@ module Gitlab
 
         def expand_value(value, context)
           ExpandVariables.expand_existing(value, -> { context.variables_hash })
+        end
+
+        def complex_exists_enabled?
+          # We do not need to check the FF `ci_support_rules_exists_paths_and_project` here.
+          # Instead, we can simply check if the value is a Hash because it can only be a Hash
+          # if the FF was on when `Entry::Rules::Rule::Exists` was composed. The entry is
+          # always composed before we reach this point. This also ensures we have the correct
+          # value type before processing, which is safer.
+          @clause.is_a?(Hash)
         end
       end
     end

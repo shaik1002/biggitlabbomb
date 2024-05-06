@@ -8,7 +8,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 ## API Fuzzing job times out after N hours
 
-For larger repositories, the API Fuzzing job could time out on the [small hosted runner on Linux](../../../ci/runners/hosted_runners/linux.md#machine-types-available-for-linux---x86-64), which is set per default. If this happens in your jobs, you should scale up to a [larger runner](performance.md#using-a-larger-runner).
+For larger repositories, the API Fuzzing job could time out on the [small hosted runner on Linux](../../../ci/runners/hosted_runners/linux.md#machine-types-available-for-linux-x86-64), which is set per default. If this happens in your jobs, you should scale up to a [larger runner](performance.md#using-a-larger-runner).
 
 See the following documentation sections for assistance:
 
@@ -185,7 +185,7 @@ To detect and correct elements that don't comply with the OpenAPI specifications
 | Editor | OpenAPI 2.0 | OpenAPI 3.0.x | OpenAPI 3.1.x |
 | -- | -- | -- | -- |
 | [Swagger Editor](https://editor.swagger.io/) | **{check-circle}** YAML, JSON | **{check-circle}** YAML, JSON | **{dotted-circle}** YAML, JSON |
-| [Stoplight Studio](https://stoplight.io/solutions) | **{check-circle}** YAML, JSON | **{check-circle}** YAML, JSON | **{check-circle}** YAML, JSON |
+| [Stoplight Studio](https://stoplight.io/studio) | **{check-circle}** YAML, JSON | **{check-circle}** YAML, JSON | **{check-circle}** YAML, JSON |
 
 If your OpenAPI document is generated manually, load your document in the editor and fix anything that is non-compliant. If your document is generated automatically, load it in your editor to identify the issues in the schema, then go to the application and perform the corrections based on the framework you are using.
 

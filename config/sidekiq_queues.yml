@@ -43,8 +43,6 @@
   - 1
 - - analytics_usage_trends_counter_job
   - 1
-- - app_sec_container_scanning_scan_image
-  - 1
 - - app_sec_dast_scanner_profiles_builds_consistency
   - 1
 - - app_sec_dast_scans_consistency
@@ -376,8 +374,6 @@
 - - groups_enterprise_users_disassociate
   - 1
 - - groups_export_memberships
-  - 1
-- - groups_reset_seat_callouts
   - 1
 - - groups_schedule_bulk_repository_shard_moves
   - 1

@@ -630,12 +630,14 @@ order = Gitlab::Pagination::Keyset::Order.build([
   Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
     attribute_name: 'merge_request_diff_id',
     order_expression: MergeRequestDiffCommit.arel_table[:merge_request_diff_id].asc,
-    nullable: :not_nullable
+    nullable: :not_nullable,
+    distinct: false,
   ),
   Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
     attribute_name: 'relative_order',
     order_expression: MergeRequestDiffCommit.arel_table[:relative_order].asc,
-    nullable: :not_nullable
+    nullable: :not_nullable,
+    distinct: false,
   )
 ])
 MergeRequestDiffCommit.include(FromUnion) # keyset pagination generates UNION queries

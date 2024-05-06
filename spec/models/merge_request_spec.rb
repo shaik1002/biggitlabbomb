@@ -141,7 +141,7 @@ RSpec.describe MergeRequest, factory_default: :keep, feature_category: :code_rev
     end
 
     let_it_be(:merge_request2) do
-      create(:merge_request, :unprepared, :unique_branches, reviewers: [user1, user2], created_at:
+      create(:merge_request, :unprepared, :unique_branches, reviewers: [user2], created_at:
              3.hours.ago)
     end
 
@@ -154,7 +154,6 @@ RSpec.describe MergeRequest, factory_default: :keep, feature_category: :code_rev
 
     before_all do
       merge_request1.merge_request_reviewers.update_all(state: :requested_changes)
-      merge_request2.merge_request_reviewers.update_all(state: :reviewed)
     end
 
     describe '.preload_target_project_with_namespace' do
@@ -179,30 +178,24 @@ RSpec.describe MergeRequest, factory_default: :keep, feature_category: :code_rev
     end
 
     describe '.review_requested_to' do
-      let(:states) { nil }
+      let(:state) { nil }
 
-      subject(:merge_requests) { described_class.review_requested_to(user1, states) }
+      subject(:merge_requests) { described_class.review_requested_to(user1, state) }
 
       it 'returns MRs that the user has been requested to review' do
-        expect(merge_requests).to match_array([merge_request1, merge_request2])
+        expect(merge_requests).to eq([merge_request1])
       end
 
       context 'when state is requested_changes' do
-        let(:states) { MergeRequestReviewer.states[:requested_changes] }
+        let(:state) { 'requested_changes' }
 
         it 'returns MRs that the user has been requested to review and has the passed state' do
           expect(merge_requests).to eq([merge_request1])
         end
       end
 
-      context 'when states includes requested_changes and reviewed' do
-        let(:states) { [MergeRequestReviewer.states[:reviewed], MergeRequestReviewer.states[:requested_changes]] }
-
-        it { expect(merge_requests).to match_array([merge_request1, merge_request2]) }
-      end
-
       context 'when state is approved' do
-        let(:states) { MergeRequestReviewer.states[:approved] }
+        let(:state) { 'approved' }
 
         it 'returns MRs that the user has been requested to review and has the passed state' do
           expect(merge_requests).to eq([])
@@ -213,23 +206,13 @@ RSpec.describe MergeRequest, factory_default: :keep, feature_category: :code_rev
     describe '.no_review_requested_to' do
       it 'returns MRs that the user has not been requested to review' do
         expect(described_class.no_review_requested_to(user1))
-          .to match_array([merge_request3, merge_request4])
+          .to eq([merge_request2, merge_request3, merge_request4])
       end
     end
 
-    describe '.review_states' do
-      let(:states) { MergeRequestReviewer.states[:requested_changes] }
-
-      subject(:merge_requests) { described_class.review_states(states) }
-
+    describe '.review_state' do
       it 'returns MRs that have a reviewer with the passed state' do
-        expect(merge_requests).to eq([merge_request1])
-      end
-
-      context 'when states includes requested_changes and reviewed' do
-        let(:states) { [MergeRequestReviewer.states[:reviewed], MergeRequestReviewer.states[:requested_changes]] }
-
-        it { expect(merge_requests).to match_array([merge_request1, merge_request2]) }
+        expect(described_class.review_state(:requested_changes)).to eq([merge_request1])
       end
     end
 
@@ -6577,10 +6560,10 @@ RSpec.describe MergeRequest, factory_default: :keep, feature_category: :code_rev
     end
   end
 
-  describe '#diff_head_pipeline_considered_in_progress?' do
+  describe '#auto_merge_available_when_pipeline_succeeds?' do
     let(:merge_request) { build(:merge_request, project: project) }
 
-    subject { merge_request.diff_head_pipeline_considered_in_progress? }
+    subject { merge_request.auto_merge_available_when_pipeline_succeeds? }
 
     context 'when there is no pipeline' do
       it { is_expected.to be_falsy }
@@ -6589,27 +6572,18 @@ RSpec.describe MergeRequest, factory_default: :keep, feature_category: :code_rev
     context 'when there is a pipeline' do
       before do
         merge_request.head_pipeline = build(:ci_pipeline, sha: merge_request.diff_head_sha, status: pipeline_status)
-        allow(merge_request).to receive(:only_allow_merge_if_pipeline_succeeds?).and_return(pipelines_must_succeed)
       end
 
-      where(:pipeline_status, :pipelines_must_succeed, :expected) do
-        # completed statuses
-        'success'   | false | false
-        'failed'    | false | false
-        'canceled'  | false | false
-        'skipped'   | false | false
-        # not completed, pipeline must succeed disabled
-        'created'   | false | true
-        'pending'   | false | true
-        'running'   | false | true
-        'scheduled' | false | false
-        'manual'    | false | false
-        # not completed, pipeline must succeed enabled
-        'created'   | true  | true
-        'pending'   | true  | true
-        'running'   | true  | true
-        'scheduled' | true  | true
-        'manual'    | true  | true
+      where(:pipeline_status, :expected) do
+        'success'   | false
+        'failed'    | false
+        'canceled'  | false
+        'skipped'   | false
+        'created'   | true
+        'pending'   | true
+        'running'   | true
+        'scheduled' | true
+        'manual'    | true
       end
 
       with_them do
@@ -6621,15 +6595,11 @@ RSpec.describe MergeRequest, factory_default: :keep, feature_category: :code_rev
           stub_feature_flags(auto_merge_when_incomplete_pipeline_succeeds: false)
         end
 
-        let(:pipelines_must_succeed) { false }
-
         where(:pipeline_status, :expected) do
-          # completed statuses
           'success'   | false
           'failed'    | false
           'canceled'  | false
           'skipped'   | false
-          # not completed statuses
           'created'   | false
           'pending'   | true
           'running'   | true

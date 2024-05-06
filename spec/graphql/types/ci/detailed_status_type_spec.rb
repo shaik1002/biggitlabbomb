@@ -36,8 +36,7 @@ RSpec.describe Types::Ci::DetailedStatusType do
         icon: status.action_icon,
         method: status.action_method,
         path: status.action_path,
-        title: status.action_title,
-        confirmation_message: status.confirmation_message
+        title: status.action_title
       }
 
       expect(resolve_field('action', status, arg_style: :internal)).to eq(expected_status)

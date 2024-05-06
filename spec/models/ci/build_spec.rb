@@ -8,7 +8,7 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
   include AfterNextHelpers
 
   let_it_be(:user) { create(:user) }
-  let_it_be(:group, reload: true) { create_default(:group, :allow_runner_registration_token) }
+  let_it_be(:group, reload: true) { create_default(:group) }
   let_it_be(:project, reload: true) { create_default(:project, :repository, group: group) }
 
   let_it_be(:pipeline, reload: true) do
@@ -22,12 +22,6 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
   end
 
   let_it_be(:build, refind: true) { create(:ci_build, pipeline: pipeline) }
-
-  let(:allow_runner_registration_token) { false }
-
-  before do
-    stub_application_setting(allow_runner_registration_token: allow_runner_registration_token)
-  end
 
   it { is_expected.to belong_to(:runner) }
   it { is_expected.to belong_to(:trigger_request) }
@@ -132,8 +126,6 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
   it_behaves_like 'a deployable job' do
     let(:job) { build }
   end
-
-  it_behaves_like 'a triggerable processable', :ci_build
 
   describe '.ref_protected' do
     subject { described_class.ref_protected }
@@ -1563,7 +1555,6 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
 
     context 'hide runners token' do
       let(:data) { "new #{project.runners_token} data" }
-      let(:allow_runner_registration_token) { true }
 
       it { is_expected.to match(/^new x+ data$/) }
 
@@ -3017,6 +3008,22 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
 
         it { is_expected.not_to include(protected_variable) }
       end
+    end
+
+    context 'when build is for triggers' do
+      let(:trigger) { create(:ci_trigger, project: project) }
+      let(:trigger_request) { create(:ci_trigger_request, pipeline: pipeline, trigger: trigger) }
+
+      let(:predefined_trigger_variables) do
+        [{ key: 'CI_PIPELINE_TRIGGERED', value: 'true', public: true, masked: false },
+        { key: 'CI_TRIGGER_SHORT_TOKEN', value: trigger.short_token, public: true, masked: false }]
+      end
+
+      before do
+        build.trigger_request = trigger_request
+      end
+
+      it { is_expected.to include(*predefined_trigger_variables) }
     end
 
     context 'when pipeline has a variable' do

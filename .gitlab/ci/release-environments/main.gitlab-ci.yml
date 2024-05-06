@@ -7,32 +7,23 @@ include:
 
 stages:
   - prepare
-  - start
   - deploy
   - qa
-  - finish
-
-.inherit_variables:
-  inherit:
-    variables:
-      - GIT_DEPTH
-      - GIT_STRATEGY
-
-variables:
-  GIT_DEPTH: 20
-  GIT_STRATEGY: fetch
 
 release-environments-build-cng-env:
   extends: .build-cng-env
+  allow_failure: true
 
 release-environments-build-cng:
   extends: .build-cng
   needs: ["release-environments-build-cng-env"]
   variables:
     IMAGE_TAG_EXT: "-${CI_COMMIT_SHORT_SHA}"
+  allow_failure: true
 
 release-environments-deploy-env:
-  stage: prepare
+  allow_failure: true
+  stage: deploy
   needs: ["release-environments-build-cng"]
   variables:
     DEPLOY_ENV: deploy.env
@@ -46,17 +37,10 @@ release-environments-deploy-env:
     expire_in: 7 days
     when: always
 
-release-environments-notification-start:
-  stage: start
-  extends: .inherit_variables
-  variables:
-    RELEASE_ENVIRONMENT_NOTIFICATION_TYPE: "deploy"
-  script:
-    - ruby scripts/release_environment/notification.rb
-  needs: ["release-environments-deploy-env"]
-
 release-environments-deploy:
+  allow_failure: true
   stage: deploy
+  needs: ["release-environments-deploy-env"]
   inherit:
     variables: false
   variables:
@@ -66,7 +50,6 @@ release-environments-deploy:
     project: gitlab-com/gl-infra/release-environments
     branch: main
     strategy: depend
-  needs: ["release-environments-deploy-env"]
 
 release-environments-qa:
   stage: qa
@@ -80,41 +63,3 @@ release-environments-qa:
     GITLAB_INITIAL_ROOT_PASSWORD: "${RELEASE_ENVIRONMENTS_ROOT_PASSWORD}"
     QA_PRAEFECT_REPOSITORY_STORAGE: "default"
     SIGNUP_DISABLED: "true"
-
-release-environments-notification-failure:
-  stage: finish
-  extends: .inherit_variables
-  variables:
-    RELEASE_ENVIRONMENT_NOTIFICATION_TYPE: "deploy"
-  script:
-    - ruby scripts/release_environment/notification.rb
-  needs:
-    - job: release-environments-deploy
-      artifacts: false
-    - job: release-environments-deploy-env
-  when: on_failure
-
-release-environments-notification-success:
-  stage: finish
-  extends: .inherit_variables
-  variables:
-    RELEASE_ENVIRONMENT_NOTIFICATION_TYPE: "deploy"
-  script:
-    - ruby scripts/release_environment/notification.rb
-  needs:
-    - job: release-environments-qa
-      artifacts: false
-    - job: release-environments-deploy-env
-
-release-environments-notification-qa-failure:
-  stage: finish
-  extends: .inherit_variables
-  variables:
-    RELEASE_ENVIRONMENT_NOTIFICATION_TYPE: "qa"
-  script:
-    - ruby scripts/release_environment/notification.rb
-  needs:
-    - job: release-environments-qa
-      artifacts: false
-    - job: release-environments-deploy-env
-  when: on_failure

@@ -2,8 +2,9 @@
 import { GlTokenSelector, GlAvatar, GlAvatarLabeled, GlIcon, GlSprintf } from '@gitlab/ui';
 import { debounce, isEmpty } from 'lodash';
 import { __ } from '~/locale';
-import { getUsers } from '~/rest_api';
+import { getUsers, getGroupUsers } from '~/rest_api';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { memberName } from '../utils/member_utils';
 import {
   SEARCH_DELAY,
@@ -21,6 +22,7 @@ export default {
     GlIcon,
     GlSprintf,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     placeholder: {
       type: String,
@@ -54,6 +56,10 @@ export default {
       type: String,
       required: false,
       default: '',
+    },
+    groupId: {
+      type: String,
+      required: true,
     },
   },
   data() {
@@ -126,6 +132,10 @@ export default {
       }));
     },
     retrieveUsersRequest() {
+      if (this.usersFilter === USERS_FILTER_SAML_PROVIDER_ID && this.glFeatures.groupUserSaml) {
+        return getGroupUsers(this.query, this.groupId, this.queryOptions);
+      }
+
       return getUsers(this.query, this.queryOptions);
     },
     retrieveUsers: debounce(async function debouncedRetrieveUsers() {

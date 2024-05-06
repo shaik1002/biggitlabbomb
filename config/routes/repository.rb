@@ -94,8 +94,6 @@ end
 
 resources :commit, only: [:show], constraints: { id: Gitlab::Git::Commit::SHA_PATTERN } do
   member do
-    get :show, to: 'commit#rapid_diffs',
-      constraints: ->(params) { params[:rapid_diffs] == 'true' }
     get :branches
     get :pipelines
     post :revert

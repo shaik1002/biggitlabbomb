@@ -17,28 +17,32 @@ import {
   WIDGET_TYPE_COLOR,
   WORK_ITEM_TYPE_VALUE_EPIC,
 } from '../constants';
-import WorkItemAssignees from './work_item_assignees.vue';
-import WorkItemDueDate from './work_item_due_date.vue';
-import WorkItemLabels from './work_item_labels.vue';
-import WorkItemMilestone from './work_item_milestone.vue';
-import WorkItemParent from './work_item_parent.vue';
+import WorkItemAssigneesWithEdit from './work_item_assignees_with_edit.vue';
+import WorkItemDueDateWithEdit from './work_item_due_date_with_edit.vue';
+import WorkItemLabelsWithEdit from './work_item_labels_with_edit.vue';
+import WorkItemMilestoneWithEdit from './work_item_milestone_with_edit.vue';
+import WorkItemParent from './work_item_parent_with_edit.vue';
 import WorkItemTimeTracking from './work_item_time_tracking.vue';
 
 export default {
   components: {
     Participants,
-    WorkItemLabels,
-    WorkItemMilestone,
-    WorkItemAssignees,
-    WorkItemDueDate,
+    WorkItemLabelsWithEdit,
+    WorkItemMilestoneWithEdit,
+    WorkItemAssigneesWithEdit,
+    WorkItemDueDateWithEdit,
     WorkItemParent,
     WorkItemTimeTracking,
-    WorkItemWeight: () => import('ee_component/work_items/components/work_item_weight.vue'),
-    WorkItemProgress: () => import('ee_component/work_items/components/work_item_progress.vue'),
-    WorkItemIteration: () => import('ee_component/work_items/components/work_item_iteration.vue'),
+    WorkItemWeight: () =>
+      import('ee_component/work_items/components/work_item_weight_with_edit.vue'),
+    WorkItemProgressWithEdit: () =>
+      import('ee_component/work_items/components/work_item_progress_with_edit.vue'),
+    WorkItemIteration: () =>
+      import('ee_component/work_items/components/work_item_iteration_with_edit.vue'),
     WorkItemHealthStatus: () =>
-      import('ee_component/work_items/components/work_item_health_status.vue'),
-    WorkItemColor: () => import('ee_component/work_items/components/work_item_color.vue'),
+      import('ee_component/work_items/components/work_item_health_status_with_edit.vue'),
+    WorkItemColorWithEdit: () =>
+      import('ee_component/work_items/components/work_item_color_with_edit.vue'),
     WorkItemRolledupDates: () =>
       import('ee_component/work_items/components/work_item_rolledup_dates.vue'),
   },
@@ -128,7 +132,7 @@ export default {
 <template>
   <div class="work-item-attributes-wrapper">
     <template v-if="workItemAssignees">
-      <work-item-assignees
+      <work-item-assignees-with-edit
         class="gl-mb-5 js-assignee"
         :can-update="canUpdate"
         :full-path="fullPath"
@@ -143,7 +147,7 @@ export default {
       />
     </template>
     <template v-if="workItemLabels">
-      <work-item-labels
+      <work-item-labels-with-edit
         class="gl-mb-5 js-labels"
         :can-update="canUpdate"
         :full-path="fullPath"
@@ -179,7 +183,7 @@ export default {
       />
     </template>
     <template v-if="workItemMilestone">
-      <work-item-milestone
+      <work-item-milestone-with-edit
         class="gl-mb-5 js-milestone"
         :full-path="fullPath"
         :work-item-id="workItem.id"
@@ -202,7 +206,7 @@ export default {
       />
     </template>
     <template v-if="workItemDueDate && !showRolledupDates">
-      <work-item-due-date
+      <work-item-due-date-with-edit
         :can-update="canUpdate"
         :due-date="workItemDueDate.dueDate"
         :start-date="workItemDueDate.startDate"
@@ -212,7 +216,7 @@ export default {
       />
     </template>
     <template v-if="workItemProgress">
-      <work-item-progress
+      <work-item-progress-with-edit
         class="gl-mb-5"
         :can-update="canUpdate"
         :progress="workItemProgress.progress"
@@ -233,7 +237,7 @@ export default {
       />
     </template>
     <template v-if="workItemColor">
-      <work-item-color
+      <work-item-color-with-edit
         class="gl-mb-5"
         :work-item="workItem"
         :can-update="canUpdate"
@@ -253,13 +257,8 @@ export default {
     <work-item-time-tracking
       v-if="workItemTimeTracking"
       class="gl-mb-5 gl-pt-5 gl-border-t gl-border-gray-50"
-      :can-update="canUpdate"
       :time-estimate="workItemTimeTracking.timeEstimate"
-      :timelogs="workItemTimeTracking.timelogs.nodes"
       :total-time-spent="workItemTimeTracking.totalTimeSpent"
-      :work-item-id="workItem.id"
-      :work-item-iid="workItem.iid"
-      :work-item-type="workItemType"
     />
     <participants
       v-if="workItemParticipants"

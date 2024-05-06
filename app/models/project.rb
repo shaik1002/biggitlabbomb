@@ -478,7 +478,7 @@ class Project < ApplicationRecord
   # rubocop:disable Cop/ActiveRecordDependent -- we need to clean up files, not only remove records
   has_many :pages_deployments, dependent: :destroy, inverse_of: :project
   # rubocop:enable Cop/ActiveRecordDependent
-  has_many :active_pages_deployments, -> { active.order_by(:created_desc) }, class_name: 'PagesDeployment', inverse_of: :project
+  has_many :active_pages_deployments, -> { active }, class_name: 'PagesDeployment', inverse_of: :project
 
   has_many :operations_feature_flags, class_name: 'Operations::FeatureFlag'
   has_one :operations_feature_flags_client, class_name: 'Operations::FeatureFlagsClient'
@@ -681,6 +681,7 @@ class Project < ApplicationRecord
           column_expression: order_expression,
           order_expression: order_expression.desc,
           order_direction: :desc,
+          distinct: false,
           add_to_projections: true
         ),
         Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(

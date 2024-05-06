@@ -33,12 +33,10 @@ RSpec.shared_examples 'WikiPages::CreateService#execute' do |container_type|
     service.execute
   end
 
-  it_behaves_like 'internal event tracking' do
-    let(:event) { 'create_wiki_page' }
-    let(:project) { container if container.is_a?(Project) }
-    let(:namespace) { container.is_a?(Group) ? container : container.namespace }
+  it 'counts wiki page creation' do
+    counter = Gitlab::UsageDataCounters::WikiPageCounter
 
-    subject(:track_event) { service.execute }
+    expect { service.execute }.to change { counter.read(:create) }.by 1
   end
 
   shared_examples 'correct event created' do
@@ -71,7 +69,9 @@ RSpec.shared_examples 'WikiPages::CreateService#execute' do |container_type|
     let(:page_title) { '' }
 
     it 'does not count a creation event' do
-      expect(Gitlab::InternalEvents).not_to receive(:track_event)
+      counter = Gitlab::UsageDataCounters::WikiPageCounter
+
+      expect { service.execute }.not_to change { counter.read(:create) }
     end
 
     it 'does not record the activity' do

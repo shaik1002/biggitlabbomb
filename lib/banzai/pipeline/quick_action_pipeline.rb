@@ -10,7 +10,7 @@ module Banzai
           Filter::NormalizeSourceFilter,
           Filter::TruncateSourceFilter,
           Filter::FrontMatterFilter,
-          Filter::BlockquoteFenceLegacyFilter,
+          Filter::BlockquoteFenceFilter,
           Filter::MarkdownFilter,
           Filter::QuickActionFilter
         ]

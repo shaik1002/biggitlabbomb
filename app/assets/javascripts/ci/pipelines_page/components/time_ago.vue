@@ -39,20 +39,12 @@ export default {
     class="gl-display-flex gl-flex-direction-column gl-align-items-flex-end gl-lg-align-items-flex-start"
     :class="fontSize"
   >
-    <p
-      v-if="duration"
-      class="gl-display-inline-flex gl-align-items-center gl-text-secondary gl-m-0 gl-whitespace-nowrap"
-      data-testid="duration"
-    >
+    <p v-if="duration" class="duration gl-display-inline-flex gl-align-items-center">
       <gl-icon name="timer" class="gl-mr-2" :size="12" />
       {{ durationFormatted }}
     </p>
 
-    <p
-      v-if="finishedTime"
-      class="gl-display-inline-flex gl-align-items-center gl-text-secondary gl-m-0 gl-whitespace-nowrap"
-      data-testid="finished-at"
-    >
+    <p v-if="finishedTime" class="finished-at gl-display-inline-flex gl-align-items-center">
       <gl-icon name="calendar" class="gl-mr-2" :size="12" data-testid="calendar-icon" />
 
       <time

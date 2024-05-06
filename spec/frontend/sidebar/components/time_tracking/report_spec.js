@@ -35,7 +35,6 @@ describe('Issuable Time Tracking Report', () => {
     issuableType = 'issue',
     mountFunction = shallowMount,
     limitToHours = false,
-    timelogs,
   } = {}) => {
     wrapper = extendedWrapper(
       mountFunction(Report, {
@@ -48,11 +47,7 @@ describe('Issuable Time Tracking Report', () => {
           issuableId: 1,
           issuableType,
         },
-        propsData: {
-          limitToHours,
-          issuableId: '1',
-          timelogs,
-        },
+        propsData: { limitToHours, issuableId: '1' },
       }),
     );
   };
@@ -168,14 +163,6 @@ describe('Issuable Time Tracking Report', () => {
         captureError: true,
         error: expect.any(Object),
       });
-    });
-  });
-
-  describe('with provided timelogs', () => {
-    it('skips fetching the time tracking report', () => {
-      mountComponent({ timelogs: getIssueTimelogsQueryResponse.data.issuable.timelogs.nodes });
-
-      expect(successIssueQueryHandler).not.toHaveBeenCalled();
     });
   });
 });

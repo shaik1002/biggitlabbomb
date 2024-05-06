@@ -120,7 +120,7 @@ RSpec.describe 'Merge request > User resolves diff notes and threads', :js, feat
           before do
             page.within('.merge-request-tabs') { click_link 'Changes' }
             find('.js-show-diff-settings').click
-            find_by_testid('listbox-item-parallel').click
+            page.find('#parallel-diff-btn').click
           end
 
           it 'hides when resolve thread is clicked' do

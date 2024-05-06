@@ -31,31 +31,26 @@ module BreadcrumbsHelper
     @breadcrumb_collapsed_links[location] << link
   end
 
-  def push_to_schema_breadcrumb(text, href, avatar = nil)
-    schema_breadcrumb_list.push({ text: text, href: href, avatar: avatar })
+  def push_to_schema_breadcrumb(text, link, avatar = nil)
+    list_item = schema_list_item(text, link, schema_breadcrumb_list.size + 1, avatar)
+
+    schema_breadcrumb_list.push(list_item)
   end
 
   def schema_breadcrumb_json
     {
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
-      'itemListElement': build_item_list_elements&.map&.with_index do |item, index|
-        {
-          '@type' => 'ListItem',
-          'position' => index + 1,
-          'name' => item[:text],
-          'item' => ensure_absolute_url(item[:href])
-        }
-      end
+      'itemListElement': build_item_list_elements&.map { |item| item.except('avatar') }
     }.to_json
   end
 
   def breadcrumbs_as_json
     schema_breadcrumb_list.map do |breadcrumb|
       {
-        text: breadcrumb[:text],
-        href: breadcrumb[:href],
-        avatarPath: breadcrumb[:avatar]
+        text: breadcrumb['name'],
+        href: breadcrumb['item'],
+        avatarPath: breadcrumb['avatar']
       }
     end.to_json
   end
@@ -67,25 +62,29 @@ module BreadcrumbsHelper
   end
 
   def build_item_list_elements
+    return @schema_breadcrumb_list unless @breadcrumbs_extra_links&.any?
+
     last_element = schema_breadcrumb_list.pop
 
-    if @breadcrumbs_extra_links&.any?
-      @breadcrumbs_extra_links.each do |el|
-        push_to_schema_breadcrumb(el[:text], el[:link])
-      end
+    @breadcrumbs_extra_links.each do |el|
+      push_to_schema_breadcrumb(el[:text], el[:link])
     end
 
-    if @breadcrumb_collapsed_links&.[](:after)&.any?
-      @breadcrumb_collapsed_links[:after].each do |el|
-        push_to_schema_breadcrumb(el[:text], el[:href], el[:avatar_url])
-      end
-    end
-
-    schema_breadcrumb_list.push(last_element) if last_element
-    schema_breadcrumb_list
+    last_element['position'] = schema_breadcrumb_list.last['position'] + 1
+    schema_breadcrumb_list.push(last_element)
   end
 
-  def ensure_absolute_url(link)
+  def schema_list_item(text, link, position, avatar = nil)
+    {
+      '@type' => 'ListItem',
+      'position' => position,
+      'name' => text,
+      'item' => ensure_absolute_link(link),
+      'avatar' => avatar
+    }
+  end
+
+  def ensure_absolute_link(link)
     url = URI.parse(link)
     url.absolute? ? link : URI.join(request.base_url, link).to_s
   rescue URI::InvalidURIError

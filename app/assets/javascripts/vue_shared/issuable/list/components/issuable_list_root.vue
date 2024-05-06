@@ -414,9 +414,6 @@ export default {
           <template #pipeline-status>
             <slot name="pipeline-status" :issuable="issuable"></slot>
           </template>
-          <template #title-icons>
-            <slot name="title-icons" :issuable="issuable"></slot>
-          </template>
         </issuable-item>
       </component>
       <div v-else-if="issuables.length > 0 && isGridView">

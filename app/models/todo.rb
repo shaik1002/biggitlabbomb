@@ -186,17 +186,20 @@ class Todo < ApplicationRecord
           order_expression: asc ? highest_priority_arel.asc.nulls_last : highest_priority_arel.desc.nulls_first,
           reversed_order_expression: asc ? highest_priority_arel.desc.nulls_first : highest_priority_arel.asc.nulls_last,
           nullable: asc ? :nulls_last : :nulls_first,
-          order_direction: asc ? :asc : :desc
+          order_direction: asc ? :asc : :desc,
+          distinct: false
         ),
         Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
           attribute_name: 'created_at',
           order_expression: asc ? Todo.arel_table[:created_at].asc : Todo.arel_table[:created_at].desc,
-          nullable: :not_nullable
+          nullable: :not_nullable,
+          distinct: false
         ),
         Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
           attribute_name: 'id',
           order_expression: asc ? Todo.arel_table[:id].asc : Todo.arel_table[:id].desc,
-          nullable: :not_nullable
+          nullable: :not_nullable,
+          distinct: true
         )
       ])
 

@@ -5,15 +5,11 @@ require 'spec_helper'
 RSpec.describe API::Ci::Runners, feature_category: :fleet_visibility do
   let_it_be(:admin_mode) { false }
 
-  subject(:request) { post api("#{prefix}/runners/reset_registration_token", user, admin_mode: admin_mode) }
-
-  before do
-    stub_application_setting(allow_runner_registration_token: true)
-  end
+  subject { post api("#{prefix}/runners/reset_registration_token", user, admin_mode: admin_mode) }
 
   shared_examples 'bad request' do |result|
     it 'returns 400 error', :aggregate_failures do
-      expect { request }.not_to change { get_token }
+      expect { subject }.not_to change { get_token }
 
       expect(response).to have_gitlab_http_status(:bad_request)
       expect(json_response).to eq(result)
@@ -22,7 +18,7 @@ RSpec.describe API::Ci::Runners, feature_category: :fleet_visibility do
 
   shared_examples 'unauthenticated' do
     it 'returns 401 error', :aggregate_failures do
-      expect { request }.not_to change { get_token }
+      expect { subject }.not_to change { get_token }
 
       expect(response).to have_gitlab_http_status(:unauthorized)
     end
@@ -30,7 +26,7 @@ RSpec.describe API::Ci::Runners, feature_category: :fleet_visibility do
 
   shared_examples 'unauthorized' do
     it 'returns 403 error', :aggregate_failures do
-      expect { request }.not_to change { get_token }
+      expect { subject }.not_to change { get_token }
 
       expect(response).to have_gitlab_http_status(:forbidden)
     end
@@ -38,7 +34,7 @@ RSpec.describe API::Ci::Runners, feature_category: :fleet_visibility do
 
   shared_examples 'not found' do |scope|
     it 'returns 404 error', :aggregate_failures do
-      expect { request }.not_to change { get_token }
+      expect { subject }.not_to change { get_token }
 
       expect(response).to have_gitlab_http_status(:not_found)
       expect(json_response).to eq({ 'message' => "404 #{scope.capitalize} Not Found" })
@@ -64,17 +60,11 @@ RSpec.describe API::Ci::Runners, feature_category: :fleet_visibility do
   end
 
   shared_context 'when authorized' do |scope|
-    let(:allow_runner_registration_token) { false }
+    it 'resets runner registration token', :aggregate_failures do
+      expect { subject }.to change { get_token }
 
-    before do
-      stub_application_setting(allow_runner_registration_token: allow_runner_registration_token)
-    end
-
-    it 'does not reset runner registration token', :aggregate_failures do
-      request
-
-      expect(response).to have_gitlab_http_status(:forbidden)
-      expect(json_response).to eq({ 'message' => '403 Forbidden' })
+      expect(response).to have_gitlab_http_status(:success)
+      expect(json_response).to eq({ 'token' => get_token })
     end
 
     if scope != 'instance'
@@ -82,17 +72,6 @@ RSpec.describe API::Ci::Runners, feature_category: :fleet_visibility do
         let(:prefix) { "/#{scope.pluralize}/some%20string" }
 
         it_behaves_like 'not found', scope
-      end
-    end
-
-    context 'when runner registration is allowed' do
-      let(:allow_runner_registration_token) { true }
-
-      it 'resets runner registration token', :aggregate_failures do
-        expect { request }.to change { get_token }
-
-        expect(response).to have_gitlab_http_status(:success)
-        expect(json_response).to eq({ 'token' => get_token })
       end
     end
   end
@@ -133,7 +112,7 @@ RSpec.describe API::Ci::Runners, feature_category: :fleet_visibility do
 
   describe '/api/v4/groups/:id/runners/reset_registration_token' do
     describe 'POST /api/v4/groups/:id/runners/reset_registration_token' do
-      let_it_be(:group) { create(:group, :private, :allow_runner_registration_token) }
+      let_it_be(:group) { create_default(:group, :private) }
 
       let(:prefix) { "/groups/#{group.id}" }
 

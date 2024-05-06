@@ -140,16 +140,18 @@ FactoryBot.define do
       avatar { fixture_file_upload('spec/fixtures/dk.png') }
     end
 
-    trait :with_last_activity_on_today do
-      last_activity_on { Date.today }
-    end
-
     trait :with_sign_ins do
       sign_in_count { 3 }
       current_sign_in_at { FFaker::Time.between(10.days.ago, 1.day.ago) }
       last_sign_in_at { FFaker::Time.between(10.days.ago, 1.day.ago) }
       current_sign_in_ip { '127.0.0.1' }
       last_sign_in_ip { '127.0.0.1' }
+    end
+
+    trait :with_credit_card_validation do
+      after :create do |user|
+        create :credit_card_validation, user: user
+      end
     end
 
     trait :two_factor_via_otp do

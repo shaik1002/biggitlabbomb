@@ -33,8 +33,7 @@ RSpec.describe 'Query', feature_category: :groups_and_projects do
           expect(query_result).to include(
             'fullPath' => target_namespace.full_path,
             'name' => target_namespace.name,
-            'crossProjectPipelineAvailable' => target_namespace.licensed_feature_available?(:cross_project_pipeline),
-            'achievementsPath' => achievements_path
+            'crossProjectPipelineAvailable' => target_namespace.licensed_feature_available?(:cross_project_pipeline)
           )
         end
       end
@@ -62,24 +61,8 @@ RSpec.describe 'Query', feature_category: :groups_and_projects do
       end
     end
 
-    context 'when achievements feature flag is off' do
-      let(:target_namespace) { public_group_namespace }
-
-      before do
-        stub_feature_flags(achievements: false)
-      end
-
-      it 'does not return achievementsPath' do
-        subject
-        expect(query_result).to include(
-          'achievementsPath' => nil
-        )
-      end
-    end
-
     context 'when used with a public group' do
       let(:target_namespace) { public_group_namespace }
-      let(:achievements_path) { ::Gitlab::Routing.url_helpers.group_achievements_path(target_namespace) }
 
       before do
         subject
@@ -95,8 +78,7 @@ RSpec.describe 'Query', feature_category: :groups_and_projects do
         it 'fetches the expected data' do
           expect(query_result).to include(
             'fullPath' => target_namespace.full_path,
-            'name' => target_namespace.name,
-            'achievementsPath' => achievements_path
+            'name' => target_namespace.name
           )
         end
       end
@@ -107,8 +89,7 @@ RSpec.describe 'Query', feature_category: :groups_and_projects do
         it 'fetches the expected data' do
           expect(query_result).to include(
             'fullPath' => target_namespace.full_path,
-            'name' => target_namespace.name,
-            'achievementsPath' => achievements_path
+            'name' => target_namespace.name
           )
         end
       end
@@ -119,8 +100,7 @@ RSpec.describe 'Query', feature_category: :groups_and_projects do
         it 'fetches the expected data' do
           expect(query_result).to include(
             'fullPath' => target_namespace.full_path,
-            'name' => target_namespace.name,
-            'achievementsPath' => achievements_path
+            'name' => target_namespace.name
           )
         end
       end
@@ -130,7 +110,6 @@ RSpec.describe 'Query', feature_category: :groups_and_projects do
       context 'retrieving a group' do
         it_behaves_like 'retrieving a namespace' do
           let(:target_namespace) { group_namespace }
-          let(:achievements_path) { ::Gitlab::Routing.url_helpers.group_achievements_path(target_namespace) }
 
           before do
             group_namespace.add_developer(user)
@@ -141,14 +120,12 @@ RSpec.describe 'Query', feature_category: :groups_and_projects do
       context 'retrieving a user namespace' do
         it_behaves_like 'retrieving a namespace' do
           let(:target_namespace) { user_namespace }
-          let(:achievements_path) { nil }
         end
       end
 
       context 'retrieving a project' do
         it_behaves_like 'retrieving a namespace' do
           let(:target_namespace) { project }
-          let(:achievements_path) { nil }
 
           before do
             group_namespace.add_developer(user)

@@ -72,29 +72,13 @@ config/bounded_contexts.yml @fabiopitino @grzesiek @stanhu @cwoolley-gitlab @tku
 /ee/db/schema_migrations/
 # The following two lines only match db/ root files
 /db/*
-/spec/db/*
 /ee/db/*
-/ee/spec/db/*
 /lib/gitlab/background_migration/
-/spec/lib/gitlab/background_migration/
 /ee/lib/ee/gitlab/background_migration/
-/ee/spec/lib/ee/gitlab/background_migration/
-/lib/gitlab/database.rb
 /lib/gitlab/database/
-/spec/lib/gitlab/database_spec.rb
-/spec/lib/gitlab/database/
-/ee/lib/gitlab/database/
-/ee/spec/lib/gitlab/database/
-/ee/lib/ee/gitlab/database.rb
-/ee/lib/ee/gitlab/database/
-/ee/spec/lib/ee/gitlab/database/
-/ee/spec/lib/ee/gitlab/database_spec.rb
 /lib/gitlab/sql/
-/spec/lib/gitlab/sql/
 /app/finders/
-/spec/finders/
 /ee/app/finders/
-/ee/spec/finders/
 /rubocop/rubocop-migrations.yml
 
 [Pipeline configuration] @gl-quality/eng-prod
@@ -145,7 +129,6 @@ Dangerfile
 
 ^[End-to-end] @gl-quality
 /qa/
-/gems/gitlab-cng/
 
 ^[LDAP] @dblessing @mkozono
 /ee/lib/ee/gitlab/auth/ldap/
@@ -614,7 +597,6 @@ lib/gitlab/checks/**
 /doc/administration/settings/email.md @msedlakjakubowski
 /doc/administration/settings/external_authorization.md @jglassman1
 /doc/administration/settings/files_api_rate_limits.md @msedlakjakubowski
-/doc/administration/settings/git_http_rate_limits.md @msedlakjakubowski
 /doc/administration/settings/git_lfs_rate_limits.md @msedlakjakubowski
 /doc/administration/settings/gitaly_timeouts.md @eread
 /doc/administration/settings/import_and_export_settings.md @eread @ashrafkhamis
@@ -793,7 +775,7 @@ lib/gitlab/checks/**
 /doc/api/snippet_repository_storage_moves.md @msedlakjakubowski
 /doc/api/snippets.md @msedlakjakubowski
 /doc/api/statistics.md @jglassman1
-/doc/api/status_checks.md @rdickenson
+/doc/api/status_checks.md @eread
 /doc/api/suggestions.md @msedlakjakubowski
 /doc/api/system_hooks.md @eread @ashrafkhamis
 /doc/api/tags.md @msedlakjakubowski
@@ -805,6 +787,7 @@ lib/gitlab/checks/**
 /doc/api/topics.md @lciutacu
 /doc/api/users.md @jglassman1
 /doc/api/version.md @phillipwells
+/doc/api/visual_review_discussions.md @marcel.amirault @lyspin
 /doc/api/vulnerabilities.md @rdickenson
 /doc/api/vulnerability_exports.md @rdickenson
 /doc/api/vulnerability_findings.md @rdickenson
@@ -825,8 +808,11 @@ lib/gitlab/checks/**
 /doc/ci/gitlab_google_cloud_integration/ @marcel.amirault
 /doc/ci/interactive_web_terminal/ @fneill
 /doc/ci/jobs/ci_job_token.md @marcel.amirault
+/doc/ci/jobs/index.md @marcel.amirault @lyspin
 /doc/ci/jobs/job_artifacts.md @marcel.amirault
 /doc/ci/jobs/job_artifacts_troubleshooting.md @marcel.amirault
+/doc/ci/jobs/job_control.md @marcel.amirault @lyspin
+/doc/ci/jobs/job_troubleshooting.md @marcel.amirault @lyspin
 /doc/ci/pipelines/pipeline_security.md @marcel.amirault
 /doc/ci/resource_groups/ @phillipwells
 /doc/ci/runners/ @fneill
@@ -834,7 +820,6 @@ lib/gitlab/checks/**
 /doc/ci/secure_files/ @marcel.amirault
 /doc/ci/services/ @fneill
 /doc/ci/ssh_keys/ @marcel.amirault
-/doc/ci/steps/ @fneill
 /doc/ci/test_cases/ @msedlakjakubowski
 /doc/ci/testing/code_quality.md @rdickenson
 /doc/ci/testing/code_quality_troubleshooting.md @rdickenson
@@ -882,7 +867,7 @@ lib/gitlab/checks/**
 /doc/integration/advanced_search/ @ashrafkhamis
 /doc/integration/akismet.md @phillipwells
 /doc/integration/arkose.md @phillipwells
-/doc/integration/datadog.md @fneill
+/doc/integration/datadog.md @eread @ashrafkhamis
 /doc/integration/diffblue_cover.md @marcel.amirault @lyspin
 /doc/integration/external-issue-tracker.md @eread @ashrafkhamis
 /doc/integration/gitpod.md @ashrafkhamis
@@ -928,7 +913,6 @@ lib/gitlab/checks/**
 /doc/tutorials/move_personal_project_to_group/ @lciutacu
 /doc/tutorials/product_analytics_onboarding_website_project/ @lciutacu
 /doc/tutorials/protected_workflow/ @aqualls
-/doc/tutorials/reviews/ @aqualls
 /doc/tutorials/scan_execution_policy/ @rdickenson
 /doc/tutorials/scan_result_policy/ @rdickenson
 /doc/tutorials/scrum_events/ @msedlakjakubowski
@@ -949,8 +933,6 @@ lib/gitlab/checks/**
 /doc/user/discussions/ @aqualls
 /doc/user/emoji_reactions.md @msedlakjakubowski
 /doc/user/enterprise_user/ @jglassman1
-/doc/user/get_started/ @msedlakjakubowski
-/doc/user/get_started/get_started_managing_infrastructure.md @phillipwells
 /doc/user/gitlab_duo_chat.md @sselhorn
 /doc/user/gitlab_duo_examples.md @sselhorn
 /doc/user/group/access_and_permissions.md @lciutacu
@@ -1027,7 +1009,7 @@ lib/gitlab/checks/**
 /doc/user/project/merge_requests/methods/ @msedlakjakubowski
 /doc/user/project/merge_requests/reviews/data_usage.md @sselhorn
 /doc/user/project/merge_requests/squash_and_merge.md @msedlakjakubowski
-/doc/user/project/merge_requests/status_checks.md @rdickenson
+/doc/user/project/merge_requests/status_checks.md @eread
 /doc/user/project/ml/experiment_tracking/ @sselhorn
 /doc/user/project/ml/model_registry/ @sselhorn
 /doc/user/project/organize_work_with_projects.md @lciutacu
@@ -1419,11 +1401,11 @@ lib/gitlab/checks/**
 
 # CI/CD templates require approval from specific owners.
 /lib/gitlab/ci/templates/ @gitlab-org/maintainers/cicd-templates
-/lib/gitlab/ci/templates/Security/ @gonzoyumo @twoodham @amarpatel @theoretick @thiagocsf @agroleau
+/lib/gitlab/ci/templates/Security/ @gonzoyumo @twoodham @amarpatel
 /lib/gitlab/ci/templates/Security/API-Fuzzing.*.yml @gitlab-org/secure/dynamic-analysis
 /lib/gitlab/ci/templates/Security/Container-Scanning.*.yml @gitlab-org/secure/composition-analysis-be
 /lib/gitlab/ci/templates/Security/Coverage-Fuzzing.*.yml @gitlab-org/secure/dynamic-analysis
-/lib/gitlab/ci/templates/Security/DAST*.yml @gitlab-org/secure/dynamic-analysis
+/lib/gitlab/ci/templates/Security/DAST.*.yml @gitlab-org/secure/dynamic-analysis
 /lib/gitlab/ci/templates/Security/Dependency-Scanning.*.yml @gitlab-org/secure/composition-analysis-be
 /lib/gitlab/ci/templates/Security/License-Scanning.*.yml @gitlab-org/secure/composition-analysis-be
 /lib/gitlab/ci/templates/Security/SAST.*.yml @gitlab-org/secure/static-analysis

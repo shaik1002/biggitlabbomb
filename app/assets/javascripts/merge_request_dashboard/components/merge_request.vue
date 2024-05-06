@@ -4,7 +4,6 @@ import { __, sprintf } from '~/locale';
 import SafeHtml from '~/vue_shared/directives/safe_html';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
-import CiIcon from '~/vue_shared/components/ci_icon/ci_icon.vue';
 import { isScopedLabel } from '~/lib/utils/common_utils';
 
 export default {
@@ -13,7 +12,6 @@ export default {
     GlSprintf,
     GlIcon,
     GlLabel,
-    CiIcon,
     TimeAgoTooltip,
     UserAvatarLink,
   },
@@ -43,12 +41,12 @@ export default {
 
 <template>
   <div class="gl-bg-white gl-p-5 gl-rounded-base">
-    <div class="gl-display-flex" :class="{ 'gl-mb-2': mergeRequest.labels.length }">
+    <div class="gl-display-flex gl-mb-2">
       <div class="gl-display-flex gl-flex-direction-column">
         <h4 class="gl-mb-0 gl-mt-0 gl-font-base">
           <gl-link
             v-safe-html="mergeRequest.titleHtml"
-            :href="mergeRequest.webUrl"
+            href="#"
             class="gl-text-body gl-hover-text-gray-900"
           />
         </h4>
@@ -65,20 +63,15 @@ export default {
               </gl-link>
             </template>
             <template #milestone>
-              <template v-if="mergeRequest.milestone">
-                <gl-icon :size="16" class="gl-ml-2" name="milestone" />
-                {{ mergeRequest.milestone.title }}
-              </template>
+              <gl-icon :size="16" class="gl-ml-2" name="milestone" />
+              {{ mergeRequest.milestone.title }}
             </template>
           </gl-sprintf>
         </div>
       </div>
       <div class="gl-ml-auto gl-display-flex gl-flex-direction-column">
-        <ul class="gl-display-flex gl-justify-content-end gl-m-0 gl-p-0 gl-list-none">
-          <li v-if="mergeRequest.headPipeline && mergeRequest.headPipeline.detailedStatus">
-            <ci-icon :status="mergeRequest.headPipeline.detailedStatus" use-link show-tooltip />
-          </li>
-          <li v-if="mergeRequest.assignees.nodes.length" class="gl-ml-4">
+        <ul class="gl-display-flex gl-justify-content-end gl-m-0 gl-p-0 gl-list-style-none">
+          <li v-if="mergeRequest.assignees.nodes.length">
             <user-avatar-link
               v-for="(assignee, index) in mergeRequest.assignees.nodes"
               :key="`assignee_${assignee.id}`"
@@ -109,10 +102,7 @@ export default {
             {{ mergeRequest.userDiscussionsCount }}
           </li>
         </ul>
-        <div
-          v-if="mergeRequest.updatedAt"
-          class="gl-font-sm gl-mt-2 gl-text-secondary gl-text-right"
-        >
+        <div v-if="mergeRequest.updatedAt" class="gl-font-sm gl-mt-2 gl-text-secondary">
           <gl-sprintf :message="__('Updated at %{updatedAt}')">
             <template #updatedAt><time-ago-tooltip :time="mergeRequest.updatedAt" /></template>
           </gl-sprintf>

@@ -836,10 +836,9 @@ Use `detailed_merge_status` instead of `merge_status` to account for all potenti
   - `mergeable`: The branch can merge cleanly into the target branch.
   - `not_approved`: Approval is required before merge.
   - `not_open`: The merge request must be open before merge.
-  - `jira_association_missing`: The title or description must reference a Jira issue. To configure, see
-    [Require associated Jira issue for merge requests to be merged](../integration/jira/issues.md#require-associated-jira-issue-for-merge-requests-to-be-merged).
+  - `jira_association_missing`: The title or description must reference a Jira issue.
   - `need_rebase`: The merge request must be rebased.
-  - `conflict`: Conflicts exist between the source and target branches.
+  - `conflict`: There are conflicts between the source and target branches.
   - `requested_changes`: The merge request has reviewers who have requested changes.
 
 ### Preparation steps

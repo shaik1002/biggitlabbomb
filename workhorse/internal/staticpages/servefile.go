@@ -16,13 +16,10 @@ import (
 	"gitlab.com/gitlab-org/gitlab/workhorse/internal/urlprefix"
 )
 
-// CacheMode represents the caching mode used in the application.
 type CacheMode int
 
 const (
-	// CacheDisabled represents a cache mode where caching is disabled.
 	CacheDisabled CacheMode = iota
-	// CacheExpireMax represents the maximum duration for cache expiration.
 	CacheExpireMax
 )
 
@@ -32,11 +29,12 @@ const (
 func (s *Static) ServeExisting(prefix urlprefix.Prefix, cache CacheMode, notFoundHandler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if notFoundHandler == nil {
-			notFoundHandler = http.NotFoundHandler()
+			notFoundHandler = http.HandlerFunc(http.NotFound)
 		}
 
 		// We intentionally use r.URL.Path instead of r.URL.EscaptedPath() below.
-		// This is to make it possible to serve static files with e.g. a space %20 in their name.
+		// This is to make it possible to serve static files with e.g. a space
+		// %20 in their name.
 		relativePath, err := s.validatePath(prefix.Strip(r.URL.Path))
 		if err != nil {
 			notFoundHandler.ServeHTTP(w, r)
@@ -49,6 +47,7 @@ func (s *Static) ServeExisting(prefix urlprefix.Prefix, cache CacheMode, notFoun
 			notFoundHandler.ServeHTTP(w, r)
 			return
 		}
+
 		var content *os.File
 		var fi os.FileInfo
 
@@ -68,15 +67,13 @@ func (s *Static) ServeExisting(prefix urlprefix.Prefix, cache CacheMode, notFoun
 			notFoundHandler.ServeHTTP(w, r)
 			return
 		}
+
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 
-		defer func() {
-			if err := content.Close(); err != nil {
-				fmt.Printf("Error closing file: %v\n", err)
-			}
-		}()
+		defer content.Close()
 
-		if cache == CacheExpireMax {
+		switch cache {
+		case CacheExpireMax:
 			// Cache statically served files for 1 year
 			cacheUntil := time.Now().AddDate(1, 0, 0).Format(http.TimeFormat)
 			w.Header().Set("Cache-Control", "public")

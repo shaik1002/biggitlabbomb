@@ -4,6 +4,7 @@
 # This class ensures that we keep 1 record per project per month.
 module Projects
   class DataTransfer < ApplicationRecord
+    include AfterCommitQueue
     include CounterAttribute
 
     self.table_name = 'project_data_transfers'

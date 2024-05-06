@@ -421,7 +421,8 @@ class Issue < ApplicationRecord
       attribute_name: 'relative_position',
       column_expression: arel_table[:relative_position],
       order_expression: Issue.arel_table[:relative_position].asc.nulls_last,
-      nullable: :nulls_last
+      nullable: :nulls_last,
+      distinct: false
     )
   end
 
@@ -729,6 +730,12 @@ class Issue < ApplicationRecord
 
   def issue_type
     work_item_type_with_default.base_type
+  end
+
+  def unsubscribe_email_participant(email)
+    return if email.blank?
+
+    issue_email_participants.find_by_email(email)&.destroy
   end
 
   def hook_attrs

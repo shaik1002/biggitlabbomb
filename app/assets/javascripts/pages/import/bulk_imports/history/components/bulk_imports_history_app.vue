@@ -85,12 +85,12 @@ export default {
     tableCell({
       key: 'source_full_path',
       label: s__('BulkImport|Source'),
-      thClass: `gl-w-3/10`,
+      thClass: `gl-w-30p`,
     }),
     tableCell({
       key: 'destination_name',
       label: s__('BulkImport|Destination'),
-      thClass: `gl-w-3/10`,
+      thClass: `gl-w-30p`,
     }),
     tableCell({
       key: 'created_at',
@@ -99,7 +99,7 @@ export default {
     tableCell({
       key: 'status',
       label: __('Status'),
-      thClass: `gl-w-1/4`,
+      thClass: `gl-w-quarter`,
     }),
   ],
 

@@ -13,23 +13,8 @@ import { designCollectionResponse, mockDesign, mockDesign2 } from './mock_data';
 
 Vue.use(VueApollo);
 
-const PREVIOUS_VERSION_ID = 2;
-
-const designRouteFactory = (versionId) => ({
-  path: `?version=${versionId}`,
-  query: {
-    version: `${versionId}`,
-  },
-});
-
-const MOCK_ROUTE = {
-  path: '/',
-  query: {},
-};
-
 describe('DesignWidget', () => {
   let wrapper;
-  const workItemId = 'gid://gitlab/WorkItem/1';
 
   const oneDesignQueryHandler = jest.fn().mockResolvedValue(designCollectionResponse());
   const twoDesignsQueryHandler = jest
@@ -39,19 +24,13 @@ describe('DesignWidget', () => {
   const findWidgetWrapper = () => wrapper.findComponent(WidgetWrapper);
   const findAllDesignItems = () => wrapper.findAllComponents(DesignItem);
 
-  function createComponent({
-    designCollectionQueryHandler = oneDesignQueryHandler,
-    routeArg = MOCK_ROUTE,
-  } = {}) {
+  function createComponent({ designCollectionQueryHandler = oneDesignQueryHandler } = {}) {
     wrapper = shallowMountExtended(DesignWidget, {
       apolloProvider: createMockApollo([
         [getWorkItemDesignListQuery, designCollectionQueryHandler],
       ]),
       propsData: {
-        workItemId,
-      },
-      mocks: {
-        $route: routeArg,
+        workItemId: 'gid://gitlab/WorkItem/1',
       },
       provide: {
         fullPath: 'gitlab-org/gitlab-shell',
@@ -65,26 +44,12 @@ describe('DesignWidget', () => {
       return waitForPromises();
     });
 
-    it('calls design collection query without version by default', () => {
-      expect(oneDesignQueryHandler).toHaveBeenCalledWith({
-        id: workItemId,
-        atVersion: null,
-      });
+    it('called design collection query', () => {
+      expect(oneDesignQueryHandler).toHaveBeenCalled();
     });
 
     it('renders widget wrapper', () => {
       expect(findWidgetWrapper().exists()).toBe(true);
-    });
-  });
-
-  it('calls design collection query with version passed in route', async () => {
-    createComponent({ routeArg: designRouteFactory(PREVIOUS_VERSION_ID) });
-
-    await waitForPromises();
-
-    expect(oneDesignQueryHandler).toHaveBeenCalledWith({
-      id: workItemId,
-      atVersion: `gid://gitlab/DesignManagement::Version/${PREVIOUS_VERSION_ID}`,
     });
   });
 

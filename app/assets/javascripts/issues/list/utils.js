@@ -10,7 +10,6 @@ import {
   OPERATORS_TO_GROUP,
   TOKEN_TYPE_ASSIGNEE,
   TOKEN_TYPE_AUTHOR,
-  TOKEN_TYPE_DRAFT,
   TOKEN_TYPE_CONFIDENTIAL,
   TOKEN_TYPE_ITERATION,
   TOKEN_TYPE_MILESTONE,
@@ -322,10 +321,9 @@ const formatData = (token) => {
   if (requiresUpperCaseValue(token.type, token.value.data)) {
     return token.value.data.toUpperCase();
   }
-  if ([TOKEN_TYPE_CONFIDENTIAL, TOKEN_TYPE_DRAFT].includes(token.type)) {
+  if (token.type === TOKEN_TYPE_CONFIDENTIAL) {
     return token.value.data === 'yes';
   }
-
   return token.value.data;
 };
 

@@ -143,13 +143,13 @@ export default {
     {
       key: 'webUrl',
       label: s__('BulkImport|Source group'),
-      thClass: 'gl-pl-0! gl-w-1/2',
+      thClass: 'gl-pl-0! gl-w-half',
       tdClass: 'gl-pl-0!',
     },
     {
       key: 'importTarget',
       label: s__('BulkImport|New group'),
-      thClass: `gl-w-1/2`,
+      thClass: `gl-w-half`,
     },
     {
       key: 'progress',

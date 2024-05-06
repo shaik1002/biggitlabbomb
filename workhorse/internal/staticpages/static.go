@@ -2,7 +2,6 @@ package staticpages
 
 import "net/http"
 
-// Static represents a package for serving static pages and handling errors.
 type Static struct {
 	DocumentRoot string
 	Exclude      []string

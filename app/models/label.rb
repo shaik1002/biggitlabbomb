@@ -90,6 +90,7 @@ class Label < ApplicationRecord
           column_expression: order_expression,
           order_expression: order_expression.desc,
           order_direction: :desc,
+          distinct: false,
           add_to_projections: true
         ),
         Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
@@ -347,7 +348,7 @@ class Label < ApplicationRecord
   def label_format_reference(format = :id)
     raise StandardError, 'Unknown format' unless [:id, :name].include?(format)
 
-    if format == :name && name.exclude?('"')
+    if format == :name && !name.include?('"')
       %("#{name}")
     else
       id

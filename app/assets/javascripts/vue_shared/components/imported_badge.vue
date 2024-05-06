@@ -3,16 +3,13 @@ import { GlBadge, GlTooltipDirective } from '@gitlab/ui';
 import { __, s__, sprintf } from '~/locale';
 
 import { TYPE_EPIC, TYPE_ISSUE, TYPE_MERGE_REQUEST } from '~/issues/constants';
-import { TYPE_ACTIVITY, TYPE_COMMENT, TYPE_DESIGN, TYPE_SNIPPET } from '~/import/constants';
+import { TYPE_DESIGN } from '~/import/constants';
 
 const importableTypeText = {
-  [TYPE_ACTIVITY]: __('activity'),
-  [TYPE_COMMENT]: __('comment'),
   [TYPE_DESIGN]: __('design'),
   [TYPE_EPIC]: __('epic'),
   [TYPE_ISSUE]: __('issue'),
   [TYPE_MERGE_REQUEST]: __('merge request'),
-  [TYPE_SNIPPET]: __('snippet'),
 };
 
 export default {
@@ -33,11 +30,6 @@ export default {
       required: false,
       default: undefined,
     },
-    textOnly: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
   computed: {
     title() {
@@ -50,10 +42,7 @@ export default {
 </script>
 
 <template>
-  <span v-if="textOnly" v-gl-tooltip="title">
-    {{ __('Imported') }}
-  </span>
-  <gl-badge v-else v-gl-tooltip="title" :size="size">
+  <gl-badge v-gl-tooltip="title" :size="size">
     {{ __('Imported') }}
   </gl-badge>
 </template>

@@ -22,7 +22,8 @@ RSpec.describe Gitlab::Graphql::Pagination::Keyset::Connection do
       order_expression: Project.arel_table[:last_repository_check_at].asc.nulls_last,
       reversed_order_expression: Project.arel_table[:last_repository_check_at].desc.nulls_last,
       order_direction: :asc,
-      nullable: :nulls_last)
+      nullable: :nulls_last,
+      distinct: false)
   end
 
   let_it_be(:column_order_last_repo_desc) do
@@ -32,7 +33,8 @@ RSpec.describe Gitlab::Graphql::Pagination::Keyset::Connection do
       order_expression: Project.arel_table[:last_repository_check_at].desc.nulls_last,
       reversed_order_expression: Project.arel_table[:last_repository_check_at].asc.nulls_last,
       order_direction: :desc,
-      nullable: :nulls_last)
+      nullable: :nulls_last,
+      distinct: false)
   end
 
   subject(:connection) do

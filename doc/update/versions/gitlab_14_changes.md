@@ -4,8 +4,6 @@ group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
-<!--- start_remove The following content will be removed on remove_date: '2024-08-30' -->
-
 # GitLab 14 changes
 
 DETAILS:
@@ -821,7 +819,7 @@ DETAILS:
 Prerequisites:
 
 - The [GitLab 14.0 release post contains several important notes](https://about.gitlab.com/releases/2021/06/22/gitlab-14-0-released/#upgrade)
-  about pre-requisites including [using Patroni instead of repmgr](https://archives.docs.gitlab.com/15.0/ee/administration/postgresql/replication_and_failover.html#switching-from-repmgr-to-patroni),
+  about pre-requisites including [using Patroni instead of repmgr](../../administration/postgresql/replication_and_failover.md#switching-from-repmgr-to-patroni),
   migrating to hashed storage and [to Puma](../../administration/operations/puma.md).
 - The support of PostgreSQL 11 [has been dropped](../../install/requirements.md#database). Make sure to [update your database](https://docs.gitlab.com/omnibus/settings/database.html#upgrade-packaged-postgresql-server) to version 12 before updating to GitLab 14.0.
 
@@ -885,7 +883,7 @@ Other issues:
 
 - The binaries for PostgreSQL 11 and repmgr have been removed. Before upgrading, you must:
   1. Ensure the installation is using [PostgreSQL 12](https://docs.gitlab.com/omnibus/settings/database.html#upgrade-packaged-postgresql-server).
-  1. If using repmgr, [convert to using Patroni](https://archives.docs.gitlab.com/15.0/ee/administration/postgresql/replication_and_failover.html#switching-from-repmgr-to-patroni).
+  1. If using repmgr, [convert to using Patroni](../../administration/postgresql/replication_and_failover.md#switching-from-repmgr-to-patroni).
 
 - In GitLab 13.0, `sidekiq-cluster` was enabled by default and the `sidekiq` service ran `sidekiq-cluster` under the hood.
   However, users could control this behavior using `sidekiq['cluster']` setting to run Sidekiq directly instead. Users
@@ -951,5 +949,3 @@ DETAILS:
      - 14.1.0 or a later 14.1.Z patch release.
   1. [Batched background migrations must finish](../background_migrations.md#batched-background-migrations)
      before you upgrade to a later version [and may take longer than usual](#1400).
-
-<!--- end_remove -->

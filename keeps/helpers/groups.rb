@@ -55,14 +55,14 @@ module Keeps
 
       def fetch_groups
         @groups_json ||= begin
-          response = Gitlab::HTTP_V2.get(GROUPS_JSON_URL)
+          response = Gitlab::HTTP.get(GROUPS_JSON_URL)
 
           unless (200..299).cover?(response.code)
             raise Error,
               "Failed to get group information with response code: #{response.code} and body:\n#{response.body}"
           end
 
-          JSON.parse(response.body) # rubocop:disable Gitlab:Json -- We don't rely on GitLab internal classes
+          Gitlab::Json.parse(response.body)
         end
       end
     end

@@ -176,7 +176,7 @@ class CommitStatus < Ci::ApplicationRecord
 
     event :cancel do
       transition running: :canceling, if: :supports_canceling?
-      transition CANCELABLE_STATUSES.map(&:to_sym) + [:manual] => :canceled
+      transition [:created, :waiting_for_resource, :preparing, :waiting_for_callback, :pending, :manual, :scheduled, :running] => :canceled
     end
 
     before_transition [:created, :waiting_for_resource, :preparing, :skipped, :manual, :scheduled] => :pending do |commit_status|
@@ -245,6 +245,10 @@ class CommitStatus < Ci::ApplicationRecord
 
   def self.locking_enabled?
     false
+  end
+
+  def self.use_partition_id_filter?
+    Ci::Pipeline.use_partition_id_filter?
   end
 
   def locking_enabled?

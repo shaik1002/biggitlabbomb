@@ -7,21 +7,9 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
   include AdminModeHelper
   include_context 'ProjectPolicy context'
 
-  let_it_be_with_reload(:project_with_runner_registration_token) do
-    create(:project, :public, :allow_runner_registration_token)
-  end
-
   let(:project) { public_project }
 
   subject { described_class.new(current_user, project) }
-
-  before_all do
-    project_with_runner_registration_token.add_guest(guest)
-    project_with_runner_registration_token.add_reporter(reporter)
-    project_with_runner_registration_token.add_developer(developer)
-    project_with_runner_registration_token.add_maintainer(maintainer)
-    project_with_runner_registration_token.add_owner(owner)
-  end
 
   def expect_allowed(*permissions)
     permissions.each { |p| is_expected.to be_allowed(p) }
@@ -2687,118 +2675,6 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
     end
   end
 
-  describe 'public_user_access for internal project' do
-    using RSpec::Parameterized::TableSyntax
-
-    let(:policy) { :public_user_access }
-
-    where(:project_visibility, :external_user, :token_scope_enabled, :role, :allowed) do
-      :private  | false | false | :anonymous | false
-      :private  | false | false | :guest     | true
-      :private  | false | false | :reporter  | true
-      :private  | false | false | :developer | true
-      :private  | false | false | :maintainer | true
-      :private  | false | false | :owner | true
-      :public   | false | false | :anonymous | false
-      :public   | false | false | :guest     | true
-      :public   | false | false | :reporter  | true
-      :public   | false | false | :developer | true
-      :public   | false | false | :maintainer | true
-      :public   | false | false | :owner | true
-      :internal | false | false | :anonymous | false
-      :internal | false | false | :guest     | true
-      :internal | false | false | :reporter  | true
-      :internal | false | false | :developer | true
-      :internal | false | false | :maintainer | true
-      :internal | false | false | :owner | true
-      :private  | true | false | :anonymous | false
-      :private  | true | false | :guest     | false
-      :private  | true | false | :reporter  | false
-      :private  | true | false | :developer | false
-      :private  | true | false | :maintainer | false
-      :private  | true | false | :owner | false
-      :public   | true | false | :anonymous | false
-      :public   | true | false | :guest     | false
-      :public   | true | false | :reporter  | false
-      :public   | true | false | :developer | false
-      :public   | true | false | :maintainer | false
-      :public   | true | false | :owner | false
-      :internal | true | false | :anonymous | false
-      :internal | true | false | :guest     | false
-      :internal | true | false | :reporter  | false
-      :internal | true | false | :developer | false
-      :internal | true | false | :maintainer | false
-      :internal | true | false | :owner | false
-      :private  | false | true | :anonymous | false
-      :private  | false | true | :guest     | true
-      :private  | false | true | :reporter  | true
-      :private  | false | true | :developer | true
-      :private  | false | true | :maintainer | true
-      :private  | false | true | :owner | true
-      :public   | false | true | :anonymous | false
-      :public   | false | true | :guest     | true
-      :public   | false | true | :reporter  | true
-      :public   | false | true | :developer | true
-      :public   | false | true | :maintainer | true
-      :public   | false | true | :owner | true
-      :internal | false | true | :anonymous | false
-      :internal | false | true | :guest     | true
-      :internal | false | true | :reporter  | true
-      :internal | false | true | :developer | true
-      :internal | false | true | :maintainer | true
-      :internal | false | true | :owner | true
-      :private  | true | true | :anonymous | false
-      :private  | true | true | :guest     | false
-      :private  | true | true | :reporter  | false
-      :private  | true | true | :developer | false
-      :private  | true | true | :maintainer | false
-      :private  | true | true | :owner | false
-      :public   | true | true | :anonymous | false
-      :public   | true | true | :guest     | false
-      :public   | true | true | :reporter  | false
-      :public   | true | true | :developer | false
-      :public   | true | true | :maintainer | false
-      :public   | true | true | :owner | false
-      :internal | true | true | :anonymous | false
-      :internal | true | true | :guest     | false
-      :internal | true | true | :reporter  | false
-      :internal | true | true | :developer | false
-      :internal | true | true | :maintainer | false
-      :internal | true | true | :owner | false
-    end
-
-    with_them do
-      let(:current_user) do
-        if role == :anonymous
-          anonymous
-        else
-          public_send(role)
-        end
-      end
-
-      let(:project) { create(:project, :internal, ci_inbound_job_token_scope_enabled: token_scope_enabled) }
-      let(:job) { build_stubbed(:ci_build, project: scope_project, user: current_user) }
-      let(:scope_project) { public_send("#{project_visibility}_project") }
-
-      before do
-        if role != :anonymous
-          # The below two allow statements are to make sure the CI_JOB_TOKEN is used to access the project and the internal project is not in scope
-          allow(current_user).to receive(:ci_job_token_scope).and_return(current_user.set_ci_job_token_scope!(job))
-          allow(Ci::JobToken::Scope).to receive(:accessible?).with(project).and_return(false)
-          current_user.external = external_user
-        end
-      end
-
-      it "enforces the expected permissions" do
-        if allowed
-          is_expected.to be_allowed(policy)
-        else
-          is_expected.to be_disallowed(policy)
-        end
-      end
-    end
-  end
-
   describe 'container_image policies' do
     using RSpec::Parameterized::TableSyntax
 
@@ -2975,14 +2851,6 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
   end
 
   describe 'update_runners_registration_token' do
-    # Override project with a version with namespace_settings
-    let(:project) { project_with_runner_registration_token }
-    let(:allow_runner_registration_token) { true }
-
-    before do
-      stub_application_setting(allow_runner_registration_token: allow_runner_registration_token)
-    end
-
     context 'when anonymous' do
       let(:current_user) { anonymous }
 
@@ -2994,12 +2862,6 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
 
       context 'when admin mode is enabled', :enable_admin_mode do
         it { is_expected.to be_allowed(:update_runners_registration_token) }
-
-        context 'with registration tokens disabled' do
-          let(:allow_runner_registration_token) { false }
-
-          it { is_expected.to be_disallowed(:update_runners_registration_token) }
-        end
       end
 
       context 'when admin mode is disabled' do
@@ -3020,25 +2882,11 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
         let(:current_user) { send(role) }
 
         it { is_expected.to be_allowed(:update_runners_registration_token) }
-
-        context 'with registration tokens disabled' do
-          let(:allow_runner_registration_token) { false }
-
-          it { is_expected.to be_disallowed(:update_runners_registration_token) }
-        end
       end
     end
   end
 
   describe 'register_project_runners' do
-    # Override project with a version with namespace_settings
-    let(:project) { project_with_runner_registration_token }
-    let(:allow_runner_registration_token) { true }
-
-    before do
-      stub_application_setting(allow_runner_registration_token: allow_runner_registration_token)
-    end
-
     context 'admin' do
       let(:current_user) { admin }
 
@@ -3051,12 +2899,6 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
           end
 
           it { is_expected.to be_allowed(:register_project_runners) }
-
-          context 'with registration tokens disabled' do
-            let(:allow_runner_registration_token) { false }
-
-            it { is_expected.to be_disallowed(:register_project_runners) }
-          end
         end
 
         context 'with specific project runner registration disabled' do
@@ -3077,12 +2919,6 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
       let(:current_user) { owner }
 
       it { is_expected.to be_allowed(:register_project_runners) }
-
-      context 'with registration tokens disabled' do
-        let(:allow_runner_registration_token) { false }
-
-        it { is_expected.to be_disallowed(:register_project_runners) }
-      end
 
       context 'with project runner registration disabled' do
         before do
@@ -3105,12 +2941,6 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
       let(:current_user) { maintainer }
 
       it { is_expected.to be_allowed(:register_project_runners) }
-
-      context 'with registration tokens disabled' do
-        let(:allow_runner_registration_token) { false }
-
-        it { is_expected.to be_disallowed(:register_project_runners) }
-      end
     end
 
     context 'with reporter' do

@@ -229,17 +229,6 @@ module MergeRequestsHelper
     }
   end
 
-  def project_merge_requests_list_more_actions_data(project, current_user)
-    {
-      is_signed_in: current_user.present?.to_s,
-      issuable_type: :merge_request,
-      issuable_count: issuables_count_for_state(:merge_request, params[:state]),
-      email: current_user.present? ? current_user.notification_email_or_default : nil,
-      export_csv_path: export_csv_project_merge_requests_path(project, request.query_parameters),
-      rss_url: url_for(safe_params.merge(rss_url_options))
-    }
-  end
-
   private
 
   def review_requested_merge_requests_count
@@ -337,69 +326,6 @@ module MergeRequestsHelper
       is_public_visibility_restricted:
         Gitlab::CurrentSettings.restricted_visibility_levels&.include?(Gitlab::VisibilityLevel::PUBLIC).to_s,
       is_signed_in: current_user.present?.to_s
-    }
-  end
-
-  def merge_request_dashboard_enabled?(current_user)
-    Feature.enabled?(:merge_request_dashboard, current_user, type: :wip)
-  end
-
-  def merge_request_dashboard_data
-    {
-      lists: [
-        {
-          title: _('Needs your review'),
-          query: 'reviewRequestedMergeRequests',
-          variables: {
-            reviewState: 'UNREVIEWED'
-          }
-        },
-        {
-          title: _('Returned to you'),
-          query: 'assignedMergeRequests',
-          variables: {
-            reviewStates: %w[REQUESTED_CHANGES REVIEWED]
-          }
-        },
-        {
-          title: _('Your approvals'),
-          query: 'reviewRequestedMergeRequests',
-          variables: {
-            reviewStates: %w[APPROVED UNAPPROVED]
-          }
-        },
-        {
-          title: _('Waiting for reviewers'),
-          query: 'assignedMergeRequests',
-          variables: {
-            reviewState: 'UNREVIEWED'
-          }
-        },
-        {
-          title: _('Waiting for assignees'),
-          query: 'reviewRequestedMergeRequests',
-          variables: {
-            reviewStates: %w[REQUESTED_CHANGES REVIEWED]
-          }
-        },
-        {
-          title: _('Merged as assignee (1 week ago)'),
-          query: 'assignedMergeRequests',
-          variables: {
-            status: 'merged',
-            mergedAfter: 1.week.ago.to_time.iso8601
-          }
-        },
-        {
-          title: _('Merged as reviewer (1 week ago)'),
-          query: 'reviewRequestedMergeRequests',
-          variables: {
-            status: 'merged',
-            mergedAfter: 1.week.ago.to_time.iso8601
-          }
-        }
-
-      ]
     }
   end
 end

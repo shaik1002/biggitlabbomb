@@ -17,9 +17,6 @@ module Gitlab
       end
 
       def execute
-        bitbucket_server_notes_separate_worker_enabled =
-          Feature.enabled?(:bitbucket_server_notes_separate_worker, current_user)
-
         ::Projects::CreateService.new(
           current_user,
           name: name,
@@ -32,12 +29,7 @@ module Gitlab
           import_url: repo.clone_url,
           import_data: {
             credentials: session_data,
-            data: {
-              project_key: project_key,
-              repo_slug: repo_slug,
-              timeout_strategy: timeout_strategy,
-              bitbucket_server_notes_separate_worker: bitbucket_server_notes_separate_worker_enabled
-            }
+            data: { project_key: project_key, repo_slug: repo_slug, timeout_strategy: timeout_strategy }
           },
           skip_wiki: true
         ).execute

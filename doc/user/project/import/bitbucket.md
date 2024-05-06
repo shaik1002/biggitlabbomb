@@ -108,29 +108,33 @@ For user contributions to be mapped, each user must complete the following befor
    - For the first time: Select **Import**.
    - Again: Select **Re-import**. Specify a new name and select **Re-import** again. Re-importing creates a new copy of the source project.
 
-### Generate a Bitbucket Cloud app password
+### Use the API
 
-If you want to use the [GitLab REST API](../../../api/import.md#import-repository-from-bitbucket-cloud) to import a
-Bitbucket Cloud repository, you must create a Bitbucket Cloud app password.
+The [GitLab REST API](../../../api/import.md#import-repository-from-bitbucket-cloud) can be used to import a Bitbucket Cloud repository.
 
-To generate a Bitbucket Cloud app password:
+The REST API is limited to authenticating with GitLab Personal Access Tokens.
 
-1. Go to <https://bitbucket.org/account/settings/>.
-1. In the **Access Management** section, select **App passwords**.
-1. Select **Create app password**.
-1. Enter password name.
-1. Select at least the following permissions:
+To import your Bitbucket Cloud repository using the GitLab REST API:
 
-   ```plaintext
-   Account: Email, Read
-   Projects: Read
-   Repositories: Read
-   Pull Requests: Read
-   Issues: Read
-   Wiki: Read and Write
-   ```
+1. Generate a Bitbucket Cloud app password:
+    1. Go to <https://bitbucket.org/account/settings/>.
+    1. In the **Access Management** section, select **App passwords**.
+    1. Select **Create app password**.
+    1. Enter password name.
+    1. Select at least the following permissions:
 
-1. Select **Create**.
+       ```plaintext
+       Account: Email, Read
+       Projects: Read
+       Repositories: Read
+       Pull Requests: Read
+       Issues: Read
+       Wiki: Read and Write
+       ```
+
+    1. Select **Create**.
+
+1. Use the [GitLab REST API](../../../api/import.md#import-repository-from-bitbucket-cloud) to import your GitHub repository.
 
 ## Troubleshooting
 

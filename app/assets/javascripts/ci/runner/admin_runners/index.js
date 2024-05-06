@@ -2,7 +2,7 @@ import { GlToast } from '@gitlab/ui';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 
-import { runnersAppProvide } from 'ee_else_ce/ci/runner/provide';
+import { provide } from 'ee_else_ce/ci/runner/admin_runners/provide';
 
 import { visitUrl } from '~/lib/utils/url_utility';
 import { updateOutdatedUrl } from '~/ci/runner/runner_search_utils';
@@ -33,12 +33,7 @@ export const initAdminRunners = (selector = '#js-admin-runners') => {
     return null;
   }
 
-  const {
-    newRunnerPath,
-    allowRegistrationToken,
-    registrationToken,
-    tagSuggestionsPath,
-  } = el.dataset;
+  const { newRunnerPath, allowRegistrationToken, registrationToken } = el.dataset;
   const { cacheConfig, typeDefs, localMutations } = createLocalState();
 
   const apolloProvider = new VueApollo({
@@ -49,9 +44,8 @@ export const initAdminRunners = (selector = '#js-admin-runners') => {
     el,
     apolloProvider,
     provide: {
-      ...runnersAppProvide(el.dataset),
+      ...provide(el.dataset),
       localMutations,
-      tagSuggestionsPath,
     },
     render(h) {
       return h(AdminRunnersApp, {

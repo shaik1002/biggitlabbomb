@@ -188,7 +188,7 @@ export default {
             :avatar-size="16"
             badge-tooltip-prop="name"
             :badge-sr-only-text="assigneesCollapsedTooltip"
-            class="gl-whitespace-nowrap gl-mr-3"
+            class="gl-white-space-nowrap gl-mr-3"
           >
             <template #avatar="{ avatar }">
               <gl-avatar-link v-gl-tooltip :href="avatar.webUrl" :title="avatar.name">
@@ -202,6 +202,7 @@ export default {
             data-testid="item-status-icon"
           >
             <gl-icon
+              class="gl-text-secondary"
               :class="statusIconClass"
               :name="statusIconName"
               :aria-label="stateTimestampTypeText"
@@ -236,7 +237,7 @@ export default {
     <div v-if="canUpdate">
       <gl-button
         v-gl-tooltip
-        class="-gl-mt-2 -gl-mr-2"
+        class="gl-mt-n2 gl-mr-n2"
         category="tertiary"
         size="small"
         icon="close"

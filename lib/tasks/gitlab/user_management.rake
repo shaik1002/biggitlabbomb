@@ -13,9 +13,9 @@ namespace :gitlab do
       result = User.where(id: user_ids).update_all(projects_limit: 0, can_create_group: false)
 
       if result == user_ids.count
-        puts Rainbow("Done").green
+        puts "Done".color(:green)
       else
-        puts Rainbow("Something went wrong").red
+        puts "Something went wrong".color(:red)
       end
     end
   end

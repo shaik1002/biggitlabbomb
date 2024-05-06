@@ -19,6 +19,7 @@ module Ci
 
     belongs_to :project, inverse_of: :builds
     belongs_to :runner
+    belongs_to :trigger_request
     belongs_to :erased_by, class_name: 'User'
     belongs_to :pipeline,
       ->(build) { in_partition(build) },
@@ -114,6 +115,7 @@ module Ci
     delegate :apple_app_store_integration, to: :project
     delegate :google_play_integration, to: :project
     delegate :diffblue_cover_integration, to: :project
+    delegate :trigger_short_token, to: :trigger_request, allow_nil: true
     delegate :ensure_persistent_ref, to: :pipeline
     delegate :enable_debug_trace!, to: :metadata
 

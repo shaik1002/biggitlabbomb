@@ -121,7 +121,6 @@ module Gitlab
               job_timeout: job[:timeout],
               before_script: job[:before_script],
               script: job[:script],
-              manual_confirmation: job[:manual_confirmation],
               after_script: job[:after_script],
               hooks: job[:hooks],
               environment: job[:environment],

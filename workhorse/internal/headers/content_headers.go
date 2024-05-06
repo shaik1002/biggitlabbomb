@@ -45,7 +45,6 @@ const (
 	dummyFilename             = "blob"
 )
 
-// SafeContentHeaders determines safe content type and disposition for the given data and content disposition
 func SafeContentHeaders(data []byte, contentDisposition string) (string, string) {
 	detectedContentType := detectContentType(data)
 

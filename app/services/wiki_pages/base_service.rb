@@ -4,7 +4,7 @@ module WikiPages
   # There are 3 notions of 'action' that inheriting classes must implement:
   #
   # - external_action: the action we report to external clients with webhooks
-  # - internal_event_name: the action that we count in out internal counters
+  # - usage_counter_action: the action that we count in out internal counters
   # - event_action: what we record as the value of `Event#action`
   class BaseService < ::BaseContainerService
     private
@@ -22,8 +22,9 @@ module WikiPages
       raise NotImplementedError
     end
 
-    # Should return a valid event name to be used with Gitlab::InternalEvents
-    def internal_event_name
+    # Passed to the WikiPageCounter to count events.
+    # Must be one of WikiPageCounter::KNOWN_EVENTS
+    def usage_counter_action
       raise NotImplementedError
     end
 
@@ -37,9 +38,9 @@ module WikiPages
       Gitlab::DataBuilder::WikiPage.build(page, current_user, external_action)
     end
 
-    # This method throws an error if internal_event_name returns an unknown event name
+    # This method throws an error if the action is an unanticipated value.
     def increment_usage
-      Gitlab::InternalEvents.track_event(internal_event_name, user: current_user, project: project, namespace: group)
+      Gitlab::UsageDataCounters::WikiPageCounter.count(usage_counter_action)
     end
 
     def create_wiki_event(page)

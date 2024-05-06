@@ -19,8 +19,8 @@ module WikiPages
       end
     end
 
-    def internal_event_name
-      'create_wiki_page'
+    def usage_counter_action
+      :create
     end
 
     def external_action

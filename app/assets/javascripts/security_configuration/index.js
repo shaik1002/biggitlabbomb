@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import { GlToast } from '@gitlab/ui';
 import createDefaultClient from '~/lib/graphql';
 import { parseBooleanDataAttributes } from '~/lib/utils/dom_utils';
 import SecurityConfigurationApp from './components/app.vue';
@@ -13,7 +12,6 @@ export const initSecurityConfiguration = (el) => {
   }
 
   Vue.use(VueApollo);
-  Vue.use(GlToast);
 
   const apolloProvider = new VueApollo({
     defaultClient: createDefaultClient(),
@@ -47,10 +45,6 @@ export const initSecurityConfiguration = (el) => {
       autoDevopsPath,
       vulnerabilityTrainingDocsPath,
       containerScanningForRegistryEnabled,
-      ...parseBooleanDataAttributes(el, [
-        'preReceiveSecretDetectionAvailable',
-        'preReceiveSecretDetectionEnabled',
-      ]),
     },
     render(createElement) {
       return createElement(SecurityConfigurationApp, {

@@ -1,4 +1,3 @@
-// Package headers provides functionality related to HTTP headers
 package headers
 
 import (
@@ -6,7 +5,7 @@ import (
 	"strconv"
 )
 
-// MaxDetectSize defines max number of bytes that http.DetectContentType needs to get the content type
+// Max number of bytes that http.DetectContentType needs to get the content type
 // Fixme: Go back to 512 bytes once https://gitlab.com/gitlab-org/gitlab/-/issues/325074
 // has been merged
 const MaxDetectSize = 4096
@@ -25,14 +24,12 @@ const (
 	GitlabWorkhorseDetectContentTypeHeader = "Gitlab-Workhorse-Detect-Content-Type"
 )
 
-// ResponseHeaders contains a list of headers that are checked for presence
 var ResponseHeaders = []string{
 	XSendFileHeader,
 	GitlabWorkhorseSendDataHeader,
 	GitlabWorkhorseDetectContentTypeHeader,
 }
 
-// IsDetectContentTypeHeaderPresent checks if the detect content type header is present in the ResponseWriter
 func IsDetectContentTypeHeaderPresent(rw http.ResponseWriter) bool {
 	header, err := strconv.ParseBool(rw.Header().Get(GitlabWorkhorseDetectContentTypeHeader))
 	if err != nil || !header {

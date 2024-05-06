@@ -133,7 +133,7 @@ gem 'net-ldap', '~> 0.17.1' # rubocop:todo Gemfile/MissingFeatureCategory
 
 # API
 gem 'grape', '~> 2.0.0', feature_category: :api
-gem 'grape-entity', '~> 1.0.1', feature_category: :api
+gem 'grape-entity', '~> 0.10.2', feature_category: :api
 gem 'grape-swagger', '~> 2.0.2', group: [:development, :test], feature_category: :api
 gem 'grape-swagger-entity', '~> 0.5.1', group: [:development, :test], feature_category: :api
 gem 'grape-path-helpers', '~> 2.0.1', feature_category: :api
@@ -206,9 +206,9 @@ gem 'seed-fu', '~> 2.3.7' # rubocop:todo Gemfile/MissingFeatureCategory
 gem 'elasticsearch-model', '~> 7.2' # rubocop:todo Gemfile/MissingFeatureCategory
 gem 'elasticsearch-rails', '~> 7.2', require: 'elasticsearch/rails/instrumentation' # rubocop:todo Gemfile/MissingFeatureCategory
 gem 'elasticsearch-api',   '7.13.3' # rubocop:todo Gemfile/MissingFeatureCategory
-gem 'aws-sdk-core', '~> 3.194.0' # rubocop:todo Gemfile/MissingFeatureCategory
+gem 'aws-sdk-core', '~> 3.192.1' # rubocop:todo Gemfile/MissingFeatureCategory
 gem 'aws-sdk-cloudformation', '~> 1' # rubocop:todo Gemfile/MissingFeatureCategory
-gem 'aws-sdk-s3', '~> 1.149.0' # rubocop:todo Gemfile/MissingFeatureCategory
+gem 'aws-sdk-s3', '~> 1.147.0' # rubocop:todo Gemfile/MissingFeatureCategory
 gem 'faraday_middleware-aws-sigv4', '~>0.3.0' # rubocop:todo Gemfile/MissingFeatureCategory
 gem 'typhoeus', '~> 1.4.0' # Used with Elasticsearch to support http keep-alive connections # rubocop:todo Gemfile/MissingFeatureCategory
 
@@ -229,7 +229,7 @@ gem 'asciidoctor-kroki', '~> 0.8.0', require: false # rubocop:todo Gemfile/Missi
 gem 'rouge', '~> 4.2.0' # rubocop:todo Gemfile/MissingFeatureCategory
 gem 'truncato', '~> 0.7.12' # rubocop:todo Gemfile/MissingFeatureCategory
 gem 'nokogiri', '~> 1.16' # rubocop:todo Gemfile/MissingFeatureCategory
-gem 'gitlab-glfm-markdown', '~> 0.0.16', feature_category: :team_planning
+gem 'gitlab-glfm-markdown', '~> 0.0.14', feature_category: :team_planning
 
 # Calendar rendering
 gem 'icalendar' # rubocop:todo Gemfile/MissingFeatureCategory
@@ -547,7 +547,7 @@ group :test do
   gem 'webmock', '~> 3.23.0', feature_category: :shared
   gem 'rails-controller-testing' # rubocop:todo Gemfile/MissingFeatureCategory
   gem 'concurrent-ruby', '~> 1.1' # rubocop:todo Gemfile/MissingFeatureCategory
-  gem 'test-prof', '~> 1.3.3', feature_category: :tooling
+  gem 'test-prof', '~> 1.3.2', feature_category: :tooling
   gem 'rspec_junit_formatter' # rubocop:todo Gemfile/MissingFeatureCategory
   gem 'guard-rspec' # rubocop:todo Gemfile/MissingFeatureCategory
   gem 'axe-core-rspec', '~> 4.9.0', feature_category: :tooling
@@ -555,7 +555,7 @@ group :test do
   # Moved in `test` because https://gitlab.com/gitlab-org/gitlab/-/issues/217527
   gem 'derailed_benchmarks', require: false # rubocop:todo Gemfile/MissingFeatureCategory
 
-  gem 'gitlab_quality-test_tooling', '~> 1.24.0', require: false, feature_category: :tooling
+  gem 'gitlab_quality-test_tooling', '~> 1.23.0', require: false, feature_category: :tooling
 end
 
 gem 'octokit', '~> 8.1', feature_category: :importers
@@ -595,7 +595,7 @@ gem 'gitaly', '~> 17.0.0.pre.rc2', feature_category: :gitaly
 # KAS GRPC protocol definitions
 gem 'kas-grpc', '~> 0.5.0', feature_category: :deployment_management
 
-gem 'grpc', '~> 1.63', feature_category: :shared
+gem 'grpc', '~> 1.62', feature_category: :shared
 
 gem 'google-protobuf', '~> 3.25', '>= 3.25.3' # rubocop:todo Gemfile/MissingFeatureCategory
 

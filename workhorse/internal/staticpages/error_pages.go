@@ -19,15 +19,11 @@ var staticErrorResponses = promauto.NewCounterVec(
 	[]string{"code"},
 )
 
-// ErrorFormat represents the format for error handling or reporting.
 type ErrorFormat int
 
 const (
-	// ErrorFormatHTML represents the HTML format for error handling.
 	ErrorFormatHTML ErrorFormat = iota
-	// ErrorFormatJSON represents the JSON format for error handling.
 	ErrorFormatJSON
-	// ErrorFormatText represents the text format for error handling.
 	ErrorFormatText
 )
 
@@ -89,10 +85,7 @@ func (s *errorPageResponseWriter) WriteHeader(status int) {
 	s.rw.Header().Set("Content-Length", fmt.Sprintf("%d", len(data)))
 	s.rw.Header().Del("Transfer-Encoding")
 	s.rw.WriteHeader(s.status)
-	_, err := s.rw.Write(data)
-	if err != nil {
-		fmt.Printf("Error reading deploy page file: %v\n", err)
-	}
+	s.rw.Write(data)
 }
 
 func (s *errorPageResponseWriter) writeHTML() (string, []byte) {
@@ -100,8 +93,7 @@ func (s *errorPageResponseWriter) writeHTML() (string, []byte) {
 		errorPageFile := filepath.Join(s.path, fmt.Sprintf("%d.html", s.status))
 
 		// check if custom error page exists, serve this page instead
-		cleanPath := filepath.Clean(errorPageFile)
-		if data, err := os.ReadFile(cleanPath); err == nil {
+		if data, err := os.ReadFile(errorPageFile); err == nil {
 			return "text/html; charset=utf-8", data
 		}
 	}
@@ -131,15 +123,14 @@ func (s *errorPageResponseWriter) Unwrap() http.ResponseWriter {
 	return s.rw
 }
 
-// ErrorPagesUnless sets up error pages for specific formats unless explicitly disabled.
-func (s *Static) ErrorPagesUnless(disabled bool, format ErrorFormat, handler http.Handler) http.Handler {
+func (st *Static) ErrorPagesUnless(disabled bool, format ErrorFormat, handler http.Handler) http.Handler {
 	if disabled {
 		return handler
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		rw := errorPageResponseWriter{
 			rw:     w,
-			path:   s.DocumentRoot,
+			path:   st.DocumentRoot,
 			format: format,
 		}
 		defer rw.flush()

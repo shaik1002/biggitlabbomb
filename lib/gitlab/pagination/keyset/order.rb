@@ -58,6 +58,7 @@ module Gitlab
       #         attribute_name: :created_at,
       #         column_expression: Project.arel_table[:created_at],
       #         order_expression: Project.arel_table[:created_at].asc,
+      #         distinct: false, # values in the column are not unique
       #         nullable: :nulls_last # we might see NULL values (bottom)
       #       ),
       #       Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(

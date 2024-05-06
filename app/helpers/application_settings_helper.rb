@@ -123,7 +123,7 @@ module ApplicationSettingsHelper
 
   def oauth_providers_checkboxes(form)
     button_based_providers.map do |source|
-      checked = @application_setting.disabled_oauth_sign_in_sources.exclude?(source.to_s)
+      checked = !@application_setting.disabled_oauth_sign_in_sources.include?(source.to_s)
       name = Gitlab::Auth::OAuth::Provider.label_for(source)
 
       form.gitlab_ui_checkbox_component(
@@ -365,6 +365,7 @@ module ApplicationSettingsHelper
       :session_expire_delay,
       :shared_runners_enabled,
       :shared_runners_text,
+      :sign_in_text,
       :signup_enabled,
       :silent_mode_enabled,
       :slack_app_enabled,
@@ -529,7 +530,6 @@ module ApplicationSettingsHelper
       else
         settings << :deactivate_dormant_users
         settings << :deactivate_dormant_users_period
-        settings << :nuget_skip_metadata_url_validation
       end
     end
   end

@@ -1,4 +1,3 @@
-// Package exif provides functionality for extracting EXIF metadata from images.
 package exif
 
 import (
@@ -14,7 +13,6 @@ import (
 	"gitlab.com/gitlab-org/labkit/log"
 )
 
-// ErrRemovingExif is an error returned when there is an issue while removing EXIF metadata from an image.
 var ErrRemovingExif = errors.New("error while removing EXIF")
 
 type cleaner struct {
@@ -25,20 +23,14 @@ type cleaner struct {
 	eof    bool
 }
 
-// FileType represents the type of an image file.
 type FileType int
 
 const (
-	// TypeUnknown represents an unknown file type.
 	TypeUnknown FileType = iota
-	// TypeJPEG represents the JPEG image file type.
 	TypeJPEG
-	// TypeTIFF represents the TIFF image file type.
 	TypeTIFF
 )
 
-// NewCleaner creates a new EXIF cleaner instance using the provided context and stdin.
-// It processes the input from stdin to remove EXIF data from images.
 func NewCleaner(ctx context.Context, stdin io.Reader) (io.ReadCloser, error) {
 	c := &cleaner{ctx: ctx}
 
@@ -83,7 +75,7 @@ func (c *cleaner) Read(p []byte) (int, error) {
 func (c *cleaner) startProcessing(stdin io.Reader) error {
 	var err error
 
-	whitelistedTags := []string{
+	whitelisted_tags := []string{
 		"-ResolutionUnit",
 		"-XResolution",
 		"-YResolution",
@@ -98,7 +90,7 @@ func (c *cleaner) startProcessing(stdin io.Reader) error {
 		"-Orientation",
 	}
 
-	args := append([]string{"-all=", "--IPTC:all", "--XMP-iptcExt:all", "-tagsFromFile", "@"}, whitelistedTags...)
+	args := append([]string{"-all=", "--IPTC:all", "--XMP-iptcExt:all", "-tagsFromFile", "@"}, whitelisted_tags...)
 	args = append(args, "-")
 	c.cmd = exec.CommandContext(c.ctx, "exiftool", args...)
 
@@ -117,7 +109,6 @@ func (c *cleaner) startProcessing(stdin io.Reader) error {
 	return nil
 }
 
-// FileTypeFromSuffix returns the FileType inferred from the filename's suffix.
 func FileTypeFromSuffix(filename string) FileType {
 	if os.Getenv("SKIP_EXIFTOOL") == "1" {
 		return TypeUnknown

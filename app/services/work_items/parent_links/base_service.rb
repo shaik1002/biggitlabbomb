@@ -51,5 +51,3 @@ module WorkItems
     end
   end
 end
-
-WorkItems::ParentLinks::BaseService.prepend_mod

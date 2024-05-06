@@ -54,12 +54,12 @@ export default {
     tableCell({
       key: 'source',
       label: s__('BulkImport|Source'),
-      thClass: 'gl-w-3/10',
+      thClass: 'gl-w-30p',
     }),
     tableCell({
       key: 'destination',
       label: s__('BulkImport|Destination'),
-      thClass: 'gl-w-4/10',
+      thClass: 'gl-w-40p',
     }),
     tableCell({
       key: 'created_at',

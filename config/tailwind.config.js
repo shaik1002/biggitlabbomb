@@ -1,7 +1,6 @@
 const path = require('path');
 const plugin = require('tailwindcss/plugin');
 const tailwindDefaults = require('@gitlab/ui/tailwind.defaults');
-const { range, round } = require('lodash');
 
 // Try loading the tailwind css_in_js, in case they exist
 let utilities = {};
@@ -34,8 +33,6 @@ function gitLabUIUtilities({ addUtilities }) {
   });
 }
 
-const widthPercentageScales = [8, 10, 20];
-
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   presets: [tailwindDefaults],
@@ -65,6 +62,13 @@ module.exports = {
      */
     lineClamp: false,
     /*
+    Our opacity scale is 0 to 10, tailwind is 0, 100
+    So:
+    opacity-5 => opacity-50
+    opacity-10 => opacity-100
+     */
+    opacity: false,
+    /*
     outline-none in tailwind is 2px solid transparent, we have outline: none
 
     I assume that tailwind has it's reasons, and we probably could enable it
@@ -88,20 +92,6 @@ module.exports = {
     fontFamily: {
       regular:
         'var(--default-regular-font, "GitLab Sans"), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu, Cantarell, "Helvetica Neue", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
-    },
-    // TODO: Backport to GitLab UI
-    opacity: {
-      0: '0',
-      1: '.1',
-      2: '.2',
-      3: '.3',
-      4: '.4',
-      5: '.5',
-      6: '.6',
-      7: '.7',
-      8: '.8',
-      9: '.9',
-      10: '1',
     },
     // These extends probably should be moved to GitLab UI:
     extend: {
@@ -135,30 +125,12 @@ module.exports = {
         'x0-y2-b4-s0': '0 2px 4px 0 #0000001a',
         'x0-y0-b3-s1-blue-500': 'inset 0 0 3px 1px var(--blue-500, #1f75cb)',
       },
-      // TODO: backport these width percentage classes to GitLab UI
-      width: widthPercentageScales.reduce((accumulator1, denominator) => {
-        return {
-          ...accumulator1,
-          ...range(1, denominator).reduce((accumulator2, numerator) => {
-            const width = (numerator / denominator) * 100;
-
-            return {
-              ...accumulator2,
-              [`${numerator}/${denominator}`]: `${round(width, 6)}%`,
-            };
-          }, {}),
-        };
-      }, {}),
       zIndex: {
         1: '1',
         2: '2',
         3: '3',
         200: '200',
         9999: '9999',
-      },
-      transitionProperty: {
-        stroke: 'stroke',
-        'stroke-opacity': 'stroke-opacity',
       },
     },
   },

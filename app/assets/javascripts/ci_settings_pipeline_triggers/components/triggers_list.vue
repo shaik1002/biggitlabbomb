@@ -43,32 +43,32 @@ export default {
     {
       key: 'token',
       label: s__('Pipelines|Token'),
-      thClass: 'gl-w-12/20',
+      thClass: 'gl-w-60p',
       tdClass: '!gl-align-middle',
     },
     {
       key: 'description',
       label: s__('Pipelines|Description'),
-      thClass: 'gl-w-4/20',
+      thClass: 'gl-w-20p',
       tdClass: '!gl-align-middle',
     },
     {
       key: 'owner',
       label: s__('Pipelines|Owner'),
-      thClass: 'gl-w-1/20',
+      thClass: 'gl-w-5p',
       tdClass: '!gl-align-middle',
     },
     {
       key: 'lastUsed',
       label: s__('Pipelines|Last Used'),
-      thClass: 'gl-w-2/20',
+      thClass: 'gl-w-10p',
       tdClass: '!gl-align-middle',
     },
     {
       key: 'actions',
       label: __('Actions'),
-      tdClass: 'gl-text-right gl-whitespace-nowrap',
-      thClass: `gl-text-right gl-w-1/20`,
+      tdClass: 'gl-text-right gl-white-space-nowrap',
+      thClass: `gl-text-right gl-w-5p`,
     },
   ],
   computed: {

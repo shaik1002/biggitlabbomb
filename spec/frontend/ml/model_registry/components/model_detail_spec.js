@@ -4,13 +4,13 @@ import ModelDetail from '~/ml/model_registry/components/model_detail.vue';
 import ModelVersionDetail from '~/ml/model_registry/components/model_version_detail.vue';
 import EmptyState from '~/ml/model_registry/components/empty_state.vue';
 import { MODEL_ENTITIES } from '~/ml/model_registry/constants';
-import { model, modelWithoutVersion } from '../graphql_mock_data';
+import { MODEL, makeModel } from '../mock_data';
 
 let wrapper;
 
-const createWrapper = (modelProp = model) => {
+const createWrapper = (model = MODEL) => {
   wrapper = shallowMountExtended(ModelDetail, {
-    propsData: { model: modelProp },
+    propsData: { model },
     stubs: { GlTab },
   });
 };
@@ -26,21 +26,19 @@ describe('ShowMlModel', () => {
     });
 
     it('displays the version', () => {
-      expect(findModelVersionDetail().props('modelVersion')).toBe(model.latestVersion);
+      expect(findModelVersionDetail().props('modelVersion')).toBe(MODEL.latestVersion);
     });
 
     it('displays a link to latest version', () => {
       expect(wrapper.text()).toContain('Latest version:');
-      expect(findVersionLink().attributes('href')).toBe(
-        '/root/test-project/-/ml/models/1/versions/5000',
-      );
-      expect(findVersionLink().text()).toBe('1.0.4999');
+      expect(findVersionLink().attributes('href')).toBe(MODEL.latestVersion.path);
+      expect(findVersionLink().text()).toBe('1.2.3');
     });
   });
 
   describe('when it does not have latest version', () => {
     beforeEach(() => {
-      createWrapper(modelWithoutVersion);
+      createWrapper(makeModel({ latestVersion: null }));
     });
 
     it('shows empty state', () => {

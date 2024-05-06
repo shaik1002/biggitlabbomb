@@ -6,17 +6,12 @@ RSpec.describe Ci::Processable, feature_category: :continuous_integration do
   let_it_be(:project) { create(:project) }
   let_it_be_with_refind(:pipeline) { create(:ci_pipeline, project: project) }
 
-  describe 'associations' do
-    it { is_expected.to belong_to(:trigger_request) }
-  end
-
   describe 'delegations' do
     subject { described_class.new }
 
     it { is_expected.to delegate_method(:merge_request?).to(:pipeline) }
     it { is_expected.to delegate_method(:merge_request_ref?).to(:pipeline) }
     it { is_expected.to delegate_method(:legacy_detached_merge_request_pipeline?).to(:pipeline) }
-    it { is_expected.to delegate_method(:trigger_short_token).to(:trigger_request) }
   end
 
   describe '#clone' do
@@ -568,61 +563,27 @@ RSpec.describe Ci::Processable, feature_category: :continuous_integration do
     end
   end
 
-  describe 'manual_job?' do
-    context 'when job is manual' do
-      subject { build(:ci_build, :manual) }
-
-      it { expect(subject.manual_job?).to be_truthy }
-    end
-
-    context 'when job is not manual' do
-      subject { build(:ci_build) }
-
-      it { expect(subject.manual_job?).to be_falsey }
-    end
-  end
-
-  describe 'manual_confirmation_message' do
-    context 'when job is manual' do
-      subject { build(:ci_build, :manual, :with_manual_confirmation) }
-
-      it 'return manual_confirmation from option' do
-        expect(subject.manual_confirmation_message).to eq('Please confirm. Do you want to proceed?')
-      end
-    end
-
-    context 'when job is not manual' do
-      subject { build(:ci_build) }
-
-      it { expect(subject.manual_confirmation_message).to be_nil }
-    end
-  end
-
   describe 'state transition: any => [:failed]' do
-    using RSpec::Parameterized::TableSyntax
-
     let!(:processable) { create(:ci_build, :running, pipeline: pipeline, user: create(:user)) }
 
     before do
       allow(processable).to receive(:can_auto_cancel_pipeline_on_job_failure?).and_return(can_auto_cancel_pipeline_on_job_failure)
-      allow(processable).to receive(:allow_failure?).and_return(allow_failure)
     end
 
-    where(:can_auto_cancel_pipeline_on_job_failure, :allow_failure, :result) do
-      true  | true  | false
-      true  | false | true
-      false | true  | false
-      false | false | false
+    context 'when the processable can cancel the pipeline' do
+      let(:can_auto_cancel_pipeline_on_job_failure) { true }
+
+      it 'cancels the pipeline' do
+        expect(processable.pipeline).to receive(:cancel_async_on_job_failure)
+        processable.drop!
+      end
     end
 
-    with_them do
-      it 'behaves as expected' do
-        if result
-          expect(processable.pipeline).to receive(:cancel_async_on_job_failure)
-        else
-          expect(processable.pipeline).not_to receive(:cancel_async_on_job_failure)
-        end
+    context 'when the processable cannot cancel the pipeline' do
+      let(:can_auto_cancel_pipeline_on_job_failure) { false }
 
+      it 'does not cancel the pipeline' do
+        expect(processable.pipeline).not_to receive(:cancel_async_on_job_failure)
         processable.drop!
       end
     end

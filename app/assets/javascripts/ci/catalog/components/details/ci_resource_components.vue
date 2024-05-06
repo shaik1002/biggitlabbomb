@@ -60,17 +60,17 @@ export default {
     {
       key: 'name',
       label: s__('CiCatalogComponent|Parameters'),
-      thClass: 'gl-w-2/5',
+      thClass: 'gl-w-40p',
     },
     {
       key: 'default',
       label: s__('CiCatalogComponent|Default Value'),
-      thClass: 'gl-w-2/5',
+      thClass: 'gl-w-40p',
     },
     {
       key: 'required',
       label: s__('CiCatalogComponent|Mandatory'),
-      thClass: 'gl-w-1/5',
+      thClass: 'gl-w-20p',
     },
   ],
   i18n: {

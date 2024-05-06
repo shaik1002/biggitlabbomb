@@ -24,7 +24,6 @@ module RuboCop
           Search EE::Search API::Search EE::API::Search API::Admin::Search RuboCop::Cop::Search
           API::Entities::Search::Zoekt
           API::Internal::Search::Zoekt
-          Keeps
         ].map { |x| x.split('::') }.freeze
 
         SEARCH_REGEXES = [

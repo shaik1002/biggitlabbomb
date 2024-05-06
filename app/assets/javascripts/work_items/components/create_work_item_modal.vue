@@ -1,12 +1,7 @@
 <script>
-import { GlButton, GlModal, GlDisclosureDropdownItem } from '@gitlab/ui';
+import { GlButton, GlModal } from '@gitlab/ui';
 import { visitUrl } from '~/lib/utils/url_utility';
-import { __ } from '~/locale';
-import {
-  I18N_NEW_WORK_ITEM_BUTTON_LABEL,
-  I18N_WORK_ITEM_CREATED,
-  sprintfWorkItem,
-} from '../constants';
+import { I18N_NEW_WORK_ITEM_BUTTON_LABEL, sprintfWorkItem } from '../constants';
 import CreateWorkItem from './create_work_item.vue';
 
 export default {
@@ -14,18 +9,12 @@ export default {
     CreateWorkItem,
     GlButton,
     GlModal,
-    GlDisclosureDropdownItem,
   },
   props: {
-    workItemTypeName: {
+    workItemType: {
       type: String,
       required: false,
       default: null,
-    },
-    asDropdownItem: {
-      type: Boolean,
-      required: false,
-      default: false,
     },
   },
   data() {
@@ -35,16 +24,7 @@ export default {
   },
   computed: {
     newWorkItemText() {
-      return sprintfWorkItem(I18N_NEW_WORK_ITEM_BUTTON_LABEL, this.workItemTypeName);
-    },
-    workItemCreatedText() {
-      return sprintfWorkItem(I18N_WORK_ITEM_CREATED, this.workItemTypeName);
-    },
-    dropdownItem() {
-      return {
-        text: this.newWorkItemText,
-        action: this.showModal,
-      };
+      return sprintfWorkItem(I18N_NEW_WORK_ITEM_BUTTON_LABEL, this.workItemType);
     },
   },
   methods: {
@@ -54,17 +34,8 @@ export default {
     showModal() {
       this.visible = true;
     },
-    handleCreated(workItem) {
-      this.$toast.show(this.workItemCreatedText, {
-        action: {
-          text: __('View details'),
-          onClick: () => {
-            visitUrl(workItem.webUrl);
-          },
-        },
-      });
-      this.$emit('workItemCreated', workItem);
-      this.hideModal();
+    handleCreation(workItem) {
+      visitUrl(workItem.webUrl);
     },
   },
 };
@@ -72,9 +43,7 @@ export default {
 
 <template>
   <div>
-    <gl-disclosure-dropdown-item v-if="asDropdownItem" :item="dropdownItem" />
     <gl-button
-      v-else
       category="primary"
       variant="confirm"
       data-testid="new-epic-button"
@@ -84,17 +53,14 @@ export default {
     <gl-modal
       modal-id="create-work-item-modal"
       :visible="visible"
-      :title="newWorkItemText"
-      size="lg"
       hide-footer
       no-focus-on-show
       @hide="hideModal"
     >
       <create-work-item
-        :work-item-type-name="workItemTypeName"
-        hide-form-title
+        :work-item-type="workItemType"
         @cancel="hideModal"
-        @workItemCreated="handleCreated"
+        @workItemCreated="handleCreation"
       />
     </gl-modal>
   </div>

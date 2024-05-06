@@ -172,6 +172,7 @@ module ApplicationSettingImplementation
         sidekiq_job_limiter_mode: Gitlab::SidekiqMiddleware::SizeLimiter::Validator::COMPRESS_MODE,
         sidekiq_job_limiter_compression_threshold_bytes: Gitlab::SidekiqMiddleware::SizeLimiter::Validator::DEFAULT_COMPRESSION_THRESHOLD_BYTES,
         sidekiq_job_limiter_limit_bytes: Gitlab::SidekiqMiddleware::SizeLimiter::Validator::DEFAULT_SIZE_LIMIT,
+        sign_in_text: nil,
         signup_enabled: Settings.gitlab['signup_enabled'],
         snippet_size_limit: 50.megabytes,
         snowplow_app_id: nil,
@@ -284,8 +285,7 @@ module ApplicationSettingImplementation
         security_approval_policies_limit: 5,
         downstream_pipeline_trigger_limit_per_project_user_sha: 0,
         asciidoc_max_includes: 32,
-        use_clickhouse_for_analytics: false,
-        nuget_skip_metadata_url_validation: false
+        use_clickhouse_for_analytics: false
       }.tap do |hsh|
         hsh.merge!(non_production_defaults) unless Rails.env.production?
       end

@@ -14,8 +14,8 @@ import { cleanLeadingSeparator } from '~/lib/utils/url_utility';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import AbuseCategorySelector from '~/abuse_reports/components/abuse_category_selector.vue';
 import Markdown from '~/vue_shared/components/markdown/non_gfm_markdown.vue';
-import { VERIFICATION_LEVEL_UNVERIFIED } from '../../constants';
 import CiVerificationBadge from '../shared/ci_verification_badge.vue';
+import CiResourceAbout from './ci_resource_about.vue';
 import CiResourceHeaderSkeletonLoader from './ci_resource_header_skeleton_loader.vue';
 
 export default {
@@ -27,6 +27,7 @@ export default {
   },
   components: {
     AbuseCategorySelector,
+    CiResourceAbout,
     CiResourceHeaderSkeletonLoader,
     CiVerificationBadge,
     GlAvatar,
@@ -42,9 +43,23 @@ export default {
   },
   inject: ['reportAbusePath'],
   props: {
-    isLoadingData: {
+    isLoadingDetails: {
       type: Boolean,
       required: true,
+    },
+    isLoadingSharedData: {
+      type: Boolean,
+      required: true,
+    },
+    openIssuesCount: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
+    openMergeRequestsCount: {
+      type: Number,
+      required: false,
+      default: 0,
     },
     resource: {
       type: Object,
@@ -69,7 +84,7 @@ export default {
       return this.latestVersion?.name;
     },
     isVerified() {
-      return this.resource?.verificationLevel !== VERIFICATION_LEVEL_UNVERIFIED;
+      return this.resource?.verificationLevel !== 'UNVERIFIED';
     },
     lastReleaseText() {
       if (this.latestVersion?.createdAt) {
@@ -104,7 +119,7 @@ export default {
 </script>
 <template>
   <div>
-    <ci-resource-header-skeleton-loader v-if="isLoadingData" class="gl-py-5" />
+    <ci-resource-header-skeleton-loader v-if="isLoadingSharedData" class="gl-py-5" />
     <div v-else class="gl-display-flex gl-justify-content-space-between gl-py-5">
       <div class="gl-display-flex">
         <gl-avatar-link :href="resource.webPath">
@@ -135,7 +150,6 @@ export default {
               v-gl-tooltip
               size="sm"
               class="gl-ml-3 gl-my-1"
-              variant="info"
               :href="latestVersion.path"
               :title="lastReleaseText"
             >
@@ -173,8 +187,17 @@ export default {
         </gl-disclosure-dropdown>
       </div>
     </div>
+    <ci-resource-about
+      v-if="false"
+      :is-loading-details="isLoadingDetails"
+      :is-loading-shared-data="isLoadingSharedData"
+      :open-issues-count="openIssuesCount"
+      :open-merge-requests-count="openMergeRequestsCount"
+      :latest-version="latestVersion"
+      :web-path="resource.webPath"
+    />
     <div
-      v-if="isLoadingData"
+      v-if="isLoadingSharedData"
       class="gl-animate-skeleton-loader gl-h-4 gl-rounded-base gl-my-3 gl-max-w-20!"
     ></div>
     <markdown v-else class="gl-mt-2" :markdown="resource.description" />

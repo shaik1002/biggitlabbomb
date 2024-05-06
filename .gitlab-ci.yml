@@ -27,6 +27,10 @@ default:
   # Default job timeout doesn't work: https://gitlab.com/gitlab-org/gitlab/-/issues/387528
   timeout: 90m
 
+.old-ruby-variables: &old-ruby-variables
+  RUBY_VERSION: "3.0"
+  OMNIBUS_GITLAB_CACHE_EDITION: "GITLAB_RUBY3_0"
+
 .default-ruby-variables: &default-ruby-variables
   RUBY_VERSION: "3.1"
   OMNIBUS_GITLAB_CACHE_EDITION: "GITLAB_RUBY3_1"
@@ -41,7 +45,6 @@ default:
   CREATE_RAILS_TEST_FAILURE_ISSUES: "true"
 
 .default-merge-request-variables: &default-merge-request-variables
-  NO_SOURCEMAPS: "true"
   ADD_SLOW_TEST_NOTE_TO_MERGE_REQUEST: "true"
 
 .if-merge-request-security-canonical-sync: &if-merge-request-security-canonical-sync
@@ -73,40 +76,47 @@ workflow:
     # they serve no purpose and will run anyway when the changes are merged.
     - if: '$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ /^release-tools\/\d+\.\d+\.\d+-rc\d+$/ && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^[\d-]+-stable(-ee)?$/ && $CI_PROJECT_PATH == "gitlab-org/gitlab"'
       when: never
+    - if: '$CI_MERGE_REQUEST_LABELS =~ /pipeline:run-in-ruby3_0/'
+      variables:
+        <<: *old-ruby-variables
+        PIPELINE_NAME: 'Ruby $RUBY_VERSION MR'
+        NO_SOURCEMAPS: 'true'
     - if: '$CI_MERGE_REQUEST_LABELS =~ /pipeline:run-in-ruby3_1/'
       variables:
-        <<: [*default-ruby-variables, *default-merge-request-variables]
+        <<: *default-ruby-variables
         PIPELINE_NAME: 'Ruby $RUBY_VERSION MR'
+        NO_SOURCEMAPS: 'true'
+    - if: '$CI_MERGE_REQUEST_LABELS =~ /pipeline:run-in-ruby3_2/'
+      variables:
+        <<: *next-ruby-variables
+        PIPELINE_NAME: 'Ruby $RUBY_VERSION MR'
+        NO_SOURCEMAPS: 'true'
     - if: '$CI_MERGE_REQUEST_LABELS =~ /Community contribution/'
       variables:
-        <<: [*next-ruby-variables, *default-merge-request-variables]
+        <<: *default-ruby-variables
         GITLAB_DEPENDENCY_PROXY_ADDRESS: ""
         PIPELINE_NAME: 'Ruby $RUBY_VERSION MR (community contribution)'
-    # This work around https://gitlab.com/gitlab-org/gitlab/-/issues/332411 which prevents usage of dependency proxy
-    # when pipeline is triggered by a project access token.
-    # Example of project bot usernames (the format changed over time):
-    # - project_278964_bot2
-    # - project_278964_bot_7fb4d1cca8242cb399a0b8f483783120
-    - if: '$CI_MERGE_REQUEST_IID && $GITLAB_USER_LOGIN =~ /project_\d+_bot/'
-      variables:
-        <<: [*next-ruby-variables, *default-merge-request-variables]
-        GITLAB_DEPENDENCY_PROXY_ADDRESS: ""
-        PIPELINE_NAME: 'Ruby $RUBY_VERSION MR (triggered by a project token)'
+        NO_SOURCEMAPS: 'true'
     - <<: *if-merge-request-security-canonical-sync
       variables:
-        <<: [*next-ruby-variables, *default-merge-request-variables]
+        <<: *default-ruby-variables
         PIPELINE_NAME: '$CI_DEFAULT_BRANCH security->canonical sync'
         SKIP_MESSAGE: 'MR only contains changes from the security mirror, which have already been reviewed, tested and deployed.'
     # For (detached) merge request pipelines.
     - if: '$CI_MERGE_REQUEST_IID'
       variables:
-        <<: [*next-ruby-variables, *default-merge-request-variables]
+        <<: [*default-ruby-variables, *default-merge-request-variables]
         PIPELINE_NAME: 'Ruby $RUBY_VERSION MR'
+        NO_SOURCEMAPS: 'true'
     # For the scheduled pipelines, we set specific variables.
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PIPELINE_SOURCE == "schedule"'
       variables:
         <<: [*default-ruby-variables, *default-branch-pipeline-failure-variables]
         CRYSTALBALL: "true"
+        PIPELINE_NAME: 'Scheduled Ruby $RUBY_VERSION $CI_COMMIT_BRANCH branch'
+    - if: '$CI_COMMIT_BRANCH == "ruby3_0" && $CI_PIPELINE_SOURCE == "schedule"'
+      variables:
+        <<: *old-ruby-variables
         PIPELINE_NAME: 'Scheduled Ruby $RUBY_VERSION $CI_COMMIT_BRANCH branch'
     - if: '$CI_COMMIT_BRANCH == "ruby3_2" && $CI_PIPELINE_SOURCE == "schedule"'
       variables:
@@ -117,7 +127,7 @@ workflow:
     # Example of project bot usernames (the format changed over time):
     # - project_278964_bot2
     # - project_278964_bot_7fb4d1cca8242cb399a0b8f483783120
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $GITLAB_USER_LOGIN =~ /project_\d+_bot/'
+    - if: '$GITLAB_USER_LOGIN =~ /project_\d+_bot/'
       variables:
         <<: [*default-ruby-variables, *default-branch-pipeline-failure-variables]
         GITLAB_DEPENDENCY_PROXY_ADDRESS: ""
@@ -193,6 +203,7 @@ variables:
   RSPEC_CHANGED_FILES_PATH: rspec/changed_files.txt
   RSPEC_FAIL_FAST_THRESHOLD: 20
   RSPEC_FAST_QUARANTINE_PATH: rspec/fast_quarantine-gitlab.txt
+  RSPEC_FOSS_IMPACT_PIPELINE_TEMPLATE_YML: .gitlab/ci/rails/rspec-foss-impact.gitlab-ci.yml.erb
   RSPEC_LAST_RUN_RESULTS_FILE: rspec/rspec_last_run_results.txt
   RSPEC_MATCHING_JS_FILES_PATH: rspec/js_matching_files.txt
   RSPEC_MATCHING_TESTS_EE_PATH: rspec/matching_tests-ee.txt

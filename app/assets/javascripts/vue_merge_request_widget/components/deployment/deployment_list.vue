@@ -23,6 +23,16 @@ export default {
       type: Boolean,
       required: true,
     },
+    visualReviewAppMeta: {
+      type: Object,
+      required: false,
+      default: () => ({
+        sourceProjectId: '',
+        sourceProjectPath: '',
+        mergeRequestId: '',
+        appUrl: '',
+      }),
+    },
   },
   computed: {
     showCollapsedDeployments() {

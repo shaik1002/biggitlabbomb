@@ -1171,22 +1171,6 @@ describe('buildClient', () => {
             'start_time=2020-07-05T00:00:00.000Z&end_time=2020-07-06T00:00:00.000Z',
           );
         });
-
-        it('handles exact timestamps', async () => {
-          await client.fetchLogs({
-            filters: {
-              dateRange: {
-                timestamp: '2024-02-19T16:10:15.4433398Z',
-                endDate: new Date('2024-02-19'),
-                startDate: new Date('2024-02-19'),
-                value: 'custom',
-              },
-            },
-          });
-          expect(getQueryParam()).toContain(
-            'start_time=2024-02-19T16:10:15.4433398Z&end_time=2024-02-19T16:10:15.4433398Z',
-          );
-        });
       });
 
       describe('attributes filters', () => {
@@ -1201,10 +1185,6 @@ describe('buildClient', () => {
                 severityName: [
                   { operator: '=', value: 'info' },
                   { operator: '!=', value: 'warning' },
-                ],
-                severityNumber: [
-                  { operator: '=', value: '9' },
-                  { operator: '!=', value: '10' },
                 ],
                 traceId: [{ operator: '=', value: 'traceId' }],
                 spanId: [{ operator: '=', value: 'spanId' }],
@@ -1222,7 +1202,6 @@ describe('buildClient', () => {
           expect(getQueryParam()).toEqual(
             `service_name=serviceName&not[service_name]=serviceName2` +
               `&severity_name=info&not[severity_name]=warning` +
-              `&severity_number=9&not[severity_number]=10` +
               `&trace_id=traceId` +
               `&span_id=spanId` +
               `&fingerprint=fingerprint` +

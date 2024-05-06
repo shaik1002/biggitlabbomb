@@ -40,8 +40,6 @@ module Projects
         tracker.fail_op!
 
         raise
-      ensure
-        remove_extracted_import
       end
 
       private
@@ -49,29 +47,20 @@ module Projects
       def extract_import_file
         Gitlab::ImportExport::FileImporter.import(
           importable: project,
-          archive_file: nil,
-          shared: project.import_export_shared,
-          tmpdir: tmpdir
+          archive_file: project.import_export_upload.import_file.path,
+          shared: shared_export_data
         )
-      end
-
-      def remove_extracted_import
-        FileUtils.rm_rf(tmpdir)
-      end
-
-      def tmpdir
-        @tmpdir ||= Dir.mktmpdir('export_archives')
       end
 
       def process_import
         tree_restorer = Gitlab::ImportExport::Project::RelationTreeRestorer.new(
           user: current_user,
-          shared: project.import_export_shared,
+          shared: shared_export_data,
           relation_reader: relation_reader,
           object_builder: Gitlab::ImportExport::Project::ObjectBuilder,
           members_mapper: members_mapper,
           relation_factory: Gitlab::ImportExport::Project::RelationFactory,
-          reader: Gitlab::ImportExport::Reader.new(shared: project.import_export_shared),
+          reader: Gitlab::ImportExport::Reader.new(shared: shared_export_data),
           importable: project,
           importable_attributes: relation_reader.consume_attributes('project'),
           importable_path: 'project',
@@ -83,7 +72,7 @@ module Projects
 
       def relation_reader
         @relation_reader ||= Gitlab::ImportExport::Json::NdjsonReader.new(
-          File.join(tmpdir, 'tree')
+          File.join(shared_export_data.export_path, 'tree')
         )
       end
 
@@ -97,6 +86,10 @@ module Projects
           user: current_user,
           importable: project
         )
+      end
+
+      def shared_export_data
+        @shared ||= project.import_export_shared
       end
     end
   end

@@ -2,7 +2,6 @@
 stage: Create
 group: Code Review
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
-description: "Use AI-assisted features for relevant information about a merge request."
 ---
 
 # GitLab Duo in merge requests
@@ -100,3 +99,16 @@ Provide feedback on this experimental feature in [issue 408994](https://gitlab.c
 
 - Contents of the file
 - The filename
+
+<!--- start_remove The following content will be removed on remove_date: '2024-04-12' -->
+
+## Generate suggested tests in merge requests
+
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/10366) in GitLab 16.0 as an [Experiment](../../../policy/experiment-beta-support.md#experiment).
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/141086) to GitLab Duo Chat in GitLab 16.8.
+
+This feature was [moved](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/141086)
+into GitLab Duo Chat in GitLab 16.8. Find more information in
+[Write tests in the IDE](../../gitlab_duo_chat.md#write-tests-in-the-ide).
+
+<!--- end_remove -->

@@ -1,5 +1,4 @@
-export const buildDisplayListboxItem = ({ sortName, resourceType, text }) => ({
+export const buildDisplayListboxItem = ({ filter, resourceType, text }) => ({
   text,
-  value: `${sortName}_${resourceType}`,
-  sortName,
+  value: `${filter}_${resourceType}`,
 });

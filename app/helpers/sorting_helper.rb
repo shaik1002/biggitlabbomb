@@ -119,9 +119,9 @@ module SortingHelper
     }
   end
 
-  def label_sort_options_hash
+  def label_sort_options_hash(relevance)
     options = {}
-    options[sort_value_relevance] = sort_title_relevance if params[:search].present?
+    options[sort_value_relevance] = sort_title_relevance if params[:search].present? && relevance
     options.merge({
       sort_value_name => sort_title_name,
       sort_value_name_desc => sort_title_name_desc,

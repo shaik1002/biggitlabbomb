@@ -15,7 +15,6 @@ import {
   TOKEN_TYPE_AUTHOR,
   TOKEN_TYPE_CONFIDENTIAL,
   TOKEN_TYPE_CONTACT,
-  TOKEN_TYPE_DRAFT,
   TOKEN_TYPE_EPIC,
   TOKEN_TYPE_HEALTH,
   TOKEN_TYPE_ITERATION,
@@ -345,16 +344,6 @@ export const filtersMap = {
     [URL_PARAM]: {
       [OPERATOR_IS]: {
         [NORMAL_FILTER]: 'confidential',
-      },
-    },
-  },
-  [TOKEN_TYPE_DRAFT]: {
-    [API_PARAM]: {
-      [NORMAL_FILTER]: 'draft',
-    },
-    [URL_PARAM]: {
-      [OPERATOR_IS]: {
-        [NORMAL_FILTER]: 'draft',
       },
     },
   },

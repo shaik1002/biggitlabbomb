@@ -622,6 +622,7 @@ order = Gitlab::Pagination::Keyset::Order.build([
   Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
     attribute_name: 'duration_in_seconds',
     order_expression: Arel.sql('EXTRACT(EPOCH FROM epics.closed_at - epics.created_at)').desc,
+    distinct: false,
     sql_type: 'double precision' # important for calculated SQL expressions
   ),
   Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
@@ -696,7 +697,8 @@ order = Gitlab::Pagination::Keyset::Order.build([
             attribute_name: 'projects_name',
             order_expression: Issue.arel_table[:projects_name].asc,
             sql_type: 'character varying',
-            nullable: :nulls_last
+            nullable: :nulls_last,
+            distinct: false
           ),
           Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
             attribute_name: :id,

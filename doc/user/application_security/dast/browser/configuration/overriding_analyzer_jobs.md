@@ -17,5 +17,5 @@ include:
 
 dast:
   variables:
-    DAST_LOG_CONFIG: auth:debug
+    DAST_BROWSER_LOG: auth:debug
 ```

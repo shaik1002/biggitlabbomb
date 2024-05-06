@@ -22,7 +22,7 @@ To set up the GitLab for Jira Cloud app on your self-managed instance, do one of
 - [Connect the GitLab for Jira Cloud app](#connect-the-gitlab-for-jira-cloud-app) (GitLab 15.7 and later).
 - [Install the GitLab for Jira Cloud app manually](#install-the-gitlab-for-jira-cloud-app-manually).
 
-After you set up the app, you can use the [project toolchain](https://support.atlassian.com/jira-software-cloud/docs/what-is-the-connections-feature/)
+After you set up the app, you can use the [project toolchain](https://support.atlassian.com/jira-software-cloud/docs/what-is-the-project-toolchain-in-jira/)
 developed and maintained by Atlassian to [link GitLab repositories to Jira projects](https://support.atlassian.com/jira-software-cloud/docs/link-repositories-to-a-project/#Link-repositories-using-the-toolchain-feature).
 The project toolchain does not affect how development information is synced between GitLab and Jira Cloud.
 
@@ -299,9 +299,6 @@ You can use a reverse proxy, but keep the following in mind:
   For more information, see [issue 434085](https://gitlab.com/gitlab-org/gitlab/-/issues/434085).
 - To secure the reverse proxy on the public internet, allow inbound traffic from
   [Atlassian IP addresses](https://support.atlassian.com/organization-administration/docs/ip-addresses-and-domains-for-atlassian-cloud-products/#Outgoing-Connections) only.
-- If you use a rewrite or subfilter with your proxy, ensure the proxy
-  does not rewrite or replace the `gitlab-jira-connect-${host}` app key.
-  Otherwise, you might get a [`Failed to link group`](jira_cloud_app_troubleshooting.md#failed-to-link-group) error.
 
 ### External NGINX
 

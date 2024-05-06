@@ -1,8 +1,7 @@
 ---
 stage: Create
 group: Code Review
-info: Any user with at least the Maintainer role can merge updates to this content. For details, see https://docs.gitlab.com/ee/development/development_processes.html#development-guidelines-review.
-description: "Developer information explaining terminology and features used in merge requests."
+info: "See the Technical Writers assigned to Development Guidelines: https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments-to-development-guidelines"
 ---
 
 # Merge request concepts

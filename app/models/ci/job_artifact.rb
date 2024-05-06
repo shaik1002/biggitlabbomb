@@ -156,6 +156,10 @@ module Ci
       service.update_statistics
     end
 
+    def self.use_partition_id_filter?
+      Ci::Pipeline.use_partition_id_filter?
+    end
+
     def local_store?
       [nil, ::JobArtifactUploader::Store::LOCAL].include?(self.file_store)
     end

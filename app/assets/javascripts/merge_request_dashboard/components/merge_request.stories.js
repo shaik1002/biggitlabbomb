@@ -18,7 +18,6 @@ Default.args = {
   mergeRequest: {
     reference: '!123456',
     titleHtml: 'Merge request title',
-    webUrl: '#',
     author: {
       name: 'John Smith',
       webUrl: 'https://gitlab.com/root',
@@ -103,15 +102,6 @@ Default.args = {
           webPath: '/root',
         },
       ],
-    },
-    headPipeline: {
-      id: 'gid://gitlab/Ci::Pipeline/1',
-      detailedStatus: {
-        id: 'success-1',
-        icon: 'status_success',
-        text: 'Passed',
-        detailsPath: '/',
-      },
     },
     userDiscussionsCount: 5,
     createdAt: '2024-04-22T10:13:09Z',

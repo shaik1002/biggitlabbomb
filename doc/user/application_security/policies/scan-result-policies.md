@@ -68,6 +68,7 @@ For more information see [Use security scanning tools with merge request pipelin
 
 ## Merge request approval policy editor
 
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/77814) in GitLab 14.8.
 > - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/369473) in GitLab 15.6.
 
 NOTE:
@@ -207,12 +208,6 @@ the bot message is sent as long as at least one of those policies has the `send_
 | `type` | `string` | true | `send_bot_message` | The action's type. |
 | `enabled` | `boolean` | true | `true`, `false` | Whether a bot message should be created when policy violations are detected. Default: `true` |
 
-### Example bot messages
-
-![scan_results_example_bot_message_v17_0](img/scan_result_policy_example_bot_message_vulnerabilities_v17_0.png)
-
-![scan_results_example_bot_message_v17_0](img/scan_result_policy_example_bot_message_artifacts_v17_0.png)
-
 ## `approval_settings`
 
 > - The `block_group_branch_modification` field was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/420724) in GitLab 16.8 [with flag](../../../administration/feature_flags.md) named `scan_result_policy_block_group_branch_modification`. Disabled by default.
@@ -255,7 +250,7 @@ On GitLab.com and GitLab Dedicated, this feature is not available.
 
 | Field  | Type     | Required | Possible values    | Description                                                                                                          |
 |--------|----------|----------|--------------------|----------------------------------------------------------------------------------------------------------------------|
-| `fail` | `string` | false    | `open` or `closed` | `closed` (default): Invalid or unenforceable rules of a policy require approval. `open`: Invalid or unenforceable rules of a policy do not require approval. |
+| `fail` | `string` | false    | `open` or `closed` | `closed` (default): Invalid or unenforceable rules of a policy do not require approval. `open`: Invalid or unenforceable rules of a policy require approval. |
 
 ## Example security merge request approval policies project
 

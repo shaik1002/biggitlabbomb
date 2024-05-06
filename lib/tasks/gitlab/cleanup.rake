@@ -15,17 +15,17 @@ namespace :gitlab do
         print "#{user.name} (#{user.ldap_identity.extern_uid}) ..."
 
         if Gitlab::Auth::Ldap::Access.allowed?(user)
-          puts Rainbow(" [OK]").green
+          puts " [OK]".color(:green)
         elsif block_flag
           user.block! unless user.blocked?
-          puts Rainbow(" [BLOCKED]").red
+          puts " [BLOCKED]".color(:red)
         else
-          puts Rainbow(" [NOT IN LDAP]").yellow
+          puts " [NOT IN LDAP]".color(:yellow)
         end
       end
 
       unless block_flag
-        puts Rainbow("To block these users run this command with BLOCK=true").yellow
+        puts "To block these users run this command with BLOCK=true".color(:yellow)
       end
     end
 
@@ -37,7 +37,7 @@ namespace :gitlab do
       cleaner.run!(dry_run: dry_run?)
 
       if dry_run?
-        logger.info Rainbow("To clean up these files run this command with DRY_RUN=false").yellow
+        logger.info "To clean up these files run this command with DRY_RUN=false".color(:yellow)
       end
     end
 
@@ -47,7 +47,7 @@ namespace :gitlab do
       cleaner.run!(dry_run: dry_run?)
 
       if dry_run?
-        logger.info Rainbow("To cleanup these files run this command with DRY_RUN=false").yellow
+        logger.info "To cleanup these files run this command with DRY_RUN=false".color(:yellow)
       end
     end
 
@@ -59,7 +59,7 @@ namespace :gitlab do
       cleaner.run!
 
       if dry_run?
-        logger.info Rainbow("To clean up these files run this command with DRY_RUN=false").yellow
+        logger.info "To clean up these files run this command with DRY_RUN=false".color(:yellow)
       end
     end
 
@@ -80,9 +80,7 @@ namespace :gitlab do
 
         generator.run!
 
-        logger.info(
-          Rainbow("To delete these objects run gitlab:cleanup:delete_orphan_job_artifact_final_objects").yellow
-        )
+        logger.info "To delete these objects run gitlab:cleanup:delete_orphan_job_artifact_final_objects".color(:yellow)
       rescue Gitlab::Cleanup::OrphanJobArtifactFinalObjects::GenerateList::UnsupportedProviderError => e
         abort %(#{e.message}
 Usage: rake "gitlab:cleanup:list_orphan_job_artifact_final_objects[provider]")
@@ -128,7 +126,7 @@ Usage: rake "gitlab:cleanup:list_orphan_job_artifact_final_objects[provider]")
       project = find_project
 
       unless project
-        logger.info Rainbow("Specify the project with PROJECT_ID={number} or PROJECT_PATH={namespace/project-name}").red
+        logger.info "Specify the project with PROJECT_ID={number} or PROJECT_PATH={namespace/project-name}".color(:red)
         exit
       end
 
@@ -141,7 +139,7 @@ Usage: rake "gitlab:cleanup:list_orphan_job_artifact_final_objects[provider]")
       cleaner.run!
 
       if dry_run?
-        logger.info Rainbow("To clean up these files run this command with DRY_RUN=false").yellow
+        logger.info "To clean up these files run this command with DRY_RUN=false".color(:yellow)
       end
     end
 
@@ -219,7 +217,7 @@ new_sha: Gitlab::Git::SHA1_BLANK_SHA }
 
       number_of_removed_files = RemoveUnreferencedLfsObjectsWorker.new.perform
 
-      logger.info Rainbow("Removed unreferenced LFS files: #{number_of_removed_files}").green
+      logger.info "Removed unreferenced LFS files: #{number_of_removed_files}".color(:green)
     end
 
     namespace :sessions do

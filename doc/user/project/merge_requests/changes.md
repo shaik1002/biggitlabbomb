@@ -2,7 +2,6 @@
 stage: Create
 group: Code Review
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
-description: "Understand how to read the changes proposed in a merge request."
 ---
 
 # Changes in merge requests
@@ -134,8 +133,8 @@ To temporarily change your viewing preferences for a specific merge request:
 1. On the left sidebar, select **Search or go to** and find your project.
 1. Select **Code > Merge requests** and find your merge request.
 1. Below the merge request title, select **Changes**.
-1. Select **Preferences** (**{preferences}**).
-1. Select or clear **Show one file at a time**.
+1. Select **Preferences** (**{settings}**).
+1. Select or clear the **Show one file at a time** checkbox.
 
 This change overrides your choice in your user preferences. It persists until you
 clear your browser's cookies or change this behavior again.
@@ -155,35 +154,34 @@ merge requests. To view other changed files, either:
 - Scroll to the end of the file and select either **Prev** or **Next**.
 - Select **Show file browser** (**{file-tree}**) and select another file to view.
 
-## Compare changes
+## Compare changes inline
 
-You can view the changes in a merge request either:
-
-- Inline, which shows the changes vertically. The old version of a line is shown
-  first, with the new version shown directly below it.
-  Inline mode is often better for changes to single lines.
-- Side-by-side, which shows the old and new versions of lines in separate columns.
-  Side-by-side mode is often better for changes affecting large numbers of sequential lines.
-
-To change how a merge request shows changed lines:
+You can view the changes inline:
 
 1. On the left sidebar, select **Search or go to** and find your project.
 1. Select **Code > Merge requests** and find your merge request.
 1. Below the title, select **Changes**.
-1. Select **Preferences** (**{preferences}**). Select either **Side-by-side** or **Inline**.
-   This example shows how the same change is rendered in both inline and side-by-side mode:
+1. Select **Preferences** (**{settings}**).
+1. In the **Compare changes** area, select **Inline**.
 
-   ::Tabs
+The changes are displayed after the original text.
 
-   :::TabTitle Inline changes
+![inline changes](img/changes-inline_v14_8.png)
 
-   ![inline changes](img/changes-inline_v14_8.png)
+## Compare changes side-by-side
 
-   :::TabTitle Side-by-side changes
+Depending on the length of the changes in your merge request, you might find it
+easier to view the changes inline, or side-by-side:
 
-   ![side-by-side changes](img/changes-sidebyside_v14_8.png)
+1. On the left sidebar, select **Search or go to** and find your project.
+1. Select **Code > Merge requests** and find your merge request.
+1. Below the title, select **Changes**.
+1. Select **Preferences** (**{settings}**).
+1. In the **Compare changes** area, select **Side-by-side**.
 
-   ::EndTabs
+The changes are displayed across from one another.
+
+![side-by-side changes](img/changes-sidebyside_v14_8.png)
 
 ## Expand or collapse comments
 
@@ -213,8 +211,8 @@ a merge request. You can choose to hide or show whitespace changes:
 1. On the left sidebar, select **Search or go to** and find your project.
 1. Select **Code > Merge requests** and find your merge request.
 1. Below the title, select **Changes**.
-1. Before the list of changed files, select **Preferences** (**{preferences}**).
-1. Select or clear **Show whitespace changes**:
+1. Before the list of changed files, select **Preferences** (**{settings}**).
+1. Select or clear the **Show whitespace changes** checkbox:
 
    ![MR diff](img/merge_request_diff_v14_2.png)
 

@@ -5,16 +5,7 @@ import { mapActions, mapState } from 'vuex';
 import { InternalEvents } from '~/tracking';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import { __ } from '~/locale';
-import {
-  MR_FILTER_OPTIONS,
-  MR_FILTER_TRACKING_OPENED,
-  MR_FILTER_TRACKING_USER_COMMENTS,
-} from '~/notes/constants';
-
-const filterOptionToTrackingEventMap = {
-  comments: MR_FILTER_TRACKING_USER_COMMENTS,
-};
-const allFilters = MR_FILTER_OPTIONS.map((f) => f.value);
+import { MR_FILTER_OPTIONS, MR_FILTER_TRACKING_OPENED } from '~/notes/constants';
 
 export default {
   components: {
@@ -28,8 +19,7 @@ export default {
   mixins: [InternalEvents.mixin()],
   data() {
     return {
-      selectedFilters: allFilters,
-      previousFilters: allFilters,
+      selectedFilters: MR_FILTER_OPTIONS.map((f) => f.value),
     };
   },
   computed: {
@@ -72,43 +62,18 @@ export default {
     filterListShown() {
       this.trackEvent(MR_FILTER_TRACKING_OPENED);
     },
-    trackDropdownSelection(selectedItem) {
-      const trackingEvent = filterOptionToTrackingEventMap[selectedItem];
-
-      if (trackingEvent) {
-        this.trackEvent(trackingEvent);
-      }
-    },
     applyFilters() {
       this.updateMergeRequestFilters(this.selectedFilters);
     },
     localSyncFilters(filters) {
       this.updateMergeRequestFilters(filters);
       this.selectedFilters = filters;
-      this.previousFilters = filters;
     },
     deselectAll() {
       this.selectedFilters = [];
-      this.previousFilters = [];
     },
     selectAll() {
-      this.selectedFilters = allFilters;
-      this.previousFilters = allFilters;
-    },
-    select(allSelectedFilters) {
-      const removedFilters = this.previousFilters.filter(
-        (filterValue) => !allSelectedFilters.includes(filterValue),
-      );
-      const addedFilters = allSelectedFilters.filter(
-        (filterValue) => !this.previousFilters.includes(filterValue),
-      );
-      const allInteractedItems = removedFilters.concat(addedFilters);
-
-      allInteractedItems.forEach((filterValue) => {
-        this.trackDropdownSelection(filterValue);
-      });
-
-      this.previousFilters = allSelectedFilters;
+      this.selectedFilters = MR_FILTER_OPTIONS.map((f) => f.value);
     },
   },
   MR_FILTER_OPTIONS,
@@ -141,7 +106,6 @@ export default {
         @hidden="applyFilters"
         @reset="deselectAll"
         @select-all="selectAll"
-        @select="select"
       >
         <template #toggle>
           <gl-button class="gl-rounded-top-right-none! gl-rounded-bottom-right-none!">

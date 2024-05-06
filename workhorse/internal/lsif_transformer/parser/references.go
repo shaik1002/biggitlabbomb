@@ -5,14 +5,14 @@ import (
 )
 
 type ReferencesOffset struct {
-	Id  ID
+	Id  Id
 	Len int32
 }
 
 type References struct {
 	Items           *cache
 	Offsets         *cache
-	CurrentOffsetId ID
+	CurrentOffsetId Id
 }
 
 type SerializedReference struct {
@@ -41,10 +41,10 @@ func NewReferences() (*References, error) {
 // serializing in `For`.
 //
 // The references are stored in a file to cache them. It is like
-// `map[ID][]Item` (where `Id` is `refId`) but relies on caching the array and
+// `map[Id][]Item` (where `Id` is `refId`) but relies on caching the array and
 // its offset in files for storage to reduce RAM usage. The items can be
 // fetched by calling `getItems`.
-func (r *References) Store(refId ID, references []Item) error {
+func (r *References) Store(refId Id, references []Item) error {
 	size := len(references)
 
 	if size == 0 {
@@ -59,12 +59,12 @@ func (r *References) Store(refId ID, references []Item) error {
 
 	size = len(items)
 	r.Offsets.SetEntry(refId, ReferencesOffset{Id: r.CurrentOffsetId, Len: int32(size)})
-	r.CurrentOffsetId += ID(size)
+	r.CurrentOffsetId += Id(size)
 
 	return nil
 }
 
-func (r *References) For(docs map[ID]string, refId ID) []SerializedReference {
+func (r *References) For(docs map[Id]string, refId Id) []SerializedReference {
 	references := r.getItems(refId)
 	if references == nil {
 		return nil
@@ -95,7 +95,7 @@ func (r *References) Close() error {
 	return nil
 }
 
-func (r *References) getItems(refId ID) []Item {
+func (r *References) getItems(refId Id) []Item {
 	var offset ReferencesOffset
 	if err := r.Offsets.Entry(refId, &offset); err != nil || offset.Len == 0 {
 		return nil

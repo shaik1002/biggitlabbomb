@@ -1,16 +1,12 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script>
 import { GlLoadingIcon, GlTableLite, GlButton, GlTooltipDirective } from '@gitlab/ui';
-import produce from 'immer';
 import { createAlert } from '~/alert';
 import { TYPENAME_ISSUE, TYPENAME_MERGE_REQUEST } from '~/graphql_shared/constants';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { TYPE_ISSUE } from '~/issues/constants';
 import { formatDate, parseSeconds, stringifyTime } from '~/lib/utils/datetime_utility';
 import { __, s__ } from '~/locale';
-import { WIDGET_TYPE_TIME_TRACKING } from '~/work_items/constants';
-import groupWorkItemByIidQuery from '~/work_items/graphql/group_work_item_by_iid.query.graphql';
-import workItemByIidQuery from '~/work_items/graphql/work_item_by_iid.query.graphql';
 import { timelogQueries } from '../../queries/constants';
 import deleteTimelogMutation from '../../queries/delete_timelog.mutation.graphql';
 
@@ -26,12 +22,6 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   inject: {
-    fullPath: {
-      default: null,
-    },
-    isGroup: {
-      default: null,
-    },
     issuableType: {
       default: null,
     },
@@ -44,25 +34,11 @@ export default {
     },
     issuableId: {
       type: String,
-      required: false,
-      default: '',
-    },
-    timelogs: {
-      type: Array,
-      required: false,
-      default: undefined,
-    },
-    workItemIid: {
-      type: String,
-      required: false,
-      default: '',
+      required: true,
     },
   },
   data() {
-    return {
-      report: this.timelogs ?? [],
-      removingIds: [],
-    };
+    return { report: [], isLoading: true, removingIds: [] };
   },
   apollo: {
     report: {
@@ -73,45 +49,17 @@ export default {
         return this.getQueryVariables();
       },
       update(data) {
-        const timelogs = data?.issuable?.timelogs?.nodes || [];
-        return timelogs.slice().sort((a, b) => new Date(a.spentAt) - new Date(b.spentAt));
+        this.isLoading = false;
+        return this.extractTimelogs(data);
       },
       error() {
         createAlert({ message: __('Something went wrong. Please try again.') });
-      },
-      skip() {
-        return Boolean(this.timelogs);
-      },
-    },
-    workItem: {
-      query() {
-        return this.isGroup ? groupWorkItemByIidQuery : workItemByIidQuery;
-      },
-      variables() {
-        return {
-          fullPath: this.fullPath,
-          iid: this.workItemIid,
-        };
-      },
-      update(data) {
-        return data.workspace.workItem ?? {};
-      },
-      skip() {
-        return !this.workItemIid;
       },
     },
   },
   computed: {
     deleteButtonTooltip() {
       return s__('TimeTracking|Delete time spent');
-    },
-    isLoading() {
-      return this.$apollo.queries.report.loading || this.$apollo.queries.workItem.loading;
-    },
-  },
-  watch: {
-    timelogs(timelogs) {
-      this.report = timelogs;
     },
   },
   methods: {
@@ -128,6 +76,10 @@ export default {
     },
     getGraphQLEntityType() {
       return this.isIssue() ? TYPENAME_ISSUE : TYPENAME_MERGE_REQUEST;
+    },
+    extractTimelogs(data) {
+      const timelogs = data?.issuable?.timelogs?.nodes || [];
+      return timelogs.slice().sort((a, b) => new Date(a.spentAt) - new Date(b.spentAt));
     },
     formatDate(date) {
       return formatDate(date, TIME_DATE_FORMAT);
@@ -152,28 +104,6 @@ export default {
         .mutate({
           mutation: deleteTimelogMutation,
           variables: { input: { id: timelogId } },
-          update: (store) => {
-            if (!this.workItemIid) {
-              return;
-            }
-            store.updateQuery(
-              {
-                query: this.isGroup ? groupWorkItemByIidQuery : workItemByIidQuery,
-                variables: { fullPath: this.fullPath, iid: this.workItemIid },
-              },
-              (sourceData) =>
-                produce(sourceData, (draftState) => {
-                  const timeTrackingWidget = draftState.workspace.workItem.widgets.find(
-                    (widget) => widget.type === WIDGET_TYPE_TIME_TRACKING,
-                  );
-                  const timelogs = timeTrackingWidget.timelogs.nodes;
-                  const index = timelogs.findIndex((timelog) => timelog.id === timelogId);
-
-                  timeTrackingWidget.totalTimeSpent -= timelogs[index].timeSpent;
-                  timelogs.splice(index, 1);
-                }),
-            );
-          },
         })
         .then(({ data }) => {
           if (data.timelogDelete?.errors?.length) {
@@ -193,7 +123,7 @@ export default {
     },
   },
   fields: [
-    { key: 'spentAt', label: __('Date'), tdClass: 'gl-w-1/4' },
+    { key: 'spentAt', label: __('Date'), tdClass: 'gl-w-quarter' },
     { key: 'timeSpent', label: __('Time spent'), tdClass: 'gl-w-15' },
     { key: 'user', label: __('User') },
     { key: 'summary', label: __('Summary') },

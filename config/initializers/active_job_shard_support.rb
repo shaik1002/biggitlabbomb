@@ -16,7 +16,12 @@ module ActiveJob
     module ActiveJobShardSupport
       %i[enqueue enqueue_at].each do |name|
         define_method(name) do |*args|
-          Gitlab::SidekiqSharding::Router.route(ActionMailer::MailDeliveryJob) do
+          return super(*args) unless Gitlab::SidekiqSharding::Router.enabled?
+
+          store_name = ActionMailer::MailDeliveryJob.sidekiq_options['store']
+          _, pool = Gitlab::SidekiqSharding::Router.get_shard_instance(store_name)
+
+          Sidekiq::Client.via(pool) do
             super(*args)
           end
         end

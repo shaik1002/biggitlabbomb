@@ -157,7 +157,7 @@ export default {
 
 <template>
   <gl-card
-    class="gl-new-card"
+    class="gl-new-card gl-overflow-hidden"
     header-class="gl-new-card-header"
     body-class="gl-new-card-body gl-px-0"
   >

@@ -50,16 +50,7 @@ class SentNotificationsController < ApplicationController
 
     # Unsubscribe external author for legacy reasons when no issue email participant is set
     email = @sent_notification.issue_email_participant&.email || noteable.external_author
-
-    ::IssueEmailParticipants::DestroyService.new(
-      target: noteable,
-      current_user: current_user,
-      emails: [email],
-      options: {
-        context: :unsubscribe,
-        skip_permission_check: true
-      }
-    ).execute
+    noteable.unsubscribe_email_participant(email)
   end
 
   def noteable_path(noteable)

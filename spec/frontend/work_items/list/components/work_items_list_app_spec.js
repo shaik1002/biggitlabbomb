@@ -11,25 +11,15 @@ import {
   setSortPreferenceMutationResponse,
   setSortPreferenceMutationResponseWithErrors,
 } from 'jest/issues/list/mock_data';
-import { TYPENAME_USER } from '~/graphql_shared/constants';
-import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { STATUS_CLOSED, STATUS_OPEN } from '~/issues/constants';
 import { CREATED_DESC, UPDATED_DESC } from '~/issues/list/constants';
 import setSortPreferenceMutation from '~/issues/list/queries/set_sort_preference.mutation.graphql';
-import { scrollUp } from '~/lib/utils/scroll_utils';
-import {
-  FILTERED_SEARCH_TERM,
-  OPERATOR_IS,
-  TOKEN_TYPE_AUTHOR,
-  TOKEN_TYPE_SEARCH_WITHIN,
-} from '~/vue_shared/components/filtered_search_bar/constants';
 import IssuableList from '~/vue_shared/issuable/list/components/issuable_list_root.vue';
 import WorkItemsListApp from '~/work_items/list/components/work_items_list_app.vue';
 import { sortOptions, urlSortParams } from '~/work_items/list/constants';
 import getWorkItemsQuery from '~/work_items/list/queries/get_work_items.query.graphql';
 import { groupWorkItemsQueryResponse } from '../../mock_data';
 
-jest.mock('~/lib/utils/scroll_utils', () => ({ scrollUp: jest.fn() }));
 jest.mock('~/sentry/sentry_browser_wrapper');
 
 describe('WorkItemsListApp component', () => {
@@ -73,6 +63,7 @@ describe('WorkItemsListApp component', () => {
       issuablesLoading: true,
       namespace: 'work-items',
       recentSearchesStorageKey: 'issues',
+      searchTokens: [],
       showWorkItemTypeIcon: true,
       sortOptions,
       tabs: WorkItemsListApp.issuableListTabs,
@@ -102,25 +93,6 @@ describe('WorkItemsListApp component', () => {
     expect(findIssueCardTimeInfo().exists()).toBe(true);
   });
 
-  describe('pagination controls', () => {
-    describe.each`
-      description                                                | pageInfo                                          | exists
-      ${'when hasNextPage=true and hasPreviousPage=true'}        | ${{ hasNextPage: true, hasPreviousPage: true }}   | ${true}
-      ${'when hasNextPage=true'}                                 | ${{ hasNextPage: true, hasPreviousPage: false }}  | ${true}
-      ${'when hasPreviousPage=true'}                             | ${{ hasNextPage: false, hasPreviousPage: true }}  | ${true}
-      ${'when neither hasNextPage nor hasPreviousPage are true'} | ${{ hasNextPage: false, hasPreviousPage: false }} | ${false}
-    `('$description', ({ pageInfo, exists }) => {
-      it(`${exists ? 'renders' : 'does not render'} pagination controls`, async () => {
-        const response = cloneDeep(groupWorkItemsQueryResponse);
-        Object.assign(response.data.group.workItems.pageInfo, pageInfo);
-        mountComponent({ queryHandler: jest.fn().mockResolvedValue(response) });
-        await waitForPromises();
-
-        expect(findIssuableList().props('showPaginationControls')).toBe(exists);
-      });
-    });
-  });
-
   it('renders work items', async () => {
     mountComponent();
     await waitForPromises();
@@ -137,7 +109,6 @@ describe('WorkItemsListApp component', () => {
       fullPath: 'full/path',
       sort: CREATED_DESC,
       state: STATUS_OPEN,
-      firstPageSize: 20,
     });
   });
 
@@ -162,36 +133,6 @@ describe('WorkItemsListApp component', () => {
     });
   });
 
-  describe('tokens', () => {
-    const mockCurrentUser = {
-      id: 1,
-      name: 'Administrator',
-      username: 'root',
-      avatar_url: 'avatar/url',
-    };
-
-    beforeEach(() => {
-      window.gon = {
-        current_user_id: mockCurrentUser.id,
-        current_user_fullname: mockCurrentUser.name,
-        current_username: mockCurrentUser.username,
-        current_user_avatar_url: mockCurrentUser.avatar_url,
-      };
-      mountComponent();
-    });
-
-    it('renders all tokens', () => {
-      const preloadedUsers = [
-        { ...mockCurrentUser, id: convertToGraphQLId(TYPENAME_USER, mockCurrentUser.id) },
-      ];
-
-      expect(findIssuableList().props('searchTokens')).toMatchObject([
-        { type: TOKEN_TYPE_AUTHOR, preloadedUsers },
-        { type: TOKEN_TYPE_SEARCH_WITHIN },
-      ]);
-    });
-  });
-
   describe('events', () => {
     describe('when "click-tab" event is emitted by IssuableList', () => {
       beforeEach(async () => {
@@ -203,50 +144,6 @@ describe('WorkItemsListApp component', () => {
 
       it('updates ui to the new tab', () => {
         expect(findIssuableList().props('currentTab')).toBe(STATUS_CLOSED);
-      });
-    });
-
-    describe('when "filter" event is emitted by IssuableList', () => {
-      it('fetches filtered work items', async () => {
-        mountComponent();
-
-        findIssuableList().vm.$emit('filter', [
-          { type: FILTERED_SEARCH_TERM, value: { data: 'find issues', operator: 'undefined' } },
-          { type: TOKEN_TYPE_AUTHOR, value: { data: 'homer', operator: OPERATOR_IS } },
-          { type: TOKEN_TYPE_SEARCH_WITHIN, value: { data: 'TITLE', operator: OPERATOR_IS } },
-        ]);
-        await nextTick();
-
-        expect(defaultQueryHandler).toHaveBeenCalledWith({
-          fullPath: 'full/path',
-          sort: CREATED_DESC,
-          state: STATUS_OPEN,
-          search: 'find issues',
-          authorUsername: 'homer',
-          in: 'TITLE',
-          firstPageSize: 20,
-        });
-      });
-    });
-
-    describe.each`
-      event              | params
-      ${'next-page'}     | ${{ afterCursor: 'endCursor', firstPageSize: 20 }}
-      ${'previous-page'} | ${{ beforeCursor: 'startCursor', lastPageSize: 20 }}
-    `('when "$event" event is emitted by IssuableList', ({ event, params }) => {
-      beforeEach(async () => {
-        mountComponent();
-        await waitForPromises();
-
-        findIssuableList().vm.$emit(event);
-      });
-
-      it('scrolls to the top', () => {
-        expect(scrollUp).toHaveBeenCalled();
-      });
-
-      it('fetches next/previous work items', () => {
-        expect(defaultQueryHandler).toHaveBeenLastCalledWith(expect.objectContaining(params));
       });
     });
 

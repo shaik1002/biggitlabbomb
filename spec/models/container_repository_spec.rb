@@ -33,6 +33,19 @@ RSpec.describe ContainerRepository, :aggregate_failures, feature_category: :cont
     end
   end
 
+  describe 'validations' do
+    it { is_expected.to validate_presence_of(:migration_retries_count) }
+    it { is_expected.to validate_numericality_of(:migration_retries_count).is_greater_than_or_equal_to(0) }
+
+    it { is_expected.to validate_inclusion_of(:migration_aborted_in_state).in_array(described_class::ABORTABLE_MIGRATION_STATES) }
+    it { is_expected.to allow_value(nil).for(:migration_aborted_in_state) }
+
+    context 'migration_state' do
+      it { is_expected.to validate_presence_of(:migration_state) }
+      it { is_expected.to validate_inclusion_of(:migration_state).in_array(described_class::MIGRATION_STATES) }
+    end
+  end
+
   context 'when triggering registry API requests' do
     let(:repository_state) { nil }
     let(:repository) { create(:container_repository, repository_state) }
@@ -752,6 +765,46 @@ RSpec.describe ContainerRepository, :aggregate_failures, feature_category: :cont
         repository.name = 'different-image'
 
         expect { repository.save! }.not_to change(repository, :status_updated_at)
+      end
+    end
+  end
+
+  context 'registry migration' do
+    before do
+      allow(repository.gitlab_api_client).to receive(:supports_gitlab_api?).and_return(true)
+    end
+
+    shared_examples 'gitlab migration client request' do |step|
+      let(:client_response) { :foobar }
+
+      it 'returns the same response as the client' do
+        expect(repository.gitlab_api_client)
+          .to receive(step).with(repository.path).and_return(client_response)
+        expect(subject).to eq(client_response)
+      end
+
+      context 'when the gitlab_api feature is not supported' do
+        before do
+          allow(repository.gitlab_api_client).to receive(:supports_gitlab_api?).and_return(false)
+        end
+
+        it 'returns :error' do
+          expect(repository.gitlab_api_client).not_to receive(step)
+
+          expect(subject).to eq(:error)
+        end
+      end
+    end
+
+    shared_examples 'handling the migration step' do |step|
+      it_behaves_like 'gitlab migration client request', step
+
+      context 'too many imports' do
+        it 'raises an error when it receives too_many_imports as a response' do
+          expect(repository.gitlab_api_client)
+            .to receive(step).with(repository.path).and_return(:too_many_imports)
+          expect { subject }.to raise_error(described_class::TooManyImportsError)
+        end
       end
     end
   end

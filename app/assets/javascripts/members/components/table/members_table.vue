@@ -1,5 +1,5 @@
 <script>
-import { GlTable, GlBadge } from '@gitlab/ui';
+import { GlTable, GlBadge, GlPagination } from '@gitlab/ui';
 // eslint-disable-next-line no-restricted-imports
 import { mapState } from 'vuex';
 import MembersTableCell from 'ee_else_ce/members/components/table/members_table_cell.vue';
@@ -12,9 +12,11 @@ import {
   canResend,
   canUpdate,
 } from 'ee_else_ce/members/utils';
+import { mergeUrlParams } from '~/lib/utils/url_utility';
 import {
   FIELD_KEY_ACTIONS,
   FIELDS,
+  ACTIVE_TAB_QUERY_PARAM_NAME,
   MEMBER_STATE_AWAITING,
   MEMBER_STATE_ACTIVE,
   USER_STATE_BLOCKED,
@@ -30,13 +32,13 @@ import MemberAvatar from './member_avatar.vue';
 import MemberSource from './member_source.vue';
 import MemberActivity from './member_activity.vue';
 import MaxRole from './max_role.vue';
-import MembersPagination from './members_pagination.vue';
 
 export default {
   name: 'MembersTable',
   components: {
     GlTable,
     GlBadge,
+    GlPagination,
     MemberAvatar,
     CreatedAt,
     MembersTableCell,
@@ -47,7 +49,6 @@ export default {
     RemoveMemberModal,
     ExpirationDatepicker,
     MemberActivity,
-    MembersPagination,
     DisableTwoFactorModal: () =>
       import('ee_component/members/components/modals/disable_two_factor_modal.vue'),
     LdapOverrideConfirmationModal: () =>
@@ -83,6 +84,11 @@ export default {
     },
     userIsLoggedIn() {
       return this.currentUserId !== null;
+    },
+    showPagination() {
+      const { paramName, currentPage, perPage, totalItems } = this.pagination;
+
+      return paramName && currentPage && perPage && totalItems;
     },
   },
   methods: {
@@ -134,6 +140,19 @@ export default {
           'data-testid': `members-table-row-${member.id}`,
         }),
       };
+    },
+    paginationLinkGenerator(page) {
+      const { params = {}, paramName } = this.pagination;
+
+      return mergeUrlParams(
+        {
+          ...params,
+          [ACTIVE_TAB_QUERY_PARAM_NAME]:
+            this.tabQueryParamValue !== '' ? this.tabQueryParamValue : null,
+          [paramName]: page,
+        },
+        window.location.href,
+      );
     },
     /**
      * Returns whether it's a new or existing user
@@ -300,7 +319,18 @@ export default {
         <span data-testid="col-actions" class="gl-sr-only">{{ label }}</span>
       </template>
     </gl-table>
-    <members-pagination :pagination="pagination" :tab-query-param-value="tabQueryParamValue" />
+    <gl-pagination
+      v-if="showPagination"
+      :value="pagination.currentPage"
+      :per-page="pagination.perPage"
+      :total-items="pagination.totalItems"
+      :link-gen="paginationLinkGenerator"
+      :prev-text="__('Prev')"
+      :next-text="__('Next')"
+      :label-next-page="__('Go to next page')"
+      :label-prev-page="__('Go to previous page')"
+      align="center"
+    />
     <disable-two-factor-modal />
     <remove-group-link-modal />
     <remove-member-modal />

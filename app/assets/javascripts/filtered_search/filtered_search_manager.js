@@ -448,7 +448,6 @@ export default class FilteredSearchManager {
 
   onClearSearch(e) {
     e.preventDefault();
-    this.isHandledAsync = true;
     this.clearSearch();
   }
 

@@ -30,7 +30,7 @@ export default {
       label: s__('CiVariables|Key'),
       tdClass: 'text-plain',
       sortable: true,
-      thClass: 'gl-w-2/5',
+      thClass: 'gl-w-40p',
     },
     {
       key: 'value',
@@ -421,6 +421,7 @@ export default {
       <div v-if="showPagination" class="gl-display-flex gl-justify-content-center gl-mt-5">
         <gl-keyset-pagination
           v-bind="pageInfo"
+          :prev-text="__('Previous')"
           @prev="$emit('handle-prev-page')"
           @next="$emit('handle-next-page')"
         />

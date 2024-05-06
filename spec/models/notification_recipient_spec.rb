@@ -60,12 +60,12 @@ RSpec.describe NotificationRecipient, feature_category: :team_planning do
       end
 
       context 'with temporary failures' do
-        it 'returns false' do
-          freeze_time do
-            2.times { Gitlab::ApplicationRateLimiter.throttled?(:temporary_email_failure, scope: user.email) }
+        before do
+          2.times { Gitlab::ApplicationRateLimiter.throttled?(:temporary_email_failure, scope: user.email) }
+        end
 
-            expect(recipient.notifiable?).to eq(false)
-          end
+        it 'returns false' do
+          expect(recipient.notifiable?).to eq(false)
         end
       end
     end

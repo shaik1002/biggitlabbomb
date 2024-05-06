@@ -21,6 +21,16 @@ boards_epic_board_recent_visits:
 boards_epic_user_preferences:
   index_boards_epic_user_preferences_on_board_user_epic_unique:
     - index_boards_epic_user_preferences_on_board_id
+ci_job_artifacts:
+  index_ci_job_artifacts_on_id_project_id_and_created_at:
+    - index_ci_job_artifacts_on_project_id
+  index_ci_job_artifacts_on_id_project_id_and_file_type:
+    - index_ci_job_artifacts_on_project_id
+  index_ci_job_artifacts_on_project_id_and_id:
+    - index_ci_job_artifacts_on_project_id
+ci_pipeline_artifacts:
+  index_ci_pipeline_artifacts_on_pipeline_id_and_file_type:
+    - index_ci_pipeline_artifacts_on_pipeline_id
 ci_stages:
   index_ci_stages_on_pipeline_id_and_position:
     - index_ci_stages_on_pipeline_id
@@ -83,6 +93,13 @@ ml_models:
 p_ci_runner_machine_builds:
   index_p_ci_runner_machine_builds_on_runner_machine_id:
     - index_ci_runner_machine_builds_on_runner_machine_id
+p_ci_job_artifacts:
+  p_ci_job_artifacts_project_id_file_type_id_idx:
+    - p_ci_job_artifacts_project_id_idx
+  p_ci_job_artifacts_project_id_created_at_id_idx:
+    - p_ci_job_artifacts_project_id_idx
+  p_ci_job_artifacts_project_id_id_idx1:
+    - p_ci_job_artifacts_project_id_idx
 p_ci_stages:
   p_ci_stages_pipeline_id_name_partition_id_idx:
     - p_ci_stages_pipeline_id_idx

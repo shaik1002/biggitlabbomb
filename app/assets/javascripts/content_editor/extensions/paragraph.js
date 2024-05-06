@@ -12,7 +12,6 @@ export default Paragraph.extend({
 
   addKeyboardShortcuts() {
     return {
-      ...this.parent?.(),
       'Shift-Enter': async () => {
         // can only delegate one shortcut to another async
         await Promise.resolve();

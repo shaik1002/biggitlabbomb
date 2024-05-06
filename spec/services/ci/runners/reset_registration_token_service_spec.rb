@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ::Ci::Runners::ResetRegistrationTokenService, '#execute', feature_category: :runner do
+RSpec.describe ::Ci::Runners::ResetRegistrationTokenService, '#execute', feature_category: :fleet_visibility do
   subject(:execute) { described_class.new(scope, current_user).execute }
 
   let_it_be(:user) { build(:user) }
@@ -40,24 +40,11 @@ RSpec.describe ::Ci::Runners::ResetRegistrationTokenService, '#execute', feature
         expect(execute).to be_success
         expect(execute.payload[:new_registration_token]).to eq("#{token_method_name} return value")
       end
-
-      context 'when allow_runner_registration_token is false' do
-        before do
-          stub_application_setting(allow_runner_registration_token: false)
-        end
-
-        it 'does not reset registration token and returns error response' do
-          expect(scope).not_to receive(token_reset_method_name)
-
-          expect(execute).to be_error
-          expect(execute.message).to eq('user not allowed to update runners registration token')
-        end
-      end
     end
   end
 
   context 'with instance scope' do
-    let_it_be(:scope) { create(:application_setting, allow_runner_registration_token: true) }
+    let_it_be(:scope) { create(:application_setting) }
 
     before do
       allow(ApplicationSetting).to receive(:current).and_return(scope)
@@ -71,7 +58,7 @@ RSpec.describe ::Ci::Runners::ResetRegistrationTokenService, '#execute', feature
   end
 
   context 'with group scope' do
-    let_it_be(:scope) { create(:group, :allow_runner_registration_token) }
+    let_it_be(:scope) { create(:group) }
 
     it_behaves_like 'a registration token reset operation' do
       let(:token_method_name) { :runners_token }
@@ -80,7 +67,7 @@ RSpec.describe ::Ci::Runners::ResetRegistrationTokenService, '#execute', feature
   end
 
   context 'with project scope' do
-    let_it_be(:scope) { create(:project, :allow_runner_registration_token) }
+    let_it_be(:scope) { create(:project) }
 
     it_behaves_like 'a registration token reset operation' do
       let(:token_method_name) { :runners_token }

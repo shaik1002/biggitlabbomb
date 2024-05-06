@@ -13,16 +13,17 @@ module Gitlab
         new(*args, **kwargs).import
       end
 
-      def initialize(importable:, archive_file:, shared:, tmpdir: nil)
+      def initialize(importable:, archive_file:, shared:)
         @importable = importable
         @archive_file = archive_file
         @shared = shared
-        @tmpdir = tmpdir
       end
 
       def import
-        prepare_extraction_dir
+        mkdir_p(@shared.export_path)
+        mkdir_p(@shared.archive_path)
 
+        clean_extraction_dir!(@shared.export_path)
         copy_archive
 
         wait_for_archived_file do
@@ -34,21 +35,10 @@ module Gitlab
         false
       ensure
         remove_import_file
-        clean_extraction_dir!(target_directory) if should_clean_extraction_dir?
+        clean_extraction_dir!(@shared.export_path)
       end
 
       private
-
-      def prepare_extraction_dir
-        if @tmpdir
-          @tmpdir_valid = validate_tmpdir!
-        else
-          mkdir_p(@shared.export_path)
-          mkdir_p(@shared.archive_path)
-        end
-
-        clean_extraction_dir!(target_directory)
-      end
 
       # Exponentially sleep until I/O finishes copying the file
       def wait_for_archived_file
@@ -62,9 +52,9 @@ module Gitlab
       end
 
       def decompress_archive
-        result = untar_zxf(archive: @archive_file, dir: target_directory)
+        result = untar_zxf(archive: @archive_file, dir: @shared.export_path)
 
-        raise ImporterError, "Unable to decompress #{@archive_file} into #{target_directory}" unless result
+        raise ImporterError, "Unable to decompress #{@archive_file} into #{@shared.export_path}" unless result
 
         result
       end
@@ -72,21 +62,9 @@ module Gitlab
       def copy_archive
         return if @archive_file
 
-        @archive_file = File.join(source_directory, Gitlab::ImportExport.export_filename(exportable: @importable))
+        @archive_file = File.join(@shared.archive_path, Gitlab::ImportExport.export_filename(exportable: @importable))
 
         remote_download_or_download_or_copy_upload
-      end
-
-      def source_directory
-        return @tmpdir if @tmpdir
-
-        @shared.archive_path
-      end
-
-      def target_directory
-        return @tmpdir if @tmpdir
-
-        @shared.export_path
       end
 
       def remote_download_or_download_or_copy_upload
@@ -112,7 +90,7 @@ module Gitlab
       end
 
       def remove_import_file
-        FileUtils.rm_rf(@archive_file) if @archive_file
+        FileUtils.rm_rf(@archive_file)
       end
 
       def validate_decompressed_archive_size
@@ -121,21 +99,6 @@ module Gitlab
 
       def size_validator
         @size_validator ||= DecompressedArchiveSizeValidator.new(archive_path: @archive_file)
-      end
-
-      def validate_tmpdir!
-        Gitlab::PathTraversal.check_path_traversal!(@tmpdir)
-        Gitlab::PathTraversal.check_allowed_absolute_path!(@tmpdir, [Dir.tmpdir])
-
-        true
-      end
-
-      attr_reader :tmpdir_valid
-
-      def should_clean_extraction_dir?
-        return true if @tmpdir.nil?
-
-        tmpdir_valid
       end
     end
   end

@@ -83,7 +83,6 @@ export const I18N_WORK_ITEM_ARE_YOU_SURE_DELETE = s__(
 export const I18N_WORK_ITEM_ARE_YOU_SURE_DELETE_HIERARCHY = s__(
   'WorkItem|Delete this %{workItemType} and release all child items? This action cannot be reversed.',
 );
-export const I18N_WORK_ITEM_CREATED = s__('WorkItem|%{workItemType} created');
 export const I18N_WORK_ITEM_DELETED = s__('WorkItem|%{workItemType} deleted');
 
 export const I18N_WORK_ITEM_FETCH_ITERATIONS_ERROR = s__(
@@ -343,5 +342,3 @@ export const EPIC_COLORS = [
 ];
 
 export const DEFAULT_EPIC_COLORS = '#1068bf';
-
-export const CREATE_NEW_WORK_ITEM_MODAL = 'create_new_work_item_modal';

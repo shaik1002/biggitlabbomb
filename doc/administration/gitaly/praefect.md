@@ -1151,13 +1151,30 @@ For more information on Gitaly server configuration, see our
    `/etc/gitlab/gitlab.rb`. Each Gitaly node should have a unique storage name
    (such as `gitaly-1`).
 
+   Instead of configuring `gitaly['configuration'][:storage]` uniquely for each Gitaly node, it is
+   often easier to have include the configuration for all Gitaly nodes on every
+   Gitaly node. You can do this because the Praefect `virtual_storage`
+   configuration maps each storage name (such as `gitaly-1`) to a specific node, and
+   requests are routed accordingly. This means every Gitaly node in your fleet
+   can share the same configuration.
+
    ```ruby
+   # You can include the data dirs for all nodes in the same config, because
+   # Praefect will only route requests according to the addresses provided in the
+   # prior step.
    gitaly['configuration'] = {
       # ...
       storage: [
-        # Replace with appropriate name for each Gitaly nodes.
         {
           name: 'gitaly-1',
+          path: '/var/opt/gitlab/git-data/repositories',
+        },
+        {
+          name: 'gitaly-2',
+          path: '/var/opt/gitlab/git-data/repositories',
+        },
+        {
+          name: 'gitaly-3',
           path: '/var/opt/gitlab/git-data/repositories',
         },
       ],
@@ -1389,7 +1406,7 @@ running multiple Gitaly storages.
 ### Grafana
 
 Grafana is included with GitLab, and can be used to monitor your Praefect
-cluster. See [Grafana Dashboard Service](../../administration/monitoring/performance/grafana_configuration.md)
+cluster. See [Grafana Dashboard Service](https://docs.gitlab.com/omnibus/settings/grafana.html)
 for detailed documentation.
 
 To get started quickly:

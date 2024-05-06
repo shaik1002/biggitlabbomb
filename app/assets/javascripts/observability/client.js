@@ -121,11 +121,8 @@ function handleAttributeFilter(filterValue, filterOperator, searchParams, namePa
 function addDateRangeFilterToQueryParams(dateRangeFilter, params) {
   if (!dateRangeFilter || !params) return;
 
-  const { value, endDate, startDate, timestamp } = dateRangeFilter;
-  if (timestamp) {
-    params.append('start_time', timestamp);
-    params.append('end_time', timestamp);
-  } else if (value === CUSTOM_DATE_RANGE_OPTION) {
+  const { value, endDate, startDate } = dateRangeFilter;
+  if (value === CUSTOM_DATE_RANGE_OPTION) {
     if (isValidDate(startDate) && isValidDate(endDate)) {
       params.append('start_time', startDate.toISOString());
       params.append('end_time', endDate.toISOString());
@@ -512,7 +509,6 @@ async function fetchMetricSearchMetadata(searchMetadataUrl, name, type) {
 const SUPPORTED_LOGS_FILTERS = {
   service: ['=', '!='],
   severityName: ['=', '!='],
-  severityNumber: ['=', '!='],
   traceId: ['='],
   spanId: ['='],
   fingerprint: ['='],
@@ -528,7 +524,6 @@ const SUPPORTED_LOGS_FILTERS = {
 const LOGS_FILTER_TO_QUERY_PARAM = {
   service: 'service_name',
   severityName: 'severity_name',
-  severityNumber: 'severity_number',
   traceId: 'trace_id',
   spanId: 'span_id',
   fingerprint: 'fingerprint',

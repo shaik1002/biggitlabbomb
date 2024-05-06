@@ -151,7 +151,8 @@ RSpec.describe 'Merge request > Batch comments', :js, feature_category: :code_re
   context 'in parallel diff' do
     before do
       find('.js-show-diff-settings').click
-      find_by_testid('listbox-item-parallel').click
+      click_button 'Side-by-side'
+      find('.js-show-diff-settings').click
     end
 
     it 'adds draft comments to both sides' do

@@ -50,7 +50,7 @@ module Ci
       when 'cer'
         Gitlab::Ci::SecureFiles::Cer.new(file.read)
       when 'p12'
-        Gitlab::Ci::SecureFiles::P12.new(file.read) if Feature.enabled?(:secure_files_p12_parser)
+        Gitlab::Ci::SecureFiles::P12.new(file.read)
       when 'mobileprovision'
         Gitlab::Ci::SecureFiles::MobileProvision.new(file.read)
       end

@@ -12,8 +12,8 @@ module WikiPages
       end
     end
 
-    def internal_event_name
-      'delete_wiki_page'
+    def usage_counter_action
+      :delete
     end
 
     def external_action

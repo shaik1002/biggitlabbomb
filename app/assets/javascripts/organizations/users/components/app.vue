@@ -1,9 +1,8 @@
 <script>
 import { __, s__ } from '~/locale';
 import { createAlert } from '~/alert';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { ORGANIZATION_USERS_PER_PAGE } from '~/organizations/constants';
 import organizationUsersQuery from '../graphql/organization_users.query.graphql';
-import { ORGANIZATION_USERS_PER_PAGE } from '../constants';
 import UsersView from './users_view.vue';
 
 const defaultPagination = {
@@ -52,7 +51,7 @@ export default {
         this.pageInfo = pageInfo;
 
         return nodes.map(({ badges, user }) => {
-          return { ...user, id: getIdFromGraphQLId(user.id), badges, email: user.publicEmail };
+          return { ...user, badges, email: user.publicEmail };
         });
       },
       error(error) {

@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Gitlab::Database::Partitioning::MultipleNumericListPartition, feature_category: :database do
   describe '.from_sql' do
-    subject(:parsed_partition) { described_class.from_sql(table, partition_name, definition, schema: nil) }
+    subject(:parsed_partition) { described_class.from_sql(table, partition_name, definition) }
 
     let(:table) { 'partitioned_table' }
 
@@ -86,8 +86,7 @@ RSpec.describe Gitlab::Database::Partitioning::MultipleNumericListPartition, fea
   describe '#data_size' do
     it 'returns the partition size' do
       partition = Gitlab::Database::PostgresPartition.for_parent_table(:p_ci_builds).last
-      parsed_partition = described_class.from_sql(:p_ci_builds, partition.name, partition.condition,
-        schema: partition.schema)
+      parsed_partition = described_class.from_sql(:p_ci_builds, partition.name, partition.condition)
 
       expect(parsed_partition.data_size).not_to eq(0)
     end

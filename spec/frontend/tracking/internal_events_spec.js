@@ -5,7 +5,6 @@ import { LOAD_INTERNAL_EVENTS_SELECTOR } from '~/tracking/constants';
 import * as utils from '~/tracking/utils';
 import { Tracker } from '~/tracking/tracker';
 import Tracking from '~/tracking';
-import { resetHTMLFixture, setHTMLFixture } from 'helpers/fixtures';
 
 const allowedAdditionalProps = {
   property: 'value',
@@ -27,19 +26,6 @@ Tracker.enabled = jest.fn();
 const event = 'TestEvent';
 
 describe('InternalEvents', () => {
-  beforeEach(() => {
-    setHTMLFixture(`<div><button data-event-tracking data-testid="button" /></div>`);
-  });
-
-  afterEach(() => {
-    resetHTMLFixture();
-  });
-
-  const findButton = () => document.querySelector('[data-testid="button"]');
-  const triggerClick = () => {
-    findButton().dispatchEvent(new Event('click', { bubbles: true }));
-  };
-
   describe('trackEvent', () => {
     const category = 'TestCategory';
 
@@ -172,53 +158,30 @@ describe('InternalEvents', () => {
   });
 
   describe('bindInternalEventDocument', () => {
-    let disposeBind;
-    let trackEventSpy;
-
-    beforeEach(() => {
-      Tracker.enabled.mockReturnValue(true);
-      trackEventSpy = jest.spyOn(InternalEvents, 'trackEvent');
-    });
-
-    afterEach(() => {
-      disposeBind?.();
-    });
-
     it('should not bind event handlers if tracker is not enabled', () => {
       Tracker.enabled.mockReturnValue(false);
-
-      disposeBind = InternalEvents.bindInternalEventDocument();
-
-      expect(disposeBind).toBe(null);
+      const result = InternalEvents.bindInternalEventDocument();
+      expect(result).toEqual([]);
       expect(utils.getInternalEventHandlers).not.toHaveBeenCalled();
     });
 
     it('should not bind event handlers if already bound', () => {
-      disposeBind = InternalEvents.bindInternalEventDocument();
-
-      utils.getInternalEventHandlers.mockReset();
-
-      const nextDisposeBind = InternalEvents.bindInternalEventDocument();
-
-      expect(nextDisposeBind).toBe(null);
+      Tracker.enabled.mockReturnValue(true);
+      document.internalEventsTrackingBound = true;
+      const result = InternalEvents.bindInternalEventDocument();
+      expect(result).toEqual([]);
       expect(utils.getInternalEventHandlers).not.toHaveBeenCalled();
     });
 
     it('should bind event handlers when not bound yet', () => {
-      disposeBind = InternalEvents.bindInternalEventDocument();
+      Tracker.enabled.mockReturnValue(true);
+      document.internalEventsTrackingBound = false;
+      const addEventListenerMock = jest.spyOn(document, 'addEventListener');
 
-      triggerClick();
+      const result = InternalEvents.bindInternalEventDocument();
 
-      expect(trackEventSpy).toHaveBeenCalledWith('', {});
-    });
-
-    it('returns function that disposes listener', () => {
-      disposeBind = InternalEvents.bindInternalEventDocument();
-      disposeBind();
-
-      triggerClick();
-
-      expect(trackEventSpy).not.toHaveBeenCalled();
+      expect(addEventListenerMock).toHaveBeenCalledWith('click', expect.any(Function));
+      expect(result).toEqual({ name: 'click', func: expect.any(Function) });
     });
   });
 

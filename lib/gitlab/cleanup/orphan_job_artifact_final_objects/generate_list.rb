@@ -13,8 +13,7 @@ module Gitlab
 
         PAGINATORS = {
           google: Gitlab::Cleanup::OrphanJobArtifactFinalObjects::Paginators::Google,
-          aws: Gitlab::Cleanup::OrphanJobArtifactFinalObjects::Paginators::Aws,
-          azurerm: Gitlab::Cleanup::OrphanJobArtifactFinalObjects::Paginators::Azure
+          aws: Gitlab::Cleanup::OrphanJobArtifactFinalObjects::Paginators::Aws
         }.freeze
 
         def initialize(provider: nil, filename: nil, force_restart: false, logger: Gitlab::AppLogger)

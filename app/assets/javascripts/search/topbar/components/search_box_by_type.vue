@@ -3,8 +3,9 @@
   https://gitlab.com/gitlab-org/gitlab-ui/-/merge_requests/3969
  -->
 <script>
-import { GlFormInput, GlIcon, GlLoadingIcon, GlButton, GlTooltipDirective } from '@gitlab/ui';
+import { GlFormInput, GlIcon, GlLoadingIcon, GlButton } from '@gitlab/ui';
 import { __ } from '~/locale';
+import { darkModeEnabled } from '~/lib/utils/color_utils';
 import GlClearIconButton from './clear_icon_button.vue';
 
 export default {
@@ -15,9 +16,6 @@ export default {
     GlFormInput,
     GlLoadingIcon,
     GlButton,
-  },
-  directives: {
-    GlTooltip: GlTooltipDirective,
   },
   inheritAttrs: false,
   model: {
@@ -84,9 +82,6 @@ export default {
       default: () => {},
     },
   },
-  i18n: {
-    label: __('Use Regular Expression'),
-  },
   computed: {
     inputAttributes() {
       const attributes = {
@@ -120,6 +115,11 @@ export default {
         'gl-bg-blue-50!': this.regexButtonState,
         'gl-shadow-none!': !this.regexButtonState,
       };
+    },
+    regexButtonUrl() {
+      return darkModeEnabled()
+        ? '/assets/regular_expression_icon_white.svg'
+        : '/assets/regular_expression_icon_black.svg';
     },
   },
   methods: {
@@ -190,9 +190,6 @@ export default {
       <div class="gl-mr-2 gl-ml-1">
         <gl-button
           v-if="regexButtonIsVisible"
-          v-gl-tooltip.hover
-          :title="$options.i18n.label"
-          :aria-label="$options.i18n.label"
           class="gl-sm-display-block gl-display-none gl-ml-2"
           :class="regexButtonHighlightClass"
           category="secondary"

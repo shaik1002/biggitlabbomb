@@ -34,7 +34,8 @@ describe('Container protection rules project settings', () => {
   const findTableBody = () => extendedWrapper(findTable().findAllByRole('rowgroup').at(1));
   const findTableLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
   const findTableRow = (i) => extendedWrapper(findTableBody().findAllByRole('row').at(i));
-  const findTableRowButtonDelete = (i) => findTableRow(i).findByRole('button', { name: /delete/i });
+  const findTableRowButtonDelete = (i) =>
+    findTableRow(i).findByRole('button', { name: /delete rule/i });
   const findAddProtectionRuleForm = () => wrapper.findComponent(ContainerProtectionRuleForm);
   const findAddProtectionRuleFormSubmitButton = () =>
     wrapper.findByRole('button', { name: /add protection rule/i });
@@ -285,14 +286,14 @@ describe('Container protection rules project settings', () => {
 
             await waitForPromises();
 
-            await findTableRowButtonDelete(0).trigger('click');
-
             const modalId = getBinding(findTableRowButtonDelete(0).element, 'gl-modal');
 
             expect(findModal().props('modal-id')).toBe(modalId);
-            expect(findModal().props('title')).toBe('Delete container protection rule?');
-            expect(findModal().text()).toContain(
-              'Users with at least the Developer role for this project will be able to push and delete container images to this repository path.',
+            expect(findModal().props('title')).toBe(
+              'Are you sure you want to delete the container protection rule?',
+            );
+            expect(findModal().text()).toBe(
+              'Users with at least the Developer role for this project will be able to push and delete container images.',
             );
           });
         });

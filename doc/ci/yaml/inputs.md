@@ -159,8 +159,6 @@ test_job:
 
 #### Array type
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/407176) in GitLab 16.11.
-
 The content of the items in an array type can be any valid YAML map, sequence, or scalar. More complex YAML features
 like [`!reference`](yaml_optimization.md#reference-tags) cannot be used.
 
@@ -422,7 +420,7 @@ spec:
 $[[ inputs.environment | expand_vars ]] job:
   script: echo
   rules:
-    - if: '"$[[ inputs.environment | expand_vars ]]" == "production"'
+    - if: '"$[[ inputs.environment1 | expand_vars ]]" == "production"'
 ```
 
 In this example, quoting the input block and also the entire variable expression

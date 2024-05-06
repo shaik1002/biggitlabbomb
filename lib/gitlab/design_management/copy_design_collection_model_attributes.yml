@@ -18,7 +18,6 @@ design_attributes:
   - relative_position
   - description
   - imported
-  - imported_from
 
 version_attributes:
   - author_id

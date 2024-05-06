@@ -129,7 +129,7 @@ end
 
 ### Alternatives
 
-Instead, use any of these:
+Instead of writing any of these:
 
 - `expect_next_instance_of`
 - `allow_next_instance_of`

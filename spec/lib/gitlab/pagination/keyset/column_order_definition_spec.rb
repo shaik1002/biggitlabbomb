@@ -7,7 +7,8 @@ RSpec.describe Gitlab::Pagination::Keyset::ColumnOrderDefinition do
     described_class.new(
       attribute_name: :name,
       order_expression: Project.arel_table[:name].asc,
-      nullable: :not_nullable
+      nullable: :not_nullable,
+      distinct: true
     )
   end
 
@@ -15,7 +16,8 @@ RSpec.describe Gitlab::Pagination::Keyset::ColumnOrderDefinition do
     described_class.new(
       attribute_name: :name,
       order_expression: Project.arel_table[:name].lower.desc,
-      nullable: :not_nullable
+      nullable: :not_nullable,
+      distinct: true
     )
   end
 
@@ -33,7 +35,8 @@ RSpec.describe Gitlab::Pagination::Keyset::ColumnOrderDefinition do
       attribute_name: :name,
       column_expression: project_calculated_column_expression,
       order_expression: project_calculated_column_expression.asc,
-      nullable: :not_nullable
+      nullable: :not_nullable,
+      distinct: true
     )
   end
 
@@ -54,7 +57,8 @@ RSpec.describe Gitlab::Pagination::Keyset::ColumnOrderDefinition do
             attribute_name: :name,
             column_expression: Project.arel_table[:name],
             order_expression: Project.arel_table[:name].asc.nulls_last,
-            nullable: :nulls_last
+            nullable: :nulls_last,
+            distinct: false
           )
 
           expect(column_order_definition).to be_ascending_order
@@ -68,7 +72,8 @@ RSpec.describe Gitlab::Pagination::Keyset::ColumnOrderDefinition do
             column_expression: Project.arel_table[:name],
             order_expression: 'name asc',
             reversed_order_expression: 'name desc',
-            nullable: :not_nullable
+            nullable: :not_nullable,
+            distinct: true
           )
         end.to raise_error(RuntimeError, /Invalid or missing `order_direction`/)
       end
@@ -80,7 +85,8 @@ RSpec.describe Gitlab::Pagination::Keyset::ColumnOrderDefinition do
           order_expression: 'name asc',
           reversed_order_expression: 'name desc',
           order_direction: :asc,
-          nullable: :not_nullable
+          nullable: :not_nullable,
+          distinct: true
         )
 
         expect(column_order_definition).to be_ascending_order
@@ -112,7 +118,8 @@ RSpec.describe Gitlab::Pagination::Keyset::ColumnOrderDefinition do
           column_expression: Project.arel_table[:name],
           order_expression: 'name asc',
           order_direction: :asc,
-          nullable: :not_nullable
+          nullable: :not_nullable,
+          distinct: true
         )
       end.to raise_error(RuntimeError, /Couldn't determine reversed order/)
     end
@@ -133,7 +140,8 @@ RSpec.describe Gitlab::Pagination::Keyset::ColumnOrderDefinition do
           order_expression: 'name asc',
           reversed_order_expression: 'name desc',
           order_direction: :asc,
-          nullable: :not_nullable
+          nullable: :not_nullable,
+          distinct: true
         )
 
         expect(column_order_definition.reverse.order_expression).to eq('name desc')
@@ -147,7 +155,8 @@ RSpec.describe Gitlab::Pagination::Keyset::ColumnOrderDefinition do
           column_expression: Project.arel_table[:name],
           order_expression: Project.arel_table[:name].asc.nulls_last,
           order_direction: :asc,
-          nullable: :nulls_last
+          nullable: :nulls_last,
+          distinct: false
         )
 
         expect(column_order_definition.reverse.order_expression).to eq(Project.arel_table[:name].desc.nulls_first)
@@ -164,7 +173,8 @@ RSpec.describe Gitlab::Pagination::Keyset::ColumnOrderDefinition do
           order_expression: MergeRequest::Metrics.arel_table[:merged_at].desc.nulls_last,
           reversed_order_expression: MergeRequest::Metrics.arel_table[:merged_at].asc.nulls_first,
           order_direction: :desc,
-          nullable: :nulls_last # null values are always last
+          nullable: :nulls_last, # null values are always last
+          distinct: false
         )
       end
 
@@ -184,9 +194,24 @@ RSpec.describe Gitlab::Pagination::Keyset::ColumnOrderDefinition do
             order_expression: MergeRequest::Metrics.arel_table[:merged_at].desc.nulls_last,
             reversed_order_expression: MergeRequest::Metrics.arel_table[:merged_at].asc.nulls_first,
             order_direction: :desc,
-            nullable: true
+            nullable: true,
+            distinct: false
           )
         end.to raise_error(RuntimeError, /Invalid `nullable` is given/)
+      end
+
+      it 'raises error when the column is nullable and distinct' do
+        expect do
+          described_class.new(
+            attribute_name: :name,
+            column_expression: Project.arel_table[:name],
+            order_expression: MergeRequest::Metrics.arel_table[:merged_at].desc.nulls_last,
+            reversed_order_expression: MergeRequest::Metrics.arel_table[:merged_at].asc.nulls_first,
+            order_direction: :desc,
+            nullable: :nulls_last,
+            distinct: true
+          )
+        end.to raise_error(RuntimeError, /Invalid column definition/)
       end
     end
   end
@@ -199,7 +224,8 @@ RSpec.describe Gitlab::Pagination::Keyset::ColumnOrderDefinition do
         order_expression: MergeRequest::Metrics.arel_table[:merged_at].desc.nulls_last,
         reversed_order_expression: MergeRequest::Metrics.arel_table[:merged_at].asc.nulls_first,
         order_direction: :desc,
-        nullable: :nulls_last # null values are always last
+        nullable: :nulls_last, # null values are always last
+        distinct: false
       )
     end
 

@@ -9,8 +9,8 @@ module Pajamas
   class AvatarComponent < Pajamas::Component
     include Gitlab::Utils::StrongMemoize
 
-    # @param item [User, Project, Group, AvatarEmail, String]
-    # @param alt [String] text for the alt attribute
+    # @param item [User, Project, Group, AvatarEmail]
+    # @param alt [String] text for the alt tag
     # @param class [String] custom CSS class(es)
     # @param size [Integer] size in pixel
     # @param [Hash] avatar_options
@@ -28,11 +28,8 @@ module Pajamas
 
     def avatar_classes
       classes = ["gl-avatar", "gl-avatar-s#{@size}", @class]
-      if @item.is_a?(User) || @item.is_a?(AvatarEmail)
-        classes.push("gl-avatar-circle")
-      else
-        classes.push("gl-rounded-base!")
-      end
+      classes.push("gl-avatar-circle") if @item.is_a?(User) || @item.is_a?(AvatarEmail)
+      classes.push("gl-rounded-base!") if @item.is_a?(Project) || @item.is_a?(Group)
 
       unless src
         classes.push("gl-avatar-identicon")
@@ -44,9 +41,7 @@ module Pajamas
 
     def src
       strong_memoize(:src) do
-        if @item.is_a?(String)
-          @item
-        elsif @item.is_a?(User)
+        if @item.is_a?(User)
           # Users show a gravatar instead of an identicon. Also avatars of
           # blocked users are only shown if the current_user is an admin.
           # To not duplicate this logic, we are using existing helpers here.
@@ -72,7 +67,7 @@ module Pajamas
     end
 
     def alt
-      @alt || @item.try(:name)
+      @alt || @item.name
     end
 
     def initial
