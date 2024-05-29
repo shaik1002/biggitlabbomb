@@ -51,7 +51,6 @@ dast_api:
   script:
     - /peach/analyzer-dast-api
   artifacts:
-    access: 'developer'
     when: always
     paths:
       - gl-assets

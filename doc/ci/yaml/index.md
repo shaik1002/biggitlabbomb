@@ -1,9 +1,11 @@
 ---
 stage: Verify
 group: Pipeline Authoring
-info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
+info: >-
+  To determine the technical writer assigned to the Stage/Group associated with
+  this page, see
+  https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
-
 # CI/CD YAML syntax reference
 
 DETAILS:
@@ -663,6 +665,8 @@ and the pipeline is for either:
 
 **Related topics**:
 
+- You can use the [`workflow:rules` templates](workflow.md#workflowrules-templates) to import
+  a preconfigured `workflow: rules` entry.
 - [Common `if` clauses for `workflow:rules`](workflow.md#common-if-clauses-for-workflowrules).
 - [Use `rules` to run merge request pipelines](../pipelines/merge_request_pipelines.md#add-jobs-to-merge-request-pipelines).
 
@@ -961,7 +965,7 @@ Use `spec:inputs:regex` to specify a regular expression that the input must matc
 **Keyword type**: Header keyword. `spec` must be declared at the top of the configuration file,
 in a header section.
 
-**Possible inputs**: Must be a regular expression.
+**Possible inputs**: Must be a regular expression that starts and ends with the `/` character.
 
 **Example of `spec:inputs:regex`**:
 
@@ -969,7 +973,7 @@ in a header section.
 spec:
   inputs:
     version:
-      regex: ^v\d\.\d+(\.\d+)$
+      regex: /^v\d\.\d+(\.\d+)$/
 ---
 
 # The pipeline configuration would follow...
@@ -982,8 +986,6 @@ An input of `v1.A.B` does not match the regular expression and fails validation.
 
 - `inputs:regex` can only be used with a [`type`](#specinputstype) of `string`,
   not `number` or `boolean`.
-- Do not enclose the regular expression with the `/` character. For example, use `regex.*`,
-  not `/regex.*/`.
 
 ##### `spec:inputs:type`
 
@@ -1025,13 +1027,11 @@ The following topics explain how to use keywords to configure CI/CD pipelines.
 
 ### `after_script`
 
-> - Running `after_script` commands for cancelled jobs [introduced](https://gitlab.com/groups/gitlab-org/-/epics/10158) in GitLab 17.0.
+Use `after_script` to define an array of commands that run after a job's `script` section, including failed jobs with failure type of `script_failure`.
+`after_script` commands do not run after [other failure types](#retrywhen).
 
-Use `after_script` to define an array of commands to run last, after a job's `before_script` and
-`script` sections complete. `after_script` commands also run when:
-
-- The job is cancelled while the `before_script` or `script` sections are still running.
-- The job fails with failure type of `script_failure`, but not [other failure types](#retrywhen).
+NOTE:
+In GitLab 17.0, `after_script` commands will run when a [job is cancelled](script.md#run-after_script-on-cancel).
 
 **Keyword type**: Job keyword. You can use it only as part of a job or in the
 [`default` section](#default).
@@ -1078,7 +1078,6 @@ If a job times out, the `after_script` commands do not execute.
 
 - [Use `after_script` with `default`](script.md#set-a-default-before_script-or-after_script-for-all-jobs)
   to define a default array of commands that should run after all jobs.
-- You can configure a job to [skip `after_script` commands if the job is cancelled](script.md#skip-after_script-commands-if-a-job-is-cancelled).
 - You can [ignore non-zero exit codes](script.md#ignore-non-zero-exit-codes).
 - [Use color codes with `after_script`](script.md#add-color-codes-to-script-output)
   to make job logs easier to review.
@@ -2509,7 +2508,9 @@ DETAILS:
 **Status:** Beta
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/142054) in GitLab 16.9 [with a flag](../../administration/feature_flags.md) named `google_cloud_support_feature_flag`. This feature is in [beta](../../policy/experiment-beta-support.md).
-> - [Enabled on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/150472) in GitLab 17.1. Feature flag `google_cloud_support_feature_flag` removed.
+
+FLAG:
+On GitLab.com, this feature is available for a subset of users. On GitLab Dedicated, this feature is not available.
 
 This feature is in [beta](../../policy/experiment-beta-support.md).
 
@@ -4085,18 +4086,13 @@ job:
 Use `rules:changes` to specify when to add a job to a pipeline by checking for changes
 to specific files.
 
-For new branch pipelines or when there is no Git `push` event, `rules: changes` always evaluates to true
-and the job always runs. Pipelines like tag pipelines, scheduled pipelines,
-and manual pipelines, all do **not** have a Git `push` event associated with them.
-To cover these cases, use [`rules: changes: compare_to`](#ruleschangescompare_to) to specify
-the branch to compare against the pipeline ref.
-
-If you do not use `compare_to`, you should use `rules: changes` only with [branch pipelines](../pipelines/pipeline_types.md#branch-pipeline)
-or [merge request pipelines](../pipelines/merge_request_pipelines.md), though
-`rules: changes` still evaluates to true when creating a new branch. With:
-
-- Merge request pipelines, `rules:changes` compares the changes with the target MR branch.
-- Branch pipelines, `rules:changes` compares the changes with the previous commit on the branch.
+WARNING:
+You should use `rules: changes` only with **branch pipelines** or **merge request pipelines**.
+You can use `rules: changes` with other pipeline types, but `rules: changes` always
+evaluates to true for new branch pipelines or when there is no Git `push` event. Pipelines like tag pipelines,
+scheduled pipelines, and manual pipelines, all do **not**
+have a Git `push` event associated with them. In these cases, use [`rules: changes: compare_to`](#ruleschangescompare_to)
+to specify the branch to compare against.
 
 **Keyword type**: Job keyword. You can use it only as part of a job.
 

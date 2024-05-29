@@ -71,7 +71,6 @@ describe('registry_header', () => {
           expect(findImagesCountSubHeader().props()).toMatchObject({
             text: '1 Image repository',
             icon: 'container-image',
-            size: 'xl',
           });
         });
 

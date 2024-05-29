@@ -18,7 +18,6 @@ module Integrations
       non_empty_password_title: -> { s_('TelegramIntegration|New token') },
       non_empty_password_help: -> { s_('TelegramIntegration|Leave blank to use your current token.') },
       placeholder: '123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11',
-      description: -> { _('The Telegram bot token (for example, `123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11`).') },
       exposes_secrets: true,
       is_secret: true,
       required: true
@@ -26,34 +25,26 @@ module Integrations
     field :room,
       title: 'Channel identifier',
       section: SECTION_TYPE_CONFIGURATION,
-      help: -> {
-        _("Unique identifier for the target chat or the username of the target channel " \
-          "(in the format `@channelusername`).")
-      },
+      help: "Unique identifier for the target chat or the username of the target channel (format: @channelusername)",
       placeholder: '@channelusername',
       required: true
 
     field :thread,
       title: 'Message thread ID',
       section: SECTION_TYPE_CONFIGURATION,
-      help: 'Unique identifier for the target message thread (topic in a forum supergroup).',
+      help: 'Unique identifier for the target message thread (topic in a forum supergroup)',
       placeholder: '123',
       required: false
 
     field :notify_only_broken_pipelines,
       type: :checkbox,
       section: SECTION_TYPE_CONFIGURATION,
-      description: -> { _('Send notifications for broken pipelines.') },
       help: 'If selected, successful pipelines do not trigger a notification event.'
 
     field :branches_to_be_notified,
       type: :select,
       section: SECTION_TYPE_CONFIGURATION,
       title: -> { s_('Integrations|Branches for which notifications are to be sent') },
-      description: -> {
-                     _('Branches to send notifications for. Valid options are `all`, `default`, `protected`, ' \
-                       'and `default_and_protected`. The default value is `default`.')
-                   },
       choices: -> { branch_choices }
 
     with_options if: :activated? do

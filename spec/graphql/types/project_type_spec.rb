@@ -349,9 +349,6 @@ RSpec.describe GitlabSchema.types['Project'], feature_category: :groups_and_proj
         :merged_before,
         :created_after,
         :created_before,
-        :deployed_after,
-        :deployed_before,
-        :deployment_id,
         :updated_after,
         :updated_before,
         :author_username,
@@ -477,7 +474,7 @@ RSpec.describe GitlabSchema.types['Project'], feature_category: :groups_and_proj
   end
 
   it_behaves_like 'a GraphQL type with labels' do
-    let(:labels_resolver_arguments) { [:search_term, :includeAncestorGroups, :searchIn] }
+    let(:labels_resolver_arguments) { [:search_term, :includeAncestorGroups] }
   end
 
   describe 'jira_imports' do

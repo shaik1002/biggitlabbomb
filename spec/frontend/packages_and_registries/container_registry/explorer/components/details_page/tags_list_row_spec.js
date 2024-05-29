@@ -48,7 +48,6 @@ describe('tags list row', () => {
   const findDeleteButton = () => wrapper.findComponent(GlDisclosureDropdownItem);
   const findSignedBadge = () => wrapper.findComponent(GlBadge);
   const findSignatureDetailsModal = () => wrapper.findComponent(SignatureDetailsModal);
-  const getTooltipFor = (component) => getBinding(component.element, 'gl-tooltip');
 
   const mountComponent = (propsData = defaultProps) => {
     wrapper = shallowMountExtended(TagsListRow, {
@@ -60,7 +59,9 @@ describe('tags list row', () => {
         GlDisclosureDropdownItem,
       },
       propsData,
-      directives: { GlTooltip: createMockDirective('gl-tooltip') },
+      directives: {
+        GlTooltip: createMockDirective('gl-tooltip'),
+      },
     });
   };
 
@@ -125,7 +126,9 @@ describe('tags list row', () => {
     it('has a tooltip', () => {
       mountComponent();
 
-      expect(getTooltipFor(findName()).value).toBe(tag.name);
+      const tooltip = getBinding(findName().element, 'gl-tooltip');
+
+      expect(tooltip.value).toBe(tag.name);
     });
 
     it('on mobile has mw-s class', () => {
@@ -180,7 +183,8 @@ describe('tags list row', () => {
     it('has an appropriate tooltip', () => {
       mountComponent({ tag: { ...tag, digest: null } });
 
-      expect(getTooltipFor(findWarningIcon()).value).toBe(MISSING_MANIFEST_WARNING_TOOLTIP);
+      const tooltip = getBinding(findWarningIcon().element, 'gl-tooltip');
+      expect(tooltip.value).toBe(MISSING_MANIFEST_WARNING_TOOLTIP);
     });
   });
 
@@ -467,14 +471,10 @@ describe('tags list row', () => {
 
       it('shows the signed badge with the expected settings', () => {
         expect(findSignedBadge().text()).toBe('Signed');
-        expect(findSignedBadge().props('variant')).toBe('muted');
-      });
-
-      it('shows the signed badge tooltip', () => {
-        expect(getTooltipFor(findSignedBadge()).modifiers.d0).toBe(true);
-        expect(getTooltipFor(findSignedBadge()).value).toBe(
-          'GitLab is unable to validate this signature automatically. Validate the signature manually before trusting it.',
-        );
+        expect(findSignedBadge().props()).toMatchObject({
+          icon: 'check-circle',
+          variant: 'success',
+        });
       });
 
       describe('signature details rows', () => {

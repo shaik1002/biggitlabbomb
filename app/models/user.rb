@@ -279,8 +279,6 @@ class User < MainClusterwide::ApplicationRecord
   has_many :organization_users, class_name: 'Organizations::OrganizationUser', inverse_of: :user
   has_many :organizations, through: :organization_users, class_name: 'Organizations::Organization', inverse_of: :users,
     disable_joins: true
-  has_many :owned_organizations, -> { where(organization_users: { access_level: Gitlab::Access::OWNER }) },
-    through: :organization_users, source: :organization, class_name: 'Organizations::Organization'
 
   has_one :status, class_name: 'UserStatus'
   has_one :user_preference
@@ -311,8 +309,6 @@ class User < MainClusterwide::ApplicationRecord
 
   has_many :requested_member_approvals, class_name: 'Members::MemberApproval', foreign_key: 'requested_by_id'
   has_many :reviewed_member_approvals, class_name: 'Members::MemberApproval', foreign_key: 'reviewed_by_id'
-
-  has_many :broadcast_message_dismissals, class_name: 'Users::BroadcastMessageDismissal'
 
   #
   # Validations
@@ -643,7 +639,6 @@ class User < MainClusterwide::ApplicationRecord
   scope :dormant, -> { with_state(:active).human_or_service_user.where('last_activity_on <= ?', Gitlab::CurrentSettings.deactivate_dormant_users_period.day.ago.to_date) }
   scope :with_no_activity, -> { with_state(:active).human_or_service_user.where(last_activity_on: nil).where('created_at <= ?', MINIMUM_DAYS_CREATED.day.ago.to_date) }
   scope :by_provider_and_extern_uid, ->(provider, extern_uid) { joins(:identities).merge(Identity.with_extern_uid(provider, extern_uid)) }
-  scope :by_ids, ->(ids) { where(id: ids) }
   scope :by_ids_or_usernames, ->(ids, usernames) { where(username: usernames).or(where(id: ids)) }
   scope :without_forbidden_states, -> { where.not(state: FORBIDDEN_SEARCH_STATES) }
   scope :trusted, -> do
@@ -808,11 +803,6 @@ class User < MainClusterwide::ApplicationRecord
 
       items = [from_users, from_emails]
 
-      # TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/461885
-      # What about private commit emails with capitalized username, we'd never find them and
-      # since the private_commit_email derives from the username, it can
-      # be uppercase in parts. So we'll never find an existing user during the invite
-      # process by email if that is true as we are case sensitive in this case.
       user_ids = Gitlab::PrivateCommitEmail.user_ids_for_emails(Array(emails).map(&:downcase))
       items << where(id: user_ids) if user_ids.present?
 
@@ -1619,24 +1609,6 @@ class User < MainClusterwide::ApplicationRecord
 
     Group
       .from(owned_groups, :namespaces)
-      .where_exists(counts)
-  end
-
-  # All organizations that are owned by this user, and only this user.
-  def solo_owned_organizations
-    ownerships_cte = Gitlab::SQL::CTE.new(:ownerships, organization_users.owners, materialized: false)
-
-    owned_orgs_from_cte = Organizations::Organization
-      .joins('INNER JOIN ownerships ON ownerships.organization_id = organizations.id')
-
-    counts = Organizations::OrganizationUser
-      .owners
-      .joins('INNER JOIN ownerships ON ownerships.organization_id = organization_users.organization_id')
-      .having('count(organization_users.user_id) = 1')
-
-    Organizations::Organization
-      .with(ownerships_cte.to_arel)
-      .from(owned_orgs_from_cte, :organizations)
       .where_exists(counts)
   end
 

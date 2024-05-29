@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-require "simplecov"
 require "rspec"
-require "climate_control"
 require "gitlab/cng/cli"
 
 require_relative "command_helper"

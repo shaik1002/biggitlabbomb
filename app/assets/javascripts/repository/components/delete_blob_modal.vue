@@ -274,7 +274,6 @@ export default {
               v-model="form.fields['commit_message'].value"
               v-validation:[form.showValidation]
               name="commit_message"
-              no-resize
               data-testid="commit-message-field"
               :state="form.fields['commit_message'].state"
               :disabled="loading"

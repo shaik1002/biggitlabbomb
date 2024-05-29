@@ -651,10 +651,10 @@ end
 
 ### Code in `app/models/`
 
-EE-specific models should be defined in `ee/app/models/`.
+EE-specific models should `extend EE::Model`.
 
-To override a CE model create the file in
-`ee/app/models/ee/` and add new code to a `prepended` block.
+For example, if EE has a specific `Tanuki` model, you would
+place it in `ee/app/models/ee/tanuki.rb`.
 
 ActiveRecord `enums` should be entirely
 [defined in FOSS](database/creating_enums.md#all-of-the-keyvalue-pairs-should-be-defined-in-foss).

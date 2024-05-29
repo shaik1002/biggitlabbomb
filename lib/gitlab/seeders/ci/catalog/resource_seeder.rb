@@ -33,7 +33,6 @@ module Gitlab
               description: "This is Catalog resource ##{index}",
               name: name,
               namespace_id: @group.id,
-              organization_id: @group.organization_id,
               path: name,
               visibility_level: @group.visibility_level
             ).execute

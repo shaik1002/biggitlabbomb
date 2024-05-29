@@ -107,7 +107,7 @@ module Packages
       end
 
       def incoming
-        ::Packages::Debian::Package.for_projects(@package_file.package.project).incoming_package!
+        @package_file.package.project.packages.debian_incoming_package!
       end
       strong_memoize_attr(:incoming)
     end

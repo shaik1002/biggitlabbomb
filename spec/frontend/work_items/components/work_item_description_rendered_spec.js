@@ -20,7 +20,7 @@ describe('WorkItemDescription', () => {
     workItemDescription = defaultWorkItemDescription,
     canEdit = false,
     mockComputed = {},
-    hasWorkItemsBeta = false,
+    hasWorkItemsMvc2 = false,
   } = {}) => {
     wrapper = shallowMount(WorkItemDescriptionRendered, {
       propsData: {
@@ -29,7 +29,7 @@ describe('WorkItemDescription', () => {
       },
       computed: mockComputed,
       provide: {
-        workItemsBeta: hasWorkItemsBeta,
+        workItemsMvc2: hasWorkItemsMvc2,
       },
     });
   };
@@ -54,7 +54,7 @@ describe('WorkItemDescription', () => {
             return true;
           },
         },
-        hasWorkItemsBeta: true,
+        hasWorkItemsMvc2: true,
       });
 
       expect(wrapper.find('[data-test-id="description-read-more"]').exists()).toBe(true);
@@ -73,7 +73,7 @@ describe('WorkItemDescription', () => {
             return false;
           },
         },
-        hasWorkItemsBeta: true,
+        hasWorkItemsMvc2: true,
       });
 
       expect(wrapper.find('[data-test-id="description-read-more"]').exists()).toBe(false);

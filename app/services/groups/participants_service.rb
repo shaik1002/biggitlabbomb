@@ -12,9 +12,8 @@ module Groups
         noteable_owner +
         participants_in_noteable +
         all_members +
-        group_hierarchy_users
-
-      participants += groups unless relation_at_search_limit?(group_hierarchy_users)
+        group_hierarchy_users +
+        groups
 
       render_participants_as_hash(participants.uniq)
     end
@@ -34,6 +33,5 @@ module Groups
 
       filter_and_sort_users(relation)
     end
-    strong_memoize_attr :group_hierarchy_users
   end
 end

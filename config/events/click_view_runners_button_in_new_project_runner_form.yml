@@ -1,6 +1,6 @@
 ---
 description: View Runners clicked after project runner creation
-internal_events: true
+category: InternalEventTracking
 action: click_view_runners_button_in_new_project_runner_form
 identifiers:
   - project

@@ -4,7 +4,7 @@ module API
   class DependencyProxy < ::API::Base
     helpers ::API::Helpers::PackagesHelpers
 
-    feature_category :virtual_registry
+    feature_category :dependency_proxy
     urgency :low
 
     after_validation do

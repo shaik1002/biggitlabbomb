@@ -285,7 +285,6 @@ export default {
                 class="js-gfm-input js-autosize markdown-area !gl-font-monospace"
                 data-testid="conflicted-description"
                 readonly
-                no-resize
                 :value="conflictedDescription"
               />
             </details>

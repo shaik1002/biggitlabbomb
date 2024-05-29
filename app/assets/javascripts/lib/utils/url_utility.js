@@ -696,16 +696,24 @@ export const removeLastSlashInUrlPath = (url) =>
   url.replace(/\/$/, '').replace(/\/(\?|#){1}([^/]*)$/, '$1$2');
 
 /**
+ * Navigates to a URL
+ * @deprecated Use visitUrl from ~/lib/utils/url_utility.js instead
+ * @param {*} url
+ */
+export function redirectTo(url) {
+  return window.location.assign(url);
+}
+
+/**
  * Navigates to a URL.
  *
  * If destination is a querystring, it will be automatically transformed into a fully qualified URL.
  * If the URL is not a safe URL (see isSafeURL implementation), this function will log an exception into Sentry.
- * If the URL is external it calls window.open so it has no referrer header or reference to its opener.
  *
  * @param {*} destination - url to navigate to. This can be a fully qualified URL or a querystring.
- * @param {*} openWindow - if true, open a new window or tab
+ * @param {*} external - if true, open a new page or tab
  */
-export function visitUrl(destination, openWindow = false) {
+export function visitUrl(destination, external = false) {
   let url = destination;
 
   if (destination.startsWith('?')) {
@@ -718,12 +726,9 @@ export function visitUrl(destination, openWindow = false) {
     throw new RangeError(`Only http and https protocols are allowed: ${url}`);
   }
 
-  if (isExternal(url)) {
-    const target = openWindow ? '_blank' : '_self';
-    // Sets window.opener to null and avoids leaking referrer information.
-    window.open(url, target, 'noreferrer');
-  } else if (openWindow) {
-    window.open(url);
+  if (external) {
+    // Opens URL in another browsing context, sets window.opener to null and don't leak referrer information.
+    window.open(url, '_blank', 'noreferrer');
   } else {
     window.location.assign(url);
   }

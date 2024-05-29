@@ -3,9 +3,9 @@ import { initToggle } from '~/toggles';
 function updateVisibility(selector, isVisible) {
   Array.from(document.querySelectorAll(selector)).forEach((el) => {
     if (isVisible) {
-      el.classList.remove('!gl-hidden');
+      el.classList.remove('d-none');
     } else {
-      el.classList.add('!gl-hidden');
+      el.classList.add('d-none');
     }
   });
 }

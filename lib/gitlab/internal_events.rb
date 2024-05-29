@@ -23,10 +23,7 @@ module Gitlab
       def track_event(
         event_name, category: nil, send_snowplow_event: true,
         additional_properties: DEFAULT_ADDITIONAL_PROPERTIES, **kwargs)
-
-        unless Gitlab::Tracking::EventDefinition.internal_event_exists?(event_name)
-          raise UnknownEventError, "Unknown event: #{event_name}"
-        end
+        raise UnknownEventError, "Unknown event: #{event_name}" unless EventDefinitions.known_event?(event_name)
 
         validate_properties!(additional_properties, kwargs)
 

@@ -48,6 +48,5 @@ fortify_fod_sast:
   allow_failure: true
   # Report SAST vulnerabilities back to GitLab
   artifacts:
-    access: 'developer'
     reports:
       sast: gl-fortify-sast.json

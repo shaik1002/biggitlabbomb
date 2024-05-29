@@ -26,12 +26,6 @@ export function createMockMergeRequest(mergeRequest = {}) {
     userDiscussionsCount: 0,
     createdAt: '',
     updatedAt: '',
-    approved: false,
-    approvalsRequired: 0,
-    approvalsLeft: null,
-    approvedBy: {
-      nodes: [],
-    },
     __typename: 'MergeRequest',
     ...mergeRequest,
   };

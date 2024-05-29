@@ -428,7 +428,7 @@ export default {
             :aria-label="detailsShowing ? __('Collapse') : __('Expand')"
             data-testid="toggle-details-button"
             category="tertiary"
-            class="!-gl-mt-2"
+            class="gl-mt-n2!"
             size="small"
             @click="
               toggleDetails();
@@ -459,7 +459,7 @@ export default {
             category="tertiary"
             icon="ellipsis_v"
             placement="bottom-end"
-            class="!-gl-my-3"
+            class="gl-my-n3!"
             :toggle-text="$options.i18n.moreActionsText"
             text-sr-only
             no-caret

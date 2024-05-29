@@ -26,7 +26,6 @@ const PERSISTENT_USER_CALLOUTS = [
   '.js-namespace-over-storage-users-combined-alert',
   '.js-joining-a-project-alert',
   '.js-all-seats-used',
-  '.js-period-in-terraform-state-name-alert',
 ];
 
 const initCallouts = () => {

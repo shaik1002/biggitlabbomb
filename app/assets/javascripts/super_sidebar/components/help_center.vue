@@ -233,7 +233,7 @@ export default {
       :group="itemGroups.versionCheck"
     >
       <template #list-item="{ item }">
-        <span class="gl-display-flex gl-flex-direction-column gl-leading-24">
+        <span class="gl-display-flex gl-flex-direction-column gl-line-height-24">
           <span class="gl-font-sm gl-font-weight-bold">
             {{ item.text }}
             <gl-emoji data-name="rocket" />
@@ -261,7 +261,7 @@ export default {
     <gl-disclosure-dropdown-group :group="itemGroups.helpActions" bordered>
       <template #list-item="{ item }">
         <span
-          class="gl-display-flex gl-justify-content-space-between gl-align-items-center -gl-my-1"
+          class="gl-display-flex gl-justify-content-space-between gl-align-items-center gl-my-n1"
         >
           {{ item.text }}
           <gl-badge v-if="item.count" pill size="sm" variant="info">{{ item.count }}</gl-badge>

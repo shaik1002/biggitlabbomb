@@ -431,6 +431,10 @@ class GroupPolicy < Namespaces::GroupProjectNamespaceSharedPolicy
 
   private
 
+  def user_is_user?
+    user.is_a?(User)
+  end
+
   def group
     @subject
   end

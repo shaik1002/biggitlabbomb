@@ -132,7 +132,7 @@ export default {
     },
     computedLinkClasses() {
       return {
-        'gl-px-2 gl-mx-2 gl-leading-normal': this.isSubitem,
+        'gl-px-2 gl-mx-2 gl-line-height-normal': this.isSubitem,
         'gl-px-3': !this.isSubitem,
         'gl-pl-5! gl-rounded-small': this.isFlyout,
         'gl-rounded-base': !this.isFlyout,
@@ -234,7 +234,7 @@ export default {
     >
       <div
         :class="[isActive ? 'gl-opacity-10' : 'gl-opacity-0']"
-        class="active-indicator gl-absolute gl-left-2 gl-top-2 gl-bottom-2 gl-transition-all gl-duration-slow"
+        class="active-indicator gl-absolute gl-left-2 gl-top-2 gl-bottom-2 gl-transition-slow"
         aria-hidden="true"
         :style="activeIndicatorStyle"
         data-testid="active-indicator"

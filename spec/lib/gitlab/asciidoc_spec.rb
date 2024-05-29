@@ -951,13 +951,6 @@ module Gitlab
       end
     end
 
-    it 'detects and converts to a wikilink' do
-      tag = '[[text|url]]'
-      html = render("See #{tag}", {})
-
-      expect(html).to include 'See <a href="url" data-wikilink="true">text</a>'
-    end
-
     def render(...)
       described_class.render(...)
     end

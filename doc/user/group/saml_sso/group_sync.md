@@ -55,16 +55,10 @@ To link the SAML groups:
 
 ![SAML Group Links](img/saml_group_links_v13_9.png)
 
-### How role conflicts are resolved
-
-#### Members of multiple mapped SAML groups
-
 If a user is a member of multiple SAML groups mapped to the same GitLab group,
 the user gets the highest role from the groups. For example, if one group
 is linked as Guest and another Maintainer, a user in both groups gets the Maintainer
 role.
-
-#### Parent group role is higher than child group
 
 Users granted:
 
@@ -257,9 +251,6 @@ For example, in the following diagram:
 ```mermaid
 %%{init: { "fontFamily": "GitLab Sans" }}%%
 graph TB
-accTitle: Automatic member removal
-accDescr: How group membership of users is determined before sign in if group sync is set up.
-
    subgraph SAML users
       SAMLUserA[Sidney Jones]
       SAMLUserB[Zhang Wei]
@@ -286,9 +277,6 @@ accDescr: How group membership of users is determined before sign in if group sy
 ```mermaid
 %%{init: { "fontFamily": "GitLab Sans" }}%%
 graph TB
-accTitle: Automatic member removal
-accDescr: User membership for Sidney when she has not signed into group C, and group B has not configured group links.
-
     subgraph GitLab users
       GitLabUserA[Sidney Jones]
       GitLabUserB[Zhang Wei]
@@ -312,11 +300,7 @@ accDescr: User membership for Sidney when she has not signed into group C, and g
 ```
 
 ```mermaid
-%%{init: { "fontFamily": "GitLab Sans" }}%%
 graph TB
-accTitle: Automatic member removal
-accDescr: How membership of Alex Garcia works once she has signed into a group that has group links enabled.
-
    subgraph GitLab users
       GitLabUserA[Sidney Jones]
       GitLabUserB[Zhang Wei]

@@ -96,12 +96,7 @@ export default {
       <slot name="commands"></slot>
     </template>
     <template v-if="imagesCount" #metadata-count>
-      <metadata-item
-        data-testid="images-count"
-        icon="container-image"
-        :text="imagesCountText"
-        size="xl"
-      />
+      <metadata-item data-testid="images-count" icon="container-image" :text="imagesCountText" />
     </template>
     <template #metadata-exp-policies>
       <metadata-item

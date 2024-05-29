@@ -16,7 +16,7 @@ import { buildApiUrl } from '~/api/api_utils';
 import { createAlert } from '~/alert';
 import axios from '~/lib/utils/axios_utils';
 import csrf from '~/lib/utils/csrf';
-import { visitUrl } from '~/lib/utils/url_utility';
+import { redirectTo } from '~/lib/utils/url_utility'; // eslint-disable-line import/no-deprecated
 import { s__, __ } from '~/locale';
 import validation from '~/vue_shared/directives/validation';
 import {
@@ -280,7 +280,7 @@ export default {
 
       try {
         const { data } = await axios.post(url, postParams);
-        visitUrl(data.web_url);
+        redirectTo(data.web_url); // eslint-disable-line import/no-deprecated
       } catch (error) {
         this.isSaving = false;
         const message =
@@ -352,7 +352,7 @@ export default {
       </div>
     </div>
 
-    <p class="-gl-mt-3 gl-text-gray-500">
+    <p class="gl-mt-n3 gl-text-gray-500">
       {{ s__('ForkProject|Want to organize several dependent projects under the same namespace?') }}
       <gl-link :href="newGroupPath" target="_blank">
         {{ s__('ForkProject|Create a group') }}
@@ -365,7 +365,6 @@ export default {
         v-model="form.fields.description.value"
         data-testid="fork-description-textarea"
         name="description"
-        no-resize
         :state="form.fields.description.state"
       />
     </gl-form-group>

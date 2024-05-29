@@ -49,7 +49,7 @@ RSpec.shared_examples 'User creates wiki page' do
 
       click_link("link test")
 
-      expect(page).to have_content("New page")
+      expect(page).to have_content("New Page")
     end
 
     it "shows non-escaped link in the pages list", :js do
@@ -90,7 +90,7 @@ RSpec.shared_examples 'User creates wiki page' do
       expect(page).to have_current_path(wiki_page_path(wiki, "test"), ignore_query: true)
 
       page.within(:css, ".wiki-page-header") do
-        expect(page).to have_content("New page")
+        expect(page).to have_content("New Page")
       end
 
       click_link("Home")
@@ -102,7 +102,7 @@ RSpec.shared_examples 'User creates wiki page' do
       expect(page).to have_current_path(wiki_page_path(wiki, "api"), ignore_query: true)
 
       page.within(:css, ".wiki-page-header") do
-        expect(page).to have_content("New page")
+        expect(page).to have_content("New Page")
       end
 
       click_link("Home")
@@ -114,7 +114,7 @@ RSpec.shared_examples 'User creates wiki page' do
       expect(page).to have_current_path(wiki_page_path(wiki, "raketasks"), ignore_query: true)
 
       page.within(:css, ".wiki-page-header") do
-        expect(page).to have_content("New page")
+        expect(page).to have_content("New Page")
       end
     end
 
@@ -195,7 +195,6 @@ RSpec.shared_examples 'User creates wiki page' do
 
     context "via the `new wiki page` page", :js do
       it "creates a page with a single word" do
-        find_by_testid('wiki-more-dropdown').click
         click_link("New page")
 
         page.within(".wiki-form") do
@@ -214,7 +213,6 @@ RSpec.shared_examples 'User creates wiki page' do
       end
 
       it "creates a page with spaces in the name", :js do
-        find_by_testid('wiki-more-dropdown').click
         click_link("New page")
 
         page.within(".wiki-form") do
@@ -233,7 +231,6 @@ RSpec.shared_examples 'User creates wiki page' do
       end
 
       it "creates a page with hyphens in the name", :js do
-        find_by_testid('wiki-more-dropdown').click
         click_link("New page")
 
         page.within(".wiki-form") do
@@ -262,7 +259,6 @@ RSpec.shared_examples 'User creates wiki page' do
           message: 'Add redirect', branch_name: 'master'
         )
 
-        find_by_testid('wiki-more-dropdown').click
         click_link('New page')
 
         page.within('.wiki-form') do
@@ -288,7 +284,6 @@ RSpec.shared_examples 'User creates wiki page' do
             message: 'Add redirect', branch_name: 'master'
           )
 
-          find_by_testid('wiki-more-dropdown').click
           click_link('New page')
 
           page.within('.wiki-form') do
@@ -305,7 +300,6 @@ RSpec.shared_examples 'User creates wiki page' do
 
       context 'when a server side validation error is returned' do
         it "still displays edit form", :js do
-          find_by_testid('wiki-more-dropdown').click
           click_link("New page")
 
           page.within(".wiki-form") do
@@ -323,7 +317,6 @@ RSpec.shared_examples 'User creates wiki page' do
     end
 
     it "shows the emoji autocompletion dropdown", :js do
-      find_by_testid('wiki-more-dropdown').click
       click_link("New page")
 
       page.within(".wiki-form") do

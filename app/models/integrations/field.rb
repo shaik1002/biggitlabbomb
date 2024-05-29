@@ -26,7 +26,6 @@ module Integrations
       attributes[:api_only] = api_only
       attributes[:if] = attributes.fetch(:if, true)
       attributes[:is_secret] = is_secret
-      attributes[:description] ||= attributes[:help]
       @attributes = attributes.freeze
 
       invalid_attributes = attributes.keys - ATTRIBUTES

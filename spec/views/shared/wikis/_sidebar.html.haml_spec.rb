@@ -10,6 +10,18 @@ RSpec.describe 'shared/wikis/_sidebar.html.haml' do
     assign(:project, project)
   end
 
+  it 'includes a link to clone the repository' do
+    render
+
+    expect(rendered).to have_link('Clone repository')
+  end
+
+  it 'includes a link to a list of templates' do
+    render
+
+    expect(rendered).to have_link('Templates')
+  end
+
   context 'the sidebar failed to load' do
     before do
       assign(:sidebar_error, Object.new)
@@ -61,7 +73,17 @@ RSpec.describe 'shared/wikis/_sidebar.html.haml' do
       render
 
       expect(rendered).to include("A WIKI PAGE\n" * 3)
-      expect(rendered).to have_link('View all')
+      expect(rendered).to have_link('View All Pages')
+    end
+
+    context 'there is no more to see' do
+      it 'does not invite the user to view more' do
+        assign(:sidebar_limited, false)
+
+        render
+
+        expect(rendered).not_to have_link('View All Pages')
+      end
     end
   end
 
@@ -76,7 +98,7 @@ RSpec.describe 'shared/wikis/_sidebar.html.haml' do
       let(:can_edit) { true }
 
       it 'renders the link' do
-        expect(rendered).to have_link('Edit wiki sidebar', href: wiki_page_path(wiki, Wiki::SIDEBAR, action: :edit))
+        expect(rendered).to have_link('Edit sidebar', href: wiki_page_path(wiki, Wiki::SIDEBAR, action: :edit))
       end
     end
 
@@ -84,7 +106,7 @@ RSpec.describe 'shared/wikis/_sidebar.html.haml' do
       let(:can_edit) { false }
 
       it 'does not render the link' do
-        expect(rendered).not_to have_link('Edit wiki sidebar')
+        expect(rendered).not_to have_link('Edit sidebar')
       end
     end
   end

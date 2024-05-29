@@ -6,6 +6,10 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Control GitLab Duo availability
 
+DETAILS:
+**Tier:** Premium, Ultimate
+**Offering:** GitLab.com, Self-managed, GitLab Dedicated
+
 > - [Settings to turn off AI features introduced](https://gitlab.com/groups/gitlab-org/-/epics/12404) in GitLab 16.10.
 > - [Settings to turn off AI features added to the UI](https://gitlab.com/gitlab-org/gitlab/-/issues/441489) in GitLab 16.11.
 
@@ -14,7 +18,6 @@ In addition:
 
 - If you have self-managed GitLab, you must
   [allow connectivity](#configure-gitlab-duo-on-a-self-managed-instance).
-- If you have GitLab Dedicated, you must have [GitLab Duo Pro or Enterprise](../subscriptions/subscription-add-ons.md).
 - For some generally available features, like [Code Suggestions](project/repository/code_suggestions/index.md),
   [you must assign seats](../subscriptions/subscription-add-ons.md#assign-gitlab-duo-pro-seats)
   to the users you want to have access.
@@ -154,7 +157,7 @@ To turn on GitLab Duo experiment and beta features for a top-level group:
 1. On the left sidebar, select **Search or go to** and find your group.
 1. Select **Settings > General**.
 1. Expand **Permissions and group features**.
-1. Under **Experiment and beta features**, select the **Use experiment and beta features** checkbox.
+1. Under **Experiment and Beta features**, select the **Use Experiment and Beta features** checkbox.
 1. Select **Save changes**.
 
 This setting [cascades to all projects](../user/project/merge_requests/approvals/settings.md#cascade-settings-from-the-instance-or-top-level-group)

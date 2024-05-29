@@ -427,7 +427,7 @@ export default {
     <template #pipeline-status="{ issuable = {} }">
       <li
         v-if="issuable.headPipeline && issuable.headPipeline.detailedStatus"
-        class="issuable-pipeline-status gl-hidden sm:gl-flex"
+        class="issuable-pipeline-status d-none d-sm-flex"
       >
         <ci-icon :status="issuable.headPipeline.detailedStatus" use-link show-tooltip />
       </li>

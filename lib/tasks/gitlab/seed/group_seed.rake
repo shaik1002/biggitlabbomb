@@ -147,15 +147,14 @@ class GroupSeeder
       @resource_count.times do |_|
         group = Group.find(group_id)
 
-        author = group.group_members.non_invite.sample.user
         epic_params = {
           title: FFaker::Lorem.sentence(6),
           description: FFaker::Lorem.paragraphs(3).join("\n\n"),
-          author: author,
+          author: group.group_members.non_invite.sample.user,
           group: group
         }
 
-        ::Epics::CreateService.new(group: group, current_user: author, params: epic_params).execute
+        Epic.create!(epic_params)
       end
     end
   end

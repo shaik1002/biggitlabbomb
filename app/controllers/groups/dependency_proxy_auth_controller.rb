@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Groups::DependencyProxyAuthController < ::Groups::DependencyProxy::ApplicationController
-  feature_category :virtual_registry
+  feature_category :dependency_proxy
   urgency :low
 
   def authenticate

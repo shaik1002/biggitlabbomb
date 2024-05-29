@@ -68,10 +68,7 @@ RSpec.describe Gitlab::Database::SchemaCacheWithRenamedTable do
 
     describe 'when the table behind a model is actually a view' do
       let(:group) { create(:group) }
-      let(:attrs) do
-        attributes_for(:project, namespace_id: group.id, project_namespace_id: group.id).except(:creator, :organization)
-      end
-
+      let(:attrs) { attributes_for(:project, namespace_id: group.id, project_namespace_id: group.id).except(:creator) }
       let(:record) { old_model.create!(attrs) }
 
       it 'can persist records' do

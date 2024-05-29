@@ -38,24 +38,13 @@ DETAILS:
 ### GitLab Duo Chat
 
 DETAILS:
-**Tier:** Freely available for Premium and Ultimate for a limited time for GitLab.com and self-managed. In the future, will require [GitLab Duo Pro or Enterprise](../subscriptions/subscription-add-ons.md). For GitLab Dedicated, you must have GitLab Duo Pro or Enterprise.
+**Tier:** Freely available for Premium and Ultimate for a limited time
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
 - Processes and generates text and code in a conversational manner.
-  Help you write and understand code faster, get up to speed on the status of projects,
-  and quickly learn about GitLab.
-- LLM: Anthropic [`claude-3-sonnet-20240229`](https://docs.anthropic.com/en/docs/models-overview#claude-3-a-new-generation-of-ai),
-  Anthropic [`claude-3-haiku-20240307`](https://docs.anthropic.com/en/docs/models-overview#claude-3-a-new-generation-of-ai),
-  [`claude-2.1`](https://docs.anthropic.com/en/docs/legacy-model-guide#anthropics-legacy-models),
-  and [Vertex AI Search](https://cloud.google.com/enterprise-search).
-- <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [Watch overview](https://www.youtube.com/watch?v=ZQBAuf-CTAY&list=PLFGfElNsQthYDx0A_FaNNfUm9NHsK6zED)
+  Helps you quickly identify useful information in large volumes of text in issues, epics, code, and GitLab documentation.
+- LLM: Anthropic [`claude-3-sonnet-20240229`](https://docs.anthropic.com/en/docs/models-overview#claude-3-a-new-generation-of-ai) and Vertex AI Codey [`textembedding-gecko`](https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/get-text-embeddings)
 - [View documentation](gitlab_duo_chat.md).
-
-NOTE:
-The LLM for GitLab Duo Chat depends on the question asked. For more information, see
-the [Duo Chat examples](gitlab_duo_chat_examples.md).
-For self-managed, the models also depend on your GitLab version.
-For the most benefit, use the latest GitLab version whenever possible.
 
 ### Suggested Reviewers
 
@@ -71,50 +60,40 @@ DETAILS:
 ### Test generation
 
 DETAILS:
-**Tier:** Freely available for Premium and Ultimate for a limited time for GitLab.com and self-managed. In the future, will require [GitLab Duo Pro or Enterprise](../subscriptions/subscription-add-ons.md). For GitLab Dedicated, you must have GitLab Duo Pro or Enterprise.
+**Tier:** Freely available for Premium and Ultimate for a limited time. In the future, will require Premium or Ultimate with [GitLab Duo Pro](../subscriptions/subscription-add-ons.md).
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
 - Automates repetitive tasks and helps catch bugs early.
 - LLM: Anthropic [`Claude-2.1`](https://docs.anthropic.com/claude/docs/models-overview#model-comparison)
-- <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [Watch overview](https://www.youtube.com/watch?v=zWhwuixUkYU&list=PLFGfElNsQthYDx0A_FaNNfUm9NHsK6zED)
+- <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [Watch overview](https://www.youtube.com/watch?v=g6MS1JsRWgs)
 - [View documentation](gitlab_duo_chat_examples.md#write-tests-in-the-ide).
-
-### Code explanation in the IDE
-
-DETAILS:
-**Tier:** Freely available for Premium and Ultimate for a limited time. In the future, will require [GitLab Duo Pro or Enterprise](../subscriptions/subscription-add-ons.md).
-**Offering:** GitLab.com
-
-- Helps you understand code by explaining it in English language.
-- LLM: Anthropic: [`claude-3-haiku-20240307`](https://docs.anthropic.com/en/docs/models-overview#claude-3-a-new-generation-of-ai)
-- View documentation for [explaining code in the IDE](../user/gitlab_duo_chat_examples.md#explain-code-in-the-ide).
 
 ## Beta features
 
 ### Merge request summary
 
 DETAILS:
-**Tier:** Freely available for Ultimate for a limited time. In the future, will require [GitLab Duo Enterprise](../subscriptions/subscription-add-ons.md).
+**Tier:** Freely available for Ultimate for a limited time. In the future, will require Ultimate with [GitLab Duo Enterprise](../subscriptions/subscription-add-ons.md).
 **Offering:** GitLab.com
 
 - Efficiently communicates the impact of your merge request changes.
 - LLM: Vertex AI Codey [`text-bison`](https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/text)
-- [View documentation](project/merge_requests/ai_in_merge_requests.md#generate-a-description-by-summarizing-code-changes).
+- [View documentation](project/merge_requests/ai_in_merge_requests.md#summarize-merge-request-changes).
 
 ### Merge request template population
 
 DETAILS:
-**Tier:** Freely available for Ultimate for a limited time. In the future, will require [GitLab Duo Enterprise](../subscriptions/subscription-add-ons.md).
+**Tier:** Freely available for Ultimate for a limited time. In the future, will require Ultimate with [GitLab Duo Enterprise](../subscriptions/subscription-add-ons.md).
 **Offering:** GitLab.com
 
 - Generates a description for the merge request based on the contents of the template.
 - LLM: Vertex AI Codey [`text-bison`](https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/text)
-- [View documentation](project/merge_requests/ai_in_merge_requests.md#generate-a-description-from-a-template).
+- [View documentation](project/merge_requests/ai_in_merge_requests.md#fill-in-merge-request-templates).
 
 ### Vulnerability explanation
 
 DETAILS:
-**Tier:** Freely available for Ultimate for a limited time. In the future, will require [GitLab Duo Enterprise](../subscriptions/subscription-add-ons.md).
+**Tier:** Freely available for Ultimate for a limited time. In the future, will require Ultimate with [GitLab Duo Enterprise](../subscriptions/subscription-add-ons.md).
 **Offering:** GitLab.com
 
 - Helps you remediate vulnerabilities more efficiently, boost your skills, and write more secure code.
@@ -127,7 +106,7 @@ DETAILS:
 ### Git suggestions
 
 DETAILS:
-**Tier:** Freely available for Ultimate for a limited time. In the future, will require [GitLab Duo Enterprise](../subscriptions/subscription-add-ons.md).
+**Tier:** Freely available for Ultimate for a limited time. In the future, will require Ultimate with [GitLab Duo Enterprise](../subscriptions/subscription-add-ons.md)
 **Offering:** GitLab.com
 
 - Helps you discover or recall Git commands when and where you need them.
@@ -148,7 +127,7 @@ DETAILS:
 ### Issue description generation
 
 DETAILS:
-**Tier:** Freely available for Ultimate for a limited time. In the future, will require [GitLab Duo Enterprise](../subscriptions/subscription-add-ons.md).
+**Tier:** Freely available for Ultimate for a limited time. In the future, will require Ultimate with [GitLab Duo Enterprise](../subscriptions/subscription-add-ons.md).
 **Offering:** GitLab.com
 
 - Generates issue descriptions.
@@ -158,13 +137,12 @@ DETAILS:
 ### Code review summary
 
 DETAILS:
-**Tier:** Freely available for Ultimate for a limited time. In the future, will require [GitLab Duo Enterprise](../subscriptions/subscription-add-ons.md).
+**Tier:** Freely available for Ultimate for a limited time. In the future, will require Ultimate with [GitLab Duo Enterprise](../subscriptions/subscription-add-ons.md).
 **Offering:** GitLab.com
 
 - Helps ease merge request handoff between authors and reviewers and help reviewers efficiently understand suggestions.
 - LLM: Vertex AI Codey [`text-bison`](https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/text)
-- <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [Watch overview](https://www.youtube.com/watch?v=Bx6Zajyuy9k&list=PLFGfElNsQthYDx0A_FaNNfUm9NHsK6zED)
-- [View documentation](project/merge_requests/ai_in_merge_requests.md#summarize-a-code-review).
+- [View documentation](project/merge_requests/ai_in_merge_requests.md#summarize-my-merge-request-review).
 
 ### Vulnerability resolution
 
@@ -176,43 +154,41 @@ DETAILS:
 - LLM: Vertex AI Codey [`code-bison`](https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/code-generation)
 - [View documentation](application_security/vulnerabilities/index.md#vulnerability-resolution).
 
-### Code explanation in a file or merge request
+### Code explanation
 
 DETAILS:
-**Tier:** Freely available for Premium and Ultimate for a limited time. In the future, will require [GitLab Duo Pro or Enterprise](../subscriptions/subscription-add-ons.md).
+**Tier:** Freely available for Premium and Ultimate for a limited time. In the future, will require Premium or Ultimate with [GitLab Duo Pro](../subscriptions/subscription-add-ons.md).
 **Offering:** GitLab.com
 
 - Helps you understand code by explaining it in English language.
-- LLM: Anthropic: [`claude-3-haiku-20240307`](https://docs.anthropic.com/en/docs/models-overview#claude-3-a-new-generation-of-ai)
-- View documentation for explaining code in:
-  - [A file](../user/project/repository/code_explain.md).
-  - [A merge request](../user/project/merge_requests/changes.md#explain-code-in-a-merge-request).
+- LLM: Vertex AI Codey [`codechat-bison`](https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/code-chat)
+- <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [Watch overview](https://www.youtube.com/watch?v=1izKaLmmaCA)
+- [View documentation](ai_experiments.md#explain-code-in-the-web-ui-with-code-explanation).
 
 ### Root cause analysis
 
 DETAILS:
-**Tier:** Freely available for Ultimate for a limited time. In the future, will require [GitLab Duo Enterprise](../subscriptions/subscription-add-ons.md).
+**Tier:** Freely available for Ultimate for a limited time. In the future, will require Ultimate with [GitLab Duo Enterprise](../subscriptions/subscription-add-ons.md).
 **Offering:** GitLab.com
 
-- Assists you in determining the root cause for a CI/CD job failure by analyzing the logs.
+- Assists you in determining the root cause for a pipeline failure and failed CI/CD build.
 - LLM: Vertex AI Codey [`text-bison`](https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/text)
 - [View documentation](ai_experiments.md#root-cause-analysis).
 
 ### Value stream forecasting
 
 DETAILS:
-**Tier:** Freely available for Ultimate for a limited time for GitLab.com and self-managed. In the future, will require [GitLab Duo Enterprise](../subscriptions/subscription-add-ons.md). For GitLab Dedicated, you must have GitLab Duo Enterprise.
+**Tier:** Freely available for Ultimate for a limited time. In the future, will require Ultimate with [GitLab Duo Enterprise](../subscriptions/subscription-add-ons.md).
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
 - Assists you with predicting productivity metrics and identifying anomalies across your software development lifecycle.
 - LLM: Statistical forecasting
-- <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [Watch overview](https://www.youtube.com/watch?v=6u8_8QQ5pEQ&list=PLFGfElNsQthYDx0A_FaNNfUm9NHsK6zED)
 - [View documentation](ai_experiments.md#forecast-deployment-frequency-with-value-stream-forecasting).
 
 ### Product Analytics
 
 DETAILS:
-**Tier:** Freely available for Ultimate for a limited time. In the future, will require [GitLab Duo Enterprise](../subscriptions/subscription-add-ons.md).
+**Tier:** Freely available for Ultimate for a limited time. In the future, will require Ultimate with [GitLab Duo Enterprise](../subscriptions/subscription-add-ons.md).
 **Offering:** GitLab.com
 
 - Processes and responds to your questions about your application's usage data.
@@ -222,12 +198,12 @@ DETAILS:
 ### Merge and squash commit generation
 
 DETAILS:
-**Tier:** Freely available for Ultimate for a limited time. In the future, will require [GitLab Duo Enterprise](../subscriptions/subscription-add-ons.md).
+**Tier:** Freely available for Ultimate for a limited time. In the future, will require Ultimate with [GitLab Duo Enterprise](../subscriptions/subscription-add-ons.md).
 **Offering:** GitLab.com
 
 - Helps users generate meaningful commit messages for merge and squash commits.
 - LLM: Vertex AI Codey [`text-bison`](https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/text).
-- [View documentation](project/merge_requests/ai_in_merge_requests.md#generate-a-merge-or-squash-commit-message).
+- [View documentation](project/merge_requests/ai_in_merge_requests.md#generate-messages-for-merge-or-squash-commits).
 
 ## Disable GitLab Duo features for specific groups or projects or an entire instance
 

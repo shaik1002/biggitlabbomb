@@ -191,6 +191,7 @@ export function initPageBreadcrumbs() {
     render(h) {
       return h(GlBreadcrumb, {
         props: staticBreadcrumbs,
+        attrs: { 'data-testid': 'breadcrumb-links' },
       });
     },
   });

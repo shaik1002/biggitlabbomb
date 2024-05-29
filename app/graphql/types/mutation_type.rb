@@ -111,7 +111,6 @@ module Types
     mount_mutation Mutations::Notes::Destroy
     mount_mutation Mutations::Organizations::Create, alpha: { milestone: '16.6' }
     mount_mutation Mutations::Organizations::Update, alpha: { milestone: '16.7' }
-    mount_mutation Mutations::Projects::BlobsRemove, calls_gitaly: true, alpha: { milestone: '17.1' }
     mount_mutation Mutations::Projects::SyncFork, calls_gitaly: true, alpha: { milestone: '15.9' }
     mount_mutation Mutations::Projects::Star, alpha: { milestone: '16.7' }
     mount_mutation Mutations::BranchRules::Update, alpha: { milestone: '16.7' }
@@ -212,10 +211,8 @@ module Types
     mount_mutation Mutations::Ml::Models::Create, alpha: { milestone: '16.8' }
     mount_mutation Mutations::Ml::Models::Destroy, alpha: { milestone: '16.10' }
     mount_mutation Mutations::Ml::Models::Delete, alpha: { milestone: '17.0' }
-    mount_mutation Mutations::Ml::ModelVersions::Create, alpha: { milestone: '17.1' }
     mount_mutation Mutations::Ml::ModelVersions::Delete, alpha: { milestone: '17.0' }
     mount_mutation Mutations::BranchRules::Delete, alpha: { milestone: '16.9' }
-    mount_mutation Mutations::Pages::Deployment::Delete, alpha: { milestone: '17.1' }
   end
 end
 

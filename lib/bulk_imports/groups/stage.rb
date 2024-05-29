@@ -53,6 +53,11 @@ module BulkImports
             pipeline: BulkImports::Common::Pipelines::BadgesPipeline,
             stage: 1
           },
+          subgroups: {
+            pipeline: BulkImports::Groups::Pipelines::SubgroupEntitiesPipeline,
+            stage: 2 # SubGroup Entities must be imported in later stage
+            # to Project Entities to avoid `full_path` naming conflicts.
+          },
           boards: {
             pipeline: BulkImports::Common::Pipelines::BoardsPipeline,
             stage: 2
@@ -61,14 +66,9 @@ module BulkImports
             pipeline: BulkImports::Common::Pipelines::UploadsPipeline,
             stage: 2
           },
-          subgroups: {
-            pipeline: BulkImports::Groups::Pipelines::SubgroupEntitiesPipeline,
-            stage: 3 # SubGroup Entities must be imported in later stage
-            # to Project Entities to avoid `full_path` naming conflicts.
-          },
           finisher: {
             pipeline: BulkImports::Common::Pipelines::EntityFinisher,
-            stage: 4
+            stage: 3
           }
         }.merge(project_entities_pipeline)
       end
@@ -78,7 +78,7 @@ module BulkImports
           {
             project_entities: {
               pipeline: BulkImports::Groups::Pipelines::ProjectEntitiesPipeline,
-              stage: 2
+              stage: 1
             }
           }
         else

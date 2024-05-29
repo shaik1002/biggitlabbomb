@@ -16,7 +16,6 @@ module Ci
         Ci::BuildTraceChunk
         Ci::BuildTraceMetadata
         Ci::BuildPendingState
-        Ci::DailyBuildGroupReportResult
         Ci::JobAnnotation
         Ci::JobArtifact
         Ci::JobVariable

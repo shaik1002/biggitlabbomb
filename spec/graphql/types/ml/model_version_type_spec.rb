@@ -23,7 +23,6 @@ RSpec.describe GitlabSchema.types['MlModelVersion'], feature_category: :mlops do
               _links {
                 packagePath
                 showPath
-                importPath
               }
             }
           }
@@ -54,8 +53,7 @@ RSpec.describe GitlabSchema.types['MlModelVersion'], feature_category: :mlops do
       },
       '_links' => {
         'showPath' => "/#{project.full_path}/-/ml/models/#{model_version.model.id}/versions/#{model_version.id}",
-        'packagePath' => "/#{project.full_path}/-/packages/#{model_version.package_id}",
-        'importPath' => "/api/v4/projects/#{project.id}/packages/ml_models/#{model_version.id}/files/"
+        'packagePath' => "/#{project.full_path}/-/packages/#{model_version.package_id}"
       }
     })
   end

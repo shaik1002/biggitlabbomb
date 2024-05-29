@@ -3,8 +3,6 @@ import VueApollo from 'vue-apollo';
 import VueRouter from 'vue-router';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { removeLastSlashInUrlPath } from '~/lib/utils/url_utility';
-import { injectVueAppBreadcrumbs } from '~/lib/utils/breadcrumbs';
-import EnvironmentBreadcrumbs from './environment_details/environment_breadcrumbs.vue';
 import EnvironmentsDetailHeader from './components/environments_detail_header.vue';
 import { apolloProvider as createApolloProvider } from './graphql/client';
 import environmentsMixin from './mixins/environments_mixin';
@@ -62,6 +60,8 @@ export const initHeader = () => {
 };
 
 export const initPage = async () => {
+  const EnvironmentsDetailPageModule = await import('./environment_details/index.vue');
+  const EnvironmentsDetailPage = EnvironmentsDetailPageModule.default;
   const dataElement = document.getElementById('environments-detail-view');
   const dataSet = convertObjectPropsToCamelCase(JSON.parse(dataElement.dataset.details));
 
@@ -70,27 +70,12 @@ export const initPage = async () => {
 
   const router = new VueRouter({
     mode: 'history',
-    base: dataSet.basePath,
+    base: window.location.pathname,
     routes: [
-      {
-        path: '/k8s/namespace/:namespace/pods/:podName/logs',
-        name: 'logs',
-        meta: {
-          environmentName: dataSet.name,
-        },
-        component: () => import('./environment_details/components/kubernetes/kubernetes_logs.vue'),
-        props: (route) => ({
-          podName: route.params.podName,
-          namespace: route.params.namespace,
-        }),
-      },
       {
         path: '/',
         name: 'environment_details',
-        meta: {
-          environmentName: dataSet.name,
-        },
-        component: () => import('./environment_details/index.vue'),
+        component: EnvironmentsDetailPage,
         props: (route) => ({
           after: route.query.after,
           before: route.query.before,
@@ -106,8 +91,6 @@ export const initPage = async () => {
       return { top: 0 };
     },
   });
-
-  injectVueAppBreadcrumbs(router, EnvironmentBreadcrumbs);
 
   return new Vue({
     el,

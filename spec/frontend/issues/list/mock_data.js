@@ -221,7 +221,7 @@ export const locationSearch = [
 ].join('&');
 
 export const locationSearchWithSpecialValues = [
-  'assignee_id=Any',
+  'assignee_id=123',
   'assignee_username=bart',
   'my_reaction_emoji=None',
   'iteration_id=Current',
@@ -312,7 +312,7 @@ export const filteredTokens = makeFilteredTokens({ grouped: false });
 export const groupedFilteredTokens = makeFilteredTokens({ grouped: true });
 
 export const filteredTokensWithSpecialValues = [
-  { type: TOKEN_TYPE_ASSIGNEE, value: { data: 'Any', operator: OPERATOR_IS } },
+  { type: TOKEN_TYPE_ASSIGNEE, value: { data: '123', operator: OPERATOR_IS } },
   { type: TOKEN_TYPE_ASSIGNEE, value: { data: 'bart', operator: OPERATOR_IS } },
   { type: TOKEN_TYPE_MY_REACTION, value: { data: 'None', operator: OPERATOR_IS } },
   { type: TOKEN_TYPE_ITERATION, value: { data: 'Current', operator: OPERATOR_IS } },
@@ -361,15 +361,15 @@ export const apiParams = {
 };
 
 export const apiParamsWithSpecialValues = {
-  assigneeWildcardId: 'ANY',
+  assigneeId: '123',
   assigneeUsernames: 'bart',
   labelName: 'None',
   myReactionEmoji: 'None',
   releaseTagWildcardId: 'NONE',
   iterationWildcardId: 'CURRENT',
   milestoneWildcardId: 'UPCOMING',
-  epicWildcardId: 'NONE',
-  weightWildcardId: 'NONE',
+  epicId: 'None',
+  weight: 'None',
   healthStatusFilter: 'NONE',
 };
 
@@ -406,7 +406,7 @@ export const urlParams = {
 };
 
 export const urlParamsWithSpecialValues = {
-  assignee_id: 'Any',
+  assignee_id: '123',
   'assignee_username[]': 'bart',
   'label_name[]': 'None',
   release_tag: 'None',

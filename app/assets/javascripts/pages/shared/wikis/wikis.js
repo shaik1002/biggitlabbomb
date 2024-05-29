@@ -19,18 +19,11 @@ export default class Wikis {
     const listToggles = document.querySelectorAll('.js-wiki-list-toggle');
 
     listToggles.forEach((listToggle) => {
-      listToggle.querySelectorAll('a').forEach((link) => {
-        link.addEventListener('click', (e) => e.stopPropagation());
+      listToggle.querySelector('.js-wiki-list-expand-button')?.addEventListener('click', () => {
+        listToggle.classList.remove('collapsed');
       });
-
-      listToggle.addEventListener('click', (e) => {
-        if (listToggle.classList.contains('collapsed')) {
-          listToggle.classList.remove('collapsed');
-        } else {
-          listToggle.classList.add('collapsed');
-        }
-
-        e.stopImmediatePropagation();
+      listToggle.querySelector('.js-wiki-list-collapse-button')?.addEventListener('click', () => {
+        listToggle.classList.add('collapsed');
       });
     });
 

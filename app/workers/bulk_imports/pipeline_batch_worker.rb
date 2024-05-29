@@ -71,7 +71,6 @@ module BulkImports
 
     def run
       return batch.skip! if tracker.failed? || tracker.finished?
-      return cancel_batch if tracker.canceled?
 
       logger.info(log_attributes(message: 'Batch tracker started'))
       batch.start!
@@ -149,12 +148,6 @@ module BulkImports
           importer: Logger::IMPORTER_NAME
         }.merge(extra)
       )
-    end
-
-    def cancel_batch
-      batch.cancel!
-
-      logger.info(log_attributes(message: 'Batch tracker canceled'))
     end
   end
 end

@@ -30,10 +30,6 @@ By using the data collected with product analytics in GitLab, you can better und
 identify friction points in funnels, make data-driven product decisions, and ultimately build better
 products that drive user engagement and business growth.
 
-<i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
-For an overview of the product analytics setup and functionality,
-watch the [Product Analytics walkthrough videos](https://youtube.com/playlist?list=PL05JrBw4t0Kqfb4oLOFKkXxNrBJzDQ3sL&feature=shared).
-
 For more information about the vision and development of product analytics, see the [group direction page](https://about.gitlab.com/direction/monitor/product-analytics/).
 To leave feedback about product analytics bugs or functionality:
 
@@ -51,11 +47,10 @@ Product analytics uses the following tools:
 The following diagram illustrates the product analytics flow:
 
 ```mermaid
-%%{init: { "fontFamily": "GitLab Sans" }}%%
+---
+title: Product Analytics flow
+---
 flowchart TB
-accTitle: Product Analytics flow
-accDescr: How data is collected, processed, and visualized in dashboards.
-
     subgraph Event collection
         A([SDK]) --Send user data--> B[Snowplow Collector]
         B --Pass data--> C[Snowplow Enricher]
@@ -149,7 +144,7 @@ These group-level settings are available for top-level groups and cascade to all
 1. On the left sidebar, select **Search or go to** and find your group.
 1. Select **Settings > General**.
 1. Expand the **Permissions and group features** section.
-1. Check **Use experiment and beta features** checkbox.
+1. Check **Use Experiment and Beta features** checkbox.
 1. Select **Save changes**.
 
 ### Project-level settings
@@ -181,7 +176,9 @@ To onboard a project:
 1. Select **Analyze > Analytics dashboards**.
 1. Under **Product analytics**, select **Set up**.
 
-Then continue with the setup depending on the provider type.
+Then continue with the setup depending on your environment.
+
+### On GitLab.com
 
 ::Tabs
 
@@ -217,6 +214,13 @@ Your instance is being created, and the project onboarded.
 Your instance is being created, and the project onboarded.
 
 ::EndTabs
+
+### On GitLab self-managed or GitLab Dedicated
+
+- Select **Set up product analytics**.
+  Project-level settings are used if defined, otherwise [instance-level settings](#instance-level-settings).
+
+Your instance is being created, and the project onboarded.
 
 ## Instrument your application
 

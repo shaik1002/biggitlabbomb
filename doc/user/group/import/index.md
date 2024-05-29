@@ -59,11 +59,6 @@ ready for production use.
 We invite you to leave your feedback about migrating by direct transfer in
 [the feedback issue](https://gitlab.com/gitlab-org/gitlab/-/issues/284495).
 
-## Migrating specific projects
-
-Migrating groups by using direct transfer in the GitLab UI migrates all projects in the group. If you want to migrate only specific projects in the group by using direct
-transfer, you must use the [API](../../../api/bulk_imports.md#start-a-new-group-or-project-migration).
-
 ## Known issues
 
 - Because of [issue 406685](https://gitlab.com/gitlab-org/gitlab/-/issues/406685), files with a filename longer than 255 characters are not migrated.
@@ -273,9 +268,7 @@ After you have authorized access to the source GitLab instance, you are redirect
 importer page. Here you can see a list of the top-level groups on the connected source instance where you have the Owner
 role.
 
-1. By default, the proposed group namespaces match the names as they exist in source instance, but based on your permissions, you can choose to edit these names before you
-   proceed to import any of them. Group and project paths must conform to naming [limitations](../../reserved_names.md#limitations-on-usernames-project-and-group-names)
-   and are normalized if necessary to avoid import failures.
+1. By default, the proposed group namespaces match the names as they exist in source instance, but based on your permissions, you can choose to edit these names before you proceed to import any of them.
 1. Next to the groups you want to import, select either:
    - **Import with projects**. If this is not available, see [prerequisites](#prerequisites).
    - **Import without projects**.
@@ -602,56 +595,13 @@ You can receive other `404` errors when importing a group, for example:
 This error indicates a problem transferring from the _source_ instance. To solve this, check that you have met the [prerequisites](#prerequisites) on the source
 instance.
 
-### Mismatched group or project path names
-
-If a source group or project path doesn't conform to naming [limitations](../../reserved_names.md#limitations-on-usernames-project-and-group-names), the path is normalized to
-ensure it is valid. For example, `Destination-Project-Path` is normalized to `destination-project-path`.
-
 ### Reducing migration duration
 
-These are some strategies for reducing the duration of migrations that use direct transfer.
-
-#### Add Sidekiq workers to the destination instance
-
 A single direct transfer migration runs 5 entities (groups or projects) per import at a time, independent of the number of workers available on the destination instance.
-That said, adding more Sidekiq worker processes on the destination instance speeds up migration by decreasing the time it takes to import each entity.
+That said, having more workers on the destination instance speeds up migration by decreasing the time it takes to import each entity.
 
-To add more Sidekiq workers on the destination instance, you can either:
-
-1. [Use routing rules](../../../administration/sidekiq/processing_specific_job_classes.md#routing-rules). This approach creates additional Sidekiq
-   workers that are dedicated to direct transfer operations.
-1. [Start multiple Sidekiq processes](../../../administration/sidekiq/extra_sidekiq_processes.md#start-multiple-processes). This approach allows all
-   queues in GitLab to make use of the additional Sidekiq worker processes.
-
-An example of how to use the routing rules is below. This example:
-
-- Can be added to the `/etc/gitlab/gitlab.rb` file on a destination instance, with a subsequent [reconfigure](../../../administration/restart_gitlab.md#reconfigure-a-linux-package-installation)
-  to apply the changes.
-- Creates four Sidekiq worker processes. Three of the processes are used exclusively for the direct transfer importer queues, and the last process is used for all other queues.
-- Should have a number of processes set that, at most, equal (and not exceed) the number of CPU cores you want to dedicate to Sidekiq. The Sidekiq worker process uses no more than one CPU core.
-
-```ruby
-sidekiq['routing_rules'] = [
-  ['feature_category=importers', 'importers'],
-  ['*', 'default']
-]
-
-sidekiq['queue_selector'] = false
-sidekiq['queue_groups'] = [
-  # Run two processes just for importers
-  'importers',
-  'importers',
-  'importers',
-
-  # Run one 'catchall' process on the default and mailers queues
-  'default,mailers'
-]
-```
-
-Increasing the number of workers on the destination instance helps reduce the migration duration until the source instance hardware resources are saturated. Exporting and importing relations in batches, available by default from GitLab 16.8, makes having enough available workers on
+Increasing the number of workers on the destination instance helps reduce the migration duration until the source instance hardware resources are saturated. Exporting and importing relations in batches (proposed in [epic 9036](https://gitlab.com/groups/gitlab-org/-/epics/9036)) will make having enough available workers on
 the destination instance even more useful.
-
-#### Redistribute large projects or start separate migrations
 
 The number of workers on the source instance should be enough to export the 5 concurrent entities in parallel (for each running import). Otherwise, there can be
 delays and potential timeouts as the destination is waiting for exported data to become available.

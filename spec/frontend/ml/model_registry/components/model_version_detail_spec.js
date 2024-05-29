@@ -79,8 +79,6 @@ describe('ml/model_registry/components/model_version_detail.vue', () => {
     it('renders import artifact zone', () => {
       expect(findImportArtifactZone().props()).toEqual({
         path: 'path/to/import',
-        submitOnSelect: true,
-        value: null,
       });
     });
   });

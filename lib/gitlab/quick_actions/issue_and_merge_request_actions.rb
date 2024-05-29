@@ -154,8 +154,7 @@ module Gitlab
         end
         parse_params do |issuable_param|
           extract_references(issuable_param, :issue).first ||
-            extract_references(issuable_param, :merge_request).first ||
-            failed_parse(_("Failed to find issue or merge request"))
+            extract_references(issuable_param, :merge_request).first
         end
         command :copy_metadata do |source_issuable|
           if can_copy_metadata?(source_issuable)

@@ -139,6 +139,43 @@ RSpec.describe API::RemoteMirrors, feature_category: :source_code_management do
       end
     end
 
+    context 'when feature flag "use_remote_mirror_create_service" is disabled' do
+      before do
+        stub_feature_flags(use_remote_mirror_create_service: false)
+      end
+
+      context 'creates a remote mirror' do
+        context 'disabled by default' do
+          let(:params) { { url: 'https://foo:bar@test.com' } }
+
+          it_behaves_like 'creates a remote mirror'
+        end
+
+        context 'enabled' do
+          let(:params) { { url: 'https://foo:bar@test.com', enabled: true } }
+
+          it_behaves_like 'creates a remote mirror'
+        end
+
+        context 'auth method' do
+          let(:params) { { url: 'https://foo:bar@test.com', enabled: true, auth_method: 'ssh_public_key' } }
+
+          it_behaves_like 'creates a remote mirror'
+        end
+      end
+
+      it 'returns error if url is invalid' do
+        project.add_maintainer(user)
+
+        post api(route, user), params: { url: 'ftp://foo:bar@test.com' }
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(json_response['message']['url']).to match_array(
+          ["is blocked: Only allowed schemes are http, https, ssh, git"]
+        )
+      end
+    end
+
     it 'returns error if url is invalid' do
       project.add_maintainer(user)
 
@@ -162,19 +199,6 @@ RSpec.describe API::RemoteMirrors, feature_category: :source_code_management do
 
         expect(response).to have_gitlab_http_status(:bad_request)
         expect(json_response['error']).to eq('auth_method does not have a valid value')
-      end
-    end
-
-    context 'when only_protected_branches is not set' do
-      let(:params) { { url: 'https://foo:bar@test.com', enabled: true, only_protected_branches: nil } }
-
-      it 'returns an error' do
-        project.add_maintainer(user)
-
-        post api(route, user), params: params
-
-        expect(response).to have_gitlab_http_status(:bad_request)
-        expect(json_response['message']['only_protected_branches']).to match_array(["can't be blank"])
       end
     end
   end
@@ -202,85 +226,6 @@ RSpec.describe API::RemoteMirrors, feature_category: :source_code_management do
       expect(json_response['enabled']).to eq(false)
       expect(json_response['only_protected_branches']).to eq(true)
       expect(json_response['keep_divergent_refs']).to eq(true)
-    end
-
-    context 'when auth method is invalid' do
-      let(:params) { { enabled: true, auth_method: 'invalid' } }
-
-      it 'returns an error' do
-        project.add_maintainer(user)
-
-        put api(route, user), params: params
-
-        expect(response).to have_gitlab_http_status(:bad_request)
-        expect(json_response['message']['auth_method']).to match_array(['is not included in the list'])
-      end
-    end
-
-    context 'when only_protected_branches is not set' do
-      let(:params) { { enabled: true, only_protected_branches: nil } }
-
-      it 'returns an error' do
-        project.add_maintainer(user)
-
-        put api(route, user), params: params
-
-        expect(response).to have_gitlab_http_status(:bad_request)
-        expect(json_response['message']['only_protected_branches']).to match_array(["can't be blank"])
-      end
-    end
-
-    context 'when feature flag "use_remote_service_update_service" is disabled' do
-      before do
-        stub_feature_flags(use_remote_service_update_service: false)
-      end
-
-      it 'requires `admin_remote_mirror` permission' do
-        put api(route, developer)
-
-        expect(response).to have_gitlab_http_status(:unauthorized)
-      end
-
-      it 'updates a remote mirror' do
-        project.add_maintainer(user)
-
-        put api(route, user), params: {
-          enabled: '0',
-          only_protected_branches: 'true',
-          keep_divergent_refs: 'true'
-        }
-
-        expect(response).to have_gitlab_http_status(:success)
-        expect(json_response['enabled']).to eq(false)
-        expect(json_response['only_protected_branches']).to eq(true)
-        expect(json_response['keep_divergent_refs']).to eq(true)
-      end
-
-      context 'when auth method is invalid' do
-        let(:params) { { enabled: true, auth_method: 'invalid' } }
-
-        it 'returns an error' do
-          project.add_maintainer(user)
-
-          put api(route, user), params: params
-
-          expect(response).to have_gitlab_http_status(:bad_request)
-          expect(json_response['message']).to eq('Remote mirrors auth method is not included in the list')
-        end
-      end
-
-      context 'when only_protected_branches is not set' do
-        let(:params) { { enabled: true, only_protected_branches: nil } }
-
-        it 'returns an error' do
-          project.add_maintainer(user)
-
-          put api(route, user), params: params
-
-          expect(response).to have_gitlab_http_status(:bad_request)
-          expect(json_response['message']).to eq("Remote mirrors only protected branches can't be blank")
-        end
-      end
     end
   end
 

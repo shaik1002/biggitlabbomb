@@ -5,9 +5,7 @@ RSpec.describe Gitlab::Cng::Helpers::Spinner, :aggregate_failures do
     described_class.spin(spinner_message, **args) { success ? "success" : raise("error") }
   end
 
-  let(:spinner) do
-    instance_double(TTY::Spinner, auto_spin: nil, stop: nil, success: nil, error: nil, tty?: tty, spinning?: tty)
-  end
+  let(:spinner) { instance_double(TTY::Spinner, auto_spin: nil, stop: nil, success: nil, error: nil, tty?: tty) }
 
   let(:spinner_message) { "spinner message" }
   let(:tty) { true }
@@ -34,8 +32,7 @@ RSpec.describe Gitlab::Cng::Helpers::Spinner, :aggregate_failures do
 
       it "prints plain success message with default done message" do
         expect { spin }.to output("[#{Rainbow.new.wrap(success_mark)}] #{spinner_message} ... custom done\n").to_stdout
-        expect(spinner).not_to have_received(:auto_spin)
-        expect(spinner).not_to have_received(:stop)
+        expect(spinner).to have_received(:stop)
       end
     end
   end
@@ -66,8 +63,7 @@ RSpec.describe Gitlab::Cng::Helpers::Spinner, :aggregate_failures do
           output = "[#{error_mark}] #{spinner_message} ... #{Rainbow.new.wrap(error_message).color(:red)}\n"
 
           expect { expect { spin }.to raise_error("error") }.to output(output).to_stdout
-          expect(spinner).not_to have_received(:auto_spin)
-          expect(spinner).not_to have_received(:stop)
+          expect(spinner).to have_received(:stop)
         end
       end
     end
@@ -95,8 +91,7 @@ RSpec.describe Gitlab::Cng::Helpers::Spinner, :aggregate_failures do
           output = "[#{error_mark}] #{spinner_message} ... #{Rainbow.new.wrap(error_message).color(:yellow)}\n"
 
           expect { spin }.to output(output).to_stdout
-          expect(spinner).not_to have_received(:auto_spin)
-          expect(spinner).not_to have_received(:stop)
+          expect(spinner).to have_received(:stop)
         end
       end
     end

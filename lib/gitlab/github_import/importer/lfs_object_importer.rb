@@ -14,8 +14,7 @@ module Gitlab
         end
 
         def lfs_download_object
-          LfsDownloadObject.new(oid: lfs_object.oid, size: lfs_object.size, link: lfs_object.link,
-            headers: lfs_object.headers)
+          LfsDownloadObject.new(oid: lfs_object.oid, size: lfs_object.size, link: lfs_object.link)
         end
 
         def execute

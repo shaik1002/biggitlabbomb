@@ -16,7 +16,7 @@ import { TRACKING_ACTIONS } from '~/packages_and_registries/shared/constants';
 import { TRACK_CATEGORY } from '~/packages_and_registries/infrastructure_registry/shared/constants';
 import TerraformTitle from '~/packages_and_registries/infrastructure_registry/details/components/details_title.vue';
 import TerraformInstallation from '~/packages_and_registries/infrastructure_registry/details/components/terraform_installation.vue';
-import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
+import Tracking from '~/tracking';
 
 import { mavenPackage, mavenFiles, npmPackage } from '../../mock_data';
 
@@ -229,11 +229,7 @@ describe('PackagesApp', () => {
       let eventSpy;
 
       beforeEach(() => {
-        eventSpy = mockTracking(undefined, undefined, jest.spyOn);
-      });
-
-      afterEach(() => {
-        unmockTracking();
+        eventSpy = jest.spyOn(Tracking, 'event');
       });
 
       it(`delete button on delete modal call event with ${TRACKING_ACTIONS.DELETE_PACKAGE}`, () => {

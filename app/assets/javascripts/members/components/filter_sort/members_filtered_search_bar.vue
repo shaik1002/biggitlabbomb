@@ -2,7 +2,12 @@
 // eslint-disable-next-line no-restricted-imports
 import { mapState } from 'vuex';
 import { __ } from '~/locale';
-import { getParameterByName, setUrlParams, queryToObject, visitUrl } from '~/lib/utils/url_utility';
+import {
+  getParameterByName,
+  setUrlParams,
+  queryToObject,
+  redirectTo, // eslint-disable-line import/no-deprecated
+} from '~/lib/utils/url_utility';
 import {
   SORT_QUERY_PARAM_NAME,
   ACTIVE_TAB_QUERY_PARAM_NAME,
@@ -114,7 +119,8 @@ export default {
       const sortParamValue = getParameterByName(SORT_QUERY_PARAM_NAME);
       const activeTabParamValue = getParameterByName(ACTIVE_TAB_QUERY_PARAM_NAME);
 
-      visitUrl(
+      // eslint-disable-next-line import/no-deprecated
+      redirectTo(
         setUrlParams(
           {
             ...params,

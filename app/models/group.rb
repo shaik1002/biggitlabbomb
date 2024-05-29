@@ -20,7 +20,6 @@ class Group < Namespace
   include ChronicDurationAttribute
   include RunnerTokenExpirationInterval
   include Todoable
-  include Importable
 
   extend ::Gitlab::Utils::Override
 

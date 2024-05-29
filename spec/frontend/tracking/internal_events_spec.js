@@ -335,22 +335,10 @@ describe('InternalEvents', () => {
 
   describe('trackBrowserSDK', () => {
     beforeEach(() => {
-      window.glClient = { track: jest.fn() };
-      Tracker.enabled = jest.fn();
-    });
-
-    afterEach(() => {
-      window.glClient = null;
-      window.gl = null;
-    });
-
-    const mockSnowplowContext = (projectId, namespaceId) => {
-      window.gl = {
-        snowplowStandardContext: {
-          data: { project_id: projectId, namespace_id: namespaceId },
-        },
+      window.glClient = {
+        track: jest.fn(),
       };
-    };
+    });
 
     it('should not call glClient.track if Tracker is not enabled', () => {
       Tracker.enabled.mockReturnValue(false);
@@ -360,30 +348,25 @@ describe('InternalEvents', () => {
       expect(window.glClient.track).not.toHaveBeenCalled();
     });
 
-    it('should call glClient.track with event name if Tracker is enabled and no project_id and namespace_id present', () => {
-      mockSnowplowContext(null, null);
+    it('should call glClient.track with event name if Tracker is enabled', () => {
       Tracker.enabled.mockReturnValue(true);
 
       InternalEvents.trackBrowserSDK(event);
 
       expect(window.glClient.track).toHaveBeenCalledTimes(1);
-      expect(window.glClient.track).toHaveBeenCalledWith(event, {
-        project_id: null,
-        namespace_id: null,
-      });
+      expect(window.glClient.track).toHaveBeenCalledWith(event, {});
     });
 
     it('should call glClient.track with event name and additional properties if Tracker is enabled', () => {
-      mockSnowplowContext(123, 456);
       Tracker.enabled.mockReturnValue(true);
 
       InternalEvents.trackBrowserSDK(event, allowedAdditionalProps);
 
       expect(window.glClient.track).toHaveBeenCalledTimes(1);
       expect(window.glClient.track).toHaveBeenCalledWith(event, {
-        project_id: 123,
-        namespace_id: 456,
-        ...allowedAdditionalProps,
+        property: 'value',
+        label: 'value',
+        value: 2,
       });
     });
   });

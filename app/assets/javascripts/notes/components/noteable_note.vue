@@ -443,7 +443,7 @@ export default {
       </gl-sprintf>
     </div>
 
-    <div v-if="isMRDiffView" class="timeline-avatar gl-float-left gl-pt-7 sm:gl-pt-2">
+    <div v-if="isMRDiffView" class="timeline-avatar gl-float-left gl-pt-2">
       <gl-avatar-link
         :href="author.path"
         :data-user-id="author.id"
@@ -494,7 +494,7 @@ export default {
             <slot name="note-header-info"></slot>
           </template>
           <span v-if="commit" v-safe-html="actionText"></span>
-          <span v-else-if="note.created_at" class="gl-hidden sm:gl-inline">&middot;</span>
+          <span v-else-if="note.created_at" class="d-none d-sm-inline">&middot;</span>
         </note-header>
         <note-actions
           :author="author"

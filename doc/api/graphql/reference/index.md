@@ -3959,30 +3959,6 @@ Input type: `DeletePackagesProtectionRuleInput`
 | <a id="mutationdeletepackagesprotectionruleerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationdeletepackagesprotectionrulepackageprotectionrule"></a>`packageProtectionRule` | [`PackagesProtectionRule`](#packagesprotectionrule) | Packages protection rule that was deleted successfully. |
 
-### `Mutation.deletePagesDeployment`
-
-Deletes a Pages deployment.
-
-DETAILS:
-**Introduced** in GitLab 17.1.
-**Status**: Experiment.
-
-Input type: `DeletePagesDeploymentInput`
-
-#### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationdeletepagesdeploymentclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationdeletepagesdeploymentid"></a>`id` | [`PagesDeploymentID!`](#pagesdeploymentid) | ID of the Pages Deployment. |
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationdeletepagesdeploymentclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationdeletepagesdeploymenterrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
-
 ### `Mutation.designManagementDelete`
 
 Input type: `DesignManagementDeleteInput`
@@ -6680,32 +6656,6 @@ Input type: `MlModelDestroyInput`
 | <a id="mutationmlmodeldestroymessage"></a>`message` | [`String`](#string) | Model deletion result message. |
 | <a id="mutationmlmodeldestroymodel"></a>`model` | [`MlModel`](#mlmodel) | Model after mutation. |
 
-### `Mutation.mlModelVersionCreate`
-
-DETAILS:
-**Introduced** in GitLab 17.1.
-**Status**: Experiment.
-
-Input type: `MlModelVersionCreateInput`
-
-#### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationmlmodelversioncreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationmlmodelversioncreatedescription"></a>`description` | [`String`](#string) | Description of the model version. |
-| <a id="mutationmlmodelversioncreatemodelid"></a>`modelId` | [`MlModelID!`](#mlmodelid) | Global ID of the model the version belongs to. |
-| <a id="mutationmlmodelversioncreateprojectpath"></a>`projectPath` | [`ID!`](#id) | Project the model to mutate is in. |
-| <a id="mutationmlmodelversioncreateversion"></a>`version` | [`String`](#string) | Model version. |
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationmlmodelversioncreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationmlmodelversioncreateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
-| <a id="mutationmlmodelversioncreatemodelversion"></a>`modelVersion` | [`MlModelVersion`](#mlmodelversion) | Model after mutation. |
-
 ### `Mutation.mlModelVersionDelete`
 
 DETAILS:
@@ -7271,29 +7221,6 @@ Input type: `ProductAnalyticsProjectSettingsUpdateInput`
 | <a id="mutationproductanalyticsprojectsettingsupdateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationproductanalyticsprojectsettingsupdateproductanalyticsconfiguratorconnectionstring"></a>`productAnalyticsConfiguratorConnectionString` | [`String`](#string) | Connection string for the product analytics configurator. |
 | <a id="mutationproductanalyticsprojectsettingsupdateproductanalyticsdatacollectorhost"></a>`productAnalyticsDataCollectorHost` | [`String`](#string) | Host for the product analytics data collector. |
-
-### `Mutation.projectBlobsRemove`
-
-DETAILS:
-**Introduced** in GitLab 17.1.
-**Status**: Experiment.
-
-Input type: `projectBlobsRemoveInput`
-
-#### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationprojectblobsremovebloboids"></a>`blobOids` | [`[String!]!`](#string) | List of blob oids. |
-| <a id="mutationprojectblobsremoveclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationprojectblobsremoveprojectpath"></a>`projectPath` | [`ID!`](#id) | Full path of the project to replace. |
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationprojectblobsremoveclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationprojectblobsremoveerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
 ### `Mutation.projectCiCdSettingsUpdate`
 
@@ -8268,7 +8195,7 @@ Input type: `SecurityTrainingUpdateInput`
 
 ### `Mutation.setContainerScanningForRegistry`
 
-Enable/disable Container Scanning on Container Registry for the given project.
+Enable/disable Container Scanning on Container Registry for the given project or group.
 
 Input type: `SetContainerScanningForRegistryInput`
 
@@ -8278,7 +8205,7 @@ Input type: `SetContainerScanningForRegistryInput`
 | ---- | ---- | ----------- |
 | <a id="mutationsetcontainerscanningforregistryclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationsetcontainerscanningforregistryenable"></a>`enable` | [`Boolean!`](#boolean) | Desired status for Container Scanning on Container Registry feature. |
-| <a id="mutationsetcontainerscanningforregistrynamespacepath"></a>`namespacePath` | [`ID!`](#id) | Full path of the namespace (project). |
+| <a id="mutationsetcontainerscanningforregistrynamespacepath"></a>`namespacePath` | [`ID!`](#id) | Full path of the namespace (project or group). |
 
 #### Fields
 
@@ -8290,7 +8217,7 @@ Input type: `SetContainerScanningForRegistryInput`
 
 ### `Mutation.setPreReceiveSecretDetection`
 
-Enable/disable secret push protection for the given project.
+Enable/disable pre-receive secret detection for the given project.
 
 Input type: `SetPreReceiveSecretDetectionInput`
 
@@ -8299,7 +8226,7 @@ Input type: `SetPreReceiveSecretDetectionInput`
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="mutationsetprereceivesecretdetectionclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationsetprereceivesecretdetectionenable"></a>`enable` | [`Boolean!`](#boolean) | Desired status for secret push protection feature. |
+| <a id="mutationsetprereceivesecretdetectionenable"></a>`enable` | [`Boolean!`](#boolean) | Desired status for pre-receive secret detection feature. |
 | <a id="mutationsetprereceivesecretdetectionnamespacepath"></a>`namespacePath` | [`ID!`](#id) | Full path of the namespace (project). |
 
 #### Fields
@@ -9459,27 +9386,6 @@ Input type: `ValueStreamUpdateInput`
 | <a id="mutationvaluestreamupdateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationvaluestreamupdateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 | <a id="mutationvaluestreamupdatevaluestream"></a>`valueStream` | [`ValueStream`](#valuestream) | Updated value stream. |
-
-### `Mutation.verifiedNamespaceCreate`
-
-Create a verified namespace and mark all child catalog resources with the passed verification level info.
-
-Input type: `VerifiedNamespaceCreateInput`
-
-#### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationverifiednamespacecreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationverifiednamespacecreatenamespacepath"></a>`namespacePath` | [`ID!`](#id) | Root namespace path. |
-| <a id="mutationverifiednamespacecreateverificationlevel"></a>`verificationLevel` | [`String!`](#string) | Verification level used to indicate the verification for namespace given by Gitlab. |
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationverifiednamespacecreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationverifiednamespacecreateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
 ### `Mutation.vulnerabilitiesDismiss`
 
@@ -15490,29 +15396,6 @@ The edge type for [`VulnerabilityStateTransitionType`](#vulnerabilitystatetransi
 | <a id="vulnerabilitystatetransitiontypeedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | <a id="vulnerabilitystatetransitiontypeedgenode"></a>`node` | [`VulnerabilityStateTransitionType`](#vulnerabilitystatetransitiontype) | The item at the end of the edge. |
 
-#### `WorkItemClosingMergeRequestConnection`
-
-The connection type for [`WorkItemClosingMergeRequest`](#workitemclosingmergerequest).
-
-##### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="workitemclosingmergerequestconnectionedges"></a>`edges` | [`[WorkItemClosingMergeRequestEdge]`](#workitemclosingmergerequestedge) | A list of edges. |
-| <a id="workitemclosingmergerequestconnectionnodes"></a>`nodes` | [`[WorkItemClosingMergeRequest]`](#workitemclosingmergerequest) | A list of nodes. |
-| <a id="workitemclosingmergerequestconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
-
-#### `WorkItemClosingMergeRequestEdge`
-
-The edge type for [`WorkItemClosingMergeRequest`](#workitemclosingmergerequest).
-
-##### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="workitemclosingmergerequestedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
-| <a id="workitemclosingmergerequestedgenode"></a>`node` | [`WorkItemClosingMergeRequest`](#workitemclosingmergerequest) | The item at the end of the edge. |
-
 #### `WorkItemConnection`
 
 The connection type for [`WorkItem`](#workitem).
@@ -15535,6 +15418,29 @@ The edge type for [`WorkItem`](#workitem).
 | ---- | ---- | ----------- |
 | <a id="workitemedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | <a id="workitemedgenode"></a>`node` | [`WorkItem`](#workitem) | The item at the end of the edge. |
+
+#### `WorkItemRelatedMergeRequestConnection`
+
+The connection type for [`WorkItemRelatedMergeRequest`](#workitemrelatedmergerequest).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="workitemrelatedmergerequestconnectionedges"></a>`edges` | [`[WorkItemRelatedMergeRequestEdge]`](#workitemrelatedmergerequestedge) | A list of edges. |
+| <a id="workitemrelatedmergerequestconnectionnodes"></a>`nodes` | [`[WorkItemRelatedMergeRequest]`](#workitemrelatedmergerequest) | A list of nodes. |
+| <a id="workitemrelatedmergerequestconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
+
+#### `WorkItemRelatedMergeRequestEdge`
+
+The edge type for [`WorkItemRelatedMergeRequest`](#workitemrelatedmergerequest).
+
+##### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="workitemrelatedmergerequestedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
+| <a id="workitemrelatedmergerequestedgenode"></a>`node` | [`WorkItemRelatedMergeRequest`](#workitemrelatedmergerequest) | The item at the end of the edge. |
 
 #### `WorkItemTimelogConnection`
 
@@ -15819,9 +15725,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="addonuserassignedmergerequestsauthorusername"></a>`authorUsername` | [`String`](#string) | Username of the author. |
 | <a id="addonuserassignedmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="addonuserassignedmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="addonuserassignedmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="addonuserassignedmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="addonuserassignedmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="addonuserassignedmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="addonuserassignedmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="addonuserassignedmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
@@ -15861,9 +15764,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="addonuserauthoredmergerequestsassigneeusername"></a>`assigneeUsername` | [`String`](#string) | Username of the assignee. |
 | <a id="addonuserauthoredmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="addonuserauthoredmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="addonuserauthoredmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="addonuserauthoredmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="addonuserauthoredmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="addonuserauthoredmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="addonuserauthoredmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="addonuserauthoredmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
@@ -15884,22 +15784,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="addonuserauthoredmergerequeststargetbranches"></a>`targetBranches` | [`[String!]`](#string) | Array of target branch names. All resolved merge requests will have one of these branches as their target. |
 | <a id="addonuserauthoredmergerequestsupdatedafter"></a>`updatedAfter` | [`Time`](#time) | Merge requests updated after this timestamp. |
 | <a id="addonuserauthoredmergerequestsupdatedbefore"></a>`updatedBefore` | [`Time`](#time) | Merge requests updated before this timestamp. |
-
-##### `AddOnUser.contributedProjects`
-
-Projects the user has contributed to.
-
-Returns [`ProjectConnection`](#projectconnection).
-
-This field returns a [connection](#connections). It accepts the
-four standard [pagination arguments](#pagination-arguments):
-`before: String`, `after: String`, `first: Int`, and `last: Int`.
-
-###### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="addonusercontributedprojectssort"></a>`sort` | [`ProjectSort`](#projectsort) | Sort contributed projects. |
 
 ##### `AddOnUser.groups`
 
@@ -15957,9 +15841,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="addonuserreviewrequestedmergerequestsauthorusername"></a>`authorUsername` | [`String`](#string) | Username of the author. |
 | <a id="addonuserreviewrequestedmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="addonuserreviewrequestedmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="addonuserreviewrequestedmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="addonuserreviewrequestedmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="addonuserreviewrequestedmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="addonuserreviewrequestedmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="addonuserreviewrequestedmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="addonuserreviewrequestedmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
@@ -16212,9 +16093,9 @@ Describes an alert from the project's Alert Management.
 | <a id="alertmanagementalerteventcount"></a>`eventCount` | [`Int`](#int) | Number of events of this alert. |
 | <a id="alertmanagementalerthosts"></a>`hosts` | [`[String!]`](#string) | List of hosts the alert came from. |
 | <a id="alertmanagementalertid"></a>`id` | [`ID!`](#id) | ID of the alert. |
-| <a id="alertmanagementalertiid"></a>`iid` | [`String!`](#string) | Internal ID of the alert. |
+| <a id="alertmanagementalertiid"></a>`iid` | [`ID!`](#id) | Internal ID of the alert. |
 | <a id="alertmanagementalertissue"></a>`issue` | [`Issue`](#issue) | Issue attached to the alert. |
-| <a id="alertmanagementalertissueiid"></a>`issueIid` **{warning-solid}** | [`String`](#string) | **Deprecated** in GitLab 13.10. Use issue field. |
+| <a id="alertmanagementalertissueiid"></a>`issueIid` **{warning-solid}** | [`ID`](#id) | **Deprecated** in GitLab 13.10. Use issue field. |
 | <a id="alertmanagementalertmetricsdashboardurl"></a>`metricsDashboardUrl` **{warning-solid}** | [`String`](#string) | **Deprecated** in GitLab 16.0. Returns no data. Underlying feature was removed in 16.0. |
 | <a id="alertmanagementalertmonitoringtool"></a>`monitoringTool` | [`String`](#string) | Monitoring tool the alert came from. |
 | <a id="alertmanagementalertprometheusalert"></a>`prometheusAlert` | [`PrometheusAlert`](#prometheusalert) | Alert condition for Prometheus. |
@@ -16608,9 +16489,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="autocompleteduserassignedmergerequestsauthorusername"></a>`authorUsername` | [`String`](#string) | Username of the author. |
 | <a id="autocompleteduserassignedmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="autocompleteduserassignedmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="autocompleteduserassignedmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="autocompleteduserassignedmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="autocompleteduserassignedmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="autocompleteduserassignedmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="autocompleteduserassignedmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="autocompleteduserassignedmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
@@ -16650,9 +16528,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="autocompleteduserauthoredmergerequestsassigneeusername"></a>`assigneeUsername` | [`String`](#string) | Username of the assignee. |
 | <a id="autocompleteduserauthoredmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="autocompleteduserauthoredmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="autocompleteduserauthoredmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="autocompleteduserauthoredmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="autocompleteduserauthoredmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="autocompleteduserauthoredmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="autocompleteduserauthoredmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="autocompleteduserauthoredmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
@@ -16673,22 +16548,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="autocompleteduserauthoredmergerequeststargetbranches"></a>`targetBranches` | [`[String!]`](#string) | Array of target branch names. All resolved merge requests will have one of these branches as their target. |
 | <a id="autocompleteduserauthoredmergerequestsupdatedafter"></a>`updatedAfter` | [`Time`](#time) | Merge requests updated after this timestamp. |
 | <a id="autocompleteduserauthoredmergerequestsupdatedbefore"></a>`updatedBefore` | [`Time`](#time) | Merge requests updated before this timestamp. |
-
-##### `AutocompletedUser.contributedProjects`
-
-Projects the user has contributed to.
-
-Returns [`ProjectConnection`](#projectconnection).
-
-This field returns a [connection](#connections). It accepts the
-four standard [pagination arguments](#pagination-arguments):
-`before: String`, `after: String`, `first: Int`, and `last: Int`.
-
-###### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="autocompletedusercontributedprojectssort"></a>`sort` | [`ProjectSort`](#projectsort) | Sort contributed projects. |
 
 ##### `AutocompletedUser.groups`
 
@@ -16758,9 +16617,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="autocompleteduserreviewrequestedmergerequestsauthorusername"></a>`authorUsername` | [`String`](#string) | Username of the author. |
 | <a id="autocompleteduserreviewrequestedmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="autocompleteduserreviewrequestedmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="autocompleteduserreviewrequestedmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="autocompleteduserreviewrequestedmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="autocompleteduserreviewrequestedmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="autocompleteduserreviewrequestedmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="autocompleteduserreviewrequestedmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="autocompleteduserreviewrequestedmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
@@ -17066,7 +16922,7 @@ Represents an epic on an issue board.
 | <a id="boardepichasparent"></a>`hasParent` | [`Boolean!`](#boolean) | Indicates if the epic has a parent epic. |
 | <a id="boardepichealthstatus"></a>`healthStatus` | [`EpicHealthStatus`](#epichealthstatus) | Current health status of the epic. |
 | <a id="boardepicid"></a>`id` | [`ID!`](#id) | ID of the epic. |
-| <a id="boardepiciid"></a>`iid` | [`String!`](#string) | Internal ID of the epic. |
+| <a id="boardepiciid"></a>`iid` | [`ID!`](#id) | Internal ID of the epic. |
 | <a id="boardepicissues"></a>`issues` | [`EpicIssueConnection`](#epicissueconnection) | A list of issues associated with the epic. (see [Connections](#connections)) |
 | <a id="boardepiclabels"></a>`labels` | [`LabelConnection`](#labelconnection) | Labels assigned to the epic. (see [Connections](#connections)) |
 | <a id="boardepicparent"></a>`parent` | [`Epic`](#epic) | Parent epic of the epic. |
@@ -18809,9 +18665,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="currentuserassignedmergerequestsauthorusername"></a>`authorUsername` | [`String`](#string) | Username of the author. |
 | <a id="currentuserassignedmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="currentuserassignedmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="currentuserassignedmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="currentuserassignedmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="currentuserassignedmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="currentuserassignedmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="currentuserassignedmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="currentuserassignedmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
@@ -18851,9 +18704,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="currentuserauthoredmergerequestsassigneeusername"></a>`assigneeUsername` | [`String`](#string) | Username of the assignee. |
 | <a id="currentuserauthoredmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="currentuserauthoredmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="currentuserauthoredmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="currentuserauthoredmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="currentuserauthoredmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="currentuserauthoredmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="currentuserauthoredmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="currentuserauthoredmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
@@ -18874,22 +18724,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="currentuserauthoredmergerequeststargetbranches"></a>`targetBranches` | [`[String!]`](#string) | Array of target branch names. All resolved merge requests will have one of these branches as their target. |
 | <a id="currentuserauthoredmergerequestsupdatedafter"></a>`updatedAfter` | [`Time`](#time) | Merge requests updated after this timestamp. |
 | <a id="currentuserauthoredmergerequestsupdatedbefore"></a>`updatedBefore` | [`Time`](#time) | Merge requests updated before this timestamp. |
-
-##### `CurrentUser.contributedProjects`
-
-Projects the user has contributed to.
-
-Returns [`ProjectConnection`](#projectconnection).
-
-This field returns a [connection](#connections). It accepts the
-four standard [pagination arguments](#pagination-arguments):
-`before: String`, `after: String`, `first: Int`, and `last: Int`.
-
-###### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="currentusercontributedprojectssort"></a>`sort` | [`ProjectSort`](#projectsort) | Sort contributed projects. |
 
 ##### `CurrentUser.groups`
 
@@ -18947,9 +18781,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="currentuserreviewrequestedmergerequestsauthorusername"></a>`authorUsername` | [`String`](#string) | Username of the author. |
 | <a id="currentuserreviewrequestedmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="currentuserreviewrequestedmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="currentuserreviewrequestedmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="currentuserreviewrequestedmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="currentuserreviewrequestedmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="currentuserreviewrequestedmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="currentuserreviewrequestedmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="currentuserreviewrequestedmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
@@ -19537,7 +19368,7 @@ The deployment of an environment.
 | <a id="deploymentcreatedat"></a>`createdAt` | [`Time`](#time) | When the deployment record was created. |
 | <a id="deploymentfinishedat"></a>`finishedAt` | [`Time`](#time) | When the deployment finished. |
 | <a id="deploymentid"></a>`id` | [`ID`](#id) | Global ID of the deployment. |
-| <a id="deploymentiid"></a>`iid` | [`String`](#string) | Project-level internal ID of the deployment. |
+| <a id="deploymentiid"></a>`iid` | [`ID`](#id) | Project-level internal ID of the deployment. |
 | <a id="deploymentjob"></a>`job` | [`CiJob`](#cijob) | Pipeline job of the deployment. |
 | <a id="deploymentpendingapprovalcount"></a>`pendingApprovalCount` | [`Int`](#int) | Number of pending unified approvals on the deployment. |
 | <a id="deploymentref"></a>`ref` | [`String`](#string) | Git-Ref that the deployment ran on. |
@@ -20266,7 +20097,7 @@ Represents an epic.
 | <a id="epichasparent"></a>`hasParent` | [`Boolean!`](#boolean) | Indicates if the epic has a parent epic. |
 | <a id="epichealthstatus"></a>`healthStatus` | [`EpicHealthStatus`](#epichealthstatus) | Current health status of the epic. |
 | <a id="epicid"></a>`id` | [`ID!`](#id) | ID of the epic. |
-| <a id="epiciid"></a>`iid` | [`String!`](#string) | Internal ID of the epic. |
+| <a id="epiciid"></a>`iid` | [`ID!`](#id) | Internal ID of the epic. |
 | <a id="epicissues"></a>`issues` | [`EpicIssueConnection`](#epicissueconnection) | A list of issues associated with the epic. (see [Connections](#connections)) |
 | <a id="epiclabels"></a>`labels` | [`LabelConnection`](#labelconnection) | Labels assigned to the epic. (see [Connections](#connections)) |
 | <a id="epicparent"></a>`parent` | [`Epic`](#epic) | Parent epic of the epic. |
@@ -20528,7 +20359,7 @@ Relationship between an epic and an issue.
 | <a id="epicissuehumantimeestimate"></a>`humanTimeEstimate` | [`String`](#string) | Human-readable time estimate of the issue. |
 | <a id="epicissuehumantotaltimespent"></a>`humanTotalTimeSpent` | [`String`](#string) | Human-readable total time reported as spent on the issue. |
 | <a id="epicissueid"></a>`id` | [`ID`](#id) | Global ID of the epic-issue relation. |
-| <a id="epicissueiid"></a>`iid` | [`String!`](#string) | Internal ID of the issue. |
+| <a id="epicissueiid"></a>`iid` | [`ID!`](#id) | Internal ID of the issue. |
 | <a id="epicissueiteration"></a>`iteration` | [`Iteration`](#iteration) | Iteration of the issue. |
 | <a id="epicissuelabels"></a>`labels` | [`LabelConnection`](#labelconnection) | Labels of the issue. (see [Connections](#connections)) |
 | <a id="epicissuemergerequestscount"></a>`mergeRequestsCount` | [`Int!`](#int) | Number of merge requests that close the issue on merge. |
@@ -21293,7 +21124,7 @@ Represents a repository of Google Artifact Registry.
 
 ##### `GoogleCloudArtifactRegistryRepository.artifacts`
 
-Google Artifact Registry repository artifacts. Returns `null` if GitLab.com feature is unavailable.
+Google Artifact Registry repository artifacts. Returns `null` if `google_cloud_support_feature_flag` feature flag is disabled or GitLab.com feature is unavailable.
 
 Returns [`GoogleCloudArtifactRegistryArtifactConnection`](#googlecloudartifactregistryartifactconnection).
 
@@ -21405,7 +21236,6 @@ GPG signature for a signed commit.
 | <a id="groupmaxaccesslevel"></a>`maxAccessLevel` | [`AccessLevel!`](#accesslevel) | The maximum access level of the current user in the group. |
 | <a id="groupmentionsdisabled"></a>`mentionsDisabled` | [`Boolean`](#boolean) | Indicates if a group is disabled from getting mentioned. |
 | <a id="groupname"></a>`name` | [`String!`](#string) | Name of the namespace. |
-| <a id="grouporganizationeditpath"></a>`organizationEditPath` **{warning-solid}** | [`String`](#string) | **Introduced** in GitLab 17.1. **Status**: Experiment. Path for editing group at the organization level. |
 | <a id="grouppackagesettings"></a>`packageSettings` | [`PackageSettings`](#packagesettings) | Package settings for the namespace. |
 | <a id="groupparent"></a>`parent` | [`Group`](#group) | Parent group. |
 | <a id="grouppath"></a>`path` | [`String!`](#string) | Path of the namespace. |
@@ -22089,7 +21919,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="grouplabelsincludeancestorgroups"></a>`includeAncestorGroups` | [`Boolean`](#boolean) | Include labels from ancestor groups. |
 | <a id="grouplabelsincludedescendantgroups"></a>`includeDescendantGroups` | [`Boolean`](#boolean) | Include labels from descendant groups. |
 | <a id="grouplabelsonlygrouplabels"></a>`onlyGroupLabels` | [`Boolean`](#boolean) | Include only group level labels. |
-| <a id="grouplabelssearchin"></a>`searchIn` | [`[LabelSearchFieldList!]!`](#labelsearchfieldlist) | Specify which fields to search in. |
 | <a id="grouplabelssearchterm"></a>`searchTerm` | [`String`](#string) | Search term to find labels with. |
 
 ##### `Group.memberRoles`
@@ -22150,9 +21979,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="groupmergerequestsauthorusername"></a>`authorUsername` | [`String`](#string) | Username of the author. |
 | <a id="groupmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="groupmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="groupmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="groupmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="groupmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="groupmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="groupmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
 | <a id="groupmergerequestsincludearchived"></a>`includeArchived` | [`Boolean`](#boolean) | Return merge requests from archived projects. |
@@ -22359,7 +22185,7 @@ four standard [pagination arguments](#pagination-arguments):
 
 ##### `Group.runnerCloudProvisioning`
 
-Information used for provisioning the runner on a cloud provider. Returns `null` if the GitLab instance is not a SaaS instance.
+Information used for provisioning the runner on a cloud provider. Returns `null` if `:google_cloud_support_feature_flag` feature flag is disabled, or the GitLab instance is not a SaaS instance.
 
 DETAILS:
 **Introduced** in GitLab 16.10.
@@ -22802,7 +22628,6 @@ Returns [`UserMergeRequestInteraction`](#usermergerequestinteraction).
 | <a id="grouppermissionscreateprojects"></a>`createProjects` | [`Boolean!`](#boolean) | If `true`, the user can perform `create_projects` on this resource. |
 | <a id="grouppermissionsreadgroup"></a>`readGroup` | [`Boolean!`](#boolean) | If `true`, the user can perform `read_group` on this resource. |
 | <a id="grouppermissionsremovegroup"></a>`removeGroup` | [`Boolean!`](#boolean) | If `true`, the user can perform `remove_group` on this resource. |
-| <a id="grouppermissionsvieweditpage"></a>`viewEditPage` | [`Boolean!`](#boolean) | If `true`, the user can perform `view_edit_page` on this resource. |
 
 ### `GroupReleaseStats`
 
@@ -23080,7 +22905,7 @@ Describes an incident management on-call schedule.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="incidentmanagementoncallscheduledescription"></a>`description` | [`String`](#string) | Description of the on-call schedule. |
-| <a id="incidentmanagementoncallscheduleiid"></a>`iid` | [`String!`](#string) | Internal ID of the on-call schedule. |
+| <a id="incidentmanagementoncallscheduleiid"></a>`iid` | [`ID!`](#id) | Internal ID of the on-call schedule. |
 | <a id="incidentmanagementoncallschedulename"></a>`name` | [`String!`](#string) | Name of the on-call schedule. |
 | <a id="incidentmanagementoncallscheduleoncallusers"></a>`oncallUsers` | [`[UserCore!]`](#usercore) |  |
 | <a id="incidentmanagementoncallschedulerotations"></a>`rotations` | [`IncidentManagementOncallRotationConnection!`](#incidentmanagementoncallrotationconnection) | On-call rotations for the on-call schedule. (see [Connections](#connections)) |
@@ -23333,7 +23158,7 @@ Describes an issuable resource link for incident issues.
 | <a id="issuehumantimeestimate"></a>`humanTimeEstimate` | [`String`](#string) | Human-readable time estimate of the issue. |
 | <a id="issuehumantotaltimespent"></a>`humanTotalTimeSpent` | [`String`](#string) | Human-readable total time reported as spent on the issue. |
 | <a id="issueid"></a>`id` | [`ID!`](#id) | ID of the issue. |
-| <a id="issueiid"></a>`iid` | [`String!`](#string) | Internal ID of the issue. |
+| <a id="issueiid"></a>`iid` | [`ID!`](#id) | Internal ID of the issue. |
 | <a id="issueiteration"></a>`iteration` | [`Iteration`](#iteration) | Iteration of the issue. |
 | <a id="issuelabels"></a>`labels` | [`LabelConnection`](#labelconnection) | Labels of the issue. (see [Connections](#connections)) |
 | <a id="issuemergerequestscount"></a>`mergeRequestsCount` | [`Int!`](#int) | Number of merge requests that close the issue on merge. |
@@ -23495,7 +23320,7 @@ Represents an iteration object.
 | <a id="iterationdescriptionhtml"></a>`descriptionHtml` | [`String`](#string) | GitLab Flavored Markdown rendering of `description`. |
 | <a id="iterationduedate"></a>`dueDate` | [`Time`](#time) | Timestamp of the iteration due date. |
 | <a id="iterationid"></a>`id` | [`ID!`](#id) | ID of the iteration. |
-| <a id="iterationiid"></a>`iid` | [`String!`](#string) | Internal ID of the iteration. |
+| <a id="iterationiid"></a>`iid` | [`ID!`](#id) | Internal ID of the iteration. |
 | <a id="iterationiterationcadence"></a>`iterationCadence` | [`IterationCadence!`](#iterationcadence) | Cadence of the iteration. |
 | <a id="iterationscopedpath"></a>`scopedPath` | [`String`](#string) | Web path of the iteration, scoped to the query parent. Only valid for Project parents. Returns null in other contexts. |
 | <a id="iterationscopedurl"></a>`scopedUrl` | [`String`](#string) | Web URL of the iteration, scoped to the query parent. Only valid for Project parents. Returns null in other contexts. |
@@ -23783,7 +23608,6 @@ Represents links to perform actions on the model version.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="mlmodelversionlinksimportpath"></a>`importPath` | [`String`](#string) | File upload path for the machine learning model. |
 | <a id="mlmodelversionlinkspackagepath"></a>`packagePath` | [`String`](#string) | Path to the package of the model version. |
 | <a id="mlmodelversionlinksshowpath"></a>`showPath` | [`String`](#string) | Path to the details page of the model version. |
 
@@ -23841,7 +23665,7 @@ Defines which user roles, users, or groups can merge into a protected branch.
 | <a id="mergerequestallowcollaboration"></a>`allowCollaboration` | [`Boolean`](#boolean) | Indicates if members of the target project can push to the fork. |
 | <a id="mergerequestallowsmultipleassignees"></a>`allowsMultipleAssignees` | [`Boolean!`](#boolean) | Allows assigning multiple users to a merge request. |
 | <a id="mergerequestallowsmultiplereviewers"></a>`allowsMultipleReviewers` | [`Boolean!`](#boolean) | Allows assigning multiple reviewers to a merge request. |
-| <a id="mergerequestapprovalstate"></a>`approvalState` | [`MergeRequestApprovalState!`](#mergerequestapprovalstate) | Information relating to rules that must be satisfied to merge the merge request. |
+| <a id="mergerequestapprovalstate"></a>`approvalState` | [`MergeRequestApprovalState!`](#mergerequestapprovalstate) | Information relating to rules that must be satisfied to merge this merge request. |
 | <a id="mergerequestapprovalsleft"></a>`approvalsLeft` | [`Int`](#int) | Number of approvals left. |
 | <a id="mergerequestapprovalsrequired"></a>`approvalsRequired` | [`Int`](#int) | Number of approvals required. |
 | <a id="mergerequestapproved"></a>`approved` | [`Boolean!`](#boolean) | Indicates if the merge request has all the required approvals. |
@@ -23890,7 +23714,6 @@ Defines which user roles, users, or groups can merge into a protected branch.
 | <a id="mergerequestmergerequestdiffs"></a>`mergeRequestDiffs` **{warning-solid}** | [`MergeRequestDiffConnection`](#mergerequestdiffconnection) | **Introduced** in GitLab 16.2. **Status**: Experiment. Diff versions of a merge request. |
 | <a id="mergerequestmergestatus"></a>`mergeStatus` **{warning-solid}** | [`String`](#string) | **Deprecated** in GitLab 14.0. This was renamed. Use: [`MergeRequest.mergeStatusEnum`](#mergerequestmergestatusenum). |
 | <a id="mergerequestmergestatusenum"></a>`mergeStatusEnum` | [`MergeStatus`](#mergestatus) | Merge status of the merge request. |
-| <a id="mergerequestmergetrainindex"></a>`mergeTrainIndex` | [`Int`](#int) | Zero-based position of the merge request in the merge train. Returns `null` if the merge request is not in a merge train. |
 | <a id="mergerequestmergetrainscount"></a>`mergeTrainsCount` | [`Int`](#int) | Number of merge requests in the merge train. |
 | <a id="mergerequestmergeuser"></a>`mergeUser` | [`UserCore`](#usercore) | User who merged this merge request or set it to auto-merge. |
 | <a id="mergerequestmergewhenpipelinesucceeds"></a>`mergeWhenPipelineSucceeds` | [`Boolean`](#boolean) | Indicates if the merge has been set to auto-merge. |
@@ -24116,9 +23939,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="mergerequestassigneeassignedmergerequestsauthorusername"></a>`authorUsername` | [`String`](#string) | Username of the author. |
 | <a id="mergerequestassigneeassignedmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="mergerequestassigneeassignedmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="mergerequestassigneeassignedmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="mergerequestassigneeassignedmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="mergerequestassigneeassignedmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="mergerequestassigneeassignedmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="mergerequestassigneeassignedmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="mergerequestassigneeassignedmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
@@ -24158,9 +23978,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="mergerequestassigneeauthoredmergerequestsassigneeusername"></a>`assigneeUsername` | [`String`](#string) | Username of the assignee. |
 | <a id="mergerequestassigneeauthoredmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="mergerequestassigneeauthoredmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="mergerequestassigneeauthoredmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="mergerequestassigneeauthoredmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="mergerequestassigneeauthoredmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="mergerequestassigneeauthoredmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="mergerequestassigneeauthoredmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="mergerequestassigneeauthoredmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
@@ -24181,22 +23998,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="mergerequestassigneeauthoredmergerequeststargetbranches"></a>`targetBranches` | [`[String!]`](#string) | Array of target branch names. All resolved merge requests will have one of these branches as their target. |
 | <a id="mergerequestassigneeauthoredmergerequestsupdatedafter"></a>`updatedAfter` | [`Time`](#time) | Merge requests updated after this timestamp. |
 | <a id="mergerequestassigneeauthoredmergerequestsupdatedbefore"></a>`updatedBefore` | [`Time`](#time) | Merge requests updated before this timestamp. |
-
-##### `MergeRequestAssignee.contributedProjects`
-
-Projects the user has contributed to.
-
-Returns [`ProjectConnection`](#projectconnection).
-
-This field returns a [connection](#connections). It accepts the
-four standard [pagination arguments](#pagination-arguments):
-`before: String`, `after: String`, `first: Int`, and `last: Int`.
-
-###### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mergerequestassigneecontributedprojectssort"></a>`sort` | [`ProjectSort`](#projectsort) | Sort contributed projects. |
 
 ##### `MergeRequestAssignee.groups`
 
@@ -24254,9 +24055,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="mergerequestassigneereviewrequestedmergerequestsauthorusername"></a>`authorUsername` | [`String`](#string) | Username of the author. |
 | <a id="mergerequestassigneereviewrequestedmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="mergerequestassigneereviewrequestedmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="mergerequestassigneereviewrequestedmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="mergerequestassigneereviewrequestedmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="mergerequestassigneereviewrequestedmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="mergerequestassigneereviewrequestedmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="mergerequestassigneereviewrequestedmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="mergerequestassigneereviewrequestedmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
@@ -24453,9 +24251,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="mergerequestauthorassignedmergerequestsauthorusername"></a>`authorUsername` | [`String`](#string) | Username of the author. |
 | <a id="mergerequestauthorassignedmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="mergerequestauthorassignedmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="mergerequestauthorassignedmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="mergerequestauthorassignedmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="mergerequestauthorassignedmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="mergerequestauthorassignedmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="mergerequestauthorassignedmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="mergerequestauthorassignedmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
@@ -24495,9 +24290,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="mergerequestauthorauthoredmergerequestsassigneeusername"></a>`assigneeUsername` | [`String`](#string) | Username of the assignee. |
 | <a id="mergerequestauthorauthoredmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="mergerequestauthorauthoredmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="mergerequestauthorauthoredmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="mergerequestauthorauthoredmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="mergerequestauthorauthoredmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="mergerequestauthorauthoredmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="mergerequestauthorauthoredmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="mergerequestauthorauthoredmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
@@ -24518,22 +24310,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="mergerequestauthorauthoredmergerequeststargetbranches"></a>`targetBranches` | [`[String!]`](#string) | Array of target branch names. All resolved merge requests will have one of these branches as their target. |
 | <a id="mergerequestauthorauthoredmergerequestsupdatedafter"></a>`updatedAfter` | [`Time`](#time) | Merge requests updated after this timestamp. |
 | <a id="mergerequestauthorauthoredmergerequestsupdatedbefore"></a>`updatedBefore` | [`Time`](#time) | Merge requests updated before this timestamp. |
-
-##### `MergeRequestAuthor.contributedProjects`
-
-Projects the user has contributed to.
-
-Returns [`ProjectConnection`](#projectconnection).
-
-This field returns a [connection](#connections). It accepts the
-four standard [pagination arguments](#pagination-arguments):
-`before: String`, `after: String`, `first: Int`, and `last: Int`.
-
-###### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mergerequestauthorcontributedprojectssort"></a>`sort` | [`ProjectSort`](#projectsort) | Sort contributed projects. |
 
 ##### `MergeRequestAuthor.groups`
 
@@ -24591,9 +24367,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="mergerequestauthorreviewrequestedmergerequestsauthorusername"></a>`authorUsername` | [`String`](#string) | Username of the author. |
 | <a id="mergerequestauthorreviewrequestedmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="mergerequestauthorreviewrequestedmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="mergerequestauthorreviewrequestedmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="mergerequestauthorreviewrequestedmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="mergerequestauthorreviewrequestedmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="mergerequestauthorreviewrequestedmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="mergerequestauthorreviewrequestedmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="mergerequestauthorreviewrequestedmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
@@ -24837,9 +24610,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="mergerequestparticipantassignedmergerequestsauthorusername"></a>`authorUsername` | [`String`](#string) | Username of the author. |
 | <a id="mergerequestparticipantassignedmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="mergerequestparticipantassignedmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="mergerequestparticipantassignedmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="mergerequestparticipantassignedmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="mergerequestparticipantassignedmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="mergerequestparticipantassignedmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="mergerequestparticipantassignedmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="mergerequestparticipantassignedmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
@@ -24879,9 +24649,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="mergerequestparticipantauthoredmergerequestsassigneeusername"></a>`assigneeUsername` | [`String`](#string) | Username of the assignee. |
 | <a id="mergerequestparticipantauthoredmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="mergerequestparticipantauthoredmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="mergerequestparticipantauthoredmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="mergerequestparticipantauthoredmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="mergerequestparticipantauthoredmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="mergerequestparticipantauthoredmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="mergerequestparticipantauthoredmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="mergerequestparticipantauthoredmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
@@ -24902,22 +24669,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="mergerequestparticipantauthoredmergerequeststargetbranches"></a>`targetBranches` | [`[String!]`](#string) | Array of target branch names. All resolved merge requests will have one of these branches as their target. |
 | <a id="mergerequestparticipantauthoredmergerequestsupdatedafter"></a>`updatedAfter` | [`Time`](#time) | Merge requests updated after this timestamp. |
 | <a id="mergerequestparticipantauthoredmergerequestsupdatedbefore"></a>`updatedBefore` | [`Time`](#time) | Merge requests updated before this timestamp. |
-
-##### `MergeRequestParticipant.contributedProjects`
-
-Projects the user has contributed to.
-
-Returns [`ProjectConnection`](#projectconnection).
-
-This field returns a [connection](#connections). It accepts the
-four standard [pagination arguments](#pagination-arguments):
-`before: String`, `after: String`, `first: Int`, and `last: Int`.
-
-###### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mergerequestparticipantcontributedprojectssort"></a>`sort` | [`ProjectSort`](#projectsort) | Sort contributed projects. |
 
 ##### `MergeRequestParticipant.groups`
 
@@ -24975,9 +24726,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="mergerequestparticipantreviewrequestedmergerequestsauthorusername"></a>`authorUsername` | [`String`](#string) | Username of the author. |
 | <a id="mergerequestparticipantreviewrequestedmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="mergerequestparticipantreviewrequestedmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="mergerequestparticipantreviewrequestedmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="mergerequestparticipantreviewrequestedmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="mergerequestparticipantreviewrequestedmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="mergerequestparticipantreviewrequestedmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="mergerequestparticipantreviewrequestedmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="mergerequestparticipantreviewrequestedmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
@@ -25210,9 +24958,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="mergerequestreviewerassignedmergerequestsauthorusername"></a>`authorUsername` | [`String`](#string) | Username of the author. |
 | <a id="mergerequestreviewerassignedmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="mergerequestreviewerassignedmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="mergerequestreviewerassignedmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="mergerequestreviewerassignedmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="mergerequestreviewerassignedmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="mergerequestreviewerassignedmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="mergerequestreviewerassignedmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="mergerequestreviewerassignedmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
@@ -25252,9 +24997,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="mergerequestreviewerauthoredmergerequestsassigneeusername"></a>`assigneeUsername` | [`String`](#string) | Username of the assignee. |
 | <a id="mergerequestreviewerauthoredmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="mergerequestreviewerauthoredmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="mergerequestreviewerauthoredmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="mergerequestreviewerauthoredmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="mergerequestreviewerauthoredmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="mergerequestreviewerauthoredmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="mergerequestreviewerauthoredmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="mergerequestreviewerauthoredmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
@@ -25275,22 +25017,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="mergerequestreviewerauthoredmergerequeststargetbranches"></a>`targetBranches` | [`[String!]`](#string) | Array of target branch names. All resolved merge requests will have one of these branches as their target. |
 | <a id="mergerequestreviewerauthoredmergerequestsupdatedafter"></a>`updatedAfter` | [`Time`](#time) | Merge requests updated after this timestamp. |
 | <a id="mergerequestreviewerauthoredmergerequestsupdatedbefore"></a>`updatedBefore` | [`Time`](#time) | Merge requests updated before this timestamp. |
-
-##### `MergeRequestReviewer.contributedProjects`
-
-Projects the user has contributed to.
-
-Returns [`ProjectConnection`](#projectconnection).
-
-This field returns a [connection](#connections). It accepts the
-four standard [pagination arguments](#pagination-arguments):
-`before: String`, `after: String`, `first: Int`, and `last: Int`.
-
-###### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mergerequestreviewercontributedprojectssort"></a>`sort` | [`ProjectSort`](#projectsort) | Sort contributed projects. |
 
 ##### `MergeRequestReviewer.groups`
 
@@ -25348,9 +25074,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="mergerequestreviewerreviewrequestedmergerequestsauthorusername"></a>`authorUsername` | [`String`](#string) | Username of the author. |
 | <a id="mergerequestreviewerreviewrequestedmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="mergerequestreviewerreviewrequestedmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="mergerequestreviewerreviewrequestedmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="mergerequestreviewerreviewrequestedmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="mergerequestreviewerreviewrequestedmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="mergerequestreviewerreviewrequestedmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="mergerequestreviewerreviewrequestedmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="mergerequestreviewerreviewrequestedmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
@@ -25503,7 +25226,7 @@ Represents a metric image upload.
 | <a id="metricimagefilename"></a>`fileName` | [`String`](#string) | File name of the metric image. |
 | <a id="metricimagefilepath"></a>`filePath` | [`String`](#string) | File path of the metric image. |
 | <a id="metricimageid"></a>`id` | [`ID!`](#id) | ID of the metric upload. |
-| <a id="metricimageiid"></a>`iid` | [`String!`](#string) | Internal ID of the metric upload. |
+| <a id="metricimageiid"></a>`iid` | [`ID!`](#id) | Internal ID of the metric upload. |
 | <a id="metricimageurl"></a>`url` | [`String!`](#string) | URL of the metric source. |
 
 ### `MetricsDashboardAnnotation`
@@ -26218,7 +25941,6 @@ An organization user badge.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="organizationuserpermissionsdeleteuser"></a>`deleteUser` | [`Boolean!`](#boolean) | If `true`, the user can perform `delete_user` on this resource. |
 | <a id="organizationuserpermissionsremoveuser"></a>`removeUser` | [`Boolean!`](#boolean) | If `true`, the user can perform `remove_user` on this resource. |
 
 ### `Package`
@@ -27113,19 +26835,6 @@ Represents generic policy violation information.
 | <a id="previewbillableuserchangeseatsinsubscription"></a>`seatsInSubscription` | [`Int`](#int) | Number of seats in subscription. |
 | <a id="previewbillableuserchangewillincreaseoverage"></a>`willIncreaseOverage` | [`Boolean`](#boolean) | If the group will have an increased overage after change. |
 
-### `ProductAnalyticsProjectSettings`
-
-Project-level settings for product analytics provider.
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="productanalyticsprojectsettingscubeapibaseurl"></a>`cubeApiBaseUrl` | [`String`](#string) | Base URL for the Cube API. |
-| <a id="productanalyticsprojectsettingscubeapikey"></a>`cubeApiKey` | [`String`](#string) | API key for the Cube API. |
-| <a id="productanalyticsprojectsettingsproductanalyticsconfiguratorconnectionstring"></a>`productAnalyticsConfiguratorConnectionString` | [`String`](#string) | Connection string for the product analytics configurator. |
-| <a id="productanalyticsprojectsettingsproductanalyticsdatacollectorhost"></a>`productAnalyticsDataCollectorHost` | [`String`](#string) | Host for the product analytics data collector. |
-
 ### `Project`
 
 #### Fields
@@ -27168,7 +26877,7 @@ Project-level settings for product analytics provider.
 | <a id="projectforkingaccesslevel"></a>`forkingAccessLevel` | [`ProjectFeatureAccess`](#projectfeatureaccess) | Access level required for forking access. |
 | <a id="projectforkscount"></a>`forksCount` | [`Int!`](#int) | Number of times the project has been forked. |
 | <a id="projectfullpath"></a>`fullPath` | [`ID!`](#id) | Full path of the project. |
-| <a id="projectgooglecloudartifactregistryrepository"></a>`googleCloudArtifactRegistryRepository` **{warning-solid}** | [`GoogleCloudArtifactRegistryRepository`](#googlecloudartifactregistryrepository) | **Introduced** in GitLab 16.10. **Status**: Experiment. Google Artifact Registry repository. Returns `null` if the GitLab instance is not a SaaS instance. |
+| <a id="projectgooglecloudartifactregistryrepository"></a>`googleCloudArtifactRegistryRepository` **{warning-solid}** | [`GoogleCloudArtifactRegistryRepository`](#googlecloudartifactregistryrepository) | **Introduced** in GitLab 16.10. **Status**: Experiment. Google Artifact Registry repository. Returns `null` if `google_cloud_support_feature_flag` feature flag is disabled, or the GitLab instance is not a SaaS instance. |
 | <a id="projectgrafanaintegration"></a>`grafanaIntegration` | [`GrafanaIntegration`](#grafanaintegration) | Grafana integration details for the project. |
 | <a id="projectgroup"></a>`group` | [`Group`](#group) | Group of the project. |
 | <a id="projecthasjiravulnerabilityissuecreationenabled"></a>`hasJiraVulnerabilityIssueCreationEnabled` | [`Boolean!`](#boolean) | Indicates whether Jira issue creation from vulnerabilities is enabled. |
@@ -27213,7 +26922,6 @@ Project-level settings for product analytics provider.
 | <a id="projectpreventmergewithoutjiraissueenabled"></a>`preventMergeWithoutJiraIssueEnabled` | [`Boolean!`](#boolean) | Indicates if an associated issue from Jira is required. |
 | <a id="projectprintingmergerequestlinkenabled"></a>`printingMergeRequestLinkEnabled` | [`Boolean`](#boolean) | Indicates if a link to create or view a merge request should display after a push to Git repositories of the project from the command line. |
 | <a id="projectproductanalyticsinstrumentationkey"></a>`productAnalyticsInstrumentationKey` **{warning-solid}** | [`String`](#string) | **Introduced** in GitLab 16.0. **Status**: Experiment. Product Analytics instrumentation key assigned to the project. |
-| <a id="projectproductanalyticssettings"></a>`productAnalyticsSettings` | [`ProductAnalyticsProjectSettings`](#productanalyticsprojectsettings) | Project-level settings for product analytics. |
 | <a id="projectproductanalyticsstate"></a>`productAnalyticsState` **{warning-solid}** | [`ProductAnalyticsState`](#productanalyticsstate) | **Introduced** in GitLab 15.10. **Status**: Experiment. Current state of the product analytics stack for this project.Can only be called for one project in a single request. |
 | <a id="projectprojectplanlimits"></a>`projectPlanLimits` **{warning-solid}** | [`ProjectPlanLimits`](#projectplanlimits) | **Introduced** in GitLab 16.9. **Status**: Experiment. Plan limits for the current project. |
 | <a id="projectprotectablebranches"></a>`protectableBranches` **{warning-solid}** | [`[String!]`](#string) | **Introduced** in GitLab 16.9. **Status**: Experiment. List of unprotected branches, ignoring any wildcard branch rules. |
@@ -27720,7 +27428,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="projectdependenciescomponentnames"></a>`componentNames` | [`[String!]`](#string) | Filter dependencies by component names. |
 | <a id="projectdependenciespackagemanagers"></a>`packageManagers` | [`[PackageManager!]`](#packagemanager) | Filter dependencies by package managers. |
 | <a id="projectdependenciessort"></a>`sort` | [`DependencySort`](#dependencysort) | Sort dependencies by given criteria. |
-| <a id="projectdependenciessourcetypes"></a>`sourceTypes` | [`[SbomSourceType!]`](#sbomsourcetype) | Filter dependencies by source type. |
 
 ##### `Project.deployment`
 
@@ -28163,7 +27870,6 @@ four standard [pagination arguments](#pagination-arguments):
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="projectlabelsincludeancestorgroups"></a>`includeAncestorGroups` | [`Boolean`](#boolean) | Include labels from ancestor groups. |
-| <a id="projectlabelssearchin"></a>`searchIn` | [`[LabelSearchFieldList!]!`](#labelsearchfieldlist) | Specify which fields to search in. |
 | <a id="projectlabelssearchterm"></a>`searchTerm` | [`String`](#string) | Search term to find labels with. |
 
 ##### `Project.memberRoles`
@@ -28219,9 +27925,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="projectmergerequestsauthorusername"></a>`authorUsername` | [`String`](#string) | Username of the author. |
 | <a id="projectmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="projectmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="projectmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="projectmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="projectmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="projectmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="projectmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
 | <a id="projectmergerequestslabels"></a>`labels` | [`[String!]`](#string) | Array of label names. All resolved merge requests will have all of these labels. |
@@ -28516,7 +28219,7 @@ four standard [pagination arguments](#pagination-arguments):
 
 ##### `Project.runnerCloudProvisioning`
 
-Information used for provisioning the runner on a cloud provider. Returns `null` if the GitLab instance is not a SaaS instance.
+Information used for provisioning the runner on a cloud provider. Returns `null` if `:google_cloud_support_feature_flag` feature flag is disabled, or the GitLab instance is not a SaaS instance.
 
 DETAILS:
 **Introduced** in GitLab 16.9.
@@ -29754,7 +29457,7 @@ Represents a requirement.
 | <a id="requirementdescription"></a>`description` | [`String`](#string) | Description of the requirement. |
 | <a id="requirementdescriptionhtml"></a>`descriptionHtml` | [`String`](#string) | GitLab Flavored Markdown rendering of `description`. |
 | <a id="requirementid"></a>`id` | [`ID!`](#id) | ID of the requirement. |
-| <a id="requirementiid"></a>`iid` **{warning-solid}** | [`String!`](#string) | **Deprecated** in GitLab 15.8. Use work_item_iid instead. |
+| <a id="requirementiid"></a>`iid` **{warning-solid}** | [`ID!`](#id) | **Deprecated** in GitLab 15.8. Use work_item_iid instead. |
 | <a id="requirementlasttestreportmanuallycreated"></a>`lastTestReportManuallyCreated` | [`Boolean`](#boolean) | Indicates if latest test report was created by user. |
 | <a id="requirementlasttestreportstate"></a>`lastTestReportState` | [`TestReportState`](#testreportstate) | Latest requirement test report state. |
 | <a id="requirementproject"></a>`project` | [`Project!`](#project) | Project to which the requirement belongs. |
@@ -29763,7 +29466,7 @@ Represents a requirement.
 | <a id="requirementtitlehtml"></a>`titleHtml` | [`String`](#string) | GitLab Flavored Markdown rendering of `title`. |
 | <a id="requirementupdatedat"></a>`updatedAt` | [`Time!`](#time) | Timestamp of when the requirement was last updated. |
 | <a id="requirementuserpermissions"></a>`userPermissions` | [`RequirementPermissions!`](#requirementpermissions) | Permissions for the current user on the resource. |
-| <a id="requirementworkitemiid"></a>`workItemIid` | [`String!`](#string) | Work item IID of the requirement, will replace current IID as identifier soon. |
+| <a id="requirementworkitemiid"></a>`workItemIid` | [`ID!`](#id) | Work item IID of the requirement, will replace current IID as identifier soon. |
 
 #### Fields with arguments
 
@@ -30961,9 +30664,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="usercoreassignedmergerequestsauthorusername"></a>`authorUsername` | [`String`](#string) | Username of the author. |
 | <a id="usercoreassignedmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="usercoreassignedmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="usercoreassignedmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="usercoreassignedmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="usercoreassignedmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="usercoreassignedmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="usercoreassignedmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="usercoreassignedmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
@@ -31003,9 +30703,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="usercoreauthoredmergerequestsassigneeusername"></a>`assigneeUsername` | [`String`](#string) | Username of the assignee. |
 | <a id="usercoreauthoredmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="usercoreauthoredmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="usercoreauthoredmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="usercoreauthoredmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="usercoreauthoredmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="usercoreauthoredmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="usercoreauthoredmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="usercoreauthoredmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
@@ -31026,22 +30723,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="usercoreauthoredmergerequeststargetbranches"></a>`targetBranches` | [`[String!]`](#string) | Array of target branch names. All resolved merge requests will have one of these branches as their target. |
 | <a id="usercoreauthoredmergerequestsupdatedafter"></a>`updatedAfter` | [`Time`](#time) | Merge requests updated after this timestamp. |
 | <a id="usercoreauthoredmergerequestsupdatedbefore"></a>`updatedBefore` | [`Time`](#time) | Merge requests updated before this timestamp. |
-
-##### `UserCore.contributedProjects`
-
-Projects the user has contributed to.
-
-Returns [`ProjectConnection`](#projectconnection).
-
-This field returns a [connection](#connections). It accepts the
-four standard [pagination arguments](#pagination-arguments):
-`before: String`, `after: String`, `first: Int`, and `last: Int`.
-
-###### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="usercorecontributedprojectssort"></a>`sort` | [`ProjectSort`](#projectsort) | Sort contributed projects. |
 
 ##### `UserCore.groups`
 
@@ -31099,9 +30780,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="usercorereviewrequestedmergerequestsauthorusername"></a>`authorUsername` | [`String`](#string) | Username of the author. |
 | <a id="usercorereviewrequestedmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="usercorereviewrequestedmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="usercorereviewrequestedmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="usercorereviewrequestedmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="usercorereviewrequestedmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="usercorereviewrequestedmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="usercorereviewrequestedmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="usercorereviewrequestedmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
@@ -32020,7 +31698,6 @@ Represents a state transition of a vulnerability.
 | <a id="vulnerabilitystatetransitiontypecreatedat"></a>`createdAt` | [`Time!`](#time) | Time of the state change of the vulnerability. |
 | <a id="vulnerabilitystatetransitiontypedismissalreason"></a>`dismissalReason` | [`VulnerabilityDismissalReason`](#vulnerabilitydismissalreason) | Reason for the dismissal. |
 | <a id="vulnerabilitystatetransitiontypefromstate"></a>`fromState` | [`VulnerabilityState!`](#vulnerabilitystate) | State of the vulnerability before transition. |
-| <a id="vulnerabilitystatetransitiontypeid"></a>`id` | [`VulnerabilitiesStateTransitionID!`](#vulnerabilitiesstatetransitionid) | ID of the state transition. |
 | <a id="vulnerabilitystatetransitiontypetostate"></a>`toState` | [`VulnerabilityState!`](#vulnerabilitystate) | State of the vulnerability after transition. |
 
 ### `VulnerableDependency`
@@ -32086,7 +31763,7 @@ Represents vulnerability letter grades with associated projects.
 | <a id="workitemdescription"></a>`description` | [`String`](#string) | Description of the work item. |
 | <a id="workitemdescriptionhtml"></a>`descriptionHtml` | [`String`](#string) | GitLab Flavored Markdown rendering of `description`. |
 | <a id="workitemid"></a>`id` | [`WorkItemID!`](#workitemid) | Global ID of the work item. |
-| <a id="workitemiid"></a>`iid` | [`String!`](#string) | Internal ID of the work item. |
+| <a id="workitemiid"></a>`iid` | [`ID!`](#id) | Internal ID of the work item. |
 | <a id="workitemlockversion"></a>`lockVersion` | [`Int!`](#int) | Lock version of the work item. Incremented each time the work item is updated. |
 | <a id="workitemnamespace"></a>`namespace` **{warning-solid}** | [`Namespace`](#namespace) | **Introduced** in GitLab 15.10. **Status**: Experiment. Namespace the work item belongs to. |
 | <a id="workitemproject"></a>`project` **{warning-solid}** | [`Project`](#project) | **Introduced** in GitLab 15.3. **Status**: Experiment. Project the work item belongs to. |
@@ -32113,16 +31790,6 @@ Returns [`String!`](#string).
 | ---- | ---- | ----------- |
 | <a id="workitemreferencefull"></a>`full` | [`Boolean`](#boolean) | Boolean option specifying whether the reference should be returned in full. |
 
-### `WorkItemClosingMergeRequest`
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="workitemclosingmergerequestfrommrdescription"></a>`fromMrDescription` | [`Boolean!`](#boolean) | Whether this merge request link was created by referencing the work item on the merge request description, using the closing pattern. |
-| <a id="workitemclosingmergerequestid"></a>`id` | [`MergeRequestsClosingIssuesID!`](#mergerequestsclosingissuesid) | Global ID of the closing merge request association. |
-| <a id="workitemclosingmergerequestmergerequest"></a>`mergeRequest` | [`MergeRequest`](#mergerequest) | Related merge request. |
-
 ### `WorkItemPermissions`
 
 Check permissions for the current user on a work item.
@@ -32139,6 +31806,14 @@ Check permissions for the current user on a work item.
 | <a id="workitempermissionsreadworkitem"></a>`readWorkItem` | [`Boolean!`](#boolean) | If `true`, the user can perform `read_work_item` on this resource. |
 | <a id="workitempermissionssetworkitemmetadata"></a>`setWorkItemMetadata` | [`Boolean!`](#boolean) | If `true`, the user can perform `set_work_item_metadata` on this resource. |
 | <a id="workitempermissionsupdateworkitem"></a>`updateWorkItem` | [`Boolean!`](#boolean) | If `true`, the user can perform `update_work_item` on this resource. |
+
+### `WorkItemRelatedMergeRequest`
+
+#### Fields
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="workitemrelatedmergerequestmergerequest"></a>`mergeRequest` | [`MergeRequest`](#mergerequest) | Related merge request. |
 
 ### `WorkItemStateCountsType`
 
@@ -32274,7 +31949,6 @@ Represents a hierarchy widget definition.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="workitemwidgetdefinitionhierarchyallowedchildtypes"></a>`allowedChildTypes` | [`WorkItemTypeConnection`](#workitemtypeconnection) | Allowed child types for the work item type. (see [Connections](#connections)) |
-| <a id="workitemwidgetdefinitionhierarchyallowedparenttypes"></a>`allowedParentTypes` | [`WorkItemTypeConnection`](#workitemtypeconnection) | Allowed parent types for the work item type. (see [Connections](#connections)) |
 | <a id="workitemwidgetdefinitionhierarchytype"></a>`type` | [`WorkItemWidgetType!`](#workitemwidgettype) | Widget type. |
 
 ### `WorkItemWidgetDefinitionLabels`
@@ -32322,8 +31996,8 @@ Represents a development widget.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="workitemwidgetdevelopmentclosingmergerequests"></a>`closingMergeRequests` | [`WorkItemClosingMergeRequestConnection`](#workitemclosingmergerequestconnection) | Merge requests that will close the work item when merged. (see [Connections](#connections)) |
 | <a id="workitemwidgetdevelopmentfeatureflags"></a>`featureFlags` | [`FeatureFlagConnection`](#featureflagconnection) | Feature flags associated with the work item. (see [Connections](#connections)) |
+| <a id="workitemwidgetdevelopmentrelatedmergerequests"></a>`relatedMergeRequests` | [`WorkItemRelatedMergeRequestConnection`](#workitemrelatedmergerequestconnection) | Merge requests related to the work item. (see [Connections](#connections)) |
 | <a id="workitemwidgetdevelopmenttype"></a>`type` | [`WorkItemWidgetType`](#workitemwidgettype) | Widget type. |
 
 ### `WorkItemWidgetHealthStatus`
@@ -33941,7 +33615,6 @@ Import source.
 | <a id="importsourcegit"></a>`GIT` | Imported from Git. |
 | <a id="importsourcegitea"></a>`GITEA` | Imported from Gitea. |
 | <a id="importsourcegithub"></a>`GITHUB` | Imported from Github. |
-| <a id="importsourcegitlab_group"></a>`GITLAB_GROUP` | Imported from Gitlab Group. |
 | <a id="importsourcegitlab_migration"></a>`GITLAB_MIGRATION` | Imported from Gitlab Migration. |
 | <a id="importsourcegitlab_project"></a>`GITLAB_PROJECT` | Imported from Gitlab Project. |
 | <a id="importsourcemanifest"></a>`MANIFEST` | Imported from Manifest. |
@@ -34180,15 +33853,6 @@ Iteration ID wildcard values.
 | <a id="jobartifactfiletypesecret_detection"></a>`SECRET_DETECTION` | SECRET DETECTION job artifact file type. |
 | <a id="jobartifactfiletypeterraform"></a>`TERRAFORM` | TERRAFORM job artifact file type. |
 | <a id="jobartifactfiletypetrace"></a>`TRACE` | TRACE job artifact file type. |
-
-### `LabelSearchFieldList`
-
-List of fields where the provided searchTerm should be looked up.
-
-| Value | Description |
-| ----- | ----------- |
-| <a id="labelsearchfieldlistdescription"></a>`DESCRIPTION` | Search in the label description. |
-| <a id="labelsearchfieldlisttitle"></a>`TITLE` | Search in the label title. |
 
 ### `ListLimitMetric`
 
@@ -34808,31 +34472,6 @@ Project member relation.
 | <a id="projectmemberrelationinvited_groups"></a>`INVITED_GROUPS` | Invited Groups members. |
 | <a id="projectmemberrelationshared_into_ancestors"></a>`SHARED_INTO_ANCESTORS` | Shared Into Ancestors members. |
 
-### `ProjectSort`
-
-Values for sorting projects.
-
-| Value | Description |
-| ----- | ----------- |
-| <a id="projectsortcreated_asc"></a>`CREATED_ASC` | Created at ascending order. |
-| <a id="projectsortcreated_desc"></a>`CREATED_DESC` | Created at descending order. |
-| <a id="projectsortid_asc"></a>`ID_ASC` | ID by ascending order. |
-| <a id="projectsortid_desc"></a>`ID_DESC` | ID by descending order. |
-| <a id="projectsortlatest_activity_asc"></a>`LATEST_ACTIVITY_ASC` | Latest activity by ascending order. |
-| <a id="projectsortlatest_activity_desc"></a>`LATEST_ACTIVITY_DESC` | Latest activity by descending order. |
-| <a id="projectsortname_asc"></a>`NAME_ASC` | Name by ascending order. |
-| <a id="projectsortname_desc"></a>`NAME_DESC` | Name by descending order. |
-| <a id="projectsortpath_asc"></a>`PATH_ASC` | Path by ascending order. |
-| <a id="projectsortpath_desc"></a>`PATH_DESC` | Path by descending order. |
-| <a id="projectsortstars_asc"></a>`STARS_ASC` | Stars by ascending order. |
-| <a id="projectsortstars_desc"></a>`STARS_DESC` | Stars by descending order. |
-| <a id="projectsortupdated_asc"></a>`UPDATED_ASC` | Updated at ascending order. |
-| <a id="projectsortupdated_desc"></a>`UPDATED_DESC` | Updated at descending order. |
-| <a id="projectsortcreated_asc"></a>`created_asc` **{warning-solid}** | **Deprecated** in GitLab 13.5. This was renamed. Use: `CREATED_ASC`. |
-| <a id="projectsortcreated_desc"></a>`created_desc` **{warning-solid}** | **Deprecated** in GitLab 13.5. This was renamed. Use: `CREATED_DESC`. |
-| <a id="projectsortupdated_asc"></a>`updated_asc` **{warning-solid}** | **Deprecated** in GitLab 13.5. This was renamed. Use: `UPDATED_ASC`. |
-| <a id="projectsortupdated_desc"></a>`updated_desc` **{warning-solid}** | **Deprecated** in GitLab 13.5. This was renamed. Use: `UPDATED_DESC`. |
-
 ### `RefType`
 
 Type of ref.
@@ -34939,17 +34578,6 @@ Size of UI component in SAST configuration page.
 | <a id="sastuicomponentsizelarge"></a>`LARGE` | Size of UI component in SAST configuration page is large. |
 | <a id="sastuicomponentsizemedium"></a>`MEDIUM` | Size of UI component in SAST configuration page is medium. |
 | <a id="sastuicomponentsizesmall"></a>`SMALL` | Size of UI component in SAST configuration page is small. |
-
-### `SbomSourceType`
-
-Values for sbom source types.
-
-| Value | Description |
-| ----- | ----------- |
-| <a id="sbomsourcetypecontainer_scanning"></a>`CONTAINER_SCANNING` | Source Type: container_scanning. |
-| <a id="sbomsourcetypecontainer_scanning_for_registry"></a>`CONTAINER_SCANNING_FOR_REGISTRY` | Source Type: container_scanning_for_registry. |
-| <a id="sbomsourcetypedependency_scanning"></a>`DEPENDENCY_SCANNING` | Source Type: dependency_scanning. |
-| <a id="sbomsourcetypenil_source"></a>`NIL_SOURCE` | Enum source nil. |
 
 ### `ScanStatus`
 
@@ -35258,6 +34886,7 @@ Name of the feature that the callout is for.
 | Value | Description |
 | ----- | ----------- |
 | <a id="usercalloutfeaturenameenumactive_user_count_threshold"></a>`ACTIVE_USER_COUNT_THRESHOLD` | Callout feature name for active_user_count_threshold. |
+| <a id="usercalloutfeaturenameenumboard_add_new_column_trigger_popover"></a>`BOARD_ADD_NEW_COLUMN_TRIGGER_POPOVER` | Callout feature name for board_add_new_column_trigger_popover. |
 | <a id="usercalloutfeaturenameenumbranch_rules_info_callout"></a>`BRANCH_RULES_INFO_CALLOUT` | Callout feature name for branch_rules_info_callout. |
 | <a id="usercalloutfeaturenameenumbuy_pipeline_minutes_notification_dot"></a>`BUY_PIPELINE_MINUTES_NOTIFICATION_DOT` | Callout feature name for buy_pipeline_minutes_notification_dot. |
 | <a id="usercalloutfeaturenameenumcanary_deployment"></a>`CANARY_DEPLOYMENT` | Callout feature name for canary_deployment. |
@@ -36323,12 +35952,6 @@ A `MergeRequestID` is a global ID. It is encoded as a string.
 
 An example `MergeRequestID` is: `"gid://gitlab/MergeRequest/1"`.
 
-### `MergeRequestsClosingIssuesID`
-
-A `MergeRequestsClosingIssuesID` is a global ID. It is encoded as a string.
-
-An example `MergeRequestsClosingIssuesID` is: `"gid://gitlab/MergeRequestsClosingIssues/1"`.
-
 ### `MergeRequestsExternalStatusCheckID`
 
 A `MergeRequestsExternalStatusCheckID` is a global ID. It is encoded as a string.
@@ -36479,12 +36102,6 @@ A `PackagesPypiMetadatumID` is a global ID. It is encoded as a string.
 
 An example `PackagesPypiMetadatumID` is: `"gid://gitlab/Packages::Pypi::Metadatum/1"`.
 
-### `PagesDeploymentID`
-
-A `PagesDeploymentID` is a global ID. It is encoded as a string.
-
-An example `PagesDeploymentID` is: `"gid://gitlab/PagesDeployment/1"`.
-
 ### `PathLockID`
 
 A `PathLockID` is a global ID. It is encoded as a string.
@@ -36626,12 +36243,6 @@ An example `VulnerabilitiesExternalIssueLinkID` is: `"gid://gitlab/Vulnerabiliti
 A `VulnerabilitiesScannerID` is a global ID. It is encoded as a string.
 
 An example `VulnerabilitiesScannerID` is: `"gid://gitlab/Vulnerabilities::Scanner/1"`.
-
-### `VulnerabilitiesStateTransitionID`
-
-A `VulnerabilitiesStateTransitionID` is a global ID. It is encoded as a string.
-
-An example `VulnerabilitiesStateTransitionID` is: `"gid://gitlab/Vulnerabilities::StateTransition/1"`.
 
 ### `VulnerabilityID`
 
@@ -37301,9 +36912,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="userassignedmergerequestsauthorusername"></a>`authorUsername` | [`String`](#string) | Username of the author. |
 | <a id="userassignedmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="userassignedmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="userassignedmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="userassignedmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="userassignedmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="userassignedmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="userassignedmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="userassignedmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
@@ -37343,9 +36951,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="userauthoredmergerequestsassigneeusername"></a>`assigneeUsername` | [`String`](#string) | Username of the assignee. |
 | <a id="userauthoredmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="userauthoredmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="userauthoredmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="userauthoredmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="userauthoredmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="userauthoredmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="userauthoredmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="userauthoredmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |
@@ -37366,22 +36971,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="userauthoredmergerequeststargetbranches"></a>`targetBranches` | [`[String!]`](#string) | Array of target branch names. All resolved merge requests will have one of these branches as their target. |
 | <a id="userauthoredmergerequestsupdatedafter"></a>`updatedAfter` | [`Time`](#time) | Merge requests updated after this timestamp. |
 | <a id="userauthoredmergerequestsupdatedbefore"></a>`updatedBefore` | [`Time`](#time) | Merge requests updated before this timestamp. |
-
-###### `User.contributedProjects`
-
-Projects the user has contributed to.
-
-Returns [`ProjectConnection`](#projectconnection).
-
-This field returns a [connection](#connections). It accepts the
-four standard [pagination arguments](#pagination-arguments):
-`before: String`, `after: String`, `first: Int`, and `last: Int`.
-
-####### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="usercontributedprojectssort"></a>`sort` | [`ProjectSort`](#projectsort) | Sort contributed projects. |
 
 ###### `User.groups`
 
@@ -37439,9 +37028,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="userreviewrequestedmergerequestsauthorusername"></a>`authorUsername` | [`String`](#string) | Username of the author. |
 | <a id="userreviewrequestedmergerequestscreatedafter"></a>`createdAfter` | [`Time`](#time) | Merge requests created after this timestamp. |
 | <a id="userreviewrequestedmergerequestscreatedbefore"></a>`createdBefore` | [`Time`](#time) | Merge requests created before this timestamp. |
-| <a id="userreviewrequestedmergerequestsdeployedafter"></a>`deployedAfter` | [`Time`](#time) | Merge requests deployed after this timestamp. |
-| <a id="userreviewrequestedmergerequestsdeployedbefore"></a>`deployedBefore` | [`Time`](#time) | Merge requests deployed before this timestamp. |
-| <a id="userreviewrequestedmergerequestsdeploymentid"></a>`deploymentId` | [`String`](#string) | ID of the deployment. |
 | <a id="userreviewrequestedmergerequestsdraft"></a>`draft` | [`Boolean`](#boolean) | Limit result to draft merge requests. |
 | <a id="userreviewrequestedmergerequestsgroupid"></a>`groupId` | [`GroupID`](#groupid) | The global ID of the group the authored merge requests should be in. Merge requests in subgroups are included. |
 | <a id="userreviewrequestedmergerequestsiids"></a>`iids` | [`[String!]`](#string) | Array of IIDs of merge requests, for example `[1, 2]`. |

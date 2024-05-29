@@ -16,7 +16,6 @@ variables:
 sast:
   stage: test
   artifacts:
-    access: 'developer'
     reports:
       sast: gl-sast-report.json
   rules:
@@ -202,3 +201,5 @@ spotbugs-sast:
     - if: $CI_COMMIT_BRANCH
       exists:
         - '**/*.groovy'
+        - '**/*.scala'
+        - '**/*.kt'

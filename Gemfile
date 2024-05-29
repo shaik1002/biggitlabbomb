@@ -54,7 +54,7 @@ gem 'view_component', '~> 3.12.1' # rubocop:todo Gemfile/MissingFeatureCategory
 # Supported DBs
 gem 'pg', '~> 1.5.6' # rubocop:todo Gemfile/MissingFeatureCategory
 
-gem 'neighbor', '~> 0.3.2', feature_category: :duo_chat
+gem 'neighbor', '~> 0.2.3' # rubocop:todo Gemfile/MissingFeatureCategory
 
 gem 'rugged', '~> 1.6' # rubocop:todo Gemfile/MissingFeatureCategory
 
@@ -226,7 +226,7 @@ gem 'asciidoctor-kroki', '~> 0.8.0', require: false # rubocop:todo Gemfile/Missi
 gem 'rouge', '~> 4.2.0' # rubocop:todo Gemfile/MissingFeatureCategory
 gem 'truncato', '~> 0.7.12' # rubocop:todo Gemfile/MissingFeatureCategory
 gem 'nokogiri', '~> 1.16' # rubocop:todo Gemfile/MissingFeatureCategory
-gem 'gitlab-glfm-markdown', '~> 0.0.17', feature_category: :team_planning
+gem 'gitlab-glfm-markdown', '~> 0.0.16', feature_category: :team_planning
 
 # Calendar rendering
 gem 'icalendar' # rubocop:todo Gemfile/MissingFeatureCategory
@@ -273,7 +273,7 @@ gem 're2', '2.7.0' # rubocop:todo Gemfile/MissingFeatureCategory
 
 # Misc
 
-gem 'semver_dialects', '~> 2.0', '>= 2.0.2', feature_category: :software_composition_analysis
+gem 'semver_dialects', '~> 2.0', '>= 2.0.2', feature_category: :static_application_security_testing
 gem 'version_sorter', '~> 2.3' # rubocop:todo Gemfile/MissingFeatureCategory
 gem 'csv_builder', path: 'gems/csv_builder' # rubocop:todo Gemfile/MissingFeatureCategory
 
@@ -440,7 +440,7 @@ group :development do
 
   gem 'listen', '~> 3.7' # rubocop:todo Gemfile/MissingFeatureCategory
 
-  gem 'ruby-lsp', "~> 0.16.7", require: false, feature_category: :tooling
+  gem 'ruby-lsp', "~> 0.16.6", require: false, feature_category: :tooling
 
   gem 'ruby-lsp-rails', "~> 0.3.3", feature_category: :tooling
 

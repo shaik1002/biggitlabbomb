@@ -1,6 +1,6 @@
 ---
 description: Group runner created
-internal_events: true
+category: InternalEventTracking
 action: click_create_group_runner_button
 identifiers:
   - namespace

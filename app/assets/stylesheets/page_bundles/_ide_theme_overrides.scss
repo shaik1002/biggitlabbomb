@@ -136,7 +136,7 @@
   }
 
   hr {
-    border-color: var(--ide-border-color, $gray-100);
+    border-color: var(--ide-border-color, darken($gray-normal, 8%));
   }
 
   .md h1,

@@ -2,7 +2,6 @@
 table_name: packages_packages
 classes:
 - Packages::Conan::Package
-- Packages::Debian::Package
 - Packages::Go::Package
 - Packages::MlModel::Package
 - Packages::Package

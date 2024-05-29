@@ -139,12 +139,7 @@ export const addHierarchyChild = ({ cache, fullPath, iid, isGroup, workItem }) =
   cache.writeQuery({
     ...queryArgs,
     data: produce(sourceData, (draftState) => {
-      const existingChild = findHierarchyWidgetChildren(draftState.workspace?.workItem).find(
-        (child) => child.id === workItem?.id,
-      );
-      if (!existingChild) {
-        findHierarchyWidgetChildren(draftState.workspace?.workItem).push(workItem);
-      }
+      findHierarchyWidgetChildren(draftState.workspace?.workItem).push(workItem);
     }),
   });
 };
@@ -165,7 +160,7 @@ export const removeHierarchyChild = ({ cache, fullPath, iid, isGroup, workItem }
     data: produce(sourceData, (draftState) => {
       const children = findHierarchyWidgetChildren(draftState.workspace?.workItem);
       const index = children.findIndex((child) => child.id === workItem.id);
-      if (index >= 0) children.splice(index, 1);
+      children.splice(index, 1);
     }),
   });
 };

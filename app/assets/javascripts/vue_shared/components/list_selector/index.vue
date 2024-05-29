@@ -40,27 +40,7 @@ export default {
       required: false,
       default: null,
     },
-    groupPath: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    groupId: {
-      type: Number,
-      required: false,
-      default: null,
-    },
     autofocus: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    usersQueryOptions: {
-      type: Object,
-      required: false,
-      default: () => ({}),
-    },
-    isProjectOnlyNamespace: {
       type: Boolean,
       required: false,
       default: false,
@@ -78,9 +58,6 @@ export default {
   computed: {
     config() {
       return CONFIG[this.type];
-    },
-    showNamespaceDropdown() {
-      return this.config.showNamespaceDropdown && !this.isProjectOnlyNamespace;
     },
     namespaceDropdownText() {
       return parseBoolean(this.isProjectNamespace)
@@ -128,7 +105,7 @@ export default {
       }
     },
     async fetchUsersBySearchTerm(search) {
-      const users = await Api.projectUsers(this.projectPath, search, this.usersQueryOptions);
+      const users = await Api.projectUsers(this.projectPath, search);
 
       return users?.map((user) => ({
         text: user.name,
@@ -138,10 +115,6 @@ export default {
     },
     async fetchGroupsBySearchTerm(search) {
       let groups = [];
-      if (parseBoolean(this.groupId)) {
-        groups = await this.fetchSubgroupsBySearchTerm(search);
-        return groups;
-      }
       if (parseBoolean(this.isProjectNamespace)) {
         groups = await this.fetchProjectGroups(search);
       } else {
@@ -177,17 +150,6 @@ export default {
             id: getIdFromGraphQLId(group.id),
           })),
         );
-    },
-    async fetchSubgroupsBySearchTerm(search) {
-      let groups = [];
-      const subgroups = await Api.groupSubgroups(this.groupId, search);
-      groups = subgroups?.data || [];
-      return groups?.map((group) => ({
-        text: group.fullName,
-        value: group.name,
-        type: 'group',
-        ...group,
-      }));
     },
     fetchDeployKeysBySearchTerm() {
       // TODO - implement API request (follow-up)
@@ -266,11 +228,10 @@ export default {
       </gl-collapsible-listbox>
 
       <gl-collapsible-listbox
-        v-if="showNamespaceDropdown"
+        v-if="config.showNamespaceDropdown"
         v-model="isProjectNamespace"
         :toggle-text="namespaceDropdownText"
         :items="$options.namespaceOptions"
-        data-testid="namespace-dropdown"
         @select="handleSelectNamespace"
       />
     </div>

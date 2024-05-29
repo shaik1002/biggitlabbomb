@@ -10,22 +10,22 @@ describe('DateRangeFilter', () => {
 
   let wrapper;
 
-  const defaultProps = {
-    selected: {
-      value: '1h',
-      startDate: new Date(),
-      endDate: new Date(),
-    },
+  const defaultTimeRange = {
+    value: '1h',
+    startDate: new Date(),
+    endDate: new Date(),
   };
 
-  const mount = (props = defaultProps) => {
+  const mount = (selected) => {
     wrapper = shallowMountExtended(DateRangeFilter, {
-      propsData: props,
+      propsData: {
+        selected,
+      },
     });
   };
 
   beforeEach(() => {
-    mount();
+    mount(defaultTimeRange);
   });
 
   const findDateRangesDropdown = () => wrapper.findComponent(DateRangesDropdown);
@@ -34,7 +34,7 @@ describe('DateRangeFilter', () => {
   it('renders the date ranges dropdown with the default selected value and options', () => {
     const dateRangesDropdown = findDateRangesDropdown();
     expect(dateRangesDropdown.exists()).toBe(true);
-    expect(dateRangesDropdown.props('selected')).toBe(defaultProps.selected.value);
+    expect(dateRangesDropdown.props('selected')).toBe(defaultTimeRange.value);
     expect(dateRangesDropdown.props('dateRangeOptions')).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -101,23 +101,8 @@ describe('DateRangeFilter', () => {
     `);
   });
 
-  it('renders dateRangeOptions based on dateOptions if specified', () => {
-    mount({ ...defaultProps, dateOptions: [{ value: '7m', title: 'Last 7 minutes' }] });
-
-    expect(findDateRangesDropdown().props('dateRangeOptions')).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "endDate": 2024-04-23T04:00:00.000Z,
-          "startDate": 2024-04-23T03:53:00.000Z,
-          "text": "Last 7 minutes",
-          "value": "7m",
-        },
-      ]
-    `);
-  });
-
   it('does not set the selected value if not specified', () => {
-    mount({ selected: undefined });
+    mount(undefined);
 
     expect(findDateRangesDropdown().props('selected')).toBe('');
   });
@@ -127,9 +112,7 @@ describe('DateRangeFilter', () => {
       startDate: new Date('2022-01-01'),
       endDate: new Date('2022-01-02'),
     };
-    mount({
-      selected: { value: 'custom', startDate: timeRange.startDate, endDate: timeRange.endDate },
-    });
+    mount({ value: 'custom', startDate: timeRange.startDate, endDate: timeRange.endDate });
 
     expect(findDateRangesPicker().exists()).toBe(true);
     expect(findDateRangesPicker().props('defaultStartDate')).toBe(timeRange.startDate);
@@ -170,19 +153,17 @@ describe('DateRangeFilter', () => {
   });
 
   describe('start opened', () => {
-    it('sets startOpened to true if custom date is selected without start and end date', () => {
-      mount({ selected: { value: 'custom' } });
+    it('sets startOpend to true if custom date is selected without start and end date', () => {
+      mount({ value: 'custom' });
 
       expect(findDateRangesPicker().props('startOpened')).toBe(true);
     });
 
-    it('sets startOpened to false if custom date is selected with start and end date', () => {
+    it('sets startOpend to false if custom date is selected with start and end date', () => {
       mount({
-        selected: {
-          value: 'custom',
-          startDate: new Date('2022-01-01'),
-          endDate: new Date('2022-01-02'),
-        },
+        value: 'custom',
+        startDate: new Date('2022-01-01'),
+        endDate: new Date('2022-01-02'),
       });
 
       expect(findDateRangesPicker().props('startOpened')).toBe(false);
@@ -201,17 +182,5 @@ describe('DateRangeFilter', () => {
     expect(findDateRangesPicker().props('defaultMaxDate').toISOString()).toBe(
       '2024-04-24T00:00:00.000Z',
     );
-  });
-  it('sets max-date-range to maxDateRange', () => {
-    mount({
-      selected: {
-        value: 'custom',
-        startDate: new Date('2022-01-01'),
-        endDate: new Date('2022-01-02'),
-      },
-      maxDateRange: 7,
-    });
-
-    expect(findDateRangesPicker().props('maxDateRange')).toBe(7);
   });
 });

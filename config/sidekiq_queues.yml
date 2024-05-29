@@ -159,8 +159,6 @@
   - 1
 - - bulk_imports_transform_references
   - 1
-- - bulk_imports_user_contributions_export
-  - 1
 - - chaos
   - 2
 - - chat_notification
@@ -826,10 +824,6 @@
 - - wikis_git_garbage_collect
   - 1
 - - work_items_import_work_items_csv
-  - 1
-- - work_items_rolledup_dates_update_milestone_related_work_item_dates_event_handler
-  - 1
-- - work_items_rolledup_dates_update_multiple_rolledup_dates
   - 1
 - - work_items_rolledup_dates_update_parent_rolledup_dates_event_handler
   - 1

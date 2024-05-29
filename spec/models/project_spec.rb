@@ -3,7 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_projects do
-  include ContainerRegistryHelpers
   include ProjectForksHelper
   include ExternalAuthorizationServiceHelpers
   include ReloadHelpers
@@ -672,7 +671,10 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
   end
 
   describe 'validation' do
+    let!(:project) { create(:project) }
+
     it { is_expected.to validate_presence_of(:name) }
+    it { is_expected.to validate_uniqueness_of(:name).scoped_to(:namespace_id) }
     it { is_expected.to validate_length_of(:name).is_at_most(255) }
     it { is_expected.to allow_value('space last ').for(:name) }
     it { is_expected.not_to allow_value('colon:in:path').for(:path) } # This is to validate that a specially crafted name cannot bypass a pattern match. See !72555
@@ -688,12 +690,6 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
     it { is_expected.to validate_presence_of(:repository_storage) }
     it { is_expected.to validate_numericality_of(:max_artifacts_size).only_integer.is_greater_than(0) }
     it { is_expected.to validate_length_of(:suggestion_commit_message).is_at_most(255) }
-
-    it 'validates name is case-sensitively unique within the scope of namespace_id' do
-      project = create(:project)
-
-      expect(project).to validate_uniqueness_of(:name).scoped_to(:namespace_id)
-    end
 
     it 'validates build timeout constraints' do
       is_expected.to validate_numericality_of(:build_timeout)
@@ -3397,50 +3393,31 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
 
     subject { project.container_repositories_size }
 
-    context 'when there are no container repositories' do
-      before do
-        allow(project.container_repositories).to receive(:empty?).and_return(true)
+    context 'on gitlab.com' do
+      where(:no_container_repositories, :all_migrated, :gitlab_api_supported, :returned_size, :expected_result) do
+        true  | nil   | nil   | nil | 0
+        false | false | nil   | nil | nil
+        false | true  | false | nil | nil
+        false | true  | true  | 555 | 555
+        false | true  | true  | nil | nil
       end
 
-      it { is_expected.to eq(0) }
+      with_them do
+        before do
+          stub_container_registry_config(enabled: true, api_url: 'http://container-registry', key: 'spec/fixtures/x509_certificate_pk.key')
+          allow(Gitlab).to receive(:com?).and_return(true)
+          allow(project.container_repositories).to receive(:empty?).and_return(no_container_repositories)
+          allow(project.container_repositories).to receive(:all_migrated?).and_return(all_migrated)
+          allow(ContainerRegistry::GitlabApiClient).to receive(:supports_gitlab_api?).and_return(gitlab_api_supported)
+          allow(ContainerRegistry::GitlabApiClient).to receive(:deduplicated_size).with(project.full_path).and_return(returned_size)
+        end
+
+        it { is_expected.to eq(expected_result) }
+      end
     end
 
-    context 'when there are container repositories' do
-      include_context 'container registry client stubs'
-
-      before do
-        allow(project.container_repositories).to receive(:empty?).and_return(false)
-      end
-
-      context 'when the GitLab API is supported' do
-        before do
-          stub_gitlab_api_client_to_support_gitlab_api(supported: true)
-        end
-
-        context 'when the Gitlab API client returns a value for deduplicated_size' do
-          before do
-            allow(ContainerRegistry::GitlabApiClient).to receive(:deduplicated_size).with(project.full_path).and_return(123)
-          end
-
-          it { is_expected.to eq(123) }
-        end
-
-        context 'when the Gitlab API client returns nil for deduplicated_size' do
-          before do
-            allow(ContainerRegistry::GitlabApiClient).to receive(:deduplicated_size).with(project.full_path).and_return(nil)
-          end
-
-          it { is_expected.to be_nil }
-        end
-      end
-
-      context 'when the GitLab API is not supported' do
-        before do
-          stub_gitlab_api_client_to_support_gitlab_api(supported: false)
-        end
-
-        it { is_expected.to be_nil }
-      end
+    context 'not on gitlab.com' do
+      it { is_expected.to eq(nil) }
     end
   end
 
@@ -6293,39 +6270,6 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
           integration.project.execute_integrations('data', :push_hooks, skip_ci: true)
         end
       end
-    end
-  end
-
-  describe '#jenkins_integration_active?' do
-    let_it_be_with_reload(:project) { create(:project) }
-    let_it_be_with_reload(:integration) { create(:jenkins_integration, push_events: true, project: project) }
-
-    subject { project.jenkins_integration_active? }
-
-    before do
-      integration.update!(active: active)
-    end
-
-    context 'when a project has an activated Jenkins integration' do
-      let(:active) { true }
-
-      it { is_expected.to be_truthy }
-    end
-
-    context 'when a project has an inactive Jenkins integration' do
-      let(:active) { false }
-
-      it { is_expected.to be_falsey }
-    end
-
-    context 'when a project does not have a Jenkins integration at all' do
-      let(:active) { true }
-
-      before do
-        integration.destroy!
-      end
-
-      it { is_expected.to be_falsey }
     end
   end
 
@@ -9281,8 +9225,7 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
   context 'with loose foreign key on organization_id' do
     it_behaves_like 'cleanup by a loose foreign key' do
       let_it_be(:parent) { create(:organization) }
-      let_it_be(:group) { create(:group, organization: parent) }
-      let_it_be(:model) { create(:project, group: group, organization: parent) }
+      let_it_be(:model) { create(:project, organization: parent) }
     end
   end
 

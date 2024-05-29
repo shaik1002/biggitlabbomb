@@ -42,10 +42,10 @@ export default {
           variables,
         });
 
-        if (isEmpty(data?.mlModelDelete?.errors)) {
+        if (isEmpty(data?.mlModelDestroy?.errors)) {
           this.$emit('model-deleted');
         } else {
-          this.handleError(new Error(data.mlModelDelete.errors.join(', ')));
+          this.handleError(new Error(data.mlModelDestroy.errors.join(', ')));
         }
       } catch (error) {
         this.handleError(error);

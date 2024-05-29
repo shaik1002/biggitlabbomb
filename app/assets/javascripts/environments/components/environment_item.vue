@@ -550,7 +550,7 @@ export default {
     upcomingDeploymentCellClasses() {
       return [
         this.tableData.upcoming.spacing,
-        { '!gl-hidden md:!gl-block': !this.upcomingDeployment },
+        { 'gl-display-none gl-md-display-block': !this.upcomingDeployment },
       ];
     },
     tableNameSpacingClass() {
@@ -643,7 +643,7 @@ export default {
 
     <div
       v-if="!isFolder"
-      class="table-section deployment-column gl-hidden md:gl-block"
+      class="table-section deployment-column d-none d-md-block"
       :class="tableData.deploy.spacing"
       role="gridcell"
       data-testid="environment-deployment-id-cell"
@@ -678,7 +678,7 @@ export default {
 
     <div
       v-if="!isFolder"
-      class="table-section gl-hidden md:gl-block"
+      class="table-section d-none d-md-block"
       :class="tableData.build.spacing"
       role="gridcell"
       data-testid="environment-build-cell"

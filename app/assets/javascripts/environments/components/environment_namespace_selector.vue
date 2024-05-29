@@ -1,14 +1,6 @@
 <script>
-import {
-  GlFormGroup,
-  GlCollapsibleListbox,
-  GlAlert,
-  GlButton,
-  GlSprintf,
-  GlLink,
-} from '@gitlab/ui';
+import { GlFormGroup, GlCollapsibleListbox, GlAlert, GlButton, GlSprintf } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
-import { helpPagePath } from '~/helpers/help_page_helper';
 import getNamespacesQuery from '../graphql/queries/k8s_namespaces.query.graphql';
 
 export default {
@@ -18,7 +10,6 @@ export default {
     GlAlert,
     GlButton,
     GlSprintf,
-    GlLink,
   },
   props: {
     configuration: {
@@ -31,14 +22,10 @@ export default {
       default: '',
     },
   },
-  clustersHelpPagePath: helpPagePath('user/clusters/agent/index.md'),
   i18n: {
     namespaceLabel: s__('Environments|Kubernetes namespace (optional)'),
     namespaceHelpText: s__('Environments|Select namespace'),
     selectButton: s__('Environments|Or select namespace: %{searchTerm}'),
-    namespaceSelectorDescription: s__(
-      'Environments|No selection shows all authorized resources in the cluster. %{linkStart}Learn more.%{linkEnd}',
-    ),
     reset: __('Reset'),
   },
   data() {
@@ -145,12 +132,5 @@ export default {
         </gl-button>
       </template>
     </gl-collapsible-listbox>
-    <template #description>
-      <gl-sprintf :message="$options.i18n.namespaceSelectorDescription">
-        <template #link="{ content }">
-          <gl-link :href="$options.clustersHelpPagePath" target="_blank">{{ content }}</gl-link>
-        </template>
-      </gl-sprintf>
-    </template>
   </gl-form-group>
 </template>

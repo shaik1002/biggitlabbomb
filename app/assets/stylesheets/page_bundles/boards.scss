@@ -20,14 +20,6 @@
   }
 }
 
-.board-swimlanes-headers {
-  background-color: $white;
-
-  .gl-dark & {
-    background-color: var(--gray-10);
-  }
-}
-
 .boards-list,
 .board-swimlanes {
   flex-grow: 1;

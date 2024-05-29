@@ -11,7 +11,7 @@ module DependencyProxy
     sidekiq_options retry: 3
 
     queue_namespace :dependency_proxy_manifest
-    feature_category :virtual_registry
+    feature_category :dependency_proxy
     urgency :low
     worker_resource_boundary :unknown
     idempotent!

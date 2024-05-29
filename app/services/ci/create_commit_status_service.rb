@@ -20,8 +20,9 @@ module Ci
     attr_reader :pipeline, :stage, :commit_status, :optional_commit_status_params
 
     def unsafe_execute
-      result = validate
-      return result if result&.error?
+      return not_found('Commit') if commit.blank?
+      return bad_request('State is required') if params[:state].blank?
+      return not_found('References for commit') if ref.blank?
 
       @pipeline = first_matching_pipeline || create_pipeline
       return forbidden unless ::Ability.allowed?(current_user, :update_pipeline, pipeline)
@@ -36,16 +37,6 @@ module Ci
       return bad_request(response.message) if response.error?
 
       response
-    end
-
-    def validate
-      return not_found('Commit') if commit.blank?
-      return bad_request('State is required') if params[:state].blank?
-      return not_found('References for commit') if ref.blank?
-
-      return unless params[:pipeline_id] && !first_matching_pipeline
-
-      not_found("Pipeline for pipeline_id, sha and ref")
     end
 
     def ref

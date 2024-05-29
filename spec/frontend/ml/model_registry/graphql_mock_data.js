@@ -214,14 +214,14 @@ export const createModelResponses = {
 export const destroyModelResponses = {
   success: {
     data: {
-      mlModelDelete: {
+      mlModelDestroy: {
         errors: [],
       },
     },
   },
   failure: {
     data: {
-      mlModelDelete: {
+      mlModelDestroy: {
         errors: ['Model not found'],
       },
     },
@@ -326,32 +326,6 @@ export const deleteModelVersionResponses = {
     data: {
       mlModelVersionDelete: {
         errors: ['Model version not found', 'Project not found'],
-      },
-    },
-  },
-};
-
-export const createModelVersionResponses = {
-  success: {
-    data: {
-      mlModelVersionCreate: {
-        modelVersion: {
-          id: 'gid://gitlab/Ml::ModelVersion/1',
-          _links: {
-            showPath: '/some/project/-/ml/models/1/versions/1',
-            packagePath: '/some/project/-/packages/19',
-            importPath: '/api/v4/projects/1/packages/ml_models/1/files/',
-          },
-        },
-        errors: [],
-      },
-    },
-  },
-  failure: {
-    data: {
-      mlModelVersionCreate: {
-        modelVersion: null,
-        errors: ['Version is invalid'],
       },
     },
   },

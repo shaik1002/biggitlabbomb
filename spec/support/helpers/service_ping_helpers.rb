@@ -2,12 +2,16 @@
 
 # Helpers for calculating the latest metric values from specs and the dev rails console.
 # The time frame for the metrics is modified to includes all records and events
-# created on the current date (rather than only completed days from the last week.)
+# created on the current date (rather than only completed days.)
 module ServicePingHelpers
   # Override metric timeframe from within specs
-  # @param metric [Gitlab::Usage::Metric]
-  def stub_metric_timeframe(metric)
-    metric.send(:instrumentation_object).extend(CurrentTimeFrame)
+  def stub_metric_timeframes
+    stub_const('Gitlab::Usage::TimeFrame',
+      Module.new do
+        include Gitlab::Usage::TimeFrame
+        include CurrentTimeFrame
+      end
+    )
   end
 
   class << self
@@ -43,7 +47,7 @@ module ServicePingHelpers
 
     def override_timeframe_from_dev_console!
       if Rails.env.test?
-        raise 'Prefer ServicePingHelpers#stub_metric_timeframe from specs!'
+        raise 'Prefer ServicePingHelpers#stub_metric_timeframes from specs!'
       elsif !defined?(Rails::Console) || !Rails.env.development?
         raise 'ServicePingHelpers override the timeframe used to calculate metrics. ' \
               'Use only in the development rails console.'

@@ -2,7 +2,7 @@
 import { GlAlert, GlIcon, GlLink, GlLoadingIcon, GlSprintf, GlTooltipDirective } from '@gitlab/ui';
 import { BUTTON_TOOLTIP_RETRY, BUTTON_TOOLTIP_CANCEL } from '~/ci/constants';
 import { timeIntervalInWords } from '~/lib/utils/datetime_utility';
-import { setUrlFragment, visitUrl } from '~/lib/utils/url_utility';
+import { setUrlFragment, redirectTo } from '~/lib/utils/url_utility'; // eslint-disable-line import/no-deprecated
 import { __, n__, sprintf, formatNumber } from '~/locale';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
@@ -281,7 +281,7 @@ export default {
           this.reportFailure(DELETE_FAILURE, errors);
           this.isDeleting = false;
         } else {
-          visitUrl(setUrlFragment(this.paths.pipelinesPath, 'delete_success'));
+          redirectTo(setUrlFragment(this.paths.pipelinesPath, 'delete_success')); // eslint-disable-line import/no-deprecated
         }
       } catch {
         this.$apollo.queries.pipeline.startPolling(POLL_INTERVAL);

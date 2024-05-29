@@ -446,10 +446,6 @@ describe('URL utility', () => {
       });
     });
 
-    beforeEach(() => {
-      gon.gitlab_url = 'http://example.com';
-    });
-
     afterAll(() => {
       window.location = originalLocation;
     });
@@ -479,7 +475,7 @@ describe('URL utility', () => {
       expect(window.location.assign).toHaveBeenCalledWith(mockUrl);
     });
 
-    it('opens a new window', () => {
+    it('navigates to a new page', () => {
       Object.defineProperty(window, 'open', {
         writable: true,
         value: jest.fn(),
@@ -487,35 +483,7 @@ describe('URL utility', () => {
 
       urlUtils.visitUrl(mockUrl, true);
 
-      expect(window.open).toHaveBeenCalledWith(mockUrl);
-    });
-
-    describe('when the URL is external', () => {
-      beforeEach(() => {
-        gon.gitlab_url = 'http://other.com';
-      });
-
-      it('navigates (on the same window) with no referrer or opener information', () => {
-        Object.defineProperty(window, 'open', {
-          writable: true,
-          value: jest.fn(),
-        });
-
-        urlUtils.visitUrl(mockUrl);
-
-        expect(window.open).toHaveBeenCalledWith(mockUrl, '_self', 'noreferrer');
-      });
-
-      it('opens a new window with no referrer or opener information', () => {
-        Object.defineProperty(window, 'open', {
-          writable: true,
-          value: jest.fn(),
-        });
-
-        urlUtils.visitUrl(mockUrl, true);
-
-        expect(window.open).toHaveBeenCalledWith(mockUrl, '_blank', 'noreferrer');
-      });
+      expect(window.open).toHaveBeenCalledWith(mockUrl, '_blank', 'noreferrer');
     });
   });
 

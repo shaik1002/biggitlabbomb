@@ -22,6 +22,10 @@ describe('Snippet Description Edit component', () => {
     });
   }
 
+  function isHidden(sel) {
+    return wrapper.find(sel).classes('d-none');
+  }
+
   beforeEach(() => {
     createComponent();
   });
@@ -31,10 +35,19 @@ describe('Snippet Description Edit component', () => {
       expect(wrapper.element).toMatchSnapshot();
     });
 
-    it('renders the description field', () => {
+    it('renders the field expanded when description exists', () => {
+      expect(wrapper.find('.js-collapsed').classes('d-none')).toBe(true);
+      expect(wrapper.find('.js-expanded').classes('d-none')).toBe(false);
+
+      expect(isHidden('.js-collapsed')).toBe(true);
+      expect(isHidden('.js-expanded')).toBe(false);
+    });
+
+    it('renders the field collapsed if there is no description yet', () => {
       createComponent('');
 
-      expect(wrapper.find('.md-area').exists()).toBe(true);
+      expect(isHidden('.js-collapsed')).toBe(false);
+      expect(isHidden('.js-expanded')).toBe(true);
     });
   });
 

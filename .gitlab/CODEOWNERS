@@ -39,7 +39,6 @@ config/bounded_contexts.yml @fabiopitino @grzesiek @stanhu @cwoolley-gitlab @tku
 ^[Backend] @gitlab-org/maintainers/rails-backend
 *.rb
 *.rake
-.rubocop_todo/
 
 ^[Frontend] @gitlab-org/maintainers/frontend
 *.scss
@@ -138,6 +137,7 @@ Dangerfile
 
 ^[Backend Static Code Analysis] @gl-quality/eng-prod @dstull
 .rubocop*.yml
+.rubocop_todo/
 /gems/config/rubocop.yml
 /rubocop/
 /spec/rubocop/
@@ -523,6 +523,7 @@ lib/gitlab/checks/**
 /doc/administration/audit_event_reports.md @eread
 /doc/administration/audit_event_schema.md @eread
 /doc/administration/audit_event_streaming/ @eread
+/doc/administration/audit_event_types.md @eread
 /doc/administration/auditor_users.md @jglassman1
 /doc/administration/auth/ @jglassman1
 /doc/administration/backup_restore/ @axil
@@ -595,10 +596,13 @@ lib/gitlab/checks/**
 /doc/administration/redis/ @axil
 /doc/administration/reference_architectures/ @axil
 /doc/administration/reply_by_email_postfix_setup.md @axil
-/doc/administration/reporting/ @axil
+/doc/administration/reporting/ @phillipwells
+/doc/administration/reporting/spamcheck.md @axil
 /doc/administration/repository_checks.md @eread
 /doc/administration/repository_storage_paths.md @eread
 /doc/administration/restart_gitlab.md @axil
+/doc/administration/review_abuse_reports.md @phillipwells
+/doc/administration/review_spam_logs.md @phillipwells
 /doc/administration/server_hooks.md @eread
 /doc/administration/settings/account_and_limit_settings.md @msedlakjakubowski
 /doc/administration/settings/continuous_integration.md @marcel.amirault @lyspin
@@ -617,7 +621,6 @@ lib/gitlab/checks/**
 /doc/administration/settings/package_registry_rate_limits.md @phillipwells
 /doc/administration/settings/project_integration_management.md @eread @ashrafkhamis
 /doc/administration/settings/push_event_activities_limit.md @msedlakjakubowski
-/doc/administration/settings/rate_limit_on_groups_api.md @lciutacu
 /doc/administration/settings/rate_limit_on_issues_creation.md @msedlakjakubowski
 /doc/administration/settings/rate_limit_on_members_api.md @lciutacu
 /doc/administration/settings/rate_limit_on_notes_creation.md @msedlakjakubowski
@@ -681,8 +684,6 @@ lib/gitlab/checks/**
 /doc/api/geo_nodes.md @axil
 /doc/api/geo_sites.md @axil
 /doc/api/google_cloud_integration.md @jglassman1
-/doc/api/graphql/audit_event_streaming_groups.md @eread
-/doc/api/graphql/audit_event_streaming_instances.md @eread
 /doc/api/graphql/audit_report.md @eread
 /doc/api/graphql/branch_rules.md @msedlakjakubowski
 /doc/api/graphql/custom_emoji.md @msedlakjakubowski
@@ -874,9 +875,12 @@ lib/gitlab/checks/**
 /doc/install/ @axil
 /doc/integration/ @jglassman1
 /doc/integration/advanced_search/ @ashrafkhamis
+/doc/integration/akismet.md @phillipwells
+/doc/integration/arkose.md @phillipwells
 /doc/integration/datadog.md @fneill
 /doc/integration/diffblue_cover.md @marcel.amirault @lyspin
 /doc/integration/external-issue-tracker.md @eread @ashrafkhamis
+/doc/integration/github.md @marcel.amirault @lyspin
 /doc/integration/gitpod.md @ashrafkhamis
 /doc/integration/gmail_action_buttons_for_gitlab.md @eread @ashrafkhamis
 /doc/integration/index.md @eread @ashrafkhamis
@@ -884,7 +888,7 @@ lib/gitlab/checks/**
 /doc/integration/jira/ @eread @ashrafkhamis
 /doc/integration/mattermost/ @axil
 /doc/integration/partner_marketplace.md @fneill
-/doc/integration/snowflake.md @eread
+/doc/integration/recaptcha.md @phillipwells
 /doc/integration/sourcegraph.md @msedlakjakubowski
 /doc/integration/trello_power_up.md @eread @ashrafkhamis
 /doc/integration/vault.md @phillipwells
@@ -894,6 +898,8 @@ lib/gitlab/checks/**
 /doc/raketasks/spdx.md @rdickenson
 /doc/raketasks/x509_signatures.md @msedlakjakubowski
 /doc/security/ @jglassman1
+/doc/security/email_verification.md @phillipwells
+/doc/security/identity_verification.md @phillipwells
 /doc/solutions/ @jfullam @brianwald @Darwinjs
 /doc/subscriptions/ @fneill
 /doc/subscriptions/gitlab_dedicated/ @lyspin
@@ -935,10 +941,9 @@ lib/gitlab/checks/**
 /doc/user/application_security/ @rdickenson
 /doc/user/asciidoc.md @msedlakjakubowski
 /doc/user/clusters/ @phillipwells
-/doc/user/compliance/ @eread
-/doc/user/compliance/license_approval_policies.md @rdickenson
-/doc/user/compliance/license_list.md @rdickenson
-/doc/user/compliance/license_scanning_of_cyclonedx_files/ @rdickenson
+/doc/user/compliance/ @rdickenson
+/doc/user/compliance/compliance_center/ @eread
+/doc/user/compliance/index.md @eread
 /doc/user/custom_roles.md @jglassman1
 /doc/user/custom_roles/ @jglassman1
 /doc/user/discussions/ @aqualls
@@ -966,7 +971,9 @@ lib/gitlab/checks/**
 /doc/user/group/issues_analytics/ @lciutacu
 /doc/user/group/iterations/ @msedlakjakubowski
 /doc/user/group/manage.md @lciutacu
+/doc/user/group/moderate_users.md @phillipwells
 /doc/user/group/planning_hierarchy/ @msedlakjakubowski
+/doc/user/group/reporting/ @phillipwells
 /doc/user/group/repositories_analytics/ @marcel.amirault @lyspin
 /doc/user/group/roadmap/ @msedlakjakubowski
 /doc/user/group/saml_sso/ @jglassman1
@@ -1047,6 +1054,7 @@ lib/gitlab/checks/**
 /doc/user/project/web_ide/ @ashrafkhamis
 /doc/user/project/working_with_projects.md @lciutacu
 /doc/user/public_access.md @lciutacu
+/doc/user/report_abuse.md @phillipwells
 /doc/user/reserved_names.md @lciutacu
 /doc/user/search/ @ashrafkhamis
 /doc/user/search/command_palette.md @sselhorn
@@ -1241,10 +1249,12 @@ lib/gitlab/checks/**
 /ee/app/controllers/groups/scim_oauth_controller.rb
 /ee/app/controllers/oauth/
 /ee/app/controllers/omniauth_kerberos_controller.rb
+/ee/app/controllers/users/registrations_identity_verification_controller.rb
 /ee/app/finders/auth/
 /ee/app/helpers/ee/access_tokens_helper.rb
 /ee/app/helpers/ee/auth_helper.rb
 /ee/app/helpers/ee/personal_access_tokens_helper.rb
+/ee/app/models/concerns/identity_verifiable.rb
 /ee/app/models/concerns/password_complexity.rb
 /ee/app/models/ee/personal_access_token.rb
 /ee/app/models/ee/project_authorization.rb
@@ -1555,10 +1565,8 @@ ee/lib/ee/api/entities/project.rb
 /ee/spec/frontend/remote_development/
 /ee/spec/frontend/**/remote_development/
 
-[Govern::Anti-abuse] @gitlab-org/modelops/anti-abuse
+^[Govern::Anti-abuse] @gitlab-org/modelops/anti-abuse
 /ee/app/controllers/users/registrations_identity_verification_controller.rb
-/ee/app/controllers/users/base_identity_verification_controller.rb
-/ee/app/controllers/users/identity_verification_controller.rb
 /ee/app/models/concerns/identity_verifiable.rb
 /ee/config/routes/identity_verification.rb
 

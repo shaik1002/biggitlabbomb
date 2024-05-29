@@ -149,6 +149,8 @@ describe('convertToApiParams', () => {
   });
 
   it('returns api params given filtered tokens with special values', () => {
+    setWindowLocation('?assignee_id=123');
+
     expect(convertToApiParams(filteredTokensWithSpecialValues)).toEqual(apiParamsWithSpecialValues);
   });
 });

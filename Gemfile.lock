@@ -701,7 +701,7 @@ GEM
       fog-core (~> 2.1)
       fog-json (~> 1.2)
       mime-types
-    gitlab-glfm-markdown (0.0.17)
+    gitlab-glfm-markdown (0.0.16)
       rb_sys (= 0.9.94)
     gitlab-labkit (0.36.0)
       actionpack (>= 5.0.0, < 8.0.0)
@@ -1112,8 +1112,8 @@ GEM
     mustermann-grape (1.0.2)
       mustermann (>= 1.0.0)
     nap (1.1.0)
-    neighbor (0.3.2)
-      activerecord (>= 6.1)
+    neighbor (0.2.3)
+      activerecord (>= 5.2)
     nenv (0.3.0)
     net-http (0.1.1)
       net-protocol
@@ -1378,7 +1378,7 @@ GEM
     prime (0.1.2)
       forwardable
       singleton
-    prism (0.29.0)
+    prism (0.24.0)
     proc_to_ast (0.1.0)
       coderay
       parser
@@ -1484,7 +1484,7 @@ GEM
       actionpack (>= 5, < 8)
       redis-rack (>= 2.1.0, < 4)
       redis-store (>= 1.1.0, < 2)
-    redis-client (0.22.2)
+    redis-client (0.22.1)
       connection_pool
     redis-cluster-client (0.8.2)
       redis-client (~> 0.22)
@@ -1604,9 +1604,9 @@ GEM
     ruby-fogbugz (0.3.0)
       crack (~> 0.4)
       multipart-post (~> 2.0)
-    ruby-lsp (0.16.7)
+    ruby-lsp (0.16.6)
       language_server-protocol (~> 3.17.0)
-      prism (>= 0.29.0, < 0.30)
+      prism (>= 0.23.0, < 0.28)
       sorbet-runtime (>= 0.5.10782)
     ruby-lsp-rails (0.3.5)
       ruby-lsp (>= 0.16.0, < 0.17.0)
@@ -2000,7 +2000,7 @@ DEPENDENCIES
   gitlab-dangerfiles (~> 4.7.0)
   gitlab-experiment (~> 0.9.1)
   gitlab-fog-azure-rm (~> 1.9.1)
-  gitlab-glfm-markdown (~> 0.0.17)
+  gitlab-glfm-markdown (~> 0.0.16)
   gitlab-housekeeper!
   gitlab-http!
   gitlab-labkit (~> 0.36.0)
@@ -2094,7 +2094,7 @@ DEPENDENCIES
   mini_magick (~> 4.12)
   minitest (~> 5.11.0)
   multi_json (~> 1.14.1)
-  neighbor (~> 0.3.2)
+  neighbor (~> 0.2.3)
   net-http (= 0.1.1)
   net-ldap (~> 0.17.1)
   net-ntp
@@ -2191,7 +2191,7 @@ DEPENDENCIES
   rspec_profiling (~> 0.0.9)
   rubocop
   ruby-fogbugz (~> 0.3.0)
-  ruby-lsp (~> 0.16.7)
+  ruby-lsp (~> 0.16.6)
   ruby-lsp-rails (~> 0.3.3)
   ruby-lsp-rspec (~> 0.1.10)
   ruby-magic (~> 0.6)

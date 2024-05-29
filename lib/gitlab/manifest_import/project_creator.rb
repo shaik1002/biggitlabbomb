@@ -21,7 +21,6 @@ module Gitlab
           import_source: repository[:url],
           import_type: 'manifest',
           namespace_id: group.id,
-          organization_id: group.organization_id,
           path: project_path,
           name: project_path,
           visibility_level: destination.visibility_level

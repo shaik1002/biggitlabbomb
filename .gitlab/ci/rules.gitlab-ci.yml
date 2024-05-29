@@ -408,6 +408,9 @@
 .frontend-predictive-patterns: &frontend-predictive-patterns
   - "{,ee/,jh/}{app/assets/javascripts,spec/frontend}/**/*"
 
+.frontend-predictive-patterns-as-if-foss: &frontend-predictive-patterns-as-if-foss
+  - "{app/assets/javascripts,spec/frontend}/**/*"
+
 # Frontend view patterns + .qa-patterns
 .frontend-qa-patterns: &frontend-qa-patterns
   - "{,ee/,jh/}{app/assets,app/components,app/helpers,app/presenters,app/views}/**/*"
@@ -1256,6 +1259,17 @@
     - <<: *if-default-refs
       changes: *workhorse-patterns
 
+.frontend:rules:compile-test-assets-as-if-foss:
+  rules:
+    - !reference [".strict-ee-only-rules", rules]
+    - <<: *if-merge-request-labels-as-if-foss
+    - <<: *if-merge-request-labels-run-all-rspec
+    - <<: *if-merge-request-labels-frontend-and-feature-flag
+    - <<: *if-default-refs
+      changes: *code-backstage-qa-patterns
+    - <<: *if-default-refs
+      changes: *workhorse-patterns
+
 .frontend:rules:default-frontend-jobs:
   rules:
     - <<: *if-merge-request-labels-pipeline-expedite
@@ -1322,6 +1336,20 @@
     - <<: *if-default-refs
       changes: *code-backstage-patterns
 
+.frontend:rules:frontend_fixture-as-if-foss:
+  rules:
+    - !reference [".strict-ee-only-rules", rules]
+    - <<: *if-merge-request-labels-pipeline-expedite
+      when: never
+    - <<: *if-merge-request-labels-as-if-foss
+    - <<: *if-merge-request-labels-run-all-rspec
+    - <<: *if-merge-request-labels-run-all-jest
+    - <<: *if-merge-request-labels-frontend-and-feature-flag
+    - <<: *if-security-merge-request
+      changes: *code-backstage-patterns
+    - <<: *if-merge-request
+      changes: *frontend-predictive-patterns-as-if-foss
+
 .frontend:rules:upload-frontend-fixtures:
   rules:
     # The new strategy to upload fixtures as generic packages is experimental and can be disabled by removing the `REUSE_FRONTEND_FIXTURES_ENABLED` variable
@@ -1374,7 +1402,6 @@
     - <<: *if-merge-request
       changes: *frontend-dependency-patterns
       when: never
-    - if: '$ENABLE_JEST_PREDICTIVE == "true"'
     - <<: *if-merge-request
       changes: [".gitlab/ci/frontend.gitlab-ci.yml"]  # When this file is modified, we run full Jest jobs
       when: never
@@ -1398,6 +1425,20 @@
     # From .frontend:rules:default-frontend-jobs
     - <<: *if-default-refs
       changes: *code-backstage-patterns
+
+.frontend:rules:jest:predictive-as-if-foss:
+  rules:
+    - !reference [".strict-ee-only-rules", rules]
+    - !reference [".frontend:rules:predictive-default-rules", rules]
+    - <<: *if-merge-request-labels-as-if-foss
+      when: never
+    - <<: *if-merge-request
+      changes: *frontend-dependency-patterns
+      when: never
+    - <<: *if-fork-merge-request
+      when: never
+    - <<: *if-merge-request
+      changes: *frontend-predictive-patterns-as-if-foss
 
 .frontend:rules:coverage-frontend:
   rules:
@@ -1772,9 +1813,6 @@
     - <<: [*if-dot-com-gitlab-org-schedule, *qa-e2e-test-schedule-variables]
     - <<: *if-merge-request
       changes: *qa-patterns
-    - <<: *if-merge-request
-      changes:
-        - gems/gitlab-cng/**/*.rb
 
 .qa:rules:package-and-test-nightly:
   rules:
@@ -1997,11 +2035,6 @@
       allow_failure: true
     - if: '$CI_MERGE_REQUEST_LABELS =~ /pipeline:run-praefect-with-db/'
       allow_failure: true
-
-.rails:rules:gitaly-without-transactions:
-  rules:
-    - <<: *if-schedule-maintenance
-    - if: '$CI_MERGE_REQUEST_LABELS =~ /pipeline:run-without-gitaly-transactions/'
 
 .rails:rules:ee-and-foss-migration:
   rules:
@@ -2344,6 +2377,7 @@
       changes: *workhorse-patterns
     - <<: *if-merge-request
       changes: *rubocop-patterns
+
 
 .rails:rules:detect-previous-failed-tests:
   rules:

@@ -64,7 +64,6 @@ apifuzzer_fuzz:
     script:
         - /peach/analyzer-fuzz-api
     artifacts:
-        access: 'developer'
         when: always
         paths:
             - gl-assets

@@ -9,6 +9,7 @@ import toast from '~/vue_shared/plugins/global_toast';
 import { isLoggedIn } from '~/lib/utils/common_utils';
 
 import updateWorkItemNotificationsMutation from '../graphql/update_work_item_notifications.mutation.graphql';
+import projectWorkItemTypesQuery from '../graphql/project_work_item_types.query.graphql';
 
 const ICON_ON = 'notifications';
 const ICON_OFF = 'notifications-off';
@@ -56,6 +57,22 @@ export default {
       isLockDiscussionUpdating: false,
       emailsDisabled: false,
     };
+  },
+  apollo: {
+    workItemTypes: {
+      query: projectWorkItemTypesQuery,
+      variables() {
+        return {
+          fullPath: this.fullPath,
+        };
+      },
+      update(data) {
+        return data.workspace?.workItemTypes?.nodes;
+      },
+      skip() {
+        return !this.canUpdate;
+      },
+    },
   },
   computed: {
     notificationTooltip() {

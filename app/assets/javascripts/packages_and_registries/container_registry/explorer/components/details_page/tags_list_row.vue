@@ -27,7 +27,6 @@ import {
   NOT_AVAILABLE_SIZE,
   MORE_ACTIONS_TEXT,
   COPY_IMAGE_PATH_TITLE,
-  SIGNATURE_BADGE_TOOLTIP,
 } from '../../constants/index';
 import SignatureDetailsModal from './signature_details_modal.vue';
 
@@ -79,7 +78,6 @@ export default {
     MISSING_MANIFEST_WARNING_TOOLTIP,
     MORE_ACTIONS_TEXT,
     COPY_IMAGE_PATH_TITLE,
-    SIGNATURE_BADGE_TOOLTIP,
   },
   data() {
     return {
@@ -194,7 +192,7 @@ export default {
     </template>
 
     <template v-if="signatures.length" #left-after-toggle>
-      <gl-badge v-gl-tooltip.d0="$options.i18n.SIGNATURE_BADGE_TOOLTIP" class="gl-ml-4">
+      <gl-badge icon="check-circle" variant="success" class="gl-ml-4">
         {{ s__('ContainerRegistry|Signed') }}
       </gl-badge>
     </template>

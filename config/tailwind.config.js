@@ -107,34 +107,6 @@ module.exports = {
       9: '.9',
       10: '1',
     },
-    // TODO: Backport to GitLab UI
-    zIndex: {
-      0: '0',
-      1: '1',
-      2: '2',
-      3: '3',
-      200: '200',
-      9999: '9999',
-    },
-    // TODO: Backport to GitLab UI.
-    lineHeight: {
-      reset: 'inherit',
-      0: '0',
-      1: '1',
-      normal: '1rem',
-      20: '1.25rem',
-      24: '1.5rem',
-      28: '1.75rem',
-      32: '2rem',
-      36: '2.25rem',
-      42: '2.625rem',
-    },
-    transitionDuration: {
-      DEFAULT: '200ms',
-      slow: '400ms',
-      medium: '200ms',
-      fast: '100ms',
-    },
     // These extends probably should be moved to GitLab UI:
     extend: {
       // TODO: Backport to GitLab UI. This should be part of the default colors config.
@@ -165,7 +137,6 @@ module.exports = {
         'inner-l-4-gray-100': 'inset 4px 0 0 0 var(--gray-100, #dcdcde)',
         'inner-1-red-400': 'inset 0 0 0 1px var(--red-400, #ec5941)',
         'inner-1-gray-400': 'inset 0 0 0 1px var(--gray-400, #89888d)',
-        'inner-2-blue-400': 'inset 0 0 0 2px var(--blue-400, #428fdc)',
         'inner-1-blue-500': 'inset 0 0 0 1px var(--blue-500, #1f75cb)',
         'inner-1-red-500': 'inset 0 0 0 1px var(--red-500, #dd2b0e)',
         'inner-l-3-red-600': 'inset 3px 0 0 0 var(--red-600, #c91c00)',
@@ -193,15 +164,16 @@ module.exports = {
         limited: '1006px',
         '1/2': '50%',
       },
+      zIndex: {
+        1: '1',
+        2: '2',
+        3: '3',
+        200: '200',
+        9999: '9999',
+      },
       transitionProperty: {
         stroke: 'stroke',
         'stroke-opacity': 'stroke-opacity',
-      },
-      transitionTimingFunction: {
-        DEFAULT: 'ease',
-      },
-      gridTemplateRows: {
-        auto: 'auto',
       },
     },
   },

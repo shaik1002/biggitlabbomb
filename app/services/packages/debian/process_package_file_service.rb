@@ -32,7 +32,7 @@ module Packages
             cleanup_temp_package
           end
 
-          ::Packages::Debian::GenerateDistributionWorker.perform_async(:project, package.distribution.id)
+          ::Packages::Debian::GenerateDistributionWorker.perform_async(:project, package.debian_distribution.id)
         end
       end
 
@@ -90,9 +90,10 @@ module Packages
       end
 
       def package
-        packages = ::Packages::Debian::Package.for_projects(temp_package.project)
-                                            .existing_packages_with(name: package_name, version: package_version)
-        package = packages.with_codename_or_suite(package_distribution)
+        packages = temp_package.project
+                               .packages
+                               .existing_debian_packages_with(name: package_name, version: package_version)
+        package = packages.with_debian_codename_or_suite(package_distribution)
                           .first
 
         unless package
@@ -100,7 +101,7 @@ module Packages
 
           if package_in_other_distribution
             raise ArgumentError, "Debian package #{package_name} #{package_version} exists " \
-                                 "in distribution #{package_in_other_distribution.distribution.codename}"
+                                 "in distribution #{package_in_other_distribution.debian_distribution.codename}"
           end
         end
 
@@ -152,7 +153,7 @@ module Packages
         return unless using_temporary_package?
 
         package.update!(
-          publication_attributes: { distribution_id: distribution.id }
+          debian_publication_attributes: { distribution_id: distribution.id }
         )
       end
 

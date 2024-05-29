@@ -33,9 +33,5 @@ FactoryBot.define do
     trait :skipped do
       status { -2 }
     end
-
-    trait :canceled do
-      status { -3 }
-    end
   end
 end

@@ -1,24 +1,9 @@
-mutation editBrachRule($input: BranchRuleUpdateInput!) {
-  branchRuleUpdate(input: $input) {
+mutation editBrachRule($id: ProjectsBranchRuleID!, $name: String!) {
+  branchRuleUpdate(input: { id: $id, name: $name }) {
     errors
     branchRule {
       id
       name
-      branchProtection {
-        allowForcePush
-        pushAccessLevels {
-          nodes {
-            accessLevel
-            accessLevelDescription
-          }
-        }
-        mergeAccessLevels {
-          nodes {
-            accessLevel
-            accessLevelDescription
-          }
-        }
-      }
     }
   }
 }

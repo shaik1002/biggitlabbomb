@@ -27,8 +27,8 @@ describe('Branch rule protection', () => {
   const findHeader = () => wrapper.findByText(protectionPropsMock.header);
   const findLink = () => wrapper.findComponent(GlLink);
   const findProtectionRows = () => wrapper.findAllComponents(ProtectionRow);
+  const findEditButton = () => wrapper.findByTestId('edit-button');
   const findEmptyState = () => wrapper.findByTestId('protection-empty-state');
-  const findEditButton = () => wrapper.findByTestId('edit-rule-button');
 
   it('renders a card component', () => {
     expect(findCard().exists()).toBe(true);
@@ -58,24 +58,31 @@ describe('Branch rule protection', () => {
     });
   });
 
-  it('renders a protection row for users and groups', () => {
+  it('renders a protection row for users', () => {
     expect(findProtectionRows().at(1).props()).toMatchObject({
-      showDivider: true,
-      groups: protectionPropsMock.groups,
       users: protectionPropsMock.users,
-      title: i18n.usersAndGroupsTitle,
+      showDivider: true,
+      title: i18n.usersTitle,
+    });
+  });
+
+  it('renders a protection row for groups', () => {
+    expect(findProtectionRows().at(2).props()).toMatchObject({
+      accessLevels: protectionPropsMock.groups,
+      showDivider: true,
+      title: i18n.groupsTitle,
     });
   });
 
   it('renders a protection row for status checks', () => {
     const statusCheck = protectionPropsMock.statusChecks[0];
-    expect(findProtectionRows().at(2).props()).toMatchObject({
+    expect(findProtectionRows().at(3).props()).toMatchObject({
       title: statusCheck.name,
       showDivider: false,
       statusCheckUrl: statusCheck.externalUrl,
     });
 
-    expect(findProtectionRows().at(3).props('showDivider')).toBe(true);
+    expect(findProtectionRows().at(4).props('showDivider')).toBe(true);
   });
 
   describe('When `isEditAvailable` prop is set to true', () => {

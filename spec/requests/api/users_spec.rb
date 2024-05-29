@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe API::Users, :aggregate_failures, feature_category: :user_management do
+RSpec.describe API::Users, :aggregate_failures, feature_category: :user_profile do
   include WorkhorseHelpers
   include KeysetPaginationHelpers
   include CryptoHelpers
@@ -1608,21 +1608,15 @@ RSpec.describe API::Users, :aggregate_failures, feature_category: :user_manageme
     end
 
     context 'updating password' do
+      # user should have `last_on_activity` set to today,
+      # so that `Users::ActivityService` does not register any more updates.
+      let_it_be(:admin) { create(:admin, :with_last_activity_on_today) }
+
       def update_password(user, admin, password = User.random_password)
         put api("/users/#{user.id}", admin, admin_mode: true), params: { password: password }
       end
 
       context 'admin updates their own password' do
-        # `Users::ActivityService` should not be allowed to execute
-        # as the same fails on update user_details
-        # This prevents a failure we saw in
-        # https://gitlab.com/gitlab-org/quality/engineering-productivity/master-broken-incidents/-/issues/6616
-        before do
-          allow_next_instance_of(Users::ActivityService) do |service|
-            allow(service).to receive(:execute).and_return(true)
-          end
-        end
-
         it 'does not force reset on next login' do
           update_password(admin, admin)
 
@@ -2198,7 +2192,7 @@ RSpec.describe API::Users, :aggregate_failures, feature_category: :user_manageme
     end
   end
 
-  describe 'GET /users/:id/project_deploy_keys', feature_category: :continuous_delivery do
+  describe 'GET /users/:id/project_deploy_keys' do
     let(:project) { create(:project) }
     let(:path) { "/users/#{user.id}/project_deploy_keys" }
 

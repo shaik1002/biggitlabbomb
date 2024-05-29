@@ -323,28 +323,6 @@ Offset-based pagination for the [List registry repository tags](https://docs.git
 
 </div>
 
-<div class="deprecation breaking-change" data-milestone="18.0">
-
-### OpenTofu CI/CD template
-
-<div class="deprecation-notes">
-- Announced in GitLab <span class="milestone">17.1</span>
-- Removal in GitLab <span class="milestone">18.0</span> ([breaking change](https://docs.gitlab.com/ee/update/terminology.html#breaking-change))
-- To discuss this change or learn more, see the [deprecation issue](https://gitlab.com/components/opentofu/-/issues/43#note_1913822299).
-</div>
-
-We introduces the OpenTofu CI/CD template in 16.8 as CI/CD components were not available for self-managed installations yet.
-With the introduction of [GitLab CI/CD components for self-managed users](https://docs.gitlab.com/ee/ci/components/#use-a-gitlabcom-component-in-a-self-managed-instance)
-we are removing the redundant OpenTofu CI/CD templates in favor of the CI/CD components.
-
-We introduced the OpenTofu CI/CD template in 16.8 because CI/CD components were not yet available for self-managed instances.
-With the introduction of [GitLab CI/CD components for self-managed users](https://docs.gitlab.com/ee/ci/components/#use-a-gitlabcom-component-in-a-self-managed-instance),
-we are removing the redundant OpenTofu CI/CD templates in favor of the [OpenTofu CI/CD component](https://gitlab.com/components/opentofu).
-
-For information about migrating from the CI/CD template to the component, see the [OpenTofu component documentation](https://gitlab.com/components/opentofu#usage-on-self-managed).
-
-</div>
-
 <div class="deprecation " data-milestone="18.0">
 
 ### Project page in group settings is deprecated
@@ -620,21 +598,6 @@ Toggling notes confidentiality with REST and GraphQL APIs is being deprecated. U
 
 <div class="deprecation breaking-change" data-milestone="18.0">
 
-### ZenTao integration
-
-<div class="deprecation-notes">
-- Announced in GitLab <span class="milestone">15.7</span>
-- Removal in GitLab <span class="milestone">18.0</span> ([breaking change](https://docs.gitlab.com/ee/update/terminology.html#breaking-change))
-- To discuss this change or learn more, see the [deprecation issue](https://gitlab.com/gitlab-org/gitlab/-/issues/377825).
-</div>
-
-The [ZenTao product integration](https://docs.gitlab.com/ee/user/project/integrations/zentao.html) has been deprecated
-and will be moved to the JiHu GitLab codebase.
-
-</div>
-
-<div class="deprecation breaking-change" data-milestone="18.0">
-
 ### `GITLAB_SHARED_RUNNERS_REGISTRATION_TOKEN` is deprecated
 
 <div class="deprecation-notes">
@@ -710,22 +673,6 @@ We encourage GitLab administrators to switch to the webhook delivery method for
 
 [Issue 393157](https://gitlab.com/gitlab-org/gitlab/-/issues/393157) tracks improving email ingestion in general.
 We hope this will simplify infrastructure setup and add several improvements to how you manage GitLab in the near future.
-
-</div>
-
-<div class="deprecation breaking-change" data-milestone="18.0">
-
-### `workflow:rules` templates
-
-<div class="deprecation-notes">
-- Announced in GitLab <span class="milestone">17.0</span>
-- Removal in GitLab <span class="milestone">18.0</span> ([breaking change](https://docs.gitlab.com/ee/update/terminology.html#breaking-change))
-- To discuss this change or learn more, see the [deprecation issue](https://gitlab.com/gitlab-org/gitlab/-/issues/456394).
-</div>
-
-The [`workflow:rules`](https://docs.gitlab.com/ee/ci/yaml/workflow.html#workflowrules-templates) templates are deprecated and no longer recommended for use. Using these templates greatly limits the flexibility of your pipelines and makes it hard to use new `workflow` features.
-
-This is one small step towards moving away from CI/CD templates in preference of [CI/CD components](https://docs.gitlab.com/ee/ci/components/). You can search the [CI/CD Catalog](https://docs.gitlab.com/ee/ci/components/#cicd-catalog) for a replacement, or [add `workflow:rules`](https://docs.gitlab.com/ee/ci/yaml/workflow.html) to your pipeline explicitly.
 
 </div>
 </div>
@@ -3950,6 +3897,21 @@ In GitLab 15.10 we added support for using internal IDs (IID) in that path by ap
 the end (`iid_path`) in the following format: `https://gitlab.com/gitlab-org/gitlab/-/work_items/<iid>?iid_path=true`.
 
 In GitLab 16.0 we will remove the ability to use a global ID in the work items path. The number at the end of the path will be considered an internal ID (IID) without the need of adding a query param at the end. Only the following format will be supported: `https://gitlab.com/gitlab-org/gitlab/-/work_items/<iid>`.
+
+</div>
+
+<div class="deprecation breaking-change" data-milestone="16.0">
+
+### ZenTao integration
+
+<div class="deprecation-notes">
+- Announced in GitLab <span class="milestone">15.7</span>
+- Removal in GitLab <span class="milestone">16.0</span> ([breaking change](https://docs.gitlab.com/ee/update/terminology.html#breaking-change))
+- To discuss this change or learn more, see the [deprecation issue](https://gitlab.com/gitlab-org/gitlab/-/issues/377825).
+</div>
+
+The [ZenTao product integration](https://docs.gitlab.com/ee/user/project/integrations/zentao.html) has been deprecated
+and will be moved to the JiHu GitLab codebase.
 
 </div>
 

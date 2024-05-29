@@ -70,9 +70,9 @@ module Gitlab
             type: 'container_scanning'
           },
           pre_receive_secret_detection: {
-            name: _('Secret push protection'),
+            name: _('Pre-receive Secret Detection'),
             description: _('Block secrets such as keys and API tokens from being pushed to your repositories. ' \
-                           'Secret push protection is triggered when commits are pushed to a repository. ' \
+                           'Pre-receive secret detection is triggered when commits are pushed to a repository. ' \
                            'If any secrets are detected, the push is blocked.'),
             help_path: Gitlab::Routing.url_helpers.help_page_path(
               'user/application_security/secret_detection/pre_receive/index'),

@@ -1,8 +1,0 @@
-fragment MergeRequestApprovalFragment on MergeRequest {
-  approved
-  approvedBy {
-    nodes {
-      id
-    }
-  }
-}

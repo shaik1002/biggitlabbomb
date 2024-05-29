@@ -1,4 +1,4 @@
-import { nextTick } from 'vue';
+import Vue, { nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
 import { projectData, branches } from 'jest/ide/mock_data';
 import CommitActions from '~/ide/components/commit_sidebar/actions.vue';
@@ -28,10 +28,7 @@ describe('IDE commit sidebar actions', () => {
     proj.branches[currentBranchId] = branches.find((branch) => branch.name === currentBranchId);
     proj.empty_repo = emptyRepo;
 
-    store.state.projects = {
-      ...store.state.projects,
-      abcproject: proj,
-    };
+    Vue.set(store.state.projects, 'abcproject', proj);
 
     if (hasMR) {
       store.state.currentMergeRequestId = '1';

@@ -648,7 +648,7 @@ export default {
           <strong class="gl-display-block">{{ s__('ProjectSettings|Additional options') }}</strong>
           <label
             v-if="visibilityLevel !== $options.VISIBILITY_LEVEL_PRIVATE_INTEGER"
-            class="gl-leading-28 gl-font-weight-normal gl-mb-0"
+            class="gl-line-height-28 gl-font-weight-normal gl-mb-0"
           >
             <input
               :value="requestAccessEnabled"
@@ -660,7 +660,7 @@ export default {
           </label>
           <label
             v-if="visibilityLevel !== $options.VISIBILITY_LEVEL_PUBLIC_INTEGER"
-            class="gl-leading-28 gl-font-weight-normal gl-display-block gl-mb-0"
+            class="gl-line-height-28 gl-font-weight-normal gl-display-block gl-mb-0"
           >
             <input
               :value="enforceAuthChecksOnUploads"
@@ -669,7 +669,7 @@ export default {
             />
             <input v-model="enforceAuthChecksOnUploads" type="checkbox" />
             {{ s__('ProjectSettings|Require authentication to view media files') }}
-            <span class="gl-text-gray-500 gl-display-block gl-ml-5 -gl-mt-3">{{
+            <span class="gl-text-gray-500 gl-display-block gl-ml-5 gl-mt-n3">{{
               s__('ProjectSettings|Prevents direct linking to potentially sensitive media files')
             }}</span>
           </label>

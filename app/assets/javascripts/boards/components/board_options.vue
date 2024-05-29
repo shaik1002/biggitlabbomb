@@ -10,13 +10,6 @@ import isShowingLabelsQuery from '~/graphql_shared/client/is_showing_labels.quer
 import setIsShowingLabelsMutation from '~/graphql_shared/client/set_is_showing_labels.mutation.graphql';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 
-import Tracking from '~/tracking';
-import { historyPushState } from '~/lib/utils/common_utils';
-import { mergeUrlParams, removeParams } from '~/lib/utils/url_utility';
-import { GroupByParamType } from 'ee_else_ce/boards/constants';
-
-const trackingMixin = Tracking.mixin();
-
 export default {
   components: {
     GlDisclosureDropdown,
@@ -28,7 +21,6 @@ export default {
   directives: {
     GlTooltipDirective,
   },
-  mixins: [trackingMixin],
   props: {
     showEpicLaneOption: {
       type: Boolean,
@@ -58,34 +50,8 @@ export default {
     },
   },
   methods: {
-    onToggleSwimLanes() {
-      // Track toggle event
-      this.track('click_toggle_swimlanes_button', {
-        label: 'toggle_swimlanes',
-        property: this.isSwimlanesOn ? 'off' : 'on',
-      });
-
-      // Track if the board has swimlane active
-      if (!this.isSwimlanesOn) {
-        this.track('click_toggle_swimlanes_button', {
-          label: 'swimlanes_active',
-        });
-      }
-
-      this.toggleEpicSwimlanes();
-    },
-    toggleEpicSwimlanes() {
-      if (this.isSwimlanesOn) {
-        historyPushState(removeParams(['group_by']), window.location.href, true);
-        this.$emit('toggleSwimlanes', false);
-      } else {
-        historyPushState(
-          mergeUrlParams({ group_by: GroupByParamType.epic }, window.location.href, {
-            spreadArrays: true,
-          }),
-        );
-        this.$emit('toggleSwimlanes', true);
-      }
+    toggleEpicsSwimlanes() {
+      this.$emit('toggleSwimlanes', !this.isSwimlanesOn);
     },
     setShowLabels() {
       this.$apollo.mutate({
@@ -136,7 +102,7 @@ export default {
     <gl-disclosure-dropdown-item
       v-if="showEpicLaneOption"
       data-testid="epic-swimlanes-toggle-item"
-      @action="onToggleSwimLanes"
+      @action="toggleEpicsSwimlanes"
     >
       <template #list-item>
         <toggle-epics-swimlanes :is-swimlanes-on="isSwimlanesOn" />

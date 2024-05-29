@@ -6,15 +6,14 @@ module Gitlab
       class LfsObject
         include Representable
 
-        expose_attribute :oid, :link, :size, :headers
+        expose_attribute :oid, :link, :size
 
         # Builds a lfs_object
         def self.from_api_response(lfs_object, additional_data = {})
           new(
             oid: lfs_object.oid,
             link: lfs_object.link,
-            size: lfs_object.size,
-            headers: lfs_object.headers
+            size: lfs_object.size
           )
         end
 

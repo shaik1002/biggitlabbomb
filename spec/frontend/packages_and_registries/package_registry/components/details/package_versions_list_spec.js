@@ -11,7 +11,7 @@ import PackageVersionsList from '~/packages_and_registries/package_registry/comp
 import PackagesListLoader from '~/packages_and_registries/shared/components/packages_list_loader.vue';
 import RegistryList from '~/packages_and_registries/shared/components/registry_list.vue';
 import VersionRow from '~/packages_and_registries/package_registry/components/details/version_row.vue';
-import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
+import Tracking from '~/tracking';
 import {
   CANCEL_DELETE_PACKAGE_VERSION_TRACKING_ACTION,
   CANCEL_DELETE_PACKAGE_VERSIONS_TRACKING_ACTION,
@@ -248,14 +248,10 @@ describe('PackageVersionsList', () => {
     const { findDeletePackagesModal } = uiElements;
 
     beforeEach(async () => {
-      eventSpy = mockTracking(undefined, undefined, jest.spyOn);
+      eventSpy = jest.spyOn(Tracking, 'event');
       mountComponent({ props: { canDestroy: true } });
       await waitForPromises();
       finderFunction().vm.$emit('delete', deletePayload);
-    });
-
-    afterEach(() => {
-      unmockTracking();
     });
 
     it('passes itemsToBeDeleted to the modal', () => {
@@ -312,13 +308,9 @@ describe('PackageVersionsList', () => {
     const { findDeletePackagesModal, findRegistryList } = uiElements;
 
     beforeEach(async () => {
-      eventSpy = mockTracking(undefined, undefined, jest.spyOn);
+      eventSpy = jest.spyOn(Tracking, 'event');
       mountComponent({ props: { canDestroy: true } });
       await waitForPromises();
-    });
-
-    afterEach(() => {
-      unmockTracking();
     });
 
     it('binds the right props', () => {

@@ -327,7 +327,7 @@ fieldset[disabled] .btn,
 
 copy-code {
   position: absolute;
-  @apply gl-transition-all;
+  @include gl-transition-medium;
   opacity: 0;
 
   top: 7px;

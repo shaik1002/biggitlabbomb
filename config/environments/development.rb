@@ -112,6 +112,4 @@ Rails.application.configure do
   end
 
   config.middleware.insert_before(ActionDispatch::Cookies, Gitlab::Middleware::StripCookies, paths: [%r{^/assets/}])
-
-  config.log_level = Gitlab::Utils.to_rails_log_level(ENV["GITLAB_LOG_LEVEL"], :debug)
 end

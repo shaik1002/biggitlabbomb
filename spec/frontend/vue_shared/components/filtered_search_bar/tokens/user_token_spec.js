@@ -210,7 +210,7 @@ describe('UserToken', () => {
 
       expect(baseTokenEl.props()).toMatchObject({
         suggestions: mockUsers,
-        valueIdentifier: expect.any(Function),
+        valueIdentifier: 'username',
         getActiveTokenValue: baseTokenEl.props('getActiveTokenValue'),
       });
     });

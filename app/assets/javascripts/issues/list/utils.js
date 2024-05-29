@@ -18,8 +18,6 @@ import {
   TOKEN_TYPE_TYPE,
   TOKEN_TYPE_HEALTH,
   TOKEN_TYPE_LABEL,
-  TOKEN_TYPE_EPIC,
-  TOKEN_TYPE_WEIGHT,
 } from '~/vue_shared/components/filtered_search_bar/constants';
 import { DEFAULT_PAGE_SIZE } from '~/vue_shared/issuable/list/constants';
 import {
@@ -285,12 +283,12 @@ export function groupMultiSelectFilterTokens(filterTokensToGroup, tokenDefs) {
 export const isNotEmptySearchToken = (token) =>
   !(token.type === FILTERED_SEARCH_TERM && !token.value.data);
 
-export const isAssigneeIdParam = (type, data) => {
-  return (
+export const isSpecialFilter = (type, data) => {
+  const isAssigneeIdParam =
     type === TOKEN_TYPE_ASSIGNEE &&
     isPositiveInteger(data) &&
-    getParameterByName(PARAM_ASSIGNEE_ID) === data
-  );
+    getParameterByName(PARAM_ASSIGNEE_ID) === data;
+  return specialFilterValues.includes(data) || isAssigneeIdParam;
 };
 
 const getFilterType = ({ type, value: { data, operator } }) => {
@@ -298,24 +296,16 @@ const getFilterType = ({ type, value: { data, operator } }) => {
   const isUnionedLabel = type === TOKEN_TYPE_LABEL && operator === OPERATOR_OR;
   const isAfter = operator === OPERATOR_AFTER;
 
-  if (isUnionedAuthor || isUnionedLabel || isAssigneeIdParam(type, data) || isAfter) {
+  if (isUnionedAuthor || isUnionedLabel || isAfter) {
     return ALTERNATIVE_FILTER;
   }
-  if (specialFilterValues.includes(data)) {
+  if (isSpecialFilter(type, data)) {
     return SPECIAL_FILTER;
   }
-
   return NORMAL_FILTER;
 };
 
-const wildcardTokens = [
-  TOKEN_TYPE_ITERATION,
-  TOKEN_TYPE_MILESTONE,
-  TOKEN_TYPE_RELEASE,
-  TOKEN_TYPE_EPIC,
-  TOKEN_TYPE_ASSIGNEE,
-  TOKEN_TYPE_WEIGHT,
-];
+const wildcardTokens = [TOKEN_TYPE_ITERATION, TOKEN_TYPE_MILESTONE, TOKEN_TYPE_RELEASE];
 
 const isWildcardValue = (tokenType, value) =>
   wildcardTokens.includes(tokenType) && specialFilterValues.includes(value);

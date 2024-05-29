@@ -13,7 +13,7 @@ import { stubComponent } from 'helpers/stub_component';
 import { mountExtended, extendedWrapper } from 'helpers/vue_test_utils_helper';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
+import Tracking from '~/tracking';
 import { s__ } from '~/locale';
 import { createAlert } from '~/alert';
 import {
@@ -181,16 +181,9 @@ describe('Package Files', () => {
   });
 
   describe('link', () => {
-    let trackingSpy;
-
-    beforeEach(() => {
-      trackingSpy = mockTracking(undefined, undefined, jest.spyOn);
+    beforeEach(async () => {
       createComponent();
-      return waitForPromises();
-    });
-
-    afterEach(() => {
-      unmockTracking();
+      await waitForPromises();
     });
 
     it('exists', () => {
@@ -202,9 +195,11 @@ describe('Package Files', () => {
     });
 
     it('tracks "download-file" event on click', () => {
+      const eventSpy = jest.spyOn(Tracking, 'event');
+
       findFirstRowDownloadLink().vm.$emit('click');
 
-      expect(trackingSpy).toHaveBeenCalledWith(
+      expect(eventSpy).toHaveBeenCalledWith(
         eventCategory,
         DOWNLOAD_PACKAGE_ASSET_TRACKING_ACTION,
         expect.any(Object),
@@ -869,29 +864,18 @@ describe('Package Files', () => {
       });
     });
   });
-
   describe('upload slot', () => {
     const resolver = jest.fn().mockResolvedValue(packageFilesQuery({ files: [file] }));
-    const findUploadSlot = () => wrapper.findByTestId('upload-slot');
+    const uploadSlotSpy = jest.fn();
+
+    const callFetchSlotProp = () => uploadSlotSpy.mock.calls[0][0].refetch();
 
     beforeEach(async () => {
       createComponent({
         resolver,
         options: {
           scopedSlots: {
-            upload(props) {
-              return this.$createElement('div', {
-                attrs: {
-                  'data-testid': 'upload-slot',
-                  ...props,
-                },
-                on: {
-                  click: () => {
-                    return props.refetch();
-                  },
-                },
-              });
-            },
+            upload: uploadSlotSpy,
           },
         },
       });
@@ -899,11 +883,11 @@ describe('Package Files', () => {
     });
 
     it('should render slot content', () => {
-      expect(findUploadSlot().attributes()).toMatchObject({ refetch: expect.anything() });
+      expect(uploadSlotSpy).toHaveBeenLastCalledWith({ refetch: expect.anything() });
     });
 
-    it('should refetch when clicked', async () => {
-      await findUploadSlot().trigger('click');
+    it('should refetch on change', () => {
+      callFetchSlotProp();
       expect(resolver).toHaveBeenCalledTimes(2);
     });
   });

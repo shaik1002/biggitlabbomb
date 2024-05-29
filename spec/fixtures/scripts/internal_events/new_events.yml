@@ -5,7 +5,6 @@
     - "Engineer uses Internal Event CLI to define a new event\n" # Submit description
     - "internal_events_cli_used\n" # Submit action name
     - "1\n" # Select: [namespace, project, user]
-    - "\n" # Select (add props): None! Continue to next step!
     - "\n" # Skip MR URL
     - "instrumentation" # Filters to the analytics instrumentation group
     - "\n" # Accept analytics:monitor:analytics_instrumentation
@@ -34,7 +33,6 @@
     - "\n" # Attempt to skip naming action --> should get help message
     - "internal_events_cli_used\n" # Submit action name
     - "1\n" # Select [namespace, project, user]
-    - "\n" # Select (add props): None! Continue to next step!
     - "\n" # Skip MR URL
     - "instrumentation" # Filters to the analytics instrumentation group
     - "\n" # Accept analytics:monitor:analytics_instrumentation
@@ -57,7 +55,6 @@
     - "internal_events_cli_used\n" # Submit already-existing action name
     - "internal_events_cli_closed\n" # Submit alterred action name
     - "1\n" # Select [namespace, project, user]
-    - "\n" # Select (add props): None! Continue to next step!
     - "\n" # Skip MR URL
     - "instrumentation" # Filters to the analytics instrumentation group
     - "\n" # Accept analytics:monitor:analytics_instrumentation
@@ -76,7 +73,6 @@
     - "Internal Event CLI is opened\n" # Submit description
     - "internal_events_cli_opened\n" # Submit action name
     - "6\n" # Select: None
-    - "\n" # Select (add props): None! Continue to next step!
     - "\n" # Skip MR URL
     - "instrumentation" # Filters to the analytics instrumentation group
     - "\n" # Accept analytics:monitor:analytics_instrumentation
@@ -95,7 +91,6 @@
     - "random event string\n" # Submit keyboard-smashing description
     - "random_name\n" # Submit keyboard-smashing action name
     - "\n" # Select: [namespace, project, user]
-    - "\n" # Select (add props): None! Continue to next step!
     - "\n" # Skip MR URL
     - "\n" # Select core_platform:manage:import_and_integrate
     - "\n" # Select [free, premium, ultimate]
@@ -131,7 +126,6 @@
     - "Internal Event CLI is opened\n" # Submit description
     - "internal_events_cli_opened\n" # Submit action name
     - "6\n" # Select: None
-    - "\n" # Select (add props): None! Continue to next step!
     - "\n" # Skip MR URL
     - "instrumentation" # Filters to the analytics instrumentation group
     - "\n" # Accept analytics:monitor:analytics_instrumentation
@@ -150,7 +144,6 @@
     - "Engineer uses Internal Event CLI to define a new event\n" # Submit description
     - "internal_events_cli_used\n" # Submit action name
     - "1\n" # Select: [namespace, project, user]
-    - "\n" # Select (add props): None! Continue to next step!
     - "\n" # Skip MR URL
     - "instrumentation" # Filters to the analytics instrumentation group
     - "\n" # Accept analytics:monitor:analytics_instrumentation
@@ -170,7 +163,6 @@
     - "Engineer uses Internal Event CLI to define a new event\n" # Submit description
     - "internal_events_cli_used\n" # Submit action name
     - "1\n" # Select: [namespace, project, user]
-    - "\n" # Select (add props): None! Continue to next step!
     - "\n" # Skip MR URL
     - "instrumentation" # Filters to the analytics instrumentation group
     - "\n" # Accept analytics:monitor:analytics_instrumentation
@@ -190,6 +182,7 @@
     - path: config/metrics/counts_all/count_total_internal_events_cli_used.yml
       content: spec/fixtures/scripts/internal_events/metrics/total_single_event.yml
 
+
 - description: Creates a new event with an entirely valid output
   inputs:
     keystrokes:
@@ -197,7 +190,6 @@
     - "Engineer uses Internal Event CLI to define a new event\n" # Submit description
     - "internal_events_cli_used\n" # Submit action name
     - "1\n" # Select: [namespace, project, user]
-    - "\n" # Select (add props): None! Continue to next step!
     - "https://gitlab.com/gitlab-org/gitlab/-/merge_requests/143433\n" # Submit MR URL
     - "instrumentation" # Filters to the analytics instrumentation group
     - "\n" # Accept analytics:monitor:analytics_instrumentation
@@ -208,50 +200,3 @@
     files:
     - path: config/events/internal_events_cli_used.yml
       content: spec/fixtures/scripts/internal_events/events/event_with_mr_url.yml
-
-- description: Creates a new event with some additional properties
-  inputs:
-    keystrokes:
-    - "1\n" # Enum-select: New Event -- start tracking when an action or scenario occurs on gitlab instances
-    - "Engineer uses Internal Event CLI to define a new event\n" # Submit description
-    - "internal_events_cli_used\n" # Submit action name
-    - "1\n" # Select: [namespace, project, user]
-    - "\e[B\n" # Select: String 1 (aka label)
-    - "\n" # Skip label description
-    - "\e[B\e[B\n" # Select: Number (aka value)
-    - "Time the CLI ran before closing (seconds)\n" # value description
-    - "\n" # Select (add props): None! Continue to next step!
-    - "\n" # Skip MR URL
-    - "instrumentation" # Filters to the analytics instrumentation group
-    - "\n" # Accept analytics:monitor:analytics_instrumentation
-    - "1\n" # Select: [free, premium, ultimate]
-    - "y\n" # Create file
-    - "3\n" # Exit
-  outputs:
-    files:
-    - path: config/events/internal_events_cli_used.yml
-      content: spec/fixtures/scripts/internal_events/events/event_with_additional_properties.yml
-
-- description: Auto-proceeds to MR selection when event uses all additional properties
-  inputs:
-    keystrokes:
-    - "1\n" # Enum-select: New Event -- start tracking when an action or scenario occurs on gitlab instances
-    - "Engineer uses Internal Event CLI to define a new event\n" # Submit description
-    - "internal_events_cli_used\n" # Submit action name
-    - "1\n" # Select: [namespace, project, user]
-    - "\e[B\n" # Arrow down to & Select: String 1 (aka label)
-    - "\n" # Skip label description
-    - "\e[B\n" # Arrow down to: String 2 (aka property)
-    - "\n" # Skip property description
-    - "\e[B\n" # Arrow down to: Number (aka value)
-    - "Time the CLI ran before closing (seconds)\n" # value description
-    - "\n" # Skip MR URL
-    - "instrumentation" # Filters to the analytics instrumentation group
-    - "\n" # Accept analytics:monitor:analytics_instrumentation
-    - "1\n" # Select: [free, premium, ultimate]
-    - "y\n" # Create file
-    - "3\n" # Exit
-  outputs:
-    files:
-    - path: config/events/internal_events_cli_used.yml
-      content: spec/fixtures/scripts/internal_events/events/event_with_all_additional_properties.yml

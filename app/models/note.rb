@@ -25,9 +25,6 @@ class Note < ApplicationRecord
   include Sortable
   include EachBatch
   include Spammable
-  include IgnorableColumns
-
-  ignore_column :imported, remove_with: '17.2', remove_after: '2024-07-22'
 
   cache_markdown_field :note, pipeline: :note, issuable_reference_expansion_enabled: true
 
@@ -159,7 +156,7 @@ class Note < ApplicationRecord
     includes(relations)
   end
 
-  scope :with_notes_filter, ->(notes_filter) do
+  scope :with_notes_filter, -> (notes_filter) do
     case notes_filter
     when UserPreference::NOTES_FILTERS[:only_comments]
       user

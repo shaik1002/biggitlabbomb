@@ -86,7 +86,7 @@ module QA
           return log_failure(resource, response) unless mark_for_deletion_possible?(resource)
 
           @permanently_delete ? delete_permanently(resource) : log_marked_for_deletion(resource)
-        elsif response&.code == HTTP_STATUS_NOT_FOUND
+        elsif response&.code == 404
           log_permanent_deletion(resource)
         else
           log_failure(resource, response)
@@ -98,7 +98,6 @@ module QA
 
         unless user_response.code == HTTP_STATUS_OK
           logger.error("Request for #{qa_username} returned (#{user_response.code}): `#{user_response}` ")
-          exit 1 if user_response.code == HTTP_STATUS_UNAUTHORIZED
           return
         end
 
@@ -136,7 +135,6 @@ module QA
             resources.concat(parse_body(response).select { |r| Date.parse(r[:created_at]) < @delete_before })
           else
             logger.error("Request for #{@type} returned (#{response.code}): `#{response}` ")
-            exit 1 if response.code == HTTP_STATUS_UNAUTHORIZED
           end
 
           page_no = response.headers[:x_next_page].to_s
@@ -265,7 +263,7 @@ module QA
       # @return [Boolean]
       def permanently_deleted?(resource)
         response = get(resource_request(resource))
-        response.code == HTTP_STATUS_NOT_FOUND
+        response.code == 404
       end
 
       # Prints failed deletion attempts
@@ -307,12 +305,11 @@ module QA
       def wait_for_resource_deletion(resource, permanent = false)
         wait_until(max_duration: 60, sleep_interval: 1, raise_on_failure: false) do
           response = get(resource_request(resource))
-          deleted = response&.code == HTTP_STATUS_NOT_FOUND
 
           if permanent
-            deleted
+            response&.code == 404
           else
-            deleted || (success?(response&.code) && marked_for_deletion?(parse_body(response)))
+            response&.code == 404 || (success?(response&.code) && marked_for_deletion?(parse_body(response)))
           end
         end
       end

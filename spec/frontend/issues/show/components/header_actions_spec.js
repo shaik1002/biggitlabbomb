@@ -137,7 +137,6 @@ describe('HeaderActions component', () => {
   const findReportAbuseButton = () => wrapper.findByTestId('report-abuse-item');
   const findCopyRefenceDropdownItem = () => wrapper.findByTestId('copy-reference');
   const findCopyEmailItem = () => wrapper.findByTestId('copy-email');
-  const findPromoteToEpicButton = () => wrapper.findByTestId('promote-button');
 
   const findModal = () => wrapper.findComponent(GlModal);
 
@@ -360,35 +359,7 @@ describe('HeaderActions component', () => {
     });
   });
 
-  describe('"Promote to epic" button behavior', () => {
-    describe('default', () => {
-      it('the button is enabled when the user can promote to epic', () => {
-        wrapper = mountComponent();
-
-        expect(findPromoteToEpicButton().props('item')).toMatchObject({
-          extraAttrs: { disabled: false },
-          text: 'Promote to epic',
-        });
-      });
-    });
-
-    describe('when request is in flight', () => {
-      it('disables the promote option', async () => {
-        wrapper = mountComponent({
-          promoteToEpicHandler: promoteToEpicMutationSuccessResponseHandler,
-        });
-
-        findPromoteToEpicButton().vm.$emit('action');
-
-        await nextTick();
-
-        expect(findPromoteToEpicButton().props('item')).toMatchObject({
-          extraAttrs: { disabled: true },
-          text: 'Promote to epic',
-        });
-      });
-    });
-
+  describe('when "Promote to epic" button is clicked', () => {
     describe('when response is successful', () => {
       beforeEach(async () => {
         visitUrlSpy = jest.spyOn(urlUtility, 'visitUrl').mockReturnValue({});

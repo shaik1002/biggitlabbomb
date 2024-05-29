@@ -445,7 +445,7 @@ describe('ForkForm component', () => {
 
   describe('onSubmit', () => {
     const setupComponent = (fields = {}) => {
-      jest.spyOn(urlUtility, 'visitUrl').mockImplementation();
+      jest.spyOn(urlUtility, 'redirectTo').mockImplementation();
 
       createFullComponent(
         {},
@@ -485,7 +485,7 @@ describe('ForkForm component', () => {
 
         await submitForm();
 
-        expect(urlUtility.visitUrl).not.toHaveBeenCalled();
+        expect(urlUtility.redirectTo).not.toHaveBeenCalled(); // eslint-disable-line import/no-deprecated
       });
 
       it('does not make POST request if no visibility is checked', async () => {
@@ -575,7 +575,7 @@ describe('ForkForm component', () => {
         setupComponent();
         await submitForm();
 
-        expect(urlUtility.visitUrl).toHaveBeenCalledWith(webUrl);
+        expect(urlUtility.redirectTo).toHaveBeenCalledWith(webUrl); // eslint-disable-line import/no-deprecated
       });
 
       it('displays an alert with message coming from server when POST is unsuccessful', async () => {
@@ -586,7 +586,7 @@ describe('ForkForm component', () => {
         setupComponent();
         await submitForm();
 
-        expect(urlUtility.visitUrl).not.toHaveBeenCalled();
+        expect(urlUtility.redirectTo).not.toHaveBeenCalled(); // eslint-disable-line import/no-deprecated
         expect(createAlert).toHaveBeenCalledWith({
           message: 'Update error',
         });
@@ -600,7 +600,7 @@ describe('ForkForm component', () => {
         setupComponent();
         await submitForm();
 
-        expect(urlUtility.visitUrl).not.toHaveBeenCalled();
+        expect(urlUtility.redirectTo).not.toHaveBeenCalled(); // eslint-disable-line import/no-deprecated
         expect(createAlert).toHaveBeenCalledWith({
           message: 'An error occurred while forking the project. Please try again.',
         });

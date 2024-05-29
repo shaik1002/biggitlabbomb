@@ -3,8 +3,10 @@ import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import WikiMoreDropdown from '~/pages/shared/wikis/components/wiki_more_dropdown.vue';
 import DeleteWikiModal from '~/pages/shared/wikis/components/delete_wiki_modal.vue';
-import CloneWikiModal from '~/pages/shared/wikis/components/clone_wiki_modal.vue';
+import printMarkdownDom from '~/lib/print_markdown_dom';
 import { mockLocation, restoreLocation } from '../test_utils';
+
+jest.mock('~/lib/print_markdown_dom');
 
 describe('pages/shared/wikis/components/wiki_more_dropdown', () => {
   let wrapper;
@@ -15,23 +17,21 @@ describe('pages/shared/wikis/components/wiki_more_dropdown', () => {
         GlTooltip: createMockDirective('gl-tooltip'),
       },
       provide: {
-        newUrl: 'https://new.url/path',
         history: 'https://history.url/path',
+        print: {
+          target: '#content-body',
+          title: 'test title',
+          stylesheet: [],
+        },
+        pagePersisted: true,
         pageTitle: 'Wiki title',
         csrfToken: '',
         deleteWikiUrl: 'https://delete.url/path',
-        wikiPath: '',
-        cloneSshUrl: 'ssh://clone.url/path',
-        cloneHttpUrl: 'http://clone.url/path',
-        cloneLinkClass: '',
-        templatesUrl: 'https://templates.url/path',
-        pagePersisted: true,
         ...provide,
       },
       stubs: {
         GlDisclosureDropdown,
         GlDisclosureDropdownItem,
-        CloneWikiModal,
         DeleteWikiModal,
       },
     });
@@ -39,46 +39,9 @@ describe('pages/shared/wikis/components/wiki_more_dropdown', () => {
 
   const findMoreDropdown = () => wrapper.findByTestId('wiki-more-dropdown');
   const findMoreDropdownTooltip = () => getBinding(findMoreDropdown().element, 'gl-tooltip');
-  const findNewItem = () => wrapper.findByTestId('page-new-button');
   const findHistoryItem = () => wrapper.findByTestId('page-history-button');
   const findPrintItem = () => wrapper.findByTestId('page-print-button');
   const findDeleteItem = () => wrapper.findByTestId('page-delete-button');
-  const findTemplatesItem = () => wrapper.findByTestId('page-templates-button');
-  const findCloneRepositoryItem = () => wrapper.findByTestId('page-clone-button');
-
-  describe('new page', () => {
-    it('shows label "New page"', () => {
-      createComponent();
-
-      expect(findNewItem().text()).toBe('New page');
-    });
-
-    it('renders if `newUrl` is set', () => {
-      createComponent({ newUrl: false });
-
-      expect(findNewItem().exists()).toBe(false);
-
-      createComponent();
-
-      expect(findNewItem().exists()).toBe(true);
-    });
-
-    it('should have new page url', () => {
-      createComponent();
-
-      expect(findNewItem().attributes('href')).toBe('https://new.url/path');
-    });
-
-    it('shows label "New template" on a template page', () => {
-      mockLocation('http://gitlab.com/gitlab-org/gitlab/-/wikis/templates/abc');
-
-      createComponent();
-
-      expect(findNewItem().text()).toBe('New template');
-
-      restoreLocation();
-    });
-  });
 
   describe('history', () => {
     it('shows label "Page history"', () => {
@@ -116,53 +79,34 @@ describe('pages/shared/wikis/components/wiki_more_dropdown', () => {
 
   describe('print', () => {
     beforeEach(() => {
-      document.body.innerHTML = `
-        <div id="content-body">
-          <details><summary>Summary</summary><p>Content</p></details>
-          <img src="https://example.com/image.png" loading="lazy" />
-        </div>'
-      `;
+      document.body.innerHTML = '<div id="content-body">Content</div>';
     });
 
     afterEach(() => {
       document.body.innerHTML = '';
     });
 
-    it('renders', () => {
+    it('renders if `print` is set', () => {
+      createComponent({ print: false });
+
+      expect(findPrintItem().exists()).toBe(false);
+
       createComponent();
 
       expect(findPrintItem().exists()).toBe(true);
     });
 
-    it('does not render for a template page', () => {
-      mockLocation('http://gitlab.com/gitlab-org/gitlab/-/wikis/templates/abc');
-
+    it('should print the content', () => {
       createComponent();
 
-      expect(findPrintItem().exists()).toBe(false);
+      expect(findPrintItem().exists()).toBe(true);
 
-      restoreLocation();
-    });
+      findPrintItem().trigger('click');
 
-    describe('on click', () => {
-      beforeEach(() => {
-        jest.spyOn(window, 'print').mockImplementation(() => {});
-
-        createComponent();
-
-        findPrintItem().trigger('click');
-      });
-
-      it('should print the content', () => {
-        expect(window.print).toHaveBeenCalled();
-      });
-
-      it('sets all images to eager loading', () => {
-        expect(document.querySelector('img').getAttribute('loading')).toBe('eager');
-      });
-
-      it('opens all details elements', () => {
-        expect(document.querySelector('details').getAttribute('open')).toBe('');
+      expect(printMarkdownDom).toHaveBeenCalledWith({
+        target: document.querySelector('#content-body'),
+        title: 'test title',
+        stylesheet: [],
       });
     });
   });
@@ -182,48 +126,6 @@ describe('pages/shared/wikis/components/wiki_more_dropdown', () => {
       createComponent();
 
       expect(findDeleteItem().exists()).toBe(true);
-    });
-  });
-
-  describe('templates', () => {
-    it('shows label "Templates"', () => {
-      createComponent();
-
-      expect(findTemplatesItem().text()).toBe('Templates');
-    });
-
-    it('renders if `templatesUrl` is set', () => {
-      createComponent({ templatesUrl: false });
-
-      expect(findTemplatesItem().exists()).toBe(false);
-
-      createComponent();
-
-      expect(findTemplatesItem().exists()).toBe(true);
-    });
-
-    it('should have templates page url', () => {
-      createComponent();
-
-      expect(findTemplatesItem().attributes('href')).toBe('https://templates.url/path');
-    });
-  });
-
-  describe('clone repository', () => {
-    it('shows label "Clone repository"', () => {
-      createComponent();
-
-      expect(findCloneRepositoryItem().text()).toBe('Clone repository');
-    });
-
-    it('renders if `cloneSshUrl` or `cloneHttpUrl` is set', () => {
-      createComponent({ cloneSshUrl: '', cloneHttpUrl: '' });
-
-      expect(findCloneRepositoryItem().exists()).toBe(false);
-
-      createComponent();
-
-      expect(findCloneRepositoryItem().exists()).toBe(true);
     });
   });
 

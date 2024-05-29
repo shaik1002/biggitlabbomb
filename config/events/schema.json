@@ -3,6 +3,8 @@
   "required": [
     "description",
     "action",
+    "product_section",
+    "product_stage",
     "product_group",
     "introduced_by_url",
     "milestone",

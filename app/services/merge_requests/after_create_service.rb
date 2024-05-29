@@ -43,11 +43,7 @@ module MergeRequests
       todo_service.new_merge_request(merge_request, current_user)
       merge_request.cache_merge_request_closes_issues!(current_user)
 
-      Gitlab::InternalEvents.track_event(
-        'create_merge_request',
-        user: current_user,
-        project: merge_request.target_project
-      )
+      Gitlab::UsageDataCounters::MergeRequestCounter.count(:create)
       link_lfs_objects(merge_request)
     end
 

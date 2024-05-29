@@ -217,8 +217,7 @@ export const filtersMap = {
   [TOKEN_TYPE_ASSIGNEE]: {
     [API_PARAM]: {
       [NORMAL_FILTER]: 'assigneeUsernames',
-      [SPECIAL_FILTER]: 'assigneeWildcardId',
-      [ALTERNATIVE_FILTER]: 'assigneeId',
+      [SPECIAL_FILTER]: 'assigneeId',
     },
     [URL_PARAM]: {
       [OPERATOR_IS]: {
@@ -372,7 +371,7 @@ export const filtersMap = {
   [TOKEN_TYPE_EPIC]: {
     [API_PARAM]: {
       [NORMAL_FILTER]: 'epicId',
-      [SPECIAL_FILTER]: 'epicWildcardId',
+      [SPECIAL_FILTER]: 'epicId',
     },
     [URL_PARAM]: {
       [OPERATOR_IS]: {
@@ -387,7 +386,7 @@ export const filtersMap = {
   [TOKEN_TYPE_WEIGHT]: {
     [API_PARAM]: {
       [NORMAL_FILTER]: 'weight',
-      [SPECIAL_FILTER]: 'weightWildcardId',
+      [SPECIAL_FILTER]: 'weight',
     },
     [URL_PARAM]: {
       [OPERATOR_IS]: {

@@ -789,7 +789,6 @@ export const mockTokens = (fetchLabels, isSignedIn) => [
     unique: false,
     symbol: '~',
     fetchLabels,
-    recentSuggestionsStorageKey: 'gitlab-org-board-recent-tokens-label',
   },
   ...(isSignedIn ? [mockEmojiToken, mockConfidentialToken] : []),
   {

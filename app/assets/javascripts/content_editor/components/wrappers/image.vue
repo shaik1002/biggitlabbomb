@@ -75,7 +75,7 @@ export default {
       this.editor
         .chain()
         .focus()
-        .updateAttributes(this.node.type.name, {
+        .updateAttributes(this.node.type, {
           width: this.$refs.image.width,
           height: this.$refs.image.height,
         })
@@ -103,8 +103,6 @@ export default {
     ></span>
     <img
       ref="image"
-      draggable="true"
-      data-drag-handle
       :src="node.attrs.src"
       :alt="node.attrs.alt"
       :title="node.attrs.title"

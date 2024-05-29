@@ -15,7 +15,7 @@ class Groups::DependencyProxyForContainersController < ::Groups::DependencyProxy
 
   attr_reader :token
 
-  feature_category :virtual_registry
+  feature_category :dependency_proxy
   urgency :low
 
   def manifest

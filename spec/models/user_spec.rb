@@ -195,7 +195,6 @@ RSpec.describe User, feature_category: :user_profile do
     it { is_expected.to have_many(:callouts).class_name('Users::Callout') }
     it { is_expected.to have_many(:group_callouts).class_name('Users::GroupCallout') }
     it { is_expected.to have_many(:project_callouts).class_name('Users::ProjectCallout') }
-    it { is_expected.to have_many(:broadcast_message_dismissals).class_name('Users::BroadcastMessageDismissal') }
     it { is_expected.to have_many(:created_projects).dependent(:nullify).class_name('Project') }
     it { is_expected.to have_many(:created_namespace_details).class_name('Namespace::Detail') }
     it { is_expected.to have_many(:user_achievements).class_name('Achievements::UserAchievement').inverse_of(:user) }
@@ -223,11 +222,6 @@ RSpec.describe User, feature_category: :user_profile do
     it do
       is_expected.to have_many(:organizations)
                        .through(:organization_users).class_name('Organizations::Organization').inverse_of(:users)
-    end
-
-    it do
-      is_expected.to have_many(:owned_organizations)
-                      .through(:organization_users).class_name('Organizations::Organization')
     end
 
     it do
@@ -1559,18 +1553,6 @@ RSpec.describe User, feature_category: :user_profile do
 
       it 'returns only the trusted users' do
         expect(described_class.trusted).to match_array([trusted_user1, trusted_user2])
-      end
-    end
-
-    describe '.by_ids' do
-      let_it_be(:first_user) { create(:user) }
-      let_it_be(:second_user) { create(:user) }
-      let_it_be(:third_user) { create(:user) }
-
-      it 'returns users for the given ids' do
-        user_ids = [first_user, second_user].map(&:id)
-
-        expect(described_class.by_ids(user_ids)).to contain_exactly(first_user, second_user)
       end
     end
   end
@@ -4778,46 +4760,6 @@ RSpec.describe User, feature_category: :user_profile do
 
           expect { solo_owned_groups }.not_to exceed_query_limit(control)
         end
-      end
-    end
-  end
-
-  describe '#solo_owned_organizations' do
-    let_it_be_with_refind(:user) { create(:user) }
-
-    subject(:solo_owned_organizations) { user.solo_owned_organizations }
-
-    context 'no owned organizations' do
-      it { is_expected.to be_empty }
-    end
-
-    context 'has owned organizations' do
-      let(:organization) { create(:organization) }
-
-      before do
-        organization.add_owner(user)
-      end
-
-      context 'not solo owner' do
-        let_it_be(:user2) { create(:user) }
-
-        before do
-          organization.add_owner(user2)
-        end
-
-        it { is_expected.to be_empty }
-      end
-
-      context 'solo owner' do
-        it { is_expected.to include(organization) }
-      end
-
-      context 'solo owner with other members' do
-        before do
-          create(:organization_user, organization: organization)
-        end
-
-        it { is_expected.to include(organization) }
       end
     end
   end

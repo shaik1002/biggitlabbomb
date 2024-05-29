@@ -18,12 +18,6 @@ module Gitlab
           @definitions ||= paths.flat_map { |glob_path| load_all_from_path(glob_path) }
         end
 
-        def internal_event_exists?(event_name)
-          definitions
-            .any? { |event| event.attributes[:internal_events] && event.attributes[:action] == event_name } ||
-            Gitlab::UsageDataCounters::HLLRedisCounter.legacy_event?(event_name)
-        end
-
         def find(event_name)
           strong_memoize_with(:find, event_name) do
             definitions.find { |definition| definition.attributes[:action] == event_name }
@@ -73,7 +67,6 @@ module Gitlab
             Error type: #{error['type']}
             Data: #{error['data']}
             Path: #{error['data_pointer']}
-            Details: #{error['details']}
           ERROR_MSG
         end
       end
@@ -90,10 +83,15 @@ module Gitlab
           { name: attributes[:action], time_framed?: true, filter: {} }
         ]
         Gitlab::Usage::MetricDefinition.definitions.each_value do |metric_definition|
-          matching_event_selection_rules = metric_definition.event_selection_rules.select do |event_selection_rule|
-            event_selection_rule[:name] == attributes[:action]
+          metric_definition.attributes[:events]&.each do |event_selection_rule|
+            if event_selection_rule[:name] == attributes[:action]
+              result << {
+                name: attributes[:action],
+                time_framed?: %w[7d 28d].include?(metric_definition.attributes[:time_frame]),
+                filter: event_selection_rule[:filter] || {}
+              }
+            end
           end
-          result.concat(matching_event_selection_rules)
         end
         result.uniq
       end

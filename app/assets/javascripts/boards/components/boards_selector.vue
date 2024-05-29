@@ -8,7 +8,7 @@ import BoardForm from 'ee_else_ce/boards/components/board_form.vue';
 import { formType } from '~/boards/constants';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { isMetaKey } from '~/lib/utils/common_utils';
-import { visitUrl } from '~/lib/utils/url_utility';
+import { updateHistory } from '~/lib/utils/url_utility';
 import { DEFAULT_DEBOUNCE_AND_THROTTLE_MS } from '~/lib/utils/constants';
 import { s__, __ } from '~/locale';
 
@@ -243,12 +243,13 @@ export default {
     async switchBoardKeyEvent(boardId, e) {
       if (isMetaKey(e)) {
         e.stopPropagation();
-        visitUrl(`${this.boardBaseUrl}/${boardId}`, true);
+        window.open(`${this.boardBaseUrl}/${boardId}`, '_blank');
       }
     },
     switchBoardGroup(value) {
       // Epic board ID is supported in EE version of this file
       this.$emit('switchBoard', this.fullBoardId(value));
+      updateHistory({ url: `${this.boardBaseUrl}/${value}` });
     },
   },
   formType,
@@ -302,6 +303,18 @@ export default {
             >
               {{ s__('IssueBoards|Create new board') }}
             </gl-button>
+
+            <gl-button
+              v-if="showDelete"
+              v-gl-modal-directive="'board-config-modal'"
+              block
+              category="tertiary"
+              variant="danger"
+              class="gl-mt-0! gl-justify-content-start!"
+              @click="$emit('showBoardModal', $options.formType.delete)"
+            >
+              {{ s__('IssueBoards|Delete board') }}
+            </gl-button>
           </div>
         </template>
       </gl-collapsible-listbox>
@@ -313,11 +326,8 @@ export default {
         :weights="weights"
         :current-board="board"
         :current-page="boardModalForm"
-        :show-delete="showDelete"
         @addBoard="addBoard"
         @updateBoard="$emit('updateBoard', $event)"
-        @showBoardModal="$emit('showBoardModal', $event)"
-        @shown="loadBoards"
         @cancel="cancel"
       />
     </span>

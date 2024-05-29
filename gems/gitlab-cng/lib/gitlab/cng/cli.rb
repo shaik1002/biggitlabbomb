@@ -3,8 +3,6 @@
 require "thor"
 require "require_all"
 
-# make sure helpers are required first
-require_rel "lib/helpers/**/*.rb"
 require_rel "lib/**/*.rb"
 require_rel "commands/**/*.rb"
 

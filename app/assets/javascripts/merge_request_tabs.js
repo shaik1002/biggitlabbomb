@@ -5,7 +5,7 @@ import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
 import { createAlert } from '~/alert';
 import { getCookie, isMetaClick, parseBoolean, scrollToElement } from '~/lib/utils/common_utils';
-import { parseUrlPathname, visitUrl } from '~/lib/utils/url_utility';
+import { parseUrlPathname } from '~/lib/utils/url_utility';
 import createEventHub from '~/helpers/event_hub_factory';
 import { renderGFM } from '~/behaviors/markdown/render_gfm';
 import BlobForkSuggestion from './blob/blob_fork_suggestion';
@@ -131,7 +131,7 @@ function mountPipelines() {
   return table;
 }
 
-export function destroyPipelines(app) {
+function destroyPipelines(app) {
   if (app && app.$destroy) {
     app.$destroy();
 
@@ -167,7 +167,7 @@ function loadDiffs({ url, tabs }) {
   });
 }
 
-export function toggleLoader(state) {
+function toggleLoader(state) {
   $('.mr-loading-status .loading').toggleClass('hide', !state);
 }
 
@@ -183,7 +183,7 @@ export function getActionFromHref(pathName) {
   return action;
 }
 
-export const pageBundles = {
+const pageBundles = {
   show: () => import(/* webpackPrefetch: true */ '~/mr_notes/mount_app'),
   diffs: () => import(/* webpackPrefetch: true */ '~/diffs'),
 };
@@ -208,7 +208,6 @@ export default class MergeRequestTabs {
     this.pageLayout = document.querySelector('.layout-page');
     this.expandSidebar = document.querySelectorAll('.js-expand-sidebar, .js-sidebar-toggle');
     this.paddingTop = 16;
-    this.actionRegex = /\/(commits|diffs|pipelines)(\.html)?\/?$/;
 
     this.scrollPositions = {};
 
@@ -283,7 +282,7 @@ export default class MergeRequestTabs {
 
       if (isMetaClick(e)) {
         const targetLink = e.currentTarget.getAttribute('href');
-        visitUrl(targetLink, true);
+        window.open(targetLink, '_blank');
       } else if (action) {
         const href = e.currentTarget.getAttribute('href');
         this.tabShown(action, href);
@@ -436,7 +435,7 @@ export default class MergeRequestTabs {
     this.currentAction = action;
 
     // Remove a trailing '/commits' '/diffs' '/pipelines'
-    let newState = location.pathname.replace(this.actionRegex, '');
+    let newState = location.pathname.replace(/\/(commits|diffs|pipelines)(\.html)?\/?$/, '');
 
     // Append the new action if we're on a tab other than 'notes'
     if (this.currentAction !== 'show' && this.currentAction !== 'new') {

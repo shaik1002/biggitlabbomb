@@ -348,13 +348,11 @@ To add a task to an iteration:
 1. Next to **Iteration**, select **Add to iteration**.
 1. From the dropdown list, select the iteration to be associated with the task.
 
-## Estimate and track spent time
+## Set time tracking
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/438577) in GitLab 17.0.
 
-You can estimate and track the time you spend on a task.
-
-For more information, see [Time tracking](project/time_tracking.md).
+To set time tracking, refer to the [time tracking page](project/time_tracking.md)
 
 ## View task system notes
 

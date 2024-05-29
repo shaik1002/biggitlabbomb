@@ -549,7 +549,6 @@ Gitlab/BoundedContexts:
     - '**/app/channels/**/*'
     - '**/app/components/**/*'
     - '**/app/controllers/**/*'
-    - '**/app/helpers/**/*'
     - '**/app/presenters/**/*'
     - '**/app/serializers/**/*'
     - '**/lib/tasks/**/*'

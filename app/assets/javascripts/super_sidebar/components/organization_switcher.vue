@@ -12,12 +12,12 @@ export default {
   ITEM_LOADING: {
     id: 'loading',
     text: 'loading',
-    extraAttrs: { disabled: true, class: '!gl-shadow-none' },
+    extraAttrs: { disabled: true, class: 'gl-shadow-none!' },
   },
   ITEM_EMPTY: {
     id: 'empty',
     text: s__('Organization|No organizations available to switch to.'),
-    extraAttrs: { disabled: true, class: '!gl-shadow-none gl-text-secondary' },
+    extraAttrs: { disabled: true, class: 'gl-shadow-none! gl-text-secondary' },
   },
   i18n: {
     currentOrganization: s__('Organization|Current organization'),
@@ -135,12 +135,12 @@ export default {
   <gl-disclosure-dropdown
     :items="items"
     class="gl-display-block"
-    placement="bottom"
+    placement="center"
     @shown="onShown"
   >
     <template #toggle>
       <button
-        class="organization-switcher-button gl-display-flex gl-align-items-center gl-gap-3 gl-p-3 gl-rounded-base gl-border-none gl-leading-1 gl-w-full"
+        class="organization-switcher-button gl-display-flex gl-align-items-center gl-gap-3 gl-p-3 gl-rounded-base gl-border-none gl-line-height-1 gl-w-full"
         data-testid="toggle-button"
       >
         <gl-avatar

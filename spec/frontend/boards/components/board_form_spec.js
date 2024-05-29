@@ -49,7 +49,6 @@ describe('BoardForm', () => {
   const findDeleteConfirmation = () => wrapper.findByTestId('delete-confirmation-message');
   const findInput = () => wrapper.find('#board-new-name');
   const findInputFormWrapper = () => wrapper.findComponent(GlForm);
-  const findDeleteButton = () => wrapper.findByTestId('delete-board-button');
 
   const defaultHandlers = {
     createBoardMutationHandler: jest.fn().mockResolvedValue({
@@ -85,12 +84,7 @@ describe('BoardForm', () => {
     ]);
   };
 
-  const createComponent = ({
-    props,
-    provide,
-    handlers = defaultHandlers,
-    stubs = { GlForm },
-  } = {}) => {
+  const createComponent = ({ props, provide, handlers = defaultHandlers } = {}) => {
     wrapper = shallowMountExtended(BoardForm, {
       apolloProvider: createMockApolloProvider(handlers),
       propsData: { ...defaultProps, ...props },
@@ -101,7 +95,9 @@ describe('BoardForm', () => {
         ...provide,
       },
       attachTo: document.body,
-      stubs,
+      stubs: {
+        GlForm,
+      },
     });
   };
 
@@ -264,19 +260,6 @@ describe('BoardForm', () => {
 
       it('renders form wrapper', () => {
         expect(findFormWrapper().exists()).toBe(true);
-      });
-      it('emits showBoardModal with delete when clicking on delete board button', () => {
-        createComponent({
-          props: {
-            currentPage: formType.edit,
-            showDelete: true,
-            canAdminBoard: true,
-          },
-          stubs: { GlModal },
-        });
-
-        findDeleteButton().vm.$emit('click');
-        expect(wrapper.emitted('showBoardModal')).toEqual([[formType.delete]]);
       });
     });
 

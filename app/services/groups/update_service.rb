@@ -4,11 +4,7 @@ module Groups
   class UpdateService < Groups::BaseService
     include UpdateVisibilityLevel
 
-    SETTINGS_PARAMS = [
-      :allow_mfa_for_subgroups,
-      :remove_dormant_members,
-      :remove_dormant_members_period
-    ].freeze
+    SETTINGS_PARAMS = [:allow_mfa_for_subgroups].freeze
 
     def execute
       reject_parent_id!

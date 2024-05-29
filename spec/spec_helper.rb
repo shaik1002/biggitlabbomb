@@ -339,6 +339,9 @@ RSpec.configure do |config|
 
       # Experimental merge request dashboard
       stub_feature_flags(merge_request_dashboard: false)
+
+      # Disable new Vue breadcrumbs while feature flag is still in wip state
+      stub_feature_flags(vue_page_breadcrumbs: false)
     else
       unstub_all_feature_flags
     end
@@ -536,9 +539,6 @@ Rugged::Settings['search_path_global'] = Rails.root.join('tmp/tests').to_s
 
 # Initialize FactoryDefault to use create_default helper
 TestProf::FactoryDefault.init
-
-# Set the start of ID sequence for records initialized by `build_stubbed` to prevent conflicts
-FactoryBot::Strategy::Stub.next_id = 1_000_000_000
 
 # Exclude the Geo proxy API request from getting on_next_request Warden handlers,
 # necessary to prevent race conditions with feature tests not getting authenticated.

@@ -77,6 +77,12 @@ compile-test-assets:
       - "${WEBPACK_COMPILE_LOG_PATH}"
     when: always
 
+compile-test-assets as-if-foss:
+  extends:
+    - compile-test-assets
+    - .frontend:rules:compile-test-assets-as-if-foss
+    - .as-if-foss
+
 update-assets-compile-production-cache:
   extends:
     - compile-production-assets
@@ -174,6 +180,23 @@ rspec-all frontend_fixture:
     - "compile-test-assets"
   parallel: 7
 
+# Builds FOSS fixtures in the EE project, with the `ee/` folder removed (due to `as-if-foss`).
+rspec-all frontend_fixture as-if-foss:
+  extends:
+    - .frontend-fixtures-base
+    - .frontend:rules:frontend_fixture-as-if-foss
+    - .as-if-foss
+  variables:
+    # We explicitly disable Crystalball here so as even in scheduled pipelines we don't need it
+    # since it's already enabled for `rspec-all frontend_fixture` there.
+    CRYSTALBALL: "false"
+    WEBPACK_VENDOR_DLL: "true"
+    KNAPSACK_GENERATE_REPORT: ""
+    FLAKY_RSPEC_GENERATE_REPORT: ""
+  needs:
+    - !reference [.frontend-fixtures-base, needs]
+    - "compile-test-assets as-if-foss"
+
 # Uploads EE fixtures in the EE project.
 # Uploads FOSS fixtures in the FOSS project.
 upload-frontend-fixtures:
@@ -234,7 +257,7 @@ graphql-schema-dump:
 .jest-base:
   extends: .frontend-test-base
   script:
-    - run_timed_command "yarn jest:ci:without-fixtures"
+    - run_timed_command "yarn jest:ci"
 
 jest-build-cache:
   extends:
@@ -264,33 +287,12 @@ jest-build-cache-vue3:
     - .frontend:rules:jest-vue3
     - .vue3
 
-jest-with-fixtures:
-  extends:
-    - .jest-base
-    - .frontend:rules:jest
-  needs:
-    - "rspec-all frontend_fixture"
-    - job: jest-build-cache
-      optional: true
-  artifacts:
-    name: coverage-frontend
-    expire_in: 31d
-    when: always
-    paths:
-      - coverage-frontend/
-      - junit_jest.xml
-      - tmp/tests/frontend/
-    reports:
-      junit: junit_jest.xml
-  parallel: 2
-  script:
-    - run_timed_command "yarn jest:ci:with-fixtures"
-
 jest:
   extends:
     - .jest-base
     - .frontend:rules:jest
   needs:
+    - "rspec-all frontend_fixture"
     - job: jest-build-cache
       optional: true
   artifacts:
@@ -303,17 +305,7 @@ jest:
       - tmp/tests/frontend/
     reports:
       junit: junit_jest.xml
-  parallel: 11
-
-jest-with-fixtures vue3:
-  extends:
-    - jest-with-fixtures
-    - .frontend:rules:jest-vue3
-    - .vue3
-  needs:
-    - "rspec-all frontend_fixture"
-    - job: jest-build-cache-vue3
-      optional: true
+  parallel: 12
 
 jest vue3:
   extends:
@@ -321,6 +313,7 @@ jest vue3:
     - .frontend:rules:jest-vue3
     - .vue3
   needs:
+    - "rspec-all frontend_fixture"
     - job: jest-build-cache-vue3
       optional: true
 
@@ -329,10 +322,19 @@ jest predictive:
     - jest
     - .frontend:rules:jest:predictive
   needs:
-    - !reference [jest-with-fixtures, needs]
+    - !reference [jest, needs]
     - "detect-tests"
   script:
     - if [[ -s "$RSPEC_CHANGED_FILES_PATH" ]] || [[ -s "$RSPEC_MATCHING_JS_FILES_PATH" ]]; then run_timed_command "yarn jest:ci:predictive"; fi
+
+jest predictive as-if-foss:
+  extends:
+    - jest predictive
+    - .frontend:rules:jest:predictive-as-if-foss
+    - .as-if-foss
+  needs:
+    - "rspec-all frontend_fixture as-if-foss"
+    - "detect-tests"
 
 jest-integration:
   extends:
@@ -386,8 +388,6 @@ coverage-frontend:
     - .frontend:rules:coverage-frontend
   needs:
     - job: "jest"
-      optional: true
-    - job: "jest-with-fixtures"
       optional: true
     - job: "jest predictive"
       optional: true

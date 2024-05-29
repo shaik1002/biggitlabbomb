@@ -139,14 +139,16 @@ RSpec.describe Cli, feature_category: :service_ping do
     end
 
     context 'when creating a metric from multiple events' do
-      # all of these product_groups belong to 'dev' product_section
       let(:events) do
         [{
-          action: '00_event1', internal_events: true, product_group: 'optimize'
+          action: '00_event1', internal_events: true,
+          product_section: 'dev', product_stage: 'plan', product_group: 'optimize'
         }, {
-          action: '00_event2', internal_events: true, product_group: 'ide'
+          action: '00_event2', internal_events: true,
+          product_section: 'dev', product_stage: 'create', product_group: 'ide'
         }, {
-          action: '00_event3', internal_events: true, product_group: 'source_code'
+          action: '00_event3', internal_events: true,
+          product_section: 'dev', product_stage: 'create', product_group: 'source_code'
         }]
       end
 
@@ -167,7 +169,8 @@ RSpec.describe Cli, feature_category: :service_ping do
           "\n", # Submit selections
           "\n", # Select: Weekly/Monthly count of unique users
           "aggregate metric description\n", # Submit description
-          "\n" # Accept description for weekly
+          "\n", # Accept description for weekly
+          "\n" # Copy & continue
         ])
 
         # Filter down to "dev" options
@@ -200,7 +203,8 @@ RSpec.describe Cli, feature_category: :service_ping do
           "\n", # Submit selections
           "\n", # Select: Weekly/Monthly count of unique users
           "aggregate metric description\n", # Submit description
-          "\n" # Accept description for weekly
+          "\n", # Accept description for weekly
+          "\n" # Copy & continue
         ])
 
         # Filter down to "dev:create" options
@@ -772,8 +776,9 @@ RSpec.describe Cli, feature_category: :service_ping do
           "Internal Event CLI is opened\n", # Submit description
           "internal_events_cli_opened\n", # Submit action name
           "6\n", # Select: None
-          "\n", # Select: None! Continue to next section!
           "\n", # Skip MR URL
+          "analytics\n", # Input section
+          "monitor\n", # Input stage
           "analytics_instrumentation\n", # Input group
           "2\n", # Select [premium, ultimate]
           "y\n", # Create file
@@ -800,6 +805,8 @@ RSpec.describe Cli, feature_category: :service_ping do
           "where a defition file was created with the CLI\n", # Input description
           "\n", # Submit weekly description for monthly
           "2\n", # Select: Modify attributes
+          "\n", # Accept section
+          "\n", # Accept stage
           "\n", # Accept group
           "\n", # Skip URL
           "1\n", # Select: [free, premium, ultimate]
@@ -845,7 +852,6 @@ RSpec.describe Cli, feature_category: :service_ping do
           "Internal Event CLI is opened\n", # Submit description
           "internal_events_cli_opened\n", # Submit action name
           "6\n", # Select: None
-          "\n", # Select: None! Continue to next section!
           "\n", # Skip MR URL
           "instrumentation\n", # Filter & select group
           "2\n", # Select [premium, ultimate]

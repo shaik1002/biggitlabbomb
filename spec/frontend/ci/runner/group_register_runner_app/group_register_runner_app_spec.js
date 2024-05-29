@@ -34,13 +34,18 @@ describe('GroupRegisterRunnerApp', () => {
   const findRegistrationInstructions = () => wrapper.findComponent(RegistrationInstructions);
   const findBtn = () => wrapper.findComponent(GlButton);
 
-  const createComponent = () => {
+  const createComponent = (googleCloudSupportFeatureFlag = false) => {
     trackingSpy = mockTracking(undefined, window.document, jest.spyOn);
     wrapper = shallowMountExtended(GroupRegisterRunnerApp, {
       propsData: {
         runnerId: mockRunnerId,
         runnersPath: mockRunnersPath,
         groupPath: mockGroupPath,
+      },
+      provide: {
+        glFeatures: {
+          googleCloudSupportFeatureFlag,
+        },
       },
     });
   };

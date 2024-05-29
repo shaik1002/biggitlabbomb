@@ -20,9 +20,16 @@ Inputs can use CI/CD variables, but have the same [variable limitations as the `
 
 ## Define input parameters with `spec:inputs`
 
-Use `spec:inputs` to define parameters that can be populated in reusable CI/CD configuration
-files when added to a pipeline. Then use [`include:inputs`](#set-input-values-when-using-include)
-to add the configuration to a project's pipeline and set the values for the parameters.
+Use `spec:inputs` to define input parameters for CI/CD configuration intended to be added
+to a pipeline with `include`. Use [`include:inputs`](#set-input-values-when-using-include)
+to pass input values when building the configuration for a pipeline.
+
+The specs must be declared at the top of the configuration file, in a header section.
+Separate the header from the rest of the configuration with `---`.
+
+Use the interpolation format `$[[ inputs.input-id ]]` outside the header section to replace the values.
+The inputs are evaluated and interpolated when the configuration is fetched during pipeline creation, but before the
+configuration is merged with the contents of the `.gitlab-ci.yml` file.
 
 For example, in a file named `custom_website_scan.yml`:
 
@@ -38,28 +45,12 @@ scan-website:
   script: ./scan-website $[[ inputs.environment ]]
 ```
 
-In this example, the inputs are `job-stage` and `environment`. Then, in a `.gitlab-ci.yml` file,
-you can add this configuration and set the input values:
-
-```yaml
-include:
-  - local: 'custom_website_scan.yml'
-    inputs:
-      job-stage: 'my-test-stage'
-      environment: 'my-environment'
-```
-
-Specs must be declared at the top of a configuration file, in a header section separated
-from the rest of the configuration with `---`. Use the `$[[ inputs.input-id ]]` interpolation format
-outside the header section to declare where to use the inputs.
-
-With `spec:inputs`:
+When using `spec:inputs`:
 
 - Inputs are mandatory by default.
-- Inputs are evaluated and populated when the configuration is fetched during pipeline creation,
-  before the configuration is merged with the contents of the `.gitlab-ci.yml` file.
-- A string containing an input must be less than 1 MB.
-- A string inside an input must be less than 1 KB.
+- Validation errors are returned if:
+  - A string containing an interpolation block exceeds 1 MB.
+  - The string inside an interpolation block exceeds 1 KB.
 
 Additionally, use:
 
@@ -96,7 +87,7 @@ spec:
       default: 1
     version:        # Mandatory string input that must match the regular expression
       type: string
-      regex: ^v\d\.\d+(\.\d+)$
+      regex: /^v\d\.\d+(\.\d+)$/
     export_results: # Optional boolean input with a default value when not provided
       type: boolean
       default: true
@@ -328,53 +319,6 @@ include:
 You cannot use [`!reference` tags](yaml_optimization.md#reference-tags) in inputs,
 but [issue 424481](https://gitlab.com/gitlab-org/gitlab/-/issues/424481) proposes adding
 this functionality.
-
-## `inputs` examples
-
-### Use `inputs` with `needs`
-
-You can use array type inputs with [`needs`](index.md#needs) for complex job dependencies.
-
-For example, in a file named `component.yml`:
-
-```yaml
-spec:
-  inputs:
-    first_needs:
-      type: array
-    second_needs:
-      type: array
----
-
-test_job:
-  script: echo "this job has needs"
-  needs:
-    - $[[ inputs.first_needs ]]
-    - $[[ inputs.second_needs ]]
-```
-
-In this example, the inputs are `first_needs` and `second_needs`, both [array type inputs](#array-type).
-Then, in a `.gitlab-ci.yml` file, you can add this configuration and set the input values:
-
-```yaml
-include:
-  - local: 'component.yml'
-    inputs:
-      first_needs:
-        - build1
-      second_needs:
-        - build2
-```
-
-When the pipeline starts, the items in the `needs` array for `test_job` get concatenated into:
-
-```yaml
-test_job:
-  script: echo "this job has needs"
-  needs:
-  - build1
-  - build2
-```
 
 ## Specify functions to manipulate input values
 

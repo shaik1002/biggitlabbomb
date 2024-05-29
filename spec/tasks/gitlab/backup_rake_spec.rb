@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'gitlab:backup namespace rake tasks', :reestablished_active_record_base, :delete, feature_category: :backup_restore do
+RSpec.describe 'gitlab:backup namespace rake tasks', :delete, feature_category: :backup_restore do
   let(:enable_registry) { true }
   let(:backup_restore_pid_path) { "#{Rails.application.root}/tmp/backup_restore.pid" }
   let(:backup_rake_task_names) do
@@ -23,6 +23,24 @@ RSpec.describe 'gitlab:backup namespace rake tasks', :reestablished_active_recor
     tars_glob.first
   end
 
+  def backup_files
+    %w[
+      backup_information.yml
+      artifacts.tar.gz
+      builds.tar.gz
+      lfs.tar.gz
+      terraform_state.tar.gz
+      pages.tar.gz
+      packages.tar.gz
+      ci_secure_files.tar.gz
+      uploads.tar.gz
+    ]
+  end
+
+  def backup_directories
+    %w[db repositories]
+  end
+
   def backup_path
     Pathname(Gitlab.config.backup.path)
   end
@@ -38,6 +56,8 @@ RSpec.describe 'gitlab:backup namespace rake tasks', :reestablished_active_recor
   before do
     stub_env('force', 'yes')
     FileUtils.rm(tars_glob, force: true)
+    FileUtils.rm(backup_files, force: true)
+    FileUtils.rm_rf(backup_directories, secure: true)
     FileUtils.mkdir_p('tmp/tests/public/uploads')
     reenable_backup_sub_tasks
     stub_container_registry_config(enabled: enable_registry)
@@ -45,7 +65,9 @@ RSpec.describe 'gitlab:backup namespace rake tasks', :reestablished_active_recor
 
   after do
     FileUtils.rm(tars_glob, force: true)
+    FileUtils.rm(backup_files, force: true)
     FileUtils.rm(backup_restore_pid_path, force: true)
+    FileUtils.rm_rf(backup_directories, secure: true)
     FileUtils.rm_rf('tmp/tests/public/uploads', secure: true)
   end
 

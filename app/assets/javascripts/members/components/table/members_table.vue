@@ -1,5 +1,5 @@
 <script>
-import { GlTable, GlBadge, GlTooltipDirective, GlLink } from '@gitlab/ui';
+import { GlTable, GlBadge } from '@gitlab/ui';
 // eslint-disable-next-line no-restricted-imports
 import { mapState } from 'vuex';
 import MembersTableCell from 'ee_else_ce/members/components/table/members_table_cell.vue';
@@ -12,7 +12,6 @@ import {
   canResend,
   canUpdate,
 } from 'ee_else_ce/members/utils';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import {
   FIELD_KEY_ACTIONS,
   FIELDS,
@@ -33,13 +32,12 @@ import MemberSource from './member_source.vue';
 import MemberActivity from './member_activity.vue';
 import MaxRole from './max_role.vue';
 import MembersPagination from './members_pagination.vue';
-import RoleDetailsDrawer from './role_details_drawer.vue';
 
 export default {
+  name: 'MembersTable',
   components: {
     GlTable,
     GlBadge,
-    GlLink,
     MemberAvatar,
     CreatedAt,
     MembersTableCell,
@@ -51,7 +49,6 @@ export default {
     ExpirationDatepicker,
     MemberActivity,
     MembersPagination,
-    RoleDetailsDrawer,
     DisableTwoFactorModal: () =>
       import('ee_component/members/components/modals/disable_two_factor_modal.vue'),
     LdapOverrideConfirmationModal: () =>
@@ -59,8 +56,6 @@ export default {
     UserLimitReachedAlert: () =>
       import('ee_component/members/components/table/user_limit_reached_alert.vue'),
   },
-  directives: { GlTooltip: GlTooltipDirective },
-  mixins: [glFeatureFlagsMixin()],
   inject: ['namespace', 'currentUserId', 'canManageMembers'],
   props: {
     tabQueryParamValue: {
@@ -68,11 +63,6 @@ export default {
       required: false,
       default: '',
     },
-  },
-  data() {
-    return {
-      selectedMember: null,
-    };
   },
   computed: {
     ...mapState({
@@ -243,6 +233,9 @@ export default {
       show-empty
       :tbody-tr-attr="tbodyTrAttr"
     >
+      <template #head()="{ label }">
+        {{ label }}
+      </template>
       <template #cell(account)="{ item: member }">
         <members-table-cell #default="{ memberType, isCurrentUser }" :member="member">
           <member-avatar
@@ -284,20 +277,8 @@ export default {
       </template>
 
       <template #cell(maxRole)="{ item: member }">
-        <members-table-cell #default="{ permissions }" :member="member" data-testid="max-role">
-          <div v-if="glFeatures.showRoleDetailsInDrawer">
-            <gl-link
-              v-gl-tooltip.d0.hover="member.accessLevel.description"
-              class="gl-display-block"
-              @click="selectedMember = member"
-            >
-              {{ member.accessLevel.stringValue }}
-            </gl-link>
-            <gl-badge v-if="member.accessLevel.memberRoleId" class="gl-mt-3" size="sm">
-              {{ s__('MemberRole|Custom role') }}
-            </gl-badge>
-          </div>
-          <max-role v-else :permissions="permissions" :member="member" />
+        <members-table-cell #default="{ permissions }" :member="member">
+          <max-role :permissions="permissions" :member="member" />
         </members-table-cell>
       </template>
 
@@ -331,11 +312,5 @@ export default {
     <remove-group-link-modal />
     <remove-member-modal />
     <ldap-override-confirmation-modal />
-
-    <role-details-drawer
-      v-if="glFeatures.showRoleDetailsInDrawer"
-      :member="selectedMember"
-      @close="selectedMember = null"
-    />
   </div>
 </template>

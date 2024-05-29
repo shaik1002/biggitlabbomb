@@ -28,7 +28,7 @@ export const getAccessLevels = (accessLevels = {}) => {
       const src = node.user.avatarUrl;
       accessLevelTypes.users.push({ src, ...node.user });
     } else if (node.group) {
-      accessLevelTypes.groups.push(node.group);
+      accessLevelTypes.groups.push(node);
     } else {
       accessLevelTypes.roles.push({ accessLevelDescription: node.accessLevelDescription });
     }

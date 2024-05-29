@@ -25,7 +25,7 @@ RSpec.describe Gitlab::Usage::Metric do
 
   let(:issue_count_metric_definiton) do
     double(:issue_count_metric_definiton,
-      attributes.merge({ raw_attributes: attributes })
+      attributes.merge({ attributes: attributes })
     )
   end
 
@@ -49,7 +49,7 @@ RSpec.describe Gitlab::Usage::Metric do
     let(:instrumentation_class) { "UnavailableMetric" }
     let(:issue_count_metric_definiton) do
       double(:issue_count_metric_definiton,
-        attributes.merge({ raw_attributes: attributes, instrumentation_class: instrumentation_class })
+        attributes.merge({ attributes: attributes, instrumentation_class: instrumentation_class })
       )
     end
 

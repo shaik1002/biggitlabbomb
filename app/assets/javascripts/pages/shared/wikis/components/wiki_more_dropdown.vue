@@ -1,29 +1,26 @@
 <script>
 import {
-  GlIcon,
   GlDisclosureDropdown,
   GlDisclosureDropdownGroup,
   GlDisclosureDropdownItem,
   GlTooltipDirective,
 } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
+import printMarkdownDom from '~/lib/print_markdown_dom';
 import { isTemplate } from '../utils';
-import CloneWikiModal from './clone_wiki_modal.vue';
 import DeleteWikiModal from './delete_wiki_modal.vue';
 
 export default {
   components: {
-    GlIcon,
     GlDisclosureDropdown,
     GlDisclosureDropdownGroup,
     GlDisclosureDropdownItem,
-    CloneWikiModal,
     DeleteWikiModal,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  inject: ['newUrl', 'history', 'templatesUrl', 'cloneLinkClass', 'pagePersisted'],
+  inject: ['print', 'history', 'pagePersisted'],
   i18n: {
     wikiActions: s__('Wiki|Wiki actions'),
   },
@@ -34,15 +31,6 @@ export default {
   },
   computed: {
     isTemplate,
-    newItem() {
-      return {
-        text: this.isTemplate ? s__('Wiki|New template') : s__('Wiki|New page'),
-        href: this.newUrl,
-        extraAttrs: {
-          'data-testid': 'page-new-button',
-        },
-      };
-    },
     historyItem() {
       return {
         text: this.isTemplate ? s__('Wiki|Template history') : s__('Wiki|Page history'),
@@ -61,29 +49,17 @@ export default {
         },
       };
     },
-    templateItem() {
-      return {
-        text: __('Templates'),
-        href: this.templatesUrl,
-        extraAttrs: {
-          class: this.templateLinkClass,
-          'data-testid': 'page-templates-button',
-        },
-      };
-    },
     showDropdownTooltip() {
       return !this.isDropdownVisible ? this.$options.i18n.wikiActions : '';
-    },
-    showPrintItem() {
-      return !this.isTemplate;
     },
   },
   methods: {
     printPage() {
-      document.querySelectorAll('img').forEach((img) => img.setAttribute('loading', 'eager'));
-      document.querySelectorAll('details').forEach((detail) => detail.setAttribute('open', ''));
-
-      window.print();
+      printMarkdownDom({
+        target: document.querySelector(this.print.target),
+        title: this.print.title,
+        stylesheet: this.print.stylesheet,
+      });
     },
     showDropdown() {
       this.isDropdownVisible = true;
@@ -105,37 +81,8 @@ export default {
     @shown="showDropdown"
     @hidden="hideDropdown"
   >
-    <gl-disclosure-dropdown-item v-if="newUrl" :item="newItem">
-      <template #list-item>
-        <gl-icon name="plus" class="gl-mr-2 gl-text-secondary" />
-        {{ newItem.text }}
-      </template>
-    </gl-disclosure-dropdown-item>
-
-    <gl-disclosure-dropdown-item v-if="templatesUrl" :item="templateItem">
-      <template #list-item>
-        <gl-icon name="template" class="gl-mr-2 gl-text-secondary" />
-        {{ templateItem.text }}
-      </template>
-    </gl-disclosure-dropdown-item>
-
-    <clone-wiki-modal show-as-dropdown-item />
-
-    <gl-disclosure-dropdown-group v-if="history || showPrintItem" bordered>
-      <gl-disclosure-dropdown-item v-if="history" :item="historyItem">
-        <template #list-item>
-          <gl-icon name="history" class="gl-mr-2 gl-text-secondary" />
-          {{ historyItem.text }}
-        </template>
-      </gl-disclosure-dropdown-item>
-      <gl-disclosure-dropdown-item v-if="showPrintItem" :item="printItem">
-        <template #list-item>
-          <gl-icon name="document" class="gl-mr-2 gl-text-secondary" />
-          {{ printItem.text }}
-        </template>
-      </gl-disclosure-dropdown-item>
-    </gl-disclosure-dropdown-group>
-
+    <gl-disclosure-dropdown-item v-if="history" :item="historyItem" />
+    <gl-disclosure-dropdown-item v-if="print && !isTemplate" :item="printItem" />
     <gl-disclosure-dropdown-group v-if="pagePersisted" bordered>
       <delete-wiki-modal show-as-dropdown-item />
     </gl-disclosure-dropdown-group>

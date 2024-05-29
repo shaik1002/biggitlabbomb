@@ -32,6 +32,8 @@ module Gitlab
           span :project_containers_registry_size
 
           # Pending members
+          button :view_pending_approvals, text: /View pending approvals/
+          div :pending_members_alert
           div :pending_members
           button :approve_member
           button :confirm_member_approval, text: /^OK$/

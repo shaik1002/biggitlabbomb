@@ -7,8 +7,6 @@ const resolveImageEl = (element) =>
   element.nodeName === 'IMG' ? element : element.querySelector('img');
 
 export default Image.extend({
-  draggable: true,
-
   addOptions() {
     return {
       ...this.parent?.(),

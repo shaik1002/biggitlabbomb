@@ -8,15 +8,10 @@ import axios from '~/lib/utils/axios_utils';
 import MergeRequestTabs, { getActionFromHref } from '~/merge_request_tabs';
 import Diff from '~/diff';
 import '~/lib/utils/common_utils';
-import { visitUrl } from '~/lib/utils/url_utility';
+import '~/lib/utils/url_utility';
 
 jest.mock('~/lib/utils/webpack', () => ({
   resetServiceWorkersPublicPath: jest.fn(),
-}));
-
-jest.mock('~/lib/utils/url_utility', () => ({
-  ...jest.requireActual('~/lib/utils/url_utility'),
-  visitUrl: jest.fn(),
 }));
 
 describe('MergeRequestTabs', () => {
@@ -132,7 +127,7 @@ describe('MergeRequestTabs', () => {
         testContext.class.bindEvents();
         $('.merge-request-tabs .commits-tab a').trigger(metakeyEvent);
 
-        expect(visitUrl).toHaveBeenCalledWith(expect.any(String), true);
+        expect(window.open).toHaveBeenCalled();
       });
 
       it('opens page when commits badge is clicked', () => {
@@ -144,7 +139,7 @@ describe('MergeRequestTabs', () => {
         testContext.class.bindEvents();
         $('.merge-request-tabs .commits-tab a .badge').trigger(metakeyEvent);
 
-        expect(visitUrl).toHaveBeenCalledWith(expect.any(String), true);
+        expect(window.open).toHaveBeenCalled();
       });
     });
 
@@ -156,7 +151,7 @@ describe('MergeRequestTabs', () => {
 
       testContext.class.clickTab({ ...clickTabParams, metaKey: true });
 
-      expect(visitUrl).toHaveBeenCalledWith(expect.any(String), true);
+      expect(window.open).toHaveBeenCalled();
     });
 
     it('opens page tab in a new browser tab with Cmd+Click - Mac', () => {
@@ -167,7 +162,7 @@ describe('MergeRequestTabs', () => {
 
       testContext.class.clickTab({ ...clickTabParams, ctrlKey: true });
 
-      expect(visitUrl).toHaveBeenCalledWith(expect.any(String), true);
+      expect(window.open).toHaveBeenCalled();
     });
 
     it('opens page tab in a new browser tab with Middle-click - Mac/PC', () => {
@@ -178,7 +173,7 @@ describe('MergeRequestTabs', () => {
 
       testContext.class.clickTab({ ...clickTabParams, which: 2 });
 
-      expect(visitUrl).toHaveBeenCalledWith(expect.any(String), true);
+      expect(window.open).toHaveBeenCalled();
     });
   });
 

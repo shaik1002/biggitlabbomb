@@ -136,14 +136,7 @@ workflow:
 
 This example assumes that your long-lived branches are [protected](../../user/project/protected_branches.md).
 
-<!--- start_remove The following content will be removed on remove_date: '2025-05-15' -->
-
-## `workflow:rules` templates (Deprecated)
-
-WARNING:
-The `workflow:rules` templates were [deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/456394)
-in GitLab 17.0 and are planned for removal in 18.0. This change is a breaking change.
-To configure `workflow:rules` in your pipeline, add the keyword explicitly. See the examples above for options.
+## `workflow:rules` templates
 
 GitLab provides templates that set up `workflow: rules`
 for common scenarios. These templates help prevent duplicate pipelines.
@@ -176,8 +169,6 @@ To [include](index.md#include) it:
 include:
   - template: 'Workflows/MergeRequest-Pipelines.gitlab-ci.yml'
 ```
-
-<!--- end_remove -->
 
 ## Troubleshooting
 

@@ -125,8 +125,4 @@ export default {
     text: s__('ProjectTemplates|Astro Tailwind'),
     icon: '.template-option .icon-gitlab_logo',
   },
-  nist_80053r5: {
-    text: s__('ProjectTemplates|NIST 800-53r5'),
-    icon: '.template-option .icon-gitlab_logo',
-  },
 };

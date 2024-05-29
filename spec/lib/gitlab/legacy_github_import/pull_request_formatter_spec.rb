@@ -66,7 +66,8 @@ RSpec.describe Gitlab::LegacyGithubImport::PullRequestFormatter, feature_categor
           author_id: project.creator_id,
           assignee_id: nil,
           created_at: created_at,
-          updated_at: updated_at
+          updated_at: updated_at,
+          imported: true
         }
 
         expect(pull_request.attributes).to eq(expected)
@@ -92,7 +93,8 @@ RSpec.describe Gitlab::LegacyGithubImport::PullRequestFormatter, feature_categor
           author_id: project.creator_id,
           assignee_id: nil,
           created_at: created_at,
-          updated_at: updated_at
+          updated_at: updated_at,
+          imported: true
         }
 
         expect(pull_request.attributes).to eq(expected)
@@ -119,7 +121,8 @@ RSpec.describe Gitlab::LegacyGithubImport::PullRequestFormatter, feature_categor
           author_id: project.creator_id,
           assignee_id: nil,
           created_at: created_at,
-          updated_at: updated_at
+          updated_at: updated_at,
+          imported: true
         }
 
         expect(pull_request.attributes).to eq(expected)

@@ -15,9 +15,6 @@ RSpec.shared_context 'with work item types request context' do
           allowedChildTypes {
             nodes { id name }
           }
-          allowedParentTypes {
-            nodes { id name }
-          }
         }
       }
     GRAPHQL
@@ -58,14 +55,10 @@ RSpec.shared_context 'with work item types request context' do
   end
 
   def hierarchy_widget_attributes(work_item_type, base_attributes)
-    child_types = work_item_type.allowed_child_types_by_name.map do |child_type|
+    fields = work_item_type.allowed_child_types_by_name.map do |child_type|
       { "id" => child_type.to_global_id.to_s, "name" => child_type.name }
     end
-    parent_types = work_item_type.allowed_parent_types_by_name.map do |parent_type|
-      { "id" => parent_type.to_global_id.to_s, "name" => parent_type.name }
-    end
 
-    base_attributes.merge({ 'allowedChildTypes' => { 'nodes' => child_types },
-'allowedParentTypes' => { 'nodes' => parent_types } })
+    base_attributes.merge({ 'allowedChildTypes' => { 'nodes' => fields } })
   end
 end

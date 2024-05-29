@@ -214,11 +214,12 @@ describe('Filtered Search Visual Tokens', () => {
       expect(token.style.color).not.toEqual(originalTextColor);
     });
 
-    it('should set the color of the remove token close icon to the label text color', () => {
+    it('should add inverted class when textColor is #FFFFFF', () => {
       const token = VisualTokenValue.setTokenStyle(bugLabelToken, 'black', '#FFFFFF');
-      const removeIcon = token.querySelector('.close-icon');
 
-      expect(removeIcon.style.color).toEqual('rgb(255, 255, 255)');
+      expect(token.style.color).toEqual('rgb(255, 255, 255)');
+      expect(token.style.color).not.toEqual(originalTextColor);
+      expect(token.querySelector('.remove-token').classList.contains('inverted')).toEqual(true);
     });
   });
 

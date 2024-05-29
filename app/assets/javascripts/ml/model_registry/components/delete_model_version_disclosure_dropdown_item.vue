@@ -18,12 +18,9 @@ export default {
   },
   computed: {
     deleteConfirmationText() {
-      return sprintf(
-        s__('MlModelRegistry|Are you sure you want to delete model version %{versionName}?'),
-        {
-          versionName: this.versionName,
-        },
-      );
+      return sprintf(s__('MLOps|Are you sure you want to delete model version %{versionName}?'), {
+        versionName: this.versionName,
+      });
     },
   },
   methods: {
@@ -34,7 +31,7 @@ export default {
   modal: {
     id: 'ml-model-version-delete-modal',
     actionPrimary: {
-      text: s__('MlModelRegistry|Delete model version'),
+      text: s__('MLOps|Delete model version'),
       attributes: { variant: 'danger' },
     },
     actionCancel: {
@@ -42,7 +39,7 @@ export default {
     },
   },
   i18n: {
-    modalTitle: s__('MlModelRegistry|Delete model version?'),
+    modalTitle: s__('MLOps|Delete model version?'),
   },
 };
 </script>

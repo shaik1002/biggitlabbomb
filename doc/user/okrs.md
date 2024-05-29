@@ -178,29 +178,20 @@ To add an objective to a milestone:
    If an objective already belongs to a milestone, the dropdown list shows the current milestone.
 1. From the dropdown list, select the milestone to be associated with the objective.
 
-## Set progress
-
-> - Setting progress for key results [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/382433) in GitLab 15.8.
+## Set objective progress
 
 Show how much of the work needed to achieve an objective is finished.
 
-You can set progress manually on objectives and key results.
-
-When you enter progress for a child item, progress of all parent items in the hierarchy is updated
-to the average of the child items' progress.
-You can override progress at any level and enter a value manually, but when a child item's progress
-value is updated, the automation updates all parents again to show the average.
+You can only set progress manually on objectives, and it's not rolled up from child objectives or
+key results.
 
 Prerequisites:
 
 - You must have at least the Reporter role for the project.
 
-To set progress of an objective or key result:
+To set progress of an objective:
 
-1. On the left sidebar, select **Search or go to** and find your project.
-1. Select **Plan > Issues**.
-1. [Filter the list of issues](project/issues/managing_issues.md#filter-the-list-of-issues)
-   for `Type = objective` or `Type = key result` and select your item.
+1. [Open the objective](okrs.md#view-an-objective) that you want to edit.
 1. Next to **Progress**, select the text box.
 1. Enter a number from 0 to 100.
 

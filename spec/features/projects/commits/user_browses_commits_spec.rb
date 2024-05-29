@@ -195,7 +195,7 @@ RSpec.describe 'User browses commits', feature_category: :source_code_management
       end
     end
 
-    context 'master branch', :js do
+    context 'master branch' do
       before do
         visit_commits_page
       end

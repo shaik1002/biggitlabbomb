@@ -184,7 +184,6 @@ export default {
           v-model="message"
           :placeholder="defaultMessage"
           data-testid="commit_message"
-          no-resize
           size="md"
           @input="(v) => $emit('update:message', v)"
         />

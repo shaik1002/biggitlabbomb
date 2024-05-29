@@ -81,13 +81,7 @@ RSpec.describe 'new tables missing sharding_key', feature_category: :cell do
       'value_stream_dashboard_counts.namespace_id', # https://gitlab.com/gitlab-org/gitlab/-/issues/439555
       'zoekt_indices.namespace_id',
       'zoekt_repositories.project_identifier',
-      'zoekt_tasks.project_identifier',
-      'project_audit_events.project_id',
-      'group_audit_events.group_id',
-      # aggregated table, a worker ensures eventual consistency
-      'analytics_cycle_analytics_issue_stage_events.group_id',
-      # aggregated table, a worker ensures eventual consistency
-      'analytics_cycle_analytics_merge_request_stage_events.group_id'
+      'zoekt_tasks.project_identifier'
     ]
   end
 

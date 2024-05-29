@@ -250,9 +250,7 @@ module API
         get ':id/pipelines/:pipeline_id/test_report', feature_category: :code_testing, urgency: :low do
           authorize! :read_build, pipeline
 
-          cache_action_if(pipeline.has_test_reports?, [user_project, pipeline], expires_in: 2.minutes) do
-            present pipeline.test_reports, with: TestReportEntity, details: true
-          end
+          present pipeline.test_reports, with: TestReportEntity, details: true
         end
 
         desc 'Gets the test report summary for a given pipeline' do

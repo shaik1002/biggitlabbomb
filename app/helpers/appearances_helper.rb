@@ -73,7 +73,11 @@ module AppearancesHelper
   end
 
   def custom_sign_in_description
-    markdown_field(current_appearance, :description)
+    [
+      markdown_field(current_appearance, :description),
+      markdown(Gitlab::CurrentSettings.sign_in_text),
+      markdown(Gitlab::CurrentSettings.help_text)
+    ].compact_blank.join("<br>").html_safe
   end
 
   def brand_member_guidelines

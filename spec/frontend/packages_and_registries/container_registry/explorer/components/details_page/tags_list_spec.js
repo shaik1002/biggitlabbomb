@@ -4,7 +4,7 @@ import { GlEmptyState } from '@gitlab/ui';
 import VueApollo from 'vue-apollo';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
+import Tracking from '~/tracking';
 import component from '~/packages_and_registries/container_registry/explorer/components/details_page/tags_list.vue';
 import TagsListRow from '~/packages_and_registries/container_registry/explorer/components/details_page/tags_list_row.vue';
 import TagsLoader from '~/packages_and_registries/shared/components/tags_loader.vue';
@@ -92,6 +92,7 @@ describe('Tags List', () => {
 
   beforeEach(() => {
     resolver = jest.fn().mockResolvedValue(imageTagsMock());
+    jest.spyOn(Tracking, 'event');
   });
 
   describe('registry list', () => {
@@ -152,16 +153,6 @@ describe('Tags List', () => {
       });
 
       describe('delete event', () => {
-        let trackingSpy;
-
-        beforeEach(() => {
-          trackingSpy = mockTracking(undefined, undefined, jest.spyOn);
-        });
-
-        afterEach(() => {
-          unmockTracking();
-        });
-
         describe('single item', () => {
           beforeEach(() => {
             findRegistryList().vm.$emit('delete', [tags[0]]);
@@ -176,7 +167,7 @@ describe('Tags List', () => {
           });
 
           it('tracks a single delete event', () => {
-            expect(trackingSpy).toHaveBeenCalledWith(undefined, 'click_button', {
+            expect(Tracking.event).toHaveBeenCalledWith(undefined, 'click_button', {
               label: 'registry_tag_delete',
             });
           });
@@ -196,7 +187,7 @@ describe('Tags List', () => {
           });
 
           it('tracks multiple delete event', () => {
-            expect(trackingSpy).toHaveBeenCalledWith(undefined, 'click_button', {
+            expect(Tracking.event).toHaveBeenCalledWith(undefined, 'click_button', {
               label: 'bulk_registry_tag_delete',
             });
           });
@@ -275,10 +266,8 @@ describe('Tags List', () => {
 
       describe('delete event', () => {
         let mutationResolver;
-        let trackingSpy;
 
         beforeEach(async () => {
-          trackingSpy = mockTracking(undefined, undefined, jest.spyOn);
           mutationResolver = jest.fn().mockResolvedValue(graphQLDeleteImageRepositoryTagsMock);
           resolver = jest.fn().mockResolvedValue(imageTagsMock());
           await mountComponent({ mutationResolver });
@@ -286,16 +275,12 @@ describe('Tags List', () => {
           findTagsListRow().at(0).vm.$emit('delete');
         });
 
-        afterEach(() => {
-          unmockTracking();
-        });
-
         it('opens the modal', () => {
           expect(DeleteModal.methods.show).toHaveBeenCalled();
         });
 
         it('tracks a single delete event', () => {
-          expect(trackingSpy).toHaveBeenCalledWith(undefined, 'click_button', {
+          expect(Tracking.event).toHaveBeenCalledWith(undefined, 'click_button', {
             label: 'registry_tag_delete',
           });
         });
@@ -376,22 +361,12 @@ describe('Tags List', () => {
     });
 
     describe('cancel event', () => {
-      let trackingSpy;
-
-      beforeEach(() => {
-        trackingSpy = mockTracking(undefined, undefined, jest.spyOn);
-      });
-
-      afterEach(() => {
-        unmockTracking();
-      });
-
       it('tracks cancel_delete', async () => {
         await mountComponent();
 
         findDeleteModal().vm.$emit('cancel');
 
-        expect(trackingSpy).toHaveBeenCalledWith(undefined, 'cancel_delete', {
+        expect(Tracking.event).toHaveBeenCalledWith(undefined, 'cancel_delete', {
           label: 'registry_tag_delete',
         });
       });

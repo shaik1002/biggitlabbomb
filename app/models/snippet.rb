@@ -13,6 +13,7 @@ class Snippet < ApplicationRecord
   include Editable
   include Gitlab::SQL::Pattern
   include FromUnion
+  include IgnorableColumns
   include HasRepository
   include CanMoveRepositoryStorage
   include AfterCommitQueue
@@ -20,9 +21,6 @@ class Snippet < ApplicationRecord
   include CreatedAtFilterable
   include EachBatch
   include Import::HasImportSource
-  include IgnorableColumns
-
-  ignore_column :imported, remove_with: '17.2', remove_after: '2024-07-22'
 
   MAX_FILE_COUNT = 10
 
@@ -250,6 +248,10 @@ class Snippet < ApplicationRecord
   end
 
   def hook_attrs
+    if Feature.disabled?(:webhooks_static_snippet_hook_attrs, Project.actor_from_id(project_id))
+      return attributes.merge('url' => Gitlab::UrlBuilder.build(self))
+    end
+
     {
       id: id,
       title: title,

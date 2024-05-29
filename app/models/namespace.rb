@@ -165,7 +165,6 @@ class Namespace < ApplicationRecord
   delegate :math_rendering_limits_enabled?,
     :lock_math_rendering_limits_enabled?,
     to: :namespace_settings
-  delegate :add_creator, to: :namespace_details
 
   before_create :sync_share_with_group_lock_with_parent
   before_update :sync_share_with_group_lock_with_parent, if: :parent_changed?
@@ -187,10 +186,10 @@ class Namespace < ApplicationRecord
   scope :without_project_namespaces, -> { where(Namespace.arel_table[:type].not_eq(Namespaces::ProjectNamespace.sti_name)) }
   scope :sort_by_type, -> { order(arel_table[:type].asc.nulls_first) }
   scope :include_route, -> { includes(:route) }
-  scope :by_parent, ->(parent) { where(parent_id: parent) }
-  scope :by_root_id, ->(root_id) { where('traversal_ids[1] IN (?)', root_id) }
-  scope :filter_by_path, ->(query) { where('lower(path) = :query', query: query.downcase) }
-  scope :in_organization, ->(organization) { where(organization: organization) }
+  scope :by_parent, -> (parent) { where(parent_id: parent) }
+  scope :by_root_id, -> (root_id) { where('traversal_ids[1] IN (?)', root_id) }
+  scope :filter_by_path, -> (query) { where('lower(path) = :query', query: query.downcase) }
+  scope :in_organization, -> (organization) { where(organization: organization) }
   scope :by_name, ->(name) { where('name LIKE ?', "#{sanitize_sql_like(name)}%") }
   scope :ordered_by_name, -> { order(:name) }
 
@@ -216,7 +215,7 @@ class Namespace < ApplicationRecord
     .where(jira_connect_subscriptions: { jira_connect_installation_id: installation_id })
   end
 
-  scope :sorted_by_similarity_and_parent_id_desc, ->(search) do
+  scope :sorted_by_similarity_and_parent_id_desc, -> (search) do
     order_expression = Gitlab::Database::SimilarityScore.build_expression(
       search: search,
       rules: [
@@ -555,9 +554,11 @@ class Namespace < ApplicationRecord
 
   def container_repositories_size
     strong_memoize(:container_repositories_size) do
+      next unless Gitlab.com_except_jh?
       next unless root?
       next unless ContainerRegistry::GitlabApiClient.supports_gitlab_api?
       next 0 if all_container_repositories.empty?
+      next unless all_container_repositories.all_migrated?
 
       Rails.cache.fetch(container_repositories_size_cache_key, expires_in: 7.days) do
         ContainerRegistry::GitlabApiClient.deduplicated_size(full_path)

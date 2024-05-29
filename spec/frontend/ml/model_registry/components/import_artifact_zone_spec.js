@@ -1,38 +1,46 @@
+import axios from 'axios';
+import MockAdapter from 'axios-mock-adapter';
 import { GlLoadingIcon } from '@gitlab/ui';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import { createAlert } from '~/alert';
-import { uploadModel } from '~/ml/model_registry/services/upload_model';
+import { HTTP_STATUS_INTERNAL_SERVER_ERROR, HTTP_STATUS_OK } from '~/lib/utils/http_status';
 import ImportArtifactZone from '~/ml/model_registry/components/import_artifact_zone.vue';
 import UploadDropzone from '~/vue_shared/components/upload_dropzone/upload_dropzone.vue';
 
 jest.mock('~/alert');
-jest.mock('~/ml/model_registry/services/upload_model', () => ({
-  uploadModel: jest.fn(() => Promise.resolve()),
-}));
 
 describe('ImportArtifactZone', () => {
   let wrapper;
+  let axiosMock;
 
   const file = { name: 'file.txt', size: 1024 };
   const initialProps = {
     path: 'some/path',
   };
+  const filePath = 'some/path/file.txt';
   const formattedFileSizeDiv = () => wrapper.findByTestId('formatted-file-size');
   const fileNameDiv = () => wrapper.findByTestId('file-name');
   const zone = () => wrapper.findComponent(UploadDropzone);
   const loadingIcon = () => wrapper.findComponent(GlLoadingIcon);
   const emulateFileDrop = () => zone().vm.$emit('change', file);
 
-  describe('successful upload', () => {
-    beforeEach(() => {
-      wrapper = shallowMountExtended(ImportArtifactZone, {
-        propsData: {
-          ...initialProps,
-        },
-      });
+  beforeEach(() => {
+    wrapper = shallowMountExtended(ImportArtifactZone, {
+      propsData: {
+        ...initialProps,
+      },
     });
 
+    axiosMock = new MockAdapter(axios);
+    axiosMock.onPut(filePath).replyOnce(HTTP_STATUS_OK, {});
+  });
+
+  afterEach(() => {
+    axiosMock.restore();
+  });
+
+  describe('successful upload', () => {
     it('displays the formatted file size', async () => {
       await emulateFileDrop();
       expect(formattedFileSizeDiv().text()).toContain('1.00 KiB');
@@ -62,13 +70,9 @@ describe('ImportArtifactZone', () => {
       await emulateFileDrop();
       await waitForPromises();
 
-      expect(uploadModel).toHaveBeenCalledWith({
-        file: {
-          name: 'file.txt',
-          size: 1024,
-        },
-        importPath: 'some/path',
-      });
+      expect(axiosMock.history.put).toHaveLength(1);
+      const uploadRequest = axiosMock.history.put[0];
+      expect(uploadRequest.url).toBe('some/path/file.txt');
     });
 
     it('emits a change event on success', async () => {
@@ -79,16 +83,9 @@ describe('ImportArtifactZone', () => {
     });
 
     describe('failed uploads', () => {
-      beforeEach(() => {
-        wrapper = shallowMountExtended(ImportArtifactZone, {
-          propsData: {
-            ...initialProps,
-          },
-        });
-      });
-
       it('displays an error on failure', async () => {
-        uploadModel.mockRejectedValue('Internal server error.');
+        axiosMock.reset();
+        axiosMock.onPut(filePath).replyOnce(HTTP_STATUS_INTERNAL_SERVER_ERROR, {});
 
         await emulateFileDrop();
         await waitForPromises();
@@ -99,51 +96,14 @@ describe('ImportArtifactZone', () => {
       });
 
       it('resets the state on failure', async () => {
-        uploadModel.mockRejectedValue('Internal server error.');
+        axiosMock.reset();
+        axiosMock.onPut(filePath).timeout();
 
         await emulateFileDrop();
         await waitForPromises();
         expect(loadingIcon().exists()).toBe(false);
         expect(formattedFileSizeDiv().exists()).toBe(false);
         expect(fileNameDiv().exists()).toBe(false);
-      });
-    });
-
-    describe('when submit-on-load is false', () => {
-      beforeEach(() => {
-        wrapper = shallowMountExtended(ImportArtifactZone, {
-          propsData: {
-            ...initialProps,
-            submitOnSelect: false,
-          },
-        });
-      });
-
-      it('does not submit the request', async () => {
-        await emulateFileDrop();
-        await waitForPromises();
-
-        expect(uploadModel).not.toHaveBeenCalled();
-        expect(loadingIcon().exists()).toBe(false);
-      });
-    });
-
-    describe('when path is empty', () => {
-      beforeEach(() => {
-        wrapper = shallowMountExtended(ImportArtifactZone, {
-          propsData: {
-            ...initialProps,
-            path: null,
-          },
-        });
-      });
-
-      it('does not submit the request', async () => {
-        await emulateFileDrop();
-        await waitForPromises();
-
-        expect(uploadModel).not.toHaveBeenCalled();
-        expect(loadingIcon().exists()).toBe(false);
       });
     });
   });

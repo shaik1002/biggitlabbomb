@@ -71,7 +71,7 @@ RSpec.describe Gitlab::Ci::Build::Rules::Rule::Clause::Exists, feature_category:
 
         before do
           stub_const('Gitlab::Ci::Build::Rules::Rule::Clause::Exists::MAX_PATTERN_COMPARISONS', 2)
-          expect(File).not_to receive(:fnmatch?)
+          expect(File).to receive(:fnmatch?).twice.and_call_original
         end
 
         it { is_expected.to be_truthy }

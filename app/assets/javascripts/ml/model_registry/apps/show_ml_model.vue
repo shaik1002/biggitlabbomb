@@ -1,5 +1,5 @@
 <script>
-import { GlBadge, GlTab, GlTabs } from '@gitlab/ui';
+import { GlTab, GlTabs, GlBadge } from '@gitlab/ui';
 import VueRouter from 'vue-router';
 import { n__, s__, sprintf } from '~/locale';
 import MetadataItem from '~/vue_shared/components/registry/metadata_item.vue';
@@ -8,7 +8,6 @@ import { MODEL_ENTITIES } from '~/ml/model_registry/constants';
 import ModelVersionList from '~/ml/model_registry/components/model_version_list.vue';
 import CandidateList from '~/ml/model_registry/components/candidate_list.vue';
 import ModelDetail from '~/ml/model_registry/components/model_detail.vue';
-import ModelVersionCreate from '~/ml/model_registry/components/model_version_create.vue';
 import ActionsDropdown from '~/ml/model_registry/components/actions_dropdown.vue';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { visitUrlWithAlerts } from '~/lib/utils/url_utility';
@@ -59,7 +58,6 @@ export default {
     MetadataItem,
     LoadOrErrorOrShow,
     DeleteModel,
-    ModelVersionCreate,
   },
   router: new VueRouter({
     routes,
@@ -184,8 +182,6 @@ export default {
             {{ description }}
           </template>
           <template #right-actions>
-            <model-version-create v-if="canWriteModelRegistry" :model-gid="modelGid" />
-
             <actions-dropdown>
               <delete-disclosure-dropdown-item
                 v-if="canWriteModelRegistry"

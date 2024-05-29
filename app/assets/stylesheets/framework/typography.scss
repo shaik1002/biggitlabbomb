@@ -43,12 +43,6 @@
     max-width: 100%;
   }
 
-  img[width][height] {
-    object-fit: contain;
-    object-position: top;
-    height: auto;
-  }
-
   img:not(.emoji) {
     margin: 0 0 8px;
   }

@@ -207,7 +207,7 @@ describe('graph component', () => {
         'gl-font-weight-bold',
         'gl-pipeline-job-width',
         'gl-text-truncate',
-        'gl-leading-36',
+        'gl-line-height-36',
         'gl-pl-4',
         '-gl-mb-2',
       ];

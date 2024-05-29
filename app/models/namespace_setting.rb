@@ -9,7 +9,6 @@ class NamespaceSetting < ApplicationRecord
   ignore_column :third_party_ai_features_enabled, remove_with: '16.11', remove_after: '2024-04-18'
   ignore_column :code_suggestions, remove_with: '17.0', remove_after: '2024-05-16'
   ignore_column :toggle_security_policies_policy_scope, remove_with: '17.0', remove_after: '2024-05-16'
-  ignore_column :lock_toggle_security_policies_policy_scope, remove_with: '17.2', remove_after: '2024-07-12'
 
   cascading_attr :toggle_security_policy_custom_ci
   cascading_attr :math_rendering_limits_enabled
@@ -24,15 +23,11 @@ class NamespaceSetting < ApplicationRecord
   validates :enabled_git_access_protocol, inclusion: { in: enabled_git_access_protocols.keys }
   validates :default_branch_protection_defaults, json_schema: { filename: 'default_branch_protection_defaults' }
   validates :default_branch_protection_defaults, bytesize: { maximum: -> { DEFAULT_BRANCH_PROTECTIONS_DEFAULT_MAX_SIZE } }
-  validates :remove_dormant_members, inclusion: { in: [false] }, if: :subgroup?
-  validates :remove_dormant_members_period, numericality: { only_integer: true, greater_than_or_equal_to: 90 }
 
   validate :allow_mfa_for_group
   validate :allow_resource_access_token_creation_for_group
 
   sanitizes! :default_branch_name
-
-  after_initialize :set_default_values, if: :new_record?
 
   before_validation :normalize_default_branch_name
 
@@ -105,10 +100,6 @@ class NamespaceSetting < ApplicationRecord
 
   private
 
-  def set_default_values
-    self.remove_dormant_members_period = 90
-  end
-
   def all_ancestors_have_emails_enabled?
     self.class.where(namespace_id: namespace.self_and_ancestors, emails_enabled: false).none?
   end
@@ -121,18 +112,14 @@ class NamespaceSetting < ApplicationRecord
     self.default_branch_name = default_branch_name.presence
   end
 
-  def subgroup?
-    !!namespace&.subgroup?
-  end
-
   def allow_mfa_for_group
-    if subgroup? && allow_mfa_for_subgroups == false
+    if namespace&.subgroup? && allow_mfa_for_subgroups == false
       errors.add(:allow_mfa_for_subgroups, _('is not allowed since the group is not top-level group.'))
     end
   end
 
   def allow_resource_access_token_creation_for_group
-    if subgroup? && !resource_access_token_creation_allowed
+    if namespace&.subgroup? && !resource_access_token_creation_allowed
       errors.add(:resource_access_token_creation_allowed, _('is not allowed since the group is not top-level group.'))
     end
   end

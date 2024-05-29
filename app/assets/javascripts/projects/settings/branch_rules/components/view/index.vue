@@ -5,12 +5,12 @@ import {
   GlSprintf,
   GlLink,
   GlLoadingIcon,
+  GlIcon,
   GlCard,
   GlButton,
   GlModal,
   GlModalDirective,
 } from '@gitlab/ui';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { sprintf, n__, s__ } from '~/locale';
 import {
   getParameterByName,
@@ -22,50 +22,45 @@ import { helpPagePath } from '~/helpers/help_page_helper';
 import branchRulesQuery from 'ee_else_ce/projects/settings/branch_rules/queries/branch_rules_details.query.graphql';
 import { createAlert } from '~/alert';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import editBranchRuleMutation from 'ee_else_ce/projects/settings/branch_rules/mutations/edit_branch_rule.mutation.graphql';
 import deleteBranchRuleMutation from '../../mutations/branch_rule_delete.mutation.graphql';
+import editBranchRuleMutation from '../../mutations/edit_branch_rule.mutation.graphql';
 import { getAccessLevels } from '../../../utils';
 import BranchRuleModal from '../../../components/branch_rule_modal.vue';
 import Protection from './protection.vue';
-import RuleDrawer from './rule_drawer.vue';
-import ProtectionToggle from './protection_toggle.vue';
 import {
   I18N,
   ALL_BRANCHES_WILDCARD,
   BRANCH_PARAM_NAME,
   PROTECTED_BRANCHES_HELP_PATH,
-  CODE_OWNERS_HELP_PATH,
-  PUSH_RULES_HELP_PATH,
+  REQUIRED_ICON,
+  NOT_REQUIRED_ICON,
+  REQUIRED_ICON_CLASS,
+  NOT_REQUIRED_ICON_CLASS,
   DELETE_RULE_MODAL_ID,
   EDIT_RULE_MODAL_ID,
 } from './constants';
 
 const protectedBranchesHelpDocLink = helpPagePath(PROTECTED_BRANCHES_HELP_PATH);
-const codeOwnersHelpDocLink = helpPagePath(CODE_OWNERS_HELP_PATH);
-const pushRulesHelpDocLink = helpPagePath(PUSH_RULES_HELP_PATH);
 
 export default {
   name: 'RuleView',
   i18n: I18N,
   deleteModalId: DELETE_RULE_MODAL_ID,
   protectedBranchesHelpDocLink,
-  codeOwnersHelpDocLink,
-  pushRulesHelpDocLink,
   directives: {
     GlModal: GlModalDirective,
   },
   editModalId: EDIT_RULE_MODAL_ID,
   components: {
     Protection,
-    ProtectionToggle,
     GlSprintf,
     GlLink,
     GlLoadingIcon,
+    GlIcon,
     GlCard,
     GlModal,
     GlButton,
     BranchRuleModal,
-    RuleDrawer,
   },
   mixins: [glFeatureFlagsMixin()],
   inject: {
@@ -93,13 +88,13 @@ export default {
           projectPath: this.projectPath,
         };
       },
-      update({ project: { branchRules, group } }) {
+      update({ project: { branchRules } }) {
         const branchRule = branchRules.nodes.find((rule) => rule.name === this.branch);
         this.branchRule = branchRule;
         this.branchProtection = branchRule?.branchProtection;
         this.statusChecks = branchRule?.externalStatusChecks?.nodes || [];
         this.matchingBranchesCount = branchRule?.matchingBranchesCount;
-        this.groupId = getIdFromGraphQLId(group?.id) || '';
+
         if (!this.showApprovers) return;
         // The approval rules app uses a separate endpoint to fetch the list of approval rules.
         // In future, we will update the GraphQL request to include the approval rules data.
@@ -119,46 +114,32 @@ export default {
       branchProtection: {},
       statusChecks: [],
       branchRule: {},
-      groupId: null,
       matchingBranchesCount: null,
-      isAllowedToMergeDrawerOpen: false,
-      isRuleUpdating: false,
     };
   },
   computed: {
     forcePushAttributes() {
       const { allowForcePush } = this.branchProtection || {};
+      const icon = allowForcePush ? REQUIRED_ICON : NOT_REQUIRED_ICON;
+      const iconClass = allowForcePush ? REQUIRED_ICON_CLASS : NOT_REQUIRED_ICON_CLASS;
       const title = allowForcePush
         ? this.$options.i18n.allowForcePushTitle
         : this.$options.i18n.doesNotAllowForcePushTitle;
 
-      if (!this.glFeatures.editBranchRules) {
-        return { title, description: this.$options.i18n.forcePushIconDescription };
-      }
-
-      return {
-        title,
-        description: this.$options.i18n.forcePushDescriptionWithDocs,
-      };
+      return { icon, iconClass, title };
     },
     codeOwnersApprovalAttributes() {
       const { codeOwnerApprovalRequired } = this.branchProtection || {};
+      const icon = codeOwnerApprovalRequired ? REQUIRED_ICON : NOT_REQUIRED_ICON;
+      const iconClass = codeOwnerApprovalRequired ? REQUIRED_ICON_CLASS : NOT_REQUIRED_ICON_CLASS;
       const title = codeOwnerApprovalRequired
         ? this.$options.i18n.requiresCodeOwnerApprovalTitle
         : this.$options.i18n.doesNotRequireCodeOwnerApprovalTitle;
+      const description = codeOwnerApprovalRequired
+        ? this.$options.i18n.requiresCodeOwnerApprovalDescription
+        : this.$options.i18n.doesNotRequireCodeOwnerApprovalDescription;
 
-      if (!this.glFeatures.editBranchRules) {
-        const description = codeOwnerApprovalRequired
-          ? this.$options.i18n.requiresCodeOwnerApprovalDescription
-          : this.$options.i18n.doesNotRequireCodeOwnerApprovalDescription;
-
-        return { title, description };
-      }
-
-      return {
-        title,
-        description: this.$options.i18n.codeOwnerApprovalDescription,
-      };
+      return { icon, iconClass, title, description };
     },
     mergeAccessLevels() {
       const { mergeAccessLevels } = this.branchProtection || {};
@@ -199,9 +180,6 @@ export default {
         this.branch === this.$options.i18n.allProtectedBranches
       );
     },
-    hasPushAccessLevelSet() {
-      return this.pushAccessLevels?.total > 0;
-    },
   },
   methods: {
     ...mapActions(['setRulesFilter', 'fetchRules']),
@@ -236,39 +214,18 @@ export default {
           });
         });
     },
-    openAllowedToMergeDrawer() {
-      this.isAllowedToMergeDrawerOpen = true;
-    },
-    closeAllowedToMergeDrawer() {
-      this.isAllowedToMergeDrawerOpen = false;
-    },
-    editBranchRule({ name = this.branchRule.name, branchProtection = null, toastMessage = '' }) {
-      this.isRuleUpdating = true;
+    editBranchRule({ name }) {
       this.$apollo
         .mutate({
           mutation: editBranchRuleMutation,
           variables: {
-            input: {
-              id: this.branchRule.id,
-              name,
-              ...(branchProtection && { branchProtection }),
-            },
+            id: this.branchRule.id,
+            name,
           },
         })
-        .then(() => {
-          const isRedirectNeeded = !branchProtection;
-          if (isRedirectNeeded) {
-            visitUrl(setUrlParams({ branch: name }));
-          } else {
-            this.closeAllowedToMergeDrawer();
-            this.$toast.show(toastMessage);
-          }
-        })
+        .then(visitUrl(setUrlParams({ branch: name })))
         .catch(() => {
           createAlert({ message: this.$options.i18n.updateBranchRuleError });
-        })
-        .finally(() => {
-          this.isRuleUpdating = false;
         });
     },
   },
@@ -303,7 +260,7 @@ export default {
           <gl-button
             v-if="glFeatures.editBranchRules && !isPredefinedRule"
             v-gl-modal="$options.editModalId"
-            data-testid="edit-rule-name-button"
+            data-testid="edit-rule-button"
             size="small"
             >{{ $options.i18n.edit }}</gl-button
           >
@@ -327,37 +284,6 @@ export default {
           </template>
         </gl-sprintf>
 
-        <!-- Allowed to merge -->
-        <protection
-          :header="allowedToMergeHeader"
-          :header-link-title="$options.i18n.manageProtectionsLinkTitle"
-          :header-link-href="protectedBranchesPath"
-          :roles="mergeAccessLevels.roles"
-          :users="mergeAccessLevels.users"
-          :groups="mergeAccessLevels.groups"
-          :empty-state-copy="$options.i18n.allowedToMergeEmptyState"
-          is-edit-available
-          data-testid="allowed-to-merge-content"
-          @edit="openAllowedToMergeDrawer"
-        />
-
-        <rule-drawer
-          :is-open="isAllowedToMergeDrawerOpen"
-          :roles="mergeAccessLevels.roles"
-          :users="mergeAccessLevels.users"
-          :groups="mergeAccessLevels.groups"
-          :is-loading="isRuleUpdating"
-          :group-id="groupId"
-          :title="s__('BranchRules|Edit allowed to merge')"
-          @editRule="
-            editBranchRule({
-              branchProtection: { mergeAccessLevels: $event },
-              toastMessage: s__('BranchRules|Allowed to merge updated'),
-            })
-          "
-          @close="closeAllowedToMergeDrawer"
-        />
-
         <!-- Allowed to push -->
         <protection
           class="gl-mt-3"
@@ -372,30 +298,47 @@ export default {
           data-testid="allowed-to-push-content"
         />
 
-        <!-- Force push -->
-        <protection-toggle
-          v-if="hasPushAccessLevelSet"
-          data-testid="force-push-content"
-          data-test-id-prefix="force-push"
-          :is-protected="branchProtection.allowForcePush"
-          :label="$options.i18n.allowForcePushLabel"
-          :icon-title="forcePushAttributes.title"
-          :description="forcePushAttributes.description"
-          :description-link="$options.pushRulesHelpDocLink"
+        <!-- Allowed to merge -->
+        <protection
+          :header="allowedToMergeHeader"
+          :header-link-title="$options.i18n.manageProtectionsLinkTitle"
+          :header-link-href="protectedBranchesPath"
+          :roles="mergeAccessLevels.roles"
+          :users="mergeAccessLevels.users"
+          :groups="mergeAccessLevels.groups"
+          :empty-state-copy="$options.i18n.allowedToMergeEmptyState"
+          is-edit-available
+          data-testid="allowed-to-merge-content"
         />
+
+        <!-- Force push -->
+        <div class="gl-display-flex gl-align-items-center">
+          <gl-icon
+            :size="14"
+            data-testid="force-push-icon"
+            :name="forcePushAttributes.icon"
+            :class="forcePushAttributes.iconClass"
+          />
+          <strong class="gl-ml-2">{{ forcePushAttributes.title }}</strong>
+        </div>
+
+        <div class="gl-text-secondary gl-mb-2">{{ $options.i18n.forcePushDescription }}</div>
 
         <!-- EE start -->
         <!-- Code Owners -->
-        <protection-toggle
-          v-if="showCodeOwners"
-          data-testid="code-owners-content"
-          data-test-id-prefix="code-owners"
-          :is-protected="branchProtection.codeOwnerApprovalRequired"
-          :label="$options.i18n.requiresCodeOwnerApprovalLabel"
-          :icon-title="codeOwnersApprovalAttributes.title"
-          :description="codeOwnersApprovalAttributes.description"
-          :description-link="$options.codeOwnersHelpDocLink"
-        />
+        <div v-if="showCodeOwners">
+          <div class="gl-display-flex gl-align-items-center">
+            <gl-icon
+              data-testid="code-owners-icon"
+              :size="14"
+              :name="codeOwnersApprovalAttributes.icon"
+              :class="codeOwnersApprovalAttributes.iconClass"
+            />
+            <strong class="gl-ml-2">{{ codeOwnersApprovalAttributes.title }}</strong>
+          </div>
+
+          <div class="gl-text-secondary">{{ codeOwnersApprovalAttributes.description }}</div>
+        </div>
       </section>
 
       <!-- Approvals -->
@@ -432,7 +375,6 @@ export default {
         </gl-sprintf>
 
         <protection
-          data-testid="status-checks-content"
           class="gl-mt-3"
           :header="statusChecksHeader"
           :header-link-title="$options.i18n.statusChecksLinkTitle"

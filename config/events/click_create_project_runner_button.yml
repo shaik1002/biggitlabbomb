@@ -1,6 +1,6 @@
 ---
 description: Project runner created
-internal_events: true
+category: InternalEventTracking
 action: click_create_project_runner_button
 identifiers:
   - project

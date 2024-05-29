@@ -441,7 +441,7 @@ RSpec.describe API::Projects, :aggregate_failures, feature_category: :groups_and
 
         statistics = json_response.find { |p| p['id'] == project.id }['statistics']
         expect(statistics).to be_present
-        expect(statistics).to include('commit_count', 'storage_size', 'repository_size', 'wiki_size', 'lfs_objects_size', 'job_artifacts_size', 'pipeline_artifacts_size', 'snippets_size', 'packages_size', 'uploads_size', 'container_registry_size')
+        expect(statistics).to include('commit_count', 'storage_size', 'repository_size', 'wiki_size', 'lfs_objects_size', 'job_artifacts_size', 'pipeline_artifacts_size', 'snippets_size', 'packages_size', 'uploads_size')
       end
 
       it "does not include license by default" do
@@ -1184,20 +1184,22 @@ RSpec.describe API::Projects, :aggregate_failures, feature_category: :groups_and
     context 'rate limiting' do
       let_it_be(:current_user) { create(:user) }
 
-      context 'when the user is signed in' do
-        it_behaves_like 'rate limited endpoint', rate_limit_key: :projects_api do
-          def request
-            get api(path, current_user)
-          end
+      shared_examples_for 'does not log request and does not block the request' do
+        specify do
+          request
+          request
+
+          expect(response).not_to have_gitlab_http_status(:too_many_requests)
+          expect(Gitlab::AuthLogger).not_to receive(:error)
         end
+      end
 
-        context 'when rate_limit_groups_and_projects_api feature flag is disabled' do
-          before do
-            stub_feature_flags(rate_limit_groups_and_projects_api: false)
-          end
+      before do
+        stub_application_setting(projects_api_rate_limit_unauthenticated: 1)
+      end
 
-          it_behaves_like 'unthrottled endpoint'
-
+      context 'when the user is signed in' do
+        it_behaves_like 'does not log request and does not block the request' do
           def request
             get api(path, current_user)
           end
@@ -1733,24 +1735,6 @@ RSpec.describe API::Projects, :aggregate_failures, feature_category: :groups_and
       expect(json_response.map { |project| project['id'] }).to contain_exactly(public_project.id)
     end
 
-    it_behaves_like 'rate limited endpoint', rate_limit_key: :user_projects_api do
-      def request
-        get api("/users/#{user4.id}/projects/")
-      end
-    end
-
-    context 'when rate_limit_groups_and_projects_api feature flag is disabled' do
-      before do
-        stub_feature_flags(rate_limit_groups_and_projects_api: false)
-      end
-
-      it_behaves_like 'unthrottled endpoint'
-
-      def request
-        get api("/users/#{user4.id}/projects/")
-      end
-    end
-
     it 'includes container_registry_access_level' do
       get api("/users/#{user4.id}/projects/", user)
 
@@ -1892,24 +1876,6 @@ RSpec.describe API::Projects, :aggregate_failures, feature_category: :groups_and
       expect(json_response['message']).to eq('404 User Not Found')
     end
 
-    it_behaves_like 'rate limited endpoint', rate_limit_key: :user_starred_projects_api do
-      def request
-        get api(path)
-      end
-    end
-
-    context 'when rate_limit_groups_and_projects_api feature flag is disabled' do
-      before do
-        stub_feature_flags(rate_limit_groups_and_projects_api: false)
-      end
-
-      it_behaves_like 'unthrottled endpoint'
-
-      def request
-        get api(path)
-      end
-    end
-
     context 'with a public profile' do
       it 'returns projects filtered by user' do
         get api(path, user)
@@ -1984,24 +1950,6 @@ RSpec.describe API::Projects, :aggregate_failures, feature_category: :groups_and
 
       expect(response).to have_gitlab_http_status(:not_found)
       expect(json_response['message']).to eq('404 User Not Found')
-    end
-
-    it_behaves_like 'rate limited endpoint', rate_limit_key: :user_contributed_projects_api do
-      def request
-        get api(path)
-      end
-    end
-
-    context 'when rate_limit_groups_and_projects_api feature flag is disabled' do
-      before do
-        stub_feature_flags(rate_limit_groups_and_projects_api: false)
-      end
-
-      it_behaves_like 'unthrottled endpoint'
-
-      def request
-        get api(path)
-      end
     end
 
     context 'with a public profile' do
@@ -2341,7 +2289,7 @@ RSpec.describe API::Projects, :aggregate_failures, feature_category: :groups_and
       expect(json_response['alt']).to eq("dk")
       expect(json_response['url']).to start_with("/uploads/")
       expect(json_response['url']).to end_with("/dk.png")
-      expect(json_response['full_path']).to start_with("/-/project/#{project.id}/uploads")
+      expect(json_response['full_path']).to start_with("/#{project.namespace.path}/#{project.path}/uploads")
     end
 
     it "does not leave the temporary file in place after uploading, even when the tempfile reaper does not run" do
@@ -2623,24 +2571,6 @@ RSpec.describe API::Projects, :aggregate_failures, feature_category: :groups_and
 
     it_behaves_like 'GET request permissions for admin mode' do
       let(:failed_status_code) { :not_found }
-    end
-
-    it_behaves_like 'rate limited endpoint', rate_limit_key: :project_api do
-      def request
-        get api(path)
-      end
-    end
-
-    context 'when rate_limit_groups_and_projects_api feature flag is disabled' do
-      before do
-        stub_feature_flags(rate_limit_groups_and_projects_api: false)
-      end
-
-      it_behaves_like 'unthrottled endpoint'
-
-      def request
-        get api(path)
-      end
     end
 
     context 'when unauthenticated' do
@@ -4591,15 +4521,6 @@ RSpec.describe API::Projects, :aggregate_failures, feature_category: :groups_and
 
         expect(response).to have_gitlab_http_status(:bad_request)
         expect(json_response['error']).to eq('container_expiration_policy_attributes[keep_n] is invalid')
-      end
-    end
-
-    context 'with repository_object_format' do
-      it 'ignores repositotory object format field' do
-        put api(path, user), params: { name: 'new', repository_object_format: 'sha256' }
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(json_response['repository_object_format']).to eq 'sha1'
       end
     end
 

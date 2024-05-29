@@ -6,7 +6,7 @@ import ProtectionRow from './protection_row.vue';
 
 export const i18n = {
   rolesTitle: s__('BranchRules|Roles'),
-  usersAndGroupsTitle: s__('BranchRules|Users & groups'),
+  usersTitle: s__('BranchRules|Users'),
   groupsTitle: s__('BranchRules|Groups'),
 };
 
@@ -100,7 +100,7 @@ export default {
       <gl-button
         v-if="glFeatures.editBranchRules && isEditAvailable"
         size="small"
-        data-testid="edit-rule-button"
+        data-testid="edit-button"
         @click="$emit('edit')"
         >{{ __('Edit') }}</gl-button
       >
@@ -117,13 +117,20 @@ export default {
     <!-- Roles -->
     <protection-row v-if="roles.length" :title="$options.i18n.rolesTitle" :access-levels="roles" />
 
-    <!-- Users and Groups -->
+    <!-- Users -->
     <protection-row
-      v-if="hasUsers || hasGroups"
+      v-if="users.length"
       :show-divider="hasRoles"
+      :title="$options.i18n.usersTitle"
       :users="users"
-      :groups="groups"
-      :title="$options.i18n.usersAndGroupsTitle"
+    />
+
+    <!-- Groups -->
+    <protection-row
+      v-if="groups.length"
+      :show-divider="showDivider"
+      :title="$options.i18n.groupsTitle"
+      :access-levels="groups"
     />
 
     <!-- Status checks -->

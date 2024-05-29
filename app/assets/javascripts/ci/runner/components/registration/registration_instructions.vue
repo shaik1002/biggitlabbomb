@@ -143,8 +143,13 @@ export default {
     isRunnerOnline() {
       return this.runner?.status === STATUS_ONLINE;
     },
+    showGoogleCloudPlatformOption() {
+      return this.glFeatures?.googleCloudSupportFeatureFlag;
+    },
     showGoogleCloudRegistration() {
-      return this.platform === GOOGLE_CLOUD_PLATFORM;
+      return (
+        this.glFeatures?.googleCloudSupportFeatureFlag && this.platform === GOOGLE_CLOUD_PLATFORM
+      );
     },
   },
   watch: {
@@ -191,7 +196,7 @@ export default {
       {{ s__('Runners|Platform') }}
     </h2>
     <runner-platforms-radio-group :value="platform" @input="onSelectPlatform">
-      <template #cloud-options>
+      <template v-if="showGoogleCloudPlatformOption" #cloud-options>
         <runner-google-cloud-option :checked="platform" @input="onSelectPlatform" />
       </template>
     </runner-platforms-radio-group>
