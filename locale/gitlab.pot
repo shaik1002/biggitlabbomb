@@ -58840,6 +58840,9 @@ msgstr ""
 msgid "Vulnerability|Code Review"
 msgstr ""
 
+msgid "Vulnerability|Code flow"
+msgstr ""
+
 msgid "Vulnerability|Comments"
 msgstr ""
 
@@ -59017,6 +59020,9 @@ msgstr ""
 msgid "Vulnerability|Unmodified response:"
 msgstr ""
 
+msgid "Vulnerability|View code flow"
+msgstr ""
+
 msgid "Vulnerability|View training"
 msgstr ""
 
@@ -59027,6 +59033,9 @@ msgid "Vulnerability|Vulnerable method:"
 msgstr ""
 
 msgid "Vulnerability|Warning: possible secrets detected"
+msgstr ""
+
+msgid "Vulnerability|code_flow"
 msgstr ""
 
 msgid "Vulnerability|You can also %{message}."
