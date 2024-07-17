@@ -29,6 +29,7 @@ export const parseGetStorageResults = (data) => {
     },
   } = data || {};
 
+  // Test codeowners
   const totalUsage = rootStorageStatistics?.storageSize
     ? numberToHumanSize(rootStorageStatistics.storageSize)
     : __('Not applicable.');

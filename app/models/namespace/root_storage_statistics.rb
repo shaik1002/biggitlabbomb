@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+  # Test codeowners
 class Namespace::RootStorageStatistics < ApplicationRecord
   SNIPPETS_SIZE_STAT_NAME = 'snippets_size'
   STATISTICS_ATTRIBUTES = %W[
@@ -14,6 +15,7 @@ class Namespace::RootStorageStatistics < ApplicationRecord
     uploads_size
   ].freeze
 
+  # Test codeowners
   self.primary_key = :namespace_id
 
   belongs_to :namespace

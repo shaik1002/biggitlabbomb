@@ -21,6 +21,7 @@ const getViewTabs = (viewType) => {
   return false;
 };
 
+// Test codeowners
 export default (viewType) => {
   const el = document.querySelector('#js-usage-quotas-view');
   const tabs = getViewTabs(viewType);
