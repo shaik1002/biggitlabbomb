@@ -29,41 +29,44 @@ RSpec.describe PagesDomain, feature_category: :pages do
     end
   end
 
-  describe 'domain validations' do
+  describe 'validate domain' do
     subject(:pages_domain) { build(:pages_domain, domain: domain) }
 
-    context 'when the domain is unique' do
+    context 'is unique' do
       let(:domain) { 'my.domain.com' }
 
       it { is_expected.to validate_uniqueness_of(:domain).case_insensitive }
     end
 
-    context "with different domain names" do
-      before do
-        allow(Settings.pages).to receive(:host).and_return('reserved.com')
-      end
+    describe "hostname" do
+      {
+        'my.domain.com' => true,
+        '123.456.789' => true,
+        '0x12345.com' => true,
+        '0123123' => true,
+        'a-reserved.com' => true,
+        'a.b-reserved.com' => true,
+        'reserved.com' => true,
+        '_foo.com' => false,
+        'a.reserved.com' => false,
+        'a.b.reserved.com' => false,
+        nil => false
+      }.each do |value, validity|
+        context "domain #{value.inspect} validity" do
+          before do
+            allow(Settings.pages).to receive(:host).and_return('reserved.com')
+          end
 
-      where(:domain, :expected) do
-        'my.domain.com'    | true
-        '123.456.789'      | true
-        '0x12345.com'      | true
-        '0123123'          | true
-        'a-reserved.com'   | true
-        'a.b-reserved.com' | true
-        'reserved.com'     | true
+          let(:domain) { value }
 
-        '_foo.com'         | false
-        'a.reserved.com'   | false
-        'a.b.reserved.com' | false
-        nil                | false
-      end
-
-      with_them do
-        it { is_expected.to have_attributes(valid?: expected) }
+          it { expect(pages_domain.valid?).to eq(validity) }
+        end
       end
     end
 
     describe "HTTPS-only" do
+      using RSpec::Parameterized::TableSyntax
+
       let(:domain) { 'my.domain.com' }
 
       let(:project) do
@@ -121,7 +124,7 @@ RSpec.describe PagesDomain, feature_category: :pages do
   describe 'validate certificate' do
     subject { domain }
 
-    context 'for serverless domain' do
+    context 'serverless domain' do
       it 'requires certificate and key to be present' do
         expect(build(:pages_domain, :without_certificate, :without_key, usage: :serverless)).not_to be_valid
         expect(build(:pages_domain, :without_certificate, usage: :serverless)).not_to be_valid
@@ -154,7 +157,9 @@ RSpec.describe PagesDomain, feature_category: :pages do
     end
 
     context 'when certificate is expired' do
-      let(:domain) { build(:pages_domain, :with_trusted_expired_chain) }
+      let(:domain) do
+        build(:pages_domain, :with_trusted_expired_chain)
+      end
 
       context 'when certificate is being changed' do
         it "adds error to certificate" do
@@ -176,17 +181,19 @@ RSpec.describe PagesDomain, feature_category: :pages do
     end
 
     context 'with ecdsa certificate' do
-      let(:domain) { build(:pages_domain, :ecdsa) }
+      it "is valid" do
+        domain = build(:pages_domain, :ecdsa)
 
-      it { is_expected.to be_valid }
+        expect(domain).to be_valid
+      end
 
       context 'when curve is set explicitly by parameters' do
-        let(:domain) { build(:pages_domain, :explicit_ecdsa) }
-
         it 'adds errors to private key' do
-          is_expected.to be_invalid
+          domain = build(:pages_domain, :explicit_ecdsa)
 
-          expect(domain.errors[:key]).to be_present
+          expect(domain).to be_invalid
+
+          expect(domain.errors[:key]).not_to be_empty
         end
       end
     end
@@ -223,13 +230,20 @@ RSpec.describe PagesDomain, feature_category: :pages do
   end
 
   describe 'default values' do
-    it do
-      is_expected.to have_attributes(
-        wildcard: false,
-        auto_ssl_enabled: false,
-        scope: 'project',
-        usage: 'pages'
-      )
+    it 'defaults wildcard to false' do
+      expect(subject.wildcard).to eq(false)
+    end
+
+    it 'defaults auto_ssl_enabled to false' do
+      expect(subject.auto_ssl_enabled).to eq(false)
+    end
+
+    it 'defaults scope to project' do
+      expect(subject.scope).to eq('project')
+    end
+
+    it 'defaults usage to pages' do
+      expect(subject.usage).to eq('pages')
     end
   end
 
@@ -237,7 +251,7 @@ RSpec.describe PagesDomain, feature_category: :pages do
     subject { pages_domain.verification_code }
 
     it 'is set automatically with 128 bits of SecureRandom data' do
-      expect(SecureRandom).to receive(:hex).with(16).and_return('verification code')
+      expect(SecureRandom).to receive(:hex).with(16) { 'verification code' }
 
       is_expected.to eq('verification code')
     end
@@ -376,13 +390,17 @@ RSpec.describe PagesDomain, feature_category: :pages do
     context 'when certificate is provided by user' do
       let(:domain) { create(:pages_domain) }
 
-      it { is_expected.to eq domain.key }
+      it 'returns key' do
+        is_expected.to eq(domain.key)
+      end
     end
 
     context 'when certificate is provided by gitlab' do
       let(:domain) { create(:pages_domain, :letsencrypt) }
 
-      it { is_expected.to be_nil }
+      it 'returns nil' do
+        is_expected.to be_nil
+      end
     end
   end
 
@@ -392,18 +410,24 @@ RSpec.describe PagesDomain, feature_category: :pages do
     context 'when certificate is provided by user' do
       let(:domain) { create(:pages_domain) }
 
-      it { is_expected.to eq domain.certificate }
+      it 'returns key' do
+        is_expected.to eq(domain.certificate)
+      end
     end
 
     context 'when certificate is provided by gitlab' do
       let(:domain) { create(:pages_domain, :letsencrypt) }
 
-      it { is_expected.to be_nil }
+      it 'returns nil' do
+        is_expected.to be_nil
+      end
     end
   end
 
   shared_examples 'certificate setter' do |attribute, setter_name, old_certificate_source, new_certificate_source|
-    let(:domain) { create(:pages_domain, certificate_source: old_certificate_source) }
+    let(:domain) do
+      create(:pages_domain, certificate_source: old_certificate_source)
+    end
 
     let(:old_value) { domain.public_send(attribute) }
 
@@ -413,13 +437,15 @@ RSpec.describe PagesDomain, feature_category: :pages do
       let(:new_value) { 'new_value' }
 
       it "assignes new value to #{attribute}" do
-        expect { subject }
-          .to change { domain.public_send(attribute) }.from(old_value).to('new_value')
+        expect do
+          subject
+        end.to change { domain.public_send(attribute) }.from(old_value).to('new_value')
       end
 
       it 'changes certificate source' do
-        expect { subject }
-          .to change { domain.certificate_source }.from(old_certificate_source).to(new_certificate_source)
+        expect do
+          subject
+        end.to change { domain.certificate_source }.from(old_certificate_source).to(new_certificate_source)
       end
     end
 
@@ -463,11 +489,15 @@ RSpec.describe PagesDomain, feature_category: :pages do
       let(:domain) { create(:pages_domain, auto_ssl_enabled: true, auto_ssl_failed: true) }
 
       it 'clears failure if auto ssl is disabled' do
-        expect { domain.update!(auto_ssl_enabled: false) }.to change { domain.auto_ssl_failed }.from(true).to(false)
+        expect do
+          domain.update!(auto_ssl_enabled: false)
+        end.to change { domain.auto_ssl_failed }.from(true).to(false)
       end
 
       it 'does not clear failure on unrelated updates' do
-        expect { domain.update!(verified_at: Time.current) }.not_to change { domain.auto_ssl_failed }.from(true)
+        expect do
+          domain.update!(verified_at: Time.current)
+        end.not_to change { domain.auto_ssl_failed }.from(true)
       end
     end
   end
@@ -501,16 +531,24 @@ RSpec.describe PagesDomain, feature_category: :pages do
   end
 
   describe '.instance_serverless' do
-    let_it_be(:domain_1) { create(:pages_domain, wildcard: true) }
-    let_it_be(:domain_2) { create(:pages_domain, :instance_serverless) }
-    let_it_be(:domain_3) { create(:pages_domain, scope: :instance) }
-    let_it_be(:domain_4) { create(:pages_domain, :instance_serverless) }
-    let_it_be(:domain_5) { create(:pages_domain, usage: :serverless) }
-
     subject { described_class.instance_serverless }
 
+    before do
+      create(:pages_domain, wildcard: true)
+      create(:pages_domain, :instance_serverless)
+      create(:pages_domain, scope: :instance)
+      create(:pages_domain, :instance_serverless)
+      create(:pages_domain, usage: :serverless)
+    end
+
     it 'returns domains that are wildcard, instance-level, and serverless' do
-      is_expected.to match_array [domain_2, domain_4]
+      expect(subject.length).to eq(2)
+
+      subject.each do |domain|
+        expect(domain.wildcard).to eq(true)
+        expect(domain.usage).to eq('serverless')
+        expect(domain.scope).to eq('instance')
+      end
     end
   end
 
@@ -572,10 +610,10 @@ RSpec.describe PagesDomain, feature_category: :pages do
   end
 
   describe '.find_by_domain_case_insensitive' do
-    let_it_be(:pages_domain) { create(:pages_domain, domain: "Pages.IO") }
-
     it 'lookup is case-insensitive' do
-      expect(described_class.find_by_domain_case_insensitive('pages.io')).to eq pages_domain
+      pages_domain = create(:pages_domain, domain: "Pages.IO")
+
+      expect(described_class.find_by_domain_case_insensitive('pages.io')).to eq(pages_domain)
     end
   end
 end

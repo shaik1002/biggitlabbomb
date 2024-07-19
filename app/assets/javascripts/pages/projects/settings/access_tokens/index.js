@@ -1,6 +1,5 @@
 import {
   initAccessTokenTableApp,
-  initInactiveAccessTokenTableApp,
   initExpiresAtField,
   initNewAccessTokenApp,
 } from '~/access_tokens';
@@ -8,7 +7,3 @@ import {
 initAccessTokenTableApp();
 initExpiresAtField();
 initNewAccessTokenApp();
-
-if (gon.features.retainResourceAccessTokenUserAfterRevoke) {
-  initInactiveAccessTokenTableApp();
-}

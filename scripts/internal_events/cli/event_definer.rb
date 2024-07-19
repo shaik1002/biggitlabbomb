@@ -27,12 +27,10 @@ module InternalEventsCli
                                '(ex - service_desk_request_received)',
       %w[namespace] => 'Use case: For namespace-level events without user interaction ' \
                        '(ex - stale_runners_cleaned_up)',
-      %w[feature_enabled_by_namespace_ids user] => 'Use case: For user actions attributable to multiple namespaces ' \
-                                                   '(ex - Code-Suggestions / Duo Pro)',
       %w[] => "Use case: For instance-level events without user interaction [LEAST COMMON]"
     }.freeze
 
-    IDENTIFIER_FORMATTING_BUFFER = "[#{IDENTIFIER_OPTIONS.keys.map { |k| k.join(', ') }.max_by(&:length)}]".length
+    IDENTIFIER_FORMATTING_BUFFER = "[#{IDENTIFIER_OPTIONS.keys.max_by(&:length).join(', ')}]".length
 
     attr_reader :cli, :event
 
@@ -97,8 +95,7 @@ module InternalEventsCli
 
       identifiers = prompt_for_array_selection(
         'Which identifiers are available when the event occurs?',
-        IDENTIFIER_OPTIONS.keys,
-        per_page: IDENTIFIER_OPTIONS.length
+        IDENTIFIER_OPTIONS.keys
       ) { |choice| format_identifier_choice(choice) }
 
       event.identifiers = identifiers if identifiers.any?

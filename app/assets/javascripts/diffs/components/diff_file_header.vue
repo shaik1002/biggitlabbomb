@@ -98,6 +98,11 @@ export default {
       required: false,
       default: false,
     },
+    pinned: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   idState() {
     return {
@@ -218,6 +223,7 @@ export default {
       'setFileCollapsedByUser',
       'setFileForcedOpen',
       'toggleFileCommentForm',
+      'unpinFile',
     ]),
     handleToggleFile() {
       this.setFileForcedOpen({
@@ -292,7 +298,19 @@ export default {
   >
     <div class="file-header-content">
       <gl-button
-        v-if="collapsible"
+        v-if="pinned"
+        v-gl-tooltip.hover.focus
+        :title="__('Unpin the file')"
+        :aria-label="__('Unpin the file')"
+        icon="thumbtack"
+        size="small"
+        class="btn-icon gl-mr-2"
+        category="tertiary"
+        data-testid="unpin-button"
+        @click="unpinFile"
+      />
+      <gl-button
+        v-else-if="collapsible"
         ref="collapseButton"
         class="gl-mr-2"
         category="tertiary"

@@ -43,15 +43,11 @@ module Gitlab
 
         module MigratorOverrides
           def current_version
-            reverse_sorted_migrations
+            migrations
+              .sort_by(&:version)
+              .reverse
               .find { |m| migrated.include?(m.version) }
               .try(:version) || 0
-          end
-
-          private
-
-          def reverse_sorted_migrations
-            @reverse_sorted_migrations ||= migrations.sort_by(&:version).reverse
           end
         end
 

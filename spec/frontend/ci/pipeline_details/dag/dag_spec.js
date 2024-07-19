@@ -1,7 +1,6 @@
-import { GlEmptyState } from '@gitlab/ui';
+import { GlAlert, GlEmptyState } from '@gitlab/ui';
+import { mount, shallowMount } from '@vue/test-utils';
 import { nextTick } from 'vue';
-import { mount } from '@vue/test-utils';
-import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import { ADD_NOTE, REMOVE_NOTE, REPLACE_NOTES } from '~/ci/pipeline_details/dag/constants';
 import Dag from '~/ci/pipeline_details/dag/dag.vue';
 import DagAnnotations from '~/ci/pipeline_details/dag/components/dag_annotations.vue';
@@ -19,9 +18,8 @@ import {
 
 describe('Pipeline DAG graph wrapper', () => {
   let wrapper;
-  const getDeprecationAlert = () => wrapper.findByTestId('deprecation-alert');
-  const getFailureAlert = () => wrapper.findByTestId('failure-alert');
-  const getAllFailureAlerts = () => wrapper.findAllByTestId('failure-alert');
+  const getAlert = () => wrapper.findComponent(GlAlert);
+  const getAllAlerts = () => wrapper.findAllComponents(GlAlert);
   const getGraph = () => wrapper.findComponent(DagGraph);
   const getNotes = () => wrapper.findComponent(DagAnnotations);
   const getErrorText = (type) => wrapper.vm.$options.errorTexts[type];
@@ -30,7 +28,7 @@ describe('Pipeline DAG graph wrapper', () => {
   const createComponent = ({
     graphData = mockParsedGraphQLNodes,
     provideOverride = {},
-    method = shallowMountExtended,
+    method = shallowMount,
   } = {}) => {
     wrapper = method(Dag, {
       provide: {
@@ -48,23 +46,6 @@ describe('Pipeline DAG graph wrapper', () => {
       },
     });
   };
-
-  describe('deprecation alert', () => {
-    beforeEach(() => {
-      createComponent();
-    });
-
-    it('renders the deprecation alert', () => {
-      expect(getDeprecationAlert().exists()).toBe(true);
-    });
-
-    it('dismisses the deprecation alert properly', async () => {
-      getDeprecationAlert().vm.$emit('dismiss');
-      await nextTick();
-
-      expect(getDeprecationAlert().exists()).toBe(false);
-    });
-  });
 
   describe('when a query argument is undefined', () => {
     beforeEach(() => {
@@ -92,8 +73,8 @@ describe('Pipeline DAG graph wrapper', () => {
       });
 
       it('shows the PARSE_FAILURE alert and not the graph', () => {
-        expect(getFailureAlert().exists()).toBe(true);
-        expect(getFailureAlert().text()).toBe(getErrorText(PARSE_FAILURE));
+        expect(getAlert().exists()).toBe(true);
+        expect(getAlert().text()).toBe(getErrorText(PARSE_FAILURE));
         expect(getGraph().exists()).toBe(false);
       });
 
@@ -124,8 +105,8 @@ describe('Pipeline DAG graph wrapper', () => {
       });
 
       it('shows the UNSUPPORTED_DATA alert and not the graph', () => {
-        expect(getFailureAlert().exists()).toBe(true);
-        expect(getFailureAlert().text()).toBe(getErrorText(UNSUPPORTED_DATA));
+        expect(getAlert().exists()).toBe(true);
+        expect(getAlert().text()).toBe(getErrorText(UNSUPPORTED_DATA));
         expect(getGraph().exists()).toBe(false);
       });
 
@@ -137,13 +118,13 @@ describe('Pipeline DAG graph wrapper', () => {
     describe('the returned data is empty', () => {
       beforeEach(() => {
         createComponent({
-          method: shallowMountExtended,
+          method: shallowMount,
           graphData: graphWithoutDependencies,
         });
       });
 
       it('does not render an error alert or the graph', () => {
-        expect(getAllFailureAlerts().length).toBe(0);
+        expect(getAllAlerts().length).toBe(0);
         expect(getGraph().exists()).toBe(false);
       });
 

@@ -69,7 +69,7 @@ As with all sensitive information, you should ensure only those who need access 
 For human interactions, use credentials tied to users such as Personal Access Tokens.
 
 To help detect a potential secret leak, you can use the
-[audit event](../../compliance/audit_event_schema.md#example-audit-event-payloads-for-git-over-ssh-events-with-deploy-key) feature.
+[Audit Event](../../compliance/audit_event_schema.md#example-audit-event-payloads-for-git-over-ssh-events-with-deploy-key) feature.
 
 ## View deploy keys
 
@@ -120,7 +120,7 @@ Prerequisites:
 To create a public deploy key:
 
 1. On the left sidebar, at the bottom, select **Admin area**.
-1. Select **Deploy keys**.
+1. Select **Deploy Keys**.
 1. Select **New deploy key**.
 1. Complete the fields.
    - Use a meaningful description for **Name**. For example, include the name of the external host

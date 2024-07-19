@@ -436,29 +436,29 @@ rspec:artifact-collector unit:
     - .artifact-collector
     - .rails:rules:artifact-collector-unit
   needs:
-    - job: rspec unit pg14  # 44 jobs
+    - job: rspec unit pg14  # 32 jobs
       optional: true
     - job: rspec unit clickhouse  # 1 job
       optional: true
 
-rspec:artifact-collector part-a:
+rspec:artifact-collector system:
   extends:
     - .artifact-collector
-    - .rails:rules:artifact-collector-part-a
+    - .rails:rules:artifact-collector-system
   needs:
     - job: rspec system pg14  # 32 jobs
       optional: true
-    - job: rspec background_migration pg14  # 10 jobs
-      optional: true
 
-rspec:artifact-collector part-b:
+rspec:artifact-collector remainder:
   extends:
     - .artifact-collector
-    - .rails:rules:artifact-collector-part-b
+    - .rails:rules:artifact-collector-remainder
   needs:
-    - job: rspec integration pg14  # 20 jobs
+    - job: rspec integration pg14  # 16 jobs
       optional: true
-    - job: rspec migration pg14  # 26 jobs
+    - job: rspec migration pg14  # 15 jobs
+      optional: true
+    - job: rspec background_migration pg14  # 5 jobs
       optional: true
 
 rspec:artifact-collector unit single-redis:
@@ -466,7 +466,7 @@ rspec:artifact-collector unit single-redis:
     - .artifact-collector
     - .rails:rules:single-redis
   needs:
-    - job: rspec unit pg14 single-redis  # 44 jobs
+    - job: rspec unit pg14 single-redis  # 32 jobs
       optional: true
 
 rspec:artifact-collector system single-redis:
@@ -482,32 +482,26 @@ rspec:artifact-collector remainder single-redis:
     - .artifact-collector
     - .rails:rules:single-redis
   needs:
-    - job: rspec integration pg14 single-redis  # 20 jobs
+    - job: rspec integration pg14 single-redis  # 16 jobs
       optional: true
 
-rspec:artifact-collector ee unit single-redis:
+rspec:artifact-collector ee single-redis:
   extends:
     - .artifact-collector
     - .rails:rules:single-redis
   needs:
-    - job: rspec-ee unit pg14 single-redis  # 39 jobs
+    - job: rspec-ee unit pg14 single-redis  # 28 jobs
       optional: true
-
-rspec:artifact-collector ee remainder single-redis:
-  extends:
-    - .artifact-collector
-    - .rails:rules:single-redis
-  needs:
-    - job: rspec-ee integration pg14 single-redis  # 9 jobs
+    - job: rspec-ee integration pg14 single-redis  # 7 jobs
       optional: true
-    - job: rspec-ee system pg14 single-redis  # 16 jobs
+    - job: rspec-ee system pg14 single-redis  # 14 jobs
       optional: true
 
 rspec:artifact-collector ee unit:
   extends:
     - .artifact-collector
   needs:
-    - job: rspec-ee unit pg14  # 39 jobs
+    - job: rspec-ee unit pg14  # 28 jobs
       optional: true
   rules:
     - !reference ['.rails:rules:ee-only-unit', rules]
@@ -518,13 +512,13 @@ rspec:artifact-collector ee remainder:
   needs:
     - job: rspec-ee migration pg14  # 2 jobs
       optional: true
-    - job: rspec-ee background_migration pg14  # 3 jobs
+    - job: rspec-ee background_migration pg14  # 2 jobs
       optional: true
     - job: rspec-ee unit clickhouse  # 1 job
       optional: true
-    - job: rspec-ee integration pg14  # 9 jobs
+    - job: rspec-ee integration pg14  # 7 jobs
       optional: true
-    - job: rspec-ee system pg14  # 16 jobs
+    - job: rspec-ee system pg14  # 14 jobs
       optional: true
   rules:
     - !reference ['.rails:rules:ee-only-migration', rules]
@@ -544,9 +538,9 @@ rspec:coverage:
     # FOSS/EE jobs
     - job: rspec:artifact-collector unit
       optional: true
-    - job: rspec:artifact-collector part-a
+    - job: rspec:artifact-collector system
       optional: true
-    - job: rspec:artifact-collector part-b
+    - job: rspec:artifact-collector remainder
       optional: true
     - job: rspec:artifact-collector unit single-redis
       optional: true
@@ -558,9 +552,7 @@ rspec:coverage:
     - job: rspec:artifact-collector as-if-foss
       optional: true
     # EE jobs
-    - job: rspec:artifact-collector ee unit single-redis
-      optional: true
-    - job: rspec:artifact-collector ee remainder single-redis
+    - job: rspec:artifact-collector ee single-redis
       optional: true
     - job: rspec:artifact-collector ee unit
       optional: true
@@ -666,21 +658,8 @@ rspec-predictive:pipeline-generate:
   stage: prepare
   needs: ["detect-tests", "retrieve-tests-metadata"]
   script:
-    - |
-      scripts/generate_rspec_pipeline.rb \
-        -t "${RSPEC_PREDICTIVE_PIPELINE_TEMPLATE_YML}" \
-        -k "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" \
-        -f "${RSPEC_MATCHING_TESTS_FOSS_PATH}" \
-        -j "${DEFAULT_RSPEC_PREDICTIVE_JOB_TAGS}" \
-        -o "${RSPEC_PREDICTIVE_PIPELINE_TEMPLATE_YML}.yml"
-    - |
-      scripts/generate_rspec_pipeline.rb \
-        -t "${RSPEC_PREDICTIVE_PIPELINE_TEMPLATE_YML}" \
-        -k "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" \
-        -f "${RSPEC_MATCHING_TESTS_EE_PATH}" \
-        -j "${DEFAULT_RSPEC_PREDICTIVE_JOB_TAGS}" \
-        -o "${RSPEC_PREDICTIVE_PIPELINE_TEMPLATE_YML}-ee.yml" \
-        -p "ee/"
+    - scripts/generate_rspec_pipeline.rb -t "${RSPEC_PREDICTIVE_PIPELINE_TEMPLATE_YML}" -k "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" -f "${RSPEC_MATCHING_TESTS_FOSS_PATH}" -o "${RSPEC_PREDICTIVE_PIPELINE_TEMPLATE_YML}.yml"
+    - scripts/generate_rspec_pipeline.rb -t "${RSPEC_PREDICTIVE_PIPELINE_TEMPLATE_YML}" -k "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" -f "${RSPEC_MATCHING_TESTS_EE_PATH}" -o "${RSPEC_PREDICTIVE_PIPELINE_TEMPLATE_YML}-ee.yml" -p "ee/"
     - echo "Content of ${RSPEC_PREDICTIVE_PIPELINE_TEMPLATE_YML}.yml:"
     - cat "${RSPEC_PREDICTIVE_PIPELINE_TEMPLATE_YML}.yml"
     - echo "\n================================================\n"
@@ -1254,6 +1233,42 @@ rspec-ee system pg15 es8:
     - .rspec-ee-system-parallel
 
 # PG16
+rspec-ee unit pg16 opensearch1:
+  extends:
+    - .rspec-ee-base-pg16-opensearch1
+    - .rspec-ee-unit-parallel
+    - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
+
+rspec-ee unit pg16 opensearch2:
+  extends:
+    - .rspec-ee-base-pg16-opensearch2
+    - .rspec-ee-unit-parallel
+    - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
+
+rspec-ee integration pg16 opensearch1:
+  extends:
+    - .rspec-ee-base-pg16-opensearch1
+    - .rspec-ee-integration-parallel
+    - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
+
+rspec-ee integration pg16 opensearch2:
+  extends:
+    - .rspec-ee-base-pg16-opensearch2
+    - .rspec-ee-integration-parallel
+    - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
+
+rspec-ee system pg16 opensearch1:
+  extends:
+    - .rspec-ee-base-pg16-opensearch1
+    - .rspec-ee-system-parallel
+    - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
+
+rspec-ee system pg16 opensearch2:
+  extends:
+    - .rspec-ee-base-pg16-opensearch2
+    - .rspec-ee-system-parallel
+    - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
+
 rspec-ee migration pg16:
   extends:
     - .rspec-ee-base-pg16
@@ -1274,9 +1289,21 @@ rspec-ee unit pg16:
     - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
     - .rspec-ee-unit-parallel
 
+rspec-ee unit pg16 es8:
+  extends:
+    - .rspec-ee-base-pg16-es8
+    - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
+    - .rspec-ee-unit-parallel
+
 rspec-ee integration pg16:
   extends:
     - .rspec-ee-base-pg16
+    - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
+    - .rspec-ee-integration-parallel
+
+rspec-ee integration pg16 es8:
+  extends:
+    - .rspec-ee-base-pg16-es8
     - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
     - .rspec-ee-integration-parallel
 
@@ -1286,62 +1313,11 @@ rspec-ee system pg16:
     - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
     - .rspec-ee-system-parallel
 
-# We have too many jobs in nightly pipeline, more than 2k+,
-# which exceeds the limit of jobs a pipeline can have. Disable below for now.
-#
-# rspec-ee unit pg16 opensearch1:
-#   extends:
-#     - .rspec-ee-base-pg16-opensearch1
-#     - .rspec-ee-unit-parallel
-#     - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
-
-# rspec-ee unit pg16 opensearch2:
-#   extends:
-#     - .rspec-ee-base-pg16-opensearch2
-#     - .rspec-ee-unit-parallel
-#     - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
-
-# rspec-ee integration pg16 opensearch1:
-#   extends:
-#     - .rspec-ee-base-pg16-opensearch1
-#     - .rspec-ee-integration-parallel
-#     - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
-
-# rspec-ee integration pg16 opensearch2:
-#   extends:
-#     - .rspec-ee-base-pg16-opensearch2
-#     - .rspec-ee-integration-parallel
-#     - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
-
-# rspec-ee system pg16 opensearch1:
-#   extends:
-#     - .rspec-ee-base-pg16-opensearch1
-#     - .rspec-ee-system-parallel
-#     - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
-
-# rspec-ee system pg16 opensearch2:
-#   extends:
-#     - .rspec-ee-base-pg16-opensearch2
-#     - .rspec-ee-system-parallel
-#     - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
-
-# rspec-ee unit pg16 es8:
-#   extends:
-#     - .rspec-ee-base-pg16-es8
-#     - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
-#     - .rspec-ee-unit-parallel
-
-# rspec-ee integration pg16 es8:
-#   extends:
-#     - .rspec-ee-base-pg16-es8
-#     - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
-#     - .rspec-ee-integration-parallel
-
-# rspec-ee system pg16 es8:
-#   extends:
-#     - .rspec-ee-base-pg16-es8
-#     - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
-#     - .rspec-ee-system-parallel
+rspec-ee system pg16 es8:
+  extends:
+    - .rspec-ee-base-pg16-es8
+    - .rails:rules:default-branch-schedule-nightly--code-backstage-ee-only
+    - .rspec-ee-system-parallel
 # EE: default branch nightly scheduled jobs #
 #####################################
 

@@ -180,7 +180,7 @@ export default {
         <counter
           v-gl-tooltip:super-sidebar.bottom="mrMenuShown ? '' : $options.i18n.mergeRequests"
           class="gl-w-full"
-          icon="merge-request"
+          icon="merge-request-open"
           :href="sidebarData.merge_request_dashboard_path"
           :count="mergeRequestTotalCount"
           :label="$options.i18n.mergeRequests"

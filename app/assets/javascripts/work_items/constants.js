@@ -245,7 +245,6 @@ export const FORM_TYPES = {
 export const DEFAULT_PAGE_SIZE_ASSIGNEES = 10;
 export const DEFAULT_PAGE_SIZE_NOTES = 30;
 export const DEFAULT_PAGE_SIZE_EMOJIS = 100;
-export const DEFAULT_PAGE_SIZE_CHILD_ITEMS = 20;
 
 export const WORK_ITEM_NOTES_SORT_ORDER_KEY = 'sort_direction_work_item';
 
@@ -297,11 +296,9 @@ export const WORK_ITEM_TO_ISSUE_MAP = {
   [WIDGET_TYPE_LABELS]: 'labels',
   [WIDGET_TYPE_MILESTONE]: 'milestone',
   [WIDGET_TYPE_WEIGHT]: 'weight',
-  [WIDGET_TYPE_ITERATION]: 'iteration',
   [WIDGET_TYPE_START_AND_DUE_DATE]: 'dueDate',
   [WIDGET_TYPE_HEALTH_STATUS]: 'healthStatus',
   [WIDGET_TYPE_AWARD_EMOJI]: 'awardEmoji',
-  [WIDGET_TYPE_TIME_TRACKING]: 'timeEstimate',
 };
 
 export const LINKED_CATEGORIES_MAP = {

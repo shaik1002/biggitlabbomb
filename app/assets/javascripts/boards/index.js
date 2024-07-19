@@ -22,15 +22,7 @@ const apolloProvider = new VueApollo({
 });
 
 function mountBoardApp(el) {
-  const {
-    boardId,
-    groupId,
-    fullPath,
-    rootPath,
-    hasScopedLabelsFeature,
-    wiGroupPath,
-    wiCanAdminLabel,
-  } = el.dataset;
+  const { boardId, groupId, fullPath, rootPath, hasScopedLabelsFeature } = el.dataset;
 
   const rawFilterParams = queryToObject(window.location.search, { gatherArrays: true });
 
@@ -51,11 +43,9 @@ function mountBoardApp(el) {
       groupId: Number(groupId),
       rootPath,
       fullPath,
-      groupPath: wiGroupPath,
       initialFilterParams,
       boardBaseUrl: el.dataset.boardBaseUrl,
       boardType,
-      isGroup: boardType === WORKSPACE_GROUP,
       isGroupBoard: boardType === WORKSPACE_GROUP,
       isProjectBoard: boardType === WORKSPACE_PROJECT,
       currentUserId: gon.current_user_id || null,
@@ -70,8 +60,6 @@ function mountBoardApp(el) {
       weights: el.dataset.weights ? JSON.parse(el.dataset.weights) : [],
       isIssueBoard: true,
       isEpicBoard: false,
-      reportAbusePath: el.dataset.wiReportAbusePath,
-      issuesListPath: el.dataset.wiIssuesListPath,
       // Permissions
       canUpdate: parseBoolean(el.dataset.canUpdate),
       canAdminList: parseBoolean(el.dataset.canAdminList),
@@ -79,7 +67,6 @@ function mountBoardApp(el) {
       allowLabelCreate: parseBoolean(el.dataset.canUpdate),
       allowLabelEdit: parseBoolean(el.dataset.canUpdate),
       isSignedIn: isLoggedIn(),
-      canAdminLabel: parseBoolean(wiCanAdminLabel),
       // Features
       multipleAssigneesFeatureAvailable: parseBoolean(el.dataset.multipleAssigneesFeatureAvailable),
       epicFeatureAvailable: parseBoolean(el.dataset.epicFeatureAvailable),
@@ -96,10 +83,6 @@ function mountBoardApp(el) {
       scopedIssueBoardFeatureEnabled: parseBoolean(el.dataset.scopedIssueBoardFeatureEnabled),
       allowSubEpics: false,
       hasScopedLabelsFeature: parseBoolean(hasScopedLabelsFeature),
-      hasIterationsFeature: parseBoolean(el.dataset.iterationFeatureAvailable),
-      hasIssueWeightsFeature: parseBoolean(el.dataset.weightFeatureAvailable),
-      hasIssuableHealthStatusFeature: parseBoolean(el.dataset.healthStatusFeatureAvailable),
-      hasSubepicsFeature: parseBoolean(el.dataset.subEpicsFeatureAvailable),
     },
     render: (createComponent) => createComponent(BoardApp),
   });

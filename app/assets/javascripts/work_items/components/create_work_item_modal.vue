@@ -10,7 +10,8 @@ import {
   sprintfWorkItem,
   I18N_WORK_ITEM_ERROR_FETCHING_TYPES,
 } from '../constants';
-import namespaceWorkItemTypesQuery from '../graphql/namespace_work_item_types.query.graphql';
+import projectWorkItemTypesQuery from '../graphql/project_work_item_types.query.graphql';
+import groupWorkItemTypesQuery from '../graphql/group_work_item_types.query.graphql';
 import CreateWorkItem from './create_work_item.vue';
 
 export default {
@@ -42,7 +43,7 @@ export default {
   apollo: {
     workItemTypes: {
       query() {
-        return namespaceWorkItemTypesQuery;
+        return this.isGroup ? groupWorkItemTypesQuery : projectWorkItemTypesQuery;
       },
       variables() {
         return {

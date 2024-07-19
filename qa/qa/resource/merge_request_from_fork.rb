@@ -3,26 +3,23 @@
 module QA
   module Resource
     class MergeRequestFromFork < MergeRequest
+      attr_accessor :fork_branch
+
       attribute :fork do
-        Fork.fabricate_via_api!
+        Fork.fabricate_via_browser_ui!
       end
 
-      attribute :project do
-        fork.project
-      end
-
-      attribute :source do
-        Repository::Commit.fabricate_via_api! do |resource|
-          resource.project = project
-          resource.api_client = api_client
-          resource.commit_message = 'This is a test commit'
-          resource.add_files([{ file_path: "file-#{SecureRandom.hex(8)}.txt", content: 'MR init' }])
-          resource.branch = project.default_branch
+      attribute :push do
+        Repository::ProjectPush.fabricate! do |resource|
+          resource.project = fork.project
+          resource.branch_name = fork_branch
+          resource.file_name = "file2-#{SecureRandom.hex(8)}.txt"
+          resource.user = fork.user
         end
       end
 
       def fabricate!
-        populate(:source)
+        populate(:push)
 
         fork.project.visit!
 
@@ -40,42 +37,8 @@ module QA
         visit(mr_url)
       end
 
-      def api_post_body
-        super.merge({
-          target_project_id: upstream.id,
-          source_branch: project.default_branch,
-          target_branch: upstream.default_branch
-        })
-      end
-
       def fabricate_via_api!
-        populate(:source)
-
-        super
-      end
-
-      # Fabricated mr needs to be fetched from upstream project rather than source project
-      #
-      # @return [String]
-      def api_get_path
-        "/projects/#{upstream.id}/merge_requests/#{iid}"
-      end
-
-      private
-
-      def api_client
-        fork.api_client
-      end
-
-      # Target is upstream, in fork workflow it must not be populated
-      #
-      # @return [Boolean]
-      def create_target?
-        false
-      end
-
-      def upstream
-        fork.upstream
+        raise NotImplementedError
       end
     end
   end

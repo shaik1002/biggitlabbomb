@@ -32,7 +32,8 @@ import {
   WIDGET_TYPE_ROLLEDUP_DATES,
 } from '../constants';
 import createWorkItemMutation from '../graphql/create_work_item.mutation.graphql';
-import namespaceWorkItemTypesQuery from '../graphql/namespace_work_item_types.query.graphql';
+import groupWorkItemTypesQuery from '../graphql/group_work_item_types.query.graphql';
+import projectWorkItemTypesQuery from '../graphql/project_work_item_types.query.graphql';
 import groupWorkItemByIidQuery from '../graphql/group_work_item_by_iid.query.graphql';
 import workItemByIidQuery from '../graphql/work_item_by_iid.query.graphql';
 import updateNewWorkItemMutation from '../graphql/update_new_work_item.mutation.graphql';
@@ -109,7 +110,7 @@ export default {
     },
     workItemTypes: {
       query() {
-        return namespaceWorkItemTypesQuery;
+        return this.isGroup ? groupWorkItemTypesQuery : projectWorkItemTypesQuery;
       },
       fetchPolicy() {
         return this.workItemTypeName ? fetchPolicies.CACHE_ONLY : fetchPolicies.CACHE_FIRST;

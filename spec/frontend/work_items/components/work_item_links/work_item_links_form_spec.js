@@ -1,9 +1,9 @@
 import Vue, { nextTick } from 'vue';
-import { GlForm, GlFormGroup, GlFormInput, GlFormCheckbox, GlTooltip } from '@gitlab/ui';
+import { GlForm, GlFormInput, GlFormCheckbox, GlTooltip } from '@gitlab/ui';
 import VueApollo from 'vue-apollo';
-import namespaceWorkItemTypesQueryResponse from 'test_fixtures/graphql/work_items/namespace_work_item_types.query.graphql.json';
+import projectWorkItemTypesQueryResponse from 'test_fixtures/graphql/work_items/project_work_item_types.query.graphql.json';
+import groupWorkItemTypesQueryResponse from 'test_fixtures/graphql/work_items/group_work_item_types.query.graphql.json';
 import { sprintf, s__ } from '~/locale';
-import { stubComponent } from 'helpers/stub_component';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
@@ -22,24 +22,27 @@ import {
   WORK_ITEM_TYPE_ENUM_EPIC,
 } from '~/work_items/constants';
 import projectWorkItemsQuery from '~/work_items/graphql/project_work_items.query.graphql';
-import namespaceWorkItemTypesQuery from '~/work_items/graphql/namespace_work_item_types.query.graphql';
+import groupWorkItemTypesQuery from '~/work_items/graphql/group_work_item_types.query.graphql';
+import projectWorkItemTypesQuery from '~/work_items/graphql/project_work_item_types.query.graphql';
 import createWorkItemMutation from '~/work_items/graphql/create_work_item.mutation.graphql';
-import updateWorkItemHierarchyMutation from '~/work_items/graphql/update_work_item_hierarchy.mutation.graphql';
-import namespaceProjectsForLinksWidgetQuery from '~/work_items/graphql/namespace_projects_for_links_widget.query.graphql';
+import updateWorkItemMutation from '~/work_items/graphql/update_work_item.mutation.graphql';
+import groupProjectsForLinksWidgetQuery from '~/work_items/graphql/group_projects_for_links_widget.query.graphql';
+import relatedProjectsForLinksWidgetQuery from '~/work_items/graphql/related_projects_for_links_widget.query.graphql';
 import {
   availableWorkItemsResponse,
   createWorkItemMutationResponse,
   updateWorkItemMutationResponse,
   mockIterationWidgetResponse,
-  namespaceProjectsList,
+  groupProjectsList,
+  relatedProjectsList,
 } from '../../mock_data';
 
 Vue.use(VueApollo);
 
-const projectData = namespaceProjectsList.data.namespace.projects.nodes;
+const projectData = groupProjectsList.data.group.projects.nodes;
 
 const findWorkItemTypeId = (typeName) => {
-  return namespaceWorkItemTypesQueryResponse.data.workspace.workItemTypes.nodes.find(
+  return projectWorkItemTypesQueryResponse.data.workspace.workItemTypes.nodes.find(
     (node) => node.name === typeName,
   ).id;
 };
@@ -57,14 +60,13 @@ describe('WorkItemLinksForm', () => {
   const updateMutationResolver = jest.fn().mockResolvedValue(updateWorkItemMutationResponse);
   const updateMutationRejection = jest.fn().mockRejectedValue(new Error('error'));
   const createMutationResolver = jest.fn().mockResolvedValue(createWorkItemMutationResponse);
-  const createMutationRejection = jest.fn().mockRejectedValue(new Error('error'));
   const availableWorkItemsResolver = jest.fn().mockResolvedValue(availableWorkItemsResponse);
-  const namespaceWorkItemTypesResolver = jest
+  const projectWorkItemTypesResolver = jest
     .fn()
-    .mockResolvedValue(namespaceWorkItemTypesQueryResponse);
-  const namespaceProjectsFormLinksWidgetResolver = jest
-    .fn()
-    .mockResolvedValue(namespaceProjectsList);
+    .mockResolvedValue(projectWorkItemTypesQueryResponse);
+  const groupWorkItemTypesResolver = jest.fn().mockResolvedValue(groupWorkItemTypesQueryResponse);
+  const groupProjectsFormLinksWidgetResolver = jest.fn().mockResolvedValue(groupProjectsList);
+  const relatedProjectsForLinksWidgetResolver = jest.fn().mockResolvedValue(relatedProjectsList);
 
   const mockParentIteration = mockIterationWidgetResponse;
 
@@ -76,17 +78,18 @@ describe('WorkItemLinksForm', () => {
     parentWorkItemType = WORK_ITEM_TYPE_VALUE_ISSUE,
     childrenType = WORK_ITEM_TYPE_ENUM_TASK,
     updateMutation = updateMutationResolver,
-    createMutation = createMutationResolver,
     isGroup = false,
     createGroupLevelWorkItems = true,
   } = {}) => {
     wrapper = shallowMountExtended(WorkItemLinksForm, {
       apolloProvider: createMockApollo([
         [projectWorkItemsQuery, availableWorkItemsResolver],
-        [namespaceWorkItemTypesQuery, namespaceWorkItemTypesResolver],
-        [namespaceProjectsForLinksWidgetQuery, namespaceProjectsFormLinksWidgetResolver],
-        [updateWorkItemHierarchyMutation, updateMutation],
-        [createWorkItemMutation, createMutation],
+        [projectWorkItemTypesQuery, projectWorkItemTypesResolver],
+        [groupWorkItemTypesQuery, groupWorkItemTypesResolver],
+        [groupProjectsForLinksWidgetQuery, groupProjectsFormLinksWidgetResolver],
+        [relatedProjectsForLinksWidgetQuery, relatedProjectsForLinksWidgetResolver],
+        [updateWorkItemMutation, updateMutation],
+        [createWorkItemMutation, createMutationResolver],
       ]),
       propsData: {
         fullPath: 'group-a',
@@ -104,15 +107,6 @@ describe('WorkItemLinksForm', () => {
         hasIterationsFeature,
         isGroup,
       },
-      stubs: {
-        GlFormGroup: stubComponent(GlFormGroup, {
-          props: ['state', 'invalidFeedback'],
-        }),
-        GlFormInput: stubComponent(GlFormInput, {
-          props: ['state', 'disabled', 'value'],
-          template: `<input />`,
-        }),
-      },
     });
 
     jest.advanceTimersByTime(SEARCH_DEBOUNCE);
@@ -120,7 +114,6 @@ describe('WorkItemLinksForm', () => {
   };
 
   const findForm = () => wrapper.findComponent(GlForm);
-  const findFormGroup = () => wrapper.findByTestId('work-items-create-form-group');
   const findWorkItemTokenInput = () => wrapper.findComponent(WorkItemTokenInput);
   const findInput = () => wrapper.findComponent(GlFormInput);
   const findConfidentialCheckbox = () => wrapper.findComponent(GlFormCheckbox);
@@ -136,8 +129,8 @@ describe('WorkItemLinksForm', () => {
 
   it.each`
     workspace    | isGroup  | queryResolver
-    ${'project'} | ${false} | ${namespaceWorkItemTypesResolver}
-    ${'group'}   | ${true}  | ${namespaceWorkItemTypesResolver}
+    ${'project'} | ${false} | ${projectWorkItemTypesResolver}
+    ${'group'}   | ${true}  | ${groupWorkItemTypesResolver}
   `(
     'fetches $workspace work item types when isGroup is $isGroup',
     async ({ isGroup, queryResolver }) => {
@@ -158,27 +151,6 @@ describe('WorkItemLinksForm', () => {
         expect(findInput().exists()).toBe(true);
         expect(findAddChildButton().text()).toBe('Create task');
         expect(findWorkItemTokenInput().exists()).toBe(false);
-      });
-
-      it('passes field validation details to form when create mutation fails', async () => {
-        await createComponent({ createMutation: createMutationRejection });
-
-        expect(findFormGroup().props('state')).toBe(true);
-        expect(findFormGroup().props('invalidFeedback')).toBe(null);
-        expect(findInput().props('state')).toBe(true);
-
-        findInput().vm.$emit('input', 'Create task test');
-        // Trigger form submission
-        findForm().vm.$emit('submit', {
-          preventDefault: jest.fn(),
-        });
-        await waitForPromises();
-
-        expect(findFormGroup().props('state')).toBe(false);
-        expect(findFormGroup().props('invalidFeedback')).toBe(
-          'Something went wrong when trying to create a child. Please try again.',
-        );
-        expect(findInput().props('state')).toBe(false);
       });
 
       it('creates child task in non confidential parent', async () => {

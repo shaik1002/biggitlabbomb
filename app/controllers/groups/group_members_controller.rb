@@ -17,7 +17,7 @@ class Groups::GroupMembersController < Groups::ApplicationController
   before_action :authorize_read_group_member!, only: :index
 
   before_action only: [:index] do
-    push_frontend_feature_flag(:importer_user_mapping, current_user)
+    push_frontend_feature_flag(:bulk_import_user_mapping, current_user)
     push_frontend_feature_flag(:service_accounts_crud, @group)
     push_frontend_feature_flag(:webui_members_inherited_users, current_user)
   end
@@ -44,7 +44,6 @@ class Groups::GroupMembersController < Groups::ApplicationController
     end
 
     @members = present_group_members(non_invited_members)
-    @placeholder_users_count = placeholder_users_count
 
     @requesters = present_members(
       AccessRequestsFinder.new(@group).execute(current_user)
@@ -83,7 +82,7 @@ class Groups::GroupMembersController < Groups::ApplicationController
   end
 
   def filter_params
-    params.permit(:two_factor, :search, :user_type, :max_role).merge(sort: @sort)
+    params.permit(:two_factor, :search, :user_type).merge(sort: @sort)
   end
 
   def membershipable_members
@@ -105,25 +104,6 @@ class Groups::GroupMembersController < Groups::ApplicationController
   def root_params_key
     :group_member
   end
-
-  def placeholder_users_count
-    {
-      pagination: {
-        total_items: placeholder_users.count,
-        awaiting_reassignment_items: placeholder_users.awaiting_reassignment.count,
-        reassigned_items: placeholder_users.reassigned.count
-      }
-    }
-  end
-
-  def placeholder_users
-    if Feature.enabled?(:importer_user_mapping, current_user)
-      Import::SourceUsersFinder.new(@group, current_user).execute
-    else
-      Import::SourceUser.none
-    end
-  end
-  strong_memoize_attr :placeholder_users
 end
 
 Groups::GroupMembersController.prepend_mod_with('Groups::GroupMembersController')

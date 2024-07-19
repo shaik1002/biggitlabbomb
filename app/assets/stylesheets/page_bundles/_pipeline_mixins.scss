@@ -25,8 +25,8 @@
 
   .ci-action-icon-container {
     position: absolute;
-    top: 4px;
-    right: 4px;
+    right: 11px;
+    top: 7px;
 
     &.ci-action-icon-wrapper {
       height: $ci-action-dropdown-button-size;
@@ -39,7 +39,6 @@
         background-color: var(--gray-50, $gray-50);
       }
 
-      // stylelint-disable-next-line gitlab/no-gl-class
       .gl-spinner,
       svg {
         width: $ci-action-dropdown-svg-size;

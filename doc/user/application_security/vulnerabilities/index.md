@@ -19,7 +19,6 @@ including:
 - Available actions
 - Linked issues
 - Actions log
-- Filename and line number of the vulnerability (if available)
 
 If the scanner determined the vulnerability to be a false positive, an alert message is included at
 the top of the vulnerability's page.
@@ -91,10 +90,10 @@ The following data is shared with third-party AI APIs:
 
 DETAILS:
 **Tier:** Ultimate with [GitLab Duo Enterprise](../../../subscriptions/subscription-add-ons.md)
-**Offering:** GitLab.com
-**Status:** Experiment
+**Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/10779) in GitLab 16.7 as an [experiment](../../../policy/experiment-beta-support.md#experiment) on GitLab.com.
+> - [Generally available](https://gitlab.com/groups/gitlab-org/-/epics/10783) in GitLab 17.2.
 
 Use GitLab Duo Vulnerability resolution to automatically create a merge request that
 resolves the vulnerability. By default, it is powered by Anthropic's [`claude-3-haiku`](https://docs.anthropic.com/en/docs/about-claude/models#claude-3-a-new-generation-of-ai)
@@ -105,7 +104,7 @@ explanation with caution.
 
 Prerequisites:
 
-- You must have the GitLab Ultimate subscription tier and GitLab Duo Enterprise..
+- You must have the GitLab Ultimate subscription tier and GitLab Duo Enterprise.
 - You must be a member of the project.
 - The vulnerability must be a SAST finding.
 

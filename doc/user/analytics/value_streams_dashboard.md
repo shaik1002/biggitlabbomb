@@ -118,13 +118,13 @@ panels:
 > - [Enabled on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/439737) in GitLab 16.9.
 > - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/440694) in GitLab 16.11. Feature flag `dora_performers_score_panel` removed.
 
-The [DORA](dora_metrics.md) Performers score panel is a group-level bar chart that visualizes the status of the organization's DevOps performance levels across different projects for the last full calendar month.
+The [DORA metrics](dora_metrics.md) Performers score panel is a group-level bar chart that visualizes the status of the organization's DevOps performance levels across different projects.
 
 The chart is a breakdown of your project's DORA scores, [categorized](https://cloud.google.com/blog/products/devops-sre/dora-2022-accelerate-state-of-devops-report-now-out) as high, medium, or low.
 The chart aggregates all the child projects in the group.
 
-The chart bars display the total number of projects per score category, calculated monthly.
-To exclude data from the chart (for example, **Not included**), in the legend select the series you want to exclude.
+Each bar on the chart displays the sum of total projects per score category, calculated monthly.
+To exclude data from the chart (for example, **Not Included**), in the legend select the series you want to exclude.
 Hovering over each bar reveals a dialog that explains the score's definition.
 
 For example, if a project has a high score for deployment frequency (velocity), it means that the project has one or more deploys to production per day.
@@ -158,7 +158,6 @@ If multiple topics are provided, all topics must match for the project to be inc
 ### AI Impact analytics
 
 DETAILS:
-**Tier:** For a limited time, Ultimate. In the future, GitLab Duo Enterprise.
 **Offering:** GitLab.com, Self-managed
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/443696) in GitLab 16.11 [with a flag](../../administration/feature_flags.md) named `ai_impact_analytics_dashboard`. Disabled by default.

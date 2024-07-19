@@ -360,7 +360,6 @@
       margin-bottom: $gl-padding-8;
     }
 
-    // stylelint-disable-next-line gitlab/no-gl-class
     .gl-button {
       margin-left: 0;
     }
@@ -471,7 +470,6 @@
     display: none;
   }
 
-  // stylelint-disable-next-line gitlab/no-gl-class
   .gl-skeleton-loader {
     display: block;
   }
@@ -819,7 +817,6 @@
     z-index: 199;
     white-space: nowrap;
 
-    // stylelint-disable-next-line gitlab/no-gl-class
     .gl-dropdown-toggle {
       width: auto;
       max-width: 170px;
@@ -841,12 +838,10 @@
     top: 1px;
     margin: 0 $gl-spacing-scale-1;
 
-    // stylelint-disable-next-line gitlab/no-gl-class
     .dropdown-toggle.gl-button {
       padding: $gl-spacing-scale-2 2px $gl-spacing-scale-2 $gl-spacing-scale-2;
       font-weight: $gl-font-weight-bold;
 
-      // stylelint-disable-next-line gitlab/no-gl-class
       .gl-button-icon {
         margin-left: $gl-spacing-scale-1;
       }
@@ -892,7 +887,6 @@
   }
 }
 
-// stylelint-disable-next-line gitlab/no-gl-class
 .submit-review-dropdown .gl-new-dropdown-panel {
   max-width: none;
 }
@@ -953,12 +947,10 @@
 }
 
 .merge-request-notification-toggle {
-  // stylelint-disable-next-line gitlab/no-gl-class
   .gl-toggle {
     margin-left: auto;
   }
 
-  // stylelint-disable-next-line gitlab/no-gl-class
   .gl-toggle-label {
     font-weight: $gl-font-weight-normal;
   }
@@ -1005,8 +997,8 @@
   height: var(--mr-review-bar-height);
   padding-left: $super-sidebar-width;
   padding-right: $right-sidebar-collapsed-width;
-  background: var(--gl-background-color-default);
-  border-top: 1px solid var(--gl-border-color-default);
+  background: var(--white, $white);
+  border-top: 1px solid var(--border-color, $border-color);
   @apply gl-transition-padding;
 
   @media (max-width: map-get($grid-breakpoints, sm)-1) {
@@ -1083,7 +1075,6 @@
     vertical-align: middle;
   }
 
-  // stylelint-disable-next-line gitlab/no-gl-class
   .gl-skeleton-loader {
     max-width: 334px;
   }

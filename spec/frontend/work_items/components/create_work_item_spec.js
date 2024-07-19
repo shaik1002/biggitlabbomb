@@ -2,7 +2,8 @@ import Vue, { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
 import { GlAlert, GlFormSelect } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import namespaceWorkItemTypesQueryResponse from 'test_fixtures/graphql/work_items/namespace_work_item_types.query.graphql.json';
+import projectWorkItemTypesQueryResponse from 'test_fixtures/graphql/work_items/project_work_item_types.query.graphql.json';
+import groupWorkItemTypesQueryResponse from 'test_fixtures/graphql/work_items/group_work_item_types.query.graphql.json';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import CreateWorkItem from '~/work_items/components/create_work_item.vue';
@@ -11,19 +12,20 @@ import WorkItemDescription from '~/work_items/components/work_item_description.v
 import WorkItemAssignees from '~/work_items/components/work_item_assignees.vue';
 import WorkItemLabels from '~/work_items/components/work_item_labels.vue';
 import { WORK_ITEM_TYPE_ENUM_EPIC } from '~/work_items/constants';
-import namespaceWorkItemTypesQuery from '~/work_items/graphql/namespace_work_item_types.query.graphql';
+import groupWorkItemTypesQuery from '~/work_items/graphql/group_work_item_types.query.graphql';
+import projectWorkItemTypesQuery from '~/work_items/graphql/project_work_item_types.query.graphql';
 import createWorkItemMutation from '~/work_items/graphql/create_work_item.mutation.graphql';
 import groupWorkItemByIidQuery from '~/work_items/graphql/group_work_item_by_iid.query.graphql';
 import workItemByIidQuery from '~/work_items/graphql/work_item_by_iid.query.graphql';
 import { resolvers } from '~/graphql_shared/issuable_client';
 import { createWorkItemMutationResponse, createWorkItemQueryResponse } from '../mock_data';
 
-const namespaceSingleWorkItemTypeQueryResponse = {
+const projectSingleWorkItemTypeQueryResponse = {
   data: {
     workspace: {
-      ...namespaceWorkItemTypesQueryResponse.data.workspace,
+      ...projectWorkItemTypesQueryResponse.data.workspace,
       workItemTypes: {
-        nodes: [namespaceWorkItemTypesQueryResponse.data.workspace.workItemTypes.nodes[0]],
+        nodes: [projectWorkItemTypesQueryResponse.data.workspace.workItemTypes.nodes[0]],
       },
     },
   },
@@ -43,9 +45,7 @@ describe('Create work item component', () => {
     .fn()
     .mockResolvedValue(createWorkItemQueryResponse);
   const groupWorkItemQuerySuccessHandler = jest.fn().mockResolvedValue(createWorkItemQueryResponse);
-  const namespaceWorkItemTypesHandler = jest
-    .fn()
-    .mockResolvedValue(namespaceWorkItemTypesQueryResponse);
+
   const findFormTitle = () => wrapper.find('h1');
   const findAlert = () => wrapper.findComponent(GlAlert);
   const findTitleInput = () => wrapper.findComponent(WorkItemTitle);
@@ -71,19 +71,24 @@ describe('Create work item component', () => {
         [groupWorkItemByIidQuery, groupWorkItemQuerySuccessHandler],
         [workItemByIidQuery, projectWorkItemQuerySuccessHandler],
         [createWorkItemMutation, mutationHandler],
-        [namespaceWorkItemTypesQuery, namespaceWorkItemTypesHandler],
       ],
       resolvers,
       { typePolicies: { Project: { merge: true } } },
     );
 
-    const namespaceWorkItemTypeResponse = singleWorkItemType
-      ? namespaceSingleWorkItemTypeQueryResponse
-      : namespaceWorkItemTypesQueryResponse;
+    const projectWorkItemTypeResponse = singleWorkItemType
+      ? projectSingleWorkItemTypeQueryResponse
+      : projectWorkItemTypesQueryResponse;
     mockApollo.clients.defaultClient.cache.writeQuery({
-      query: namespaceWorkItemTypesQuery,
+      query: isGroup ? groupWorkItemTypesQuery : projectWorkItemTypesQuery,
       variables: { fullPath: 'full-path', name: workItemTypeName },
-      data: namespaceWorkItemTypeResponse.data,
+      data: isGroup
+        ? {
+            ...groupWorkItemTypesQueryResponse.data,
+          }
+        : {
+            ...projectWorkItemTypeResponse.data,
+          },
     });
 
     wrapper = shallowMount(CreateWorkItem, {
@@ -168,13 +173,27 @@ describe('Create work item component', () => {
   });
 
   describe('Work item types dropdown', () => {
-    it('displays a list of namespace work item types', async () => {
+    it('displays a list of project work item types', async () => {
       createComponent();
       await waitForPromises();
 
       // +1 for the "None" option
       const expectedOptions =
-        namespaceWorkItemTypesQueryResponse.data.workspace.workItemTypes.nodes.length + 1;
+        projectWorkItemTypesQueryResponse.data.workspace.workItemTypes.nodes.length + 1;
+
+      expect(findSelect().attributes('options').split(',')).toHaveLength(expectedOptions);
+    });
+
+    it('fetches group work item types when isGroup is true', async () => {
+      createComponent({
+        isGroup: true,
+      });
+
+      await waitForPromises();
+
+      const expectedOptions =
+        groupWorkItemTypesQueryResponse.data.workspace.workItemTypes.nodes.length + 1;
+
       expect(findSelect().attributes('options').split(',')).toHaveLength(expectedOptions);
     });
 

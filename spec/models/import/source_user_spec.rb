@@ -27,28 +27,6 @@ RSpec.describe Import::SourceUser, type: :model, feature_category: :importers do
         )
       end
     end
-
-    describe '.awaiting_reassignment' do
-      it 'only returns source users that await reassignment' do
-        namespace = create(:namespace)
-        pending_assignment_user = create(:import_source_user, :pending_assignment, namespace: namespace)
-        awaiting_approval_user = create(:import_source_user, :awaiting_approval, namespace: namespace)
-
-        expect(namespace.import_source_users.awaiting_reassignment)
-          .to match_array([pending_assignment_user, awaiting_approval_user])
-      end
-    end
-
-    describe '.reassigned' do
-      it 'only returns source users with status completed' do
-        namespace = create(:namespace)
-        completed_assignment_user = create(:import_source_user, :completed, namespace: namespace)
-        placeholder_user = create(:import_source_user, :keep_as_placeholder, namespace: namespace)
-
-        expect(described_class.for_namespace(namespace.id).to_a)
-          .to match_array([completed_assignment_user, placeholder_user])
-      end
-    end
   end
 
   describe 'state machine' do
@@ -137,74 +115,6 @@ RSpec.describe Import::SourceUser, type: :model, feature_category: :importers do
         source_hostname: 'github.com',
         import_type: 'github'
       )).to be_nil
-    end
-  end
-
-  describe '.search' do
-    let!(:source_user) do
-      create(:import_source_user, source_name: 'Source Name', source_username: 'Username')
-    end
-
-    it 'searches by source_name or source_username' do
-      expect(described_class.search('name')).to eq([source_user])
-      expect(described_class.search('username')).to eq([source_user])
-      expect(described_class.search('source')).to eq([source_user])
-      expect(described_class.search('inexistent')).to eq([])
-    end
-  end
-
-  describe '.sort_by_attribute' do
-    let_it_be(:namespace) { create(:namespace) }
-    let_it_be(:source_user_1) { create(:import_source_user, namespace: namespace, status: 4, source_name: 'd') }
-    let_it_be(:source_user_2) { create(:import_source_user, namespace: namespace, status: 2, source_name: 'b') }
-    let_it_be(:source_user_3) { create(:import_source_user, namespace: namespace, status: 1, source_name: 'a') }
-    let_it_be(:source_user_4) { create(:import_source_user, namespace: namespace, status: 3, source_name: 'c') }
-
-    let(:sort_by_attribute) { described_class.sort_by_attribute(method).pluck(attribute) }
-
-    context 'with method status_asc' do
-      let(:method) { 'status_asc' }
-      let(:attribute) { :status }
-
-      it 'order by status_desc ascending' do
-        expect(sort_by_attribute).to eq([1, 2, 3, 4])
-      end
-    end
-
-    context 'with method status_desc' do
-      let(:method) { 'status_desc' }
-      let(:attribute) { :status }
-
-      it 'order by status_desc descending' do
-        expect(sort_by_attribute).to eq([4, 3, 2, 1])
-      end
-    end
-
-    context 'with method source_name_asc' do
-      let(:method) { 'source_name_asc' }
-      let(:attribute) { :source_name }
-
-      it 'order by source_name_asc ascending' do
-        expect(sort_by_attribute).to eq(%w[a b c d])
-      end
-    end
-
-    context 'with method source_name_desc' do
-      let(:method) { 'source_name_desc' }
-      let(:attribute) { :source_name }
-
-      it 'order by source_name_desc descending' do
-        expect(sort_by_attribute).to eq(%w[d c b a])
-      end
-    end
-
-    context 'with an unexpected method' do
-      let(:method) { 'id_asc' }
-      let(:attribute) { :source_name }
-
-      it 'order by source_name_asc ascending' do
-        expect(sort_by_attribute).to eq(%w[a b c d])
-      end
     end
   end
 

@@ -274,7 +274,6 @@ export default {
           return;
         }
         this.track('updated_assignees');
-        this.$emit('assigneesUpdated', localAssigneeIds);
       } catch {
         this.throwUpdateError();
       } finally {

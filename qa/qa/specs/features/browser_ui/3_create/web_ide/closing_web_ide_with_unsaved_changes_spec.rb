@@ -10,9 +10,7 @@ module QA
         Flow::Login.sign_in
         project.visit!
         Page::Project::Show.perform(&:open_web_ide!)
-        Page::Project::WebIDE::VSCode.perform do |ide|
-          ide.wait_for_ide_to_load('README.md')
-        end
+        Page::Project::WebIDE::VSCode.perform(&:wait_for_ide_to_load)
       end
 
       it 'shows an alert when there are unsaved changes', :blocking,

@@ -24,13 +24,13 @@ In GitLab 15.4 and later, to configure push rules for a group:
 1. On the left sidebar, select **Settings > Repository**.
 1. Expand the **Pre-defined push rules** section.
 1. Select the settings you want.
-1. Select **Save push rules**.
+1. Select **Save Push Rules**.
 
 In GitLab 15.3 and earlier, to configure push rules for a group:
 
 1. On the left sidebar, select **Push rules**.
 1. Select the settings you want.
-1. Select **Save push rules**.
+1. Select **Save Push Rules**.
 
 The group's new subgroups have push rules set for them based on either:
 
@@ -247,7 +247,7 @@ DETAILS:
 As a group Owner, you can prevent any new project membership for all
 projects in a group, allowing tighter control over project membership.
 
-For example, if you want to lock the group for an [audit event](../../administration/audit_event_reports.md),
+For example, if you want to lock the group for an [Audit Event](../../administration/audit_event_reports.md),
 you can guarantee that project membership cannot be modified during the audit.
 
 If group membership lock is enabled, the group Owner can still:

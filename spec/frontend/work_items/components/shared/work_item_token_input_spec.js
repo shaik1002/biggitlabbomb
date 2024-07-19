@@ -286,17 +286,7 @@ describe('WorkItemTokenInput', () => {
     });
 
     it('calls the project work items query', () => {
-      expect(searchWorkItemTextResolver).toHaveBeenCalledWith(
-        expect.objectContaining({
-          fullPath: 'test-project-path',
-          iid: null,
-          in: undefined,
-          searchByIid: false,
-          searchByText: true,
-          searchTerm: '',
-          types: ['TASK'],
-        }),
-      );
+      expect(searchWorkItemTextResolver).toHaveBeenCalled();
     });
 
     it('skips calling the group work items query', () => {
@@ -315,19 +305,7 @@ describe('WorkItemTokenInput', () => {
     });
 
     it('calls the group work items query', () => {
-      expect(groupSearchedWorkItemResolver).toHaveBeenCalledWith(
-        expect.objectContaining({
-          fullPath: 'test-project-path',
-          iid: null,
-          in: undefined,
-          includeAncestors: true,
-          includeDescendants: true,
-          searchByIid: false,
-          searchByText: true,
-          searchTerm: '',
-          types: ['TASK'],
-        }),
-      );
+      expect(groupSearchedWorkItemResolver).toHaveBeenCalled();
     });
   });
 

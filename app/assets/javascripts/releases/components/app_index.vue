@@ -21,7 +21,6 @@ export default {
   i18n,
   links: {
     alertInfoMessageLink: helpPagePath('ci/yaml/index.html', { anchor: 'release' }),
-    // eslint-disable-next-line local-rules/require-valid-help-page-path
     alertInfoPublishLink: helpPagePath('ci/components/index', { anchor: 'release-a-component' }),
   },
   components: {

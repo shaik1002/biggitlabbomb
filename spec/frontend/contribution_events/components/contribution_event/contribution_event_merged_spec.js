@@ -23,7 +23,7 @@ describe('ContributionEventMerged', () => {
   it('renders `ContributionEventBase`', () => {
     expect(wrapper.findComponent(ContributionEventBase).props()).toEqual({
       event: defaultPropsData.event,
-      iconName: 'merge-request',
+      iconName: 'git-merge',
       message: ContributionEventMerged.i18n.message,
     });
   });

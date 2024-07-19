@@ -119,6 +119,7 @@ RSpec.describe ProjectsHelper, feature_category: :source_code_management do
   end
 
   describe '#can_set_diff_preview_in_email?' do
+    stub_feature_flags(diff_preview_in_email: true)
     let_it_be(:user) { create(:project_member, :maintainer, user: create(:user), project: project).user }
 
     it 'returns true for the project owner' do
@@ -354,13 +355,13 @@ RSpec.describe ProjectsHelper, feature_category: :source_code_management do
 
     describe 'using the default options' do
       it 'returns an HTML link to the user' do
-        link = helper.link_to_member(user)
+        link = helper.link_to_member(project, user)
 
         expect(link).to match(%r{/#{user.username}})
       end
 
       it 'HTML escapes the name of the user' do
-        link = helper.link_to_member(user)
+        link = helper.link_to_member(project, user)
 
         expect(link).to include(ERB::Util.html_escape(user.name))
         expect(link).not_to include(user.name)
@@ -369,7 +370,7 @@ RSpec.describe ProjectsHelper, feature_category: :source_code_management do
 
     context 'when user is nil' do
       it 'returns "(deleted)"' do
-        link = helper.link_to_member(nil)
+        link = helper.link_to_member(project, nil)
 
         expect(link).to eq("(deleted)")
       end

@@ -4,9 +4,9 @@ group: Compliance
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
-# Audit event schema and examples
+# Audit Event schema and examples
 
-## Audit event schema
+## Audit Event schema
 
 > - Documentation for an audit event streaming schema was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/358149) in GitLab 15.3.
 
@@ -28,7 +28,7 @@ Audit events have a predictable schema in the body of the response.
 | `target_id`      | ID of the audit event's target                             |                                                                                   | **{check-circle}** Yes      |
 | `target_type`    | String representation of the target's type                 |                                                                                   | **{check-circle}** Yes      |
 
-### Audit event JSON schema
+### Audit Event JSON schema
 
 ```json
 {
@@ -96,7 +96,7 @@ Streaming audit events can be sent when authenticated users push, pull, or clone
 
 Audit events are not captured for users that are not signed in. For example, when downloading a public project.
 
-### Example: audit event payloads for Git over SSH events with deploy key
+### Example: audit event payloads for Git over SSH events with Deploy Key
 
 Fetch:
 

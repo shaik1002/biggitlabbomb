@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Pajamas::BroadcastBannerComponent, :aggregate_failures, type: :component, feature_category: :notifications do
+  include Features::DomHelpers
+
   before do
     render_inline described_class.new(message: message,
       id: id,

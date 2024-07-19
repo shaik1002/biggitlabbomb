@@ -16,9 +16,6 @@ RSpec.describe Projects::ProjectMembersHelper do
     let_it_be(:members) { create_list(:project_member, 2, project: project) }
     let_it_be(:invited) { create_list(:project_member, 2, :invited, project: project) }
     let_it_be(:access_requests) { create_list(:project_member, 2, :access_request, project: project) }
-    let(:available_roles) do
-      Gitlab::Access.options_with_owner.map { |name, access_level| { title: name, value: "static-#{access_level}" } }
-    end
 
     let(:members_collection) { members }
 
@@ -49,8 +46,7 @@ RSpec.describe Projects::ProjectMembersHelper do
           can_manage_access_requests: true,
           group_name: project.group.name,
           group_path: project.group.path,
-          can_approve_access_requests: true,
-          available_roles: available_roles
+          can_approve_access_requests: true
         }.as_json
 
         expect(subject).to include(expected)

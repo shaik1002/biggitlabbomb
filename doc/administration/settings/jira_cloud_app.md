@@ -81,7 +81,6 @@ You can use the official GitLab for Jira Cloud app from the Atlassian Marketplac
 With this method:
 
 - GitLab.com [handles the install and uninstall lifecycle events](#gitlabcom-handling-of-app-lifecycle-events) sent from Jira Cloud and forwards them to your GitLab instance. All data from your self-managed instance is still sent directly to Jira Cloud.
-- GitLab.com [handles branch creation links](#gitlabcom-handling-of-branch-creation) by redirecting them to your instance.
 - With any version of GitLab prior to 17.2 it is not possible to create branches from Jira Cloud on self-managed instances.
   For more information, see [issue 391432](https://gitlab.com/gitlab-org/gitlab/-/issues/391432).
 
@@ -90,14 +89,14 @@ Alternatively, you might want to [install the GitLab for Jira Cloud app manually
 - Your instance does not meet the [prerequisites](#prerequisites).
 - You do not want to use the official Atlassian Marketplace listing.
 - You do not want GitLab.com to [handle the app lifecycle events](#gitlabcom-handling-of-app-lifecycle-events) or to know that your instance has installed the app.
-- You do not want GitLab.com to [redirect branch creation links](#gitlabcom-handling-of-branch-creation) to your instance.
+- You want to create branches from Jira Cloud.
 
 ### Prerequisites
 
 - The instance must be publicly available.
 - The instance must be on GitLab version 15.7 or later.
 - You must set up [OAuth authentication](#set-up-oauth-authentication).
-- Your GitLab instance must use HTTPS _and_ your GitLab certificate must be publicly trusted or contain the full chain certificate.
+- If your instance uses HTTPS, your GitLab certificate must be publicly trusted or contain the full chain certificate.
 - Your network must allow inbound and outbound connections between your self-managed instance,
   Jira, and GitLab.com. For self-managed instances that are behind a
   firewall and cannot be directly accessed from the internet, you must:
@@ -297,14 +296,6 @@ accDescr: How GitLab.com handles lifecycle events when the GitLab for Jira Cloud
     GitLab.com->>-Your instance: App install/uninstall event
     Your instance->>Jira: Your development data
 ```
-
-### GitLab.com handling of branch creation
-
-When you have
-[installed the GitLab for Jira Cloud app from the Atlassian Marketplace](#install-the-gitlab-for-jira-cloud-app-from-the-atlassian-marketplace),
-the links to create a branch from the development panel initially send the user to GitLab.com.
-
-Jira sends GitLab.com a JWT token. GitLab.com handles the request by verifying the token and then redirects the request to your GitLab instance.
 
 ### Access to GitLab through OAuth
 

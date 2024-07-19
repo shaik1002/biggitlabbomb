@@ -537,7 +537,7 @@ Settings.cron_jobs['prune_old_events_worker'] ||= {}
 Settings.cron_jobs['prune_old_events_worker']['cron'] ||= '0 */6 * * *'
 Settings.cron_jobs['prune_old_events_worker']['job_class'] = 'PruneOldEventsWorker'
 Settings.cron_jobs['gitlab_export_prune_project_export_jobs_worker'] ||= {}
-Settings.cron_jobs['gitlab_export_prune_project_export_jobs_worker']['cron'] ||= '30 3 * * *'
+Settings.cron_jobs['gitlab_export_prune_project_export_jobs_worker']['cron'] ||= '30 3 * * */7'
 Settings.cron_jobs['gitlab_export_prune_project_export_jobs_worker']['job_class'] = 'Gitlab::Export::PruneProjectExportJobsWorker'
 Settings.cron_jobs['trending_projects_worker'] ||= {}
 Settings.cron_jobs['trending_projects_worker']['cron'] = '0 1 * * *'
@@ -807,7 +807,7 @@ Gitlab.ee do
   Settings.cron_jobs['elastic_migration_worker']['cron'] ||= '*/5 * * * *'
   Settings.cron_jobs['elastic_migration_worker']['job_class'] ||= 'Elastic::MigrationWorker'
   Settings.cron_jobs['search_zoekt_scheduling_worker'] ||= {}
-  Settings.cron_jobs['search_zoekt_scheduling_worker']['cron'] ||= '*/1 * * * *'
+  Settings.cron_jobs['search_zoekt_scheduling_worker']['cron'] ||= '*/10 * * * *'
   Settings.cron_jobs['search_zoekt_scheduling_worker']['job_class'] ||= 'Search::Zoekt::SchedulingWorker'
   Settings.cron_jobs['search_index_curation_worker'] ||= {}
   Settings.cron_jobs['search_index_curation_worker']['cron'] ||= '*/1 * * * *'

@@ -7,11 +7,7 @@ import isShowingLabelsQuery from '~/graphql_shared/client/is_showing_labels.quer
 import getIssueStateQuery from '~/issues/show/queries/get_issue_state.query.graphql';
 import createDefaultClient from '~/lib/graphql';
 import typeDefs from '~/work_items/graphql/typedefs.graphql';
-import {
-  WIDGET_TYPE_NOTES,
-  WIDGET_TYPE_AWARD_EMOJI,
-  WIDGET_TYPE_HIERARCHY,
-} from '~/work_items/constants';
+import { WIDGET_TYPE_NOTES, WIDGET_TYPE_AWARD_EMOJI } from '~/work_items/constants';
 import activeBoardItemQuery from 'ee_else_ce/boards/graphql/client/active_board_item.query.graphql';
 import { updateNewWorkItemCache } from '~/work_items/graphql/resolvers';
 
@@ -84,15 +80,6 @@ export const config = {
           },
         },
       },
-      WorkItemWidgetHierarchy: {
-        fields: {
-          // If we add any key args, the children field becomes children({"first":10}) and
-          // kills any possibility to handle it on the widget level without hardcoding a string.
-          children: {
-            keyArgs: false,
-          },
-        },
-      },
       WorkItem: {
         fields: {
           // widgets policy because otherwise the subscriptions invalidate the cache
@@ -132,18 +119,6 @@ export const config = {
                         ...existingWidget.discussions.nodes,
                         ...incomingWidget.discussions.nodes,
                       ],
-                    },
-                  };
-                }
-
-                // we want to concat next page of children work items within Hierarchy widget to the existing ones
-                if (incomingWidget?.type === WIDGET_TYPE_HIERARCHY && context.variables.endCursor) {
-                  // concatPagination won't work because we were placing new widget here so we have to do this manually
-                  return {
-                    ...incomingWidget,
-                    children: {
-                      ...incomingWidget.children,
-                      nodes: [...existingWidget.children.nodes, ...incomingWidget.children.nodes],
                     },
                   };
                 }

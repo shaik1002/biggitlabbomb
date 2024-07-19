@@ -186,7 +186,6 @@ export default {
       });
     },
     issuesHelpPagePath() {
-      // eslint-disable-next-line local-rules/require-valid-help-page-path
       return helpPagePath('user/project/settings/index.md', {
         anchor: 'configure-project-visibility-features-and-permissions',
       });

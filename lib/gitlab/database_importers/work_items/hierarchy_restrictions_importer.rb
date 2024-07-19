@@ -41,7 +41,7 @@ module Gitlab
             {
               parent_type_id: epic.id,
               child_type_id: epic.id,
-              maximum_depth: 7,
+              maximum_depth: 9,
               cross_hierarchy_enabled: true
             },
             {

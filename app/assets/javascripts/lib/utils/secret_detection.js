@@ -11,7 +11,12 @@ const CONTENT_TYPE = {
 
 const defaultContentType = CONTENT_TYPE.COMMENT;
 
-const documentationHref = helpPagePath('user/application_security/secret_detection/client/index');
+const documentationHref = helpPagePath(
+  'user/application_security/secret_detection/pipeline/index',
+  {
+    anchor: 'warnings-for-potential-leaks-in-text-content',
+  },
+);
 
 const i18n = {
   title: (count) =>

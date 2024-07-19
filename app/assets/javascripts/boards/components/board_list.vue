@@ -653,7 +653,7 @@ export default {
         'gl-overflow-hidden': disableScrollingWhenMutationInProgress,
         'gl-overflow-y-auto': !disableScrollingWhenMutationInProgress,
       }"
-      :draggable="canMoveIssue ? '.board-card' : false"
+      draggable=".board-card"
       class="board-list gl-w-full gl-h-full gl-list-none gl-mb-0 gl-p-3 gl-pt-0 gl-overflow-x-hidden"
       data-testid="tree-root-wrapper"
       @start="handleDragOnStart"

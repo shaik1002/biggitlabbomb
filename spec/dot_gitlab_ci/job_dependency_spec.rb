@@ -62,7 +62,7 @@ RSpec.describe 'ci jobs dependency', feature_category: :tooling,
 
   let_it_be(:group)   { create(:group, path: 'ci-org') }
   let_it_be(:user)    { create(:user) }
-  let_it_be(:project) { create(:project, :empty_repo, group: group, path: 'ci') }
+  let_it_be(:project) { create(:project, :empty_repo, group: group, path: "ci") }
   let_it_be(:ci_glob) { Dir.glob("{.gitlab-ci.yml,.gitlab/**/*.yml}").freeze }
   let_it_be(:master_branch) { 'master' }
 
@@ -70,8 +70,7 @@ RSpec.describe 'ci jobs dependency', feature_category: :tooling,
     [
       { key: 'CI_SERVER_HOST', value: 'gitlab.com' },
       { key: 'CI_PROJECT_NAMESPACE', value: 'gitlab-org' },
-      { key: 'CI_PROJECT_PATH', value: 'gitlab-org/gitlab' },
-      { key: 'CI_PROJECT_NAME', value: 'gitlab' }
+      { key: 'CI_PROJECT_PATH', value: 'gitlab-org/gitlab' }
     ]
   end
 
@@ -115,7 +114,7 @@ RSpec.describe 'ci jobs dependency', feature_category: :tooling,
     context 'with default master pipeline' do
       let(:variables_attributes) { gitlab_com_variables_attributes_base }
       let(:trigger_source) { :push }
-      let(:expected_job_name) { 'db:migrate:multi-version-upgrade' }
+      let(:expected_job_name) { 'rspec background_migration pg14 1/5' }
 
       # Test: remove rules from .rails:rules:setup-test-env
       it_behaves_like 'master pipeline'
@@ -123,7 +122,7 @@ RSpec.describe 'ci jobs dependency', feature_category: :tooling,
 
     context 'with scheduled nightly' do
       let(:trigger_source) { :schedule }
-      let(:expected_job_name) { 'db:rollback single-db' }
+      let(:expected_job_name) { 'rspec migration pg16 1/15' }
       let(:variables_attributes) do
         [
           *gitlab_com_variables_attributes_base,
@@ -145,7 +144,7 @@ RSpec.describe 'ci jobs dependency', feature_category: :tooling,
 
     context 'with scheduled maintenance' do
       let(:trigger_source) { :schedule }
-      let(:expected_job_name) { 'generate-frontend-fixtures-mapping' }
+      let(:expected_job_name) { 'rspec-ee system pg14 no_gitaly_transactions 1/14' }
       let(:variables_attributes) do
         [
           *gitlab_com_variables_attributes_base,
@@ -162,21 +161,20 @@ RSpec.describe 'ci jobs dependency', feature_category: :tooling,
       [
         { key: 'CI_SERVER_HOST', value: 'gitlab.com' },
         { key: 'CI_PROJECT_NAMESPACE', value: 'gitlab-org' },
-        { key: 'CI_PROJECT_PATH', value: 'gitlab-org/gitlab-foss' },
-        { key: 'CI_PROJECT_NAME', value: 'gitlab-foss' }
+        { key: 'CI_PROJECT_PATH', value: 'gitlab-org/gitlab-foss' }
       ]
     end
 
     context 'with master pipeline triggered by push' do
       let(:trigger_source) { :push }
-      let(:expected_job_name) { 'db:backup_and_restore single-db' }
+      let(:expected_job_name) { 'rspec background_migration pg14 1/5' }
 
       it_behaves_like 'master pipeline'
     end
 
     context 'with scheduled master pipeline' do
       let(:trigger_source) { :schedule }
-      let(:expected_job_name) { 'db:backup_and_restore single-db' }
+      let(:expected_job_name) { 'rspec background_migration pg14 1/5' }
 
       # Verify by removing the following rule from .qa:rules:e2e:test-on-cng
       # - !reference [".qa:rules:package-and-test-never-run", rules]

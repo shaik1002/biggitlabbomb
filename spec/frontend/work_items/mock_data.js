@@ -930,7 +930,6 @@ export const workItemResponseFactory = ({
   linkedItems = mockEmptyLinkedItems,
   developmentItems = workItemDevelopmentFragmentResponse(),
   color = '#1068bf',
-  editableWeightWidget = true,
 } = {}) => ({
   data: {
     workItem: {
@@ -1021,15 +1020,9 @@ export const workItemResponseFactory = ({
           : { type: 'MOCK TYPE' },
         weightWidgetPresent
           ? {
-              type: 'WEIGHT',
-              weight: null,
-              rolledUpWeight: 0,
-              widgetDefinition: {
-                editable: editableWeightWidget,
-                rollUp: !editableWeightWidget,
-                __typename: 'WorkItemWidgetDefinitionWeight',
-              },
               __typename: 'WorkItemWidgetWeight',
+              type: 'WEIGHT',
+              weight: 0,
             }
           : { type: 'MOCK TYPE' },
         iterationWidgetPresent
@@ -1424,14 +1417,6 @@ export const workItemHierarchyEmptyResponse = {
             parent: null,
             hasChildren: false,
             children: {
-              pageInfo: {
-                hasNextPage: false,
-                hasPreviousPage: false,
-                startCursor: null,
-                endCursor: null,
-                __typename: 'PageInfo',
-              },
-              count: 1,
               nodes: [],
               __typename: 'WorkItemConnection',
             },
@@ -1486,14 +1471,6 @@ export const workItemHierarchyNoUpdatePermissionResponse = {
           parent: null,
           hasChildren: true,
           children: {
-            pageInfo: {
-              hasNextPage: false,
-              hasPreviousPage: false,
-              startCursor: null,
-              endCursor: null,
-              __typename: 'PageInfo',
-            },
-            count: 1,
             nodes: [
               {
                 id: 'gid://gitlab/WorkItem/2',
@@ -1790,7 +1767,7 @@ export const workItemObjectiveNoMetadata = {
   ],
 };
 
-export const workItemHierarchyTreeEmptyResponse = {
+export const workItemHierarchyTreeResponse = {
   data: {
     workItem: {
       id: 'gid://gitlab/WorkItem/2',
@@ -1830,139 +1807,39 @@ export const workItemHierarchyTreeEmptyResponse = {
           parent: null,
           hasChildren: true,
           children: {
-            pageInfo: {
-              hasNextPage: false,
-              hasPreviousPage: false,
-              startCursor: null,
-              endCursor: null,
-              __typename: 'PageInfo',
-            },
-            count: 0,
-            nodes: [],
+            nodes: [
+              {
+                id: 'gid://gitlab/WorkItem/13',
+                iid: '13',
+                workItemType: {
+                  id: 'gid://gitlab/WorkItems::Type/2411',
+                  name: 'Objective',
+                  iconName: 'issue-type-objective',
+                  __typename: 'WorkItemType',
+                },
+                title: 'Objective 2',
+                state: 'OPEN',
+                confidential: false,
+                reference: 'test-project-path#13',
+                createdAt: '2022-08-03T12:41:54Z',
+                closedAt: null,
+                webUrl: '/gitlab-org/gitlab-test/-/work_items/13',
+                widgets: [
+                  {
+                    type: 'HIERARCHY',
+                    hasChildren: true,
+                    __typename: 'WorkItemWidgetHierarchy',
+                  },
+                ],
+                __typename: 'WorkItem',
+              },
+            ],
             __typename: 'WorkItemConnection',
           },
           __typename: 'WorkItemWidgetHierarchy',
         },
       ],
       __typename: 'WorkItem',
-    },
-  },
-};
-
-export const mockHierarchyChildren = [
-  {
-    id: 'gid://gitlab/WorkItem/37',
-    iid: '37',
-    workItemType: {
-      id: 'gid://gitlab/WorkItems::Type/2411',
-      name: 'Objective',
-      iconName: 'issue-type-objective',
-      __typename: 'WorkItemType',
-    },
-    title: 'Objective 2',
-    state: 'OPEN',
-    confidential: false,
-    reference: 'test-project-path#13',
-    createdAt: '2022-08-03T12:41:54Z',
-    closedAt: null,
-    webUrl: '/gitlab-org/gitlab-test/-/work_items/13',
-    widgets: [
-      {
-        type: 'HIERARCHY',
-        hasChildren: true,
-        __typename: 'WorkItemWidgetHierarchy',
-      },
-    ],
-    __typename: 'WorkItem',
-  },
-];
-
-export const mockHierarchyWidget = {
-  type: 'HIERARCHY',
-  parent: null,
-  hasChildren: true,
-  children: {
-    pageInfo: {
-      hasNextPage: false,
-      hasPreviousPage: false,
-      startCursor: null,
-      endCursor: null,
-      __typename: 'PageInfo',
-    },
-    count: 1,
-    nodes: mockHierarchyChildren,
-    __typename: 'WorkItemConnection',
-  },
-  __typename: 'WorkItemWidgetHierarchy',
-};
-
-export const workItemHierarchyTreeResponse = {
-  data: {
-    workItem: {
-      id: 'gid://gitlab/WorkItem/2',
-      iid: '2',
-      archived: false,
-      workItemType: {
-        id: 'gid://gitlab/WorkItems::Type/2411',
-        name: 'Objective',
-        iconName: 'issue-type-objective',
-        __typename: 'WorkItemType',
-      },
-      title: 'New title',
-      userPermissions: {
-        deleteWorkItem: true,
-        updateWorkItem: true,
-        setWorkItemMetadata: true,
-        adminParentLink: true,
-        createNote: true,
-        adminWorkItemLink: true,
-        __typename: 'WorkItemPermissions',
-      },
-      confidential: false,
-      reference: 'test-project-path#2',
-      namespace: {
-        __typename: 'Project',
-        id: '1',
-        fullPath: 'test-project-path',
-        name: 'Project name',
-      },
-      widgets: [
-        {
-          type: 'DESCRIPTION',
-          __typename: 'WorkItemWidgetDescription',
-        },
-        mockHierarchyWidget,
-      ],
-      __typename: 'WorkItem',
-    },
-  },
-};
-
-export const workItemHierarchyPaginatedTreeResponse = {
-  data: {
-    workItem: {
-      ...workItemHierarchyTreeResponse.data.workItem,
-      widgets: [
-        {
-          type: 'DESCRIPTION',
-          __typename: 'WorkItemWidgetDescription',
-        },
-        {
-          ...mockHierarchyWidget,
-          children: {
-            count: 2,
-            pageInfo: {
-              hasNextPage: true,
-              hasPreviousPage: false,
-              startCursor: 'Y3Vyc29yOjE=',
-              endCursor: 'Y3Vyc29yOjE=',
-              __typename: 'PageInfo',
-            },
-            nodes: mockHierarchyChildren,
-            __typename: 'WorkItemConnection',
-          },
-        },
-      ],
     },
   },
 };
@@ -4392,9 +4269,9 @@ export const allowedChildrenTypesResponse = {
 export const generateWorkItemsListWithId = (count) =>
   Array.from({ length: count }, (_, i) => ({ id: `gid://gitlab/WorkItem/${i + 1}` }));
 
-export const namespaceProjectsList = {
+export const groupProjectsList = {
   data: {
-    namespace: {
+    group: {
       id: 'gid://gitlab/Group/1',
       projects: {
         nodes: [
@@ -4428,6 +4305,50 @@ export const namespaceProjectsList = {
         __typename: 'ProjectConnection',
       },
       __typename: 'Group',
+    },
+  },
+};
+
+export const relatedProjectsList = {
+  data: {
+    project: {
+      id: 'gid://gitlab/Project/1',
+      group: {
+        id: 'gid://gitlab/Group/33',
+        projects: {
+          nodes: [
+            {
+              id: 'gid://gitlab/Project/1',
+              name: 'Example project A',
+              avatarUrl: null,
+              nameWithNamespace: 'Group A / Example project A',
+              fullPath: 'group-a/example-project-a',
+              namespace: {
+                id: 'gid://gitlab/Group/1',
+                name: 'Group A',
+                __typename: 'Namespace',
+              },
+              __typename: 'Project',
+            },
+            {
+              id: 'gid://gitlab/Project/2',
+              name: 'Example project B',
+              avatarUrl: null,
+              nameWithNamespace: 'Group A / Example project B',
+              fullPath: 'group-a/example-project-b',
+              namespace: {
+                id: 'gid://gitlab/Group/1',
+                name: 'Group A',
+                __typename: 'Namespace',
+              },
+              __typename: 'Project',
+            },
+          ],
+          __typename: 'ProjectConnection',
+        },
+        __typename: 'Group',
+      },
+      __typename: 'Project',
     },
   },
 };

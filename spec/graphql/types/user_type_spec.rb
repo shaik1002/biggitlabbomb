@@ -15,8 +15,6 @@ RSpec.describe GitlabSchema.types['User'], feature_category: :user_profile do
     expected_fields = %w[
       id
       bot
-      active
-      human
       user_permissions
       snippets
       name

@@ -26,7 +26,6 @@ import {
   WORK_ITEM_REFERENCE_CHAR,
   WORK_ITEM_TYPE_VALUE_TASK,
   WORK_ITEM_TYPE_VALUE_EPIC,
-  WIDGET_TYPE_WEIGHT,
 } from '../constants';
 
 import workItemUpdatedSubscription from '../graphql/work_item_updated.subscription.graphql';
@@ -34,7 +33,7 @@ import updateWorkItemMutation from '../graphql/update_work_item.mutation.graphql
 import groupWorkItemByIidQuery from '../graphql/group_work_item_by_iid.query.graphql';
 import workItemByIidQuery from '../graphql/work_item_by_iid.query.graphql';
 import getAllowedWorkItemChildTypes from '../graphql/work_item_allowed_children.query.graphql';
-import { findHierarchyWidgetDefinition } from '../utils';
+import { findHierarchyWidgetChildren, findHierarchyWidgetDefinition } from '../utils';
 
 import WorkItemTree from './work_item_links/work_item_tree.vue';
 import WorkItemActions from './work_item_actions.vue';
@@ -54,7 +53,6 @@ import WorkItemLoading from './work_item_loading.vue';
 import DesignWidget from './design_management/design_management_widget.vue';
 
 export default {
-  name: 'WorkItemDetail',
   i18n,
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -121,7 +119,6 @@ export default {
       isStickyHeaderShowing: false,
       editMode: false,
       draftData: {},
-      hasChildren: false,
     };
   },
   apollo: {
@@ -259,7 +256,7 @@ export default {
       return this.isWidgetPresent(WIDGET_TYPE_DESCRIPTION);
     },
     hasDesignWidget() {
-      return this.isWidgetPresent(WIDGET_TYPE_DESIGNS) && this.$router;
+      return this.isWidgetPresent(WIDGET_TYPE_DESIGNS);
     },
     workItemNotificationsSubscribed() {
       return Boolean(this.isWidgetPresent(WIDGET_TYPE_NOTIFICATIONS)?.subscribed);
@@ -285,14 +282,11 @@ export default {
     workItemNotes() {
       return this.isWidgetPresent(WIDGET_TYPE_NOTES);
     },
-    workItemWeight() {
-      return this.isWidgetPresent(WIDGET_TYPE_WEIGHT);
+    children() {
+      return this.workItem ? findHierarchyWidgetChildren(this.workItem) : [];
     },
-    showRolledUpWeight() {
-      return this.workItemWeight?.widgetDefinition?.rollUp;
-    },
-    rolledUpWeight() {
-      return this.workItemWeight?.rolledUpWeight;
+    hasChildren() {
+      return !isEmpty(this.children);
     },
     workItemBodyClass() {
       return {
@@ -506,7 +500,6 @@ export default {
       @error="updateError = $event"
       @promotedToObjective="$emit('promotedToObjective', workItemIid)"
       @toggleEditMode="enableEditMode"
-      @workItemStateUpdated="$emit('workItemStateUpdated')"
     />
     <section class="work-item-view">
       <section v-if="updateError" class="flash-container flash-container-page sticky">
@@ -597,7 +590,6 @@ export default {
                 @toggleWorkItemConfidentiality="toggleConfidentiality"
                 @error="updateError = $event"
                 @promotedToObjective="$emit('promotedToObjective', workItemIid)"
-                @workItemStateUpdated="$emit('workItemStateUpdated')"
               />
             </div>
             <gl-button
@@ -663,7 +655,6 @@ export default {
                 :work-item="workItem"
                 :group-path="groupPath"
                 @error="updateError = $event"
-                @attributesUpdated="$emit('attributesUpdated', $event)"
               />
             </aside>
 
@@ -681,15 +672,13 @@ export default {
               :parent-work-item-type="workItem.workItemType.name"
               :work-item-id="workItem.id"
               :work-item-iid="workItemIid"
+              :children="children"
               :can-update="canUpdate"
               :can-update-children="canUpdateChildren"
-              :rolled-up-weight="rolledUpWeight"
-              :show-rolled-up-weight="showRolledUpWeight"
               :confidential="workItem.confidential"
               :allowed-child-types="allowedChildTypes"
               @show-modal="openInModal"
               @addChild="$emit('addChild')"
-              @childrenLoaded="hasChildren = $event"
             />
             <work-item-relationships
               v-if="workItemLinkedItems"

@@ -122,7 +122,7 @@ export default {
       <gl-icon
         v-if="upstreamPipeline"
         :class="$options.arrowStyles"
-        name="arrow-right"
+        name="long-arrow"
         data-testid="upstream-arrow-icon"
       />
       <pipeline-stages
@@ -134,7 +134,7 @@ export default {
       <gl-icon
         v-if="hasDownstreamPipelines"
         :class="$options.arrowStyles"
-        name="arrow-right"
+        name="long-arrow"
         data-testid="downstream-arrow-icon"
       />
       <downstream-pipelines

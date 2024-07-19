@@ -76,6 +76,7 @@ import {
   TOKEN_TYPE_CREATED,
   TOKEN_TYPE_CLOSED,
 } from '~/vue_shared/components/filtered_search_bar/constants';
+import deleteWorkItemMutation from '~/work_items/graphql/delete_work_item.mutation.graphql';
 import {
   workItemResponseFactory,
   workItemByIidResponseFactory,
@@ -148,6 +149,10 @@ describe('CE IssuesListApp component', () => {
   const mockIssuesQueryResponse = jest.fn().mockResolvedValue(defaultQueryResponse);
   const mockIssuesCountsQueryResponse = jest.fn().mockResolvedValue(getIssuesCountsQueryResponse);
 
+  const deleteWorkItemMutationHandler = jest
+    .fn()
+    .mockResolvedValue({ data: { workItemDelete: { errors: [] } } });
+
   const findCsvImportExportButtons = () => wrapper.findComponent(CsvImportExportButtons);
   const findDropdown = () => wrapper.findComponent(GlDisclosureDropdown);
   const findIssuableByEmail = () => wrapper.findComponent(IssuableByEmail);
@@ -177,11 +182,13 @@ describe('CE IssuesListApp component', () => {
     sortPreferenceMutationResponse = jest.fn().mockResolvedValue(setSortPreferenceMutationResponse),
     stubs = {},
     mountFn = shallowMount,
+    deleteMutationHandler = deleteWorkItemMutationHandler,
   } = {}) => {
     const requestHandlers = [
       [getIssuesQuery, issuesQueryResponse],
       [getIssuesCountsQuery, issuesCountsQueryResponse],
       [setSortPreferenceMutation, sortPreferenceMutationResponse],
+      [deleteWorkItemMutation, deleteMutationHandler],
     ];
 
     router = new VueRouter({ mode: 'history' });
@@ -1251,8 +1258,13 @@ describe('CE IssuesListApp component', () => {
       });
 
       describe('when deleting an issuable from the drawer', () => {
-        beforeEach(() => {
-          findWorkItemDrawer().vm.$emit('workItemDeleted');
+        beforeEach(async () => {
+          const {
+            data: { workItem },
+          } = workItemResponseFactory({ iid: '789' });
+          findWorkItemDrawer().vm.$emit('deleteWorkItem', workItem);
+
+          await waitForPromises();
         });
 
         it('should refetch issues and issues count', () => {
@@ -1268,12 +1280,18 @@ describe('CE IssuesListApp component', () => {
   });
 
   it('shows an error when deleting from the drawer fails', async () => {
+    const errorHandler = jest.fn().mockRejectedValue('Houston, we have a problem');
+    const {
+      data: { workItem },
+    } = workItemResponseFactory({ iid: '789' });
+
     wrapper = mountComponent({
       provide: {
         glFeatures: {
           issuesListDrawer: true,
         },
       },
+      deleteMutationHandler: errorHandler,
     });
 
     findIssuableList().vm.$emit(
@@ -1282,9 +1300,10 @@ describe('CE IssuesListApp component', () => {
     );
     await nextTick();
 
-    findWorkItemDrawer().vm.$emit('deleteWorkItemError');
-    await nextTick();
+    findWorkItemDrawer().vm.$emit('deleteWorkItem', workItem);
+    await waitForPromises();
 
+    expect(Sentry.captureException).toHaveBeenCalled();
     expect(findIssuableList().props('error')).toBe('An error occurred while deleting an issuable.');
   });
 });

@@ -46,7 +46,7 @@ export default {
     showMore: __('Show more'),
     showLess: __('Show less'),
   },
-  truncateTextToggleButtonProps: { class: '!gl-text-sm' },
+  truncateTextToggleButtonProps: { class: 'gl-font-sm!' },
   components: {
     GlAvatarLabeled,
     GlIcon,
@@ -249,10 +249,13 @@ export default {
 </script>
 
 <template>
-  <li class="projects-list-item gl-border-b gl-flex gl-py-5">
-    <div class="gl-grow md:gl-flex">
+  <li class="projects-list-item gl-py-5 gl-border-b gl-display-flex">
+    <div class="md:gl-flex gl-flex-grow-1">
       <div class="gl-flex gl-grow gl-items-start">
-        <div v-if="showProjectIcon" class="gl-mr-3 gl-flex gl-h-9 gl-flex-shrink-0 gl-items-center">
+        <div
+          v-if="showProjectIcon"
+          class="gl-display-flex gl-align-items-center gl-flex-shrink-0 gl-h-9 gl-mr-3"
+        >
           <gl-icon class="gl-text-secondary" name="project" />
         </div>
         <gl-avatar-labeled
@@ -265,7 +268,7 @@ export default {
         >
           <template #meta>
             <div class="gl-px-2">
-              <div class="-gl-mx-2 gl-flex gl-flex-wrap gl-items-center">
+              <div class="-gl-mx-2 gl-display-flex gl-align-items-center gl-flex-wrap">
                 <div class="gl-px-2">
                   <gl-icon
                     v-if="visibility"
@@ -296,15 +299,15 @@ export default {
           >
             <div
               v-safe-html="project.descriptionHtml"
-              class="md gl-text-sm gl-text-secondary"
+              class="gl-font-sm gl-text-secondary md"
               data-testid="project-description"
             ></div>
           </gl-truncate-text>
           <div v-if="hasTopics" class="gl-mt-3" data-testid="project-topics">
             <div
-              class="-gl-mx-2 -gl-my-2 gl-inline-flex gl-w-full gl-flex-wrap gl-items-center gl-text-base gl-font-normal"
+              class="gl-w-full gl-inline-flex gl-flex-wrap gl-font-base gl-font-normal gl-align-items-center -gl-mx-2 -gl-my-2"
             >
-              <span class="gl-p-2 gl-text-sm gl-text-secondary">{{ $options.i18n.topics }}:</span>
+              <span class="gl-p-2 gl-font-sm gl-text-secondary">{{ $options.i18n.topics }}:</span>
               <div v-for="topic in visibleTopics" :key="topic" class="gl-p-2">
                 <gl-badge v-gl-tooltip="topicTooltipTitle(topic)" :href="topicPath(topic)">
                   {{ topicTitle(topic) }}
@@ -313,7 +316,7 @@ export default {
               <template v-if="popoverTopics.length">
                 <div
                   :id="topicsPopoverTarget"
-                  class="gl-p-2 gl-text-sm gl-text-secondary"
+                  class="gl-p-2 gl-font-sm gl-text-secondary"
                   role="button"
                   tabindex="0"
                 >
@@ -322,8 +325,12 @@ export default {
                   </gl-sprintf>
                 </div>
                 <gl-popover :target="topicsPopoverTarget" :title="$options.i18n.moreTopics">
-                  <div class="-gl-mx-2 -gl-my-2 gl-text-base gl-font-normal">
-                    <div v-for="topic in popoverTopics" :key="topic" class="gl-inline-block gl-p-2">
+                  <div class="gl-font-base gl-font-normal -gl-mx-2 -gl-my-2">
+                    <div
+                      v-for="topic in popoverTopics"
+                      :key="topic"
+                      class="gl-p-2 gl-display-inline-block"
+                    >
                       <gl-badge v-gl-tooltip="topicTooltipTitle(topic)" :href="topicPath(topic)">
                         {{ topicTitle(topic) }}
                       </gl-badge>
@@ -336,7 +343,7 @@ export default {
         </gl-avatar-labeled>
       </div>
       <div
-        class="gl-mt-3 gl-shrink-0 gl-flex-col gl-items-end md:gl-mt-0 md:gl-flex md:gl-pl-0"
+        class="md:gl-flex gl-flex-col gl-items-end gl-shrink-0 gl-mt-3 md:gl-pl-0 md:gl-mt-0"
         :class="showProjectIcon ? 'gl-pl-12' : 'gl-pl-10'"
       >
         <div class="gl-flex gl-items-center gl-gap-x-3 md:gl-h-9">
@@ -367,7 +374,7 @@ export default {
             :aria-label="$options.i18n.mergeRequests"
             class="gl-text-secondary"
           >
-            <gl-icon name="merge-request" />
+            <gl-icon name="git-merge" />
             <span>{{ openMergeRequestsCount }}</span>
           </gl-link>
           <gl-link
@@ -383,14 +390,14 @@ export default {
         </div>
         <div
           v-if="timestamp"
-          class="gl-mt-3 gl-whitespace-nowrap gl-text-sm gl-text-secondary md:-gl-mt-2"
+          class="gl-text-sm gl-whitespace-nowrap gl-text-secondary gl-mt-3 md:-gl-mt-2"
         >
           <span>{{ timestampText }}</span>
           <time-ago-tooltip :time="timestamp" />
         </div>
       </div>
     </div>
-    <div class="gl-ml-3 gl-flex gl-h-9 gl-items-center">
+    <div class="gl-display-flex gl-align-items-center gl-h-9 gl-ml-3">
       <list-actions
         v-if="hasActions"
         :actions="actions"

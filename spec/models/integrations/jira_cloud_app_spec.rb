@@ -7,8 +7,6 @@ RSpec.describe Integrations::JiraCloudApp, feature_category: :integrations do
 
   subject(:integration) { build(:jira_cloud_app_integration, project: project) }
 
-  it_behaves_like Integrations::HasAvatar
-
   it { is_expected.to allow_value(nil).for(:jira_cloud_app_service_ids) }
   it { is_expected.to allow_value('b:asfasd=,b:asfasd=').for(:jira_cloud_app_service_ids) }
   it { is_expected.to allow_value('b:asfasd=').for(:jira_cloud_app_service_ids) }
@@ -51,18 +49,6 @@ RSpec.describe Integrations::JiraCloudApp, feature_category: :integrations do
       jira_cloud_app_integration.jira_cloud_app_service_ids = 'b:asfasd=,b:bsfasd=,b:csfasd='
 
       jira_cloud_app_integration.validate
-    end
-  end
-
-  describe '#editable?' do
-    it 'is true when integration is active' do
-      expect(integration).to be_editable
-    end
-
-    it 'is false when integration is disabled' do
-      integration.active = false
-
-      expect(integration).not_to be_editable
     end
   end
 end

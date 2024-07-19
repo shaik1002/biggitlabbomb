@@ -159,6 +159,7 @@ semgrep-sast:
         - '**/*.hpp'
         - '**/*.go'
         - '**/*.java'
+        - '**/*.html'
         - '**/*.cs'
         - '**/*.scala'
         - '**/*.sc'
@@ -167,8 +168,6 @@ semgrep-sast:
         - '**/*.m'
         - '**/*.rb'
         - '**/*.kt'
-        - '**/*.cjs'
-        - '**/*.mjs'
 
 sobelow-sast:
   extends: .sast-analyzer

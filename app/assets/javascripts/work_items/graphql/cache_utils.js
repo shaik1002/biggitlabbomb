@@ -31,7 +31,6 @@ import {
 } from '../constants';
 import groupWorkItemByIidQuery from './group_work_item_by_iid.query.graphql';
 import workItemByIidQuery from './work_item_by_iid.query.graphql';
-import getWorkItemTreeQuery from './work_item_tree.query.graphql';
 
 const getNotesWidgetFromSourceData = (draftData) =>
   draftData?.workspace?.workItem?.widgets.find(isNotesWidget);
@@ -155,10 +154,10 @@ export const updateCacheAfterRemovingAwardEmojiFromNote = (currentNotes, note) =
   });
 };
 
-export const addHierarchyChild = ({ cache, id, workItem }) => {
+export const addHierarchyChild = ({ cache, fullPath, iid, isGroup, workItem }) => {
   const queryArgs = {
-    query: getWorkItemTreeQuery,
-    variables: { id },
+    query: isGroup ? groupWorkItemByIidQuery : workItemByIidQuery,
+    variables: { fullPath, iid },
   };
   const sourceData = cache.readQuery(queryArgs);
 
@@ -169,40 +168,19 @@ export const addHierarchyChild = ({ cache, id, workItem }) => {
   cache.writeQuery({
     ...queryArgs,
     data: produce(sourceData, (draftState) => {
-      const existingChild = findHierarchyWidgetChildren(draftState?.workItem).find(
+      const existingChild = findHierarchyWidgetChildren(draftState.workspace?.workItem).find(
         (child) => child.id === workItem?.id,
       );
       if (!existingChild) {
-        findHierarchyWidgetChildren(draftState?.workItem).unshift(workItem);
+        findHierarchyWidgetChildren(draftState.workspace?.workItem).push(workItem);
       }
     }),
   });
 };
 
-export const removeHierarchyChild = ({ cache, id, workItem }) => {
+export const removeHierarchyChild = ({ cache, fullPath, iid, isGroup, workItem }) => {
   const queryArgs = {
-    query: getWorkItemTreeQuery,
-    variables: { id },
-  };
-  const sourceData = cache.readQuery(queryArgs);
-
-  if (!sourceData) {
-    return;
-  }
-
-  cache.writeQuery({
-    ...queryArgs,
-    data: produce(sourceData, (draftState) => {
-      const children = findHierarchyWidgetChildren(draftState?.workItem);
-      const index = children.findIndex((child) => child.id === workItem.id);
-      if (index >= 0) children.splice(index, 1);
-    }),
-  });
-};
-
-export const updateParent = ({ cache, query, fullPath, iid, workItem }) => {
-  const queryArgs = {
-    query,
+    query: isGroup ? groupWorkItemByIidQuery : workItemByIidQuery,
     variables: { fullPath, iid },
   };
   const sourceData = cache.readQuery(queryArgs);
@@ -318,18 +296,9 @@ export const setNewWorkItemCache = async (
       }
 
       if (widgetName === WIDGET_TYPE_WEIGHT) {
-        const weightWidgetData = widgetDefinitions.find(
-          (definition) => definition.type === WIDGET_TYPE_WEIGHT,
-        );
-
         widgets.push({
           type: 'WEIGHT',
           weight: null,
-          rolledUpWeight: 0,
-          widgetDefinition: {
-            editable: weightWidgetData?.editable,
-            rollUp: weightWidgetData?.rollUp,
-          },
           __typename: 'WorkItemWidgetWeight',
         });
       }

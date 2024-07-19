@@ -24,7 +24,7 @@
           #{issuable_reference(merge_request)}
         %span.issuable-authored.gl-inline-block.gl-text-gray-500!
           &middot;
-          #{s_('IssueList|created %{timeAgoString} by %{user}').html_safe % { timeAgoString: time_ago_with_tooltip(merge_request.created_at, placement: 'bottom'), user: link_to_member(merge_request.author, avatar: false, extra_class: 'gl-text-gray-500!') }}
+          #{s_('IssueList|created %{timeAgoString} by %{user}').html_safe % { timeAgoString: time_ago_with_tooltip(merge_request.created_at, placement: 'bottom'), user: link_to_member(@project, merge_request.author, avatar: false, extra_class: 'gl-text-gray-500!') }}
         - if merge_request.milestone
           %span.issuable-milestone.gl-inline-block
             &nbsp;
@@ -48,10 +48,10 @@
           - merged_at = merge_request.merged_at ? l(merge_request.merged_at.to_time) : _("Merge date & time could not be determined")
           %li.gl-flex{ class: 'gl-mr-0!' }
             %a.has-tooltip{ href: "#{merge_request_path(merge_request)}#widget-state", title: merged_at }
-              = render Pajamas::BadgeComponent.new(_('Merged'), variant: 'info')
+              = render Pajamas::BadgeComponent.new(_('Merged'), size: 'sm', variant: 'info')
         - elsif merge_request.closed?
           %li.gl-flex{ class: 'gl-mr-0!' }
-            = render Pajamas::BadgeComponent.new(_('Closed'), variant: 'danger')
+            = render Pajamas::BadgeComponent.new(_('Closed'), size: 'sm', variant: 'danger')
         - if merge_request.open? && merge_request.broken?
           %li.issuable-pipeline-broken.gl-flex{ class: 'gl-mr-0!' }
             = link_to merge_request_path(merge_request), class: "has-tooltip", title: _('Cannot be merged automatically') do

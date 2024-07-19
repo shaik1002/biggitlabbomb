@@ -13,23 +13,20 @@ export const splitDocument = (htmlString) => {
 };
 
 export const getRenderedMarkdown = (documentPath) => {
-  return (
-    axios
-      // eslint-disable-next-line local-rules/require-valid-help-page-path
-      .get(helpPagePath(documentPath))
-      .then(({ data }) => {
-        const { body, title } = splitDocument(data);
-        return {
-          body,
-          title,
-          hasFetchError: false,
-        };
-      })
-      .catch((e) => {
-        Sentry.captureException(e);
-        return {
-          hasFetchError: true,
-        };
-      })
-  );
+  return axios
+    .get(helpPagePath(documentPath))
+    .then(({ data }) => {
+      const { body, title } = splitDocument(data);
+      return {
+        body,
+        title,
+        hasFetchError: false,
+      };
+    })
+    .catch((e) => {
+      Sentry.captureException(e);
+      return {
+        hasFetchError: true,
+      };
+    });
 };

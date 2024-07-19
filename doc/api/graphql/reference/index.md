@@ -385,20 +385,6 @@ four standard [pagination arguments](#pagination-arguments):
 | ---- | ---- | ----------- |
 | <a id="queryduoworkfloweventsworkflowid"></a>`workflowId` | [`AiDuoWorkflowsWorkflowID!`](#aiduoworkflowsworkflowid) | Array of request IDs to fetch. |
 
-### `Query.duoWorkflowWorkflows`
-
-List the workflows owned by the current user.
-
-DETAILS:
-**Introduced** in GitLab 17.2.
-**Status**: Experiment.
-
-Returns [`DuoWorkflowConnection!`](#duoworkflowconnection).
-
-This field returns a [connection](#connections). It accepts the
-four standard [pagination arguments](#pagination-arguments):
-`before: String`, `after: String`, `first: Int`, and `last: Int`.
-
 ### `Query.echo`
 
 Testing endpoint to validate the API with.
@@ -1185,10 +1171,8 @@ four standard [pagination arguments](#pagination-arguments):
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="queryusersactive"></a>`active` | [`Boolean`](#boolean) | Filter by active users. When true, returns active users. When false, returns non-active users. |
 | <a id="queryusersadmins"></a>`admins` | [`Boolean`](#boolean) | Return only admin users. |
 | <a id="queryusersgroupid"></a>`groupId` | [`GroupID`](#groupid) | Return users member of a given group. |
-| <a id="queryusershumans"></a>`humans` | [`Boolean`](#boolean) | Filter by regular users. When true, returns only users that are not bot or internal users. When false, returns only users that are bot or internal users. |
 | <a id="queryusersids"></a>`ids` | [`[ID!]`](#id) | List of user Global IDs. |
 | <a id="queryuserssearch"></a>`search` | [`String`](#string) | Query to search users by name, username, or primary email. |
 | <a id="queryuserssort"></a>`sort` | [`Sort`](#sort) | Sort users by the criteria. |
@@ -1567,6 +1551,7 @@ Input type: `AiActionInput`
 | <a id="mutationaiactionclientsubscriptionid"></a>`clientSubscriptionId` | [`String`](#string) | Client generated ID that can be subscribed to, to receive a response for the mutation. |
 | <a id="mutationaiactionexplaincode"></a>`explainCode` | [`AiExplainCodeInput`](#aiexplaincodeinput) | Input for explain_code AI action. |
 | <a id="mutationaiactionexplainvulnerability"></a>`explainVulnerability` | [`AiExplainVulnerabilityInput`](#aiexplainvulnerabilityinput) | Input for explain_vulnerability AI action. |
+| <a id="mutationaiactionfillinmergerequesttemplate"></a>`fillInMergeRequestTemplate` | [`AiFillInMergeRequestTemplateInput`](#aifillinmergerequesttemplateinput) | Input for fill_in_merge_request_template AI action. |
 | <a id="mutationaiactiongeneratecommitmessage"></a>`generateCommitMessage` | [`AiGenerateCommitMessageInput`](#aigeneratecommitmessageinput) | Input for generate_commit_message AI action. |
 | <a id="mutationaiactiongeneratecubequery"></a>`generateCubeQuery` | [`AiGenerateCubeQueryInput`](#aigeneratecubequeryinput) | Input for generate_cube_query AI action. |
 | <a id="mutationaiactiongeneratedescription"></a>`generateDescription` | [`AiGenerateDescriptionInput`](#aigeneratedescriptioninput) | Input for generate_description AI action. |
@@ -10216,7 +10201,6 @@ Input type: `WorkItemCreateInput`
 | <a id="mutationworkitemcreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationworkitemcreatecolorwidget"></a>`colorWidget` | [`WorkItemWidgetColorInput`](#workitemwidgetcolorinput) | Input for color widget. |
 | <a id="mutationworkitemcreateconfidential"></a>`confidential` | [`Boolean`](#boolean) | Sets the work item confidentiality. |
-| <a id="mutationworkitemcreatecrmcontactswidget"></a>`crmContactsWidget` | [`WorkItemWidgetCrmContactsCreateInput`](#workitemwidgetcrmcontactscreateinput) | Input for CRM contacts widget. |
 | <a id="mutationworkitemcreatedescription"></a>`description` **{warning-solid}** | [`String`](#string) | **Deprecated:** use description widget instead. Deprecated in GitLab 16.9. |
 | <a id="mutationworkitemcreatedescriptionwidget"></a>`descriptionWidget` | [`WorkItemWidgetDescriptionInput`](#workitemwidgetdescriptioninput) | Input for description widget. |
 | <a id="mutationworkitemcreatehealthstatuswidget"></a>`healthStatusWidget` | [`WorkItemWidgetHealthStatusInput`](#workitemwidgethealthstatusinput) | Input for health status widget. |
@@ -10400,7 +10384,6 @@ Input type: `WorkItemUpdateInput`
 | <a id="mutationworkitemupdateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationworkitemupdatecolorwidget"></a>`colorWidget` | [`WorkItemWidgetColorInput`](#workitemwidgetcolorinput) | Input for color widget. |
 | <a id="mutationworkitemupdateconfidential"></a>`confidential` | [`Boolean`](#boolean) | Sets the work item confidentiality. |
-| <a id="mutationworkitemupdatecrmcontactswidget"></a>`crmContactsWidget` | [`WorkItemWidgetCrmContactsUpdateInput`](#workitemwidgetcrmcontactsupdateinput) | Input for CRM contacts widget. |
 | <a id="mutationworkitemupdatecurrentusertodoswidget"></a>`currentUserTodosWidget` | [`WorkItemWidgetCurrentUserTodosInput`](#workitemwidgetcurrentusertodosinput) | Input for to-dos widget. |
 | <a id="mutationworkitemupdatedescriptionwidget"></a>`descriptionWidget` | [`WorkItemWidgetDescriptionInput`](#workitemwidgetdescriptioninput) | Input for description widget. |
 | <a id="mutationworkitemupdatehealthstatuswidget"></a>`healthStatusWidget` | [`WorkItemWidgetHealthStatusInput`](#workitemwidgethealthstatusinput) | Input for health status widget. |
@@ -12571,29 +12554,6 @@ The edge type for [`DoraPerformanceScoreCount`](#doraperformancescorecount).
 | ---- | ---- | ----------- |
 | <a id="doraperformancescorecountedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | <a id="doraperformancescorecountedgenode"></a>`node` | [`DoraPerformanceScoreCount`](#doraperformancescorecount) | The item at the end of the edge. |
-
-#### `DuoWorkflowConnection`
-
-The connection type for [`DuoWorkflow`](#duoworkflow).
-
-##### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="duoworkflowconnectionedges"></a>`edges` | [`[DuoWorkflowEdge]`](#duoworkflowedge) | A list of edges. |
-| <a id="duoworkflowconnectionnodes"></a>`nodes` | [`[DuoWorkflow]`](#duoworkflow) | A list of nodes. |
-| <a id="duoworkflowconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
-
-#### `DuoWorkflowEdge`
-
-The edge type for [`DuoWorkflow`](#duoworkflow).
-
-##### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="duoworkflowedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
-| <a id="duoworkflowedgenode"></a>`node` | [`DuoWorkflow`](#duoworkflow) | The item at the end of the edge. |
 
 #### `DuoWorkflowEventConnection`
 
@@ -16346,7 +16306,6 @@ A user with add-on data.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="addonuseractive"></a>`active` | [`Boolean`](#boolean) | Indicates if the user is active. |
 | <a id="addonuseravatarurl"></a>`avatarUrl` | [`String`](#string) | URL of the user's avatar. |
 | <a id="addonuserbio"></a>`bio` | [`String`](#string) | Bio of the user. |
 | <a id="addonuserbot"></a>`bot` | [`Boolean!`](#boolean) | Indicates if the user is a bot. |
@@ -16359,7 +16318,6 @@ A user with add-on data.
 | <a id="addonusergitpodenabled"></a>`gitpodEnabled` | [`Boolean`](#boolean) | Whether Gitpod is enabled at the user level. |
 | <a id="addonusergroupcount"></a>`groupCount` | [`Int`](#int) | Group count for the user. |
 | <a id="addonusergroupmemberships"></a>`groupMemberships` | [`GroupMemberConnection`](#groupmemberconnection) | Group memberships of the user. (see [Connections](#connections)) |
-| <a id="addonuserhuman"></a>`human` | [`Boolean`](#boolean) | Indicates if the user is a regular user. |
 | <a id="addonuserid"></a>`id` | [`ID!`](#id) | ID of the user. |
 | <a id="addonuseride"></a>`ide` | [`Ide`](#ide) | IDE settings. |
 | <a id="addonuserjobtitle"></a>`jobTitle` | [`String`](#string) | Job title of the user. |
@@ -17185,7 +17143,6 @@ Core representation of a GitLab user.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="autocompleteduseractive"></a>`active` | [`Boolean`](#boolean) | Indicates if the user is active. |
 | <a id="autocompleteduseravatarurl"></a>`avatarUrl` | [`String`](#string) | URL of the user's avatar. |
 | <a id="autocompleteduserbio"></a>`bio` | [`String`](#string) | Bio of the user. |
 | <a id="autocompleteduserbot"></a>`bot` | [`Boolean!`](#boolean) | Indicates if the user is a bot. |
@@ -17198,7 +17155,6 @@ Core representation of a GitLab user.
 | <a id="autocompletedusergitpodenabled"></a>`gitpodEnabled` | [`Boolean`](#boolean) | Whether Gitpod is enabled at the user level. |
 | <a id="autocompletedusergroupcount"></a>`groupCount` | [`Int`](#int) | Group count for the user. |
 | <a id="autocompletedusergroupmemberships"></a>`groupMemberships` | [`GroupMemberConnection`](#groupmemberconnection) | Group memberships of the user. (see [Connections](#connections)) |
-| <a id="autocompleteduserhuman"></a>`human` | [`Boolean`](#boolean) | Indicates if the user is a regular user. |
 | <a id="autocompleteduserid"></a>`id` | [`ID!`](#id) | ID of the user. |
 | <a id="autocompleteduseride"></a>`ide` | [`Ide`](#ide) | IDE settings. |
 | <a id="autocompleteduserjobtitle"></a>`jobTitle` | [`String`](#string) | Job title of the user. |
@@ -19419,7 +19375,6 @@ The currently authenticated GitLab user.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="currentuseractive"></a>`active` | [`Boolean`](#boolean) | Indicates if the user is active. |
 | <a id="currentuseravatarurl"></a>`avatarUrl` | [`String`](#string) | URL of the user's avatar. |
 | <a id="currentuserbio"></a>`bio` | [`String`](#string) | Bio of the user. |
 | <a id="currentuserbot"></a>`bot` | [`Boolean!`](#boolean) | Indicates if the user is a bot. |
@@ -19434,7 +19389,6 @@ The currently authenticated GitLab user.
 | <a id="currentusergitpodenabled"></a>`gitpodEnabled` | [`Boolean`](#boolean) | Whether Gitpod is enabled at the user level. |
 | <a id="currentusergroupcount"></a>`groupCount` | [`Int`](#int) | Group count for the user. |
 | <a id="currentusergroupmemberships"></a>`groupMemberships` | [`GroupMemberConnection`](#groupmemberconnection) | Group memberships of the user. (see [Connections](#connections)) |
-| <a id="currentuserhuman"></a>`human` | [`Boolean`](#boolean) | Indicates if the user is a regular user. |
 | <a id="currentuserid"></a>`id` | [`ID!`](#id) | ID of the user. |
 | <a id="currentuseride"></a>`ide` | [`Ide`](#ide) | IDE settings. |
 | <a id="currentuserjobtitle"></a>`jobTitle` | [`String`](#string) | Job title of the user. |
@@ -20813,21 +20767,6 @@ Aggregated DORA score counts for projects for the last complete month.
 | <a id="doraperformancescorecountmetricname"></a>`metricName` | [`String!`](#string) | Name of the DORA metric. |
 | <a id="doraperformancescorecountnodataprojectscount"></a>`noDataProjectsCount` | [`Int`](#int) | Number of projects with no data for the metric. |
 
-### `DuoWorkflow`
-
-A Duo Workflow.
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="duoworkflowcreatedat"></a>`createdAt` | [`Time!`](#time) | Timestamp of when the workflow was created. |
-| <a id="duoworkflowhumanstatus"></a>`humanStatus` | [`String!`](#string) | Human-readable status of the workflow. |
-| <a id="duoworkflowid"></a>`id` | [`ID!`](#id) | ID of the workflow. |
-| <a id="duoworkflowprojectid"></a>`projectId` | [`ProjectID!`](#projectid) | ID of the project. |
-| <a id="duoworkflowupdatedat"></a>`updatedAt` | [`Time!`](#time) | Timestamp of when the workflow was last updated. |
-| <a id="duoworkflowuserid"></a>`userId` | [`UserID!`](#userid) | ID of the user. |
-
 ### `DuoWorkflowEvent`
 
 Events that describe the history and progress of a Duo Workflow.
@@ -22106,6 +22045,7 @@ GPG signature for a signed commit.
 | <a id="groupgooglecloudloggingconfigurations"></a>`googleCloudLoggingConfigurations` | [`GoogleCloudLoggingConfigurationTypeConnection`](#googlecloudloggingconfigurationtypeconnection) | Google Cloud logging configurations that receive audit events belonging to the group. (see [Connections](#connections)) |
 | <a id="groupgroupmemberscount"></a>`groupMembersCount` | [`Int!`](#int) | Count of direct members of this group. |
 | <a id="groupid"></a>`id` | [`ID!`](#id) | ID of the namespace. |
+| <a id="groupimportsourceusers"></a>`importSourceUsers` **{warning-solid}** | [`ImportSourceUserConnection`](#importsourceuserconnection) | **Introduced** in GitLab 17.2. **Status**: Experiment. Import source users of the namespace. This field can only be resolved for one namespace in any single request. |
 | <a id="groupisadjourneddeletionenabled"></a>`isAdjournedDeletionEnabled` **{warning-solid}** | [`Boolean!`](#boolean) | **Introduced** in GitLab 16.11. **Status**: Experiment. Indicates if delayed group deletion is enabled. |
 | <a id="grouplfsenabled"></a>`lfsEnabled` | [`Boolean`](#boolean) | Indicates if Large File Storage (LFS) is enabled for namespace. |
 | <a id="grouplockduofeaturesenabled"></a>`lockDuoFeaturesEnabled` **{warning-solid}** | [`Boolean`](#boolean) | **Introduced** in GitLab 16.10. **Status**: Experiment. Indicates if the GitLab Duo features enabled setting is enforced for all subgroups. |
@@ -22667,28 +22607,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="groupgroupmembersrelations"></a>`relations` | [`[GroupMemberRelation!]`](#groupmemberrelation) | Filter members by the given member relations. |
 | <a id="groupgroupmemberssearch"></a>`search` | [`String`](#string) | Search query. |
 | <a id="groupgroupmemberssort"></a>`sort` | [`MemberSort`](#membersort) | sort query. |
-
-##### `Group.importSourceUsers`
-
-Import source users of the namespace. This field can only be resolved for one namespace in any single request.
-
-DETAILS:
-**Introduced** in GitLab 17.2.
-**Status**: Experiment.
-
-Returns [`ImportSourceUserConnection`](#importsourceuserconnection).
-
-This field returns a [connection](#connections). It accepts the
-four standard [pagination arguments](#pagination-arguments):
-`before: String`, `after: String`, `first: Int`, and `last: Int`.
-
-###### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="groupimportsourceuserssearch"></a>`search` | [`String`](#string) | Query to search mappings by name or username of users on source instance. |
-| <a id="groupimportsourceuserssort"></a>`sort` | [`SourceUserSort`](#sourceusersort) | Sort mapping of users on source instance to users on destination instance by the criteria. |
-| <a id="groupimportsourceusersstatuses"></a>`statuses` | [`[ImportSourceUserStatus!]`](#importsourceuserstatus) | Filter mapping of users on source instance to users on destination instance by status. |
 
 ##### `Group.issues`
 
@@ -24677,7 +24595,6 @@ Defines which user roles, users, or groups can merge into a protected branch.
 | <a id="mergerequestmergerequestdiffs"></a>`mergeRequestDiffs` **{warning-solid}** | [`MergeRequestDiffConnection`](#mergerequestdiffconnection) | **Introduced** in GitLab 16.2. **Status**: Experiment. Diff versions of a merge request. |
 | <a id="mergerequestmergestatus"></a>`mergeStatus` **{warning-solid}** | [`String`](#string) | **Deprecated** in GitLab 14.0. This was renamed. Use: [`MergeRequest.mergeStatusEnum`](#mergerequestmergestatusenum). |
 | <a id="mergerequestmergestatusenum"></a>`mergeStatusEnum` | [`MergeStatus`](#mergestatus) | Merge status of the merge request. |
-| <a id="mergerequestmergetraincar"></a>`mergeTrainCar` **{warning-solid}** | [`MergeTrainCar`](#mergetraincar) | **Introduced** in GitLab 17.2. **Status**: Experiment. Represents the merge request in a merge train. |
 | <a id="mergerequestmergetrainindex"></a>`mergeTrainIndex` | [`Int`](#int) | Zero-based position of the merge request in the merge train. Returns `null` if the merge request is not in a merge train. |
 | <a id="mergerequestmergetrainscount"></a>`mergeTrainsCount` | [`Int`](#int) | Number of merge requests in the merge train. |
 | <a id="mergerequestmergeuser"></a>`mergeUser` | [`UserCore`](#usercore) | User who merged this merge request or set it to auto-merge. |
@@ -24847,7 +24764,6 @@ A user assigned to a merge request.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="mergerequestassigneeactive"></a>`active` | [`Boolean`](#boolean) | Indicates if the user is active. |
 | <a id="mergerequestassigneeavatarurl"></a>`avatarUrl` | [`String`](#string) | URL of the user's avatar. |
 | <a id="mergerequestassigneebio"></a>`bio` | [`String`](#string) | Bio of the user. |
 | <a id="mergerequestassigneebot"></a>`bot` | [`Boolean!`](#boolean) | Indicates if the user is a bot. |
@@ -24860,7 +24776,6 @@ A user assigned to a merge request.
 | <a id="mergerequestassigneegitpodenabled"></a>`gitpodEnabled` | [`Boolean`](#boolean) | Whether Gitpod is enabled at the user level. |
 | <a id="mergerequestassigneegroupcount"></a>`groupCount` | [`Int`](#int) | Group count for the user. |
 | <a id="mergerequestassigneegroupmemberships"></a>`groupMemberships` | [`GroupMemberConnection`](#groupmemberconnection) | Group memberships of the user. (see [Connections](#connections)) |
-| <a id="mergerequestassigneehuman"></a>`human` | [`Boolean`](#boolean) | Indicates if the user is a regular user. |
 | <a id="mergerequestassigneeid"></a>`id` | [`ID!`](#id) | ID of the user. |
 | <a id="mergerequestassigneeide"></a>`ide` | [`Ide`](#ide) | IDE settings. |
 | <a id="mergerequestassigneejobtitle"></a>`jobTitle` | [`String`](#string) | Job title of the user. |
@@ -25195,7 +25110,6 @@ The author of the merge request.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="mergerequestauthoractive"></a>`active` | [`Boolean`](#boolean) | Indicates if the user is active. |
 | <a id="mergerequestauthoravatarurl"></a>`avatarUrl` | [`String`](#string) | URL of the user's avatar. |
 | <a id="mergerequestauthorbio"></a>`bio` | [`String`](#string) | Bio of the user. |
 | <a id="mergerequestauthorbot"></a>`bot` | [`Boolean!`](#boolean) | Indicates if the user is a bot. |
@@ -25208,7 +25122,6 @@ The author of the merge request.
 | <a id="mergerequestauthorgitpodenabled"></a>`gitpodEnabled` | [`Boolean`](#boolean) | Whether Gitpod is enabled at the user level. |
 | <a id="mergerequestauthorgroupcount"></a>`groupCount` | [`Int`](#int) | Group count for the user. |
 | <a id="mergerequestauthorgroupmemberships"></a>`groupMemberships` | [`GroupMemberConnection`](#groupmemberconnection) | Group memberships of the user. (see [Connections](#connections)) |
-| <a id="mergerequestauthorhuman"></a>`human` | [`Boolean`](#boolean) | Indicates if the user is a regular user. |
 | <a id="mergerequestauthorid"></a>`id` | [`ID!`](#id) | ID of the user. |
 | <a id="mergerequestauthoride"></a>`ide` | [`Ide`](#ide) | IDE settings. |
 | <a id="mergerequestauthorjobtitle"></a>`jobTitle` | [`String`](#string) | Job title of the user. |
@@ -25589,7 +25502,6 @@ A user participating in a merge request.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="mergerequestparticipantactive"></a>`active` | [`Boolean`](#boolean) | Indicates if the user is active. |
 | <a id="mergerequestparticipantavatarurl"></a>`avatarUrl` | [`String`](#string) | URL of the user's avatar. |
 | <a id="mergerequestparticipantbio"></a>`bio` | [`String`](#string) | Bio of the user. |
 | <a id="mergerequestparticipantbot"></a>`bot` | [`Boolean!`](#boolean) | Indicates if the user is a bot. |
@@ -25602,7 +25514,6 @@ A user participating in a merge request.
 | <a id="mergerequestparticipantgitpodenabled"></a>`gitpodEnabled` | [`Boolean`](#boolean) | Whether Gitpod is enabled at the user level. |
 | <a id="mergerequestparticipantgroupcount"></a>`groupCount` | [`Int`](#int) | Group count for the user. |
 | <a id="mergerequestparticipantgroupmemberships"></a>`groupMemberships` | [`GroupMemberConnection`](#groupmemberconnection) | Group memberships of the user. (see [Connections](#connections)) |
-| <a id="mergerequestparticipanthuman"></a>`human` | [`Boolean`](#boolean) | Indicates if the user is a regular user. |
 | <a id="mergerequestparticipantid"></a>`id` | [`ID!`](#id) | ID of the user. |
 | <a id="mergerequestparticipantide"></a>`ide` | [`Ide`](#ide) | IDE settings. |
 | <a id="mergerequestparticipantjobtitle"></a>`jobTitle` | [`String`](#string) | Job title of the user. |
@@ -25956,7 +25867,6 @@ A user assigned to a merge request as a reviewer.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="mergerequestrevieweractive"></a>`active` | [`Boolean`](#boolean) | Indicates if the user is active. |
 | <a id="mergerequestrevieweravatarurl"></a>`avatarUrl` | [`String`](#string) | URL of the user's avatar. |
 | <a id="mergerequestreviewerbio"></a>`bio` | [`String`](#string) | Bio of the user. |
 | <a id="mergerequestreviewerbot"></a>`bot` | [`Boolean!`](#boolean) | Indicates if the user is a bot. |
@@ -25969,7 +25879,6 @@ A user assigned to a merge request as a reviewer.
 | <a id="mergerequestreviewergitpodenabled"></a>`gitpodEnabled` | [`Boolean`](#boolean) | Whether Gitpod is enabled at the user level. |
 | <a id="mergerequestreviewergroupcount"></a>`groupCount` | [`Int`](#int) | Group count for the user. |
 | <a id="mergerequestreviewergroupmemberships"></a>`groupMemberships` | [`GroupMemberConnection`](#groupmemberconnection) | Group memberships of the user. (see [Connections](#connections)) |
-| <a id="mergerequestreviewerhuman"></a>`human` | [`Boolean`](#boolean) | Indicates if the user is a regular user. |
 | <a id="mergerequestreviewerid"></a>`id` | [`ID!`](#id) | ID of the user. |
 | <a id="mergerequestrevieweride"></a>`ide` | [`Ide`](#ide) | IDE settings. |
 | <a id="mergerequestreviewerjobtitle"></a>`jobTitle` | [`String`](#string) | Job title of the user. |
@@ -26592,6 +26501,7 @@ Product analytics events for a specific month and year.
 | <a id="namespacefullname"></a>`fullName` | [`String!`](#string) | Full name of the namespace. |
 | <a id="namespacefullpath"></a>`fullPath` | [`ID!`](#id) | Full path of the namespace. |
 | <a id="namespaceid"></a>`id` | [`ID!`](#id) | ID of the namespace. |
+| <a id="namespaceimportsourceusers"></a>`importSourceUsers` **{warning-solid}** | [`ImportSourceUserConnection`](#importsourceuserconnection) | **Introduced** in GitLab 17.2. **Status**: Experiment. Import source users of the namespace. This field can only be resolved for one namespace in any single request. |
 | <a id="namespacelfsenabled"></a>`lfsEnabled` | [`Boolean`](#boolean) | Indicates if Large File Storage (LFS) is enabled for namespace. |
 | <a id="namespacename"></a>`name` | [`String!`](#string) | Name of the namespace. |
 | <a id="namespacepackagesettings"></a>`packageSettings` | [`PackageSettings`](#packagesettings) | Package settings for the namespace. |
@@ -26696,28 +26606,6 @@ four standard [pagination arguments](#pagination-arguments):
 | <a id="namespacecomplianceframeworksid"></a>`id` | [`ComplianceManagementFrameworkID`](#compliancemanagementframeworkid) | Global ID of a specific compliance framework to return. |
 | <a id="namespacecomplianceframeworksids"></a>`ids` | [`[ComplianceManagementFrameworkID!]`](#compliancemanagementframeworkid) | List of Global IDs of compliance frameworks to return. |
 | <a id="namespacecomplianceframeworkssearch"></a>`search` | [`String`](#string) | Search framework with most similar names. |
-
-##### `Namespace.importSourceUsers`
-
-Import source users of the namespace. This field can only be resolved for one namespace in any single request.
-
-DETAILS:
-**Introduced** in GitLab 17.2.
-**Status**: Experiment.
-
-Returns [`ImportSourceUserConnection`](#importsourceuserconnection).
-
-This field returns a [connection](#connections). It accepts the
-four standard [pagination arguments](#pagination-arguments):
-`before: String`, `after: String`, `first: Int`, and `last: Int`.
-
-###### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="namespaceimportsourceuserssearch"></a>`search` | [`String`](#string) | Query to search mappings by name or username of users on source instance. |
-| <a id="namespaceimportsourceuserssort"></a>`sort` | [`SourceUserSort`](#sourceusersort) | Sort mapping of users on source instance to users on destination instance by the criteria. |
-| <a id="namespaceimportsourceusersstatuses"></a>`statuses` | [`[ImportSourceUserStatus!]`](#importsourceuserstatus) | Filter mapping of users on source instance to users on destination instance by status. |
 
 ##### `Namespace.pagesDeployments`
 
@@ -31965,7 +31853,6 @@ Core representation of a GitLab user.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="usercoreactive"></a>`active` | [`Boolean`](#boolean) | Indicates if the user is active. |
 | <a id="usercoreavatarurl"></a>`avatarUrl` | [`String`](#string) | URL of the user's avatar. |
 | <a id="usercorebio"></a>`bio` | [`String`](#string) | Bio of the user. |
 | <a id="usercorebot"></a>`bot` | [`Boolean!`](#boolean) | Indicates if the user is a bot. |
@@ -31978,7 +31865,6 @@ Core representation of a GitLab user.
 | <a id="usercoregitpodenabled"></a>`gitpodEnabled` | [`Boolean`](#boolean) | Whether Gitpod is enabled at the user level. |
 | <a id="usercoregroupcount"></a>`groupCount` | [`Int`](#int) | Group count for the user. |
 | <a id="usercoregroupmemberships"></a>`groupMemberships` | [`GroupMemberConnection`](#groupmemberconnection) | Group memberships of the user. (see [Connections](#connections)) |
-| <a id="usercorehuman"></a>`human` | [`Boolean`](#boolean) | Indicates if the user is a regular user. |
 | <a id="usercoreid"></a>`id` | [`ID!`](#id) | ID of the user. |
 | <a id="usercoreide"></a>`ide` | [`Ide`](#ide) | IDE settings. |
 | <a id="usercorejobtitle"></a>`jobTitle` | [`String`](#string) | Job title of the user. |
@@ -33299,17 +33185,6 @@ Represents a color widget.
 | <a id="workitemwidgetcolorcolor"></a>`color` | [`String`](#string) | Color of the Work Item. |
 | <a id="workitemwidgetcolortextcolor"></a>`textColor` | [`String`](#string) | Text color generated for the Work Item. |
 | <a id="workitemwidgetcolortype"></a>`type` | [`WorkItemWidgetType`](#workitemwidgettype) | Widget type. |
-
-### `WorkItemWidgetCrmContacts`
-
-Represents CRM contacts widget.
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="workitemwidgetcrmcontactscontacts"></a>`contacts` | [`CustomerRelationsContactConnection`](#customerrelationscontactconnection) | Collection of CRM contacts associated with the work item. (see [Connections](#connections)) |
-| <a id="workitemwidgetcrmcontactstype"></a>`type` | [`WorkItemWidgetType`](#workitemwidgettype) | Widget type. |
 
 ### `WorkItemWidgetCurrentUserTodos`
 
@@ -36382,17 +36257,6 @@ Values for sort direction.
 | <a id="sortdirectionenumasc"></a>`ASC` | Ascending order. |
 | <a id="sortdirectionenumdesc"></a>`DESC` | Descending order. |
 
-### `SourceUserSort`
-
-Values for sorting the mapping of users on source instance to users on destination instance.
-
-| Value | Description |
-| ----- | ----------- |
-| <a id="sourceusersortsource_name_asc"></a>`SOURCE_NAME_ASC` | Instance source name by ascending order. |
-| <a id="sourceusersortsource_name_desc"></a>`SOURCE_NAME_DESC` | Instance source name by descending order. |
-| <a id="sourceusersortstatus_asc"></a>`STATUS_ASC` | Status of the mapping by ascending order. |
-| <a id="sourceusersortstatus_desc"></a>`STATUS_DESC` | Status of the mapping by descending order. |
-
 ### `TestCaseStatus`
 
 | Value | Description |
@@ -36948,7 +36812,6 @@ Type of a work item widget.
 | <a id="workitemwidgettypeassignees"></a>`ASSIGNEES` | Assignees widget. |
 | <a id="workitemwidgettypeaward_emoji"></a>`AWARD_EMOJI` | Award Emoji widget. |
 | <a id="workitemwidgettypecolor"></a>`COLOR` | Color widget. |
-| <a id="workitemwidgettypecrm_contacts"></a>`CRM_CONTACTS` | Crm Contacts widget. |
 | <a id="workitemwidgettypecurrent_user_todos"></a>`CURRENT_USER_TODOS` | Current User Todos widget. |
 | <a id="workitemwidgettypedescription"></a>`DESCRIPTION` | Description widget. |
 | <a id="workitemwidgettypedesigns"></a>`DESIGNS` | Designs widget. |
@@ -38588,7 +38451,6 @@ Implementations:
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="useractive"></a>`active` | [`Boolean`](#boolean) | Indicates if the user is active. |
 | <a id="useravatarurl"></a>`avatarUrl` | [`String`](#string) | URL of the user's avatar. |
 | <a id="userbio"></a>`bio` | [`String`](#string) | Bio of the user. |
 | <a id="userbot"></a>`bot` | [`Boolean!`](#boolean) | Indicates if the user is a bot. |
@@ -38601,7 +38463,6 @@ Implementations:
 | <a id="usergitpodenabled"></a>`gitpodEnabled` | [`Boolean`](#boolean) | Whether Gitpod is enabled at the user level. |
 | <a id="usergroupcount"></a>`groupCount` | [`Int`](#int) | Group count for the user. |
 | <a id="usergroupmemberships"></a>`groupMemberships` | [`GroupMemberConnection`](#groupmemberconnection) | Group memberships of the user. (see [Connections](#connections)) |
-| <a id="userhuman"></a>`human` | [`Boolean`](#boolean) | Indicates if the user is a regular user. |
 | <a id="userid"></a>`id` | [`ID!`](#id) | ID of the user. |
 | <a id="useride"></a>`ide` | [`Ide`](#ide) | IDE settings. |
 | <a id="userjobtitle"></a>`jobTitle` | [`String`](#string) | Job title of the user. |
@@ -38914,7 +38775,6 @@ Implementations:
 - [`WorkItemWidgetAssignees`](#workitemwidgetassignees)
 - [`WorkItemWidgetAwardEmoji`](#workitemwidgetawardemoji)
 - [`WorkItemWidgetColor`](#workitemwidgetcolor)
-- [`WorkItemWidgetCrmContacts`](#workitemwidgetcrmcontacts)
 - [`WorkItemWidgetCurrentUserTodos`](#workitemwidgetcurrentusertodos)
 - [`WorkItemWidgetDescription`](#workitemwidgetdescription)
 - [`WorkItemWidgetDesigns`](#workitemwidgetdesigns)
@@ -39016,6 +38876,19 @@ see the associated mutation type above.
 | ---- | ---- | ----------- |
 | <a id="aiexplainvulnerabilityinputincludesourcecode"></a>`includeSourceCode` | [`Boolean`](#boolean) | Include vulnerablility source code in the AI prompt. |
 | <a id="aiexplainvulnerabilityinputresourceid"></a>`resourceId` | [`AiModelID!`](#aimodelid) | Global ID of the resource to mutate. |
+
+### `AiFillInMergeRequestTemplateInput`
+
+#### Arguments
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| <a id="aifillinmergerequesttemplateinputcontent"></a>`content` | [`String!`](#string) | Template content to fill in. |
+| <a id="aifillinmergerequesttemplateinputresourceid"></a>`resourceId` | [`AiModelID!`](#aimodelid) | Global ID of the resource to mutate. |
+| <a id="aifillinmergerequesttemplateinputsourcebranch"></a>`sourceBranch` | [`String!`](#string) | Source branch of the changes. |
+| <a id="aifillinmergerequesttemplateinputsourceprojectid"></a>`sourceProjectId` | [`ID`](#id) | ID of the project where the changes are from. |
+| <a id="aifillinmergerequesttemplateinputtargetbranch"></a>`targetBranch` | [`String!`](#string) | Target branch of where the changes will be merged into. |
+| <a id="aifillinmergerequesttemplateinputtitle"></a>`title` | [`String!`](#string) | Title of the merge request to be created. |
 
 ### `AiGenerateCommitMessageInput`
 
@@ -39821,23 +39694,6 @@ Attributes for value stream stage.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="workitemwidgetcolorinputcolor"></a>`color` | [`Color!`](#color) | Color of the work item. |
-
-### `WorkItemWidgetCrmContactsCreateInput`
-
-#### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="workitemwidgetcrmcontactscreateinputcontactids"></a>`contactIds` | [`[CustomerRelationsContactID!]!`](#customerrelationscontactid) | CRM contact IDs to set. |
-
-### `WorkItemWidgetCrmContactsUpdateInput`
-
-#### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="workitemwidgetcrmcontactsupdateinputcontactids"></a>`contactIds` | [`[CustomerRelationsContactID!]!`](#customerrelationscontactid) | CRM contact IDs to set. Replaces existing contacts by default. |
-| <a id="workitemwidgetcrmcontactsupdateinputoperationmode"></a>`operationMode` | [`MutationOperationMode`](#mutationoperationmode) | Set the operation mode. |
 
 ### `WorkItemWidgetCurrentUserTodosInput`
 

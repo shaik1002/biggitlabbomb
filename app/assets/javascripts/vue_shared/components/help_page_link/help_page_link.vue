@@ -28,7 +28,6 @@ export default {
   },
   computed: {
     compiledHref() {
-      // eslint-disable-next-line local-rules/require-valid-help-page-path
       return helpPagePath(this.href, { anchor: this.anchor });
     },
     attributes() {

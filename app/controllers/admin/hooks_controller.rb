@@ -5,8 +5,6 @@ class Admin::HooksController < Admin::ApplicationController
 
   urgency :low, [:test]
 
-  before_action :not_found, unless: -> { system_hooks? }
-
   def test
     result = TestHooks::SystemService.new(hook, current_user, params[:trigger]).execute
 
@@ -31,9 +29,5 @@ class Admin::HooksController < Admin::ApplicationController
 
   def trigger_values
     SystemHook.triggers.values
-  end
-
-  def system_hooks?
-    !Gitlab.com? # rubocop:disable Gitlab/AvoidGitlabInstanceChecks -- Not related to SaaS offerings
   end
 end

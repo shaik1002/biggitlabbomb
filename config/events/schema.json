@@ -41,8 +41,7 @@
         "enum": [
           "project",
           "user",
-          "namespace",
-          "feature_enabled_by_namespace_ids"
+          "namespace"
         ]
       }
     },

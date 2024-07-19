@@ -30,13 +30,8 @@ RSpec.describe ::Search::EmptySearchResults, feature_category: :global_search do
   end
 
   describe '#failed?' do
-    [true, false].each do |failure|
-      it "returns #{failure} when passed an error option" do
-        error_message = failure ? 'error message' : nil
-        results = described_class.new(error: error_message)
-        expect(results.failed?).to eq failure
-        expect(results.error).to eq error_message
-      end
+    it 'returns false' do
+      expect(results.failed?).to eq false
     end
   end
 end

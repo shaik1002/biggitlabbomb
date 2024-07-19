@@ -499,7 +499,6 @@
   - "{,ee/,jh/}fixtures/**/*"
   - "{,ee/,jh/}rubocop/**/*"
   - "{,ee/,jh/}spec/**/*"
-  - "scripts/**/*"
   - "{,spec/}tooling/**/*"
 
 # .code-patterns + .qa-patterns
@@ -559,7 +558,6 @@
   - "{,ee/,jh/}fixtures/**/*"
   - "{,ee/,jh/}rubocop/**/*"
   - "{,ee/,jh/}spec/**/*"
-  - "scripts/**/*"
   - "{,spec/}tooling/**/*"
   # QA changes
   - ".dockerignore"
@@ -602,7 +600,6 @@
   - "{,ee/,jh/}fixtures/**/*"
   - "{,ee/,jh/}rubocop/**/*"
   - "{,ee/,jh/}spec/**/*"
-  - "scripts/**/*"
   - "{,spec/}tooling/**/*"
   # QA changes
   - ".dockerignore"
@@ -1285,12 +1282,6 @@
     - <<: *if-default-refs
       changes: *code-backstage-patterns
 
-.frontend:rules:default-frontend-jobs-with-docs-changes:
-  rules:
-    - !reference [.frontend:rules:default-frontend-jobs, rules]
-    - <<: *if-default-refs
-      changes: *docs-patterns
-
 # .frontend:rules:default-frontend-jobs, with a additional rules when MR is not approved
 .frontend:rules:frontend_fixture:
   rules:
@@ -1466,12 +1457,6 @@
 .frontend:rules:jest-vue3:
   rules:
     - <<: *if-default-branch-schedule-nightly
-
-.frontend:rules:jest-linters:
-  rules:
-    - <<: *if-merge-request-labels-run-all-jest
-    - <<: *if-default-refs
-      changes: ["tooling/eslint-config/**/*", "spec/tooling/frontend/eslint-config/**/*"]
 
 ################
 # Memory rules #
@@ -1782,7 +1767,6 @@
     - <<: *if-dot-com-gitlab-org-schedule
       variables:
         KNAPSACK_GENERATE_REPORT: "true"
-        PROCESS_TEST_RESULTS: "true"
         QA_SAVE_TEST_METRICS: "true"
         QA_EXPORT_TEST_METRICS: "false"
       allow_failure: true
@@ -2339,17 +2323,17 @@
     - if: '$START_AS_IF_FOSS == "true"'
     - !reference [".rails:rules:ee-and-foss-unit", rules]
 
-.rails:rules:artifact-collector-part-a:
+.rails:rules:artifact-collector-system:
   rules:
     - if: '$START_AS_IF_FOSS == "true"'
     - !reference [".rails:rules:ee-and-foss-system", rules]
-    - !reference ['.rails:rules:ee-and-foss-background-migration', rules]
 
-.rails:rules:artifact-collector-part-b:
+.rails:rules:artifact-collector-remainder:
   rules:
     - if: '$START_AS_IF_FOSS == "true"'
     - !reference ['.rails:rules:ee-and-foss-integration', rules]
     - !reference ['.rails:rules:ee-and-foss-migration', rules]
+    - !reference ['.rails:rules:ee-and-foss-background-migration', rules]
 
 .rails:rules:detect-tests:
   rules:
@@ -3008,12 +2992,6 @@
       changes:
         - ".gitlab/ci/test-metadata.gitlab-ci.yml"
         - "scripts/rspec_helpers.sh"
-    - <<: *if-merge-request
-      changes:
-        - ".gitlab/ci/test-metadata.gitlab-ci.yml"
-        - "scripts/rspec_helpers.sh"
-      when: manual
-      allow_failure: true
     - <<: *if-merge-request-not-approved
       when: never
     - <<: *if-merge-request

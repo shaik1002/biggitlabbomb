@@ -260,7 +260,6 @@ export default {
         }
 
         this.track('updated_labels');
-        this.$emit('labelsUpdated', [...this.addLabelIds, ...this.removeLabelIds]);
       } catch {
         this.$emit('error', i18n.updateError);
       } finally {

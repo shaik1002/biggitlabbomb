@@ -141,11 +141,6 @@ The token generated when you create an agent for Kubernetes. Use **agent access 
 - secret token
 - authentication token
 
-## agnostic
-
-Instead of **agnostic**, use **platform-independent** or **vendor-neutral**.
-([Vale](../testing/vale.md) rule: [`SubstitutionWarning.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/SubstitutionWarning.yml))
-
 ## AI, artificial intelligence
 
 Use **AI**. Do not spell out **artificial intelligence**.
@@ -1173,10 +1168,6 @@ Instead of:
 Do not use **list** when referring to a [**dropdown list**](#dropdown-list).
 Use the full phrase **dropdown list** instead.
 
-Also, do not use **list** when referring to a page. For example, the **Issues** page
-is populated with a list of issues. However, you should call it the **Issues** page,
-and not the **Issues** list.
-
 ## license
 
 Licenses are different than subscriptions.
@@ -1969,13 +1960,6 @@ Examples:
 
 - Suggested Reviewers can recommend a person to review your merge request. (This phrase describes the feature.)
 - As you type, Suggested Reviewers are displayed. (This phrase is generic but still uses capital letters.)
-
-## tab
-
-Use bold for tab names. For example:
-
-- The **Pipelines** tab
-- The **Overview** tab
 
 ## that
 

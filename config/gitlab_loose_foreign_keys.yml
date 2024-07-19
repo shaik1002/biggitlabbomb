@@ -382,10 +382,6 @@ sbom_occurrences:
   - table: ci_pipelines
     column: pipeline_id
     on_delete: async_nullify
-sbom_sources:
-  - table: organizations
-    column: organization_id
-    on_delete: async_delete
 security_scans:
   - table: ci_builds
     column: build_id
@@ -411,10 +407,6 @@ user_details:
   - table: namespaces
     column: enterprise_group_id
     on_delete: async_nullify
-vulnerability_export_parts:
-  - table: organizations
-    column: organization_id
-    on_delete: async_delete
 vulnerability_feedback:
   - table: ci_pipelines
     column: pipeline_id

@@ -119,7 +119,7 @@ export default {
     <crud-component
       ref="crudComponent"
       :title="$options.i18n.title"
-      icon="bullhorn"
+      icon="messages"
       :count="messagesCount"
       :toggle-text="$options.i18n.addButton"
     >

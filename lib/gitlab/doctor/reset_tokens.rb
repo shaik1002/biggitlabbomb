@@ -51,7 +51,7 @@ module Gitlab
         instance.public_send("reset_#{attribute_name}!") unless @dry_run # rubocop:disable GitlabSecurity/PublicSend
       rescue StandardError => e
         logger.debug(
-          Rainbow("> Something went wrong for #{instance.class.name}[#{instance.id}].#{attribute_name}: #{e}").red)
+          "> Something went wrong for #{instance.class.name}[#{instance.id}].#{attribute_name}: #{e}".color(:red))
 
         false
       end

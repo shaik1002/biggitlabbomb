@@ -27,7 +27,6 @@ issues:
 - own_resource_state_events
 - own_resource_label_events
 - own_description_versions
-- own_events
 - sync_object
 - last_edited_by
 - todos
@@ -460,7 +459,6 @@ builds:
 - job_annotations
 - job_artifacts_annotations
 - project_mirror
-- build_source
 bridges:
 - user
 - pipeline
@@ -1037,7 +1035,6 @@ epic:
 - own_resource_state_events
 - own_resource_label_events
 - own_description_versions
-- own_events
 - sync_object
 - todos
 - metrics

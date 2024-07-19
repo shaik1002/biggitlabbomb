@@ -92,7 +92,7 @@ export default {
             }"
             class="!gl-shadow-none"
             category="tertiary"
-            icon="remove"
+            icon="remove-all"
             data-placement="bottom"
             data-container="body"
             data-boundary="viewport"

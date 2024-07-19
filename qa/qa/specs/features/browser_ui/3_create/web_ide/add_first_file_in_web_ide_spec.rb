@@ -9,9 +9,7 @@ module QA
         Flow::Login.sign_in
         project.visit!
         Page::Project::Show.perform(&:open_web_ide!)
-        Page::Project::WebIDE::VSCode.perform do |ide|
-          ide.wait_for_ide_to_load('README.md')
-        end
+        Page::Project::WebIDE::VSCode.perform(&:wait_for_ide_to_load)
       end
 
       context 'when a file with the same name already exists' do
@@ -30,19 +28,14 @@ module QA
       context 'when user adds a new file' do
         let(:file_name) { 'first_file.txt' }
 
-        it 'shows successfully added and visible in project',
+        it 'shows successfully added and visible in project', :blocking,
           testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/432898' do
           Page::Project::WebIDE::VSCode.perform do |ide|
             ide.create_new_file(file_name)
             ide.commit_and_push_to_existing_branch(file_name)
           end
 
-          # We retry on exception as there can be an unexpected alert present if we try to
-          # navigate away from the web ide too quickly after commit_and_push_to_existing_branch
-          Support::Retrier.retry_until(retry_on_exception: true, sleep_interval: 3,
-            message: 'Retry visiting project') do
-            project.visit!
-          end
+          project.visit!
 
           Page::Project::Show.perform do |project|
             expect(project).to have_file(file_name)

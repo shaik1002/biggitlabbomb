@@ -59,14 +59,12 @@
         color: var(--gl-text-color, $gl-text-color);
       }
 
-      // stylelint-disable-next-line gitlab/no-gl-class
       .gl-label-link {
         color: inherit;
 
         &:hover {
           text-decoration: none;
 
-          // stylelint-disable-next-line gitlab/no-gl-class
           .gl-label-text:last-of-type {
             text-decoration: underline;
           }

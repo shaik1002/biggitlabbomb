@@ -15,8 +15,6 @@ module Import
         return error_invalid_assignee unless valid_assignee?(assignee_user)
 
         if reassign_user
-          send_user_reassign_email
-
           ServiceResponse.success(payload: import_source_user)
         else
           ServiceResponse.error(payload: import_source_user, message: import_source_user.errors.full_messages)
@@ -25,7 +23,7 @@ module Import
 
       private
 
-      attr_reader :assignee_user
+      attr_reader :import_source_user, :current_user, :assignee_user
 
       def reassign_user
         import_source_user.reassign_to_user = assignee_user

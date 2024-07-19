@@ -226,9 +226,6 @@ rule in the defined policy are met.
 | `tags` | `array` of `string` | | A list of runner tags for the policy. The policy jobs are run by runner with the specified tags. |
 | `template` | `string` | `default`, `latest` | CI/CD template edition to be enforced. The [`latest`](../../../development/cicd/templates.md#latest-version) edition may introduce breaking changes. |
 
-NOTE:
-If you have Merge Request Pipelines enabled for your project, you must select `template: latest` in your policy for each enforced scan. Using the latest template is crucial for compatibility with Merge Request Pipelines and allows you to take full advantage of GitLab security features. For more information on using security scanning tools with Merge Request Pipelines, please refer to our [security scanning documentation](../../application_security/index.md#use-security-scanning-tools-with-merge-request-pipelines).
-
 ### Scan field details
 
 There are additional requirements for some of the `scan` action fields.
@@ -441,3 +438,85 @@ DETAILS:
 This experiment has concluded and will not continue. After receiving feedback within this experiment, we will be focusing our efforts on a new policy type for enforcement of custom CI. The experiment will be removed in 17.3.
 
 Learn more about the [pipeline execution policy](pipeline_execution_policies.md).
+
+### Pipeline execution policy action
+
+Prerequisites:
+
+- To enable the pipeline execution policy action feature, a Group owner or administrator must enable
+  the experimental feature:
+
+  1. On the left sidebar, select **Search or go to** and find your group.
+  1. Select **Settings > General**.
+  1. Expand **Permissions and group features**.
+  1. Select the **Security policy pipeline execution action** checkbox.
+  1. Optional. Select **Enforce for all subgroups**.
+
+     If the setting is not enforced for all subgroups, subgroup owners can manage the setting per subgroup.
+
+The pipeline execution policy action introduces a new scan action type into
+scan execution policies for creating and enforcing custom CI in your target
+development projects.
+
+This custom scan type uses a remote CI configuration file to define the custom
+CI you want enforced. Scan execution policies then merge this file with the
+project's `.gitlab-ci.yml` to execute the compliance jobs for each project
+enforced by the policy.
+
+#### `scan` action type
+
+This action executes the selected `scan` with additional parameters when
+conditions for at least one rule in the defined policy are met.
+
+| Field                   | Type     | Possible values | Description |
+|-------------------------|----------|-----------------|-------------|
+| `scan`                  | `string` | `custom`        | The action's type. |
+| `ci_configuration`      | `string` |                 | GitLab CI YAML as formatted as string. |
+| `ci_configuration_path` | object   |                 | Object with project path and filename pointing to a CI configuration. |
+
+#### `ci_configuration_path` object
+
+| Field     | Type                | Required | Description |
+|-----------|---------------------|----------|-------------|
+| `project` | `string`            | true     | A project namespace path. |
+| `file`    | `string`            | true     | The filename of the CI/CD YAML file. |
+| `ref`     | `string`            | false    | The branch name, tag name, or commit SHA. If not specified, uses the default branch. |
+
+Note the following:
+
+- For `custom` scans, you must specify one of `ci_configuration` or `ci_configuration_path`.
+- `custom` scans are being executed for triggered rules only.
+- Jobs variables from `custom` scans take precedence over the project's CI/CD configuration.
+- Users triggering a pipeline must have at least read access to CI files specified in the `ci_configuration_path` or included in the CI/CD configuration.
+- It is not possible to define custom stages using the `stages` keyword in a custom scan action. Instead three reserved stages will be added to the pipeline:
+  - `.pipeline-policy-pre`at the beginning of the pipeline, before the `.pre` stage.
+  - `.pipeline-policy-test` after the `test` stage. If the `test` stage does not exist, it will be injected after the `build` stage. If the `build` stage does not exist, it will be injected at the beginning of the pipeline after the `.pre` stage.
+  - `.pipeline-policy-post` at the very end of the pipeline, after the .post stage.
+- Jobs without a stage are assigned to the `.pipeline-policy-test` stage by default.
+- It is not possible to assign jobs to reserved stages outside of a custom scan action.
+
+#### Example security policies project
+
+You can use this example in a `.gitlab/security-policies/policy.yml` file stored in a
+[security policy project](index.md#security-policy-project):
+
+```yaml
+---
+scan_execution_policy:
+- name: Create a custom scan that injects test job
+  description: This policy enforces pipeline configuration to have a job with DAST scan for release branches
+  enabled: true
+  rules:
+  - type: pipeline
+    branches:
+    - release/*
+  actions:
+  - scan: custom
+    ci_configuration: |-
+      test job:
+        stage: test
+        script:
+          - echo "Hello World"
+```
+
+In this example a `test job` is injected into the `test` stage of the pipeline, printing `Hello World`.

@@ -189,7 +189,7 @@ describe('Commit component', () => {
 
       expect(refEl.attributes('href')).toBe(props.mergeRequestRef.path);
 
-      expect(findIcon('merge-request').exists()).toBe(true);
+      expect(findIcon('git-merge').exists()).toBe(true);
     });
   });
 

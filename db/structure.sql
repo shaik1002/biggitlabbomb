@@ -857,22 +857,6 @@ RETURN NEW;
 END
 $$;
 
-CREATE FUNCTION trigger_158ac875f254() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-IF NEW."group_id" IS NULL THEN
-  SELECT "group_id"
-  INTO NEW."group_id"
-  FROM "approval_group_rules"
-  WHERE "approval_group_rules"."id" = NEW."approval_group_rule_id";
-END IF;
-
-RETURN NEW;
-
-END
-$$;
-
 CREATE FUNCTION trigger_174b23fa3dfb() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
@@ -1142,22 +1126,6 @@ IF NEW."project_id" IS NULL THEN
   INTO NEW."project_id"
   FROM "merge_requests"
   WHERE "merge_requests"."id" = NEW."merge_request_id";
-END IF;
-
-RETURN NEW;
-
-END
-$$;
-
-CREATE FUNCTION trigger_49862b4b3035() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-IF NEW."group_id" IS NULL THEN
-  SELECT "group_id"
-  INTO NEW."group_id"
-  FROM "approval_group_rules"
-  WHERE "approval_group_rules"."id" = NEW."approval_group_rule_id";
 END IF;
 
 RETURN NEW;
@@ -2229,7 +2197,6 @@ CREATE TABLE p_ci_builds (
     upstream_pipeline_id bigint,
     user_id bigint,
     execution_config_id bigint,
-    upstream_pipeline_partition_id bigint,
     CONSTRAINT check_1e2fbd1b39 CHECK ((lock_version IS NOT NULL))
 )
 PARTITION BY LIST (partition_id);
@@ -5616,6 +5583,7 @@ CREATE TABLE application_settings (
     encrypted_arkose_labs_public_api_key_iv bytea,
     encrypted_arkose_labs_private_api_key bytea,
     encrypted_arkose_labs_private_api_key_iv bytea,
+    arkose_labs_verify_api_url text,
     delete_inactive_projects boolean DEFAULT false NOT NULL,
     inactive_projects_delete_after_months integer DEFAULT 2 NOT NULL,
     inactive_projects_min_size_mb integer DEFAULT 0 NOT NULL,
@@ -5843,7 +5811,8 @@ CREATE TABLE application_settings (
     CONSTRAINT check_e2dd6e290a CHECK ((char_length(jira_connect_application_key) <= 255)),
     CONSTRAINT check_e5024c8801 CHECK ((char_length(elasticsearch_username) <= 255)),
     CONSTRAINT check_e5aba18f02 CHECK ((char_length(container_registry_version) <= 255)),
-    CONSTRAINT check_ef6176834f CHECK ((char_length(encrypted_cloud_license_auth_token_iv) <= 255))
+    CONSTRAINT check_ef6176834f CHECK ((char_length(encrypted_cloud_license_auth_token_iv) <= 255)),
+    CONSTRAINT check_f6563bc000 CHECK ((char_length(arkose_labs_verify_api_url) <= 255))
 );
 
 COMMENT ON COLUMN application_settings.content_validation_endpoint_url IS 'JiHu-specific column';
@@ -5940,8 +5909,7 @@ ALTER SEQUENCE approval_group_rules_id_seq OWNED BY approval_group_rules.id;
 CREATE TABLE approval_group_rules_protected_branches (
     id bigint NOT NULL,
     approval_group_rule_id bigint NOT NULL,
-    protected_branch_id bigint NOT NULL,
-    group_id bigint
+    protected_branch_id bigint NOT NULL
 );
 
 CREATE SEQUENCE approval_group_rules_protected_branches_id_seq
@@ -5956,8 +5924,7 @@ ALTER SEQUENCE approval_group_rules_protected_branches_id_seq OWNED BY approval_
 CREATE TABLE approval_group_rules_users (
     id bigint NOT NULL,
     approval_group_rule_id bigint NOT NULL,
-    user_id bigint NOT NULL,
-    group_id bigint
+    user_id bigint NOT NULL
 );
 
 CREATE SEQUENCE approval_group_rules_users_id_seq
@@ -7547,7 +7514,6 @@ CREATE TABLE ci_builds (
     upstream_pipeline_id bigint,
     user_id bigint,
     execution_config_id bigint,
-    upstream_pipeline_partition_id bigint,
     CONSTRAINT check_1e2fbd1b39 CHECK ((lock_version IS NOT NULL))
 );
 
@@ -11016,8 +10982,7 @@ CREATE TABLE group_group_links (
     shared_group_id bigint NOT NULL,
     shared_with_group_id bigint NOT NULL,
     expires_at date,
-    group_access smallint DEFAULT 30 NOT NULL,
-    member_role_id bigint
+    group_access smallint DEFAULT 30 NOT NULL
 );
 
 CREATE SEQUENCE group_group_links_id_seq
@@ -17155,8 +17120,7 @@ CREATE TABLE sbom_sources (
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
     source_type smallint NOT NULL,
-    source jsonb DEFAULT '{}'::jsonb NOT NULL,
-    organization_id bigint DEFAULT 1 NOT NULL
+    source jsonb DEFAULT '{}'::jsonb NOT NULL
 );
 
 CREATE SEQUENCE sbom_sources_id_seq
@@ -17222,15 +17186,14 @@ ALTER SEQUENCE scan_result_policies_id_seq OWNED BY scan_result_policies.id;
 
 CREATE TABLE scan_result_policy_violations (
     id bigint NOT NULL,
-    scan_result_policy_id bigint,
+    scan_result_policy_id bigint NOT NULL,
     merge_request_id bigint NOT NULL,
     project_id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
     violation_data jsonb,
     approval_policy_rule_id bigint,
-    status smallint DEFAULT 1 NOT NULL,
-    CONSTRAINT chk_policy_violations_rule_id_or_policy_id_not_null CHECK (((approval_policy_rule_id IS NOT NULL) OR (scan_result_policy_id IS NOT NULL)))
+    status smallint DEFAULT 1 NOT NULL
 );
 
 CREATE SEQUENCE scan_result_policy_violations_id_seq
@@ -22587,9 +22550,6 @@ ALTER TABLE ONLY chat_teams
 ALTER TABLE workspaces
     ADD CONSTRAINT check_2a89035b04 CHECK ((personal_access_token_id IS NOT NULL)) NOT VALID;
 
-ALTER TABLE ci_pipelines
-    ADD CONSTRAINT check_2ba2a044b9 CHECK ((project_id IS NOT NULL)) NOT VALID;
-
 ALTER TABLE vulnerability_scanners
     ADD CONSTRAINT check_37608c9db5 CHECK ((char_length(vendor) <= 255)) NOT VALID;
 
@@ -26189,10 +26149,6 @@ CREATE INDEX index_approval_group_rules_on_approval_policy_rule_id ON approval_g
 
 CREATE INDEX index_approval_group_rules_on_scan_result_policy_id ON approval_group_rules USING btree (scan_result_policy_id);
 
-CREATE INDEX index_approval_group_rules_protected_branches_on_group_id ON approval_group_rules_protected_branches USING btree (group_id);
-
-CREATE INDEX index_approval_group_rules_users_on_group_id ON approval_group_rules_users USING btree (group_id);
-
 CREATE INDEX index_approval_group_rules_users_on_user_id ON approval_group_rules_users USING btree (user_id);
 
 CREATE UNIQUE INDEX index_approval_merge_request_rule_sources_1 ON approval_merge_request_rule_sources USING btree (approval_merge_request_rule_id);
@@ -27379,8 +27335,6 @@ CREATE UNIQUE INDEX index_feature_gates_on_feature_key_and_key_and_value ON feat
 
 CREATE UNIQUE INDEX index_features_on_key ON features USING btree (key);
 
-CREATE INDEX index_for_owasp_top_10_group_level_reports ON vulnerability_reads USING btree (owasp_top_10, state, report_type, severity, traversal_ids, vulnerability_id, resolved_on_default_branch) WHERE (archived = false);
-
 CREATE INDEX index_for_security_scans_scan_type ON security_scans USING btree (scan_type, project_id, pipeline_id) WHERE (status = 1);
 
 CREATE INDEX index_for_status_per_branch_per_project ON merge_trains USING btree (target_project_id, target_branch, status);
@@ -27483,8 +27437,6 @@ CREATE INDEX index_group_deploy_tokens_on_deploy_token_id ON group_deploy_tokens
 
 CREATE UNIQUE INDEX index_group_deploy_tokens_on_group_and_deploy_token_ids ON group_deploy_tokens USING btree (group_id, deploy_token_id);
 
-CREATE INDEX index_group_group_links_on_member_role_id ON group_group_links USING btree (member_role_id);
-
 CREATE UNIQUE INDEX index_group_group_links_on_shared_group_and_shared_with_group ON group_group_links USING btree (shared_group_id, shared_with_group_id);
 
 CREATE INDEX index_group_group_links_on_shared_with_group_and_group_access ON group_group_links USING btree (shared_with_group_id, group_access);
@@ -27581,7 +27533,7 @@ CREATE INDEX index_import_source_user_placeholder_references_on_namespace_id ON 
 
 CREATE INDEX index_import_source_user_placeholder_references_on_source_user_ ON import_source_user_placeholder_references USING btree (source_user_id);
 
-CREATE INDEX index_import_source_users_on_namespace_id_and_status ON import_source_users USING btree (namespace_id, status);
+CREATE INDEX index_import_source_users_on_namespace_id ON import_source_users USING btree (namespace_id);
 
 CREATE INDEX index_import_source_users_on_placeholder_user_id ON import_source_users USING btree (placeholder_user_id);
 
@@ -28291,8 +28243,6 @@ CREATE UNIQUE INDEX index_on_instance_statistics_recorded_at_and_identifier ON a
 
 CREATE INDEX index_on_issue_assignment_events_issue_id_action_created_at_id ON issue_assignment_events USING btree (issue_id, action, created_at, id);
 
-CREATE INDEX index_on_job_artifact_id_partition_id_verification_state ON ci_job_artifact_states USING btree (verification_state, job_artifact_id, partition_id);
-
 CREATE INDEX index_on_label_links_all_columns ON label_links USING btree (target_id, label_id, target_type);
 
 CREATE INDEX index_on_merge_request_diffs_head_commit_sha ON merge_request_diffs USING btree (head_commit_sha);
@@ -28616,8 +28566,6 @@ CREATE UNIQUE INDEX index_plans_on_name ON plans USING btree (name);
 CREATE UNIQUE INDEX index_pm_advisories_on_advisory_xid_and_source_xid ON pm_advisories USING btree (advisory_xid, source_xid);
 
 CREATE INDEX index_pm_affected_packages_on_pm_advisory_id ON pm_affected_packages USING btree (pm_advisory_id);
-
-CREATE INDEX index_pm_affected_packages_on_purl_type_and_package_name ON pm_affected_packages USING btree (purl_type, package_name);
 
 CREATE INDEX index_pm_package_version_licenses_on_pm_license_id ON pm_package_version_licenses USING btree (pm_license_id);
 
@@ -29121,9 +29069,7 @@ CREATE INDEX index_sbom_occurrences_vulnerabilities_on_vulnerability_id ON sbom_
 
 CREATE INDEX index_sbom_source_packages_on_source_package_id_and_id ON sbom_occurrences USING btree (source_package_id, id);
 
-CREATE INDEX index_sbom_sources_on_organization_id ON sbom_sources USING btree (organization_id);
-
-CREATE UNIQUE INDEX index_sbom_sources_on_source_type_and_source_and_org_id ON sbom_sources USING btree (source_type, source, organization_id);
+CREATE UNIQUE INDEX index_sbom_sources_on_source_type_and_source ON sbom_sources USING btree (source_type, source);
 
 CREATE INDEX index_scan_execution_policy_rules_on_policy_mgmt_project_id ON scan_execution_policy_rules USING btree (security_policy_management_project_id);
 
@@ -30074,6 +30020,10 @@ CREATE UNIQUE INDEX tmp_index_issues_on_tmp_epic_id ON issues USING btree (tmp_e
 CREATE INDEX tmp_index_on_vulnerabilities_non_dismissed ON vulnerabilities USING btree (id) WHERE (state <> 2);
 
 CREATE INDEX tmp_index_project_statistics_cont_registry_size ON project_statistics USING btree (project_id) WHERE (container_registry_size = 0);
+
+CREATE INDEX tmp_index_vulnerability_occurrences_id_and_initial_pipline_id ON vulnerability_occurrences USING btree (id, initial_pipeline_id) WHERE (initial_pipeline_id IS NULL);
+
+CREATE INDEX tmp_index_vulnerability_occurrences_id_and_latest_pipeline_id ON vulnerability_occurrences USING btree (id, latest_pipeline_id) WHERE (latest_pipeline_id IS NULL);
 
 CREATE INDEX tmp_index_vulnerability_overlong_title_html ON vulnerabilities USING btree (id) WHERE (length(title_html) > 800);
 
@@ -31795,8 +31745,6 @@ CREATE TRIGGER trigger_0e13f214e504 BEFORE INSERT OR UPDATE ON merge_request_ass
 
 CREATE TRIGGER trigger_13d4aa8fe3dd BEFORE INSERT OR UPDATE ON draft_notes FOR EACH ROW EXECUTE FUNCTION trigger_13d4aa8fe3dd();
 
-CREATE TRIGGER trigger_158ac875f254 BEFORE INSERT OR UPDATE ON approval_group_rules_users FOR EACH ROW EXECUTE FUNCTION trigger_158ac875f254();
-
 CREATE TRIGGER trigger_174b23fa3dfb BEFORE INSERT OR UPDATE ON approval_project_rules_users FOR EACH ROW EXECUTE FUNCTION trigger_174b23fa3dfb();
 
 CREATE TRIGGER trigger_18bc439a6741 BEFORE INSERT OR UPDATE ON packages_conan_metadata FOR EACH ROW EXECUTE FUNCTION trigger_18bc439a6741();
@@ -31834,8 +31782,6 @@ CREATE TRIGGER trigger_41eaf23bf547 BEFORE INSERT OR UPDATE ON release_links FOR
 CREATE TRIGGER trigger_43484cb41aca BEFORE INSERT OR UPDATE ON wiki_repository_states FOR EACH ROW EXECUTE FUNCTION trigger_43484cb41aca();
 
 CREATE TRIGGER trigger_44558add1625 BEFORE INSERT OR UPDATE ON merge_request_assignees FOR EACH ROW EXECUTE FUNCTION trigger_44558add1625();
-
-CREATE TRIGGER trigger_49862b4b3035 BEFORE INSERT OR UPDATE ON approval_group_rules_protected_branches FOR EACH ROW EXECUTE FUNCTION trigger_49862b4b3035();
 
 CREATE TRIGGER trigger_49e070da6320 BEFORE INSERT OR UPDATE ON packages_dependency_links FOR EACH ROW EXECUTE FUNCTION trigger_49e070da6320();
 
@@ -32265,9 +32211,6 @@ ALTER TABLE ONLY duo_workflows_workflows
 ALTER TABLE ONLY members
     ADD CONSTRAINT fk_2f85abf8f1 FOREIGN KEY (member_namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY group_group_links
-    ADD CONSTRAINT fk_2fbc7071a3 FOREIGN KEY (member_role_id) REFERENCES member_roles(id) ON DELETE SET NULL;
-
 ALTER TABLE ONLY zoekt_replicas
     ADD CONSTRAINT fk_3035f4b498 FOREIGN KEY (zoekt_enabled_namespace_id) REFERENCES zoekt_enabled_namespaces(id) ON DELETE CASCADE;
 
@@ -32321,9 +32264,6 @@ ALTER TABLE ONLY protected_tag_create_access_levels
 
 ALTER TABLE ONLY incident_management_timeline_events
     ADD CONSTRAINT fk_38a74279df FOREIGN KEY (updated_by_user_id) REFERENCES users(id) ON DELETE SET NULL;
-
-ALTER TABLE ONLY approval_group_rules_users
-    ADD CONSTRAINT fk_3995d73930 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY bulk_import_exports
     ADD CONSTRAINT fk_39c726d3b5 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
@@ -32432,9 +32372,6 @@ ALTER TABLE ONLY vulnerability_reads
 
 ALTER TABLE ONLY approval_group_rules_groups
     ADD CONSTRAINT fk_50edc8134e FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY approval_group_rules_protected_branches
-    ADD CONSTRAINT fk_514003db08 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY alert_management_alerts
     ADD CONSTRAINT fk_51ab4b6089 FOREIGN KEY (prometheus_alert_id) REFERENCES prometheus_alerts(id) ON DELETE CASCADE;
@@ -32860,7 +32797,10 @@ ALTER TABLE ONLY subscription_add_on_purchases
     ADD CONSTRAINT fk_a1db288990 FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE p_ci_builds
-    ADD CONSTRAINT fk_a2141b1522_p FOREIGN KEY (auto_canceled_by_partition_id, auto_canceled_by_id) REFERENCES ci_pipelines(partition_id, id) ON UPDATE CASCADE ON DELETE SET NULL;
+    ADD CONSTRAINT fk_a2141b1522 FOREIGN KEY (auto_canceled_by_id) REFERENCES ci_pipelines(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY ci_builds
+    ADD CONSTRAINT fk_a2141b1522_p FOREIGN KEY (auto_canceled_by_partition_id, auto_canceled_by_id) REFERENCES ci_pipelines(partition_id, id) ON UPDATE CASCADE ON DELETE SET NULL NOT VALID;
 
 ALTER TABLE ONLY merge_request_assignment_events
     ADD CONSTRAINT fk_a437da318b FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
@@ -33169,7 +33109,10 @@ ALTER TABLE ONLY dast_pre_scan_verifications
     ADD CONSTRAINT fk_d23ad33d6e FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE p_ci_builds
-    ADD CONSTRAINT fk_d3130c9a7f_p FOREIGN KEY (partition_id, commit_id) REFERENCES ci_pipelines(partition_id, id) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT fk_d3130c9a7f FOREIGN KEY (commit_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_builds
+    ADD CONSTRAINT fk_d3130c9a7f_p FOREIGN KEY (partition_id, commit_id) REFERENCES ci_pipelines(partition_id, id) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
 
 ALTER TABLE ONLY boards_epic_user_preferences
     ADD CONSTRAINT fk_d32c3d693c FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
@@ -33178,7 +33121,10 @@ ALTER TABLE ONLY vulnerability_state_transitions
     ADD CONSTRAINT fk_d3ede71c58 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY ci_sources_pipelines
-    ADD CONSTRAINT fk_d4e29af7d7_p FOREIGN KEY (source_partition_id, source_pipeline_id) REFERENCES ci_pipelines(partition_id, id) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT fk_d4e29af7d7 FOREIGN KEY (source_pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_sources_pipelines
+    ADD CONSTRAINT fk_d4e29af7d7_p FOREIGN KEY (source_partition_id, source_pipeline_id) REFERENCES ci_pipelines(partition_id, id) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
 
 ALTER TABLE ONLY operations_strategies_user_lists
     ADD CONSTRAINT fk_d4f7076369 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
@@ -33262,7 +33208,10 @@ ALTER TABLE ONLY ci_resources
     ADD CONSTRAINT fk_e169a8e3d5_p FOREIGN KEY (partition_id, build_id) REFERENCES p_ci_builds(partition_id, id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 ALTER TABLE ONLY ci_sources_pipelines
-    ADD CONSTRAINT fk_e1bad85861_p FOREIGN KEY (partition_id, pipeline_id) REFERENCES ci_pipelines(partition_id, id) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT fk_e1bad85861 FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_sources_pipelines
+    ADD CONSTRAINT fk_e1bad85861_p FOREIGN KEY (partition_id, pipeline_id) REFERENCES ci_pipelines(partition_id, id) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
 
 ALTER TABLE p_ci_builds_metadata
     ADD CONSTRAINT fk_e20479742e_p FOREIGN KEY (partition_id, build_id) REFERENCES p_ci_builds(partition_id, id) ON UPDATE CASCADE ON DELETE CASCADE;
@@ -33382,7 +33331,10 @@ ALTER TABLE ONLY epic_user_mentions
     ADD CONSTRAINT fk_f1ab52883e FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE p_ci_pipeline_variables
-    ADD CONSTRAINT fk_f29c5f4380_p FOREIGN KEY (partition_id, pipeline_id) REFERENCES ci_pipelines(partition_id, id) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT fk_f29c5f4380 FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_pipeline_variables
+    ADD CONSTRAINT fk_f29c5f4380_p FOREIGN KEY (partition_id, pipeline_id) REFERENCES ci_pipelines(partition_id, id) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
 
 ALTER TABLE ONLY zoekt_indices
     ADD CONSTRAINT fk_f34800a202 FOREIGN KEY (zoekt_node_id) REFERENCES zoekt_nodes(id) ON DELETE CASCADE;
@@ -33427,7 +33379,10 @@ ALTER TABLE ONLY vulnerability_finding_evidences
     ADD CONSTRAINT fk_fa3efd4e94 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE p_ci_stages
-    ADD CONSTRAINT fk_fb57e6cc56_p FOREIGN KEY (partition_id, pipeline_id) REFERENCES ci_pipelines(partition_id, id) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT fk_fb57e6cc56 FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_stages
+    ADD CONSTRAINT fk_fb57e6cc56_p FOREIGN KEY (partition_id, pipeline_id) REFERENCES ci_pipelines(partition_id, id) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
 
 ALTER TABLE ONLY agent_group_authorizations
     ADD CONSTRAINT fk_fb70782616 FOREIGN KEY (agent_id) REFERENCES cluster_agents(id) ON DELETE CASCADE;
@@ -34066,7 +34021,10 @@ ALTER TABLE ONLY status_page_settings
     ADD CONSTRAINT fk_rails_506e5ba391 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY ci_pipeline_metadata
-    ADD CONSTRAINT fk_rails_50c1e9ea10_p FOREIGN KEY (partition_id, pipeline_id) REFERENCES ci_pipelines(partition_id, id) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT fk_rails_50c1e9ea10 FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_pipeline_metadata
+    ADD CONSTRAINT fk_rails_50c1e9ea10_p FOREIGN KEY (partition_id, pipeline_id) REFERENCES ci_pipelines(partition_id, id) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
 
 ALTER TABLE ONLY project_repository_storage_moves
     ADD CONSTRAINT fk_rails_5106dbd44a FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
@@ -34525,7 +34483,10 @@ ALTER TABLE ONLY vulnerability_feedback
     ADD CONSTRAINT fk_rails_8c77e5891a FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY ci_pipeline_messages
-    ADD CONSTRAINT fk_rails_8d3b04e3e1_p FOREIGN KEY (partition_id, pipeline_id) REFERENCES ci_pipelines(partition_id, id) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT fk_rails_8d3b04e3e1 FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_pipeline_messages
+    ADD CONSTRAINT fk_rails_8d3b04e3e1_p FOREIGN KEY (partition_id, pipeline_id) REFERENCES ci_pipelines(partition_id, id) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
 
 ALTER TABLE incident_management_pending_alert_escalations
     ADD CONSTRAINT fk_rails_8d8de95da9 FOREIGN KEY (alert_id) REFERENCES alert_management_alerts(id) ON DELETE CASCADE;
@@ -34552,7 +34513,10 @@ ALTER TABLE ONLY organization_details
     ADD CONSTRAINT fk_rails_8facb04bef FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY ci_pipelines_config
-    ADD CONSTRAINT fk_rails_906c9a2533_p FOREIGN KEY (partition_id, pipeline_id) REFERENCES ci_pipelines(partition_id, id) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT fk_rails_906c9a2533 FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_pipelines_config
+    ADD CONSTRAINT fk_rails_906c9a2533_p FOREIGN KEY (partition_id, pipeline_id) REFERENCES ci_pipelines(partition_id, id) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
 
 ALTER TABLE ONLY approval_project_rules_groups
     ADD CONSTRAINT fk_rails_9071e863d1 FOREIGN KEY (approval_project_rule_id) REFERENCES approval_project_rules(id) ON DELETE CASCADE;
@@ -34738,7 +34702,10 @@ ALTER TABLE ONLY saved_replies
     ADD CONSTRAINT fk_rails_a8bf5bf111 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY ci_pipeline_artifacts
-    ADD CONSTRAINT fk_rails_a9e811a466_p FOREIGN KEY (partition_id, pipeline_id) REFERENCES ci_pipelines(partition_id, id) ON UPDATE CASCADE ON DELETE CASCADE;
+    ADD CONSTRAINT fk_rails_a9e811a466 FOREIGN KEY (pipeline_id) REFERENCES ci_pipelines(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY ci_pipeline_artifacts
+    ADD CONSTRAINT fk_rails_a9e811a466_p FOREIGN KEY (partition_id, pipeline_id) REFERENCES ci_pipelines(partition_id, id) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
 
 ALTER TABLE ONLY merge_request_user_mentions
     ADD CONSTRAINT fk_rails_aa1b2961b1 FOREIGN KEY (merge_request_id) REFERENCES merge_requests(id) ON DELETE CASCADE;
@@ -35381,6 +35348,9 @@ ALTER TABLE ONLY cluster_groups
 
 ALTER TABLE ONLY resource_label_events
     ADD CONSTRAINT fk_rails_fe91ece594 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY vulnerability_export_parts
+    ADD CONSTRAINT fk_rails_feaf890d7a FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY pages_deployment_states
     ADD CONSTRAINT fk_rails_ff6ca551a4 FOREIGN KEY (pages_deployment_id) REFERENCES pages_deployments(id) ON DELETE CASCADE;

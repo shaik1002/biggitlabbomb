@@ -462,7 +462,6 @@
   }
 
   @media (min-width: $breakpoint-lg) {
-    // stylelint-disable-next-line gitlab/no-gl-class
     .gl-card {
       width: calc(50% - 15px);
     }

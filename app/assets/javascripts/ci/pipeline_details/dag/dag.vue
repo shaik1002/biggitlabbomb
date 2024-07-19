@@ -3,8 +3,7 @@
 import { GlAlert, GlButton, GlEmptyState, GlLink, GlSprintf } from '@gitlab/ui';
 import { isEmpty } from 'lodash';
 import { fetchPolicies } from '~/lib/graphql';
-import { s__, __ } from '~/locale';
-import { helpPagePath } from '~/helpers/help_page_helper';
+import { __ } from '~/locale';
 import {
   DEFAULT,
   PARSE_FAILURE,
@@ -20,17 +19,6 @@ import DagGraph from './components/dag_graph.vue';
 export default {
   // eslint-disable-next-line @gitlab/require-i18n-strings
   name: 'Dag',
-  i18n: {
-    deprecationAlert: {
-      title: s__('Pipelines|Upcoming visualization change'),
-      message: s__(
-        'Pipelines|The visualization in this tab will be %{linkStart}removed%{linkEnd}. Instead, view %{codeStart}needs%{codeEnd} relationships with the %{strongStart}Job dependency%{strongEnd} option in the %{strongStart}Pipeline%{strongEnd} tab.',
-      ),
-    },
-  },
-  deprecationInfoLink: helpPagePath('update/deprecations', {
-    anchor: 'removed-needs-tab-from-the-pipeline-view',
-  }),
   components: {
     DagAnnotations,
     DagGraph,
@@ -105,7 +93,6 @@ export default {
       failureType: null,
       graphData: null,
       showFailureAlert: false,
-      showDeprecationAlert: true,
       hasNoDependentJobs: false,
     };
   },
@@ -191,10 +178,7 @@ export default {
 
       return parsed;
     },
-    hideDeprecationAlert() {
-      this.showDeprecationAlert = false;
-    },
-    hideFailureAlert() {
+    hideAlert() {
       this.showFailureAlert = false;
     },
     removeAnnotationFromMap({ uid }) {
@@ -226,37 +210,7 @@ export default {
 </script>
 <template>
   <div>
-    <gl-alert
-      v-if="showDeprecationAlert"
-      :title="$options.i18n.deprecationAlert.title"
-      variant="warning"
-      data-testid="deprecation-alert"
-      @dismiss="hideDeprecationAlert"
-    >
-      <gl-sprintf :message="$options.i18n.deprecationAlert.message">
-        <template #code="{ content }">
-          <code>{{ content }}</code>
-        </template>
-        <template #strong="{ content }">
-          <strong>{{ content }}</strong>
-        </template>
-        <template #link="{ content }">
-          <gl-link
-            :href="$options.deprecationInfoLink"
-            class="gl-inline-flex !gl-no-underline"
-            target="_blank"
-          >
-            {{ content }}
-          </gl-link>
-        </template>
-      </gl-sprintf>
-    </gl-alert>
-    <gl-alert
-      v-if="showFailureAlert"
-      :variant="failure.variant"
-      data-testid="failure-alert"
-      @dismiss="hideFailureAlert"
-    >
+    <gl-alert v-if="showFailureAlert" :variant="failure.variant" @dismiss="hideAlert">
       {{ failure.text }}
     </gl-alert>
 

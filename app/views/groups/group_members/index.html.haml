@@ -32,7 +32,6 @@
                                                                              banned: @banned || [],
                                                                              include_relations: @include_relations,
                                                                              search: params[:search_groups],
-                                                                             pending_members: @pending_promotion_members,
-                                                                             placeholder_users: @placeholder_users_count
+                                                                             pending_members: @pending_promotion_members
                                                                             ).to_json } }
       = gl_loading_icon(css_class: 'gl-my-5', size: 'md')

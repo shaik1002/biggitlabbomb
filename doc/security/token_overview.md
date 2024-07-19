@@ -298,47 +298,6 @@ result in `403 Forbidden` responses from GitLab.com.
 
 For more information on authentication request limits, see [Git and container registry failed authentication ban](../user/gitlab_com/index.md#git-and-container-registry-failed-authentication-ban).
 
-### Identify expired access tokens from logs
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/464652) in GitLab 17.2.
-
-Prerequisites:
-
-You must:
-
-- Be an administrator.
-- Have access to the [`api_json.log`](../administration/logs/index.md#api_jsonlog) file.
-
-To identify which `401 Unauthorized` requests are failing due to
-expired access tokens, use the following fields in the `api_json.log` file:
-
-|Field name|Description|
-|----------|-----------|
-|`meta.auth_fail_reason`|The reason the request was rejected. Possible values: `token_expired`, `token_revoked`, `insufficient_scope`, and `impersonation_disabled`.|
-|`meta.auth_fail_token_id`|A string describing the type and ID of the attempted token.|
-
-When a user attempts to use an expired token, the `meta.auth_fail_reason`
-is `token_expired`. The following shows an excerpt from a log
-entry:
-
-```json
-{
-  "status": 401,
-  "method": "GET",
-  "path": "/api/v4/user",
-  ...
-  "meta.auth_fail_reason": "token_expired",
-  "meta.auth_fail_token_id": "PersonalAccessToken/12",
-}
-```
-
-`meta.auth_fail_token_id` indicates that an access token of ID 12 was used.
-
-To find more information about this token, use the [personal access token API](../api/personal_access_tokens.md#get-single-personal-access-token).
-You can also use the API to [rotate the token](../api/personal_access_tokens.md#rotate-a-personal-access-token).
-
-### Replace expired access tokens
-
 To replace the token:
 
 1. Check where this token may have been used previously, and remove it from any
@@ -382,10 +341,7 @@ If you are not aware of when your tokens expire because the dates have changed,
 you might have unexpected authentication failures when trying to sign into GitLab
 on that date.
 
-To manage this issue, you should upgrade to GitLab 17.2 or later, because these versions
-contain a [tool that assists with analyzing, extending, or remove token expiration dates](../administration/raketasks/tokens/index.md).
-
-If you cannot run the tool, you can also run scripts in self-managed instances to identify
+To manage this issue, you can run scripts in self-managed instances to identify
 tokens that either:
 
 - Expire on a specific date.

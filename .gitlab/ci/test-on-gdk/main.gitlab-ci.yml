@@ -176,11 +176,7 @@ gdk-qa-non-blocking:
   allow_failure: true
   artifacts:
     paths:
-      - '*.log'
-      - qa/tmp/test-metrics-*.json
-      - qa/tmp/*.txt
-      - qa/tmp/*.log
-      - qa/tmp/qa-test-*/*
+      - log
     reports:
       dotenv: ""
   rules:

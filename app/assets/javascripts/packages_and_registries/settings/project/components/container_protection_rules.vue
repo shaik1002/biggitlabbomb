@@ -2,6 +2,7 @@
 import {
   GlAlert,
   GlButton,
+  GlCard,
   GlFormSelect,
   GlKeysetPagination,
   GlLoadingIcon,
@@ -11,7 +12,6 @@ import {
   GlTable,
   GlSprintf,
 } from '@gitlab/ui';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
 import protectionRulesQuery from '~/packages_and_registries/settings/project/graphql/queries/get_container_protection_rules.query.graphql';
 import SettingsBlock from '~/packages_and_registries/shared/components/settings_block.vue';
 import ContainerProtectionRuleForm from '~/packages_and_registries/settings/project/components/container_protection_rule_form.vue';
@@ -28,10 +28,10 @@ const I18N_MINIMUM_ACCESS_LEVEL_FOR_DELETE = s__(
 
 export default {
   components: {
-    CrudComponent,
     ContainerProtectionRuleForm,
     GlAlert,
     GlButton,
+    GlCard,
     GlFormSelect,
     GlKeysetPagination,
     GlLoadingIcon,
@@ -288,15 +288,24 @@ export default {
     </template>
 
     <template #default>
-      <crud-component :title="$options.i18n.settingBlockTitle">
-        <template #actions>
-          <gl-button
-            size="small"
-            :disabled="isAddProtectionRuleButtonDisabled"
-            @click="showProtectionRuleForm"
-          >
-            {{ s__('ContainerRegistry|Add protection rule') }}
-          </gl-button>
+      <gl-card
+        class="gl-new-card"
+        header-class="gl-new-card-header"
+        body-class="gl-new-card-body gl-px-0"
+      >
+        <template #header>
+          <div class="gl-new-card-title-wrapper gl-justify-content-space-between">
+            <h3 class="gl-new-card-title">{{ $options.i18n.settingBlockTitle }}</h3>
+            <div class="gl-new-card-actions">
+              <gl-button
+                size="small"
+                :disabled="isAddProtectionRuleButtonDisabled"
+                @click="showProtectionRuleForm"
+              >
+                {{ s__('ContainerRegistry|Add protection rule') }}
+              </gl-button>
+            </div>
+          </div>
         </template>
 
         <template #default>
@@ -374,7 +383,7 @@ export default {
             />
           </div>
         </template>
-      </crud-component>
+      </gl-card>
 
       <gl-modal
         v-if="protectionRuleMutationItem"

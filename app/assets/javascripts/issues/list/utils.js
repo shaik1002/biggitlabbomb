@@ -429,13 +429,9 @@ export function findWidget(type, workItem) {
   return workItem?.widgets?.find((widget) => widget.type === type);
 }
 
-export function mapWorkItemWidgetsToIssueFields(issuesList, workItem, isBoard = false) {
+export function mapWorkItemWidgetsToIssueFields(issuesList, workItem) {
   return produce(issuesList, (draftData) => {
-    const activeList = isBoard
-      ? draftData.project.board.lists.nodes[0].issues.nodes
-      : draftData.project.issues.nodes;
-
-    const activeItem = activeList.find((issue) => issue.iid === workItem.iid);
+    const activeItem = draftData.project.issues.nodes.find((issue) => issue.iid === workItem.iid);
 
     Object.keys(WORK_ITEM_TO_ISSUE_MAP).forEach((type) => {
       const currentWidget = findWidget(type, workItem);

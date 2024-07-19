@@ -153,8 +153,7 @@ module Gitlab
           target_project_id: target_project_id,
           remove_source_branch: true,
           assignee_ids: usernames_to_ids(change.assignees),
-          reviewer_ids: usernames_to_ids(change.reviewers),
-          squash: true
+          reviewer_ids: usernames_to_ids(change.reviewers)
         })
       end
 

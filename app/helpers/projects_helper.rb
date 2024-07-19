@@ -56,7 +56,7 @@ module ProjectsHelper
     content_tag(:span, username, name_tag_options)
   end
 
-  def link_to_member(author, opts = {}, &block)
+  def link_to_member(_project, author, opts = {}, &block)
     default_opts = { avatar: true, name: true, title: ":name" }
     opts = default_opts.merge(opts)
 
@@ -197,6 +197,7 @@ module ProjectsHelper
   end
 
   def can_set_diff_preview_in_email?(project, current_user)
+    return false unless Feature.enabled?(:diff_preview_in_email, project.group)
     return false if project.group&.show_diff_preview_in_email?.equal?(false)
 
     can?(current_user, :set_show_diff_preview_in_email, project)

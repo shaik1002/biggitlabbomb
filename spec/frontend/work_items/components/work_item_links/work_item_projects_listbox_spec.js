@@ -5,13 +5,19 @@ import { mountExtended } from 'helpers/vue_test_utils_helper';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import WorkItemProjectsListbox from '~/work_items/components/work_item_links/work_item_projects_listbox.vue';
-import namespaceProjectsForLinksWidgetQuery from '~/work_items/graphql/namespace_projects_for_links_widget.query.graphql';
+import groupProjectsForLinksWidgetQuery from '~/work_items/graphql/group_projects_for_links_widget.query.graphql';
+import relatedProjectsForLinksWidgetQuery from '~/work_items/graphql/related_projects_for_links_widget.query.graphql';
 import { SEARCH_DEBOUNCE } from '~/work_items/constants';
-import { namespaceProjectsList, mockFrequentlyUsedProjects } from '../../mock_data';
+import {
+  groupProjectsList,
+  relatedProjectsList,
+  mockFrequentlyUsedProjects,
+} from '../../mock_data';
 
 Vue.use(VueApollo);
 
-const namespaceProjectsData = namespaceProjectsList.data.namespace.projects.nodes;
+const groupProjectsData = groupProjectsList.data.group.projects.nodes;
+const relatedProjectsData = relatedProjectsList.data.project.group.projects.nodes;
 
 describe('WorkItemProjectsListbox', () => {
   /**
@@ -31,9 +37,8 @@ describe('WorkItemProjectsListbox', () => {
     localStorage.removeItem(getLocalstorageKey());
   };
 
-  const namespaceProjectsFormLinksWidgetResolver = jest
-    .fn()
-    .mockResolvedValue(namespaceProjectsList);
+  const groupProjectsFormLinksWidgetResolver = jest.fn().mockResolvedValue(groupProjectsList);
+  const relatedProjectsFormLinksWidgetResolver = jest.fn().mockResolvedValue(relatedProjectsList);
 
   const findDropdown = () => wrapper.findComponent(GlCollapsibleListbox);
   const findDropdownItemFor = (fullPath) => wrapper.findByTestId(`listbox-item-${fullPath}`);
@@ -43,7 +48,8 @@ describe('WorkItemProjectsListbox', () => {
   const createComponent = async (isGroup = true, fullPath = 'group-a') => {
     wrapper = mountExtended(WorkItemProjectsListbox, {
       apolloProvider: createMockApollo([
-        [namespaceProjectsForLinksWidgetQuery, namespaceProjectsFormLinksWidgetResolver],
+        [groupProjectsForLinksWidgetQuery, groupProjectsFormLinksWidgetResolver],
+        [relatedProjectsForLinksWidgetQuery, relatedProjectsFormLinksWidgetResolver],
       ]),
       propsData: {
         fullPath,
@@ -66,10 +72,10 @@ describe('WorkItemProjectsListbox', () => {
 
       expect(findDropdown().text()).not.toContain('Recently used');
 
-      const dropdownItem = findDropdownItemFor(namespaceProjectsData[0].fullPath);
+      const dropdownItem = findDropdownItemFor(groupProjectsData[0].fullPath);
 
-      expect(dropdownItem.text()).toContain(namespaceProjectsData[0].name);
-      expect(dropdownItem.text()).toContain(namespaceProjectsData[0].namespace.name);
+      expect(dropdownItem.text()).toContain(groupProjectsData[0].name);
+      expect(dropdownItem.text()).toContain(groupProjectsData[0].namespace.name);
     });
 
     it('supports selecting a project', async () => {
@@ -79,13 +85,13 @@ describe('WorkItemProjectsListbox', () => {
 
       await nextTick();
 
-      await findDropdownItemFor(namespaceProjectsData[0].fullPath).trigger('click');
+      await findDropdownItemFor(groupProjectsData[0].fullPath).trigger('click');
 
       await nextTick();
 
       const emitted = wrapper.emitted('selectProject');
 
-      expect(emitted[1][0]).toEqual(namespaceProjectsData[0]);
+      expect(emitted[1][0]).toEqual(groupProjectsData[0]);
     });
 
     it('renders recent projects if present', async () => {
@@ -116,7 +122,7 @@ describe('WorkItemProjectsListbox', () => {
 
       const emitted = wrapper.emitted('selectProject');
 
-      expect(emitted[1][0]).toEqual(namespaceProjectsData[1]);
+      expect(emitted[1][0]).toEqual(groupProjectsData[1]);
     });
 
     it('supports filtering recent projects via search input', async () => {
@@ -137,7 +143,7 @@ describe('WorkItemProjectsListbox', () => {
       content = findRecentDropdownItems();
 
       expect(content).toHaveLength(1);
-      expect(content.at(0).text()).toContain(namespaceProjectsData[0].name);
+      expect(content.at(0).text()).toContain(groupProjectsData[0].name);
     });
   });
 
@@ -152,10 +158,10 @@ describe('WorkItemProjectsListbox', () => {
 
       expect(findDropdown().text()).not.toContain('Recently used');
 
-      const dropdownItem = findDropdownItemFor(namespaceProjectsData[0].fullPath);
+      const dropdownItem = findDropdownItemFor(relatedProjectsData[0].fullPath);
 
-      expect(dropdownItem.text()).toContain(namespaceProjectsData[0].name);
-      expect(dropdownItem.text()).toContain(namespaceProjectsData[0].namespace.name);
+      expect(dropdownItem.text()).toContain(relatedProjectsData[0].name);
+      expect(dropdownItem.text()).toContain(relatedProjectsData[0].namespace.name);
     });
 
     it('auto-selects the current project', async () => {
@@ -163,7 +169,7 @@ describe('WorkItemProjectsListbox', () => {
 
       const emitted = wrapper.emitted('selectProject');
 
-      expect(emitted[0][0]).toEqual(namespaceProjectsData[0]);
+      expect(emitted[0][0]).toEqual(relatedProjectsData[0]);
     });
 
     it('supports selecting a project', async () => {
@@ -173,13 +179,13 @@ describe('WorkItemProjectsListbox', () => {
 
       await nextTick();
 
-      await findDropdownItemFor(namespaceProjectsData[1].fullPath).trigger('click');
+      await findDropdownItemFor(relatedProjectsData[1].fullPath).trigger('click');
 
       await nextTick();
 
       const emitted = wrapper.emitted('selectProject');
 
-      expect(emitted[1][0]).toEqual(namespaceProjectsData[1]);
+      expect(emitted[1][0]).toEqual(relatedProjectsData[1]);
     });
 
     it('renders recent projects if present', async () => {
@@ -210,7 +216,7 @@ describe('WorkItemProjectsListbox', () => {
 
       const emitted = wrapper.emitted('selectProject');
 
-      expect(emitted[1][0]).toEqual(namespaceProjectsData[1]);
+      expect(emitted[1][0]).toEqual(relatedProjectsData[1]);
     });
 
     it('supports filtering recent projects via search input', async () => {
@@ -231,7 +237,7 @@ describe('WorkItemProjectsListbox', () => {
       content = findRecentDropdownItems();
 
       expect(content).toHaveLength(1);
-      expect(content.at(0).text()).toContain(namespaceProjectsData[0].name);
+      expect(content.at(0).text()).toContain(relatedProjectsData[0].name);
     });
   });
 });

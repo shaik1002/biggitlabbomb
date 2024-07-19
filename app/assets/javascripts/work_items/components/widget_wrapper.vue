@@ -57,12 +57,7 @@ export default {
 </script>
 
 <template>
-  <div
-    :id="widgetName"
-    data-testid="widget-wrapper"
-    class="gl-new-card"
-    :class="{ 'is-collapsed': !isOpen }"
-  >
+  <div :id="widgetName" class="gl-new-card">
     <div class="gl-new-card-header">
       <div class="gl-new-card-title-wrapper">
         <h2 class="gl-new-card-title">
@@ -87,7 +82,6 @@ export default {
           :aria-label="toggleLabel"
           data-testid="widget-toggle"
           :aria-expanded="isOpenString"
-          :aria-controls="widgetName"
           @click="toggle"
         />
       </div>

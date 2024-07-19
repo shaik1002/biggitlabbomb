@@ -13,7 +13,6 @@ globals:
   IS_EE: false
 plugins:
   - no-jquery
-  - local-rules
 settings:
   import/resolver:
     webpack:
@@ -153,7 +152,6 @@ rules:
         - '^router-link$'
         - '^router-view$'
         - '^gl-emoji$'
-  local-rules/require-valid-help-page-path: 'error'
 overrides:
   - files:
       - '{,ee/,jh/}spec/frontend*/**/*'
@@ -193,7 +191,6 @@ overrides:
           message: '`/ee` or `/jh` path found in docs url, use `DOCS_URL_IN_EE_DIR` in `jh_else_ce/lib/utils/url_utility`'
       no-unsanitized/method: off
       no-unsanitized/property: off
-      local-rules/require-valid-help-page-path: off
   - files:
       - 'config/**/*'
       - 'scripts/**/*'
@@ -247,11 +244,3 @@ overrides:
       - 'ee/app/assets/javascripts/projects/settings/repository/branch_rules/graphql/queries/branch_rules.query.graphql'
     rules:
       '@graphql-eslint/require-id-when-available': off
-  - files:
-      - '{,spec/}tooling/**/*'
-    rules:
-      'no-undef': off
-      'import/no-commonjs': off
-      'import/no-extraneous-dependencies': off
-      'no-restricted-syntax': off
-      '@gitlab/require-i18n-strings': off

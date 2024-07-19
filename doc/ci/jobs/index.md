@@ -109,14 +109,10 @@ You can't use these keywords as job names:
 - `variables`
 - `cache`
 - `include`
+- `true`
+- `false`
+- `nil`
 - `pages:deploy` configured for a `deploy` stage
-
-Additionally, these names are valid when quoted, but are
-not recommended as they can make pipeline configuration unclear:
-
-- `"true":`
-- `"false":`
-- `"nil":`
 
 Job names must be 255 characters or fewer.
 
@@ -303,7 +299,7 @@ the duration.
 
 In the following example:
 
-- Three sections have been collapsed and can be expanded.
+- Three sections are collapsed and can be expanded.
 - Three sections are expanded and can be collapsed.
 
 ![Collapsible sections](img/collapsible_log_v13_10.png)
@@ -312,13 +308,13 @@ In the following example:
 
 You can create [collapsible sections in job logs](#expand-and-collapse-job-log-sections)
 by manually outputting special codes
-that GitLab uses to delimit collapsible sections:
+that GitLab uses to determine what sections to collapse:
 
 - Section start marker: `\e[0Ksection_start:UNIX_TIMESTAMP:SECTION_NAME\r\e[0K` + `TEXT_OF_SECTION_HEADER`
 - Section end marker: `\e[0Ksection_end:UNIX_TIMESTAMP:SECTION_NAME\r\e[0K`
 
-You must add these codes to the script section of the CI configuration.
-For example, using `echo`:
+You must add these codes to the script section of the CI configuration. For example,
+using `echo`:
 
 ```yaml
 job1:
@@ -328,21 +324,19 @@ job1:
     - echo -e "\e[0Ksection_end:`date +%s`:my_first_section\r\e[0K"
 ```
 
-The escape syntax may differ depending on the shell that your runner uses.
-For example if it is using Zsh, you may need to escape the special characters
-with `\\e` or `\\r`.
+Depending on the shell that your runner uses, for example if it is using Zsh, you may need to
+escape the special characters like so: `\\e` and `\\r`.
 
 In the example above:
 
-- `date +%s`: Command that produces the Unix timestamp (for example `1560896352`).
-- `my_first_section`: The name given to the section. The name can only be composed
-  of letters, numbers, and the `_`, `.`, or `-` characters.
-- `\r\e[0K`: Escape sequence that prevents the section markers from displaying in the
-  rendered (colored) job log. They are displayed when viewing the raw job log, accessed
-  in the upper-right corner of the job log by selecting **Show complete raw** (**{doc-text}**).
-  - `\r`: carriage return (returns the cursor to the start of the line).
-  - `\e[0K`: ANSI escape code to clear the line from the cursor position to the end of the line.
-    (`\e[K` alone does not work; the `0` must be included).
+- `date +%s`: The Unix timestamp (for example `1560896352`).
+- `my_first_section`: The name given to the section. The name can only be composed of
+  letters, numbers, and the `_`, `.`, or `-` characters.
+- `\r\e[0K`: Prevents the section markers from displaying in the rendered (colored)
+  job log, but they are displayed in the raw job log. To see them, in the upper-right corner
+  of the job log, select **Show complete raw** (**{doc-text}**).
+  - `\r`: carriage return.
+  - `\e[0K`: clear line ANSI escape sequence (`\e[K` does not work, the `0` must be included).
 
 Sample raw job log:
 
@@ -358,8 +352,7 @@ Sample job console log:
 
 #### Use a script to improve display of collapsible sections
 
-To remove the `echo` statements that create the section markers from the job output,
-you can move the job contents to a script file and invoke it from the job:
+To remove `echo` statements from the job output, you can move the job contents to a script file and invoke it from the job:
 
 1. Create a script that can handle the section headers. For example:
 
@@ -404,7 +397,7 @@ Add `[collapsed=true]` after the section name and before the `\r`. The section e
 remains unchanged:
 
 - Section start marker with `[collapsed=true]`: `\e[0Ksection_start:UNIX_TIMESTAMP:SECTION_NAME[collapsed=true]\r\e[0K` + `TEXT_OF_SECTION_HEADER`
-- Section end marker (unchanged): `\e[0Ksection_end:UNIX_TIMESTAMP:SECTION_NAME\r\e[0K`
+- Section end marker: `\e[0Ksection_end:UNIX_TIMESTAMP:SECTION_NAME\r\e[0K`
 
 Add the updated section start text to the CI configuration. For example,
 using `echo`:

@@ -4,8 +4,6 @@ module Gitlab
   module Graphql
     module Authorize
       class ObjectAuthorization
-        include ::Gitlab::Allowable
-
         attr_reader :abilities, :permitted_scopes
 
         def initialize(abilities, scopes = %i[api read_api])
@@ -31,7 +29,9 @@ module Gitlab
           return true if none?
 
           subject = object.try(:declarative_policy_subject) || object
-          can_all?(current_user, abilities, subject)
+          abilities.all? do |ability|
+            Ability.allowed?(current_user, ability, subject)
+          end
         end
 
         def scopes_ok?(validator)

@@ -2,10 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::BackgroundMigration::QueueBackfillAutocancelPartitionIdOnCiPipelines,
-  feature_category: :ci_scaling,
-  migration: :gitlab_ci,
-  schema: 20240704155541 do
+RSpec.describe Gitlab::BackgroundMigration::QueueBackfillAutocancelPartitionIdOnCiPipelines, feature_category: :ci_scaling do
   let(:ci_pipelines_table) { table(:ci_pipelines, database: :ci) }
 
   let!(:pipeline_1) { ci_pipelines_table.create!(partition_id: 100) }

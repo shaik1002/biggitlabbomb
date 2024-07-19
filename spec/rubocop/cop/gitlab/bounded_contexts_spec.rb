@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'spec_helper'
 require 'rubocop_spec_helper'
 require_relative '../../../../rubocop/cop/gitlab/bounded_contexts'
 

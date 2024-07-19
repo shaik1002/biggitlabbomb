@@ -75,7 +75,6 @@
   .note-action-button,
   .right-sidebar,
   .flash-container,
-  .top-bar-fixed,
   copy-code,
   #js-peek {
     display: none !important;
@@ -99,7 +98,7 @@
     content: none !important;
   }
 
-  .with-performance-bar .layout-page, .content-wrapper {
+  .with-performance-bar .layout-page {
     padding-top: 0;
   }
 }

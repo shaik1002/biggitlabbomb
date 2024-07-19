@@ -16,7 +16,7 @@ export default {
     v-gl-tooltip
     :title="__('Part of merge request changes')"
     :size="12"
-    name="merge-request"
+    name="git-merge"
     class="gl-mr-3"
   />
 </template>

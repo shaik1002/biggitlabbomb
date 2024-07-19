@@ -4,16 +4,16 @@ group: Source Code
 info: Any user with at least the Maintainer role can merge updates to this content. For details, see https://docs.gitlab.com/ee/development/development_processes.html#development-guidelines-review.
 ---
 
-# Push rules development guidelines
+# Push Rules development guidelines
 
 This document was created to help contributors understand the code design of
-[push rules](../../user/project/repository/push_rules.md). You should read this
+[Push Rules](../../user/project/repository/push_rules.md). You should read this
 document before making changes to the code for this feature.
 
 This document is intentionally limited to an overview of how the code is
 designed, as code can change often. To understand how a specific part of the
 feature works, view the code and the specs. The details here explain how the
-major components of the push rules feature work.
+major components of the Push Rules feature work.
 
 NOTE:
 This document should be updated when parts of the codebase referenced in this

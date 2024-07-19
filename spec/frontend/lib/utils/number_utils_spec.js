@@ -145,7 +145,6 @@ describe('Number Utils', () => {
       ${123456789} | ${'123.5m'}
     `('returns $expected given $number', ({ number, expected }) => {
       expect(numberToMetricPrefix(number)).toBe(expected);
-      expect(numberToMetricPrefix(number, true)).toBe(expected.toUpperCase());
     });
   });
 

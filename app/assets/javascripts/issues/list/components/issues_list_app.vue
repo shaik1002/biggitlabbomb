@@ -70,6 +70,7 @@ import IssuableList from '~/vue_shared/issuable/list/components/issuable_list_ro
 import { DEFAULT_PAGE_SIZE, issuableListTabs } from '~/vue_shared/issuable/list/constants';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import NewResourceDropdown from '~/vue_shared/components/new_resource_dropdown/new_resource_dropdown.vue';
+import deleteWorkItemMutation from '~/work_items/graphql/delete_work_item.mutation.graphql';
 import { WORK_ITEM_TYPE_ENUM_OBJECTIVE } from '~/work_items/constants';
 import WorkItemDrawer from '~/work_items/components/work_item_drawer.vue';
 import {
@@ -863,9 +864,23 @@ export default {
       this.$apollo.queries.issues.refetch();
       this.$apollo.queries.issuesCounts.refetch();
     },
-    deleteIssuable() {
-      this.activeIssuable = null;
-      this.refetchIssuables();
+    deleteIssuable({ workItemId }) {
+      this.$apollo
+        .mutate({
+          mutation: deleteWorkItemMutation,
+          variables: { input: { id: workItemId } },
+        })
+        .then(({ data }) => {
+          if (data.workItemDelete.errors?.length) {
+            throw new Error(data.workItemDelete.errors[0]);
+          }
+          this.activeIssuable = null;
+          this.refetchIssuables();
+        })
+        .catch((error) => {
+          this.issuesError = __('An error occurred while deleting an issuable.');
+          Sentry.captureException(error);
+        });
     },
     updateIssuableEmojis(workItem) {
       const client = this.$apollo.provider.clients.defaultClient;
@@ -892,8 +907,7 @@ export default {
       @work-item-updated="updateIssuablesCache"
       @work-item-emoji-updated="updateIssuableEmojis"
       @addChild="refetchIssuables"
-      @deleteWorkItemError="issuesError = __('An error occurred while deleting an issuable.')"
-      @workItemDeleted="deleteIssuable"
+      @deleteWorkItem="deleteIssuable"
       @promotedToObjective="promoteToObjective"
     />
     <issuable-list

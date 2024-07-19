@@ -66,15 +66,15 @@ module Gitlab
           output_failures_for_model(model, failures_per_row)
         end
 
-        logger.info Rainbow("Total: #{running_failures} row(s) affected").blue
+        logger.info "Total: #{running_failures} row(s) affected".color(:blue)
       end
 
       def output_failures_for_model(model, failures)
         status_color = failures.empty? ? :green : :red
 
-        logger.info Rainbow("- #{model} failures: #{failures.count}").color(status_color)
+        logger.info "- #{model} failures: #{failures.count}".color(status_color)
         failures.each do |row_id, attributes|
-          logger.debug Rainbow("  - #{model}[#{row_id}]: #{attributes.join(", ")}").red
+          logger.debug "  - #{model}[#{row_id}]: #{attributes.join(", ")}".color(:red)
         end
       end
 
@@ -99,7 +99,7 @@ module Gitlab
       rescue OpenSSL::Cipher::CipherError, TypeError
         false
       rescue StandardError => e
-        logger.debug Rainbow("> Something went wrong for #{data.class.name}[#{data.id}].#{attr}: #{e}").red
+        logger.debug "> Something went wrong for #{data.class.name}[#{data.id}].#{attr}: #{e}".color(:red)
 
         false
       end

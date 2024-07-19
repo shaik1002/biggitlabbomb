@@ -60,14 +60,14 @@ RSpec.describe 'Group share with group lock', feature_category: :groups_and_proj
   end
 
   def enable_group_lock
-    within_testid('permissions-settings') do
+    page.within('.gs-permissions') do
       check 'group_share_with_group_lock'
       click_on 'Save changes'
     end
   end
 
   def disable_group_lock
-    within_testid('permissions-settings') do
+    page.within('.gs-permissions') do
       uncheck 'group_share_with_group_lock'
       click_on 'Save changes'
     end

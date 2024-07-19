@@ -92,15 +92,13 @@ RSpec.describe Ci::Processable, feature_category: :continuous_integration do
            runner_id tag_taggings taggings tags trigger_request_id
            user_id auto_canceled_by_id retried failure_reason
            sourced_pipelines sourced_pipeline artifacts_file_store artifacts_metadata_store
-           metadata runner_manager_build runner_manager runner_session trace_chunks
-           upstream_pipeline_id upstream_pipeline_partition_id
+           metadata runner_manager_build runner_manager runner_session trace_chunks upstream_pipeline_id
            artifacts_file artifacts_metadata artifacts_size commands
            resource resource_group_id processed security_scans author
            pipeline_id report_results pending_state pages_deployments
            queuing_entry runtime_metadata trace_metadata
            dast_site_profile dast_scanner_profile stage_id dast_site_profiles_build
-           dast_scanner_profiles_build auto_canceled_by_partition_id execution_config_id execution_config
-           build_source].freeze
+           dast_scanner_profiles_build auto_canceled_by_partition_id execution_config_id execution_config].freeze
       end
 
       before_all do

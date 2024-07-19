@@ -1,6 +1,7 @@
-#!/usr/bin/env ruby
 # frozen_string_literal: true
 
+# !/usr/bin/env ruby
+#
 # Generate a metric/event files in the correct locations.
 
 require 'tty-prompt'
@@ -112,7 +113,7 @@ class Cli
   def proceed_to_event_definition
     new_page!
 
-    cli.say format_info("Okay! The next step is adding a new event! (~5-10 min)\n")
+    cli.say format_info("Okay! The next step is adding a new event! (~5 min)\n")
 
     return not_ready_error('New Event') unless cli.yes?(format_prompt('Ready to start?'))
 

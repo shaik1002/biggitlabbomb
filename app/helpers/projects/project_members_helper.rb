@@ -30,8 +30,7 @@ module Projects::ProjectMembersHelper
       can_manage_access_requests: Ability.allowed?(current_user, :admin_member_access_request, project),
       group_name: project.group&.name,
       group_path: project.group&.full_path,
-      can_approve_access_requests: true, # true for CE, overridden in EE
-      available_roles: available_project_roles(project)
+      can_approve_access_requests: true # true for CE, overridden in EE
     }
   end
 
@@ -92,13 +91,6 @@ module Projects::ProjectMembersHelper
       pagination: members_pagination_data(members),
       member_path: project_group_link_path(project, ':id')
     }
-  end
-
-  # Overridden in `ee/app/helpers/ee/projects/project_members_helper.rb`
-  def available_project_roles(_)
-    Gitlab::Access.options_with_owner.map do |name, access_level|
-      { title: name, value: "static-#{access_level}" }
-    end
   end
 end
 
