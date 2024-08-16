@@ -722,6 +722,10 @@ class Namespace < ApplicationRecord
       :active_pages_deployments)
   end
 
+  def work_item_sync_to_epic_enabled?
+    ::Feature.enabled?(:sync_work_item_to_epic, self, type: :wip)
+  end
+
   private
 
   def cross_namespace_reference?(from)

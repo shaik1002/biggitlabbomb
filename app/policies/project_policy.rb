@@ -311,6 +311,9 @@ class ProjectPolicy < BasePolicy
     Feature.enabled?(:hide_projects_of_banned_users) && @subject.created_and_owned_by_banned_user?
   end
 
+  condition(:work_items_feature_available) { Feature.enabled?(:work_items_alpha) }
+  condition(:epics_available, scope: :subject) { @subject.licensed_feature_available?(:epics) }
+
   # `:read_project` may be prevented in EE, but `:read_project_for_iids` should
   # not.
   rule { guest | admin | organization_owner }.enable :read_project_for_iids
@@ -386,6 +389,8 @@ class ProjectPolicy < BasePolicy
   rule { can?(:create_issue) }.enable :create_work_item
 
   rule { can?(:create_issue) }.enable :create_task
+
+  rule { can?(:create_issue) & work_items_feature_available & epics_available }.enable :create_epic
 
   # These abilities are not allowed to admins that are not members of the project,
   # that's why they are defined separately.
