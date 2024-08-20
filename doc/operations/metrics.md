@@ -102,3 +102,24 @@ The following table shows what type of aggregation is used for each search perio
 ### Data retention
 
 GitLab has a retention limit of 30 days for all ingested metrics.
+
+### Create an issue for a metric
+
+You can create an issue to track any action taken to resolve or investigate a metric. To create an issue for a metric:
+
+1. On the left sidebar, select **Search or go to** and find your project.
+1. Select **Monitor > Metrics**.
+1. Search for, and select a metric from the list of metrics.
+1. Select **Create issue**.
+
+The issue is created in the selected project and pre-filled with information from the metric. The issue title and
+description can be edited as usual.
+
+### View issues related to a metric
+
+1. On the left sidebar, select **Search or go to** and find your project.
+1. Select **Monitor > Metrics**.
+1. Search for, and select a metric from the list of metrics.
+1. Scroll to **Linked items**.
+   - Optionally, select **View issues** to automatically scroll to **Linked items**.
+1. Optionally, select an issue from the list to view the issue details.
