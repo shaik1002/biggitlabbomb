@@ -2,7 +2,17 @@ name: gitlab_sec
 description: Schema for all Cell-local Security features.
 allow_cross_joins:
   - gitlab_shared
+  - gitlab_main_cell:
+      specific_tables:
+      - vulnerabilities
 allow_cross_transactions:
   - gitlab_internal
   - gitlab_shared
+  - gitlab_main_cell:
+      specific_tables:
+      - vulnerabilities
+allow_cross_foreign_keys:
+  - gitlab_main_cell:
+      specific_tables:
+      - vulnerabilities
 cell_local: true
