@@ -60,30 +60,37 @@ module API
       end
 
       get ':id/templates/:type/:name', requirements: TEMPLATE_NAMES_ENDPOINT_REQUIREMENTS do
-        begin
-          template = TemplateFinder.build(
-            params[:type],
-            user_project,
-            {
-              name: params[:name],
-              source_template_project_id: params[:source_template_project_id]
-            }
-          ).execute
-        rescue ::Gitlab::Template::Finders::RepoTemplateFinder::FileNotFoundError
-          not_found!('Template')
-        end
+        current_user_role = user_project.team.max_member_access(current_user.id)
+        allowed_templates_for_guests = ['issues']
 
-        not_found!('Template') unless template.present?
-
-        template.resolve!(
-          project_name: params[:project].presence,
-          fullname: params[:fullname].presence || current_user&.name
-        )
-
-        if template.is_a?(::LicenseTemplate)
-          present template, with: Entities::License
+        if current_user_role == Gitlab::Access::GUEST && allowed_templates_for_guests.exclude?(params[:type])
+          forbidden!("Guests are not allowed to access #{params[:type]} template")
         else
-          present template, with: Entities::Template
+          begin
+            template = TemplateFinder.build(
+              params[:type],
+              user_project,
+              {
+                name: params[:name],
+                source_template_project_id: params[:source_template_project_id]
+              }
+            ).execute
+          rescue ::Gitlab::Template::Finders::RepoTemplateFinder::FileNotFoundError
+            not_found!('Template')
+          end
+
+          not_found!('Template') unless template.present?
+
+          template.resolve!(
+            project_name: params[:project].presence,
+            fullname: params[:fullname].presence || current_user&.name
+          )
+
+          if template.is_a?(::LicenseTemplate)
+            present template, with: Entities::License
+          else
+            present template, with: Entities::Template
+          end
         end
       end
     end
