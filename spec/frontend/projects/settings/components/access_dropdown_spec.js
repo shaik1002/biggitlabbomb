@@ -50,10 +50,6 @@ jest.mock('~/projects/settings/api/access_dropdown_api', () => ({
 }));
 
 describe('Access Level Dropdown', () => {
-  beforeEach(() => {
-    window.gon = { abilities: { adminProject: true } };
-  });
-
   let wrapper;
   const defaultToggleClass = '!gl-text-gray-500';
   const mockAccessLevelsData = [
@@ -75,14 +71,9 @@ describe('Access Level Dropdown', () => {
     },
   ];
 
-  const abilities = {
-    adminProject: true,
-    adminProtectedBranch: false,
-  };
   const createComponent = ({
     accessLevelsData = mockAccessLevelsData,
     accessLevel = ACCESS_LEVELS.PUSH,
-    glAbilities = abilities,
     stubs = {},
     ...optionalProps
   } = {}) => {
@@ -91,9 +82,6 @@ describe('Access Level Dropdown', () => {
         accessLevelsData,
         accessLevel,
         ...optionalProps,
-      },
-      provide: {
-        glAbilities,
       },
       stubs: {
         GlSprintf,
@@ -130,18 +118,6 @@ describe('Access Level Dropdown', () => {
         expect(getUsers).toHaveBeenCalled();
         expect(getGroups).toHaveBeenCalledWith({ withProjectAccess: true });
         expect(getDeployKeys).toHaveBeenCalled();
-      });
-    });
-
-    describe('withProtectedBranchesAccess', () => {
-      it('should make an api call for users && groups when user has a license', () => {
-        createComponent({
-          groupsWithProjectAccess: true,
-          glAbilities: { adminProject: false, adminProtectedBranch: true },
-        });
-        expect(getUsers).toHaveBeenCalled();
-        expect(getGroups).toHaveBeenCalledWith({ withProjectAccess: true });
-        expect(getDeployKeys).not.toHaveBeenCalled();
       });
     });
 

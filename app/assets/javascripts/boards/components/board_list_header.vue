@@ -206,7 +206,6 @@ export default {
     },
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     boardList: {
       fetchPolicy: fetchPolicies.CACHE_AND_NETWORK,
       query() {

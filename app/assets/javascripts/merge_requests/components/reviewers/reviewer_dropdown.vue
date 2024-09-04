@@ -12,7 +12,6 @@ import userPermissionsQuery from './queries/user_permissions.query.graphql';
 
 export default {
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     userPermissions: {
       query: userPermissionsQuery,
       variables() {

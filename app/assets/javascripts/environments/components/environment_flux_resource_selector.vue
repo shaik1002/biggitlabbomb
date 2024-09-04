@@ -52,7 +52,6 @@ export default {
     };
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     fluxKustomizations: {
       query: fluxKustomizationsQuery,
       variables() {
@@ -76,7 +75,6 @@ export default {
         }
       },
     },
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     fluxHelmReleases: {
       query: fluxHelmReleasesQuery,
       variables() {

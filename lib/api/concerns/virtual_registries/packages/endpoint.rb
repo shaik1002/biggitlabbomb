@@ -10,7 +10,16 @@ module API
           NO_BROWSER_EXECUTION_RESPONSE_HEADERS = { 'Content-Security-Policy' => "default-src 'none'" }.freeze
           MAJOR_BROWSERS = %i[webkit firefox ie edge opera chrome].freeze
           WEB_BROWSER_ERROR_MESSAGE = 'This endpoint is not meant to be accessed by a web browser.'
-          UPSTREAM_GID_HEADER = 'X-Gitlab-Virtual-Registry-Upstream-Global-Id'
+
+          TIMEOUTS = {
+            open: 10,
+            read: 10
+          }.freeze
+
+          RESPONSE_STATUSES = {
+            error: :bad_gateway,
+            timeout: :gateway_timeout
+          }.freeze
 
           included do
             helpers do
@@ -22,8 +31,8 @@ module API
               def send_successful_response_from(service_response:)
                 action, action_params = service_response.to_h.values_at(:action, :action_params)
                 case action
-                when :workhorse_upload_url
-                  workhorse_upload_url(**action_params.slice(:url, :upstream))
+                when :workhorse_send_url
+                  workhorse_send_url(url: action_params[:url], headers: action_params[:headers])
                 end
               end
 
@@ -38,13 +47,15 @@ module API
                 end
               end
 
-              def workhorse_upload_url(url:, upstream:)
+              def workhorse_send_url(url:, headers: {})
                 send_workhorse_headers(
-                  Gitlab::Workhorse.send_dependency(
-                    upstream.headers,
+                  Gitlab::Workhorse.send_url(
                     url,
-                    response_headers: NO_BROWSER_EXECUTION_RESPONSE_HEADERS,
-                    upload_config: { headers: { UPSTREAM_GID_HEADER => upstream.to_global_id.to_s } }
+                    headers: headers,
+                    allow_redirects: true,
+                    timeouts: TIMEOUTS,
+                    response_statuses: RESPONSE_STATUSES,
+                    response_headers: NO_BROWSER_EXECUTION_RESPONSE_HEADERS
                   )
                 )
               end

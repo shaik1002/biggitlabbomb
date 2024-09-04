@@ -242,8 +242,7 @@ RSpec.describe BulkImports::NdjsonPipeline, feature_category: :importers do
           user: user,
           excluded_keys: nil,
           import_source: Import::SOURCE_DIRECT_TRANSFER,
-          original_users_map: {},
-          rewrite_mentions: false
+          original_users_map: {}
         )
         .and_return(relation_object)
       expect(relation_object).to receive(:assign_attributes).with(group: group)
@@ -269,8 +268,7 @@ RSpec.describe BulkImports::NdjsonPipeline, feature_category: :importers do
           user: user,
           excluded_keys: nil,
           import_source: Import::SOURCE_DIRECT_TRANSFER,
-          original_users_map: {},
-          rewrite_mentions: true
+          original_users_map: {}
         ).and_return(double(assign_attributes: nil))
 
         subject.transform(context, data)

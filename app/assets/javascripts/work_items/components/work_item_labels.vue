@@ -170,7 +170,6 @@ export default {
     },
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     workItem: {
       query: workItemByIidQuery,
       variables() {
@@ -194,7 +193,6 @@ export default {
         this.$emit('error', i18n.fetchError);
       },
     },
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     searchLabels: {
       query() {
         return this.isGroup ? groupLabelsQuery : projectLabelsQuery;

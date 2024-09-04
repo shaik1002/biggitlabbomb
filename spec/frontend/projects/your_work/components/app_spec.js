@@ -3,9 +3,7 @@ import VueRouter from 'vue-router';
 import { GlTabs } from '@gitlab/ui';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
 import YourWorkProjectsApp from '~/projects/your_work/components/app.vue';
-import TabView from '~/projects/your_work/components/tab_view.vue';
 import { createRouter } from '~/projects/your_work';
-import { stubComponent } from 'helpers/stub_component';
 import {
   ROOT_ROUTE_NAME,
   DASHBOARD_ROUTE_NAME,
@@ -33,16 +31,13 @@ describe('YourWorkProjectsApp', () => {
 
     wrapper = mountExtended(YourWorkProjectsApp, {
       router,
-      stubs: {
-        TabView: stubComponent(TabView),
-      },
     });
   };
 
   const findPageTitle = () => wrapper.find('h1');
   const findGlTabs = () => wrapper.findComponent(GlTabs);
   const findAllTabTitles = () => wrapper.findAllByTestId('projects-dashboard-tab-title');
-  const findActiveTab = () => wrapper.findByRole('tab', { selected: true });
+  const findActiveTab = () => wrapper.find('.tab-pane.active');
 
   afterEach(() => {
     router = null;
@@ -86,12 +81,6 @@ describe('YourWorkProjectsApp', () => {
     it('initializes to the correct tab', () => {
       expect(findActiveTab().text()).toContain(expectedTab.text);
     });
-
-    if (expectedTab.query) {
-      it('renders `TabView` component and passes `tab` prop', () => {
-        expect(wrapper.findComponent(TabView).props('tab')).toMatchObject(expectedTab);
-      });
-    }
   });
 
   describe('onTabUpdate', () => {

@@ -241,12 +241,13 @@ module API
         mount ::API::Ci::Triggers
         mount ::API::Ci::Variables
         mount ::API::Clusters::AgentTokens
+        mount ::API::Clusters::AgentUrlConfigurations
         mount ::API::Clusters::Agents
         mount ::API::Commits
         mount ::API::CommitStatuses
         mount ::API::ComposerPackages
-        mount ::API::Conan::V1::InstancePackages
-        mount ::API::Conan::V1::ProjectPackages
+        mount ::API::ConanInstancePackages
+        mount ::API::ConanProjectPackages
         mount ::API::ContainerRegistryEvent
         mount ::API::ContainerRepositories
         mount ::API::DebianGroupPackages
@@ -304,6 +305,7 @@ module API
         mount ::API::NpmProjectPackages
         mount ::API::NugetGroupPackages
         mount ::API::NugetProjectPackages
+        mount ::API::PackagesDependencyFirewall
         mount ::API::PackageFiles
         mount ::API::Pages
         mount ::API::PagesDomains
@@ -359,7 +361,6 @@ module API
         mount ::API::UserCounts
         mount ::API::UserRunners
         mount ::API::VirtualRegistries::Packages::Maven
-        mount ::API::WebCommits
         mount ::API::Wikis
 
         add_open_api_documentation!

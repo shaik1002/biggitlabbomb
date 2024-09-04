@@ -5,7 +5,8 @@
     "name",
     "config_project",
     "created_at",
-    "created_by_user_id"
+    "created_by_user_id",
+    "is_receptive"
   ],
   "properties": {
     "id": {

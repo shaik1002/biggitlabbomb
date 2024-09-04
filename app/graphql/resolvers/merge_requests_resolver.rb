@@ -185,5 +185,3 @@ module Resolvers
     end
   end
 end
-
-Resolvers::MergeRequestsResolver.prepend_mod

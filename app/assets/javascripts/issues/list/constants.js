@@ -11,7 +11,6 @@ import {
   OPERATOR_OR,
   OPERATOR_AFTER,
   OPERATOR_BEFORE,
-  TOKEN_TYPE_APPROVED_BY,
   TOKEN_TYPE_ASSIGNEE,
   TOKEN_TYPE_REVIEWER,
   TOKEN_TYPE_AUTHOR,
@@ -147,19 +146,6 @@ export const filtersMap = {
     [URL_PARAM]: {
       [undefined]: {
         [NORMAL_FILTER]: 'search',
-      },
-    },
-  },
-  [TOKEN_TYPE_APPROVED_BY]: {
-    [API_PARAM]: {
-      [NORMAL_FILTER]: 'approvedBy',
-    },
-    [URL_PARAM]: {
-      [OPERATOR_IS]: {
-        [NORMAL_FILTER]: 'approved_by_usernames[]',
-      },
-      [OPERATOR_NOT]: {
-        [NORMAL_FILTER]: 'not[approved_by_usernames][]',
       },
     },
   },

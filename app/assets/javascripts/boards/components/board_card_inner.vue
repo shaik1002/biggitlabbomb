@@ -79,7 +79,6 @@ export default {
     };
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     isShowingLabels: {
       query: isShowingLabelsQuery,
       update: (data) => data.isShowingLabels,

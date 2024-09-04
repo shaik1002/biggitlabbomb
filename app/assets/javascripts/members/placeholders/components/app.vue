@@ -186,7 +186,7 @@ export default {
         />
       </gl-tab>
 
-      <gl-tab>
+      <gl-tab lazy>
         <template #title>
           <span>{{ s__('UserMapping|Reassigned') }}</span>
           <gl-badge class="gl-tab-counter-badge">{{ reassignedCount || 0 }}</gl-badge>

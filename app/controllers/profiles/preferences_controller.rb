@@ -63,8 +63,7 @@ class Profiles::PreferencesController < Profiles::ApplicationController
       :markdown_surround_selection,
       :markdown_automatic_lists,
       :use_new_navigation,
-      :enabled_following,
-      :use_work_items_view
+      :enabled_following
     ]
   end
 end

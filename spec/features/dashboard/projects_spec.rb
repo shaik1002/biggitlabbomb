@@ -21,7 +21,7 @@ RSpec.describe 'Dashboard Projects', :js, feature_category: :groups_and_projects
       visit dashboard_projects_path
 
       expect(page).to have_content('Projects')
-      expect(page).to have_selector('a[aria-selected="true"]', text: 'Contributed')
+      expect(page).to have_content('Active tab: Contributed')
     end
   end
 

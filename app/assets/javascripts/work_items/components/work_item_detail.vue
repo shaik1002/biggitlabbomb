@@ -202,7 +202,6 @@ export default {
         },
       },
     },
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     allowedChildTypes: {
       query: getAllowedWorkItemChildTypes,
       variables() {

@@ -103,8 +103,3 @@ export default class Presenter {
     return this.#component;
   }
 }
-
-export const present = (data, config, ...props) => {
-  const presenter = new Presenter().init({ data, config, ...props });
-  return presenter.component;
-};

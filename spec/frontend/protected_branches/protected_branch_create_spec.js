@@ -17,7 +17,6 @@ describe('ProtectedBranchCreate', () => {
     window.gon = {
       merge_access_levels: { roles: [] },
       push_access_levels: { roles: [] },
-      abilities: { adminProject: true },
     };
   });
 

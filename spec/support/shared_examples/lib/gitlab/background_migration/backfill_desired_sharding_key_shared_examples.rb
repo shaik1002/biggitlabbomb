@@ -27,39 +27,28 @@ RSpec.shared_examples 'desired sharding key backfill job' do
       vulnerability_flags: {
         vulnerability_occurrences: 'https://gitlab.com/gitlab-org/gitlab/-/issues/480354'
       },
-      dast_site_validations: { dast_site_tokens: 'https://gitlab.com/gitlab-org/gitlab/-/issues/474985' },
-      dast_site_profile_secret_variables: {
-        dast_site_profiles: 'https://gitlab.com/gitlab-org/gitlab/-/issues/480014'
-      },
-      dast_site_profiles_builds: { dast_site_profiles: 'https://gitlab.com/gitlab-org/gitlab/-/issues/480014' }
+      dast_site_validations: { dast_site_tokens: 'https://gitlab.com/gitlab-org/gitlab/-/issues/474985' }
     }
   end
 
-  let(:batch_column) { :id }
   let!(:connection) { table(batch_table).connection }
-  let!(:starting_id) { table(batch_table).pluck(batch_column).min }
-  let!(:end_id) { table(batch_table).pluck(batch_column).max }
-  let(:job_arguments) do
-    args = [
-      backfill_column,
-      backfill_via_table,
-      backfill_via_column,
-      backfill_via_foreign_key
-    ]
-    args << partition_column if defined?(partition_column)
-    args
-  end
-
+  let!(:starting_id) { table(batch_table).pluck(:id).min }
+  let!(:end_id) { table(batch_table).pluck(:id).max }
   let!(:migration) do
     described_class.new(
       start_id: starting_id,
       end_id: end_id,
       batch_table: batch_table,
-      batch_column: batch_column,
+      batch_column: :id,
       sub_batch_size: 10,
       pause_ms: 2,
       connection: connection,
-      job_arguments: job_arguments
+      job_arguments: [
+        backfill_column,
+        backfill_via_table,
+        backfill_via_column,
+        backfill_via_foreign_key
+      ]
     )
   end
 
@@ -69,10 +58,6 @@ RSpec.shared_examples 'desired sharding key backfill job' do
 
   it 'constructs a valid query' do
     query = migration.construct_query(sub_batch: table(batch_table).all)
-
-    if defined?(partition_column)
-      expect(query).to include("AND #{backfill_via_table}.#{partition_column} = #{batch_table}.#{partition_column}")
-    end
 
     if known_cross_joins.dig(batch_table, backfill_via_table).present?
       ::Gitlab::Database.allow_cross_joins_across_databases(

@@ -30,7 +30,6 @@ export default {
     };
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     activeBoardItem: {
       query: activeBoardItemQuery,
       variables() {
@@ -143,6 +142,7 @@ export default {
       onAttributeUpdated: this.onAttributeUpdated,
       onIssuableDeleted: this.refetchActiveIssuableLists,
       onStateUpdated: this.onStateUpdated,
+      modalWorkItemFullPath: this.modalWorkItemFullPath,
     });
   },
 };

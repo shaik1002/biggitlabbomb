@@ -2792,7 +2792,7 @@ RSpec.describe Project, factory_default: :keep, feature_category: :groups_and_pr
     end
   end
 
-  describe '#any_online_runners?', :freeze_time do
+  describe '#any_online_runners?' do
     subject { project.any_online_runners? }
 
     context 'shared runners' do

@@ -64,11 +64,6 @@ export default {
       required: false,
       default: () => [],
     },
-    showTaskWeight: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
   },
   data() {
     return {
@@ -178,9 +173,6 @@ export default {
         '!gl-ml-0': this.hasChildren || (!this.hasIndirectChildren && this.isTopLevel),
       };
     },
-    shouldShowWeight() {
-      return this.childItemType === WORK_ITEM_TYPE_VALUE_TASK ? this.showTaskWeight : true;
-    },
     showChildrenDropzone() {
       return !this.hasChildren && this.allowedChildTypes.length > 0;
     },
@@ -248,7 +240,6 @@ export default {
         :work-item-type="workItemType"
         :show-labels="showLabels"
         :work-item-full-path="workItemFullPath"
-        :show-weight="shouldShowWeight"
         @click="$emit('click', $event)"
         @removeChild="$emit('removeChild', childItem)"
       />
@@ -265,7 +256,6 @@ export default {
       :show-labels="showLabels"
       :full-path="workItemFullPath"
       :is-top-level="false"
-      :show-task-weight="showTaskWeight"
       @removeChild="$emit('removeChild', childItem)"
       @error="$emit('error', $event)"
       @click="$emit('click', $event)"

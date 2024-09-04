@@ -86,9 +86,4 @@ export const MOCK_ASSIGNEES = {
   ],
 };
 
-export const MOCK_FIELDS = [
-  { key: 'title', label: 'Title', name: 'title' },
-  { key: 'author', label: 'Author', name: 'author' },
-  { key: 'state', label: 'State', name: 'state' },
-  { key: 'description', label: 'Description', name: 'description' },
-];
+export const MOCK_FIELDS = ['title', 'author', 'state', 'description'];

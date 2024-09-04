@@ -20,10 +20,7 @@ import {
   WORK_ITEM_TYPE_ENUM_ISSUE,
   WORK_ITEM_TYPE_VALUE_EPIC,
   WORK_ITEM_TYPE_VALUE_OBJECTIVE,
-  WORK_ITEM_TYPE_VALUE_TASK,
 } from '~/work_items/constants';
-import { useLocalStorageSpy } from 'helpers/local_storage_helper';
-import * as utils from '~/work_items/utils';
 import {
   workItemHierarchyTreeResponse,
   workItemHierarchyPaginatedTreeResponse,
@@ -106,20 +103,6 @@ describe('WorkItemTree', () => {
     expect(findWorkItemLinkChildrenWrapper().exists()).toBe(true);
     expect(findWorkItemLinkChildrenWrapper().props().children).toHaveLength(1);
   });
-
-  it.each`
-    workItemType                      | showTaskWeight
-    ${WORK_ITEM_TYPE_VALUE_EPIC}      | ${false}
-    ${WORK_ITEM_TYPE_VALUE_TASK}      | ${true}
-    ${WORK_ITEM_TYPE_VALUE_OBJECTIVE} | ${true}
-  `(
-    'passes `showTaskWeight` as $showTaskWeight when the type is $workItemType',
-    async ({ workItemType, showTaskWeight }) => {
-      await createComponent({ workItemType });
-
-      expect(findWorkItemLinkChildrenWrapper().props().showTaskWeight).toBe(showTaskWeight);
-    },
-  );
 
   it('does not display form by default', () => {
     createComponent();
@@ -278,18 +261,6 @@ describe('WorkItemTree', () => {
   });
 
   describe('more actions', () => {
-    useLocalStorageSpy();
-
-    beforeEach(async () => {
-      jest.spyOn(utils, 'getShowLabelsFromLocalStorage');
-      jest.spyOn(utils, 'saveShowLabelsToLocalStorage');
-      await createComponent();
-    });
-
-    afterEach(() => {
-      localStorage.clear();
-    });
-
     it.each`
       visible | workItemType
       ${true} | ${WORK_ITEM_TYPE_VALUE_EPIC}
@@ -322,15 +293,6 @@ describe('WorkItemTree', () => {
       await nextTick();
 
       expect(findWorkItemLinkChildrenWrapper().props('showLabels')).toBe(true);
-    });
-
-    it('calls saveShowLabelsToLocalStorage on toggle', () => {
-      findMoreActions().vm.$emit('toggle-show-labels');
-      expect(utils.saveShowLabelsToLocalStorage).toHaveBeenCalled();
-    });
-
-    it('calls getShowLabelsFromLocalStorage on mount', () => {
-      expect(utils.getShowLabelsFromLocalStorage).toHaveBeenCalled();
     });
   });
 });

@@ -53,6 +53,7 @@ module API
             state: params[:state],
             confidential: params[:confidential],
             snippets: snippets?,
+            basic_search: params[:basic_search],
             num_context_lines: params[:num_context_lines],
             search_type: params[:search_type],
             page: params[:page],

@@ -1,4 +1,5 @@
-import { upperFirst, lowerCase } from 'lodash';
+import jsYaml from 'js-yaml';
+import { uniq, upperFirst, lowerCase } from 'lodash';
 
 export const extractGroupOrProject = (url = window.location.href) => {
   let fullPath = url
@@ -12,6 +13,22 @@ export const extractGroupOrProject = (url = window.location.href) => {
     group: isGroup ? fullPath : undefined,
     project: !isGroup ? fullPath : undefined,
   };
+};
+
+export const parseQueryText = (text) => {
+  const frontmatter = text.match(/---\n([\s\S]*?)\n---/);
+  const remaining = text.replace(frontmatter ? frontmatter[0] : '', '');
+  return {
+    frontmatter: frontmatter ? frontmatter[1].trim() : '',
+    query: remaining.trim(),
+  };
+};
+
+export const parseFrontmatter = (frontmatter, defaults = {}) => {
+  const config = jsYaml.safeLoad(frontmatter) || {};
+  config.fields = uniq(config.fields?.split(',').map((f) => f.trim()) || defaults?.fields);
+  config.display = config.display || 'list';
+  return config;
 };
 
 export const toSentenceCase = (str) => {

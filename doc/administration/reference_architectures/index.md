@@ -418,7 +418,7 @@ Additionally, the following cloud provider services are recommended for use as p
 
 ### Recommendation notes for the database services
 
-[When selecting to use an external database service](../postgresql/external.md), it should run a standard, performant, and [supported version](../../install/requirements.md#postgresql).
+[When selecting to use an external database service](../postgresql/external.md), it should run a standard, performant, and [supported version](../../install/requirements.md#postgresql-requirements).
 
 If you choose to use a third party external service:
 

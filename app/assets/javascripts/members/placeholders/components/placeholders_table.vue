@@ -63,7 +63,6 @@ export default {
     };
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     sourceUsers: {
       query: importSourceUsersQuery,
       variables() {
@@ -221,7 +220,7 @@ export default {
           :label="reassignedUser(item).name"
           :sub-label="`@${reassignedUser(item).username}`"
         />
-        <placeholder-actions v-else :key="item.id" :source-user="item" @confirm="onConfirm(item)" />
+        <placeholder-actions v-else :source-user="item" @confirm="onConfirm(item)" />
       </template>
     </gl-table>
 

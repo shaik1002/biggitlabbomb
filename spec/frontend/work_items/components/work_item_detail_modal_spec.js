@@ -4,6 +4,7 @@ import Vue, { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
 import waitForPromises from 'helpers/wait_for_promises';
 import createMockApollo from 'helpers/mock_apollo_helper';
+import { stubComponent } from 'helpers/stub_component';
 import WorkItemDetailModal from '~/work_items/components/work_item_detail_modal.vue';
 import deleteWorkItemMutation from '~/work_items/graphql/delete_work_item.mutation.graphql';
 import WorkItemDetail from '~/work_items/components/work_item_detail.vue';
@@ -46,13 +47,10 @@ describe('WorkItemDetailModal component', () => {
       },
       provide: {
         fullPath: 'group/project',
-        reportAbusePath: 'report/abuse',
-        groupPath: '',
-        hasSubepicsFeature: false,
       },
       stubs: {
         GlModal,
-        WorkItemDetail,
+        WorkItemDetail: stubComponent(WorkItemDetail),
       },
     });
   };

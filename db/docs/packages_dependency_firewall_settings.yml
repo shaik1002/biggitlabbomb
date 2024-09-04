@@ -1,0 +1,14 @@
+---
+table_name: packages_dependency_firewall_settings
+classes:
+- Packages::DependencyFirewall::Setting
+feature_categories:
+- package_registry
+description: Settings for the dependency firewall for the package registry.
+introduced_by_url:
+milestone: '17.4'
+gitlab_schema: gitlab_main_cell
+allow_cross_foreign_keys:
+- gitlab_main_clusterwide
+sharding_key:
+  project_id: projects

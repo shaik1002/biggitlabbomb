@@ -865,9 +865,6 @@ msgstr ""
 msgid "%{fork_icon} %{source_project_path}:%{source_branch}"
 msgstr ""
 
-msgid "%{get_started}Get started with Git%{get_started_end} and learn %{git_config}how to configure it%{git_config_end}."
-msgstr ""
-
 msgid "%{global_id} is not a valid ID for %{expected_types}."
 msgstr ""
 
@@ -1047,9 +1044,6 @@ msgid "%{linkStart}Advanced search%{linkEnd} is disabled since %{ref_elem} is no
 msgstr ""
 
 msgid "%{linkStart}Advanced search%{linkEnd} is enabled."
-msgstr ""
-
-msgid "%{link}How to use SSH keys%{link_end}?"
 msgstr ""
 
 msgid "%{listToShow}, and %{awardsListLength} more"
@@ -3095,6 +3089,9 @@ msgstr ""
 msgid "Active project access tokens"
 msgstr ""
 
+msgid "Active tab: %{tab}"
+msgstr ""
+
 msgid "Activity"
 msgstr ""
 
@@ -3300,9 +3297,6 @@ msgid "Add existing confidential %{issuableType}"
 msgstr ""
 
 msgid "Add existing issue"
-msgstr ""
-
-msgid "Add files"
 msgstr ""
 
 msgid "Add group or project"
@@ -5805,9 +5799,6 @@ msgid "An error occurred fetching the project authors."
 msgstr ""
 
 msgid "An error occurred fetching the public deploy keys. Please try again."
-msgstr ""
-
-msgid "An error occurred loading the projects. Please refresh the page to try again."
 msgstr ""
 
 msgid "An error occurred previewing the blob"
@@ -12757,9 +12748,6 @@ msgstr ""
 msgid "ClusterAgent|Receptive agents are disabled for this GitLab instance"
 msgstr ""
 
-msgid "ClusterAgent|Receptive agents are unavailable for this GitLab instance"
-msgstr ""
-
 msgid "ClusterAgent|URL configuration already exists for this agent"
 msgstr ""
 
@@ -14536,15 +14524,6 @@ msgstr ""
 msgid "Configure with a merge request"
 msgstr ""
 
-msgid "Configure your Git identity"
-msgstr ""
-
-msgid "Configure your Git identity globally to use it for all current and future projects on your machine:"
-msgstr ""
-
-msgid "Configure your Git identity locally to use it only for this project:"
-msgstr ""
-
 msgid "Configure your environments to be deployed to specific geographical regions"
 msgstr ""
 
@@ -15917,6 +15896,9 @@ msgid "Create a Mattermost team for this group"
 msgstr ""
 
 msgid "Create a cluster"
+msgstr ""
+
+msgid "Create a confidential issue"
 msgstr ""
 
 msgid "Create a group"
@@ -20095,19 +20077,19 @@ msgstr ""
 msgid "DuoProDiscover|Chat from any location"
 msgstr ""
 
-msgid "DuoProDiscover|Code Explanation"
-msgstr ""
-
-msgid "DuoProDiscover|Code Refactoring"
-msgstr ""
-
 msgid "DuoProDiscover|Code Suggestions"
 msgstr ""
 
 msgid "DuoProDiscover|Code completion"
 msgstr ""
 
+msgid "DuoProDiscover|Code explanation"
+msgstr ""
+
 msgid "DuoProDiscover|Code generation"
+msgstr ""
+
+msgid "DuoProDiscover|Code refactoring"
 msgstr ""
 
 msgid "DuoProDiscover|Committed to transparent AI"
@@ -20140,7 +20122,7 @@ msgstr ""
 msgid "DuoProDiscover|Ship software faster and more securely with AI integrated into your entire DevSecOps lifecycle."
 msgstr ""
 
-msgid "DuoProDiscover|Test Generation"
+msgid "DuoProDiscover|Test generation"
 msgstr ""
 
 msgid "DuoProDiscover|What's new in GitLab Duo Chat"
@@ -20688,6 +20670,9 @@ msgstr ""
 msgid "Enable Mailgun event receiver"
 msgstr ""
 
+msgid "Enable OWASP depscan"
+msgstr ""
+
 msgid "Enable PlantUML"
 msgstr ""
 
@@ -20731,6 +20716,12 @@ msgid "Enable cleanup policies for projects created earlier than GitLab 12.7."
 msgstr ""
 
 msgid "Enable cleanup policy caching."
+msgstr ""
+
+msgid "Enable deny regex validation"
+msgstr ""
+
+msgid "Enable dependency scanning validation"
 msgstr ""
 
 msgid "Enable diagrams.net"
@@ -24273,9 +24264,6 @@ msgstr ""
 msgid "Git global setup"
 msgstr ""
 
-msgid "Git local setup"
-msgstr ""
-
 msgid "Git repository URL"
 msgstr ""
 
@@ -24828,9 +24816,6 @@ msgstr ""
 msgid "Given inputs not defined in the `spec` section of the included configuration file"
 msgstr ""
 
-msgid "Global"
-msgstr ""
-
 msgid "Global SAML group membership lock"
 msgstr ""
 
@@ -24895,9 +24880,6 @@ msgid "GlobalSearch|Explore"
 msgstr ""
 
 msgid "GlobalSearch|Fetching aggregations error."
-msgstr ""
-
-msgid "GlobalSearch|File name match only"
 msgstr ""
 
 msgid "GlobalSearch|Files"
@@ -26741,9 +26723,6 @@ msgstr ""
 msgid "HTTP Basic: Access denied. The provided password or token is incorrect or your account has 2FA enabled and you must use a personal access token instead of a password. See %{help_page_url}"
 msgstr ""
 
-msgid "HTTPS"
-msgstr ""
-
 msgid "Harbor Registry"
 msgstr ""
 
@@ -28136,16 +28115,10 @@ msgstr ""
 msgid "InProductMarketing|%{upper_start}Free 30-day trial%{upper_end} %{lower_start}GitLab Ultimate%{lower_end}"
 msgstr ""
 
-msgid "InProductMarketing|%{upper_start}Free 60-day trial%{upper_end} %{lower_start}GitLab Ultimate & GitLab Duo Enterprise%{lower_end} %{last_start}Sign up for a free trial of the most comprehensive AI-powered DevSecOps Platform%{last_end}"
-msgstr ""
-
 msgid "InProductMarketing|Accelerate your digital transformation"
 msgstr ""
 
 msgid "InProductMarketing|Blog"
-msgstr ""
-
-msgid "InProductMarketing|Boost efficiency and collaboration"
 msgstr ""
 
 msgid "InProductMarketing|Build in security"
@@ -28157,9 +28130,6 @@ msgstr ""
 msgid "InProductMarketing|Deliver software faster"
 msgstr ""
 
-msgid "InProductMarketing|End-to-end security and compliance"
-msgstr ""
-
 msgid "InProductMarketing|Ensure compliance"
 msgstr ""
 
@@ -28167,9 +28137,6 @@ msgid "InProductMarketing|Facebook"
 msgstr ""
 
 msgid "InProductMarketing|Free guest users"
-msgstr ""
-
-msgid "InProductMarketing|GitLab Duo Enterprise: AI across the software development lifecycle"
 msgstr ""
 
 msgid "InProductMarketing|If you don't want to receive marketing emails directly from GitLab, %{marketing_preference_link}."
@@ -28188,12 +28155,6 @@ msgid "InProductMarketing|No credit card required"
 msgstr ""
 
 msgid "InProductMarketing|No credit card required."
-msgstr ""
-
-msgid "InProductMarketing|One platform for Dev, Sec, and Ops teams"
-msgstr ""
-
-msgid "InProductMarketing|Ship secure software faster"
 msgstr ""
 
 msgid "InProductMarketing|Start a Self-Managed trial"
@@ -28596,9 +28557,6 @@ msgid "Index root namespaces automatically"
 msgstr ""
 
 msgid "Index the instance"
-msgstr ""
-
-msgid "Indexing CPU to tasks multiplier"
 msgstr ""
 
 msgid "Indexing status"
@@ -30093,9 +30051,6 @@ msgstr ""
 msgid "Iteration|cannot be more than 500 years in the future"
 msgstr ""
 
-msgid "JWT must be less than 10KB"
-msgstr ""
-
 msgid "Jan"
 msgstr ""
 
@@ -31026,7 +30981,7 @@ msgstr ""
 msgid "Keep sidebar visible"
 msgstr ""
 
-msgid "Kerberos"
+msgid "Keep those 😈 packages at bay."
 msgstr ""
 
 msgid "Kerberos access denied"
@@ -31351,9 +31306,7 @@ msgid "LICENSE"
 msgstr ""
 
 msgid "Label"
-msgid_plural "Labels"
-msgstr[0] ""
-msgstr[1] ""
+msgstr ""
 
 msgid "Label %{labelName} was not found"
 msgstr ""
@@ -34928,6 +34881,9 @@ msgstr ""
 msgid "Multiple integrations of a single type are not supported for this project"
 msgstr ""
 
+msgid "Multiple regexes separated by a new line. Package names will be evaluated against these regexes."
+msgstr ""
+
 msgid "Multiple signatures"
 msgstr ""
 
@@ -35611,60 +35567,6 @@ msgid "New users set to external"
 msgstr ""
 
 msgid "New! Suggest changes directly"
-msgstr ""
-
-msgid "NewFramework|All todos done."
-msgstr ""
-
-msgid "NewFramework|Apply to projects"
-msgstr ""
-
-msgid "NewFramework|Back to compliance center"
-msgstr ""
-
-msgid "NewFramework|Compliance framework created!"
-msgstr ""
-
-msgid "NewFramework|Feedback?"
-msgstr ""
-
-msgid "NewFramework|Go to the %{linkStart}compliance center%{linkEnd} to apply this framework to projects."
-msgstr ""
-
-msgid "NewFramework|Go to the %{linkStart}policy management page%{linkEnd} to scope a policy for this framework."
-msgstr ""
-
-msgid "NewFramework|Have questions or thoughts on the new improvements we made? %{linkStart}Please provide feedback on your experience%{linkEnd}."
-msgstr ""
-
-msgid "NewFramework|How do I apply the framework to projects?"
-msgstr ""
-
-msgid "NewFramework|How to scope policies?"
-msgstr ""
-
-msgid "NewFramework|New improvements to creating compliance framework."
-msgstr ""
-
-msgid "NewFramework|Policies scoped to a framework serve as solutions to specific compliance requirements and are applied to projects."
-msgstr ""
-
-msgid "NewFramework|Projects that have this framework applied are automatically checked against requirements and have policies enforced."
-msgstr ""
-
-msgid "NewFramework|Scope policies"
-msgstr ""
-
-msgid "NewFramework|Suggested next steps"
-msgstr ""
-
-msgid "NewFramework|Use the compliance framework to scope policies and include projects to make sure they are compliant."
-msgstr ""
-
-msgid "NewFramework|Why apply the framework to projects?"
-msgstr ""
-
-msgid "NewFramework|Why scope policies?"
 msgstr ""
 
 msgid "Newest first"
@@ -38608,6 +38510,9 @@ msgstr ""
 msgid "PackageRegistry|Other versions"
 msgstr ""
 
+msgid "PackageRegistry|Package Quarantined"
+msgstr ""
+
 msgid "PackageRegistry|Package Registry"
 msgstr ""
 
@@ -38692,6 +38597,9 @@ msgid "PackageRegistry|Published to the %{project} Terraform Module Registry %{d
 msgstr ""
 
 msgid "PackageRegistry|PyPI"
+msgstr ""
+
+msgid "PackageRegistry|Quarantined"
 msgstr ""
 
 msgid "PackageRegistry|Readme"
@@ -39067,12 +38975,6 @@ msgid "Parent removed successfully"
 msgstr ""
 
 msgid "Parent set successfully"
-msgstr ""
-
-msgid "Parse error: Expected `%{expected}`, but got `%{got}`."
-msgstr ""
-
-msgid "Parse error: Unexpected input near `%{input}`."
 msgstr ""
 
 msgid "Part of merge request changes"
@@ -43871,9 +43773,6 @@ msgstr ""
 msgid "ProtectedBranch|Protect a branch"
 msgstr ""
 
-msgid "ProtectedBranch|Protected branch was sucessfully created"
-msgstr ""
-
 msgid "ProtectedBranch|Protected branches"
 msgstr ""
 
@@ -44280,9 +44179,6 @@ msgstr ""
 msgid "Push events"
 msgstr ""
 
-msgid "Push files to this repository using SSH or HTTPS. If you're unsure, we recommend SSH."
-msgstr ""
-
 msgid "Push mirrors will %{strong_open}not%{strong_close} sync LFS objects over SSH."
 msgstr ""
 
@@ -44440,6 +44336,9 @@ msgid "PushoverService|Total commits count: %{total_commits_count}"
 msgstr ""
 
 msgid "QualitySummary|Project quality"
+msgstr ""
+
+msgid "Quarantine the package"
 msgstr ""
 
 msgid "Quarter"
@@ -47355,9 +47254,6 @@ msgid "SOC 2"
 msgstr ""
 
 msgid "SOC2"
-msgstr ""
-
-msgid "SSH"
 msgstr ""
 
 msgid "SSH Key"
@@ -56352,9 +56248,6 @@ msgstr ""
 msgid "To get started, click the link below to confirm your account."
 msgstr ""
 
-msgid "To get started, clone the repository or upload some files."
-msgstr ""
-
 msgid "To get started, please enter your Gitea host URL and a %{link_to_personal_token}."
 msgstr ""
 
@@ -57723,22 +57616,13 @@ msgstr ""
 msgid "Unknown Error"
 msgstr ""
 
-msgid "Unknown data source: %{source}"
-msgstr ""
-
 msgid "Unknown encryption strategy: %{encrypted_strategy}!"
 msgstr ""
 
 msgid "Unknown format"
 msgstr ""
 
-msgid "Unknown function: %{name}"
-msgstr ""
-
 msgid "Unknown user"
-msgstr ""
-
-msgid "Unknown value type: %{type}"
 msgstr ""
 
 msgid "Unless otherwise agreed to in writing with GitLab, by selecting \"Add License\" you agree that your use of GitLab Software is subject to the %{eula_link_start}Terms of Service%{eula_link_end}."
@@ -58882,6 +58766,9 @@ msgstr ""
 msgid "UserMapping|Reassignment approved"
 msgstr ""
 
+msgid "UserMapping|Reassignment cancelled"
+msgstr ""
+
 msgid "UserMapping|Reassignment details:"
 msgstr ""
 
@@ -58892,9 +58779,6 @@ msgid "UserMapping|Reassignment has not started."
 msgstr ""
 
 msgid "UserMapping|Reassignment in progress."
-msgstr ""
-
-msgid "UserMapping|Reassignment not available"
 msgstr ""
 
 msgid "UserMapping|Reassignment rejected"
@@ -58942,6 +58826,12 @@ msgstr ""
 msgid "UserMapping|The invitation could not be declined."
 msgstr ""
 
+msgid "UserMapping|The invitation is no longer valid."
+msgstr ""
+
+msgid "UserMapping|The reassignment has been cancelled by the group owner."
+msgstr ""
+
 msgid "UserMapping|There was a problem cancelling placeholder user reassignment."
 msgstr ""
 
@@ -58973,9 +58863,6 @@ msgid "UserMapping|You have approved the reassignment of contributions from %{st
 msgstr ""
 
 msgid "UserMapping|You have rejected the reassignment of contributions from %{strong_open}%{source_user_name} (@%{source_username})%{strong_close} on %{strong_open}%{source_hostname}%{strong_close} to yourself on the group %{strong_open}%{destination_group}%{strong_close}."
-msgstr ""
-
-msgid "UserMapping|You might have already accepted or rejected the reassignment, or it might have been canceled by the group owner."
 msgstr ""
 
 msgid "UserProfile|%{count} %{file}"
@@ -59890,6 +59777,9 @@ msgid "Vulnerability resolved in %{branch}"
 msgstr ""
 
 msgid "Vulnerability resolved in the default branch"
+msgstr ""
+
+msgid "Vulnerability score threshold."
 msgstr ""
 
 msgid "VulnerabilityChart|%{formattedStartDate} to today"
@@ -60919,6 +60809,9 @@ msgid "What is squashing?"
 msgstr ""
 
 msgid "What templates can I create?"
+msgstr ""
+
+msgid "What to do when this check fails"
 msgstr ""
 
 msgid "What variables can I use?"
@@ -62355,6 +62248,9 @@ msgid "You can filter by 'days to merge' by clicking on the columns in the chart
 msgstr ""
 
 msgid "You can find more information about GitLab subscriptions in %{subscriptions_doc_link}."
+msgstr ""
+
+msgid "You can get started by cloning the repository or start adding files to it with one of the following options."
 msgstr ""
 
 msgid "You can invite a new member to %{project_name} or invite another group."
@@ -64187,15 +64083,18 @@ msgstr ""
 msgid "features adopted"
 msgstr ""
 
-msgid "field name"
-msgstr ""
-
 msgid "file"
 msgid_plural "files"
 msgstr[0] ""
 msgstr[1] ""
 
 msgid "finding is not found or is already attached to a vulnerability"
+msgstr ""
+
+msgid "for Workspace must have an associated WorkspacesAgentConfig"
+msgstr ""
+
+msgid "for Workspace must match the dns_zone of the associated WorkspacesAgentConfig"
 msgstr ""
 
 msgid "for this project"
@@ -64216,9 +64115,6 @@ msgid "from yourself"
 msgstr ""
 
 msgid "frontmatter"
-msgstr ""
-
-msgid "function name"
 msgstr ""
 
 msgid "group"
@@ -64464,18 +64360,6 @@ msgid "item"
 msgstr ""
 
 msgid "key result"
-msgstr ""
-
-msgid "key: %{key} is reserved for internal usage"
-msgstr ""
-
-msgid "key: %{key} must be a string"
-msgstr ""
-
-msgid "key: %{key} must have name component with 63 characters or less, and start/end with an alphanumeric character"
-msgstr ""
-
-msgid "key: %{key} must have prefix component with 253 characters or less, and have a valid DNS subdomain as a prefix"
 msgstr ""
 
 msgid "kuromoji custom analyzer"
@@ -64905,9 +64789,6 @@ msgstr ""
 msgid "mrWidget|Your password"
 msgstr ""
 
-msgid "must be 254 characters or less."
-msgstr ""
-
 msgid "must be a boolean value"
 msgstr ""
 
@@ -64927,9 +64808,6 @@ msgid "must be a root group."
 msgstr ""
 
 msgid "must be a root namespace"
-msgstr ""
-
-msgid "must be a string"
 msgstr ""
 
 msgid "must be a valid IPv4 or IPv6 address"
@@ -64960,9 +64838,6 @@ msgid "must be an array of hash containing 'allow' attribute of type string"
 msgstr ""
 
 msgid "must be an email you have verified"
-msgstr ""
-
-msgid "must be an hash"
 msgstr ""
 
 msgid "must be associated with a Group or a Project"
@@ -65423,9 +65298,6 @@ msgstr ""
 msgid "snippet"
 msgstr ""
 
-msgid "something to parse"
-msgstr ""
-
 msgid "source"
 msgstr ""
 
@@ -65451,9 +65323,6 @@ msgid "started on %{timebox_start_date}"
 msgstr ""
 
 msgid "starts on %{timebox_start_date}"
-msgstr ""
-
-msgid "string"
 msgstr ""
 
 msgid "structure is too large. Maximum size is %{max_size} characters"
@@ -65596,12 +65465,6 @@ msgstr ""
 msgid "value for '%{storage}' must be between 0 and 100"
 msgstr ""
 
-msgid "value: %{value} must be 63 characters or less, and start/end with an alphanumeric character"
-msgstr ""
-
-msgid "value: %{value} must be a string"
-msgstr ""
-
 msgid "verify ownership"
 msgstr ""
 
@@ -65680,4 +65543,13 @@ msgid "{project}"
 msgstr ""
 
 msgid "✔"
+msgstr ""
+
+msgid "🐝 OWASP depscan"
+msgstr ""
+
+msgid "🔎 Dependency scanning"
+msgstr ""
+
+msgid "🛂 Deny regex"
 msgstr ""

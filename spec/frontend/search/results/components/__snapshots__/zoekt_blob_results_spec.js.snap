@@ -24,7 +24,6 @@ exports[`ZoektBlobResults when component loads normally renders component proper
       >
         <blob-body-stub
           file="[object Object]"
-          position="1"
         />
       </div>
     </div>
@@ -45,7 +44,6 @@ exports[`ZoektBlobResults when component loads normally renders component proper
       >
         <blob-body-stub
           file="[object Object]"
-          position="2"
         />
       </div>
       <div
@@ -53,7 +51,6 @@ exports[`ZoektBlobResults when component loads normally renders component proper
       >
         <blob-footer-stub
           file="[object Object]"
-          position="2"
         />
       </div>
     </div>
@@ -66,7 +63,6 @@ exports[`ZoektBlobResults when component loads normally renders component proper
         <blob-header-stub
           filepath="test/spec/test_utils_spec.js"
           fileurl="http://127.0.0.1:3000/flightjs/Flight/-/blob/master/test/spec/utils_spec.js"
-          isheaderonly="true"
           projectpath="flightjs/Flight"
         />
       </div>

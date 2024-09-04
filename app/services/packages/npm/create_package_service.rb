@@ -145,7 +145,8 @@ module Packages
           size: calculated_package_file_size,
           file_sha1: version_data[:dist][:shasum],
           file_name: package_file_name,
-          build: params[:build]
+          build: params[:build],
+          status: :processing
         }
       end
 

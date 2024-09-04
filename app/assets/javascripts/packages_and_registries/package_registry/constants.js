@@ -156,11 +156,13 @@ export const ERRORED_PACKAGE_TEXT = s__(
   'PackageRegistry|Invalid Package: failed metadata extraction',
 );
 export const ERROR_PUBLISHING = s__('PackageRegistry|Error publishing');
+export const ERROR_QUARANTINED = s__('PackageRegistry|Package Quarantined');
 export const WARNING_TEXT = __('Warning');
 
 export const PACKAGE_REGISTRY_TITLE = __('Package Registry');
 
 export const PACKAGE_ERROR_STATUS = 'ERROR';
+export const PACKAGE_QUARANTINED_STATUS = 'QUARANTINED';
 export const PACKAGE_DEFAULT_STATUS = 'DEFAULT';
 
 export const NPM_PACKAGE_MANAGER = 'npm';
@@ -231,6 +233,7 @@ export const PACKAGE_STATUS_OPTIONS = [
   { value: 'hidden', title: s__('PackageRegistry|Hidden') },
   { value: 'pending_destruction', title: s__('PackageRegistry|Pending deletion') },
   { value: 'processing', title: s__('PackageRegistry|Processing') },
+  { value: PACKAGE_QUARANTINED_STATUS.toLowerCase(), title: s__('PackageRegistry|Quarantined') }
 ];
 
 // links

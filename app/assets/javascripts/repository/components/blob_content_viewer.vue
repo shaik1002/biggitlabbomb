@@ -39,7 +39,6 @@ export default {
     explainCodeAvailable: { default: false },
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     projectInfo: {
       query: projectInfoQuery,
       variables() {

@@ -15,6 +15,8 @@ import {
   ERRORED_PACKAGE_TEXT,
   ERROR_PUBLISHING,
   PACKAGE_ERROR_STATUS,
+  PACKAGE_QUARANTINED_STATUS,
+  ERROR_QUARANTINED,
   PACKAGE_DEFAULT_STATUS,
   WARNING_TEXT,
 } from '~/packages_and_registries/package_registry/constants';
@@ -78,12 +80,17 @@ export default {
       return this.pipeline?.user?.name;
     },
     errorStatusRow() {
-      return this.packageEntity.status === PACKAGE_ERROR_STATUS;
+      return this.packageEntity.status === PACKAGE_ERROR_STATUS || this.packageEntity.status === PACKAGE_QUARANTINED_STATUS;
     },
     errorStatusMessage() {
-      return this.packageEntity.statusMessage
-        ? this.packageEntity.statusMessage
-        : ERRORED_PACKAGE_TEXT;
+      if (this.packageEntity.status === PACKAGE_QUARANTINED_STATUS) {
+        return ERROR_QUARANTINED;
+      }
+      else {
+        return this.packageEntity.statusMessage
+          ? this.packageEntity.statusMessage
+          : ERRORED_PACKAGE_TEXT;
+      }
     },
     showTags() {
       return Boolean(this.packageEntity.tags?.nodes?.length);

@@ -58,5 +58,3 @@ module Types
     end
   end
 end
-
-Types::Analytics::CycleAnalytics::ValueStreams::StageMetricsType.prepend_mod

@@ -23,7 +23,6 @@ export default {
     WorkloadTable,
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     k8sPods: {
       query: k8sPodsQuery,
       variables() {

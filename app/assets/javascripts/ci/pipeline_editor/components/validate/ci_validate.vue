@@ -80,7 +80,6 @@ export default {
     },
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     initialBlobContent: {
       query: getBlobContent,
       variables() {
@@ -94,7 +93,6 @@ export default {
         return data?.project?.repository?.blobs?.nodes[0]?.rawBlob;
       },
     },
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     currentBranch: {
       query: getCurrentBranch,
       update(data) {

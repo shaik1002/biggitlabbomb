@@ -14,17 +14,9 @@ RSpec.describe 'Query.runners', feature_category: :fleet_visibility do
     end
   end
 
-  describe 'Query.runners', :freeze_time do
-    before_all do
-      freeze_time # Freeze time before `let_it_be` runs, so that runner statuses are frozen during execution
-    end
-
-    after :all do
-      unfreeze_time
-    end
-
+  describe 'Query.runners' do
     let_it_be(:project) { create(:project, :repository, :public) }
-    let_it_be(:instance_runner) { create(:ci_runner, :instance, :almost_offline, description: 'Instance runner') }
+    let_it_be(:instance_runner) { create(:ci_runner, :instance, :online, description: 'Instance runner') }
     let_it_be(:instance_runner_manager) do
       create(:ci_runner_machine, runner: instance_runner, version: 'abc', revision: '123', ip_address: '127.0.0.1')
     end
@@ -355,7 +347,7 @@ RSpec.describe 'Query.runners', feature_category: :fleet_visibility do
   end
 end
 
-RSpec.describe 'Group.runners', feature_category: :fleet_visibility do
+RSpec.describe 'Group.runners' do
   include GraphqlHelpers
 
   let_it_be(:group) { create(:group) }

@@ -8,16 +8,8 @@ import CrudComponent from '~/vue_shared/components/crud_component.vue';
 
 import workItemLinkedItemsQuery from '../../graphql/work_item_linked_items.query.graphql';
 import removeLinkedItemsMutation from '../../graphql/remove_linked_items.mutation.graphql';
-import {
-  findLinkedItemsWidget,
-  saveShowLabelsToLocalStorage,
-  getShowLabelsFromLocalStorage,
-} from '../../utils';
-import {
-  LINKED_CATEGORIES_MAP,
-  LINKED_ITEMS_ANCHOR,
-  WORKITEM_RELATIONSHIPS_SHOWLABELS_LOCALSTORAGEKEY,
-} from '../../constants';
+import { findLinkedItemsWidget } from '../../utils';
+import { LINKED_CATEGORIES_MAP, LINKED_ITEMS_ANCHOR } from '../../constants';
 
 import WorkItemMoreActions from '../shared/work_item_more_actions.vue';
 import WorkItemRelationshipList from './work_item_relationship_list.vue';
@@ -110,10 +102,8 @@ export default {
       linksIsBlockedBy: [],
       linksBlocks: [],
       widgetName: LINKED_ITEMS_ANCHOR,
-      defaultShowLabels: true,
       showLabels: true,
       linkedWorkItems: [],
-      showLabelsLocalStorageKey: WORKITEM_RELATIONSHIPS_SHOWLABELS_LOCALSTORAGEKEY,
     };
   },
   computed: {
@@ -130,22 +120,12 @@ export default {
       return !this.error && this.linkedWorkItems.length === 0;
     },
   },
-  mounted() {
-    this.showLabels = getShowLabelsFromLocalStorage(
-      this.showLabelsLocalStorageKey,
-      this.defaultShowLabels,
-    );
-  },
   methods: {
     showLinkItemForm() {
       this.$refs.widget.showForm();
     },
     hideLinkItemForm() {
       this.$refs.widget.hideForm();
-    },
-    toggleShowLabels() {
-      this.showLabels = !this.showLabels;
-      saveShowLabelsToLocalStorage(this.showLabelsLocalStorageKey, this.showLabels);
     },
     async removeLinkedItem(linkedItem) {
       try {
@@ -225,7 +205,7 @@ export default {
     :anchor-id="widgetName"
     :title="$options.i18n.title"
     :count="linkedWorkItemsCount"
-    icon="link"
+    icon="issues"
     :is-loading="isLoading"
     is-collapsible
     data-testid="work-item-relationships"
@@ -235,6 +215,7 @@ export default {
         v-if="canAdminWorkItemLink"
         data-testid="link-item-add-button"
         size="small"
+        class="gl-mr-3"
         @click="showLinkItemForm"
       >
         <slot name="add-button-text">{{ $options.i18n.addLinkedWorkItemButtonLabel }}</slot>
@@ -245,7 +226,7 @@ export default {
         :work-item-type="workItemType"
         :show-labels="showLabels"
         :show-view-roadmap-action="false"
-        @toggle-show-labels="toggleShowLabels"
+        @toggle-show-labels="showLabels = !showLabels"
       />
     </template>
 

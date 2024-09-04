@@ -38,7 +38,6 @@ export default {
     },
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     environment: {
       query: environmentClusterAgentQuery,
       variables() {

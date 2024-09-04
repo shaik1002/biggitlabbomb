@@ -10,14 +10,23 @@ module Packages
           'name' => { 'type' => 'string' },
           'version' => { 'type' => %w[string null] },
           'package_type' => { 'type' => 'string', 'enum' => ::Packages::Package.package_types.keys },
-          'id' => { 'type' => 'integer' }
+          'id' => { 'type' => 'integer' },
+          'user_id' => { 'type' => 'integer' }
         },
         'required' => %w[project_id id name package_type]
       }
     end
 
+    def user_id
+      data[:user_id]
+    end
+
     def generic?
       data[:package_type] == 'generic'
+    end
+
+    def npm?
+      data[:package_type] == 'npm'
     end
   end
 end

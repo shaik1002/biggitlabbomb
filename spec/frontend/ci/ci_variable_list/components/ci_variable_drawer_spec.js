@@ -4,7 +4,7 @@ import {
   GlFormCombobox,
   GlFormGroup,
   GlFormInput,
-  GlCollapsibleListbox,
+  GlFormSelect,
   GlLink,
   GlModal,
   GlSprintf,
@@ -102,7 +102,7 @@ describe('CI Variable Drawer', () => {
   const findValueLabel = () => wrapper.findByTestId('ci-variable-value-label');
   const findHiddenVariableTip = () => wrapper.findByTestId('hidden-variable-tip');
   const findTitle = () => findDrawer().find('h2');
-  const findTypeDropdown = () => wrapper.findComponent(GlCollapsibleListbox);
+  const findTypeDropdown = () => wrapper.findComponent(GlFormSelect);
   const findVariablesPrecedenceDocsLink = () =>
     wrapper.findByTestId('ci-variable-precedence-docs-link');
 
@@ -135,7 +135,7 @@ describe('CI Variable Drawer', () => {
       });
 
       it('adds each type option as a dropdown item', () => {
-        expect(findTypeDropdown().props('items')).toHaveLength(variableOptions.length);
+        expect(findTypeDropdown().findAll('option')).toHaveLength(variableOptions.length);
 
         variableOptions.forEach((v) => {
           expect(findTypeDropdown().text()).toContain(v.text);
@@ -143,7 +143,9 @@ describe('CI Variable Drawer', () => {
       });
 
       it('is set to environment variable by default', () => {
-        expect(findTypeDropdown().props('items')[0].value).toBe(variableTypes.envType);
+        expect(findTypeDropdown().findAll('option').at(0).attributes('value')).toBe(
+          variableTypes.envType,
+        );
       });
 
       it('renders the selected variable type', () => {
@@ -155,7 +157,7 @@ describe('CI Variable Drawer', () => {
           },
         });
 
-        expect(findTypeDropdown().props('selected')).toBe(variableTypes.fileType);
+        expect(findTypeDropdown().attributes('value')).toBe(variableTypes.fileType);
       });
     });
 

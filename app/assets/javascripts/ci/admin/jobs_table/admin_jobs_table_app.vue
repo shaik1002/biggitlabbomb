@@ -90,7 +90,6 @@ export default {
         this.error = this.$options.i18n.jobsCountErrorMsg;
       },
     },
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     cancelable: {
       query: getCancelableJobs,
       update(data) {

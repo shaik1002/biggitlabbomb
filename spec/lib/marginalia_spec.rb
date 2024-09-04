@@ -53,6 +53,8 @@ RSpec.describe 'Marginalia spec' do
     end
 
     it 'generates a query that includes the component and value' do
+      stub_feature_flags(controller_static_context: false)
+
       component_map.each do |component, value|
         expect(recorded.log.last).to include("#{component}:#{value}")
       end
@@ -74,6 +76,8 @@ RSpec.describe 'Marginalia spec' do
       end
 
       it 'generates a query that includes the component and value' do
+        stub_feature_flags(controller_static_context: false)
+
         component_map.each do |component, value|
           expect(recorded.log.last).to include("#{component}:#{value}")
         end
@@ -147,7 +151,6 @@ RSpec.describe 'Marginalia spec' do
   def make_request(correlation_id, action_name)
     request_env = Rack::MockRequest.env_for('/')
 
-    ::Labkit::Context.push(caller_id: MarginaliaTestController.endpoint_id_for_action(action_name))
     ::Labkit::Correlation::CorrelationId.use_id(correlation_id) do
       MarginaliaTestController.action(action_name).call(request_env)
     end

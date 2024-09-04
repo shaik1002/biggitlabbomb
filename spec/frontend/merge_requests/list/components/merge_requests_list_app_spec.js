@@ -10,7 +10,6 @@ import { STATUS_CLOSED, STATUS_OPEN, STATUS_MERGED } from '~/issues/constants';
 import { TYPENAME_USER } from '~/graphql_shared/constants';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import {
-  TOKEN_TYPE_APPROVED_BY,
   TOKEN_TYPE_AUTHOR,
   TOKEN_TYPE_DRAFT,
   TOKEN_TYPE_LABEL,
@@ -140,7 +139,6 @@ describe('Merge requests list app', () => {
 
       it('does not have preloaded users when gon.current_user_id does not exist', () => {
         expect(findIssuableList().props('searchTokens')).toMatchObject([
-          { type: TOKEN_TYPE_APPROVED_BY, preloadedUsers: [] },
           { type: TOKEN_TYPE_ASSIGNEE },
           { type: TOKEN_TYPE_REVIEWER, preloadedUsers: [] },
           { type: TOKEN_TYPE_AUTHOR, preloadedUsers: [] },
@@ -157,7 +155,6 @@ describe('Merge requests list app', () => {
 
     describe('when all tokens are available', () => {
       const urlParams = {
-        'approved_by_usernames[]': 'anthony',
         assignee_username: 'bob',
         reviewer_username: 'bill',
         draft: 'yes',
@@ -193,7 +190,6 @@ describe('Merge requests list app', () => {
         ];
 
         expect(findIssuableList().props('searchTokens')).toMatchObject([
-          { type: TOKEN_TYPE_APPROVED_BY, preloadedUsers },
           { type: TOKEN_TYPE_ASSIGNEE },
           { type: TOKEN_TYPE_REVIEWER, preloadedUsers },
           { type: TOKEN_TYPE_AUTHOR, preloadedUsers },
@@ -209,7 +205,6 @@ describe('Merge requests list app', () => {
 
       it('pre-displays tokens that are in the url search parameters', () => {
         expect(findIssuableList().props('initialFilterValue')).toMatchObject([
-          { type: TOKEN_TYPE_APPROVED_BY },
           { type: TOKEN_TYPE_ASSIGNEE },
           { type: TOKEN_TYPE_REVIEWER },
           { type: TOKEN_TYPE_DRAFT },

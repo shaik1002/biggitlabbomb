@@ -16,13 +16,11 @@ import {
   WORK_ITEM_TYPE_VALUE_OBJECTIVE,
   WORK_ITEM_TYPE_VALUE_TASK,
   DEFAULT_PAGE_SIZE_CHILD_ITEMS,
-  WORK_ITEM_TYPE_VALUE_EPIC,
 } from '~/work_items/constants';
 
 import {
   workItemTask,
   workItemObjectiveWithChild,
-  workItemEpic,
   workItemHierarchyTreeResponse,
   workItemHierarchyPaginatedTreeResponse,
   workItemHierarchyTreeFailureResponse,
@@ -57,7 +55,6 @@ describe('WorkItemLinkChild', () => {
     workItemType = WORK_ITEM_TYPE_VALUE_OBJECTIVE,
     workItemTreeQueryHandler = getWorkItemTreeQueryHandler,
     isExpanded = false,
-    showTaskWeight = false,
   } = {}) => {
     const mockApollo = createMockApollo([[getWorkItemTreeQuery, workItemTreeQueryHandler]], {
       Mutation: {
@@ -82,7 +79,6 @@ describe('WorkItemLinkChild', () => {
         childItem,
         workItemType,
         workItemFullPath,
-        showTaskWeight,
       },
       stubs: {
         WorkItemChildrenWrapper,
@@ -184,36 +180,13 @@ describe('WorkItemLinkChild', () => {
 
     describe('renders WorkItemLinkChildContents', () => {
       it('with default props', () => {
-        createComponent();
-
         expect(findWorkItemLinkChildContents().props()).toEqual({
           childItem: workItemObjectiveWithChild,
           canUpdate: true,
           showLabels: true,
           workItemFullPath,
-          showWeight: true,
         });
       });
-
-      it.each`
-        workItemType                      | childItem                     | showTaskWeight | showWeight
-        ${WORK_ITEM_TYPE_VALUE_TASK}      | ${workItemTask}               | ${false}       | ${false}
-        ${WORK_ITEM_TYPE_VALUE_TASK}      | ${workItemTask}               | ${true}        | ${true}
-        ${WORK_ITEM_TYPE_VALUE_OBJECTIVE} | ${workItemObjectiveWithChild} | ${false}       | ${true}
-        ${WORK_ITEM_TYPE_VALUE_OBJECTIVE} | ${workItemObjectiveWithChild} | ${true}        | ${true}
-        ${WORK_ITEM_TYPE_VALUE_OBJECTIVE} | ${workItemObjectiveWithChild} | ${false}       | ${true}
-        ${WORK_ITEM_TYPE_VALUE_EPIC}      | ${workItemEpic}               | ${true}        | ${true}
-      `(
-        'passes `showWeight` as $showWeight when the type is $workItemType and `showTaskWeight` is $showWeight',
-        ({ childItem, showWeight }) => {
-          createComponent({
-            childItem,
-            showTaskWeight: showWeight,
-          });
-
-          expect(findWorkItemLinkChildContents().props('showWeight')).toEqual(showWeight);
-        },
-      );
     });
 
     describe('pagination', () => {

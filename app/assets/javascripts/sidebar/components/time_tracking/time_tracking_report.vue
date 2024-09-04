@@ -89,7 +89,6 @@ export default {
         return Boolean(this.timelogs);
       },
     },
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     workItem: {
       query: workItemByIidQuery,
       variables() {

@@ -34,7 +34,6 @@ export default {
     return { visible: false, interval: undefined };
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     folder: {
       query: folderQuery,
       variables() {

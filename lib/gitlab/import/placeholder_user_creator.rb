@@ -6,11 +6,12 @@ module Gitlab
       LAMBDA_FOR_UNIQUE_USERNAME = ->(username) { User.username_exists?(username) }.freeze
       LAMBDA_FOR_UNIQUE_EMAIL = ->(email) { User.find_by_email(email) || ::Email.find_by_email(email) }.freeze
 
-      delegate :import_type, :namespace, :source_user_identifier, :source_name, :source_username, to: :source_user,
-        private: true
-
-      def initialize(source_user)
-        @source_user = source_user
+      def initialize(import_type:, source_hostname:, source_name:, source_username:, namespace:)
+        @import_type = import_type
+        @source_hostname = source_hostname
+        @source_name = source_name
+        @source_username = source_username
+        @namespace = namespace
       end
 
       def execute
@@ -29,7 +30,7 @@ module Gitlab
 
       private
 
-      attr_reader :source_user
+      attr_reader :import_type, :namespace, :source_hostname, :source_name, :source_username
 
       def placeholder_name
         # Some APIs don't expose users' names, so set a default if it's nil
@@ -46,7 +47,7 @@ module Gitlab
       end
 
       def placeholder_email
-        email_pattern = "#{fallback_username_segment}_%s@#{Settings.gitlab.host}"
+        email_pattern = "#{valid_username_segment}_placeholder_user_%s@#{Settings.gitlab.host}"
 
         uniquify_string(email_pattern, LAMBDA_FOR_UNIQUE_EMAIL)
       end
@@ -60,13 +61,8 @@ module Gitlab
         sanitized_source_username.slice(0, User::MAX_USERNAME_LENGTH - 55)
       end
 
-      # Returns a string based on the import type, and digest of namespace path and source user identifier.
-      # Example: "gitlab_migration_64c4f07e"
       def fallback_username_segment
-        @fallback_username_segment ||= [
-          import_type,
-          Zlib.crc32([namespace.path, source_user_identifier].join).to_s(16)
-        ].join('_')
+        "#{namespace.path}_#{import_type}"
       end
 
       def uniquify_string(base_pattern, lambda_for_uniqueness)

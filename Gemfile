@@ -155,7 +155,7 @@ gem 'grape-path-helpers', '~> 2.0.1', feature_category: :api
 gem 'rack-cors', '~> 2.0.1', require: 'rack/cors' # rubocop:todo Gemfile/MissingFeatureCategory
 
 # GraphQL API
-gem 'graphql', '~> 2.3.14', feature_category: :api
+gem 'graphql', '~> 2.3.5', feature_category: :api
 gem 'graphql-docs', '~> 5.0.0', group: [:development, :test], feature_category: :api
 gem 'graphiql-rails', '~> 1.10', feature_category: :api
 gem 'apollo_upload_server', '~> 2.1.6', feature_category: :api
@@ -463,7 +463,7 @@ end
 gem 'warning', '~> 1.3.0' # rubocop:todo Gemfile/MissingFeatureCategory
 
 group :development do
-  gem 'lefthook', '~> 1.7.0', require: false, feature_category: :tooling
+  gem 'lefthook', '~> 1.6.8', require: false, feature_category: :tooling
   gem 'rubocop', feature_category: :tooling
   gem 'solargraph', '~> 0.47.2', require: false # rubocop:todo Gemfile/MissingFeatureCategory
 
@@ -589,7 +589,7 @@ group :test do
   # Moved in `test` because https://gitlab.com/gitlab-org/gitlab/-/issues/217527
   gem 'derailed_benchmarks', require: false # rubocop:todo Gemfile/MissingFeatureCategory
 
-  gem 'gitlab_quality-test_tooling', '~> 1.37.0', require: false, feature_category: :tooling
+  gem 'gitlab_quality-test_tooling', '~> 1.35.0', require: false, feature_category: :tooling
 end
 
 gem 'octokit', '~> 9.0', feature_category: :importers

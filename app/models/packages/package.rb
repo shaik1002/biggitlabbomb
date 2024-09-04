@@ -9,7 +9,7 @@ class Packages::Package < ApplicationRecord
   include Packages::Downloadable
   include EnumInheritance
 
-  DISPLAYABLE_STATUSES = [:default, :error].freeze
+  DISPLAYABLE_STATUSES = [:default, :error, :quarantined].freeze
   INSTALLABLE_STATUSES = [:default, :hidden].freeze
   STATUS_MESSAGE_MAX_LENGTH = 255
 
@@ -30,7 +30,7 @@ class Packages::Package < ApplicationRecord
     ml_model: 14
   }
 
-  enum status: { default: 0, hidden: 1, processing: 2, error: 3, pending_destruction: 4 }
+  enum status: { default: 0, hidden: 1, processing: 2, error: 3, pending_destruction: 4, quarantined: 5 }
 
   belongs_to :project
   belongs_to :creator, class_name: 'User'
@@ -348,6 +348,7 @@ class Packages::Package < ApplicationRecord
       ::Packages::PackageCreatedEvent.new(data: {
         project_id: project_id,
         id: id,
+        user_id: creator_id,
         name: name,
         version: version,
         package_type: package_type

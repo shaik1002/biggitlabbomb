@@ -1,11 +1,12 @@
-import { execute } from './executor';
-import { parse } from './parser';
-import { present } from './presenter';
-import { transform } from './transformer/data';
+import Executor from './executor';
+import Presenter from './presenter';
 
-export const executeAndPresentQuery = async (glqlQuery) => {
-  const { query, config } = await parse(glqlQuery);
-  const data = await execute(query);
-  const transformed = transform(data, config);
-  return present(transformed, config);
+export const executeAndPresentQuery = async (query) => {
+  const executor = await new Executor().init();
+  const { data, config } = await executor.compile(query).execute();
+  const { component } = new Presenter().init({
+    data: (data.project || data.group).issues,
+    config,
+  });
+  return component;
 };

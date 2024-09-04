@@ -69,15 +69,9 @@ RSpec.describe Ml::ModelVersion, feature_category: :mlops do
 
     describe 'description' do
       context 'when description is too large' do
-        let(:description) { 'a' * 10_001 }
+        let(:description) { 'a' * 501 }
 
         it { expect(errors).to include(:description) }
-      end
-
-      context 'when description is below threshold' do
-        let(:description) { 'a' * 100 }
-
-        it { expect(errors).not_to include(:description) }
       end
     end
 

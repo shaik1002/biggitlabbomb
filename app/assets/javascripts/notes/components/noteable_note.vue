@@ -174,7 +174,6 @@ export default {
     },
     canResolve() {
       if (!this.discussionRoot) return false;
-      if (!this.note.resolvable) return false;
 
       return this.note.current_user.can_resolve_discussion;
     },

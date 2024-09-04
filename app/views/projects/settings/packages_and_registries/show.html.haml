@@ -2,4 +2,43 @@
 - page_title _('Packages and registries settings')
 - @force_desktop_expanded_sidebar = true
 
+= render(::Layouts::SettingsSectionComponent.new('🧱 Dependency Firewall for Packages', description: 'Run additional validations when a package is published', id: 'js-df-pkgs-settings')) do |c|
+  - c.with_description { _('Keep those 😈 packages at bay.') }
+  - c.with_body do
+    -# It would be better to target a dedicated controller for these settings and simply redirect back to the packages and registries page. To keep things simple here, we target the packages and registries controller.
+    = gitlab_ui_form_for @dependency_firewall_setting, method: :put, url: project_settings_packages_and_registries_path(@project, anchor: 'js-df-pkgs-settings'), html: { class: 'fieldset-form', id: 'df-pkgs-settings' } do |f|
+      %fieldset
+        %h3.gl-heading-3= _('🛂 Deny regex')
+        .form-group
+          = f.gitlab_ui_checkbox_component :deny_regex_check_enabled, _('Enable deny regex validation')
+          = f.text_area :deny_regex_check_list, class: 'form-control gl-form-input', rows: 4
+          .form-text.text-muted= _('Multiple regexes separated by a new line. Package names will be evaluated against these regexes.')
+        %h5.gl-heading-5= _('What to do when this check fails')
+        .form-group
+          = f.gitlab_ui_checkbox_component :deny_regex_check_quarantine, _('Quarantine the package')
+          = f.gitlab_ui_checkbox_component :deny_regex_check_create_issue, _('Create a confidential issue')
+
+      %fieldset
+        %h3.gl-heading-3= _('🔎 Dependency scanning')
+        .form-group
+          = f.gitlab_ui_checkbox_component :dependency_scanning_check_enabled, _('Enable dependency scanning validation')
+          = f.select :dependency_scanning_check_threshold, ::Packages::DependencyFirewall::Setting.dependency_scanning_check_thresholds.keys.map { |k| [k.humanize.capitalize, k] }, {}, class: 'form-control'
+          .form-text.text-muted
+            = _('Vulnerability score threshold.')
+        %h5.gl-heading-5= _('What to do when this check fails')
+        .form-group
+          = f.gitlab_ui_checkbox_component :dependency_scanning_check_quarantine, _('Quarantine the package')
+          = f.gitlab_ui_checkbox_component :dependency_scanning_check_create_issue, _('Create a confidential issue')
+
+      %fieldset
+        %h3.gl-heading-3= _('🐝 OWASP depscan')
+        .form-group
+          = f.gitlab_ui_checkbox_component :owasp_dep_scan_check_enabled, _('Enable OWASP depscan')
+        %h5.gl-heading-5= _('What to do when this check fails')
+        .form-group
+          = f.gitlab_ui_checkbox_component :owasp_dep_scan_check_quarantine, _('Quarantine the package')
+          = f.gitlab_ui_checkbox_component :owasp_dep_scan_check_create_issue, _('Create a confidential issue')
+
+      = f.submit _('Save changes'), pajamas_button: true
+
 #js-registry-settings{ data: settings_data(@project) }

@@ -208,10 +208,6 @@ dast_scanner_profiles_builds:
   - table: p_ci_builds
     column: ci_build_id
     on_delete: async_delete
-dast_site_profiles:
-  - table: projects
-    column: project_id
-    on_delete: async_delete
 dast_site_profiles_builds:
   - table: ci_builds
     column: ci_build_id
@@ -342,10 +338,6 @@ p_ci_builds_metadata:
   - table: projects
     column: project_id
     on_delete: async_delete
-p_ci_finished_build_ch_sync_events:
-  - table: projects
-    column: project_id
-    on_delete: async_delete
 p_ci_finished_pipeline_ch_sync_events:
   - table: namespaces
     column: project_namespace_id
@@ -390,10 +382,6 @@ pages_deployments:
 project_authorizations:
   - table: users
     column: user_id
-    on_delete: async_delete
-project_security_exclusions:
-  - table: projects
-    column: project_id
     on_delete: async_delete
 projects:
   - table: organizations
@@ -536,10 +524,6 @@ vulnerability_flags:
     column: project_id
     on_delete: async_delete
 vulnerability_historical_statistics:
-  - table: projects
-    column: project_id
-    on_delete: async_delete
-vulnerability_identifiers:
   - table: projects
     column: project_id
     on_delete: async_delete

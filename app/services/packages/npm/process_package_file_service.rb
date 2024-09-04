@@ -23,7 +23,7 @@ module Packages
           ::Packages::Npm::CheckManifestCoherenceService.new(package, entry).execute
         end
 
-        package.default!
+        package.publish_creation_event
 
         ::Packages::Npm::CreateMetadataCacheWorker.perform_async(package.project_id, package.name)
 

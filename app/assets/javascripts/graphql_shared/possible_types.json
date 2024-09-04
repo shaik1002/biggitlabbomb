@@ -186,7 +186,6 @@
     "VulnerabilityDetailBase",
     "VulnerabilityDetailBoolean",
     "VulnerabilityDetailCode",
-    "VulnerabilityDetailCodeFlows",
     "VulnerabilityDetailCommit",
     "VulnerabilityDetailDiff",
     "VulnerabilityDetailFileLocation",

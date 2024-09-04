@@ -158,7 +158,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
             end
           end
 
-          resource :packages_and_registries, only: [:show] do
+          resource :packages_and_registries, only: [:show, :update] do
             get '/cleanup_image_tags', to: 'packages_and_registries#cleanup_tags'
           end
           resource :merge_requests, only: [:show, :update]

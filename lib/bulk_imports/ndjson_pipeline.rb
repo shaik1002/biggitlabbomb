@@ -30,8 +30,7 @@ module BulkImports
             user: context.current_user,
             excluded_keys: import_export_config.relation_excluded_keys(key),
             import_source: Import::SOURCE_DIRECT_TRANSFER,
-            original_users_map: original_users_map,
-            rewrite_mentions: context.importer_user_mapping_enabled?
+            original_users_map: original_users_map
           )
         end
 

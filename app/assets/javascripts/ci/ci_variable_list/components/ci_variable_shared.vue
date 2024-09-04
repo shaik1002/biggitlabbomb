@@ -158,7 +158,6 @@ export default {
         }
       },
     },
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     environments: {
       query() {
         return this.queryData?.environments?.query || {};

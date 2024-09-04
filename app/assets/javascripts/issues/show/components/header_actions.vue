@@ -103,7 +103,6 @@ export default {
     };
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     issuableReference: {
       query: issueReferenceQuery,
       variables() {

@@ -6,7 +6,6 @@ import createMockApollo from 'helpers/mock_apollo_helper';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import { isLoggedIn } from '~/lib/utils/common_utils';
-import { ESC_KEY } from '~/lib/utils/keys';
 import WorkItemChildrenWrapper from '~/work_items/components/work_item_links/work_item_children_wrapper.vue';
 import WorkItemLinkChild from '~/work_items/components/work_item_links/work_item_link_child.vue';
 import updateWorkItemMutation from '~/work_items/graphql/update_work_item.mutation.graphql';
@@ -173,52 +172,20 @@ describe('WorkItemChildrenWrapper', () => {
   });
 
   describe('drag & drop', () => {
-    let dragParams;
-
     beforeEach(() => {
       isLoggedIn.mockReturnValue(true);
       createComponent({ canUpdate: true, children: childrenWorkItemsObjectives });
-
-      dragParams = {
-        oldIndex: 1,
-        newIndex: 0,
-        from: wrapper.element,
-        to: wrapper.element,
-      };
-    });
-
-    it('adds a class `is-dragging` to document body when dragging', async () => {
-      expect(document.body.classList.contains('is-dragging')).toBe(false);
-
-      wrapper.findComponent(Draggable).vm.$emit('start');
-
-      expect(document.body.classList.contains('is-dragging')).toBe(true);
-
-      wrapper.findComponent(Draggable).vm.$emit('end', dragParams);
-      await nextTick();
-
-      expect(document.body.classList.contains('is-dragging')).toBe(false);
-    });
-
-    it('dispatches `mouseup` event and cancels drag when Escape key is pressed', async () => {
-      jest.spyOn(document, 'dispatchEvent');
-      wrapper.findComponent(Draggable).vm.$emit('start');
-
-      const event = new Event('keyup');
-      event.code = ESC_KEY;
-      document.dispatchEvent(event);
-
-      wrapper.findComponent(Draggable).vm.$emit('end', dragParams);
-      await nextTick();
-
-      expect(document.dispatchEvent).toHaveBeenCalledWith(new Event('mouseup'));
-      expect(moveWorkItemMutationSuccessHandler).not.toHaveBeenCalled();
     });
 
     it('does not fetch nested children when reordering within the same work item', async () => {
       expect(wrapper.findComponent(Draggable).exists()).toBe(true);
 
-      wrapper.findComponent(Draggable).vm.$emit('end', dragParams);
+      wrapper.findComponent(Draggable).vm.$emit('end', {
+        oldIndex: 1,
+        newIndex: 0,
+        from: wrapper.element,
+        to: wrapper.element,
+      });
       await nextTick();
 
       expect(getWorkItemTreeQueryHandler).not.toHaveBeenCalled();
@@ -228,7 +195,9 @@ describe('WorkItemChildrenWrapper', () => {
       expect(wrapper.findComponent(Draggable).exists()).toBe(true);
 
       wrapper.findComponent(Draggable).vm.$emit('end', {
-        ...dragParams,
+        oldIndex: 1,
+        newIndex: 0,
+        from: wrapper.element,
         to: { dataset: { parentId: 'gid://gitlab/WorkItem/5', parentTitle: 'Objective 19' } },
       });
       await nextTick();
@@ -239,7 +208,12 @@ describe('WorkItemChildrenWrapper', () => {
     it('calls move mutation with reorder params when reordering within the same work item', async () => {
       expect(wrapper.findComponent(Draggable).exists()).toBe(true);
 
-      wrapper.findComponent(Draggable).vm.$emit('end', dragParams);
+      wrapper.findComponent(Draggable).vm.$emit('end', {
+        oldIndex: 1,
+        newIndex: 0,
+        from: wrapper.element,
+        to: wrapper.element,
+      });
       await waitForPromises();
 
       expect(moveWorkItemMutationSuccessHandler).toHaveBeenCalledWith({
@@ -257,7 +231,9 @@ describe('WorkItemChildrenWrapper', () => {
       expect(wrapper.findComponent(Draggable).exists()).toBe(true);
 
       wrapper.findComponent(Draggable).vm.$emit('end', {
-        ...dragParams,
+        oldIndex: 1,
+        newIndex: 0,
+        from: wrapper.element,
         to: { dataset: { parentId: 'gid://gitlab/WorkItem/5', parentTitle: 'Objective 19' } },
       });
       await waitForPromises();
@@ -281,7 +257,9 @@ describe('WorkItemChildrenWrapper', () => {
       });
 
       wrapper.findComponent(Draggable).vm.$emit('end', {
-        ...dragParams,
+        oldIndex: 1,
+        newIndex: 0,
+        from: wrapper.element,
         to: { dataset: { parentId: 'gid://gitlab/WorkItem/5', parentTitle: 'Objective 19' } },
       });
       await waitForPromises();
@@ -299,7 +277,12 @@ describe('WorkItemChildrenWrapper', () => {
         moveWorkItemMutationHandler: moveWorkItemMutationFailureHandler,
       });
 
-      wrapper.findComponent(Draggable).vm.$emit('end', dragParams);
+      wrapper.findComponent(Draggable).vm.$emit('end', {
+        oldIndex: 1,
+        newIndex: 0,
+        from: wrapper.element,
+        to: wrapper.element,
+      });
       await waitForPromises();
 
       expect(moveWorkItemMutationFailureHandler).toHaveBeenCalled();

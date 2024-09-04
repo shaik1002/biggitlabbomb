@@ -12,12 +12,26 @@ RSpec.describe Gitlab::Middleware::ActionControllerStaticContext, feature_catego
 
   let(:app) { ->(_env) { [200, {}, ["Hello World"]] } }
 
-  it 'populates context with static controller attributes' do
-    described_class.new(app).call(env)
+  context 'when feature flag is disabled' do
+    it 'does not update context' do
+      stub_feature_flags(controller_static_context: false)
 
-    expect(Labkit::Context.current.to_h).to include({
-      'meta.feature_category' => 'groups_and_projects',
-      'meta.caller_id' => 'Dashboard::GroupsController#index'
-    })
+      described_class.new(app).call(env)
+
+      expect(Gitlab::ApplicationContext.current.keys).not_to include('meta.feature_category', 'meta.caller_id')
+    end
+  end
+
+  context 'when feature flag is enabled' do
+    it 'populates context with static controller attributes' do
+      stub_feature_flags(controller_static_context: true)
+
+      described_class.new(app).call(env)
+
+      expect(Labkit::Context.current.to_h).to include({
+        'meta.feature_category' => 'groups_and_projects',
+        'meta.caller_id' => 'Dashboard::GroupsController#index'
+      })
+    end
   end
 end

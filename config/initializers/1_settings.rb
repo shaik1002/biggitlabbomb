@@ -698,6 +698,9 @@ Settings.cron_jobs['object_storage_delete_stale_direct_uploads_worker']['job_cla
 Settings.cron_jobs['service_desk_custom_email_verification_cleanup'] ||= {}
 Settings.cron_jobs['service_desk_custom_email_verification_cleanup']['cron'] ||= '*/2 * * * *'
 Settings.cron_jobs['service_desk_custom_email_verification_cleanup']['job_class'] = 'ServiceDesk::CustomEmailVerificationCleanupWorker'
+Settings.cron_jobs['ensure_merge_requests_prepared_worker'] ||= {}
+Settings.cron_jobs['ensure_merge_requests_prepared_worker']['cron'] ||= '*/30 * * * *'
+Settings.cron_jobs['ensure_merge_requests_prepared_worker']['job_class'] ||= 'MergeRequests::EnsurePreparedWorker'
 Settings.cron_jobs['deactivated_pages_deployments_delete_cron_worker'] ||= {}
 Settings.cron_jobs['deactivated_pages_deployments_delete_cron_worker']['cron'] ||= '*/10 * * * *'
 Settings.cron_jobs['deactivated_pages_deployments_delete_cron_worker']['job_class'] ||= 'Pages::DeactivatedDeploymentsDeleteCronWorker'
@@ -930,9 +933,6 @@ Gitlab.ee do
   Settings.cron_jobs['observability_alert_query_worker'] ||= {}
   Settings.cron_jobs['observability_alert_query_worker']['cron'] ||= '* * * * *'
   Settings.cron_jobs['observability_alert_query_worker']['job_class'] = 'Observability::AlertQueryWorker'
-  Settings.cron_jobs['report_security_policies_metrics_worker.rb'] ||= {}
-  Settings.cron_jobs['report_security_policies_metrics_worker.rb']['cron'] ||= '*/1 * * * *'
-  Settings.cron_jobs['report_security_policies_metrics_worker.rb']['job_class'] = 'Security::Policies::ReportSecurityPoliciesMetricsWorker'
 
   Gitlab.com do
     Settings.cron_jobs['disable_legacy_open_source_license_for_inactive_projects'] ||= {}

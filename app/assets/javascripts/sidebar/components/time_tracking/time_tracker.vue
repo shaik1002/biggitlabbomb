@@ -110,7 +110,6 @@ export default {
     };
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     issuableTimeTracking: {
       query() {
         return timeTrackingQueries[this.issuableType].query;
@@ -262,7 +261,7 @@ export default {
     </div>
     <div v-if="!isTimeTrackingInfoLoading" class="hide-collapsed">
       <div v-if="showEstimateOnlyState" data-testid="estimateOnlyPane">
-        {{ $options.i18n.estimatedOnlyText }} {{ humanTimeEstimate }}
+        <span>{{ $options.i18n.estimatedOnlyText }} </span>{{ humanTimeEstimate }}
       </div>
       <time-tracking-spent-only-pane
         v-if="showSpentOnlyState"
