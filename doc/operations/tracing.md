@@ -8,17 +8,16 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 DETAILS:
 **Tier:** Ultimate
-**Offering:** GitLab.com, Self-managed
+**Offering:** GitLab.com
 **Status:** Beta
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/124966) in GitLab 16.2 [with a flag](../administration/feature_flags.md) named `observability_tracing`. Disabled by default. This feature is in [beta](../policy/experiment-beta-support.md#beta).
-> - Feature flag [changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/158786) in GitLab 17.3 to the `observability_features` [feature flag](../administration/feature_flags.md), disabled by default. The previous feature flag `observability_tracing` was removed.
-> - [Introduced](https://gitlab.com/groups/gitlab-org/opstrace/-/epics/100) for self-managed in GitLab 17.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/124966) in GitLab 16.2 [with flags](../administration/feature_flags.md) named `observability_group_tab` and `observability_tracing`. Disabled by default. This feature is in [beta](../policy/experiment-beta-support.md#beta).
+> - Feature flag `observability_group_tab` [removed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/133264) in GitLab 16.5.
 
 FLAG:
-The availability of this feature is controlled by a feature flag.
-For more information, see the history.
-This feature is available for testing, but not ready for production use.
+On GitLab.com, by default this feature is not available.
+To make it available, an administrator can [enable the feature flag](../administration/feature_flags.md) named `observability_tracing`.
+This feature is not ready for production use.
 
 With distributed tracing, you can troubleshoot application performance issues by inspecting how a request moves through different services and systems, the timing of each operation, and any errors or logs as they occur. Tracing is particularly useful in the context of microservice applications, which group multiple independent services collaborating to fulfill user requests.
 
@@ -26,30 +25,41 @@ This feature is in [beta](../policy/experiment-beta-support.md). For more inform
 
 ## Configure distributed tracing for a project
 
-Configure distributed tracing to enable it for a project.
+To configure distributed tracing:
+
+1. [Create an access token and enable tracing.](#create-an-access-token)
+1. [Configure your application to use the OpenTelemetry exporter.](#configure-your-application-to-use-the-opentelemetry-exporter)
+
+### Create an access token
 
 Prerequisites:
 
 - You must have at least the Maintainer role for the project.
 
-1. Create an access token:
-   1. On the left sidebar, select **Search or go to** and find your project.
-   1. Select **Settings > Access tokens**.
-   1. Create an access token with the `api` scope and **Developer** role or greater.
-      Save the access token value for later.
-1. To configure your application to send GitLab traces, set the following environment variables:
+To enable tracing in a project, you must first create an access token:
 
-   ```shell
-   OTEL_EXPORTER = "otlphttp"
-   OTEL_EXPORTER_OTLP_ENDPOINT = "https://gitlab.example.com/api/v4/projects/<gitlab-project-id>/observability/"
-   OTEL_EXPORTER_OTLP_HEADERS = "PRIVATE-TOKEN=<gitlab-access-token>"
-   ```
+1. On the left sidebar, select **Search or go to** and find your project.
+1. Select **Settings > Access Tokens**.
+1. Create an access token with the following scopes: `read_api`, `read_observability`, `write_observability`.
+1. Copy the value of the access token.
 
-   Use the following values:
+### Configure your application to use the OpenTelemetry exporter
 
-   - `gitlab.example.com` - The hostname for your self-managed instance, or `gitlab.com`
-   - `gitlab-project-id` - The project ID.
-   - `gitlab-access-token` - The access token you created
+Next, configure your application to send traces to GitLab.
+
+To do this, set the following environment variables:
+
+```shell
+OTEL_EXPORTER = "otlphttp"
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT = "https://observe.gitlab.com/v3/<namespace-id>/<gitlab-project-id>/ingest/traces"
+OTEL_EXPORTER_OTLP_TRACES_HEADERS = "PRIVATE-TOKEN=<gitlab-access-token>"
+```
+
+Use the following values:
+
+- `namespace-id`: The top-level namespace ID where your project is located.
+- `gitlab-project-id`: The project ID.
+- `gitlab-access-token`: The access token you [created previously](#create-an-access-token).
 
 When your application is configured, run it, and the OpenTelemetry exporter attempts to send
 traces to GitLab.
@@ -85,23 +95,3 @@ To request a limit increase to 1,048,576 bytes per minute, contact GitLab suppor
 ## Data retention
 
 GitLab has a retention limit of 30 days for all traces.
-
-## Create an issue for a trace
-
-You can create an issue to track any action taken to resolve or investigate a trace. To create an issue for a trace:
-
-1. On the left sidebar, select **Search or go to** and find your project.
-1. Select **Monitor > Traces**.
-1. From the list of traces, select a trace.
-1. Select **Create issue**.
-
-The issue is created in the selected project and pre-filled with information from the trace.
-You can edit the issue title and description.
-
-## View issues related to a trace
-
-1. On the left sidebar, select **Search or go to** and find your project.
-1. Select **Monitor > Traces**.
-1. From the list of traces, select a trace.
-1. Scroll to **Related issues**.
-1. Optional. To view the issue details, select an issue.

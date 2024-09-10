@@ -63,10 +63,26 @@ RSpec.describe Ci::StatusHelper do
       end
     end
 
-    describe 'ci icon appearance' do
+    context "when status is success-with-warnings" do
+      subject { helper.render_ci_icon("success-with-warnings") }
+
+      it "renders warning variant of gl-badge" do
+        is_expected.to include('gl-badge badge badge-pill badge-warning')
+      end
+    end
+
+    context "when status is manual" do
+      subject { helper.render_ci_icon("manual") }
+
+      it "renders neutral variant of gl-badge" do
+        is_expected.to include('gl-badge badge badge-pill badge-neutral')
+      end
+    end
+
+    describe 'badge and icon appearance' do
       using RSpec::Parameterized::TableSyntax
 
-      where(:status, :icon, :variant) do
+      where(:status, :icon, :badge_variant) do
         'success'               | 'status_success_borderless'   | 'success'
         'success-with-warnings' | 'status_warning_borderless'   | 'warning'
         'pending'               | 'status_pending_borderless'   | 'warning'
@@ -87,7 +103,8 @@ RSpec.describe Ci::StatusHelper do
         subject { helper.render_ci_icon(status) }
 
         it 'uses the correct variant and icon for status' do
-          is_expected.to include("ci-icon-variant-#{variant}")
+          is_expected.to include("gl-badge badge badge-pill badge-#{badge_variant}")
+          is_expected.to include("ci-icon-variant-#{badge_variant}")
           is_expected.to include("data-testid=\"#{icon}-icon\"")
         end
       end

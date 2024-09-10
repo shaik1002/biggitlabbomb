@@ -249,7 +249,6 @@ RSpec.describe PlanLimits do
         ci_max_artifact_size_coverage_fuzzing
         ci_max_artifact_size_api_fuzzing
         ci_max_artifact_size_annotations
-        ci_max_artifact_size_jacoco
       ]
     end
 
@@ -262,10 +261,6 @@ RSpec.describe PlanLimits do
         web_hook_calls
         web_hook_calls_mid
         web_hook_calls_low
-        import_placeholder_user_limit_tier_1
-        import_placeholder_user_limit_tier_2
-        import_placeholder_user_limit_tier_3
-        import_placeholder_user_limit_tier_4
         ci_daily_pipeline_schedule_triggers
         repository_size
         security_policy_scan_execution_schedules

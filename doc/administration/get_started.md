@@ -53,7 +53,7 @@ Get started:
 - [Run multiple Agile teams](https://www.youtube.com/watch?v=VR2r1TJCDew).
 - [Sync group memberships by using LDAP](../administration/auth/ldap/ldap_synchronization.md#group-sync).
 - Manage user access with inherited permissions. Use up to 20 levels of subgroups to organize both teams and projects.
-  - [Inherited membership](../user/project/members/index.md#membership-types).
+  - [Inherited membership](../user/project/members/index.md#inherited-membership).
   - [Example](../user/group/subgroups/index.md).
 
 ## Import projects
@@ -249,7 +249,7 @@ Rate limits also improve the security of your application.
 
 ### Configure rate limits for self-managed GitLab
 
-You can make changes to your default rate limits from the **Admin** area. For more information about configuration, see the [**Admin** area page](../security/rate_limits.md#configurable-limits).
+You can make changes to your default rate limits from the Admin area. For more information about configuration, see the [Admin area page](../security/rate_limits.md#configurable-limits).
 
 - Define [issues rate limits](settings/rate_limit_on_issues_creation.md) to set a maximum number of issue creation requests per minute, per user.
 - Enforce [user and IP rate limits](settings/user_and_ip_rate_limits.md) for unauthenticated web requests.
@@ -267,7 +267,7 @@ Rate limits also improve the security of your application.
 
 ### Configure rate limits for GitLab SaaS
 
-You can make changes to your default rate limits from the **Admin** area. For more information about configuration, see the [**Admin** area page](../security/rate_limits.md#configurable-limits).
+You can make changes to your default rate limits from the Admin area. For more information about configuration, see the [Admin area page](../security/rate_limits.md#configurable-limits).
 
 - Review the rate limit page.
 - Read our [API page](../api/rest/index.md) for more information about API and rate limiting.

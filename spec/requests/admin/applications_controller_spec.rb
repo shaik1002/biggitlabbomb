@@ -14,7 +14,5 @@ RSpec.describe Admin::ApplicationsController, :enable_admin_mode, feature_catego
 
   include_examples 'applications controller - GET #show'
 
-  include_examples 'applications controller - GET #new'
-
   include_examples 'applications controller - POST #create'
 end

@@ -12,7 +12,6 @@ import { createAlert } from '~/alert';
 import DiffContentComponent from 'jh_else_ce/diffs/components/diff_content.vue';
 import DiffFileComponent from '~/diffs/components/diff_file.vue';
 import DiffFileHeaderComponent from '~/diffs/components/diff_file_header.vue';
-import DiffFileDiscussionExpansion from '~/diffs/components/diff_file_discussion_expansion.vue';
 
 import {
   EVT_DISCUSSIONS_ASSIGNED,
@@ -114,11 +113,9 @@ const makeFileManuallyCollapsed = (store, index = 0) =>
 const changeViewerType = (store, newType, index = 0) =>
   changeViewer(store, index, { name: diffViewerModes[newType] });
 
-// eslint-disable-next-line max-params
 const triggerSaveNote = (wrapper, note, parent, error) =>
   findNoteForm(wrapper).vm.$emit('handleFormUpdate', note, parent, error);
 
-// eslint-disable-next-line max-params
 const triggerSaveDraftNote = (wrapper, note, parent, error) =>
   findNoteForm(wrapper).vm.$emit('handleFormUpdateAddToReview', note, false, parent, error);
 
@@ -126,7 +123,6 @@ describe('DiffFile', () => {
   let wrapper;
   let store;
   let axiosMock;
-  let toggleFileDiscussionMock;
 
   function createComponent({
     file = getReadableFile(),
@@ -135,12 +131,9 @@ describe('DiffFile', () => {
     options = {},
     props = {},
   } = {}) {
-    toggleFileDiscussionMock = jest.fn();
-
     const diffs = diffsModule();
     diffs.actions = {
       ...diffs.actions,
-      toggleFileDiscussion: toggleFileDiscussionMock,
       prefetchFileNeighbors: prefetchFileNeighborsMock,
       saveDiffDiscussion: saveDiffDiscussionMock,
     };
@@ -696,9 +689,9 @@ describe('DiffFile', () => {
     );
 
     it.each`
-      discussions                                                               | exists   | existsText
-      ${[]}                                                                     | ${false} | ${'does not'}
-      ${[{ id: 1, position: { position_type: 'file' }, expandedOnDiff: true }]} | ${true}  | ${'does'}
+      discussions                                         | exists   | existsText
+      ${[]}                                               | ${false} | ${'does not'}
+      ${[{ id: 1, position: { position_type: 'file' } }]} | ${true}  | ${'does'}
     `('discussions $existsText exist for $discussions', ({ discussions, exists }) => {
       const file = {
         ...getReadableFile(),
@@ -710,37 +703,6 @@ describe('DiffFile', () => {
       });
 
       expect(wrapper.findByTestId('diff-file-discussions').exists()).toEqual(exists);
-    });
-
-    it('hides discussions when expandedOnDiff is false', () => {
-      const file = {
-        ...getReadableFile(),
-        discussions: [{ id: 1, position: { position_type: 'file' }, expandedOnDiff: false }],
-      };
-
-      createComponent({
-        file,
-      });
-
-      expect(wrapper.findByTestId('diff-file-discussions').exists()).toEqual(false);
-    });
-
-    it('calls toggleFileDiscussion when toggle is emited on expansion component', () => {
-      const file = {
-        ...getReadableFile(),
-        discussions: [
-          { id: 1, position: { position_type: 'file' }, expandedOnDiff: false },
-          { id: 2, position: { position_type: 'file' }, expandedOnDiff: false },
-        ],
-      };
-
-      createComponent({
-        file,
-      });
-
-      wrapper.findComponent(DiffFileDiscussionExpansion).vm.$emit('toggle');
-
-      expect(toggleFileDiscussionMock).toHaveBeenCalledTimes(2);
     });
 
     describe('when note-form emits `handleFormUpdate`', () => {

@@ -2,6 +2,7 @@ import PortalVue from 'portal-vue';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import BoardApp from '~/boards/components/board_app.vue';
+import '~/boards/filters/due_date_filters';
 import { TYPE_ISSUE, WORKSPACE_GROUP, WORKSPACE_PROJECT } from '~/issues/constants';
 import {
   navigationType,
@@ -16,34 +17,6 @@ import { fullBoardId } from './boards_util';
 Vue.use(VueApollo);
 Vue.use(PortalVue);
 
-defaultClient.cache.policies.addTypePolicies({
-  BoardList: {
-    fields: {
-      issues: {
-        keyArgs: ['filters'],
-      },
-    },
-  },
-  IssueConnection: {
-    merge(existing = { nodes: [] }, incoming, { args }) {
-      if (!args?.after) {
-        return incoming;
-      }
-      return {
-        ...incoming,
-        nodes: [...existing.nodes, ...incoming.nodes],
-      };
-    },
-  },
-  Board: {
-    fields: {
-      epics: {
-        keyArgs: ['boardId'],
-      },
-    },
-  },
-});
-
 const apolloProvider = new VueApollo({
   defaultClient,
 });
@@ -54,7 +27,7 @@ function mountBoardApp(el) {
     groupId,
     fullPath,
     rootPath,
-    wiHasScopedLabelsFeature,
+    hasScopedLabelsFeature,
     wiGroupPath,
     wiCanAdminLabel,
   } = el.dataset;
@@ -122,7 +95,7 @@ function mountBoardApp(el) {
       multipleIssueBoardsAvailable: parseBoolean(el.dataset.multipleBoardsAvailable),
       scopedIssueBoardFeatureEnabled: parseBoolean(el.dataset.scopedIssueBoardFeatureEnabled),
       allowSubEpics: false,
-      hasScopedLabelsFeature: parseBoolean(wiHasScopedLabelsFeature),
+      hasScopedLabelsFeature: parseBoolean(hasScopedLabelsFeature),
       hasIterationsFeature: parseBoolean(el.dataset.iterationFeatureAvailable),
       hasIssueWeightsFeature: parseBoolean(el.dataset.weightFeatureAvailable),
       hasIssuableHealthStatusFeature: parseBoolean(el.dataset.healthStatusFeatureAvailable),

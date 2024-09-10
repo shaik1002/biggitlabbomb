@@ -2,7 +2,6 @@
 import { GlLoadingIcon, GlAlert, GlDrawer } from '@gitlab/ui';
 import { DRAWER_Z_INDEX } from '~/lib/utils/constants';
 import { getContentWrapperHeight } from '~/lib/utils/dom_utils';
-import eventHub from '~/environments/event_hub';
 import WorkloadStats from './workload_stats.vue';
 import WorkloadTable from './workload_table.vue';
 import WorkloadDetails from './workload_details.vue';
@@ -60,7 +59,6 @@ export default {
   },
   methods: {
     closeDetailsDrawer() {
-      eventHub.$emit('closeDetailsDrawer');
       this.showDetailsDrawer = false;
     },
     onItemSelect(item) {
@@ -96,7 +94,7 @@ export default {
       @close="closeDetailsDrawer"
     >
       <template #title>
-        <h4 class="gl-m-0 gl-text-size-h2 gl-font-bold gl-break-anywhere">
+        <h4 class="gl-font-bold gl-font-size-h2 gl-m-0 gl-break-anywhere">
           {{ selectedItem.name }}
         </h4>
       </template>

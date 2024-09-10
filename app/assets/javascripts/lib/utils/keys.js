@@ -6,4 +6,3 @@ export const ARROW_DOWN_KEY = 'ArrowDown';
 export const ARROW_UP_KEY = 'ArrowUp';
 export const END_KEY = 'End';
 export const HOME_KEY = 'Home';
-export const TAB_KEY = 'Tab';

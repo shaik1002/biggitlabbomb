@@ -191,19 +191,6 @@ On GitLab [Premium](https://about.gitlab.com/pricing/premium/) and [Ultimate](ht
 
 If the user who set up the deletion is removed from the group before the deletion happens, the job is cancelled, and the group is no longer scheduled for deletion.
 
-### View groups pending deletion
-
-DETAILS:
-**Tier:** Premium, Ultimate
-**Offering:** GitLab.com, Self-managed, GitLab Dedicated
-
-To view a list of the subgroups that are pending deletion in a group:
-
-1. On the left sidebar, select **Search or go to** and find your group.
-1. Select **Subgroups and projects**.
-
-Groups that are marked for deletion are labeled **Pending deletion**.
-
 ## Delete a group immediately
 
 DETAILS:
@@ -261,7 +248,7 @@ If you change your mind before your request is approved, select
 
 ## View group members
 
-To view members of a group:
+To view the direct and inherited members of a group:
 
 1. On the left sidebar, select **Search or go to** and find your group.
 1. Select **Manage > Members**.
@@ -275,7 +262,7 @@ A table displays the member's:
   For example, if a member has been added to the group both directly and through inheritance,
   the member is displayed twice in the **Members** table, with different sources,
   and is counted as two individual members of the group.
-- [**Role**](../project/members/index.md#which-roles-you-can-assign) in the group.
+- [**Max role**](../project/members/index.md#which-roles-you-can-assign) in the group.
 - **Expiration** date of their group membership.
 - **Activity** related to their account.
 
@@ -302,7 +289,7 @@ In lists of group members, entries can display the following badges:
 1. Select **Manage > Members**.
 1. Above the list of members, in the **Filter members** text box, enter your search criteria. To view:
    - Direct members of the group, select **Membership = Direct**.
-   - Inherited, shared, and inherited shared members of the group, select **Membership = Indirect**.
+   - Members of the group and its subgroups, select **Membership = Inherited**.
    - Members with two-factor authentication enabled or disabled, select **2FA = Enabled** or **2FA = Disabled**.
    - Members of the top-level group who are [enterprise users](../enterprise_user/index.md), select **Enterprise = true**.
 
@@ -317,7 +304,7 @@ You can search for members by name, username, or [public email](../profile/index
 
 ### Sort members in a group
 
-You can sort members by **Account**, **Access granted**, **Role**, or **Last sign-in**.
+You can sort members by **Account**, **Access granted**, **Max role**, or **Last sign-in**.
 
 1. On the left sidebar, select **Search or go to** and find your group.
 1. Select **Manage > Members**.

@@ -15,7 +15,6 @@ export default {
   mixins: [glFeatureFlagsMixin()],
   inject: ['projectEnvironmentsPath', 'projectPath', 'environmentName'],
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     environment: {
       query: getEnvironment,
       variables() {

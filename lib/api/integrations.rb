@@ -78,8 +78,7 @@ module API
             failure [
               { code: 400, message: 'Bad request' },
               { code: 401, message: 'Unauthorized' },
-              { code: 404, message: 'Not found' },
-              { code: 422, message: 'Unprocessable entity' }
+              { code: 404, message: 'Not found' }
             ]
             tags INTEGRATIONS_TAGS
           end
@@ -99,17 +98,17 @@ module API
 
             integration = user_project.find_or_initialize_integration(slug.underscore)
 
-            render_api_error!('400 Integration not available', 400) if integration.nil?
-
             params = declared_params(include_missing: false).merge(active: true)
 
-            unless integration.manual_activation? || integration.is_a?(::Integrations::Prometheus)
+            if integration.is_a?(::Integrations::GitlabSlackApplication)
               if integration.new_record?
-                render_api_error!("You cannot create the #{integration.class.title} integration from the API", 422)
+                render_api_error!('You cannot create the GitLab for Slack app from the API', 422)
               end
 
               params.delete(:active)
             end
+
+            render_api_error!('400 Bad Request', 400) if integration.nil?
 
             result = ::Integrations::UpdateService.new(
               current_user: current_user, integration: integration, attributes: params
@@ -144,10 +143,6 @@ module API
           integration = user_project.find_or_initialize_integration(params[:slug].underscore)
 
           not_found!('Integration') unless integration&.persisted?
-
-          if integration.is_a?(::Integrations::JiraCloudApp)
-            render_api_error!("You cannot disable the #{integration.class.title} integration from the API", 422)
-          end
 
           destroy_conditionally!(integration) do
             attrs = integration_attributes(integration).index_with do |attr|

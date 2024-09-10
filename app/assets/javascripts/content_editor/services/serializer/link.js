@@ -1,11 +1,8 @@
 import { removeLastSlashInUrlPath, removeUrlProtocol } from '~/lib/utils/url_utility';
-import {
-  findChildWithMark,
-  openTag,
-  closeTag,
-  getMarkText,
-  preserveUnchangedMark,
-} from '../serialization_helpers';
+import { findChildWithMark, openTag, closeTag, getMarkText } from '../serialization_helpers';
+
+const LINK_HTML = 'linkHtml';
+const LINK_MARKDOWN = 'linkMarkdown';
 
 /**
  * Validates that the provided URL is a valid GFM autolink
@@ -66,28 +63,41 @@ function getLinkHref(mark, useCanonicalSrc = true) {
   return href || '';
 }
 
-const link = preserveUnchangedMark({
+const linkType = (sourceMarkdown) => {
+  const expression = /^(\[|<a).*/.exec(sourceMarkdown)?.[1];
+
+  if (!expression || expression === '[') {
+    return LINK_MARKDOWN;
+  }
+
+  return LINK_HTML;
+};
+
+const link = {
   open(state, mark, parent) {
     if (isAutoLink(mark, parent)) {
       return isBracketAutoLink(mark.attrs.sourceMarkdown) ? '<' : '';
     }
 
-    const { href, title, isGollumLink, sourceTagName, sourceMarkdown } = mark.attrs;
+    const { href, title, sourceMarkdown, isGollumLink } = mark.attrs;
 
     // eslint-disable-next-line @gitlab/require-i18n-strings
     if (href.startsWith('data:') || href.startsWith('blob:')) return '';
+
+    if (linkType(sourceMarkdown) === LINK_MARKDOWN) {
+      if (isGollumLink) return '[[';
+      return '[';
+    }
 
     const attrs = {
       href: state.esc(getLinkHref(mark, state.options.useCanonicalSrc)),
     };
 
     if (title) {
-      attrs.title = state.esc(title);
+      attrs.title = title;
     }
 
-    if (sourceTagName && !sourceMarkdown) return openTag(sourceTagName, attrs);
-    if (isGollumLink) return '[[';
-    return '[';
+    return openTag('a', attrs);
   },
   close(state, mark, parent) {
     if (isAutoLink(mark, parent)) {
@@ -97,7 +107,6 @@ const link = preserveUnchangedMark({
     const {
       href = '',
       title,
-      sourceTagName,
       sourceMarkdown,
       isReference,
       isGollumLink,
@@ -107,12 +116,12 @@ const link = preserveUnchangedMark({
     // eslint-disable-next-line @gitlab/require-i18n-strings
     if (href.startsWith('data:') || href.startsWith('blob:')) return '';
 
-    if (sourceTagName && !sourceMarkdown) {
-      return closeTag(sourceTagName);
-    }
-
     if (isReference) {
       return `][${state.esc(getLinkHref(mark, state.options.useCanonicalSrc))}]`;
+    }
+
+    if (linkType(sourceMarkdown) === LINK_HTML) {
+      return closeTag('a');
     }
 
     if (isGollumLink) {
@@ -130,6 +139,6 @@ const link = preserveUnchangedMark({
       title ? ` ${state.quote(title)}` : ''
     })`;
   },
-});
+};
 
 export default link;

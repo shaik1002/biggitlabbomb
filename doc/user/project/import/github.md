@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -17,10 +17,6 @@ DETAILS:
 You can import your GitHub projects from either GitHub.com or GitHub Enterprise. Importing projects does not
 migrate or import any types of groups or organizations from GitHub to GitLab.
 
-WARNING:
-Importing from GitHub to GitLab.com is [currently unavailable](https://status.gitlab.com). We don't have an
-estimated time for resolution. For more information, please [contact support](https://about.gitlab.com/support/).
-
 Imported issues, merge requests, comments, and events have an **Imported** badge in GitLab.
 
 The namespace is a user or group in GitLab, such as `gitlab.com/sidney-jones` or
@@ -34,15 +30,6 @@ You can change the target namespace and target repository name before you import
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For an overview of the import process, see [How to migrate from GitHub to GitLab including Actions](https://www.youtube.com/watch?v=0Id5oMl1Kqs).
-
-## Estimating import duration
-
-Every import from GitHub is different, which affects the duration of imports you perform. However, in our testing we
-imported `https://github.com/kubernetes/kubernetes` in 76 hours. When we tested, that project comprised:
-
-- 80,000 pull requests.
-- 45,000 issues.
-- Approximately 1.5 million comments.
 
 ## Prerequisites
 
@@ -95,13 +82,6 @@ If the above requirements are not met, the importer can't map the particular use
 - GitLab [can't import](https://gitlab.com/gitlab-org/gitlab/-/issues/424046) GitHub Markdown image attachments that
   were uploaded to private repositories before 2023-05-09. If you encounter this problem, would like to help us resolve the problem, and are willing to provide a sample repository
   for us, please add a comment to [issue 424046](https://gitlab.com/gitlab-org/gitlab/-/issues/424046) and we'll contact you.
-- For [GitLab-specific references](../../markdown.md#gitlab-specific-references), GitLab uses a `#` character for issues and a `!` character for merge requests.
-  However, GitHub uses only a `#` character for both issues and pull requests.
-
-  When importing:
-
-  - Comment notes, GitLab only matches references to issues because GitLab doesn't know whether a references points to an issue or a merge request.
-  - Issues or merge request descriptions, GitLab ignores all references because their imported counterparts might not have been created on the destination yet.
 
 ## Import your GitHub repository into GitLab
 
@@ -117,7 +97,7 @@ performing the import.
 You can import your GitHub repository by either:
 
 - [Using GitHub OAuth](#use-github-oauth)
-- [Using a GitHub personal access token](#use-a-github-personal-access-token)
+- [Using a GitHub Personal Access Token](#use-a-github-personal-access-token)
 - [Using the API](#use-the-api)
 
 If importing from `github.com` you can use any method to import. Self-hosted GitHub Enterprise Server customers must use the API.
@@ -126,7 +106,7 @@ If importing from `github.com` you can use any method to import. Self-hosted Git
 
 If you are importing to GitLab.com or to a self-managed GitLab that has GitHub OAuth [configured](../../../integration/github.md), you can use GitHub OAuth to import your repository.
 
-This method has an advantage over using a [personal access token (PAT)](#use-a-github-personal-access-token)
+This method has an advantage over using a [Personal Access Token (PAT)](#use-a-github-personal-access-token)
 because the backend exchanges the access token with the appropriate permissions.
 
 1. On the left sidebar, at the top, select **Create new** (**{plus}**) and **New project/repository**.
@@ -137,9 +117,9 @@ because the backend exchanges the access token with the appropriate permissions.
 To use a different method to perform an import after previously performing
 these steps, sign out of your GitLab account and sign in again.
 
-### Use a GitHub personal access token
+### Use a GitHub Personal Access Token
 
-To import your GitHub repository using a GitHub personal access token:
+To import your GitHub repository using a GitHub Personal Access Token:
 
 1. Generate a GitHub personal access token. Only **classic** personal access tokens are supported.
    1. Go to <https://github.com/settings/tokens/new>.
@@ -150,7 +130,7 @@ To import your GitHub repository using a GitHub personal access token:
 1. On the GitLab left sidebar, at the top, select **Create new** (**{plus}**) and **New project/repository**.
 1. Select **Import project** and then **GitHub**.
 1. Select **Authorize with GitHub**.
-1. In the **Personal access token** field, paste the GitHub personal access token.
+1. In the **Personal Access Token** field, paste the GitHub Personal Access Token.
 1. Select **Authenticate**.
 1. Proceed to [selecting which repositories to import](#select-which-repositories-to-import).
 
@@ -166,7 +146,7 @@ The [GitLab REST API](../../../api/import.md#import-repository-from-github) can 
 - It can be used to import from a GitHub Enterprise Server that is self-hosted.
 - Can be used to set the `timeout_strategy` option that is not available to the UI.
 
-The REST API is limited to authenticating with GitLab personal access tokens.
+The REST API is limited to authenticating with GitLab Personal Access Tokens.
 
 To import your GitHub repository using the GitLab REST API:
 

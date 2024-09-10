@@ -6,13 +6,9 @@ module API
       module AgentHelpers
         include Gitlab::Utils::StrongMemoize
 
-        COUNTERS_EVENTS_MAPPING = {
-          'flux_git_push_notifications_total' => 'create_flux_git_push_notification',
-          'k8s_api_proxy_request' => 'request_api_proxy_access',
-          'k8s_api_proxy_requests_via_ci_access' => 'request_api_proxy_access_via_ci',
-          'k8s_api_proxy_requests_via_user_access' => 'request_api_proxy_access_via_user',
-          'k8s_api_proxy_requests_via_pat_access' => 'request_api_proxy_access_via_pat'
-        }.freeze
+        def authenticate_gitlab_kas_request!
+          render_api_error!('KAS JWT authentication invalid', 401) unless Gitlab::Kas.verify_api_request(headers)
+        end
 
         def agent_token
           cluster_agent_token_from_authorization_token
@@ -23,6 +19,14 @@ module API
           agent_token.agent
         end
         strong_memoize_attr :agent
+
+        def gitaly_info(project)
+          Gitlab::GitalyClient.connection_data(project.repository_storage)
+        end
+
+        def gitaly_repository(project)
+          project.repository.gitaly_repository.to_h
+        end
 
         def check_agent_token
           unauthorized! unless agent_token
@@ -90,16 +94,13 @@ module API
         end
 
         def increment_count_events
-          counters = params[:counters]&.slice(*COUNTERS_EVENTS_MAPPING.keys)
+          events = params[:counters]&.slice(
+            :k8s_api_proxy_request, :flux_git_push_notifications_total,
+            :k8s_api_proxy_requests_via_ci_access, :k8s_api_proxy_requests_via_user_access,
+            :k8s_api_proxy_requests_via_pat_access
+          )
 
-          return unless counters.present?
-
-          counters.each do |counter, incr|
-            next if incr == 0
-
-            event = COUNTERS_EVENTS_MAPPING[counter]
-            incr.times { Gitlab::InternalEvents.track_event(event) }
-          end
+          Gitlab::UsageDataCounters::KubernetesAgentCounter.increment_event_counts(events)
         end
 
         def update_configuration(agent:, config:)
@@ -121,9 +122,7 @@ module API
           unauthorized!('Invalid session') unless session
 
           # CSRF check
-          unless ::Gitlab::Kas::UserAccess.valid_authenticity_token?(
-            request, session.symbolize_keys, params[:csrf_token]
-          )
+          unless ::Gitlab::Kas::UserAccess.valid_authenticity_token?(session.symbolize_keys, params[:csrf_token])
             unauthorized!('CSRF token does not match')
           end
 

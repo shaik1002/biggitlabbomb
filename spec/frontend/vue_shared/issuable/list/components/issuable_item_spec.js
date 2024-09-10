@@ -160,7 +160,7 @@ describe('IssuableItem', () => {
       it('returns `issuable.assignees` reference when it is available', () => {
         wrapper = createComponent();
 
-        expect(wrapper.vm.assignees).toStrictEqual(mockIssuable.assignees);
+        expect(wrapper.vm.assignees).toBe(mockIssuable.assignees);
       });
     });
 
@@ -640,20 +640,6 @@ describe('IssuableItem', () => {
       findIssuableTitleLink().vm.$emit('click', new MouseEvent('click'));
 
       expect(wrapper.emitted('select-issuable')).toEqual([[{ iid, webUrl }]]);
-    });
-
-    it('includes fullPath in emitted event for work items', () => {
-      const { iid, webUrl } = mockIssuable;
-      const fullPath = 'gitlab-org/gitlab';
-
-      wrapper = createComponent({
-        preventRedirect: true,
-        issuable: { ...mockIssuable, namespace: { fullPath } },
-      });
-
-      findIssuableTitleLink().vm.$emit('click', new MouseEvent('click'));
-
-      expect(wrapper.emitted('select-issuable')).toEqual([[{ iid, webUrl, fullPath }]]);
     });
 
     it('does not apply highlighted class when item is not active', () => {

@@ -1,12 +1,12 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments"
 ---
 
 # Troubleshooting file export project migrations
 
-If you have problems with [migrating projects by using file exports](import_export.md), see the possible solutions below.
+If you have problems with [migrating projects using file exports](import_export.md), see the possible solutions below.
 
 ## Troubleshooting commands
 
@@ -197,14 +197,7 @@ e.send(:design_repo_saver).send(:save)
 ## continue using `e.send(:exporter_name).send(:save)` going through the list of exporters
 
 # The following line should show you the export_path similar to /var/opt/gitlab/gitlab-rails/shared/tmp/gitlab_exports/@hashed/49/94/4994....
-s = Gitlab::ImportExport::Saver.new(exportable: p, shared: p.import_export_shared, user: u)
-
-# Prior to GitLab 17.0, the `user` parameter was not supported. If you encounter an
-# error with the above or are unsure whether or not to supply the `user`
-# argument, use the following check:
-Gitlab::ImportExport::Saver.instance_method(:initialize).parameters.include?([:keyreq, :user])
-# If the preceding check returns false, omit the user argument:
-s = Gitlab::ImportExport::Saver.new(exportable: p, shared: p.import_export_shared)
+s = Gitlab::ImportExport::Saver.new(exportable: p, shared:p.import_export_shared)
 
 # To try and upload use:
 s.send(:compress_and_save)
@@ -226,23 +219,6 @@ Validation failed: User project bots cannot be added to other groups / projects
 
 To use [Import REST API](../../../api/project_import_export.md),
 pass regular user account credentials such as [personal access tokens](../../profile/personal_access_tokens.md).
-
-## Error: `PG::QueryCanceled: ERROR: canceling statement due to statement timeout`
-
-Some migrations can time out with the error: `PG::QueryCanceled: ERROR: canceling statement due to statement timeout`.
-One way to avoid this problem is to have the migration batch size reduced. This makes a migration less likely to time
-out, but makes migrations slower.
-
-To have the batch sized reduced, you must have a feature flag enabled. For more information, see
-[issue 456948](https://gitlab.com/gitlab-org/gitlab/-/issues/456948).
-
-## Error: `command exited with error code 15 and Unable to save [FILTERED] into [FILTERED]`
-
-You might receive the error `command exited with error code 15 and Unable to save [FILTERED] into [FILTERED]` in logs
-when migrating projects by using file exports. If you receive this error:
-
-- When exporting a file export, you can safely ignore the error. GitLab retries the exited command.
-- When importing a file import, you must retry the import. GitLab doesn't automatically retry the import.
 
 ## Troubleshooting performance issues
 

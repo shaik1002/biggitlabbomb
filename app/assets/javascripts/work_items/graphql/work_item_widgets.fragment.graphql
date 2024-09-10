@@ -2,6 +2,8 @@
 #import "~/graphql_shared/fragments/user.fragment.graphql"
 #import "~/work_items/graphql/milestone.fragment.graphql"
 #import "~/work_items/graphql/timelog.fragment.graphql"
+#import "ee_else_ce/work_items/graphql/work_item_metadata_widgets.fragment.graphql"
+#import "ee_else_ce/work_items/graphql/work_item_metadata_widgets_extras.fragment.graphql"
 
 fragment WorkItemWidgets on WorkItemWidget {
   type
@@ -34,6 +36,13 @@ fragment WorkItemWidgets on WorkItemWidget {
       }
     }
   }
+  ... on WorkItemWidgetParticipants {
+    participants {
+      nodes {
+        ...User
+      }
+    }
+  }
   ... on WorkItemWidgetStartAndDueDate {
     dueDate
     startDate
@@ -49,7 +58,6 @@ fragment WorkItemWidgets on WorkItemWidget {
   }
   ... on WorkItemWidgetHierarchy {
     hasChildren
-    hasParent
     parent {
       id
       iid
@@ -81,9 +89,36 @@ fragment WorkItemWidgets on WorkItemWidget {
       }
     }
   }
+  ... on WorkItemWidgetLinkedItems {
+    linkedItems {
+      nodes {
+        linkId
+        linkType
+        workItem {
+          id
+          iid
+          confidential
+          workItemType {
+            id
+            name
+            iconName
+          }
+          title
+          state
+          createdAt
+          closedAt
+          webUrl
+          reference(full: true)
+          widgets {
+            ...WorkItemMetadataWidgets
+            ...WorkItemMetadataWidgetsExtras
+          }
+        }
+      }
+    }
+  }
   ... on WorkItemWidgetDevelopment {
     type
-    willAutoCloseByMergeRequest
     closingMergeRequests {
       nodes {
         fromMrDescription
@@ -109,24 +144,6 @@ fragment WorkItemWidgets on WorkItemWidget {
               avatarUrl
             }
           }
-        }
-      }
-    }
-  }
-  ... on WorkItemWidgetCrmContacts {
-    contacts {
-      nodes {
-        id
-        email
-        firstName
-        lastName
-        phone
-        description
-        organization {
-          id
-          name
-          description
-          defaultRate
         }
       }
     }

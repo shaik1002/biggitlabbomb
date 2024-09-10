@@ -23,10 +23,6 @@ module Resolvers
       required: false,
       description: "Return only projects with merge requests enabled."
 
-    argument :archived, ::Types::Projects::ArchivedEnum,
-      required: false,
-      description: 'Filter projects by archived status.'
-
     def resolve_with_lookahead(**args)
       validate_args!(args)
 
@@ -68,8 +64,7 @@ module Resolvers
         **project_finder_params(args),
         with_issues_enabled: args[:with_issues_enabled],
         with_merge_requests_enabled: args[:with_merge_requests_enabled],
-        full_paths: args[:full_paths],
-        archived: args[:archived]
+        full_paths: args[:full_paths]
       }
     end
 

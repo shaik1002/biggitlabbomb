@@ -209,11 +209,12 @@ RSpec.describe Projects::TreeController, feature_category: :source_code_manageme
   end
 
   describe '#create_dir' do
-    subject(:create_dir) { post :create_dir, params: params }
-
     let(:create_merge_request) { nil }
-    let(:params) do
-      {
+
+    render_views
+
+    before do
+      post :create_dir, params: {
         namespace_id: project.namespace.to_param,
         project_id: project,
         id: 'master',
@@ -224,8 +225,6 @@ RSpec.describe Projects::TreeController, feature_category: :source_code_manageme
       }
     end
 
-    render_views
-
     context 'successful creation' do
       let(:path) { 'files/new_dir' }
       let(:branch_name) { "main-test-#{SecureRandom.hex}" }
@@ -234,7 +233,7 @@ RSpec.describe Projects::TreeController, feature_category: :source_code_manageme
         let(:create_merge_request) { 'false' }
 
         it 'redirects to the new directory' do
-          expect(create_dir)
+          expect(subject)
               .to redirect_to("/#{project.full_path}/-/tree/#{branch_name}/#{path}")
           expect(flash[:notice]).to eq('The directory has been successfully created.')
         end
@@ -243,7 +242,7 @@ RSpec.describe Projects::TreeController, feature_category: :source_code_manageme
       context 'when creating a new MR' do
         shared_examples 'a new MR from branch redirection' do
           it 'redirects to the new MR page' do
-            expect(create_dir)
+            expect(subject)
                 .to redirect_to("/#{project.full_path}/-/merge_requests/new?merge_request%5Bsource_branch%5D=#{branch_name}&merge_request%5Btarget_branch%5D=master&merge_request%5Btarget_project_id%5D=#{project.id}")
             expect(flash[:notice]).to eq('The directory has been successfully created. You can now submit a merge request to get this change into the original branch.')
           end
@@ -280,27 +279,9 @@ RSpec.describe Projects::TreeController, feature_category: :source_code_manageme
       let(:branch_name) { 'master' }
 
       it 'does not allow overwriting of existing files' do
-        expect(create_dir)
+        expect(subject)
             .to redirect_to("/#{project.full_path}/-/tree/master")
         expect(flash[:alert]).to eq('A file with this name already exists')
-      end
-
-      [:branch_name, :dir_name, :commit_message].each do |required_param|
-        context "when #{required_param} is missing" do
-          let(:params) { super().except(required_param) }
-
-          it 'raises a missing parameter exception' do
-            expect { create_dir }.to raise_error(ActionController::ParameterMissing)
-          end
-        end
-
-        context "when #{required_param} is empty" do
-          let(:params) { super().merge(required_param => nil) }
-
-          it 'raises a missing parameter exception' do
-            expect { create_dir }.to raise_error(ActionController::ParameterMissing)
-          end
-        end
       end
     end
   end

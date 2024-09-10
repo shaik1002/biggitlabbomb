@@ -98,7 +98,7 @@ export default {
     <div class="search-page-form gl-mt-5">
       <search-type-indicator />
       <template v-if="showSyntaxOptions">
-        <div class="gl-inline-block">
+        <div class="gl-display-inline-block">
           <gl-button category="tertiary" variant="link" @click="onToggleDrawer"
             >{{ $options.i18n.syntaxOptionsLabel }}
           </gl-button>

@@ -20,7 +20,8 @@ export default {
       default: '',
     },
   },
-  docsLink: helpPagePath('development/internal_analytics/service_ping/index'),
+  // eslint-disable-next-line local-rules/require-valid-help-page-path
+  docsLink: helpPagePath('development/service_ping/index.md'),
 };
 </script>
 <template>

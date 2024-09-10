@@ -3,8 +3,6 @@
 module AntiAbuse
   module Reports
     class Discussion < ::Discussion
-      delegate :abuse_report, to: :first_note
-
       def self.base_discussion_id(_note)
         [:discussion, :abuse_report_id]
       end
@@ -14,7 +12,7 @@ module AntiAbuse
       end
 
       def reply_attributes
-        first_note.slice(:type, :abuse_report_id, :discussion_id)
+        first_note.slice(:abuse_report_id, :discussion_id)
       end
 
       def individual_note?

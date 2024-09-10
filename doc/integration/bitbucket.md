@@ -92,8 +92,7 @@ you to use.
        # label: "Provider name", # optional label for login button, defaults to "Bitbucket"
        app_id: "<bitbucket_app_key>",
        app_secret: "<bitbucket_app_secret>",
-       url: "https://bitbucket.org/",
-       args: { redirect_uri: "https://gitlab.example.com/users/auth/" },
+       url: "https://bitbucket.org/"
      }
    ]
    ```
@@ -108,9 +107,7 @@ you to use.
            # label: 'Provider name', # optional label for login button, defaults to "Bitbucket"
            app_id: '<bitbucket_app_key>',
            app_secret: '<bitbucket_app_secret>',
-           url: 'https://bitbucket.org/',
-           args: { redirect_uri: "https://gitlab.example.com/users/auth/" },
-         }
+           url: 'https://bitbucket.org/' }
    ```
 
    Where `<bitbucket_app_key>` is the **Key** and `<bitbucket_app_secret>` the **Secret**
@@ -132,4 +129,4 @@ After the above configuration is set up, you can use Bitbucket to sign in to
 GitLab and [start importing your projects](../user/project/import/bitbucket.md).
 
 If you want to import projects from Bitbucket, but don't want to enable signing in,
-you can [disable Sign-Ins in the **Admin** area](omniauth.md#enable-or-disable-sign-in-with-an-omniauth-provider-without-disabling-import-sources).
+you can [disable Sign-Ins in the Admin area](omniauth.md#enable-or-disable-sign-in-with-an-omniauth-provider-without-disabling-import-sources).

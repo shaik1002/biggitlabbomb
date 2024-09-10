@@ -5,7 +5,7 @@ import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { isNumeric } from '~/lib/utils/number_utils';
 import { DEFAULT_DEBOUNCE_AND_THROTTLE_MS } from '~/lib/utils/constants';
 import SafeHtml from '~/vue_shared/directives/safe_html';
-import { isValidURL } from '~/lib/utils/url_utility';
+import { isSafeURL } from '~/lib/utils/url_utility';
 
 import { highlighter } from 'ee_else_ce/gfm_auto_complete';
 
@@ -27,6 +27,7 @@ export default {
     GlAlert,
   },
   directives: { SafeHtml },
+  inject: ['isGroup'],
   props: {
     value: {
       type: Array,
@@ -36,11 +37,6 @@ export default {
     fullPath: {
       type: String,
       required: true,
-    },
-    isGroup: {
-      type: Boolean,
-      required: false,
-      default: false,
     },
     childrenType: {
       type: String,
@@ -105,12 +101,11 @@ export default {
   data() {
     return {
       workspaceWorkItems: [],
-      workItemsByReference: [],
       searchTerm: '',
       searchStarted: false,
       error: '',
       textInputAttrs: {
-        class: '!gl-min-w-fit',
+        class: 'gl-min-w-fit-content!',
       },
     };
   },
@@ -119,7 +114,7 @@ export default {
       return this.isSearchingByReference ? this.workItemsByReference : this.workspaceWorkItems;
     },
     isSearchingByReference() {
-      return isReference(this.searchTerm) || isValidURL(this.searchTerm);
+      return isReference(this.searchTerm) || isSafeURL(this.searchTerm);
     },
     workItemsToAdd: {
       get() {
@@ -195,7 +190,7 @@ export default {
         return input;
       }
 
-      return highlighter(`<span class="gl-text-default">${input}</span>`, this.searchTerm);
+      return highlighter(`<span class="gl-text-black-normal">${input}</span>`, this.searchTerm);
     },
     unsetError() {
       this.error = '';
@@ -225,7 +220,7 @@ export default {
       :dropdown-items="availableWorkItems"
       :loading="isLoading"
       :placeholder="$options.i18n.addInputPlaceholder"
-      menu-class="gl-dropdown-menu-wide dropdown-reduced-height !gl-min-h-7"
+      menu-class="gl-dropdown-menu-wide dropdown-reduced-height gl-min-h-7!"
       :container-class="tokenSelectorContainerClass"
       data-testid="work-item-token-select-input"
       :text-input-attrs="textInputAttrs"
@@ -239,12 +234,12 @@ export default {
     >
       <template #token-content="{ token }"> {{ token.iid }} {{ token.title }} </template>
       <template #dropdown-item-content="{ dropdownItem }">
-        <div class="gl-flex">
+        <div class="gl-display-flex">
           <div
             v-safe-html="formatResults(dropdownItem.iid)"
-            class="gl-mr-4 gl-text-sm gl-text-secondary"
+            class="gl-text-secondary gl-font-sm gl-mr-4"
           ></div>
-          <div v-safe-html="formatResults(dropdownItem.title)" class="gl-truncate"></div>
+          <div v-safe-html="formatResults(dropdownItem.title)" class="gl-text-truncate"></div>
         </div>
       </template>
       <template #no-results-content>

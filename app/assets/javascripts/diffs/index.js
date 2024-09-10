@@ -92,7 +92,7 @@ export default function initDiffsApp(store = notesStore) {
           helpPagePath: this.helpPagePath,
           shouldShow: this.activeTab === 'diffs',
           changesEmptyStateIllustration: this.changesEmptyStateIllustration,
-          linkedFileUrl: dataset.linkedFileUrl,
+          pinnedFileUrl: dataset.pinnedFileUrl,
         },
       });
     },

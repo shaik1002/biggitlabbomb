@@ -12,6 +12,12 @@ import {
   SEARCH_LEVEL_GLOBAL,
   SEARCH_LEVEL_GROUP,
 } from '~/search/store/constants';
+import {
+  ZOEKT_HELP_PAGE,
+  ADVANCED_SEARCH_HELP_PAGE,
+  ADVANCED_SEARCH_SYNTAX_HELP_ANCHOR,
+  ZOEKT_HELP_PAGE_SYNTAX_ANCHOR,
+} from '../constants';
 
 import { SCOPE_BLOB } from '../../sidebar/constants';
 
@@ -33,29 +39,33 @@ export default {
     ),
     more: __('Learn more.'),
   },
-  zoektHelpUrl: helpPagePath('user/search/exact_code_search'),
-  zoektSyntaxHelpUrl: helpPagePath('user/search/exact_code_search', {
-    anchor: 'syntax',
-  }),
-  advancedSearchHelpUrl: helpPagePath('user/search/advanced_search'),
-  advancedSearchSyntaxHelpUrl: helpPagePath('user/search/advanced_search', {
-    anchor: 'syntax',
-  }),
   components: {
     GlSprintf,
     GlLink,
   },
   computed: {
-    ...mapState([
-      'searchType',
-      'advancedSearchAvailable',
-      'zoektAvailable',
-      'defaultBranchName',
-      'query',
-      'searchLevel',
-      'query',
-    ]),
+    ...mapState(['searchType', 'defaultBranchName', 'query', 'searchLevel', 'query']),
     ...mapGetters(['currentScope']),
+    zoektHelpUrl() {
+      // eslint-disable-next-line local-rules/require-valid-help-page-path
+      return helpPagePath(ZOEKT_HELP_PAGE);
+    },
+    zoektSyntaxHelpUrl() {
+      // eslint-disable-next-line local-rules/require-valid-help-page-path
+      return helpPagePath(ZOEKT_HELP_PAGE, {
+        anchor: ZOEKT_HELP_PAGE_SYNTAX_ANCHOR,
+      });
+    },
+    advancedSearchHelpUrl() {
+      // eslint-disable-next-line local-rules/require-valid-help-page-path
+      return helpPagePath(ADVANCED_SEARCH_HELP_PAGE);
+    },
+    advancedSearchSyntaxHelpUrl() {
+      // eslint-disable-next-line local-rules/require-valid-help-page-path
+      return helpPagePath(ADVANCED_SEARCH_HELP_PAGE, {
+        anchor: ADVANCED_SEARCH_SYNTAX_HELP_ANCHOR,
+      });
+    },
     isZoekt() {
       return this.searchType === ZOEKT_SEARCH_TYPE && this.currentScope === SCOPE_BLOB;
     },
@@ -75,14 +85,7 @@ export default {
 
       return BASIC_SEARCH_TYPE;
     },
-    searchTypeAvailableTestId() {
-      if (this.zoektAvailable) {
-        return ZOEKT_SEARCH_TYPE;
-      }
-
-      return ADVANCED_SEARCH_TYPE;
-    },
-    useAdvancedOrZoekt() {
+    isEnabled() {
       const repoRef = this.query.repository_ref;
       switch (this.searchLevel) {
         case SEARCH_LEVEL_GLOBAL:
@@ -98,27 +101,22 @@ export default {
           return false;
       }
     },
-    isFallBacktoBasicSearch() {
-      return !this.useAdvancedOrZoekt && (this.advancedSearchAvailable || this.zoektAvailable);
-    },
     isBasicSearch() {
       return this.searchType === BASIC_SEARCH_TYPE;
     },
     disabledMessage() {
-      return this.zoektAvailable
+      return this.isZoekt
         ? this.$options.i18n.zoekt_disabled
         : this.$options.i18n.advanced_disabled;
     },
     helpUrl() {
-      return this.isZoekt ? this.$options.zoektHelpUrl : this.$options.advancedSearchHelpUrl;
+      return this.isZoekt ? this.zoektHelpUrl : this.advancedSearchHelpUrl;
     },
     enabledMessage() {
       return this.isZoekt ? this.$options.i18n.zoekt_enabled : this.$options.i18n.advanced_enabled;
     },
     syntaxHelpUrl() {
-      return this.zoektAvailable
-        ? this.$options.zoektSyntaxHelpUrl
-        : this.$options.advancedSearchSyntaxHelpUrl;
+      return this.isZoekt ? this.zoektSyntaxHelpUrl : this.advancedSearchSyntaxHelpUrl;
     },
   },
 };
@@ -126,27 +124,26 @@ export default {
 
 <template>
   <div class="gl-inline gl-text-gray-600">
-    <div v-if="isBasicSearch" data-testid="basic">
-      <div v-if="isFallBacktoBasicSearch" :data-testid="`${searchTypeAvailableTestId}-disabled`">
-        <gl-sprintf :message="disabledMessage">
-          <template #link="{ content }">
-            <gl-link :href="helpUrl" target="_blank" data-testid="docs-link">{{ content }}</gl-link>
-          </template>
-          <template #ref_elem>
-            <code v-gl-tooltip :title="query.repository_ref">{{ query.repository_ref }}</code>
-          </template>
-          <template #docs_link>
-            <gl-link :href="syntaxHelpUrl" target="_blank" data-testid="syntax-docs-link"
-              >{{ $options.i18n.more }}
-            </gl-link>
-          </template>
-        </gl-sprintf>
-      </div>
-    </div>
-    <div v-else :data-testid="`${searchTypeTestId}-enabled`" class="gl-inline">
+    <div v-if="isBasicSearch" data-testid="basic"></div>
+    <div v-else-if="isEnabled" :data-testid="`${searchTypeTestId}-enabled`" class="gl-inline">
       <gl-sprintf :message="enabledMessage">
         <template #link="{ content }">
           <gl-link :href="helpUrl" target="_blank" data-testid="docs-link">{{ content }}</gl-link>
+        </template>
+      </gl-sprintf>
+    </div>
+    <div v-else :data-testid="`${searchTypeTestId}-disabled`" class="gl-inline">
+      <gl-sprintf :message="disabledMessage">
+        <template #link="{ content }">
+          <gl-link :href="helpUrl" target="_blank" data-testid="docs-link">{{ content }}</gl-link>
+        </template>
+        <template #ref_elem>
+          <code v-gl-tooltip :title="query.repository_ref">{{ query.repository_ref }}</code>
+        </template>
+        <template #docs_link>
+          <gl-link :href="syntaxHelpUrl" target="_blank" data-testid="syntax-docs-link"
+            >{{ $options.i18n.more }}
+          </gl-link>
         </template>
       </gl-sprintf>
     </div>

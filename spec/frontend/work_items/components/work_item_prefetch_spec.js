@@ -20,7 +20,7 @@ describe('WorkItemPrefetch component', () => {
 
   Vue.use(VueApollo);
 
-  const createComponent = (workItemFullPath = undefined) => {
+  const createComponent = () => {
     const mockApollo = createMockApollo([[workItemByIidQuery, getWorkItemQueryHandler]]);
 
     wrapper = shallowMountExtended(WorkItemPrefetch, {
@@ -30,33 +30,30 @@ describe('WorkItemPrefetch component', () => {
       },
       propsData: {
         workItemIid: '1',
-        workItemFullPath,
       },
       scopedSlots: {
         default: `
-          <span
-            @mouseover="props.prefetchWorkItem"
-            @mouseleave="props.clearPrefetching"
-            data-testid="prefetch-trigger"
-          >
-            Hover item
-          </span>
+          <template #default="{ prefetchWorkItem, clearPrefetching }">
+            <span
+              @mouseover="prefetchWorkItem"
+              @mouseleave="clearPrefetching"
+              data-testid="prefetch-trigger"
+            >
+              Hover item
+            </span>
+          </template>
         `,
       },
     });
   };
 
-  const triggerQuery = async () => {
+  it('triggers prefetching on hover', async () => {
+    createComponent();
+
     await findPrefetchTrigger().trigger('mouseover');
 
     await waitForPromises();
     await jest.advanceTimersByTime(DEFAULT_DEBOUNCE_AND_THROTTLE_MS);
-  };
-
-  it('triggers prefetching on hover', async () => {
-    createComponent();
-
-    await triggerQuery();
 
     expect(getWorkItemQueryHandler).toHaveBeenCalled();
   });
@@ -68,26 +65,5 @@ describe('WorkItemPrefetch component', () => {
     await findPrefetchTrigger().trigger('mouseleave');
 
     expect(getWorkItemQueryHandler).not.toHaveBeenCalled();
-  });
-
-  describe('fullPath handling', () => {
-    it('uses the injected fullPath if no workItemFullPath prop is provided', async () => {
-      createComponent();
-
-      await triggerQuery();
-
-      expect(getWorkItemQueryHandler).toHaveBeenCalledWith({ fullPath: 'group/project', iid: '1' });
-    });
-
-    it('uses the workItemFullPath prop when provided', async () => {
-      createComponent('other-full-path');
-
-      await triggerQuery();
-
-      expect(getWorkItemQueryHandler).toHaveBeenCalledWith({
-        fullPath: 'other-full-path',
-        iid: '1',
-      });
-    });
   });
 });

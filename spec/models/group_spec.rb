@@ -44,7 +44,6 @@ RSpec.describe Group, feature_category: :groups_and_projects do
     it { is_expected.to have_many(:debian_distributions).class_name('Packages::Debian::GroupDistribution').dependent(:destroy) }
     it { is_expected.to have_many(:daily_build_group_report_results).class_name('Ci::DailyBuildGroupReportResult') }
     it { is_expected.to have_many(:group_callouts).class_name('Users::GroupCallout').with_foreign_key(:group_id) }
-    it { is_expected.to have_many(:import_export_uploads).dependent(:destroy) }
 
     it { is_expected.to have_many(:bulk_import_exports).class_name('BulkImports::Export') }
 
@@ -1194,7 +1193,6 @@ RSpec.describe Group, feature_category: :groups_and_projects do
         using RSpec::Parameterized::TableSyntax
 
         where(:restricted_visibility_levels, :expected_groups) do
-          nil                                     | lazy { [private_group, internal_group, group] }
           []                                      | lazy { [private_group, internal_group, group] }
           [private_vis]                           | lazy { [internal_group, group] }
           [internal_vis]                          | lazy { [private_group, internal_group, group] }
@@ -1367,32 +1365,6 @@ RSpec.describe Group, feature_category: :groups_and_projects do
       subject { described_class.in_organization(organization) }
 
       it { is_expected.to match_array(groups) }
-    end
-
-    describe '.by_min_access_level' do
-      let_it_be(:user) { create(:user) }
-      let_it_be(:group1) { create(:group) }
-      let_it_be(:group2) { create(:group) }
-
-      let(:owner_access_level) { Gitlab::Access::OWNER }
-      let(:developer_access_level) { Gitlab::Access::DEVELOPER }
-
-      before do
-        create(:group_member, user: user, group: group1, access_level: owner_access_level)
-        create(:group_member, user: user, group: group2, access_level: developer_access_level)
-      end
-
-      it 'returns groups where the user has the specified access level' do
-        result = described_class.by_min_access_level(user, owner_access_level)
-
-        expect(result).to contain_exactly(group1)
-      end
-
-      it 'returns groups if the user has greater or equal specified access level' do
-        result = described_class.by_min_access_level(user, developer_access_level)
-
-        expect(result).to contain_exactly(group1, group2)
-      end
     end
 
     describe 'descendants_with_shared_with_groups' do
@@ -1847,6 +1819,18 @@ RSpec.describe Group, feature_category: :groups_and_projects do
     group.request_access(members[:requester])
 
     members
+  end
+
+  describe '#web_url' do
+    it 'returns the canonical URL' do
+      expect(group.web_url).to include("groups/#{group.name}")
+    end
+
+    context 'nested group' do
+      let(:nested_group) { create(:group, :nested) }
+
+      it { expect(nested_group.web_url).to include("groups/#{nested_group.full_path}") }
+    end
   end
 
   describe 'nested group' do
@@ -3309,34 +3293,14 @@ RSpec.describe Group, feature_category: :groups_and_projects do
   end
 
   context 'with export' do
-    let(:group) { create(:group) }
-    let(:export_file) { fixture_file_upload('spec/fixtures/group_export.tar.gz') }
-    let(:export) { create(:import_export_upload, group: group, export_file: export_file) }
+    let(:group) { create(:group, :with_export) }
 
     it '#export_file_exists? returns true' do
-      expect(group.export_file_exists?(export.user)).to be true
+      expect(group.export_file_exists?).to be true
     end
 
     it '#export_archive_exists? returns true' do
-      expect(group.export_archive_exists?(export.user)).to be true
-    end
-  end
-
-  describe '#import_export_upload_by_user' do
-    let(:group) { create(:group) }
-    let(:user) { create(:user) }
-    let!(:import_export_upload) { create(:import_export_upload, group: group, user: user) }
-
-    it 'returns the import_export_upload' do
-      expect(group.import_export_upload_by_user(user)).to eq import_export_upload
-    end
-
-    context 'when import_export_upload does not exist for user' do
-      let(:import_export_upload) { create(:import_export_upload, group: group) }
-
-      it 'returns nil' do
-        expect(group.import_export_upload_by_user(user)).to be nil
-      end
+      expect(group.export_archive_exists?).to be true
     end
   end
 
@@ -3823,13 +3787,6 @@ RSpec.describe Group, feature_category: :groups_and_projects do
     it_behaves_like 'checks self and root ancestor feature flag' do
       let(:feature_flag) { :work_items_alpha }
       let(:feature_flag_method) { :work_items_alpha_feature_flag_enabled? }
-    end
-  end
-
-  describe '#glql_integration_feature_flag_enabled?' do
-    it_behaves_like 'checks self and root ancestor feature flag' do
-      let(:feature_flag) { :glql_integration }
-      let(:feature_flag_method) { :glql_integration_feature_flag_enabled? }
     end
   end
 

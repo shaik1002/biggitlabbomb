@@ -80,7 +80,6 @@ describe('~/environments/environment_details/components/kubernetes/kubernetes_ta
         [summaryTab, 0, 2, k8sResourceType.k8sServices],
       ])(
         'when activeTab is %s, it activates the right tab and emit the correct tab name when switching',
-        // eslint-disable-next-line max-params
         async (activeTab, tabIndex, newTabIndex, newActiveTab) => {
           createWrapper({ k8sTreeViewEnabled: true, activeTab });
           const tabsComponent = findTabs();
@@ -98,7 +97,6 @@ describe('~/environments/environment_details/components/kubernetes/kubernetes_ta
         [k8sResourceType.k8sServices, 1, 0, k8sResourceType.k8sPods],
       ])(
         'when activeTab is %s, it activates the right tab and emit the correct tab name when switching',
-        // eslint-disable-next-line max-params
         async (activeTab, tabIndex, newTabIndex, newActiveTab) => {
           createWrapper({ activeTab });
           await nextTick();
@@ -161,13 +159,6 @@ describe('~/environments/environment_details/components/kubernetes/kubernetes_ta
       const errorMessage = 'Error from the cluster_client API';
       findKubernetesPods().vm.$emit('cluster-error', errorMessage);
       expect(wrapper.emitted('cluster-error')).toEqual([[errorMessage]]);
-    });
-
-    it('emits delete pod event when gets it from the component', () => {
-      expect(wrapper.emitted('delete-pod')).toBeUndefined();
-
-      findKubernetesPods().vm.$emit('delete-pod', mockPodsTableItems[0]);
-      expect(wrapper.emitted('delete-pod')).toEqual([[mockPodsTableItems[0]]]);
     });
   });
 });

@@ -43,14 +43,6 @@
   - 1
 - - analytics_usage_trends_counter_job
   - 1
-- - anti_abuse_new_abuse_report
-  - 1
-- - anti_abuse_spam_abuse_events
-  - 1
-- - anti_abuse_trust_score
-  - 1
-- - anti_abuse_trust_score_cleanup
-  - 1
 - - app_sec_container_scanning_scan_image
   - 1
 - - app_sec_dast_scanner_profiles_builds_consistency
@@ -411,15 +403,9 @@
   - 1
 - - groups_update_two_factor_requirement_for_members
   - 1
-- - import_bulk_imports_source_users_attributes
-  - 1
-- - import_delete_placeholder_user
-  - 1
 - - import_issues_csv
   - 2
 - - import_load_placeholder_references
-  - 1
-- - import_reassign_placeholder_user_records
   - 1
 - - import_refresh_import_jid
   - 1
@@ -481,6 +467,8 @@
   - 1
 - - llm_namespace_access_cache_reset
   - 1
+- - llm_vertex_ai_access_token_refresh
+  - 1
 - - mail_scheduler
   - 2
 - - mailers
@@ -488,10 +476,6 @@
 - - members_destroyer_clean_up_group_protected_branch_rules
   - 1
 - - members_expiring_email_notification
-  - 1
-- - members_groups_base_memberships_export
-  - 1
-- - members_groups_export_detailed_memberships
   - 1
 - - merge
   - 5
@@ -584,6 +568,8 @@
 - - package_metadata_global_advisory_scan
   - 1
 - - package_repositories
+  - 1
+- - packages_composer_cache_update
   - 1
 - - pages
   - 1
@@ -711,8 +697,6 @@
   - 1
 - - sbom_process_transfer_events
   - 1
-- - sbom_process_vulnerabilities
-  - 1
 - - sbom_reports
   - 1
 - - sbom_sync_archived_status
@@ -747,8 +731,6 @@
   - 1
 - - search_zoekt_project_transfer
   - 1
-- - secrets_management_provision_project_secrets_manager
-  - 1
 - - security_create_security_policy_project
   - 1
 - - security_delete_orchestration_configuration
@@ -774,10 +756,6 @@
 - - security_scan_execution_policies_rule_schedule
   - 1
 - - security_scan_result_policies_add_approvers_to_rules
-  - 1
-- - security_scan_result_policies_delete_scan_result_policy_reads
-  - 1
-- - security_scan_result_policies_fallback_behavior_tracking
   - 1
 - - security_scan_result_policies_sync_any_merge_request_approval_rules
   - 1
@@ -839,8 +817,6 @@
   - 1
 - - upload_checksum
   - 1
-- - users_experimental_communication_opt_in
-  - 1
 - - users_record_last_activity
   - 1
 - - users_track_namespace_visits
@@ -872,8 +848,6 @@
 - - web_hooks_log_execution
   - 1
 - - wikis_git_garbage_collect
-  - 1
-- - work_items_copy_timelogs
   - 1
 - - work_items_import_work_items_csv
   - 1

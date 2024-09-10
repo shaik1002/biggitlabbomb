@@ -28,7 +28,7 @@ RSpec.describe 'Profile > Applications', feature_category: :user_profile do
       visit oauth_applications_path
 
       within_testid('oauth-applications') do
-        within_testid('crud-count') do
+        page.within('.gl-new-card-count') do
           expect(page).to have_content('1')
         end
         click_button 'Destroy'
@@ -37,15 +37,11 @@ RSpec.describe 'Profile > Applications', feature_category: :user_profile do
       accept_gl_confirm(button_text: 'Destroy')
 
       expect(page).to have_content('The application was deleted successfully')
-      within_testid('oauth-applications') do
-        within_testid('crud-count') do
-          expect(page).to have_content('0')
-        end
+      page.within('[data-testid="oauth-applications"] .gl-new-card-count') do
+        expect(page).to have_content('0')
       end
-      within_testid('oauth-authorized-applications') do
-        within_testid('crud-count') do
-          expect(page).to have_content('0')
-        end
+      page.within('.oauth-authorized-applications .gl-new-card-count') do
+        expect(page).to have_content('0')
       end
     end
   end
@@ -70,13 +66,11 @@ RSpec.describe 'Profile > Applications', feature_category: :user_profile do
       it 'displays the correct authorized applications' do
         visit oauth_applications_path
 
-        within_testid('oauth-authorized-applications') do
-          within_testid('crud-count') do
-            expect(page).to have_content('2')
-          end
+        page.within('.oauth-authorized-applications .gl-new-card-count') do
+          expect(page).to have_content('2')
         end
 
-        within_testid('oauth-authorized-applications') do
+        page.within('div.oauth-authorized-applications') do
           # Ensure the correct user's token details are displayed
           # when the application has more than one token
           page.within("tr#application_#{application.id}") do
@@ -93,7 +87,7 @@ RSpec.describe 'Profile > Applications', feature_category: :user_profile do
       token
       visit oauth_applications_path
 
-      within_testid('oauth-authorized-applications') do
+      page.within('div.oauth-authorized-applications') do
         page.within("tr#application_#{application.id}") do
           click_button 'Revoke'
         end
@@ -102,10 +96,8 @@ RSpec.describe 'Profile > Applications', feature_category: :user_profile do
       accept_gl_confirm(button_text: 'Revoke application')
 
       expect(page).to have_content('The application was revoked access.')
-      within_testid('oauth-authorized-applications') do
-        within_testid('crud-count') do
-          expect(page).to have_content('0')
-        end
+      page.within('.oauth-authorized-applications .gl-new-card-count') do
+        expect(page).to have_content('0')
       end
     end
 
@@ -114,8 +106,8 @@ RSpec.describe 'Profile > Applications', feature_category: :user_profile do
       anonymous_token
       visit oauth_applications_path
 
-      within_testid('oauth-authorized-applications') do
-        within_testid('crud-count') do
+      page.within('.oauth-authorized-applications') do
+        page.within('.oauth-authorized-applications .gl-new-card-count') do
           expect(page).to have_content('1')
         end
         click_button 'Revoke'
@@ -124,10 +116,8 @@ RSpec.describe 'Profile > Applications', feature_category: :user_profile do
       accept_gl_confirm(button_text: 'Revoke application')
 
       expect(page).to have_content('The application was revoked access.')
-      within_testid('oauth-authorized-applications') do
-        within_testid('crud-count') do
-          expect(page).to have_content('0')
-        end
+      page.within('.oauth-authorized-applications .gl-new-card-count') do
+        expect(page).to have_content('0')
       end
     end
   end

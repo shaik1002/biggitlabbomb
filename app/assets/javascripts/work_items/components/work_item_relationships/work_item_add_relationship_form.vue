@@ -4,10 +4,10 @@ import { GlFormGroup, GlForm, GlFormRadioGroup, GlButton, GlAlert } from '@gitla
 import { __, s__ } from '~/locale';
 import WorkItemTokenInput from '../shared/work_item_token_input.vue';
 import addLinkedItemsMutation from '../../graphql/add_linked_items.mutation.graphql';
-import workItemLinkedItemsQuery from '../../graphql/work_item_linked_items.query.graphql';
-import { findLinkedItemsWidget } from '../../utils';
+import workItemByIidQuery from '../../graphql/work_item_by_iid.query.graphql';
 import {
   LINK_ITEM_FORM_HEADER_LABEL,
+  WIDGET_TYPE_LINKED_ITEMS,
   LINKED_ITEM_TYPE_VALUE,
   MAX_WORK_ITEMS,
   I18N_MAX_WORK_ITEMS_ERROR_MESSAGE,
@@ -24,11 +24,6 @@ export default {
     WorkItemTokenInput,
   },
   props: {
-    isGroup: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     workItemId: {
       type: String,
       required: false,
@@ -126,7 +121,7 @@ export default {
             },
           ) => {
             const queryArgs = {
-              query: workItemLinkedItemsQuery,
+              query: workItemByIidQuery,
               variables: { fullPath: this.workItemFullPath, iid: this.workItemIid },
             };
             const sourceData = cache.readQuery(queryArgs);
@@ -138,9 +133,13 @@ export default {
             cache.writeQuery({
               ...queryArgs,
               data: produce(sourceData, (draftState) => {
-                const linkedItemsWidget = findLinkedItemsWidget(draftState.workspace.workItem);
+                const linkedItemsWidget = draftState.workspace.workItem?.widgets?.find(
+                  (widget) => widget.type === WIDGET_TYPE_LINKED_ITEMS,
+                );
 
-                linkedItemsWidget.linkedItems = findLinkedItemsWidget(workItem)?.linkedItems;
+                linkedItemsWidget.linkedItems = workItem.widgets?.find(
+                  (widget) => widget.type === WIDGET_TYPE_LINKED_ITEMS,
+                ).linkedItems;
               }),
             });
           },
@@ -182,7 +181,11 @@ export default {
 </script>
 
 <template>
-  <gl-form data-testid="link-work-item-form" @submit.stop.prevent="linkWorkItem">
+  <gl-form
+    class="gl-new-card-add-form"
+    data-testid="link-work-item-form"
+    @submit.stop.prevent="linkWorkItem"
+  >
     <gl-alert v-if="error" variant="danger" class="gl-mb-3" @dismiss="unsetError">
       {{ error }}
     </gl-alert>
@@ -199,7 +202,7 @@ export default {
         :checked="linkedItemType"
       />
     </gl-form-group>
-    <p class="gl-mb-2 gl-font-bold">
+    <p class="gl-font-bold gl-mb-2">
       {{ $options.i18n.linkItemInputLabel }}
     </p>
     <div class="gl-mb-5">
@@ -210,39 +213,37 @@ export default {
         :children-ids="childrenIds"
         :are-work-items-to-add-valid="areWorkItemsToAddValid"
         :full-path="workItemFullPath"
-        :is-group="isGroup"
         :max-selection-limit="maxWorkItems"
         @searching="searchInProgress = $event"
       />
-      <div v-if="errorMessage" class="gl-mb-2 gl-text-danger">
+      <div v-if="errorMessage" class="gl-mb-2 gl-text-red-500">
         {{ $options.i18n.maxItemsErrorMessage }}
       </div>
-      <div v-if="!errorMessage" data-testid="max-work-item-note" class="gl-text-subtle">
+      <div v-if="!errorMessage" data-testid="max-work-item-note" class="gl-text-gray-500">
         {{ $options.i18n.maxItemsNoteLabel }}
       </div>
       <div
         v-if="showWorkItemsToAddInvalidMessage"
-        class="gl-text-danger"
+        class="gl-text-red-500"
         data-testid="work-items-invalid"
       >
         {{ workItemsToAddInvalidMessage }}
       </div>
     </div>
-    <div class="gl-flex gl-gap-3">
-      <gl-button
-        data-testid="link-work-item-button"
-        category="primary"
-        variant="confirm"
-        size="small"
-        type="submit"
-        :disabled="isSubmitButtonDisabled"
-        :loading="isSubmitting"
-      >
-        {{ $options.i18n.addButtonLabel }}
-      </gl-button>
-      <gl-button category="secondary" size="small" @click="$emit('cancel')">
-        {{ s__('WorkItem|Cancel') }}
-      </gl-button>
-    </div>
+    <gl-button
+      data-testid="link-work-item-button"
+      category="primary"
+      variant="confirm"
+      size="small"
+      type="submit"
+      :disabled="isSubmitButtonDisabled"
+      :loading="isSubmitting"
+      class="gl-mr-2"
+    >
+      {{ $options.i18n.addButtonLabel }}
+    </gl-button>
+    <gl-button category="secondary" size="small" @click="$emit('cancel')">
+      {{ s__('WorkItem|Cancel') }}
+    </gl-button>
   </gl-form>
 </template>

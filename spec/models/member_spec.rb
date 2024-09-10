@@ -236,7 +236,7 @@ RSpec.describe Member, feature_category: :groups_and_projects do
       end
     end
 
-    describe 'hierarchy related scopes' do
+    describe '.in_hierarchy' do
       let(:root_ancestor) { create(:group) }
       let(:project) { create(:project, group: root_ancestor) }
       let(:subgroup) { create(:group, parent: root_ancestor) }
@@ -247,53 +247,29 @@ RSpec.describe Member, feature_category: :groups_and_projects do
       let!(:subgroup_member) { create(:group_member, group: subgroup) }
       let!(:subgroup_project_member) { create(:project_member, project: subgroup_project) }
 
-      describe '.in_hierarchy' do
-        let(:hierarchy_members) do
-          [
-            root_ancestor_member,
-            project_member,
-            subgroup_member,
-            subgroup_project_member
-          ]
-        end
-
-        context 'for a project' do
-          subject { described_class.in_hierarchy(project) }
-
-          it { is_expected.to contain_exactly(*hierarchy_members) }
-
-          context 'with scope prefix' do
-            subject { described_class.where.not(source: project).in_hierarchy(subgroup) }
-
-            it { is_expected.to contain_exactly(root_ancestor_member, subgroup_member, subgroup_project_member) }
-          end
-
-          context 'with scope suffix' do
-            subject { described_class.in_hierarchy(project).where.not(source: project) }
-
-            it { is_expected.to contain_exactly(root_ancestor_member, subgroup_member, subgroup_project_member) }
-          end
-        end
-
-        context 'for a group' do
-          subject(:group_related_members) { described_class.in_hierarchy(subgroup) }
-
-          it { is_expected.to contain_exactly(*hierarchy_members) }
-        end
+      let(:hierarchy_members) do
+        [
+          root_ancestor_member,
+          project_member,
+          subgroup_member,
+          subgroup_project_member
+        ]
       end
 
-      describe '.for_self_and_descendants' do
-        let(:expected_members) do
-          [
-            project_member,
-            subgroup_member,
-            subgroup_project_member
-          ]
-        end
+      subject { described_class.in_hierarchy(project) }
 
-        subject(:self_and_descendant_members) { described_class.for_self_and_descendants(subgroup) }
+      it { is_expected.to contain_exactly(*hierarchy_members) }
 
-        it { is_expected.to contain_exactly(*expected_members) }
+      context 'with scope prefix' do
+        subject { described_class.where.not(source: project).in_hierarchy(subgroup) }
+
+        it { is_expected.to contain_exactly(root_ancestor_member, subgroup_member, subgroup_project_member) }
+      end
+
+      context 'with scope suffix' do
+        subject { described_class.in_hierarchy(project).where.not(source: project) }
+
+        it { is_expected.to contain_exactly(root_ancestor_member, subgroup_member, subgroup_project_member) }
       end
     end
 
@@ -847,16 +823,6 @@ RSpec.describe Member, feature_category: :groups_and_projects do
         expect(group.members.excluding_users(active_group_member.user_id)).not_to include active_group_member
       end
     end
-
-    describe '.no_activity_today' do
-      let_it_be(:active_group_member) { create(:group_member, group: group) }
-      let_it_be(:inactive_group_member) { create(:group_member, group: group, last_activity_on: 1.month.ago) }
-
-      it 'returns members with no activity today' do
-        expect(group.members.no_activity_today).to include inactive_group_member
-        expect(group.members.no_activity_today).not_to include active_group_member
-      end
-    end
   end
 
   describe 'Delegate methods' do
@@ -882,16 +848,6 @@ RSpec.describe Member, feature_category: :groups_and_projects do
           expect { create(:group_member) }.not_to have_enqueued_mail(Members::InviteMailer, :initial_email)
         end
       end
-    end
-  end
-
-  describe '.with_created_by' do
-    it 'only returns members that are created_by a user' do
-      invited_member_by_user = create(:group_member, :created_by)
-      another_member_by_user = create(:group_member, :created_by, source: invited_member_by_user.group)
-      create(:group_member)
-
-      expect(described_class.with_created_by).to contain_exactly(invited_member_by_user, another_member_by_user)
     end
   end
 
@@ -994,7 +950,7 @@ RSpec.describe Member, feature_category: :groups_and_projects do
         specify do
           members = invited_group
                          .members
-                         .with_group_group_sharing_access(shared_group, false)
+                         .with_group_group_sharing_access(shared_group)
                          .id_in(member.id)
                          .to_a
 
@@ -1252,16 +1208,15 @@ RSpec.describe Member, feature_category: :groups_and_projects do
   end
 
   describe '#send_invitation_reminder' do
-    subject(:send_invitation_reminder) { member.send_invitation_reminder(0) }
+    subject { member.send_invitation_reminder(0) }
 
     context 'an invited group member' do
       let!(:member) { create(:group_member, :invited) }
 
-      it 'enqueues a reminder email' do
-        expect(Members::InviteReminderMailer)
-          .to receive(:email).with(member, member.raw_invite_token, 0).and_call_original
+      it 'sends a reminder' do
+        expect_any_instance_of(NotificationService).to receive(:invite_member_reminder).with(member, member.raw_invite_token, 0)
 
-        expect { send_invitation_reminder }.to have_enqueued_mail(Members::InviteReminderMailer, :email)
+        subject
       end
     end
 
@@ -1270,13 +1225,13 @@ RSpec.describe Member, feature_category: :groups_and_projects do
 
       before do
         member.instance_variable_set(:@raw_invite_token, nil)
-        allow(Members::InviteReminderMailer).to receive(:email).and_call_original
+        allow_any_instance_of(NotificationService).to receive(:invite_member_reminder)
       end
 
       it 'generates a new token' do
         expect(member).to receive(:generate_invite_token!)
 
-        send_invitation_reminder
+        subject
       end
     end
 
@@ -1284,9 +1239,9 @@ RSpec.describe Member, feature_category: :groups_and_projects do
       let!(:member) { create(:group_member) }
 
       it 'does not send a reminder' do
-        expect(Members::InviteReminderMailer).not_to receive(:email)
+        expect_any_instance_of(NotificationService).not_to receive(:invite_member_reminder)
 
-        send_invitation_reminder
+        subject
       end
     end
   end
@@ -1322,8 +1277,7 @@ RSpec.describe Member, feature_category: :groups_and_projects do
   end
 
   context 'for updating organization_users' do
-    let_it_be(:organization) { create(:organization) }
-    let_it_be(:group) { create(:group, organization: organization) }
+    let_it_be(:group) { create(:group) }
     let_it_be(:user) { create(:user) }
     let(:member) { create(:group_member, source: group, user: user) }
 
@@ -1557,18 +1511,6 @@ RSpec.describe Member, feature_category: :groups_and_projects do
       end
 
       create_member
-    end
-
-    context 'when member is a requested member' do
-      let(:member) { create(:group_member, source: source, requested_at: Time.current.utc) }
-
-      it 'calls the system hook service' do
-        expect_next_instance_of(SystemHooksService) do |instance|
-          expect(instance).to receive(:execute_hooks_for).with(an_instance_of(GroupMember), :request)
-        end
-
-        create_member
-      end
     end
 
     context 'when source is a group' do

@@ -1,20 +1,28 @@
-import { openTag, closeTag, preserveUnchangedMark } from '../serialization_helpers';
+import { openTag, closeTag } from '../serialization_helpers';
 
-const generateBoldTag = (wrapTagName = openTag) => {
+const generateBoldTags = (wrapTagName = openTag) => {
   return (_, mark) => {
-    const type = /^(\*\*|__).*/.exec(mark.attrs.sourceMarkdown)?.[1];
-    if (type === '**' || type === '__') return type;
-    if (mark.attrs.sourceTagName) return wrapTagName(mark.attrs.sourceTagName);
+    const type = /^(\*\*|__|<strong|<b).*/.exec(mark.attrs.sourceMarkdown)?.[1];
 
-    return '**';
+    switch (type) {
+      case '**':
+      case '__':
+        return type;
+      // eslint-disable-next-line @gitlab/require-i18n-strings
+      case '<strong':
+      case '<b':
+        return wrapTagName(type.substring(1));
+      default:
+        return '**';
+    }
   };
 };
 
-const bold = preserveUnchangedMark({
-  open: generateBoldTag(),
-  close: generateBoldTag(closeTag),
+const bold = {
+  open: generateBoldTags(),
+  close: generateBoldTags(closeTag),
   mixable: true,
   expelEnclosingWhitespace: true,
-});
+};
 
 export default bold;

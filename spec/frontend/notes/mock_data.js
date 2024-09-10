@@ -1,5 +1,6 @@
 // Copied to ee/spec/frontend/notes/mock_data.js
 import { HTTP_STATUS_OK } from '~/lib/utils/http_status';
+import { __ } from '~/locale';
 
 export const notesDataMock = {
   discussionsPath: '/gitlab-org/gitlab-foss/issues/26/discussions.json',
@@ -1299,15 +1300,15 @@ export const draftDiffDiscussion = {
 
 export const notesFilters = [
   {
-    title: 'Show all activity',
+    title: __('Show all activity'),
     value: 0,
   },
   {
-    title: 'Show comments only',
+    title: __('Show comments only'),
     value: 1,
   },
   {
-    title: 'Show history only',
+    title: __('Show history only'),
     value: 2,
   },
 ];

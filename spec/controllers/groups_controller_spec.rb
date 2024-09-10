@@ -1273,7 +1273,7 @@ RSpec.describe GroupsController, factory_default: :keep, feature_category: :code
     context 'when there is a file available to download' do
       before do
         sign_in(admin)
-        create(:import_export_upload, group: group, export_file: export_file, user: admin)
+        create(:import_export_upload, group: group, export_file: export_file)
       end
 
       it 'sends the file' do
@@ -1287,8 +1287,8 @@ RSpec.describe GroupsController, factory_default: :keep, feature_category: :code
       before do
         sign_in(admin)
 
-        create(:import_export_upload, group: group, export_file: export_file, user: admin)
-        group.export_file(admin).file.delete
+        create(:import_export_upload, group: group, export_file: export_file)
+        group.export_file.file.delete
       end
 
       it 'returns not found' do
@@ -1418,15 +1418,6 @@ RSpec.describe GroupsController, factory_default: :keep, feature_category: :code
 
           it 'does not update name' do
             expect { subject }.not_to change { group.reload.name }
-          end
-        end
-
-        context 'when default branch name is invalid' do
-          subject { put :update, params: { id: group.to_param, group: { default_branch_name: "***" } } }
-
-          it 'renders an error message' do
-            expect { subject }.not_to change { group.reload.name }
-            expect(flash[:alert]).to eq('Default branch name is invalid.')
           end
         end
       end

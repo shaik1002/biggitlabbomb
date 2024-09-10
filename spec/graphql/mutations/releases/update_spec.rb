@@ -3,8 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe Mutations::Releases::Update do
-  include GraphqlHelpers
-
   let_it_be(:project) { create(:project, :public, :repository) }
   let_it_be(:milestone_12_3) { create(:milestone, project: project, title: '12.3') }
   let_it_be(:milestone_12_4) { create(:milestone, project: project, title: '12.4') }
@@ -31,7 +29,7 @@ RSpec.describe Mutations::Releases::Update do
     )
   end
 
-  let(:mutation) { described_class.new(object: nil, context: query_context, field: nil) }
+  let(:mutation) { described_class.new(object: nil, context: { current_user: current_user }, field: nil) }
 
   let(:mutation_arguments) do
     {

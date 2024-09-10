@@ -9,7 +9,6 @@ module Gitlab
       EXCLUDED_QUERY_PARAM_NAMES = %w[
         search
         search_title
-        search_query
         term
         name
         filter
@@ -18,9 +17,7 @@ module Gitlab
         body
         commit_message
         content
-        description
       ].freeze
-      NESTED_PARAMETERS_MAX_LEVEL = 5
 
       def initialize(app)
         @app = app
@@ -47,7 +44,6 @@ module Gitlab
       private
 
       def check(request, log_params)
-        original_fullpath = request.fullpath
         exclude_query_parameters(request)
 
         decoded_fullpath = CGI.unescape(request.fullpath)
@@ -55,7 +51,7 @@ module Gitlab
         return unless Gitlab::PathTraversal.path_traversal?(decoded_fullpath, match_new_line: false)
 
         log_params[:method] = request.request_method
-        log_params[:fullpath] = original_fullpath
+        log_params[:fullpath] = request.fullpath
         log_params[:message] = PATH_TRAVERSAL_MESSAGE
       end
 
@@ -63,16 +59,8 @@ module Gitlab
         query_params = request.GET
         return if query_params.empty?
 
-        cleanup_query_parameters!(query_params)
-
+        query_params.except!(*EXCLUDED_QUERY_PARAM_NAMES)
         request.set_header(Rack::QUERY_STRING, Rack::Utils.build_nested_query(query_params))
-      end
-
-      def cleanup_query_parameters!(params, level: 1)
-        return params if params.empty? || level > NESTED_PARAMETERS_MAX_LEVEL
-
-        params.except!(*EXCLUDED_QUERY_PARAM_NAMES)
-        params.each { |k, v| params[k] = cleanup_query_parameters!(v, level: level + 1) if v.is_a?(Hash) }
       end
 
       def log(payload)

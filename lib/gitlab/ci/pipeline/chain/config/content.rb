@@ -34,7 +34,7 @@ module Gitlab
                   pipeline_source: @command.source, pipeline_source_bridge: @command.bridge,
                   triggered_for_branch: @pipeline.branch?,
                   ref: @pipeline.ref,
-                  pipeline_policy_context: @command.pipeline_policy_context
+                  has_pipeline_execution_policies: @command.pipeline_execution_policies.present?
                 )
               end
             end
@@ -44,5 +44,3 @@ module Gitlab
     end
   end
 end
-
-Gitlab::Ci::Pipeline::Chain::Config::Content.prepend_mod

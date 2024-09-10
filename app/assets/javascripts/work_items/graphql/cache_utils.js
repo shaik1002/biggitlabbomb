@@ -7,7 +7,6 @@ import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { getBaseURL } from '~/lib/utils/url_utility';
 import { convertEachWordToTitleCase } from '~/lib/utils/text_utility';
 import {
-  findHierarchyWidgets,
   findHierarchyWidgetChildren,
   isNotesWidget,
   newWorkItemFullPath,
@@ -28,7 +27,6 @@ import {
   WIDGET_TYPE_ITERATION,
   WIDGET_TYPE_HEALTH_STATUS,
   WIDGET_TYPE_DESCRIPTION,
-  WIDGET_TYPE_CRM_CONTACTS,
   NEW_WORK_ITEM_IID,
 } from '../constants';
 import workItemByIidQuery from './work_item_by_iid.query.graphql';
@@ -156,7 +154,7 @@ export const updateCacheAfterRemovingAwardEmojiFromNote = (currentNotes, note) =
   });
 };
 
-export const addHierarchyChild = ({ cache, id, workItem, atIndex = null }) => {
+export const addHierarchyChild = ({ cache, id, workItem }) => {
   const queryArgs = {
     query: getWorkItemTreeQuery,
     variables: { id },
@@ -170,49 +168,11 @@ export const addHierarchyChild = ({ cache, id, workItem, atIndex = null }) => {
   cache.writeQuery({
     ...queryArgs,
     data: produce(sourceData, (draftState) => {
-      const widget = findHierarchyWidgets(draftState?.workItem.widgets);
-      widget.hasChildren = true;
-      const children = findHierarchyWidgetChildren(draftState?.workItem) || [];
-      const existingChild = children.find((child) => child.id === workItem?.id);
+      const existingChild = findHierarchyWidgetChildren(draftState?.workItem).find(
+        (child) => child.id === workItem?.id,
+      );
       if (!existingChild) {
-        if (atIndex !== null) {
-          children.splice(atIndex, 0, workItem);
-        } else {
-          children.unshift(workItem);
-        }
-        widget.hasChildren = children?.length > 0;
-        widget.count = children?.length || 0;
-      }
-    }),
-  });
-};
-
-export const addHierarchyChildren = ({ cache, id, workItem, newItemsToAddCount }) => {
-  const queryArgs = {
-    query: getWorkItemTreeQuery,
-    variables: {
-      id,
-    },
-  };
-  const sourceData = cache.readQuery(queryArgs);
-
-  if (!sourceData) {
-    return;
-  }
-
-  cache.writeQuery({
-    ...queryArgs,
-    data: produce(sourceData, (draftState) => {
-      const newChildren = findHierarchyWidgetChildren(workItem);
-
-      const existingChildren = findHierarchyWidgetChildren(draftState?.workItem);
-
-      const childrenToAdd = newChildren.slice(0, newItemsToAddCount);
-
-      for (const item of childrenToAdd) {
-        if (item) {
-          existingChildren.unshift(item);
-        }
+        findHierarchyWidgetChildren(draftState?.workItem).unshift(workItem);
       }
     }),
   });
@@ -232,19 +192,16 @@ export const removeHierarchyChild = ({ cache, id, workItem }) => {
   cache.writeQuery({
     ...queryArgs,
     data: produce(sourceData, (draftState) => {
-      const widget = findHierarchyWidgets(draftState?.workItem.widgets);
       const children = findHierarchyWidgetChildren(draftState?.workItem);
       const index = children.findIndex((child) => child.id === workItem.id);
       if (index >= 0) children.splice(index, 1);
-      widget.hasChildren = children?.length > 0;
-      widget.count = children?.length || 0;
     }),
   });
 };
 
-export const updateParent = ({ cache, fullPath, iid, workItem }) => {
+export const updateParent = ({ cache, query, fullPath, iid, workItem }) => {
   const queryArgs = {
-    query: workItemByIidQuery,
+    query,
     variables: { fullPath, iid },
   };
   const sourceData = cache.readQuery(queryArgs);
@@ -268,7 +225,6 @@ export const setNewWorkItemCache = async (
   widgetDefinitions,
   workItemType,
   workItemTypeId,
-  // eslint-disable-next-line max-params
 ) => {
   const workItemAttributesWrapperOrder = [
     WIDGET_TYPE_ASSIGNEES,
@@ -284,7 +240,6 @@ export const setNewWorkItemCache = async (
     WIDGET_TYPE_HIERARCHY,
     WIDGET_TYPE_TIME_TRACKING,
     WIDGET_TYPE_PARTICIPANTS,
-    WIDGET_TYPE_CRM_CONTACTS,
   ];
 
   if (!widgetDefinitions) {
@@ -345,17 +300,6 @@ export const setNewWorkItemCache = async (
         });
       }
 
-      if (widgetName === WIDGET_TYPE_CRM_CONTACTS) {
-        widgets.push({
-          type: 'CRM_CONTACTS',
-          contacts: {
-            nodes: [],
-            __typename: 'CustomerRelationsContactConnection',
-          },
-          __typename: 'WorkItemWidgetCrmContacts',
-        });
-      }
-
       if (widgetName === WIDGET_TYPE_LABELS) {
         const labelsWidgetData = widgetDefinitions.find(
           (definition) => definition.type === WIDGET_TYPE_LABELS,
@@ -380,7 +324,6 @@ export const setNewWorkItemCache = async (
           type: 'WEIGHT',
           weight: null,
           rolledUpWeight: 0,
-          rolledUpCompletedWeight: 0,
           widgetDefinition: {
             editable: weightWidgetData?.editable,
             rollUp: weightWidgetData?.rollUp,
@@ -440,7 +383,6 @@ export const setNewWorkItemCache = async (
         widgets.push({
           type: 'HEALTH_STATUS',
           healthStatus: null,
-          rolledUpHealthStatus: [],
           __typename: 'WorkItemWidgetHealthStatus',
         });
       }
@@ -458,9 +400,7 @@ export const setNewWorkItemCache = async (
         widgets.push({
           type: 'HIERARCHY',
           hasChildren: false,
-          hasParent: false,
           parent: null,
-          rolledUpCountsByType: [],
           children: {
             nodes: [],
             __typename: 'WorkItemConnection',
@@ -554,14 +494,4 @@ export const setNewWorkItemCache = async (
       },
     },
   });
-};
-
-export const optimisticUserPermissions = {
-  deleteWorkItem: false,
-  updateWorkItem: false,
-  adminParentLink: false,
-  setWorkItemMetadata: false,
-  createNote: false,
-  adminWorkItemLink: false,
-  __typename: 'WorkItemPermissions',
 };

@@ -325,7 +325,7 @@ The steps for doing this vary depending on which registrar you use and is beyond
 ## PostgreSQL with RDS
 
 For our database server we use Amazon RDS for PostgreSQL which offers Multi AZ
-for redundancy ([Aurora is **not** supported](https://gitlab.com/gitlab-partners-public/aws/aws-known-issues/-/issues/10)). First we create a security group and subnet group, then we
+for redundancy ([Aurora is **not** supported](https://gitlab.com/gitlab-com/partners/alliance/aws/public-tracker/-/issues/12)). First we create a security group and subnet group, then we
 create the actual RDS instance.
 
 ### RDS Security Group
@@ -359,7 +359,7 @@ Now, it's time to create the database:
 
 1. Go to the RDS dashboard, select **Databases** from the left menu, and select **Create database**.
 1. Select **Standard Create** for the database creation method.
-1. Select **PostgreSQL** as the database engine and select the minimum PostgreSQL version as defined for your GitLab version in our [database requirements](../../install/requirements.md#postgresql).
+1. Select **PostgreSQL** as the database engine and select the minimum PostgreSQL version as defined for your GitLab version in our [database requirements](../../install/requirements.md#postgresql-requirements).
 1. Because this is a production server, let's choose **Production** from the **Templates** section.
 1. Under **Availability & durability**, select **Multi-AZ DB instance** to have a standby RDS instance provisioned in a different [Availability Zone](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html).
 1. Under **Settings**, use:
@@ -420,7 +420,7 @@ persistence and is used to store session data, temporary cache information, and 
    Redis cluster.
 1. Under **Deployment option** select **Design your own cache**.
 1. Under **Creation method** select **Cluster cache**.
-1. Under **Cluster mode** select **Disabled** as it is [not supported](../../administration/redis/replication_and_failover_external.md#requirements). Even without cluster mode on, you still get the
+1. Under **Cluster mode**  select **Disabled** as it is [not supported](../../administration/redis/replication_and_failover_external.md#requirements). Even without cluster mode on, you still get the
    chance to deploy Redis in multiple availability zones.
 1. Under **Cluster info** give the cluster a name (`gitlab-redis`) and a description.
 1. Under **Location** select **AWS Cloud** and enable **Multi-AZ** option.
@@ -517,7 +517,7 @@ From the EC2 dashboard:
 
 1. Use the section below titled "[Find official GitLab-created AMI IDs on AWS](#find-official-gitlab-created-ami-ids-on-aws)" to find the correct AMI and select **Launch**.
 1. In the **Name and tags** section, set the **Name** to `GitLab`.
-1. In the **Instance type** dropdown list, select an instance type based on your workload. Consult the [hardware requirements](../../install/requirements.md#hardware) to choose one that fits your needs (at least `c5.2xlarge`, which is sufficient to accommodate 100 users).
+1. In the **Instance type** dropdown list, select an instance type based on your workload. Consult the [hardware requirements](../../install/requirements.md#hardware-requirements) to choose one that fits your needs (at least `c5.2xlarge`, which is sufficient to accommodate 100 users).
 1. In the **Key pair** section, select **Create new key pair**.
    1. Give the key pair a name (we use `gitlab`) and save the `gitlab.pem` file for later use.
 1. In the **Network settings** section:
@@ -744,7 +744,7 @@ If Proxy protocol is enabled in the [load balancer](#load-balancer) we created e
    sudo gitlab-ctl reconfigure
    ```
 
-### Sign in for the first time
+### Log in for the first time
 
 Using the domain name you used when setting up [DNS for the load balancer](#configure-dns-for-load-balancer), you should now be able to visit GitLab in your browser.
 
@@ -753,7 +753,7 @@ Depending on how you installed GitLab and if you did not change the password by 
 - Your instance ID if you used the official GitLab AMI.
 - A randomly generated password stored for 24 hours in `/etc/gitlab/initial_root_password`.
 
-To change the default password, sign in as the `root` user with the default password and [change it in the user profile](../../user/profile/user_passwords.md#change-your-password).
+To change the default password, log in as the `root` user with the default password and [change it in the user profile](../../user/profile/user_passwords.md#change-your-password).
 
 When our [auto scaling group](#create-an-auto-scaling-group) spins up new instances, we are able to sign in with username `root` and the newly created password.
 

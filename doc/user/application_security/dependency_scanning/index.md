@@ -229,20 +229,6 @@ The following languages and dependency managers are supported by Dependency Scan
       <td><code>build.sbt</code></td>
       <td>N</td>
     </tr>
-    <tr>
-      <td>Swift</td>
-      <td>All versions</td>
-      <td><a href="https://swift.org/package-manager/">Swift Package Manager</a></td>
-      <td><code>Package.resolved</code></td>
-      <td>N</td>
-    </tr>
-    <tr>
-      <td>Cocoapods<sup><b><a href="#notes-regarding-supported-languages-and-package-managers-9">9</a></b></sup></td>
-      <td>All versions</td>
-      <td><a href="https://cocoapods.org/">CocoaPods</a></td>
-      <td><code>Podfile.lock</code></td>
-      <td>N</td>
-    </tr>
   </tbody>
 </table>
 
@@ -296,12 +282,6 @@ The following languages and dependency managers are supported by Dependency Scan
     <a id="notes-regarding-supported-languages-and-package-managers-8"></a>
     <p>
       Excludes both <code>pip</code> and <code>setuptools</code> from the report as they are required by the installer.
-    </p>
-  </li>
-  <li>
-    <a id="notes-regarding-supported-languages-and-package-managers-9"></a>
-    <p>
-      Only SBOM, without advisories. See <a href="https://gitlab.com/gitlab-org/gitlab/-/issues/468764">spike on CocoaPods advisories research</a>.
     </p>
   </li>
 </ol>
@@ -533,10 +513,10 @@ To support the following package managers, the GitLab analyzers proceed in two s
     <tr>
       <td>setuptools</td>
       <td>
-        <a href="https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium/-/blob/v5.4.1/build/gemnasium-python/requirements.txt#L41">70.3.0</a>
+        <a href="https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium/-/blob/v5.2.14/build/gemnasium-python/requirements.txt#L41">69.0.3</a>
       </td>
       <td>
-        <a href="https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium/-/blob/v5.4.1/spec/gemnasium-python_image_spec.rb#L294-316">&gt;= 70.3.0</a>
+        <a href="https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium/-/blob/v5.2.14/spec/gemnasium-python_image_spec.rb#L294-316">&gt;= 69.0.3</a>
       </td>
     </tr>
     <tr>
@@ -664,12 +644,12 @@ The following analyzers are executed, each of which have different behavior when
 
 - [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium)
 
-  Supports multiple lockfiles
+   Supports multiple lockfiles
 
 - [Retire.js](https://retirejs.github.io/retire.js/)
 
-  Does not support multiple lockfiles. When multiple lockfiles exist, `Retire.js`
-  analyzes the first lockfile discovered while traversing the directory tree in alphabetical order.
+   Does not support multiple lockfiles. When multiple lockfiles exist, `Retire.js`
+   analyzes the first lockfile discovered while traversing the directory tree in alphabetical order.
 
 The `gemnasium` analyzer scans supports JavaScript projects for vendored libraries
 (that is, those checked into the project but not managed by the package manager).
@@ -712,10 +692,10 @@ To enable the analyzer, either:
 
 - Enable [Auto DevOps](../../../topics/autodevops/index.md), which includes dependency scanning.
 - Use a preconfigured merge request.
-- Create a [scan execution policy](../policies/scan_execution_policies.md) that enforces dependency
+- Create a [scan execution policy](../policies/scan-execution-policies.md) that enforces dependency
   scanning.
 - Edit the `.gitlab-ci.yml` file manually.
-- [Use CI/CD components](#use-cicd-components)
+- [Use CI/CD components](#use-cicd-components) (Android projects only)
 
 #### Use a preconfigured merge request
 
@@ -777,9 +757,9 @@ Pipelines now include a Dependency Scanning job.
 Use [CI/CD components](../../../ci/components/index.md) to perform Dependency Scanning of your
 application. For instructions, see the respective component's README file.
 
-##### Available CI/CD components
+##### Available CI/CD components per language and package manager
 
-See <https://gitlab.com/explore/catalog/components/dependency-scanning>
+- [Android applications](https://gitlab.com/explore/catalog/components/android-dependency-scanning)
 
 ### Running jobs in merge request pipelines
 
@@ -832,7 +812,7 @@ The following variables allow configuration of global dependency scanning settin
 | ----------------------------|------------ |
 | `ADDITIONAL_CA_CERT_BUNDLE` | Bundle of CA certificates to trust. The bundle of certificates provided here is also used by other tools during the scanning process, such as `git`, `yarn`, or `npm`. For more details, see [Custom TLS certificate authority](#custom-tls-certificate-authority). |
 | `DS_EXCLUDED_ANALYZERS`     | Specify the analyzers (by name) to exclude from Dependency Scanning. For more information, see [Analyzers](#analyzers). |
-| `DS_EXCLUDED_PATHS`         | Exclude files and directories from the scan based on the paths. A comma-separated list of patterns. Patterns can be globs (see [`doublestar.Match`](https://pkg.go.dev/github.com/bmatcuk/doublestar/v4@v4.0.2#Match) for supported patterns), or file or folder paths (for example, `doc,spec`). Parent directories also match patterns. This is a pre-filter which is applied _before_ the scan is executed. Default: `"spec, test, tests, tmp"`. |
+| `DS_EXCLUDED_PATHS`         | Exclude files and directories from the scan based on the paths. A comma-separated list of patterns. Patterns can be globs (see [`doublestar.Match`](https://pkg.go.dev/github.com/bmatcuk/doublestar/v4@v4.0.2#Match) for supported patterns), or file or folder paths (for example, `doc,spec`). Parent directories also match patterns. Default: `"spec, test, tests, tmp"`. |
 | `DS_IMAGE_SUFFIX`           | Suffix added to the image name. (GitLab team members can view more information in this confidential issue: `https://gitlab.com/gitlab-org/gitlab/-/issues/354796`). Automatically set to `"-fips"` when FIPS mode is enabled. |
 | `DS_MAX_DEPTH`              | Defines how many directory levels deep that the analyzer should search for supported files to scan. A value of `-1` scans all directories regardless of depth. Default: `2`. |
 | `SECURE_ANALYZERS_PREFIX`   | Override the name of the Docker registry providing the official default images (proxy). |
@@ -1174,11 +1154,11 @@ variables:
 
 Maven does not read the `HTTP(S)_PROXY` environment variables.
 
-To make the Maven dependency scanner use a proxy, you can configure it using a `settings.xml` file (see [Maven documentation](https://maven.apache.org/guides/mini/guide-proxies.html)) and instruct Maven to use this configuration by using the `MAVEN_CLI_OPTS` CI/CD variable:
+To make the Maven dependency scanner use a proxy, you can specify the options using the `MAVEN_CLI_OPTS` CI/CD variable:
 
 ```yaml
 variables:
-  MAVEN_CLI_OPTS: "--settings mysettings.xml"
+  MAVEN_CLI_OPTS: "-DproxySet=true -Dhttps.proxyHost=squid-proxy -Dhttps.proxyPort=3128 -Dhttp.proxyHost=squid-proxy -Dhttp.proxyPort=3218"
 ```
 
 ## Specific settings for languages and package managers
@@ -1271,190 +1251,3 @@ In these cases, the analyzer skips the dependency and outputs a message to the l
 
 The GitLab analyzers do not make assumptions as they could result in a false positive or false
 negative. For a discussion, see [issue 442027](https://gitlab.com/gitlab-org/gitlab/-/issues/442027).
-
-## Build Swift projects
-
-Swift Package Manager (SPM) is the official tool for managing the distribution of Swift code.
-It's integrated with the Swift build system to automate the process of downloading, compiling, and linking dependencies.
-
-Follow these best practices when you build a Swift project with SPM.
-
-1. Include a `Package.resolved` file.
-
-   The `Package.resolved` file locks your dependencies to specific versions.
-   Always commit this file to your repository to ensure consistency across
-   different environments.
-
-   ```shell
-   git add Package.resolved
-   git commit -m "Add Package.resolved to lock dependencies"
-   ```
-
-1. To build your Swift project, use the following commands:
-
-   ```shell
-   # Update dependencies
-   swift package update
-
-   # Build the project
-   swift build
-   ```
-
-1. To configure CI/CD, add these steps to your `.gitlab-ci.yml` file:
-
-   ```yaml
-   swift-build:
-     stage: build
-     script:
-       - swift package update
-       - swift build
-   ```
-
-1. Optional. If you use private Swift package repositories with self-signed certificates,
-   you might need to add the certificate to your project and configure Swift to trust it:
-
-   1. Fetch the certificate:
-
-      ```shell
-      echo | openssl s_client -servername your.repo.url -connect your.repo.url:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END
-      CERTIFICATE-/p' > repo-cert.crt
-      ```
-
-   1. Add these lines to your Swift package manifest (`Package.swift`):
-
-      ```swift
-      import Foundation
-
-      #if canImport(Security)
-      import Security
-      #endif
-
-      extension Package {
-          public static func addCustomCertificate() {
-              guard let certPath = Bundle.module.path(forResource: "repo-cert", ofType: "crt") else {
-                  fatalError("Certificate not found")
-              }
-              SecCertificateAddToSystemStore(SecCertificateCreateWithData(nil, try! Data(contentsOf: URL(fileURLWithPath: certPath)) as CFData)!)
-          }
-      }
-
-      // Call this before defining your package
-      Package.addCustomCertificate()
-      ```
-
-Always test your build process in a clean environment to ensure your
-dependencies are correctly specified and resolve automatically.
-
-## Build CocoaPods projects
-
-CocoaPods is a popular dependency manager for Swift and Objective-C Cocoa projects. It provides a standard format for managing external libraries in iOS, macOS, watchOS, and tvOS projects.
-
-Follow these best practices when you build projects that use CocoaPods for dependency management.
-
-1. Include a `Podfile.lock` file.
-
-   The `Podfile.lock` file is crucial for locking your dependencies to specific versions. Always commit this file to your repository to ensure consistency across different environments.
-
-   ```shell
-   git add Podfile.lock
-   git commit -m "Add Podfile.lock to lock CocoaPods dependencies"
-   ```
-
-1. You can build your project with one of the following:
-
-   - The `xcodebuild` command-line tool:
-
-     ```shell
-     # Install CocoaPods dependencies
-     pod install
-
-     # Build the project
-     xcodebuild -workspace YourWorkspace.xcworkspace -scheme YourScheme build
-     ```
-
-   - The Xcode IDE:
-
-     1. Open your `.xcworkspace` file in Xcode.
-     1. Select your target scheme.
-     1. Select **Product > Build**. You can also press <kbd>⌘</kbd>+<kbd>B</kbd>.
-
-   - [fastlane](https://fastlane.tools/), a tool for automating builds and releases for iOS and Android apps:
-
-     1. Install `fastlane`:
-
-        ```shell
-        sudo gem install fastlane
-        ```
-
-     1. In your project, configure `fastlane`:
-
-        ```shell
-        fastlane init
-        ```
-
-     1. Add a lane to your `fastfile`:
-
-        ```ruby
-        lane :build do
-          cocoapods
-          gym(scheme: "YourScheme")
-        end
-        ```
-
-     1. Run the build:
-
-        ```shell
-        fastlane build
-        ```
-
-   - If your project uses both CocoaPods and Carthage, you can use Carthage to build your dependencies:
-
-     1. Create a `Cartfile` that includes your CocoaPods dependencies.
-     1. Run the following:
-
-        ```shell
-        carthage update --platform iOS
-        ```
-
-1. Configure CI/CD to build the project according to your preferred method.
-
-   For example, using `xcodebuild`:
-
-   ```yaml
-   cocoapods-build:
-     stage: build
-     script:
-       - pod install
-       - xcodebuild -workspace YourWorkspace.xcworkspace -scheme YourScheme build
-   ```
-
-1. Optional. If you use private CocoaPods repositories,
-   you might need to configure your project to access them:
-
-   1. Add the private spec repo:
-
-      ```shell
-      pod repo add REPO_NAME SOURCE_URL
-      ```
-
-   1. In your Podfile, specify the source:
-
-      ```ruby
-      source 'https://github.com/CocoaPods/Specs.git'
-      source 'SOURCE_URL'
-      ```
-
-1. Optional. If your private CocoaPods repository uses SSL, ensure the SSL certificate is properly configured:
-
-   - If you use a self-signed certificate, add it to your system's trusted certificates.
-     You can also specify the SSL configuration in your `.netrc` file:
-
-     ```netrc
-     machine your.private.repo.url
-       login your_username
-       password your_password
-     ```
-
-1. After you update your Podfile, run `pod install` to install dependencies and update your workspace.
-
-Remember to always run `pod install` after updating your Podfile to ensure all dependencies are properly installed and the workspace is updated.

@@ -113,9 +113,6 @@ dast:
     DAST_LOG_FILE_CONFIG: "loglevel:debug,cache:warn"           # file log defaults to DEBUG level, logs CACHE module at WARN
 ```
 
-By default, the file log is a job artifact called `gl-dast-scan.log`.
-To [configure this path](configuration/variables.md), modify the `DAST_LOG_FILE_PATH` CI/CD variable.
-
 ### Log levels
 
 The log levels that can be configured are as follows:
@@ -156,7 +153,6 @@ The modules that can be configured for logging are as follows:
 | `STAT`     | Used for general statistics while running the scan.                                               |
 | `VLDFN`    | Used for loading and parsing vulnerability definitions.                                           |
 | `WEBGW`    | Used to log messages sent to the target application when running active checks.                   |
-| `SCOPE`    | Used to log messages related to [scope management](configuration/customize_settings.md#managing-scope). |
 
 ### Example - log crawled paths
 

@@ -90,13 +90,6 @@ To change the subscription contact:
 1. Edit the contact details.
 1. Select **Save changes**.
 
-### Add a secondary contact
-
-To add a secondary contact for your account:
-
-1. Ensure an account exists in the [Customers Portal](https://customers.gitlab.com/customers/sign_in) for the user you want to add.
-1. [Create a ticket with the Support team](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=360000071293). Include any relevant material in your request.
-
 ### Change your billing contact
 
 The billing contact receives all invoices and subscription event notifications.
@@ -166,7 +159,7 @@ method as the default:
 
 ## Link a GitLab.com account
 
-Follow this guideline if you have a legacy Customers Portal profile to sign in.
+Follow this guideline if you have a legacy Customers Portal profile to log in.
 
 To link a GitLab.com account to your Customers Portal profile:
 
@@ -178,13 +171,7 @@ To link a GitLab.com account to your Customers Portal profile:
 
 ## Change the linked account
 
-If you want to link your Customers Portal account to a different GitLab.com account,
-you must use your GitLab.com account to register for a new Customers Portal profile.
-
-If you want to change subscription contacts, you can instead do either of the following:
-
-- [Change the billing contact](#change-your-billing-contact).
-- [Change the subscription contact](#change-your-subscription-contact).
+Customers are required to use their GitLab.com account to register for a new Customers Portal profile.
 
 If you have a legacy Customers Portal profile that is not linked to a GitLab.com account, you may still [sign in](https://customers.gitlab.com/customers/sign_in?legacy=true) using a one-time sign-in link sent to your email. However, you should [create](https://gitlab.com/users/sign_up) and [link a GitLab.com account](#change-the-linked-account) to ensure continued access to the Customers Portal.
 
@@ -214,5 +201,5 @@ Resellers do not have access to the Customers Portal, or their customers' accoun
 
 After your subscription order is processed, you will receive several emails:
 
-- A "Welcome to the Customers Portal" email, including instructions on how to sign in.
+- A "Welcome to the Customers Portal" email, including instructions on how to log in.
 - A purchase confirmation email with instructions on how to provision access.

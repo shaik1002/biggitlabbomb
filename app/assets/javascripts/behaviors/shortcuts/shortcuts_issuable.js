@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import ClipboardJS from 'clipboard';
 import { getSelectedFragment } from '~/lib/utils/common_utils';
+import { isElementVisible } from '~/lib/utils/dom_utils';
 import { DEBOUNCE_DROPDOWN_DELAY } from '~/sidebar/components/labels/labels_select_widget/constants';
 import toast from '~/vue_shared/plugins/global_toast';
 import { s__ } from '~/locale';
@@ -15,11 +16,6 @@ import {
   MR_COPY_SOURCE_BRANCH_NAME,
   ISSUABLE_COPY_REF,
 } from './keybindings';
-
-const nextFrame = () =>
-  new Promise((resolve) => {
-    requestAnimationFrame(resolve);
-  });
 
 export default class ShortcutsIssuable {
   constructor(shortcuts) {
@@ -50,15 +46,43 @@ export default class ShortcutsIssuable {
       [MR_COPY_SOURCE_BRANCH_NAME, () => this.copyBranchName()],
       [ISSUABLE_COPY_REF, () => this.copyIssuableRef()],
     ]);
+
+    /**
+     * We're attaching a global focus event listener on document for
+     * every markdown input field.
+     */
+    $(document).on(
+      'focus',
+      '.js-vue-markdown-field .js-gfm-input',
+      ShortcutsIssuable.handleMarkdownFieldFocus,
+    );
   }
 
-  static async replyWithSelectedText() {
-    const documentFragment = getSelectedFragment(document.querySelector('#content-body'));
-    const $replyField = await ShortcutsIssuable.getCurrentReplyField();
+  /**
+   * This event handler preserves last focused markdown input field.
+   * @param {Object} event
+   */
+  static handleMarkdownFieldFocus({ currentTarget }) {
+    ShortcutsIssuable.$lastFocusedReplyField = $(currentTarget);
+  }
+
+  static replyWithSelectedText() {
+    let $replyField = $('.js-main-target-form .js-gfm-input');
+
+    // Ensure that markdown input is still present in the DOM
+    // otherwise fall back to main comment input field.
+    if (
+      ShortcutsIssuable.$lastFocusedReplyField &&
+      isElementVisible(ShortcutsIssuable.$lastFocusedReplyField?.get(0))
+    ) {
+      $replyField = ShortcutsIssuable.$lastFocusedReplyField;
+    }
 
     if (!$replyField.length || $replyField.is(':hidden') /* Other tab selected in MR */) {
       return false;
     }
+
+    const documentFragment = getSelectedFragment(document.querySelector('#content-body'));
 
     if (!documentFragment) {
       $replyField.focus();
@@ -93,58 +117,32 @@ export default class ShortcutsIssuable {
     const el = CopyAsGFM.transformGFMSelection(documentFragment.cloneNode(true));
     const blockquoteEl = document.createElement('blockquote');
     blockquoteEl.appendChild(el);
-    const text = await CopyAsGFM.nodeToGFM(blockquoteEl);
+    CopyAsGFM.nodeToGFM(blockquoteEl)
+      .then((text) => {
+        if (text.trim() === '') {
+          return false;
+        }
 
-    if (text.trim() === '') {
-      return false;
-    }
+        // If replyField already has some content, add a newline before our quote
+        const separator = ($replyField.val().trim() !== '' && '\n\n') || '';
+        $replyField
+          .val((a, current) => `${current}${separator}${text}\n\n`)
+          .trigger('input')
+          .trigger('change');
 
-    // If replyField already has some content, add a newline before our quote
-    const separator = ($replyField.val().trim() !== '' && '\n\n') || '';
-    $replyField
-      .val((a, current) => `${current}${separator}${text}\n\n`)
-      .trigger('input')
-      .trigger('change');
+        // Trigger autosize
+        const event = document.createEvent('Event');
+        event.initEvent('autosize:update', true, false);
+        $replyField.get(0).dispatchEvent(event);
 
-    // Trigger autosize
-    const event = document.createEvent('Event');
-    event.initEvent('autosize:update', true, false);
-    $replyField.get(0).dispatchEvent(event);
+        // Focus the input field
+        $replyField.focus();
 
-    // Focus the input field
-    $replyField.focus();
+        return false;
+      })
+      .catch(() => {});
 
     return false;
-  }
-
-  static async getCurrentReplyField() {
-    const defaultReplyField = $('.js-main-target-form .js-gfm-input');
-    const selection = window.getSelection();
-
-    // prevent hotkey input from going directly into the textarea
-    await nextFrame();
-
-    if (selection.rangeCount <= 0) return defaultReplyField;
-
-    const range = selection.getRangeAt(0);
-    const selectedNode = range.startContainer;
-    const discussionContainer =
-      selectedNode.nodeType === Node.TEXT_NODE
-        ? $(selectedNode.parentNode.closest('.js-discussion-container'))
-        : $(selectedNode.closest('.js-discussion-container'));
-
-    if (discussionContainer.length === 0) return defaultReplyField;
-
-    const replyField = discussionContainer.find('.js-gfm-input');
-    if (replyField.length !== 0) return replyField;
-
-    const placeholder = discussionContainer.find('.js-discussion-reply-field-placeholder');
-    if (placeholder.length === 0) return defaultReplyField;
-
-    placeholder.get(0).dispatchEvent(new Event('focus'));
-    // wait for Vue to re-render
-    await nextFrame();
-    return discussionContainer.find('.js-gfm-input');
   }
 
   static editIssue() {

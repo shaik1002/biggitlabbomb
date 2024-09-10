@@ -68,9 +68,7 @@ export default {
   },
   methods: {
     onKeyUp(event) {
-      const { tagName, isContentEditable } = event.currentTarget.activeElement;
-
-      if (/input|textarea/i.test(tagName) || isContentEditable) return false;
+      if (/input|textearea/i.test(event.currentTarget.activeElement.tagName)) return false;
 
       if (event.key === 'e') {
         this.$emit('is-editing', true);
@@ -97,7 +95,7 @@ export default {
 
 <template>
   <div
-    class="wiki-page-header has-sidebar-toggle detail-page-header border-bottom-0 gl-flex gl-flex-wrap !gl-pt-0"
+    class="wiki-page-header has-sidebar-toggle detail-page-header border-bottom-0 !gl-pt-0 gl-flex gl-flex-wrap"
   >
     <page-heading :heading="pageHeadingComputed" class="gl-w-full">
       <template v-if="!isEditingPath" #actions>
@@ -121,7 +119,7 @@ export default {
         <div class="wiki-last-version gl-leading-20" data-testid="wiki-page-last-version">
           <gl-sprintf :message="$options.i18n.lastEdited">
             <template #author>
-              <gl-link :href="authorUrl" class="gl-font-bold gl-text-default">{{
+              <gl-link :href="authorUrl" class="gl-text-black-normal gl-font-bold">{{
                 pageVersion.author_name
               }}</gl-link>
             </template>

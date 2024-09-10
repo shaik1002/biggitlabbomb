@@ -11,8 +11,6 @@ RSpec.describe Gitlab::Ci::Build::Rules::Rule::Clause::Exists, feature_category:
     Gitlab::Ci::Variables::Collection.new([
       { key: 'SUBDIR', value: 'subdir' },
       { key: 'FILE_TXT', value: 'file.txt' },
-      { key: 'FULL_PATH_VALID', value: 'subdir/my_file.txt' },
-      { key: 'FULL_PATH_INVALID', value: 'subdir/does_not_exist.txt' },
       { key: 'NEW_BRANCH', value: 'new_branch' },
       { key: 'MASKED_VAR', value: 'masked_value', masked: true }
     ])
@@ -51,20 +49,6 @@ RSpec.describe Gitlab::Ci::Build::Rules::Rule::Clause::Exists, feature_category:
     shared_examples 'a rules:exists with a context' do
       it_behaves_like 'a glob matching rule' do
         let(:project) { create(:project, :small_repo, files: files) }
-      end
-
-      context 'when a file path is in a variable' do
-        let(:globs) { ['$FULL_PATH_VALID'] }
-
-        context 'when the variable matches' do
-          it { is_expected.to be_truthy }
-        end
-
-        context 'when the variable does not match' do
-          let(:globs) { ['$FULL_PATH_INVALID'] }
-
-          it { is_expected.to be_falsey }
-        end
       end
 
       context 'when a file path has a variable' do

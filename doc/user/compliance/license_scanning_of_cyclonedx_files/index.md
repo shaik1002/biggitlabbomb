@@ -34,7 +34,7 @@ To enable License scanning of CycloneDX files:
 - Using the Dependency Scanning template
   - Enable [Dependency Scanning](../../application_security/dependency_scanning/index.md#enabling-the-analyzer)
       and ensure that its prerequisites are met.
-  - On GitLab self-managed only, you can [choose package registry metadata to synchronize](../../../administration/settings/security_and_compliance.md#choose-package-registry-metadata-to-sync) in the **Admin** area for the GitLab instance. For this data synchronization to work, you must allow outbound network traffic from your GitLab instance to the domain `storage.googleapis.com`. If you have limited or no network connectivity then refer to the documentation section [running in an offline environment](#running-in-an-offline-environment) for further guidance.
+  - On GitLab self-managed only, you can [choose package registry metadata to synchronize](../../../administration/settings/security_and_compliance.md#choose-package-registry-metadata-to-sync) in the Admin area for the GitLab instance. For this data synchronization to work, you must allow outbound network traffic from your GitLab instance to the domain `storage.googleapis.com`. If you have limited or no network connectivity then refer to the documentation section [running in an offline environment](#running-in-an-offline-environment) for further guidance.
 - Or use the [CI/CD component](../../../ci/components/index.md) for applicable package registries.
 
 ## Supported languages and package managers
@@ -75,7 +75,7 @@ License scanning is supported for the following languages and package managers:
       <td>No</td>
     </tr>
     <tr>
-      <td>Go<sup><b><a href="#notes-regarding-supported-languages-and-package-managers-1">1</a></b></sup></td>
+      <td>Go</td>
       <td><a href="https://go.dev/">Go</a></td>
       <td>Yes</td>
       <td>No</td>
@@ -159,39 +159,10 @@ License scanning is supported for the following languages and package managers:
     </tr>
   </tbody>
 </table>
-
-<ol>
-  <li>
-    <a id="notes-regarding-supported-languages-and-package-managers-1"></a>
-    <p>
-      Go standard libraries such as `stdlib` are not supported and will appear with an `unknown`
-      license. Support for these is tracked in
-      <a href="https://gitlab.com/gitlab-org/gitlab/-/issues/480305">issue 480305</a>.
-    </p>
-  </li>
-</ol>
 <!-- markdownlint-disable MD044 -->
 
 The supported files and versions are the ones supported by
 [Dependency Scanning](../../application_security/dependency_scanning/index.md#supported-languages-and-package-managers).
-
-## Data sources
-
-License information for supported packages is obtained from the sources below. GitLab does
-additional processing on the original data, which includes mapping variations to the canonical
-license names.
-
-| Package manager | Source                                                           |
-|-----------------|------------------------------------------------------------------|
-| Cargo           | <https://deps.dev/>                                              |
-| Conan           | <https://github.com/conan-io/conan-center-index>                 |
-| Go              | <https://index.golang.org/>                                      |
-| Maven           | <https://storage.googleapis.com/maven-central>                   |
-| npm             | <https://deps.dev/>                                              |
-| NuGet           | <https://api.nuget.org/v3/catalog0/index.json>                   |
-| Packagist       | <https://packagist.org/packages/list.json>                       |
-| PyPI            | <https://warehouse.pypa.io/api-reference/bigquery-datasets.html> |
-| Rubygems        | <https://rubygems.org/versions>                                  |
 
 ## License expressions
 
@@ -267,14 +238,3 @@ To remove the unneeded data:
    PackageMetadata::PackageVersionLicense.delete_all
    PackageMetadata::PackageVersion.delete_all
    ```
-
-### Dependency licenses are unknown
-
-Open source license information is stored in the database and used to resolve licenses for a
-project's dependencies. A dependency's license may appear as `unknown` if license information does
-not exist or if that data is not yet available in the database.
-
-Lookups for a dependency's licenses are done upon pipeline completion, so if this data was not
-available at that time an `unknown` license is recorded. This license is shown up until a subsequent
-pipeline is executed at which point another license lookup is made. If a lookup confirms the
-dependency's license has changed, the new license is shown at this time.

@@ -2,15 +2,11 @@
 
 require 'spec_helper'
 
-RSpec.describe Mutations::MergeRequests::SetMilestone, feature_category: :api do
-  include GraphqlHelpers
-
+RSpec.describe Mutations::MergeRequests::SetMilestone do
   let(:user) { create(:user) }
   let(:project) { create(:project, :private) }
   let(:merge_request) { create(:merge_request, source_project: project, target_project: project, assignees: [user]) }
-  let(:query) { GraphQL::Query.new(empty_schema, document: nil, context: {}, variables: {}) }
-  let(:context) { GraphQL::Query::Context.new(query: query, values: { current_user: user }) }
-  let(:mutation) { described_class.new(object: nil, context: context, field: nil) }
+  let(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
   let(:milestone) { create(:milestone, project: project) }
 
   subject { mutation.resolve(project_path: project.full_path, iid: merge_request.iid, milestone: milestone) }

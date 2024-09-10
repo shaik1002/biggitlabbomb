@@ -31,5 +31,3 @@ module SignUpHelpers
     expect(page).to have_selector('[data-testid="new-user-username-field"].gl-field-success-outline')
   end
 end
-
-SignUpHelpers.prepend_mod_with('SignUpHelpers')

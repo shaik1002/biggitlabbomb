@@ -449,15 +449,6 @@ RSpec.describe ProjectsController, feature_category: :groups_and_projects do
       end
     end
 
-    context 'redirection from http://someproject.git?ref=master' do
-      it 'redirects to project without .git extension' do
-        get :show, params: { namespace_id: public_project.namespace, id: public_project, ref: 'master', path: '/.gitlab-ci.yml' }, format: :git
-
-        expect(response).to have_gitlab_http_status(:found)
-        expect(response).to redirect_to(project_path(public_project, ref: 'master', path: '/.gitlab-ci.yml'))
-      end
-    end
-
     context 'when project is moved and git format is requested' do
       let(:old_path) { project.path + 'old' }
 
@@ -1632,8 +1623,7 @@ RSpec.describe ProjectsController, feature_category: :groups_and_projects do
     end
 
     describe '#download_export', :clean_gitlab_redis_rate_limiting do
-      let(:project) { create(:project, service_desk_enabled: false, creator: user) }
-      let!(:export) { create(:import_export_upload, project: project, user: user) }
+      let(:project) { create(:project, :with_export, service_desk_enabled: false) }
       let(:action) { :download_export }
 
       context 'object storage enabled' do
@@ -1647,7 +1637,7 @@ RSpec.describe ProjectsController, feature_category: :groups_and_projects do
 
         context 'when project export file is absent' do
           it 'alerts the user and returns 302' do
-            project.export_file(user).file.delete
+            project.export_file.file.delete
 
             get action, params: { namespace_id: project.namespace, id: project }
 

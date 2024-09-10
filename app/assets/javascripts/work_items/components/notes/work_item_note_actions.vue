@@ -21,7 +21,6 @@ export default {
     assignUserText: __('Assign to commenting user'),
     unassignUserText: __('Unassign from commenting user'),
     reportAbuseText: __('Report abuse'),
-    resolveThreadTitle: __('Resolve thread'),
   },
   components: {
     EmojiPicker: () => import('~/emoji/components/picker.vue'),
@@ -34,6 +33,7 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  inject: ['isGroup'],
   props: {
     fullPath: {
       type: String,
@@ -108,31 +108,6 @@ export default {
       required: false,
       default: '',
     },
-    canResolve: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    resolvable: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    isResolved: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    isResolving: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    resolvedBy: {
-      type: Object,
-      required: false,
-      default: () => ({}),
-    },
   },
   computed: {
     assignUserActionText() {
@@ -156,18 +131,8 @@ export default {
         name: this.projectName,
       });
     },
-    resolveIcon() {
-      if (!this.isResolving) {
-        return this.isResolved ? 'check-circle-filled' : 'check-circle';
-      }
-      return null;
-    },
-    resolveThreadTitle() {
-      return this.isResolved
-        ? __('Resolved by ') + this.resolvedBy.name
-        : this.$options.i18n.resolveThreadTitle;
-    },
   },
+
   methods: {
     async setAwardEmoji(name) {
       const { mutation, mutationName, errorMessage } = getMutation({ note: this.note, name });
@@ -188,6 +153,7 @@ export default {
             note: this.note,
             name,
             fullPath: this.fullPath,
+            isGroup: this.isGroup,
             workItemIid: this.workItemIid,
           }),
         });
@@ -233,20 +199,6 @@ export default {
     >
       {{ __('Contributor') }}
     </user-access-role-badge>
-    <gl-button
-      v-if="canResolve"
-      ref="resolveButton"
-      v-gl-tooltip.hover
-      data-testid="resolve-line-button"
-      category="tertiary"
-      class="note-action-button"
-      :class="{ '!gl-text-success': isResolved }"
-      :title="resolveThreadTitle"
-      :aria-label="resolveThreadTitle"
-      :icon="resolveIcon"
-      :loading="isResolving"
-      @click="$emit('resolve')"
-    />
     <emoji-picker
       v-if="showAwardEmoji"
       toggle-class="add-reaction-button btn-default-tertiary"

@@ -13,7 +13,7 @@ gitlab_schema: gitlab_main_cell
 allow_cross_foreign_keys:
 - gitlab_main_clusterwide
 desired_sharding_key:
-  protected_environment_project_id:
+  project_id:
     references: projects
     backfill_via:
       parent:
@@ -21,7 +21,7 @@ desired_sharding_key:
         table: protected_environments
         sharding_key: project_id
         belongs_to: protected_environment
-  protected_environment_group_id:
+  group_id:
     references: namespaces
     backfill_via:
       parent:
@@ -29,6 +29,3 @@ desired_sharding_key:
         table: protected_environments
         sharding_key: group_id
         belongs_to: protected_environment
-desired_sharding_key_migration_job_name:
-- BackfillProtectedEnvironmentDeployAccessLevelsProtectedEnvironmentProjectId
-- BackfillProtectedEnvironmentDeployAccessLevelsProtectedEnvironmentGroupId

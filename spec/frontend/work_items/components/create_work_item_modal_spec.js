@@ -53,10 +53,9 @@ describe('CreateWorkItemModal', () => {
   });
 
   const createComponent = ({
-    asDropdownItem = false,
-    hideButton = false,
     workItemTypeName = 'EPIC',
     namespaceWorkItemTypesQueryHandler = workItemTypesQueryHandler,
+    asDropdownItem = false,
   } = {}) => {
     apolloProvider = createMockApollo([
       [namespaceWorkItemTypesQuery, namespaceWorkItemTypesQueryHandler],
@@ -66,11 +65,11 @@ describe('CreateWorkItemModal', () => {
       propsData: {
         workItemTypeName,
         asDropdownItem,
-        hideButton,
       },
       apolloProvider,
       provide: {
         fullPath: 'full-path',
+        isGroup: false,
       },
       mocks: {
         $toast: {
@@ -111,12 +110,6 @@ describe('CreateWorkItemModal', () => {
 
       expect(findModal().props('visible')).toBe(true);
     });
-
-    it('does not render when hideButton=true', () => {
-      createComponent({ hideButton: true });
-
-      expect(findTrigger().exists()).toBe(false);
-    });
   });
 
   describe('dropdown item trigger', () => {
@@ -125,16 +118,6 @@ describe('CreateWorkItemModal', () => {
 
       expect(findDropdownItem().exists()).toBe(true);
     });
-  });
-
-  it('opens modal when visible prop updates to true', async () => {
-    createComponent();
-
-    expect(findModal().props('visible')).toBe(false);
-
-    await wrapper.setProps({ visible: true });
-
-    expect(findModal().props('visible')).toBe(true);
   });
 
   it('closes modal on cancel event from form', async () => {

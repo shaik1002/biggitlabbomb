@@ -14,7 +14,7 @@ export default {
 };
 </script>
 <template>
-  <div class="gl-p-7 gl-text-center">
+  <div class="gl-text-center gl-p-7">
     <audio :src="src" controls data-testid="audio"></audio>
   </div>
 </template>

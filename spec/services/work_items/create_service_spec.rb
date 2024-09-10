@@ -144,8 +144,9 @@ RSpec.describe WorkItems::CreateService, feature_category: :team_planning do
         let(:supported_widgets) do
           [
             {
-              klass: WorkItems::Callbacks::Hierarchy,
-              callback: :after_create
+              klass: WorkItems::Widgets::HierarchyService::CreateService,
+              callback: :after_create_in_transaction,
+              params: { parent: parent }
             }
           ]
         end
@@ -215,4 +216,5 @@ RSpec.describe WorkItems::CreateService, feature_category: :team_planning do
 
   it_behaves_like 'creates work item in container', :project
   it_behaves_like 'creates work item in container', :project_namespace
+  it_behaves_like 'creates work item in container', :group
 end

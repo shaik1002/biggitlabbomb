@@ -5,7 +5,8 @@ require 'spec_helper'
 RSpec.describe Mutations::CustomerRelations::Contacts::Create do
   include GraphqlHelpers
 
-  let_it_be(:current_user) { create(:user) }
+  let_it_be(:user) { create(:user) }
+
   let(:group) { create(:group) }
   let(:not_found_or_does_not_belong) { 'The specified organization was not found or does not belong to this group' }
   let(:valid_params) do
@@ -17,7 +18,7 @@ RSpec.describe Mutations::CustomerRelations::Contacts::Create do
 
   describe '#resolve' do
     subject(:resolve_mutation) do
-      described_class.new(object: nil, context: query_context, field: nil).resolve(
+      described_class.new(object: nil, context: { current_user: user }, field: nil).resolve(
         **valid_params,
         group_id: group.to_global_id
       )
@@ -25,7 +26,7 @@ RSpec.describe Mutations::CustomerRelations::Contacts::Create do
 
     context 'when the user does not have permission' do
       before do
-        group.add_reporter(current_user)
+        group.add_reporter(user)
       end
 
       it 'raises an error' do
@@ -36,7 +37,7 @@ RSpec.describe Mutations::CustomerRelations::Contacts::Create do
 
     context 'when the user has permission' do
       before do
-        group.add_developer(current_user)
+        group.add_developer(user)
       end
 
       context 'when crm_enabled is false' do

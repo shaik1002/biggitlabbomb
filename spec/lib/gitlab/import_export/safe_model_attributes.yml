@@ -270,7 +270,6 @@ MergeRequestDiffFile:
 - b_mode
 - too_large
 - binary
-- encoded_file_path
 MergeRequestContextCommit:
 - id
 - authored_date
@@ -796,6 +795,26 @@ ProjectCustomAttribute:
 - project_id
 - key
 - value
+PrometheusMetric:
+- id
+- created_at
+- updated_at
+- project_id
+- y_label
+- unit
+- legend
+- title
+- query
+- group
+- common
+- identifier
+- dashboard_path
+PrometheusAlert:
+- threshold
+- operator
+- environment_id
+- project_id
+- prometheus_metric_id
 Badge:
 - id
 - name
@@ -993,7 +1012,6 @@ Epic:
 EpicIssue:
   - id
   - relative_position
-  - namespace_id
 SystemNoteMetadata:
   - id
   - commit_count

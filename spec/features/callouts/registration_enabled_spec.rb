@@ -43,16 +43,14 @@ RSpec.describe 'Registration enabled callout', feature_category: :system_access 
         before do
           visit admin_root_path
 
-          within('body.page-initialised') do
-            find_by_testid('close-registration-enabled-callout').click
-          end
+          find_by_testid('close-registration-enabled-callout').click
 
           wait_for_requests
 
           visit root_dashboard_path
         end
 
-        it 'does not display callout' do
+        it 'does not display callout', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/391192' do
           expect(page).not_to have_content callout_title
         end
       end

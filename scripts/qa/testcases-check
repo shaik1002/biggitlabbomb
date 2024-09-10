@@ -3,10 +3,7 @@
 
 require 'json'
 
-TESTCASE_FORMAT = %r{
-  (https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/\d+)|
-  (https://jihulab.com/gitlab-cn/quality/testcases/-/quality/test_cases/\d+)
-}x
+TESTCASE_FORMAT = %r{https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/\d+}
 
 testcases = []
 missing_testcases = []

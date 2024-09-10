@@ -23,7 +23,8 @@ export default {
     },
   },
   constantOptions: {
-    archivedProjectDocsPath: helpPagePath('user/project/working_with_projects', {
+    // eslint-disable-next-line local-rules/require-valid-help-page-path
+    archivedProjectDocsPath: helpPagePath('user/project/settings/index.md', {
       anchor: 'archive-a-project',
     }),
     lockedIssueDocsPath: helpPagePath('user/discussions/index.md', {
@@ -48,7 +49,7 @@ export default {
 </script>
 
 <template>
-  <div class="issuable-note-warning gl-relative gl-rounded-base gl-py-4">
+  <div class="issuable-note-warning gl-relative gl-py-4 gl-rounded-base">
     <gl-icon name="lock" class="gl-mr-2" />
     <template v-if="isProjectArchived">
       {{ $options.constantOptions.projectArchivedWarning }}

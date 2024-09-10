@@ -97,8 +97,7 @@ function renderMermaidEl(el, source) {
 
   // Hide the markdown but keep it "visible enough" to allow Copy-as-GFM
   // https://gitlab.com/gitlab-org/gitlab/-/merge_requests/83202
-  // Also remove padding from the pre element to prevent errant scrollbar appearing
-  el.closest('pre').classList.add('gl-sr-only', '!gl-p-0');
+  el.closest('pre').classList.add('gl-sr-only');
   el.closest('pre').parentNode.appendChild(wrapper);
 
   // Event Listeners

@@ -13,11 +13,10 @@ module Gitlab
         new(*args, **kwargs).import
       end
 
-      def initialize(importable:, archive_file:, shared:, user:, tmpdir: nil)
+      def initialize(importable:, archive_file:, shared:, tmpdir: nil)
         @importable = importable
         @archive_file = archive_file
         @shared = shared
-        @user = user
         @tmpdir = tmpdir
       end
 
@@ -91,7 +90,7 @@ module Gitlab
       end
 
       def remote_download_or_download_or_copy_upload
-        import_export_upload = @importable.import_export_upload_by_user(@user)
+        import_export_upload = @importable.import_export_upload
 
         if import_export_upload.remote_import_url.present?
           download(

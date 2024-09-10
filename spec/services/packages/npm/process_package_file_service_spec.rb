@@ -87,6 +87,14 @@ RSpec.describe ::Packages::Npm::ProcessPackageFileService, feature_category: :pa
       end
 
       it_behaves_like 'processing the package file'
+
+      context 'when the feature flag is disabled' do
+        before do
+          stub_feature_flags(allow_custom_root_folder_name_in_npm_upload: false)
+        end
+
+        it_behaves_like 'raising an error', 'package.json not found'
+      end
     end
 
     context 'with multiple package.json entries' do
@@ -111,16 +119,18 @@ RSpec.describe ::Packages::Npm::ProcessPackageFileService, feature_category: :pa
           archives.find { |e| e.full_name == 'pkg3/package.json' }
         )
       end
-    end
 
-    context 'with TarInvalidError' do
-      before do
-        allow_next_instance_of(Gem::Package::TarReader::Entry) do |instance|
-          allow(instance).to receive(:full_name).and_raise(::Gem::Package::TarInvalidError)
+      context 'when the feature flag is disabled' do
+        before do
+          stub_feature_flags(allow_custom_root_folder_name_in_npm_upload: false)
+        end
+
+        it 'yeilds first package.json entry in non-custom root folder' do
+          expect { |b| service.send(:with_package_json_entry, &b) }.to yield_with_args(
+            archives.find { |e| e.full_name == 'package/package.json' }
+          )
         end
       end
-
-      it_behaves_like 'processing the package file'
     end
   end
 end

@@ -25,7 +25,7 @@ describe('FormErrorsAlert', () => {
     it('renders nothing', () => {
       createComponent({ propsData: { errors: [] } });
 
-      expect(wrapper.find('*').exists()).toBe(false);
+      expect(wrapper.html()).toBe('');
     });
   });
 

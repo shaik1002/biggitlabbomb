@@ -55,8 +55,9 @@ export default {
   methods: {
     openDocs() {
       visitUrl(
+        // eslint-disable-next-line local-rules/require-valid-help-page-path
         helpPagePath('user/project/ml/model_registry/index', {
-          anchor: 'create-machine-learning-models-and-model-versions-by-using-mlflow',
+          anchor: 'creating-machine-learning-models-and-model-versions',
         }),
         true,
       );
@@ -92,7 +93,7 @@ export default {
         <label> {{ instruction.label }}</label>
 
         <pre
-          class="code highlight gl-flex gl-border-none gl-p-2 gl-text-left gl-font-monospace"
+          class="code highlight gl-flex gl-border-none gl-text-left gl-p-2 gl-font-monospace"
           data-testid="preview-code"
         >
           <code class="gl-grow">{{ instruction.cmd }}</code>

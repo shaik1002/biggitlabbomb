@@ -99,7 +99,6 @@ RSpec.shared_context 'structured_logger' do
                         .and_return(clock_realtime_start, clock_realtime_end)
     allow(Process).to receive(:clock_gettime).with(Process::CLOCK_THREAD_CPUTIME_ID, :float_second)
                         .and_return(clock_thread_cputime_start, clock_thread_cputime_end)
-    allow(Process).to receive(:clock_gettime).with(anything, :float_millisecond).and_call_original
   end
 
   subject { described_class.new(logger) }

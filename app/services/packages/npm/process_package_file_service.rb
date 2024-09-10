@@ -4,6 +4,7 @@ module Packages
   module Npm
     class ProcessPackageFileService
       ExtractionError = Class.new(StandardError)
+      PACKAGE_JSON_ENTRY_PATH = 'package/package.json'
       PACKAGE_JSON_ENTRY_REGEX = %r{^[^/]+/package.json$}
       MAX_FILE_SIZE = 4.megabytes
 
@@ -43,11 +44,15 @@ module Packages
           Zlib::GzipReader.open(open_file.file_path) do |gz|
             tar_reader = Gem::Package::TarReader.new(gz)
 
-            entry_path = entry_full_name(tar_reader)
-            yield unless entry_path.is_a?(String)
+            if Feature.disabled?(:allow_custom_root_folder_name_in_npm_upload, package.project)
+              entry = tar_reader.find { |e| File.fnmatch(PACKAGE_JSON_ENTRY_PATH, e.full_name) }
+            else
+              entry_path = entry_full_name(tar_reader)
+              yield unless entry_path.is_a?(String)
 
-            tar_reader.rewind
-            entry = tar_reader.find { |e| path_for(e) == entry_path }
+              tar_reader.rewind
+              entry = tar_reader.find { |e| e.full_name == entry_path }
+            end
 
             yield entry
           end
@@ -60,15 +65,8 @@ module Packages
         # We cannot get the entry directly when using #reverse_each because
         # TarReader closes the stream after iterating over all entries
         tar_reader.reverse_each do |entry|
-          entry_path = path_for(entry)
-          break entry_path if entry_path.match?(PACKAGE_JSON_ENTRY_REGEX)
+          break entry.full_name if entry.full_name.match?(PACKAGE_JSON_ENTRY_REGEX)
         end
-      end
-
-      def path_for(entry)
-        entry.full_name
-      rescue ::Gem::Package::TarInvalidError
-        entry.header.name
       end
     end
   end

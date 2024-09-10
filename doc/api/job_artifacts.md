@@ -296,7 +296,7 @@ Delete artifacts of a job.
 
 Prerequisites:
 
-- You must have at least the maintainer role for the project.
+- Must have at least the maintainer role in the project.
 
 ```plaintext
 DELETE /projects/:id/jobs/:job_id/artifacts

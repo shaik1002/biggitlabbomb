@@ -19,7 +19,7 @@ class CommitStatus < Ci::ApplicationRecord
     trigger_request_id_convert_to_bigint
     upstream_pipeline_id_convert_to_bigint
     user_id_convert_to_bigint
-  ], remove_with: '17.4', remove_after: '2024-08-12'
+  ], remove_with: '17.0', remove_after: '2024-04-22'
 
   self.table_name = :p_ci_builds
   self.sequence_name = :ci_builds_id_seq
@@ -50,7 +50,7 @@ class CommitStatus < Ci::ApplicationRecord
   validates :name, presence: true, unless: :importing?
   validates :ci_stage, presence: true, on: :create, unless: :importing?
   validates :ref, :target_url, :description, length: { maximum: 255 }
-  validates :project, presence: true
+  validates :project, presence: true, on: :create
 
   alias_attribute :author, :user
   alias_attribute :pipeline_id, :commit_id

@@ -1,6 +1,6 @@
 import { createWrapper } from '@vue/test-utils';
 import MembersTabs from '~/members/components/members_tabs.vue';
-import { CONTEXT_TYPE, MEMBERS_TAB_TYPES } from '~/members/constants';
+import { MEMBERS_TAB_TYPES } from '~/members/constants';
 import { initMembersApp } from '~/members/index';
 import membersStore from '~/members/store';
 import { parseDataAttributes } from '~/members/utils';
@@ -30,7 +30,7 @@ describe('initMembersApp', () => {
   };
 
   const setup = () => {
-    vm = initMembersApp(el, CONTEXT_TYPE.GROUP, options);
+    vm = initMembersApp(el, options);
     wrapper = createWrapper(vm);
   };
 

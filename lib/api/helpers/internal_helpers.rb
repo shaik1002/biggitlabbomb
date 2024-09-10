@@ -95,15 +95,6 @@ module API
         return unless commands.include?(params[:action])
 
         ::Users::ActivityService.new(author: actor, namespace: project&.namespace, project: project).execute
-
-        return unless project && actor
-
-        Gitlab::EventStore.publish(
-          ::Users::ActivityEvent.new(data: {
-            user_id: actor.id,
-            namespace_id: project.namespace_id
-          })
-        )
       end
 
       def redis_ping

@@ -56,7 +56,7 @@ export default {
         <gl-link
           :href="editedBy.path"
           :data-user-id="editedBy.id"
-          class="js-user-link author-link hover:gl-underline"
+          class="js-user-link author-link gl-hover-text-decoration-underline"
         >
           {{ editedBy.name }}
         </gl-link>

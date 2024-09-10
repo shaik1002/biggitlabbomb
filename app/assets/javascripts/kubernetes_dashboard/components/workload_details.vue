@@ -1,75 +1,23 @@
 <script>
-import {
-  GlBadge,
-  GlTruncate,
-  GlButton,
-  GlTooltipDirective,
-  GlLoadingIcon,
-  GlAlert,
-} from '@gitlab/ui';
+import { GlBadge, GlTruncate } from '@gitlab/ui';
 import { stringify } from 'yaml';
 import { s__ } from '~/locale';
 import PodLogsButton from '~/environments/environment_details/components/kubernetes/pod_logs_button.vue';
-import getK8sEventsQuery from '~/environments/graphql/queries/k8s_events.query.graphql';
 import { WORKLOAD_STATUS_BADGE_VARIANTS, STATUS_LABELS } from '../constants';
 import WorkloadDetailsItem from './workload_details_item.vue';
-import K8sEventItem from './k8s_event_item.vue';
 
 export default {
   components: {
     GlBadge,
     GlTruncate,
-    GlButton,
-    GlLoadingIcon,
-    GlAlert,
     WorkloadDetailsItem,
     PodLogsButton,
-    K8sEventItem,
-  },
-  directives: {
-    GlTooltip: GlTooltipDirective,
   },
   props: {
-    configuration: {
-      type: Object,
-      required: false,
-      default: () => ({}),
-    },
     item: {
       type: Object,
       required: true,
       validator: (item) => ['name', 'kind', 'labels', 'annotations'].every((key) => item[key]),
-    },
-  },
-  data() {
-    return { eventsError: null, eventsLoading: false, k8sEvents: [] };
-  },
-  apollo: {
-    k8sEvents: {
-      query: getK8sEventsQuery,
-      fetchPolicy: 'no-cache',
-      notifyOnNetworkStatusChange: true,
-      variables() {
-        return {
-          configuration: this.configuration,
-          involvedObjectName: this.item.name,
-          namespace: this.item.namespace,
-        };
-      },
-      skip() {
-        return Boolean(!Object.keys(this.configuration).length);
-      },
-      error(err) {
-        this.eventsError = err.message;
-      },
-      watchLoading(isLoading) {
-        this.eventsLoading = isLoading;
-      },
-      update(data) {
-        return data?.k8sEvents?.sort(
-          (a, b) => new Date(b.lastTimestamp) - new Date(a.lastTimestamp),
-        );
-      },
     },
   },
   computed: {
@@ -96,9 +44,6 @@ export default {
     hasContainers() {
       return Boolean(this.item.containers);
     },
-    hasActions() {
-      return Boolean(this.item.actions?.length);
-    },
   },
   methods: {
     getLabelBadgeText([key, value]) {
@@ -120,15 +65,12 @@ export default {
   },
   i18n: {
     name: s__('KubernetesDashboard|Name'),
-    actions: s__('KubernetesDashboard|Actions'),
     kind: s__('KubernetesDashboard|Kind'),
     labels: s__('KubernetesDashboard|Labels'),
     status: s__('KubernetesDashboard|Status'),
     annotations: s__('KubernetesDashboard|Annotations'),
     spec: s__('KubernetesDashboard|Spec'),
     containers: s__('KubernetesDashboard|Containers'),
-    events: s__('KubernetesDashboard|Events'),
-    eventsEmptyText: s__('KubernetesDashboard|No events available'),
   },
   WORKLOAD_STATUS_BADGE_VARIANTS,
   STATUS_LABELS,
@@ -140,26 +82,12 @@ export default {
     <workload-details-item :label="$options.i18n.name">
       <span class="gl-break-anywhere"> {{ item.name }}</span>
     </workload-details-item>
-    <workload-details-item v-if="hasActions" :label="$options.i18n.actions">
-      <span v-for="action of item.actions" :key="action.name">
-        <gl-button
-          v-gl-tooltip
-          :title="action.text"
-          :aria-label="action.text"
-          :variant="action.variant"
-          :icon="action.icon"
-          category="secondary"
-          class="gl-mr-3"
-          @click="$emit(action.name, item)"
-        />
-      </span>
-    </workload-details-item>
     <workload-details-item :label="$options.i18n.kind">
       {{ item.kind }}
     </workload-details-item>
     <workload-details-item v-if="itemLabels.length" :label="$options.i18n.labels">
-      <div class="gl-flex gl-flex-wrap gl-gap-2">
-        <gl-badge v-for="label of itemLabels" :key="label" class="gl-w-auto gl-max-w-full">
+      <div class="gl-display-flex gl-flex-wrap gl-gap-2">
+        <gl-badge v-for="label of itemLabels" :key="label" class="gl-max-w-full gl-w-auto">
           <gl-truncate :text="label" with-tooltip />
         </gl-badge>
       </div>
@@ -192,9 +120,9 @@ export default {
       <div
         v-for="(container, index) of item.containers"
         :key="index"
-        class="gl-flex gl-items-center gl-justify-between gl-px-5 gl-py-3"
+        class="gl-flex gl-justify-between gl-items-center gl-py-3 gl-px-5"
         :class="{
-          'gl-border-t-1 gl-border-t-gray-100 gl-border-t-solid': index > 0,
+          'gl-border-t-solid gl-border-t-1 gl-border-t-gray-100': index > 0,
         }"
       >
         {{ container.name }}
@@ -204,18 +132,6 @@ export default {
           :containers="getContainersProp(container)"
         />
       </div>
-    </workload-details-item>
-    <workload-details-item :label="$options.i18n.events" collapsible>
-      <gl-loading-icon v-if="eventsLoading" inline />
-      <gl-alert v-else-if="eventsError" variant="danger" :dismissible="false">
-        {{ eventsError }}
-      </gl-alert>
-      <div v-else-if="k8sEvents.length" class="issuable-discussion">
-        <ul class="notes main-notes-list timeline -gl-ml-2">
-          <k8s-event-item v-for="(event, index) in k8sEvents" :key="index" :event="event" />
-        </ul>
-      </div>
-      <span v-else class="gl-text-gray-500">{{ $options.i18n.eventsEmptyText }}</span>
     </workload-details-item>
   </ul>
 </template>

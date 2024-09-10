@@ -39,8 +39,7 @@ RSpec.describe Packages::Conan::Package, type: :model, feature_category: :packag
 
     context 'for recipe uniqueness' do
       let_it_be(:package) { create(:conan_package) }
-
-      let(:new_package) do
+      let_it_be(:new_package) do
         build(:conan_package, project: package.project, name: package.name, version: package.version)
       end
 
@@ -98,10 +97,6 @@ RSpec.describe Packages::Conan::Package, type: :model, feature_category: :packag
       it 'loads conan metadatum' do
         expect(packages.first.association(:conan_metadatum)).to be_loaded
       end
-    end
-
-    describe '.installable' do
-      it_behaves_like 'installable packages', :conan_package
     end
   end
 end

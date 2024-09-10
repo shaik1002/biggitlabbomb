@@ -17,11 +17,13 @@ class Import::GitlabGroupsController < ApplicationController
       .except(:file)
       .merge(
         visibility_level: closest_allowed_visibility_level,
-        import_export_upload: ImportExportUpload.new(import_file: group_params[:file], user: current_user)
+        import_export_upload: ImportExportUpload.new(import_file: group_params[:file])
       )
       .with_defaults(organization_id: Current.organization_id)
 
-    response = ::Groups::CreateService.new(current_user, group_data).execute
+    response = Namespace.with_disabled_organization_validation do
+      ::Groups::CreateService.new(current_user, group_data).execute
+    end
 
     group = response[:group]
 

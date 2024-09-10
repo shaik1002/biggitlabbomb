@@ -50,12 +50,11 @@ module Groups
 
       set_visibility_level
 
-      except_keys = ::NamespaceSetting.allowed_namespace_settings_params + [:organization_id, :import_export_upload]
+      except_keys = ::NamespaceSetting.allowed_namespace_settings_params + [:organization_id]
       @group = Group.new(params.except(*except_keys))
 
       set_organization
 
-      @group.import_export_uploads << params[:import_export_upload] if params[:import_export_upload]
       @group.build_namespace_settings
       handle_namespace_settings
     end

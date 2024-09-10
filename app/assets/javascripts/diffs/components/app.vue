@@ -143,7 +143,7 @@ export default {
       required: false,
       default: '',
     },
-    linkedFileUrl: {
+    pinnedFileUrl: {
       type: String,
       required: false,
       default: '',
@@ -157,7 +157,7 @@ export default {
       autoScrolled: false,
       activeProject: undefined,
       hasScannerError: false,
-      linkedFileStatus: '',
+      pinnedFileStatus: '',
       codequalityData: {},
       sastData: {},
       keydownTime: undefined,
@@ -165,7 +165,6 @@ export default {
     };
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     getMRCodequalityAndSecurityReports: {
       query: getMRCodequalityAndSecurityReports,
       pollInterval: FINDINGS_POLL_INTERVAL,
@@ -448,7 +447,7 @@ export default {
       'navigateToDiffFileIndex',
       'setFileByFile',
       'disableVirtualScroller',
-      'fetchLinkedFile',
+      'fetchPinnedFile',
       'toggleTreeList',
     ]),
     ...mapActions('findingsDrawer', ['setDrawer']),
@@ -537,17 +536,17 @@ export default {
       return !this.diffFiles.length;
     },
     fetchData({ toggleTree = true, fetchMeta = true } = {}) {
-      if (this.linkedFileUrl && this.linkedFileStatus !== 'loaded') {
-        this.linkedFileStatus = 'loading';
-        this.fetchLinkedFile(this.linkedFileUrl)
+      if (this.pinnedFileUrl && this.pinnedFileStatus !== 'loaded') {
+        this.pinnedFileStatus = 'loading';
+        this.fetchPinnedFile(this.pinnedFileUrl)
           .then(() => {
-            this.linkedFileStatus = 'loaded';
+            this.pinnedFileStatus = 'loaded';
             if (toggleTree) this.setTreeDisplay();
           })
           .catch(() => {
-            this.linkedFileStatus = 'error';
+            this.pinnedFileStatus = 'error';
             createAlert({
-              message: __("Couldn't fetch the linked file."),
+              message: __("Couldn't fetch the pinned file."),
             });
           });
       }
@@ -581,7 +580,7 @@ export default {
       }
 
       if (!this.viewDiffsFileByFile) {
-        this.fetchDiffFilesBatch(Boolean(this.linkedFileUrl))
+        this.fetchDiffFilesBatch(Boolean(this.pinnedFileUrl))
           .then(() => {
             if (toggleTree) this.setTreeDisplay();
             // Guarantee the discussions are assigned after the batch finishes.
@@ -757,7 +756,7 @@ export default {
 
       <div
         :data-can-create-note="getNoteableData.current_user.can_create_note"
-        class="files gl-mt-2 gl-flex"
+        class="files gl-flex gl-mt-2"
       >
         <diffs-file-tree :visible="renderFileTree" @toggled="fileTreeToggled" />
         <div class="col-12 col-md-auto diff-files-holder">
@@ -775,7 +774,7 @@ export default {
             <gl-loading-icon size="lg" />
           </div>
           <template v-else-if="renderDiffFiles">
-            <div v-if="linkedFileStatus === 'loading'" class="loading">
+            <div v-if="pinnedFileStatus === 'loading'" class="loading">
               <gl-loading-icon size="lg" />
             </div>
             <hidden-files-warning
@@ -836,7 +835,7 @@ export default {
             <div
               v-if="showFileByFileNavigation"
               data-testid="file-by-file-navigation"
-              class="gl-grid gl-text-center"
+              class="gl-display-grid gl-text-center"
             >
               <gl-pagination
                 class="gl-mx-auto"

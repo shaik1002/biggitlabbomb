@@ -7,11 +7,8 @@ import { addShortcutsExtension } from '~/behaviors/shortcuts';
 import ShortcutsWorkItems from '~/behaviors/shortcuts/shortcuts_work_items';
 import ShortcutsNavigation from '~/behaviors/shortcuts/shortcuts_navigation';
 import { parseBoolean } from '~/lib/utils/common_utils';
-import { injectVueAppBreadcrumbs } from '~/lib/utils/breadcrumbs';
 import { apolloProvider } from '~/graphql_shared/issuable_client';
 import App from './components/app.vue';
-import WorkItemBreadcrumb from './components/work_item_breadcrumb.vue';
-import activeDiscussionQuery from './components/design_management/graphql/client/active_design_discussion.query.graphql';
 import { createRouter } from './router';
 
 Vue.use(VueApollo);
@@ -33,7 +30,6 @@ export const initWorkItemsRoot = ({ workItemType, workspaceType } = {}) => {
     hasIssueWeightsFeature,
     iid,
     issuesListPath,
-    epicsListPath,
     labelsManagePath,
     registerPath,
     signInPath,
@@ -44,47 +40,14 @@ export const initWorkItemsRoot = ({ workItemType, workspaceType } = {}) => {
     newCommentTemplatePaths,
     reportAbusePath,
     defaultBranch,
-    initialSort,
-    isSignedIn,
-    workItemType: listWorkItemType,
-    hasEpicsFeature,
-    showNewIssueLink,
-    canCreateEpic,
-    autocompleteAwardEmojisPath,
-    hasScopedLabelsFeature,
-    hasQualityManagementFeature,
-    canBulkEditEpics,
-    groupIssuesPath,
-    labelsFetchPath,
   } = el.dataset;
 
   const isGroup = workspaceType === WORKSPACE_GROUP;
-  const router = createRouter({ fullPath, workItemType, workspaceType, defaultBranch, isGroup });
-  let listPath = issuesListPath;
-
-  if (isGroup) {
-    listPath = epicsListPath;
-    injectVueAppBreadcrumbs(router, WorkItemBreadcrumb, apolloProvider, {
-      workItemType: listWorkItemType,
-      epicsListPath,
-    });
-  }
-
-  apolloProvider.clients.defaultClient.cache.writeQuery({
-    query: activeDiscussionQuery,
-    data: {
-      activeDesignDiscussion: {
-        __typename: 'ActiveDesignDiscussion',
-        id: null,
-        source: null,
-      },
-    },
-  });
 
   return new Vue({
     el,
     name: 'WorkItemsRoot',
-    router,
+    router: createRouter({ fullPath, workItemType, workspaceType, defaultBranch }),
     apolloProvider,
     provide: {
       canAdminLabel,
@@ -93,8 +56,7 @@ export const initWorkItemsRoot = ({ workItemType, workspaceType } = {}) => {
       hasIssueWeightsFeature: parseBoolean(hasIssueWeightsFeature),
       hasOkrsFeature: parseBoolean(hasOkrsFeature),
       hasSubepicsFeature: parseBoolean(hasSubepicsFeature),
-      hasScopedLabelsFeature: parseBoolean(hasScopedLabelsFeature),
-      issuesListPath: listPath,
+      issuesListPath,
       labelsManagePath,
       registerPath,
       signInPath,
@@ -103,17 +65,6 @@ export const initWorkItemsRoot = ({ workItemType, workspaceType } = {}) => {
       newCommentTemplatePaths: JSON.parse(newCommentTemplatePaths),
       reportAbusePath,
       groupPath,
-      initialSort,
-      isSignedIn: parseBoolean(isSignedIn),
-      workItemType: listWorkItemType,
-      hasEpicsFeature: parseBoolean(hasEpicsFeature),
-      showNewIssueLink: parseBoolean(showNewIssueLink),
-      canCreateEpic: parseBoolean(canCreateEpic),
-      autocompleteAwardEmojisPath,
-      hasQualityManagementFeature: parseBoolean(hasQualityManagementFeature),
-      canBulkEditEpics: parseBoolean(canBulkEditEpics),
-      groupIssuesPath,
-      labelsFetchPath,
     },
     mounted() {
       performanceMarkAndMeasure({

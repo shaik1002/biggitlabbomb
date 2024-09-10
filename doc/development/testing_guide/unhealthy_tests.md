@@ -173,7 +173,7 @@ usually a good idea.
    - OR Run `while :; do bin/rspec <spec> || break; done` in a loop to find a `seed`
 1. Reduce the examples by bisecting the spec failure with `bin/rspec --seed <previously found> --bisect <spec>`
 1. Look at the remaining examples and watch for state leakage
-   - e.g. Updating records created with `let_it_be` is a common source of problems
+    - e.g. Updating records created with `let_it_be` is a common source of problems
 1. Once fixed, rerun the specs with `seed`
 1. Run `scripts/rspec_check_order_dependence` to ensure the spec can be run in [random order](best_practices.md#test-order)
 1. Run `while :; do bin/rspec <spec> || break; done` in a loop again (and grab lunch) to verify it's no longer flaky
@@ -208,44 +208,17 @@ Then, you can use the `quarantine: '<issue url>'` metadata with the URL of the
 ~"failure::flaky-test" issue you created previously.
 
 ```ruby
-# Quarantine a single spec
 it 'succeeds', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/12345' do
   expect(response).to have_gitlab_http_status(:ok)
 end
-
-# Quarantine a describe/context block
-describe '#flaky-method', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/12345' do
-  [...]
-end
 ```
 
-This means it will be skipped in CI. By default, the quarantined tests will run locally.
+This means it is skipped in CI. By default, the quarantined tests will run locally.
 
 We can skip them in local development as well by running with `--tag ~quarantine`:
 
 ```shell
-# Bash
 bin/rspec --tag ~quarantine
-
-# ZSH
-bin/rspec --tag \~quarantine
-```
-
-Also, please add the ~"quarantine" label on the merge request.
-
-Note that we [should not quarantine a shared example/context](https://gitlab.com/gitlab-org/gitlab/-/issues/404388), and [we cannot quarantine a call to `it_behaves_like` or `include_examples`](https://github.com/rspec/rspec-core/pull/2307#issuecomment-236006902):
-
-```ruby
-# Will be flagged by Rubocop
-shared_examples 'loads all the users when opened', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/12345' do
-  [...]
-end
-
-# Does not work
-it_behaves_like 'a shared example', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/12345'
-
-# Does not work
-include_examples 'a shared example', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/12345'
 ```
 
 After the long-term quarantining MR has reached production, you should revert the fast-quarantine MR you created earlier.
@@ -396,9 +369,9 @@ to print the Ruby thread dump :
 1. Run the hanging spec locally.
 1. Trigger the Ruby thread dump by running this command:
 
-   ```shell
-   kill -CONT <pid>
-   ```
+    ```shell
+    kill -CONT <pid>
+    ```
 
 1. The thread dump will be saved to the `/tmp/sigdump-<pid>.log` file.
 

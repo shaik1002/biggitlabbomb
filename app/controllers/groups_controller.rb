@@ -41,7 +41,8 @@ class GroupsController < Groups::ApplicationController
     push_force_frontend_feature_flag(:work_items_beta, group.work_items_beta_feature_flag_enabled?)
     push_force_frontend_feature_flag(:work_items_alpha, group.work_items_alpha_feature_flag_enabled?)
     push_frontend_feature_flag(:issues_grid_view)
-    push_force_frontend_feature_flag(:namespace_level_work_items, group.namespace_work_items_enabled?(current_user))
+    push_frontend_feature_flag(:group_multi_select_tokens, group)
+    push_force_frontend_feature_flag(:namespace_level_work_items, group.namespace_work_items_enabled?)
   end
 
   before_action only: :merge_requests do
@@ -153,14 +154,9 @@ class GroupsController < Groups::ApplicationController
 
   def update
     if Groups::UpdateService.new(@group, current_user, group_params).execute
+      notice = "Group '#{@group.name}' was successfully updated."
 
-      if @group.namespace_settings.errors.present?
-        flash[:alert] = group.namespace_settings.errors.full_messages.to_sentence
-      else
-        flash[:notice] = "Group '#{@group.name}' was successfully updated."
-      end
-
-      redirect_to edit_group_origin_location
+      redirect_to edit_group_origin_location, notice: notice
     else
       @group.reset
       render action: "edit"
@@ -213,10 +209,9 @@ class GroupsController < Groups::ApplicationController
   end
 
   def download_export
-    if @group.export_file_exists?(current_user)
-      if @group.export_archive_exists?(current_user)
-        export_file = @group.export_file(current_user)
-        send_upload(export_file, attachment: export_file.filename)
+    if @group.export_file_exists?
+      if @group.export_archive_exists?
+        send_upload(@group.export_file, attachment: @group.export_file.filename)
       else
         redirect_to edit_group_path(@group),
           alert: _('The file containing the export is not available yet; it may still be transferring. Please try again later.')

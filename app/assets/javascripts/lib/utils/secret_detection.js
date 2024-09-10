@@ -2,7 +2,6 @@ import { escape } from 'lodash';
 import { confirmAction } from '~/lib/utils/confirm_via_gl_modal/confirm_via_gl_modal';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import { __, n__, sprintf } from '~/locale';
-import { InternalEvents } from '~/tracking';
 import sensitiveDataPatterns from './secret_detection_patterns';
 
 const CONTENT_TYPE = {
@@ -13,9 +12,6 @@ const CONTENT_TYPE = {
 const defaultContentType = CONTENT_TYPE.COMMENT;
 
 const documentationHref = helpPagePath('user/application_security/secret_detection/client/index');
-
-export const SHOW_CLIENT_SIDE_SECRET_DETECTION_WARNING =
-  'show_client_side_secret_detection_warning';
 
 const i18n = {
   title: (count) =>
@@ -89,13 +85,13 @@ const containsSensitiveToken = (message) => {
   return findings.length > 0 ? findings : false;
 };
 
-const confirmSensitiveAction = async (findings = [], contentType = defaultContentType) => {
+const confirmSensitiveAction = (findings = [], contentType = defaultContentType) => {
   const title = i18n.title(findings.length);
   const modalHtmlMessage = formatMessage(findings, contentType);
   const primaryBtnText = sprintf(i18n.primaryBtnText, { contentType });
   const secondaryBtnText = sprintf(i18n.secondaryBtnText, { contentType });
 
-  const confirmed = await confirmAction('', {
+  return confirmAction('', {
     title,
     modalHtmlMessage,
     primaryBtnVariant: 'danger',
@@ -103,12 +99,6 @@ const confirmSensitiveAction = async (findings = [], contentType = defaultConten
     secondaryBtnText,
     hideCancel: true,
   });
-  InternalEvents.trackEvent(SHOW_CLIENT_SIDE_SECRET_DETECTION_WARNING, {
-    label: contentType,
-    property: findings[0].patternName,
-    value: confirmed ? 1 : 0,
-  });
-  return confirmed;
 };
 
 /**

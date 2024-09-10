@@ -44,7 +44,6 @@ issues:
 - issuable_severity
 - issuable_sla
 - issue_assignees
-- issue_stage_events
 - search_data
 - closed_by
 - epic_issue
@@ -54,6 +53,9 @@ issues:
 - designs
 - design_versions
 - description_versions
+- prometheus_alerts
+- prometheus_alert_events
+- self_managed_prometheus_alert_events
 - zoom_meetings
 - vulnerability_links
 - related_vulnerabilities
@@ -78,9 +80,6 @@ issues:
 - email
 - issuable_resource_links
 - synced_epic
-- observability_metrics
-- observability_logs
-- observability_traces
 work_item_type:
 - issues
 - namespace
@@ -226,7 +225,6 @@ merge_requests:
 - merge_head_diff
 - merge_request_context_commits
 - merge_request_context_commit_diff_files
-- merge_request_stage_events
 - events
 - merge_requests_closing_issues
 - cached_closes_issues
@@ -271,9 +269,6 @@ merge_requests:
 - scan_result_policy_violations
 - applicable_post_merge_approval_rules
 - requested_changes
-- scan_result_policy_reads_through_violations
-- scan_result_policy_reads_through_approval_rules
-- running_scan_result_policy_violations
 external_pull_requests:
 - project
 merge_request_diff:
@@ -435,7 +430,6 @@ builds:
 - job_artifacts_lsif
 - job_artifacts_dotenv
 - job_artifacts_cobertura
-- job_artifacts_jacoco
 - job_artifacts_terraform
 - job_artifacts_accessibility
 - job_artifacts_cluster_applications
@@ -456,7 +450,6 @@ builds:
 - terraform_state_versions
 - taggings
 - base_tags
-- tag_links
 - tag_taggings
 - tags
 - security_scans
@@ -607,7 +600,6 @@ project:
 - google_play_integration
 - pipelines_email_integration
 - mattermost_slash_commands_integration
-- matrix_integration
 - slack_slash_commands_integration
 - harbor_integration
 - irker_integration
@@ -734,7 +726,7 @@ project:
 - settings
 - ci_cd_settings
 - project_settings
-- import_export_uploads
+- import_export_upload
 - repository_languages
 - pool_repository
 - kubernetes_namespaces
@@ -762,6 +754,7 @@ project:
 - wiki_repository_state
 - source_pipelines
 - sourced_pipelines
+- prometheus_metrics
 - vulnerabilities
 - vulnerability_exports
 - vulnerability_findings
@@ -777,6 +770,9 @@ project:
 - operations_feature_flags
 - operations_feature_flags_client
 - operations_feature_flags_user_lists
+- prometheus_alerts
+- prometheus_alert_events
+- self_managed_prometheus_alert_events
 - software_license_policies
 - software_licenses
 - custom_software_licenses
@@ -818,6 +814,7 @@ project:
 - jira_imports
 - compliance_framework_settings
 - compliance_management_frameworks
+- metrics_users_starred_dashboards
 - alert_management_alerts
 - repository_storage_moves
 - freeze_periods
@@ -827,7 +824,6 @@ project:
 - build_report_results
 - vulnerability_statistic
 - vulnerability_historical_statistics
-- vulnerability_namespace_historical_statistics
 - vulnerability_remediations
 - product_analytics_events
 - pipeline_artifacts
@@ -867,8 +863,6 @@ project:
 - design_management_repository
 - design_management_repository_state
 - compliance_standards_adherence
-- compliance_requirements
-- compliance_checks
 - scan_result_policy_reads
 - scan_result_policy_violations
 - project_state
@@ -882,23 +876,16 @@ project:
 - security_policy_management_project_linked_configurations
 - security_policy_project_linked_projects
 - security_policy_project_linked_namespaces
-- security_policy_project_linked_groups
 - relation_import_trackers
 - saved_replies
-- security_policy_project_links
-- security_policies
-- approval_policy_rule_project_links
-- approval_policy_rules
-- secrets_manager
-- observability_metrics
-- observability_traces
-- observability_logs
-- security_exclusions
 award_emoji:
 - awardable
 - user
 priorities:
 - label
+prometheus_metrics:
+- project
+- prometheus_alerts
 timelogs:
 - issue
 - merge_request
@@ -954,6 +941,13 @@ unprotect_access_levels:
 - user
 - protected_branch
 - group
+prometheus_alerts:
+- project
+- prometheus_alert_events
+prometheus_alert_events:
+- project
+self_managed_prometheus_alert_events:
+- project
 epic_issues:
 - issue
 - epic
@@ -1140,7 +1134,6 @@ approval_rules:
   - approval_project_rules_users
   - approval_project_rules_protected_branches
   - scan_result_policy_read
-  - approval_policy_rule
 approval_project_rules_users:
   - user
   - approval_project_rule

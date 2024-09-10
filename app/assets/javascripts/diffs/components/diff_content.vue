@@ -178,7 +178,7 @@ export default {
       </template>
       <div
         v-else-if="isWhitespaceOnly"
-        class="gl-flex gl-h-13 gl-items-center gl-justify-center gl-bg-gray-10"
+        class="gl-bg-gray-10 gl-flex gl-justify-center gl-items-center gl-h-13"
         data-testid="diff-whitespace-only-state"
       >
         {{ __('Contains only whitespace changes.') }}
@@ -228,7 +228,7 @@ export default {
             :img-src="author.avatar_url"
             :img-alt="author.name"
             :img-size="48"
-            class="new-comment !gl-hidden sm:!gl-block"
+            class="!gl-hidden sm:!gl-block new-comment"
           />
           <diff-discussions
             v-if="imageDiscussions.length"

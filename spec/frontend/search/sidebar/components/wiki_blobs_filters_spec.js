@@ -12,7 +12,7 @@ describe('GlobalSearch WikiBlobsFilters', () => {
   let wrapper;
 
   const defaultGetters = {
-    hasProjectContext: () => true,
+    showArchived: () => true,
   };
 
   const createComponent = () => {
@@ -41,9 +41,9 @@ describe('GlobalSearch WikiBlobsFilters', () => {
     });
   });
 
-  describe('hasProjectContext getter', () => {
+  describe('ShowArchived getter', () => {
     beforeEach(() => {
-      defaultGetters.hasProjectContext = () => false;
+      defaultGetters.showArchived = () => false;
       createComponent();
     });
 

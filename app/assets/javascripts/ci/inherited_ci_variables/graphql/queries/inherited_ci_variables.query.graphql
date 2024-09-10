@@ -16,7 +16,6 @@ query getInheritedCiVariables($after: String, $first: Int, $fullPath: ID!) {
         groupCiCdSettingsPath
         groupName
         masked
-        hidden
         protected
         raw
       }

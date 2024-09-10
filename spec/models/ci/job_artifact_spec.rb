@@ -111,14 +111,8 @@ RSpec.describe Ci::JobArtifact, feature_category: :job_artifacts do
     describe 'coverage_reports' do
       let(:report_type) { :coverage }
 
-      context 'when there is a cobertura report' do
+      context 'when there is a coverage report' do
         let!(:artifact) { create(:ci_job_artifact, :cobertura) }
-
-        it { is_expected.to eq([artifact]) }
-      end
-
-      context 'when there is a jacoco report' do
-        let!(:artifact) { create(:ci_job_artifact, :jacoco) }
 
         it { is_expected.to eq([artifact]) }
       end
@@ -841,10 +835,6 @@ RSpec.describe Ci::JobArtifact, feature_category: :job_artifacts do
     shared_examples_for 'returning attributes for object deletion' do
       it 'returns the file store' do
         expect(attributes[:file_store]).to eq(artifact.file_store)
-      end
-
-      it 'returns the project_id' do
-        expect(attributes[:project_id]).to eq(artifact.project_id)
       end
 
       context 'when pick_up_at is present' do

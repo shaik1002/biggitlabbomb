@@ -4,7 +4,6 @@ import {
   GlDisclosureDropdownItem,
   GlIcon,
   GlTooltipDirective,
-  GlBadge,
 } from '@gitlab/ui';
 import { sprintf, n__, s__ } from '~/locale';
 import MetadataItem from '~/vue_shared/components/registry/metadata_item.vue';
@@ -12,7 +11,6 @@ import TitleArea from '~/vue_shared/components/registry/title_area.vue';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import {
   CREATED_AT,
   LAST_PUBLISHED_AT,
@@ -33,23 +31,17 @@ import {
   ONGOING_STATUS,
   ROOT_IMAGE_TOOLTIP,
 } from '../../constants/index';
+
 import getContainerRepositoryMetadata from '../../graphql/queries/get_container_repository_metadata.query.graphql';
 import { getImageName } from '../../utils';
 
 export default {
   name: 'DetailsHeader',
-  components: {
-    GlDisclosureDropdown,
-    GlDisclosureDropdownItem,
-    GlIcon,
-    TitleArea,
-    MetadataItem,
-    GlBadge,
-  },
+  components: { GlDisclosureDropdown, GlDisclosureDropdownItem, GlIcon, TitleArea, MetadataItem },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [timeagoMixin, glFeatureFlagsMixin()],
+  mixins: [timeagoMixin],
   inject: ['config'],
   props: {
     image: {
@@ -136,12 +128,6 @@ export default {
       const { size } = this.imageDetails;
       return size ? numberToHumanSize(Number(size)) : null;
     },
-    showBadgeProtected() {
-      return (
-        Boolean(this.glFeatures.containerRegistryProtectedContainers) &&
-        Boolean(this.image?.protectionRuleExists)
-      );
-    },
   },
   methods: {
     formatDate(date) {
@@ -151,9 +137,6 @@ export default {
   i18n: {
     DELETE_IMAGE_TEXT,
     MORE_ACTIONS_TEXT,
-    BADGE_PROTECTED_TOOLTIP_TEXT: s__(
-      'ContainerRegistry|A protection rule exists for this container repository.',
-    ),
   },
 };
 </script>
@@ -204,7 +187,6 @@ export default {
         data-testid="created-and-visibility"
       />
     </template>
-
     <template v-if="containsLastPublishedAtDate" #metadata-last-published-at>
       <metadata-item
         icon="calendar"
@@ -213,19 +195,6 @@ export default {
         data-testid="last-published-at"
       />
     </template>
-
-    <template #metadata-protection-rule-exists>
-      <gl-badge
-        v-if="showBadgeProtected"
-        v-gl-tooltip="{ title: $options.i18n.BADGE_PROTECTED_TOOLTIP_TEXT }"
-        icon-size="sm"
-        size="sm"
-        variant="neutral"
-      >
-        {{ __('protected') }}
-      </gl-badge>
-    </template>
-
     <template v-if="!deleteButtonDisabled" #right-actions>
       <gl-disclosure-dropdown
         category="tertiary"

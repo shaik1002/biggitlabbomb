@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class MergeRequest < ApplicationRecord
-  extend Gitlab::Cache::RequestCache
-
   include AtomicInternalId
   include IidRoutes
   include Issuable
@@ -19,12 +17,15 @@ class MergeRequest < ApplicationRecord
   include FromUnion
   include DeprecatedAssignee
   include ShaAttribute
+  include IgnorableColumns
   include MilestoneEventable
   include StateEventable
   include Approvable
   include IdInOrdered
   include Todoable
   include Spammable
+
+  ignore_columns :head_pipeline_id_convert_to_bigint, remove_with: '17.4', remove_after: '2024-08-14'
 
   extend ::Gitlab::Utils::Override
 
@@ -38,7 +39,6 @@ class MergeRequest < ApplicationRecord
 
   SORTING_PREFERENCE_FIELD = :merge_requests_sort
   CI_MERGE_REQUEST_DESCRIPTION_MAX_LENGTH = 2700
-  MERGE_LEASE_TIMEOUT = 15.minutes.to_i
 
   belongs_to :target_project, class_name: "Project"
   belongs_to :source_project, class_name: "Project"
@@ -465,16 +465,6 @@ class MergeRequest < ApplicationRecord
     )
   end
 
-  scope :assignee_or_reviewer, ->(user, assigned_review_states, reviewer_state) do
-    assigned_to_scope = assigned_to(user)
-    assigned_to_scope = assigned_to_scope.review_states(assigned_review_states) if assigned_review_states
-
-    from_union(
-      assigned_to_scope,
-      review_requested_to(user, reviewer_state)
-    )
-  end
-
   scope :without_hidden, -> {
     if Feature.enabled?(:hide_merge_requests_from_banned_users)
       where_not_exists(Users::BannedUser.where('merge_requests.author_id = banned_users.user_id'))
@@ -703,10 +693,6 @@ class MergeRequest < ApplicationRecord
     [:assignees, :reviewers] + super
   end
 
-  def self.use_locked_set?
-    Feature.enabled?(:unstick_locked_merge_requests_redis) # rubocop: disable Gitlab/FeatureFlagWithoutActor -- no actor needed
-  end
-
   def committers(with_merge_commits: false, lazy: false, include_author_when_signed: false)
     strong_memoize_with(:committers, with_merge_commits, lazy, include_author_when_signed) do
       commits.committers(
@@ -849,18 +835,6 @@ class MergeRequest < ApplicationRecord
     compare.present? ? compare.raw_diffs(*args) : merge_request_diff.raw_diffs(*args)
   end
 
-  def diffs_for_streaming(diff_options = {}, &)
-    diff = diffable_merge_ref? ? merge_head_diff : merge_request_diff
-
-    offset = diff_options[:offset_index].to_i || 0
-
-    if block_given?
-      source_project.repository.diffs_by_changed_paths(diff.diff_refs, offset, &)
-    else
-      diff.diffs(diff_options)
-    end
-  end
-
   def diffs(diff_options = {})
     if compare
       # When saving MR diffs, `expanded` is implicitly added (because we need
@@ -931,11 +905,6 @@ class MergeRequest < ApplicationRecord
       merge_request_diff.modified_paths(fallback_on_overflow: fallback_on_overflow)
     end
   end
-
-  def changed_paths
-    project.repository.find_changed_paths(commits, merge_commit_diff_mode: :all_parents)
-  end
-  request_cache(:changed_paths) { [id, diff_head_sha] }
 
   def new_paths
     diffs.diff_files.map(&:new_path)
@@ -1291,10 +1260,7 @@ class MergeRequest < ApplicationRecord
       skip_discussions_check: merge_when_checks_pass_strat,
       skip_external_status_check: merge_when_checks_pass_strat,
       skip_requested_changes_check: merge_when_checks_pass_strat,
-      skip_locked_paths_check: merge_when_checks_pass_strat,
-      skip_jira_check: merge_when_checks_pass_strat,
-      skip_locked_lfs_files_check: merge_when_checks_pass_strat,
-      skip_security_policy_check: merge_when_checks_pass_strat
+      skip_jira_check: merge_when_checks_pass_strat
     }
   end
 
@@ -1306,9 +1272,7 @@ class MergeRequest < ApplicationRecord
   # skip_blocked_check
   # skip_external_status_check
   # skip_requested_changes_check
-  # skip_locked_paths_check
   # skip_jira_check
-  # skip_locked_lfs_files_check
   def mergeable?(check_mergeability_retry_lease: false, skip_rebase_check: false, **mergeable_state_check_params)
     return false unless mergeable_state?(**mergeable_state_check_params)
 
@@ -1325,8 +1289,7 @@ class MergeRequest < ApplicationRecord
       ::MergeRequests::Mergeability::CheckDraftStatusService,
       ::MergeRequests::Mergeability::CheckCommitsStatusService,
       ::MergeRequests::Mergeability::CheckDiscussionsStatusService,
-      ::MergeRequests::Mergeability::CheckCiStatusService,
-      ::MergeRequests::Mergeability::CheckLfsFileLocksService
+      ::MergeRequests::Mergeability::CheckCiStatusService
     ]
   end
 
@@ -1479,10 +1442,9 @@ class MergeRequest < ApplicationRecord
   def cache_merge_request_closes_issues!(current_user = self.author)
     return if closed? || merged?
 
-    issues_to_close_ids = closes_issues(current_user).reject { |issue| issue.is_a?(ExternalIssue) }.map(&:id)
-
     transaction do
       merge_requests_closing_issues.from_mr_description.delete_all
+      issues_to_close_ids = closes_issues(current_user).reject { |issue| issue.is_a?(ExternalIssue) }.map(&:id)
 
       # These might have been created manually from the work item interface
       issue_ids_to_update = merge_requests_closing_issues
@@ -1494,7 +1456,7 @@ class MergeRequest < ApplicationRecord
       end
 
       issue_ids_to_create = issues_to_close_ids - issue_ids_to_update
-      next unless issue_ids_to_create.any?
+      next if issue_ids_to_create.empty?
 
       now = Time.zone.now
       new_associations = issue_ids_to_create.map do |issue_id|
@@ -1516,21 +1478,12 @@ class MergeRequest < ApplicationRecord
 
   def visible_closing_issues_for(current_user = self.author)
     strong_memoize(:visible_closing_issues_for) do
-      visible_issues = if self.target_project.has_external_issue_tracker?
-                         closes_issues(current_user)
-                       else
-                         cached_closes_issues.select do |issue|
-                           Ability.allowed?(current_user, :read_issue, issue)
-                         end
-                       end
-
-      ActiveRecord::Associations::Preloader.new(
-        records: visible_issues.select { |issue| issue.is_a?(Issue) },
-        associations: :project
-      ).call
-      # Exclude isues that have been cached but their project setting has been disabled, or they belong to a group
-      visible_issues.select do |issue|
-        !issue.is_a?(Issue) || issue.autoclose_by_merged_closing_merge_request?
+      if self.target_project.has_external_issue_tracker?
+        closes_issues(current_user)
+      else
+        cached_closes_issues.select do |issue|
+          Ability.allowed?(current_user, :read_issue, issue)
+        end
       end
     end
   end
@@ -1771,19 +1724,10 @@ class MergeRequest < ApplicationRecord
   end
 
   def in_locked_state
-    # This method raises an error when adding to Redis set fails. This is so
-    # we can retry merging if it wasn't added to ensure that the MR gets added
-    # to locked set for unsticking in case it gets into a stuck state during
-    # the merge process.
-    add_to_locked_set
     lock_mr
     yield
   ensure
     unlock_mr if locked?
-
-    # We only remove it from the locked set if it's no longer locked as it means
-    # the MR is either unlocked or merged.
-    remove_from_locked_set unless locked?
   end
 
   def update_and_mark_in_progress_merge_commit_sha(commit_id)
@@ -2383,42 +2327,6 @@ class MergeRequest < ApplicationRecord
       description,
       custom_regex: project.jira_integration.reference_pattern
     )
-  end
-
-  def merge_exclusive_lease
-    lease_key = ['merge_requests_merge_service', id].join(':')
-
-    Gitlab::ExclusiveLease.new(lease_key, timeout: MERGE_LEASE_TIMEOUT)
-  end
-
-  def source_and_target_branches_exist?
-    source_branch_sha.present? && target_branch_sha.present?
-  end
-
-  def has_diffs?
-    Gitlab::Git::Compare.new(
-      project.repository.raw_repository,
-      target_branch_sha,
-      source_branch_sha
-    ).diffs.any?
-  end
-
-  def add_to_locked_set
-    return unless self.class.use_locked_set?
-
-    Gitlab::MergeRequests::LockedSet.add(self.id, rescue_connection_error: false)
-  end
-
-  def remove_from_locked_set
-    return unless self.class.use_locked_set?
-
-    Gitlab::MergeRequests::LockedSet.remove(self.id)
-  end
-
-  def first_diffs_slice(limit)
-    diff = diffable_merge_ref? ? merge_head_diff : merge_request_diff
-
-    diff.paginated_diffs(1, limit).diff_files
   end
 
   private

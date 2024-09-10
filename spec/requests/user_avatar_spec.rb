@@ -3,8 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe 'Loading a user avatar', feature_category: :user_profile do
-  let_it_be(:organization) { create(:organization) }
-  let(:user) { create(:user, :with_avatar, organizations: [organization]) }
+  let(:user) { create(:user, :with_avatar) }
 
   context 'when logged in' do
     # The exact query count will vary depending on the 2FA settings of the
@@ -13,11 +12,11 @@ RSpec.describe 'Loading a user avatar', feature_category: :user_profile do
     before do
       stub_application_setting(require_two_factor_authentication: true)
 
-      login_as(create(:user, :two_factor, organizations: [organization]))
+      login_as(create(:user, :two_factor))
     end
 
-    # One each for: current user, current organization, avatar user, and upload record
-    it 'only performs four SQL queries' do
+    # One each for: current user, avatar user, and upload record
+    it 'only performs three SQL queries' do
       get user.avatar_url # Skip queries on first application load
 
       expect(response).to have_gitlab_http_status(:ok)

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Projects::ProjectMembersHelper, feature_category: :groups_and_projects do
+RSpec.describe Projects::ProjectMembersHelper do
   include MembersPresentation
 
   let_it_be(:current_user) { create(:user) }
@@ -49,7 +49,6 @@ RSpec.describe Projects::ProjectMembersHelper, feature_category: :groups_and_pro
           can_manage_access_requests: true,
           group_name: project.group.name,
           group_path: project.group.path,
-          project_path: project.full_path,
           can_approve_access_requests: true,
           available_roles: available_roles
         }.as_json

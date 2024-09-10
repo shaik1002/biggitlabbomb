@@ -74,6 +74,7 @@ RSpec.describe Emails::Projects do
         is_expected.to have_body_text(alert.details_url)
         is_expected.not_to have_body_text('Description:')
         is_expected.not_to have_body_text('Environment:')
+        is_expected.not_to have_body_text('Metric:')
       end
     end
 
@@ -95,6 +96,7 @@ RSpec.describe Emails::Projects do
         is_expected.to have_body_text('Description:')
         is_expected.to have_body_text('alert description')
         is_expected.not_to have_body_text('Environment:')
+        is_expected.not_to have_body_text('Metric:')
       end
     end
 
@@ -118,6 +120,7 @@ RSpec.describe Emails::Projects do
         is_expected.to have_body_text('Environment:')
         is_expected.to have_body_text(environment.name)
         is_expected.not_to have_body_text('Description:')
+        is_expected.not_to have_body_text('Metric:')
       end
     end
 

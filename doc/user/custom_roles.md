@@ -75,7 +75,7 @@ Prerequisites:
 
 After you create a custom role for your self-managed instance, you can assign that custom role to a user in any group or subgroup in that instance.
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Settings > Roles and Permissions**.
 1. Select **New role**.
 1. In **Base role to use as template**, select an existing default role.
@@ -120,7 +120,7 @@ Prerequisites:
 
 - You must be an administrator for the self-managed instance.
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Settings > Roles and Permissions**.
 1. Select the vertical ellipsis (**{ellipsis_v}**) for the custom role, then
    select **Edit role**.
@@ -138,7 +138,7 @@ Prerequisites:
 You can remove a custom role from a group only if no members have that role. See [unassign a custom role from a group or project member](#unassign-a-custom-role-from-a-group-or-project-member).
 
 1. On the left sidebar:
-   - For self-managed, at the bottom, select **Admin**.
+   - For self-managed, at the bottom, select **Admin area**.
    - For SaaS, select **Search or go to** and find your group.
 1. Select **Settings > Roles and Permissions**.
 1. Select **Custom Roles**.
@@ -175,9 +175,8 @@ If you are assigning a custom role to an existing:
 
 1. On the left sidebar, select **Search or go to** and find your group or project.
 1. Select **Manage > Members**.
-1. In the **Max role** column, select the role for the member. The **Role details** drawer opens.
-1. Using the **Role** dropdown list, select the custom role you want to assign to the member.
-1. Select **Update role** to assign the role.
+1. Select the **Max role** dropdown list for the member you want to select a custom role for.
+1. On the **Change role** dialog, select a different custom role.
 
 ### Use the API to assign a custom role
 
@@ -226,9 +225,8 @@ To remove a custom role from a group member:
 
 1. On the left sidebar, select **Search or go to** and find your group.
 1. Select **Manage > Members**.
-1. In the **Max role** column, select the role for the member. The **Role details** drawer opens.
-1. Using the **Role** dropdown list, select the default role you want to assign to the member.
-1. Select **Update role** to assign the role.
+1. Select the **Max role** dropdown list for the member you want to remove a custom role from.
+1. On the **Change role** dialog, select a default role.
 
 ### Use the API to change user role
 
@@ -245,7 +243,7 @@ curl --request PUT --header "Content-Type: application/json" --header "Authoriza
 ## Inheritance
 
 If a user belongs to a group, they are a _direct member_ of the group
-and an [inherited member](project/members/index.md#membership-types)
+and an [inherited member](project/members/index.md#inherited-membership)
 of any subgroups or projects. If a user is assigned a custom role
 by the top-level group, the permissions of the role are also inherited by subgroups
 and projects.
@@ -286,7 +284,8 @@ You can assign custom roles and permissions to the following:
 You can sync users to custom roles with following authentication providers:
 
 - See [Configure SAML Group Links](group/saml_sso/group_sync.md#configure-saml-group-links).
-- See [Manage group memberships via LDAP](group/access_and_permissions.md#manage-group-memberships-via-ldap).
+- LDAP Group Links are not supported, but [issue 435229](https://gitlab.com/gitlab-org/gitlab/-/issues/435229)
+  proposes to change this.
 
 ## Known issues
 

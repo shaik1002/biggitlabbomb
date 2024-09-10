@@ -33,8 +33,12 @@ RSpec.describe Banzai::Filter::BlockquoteFenceLegacyFilter, feature_category: :t
       test_string = ">>>#{"\n```\nfoo\n```" * 20}"
 
       expect do
-        Timeout.timeout(BANZAI_FILTER_TIMEOUT_MAX) { filter(test_string, context) }
+        Timeout.timeout(2.seconds) { filter(test_string, context) }
       end.not_to raise_error
     end
+  end
+
+  it_behaves_like 'text filter timeout' do
+    let(:text) { ">>>\ntest\n>>>" }
   end
 end

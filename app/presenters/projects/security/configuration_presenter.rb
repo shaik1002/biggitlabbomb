@@ -20,12 +20,12 @@ module Projects
           gitlab_ci_present: project.has_ci_config_file?,
           gitlab_ci_history_path: gitlab_ci_history_path,
           security_training_enabled: project.security_training_available?,
+          continuous_vulnerability_scans_enabled: continuous_vulnerability_scans_enabled,
           container_scanning_for_registry_enabled: container_scanning_for_registry_enabled,
           pre_receive_secret_detection_available:
             Gitlab::CurrentSettings.current_application_settings.pre_receive_secret_detection_enabled,
           pre_receive_secret_detection_enabled: pre_receive_secret_detection_enabled,
-          user_is_project_admin: user_is_project_admin?,
-          secret_detection_configuration_path: secret_detection_configuration_path
+          user_is_project_admin: user_is_project_admin?
         }
       end
 
@@ -103,17 +103,19 @@ module Projects
       end
 
       def pre_receive_secret_detection_feature_flag_enabled?
-        project.licensed_feature_available?(:pre_receive_secret_detection) &&
-          Feature.enabled?(:pre_receive_secret_detection_push_check, project)
+        return false unless project.licensed_feature_available?(:pre_receive_secret_detection)
+
+        Feature.enabled?(:pre_receive_secret_detection_beta_release) && Feature.enabled?(
+          :pre_receive_secret_detection_push_check, project)
       end
 
       def project_settings
         project.security_setting
       end
 
+      def continuous_vulnerability_scans_enabled; end
       def container_scanning_for_registry_enabled; end
       def pre_receive_secret_detection_enabled; end
-      def secret_detection_configuration_path; end
     end
   end
 end

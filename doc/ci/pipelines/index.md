@@ -219,7 +219,7 @@ non-manual jobs, the option is not displayed.
 To push a commit without triggering a pipeline, add `[ci skip]` or `[skip ci]`, using any
 capitalization, to your commit message.
 
-Alternatively, with Git 2.10 or later, use the `ci.skip` [Git push option](../../topics/git/commit.md#push-options-for-gitlab-cicd).
+Alternatively, with Git 2.10 or later, use the `ci.skip` [Git push option](../../gitlab-basics/add-file.md#push-options-for-gitlab-cicd).
 The `ci.skip` push option does not skip merge request pipelines.
 
 ### Delete a pipeline
@@ -298,7 +298,7 @@ number of upstream pipeline subscriptions is 2 by default, for both the upstream
 downstream projects. On self-managed instances, an administrator can change this
 [limit](../../administration/instance_limits.md#number-of-cicd-subscriptions-to-a-project).
 
-## How pipeline duration is calculated
+### How pipeline duration is calculated
 
 The total running time for a given pipeline excludes:
 

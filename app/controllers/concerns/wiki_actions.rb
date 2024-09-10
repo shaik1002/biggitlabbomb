@@ -32,11 +32,6 @@ module WikiActions
     before_action :page, only: [:show, :edit, :update, :history, :destroy, :diff]
     before_action :load_sidebar, except: [:pages]
 
-    before_action do
-      push_frontend_feature_flag(:preserve_markdown, container)
-      push_force_frontend_feature_flag(:glql_integration, container&.glql_integration_feature_flag_enabled?)
-    end
-
     before_action only: [:show, :edit, :update] do
       @valid_encoding = valid_encoding?
     end
@@ -423,6 +418,8 @@ module WikiActions
   end
 
   def find_redirection(path, redirect_limit = 50)
+    return unless Feature.enabled?(:wiki_redirection, container)
+
     seen = Set[]
     current_path = path
 

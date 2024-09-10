@@ -692,7 +692,7 @@ Example response:
 
 ## Commit status
 
-The commit status API for use with GitLab.
+This is the commit status API for use with GitLab.
 
 ### List the statuses of a commit
 

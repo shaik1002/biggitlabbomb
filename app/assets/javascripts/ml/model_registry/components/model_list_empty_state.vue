@@ -33,8 +33,9 @@ export default {
     },
   },
   mlflowDocs: s__('MlModelRegistry|Create using MLflow'),
+  // eslint-disable-next-line local-rules/require-valid-help-page-path
   helpPath: helpPagePath('user/project/ml/model_registry/index', {
-    anchor: 'create-machine-learning-models-and-model-versions-by-using-mlflow',
+    anchor: 'creating-machine-learning-models-and-model-versions',
   }),
   emptySvgPath: emptySvgUrl,
   mlflowModalId: MLFLOW_USAGE_MODAL_ID,
@@ -53,7 +54,7 @@ export default {
       <gl-button v-gl-modal="modalId" variant="confirm" class="gl-mx-2 gl-mb-3">{{
         primaryText
       }}</gl-button>
-      <gl-button v-gl-modal="$options.mlflowModalId" class="gl-mx-2 gl-mb-3 gl-mr-3">
+      <gl-button v-gl-modal="$options.mlflowModalId" class="gl-mb-3 gl-mr-3 gl-mx-2">
         {{ $options.mlflowDocs }}
       </gl-button>
     </template>

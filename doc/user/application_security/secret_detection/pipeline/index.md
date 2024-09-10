@@ -22,7 +22,6 @@ With GitLab Ultimate, pipeline secret detection results are also processed so yo
 - Use them in approval workflows.
 - Review them in the security dashboard.
 - [Automatically respond](../automatic_response.md) to leaks in public repositories.
-- Enforce consistent secret detection rules across projects using [security policies](../../policies/index.md).
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> For an interactive reading and how-to demo of this pipeline secret detection documentation see:
 
@@ -156,13 +155,12 @@ Different features are available in different [GitLab tiers](https://about.gitla
 | [Manage vulnerabilities](../../vulnerability_report/index.md)                                        | **{dotted-circle}** No | **{check-circle}** Yes |
 | [Access the Security Dashboard](../../security_dashboard/index.md)                                   | **{dotted-circle}** No | **{check-circle}** Yes |
 | [Customize analyzer rulesets](#customize-analyzer-rulesets)                                          | **{dotted-circle}** No | **{check-circle}** Yes |
-| [Enable security policies](../../policies/index.md)                                                  | **{dotted-circle}** No | **{check-circle}** Yes |
 
 ### Enable the analyzer
 
 To enable pipeline secret detection, either:
 
-- Enable [Auto DevOps](../../../../topics/autodevops/index.md), which includes [Auto Secret Detection](../../../../topics/autodevops/stages.md#auto-secret-detection).
+- Enable [Auto DevOps](../../../../topics/autodevops/index.md), which includes [Auto Pipeline Secret Detection](../../../../topics/autodevops/stages.md#auto-secret-detection).
 
 - [Edit the `.gitlab-ci.yml` file manually](#edit-the-gitlab-ciyml-file-manually). Use this method
   if your `.gitlab-ci.yml` file is complex.
@@ -190,7 +188,7 @@ your GitLab CI/CD configuration file is complex.
 1. In the **Branch** text box, enter the name of the default branch.
 1. Select **Commit changes**.
 
-Pipelines now include a pipeline secret detection job.
+Pipelines now include a pipeline Secret Detection job.
 
 #### Use an automatically configured merge request
 
@@ -209,7 +207,7 @@ To enable pipeline secret detection:
 
 1. On the left sidebar, select **Search or go to** and find your project.
 1. Select **Secure > Security configuration**.
-1. In the **Pipeline secret detection** row, select **Configure with a merge request**.
+1. In the **Pipeline Secret Detection** row, select **Configure with a merge request**.
 1. Optional. Complete the fields.
 1. Select **Create merge request**.
 1. Review and merge the merge request.
@@ -297,8 +295,9 @@ DETAILS:
 **Tier:** Ultimate
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/211387) in GitLab 13.5.
-> - Expanded to include additional passthrough types of `file` and `raw` in GitLab 14.6.
-> - [Enabled](https://gitlab.com/gitlab-org/gitlab/-/issues/235359) support for overriding rules in GitLab 14.8.
+>   Expanded to include additional passthrough types of `file` and `raw` in GitLab 14.6.
+> - [Enabled](https://gitlab.com/gitlab-org/gitlab/-/issues/235359) support for overriding rules in
+>   GitLab 14.8.
 > - [Enabled](https://gitlab.com/gitlab-org/gitlab/-/issues/336395) support for passthrough chains and included additional passthrough types of `git` and `url` in GitLab 17.2.
 
 You can customize the behavior of pipeline secret detection by [creating a ruleset configuration file](#create-a-ruleset-configuration-file),
@@ -430,8 +429,6 @@ include:
 variables:
   SECRET_DETECTION_RULESET_GIT_REFERENCE: "group_2504721_bot_7c9311ffb83f2850e794d478ccee36f5:$GROUP_ACCESS_TOKEN@gitlab.com/example-group/remote-ruleset-project"
 ```
-
-The group access token must have the `read_repository` scope and at least the Reporter role. For details, see [Repository permissions](../../../../user/permissions.md#repository).
 
 See [bot users for groups](../../../../user/group/settings/group_access_tokens.md#bot-users-for-groups) to learn how to find the username associated with a group access token.
 
@@ -847,7 +844,7 @@ Below is a table with the demonstration projects and their associated workflows:
 
 There are also some video demonstrations walking through setting up remote rulesets:
 
-- [Secret detection with local and remote ruleset](https://youtu.be/rsN1iDug5GU)
+- [Secret Detection with local and remote ruleset](https://youtu.be/rsN1iDug5GU)
 
 ## FIPS-enabled images
 

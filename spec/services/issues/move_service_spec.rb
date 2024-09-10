@@ -294,23 +294,10 @@ RSpec.describe Issues::MoveService, feature_category: :team_planning do
         end
 
         it 'executes project issue hooks for both projects' do
-          expect_next_instance_of(
-            WebHookService,
-            new_project_hook,
-            expected_new_project_hook_payload,
-            'issue_hooks',
-            idempotency_key: anything
-          ) do |service|
+          expect_next_instance_of(WebHookService, new_project_hook, expected_new_project_hook_payload, 'issue_hooks') do |service|
             expect(service).to receive(:async_execute).once
           end
-
-          expect_next_instance_of(
-            WebHookService,
-            old_project_hook,
-            expected_old_project_hook_payload,
-            'issue_hooks',
-            idempotency_key: anything
-          ) do |service|
+          expect_next_instance_of(WebHookService, old_project_hook, expected_old_project_hook_payload, 'issue_hooks') do |service|
             expect(service).to receive(:async_execute).once
           end
 
@@ -382,18 +369,6 @@ RSpec.describe Issues::MoveService, feature_category: :team_planning do
 
           expect(new_issue.designs.size).to eq(1)
           expect(new_issue.designs.first.notes.size).to eq(1)
-        end
-      end
-
-      context 'issue with timelogs' do
-        before do
-          create(:timelog, issue: old_issue)
-        end
-
-        it 'calls CopyTimelogsWorker' do
-          expect(WorkItems::CopyTimelogsWorker).to receive(:perform_async).with(old_issue.id, kind_of(Integer))
-
-          move_service.execute(old_issue, new_project)
         end
       end
 

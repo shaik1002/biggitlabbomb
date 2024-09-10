@@ -164,21 +164,13 @@ module Gitlab
       # Their values must be given in seconds.
       # Example: timeouts: { open: 5, read: 5 }
       def send_url(
-        url,
-        allow_redirects: false,
-        method: 'GET',
-        body: nil,
-        headers: {},
-        timeouts: {},
-        response_statuses: {},
-        response_headers: {}
+        url, allow_redirects: false, method: 'GET', body: nil, headers: {}, timeouts: {}, response_statuses: {}
       )
         params = {
           'URL' => url,
           'AllowRedirects' => allow_redirects,
           'Body' => body.to_s,
           'Header' => headers.transform_values { |v| Array.wrap(v) },
-          'ResponseHeaders' => response_headers.transform_values { |v| Array.wrap(v) },
           'Method' => method
         }.compact
 
@@ -216,10 +208,9 @@ module Gitlab
         ]
       end
 
-      def send_dependency(headers, url, upload_config: {}, response_headers: {})
+      def send_dependency(headers, url, upload_config: {})
         params = {
           'Headers' => headers.transform_values { |v| Array.wrap(v) },
-          'ResponseHeaders' => response_headers.transform_values { |v| Array.wrap(v) },
           'Url' => url,
           'UploadConfig' => {
             'Method' => upload_config[:method],

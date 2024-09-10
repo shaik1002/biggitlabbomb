@@ -1,8 +1,7 @@
 <script>
 import NO_USERS_SVG from '@gitlab/svgs/dist/illustrations/empty-state/empty-user-settings-md.svg';
-import { GlSkeletonLoader, GlTable } from '@gitlab/ui';
+import { GlSkeletonLoader, GlTable, GlEmptyState } from '@gitlab/ui';
 import { __ } from '~/locale';
-import EmptyResult from '~/vue_shared/components/empty_result.vue';
 import UserDate from '~/vue_shared/components/user_date.vue';
 import UserAvatar from './user_avatar.vue';
 
@@ -12,7 +11,7 @@ export default {
     GlTable,
     UserAvatar,
     UserDate,
-    EmptyResult,
+    GlEmptyState,
   },
   props: {
     users: {
@@ -107,5 +106,9 @@ export default {
       <slot name="user-actions" :user="user"></slot>
     </template>
   </gl-table>
-  <empty-result v-else />
+  <gl-empty-state
+    v-else
+    :svg-path="$options.NO_USERS_SVG"
+    :title="s__('AdminUsers|No users found')"
+  />
 </template>

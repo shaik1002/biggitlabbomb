@@ -69,10 +69,7 @@ The process for configuring TLS support depends on your installation type.
    sudo mkdir -p /etc/gitlab/ssl
    sudo chmod 755 /etc/gitlab/ssl
    sudo cp key.pem cert.pem /etc/gitlab/ssl/
-   sudo chmod 644 /etc/gitlab/ssl/cert.pem
-   sudo chmod 600 /etc/gitlab/ssl/key.pem
-   # For Linux package installations, 'git' is the default username. Modify the following command if it was changed from the default
-   sudo chown -R git /etc/gitlab/ssl
+   sudo chmod 644 key.pem cert.pem
    ```
 
 1. Copy all Gitaly server certificates (or their certificate authority) to
@@ -155,10 +152,8 @@ The process for configuring TLS support depends on your installation type.
    sudo mkdir -p /etc/gitlab/ssl
    sudo chmod 755 /etc/gitlab/ssl
    sudo cp key.pem cert.pem /etc/gitlab/ssl/
-   sudo chmod 644 /etc/gitlab/ssl/cert.pem
-   sudo chmod 600 /etc/gitlab/ssl/key.pem
-   # Set ownership to the same user that runs Gitaly
-   sudo chown -R git /etc/gitlab/ssl
+   sudo chmod 644 key.pem cert.pem
+   ```
 
 1. Copy all Gitaly server certificates (or their certificate authority) to the system trusted
    certificates folder so Gitaly server trusts the certificate when calling into itself or other Gitaly

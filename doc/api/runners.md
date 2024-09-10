@@ -51,7 +51,7 @@ Get a list of runners available to the user.
 
 Prerequisites:
 
-- You must be an administrator of or have the Owner role for the target namespace or project.
+- You must be an administrator of or have the Owner role in the target namespace or project.
 - For `instance_type`, you must be an administrator of the GitLab instance.
 
 ```plaintext
@@ -134,7 +134,7 @@ is restricted to users with administrator access.
 
 Prerequisites:
 
-- You must be an administrator of or have the Owner role for the target namespace or project.
+- You must be an administrator of or have the Owner role in the target namespace or project.
 - For `instance_type`, you must be an administrator of the GitLab instance.
 
 ```plaintext
@@ -240,7 +240,7 @@ Instance-level runner details via this endpoint are available to all authenticat
 
 Prerequisites:
 
-- You must have at least the Developer role for the target namespace or project.
+- You must at least the Developer role in the target namespace or project.
 - An access token with the `manage_runner` scope and the appropriate role.
 
 ```plaintext
@@ -328,8 +328,8 @@ PUT /runners/:id
 Prerequisites:
 
 - For `instance_type`, you must be an administrator of the GitLab instance.
-- For `group_type`, you must have the Owner role for the target namespace.
-- For `project_type`, you must have at least the Maintainer role for the target project.
+- For `group_type`, you must have the Owner role in the target namespace.
+- For `project_type`, you must have at least the Maintainer role in the target project.
 - An access token with the `manage_runner` scope and the appropriate role.
 
 | Attribute          | Type    | Required | Description                                                                                     |
@@ -412,8 +412,8 @@ Pause a runner.
 Prerequisites:
 
 - For `instance_type`, you must be an administrator of the GitLab instance.
-- For `group_type`, you must have the Owner role for the target namespace.
-- For `project_type`, you must have at least the Maintainer role for the target project.
+- For `group_type`, you must have the Owner role in the target namespace.
+- For `project_type`, you must have at least the Maintainer role in the target project.
 - An access token with the `manage_runner` scope and the appropriate role.
 
 ```plaintext
@@ -583,7 +583,6 @@ Example response:
 
     }
 ]
-```
 
 ## List project's runners
 
@@ -591,7 +590,7 @@ List all runners available in the project, including from ancestor groups and [a
 
 Prerequisites:
 
-- You must be an administrator of or have at least the Maintainer role for the target project.
+- You must be an administrator of or have at least the Maintainer role in the target project.
 
 ```plaintext
 GET /projects/:id/runners
@@ -670,8 +669,8 @@ Enable an available project runner in the project.
 Prerequisites:
 
 - For `instance_type`, you must be an administrator of the GitLab instance.
-- For `group_type`, you must have the Owner role for the target namespace.
-- For `project_type`, you must have at least the Maintainer role for the target project.
+- For `group_type`, you must have the Owner role in the target namespace.
+- For `project_type`, you must have at least the Maintainer role in the target project.
 
 ```plaintext
 POST /projects/:id/runners
@@ -720,8 +719,8 @@ returned. Use the call to [delete a runner](#delete-a-runner) instead.
 Prerequisites:
 
 - For `instance_type`, you must be an administrator of the GitLab instance.
-- For `group_type`, you must have the Owner role for the target namespace.
-- For `project_type`, you must have at least the Maintainer role for the target project.
+- For `group_type`, you must have the Owner role in the target namespace.
+- For `project_type`, you must have at least the Maintainer role in the target project.
 
 ```plaintext
 DELETE /projects/:id/runners/:runner_id
@@ -842,7 +841,7 @@ POST /runners
 |--------------------|--------------|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `token`            | string       | yes      | [Registration token](#registration-and-authentication-tokens)                                                                                                                                  |
 | `description`      | string       | no       | Description of the runner                                                                                                                                                                      |
-| `info`             | hash         | no       | Runner's metadata. You can include `name`, `version`, `revision`, `platform`, and `architecture`, but only `version`, `platform`, and `architecture` are displayed in the **Admin** area of the UI |
+| `info`             | hash         | no       | Runner's metadata. You can include `name`, `version`, `revision`, `platform`, and `architecture`, but only `version`, `platform`, and `architecture` are displayed in the Admin area of the UI |
 | `active`           | boolean      | no       | Deprecated: Use `paused` instead. Specifies if the runner is allowed to receive new jobs                                                                                                       |
 | `paused`           | boolean      | no       | Specifies if the runner should ignore new jobs                                                                                                                                                 |
 | `locked`           | boolean      | no       | Specifies if the runner should be locked for the current project                                                                                                                               |
@@ -891,8 +890,8 @@ To delete the runner by ID, use your access token with the runner's ID:
 Prerequisites:
 
 - For `instance_type`, you must be an administrator of the GitLab instance.
-- For `group_type`, you must have the Owner role for the target namespace.
-- For `project_type`, you must have at least the Maintainer role for the target project.
+- For `group_type`, you must have the Owner role in the target namespace.
+- For `project_type`, you must have at least the Maintainer role in the target project.
 - An access token with the `manage_runner` scope and the appropriate role.
 
 ```plaintext
@@ -913,7 +912,7 @@ To delete the runner by using its authentication token:
 
 Prerequisites:
 
-- You must be an administrator of or have the Owner role for the target namespace or project.
+- You must be an administrator of or have the Owner role in the target namespace or project.
 - For `instance_type`, you must be an administrator of the GitLab instance.
 
 ```plaintext
@@ -1025,8 +1024,8 @@ Reset the runner's authentication token by using its runner ID.
 Prerequisites:
 
 - For `instance_type`, you must be an administrator of the GitLab instance.
-- For `group_type`, you must have the Owner role for the target namespace.
-- For `project_type`, you must have at least the Maintainer role for the target project.
+- For `group_type`, you must have the Owner role in the target namespace.
+- For `project_type`, you must have at least the Maintainer role in the target project.
 - An access token with the `manage_runner` scope and the appropriate role.
 
 ```plaintext
@@ -1054,6 +1053,11 @@ Example response:
 ## Reset runner's authentication token by using the current token
 
 Reset the runner's authentication token by using the current token's value as an input.
+
+Prerequisites:
+
+- You must be an administrator of or have the Owner role in the target namespace or project.
+- For `instance_type`, you must be an administrator of the GitLab instance.
 
 ```plaintext
 POST /runners/reset_authentication_token

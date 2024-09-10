@@ -22,6 +22,10 @@
   }
 }
 
+.cluster-button-container:focus-within {
+  @include gl-focus;
+}
+
 .select-agent-dropdown {
   // stylelint-disable-next-line gitlab/no-gl-class
   .gl-button-text {

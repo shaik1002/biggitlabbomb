@@ -6,7 +6,6 @@ module Banzai
       def self.filters
         FilterArray[
           Filter::AsciiDocSanitizationFilter,
-          Filter::SanitizeLinkFilter,
           Filter::CodeLanguageFilter,
           Filter::GollumTagsFilter,
           Filter::WikiLinkGollumFilter,

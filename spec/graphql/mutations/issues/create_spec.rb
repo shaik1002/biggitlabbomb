@@ -2,9 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Mutations::Issues::Create, feature_category: :api do
-  include GraphqlHelpers
-
+RSpec.describe Mutations::Issues::Create do
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
   let_it_be(:assignee1) { create(:user) }
@@ -42,9 +40,7 @@ RSpec.describe Mutations::Issues::Create, feature_category: :api do
     }
   end
 
-  let(:query) { GraphQL::Query.new(empty_schema, document: nil, context: {}, variables: {}) }
-  let(:context) { GraphQL::Query::Context.new(query: query, values: { current_user: user }) }
-  let(:mutation) { described_class.new(object: nil, context: context, field: nil) }
+  let(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
   let(:mutated_issue) { subject[:issue] }
 
   specify { expect(described_class).to require_graphql_authorizations(:create_issue) }

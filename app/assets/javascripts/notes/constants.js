@@ -66,7 +66,7 @@ export const MR_FILTER_OPTIONS = [
   {
     text: __('Approvals'),
     value: 'approval',
-    systemNoteIcons: ['approval', 'unapproval', 'check', 'error'],
+    systemNoteIcons: ['approval', 'unapproval', 'check'],
   },
   {
     text: __('Assignees & reviewers'),
@@ -118,7 +118,7 @@ export const MR_FILTER_OPTIONS = [
   {
     text: __('Merge request status'),
     value: 'status',
-    systemNoteIcons: ['merge-request', 'issue-close', 'issues', 'merge-request-close', 'merge'],
+    systemNoteIcons: ['merge-request', 'issue-close', 'issues', 'merge-request-close'],
   },
   {
     text: __('Tracking'),

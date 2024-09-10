@@ -131,25 +131,16 @@ RSpec.describe Gitlab::Cng::Kubectl::Client do
   describe "#events" do
     before do
       allow(client).to receive(:execute_shell).with(
-        ["kubectl", "get", "events", "-n", "gitlab", *args],
+        %w[kubectl get events -n gitlab --sort-by=lastTimestamp],
         stdin_data: nil
       ).and_return("some events")
     end
 
-    context "with default format" do
-      let(:args) { %w[--sort-by=lastTimestamp] }
+    it "return events" do
+      events = nil
 
-      it "return events in default format" do
-        expect(client.events).to eq("some events")
-      end
-    end
-
-    context "with json format" do
-      let(:args) { %w[--sort-by=lastTimestamp --output=json] }
-
-      it "return events in default format" do
-        expect(client.events(json_format: true)).to eq("some events")
-      end
+      expect { events = client.events }.to output(/Fetching events/).to_stdout
+      expect(events).to eq("some events")
     end
   end
 

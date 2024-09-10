@@ -6,13 +6,12 @@ module CsvBuilder
 
     attr_reader :rows_written
 
-    def initialize(collection, header_to_value_hash, associations_to_preload = [], replace_newlines: false)
+    def initialize(collection, header_to_value_hash, associations_to_preload = [])
       @header_to_value_hash = header_to_value_hash
       @collection = collection
       @truncated = false
       @rows_written = 0
       @associations_to_preload = associations_to_preload
-      @replace_newlines = replace_newlines
     end
 
     # Renders the csv to a string
@@ -79,19 +78,13 @@ module CsvBuilder
 
     def row(object)
       attributes.map do |attribute|
-        data = if attribute.respond_to?(:call)
-                 attribute.call(object)
-               elsif object.is_a?(Hash)
-                 object[attribute]
-               else
-                 object.public_send(attribute) # rubocop:disable GitlabSecurity/PublicSend -- Not user input
-               end
-
-        next if data.nil?
-
-        data = data.gsub("\n", '\n') if data.is_a?(String) && @replace_newlines
-
-        excel_sanitize(data)
+        if attribute.respond_to?(:call)
+          excel_sanitize(attribute.call(object))
+        elsif object.is_a?(Hash)
+          excel_sanitize(object[attribute])
+        else
+          excel_sanitize(object.public_send(attribute)) # rubocop:disable GitlabSecurity/PublicSend
+        end
       end
     end
 
@@ -111,6 +104,7 @@ module CsvBuilder
     end
 
     def excel_sanitize(line)
+      return if line.nil?
       return line unless line.is_a?(String) && line.match?(UNSAFE_EXCEL_PREFIX)
 
       ["'", line].join

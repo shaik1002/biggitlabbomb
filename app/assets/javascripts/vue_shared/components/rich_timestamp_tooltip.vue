@@ -36,9 +36,7 @@ export default {
 
 <template>
   <gl-tooltip :target="target">
-    <div class="gl-font-bold" data-testid="header-text">
-      {{ timestampTypeText }} {{ timestampInWords }}
-    </div>
-    <div class="gl-text-tertiary" data-testid="body-text">{{ timestamp }}</div>
+    <div class="bold" data-testid="header-text">{{ timestampTypeText }} {{ timestampInWords }}</div>
+    <div class="text-tertiary" data-testid="body-text">{{ timestamp }}</div>
   </gl-tooltip>
 </template>

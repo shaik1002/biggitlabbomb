@@ -34,7 +34,7 @@ export default {
 
   css: {
     label: [
-      'gl-text-base',
+      'gl-font-base',
       'gl-font-normal',
       'gl-leading-normal',
       'gl-shadow-inner-1-gray-200',
@@ -76,22 +76,22 @@ export default {
 };
 </script>
 <template>
-  <section class="gl-m-3 gl-flex gl-bg-white">
-    <div class="gl-flex gl-flex-col">
-      <label :for="stableWeightId" :class="$options.css.label" class="gl-rounded-tl-base">
+  <section class="gl-display-flex gl-bg-white gl-m-3">
+    <div class="gl-display-flex gl-flex-direction-column">
+      <label :for="stableWeightId" :class="$options.css.label" class="gl-rounded-top-left-base">
         {{ $options.translations.stableLabel }}
       </label>
       <gl-collapsible-listbox
         :id="stableWeightId"
         :selected="stableWeight"
         :items="$options.ingressOptions"
-        class="gl-min-w-full gl-text-default"
-        toggle-class="gl-min-w-full !gl-rounded-tl-none !gl-rounded-tr-none !gl-rounded-br-none"
+        class="gl-min-w-full gl-text-black-normal"
+        toggle-class="gl-min-w-full gl-rounded-top-left-none! gl-rounded-top-right-none! gl-rounded-bottom-right-none!"
         @select="changeStable"
       />
     </div>
-    <div class="gl-flex gl-flex-col">
-      <label :for="canaryWeightId" :class="$options.css.label" class="gl-rounded-tr-base">{{
+    <div class="gl-display-flex gl-display-flex gl-flex-direction-column">
+      <label :for="canaryWeightId" :class="$options.css.label" class="gl-rounded-top-right-base">{{
         $options.translations.canaryLabel
       }}</label>
       <gl-collapsible-listbox
@@ -99,7 +99,7 @@ export default {
         :selected="canaryWeight"
         :items="$options.ingressOptions"
         class="gl-min-w-full"
-        toggle-class="gl-min-w-full !gl-rounded-tl-none !gl-rounded-tr-none !gl-rounded-br-none"
+        toggle-class="gl-min-w-full gl-rounded-top-left-none! gl-rounded-top-right-none! gl-rounded-bottom-right-none!"
         @select="changeCanary"
       />
     </div>

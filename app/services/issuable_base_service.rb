@@ -5,7 +5,6 @@ class IssuableBaseService < ::BaseContainerService
 
   def available_callbacks
     [
-      Issuable::Callbacks::Description,
       Issuable::Callbacks::Milestone,
       Issuable::Callbacks::TimeTracking
     ].freeze
@@ -218,33 +217,51 @@ class IssuableBaseService < ::BaseContainerService
   # If the description has not been edited, then just remove any quick actions
   # in the current description.
   def merge_quick_actions_into_params!(issuable, params:, only: nil)
-    target_description = params.fetch(:description, issuable.description)
+    interpret_params = quick_action_options
+    unedited_description = issuable.description
+    edited_description = params.fetch(:description, issuable.description)
 
-    description, command_params = QuickActions::InterpretService.new(
-      container: container,
-      current_user: current_user,
-      params: quick_action_options
-    ).execute_with_original_text(target_description, issuable, only: only, original_text: issuable.description_was)
+    target_text = issuable.new_record? || params[:description] ? edited_description : unedited_description
+
+    # only set the original_text if we're editing the issuable
+    original_text = params[:description] && !issuable.new_record? ? unedited_description : nil
+
+    sanitized_description, sanitized_command_params = interpret_quick_actions(target_text, issuable, params: interpret_params, only: only, original_text: original_text)
+
+    unless issuable.new_record? || params[:description]
+      edited_description = unedited_description
+      sanitized_command_params = nil
+    end
 
     # Avoid a description already set on an issuable to be overwritten by a nil
-    params[:description] = description if description && description != target_description
+    params[:description] = sanitized_description if sanitized_description && sanitized_description != edited_description
 
-    params.merge!(command_params)
+    params.merge!(sanitized_command_params) if sanitized_command_params
   end
 
   def quick_action_options
     {}
   end
 
-  def create(issuable, skip_system_notes: false)
-    # Set author early since this is used for ability checks
-    set_issuable_author(issuable)
+  def interpret_quick_actions(new_text, issuable, params:, only:, original_text: nil)
+    sanitized_new_text, new_command_params = QuickActions::InterpretService.new(
+      container: container,
+      current_user: current_user,
+      params: params
+    ).execute_with_original_text(new_text, issuable, only: only, original_text: original_text)
 
-    handle_quick_actions(issuable)
+    [sanitized_new_text, new_command_params]
+  end
+
+  def create(issuable, skip_system_notes: false)
+    initialize_callbacks!(issuable)
+
     prepare_create_params(issuable)
+    handle_quick_actions(issuable)
     filter_params(issuable)
 
     params.delete(:state_event)
+    params[:author] ||= current_user
     params[:label_ids] = process_label_ids(params, issuable: issuable, extra_label_ids: issuable.label_ids.to_a)
 
     if issuable.respond_to?(:assignee_ids)
@@ -254,7 +271,6 @@ class IssuableBaseService < ::BaseContainerService
     params.delete(:remove_contacts)
     add_crm_contact_emails = params.delete(:add_contacts)
 
-    initialize_callbacks!(issuable)
     issuable.assign_attributes(allowed_create_params(params))
 
     before_create(issuable)
@@ -280,19 +296,6 @@ class IssuableBaseService < ::BaseContainerService
     end
 
     issuable
-  end
-
-  def set_issuable_author(issuable)
-    author = params.delete(:author)
-    author_id = params.delete(:author_id)
-
-    if author
-      issuable.author = author
-    elsif author_id
-      issuable.author_id = author_id
-    else
-      issuable.author = current_user
-    end
   end
 
   def set_crm_contacts(issuable, add_crm_contact_emails, remove_crm_contact_emails = [])
@@ -337,8 +340,10 @@ class IssuableBaseService < ::BaseContainerService
 
     old_associations = associations_before_update(issuable)
 
-    handle_quick_actions(issuable)
+    initialize_callbacks!(issuable)
+
     prepare_update_params(issuable)
+    handle_quick_actions(issuable)
     filter_params(issuable)
 
     change_additional_attributes(issuable)
@@ -348,10 +353,10 @@ class IssuableBaseService < ::BaseContainerService
     assign_requested_crm_contacts(issuable)
     widget_params = filter_widget_params
 
-    initialize_callbacks!(issuable)
-
     if issuable.changed? || params.present? || widget_params.present? || @callbacks.present?
       issuable.assign_attributes(allowed_update_params(params))
+
+      assign_last_edited(issuable)
 
       before_update(issuable)
 
@@ -397,31 +402,20 @@ class IssuableBaseService < ::BaseContainerService
       end
     end
 
-    trigger_update_subscriptions(issuable, old_associations)
-
     issuable
   end
-
-  # Overriden in child class
-  def trigger_update_subscriptions(issuable, old_associations); end
 
   def transaction_update(issuable, opts = {})
     touch = opts[:save_with_touch] || false
 
     issuable.save(touch: touch).tap do |saved|
-      if saved
-        @callbacks.each(&:after_update)
-        @callbacks.each(&:after_save)
-      end
+      @callbacks.each(&:after_save) if saved
     end
   end
 
   def transaction_create(issuable)
     issuable.save.tap do |saved|
-      if saved
-        @callbacks.each(&:after_create)
-        @callbacks.each(&:after_save)
-      end
+      @callbacks.each(&:after_save) if saved
     end
   end
 
@@ -557,6 +551,12 @@ class IssuableBaseService < ::BaseContainerService
     end
   end
 
+  def assign_last_edited(issuable)
+    return unless issuable.description_changed?
+
+    issuable.assign_attributes(last_edited_at: Time.current, last_edited_by: current_user)
+  end
+
   # Arrays of ids are used, but we should really use sets of ids, so
   # let's have an helper to properly check if some ids are changing
   def ids_changing?(old_array, new_array)
@@ -675,7 +675,7 @@ class IssuableBaseService < ::BaseContainerService
   end
 
   def allowed_create_params(params)
-    params.except(:observability_links)
+    params
   end
 
   def allowed_update_params(params)

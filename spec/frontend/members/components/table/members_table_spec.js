@@ -104,7 +104,7 @@ describe('MembersTable', () => {
       ${'source'}     | ${'Source'}     | ${memberMock}      | ${MemberSource}
       ${'invited'}    | ${'Invited'}    | ${invite}          | ${CreatedAt}
       ${'requested'}  | ${'Requested'}  | ${accessRequest}   | ${CreatedAt}
-      ${'maxRole'}    | ${'Role'}       | ${memberCanUpdate} | ${MaxRole}
+      ${'maxRole'}    | ${'Max role'}   | ${memberCanUpdate} | ${MaxRole}
       ${'expiration'} | ${'Expiration'} | ${memberMock}      | ${ExpirationDatepicker}
       ${'activity'}   | ${'Activity'}   | ${memberMock}      | ${MemberActivity}
     `('$label field', ({ field, label, member, expectedComponent }) => {
@@ -124,7 +124,7 @@ describe('MembersTable', () => {
       });
     });
 
-    describe('Role column', () => {
+    describe('Max role column', () => {
       const createMaxRoleComponent = (member = memberMock) => {
         createComponent({ members: [member], tableFields: ['maxRole'] });
       };
@@ -262,7 +262,10 @@ describe('MembersTable', () => {
 
       it('passes correct props to `MemberSource` component', () => {
         expect(wrapper.findComponent(MemberSource).props()).toMatchObject({
-          member: privateGroup,
+          memberSource: {},
+          isDirectMember: true,
+          isSharedWithGroupPrivate: true,
+          createdBy: null,
         });
       });
     });

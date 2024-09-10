@@ -12,23 +12,11 @@ Signal.trap('INT') do
 end
 
 module Cng
-  class << self
-    def run
-      Gitlab::Cng::Helpers::Output.force_color! if force_color?
-
-      Gitlab::Cng::CLI.start
-    rescue Gitlab::Cng::CLI::Error => e
-      puts "ERROR: #{e.message}"
-      exit 1
-    end
-
-    private
-
-    def force_color?
-      ENV["CNG_FORCE_COLOR"]&.match?(/^(true|yes|1)$/i) || %w[--force-color --force-color=true].any? do |arg|
-        ARGV.include?(arg)
-      end
-    end
+  def self.run
+    Gitlab::Cng::CLI.start
+  rescue Gitlab::Cng::CLI::Error => e
+    puts "ERROR: #{e.message}"
+    exit 1
   end
 end
 

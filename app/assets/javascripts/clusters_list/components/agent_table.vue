@@ -9,30 +9,20 @@ import {
   GlPopover,
   GlBadge,
   GlPagination,
-  GlDisclosureDropdown,
-  GlDisclosureDropdownItem,
-  GlModalDirective,
 } from '@gitlab/ui';
 import semverLt from 'semver/functions/lt';
 import semverInc from 'semver/functions/inc';
 import semverPrerelease from 'semver/functions/prerelease';
-import { __, s__, sprintf } from '~/locale';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import { MAX_LIST_COUNT, AGENT_STATUSES, I18N_AGENT_TABLE, CONNECT_MODAL_ID } from '../constants';
+import { MAX_LIST_COUNT, AGENT_STATUSES, I18N_AGENT_TABLE } from '../constants';
 import { getAgentConfigPath } from '../clusters_util';
 import DeleteAgentButton from './delete_agent_button.vue';
-import ConnectToAgentModal from './connect_to_agent_modal.vue';
 
 export default {
-  i18n: {
-    ...I18N_AGENT_TABLE,
-    connectActionText: s__('ClusterAgents|Connect to %{agentName}'),
-    deleteActionText: s__('ClusterAgents|Delete agent'),
-    actions: __('Actions'),
-  },
+  i18n: I18N_AGENT_TABLE,
   components: {
     GlLink,
     GlTable,
@@ -42,15 +32,11 @@ export default {
     GlPopover,
     GlBadge,
     GlPagination,
-    GlDisclosureDropdown,
-    GlDisclosureDropdownItem,
     TimeAgoTooltip,
     DeleteAgentButton,
-    ConnectToAgentModal,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
-    GlModalDirective,
   },
   mixins: [timeagoMixin],
   AGENT_STATUSES,
@@ -82,12 +68,11 @@ export default {
     return {
       currentPage: 1,
       limit: this.maxAgents ?? MAX_LIST_COUNT,
-      selectedAgent: null,
     };
   },
   computed: {
     fields() {
-      const tdClass = '!gl-pt-3 !gl-pb-4 !gl-align-middle';
+      const tdClass = 'gl-pt-3! gl-pb-4! !gl-align-middle';
       return [
         {
           key: 'name',
@@ -145,9 +130,6 @@ export default {
     nextPage() {
       const nextPage = this.currentPage + 1;
       return nextPage > Math.ceil(this.agents.length / this.limit) ? null : nextPage;
-    },
-    isUserAccessConfigured() {
-      return Boolean(this.selectedAgent?.userAccessAuthorizations);
     },
   },
   methods: {
@@ -216,31 +198,6 @@ export default {
 
       return null;
     },
-
-    getActions(item) {
-      const connectAction = {
-        text: sprintf(this.$options.i18n.connectActionText, { agentName: item.name }),
-        name: 'connect-agent',
-        modalId: CONNECT_MODAL_ID,
-        action: () => {
-          this.selectedAgent = item;
-        },
-      };
-      const deleteAction = {
-        text: this.$options.i18n.deleteActionText,
-        name: 'delete-agent',
-        action: () => {
-          this.selectedAgent = item;
-        },
-      };
-
-      const actions = [connectAction];
-      if (!item.isShared) {
-        actions.push(deleteAction);
-      }
-
-      return actions;
-    },
   },
 };
 </script>
@@ -253,7 +210,7 @@ export default {
       :per-page="limit"
       :current-page="currentPage"
       stacked="md"
-      class="!gl-mb-4"
+      class="gl-mb-4!"
       data-testid="cluster-agent-list-table"
     >
       <template #cell(name)="{ item }">
@@ -266,7 +223,7 @@ export default {
       <template #cell(status)="{ item }">
         <span
           :id="getStatusCellId(item)"
-          class="md:gl-pr-5"
+          class="gl-md-pr-5"
           data-testid="cluster-agent-connection-status"
         >
           <span :class="$options.AGENT_STATUSES[item.status].class" class="gl-mr-3">
@@ -295,7 +252,7 @@ export default {
             >
           </p>
           <p class="gl-mb-0">
-            <gl-link :href="$options.troubleshootingLink" target="_blank" class="gl-text-sm">
+            <gl-link :href="$options.troubleshootingLink" target="_blank" class="gl-font-sm">
               {{ $options.i18n.troubleshootingText }}</gl-link
             >
           </p>
@@ -316,7 +273,7 @@ export default {
           <gl-icon
             v-if="isVersionMismatch(item) || isVersionOutdated(item)"
             name="warning"
-            class="gl-ml-2 gl-text-orange-500"
+            class="gl-text-orange-500 gl-ml-2"
           />
         </span>
 
@@ -335,7 +292,7 @@ export default {
               <gl-sprintf :message="$options.i18n.versionOutdatedText">
                 <template #version>{{ kasCheckVersion }}</template>
               </gl-sprintf>
-              <gl-link :href="$options.versionUpdateLink" class="gl-text-sm">
+              <gl-link :href="$options.versionUpdateLink" class="gl-font-sm">
                 {{ $options.i18n.viewDocsText }}</gl-link
               >
             </p>
@@ -348,7 +305,7 @@ export default {
             <gl-sprintf :message="$options.i18n.versionOutdatedText">
               <template #version>{{ kasCheckVersion }}</template>
             </gl-sprintf>
-            <gl-link :href="$options.versionUpdateLink" class="gl-text-sm">
+            <gl-link :href="$options.versionUpdateLink" class="gl-font-sm">
               {{ $options.i18n.viewDocsText }}</gl-link
             >
           </p>
@@ -385,32 +342,11 @@ export default {
       </template>
 
       <template #cell(options)="{ item }">
-        <gl-disclosure-dropdown
-          :title="$options.i18n.actions"
-          text-sr-only
-          category="tertiary"
-          no-caret
-          icon="ellipsis_v"
-        >
-          <template v-for="action in getActions(item)">
-            <delete-agent-button
-              v-if="action.name === 'delete-agent'"
-              :key="action.name"
-              :agent="item"
-              :default-branch-name="defaultBranchName"
-            />
-            <gl-disclosure-dropdown-item
-              v-else
-              :key="action.name"
-              v-gl-modal-directive="action.modalId"
-              @action="action.action"
-            >
-              <template #list-item>
-                {{ action.text }}
-              </template>
-            </gl-disclosure-dropdown-item>
-          </template>
-        </gl-disclosure-dropdown>
+        <delete-agent-button
+          v-if="!item.isShared"
+          :agent="item"
+          :default-branch-name="defaultBranchName"
+        />
       </template>
     </gl-table>
 
@@ -421,13 +357,6 @@ export default {
       :next-page="nextPage"
       align="center"
       class="gl-mt-5"
-    />
-
-    <connect-to-agent-modal
-      v-if="selectedAgent"
-      :agent-id="selectedAgent.id"
-      :project-path="selectedAgent.project.fullPath"
-      :is-configured="isUserAccessConfigured"
     />
   </div>
 </template>

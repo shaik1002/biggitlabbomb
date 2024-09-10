@@ -21,7 +21,7 @@ describe('Ci environments dropdown', () => {
   const findListboxText = () => findListbox().props('toggleText');
   const findCreateWildcardButton = () => wrapper.findByTestId('create-wildcard-button');
   const findDropdownDivider = () => wrapper.findComponent(GlDropdownDivider);
-  const findSearchQueryNote = () => wrapper.findByTestId('search-query-note');
+  const findMaxEnvNote = () => wrapper.findByTestId('max-envs-notice');
 
   const createComponent = ({ props = {}, searchTerm = '' } = {}) => {
     wrapper = mountExtended(CiEnvironmentsDropdown, {
@@ -34,10 +34,10 @@ describe('Ci environments dropdown', () => {
     findListbox().vm.$emit('search', searchTerm);
   };
 
-  describe('create wildcard buttons', () => {
-    describe('when canCreateWildcard is true and search has wildcard character', () => {
+  describe('create wildcard button', () => {
+    describe('when canCreateWildcard is true', () => {
       beforeEach(() => {
-        createComponent({ props: { canCreateWildcard: true }, searchTerm: 'stable/*' });
+        createComponent({ props: { canCreateWildcard: true }, searchTerm: 'stable' });
       });
 
       it('renders create button during search', () => {
@@ -45,19 +45,9 @@ describe('Ci environments dropdown', () => {
       });
     });
 
-    describe('when canCreateWildcard is true and wildcard character is missing from search', () => {
-      beforeEach(() => {
-        createComponent({ props: { canCreateWildcard: true }, searchTerm: 'stable/' });
-      });
-
-      it('does not render create button during search', () => {
-        expect(findCreateWildcardButton().exists()).toBe(false);
-      });
-    });
-
     describe('when canCreateWildcard is false', () => {
       beforeEach(() => {
-        createComponent({ props: { canCreateWildcard: false }, searchTerm: 'stable/*' });
+        createComponent({ props: { canCreateWildcard: false }, searchTerm: 'stable' });
       });
 
       it('does not render create button during search', () => {
@@ -69,7 +59,7 @@ describe('Ci environments dropdown', () => {
   describe('No environments found', () => {
     describe('default behavior', () => {
       beforeEach(() => {
-        createComponent({ searchTerm: 'stable/*' });
+        createComponent({ searchTerm: 'stable' });
       });
 
       it('renders dropdown divider', () => {
@@ -79,7 +69,7 @@ describe('Ci environments dropdown', () => {
       it('renders create button with search term if environments do not contain search term', () => {
         const button = findCreateWildcardButton();
         expect(button.exists()).toBe(true);
-        expect(button.text()).toBe('Create wildcard: stable/*');
+        expect(button.text()).toBe('Create wildcard: stable');
       });
     });
   });
@@ -127,16 +117,6 @@ describe('Ci environments dropdown', () => {
     });
   });
 
-  describe('when no environment is selected', () => {
-    beforeEach(() => {
-      createComponent({ props: { selectedEnvironmentScope: '' } });
-    });
-
-    it('shows the placeholder text', () => {
-      expect(findListboxText()).toContain('Select environment or create wildcard');
-    });
-  });
-
   describe('when fetching environments', () => {
     const currentEnv = envs[2];
 
@@ -180,9 +160,8 @@ describe('Ci environments dropdown', () => {
     });
 
     it('displays note about max environments', () => {
-      expect(findSearchQueryNote().text()).toBe(
-        'Enter a search query to find more environments, or use * to create a wildcard.',
-      );
+      expect(findMaxEnvNote().exists()).toBe(true);
+      expect(findMaxEnvNote().text()).toContain('30');
     });
   });
 
@@ -202,7 +181,7 @@ describe('Ci environments dropdown', () => {
     });
 
     describe('when creating a new environment scope from a search term', () => {
-      const searchTerm = 'new-env-*';
+      const searchTerm = 'new-env';
       beforeEach(() => {
         createComponent({ searchTerm });
       });

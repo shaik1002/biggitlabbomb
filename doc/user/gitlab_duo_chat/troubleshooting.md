@@ -50,7 +50,7 @@ This error occurs when:
 - You ask GitLab Duo Chat about items (like issues, epics, and merge requests) you don't have access to, or about items that don't exist.
 - Your session has expired.
 
-Try again, asking about items you have access to. If you continue to experience issues, it might be due to an expired session. To continue using GitLab Duo Chat, sign in again. For more information, see [Control GitLab Duo availability](../gitlab_duo/turn_on_off.md).
+Try again, asking about items you have access to. If you continue to experience issues, it might be due to an expired session. To continue using GitLab Duo Chat, log in again. For more information, see [Control GitLab Duo availability](../gitlab_duo/turn_on_off.md).
 
 ## `Error M3004`
 
@@ -82,7 +82,7 @@ For more information about slash commands, refer to the documentation:
 - [/tests](../gitlab_duo_chat/examples.md#write-tests-in-the-ide)
 - [/refactor](../gitlab_duo_chat/examples.md#refactor-code-in-the-ide)
 - [/fix](../gitlab_duo_chat/examples.md#fix-code-in-the-ide)
-- [/explain](../gitlab_duo_chat/examples.md#explain-selected-code)
+- [/explain](../gitlab_duo_chat/examples.md#explain-code-in-the-ide)
 
 ## `Error M4001`
 
@@ -117,20 +117,7 @@ This error occurs when there is a timeout during processing. Please try your req
 You might get an error that states
 `I'm sorry, I can't generate a response. Please try again. Error code: A1001`.
 
-This error means there was a problem encountered by the AI service that processed your request.
-
-Some possible reasons:
-
-- A client-side error caused by a bug in the GitLab code.
-- A server-side error caused by a bug in the Anthropic code.
-- An HTTP request that didn't reach the AI Gateway.
-
-[An issue exists](https://gitlab.com/gitlab-org/gitlab/-/issues/479465) to more clearly specify the reason for the error.
-
-To resolve the issue, try your request again.
-
-If the error persists, use the `/clear` command to reset the chat.
-If problem continues, please report the issue to the GitLab support team.
+This error occurs when there is a connection error during processing. Please try your request again.
 
 ## `Error A6000`
 

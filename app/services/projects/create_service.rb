@@ -19,7 +19,6 @@ module Projects
       @default_branch = @params.delete(:default_branch)
       @readme_template = @params.delete(:readme_template)
       @repository_object_format = @params.delete(:repository_object_format)
-      @import_export_upload = @params.delete(:import_export_upload)
 
       build_topics
     end
@@ -35,16 +34,7 @@ module Projects
         return ::Projects::CreateFromTemplateService.new(current_user, params).execute
       end
 
-      @project = Project.new.tap do |p|
-        # Explicitly build an association for ci_cd_settings
-        # See: https://gitlab.com/gitlab-org/gitlab/-/issues/421050
-        p.build_ci_cd_settings
-        p.assign_attributes(params.merge(creator: current_user))
-      end
-
-      if @import_export_upload
-        @import_export_upload.project = project
-      end
+      @project = Project.new(params.merge(creator: current_user))
 
       validate_import_source_enabled!
 
@@ -252,7 +242,6 @@ module Projects
           if @project.saved?
             Integration.create_from_default_integrations(@project, :project_id)
 
-            @import_export_upload.save if @import_export_upload
             @project.create_labels unless @project.gitlab_project_import?
 
             next if @project.import?
@@ -320,7 +309,7 @@ module Projects
       return if INTERNAL_IMPORT_SOURCES.include?(import_type)
 
       # Skip validation when creating project from a built in template
-      return if @import_export_upload.present? && import_type == 'gitlab_project'
+      return if @params[:import_export_upload].present? && import_type == 'gitlab_project'
 
       unless ::Gitlab::CurrentSettings.import_sources&.include?(import_type)
         return if import_type == 'github' && Feature.enabled?(:override_github_disabled, current_user, type: :ops)

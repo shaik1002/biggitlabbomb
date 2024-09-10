@@ -102,19 +102,15 @@ module Packages
 
       def nuget_packages
         Packages::Package.nuget
-                         .installable
+                         .displayable
                          .has_version
+                         .without_nuget_temporary_name
       end
 
       def project_ids_cte
         return unless use_project_ids_cte?
 
-        query = if Feature.enabled?(:allow_anyone_to_pull_public_nuget_packages_on_group_level, @project_or_group)
-                  projects_visible_to_user_including_public_registries(@current_user, within_group: @project_or_group)
-                else
-                  projects_visible_to_user(@current_user, within_group: @project_or_group)
-                end
-
+        query = projects_visible_to_user(@current_user, within_group: @project_or_group)
         Gitlab::SQL::CTE.new(:project_ids, query.select(:id))
       end
       strong_memoize_attr :project_ids_cte

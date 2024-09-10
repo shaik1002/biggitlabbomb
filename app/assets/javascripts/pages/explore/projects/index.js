@@ -1,6 +1,3 @@
-import { initProjectsFilteredSearchAndSort } from '~/projects/filtered_search_and_sort';
+import { initProjectsExploreFilteredSearchAndSort } from '~/projects/explore';
 
-initProjectsFilteredSearchAndSort({
-  sortEventName: 'use_sort_projects_explore',
-  filterEventName: 'use_filter_bar_projects_explore',
-});
+initProjectsExploreFilteredSearchAndSort();

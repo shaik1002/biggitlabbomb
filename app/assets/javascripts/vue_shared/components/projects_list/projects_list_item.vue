@@ -252,7 +252,7 @@ export default {
   <li class="projects-list-item gl-border-b gl-flex gl-py-5">
     <div class="gl-grow md:gl-flex">
       <div class="gl-flex gl-grow gl-items-start">
-        <div v-if="showProjectIcon" class="gl-mr-3 gl-flex gl-h-9 gl-shrink-0 gl-items-center">
+        <div v-if="showProjectIcon" class="gl-mr-3 gl-flex gl-h-9 gl-flex-shrink-0 gl-items-center">
           <gl-icon class="gl-text-secondary" name="project" />
         </div>
         <gl-avatar-labeled
@@ -260,7 +260,6 @@ export default {
           :entity-name="project.name"
           :label="project.name"
           :label-link="project.webUrl"
-          :src="project.avatarUrl"
           shape="rect"
           :size="48"
         >

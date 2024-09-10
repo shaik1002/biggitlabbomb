@@ -920,16 +920,6 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
 
           it_behaves_like 'API rate limit setting'
         end
-
-        context 'for GET /groups/:id/invited_groups API requests' do
-          let(:rate_limit_field) do
-            format(_('Maximum requests to the %{api_name} API per %{timeframe} per user or IP address'), api_name: 'GET /groups/:id/invited_groups', timeframe: 'minute')
-          end
-
-          let(:application_setting_key) { :group_invited_groups_api_limit }
-
-          it_behaves_like 'API rate limit setting'
-        end
       end
 
       describe 'projects API rate limits' do
@@ -961,16 +951,6 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
           end
 
           let_it_be(:application_setting_key) { :project_api_limit }
-
-          it_behaves_like 'API rate limit setting'
-        end
-
-        context 'for GET /projects/:id/invited_groups API requests' do
-          let_it_be(:rate_limit_field) do
-            format(_('Maximum requests to the %{api_name} API per %{timeframe} per user or IP address'), api_name: 'GET /projects/:id/invited_groups', timeframe: 'minute')
-          end
-
-          let_it_be(:application_setting_key) { :project_invited_groups_api_limit }
 
           it_behaves_like 'API rate limit setting'
         end

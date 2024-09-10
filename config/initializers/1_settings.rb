@@ -6,7 +6,6 @@ require_relative '../smime_signature_settings'
 
 # Default settings
 Settings['shared'] ||= {}
-# If you are changing default storage paths, then you must change them in the gitlab-backup-cli gem as well
 Settings.shared['path'] = Settings.absolute(Settings.shared['path'] || "shared")
 
 Settings['encrypted_settings'] ||= {}
@@ -266,7 +265,6 @@ end
 #
 Settings['gitlab_ci'] ||= {}
 Settings.gitlab_ci['shared_runners_enabled'] = true if Settings.gitlab_ci['shared_runners_enabled'].nil?
-# If you are changing default storage paths, then you must change them in the gitlab-backup-cli gem as well
 Settings.gitlab_ci['builds_path']           = Settings.absolute(Settings.gitlab_ci['builds_path'] || "builds/")
 Settings.gitlab_ci['url']                 ||= Settings.__send__(:build_gitlab_ci_url)
 Settings.gitlab_ci['server_fqdn']         ||= Settings.__send__(:build_ci_server_fqdn)
@@ -276,7 +274,6 @@ Settings.gitlab_ci['server_fqdn']         ||= Settings.__send__(:build_ci_server
 #
 Settings['ci_secure_files'] ||= {}
 Settings.ci_secure_files['enabled']      = true if Settings.ci_secure_files['enabled'].nil?
-# If you are changing default storage paths, then you must change them in the gitlab-backup-cli gem as well
 Settings.ci_secure_files['storage_path'] = Settings.absolute(Settings.ci_secure_files['storage_path'] || File.join(Settings.shared['path'], "ci_secure_files"))
 Settings.ci_secure_files['object_store'] = ObjectStoreSettings.legacy_parse(Settings.ci_secure_files['object_store'], 'secure_files')
 
@@ -300,7 +297,6 @@ Settings.service_desk_email['encrypted_secret_file'] = Settings.absolute(Setting
 #
 Settings['artifacts'] ||= {}
 Settings.artifacts['enabled']      = true if Settings.artifacts['enabled'].nil?
-# If you are changing default storage paths, then you must change them in the gitlab-backup-cli gem as well
 Settings.artifacts['storage_path'] = Settings.absolute(Settings.artifacts.values_at('path', 'storage_path').compact.first || File.join(Settings.shared['path'], "artifacts"))
 # Settings.artifact['path'] is deprecated, use `storage_path` instead
 Settings.artifacts['path']         = Settings.artifacts['storage_path']
@@ -318,7 +314,6 @@ Settings.registry['api_url'] ||= "http://localhost:5000/"
 Settings.registry['key'] ||= nil
 Settings.registry['issuer'] ||= nil
 Settings.registry['host_port'] ||= [Settings.registry['host'], Settings.registry['port']].compact.join(':')
-# If you are changing default storage paths, then you must change them in the gitlab-backup-cli gem as well
 Settings.registry['path']            = Settings.absolute(Settings.registry['path'] || File.join(Settings.shared['path'], 'registry'))
 Settings.registry['notifications'] ||= []
 
@@ -338,7 +333,6 @@ Settings['pages'] ||= {}
 Settings['pages'] = ::Gitlab::Pages::Settings.new(Settings.pages) # For path access detection https://gitlab.com/gitlab-org/gitlab/-/issues/230702
 Settings.pages['enabled']           = false if Settings.pages['enabled'].nil?
 Settings.pages['access_control']    = false if Settings.pages['access_control'].nil?
-# If you are changing default storage paths, then you must change them in the gitlab-backup-cli gem as well
 Settings.pages['path']              = Settings.absolute(Settings.pages['path'] || File.join(Settings.shared['path'], "pages"))
 Settings.pages['https']             = false if Settings.pages['https'].nil?
 Settings.pages['host'] ||= "example.com"
@@ -354,7 +348,6 @@ Settings.pages['secret_file'] ||= Rails.root.join('.gitlab_pages_secret')
 Settings.pages['storage_path']      = Settings.pages['path']
 Settings.pages['object_store']      = ObjectStoreSettings.legacy_parse(Settings.pages['object_store'], 'pages')
 Settings.pages['local_store'] ||= {}
-# If you are changing default storage paths, then you must change them in the gitlab-backup-cli gem as well
 Settings.pages['local_store']['path'] = Settings.absolute(Settings.pages['local_store']['path'] || File.join(Settings.shared['path'], "pages"))
 Settings.pages['local_store']['enabled'] = true if Settings.pages['local_store']['enabled'].nil?
 Settings.pages['namespace_in_path'] = false if Settings.pages['namespace_in_path'].nil?
@@ -394,7 +387,6 @@ Settings.feature_flags.unleash['enabled'] = false if Settings.feature_flags.unle
 Settings['external_diffs'] ||= {}
 Settings.external_diffs['enabled']      = false if Settings.external_diffs['enabled'].nil?
 Settings.external_diffs['when']         = 'always' if Settings.external_diffs['when'].nil?
-# If you are changing default storage paths, then you must change them in the gitlab-backup-cli gem as well
 Settings.external_diffs['storage_path'] = Settings.absolute(Settings.external_diffs['storage_path'] || File.join(Settings.shared['path'], 'external-diffs'))
 Settings.external_diffs['object_store'] = ObjectStoreSettings.legacy_parse(Settings.external_diffs['object_store'], 'external_diffs')
 
@@ -403,7 +395,6 @@ Settings.external_diffs['object_store'] = ObjectStoreSettings.legacy_parse(Setti
 #
 Settings['lfs'] ||= {}
 Settings.lfs['enabled']      = true if Settings.lfs['enabled'].nil?
-# If you are changing default storage paths, then you must change them in the gitlab-backup-cli gem as well
 Settings.lfs['storage_path'] = Settings.absolute(Settings.lfs['storage_path'] || File.join(Settings.shared['path'], "lfs-objects"))
 Settings.lfs['object_store'] = ObjectStoreSettings.legacy_parse(Settings.lfs['object_store'], 'lfs')
 
@@ -422,7 +413,6 @@ Settings.uploads['object_store']['remote_directory'] ||= 'uploads'
 Settings['packages'] ||= {}
 Settings.packages['enabled']       = true if Settings.packages['enabled'].nil?
 Settings.packages['dpkg_deb_path'] = '/usr/bin/dpkg-deb' if Settings.packages['dpkg_deb_path'].nil?
-# If you are changing default storage paths, then you must change them in the gitlab-backup-cli gem as well
 Settings.packages['storage_path']  = Settings.absolute(Settings.packages['storage_path'] || File.join(Settings.shared['path'], "packages"))
 Settings.packages['object_store']  = ObjectStoreSettings.legacy_parse(Settings.packages['object_store'], 'packages')
 
@@ -431,7 +421,6 @@ Settings.packages['object_store']  = ObjectStoreSettings.legacy_parse(Settings.p
 #
 Settings['dependency_proxy'] ||= {}
 Settings.dependency_proxy['enabled']      = true if Settings.dependency_proxy['enabled'].nil?
-# If you are changing default storage paths, then you must change them in the gitlab-backup-cli gem as well
 Settings.dependency_proxy['storage_path'] = Settings.absolute(Settings.dependency_proxy['storage_path'] || File.join(Settings.shared['path'], "dependency_proxy"))
 Settings.dependency_proxy['object_store'] = ObjectStoreSettings.legacy_parse(Settings.dependency_proxy['object_store'], 'dependency_proxy')
 
@@ -446,7 +435,6 @@ Settings.dependency_proxy['enabled'] = false unless Gitlab::Runtime.puma?
 #
 Settings['terraform_state'] ||= {}
 Settings.terraform_state['enabled']      = true if Settings.terraform_state['enabled'].nil?
-# If you are changing default storage paths, then you must change them in the gitlab-backup-cli gem as well
 Settings.terraform_state['storage_path'] = Settings.absolute(Settings.terraform_state['storage_path'] || File.join(Settings.shared['path'], "terraform_state"))
 Settings.terraform_state['object_store'] = ObjectStoreSettings.legacy_parse(Settings.terraform_state['object_store'], 'terraform_state')
 
@@ -524,9 +512,6 @@ Settings.cron_jobs['personal_access_tokens_expiring_worker']['job_class'] = 'Per
 Settings.cron_jobs['personal_access_tokens_expired_notification_worker'] ||= {}
 Settings.cron_jobs['personal_access_tokens_expired_notification_worker']['cron'] ||= '0 2 * * *'
 Settings.cron_jobs['personal_access_tokens_expired_notification_worker']['job_class'] = 'PersonalAccessTokens::ExpiredNotificationWorker'
-Settings.cron_jobs['resource_access_tokens_inactive_tokens_deletion_cron_worker'] ||= {}
-Settings.cron_jobs['resource_access_tokens_inactive_tokens_deletion_cron_worker']['cron'] ||= '0 0 * * *'
-Settings.cron_jobs['resource_access_tokens_inactive_tokens_deletion_cron_worker']['job_class'] = 'ResourceAccessTokens::InactiveTokensDeletionCronWorker'
 Settings.cron_jobs['repository_archive_cache_worker'] ||= {}
 Settings.cron_jobs['repository_archive_cache_worker']['cron'] ||= '0 * * * *'
 Settings.cron_jobs['repository_archive_cache_worker']['job_class'] = 'RepositoryArchiveCacheWorker'
@@ -629,6 +614,9 @@ Settings.cron_jobs['postgres_dynamic_partitions_manager']['job_class'] ||= 'Data
 Settings.cron_jobs['postgres_dynamic_partitions_dropper'] ||= {}
 Settings.cron_jobs['postgres_dynamic_partitions_dropper']['cron'] ||= '45 12 * * *'
 Settings.cron_jobs['postgres_dynamic_partitions_dropper']['job_class'] ||= 'Database::DropDetachedPartitionsWorker'
+Settings.cron_jobs['ci_platform_metrics_update_cron_worker'] ||= {}
+Settings.cron_jobs['ci_platform_metrics_update_cron_worker']['cron'] ||= '47 9 * * *'
+Settings.cron_jobs['ci_platform_metrics_update_cron_worker']['job_class'] = 'CiPlatformMetricsUpdateCronWorker'
 Settings.cron_jobs['analytics_usage_trends_count_job_trigger_worker'] ||= {}
 Settings.cron_jobs['analytics_usage_trends_count_job_trigger_worker']['cron'] ||= '50 23 */1 * *'
 Settings.cron_jobs['analytics_usage_trends_count_job_trigger_worker']['job_class'] ||= 'Analytics::UsageTrends::CountJobTriggerWorker'
@@ -701,6 +689,9 @@ Settings.cron_jobs['object_storage_delete_stale_direct_uploads_worker']['job_cla
 Settings.cron_jobs['service_desk_custom_email_verification_cleanup'] ||= {}
 Settings.cron_jobs['service_desk_custom_email_verification_cleanup']['cron'] ||= '*/2 * * * *'
 Settings.cron_jobs['service_desk_custom_email_verification_cleanup']['job_class'] = 'ServiceDesk::CustomEmailVerificationCleanupWorker'
+Settings.cron_jobs['ensure_merge_requests_prepared_worker'] ||= {}
+Settings.cron_jobs['ensure_merge_requests_prepared_worker']['cron'] ||= '*/30 * * * *'
+Settings.cron_jobs['ensure_merge_requests_prepared_worker']['job_class'] ||= 'MergeRequests::EnsurePreparedWorker'
 Settings.cron_jobs['deactivated_pages_deployments_delete_cron_worker'] ||= {}
 Settings.cron_jobs['deactivated_pages_deployments_delete_cron_worker']['cron'] ||= '*/10 * * * *'
 Settings.cron_jobs['deactivated_pages_deployments_delete_cron_worker']['job_class'] ||= 'Pages::DeactivatedDeploymentsDeleteCronWorker'
@@ -723,9 +714,6 @@ Settings.cron_jobs['ci_click_house_finished_pipelines_sync_worker'] ||= {}
 Settings.cron_jobs['ci_click_house_finished_pipelines_sync_worker']['cron'] ||= '*/4 * * * *'
 Settings.cron_jobs['ci_click_house_finished_pipelines_sync_worker']['args'] ||= [1]
 Settings.cron_jobs['ci_click_house_finished_pipelines_sync_worker']['job_class'] = 'Ci::ClickHouse::FinishedPipelinesSyncCronWorker'
-Settings.cron_jobs['deactivate_expired_deployments_cron_worker'] ||= {}
-Settings.cron_jobs['deactivate_expired_deployments_cron_worker']['cron'] ||= '*/10 * * * *'
-Settings.cron_jobs['deactivate_expired_deployments_cron_worker']['job_class'] ||= 'Pages::DeactivateExpiredDeploymentsCronWorker'
 
 Gitlab.ee do
   Settings.cron_jobs['analytics_devops_adoption_create_all_snapshots_worker'] ||= {}
@@ -824,9 +812,6 @@ Gitlab.ee do
   Settings.cron_jobs['search_index_curation_worker'] ||= {}
   Settings.cron_jobs['search_index_curation_worker']['cron'] ||= '*/1 * * * *'
   Settings.cron_jobs['search_index_curation_worker']['job_class'] ||= 'Search::IndexCurationWorker'
-  Settings.cron_jobs['search_elastic_metrics_update_cron_worker'] ||= {}
-  Settings.cron_jobs['search_elastic_metrics_update_cron_worker']['cron'] ||= '*/1 * * * *'
-  Settings.cron_jobs['search_elastic_metrics_update_cron_worker']['job_class'] ||= 'Search::Elastic::MetricsUpdateCronWorker'
   Settings.cron_jobs['pause_control_resume_worker'] ||= {}
   Settings.cron_jobs['pause_control_resume_worker']['cron'] ||= '*/5 * * * *'
   Settings.cron_jobs['pause_control_resume_worker']['job_class'] ||= 'PauseControl::ResumeWorker'
@@ -856,7 +841,7 @@ Gitlab.ee do
   Settings.cron_jobs['vulnerability_historical_statistics_deletion_worker']['job_class'] = 'Vulnerabilities::HistoricalStatistics::DeletionWorker'
   Settings.cron_jobs['vulnerability_orphaned_remediations_cleanup_worker'] ||= {}
   Settings.cron_jobs['vulnerability_orphaned_remediations_cleanup_worker']['job_class'] = 'Vulnerabilities::OrphanedRemediationsCleanupWorker'
-  Settings.cron_jobs['vulnerability_orphaned_remediations_cleanup_worker']['cron'] ||= '15 3 * * */6'
+  Settings.cron_jobs['vulnerability_orphaned_remediations_cleanup_worker']['cron'] ||= '15 3 3 * *'
   Settings.cron_jobs['security_create_orchestration_policy_worker'] ||= {}
   Settings.cron_jobs['security_create_orchestration_policy_worker']['cron'] ||= '*/10 * * * *'
   Settings.cron_jobs['security_create_orchestration_policy_worker']['job_class'] = 'Security::CreateOrchestrationPolicyWorker'
@@ -930,12 +915,6 @@ Gitlab.ee do
   Settings.cron_jobs['gitlab_subscriptions_add_on_purchases_cleanup_worker'] ||= {}
   Settings.cron_jobs['gitlab_subscriptions_add_on_purchases_cleanup_worker']['cron'] ||= '0 1 * * *'
   Settings.cron_jobs['gitlab_subscriptions_add_on_purchases_cleanup_worker']['job_class'] = 'GitlabSubscriptions::AddOnPurchases::CleanupWorker'
-  Settings.cron_jobs['observability_alert_query_worker'] ||= {}
-  Settings.cron_jobs['observability_alert_query_worker']['cron'] ||= '* * * * *'
-  Settings.cron_jobs['observability_alert_query_worker']['job_class'] = 'Observability::AlertQueryWorker'
-  Settings.cron_jobs['report_security_policies_metrics_worker.rb'] ||= {}
-  Settings.cron_jobs['report_security_policies_metrics_worker.rb']['cron'] ||= '*/1 * * * *'
-  Settings.cron_jobs['report_security_policies_metrics_worker.rb']['job_class'] = 'Security::Policies::ReportSecurityPoliciesMetricsWorker'
 
   Gitlab.com do
     Settings.cron_jobs['disable_legacy_open_source_license_for_inactive_projects'] ||= {}
@@ -947,6 +926,9 @@ Gitlab.ee do
     Settings.cron_jobs['gitlab_subscriptions_schedule_refresh_seats_worker'] ||= {}
     Settings.cron_jobs['gitlab_subscriptions_schedule_refresh_seats_worker']['cron'] ||= "0 */6 * * *"
     Settings.cron_jobs['gitlab_subscriptions_schedule_refresh_seats_worker']['job_class'] = 'GitlabSubscriptions::ScheduleRefreshSeatsWorker'
+    Settings.cron_jobs['vertex_ai_refresh_access_token_worker'] ||= {}
+    Settings.cron_jobs['vertex_ai_refresh_access_token_worker']['cron'] ||= '*/50 * * * *'
+    Settings.cron_jobs['vertex_ai_refresh_access_token_worker']['job_class'] = 'Llm::VertexAiAccessTokenRefreshWorker'
     Settings.cron_jobs['click_house_audit_events_sync_worker'] ||= {}
     Settings.cron_jobs['click_house_audit_events_sync_worker']['cron'] ||= "*/3 * * * *"
     Settings.cron_jobs['click_house_audit_events_sync_worker']['job_class'] = 'ClickHouse::AuditEventsSyncWorker'
@@ -1026,26 +1008,6 @@ end
 Gitlab.ee do
   Settings['cloud_connector'] = {}
   Settings.cloud_connector['base_url'] ||= ENV['CLOUD_CONNECTOR_BASE_URL'] || 'https://cloud.gitlab.com'
-end
-
-#
-# Duo Workflow
-#
-Gitlab.ee do
-  Settings['duo_workflow'] ||= {}
-  executor_version = Rails.root.join('DUO_WORKFLOW_EXECUTOR_VERSION').read.chomp
-  Settings.duo_workflow.reverse_merge!(
-    secure: true,
-    executor_binary_url: "https://gitlab.com/api/v4/projects/58711783/packages/generic/#{executor_version}/duo-workflow-executor.tar.gz",
-    executor_version: executor_version
-  )
-
-  # Default to proxy via Cloud Connector
-  unless Settings.duo_workflow['service_url'].present?
-    cloud_connector_uri = URI.parse(Settings.cloud_connector.base_url)
-    Settings.duo_workflow['service_url'] = "#{cloud_connector_uri.host}:#{cloud_connector_uri.port}"
-    Settings.duo_workflow['secure'] = cloud_connector_uri.scheme == 'https'
-  end
 end
 
 #
@@ -1170,7 +1132,7 @@ Settings['extra'] ||= {}
 Settings.extra['matomo_site_id'] ||= Settings.extra['piwik_site_id'] if Settings.extra['piwik_site_id'].present?
 Settings.extra['matomo_url'] ||= Settings.extra['piwik_url'] if Settings.extra['piwik_url'].present?
 Settings.extra['matomo_disable_cookies'] = false if Settings.extra['matomo_disable_cookies'].nil?
-Settings.extra['maximum_text_highlight_size_kilobytes'] = Settings.extra.fetch('maximum_text_highlight_size_kilobytes', 512)
+Settings.extra['maximum_text_highlight_size_kilobytes'] = Settings.extra.fetch('maximum_text_highlight_size_kilobytes', 512).kilobytes
 
 #
 # Rack::Attack settings

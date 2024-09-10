@@ -260,7 +260,14 @@ export default {
       </template>
 
       <template #cell(source)="{ item: member }">
-        <member-source :member="member" />
+        <members-table-cell #default="{ isDirectMember }" :member="member">
+          <member-source
+            :is-direct-member="isDirectMember"
+            :member-source="member.source"
+            :created-by="member.createdBy"
+            :is-shared-with-group-private="member.isSharedWithGroupPrivate"
+          />
+        </members-table-cell>
       </template>
 
       <template #cell(granted)="{ item: { createdAt, createdBy } }">
@@ -269,7 +276,7 @@ export default {
 
       <template #cell(invited)="{ item: { createdAt, createdBy, invite, state } }">
         <div
-          class="gl-flex gl-flex-wrap gl-items-center gl-justify-end gl-gap-3 lg:gl-justify-start"
+          class="gl-display-flex gl-align-items-center gl-justify-content-end gl-lg-justify-content-start gl-flex-wrap gl-gap-3"
         >
           <created-at :date="createdAt" :created-by="createdBy" />
           <gl-badge v-if="inviteBadge(invite, state)" data-testid="invited-badge"

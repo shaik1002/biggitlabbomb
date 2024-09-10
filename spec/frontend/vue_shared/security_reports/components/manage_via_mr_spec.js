@@ -75,7 +75,6 @@ describe('ManageViaMr component', () => {
 
   describe.each(supportedReportTypes)(
     '%s',
-    // eslint-disable-next-line max-params
     (featureName, featureType, mutation, mutationId, mutationVariables) => {
       const buildConfigureSecurityFeatureMock =
         buildConfigureSecurityFeatureMockFactory(mutationId);

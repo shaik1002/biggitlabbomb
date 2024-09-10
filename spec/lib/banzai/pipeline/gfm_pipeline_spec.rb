@@ -3,8 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe Banzai::Pipeline::GfmPipeline, feature_category: :team_planning do
-  it_behaves_like 'sanitize pipeline'
-
   describe 'integration between parsing regular and external issue references' do
     let_it_be(:project) { create(:project, :with_redmine_integration, :public) }
 
@@ -23,12 +21,11 @@ RSpec.describe Banzai::Pipeline::GfmPipeline, feature_category: :team_planning d
         end
       end
 
-      it 'executes :each_node only once for first reference filter' do
+      it 'executes :each_node only once for first reference filter', :aggregate_failures do
         issue = create(:issue, project: project)
         markdown = "text #{issue.to_reference(project, full: true)}"
 
-        # The pipeline is run twice, once for the issue title, another for the markdown.
-        expect_any_instance_of(Banzai::Filter::References::ReferenceFilter).to receive(:each_node).twice.and_call_original
+        expect_any_instance_of(Banzai::Filter::References::ReferenceFilter).to receive(:each_node).once
 
         described_class.call(markdown, project: project)
       end

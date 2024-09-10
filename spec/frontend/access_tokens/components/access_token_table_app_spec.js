@@ -3,7 +3,7 @@ import { nextTick } from 'vue';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
 import AccessTokenTableApp from '~/access_tokens/components/access_token_table_app.vue';
 import { EVENT_SUCCESS, PAGE_SIZE } from '~/access_tokens/components/constants';
-import { sprintf } from '~/locale';
+import { __, s__, sprintf } from '~/locale';
 import DomElementListener from '~/vue_shared/components/dom_element_listener.vue';
 
 describe('~/access_tokens/components/access_token_table_app', () => {
@@ -78,7 +78,7 @@ describe('~/access_tokens/components/access_token_table_app', () => {
     const cells = findCells();
     expect(cells).toHaveLength(1);
     expect(cells.at(0).text()).toBe(
-      sprintf('This user has no active %{accessTokenTypePlural}.', { accessTokenTypePlural }),
+      sprintf(__('This user has no active %{accessTokenTypePlural}.'), { accessTokenTypePlural }),
     );
   });
 
@@ -97,12 +97,12 @@ describe('~/access_tokens/components/access_token_table_app', () => {
 
       const headers = findHeaders();
       expect(headers.wrappers.map((header) => header.text())).toStrictEqual([
-        'Token name',
-        'Scopes',
-        'Created',
+        __('Token name'),
+        __('Scopes'),
+        s__('AccessTokens|Created'),
         'Last Used',
-        'Expires',
-        'Action',
+        __('Expires'),
+        __('Action'),
       ]);
     });
 
@@ -111,13 +111,13 @@ describe('~/access_tokens/components/access_token_table_app', () => {
 
       const headers = findHeaders();
       expect(headers.wrappers.map((header) => header.text())).toStrictEqual([
-        'Token name',
-        'Scopes',
-        'Created',
+        __('Token name'),
+        __('Scopes'),
+        s__('AccessTokens|Created'),
         'Last Used',
-        'Expires',
-        'Role',
-        'Action',
+        __('Expires'),
+        __('Role'),
+        __('Action'),
       ]);
     });
   });
@@ -133,7 +133,7 @@ describe('~/access_tokens/components/access_token_table_app', () => {
     expect(anchor.attributes('href')).toBe(
       '/help/user/profile/personal_access_tokens.md#view-the-last-time-a-token-was-used',
     );
-    expect(assistiveElement.text()).toBe('The last time a token was used');
+    expect(assistiveElement.text()).toBe(s__('AccessTokens|The last time a token was used'));
   });
 
   it('updates the table after new tokens are created', async () => {
@@ -146,18 +146,19 @@ describe('~/access_tokens/components/access_token_table_app', () => {
     // First row
     expect(cells.at(0).text()).toBe('a');
     expect(cells.at(1).text()).toBe('api');
-    expect(cells.at(2).text()).not.toBe('Never');
-    expect(cells.at(3).text()).toBe('Never');
-    expect(cells.at(4).text()).toBe('Never');
+    expect(cells.at(2).text()).not.toBe(__('Never'));
+    expect(cells.at(3).text()).toBe(__('Never'));
+    expect(cells.at(4).text()).toBe(__('Never'));
     expect(cells.at(5).text()).toBe('Maintainer');
     let button = cells.at(6).findComponent(GlButton);
     expect(button.attributes()).toMatchObject({
-      'aria-label': 'Revoke',
+      'aria-label': __('Revoke'),
       'data-testid': 'revoke-button',
       href: '/-/user_settings/personal_access_tokens/1/revoke',
       'data-confirm': sprintf(
-        'Are you sure you want to revoke the %{accessTokenType} "%{tokenName}"? This action cannot be undone.',
-
+        __(
+          'Are you sure you want to revoke the %{accessTokenType} "%{tokenName}"? This action cannot be undone.',
+        ),
         { accessTokenType, tokenName: 'a' },
       ),
     });
@@ -166,9 +167,9 @@ describe('~/access_tokens/components/access_token_table_app', () => {
     // Second row
     expect(cells.at(7).text()).toBe('b');
     expect(cells.at(8).text()).toBe('api, sudo');
-    expect(cells.at(9).text()).not.toBe('Never');
-    expect(cells.at(10).text()).not.toBe('Never');
-    expect(cells.at(11).text()).toBe('Expired');
+    expect(cells.at(9).text()).not.toBe(__('Never'));
+    expect(cells.at(10).text()).not.toBe(__('Never'));
+    expect(cells.at(11).text()).toBe(__('Expired'));
     expect(cells.at(12).text()).toBe('Maintainer');
     button = cells.at(13).findComponent(GlButton);
     expect(button.attributes('href')).toBe('/-/user_settings/personal_access_tokens/2/revoke');
@@ -187,11 +188,16 @@ describe('~/access_tokens/components/access_token_table_app', () => {
 
         const headers = findHeaders();
         expect(headers).toHaveLength(6);
-        ['Token name', 'Scopes', 'Created', 'Last Used', 'Expires', 'Role'].forEach(
-          (text, index) => {
-            expect(headers.at(index).text()).toBe(text);
-          },
-        );
+        [
+          __('Token name'),
+          __('Scopes'),
+          s__('AccessTokens|Created'),
+          'Last Used',
+          __('Expires'),
+          __('Role'),
+        ].forEach((text, index) => {
+          expect(headers.at(index).text()).toBe(text);
+        });
       });
     });
 
@@ -206,7 +212,7 @@ describe('~/access_tokens/components/access_token_table_app', () => {
           showRole: true,
         });
 
-        expect(findHeaders().at(6).text()).toBe('Action');
+        expect(findHeaders().at(6).text()).toBe(__('Action'));
         expect(findCells().at(6).findComponent(GlButton).exists()).toBe(false);
       },
     );

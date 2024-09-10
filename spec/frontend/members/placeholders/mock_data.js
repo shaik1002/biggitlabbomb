@@ -63,14 +63,14 @@ export const mockSourceUsers = [
   }),
 ];
 
-export const mockSourceUsersQueryResponse = ({ nodes = mockSourceUsers, pageInfo = {} } = {}) => ({
+export const mockSourceUsersQueryResponse = ({ pageInfo = {} } = {}) => ({
   data: {
     namespace: {
       __typename: 'Namespace',
       id: 'gid://gitlab/Group/1',
       importSourceUsers: {
         __typename: 'ImportSourceUserConnection',
-        nodes,
+        nodes: mockSourceUsers,
         pageInfo: {
           __typename: 'PageInfo',
           hasNextPage: false,
@@ -185,10 +185,4 @@ export const mockUsersWithPaginationQueryResponse = {
       },
     },
   },
-};
-
-export const pagination = {
-  awaitingReassignmentItems: 5,
-  reassignedItems: 2,
-  totalItems: 7,
 };

@@ -4,7 +4,6 @@ module Gitlab
   class UserAccessSnippet < UserAccess
     extend ::Gitlab::Utils::Override
     extend ::Gitlab::Cache::RequestCache
-
     # TODO: apply override check https://gitlab.com/gitlab-org/gitlab/issues/205677
 
     request_cache_key do

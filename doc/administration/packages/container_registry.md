@@ -12,7 +12,7 @@ DETAILS:
 
 NOTE:
 The [next-generation container registry](container_registry_metadata_database.md)
-is now available for upgrade on self-managed instances.
+is now available for upgrade and testing on self-managed instances as a beta feature.
 This upgraded registry supports online garbage collection, and has significant performance
 and reliability improvements.
 
@@ -47,11 +47,6 @@ Otherwise, the container registry is not enabled. To enable it:
 
 The container registry works under HTTPS by default. You can use HTTP
 but it's not recommended and is beyond the scope of this document.
-
-### Helm Charts installations
-
-For Helm Charts installations, see [Using the Container Registry](https://docs.gitlab.com/charts/charts/registry/).
-in the Helm Charts documentation.
 
 ### Self-compiled installations
 
@@ -360,7 +355,7 @@ the container registry by themselves, follow the steps below.
 In GitLab, tokens for the container registry expire every five minutes.
 To increase the token duration:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Settings > CI/CD**.
 1. Expand **Container Registry**.
 1. For the **Authorization token duration (minutes)**, update the value.
@@ -516,16 +511,16 @@ To configure the `s3` storage driver for a Linux package installation:
    set `maxrequestspersecond` to a number within the [S3 request rate threshold](https://repost.aws/knowledge-center/http-5xx-errors-s3):
 
    ```ruby
-   registry['storage'] = {
-     's3' => {
-       'accesskey' => 's3-access-key',
-       'secretkey' => 's3-secret-key-for-access-key',
-       'bucket' => 'your-s3-bucket',
-       'region' => 'your-s3-region',
-       'regionendpoint' => 'your-s3-regionendpoint',
-       'maxrequestspersecond' => 100
-     }
-   }
+      registry['storage'] = {
+      's3' => {
+        'accesskey' => 's3-access-key',
+        'secretkey' => 's3-secret-key-for-access-key',
+        'bucket' => 'your-s3-bucket',
+        'region' => 'your-s3-region',
+        'regionendpoint' => 'your-s3-regionendpoint',
+        'maxrequestspersecond' => 100
+      }
+    }
    ```
 
 1. Save the file and [reconfigure GitLab](../restart_gitlab.md#reconfigure-a-linux-package-installation) for the changes to take effect.
@@ -535,14 +530,14 @@ To configure the `gcs` storage driver for a Linux package installation:
 1. Edit `/etc/gitlab/gitlab.rb`:
 
    ```ruby
-   registry['storage'] = {
-     'gcs' => {
-       'bucket' => 'BUCKET_NAME',
-       'keyfile' => 'PATH/TO/KEYFILE',
-       # If you have the bucket shared with other apps beyond the registry, uncomment the following:
-       # 'rootdirectory' => '/gcs/object/name/prefix'
-     }
-   }
+      registry['storage'] = {
+      'gcs' => {
+        'bucket' => 'BUCKET_NAME',
+        'keyfile' => 'PATH/TO/KEYFILE',
+        # If you have the bucket shared with other apps beyond the registry, uncomment the following:
+        # 'rootdirectory' => '/gcs/object/name/prefix'
+      }
+    }
    ```
 
    GitLab supports all available parameters.
@@ -647,6 +642,12 @@ you can pull from the container registry, but you cannot push.
 
 #### Moving to Azure Object Storage
 
+> - The default configuration for the storage driver is scheduled to be [changed](https://gitlab.com/gitlab-org/container-registry/-/issues/854) in GitLab 16.0.
+
+When moving from an existing file system or another object storage provider to Azure Object Storage, you must configure the registry to use the standard root directory.
+Configure it by setting [`trimlegacyrootprefix: true`](https://gitlab.com/gitlab-org/container-registry/-/blob/master/docs/upstream-differences.md#azure-storage-driver) in the Azure storage driver section of the registry configuration.
+Without this configuration, the Azure storage driver uses `//` instead of `/` as the first section of the root path, rendering the migrated images inaccessible.
+
 ::Tabs
 
 :::TabTitle Linux package (Omnibus)
@@ -654,9 +655,10 @@ you can pull from the container registry, but you cannot push.
 ```ruby
 registry['storage'] = {
   'azure' => {
-    'accountname' => '<your_storage_account_name>',
-    'accountkey' => '<base64_encoded_account_key>',
-    'container' => '<container_name>',
+    'accountname' => 'accountname',
+    'accountkey' => 'base64encodedaccountkey',
+    'container' => 'containername',
+    'rootdirectory' => '/azure/virtual/container',
     'trimlegacyrootprefix' => true
   }
 }
@@ -667,9 +669,10 @@ registry['storage'] = {
 ```yaml
 storage:
   azure:
-    accountname: <your_storage_account_name>
-    accountkey: <base64_encoded_account_key>
-    container: <container_name>
+    accountname: accountname
+    accountkey: base64encodedaccountkey
+    container: containername
+    rootdirectory: /azure/virtual/container
     trimlegacyrootprefix: true
 ```
 
@@ -692,11 +695,11 @@ However, this behavior is undesirable for registries used by internal hosts that
    ```ruby
    registry['storage'] = {
      's3' => {
-       'accesskey' => '<s3_access_key>',
-       'secretkey' => '<s3_secret_key_for_access_key>',
-       'bucket' => '<your_s3_bucket>',
-       'region' => '<your_s3_region>',
-       'regionendpoint' => '<your_s3_regionendpoint>'
+       'accesskey' => 's3-access-key',
+       'secretkey' => 's3-secret-key-for-access-key',
+       'bucket' => 'your-s3-bucket',
+       'region' => 'your-s3-region',
+       'regionendpoint' => 'your-s3-regionendpoint'
      },
      'redirect' => {
        'disable' => true
@@ -713,11 +716,11 @@ However, this behavior is undesirable for registries used by internal hosts that
    ```yaml
    storage:
      s3:
-       accesskey: '<s3_access_key>'
-       secretkey: '<s3_secret_key_for_access_key>'
-       bucket: '<your_s3_bucket>'
-       region: '<your_s3_region>'
-       regionendpoint: '<your_s3_regionendpoint>'
+       accesskey: 'AKIAKIAKI'
+       secretkey: 'secret123'
+       bucket: 'gitlab-registry-bucket-AKIAKIAKI'
+       region: 'your-s3-region'
+       regionendpoint: 'your-s3-regionendpoint'
      redirect:
        disable: true
      cache:
@@ -749,11 +752,11 @@ on how you installed GitLab. Follow the instructions here that match your instal
    ```ruby
    registry['storage'] = {
      's3' => {
-       'accesskey' => '<s3_access_key>',
-       'secretkey' => '<s3_secret_key_for_access_key>',
-       'bucket' => '<your_s3_bucket>',
-       'region' => '<your_s3_region>',
-       'regionendpoint' => '<your_s3_regionendpoint>',
+       'accesskey' => 's3-access-key',
+       'secretkey' => 's3-secret-key-for-access-key',
+       'bucket' => 'your-s3-bucket',
+       'region' => 'your-s3-region',
+       'regionendpoint' => 'your-s3-regionendpoint',
        'encrypt' => true
      }
    }
@@ -769,11 +772,11 @@ on how you installed GitLab. Follow the instructions here that match your instal
    ```yaml
    storage:
      s3:
-       accesskey: '<s3_access_key>'
-       secretkey: '<s3_secret_key_for_access_key>'
-       bucket: '<your_s3_bucket>'
-       region: '<your_s3_region>'
-       regionendpoint: '<your_s3_regionendpoint>'
+       accesskey: 'AKIAKIAKI'
+       secretkey: 'secret123'
+       bucket: 'gitlab-registry-bucket-AKIAKIAKI'
+       region: 'your-s3-region'
+       regionendpoint: 'your-s3-regionendpoint'
        encrypt: true
    ```
 
@@ -1090,8 +1093,7 @@ end
 DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** Self-managed
-
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/423459) in GitLab 17.3.
+**Status:** Beta
 
 The metadata database enables many new registry features, including
 online garbage collection, and increases the efficiency of many registry operations.
@@ -1200,16 +1202,16 @@ To enable the read-only mode:
 1. In `/etc/gitlab/gitlab.rb`, specify the read-only mode:
 
    ```ruby
-   registry['storage'] = {
-     'filesystem' => {
-       'rootdirectory' => "<your_registry_storage_path>"
-     },
-     'maintenance' => {
-       'readonly' => {
-         'enabled' => true
+     registry['storage'] = {
+       'filesystem' => {
+         'rootdirectory' => "<your_registry_storage_path>"
+       },
+       'maintenance' => {
+         'readonly' => {
+           'enabled' => true
+         }
        }
      }
-   }
    ```
 
 1. Save and reconfigure GitLab:
@@ -1235,16 +1237,16 @@ To enable the read-only mode:
 1. Once done, in `/etc/gitlab/gitlab.rb` change it back to read-write mode:
 
    ```ruby
-   registry['storage'] = {
-     'filesystem' => {
-       'rootdirectory' => "<your_registry_storage_path>"
-     },
-     'maintenance' => {
-       'readonly' => {
-         'enabled' => false
-       }
-     }
-   }
+    registry['storage'] = {
+      'filesystem' => {
+        'rootdirectory' => "<your_registry_storage_path>"
+      },
+      'maintenance' => {
+        'readonly' => {
+          'enabled' => false
+        }
+      }
+    }
    ```
 
 1. Save and reconfigure GitLab:
@@ -1285,10 +1287,18 @@ itself on the system so that the `gitlab-ctl` command can bring the registry ser
 Also, there's no way to save progress or results during the mark phase of the process. Only once
 blobs start being deleted is anything permanent done.
 
-### Continuous zero-downtime garbage collection
+### Continuous Zero-Downtime Garbage Collection
+
+DETAILS:
+**Status:** Beta
 
 You can run garbage collection in the background without the need to schedule it or require read-only mode,
 if you migrate to the [metadata database](container_registry_metadata_database.md).
+
+NOTE:
+If you would like to try this [beta feature](../../policy/experiment-beta-support.md#beta),
+you should review the [known limitations](container_registry_metadata_database.md#known-limitations). If you have any feedback,
+you can let us know in the [feedback issue](https://gitlab.com/gitlab-org/gitlab/-/issues/423459).
 
 ## Configure GitLab and Registry to run on separate nodes (Linux package installations)
 
@@ -1596,7 +1606,7 @@ project or branch name. Special characters can include:
 To get around this, you can [change the group path](../../user/group/manage.md#change-a-groups-path),
 [change the project path](../../user/project/working_with_projects.md#rename-a-repository) or change the
 branch name. Another option is to create a [push rule](../../user/project/repository/push_rules.md) to prevent
-this error for the entire instance.
+this at the instance level.
 
 ### Image push errors
 

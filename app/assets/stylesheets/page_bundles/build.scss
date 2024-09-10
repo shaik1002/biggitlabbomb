@@ -61,7 +61,7 @@
 
   .header-content {
     a {
-      color: var(--gl-text-color-default);
+      color: var(--gl-text-color, $gl-text-color);
 
       &:hover {
         color: var(--blue-600, $blue-600);
@@ -186,7 +186,8 @@
 
 .job-log-line {
   display: flex;
-  padding: 0 $gl-padding-8;
+  padding: 1px $gl-padding-8 1px $gl-padding-8;
+  min-height: $gl-line-height-20;
 }
 
 .job-log-line-number {
@@ -215,17 +216,6 @@
   display: none;
   @include media-breakpoint-up(sm) {
     display: block;
-  }
-}
-
-.job-log-line-content {
-  flex-grow: 1;
-  white-space: pre-wrap;
-
-  span {
-    // Our default 1.5 line-height leave gaps between lines with `xterm-bg` backgrounds classes.
-    // Add extra padding to fill the line. Helps with ANSI art.
-    padding: 1.25px 0;
   }
 }
 

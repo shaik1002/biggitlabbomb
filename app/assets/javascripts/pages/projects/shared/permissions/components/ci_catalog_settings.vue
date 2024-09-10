@@ -43,8 +43,9 @@ const i18n = {
   ),
 };
 
+// eslint-disable-next-line local-rules/require-valid-help-page-path
 const ciCatalogHelpPath = helpPagePath('ci/components/index', {
-  anchor: 'cicd-catalog',
+  anchor: 'components-catalog',
 });
 
 const releasesHelpPath = helpPagePath('user/project/releases/release_cicd_examples');
@@ -152,7 +153,7 @@ export default {
   <div>
     <gl-loading-icon v-if="isLoading" />
     <div v-else data-testid="ci-catalog-settings">
-      <div class="gl-flex">
+      <div class="gl-display-flex">
         <label class="gl-mb-1 gl-mr-3">
           {{ $options.i18n.ciCatalogLabel }}
         </label>

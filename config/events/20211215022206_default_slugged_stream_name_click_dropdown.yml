@@ -1,4 +1,4 @@
-description: "Select stream from dropdown"
+description: "Selec stream from dropdown"
 category: default
 action: click_dropdown
 extra_properties:

@@ -1,7 +1,7 @@
-query savedReplies($first: Int, $last: Int, $before: String, $after: String) {
+query savedReplies($after: String = "", $before: String = "") {
   object: currentUser {
     id
-    savedReplies(first: $first, last: $last, after: $after, before: $before) {
+    savedReplies(after: $after, before: $before) {
       nodes {
         id
         name

@@ -12,7 +12,7 @@ query requestingReview(
 ) {
   currentUser {
     id
-    mergeRequests: assignedMergeRequests(
+    assignedMergeRequests(
       state: $state
       reviewState: $reviewState
       reviewStates: $reviewStates
@@ -20,7 +20,6 @@ query requestingReview(
       mergedAfter: $mergedAfter
       first: $perPage
       after: $afterCursor
-      sort: UPDATED_DESC
     ) {
       count
       pageInfo {

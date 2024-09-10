@@ -1,17 +1,13 @@
 <script>
-import { GlCollapsibleListbox, GlSearchBoxByType } from '@gitlab/ui';
+import { GlCard, GlIcon, GlCollapsibleListbox, GlSearchBoxByType } from '@gitlab/ui';
 import { parseBoolean, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { createAlert } from '~/alert';
 import { __, sprintf } from '~/locale';
-import {
-  fetchProjectGroups,
-  fetchAllGroups,
-  fetchGroupsWithProjectAccess,
-  fetchProjects,
-  fetchUsers,
-  fetchAvailableDeployKeys,
-} from '~/vue_shared/components/list_selector/api';
+import { ACCESS_LEVEL_REPORTER_INTEGER } from '~/access_level/constants';
+import groupsAutocompleteQuery from '~/graphql_shared/queries/groups_autocomplete.query.graphql';
+import Api from '~/api';
+import { getProjects } from '~/rest_api';
 import { CONFIG } from './constants';
 
 const I18N = {
@@ -20,34 +16,14 @@ const I18N = {
   apiErrorMessage: __('An error occurred while fetching. Please try again.'),
 };
 
-/**
- * Renders a selector and displays a list of selected items.
- * Selected items can be:
- * - users
- * - projects
- * - groups
- * - deploy keys
- *
- *
- * For groups type, there are three different APIs you can use:
- * - `fetchAllGroups()` (default)
- *   - uses GraphQL `groupsAutocompleteQuery`
- * - `fetchProjectGroups()`
- *   - when `isProjectNamespace` equals `true`,
- *   - uses `Api.projectGroups()` with parameters `{with_shared: true, shared_min_access_level: ACCESS_LEVEL_REPORTER_INTEGER}`
- * - `fetchGroupsWithProjectAccess()`
- *   - when `isGroupsWithProjectAccess` equals `true`,
- *   - GET Request `autocomplete/project_groups.json` to fetch groups invited to the project
- *
- */
-
 export default {
   name: 'ListSelector',
   i18n: I18N,
   components: {
+    GlCard,
+    GlIcon,
     GlSearchBoxByType,
     GlCollapsibleListbox,
-    CrudComponent,
   },
   props: {
     type: {
@@ -69,7 +45,7 @@ export default {
       required: false,
       default: null,
     },
-    projectId: {
+    groupId: {
       type: Number,
       required: false,
       default: null,
@@ -90,11 +66,6 @@ export default {
       default: false,
     },
     isProjectScoped: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    isGroupsWithProjectAccess: {
       type: Boolean,
       required: false,
       default: false,
@@ -134,10 +105,7 @@ export default {
     filteredItems() {
       // Filter out selected items
       return this.items.filter(
-        (item) =>
-          !this.selectedItems.some((selectedItem) => {
-            return selectedItem.id === item.id;
-          }),
+        (item) => !this.selectedItems.some((selectedItem) => selectedItem.id === item.id),
       );
     },
   },
@@ -165,30 +133,85 @@ export default {
       }
     },
     async fetchUsersBySearchTerm(search) {
-      return fetchUsers(this.projectPath, search, this.usersQueryOptions);
+      const users = await Api.projectUsers(this.projectPath, search, this.usersQueryOptions);
+
+      return users?.map((user) => ({
+        text: user.name,
+        value: user.username,
+        ...this.convertToCamelCase(user),
+      }));
     },
     async fetchGroupsBySearchTerm(search) {
       let groups = [];
+      if (this.groupId) {
+        groups = await this.fetchSubgroupsBySearchTerm(search);
+        return groups;
+      }
       if (parseBoolean(this.isProjectNamespace)) {
-        groups = await fetchProjectGroups(this.projectPath, search);
-      } else if (this.isGroupsWithProjectAccess) {
-        groups = await fetchGroupsWithProjectAccess(this.projectId, search);
+        groups = await this.fetchProjectGroups(search);
       } else {
-        groups = await fetchAllGroups(this.$apollo, search);
+        groups = await this.fetchAllGroups(search);
       }
 
       return groups;
     },
-    fetchDeployKeysBySearchTerm(search) {
-      return fetchAvailableDeployKeys(this.$apollo, this.projectPath, search);
+    fetchProjectGroups(search) {
+      return Api.projectGroups(this.projectPath, {
+        search,
+        with_shared: true,
+        shared_min_access_level: ACCESS_LEVEL_REPORTER_INTEGER,
+      }).then((data) =>
+        data?.map((group) => ({
+          text: group.full_name,
+          value: group.name,
+          ...this.convertToCamelCase(group),
+        })),
+      );
     },
-    fetchProjectsBySearchTerm(search) {
-      return fetchProjects(search);
+    fetchAllGroups(search) {
+      return this.$apollo
+        .query({
+          query: groupsAutocompleteQuery,
+          variables: { search },
+        })
+        .then(({ data }) =>
+          data?.groups.nodes.map((group) => ({
+            text: group.fullName,
+            value: group.name,
+            ...group,
+            id: getIdFromGraphQLId(group.id),
+            type: 'group',
+          })),
+        );
+    },
+    async fetchSubgroupsBySearchTerm(search) {
+      let groups = [];
+      const subgroups = await Api.groupSubgroups(this.groupId, search);
+      groups = subgroups?.data || [];
+      return groups?.map((group) => ({
+        text: group.fullName,
+        value: group.name,
+        type: 'group',
+        ...group,
+      }));
+    },
+    fetchDeployKeysBySearchTerm() {
+      // TODO - implement API request (follow-up)
+      // https://gitlab.com/gitlab-org/gitlab/-/issues/432494
+    },
+    async fetchProjectsBySearchTerm(search) {
+      const response = await getProjects(search, { membership: false });
+      const projects = response?.data || [];
+
+      return projects.map((project) => ({
+        ...this.convertToCamelCase(project),
+        text: project.name,
+        value: project.id,
+        type: 'project',
+      }));
     },
     getItemByKey(key) {
-      return this.items.find((item) => {
-        return item[this.config.filterKey] === key;
-      });
+      return this.items.find((item) => item[this.config.filterKey] === key);
     },
     handleSelectItem(key) {
       this.$emit('select', this.getItemByKey(key));
@@ -213,7 +236,16 @@ export default {
 </script>
 
 <template>
-  <crud-component :title="config.title" :count="selectedItems.length" :icon="config.icon">
+  <gl-card header-class="gl-new-card-header gl-border-none" body-class="gl-card-footer">
+    <template #header
+      ><strong data-testid="list-selector-title"
+        >{{ config.title }}
+        <span class="gl-ml-3 gl-text-gray-700"
+          ><gl-icon :name="config.icon" /> {{ selectedItems.length }}</span
+        ></strong
+      ></template
+    >
+
     <div class="gl-flex gl-gap-3" :class="{ 'gl-mb-4': selectedItems.length }">
       <gl-collapsible-listbox
         ref="results"
@@ -262,6 +294,6 @@ export default {
       />
     </div>
 
-    <div v-else class="gl-mt-5 gl-text-subtle">{{ emptyPlaceholder }}</div>
-  </crud-component>
+    <div v-else class="gl-mt-5 gl-text-secondary">{{ emptyPlaceholder }}</div>
+  </gl-card>
 </template>

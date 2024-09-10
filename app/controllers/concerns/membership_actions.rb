@@ -163,15 +163,11 @@ module MembershipActions
   end
 
   def already_a_member!
-    member = members.with_user(current_user)
-    if member.present?
-      redirect_to polymorphic_path(membershipable), notice: _('You already have access.')
-    else
-      requester = requesters.with_user(current_user)
-      return unless requester.present?
+    member = members_and_requesters.find_by(user_id: current_user.id) # rubocop: disable CodeReuse/ActiveRecord
+    return if member.nil?
 
-      redirect_to polymorphic_path(membershipable), notice: _('You have already requested access.')
-    end
+    message = member.request? ? _('You have already requested access.') : _('You already have access.')
+    redirect_to polymorphic_path(membershipable), notice: message
   end
 
   private
@@ -189,6 +185,8 @@ module MembershipActions
   end
 
   def shared_members_relations
+    return [] unless Feature.enabled?(:webui_members_inherited_users, current_user)
+
     project_relations = [:invited_groups, :shared_into_ancestors]
     [:shared_from_groups, *(project_relations if params[:project_id])]
   end

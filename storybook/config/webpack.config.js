@@ -149,7 +149,6 @@ module.exports = function storybookWebpackConfig({ config }) {
       loaders: [
         'style-loader',
         'css-loader',
-        'postcss-loader',
         {
           loader: 'sass-loader',
           options: sassLoaderOptions,
@@ -171,11 +170,6 @@ module.exports = function storybookWebpackConfig({ config }) {
     {
       test: /marked\/.*\.js?$/,
       use: transpileDependencyConfig,
-    },
-    {
-      test: /\.mjs$/,
-      include: /node_modules/,
-      type: 'javascript/auto',
     },
   ];
 

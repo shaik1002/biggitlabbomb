@@ -30,12 +30,12 @@ module UsersHelper
     }) + content_tag(:p) { confirmation_link }
   end
 
-  def profile_actions(user)
-    return [] unless can?(current_user, :read_user_profile, user)
+  def profile_tabs
+    @profile_tabs ||= get_profile_tabs
+  end
 
-    return [:overview, :activity] if user.bot?
-
-    [:overview, :activity, :groups, :contributed, :projects, :starred, :snippets, :followers, :following]
+  def profile_tab?(tab)
+    profile_tabs.include?(tab)
   end
 
   def user_internal_regex_data
@@ -195,12 +195,6 @@ module UsersHelper
     }
   end
 
-  def has_contact_info?(user)
-    contact_fields = %i[bluesky discord linkedin mastodon skype twitter website_url]
-    has_contact = contact_fields.any? { |field| user.public_send(field).present? }  # rubocop:disable GitlabSecurity/PublicSend -- fields are controlled, it is safe.
-    has_contact || display_public_email?(user)
-  end
-
   def display_public_email?(user)
     user.public_email.present?
   end
@@ -249,13 +243,6 @@ module UsersHelper
     )
   end
 
-  def email_verification_token_expired?(email_sent_at:)
-    return false unless email_sent_at
-
-    token_valid_for = Users::EmailVerification::ValidateTokenService::TOKEN_VALID_FOR_MINUTES.minutes
-    (email_sent_at + token_valid_for).before?(Time.zone.now)
-  end
-
   private
 
   def admin_users_paths
@@ -289,6 +276,16 @@ module UsersHelper
     return ldap_blocked_badge if user.ldap_blocked?
 
     { text: s_('AdminUsers|Blocked'), variant: 'danger' }
+  end
+
+  def get_profile_tabs
+    tabs = []
+
+    if can?(current_user, :read_user_profile, @user)
+      tabs += [:overview, :activity, :groups, :contributed, :projects, :starred, :snippets, :followers, :following]
+    end
+
+    tabs
   end
 
   def get_current_user_menu_items

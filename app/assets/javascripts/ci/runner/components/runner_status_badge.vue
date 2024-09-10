@@ -122,8 +122,6 @@ export default {
     :icon="badge.icon"
     v-bind="$attrs"
   >
-    <span class="gl-truncate">
-      {{ badge.label }}
-    </span>
+    {{ badge.label }}
   </gl-badge>
 </template>

@@ -115,7 +115,7 @@ RSpec.describe 'Merge request > User sees discussions navigation', :js, feature_
       context 'with collapsed threads' do
         before do
           page.within(first_discussion_selector) do
-            click_button text: 'Collapse replies'
+            click_button 'Hide thread'
           end
         end
 

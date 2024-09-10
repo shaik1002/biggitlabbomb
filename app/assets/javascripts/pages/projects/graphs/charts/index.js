@@ -21,7 +21,6 @@ const reorderWeekDays = (weekDays, firstDayOfWeek = 0) => {
     return weekDays;
   }
 
-  // eslint-disable-next-line max-params
   return Object.keys(weekDays).reduce((acc, dayName, idx, arr) => {
     const reorderedDayName = arr[(idx + firstDayOfWeek) % arr.length];
 

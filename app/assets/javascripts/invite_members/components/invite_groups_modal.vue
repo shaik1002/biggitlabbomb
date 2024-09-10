@@ -129,7 +129,7 @@ export default {
     closeModal() {
       this.$root.$emit(BV_HIDE_MODAL, this.modalId);
     },
-    sendInvite({ accessLevel, expiresAt, memberRoleId }) {
+    sendInvite({ accessLevel, expiresAt }) {
       this.invalidFeedbackMessage = '';
       this.isLoading = true;
 
@@ -142,7 +142,6 @@ export default {
         group_id: this.groupToBeSharedWith.id,
         group_access: accessLevel,
         expires_at: expiresAt,
-        member_role_id: memberRoleId,
       })
         .then(() => {
           this.onInviteSuccess();

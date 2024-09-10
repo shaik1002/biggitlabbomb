@@ -20,7 +20,6 @@ Bundler.require(*Rails.groups)
 module Gitlab
   class Application < Rails::Application
     config.load_defaults 7.0
-
     # This section contains configuration from Rails upgrades to override the new defaults so that we
     # keep existing behavior.
     #
@@ -38,14 +37,17 @@ module Gitlab
     config.active_record.automatic_scope_inversing = nil # New default is true
     config.active_record.verify_foreign_keys_for_fixtures = nil # New default is true
     config.active_record.partial_inserts = true # New default is false
+    config.active_support.cache_format_version = nil # New default is 7.0
+    config.active_support.disable_to_s_conversion = false # New default is true
     config.active_support.executor_around_test_case = nil # New default is true
     config.active_support.isolation_level = nil # New default is thread
     config.active_support.key_generator_hash_digest_class = nil # New default is OpenSSL::Digest::SHA256
+    config.active_support.use_rfc4122_namespaced_uuids = nil # New default is true
 
     # Rails 6.1
     config.action_dispatch.cookies_same_site_protection = nil # New default is :lax
-    config.action_view.preload_links_header = false
     ActiveSupport.utc_to_local_returns_utc_offset_times = false
+    config.action_view.preload_links_header = false
 
     # Rails 5.2
     config.action_dispatch.use_authenticated_cookie_encryption = false
@@ -59,6 +61,7 @@ module Gitlab
     # Rails 5.0
     config.action_controller.per_form_csrf_tokens = false
     config.action_controller.forgery_protection_origin_check = false
+    ActiveSupport.to_time_preserves_timezone = false
 
     require_dependency Rails.root.join('lib/gitlab')
     require_dependency Rails.root.join('lib/gitlab/action_cable/config')
@@ -84,15 +87,7 @@ module Gitlab
     require_dependency Rails.root.join('lib/gitlab/runtime')
     require_dependency Rails.root.join('lib/gitlab/patch/database_config')
     require_dependency Rails.root.join('lib/gitlab/patch/redis_cache_store')
-    require_dependency Rails.root.join('lib/gitlab/patch/old_redis_cache_store')
     require_dependency Rails.root.join('lib/gitlab/exceptions_app')
-
-    unless ::Gitlab.next_rails?
-      config.active_support.cache_format_version = nil
-      config.active_support.disable_to_s_conversion = false # New default is true
-      config.active_support.use_rfc4122_namespaced_uuids = true
-      ActiveSupport.to_time_preserves_timezone = false
-    end
 
     config.exceptions_app = Gitlab::ExceptionsApp.new(Gitlab.jh? ? Rails.root.join('jh/public') : Rails.public_path)
 
@@ -124,13 +119,7 @@ module Gitlab
 
     config.generators.templates.push("#{config.root}/generator_templates")
 
-    foss_eager_load_paths =
-      if Gitlab.next_rails?
-        config.all_eager_load_paths.dup.freeze
-      else
-        config.eager_load_paths.dup.freeze
-      end
-
+    foss_eager_load_paths = config.eager_load_paths.dup.freeze
     load_paths = ->(dir:) do
       ext_paths = foss_eager_load_paths.each_with_object([]) do |path, memo|
         ext_path = config.root.join(dir, Pathname.new(path).relative_path_from(config.root))
@@ -242,8 +231,10 @@ module Gitlab
       redirect
       question
       SAMLResponse
-      selectedText
     ]
+
+    # This config option can be removed after Rails 7.1 by https://gitlab.com/gitlab-org/gitlab/-/issues/416270
+    config.active_support.use_rfc4122_namespaced_uuids = true
 
     # Enable escaping HTML in JSON.
     config.active_support.escape_html_entities_in_json = true
@@ -287,6 +278,7 @@ module Gitlab
     config.assets.precompile << "mailers/notify.css"
     config.assets.precompile << "mailers/notify_enhanced.css"
     config.assets.precompile << "page_bundles/_mixins_and_variables_and_functions.css"
+    config.assets.precompile << "page_bundles/admin/application_settings_metrics_and_profiling.css"
     config.assets.precompile << "page_bundles/admin/elasticsearch_form.css"
     config.assets.precompile << "page_bundles/admin/geo_sites.css"
     config.assets.precompile << "page_bundles/admin/geo_replicable.css"
@@ -325,6 +317,7 @@ module Gitlab
     config.assets.precompile << "page_bundles/issues_list.css"
     config.assets.precompile << "page_bundles/issues_show.css"
     config.assets.precompile << "page_bundles/jira_connect.css"
+    config.assets.precompile << "page_bundles/learn_gitlab.css"
     config.assets.precompile << "page_bundles/log_viewer.css"
     config.assets.precompile << "page_bundles/login.css"
     config.assets.precompile << "page_bundles/members.css"
@@ -336,7 +329,6 @@ module Gitlab
     config.assets.precompile << "page_bundles/milestone.css"
     config.assets.precompile << "page_bundles/ml_experiment_tracking.css"
     config.assets.precompile << "page_bundles/new_namespace.css"
-    config.assets.precompile << "page_bundles/notes_shared.css"
     config.assets.precompile << "page_bundles/notifications.css"
     config.assets.precompile << "page_bundles/oncall_schedules.css"
     config.assets.precompile << "page_bundles/operations.css"
@@ -363,6 +355,7 @@ module Gitlab
     config.assets.precompile << "page_bundles/runners.css"
     config.assets.precompile << "page_bundles/search.css"
     config.assets.precompile << "page_bundles/security_dashboard.css"
+    config.assets.precompile << "page_bundles/security_discover.css"
     config.assets.precompile << "page_bundles/settings.css"
     config.assets.precompile << "page_bundles/signup.css"
     config.assets.precompile << "page_bundles/terminal.css"
@@ -449,7 +442,7 @@ module Gitlab
 
     # Allow access to GitLab API from other domains
     config.middleware.insert_before Warden::Manager, Rack::Cors do
-      headers_to_expose = %w[Link X-Total X-Total-Pages X-Per-Page X-Page X-Next-Page X-Prev-Page X-Gitlab-Blob-Id X-Gitlab-Commit-Id X-Gitlab-Content-Sha256 X-Gitlab-Encoding X-Gitlab-File-Name X-Gitlab-File-Path X-Gitlab-Last-Commit-Id X-Gitlab-Ref X-Gitlab-Size X-Request-Id ETag]
+      headers_to_expose = %w[Link X-Total X-Total-Pages X-Per-Page X-Page X-Next-Page X-Prev-Page X-Gitlab-Blob-Id X-Gitlab-Commit-Id X-Gitlab-Content-Sha256 X-Gitlab-Encoding X-Gitlab-File-Name X-Gitlab-File-Path X-Gitlab-Last-Commit-Id X-Gitlab-Ref X-Gitlab-Size X-Request-Id]
 
       allow do
         origins Gitlab.config.gitlab.url
@@ -537,12 +530,7 @@ module Gitlab
     end
 
     # Use caching across all environments
-    if ::Gitlab.next_rails?
-      ActiveSupport::Cache::RedisCacheStore.prepend(Gitlab::Patch::RedisCacheStore)
-    else
-      ActiveSupport::Cache::RedisCacheStore.prepend(Gitlab::Patch::OldRedisCacheStore)
-    end
-
+    ActiveSupport::Cache::RedisCacheStore.prepend(Gitlab::Patch::RedisCacheStore)
     config.cache_store = :redis_cache_store, Gitlab::Redis::Cache.active_support_config
 
     config.active_job.queue_adapter = :sidekiq

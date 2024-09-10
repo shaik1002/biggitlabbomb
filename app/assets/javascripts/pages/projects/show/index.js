@@ -10,7 +10,6 @@ import initReadMore from '~/read_more';
 import initAmbiguousRefModal from '~/ref/init_ambiguous_ref_modal';
 import CodeDropdown from '~/vue_shared/components/code_dropdown/code_dropdown.vue';
 import initSourceCodeDropdowns from '~/vue_shared/components/download_dropdown/init_download_dropdowns';
-import EmptyProject from '~/pages/projects/show/empty_project';
 import { initHomePanel } from '../home_panel';
 
 // Project show page loads different overview content based on user preferences
@@ -82,15 +81,6 @@ const initCodeDropdown = () => {
   });
 };
 
-const initEmptyProjectTabs = () => {
-  const emptyProjectEl = document.querySelector('#js-project-show-empty-page');
-
-  if (!emptyProjectEl) return;
-
-  new EmptyProject(); // eslint-disable-line no-new
-};
-
 initCodeDropdown();
 initSourceCodeDropdowns();
 initFindFileShortcut();
-initEmptyProjectTabs();

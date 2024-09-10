@@ -248,10 +248,6 @@ module SearchHelper
     end
   end
 
-  def should_show_zoekt_results?(_scope, _search_type)
-    false
-  end
-
   private
 
   # Autocomplete results for various settings pages
@@ -374,11 +370,7 @@ module SearchHelper
   end
 
   def users_autocomplete(term, limit = 5)
-    unless current_user &&
-        Ability.allowed?(current_user, :read_users_list) &&
-        Feature.enabled?(:global_search_users_tab, current_user, type: :ops)
-      return []
-    end
+    return [] unless current_user && Ability.allowed?(current_user, :read_users_list)
 
     ::SearchService
       .new(current_user, { scope: 'users', per_page: limit, search: term })

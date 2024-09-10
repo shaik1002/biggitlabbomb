@@ -41,7 +41,7 @@ module Projects
           user: build.user
         )
 
-        if extra_deployment?
+        if deployment.path_prefix.present?
           track_internal_event(
             'create_pages_extra_deployment',
             project: project,
@@ -59,14 +59,6 @@ module Projects
     end
 
     private
-
-    def extra_deployment?
-      path_prefix.present?
-    end
-
-    def path_prefix
-      ::Gitlab::Utils.slugify(build.pages&.fetch(:path_prefix, nil) || '')
-    end
 
     def success
       commit_status.success

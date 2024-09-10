@@ -10,7 +10,6 @@
   overflow-y: auto;
   transition: box-shadow ease-in-out 0.15s;
 
-  // stylelint-disable-next-line gitlab/no-gl-class
   .gl-dark & {
     width: calc(100% - 6px);
     margin: 2px 3px;
@@ -80,15 +79,6 @@
     height: 8px;
     background: $blue-200;
     outline: 1px solid $white;
-
-    &::before {
-      content: '';
-      position: absolute;
-      width: 24px;
-      height: 24px;
-      top: -8px;
-      left: -8px;
-    }
   }
 
   .image-resize-nw {
@@ -305,7 +295,6 @@
   }
 }
 
-// stylelint-disable-next-line gitlab/no-gl-class
 .gl-dark .ProseMirror {
   .suggestion-added-input,
   .suggestion-deleted {

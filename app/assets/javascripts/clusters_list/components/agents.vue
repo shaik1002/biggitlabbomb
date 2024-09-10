@@ -7,7 +7,6 @@ import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import { AGENT_FEEDBACK_ISSUE, AGENT_FEEDBACK_KEY } from '../constants';
 import getAgentsQuery from '../graphql/queries/get_agents.query.graphql';
-import getTreeList from '../graphql/queries/get_tree_list.query.graphql';
 import { getAgentLastContact, getAgentStatus } from '../clusters_util';
 import AgentEmptyState from './agent_empty_state.vue';
 import AgentTable from './agent_table.vue';
@@ -24,27 +23,8 @@ export default {
   AGENT_FEEDBACK_ISSUE,
   AGENT_FEEDBACK_KEY,
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     agents: {
       query: getAgentsQuery,
-      variables() {
-        return {
-          projectPath: this.projectPath,
-        };
-      },
-      update(data) {
-        return data;
-      },
-      result() {
-        this.emitAgentsLoaded();
-      },
-      error() {
-        this.queryErrored = true;
-      },
-    },
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
-    treeList: {
-      query: getTreeList,
       variables() {
         return {
           defaultBranchName: this.defaultBranchName,
@@ -54,6 +34,12 @@ export default {
       update(data) {
         this.updateTreeList(data);
         return data;
+      },
+      result() {
+        this.emitAgentsLoaded();
+      },
+      error() {
+        this.queryErrored = true;
       },
     },
   },

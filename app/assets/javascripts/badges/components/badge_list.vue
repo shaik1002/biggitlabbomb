@@ -31,8 +31,6 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   i18n: {
-    edit: __('Edit'),
-    delete: __('Delete'),
     emptyGroupMessage: s__('Badges|This group has no badges. Add an existing badge or create one.'),
     emptyProjectMessage: s__('Badges|This project has no badges. Start by adding a new badge.'),
   },
@@ -134,31 +132,26 @@ export default {
         </template>
 
         <template #cell(actions)="{ item }">
-          <div
-            v-if="canEditBadge(item)"
-            class="table-action-buttons gl-flex gl-justify-end gl-gap-2"
-            data-testid="badge-actions"
-          >
+          <div v-if="canEditBadge(item)" class="table-action-buttons" data-testid="badge-actions">
             <gl-button
-              v-gl-tooltip
+              v-gl-modal.edit-badge-modal
               :disabled="item.isDeleting"
-              category="tertiary"
+              class="gl-mr-3"
+              variant="default"
               icon="pencil"
               size="medium"
-              :title="$options.i18n.edit"
-              :aria-label="$options.i18n.edit"
+              :aria-label="__('Edit')"
               data-testid="edit-badge-button"
               @click="editBadge(item)"
             />
             <gl-button
-              v-gl-tooltip
               v-gl-modal.delete-badge-modal
               :disabled="item.isDeleting"
-              category="tertiary"
+              category="secondary"
+              variant="danger"
               icon="remove"
               size="medium"
-              :title="$options.i18n.delete"
-              :aria-label="$options.i18n.delete"
+              :aria-label="__('Delete')"
               data-testid="delete-badge"
               @click="updateBadgeInModal(item)"
             />
@@ -172,6 +165,10 @@ export default {
         v-model="currentPage"
         :per-page="$options.PAGE_SIZE"
         :total-items="badges.length"
+        :prev-text="__('Prev')"
+        :next-text="__('Next')"
+        :label-next-page="__('Go to next page')"
+        :label-prev-page="__('Go to previous page')"
         align="center"
         class="gl-mt-5"
       />

@@ -40,18 +40,15 @@ RSpec.describe Gitlab::ImportExport::FileImporter, feature_category: :importers 
 
     subject(:perform_import) do
       described_class.import(
-        importable: project,
+        importable: build(:project, import_export_upload: import_export_upload),
         archive_file: archive_file,
         shared: shared,
-        tmpdir: tmpdir,
-        user: user
+        tmpdir: tmpdir
       )
     end
 
     let(:archive_file) { nil }
-    let(:project) { create(:project) }
-    let(:user) { project.creator }
-    let!(:import_export_upload) { create(:import_export_upload, project: project, user: user) }
+    let(:import_export_upload) { build(:import_export_upload) }
     let(:tmpdir) { Dir.mktmpdir }
 
     shared_examples 'it cleans the target directory' do
@@ -103,7 +100,7 @@ RSpec.describe Gitlab::ImportExport::FileImporter, feature_category: :importers 
         expect_next(described_class)
           .to receive(:download_or_copy_upload)
           .with(
-            an_instance_of(ImportExportUploader),
+            import_export_upload.import_file,
             a_string_matching(expected_destination_regex),
             kind_of(Hash)
           )
@@ -139,10 +136,8 @@ RSpec.describe Gitlab::ImportExport::FileImporter, feature_category: :importers 
   end
 
   context 'as normal run' do
-    let(:project) { build(:project) }
-
     before do
-      described_class.import(importable: project, archive_file: '', shared: shared, user: project.creator)
+      described_class.import(importable: build(:project), archive_file: '', shared: shared)
     end
 
     it 'removes symlinks in root folder' do
@@ -181,18 +176,18 @@ RSpec.describe Gitlab::ImportExport::FileImporter, feature_category: :importers 
       include AfterNextHelpers
 
       it 'downloads the file from a remote object storage' do
-        project = create(:project)
-        create(:import_export_upload, project: project, user: project.creator)
+        import_export_upload = build(:import_export_upload)
+        project = build(:project, import_export_upload: import_export_upload)
 
         expect_next(described_class)
           .to receive(:download_or_copy_upload)
           .with(
-            anything,
+            import_export_upload.import_file,
             kind_of(String),
             size_limit: Gitlab::CurrentSettings.current_application_settings.max_import_remote_file_size.megabytes
           )
 
-        described_class.import(importable: project, archive_file: nil, shared: shared, user: project.creator)
+        described_class.import(importable: project, archive_file: nil, shared: shared)
       end
     end
 
@@ -201,9 +196,8 @@ RSpec.describe Gitlab::ImportExport::FileImporter, feature_category: :importers 
 
       it 'downloads the file from a remote object storage' do
         file_url = 'https://remote.url/file'
-        project = create(:project)
-        create(:import_export_upload, remote_import_url: file_url, project: project,
-          user: project.creator)
+        import_export_upload = build(:import_export_upload, remote_import_url: file_url)
+        project = build(:project, import_export_upload: import_export_upload)
 
         expect_next(described_class)
           .to receive(:download)
@@ -213,17 +207,13 @@ RSpec.describe Gitlab::ImportExport::FileImporter, feature_category: :importers 
             size_limit: Gitlab::CurrentSettings.current_application_settings.max_import_remote_file_size.megabytes
           )
 
-        described_class.import(importable: project, archive_file: nil, shared: shared, user: project.creator)
+        described_class.import(importable: project, archive_file: nil, shared: shared)
       end
     end
   end
 
   context 'when an error occurs' do
-    let(:project) { build(:project) }
-
-    subject(:import) do
-      described_class.import(importable: project, archive_file: '', shared: shared, user: project.creator)
-    end
+    subject(:import) { described_class.import(importable: build(:project), archive_file: '', shared: shared) }
 
     before do
       allow_next_instance_of(described_class) do |instance|
@@ -297,9 +287,7 @@ RSpec.describe Gitlab::ImportExport::FileImporter, feature_category: :importers 
     let(:shared) { Gitlab::ImportExport::Shared.new(project) }
     let(:filepath) { File.join(Dir.tmpdir, 'file_importer_spec.gz') }
 
-    subject(:file_importer) do
-      described_class.new(importable: project, archive_file: filepath, shared: shared, user: project.creator)
-    end
+    subject(:file_importer) { described_class.new(importable: project, archive_file: filepath, shared: shared) }
 
     before do
       Zlib::GzipWriter.open(filepath) do |gz|

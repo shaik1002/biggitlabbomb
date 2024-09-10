@@ -8,9 +8,7 @@ module Layouts
     # @param [String] testid
     # @param [Boolean] expanded
     # @param [Hash] button_options
-    def initialize(
-      heading, description: nil, id: nil, testid: nil, expanded: nil, button_options: {},
-      css_class: nil)
+    def initialize(heading, description: nil, id: nil, testid: nil, expanded: nil, button_options: {}, css_class: nil)
       @heading = heading
       @description = description
       @id = id
@@ -22,7 +20,6 @@ module Layouts
 
     renders_one :heading
     renders_one :description
-    renders_one :callout
     renders_one :body
 
     private

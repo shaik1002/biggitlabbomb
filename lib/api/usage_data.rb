@@ -4,42 +4,9 @@ module API
   class UsageData < ::API::Base
     include APIGuard
 
-    MAXIMUM_TRACKED_EVENTS = 50
-
     before { authenticate_non_get! }
 
     feature_category :service_ping
-
-    helpers do
-      params :event_params do
-        requires :event, type: String, desc: 'The event name that should be tracked',
-          documentation: { example: 'i_quickactions_page' }
-        optional :namespace_id, type: Integer, desc: 'Namespace ID',
-          documentation: { example: 1234 }
-        optional :project_id, type: Integer, desc: 'Project ID',
-          documentation: { example: 1234 }
-        optional :additional_properties, type: Hash, desc: 'Additional properties to be tracked',
-          documentation: { example: { label: 'login_button', value: 1 } }
-      end
-
-      def process_event(params)
-        event_name = params[:event]
-        namespace_id = params[:namespace_id]
-        project_id = params[:project_id]
-        additional_properties = params.fetch(:additional_properties, {}).symbolize_keys
-
-        Gitlab::Tracking::AiTracking.track_event(event_name, additional_properties.merge(user: current_user))
-
-        track_event(
-          event_name,
-          send_snowplow_event: false,
-          user: current_user,
-          namespace_id: namespace_id,
-          project_id: project_id,
-          additional_properties: additional_properties
-        )
-      end
-    end
 
     namespace 'usage_data' do
       resource :service_ping do
@@ -50,7 +17,7 @@ module API
         end
 
         desc 'Get the latest ServicePing payload' do
-          detail 'Introduces in Gitlab 16.9. Requires personal access token with read_service_ping scope.'
+          detail 'Introduces in Gitlab 16.9. Requires Personal Access Token with read_service_ping scope.'
           success code: 200
           failure [
             { code: 401, message: '401 Unauthorized' },
@@ -112,55 +79,48 @@ module API
         status :ok
       end
 
-      resource :track_event do
-        allow_access_with_scope :ai_workflows
-
-        desc 'Track gitlab internal events' do
-          detail 'This feature was introduced in GitLab 16.2.'
-          success code: 200
-          failure [
-            { code: 401, message: 'Unauthorized' },
-            { code: 404, message: 'Not found' }
-          ]
-          tags %w[usage_data]
-        end
-
-        params do
-          use :event_params
-        end
-
-        post urgency: :low do
-          process_event(params)
-
-          status :ok
-        end
-      end
-
-      desc 'Track multiple gitlab internal events' do
-        detail 'This feature was introduced in GitLab 17.3.'
+      desc 'Track gitlab internal events' do
+        detail 'This feature was introduced in GitLab 16.2.'
         success code: 200
         failure [
-          { code: 400, message: 'Validation error' },
-          { code: 401, message: 'Unauthorized' }
+          { code: 401, message: 'Unauthorized' },
+          { code: 404, message: 'Not found' }
         ]
         tags %w[usage_data]
       end
       params do
-        requires :events, type: Array[JSON],
-          desc: "An array of internal events. Maximum #{MAXIMUM_TRACKED_EVENTS} events allowed." do
-          use :event_params
-        end
+        requires :event, type: String, desc: 'The event name that should be tracked',
+          documentation: { example: 'i_quickactions_page' }
+        optional :namespace_id, type: Integer, desc: 'Namespace ID',
+          documentation: { example: 1234 }
+        optional :project_id, type: Integer, desc: 'Project ID',
+          documentation: { example: 1234 }
       end
-      post 'track_events', urgency: :low do
-        if params[:events].count > MAXIMUM_TRACKED_EVENTS
-          render_api_error!("Maximum #{MAXIMUM_TRACKED_EVENTS} events allowed in one request.", :bad_request)
-        else
-          params[:events].each do |event_params|
-            process_event(event_params)
-          end
+      post 'track_event', urgency: :low do
+        event_name = params[:event]
+        namespace_id = params[:namespace_id]
+        project_id = params[:project_id]
+        additional_properties = params
+          .fetch(:additional_properties, Gitlab::InternalEvents::DEFAULT_ADDITIONAL_PROPERTIES)
+          .symbolize_keys
 
-          status :ok
+        unless Gitlab::Tracking::AiTracking.track_via_code_suggestions?(event_name, current_user)
+          Gitlab::Tracking::AiTracking.track_event(event_name, additional_properties.merge(user: current_user))
         end
+
+        internal_event_additional_props = additional_properties
+          .slice(*Gitlab::InternalEvents::ALLOWED_ADDITIONAL_PROPERTIES.keys)
+
+        track_event(
+          event_name,
+          send_snowplow_event: false,
+          user: current_user,
+          namespace_id: namespace_id,
+          project_id: project_id,
+          additional_properties: internal_event_additional_props
+        )
+
+        status :ok
       end
 
       desc 'Get a list of all metric definitions' do

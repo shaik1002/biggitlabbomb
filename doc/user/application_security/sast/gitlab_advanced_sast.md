@@ -9,33 +9,19 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 DETAILS:
 **Tier:** Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
+**Status:** Beta
 
 > - Introduced in GitLab 17.1 as an [experiment](../../../policy/experiment-beta-support.md) for Python.
-> - Support for Go and Java added in 17.2.
 > - [Changed](https://gitlab.com/gitlab-org/gitlab/-/issues/461859) to beta in GitLab 17.2.
-> - Support for JavaScript, TypeScript and C# added in 17.3.
-> - [Changed](https://gitlab.com/gitlab-org/gitlab/-/issues/474094) to GA in GitLab 17.3.
-> - Support for Java Server Pages (JSP) added in GitLab 17.4.
+
+NOTE:
+This analyzer is in [beta](../../../policy/experiment-beta-support.md)
+and is subject to the [GitLab Testing Agreement](https://handbook.gitlab.com/handbook/legal/testing-agreement/).
 
 GitLab Advanced SAST is a Static Application Security Testing (SAST) analyzer
 designed to discover vulnerabilities by performing cross-function and cross-file taint analysis.
 
-GitLab Advanced SAST is an opt-in feature.
-When it is enabled, the GitLab Advanced SAST analyzer scans all the files of the supported languages,
-using the GitLab Advanced SAST predefined ruleset.
-The Semgrep analyzer will not scan these files.
-
-All vulnerabilities identified by the GitLab Advanced SAST analyzer will be reported,
-including vulnerabilities previously reported by the Semgrep analyzer.
-An automated transition process is proposed for the future,
-in which the Vulnerability Management system will automatically de-duplicate findings
-that were identified by both the GitLab Advanced SAST analyzer and the Semgrep analyzer.
-It's proposed that the capability will be based on the advanced tracking algorithm
-and will keep the original record of the vulnerability
-(if it was first identified by Semgrep, then the Semgrep finding).
-
-NOTE:
-In case a duplicated vulnerability was already introduced (in the interim time until the deduplication is available),the deduplication capability will not deduplicate it. The capability will be relevant only for validating new vulnerabilities that are not already duplicated.
+During the Beta phase, we advise running it side-by-side with your existing SAST analyzer, if any.
 
 By following the paths user inputs take, the analyzer identifies potential points
 where untrusted data can influence the execution of your application in unsafe ways,
@@ -56,10 +42,7 @@ GitLab Advanced SAST supports the following languages with cross-function and cr
 
 - Python
 - Go
-- Java (JSP files are also supported)
-- JavaScript
-- TypeScript
-- C#
+- Java
 
 ## Configuration
 
@@ -81,19 +64,43 @@ To enable the Advanced SAST analyzer:
 1. Select **Build > Pipeline editor**.
 1. If no `.gitlab-ci.yml` file exists, select **Configure pipeline**, then delete the example
    content.
-1. Include a SAST template (if not already done), either `Jobs/SAST.gitlab-ci.yml` or `Jobs/SAST.latest.gitlab-ci.yml`.
-   **Note:** The `latest` templates can receive breaking changes in any release.
-1. Set the CI/CD variable `GITLAB_ADVANCED_SAST_ENABLED` to `true`.
+1. If there is already an include of `Jobs/SAST.latest.gitlab-ci.yml`,
+GitLab Advanced SAST is already configured.
+There is no additional step needed.
+1. If there is already an `include:` line, add `- template: Jobs/SAST.gitlab-ci.yml`
+   below that line then paste only the `gitlab-advanced-sast:` block to the bottom of the file,
+   otherwise paste the whole block to the bottom of the file.
 
-Here is a minimal YAML file for enabling GitLab Advanced SAST:
+   ```yaml
+   include:
+     - template: Jobs/SAST.gitlab-ci.yml
 
-```yaml
-include:
-  - template: Jobs/SAST.gitlab-ci.yml
-
-variables:
-  GITLAB_ADVANCED_SAST_ENABLED: 'true'
-```
+   gitlab-advanced-sast:
+     extends: .sast-analyzer
+     image:
+       name: "$SAST_ANALYZER_IMAGE"
+     variables:
+       SEARCH_MAX_DEPTH: 20
+       SAST_ANALYZER_IMAGE_TAG: 0
+       SAST_ANALYZER_IMAGE: "$SECURE_ANALYZERS_PREFIX/gitlab-advanced-sast:$SAST_ANALYZER_IMAGE_TAG$SAST_IMAGE_SUFFIX"
+     rules:
+       - if: $SAST_DISABLED == 'true' || $SAST_DISABLED == '1'
+         when: never
+       - if: $SAST_EXCLUDED_ANALYZERS =~ /gitlab-advanced-sast/
+         when: never
+       - if: $CI_PIPELINE_SOURCE == "merge_request_event"  # Add the job to merge request pipelines if there's an open merge request.
+         exists:
+           - '**/*.py'
+           - '**/*.go'
+           - '**/*.java'
+       - if: $CI_OPEN_MERGE_REQUESTS  # Don't add it to a *branch* pipeline if it's already in a merge request pipeline.
+         when: never
+       - if: $CI_COMMIT_BRANCH        # If there's no open merge request, add it to a *branch* pipeline instead.
+         exists:
+           - '**/*.py'
+           - '**/*.go'
+           - '**/*.java'
+   ```
 
 1. Select the **Validate** tab, then select **Validate pipeline**.
 

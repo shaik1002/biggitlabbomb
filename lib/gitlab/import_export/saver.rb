@@ -9,10 +9,9 @@ module Gitlab
         new(*args, **kwargs).save
       end
 
-      def initialize(exportable:, shared:, user:)
+      def initialize(exportable:, shared:)
         @exportable = exportable
         @shared = shared
-        @user = user
       end
 
       def save
@@ -78,7 +77,7 @@ module Gitlab
       def initialize_upload
         exportable_kind = @exportable.class.name.downcase
 
-        ImportExportUpload.find_or_initialize_by(Hash[exportable_kind, @exportable].merge(user: @user))
+        ImportExportUpload.find_or_initialize_by(Hash[exportable_kind, @exportable])
       end
 
       def log_export_results(message)

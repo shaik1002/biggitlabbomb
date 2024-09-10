@@ -22,7 +22,11 @@ $language-filter-max-height: 20rem;
   }
 
   mark {
-    @include str-highlighted;
+    position: relative;
+    background-color: $orange-100;
+    padding: 0;
+    box-shadow: 0 0 0 $gl-spacing-scale-1 $orange-100;
+    z-index: -1;
   }
 }
 
@@ -160,7 +164,7 @@ $language-filter-max-height: 20rem;
     .dropdown-header {
       // Necessary because deprecatedJQueryDropdown doesn't support a second style of headers
       font-weight: $gl-font-weight-bold;
-      color: var(--gl-text-color-strong);
+      color: var(--gl-text-color, $gl-text-color);
       font-size: $gl-font-size;
       line-height: 16px;
     }
@@ -195,7 +199,7 @@ $language-filter-max-height: 20rem;
       }
 
       .search-input {
-        color: var(--gl-text-color-default);
+        color: var(--gl-text-color, $gl-text-color);
         transition: color ease-in-out $default-transition-duration;
       }
 
@@ -271,6 +275,7 @@ $language-filter-max-height: 20rem;
 
   // stylelint-disable-next-line gitlab/no-gl-class
   .btn-search,
+  .btn-success,
   .dropdown-menu-toggle,
   .gl-dropdown {
     width: 100%;

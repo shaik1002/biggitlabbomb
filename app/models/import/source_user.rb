@@ -3,7 +3,6 @@
 module Import
   class SourceUser < ApplicationRecord
     include Gitlab::SQL::Pattern
-    include EachBatch
 
     self.table_name = 'import_source_users'
 
@@ -20,55 +19,31 @@ module Import
     belongs_to :namespace
 
     validates :namespace_id, :import_type, :source_hostname, :source_user_identifier, :status, presence: true
-    validates :placeholder_user_id, presence: true, unless: :completed?
-    validates :reassign_to_user_id, presence: true, if: -> {
-                                                          awaiting_approval? || reassignment_in_progress? || completed?
-                                                        }
-    validates :reassign_to_user_id, absence: true, if: -> { pending_reassignment? || keep_as_placeholder? }
-    validates :reassign_to_user_id, uniqueness: {
-      scope: [:namespace_id, :source_hostname, :import_type],
-      allow_nil: true,
-      message: ->(_object, _data) {
-        s_('Import|already assigned to another placeholder')
-      }
-    }
 
     scope :for_namespace, ->(namespace_id) { where(namespace_id: namespace_id) }
-    scope :by_source_hostname, ->(source_hostname) { where(source_hostname: source_hostname) }
-    scope :by_import_type, ->(import_type) { where(import_type: import_type) }
     scope :by_statuses, ->(statuses) { where(status: statuses) }
     scope :awaiting_reassignment, -> { where(status: [0, 1, 2, 3, 4]) }
     scope :reassigned, -> { where(status: [5, 6]) }
 
-    STATUSES = {
-      pending_reassignment: 0,
-      awaiting_approval: 1,
-      reassignment_in_progress: 2,
-      rejected: 3,
-      failed: 4,
-      completed: 5,
-      keep_as_placeholder: 6
-    }.freeze
-
-    ACCEPTED_STATUSES = %i[reassignment_in_progress completed failed].freeze
-    REASSIGNABLE_STATUSES = %i[pending_reassignment rejected].freeze
-    CANCELABLE_STATUSES = %i[awaiting_approval rejected].freeze
-
     state_machine :status, initial: :pending_reassignment do
-      STATUSES.each do |status_name, value|
-        state status_name, value: value
-      end
+      state :pending_reassignment, value: 0
+      state :awaiting_approval, value: 1
+      state :reassignment_in_progress, value: 2
+      state :rejected, value: 3
+      state :failed, value: 4
+      state :completed, value: 5
+      state :keep_as_placeholder, value: 6
 
       event :reassign do
-        transition REASSIGNABLE_STATUSES => :awaiting_approval
+        transition [:pending_reassignment, :rejected] => :awaiting_approval
       end
 
       event :cancel_reassignment do
-        transition CANCELABLE_STATUSES => :pending_reassignment
+        transition [:awaiting_approval, :rejected] => :pending_reassignment
       end
 
       event :keep_as_placeholder do
-        transition REASSIGNABLE_STATUSES => :keep_as_placeholder
+        transition [:pending_reassignment, :rejected] => :keep_as_placeholder
       end
 
       event :accept do
@@ -85,6 +60,10 @@ module Import
 
       event :fail_reassignment do
         transition reassignment_in_progress: :failed
+      end
+
+      after_transition any => [:pending_reassignment, :rejected, :keep_as_placeholder] do |status|
+        status.update!(reassign_to_user: nil)
       end
     end
 
@@ -111,40 +90,22 @@ module Import
 
         reorder(sort_order[:order_by] => sort_order[:sort])
       end
-
-      def namespace_placeholder_user_count(namespace, limit:)
-        for_namespace(namespace).distinct.limit(limit).count(:placeholder_user_id) -
-          (namespace.namespace_import_user.present? ? 1 : 0)
-      end
-
-      def source_users_with_missing_information(namespace:, source_hostname:, import_type:)
-        for_namespace(namespace)
-          .by_source_hostname(source_hostname)
-          .by_import_type(import_type)
-          .and(
-            where(source_name: nil).or(where(source_username: nil))
-          )
-      end
     end
 
-    def mapped_user
-      accepted_status? ? reassign_to_user : placeholder_user
-    end
-
-    def mapped_user_id
-      accepted_status? ? reassign_to_user_id : placeholder_user_id
+    def accepted_reassign_to_user
+      reassign_to_user if accepted_status?
     end
 
     def accepted_status?
-      STATUSES.slice(*ACCEPTED_STATUSES).value?(status)
+      reassignment_in_progress? || completed? || failed?
     end
 
     def reassignable_status?
-      STATUSES.slice(*REASSIGNABLE_STATUSES).value?(status)
+      pending_reassignment? || rejected?
     end
 
     def cancelable_status?
-      STATUSES.slice(*CANCELABLE_STATUSES).value?(status)
+      awaiting_approval? || rejected?
     end
   end
 end

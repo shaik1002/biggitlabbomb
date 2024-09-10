@@ -1,12 +1,11 @@
 <script>
-import { GlModal } from '@gitlab/ui';
+import { GlSkeletonLoader, GlModal } from '@gitlab/ui';
 import { uniqueId } from 'lodash';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import { __ } from '~/locale';
 import { scrollToTargetOnResize } from '~/lib/utils/resize_observer';
 import { TYPENAME_DISCUSSION, TYPENAME_NOTE } from '~/graphql_shared/constants';
 import SystemNote from '~/work_items/components/notes/system_note.vue';
-import WorkItemNotesLoading from '~/work_items/components/notes/work_item_notes_loading.vue';
 import WorkItemNotesActivityHeader from '~/work_items/components/notes/work_item_notes_activity_header.vue';
 import {
   i18n,
@@ -14,7 +13,6 @@ import {
   WORK_ITEM_NOTES_FILTER_ALL_NOTES,
   WORK_ITEM_NOTES_FILTER_ONLY_COMMENTS,
   WORK_ITEM_NOTES_FILTER_ONLY_HISTORY,
-  NEW_WORK_ITEM_IID,
 } from '~/work_items/constants';
 import { ASC, DESC } from '~/notes/constants';
 import { autocompleteDataSources, markdownPreviewPath } from '~/work_items/utils';
@@ -23,7 +21,6 @@ import {
   updateCacheAfterDeletingNote,
 } from '~/work_items/graphql/cache_utils';
 import { getLocationHash } from '~/lib/utils/url_utility';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { collapseSystemNotes } from '~/work_items/notes/collapse_utils';
 import WorkItemDiscussion from '~/work_items/components/notes/work_item_discussion.vue';
 import WorkItemHistoryOnlyFilterNote from '~/work_items/components/notes/work_item_history_only_filter_note.vue';
@@ -31,18 +28,24 @@ import workItemNoteCreatedSubscription from '~/work_items/graphql/notes/work_ite
 import workItemNoteUpdatedSubscription from '~/work_items/graphql/notes/work_item_note_updated.subscription.graphql';
 import workItemNoteDeletedSubscription from '~/work_items/graphql/notes/work_item_note_deleted.subscription.graphql';
 import deleteNoteMutation from '../graphql/notes/delete_work_item_notes.mutation.graphql';
+import groupWorkItemNotesByIidQuery from '../graphql/notes/group_work_item_notes_by_iid.query.graphql';
 import workItemNotesByIidQuery from '../graphql/notes/work_item_notes_by_iid.query.graphql';
 import WorkItemAddNote from './notes/work_item_add_note.vue';
 
 export default {
+  loader: {
+    repeat: 10,
+    width: 1000,
+    height: 40,
+  },
   components: {
+    GlSkeletonLoader,
     GlModal,
     SystemNote,
     WorkItemAddNote,
     WorkItemDiscussion,
     WorkItemNotesActivityHeader,
     WorkItemHistoryOnlyFilterNote,
-    WorkItemNotesLoading,
   },
   inject: ['isGroup'],
   props: {
@@ -104,7 +107,6 @@ export default {
       noteToDelete: null,
       discussionFilter: WORK_ITEM_NOTES_FILTER_ALL_NOTES,
       addNoteKey: uniqueId(`work-item-add-note-${this.workItemId}`),
-      workItemNamespace: '',
     };
   },
   computed: {
@@ -130,17 +132,9 @@ export default {
       const { fullPath, isGroup, workItemIid: iid } = this;
       return markdownPreviewPath({ fullPath, iid, isGroup });
     },
-    isGroupWorkItem() {
-      return this.workItemNamespace?.id.includes('Group');
-    },
     autocompleteDataSources() {
-      const { fullPath, workItemIid: iid } = this;
-      const isNewWorkItemInGroup = this.isGroup && iid === NEW_WORK_ITEM_IID;
-      return autocompleteDataSources({
-        fullPath,
-        iid,
-        isGroup: this.isGroupWorkItem || isNewWorkItemInGroup,
-      });
+      const { fullPath, isGroup, workItemIid: iid } = this;
+      return autocompleteDataSources({ fullPath, iid, isGroup });
     },
     workItemCommentFormProps() {
       return {
@@ -189,9 +183,10 @@ export default {
     },
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     workItemNotes: {
-      query: workItemNotesByIidQuery,
+      query() {
+        return this.isGroup ? groupWorkItemNotesByIidQuery : workItemNotesByIidQuery;
+      },
       variables() {
         return {
           fullPath: this.fullPath,
@@ -210,8 +205,7 @@ export default {
       error() {
         this.$emit('error', i18n.fetchError);
       },
-      result({ data }) {
-        this.workItemNamespace = data.workspace?.workItem?.namespace;
+      result() {
         if (this.hasNextPage) {
           this.fetchMoreNotes();
         } else if (this.targetNoteHash) {
@@ -286,21 +280,6 @@ export default {
     reportAbuse(isOpen, reply = {}) {
       this.$emit('openReportAbuse', reply);
     },
-    noteId(note) {
-      return getIdFromGraphQLId(note.id);
-    },
-    isHashTargeted(discussion) {
-      return (
-        discussion.notes.nodes.length &&
-        discussion.notes.nodes.some((note) => this.targetNoteHash === `note_${this.noteId(note)}`)
-      );
-    },
-    isDiscussionExpandedOnLoad(discussion) {
-      return !this.isDiscussionResolved(discussion) || this.isHashTargeted(discussion);
-    },
-    isDiscussionResolved(discussion) {
-      return discussion.notes.nodes[0]?.discussion?.resolved;
-    },
     async fetchMoreNotes() {
       this.isLoadingMore = true;
       await this.$apollo.queries.workItemNotes
@@ -358,7 +337,7 @@ export default {
 </script>
 
 <template>
-  <div class="work-item-notes">
+  <div class="gl-border-t gl-mt-5 work-item-notes">
     <work-item-notes-activity-header
       :sort-order="sortOrder"
       :disable-activity-filter-sort="disableActivityFilterSort"
@@ -368,8 +347,19 @@ export default {
       @changeSort="changeNotesSortOrder"
       @changeFilter="filterDiscussions"
     />
-    <work-item-notes-loading v-if="initialLoading" class="gl-mt-5" />
-    <div v-else class="issuable-discussion gl-mb-5 !gl-clearfix">
+    <div v-if="initialLoading" class="gl-mt-5">
+      <gl-skeleton-loader
+        v-for="i in $options.loader.repeat"
+        :key="i"
+        :width="1000"
+        :height="$options.loader.height"
+        preserve-aspect-ratio="xMinYMax meet"
+      >
+        <circle cx="20" cy="20" r="16" />
+        <rect width="950" x="45" y="15" height="10" rx="4" />
+      </gl-skeleton-loader>
+    </div>
+    <div v-else class="issuable-discussion gl-mb-5 gl-clearfix!">
       <template v-if="!initialLoading">
         <div v-if="formAtTop && !commentsDisabled" class="js-comment-form">
           <ul class="notes notes-form timeline">
@@ -381,7 +371,6 @@ export default {
             />
           </ul>
         </div>
-        <work-item-notes-loading v-if="formAtTop && isLoadingMore" />
         <ul class="notes main-notes-list timeline">
           <template v-for="discussion in notesArray">
             <system-note
@@ -404,19 +393,18 @@ export default {
                 :can-set-work-item-metadata="canSetWorkItemMetadata"
                 :is-discussion-locked="isDiscussionLocked"
                 :is-work-item-confidential="isWorkItemConfidential"
-                :is-expanded-on-load="isDiscussionExpandedOnLoad(discussion)"
                 @deleteNote="showDeleteNoteModal($event, discussion)"
                 @reportAbuse="reportAbuse(true, $event)"
                 @error="$emit('error', $event)"
               />
             </template>
           </template>
+
           <work-item-history-only-filter-note
             v-if="commentsDisabled"
             @changeFilter="filterDiscussions"
           />
         </ul>
-        <work-item-notes-loading v-if="!formAtTop && isLoadingMore" />
         <div v-if="!formAtTop && !commentsDisabled" class="js-comment-form">
           <ul class="notes notes-form timeline">
             <work-item-add-note
@@ -427,6 +415,19 @@ export default {
             />
           </ul>
         </div>
+      </template>
+
+      <template v-if="isLoadingMore">
+        <gl-skeleton-loader
+          v-for="index in $options.loader.repeat"
+          :key="index"
+          :width="$options.loader.width"
+          :height="$options.loader.height"
+          preserve-aspect-ratio="xMinYMax meet"
+        >
+          <circle cx="20" cy="20" r="16" />
+          <rect width="500" x="45" y="15" height="10" rx="4" />
+        </gl-skeleton-loader>
       </template>
     </div>
     <gl-modal

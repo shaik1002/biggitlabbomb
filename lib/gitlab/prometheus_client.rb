@@ -4,7 +4,6 @@ module Gitlab
   # Helper methods to interact with Prometheus network services & resources
   class PrometheusClient
     include Gitlab::Utils::StrongMemoize
-
     Error = Class.new(StandardError)
     ConnectionError = Class.new(Gitlab::PrometheusClient::Error)
     UnexpectedResponseError = Class.new(Gitlab::PrometheusClient::Error)

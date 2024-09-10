@@ -5,8 +5,6 @@ require 'spec_helper'
 RSpec.describe Banzai::Pipeline::FullPipeline, feature_category: :team_planning do
   using RSpec::Parameterized::TableSyntax
 
-  it_behaves_like 'sanitize pipeline'
-
   describe 'References' do
     let(:project) { create(:project, :public) }
     let(:issue)   { create(:issue, project: project) }
@@ -231,6 +229,7 @@ RSpec.describe Banzai::Pipeline::FullPipeline, feature_category: :team_planning 
   end
 
   context 'when input is malicious' do
+    let_it_be(:duration) { (Banzai::Filter::Concerns::PipelineTimingCheck::MAX_PIPELINE_SECONDS + 10).seconds }
     let_it_be(:markdown1) { '![a ' * 3 }
     let_it_be(:markdown2) { "$1$\n" * 190000 }
     let_it_be(:markdown3) { "[^1]\n[^1]:\n" * 100000 }
@@ -254,7 +253,7 @@ RSpec.describe Banzai::Pipeline::FullPipeline, feature_category: :team_planning 
     with_them do
       it 'is not long running' do
         expect do
-          Timeout.timeout(BANZAI_FILTER_TIMEOUT_MAX) { described_class.to_html(markdown, project: nil) }
+          Timeout.timeout(duration) { described_class.to_html(markdown, project: nil) }
         end.not_to raise_error
       end
     end

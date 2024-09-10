@@ -58,8 +58,6 @@ class ProjectSnippetPolicy < BasePolicy
   end
 
   rule { ~can?(:read_snippet) }.prevent :create_note
-
-  rule { public_snippet & public_project }.enable :cache_blob
 end
 
 ProjectSnippetPolicy.prepend_mod_with('ProjectSnippetPolicy')

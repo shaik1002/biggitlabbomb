@@ -139,7 +139,7 @@ export default {
       this.toggle(!this.visible);
     });
 
-    addStopCallback((e, el, combo) => {
+    addStopCallback(function fileFinderStopCallback(e, el, combo) {
       if (
         (combo === 't' && el.classList.contains('dropdown-input-field')) ||
         el.classList.contains('inputarea')
@@ -272,7 +272,7 @@ export default {
             </li>
           </template>
           <li v-else class="dropdown-menu-empty-item">
-            <div class="gl-mb-3 gl-ml-3 gl-mr-3 gl-mt-5">
+            <div class="gl-mr-3 gl-ml-3 gl-mt-5 gl-mb-3">
               <template v-if="loading">
                 <gl-loading-icon />
               </template>

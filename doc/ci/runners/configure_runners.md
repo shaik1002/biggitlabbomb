@@ -21,11 +21,6 @@ You can specify a maximum job timeout for each runner to prevent projects
 with longer job timeouts from using the runner. The maximum job timeout is
 used if it is shorter than the job timeout defined in the project.
 
-You can set a runner's maximum timeout with one of the following methods:
-
-- The REST API endpoint [`PUT /runners/:id`](../../api/runners.md#update-runners-details) by setting `maximum_timeout`
-- The GitLab Helm chart by setting `maximumTimeout`
-
 ### For an instance runner
 
 Prerequisites:
@@ -36,7 +31,7 @@ On GitLab.com, you cannot override the job timeout for instance runners and must
 
 To set the maximum job timeout:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **CI/CD > Runners**.
 1. To the right of the runner, you want to edit, select **Edit** (**{pencil}**).
 1. In the **Maximum job timeout** field, enter a value in seconds. The minimum amount is 600 seconds (10 minutes).
@@ -234,7 +229,7 @@ Prerequisites:
 
 To automatically rotate runner authentication tokens:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Settings > CI/CD**.
 1. Expand **Continuous Integration and Deployment**.
 1. Set a **Runners expiration** time for runners, leave empty for no expiration.
@@ -257,7 +252,7 @@ Prerequisites:
 
 - You must be an administrator.
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **CI/CD > Runners**.
 1. To the right of the runner you want to protect, select **Edit** (**{pencil}**).
 1. Select the **Protected** checkbox.
@@ -303,9 +298,9 @@ Prerequisites:
 
 - You must be an administrator.
 
-To control the jobs that an instance runner can run:
+To set the maximum job timeout:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **CI/CD > Runners**.
 1. To the right of the runner you want to edit, select **Edit** (**{pencil}**).
 1. Set the runner to run tagged or untagged jobs:
@@ -319,7 +314,7 @@ Prerequisites:
 
 - You must have the Owner role for the group.
 
-To control the jobs that a group runner can run:
+To set the maximum job timeout:
 
 1. On the left sidebar, select **Search or go to** and find your group.
 1. Select **Build > Runners**.
@@ -335,7 +330,7 @@ Prerequisites:
 
 - You must have the Owner role for the project.
 
-To control the jobs that a project runner can run:
+To set a runner to run tagged jobs:
 
 1. On the left sidebar, select **Search or go to** and find your project.
 1. Select **Settings > CI/CD**.
@@ -476,16 +471,15 @@ When using the Kubernetes executor, you can use variables to
 
 ### Git strategy
 
-The `GIT_STRATEGY` variable configures how the build directory is prepared and
-repository content is fetched. You can set this variable globally or per job
-in the [`variables`](../yaml/index.md#variables) section.
+You can set the `GIT_STRATEGY` used to fetch the repository content, either
+globally or per-job in the [`variables`](../yaml/index.md#variables) section:
 
 ```yaml
 variables:
   GIT_STRATEGY: clone
 ```
 
-Possible values are `clone`, `fetch`, `none`, and `empty`. If you do not specify a value,
+There are three possible values: `clone`, `fetch`, and `none`. If left unspecified,
 jobs use the [project's pipeline setting](../pipelines/settings.md#choose-the-default-git-strategy).
 
 `clone` is the slowest option. It clones the repository from scratch for every
@@ -511,15 +505,6 @@ It can be used for jobs that operate exclusively on artifacts, like a deployment
 Git repository data may be present, but it's likely out of date. You should only
 rely on files brought into the local working copy from cache or artifacts, and be
 aware that cache and artifact files from previous pipelines might still be present.
-
-Unlike `none`, the `empty` Git strategy deletes and then re-creates
-a dedicated build directory before downloading cache or artifact files.
-With this strategy, the GitLab Runner hook scripts are still run
-(if provided) to allow for further behavior customization.
-Use the `empty` Git strategy when:
-
-- You do not need the repository data to be present.
-- You want a clean, controlled, or customized starting state every time a job runs.
 
 ### Git submodule strategy
 
@@ -657,17 +642,17 @@ The path syntax is the same as [`git submodule`](https://git-scm.com/docs/git-su
 
 - To sync and update specific paths:
 
-  ```yaml
-  variables:
-     GIT_SUBMODULE_PATHS: submoduleA submoduleB
-  ```
+   ```yaml
+   variables:
+      GIT_SUBMODULE_PATHS: submoduleA submoduleB
+   ```
 
 - To exclude specific paths:
 
-  ```yaml
-  variables:
-     GIT_SUBMODULE_PATHS: :(exclude)submoduleA :(exclude)submoduleB
-  ```
+   ```yaml
+   variables:
+      GIT_SUBMODULE_PATHS: :(exclude)submoduleA :(exclude)submoduleB
+   ```
 
 WARNING:
 Git ignores nested paths. To ignore a nested submodule, exclude
@@ -955,9 +940,10 @@ defined in the `.gitlab-ci.yml` file. If the name is not defined, the default fi
 
 ### Provenance metadata format
 
-The provenance metadata is generated in the [in-toto attestation format](https://github.com/in-toto/attestation) for spec version [1.0](https://github.com/in-toto/attestation/tree/v1.0/spec).
+The provenance metadata is generated in the [in-toto attestation format](https://github.com/in-toto/attestation) for spec version [0.1](https://github.com/in-toto/attestation/tree/v0.1.0/spec).
+The runner also produces a statement that adheres to SLSA v0.2 by default.
 
-To use an SLSA v1.0 statement, set the `SLSA_PROVENANCE_SCHEMA_VERSION=v1` variable in the `.gitlab-ci.yml` file. 
+To opt-in to an SLSA v1.0 statement, set the `SLSA_PROVENANCE_SCHEMA_VERSION=v1` variable in the `.gitlab-ci.yml` file. The v0.2 statement is deprecated and is planned to be removed in the GitLab 17.0 and the v1.0 statement is planned to become the new default format.
 
 The following fields are populated by default:
 

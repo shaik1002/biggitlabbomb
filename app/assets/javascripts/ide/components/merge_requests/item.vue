@@ -40,13 +40,13 @@ export default {
 </script>
 
 <template>
-  <a :href="mergeRequestHref" class="btn-link gl-button gl-flex gl-items-center">
-    <span class="ide-search-list-current-icon gl-mr-3 gl-flex">
+  <a :href="mergeRequestHref" class="btn-link gl-flex gl-items-center">
+    <span class="gl-flex gl-mr-3 ide-search-list-current-icon">
       <gl-icon v-if="isActive" :size="16" name="mobile-issue-close" />
     </span>
     <span>
       <strong> {{ item.title }} </strong>
-      <span class="ide-merge-request-project-path mt-1 gl-block"> {{ pathWithID }} </span>
+      <span class="ide-merge-request-project-path gl-block mt-1"> {{ pathWithID }} </span>
     </span>
   </a>
 </template>

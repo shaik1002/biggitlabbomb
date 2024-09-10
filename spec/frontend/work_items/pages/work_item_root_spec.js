@@ -49,11 +49,9 @@ describe('Work items root component', () => {
 
     expect(findWorkItemDetail().props()).toEqual({
       isModal: false,
-      workItemId: null,
       workItemIid: '1',
       modalWorkItemFullPath: '',
       isDrawer: false,
-      modalIsGroup: null,
     });
   });
 

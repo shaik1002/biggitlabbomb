@@ -3,7 +3,6 @@
 module API
   class Search < ::API::Base
     include PaginationParams
-    include APIGuard
 
     before do
       authenticate!
@@ -12,12 +11,10 @@ module API
         users_allowlist: Gitlab::CurrentSettings.current_application_settings.search_rate_limit_allowlist)
     end
 
-    allow_access_with_scope :ai_workflows, if: ->(request) { request.get? || request.head? }
-
     feature_category :global_search
     urgency :low
 
-    rescue_from ActiveRecord::QueryCanceled do |_e|
+    rescue_from ActiveRecord::QueryCanceled do |e|
       render_api_error!({ error: 'Request timed out' }, 408)
     end
 
@@ -53,6 +50,7 @@ module API
             state: params[:state],
             confidential: params[:confidential],
             snippets: snippets?,
+            basic_search: params[:basic_search],
             num_context_lines: params[:num_context_lines],
             search_type: params[:search_type],
             page: params[:page],
@@ -214,8 +212,7 @@ module API
           type: String,
           desc: 'The scope of the search',
           values: Helpers::SearchHelpers.project_search_scopes
-        optional :ref, type: String,
-          desc: 'The name of a repository branch or tag. If not given, the default branch is used'
+        optional :ref, type: String, desc: 'The name of a repository branch or tag. If not given, the default branch is used'
         optional :state, type: String, desc: 'Filter results by state', values: Helpers::SearchHelpers.search_states
         optional :confidential, type: Boolean, desc: 'Filter results by confidentiality'
         use :pagination
@@ -223,8 +220,7 @@ module API
       get ':id/(-/)search' do
         set_headers
 
-        present search({ project_id: user_project.id, repository_ref: params[:ref] }), with: entity,
-          current_user: current_user
+        present search({ project_id: user_project.id, repository_ref: params[:ref] }), with: entity, current_user: current_user
       end
     end
   end

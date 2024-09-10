@@ -8,7 +8,6 @@ module ApplicationSettingsHelper
     :password_authentication_enabled_for_web?,
     :akismet_enabled?,
     :spam_check_endpoint_enabled?,
-    :require_personal_access_token_expiry?,
     to: :'Gitlab::CurrentSettings.current_application_settings'
 
   def user_oauth_applications?
@@ -318,7 +317,6 @@ module ApplicationSettingsHelper
       :jira_connect_public_key_storage_enabled,
       :jira_connect_proxy_url,
       :math_rendering_limits_enabled,
-      :max_artifacts_content_include_size,
       :max_artifacts_size,
       :max_attachment_size,
       :max_decompressed_archive_size,
@@ -348,7 +346,6 @@ module ApplicationSettingsHelper
       :plantuml_url,
       :diagramsnet_enabled,
       :diagramsnet_url,
-      :pages_extra_deployments_default_expiry_seconds,
       :polling_interval_multiplier,
       :project_export_enabled,
       :prometheus_metrics_enabled,
@@ -508,12 +505,10 @@ module ApplicationSettingsHelper
       :deactivation_email_additional_text,
       :projects_api_rate_limit_unauthenticated,
       :group_api_limit,
-      :group_invited_groups_api_limit,
       :group_shared_groups_api_limit,
       :group_projects_api_limit,
       :groups_api_limit,
       :project_api_limit,
-      :project_invited_groups_api_limit,
       :projects_api_limit,
       :user_contributed_projects_api_limit,
       :user_projects_api_limit,
@@ -531,9 +526,7 @@ module ApplicationSettingsHelper
       :downstream_pipeline_trigger_limit_per_project_user_sha,
       :asciidoc_max_includes,
       :ai_action_api_rate_limit,
-      :code_suggestions_api_rate_limit,
-      :require_personal_access_token_expiry,
-      :observability_backend_ssl_verification_enabled
+      :code_suggestions_api_rate_limit
     ].tap do |settings|
       unless Gitlab.com?
         settings << :deactivate_dormant_users

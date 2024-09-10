@@ -1,12 +1,12 @@
 <script>
-import { GlTabs, GlTab } from '@gitlab/ui';
+import { GlNavItem, GlTabs, GlTab } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import { settingsTabTitle } from '~/integrations/constants';
-import { visitUrl } from '~/lib/utils/url_utility';
 
 export default {
   name: 'ExclusionsTabs',
   components: {
+    GlNavItem,
     GlTabs,
     GlTab,
   },
@@ -19,17 +19,21 @@ export default {
     settingsTabTitle,
     projectsTabTitle: s__('Integrations|Exclusions'),
   },
-  methods: {
-    goToSettings() {
-      visitUrl(this.editPath);
-    },
-  },
 };
 </script>
 
 <template>
   <gl-tabs content-class="gl-p-0">
-    <gl-tab :title="$options.i18n.settingsTabTitle" @click="goToSettings" />
-    <gl-tab :title="$options.i18n.projectsTabTitle" active />
+    <template #tabs-start>
+      <gl-nav-item role="presentation" link-classes="gl-tab-nav-item" :href="editPath">{{
+        $options.i18n.settingsTabTitle
+      }}</gl-nav-item>
+    </template>
+
+    <gl-tab active>
+      <template #title>
+        {{ $options.i18n.projectsTabTitle }}
+      </template>
+    </gl-tab>
   </gl-tabs>
 </template>

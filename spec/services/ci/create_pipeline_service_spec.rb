@@ -4,7 +4,6 @@ require 'spec_helper'
 
 RSpec.describe Ci::CreatePipelineService, :ci_config_feature_flag_correctness, :clean_gitlab_redis_cache, feature_category: :continuous_integration do
   include ProjectForksHelper
-  include Ci::PipelineMessageHelpers
 
   let_it_be_with_refind(:project) { create(:project, :repository) }
   let_it_be_with_reload(:user) { project.first_owner }
@@ -695,7 +694,8 @@ RSpec.describe Ci::CreatePipelineService, :ci_config_feature_flag_correctness, :
         result = execute_service
 
         expect(result).to be_error
-        expect(result.message).to eq(sanitize_message(Ci::Pipeline.rules_failure_message))
+        expect(result.message).to eq('Pipeline will not run for the selected trigger. ' \
+          'The rules configuration prevented any jobs from being added to the pipeline.')
         expect(result.payload).not_to be_persisted
         expect(Ci::Build.all).to be_empty
         expect(Ci::Pipeline.count).to eq(0)
@@ -1140,7 +1140,7 @@ RSpec.describe Ci::CreatePipelineService, :ci_config_feature_flag_correctness, :
       context 'with valid pipeline variables' do
         let(:variables_attributes) do
           [{ key: 'first', secret_value: 'world' },
-            { key: 'second', secret_value: 'second_world' }]
+           { key: 'second', secret_value: 'second_world' }]
         end
 
         it 'creates a pipeline with specified variables' do
@@ -1152,7 +1152,7 @@ RSpec.describe Ci::CreatePipelineService, :ci_config_feature_flag_correctness, :
       context 'with duplicate pipeline variables' do
         let(:variables_attributes) do
           [{ key: 'hello', secret_value: 'world' },
-            { key: 'hello', secret_value: 'second_world' }]
+           { key: 'hello', secret_value: 'second_world' }]
         end
 
         it 'fails to create the pipeline' do
@@ -1165,10 +1165,10 @@ RSpec.describe Ci::CreatePipelineService, :ci_config_feature_flag_correctness, :
       context 'with more than one duplicate pipeline variable' do
         let(:variables_attributes) do
           [{ key: 'hello', secret_value: 'world' },
-            { key: 'hello', secret_value: 'second_world' },
-            { key: 'single', secret_value: 'variable' },
-            { key: 'other', secret_value: 'value' },
-            { key: 'other', secret_value: 'other value' }]
+           { key: 'hello', secret_value: 'second_world' },
+           { key: 'single', secret_value: 'variable' },
+           { key: 'other', secret_value: 'value' },
+           { key: 'other', secret_value: 'other value' }]
         end
 
         it 'fails to create the pipeline' do
@@ -1265,9 +1265,11 @@ RSpec.describe Ci::CreatePipelineService, :ci_config_feature_flag_correctness, :
 
               it 'does not create a detached merge request pipeline', :aggregate_failures do
                 expect(response).to be_error
-                expect(response.message).to eq(sanitize_message(Ci::Pipeline.rules_failure_message))
+                expect(response.message).to eq('Pipeline will not run for the selected trigger. ' \
+                  'The rules configuration prevented any jobs from being added to the pipeline.')
                 expect(pipeline).not_to be_persisted
-                expect(pipeline.errors[:base]).to eq([sanitize_message(Ci::Pipeline.rules_failure_message)])
+                expect(pipeline.errors[:base]).to eq(['Pipeline will not run for the selected trigger. ' \
+                  'The rules configuration prevented any jobs from being added to the pipeline.'])
               end
             end
           end
@@ -1477,7 +1479,8 @@ RSpec.describe Ci::CreatePipelineService, :ci_config_feature_flag_correctness, :
 
               it 'does not create a detached merge request pipeline', :aggregate_failures do
                 expect(response).to be_error
-                expect(response.message).to eq(sanitize_message(Ci::Pipeline.rules_failure_message))
+                expect(response.message).to eq('Pipeline will not run for the selected trigger. ' \
+                  'The rules configuration prevented any jobs from being added to the pipeline.')
                 expect(pipeline).not_to be_persisted
               end
             end
@@ -1513,7 +1516,8 @@ RSpec.describe Ci::CreatePipelineService, :ci_config_feature_flag_correctness, :
 
             it 'does not create a detached merge request pipeline', :aggregate_failures do
               expect(response).to be_error
-              expect(response.message).to eq(sanitize_message(Ci::Pipeline.rules_failure_message))
+              expect(response.message).to eq('Pipeline will not run for the selected trigger. ' \
+                'The rules configuration prevented any jobs from being added to the pipeline.')
               expect(pipeline).not_to be_persisted
             end
           end
@@ -1541,7 +1545,8 @@ RSpec.describe Ci::CreatePipelineService, :ci_config_feature_flag_correctness, :
 
             it 'does not create a detached merge request pipeline', :aggregate_failures do
               expect(response).to be_error
-              expect(response.message).to eq(sanitize_message(Ci::Pipeline.rules_failure_message))
+              expect(response.message).to eq('Pipeline will not run for the selected trigger. ' \
+                'The rules configuration prevented any jobs from being added to the pipeline.')
               expect(pipeline).not_to be_persisted
             end
           end
@@ -1571,7 +1576,8 @@ RSpec.describe Ci::CreatePipelineService, :ci_config_feature_flag_correctness, :
 
             it 'does not create a detached merge request pipeline', :aggregate_failures do
               expect(response).to be_error
-              expect(response.message).to eq(sanitize_message(Ci::Pipeline.rules_failure_message))
+              expect(response.message).to eq('Pipeline will not run for the selected trigger. ' \
+                'The rules configuration prevented any jobs from being added to the pipeline.')
               expect(pipeline).not_to be_persisted
             end
           end
@@ -1599,7 +1605,8 @@ RSpec.describe Ci::CreatePipelineService, :ci_config_feature_flag_correctness, :
 
             it 'does not create a detached merge request pipeline', :aggregate_failures do
               expect(response).to be_error
-              expect(response.message).to eq(sanitize_message(Ci::Pipeline.rules_failure_message))
+              expect(response.message).to eq('Pipeline will not run for the selected trigger. ' \
+                'The rules configuration prevented any jobs from being added to the pipeline.')
               expect(pipeline).not_to be_persisted
             end
           end

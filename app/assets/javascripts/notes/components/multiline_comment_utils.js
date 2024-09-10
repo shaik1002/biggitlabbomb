@@ -45,7 +45,6 @@ export function getLineClasses(line) {
   ];
 }
 
-// eslint-disable-next-line max-params
 export function commentLineOptions(diffLines, startingLine, lineCode, side = 'left') {
   const preferredSide = side === 'left' ? 'old_line' : 'new_line';
   const fallbackSide = preferredSide === 'new_line' ? 'old_line' : 'new_line';

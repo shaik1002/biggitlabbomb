@@ -11,7 +11,6 @@ import {
   AGENT_FEEDBACK_ISSUE,
 } from '~/clusters_list/constants';
 import getAgentsQuery from '~/clusters_list/graphql/queries/get_agents.query.graphql';
-import getTreeListQuery from '~/clusters_list/graphql/queries/get_tree_list.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
@@ -29,11 +28,6 @@ describe('Agents', () => {
     projectPath: 'path/to/project',
   };
 
-  const agentProject = {
-    id: '1',
-    fullPath: 'path/to/project',
-  };
-
   const createWrapper = async ({
     props = {},
     glFeatures = {},
@@ -43,6 +37,7 @@ describe('Agents', () => {
     trees = [],
     queryResponse = null,
   }) => {
+    const provide = provideData;
     const queryResponseData = {
       data: {
         project: {
@@ -58,32 +53,14 @@ describe('Agents', () => {
           userAccessAuthorizedAgents: {
             nodes: userAccessAuthorizedAgentsNodes,
           },
+          repository: { tree: { trees: { nodes: trees } } },
         },
       },
     };
-    const treeListResponseData = {
-      data: {
-        project: {
-          id: 'gid://gitlab/Project/1',
-          repository: {
-            tree: {
-              trees: { nodes: trees },
-            },
-          },
-        },
-      },
-    };
-    const agentQueryResponse = queryResponse || jest.fn().mockResolvedValue(queryResponseData);
-    const treeListQueryResponse = jest.fn().mockResolvedValue(treeListResponseData);
+    const agentQueryResponse =
+      queryResponse || jest.fn().mockResolvedValue(queryResponseData, provide);
 
-    const apolloProvider = createMockApollo(
-      [
-        [getAgentsQuery, agentQueryResponse],
-        [getTreeListQuery, treeListQueryResponse],
-      ],
-      {},
-      { typePolicies: { Query: { fields: { project: { merge: true } } } } },
-    );
+    const apolloProvider = createMockApollo([[getAgentsQuery, agentQueryResponse]]);
 
     wrapper = shallowMount(Agents, {
       apolloProvider,
@@ -121,10 +98,8 @@ describe('Agents', () => {
         name: 'agent-1',
         webPath: '/agent-1',
         createdAt: testDate,
-        userAccessAuthorizations: null,
         connections: null,
         tokens: null,
-        project: agentProject,
       },
       {
         __typename: 'ClusterAgent',
@@ -132,7 +107,6 @@ describe('Agents', () => {
         name: 'agent-2',
         webPath: '/agent-2',
         createdAt: testDate,
-        userAccessAuthorizations: null,
         connections: null,
         tokens: {
           nodes: [
@@ -142,7 +116,6 @@ describe('Agents', () => {
             },
           ],
         },
-        project: agentProject,
       },
     ];
     const ciAccessAuthorizedAgentsNodes = [
@@ -153,10 +126,8 @@ describe('Agents', () => {
           name: 'ci-agent-1',
           webPath: 'shared-project/agent-1',
           createdAt: testDate,
-          userAccessAuthorizations: null,
           connections: null,
           tokens: null,
-          project: agentProject,
         },
       },
     ];
@@ -187,7 +158,6 @@ describe('Agents', () => {
         lastContact: null,
         connections: null,
         tokens: null,
-        project: agentProject,
       },
       {
         id: '2',
@@ -208,7 +178,6 @@ describe('Agents', () => {
             },
           ],
         },
-        project: agentProject,
       },
       {
         id: '3',
@@ -220,7 +189,6 @@ describe('Agents', () => {
         lastContact: null,
         connections: null,
         tokens: null,
-        project: agentProject,
       },
     ];
 

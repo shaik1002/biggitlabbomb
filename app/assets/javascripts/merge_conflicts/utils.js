@@ -60,7 +60,6 @@ export const decorateLineForInlineView = (line, id, conflict) => {
   };
 };
 
-// eslint-disable-next-line max-params
 export const getLineForParallelView = (line, id, lineType, isHead) => {
   const { old_line: oldLine, new_line: newLine, rich_text: richText } = line;
   const hasConflict = lineType === 'conflict';

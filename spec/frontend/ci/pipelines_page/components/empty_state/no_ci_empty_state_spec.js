@@ -7,7 +7,7 @@ import PipelinesCiTemplates from '~/ci/pipelines_page/components/empty_state/pip
 describe('Pipelines Empty State', () => {
   let wrapper;
 
-  const findEmptyState = () => wrapper.findComponent(GlEmptyState);
+  const findIllustration = () => wrapper.find('img');
   const findButton = () => wrapper.find('a');
   const pipelinesCiTemplates = () => wrapper.findComponent(PipelinesCiTemplates);
 
@@ -46,7 +46,7 @@ describe('Pipelines Empty State', () => {
     });
 
     it('should render empty state SVG', () => {
-      expect(findEmptyState().props('svgPath')).toBe('foo.svg');
+      expect(findIllustration().attributes('src')).toBe('foo.svg');
     });
 
     it('should render empty state header', () => {

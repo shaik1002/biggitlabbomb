@@ -31,6 +31,5 @@ export const TABS = [
     title: s__('UserMapping|Placeholders'),
     queryParamValue: TAB_QUERY_PARAM_VALUES.placeholder,
     component: PlaceholdersTabApp,
-    lazy: true,
   },
 ];

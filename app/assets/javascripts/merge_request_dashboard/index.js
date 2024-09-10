@@ -2,41 +2,55 @@ import { concatPagination } from '@apollo/client/utilities';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
+import isShowingLabelsQuery from '~/graphql_shared/client/is_showing_labels.query.graphql';
 import App from './components/app.vue';
 
 export function initMergeRequestDashboard(el) {
   Vue.use(VueApollo);
 
-  const { lists, switch_dashboard_path: switchDashboardPath } = JSON.parse(el.dataset.initialData);
-
-  const keyArgs = [
-    'state',
-    'reviewState',
-    'reviewStates',
-    'reviewerWildcardId',
-    'mergedAfter',
-    'assignedReviewStates',
-    'reviewerReviewStates',
-  ];
+  const { lists } = JSON.parse(el.dataset.initialData);
 
   return new Vue({
     el,
     apolloProvider: new VueApollo({
       defaultClient: createDefaultClient(
-        {},
+        {
+          Mutation: {
+            setIsShowingLabels(_, { isShowingLabels }, { cache }) {
+              cache.writeQuery({
+                query: isShowingLabelsQuery,
+                data: { isShowingLabels },
+              });
+              return isShowingLabels;
+            },
+          },
+        },
         {
           cacheConfig: {
             typePolicies: {
-              CurrentUser: {
+              Query: {
                 fields: {
-                  assignedMergeRequests: {
-                    keyArgs,
+                  isShowingLabels: {
+                    read(currentState) {
+                      return currentState ?? true;
+                    },
                   },
+                },
+              },
+              CurrentUser: {
+                merge: true,
+                fields: {
                   reviewRequestedMergeRequests: {
-                    keyArgs,
+                    keyArgs: ['state', 'reviewState', 'reviewStates', 'mergedAfter'],
                   },
-                  assigneeOrReviewerMergeRequests: {
-                    keyArgs,
+                  assignedMergeRequests: {
+                    keyArgs: [
+                      'state',
+                      'reviewState',
+                      'reviewStates',
+                      'reviewerWildcardId',
+                      'mergedAfter',
+                    ],
                   },
                 },
               },
@@ -45,15 +59,11 @@ export function initMergeRequestDashboard(el) {
                   nodes: concatPagination(),
                 },
               },
-              MergeRequestReviewer: {
-                keyFields: false,
-              },
             },
           },
         },
       ),
     }),
-    provide: { switchDashboardPath },
     render(createElement) {
       return createElement(App, {
         props: {

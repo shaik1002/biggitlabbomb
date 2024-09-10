@@ -5,62 +5,48 @@ module Gitlab
     class SourceUserMapper
       include Gitlab::ExclusiveLeaseHelpers
 
-      LRU_CACHE_SIZE = 8000
-      LOCK_TTL = 15.seconds.freeze
-      LOCK_SLEEP = 0.3.seconds.freeze
-      LOCK_RETRIES = 100
-
       def initialize(namespace:, import_type:, source_hostname:)
-        @namespace = namespace.root_ancestor
+        @namespace = namespace
         @import_type = import_type
         @source_hostname = source_hostname
       end
 
-      def find_source_user(source_user_identifier)
-        cache_from_request_store[source_user_identifier] ||= ::Import::SourceUser.find_source_user(
+      def find_or_create_internal_user(source_name:, source_username:, source_user_identifier:)
+        @source_name = source_name
+        @source_username = source_username
+        @source_user_identifier = source_user_identifier
+
+        internal_user = find_internal_user
+        return internal_user if internal_user
+
+        in_lock(lock_key(source_user_identifier), sleep_sec: 2.seconds) do |retried|
+          if retried
+            internal_user = find_internal_user
+            next internal_user if internal_user
+          end
+
+          create_source_user_mapping
+        end
+      end
+
+      private
+
+      attr_reader :namespace, :import_type, :source_hostname, :source_name, :source_username, :source_user_identifier
+
+      def find_internal_user
+        source_user = ::Import::SourceUser.find_source_user(
           source_user_identifier: source_user_identifier,
           namespace: namespace,
           source_hostname: source_hostname,
           import_type: import_type
         )
+
+        return unless source_user
+
+        source_user.accepted_reassign_to_user || source_user.placeholder_user
       end
 
-      def find_or_create_source_user(source_name:, source_username:, source_user_identifier:)
-        source_user = find_source_user(source_user_identifier)
-
-        return source_user if source_user
-
-        source_user = create_source_user(
-          source_name: source_name,
-          source_username: source_username,
-          source_user_identifier: source_user_identifier
-        )
-
-        cache_from_request_store[source_user_identifier] = source_user
-      end
-
-      private
-
-      attr_reader :namespace, :import_type, :source_hostname
-
-      def cache_from_request_store
-        Gitlab::SafeRequestStore[:source_user_cache] ||= LruRedux::Cache.new(LRU_CACHE_SIZE)
-      end
-
-      def create_source_user(source_name:, source_username:, source_user_identifier:)
-        in_lock(
-          lock_key(source_user_identifier), ttl: LOCK_TTL, sleep_sec: LOCK_SLEEP, retries: LOCK_RETRIES
-        ) do |retried|
-          if retried
-            source_user = find_source_user(source_user_identifier)
-            next source_user if source_user
-          end
-
-          create_source_user_mapping(source_name, source_username, source_user_identifier)
-        end
-      end
-
-      def create_source_user_mapping(source_name, source_username, source_user_identifier)
+      def create_source_user_mapping
         ::Import::SourceUser.transaction do
           import_source_user = ::Import::SourceUser.new(
             namespace: namespace,
@@ -71,24 +57,22 @@ module Gitlab
             source_hostname: source_hostname
           )
 
-          import_source_user.placeholder_user = create_placeholder_user(import_source_user)
+          internal_user = create_placeholder_user
+          import_source_user.placeholder_user = internal_user
+
           import_source_user.save!
           import_source_user
         end
       end
 
-      def create_placeholder_user(import_source_user)
-        return namespace_import_user if placeholder_user_limit_exceeded?
-
-        Gitlab::Import::PlaceholderUserCreator.new(import_source_user).execute
-      end
-
-      def namespace_import_user
-        Gitlab::Import::ImportUserCreator.new(portable: namespace).execute
-      end
-
-      def placeholder_user_limit_exceeded?
-        ::Import::PlaceholderUserLimit.new(namespace: namespace).exceeded?
+      def create_placeholder_user
+        # If limit is reached, get import user instead, but that's not implemented yet
+        Gitlab::Import::PlaceholderUserCreator.new(
+          import_type: import_type,
+          source_hostname: source_hostname,
+          source_name: source_name,
+          source_username: source_username
+        ).execute
       end
 
       def lock_key(source_user_identifier)

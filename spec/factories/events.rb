@@ -85,7 +85,7 @@ FactoryBot.define do
     end
 
     factory :project_imported_event do
-      association :project, :with_import_url
+      project factory: [:project, :with_import_url]
       action { :created }
     end
   end

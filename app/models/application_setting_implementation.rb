@@ -44,7 +44,7 @@ module ApplicationSettingImplementation
         allow_possible_spam: false,
         asset_proxy_enabled: false,
         authorized_keys_enabled: true, # TODO default to false if the instance is configured to use AuthorizedKeysCommand
-        ci_max_total_yaml_size_bytes: 314572800, # max_yaml_size_bytes * ci_max_includes = 2.megabyte * 150
+        ci_max_total_yaml_size_bytes: 157286400, # max_yaml_size_bytes * ci_max_includes = 1.megabyte * 150
         commit_email_hostname: default_commit_email_hostname,
         container_expiration_policies_enable_historic_entries: false,
         container_registry_features: [],
@@ -124,7 +124,6 @@ module ApplicationSettingImplementation
         mailgun_signing_key: nil,
         mailgun_events_enabled: false,
         math_rendering_limits_enabled: true,
-        max_artifacts_content_include_size: 5.megabytes,
         max_artifacts_size: Settings.artifacts['max_size'],
         max_attachment_size: Settings.gitlab['max_attachment_size'],
         max_decompressed_archive_size: 25600,
@@ -133,7 +132,7 @@ module ApplicationSettingImplementation
         max_import_remote_file_size: 10240,
         max_login_attempts: nil,
         max_terraform_state_size_bytes: 0,
-        max_yaml_size_bytes: 2.megabyte,
+        max_yaml_size_bytes: 1.megabyte,
         max_yaml_depth: 100,
         minimum_password_length: DEFAULT_MINIMUM_PASSWORD_LENGTH,
         mirror_available: true,
@@ -162,7 +161,6 @@ module ApplicationSettingImplementation
         push_event_hooks_limit: 3,
         raw_blob_request_limit: 300,
         recaptcha_enabled: false,
-        receptive_cluster_agents_enabled: false,
         repository_checks_enabled: true,
         repository_storages_weighted: { 'default' => 100 },
         require_admin_approval_after_user_signup: true,
@@ -281,22 +279,17 @@ module ApplicationSettingImplementation
         asciidoc_max_includes: 32,
         use_clickhouse_for_analytics: false,
         group_api_limit: 400,
-        group_invited_groups_api_limit: 60,
         group_projects_api_limit: 600,
         group_shared_groups_api_limit: 60,
         groups_api_limit: 200,
         project_api_limit: 400,
-        project_invited_groups_api_limit: 60,
         projects_api_limit: 2000,
         user_contributed_projects_api_limit: 100,
         user_projects_api_limit: 300,
         user_starred_projects_api_limit: 100,
         nuget_skip_metadata_url_validation: false,
         ai_action_api_rate_limit: 160,
-        code_suggestions_api_rate_limit: 60,
-        require_personal_access_token_expiry: true,
-        pages_extra_deployments_default_expiry_seconds: 86400,
-        scan_execution_policies_action_limit: 10
+        code_suggestions_api_rate_limit: 60
       }.tap do |hsh|
         hsh.merge!(non_production_defaults) unless Rails.env.production?
       end

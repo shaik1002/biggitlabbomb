@@ -36,6 +36,8 @@ For a video overview, see [Design Management](https://www.youtube.com/watch?v=CC
   Image thumbnails are stored as other uploads, and are not associated with a project but rather
   with a specific design model.
 
+  Newly created projects use hashed storage by default.
+
   A GitLab administrator can verify the relative path of a hashed-stored project by going to **Admin area > Projects**
   and then selecting the project in question. The **Relative path** field contains `@hashed` in its value.
 
@@ -114,10 +116,10 @@ To add a design to an issue:
 1. Either:
    - Select **Upload designs** and then select images from your file browser. You can select up to
      10 files at once.
-   <!-- vale gitlab_base.SubstitutionWarning = NO -->
+   <!-- vale gitlab.SubstitutionWarning = NO -->
    - Select **click to upload** and then select images from your file browser. You can select up to
      10 files at once.
-   <!-- vale gitlab_base.SubstitutionWarning = YES -->
+   <!-- vale gitlab.SubstitutionWarning = YES -->
 
    - Drag a file from your file browser and drop it in the drop zone in the **Designs** section.
 
@@ -214,10 +216,10 @@ You can start [discussions](../../discussions/index.md) on uploaded designs. To 
 
 1. Go to an issue.
 1. Select the design.
-<!-- vale gitlab_base.SubstitutionWarning = NO -->
+<!-- vale gitlab.SubstitutionWarning = NO -->
 <!-- Disable Vale so it doesn't catch "click" -->
 1. Click or tap the image. A pin is created in that spot, identifying the discussion's location.
-<!-- vale gitlab_base.SubstitutionWarning = YES -->
+<!-- vale gitlab.SubstitutionWarning = YES -->
 1. Enter your message.
 1. Select **Comment**.
 

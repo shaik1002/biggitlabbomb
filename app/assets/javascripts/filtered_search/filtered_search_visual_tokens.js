@@ -94,7 +94,6 @@ export default class FilteredSearchVisualTokens {
     `;
   }
 
-  // eslint-disable-next-line max-params
   static renderVisualTokenValue(parentElement, tokenName, tokenValue, tokenOperator) {
     const tokenType = tokenName.toLowerCase();
     const tokenValueContainer = parentElement.querySelector('.value-container');
@@ -174,7 +173,6 @@ export default class FilteredSearchVisualTokens {
     }
   }
 
-  // eslint-disable-next-line max-params
   static addFilterVisualToken(
     tokenName,
     tokenOperator,

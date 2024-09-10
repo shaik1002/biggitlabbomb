@@ -74,7 +74,7 @@ GitLab Dedicated supports instance-level [SAML OmniAuth](../../integration/saml.
 
 GitLab Dedicated offers public connectivity by default with support for IP allowlists. You can [optionally specify a list of IP addresses](../../administration/dedicated/configure_instance.md#ip-allowlist) that can access your GitLab Dedicated instance. Subsequently, when an IP not on the allowlist tries to access your instance the connection is refused.
 
-Private connectivity using [AWS PrivateLink](https://aws.amazon.com/privatelink/) is also offered as an option. Both [inbound](../../administration/dedicated/configure_instance.md#inbound-private-link) and [outbound](../../administration/dedicated/configure_instance.md#outbound-private-link) PrivateLinks are supported. When connecting to internal resources over an outbound PrivateLink with non public certificates, you can specify a list of certificates that are trusted by GitLab. These certificates can be provided when [updating your instance configuration](../../administration/dedicated/configure_instance.md#custom-certificates).
+Private connectivity via [AWS PrivateLink](https://aws.amazon.com/privatelink/) is also offered as an option. Both [inbound](../../administration/dedicated/configure_instance.md#inbound-private-link) and [outbound](../../administration/dedicated/configure_instance.md#outbound-private-link) PrivateLinks are supported. When connecting to internal resources over an outbound PrivateLink with non public certificates, you can specify a list of certificates that are trusted by GitLab. These certificates can be provided when [updating your instance configuration](../../administration/dedicated/configure_instance.md#custom-certificates).
 
 #### Encryption
 
@@ -140,7 +140,7 @@ When you add a custom hostname:
 - The hostname is included in the external URL used to access your instance.
 - Any connections to your instance using the previous domain names are no longer available.
 
-To add a custom hostname after your instance is created, submit a [support ticket](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=4414917877650).
+You can add a custom hostname when you [create your tenant](../../administration/dedicated/create_instance.md#step-2-create-your-gitlab-dedicated-instance). To add a custom hostname after your instance is created, submit a [support ticket](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=4414917877650).
 
 NOTE:
 Custom hostnames for GitLab Pages are not supported. If you use GitLab Pages, the URL to access the Pages site for your GitLab Dedicated instance would be `tenant_name.gitlab-dedicated.site`.
@@ -188,27 +188,48 @@ The following GitLab Pages features are not available for GitLab Dedicated:
 - Reduced authentication scope
 - Running Pages behind a proxy
 
-#### Hosted runners
+#### GitLab Runners
 
-[Hosted runners for GitLab Dedicated](../../administration/dedicated/hosted_runners.md) allow you to scale CI/CD workloads with no maintenance overhead.
+##### Hosted by GitLab
 
-#### Self-managed runners
+DETAILS:
+**Status:** Beta
 
-As an alternative to using hosted runners, you can use your own runners for your GitLab Dedicated instance.
+On 2024-01-31, GitLab released Hosted runners in closed [beta](../../policy/experiment-beta-support.md#beta).
 
-To use self-managed runners, install [GitLab Runner](https://docs.gitlab.com/runner/install/) on infrastructure that you own or manage.
+Hosted runners for GitLab Dedicated allow you to scale CI/CD workloads with no maintenance overhead.
 
-#### OpenID Connect
+The beta release of Hosted Runners provides the following features:
 
-You can use [GitLab as an OpenID Connect identity provider](../../integration/openid_connect_provider.md). If you use an IP allowlist to restrict access to your instance, you can [enable OpenID Connect requests](../../administration/dedicated/configure_instance.md#enable-openid-connect-for-your-ip-allowlist) while maintaining your IP restrictions.
+1. Linux-based runners at the instance level
+1. Complete isolation from other tenants, following the same principles as GitLab Dedicated
+1. Auto-scaling
+1. Fully managed by GitLab
+
+Additional features will be included based on customer demand leading up to limited and general availability.
+
+Hosted Runners for Dedicated are available upon invitation for existing GitLab Dedicated customers. To participate in the closed beta of Hosted Runners for Dedicated, reach out to your Customer Success Manager or Account representative.
+
+##### Request runner IP ranges
+
+IP ranges for runners hosted by GitLab are available upon request. IP ranges are maintained on a best-effort basis and may change at any time during the beta due to changes in the infrastructure.
+Please reach out to your Customer Success Manager or Account representative.
+
+##### Machine types available for Linux (x86-64)
+
+Instance runners available during the beta are using EC2 `M7i` general-purpose machines.
+
+##### Bring Your Own
+
+With GitLab Dedicated, you must [install the GitLab Runner application](https://docs.gitlab.com/runner/install/index.html) on infrastructure that you own or manage. If hosting GitLab Runners on AWS, you can avoid having requests from the Runner fleet route through the public internet by setting up a secure connection from the Runner VPC to the GitLab Dedicated endpoint via AWS Private Link. Learn more about [networking options](#secure-networking).
 
 #### Migration
 
-To help you migrate your data to GitLab Dedicated, choose from the following options:
+To help you migrate your data to GitLab Dedicated, you can choose from the following options:
 
 1. When migrating from another GitLab instance, you can import groups and projects by either:
-   - Using [direct transfer](../../user/group/import/index.md).
-   - Using the [direct transfer](../../api/bulk_imports.md) API.
+    - Using [direct transfer](../../user/group/import/index.md).
+    - Using the [direct transfer](../../api/bulk_imports.md) API.
 1. When migrating from third-party services, you can use [the GitLab importers](../../user/project/import/index.md#supported-import-sources).
 1. You can also engage [Professional Services](../../user/project/import/index.md#migrate-by-engaging-professional-services).
 

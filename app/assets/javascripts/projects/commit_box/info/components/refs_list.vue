@@ -79,18 +79,18 @@ export default {
 
 <template>
   <div class="well-segment">
-    <gl-icon :name="refIcon" class="gl-ml-2 gl-mr-3" />
+    <gl-icon :name="refIcon" :size="14" class="gl-ml-2 gl-mr-3" />
     <span data-testid="title" class="gl-mr-2">{{ namespace }}</span>
     <gl-badge
       v-for="ref in tippingRefs"
       :key="ref"
       :href="getRefUrl(ref)"
-      class="gl-mr-2 gl-mt-2"
+      class="gl-mt-2 gl-mr-2"
       >{{ ref }}</gl-badge
     >
     <gl-button
       v-if="hasContainingRefs"
-      class="gl-mr-2 !gl-text-sm"
+      class="gl-mr-2 gl-font-sm!"
       variant="link"
       size="small"
       @click="showRefs"
@@ -105,7 +105,7 @@ export default {
           v-for="ref in containingRefs"
           :key="ref"
           :href="getRefUrl(ref)"
-          class="gl-mr-2 gl-mt-3"
+          class="gl-mt-3 gl-mr-2"
           >{{ ref }}</gl-badge
         >
       </template>

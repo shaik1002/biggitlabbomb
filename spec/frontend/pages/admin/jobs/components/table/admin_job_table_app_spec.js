@@ -1,12 +1,11 @@
-import { GlLoadingIcon, GlAlert, GlIntersectionObserver } from '@gitlab/ui';
-import { shallowMount } from '@vue/test-utils';
+import { GlLoadingIcon, GlEmptyState, GlAlert, GlIntersectionObserver } from '@gitlab/ui';
+import { mount, shallowMount } from '@vue/test-utils';
 import Vue, { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import JobsTableTabs from '~/ci/jobs_page/components/jobs_table_tabs.vue';
 import JobsSkeletonLoader from '~/ci/admin/jobs_table/components/jobs_skeleton_loader.vue';
-import JobsTableEmptyState from '~/ci/jobs_page/components/jobs_table_empty_state.vue';
 import getAllJobsQuery from '~/ci/admin/jobs_table/graphql/queries/get_all_jobs.query.graphql';
 import getAllJobsCount from '~/ci/admin/jobs_table/graphql/queries/get_all_jobs_count.query.graphql';
 import getCancelableJobsQuery from '~/ci/admin/jobs_table/graphql/queries/get_cancelable_jobs_count.query.graphql';
@@ -50,7 +49,7 @@ describe('Job table app', () => {
   const findSkeletonLoader = () => wrapper.findComponent(JobsSkeletonLoader);
   const findLoadingSpinner = () => wrapper.findComponent(GlLoadingIcon);
   const findTable = () => wrapper.findComponent(JobsTable);
-  const findEmptyState = () => wrapper.findComponent(JobsTableEmptyState);
+  const findEmptyState = () => wrapper.findComponent(GlEmptyState);
   const findAlert = () => wrapper.findComponent(GlAlert);
   const findTabs = () => wrapper.findComponent(JobsTableTabs);
   const findCancelJobsButton = () => wrapper.findComponent(CancelJobs);
@@ -78,11 +77,11 @@ describe('Job table app', () => {
     handler = successHandler,
     cancelableHandler = cancelHandler,
     countHandler = countSuccessHandler,
+    mountFn = shallowMount,
     data = {},
     provideOptions = {},
-    stubs = {},
   } = {}) => {
-    wrapper = shallowMount(AdminJobsTableApp, {
+    wrapper = mountFn(AdminJobsTableApp, {
       data() {
         return {
           ...data,
@@ -94,7 +93,6 @@ describe('Job table app', () => {
         ...provideOptions,
       },
       apolloProvider: createMockApolloProvider(handler, cancelableHandler, countHandler),
-      stubs,
     });
   };
 
@@ -194,7 +192,7 @@ describe('Job table app', () => {
 
   describe('empty state', () => {
     it('should display empty state if there are no jobs and tab scope is null', async () => {
-      createComponent({ handler: emptyHandler });
+      createComponent({ handler: emptyHandler, mountFn: mount });
 
       await waitForPromises();
 
@@ -203,7 +201,7 @@ describe('Job table app', () => {
     });
 
     it('should not display empty state if there are jobs and tab scope is not null', async () => {
-      createComponent({ handler: successHandler });
+      createComponent({ handler: successHandler, mountFn: mount });
 
       await waitForPromises();
 
@@ -273,7 +271,7 @@ describe('Job table app', () => {
 
   describe('cancel jobs button', () => {
     it('should display cancel all jobs button', async () => {
-      createComponent({ cancelableHandler: cancelHandler, stubs: { JobsTableTabs } });
+      createComponent({ cancelableHandler: cancelHandler, mountFn: mount });
 
       await waitForPromises();
 

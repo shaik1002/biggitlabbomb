@@ -69,7 +69,7 @@ export default {
 
           <gl-icon
             v-show="connectSuccessful"
-            class="js-error-tracking-connect-success align-middle gl-ml-2 gl-text-success"
+            class="js-error-tracking-connect-success gl-ml-2 text-success align-middle"
             :aria-label="__('Projects Successfully Retrieved')"
             name="check"
           />

@@ -21,7 +21,6 @@ import { PageEntrypointsPlugin } from './config/helpers/vite_plugin_page_entrypo
 import { FixedRubyPlugin } from './config/helpers/vite_plugin_ruby_fixed.mjs';
 import { StylePlugin } from './config/helpers/vite_plugin_style.mjs';
 import { IconsPlugin } from './config/helpers/vite_plugin_icons.mjs';
-import { ImagesPlugin } from './config/helpers/vite_plugin_images.mjs';
 /* eslint-enable import/extensions */
 
 let viteGDKConfig;
@@ -87,7 +86,6 @@ export default defineConfig({
   plugins: [
     PageEntrypointsPlugin(),
     IconsPlugin(),
-    ImagesPlugin(),
     StylePlugin({ shouldWatch: viteGDKConfig.hmr !== null }),
     viteTailwindCompilerPlugin({ shouldWatch: viteGDKConfig.hmr !== null }),
     CopyPlugin({
@@ -153,12 +151,5 @@ export default defineConfig({
   },
   worker: {
     format: 'es',
-  },
-  css: {
-    preprocessorOptions: {
-      sass: {
-        api: 'modern',
-      },
-    },
   },
 });

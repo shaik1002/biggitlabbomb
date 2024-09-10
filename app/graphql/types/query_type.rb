@@ -236,7 +236,7 @@ module Types
 
     field :feature_flag_enabled, GraphQL::Types::Boolean,
       null: false,
-      deprecated: { reason: 'Replaced with metadata.featureFlags', milestone: '17.4' },
+      alpha: { milestone: '17.1' },
       description: 'Check if a feature flag is enabled',
       resolver: Resolvers::FeatureFlagResolver
 

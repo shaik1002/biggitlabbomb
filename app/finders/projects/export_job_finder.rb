@@ -3,16 +3,15 @@
 module Projects
   class ExportJobFinder
     InvalidExportJobStatusError = Class.new(StandardError)
-    attr_reader :project, :user, :params
+    attr_reader :project, :params
 
-    def initialize(project, user, params = {})
+    def initialize(project, params = {})
       @project = project
-      @user = user
       @params = params
     end
 
     def execute
-      export_jobs = project.export_jobs.by_user_id(user.id)
+      export_jobs = project.export_jobs
       by_status(export_jobs)
     end
 

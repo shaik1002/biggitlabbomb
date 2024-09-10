@@ -128,7 +128,6 @@ export const restoreLinks = (baseOpacity) => {
   backgroundNodes(getNodesNotLive());
 };
 
-// eslint-disable-next-line max-params
 export const toggleLinkHighlight = (baseOpacity, d, idx, collection) => {
   if (currentIsLive(idx, collection)) {
     restorePath([d], [d.source.uid, d.target.uid], baseOpacity);
@@ -139,7 +138,6 @@ export const toggleLinkHighlight = (baseOpacity, d, idx, collection) => {
   highlightPath([d], [d.source.uid, d.target.uid]);
 };
 
-// eslint-disable-next-line max-params
 export const togglePathHighlights = (baseOpacity, d, idx, collection) => {
   const parentLinks = getAllLinkAncestors(d);
   const parentNodes = getAllNodeAncestors(d);

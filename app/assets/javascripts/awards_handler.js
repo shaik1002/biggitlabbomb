@@ -275,7 +275,6 @@ export class AwardsHandler {
     return $menu.css(css);
   }
 
-  // eslint-disable-next-line max-params
   addAward(votesBlock, awardUrl, emoji, checkMutuality, callback) {
     const isMainAwardsBlock = votesBlock.closest('.js-noteable-awards').length;
 
@@ -482,7 +481,6 @@ export class AwardsHandler {
     });
   }
 
-  // eslint-disable-next-line max-params
   postEmoji($emojiButton, awardUrl, emoji, callback) {
     axios
       .post(awardUrl, {

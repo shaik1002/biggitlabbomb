@@ -60,7 +60,7 @@ RSpec.describe Gitlab::InternalEvents, :snowplow, feature_category: :product_ana
     end
   end
 
-  def expect_snowplow_tracking(expected_namespace = nil, expected_additional_properties = {}, extra: {})
+  def expect_snowplow_tracking(expected_namespace = nil, expected_additional_properties = {})
     service_ping_context = Gitlab::Tracking::ServicePingContext
       .new(data_source: :redis_hll, event: event_name)
       .to_context
@@ -81,7 +81,7 @@ RSpec.describe Gitlab::InternalEvents, :snowplow, feature_category: :product_ana
         c[:schema] == Gitlab::Tracking::StandardContext::GITLAB_STANDARD_SCHEMA_URL
       end
 
-      validate_standard_context(standard_context, expected_namespace, extra)
+      validate_standard_context(standard_context, expected_namespace)
 
       # Verify Service Ping context
       service_ping_context = contexts.find { |c| c[:schema] == Gitlab::Tracking::ServicePingContext::SCHEMA_URL }
@@ -90,13 +90,12 @@ RSpec.describe Gitlab::InternalEvents, :snowplow, feature_category: :product_ana
     end
   end
 
-  def validate_standard_context(standard_context, expected_namespace, extra)
+  def validate_standard_context(standard_context, expected_namespace)
     namespace = expected_namespace || project&.namespace
     expect(standard_context).not_to eq(nil)
     expect(standard_context[:data][:user_id]).to eq(user&.id)
     expect(standard_context[:data][:namespace_id]).to eq(namespace&.id)
     expect(standard_context[:data][:project_id]).to eq(project&.id)
-    expect(standard_context[:data][:extra]).to eq(extra)
   end
 
   def validate_service_ping_context(service_ping_context)
@@ -191,23 +190,6 @@ RSpec.describe Gitlab::InternalEvents, :snowplow, feature_category: :product_ana
       )
 
       expect_snowplow_tracking(nil, additional_properties)
-    end
-
-    context 'with a custom property' do
-      let(:custom_properties) do
-        additional_properties.merge(custom: 'custom_property')
-      end
-
-      it 'is sent to Snowplow' do
-        described_class.track_event(
-          event_name,
-          additional_properties: custom_properties,
-          user: user,
-          project: project
-        )
-
-        expect_snowplow_tracking(nil, additional_properties, extra: { custom: 'custom_property' })
-      end
     end
 
     context 'when a filter is defined' do
@@ -393,6 +375,16 @@ RSpec.describe Gitlab::InternalEvents, :snowplow, feature_category: :product_ana
           let(:event_kwargs) { { user: user } }
           let(:logged_kwargs) { { user: user.id } }
         end
+      end
+    end
+
+    context "when disallowed additional properties are passed" do
+      let(:error_class) { described_class::InvalidPropertyError }
+      let(:additional_properties) { { new_property: 'value' } }
+
+      it_behaves_like 'an event that logs an error' do
+        let(:event_kwargs) { { user: user } }
+        let(:logged_kwargs) { { user: user.id } }
       end
     end
   end

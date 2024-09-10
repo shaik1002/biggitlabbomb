@@ -236,7 +236,7 @@ module ProjectsHelper
     project.last_pipeline
   end
 
-  def show_no_ssh_key_message?(project)
+  def show_no_ssh_key_message?
     Gitlab::CurrentSettings.user_show_add_ssh_key_message? &&
       cookies[:hide_no_ssh_message].blank? &&
       !current_user.hide_no_ssh_key &&
@@ -268,17 +268,21 @@ module ProjectsHelper
   end
 
   def no_password_message
+    push_pull_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: help_page_path('topics/git/terminology', anchor: 'pull-and-push') }
+    clone_with_https_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: help_page_path('gitlab-basics/start-using-git', anchor: 'clone-with-https') }
     set_password_link_start = '<a href="%{url}">'.html_safe % { url: edit_user_settings_password_path }
     set_up_pat_link_start = '<a href="%{url}">'.html_safe % { url: user_settings_personal_access_tokens_path }
 
     message = if current_user.require_password_creation_for_git?
-                _('Your account is authenticated with SSO or SAML. To push and pull over %{protocol} with Git using this account, you must %{set_password_link_start}set a password%{link_end} or %{set_up_pat_link_start}set up a personal access token%{link_end} to use instead of a password.')
+                _('Your account is authenticated with SSO or SAML. To %{push_pull_link_start}push and pull%{link_end} over %{protocol} with Git using this account, you must %{set_password_link_start}set a password%{link_end} or %{set_up_pat_link_start}set up a Personal Access Token%{link_end} to use instead of a password. For more information, see %{clone_with_https_link_start}Clone with HTTPS%{link_end}.')
               else
-                _('Your account is authenticated with SSO or SAML. To push and pull over %{protocol} with Git using this account, you must %{set_up_pat_link_start}set up a personal access token%{link_end} to use instead of a password.')
+                _('Your account is authenticated with SSO or SAML. To %{push_pull_link_start}push and pull%{link_end} over %{protocol} with Git using this account, you must %{set_up_pat_link_start}set up a Personal Access Token%{link_end} to use instead of a password. For more information, see %{clone_with_https_link_start}Clone with HTTPS%{link_end}.')
               end
 
     ERB::Util.html_escape(message) % {
+      push_pull_link_start: push_pull_link_start,
       protocol: gitlab_config.protocol.upcase,
+      clone_with_https_link_start: clone_with_https_link_start,
       set_password_link_start: set_password_link_start,
       set_up_pat_link_start: set_up_pat_link_start,
       link_end: '</a>'.html_safe
@@ -304,13 +308,7 @@ module ProjectsHelper
   end
 
   def show_projects?(projects, params)
-    !!(
-      params[:personal] ||
-      params[:name] ||
-      params[:language] ||
-      params[:archived] == 'only' ||
-      any_projects?(projects)
-    )
+    !!(params[:personal] || params[:name] || params[:language] || any_projects?(projects))
   end
 
   def push_to_create_project_command(user = current_user)
@@ -397,16 +395,6 @@ module ProjectsHelper
   def show_terraform_banner?(project)
     Feature.enabled?(:show_terraform_banner, type: :ops) &&
       project.repository_languages.with_programming_language('HCL').exists? && project.terraform_states.empty?
-  end
-
-  def show_lfs_misconfiguration_banner?(project)
-    return false unless Feature.enabled?(:lfs_misconfiguration_banner)
-    return false unless project.repository
-    return false unless project.lfs_enabled?
-
-    Rails.cache.fetch("show_lfs_misconfiguration_banner_#{project.id}", expires_in: 5.minutes) do
-      project.lfs_objects.any? && !project.repository.has_gitattributes?
-    end
   end
 
   def project_permissions_panel_data(project)
@@ -652,11 +640,12 @@ module ProjectsHelper
     'manual-ordering'
   end
 
-  def projects_filtered_search_and_sort_app_data
+  def projects_explore_filtered_search_and_sort_app_data
     {
       initial_sort: project_list_sort_by,
       programming_languages: programming_languages,
-      paths_to_exclude_sort_on: [starred_explore_projects_path, explore_root_path]
+      starred_explore_projects_path: starred_explore_projects_path,
+      explore_root_path: explore_root_path
     }.to_json
   end
 

@@ -1,12 +1,13 @@
-# Referenced in .gitlab/ci/release-environments.gitlab-ci.yml
-# This downstream pipeline should only be run in the security mirror repository.
+# Similar to .gitlab/ci/release-environments/main.gitlab-ci.yml, for release-environment pipelines in the security mirror.
+# Referenced in .gitlab/ci/release-environments.gitlab-ci.yml to differentiate from the canonical (main) version.
+# This file includes .gitlab/ci/cng/security.gitlab-ci.yml, instead of .gitlab/ci/cng/main.gitlab-ci.yml.
 ---
 include:
   - local: .gitlab/ci/cng/main.gitlab-ci.yml
     inputs:
       cng_path: 'charts/components/images'
   - project: 'gitlab-org/quality/pipeline-common'
-    ref: '9.0.1'
+    ref: '8.18.4'
     file: ci/base.gitlab-ci.yml
 
 stages:
@@ -84,13 +85,14 @@ release-environments-deploy:
     branch: main
     strategy: depend
   needs: ["release-environments-deploy-env"]
+  resource_group: release-environment-${CI_COMMIT_REF_SLUG}
 
 release-environments-qa:
   stage: qa
   extends:
     - .qa-base
   timeout: 30m
-  parallel: 3
+  parallel: 5
   variables:
     QA_SCENARIO: "Test::Instance::Smoke"
     RELEASE: "${CI_REGISTRY}/${CI_PROJECT_PATH}/gitlab-ee-qa:${CI_COMMIT_SHA}"
@@ -101,9 +103,6 @@ release-environments-qa:
   before_script:
     - !reference [.qa-base, before_script]
     - echo "$CI_REGISTRY_PASSWORD" | docker login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
-  retry:
-    max: 2
-    when: always
 
 release-environments-notification-failure:
   stage: finish

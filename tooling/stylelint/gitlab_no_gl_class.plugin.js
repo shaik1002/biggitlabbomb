@@ -25,7 +25,7 @@ const ruleFunction = (primary) => {
 
     if (!validOptions) return;
 
-    root.walkRules(/\.gl-/, (ruleNode) => {
+    root.walkRules(/\.gl-(?!dark)/, (ruleNode) => {
       report({
         result,
         ruleName,

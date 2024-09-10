@@ -13,10 +13,8 @@ export function createMockMergeRequest(mergeRequest = {}) {
       webPath: '/',
     },
     milestone: null,
-    diffStatsSummary: {
-      fileCount: 1,
-      additions: 100,
-      deletions: 50,
+    labels: {
+      nodes: [],
     },
     assignees: {
       nodes: [],
@@ -25,7 +23,7 @@ export function createMockMergeRequest(mergeRequest = {}) {
       nodes: [],
     },
     headPipeline: null,
-    userNotesCount: 0,
+    userDiscussionsCount: 0,
     createdAt: '',
     updatedAt: '',
     approved: false,

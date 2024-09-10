@@ -2,7 +2,6 @@
 import { GlAlert, GlModal } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import { scrollToTargetOnResize } from '~/lib/utils/resize_observer';
-import { removeHierarchyChild } from '../graphql/cache_utils';
 import deleteWorkItemMutation from '../graphql/delete_work_item.mutation.graphql';
 
 export default {
@@ -17,11 +16,6 @@ export default {
     WorkItemDetail: () => import('./work_item_detail.vue'),
   },
   props: {
-    parentId: {
-      type: String,
-      required: false,
-      default: null,
-    },
     workItemId: {
       type: String,
       required: false,
@@ -65,12 +59,6 @@ export default {
         .mutate({
           mutation: deleteWorkItemMutation,
           variables: { input: { id: this.workItemId } },
-          update: (cache) =>
-            removeHierarchyChild({
-              cache,
-              id: this.parentId,
-              workItem: { id: this.workItemId },
-            }),
         })
         .then(({ data }) => {
           if (data.workItemDelete.errors?.length) {
@@ -109,7 +97,8 @@ export default {
     updateHasNotes() {
       this.hasNotes = true;
     },
-    openReportAbuseModal(reply) {
+    openReportAbuseDrawer(reply) {
+      this.hide();
       this.$emit('openReportAbuse', reply);
     },
   },
@@ -123,7 +112,7 @@ export default {
     hide-footer
     size="lg"
     :modal-id="$options.WORK_ITEM_DETAIL_MODAL_ID"
-    header-class="gl-p-0 !gl-pb-2"
+    header-class="gl-p-0 gl-pb-2!"
     scrollable
     :title="$options.i18n.modalTitle"
     :data-testid="$options.WORK_ITEM_DETAIL_MODAL_ID"
@@ -136,15 +125,14 @@ export default {
 
     <work-item-detail
       is-modal
-      :work-item-id="workItemId"
       :work-item-iid="displayedWorkItemIid"
       :modal-work-item-full-path="workItemFullPath"
-      class="gl-isolate -gl-mt-3 gl-bg-inherit gl-p-5"
+      class="gl-p-5 -gl-mt-3 gl-bg-inherit gl-isolate"
       @close="hide"
       @deleteWorkItem="deleteWorkItem"
       @update-modal="updateModal"
       @has-notes="updateHasNotes"
-      @openReportAbuse="openReportAbuseModal"
+      @openReportAbuse="openReportAbuseDrawer"
     />
   </gl-modal>
 </template>

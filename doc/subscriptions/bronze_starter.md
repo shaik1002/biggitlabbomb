@@ -65,7 +65,7 @@ the tiers are no longer mentioned in GitLab documentation:
 - Merge requests:
   - [Full code quality reports in the code quality tab](../ci/testing/code_quality.md#pipeline-details-view)
   - [Merge request approvals](../user/project/merge_requests/approvals/index.md)
-  - [Multiple assignees](../user/project/merge_requests/index.md#assign-a-user-to-a-merge-request)
+  - [Multiple assignees](../user/project/merge_requests/index.md#assign-multiple-users)
   - [Approval rule information for reviewers](../user/project/merge_requests/reviews/index.md#see-how-reviewers-map-to-approval-rules)
   - [Required Approvals](../user/project/merge_requests/approvals/index.md#required-approvals)
   - [Code Owners as eligible approvers](../user/project/merge_requests/approvals/rules.md#code-owners-as-eligible-approvers)
@@ -114,8 +114,8 @@ Bronze-level subscribers:
   - LDAP synchronization:
     - Certain fields in the [group details API](../api/groups.md#details-of-a-group)
     - [syncing groups](../api/groups.md#sync-group-with-ldap)
-    - Listing, adding, and deleting [group links](../api/group_ldap_links.md)
-    - [Push rules](../api/group_push_rules.md)
+    - Listing, adding, and deleting [group links](../api/groups.md#list-ldap-group-links)
+    - [Push rules](../api/groups.md#push-rules)
     - [Audit events](../api/audit_events.md), including
       [group audit events](../api/groups.md#group-audit-events) and
       [project audit events](../api/audit_events.md#project-audit-events)

@@ -90,9 +90,8 @@ module ResourceAccessTokens
     end
 
     def create_personal_access_token(user)
-      organization_id = resource.organization_id || params[:organization_id]
       PersonalAccessTokens::CreateService.new(
-        current_user: user, target_user: user, organization_id: organization_id, params: personal_access_token_params
+        current_user: user, target_user: user, params: personal_access_token_params
       ).execute
     end
 
@@ -118,13 +117,7 @@ module ResourceAccessTokens
     end
 
     def pat_expiration
-      return params[:expires_at] if params[:expires_at].present?
-
-      if Gitlab::CurrentSettings.require_personal_access_token_expiry?
-        return PersonalAccessToken::MAX_PERSONAL_ACCESS_TOKEN_LIFETIME_IN_DAYS.days.from_now
-      end
-
-      nil
+      params[:expires_at].presence || PersonalAccessToken::MAX_PERSONAL_ACCESS_TOKEN_LIFETIME_IN_DAYS.days.from_now
     end
 
     def log_event(token)

@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Stand-ups, retrospectives, and velocity
 
-<!-- vale gitlab_base.FutureTense = NO -->
+<!-- vale gitlab.FutureTense = NO -->
 
 In addition to the core Scrum ceremonies such as sprint planning and reviews, teams can use GitLab to
 facilitate the following common Scrum ceremonies in both co-located and distributed environments:
@@ -63,10 +63,10 @@ A retrospective is a blameless opportunity for the team to identify process impr
 progress.
 You can choose from many retrospective formats.
 
-<!-- vale gitlab_base.InclusiveLanguage = NO -->
+<!-- vale gitlab.InclusionGender = NO -->
 James Shore provides [an excellent outline for how to conduct a retrospective](https://www.jamesshore.com/v2/books/aoad1/retrospectives)
 in his book, "The Art of Agile."
-<!-- vale gitlab_base.InclusiveLanguage = YES -->
+<!-- vale gitlab.InclusionGender = YES -->
 
 ### Synchronous retrospectives
 

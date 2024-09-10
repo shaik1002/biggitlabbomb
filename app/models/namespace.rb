@@ -20,7 +20,6 @@ class Namespace < ApplicationRecord
   include CrossDatabaseIgnoredTables
   include IgnorableColumns
   include UseSqlFunctionForPrimaryKeyLookups
-  include Todoable
 
   ignore_column :unlock_membership_to_ldap, remove_with: '16.7', remove_after: '2023-11-16'
 
@@ -157,7 +156,6 @@ class Namespace < ApplicationRecord
   validate :nesting_level_allowed, unless: -> { project_namespace? }
   validate :changing_shared_runners_enabled_is_allowed, unless: -> { project_namespace? }
   validate :changing_allow_descendants_override_disabled_shared_runners_is_allowed, unless: -> { project_namespace? }
-  validate :parent_organization_match, if: :require_organization?
 
   delegate :name, to: :owner, allow_nil: true, prefix: true
   delegate :avatar_url, to: :owner, allow_nil: true
@@ -308,9 +306,9 @@ class Namespace < ApplicationRecord
     # https://gitlab.com/gitlab-org/gitlab/-/blob/5d34e3488faa3982d30d7207773991c1e0b6368a/app/assets/javascripts/gfm_auto_complete.js#L68 and
     # https://gitlab.com/gitlab-org/gitlab/-/blob/5d34e3488faa3982d30d7207773991c1e0b6368a/app/assets/javascripts/gfm_auto_complete.js#L1053
     def gfm_autocomplete_search(query)
-      # This scope does not work with `ProjectNamespace` records because they don't have a corresponding `route` association.
-      # We do not chain the `without_project_namespaces` scope because it results in an expensive query plan in certain cases
-      joins(:route)
+      without_project_namespaces
+        .allow_cross_joins_across_databases(url: "https://gitlab.com/gitlab-org/gitlab/-/issues/420046")
+        .joins(:route)
         .where(
           "REPLACE(routes.name, ' ', '') ILIKE :pattern OR routes.path ILIKE :pattern",
           pattern: "%#{sanitize_sql_like(query)}%"
@@ -362,10 +360,6 @@ class Namespace < ApplicationRecord
       yield
     ensure
       Gitlab::SafeRequestStore[:require_organization] = current_value
-    end
-
-    def username_reserved?(username)
-      without_project_namespaces.where(parent_id: nil).find_by_path_or_name(username).present?
     end
   end
 
@@ -626,7 +620,7 @@ class Namespace < ApplicationRecord
     root? && actual_plan.paid?
   end
 
-  def linked_to_subscription?
+  def prevent_delete?
     paid?
   end
 
@@ -728,18 +722,13 @@ class Namespace < ApplicationRecord
       :active_pages_deployments)
   end
 
-  def web_url(only_path: nil)
-    Gitlab::UrlBuilder.build(self, only_path: only_path)
+  def require_organization?
+    return false unless Feature.enabled?(:require_organization, Feature.current_request)
+
+    Gitlab::SafeRequestStore.fetch(:require_organization) { true } # rubocop:disable Style/RedundantFetchBlock -- This fetch has a different interface
   end
 
   private
-
-  def parent_organization_match
-    return unless parent
-    return if parent.organization_id == organization_id
-
-    errors.add(:organization_id, _("must match the parent organization's ID"))
-  end
 
   def cross_namespace_reference?(from)
     return false if from == self
@@ -752,7 +741,7 @@ class Namespace < ApplicationRecord
     when Namespaces::ProjectNamespace
       from.parent_id != comparable_namespace_id
     when Namespace
-      is_a?(Group) ? from.id != id : parent != from
+      parent != from
     when User
       true
     end

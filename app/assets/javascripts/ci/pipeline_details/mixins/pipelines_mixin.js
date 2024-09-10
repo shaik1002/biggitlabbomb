@@ -3,7 +3,6 @@ import { createAlert } from '~/alert';
 import eventHub from '~/ci/event_hub';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import { historyPushState, buildUrlWithCurrentLocation } from '~/lib/utils/common_utils';
-import { reportToSentry } from '~/ci/utils';
 import { HTTP_STATUS_UNAUTHORIZED } from '~/lib/utils/http_status';
 import Poll from '~/lib/utils/poll';
 import { __ } from '~/locale';
@@ -115,9 +114,9 @@ export default {
 
           this.poll.enable({ data: this.requestData, response });
         })
-        .catch((error) => {
+        .catch(() => {
           this.isLoading = false;
-          this.errorCallback(error);
+          this.errorCallback();
 
           // restart polling
           this.poll.restart({ data: this.requestData });
@@ -146,8 +145,8 @@ export default {
         .then((response) => this.successCallback(response))
         .catch((error) => this.errorCallback(error));
     },
-    setCommonData(pipelines, isUsingAsyncPipelineCreation = false) {
-      this.store.storePipelines(pipelines, isUsingAsyncPipelineCreation);
+    setCommonData(pipelines) {
+      this.store.storePipelines(pipelines);
       this.isLoading = false;
       this.updateGraphDropdown = true;
       this.hasMadeRequest = true;
@@ -165,7 +164,6 @@ export default {
         this.hasError = true;
         this.updateGraphDropdown = false;
       }
-      reportToSentry('pipelines_list', error);
     },
     setIsMakingRequest(isMakingRequest) {
       this.isMakingRequest = isMakingRequest;
@@ -201,10 +199,7 @@ export default {
       this.service
         .runMRPipeline(options)
         .then(() => {
-          if (!options.isAsync) {
-            this.$toast.show(TOAST_MESSAGE);
-          }
-
+          this.$toast.show(TOAST_MESSAGE);
           this.updateTable();
         })
         .catch((e) => {
@@ -224,13 +219,8 @@ export default {
               link: helpPagePath('ci/pipelines/merge_request_pipelines.md'),
             },
           });
-          reportToSentry('run_mr_pipeline', e);
         })
-        .finally(() => {
-          if (!options.isAsync) {
-            this.store.toggleIsRunningPipeline(false);
-          }
-        });
+        .finally(() => this.store.toggleIsRunningPipeline(false));
     },
     onChangePage(page) {
       /* URLS parameters are strings, we need to parse to match types */

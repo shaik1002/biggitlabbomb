@@ -61,7 +61,7 @@ export const FIELDS = [
   },
   {
     key: FIELD_KEY_MAX_ROLE,
-    label: __('Role'),
+    label: __('Max role'),
     thClass: 'col-max-role',
     tdClass: 'col-max-role !gl-align-middle',
     sort: {
@@ -139,7 +139,12 @@ export const FILTERED_SEARCH_TOKEN_WITH_INHERITED_PERMISSIONS = {
   operators: OPERATORS_IS,
   options: [
     { value: 'exclude', title: s__('Members|Direct') },
-    { value: 'only', title: s__('Members|Indirect') },
+    {
+      value: 'only',
+      title: gon.features?.webuiMembersInheritedUsers
+        ? s__('Members|Indirect')
+        : s__('Members|Inherited'),
+    },
   ],
 };
 
@@ -165,8 +170,6 @@ export const AVAILABLE_FILTERED_SEARCH_TOKENS = [
 ];
 
 export const AVATAR_SIZE = 48;
-
-export const DEFAULT_PAGE_SIZE = 20;
 
 export const MEMBERS_TAB_TYPES = Object.freeze({
   user: 'user',
@@ -224,8 +227,3 @@ export const I18N_USER_BOT = __('Bot');
 export const I188N_USER_2FA = __('2FA');
 export const I18N_ROLE_SAVE_SUCCESS = s__('Members|Role was successfully updated.');
 export const I18N_ROLE_SAVE_ERROR = s__('MemberRole|Could not update role.');
-
-export const CONTEXT_TYPE = Object.freeze({
-  PROJECT: 'PROJECT',
-  GROUP: 'GROUP',
-});

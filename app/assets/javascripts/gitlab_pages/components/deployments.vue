@@ -158,7 +158,7 @@ export default {
     >
       {{ message }}
     </gl-alert>
-    <div class="gl-mb-4 gl-flex gl-flex-col gl-justify-between md:gl-mb-0 md:gl-flex-row">
+    <div class="gl-flex gl-flex-col md:gl-flex-row gl-mb-4 md:gl-mb-0 gl-justify-between">
       <h2 class="gl-text-h2">
         {{ $options.i18n.title }}
       </h2>

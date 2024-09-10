@@ -19,7 +19,7 @@ export default {
 </script>
 
 <template>
-  <div class="gl-flex gl-items-center gl-justify-center gl-gap-2">
+  <div class="gl-flex gl-items-center gl-gap-2 gl-justify-center">
     <span>
       {{ sprintf(__('+ %{n} more deployments'), { n: totalDeploymentCount }) }}
     </span>

@@ -172,7 +172,7 @@ export default {
     <div class="col-md-9">
       <gl-card>
         <template #header>
-          <div class="justify-content-between gl-flex gl-items-center">
+          <div class="gl-display-flex gl-align-items-center justify-content-between">
             <h5 class="gl-my-0">{{ $options.I18N_CARD_TITLE }}</h5>
             <beta-badge />
           </div>
@@ -199,7 +199,7 @@ export default {
           <gl-alert
             v-if="alertMessage"
             variant="warning"
-            class="-gl-mx-5 -gl-mt-5 gl-mb-4"
+            class="-gl-mt-5 gl-mb-4 -gl-mx-5"
             @dismiss="dismissAlert"
           >
             {{ alertMessage }}

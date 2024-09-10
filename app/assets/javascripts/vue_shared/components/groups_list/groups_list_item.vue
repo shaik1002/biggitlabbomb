@@ -15,7 +15,6 @@ import {
   TIMESTAMP_TYPE_CREATED_AT,
   TIMESTAMP_TYPE_UPDATED_AT,
 } from '~/vue_shared/components/resource_lists/constants';
-import GroupListItemPreventDeleteModal from './group_list_item_prevent_delete_modal.vue';
 
 export default {
   i18n: {
@@ -34,7 +33,6 @@ export default {
     GlTruncateText,
     GlBadge,
     ListActions,
-    GroupListItemPreventDeleteModal,
     GroupListItemDeleteModal,
     TimeAgoTooltip,
     GroupListItemInactiveBadge: () =>
@@ -133,9 +131,6 @@ export default {
     onActionDelete() {
       this.isDeleteModalVisible = true;
     },
-    onModalChange(isVisible) {
-      this.isDeleteModalVisible = isVisible;
-    },
   },
 };
 </script>
@@ -144,7 +139,7 @@ export default {
   <li class="groups-list-item gl-border-b gl-flex gl-py-5">
     <div class="gl-grow md:gl-flex">
       <div class="gl-flex gl-grow gl-items-start">
-        <div v-if="showGroupIcon" class="gl-mr-3 gl-flex gl-h-9 gl-shrink-0 gl-items-center">
+        <div v-if="showGroupIcon" class="gl-mr-3 gl-flex gl-h-9 gl-flex-shrink-0 gl-items-center">
           <gl-icon class="gl-text-secondary" :name="groupIconName" />
         </div>
         <gl-avatar-labeled
@@ -152,7 +147,6 @@ export default {
           :entity-name="group.fullName"
           :label="group.fullName"
           :label-link="group.webUrl"
-          :src="group.avatarUrl"
           shape="rect"
           :size="48"
         >
@@ -246,24 +240,15 @@ export default {
       />
     </div>
 
-    <template v-if="hasActionDelete">
-      <group-list-item-prevent-delete-modal
-        v-if="group.isLinkedToSubscription"
-        :visible="isDeleteModalVisible"
-        :modal-id="modalId"
-        :group="group"
-        @change="onModalChange"
-      />
-      <group-list-item-delete-modal
-        v-else
-        :visible="isDeleteModalVisible"
-        :modal-id="modalId"
-        :phrase="group.fullName"
-        :confirm-loading="isActionDeleteLoading"
-        :group="group"
-        @confirm.prevent="$emit('delete', group)"
-        @change="onModalChange"
-      />
-    </template>
+    <group-list-item-delete-modal
+      v-if="hasActionDelete"
+      :visible="isDeleteModalVisible"
+      :modal-id="modalId"
+      :phrase="group.fullName"
+      :confirm-loading="isActionDeleteLoading"
+      :group="group"
+      @confirm.prevent="$emit('delete', group)"
+      @change="isDeleteModalVisible = arguments[0]"
+    />
   </li>
 </template>

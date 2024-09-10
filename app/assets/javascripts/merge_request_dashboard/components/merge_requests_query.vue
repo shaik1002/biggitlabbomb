@@ -1,33 +1,21 @@
 <script>
 import reviewerQuery from '../queries/reviewer.query.graphql';
 import assigneeQuery from '../queries/assignee.query.graphql';
-import assigneeOrReviewerQuery from '../queries/assignee_or_reviewer.query.graphql';
-
-const PER_PAGE = 20;
-
-const QUERIES = {
-  reviewRequestedMergeRequests: reviewerQuery,
-  assignedMergeRequests: assigneeQuery,
-  assigneeOrReviewerMergeRequests: assigneeOrReviewerQuery,
-};
 
 export default {
   apollo: {
     mergeRequests: {
       query() {
-        return QUERIES[this.query];
+        return this.query === 'reviewRequestedMergeRequests' ? reviewerQuery : assigneeQuery;
       },
       update(d) {
-        return d.currentUser?.mergeRequests || {};
+        return d.currentUser?.[this.query] || {};
       },
       variables() {
         return {
           ...this.variables,
-          perPage: PER_PAGE,
+          perPage: 3,
         };
-      },
-      error() {
-        this.error = true;
       },
     },
   },
@@ -44,7 +32,6 @@ export default {
   data() {
     return {
       mergeRequests: null,
-      error: false,
     };
   },
   computed: {
@@ -60,7 +47,7 @@ export default {
       await this.$apollo.queries.mergeRequests.fetchMore({
         variables: {
           ...this.variables,
-          perPage: PER_PAGE,
+          perPage: 10,
           afterCursor: this.mergeRequests?.pageInfo?.endCursor,
         },
       });
@@ -73,7 +60,6 @@ export default {
       hasNextPage: this.hasNextPage,
       loadMore: this.loadMore,
       loading: this.isLoading,
-      error: this.error,
     });
   },
 };

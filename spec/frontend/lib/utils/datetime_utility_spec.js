@@ -1,5 +1,6 @@
 import timezoneMock from 'timezone-mock';
 import * as datetimeUtility from '~/lib/utils/datetime_utility';
+import { __, s__ } from '~/locale';
 import '~/commons/bootstrap';
 
 describe('Date time utils', () => {
@@ -7,43 +8,43 @@ describe('Date time utils', () => {
     it('should return Sunday', () => {
       const day = datetimeUtility.getDayName(new Date('07/17/2016'));
 
-      expect(day).toBe('Sunday');
+      expect(day).toBe(__('Sunday'));
     });
 
     it('should return Monday', () => {
       const day = datetimeUtility.getDayName(new Date('07/18/2016'));
 
-      expect(day).toBe('Monday');
+      expect(day).toBe(__('Monday'));
     });
 
     it('should return Tuesday', () => {
       const day = datetimeUtility.getDayName(new Date('07/19/2016'));
 
-      expect(day).toBe('Tuesday');
+      expect(day).toBe(__('Tuesday'));
     });
 
     it('should return Wednesday', () => {
       const day = datetimeUtility.getDayName(new Date('07/20/2016'));
 
-      expect(day).toBe('Wednesday');
+      expect(day).toBe(__('Wednesday'));
     });
 
     it('should return Thursday', () => {
       const day = datetimeUtility.getDayName(new Date('07/21/2016'));
 
-      expect(day).toBe('Thursday');
+      expect(day).toBe(__('Thursday'));
     });
 
     it('should return Friday', () => {
       const day = datetimeUtility.getDayName(new Date('07/22/2016'));
 
-      expect(day).toBe('Friday');
+      expect(day).toBe(__('Friday'));
     });
 
     it('should return Saturday', () => {
       const day = datetimeUtility.getDayName(new Date('07/23/2016'));
 
-      expect(day).toBe('Saturday');
+      expect(day).toBe(__('Saturday'));
     });
   });
 
@@ -149,10 +150,10 @@ describe('Date time utils', () => {
 
 describe('timeIntervalInWords', () => {
   it('should return string with number of minutes and seconds', () => {
-    expect(datetimeUtility.timeIntervalInWords(9.54)).toEqual('9 seconds');
-    expect(datetimeUtility.timeIntervalInWords(1)).toEqual('1 second');
-    expect(datetimeUtility.timeIntervalInWords(200)).toEqual('3 minutes 20 seconds');
-    expect(datetimeUtility.timeIntervalInWords(6008)).toEqual('100 minutes 8 seconds');
+    expect(datetimeUtility.timeIntervalInWords(9.54)).toEqual(s__('Timeago|9 seconds'));
+    expect(datetimeUtility.timeIntervalInWords(1)).toEqual(s__('Timeago|1 second'));
+    expect(datetimeUtility.timeIntervalInWords(200)).toEqual(s__('Timeago|3 minutes 20 seconds'));
+    expect(datetimeUtility.timeIntervalInWords(6008)).toEqual(s__('Timeago|100 minutes 8 seconds'));
   });
 });
 
@@ -192,15 +193,15 @@ describe('dateInWords', () => {
   const date = new Date('07/01/2016');
 
   it('should return date in words', () => {
-    expect(datetimeUtility.dateInWords(date)).toEqual('July 1, 2016');
+    expect(datetimeUtility.dateInWords(date)).toEqual(__('July 1, 2016'));
   });
 
   it('should return abbreviated month name', () => {
-    expect(datetimeUtility.dateInWords(date, true)).toEqual('Jul 1, 2016');
+    expect(datetimeUtility.dateInWords(date, true)).toEqual(__('Jul 1, 2016'));
   });
 
   it('should return date in words without year', () => {
-    expect(datetimeUtility.dateInWords(date, true, true)).toEqual('Jul 1');
+    expect(datetimeUtility.dateInWords(date, true, true)).toEqual(__('Jul 1'));
   });
 });
 
@@ -208,11 +209,11 @@ describe('monthInWords', () => {
   const date = new Date('2017-01-20');
 
   it('returns month name from provided date', () => {
-    expect(datetimeUtility.monthInWords(date)).toBe('January');
+    expect(datetimeUtility.monthInWords(date)).toBe(__('January'));
   });
 
   it('returns abbreviated month name from provided date', () => {
-    expect(datetimeUtility.monthInWords(date, true)).toBe('Jan');
+    expect(datetimeUtility.monthInWords(date, true)).toBe(__('Jan'));
   });
 });
 
@@ -344,7 +345,6 @@ describe('datefix', () => {
 });
 
 describe('prettyTime methods', () => {
-  // eslint-disable-next-line max-params
   const assertTimeUnits = (obj, minutes, hours, days, weeks) => {
     expect(obj.minutes).toBe(minutes);
     expect(obj.hours).toBe(hours);
@@ -504,10 +504,10 @@ describe('calculateRemainingMilliseconds', () => {
   });
 });
 
-describe('cloneDate', () => {
+describe('newDate', () => {
   it('returns new date instance from existing date instance', () => {
     const initialDate = new Date(2019, 0, 1);
-    const copiedDate = datetimeUtility.cloneDate(initialDate);
+    const copiedDate = datetimeUtility.newDate(initialDate);
 
     expect(copiedDate.getTime()).toBe(initialDate.getTime());
 
@@ -517,7 +517,7 @@ describe('cloneDate', () => {
   });
 
   it('returns date instance when provided date param is not of type date or is undefined', () => {
-    const initialDate = datetimeUtility.cloneDate();
+    const initialDate = datetimeUtility.newDate();
 
     expect(initialDate instanceof Date).toBe(true);
   });

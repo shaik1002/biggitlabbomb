@@ -59,24 +59,11 @@ module Auth
           name => %w[pull push],
           "#{name}/*" => %w[pull]
         },
-        use_key_as_project_path: true
+        override_project_path: name
       )
     end
 
-    def self.push_pull_move_repositories_access_token(name, new_namespace)
-      name = name.chomp('/')
-
-      access_token(
-        {
-          name => %w[pull push],
-          "#{name}/*" => %w[pull],
-          "#{new_namespace}/*" => %w[push]
-        },
-        use_key_as_project_path: true
-      )
-    end
-
-    def self.access_token(names_and_actions, type = 'repository', use_key_as_project_path: false)
+    def self.access_token(names_and_actions, type = 'repository', override_project_path: nil)
       registry = Gitlab.config.registry
       token = JSONWebToken::RSAToken.new(registry.key)
       token.issuer = registry.issuer
@@ -88,7 +75,7 @@ module Auth
           type: type,
           name: name,
           actions: actions,
-          meta: access_metadata(path: name, use_key_as_project_path: use_key_as_project_path)
+          meta: access_metadata(path: name, override_project_path: override_project_path)
         }.compact
       end
 
@@ -99,8 +86,8 @@ module Auth
       Time.current + Gitlab::CurrentSettings.container_registry_token_expire_delay.minutes
     end
 
-    def self.access_metadata(project: nil, path: nil, use_key_as_project_path: false)
-      return { project_path: path.chomp('/*').downcase } if use_key_as_project_path
+    def self.access_metadata(project: nil, path: nil, override_project_path: nil)
+      return { project_path: override_project_path.downcase } if override_project_path
 
       # If the project is not given, try to infer it from the provided path
       if project.nil?

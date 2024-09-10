@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -20,10 +20,6 @@ You can migrate GitLab groups:
 - From GitLab.com to self-managed GitLab.
 - From one self-managed GitLab instance to another.
 - Between groups in the same GitLab instance.
-
-WARNING:
-Migrating GitLab groups and projects by using direct transfer is [currently unavailable](https://status.gitlab.com). We don't have an
-estimated time for resolution. For more information, please [contact support](https://about.gitlab.com/support/).
 
 Migration by direct transfer creates a new copy of the group. If you want to move groups instead of copying groups, you
 can [transfer groups](../manage.md#transfer-a-group) if the groups are in the same GitLab instance. Transferring groups
@@ -72,15 +68,15 @@ transfer, you must use the [API](../../../api/bulk_imports.md#start-a-new-group-
 
 - Because of [issue 406685](https://gitlab.com/gitlab-org/gitlab/-/issues/406685), files with a filename longer than 255 characters are not migrated.
 - In GitLab 16.1 and earlier, you should **not** use direct transfer with
-  [scheduled scan execution policies](../../../user/application_security/policies/scan_execution_policies.md).
+  [scheduled scan execution policies](../../../user/application_security/policies/scan-execution-policies.md).
 - For a list of other known issues, see [epic 6629](https://gitlab.com/groups/gitlab-org/-/epics/6629).
 - In GitLab 16.9 and earlier, because of [issue 438422](https://gitlab.com/gitlab-org/gitlab/-/issues/438422), you might see the
   `DiffNote::NoteDiffFileCreationError` error. When this error occurs, the diff of a note on a merge request's diff
   is missing, but the note and the merge request are still imported.
-- When mapped from the source instance, shared members are mapped as direct members on the destination unless those
+- When imported from the source instance, shared members are created as direct members on the destination unless those
   memberships already exist on the destination. This means that importing a top-level group on the source instance to a
-  top-level group on the destination instance always maps to direct members in projects, even though the source top-level
-  group contains the necessary shared membership hierarchy details. Support for full mapping of shared memberships is
+  top-level group on the destination instance always creates direct members in projects, even though the source top-level
+  group contains the necessary shared membership hierarchy details. Support for full replication of shared memberships is
   proposed in [issue 458345](https://gitlab.com/gitlab-org/gitlab/-/issues/458345).
 
 ## Estimating migration duration
@@ -176,7 +172,7 @@ sidekiq['queue_groups'] = [
 ```
 
 If you are using GitLab 16.11 and earlier, explicitly disable any
-[queue selectors](https://archives.docs.gitlab.com/16.11/ee/administration/sidekiq/processing_specific_job_classes.html#queue-selectors-deprecated):
+[queue selectors](../../../administration/sidekiq/processing_specific_job_classes.md#queue-selectors-deprecated):
 
 ```ruby
 sidekiq['queue_selector'] = false
@@ -239,6 +235,23 @@ After migration:
 
 If you used a private network on your source instance to hide content from the general public,
 make sure to have a similar setup on the destination instance, or to import into a private group.
+
+## Memberships
+
+> - Importing of shared and inherited shared members was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/129017) in GitLab 16.3.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/148220) in GitLab 16.11, shared and inherited shared members are no longer imported as direct members if they are already shared or inherited shared members of the imported group or project.
+
+Group and project members are imported if the [user account prerequisites](direct_transfer_migrations.md#user-accounts)
+are followed.
+
+All [direct and indirect](../../../user/project/members/index.md#membership-types) members are imported.
+
+Indirect members are imported as [direct members](../../project/members/index.md#membership-types) if:
+
+- They are not already an indirect member of the target namespace.
+- They are an indirect member, but have a lower [permission](../../../user/permissions.md).
+
+There is a [known issue](#known-issues) affecting the transfer of shared memberships.
 
 ## Migration by direct transfer process
 

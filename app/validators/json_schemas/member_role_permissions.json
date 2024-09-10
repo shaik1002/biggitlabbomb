@@ -19,9 +19,6 @@
     "admin_merge_request": {
       "type": "boolean"
     },
-    "admin_protected_branch": {
-      "type": "boolean"
-    },
     "admin_push_rules": {
       "type": "boolean"
     },

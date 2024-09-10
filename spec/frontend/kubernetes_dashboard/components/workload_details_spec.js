@@ -1,28 +1,14 @@
-import Vue, { nextTick } from 'vue';
-import VueApollo from 'vue-apollo';
 import { shallowMount } from '@vue/test-utils';
-import { GlBadge, GlTruncate, GlButton, GlLoadingIcon, GlAlert } from '@gitlab/ui';
+import { GlBadge, GlTruncate } from '@gitlab/ui';
 import WorkloadDetails from '~/kubernetes_dashboard/components/workload_details.vue';
 import WorkloadDetailsItem from '~/kubernetes_dashboard/components/workload_details_item.vue';
 import { WORKLOAD_STATUS_BADGE_VARIANTS } from '~/kubernetes_dashboard/constants';
 import PodLogsButton from '~/environments/environment_details/components/kubernetes/pod_logs_button.vue';
-import waitForPromises from 'helpers/wait_for_promises';
-import createMockApollo from 'helpers/mock_apollo_helper';
-import K8sEventItem from '~/kubernetes_dashboard/components/k8s_event_item.vue';
-import { mockPodsTableItems, k8sEventsMock } from '../graphql/mock_data';
-
-Vue.use(VueApollo);
+import { mockPodsTableItems } from '../graphql/mock_data';
 
 let wrapper;
-let getK8sEventsQuery;
 
 const defaultItem = mockPodsTableItems[2];
-const configuration = {
-  basePath: 'kas/tunnel/url',
-  baseOptions: {
-    headers: { 'GitLab-Agent-Id': '1' },
-  },
-};
 
 const createWrapper = (item = defaultItem) => {
   wrapper = shallowMount(WorkloadDetails, {
@@ -33,37 +19,12 @@ const createWrapper = (item = defaultItem) => {
   });
 };
 
-const createApolloProvider = () => {
-  const mockResolvers = {
-    Query: {
-      k8sEvents: getK8sEventsQuery,
-    },
-  };
-
-  return createMockApollo([], mockResolvers);
-};
-
-const createWrapperWithApollo = () => {
-  wrapper = shallowMount(WorkloadDetails, {
-    propsData: {
-      item: defaultItem,
-      configuration,
-    },
-    apolloProvider: createApolloProvider(),
-  });
-};
-
 const findAllWorkloadDetailsItems = () => wrapper.findAllComponents(WorkloadDetailsItem);
 const findWorkloadDetailsItem = (at) => findAllWorkloadDetailsItems().at(at);
 const findAllBadges = () => wrapper.findAllComponents(GlBadge);
 const findBadge = (at) => findAllBadges().at(at);
 const findAllPodLogsButtons = () => wrapper.findAllComponents(PodLogsButton);
 const findPodLogsButton = (at) => findAllPodLogsButtons().at(at);
-const findAllButtons = () => wrapper.findAllComponents(GlButton);
-const findButton = (at) => findAllButtons().at(at);
-const findLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
-const findAlert = () => wrapper.findComponent(GlAlert);
-const findAllK8sEventItems = () => wrapper.findAllComponents(K8sEventItem);
 
 describe('Workload details component', () => {
   describe('when minimal fields are provided', () => {
@@ -113,48 +74,6 @@ describe('Workload details component', () => {
       expect(findWorkloadDetailsItem(index).props('collapsible')).toBe(true);
     });
 
-    describe('when actions are provided', () => {
-      const actions = [
-        {
-          name: 'delete-pod',
-          text: 'Delete pod',
-          icon: 'remove',
-          variant: 'danger',
-        },
-      ];
-      const mockTableItemsWithActions = {
-        ...mockPodsTableItems[0],
-        actions,
-      };
-
-      beforeEach(() => {
-        createWrapper(mockTableItemsWithActions);
-      });
-
-      it('renders a non-collapsible list item for containers', () => {
-        expect(findWorkloadDetailsItem(1).props('label')).toBe('Actions');
-        expect(findWorkloadDetailsItem(1).props('collapsible')).toBe(false);
-      });
-
-      it('renders a button for each action', () => {
-        expect(findAllButtons()).toHaveLength(1);
-      });
-
-      it.each(actions)('renders a button with the correct props', (action) => {
-        const currentIndex = actions.indexOf(action);
-
-        expect(findButton(currentIndex).props()).toMatchObject({
-          variant: action.variant,
-          icon: action.icon,
-        });
-
-        expect(findButton(currentIndex).attributes()).toMatchObject({
-          title: action.text,
-          'aria-label': action.text,
-        });
-      });
-    });
-
     describe('when containers are provided', () => {
       const mockTableItemsWithContainers = {
         ...mockPodsTableItems[0],
@@ -192,71 +111,6 @@ describe('Workload details component', () => {
           });
         },
       );
-    });
-
-    describe('k8s events', () => {
-      describe('default', () => {
-        beforeEach(() => {
-          getK8sEventsQuery = jest.fn().mockResolvedValue([]);
-          createWrapperWithApollo();
-        });
-        it('renders a collapsible list item for events', () => {
-          expect(findWorkloadDetailsItem(6).props('label')).toBe('Events');
-        });
-
-        it('requests k8s events for the current item', async () => {
-          getK8sEventsQuery = jest.fn().mockResolvedValue([]);
-          createWrapperWithApollo();
-          await nextTick();
-
-          expect(getK8sEventsQuery).toHaveBeenCalledWith(
-            {},
-            expect.objectContaining({
-              configuration,
-              namespace: defaultItem.namespace,
-              involvedObjectName: defaultItem.name,
-            }),
-            expect.any(Object),
-            expect.any(Object),
-          );
-        });
-
-        it('renders loading icon while loading events', async () => {
-          getK8sEventsQuery = jest.fn().mockResolvedValue([]);
-          createWrapperWithApollo();
-          await nextTick();
-
-          expect(findLoadingIcon().exists()).toBe(true);
-          await waitForPromises();
-
-          expect(findLoadingIcon().exists()).toBe(false);
-        });
-
-        it('shows empty state message when no events are found', async () => {
-          getK8sEventsQuery = jest.fn().mockResolvedValue([]);
-          createWrapperWithApollo();
-          await waitForPromises();
-
-          expect(findWorkloadDetailsItem(6).text()).toBe('No events available');
-        });
-      });
-
-      it('renders error alert when the request errored', async () => {
-        const error = new Error('Error from the cluster_client API');
-        getK8sEventsQuery = jest.fn().mockRejectedValue(error);
-        createWrapperWithApollo();
-        await waitForPromises();
-
-        expect(findAlert().text()).toBe(error.message);
-      });
-
-      it("renders a list of k8s-event-item's for each event", async () => {
-        getK8sEventsQuery = jest.fn().mockResolvedValue(k8sEventsMock);
-        createWrapperWithApollo();
-        await waitForPromises();
-
-        expect(findAllK8sEventItems()).toHaveLength(k8sEventsMock.length);
-      });
     });
   });
 });

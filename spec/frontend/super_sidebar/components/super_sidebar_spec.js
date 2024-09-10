@@ -184,7 +184,7 @@ describe('SuperSidebar component', () => {
 
       expect(link.exists()).toBe(true);
       expect(link.attributes('href')).toBe(linkAttrs.href);
-      expect(link.attributes('class')).toContain('gl-hidden');
+      expect(link.attributes('class')).toContain('gl-display-none');
     });
 
     it('sets up the sidebar toggle shortcut', () => {

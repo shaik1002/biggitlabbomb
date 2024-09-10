@@ -3,11 +3,9 @@ import { GlAlert, GlIntersectionObserver, GlLoadingIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
 import { createAlert } from '~/alert';
 import { setUrlParams, updateHistory, queryToObject } from '~/lib/utils/url_utility';
-import { reportToSentry } from '~/ci/utils';
 import JobsSkeletonLoader from '~/ci/admin/jobs_table/components/jobs_skeleton_loader.vue';
 import JobsFilteredSearch from '~/ci/common/private/jobs_filtered_search/app.vue';
 import { validateQueryString } from '~/ci/common/private/jobs_filtered_search/utils';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import GetJobs from './graphql/queries/get_jobs.query.graphql';
 import GetJobsCount from './graphql/queries/get_jobs_count.query.graphql';
 import JobsTable from './components/jobs_table.vue';
@@ -16,7 +14,6 @@ import JobsTableTabs from './components/jobs_table_tabs.vue';
 import { RAW_TEXT_WARNING } from './constants';
 
 export default {
-  name: 'JobsPageApp',
   i18n: {
     jobsFetchErrorMsg: __('There was an error fetching the jobs for your project.'),
     jobsCountErrorMsg: __('There was an error fetching the number of jobs for your project.'),
@@ -34,7 +31,6 @@ export default {
     GlLoadingIcon,
     JobsSkeletonLoader,
   },
-  mixins: [glFeatureFlagsMixin()],
   inject: {
     fullPath: {
       default: '',
@@ -56,9 +52,8 @@ export default {
           pageInfo,
         };
       },
-      error(error) {
+      error() {
         this.error = this.$options.i18n.jobsFetchErrorMsg;
-        reportToSentry(this.$options.name, error);
       },
     },
     jobsCount: {
@@ -72,9 +67,8 @@ export default {
       update({ project }) {
         return project?.jobs?.count || 0;
       },
-      error(error) {
+      error() {
         this.error = this.$options.i18n.jobsCountErrorMsg;
-        reportToSentry(this.$options.name, error);
       },
     },
   },
@@ -89,7 +83,6 @@ export default {
       filterSearchTriggered: false,
       jobsCount: null,
       count: 0,
-      requestData: {},
     };
   },
   computed: {
@@ -134,18 +127,11 @@ export default {
     },
   },
   methods: {
-    resetRequestData() {
-      if (this.glFeatures.populateAndUseBuildNamesTable) {
-        this.requestData = { statuses: null, name: null };
-      } else {
-        this.requestData = { statuses: null };
-      }
-    },
-    updateHistoryAndFetchCount() {
-      this.$apollo.queries.jobsCount.refetch(this.requestData);
+    updateHistoryAndFetchCount(status = null) {
+      this.$apollo.queries.jobsCount.refetch({ statuses: status });
 
       updateHistory({
-        url: setUrlParams(this.requestData, window.location.href, true),
+        url: setUrlParams({ statuses: status }, window.location.href, true),
       });
     },
     fetchJobsByStatus(scope) {
@@ -155,8 +141,6 @@ export default {
 
       this.scope = scope;
 
-      this.resetRequestData();
-
       if (!this.scope) this.updateHistoryAndFetchCount();
 
       this.$apollo.queries.jobs.refetch({ statuses: scope });
@@ -165,27 +149,33 @@ export default {
       this.infiniteScrollingTriggered = false;
       this.filterSearchTriggered = true;
 
-      this.resetRequestData();
+      // all filters have been cleared reset query param
+      // and refetch jobs/count with defaults
+      if (!filters.length) {
+        this.updateHistoryAndFetchCount();
+        this.$apollo.queries.jobs.refetch({ statuses: null });
 
+        return;
+      }
+
+      // Eventually there will be more tokens available
+      // this code is written to scale for those tokens
       filters.forEach((filter) => {
+        // Raw text input in filtered search does not have a type
+        // when a user enters raw text we alert them that it is
+        // not supported and we do not make an additional API call
         if (!filter.type) {
-          if (this.glFeatures.populateAndUseBuildNamesTable) {
-            this.requestData.name = filter;
-          } else {
-            createAlert({
-              message: RAW_TEXT_WARNING,
-              variant: 'warning',
-            });
-          }
+          createAlert({
+            message: RAW_TEXT_WARNING,
+            variant: 'warning',
+          });
         }
 
         if (filter.type === 'status') {
-          this.requestData.statuses = filter.value.data;
+          this.updateHistoryAndFetchCount(filter.value.data);
+          this.$apollo.queries.jobs.refetch({ statuses: filter.value.data });
         }
       });
-
-      this.$apollo.queries.jobs.refetch(this.requestData);
-      this.updateHistoryAndFetchCount();
     },
     fetchMoreJobs() {
       if (!this.loading) {

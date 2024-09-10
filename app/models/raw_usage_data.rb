@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
 class RawUsageData < ApplicationRecord
-  include SafelyChangeColumnDefault
-
-  columns_changing_default :organization_id
-
   REPORTING_CADENCE = 7.days.freeze
 
   belongs_to :organization, class_name: 'Organizations::Organization'

@@ -46,20 +46,10 @@ class Namespace
         %w[namespaces], url: 'https://gitlab.com/gitlab-org/gitlab/-/issues/424279'
       ) do
         Namespace.transaction do
-          lock_options = 'FOR NO KEY UPDATE'
-          lock_options += ' NOWAIT' if Feature.enabled?(:sync_traversal_ids_nowait, Feature.current_request)
-
-          @root.lock!(lock_options)
-
+          @root.lock!("FOR NO KEY UPDATE")
           Namespace.connection.exec_query(sql)
         end
       end
-    rescue ActiveRecord::LockWaitTimeout => e
-      if e.message.starts_with? 'PG::LockNotAvailable'
-        db_nowait_counter.increment(source: 'Namespace#sync_traversal_ids!')
-      end
-
-      raise
     rescue ActiveRecord::Deadlocked
       db_deadlock_counter.increment(source: 'Namespace#sync_traversal_ids!')
       raise
@@ -103,10 +93,6 @@ class Namespace
         .base_and_ancestors
         .reorder(nil)
         .find_by(parent_id: nil)
-    end
-
-    def db_nowait_counter
-      Gitlab::Metrics.counter(:db_nowait, 'Counts the times we triggered NOWAIT on a database lock operation')
     end
 
     def db_deadlock_counter

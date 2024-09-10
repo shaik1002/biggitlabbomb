@@ -7,7 +7,6 @@ query getMergeRequests(
   $fullPath: ID!
   $sort: MergeRequestSort
   $state: MergeRequestState
-  $approvedBy: [String!]
   $assigneeUsernames: String
   $assigneeWildcardId: AssigneeWildcardId
   $reviewerUsername: String
@@ -15,14 +14,10 @@ query getMergeRequests(
   $authorUsername: String
   $draft: Boolean
   $labelName: [String!]
-  $releaseTag: String
-  $mergeUser: String
   $milestoneTitle: String
   $milestoneWildcardId: MilestoneWildcardId
-  $myReactionEmoji: String
   $sourceBranches: [String!]
   $targetBranches: [String!]
-  $not: MergeRequestsResolverNegatedParams
   $beforeCursor: String
   $afterCursor: String
   $firstPageSize: Int
@@ -33,7 +28,6 @@ query getMergeRequests(
     mergeRequests(
       sort: $sort
       state: $state
-      approvedBy: $approvedBy
       assigneeUsername: $assigneeUsernames
       assigneeWildcardId: $assigneeWildcardId
       reviewerUsername: $reviewerUsername
@@ -41,14 +35,10 @@ query getMergeRequests(
       authorUsername: $authorUsername
       draft: $draft
       labelName: $labelName
-      releaseTag: $releaseTag
-      mergedBy: $mergeUser
       milestoneTitle: $milestoneTitle
       milestoneWildcardId: $milestoneWildcardId
-      myReactionEmoji: $myReactionEmoji
       sourceBranches: $sourceBranches
       targetBranches: $targetBranches
-      not: $not
       before: $beforeCursor
       after: $afterCursor
       first: $firstPageSize

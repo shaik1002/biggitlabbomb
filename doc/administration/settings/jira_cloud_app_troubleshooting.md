@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -50,7 +50,7 @@ To resolve this issue, disable the **Jira Connect Proxy URL** setting.
 
 - In GitLab 15.8 and later:
 
-  1. On the left sidebar, at the bottom, select **Admin**.
+  1. On the left sidebar, at the bottom, select **Admin area**.
   1. On the left sidebar, select **Settings > General**.
   1. Expand **GitLab for Jira App**.
   1. Clear the **Jira Connect Proxy URL** text box.
@@ -257,27 +257,14 @@ When you link a group, you might get the following error:
 Failed to link group. Please try again.
 ```
 
-This error can be returned for multiple reasons.
+A `403 Forbidden` is returned if the user information cannot be fetched from Jira because of insufficient permissions.
 
-- A `403 Forbidden` can be returned if the user information cannot be fetched from Jira because of insufficient permissions.
-  To resolve this issue, ensure the Jira user that installs and configures the app
-  meets certain [requirements](jira_cloud_app.md#jira-user-requirements).
+To resolve this issue, ensure the Jira user that installs and configures the app
+meets certain [requirements](jira_cloud_app.md#jira-user-requirements).
 
-- This error might also occur if you use a rewrite or subfilter with a [reverse proxy](jira_cloud_app.md#using-a-reverse-proxy).
-  The app key used in requests contains part of the server hostname, which some reverse proxy filters might capture.
-  The app key in Atlassian and GitLab must match for authentication to work correctly.
-
-- This error can happen if the GitLab instance was initially misconfigured when the
-  GitLab for Jira Cloud app was first installed. In this case, data in the `jira_connect_installation`
-  table might need to be deleted. Only delete this data if you are sure that no existing
-  GitLab for Jira app installations need to be kept.
-
-  1. Uninstall the GitLab for Jira Cloud app from any Jira projects.
-  1. To delete the records, run this command in the [GitLab Rails console](../operations/rails_console.md#starting-a-rails-console-session):
-
-     ```ruby
-     JiraConnectInstallation.delete_all
-     ```
+This error might also occur if you use a rewrite or subfilter with a [reverse proxy](jira_cloud_app.md#using-a-reverse-proxy).
+The app key used in requests contains part of the server hostname, which some reverse proxy filters might capture.
+The app key in Atlassian and GitLab must match for authentication to work correctly.
 
 ## `Failed to load Jira Connect Application ID`
 
@@ -303,7 +290,7 @@ To resolve this issue:
    ```
 
 1. If you [installed the app from the official Atlassian Marketplace listing](jira_cloud_app.md#install-the-gitlab-for-jira-cloud-app-from-the-atlassian-marketplace),
-   ensure [**Jira Connect Proxy URL**](jira_cloud_app.md#set-up-your-instance) is set to `https://gitlab.com` with no trailing slash.
+   ensure [**Jira Connect Proxy URL**](jira_cloud_app.md#set-up-your-instance) is set to `https://gitlab.com` without leading slashes.
 
 ## `Missing required parameter: client_id`
 

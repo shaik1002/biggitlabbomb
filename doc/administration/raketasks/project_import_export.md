@@ -31,21 +31,15 @@ Parameters:
 | `project_path` | string | yes | Project path |
 | `archive_path` | string | yes | Path to the exported project tarball you want to import |
 
-::Tabs
+```shell
+bundle exec rake "gitlab:import_export:import[root, group/subgroup, testingprojectimport, /path/to/file.tar.gz]"
+```
 
-:::TabTitle Linux package (Omnibus)
+If you're running a Linux package installation, run the following Rake task:
 
 ```shell
 gitlab-rake "gitlab:import_export:import[root, group/subgroup, testingprojectimport, /path/to/file.tar.gz]"
 ```
-
-:::TabTitle Self-compiled (source)
-
-```shell
-bundle exec rake "gitlab:import_export:import[root, group/subgroup, testingprojectimport, /path/to/file.tar.gz]" RAILS_ENV=production
-```
-
-::EndTabs
 
 ## Export large projects
 

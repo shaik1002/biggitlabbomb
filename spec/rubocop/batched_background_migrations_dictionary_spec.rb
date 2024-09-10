@@ -36,8 +36,7 @@ RSpec.describe RuboCop::BatchedBackgroundMigrationsDictionary, feature_category:
   subject(:batched_background_migration) { described_class.new(migration_version) }
 
   describe '#finalized_by' do
-    it 'returns the finalized_by version of the bbm with given version',
-      quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/456913' do
+    it 'returns the finalized_by version of the bbm with given version' do
       expect(batched_background_migration.finalized_by).to eq(finalized_by_version.to_s)
     end
 
@@ -47,8 +46,7 @@ RSpec.describe RuboCop::BatchedBackgroundMigrationsDictionary, feature_category:
   end
 
   describe '#introduced_by_url' do
-    it 'returns the introduced_by_url of the bbm with given version',
-      quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/456912' do
+    it 'returns the introduced_by_url of the bbm with given version' do
       expect(batched_background_migration.introduced_by_url).to eq(introduced_by_url)
     end
 
@@ -58,8 +56,7 @@ RSpec.describe RuboCop::BatchedBackgroundMigrationsDictionary, feature_category:
   end
 
   describe '#finalize_after' do
-    it 'returns the finalize_after timestamp of the bbm with given version',
-      quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/456914' do
+    it 'returns the finalize_after timestamp of the bbm with given version' do
       expect(batched_background_migration.finalize_after).to eq(finalize_after)
     end
 

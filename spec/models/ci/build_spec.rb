@@ -24,7 +24,6 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
   let_it_be(:build, refind: true) { create(:ci_build, pipeline: pipeline) }
 
   let(:allow_runner_registration_token) { false }
-  let_it_be(:public_project) { create(:project, :public) }
 
   before do
     stub_application_setting(allow_runner_registration_token: allow_runner_registration_token)
@@ -46,7 +45,6 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
   it { is_expected.to have_many(:job_variables).with_foreign_key(:job_id) }
   it { is_expected.to have_many(:report_results).with_foreign_key(:build_id) }
   it { is_expected.to have_many(:pages_deployments).with_foreign_key(:ci_build_id) }
-  it { is_expected.to have_many(:tag_links).with_foreign_key(:build_id).class_name('Ci::BuildTag').inverse_of(:build) }
 
   it { is_expected.to have_one(:runner_manager).through(:runner_manager_build) }
   it { is_expected.to have_one(:runner_session).with_foreign_key(:build_id) }
@@ -76,19 +74,6 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
   it { is_expected.to delegate_method(:merge_request_ref?).to(:pipeline) }
   it { is_expected.to delegate_method(:legacy_detached_merge_request_pipeline?).to(:pipeline) }
 
-  describe 'partition query' do
-    subject { build.reload }
-
-    it_behaves_like 'including partition key for relation', :trace_chunks
-    it_behaves_like 'including partition key for relation', :build_source
-    it_behaves_like 'including partition key for relation', :job_artifacts
-    it_behaves_like 'including partition key for relation', :job_annotations
-    it_behaves_like 'including partition key for relation', :runner_manager_build
-    Ci::JobArtifact.file_types.each_key do |key|
-      it_behaves_like 'including partition key for relation', :"job_artifacts_#{key}"
-    end
-  end
-
   describe 'associations' do
     it { is_expected.to belong_to(:project_mirror).with_foreign_key('project_id') }
 
@@ -100,42 +85,6 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
     it 'has a bidirectional relationship with project mirror' do
       expect(described_class.reflect_on_association(:project_mirror).has_inverse?).to eq(:builds)
       expect(Ci::ProjectMirror.reflect_on_association(:builds).has_inverse?).to eq(:project_mirror)
-    end
-  end
-
-  describe 'scopes' do
-    let_it_be(:old_project) { create(:project) }
-    let_it_be(:new_project) { create(:project) }
-    let_it_be(:old_build) { create(:ci_build, created_at: 1.week.ago, updated_at: 1.week.ago, project: old_project) }
-    let_it_be(:new_build) { create(:ci_build, created_at: 1.minute.ago, updated_at: 1.minute.ago, project: new_project) }
-
-    describe 'created_after' do
-      subject { described_class.created_after(1.day.ago) }
-
-      it 'returns the builds created after the given time' do
-        is_expected.to contain_exactly(new_build, build)
-      end
-    end
-
-    describe 'updated_after' do
-      subject { described_class.updated_after(1.day.ago) }
-
-      it 'returns the builds updated after the given time' do
-        is_expected.to contain_exactly(new_build, build)
-      end
-    end
-
-    describe 'with_pipeline_source_type' do
-      let_it_be(:pipeline) { create(:ci_pipeline, source: :security_orchestration_policy) }
-      let_it_be(:build) { create(:ci_build, pipeline: pipeline) }
-      let_it_be(:push_pipeline) { create(:ci_pipeline, source: :push) }
-      let_it_be(:push_build) { create(:ci_build, pipeline: push_pipeline) }
-
-      subject { described_class.with_pipeline_source_type('security_orchestration_policy') }
-
-      it 'returns the builds updated after the given time' do
-        is_expected.to contain_exactly(build)
-      end
     end
   end
 
@@ -923,7 +872,7 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
     end
   end
 
-  describe '#any_runners_online?', :freeze_time do
+  describe '#any_runners_online?' do
     subject { build.any_runners_online? }
 
     context 'when no runners' do
@@ -932,39 +881,32 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
 
     context 'when there is a runner' do
       before do
-        create(:ci_runner, *Array.wrap(runner_traits), :project, projects: [build.project])
+        create(:ci_runner, *runner_traits, :project, projects: [build.project])
       end
 
       context 'that is online' do
-        let(:runner_traits) { :online }
+        let(:runner_traits) { [:online] }
 
         it { is_expected.to be_truthy }
-
-        context 'and almost offline' do
-          let(:runner_traits) { :almost_offline }
-
-          it { is_expected.to be_truthy }
-        end
       end
 
-      context 'that is paused' do
-        let(:runner_traits) { [:online, :paused] }
+      context 'that is inactive' do
+        let(:runner_traits) { [:online, :inactive] }
 
         it { is_expected.to be_falsey }
       end
 
       context 'that is offline' do
-        let(:runner_traits) { :offline }
+        let(:runner_traits) { [:offline] }
 
         it { is_expected.to be_falsey }
       end
 
       context 'that cannot handle build' do
-        let(:runner_traits) { :online }
+        let(:runner_traits) { [:online] }
 
         before do
-          expect_any_instance_of(Gitlab::Ci::Matching::RunnerMatcher).to receive(:matches?).with(build.build_matcher)
-            .and_return(false)
+          expect_any_instance_of(Gitlab::Ci::Matching::RunnerMatcher).to receive(:matches?).with(build.build_matcher).and_return(false)
         end
 
         it { is_expected.to be_falsey }
@@ -1923,8 +1865,6 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
 
       expect(build.tags.count).to eq(1)
       expect(build.tags.first.name).to eq('tag')
-      expect(build.tag_links.count).to eq(1)
-      expect(build.tag_links.first.tag.name).to eq('tag')
     end
 
     it 'strips tags' do
@@ -1941,7 +1881,6 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
         end
 
         expect(build.tags).to be_empty
-        expect(build.tag_links).to be_empty
       end
     end
   end
@@ -3262,22 +3201,37 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
 
       let(:pipeline) { create(:ci_pipeline, project: project, ref: 'feature') }
 
-      context 'and id_tokens are not present in the build' do
-        it 'does not return id_token variables' do
-          expect(build.variables)
-            .not_to include(key: 'ID_TOKEN_1', value: 'feature', public: true, masked: false)
+      context 'when feature flag remove_shared_jwts is enabled' do
+        context 'and id_tokens are not present in the build' do
+          it 'does not return id_token variables' do
+            expect(build.variables)
+              .not_to include(key: 'ID_TOKEN_1', value: 'feature', public: true, masked: false)
+          end
+        end
+
+        context 'and id_tokens are present in the build' do
+          before do
+            build.id_tokens = {
+              'ID_TOKEN_1' => { aud: 'developers' },
+              'ID_TOKEN_2' => { aud: 'maintainers' }
+            }
+          end
+
+          it 'returns static predefined variables' do
+            expect(build.variables)
+              .to include(key: 'CI_COMMIT_REF_NAME', value: 'feature', public: true, masked: false)
+            expect(build).not_to be_persisted
+          end
         end
       end
 
-      context 'and id_tokens are present in the build' do
+      context 'when feature flag remove_shared_jwts is disabled' do
         before do
-          build.id_tokens = {
-            'ID_TOKEN_1' => { aud: 'developers' },
-            'ID_TOKEN_2' => { aud: 'maintainers' }
-          }
+          stub_feature_flags(remove_shared_jwts: false)
         end
 
         it 'returns static predefined variables' do
+          expect(build.variables.size).to be >= 28
           expect(build.variables)
             .to include(key: 'CI_COMMIT_REF_NAME', value: 'feature', public: true, masked: false)
           expect(build).not_to be_persisted
@@ -3543,29 +3497,9 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
       end
     end
 
-    context 'when build has dependency which has dotenv variable in same project' do
+    context 'when build has dependency which has dotenv variable' do
       let!(:prepare) { create(:ci_build, pipeline: pipeline, stage_idx: 0) }
       let!(:build) { create(:ci_build, pipeline: pipeline, stage_idx: 1, options: { dependencies: [prepare.name] }) }
-      let!(:job_artifact) { create(:ci_job_artifact, :dotenv, job: prepare, accessibility: accessibility) }
-
-      let!(:job_variable) { create(:ci_job_variable, :dotenv_source, job: prepare) }
-
-      context "when artifact is public" do
-        let(:accessibility) { 'public' }
-
-        it { is_expected.to include(key: job_variable.key, value: job_variable.value, public: false, masked: false) }
-      end
-
-      context "when artifact is private" do
-        let(:accessibility) { 'private' }
-
-        it { is_expected.to include(key: job_variable.key, value: job_variable.value, public: false, masked: false) }
-      end
-    end
-
-    context 'when build has dependency which has dotenv variable in different project' do
-      let!(:prepare) { create(:ci_build, pipeline: pipeline, stage_idx: 0) }
-      let!(:build) { create(:ci_build, project: public_project, stage_idx: 1, options: { dependencies: [prepare.name] }) }
       let!(:job_artifact) { create(:ci_job_artifact, :dotenv, job: prepare, accessibility: accessibility) }
 
       let!(:job_variable) { create(:ci_job_variable, :dotenv_source, job: prepare) }
@@ -3775,7 +3709,7 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
         end
       end
 
-      context 'with dependency variables in the same project' do
+      context 'with dependency variables' do
         let!(:prepare) { create(:ci_build, name: 'prepare', pipeline: pipeline, stage_idx: 0) }
         let!(:build) { create(:ci_build, pipeline: pipeline, stage_idx: 1, options: { dependencies: ['prepare'] }) }
         let!(:job_artifact) { create(:ci_job_artifact, :dotenv, job: prepare, accessibility: accessibility_config) }
@@ -3788,27 +3722,7 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
           it { expect(build.scoped_variables.to_hash).to include(job_variable.key => job_variable.value) }
         end
 
-        context 'inherits dependent variables that are private' do
-          let(:accessibility_config) { 'private' }
-
-          it { expect(build.scoped_variables.to_hash).to include(job_variable.key => job_variable.value) }
-        end
-      end
-
-      context 'with dependency variables in different project' do
-        let!(:prepare) { create(:ci_build, name: 'prepare', pipeline: pipeline, stage_idx: 0) }
-        let!(:build) { create(:ci_build, project: public_project, stage_idx: 1, options: { dependencies: ['prepare'] }) }
-        let!(:job_artifact) { create(:ci_job_artifact, :dotenv, job: prepare, accessibility: accessibility_config) }
-
-        let!(:job_variable) { create(:ci_job_variable, :dotenv_source, job: prepare) }
-
-        context 'inherits dependent variables that are public' do
-          let(:accessibility_config) { 'public' }
-
-          it { expect(build.scoped_variables.to_hash).to include(job_variable.key => job_variable.value) }
-        end
-
-        context 'does not inherit dependent variables that are private' do
+        context 'does not inherits dependent variables that are private' do
           let(:accessibility_config) { 'private' }
 
           it { expect(build.scoped_variables.to_hash).not_to include(job_variable.key => job_variable.value) }
@@ -3894,33 +3808,10 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
   describe '#dependency_variables' do
     subject { build.dependency_variables }
 
-    context 'when using dependencies in the same project' do
+    context 'when using dependencies' do
       let!(:prepare1) { create(:ci_build, name: 'prepare1', pipeline: pipeline, stage_idx: 0) }
       let!(:prepare2) { create(:ci_build, name: 'prepare2', pipeline: pipeline, stage_idx: 0) }
       let!(:build) { create(:ci_build, pipeline: pipeline, stage_idx: 1, options: { dependencies: ['prepare1'] }) }
-      let!(:job_artifact) { create(:ci_job_artifact, :dotenv, job: prepare1, accessibility: accessibility) }
-
-      let!(:job_variable_1) { create(:ci_job_variable, :dotenv_source, job: prepare1) }
-      let!(:job_variable_2) { create(:ci_job_variable, job: prepare1) }
-      let!(:job_variable_3) { create(:ci_job_variable, :dotenv_source, job: prepare2) }
-
-      context 'inherits only dependent variables that are public' do
-        let(:accessibility) { 'public' }
-
-        it { expect(subject.to_hash).to eq(job_variable_1.key => job_variable_1.value) }
-      end
-
-      context 'inherits dependent variables that are private' do
-        let(:accessibility) { 'private' }
-
-        it { expect(subject.to_hash).to eq(job_variable_1.key => job_variable_1.value) }
-      end
-    end
-
-    context 'when using dependencies in a different project' do
-      let!(:prepare1) { create(:ci_build, name: 'prepare1', pipeline: pipeline, stage_idx: 0) }
-      let!(:prepare2) { create(:ci_build, name: 'prepare2', pipeline: pipeline, stage_idx: 0) }
-      let!(:build) { create(:ci_build, project: public_project, stage_idx: 1, options: { dependencies: ['prepare1'] }) }
       let!(:job_artifact) { create(:ci_job_artifact, :dotenv, job: prepare1, accessibility: accessibility) }
 
       let!(:job_variable_1) { create(:ci_job_variable, :dotenv_source, job: prepare1) }
@@ -3940,37 +3831,11 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
       end
     end
 
-    context 'when using needs in the same project' do
+    context 'when using needs' do
       let!(:prepare1) { create(:ci_build, name: 'prepare1', pipeline: pipeline, stage_idx: 0) }
       let!(:prepare2) { create(:ci_build, name: 'prepare2', pipeline: pipeline, stage_idx: 0) }
       let!(:prepare3) { create(:ci_build, name: 'prepare3', pipeline: pipeline, stage_idx: 0) }
       let!(:build) { create(:ci_build, pipeline: pipeline, stage_idx: 1, scheduling_type: 'dag') }
-      let!(:build_needs_prepare1) { create(:ci_build_need, build: build, name: 'prepare1', artifacts: true) }
-      let!(:build_needs_prepare2) { create(:ci_build_need, build: build, name: 'prepare2', artifacts: false) }
-      let!(:job_artifact) { create(:ci_job_artifact, :dotenv, job: prepare1, accessibility: accessibility_config) }
-
-      let!(:job_variable_1) { create(:ci_job_variable, :dotenv_source, job: prepare1) }
-      let!(:job_variable_2) { create(:ci_job_variable, :dotenv_source, job: prepare2) }
-      let!(:job_variable_3) { create(:ci_job_variable, :dotenv_source, job: prepare3) }
-
-      context 'inherits only needs with artifacts variables that are public' do
-        let(:accessibility_config) { 'public' }
-
-        it { expect(subject.to_hash).to eq(job_variable_1.key => job_variable_1.value) }
-      end
-
-      context 'inherits needs with artifacts variables that are private' do
-        let(:accessibility_config) { 'private' }
-
-        it { expect(subject.to_hash).to eq(job_variable_1.key => job_variable_1.value) }
-      end
-    end
-
-    context 'when using needs in a different project' do
-      let!(:prepare1) { create(:ci_build, name: 'prepare1', pipeline: pipeline, stage_idx: 0) }
-      let!(:prepare2) { create(:ci_build, name: 'prepare2', pipeline: pipeline, stage_idx: 0) }
-      let!(:prepare3) { create(:ci_build, name: 'prepare3', pipeline: pipeline, stage_idx: 0) }
-      let!(:build) { create(:ci_build, project: public_project, stage_idx: 1, scheduling_type: 'dag') }
       let!(:build_needs_prepare1) { create(:ci_build_need, build: build, name: 'prepare1', artifacts: true) }
       let!(:build_needs_prepare2) { create(:ci_build_need, build: build, name: 'prepare2', artifacts: false) }
       let!(:job_artifact) { create(:ci_job_artifact, :dotenv, job: prepare1, accessibility: accessibility_config) }
@@ -4309,7 +4174,7 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
   describe '.matches_tag_ids' do
     let_it_be(:build, reload: true) { create(:ci_build, pipeline: pipeline, user: user) }
 
-    let(:tag_ids) { Ci::Tag.named_any(tag_list).ids }
+    let(:tag_ids) { ::ActsAsTaggableOn::Tag.named_any(tag_list).ids }
 
     subject { described_class.where(id: build).matches_tag_ids(tag_ids) }
 
@@ -5761,6 +5626,16 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
 
     context 'when the builds runner does not support canceling' do
       specify { expect(job.supports_canceling?).to be false }
+
+      context 'when the ci_canceling_status flag is disabled' do
+        before do
+          stub_feature_flags(ci_canceling_status: false)
+        end
+
+        it 'returns false' do
+          expect(job.supports_canceling?).to be false
+        end
+      end
     end
 
     context 'when the builds runner supports canceling' do
@@ -5768,6 +5643,16 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
 
       it 'returns true' do
         expect(job.supports_canceling?).to be true
+      end
+
+      context 'when the ci_canceling_status flag is disabled' do
+        before do
+          stub_feature_flags(ci_canceling_status: false)
+        end
+
+        it 'returns false' do
+          expect(job.supports_canceling?).to be false
+        end
       end
     end
   end
@@ -5919,7 +5804,7 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
     let(:ci_build) { FactoryBot.build(:ci_build, pipeline: new_pipeline, ci_stage: ci_stage) }
 
     before do
-      stub_current_partition_id(ci_testing_partition_id_for_check_constraints)
+      stub_current_partition_id
     end
 
     it 'assigns partition_id to job variables successfully', :aggregate_failures do
@@ -5931,8 +5816,8 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
       ci_build.save!
 
       expect(ci_build.job_variables.count).to eq(2)
-      expect(ci_build.job_variables.first.partition_id).to eq(ci_testing_partition_id_for_check_constraints)
-      expect(ci_build.job_variables.second.partition_id).to eq(ci_testing_partition_id_for_check_constraints)
+      expect(ci_build.job_variables.first.partition_id).to eq(ci_testing_partition_id)
+      expect(ci_build.job_variables.second.partition_id).to eq(ci_testing_partition_id)
     end
   end
 
@@ -5966,7 +5851,7 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
   end
 
   describe 'metadata partitioning', :ci_partitionable do
-    let(:pipeline) { create(:ci_pipeline, project: project, partition_id: ci_testing_partition_id_for_check_constraints) }
+    let(:pipeline) { create(:ci_pipeline, project: project, partition_id: ci_testing_partition_id) }
 
     let(:ci_stage) { create(:ci_stage, pipeline: pipeline) }
     let(:build) { FactoryBot.build(:ci_build, pipeline: pipeline, ci_stage: ci_stage) }
@@ -5981,7 +5866,7 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
 
       expect(build.metadata).to be_present
       expect(build.metadata).to be_valid
-      expect(build.metadata.partition_id).to eq(ci_testing_partition_id_for_check_constraints)
+      expect(build.metadata.partition_id).to eq(ci_testing_partition_id)
     end
   end
 

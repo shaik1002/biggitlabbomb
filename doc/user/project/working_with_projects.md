@@ -82,7 +82,7 @@ If you are not authenticated, then the list shows public projects only.
 To view projects you are a member of:
 
 1. On the left sidebar, select **Search or go to**.
-1. Select **View all my projects**.
+1. Select **Your work**.
 
 On the left sidebar, **Projects** is selected. On the list, on the **Yours** tab,
 all the projects you are a member of are displayed.
@@ -96,24 +96,12 @@ called `my-project` under your username, the project is created at `https://gitl
 
 To view your personal projects:
 
-1. On the left sidebar, select **Search or go to**.
-1. Select **View all my projects**.
-1. Select the **Personal** tab.
-
-Or
-
 1. On the left sidebar, select your avatar and then your username.
 1. On the left sidebar, select **Personal projects**.
 
 ## View starred projects
 
 To view projects you have [starred](#star-a-project):
-
-1. On the left sidebar, select **Search or go to**.
-1. Select **View all my projects**.
-1. Select the **Starred** tab.
-
-Or
 
 1. On the left sidebar, select your avatar and then your username.
 1. On the left sidebar, select **Starred projects**.
@@ -198,7 +186,7 @@ DETAILS:
 **Tier:** Premium, Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
-> - Option to delete projects immediately from the **Admin** area and as a group setting removed [on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/393622) and [on self-managed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/119606) in GitLab 16.0.
+> - Option to delete projects immediately from the Admin area and as a group setting removed [on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/393622) and [on self-managed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/119606) in GitLab 16.0.
 
 Prerequisites:
 
@@ -271,7 +259,8 @@ Active pipeline schedules of archived projects don't become read-only.
 Archived projects are:
 
 - Labeled with an `archived` badge on the project page.
-- Listed in the **Inactive** tab on the group page, **Your work** page, and **Explore** page.
+- Listed on the group page in the **Inactive** tab.
+- Hidden from project lists in **Your Work** and **Explore**.
 - Read-only.
 
 Prerequisites:
@@ -339,7 +328,9 @@ You can sort projects by:
 - Name
 - Created date
 - Updated date
-- Stars
+- Owner
+
+You can also choose to hide or show archived projects.
 
 ### Filter projects by language
 
@@ -352,21 +343,9 @@ You can filter projects by the programming language they use. To do this:
 1. Select either:
    - **View all your projects**, to filter your projects.
    - **Explore**, to filter all projects you can access.
-1. Above the list of projects, select **Search or filter results**.
 1. From the **Language** dropdown list, select the language you want to filter projects by.
 
 A list of projects that use the selected language is displayed.
-
-### View only projects you own
-
-To view only the projects you are the owner of:
-
-1. On the left sidebar, select **Search or go to**.
-1. Select either:
-   - **View all your projects**, to filter your projects.
-   - **Explore**, to filter all projects you can access.
-1. Above the list of projects, select **Search or filter results**.
-1. From the **Role** dropdown list, select **Owner**.
 
 ## Rename a repository
 
@@ -379,7 +358,7 @@ Prerequisites:
 
 NOTE:
 When you change the repository path, users may experience issues if they push to, or pull from, the old URL. For more information, see
-[redirects when renaming repositories](../project/repository/index.md#repository-path-changes).
+[redirects when renaming repositories](../project/repository/index.md#what-happens-when-a-repository-path-changes).
 
 To rename a repository:
 
@@ -460,4 +439,4 @@ repository. For example, if an administrator creates the alias `gitlab` for the 
 - [Connect an external repository to GitLab CI/CD](../../ci/ci_cd_for_external_repos/index.md).
 - [Fork a project](repository/forking_workflow.md#create-a-fork).
 - Adjust [project visibility](../../user/public_access.md#change-project-visibility) and [permissions](settings/index.md#configure-project-features-and-permissions).
-- [Limitations on project and group names](../../user/reserved_names.md#limitations-on-usernames-project-and-group-names-and-slugs)
+- [Limitations on project and group names](../../user/reserved_names.md#limitations-on-usernames-project-and-group-names)

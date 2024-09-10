@@ -15,7 +15,6 @@ class Commit
   include ::Gitlab::Utils::StrongMemoize
   include ActsAsPaginatedDiff
   include CacheMarkdownField
-  include GlobalID::Identification
 
   participant :author
   participant :committer
@@ -324,8 +323,7 @@ class Commit
   end
 
   def parents
-    # Usage of `reject` is intentional. `compact` doesn't work here, because of BatchLoader specifics
-    @parents ||= parent_ids.map { |oid| Commit.lazy(container, oid) }.reject(&:nil?)
+    @parents ||= parent_ids.map { |oid| Commit.lazy(container, oid) }
   end
 
   def parent
@@ -596,10 +594,6 @@ class Commit
     repository.tag_names_contains(id, limit: limit, exclude_refs: excluded) || []
   end
 
-  def has_encoded_file_paths?
-    raw_diffs.any?(&:encoded_file_path)
-  end
-
   private
 
   def tipping_refs(ref_prefix, limit: 0)
@@ -645,5 +639,3 @@ class Commit
     MergeRequestsFinder.new(user, project_id: project_id).find_by(squash_commit_sha: id)
   end
 end
-
-Commit.prepend_mod_with('Projects::Commit')

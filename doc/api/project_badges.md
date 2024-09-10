@@ -14,7 +14,7 @@ DETAILS:
 
 [Badges](../user/project/badges.md) support placeholders that are replaced in real-time in both the link and image URL. The allowed placeholders are:
 
-<!-- vale gitlab_base.Spelling = NO -->
+<!-- vale gitlab.Spelling = NO -->
 
 - **%{project_path}**: Replaced by the project path.
 - **%{project_title}**: Replaced by the project title.
@@ -28,7 +28,7 @@ DETAILS:
 - **%{commit_sha}**: Replaced by the project's last commit SHA.
 - **%{latest_tag}**: Replaced by the project's last tag.
 
-<!-- vale gitlab_base.Spelling = YES -->
+<!-- vale gitlab.Spelling = YES -->
 
 ## List all badges of a project
 

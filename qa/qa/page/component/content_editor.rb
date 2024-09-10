@@ -31,12 +31,7 @@ module QA
             text_area.set(text)
             # wait for text style option to become active after typing
             has_active_element?('text-styles', wait: 1)
-
-            retry_until(sleep_interval: 1, message: "Text style dropdown item containing #{heading} did not show up") do
-              click_element('text-styles')
-              has_element?('.gl-new-dropdown-contents li', text: heading)
-            end
-
+            click_element('text-styles')
             find_element('.gl-new-dropdown-contents li', text: heading).click
           end
         end

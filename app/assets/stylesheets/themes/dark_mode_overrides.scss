@@ -10,6 +10,8 @@
   --dark-icon-color-orange-1: #665349;
   --dark-icon-color-orange-2: #b37a5d;
 
+  --gl-text-color: #{$gray-900};
+
   --svg-status-bg: #{$white};
 }
 
@@ -22,7 +24,26 @@
 }
 
 .gl-dark {
+  .gl-button.gl-button,
+  .gl-button.gl-button.btn-block {
+    &.btn-default,
+    &.btn-dashed,
+    &.btn-info,
+    &.btn-success,
+    &.btn-danger,
+    &.btn-confirm {
+      &-tertiary {
+        mix-blend-mode: screen;
+      }
+    }
+  }
+
   .gl-datepicker-theme {
+    .pika-prev,
+    .pika-next {
+      filter: invert(0.9);
+    }
+
     .is-selected > .pika-button {
       color: $gray-900;
     }

@@ -3,8 +3,6 @@
  *
  */
 .md {
-  position: relative;
-  z-index: 1;
   color: $gl-text-color;
   word-wrap: break-word;
 
@@ -80,16 +78,6 @@
     margin-bottom: $gl-padding;
   }
 
-  // Shift the anchor link for a heading inside a details summary to the left
-  // to make room for the summary toggle
-  details summary {
-    h1, h2, h3, h4, h5, h6 {
-      a.anchor {
-        margin-left: -2rem;
-      }
-    }
-  }
-
   summary > * {
     display: inline-block;
     margin-bottom: 0;
@@ -104,10 +92,6 @@
     word-wrap: break-word;
     overflow-wrap: break-word;
     word-break: keep-all;
-  }
-
-  mark {
-    @include str-highlighted;
   }
 
   h1 {
@@ -860,32 +844,4 @@ wbr {
 // The font used in Monaco editor - Web IDE, Snippets, single file editor
 :root {
   --code-editor-font: #{$monospace-font};
-}
-
-/**
- * FOOTNOTES
- */
- section.footnotes {
-  position: relative;
-  padding-top: $gl-spacing-scale-5;
-  margin-top: $gl-spacing-scale-7;
-  font-size: $gl-font-size-12;
-
-  &::before {
-    content: '';
-    width: 16rem;
-    max-width: 100%;
-    border-top: 1px solid $border-color;
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
-
-  ol > li {
-    margin-inline-start: $gl-spacing-scale-6;
-
-     p {
-      margin-block-end: 0;
-     }
-  }
 }

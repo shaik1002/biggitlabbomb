@@ -28,7 +28,7 @@ import MrWidgetAlertMessage from '~/vue_merge_request_widget/components/mr_widge
 import getStateQuery from '~/vue_merge_request_widget/queries/get_state.query.graphql';
 import getStateSubscription from '~/vue_merge_request_widget/queries/get_state.subscription.graphql';
 import readyToMergeSubscription from '~/vue_merge_request_widget/queries/states/ready_to_merge.subscription.graphql';
-import securityReportMergeRequestDownloadPathsQuery from '~/vue_merge_request_widget/widgets/security_reports/graphql/security_report_merge_request_download_paths.query.graphql';
+import securityReportMergeRequestDownloadPathsQuery from '~/vue_merge_request_widget/extensions/security_reports/graphql/security_report_merge_request_download_paths.query.graphql';
 import readyToMergeQuery from 'ee_else_ce/vue_merge_request_widget/queries/states/ready_to_merge.query.graphql';
 import approvalsQuery from 'ee_else_ce/vue_merge_request_widget/components/approvals/queries/approvals.query.graphql';
 import approvedBySubscription from 'ee_else_ce/vue_merge_request_widget/components/approvals/queries/approvals.subscription.graphql';
@@ -176,13 +176,7 @@ describe('MrWidgetOptions', () => {
           ${'shaMismatch'} | ${'ShaMismatch'} | ${ShaMismatch}
         `('should translate $state into $componentName component', async ({ state, component }) => {
           await createComponent();
-
-          wrapper.vm.mr = {
-            ...wrapper.vm.mr,
-            setGraphqlData: jest.fn(),
-            state,
-          };
-
+          Vue.set(wrapper.vm.mr, 'state', state);
           await nextTick();
           expect(wrapper.findComponent(component).exists()).toBe(true);
         });
@@ -255,12 +249,7 @@ describe('MrWidgetOptions', () => {
             },
           });
           await nextTick();
-          wrapper.vm.mt = {
-            ...wrapper.vm.mr,
-            setGraphqlData: jest.fn(),
-            mergePipelinesEnabled: true,
-          };
-
+          Vue.set(wrapper.vm.mr, 'mergePipelinesEnabled', true);
           await nextTick();
           expect(findMergePipelineForkAlert().exists()).toBe(false);
         });
@@ -284,13 +273,7 @@ describe('MrWidgetOptions', () => {
             },
           });
           await nextTick();
-
-          wrapper.vm.mr = {
-            ...wrapper.vm.mr,
-            setGraphqlData: jest.fn(),
-            mergePipelinesEnabled: true,
-          };
-
+          Vue.set(wrapper.vm.mr, 'mergePipelinesEnabled', true);
           await nextTick();
           expect(findMergePipelineForkAlert().exists()).toBe(true);
         });

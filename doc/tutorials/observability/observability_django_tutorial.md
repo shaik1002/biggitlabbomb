@@ -6,20 +6,27 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Tutorial: Use GitLab Observability with a Django application
 
+DETAILS:
+**Tier:** Ultimate
+**Offering:** GitLab.com
+**Status:** Beta
+
+> - Observability features [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/124966) in GitLab 17.3 [with a flag](../../administration/feature_flags.md) named `observability_features`. Disabled by default.
+
 FLAG:
 The availability of this feature is controlled by a feature flag.
-For more information, see the history of the [**Distributed tracing** feature](../../operations/tracing.md).
-<!-- Update this note when observability_features flag is removed -->
+For more information, see the history.
+This feature is available for testing, but not ready for production use.
 
-In this tutorial, we'll show you how to create, configure, instrument, and monitor a Django application using GitLab observability features.
+In this tutorial, we'll show you how to create, configure, instrument and monitor a Django application using GitLab observability features.
 
-<!-- vale gitlab_base.SentenceSpacing = NO -->
+<!-- vale gitlab.SentenceSpacing = NO -->
 
 ## Before you begin
 
 To follow along this tutorial, you should have:
 
-- A GitLab Ultimate subscription for GitLab.com or GitLab self-managed
+- A GitLab Ultimate subscription for GitLab.com
 - A local installation of Python 3 and Django (You can install it with `python -m pip install Django`.)
 - Basic knowledge of Git and Python
 - Basic knowledge of the core concepts of [OpenTelemetry](https://opentelemetry.io/)
@@ -35,7 +42,7 @@ This tutorial uses the project name `animals`.
    - In the **Project name** field, enter `animals`.
 1. Select **Create project**.
 1. In the `animals` project, on the left sidebar, select **Settings > Access tokens**.
-1. Create an access token with the `api` scope and Developer role. Store the token value somewhere safe—you'll need it later.
+1. Create an access token with the Owner role and the `read_api` and `write_observability` scopes. Store the token value somewhere safe—you'll need it later.
 
 ## Create a Django application
 
@@ -143,9 +150,7 @@ To create an application:
    from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader, ConsoleMetricExporter
    ```
 
-1. To instrument the application, in the `manage.py` file, add the following code.
-   - Replace `{{PROJECT_ACCESS_TOKEN}}` and `{{PROJECT_ID}}` with the values from your project.
-   - If you're using self-managed GitLab, replace `gitlab.com` with your self-managed instance hostname.
+1. To instrument the application, in the `manage.py` file add the following code (replacing `{{PROJECT_ACCESS_TOKEN}}`, `{{NAMESPACE_ID}}`, and `{{PROJECT_ID}}` with the values from your project and root namespace):
 
    ```python
    resource = Resource(attributes={
@@ -153,12 +158,12 @@ To create an application:
    })
    os.environ.setdefault('OTEL_EXPORTER_OTLP_HEADERS', "PRIVATE-TOKEN={{PROJECT_ACCESS_TOKEN}}")
    traceProvider = TracerProvider(resource=resource)
-   processor = BatchSpanProcessor(OTLPSpanExporter(endpoint="https://gitlab.com/api/v4/projects/{{PROJECT_ID}}/observability/v1/traces"))
+   processor = BatchSpanProcessor(OTLPSpanExporter(endpoint="https://observe.gitlab.com/v3/{{NAMESPACE_ID}}/{{PROJECT_ID}}/ingest/traces"))
    traceProvider.add_span_processor(processor)
    trace.set_tracer_provider(traceProvider)
 
    reader = PeriodicExportingMetricReader(
-       OTLPMetricExporter(endpoint="https://gitlab.com/api/v4/projects/{{PROJECT_ID}}/observability/v1/metrics")
+       OTLPMetricExporter(endpoint="https://observe.gitlab.com/v3/{{NAMESPACE_ID}}/{{PROEJCT_ID}}/ingest/metrics")
    )
    meterProvider = MeterProvider(resource=resource, metric_readers=[reader])
    metrics.set_meter_provider(meterProvider)
@@ -173,7 +178,7 @@ To create an application:
 
 1. To start collecting traces, restart the Django server. After refreshing `/animals` a few times, you should see traces in the GitLab UI.
 
-   ![Django traces](img/django_traces.png)
+  ![Django traces](img/django_traces.png)
 
 1. Optional. Django will also export certain metrics by default to GitLab, but custom metrics are supported too. For example, to increment a counter metric every time a page is loaded, add the following code:
 
@@ -188,4 +193,4 @@ To create an application:
 
   ![Django metrics](img/django_metrics.png)
 
-<!-- vale gitlab_base.SentenceSpacing = YES -->
+<!-- vale gitlab.SentenceSpacing = YES -->

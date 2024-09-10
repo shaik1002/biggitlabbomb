@@ -41,6 +41,9 @@ export default {
     createdAt() {
       return this.workItem?.createdAt || '';
     },
+    updatedAt() {
+      return this.workItem?.updatedAt || '';
+    },
     author() {
       return this.workItem?.author ?? {};
     },
@@ -64,7 +67,6 @@ export default {
     },
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     workItem: {
       query: workItemByIidQuery,
       variables() {
@@ -86,7 +88,7 @@ export default {
 </script>
 
 <template>
-  <div class="gl-mb-3 gl-mt-3 gl-text-gray-700">
+  <div class="gl-mb-3 gl-text-gray-700 gl-mt-3">
     <work-item-state-badge v-if="workItemState" :work-item-state="workItemState" />
     <gl-loading-icon v-if="updateInProgress" inline />
     <confidentiality-badge
@@ -110,7 +112,7 @@ export default {
         </template>
         <template #author>
           <gl-avatar-link
-            class="js-user-link gl-font-bold gl-text-primary"
+            class="js-user-link gl-text-body gl-font-bold"
             :title="author.name"
             :data-user-id="authorId"
             :href="author.webUrl"
@@ -122,6 +124,18 @@ export default {
       <gl-sprintf v-else-if="createdAt" :message="__('created %{timeAgo}')">
         <template #timeAgo>
           <time-ago-tooltip :time="createdAt" />
+        </template>
+      </gl-sprintf>
+    </span>
+
+    <span
+      v-if="updatedAt"
+      class="gl-ml-5 gl-hidden sm:gl-inline-block gl-align-middle"
+      data-testid="work-item-updated"
+    >
+      <gl-sprintf :message="__('Updated %{timeAgo}')">
+        <template #timeAgo>
+          <time-ago-tooltip :time="updatedAt" />
         </template>
       </gl-sprintf>
     </span>

@@ -2,10 +2,6 @@
 
 query workItemTreeQuery($id: WorkItemID!, $pageSize: Int = 100, $endCursor: String) {
   workItem(id: $id) {
-    namespace {
-      id
-      fullName
-    }
     ...WorkItemHierarchy
   }
 }

@@ -29,7 +29,6 @@ export default {
     },
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     appStatus: {
       query: getAppStatus,
       update(data) {
@@ -53,7 +52,7 @@ export default {
 };
 </script>
 <template>
-  <div class="gl-mb-4 gl-flex gl-flex-wrap gl-gap-3">
+  <div class="gl-display-flex gl-flex-wrap gl-gap-3 gl-mb-4">
     <gl-button
       v-if="showFileTreeToggle"
       id="file-tree-toggle"

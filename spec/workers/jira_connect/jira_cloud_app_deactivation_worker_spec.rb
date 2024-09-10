@@ -36,16 +36,25 @@ RSpec.describe JiraConnect::JiraCloudAppDeactivationWorker, feature_category: :i
 
     subject(:perform) { described_class.new.perform(group.id) }
 
-    before do
-      stub_application_setting(jira_connect_application_key: 'mock_key')
-    end
-
     it 'deactivates all subgroup and sub project JiraCloudApp integrations' do
       expect { perform }.not_to change { Integration.count }
 
       expect(inheriting_jira_cloud_app_integration.reload).not_to be_active
       expect(inheriting_jira_cloud_app_project_integration.reload).not_to be_active
       expect(non_inheriting_jira_cloud_app_integration.reload).not_to be_active
+      expect(non_inheriting_asana_integration.reload).to be_active
+      expect(other_jira_cloud_app_project_integration.reload).to be_active
+      expect(other_jira_cloud_app_group_integration.reload).to be_active
+    end
+
+    it 'does not disable any JiraCloudApp integrations when the flag is disabled' do
+      stub_feature_flags(enable_jira_connect_configuration: false)
+
+      expect { perform }.not_to change { Integration.count }
+
+      expect(inheriting_jira_cloud_app_integration.reload).to be_active
+      expect(inheriting_jira_cloud_app_project_integration.reload).to be_active
+      expect(non_inheriting_jira_cloud_app_integration.reload).to be_active
       expect(non_inheriting_asana_integration.reload).to be_active
       expect(other_jira_cloud_app_project_integration.reload).to be_active
       expect(other_jira_cloud_app_group_integration.reload).to be_active

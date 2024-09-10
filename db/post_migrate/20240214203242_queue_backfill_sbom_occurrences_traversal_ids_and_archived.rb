@@ -8,7 +8,7 @@ class QueueBackfillSbomOccurrencesTraversalIdsAndArchived < Gitlab::Database::Mi
   BATCH_SIZE = 10_000
   SUB_BATCH_SIZE = 100
 
-  restrict_gitlab_migration gitlab_schema: :gitlab_sec
+  restrict_gitlab_migration gitlab_schema: :gitlab_main
 
   def up
     queue_batched_background_migration(

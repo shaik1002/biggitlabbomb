@@ -69,7 +69,7 @@ describe('SortDropdown', () => {
           value: 'granted',
         },
         {
-          text: 'Role',
+          text: 'Max role',
           value: 'maxRole',
         },
         {
@@ -102,7 +102,7 @@ describe('SortDropdown', () => {
 
       createComponent();
 
-      expect(findDropdownToggle().text()).toBe('Role');
+      expect(findDropdownToggle().text()).toBe('Max role');
     });
 
     describe('select new sort field', () => {

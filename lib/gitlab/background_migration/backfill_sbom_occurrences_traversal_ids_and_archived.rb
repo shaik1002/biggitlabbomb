@@ -9,11 +9,7 @@ module Gitlab
       def perform
         each_sub_batch do |relation|
           batch_start_id, batch_end_id = relation.pick(Arel.sql("MIN(#{batch_column}), MAX(#{batch_column})"))
-          ::Gitlab::Database.allow_cross_joins_across_databases(
-            url: 'https://gitlab.com/gitlab-org/gitlab/-/issues/477830'
-          ) do
-            connection.exec_update(update_sql(batch_start_id, batch_end_id))
-          end
+          connection.exec_update(update_sql(batch_start_id, batch_end_id))
         end
       end
 

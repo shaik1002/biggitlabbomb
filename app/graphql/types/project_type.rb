@@ -10,8 +10,6 @@ module Types
 
     expose_permissions Types::PermissionTypes::Project
 
-    implements Types::TodoableInterface
-
     field :id, GraphQL::Types::ID,
       null: false,
       description: 'ID of the project.'
@@ -29,14 +27,6 @@ module Types
       argument :ref, GraphQL::Types::String,
         required: true,
         description: 'Ref.'
-    end
-
-    field :ci_pipeline_creation, ::Types::Ci::PipelineCreation,
-      null: true, authorize: :read_pipeline,
-      alpha: { milestone: '17.4' },
-      description: 'Information about a pipeline creation.' do
-      argument :id, type: ::GraphQL::Types::String,
-        required: true, description: 'Unique ID associated with the pipeline creation.'
     end
 
     field :full_path, GraphQL::Types::ID,
@@ -766,7 +756,7 @@ module Types
 
     {
       issues: "Issues are",
-      merge_requests: "Merge requests are",
+      merge_requests: "Merge Requests are",
       wiki: 'Wikis are',
       snippets: 'Snippets are',
       container_registry: 'Container Registry is'
@@ -842,10 +832,6 @@ module Types
       result.map do |var_key, var_config|
         { key: var_key, **var_config }
       end
-    end
-
-    def ci_pipeline_creation(id:)
-      ::Ci::PipelineCreationMetadata.find(project: project, id: id)
     end
 
     def job(id:)

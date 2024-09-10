@@ -14,6 +14,7 @@ import { mountExtended, extendedWrapper } from 'helpers/vue_test_utils_helper';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
+import { s__ } from '~/locale';
 import { createAlert } from '~/alert';
 import {
   packageFiles as packageFilesMock,
@@ -156,7 +157,7 @@ describe('Package Files', () => {
 
       expect(findPackageFilesAlert().exists()).toBe(true);
       expect(findPackageFilesAlert().text()).toBe(
-        'Something went wrong while fetching package assets.',
+        s__('PackageRegistry|Something went wrong while fetching package assets.'),
       );
       expect(Sentry.captureException).toHaveBeenCalled();
     });

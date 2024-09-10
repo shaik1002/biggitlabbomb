@@ -1,8 +1,8 @@
 ---
-stage: none
-group: unassigned
+stage: Fulfillment
+group: Subscription Management
 description: Education, Open Source, Startups.
-info: For help with this Community Programs page, see https://handbook.gitlab.com/handbook/marketing/developer-relations/community-programs/
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
 # Community programs

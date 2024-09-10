@@ -142,13 +142,8 @@ class ProjectPolicy < BasePolicy
   end
 
   desc "If user is authenticated via CI job token then the target project should be in scope"
-  condition(:project_allowed_for_job_token_by_scope) do
-    !@user&.from_ci_job_token? || @user.ci_job_token_scope.accessible?(project)
-  end
-
-  desc "Public, internal or project in the scope allowed via CI job token"
   condition(:project_allowed_for_job_token) do
-    public_project? || internal_access? || project_allowed_for_job_token_by_scope?
+    !@user&.from_ci_job_token? || @user.ci_job_token_scope.accessible?(project)
   end
 
   desc "If the user is via CI job token and project container registry visibility allows access"
@@ -362,6 +357,7 @@ class ProjectPolicy < BasePolicy
     enable :read_wiki
     enable :read_issue
     enable :read_label
+    enable :read_planning_hierarchy
     enable :read_milestone
     enable :read_snippet
     enable :read_project_member
@@ -418,6 +414,7 @@ class ProjectPolicy < BasePolicy
     enable :read_merge_request
     enable :read_sentry_issue
     enable :read_prometheus
+    enable :read_metrics_dashboard_annotation
     enable :metrics_dashboard
     enable :read_confidential_issues
     enable :read_package
@@ -495,6 +492,11 @@ class ProjectPolicy < BasePolicy
     enable :read_deployment
   end
 
+  rule { ~anonymous & can?(:metrics_dashboard) }.policy do
+    enable :create_metrics_user_starred_dashboard
+    enable :read_metrics_user_starred_dashboard
+  end
+
   rule { packages_disabled }.policy do
     prevent(*create_read_update_admin_destroy(:package))
   end
@@ -536,6 +538,7 @@ class ProjectPolicy < BasePolicy
     enable :create_release
     enable :update_release
     enable :destroy_release
+    enable :admin_metrics_dashboard_annotation
     enable :read_alert_management_alert
     enable :update_alert_management_alert
     enable :read_terraform_state
@@ -594,6 +597,7 @@ class ProjectPolicy < BasePolicy
     enable :read_deploy_token
     enable :create_deploy_token
     enable :destroy_deploy_token
+    enable :read_prometheus_alerts
     enable :admin_terraform_state
     enable :create_freeze_period
     enable :read_freeze_period
@@ -620,8 +624,6 @@ class ProjectPolicy < BasePolicy
     enable :manage_deploy_tokens
     enable :manage_merge_request_settings
     enable :change_restrict_user_defined_variables
-    enable :create_protected_branch
-    enable :admin_protected_branch
   end
 
   rule { can?(:admin_build) }.enable :manage_trigger
@@ -741,10 +743,10 @@ class ProjectPolicy < BasePolicy
   end
 
   # If the project is private
-  rule { ~project_allowed_for_job_token }.prevent_all
+  rule { ~public_project & ~internal_access & ~project_allowed_for_job_token }.prevent_all
 
   # If this project is public or internal we want to prevent all aside from a few public policies
-  rule { public_or_internal & ~project_allowed_for_job_token_by_scope }.policy do
+  rule { public_or_internal & ~project_allowed_for_job_token }.policy do
     prevent :guest_access
     prevent :public_access
     prevent :reporter_access
@@ -753,7 +755,7 @@ class ProjectPolicy < BasePolicy
     prevent :owner_access
   end
 
-  rule { public_project & ~project_allowed_for_job_token_by_scope }.policy do
+  rule { public_project & ~project_allowed_for_job_token }.policy do
     prevent :public_user_access
   end
 
@@ -790,6 +792,7 @@ class ProjectPolicy < BasePolicy
     enable :read_issue_board_list
     enable :read_wiki
     enable :read_label
+    enable :read_planning_hierarchy
     enable :read_milestone
     enable :read_snippet
     enable :read_project_member
@@ -1017,19 +1020,19 @@ class ProjectPolicy < BasePolicy
     enable :read_namespace_catalog
   end
 
-  rule { reporter & model_registry_enabled }.policy do
+  rule { model_registry_enabled }.policy do
     enable :read_model_registry
   end
 
-  rule { developer & model_registry_enabled }.policy do
+  rule { can?(:reporter_access) & model_registry_enabled }.policy do
     enable :write_model_registry
   end
 
-  rule { reporter & model_experiments_enabled }.policy do
+  rule { model_experiments_enabled }.policy do
     enable :read_model_experiments
   end
 
-  rule { developer & model_experiments_enabled }.policy do
+  rule { can?(:reporter_access) & model_experiments_enabled }.policy do
     enable :write_model_experiments
   end
 

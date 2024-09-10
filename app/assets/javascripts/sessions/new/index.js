@@ -9,8 +9,7 @@ export default () => {
     return null;
   }
 
-  const { username, obfuscatedEmail, verifyPath, resendPath, offerEmailReset, updateEmailPath } =
-    el.dataset;
+  const { obfuscatedEmail, verifyPath, resendPath, offerEmailReset, updateEmailPath } = el.dataset;
 
   return new Vue({
     el,
@@ -18,7 +17,6 @@ export default () => {
     render(createElement) {
       return createElement(EmailVerification, {
         props: {
-          username,
           obfuscatedEmail,
           verifyPath,
           resendPath,

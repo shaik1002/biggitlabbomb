@@ -12,7 +12,6 @@ module Ci
     include Ci::HasRef
     include Ci::TrackEnvironmentUsage
     include EachBatch
-    include Ci::Taggable
 
     extend ::Gitlab::Utils::Override
 
@@ -95,13 +94,6 @@ module Ci
     has_many :sourced_pipelines, class_name: 'Ci::Sources::Pipeline', foreign_key: :source_job_id, inverse_of: :build
 
     has_many :pages_deployments, foreign_key: :ci_build_id, inverse_of: :ci_build
-
-    has_many :tag_links,
-      ->(build) { in_partition(build) },
-      class_name: 'Ci::BuildTag',
-      foreign_key: :build_id,
-      partition_foreign_key: :partition_id,
-      inverse_of: :build
 
     Ci::JobArtifact.file_types.each_key do |key|
       has_one :"job_artifacts_#{key}", ->(build) { in_partition(build).with_file_types([key]) },
@@ -198,9 +190,9 @@ module Ci
     # See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/123131
     scope :with_runner_type, ->(runner_type) { joins(:runner).where(runner: { runner_type: runner_type }) }
 
-    scope :belonging_to_runner_manager, ->(runner_machine_id) do
+    scope :belonging_to_runner_manager, ->(runner_machine_id) {
       joins(:runner_manager_build).where(p_ci_runner_machine_builds: { runner_machine_id: runner_machine_id })
-    end
+    }
 
     scope :with_secure_reports_from_config_options, ->(job_types) do
       joins(:metadata).where("#{Ci::BuildMetadata.quoted_table_name}.config_options -> 'artifacts' -> 'reports' ?| array[:job_types]", job_types: job_types)
@@ -216,20 +208,7 @@ module Ci
       joins(:pipeline).where(Ci::Pipeline.arel_table[:merge_request_id].eq(merge_request_id))
     end
 
-    scope :with_job_artifacts, -> { joins(:job_artifacts) }
-    # the queries in the scope below are for the following cases,
-    # 1. builds may not have artifacts, still a valid dependency
-    # 2. build's artifacts belong to the same project, a valid dependency
-    # 3. build's artifacts from other projects, a valid dependency only if the artifact's accessibility is public
-    scope :builds_with_accessible_artifacts, ->(project_id) do
-      with_job_artifacts.where(job_artifacts: { job_id: nil })
-      .or(with_job_artifacts.where(job_artifacts: { file_type: 'dotenv', accessibility: 'public' }))
-      .or(with_job_artifacts.where(project_id: project_id, job_artifacts: { file_type: 'dotenv' })).distinct
-    end
-
-    scope :with_pipeline_source_type, ->(pipeline_source_type) { joins(:pipeline).where(pipeline: { source: pipeline_source_type }) }
-    scope :created_after, ->(time) { where(arel_table[:created_at].gt(time)) }
-    scope :updated_after, ->(time) { where(arel_table[:updated_at].gt(time)) }
+    acts_as_taggable
 
     add_authentication_token_field :token,
       encrypted: :required,
@@ -420,7 +399,7 @@ module Ci
     # A Ci::Bridge may transition to `canceling` as a result of strategy: :depend
     # but only a Ci::Build will transition to `canceling`` via `.cancel`
     def supports_canceling?
-      cancel_gracefully?
+      Feature.enabled?(:ci_canceling_status, project) && cancel_gracefully?
     end
 
     def build_matcher
@@ -468,16 +447,6 @@ module Ci
       true
     end
 
-    def degenerated?
-      super && execution_config_id.nil?
-    end
-
-    def degenerate!
-      super do
-        execution_config&.destroy
-      end
-    end
-
     def archived?
       return true if degenerated?
 
@@ -498,7 +467,7 @@ module Ci
     end
 
     def action?
-      ACTIONABLE_WHEN.include?(self.when)
+      %w[manual delayed].include?(self.when)
     end
 
     def can_auto_cancel_pipeline_on_job_failure?
@@ -738,6 +707,14 @@ module Ci
 
     def remove_token!
       update!(token_encrypted: nil)
+    end
+
+    # acts_as_taggable uses this method create/remove tags with contexts
+    # defined by taggings and to get those contexts it executes a query.
+    # We don't use any other contexts except `tags`, so we don't need it.
+    override :custom_contexts
+    def custom_contexts
+      []
     end
 
     def tag_list
@@ -1166,11 +1143,6 @@ module Ci
     end
     strong_memoize_attr :source
 
-    # Can be removed in Rails 7.1. Related to: Gitlab.next_rails?
-    def to_partial_path
-      'jobs/job'
-    end
-
     protected
 
     def run_status_commit_hooks!
@@ -1223,11 +1195,8 @@ module Ci
       Gitlab::Ci::Variables::Collection.new.tap do |variables|
         break variables unless id_tokens?
 
-        sub_components = project.ci_id_token_sub_claim_components.map(&:to_sym)
-
         id_tokens.each do |var_name, token_data|
-          token = Gitlab::Ci::JwtV2.for_build(self, aud: expanded_id_token_aud(token_data['aud']),
-            sub_components: sub_components)
+          token = Gitlab::Ci::JwtV2.for_build(self, aud: expanded_id_token_aud(token_data['aud']))
 
           variables.append(key: var_name, value: token, public: false, masked: true)
         end
@@ -1304,30 +1273,6 @@ module Ci
 
     def prefix_and_partition_for_token
       TOKEN_PREFIX + partition_id_prefix_in_16_bit_encode
-    end
-
-    override :save_tags
-    def save_tags
-      super do |new_tags, old_tags|
-        if old_tags.present?
-          tag_links
-            .where(tag_id: old_tags)
-            .delete_all
-        end
-
-        ci_builds_tags = new_tags.map do |tag|
-          Ci::BuildTag.new(
-            build_id: id, partition_id: partition_id,
-            tag_id: tag.id, project_id: project_id)
-        end
-
-        ::Ci::BuildTag.bulk_insert!(
-          ci_builds_tags,
-          validate: false,
-          unique_by: [:tag_id, :build_id, :partition_id],
-          returns: :id
-        )
-      end
     end
   end
 end

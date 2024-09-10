@@ -59,7 +59,7 @@ RSpec.describe 'getting merge request listings nested in a project', feature_cat
       # We cannot disable SQL query limiting here, since the transaction does not
       # begin until we enter the controller.
       headers = {
-        'X-GITLAB-DISABLE-SQL-QUERY-LIMIT' => '206,https://gitlab.com/gitlab-org/gitlab/-/issues/469250'
+        'X-GITLAB-DISABLE-SQL-QUERY-LIMIT' => 'https://gitlab.com/gitlab-org/gitlab/-/issues/469250;205'
       }
 
       post_graphql(query, current_user: current_user, headers: headers)
@@ -300,25 +300,13 @@ RSpec.describe 'getting merge request listings nested in a project', feature_cat
 
     context 'when requesting `merged_at`' do
       let(:requested_fields) { [:merged_at] }
-      let(:merge_request_ids) { [merge_request_a.id, merge_request_b.id, merge_request_c.id] }
 
       before do
         # make the MRs "merged"
-        ::MergeRequest.where(id: merge_request_ids).update_all(state_id: MergeRequest.available_states[:merged])
-        ::MergeRequest::Metrics.where(merge_request_id: merge_request_ids).update_all(merged_at: Time.now)
-      end
-
-      include_examples 'N+1 query check'
-    end
-
-    context 'when requesting `closed_at`' do
-      let(:requested_fields) { [:closed_at] }
-      let(:merge_request_ids) { [merge_request_a.id, merge_request_b.id, merge_request_c.id] }
-
-      before do
-        # make the MRs "closed"
-        ::MergeRequest.where(id: merge_request_ids).update_all(state_id: MergeRequest.available_states[:closed])
-        ::MergeRequest::Metrics.where(merge_request_id: merge_request_ids).update_all(latest_closed_at: Time.now)
+        [merge_request_a, merge_request_b, merge_request_c].each do |mr|
+          mr.update!(state_id: MergeRequest.available_states[:merged])
+          mr.metrics.update!(merged_at: Time.now)
+        end
       end
 
       include_examples 'N+1 query check'

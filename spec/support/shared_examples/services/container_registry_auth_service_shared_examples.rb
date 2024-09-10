@@ -66,12 +66,6 @@ RSpec.shared_examples 'with auth_type' do
   end
 end
 
-RSpec.shared_examples 'having the correct scope' do
-  it 'has the correct scope' do
-    expect(payload).to include('access' => access)
-  end
-end
-
 RSpec.shared_examples 'a browsable' do
   let(:access) do
     [{ 'type' => 'registry',
@@ -81,7 +75,10 @@ RSpec.shared_examples 'a browsable' do
 
   it_behaves_like 'a valid token'
   it_behaves_like 'not a container repository factory'
-  it_behaves_like 'having the correct scope'
+
+  it 'has the correct scope' do
+    expect(payload).to include('access' => access)
+  end
 end
 
 RSpec.shared_examples 'an accessible' do
@@ -97,7 +94,10 @@ RSpec.shared_examples 'an accessible' do
   end
 
   it_behaves_like 'a valid token'
-  it_behaves_like 'having the correct scope'
+
+  it 'has the correct scope' do
+    expect(payload).to include('access' => access)
+  end
 end
 
 RSpec.shared_examples 'an inaccessible' do
@@ -229,9 +229,8 @@ RSpec.shared_examples 'a container registry auth service' do
 
   describe '.pull_nested_repositories_access_token' do
     let_it_be(:project) { create(:project) }
-    let(:name) { project.full_path }
-    let(:token) { described_class.pull_nested_repositories_access_token(name) }
 
+    let(:token) { described_class.pull_nested_repositories_access_token(project.full_path) }
     let(:access) do
       [
         {
@@ -259,14 +258,20 @@ RSpec.shared_examples 'a container registry auth service' do
 
     subject { { token: token } }
 
-    it_behaves_like 'having the correct scope'
+    it 'has the correct scope' do
+      expect(payload).to include('access' => access)
+    end
+
     it_behaves_like 'a valid token'
     it_behaves_like 'not a container repository factory'
 
     context 'with path ending with a slash' do
-      let(:name) { "#{project.full_path}/" }
+      let(:token) { described_class.pull_nested_repositories_access_token("#{project.full_path}/") }
 
-      it_behaves_like 'having the correct scope'
+      it 'has the correct scope' do
+        expect(payload).to include('access' => access)
+      end
+
       it_behaves_like 'a valid token'
       it_behaves_like 'not a container repository factory'
     end
@@ -280,78 +285,41 @@ RSpec.shared_examples 'a container registry auth service' do
       [
         {
           'type' => 'repository',
-          'name' => project.full_path,
+          'name' => name,
           'actions' => %w[pull push],
-          'meta' => { 'project_path' => project.full_path }
+          'meta' => { 'project_path' => name }
         },
         {
           'type' => 'repository',
-          'name' => "#{project.full_path}/*",
+          'name' => "#{name}/*",
           'actions' => %w[pull],
-          'meta' => { 'project_path' => project.full_path }
+          'meta' => { 'project_path' => name }
         }
       ]
     end
 
     subject { { token: token } }
 
-    it 'sends override project path as true for the access token' do
-      expect(described_class).to receive(:access_token).with(anything, use_key_as_project_path: true)
+    it 'has the correct scope' do
+      expect(payload).to include('access' => access)
+    end
+
+    it 'sends the name as the override project path for the access token' do
+      expect(described_class).to receive(:access_token).with(anything, override_project_path: name)
 
       subject
     end
 
-    it_behaves_like 'having the correct scope'
     it_behaves_like 'a valid token'
     it_behaves_like 'not a container repository factory'
 
     context 'with path ending with a slash' do
-      let(:name) { "#{project.full_path}/" }
+      let(:token) { described_class.push_pull_nested_repositories_access_token("#{project.full_path}/") }
 
-      it_behaves_like 'having the correct scope'
-      it_behaves_like 'a valid token'
-      it_behaves_like 'not a container repository factory'
-    end
-  end
+      it 'has the correct scope' do
+        expect(payload).to include('access' => access)
+      end
 
-  describe '.push_pull_move_repositories_access_token' do
-    let_it_be(:project) { create(:project) }
-    let_it_be(:group) { create(:group) }
-    let(:name) { project.full_path }
-    let(:token) { described_class.push_pull_move_repositories_access_token(name, group.full_path) }
-    let(:access) do
-      [
-        {
-          'type' => 'repository',
-          'name' => project.full_path,
-          'actions' => %w[pull push],
-          'meta' => { 'project_path' => project.full_path }
-        },
-        {
-          'type' => 'repository',
-          'name' => "#{project.full_path}/*",
-          'actions' => %w[pull],
-          'meta' => { 'project_path' => project.full_path }
-        },
-        {
-          'type' => 'repository',
-          'name' => "#{group.full_path}/*",
-          'actions' => %w[push],
-          'meta' => { 'project_path' => group.full_path }
-        }
-      ]
-    end
-
-    subject { { token: token } }
-
-    it_behaves_like 'having the correct scope'
-    it_behaves_like 'a valid token'
-    it_behaves_like 'not a container repository factory'
-
-    context 'with path ending with a slash' do
-      let(:name) { "#{project.full_path}/" }
-
-      it_behaves_like 'having the correct scope'
       it_behaves_like 'a valid token'
       it_behaves_like 'not a container repository factory'
     end
@@ -1374,14 +1342,11 @@ RSpec.shared_examples 'a container registry auth service' do
     end
 
     describe '#access_token' do
-      let(:path) { bad_project.full_path }
       let(:token) { described_class.access_token({ bad_project.full_path => ['pull'] }) }
       let(:access) do
-        {
-          'type' => 'repository',
-          'name' => path,
-          'actions' => ['pull']
-        }
+        { 'type' => 'repository',
+          'name' => bad_project.full_path,
+          'actions' => ['pull'] }
       end
 
       subject { { token: token } }
@@ -1392,28 +1357,19 @@ RSpec.shared_examples 'a container registry auth service' do
         expect(payload).to include('access' => [access])
       end
 
-      context 'with use_key_as_project_path as true' do
+      context 'with an override project path' do
+        let(:override_project_path) { 'group/project-override' }
         let(:token) do
           described_class.access_token(
-            { path => ['pull'] },
-            use_key_as_project_path: true
+            { bad_project.full_path => ['pull'] },
+            override_project_path: override_project_path
           )
         end
 
-        it 'returns the given path in the metadata' do
+        it 'returns the override project path in the metadata' do
           expect(payload).to include('access' => [
-            access.merge("meta" => { "project_path" => bad_project.full_path })
+            access.merge("meta" => { "project_path" => override_project_path })
           ])
-        end
-
-        context 'when the given path contains /*' do
-          let(:path) { "#{bad_project.full_path}/*" }
-
-          it 'removes the /* from the path' do
-            expect(payload).to include('access' => [
-              access.merge("meta" => { "project_path" => bad_project.full_path })
-            ])
-          end
         end
       end
     end

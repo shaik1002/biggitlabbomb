@@ -148,7 +148,7 @@ module API
     def find_project!(id)
       project = find_project(id)
 
-      return forbidden!("This project's CI/CD job token cannot be used to authenticate with the container registry of a different project.") unless authorized_project_scope?(project)
+      return forbidden! unless authorized_project_scope?(project)
 
       unless can?(current_user, read_project_ability, project)
         return unauthorized! if authenticate_non_public?
@@ -580,14 +580,10 @@ module API
       render_api_error!('202 Accepted', 202)
     end
 
-    def render_validation_error!(models, status = 400)
-      models = Array(models)
-
-      errors = models.map { |m| model_errors(m) }.filter(&:present?)
-      messages = errors.map(&:messages)
-      messages = messages.count == 1 ? messages.first : messages.join(" ")
-
-      render_api_error!(messages || '400 Bad Request', status) if errors.any?
+    def render_validation_error!(model, status = 400)
+      if model.errors.any?
+        render_api_error!(model_errors(model).messages || '400 Bad Request', status)
+      end
     end
 
     def model_errors(model)
@@ -723,7 +719,7 @@ module API
       Gitlab::AppLogger.warn("Redis tracking event failed for event: #{event_name}, message: #{error.message}")
     end
 
-    def track_event(event_name, user:, send_snowplow_event: true, namespace_id: nil, project_id: nil, additional_properties: {})
+    def track_event(event_name, user:, send_snowplow_event: true, namespace_id: nil, project_id: nil, additional_properties: Gitlab::InternalEvents::DEFAULT_ADDITIONAL_PROPERTIES)
       return unless user.present?
 
       namespace = Namespace.find(namespace_id) if namespace_id
@@ -832,7 +828,7 @@ module API
       end
 
       unless access_token
-        forbidden!('Must be authenticated using an OAuth or personal access token to use sudo')
+        forbidden!('Must be authenticated using an OAuth or Personal Access Token to use sudo')
       end
 
       validate_and_save_access_token!(scopes: [:sudo])
@@ -865,11 +861,7 @@ module API
       env['api.format'] = :txt
       content_type 'text/plain'
 
-      # Some browsers ignore content type when filename has an xhtml extension
-      # We remove the extensions to prevent the contents from being displayed inline
-      # See https://gitlab.com/gitlab-org/gitlab/-/issues/458236
-      filename = blob.name&.ends_with?('.xhtml') ? blob.name.split('.')[0] : blob.name
-      header['Content-Disposition'] = ActionDispatch::Http::ContentDisposition.format(disposition: 'inline', filename: filename)
+      header['Content-Disposition'] = ActionDispatch::Http::ContentDisposition.format(disposition: 'inline', filename: blob.name)
 
       # Let Workhorse examine the content and determine the better content disposition
       header[Gitlab::Workhorse::DETECT_HEADER] = "true"

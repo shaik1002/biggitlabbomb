@@ -3,12 +3,9 @@
 module API
   class Notes < ::API::Base
     include PaginationParams
-    include APIGuard
     helpers ::API::Helpers::NotesHelpers
 
     before { authenticate! }
-
-    allow_access_with_scope :ai_workflows
 
     urgency :low, [
       '/projects/:id/merge_requests/:noteable_id/notes',

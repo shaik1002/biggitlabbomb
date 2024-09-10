@@ -390,10 +390,6 @@ RSpec::Matchers.define :match_query_count do |expected|
 
   include ExceedQueryLimitHelpers
 
-  chain :ignoring_cached_queries do
-    @skip_cached = true
-  end
-
   def verify_count(&block)
     @subject_block = block
     actual_count == maximum
@@ -406,7 +402,7 @@ RSpec::Matchers.define :match_query_count do |expected|
   end
 
   def skip_cached
-    @skip_cached || false
+    false
   end
 
   match do |block|

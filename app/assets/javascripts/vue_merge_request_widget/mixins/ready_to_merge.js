@@ -10,7 +10,11 @@ export const PIPELINE_MUST_SUCCEED_CONFLICT_TEXT = __(
 );
 export const PIPELINE_SKIPPED_STATUS = 'SKIPPED';
 
-const MERGE_WHEN_CHECKS_PASS_HELP = helpPagePath('user/project/merge_requests/auto_merge');
+// TODO: Add documentation
+// eslint-disable-next-line local-rules/require-valid-help-page-path
+const MERGE_WHEN_CHECKS_PASS_HELP = helpPagePath(
+  '/user/project/merge_requests/merge_when_checks_pass.html',
+);
 
 export default {
   computed: {
@@ -48,7 +52,7 @@ export default {
       }
 
       return {
-        helpLink: helpPagePath('user/project/merge_requests/auto_merge'),
+        helpLink: helpPagePath('/user/project/merge_requests/merge_when_pipeline_succeeds.html'),
         bodyText: __(
           'When the pipeline for this merge request succeeds, it will %{linkStart}automatically merge%{linkEnd}.',
         ),

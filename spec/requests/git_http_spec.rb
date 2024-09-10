@@ -619,44 +619,16 @@ RSpec.describe 'Git HTTP requests', feature_category: :source_code_management do
               end
 
               context "when an oauth token is provided" do
-                context "when oauth token has ai_workflows scope" do
-                  let(:path) { "#{project.full_path}.git" }
-                  let(:env) { { user: 'oauth2', password: @token.token } }
-
-                  before do
-                    application = Doorkeeper::Application.create!(name: "MyApp", redirect_uri: "https://app.com", owner: user)
-                    @token = Doorkeeper::AccessToken.create!(application_id: application.id, resource_owner_id: user.id, scopes: "ai_workflows")
-                  end
-
-                  it_behaves_like 'pulls are allowed'
-                  it_behaves_like 'pushes are allowed'
+                before do
+                  application = Doorkeeper::Application.create!(name: "MyApp", redirect_uri: "https://app.com", owner: user)
+                  @token = Doorkeeper::AccessToken.create!(application_id: application.id, resource_owner_id: user.id, scopes: "api")
                 end
 
-                context "when oauth token has api scope" do
-                  let(:path) { "#{project.full_path}.git" }
-                  let(:env) { { user: 'oauth2', password: @token.token } }
+                let(:path) { "#{project.full_path}.git" }
+                let(:env) { { user: 'oauth2', password: @token.token } }
 
-                  before do
-                    application = Doorkeeper::Application.create!(name: "MyApp", redirect_uri: "https://app.com", owner: user)
-                    @token = Doorkeeper::AccessToken.create!(application_id: application.id, resource_owner_id: user.id, scopes: "api")
-                  end
-
-                  it_behaves_like 'pulls are allowed'
-                  it_behaves_like 'pushes are allowed'
-                end
-
-                context "when oauth token has write_repository scope" do
-                  let(:path) { "#{project.full_path}.git" }
-                  let(:env) { { user: 'oauth2', password: @token.token } }
-
-                  before do
-                    application = Doorkeeper::Application.create!(name: "MyApp", redirect_uri: "https://app.com", owner: user)
-                    @token = Doorkeeper::AccessToken.create!(application_id: application.id, resource_owner_id: user.id, scopes: "write_repository")
-                  end
-
-                  it_behaves_like 'pulls are allowed'
-                  it_behaves_like 'pushes are allowed'
-                end
+                it_behaves_like 'pulls are allowed'
+                it_behaves_like 'pushes are allowed'
 
                 context "when password is expired" do
                   it "responds to downloads with status 401 unauthorized" do
@@ -993,10 +965,10 @@ RSpec.describe 'Git HTTP requests', feature_category: :source_code_management do
 
               it_behaves_like 'can download code only'
 
-              it 'downloads from other project get status 403' do
+              it 'downloads from other project get status 404' do
                 clone_get "#{other_project.full_path}.git", user: 'gitlab-ci-token', password: build.token
 
-                expect(response).to have_gitlab_http_status(:forbidden)
+                expect(response).to have_gitlab_http_status(:not_found)
               end
 
               context 'when users password is expired' do
@@ -1594,10 +1566,10 @@ RSpec.describe 'Git HTTP requests', feature_category: :source_code_management do
 
               it_behaves_like 'can download code only'
 
-              it 'downloads from other project get status 403' do
+              it 'downloads from other project get status 404' do
                 clone_get "#{other_project.full_path}.git", user: 'gitlab-ci-token', password: build.token
 
-                expect(response).to have_gitlab_http_status(:forbidden)
+                expect(response).to have_gitlab_http_status(:not_found)
               end
 
               context 'when users password is expired' do

@@ -61,7 +61,6 @@ export default class ActivityCalendar {
   constructor({
     container,
     activitiesContainer,
-    recentActivitiesContainer,
     timestamps,
     calendarActivitiesPath,
     utcOffset = 0,
@@ -92,7 +91,6 @@ export default class ActivityCalendar {
     this.months = [];
     this.firstDayOfWeek = firstDayOfWeek;
     this.activitiesContainer = activitiesContainer;
-    this.recentActivitiesContainer = recentActivitiesContainer;
     this.container = container;
     this.onClickDay = onClickDay;
 
@@ -278,8 +276,6 @@ export default class ActivityCalendar {
         .empty()
         .append(loadingIconForLegacyJS({ size: 'lg' }));
 
-      $(this.recentActivitiesContainer).hide();
-
       axios
         .get(this.calendarActivitiesPath, {
           params: {
@@ -304,7 +300,6 @@ export default class ActivityCalendar {
     } else {
       this.currentSelectedDate = '';
       $(this.activitiesContainer).html('');
-      $(this.recentActivitiesContainer).show();
     }
   }
 }

@@ -25,30 +25,8 @@ RSpec.describe Import::SourceUsersController, feature_category: :importers do
     end
   end
 
-  shared_examples 'it requires awaiting approval status' do
-    it 'shows error message' do
-      source_user.accept!
-
-      expect { subject }.not_to change { source_user.reload.status }
-
-      expect(response).to redirect_to(root_path)
-      expect(flash[:raw]).to match(/Reassignment not available/)
-    end
-  end
-
-  shared_examples 'it requires the user is the reassign to user' do
-    it 'shows error message' do
-      source_user.update!(reassign_to_user: create(:user))
-
-      expect { subject }.not_to change { source_user.reload.status }
-
-      expect(response).to redirect_to(root_path)
-      expect(flash[:raw]).to match(/Reassignment not available/)
-    end
-  end
-
   let_it_be_with_reload(:source_user) do
-    create(:import_source_user, :with_reassigned_by_user, :awaiting_approval)
+    create(:import_source_user, :with_reassign_to_user, :with_reassigned_by_user, :awaiting_approval)
   end
 
   describe 'POST /accept' do
@@ -63,31 +41,29 @@ RSpec.describe Import::SourceUsersController, feature_category: :importers do
 
       it { expect { accept_invite }.to change { source_user.reload.reassignment_in_progress? }.from(false).to(true) }
 
-      it 'enqueues the job to reassign contributions' do
-        expect(Import::ReassignPlaceholderUserRecordsWorker).to receive(:perform_async).with(source_user.id)
-
-        accept_invite
-      end
-
       it 'redirects with a notice when accepted' do
         accept_invite
 
         expect(response).to redirect_to(root_path)
-        expect(flash[:raw]).to match(/Reassignment approved/)
+        expect(flash[:notice]).to match(/You have approved the reassignment/)
+      end
+
+      it 'can only be accepted by the reassign_to_user' do
+        source_user.update!(reassign_to_user: create(:user))
+
+        expect { accept_invite }.not_to change { source_user.reload.status }
+
+        expect(response).to have_gitlab_http_status(:not_found)
       end
 
       it 'cannot be accepted twice' do
-        allow(Import::SourceUser).to receive(:find).and_return(source_user)
-        allow(source_user).to receive(:accept).and_return(false)
+        source_user.accept!
 
         accept_invite
 
         expect(response).to redirect_to(root_path)
-        expect(flash[:alert]).to match(/The invitation could not be accepted/)
+        expect(flash[:alert]).to match(/could not be accepted/)
       end
-
-      it_behaves_like 'it requires awaiting approval status'
-      it_behaves_like 'it requires the user is the reassign to user'
     end
 
     it_behaves_like 'it requires feature flag'
@@ -96,38 +72,32 @@ RSpec.describe Import::SourceUsersController, feature_category: :importers do
 
   describe 'POST /decline' do
     let(:path) { decline_import_source_user_path(source_user) }
-    let(:message_delivery) { instance_double(ActionMailer::MessageDelivery) }
 
     subject(:reject_invite) { post path }
 
     context 'when signed in' do
       before do
         sign_in(source_user.reassign_to_user)
-        allow(message_delivery).to receive(:deliver_now)
-        allow(Notify).to receive(:import_source_user_rejected).and_return(message_delivery)
       end
 
       it { expect { reject_invite }.to change { source_user.reload.rejected? }.from(false).to(true) }
+      it { expect { reject_invite }.to change { source_user.reload.reassign_to_user }.from(instance_of(User)).to(nil) }
 
       it 'redirects with a notice' do
         reject_invite
 
         expect(response).to redirect_to(root_path)
-        expect(flash[:raw]).to match(/Reassignment rejected/)
+        expect(flash[:notice]).to match(/You have rejected the reassignment/)
       end
 
-      it 'cannot be declined twice' do
-        allow(Import::SourceUser).to receive(:find).and_return(source_user)
-        allow(source_user).to receive(:reject).and_return(false)
+      it 'cannot be declined after being accepted' do
+        source_user.accept!
 
         reject_invite
 
         expect(response).to redirect_to(root_path)
-        expect(flash[:alert]).to match(/The invitation could not be declined/)
+        expect(flash[:alert]).to match(/could not be declined/)
       end
-
-      it_behaves_like 'it requires awaiting approval status'
-      it_behaves_like 'it requires the user is the reassign to user'
     end
 
     it_behaves_like 'it requires feature flag'
@@ -150,8 +120,22 @@ RSpec.describe Import::SourceUsersController, feature_category: :importers do
         expect(response).to have_gitlab_http_status(:success)
       end
 
-      it_behaves_like 'it requires awaiting approval status'
-      it_behaves_like 'it requires the user is the reassign to user'
+      it 'shows the reassignment invite only to reassign_to_user' do
+        source_user.update!(reassign_to_user: create(:user))
+
+        show_invite
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+
+      it 'is only valid to source users awaiting approval' do
+        source_user.accept!
+
+        show_invite
+
+        expect(response).to redirect_to(root_path)
+        expect(flash[:alert]).to match(/The invitation is not valid/)
+      end
     end
 
     it_behaves_like 'it requires feature flag'

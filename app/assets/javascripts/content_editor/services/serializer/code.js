@@ -4,8 +4,11 @@ const generateCodeTag = (wrapTagName = openTag) => {
   const isOpen = wrapTagName === openTag;
 
   return (_, mark, parent) => {
-    const { sourceTagName, sourceMarkdown } = mark.attrs;
-    if (sourceTagName && !sourceMarkdown) return wrapTagName(mark.attrs.sourceTagName);
+    const type = /^(`|<code).*/.exec(mark.attrs.sourceMarkdown)?.[1];
+
+    if (type === '<code') {
+      return wrapTagName(type.substring(1));
+    }
 
     const childText = getMarkText(mark, parent);
     if (childText.includes('`')) {

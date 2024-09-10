@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class UserDetail < ApplicationRecord
+class UserDetail < MainClusterwide::ApplicationRecord
   include IgnorableColumns
   extend ::Gitlab::Utils::Override
 
@@ -16,14 +16,6 @@ class UserDetail < ApplicationRecord
   validates :bio, length: { maximum: 255 }, allow_blank: true
 
   DEFAULT_FIELD_LENGTH = 500
-
-  # specification for bluesky identifier https://web.plc.directory/spec/v0.1/did-plc
-  BLUESKY_VALIDATION_REGEX = /
-    \A            # beginning of string
-    did:plc:      # beginning of bluesky id
-    [a-z0-9]{24}  # 24 characters of word or digit
-    \z            # end of string
-  /x
 
   MASTODON_VALIDATION_REGEX = /
     \A            # beginning of string
@@ -41,10 +33,6 @@ class UserDetail < ApplicationRecord
   validate :discord_format
   validates :linkedin, length: { maximum: DEFAULT_FIELD_LENGTH }, allow_blank: true
   validates :location, length: { maximum: DEFAULT_FIELD_LENGTH }, allow_blank: true
-  validates :bluesky,
-    allow_blank: true,
-    format: { with: UserDetail::BLUESKY_VALIDATION_REGEX,
-              message: proc { s_('Profiles|must contain only a bluesky did:plc identifier.') } }
   validates :mastodon, length: { maximum: DEFAULT_FIELD_LENGTH }, allow_blank: true
   validate :mastodon_format
   validates :organization, length: { maximum: DEFAULT_FIELD_LENGTH }, allow_blank: true
@@ -59,7 +47,7 @@ class UserDetail < ApplicationRecord
   enum registration_objective: REGISTRATION_OBJECTIVE_PAIRS, _suffix: true
 
   def sanitize_attrs
-    %i[bluesky discord linkedin mastodon skype twitter website_url].each do |attr|
+    %i[discord linkedin mastodon skype twitter website_url].each do |attr|
       value = self[attr]
       self[attr] = Sanitize.clean(value) if value.present?
     end
@@ -72,7 +60,6 @@ class UserDetail < ApplicationRecord
   private
 
   def prevent_nil_fields
-    self.bluesky = '' if bluesky.nil?
     self.bio = '' if bio.nil?
     self.discord = '' if discord.nil?
     self.linkedin = '' if linkedin.nil?
@@ -94,7 +81,7 @@ end
 def mastodon_format
   return if mastodon.blank? || mastodon =~ UserDetail::MASTODON_VALIDATION_REGEX
 
-  errors.add(:mastodon, _('must contain only a mastodon handle.'))
+  errors.add(:mastodon, _('must contain only a mastodon username.'))
 end
 
 UserDetail.prepend_mod_with('UserDetail')

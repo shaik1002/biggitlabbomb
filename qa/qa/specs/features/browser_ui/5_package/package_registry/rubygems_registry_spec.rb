@@ -23,7 +23,6 @@ module QA
 
       before do
         Runtime::Feature.enable(:rubygem_packages, project: project)
-        Flow::Login.sign_in
       end
 
       after do
@@ -35,44 +34,50 @@ module QA
           issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/366099',
           type: :flaky
         } do
-        rubygem_upload_yaml = ERB.new(read_fixture('package_managers/rubygems',
-          'rubygems_upload_package.yaml.erb')).result(binding)
-        rubygem_package_gemspec = ERB.new(read_fixture('package_managers/rubygems',
-          'package.gemspec.erb')).result(binding)
+        Flow::Login.sign_in
 
-        create(:commit, project: project, commit_message: 'Add package files', actions: [
-          {
-            action: 'create',
-            file_path: '.gitlab-ci.yml',
-            content: rubygem_upload_yaml
-          },
-          {
-            action: 'create',
-            file_path: 'lib/hello_gem.rb',
-            content: <<~RUBY
+        Support::Retrier.retry_on_exception(max_attempts: 3, sleep_interval: 2) do
+          rubygem_upload_yaml = ERB.new(read_fixture('package_managers/rubygems', 'rubygems_upload_package.yaml.erb')).result(binding)
+          rubygem_package_gemspec = ERB.new(read_fixture('package_managers/rubygems', 'package.gemspec.erb')).result(binding)
+
+          create(:commit, project: project, commit_message: 'Add package files', actions: [
+            {
+              action: 'create',
+              file_path: '.gitlab-ci.yml',
+              content: rubygem_upload_yaml
+            },
+            {
+              action: 'create',
+              file_path: 'lib/hello_gem.rb',
+              content: <<~RUBY
                 class HelloWorld
                   def self.hi
                     puts "Hello world!"
                   end
                 end
-            RUBY
-          },
-          {
-            action: 'create',
-            file_path: "#{package.name}.gemspec",
-            content: rubygem_package_gemspec
-          }
-        ])
+              RUBY
+            },
+            {
+              action: 'create',
+              file_path: "#{package.name}.gemspec",
+              content: rubygem_package_gemspec
+            }
+          ])
+        end
 
         project.visit!
-        Flow::Pipeline.wait_for_pipeline_creation_via_api(project: project)
+        Flow::Pipeline.visit_latest_pipeline
 
-        project.visit_job('test_package')
+        Page::Project::Pipeline::Show.perform do |pipeline|
+          pipeline.click_job('test_package')
+        end
+
         Page::Project::Job::Show.perform do |job|
           expect(job).to be_successful(timeout: 180)
         end
 
         Page::Project::Menu.perform(&:go_to_package_registry)
+
         Page::Project::Packages::Index.perform do |index|
           expect(index).to have_package(package.name)
         end

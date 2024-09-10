@@ -573,7 +573,6 @@ export class GitLabDropdown {
     }
   }
 
-  // eslint-disable-next-line max-params
   addInput(fieldName, value, selectedObject, single) {
     // Create hidden input for form
     if (single) {

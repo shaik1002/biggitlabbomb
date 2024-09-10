@@ -71,7 +71,7 @@ export default {
 </script>
 
 <template>
-  <div class="gl-flex gl-flex-col">
+  <div class="gl-display-flex gl-flex-direction-column">
     <slot v-if="isListEmpty && !isLoading" name="empty-state"></slot>
 
     <div v-else-if="isLoading">
@@ -80,7 +80,7 @@ export default {
 
     <template v-else>
       <ul data-testid="packages-table" class="gl-pl-0">
-        <li v-for="packageEntity in list" :key="packageEntity.id" class="gl-list-none">
+        <li v-for="packageEntity in list" :key="packageEntity.id" class="gl-list-style-none">
           <packages-list-row
             :package-entity="packageEntity"
             :package-link="packageEntity._links.web_path"
@@ -95,7 +95,7 @@ export default {
         :per-page="perPage"
         :total-items="totalItems"
         align="center"
-        class="gl-mt-3 gl-w-full"
+        class="gl-w-full gl-mt-3"
       />
 
       <delete-package-modal

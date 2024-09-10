@@ -3,7 +3,7 @@ import { TYPENAME_ITERATIONS_CADENCE } from '~/graphql_shared/constants';
 import { getIdFromGraphQLId, convertToGraphQLId } from '~/graphql_shared/utils';
 import { isPositiveInteger } from '~/lib/utils/number_utils';
 import { getParameterByName } from '~/lib/utils/url_utility';
-import { __, s__ } from '~/locale';
+import { __ } from '~/locale';
 import {
   FILTERED_SEARCH_TERM,
   OPERATOR_NOT,
@@ -26,19 +26,15 @@ import {
 } from '~/vue_shared/components/filtered_search_bar/constants';
 import { DEFAULT_PAGE_SIZE } from '~/vue_shared/issuable/list/constants';
 import {
-  WORK_ITEM_TO_ISSUABLE_MAP,
+  WORK_ITEM_TO_ISSUE_MAP,
   WIDGET_TYPE_MILESTONE,
   WIDGET_TYPE_AWARD_EMOJI,
   EMOJI_THUMBSUP,
   EMOJI_THUMBSDOWN,
   WIDGET_TYPE_ASSIGNEES,
   WIDGET_TYPE_LABELS,
-  WORK_ITEM_TYPE_ENUM_ISSUE,
-  WORK_ITEM_TYPE_ENUM_INCIDENT,
-  WORK_ITEM_TYPE_ENUM_TASK,
 } from '~/work_items/constants';
-import { BoardType } from '~/boards/constants';
-import { STATUS_CLOSED, STATUS_OPEN, TYPE_EPIC } from '../constants';
+import { STATUS_CLOSED, STATUS_OPEN } from '../constants';
 import {
   ALTERNATIVE_FILTER,
   API_PARAM,
@@ -64,8 +60,8 @@ import {
   PRIORITY_ASC,
   PRIORITY_DESC,
   RELATIVE_POSITION_ASC,
-  WILDCARD_FILTER,
-  wildcardFilterValues,
+  SPECIAL_FILTER,
+  specialFilterValues,
   TITLE_ASC,
   TITLE_DESC,
   UPDATED_ASC,
@@ -76,31 +72,12 @@ import {
   WEIGHT_DESC,
 } from './constants';
 
-/**
- * Get the types of work items that should be displayed on issues lists.
- * This should be consistent with `Issue::TYPES_FOR_LIST` in the backend.
- *
- * @returns {Array<string>}
- */
-export const getDefaultWorkItemTypes = () => [
-  WORK_ITEM_TYPE_ENUM_ISSUE,
-  WORK_ITEM_TYPE_ENUM_INCIDENT,
-  WORK_ITEM_TYPE_ENUM_TASK,
-];
-
-export const getTypeTokenOptions = () => [
-  { icon: 'issue-type-issue', title: s__('WorkItem|Issue'), value: 'issue' },
-  { icon: 'issue-type-incident', title: s__('WorkItem|Incident'), value: 'incident' },
-  { icon: 'issue-type-task', title: s__('WorkItem|Task'), value: 'task' },
-];
-
 export const getInitialPageParams = (
   pageSize,
   firstPageSize = pageSize ?? DEFAULT_PAGE_SIZE,
   lastPageSize,
   afterCursor,
   beforeCursor,
-  // eslint-disable-next-line max-params
 ) => ({
   firstPageSize: lastPageSize ? undefined : firstPageSize,
   lastPageSize,
@@ -337,29 +314,33 @@ const getFilterType = ({ type, value: { data, operator } }) => {
   ) {
     return ALTERNATIVE_FILTER;
   }
-  if (wildcardFilterValues.includes(data)) {
-    return WILDCARD_FILTER;
+  if (specialFilterValues.includes(data)) {
+    return SPECIAL_FILTER;
   }
 
   return NORMAL_FILTER;
 };
 
 const wildcardTokens = [
-  TOKEN_TYPE_ASSIGNEE,
-  TOKEN_TYPE_EPIC,
-  TOKEN_TYPE_HEALTH,
   TOKEN_TYPE_ITERATION,
   TOKEN_TYPE_MILESTONE,
   TOKEN_TYPE_RELEASE,
+  TOKEN_TYPE_EPIC,
+  TOKEN_TYPE_ASSIGNEE,
   TOKEN_TYPE_REVIEWER,
   TOKEN_TYPE_WEIGHT,
 ];
 
 const isWildcardValue = (tokenType, value) =>
-  wildcardTokens.includes(tokenType) && wildcardFilterValues.includes(value);
+  wildcardTokens.includes(tokenType) && specialFilterValues.includes(value);
+
+const isHealthStatusSpecialFilter = (tokenType, value) =>
+  tokenType === TOKEN_TYPE_HEALTH && specialFilterValues.includes(value);
 
 const requiresUpperCaseValue = (tokenType, value) =>
-  tokenType === TOKEN_TYPE_TYPE || isWildcardValue(tokenType, value);
+  tokenType === TOKEN_TYPE_TYPE ||
+  isWildcardValue(tokenType, value) ||
+  isHealthStatusSpecialFilter(tokenType, value);
 
 const formatData = (token) => {
   if (requiresUpperCaseValue(token.type, token.value.data)) {
@@ -402,7 +383,7 @@ export const convertToApiParams = (filterTokens) => {
       const cadenceId = fullIterationCadenceId(cadence);
       const iterationWildCardId = iteration.toUpperCase();
       obj.set(apiField, obj.has(apiField) ? [obj.get(apiField), cadenceId].flat() : cadenceId);
-      const secondApiField = filtersMap[token.type][API_PARAM][WILDCARD_FILTER];
+      const secondApiField = filtersMap[token.type][API_PARAM][SPECIAL_FILTER];
       obj.set(
         secondApiField,
         obj.has(secondApiField)
@@ -448,37 +429,25 @@ export function findWidget(type, workItem) {
   return workItem?.widgets?.find((widget) => widget.type === type);
 }
 
-export function mapWorkItemWidgetsToIssuableFields({
-  list,
-  workItem,
-  isBoard = false,
-  namespace = BoardType.project,
-  type,
-}) {
-  const listType = `${type}s`;
-
-  return produce(list, (draftData) => {
+export function mapWorkItemWidgetsToIssueFields(issuesList, workItem, isBoard = false) {
+  return produce(issuesList, (draftData) => {
     const activeList = isBoard
-      ? draftData[namespace].board.lists.nodes[0][listType].nodes
-      : draftData[namespace][listType].nodes;
+      ? draftData.project.board.lists.nodes[0].issues.nodes
+      : draftData.project.issues.nodes;
 
-    const activeItem = activeList.find((item) =>
-      type === TYPE_EPIC
-        ? item.iid === workItem.iid
-        : getIdFromGraphQLId(item.id) === getIdFromGraphQLId(workItem.id),
-    );
+    const activeItem = activeList.find((issue) => issue.iid === workItem.iid);
 
-    Object.keys(WORK_ITEM_TO_ISSUABLE_MAP).forEach((widgetType) => {
-      const currentWidget = findWidget(widgetType, workItem);
+    Object.keys(WORK_ITEM_TO_ISSUE_MAP).forEach((type) => {
+      const currentWidget = findWidget(type, workItem);
       if (!currentWidget) {
         return;
       }
-      const property = WORK_ITEM_TO_ISSUABLE_MAP[widgetType];
+      const property = WORK_ITEM_TO_ISSUE_MAP[type];
 
       // handling the case for assignees and labels
       if (
-        property === WORK_ITEM_TO_ISSUABLE_MAP[WIDGET_TYPE_ASSIGNEES] ||
-        property === WORK_ITEM_TO_ISSUABLE_MAP[WIDGET_TYPE_LABELS]
+        property === WORK_ITEM_TO_ISSUE_MAP[WIDGET_TYPE_ASSIGNEES] ||
+        property === WORK_ITEM_TO_ISSUE_MAP[WIDGET_TYPE_LABELS]
       ) {
         activeItem[property] = {
           ...currentWidget[property],
@@ -491,10 +460,7 @@ export function mapWorkItemWidgetsToIssuableFields({
       }
 
       // handling the case for milestone
-      if (
-        property === WORK_ITEM_TO_ISSUABLE_MAP[WIDGET_TYPE_MILESTONE] &&
-        currentWidget[property]
-      ) {
+      if (property === WORK_ITEM_TO_ISSUE_MAP[WIDGET_TYPE_MILESTONE] && currentWidget[property]) {
         activeItem[property] = { __persist: true, ...currentWidget[property] };
         return;
       }
@@ -506,14 +472,12 @@ export function mapWorkItemWidgetsToIssuableFields({
   });
 }
 
-export function updateUpvotesCount({ list, workItem, namespace = BoardType.project }) {
+export function updateUpvotesCount(issuesList, workItem) {
   const type = WIDGET_TYPE_AWARD_EMOJI;
-  const property = WORK_ITEM_TO_ISSUABLE_MAP[type];
+  const property = WORK_ITEM_TO_ISSUE_MAP[type];
 
-  return produce(list, (draftData) => {
-    const activeItem = draftData[namespace].issues.nodes.find(
-      (issue) => issue.iid === workItem.iid,
-    );
+  return produce(issuesList, (draftData) => {
+    const activeItem = draftData.project.issues.nodes.find((issue) => issue.iid === workItem.iid);
 
     const currentWidget = findWidget(type, workItem);
     if (!currentWidget) {

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe BulkImports::Configuration, type: :model, feature_category: :importers do
+RSpec.describe BulkImports::Configuration, type: :model do
   describe 'associations' do
     it { is_expected.to belong_to(:bulk_import).required }
   end
@@ -13,13 +13,5 @@ RSpec.describe BulkImports::Configuration, type: :model, feature_category: :impo
 
     it { is_expected.to validate_presence_of(:url) }
     it { is_expected.to validate_presence_of(:access_token) }
-  end
-
-  describe '#source_hostname' do
-    let(:configuration) { described_class.new(url: 'http://example.com/subdir') }
-
-    it 'returns the hostname of the URL' do
-      expect(configuration.source_hostname).to eq('example.com')
-    end
   end
 end

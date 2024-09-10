@@ -98,45 +98,8 @@ RSpec.describe Spam::SpamActionService, feature_category: :instance_resiliency d
       }
     end
 
-    context 'when the rename_abuse_workers feature is enabled' do
-      it 'executes the ::AntiAbuse::SpamAbuseEventsWorker' do
-        expect(::AntiAbuse::SpamAbuseEventsWorker).to receive(:perform_async).with(params)
-
-        subject
-      end
-    end
-
-    context 'when the rename_abuse_workers feature is not enabled' do
-      before do
-        stub_feature_flags(rename_abuse_workers: false)
-      end
-
-      it 'executes the ::Abuse::SpamAbuseEventsWorker' do
-        expect(::Abuse::SpamAbuseEventsWorker).to receive(:perform_async).with(params)
-
-        subject
-      end
-    end
-  end
-
-  shared_examples 'does not execute the SpamAbuseEventsWorker' do
-    specify do
-      expect(::Abuse::SpamAbuseEventsWorker).not_to receive(:perform_async)
-      expect(::AntiAbuse::SpamAbuseEventsWorker).not_to receive(:perform_async)
-
-      subject
-    end
-  end
-
-  shared_examples 'allows the spammable' do
-    it 'does not create a spam log' do
-      expect { subject }.not_to change(SpamLog, :count)
-    end
-
-    it_behaves_like 'does not execute the SpamAbuseEventsWorker'
-
-    it 'clears spam flags' do
-      expect(target).to receive(:clear_spam_flags!)
+    it do
+      expect(::Abuse::SpamAbuseEventsWorker).to receive(:perform_async).with(params)
 
       subject
     end
@@ -219,7 +182,11 @@ RSpec.describe Spam::SpamActionService, feature_category: :instance_resiliency d
           expect { subject }.not_to change(SpamLog, :count)
         end
 
-        it_behaves_like 'does not execute the SpamAbuseEventsWorker'
+        it 'does not call SpamAbuseEventsWorker' do
+          expect(::Abuse::SpamAbuseEventsWorker).not_to receive(:perform_async)
+
+          subject
+        end
       end
 
       context 'when spammable attributes have changed' do
@@ -350,7 +317,12 @@ RSpec.describe Spam::SpamActionService, feature_category: :instance_resiliency d
           end
 
           it_behaves_like 'creates a spam log', target_type
-          it_behaves_like 'does not execute the SpamAbuseEventsWorker'
+
+          it 'does not call SpamAbuseEventsWorker' do
+            expect(::Abuse::SpamAbuseEventsWorker).not_to receive(:perform_async)
+
+            subject
+          end
 
           it 'does not mark as spam' do
             response = subject
@@ -372,7 +344,21 @@ RSpec.describe Spam::SpamActionService, feature_category: :instance_resiliency d
             allow(fake_verdict_service).to receive(:execute).and_return(ALLOW)
           end
 
-          it_behaves_like 'allows the spammable'
+          it 'does not create a spam log' do
+            expect { subject }.not_to change(SpamLog, :count)
+          end
+
+          it 'does not call SpamAbuseEventsWorker' do
+            expect(::Abuse::SpamAbuseEventsWorker).not_to receive(:perform_async)
+
+            subject
+          end
+
+          it 'clears spam flags' do
+            expect(target).to receive(:clear_spam_flags!)
+
+            subject
+          end
         end
 
         context 'when spam verdict service returns noop' do
@@ -380,7 +366,21 @@ RSpec.describe Spam::SpamActionService, feature_category: :instance_resiliency d
             allow(fake_verdict_service).to receive(:execute).and_return(NOOP)
           end
 
-          it_behaves_like 'allows the spammable'
+          it 'does not create a spam log' do
+            expect { subject }.not_to change(SpamLog, :count)
+          end
+
+          it 'does not call SpamAbuseEventsWorker' do
+            expect(::Abuse::SpamAbuseEventsWorker).not_to receive(:perform_async)
+
+            subject
+          end
+
+          it 'clears spam flags' do
+            expect(target).to receive(:clear_spam_flags!)
+
+            subject
+          end
         end
 
         context 'with spam verdict service options' do

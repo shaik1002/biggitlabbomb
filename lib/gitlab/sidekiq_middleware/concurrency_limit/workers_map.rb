@@ -23,9 +23,8 @@ module Gitlab
           def over_the_limit?(worker:)
             limit_proc = limit_for(worker: worker)
 
-            limit = limit_proc&.call.to_i
-            return false if limit == 0
-            return true if limit < 0
+            limit = limit_proc&.call
+            return false if limit.to_i <= 0
 
             current = ::Gitlab::SidekiqMiddleware::ConcurrencyLimit::WorkersConcurrency.current_for(worker: worker)
 

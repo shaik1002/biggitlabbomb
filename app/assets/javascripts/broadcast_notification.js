@@ -11,7 +11,7 @@ const dismissUserBroadcastMessage = (id, expireDate, dismissalPath) => {
 };
 
 const setBroadcastMessageHeightOffset = () => {
-  const broadcastMessages = [...document.querySelectorAll('[data-broadcast-banner]')];
+  const broadcastMessages = [...document.querySelectorAll('.gl-broadcast-message')];
   const broadcastMessageHeight = broadcastMessages.reduce(
     (acc, banner) => acc + banner.getBoundingClientRect().height,
     0,

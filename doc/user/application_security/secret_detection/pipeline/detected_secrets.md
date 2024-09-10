@@ -16,7 +16,7 @@ This table lists the secrets detected by [pipeline secret detection](index.md).
 <!-- markdownlint-disable MD034 -->
 <!-- markdownlint-disable MD037 -->
 <!-- markdownlint-disable MD044 -->
-<!-- vale gitlab_base.SentenceSpacing = NO -->
+<!-- vale gitlab.SentenceSpacing = NO -->
 
 | Description                                                        | ID                                            | Keywords                              |
 |:-------------------------------------------------------------------|:----------------------------------------------|:--------------------------------------|
@@ -26,7 +26,6 @@ This table lists the secrets detected by [pipeline secret detection](index.md).
 | Age secret key                                                     | Age secret key                                | AGE-SECRET-KEY-1                      |
 | Alibaba AccessKey ID                                               | Alibaba AccessKey ID                          | LTAI                                  |
 | Alibaba Secret Key                                                 | Alibaba Secret Key                            | alibaba                               |
-| Anthropic keys                                                     | anthropic_key                                 | sk-ant-                               |
 | Asana Client ID                                                    | Asana Client ID                               | asana                                 |
 | Asana Client Secret                                                | Asana Client Secret                           | asana                                 |
 | Atlassian API token                                                | Atlassian API token                           | atlassian                             |
@@ -145,7 +144,7 @@ This table lists the secrets detected by [pipeline secret detection](index.md).
 | Yandex.Cloud IAM Cookie v1                                         | Yandex.Cloud IAM Cookie v1 - 1                | yandex                                |
 | Yandex.Cloud IAM Token v1                                          | Yandex.Cloud IAM Cookie v1 - 2                | yandex                                |
 
-<!-- vale gitlab_base.SentenceSpacing = YES -->
+<!-- vale gitlab.SentenceSpacing = YES -->
 <!-- markdownlint-enable MD044 -->
 <!-- markdownlint-enable MD037 -->
 <!-- markdownlint-enable MD034 -->

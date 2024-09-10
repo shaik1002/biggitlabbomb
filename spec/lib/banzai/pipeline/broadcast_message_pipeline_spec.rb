@@ -12,8 +12,6 @@ RSpec.describe Banzai::Pipeline::BroadcastMessagePipeline, feature_category: :te
 
   subject { described_class.to_html(exp, project: project) }
 
-  it_behaves_like 'sanitize pipeline'
-
   context "allows `a` elements" do
     let(:exp) { "<a>Link</a>" }
 

@@ -40,13 +40,8 @@ describe('WorkItemProjectsListbox', () => {
   const findRecentDropdownItems = () => findDropdown().find('ul').findAll('[role=option]');
   const findRecentDropdownItemAt = (index) => findRecentDropdownItems().at(index);
   const findAllDropdownItemsFor = (fullPath) => wrapper.findAllByTestId(`listbox-item-${fullPath}`);
-  const findDropdownToggle = () => wrapper.findByTestId('base-dropdown-toggle');
 
-  const createComponent = async (
-    isGroup = true,
-    fullPath = 'group-a',
-    selectedProjectFullPath = null,
-  ) => {
+  const createComponent = async (isGroup = true, fullPath = 'group-a') => {
     wrapper = mountExtended(WorkItemProjectsListbox, {
       apolloProvider: createMockApollo([
         [namespaceProjectsForLinksWidgetQuery, namespaceProjectsFormLinksWidgetResolver],
@@ -54,7 +49,6 @@ describe('WorkItemProjectsListbox', () => {
       propsData: {
         fullPath,
         isGroup,
-        selectedProjectFullPath,
       },
     });
 
@@ -92,7 +86,7 @@ describe('WorkItemProjectsListbox', () => {
 
       const emitted = wrapper.emitted('selectProject');
 
-      expect(emitted[0][0]).toBe(namespaceProjectsData[0].fullPath);
+      expect(emitted[1][0]).toEqual(namespaceProjectsData[0]);
     });
 
     it('renders recent projects if present', async () => {
@@ -123,7 +117,7 @@ describe('WorkItemProjectsListbox', () => {
 
       const emitted = wrapper.emitted('selectProject');
 
-      expect(emitted[0][0]).toBe(namespaceProjectsData[1].fullPath);
+      expect(emitted[1][0]).toEqual(namespaceProjectsData[1]);
     });
 
     it('supports filtering recent projects via search input', async () => {
@@ -150,7 +144,7 @@ describe('WorkItemProjectsListbox', () => {
 
   describe('project level work items', () => {
     beforeEach(async () => {
-      await createComponent(false, 'group-a/example-project-a', 'group-a/example-project-a');
+      await createComponent(false, 'group-a/example-project-a');
       gon.current_username = 'root';
     });
 
@@ -168,7 +162,9 @@ describe('WorkItemProjectsListbox', () => {
     it('auto-selects the current project', async () => {
       await nextTick();
 
-      expect(findDropdownToggle().text()).toContain(namespaceProjectsData[0].nameWithNamespace);
+      const emitted = wrapper.emitted('selectProject');
+
+      expect(emitted[0][0]).toEqual(namespaceProjectsData[0]);
     });
 
     it('supports selecting a project', async () => {
@@ -184,7 +180,7 @@ describe('WorkItemProjectsListbox', () => {
 
       const emitted = wrapper.emitted('selectProject');
 
-      expect(emitted[0][0]).toBe(namespaceProjectsData[1].fullPath);
+      expect(emitted[1][0]).toEqual(namespaceProjectsData[1]);
     });
 
     it('renders recent projects if present', async () => {
@@ -215,7 +211,7 @@ describe('WorkItemProjectsListbox', () => {
 
       const emitted = wrapper.emitted('selectProject');
 
-      expect(emitted[0][0]).toBe(namespaceProjectsData[1].fullPath);
+      expect(emitted[1][0]).toEqual(namespaceProjectsData[1]);
     });
 
     it('supports filtering recent projects via search input', async () => {

@@ -9,8 +9,6 @@ module Ci
     include Ci::Metadatable
     extend ::Gitlab::Utils::Override
 
-    ACTIONABLE_WHEN = %w[manual delayed].freeze
-
     self.allow_legacy_sti_class = true
 
     has_one :resource, class_name: 'Ci::Resource', foreign_key: 'build_id', inverse_of: :processable
@@ -99,8 +97,7 @@ module Ci
     end
 
     def assign_resource_from_resource_group(processable)
-      if Feature.enabled?(:assign_resource_worker_deduplicate_until_executing, processable.project) &&
-          Feature.disabled?(:assign_resource_worker_deduplicate_until_executing_override, processable.project)
+      if Feature.enabled?(:assign_resource_worker_deduplicate_until_executing, processable.project)
         Ci::ResourceGroups::AssignResourceFromResourceGroupWorkerV2.perform_async(processable.resource_group_id)
       else
         Ci::ResourceGroups::AssignResourceFromResourceGroupWorker.perform_async(processable.resource_group_id)
@@ -232,17 +229,20 @@ module Ci
     def dependency_variables
       return [] if all_dependencies.empty?
 
-      dependencies_with_accessible_artifacts = job_dependencies_with_accessible_artifacts(all_dependencies)
+      dependencies_with_accessible_artifacts = find_dependencies_with_accessible_artifacts(all_dependencies)
 
       Gitlab::Ci::Variables::Collection.new.concat(
         Ci::JobVariable.where(job: dependencies_with_accessible_artifacts).dotenv_source
       )
     end
 
-    def job_dependencies_with_accessible_artifacts(all_dependencies)
-      build_ids = all_dependencies.collect(&:id)
+    def find_dependencies_with_accessible_artifacts(all_dependencies)
+      ids = all_dependencies.collect(&:id)
 
-      Ci::Build.id_in(build_ids).builds_with_accessible_artifacts(self.project_id)
+      Ci::Build.joins(:job_artifacts).where(job_artifacts: { job_id: nil })
+        .or(Ci::Build.joins(:job_artifacts).where(job_artifacts: {
+          job_id: ids, file_type: 'dotenv', accessibility: 'public'
+        }))
     end
 
     def all_dependencies

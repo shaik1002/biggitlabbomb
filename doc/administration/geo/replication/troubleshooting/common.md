@@ -21,7 +21,7 @@ Before attempting more advanced troubleshooting:
 
 On the **primary** site:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Geo > Sites**.
 
 We perform the following health checks on each **secondary** site
@@ -266,7 +266,7 @@ sudo gitlab-rake gitlab:geo:check
   ```
 
   Verify the correct password is set for `gitlab_rails['db_password']` that was
-  used when creating the hash in `postgresql['sql_user_password']` by running
+  used when creating the hash in  `postgresql['sql_user_password']` by running
   `gitlab-ctl pg-password-md5 gitlab` and entering the password.
 
 - Check returns `not a secondary node`.
@@ -282,9 +282,9 @@ sudo gitlab-rake gitlab:geo:check
   Checking Geo ... Finished
   ```
 
-  Ensure you have added the secondary site in the **Admin** area under **Geo > Sites** on the web interface for the **primary** site.
+  Ensure you have added the secondary site in the Admin area under **Geo > Sites** on the web interface for the **primary** site.
   Also ensure you entered the `gitlab_rails['geo_node_name']`
-  when adding the secondary site in the **Admin** area of the **primary** site.
+  when adding the secondary site in the Admin area of the **primary** site.
 
 - Check returns `Exception: PG::UndefinedTable: ERROR:  relation "geo_nodes" does not exist`.
 
@@ -457,7 +457,7 @@ This machine's Geo node name matches a database record ... no
 ```
 
 For more information about recommended site names in the description of the Name field, see
-[Geo **Admin** area Common Settings](../../../../administration/geo_sites.md#common-settings).
+[Geo Admin area Common Settings](../../../../administration/geo_sites.md#common-settings).
 
 ### Check OS locale data compatibility
 
@@ -472,7 +472,7 @@ See the [PostgreSQL wiki for more details](https://wiki.postgresql.org/wiki/Loca
 
 ## Fixing common errors
 
-This section documents common error messages reported in the **Admin** area on the web interface, and how to fix them.
+This section documents common error messages reported in the Admin area on the web interface, and how to fix them.
 
 ### Geo database configuration file is missing
 
@@ -584,7 +584,7 @@ If you have updated the value of `external_url` in `/etc/gitlab/gitlab.rb` for t
 
 In this case, make sure to update the changed URL on all your sites:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Geo > Sites**.
 1. Change the URL and save the change.
 
@@ -608,18 +608,3 @@ create the following empty file:
 ```shell
 sudo touch /etc/gitlab/skip-auto-backup
 ```
-
-### High CPU usage on primary during object verification
-
-From GitLab 16.11 to GitLab 17.2, a missing PostgreSQL index causes high CPU
-usage and slow artifact verification progress. Additionally, the Geo secondary
-sites might report as unhealthy. [Issue 471727](https://gitlab.com/gitlab-org/gitlab/-/issues/471727) describes the behavior in detail.
-
-To determine if you might be experiencing this issue, follow the steps to
-[confirm if you are affected](https://gitlab.com/gitlab-org/gitlab/-/issues/471727#to-confirm-if-you-are-affected).
-
-If you are affected, follow the steps in the [workaround](https://gitlab.com/gitlab-org/gitlab/-/issues/471727#workaround)
-to manually create the index. Creating the index causes PostgreSQL to
-consume slightly more resources until it finishes. Afterward, CPU usage might
-remain high while verification continues, but queries should complete
-significantly faster, and secondary site status should update correctly.

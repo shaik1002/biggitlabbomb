@@ -7,6 +7,7 @@ import { createAlert } from '~/alert';
 import { HTTP_STATUS_NOT_FOUND } from '~/lib/utils/http_status';
 import { visitUrl } from '~/lib/utils/url_utility';
 import AccessorUtilities from '~/lib/utils/accessor';
+import { s__ } from '~/locale';
 import { ASSET_LINK_TYPE } from '~/releases/constants';
 import createReleaseAssetLinkMutation from '~/releases/graphql/mutations/create_release_link.mutation.graphql';
 import deleteReleaseAssetLinkMutation from '~/releases/graphql/mutations/delete_release_link.mutation.graphql';
@@ -1036,7 +1037,7 @@ describe('Release edit/new actions', () => {
       });
 
       expect(createAlert).toHaveBeenCalledWith({
-        message: 'Unable to fetch the tag notes.',
+        message: s__('Release|Unable to fetch the tag notes.'),
       });
       expect(getTag).toHaveBeenCalledWith(state.projectId, tagName);
     });

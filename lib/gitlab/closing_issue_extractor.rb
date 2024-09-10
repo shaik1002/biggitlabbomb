@@ -29,9 +29,8 @@ module Gitlab
       end
 
       @extractor.analyze(closing_statements.join(" "))
-      relevant_records = (@extractor.issues + @extractor.work_items).uniq(&:id)
 
-      relevant_records.reject do |issue|
+      @extractor.issues.reject do |issue|
         @extractor.project.forked_from?(issue.project)
       end
     end

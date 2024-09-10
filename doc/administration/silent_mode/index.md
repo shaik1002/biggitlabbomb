@@ -41,7 +41,7 @@ There are multiple ways to enable Silent Mode:
 
 - **Web UI**
 
-  1. On the left sidebar, at the bottom, select **Admin**..
+  1. On the left sidebar, at the bottom, select **Admin area**..
   1. On the left sidebar, select **Settings > General**.
   1. Expand **Silent Mode**, and toggle **Enable Silent Mode**.
   1. Changes are saved immediately.
@@ -70,7 +70,7 @@ There are multiple ways to disable Silent Mode:
 
 - **Web UI**
 
-  1. On the left sidebar, at the bottom, select **Admin**.
+  1. On the left sidebar, at the bottom, select **Admin area**.
   1. On the left sidebar, select **Settings > General**.
   1. Expand **Silent Mode**, and toggle **Enable Silent Mode**.
   1. Changes are saved immediately.
@@ -101,7 +101,6 @@ Outbound communications from the following features are silenced by Silent Mode.
 
 | Feature                                                                   | Notes                                                                                                                                                                                                                                                   |
 | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [GitLab Duo](../../user/gitlab_duo_chat/index.md)                         | GitLab Duo features cannot contact external language model providers. |
 | [Project and group webhooks](../../user/project/integrations/webhooks.md) | Triggering webhook tests via the UI results in HTTP status 500 responses.                                                                                                                                                                               |
 | [System hooks](../system_hooks.md)                                        |                                                                                                                                                                                                                                                         |
 | [Remote mirrors](../../user/project/repository/mirror/index.md)           | Pushes to remote mirrors are skipped. Pulls from remote mirrors is skipped.                                                                                                                                                                             |

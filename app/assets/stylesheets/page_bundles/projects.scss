@@ -115,7 +115,7 @@
   margin: 0;
 
   a {
-    color: var(--gl-text-color-default);
+    color: var(--gl-text-color, $gl-text-color);
   }
 
   .dropdown-menu {
@@ -264,12 +264,8 @@
 .project-row {
   .description p {
     margin-bottom: 0;
-    color: var(--gl-text-color-subtle);
+    color: var(--gl-text-color-secondary, $gl-text-color-secondary);
     @include str-truncated(100%);
-  }
-
-  mark {
-    @include str-highlighted;
   }
 }
 
@@ -453,6 +449,18 @@
 }
 
 .compare-revision-cards {
+  @media (max-width: $breakpoint-lg) {
+    .swap-button {
+      display: none;
+    }
+  }
+
+  @media (max-width: $breakpoint-lg) {
+    .swap-button-mobile {
+      display: flex;
+    }
+  }
+
   @media (min-width: $breakpoint-lg) {
     // stylelint-disable-next-line gitlab/no-gl-class
     .gl-card {

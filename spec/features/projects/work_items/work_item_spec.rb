@@ -12,25 +12,21 @@ RSpec.describe 'Work item', :js, feature_category: :team_planning do
   let_it_be_with_reload(:user) { create(:user) }
   let_it_be_with_reload(:user2) { create(:user, name: 'John') }
 
-  let_it_be(:group) { create(:group) }
-  let_it_be(:project) { create(:project, :public, group: group) }
-  let_it_be(:label) { create(:label, project: project, title: "testing-label") }
-  let_it_be(:label2) { create(:label, project: project, title: "another-label") }
-  let_it_be(:work_item) { create(:work_item, project: project, labels: [label]) }
+  let_it_be(:project) { create(:project, :public) }
+  let_it_be(:work_item) { create(:work_item, project: project) }
   let_it_be(:task) { create(:work_item, :task, project: project) }
   let_it_be(:emoji_upvote) { create(:award_emoji, :upvote, awardable: work_item, user: user2) }
   let_it_be(:milestone) { create(:milestone, project: project) }
   let_it_be(:milestones) { create_list(:milestone, 25, project: project) }
   let_it_be(:note) { create(:note, noteable: work_item, project: work_item.project) }
   let(:work_items_path) { project_work_item_path(project, work_item.iid) }
-  let_it_be(:contact) { create(:contact, group: group) }
-  let(:contact_name) { "#{contact.first_name} #{contact.last_name}" }
+  let_it_be(:label) { create(:label, project: work_item.project, title: "testing-label") }
 
   context 'for signed in user' do
     before do
       stub_feature_flags(notifications_todos_buttons: false)
       stub_const("AutocompleteSources::ExpiresIn::AUTOCOMPLETE_EXPIRES_IN", 0)
-      group.add_developer(user)
+      project.add_developer(user)
       sign_in(user)
       visit work_items_path
     end
@@ -94,7 +90,6 @@ RSpec.describe 'Work item', :js, feature_category: :team_planning do
     it_behaves_like 'work items todos'
     it_behaves_like 'work items award emoji'
     it_behaves_like 'work items time tracking'
-    it_behaves_like 'work items crm contacts'
   end
 
   context 'for signed in owner' do
@@ -141,12 +136,6 @@ RSpec.describe 'Work item', :js, feature_category: :team_planning do
     it 'award button is disabled and add reaction is not displayed' do
       expect(page).not_to have_button _('Add reaction')
       expect(page).to have_selector('[data-testid="award-button"].disabled')
-    end
-
-    it 'renders note' do
-      wait_for_all_requests
-
-      expect(page).to have_content(note.note)
     end
 
     context 'when work_items_beta is enabled' do

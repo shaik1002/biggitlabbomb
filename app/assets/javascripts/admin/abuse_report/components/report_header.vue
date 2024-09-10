@@ -51,25 +51,29 @@ export default {
 </script>
 
 <template>
-  <header class="gl-border-b gl-flex gl-flex-col gl-justify-between gl-py-4 sm:gl-flex-row">
-    <div class="gl-flex gl-items-center gl-gap-3">
+  <header
+    class="gl-py-4 gl-border-b gl-display-flex gl-justify-content-space-between gl-flex-direction-column gl-sm-flex-direction-row"
+  >
+    <div class="gl-display-flex gl-align-items-center gl-gap-3">
       <gl-badge :variant="badgeVariant" :icon="badgeIcon" :aria-label="badgeText">
         {{ badgeText }}
       </gl-badge>
       <gl-avatar :size="48" :src="user.avatarUrl" />
-      <h1 class="gl-my-0 gl-text-size-h-display">
+      <h1 class="gl-font-size-h-display gl-my-0">
         {{ user.name }}
       </h1>
       <gl-link :href="user.path"> @{{ user.username }} </gl-link>
     </div>
-    <nav class="gl-mt-4 gl-flex gl-flex-col sm:gl-mt-0 sm:gl-flex-row sm:gl-items-center">
+    <nav
+      class="gl-display-flex gl-sm-align-items-center gl-mt-4 gl-sm-mt-0 gl-flex-direction-column gl-sm-flex-direction-row"
+    >
       <gl-button :href="user.adminPath">
         {{ $options.i18n.adminProfile }}
       </gl-button>
       <report-actions
         :user="user"
         :report="report"
-        class="gl-mt-3 sm:gl-ml-3 sm:gl-mt-0"
+        class="gl-sm-ml-3 gl-mt-3 gl-sm-mt-0"
         @closeReport="closeReport"
         v-on="$listeners"
       />

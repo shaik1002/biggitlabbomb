@@ -12,7 +12,6 @@ $dark-old-bg: rgba(255, 51, 51, 0.2);
 $dark-old-idiff: rgba(255, 51, 51, 0.25);
 $dark-border: #808080;
 $dark-code-border: #666;
-$dark-code-mark: #1d3043;
 $dark-main-bg: #1d1f21;
 $dark-main-color: #1d1f21;
 $dark-line-color: #c5c8c6;
@@ -285,7 +284,7 @@ $dark-il: #de935f;
   // mark lines via mark_multiple_lines
   pre.dark code {
     .selected-inline-section-marker {
-      background: $dark-code-mark !important;
+      background: #1d3043 !important;
     }
 
     .inline-section-marker {

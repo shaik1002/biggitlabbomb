@@ -22,16 +22,18 @@ FactoryBot.define do
       end
     end
 
-    trait(:created_by) do
-      created_by { association(:user) }
-    end
-
     trait(:ldap) do
       ldap { true }
     end
 
     trait :blocked do
       after(:build) { |group_member, _| group_member.user.block! }
+    end
+
+    trait :banned do
+      after(:create) do |member|
+        create(:namespace_ban, namespace: member.member_namespace.root_ancestor, user: member.user) unless member.owner?
+      end
     end
 
     trait :minimal_access do

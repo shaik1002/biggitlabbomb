@@ -186,8 +186,9 @@ export default {
       });
     },
     issuesHelpPagePath() {
-      return helpPagePath('user/project/settings/index', {
-        anchor: 'configure-project-features-and-permissions',
+      // eslint-disable-next-line local-rules/require-valid-help-page-path
+      return helpPagePath('user/project/settings/index.md', {
+        anchor: 'configure-project-visibility-features-and-permissions',
       });
     },
     areTicketsConfidentialByDefaultHelp() {
@@ -253,7 +254,7 @@ export default {
       id="service-desk-checkbox"
       :value="isEnabled"
       :disabled="!isIssueTrackerEnabled"
-      class="align-middle mr-1 !gl-inline-block"
+      class="!gl-inline-block align-middle mr-1"
       :label="$options.i18n.toggleLabel"
       label-position="hidden"
       @change="onCheckboxToggle"

@@ -12,7 +12,6 @@ RSpec.describe Gitlab::Fp::Settings::EnvVarOverrideProcessor, feature_category: 
   let(:env_var_prefix) { "THE_PREFIX" }
   let(:env_var_failed_message_class) { Class.new(Gitlab::Fp::Message) }
   let(:env_var_name) { "#{env_var_prefix}_#{setting_name.upcase}" }
-  let(:rails_env_is_production) { false }
   let(:context) do
     {
       settings: {
@@ -33,7 +32,6 @@ RSpec.describe Gitlab::Fp::Settings::EnvVarOverrideProcessor, feature_category: 
   before do
     allow(ENV).to receive(:[]).and_call_original
     allow(ENV).to receive(:[]).with(env_var_name) { env_var_value }
-    allow(Rails).to receive_message_chain(:env, :production?) { rails_env_is_production }
   end
 
   context "when an ENV var overrides a default setting" do
@@ -66,40 +64,6 @@ RSpec.describe Gitlab::Fp::Settings::EnvVarOverrideProcessor, feature_category: 
             env_var_failed_message_class: env_var_failed_message_class
           }
         ))
-      end
-    end
-
-    context "when setting_type is :Boolean" do
-      let(:setting_type) { :Boolean }
-
-      context "for true value" do
-        let(:env_var_value) { "true" }
-
-        it "uses the casted type of the overridden ENV var value" do
-          expect(result).to eq(Gitlab::Fp::Result.ok(
-            {
-              settings: { the_setting: true },
-              setting_types: { the_setting: setting_type },
-              env_var_prefix: env_var_prefix,
-              env_var_failed_message_class: env_var_failed_message_class
-            }
-          ))
-        end
-      end
-
-      context "for false value" do
-        let(:env_var_value) { "false" }
-
-        it "uses the casted type of the overridden ENV var value" do
-          expect(result).to eq(Gitlab::Fp::Result.ok(
-            {
-              settings: { the_setting: false },
-              setting_types: { the_setting: setting_type },
-              env_var_prefix: env_var_prefix,
-              env_var_failed_message_class: env_var_failed_message_class
-            }
-          ))
-        end
       end
     end
 
@@ -155,26 +119,11 @@ RSpec.describe Gitlab::Fp::Settings::EnvVarOverrideProcessor, feature_category: 
   context "when ENV var contains an incorrect type" do
     context "for Integer type setting" do
       let(:env_var_value) { "not an Integer type" }
-      let(:setting_type) { Integer }
 
       it "returns an err Result containing a settings environment variable failed message with details" do
         expect(result).to be_err_result(
           env_var_failed_message_class.new(
             details: "ENV var '#{env_var_name}' value could not be cast to #{setting_type} type."
-          )
-        )
-      end
-    end
-
-    context "for :Boolean type setting" do
-      let(:env_var_value) { "not a :Boolean type" }
-      let(:setting_type) { :Boolean }
-
-      it "returns an err Result containing a settings environment variable failed message with details" do
-        expect(result).to be_err_result(
-          env_var_failed_message_class.new(
-            details: "ENV var '#{env_var_name}' value could not be cast to boolean type, " \
-              "value must be 'true' or 'false'"
           )
         )
       end
@@ -253,14 +202,6 @@ RSpec.describe Gitlab::Fp::Settings::EnvVarOverrideProcessor, feature_category: 
       expect(result).to be_err_result(
         env_var_failed_message_class.new(details: "Unsupported setting type: #{setting_type}")
       )
-    end
-  end
-
-  context "when Rails env is production" do
-    let(:rails_env_is_production) { true }
-
-    it 'does not change any context' do
-      expect(result).to eq Gitlab::Fp::Result.ok(context)
     end
   end
 end

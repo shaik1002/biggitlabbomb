@@ -2,23 +2,13 @@
 
 module WebIde
   module ExtensionsMarketplace
-    # This returns true if the extensions marketplace feature is available to any users
-    #
-    # @return [Boolean]
-    def self.feature_enabled_for_any_user?
-      feature_flag_enabled_for_any_actor?(:web_ide_extensions_marketplace) &&
-        feature_flag_enabled_for_any_actor?(:vscode_web_ide) &&
-        feature_flag_enabled_for_any_actor?(:web_ide_oauth)
-    end
-
-    # This returns true if the extensions marketplace feature is available to the given user
-    #
-    # @param user [User]
-    # @return [Boolean]
     def self.feature_enabled?(user:)
-      Feature.enabled?(:web_ide_extensions_marketplace, user) &&
-        Feature.enabled?(:vscode_web_ide, user) &&
-        Feature.enabled?(:web_ide_oauth, user)
+      return false unless Feature.enabled?(:web_ide_extensions_marketplace, user)
+
+      # TODO: Add instance-level setting for this https://gitlab.com/gitlab-org/gitlab/-/issues/451871
+
+      # note: OAuth **must** be enabled for us to use the extension marketplace
+      ::WebIde::DefaultOauthApplication.feature_enabled?(user)
     end
 
     # This value is used when the end-user is accepting the third-party extension marketplace integration.
@@ -63,17 +53,12 @@ module WebIde
 
       result = { enabled: false, reason: disabled_reason, help_url: help_url }
 
-      result.merge(gallery_disabled_extra_attributes(disabled_reason: disabled_reason, user: user))
-    end
+      if disabled_reason == :opt_in_unset || disabled_reason == :opt_in_disabled
+        result[:user_preferences_url] = user_preferences_url
+      end
 
-    # rubocop:disable Lint/UnusedMethodArgument -- `user:` param is used in EE
-    def self.gallery_disabled_extra_attributes(disabled_reason:, user:)
-      return { user_preferences_url: user_preferences_url } if disabled_reason == :opt_in_unset
-      return { user_preferences_url: user_preferences_url } if disabled_reason == :opt_in_disabled
-
-      {}
+      result
     end
-    # rubocop:enable Lint/UnusedMethodArgument
 
     def self.help_url
       ::Gitlab::Routing.url_helpers.help_page_url('user/project/web_ide/index', anchor: 'extension-marketplace')
@@ -84,18 +69,6 @@ module WebIde
       ::Gitlab::Routing.url_helpers.profile_preferences_url(anchor: 'integrations')
     end
 
-    def self.feature_flag_enabled_for_any_actor?(flag)
-      # Short circuit if we're globally enabled
-      return true if Feature.enabled?(flag, nil)
-
-      # The feature could be conditionally applied, so check if `!off?`
-      # We also can't *just* check `!off?` because the ActiveRecord might not exist and be default enabled
-      feature = Feature.get(flag) # rubocop:disable Gitlab/AvoidFeatureGet -- See above
-      feature && !feature.off?
-    end
-
-    private_class_method :help_url, :user_preferences_url, :feature_flag_enabled_for_any_actor?
+    private_class_method :help_url, :user_preferences_url
   end
 end
-
-WebIde::ExtensionsMarketplace.prepend_mod

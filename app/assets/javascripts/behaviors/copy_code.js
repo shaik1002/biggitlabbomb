@@ -24,7 +24,6 @@ class CopyCodeButton extends HTMLElement {
       type: 'button',
       class: 'btn btn-default btn-md gl-button btn-icon has-tooltip',
       'data-title': __('Copy to clipboard'),
-      'aria-label': __('Copy to clipboard'),
       'data-clipboard-target': `pre#${this.for}`,
     });
 

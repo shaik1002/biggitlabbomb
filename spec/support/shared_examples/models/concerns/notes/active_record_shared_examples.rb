@@ -16,7 +16,6 @@ RSpec.shared_examples 'Notes::ActiveRecord' do
   describe 'modules' do
     subject { described_class }
 
-    it { is_expected.to include_module(AfterCommitQueue) }
     it { is_expected.to include_module(CacheMarkdownField) }
     it { is_expected.to include_module(Redactable) }
     it { is_expected.to include_module(Participable) }

@@ -281,7 +281,7 @@ export default {
       <template v-if="isLoading">{{ $options.FETCH_LOADING }}</template>
       <template v-else>
         <div class="gl-flex gl-flex-col">
-          <div class="gl-flex gl-flex-col gl-items-baseline gl-gap-3 sm:gl-flex-row">
+          <div class="gl-flex gl-flex-col sm:gl-flex-row gl-gap-3 gl-items-baseline">
             <div v-if="requireSamlAuthToApprove && showApprove">
               <gl-form
                 ref="form"
@@ -326,10 +326,10 @@ export default {
               :multiple-approval-rules-available="mr.multipleApprovalRulesAvailable"
             />
           </div>
-          <div v-if="hasInvalidRules" class="gl-mt-2 gl-text-secondary" data-testid="invalid-rules">
+          <div v-if="hasInvalidRules" class="gl-text-secondary gl-mt-2" data-testid="invalid-rules">
             <gl-sprintf :message="pluralizedRuleText">
               <template #danger="{ content }">
-                <span class="gl-font-bold gl-text-danger">{{ content }}</span>
+                <span class="gl-font-bold text-danger">{{ content }}</span>
               </template>
             </gl-sprintf>
           </div>

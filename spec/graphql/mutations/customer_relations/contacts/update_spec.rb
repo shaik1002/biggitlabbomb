@@ -3,8 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Mutations::CustomerRelations::Contacts::Update do
-  include GraphqlHelpers
-  let_it_be(:current_user) { create(:user) }
+  let_it_be(:user) { create(:user) }
   let_it_be(:group) { create(:group) }
 
   let(:first_name) { 'Lionel' }
@@ -25,14 +24,14 @@ RSpec.describe Mutations::CustomerRelations::Contacts::Update do
 
   describe '#resolve' do
     subject(:resolve_mutation) do
-      described_class.new(object: nil, context: query_context, field: nil).resolve(
+      described_class.new(object: nil, context: { current_user: user }, field: nil).resolve(
         attributes
       )
     end
 
     context 'when the user does not have permission to update a contact' do
       before do
-        group.add_reporter(current_user)
+        group.add_reporter(user)
       end
 
       it 'raises an error' do
@@ -52,7 +51,7 @@ RSpec.describe Mutations::CustomerRelations::Contacts::Update do
 
     context 'when the user has permission to update a contact' do
       before_all do
-        group.add_developer(current_user)
+        group.add_developer(user)
       end
 
       it 'updates the organization with correct values' do

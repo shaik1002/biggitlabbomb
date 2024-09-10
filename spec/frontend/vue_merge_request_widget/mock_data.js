@@ -421,7 +421,6 @@ export const mockStore = {
     ref: {},
   },
   targetBranch: 'target-branch',
-  targetProjectFullPath: '/group2/project2',
   sourceBranch: 'source-branch',
   sourceBranchLink: 'source-branch-link',
   deployments: [

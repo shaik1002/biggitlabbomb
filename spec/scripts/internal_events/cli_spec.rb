@@ -136,20 +136,6 @@ RSpec.describe Cli, feature_category: :service_ping do
         end
       end
     end
-
-    context 'with a valid event name' do
-      it 'continues to the next step' do
-        queue_cli_inputs([
-          "1\n", # Enum-select: New Event -- start tracking when an action or scenario occurs on gitlab instances
-          "Engineer uses Internal Event CLI to define a new event\n", # Submit description
-          "a_totally_fine_0123456789_name\n" # Submit action name
-        ])
-
-        with_cli_thread do
-          expect { prompt.output.string }.to eventually_include_cli_text('Step 3 / 7')
-        end
-      end
-    end
   end
 
   context 'when creating new metrics' do
@@ -465,7 +451,7 @@ RSpec.describe Cli, feature_category: :service_ping do
   context 'when showing usage examples' do
     let(:expected_example_prompt) do
       <<~TEXT.chomp
-      Select one: Select a use-case to view examples for: (Press ↑/↓ arrow to move, Enter to select and letters to filter)
+      Select one: Select a use-case to view examples for: (Press ↑/↓ arrow or 1-9 number to move and Enter to select)
       ‣ 1. ruby/rails
         2. rspec
         3. javascript (vue)
@@ -473,9 +459,8 @@ RSpec.describe Cli, feature_category: :service_ping do
         5. vue template
         6. haml
         7. Manual testing in GDK
-        8. Data verification in Tableau
-        9. View examples for a different event
-        10. Exit
+        8. View examples for a different event
+        9. Exit
       TEXT
     end
 
@@ -490,6 +475,7 @@ RSpec.describe Cli, feature_category: :service_ping do
         track_internal_event(
           'internal_events_cli_used',
           project: project,
+          namespace: project.namespace,
           user: user
         )
 
@@ -504,8 +490,9 @@ RSpec.describe Cli, feature_category: :service_ping do
 
         it_behaves_like 'internal event tracking' do
           let(:event) { 'internal_events_cli_used' }
-          let(:project) { create(:project) }
-          let(:user) { create(:user) }
+          let(:project) { project }
+          let(:namespace) { project.namespace }
+          let(:user) { user }
         end
 
         --------------------------------------------------
@@ -528,26 +515,6 @@ RSpec.describe Cli, feature_category: :service_ping do
         TEXT
       end
 
-      let(:expected_tableau_example) do
-        <<~TEXT.chomp
-        --------------------------------------------------
-        # GROUP DASHBOARDS -- view all service ping metrics for a specific group
-
-        analytics_instrumentation: https://10az.online.tableau.com/#/site/gitlab/views/PDServicePingExplorationDashboard/MetricExplorationbyGroup?Group%20Name=analytics_instrumentation&Stage%20Name=monitor
-
-        --------------------------------------------------
-        # METRIC TRENDS -- view data for a service ping metric for internal_events_cli_used
-
-        redis_hll_counters.count_distinct_user_id_from_internal_events_cli_used_weekly: https://10az.online.tableau.com/#/site/gitlab/views/PDServicePingExplorationDashboard/MetricTrend?Metrics%20Path=redis_hll_counters.count_distinct_user_id_from_internal_events_cli_used_weekly
-
-        --------------------------------------------------
-        Note: The metric dashboard links can also be accessed from https://metrics.gitlab.com/
-
-        Not what you're looking for? Check this doc:
-          - https://docs.gitlab.com/ee/development/internal_analytics/#data-discovery
-        TEXT
-      end
-
       before do
         File.write(event1_filepath, File.read(event1_content))
         File.write(
@@ -565,9 +532,7 @@ RSpec.describe Cli, feature_category: :service_ping do
           "\e[B", # Arrow down to: rspec
           "\n", # Select: rspec
           "7\n", # Select: Manual testing: check current values of metrics from rails console (any data source)
-          "8\n", # Select: Data verification in Tableau
-          "Exit", # Filters to this item
-          "\n" # select: Exit
+          "9\n" # Exit
         ])
 
         with_cli_thread do
@@ -575,8 +540,7 @@ RSpec.describe Cli, feature_category: :service_ping do
             expected_example_prompt,
             expected_rails_example,
             expected_rspec_example,
-            expected_gdk_example,
-            expected_tableau_example
+            expected_gdk_example
           )
         end
       end
@@ -750,22 +714,6 @@ RSpec.describe Cli, feature_category: :service_ping do
         TEXT
       end
 
-      let(:expected_tableau_example) do
-        <<~TEXT.chomp
-        --------------------------------------------------
-        # GROUP DASHBOARDS -- view all service ping metrics for a specific group
-
-        # Warning: There are no metrics for internal_events_cli_opened yet.
-        analytics_instrumentation: https://10az.online.tableau.com/#/site/gitlab/views/PDServicePingExplorationDashboard/MetricExplorationbyGroup?Group%20Name=analytics_instrumentation&Stage%20Name=monitor
-
-        --------------------------------------------------
-        Note: The metric dashboard links can also be accessed from https://metrics.gitlab.com/
-
-        Not what you're looking for? Check this doc:
-          - https://docs.gitlab.com/ee/development/internal_analytics/#data-discovery
-        TEXT
-      end
-
       before do
         File.write(event2_filepath, File.read(event2_content))
       end
@@ -788,10 +736,7 @@ RSpec.describe Cli, feature_category: :service_ping do
           "\n", # Select: haml
           "\e[B", # Arrow down to: gdk
           "\n", # Select: gdk
-          "\e[B", # Arrow down to: tableau
-          "\n", # Select: tableau
-          "Exit", # Filters to this item
-          "\n" # select: Exit
+          "9\n" # Exit
         ])
 
         with_cli_thread do
@@ -803,8 +748,7 @@ RSpec.describe Cli, feature_category: :service_ping do
             expected_js_example,
             expected_vue_template_example,
             expected_haml_example,
-            expected_gdk_example,
-            expected_tableau_example
+            expected_gdk_example
           )
         end
       end
@@ -821,6 +765,7 @@ RSpec.describe Cli, feature_category: :service_ping do
         track_internal_event(
           'internal_events_cli_used',
           project: project,
+          namespace: project.namespace,
           user: user
         )
 
@@ -852,12 +797,11 @@ RSpec.describe Cli, feature_category: :service_ping do
           'internal_events_cli_used', # Filters to this event
           "\n", # Select: config/events/internal_events_cli_used.yml
           "\n", # Select: ruby/rails
-          "9\n", # Select: View examples for a different event
+          "8\n", # Select: View examples for a different event
           'internal_events_cli_opened', # Filters to this event
           "\n", # Select: config/events/internal_events_cli_opened.yml
           "\n", # Select: ruby/rails
-          "Exit", # Filters to this item
-          "\n" # select: Exit
+          "9\n" # Exit
         ])
 
         with_cli_thread do
@@ -884,6 +828,7 @@ RSpec.describe Cli, feature_category: :service_ping do
         track_internal_event(
           'internal_events_cli_used',
           project: project,
+          namespace: project.namespace,
           user: user,
           additional_properties: {
             label: 'string', # TODO
@@ -902,14 +847,11 @@ RSpec.describe Cli, feature_category: :service_ping do
 
         it_behaves_like 'internal event tracking' do
           let(:event) { 'internal_events_cli_used' }
-          let(:project) { create(:project) }
-          let(:user) { create(:user) }
-          let(:additional_properties) do
-            {
-              label: 'string',
-              value: 72
-            }
-          end
+          let(:project) { project }
+          let(:namespace) { project.namespace }
+          let(:user) { user }
+          let(:label) { 'string' }
+          let(:value) { 72 }
         end
 
         --------------------------------------------------
@@ -1065,8 +1007,7 @@ RSpec.describe Cli, feature_category: :service_ping do
           "\n", # Select: vue template
           "\e[B", # Arrow down to: haml
           "\n", # Select: haml
-          "Exit", # Filters to this item
-          "\n" # select: Exit
+          "9\n" # Exit
         ])
 
         with_cli_thread do

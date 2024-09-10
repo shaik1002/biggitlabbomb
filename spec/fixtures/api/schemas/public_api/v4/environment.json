@@ -60,16 +60,6 @@
     },
     "project": {
       "$ref": "project.json"
-    },
-    "cluster_agent": {
-      "oneOf": [
-        {
-          "type": "null"
-        },
-        {
-          "$ref": "agent.json"
-        }
-      ]
     }
   },
   "additionalProperties": false

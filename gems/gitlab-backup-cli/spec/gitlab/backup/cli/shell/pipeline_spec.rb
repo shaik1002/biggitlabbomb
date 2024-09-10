@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'spec_helper'
+
 RSpec.describe Gitlab::Backup::Cli::Shell::Pipeline do
   let(:command) { Gitlab::Backup::Cli::Shell::Command }
   let(:printf_command) { command.new('printf "3\n2\n1"') }

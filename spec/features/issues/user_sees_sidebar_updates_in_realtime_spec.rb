@@ -50,10 +50,8 @@ RSpec.describe 'Issues > Real-time sidebar', :js, :with_license, feature_categor
 
     wait_for_all_requests
 
-    page.within(labels_widget) do
-      click_button label.name
-      click_button 'Close'
-    end
+    click_button label.name
+    click_button 'Close'
 
     wait_for_requests
 

@@ -381,7 +381,6 @@ module API
             }
           ],
           'jira-cloud-app' => ::Integrations::JiraCloudApp.api_arguments,
-          'matrix' => ::Integrations::Matrix.api_arguments,
           'mattermost-slash-commands' => ::Integrations::MattermostSlashCommands.api_arguments,
           'slack-slash-commands' => [
             {
@@ -644,7 +643,6 @@ module API
           ::Integrations::Jenkins,
           ::Integrations::Jira,
           ::Integrations::JiraCloudApp,
-          ::Integrations::Matrix,
           ::Integrations::Mattermost,
           ::Integrations::MattermostSlashCommands,
           ::Integrations::MicrosoftTeams,

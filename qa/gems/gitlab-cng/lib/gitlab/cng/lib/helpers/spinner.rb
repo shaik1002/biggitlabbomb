@@ -11,6 +11,12 @@ module Gitlab
       class Spinner
         include Output
 
+        def initialize(spinner_message, raise_on_error: true, print_block_output: true)
+          @spinner_message = spinner_message
+          @raise_on_error = raise_on_error
+          @print_block_output = print_block_output
+        end
+
         # Run code block inside spinner
         #
         # @param [String] spinner_message message to print when spinner starts
@@ -27,12 +33,6 @@ module Gitlab
           ).spin(done_message, &block)
         end
 
-        def initialize(spinner_message, raise_on_error: true, print_block_output: true)
-          @spinner_message = spinner_message
-          @raise_on_error = raise_on_error
-          @print_block_output = print_block_output
-        end
-
         # Run code block inside spinner and capture any output
         #
         # Spinner doesn't work with blocks producing output while it spins
@@ -47,19 +47,12 @@ module Gitlab
 
           result
         rescue StandardError => e
-          spinner_error(original_stdout)
-          error_message = [
-            "",
-            colorize("=== block '#{spinner_message}' error ===", :magenta),
-            colorize(e.message&.strip, error_color),
-            colorize("=== block '#{spinner_message}' error ===", :magenta)
-          ].join("\n")
+          spinner_error(e, original_stdout)
           return result unless raise_on_error
 
           raise(e)
         ensure
           puts_with_offset(original_stdout, $stdout.string) if print_block_output && !$stdout.string.empty?
-          puts_with_offset(original_stdout, error_message) if error_message
 
           $stdout = original_stdout
           spinner_stack.pop
@@ -154,12 +147,14 @@ module Gitlab
         # @param [StandardError] error
         # @param [IO] io
         # @return [void]
-        def spinner_error(io)
-          done_message = colorize("failed", error_color)
-          return spinner.error(done_message) if tty?
+        def spinner_error(error, io)
+          message = ["failed", error.message]
+
+          colored_message = colorize(message.compact.join("\n"), error_color)
+          return spinner.error(colored_message) if tty?
 
           spinner.stop if spinner.spinning?
-          puts_with_offset(io, "[#{error_mark}] #{spinner_message} ... #{done_message}")
+          puts_with_offset(io, "[#{error_mark}] #{spinner_message} ... #{colored_message}")
         end
 
         # Print output with a leading offset for correct nested spinner display

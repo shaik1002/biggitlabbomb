@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: Any user with at least the Maintainer role can merge updates to this content. For details, see https://docs.gitlab.com/ee/development/development_processes.html#development-guidelines-review.
 ---
@@ -268,7 +268,7 @@ module Projects
 
       def save_all!
         if save_services
-          Gitlab::ImportExport::Saver.save(project: project, shared: @shared, user: user)
+          Gitlab::ImportExport::Saver.save(project: project, shared: @shared)
           notify_success
         else
           cleanup_and_notify_error!

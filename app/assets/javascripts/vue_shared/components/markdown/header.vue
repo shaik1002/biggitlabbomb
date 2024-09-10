@@ -263,7 +263,7 @@ export default {
 
 <template>
   <div
-    class="md-header gl-border-b gl-z-2 gl-rounded-lg gl-rounded-bl-none gl-rounded-br-none gl-border-gray-100 gl-bg-white gl-px-3"
+    class="md-header gl-border-b gl-rounded-lg gl-rounded-bl-none gl-rounded-br-none gl-border-gray-100 gl-bg-white gl-px-3"
     :class="{ 'md-header-preview': previewMarkdown }"
   >
     <div class="gl-flex gl-flex-wrap gl-items-center">
@@ -499,7 +499,7 @@ export default {
             dropzone_input.js.
           -->
           <toolbar-button
-            v-show="!previewMarkdown && !restrictedToolBarItems.includes('attach-file')"
+            v-if="!previewMarkdown && !restrictedToolBarItems.includes('attach-file')"
             data-testid="button-attach-file"
             data-button-type="attach-file"
             :button-title="__('Attach a file or image')"

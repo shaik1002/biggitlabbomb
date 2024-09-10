@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe Groups::GroupMembersHelper, feature_category: :groups_and_projects do
+RSpec.describe Groups::GroupMembersHelper do
   include MembersPresentation
 
   let_it_be(:group) { create(:group) }

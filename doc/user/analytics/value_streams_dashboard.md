@@ -24,7 +24,7 @@ The Value Streams Dashboard includes [panels](#value-streams-dashboard-panels) t
 - [DORA metrics](dora_metrics.md)
 - [Value Stream Analytics (VSA) - flow metrics](../group/value_stream_analytics/index.md)
 - [Vulnerabilities](https://gitlab.com/gitlab-org/gitlab/-/security/vulnerability_report) metrics
-- [GitLab Duo Code Suggestions](../../user/project/repository/code_suggestions/index.md)
+- [GitLab Duo AI Code Suggestions](../../user/project/repository/code_suggestions/index.md)
 
 With the Value Streams Dashboard, you can:
 
@@ -47,6 +47,7 @@ The Value Streams Dashboard panels have a default configuration, but you can als
 - Overview
 - DevSecOps metrics comparison
 - DORA Performers score
+- AI Impact analytics
 
 ### Overview panel
 
@@ -154,6 +155,27 @@ panels:
 
 If multiple topics are provided, all topics must match for the project to be included in the results.
 
+### AI Impact analytics
+
+DETAILS:
+**Tier:** For a limited time, Ultimate. In the future, GitLab Duo Enterprise.
+**Offering:** GitLab.com, Self-managed
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/443696) in GitLab 16.11 [with a flag](../../administration/feature_flags.md) named `ai_impact_analytics_dashboard`. Disabled by default.
+> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/451873) in GitLab 17.2. Feature flag `ai_impact_analytics_dashboard` removed.
+
+AI Impact analytics displays SDLC metrics for a group or project in the month-to-date and the past six months. You can use this table to observe how changes in the AI usage metric correlate with changes in other metrics.
+
+The metric **Monthly Code Suggestions Usage rate** represents users that engage with Code Suggestions every month. It is calculated as the number of monthly unique Code Suggestions users divided by total monthly [unique contributors](../../user/profile/contributions_calendar.md#user-contribution-events). Only unique code contributors, meaning users with `pushed` events, are included in the calculation.
+
+The month-over-month comparison of the AI Usage unique users rate gives a more accurate indication of this metric, as it eliminates factors such as developer experience level and project type or complexity.
+
+The baseline for the AI Usage trend is the total number of code contributors, not just users with GitLab Duo seats. This baseline gives a more accurate representation of AI usage by team members. To learn more about AI Impact analytics, see the blog post [Developing GitLab Duo: AI Impact analytics dashboard measures the ROI of AI](https://about.gitlab.com/blog/2024/05/15/developing-gitlab-duo-ai-impact-analytics-dashboard-measures-the-roi-of-ai/).
+
+NOTE:
+Usage rate for Code Suggestions is calculated with data starting from GitLab 16.11.
+For more information, see [epic 12978](https://gitlab.com/groups/gitlab-org/-/epics/12978).
+
 ## Enable or disable overview background aggregation
 
 DETAILS:
@@ -178,21 +200,24 @@ Prerequisites:
 
 - You must have at least the Reporter role for the group.
 - Overview background aggregation for Value Streams Dashboards must be enabled.
+- To view AI Impact analytics, you must:
+  - Enable [Code Suggestions](../../user/project/repository/code_suggestions/index.md).
+  - Configure [ClickHouse for contribution analytics](../../user/group/contribution_analytics/index.md#contribution-analytics-with-clickhouse).
 - To view the contributor count metric in the comparison panel, you must [set up ClickHouse](../../integration/clickhouse.md).
 
 To view the Value Streams Dashboard:
 
 - From Analytics Dashboards:
 
-  1. On the group left sidebar, select **Search or go to** and find your group.
-  1. Select **Analyze > Analytics Dashboards**.
+   1. On the group left sidebar, select **Search or go to** and find your group.
+   1. Select **Analyze > Analytics Dashboards**.
 
 - From Value Stream Analytics:
 
-  1. On the left sidebar, select **Search or go to** and find your project or group.
-  1. Select **Analyze > Value stream analytics**.
-  1. Below the **Filter results** text box, in the **Lifecycle metrics** row, select **Value Streams Dashboard / DORA**.
-  1. Optional. To open the new page, append this path `/analytics/dashboards/value_streams_dashboard` to the group URL (for example, `https://gitlab.com/groups/gitlab-org/-/analytics/dashboards/value_streams_dashboard`).
+   1. On the left sidebar, select **Search or go to** and find your project or group.
+   1. Select **Analyze > Value stream analytics**.
+   1. Below the **Filter results** text box, in the **Lifecycle metrics** row, select **Value Streams Dashboard / DORA**.
+   1. Optional. To open the new page, append this path `/analytics/dashboards/value_streams_dashboard` to the group URL (for example, `https://gitlab.com/groups/gitlab-org/-/analytics/dashboards/value_streams_dashboard`).
 
 ### View the Value Streams Dashboard for a project
 
@@ -358,17 +383,9 @@ Filters for the `dora_performers_score` visualization.
 
 Filters for the `usage_overview` visualization.
 
-##### Group and subgroup namespaces
-
 |Filter|Description|Supported values|
 |---|---|---|
 |`include`|Limits the metrics returned, by default displays all available| `groups`, `projects`, `issues`, `merge_requests`, `pipelines`, `users`|
-
-##### Project namespaces
-
-|Filter|Description|Supported values|
-|---|---|---|
-|`include`|Limits the metrics returned, by default displays all available| `issues`, `merge_requests`, `pipelines`|
 
 ## Dashboard metrics and drill-down reports
 

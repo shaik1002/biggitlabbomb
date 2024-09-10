@@ -277,7 +277,7 @@ describe('diffs/components/app', () => {
       });
 
       expect(wrapper.findComponent(NoChanges).exists()).toBe(false);
-      expect(wrapper.findComponent({ name: 'DynamicScroller' }).props('items')).toStrictEqual(
+      expect(wrapper.findComponent({ name: 'DynamicScroller' }).props('items')).toBe(
         store.state.diffs.diffFiles,
       );
     });
@@ -583,7 +583,7 @@ describe('diffs/components/app', () => {
       });
 
       expect(wrapper.findComponent({ name: 'DynamicScroller' }).exists()).toBe(true);
-      expect(wrapper.findComponent({ name: 'DynamicScroller' }).props('items')).toStrictEqual(
+      expect(wrapper.findComponent({ name: 'DynamicScroller' }).props('items')).toBe(
         store.state.diffs.diffFiles,
       );
     });
@@ -991,26 +991,26 @@ describe('diffs/components/app', () => {
     });
   });
 
-  describe('linked file', () => {
-    const linkedFileUrl = 'http://localhost.test/linked-file';
-    let linkedFile;
+  describe('pinned file', () => {
+    const pinnedFileUrl = 'http://localhost.test/pinned-file';
+    let pinnedFile;
 
     beforeEach(() => {
-      linkedFile = getDiffFileMock();
-      mock.onGet(linkedFileUrl).reply(HTTP_STATUS_OK, { diff_files: [linkedFile] });
+      pinnedFile = getDiffFileMock();
+      mock.onGet(pinnedFileUrl).reply(HTTP_STATUS_OK, { diff_files: [pinnedFile] });
       mock
         .onGet(new RegExp(ENDPOINT_BATCH_URL))
         .reply(HTTP_STATUS_OK, { diff_files: [], pagination: {} });
       mock.onGet(new RegExp(ENDPOINT_METADATA_URL)).reply(HTTP_STATUS_OK, diffMetadata);
 
-      createComponent({ props: { shouldShow: true, linkedFileUrl } });
+      createComponent({ props: { shouldShow: true, pinnedFileUrl } });
     });
 
-    it('fetches and displays the file', async () => {
+    it('fetches and displays pinned file', async () => {
       await waitForPromises();
 
       expect(wrapper.findComponent({ name: 'DynamicScroller' }).props('items')[0].file_hash).toBe(
-        linkedFile.file_hash,
+        pinnedFile.file_hash,
       );
     });
 

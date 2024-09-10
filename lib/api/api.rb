@@ -86,18 +86,8 @@ module API
         runner: -> { @current_runner || @runner },
         remote_ip: request.ip,
         caller_id: api_endpoint.endpoint_id,
-        feature_category: feature_category,
-        **http_router_rule_context
+        feature_category: feature_category
       )
-
-      increment_http_router_metrics
-    end
-
-    before do
-      ::Current.organization = Gitlab::Current::Organization.new(
-        params: {},
-        user: @current_user
-      ).organization
     end
 
     before do
@@ -203,8 +193,6 @@ module API
     helpers ::API::Helpers::CommonHelpers
     helpers ::API::Helpers::PerformanceBarHelpers
     helpers ::API::Helpers::RateLimiter
-    helpers Gitlab::HttpRouter::RuleContext
-    helpers Gitlab::HttpRouter::RuleMetrics
 
     namespace do
       after do
@@ -245,8 +233,8 @@ module API
         mount ::API::Commits
         mount ::API::CommitStatuses
         mount ::API::ComposerPackages
-        mount ::API::Conan::V1::InstancePackages
-        mount ::API::Conan::V1::ProjectPackages
+        mount ::API::ConanInstancePackages
+        mount ::API::ConanProjectPackages
         mount ::API::ContainerRegistryEvent
         mount ::API::ContainerRepositories
         mount ::API::DebianGroupPackages
@@ -297,6 +285,8 @@ module API
         mount ::API::MergeRequests
         mount ::API::MergeRequestDiffs
         mount ::API::Metadata
+        mount ::API::Metrics::Dashboard::Annotations
+        mount ::API::Metrics::UserStarredDashboards
         mount ::API::MlModelPackages
         mount ::API::Namespaces
         mount ::API::NpmGroupPackages
@@ -358,8 +348,6 @@ module API
         mount ::API::Users
         mount ::API::UserCounts
         mount ::API::UserRunners
-        mount ::API::VirtualRegistries::Packages::Maven
-        mount ::API::WebCommits
         mount ::API::Wikis
 
         add_open_api_documentation!
@@ -398,7 +386,6 @@ module API
       mount ::API::Ml::Mlflow::Entrypoint
     end
 
-    mount ::API::Internal::AutoFlow
     mount ::API::Internal::Base
     mount ::API::Internal::Coverage if Gitlab::Utils.to_boolean(ENV['COVERBAND_ENABLED'], default: false)
     mount ::API::Internal::Lfs

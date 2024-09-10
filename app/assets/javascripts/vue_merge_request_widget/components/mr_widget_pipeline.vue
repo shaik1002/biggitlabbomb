@@ -13,21 +13,12 @@ import SafeHtml from '~/vue_shared/directives/safe_html';
 import { s__, n__ } from '~/locale';
 import CiIcon from '~/vue_shared/components/ci_icon/ci_icon.vue';
 import { keepLatestDownstreamPipelines } from '~/ci/pipeline_details/utils/parsing_utils';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import LegacyPipelineMiniGraph from '~/ci/pipeline_mini_graph/legacy_pipeline_mini_graph/legacy_pipeline_mini_graph.vue';
 import PipelineArtifacts from '~/ci/pipelines_page/components/pipelines_artifacts.vue';
-import PipelineMiniGraph from '~/ci/pipeline_mini_graph/pipeline_mini_graph.vue';
+import LegacyPipelineMiniGraph from '~/ci/pipeline_mini_graph/legacy_pipeline_mini_graph/legacy_pipeline_mini_graph.vue';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate/tooltip_on_truncate.vue';
-import HelpPopover from '~/vue_shared/components/help_popover.vue';
 import mergeRequestEventTypeQuery from '../queries/merge_request_event_type.query.graphql';
 import runPipelineMixin from '../mixins/run_pipeline';
-import {
-  PIPELINE_EVENT_TYPE_MERGE_REQUEST,
-  PIPELINE_EVENT_TYPE_MERGE_TRAIN,
-  PIPELINE_EVENT_TYPE_MERGED_RESULT,
-  PIPELINE_EVENT_TYPE_MAP,
-} from '../constants';
 
 export default {
   name: 'MRWidgetPipeline',
@@ -56,16 +47,14 @@ export default {
     GlButton,
     LegacyPipelineMiniGraph,
     PipelineArtifacts,
-    PipelineMiniGraph,
     TimeAgoTooltip,
     TooltipOnTruncate,
-    HelpPopover,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
     SafeHtml,
   },
-  mixins: [runPipelineMixin, glFeatureFlagsMixin()],
+  mixins: [runPipelineMixin],
   props: {
     pipeline: {
       type: Object,
@@ -73,14 +62,6 @@ export default {
     },
     pipelineCoverageDelta: {
       type: String,
-      required: false,
-    },
-    pipelineEtag: {
-      type: String,
-      required: false,
-    },
-    pipelineIid: {
-      type: Number,
       required: false,
     },
     buildsWithCoverage: {
@@ -164,9 +145,6 @@ export default {
     hasCommitInfo() {
       return this.pipeline.commit && Object.keys(this.pipeline.commit).length > 0;
     },
-    isGraphQLPipelineMiniGraph() {
-      return this.glFeatures.ciGraphqlPipelineMiniGraph;
-    },
     isMergeRequestPipeline() {
       return Boolean(this.pipeline.flags && this.pipeline.flags.merge_request_pipeline);
     },
@@ -179,10 +157,10 @@ export default {
     coverageDeltaClass() {
       const delta = this.pipelineCoverageDelta;
       if (delta && parseFloat(delta) > 0) {
-        return 'gl-text-success';
+        return 'text-success';
       }
       if (delta && parseFloat(delta) < 0) {
-        return 'gl-text-danger';
+        return 'text-danger';
       }
       return '';
     },
@@ -206,23 +184,8 @@ export default {
         this.buildsWithCoverage.length,
       );
     },
-    pipelineMiniGraphQueryId() {
-      return this.pipelineIid?.toString() || null;
-    },
     isMergeTrain() {
       return Boolean(this.pipeline.flags?.merge_train_pipeline);
-    },
-    showPipelineTypeHelpPopover() {
-      return [
-        PIPELINE_EVENT_TYPE_MERGE_TRAIN,
-        PIPELINE_EVENT_TYPE_MERGED_RESULT,
-        PIPELINE_EVENT_TYPE_MERGE_REQUEST,
-      ].includes(this.pipeline?.details?.event_type_name);
-    },
-    pipelineTypeHelpPopoverOptions() {
-      const eventTypeName = this.pipeline?.details?.event_type_name;
-
-      return PIPELINE_EVENT_TYPE_MAP[eventTypeName] || { title: '', content: '' };
     },
   },
   errorText: s__(
@@ -235,7 +198,7 @@ export default {
   <div class="ci-widget media">
     <template v-if="hasCIError">
       <gl-icon name="status_failed" class="gl-text-red-500" :size="24" />
-      <p class="gl-mb-0 gl-ml-5 gl-grow" data-testid="ci-error-message">
+      <p class="gl-flex-grow-1 gl-ml-5 gl-mb-0" data-testid="ci-error-message">
         <gl-sprintf :message="$options.errorText">
           <template #link="{ content }">
             <gl-link :href="mrTroubleshootingDocsPath">{{ content }}</gl-link>
@@ -244,8 +207,8 @@ export default {
       </p>
     </template>
     <template v-else-if="retargeted">
-      <gl-icon name="status_canceled" class="gl-mr-3 gl-self-center" />
-      <p class="text-muted gl-mb-0 gl-ml-3 gl-flex gl-grow" data-testid="retargeted-message">
+      <gl-icon name="status_canceled" class="gl-align-self-center gl-mr-3" />
+      <p class="gl-flex-grow-1 gl-flex gl-ml-3 gl-mb-0 text-muted" data-testid="retargeted-message">
         {{
           __(
             'You should run a new pipeline, because the target branch has changed for this merge request.',
@@ -266,14 +229,14 @@ export default {
     </template>
     <template v-else-if="!hasPipeline">
       <gl-loading-icon size="sm" />
-      <p class="gl-mb-0 gl-ml-3 gl-flex gl-grow" data-testid="monitoring-pipeline-message">
+      <p class="gl-flex-grow-1 gl-flex gl-ml-3 gl-mb-0" data-testid="monitoring-pipeline-message">
         {{ $options.monitoringPipelineText }}
         <gl-link
           v-gl-tooltip
           :href="ciTroubleshootingDocsPath"
           target="_blank"
           :title="__('Get more information about troubleshooting pipelines')"
-          class="gl-ml-2 gl-flex gl-items-center"
+          class="gl-flex gl-items-center gl-ml-2"
         >
           <gl-icon
             name="question-o"
@@ -283,16 +246,16 @@ export default {
       </p>
     </template>
     <template v-else-if="hasPipeline">
-      <ci-icon :status="status" class="gl-mr-3 gl-mt-2 gl-self-start" />
+      <ci-icon :status="status" class="gl-align-self-start gl-mt-2 gl-mr-3" />
       <div class="ci-widget-container gl-flex">
         <div class="ci-widget-content">
           <div class="media-body">
             <div
               data-testid="pipeline-info-container"
-              class="gl-flex gl-flex-wrap gl-items-center gl-justify-between"
+              class="gl-flex gl-flex-wrap gl-align-items-center gl-justify-content-space-between"
             >
               <p
-                class="mr-pipeline-title !gl-m-0 !gl-mr-3 gl-self-start gl-font-bold gl-text-gray-900"
+                class="mr-pipeline-title gl-align-self-start gl-m-0! gl-mr-3! gl-font-bold gl-text-gray-900"
               >
                 {{ pipeline.details.event_type_name }}
                 <gl-link :href="pipeline.path" class="pipeline-id" data-testid="pipeline-id"
@@ -300,24 +263,17 @@ export default {
                 >
                 {{ pipeline.details.status.label }}
               </p>
-              <div class="gl-inline-flex gl-grow gl-items-center gl-justify-between">
-                <div>
-                  <pipeline-mini-graph
-                    v-if="isGraphQLPipelineMiniGraph && pipelineMiniGraphQueryId"
-                    :iid="pipelineMiniGraphQueryId"
-                    :full-path="targetProjectFullPath"
-                    :is-merge-train="isMergeTrain"
-                    :pipeline-etag="pipelineEtag"
-                  />
-                  <legacy-pipeline-mini-graph
-                    v-else-if="pipeline.details.stages"
-                    :downstream-pipelines="downstreamPipelines"
-                    :is-merge-train="isMergeTrain"
-                    :pipeline-path="pipeline.path"
-                    :stages="pipeline.details.stages"
-                    :upstream-pipeline="pipeline.triggered_by"
-                  />
-                </div>
+              <div
+                class="gl-align-items-center gl-inline-flex gl-flex-grow-1 gl-justify-content-space-between"
+              >
+                <legacy-pipeline-mini-graph
+                  v-if="pipeline.details.stages"
+                  :downstream-pipelines="downstreamPipelines"
+                  :is-merge-train="isMergeTrain"
+                  :pipeline-path="pipeline.path"
+                  :stages="pipeline.details.stages"
+                  :upstream-pipeline="pipeline.triggered_by"
+                />
                 <pipeline-artifacts
                   :pipeline-id="pipeline.id"
                   :artifacts="artifacts"
@@ -325,46 +281,34 @@ export default {
                 />
               </div>
             </div>
-
-            <div class="gl-flex gl-flex-wrap gl-items-center">
-              <p
-                class="gl-m-0 gl-text-sm gl-text-gray-500"
-                data-testid="pipeline-details-container"
-              >
-                {{ pipeline.details.event_type_name }} {{ pipeline.details.status.label }}
-                <template v-if="hasCommitInfo">
-                  {{ s__('Pipeline|for') }}
-                  <gl-link
-                    :href="pipeline.commit.commit_path"
-                    class="commit-sha-container"
-                    data-testid="commit-link"
-                    >{{ pipeline.commit.short_id }}</gl-link
-                  >
-                </template>
-                <template v-if="showSourceBranch">
-                  {{ s__('Pipeline|on') }}
-                  <tooltip-on-truncate
-                    v-safe-html="sourceBranchLink"
-                    :title="sourceBranch"
-                    truncate-target="child"
-                    class="label-branch label-truncate ref-container"
-                  />
-                </template>
-                <template v-if="finishedAt">
-                  <time-ago-tooltip
-                    :time="finishedAt"
-                    tooltip-placement="bottom"
-                    data-testid="finished-at"
-                  />
-                </template>
-              </p>
-              <help-popover
-                v-if="showPipelineTypeHelpPopover"
-                class="gl-ml-3 gl-inline-flex"
-                :options="pipelineTypeHelpPopoverOptions"
-              />
-            </div>
-
+            <p data-testid="pipeline-details-container" class="gl-font-sm gl-text-gray-500 gl-m-0">
+              {{ pipeline.details.event_type_name }} {{ pipeline.details.status.label }}
+              <template v-if="hasCommitInfo">
+                {{ s__('Pipeline|for') }}
+                <gl-link
+                  :href="pipeline.commit.commit_path"
+                  class="commit-sha-container"
+                  data-testid="commit-link"
+                  >{{ pipeline.commit.short_id }}</gl-link
+                >
+              </template>
+              <template v-if="showSourceBranch">
+                {{ s__('Pipeline|on') }}
+                <tooltip-on-truncate
+                  v-safe-html="sourceBranchLink"
+                  :title="sourceBranch"
+                  truncate-target="child"
+                  class="label-branch label-truncate ref-container"
+                />
+              </template>
+              <template v-if="finishedAt">
+                <time-ago-tooltip
+                  :time="finishedAt"
+                  tooltip-placement="bottom"
+                  data-testid="finished-at"
+                />
+              </template>
+            </p>
             <div v-if="pipeline.coverage" class="coverage gl-mt-1" data-testid="pipeline-coverage">
               {{ s__('Pipeline|Test coverage') }} {{ pipeline.coverage }}%
               <span
@@ -387,7 +331,7 @@ export default {
                 <div
                   v-for="(build, index) in buildsWithCoverage"
                   :key="`${build.name}-${index}`"
-                  class="gl-mt-3 gl-px-4 gl-text-left"
+                  class="gl-mt-3 gl-text-left gl-px-4"
                 >
                   {{ build.name }} ({{ build.coverage }}%)
                 </div>

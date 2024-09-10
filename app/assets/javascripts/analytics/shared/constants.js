@@ -130,8 +130,6 @@ export const CONTRIBUTOR_METRICS = {
 
 export const AI_METRICS = {
   CODE_SUGGESTIONS_USAGE_RATE: 'code_suggestions_usage_rate',
-  CODE_SUGGESTIONS_ACCEPTANCE_RATE: 'code_suggestions_acceptance_rate',
-  DUO_CHAT_USAGE_RATE: 'duo_chat_usage_rate',
 };
 
 export const METRIC_TOOLTIPS = {
@@ -189,13 +187,15 @@ export const METRIC_TOOLTIPS = {
     description: s__('ValueStreamAnalytics|Number of new issues created.'),
     groupLink: '-/issues_analytics',
     projectLink: '-/analytics/issues_analytics',
-    docsLink: helpPagePath('user/group/issues_analytics/index'),
+    // eslint-disable-next-line local-rules/require-valid-help-page-path
+    docsLink: helpPagePath('user/analytics/issue_analytics'),
   },
   [FLOW_METRICS.ISSUES_COMPLETED]: {
     description: s__('ValueStreamAnalytics|Number of issues closed by month.'),
     groupLink: '-/issues_analytics',
     projectLink: '-/analytics/issues_analytics',
-    docsLink: helpPagePath('user/group/issues_analytics/index'),
+    // eslint-disable-next-line local-rules/require-valid-help-page-path
+    docsLink: helpPagePath('user/analytics/issue_analytics'),
   },
   [FLOW_METRICS.DEPLOYS]: {
     description: s__('ValueStreamAnalytics|Total number of deploys to production.'),

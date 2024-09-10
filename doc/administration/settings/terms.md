@@ -16,14 +16,11 @@ When this option is enabled, new and existing users must accept the terms.
 When enabled, you can view the Terms of Service at the `-/users/terms` page on the instance,
 for example `https://gitlab.example.com/-/users/terms`.
 
-The link `Terms and privacy` will become visible in the help menu if any
-terms are defined.
-
 ## Enforce a Terms of Service and Privacy Policy
 
 To enforce acceptance of a Terms of Service and Privacy Policy:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Settings > General**.
 1. Expand the **Terms of Service and Privacy Policy** section.
 1. Check the **All users must accept the Terms of Service and Privacy Policy to access GitLab** checkbox.

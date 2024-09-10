@@ -4,8 +4,6 @@
 
 @import '../common';
 
-$none-code-mark: #d3e3f4;
-
 @mixin match-line {
   color: $t-gray-a-24;
   background-color: $gray-50;
@@ -194,7 +192,7 @@ $none-code-mark: #d3e3f4;
   // mark lines via mark_multiple_lines
   pre.none code {
     .selected-inline-section-marker {
-      background: $none-code-mark !important;
+      background: #d3e3f4 !important;
     }
 
     .inline-section-marker {

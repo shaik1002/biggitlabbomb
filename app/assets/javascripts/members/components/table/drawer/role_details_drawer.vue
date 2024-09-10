@@ -130,18 +130,18 @@ export default {
             <role-badges :member="member" :role="selectedRole" />
           </dd>
 
-          <dt class="gl-mb-3 gl-mt-6" data-testid="description-header">
+          <dt class="gl-mt-6 gl-mb-3" data-testid="description-header">
             {{ s__('MemberRole|Description') }}
           </dt>
           <dd data-testid="description-value">
             <template v-if="selectedRole.description">{{ selectedRole.description }}</template>
-            <span v-else class="gl-text-subtle">{{ s__('MemberRole|No description') }}</span>
+            <span v-else class="gl-text-gray-400">{{ s__('MemberRole|No description') }}</span>
           </dd>
 
-          <dt class="gl-mb-3 gl-mt-6" data-testid="permissions-header">
-            {{ __('Permissions') }}
+          <dt class="gl-mt-6 gl-mb-3" data-testid="permissions-header">
+            {{ s__('MemberRole|Permissions') }}
           </dt>
-          <dd class="gl-mb-5 gl-flex">
+          <dd class="gl-display-flex gl-mb-5">
             <span v-if="selectedRole.memberRoleId" class="gl-mr-3" data-testid="base-role">
               <gl-sprintf :message="s__('MemberRole|Base role: %{role}')">
                 <template #role>
@@ -163,10 +163,10 @@ export default {
           <div
             v-for="permission in selectedRole.permissions"
             :key="permission.name"
-            class="gl-flex"
+            class="gl-display-flex"
             data-testid="permission"
           >
-            <gl-icon name="check" class="gl-shrink-0" />
+            <gl-icon name="check" class="gl-flex-shrink-0" />
             <div class="gl-mx-3">
               <span data-testid="permission-name">
                 {{ permission.name }}

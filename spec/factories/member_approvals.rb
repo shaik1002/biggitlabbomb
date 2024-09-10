@@ -10,8 +10,6 @@ FactoryBot.define do
     status { ::Members::MemberApproval.statuses[:pending] }
     member { association(:project_member, user: user) }
     member_namespace { association(:namespace) }
-    member_role_id { nil }
-    metadata { { access_level: new_access_level, member_role_id: member_role_id }.compact }
 
     trait :for_new_member do
       member { nil }

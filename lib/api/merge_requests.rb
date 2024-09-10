@@ -2,17 +2,12 @@
 
 module API
   class MergeRequests < ::API::Base
-    include APIGuard
     include PaginationParams
     include Helpers::Unidiff
 
     CONTEXT_COMMITS_POST_LIMIT = 20
 
     before { authenticate_non_get! }
-
-    allow_access_with_scope :ai_workflows, if: ->(request) do
-      request.get? || request.head?
-    end
 
     rescue_from ActiveRecord::QueryCanceled do |_e|
       render_api_error!({ error: 'Request timed out' }, 408)
@@ -224,7 +219,6 @@ module API
     params do
       requires :id, types: [String, Integer], desc: 'The ID or URL-encoded path of the project.'
     end
-
     resource :projects, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
       include TimeTrackingEndpoints
 
@@ -594,29 +588,13 @@ module API
         ]
         tags %w[merge_requests]
       end
-      params do
-        optional :async, type: Boolean, default: false,
-          desc: 'Indicates if the merge request pipeline creation should be performed asynchronously. If set to `true`, the pipeline will be created outside of the API request and the endpoint will return an empty response with a `202` status code. When the response is `202`, the creation can still fail outside of this request.'
-      end
       post ':id/merge_requests/:merge_request_iid/pipelines', urgency: :low, feature_category: :pipeline_composition do
-        pipeline = nil
-        merge_request = find_merge_request_with_access(params[:merge_request_iid])
+        pipeline = ::MergeRequests::CreatePipelineService
+          .new(project: user_project, current_user: current_user, params: { allow_duplicate: true })
+          .execute(find_merge_request_with_access(params[:merge_request_iid]))
+          .payload
 
-        merge_request_params = { allow_duplicate: true }
-
-        if params[:async]
-          ::MergeRequests::CreatePipelineWorker # rubocop:disable CodeReuse/Worker -- Worker wraps service and another service wrapping that is pointless
-            .perform_async(user_project.id, current_user.id, merge_request.id, merge_request_params)
-        else
-          pipeline = ::MergeRequests::CreatePipelineService
-            .new(project: user_project, current_user: current_user, params: merge_request_params)
-            .execute(merge_request)
-            .payload
-        end
-
-        if params[:async]
-          status :accepted
-        elsif pipeline.nil?
+        if pipeline.nil?
           not_allowed!
         elsif pipeline.persisted?
           status :ok

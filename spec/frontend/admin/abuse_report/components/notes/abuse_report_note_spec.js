@@ -93,8 +93,21 @@ describe('Abuse Report Note', () => {
   });
 
   describe('Editing', () => {
-    // this should be changed: https://gitlab.com/gitlab-org/gitlab/-/issues/481897
-    it('should not show edit button', () => {
+    it('should show edit button when resolveNote is true', () => {
+      createComponent({
+        note: { ...mockNote, userPermissions: { resolveNote: true } },
+      });
+
+      expect(findNoteActions().props()).toMatchObject({
+        showEditButton: true,
+      });
+    });
+
+    it('should not show edit button when resolveNote is false', () => {
+      createComponent({
+        note: { ...mockNote, userPermissions: { resolveNote: false } },
+      });
+
       expect(findNoteActions().props()).toMatchObject({
         showEditButton: false,
       });

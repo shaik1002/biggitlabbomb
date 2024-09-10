@@ -68,7 +68,7 @@ export default {
     },
     classList() {
       return this.isCodeSuggestion
-        ? '!gl-p-0 suggestion-added-input'
+        ? 'gl-p-0! suggestion-added-input'
         : `gl-p-3 code highlight ${this.$options.userColorScheme}`;
     },
     lineOffset() {
@@ -172,7 +172,7 @@ export default {
         v-if="node.attrs.showPreview"
         :contenteditable="false"
         data-testid="sandbox-preview"
-        class="!-gl-ml-4 !-gl-mr-4 !-gl-mt-3 gl-mb-3 gl-border-b-1 gl-border-b-gray-100 !gl-bg-white gl-p-4 gl-border-b-solid"
+        class="!-gl-mt-3 !-gl-ml-4 !-gl-mr-4 gl-mb-3 gl-bg-white! gl-p-4 gl-border-b-1 gl-border-b-solid gl-border-b-gray-100"
       >
         <sandboxed-mermaid v-if="node.attrs.language === 'mermaid'" :source="diagramSource" />
         <img v-else ref="diagramContainer" :src="diagramUrl" />
@@ -181,7 +181,7 @@ export default {
         v-if="node.attrs.isFrontmatter"
         :contenteditable="false"
         data-testid="frontmatter-label"
-        class="gl-absolute gl-right-3 gl-top-0"
+        class="gl-absolute gl-top-0 gl-right-3"
         >{{ __('frontmatter') }}:{{ node.attrs.language }}</span
       >
       <div
@@ -191,16 +191,18 @@ export default {
         data-testid="code-suggestion-box"
       >
         <div
-          class="md-suggestion-header gl-z-1 gl-w-full gl-flex-wrap !gl-border-b-1 !gl-border-none gl-px-4 gl-py-3 gl-font-regular !gl-border-b-solid"
+          class="md-suggestion-header gl-flex-wrap gl-z-1 gl-w-full gl-border-none! gl-font-regular gl-px-4 gl-py-3 gl-border-b-1! gl-border-b-solid!"
         >
-          <div class="gl-pr-3 gl-font-bold">
+          <div class="gl-font-bold gl-pr-3">
             {{ __('Suggested change') }}
           </div>
 
-          <div class="gl-flex gl-flex-wrap gl-items-center gl-gap-2 gl-whitespace-nowrap gl-pl-3">
+          <div
+            class="gl-display-flex gl-flex-wrap gl-align-items-center gl-pl-3 gl-gap-2 gl-whitespace-nowrap"
+          >
             <gl-sprintf :message="__('From line %{line1} to %{line2}')">
               <template #line1>
-                <div class="gl-mx-1 gl-flex gl-rounded-base gl-bg-gray-50">
+                <div class="gl-display-flex gl-bg-gray-50 gl-rounded-base gl-mx-1">
                   <gl-button
                     size="small"
                     icon="dash"
@@ -211,7 +213,9 @@ export default {
                     :disabled="disableDecrementLineStart"
                     @click="updateLineOffset(-1, 0)"
                   />
-                  <div class="monospace gl-flex gl-items-center gl-justify-center gl-px-3">
+                  <div
+                    class="flex gl-align-items-center gl-justify-content-center gl-px-3 monospace"
+                  >
                     <strong>{{ absoluteLineOffset[0] }}</strong>
                   </div>
                   <gl-button
@@ -227,7 +231,7 @@ export default {
                 </div>
               </template>
               <template #line2>
-                <div class="gl-ml-1 gl-flex gl-rounded-base gl-bg-gray-50">
+                <div class="gl-display-flex gl-bg-gray-50 gl-rounded-base gl-ml-1">
                   <gl-button
                     size="small"
                     icon="dash"
@@ -238,7 +242,9 @@ export default {
                     :disabled="disableDecrementLineEnd"
                     @click="updateLineOffset(0, -1)"
                   />
-                  <div class="monospace gl-flex gl-items-center gl-justify-center gl-px-3">
+                  <div
+                    class="flex gl-align-items-center gl-justify-content-center gl-px-3 monospace"
+                  >
                     <strong>{{ absoluteLineOffset[1] }}</strong>
                   </div>
                   <gl-button
@@ -274,11 +280,7 @@ export default {
           >
         </div>
       </div>
-      <node-view-content
-        ref="nodeViewContent"
-        as="code"
-        class="gl-relative gl-z-1 !gl-break-words"
-      />
+      <node-view-content ref="nodeViewContent" as="code" class="gl-relative gl-z-1" />
     </node-view-wrapper>
   </editor-state-observer>
 </template>

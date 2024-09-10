@@ -1431,20 +1431,6 @@ RSpec.describe API::MergeRequests, :aggregate_failures, feature_category: :sourc
   describe "GET /projects/:id/merge_requests/:merge_request_iid" do
     let(:merge_request) { create(:merge_request, :simple, author: user, assignees: [user], milestone: milestone, source_project: project, source_branch: 'markdown', title: "Test") }
 
-    context 'with oauth token that has ai_workflows scope' do
-      let(:user) { create(:user) }
-      let(:token) { create(:oauth_access_token, user: user, scopes: [:ai_workflows]) }
-
-      it "allows access" do
-        get api(
-          "/projects/#{project.id}/merge_requests/#{merge_request.iid}",
-          oauth_access_token: token
-        )
-
-        expect(response).to have_gitlab_http_status(:ok)
-      end
-    end
-
     it 'matches json schema' do
       merge_request = create(:merge_request, :with_test_reports, milestone: milestone1, author: user, assignees: [user], source_project: project, target_project: project, title: "Test", created_at: base_time)
       get api("/projects/#{project.id}/merge_requests/#{merge_request.iid}", user)
@@ -2036,20 +2022,6 @@ RSpec.describe API::MergeRequests, :aggregate_failures, feature_category: :sourc
         expect(json_response.first['id']).to eq(pipeline.id)
       end
 
-      context 'with oauth token that has ai_workflows scope' do
-        let(:user) { create(:user) }
-        let(:token) { create(:oauth_access_token, user: user, scopes: [:ai_workflows]) }
-
-        it "allows access" do
-          get api(
-            "/projects/#{project.id}/merge_requests/#{merge_request.iid}/pipelines",
-            oauth_access_token: token
-          )
-
-          expect_successful_response_with_paginated_array
-        end
-      end
-
       it 'exposes basic attributes' do
         get api("/projects/#{project.id}/merge_requests/#{merge_request.iid}/pipelines")
 
@@ -2127,20 +2099,6 @@ RSpec.describe API::MergeRequests, :aggregate_failures, feature_category: :sourc
         expect { request }.to change(Ci::Pipeline, :count).by(1)
         expect(response).to have_gitlab_http_status(:ok)
         expect(json_response).to be_a Hash
-      end
-
-      context 'when async is requested', :sidekiq_inline do
-        let(:request) do
-          post api("/projects/#{project.id}/merge_requests/#{merge_request_iid}/pipelines", authenticated_user), params: { async: true }
-        end
-
-        it 'creates the pipeline async' do
-          expect(MergeRequests::CreatePipelineWorker).to receive(:perform_async).and_call_original
-
-          expect { request }.to change(Ci::Pipeline, :count).by(1)
-
-          expect(response).to have_gitlab_http_status(:accepted)
-        end
       end
     end
 
@@ -3643,17 +3601,9 @@ RSpec.describe API::MergeRequests, :aggregate_failures, feature_category: :sourc
 
   describe 'GET :id/merge_requests/:merge_request_iid/closes_issues' do
     it 'returns the issue that will be closed on merge' do
-      group = create(:group, :public, developers: user)
-      project_without_auto_close = create(:project, :public, group: group, autoclose_referenced_issues: false)
-      group_issue = create(:issue, :group_level, namespace: group)
-      no_close_issue = create(:issue, project: project_without_auto_close)
       issue = create(:issue, project: project)
       mr = merge_request.tap do |mr|
-        mr.update_attribute(
-          :description,
-          "Closes #{issue.to_reference(mr.project)} Closes #{group_issue.to_reference(mr.project)} " \
-            "Closes #{no_close_issue.to_reference(mr.project)}"
-        )
+        mr.update_attribute(:description, "Closes #{issue.to_reference(mr.project)}")
         mr.cache_merge_request_closes_issues!
       end
 

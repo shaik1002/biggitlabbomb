@@ -39,10 +39,6 @@ RSpec.describe 'Update a work item', feature_category: :team_planning do
     end
   end
 
-  before do
-    stub_feature_flags(enforce_check_group_level_work_items_license: true)
-  end
-
   context 'the user is not allowed to update a work item' do
     let(:current_user) { create(:user) }
 
@@ -138,7 +134,7 @@ RSpec.describe 'Update a work item', feature_category: :team_planning do
       end
     end
 
-    context 'with description widget input', :freeze_time do
+    context 'with description widget input' do
       let(:fields) do
         <<~FIELDS
           workItem {
@@ -148,11 +144,7 @@ RSpec.describe 'Update a work item', feature_category: :team_planning do
             widgets {
               type
               ... on WorkItemWidgetDescription {
-                description
-                lastEditedAt
-                lastEditedBy {
-                  id
-                }
+                      description
               }
             }
           }
@@ -234,41 +226,15 @@ RSpec.describe 'Update a work item', feature_category: :team_planning do
           it_behaves_like 'mutation updating work item labels'
         end
 
-        context 'when work item belongs directly to the group', if: Gitlab.ee? do
+        context 'when work item belongs directly to the group' do
           let(:mutation_work_item) { group_work_item }
 
-          before do
-            stub_licensed_features(epics: true)
-          end
-
           it_behaves_like 'mutation updating work item labels'
-
-          context 'without group level work item license' do
-            before do
-              stub_licensed_features(epics: false)
-            end
-
-            it_behaves_like 'a mutation that returns top-level errors', errors: [
-              "The resource that you are attempting to access does not exist or you don't have " \
-                "permission to perform this action"
-            ]
-          end
 
           context 'with quick action' do
             let(:input) { { 'descriptionWidget' => { 'description' => "/remove_label ~\"#{existing_label.name}\"" } } }
 
             it_behaves_like 'mutation updating work item labels'
-
-            context 'without group level work item license' do
-              before do
-                stub_licensed_features(epics: false)
-              end
-
-              it_behaves_like 'a mutation that returns top-level errors', errors: [
-                "The resource that you are attempting to access does not exist or you don't have " \
-                  "permission to perform this action"
-              ]
-            end
           end
         end
       end
@@ -287,25 +253,10 @@ RSpec.describe 'Update a work item', feature_category: :team_planning do
           it_behaves_like 'mutation updating work item labels'
         end
 
-        context 'when work item belongs directly to the group', if: Gitlab.ee? do
+        context 'when work item belongs directly to the group' do
           let(:mutation_work_item) { group_work_item }
 
-          before do
-            stub_licensed_features(epics: true)
-          end
-
           it_behaves_like 'mutation updating work item labels'
-
-          context 'without group level work item license' do
-            before do
-              stub_licensed_features(epics: false)
-            end
-
-            it_behaves_like 'a mutation that returns top-level errors', errors: [
-              "The resource that you are attempting to access does not exist or you don't have " \
-                "permission to perform this action"
-            ]
-          end
 
           context 'with quick action' do
             let(:input) do
@@ -313,17 +264,6 @@ RSpec.describe 'Update a work item', feature_category: :team_planning do
             end
 
             it_behaves_like 'mutation updating work item labels'
-
-            context 'without group level work item license' do
-              before do
-                stub_licensed_features(epics: false)
-              end
-
-              it_behaves_like 'a mutation that returns top-level errors', errors: [
-                "The resource that you are attempting to access does not exist or you don't have " \
-                  "permission to perform this action"
-              ]
-            end
           end
         end
       end
@@ -344,25 +284,10 @@ RSpec.describe 'Update a work item', feature_category: :team_planning do
           it_behaves_like 'mutation updating work item labels'
         end
 
-        context 'when work item belongs directly to the group', if: Gitlab.ee? do
+        context 'when work item belongs directly to the group' do
           let(:mutation_work_item) { group_work_item }
 
-          before do
-            stub_licensed_features(epics: true)
-          end
-
           it_behaves_like 'mutation updating work item labels'
-
-          context 'without group level work item license' do
-            before do
-              stub_licensed_features(epics: false)
-            end
-
-            it_behaves_like 'a mutation that returns top-level errors', errors: [
-              "The resource that you are attempting to access does not exist or you don't have " \
-                "permission to perform this action"
-            ]
-          end
         end
       end
 
@@ -527,7 +452,7 @@ RSpec.describe 'Update a work item', feature_category: :team_planning do
       context 'when dates were already set for the work item' do
         before do
           (work_item.dates_source || work_item.build_dates_source)
-            .update!(start_date: start_date, start_date_fixed: start_date, due_date: due_date, due_date_fixed: due_date)
+            .update!(start_date: start_date, due_date: due_date)
         end
 
         context 'when updating only start date' do
@@ -595,7 +520,7 @@ RSpec.describe 'Update a work item', feature_category: :team_planning do
       let(:relative_range) { [valid_child1, valid_child2].map(&:parent_link).map(&:relative_position) }
 
       let(:invalid_relative_position_error) do
-        WorkItems::Callbacks::Hierarchy::INVALID_RELATIVE_POSITION_ERROR
+        WorkItems::Widgets::HierarchyService::UpdateService::INVALID_RELATIVE_POSITION_ERROR
       end
 
       shared_examples 'updates work item parent and sets the relative position' do
@@ -989,7 +914,6 @@ RSpec.describe 'Update a work item', feature_category: :team_planning do
           end
 
           context 'when conversion is not permitted' do
-            let_it_be(:work_item) { create(:work_item, :task, project: project) }
             let_it_be(:issue) { create(:work_item, project: project) }
             let_it_be(:link) { create(:parent_link, work_item_parent: issue, work_item: work_item) }
 
@@ -1769,25 +1693,10 @@ RSpec.describe 'Update a work item', feature_category: :team_planning do
             it_behaves_like 'mutation updating work item with time tracking data'
           end
 
-          context 'when work item belongs to a group', if: Gitlab.ee? do
+          context 'when work item belongs to a group' do
             let(:mutation_work_item) { group_work_item }
 
-            before do
-              stub_licensed_features(epics: true)
-            end
-
             it_behaves_like 'mutation updating work item with time tracking data'
-
-            context 'without group level work item license' do
-              before do
-                stub_licensed_features(epics: false)
-              end
-
-              it_behaves_like 'a mutation that returns top-level errors', errors: [
-                "The resource that you are attempting to access does not exist or you don't have " \
-                  "permission to perform this action"
-              ]
-            end
           end
 
           context 'when time estimate format is invalid' do
@@ -1820,25 +1729,10 @@ RSpec.describe 'Update a work item', feature_category: :team_planning do
             it_behaves_like 'mutation updating work item with time tracking data'
           end
 
-          context 'when work item belongs to a group', if: Gitlab.ee? do
+          context 'when work item belongs to a group' do
             let(:mutation_work_item) { group_work_item }
 
-            before do
-              stub_licensed_features(epics: true)
-            end
-
             it_behaves_like 'mutation updating work item with time tracking data'
-
-            context 'without group level work item license' do
-              before do
-                stub_licensed_features(epics: false)
-              end
-
-              it_behaves_like 'a mutation that returns top-level errors', errors: [
-                "The resource that you are attempting to access does not exist or you don't have " \
-                  "permission to perform this action"
-              ]
-            end
           end
         end
       end
@@ -1904,15 +1798,7 @@ RSpec.describe 'Update a work item', feature_category: :team_planning do
 
       let_it_be(:contact) { create(:contact, group: project.group) }
 
-      context 'when adding contacts' do
-        let(:input) do
-          {
-            'crmContactsWidget' => {
-              'contactIds' => [global_id_of(contact)]
-            }
-          }
-        end
-
+      shared_examples 'mutation updating work item contacts' do
         it 'updates contacts' do
           expect do
             post_graphql_mutation(mutation, current_user: current_user)
@@ -1925,8 +1811,8 @@ RSpec.describe 'Update a work item', feature_category: :team_planning do
             'contacts' => {
               'nodes' => [
                 {
-                  'id' => global_id_of(contact).to_s,
-                  'firstName' => contact.first_name
+                  'id' => expected_result[:id],
+                  'firstName' => expected_result[:first_name]
                 }
               ]
             },
@@ -1935,31 +1821,24 @@ RSpec.describe 'Update a work item', feature_category: :team_planning do
         end
       end
 
-      context 'when clearing contacts' do
-        before do
-          mutation_work_item.issue_customer_relations_contacts.create!(contact: contact)
-        end
-
-        let(:input) do
-          {
-            'crmContactsWidget' => {
-              'contactIds' => []
+      context 'when updating the contacts' do
+        context 'when mutating the work item' do
+          let(:input) do
+            {
+              'crmContactsWidget' => {
+                'contactIds' => [global_id_of(contact)]
+              }
             }
-          }
-        end
+          end
 
-        it 'updates contacts' do
-          expect do
-            post_graphql_mutation(mutation, current_user: current_user)
-            mutation_work_item.reload
-          end.to change { mutation_work_item.customer_relations_contacts.to_a }.from([contact]).to([])
+          let(:expected_result) do
+            {
+              id: global_id_of(contact).to_s,
+              first_name: contact.first_name
+            }
+          end
 
-          expect(mutation_response['workItem']['widgets']).to include(
-            'contacts' => {
-              'nodes' => []
-            },
-            'type' => 'CRM_CONTACTS'
-          )
+          it_behaves_like 'mutation updating work item contacts'
         end
       end
     end

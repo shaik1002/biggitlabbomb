@@ -11,7 +11,7 @@ class ProfilesController < Profiles::ApplicationController
   end
 
   feature_category :user_profile, [:reset_incoming_email_token, :reset_feed_token,
-    :reset_static_object_token, :update_username, :join_early_access_program]
+    :reset_static_object_token, :update_username]
 
   def reset_incoming_email_token
     Users::UpdateService.new(current_user, user: @user).execute! do |user|
@@ -24,13 +24,11 @@ class ProfilesController < Profiles::ApplicationController
   end
 
   def reset_feed_token
-    service = Users::ResetFeedTokenService.new(current_user, user: @user).execute
-
-    if service.success?
-      flash[:notice] = service.message
-    else
-      flash[:alert] = service.message
+    Users::UpdateService.new(current_user, user: @user).execute! do |user|
+      user.reset_feed_token!
     end
+
+    flash[:notice] = s_('Profiles|Feed token was successfully reset')
 
     redirect_to user_settings_personal_access_tokens_path
   end
@@ -78,35 +76,34 @@ class ProfilesController < Profiles::ApplicationController
 
   def user_params_attributes
     [
-      :achievements_enabled,
       :avatar,
       :bio,
-      :bluesky,
-      :commit_email,
       :discord,
       :email,
+      :role,
       :gitpod_enabled,
       :hide_no_password,
       :hide_no_ssh_key,
       :hide_project_limit,
-      :include_private_contributions,
-      :job_title,
       :linkedin,
       :location,
       :mastodon,
       :name,
-      :organization,
-      :private_profile,
-      :pronouns,
-      :pronunciation,
       :public_email,
-      :role,
+      :commit_email,
       :skype,
-      :timezone,
       :twitter,
       :username,
-      :validation_password,
       :website_url,
+      :organization,
+      :private_profile,
+      :include_private_contributions,
+      :achievements_enabled,
+      :timezone,
+      :job_title,
+      :pronouns,
+      :pronunciation,
+      :validation_password,
       { status: [:emoji, :message, :availability, :clear_status_after] }
     ]
   end
@@ -116,4 +113,4 @@ class ProfilesController < Profiles::ApplicationController
   end
 end
 
-ProfilesController.prepend_mod_with('ProfilesController')
+ProfilesController.prepend_mod

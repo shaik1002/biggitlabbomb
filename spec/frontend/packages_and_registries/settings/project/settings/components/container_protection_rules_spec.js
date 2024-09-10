@@ -5,10 +5,9 @@ import { mountExtended, extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { getBinding } from 'helpers/vue_mock_directive';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
 import ContainerProtectionRuleForm from '~/packages_and_registries/settings/project/components/container_protection_rule_form.vue';
 import ContainerProtectionRules from '~/packages_and_registries/settings/project/components/container_protection_rules.vue';
-import SettingsSection from '~/vue_shared/components/settings/settings_section.vue';
+import SettingsBlock from '~/packages_and_registries/shared/components/settings_block.vue';
 import ContainerProtectionRuleQuery from '~/packages_and_registries/settings/project/graphql/queries/get_container_protection_rules.query.graphql';
 import deleteContainerProtectionRuleMutation from '~/packages_and_registries/settings/project/graphql/mutations/delete_container_protection_rule.mutation.graphql';
 import updateContainerProtectionRuleMutation from '~/packages_and_registries/settings/project/graphql/mutations/update_container_registry_protection_rule.mutation.graphql';
@@ -31,7 +30,7 @@ describe('Container protection rules project settings', () => {
 
   const $toast = { show: jest.fn() };
 
-  const findSettingsBlock = () => wrapper.findComponent(SettingsSection);
+  const findSettingsBlock = () => wrapper.findComponent(SettingsBlock);
   const findTable = () =>
     extendedWrapper(wrapper.findByRole('table', { name: /protected containers/i }));
   const findTableBody = () => extendedWrapper(findTable().findAllByRole('rowgroup').at(1));
@@ -47,8 +46,7 @@ describe('Container protection rules project settings', () => {
   const mountComponent = (mountFn = mountExtended, provide = defaultProvidedValues, config) => {
     wrapper = mountFn(ContainerProtectionRules, {
       stubs: {
-        SettingsSection,
-        CrudComponent,
+        SettingsBlock,
         GlModal: true,
       },
       mocks: {
@@ -635,8 +633,8 @@ describe('Container protection rules project settings', () => {
         expect(findAddProtectionRuleForm().isVisible()).toBe(true);
       });
 
-      it('hides the button "add protection rule"', () => {
-        expect(findAddProtectionRuleFormSubmitButton().exists()).toBe(false);
+      it('disables the button "add protection rule"', () => {
+        expect(findAddProtectionRuleFormSubmitButton().attributes('disabled')).toBeDefined();
       });
     });
   });

@@ -2,9 +2,8 @@ import { highlightPlugins } from '~/highlight_js/plugins';
 import { highlightContent } from '~/highlight_js';
 import { LINES_PER_CHUNK, NEWLINE, ROUGE_TO_HLJS_LANGUAGE_MAP } from '../constants';
 
-export const splitByLineBreaks = (content = '') => content.split(/\r?\n/);
+const splitByLineBreaks = (content = '') => content.split(/\r?\n/);
 
-// eslint-disable-next-line max-params
 const createChunk = (language, rawChunkLines, highlightedChunkLines = [], startingFrom = 0) => ({
   highlightedContent: highlightedChunkLines.join(NEWLINE),
   rawContent: rawChunkLines.join(NEWLINE),

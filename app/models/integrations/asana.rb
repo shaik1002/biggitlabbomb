@@ -11,10 +11,10 @@ module Integrations
     field :api_key,
       type: :password,
       title: 'API key',
-      help: -> { s_('AsanaService|User personal access token. User must have access to the task. All comments are attributed to this user.') },
+      help: -> { s_('AsanaService|User Personal Access Token. User must have access to the task. All comments are attributed to this user.') },
       non_empty_password_title: -> { s_('ProjectService|Enter new API key') },
       non_empty_password_help: -> { s_('ProjectService|Leave blank to use your current API key.') },
-      placeholder: '0/68a9e79b868c6789e79a124c30b0', # Example personal access token from Asana docs
+      placeholder: '0/68a9e79b868c6789e79a124c30b0', # Example Personal Access Token from Asana docs
       description: -> { s_('User API token. The user must have access to the task. All comments are attributed to this user.') },
       required: true
 
@@ -32,7 +32,8 @@ module Integrations
     end
 
     def self.help
-      build_help_page_url('user/project/integrations/asana', s_('Add commit messages as comments to Asana tasks.'))
+      docs_link = ActionController::Base.helpers.link_to _('Learn more.'), Rails.application.routes.url_helpers.help_page_url('user/project/integrations/asana'), target: '_blank', rel: 'noopener noreferrer'
+      s_('Add commit messages as comments to Asana tasks. %{docs_link}').html_safe % { docs_link: docs_link.html_safe }
     end
 
     def self.to_param
@@ -68,7 +69,7 @@ module Integrations
       # - close/s/d
       # - closing
       issue_finder = %r{(?:https://app\.asana\.com/\d+/\w+/(\w+)|#(\w+))}i
-      proceded_keyword_finder = %r{(fix\w*|clos[ei]\w*)\s*\z}i
+      proceded_keyword_finder = %r{(fix\w*|clos[ei]\w*+)}i
 
       message.split(issue_finder).each_slice(2) do |prepended_text, task_id|
         next unless task_id

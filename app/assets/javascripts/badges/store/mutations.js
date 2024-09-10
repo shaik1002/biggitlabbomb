@@ -13,7 +13,7 @@ const reorderBadges = (badges) =>
 export default {
   [types.RECEIVE_NEW_BADGE](state, newBadge) {
     Object.assign(state, {
-      badgeInAddForm: {},
+      badgeInAddForm: null,
       badges: reorderBadges(state.badges.concat(newBadge)),
       isSaving: false,
       renderedBadge: null,
@@ -38,7 +38,7 @@ export default {
       return badge;
     });
     Object.assign(state, {
-      badgeInEditForm: {},
+      badgeInEditForm: null,
       badges,
       isEditing: false,
       isSaving: false,
@@ -71,6 +71,7 @@ export default {
     Object.assign(state, {
       kind: data.kind, // project or group
       apiEndpointUrl: data.apiEndpointUrl,
+      docsUrl: data.docsUrl,
       isLoading: true,
     });
   },
@@ -131,7 +132,7 @@ export default {
   },
   [types.STOP_EDITING](state) {
     Object.assign(state, {
-      badgeInEditForm: {},
+      badgeInEditForm: null,
       isEditing: false,
       renderedBadge: null,
     });

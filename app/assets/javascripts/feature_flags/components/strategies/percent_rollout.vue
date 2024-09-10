@@ -51,7 +51,7 @@ export default {
     :state="isValid"
   >
     <template #default="{ inputId }">
-      <div class="gl-flex gl-items-center">
+      <div class="gl-display-flex gl-align-items-center">
         <gl-form-input
           :id="inputId"
           :value="percentage"

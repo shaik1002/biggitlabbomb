@@ -42,7 +42,6 @@ export default {
     },
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     activeBoardItem: {
       query: activeBoardItemQuery,
       variables() {
@@ -51,7 +50,6 @@ export default {
         };
       },
     },
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     selectedBoardItems: {
       query: selectedBoardItemsQuery,
     },
@@ -140,12 +138,12 @@ export default {
   <li
     :class="[
       {
-        'multi-select gl-border-blue-200 gl-bg-blue-50': multiSelectVisible,
+        'multi-select gl-bg-blue-50 gl-border-blue-200': multiSelectVisible,
         'gl-cursor-grab': isDraggable,
         'is-disabled': isDisabled,
         'is-active gl-bg-blue-50': isActive,
         'gl-cursor-not-allowed gl-bg-gray-10': item.isLoading,
-        'gl-border-4 gl-pl-4 gl-border-l-solid': itemColor,
+        'gl-pl-4 gl-border-l-solid gl-border-4': itemColor,
       },
     ]"
     :index="index"
@@ -154,7 +152,7 @@ export default {
     :data-item-path="item.referencePath"
     :style="cardStyle"
     data-testid="board-card"
-    class="board-card gl-relative gl-mb-3 gl-rounded-base gl-p-4 gl-leading-normal"
+    class="board-card gl-p-4 gl-rounded-base gl-leading-normal gl-relative gl-mb-3"
     @click="toggleIssue($event)"
   >
     <board-card-inner

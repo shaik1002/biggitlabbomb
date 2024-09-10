@@ -59,6 +59,7 @@ import {
   WORK_ITEM_TYPE_ENUM_INCIDENT,
   WORK_ITEM_TYPE_ENUM_ISSUE,
   WORK_ITEM_TYPE_ENUM_TASK,
+  WORK_ITEM_TYPE_ENUM_TEST_CASE,
 } from '~/work_items/constants';
 import {
   TOKEN_TYPE_ASSIGNEE,
@@ -116,8 +117,6 @@ describe('CE IssuesListApp component', () => {
     hasIssuableHealthStatusFeature: true,
     hasIssueWeightsFeature: true,
     hasIterationsFeature: true,
-    hasOkrsFeature: false,
-    hasQualityManagementFeature: false,
     hasScopedLabelsFeature: true,
     initialEmail: 'email@example.com',
     initialSort: CREATED_DESC,
@@ -509,9 +508,16 @@ describe('CE IssuesListApp component', () => {
     describe('filter tokens', () => {
       it('groups url params of assignee and author', () => {
         setWindowLocation(locationSearch);
-        wrapper = mountComponent();
+        wrapper = mountComponent({ provide: { glFeatures: { groupMultiSelectTokens: true } } });
 
         expect(findIssuableList().props('initialFilterValue')).toEqual(groupedFilteredTokens);
+      });
+
+      it('is set from the url params', () => {
+        setWindowLocation(locationSearch);
+        wrapper = mountComponent();
+
+        expect(findIssuableList().props('initialFilterValue')).toEqual(filteredTokens);
       });
     });
   });
@@ -1011,21 +1017,6 @@ describe('CE IssuesListApp component', () => {
           query: expect.objectContaining({ first_page_size: 50 }),
         });
       });
-
-      it('calls the query with correct variables', async () => {
-        wrapper = mountComponent();
-
-        findIssuableList().vm.$emit('page-size-change', 50);
-        await nextTick();
-
-        expect(mockIssuesQueryResponse).toHaveBeenCalledWith(
-          expect.objectContaining({
-            afterCursor: undefined,
-            beforeCursor: undefined,
-            firstPageSize: 50,
-          }),
-        );
-      });
     });
   });
 
@@ -1053,10 +1044,11 @@ describe('CE IssuesListApp component', () => {
       wrapper = mountComponent();
     });
 
-    it('fetches default work item types', () => {
+    it('fetches issue, incident, test case, and task types', () => {
       const types = [
         WORK_ITEM_TYPE_ENUM_ISSUE,
         WORK_ITEM_TYPE_ENUM_INCIDENT,
+        WORK_ITEM_TYPE_ENUM_TEST_CASE,
         WORK_ITEM_TYPE_ENUM_TASK,
       ];
 
@@ -1126,10 +1118,9 @@ describe('CE IssuesListApp component', () => {
       });
 
       it('selects active issuable', () => {
-        expect(findIssuableList().props('activeIssuable')).toEqual({
-          ...getIssuesQueryResponse.data.project.issues.nodes[0],
-          fullPath: defaultProvide.fullPath,
-        });
+        expect(findIssuableList().props('activeIssuable')).toEqual(
+          getIssuesQueryResponse.data.project.issues.nodes[0],
+        );
       });
 
       describe('when closing the drawer', () => {
@@ -1164,7 +1155,7 @@ describe('CE IssuesListApp component', () => {
         it('updates the assignees field of active issuable', async () => {
           const {
             data: { workItem },
-          } = workItemResponseFactory({ id: 'gid://gitlab/WorkItem/123456', iid: '789' });
+          } = workItemResponseFactory({ iid: '789' });
           findWorkItemDrawer().vm.$emit('work-item-updated', workItem);
 
           await waitForPromises();
@@ -1180,7 +1171,7 @@ describe('CE IssuesListApp component', () => {
         it('updates the labels field of active issuable', async () => {
           const {
             data: { workItem },
-          } = workItemResponseFactory({ id: 'gid://gitlab/WorkItem/123456', iid: '789' });
+          } = workItemResponseFactory({ iid: '789' });
           findWorkItemDrawer().vm.$emit('work-item-updated', workItem);
 
           await waitForPromises();
@@ -1196,7 +1187,6 @@ describe('CE IssuesListApp component', () => {
 
         it('updates the upvotes count of active issuable', async () => {
           const { workItem } = workItemByIidResponseFactory({
-            id: 'gid://gitlab/WorkItem/123456',
             iid: '789',
             awardEmoji: {
               ...mockAwardsWidget,
@@ -1214,7 +1204,7 @@ describe('CE IssuesListApp component', () => {
         it('updates the milestone field of active issuable', async () => {
           const {
             data: { workItem },
-          } = workItemResponseFactory({ id: 'gid://gitlab/WorkItem/123456', iid: '789' });
+          } = workItemResponseFactory({ iid: '789' });
           findWorkItemDrawer().vm.$emit('work-item-updated', workItem);
 
           await waitForPromises();
@@ -1230,11 +1220,7 @@ describe('CE IssuesListApp component', () => {
         it('updates the title and confidential state of active issuable', async () => {
           const {
             data: { workItem },
-          } = workItemResponseFactory({
-            id: 'gid://gitlab/WorkItem/123456',
-            iid: '789',
-            confidential: true,
-          });
+          } = workItemResponseFactory({ iid: '789', confidential: true });
           findWorkItemDrawer().vm.$emit('work-item-updated', workItem);
 
           await waitForPromises();

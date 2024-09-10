@@ -88,6 +88,7 @@ function createComponent({
   slots = defaultSlots,
   scopedSlots = defaultScopedSlots,
   mountFn = mount,
+  groupMultiSelectTokens = false,
 } = {}) {
   return mountFn(BaseToken, {
     propsData: {
@@ -95,6 +96,9 @@ function createComponent({
       ...props,
     },
     provide: {
+      glFeatures: {
+        groupMultiSelectTokens,
+      },
       portalName: 'fake target',
       alignSuggestions: jest.fn(),
       suggestionsListClass: () => 'custom-class',
@@ -166,6 +170,7 @@ describe('BaseToken', () => {
             suggestions: mockLabels,
             getActiveTokenValue: mockGetActiveTokenValue,
           },
+          groupMultiSelectTokens: true,
         });
 
         const lastTitle = mockLabels[mockLabels.length - 1].title;

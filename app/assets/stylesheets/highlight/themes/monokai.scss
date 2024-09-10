@@ -8,7 +8,6 @@
 */
 $monokai-bg: #272822;
 $monokai-border: #555;
-$monokai-code-mark: #113953;
 $monokai-text-color: #f8f8f2;
 $monokai-line-num-color: rgba(255, 255, 255, 0.3);
 $monokai-line-num-color-new: #707565;
@@ -276,7 +275,7 @@ $monokai-gh: #75715e;
   // mark lines via mark_multiple_lines
   pre.monokai code {
     .selected-inline-section-marker {
-      background: $monokai-code-mark !important;
+      background: #113953 !important;
     }
 
     .inline-section-marker {

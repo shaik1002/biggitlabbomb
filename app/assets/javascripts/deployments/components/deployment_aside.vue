@@ -59,7 +59,7 @@ export default {
 };
 </script>
 <template>
-  <aside v-if="!loading" class="gl-ml-4 gl-mt-4 gl-border-l-0">
+  <aside v-if="!loading" class="gl-mt-4 gl-border-l-0 gl-ml-4">
     <gl-button
       v-if="hasUrl"
       category="secondary"
@@ -72,7 +72,7 @@ export default {
       {{ $options.i18n.openUrl }}
     </gl-button>
 
-    <aside-item class="gl-mt-8 gl-border-b-1 gl-border-gray-50 gl-pb-5 gl-border-b-solid">
+    <aside-item class="gl-mt-8 gl-pb-5 gl-border-b-solid gl-border-b-1 gl-border-gray-50">
       <template #header>
         {{ $options.i18n.triggerer }}
       </template>

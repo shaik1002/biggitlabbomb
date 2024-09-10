@@ -22,7 +22,7 @@ describe('Merge requests query component', () => {
       data: {
         currentUser: {
           id: 1,
-          mergeRequests: {
+          reviewRequestedMergeRequests: {
             count: 0,
             pageInfo: {
               __typename: 'PageInfo',
@@ -40,7 +40,7 @@ describe('Merge requests query component', () => {
       data: {
         currentUser: {
           id: 1,
-          mergeRequests: {
+          assignedMergeRequests: {
             count: 0,
             pageInfo: {
               hasNextPage: false,
@@ -77,7 +77,7 @@ describe('Merge requests query component', () => {
 
     await waitForPromises();
 
-    expect(reviewerQueryMock).toHaveBeenCalledWith({ perPage: 20, state: 'opened' });
+    expect(reviewerQueryMock).toHaveBeenCalledWith({ perPage: 3, state: 'opened' });
   });
 
   it('calls assigneeQueryMock for assignee query', async () => {
@@ -85,7 +85,7 @@ describe('Merge requests query component', () => {
 
     await waitForPromises();
 
-    expect(assigneeQueryMock).toHaveBeenCalledWith({ perPage: 20, state: 'opened' });
+    expect(assigneeQueryMock).toHaveBeenCalledWith({ perPage: 3, state: 'opened' });
   });
 
   it.each([

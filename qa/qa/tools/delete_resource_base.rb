@@ -58,46 +58,27 @@ module QA
       # Deletes a list of resources
       #
       # @param [Array<Hash>] resources
-      # @param [Boolean] wait until the end of the script to verify deletions. used for deletions that take a long time
-      # @param [Hash] API call options
       # @return [Array<String, Hash>] results
-      def delete_resources(resources, delayed_verification = false, **options)
+      def delete_resources(resources)
         logger.info("Deleting #{resources.length} #{@type}s...\n")
 
-        unverified_deletions = []
-        results = []
-
-        resources.each do |resource|
+        resources.filter_map do |resource|
           path = resource_path(resource)
           logger.info("Deleting #{@type} #{path}...")
 
-          result = delete_resource(resource, delayed_verification, **options)
-
-          if result.is_a?(Array)
-            results.append(result)
-          else
-            unverified_deletions << result
-          end
+          delete_resource(resource)
         end
-
-        results.concat(verify_deletions(unverified_deletions)) unless unverified_deletions.empty?
-
-        results
       end
 
       # Deletes a given resource
       #
       # @param [<Hash>] resource
-      # @param [Boolean] wait until the end of the script to verify deletion
-      # @param [Hash] API call options
       # @return [Array<String, Hash>] results
-      def delete_resource(resource, delayed_verification = false, **options)
+      def delete_resource(resource)
         # If delayed deletion is not enabled, resource will be permanently deleted
-        response = delete(resource_request(resource, **options))
+        response = delete(resource_request(resource))
 
         if success?(response&.code) || response.include?("already marked for deletion")
-          return resource if delayed_verification
-
           wait_for_resource_deletion(resource)
 
           return log_permanent_deletion(resource) if permanently_deleted?(resource)
@@ -319,27 +300,12 @@ module QA
           personal_access_token: token)
       end
 
-      def verify_deletions(unverified_deletions)
-        logger.info('Verifying deletions...')
-
-        unverified_deletions.filter_map do |resource|
-          wait_for_resource_deletion(resource, permanent: true)
-          response = get(resource_request(resource))
-
-          if response&.code == HTTP_STATUS_NOT_FOUND
-            log_permanent_deletion(resource)
-          else
-            log_failure(resource, response)
-          end
-        end
-      end
-
       # Wait for resource to be deleted (resource cannot be found or resource has been marked for deletion)
       #
       # @param resource [Hash] Resource to wait for deletion for
       # @return [Boolean] Whether the resource was deleted
       def wait_for_resource_deletion(resource, permanent = false)
-        wait_until(max_duration: 160, sleep_interval: 1, raise_on_failure: false) do
+        wait_until(max_duration: 60, sleep_interval: 1, raise_on_failure: false) do
           response = get(resource_request(resource))
           deleted = response&.code == HTTP_STATUS_NOT_FOUND
 

@@ -5,7 +5,6 @@ import { ASC } from '~/notes/constants';
 import { __ } from '~/locale';
 import { clearDraft } from '~/lib/utils/autosave';
 import DiscussionReplyPlaceholder from '~/notes/components/discussion_reply_placeholder.vue';
-import ResolveDiscussionButton from '~/notes/components/discussion_resolve_button.vue';
 import createNoteMutation from '../../graphql/notes/create_work_item_note.mutation.graphql';
 import workItemByIidQuery from '../../graphql/work_item_by_iid.query.graphql';
 import { TRACKING_CATEGORY_SHOW, i18n } from '../../constants';
@@ -22,7 +21,6 @@ export default {
     WorkItemNoteSignedOut,
     WorkItemCommentLocked,
     WorkItemCommentForm,
-    ResolveDiscussionButton,
   },
   mixins: [Tracking.mixin()],
   props: {
@@ -91,26 +89,6 @@ export default {
       required: false,
       default: false,
     },
-    isDiscussionResolved: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    isDiscussionResolvable: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    isResolving: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    hasReplies: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
   data() {
     return {
@@ -166,12 +144,12 @@ export default {
     timelineContentClass() {
       return {
         'timeline-content': true,
-        '!gl-border-0 !gl-pl-0': !this.addPadding,
+        'gl-border-0! gl-pl-0!': !this.addPadding,
       };
     },
     parentClass() {
       return {
-        'gl-relative gl-flex gl-items-start gl-flex-nowrap': !this.isEditing,
+        'gl-relative gl-display-flex gl-align-items-flex-start gl-flex-nowrap': !this.isEditing,
       };
     },
     isProjectArchived() {
@@ -190,14 +168,11 @@ export default {
       return {
         'timeline-entry note-form': this.isNewDiscussion,
         // eslint-disable-next-line @gitlab/require-i18n-strings
-        '!gl-pb-5 note note-wrapper note-comment discussion-reply-holder clearfix':
+        'note note-wrapper note-comment discussion-reply-holder gl-border-t-0! clearfix':
           !this.isNewDiscussion,
-        'is-replying': this.isEditing,
+        'gl-pt-0! is-replying': this.isEditing,
         'internal-note': this.isInternalThread,
       };
-    },
-    resolveDiscussionTitle() {
-      return this.isDiscussionResolved ? __('Unresolve thread') : __('Resolve thread');
     },
   },
   watch: {
@@ -308,12 +283,8 @@ export default {
             :comment-button-text="commentButtonText"
             :is-discussion-locked="isDiscussionLocked"
             :is-work-item-confidential="isWorkItemConfidential"
-            :is-discussion-resolved="isDiscussionResolved"
-            :is-discussion-resolvable="isDiscussionResolvable"
             :full-path="fullPath"
-            :has-replies="hasReplies"
             :work-item-iid="workItemIid"
-            @toggleResolveDiscussion="$emit('resolve')"
             @submitForm="updateWorkItem"
             @cancelEditing="cancelEditing"
             @error="$emit('error', $event)"
@@ -323,16 +294,6 @@ export default {
             data-testid="note-reply-textarea"
             @focus="showReplyForm"
           />
-
-          <div v-if="!isNewDiscussion && !isEditing" class="discussion-actions">
-            <resolve-discussion-button
-              v-if="isDiscussionResolvable"
-              data-testid="resolve-discussion-button"
-              :is-resolving="isResolving"
-              :button-title="resolveDiscussionTitle"
-              @onClick="$emit('resolve')"
-            />
-          </div>
         </div>
       </div>
     </div>

@@ -68,44 +68,12 @@ RSpec.describe Namespace::TraversalHierarchy, type: :model, feature_category: :g
       end
     end
 
-    it_behaves_like 'locked row', nowait: true do
+    it_behaves_like 'locked row' do
       let(:recorded_queries) { ActiveRecord::QueryRecorder.new }
       let(:row) { root }
 
       before do
         recorded_queries.record { subject }
-      end
-    end
-
-    context 'when record is already locked' do
-      before do
-        msg = %(PG::LockNotAvailable: ERROR:  could not obtain lock on row in relation "namespaces"\n)
-        allow(root).to receive(:lock!).and_raise(ActiveRecord::LockWaitTimeout.new(msg))
-      end
-
-      it { expect { subject }.to raise_error(ActiveRecord::LockWaitTimeout) }
-
-      it 'increment db_nowait counter' do
-        expect do
-          subject
-        rescue StandardError
-          nil
-        end.to change { db_nowait_total('Namespace#sync_traversal_ids!') }.by(1)
-      end
-    end
-
-    context 'when sync_traversal_ids_nowait feature flag is disabled' do
-      before do
-        stub_feature_flags(sync_traversal_ids_nowait: false)
-      end
-
-      it_behaves_like 'locked row', nowait: false do
-        let(:recorded_queries) { ActiveRecord::QueryRecorder.new }
-        let(:row) { root }
-
-        before do
-          recorded_queries.record { subject }
-        end
       end
     end
 
@@ -124,12 +92,6 @@ RSpec.describe Namespace::TraversalHierarchy, type: :model, feature_category: :g
         end.to change { db_deadlock_total('Namespace#sync_traversal_ids!') }.by(1)
       end
     end
-  end
-
-  def db_nowait_total(source)
-    Gitlab::Metrics
-      .counter(:db_nowait, 'Counts the times we triggered NOWAIT on a database lock operation')
-      .get(source: source)
   end
 
   def db_deadlock_total(source)

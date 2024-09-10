@@ -75,20 +75,20 @@ describe('Blob Header Default Actions', () => {
       it('renders the WebIdeLink component with the correct props', async () => {
         const { ideEditPath, editBlobPath, gitpodBlobUrl, pipelineEditorPath } = Blob;
         const showForkSuggestion = false;
-        const showWebIdeForkSuggestion = false;
-        await createComponent({ propsData: { showForkSuggestion, showWebIdeForkSuggestion } });
+        await createComponent({ propsData: { showForkSuggestion } });
 
         expect(findWebIdeLink().props()).toMatchObject({
           showEditButton: true,
           editUrl: editBlobPath,
           webIdeUrl: ideEditPath,
           needsToFork: showForkSuggestion,
-          needsToForkWithWebIde: showWebIdeForkSuggestion,
           showPipelineEditorButton: Boolean(pipelineEditorPath),
           pipelineEditorUrl: pipelineEditorPath,
           gitpodUrl: gitpodBlobUrl,
           showGitpodButton: applicationInfoMock.gitpodEnabled,
           gitpodEnabled: userInfoMock.currentUser.gitpodEnabled,
+          userPreferencesGitpodPath: userInfoMock.currentUser.preferencesGitpodPath,
+          userProfileEnableGitpodPath: userInfoMock.currentUser.profileEnableGitpodPath,
         });
       });
 
@@ -181,12 +181,6 @@ describe('Blob Header Default Actions', () => {
       createComponent({ propsData: { isBinary: true } });
 
       expect(findDefaultActions().props('isBinary')).toBe(true);
-    });
-
-    it('passes the `showBlobSize` prop to `blobFilepath`', () => {
-      const showBlobSize = false;
-      createComponent({ propsData: { showBlobSize } });
-      expect(findBlobFilePath().props('showBlobSize')).toBe(showBlobSize);
     });
   });
 

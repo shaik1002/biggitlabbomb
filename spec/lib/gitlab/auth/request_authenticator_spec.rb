@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Auth::RequestAuthenticator, feature_category: :system_access do
+RSpec.describe Gitlab::Auth::RequestAuthenticator do
   include DependencyProxyHelpers
 
   let(:env) do
@@ -14,7 +14,7 @@ RSpec.describe Gitlab::Auth::RequestAuthenticator, feature_category: :system_acc
 
   let(:request) { ActionDispatch::Request.new(env) }
 
-  subject(:request_authenticator) { described_class.new(request) }
+  subject { described_class.new(request) }
 
   describe '#user' do
     let_it_be(:sessionless_user) { build(:user) }
@@ -133,11 +133,6 @@ RSpec.describe Gitlab::Auth::RequestAuthenticator, feature_category: :system_acc
     let_it_be(:lfs_token_user) { build(:user) }
     let_it_be(:basic_auth_access_token_user) { build(:user) }
     let_it_be(:basic_auth_password_user) { build(:user) }
-
-    it 'raises if the request format is unknown' do
-      expect { request_authenticator.find_sessionless_user(:invalid_request_format) }
-        .to raise_error(ArgumentError, "Unknown request format")
-    end
 
     it 'returns dependency_proxy user first' do
       allow_any_instance_of(described_class).to receive(:find_user_from_dependency_proxy_token)
@@ -368,32 +363,6 @@ RSpec.describe Gitlab::Auth::RequestAuthenticator, feature_category: :system_acc
     end
   end
 
-  describe '#find_user_from_job_token_basic_auth' do
-    let_it_be(:user) { create(:user) }
-    let_it_be(:job) { create(:ci_build, user: user, status: :running) }
-
-    before do
-      allow(subject).to receive(:has_basic_credentials?).and_return(true)
-      allow(subject).to receive(:user_name_and_password).and_return([::Gitlab::Auth::CI_JOB_USER, job.token])
-    end
-
-    context 'when feature flag request_authenticator_exclude_job_token_basic_auth is enabled' do
-      it 'does not find a user' do
-        expect(subject.user([:api])).to eq nil
-      end
-    end
-
-    context 'when feature flag request_authenticator_exclude_job_token_basic_auth is disabled' do
-      before do
-        stub_feature_flags(request_authenticator_exclude_job_token_basic_auth: false)
-      end
-
-      it 'finds a job token user' do
-        expect(subject.user([:api])).to eq user
-      end
-    end
-  end
-
   describe '#find_user_from_job_token' do
     let_it_be(:user) { build(:user) }
     let_it_be(:job) { build(:ci_build, user: user, status: :running) }
@@ -409,13 +378,13 @@ RSpec.describe Gitlab::Auth::RequestAuthenticator, feature_category: :system_acc
       end
 
       it 'tries to find the user' do
-        expect(subject.find_sessionless_user(:api)).to eq user
+        expect(subject.find_sessionless_user([:api])).to eq user
       end
 
       it 'returns nil if the job is not running' do
         job.status = :success
 
-        expect(subject.find_sessionless_user(:api)).to be_blank
+        expect(subject.find_sessionless_user([:api])).to be_blank
       end
     end
 
@@ -427,7 +396,7 @@ RSpec.describe Gitlab::Auth::RequestAuthenticator, feature_category: :system_acc
       it 'does not search for job users' do
         expect(::Ci::Build).not_to receive(:find_by_token)
 
-        expect(subject.find_sessionless_user(:api)).to be_nil
+        expect(subject.find_sessionless_user([:api])).to be_nil
       end
     end
   end

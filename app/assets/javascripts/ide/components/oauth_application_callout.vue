@@ -49,7 +49,7 @@ export default {
       this.isModalVisible = false;
     },
     getRedirectUrl() {
-      return new URL(this.redirectUrlPath, gon.gitlab_url);
+      return new URL(this.redirectUrlPath, window.location.origin);
     },
   },
   i18n: I18N_WEB_IDE_OAUTH_APPLICATION_CALLOUT,

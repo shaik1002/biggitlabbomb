@@ -26,17 +26,9 @@ RSpec.describe Database::MarkMigrationService, feature_category: :database do
   describe '#execute' do
     subject(:execute) { service.execute }
 
-    def versions
-      if ::Gitlab.next_rails?
-        connection.schema_migration.versions.count { |v| v == version.to_s }
-      else
-        ActiveRecord::SchemaMigration.where(version: version).count
-      end
-    end
-
     it 'marks the migration as successful' do
       expect { execute }
-        .to change { versions }
+        .to change { ActiveRecord::SchemaMigration.where(version: version).count }
         .by(1)
 
       is_expected.to be_success
@@ -50,7 +42,7 @@ RSpec.describe Database::MarkMigrationService, feature_category: :database do
 
       it 'does not insert records' do
         expect { execute }
-          .not_to change { versions }
+          .not_to change { ActiveRecord::SchemaMigration.where(version: version).count }
       end
     end
 
@@ -64,7 +56,7 @@ RSpec.describe Database::MarkMigrationService, feature_category: :database do
 
       it 'does not insert records' do
         expect { execute }
-          .not_to change { versions }
+          .not_to change { ActiveRecord::SchemaMigration.where(version: version).count }
       end
     end
 

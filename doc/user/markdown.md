@@ -50,8 +50,6 @@ You can use GitLab Flavored Markdown in the following areas:
 You can also use other rich text files in GitLab. You might have to install a dependency
 to do so. For more information, see the [`gitlab-markup` gem project](https://gitlab.com/gitlab-org/gitlab-markup).
 
-Support for improvements to Markdown preview when using GitLab Flavored Markdown in the Web IDE is proposed in [issue 645](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/645).
-
 ### Differences between GitLab Flavored Markdown and standard Markdown
 
 <!--
@@ -87,13 +85,13 @@ The following features are not found in standard Markdown:
 
 The following features are extended from standard Markdown:
 
-| Standard Markdown                     | Extended Markdown in GitLab |
-|---------------------------------------|-----------------------------|
-| [Blockquotes](#blockquotes)           | [Multiline blockquotes](#multiline-blockquote) |
-| [Code blocks](#code-spans-and-blocks) | [Colored code and syntax highlighting](#syntax-highlighting) |
-| [Headings](#headings)                 | [Linkable heading IDs](#heading-ids-and-links) |
-| [Images](#images)                     | [Embedded videos](#videos) and [audio](#audio) |
-| [Links](#links)                       | [Automatically linking URLs](#url-auto-linking) |
+| Standard Markdown                     | Extended Markdown in GitLab                                                           |
+|---------------------------------------|---------------------------------------------------------------------------------------|
+| [Blockquotes](#blockquotes)           | [Multiline blockquotes](#multiline-blockquote)                                       |
+| [Code blocks](#code-spans-and-blocks) | [Colored code and syntax highlighting](#syntax-highlighting)         |
+| [Headings](#headings)                 | [Linkable heading IDs](#heading-ids-and-links)                                          |
+| [Images](#images)                     | [Embedded videos](#videos) and [audio](#audio)                                        |
+| [Links](#links)                       | [Automatically linking URLs](#url-auto-linking)                                       |
 
 ## Markdown and accessibility
 
@@ -220,7 +218,7 @@ do_this_and_do_that_and_another_thing
 but_emphasis is_desired _here_
 ```
 
-<!-- vale gitlab_base.Spelling = NO -->
+<!-- vale gitlab.Spelling = NO -->
 
 perform_complicated_task
 
@@ -228,7 +226,7 @@ do_this_and_do_that_and_another_thing
 
 but_emphasis is_desired _here_
 
-<!-- vale gitlab_base.Spelling = YES -->
+<!-- vale gitlab.Spelling = YES -->
 
 ---
 
@@ -427,12 +425,16 @@ Almost any URL you put into your text is auto-linked:
 - http://localhost:3000
 ```
 
+<!-- vale gitlab.Spelling = NO -->
+
 - <https://www.google.com>
 - <https://www.google.com>
 - <ftp://ftp.us.debian.org/debian/>
 - <a href="smb://foo/bar/baz/">smb://foo/bar/baz</a>
 - <a href="irc://irc.freenode.net">irc://irc.freenode.net</a>
 - <http://localhost:3000>
+
+<!-- vale gitlab.Spelling = YES -->
 
 ## Multimedia
 
@@ -651,14 +653,14 @@ For example:
 ```markdown
 1. First ordered list item
 
-  (Paragraph of first item.)
+  Paragraph of first item.
 
 1. Another item
 ```
 
 1. First ordered list item
 
-  (Paragraph of first item.)
+  Paragraph of first item.
 
 1. Another item
 
@@ -773,6 +775,14 @@ that spans multiple lines,
 you can quote that without having to manually prepend `>` to every line!
 >>>
 ```
+
+>>>
+If you paste a message from somewhere else
+
+that spans multiple lines,
+
+you can quote that without having to manually prepend `>` to every line!
+>>>
 
 ## Code spans and blocks
 
@@ -1007,13 +1017,13 @@ The number of math blocks is also limited based on render time. If the limit is 
 GitLab renders the excess math instances as text. Wiki and repository files do not have
 these limits.
 
-Math written between dollar signs with backticks (``` $`...`$ ```) or single dollar signs (`$...$`)
+Math written between dollar signs with backticks (``$`...`$``) or single dollar signs (`$...$`)
 is rendered inline with the text.
 
 Math written between double dollar signs (`$$...$$`) or in a [code block](#code-spans-and-blocks) with
 the language declared as `math` is rendered on a separate line:
 
-`````markdown
+````markdown
 This math is inline: $`a^2+b^2=c^2`$.
 
 This math is on a separate line using a ```` ```math ```` block:
@@ -1029,9 +1039,23 @@ This math is on a separate line using a `$$...$$` block:
 $$
 a^2+b^2=c^2
 $$
-`````
+````
 
-![Example of math in GitLab](img/markdown_math_v17_2.png)
+This math is inline: $`a^2+b^2=c^2`$.
+
+This math is on a separate line using a ```` ```math ```` block:
+
+```math
+a^2+b^2=c^2
+```
+
+This math is on a separate line using inline `$$`: $$a^2+b^2=c^2$$
+
+This math is on a separate line using a `$$...$$` block:
+
+$$
+a^2+b^2=c^2
+$$
 
 ## Tables
 
@@ -1039,14 +1063,18 @@ $$
 
 When creating tables:
 
-- The first line contains the headers, separated by pipe characters (`|`).
+- The first line contains the headers, separated by "pipes" (`|`).
 - The second line separates the headers from the cells.
-  - The cells can contain only empty spaces, hyphens, and (optionally) colons for horizontal alignment.
-  - Each cell must contain at least one hyphen, but adding more hyphens to a cell does not change the cell's rendering.
+  - The cells can contain only empty spaces, hyphens, and
+    (optionally) colons for horizontal alignment.
+  - Each cell must contain at least one hyphen, but adding more hyphens to a
+    cell does not change the cell's rendering.
   - Any content other than hyphens, whitespace, or colons is not allowed
 - The third, and any following lines, contain the cell values.
-  - You **can't** have cells separated over many lines in the Markdown, they must be kept to single lines, but they can be very long. You can also include HTML `<br>` tags to force newlines if needed.
-  - The cell sizes **don't** have to match each other. They are flexible, but must be separated by pipes (`|`).
+  - You **can't** have cells separated over many lines in the Markdown, they must be kept to single lines,
+    but they can be very long. You can also include HTML `<br>` tags to force newlines if needed.
+  - The cell sizes **don't** have to match each other. They are flexible, but must be separated
+    by pipes (`|`).
   - You **can** have blank cells.
 - Column widths are calculated dynamically based on the content of the cells.
 - To use the pipe character (`|`) in the text and not as table delimiter, you must [escape](#escape-characters) it with a backslash (`\|`).
@@ -1460,13 +1488,13 @@ in GitLab might look different depending on the OS and browser used.
 Most emoji are natively supported on macOS, Windows, iOS, Android, and fall back on image-based
 emoji where there is no support.
 
-<!-- vale gitlab_base.Spelling = NO -->
+<!-- vale gitlab.Spelling = NO -->
 
 On Linux, you can download [Noto Color Emoji](https://github.com/googlefonts/noto-emoji)
 to get full native emoji support. Ubuntu 22.04 (like many modern Linux distributions) has
 this font installed by default.
 
-<!-- vale gitlab_base.Spelling = YES -->
+<!-- vale gitlab.Spelling = YES -->
 
 To learn more about adding custom emoji, see [Custom emoji](emoji_reactions.md#custom-emoji).
 
@@ -1575,16 +1603,14 @@ When rendered, the escaped characters look like this:
 
 Exceptions:
 
-A backslash doesn't always escape the character that follows it. The backslash appears as regular text in the following cases:
+A backslash doesn't always escape the following character. The backslash appears as regular text in the following cases:
 
 - When the backslash appears before a non-reserved character, such as `A`, `3`, or a space.
 - When the backslash appears inside of these Markdown elements:
   - Code blocks
   - Code spans
   - Auto-links
-  - Inline HTML, such as `<kbd>`
-
-In these instances you might need to use the equivalent HTML entity, such as `&#93;` for `]`.
+  - Inline HTML
 
 ## Footnotes
 
@@ -1800,12 +1826,12 @@ The formula for water is H<sub>2</sub>O
 while the equation for the theory of relativity is E = mc<sup>2</sup>.
 ```
 
-<!-- vale gitlab_base.Spelling = NO -->
+<!-- vale gitlab.Spelling = NO -->
 
 The formula for water is H<sub>2</sub>O
 while the equation for the theory of relativity is E = mc<sup>2</sup>.
 
-<!-- vale gitlab_base.Spelling = YES -->
+<!-- vale gitlab.Spelling = YES -->
 
 GitLab Flavored Markdown doesn't support the Redcarpet superscript syntax ( `x^2` ).
 
@@ -2051,21 +2077,6 @@ To update the rendered references if the assignee, milestone, or health status c
 Issue [420807](https://gitlab.com/gitlab-org/gitlab/-/issues/420807) tracks improving how these
 references refresh.
 
-### Show comment preview when hovering on a link
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/29663) in GitLab 17.3 [with a flag](../administration/feature_flags.md) named `comment_tooltips`. Disabled by default.
-
-FLAG:
-The availability of this feature is controlled by a feature flag.
-For more information, see the history.
-This feature is available for testing, but not ready for production use.
-
-When this feature is enabled, hovering over a link to a comment shows the author and
-part of the comment.
-
-When this feature is disabled, hovering over a link to a comment shows information about the item,
-such as issue or epic.
-
 ### Embedding Observability dashboards
 
 You can embed GitLab Observability UI dashboards descriptions and comments, for example in epics, issues, and MRs.
@@ -2077,7 +2088,7 @@ To embed an Observability dashboard URL:
 
 ## References
 
-- The [GitLab Flavored Markdown (GLFM) development guidelines](../development/gitlab_flavored_markdown/index.md) is a developer-facing document that describes in detail the various goals, tools, implementations, and terms related to the GLFM specification.
+- The [GitLab Flavored Markdown (GLFM) Specification Guide](../development/gitlab_flavored_markdown/index.md) is a developer-facing document that describes in detail the various goals, tools, implementations, and terms related to the GLFM specification.
 - This document leveraged heavily from the [Markdown-Cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet).
 - The original [Markdown Syntax Guide](https://daringfireball.net/projects/markdown/syntax)
   at Daring Fireball is an excellent resource for a detailed explanation of standard Markdown.

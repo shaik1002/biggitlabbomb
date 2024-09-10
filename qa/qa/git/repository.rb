@@ -147,9 +147,7 @@ module QA
       end
 
       def init_repository
-        cmd = "git init --initial-branch=#{default_branch}"
-        cmd += " --object-format=sha256" if Runtime::Env.use_sha256_repository_object_storage
-        run_git(cmd)
+        run_git("git init --initial-branch=#{default_branch}")
       end
 
       def pull(repository = nil, branch = nil)

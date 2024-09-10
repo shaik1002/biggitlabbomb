@@ -207,7 +207,7 @@ export default {
     <div ref="overlay" class="super-sidebar-overlay" @click="collapseSidebar"></div>
     <gl-button
       v-if="sidebarData.is_logged_in"
-      class="super-sidebar-skip-to gl-sr-only gl-fixed gl-left-0 gl-m-3 focus:gl-not-sr-only"
+      class="super-sidebar-skip-to gl-sr-only-focusable gl-fixed gl-left-0 gl-m-3"
       data-testid="super-sidebar-skip-to"
       href="#content-body"
       variant="confirm"
@@ -229,27 +229,29 @@ export default {
         {{ $options.i18n.primaryNavigation }}
       </h2>
       <user-bar ref="userBar" :has-collapse-button="!showOverlay" :sidebar-data="sidebarData" />
-      <div v-if="showTrialStatusWidget" class="gl-p-2">
+      <div v-if="showTrialStatusWidget" class="gl-px-2 gl-py-2">
         <trial-status-widget
-          class="super-sidebar-nav-item gl-relative gl-mb-1 gl-flex gl-items-center gl-rounded-base gl-p-3 gl-leading-normal !gl-text-default !gl-no-underline"
+          class="super-sidebar-nav-item gl-rounded-base gl-relative gl-display-flex gl-align-items-center gl-mb-1 gl-px-3 gl-leading-normal gl-text-black-normal! gl-text-decoration-none! gl-py-3"
         />
         <trial-status-popover />
       </div>
-      <div v-else-if="showDuoProTrialStatusWidget" class="gl-p-2">
+      <div v-else-if="showDuoProTrialStatusWidget" class="gl-px-2 gl-py-2">
         <duo-pro-trial-status-widget
-          class="super-sidebar-nav-item gl-relative gl-mb-1 gl-flex gl-items-center gl-rounded-base gl-p-3 gl-leading-normal !gl-text-default !gl-no-underline"
+          class="super-sidebar-nav-item gl-rounded-base gl-relative gl-display-flex gl-align-items-center gl-mb-1 gl-px-3 gl-leading-normal gl-text-black-normal! gl-text-decoration-none! gl-py-3"
         />
         <duo-pro-trial-status-popover />
       </div>
-      <div class="contextual-nav gl-flex gl-grow gl-flex-col gl-overflow-hidden">
+      <div
+        class="contextual-nav gl-display-flex gl-flex-direction-column gl-flex-grow-1 gl-overflow-hidden"
+      >
         <div
           v-if="sidebarData.current_context_header"
           id="super-sidebar-context-header"
-          class="super-sidebar-context-header gl-m-0 gl-px-4 gl-py-3 gl-font-bold gl-leading-reset"
+          class="gl-px-4 gl-py-3 gl-m-0 gl-leading-reset gl-font-bold super-sidebar-context-header"
         >
           {{ sidebarData.current_context_header }}
         </div>
-        <scroll-scrim class="gl-grow" data-testid="nav-container">
+        <scroll-scrim class="gl-flex-grow-1" data-testid="nav-container">
           <sidebar-menu
             v-if="menuItems.length"
             :items="menuItems"
@@ -282,7 +284,7 @@ export default {
       :key="shortcutLink.href"
       :href="shortcutLink.href"
       :class="shortcutLink.css_class"
-      class="gl-hidden"
+      class="gl-display-none"
     >
       {{ shortcutLink.title }}
     </a>

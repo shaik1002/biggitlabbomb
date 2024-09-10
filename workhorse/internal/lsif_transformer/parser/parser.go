@@ -86,6 +86,7 @@ func (p *Parser) Read(b []byte) (int, error) {
 }
 
 // Close closes the parser and its associated resources
+
 func (p *Parser) Close() error {
 	return errors.Join(p.pr.Close(), p.Docs.Close())
 }

@@ -10,7 +10,7 @@ DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
-<!-- vale gitlab_base.FutureTense = NO -->
+<!-- vale gitlab.FutureTense = NO -->
 
 Idea management refers to the collection, organization, evaluation, and implementation of ideas
 within an organization or community.

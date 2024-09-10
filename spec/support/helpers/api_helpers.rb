@@ -31,13 +31,10 @@ module ApiHelpers
     elsif access_token
       query_string = "access_token=#{access_token.token}"
     elsif user
-
-      organization = Organizations::Organization.first || build(:organization)
-
       personal_access_token = if admin_mode && user.admin?
-                                create(:personal_access_token, :admin_mode, user: user, organization: organization)
+                                create(:personal_access_token, :admin_mode, user: user)
                               else
-                                create(:personal_access_token, user: user, organization: organization)
+                                create(:personal_access_token, user: user)
                               end
 
       query_string = "private_token=#{personal_access_token.token}"

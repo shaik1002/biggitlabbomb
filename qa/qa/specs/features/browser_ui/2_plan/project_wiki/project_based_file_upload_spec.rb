@@ -3,6 +3,7 @@
 module QA
   RSpec.describe 'Plan', :blocking, product_group: :knowledge,
     quarantine: {
+      only: { job: 'relative-url' },
       issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/409541',
       type: :bug
     } do

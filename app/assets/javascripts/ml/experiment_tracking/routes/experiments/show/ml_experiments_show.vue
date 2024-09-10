@@ -197,7 +197,7 @@ export default {
           :items="tableItems"
           show-empty
           small
-          class="ml-candidate-table !gl-mt-0"
+          class="gl-mt-0! ml-candidate-table"
         >
           <template #cell()="data">
             <div>{{ data.value }}</div>

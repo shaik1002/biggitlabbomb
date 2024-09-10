@@ -1,8 +1,9 @@
-- title = _("Repository analytics")
-- page_title title
+- page_title _("Repository Analytics")
 - add_page_specific_style 'page_bundles/graph_charts'
 
-= render ::Layouts::PageHeadingComponent.new(title)
+.mb-3
+  %h3
+    = _("Repository Analytics")
 
 .repo-charts
   %h4.sub-header

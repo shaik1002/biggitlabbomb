@@ -16,7 +16,6 @@ module Ci
     include IgnorableColumns
     include Ci::HasRunnerExecutor
     include Ci::HasRunnerStatus
-    include Ci::Taggable
 
     extend ::Gitlab::Utils::Override
 
@@ -72,10 +71,8 @@ module Ci
 
     AVAILABLE_TYPES_LEGACY = %w[specific shared].freeze
     AVAILABLE_TYPES = runner_types.keys.freeze
-    DEPRECATED_STATUSES = %w[active paused].freeze # TODO: Remove in REST v5. Relevant issue: https://gitlab.com/gitlab-org/gitlab/-/issues/344648
-    AVAILABLE_STATUSES = %w[online offline never_contacted stale].freeze
-    AVAILABLE_STATUSES_INCL_DEPRECATED = (DEPRECATED_STATUSES + AVAILABLE_STATUSES).freeze
-    AVAILABLE_SCOPES = (AVAILABLE_TYPES_LEGACY + AVAILABLE_TYPES + AVAILABLE_STATUSES_INCL_DEPRECATED).freeze
+    AVAILABLE_STATUSES = %w[active paused online offline never_contacted stale].freeze # TODO: Remove in %16.0: active, paused. Relevant issue: https://gitlab.com/gitlab-org/gitlab/-/issues/344648
+    AVAILABLE_SCOPES = (AVAILABLE_TYPES_LEGACY + AVAILABLE_TYPES + AVAILABLE_STATUSES).freeze
 
     FORM_EDITABLE = %i[description tag_list active run_untagged locked access_level maximum_timeout_human_readable].freeze
     MINUTES_COST_FACTOR_FIELDS = %i[public_projects_minutes_cost_factor private_projects_minutes_cost_factor].freeze
@@ -104,7 +101,7 @@ module Ci
     scope :recent, -> do
       timestamp = stale_deadline
 
-      where(arel_table[:created_at].gt(timestamp).or(arel_table[:contacted_at].gt(timestamp)))
+      where(arel_table[:created_at].gteq(timestamp).or(arel_table[:contacted_at].gteq(timestamp)))
     end
     scope :stale, -> do
       stale_timestamp = stale_deadline
@@ -234,7 +231,6 @@ module Ci
     validate :no_groups, unless: :group_type?
     validate :any_project, if: :project_type?
     validate :exactly_one_group, if: :group_type?
-    validate :no_allowed_plan_ids, unless: :instance_type?
 
     scope :with_version_prefix, ->(value) { joins(:runner_managers).merge(RunnerManager.with_version_prefix(value)) }
     scope :with_runner_type, ->(runner_type) do
@@ -242,6 +238,8 @@ module Ci
 
       where(runner_type: runner_type)
     end
+
+    acts_as_taggable
 
     after_destroy :cleanup_runner_queue
 
@@ -312,8 +310,7 @@ module Ci
         :private_projects_minutes_cost_factor,
         :run_untagged,
         :access_level,
-        Arel.sql("(#{arel_tag_names_array.to_sql})"),
-        :allowed_plan_ids
+        Arel.sql("(#{arel_tag_names_array.to_sql})")
       ]
 
       group(*unique_params).pluck('array_agg(ci_runners.id)', *unique_params).map do |values|
@@ -324,8 +321,7 @@ module Ci
           private_projects_minutes_cost_factor: values[3],
           run_untagged: values[4],
           access_level: values[5],
-          tag_list: values[6],
-          allowed_plan_ids: values[7]
+          tag_list: values[6]
         })
       end
     end
@@ -339,8 +335,7 @@ module Ci
           private_projects_minutes_cost_factor: private_projects_minutes_cost_factor,
           run_untagged: run_untagged,
           access_level: access_level,
-          tag_list: tag_list,
-          allowed_plan_ids: allowed_plan_ids
+          tag_list: tag_list
         })
       end
     end
@@ -386,7 +381,7 @@ module Ci
     def owner_project
       return unless project_type?
 
-      runner_projects.order(:id).first&.project
+      runner_projects.order(:id).first.project
     end
 
     def belongs_to_one_project?
@@ -592,12 +587,6 @@ module Ci
     def exactly_one_group
       unless runner_namespaces.size == 1
         errors.add(:runner, 'needs to be assigned to exactly one group')
-      end
-    end
-
-    def no_allowed_plan_ids
-      unless allowed_plan_ids.empty?
-        errors.add(:runner, 'cannot have allowed plans assigned')
       end
     end
 

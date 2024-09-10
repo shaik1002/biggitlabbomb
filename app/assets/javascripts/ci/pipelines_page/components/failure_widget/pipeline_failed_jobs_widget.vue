@@ -1,18 +1,17 @@
 <script>
-import { GlButton, GlIcon, GlLink, GlPopover, GlSprintf } from '@gitlab/ui';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
+import { GlButton, GlCard, GlIcon, GlLink, GlPopover, GlSprintf } from '@gitlab/ui';
 import { __, s__, sprintf } from '~/locale';
 import FailedJobsList from './failed_jobs_list.vue';
 
 export default {
   components: {
     GlButton,
+    GlCard,
     GlIcon,
     GlLink,
     GlPopover,
     GlSprintf,
     FailedJobsList,
-    CrudComponent,
   },
   inject: ['fullPath'],
   props: {
@@ -46,7 +45,7 @@ export default {
   },
   computed: {
     bodyClasses() {
-      return this.isExpanded ? '' : 'gl-hidden';
+      return this.isExpanded ? '' : 'gl-display-none';
     },
     failedJobsCountText() {
       return sprintf(this.$options.i18n.failedJobsLabel, { count: this.currentFailedJobsCount });
@@ -85,29 +84,30 @@ export default {
 };
 </script>
 <template>
-  <crud-component
+  <gl-card
     :id="$options.ariaControlsId"
-    class="expandable-card"
-    :class="{ 'is-collapsed gl-border-white hover:gl-border-gray-100': !isExpanded }"
+    class="gl-new-card"
+    :class="{ 'gl-border-white hover:gl-border-gray-100 is-collapsed': !isExpanded }"
+    header-class="gl-new-card-header gl-px-3 gl-py-3"
+    body-class="gl-new-card-body"
     data-testid="failed-jobs-card"
-    @click="toggleWidget"
   >
-    <template #title>
+    <template #header>
       <gl-button
         variant="link"
-        class="!gl-text-subtle"
+        class="gl-text-gray-500! gl-font-semibold"
         :aria-expanded="isExpanded.toString()"
         :aria-controls="$options.ariaControlsId"
         @click="toggleWidget"
       >
-        <gl-icon :name="iconName" class="gl-mr-2" />{{ failedJobsCountText
+        <gl-icon :name="iconName" />{{ failedJobsCountText
         }}<gl-icon v-if="maximumJobs" :id="popoverId" name="information-o" class="gl-ml-2" />
         <gl-popover :target="popoverId" placement="top">
           <template #title> {{ $options.i18n.additionalInfoTitle }} </template>
           <slot>
             <gl-sprintf :message="$options.i18n.additionalInfoPopover">
               <template #link="{ content }">
-                <gl-link class="gl-text-sm" :href="pipelinePath">{{ content }}</gl-link>
+                <gl-link class="gl-font-sm" :href="pipelinePath">{{ content }}</gl-link>
               </template>
             </gl-sprintf>
           </slot>
@@ -122,5 +122,5 @@ export default {
       :project-path="projectPath"
       @failed-jobs-count="setFailedJobsCount"
     />
-  </crud-component>
+  </gl-card>
 </template>

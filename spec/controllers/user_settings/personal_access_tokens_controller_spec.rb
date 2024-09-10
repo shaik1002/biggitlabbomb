@@ -10,7 +10,7 @@ RSpec.describe UserSettings::PersonalAccessTokensController, feature_category: :
     sign_in(access_token_user)
   end
 
-  describe '#create', :with_current_organization do
+  describe '#create' do
     def created_token
       PersonalAccessToken.order(:created_at).last
     end
@@ -25,16 +25,6 @@ RSpec.describe UserSettings::PersonalAccessTokensController, feature_category: :
       expect(created_token.name).to eq(name)
       expect(created_token.scopes).to eq(scopes)
       expect(PersonalAccessToken.active).to include(created_token)
-    end
-
-    it "does not allow creation of a token with workflow scope" do
-      name = 'My PAT'
-      scopes = %w[ai_workflow]
-
-      post :create, params: { personal_access_token: token_attributes.merge(scopes: scopes, name: name) }
-
-      expect(created_token).to be_nil
-      expect(response).to have_gitlab_http_status(:unprocessable_entity)
     end
 
     it "allows creation of a token with an expiry date" do

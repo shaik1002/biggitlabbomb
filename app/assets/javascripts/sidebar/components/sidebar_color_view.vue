@@ -30,15 +30,15 @@ export default {
     <span
       :style="style"
       data-testid="color-chip"
-      class="gl-mr-1 gl-inline-block gl-h-5 gl-w-5 gl-rounded-base gl-border-solid gl-border-alpha-dark-24 gl-align-middle"
+      class="gl-display-inline-block gl-w-5 gl-h-5 gl-rounded-base gl-align-middle gl-mr-1 gl-border-solid gl-border-gray-a-24"
     ></span>
-    <span v-if="colorName" class="gl-inline-block gl-align-middle">
+    <span v-if="colorName" class="gl-display-inline-block gl-align-middle">
       {{ colorName }}
     </span>
     <span
       v-else
       v-safe-html="color"
-      class="gl-inline-block gl-align-middle"
+      class="gl-display-inline-block gl-align-middle"
       data-testid="color-value"
     ></span>
   </span>

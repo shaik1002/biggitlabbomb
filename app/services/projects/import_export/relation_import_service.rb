@@ -66,11 +66,7 @@ module Projects
       end
 
       def attach_import_file
-        import_export_upload = project.import_export_upload_by_user(current_user) ||
-          project.import_export_uploads.new(user: current_user)
-
-        import_export_upload.import_file = params[:file]
-        import_export_upload.save
+        project.update(import_export_upload: ImportExportUpload.new(import_file: params[:file]))
       end
 
       def create_status_tracker

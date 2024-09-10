@@ -5,7 +5,7 @@ import Vue from 'vue';
 import { createAlert } from '~/alert';
 import { TYPE_ISSUE } from '~/issues/constants';
 import { __ } from '~/locale';
-import { isGid, getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { fetchUserCounts } from '~/super_sidebar/user_counts_fetch';
 import eventHub from '../../event_hub';
 import getMergeRequestReviewersQuery from '../../queries/get_merge_request_reviewers.query.graphql';
@@ -50,7 +50,6 @@ export default {
     },
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     issuable: {
       query: getMergeRequestReviewersQuery,
       variables() {
@@ -167,17 +166,6 @@ export default {
     requestReview(data) {
       this.mediator.requestReview(data);
     },
-    async removeReviewerById(event) {
-      const userId = isGid(event.userId) ? getIdFromGraphQLId(event.userId) : event.userId;
-      this.store.reviewers = this.store.reviewers.filter((user) => user.id !== userId);
-      try {
-        await this.saveReviewers();
-      } catch (error) {
-        createAlert(__('Unable to remove a reviewer at the moment, try again later'), { error });
-      } finally {
-        event.done();
-      }
-    },
   },
 };
 </script>
@@ -189,7 +177,6 @@ export default {
       :loading="isLoading"
       :editable="canUpdate"
       @request-review="requestReview"
-      @remove-reviewer="removeReviewerById"
     />
     <reviewers
       v-if="!initialLoading"
@@ -200,7 +187,6 @@ export default {
       class="gl-pt-2"
       @request-review="requestReview"
       @assign-self="reviewBySelf"
-      @remove-reviewer="removeReviewerById"
     />
   </div>
 </template>

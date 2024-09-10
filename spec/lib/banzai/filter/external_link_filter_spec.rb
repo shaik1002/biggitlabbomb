@@ -210,11 +210,9 @@ RSpec.describe Banzai::Filter::ExternalLinkFilter, feature_category: :team_plann
     end
   end
 
-  it_behaves_like 'does not use pipeline timing check'
-
+  it_behaves_like 'pipeline timing check'
   it_behaves_like 'a filter timeout' do
     let(:text) { 'text' }
-    let(:expected_result) { Banzai::Filter::SanitizeLinkFilter::TIMEOUT_MARKDOWN_MESSAGE }
-    let(:expected_timeout) { described_class::SANITIZATION_RENDER_TIMEOUT }
+    let(:expected_result) { described_class::COMPLEX_MARKDOWN_MESSAGE }
   end
 end

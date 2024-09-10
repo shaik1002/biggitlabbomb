@@ -24,16 +24,7 @@ For an overview, see [Project Dependency](https://www.youtube.com/watch?v=ckqkn9
 
 ## Prerequisites
 
-To list your project's dependencies the SBOM document must:
-
-- Comply with [the CycloneDX specification](https://github.com/CycloneDX/specification) version `1.4` or `1.5`.
-- Be uploaded as [a CI/CD artifact report](../../../ci/yaml/artifacts_reports.md#artifactsreportscyclonedx) from a successful pipeline on the default branch.
-
-NOTE:
-Although this is not mandatory for the dependency list, some security features also require the
-document to include and comply with the [GitLab CycloneDX property taxonomy](../../../development/sec/cyclonedx_property_taxonomy.md).
-
-GitLab already generates this document when the following requirements are met:
+To view your project's dependencies, ensure you meet the following requirements:
 
 - The [Dependency Scanning](../dependency_scanning/index.md)
   or [Container Scanning](../container_scanning/index.md)
@@ -99,7 +90,6 @@ select the vulnerability's description. The [vulnerability's details](../vulnera
 
 > - Dependency path information from CycloneDX SBOM was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/393061) in GitLab 16.9 [with a flag](../../../administration/feature_flags.md) named `project_level_sbom_occurrences`. Disabled by default.
 > - Dependency path information from CycloneDX SBOM was [enabled on GitLab.com, self-managed, and GitLab Dedicated](https://gitlab.com/gitlab-org/gitlab/-/issues/434371) in GitLab 17.0.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/457633) in GitLab 17.4. Feature flag `project_level_sbom_occurrences` removed.
 
 The dependency list shows the path between a dependency and a top-level dependency it's connected
 to, if any. Multiple paths may connect a transient dependency to top-level

@@ -165,8 +165,6 @@ module Gitlab
         i = @array.length
 
         @iterator.each do |raw|
-          @empty = false
-
           options = { expanded: expand_diff? }
           options[:generated] = @generated_files.include?(raw.from_path) if @generated_files
 
@@ -175,7 +173,7 @@ module Gitlab
           if raw.overflow_marker
             @overflow = true
             # If we're requesting patches with `collect_all_paths` enabled, then
-            # Once we hit the overflow marker, gitaly has still returned diffs, just without
+            # Once we hit the overflow marker, gitlay has still returned diffs, just without
             # patches, only metadata
             unless @limits[:collect_all_paths]
               break

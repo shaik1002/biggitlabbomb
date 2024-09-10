@@ -58,8 +58,7 @@ module SidebarsHelper
       gitlab_version_check: gitlab_version_check,
       search: search_data,
       panel_type: panel_type,
-      shortcut_links: shortcut_links,
-      terms: terms_link
+      shortcut_links: shortcut_links
     }
   end
 
@@ -466,10 +465,6 @@ module SidebarsHelper
     else
       []
     end
-  end
-
-  def terms_link
-    Gitlab::CurrentSettings.terms ? '/-/users/terms' : nil
   end
 end
 

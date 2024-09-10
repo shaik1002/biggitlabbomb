@@ -124,7 +124,7 @@ export default {
         text: __('Delete'),
         action: () => this.showDeleteModal(),
         extraAttrs: {
-          class: '!gl-text-red-500',
+          class: 'gl-text-red-500!',
         },
       };
     },
@@ -254,10 +254,12 @@ export default {
 </script>
 <template>
   <div>
-    <div class="gl-flex gl-flex-col gl-items-start gl-gap-3 gl-pt-3 sm:gl-flex-row">
+    <div
+      class="gl-flex gl-align-items-flex-start gl-flex-direction-column gl-sm-flex-direction-row gl-gap-3 gl-pt-3"
+    >
       <span
         v-if="snippet.hidden"
-        class="gl-mt-2 gl-h-6 gl-w-6 gl-rounded-base gl-bg-orange-50 gl-text-center gl-leading-24 gl-text-orange-600"
+        class="gl-bg-orange-50 gl-text-orange-600 gl-h-6 gl-w-6 gl-rounded-base gl-leading-24 gl-text-center gl-mt-2"
       >
         <gl-icon
           v-gl-tooltip.bottom
@@ -268,7 +270,7 @@ export default {
       </span>
 
       <h1
-        class="!gl-m-0 gl-w-full gl-grow gl-text-size-h-display"
+        class="gl-font-size-h-display gl-w-full gl-m-0! gl-flex-grow-1"
         data-testid="snippet-title-content"
       >
         {{ snippet.title }}
@@ -276,7 +278,7 @@ export default {
 
       <div
         v-if="hasPersonalSnippetActions"
-        class="gl-flex gl-w-full gl-flex-col gl-gap-3 gl-self-center sm:gl-w-auto sm:gl-flex-row"
+        class="gl-flex gl-align-self-center gl-gap-3 gl-w-full gl-sm-w-auto gl-flex-direction-column gl-sm-flex-direction-row"
       >
         <gl-button
           v-if="snippet.userPermissions.updateSnippet"
@@ -307,10 +309,10 @@ export default {
           @hidden="onHideDropdown"
         >
           <template #toggle>
-            <div class="gl-min-h-7 gl-w-full">
+            <div class="gl-w-full gl-min-h-7">
               <gl-button
-                class="gl-new-dropdown-toggle gl-w-full sm:!gl-hidden"
-                button-text-classes="gl-flex gl-justify-between gl-w-full"
+                class="sm:!gl-hidden gl-new-dropdown-toggle gl-w-full"
+                button-text-classes="gl-flex gl-justify-content-space-between gl-w-full"
                 category="secondary"
                 tabindex="0"
               >
@@ -319,7 +321,7 @@ export default {
               </gl-button>
               <gl-button
                 v-gl-tooltip="showDropdownTooltip"
-                class="gl-new-dropdown-toggle gl-new-dropdown-icon-only gl-new-dropdown-toggle-no-caret gl-hidden sm:!gl-flex"
+                class="gl-hidden sm:!gl-flex gl-new-dropdown-toggle gl-new-dropdown-icon-only gl-new-dropdown-toggle-no-caret"
                 category="tertiary"
                 icon="ellipsis_v"
                 :aria-label="$options.i18n.snippetAction"
@@ -344,10 +346,12 @@ export default {
       </div>
     </div>
 
-    <div class="detail-page-header gl-mb-5 gl-flex-col gl-p-0 md:gl-flex-row">
+    <div
+      class="detail-page-header gl-flex-direction-column gl-md-flex-direction-row gl-p-0 gl-mb-5"
+    >
       <div class="gl-flex gl-items-baseline">
         <div
-          class="has-tooltip gl-mr-2 gl-mt-3 gl-flex gl-self-baseline"
+          class="has-tooltip gl-flex gl-align-self-baseline gl-mt-3 gl-mr-2"
           data-testid="snippet-container"
           :title="snippetVisibilityLevelDescription"
           data-container="body"

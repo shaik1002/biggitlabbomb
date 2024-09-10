@@ -336,7 +336,6 @@ export default {
     this.cache = {};
   },
   methods: {
-    // eslint-disable-next-line max-params
     fetchWithCache(path, cacheName, searchKey, search) {
       if (this.cache[cacheName]) {
         const data = search

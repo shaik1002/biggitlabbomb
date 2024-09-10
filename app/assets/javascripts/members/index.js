@@ -3,18 +3,13 @@ import Vue from 'vue';
 // eslint-disable-next-line no-restricted-imports
 import Vuex from 'vuex';
 import VueApollo from 'vue-apollo';
+import createDefaultClient from '~/lib/graphql';
 import { parseDataAttributes } from '~/members/utils';
 import { TABS } from 'ee_else_ce/members/tabs_metadata';
 import MembersTabs from './components/members_tabs.vue';
 import membersStore from './store';
-import { graphqlClient } from './graphql_client';
 
-/**
- * @param {HTMLElement} el
- * @param {string} context as defined in CONTEXT_TYPE in ./constants.js
- * @param {Object} options
- */
-export const initMembersApp = (el, context, options) => {
+export const initMembersApp = (el, options) => {
   if (!el) {
     return () => {};
   }
@@ -32,12 +27,10 @@ export const initMembersApp = (el, context, options) => {
     exportCsvPath,
     groupName,
     groupPath,
-    projectPath,
     manageMemberRolesPath,
     canApproveAccessRequests,
     namespaceUserLimit,
     availableRoles,
-    reassignmentCsvPath,
     ...vuexStoreAttributes
   } = parseDataAttributes(el);
 
@@ -63,9 +56,7 @@ export const initMembersApp = (el, context, options) => {
     name: 'MembersRoot',
     components: { MembersTabs },
     store,
-    apolloProvider: new VueApollo({
-      defaultClient: graphqlClient,
-    }),
+    apolloProvider: new VueApollo({ defaultClient: createDefaultClient() }),
     provide: {
       currentUserId: gon.current_user_id || null,
       sourceId,
@@ -78,14 +69,9 @@ export const initMembersApp = (el, context, options) => {
       canApproveAccessRequests,
       namespaceUserLimit,
       availableRoles,
-      context,
-      reassignmentCsvPath,
       group: {
         name: groupName,
         path: groupPath,
-      },
-      project: {
-        path: projectPath,
       },
     },
     render: (createElement) => createElement('members-tabs'),

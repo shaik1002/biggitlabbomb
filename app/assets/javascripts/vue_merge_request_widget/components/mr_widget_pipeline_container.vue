@@ -81,8 +81,6 @@ export default {
     <mr-widget-pipeline
       :pipeline="pipeline"
       :pipeline-coverage-delta="mr.pipelineCoverageDelta"
-      :pipeline-etag="mr.pipelineEtag"
-      :pipeline-iid="mr.securityReportsPipelineIid"
       :builds-with-coverage="mr.buildsWithCoverage"
       :ci-status="ciStatus"
       :has-ci="mr.hasCI"
@@ -111,9 +109,9 @@ export default {
       <merge-train-position-indicator
         class="mr-widget-extension"
         :merge-request-state="mr.mergeRequestState"
+        :merge-train-index="mr.mergeTrainIndex"
         :merge-trains-count="mr.mergeTrainsCount"
         :merge-trains-path="mr.mergeTrainsPath"
-        :merge-train-car="mr.mergeTrainCar"
       />
     </template>
   </mr-widget-container>

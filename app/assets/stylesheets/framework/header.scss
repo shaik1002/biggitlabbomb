@@ -14,8 +14,8 @@
 .navbar-empty {
   justify-content: center;
   height: var(--header-height);
-  background: var(--gl-background-color-default);
-  border-bottom: 1px solid var(--gl-border-color-default);
+  background: $white;
+  border-bottom: 1px solid $gray-100;
 
   .tanuki-logo,
   .brand-header-logo {
@@ -157,10 +157,4 @@
       background-color: $brand-gray-03;
     }
   }
-}
-
-// Override Bootstrap class with offset for system-header and
-// performance bar when present
-.fixed-top {
-  top: $calc-system-headers-height;
 }

@@ -91,22 +91,22 @@ export default {
     <span
       ref="issueDueDate"
       :class="cssClass"
-      class="board-card-info gl-mr-3 gl-cursor-help gl-text-secondary"
+      class="board-card-info gl-mr-3 gl-text-secondary gl-cursor-help"
     >
       <gl-icon
-        :class="{ 'gl-text-danger': isPastDue }"
+        :class="{ 'text-danger': isPastDue }"
         class="board-card-info-icon gl-mr-2"
         name="calendar"
       />
       <time
-        :class="{ 'gl-text-danger': isPastDue }"
+        :class="{ 'text-danger': isPastDue }"
         datetime="date"
-        class="board-card-info-text gl-text-sm"
+        class="gl-font-sm board-card-info-text"
         >{{ body }}</time
       >
     </span>
     <gl-tooltip :target="() => $refs.issueDueDate" :placement="tooltipPlacement">
-      <span class="gl-font-bold">{{ __('Due date') }}</span>
+      <span class="bold">{{ __('Due date') }}</span>
       <br />
       <span :class="{ 'gl-text-red-300': isPastDue }">{{ title }}</span>
     </gl-tooltip>

@@ -40,11 +40,29 @@ module Mutations
       def resolve(project_path:, replacements:)
         project = authorized_find!(project_path)
 
-        result = Repositories::RewriteHistoryService.new(project, current_user).execute(redactions: replacements)
+        begin
+          project.set_repository_read_only!
+          client = Gitlab::GitalyClient::CleanupService.new(project.repository)
+          client.rewrite_history(redactions: replacements)
 
-        return { errors: result.errors } if result.error?
+          audit_replacements(project)
 
-        { errors: [] }
+          { errors: [] }
+        ensure
+          project.set_repository_writable!
+        end
+      end
+
+      def audit_replacements(project)
+        context = {
+          name: 'project_text_replacement',
+          author: current_user,
+          scope: project,
+          target: project,
+          message: 'Project text replaced'
+        }
+
+        ::Gitlab::Audit::Auditor.audit(context)
       end
     end
   end

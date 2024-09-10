@@ -5,7 +5,7 @@ import waitForPromises from 'helpers/wait_for_promises';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
 import { stubTransition } from 'helpers/stub_transition';
-import { sprintf } from '~/locale';
+import { __, s__, sprintf } from '~/locale';
 import EnvironmentsFolder from '~/environments/components/environment_folder.vue';
 import EnvironmentItem from '~/environments/components/new_environment_item.vue';
 import { resolvedEnvironmentsApp, resolvedFolder } from './graphql/mock_data';
@@ -18,11 +18,13 @@ describe('~/environments/components/environments_folder.vue', () => {
   let intervalMock;
   let nestedEnvironment;
 
-  const findLink = () => wrapper.findByText('See all environments.');
+  const findLink = () => wrapper.findByText(s__('Environments|See all environments.'));
   const findMessage = () =>
     wrapper.findByText(
       sprintf(
-        'Showing %{listedEnvironmentsCount} of %{totalEnvironmentsCount} environments in this folder.',
+        s__(
+          'Environments|Showing %{listedEnvironmentsCount} of %{totalEnvironmentsCount} environments in this folder.',
+        ),
         { listedEnvironmentsCount: 2, totalEnvironmentsCount: 4 },
       ),
     );
@@ -68,7 +70,7 @@ describe('~/environments/components/environments_folder.vue', () => {
       await nextTick();
       await waitForPromises();
       folderName = wrapper.findByText(nestedEnvironment.name);
-      button = wrapper.findByRole('button', { name: 'Expand' });
+      button = wrapper.findByRole('button', { name: __('Expand') });
     });
 
     it('displays the name of the folder', () => {
@@ -98,7 +100,7 @@ describe('~/environments/components/environments_folder.vue', () => {
         jest.advanceTimersByTime(2000);
         await waitForPromises();
 
-        expect(button.attributes('aria-label')).toBe('Collapse');
+        expect(button.attributes('aria-label')).toBe(__('Collapse'));
         expect(collapse.props('visible')).toBe(true);
         const iconNames = icons.wrappers.map((i) => i.props('name')).slice(0, 2);
         expect(iconNames).toEqual(['chevron-lg-down', 'folder-open']);
@@ -126,7 +128,7 @@ describe('~/environments/components/environments_folder.vue', () => {
 
         expect(environmentFolderMock).toHaveBeenCalledTimes(2);
 
-        const collapseButton = wrapper.findByRole('button', { name: 'Collapse' });
+        const collapseButton = wrapper.findByRole('button', { name: __('Collapse') });
         await collapseButton.trigger('click');
 
         expect(environmentFolderMock).toHaveBeenCalledTimes(2);

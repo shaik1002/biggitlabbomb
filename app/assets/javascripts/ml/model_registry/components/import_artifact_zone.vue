@@ -1,7 +1,6 @@
 <script>
 import {
   GlAlert,
-  GlButton,
   GlFormGroup,
   GlFormInput,
   GlFormInputGroup,
@@ -9,18 +8,17 @@ import {
   GlProgressBar,
   GlTooltip,
 } from '@gitlab/ui';
-import axios from '~/lib/utils/axios_utils';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
 import { joinPaths } from '~/lib/utils/url_utility';
 import { s__ } from '~/locale';
 import UploadDropzone from '~/vue_shared/components/upload_dropzone/upload_dropzone.vue';
 import { uploadModel } from '../services/upload_model';
+import { emptyArtifactFile } from '../constants';
 
 export default {
   name: 'ImportArtifactZone',
   components: {
     GlAlert,
-    GlButton,
     GlIcon,
     GlTooltip,
     GlFormGroup,
@@ -44,15 +42,19 @@ export default {
       required: false,
       default: true,
     },
+    value: {
+      type: Object,
+      required: false,
+      default: () => emptyArtifactFile,
+    },
   },
   data() {
     return {
-      file: null,
-      subfolder: '',
+      file: this.value.file,
+      subfolder: this.value.subfolder,
       alert: null,
       progressLoaded: null,
       progressTotal: null,
-      axiosSource: null,
     };
   },
   computed: {
@@ -85,17 +87,15 @@ export default {
       this.progressTotal = progressEvent.total;
       this.progressLoaded = progressEvent.loaded;
     },
-    uploadArtifact(importPath) {
+    submitRequest(importPath) {
       this.progressLoaded = 0;
       this.progressTotal = this.file.size;
-      this.axiosSource = axios.CancelToken.source();
       uploadModel({
         importPath,
         file: this.file,
         subfolder: this.subfolder,
         maxAllowedFileSize: this.maxAllowedFileSize,
         onUploadProgress: this.onUploadProgress,
-        cancelToken: this.axiosSource.token,
       })
         .then(() => {
           this.resetFile();
@@ -107,39 +107,36 @@ export default {
           this.alert = { message: error, variant: 'danger' };
         });
     },
+    emitInput(value) {
+      this.$emit('input', { ...value });
+    },
     changeSubfolder(subfolder) {
       this.subfolder = subfolder;
+      this.emitInput({ file: this.file, subfolder });
     },
-    changeFile(file) {
+    uploadFile(file) {
       this.file = file;
+      this.emitInput({ file, subfolder: this.subfolder });
 
       if (this.submitOnSelect && this.path) {
-        this.uploadArtifact(this.path);
+        this.submitRequest(this.path);
       }
     },
     hideAlert() {
       this.alert = null;
     },
-    cancelUpload() {
-      if (this.axiosSource) {
-        this.axiosSource.cancel(this.$options.i18n.cancelMessage);
-        this.axiosSource = null;
-      }
-      this.discardFile();
-    },
     discardFile() {
       this.file = null;
       this.subfolder = '';
+      this.emitInput(emptyArtifactFile);
     },
   },
   i18n: {
     dropToStartMessage: s__('MlModelRegistry|Drop to start upload'),
-    cancelMessage: s__('MlModelRegistry|User canceled upload.'),
-    cancelButtonText: s__('MlModelRegistry|Cancel upload'),
     uploadSingleMessage: s__(
       'MlModelRegistry|Drop or %{linkStart}select%{linkEnd} artifact to attach',
     ),
-    subfolderLabel: s__('MlModelRegistry|Subfolder'),
+    subfolderLabel: s__('MlModelRegistry|Subfolder (optional)'),
     successfulUpload: s__('MlModelRegistry|Uploaded files successfully'),
     subfolderPlaceholder: s__('MlModelRegistry|folder name'),
     subfolderTooltip: s__(
@@ -147,7 +144,6 @@ export default {
     ),
     subfolderInvalid: s__('MlModelRegistry|Subfolder cannot contain spaces'),
     subfolderDescription: s__('MlModelRegistry|Enter a subfolder name to organize your artifacts.'),
-    optionalText: s__('MlModelRegistry|(Optional)'),
   },
   validFileMimetypes: [],
 };
@@ -162,11 +158,8 @@ export default {
       :description="subfolderValid ? $options.i18n.subfolderDescription : ''"
     >
       <div>
-        <label for="subfolderId" class="gl-font-bold" data-testid="subfolderLabel">{{
+        <label for="subfolderId" class="gl-font-weight-bold" data-testid="subfolderLabel">{{
           $options.i18n.subfolderLabel
-        }}</label>
-        <label class="gl-font-normal" data-testid="subfolderLabelOptional">{{
-          $options.i18n.optionalText
         }}</label>
         <gl-icon id="toolTipSubfolderId" v-gl-tooltip name="information-o" tabindex="0" />
         <gl-tooltip target="toolTipSubfolderId">
@@ -191,27 +184,19 @@ export default {
       :upload-single-message="$options.i18n.uploadSingleMessage"
       :drop-to-start-message="$options.i18n.dropToStartMessage"
       :is-file-valid="() => true"
-      @change="changeFile"
+      @change="uploadFile"
     >
-      <div v-if="file" class="upload-dropzone-border p-3">
+      <gl-alert v-if="file" variant="success" :dismissible="!loading" @dismiss="discardFile">
         <gl-progress-bar v-if="progressLoaded" :value="progressPercentage" />
         <div v-if="progressLoaded" data-testid="formatted-progress">
           {{ formattedProgressLoaded }}
         </div>
         <div v-else data-testid="formatted-file-size">{{ formattedFileSize }}</div>
         <div data-testid="file-name">{{ fileFullpath }}</div>
-        <gl-button
-          data-testid="cancel-upload-button"
-          category="secondary"
-          class="mt-3"
-          variant="danger"
-          @click="cancelUpload"
-          >{{ $options.i18n.cancelButtonText }}</gl-button
-        >
-      </div>
+      </gl-alert>
+      <gl-alert v-if="alert" :variant="alert.variant" :dismissible="true" @dismiss="hideAlert">
+        {{ alert.message }}
+      </gl-alert>
     </upload-dropzone>
-    <gl-alert v-if="alert" :variant="alert.variant" @dismiss="hideAlert">
-      {{ alert.message }}
-    </gl-alert>
   </div>
 </template>

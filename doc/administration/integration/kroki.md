@@ -15,10 +15,10 @@ you can create diagrams-as-code within AsciiDoc, Markdown, reStructuredText, and
 
 ## Enable Kroki in GitLab
 
-You need to enable Kroki integration from Settings under **Admin** area.
+You need to enable Kroki integration from Settings under Admin area.
 To do that, sign in with an administrator account and follow these steps:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Go to **Settings > General**.
 1. Expand the **Kroki** section.
 1. Select **Enable Kroki** checkbox.
@@ -30,9 +30,6 @@ When you enable Kroki, GitLab sends diagrams to an instance of Kroki to display 
 You can use the free public cloud instance `https://kroki.io` or you can [install Kroki](https://docs.kroki.io/kroki/setup/install/)
 on your own infrastructure.
 After you've installed Kroki, make sure to update the **Kroki URL** in the settings to point to your instance.
-
-NOTE:
-Kroki diagrams are not stored on GitLab, so standard GitLab access controls and other user permission restrictions are not in force.
 
 ### Docker
 
@@ -49,7 +46,7 @@ types out of the box. For a complete list, see the [Kroki installation docs](htt
 
 Supported diagram types include:
 
-<!-- vale gitlab_base.Spelling = NO -->
+<!-- vale gitlab.Spelling = NO -->
 
 - [Bytefield](https://bytefield-svg.deepsymmetry.org/bytefield-svg/intro.html)
 - [D2](https://d2lang.com/tour/intro/)
@@ -67,7 +64,7 @@ Supported diagram types include:
 - [Vega-Lite](https://github.com/vega/vega-lite)
 - [WaveDrom](https://wavedrom.com/)
 
-<!-- vale gitlab_base.Spelling = YES -->
+<!-- vale gitlab.Spelling = YES -->
 
 If you want to use additional diagram libraries,
 read the [Kroki installation](https://docs.kroki.io/kroki/setup/install/#_images) to learn how to start Kroki companion containers.
@@ -116,7 +113,7 @@ The above blocks are converted to an HTML image tag with source pointing to the
 Kroki instance. If the Kroki server is correctly configured, this should
 render a nice diagram instead of the block:
 
-![A PlantUML diagram rendered from example code.](../img/kroki_plantuml_diagram.png)
+![PlantUML diagram](../img/kroki_plantuml_diagram.png)
 
 Kroki supports more than a dozen diagram libraries. Here's a few examples for AsciiDoc:
 
@@ -147,7 +144,7 @@ digraph finite_state_machine {
 ....
 ```
 
-![A GraphViz diagram generated from example code.](../img/kroki_graphviz_diagram.png)
+![GraphViz diagram](../img/kroki_graphviz_diagram.png)
 
 **C4 (based on PlantUML)**
 
@@ -173,13 +170,13 @@ Rel(banking_system, mainframe, "Uses")
 ....
 ```
 
-![A C4 PlantUML diagram generated from example code.](../img/kroki_c4_diagram.png)
+![C4 PlantUML diagram](../img/kroki_c4_diagram.png)
 
-<!-- vale gitlab_base.Spelling = NO -->
+<!-- vale gitlab.Spelling = NO -->
 
 **Nomnoml**
 
-<!-- vale gitlab_base.Spelling = YES -->
+<!-- vale gitlab.Spelling = YES -->
 
 ```plaintext
 [nomnoml]
@@ -200,4 +197,4 @@ Rel(banking_system, mainframe, "Uses")
 ....
 ```
 
-![A Nomnoml diagram generated from example code.](../img/kroki_nomnoml_diagram.png)
+![Diagram](../img/kroki_nomnoml_diagram.png)

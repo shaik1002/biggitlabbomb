@@ -69,7 +69,7 @@ promote a Geo replica and perform a failover.
 
 On the **secondary** site:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Geo > Sites** to see its status.
    Replicated objects (shown in green) should be close to 100%,
    and there should be no failures (shown in red). If a large proportion of
@@ -82,6 +82,9 @@ If any objects are failing to replicate, this should be investigated before
 scheduling the maintenance window. After a planned failover, anything that
 failed to replicate is **lost**.
 
+You can use the
+[Geo status API](../../../../api/geo_nodes.md#retrieve-project-sync-or-verification-failures-that-occurred-on-the-current-node)
+to review failed objects and the reasons for failure.
 A common cause of replication failures is data that is missing on the
 **primary** site - you can resolve these failures by restoring the data from backup,
 or removing references to the missing data.
@@ -105,7 +108,7 @@ follow these steps to avoid unnecessary data loss:
       [data not managed by Geo](../../replication/datatypes.md#limitations-on-replicationverification),
       trigger the final replication process now.
    1. On the **primary** site:
-      1. On the left sidebar, at the bottom, select **Admin**.
+      1. On the left sidebar, at the bottom, select **Admin area**.
       1. On the left sidebar, select **Monitoring > Background jobs**.
       1. On the Sidekiq dashboard, select **Queues**, and wait for all queues except
          those with `geo` in the name to drop to 0.
@@ -120,7 +123,7 @@ follow these steps to avoid unnecessary data loss:
          - The Geo log cursor is up to date (0 events behind).
 
    1. On the **secondary** site:
-      1. On the left sidebar, at the bottom, select **Admin**.
+      1. On the left sidebar, at the bottom, select **Admin area**.
       1. On the left sidebar, select **Monitoring > Background jobs**.
       1. On the Sidekiq dashboard, select **Queues**, and wait for all the `geo`
          queues to drop to 0 queued and 0 running jobs.

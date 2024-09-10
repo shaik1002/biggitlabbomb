@@ -25,9 +25,8 @@ module Lfs
     # rubocop: enable CodeReuse/ActiveRecord
 
     def create_lock!
-      lock = project.lfs_file_locks.create!(user: current_user, path: params[:path])
-
-      project.refresh_lfs_file_locks_changed_epoch
+      lock = project.lfs_file_locks.create!(user: current_user,
+        path: params[:path])
 
       success(http_status: 201, lock: lock)
     end

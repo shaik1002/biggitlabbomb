@@ -58,7 +58,6 @@ function getIssuableType() {
 }
 
 export default class IssuableForm {
-  // eslint-disable-next-line max-params
   static addAutosave(map, id, element, searchTerm, fallbackKey) {
     if (!element) return;
     map.set(

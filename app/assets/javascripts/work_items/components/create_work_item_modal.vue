@@ -20,43 +20,8 @@ export default {
     GlModal,
     GlDisclosureDropdownItem,
   },
-  inject: ['fullPath'],
+  inject: ['fullPath', 'isGroup'],
   props: {
-    description: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    hideButton: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    isGroup: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    parentId: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    showProjectSelector: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    title: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    visible: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     workItemTypeName: {
       type: String,
       required: false,
@@ -70,7 +35,7 @@ export default {
   },
   data() {
     return {
-      isVisible: false,
+      visible: false,
       workItemTypes: [],
     };
   },
@@ -123,18 +88,9 @@ export default {
       };
     },
   },
-  watch: {
-    visible: {
-      immediate: true,
-      handler(visible) {
-        this.isVisible = visible;
-      },
-    },
-  },
   methods: {
     hideModal() {
-      this.$emit('hideModal');
-      this.isVisible = false;
+      this.visible = false;
       if (this.workItemTypes && this.workItemTypes[0]) {
         setNewWorkItemCache(
           this.fullPath,
@@ -145,7 +101,7 @@ export default {
       }
     },
     showModal() {
-      this.isVisible = true;
+      this.visible = true;
     },
     handleCreated(workItem) {
       this.$toast.show(this.workItemCreatedText, {
@@ -165,20 +121,18 @@ export default {
 
 <template>
   <div>
-    <template v-if="!hideButton">
-      <gl-disclosure-dropdown-item v-if="asDropdownItem" :item="dropdownItem" />
-      <gl-button
-        v-else
-        category="primary"
-        variant="confirm"
-        data-testid="new-epic-button"
-        @click="showModal"
-        >{{ newWorkItemText }}
-      </gl-button>
-    </template>
+    <gl-disclosure-dropdown-item v-if="asDropdownItem" :item="dropdownItem" />
+    <gl-button
+      v-else
+      category="primary"
+      variant="confirm"
+      data-testid="new-epic-button"
+      @click="showModal"
+      >{{ newWorkItemText }}
+    </gl-button>
     <gl-modal
       modal-id="create-work-item-modal"
-      :visible="isVisible"
+      :visible="visible"
       :title="newWorkItemText"
       size="lg"
       hide-footer
@@ -186,13 +140,8 @@ export default {
       @hide="hideModal"
     >
       <create-work-item
-        :description="description"
-        hide-form-title
-        :is-group="isGroup"
-        :parent-id="parentId"
-        :show-project-selector="showProjectSelector"
-        :title="title"
         :work-item-type-name="workItemTypeName"
+        hide-form-title
         @cancel="hideModal"
         @workItemCreated="handleCreated"
       />

@@ -12,11 +12,8 @@ import {
   WIDGET_TYPE_AWARD_EMOJI,
   WIDGET_TYPE_HIERARCHY,
 } from '~/work_items/constants';
-
-import isExpandedHierarchyTreeChildQuery from '~/work_items/graphql/client/is_expanded_hierarchy_tree_child.query.graphql';
 import activeBoardItemQuery from 'ee_else_ce/boards/graphql/client/active_board_item.query.graphql';
-import activeDiscussionQuery from '~/work_items/components/design_management/graphql/client/active_design_discussion.query.graphql';
-import { updateNewWorkItemCache, workItemBulkEdit } from '~/work_items/graphql/resolvers';
+import { updateNewWorkItemCache } from '~/work_items/graphql/resolvers';
 
 export const config = {
   typeDefs,
@@ -40,8 +37,6 @@ export const config = {
           epicBoardList: {
             keyArgs: ['id'],
           },
-          isExpandedHierarchyTreeChild: (_, { variables, toReference }) =>
-            toReference({ __typename: 'LocalWorkItemChildIsExpanded', id: variables.id }),
         },
       },
       Project: {
@@ -142,11 +137,7 @@ export const config = {
                 }
 
                 // we want to concat next page of children work items within Hierarchy widget to the existing ones
-                if (
-                  incomingWidget?.type === WIDGET_TYPE_HIERARCHY &&
-                  context.variables.endCursor &&
-                  incomingWidget.children?.nodes
-                ) {
+                if (incomingWidget?.type === WIDGET_TYPE_HIERARCHY && context.variables.endCursor) {
                   // concatPagination won't work because we were placing new widget here so we have to do this manually
                   return {
                     ...incomingWidget,
@@ -168,6 +159,42 @@ export const config = {
           nodes: concatPagination(),
         },
       },
+      BoardList: {
+        fields: {
+          issues: {
+            keyArgs: ['filters'],
+          },
+        },
+      },
+      IssueConnection: {
+        merge(existing = { nodes: [] }, incoming, { args }) {
+          if (!args?.after) {
+            return incoming;
+          }
+          return {
+            ...incoming,
+            nodes: [...existing.nodes, ...incoming.nodes],
+          };
+        },
+      },
+      EpicList: {
+        fields: {
+          epics: {
+            keyArgs: ['filters'],
+          },
+        },
+      },
+      EpicConnection: {
+        merge(existing = { nodes: [] }, incoming, { args }) {
+          if (!args?.after) {
+            return incoming;
+          }
+          return {
+            ...incoming,
+            nodes: [...existing.nodes, ...incoming.nodes],
+          };
+        },
+      },
       Group: {
         fields: {
           projects: {
@@ -186,6 +213,24 @@ export const config = {
       GroupConnection: {
         fields: {
           nodes: concatPagination(),
+        },
+      },
+      Board: {
+        fields: {
+          epics: {
+            keyArgs: ['boardId'],
+          },
+        },
+      },
+      BoardEpicConnection: {
+        merge(existing = { nodes: [] }, incoming, { args }) {
+          if (!args.after) {
+            return incoming;
+          }
+          return {
+            ...incoming,
+            nodes: [...existing.nodes, ...incoming.nodes],
+          };
         },
       },
       MergeRequestApprovalState: {
@@ -258,33 +303,6 @@ export const resolvers = {
     },
     updateNewWorkItem(_, { input }, { cache }) {
       updateNewWorkItemCache(input, cache);
-    },
-    localWorkItemBulkUpdate(_, { input }) {
-      return workItemBulkEdit(input);
-    },
-    toggleHierarchyTreeChild(_, { id, isExpanded = false }, { cache }) {
-      cache.writeQuery({
-        query: isExpandedHierarchyTreeChildQuery,
-        variables: { id },
-        data: {
-          isExpandedHierarchyTreeChild: {
-            id,
-            isExpanded,
-            __typename: 'LocalWorkItemChildIsExpanded',
-          },
-        },
-      });
-    },
-    updateActiveDesignDiscussion: (_, { id = null, source }, { cache }) => {
-      const data = {
-        activeDesignDiscussion: {
-          __typename: 'ActiveDesignDiscussion',
-          id,
-          source,
-        },
-      };
-
-      cache.writeQuery({ query: activeDiscussionQuery, data });
     },
   },
 };

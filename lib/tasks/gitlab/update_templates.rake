@@ -37,13 +37,9 @@ namespace :gitlab do
 
     tmp_namespace_path = "tmp-project-import-#{Time.now.to_i}"
     puts "Creating temporary namespace #{tmp_namespace_path}"
-    tmp_namespace = Namespace.create!(
-      owner: admin,
-      name: tmp_namespace_path,
-      path: tmp_namespace_path,
-      type: Namespaces::UserNamespace.sti_name,
-      organization: tmp_organization
-    )
+    tmp_namespace = Namespace.with_disabled_organization_validation do
+      Namespace.create!(owner: admin, name: tmp_namespace_path, path: tmp_namespace_path, type: Namespaces::UserNamespace.sti_name)
+    end
 
     templates = if template_names.empty?
                   Gitlab::ProjectTemplate.all
@@ -60,7 +56,7 @@ namespace :gitlab do
       }
 
       puts "Creating project for #{template.title}"
-      project = Projects::CreateService.new(admin, params).execute
+      project = Namespace.with_disabled_organization_validation { Projects::CreateService.new(admin, params).execute }
 
       unless project.persisted?
         raise "Failed to create project: #{project.errors.messages}"
@@ -105,7 +101,7 @@ namespace :gitlab do
       project.reset
 
       Projects::ImportExport::ExportService.new(project, admin).execute
-      downloader.call(project.export_file(admin), template.archive_path)
+      downloader.call(project.export_file, template.archive_path)
 
       unless Projects::DestroyService.new(project, admin).execute
         puts "Failed to destroy project #{template.name} (but namespace will be cleaned up later)"

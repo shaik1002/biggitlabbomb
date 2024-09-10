@@ -62,15 +62,11 @@ module Resolvers
       end
 
       def selected_statuses(lookahead, period)
-        selected = []
-        return selected unless lookahead
+        return [] unless lookahead
 
-        selected << :success if lookahead.selects?(:"#{period}_pipelines_successful")
-        selected += STATUS_GROUPS.filter do |status|
+        STATUS_GROUPS.filter do |status|
           lookahead.selection(:"#{period}_pipelines").selects?(:totals, arguments: { status: status })
         end
-
-        selected.sort.uniq
       end
     end
   end

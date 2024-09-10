@@ -1,4 +1,4 @@
-ARG GDK_SHA=59f9233de457781829a606c11e775b4809677dc3
+ARG GDK_SHA=8b0c3fcbf534ce26dcd9c59fafd4a5f4f718ca55
 # Use tag prefix when running on 'stable' branch to make sure 'protected' image is used which is not deleted by registry cleanup
 ARG GDK_BASE_TAG_PREFIX
 
@@ -60,8 +60,7 @@ FROM base AS gitlab-gems
 COPY --chown=gdk:gdk Gemfile Gemfile.lock .tool-versions ./gitlab/
 COPY --chown=gdk:gdk vendor/gems/ ./gitlab/vendor/gems/
 COPY --chown=gdk:gdk gems/ ./gitlab/gems/
-RUN make gitlab-asdf-install \
-    && make .gitlab-bundle \
+RUN make .gitlab-bundle \
     && cd gitlab \
     && rm -rf /home/gdk/.asdf/installs/ruby/*/lib/ruby/gems/*/cache
 

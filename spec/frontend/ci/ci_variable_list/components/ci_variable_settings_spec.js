@@ -15,7 +15,6 @@ describe('Ci variable table', () => {
 
   const defaultProps = {
     areEnvironmentsLoading: false,
-    areHiddenVariablesAvailable: false,
     areScopedVariablesAvailable: true,
     entity: 'project',
     environments: mapEnvironmentNames(mockEnvs),
@@ -59,7 +58,6 @@ describe('Ci variable table', () => {
 
       expect(findCiVariableDrawer().props()).toEqual({
         areEnvironmentsLoading: defaultProps.areEnvironmentsLoading,
-        areHiddenVariablesAvailable: defaultProps.areHiddenVariablesAvailable,
         areScopedVariablesAvailable: defaultProps.areScopedVariablesAvailable,
         environments: defaultProps.environments,
         hideEnvironmentScope: defaultProps.hideEnvironmentScope,

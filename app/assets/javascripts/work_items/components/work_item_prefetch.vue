@@ -14,11 +14,6 @@ export default {
       type: String,
       required: true,
     },
-    workItemFullPath: {
-      type: String,
-      required: false,
-      default: '',
-    },
   },
   data() {
     return {
@@ -26,14 +21,13 @@ export default {
     };
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     workItem: {
       query() {
         return workItemByIidQuery;
       },
       variables() {
         return {
-          fullPath: this.workItemFullPath || this.fullPath,
+          fullPath: this.fullPath,
           iid: this.workItemIid,
         };
       },

@@ -18,10 +18,8 @@ repository being scanned. There are two kinds of customization:
 - Modifying the behavior of **predefined rules**. This includes:
   - [Disabling predefined rules](#disable-predefined-rules). Available for all analyzers.
   - [Overriding predefined rules](#override-predefined-rules). Available for all analyzers.
-- Replacing predefined rules by [building a custom configuration](#build-a-custom-configuration)
+- Replacing predefined rules by [synthesizing a custom configuration](#synthesize-a-custom-configuration)
   using **passthroughs**. Available only for the [Semgrep-based analyzer](https://gitlab.com/gitlab-org/security-products/analyzers/semgrep).
-
-Advanced SAST supports only modifying the behavior of **predefined rules**, not replacing predefined rules.
 
 ## Disable predefined rules
 
@@ -51,7 +49,7 @@ or choose a different message to display in the Vulnerability Report.
 See the [Schema](#schema) and [Examples](#examples) sections for information on how
 to configure this behavior.
 
-## Build a custom configuration
+## Synthesize a custom configuration
 
 You can replace the [GitLab-maintained ruleset](rules.md) for the [Semgrep-based analyzer](https://gitlab.com/gitlab-org/security-products/analyzers/semgrep) with your own rules.
 
@@ -110,10 +108,10 @@ See [specify a private remote configuration example](#specify-a-private-remote-c
 If remote configuration file doesn't seem to be applying customizations correctly, the causes can be:
 
 1. Your repository has a local `.gitlab/sast-ruleset.toml` file.
-   - By default, a local file is used if it's present, even if a remote configuration is set as a variable.
-   - You can set the [SECURE_ENABLE_LOCAL_CONFIGURATION CI/CD variable](../../../ci/variables/index.md) to `false` to ignore the local configuration file.
+    - By default, a local file is used if it's present, even if a remote configuration is set as a variable.
+    - You can set the [SECURE_ENABLE_LOCAL_CONFIGURATION CI/CD variable](../../../ci/variables/index.md) to `false` to ignore the local configuration file.
 1. There is a problem with authentication.
-   - To check whether this is the cause of the problem, try referencing a configuration file from a repository location that doesn't require authentication.
+    - To check whether this is the cause of the problem, try referencing a configuration file from a repository location that doesn't require authentication.
 
 ## Schema
 
@@ -132,7 +130,7 @@ Configuration example:
 ...
 ```
 
-Avoid creating configuration sections that modify existing rules _and_ build a custom ruleset, as
+Avoid creating configuration sections that modify existing rules _and_ synthesize a custom ruleset, as
 the latter replaces predefined rules completely.
 
 ### The `[$analyzer]` configuration section
@@ -282,7 +280,7 @@ Configuration example:
 NOTE:
 Passthrough configurations are available for the [Semgrep-based analyzer](https://gitlab.com/gitlab-org/security-products/analyzers/semgrep) only.
 
-The `[[$analyzer.passthrough]]` section allows you to build a custom configuration for an analyzer. You
+The `[[$analyzer.passthrough]]` section allows you to synthesize a custom configuration for an analyzer. You
 can define up to 20 of these sections per analyzer. Passthroughs are composed into a _passthrough chain_
 that evaluates into a complete configuration that replaces the predefined rules of the analyzer.
 
@@ -371,7 +369,7 @@ With the following custom ruleset configuration, vulnerabilities found with
       severity = "Critical"
 ```
 
-### Build a custom configuration using a file passthrough for `semgrep`
+### Synthesize a custom configuration using a file passthrough for `semgrep`
 
 With the following custom ruleset configuration, the predefined ruleset
 of the `semgrep` analyzer is replaced with a custom ruleset contained in
@@ -399,7 +397,7 @@ rules:
     value = "my-semgrep-rules.yml"
 ```
 
-### Build a custom configuration using a passthrough chain for `semgrep`
+### Synthesize a custom configuration using a passthrough chain for `semgrep`
 
 With the following custom ruleset configuration, the predefined ruleset
 of the `semgrep` analyzer is replaced with a custom ruleset produced by

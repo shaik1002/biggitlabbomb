@@ -1,5 +1,5 @@
 <script>
-import { GlAvatarLabeled, GlCollapsibleListbox, GlFormGroup } from '@gitlab/ui';
+import { GlAvatarLabeled, GlCollapsibleListbox } from '@gitlab/ui';
 import { uniqueId } from 'lodash';
 import { s__, n__ } from '~/locale';
 import { AVATAR_SHAPE_OPTION_RECT } from '~/vue_shared/constants';
@@ -9,7 +9,6 @@ export default {
   components: {
     GlAvatarLabeled,
     GlCollapsibleListbox,
-    GlFormGroup,
   },
   props: {
     selectedTopic: {
@@ -96,10 +95,8 @@ export default {
 </script>
 
 <template>
-  <gl-form-group :id="labelId">
-    <template #label>
-      {{ labelText }}
-    </template>
+  <div>
+    <label v-if="labelText" :id="labelId">{{ labelText }}</label>
     <gl-collapsible-listbox
       v-model="selected"
       block
@@ -128,5 +125,5 @@ export default {
         {{ searchSummary }}
       </template>
     </gl-collapsible-listbox>
-  </gl-form-group>
+  </div>
 </template>

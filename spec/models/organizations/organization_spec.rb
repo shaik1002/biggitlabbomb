@@ -26,7 +26,6 @@ RSpec.describe Organizations::Organization, type: :model, feature_category: :cel
     it { is_expected.to have_many(:organization_users).inverse_of(:organization) }
     it { is_expected.to have_many :projects }
     it { is_expected.to have_many :snippets }
-    it { is_expected.to have_many :topics }
   end
 
   describe 'validations' do
@@ -155,40 +154,6 @@ RSpec.describe Organizations::Organization, type: :model, feature_category: :cel
       it 'includes other organizations organization' do
         expect(described_class.without_default).to include(organization)
       end
-    end
-
-    describe '.with_namespace_path' do
-      let_it_be(:group) { create(:group, organization: organization) }
-      let(:path) { group.path }
-
-      subject(:match) { described_class.with_namespace_path(path) }
-
-      context 'when namespace path belongs to an organiation' do
-        it 'returns associated organization' do
-          expect(match).to contain_exactly(group.organization)
-        end
-      end
-
-      context 'when namespace path does not have an organiation' do
-        let(:path) { non_existing_record_id }
-
-        it 'returns nil' do
-          expect(match).to be_empty
-        end
-      end
-    end
-
-    describe '.with_user' do
-      let_it_be(:user) { create(:user) }
-      let_it_be(:second_organization) { create(:organization, users: [user]) }
-
-      subject(:organizations_for_user) { described_class.with_user(user) }
-
-      before do
-        organization.users << user
-      end
-
-      it { is_expected.to eq([default_organization, organization, second_organization]) }
     end
   end
 

@@ -2,6 +2,8 @@
 import {
   GlAlert,
   GlButton,
+  GlCard,
+  GlIcon,
   GlLoadingIcon,
   GlModal,
   GlModalDirective,
@@ -10,7 +12,6 @@ import {
   GlTable,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import Api, { DEFAULT_PER_PAGE } from '~/api';
 import { HTTP_STATUS_PAYLOAD_TOO_LARGE } from '~/lib/utils/http_status';
@@ -24,6 +25,8 @@ export default {
   components: {
     GlAlert,
     GlButton,
+    GlCard,
+    GlIcon,
     GlLoadingIcon,
     GlModal,
     GlPagination,
@@ -32,7 +35,6 @@ export default {
     TimeagoTooltip,
     MetadataButton,
     MetadataModal,
-    CrudComponent,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -47,13 +49,17 @@ export default {
     uploadLabel: __('Upload File'),
     uploadingLabel: __('Uploading...'),
     noFilesMessage: __('There are no secure files yet.'),
+    pagination: {
+      next: __('Next'),
+      prev: __('Prev'),
+    },
     uploadErrorMessages: {
       duplicate: __('A file with this name already exists.'),
-      tooLarge: __('File too large. Secure files must be less than %{limit} MB.'),
+      tooLarge: __('File too large. Secure Files must be less than %{limit} MB.'),
     },
     deleteModalTitle: s__('SecureFiles|Delete %{name}?'),
     deleteModalMessage: s__(
-      'SecureFiles|Secure file %{name} will be permanently deleted. Are you sure?',
+      'SecureFiles|Secure File %{name} will be permanently deleted. Are you sure?',
     ),
     deleteModalButton: s__('SecureFiles|Delete secure file'),
   },
@@ -182,85 +188,104 @@ export default {
 
 <template>
   <div>
-    <gl-alert v-if="error" variant="danger" class="gl-mt-6" @dismiss="error = null">
-      {{ errorMessage }}
-    </gl-alert>
+    <div>
+      <gl-alert v-if="error" variant="danger" class="gl-mt-6" @dismiss="error = null">
+        {{ errorMessage }}
+      </gl-alert>
 
-    <crud-component :title="$options.i18n.title" :count="projectSecureFiles.length" icon="document">
-      <template #actions>
-        <gl-button v-if="admin" size="small" @click="loadFileSelector">
-          <span v-if="uploading">
-            <gl-loading-icon class="gl-my-5" inline />
-            {{ $options.i18n.uploadingLabel }}
-          </span>
-          <span v-else>
-            {{ $options.i18n.uploadLabel }}
-          </span>
-        </gl-button>
-        <input
-          id="file-upload"
-          ref="fileUpload"
-          type="file"
-          class="hidden"
-          @change="uploadSecureFile"
-        />
-      </template>
-      <gl-table
-        :busy="loading"
-        :fields="fields"
-        :items="projectSecureFiles"
-        tbody-tr-class="js-ci-secure-files-row"
-        sort-by="key"
-        sort-direction="asc"
-        stacked="md"
-        table-class="text-secondary"
-        show-empty
-        :empty-text="$options.i18n.noFilesMessage"
+      <gl-card
+        class="gl-new-card"
+        header-class="gl-new-card-header"
+        body-class="gl-new-card-body gl-px-0"
       >
-        <template #table-busy>
-          <gl-loading-icon size="lg" class="gl-my-5" />
+        <template #header>
+          <div class="gl-new-card-title-wrapper">
+            <h5 class="gl-new-card-title gl-my-0">
+              {{ $options.i18n.title }}
+              <span class="gl-new-card-count">
+                <gl-icon name="document" class="gl-mr-2" />
+                {{ projectSecureFiles.length }}
+              </span>
+            </h5>
+          </div>
+          <div class="gl-new-card-actions">
+            <gl-button v-if="admin" size="small" @click="loadFileSelector">
+              <span v-if="uploading">
+                <gl-loading-icon class="gl-my-5" inline />
+                {{ $options.i18n.uploadingLabel }}
+              </span>
+              <span v-else>
+                <gl-icon name="upload" class="gl-mr-2" /> {{ $options.i18n.uploadLabel }}
+              </span>
+            </gl-button>
+            <input
+              id="file-upload"
+              ref="fileUpload"
+              type="file"
+              class="hidden"
+              @change="uploadSecureFile"
+            />
+          </div>
         </template>
 
-        <template #cell(name)="{ item }">
-          {{ item.name }}
-        </template>
+        <gl-table
+          :busy="loading"
+          :fields="fields"
+          :items="projectSecureFiles"
+          tbody-tr-class="js-ci-secure-files-row"
+          sort-by="key"
+          sort-direction="asc"
+          stacked="md"
+          table-class="text-secondary"
+          show-empty
+          :empty-text="$options.i18n.noFilesMessage"
+        >
+          <template #table-busy>
+            <gl-loading-icon size="lg" class="gl-my-5" />
+          </template>
 
-        <template #cell(created_at)="{ item }">
-          <timeago-tooltip :time="item.created_at" />
-        </template>
+          <template #cell(name)="{ item }">
+            {{ item.name }}
+          </template>
 
-        <template #cell(actions)="{ item }">
-          <metadata-button
-            :secure-file="item"
-            :admin="admin"
-            modal-id="$options.metadataModalId"
-            @selectSecureFile="updateMetadataSecureFile"
-          />
-          <gl-button
-            v-if="admin"
-            v-gl-modal="$options.deleteModalId"
-            v-gl-tooltip.hover.top="$options.i18n.deleteLabel"
-            size="small"
-            category="tertiary"
-            variant="default"
-            icon="remove"
-            :aria-label="$options.i18n.deleteLabel"
-            data-testid="delete-button"
-            @click="setDeleteModalData(item)"
-          />
-        </template>
-      </gl-table>
-      <template #pagination>
-        <gl-pagination
-          v-if="!loading"
-          v-model="page"
-          :per-page="$options.DEFAULT_PER_PAGE"
-          :total-items="totalItems"
-          align="center"
-          class="gl-mt-5"
-        />
-      </template>
-    </crud-component>
+          <template #cell(created_at)="{ item }">
+            <timeago-tooltip :time="item.created_at" />
+          </template>
+
+          <template #cell(actions)="{ item }">
+            <metadata-button
+              :secure-file="item"
+              :admin="admin"
+              modal-id="$options.metadataModalId"
+              @selectSecureFile="updateMetadataSecureFile"
+            />
+            <gl-button
+              v-if="admin"
+              v-gl-modal="$options.deleteModalId"
+              v-gl-tooltip.hover.top="$options.i18n.deleteLabel"
+              size="small"
+              category="tertiary"
+              variant="default"
+              icon="remove"
+              :aria-label="$options.i18n.deleteLabel"
+              data-testid="delete-button"
+              @click="setDeleteModalData(item)"
+            />
+          </template>
+        </gl-table>
+      </gl-card>
+    </div>
+
+    <gl-pagination
+      v-if="!loading"
+      v-model="page"
+      :per-page="$options.DEFAULT_PER_PAGE"
+      :total-items="totalItems"
+      :next-text="$options.i18n.pagination.next"
+      :prev-text="$options.i18n.pagination.prev"
+      align="center"
+      class="gl-mt-5"
+    />
 
     <gl-modal
       :ref="$options.deleteModalId"

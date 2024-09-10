@@ -8,7 +8,8 @@
       margin-bottom: $gl-padding-4;
     }
 
-    .milestone-progress {
+    .milestone-progress,
+    .milestone-release-links {
       a {
         color: var(--blue-600, $blue-600);
       }

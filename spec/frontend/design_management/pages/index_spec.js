@@ -19,7 +19,6 @@ import uploadDesignMutation from '~/design_management/graphql/mutations/upload_d
 import Index, { i18n } from '~/design_management/pages/index.vue';
 import createRouter from '~/design_management/router';
 import { DESIGNS_ROUTE_NAME } from '~/design_management/router/constants';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
 import * as utils from '~/design_management/utils/design_management_utils';
 import {
   EXISTING_DESIGN_DROP_MANY_FILES_MESSAGE,
@@ -166,13 +165,7 @@ describe('Design management index page', () => {
       },
       mocks: { $apollo },
       router,
-      stubs: {
-        CrudComponent,
-        DesignDestroyer,
-        ApolloMutation,
-        VueDraggable,
-        ...stubs,
-      },
+      stubs: { DesignDestroyer, ApolloMutation, VueDraggable, ...stubs },
       attachTo: document.body,
       provide: {
         projectPath: 'project-path',
@@ -239,7 +232,7 @@ describe('Design management index page', () => {
     it('has correct classes applied to dropzone wrapper', () => {
       createComponent({ designs: mockDesigns, allVersions: [mockVersion] });
       expect(findDropzoneWrapper().classes()).toEqual([
-        'gl-flex-col',
+        'gl-flex-direction-column',
         'col-md-6',
         'col-lg-3',
         'gl-mt-5',

@@ -40,7 +40,7 @@ describe('ReviewerTitle component', () => {
           reviewerAssignDrawer,
         },
       },
-      stubs: ['approval-summary', 'ReviewerDropdown'],
+      stubs: ['approval-summary'],
     });
   };
 
@@ -89,7 +89,7 @@ describe('ReviewerTitle component', () => {
       editable: false,
     });
 
-    expect(findEditButton().exists()).toBe(false);
+    expect(wrapper.vm.$el.querySelector('.edit-link')).toBeNull();
   });
 
   it('renders edit link when editable', () => {
@@ -98,7 +98,7 @@ describe('ReviewerTitle component', () => {
       editable: true,
     });
 
-    expect(findEditButton().exists()).toBe(true);
+    expect(wrapper.vm.$el.querySelector('.edit-link')).not.toBeNull();
   });
 
   it('tracks the event when edit is clicked', () => {

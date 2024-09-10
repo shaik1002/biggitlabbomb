@@ -2,7 +2,7 @@ import Vue, { nextTick } from 'vue';
 import { GlForm, GlFormGroup, GlFormInput, GlFormCheckbox, GlTooltip } from '@gitlab/ui';
 import VueApollo from 'vue-apollo';
 import namespaceWorkItemTypesQueryResponse from 'test_fixtures/graphql/work_items/namespace_work_item_types.query.graphql.json';
-import { sprintf } from '~/locale';
+import { sprintf, s__ } from '~/locale';
 import { stubComponent } from 'helpers/stub_component';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import createMockApollo from 'helpers/mock_apollo_helper';
@@ -20,8 +20,6 @@ import {
   I18N_WORK_ITEM_CONFIDENTIALITY_CHECKBOX_TOOLTIP,
   SEARCH_DEBOUNCE,
   WORK_ITEM_TYPE_ENUM_EPIC,
-  MAX_WORK_ITEMS,
-  I18N_MAX_WORK_ITEMS_ERROR_MESSAGE,
 } from '~/work_items/constants';
 import projectWorkItemsQuery from '~/work_items/graphql/project_work_items.query.graphql';
 import namespaceWorkItemTypesQuery from '~/work_items/graphql/namespace_work_item_types.query.graphql';
@@ -34,7 +32,6 @@ import {
   updateWorkItemMutationResponse,
   mockIterationWidgetResponse,
   namespaceProjectsList,
-  generateWorkItemsListWithId,
 } from '../../mock_data';
 
 Vue.use(VueApollo);
@@ -93,7 +90,6 @@ describe('WorkItemLinksForm', () => {
       ]),
       propsData: {
         fullPath: 'group-a',
-        isGroup,
         issuableGid: 'gid://gitlab/WorkItem/1',
         parentConfidential,
         parentIteration,
@@ -106,6 +102,7 @@ describe('WorkItemLinksForm', () => {
       },
       provide: {
         hasIterationsFeature,
+        isGroup,
       },
       stubs: {
         GlFormGroup: stubComponent(GlFormGroup, {
@@ -130,7 +127,6 @@ describe('WorkItemLinksForm', () => {
   const findTooltip = () => wrapper.findComponent(GlTooltip);
   const findAddChildButton = () => wrapper.findByTestId('add-child-button');
   const findValidationElement = () => wrapper.findByTestId('work-items-invalid');
-  const findWorkItemLimitValidationMessage = () => wrapper.findByTestId('work-items-limit-error');
   const findErrorMessageElement = () => wrapper.findByTestId('work-items-error');
   const findProjectSelector = () => wrapper.findComponent(WorkItemProjectsListbox);
 
@@ -152,19 +148,6 @@ describe('WorkItemLinksForm', () => {
   );
 
   describe('creating a new work item', () => {
-    const submitForm = ({ title, fullPath }) => {
-      findInput().vm.$emit('input', title);
-
-      if (fullPath) {
-        findProjectSelector().vm.$emit('selectProject', fullPath);
-      }
-
-      // Trigger form submission
-      findForm().vm.$emit('submit', {
-        preventDefault: jest.fn(),
-      });
-    };
-
     describe('for project level work items', () => {
       beforeEach(async () => {
         await createComponent();
@@ -184,10 +167,11 @@ describe('WorkItemLinksForm', () => {
         expect(findFormGroup().props('invalidFeedback')).toBe(null);
         expect(findInput().props('state')).toBe(true);
 
-        submitForm({ title: 'Create task test' });
-
-        expect(wrapper.emitted('update-in-progress')).toEqual([[true]]);
-
+        findInput().vm.$emit('input', 'Create task test');
+        // Trigger form submission
+        findForm().vm.$emit('submit', {
+          preventDefault: jest.fn(),
+        });
         await waitForPromises();
 
         expect(findFormGroup().props('state')).toBe(false);
@@ -195,20 +179,20 @@ describe('WorkItemLinksForm', () => {
           'Something went wrong when trying to create a child. Please try again.',
         );
         expect(findInput().props('state')).toBe(false);
-        expect(wrapper.emitted('update-in-progress')[1]).toEqual([false]);
       });
 
-      it('creates child task in non confidential parent and closes the form', async () => {
-        submitForm({ title: 'Create task test' });
+      it('creates child task in non confidential parent', async () => {
+        findInput().vm.$emit('input', 'Create task test');
 
-        expect(wrapper.emitted('update-in-progress')).toEqual([[true]]);
-
+        findForm().vm.$emit('submit', {
+          preventDefault: jest.fn(),
+        });
         await waitForPromises();
 
         expect(createMutationResolver).toHaveBeenCalledWith({
           input: {
             title: 'Create task test',
-            namespacePath: 'group-a',
+            projectPath: 'group-a',
             workItemTypeId: workItemTypeIdForTask,
             hierarchyWidget: {
               parentId: 'gid://gitlab/WorkItem/1',
@@ -217,24 +201,22 @@ describe('WorkItemLinksForm', () => {
           },
         });
         expect(wrapper.emitted('addChild')).toEqual([[]]);
-        expect(wrapper.emitted('cancel')).toEqual([[]]);
-        expect(wrapper.emitted('update-in-progress')[1]).toEqual([false]);
       });
 
       it('creates child task in confidential parent', async () => {
         await createComponent({ parentConfidential: true });
 
-        submitForm({ title: 'Create confidential task' });
+        findInput().vm.$emit('input', 'Create confidential task');
 
-        expect(wrapper.emitted('update-in-progress')).toEqual([[true]]);
-
+        findForm().vm.$emit('submit', {
+          preventDefault: jest.fn(),
+        });
         await waitForPromises();
-
         expect(wrapper.vm.childWorkItemType).toEqual(workItemTypeIdForTask);
         expect(createMutationResolver).toHaveBeenCalledWith({
           input: {
             title: 'Create confidential task',
-            namespacePath: 'group-a',
+            projectPath: 'group-a',
             workItemTypeId: workItemTypeIdForTask,
             hierarchyWidget: {
               parentId: 'gid://gitlab/WorkItem/1',
@@ -242,7 +224,6 @@ describe('WorkItemLinksForm', () => {
             confidential: true,
           },
         });
-        expect(wrapper.emitted('update-in-progress')[1]).toEqual([false]);
       });
     });
 
@@ -263,10 +244,14 @@ describe('WorkItemLinksForm', () => {
         expect(findWorkItemTokenInput().exists()).toBe(false);
       });
 
-      it('creates child issue in non confidential parent and closes the form', async () => {
-        submitForm({ title: 'Create issue test', fullPath: projectData[0].fullPath });
+      it('creates child issue in non confidential parent', async () => {
+        findInput().vm.$emit('input', 'Create issue test');
 
-        expect(wrapper.emitted('update-in-progress')).toEqual([[true]]);
+        findProjectSelector().vm.$emit('selectProject', projectData[0]);
+
+        findForm().vm.$emit('submit', {
+          preventDefault: jest.fn(),
+        });
 
         await waitForPromises();
 
@@ -282,8 +267,6 @@ describe('WorkItemLinksForm', () => {
           },
         });
         expect(wrapper.emitted('addChild')).toEqual([[]]);
-        expect(wrapper.emitted('update-in-progress')[1]).toEqual([false]);
-        expect(wrapper.emitted('cancel')).toEqual([[]]);
       });
 
       it('creates child issue in confidential parent', async () => {
@@ -294,9 +277,13 @@ describe('WorkItemLinksForm', () => {
           childrenType: WORK_ITEM_TYPE_ENUM_ISSUE,
         });
 
-        submitForm({ title: 'Create confidential issue', fullPath: projectData[0].fullPath });
+        findInput().vm.$emit('input', 'Create confidential issue');
 
-        expect(wrapper.emitted('update-in-progress')).toEqual([[true]]);
+        findProjectSelector().vm.$emit('selectProject', projectData[0]);
+
+        findForm().vm.$emit('submit', {
+          preventDefault: jest.fn(),
+        });
 
         await waitForPromises();
 
@@ -311,7 +298,6 @@ describe('WorkItemLinksForm', () => {
             confidential: true,
           },
         });
-        expect(wrapper.emitted('update-in-progress')[1]).toEqual([false]);
       });
     });
 
@@ -399,7 +385,7 @@ describe('WorkItemLinksForm', () => {
 
       expect(findAddChildButton().props('disabled')).toBe(true);
 
-      findProjectSelector().vm.$emit('selectProject', projectData[0].fullPath);
+      findProjectSelector().vm.$emit('selectProject', projectData[0]);
 
       await nextTick();
 
@@ -437,7 +423,7 @@ describe('WorkItemLinksForm', () => {
       });
     });
 
-    it('selects, adds children and closes the form', async () => {
+    it('selects and adds children', async () => {
       await selectAvailableWorkItemTokens();
 
       expect(findAddChildButton().text()).toBe('Add tasks');
@@ -449,9 +435,7 @@ describe('WorkItemLinksForm', () => {
         preventDefault: jest.fn(),
       });
       await waitForPromises();
-
       expect(updateMutationResolver).toHaveBeenCalled();
-      expect(wrapper.emitted('cancel')).toEqual([[]]);
     });
 
     it('shows validation error when non-confidential child items are being added to confidential parent', async () => {
@@ -463,7 +447,9 @@ describe('WorkItemLinksForm', () => {
       expect(findValidationElement().exists()).toBe(true);
       expect(findValidationElement().text().trim()).toBe(
         sprintf(
-          '%{invalidWorkItemsList} cannot be added: Cannot assign a non-confidential %{childWorkItemType} to a confidential parent %{parentWorkItemType}. Make the selected %{childWorkItemType} confidential and try again.',
+          s__(
+            'WorkItem|%{invalidWorkItemsList} cannot be added: Cannot assign a non-confidential %{childWorkItemType} to a confidential parent %{parentWorkItemType}. Make the selected %{childWorkItemType} confidential and try again.',
+          ),
           {
             // Only non-confidential work items are shown in the error message
             invalidWorkItemsList: availableWorkItemsResponse.data.workspace.workItems.nodes
@@ -474,17 +460,6 @@ describe('WorkItemLinksForm', () => {
             parentWorkItemType: 'Issue',
           },
         ),
-      );
-    });
-
-    it('disables button ans shows validation error when more than 10 work items are selected', async () => {
-      await selectAvailableWorkItemTokens(generateWorkItemsListWithId(MAX_WORK_ITEMS + 1));
-
-      expect(findWorkItemTokenInput().props('areWorkItemsToAddValid')).toBe(false);
-      expect(findAddChildButton().attributes().disabled).toBe('true');
-      expect(findWorkItemLimitValidationMessage().exists()).toBe(true);
-      expect(findWorkItemLimitValidationMessage().text()).toContain(
-        I18N_MAX_WORK_ITEMS_ERROR_MESSAGE,
       );
     });
 
@@ -526,7 +501,7 @@ describe('WorkItemLinksForm', () => {
       expect(createMutationResolver).toHaveBeenCalledWith({
         input: {
           title: 'Create task test',
-          namespacePath: 'group-a',
+          projectPath: 'group-a',
           workItemTypeId: workItemTypeIdForTask,
           hierarchyWidget: {
             parentId: 'gid://gitlab/WorkItem/1',
@@ -552,7 +527,7 @@ describe('WorkItemLinksForm', () => {
       expect(createMutationResolver).not.toHaveBeenCalledWith({
         input: {
           title: 'Create task test',
-          namespacePath: 'group-a',
+          projectPath: 'group-a',
           workItemTypeId: 'gid://gitlab/WorkItems::Type/3',
           hierarchyWidget: {
             parentId: 'gid://gitlab/WorkItem/1',

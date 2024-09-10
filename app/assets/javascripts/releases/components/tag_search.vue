@@ -70,12 +70,12 @@ export default {
   <div data-testid="tag-name-search">
     <gl-search-box-by-type
       :value="query"
-      class="gl-border-b-1 gl-border-gray-200 gl-border-b-solid"
+      class="gl-border-b-solid gl-border-b-1 gl-border-gray-200"
       borderless
       autofocus
       @input="onSearchBoxInput"
     />
-    <div class="release-tag-list gl-overflow-y-auto">
+    <div class="gl-overflow-y-auto release-tag-list">
       <div v-if="tags.length || release.tagName">
         <gl-dropdown-item v-if="selectedNotShown" is-checked is-check-item class="gl-list-none">
           {{ release.tagName }}
@@ -91,14 +91,17 @@ export default {
           {{ tag.name }}
         </gl-dropdown-item>
       </div>
-      <div v-else class="gl-my-5 gl-flex gl-justify-center gl-text-base gl-text-gray-500">
+      <div
+        v-else
+        class="gl-my-5 gl-text-gray-500 gl-display-flex gl-font-base gl-justify-content-center"
+      >
         {{ $options.i18n.noResults }}
       </div>
     </div>
-    <div class="gl-border-t-1 gl-border-gray-200 gl-py-3 gl-border-t-solid">
+    <div class="gl-border-t-solid gl-border-t-1 gl-border-gray-200 gl-py-3">
       <gl-button
         category="tertiary"
-        class="!gl-justify-start !gl-rounded-none"
+        class="gl-justify-content-start! gl-rounded-0!"
         block
         :disabled="!query"
         @click="$emit('create', query)"

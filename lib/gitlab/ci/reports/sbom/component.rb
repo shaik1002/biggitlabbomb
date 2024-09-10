@@ -8,9 +8,9 @@ module Gitlab
           include Gitlab::Utils::StrongMemoize
 
           attr_reader :ref, :component_type, :version, :path
-          attr_accessor :properties, :purl, :source_package_name, :ancestors, :licenses
+          attr_accessor :properties, :purl, :source_package_name, :ancestors
 
-          def initialize(ref:, type:, name:, purl:, version:, properties: nil, source_package_name: nil, licenses: [])
+          def initialize(ref:, type:, name:, purl:, version:, properties: nil, source_package_name: nil)
             @ref = ref
             @component_type = type
             @name = name
@@ -19,7 +19,6 @@ module Gitlab
             @properties = properties
             @source_package_name = source_package_name
             @ancestors = []
-            @licenses = licenses
           end
 
           def <=>(other)

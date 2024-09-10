@@ -70,8 +70,6 @@ module Types
           object.nuget_metadatum
         when 'pypi'
           object.pypi_metadatum
-        when 'terraform_module'
-          object.terraform_module_metadatum
         end
       end
       # rubocop: enable GraphQL/ResolverMethodLength

@@ -9,7 +9,7 @@ import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import WorkItemDrawer from '~/work_items/components/work_item_drawer.vue';
 import { s__ } from '~/locale';
 import { defaultSortableOptions, DRAG_DELAY } from '~/sortable/constants';
-import { mapWorkItemWidgetsToIssuableFields } from '~/issues/list/utils';
+import { mapWorkItemWidgetsToIssueFields } from '~/issues/list/utils';
 import {
   DraggableItemTypes,
   flashAnimationDuration,
@@ -18,7 +18,6 @@ import {
   ListType,
   listIssuablesQueries,
   DEFAULT_BOARD_LIST_ITEMS_SIZE,
-  BoardType,
 } from 'ee_else_ce/boards/constants';
 import { calculateNewPosition } from 'ee_else_ce/boards/boards_util';
 import { setError } from '../graphql/cache_updates';
@@ -130,9 +129,6 @@ export default {
     issuesDrawerEnabled() {
       return this.glFeatures.issuesListDrawer;
     },
-    namespace() {
-      return this.isGroupBoard ? BoardType.group : BoardType.project;
-    },
   },
   methods: {
     afterFormEnters() {
@@ -233,14 +229,7 @@ export default {
 
       cache.updateQuery(
         { query: listIssuablesQueries[this.issuableType].query, variables },
-        (boardList) =>
-          mapWorkItemWidgetsToIssuableFields({
-            list: boardList,
-            workItem,
-            isBoard: true,
-            namespace: this.namespace,
-            type: this.issuableType,
-          }),
+        (boardList) => mapWorkItemWidgetsToIssueFields(boardList, workItem, true),
       );
     },
   },
@@ -248,7 +237,11 @@ export default {
 </script>
 
 <template>
-  <div v-cloak data-testid="boards-list" class="gl-flex gl-min-h-0 gl-grow gl-flex-col">
+  <div
+    v-cloak
+    data-testid="boards-list"
+    class="gl-flex-grow-1 gl-display-flex gl-flex-direction-column gl-min-h-0"
+  >
     <gl-alert v-if="error" variant="danger" :dismissible="true" @dismiss="dismissError">
       {{ error }}
     </gl-alert>
@@ -257,7 +250,7 @@ export default {
       v-if="!isSwimlanesOn"
       ref="list"
       v-bind="draggableOptions"
-      class="boards-list gl-w-full gl-overflow-x-auto gl-whitespace-nowrap gl-py-5 gl-pl-0 gl-pr-5 xl:gl-pl-3 xl:gl-pr-6"
+      class="boards-list gl-w-full gl-py-5 gl-pl-0 gl-pr-5 xl:gl-pl-3 xl:gl-pr-6 gl-whitespace-nowrap gl-overflow-x-auto"
       @end="updateListPosition"
     >
       <board-column
@@ -275,7 +268,7 @@ export default {
       />
 
       <transition mode="out-in" name="slide" @after-enter="afterFormEnters">
-        <div v-if="!addColumnFormVisible" class="gl-inline-block gl-pl-2">
+        <div v-if="!addColumnFormVisible" class="gl-display-inline-block gl-pl-2">
           <board-add-new-column-trigger
             v-if="canAdminList"
             :is-new-list-showing="addColumnFormVisible"
@@ -308,7 +301,7 @@ export default {
       <template #create-list-button>
         <div
           v-if="!addColumnFormVisible"
-          class="gl-sticky gl-top-5 gl-mt-5 gl-inline-block gl-pl-3"
+          class="gl-mt-5 gl-display-inline-block gl-pl-3 gl-sticky gl-top-5"
         >
           <board-add-new-column-trigger
             v-if="canAdminList"
@@ -346,7 +339,6 @@ export default {
         <work-item-drawer
           :open="Boolean(activeIssuable && activeIssuable.iid)"
           :active-item="activeIssuable"
-          :issuable-type="issuableType"
           @close="onDrawerClosed"
           @work-item-updated="updateBoardCard($event, activeIssuable)"
           @workItemDeleted="onIssuableDeleted(activeIssuable)"
@@ -356,19 +348,18 @@ export default {
       </template>
     </board-drawer-wrapper>
 
-    <template v-else>
-      <board-content-sidebar
-        v-if="isIssueBoard"
-        :backlog-list-id="backlogListId"
-        :closed-list-id="closedListId"
-        data-testid="issue-boards-sidebar"
-      />
-      <epic-board-content-sidebar
-        v-else-if="isEpicBoard"
-        :backlog-list-id="backlogListId"
-        :closed-list-id="closedListId"
-        data-testid="epic-boards-sidebar"
-      />
-    </template>
+    <board-content-sidebar
+      v-if="isIssueBoard && !issuesDrawerEnabled"
+      :backlog-list-id="backlogListId"
+      :closed-list-id="closedListId"
+      data-testid="issue-boards-sidebar"
+    />
+
+    <epic-board-content-sidebar
+      v-else-if="isEpicBoard"
+      :backlog-list-id="backlogListId"
+      :closed-list-id="closedListId"
+      data-testid="epic-boards-sidebar"
+    />
   </div>
 </template>

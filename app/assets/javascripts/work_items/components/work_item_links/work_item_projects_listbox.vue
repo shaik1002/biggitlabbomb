@@ -15,7 +15,7 @@ export default {
     ProjectAvatar,
   },
   model: {
-    prop: 'selectedProjectFullPath',
+    prop: 'selectedProject',
     event: 'selectProject',
   },
   props: {
@@ -23,19 +23,14 @@ export default {
       required: true,
       type: String,
     },
-    currentProjectName: {
-      required: false,
-      type: String,
-      default: '',
-    },
     isGroup: {
       required: false,
       type: Boolean,
       default: false,
     },
-    selectedProjectFullPath: {
+    selectedProject: {
       required: false,
-      type: String,
+      type: Object,
       default: null,
     },
   },
@@ -43,8 +38,8 @@ export default {
     return {
       projects: [],
       frequentProjects: [],
+      selectedProjectFullPath: null,
       searchKey: '',
-      selectedProject: null,
     };
   },
   apollo: {
@@ -62,15 +57,14 @@ export default {
         return data.namespace?.projects?.nodes;
       },
       result() {
-        this.selectedProject = this.findSelectedProject(this.selectedProjectFullPath);
+        if (this.selectedProject === null) {
+          this.selectedProjectFullPath = this.fullPath;
+        }
       },
       debounce: SEARCH_DEBOUNCE,
     },
   },
   computed: {
-    projectsLoading() {
-      return this.$apollo.queries.projects.loading;
-    },
     dropdownToggleText() {
       if (this.selectedProject) {
         /** When selectedProject is fetched from localStorage
@@ -79,9 +73,7 @@ export default {
          * */
         return this.selectedProject.nameWithNamespace || this.selectedProject.namespace;
       }
-      return this.selectedProjectFullPath && this.currentProjectName
-        ? this.currentProjectName
-        : s__('WorkItem|Select a project');
+      return s__('WorkItem|Select a project');
     },
     listItems() {
       const items = [];
@@ -130,14 +122,16 @@ export default {
       return items;
     },
   },
+  watch: {
+    selectedProjectFullPath(projectFullPath) {
+      const project = this.findSelectedProject(projectFullPath);
+      this.$emit('selectProject', project);
+    },
+  },
   methods: {
     handleSearch(keyword) {
       this.searchKey = keyword;
       this.setFrequentProjects(keyword);
-    },
-    handleSelect(projectFullPath) {
-      this.selectedProject = this.findSelectedProject(projectFullPath);
-      this.$emit('selectProject', projectFullPath);
     },
     findSelectedProject(projectFullPath) {
       const project = this.projects.find((proj) => proj.fullPath === projectFullPath);
@@ -206,17 +200,15 @@ export default {
 
 <template>
   <gl-collapsible-listbox
+    v-model="selectedProjectFullPath"
     block
     searchable
     is-check-centered
     :items="listItems"
-    :selected="selectedProjectFullPath"
     :toggle-text="dropdownToggleText"
-    :searching="projectsLoading"
     fluid-width
     class="gl-relative"
     @search="handleSearch"
-    @select="handleSelect"
     @shown="handleDropdownShow"
   >
     <template #list-item="{ item }">
@@ -228,7 +220,7 @@ export default {
           :project-name="item.text"
         />
         <span>
-          <span class="gl-mr-2 gl-block"> {{ item.text }} </span>
+          <span class="gl-block gl-mr-2"> {{ item.text }} </span>
           <span class="gl-block gl-text-secondary"> {{ item.namespace }} </span>
         </span>
       </div>

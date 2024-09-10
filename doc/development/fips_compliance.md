@@ -16,7 +16,7 @@ You can build a FIPS-compliant instance of GitLab, but [not all features are inc
 A FIPS-compliant instance must be configured following the [FIPS install instructions](#install-gitlab-with-fips-compliance)
 exactly.
 
-The two current FIPS standards: [140-2](https://en.wikipedia.org/wiki/FIPS_140-2)
+There are two current FIPS standards: [140-2](https://en.wikipedia.org/wiki/FIPS_140-2)
 and [140-3](https://en.wikipedia.org/wiki/FIPS_140-3). At GitLab we usually
 mean FIPS 140-2.
 
@@ -78,9 +78,9 @@ Additionally, these package repositories are disabled in FIPS mode:
 ## FIPS compliance vs FIPS validation at GitLab
 
 GitLab does not fork or modify cryptographic binaries (for example OpenSSL) in its FIPS-compliant
-software releases but instead uses existing, FIPS-validated cryptographic software (modules).
+software releases but instead uses existing, FIPS-validated crytographic software (modules).
 GitLab therefore does not need to submit its software through the
-[NIST Cryptographic Module Validation Program (CMVP)](https://csrc.nist.gov/projects/cryptographic-module-validation-program/)
+[NIST Cryptographic Module Valiation Program (CMVP)](https://csrc.nist.gov/projects/cryptographic-module-validation-program/)
 independent laboratory testing.
 Instead, GitLab must use FIPS-validated software (listed in
 [Cryptographic Module Validation Program](https://csrc.nist.gov/projects/cryptographic-module-validation-program/validated-modules))
@@ -285,7 +285,7 @@ Registration is required.
 
 After the virtual machine is set up, you can follow the [GDK](https://gitlab.com/gitlab-org/gitlab-development-kit)
 installation instructions, including the [advanced instructions for RHEL](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/main/doc/advanced.md#red-hat-enterprise-linux).
-The `asdf` tool is not used for dependency management because it's essential to
+Note that `asdf` is not used for dependency management because it's essential to
 use the RedHat-provided Go compiler and other system dependencies.
 
 ### Enable FIPS mode
@@ -465,7 +465,7 @@ The Cloud Native GitLab CI pipeline generates images using several base images:
 
 UBI images ship with the same OpenSSL package as those used by
 RHEL. This makes it possible to build FIPS-compliant binaries without
-needing RHEL. RHEL 8.2 ships a [FIPS-validated OpenSSL](https://access.redhat.com/articles/compliance_activities_and_gov_standards), but 8.5 is in
+needing RHEL. Note that RHEL 8.2 ships a [FIPS-validated OpenSSL](https://access.redhat.com/articles/compliance_activities_and_gov_standards), but 8.5 is in
 review for FIPS validation.
 
 [This merge request](https://gitlab.com/gitlab-org/build/CNG/-/merge_requests/981)
@@ -487,6 +487,6 @@ Merge requests that can trigger Package and QA, can trigger a FIPS package and a
 Reference Architecture test pipeline. The base image used for the trigger is
 Ubuntu 20.04 FIPS:
 
-1. Trigger `e2e:test-on-omnibus` job, if not already triggered.
+1. Trigger `e2e:package-and-test` job, if not already triggered.
 1. On the `gitlab-omnibus-mirror` child pipeline, manually trigger `Trigger:package:fips`.
 1. When the package job is complete, manually trigger the `RAT:FIPS` job.

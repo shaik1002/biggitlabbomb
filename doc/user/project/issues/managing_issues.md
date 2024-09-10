@@ -64,7 +64,7 @@ To edit multiple issues at the same time:
 When bulk editing issues in a project, you can edit the following attributes:
 
 - Status (open or closed)
-- [Assignees](managing_issues.md#assignees)
+- [Assignees](managing_issues.md#assignee)
 - [Epic](../../group/epics/index.md)
 - [Milestone](../milestones/index.md)
 - [Labels](../labels.md)
@@ -263,23 +263,7 @@ it inherits the issue's milestone and labels.
 For performance reasons, automatic issue closing is disabled for the very first
 push from an existing repository.
 
-#### User responsibility when merging
-
-When you merge a merge request, it's your responsibility to check that it's appropriate for any targeted issues
-to close. Users can include issue closing patterns in the merge request description, and also in the body
-of a commit message. Closing messages in commit messages are easy to miss. In both cases, the merge request widget
-shows information about the issue to close on merge:
-
-![This merge request closes issue #2754.](../merge_requests/img/closing_pattern_v17_4.png)
-
-When you merge a merge request, GitLab checks that you have permission to close the targeted issues.
-In public repositories, this check is important, because external users can create both merge requests
-and commits that contain closing patterns. When you are the user who merges, it's important
-that you are aware of the effects the merge has on both the code and issues in your project.
-
 #### Default closing pattern
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/465391) work item (task, objective, or key result) references in GitLab 17.3.
 
 To automatically close an issue, use the following keywords followed by the issue reference.
 
@@ -294,10 +278,7 @@ Available issue reference formats:
 
 - A local issue (`#123`).
 - A cross-project issue (`group/project#123`).
-- The full URL of an issue (`https://gitlab.example.com/<project_full_path>/-/issues/123`).
-- The full URL of a work item (for example, task, objective, or key result):
-  - In a project (`https://gitlab.example.com/<project_full_path>/-/work_items/123`).
-  - In a group (`https://gitlab.example.com/groups/<group_full_path>/-/work_items/123`).
+- The full URL of an issue (`https://gitlab.example.com/group/project/issues/123`).
 
 For example:
 
@@ -306,7 +287,7 @@ Awesome commit message
 
 Fix #20, Fixes #21 and Closes group/otherproject#22.
 This commit is also related to #17 and fixes #18, #19
-and https://gitlab.example.com/group/otherproject/-/issues/23.
+and https://gitlab.example.com/group/otherproject/issues/23.
 ```
 
 The previous commit message closes `#18`, `#19`, `#20`, and `#21` in the project this commit is pushed to,
@@ -573,22 +554,16 @@ To copy the issue's email address:
 1. Select **Plan > Issues**, then select your issue to view it.
 1. On the right sidebar, next to **Issue email**, select **Copy Reference** (**{copy-to-clipboard}**).
 
-## Assignees
+## Assignee
 
 An issue can be assigned to one or [more users](multiple_assignees_for_issues.md).
 
 The assignees can be changed as often as needed. The idea is that the assignees are
-people responsible for the issue.
+people responsible for an issue.
 When an issue is assigned to someone, it appears in their **Assigned issues** page.
 
 If a user is not a member of a project, an issue can only be assigned to them if they create it
 themselves or another project member assigns them.
-
-### Change assignee on an issue
-
-Prerequisites:
-
-- You must have at least the Reporter role for the project.
 
 To change the assignee on an issue:
 
@@ -626,8 +601,6 @@ You can use health status to signal to others in your organization whether issue
 as planned or need attention to stay on schedule.
 
 Incorporate a review of issue health status into your daily stand-up, project status reports, or weekly meetings to address risks to timely delivery of your planned work.
-
-### Change health status of an issue
 
 Prerequisites:
 

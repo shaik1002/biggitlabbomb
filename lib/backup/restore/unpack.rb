@@ -103,12 +103,12 @@ module Backup
       end
 
       def start_unpack!
-        logger.info Rainbow('Unpacking backup ... ').blue
+        logger.info 'Unpacking backup ... '.color(:blue)
 
         if Kernel.system(*%W[tar -xf #{tar_file}])
-          logger.info Rainbow('Unpacking backup ... ').blue + Rainbow('done').green
+          logger.info 'Unpacking backup ... '.color(:blue) + 'done'.color(:green)
         else
-          logger.error Rainbow('Unpacking backup failed').red
+          logger.error 'Unpacking backup failed'.color(:red)
 
           exit 1
         end

@@ -22,10 +22,6 @@ class Dashboard::TodosController < Dashboard::ApplicationController
     @allowed_todos = ::Todos::AllowedTargetFilterService.new(@todos, current_user).execute
   end
 
-  def vue
-    redirect_to(dashboard_todos_path, status: :found) unless Feature.enabled?(:todos_vue_application, current_user)
-  end
-
   def destroy
     todo = current_user.todos.find(params[:id])
 

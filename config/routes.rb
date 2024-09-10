@@ -145,7 +145,6 @@ InitializerConnections.raise_if_new_database_connection do
       scope :ide, as: :ide, format: false do
         get '/', to: 'ide#index'
         get '/project', to: 'ide#index'
-        # note: This path has a hardcoded reference in the FE `app/assets/javascripts/ide/constants.js`
         get '/oauth_redirect', to: 'ide#oauth_redirect'
 
         scope path: 'project/:project_id', as: :project, constraints: { project_id: Gitlab::PathRegex.full_namespace_route_regex } do
@@ -159,6 +158,12 @@ InitializerConnections.raise_if_new_database_connection do
           get '/merge_requests/:merge_request_id', to: 'ide#index', constraints: { merge_request_id: /\d+/ }
           get '/', to: 'ide#index'
         end
+
+        # Remote host can contain "." characters so it needs a constraint
+        post 'remote/:remote_host(/*remote_path)',
+          as: :remote,
+          to: 'web_ide/remote_ide#index',
+          constraints: { remote_host: %r{[^/?]+} }
 
         post '/reset_oauth_application_settings' => 'admin/applications#reset_web_ide_oauth_application_settings'
       end

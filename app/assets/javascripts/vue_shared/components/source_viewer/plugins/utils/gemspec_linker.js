@@ -20,7 +20,6 @@ const DEPENDENCY_REGEX = new RegExp(
   'gm',
 );
 
-// eslint-disable-next-line max-params
 const handleReplace = (method, delimiter, packageName, closeTag, rest) => {
   // eslint-disable-next-line @gitlab/require-i18n-strings
   const openTag = generateHLJSOpenTag('string linked', delimiter);
@@ -33,7 +32,6 @@ const handleReplace = (method, delimiter, packageName, closeTag, rest) => {
 export default (result) => {
   return result.value.replace(
     DEPENDENCY_REGEX,
-    // eslint-disable-next-line max-params
     (_, method, delimiter, packageName, closeTag, rest) =>
       handleReplace(method, delimiter, packageName, closeTag, rest),
   );

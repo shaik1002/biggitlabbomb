@@ -136,7 +136,6 @@ export const highlighter = (li, query) => {
   }
   const escapedQuery = escapeRegExp(query);
   const regexp = new RegExp(`>\\s*([^<]*?)(${escapedQuery})([^<]*)\\s*<`, 'ig');
-  // eslint-disable-next-line max-params
   return li.replace(regexp, (str, $1, $2, $3) => `> ${$1}<strong>${$2}</strong>${$3} <`);
 };
 
@@ -220,7 +219,7 @@ class GfmAutoComplete {
           tpl += ' <small class="params"><%- params.join(" ") %></small>';
         }
         if (value.warning && value.icon && value.icon === 'confidential') {
-          tpl += `<small class="description gl-flex gl-items-center">${spriteIcon(
+          tpl += `<small class="description gl-display-flex gl-align-items-center">${spriteIcon(
             'eye-slash',
             's16 gl-mr-2',
           )}<em><%- warning %></em></small>`;
@@ -988,7 +987,6 @@ class GfmAutoComplete {
     }
   }
 
-  // eslint-disable-next-line max-params
   loadData($input, at, data, { search } = {}) {
     this.isLoadingData[at] = false;
 
@@ -1014,11 +1012,6 @@ class GfmAutoComplete {
     this.loadData($input, at, ['loaded']);
 
     GfmAutoComplete.glEmojiTag = Emoji.glEmojiTag;
-  }
-
-  updateDataSources(newDataSources) {
-    this.dataSources = { ...this.dataSources, ...newDataSources };
-    this.clearCache();
   }
 
   clearCache() {

@@ -227,6 +227,7 @@ export default {
       <template v-else>
         <gl-badge
           :id="fluxBadgeId"
+          ref="flux_status_badge"
           :icon="syncStatusBadge.icon"
           :variant="syncStatusBadge.variant"
           data-testid="sync-badge"
@@ -238,7 +239,7 @@ export default {
         <gl-popover :target="fluxBadgeId" :title="syncStatusBadge.popoverTitle">
           <gl-sprintf :message="syncStatusBadge.popoverText">
             <template #link="{ content }">
-              <gl-link :href="syncStatusBadge.popoverLink" class="gl-text-sm">{{
+              <gl-link :href="syncStatusBadge.popoverLink" class="gl-font-sm">{{
                 content
               }}</gl-link></template
             >

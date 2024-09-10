@@ -99,7 +99,7 @@ module Gitlab
         login, token = user_name_and_password(current_request)
         user = User.find_by_login(login.to_s)
 
-        user if user && Gitlab::LfsToken.new(user, nil).token_valid?(token.to_s)
+        user if user && Gitlab::LfsToken.new(user).token_valid?(token.to_s)
       end
 
       def find_user_from_personal_access_token
@@ -110,7 +110,7 @@ module Gitlab
         access_token&.user || raise(UnauthorizedError)
       end
 
-      # We allow private access tokens with `api` scope to be used by web
+      # We allow Private Access Tokens with `api` scope to be used by web
       # requests on RSS feeds or ICS files for backwards compatibility.
       # It is also used by GraphQL/API requests.
       # And to allow accessing /archive programatically as it was a big pain point
@@ -471,47 +471,6 @@ module Gitlab
       def access_token_rotation_request?
         current_request.path.match(%r{access_tokens/\d+/rotate$}) ||
           current_request.path.match(%r{/personal_access_tokens/self/rotate$})
-      end
-
-      # To prevent Rack Attack from incorrectly rate limiting
-      # authenticated Git activity, we need to authenticate the user
-      # from other means (e.g. HTTP Basic Authentication) only if the
-      # request originated from a Git or Git LFS
-      # request. Repositories::GitHttpClientController or
-      # Repositories::LfsApiController normally does the authentication,
-      # but Rack Attack runs before those controllers.
-      def find_user_for_git_or_lfs_request
-        return unless git_or_lfs_request?
-
-        find_user_from_lfs_token || find_user_from_basic_auth_password
-      end
-
-      def find_user_from_personal_access_token_for_api_or_git
-        return unless api_request? || git_or_lfs_request?
-
-        find_user_from_personal_access_token
-      end
-
-      def find_user_from_dependency_proxy_token
-        return unless dependency_proxy_request?
-
-        token, _ = ActionController::HttpAuthentication::Token.token_and_options(current_request)
-
-        return unless token
-
-        user_or_deploy_token = ::DependencyProxy::AuthTokenService.user_or_deploy_token_from_jwt(token)
-
-        # Do not return deploy tokens
-        # See https://gitlab.com/gitlab-org/gitlab/-/issues/342481
-        return unless user_or_deploy_token.is_a?(::User)
-
-        user_or_deploy_token
-      rescue ActiveRecord::RecordNotFound
-        nil # invalid id used return no user
-      end
-
-      def dependency_proxy_request?
-        Gitlab::PathRegex.dependency_proxy_route_regex.match?(current_request.path)
       end
     end
   end

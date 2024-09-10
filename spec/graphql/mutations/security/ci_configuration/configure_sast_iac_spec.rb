@@ -7,7 +7,7 @@ RSpec.describe Mutations::Security::CiConfiguration::ConfigureSastIac do
 
   let(:service) { ::Security::CiConfiguration::SastIacCreateService }
 
-  subject { resolve(described_class, args: { project_path: project.full_path }, ctx: query_context) }
+  subject { resolve(described_class, args: { project_path: project.full_path }, ctx: { current_user: user }) }
 
   include_examples 'graphql mutations security ci configuration'
 end

@@ -36,96 +36,80 @@ RSpec.describe ::API::MlModelPackages, feature_category: :mlops do
 
   shared_context 'ml model authorize permissions table' do # rubocop:disable RSpec/ContextWording
     # rubocop:disable Metrics/AbcSize
-    # :valid_token, :user_role, :visibility, :member, :token_type, :expected_status
+    # :visibility, :user_role, :member, :token_type, :valid_token, :expected_status
     def authorize_permissions_table
-      false | :developer  | :private | false | :job_token             | :unauthorized
-      false | :developer  | :private | false | :personal_access_token | :unauthorized
-      false | :developer  | :private | true  | :job_token             | :unauthorized
-      false | :developer  | :private | true  | :personal_access_token | :unauthorized
-      false | :developer  | :public  | false | :job_token             | :unauthorized
-      false | :developer  | :public  | false | :personal_access_token | :unauthorized
-      false | :developer  | :public  | true  | :job_token             | :unauthorized
-      false | :developer  | :public  | true  | :personal_access_token | :unauthorized
-      false | :guest      | :private | false | :job_token             | :unauthorized
-      false | :guest      | :private | false | :personal_access_token | :unauthorized
-      false | :guest      | :private | true  | :job_token             | :unauthorized
-      false | :guest      | :private | true  | :personal_access_token | :unauthorized
-      false | :guest      | :public  | false | :job_token             | :unauthorized
-      false | :guest      | :public  | false | :personal_access_token | :unauthorized
-      false | :guest      | :public  | true  | :job_token             | :unauthorized
-      false | :guest      | :public  | true  | :personal_access_token | :unauthorized
-      true  | :anonymous  | :private | false | :personal_access_token | :unauthorized
-      true  | :anonymous  | :public  | false | :personal_access_token | :unauthorized
-      true  | :developer  | :private | false | :job_token             | :not_found
-      true  | :developer  | :private | false | :personal_access_token | :not_found
-      true  | :developer  | :private | true  | :job_token             | :success
-      true  | :developer  | :private | true  | :personal_access_token | :success
-      true  | :developer  | :public  | false | :job_token             | :not_found
-      true  | :developer  | :public  | false | :personal_access_token | :not_found
-      true  | :developer  | :public  | true  | :job_token             | :success
-      true  | :developer  | :public  | true  | :personal_access_token | :success
-      true  | :guest      | :private | false | :job_token             | :not_found
-      true  | :guest      | :private | false | :personal_access_token | :not_found
-      true  | :guest      | :private | true  | :job_token             | :not_found
-      true  | :guest      | :private | true  | :personal_access_token | :not_found
-      true  | :guest      | :public  | false | :job_token             | :not_found
-      true  | :guest      | :public  | false | :personal_access_token | :not_found
-      true  | :guest      | :public  | true  | :job_token             | :not_found
-      true  | :guest      | :public  | true  | :personal_access_token | :not_found
-      true  | :reporter   | :private | false | :job_token             | :not_found
-      true  | :reporter   | :private | false | :personal_access_token | :not_found
-      true  | :reporter   | :private | true  | :job_token             | :forbidden
-      true  | :reporter   | :private | true  | :personal_access_token | :forbidden
-      true  | :reporter   | :public  | false | :job_token             | :not_found
-      true  | :reporter   | :public  | false | :personal_access_token | :not_found
-      true  | :reporter   | :public  | true  | :job_token             | :forbidden
-      true  | :reporter   | :public  | true  | :personal_access_token | :forbidden
+      :public  | :developer  | true  | :personal_access_token | true  | :success
+      :public  | :guest      | true  | :personal_access_token | true  | :forbidden
+      :public  | :developer  | true  | :personal_access_token | false | :unauthorized
+      :public  | :guest      | true  | :personal_access_token | false | :unauthorized
+      :public  | :developer  | false | :personal_access_token | true  | :forbidden
+      :public  | :guest      | false | :personal_access_token | true  | :forbidden
+      :public  | :developer  | false | :personal_access_token | false | :unauthorized
+      :public  | :guest      | false | :personal_access_token | false | :unauthorized
+      :public  | :anonymous  | false | :personal_access_token | true  | :unauthorized
+      :private | :developer  | true  | :personal_access_token | true  | :success
+      :private | :guest      | true  | :personal_access_token | true  | :forbidden
+      :private | :developer  | true  | :personal_access_token | false | :unauthorized
+      :private | :guest      | true  | :personal_access_token | false | :unauthorized
+      :private | :developer  | false | :personal_access_token | true  | :not_found
+      :private | :guest      | false | :personal_access_token | true  | :not_found
+      :private | :developer  | false | :personal_access_token | false | :unauthorized
+      :private | :guest      | false | :personal_access_token | false | :unauthorized
+      :private | :anonymous  | false | :personal_access_token | true  | :unauthorized
+      :public  | :developer  | true  | :job_token             | true  | :success
+      :public  | :guest      | true  | :job_token             | true  | :forbidden
+      :public  | :developer  | true  | :job_token             | false | :unauthorized
+      :public  | :guest      | true  | :job_token             | false | :unauthorized
+      :public  | :developer  | false | :job_token             | true  | :forbidden
+      :public  | :guest      | false | :job_token             | true  | :forbidden
+      :public  | :developer  | false | :job_token             | false | :unauthorized
+      :public  | :guest      | false | :job_token             | false | :unauthorized
+      :private | :developer  | true  | :job_token             | true  | :success
+      :private | :guest      | true  | :job_token             | true  | :forbidden
+      :private | :developer  | true  | :job_token             | false | :unauthorized
+      :private | :guest      | true  | :job_token             | false | :unauthorized
+      :private | :developer  | false | :job_token             | true  | :not_found
+      :private | :guest      | false | :job_token             | true  | :not_found
+      :private | :developer  | false | :job_token             | false | :unauthorized
+      :private | :guest      | false | :job_token             | false | :unauthorized
     end
 
-    # ::valid_token, :user_role, visibility, :member, :token_type, :expected_status
+    # :visibility, :user_role, :member, :token_type, :valid_token, :expected_status
     def download_permissions_tables
-      false |  :developer  | :private | false | :job_token             | :unauthorized
-      false |  :developer  | :private | false | :personal_access_token | :unauthorized
-      false |  :developer  | :private | true  | :job_token             | :unauthorized
-      false |  :developer  | :private | true  | :personal_access_token | :unauthorized
-      false |  :developer  | :public  | false | :job_token             | :unauthorized
-      false |  :developer  | :public  | false | :personal_access_token | :unauthorized
-      false |  :developer  | :public  | true  | :job_token             | :unauthorized
-      false |  :developer  | :public  | true  | :personal_access_token | :unauthorized
-      false |  :guest      | :private | false | :job_token             | :unauthorized
-      false |  :guest      | :private | false | :personal_access_token | :unauthorized
-      false |  :guest      | :private | true  | :job_token             | :unauthorized
-      false |  :guest      | :private | true  | :personal_access_token | :unauthorized
-      false |  :guest      | :public  | false | :job_token             | :unauthorized
-      false |  :guest      | :public  | false | :personal_access_token | :unauthorized
-      false |  :guest      | :public  | true  | :job_token             | :unauthorized
-      false |  :guest      | :public  | true  | :personal_access_token | :unauthorized
-      true  |  :anonymous  | :private | false | :personal_access_token | :not_found
-      true  |  :anonymous  | :public  | false | :personal_access_token | :not_found
-      true  |  :developer  | :private | false | :job_token             | :not_found
-      true  |  :developer  | :private | false | :personal_access_token | :not_found
-      true  |  :developer  | :private | true  | :job_token             | :success
-      true  |  :developer  | :private | true  | :personal_access_token | :success
-      true  |  :developer  | :public  | false | :job_token             | :not_found
-      true  |  :developer  | :public  | false | :personal_access_token | :not_found
-      true  |  :developer  | :public  | true  | :job_token             | :success
-      true  |  :developer  | :public  | true  | :personal_access_token | :success
-      true  |  :guest      | :private | false | :job_token             | :not_found
-      true  |  :guest      | :private | false | :personal_access_token | :not_found
-      true  |  :guest      | :private | true  | :job_token             | :not_found
-      true  |  :guest      | :private | true  | :personal_access_token | :not_found
-      true  |  :guest      | :public  | false | :job_token             | :not_found
-      true  |  :guest      | :public  | false | :personal_access_token | :not_found
-      true  |  :guest      | :public  | true  | :job_token             | :not_found
-      true  |  :guest      | :public  | true  | :personal_access_token | :not_found
-      true  |  :reporter   | :private | false | :job_token             | :not_found
-      true  |  :reporter   | :private | false | :personal_access_token | :not_found
-      true  |  :reporter   | :private | true  | :job_token             | :success
-      true  |  :reporter   | :private | true  | :personal_access_token | :success
-      true  |  :reporter   | :public  | false | :job_token             | :not_found
-      true  |  :reporter   | :public  | false | :personal_access_token | :not_found
-      true  |  :reporter   | :public  | true  | :job_token             | :success
-      true  |  :reporter   | :public  | true  | :personal_access_token | :success
+      :public  | :developer  | true  | :personal_access_token | true  |  :success
+      :public  | :guest      | true  | :personal_access_token | true  |  :success
+      :public  | :developer  | true  | :personal_access_token | false |  :unauthorized
+      :public  | :guest      | true  | :personal_access_token | false |  :unauthorized
+      :public  | :developer  | false | :personal_access_token | true  |  :success
+      :public  | :guest      | false | :personal_access_token | true  |  :success
+      :public  | :developer  | false | :personal_access_token | false |  :unauthorized
+      :public  | :guest      | false | :personal_access_token | false |  :unauthorized
+      :public  | :anonymous  | false | :personal_access_token | true  |  :success
+      :private | :developer  | true  | :personal_access_token | true  |  :success
+      :private | :guest      | true  | :personal_access_token | true  |  :forbidden
+      :private | :developer  | true  | :personal_access_token | false |  :unauthorized
+      :private | :guest      | true  | :personal_access_token | false |  :unauthorized
+      :private | :developer  | false | :personal_access_token | true | :not_found
+      :private | :guest      | false | :personal_access_token | true  |  :not_found
+      :private | :developer  | false | :personal_access_token | false |  :unauthorized
+      :private | :guest      | false | :personal_access_token | false |  :unauthorized
+      :private | :anonymous  | false | :personal_access_token | true  |  :not_found
+      :public  | :developer  | true  | :job_token             | true  |  :success
+      :public  | :guest      | true  | :job_token             | true  |  :success
+      :public  | :developer  | true  | :job_token             | false |  :unauthorized
+      :public  | :guest      | true  | :job_token             | false |  :unauthorized
+      :public  | :developer  | false | :job_token             | true  |  :success
+      :public  | :guest      | false | :job_token             | true  |  :success
+      :public  | :developer  | false | :job_token             | false |  :unauthorized
+      :public  | :guest      | false | :job_token             | false |  :unauthorized
+      :private | :developer  | true  | :job_token             | true  |  :success
+      :private | :guest      | true  | :job_token             | true  |  :forbidden
+      :private | :developer  | true  | :job_token             | false |  :unauthorized
+      :private | :guest      | true  | :job_token             | false |  :unauthorized
+      :private | :developer  | false | :job_token             | true  |  :not_found
+      :private | :guest      | false | :job_token             | true  |  :not_found
+      :private | :developer  | false | :job_token             | false |  :unauthorized
+      :private | :guest      | false | :job_token             | false |  :unauthorized
     end
     # rubocop:enable Metrics/AbcSize
   end
@@ -164,7 +148,7 @@ RSpec.describe ::API::MlModelPackages, feature_category: :mlops do
     end
 
     describe 'user access' do
-      where(:valid_token, :user_role, :visibility, :member, :token_type, :expected_status) do
+      where(:visibility, :user_role, :member, :token_type, :valid_token, :expected_status) do
         authorize_permissions_table
       end
 
@@ -280,7 +264,7 @@ RSpec.describe ::API::MlModelPackages, feature_category: :mlops do
     # rubocop:enable RSpec/MultipleMemoizedHelpers
 
     describe 'user access' do
-      where(:valid_token, :user_role, :visibility, :member, :token_type, :expected_status) do
+      where(:visibility, :user_role, :member, :token_type, :valid_token, :expected_status) do
         authorize_permissions_table
       end
 
@@ -303,10 +287,10 @@ RSpec.describe ::API::MlModelPackages, feature_category: :mlops do
   describe 'GET /api/v4/projects/:project_id/packages/ml_models/:model_version_id/files/(*path)/:file_name' do
     include_context 'ml model authorize permissions table'
 
-    let_it_be(:file_name) { Addressable::URI.escape('Mo_de-l v12.md5') }
+    let_it_be(:file_name) { 'model.md5' }
     let_it_be(:package) { model_version.package }
-    let_it_be(:package_file_1) { create(:package_file, :generic, package: package, file_name: file_name) }
-    let_it_be(:package_file_2) { create(:package_file, :generic, package: package, file_name: "my_dir%2F#{file_name}") }
+    let_it_be(:package_file_1) { create(:package_file, :generic, package: package, file_name: 'model.md5') }
+    let_it_be(:package_file_2) { create(:package_file, :generic, package: package, file_name: 'my_dir%2Fmodel.md5') }
 
     let(:file_path) { '' }
     let(:full_path) { "#{file_path}#{file_name}" }
@@ -339,7 +323,7 @@ RSpec.describe ::API::MlModelPackages, feature_category: :mlops do
     end
 
     describe 'user access' do
-      where(:valid_token, :user_role, :visibility, :member, :token_type, :expected_status) do
+      where(:visibility, :user_role, :member, :token_type, :valid_token, :expected_status) do
         download_permissions_tables
       end
 

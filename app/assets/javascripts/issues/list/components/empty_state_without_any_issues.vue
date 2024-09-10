@@ -15,7 +15,8 @@ export default {
   },
   emptyStateSvg,
   issuesHelpPagePath: helpPagePath('user/project/issues/index'),
-  jiraIntegrationPath: helpPagePath('integration/jira/configure', { anchor: 'view-jira-issues' }),
+  // eslint-disable-next-line local-rules/require-valid-help-page-path
+  jiraIntegrationPath: helpPagePath('integration/jira/issues', { anchor: 'view-jira-issues' }),
   components: {
     CsvImportExportButtons,
     GlButton,
@@ -129,7 +130,7 @@ export default {
 
           <new-resource-dropdown
             v-if="showNewIssueDropdown"
-            class="gl-mx-2 gl-mb-3 gl-self-center"
+            class="gl-self-center gl-mx-2 gl-mb-3"
             :query="$options.searchProjectsQuery"
             :query-variables="newIssueDropdownQueryVariables"
             :extract-projects="extractProjects"
@@ -138,10 +139,10 @@ export default {
         </template>
       </gl-empty-state>
       <hr />
-      <p class="gl-mb-0 gl-text-center gl-font-bold">
+      <p class="gl-text-center gl-font-bold gl-mb-0">
         {{ s__('JiraService|Using Jira for issue tracking?') }}
       </p>
-      <p class="gl-mb-0 gl-text-center">
+      <p class="gl-text-center gl-mb-0">
         <gl-sprintf :message="$options.i18n.jiraIntegrationMessage">
           <template #jiraDocsLink="{ content }">
             <gl-link

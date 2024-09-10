@@ -36,8 +36,7 @@ module API
                 model_name: params[:name],
                 description: params[:description],
                 metadata: params[:tags],
-                version: custom_version,
-                user: current_user
+                version: custom_version
               }
             ).execute
 

@@ -68,7 +68,7 @@ module QA
 
         # Cell 1 project does not show
         page.visit "#{cell2_url}#{cell1_group_name}/#{cell1_project_name}"
-        expect(page).to have_text('Page not found')
+        expect(page).to have_text('Page Not Found')
 
         page.visit cell2_url
         Page::Main::Menu.perform(&:go_to_groups)
@@ -112,7 +112,7 @@ module QA
 
         # Cell 2 Project does not show
         page.visit "#{cell1_url}#{cell2_group_name}/#{cell2_project_name}"
-        expect(page).to have_text('Page not found')
+        expect(page).to have_text('Page Not Found')
 
         # Visit Cell 2
         page.visit cell2_url
@@ -127,7 +127,7 @@ module QA
 
         # Cell 1 project does not show
         page.visit "#{cell2_url}#{cell1_group_name}/#{cell1_project_name}"
-        expect(page).to have_text('Page not found')
+        expect(page).to have_text('Page Not Found')
 
         # Cell 2 group does show
         page.visit cell2_url

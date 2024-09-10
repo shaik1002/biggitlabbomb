@@ -51,20 +51,12 @@ Selecting an individual job shows you its job log, and allows you to:
 
 ### View all jobs in a project
 
-DETAILS:
-**Offering:** GitLab.com, Self-managed
-
-> - Filtering jobs by job name [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/387547) on GitLab.com and self-managed in GitLab 17.3 [with a flag](../../administration/feature_flags.md) named `populate_and_use_build_names_table`. On GitLab.com, this feature is enabled by default. On self-managed, this feature is disabled by default.
-
-FLAG:
-The availability of this feature is controlled by a feature flag. For more information, see the history.
-
 To view the full list of jobs that ran in a project:
 
 1. On the left sidebar, select **Search or go to** and find your project.
 1. Select **Build > Jobs**.
 
-You can filter the list by [job status](#the-order-of-jobs-in-a-pipeline) and [job name](#job-name-limitations).
+You can filter the list by [job status](#the-order-of-jobs-in-a-pipeline).
 
 ## See why a job failed
 
@@ -80,10 +72,6 @@ In each place, if you hover over the failed job you can see the reason it failed
 ![Pipeline detail](img/job_failure_reason.png)
 
 You can also see the reason it failed on the Job detail page.
-
-### Troubleshoot a failed job with Root Cause Analysis
-
-You can use GitLab Duo Root Cause Analysis in GitLab Duo Chat to [troubleshoot failed CI/CD jobs](../../user/gitlab_duo_chat/examples.md#troubleshoot-failed-cicd-jobs-with-root-cause-analysis).
 
 ## The order of jobs in a pipeline
 
@@ -104,6 +92,10 @@ The job status order is:
 - success
 - skipped
 - created
+
+For example:
+
+![Pipeline mini graph sorting](img/pipelines_mini_graph_sorting.png)
 
 ## Job name limitations
 
@@ -302,7 +294,130 @@ For example, if you start rolling out new code and:
 
 ![Pipelines example](img/pipeline_delayed_job_v14_2.png)
 
-## View job logs in full screen mode
+## Expand and collapse job log sections
+
+> - Support for output of multi-line command bash shell output [Introduced](https://gitlab.com/gitlab-org/gitlab-runner/-/merge_requests/3486) in GitLab 16.5 behind the [GitLab Runner feature flag](https://docs.gitlab.com/runner/configuration/feature-flags.html), `FF_SCRIPT_SECTIONS`.
+
+Job logs are divided into sections that can be collapsed or expanded. Each section displays
+the duration.
+
+In the following example:
+
+- Three sections have been collapsed and can be expanded.
+- Three sections are expanded and can be collapsed.
+
+![Collapsible sections](img/collapsible_log_v13_10.png)
+
+### Custom collapsible sections
+
+You can create [collapsible sections in job logs](#expand-and-collapse-job-log-sections)
+by manually outputting special codes
+that GitLab uses to delimit collapsible sections:
+
+- Section start marker: `\e[0Ksection_start:UNIX_TIMESTAMP:SECTION_NAME\r\e[0K` + `TEXT_OF_SECTION_HEADER`
+- Section end marker: `\e[0Ksection_end:UNIX_TIMESTAMP:SECTION_NAME\r\e[0K`
+
+You must add these codes to the script section of the CI configuration.
+For example, using `echo`:
+
+```yaml
+job1:
+  script:
+    - echo -e "\e[0Ksection_start:`date +%s`:my_first_section\r\e[0KHeader of the 1st collapsible section"
+    - echo 'this line should be hidden when collapsed'
+    - echo -e "\e[0Ksection_end:`date +%s`:my_first_section\r\e[0K"
+```
+
+The escape syntax may differ depending on the shell that your runner uses.
+For example if it is using Zsh, you may need to escape the special characters
+with `\\e` or `\\r`.
+
+In the example above:
+
+- `date +%s`: Command that produces the Unix timestamp (for example `1560896352`).
+- `my_first_section`: The name given to the section. The name can only be composed
+  of letters, numbers, and the `_`, `.`, or `-` characters.
+- `\r\e[0K`: Escape sequence that prevents the section markers from displaying in the
+  rendered (colored) job log. They are displayed when viewing the raw job log, accessed
+  in the upper-right corner of the job log by selecting **Show complete raw** (**{doc-text}**).
+  - `\r`: carriage return (returns the cursor to the start of the line).
+  - `\e[0K`: ANSI escape code to clear the line from the cursor position to the end of the line.
+    (`\e[K` alone does not work; the `0` must be included).
+
+Sample raw job log:
+
+```plaintext
+\e[0Ksection_start:1560896352:my_first_section\r\e[0KHeader of the 1st collapsible section
+this line should be hidden when collapsed
+\e[0Ksection_end:1560896353:my_first_section\r\e[0K
+```
+
+Sample job console log:
+
+![Custom collapsible sections](img/collapsible-job.png)
+
+#### Use a script to improve display of collapsible sections
+
+To remove the `echo` statements that create the section markers from the job output,
+you can move the job contents to a script file and invoke it from the job:
+
+1. Create a script that can handle the section headers. For example:
+
+   ```shell
+   # function for starting the section
+   function section_start () {
+     local section_title="${1}"
+     local section_description="${2:-$section_title}"
+
+     echo -e "section_start:`date +%s`:${section_title}[collapsed=true]\r\e[0K${section_description}"
+   }
+
+   # Function for ending the section
+   function section_end () {
+     local section_title="${1}"
+
+     echo -e "section_end:`date +%s`:${section_title}\r\e[0K"
+   }
+
+   # Create sections
+   section_start "my_first_section" "Header of the 1st collapsible section"
+
+   echo "this line should be hidden when collapsed"
+
+   section_end "my_first_section"
+
+   # Repeat as required
+   ```
+
+1. Add the script to the `.gitlab-ci.yml` file:
+
+   ```yaml
+   job:
+     script:
+       - source script.sh
+   ```
+
+### Pre-collapse sections
+
+You can make the job log automatically collapse collapsible sections by adding the `collapsed` option to the section start.
+Add `[collapsed=true]` after the section name and before the `\r`. The section end marker
+remains unchanged:
+
+- Section start marker with `[collapsed=true]`: `\e[0Ksection_start:UNIX_TIMESTAMP:SECTION_NAME[collapsed=true]\r\e[0K` + `TEXT_OF_SECTION_HEADER`
+- Section end marker (unchanged): `\e[0Ksection_end:UNIX_TIMESTAMP:SECTION_NAME\r\e[0K`
+
+Add the updated section start text to the CI configuration. For example,
+using `echo`:
+
+```yaml
+job1:
+  script:
+    - echo -e "\e[0Ksection_start:`date +%s`:my_first_section[collapsed=true]\r\e[0KHeader of the 1st collapsible section"
+    - echo 'this line should be hidden automatically after loading the job log'
+    - echo -e "\e[0Ksection_end:`date +%s`:my_first_section\r\e[0K"
+```
+
+### Full screen mode
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/363617) in GitLab 16.7.
 

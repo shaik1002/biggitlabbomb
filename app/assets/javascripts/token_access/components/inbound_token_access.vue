@@ -2,20 +2,20 @@
 import {
   GlAlert,
   GlButton,
+  GlCard,
   GlForm,
   GlFormGroup,
   GlLink,
   GlIcon,
   GlLoadingIcon,
   GlSprintf,
+  GlToggle,
   GlTooltipDirective,
-  GlFormRadioGroup,
 } from '@gitlab/ui';
 import { createAlert } from '~/alert';
 import { __, s__, n__, sprintf } from '~/locale';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import { TYPENAME_GROUP } from '~/graphql_shared/constants';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
 import inboundAddGroupOrProjectCIJobTokenScope from '../graphql/mutations/inbound_add_group_or_project_ci_job_token_scope.mutation.graphql';
 import inboundRemoveProjectCIJobTokenScopeMutation from '../graphql/mutations/inbound_remove_project_ci_job_token_scope.mutation.graphql';
 import inboundRemoveGroupCIJobTokenScopeMutation from '../graphql/mutations/inbound_remove_group_ci_job_token_scope.mutation.graphql';
@@ -27,16 +27,16 @@ import TokenAccessTable from './token_access_table.vue';
 
 export default {
   i18n: {
-    radioGroupTitle: s__('CICD|Authorized groups and projects'),
-    radioGroupDescription: s__(
-      `CICD|Select the groups and projects authorized to use a CI/CD job token to authenticate requests to this project. %{linkStart}Learn more%{linkEnd}.`,
+    toggleLabelTitle: s__('CICD|Limit access %{italicStart}to%{italicEnd} this project'),
+    toggleDescription: s__(
+      `CICD|When enabled, only groups and projects in the allowlist are authorized to use a CI/CD job token to authenticate requests to this project. When disabled, any group or project can do so. %{linkStart}Learn more%{linkEnd}.`,
     ),
-    cardHeaderTitle: s__('CICD|CI/CD job token allowlist'),
+    cardHeaderTitle: s__('CICD|Authorized groups and projects'),
     cardHeaderDescription: s__(
       `CICD|Ensure only groups and projects with members authorized to access sensitive project data are added to the allowlist.`,
     ),
     settingDisabledMessage: s__(
-      'CICD|Access unrestricted, so users with sufficient permissions in this project can authenticate with a job token generated in any other project.',
+      'CICD|Access unrestricted, so users with sufficient permissions in this project can authenticate with a job token generated in any other project. Enable this setting to restrict authentication to only job tokens generated in the groups and projects in the allowlist below.',
     ),
     addGroupOrProject: __('Add group or project'),
     add: __('Add'),
@@ -45,31 +45,20 @@ export default {
     projectsFetchError: __('There was a problem fetching the projects'),
     scopeFetchError: __('There was a problem fetching the job token scope value'),
     projectInScopeError: s__('CICD|Target project is already in the job token scope.'),
-    saveButtonTitle: __('Save Changes'),
   },
-  inboundJobTokenScopeOptions: [
-    {
-      value: false,
-      text: s__('CICD|All groups and projects'),
-    },
-    {
-      value: true,
-      text: s__('CICD|Only this project and any groups and projects in the allowlist'),
-    },
-  ],
   components: {
     GlAlert,
     GlButton,
+    GlCard,
     GlForm,
     GlFormGroup,
     GlLink,
     GlIcon,
     GlLoadingIcon,
     GlSprintf,
-    CrudComponent,
+    GlToggle,
     GroupsAndProjectsListbox,
     TokenAccessTable,
-    GlFormRadioGroup,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -89,9 +78,6 @@ export default {
       },
       update({ project }) {
         return project.ciCdSettings.inboundJobTokenScopeEnabled;
-      },
-      result({ data }) {
-        this.projectName = data?.project?.name;
       },
       error() {
         createAlert({ message: this.$options.i18n.scopeFetchError });
@@ -121,12 +107,11 @@ export default {
   data() {
     return {
       inboundJobTokenScopeEnabled: null,
-      isUpdating: false,
       groupsAndProjectsWithAccess: [],
       groupOrProjectPath: '',
       projectCount: 0,
-      projectName: '',
       groupCount: 0,
+      isAddFormVisible: false,
     };
   },
   computed: {
@@ -160,8 +145,6 @@ export default {
   },
   methods: {
     async updateCIJobTokenScope() {
-      this.isUpdating = true;
-
       try {
         const {
           data: {
@@ -180,17 +163,9 @@ export default {
         if (errors.length) {
           throw new Error(errors[0]);
         }
-
-        const toastMessage = sprintf(
-          __("CI/CD job token permissions for '%{projectName}' were successfully updated."),
-          { projectName: this.projectName },
-        );
-        this.$toast.show(toastMessage);
       } catch (error) {
         this.inboundJobTokenScopeEnabled = !this.inboundJobTokenScopeEnabled;
         createAlert({ message: error.message });
-      } finally {
-        this.isUpdating = false;
       }
     },
     async addGroupOrProject() {
@@ -260,99 +235,98 @@ export default {
     },
     clearGroupOrProjectPath() {
       this.groupOrProjectPath = '';
-      this.$refs.jobTokenCrud.hideForm();
+      this.isAddFormVisible = false;
     },
     getGroupsAndProjects() {
       this.$apollo.queries.groupsAndProjectsWithAccess.refetch();
     },
     showAddForm() {
-      this.$refs.jobTokenCrud.showForm();
+      this.isAddFormVisible = true;
     },
   },
 };
 </script>
 <template>
-  <div class="gl-mt-5">
-    <gl-loading-icon v-if="$apollo.loading" size="md" />
+  <div>
+    <gl-loading-icon v-if="$apollo.loading" size="lg" class="gl-mt-5" />
     <template v-else>
-      <gl-form-radio-group
+      <gl-toggle
         v-model="inboundJobTokenScopeEnabled"
-        :options="$options.inboundJobTokenScopeOptions"
-        stacked
+        :label="$options.i18n.toggleLabelTitle"
+        class="gl-mt-5"
+        @change="updateCIJobTokenScope"
       >
-        <template #first>
-          <div class="gl-mb-2 gl-font-bold">
-            {{ $options.i18n.radioGroupTitle }}
-          </div>
-          <div class="gl-mb-3">
-            <gl-sprintf :message="$options.i18n.radioGroupDescription">
-              <template #link="{ content }">
-                <gl-link :href="ciJobTokenHelpPage" class="inline-link" target="_blank">{{
-                  content
-                }}</gl-link>
-              </template>
-            </gl-sprintf>
-          </div>
+        <template #label>
+          <gl-sprintf :message="$options.i18n.toggleLabelTitle">
+            <template #italic="{ content }">
+              <i>{{ content }}</i>
+            </template>
+          </gl-sprintf>
         </template>
-      </gl-form-radio-group>
+        <template #description>
+          <gl-sprintf :message="$options.i18n.toggleDescription" class="gl-text-secondary">
+            <template #link="{ content }">
+              <gl-link :href="ciJobTokenHelpPage" class="inline-link" target="_blank">{{
+                content
+              }}</gl-link>
+            </template>
+          </gl-sprintf>
+        </template>
+      </gl-toggle>
 
       <gl-alert
         v-if="!inboundJobTokenScopeEnabled"
         variant="warning"
-        class="gl-my-3"
+        class="gl-mt-6"
         :dismissible="false"
         :show-icon="false"
       >
         {{ $options.i18n.settingDisabledMessage }}
       </gl-alert>
 
-      <gl-button
-        variant="confirm"
-        class="gl-mt-3"
-        data-testid="save-ci-job-token-scope-changes-btn"
-        :loading="isUpdating"
-        @click="updateCIJobTokenScope"
-      >
-        {{ $options.i18n.saveButtonTitle }}
-      </gl-button>
-
       <div>
-        <crud-component
-          ref="jobTokenCrud"
-          :title="$options.i18n.cardHeaderTitle"
-          :description="$options.i18n.cardHeaderDescription"
-          class="gl-mt-5"
+        <gl-card
+          class="gl-new-card"
+          header-class="gl-new-card-header gl-border-bottom-0 gl-flex-wrap gl-md-flex-nowrap"
+          body-class="gl-new-card-body gl-px-0"
         >
-          <template #count>
-            <span class="gl-inline-flex gl-gap-3">
-              <span
-                v-gl-tooltip
-                :title="groupCountTooltip"
-                class="gl-inline-flex gl-items-center gl-gap-2 gl-text-sm gl-text-subtle"
-                data-testid="group-count"
+          <template #header>
+            <div class="gl-new-card-title-wrapper gl-flex-direction-column gl-flex-wrap">
+              <div class="gl-new-card-title gl-items-center">
+                <h5 class="gl-my-0">{{ $options.i18n.cardHeaderTitle }}</h5>
+                <span
+                  v-gl-tooltip
+                  :title="groupCountTooltip"
+                  class="gl-new-card-count"
+                  data-testid="group-count"
+                >
+                  <gl-icon name="group" class="gl-mr-2" />
+                  {{ groupCount }}
+                </span>
+                <span
+                  v-gl-tooltip
+                  :title="projectCountTooltip"
+                  class="gl-new-card-count"
+                  data-testid="project-count"
+                >
+                  <gl-icon name="project" class="gl-mr-2" />
+                  {{ projectCount }}
+                </span>
+              </div>
+              <p class="gl-text-secondary">{{ $options.i18n.cardHeaderDescription }}</p>
+            </div>
+            <div class="gl-new-card-actions gl-w-full gl-md-w-auto gl-text-right">
+              <gl-button
+                v-if="!isAddFormVisible"
+                size="small"
+                data-testid="toggle-form-btn"
+                @click="showAddForm"
+                >{{ $options.i18n.addGroupOrProject }}</gl-button
               >
-                <gl-icon name="group" />
-                {{ groupCount }}
-              </span>
-              <span
-                v-gl-tooltip
-                :title="projectCountTooltip"
-                class="gl-inline-flex gl-items-center gl-gap-2 gl-text-sm gl-text-subtle"
-                data-testid="project-count"
-              >
-                <gl-icon name="project" />
-                {{ projectCount }}
-              </span>
-            </span>
+            </div>
           </template>
 
-          <template #actions>
-            <gl-button size="small" data-testid="toggle-form-btn" @click="showAddForm">{{
-              $options.i18n.addGroupOrProject
-            }}</gl-button>
-          </template>
-
-          <template #form>
+          <div v-if="isAddFormVisible" class="gl-new-card-add-form gl-m-3">
             <strong>{{ $options.i18n.addGroupOrProject }}</strong>
             <gl-form @submit.prevent="addGroupOrProject">
               <gl-form-group
@@ -367,10 +341,11 @@ export default {
                   @select="setGroupOrProjectPath"
                 />
               </gl-form-group>
-              <div class="gl-mt-5 gl-flex gl-gap-3">
+              <div class="gl-display-flex gl-mt-5">
                 <gl-button
                   variant="confirm"
                   :disabled="isGroupOrProjectPathEmpty || isGroupOrProjectPathInScope"
+                  class="gl-mr-3"
                   data-testid="add-project-btn"
                   @click="addGroupOrProject"
                 >
@@ -379,10 +354,10 @@ export default {
                 <gl-button @click="clearGroupOrProjectPath">{{ $options.i18n.cancel }}</gl-button>
               </div>
             </gl-form>
-          </template>
+          </div>
 
           <token-access-table :items="groupsAndProjectsWithAccess" @removeItem="removeItem" />
-        </crud-component>
+        </gl-card>
       </div>
     </template>
   </div>

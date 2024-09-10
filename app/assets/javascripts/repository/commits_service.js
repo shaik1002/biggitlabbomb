@@ -24,7 +24,6 @@ const addRequestedOffset = (offset) => {
 
 const removeLeadingSlash = (path) => path.replace(/^\//, '');
 
-// eslint-disable-next-line max-params
 const fetchData = (projectPath, path, ref, offset, refType) => {
   if (fetchedBatches.includes(offset) || offset < 0) {
     return [];
@@ -49,7 +48,6 @@ const fetchData = (projectPath, path, ref, offset, refType) => {
     .catch(() => createAlert({ message: I18N_COMMIT_DATA_FETCH_ERROR }));
 };
 
-// eslint-disable-next-line max-params
 export const loadCommits = async (projectPath, path, ref, offset, refType) => {
   if (isRequested(offset)) {
     return [];

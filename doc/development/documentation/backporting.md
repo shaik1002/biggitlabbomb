@@ -37,7 +37,7 @@ current stable branch:
 Prerequisites:
 
 - The person requesting the backport does this step. You must have at
-  least the Developer role for the [Technical Writing project](https://gitlab.com/gitlab-org/technical-writing).
+  least the Developer role in the [Technical Writing project](https://gitlab.com/gitlab-org/technical-writing).
 
 1. Open an [issue in the Technical Writing project](https://gitlab.com/gitlab-org/technical-writing/-/issues/new)
 using the [backport changes template](https://gitlab.com/gitlab-org/technical-writing/-/blob/main/.gitlab/issue_templates/backport_changes.md).
@@ -68,9 +68,8 @@ Prerequisites:
 To backport a change, merge your changes into the stable branch of the version
 where you want the changes to occur.
 
-1. Open an MR with the backport by following the
-   [release docs guidelines](https://gitlab.com/gitlab-org/release/docs/-/blob/master/general/patch/engineers.md#backporting-a-bug-fix-in-the-gitlab-project),
-   and mention the issue you opened before so that they are linked.
+1. Open an MR with the backport. The MR should target the stable release
+   branch, for example: `16-11-stable-ee` or `17-0-stable-ee`. Mention the issue you opened before to the MR.
 
 1. Assign the MR to a technical writer for review.
 
@@ -92,7 +91,7 @@ For the change to appear in:
 Prerequisites:
 
 - The technical writer assigned to the backport does this step. You must have at
-  least the Maintainer role for the [Technical Writing project](https://gitlab.com/gitlab-org/technical-writing).
+  least the Maintainer role in the [Technical Writing project](https://gitlab.com/gitlab-org/technical-writing).
 
 After the changes are merged to the appropriate stable branch,
 you must update the Docker image that holds that version's documentation.
@@ -117,13 +116,8 @@ update the main docs site:
    [pipeline schedules](https://gitlab.com/gitlab-org/gitlab-docs/-/pipeline_schedules)
    and run the **Build Docker images manually** schedule.
 
-1. A dialog with a link to the **pipelines** page appears. Select that link.
-
 1. Open the **Build Docker images** pipeline you just started, find the
    **image:docs-latest** job, and start it manually.
-
-   You might have to wait for the
-   **test:image:docs-latest** job in the **test** stage to finish first.
 
 1. When the **image:docs-latest** job is finished,
   [run a new pipeline](https://gitlab.com/gitlab-org/gitlab-docs/-/pipelines/new)
@@ -142,16 +136,3 @@ in the `gitlab-docs-archives` repository.
 
 1. After the pipeline finishes, go to `https://archives.docs.gitlab.com` and verify
    that the changes are available for the correct version.
-
-## View older documentation versions
-
-Previous versions of the documentation are available on `docs.gitlab.com`.
-To view a previous version, in the upper-right corner, select the version
-number from the dropdown list.
-
-To view versions that are not available on `docs.gitlab.com`:
-
-- View the [documentation archives](https://docs.gitlab.com/archives/).
-- Go to the GitLab repository and select the version-specific branch. For example,
-  the [13.2 branch](https://gitlab.com/gitlab-org/gitlab/-/tree/13-2-stable-ee/doc) has the
-  documentation for GitLab 13.2.

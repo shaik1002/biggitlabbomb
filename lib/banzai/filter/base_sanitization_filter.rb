@@ -11,13 +11,13 @@ module Banzai
     #
     # Extends HTML::Pipeline::SanitizationFilter with common rules.
     class BaseSanitizationFilter < HTML::Pipeline::SanitizationFilter
-      prepend Concerns::TimeoutFilterHandler
+      include Concerns::TimeoutFilterHandler
       include Gitlab::Utils::StrongMemoize
       extend Gitlab::Utils::SanitizeNodeLink
 
       UNSAFE_PROTOCOLS = %w[data javascript vbscript].freeze
 
-      def call
+      def call_with_timeout
         Sanitize.clean_node!(doc, allowlist)
       end
 
@@ -55,8 +55,9 @@ module Banzai
           allowlist[:attributes]['img'].push('data-diagram-src')
 
           # Allow any protocol in `a` elements
-          # and then remove links with unsafe protocols in SanitizeLinkFilter
+          # and then remove links with unsafe protocols
           allowlist[:protocols].delete('a')
+          allowlist[:transformers].push(self.class.method(:sanitize_unsafe_links))
 
           # Remove `rel` attribute from `a` elements
           allowlist[:transformers].push(self.class.remove_rel)

@@ -1,7 +1,6 @@
 import Hook from './hook';
 
 class HookInput extends Hook {
-  // eslint-disable-next-line max-params
   constructor(trigger, list, plugins, config) {
     super(trigger, list, plugins, config);
 

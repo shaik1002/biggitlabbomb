@@ -7,7 +7,6 @@ require 'tty-prompt'
 require 'net/http'
 require 'yaml'
 require 'json_schemer'
-require 'delegate'
 
 require_relative './cli/helpers'
 require_relative './cli/usage_viewer'

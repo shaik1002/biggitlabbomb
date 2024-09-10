@@ -23,8 +23,6 @@ module Gitlab
     # Scopes for Duo
     AI_FEATURES = :ai_features
     AI_FEATURES_SCOPES = [AI_FEATURES].freeze
-    AI_WORKFLOW = :ai_workflows
-    AI_WORKFLOW_SCOPES = [AI_WORKFLOW].freeze
 
     PROFILE_SCOPE = :profile
     EMAIL_SCOPE = :email
@@ -285,8 +283,7 @@ module Gitlab
           read_repository: %i[download_code],
           write_repository: %i[download_code push_code],
           create_runner: %i[create_instance_runner create_runner],
-          manage_runner: %i[assign_runner update_runner delete_runner],
-          ai_workflows: %i[push_code download_code]
+          manage_runner: %i[assign_runner update_runner delete_runner]
         }
 
         scopes.flat_map do |scope|
@@ -328,7 +325,7 @@ module Gitlab
 
         return unless actor
 
-        token_handler = Gitlab::LfsToken.new(actor, project)
+        token_handler = Gitlab::LfsToken.new(actor)
 
         authentication_abilities =
           if token_handler.user?
@@ -418,7 +415,7 @@ module Gitlab
 
       # Other available scopes
       def optional_scopes
-        all_available_scopes + OPENID_SCOPES + PROFILE_SCOPES - DEFAULT_SCOPES + AI_WORKFLOW_SCOPES
+        all_available_scopes + OPENID_SCOPES + PROFILE_SCOPES - DEFAULT_SCOPES
       end
 
       def registry_scopes
@@ -451,12 +448,7 @@ module Gitlab
       end
 
       def unavailable_scopes_for_resource(resource)
-        unavailable_ai_features_scopes +
-          unavailable_observability_scopes_for_resource(resource)
-      end
-
-      def unavailable_ai_features_scopes
-        AI_WORKFLOW_SCOPES
+        unavailable_observability_scopes_for_resource(resource)
       end
 
       def unavailable_observability_scopes_for_resource(resource)

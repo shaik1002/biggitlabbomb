@@ -15,10 +15,6 @@ export default {
       type: Boolean,
       required: true,
     },
-    areHiddenVariablesAvailable: {
-      type: Boolean,
-      required: true,
-    },
     areScopedVariablesAvailable: {
       type: Boolean,
       required: false,
@@ -117,7 +113,6 @@ export default {
       <ci-variable-drawer
         v-if="showForm"
         :are-environments-loading="areEnvironmentsLoading"
-        :are-hidden-variables-available="areHiddenVariablesAvailable"
         :are-scoped-variables-available="areScopedVariablesAvailable"
         :environments="environments"
         :hide-environment-scope="hideEnvironmentScope"

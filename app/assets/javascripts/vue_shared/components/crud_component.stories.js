@@ -19,10 +19,6 @@ const Template = (args, { argTypes }) => ({
         <code>#description</code> slot
       </template>
 
-      <template v-if="isEmpty" #empty>
-        This component has no content yet.
-      </template>
-
       <code>#default</code> slot
 
       <template #form>
@@ -56,7 +52,6 @@ Default.args = {
   icon: 'rocket',
   count: 99,
   toggleText: 'Add action',
-  isEmpty: false,
 };
 
 export const WithDescription = Template.bind({});
@@ -68,7 +63,6 @@ WithDescription.args = {
   count: 99,
   toggleText: 'Add action',
   descriptionEnabled: true,
-  isEmpty: false,
 };
 
 export const WithFooter = Template.bind({});
@@ -80,7 +74,6 @@ WithFooter.args = {
   count: 99,
   toggleText: 'Add action',
   footer: true,
-  isEmpty: false,
 };
 
 export const WithPagnation = Template.bind({});
@@ -92,7 +85,6 @@ WithPagnation.args = {
   count: 99,
   toggleText: 'Add action',
   pagination: true,
-  isEmpty: false,
 };
 
 export const WithCustomActions = Template.bind({});
@@ -103,39 +95,6 @@ WithCustomActions.args = {
   count: 99,
   toggleText: 'Add action',
   customActions: true,
-  isEmpty: false,
-};
-
-export const withEmpty = Template.bind({});
-withEmpty.args = {
-  ...defaultArgs,
-  title: 'CRUD Component title',
-  icon: 'rocket',
-  count: 0,
-  toggleText: 'Add action',
-  isEmpty: true,
-};
-
-export const isLoading = Template.bind({});
-isLoading.args = {
-  ...defaultArgs,
-  title: 'CRUD Component title',
-  icon: 'rocket',
-  count: 99,
-  toggleText: 'Add action',
-  isLoading: true,
-  isEmpty: false,
-};
-
-export const isCollapsible = Template.bind({});
-isCollapsible.args = {
-  ...defaultArgs,
-  title: 'CRUD Component title',
-  icon: 'rocket',
-  count: 99,
-  toggleText: 'Add action',
-  isCollapsible: true,
-  isEmpty: false,
 };
 
 const TableTemplate = (args, { argTypes }) => ({

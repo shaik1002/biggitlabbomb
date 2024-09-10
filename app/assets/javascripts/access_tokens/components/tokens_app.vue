@@ -79,7 +79,7 @@ export default {
 </script>
 
 <template>
-  <div class="settings-section js-search-settings-section !gl-pt-0">
+  <div class="settings-section gl-pt-0! js-search-settings-section">
     <token
       v-for="(tokenData, tokenType) in enabledTokenTypes"
       :key="tokenType"

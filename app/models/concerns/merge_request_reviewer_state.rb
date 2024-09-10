@@ -9,8 +9,7 @@ module MergeRequestReviewerState
       reviewed: 1,
       requested_changes: 2,
       approved: 3,
-      unapproved: 4,
-      review_started: 5
+      unapproved: 4
     }
 
     validates :state,

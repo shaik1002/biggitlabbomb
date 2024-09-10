@@ -23,8 +23,6 @@ information on general testing practices at GitLab.
 
 If you are looking for a guide on Vue component testing, you can jump right away to this [section](../fe_guide/vue.md#testing-vue-components).
 
-Information on testing Vue 3 is contained in [this page](../testing_guide/testing_vue3.md).
-
 ## Jest
 
 We use Jest to write frontend unit and integration tests.
@@ -228,7 +226,7 @@ it('exists', () => {
   // Bad
   wrapper.find({ ref: 'foo'});
   wrapper.find('.js-foo');
-  wrapper.find('.gl-button');
+  wrapper.find('.btn-primary');
 });
 ```
 
@@ -787,7 +785,7 @@ messages can be maintained where we call `setupConsoleWatcher`. Example:
 setupConsoleWatcher({
   ignores: [
     ...,
-    // Any call to `console.error('Foo bar')` or `console.warn('Foo bar')` will be ignored by our console watcher.
+    // Any call to `console.error('Foo bar')`  or `console.warn('Foo bar')` will be ignored by our console watcher.
     'Foo bar',
     // Use regex to allow for flexible message matching.
     /Lorem ipsum/,
@@ -1205,12 +1203,12 @@ testAction(
 
 ### Wait until Axios requests finish
 
-<!-- vale gitlab_base.Spelling = NO -->
+<!-- vale gitlab.Spelling = NO -->
 
 The Axios Utils mock module located in `spec/frontend/__helpers__/mocks/axios_utils.js` contains two helper methods for Jest tests that spawn HTTP requests.
 These are very useful if you don't have a handle to the request's Promise, for example when a Vue component does a request as part of its life cycle.
 
-<!-- vale gitlab_base.Spelling = YES -->
+<!-- vale gitlab.Spelling = YES -->
 
 - `waitFor(url, callback)`: Runs `callback` after a request to `url` finishes (either successfully or unsuccessfully).
 - `waitForAll(callback)`: Runs `callback` once all pending requests have finished. If no requests are pending, runs `callback` on the next tick.
@@ -1582,9 +1580,9 @@ Feature tests live in `spec/features` folder. You should look for existing files
 1. Start your `gdk` environment with `gdk start` command.
 1. In your terminal, run:
 
-   ```shell
-    bundle exec rspec path/to/file:line_of_my_test
-   ```
+  ```shell
+   bundle exec rspec path/to/file:line_of_my_test
+  ```
 
 You can also prefix this command with `WEBDRIVER_HEADLESS=0` which will run the test by opening an actual browser on your computer that you can see, which is very useful for debugging.
 
@@ -1596,23 +1594,23 @@ To use Firefox, instead of Chrome, prefix the command with `WEBDRIVER=firefox`.
 
 1. Make all string literals unchangeable
 
-   In all feature tests, the very first line should be:
+  In all feature tests, the very first line should be:
 
-   ```ruby
-   # frozen_string_literal: true
-   ```
+  ```ruby
+  # frozen_string_literal: true
+  ```
 
-   This is in every `Ruby` file and makes all string literals unchangeable. There are also some performance benefits, but this is beyond the scope of this section.
+  This is in every `Ruby` file and makes all string literals unchangeable. There are also some performance benefits, but this is beyond the scope of this section.
 
 1. Import dependencies.
 
-   You should import the modules you need. You will most likely always need to require `spec_helper`:
+  You should import the modules you need. You will most likely always need to require `spec_helper`:
 
-   ```ruby
-   require 'spec_helper'
-   ```
+  ```ruby
+  require 'spec_helper'
+  ```
 
-   Import any other relevant module.
+  Import any other relevant module.
 
 1. Create a global scope for RSpec to define our tests, just like what we do in jest with the initial describe block.
 
@@ -1795,48 +1793,6 @@ If you are stubbing an `ee` feature flag, then use:
 ```ruby
   stub_licensed_features(my_feature_flag: false)
 ```
-
-#### Asserting browser console errors
-
-By default, feature specs won't fail if a browser console error is found. Sometimes we want to cover that there are not
-unexpected console errors which could indicate an integration problem.
-
-To set a feature spec to fail if it encounters browser console errors, use `expect_page_to_have_no_console_errors` from
-the `BrowserConsoleHelpers` support module:
-
-```ruby
-RSpec.describe 'Pipeline', :js do
-  after do
-    expect_page_to_have_no_console_errors
-  end
-
-  # ...
-end
-```
-
-NOTE:
-`expect_page_to_have_no_console_errors` will not work on `WEBDRIVER=firefox`. Logs are only captured when
-using the Chrome driver.
-
-Sometimes, there are known console errors that we want to ignore. To ignore a set of messages, such that the test
-**will not** fail if the message is observed, you can pass an `allow:` parameter to
-`expect_page_to_have_no_console_errors`:
-
-```ruby
-RSpec.describe 'Pipeline', :js do
-  after do
-    expect_page_to_have_no_console_errors(allow: [
-      "Blow up!",
-      /Foo.*happens/
-    ])
-  end
-
-  # ...
-end
-```
-
-Update the `BROWSER_CONSOLE_ERROR_FILTER` constant in `spec/support/helpers/browser_console_helpers.rb` to change
-the list of console errors that should be globally ignored.
 
 ### Debugging
 

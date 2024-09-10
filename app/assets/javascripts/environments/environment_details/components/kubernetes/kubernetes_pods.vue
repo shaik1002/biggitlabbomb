@@ -23,7 +23,6 @@ export default {
     WorkloadTable,
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     k8sPods: {
       query: k8sPodsQuery,
       variables() {
@@ -46,15 +45,6 @@ export default {
               spec: pod.spec,
               fullStatus: pod.status,
               containers: pod.spec.containers,
-              actions: [
-                {
-                  name: 'delete-pod',
-                  text: s__('KubernetesDashboard|Delete pod'),
-                  icon: 'remove',
-                  variant: 'danger',
-                  class: '!gl-text-red-500',
-                },
-              ],
             };
           }) || []
         );
@@ -138,9 +128,6 @@ export default {
     filterPods(status) {
       this.filterOption = status;
     },
-    onDeletePod(pod) {
-      this.$emit('delete-pod', pod);
-    },
   },
   i18n: {
     podsTitle: s__('Environment|Pods'),
@@ -168,7 +155,6 @@ export default {
         class="gl-mt-8"
         @select-item="onItemSelect"
         @remove-selection="onRemoveSelection"
-        @delete-pod="onDeletePod"
       />
     </template>
   </gl-tab>

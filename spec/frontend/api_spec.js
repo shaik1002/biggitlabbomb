@@ -951,31 +951,6 @@ describe('Api', () => {
     });
   });
 
-  describe('postMergeRequestPipeline', () => {
-    const dummyProjectId = 5;
-    const dummyMergeRequestIid = 123;
-    const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/5/merge_requests/123/pipelines`;
-
-    beforeEach(() => {
-      mock = new MockAdapter(axios);
-    });
-
-    it('creates a merge request pipeline async', () => {
-      jest.spyOn(axios, 'post');
-
-      mock.onPost(expectedUrl).replyOnce(HTTP_STATUS_OK, {
-        id: 456,
-      });
-
-      return Api.postMergeRequestPipeline(dummyProjectId, {
-        mergeRequestId: dummyMergeRequestIid,
-      }).then(({ data }) => {
-        expect(data.id).toBe(456);
-        expect(axios.post).toHaveBeenCalledWith(expectedUrl, { async: true });
-      });
-    });
-  });
-
   describe('projectForks', () => {
     it('gets forked projects', () => {
       const dummyProjectPath = 'gitlab-org/gitlab-ce';
@@ -1587,6 +1562,15 @@ describe('Api', () => {
               headers,
             });
           });
+        });
+      });
+
+      describe('when internal event is called with unallowed additionalProperties', () => {
+        it('throws an error', () => {
+          expect(() => {
+            const unallowedProperties = { new_key: 'unallowed' };
+            Api.trackInternalEvent(event, unallowedProperties);
+          }).toThrow(/Disallowed additional properties were provided:/);
         });
       });
     });

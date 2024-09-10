@@ -29,13 +29,6 @@ module Resolvers
             description: 'Labels applied to the issue or the merge request.'
 
           def resolve(**args)
-            Gitlab::Analytics::CycleAnalytics::DataCollector.new(stage: object,
-              params: transform_params(args, object).to_data_collector_params)
-          end
-
-          private
-
-          def transform_params(args, _stage)
             formatted_args = args.to_hash
             timeframe = args.delete(:timeframe)
             formatted_args[:created_after] = timeframe[:start]
@@ -48,16 +41,16 @@ module Resolvers
 
             formatted_args[:label_name] = formatted_args.delete(:label_names) if formatted_args[:label_names].present?
 
-            Gitlab::Analytics::CycleAnalytics::RequestParams.new(
+            params = Gitlab::Analytics::CycleAnalytics::RequestParams.new(
               namespace: object.namespace,
               current_user: current_user,
               **formatted_args.compact
             )
+
+            Gitlab::Analytics::CycleAnalytics::DataCollector.new(stage: object, params: params.to_data_collector_params)
           end
         end
       end
     end
   end
 end
-
-Resolvers::Analytics::CycleAnalytics::ValueStreams::StageMetricsResolver.prepend_mod

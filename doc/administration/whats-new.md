@@ -19,9 +19,9 @@ All users can see the feature list, but the entries might differ depending on th
 - Features only available on GitLab.com are not shown to self-managed installations.
 - Features only available to self-managed installations are not shown on GitLab.com.
 
-  NOTE:
-  For self-managed installations, the updated **What's new** is included
-  in the first patch release after a new version, such as `13.10.1`.
+   NOTE:
+   For self-managed installations, the updated **What's new** is included
+   in the first patch release after a new version, such as `13.10.1`.
 
 ## Access What's new
 
@@ -35,7 +35,7 @@ To access the **What's new** feature:
 You can configure **What's new** to display features based on the tier,
 or you can hide it. To configure it:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Settings > Preferences**.
 1. Expand **What's new**, and choose one of the following options:
 

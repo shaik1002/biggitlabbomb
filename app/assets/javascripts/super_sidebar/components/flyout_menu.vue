@@ -19,11 +19,6 @@ import NavItem from './nav_item.vue';
 // triangles, one above the section title, one below, do listen to events,
 // keeping hover.
 
-// The flyout menu gets some padding, to keep it open when the cursor goes out
-// of bounds just a little bit. This padding is compensated with an offset, to
-// not have any visual effect.
-export const FLYOUT_PADDING = 12;
-
 export default {
   name: 'FlyoutMenu',
   components: { NavItem },
@@ -64,15 +59,6 @@ export default {
 
       return `${x}, ${y} 100, ${y} 100, 100`;
     },
-    flyoutStyle() {
-      return {
-        padding: `${FLYOUT_PADDING}px`,
-        // Add extra padding on the left, to completely overlap the scrollbar of
-        // the sidebar, which can be pretty wide, depending on the user's browser.
-        // See https://gitlab.com/gitlab-org/gitlab/-/issues/426023
-        'padding-left': `${FLYOUT_PADDING * 2}px`,
-      };
-    },
   },
   created() {
     const target = document.querySelector(`#${this.targetId}`);
@@ -85,14 +71,7 @@ export default {
 
     const updatePosition = () =>
       computePosition(target, flyout, {
-        middleware: [
-          offset({
-            mainAxis: -FLYOUT_PADDING,
-            alignmentAxis: -FLYOUT_PADDING,
-          }),
-          flip(),
-          shift(),
-        ],
+        middleware: [offset({ alignmentAxis: -12 }), flip(), shift()],
         placement: 'right-start',
         strategy: 'fixed',
       }).then(({ x, y }) => {
@@ -147,13 +126,12 @@ export default {
 <template>
   <div
     :id="`${targetId}-flyout`"
-    :style="flyoutStyle"
-    class="gl-fixed gl-z-9999 -gl-mx-1 gl-max-h-full gl-overflow-y-auto"
+    class="gl-fixed gl-p-4 -gl-mx-1 gl-z-9999 gl-max-h-full gl-overflow-y-auto"
     @mouseover="$emit('mouseover')"
     @mouseleave="$emit('mouseleave')"
   >
     <ul
-      class="gl-min-w-20 gl-max-w-34 gl-list-none gl-rounded-base gl-border-1 gl-border-solid gl-border-gray-100 gl-bg-white gl-p-2 gl-pb-1 gl-shadow-md"
+      class="gl-min-w-20 gl-max-w-34 gl-border-1 gl-rounded-base gl-border-solid gl-border-gray-100 gl-shadow-md gl-bg-white gl-p-2 gl-pb-1 gl-list-none"
       @mouseenter="showSVG = false"
     >
       <nav-item

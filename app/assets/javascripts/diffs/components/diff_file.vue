@@ -32,7 +32,6 @@ import { DIFF_FILE, SOMETHING_WENT_WRONG, SAVING_THE_COMMENT_FAILED, CONFLICT_TE
 import { collapsedType, getShortShaFromFile } from '../utils/diff_file';
 import DiffDiscussions from './diff_discussions.vue';
 import DiffFileHeader from './diff_file_header.vue';
-import DiffFileDiscussionExpansion from './diff_file_discussion_expansion.vue';
 
 export default {
   components: {
@@ -46,7 +45,6 @@ export default {
     DiffFileDrafts,
     NoteForm,
     DiffDiscussions,
-    DiffFileDiscussionExpansion,
   },
   directives: {
     SafeHtml,
@@ -120,9 +118,9 @@ export default {
   computed: {
     ...mapState('diffs', ['currentDiffFileId', 'conflictResolutionPath', 'canMerge']),
     ...mapGetters(['isNotesFetched', 'getNoteableData', 'noteableType']),
-    ...mapGetters('diffs', ['getDiffFileDiscussions', 'isVirtualScrollingEnabled', 'linkedFile']),
-    isLinkedFile() {
-      return this.file === this.linkedFile;
+    ...mapGetters('diffs', ['getDiffFileDiscussions', 'isVirtualScrollingEnabled', 'pinnedFile']),
+    isPinnedFile() {
+      return this.file === this.pinnedFile;
     },
     viewBlobHref() {
       return escape(this.file.view_path);
@@ -154,16 +152,16 @@ export default {
     },
     hasBodyClasses() {
       const domParts = {
-        header: '!gl-rounded-base',
+        header: 'gl-rounded-base!',
         contentByHash: '',
         content: '',
       };
 
       if (this.showBody) {
-        domParts.header = 'gl-rounded-bl-none gl-rounded-br-none';
+        domParts.header = 'gl-rounded-bottom-left-none gl-rounded-bottom-right-none';
         domParts.contentByHash =
-          'gl-rounded-none gl-rounded-bl-base gl-rounded-br-base gl-border-0';
-        domParts.content = 'gl-rounded-bl-base gl-rounded-br-base';
+          'gl-rounded-none gl-rounded-bottom-left-base gl-rounded-bottom-right-base gl-border-0';
+        domParts.content = 'gl-rounded-bottom-left-base gl-rounded-bottom-right-base';
       }
 
       return domParts;
@@ -222,9 +220,6 @@ export default {
     fileId() {
       return fileContentsId(this.file);
     },
-    isFileDiscussionsExpanded() {
-      return this.fileDiscussions.every((d) => d.expandedOnDiff);
-    },
   },
   watch: {
     'file.id': {
@@ -276,7 +271,6 @@ export default {
       'setFileCollapsedByUser',
       'saveDiffDiscussion',
       'toggleFileCommentForm',
-      'toggleFileDiscussion',
     ]),
     manageViewedEffects() {
       if (
@@ -390,12 +384,8 @@ export default {
         errorCallback();
       });
     },
-    // eslint-disable-next-line max-params
     handleSaveDraftNote(note, _, parentElement, errorCallback) {
       this.addToReview(note, this.$options.FILE_DIFF_POSITION_TYPE, parentElement, errorCallback);
-    },
-    toggleFileDiscussionVisibility() {
-      this.fileDiscussions.forEach((d) => this.toggleFileDiscussion(d));
     },
   },
   CONFLICT_TEXT,
@@ -414,7 +404,7 @@ export default {
       'comments-disabled': Boolean(file.brokenSymlink),
       'has-body': showBody,
       'is-virtual-scrolling': isVirtualScrollingEnabled,
-      'linked-file': isLinkedFile,
+      'pinned-file': isPinnedFile,
     }"
     :data-path="file.new_path"
     class="diff-file file-holder gl-mb-5"
@@ -424,7 +414,7 @@ export default {
       variant="danger"
       :dismissible="false"
       data-testid="conflictsAlert"
-      class="gl-rounded-t-base"
+      class="gl-rounded-top-base"
     >
       {{ $options.CONFLICT_TEXT[file.conflict_type] }}
       <template v-if="!canMerge">
@@ -439,14 +429,19 @@ export default {
         "
       >
         <template #gitlabLink="{ content }">
-          <gl-button :href="conflictResolutionPath" variant="link" class="gl-align-text-bottom">{{
-            content
-          }}</gl-button>
+          <gl-button
+            :href="conflictResolutionPath"
+            variant="link"
+            class="gl-vertical-align-text-bottom"
+            >{{ content }}</gl-button
+          >
         </template>
         <template #resolveLocally="{ content }">
-          <gl-button variant="link" class="js-check-out-modal-trigger gl-align-text-bottom">{{
-            content
-          }}</gl-button>
+          <gl-button
+            variant="link"
+            class="gl-vertical-align-text-bottom js-check-out-modal-trigger"
+            >{{ content }}</gl-button
+          >
         </template>
       </gl-sprintf>
       <gl-sprintf
@@ -454,9 +449,11 @@ export default {
         :message="__('You can %{resolveLocallyStart}resolve them locally%{resolveLocallyEnd}.')"
       >
         <template #resolveLocally="{ content }">
-          <gl-button variant="link" class="js-check-out-modal-trigger gl-align-text-bottom">{{
-            content
-          }}</gl-button>
+          <gl-button
+            variant="link"
+            class="gl-vertical-align-text-bottom js-check-out-modal-trigger"
+            >{{ content }}</gl-button
+          >
         </template>
       </gl-sprintf>
     </gl-alert>
@@ -470,13 +467,14 @@ export default {
       :add-merge-request-buttons="true"
       :view-diffs-file-by-file="viewDiffsFileByFile"
       :show-local-file-reviews="showLocalFileReviews"
+      :pinned="isPinnedFile"
       class="js-file-title file-title"
       :class="[
         hasBodyClasses.header,
         {
-          '!gl-rounded-none !gl-bg-red-200': file.conflict_type,
-          '!gl-rounded-tl-none !gl-rounded-tr-none': file.conflict_type && isCollapsed,
-          '!gl-border-0': file.conflict_type || isCollapsed,
+          'gl-bg-red-200! gl-rounded-0!': file.conflict_type,
+          'gl-rounded-top-left-none! gl-rounded-top-right-none!': file.conflict_type && isCollapsed,
+          'gl-border-0!': file.conflict_type || isCollapsed,
         },
       ]"
       @toggleFile="handleToggle({ viaUserInteraction: true })"
@@ -485,7 +483,7 @@ export default {
 
     <div
       v-if="idState.forkMessageVisible"
-      class="js-file-fork-suggestion-section file-fork-suggestion gl-border-1 gl-border-t-0 gl-border-solid gl-border-gray-100"
+      class="js-file-fork-suggestion-section file-fork-suggestion gl-border-1 gl-border-solid gl-border-gray-100 gl-border-top-0"
     >
       <span v-safe-html="forkMessage" class="file-fork-suggestion-note"></span>
       <gl-button
@@ -511,37 +509,30 @@ export default {
         :class="[
           hasBodyClasses.contentByHash,
           {
-            '!gl-border-0': file.conflict_type,
+            'gl-border-0!': file.conflict_type,
           },
         ]"
       >
         <div v-if="showFileDiscussions" data-testid="file-discussions">
           <div class="diff-file-discussions-wrapper">
-            <template v-if="isFileDiscussionsExpanded">
-              <diff-discussions
-                v-if="fileDiscussions.length"
-                class="diff-file-discussions"
-                data-testid="diff-file-discussions"
-                :discussions="fileDiscussions"
-              />
-              <diff-file-drafts
-                :file-hash="file.file_hash"
-                :show-pin="false"
-                :position-type="$options.FILE_DIFF_POSITION_TYPE"
-                class="diff-file-discussions"
-              />
-            </template>
-            <diff-file-discussion-expansion
-              v-else
+            <diff-discussions
+              v-if="fileDiscussions.length"
+              class="diff-file-discussions"
+              data-testid="diff-file-discussions"
               :discussions="fileDiscussions"
-              @toggle="toggleFileDiscussionVisibility"
+            />
+            <diff-file-drafts
+              :file-hash="file.file_hash"
+              :show-pin="false"
+              :position-type="$options.FILE_DIFF_POSITION_TYPE"
+              class="diff-file-discussions"
             />
             <note-form
               v-if="file.hasCommentForm"
               :save-button-title="__('Comment')"
               :diff-file="file"
               autofocus
-              class="gl-px-5 gl-py-3"
+              class="gl-py-3 gl-px-5"
               data-testid="file-note-form"
               @handleFormUpdate="handleSaveNote"
               @handleFormUpdateAddToReview="handleSaveDraftNote"
@@ -558,7 +549,7 @@ export default {
         <div v-else-if="errorMessage" class="diff-viewer">
           <div
             v-if="isFileTooLarge"
-            class="collapsed-file-warning gl-rounded-bl-base gl-rounded-br-base gl-bg-orange-50 gl-p-7 gl-text-center"
+            class="collapsed-file-warning gl-p-7 gl-bg-orange-50 gl-text-center gl-rounded-bottom-left-base gl-rounded-bottom-right-base"
           >
             <p class="gl-mb-5">
               {{ $options.i18n.tooLarge }}
@@ -574,7 +565,7 @@ export default {
         <template v-else>
           <div
             v-if="showWarning"
-            class="collapsed-file-warning gl-rounded-bl-base gl-rounded-br-base gl-bg-orange-50 gl-p-7 gl-text-center"
+            class="collapsed-file-warning gl-p-7 gl-bg-orange-50 gl-text-center gl-rounded-bottom-left-base gl-rounded-bottom-right-base"
           >
             <p class="gl-mb-5">
               <gl-sprintf :message="expandableWarning">

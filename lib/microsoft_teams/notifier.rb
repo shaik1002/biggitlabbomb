@@ -27,33 +27,18 @@ module MicrosoftTeams
 
     private
 
-    def body(activity:, title: nil, attachments: nil)
-      body = [
-        {
-          type: "TextBlock",
-          text: title,
-          weight: "bolder",
-          size: "medium"
-        }
-      ]
+    def body(activity:, title: nil, summary: nil, attachments: nil)
+      result = { 'sections' => [] }
 
-      body << ::MicrosoftTeams::Activity.new(**activity).prepare
+      result['title'] = title
+      result['summary'] = summary
+      result['sections'] << ::MicrosoftTeams::Activity.new(**activity).prepare
 
       unless attachments.blank?
-        body << {
-          type: "TextBlock",
-          text: attachments,
-          wrap: true
-        }
+        result['sections'] << { text: attachments }
       end
 
-      {
-        type: "message",
-        'attachments' => [
-          contentType: "application/vnd.microsoft.card.adaptive",
-          content: { type: "AdaptiveCard", msteams: { width: "Full" }, version: "1.0", body: body }
-        ]
-      }.to_json
+      result.to_json
     end
   end
 end

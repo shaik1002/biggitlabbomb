@@ -26,7 +26,7 @@ masks the problem by:
 
 1. Upgrading the Gitaly binary in-place.
 1. Performing a graceful reload.
-
+ 
 The same approach doesn't fit a container-based lifecycle where a container or pod needs to fully shutdown and start as a new container or pod.
 
 Gitaly Cluster (Praefect) solves the data and service high-availability aspect by replicating data across instances. However, Gitaly Cluster is unsuited to run in Kubernetes
@@ -35,25 +35,13 @@ because of [existing issues and design constraints](index.md#known-issues) that 
 To support a Cloud Native deployment, Gitaly (non-Cluster) is the only option.
 By leveraging the right Kubernetes and Gitaly features and configuration, you can minimize service disruption and provide a good user experience.
 
-## Requirements
-
-The information on this page assumes:
-
-- Kubernetes version equal to or greater than `1.29`.
-- Kubernetes node `runc` version equal to or greater than `1.1.9`.
-- Kubernetes node cgroup v2. Native, hybrid v1 mode is not supported. Only
-  [`systemd`-style cgroup structure](https://kubernetes.io/docs/setup/production-environment/container-runtimes/#systemd-cgroup-driver) is supported (Kubernetes default).
-- Pod access to node mountpoint `/sys/fs/cgroup`.
-- Pod init container (`init-cgroups`) access to `root` user filesystem permissions on `/sys/fs/cgroup`. Used to delegate the pod cgroup to the Gitaly container
-  (user `git`, UID `1000`).
-
 ## Guidance
 
 When running Gitaly in Kubernetes, you must:
 
 - [Address pod disruption](#address-pod-disruption).
 - [Address resource contention and saturation](#address-resource-contention-and-saturation).
-- [Optimize pod rotation time](#optimize-pod-rotation-time).
+- [Optimize pod start time](#optimize-pod-start-time).
 
 ### Address pod disruption
 
@@ -72,9 +60,9 @@ service disruption and helps set expectations. You should use maintenance window
 - Gitaly configuration changes.
 - Kubernetes node maintenance windows. For example, upgrades and patching. Isolating Gitaly into its own dedicated node pool might help.
 
-#### Use `PriorityClass`
+#### Use [PriorityClass](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#priorityclass)
 
-Use [PriorityClass](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/#priorityclass) to assign Gitaly pods higher priority compared to other pods, to help with node saturation pressure, eviction priority, and scheduling latency:
+Assign Gitaly pods higher priority compared to other pods, to help with node saturation pressure, eviction priority, and scheduling latency:
 
 1. Create a priority class:
 
@@ -121,7 +109,7 @@ Pod termination raises two important concerns:
 - Data/Repository corruption
 - Service disruption
 
-This section focuses on reducing the scope of impact and protecting the service as a whole.
+This section focuses on reducing the blast radius and protecting the service as a whole.
 
 #### Constrain Git processes resource usage
 
@@ -206,7 +194,7 @@ gitlab:
     antiAffinity: hard
 ```
 
-### Optimize pod rotation time
+### Optimize pod start time
 
 This section covers areas of optimization to reduce downtime during maintenance events or unplanned infrastructure events by reducing the time it takes the pod to start serving traffic.
 
@@ -243,21 +231,4 @@ gitlab:
         timeoutSeconds: 3
         successThreshold: 1
         failureThreshold: 3
-```
-
-#### Gitaly graceful shutdown timeout
-
-By default, when terminating, Gitaly grants a 1 minute timeout for in-flight requests to complete.
-While beneficial at first glance, this timeout:
-
-- Slows down pod rotation.
-- Reduces availability by rejecting requests during the shutdown process.
-
-A better approach in a container-based deployment is to rely on client-side retry logic. You can reconfigure the timeout by using the `gracefulRestartTimeout` field.
-For example, to grant a 1 second graceful timeout:
-
-```yaml
-gitlab:
-  gitaly:
-    gracefulRestartTimeout: 1
 ```

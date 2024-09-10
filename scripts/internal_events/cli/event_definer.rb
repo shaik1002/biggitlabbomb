@@ -74,7 +74,7 @@ module InternalEventsCli
 
       event.action = cli.ask("Define the event name: #{input_required_text}", **input_opts) do |q|
         q.required true
-        q.validate ->(input) { input =~ NAME_REGEX && cli.global.events.map(&:action).none?(input) }
+        q.validate ->(input) { input =~ /\A[a-z1-9_]+\z/ && cli.global.events.map(&:action).none?(input) }
         q.modify :trim
         q.messages[:valid?] = format_warning("Invalid event name. Only lowercase/numbers/underscores allowed. " \
                                              "Ensure %{value} is not an existing event.")
@@ -203,11 +203,7 @@ module InternalEventsCli
 
         #{divider}
 
-          Do you need to create a metric? Probably!
-
-          Metrics are required to pull any usage data from self-managed instances or GitLab-Dedicated through Service Ping. Collected metric data can viewed in Tableau. Individual event details from GitLab.com can also be accessed through Snowflake.
-
-          Typical flow: Define event > Define metric > Instrument app code > Merge/Deploy MR > Verify data in Tableau/Snowflake
+          Want to have data reported in Snowflake/Tableau/ServicePing? Add a new metric for your event!
 
       TEXT
     end

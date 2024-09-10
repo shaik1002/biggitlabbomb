@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: Any user with at least the Maintainer role can merge updates to this content. For details, see https://docs.gitlab.com/ee/development/development_processes.html#development-guidelines-review.
 ---
@@ -567,11 +567,11 @@ instead:
 
 - In Ruby/HAML:
 
-  ```ruby
-  safe_format(_('In &lt; 1 hour'))
+   ```ruby
+   safe_format(_('In &lt; 1 hour'))
 
-  # => 'In < 1 hour'
-  ```
+   # => 'In < 1 hour'
+   ```
 
 - In JavaScript:
 

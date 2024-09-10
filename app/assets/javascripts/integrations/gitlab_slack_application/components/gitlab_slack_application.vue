@@ -44,8 +44,9 @@ export default {
     },
   },
   i18n,
+  // eslint-disable-next-line local-rules/require-valid-help-page-path
   learnMoreLink: helpPagePath('user/project/integrations/gitlab_slack_application', {
-    anchor: 'install-the-gitlab-for-slack-app',
+    anchor: 'configuration',
   }),
   data() {
     return {
@@ -75,8 +76,8 @@ export default {
 </script>
 
 <template>
-  <div class="gl-mx-auto gl-mt-11 gl-max-w-max gl-text-center">
-    <div v-once class="gl-my-5 gl-flex gl-items-center gl-justify-center">
+  <div class="gl-max-w-max gl-mx-auto gl-mt-11 gl-text-center">
+    <div v-once class="gl-my-5 gl-display-flex gl-justify-content-center gl-align-items-center">
       <img :src="gitlabLogoPath" :alt="$options.i18n.gitlabLogoAlt" class="gl-h-11 gl-w-11" />
       <gl-icon name="arrow-right" :size="32" class="gl-mx-5 gl-text-gray-200" />
       <img
@@ -101,7 +102,7 @@ export default {
             @project-selected="selectProject"
           />
 
-          <div class="gl-mt-3 gl-flex gl-justify-end">
+          <div class="gl-display-flex gl-justify-content-end gl-mt-3">
             <gl-button
               category="primary"
               variant="confirm"

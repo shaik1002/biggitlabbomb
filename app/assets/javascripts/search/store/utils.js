@@ -3,7 +3,6 @@ import AccessorUtilities from '~/lib/utils/accessor';
 import { formatNumber } from '~/locale';
 import { joinPaths, queryToObject, objectToQuery, getBaseURL } from '~/lib/utils/url_utility';
 import { languageFilterData } from '~/search/sidebar/components/language_filter/data';
-import { LABEL_AGREGATION_NAME } from '~/search/sidebar/components/label_filter/data';
 import {
   MAX_FREQUENT_ITEMS,
   MAX_FREQUENCY,
@@ -152,25 +151,12 @@ const sortLanguages = (state, entries) => {
   return orderBy(entries, [({ key }) => queriedLanguagesSet.has(key), 'count'], ['desc', 'desc']);
 };
 
-const getUniqueNamesOnly = (items) => {
-  return items.filter(
-    (item, index, array) => index === array.findIndex((obj) => obj.title === item.title),
-  );
-};
-
 export const prepareSearchAggregations = (state, aggregationData) =>
   aggregationData.map((item) => {
     if (item?.name === LANGUAGE_AGGREGATION_NAME) {
       return {
         ...item,
         buckets: sortLanguages(state, item.buckets),
-      };
-    }
-
-    if (item?.name === LABEL_AGREGATION_NAME) {
-      return {
-        ...item,
-        buckets: getUniqueNamesOnly(item.buckets),
       };
     }
 

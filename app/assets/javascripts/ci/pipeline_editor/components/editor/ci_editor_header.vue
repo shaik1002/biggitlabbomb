@@ -12,7 +12,7 @@ import {
 
 export default {
   i18n: {
-    browseCatalog: __('CI/CD Catalog'),
+    browseCatalog: __('Browse CI/CD Catalog'),
     help: __('Help'),
     jobAssistant: s__('JobAssistant|Job assistant'),
   },
@@ -61,13 +61,13 @@ export default {
 
 <template>
   <div
-    class="gl-flex gl-flex-col gl-gap-3 gl-border-1 gl-border-solid gl-border-gray-100 gl-p-3 md:gl-flex-row"
+    class="gl-display-flex gl-p-3 gl-gap-3 gl-border-solid gl-border-gray-100 gl-border-1 gl-flex-direction-column gl-md-flex-direction-row"
   >
     <slot></slot>
     <gl-button
       :href="ciCatalogPath"
       size="small"
-      icon="catalog-checkmark"
+      icon="external-link"
       target="_blank"
       data-testid="catalog-repo-link"
       @click="trackCatalogBrowsing"

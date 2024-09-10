@@ -48,12 +48,12 @@ RSpec.describe 'Issue board filters', :js, feature_category: :team_planning do
       end
     end
 
-    describe 'filters by assignee', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/351426' do
+    describe 'filters by assignee' do
       before do
         set_filter('assignee')
       end
 
-      it_behaves_like 'loads all the users when opened' do
+      it_behaves_like 'loads all the users when opened', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/351426' do
         let(:issue) { issue_2 }
       end
     end
@@ -177,7 +177,7 @@ RSpec.describe 'Issue board filters', :js, feature_category: :team_planning do
       it 'loads all the types when opened and submit one as filter', :aggregate_failures do
         expect(find('.board:nth-child(1)')).to have_selector('.board-card', count: 3)
 
-        expect_filtered_search_dropdown_results(filter_dropdown, 3)
+        expect_filtered_search_dropdown_results(filter_dropdown, 2)
 
         click_on 'Incident'
         filter_submit.click

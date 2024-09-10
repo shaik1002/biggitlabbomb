@@ -29,9 +29,8 @@ module Integrations
     end
 
     def self.help
-      build_help_page_url(
-        'user/project/integrations/pivotal_tracker', s_("Add commit messages as comments to Pivotal Tracker stories.")
-      )
+      docs_link = ActionController::Base.helpers.link_to _('Learn more.'), Rails.application.routes.url_helpers.help_page_url('user/project/integrations/pivotal_tracker'), target: '_blank', rel: 'noopener noreferrer'
+      s_('Add commit messages as comments to Pivotal Tracker stories. %{docs_link}').html_safe % { docs_link: docs_link.html_safe }
     end
 
     def self.to_param

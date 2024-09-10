@@ -61,37 +61,42 @@ export default {
 </script>
 
 <template>
-  <div class="gl-flex gl-flex-col">
-    <div class="gl-flex gl-flex-wrap gl-justify-between gl-py-3 sm:gl-flex-nowrap">
-      <div class="gl-min-w-0 gl-grow gl-flex-col">
-        <div class="gl-flex">
+  <div class="gl-display-flex gl-flex-direction-column">
+    <div
+      class="gl-display-flex gl-flex-wrap gl-sm-flex-nowrap gl-justify-content-space-between gl-py-3"
+    >
+      <div class="gl-flex-direction-column gl-flex-grow-1 gl-min-w-0">
+        <div class="gl-display-flex">
           <gl-avatar
             v-if="avatar"
             :src="avatar"
             :shape="$options.AVATAR_SHAPE_OPTION_RECT"
-            class="gl-mr-4 gl-self-center"
+            class="gl-align-self-center gl-mr-4"
           />
 
-          <div class="gl-flex gl-min-w-0 gl-flex-col">
-            <h2 class="gl-mb-0 gl-mt-3 gl-text-size-h1" data-testid="title">
+          <div class="gl-display-flex gl-flex-direction-column gl-min-w-0">
+            <h2 class="gl-font-size-h1 gl-mt-3 gl-mb-0" data-testid="title">
               <slot name="title">{{ title }}</slot>
             </h2>
 
             <div
               v-if="$scopedSlots['sub-header']"
-              class="gl-mt-3 gl-flex gl-items-center gl-text-gray-500"
+              class="gl-display-flex gl-align-items-center gl-text-gray-500 gl-mt-3"
             >
               <slot name="sub-header"></slot>
             </div>
           </div>
         </div>
 
-        <div v-if="metadataSlots.length > 0" class="gl-mt-3 gl-flex gl-flex-wrap gl-items-center">
+        <div
+          v-if="metadataSlots.length > 0"
+          class="gl-display-flex gl-flex-wrap gl-align-items-center gl-mt-3"
+        >
           <template v-if="!metadataLoading">
             <div
               v-for="(row, metadataIndex) in metadataSlots"
               :key="metadataIndex"
-              class="gl-mr-5 gl-flex gl-items-center"
+              class="gl-display-flex gl-align-items-center gl-mr-5"
             >
               <slot :name="row"></slot>
             </div>
@@ -106,7 +111,10 @@ export default {
           </template>
         </div>
       </div>
-      <div v-if="$scopedSlots['right-actions']" class="gl-mt-3 gl-flex gl-items-start gl-gap-3">
+      <div
+        v-if="$scopedSlots['right-actions']"
+        class="gl-display-flex gl-align-items-flex-start gl-gap-3 gl-mt-3"
+      >
         <slot name="right-actions"></slot>
       </div>
     </div>

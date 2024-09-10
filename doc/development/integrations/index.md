@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: Any user with at least the Maintainer role can merge updates to this content. For details, see https://docs.gitlab.com/ee/development/development_processes.html#development-guidelines-review.
 description: "GitLab's development guidelines for Integrations"
@@ -375,17 +375,13 @@ Sensitive fields are not exposed over the API. Sensitive fields are those fields
 
 ## Availability of integrations
 
-By default, integrations can apply to a specific project or group, or
-to an entire instance.
+By default, integrations are available on the project, group, and instance level.
 Most integrations only act in a project context, but can be still configured
-for the group and instance.
+from the group and instance levels.
 
-For some integrations it can make sense to only make it available on certain levels (project, group, or instance).
-To do that, the integration must be removed from `Integration::INTEGRATION_NAMES` and instead added to:
-
-- `Integration::PROJECT_LEVEL_ONLY_INTEGRATION_NAMES` to only allow enabling on the project level.
-- `Integration::INSTANCE_LEVEL_ONLY_INTEGRATION_NAMES` to only allow enabling on the instance level.
-- `Integration::PROJECT_AND_GROUP_LEVEL_ONLY_INTEGRATION_NAMES` to prevent enabling on the instance level.
+For some integrations it can make sense to only make it available on the project level.
+To do that, the integration must be removed from `Integration::INTEGRATION_NAMES` and
+added to `Integration::PROJECT_SPECIFIC_INTEGRATION_NAMES` instead.
 
 When developing a new integration, we also recommend you gate the availability behind a
 [feature flag](../feature_flags/index.md) in `Integration.available_integration_names`.
@@ -433,7 +429,7 @@ You must announce any deprecation [no later than the third milestone preceding i
 To deprecate an integration:
 
 - [Add a deprecation entry](../../development/deprecation_guidelines/index.md#update-the-deprecations-and-removals-documentation).
-- [Mark the integration documentation as deprecated](../../development/documentation/styleguide/deprecations_and_removals.md).
+- [Mark the integration documentation as deprecated](../../development/documentation/versions.md#deprecate-a-page-or-topic).
 - Optional. To prevent any new project-level records from
   being created, add the integration to `Project#disabled_integrations` (see [example merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/114835)).
 
@@ -446,7 +442,7 @@ In the major milestone of intended removal (M.0), disable the integration and de
 - Remove the integration from `Integration::INTEGRATION_NAMES`.
 - Delete the integration model's `#execute` and `#test` methods (if defined), but keep the model.
 - Add a post-migration to delete the integration records from PostgreSQL (see [example merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/114721)).
-- [Mark the integration documentation as removed](../../development/documentation/styleguide/deprecations_and_removals.md#remove-a-page).
+- [Mark the integration documentation as removed](../../development/documentation/versions.md#remove-a-page).
 - [Update the integration API documentation](../../api/integrations.md).
 
 In the next minor release (M.1):

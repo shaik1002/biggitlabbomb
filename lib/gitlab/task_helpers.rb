@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'rainbow'
+require 'rainbow/ext/string'
 require 'gitlab/utils/all'
 
 # rubocop:disable Rails/Output

@@ -62,7 +62,6 @@ export default {
     },
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     isLastDeployment: {
       query: isLastDeployment,
       variables() {
@@ -173,7 +172,7 @@ export default {
     'gl-border-t-solid',
     'gl-border-1',
     'gl-py-5',
-    'md:gl-pl-7',
+    'gl-md-pl-7',
     'gl-bg-gray-10',
   ],
   deployBoardClasses: [
@@ -181,15 +180,20 @@ export default {
     'gl-border-t-solid',
     'gl-border-1',
     'gl-py-4',
-    'md:gl-pl-7',
+    'gl-md-pl-7',
     'gl-bg-gray-10',
   ],
 };
 </script>
 <template>
   <div>
-    <div class="gl-flex gl-items-center gl-justify-between gl-px-3 gl-pb-5 gl-pt-3">
-      <div :class="{ 'gl-ml-7': inFolder }" class="gl-mr-4 gl-flex gl-min-w-0 gl-items-center">
+    <div
+      class="gl-px-3 gl-pt-3 gl-pb-5 gl-display-flex gl-justify-content-space-between gl-align-items-center"
+    >
+      <div
+        :class="{ 'gl-ml-7': inFolder }"
+        class="gl-min-w-0 gl-mr-4 gl-display-flex gl-align-items-center"
+      >
         <gl-button
           class="gl-mr-4 gl-min-w-fit"
           :icon="icon"
@@ -201,7 +205,7 @@ export default {
         <gl-link
           v-gl-tooltip
           :href="environment.environmentPath"
-          class="gl-truncate gl-text-blue-500"
+          class="gl-text-blue-500 gl-text-truncate"
           :class="{ 'gl-font-bold': visible }"
           :title="name"
         >
@@ -215,8 +219,8 @@ export default {
           >{{ tier }}</gl-badge
         >
       </div>
-      <div class="gl-flex gl-items-center">
-        <p v-if="canShowAutoStopDate" class="gl-mb-0 gl-mr-5 gl-text-sm gl-text-gray-700">
+      <div class="gl-display-flex gl-align-items-center">
+        <p v-if="canShowAutoStopDate" class="gl-font-sm gl-text-gray-700 gl-mr-5 gl-mb-0">
           <gl-sprintf :message="$options.i18n.autoStopIn">
             <template #time>
               <time-ago-tooltip :time="environment.autoStopAt" css-class="gl-font-bold" />
@@ -338,8 +342,8 @@ export default {
           class="gl-pl-4"
         />
       </div>
-      <div v-if="hasOpenedAlert" class="gl-bg-gray-10 md:gl-px-7">
-        <environment-alert :environment="environment" class="gl-py-5 gl-pl-4" />
+      <div v-if="hasOpenedAlert" class="gl-bg-gray-10 gl-md-px-7">
+        <environment-alert :environment="environment" class="gl-pl-4 gl-py-5" />
       </div>
     </gl-collapse>
   </div>

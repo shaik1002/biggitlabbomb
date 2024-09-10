@@ -26,8 +26,6 @@ describe('CRUD Component', () => {
   const findFormToggle = () => wrapper.findByTestId('crud-form-toggle');
   const findActions = () => wrapper.findByTestId('crud-actions');
   const findForm = () => wrapper.findByTestId('crud-form');
-  const findLoadingIcon = () => wrapper.findByTestId('crud-loading');
-  const findEmpty = () => wrapper.findByTestId('crud-empty');
   const findBody = () => wrapper.findByTestId('crud-body');
   const findFooter = () => wrapper.findByTestId('crud-footer');
   const findPagination = () => wrapper.findByTestId('crud-pagination');
@@ -36,12 +34,6 @@ describe('CRUD Component', () => {
     createComponent();
 
     expect(findTitle().text()).toBe('CRUD Component title');
-  });
-
-  it('renders `title` slot', () => {
-    createComponent({}, { title: '<p>Title slot</p>' });
-
-    expect(findTitle().text()).toBe('Title slot');
   });
 
   it('renders description', () => {
@@ -56,24 +48,11 @@ describe('CRUD Component', () => {
     expect(findDescription().text()).toBe('Description slot');
   });
 
-  it('renders count and icon appropriately when count does not exist', () => {
-    createComponent({ icon: 'rocket' });
-
-    expect(findCount().text()).toBe('0');
-    expect(findIcon().props('name')).toBe('rocket');
-  });
-
-  it('renders count and icon appropriately when count exists', () => {
+  it('renders count and icon', () => {
     createComponent({ count: 99, icon: 'rocket' });
 
     expect(findCount().text()).toBe('99');
     expect(findIcon().props('name')).toBe('rocket');
-  });
-
-  it('renders `count` slot', () => {
-    createComponent({}, { count: '<p>Count slot</p>' });
-
-    expect(findCount().text()).toBe('Count slot');
   });
 
   it('renders `actions` slot', () => {
@@ -91,28 +70,12 @@ describe('CRUD Component', () => {
     findFormToggle().vm.$emit('click');
     await nextTick();
 
-    expect(findFormToggle().exists()).toBe(false);
     expect(findForm().text()).toBe('Form slot');
-  });
-
-  it("doesn't render content while loading", () => {
-    createComponent({ isLoading: true }, { default: '<p>Body slot</p>' });
-
-    expect(findLoadingIcon().exists()).toBe(true);
-    expect(findBody().text()).toBe('');
-  });
-
-  it('renders `empty` slot', () => {
-    createComponent({}, { empty: '<span>Empty message</span>' });
-
-    expect(findLoadingIcon().exists()).toBe(false);
-    expect(findEmpty().text()).toBe('Empty message');
   });
 
   it('renders `body` slot', () => {
     createComponent({}, { default: '<p>Body slot</p>' });
 
-    expect(findLoadingIcon().exists()).toBe(false);
     expect(findBody().text()).toBe('Body slot');
   });
 
@@ -123,7 +86,7 @@ describe('CRUD Component', () => {
   });
 
   it('renders `pagination` slot', () => {
-    createComponent({}, { default: '<p>Body slot</p>', pagination: '<p>Pagination slot</p>' });
+    createComponent({}, { pagination: '<p>Pagination slot</p>' });
 
     expect(findPagination().text()).toBe('Pagination slot');
   });

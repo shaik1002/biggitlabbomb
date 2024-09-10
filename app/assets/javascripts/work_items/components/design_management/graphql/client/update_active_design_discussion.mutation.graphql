@@ -1,3 +1,0 @@
-mutation updateActiveDesignDiscussion($id: String, $source: String) {
-  updateActiveDesignDiscussion(id: $id, source: $source) @client
-}

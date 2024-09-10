@@ -36,6 +36,7 @@ module Gitlab
       gon.promo_url              = ApplicationHelper.promo_url
       gon.forum_url              = Gitlab::Saas.community_forum_url
       gon.docs_url               = Gitlab::Saas.doc_url
+      gon.organization_http_header_name = ::Organizations::ORGANIZATION_HTTP_HEADER
       gon.revision               = Gitlab.revision
       gon.feature_category       = Gitlab::ApplicationContext.current_context_attribute(:feature_category).presence
       gon.gitlab_logo            = ActionController::Base.helpers.asset_path('gitlab_logo.png')
@@ -67,10 +68,6 @@ module Gitlab
         gon.current_user_avatar_url = current_user.avatar_url
         gon.time_display_relative = current_user.time_display_relative
         gon.time_display_format = current_user.time_display_format
-      end
-
-      if current_organization && Feature.enabled?(:ui_for_organizations, current_user)
-        gon.current_organization = current_organization.slice(:id, :name, :web_url, :avatar_url)
       end
 
       # Initialize gon.features with any flags that should be
@@ -143,20 +140,6 @@ module Gitlab
       gon.analytics_url = ENV['GITLAB_ANALYTICS_URL']
       gon.analytics_id = ENV['GITLAB_ANALYTICS_ID']
     end
-
-    # `::Current.organization` is only valid within the context of a request,
-    # but it can be called from everywhere. So how do we avoid accidentally
-    # calling it outside of the context of a request? We banned it with
-    # Rubocop.
-    #
-    # This method is acceptable because it is only included by controllers.
-    # This method intentionally looks like Devise's `current_user` method,
-    # which has similar properties.
-    # rubocop:disable Gitlab/AvoidCurrentOrganization -- This method follows the spirit of the rule
-    def current_organization
-      ::Current.organization
-    end
-    # rubocop:enable Gitlab/AvoidCurrentOrganization
   end
 end
 

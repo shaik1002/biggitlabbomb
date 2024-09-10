@@ -654,7 +654,7 @@ RSpec.describe ApplicationHelper do
 
   describe '#profile_social_links' do
     context 'when discord is set' do
-      let(:user) { build(:user) }
+      let_it_be(:user) { build(:user) }
       let(:discord) { discord_url(user) }
 
       it 'returns an empty string if discord is not set' do
@@ -668,50 +668,18 @@ RSpec.describe ApplicationHelper do
       end
     end
 
-    context 'when bluesky is set' do
-      let(:user) { build(:user) }
-      let(:bluesky) { bluesky_url(user) }
-
-      it 'returns an empty string if bluesky did id is not set' do
-        expect(bluesky).to eq('')
-      end
-
-      it 'returns bluesky url when bluesky did id is set' do
-        user.bluesky = 'did:plc:ewvi7nxzyoun6zhxrhs64oiz'
-
-        expect(bluesky).to eq(external_redirect_path(url: 'https://bsky.app/profile/did:plc:ewvi7nxzyoun6zhxrhs64oiz'))
-      end
-    end
-
     context 'when mastodon is set' do
-      let(:user) { build(:user) }
+      let_it_be(:user) { build(:user) }
       let(:mastodon) { mastodon_url(user) }
 
       it 'returns an empty string if mastodon username is not set' do
         expect(mastodon).to eq('')
       end
 
-      context 'when verify_mastodon_user FF is enabled' do
-        before do
-          stub_feature_flags(verify_mastodon_user: true)
-        end
+      it 'returns mastodon url when mastodon username is set' do
+        user.mastodon = '@robin@example.com'
 
-        it 'returns mastodon url with relme when user handle is set' do
-          user.mastodon = '@robin@example.com'
-
-          expect(mastodon).to eq(external_redirect_path(url: 'https://example.com/@robin', rel: 'me'))
-        end
-      end
-
-      context 'when verify_mastodon_user FF is disabled' do
-        before do
-          stub_feature_flags(verify_mastodon_user: false)
-        end
-
-        it 'returns mastodon url when user handle is set' do
-          user.mastodon = '@robin@example.com'
-          expect(mastodon).to eq(external_redirect_path(url: 'https://example.com/@robin'))
-        end
+        expect(mastodon).to eq(external_redirect_path(url: 'https://example.com/@robin'))
       end
     end
   end
@@ -795,7 +763,21 @@ RSpec.describe ApplicationHelper do
     end
 
     describe 'with-top-bar' do
-      it { is_expected.to include('with-top-bar') }
+      context 'when @hide_top_bar_padding is false' do
+        before do
+          helper.instance_variable_set(:@hide_top_bar_padding, false)
+        end
+
+        it { is_expected.to include('with-top-bar') }
+      end
+
+      context 'when @hide_top_bar_padding is true' do
+        before do
+          helper.instance_variable_set(:@hide_top_bar_padding, true)
+        end
+
+        it { is_expected.not_to include('with-top-bar') }
+      end
     end
   end
 
@@ -887,6 +869,12 @@ RSpec.describe ApplicationHelper do
     end
   end
 
+  describe 'stylesheet_link_tag_defer' do
+    it 'uses media="all" in stylesheet' do
+      expect(helper.stylesheet_link_tag_defer('test')).to eq('<link rel="stylesheet" href="/stylesheets/test.css" media="all" />')
+    end
+  end
+
   describe 'sign_in_with_redirect?' do
     context 'when on the sign-in page that redirects afterwards' do
       before do
@@ -954,7 +942,7 @@ RSpec.describe ApplicationHelper do
 
     shared_examples 'returns icon with tooltip' do
       before do
-        allow(helper).to receive(:sprite_icon).with('spam', css_class: 'gl-align-text-bottom').and_return(mock_svg)
+        allow(helper).to receive(:sprite_icon).with('spam', css_class: 'gl-vertical-align-text-bottom').and_return(mock_svg)
       end
 
       it 'returns icon with tooltip' do
@@ -988,7 +976,7 @@ RSpec.describe ApplicationHelper do
       let_it_be(:resource) { build(:issue) }
 
       it 'passes the value to sprite_icon' do
-        expect(helper).to receive(:sprite_icon).with('spam', css_class: 'gl-align-text-bottom extra-class').and_return(mock_svg)
+        expect(helper).to receive(:sprite_icon).with('spam', css_class: 'gl-vertical-align-text-bottom extra-class').and_return(mock_svg)
 
         helper.hidden_resource_icon(resource, css_class: 'extra-class')
       end

@@ -19,6 +19,7 @@ Vue.use(VueApollo);
 const getTrialStatusWidgetData = (sidebarData) => {
   if (sidebarData.trial_status_widget_data_attrs && sidebarData.trial_status_popover_data_attrs) {
     const {
+      containerId,
       trialDaysUsed,
       trialDuration,
       navIconImagePath,
@@ -35,6 +36,7 @@ const getTrialStatusWidgetData = (sidebarData) => {
     return {
       showTrialStatusWidget: true,
       showDuoProTrialStatusWidget: false,
+      containerId,
       trialDaysUsed: Number(trialDaysUsed),
       trialDuration: Number(trialDuration),
       navIconImagePath,
@@ -42,6 +44,7 @@ const getTrialStatusWidgetData = (sidebarData) => {
       planName,
       plansHref,
       daysRemaining,
+      targetId: containerId,
       trialEndDate: new Date(trialEndDate),
       trialDiscoverPagePath,
     };
@@ -52,30 +55,36 @@ const getTrialStatusWidgetData = (sidebarData) => {
     sidebarData.duo_pro_trial_status_popover_data_attrs
   ) {
     const {
+      containerId,
       trialDaysUsed,
       trialDuration,
       percentageComplete,
+      widgetUrl,
       groupId,
       featureId,
       dismissEndpoint,
     } = convertObjectPropsToCamelCase(sidebarData.duo_pro_trial_status_widget_data_attrs);
 
-    const { daysRemaining, trialEndDate, purchaseNowUrl, learnAboutButtonUrl } =
-      convertObjectPropsToCamelCase(sidebarData.duo_pro_trial_status_popover_data_attrs);
+    const { daysRemaining, trialEndDate, purchaseNowUrl } = convertObjectPropsToCamelCase(
+      sidebarData.duo_pro_trial_status_popover_data_attrs,
+    );
 
     return {
       showDuoProTrialStatusWidget: true,
       showTrialStatusWidget: false,
+      containerId,
       trialDaysUsed: Number(trialDaysUsed),
       trialDuration: Number(trialDuration),
       percentageComplete: Number(percentageComplete),
+      widgetUrl,
       groupId,
       featureId,
       dismissEndpoint,
       daysRemaining,
+      targetId: containerId,
       trialEndDate: new Date(trialEndDate),
       purchaseNowUrl,
-      learnAboutButtonUrl,
+      learnAboutButtonUrl: widgetUrl,
     };
   }
 
@@ -87,7 +96,7 @@ export const initSuperSidebar = () => {
 
   if (!el) return false;
 
-  const { rootPath, sidebar, forceDesktopExpandedSidebar, commandPalette, isSaas } = el.dataset;
+  const { rootPath, sidebar, forceDesktopExpandedSidebar, commandPalette } = el.dataset;
 
   bindSuperSidebarCollapsedEvents(forceDesktopExpandedSidebar);
   initSuperSidebarCollapsedState(parseBoolean(forceDesktopExpandedSidebar));
@@ -135,7 +144,6 @@ export const initSuperSidebar = () => {
       canAdminLabel: parseBoolean(sidebarData.work_items?.can_admin_label),
       labelsManagePath: sidebarData.work_items?.labels_manage_path,
       isGroup,
-      isSaas: parseBoolean(isSaas),
     },
     store: createStore({
       searchPath,

@@ -399,7 +399,10 @@ Your IdP may need additional configuration. For more information, see
 
 You can configure GitLab to use multiple SAML IdPs if:
 
-- Each provider has a unique name set that matches a name set in `args`.
+- Each provider has a unique name set that matches a name set in `args`. At least
+  one provider must have the name `saml` to mitigate a
+  [known issue](https://gitlab.com/gitlab-org/gitlab/-/issues/366450) in GitLab
+  14.6 and later.
 - The providers' names are used:
   - In OmniAuth configuration for properties based on the provider name. For example,
     `allowBypassTwoFactor`, `allowSingleSignOn`, and `syncProfileFromProvider`.
@@ -2889,7 +2892,6 @@ To implement signing:
                   security: {
                     authn_requests_signed: true,  # enable signature on AuthNRequest
                     want_assertions_signed: true,  # enable the requirement of signed assertion
-                    want_assertions_encrypted: false,  # enable the requirement of encrypted assertion 
                     metadata_signed: false,  # enable signature on Metadata
                     signature_method: 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
                     digest_method: 'http://www.w3.org/2001/04/xmlenc#sha256',
@@ -2924,7 +2926,6 @@ To implement signing:
         security:
           authn_requests_signed: true  # enable signature on AuthNRequest
           want_assertions_signed: true  # enable the requirement of signed assertion
-          want_assertions_encrypted: false  # enable the requirement of encrypted assertion 
           metadata_signed: false  # enable signature on Metadata
           signature_method: 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256'
           digest_method: 'http://www.w3.org/2001/04/xmlenc#sha256'
@@ -2982,7 +2983,6 @@ To implement signing:
                            security: {
                              authn_requests_signed: true,  # enable signature on AuthNRequest
                              want_assertions_signed: true,  # enable the requirement of signed assertion
-                             want_assertions_encrypted: false,  # enable the requirement of encrypted assertion 
                              metadata_signed: false,  # enable signature on Metadata
                              signature_method: 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
                              digest_method: 'http://www.w3.org/2001/04/xmlenc#sha256',
@@ -3019,7 +3019,6 @@ To implement signing:
                         security: {
                           authn_requests_signed: true,  # enable signature on AuthNRequest
                           want_assertions_signed: true,  # enable the requirement of signed assertion
-                          want_assertions_encrypted: false,  # enable the requirement of encrypted assertion 
                           metadata_signed: false,  # enable signature on Metadata
                           signature_method: 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256',
                           digest_method: 'http://www.w3.org/2001/04/xmlenc#sha256',

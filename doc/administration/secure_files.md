@@ -97,14 +97,13 @@ DETAILS:
 Instead of storing Secure Files on disk, you should use [one of the supported object storage options](object_storage.md#supported-object-storage-providers).
 This configuration relies on valid credentials to be configured already.
 
-### Consolidated object storage
+[Read more about using object storage with GitLab](object_storage.md).
 
-> - Support for consolidated object storage was [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/149873) in GitLab 17.0.
+NOTE:
+This feature is not supported by consolidated object storage configuration.
+Adding support is proposed in [issue 414673](https://gitlab.com/gitlab-org/gitlab/-/issues/414673).
 
-Using the [consolidated form](object_storage.md#configure-a-single-storage-connection-for-all-object-types-consolidated-form)
-of the object storage is recommended.
-
-### Storage-specific object storage
+### Object storage settings
 
 The following settings are:
 
@@ -121,9 +120,7 @@ The following settings are:
 
 See [the available connection settings for different providers](object_storage.md#configure-the-connection-settings).
 
-::Tabs
-
-:::TabTitle Linux package (Omnibus)
+**For Linux package installations:**
 
 1. Edit `/etc/gitlab/gitlab.rb` and add the following lines, but using
    the values you want:
@@ -150,15 +147,10 @@ See [the available connection settings for different providers](object_storage.m
    }
    ```
 
-1. Save the file and reconfigure GitLab:
-
-   ```shell
-   sudo gitlab-ctl reconfigure
-   ```
-
+1. Save the file and [reconfigure GitLab](restart_gitlab.md#reconfigure-a-linux-package-installation).
 1. [Migrate any existing local states to the object storage](#migrate-to-object-storage).
 
-:::TabTitle Self-compiled (source)
+**For self-compiled installations**
 
 1. Edit `/home/git/gitlab/config/gitlab.yml` and add or amend the following lines:
 
@@ -175,19 +167,8 @@ See [the available connection settings for different providers](object_storage.m
          region: eu-central-1
    ```
 
-1. Save the file and restart GitLab:
-
-   ```shell
-   # For systems running systemd
-   sudo systemctl restart gitlab.target
-
-   # For systems running SysV init
-   sudo service gitlab restart
-   ```
-
+1. Save the file and [restart GitLab](restart_gitlab.md#self-compiled-installations) for the changes to take effect.
 1. [Migrate any existing local states to the object storage](#migrate-to-object-storage).
-
-::EndTabs
 
 ### Migrate to object storage
 

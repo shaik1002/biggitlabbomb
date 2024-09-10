@@ -75,8 +75,9 @@ export default {
       deep: true,
     },
   },
+  // eslint-disable-next-line local-rules/require-valid-help-page-path
   HELP_LABELS_PAGE_PATH: helpPagePath('ci/runners/configure_runners', {
-    anchor: 'control-jobs-that-a-runner-can-run',
+    anchor: 'use-tags-to-control-which-jobs-a-runner-can-run',
   }),
   ACCESS_LEVEL_NOT_PROTECTED,
   ACCESS_LEVEL_REF_PROTECTED,

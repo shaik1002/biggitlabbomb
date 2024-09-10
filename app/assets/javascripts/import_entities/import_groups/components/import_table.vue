@@ -121,14 +121,12 @@ export default {
   },
 
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     bulkImportSourceGroups: {
       query: bulkImportSourceGroupsQuery,
       variables() {
         return { page: this.page, filter: this.filter, perPage: this.perPage };
       },
     },
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     availableNamespaces: {
       query: searchNamespacesWhereUserCanImportProjectsQuery,
       update(data) {
@@ -141,15 +139,14 @@ export default {
     {
       key: 'selected',
       label: '',
-      thClass: 'gl-w-3 !gl-pr-3',
-      tdClass: '!gl-pr-3',
+      thClass: 'gl-w-3 gl-pr-3!',
+      tdClass: 'gl-pr-3!',
     },
     {
       key: 'webUrl',
       label: s__('BulkImport|Source group'),
-      // eslint-disable-next-line @gitlab/require-i18n-strings
-      thClass: '!gl-pl-0 gl-w-1/2',
-      tdClass: '!gl-pl-0',
+      thClass: 'gl-pl-0! gl-w-1/2',
+      tdClass: 'gl-pl-0!',
     },
     {
       key: 'importTarget',
@@ -347,7 +344,7 @@ export default {
       ];
       const result = [...DEFAULT_CLASSES];
       if (groupTableItem.flags.isUnselectable) {
-        result.push('!gl-cursor-default');
+        result.push('gl-cursor-default!');
       }
       return result;
     },
@@ -658,10 +655,10 @@ export default {
 <template>
   <div>
     <div
-      class="gl-flex gl-items-center gl-border-0 gl-border-b-1 gl-border-solid gl-border-gray-100"
+      class="gl-display-flex gl-align-items-center gl-border-solid gl-border-gray-100 gl-border-0 gl-border-b-1"
     >
-      <h1 class="gl-my-0 gl-flex gl-items-center gl-gap-3 gl-py-4 gl-text-size-h1">
-        <img :src="$options.gitlabLogo" class="gl-h-6 gl-w-6" />
+      <h1 class="gl-font-size-h1 gl-my-0 gl-py-4 gl-display-flex gl-align-items-center gl-gap-3">
+        <img :src="$options.gitlabLogo" class="gl-w-6 gl-h-6" />
         <span>{{ s__('BulkImport|Import groups by direct transfer') }}</span>
       </h1>
       <gl-button
@@ -721,7 +718,9 @@ export default {
         </template>
       </gl-sprintf>
     </gl-alert>
-    <div class="gl-flex gl-border-0 gl-border-b-1 gl-border-solid gl-border-gray-200 gl-py-5">
+    <div
+      class="gl-py-5 gl-border-solid gl-border-gray-200 gl-border-0 gl-border-b-1 gl-display-flex"
+    >
       <span v-if="!$apollo.loading && hasGroups">
         <gl-sprintf :message="statusMessage">
           <template #start>
@@ -749,7 +748,7 @@ export default {
             "
           >
             <template #role>
-              <gl-link class="gl-text-sm" :href="$options.permissionsHelpPath" target="_blank">{{
+              <gl-link class="gl-font-sm" :href="$options.permissionsHelpPath" target="_blank">{{
                 $options.i18n.OWNER
               }}</gl-link>
             </template>
@@ -787,7 +786,7 @@ export default {
       </gl-empty-state>
       <template v-else>
         <div
-          class="import-table-bar gl-sticky gl-z-3 gl-flex gl-items-center gl-border-0 gl-border-b-1 gl-border-solid gl-border-gray-200 gl-bg-gray-10 gl-px-4"
+          class="gl-bg-gray-10 gl-border-solid gl-border-gray-200 gl-border-0 gl-border-b-1 gl-px-4 gl-display-flex gl-align-items-center gl-sticky gl-z-3 import-table-bar"
         >
           <span data-test-id="selection-count">
             <gl-sprintf :message="__('%{count} selected')">
@@ -839,7 +838,7 @@ export default {
         </div>
         <gl-table
           ref="table"
-          class="import-table gl-w-full"
+          class="gl-w-full import-table"
           :tbody-tr-class="rowClasses"
           :tbody-tr-attr="qaRowAttributes"
           thead-class="gl-sticky gl-z-2 gl-bg-gray-10"
@@ -895,7 +894,7 @@ export default {
               v-if="showHistoryLink(group)"
               :id="group.progress.id"
               :history-path="historyShowPath"
-              class="gl-mt-2 gl-inline-block"
+              class="gl-display-inline-block gl-mt-2"
             />
           </template>
           <template #cell(actions)="{ item: group, index }">

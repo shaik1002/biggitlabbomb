@@ -30,7 +30,8 @@ namespace :gitlab do
         File.open("config.yml", "w+") { |f| f.puts config.to_yaml }
 
         [
-          %w[make make_necessary_dirs build]
+          %w[bin/install],
+          %w[make build]
         ].each do |cmd|
           unless Kernel.system(*cmd)
             raise "command failed: #{cmd.join(' ')}"

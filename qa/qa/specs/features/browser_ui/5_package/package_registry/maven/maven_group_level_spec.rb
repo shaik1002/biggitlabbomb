@@ -24,7 +24,7 @@ module QA
           ])
       end
 
-      context 'without duplication setting' do
+      context 'via maven' do
         where do
           {
             'using a personal access token' => {
@@ -61,28 +61,33 @@ module QA
             end
           end
 
-          it 'pushes and pulls a maven package', :blocking, testcase: params[:testcase] do
-            gitlab_ci_yaml = ERB.new(read_fixture('package_managers/maven/group/producer',
-              'gitlab_ci.yaml.erb')).result(binding)
+          it 'pushes and pulls a maven package', testcase: params[:testcase] do
+            gitlab_ci_yaml = ERB.new(read_fixture('package_managers/maven/group/producer', 'gitlab_ci.yaml.erb')).result(binding)
             pom_xml = ERB.new(read_fixture('package_managers/maven/group/producer', 'pom.xml.erb')).result(binding)
-            settings_xml = ERB.new(read_fixture('package_managers/maven/group/producer',
-              'settings.xml.erb')).result(binding)
+            settings_xml = ERB.new(read_fixture('package_managers/maven/group/producer', 'settings.xml.erb')).result(binding)
 
-            create(:commit, project: package_project, actions: [
-              { action: 'create', file_path: '.gitlab-ci.yml', content: gitlab_ci_yaml },
-              { action: 'create', file_path: 'pom.xml', content: pom_xml },
-              { action: 'create', file_path: 'settings.xml', content: settings_xml }
-            ])
+            Support::Retrier.retry_on_exception(max_attempts: 3, sleep_interval: 2) do
+              create(:commit, project: package_project, actions: [
+                { action: 'create', file_path: '.gitlab-ci.yml', content: gitlab_ci_yaml },
+                { action: 'create', file_path: 'pom.xml', content: pom_xml },
+                { action: 'create', file_path: 'settings.xml', content: settings_xml }
+              ])
+            end
 
             package_project.visit!
-            Flow::Pipeline.wait_for_pipeline_creation_via_api(project: package_project)
 
-            package_project.visit_job('deploy')
+            Flow::Pipeline.visit_latest_pipeline
+
+            Page::Project::Pipeline::Show.perform do |pipeline|
+              pipeline.click_job('deploy')
+            end
+
             Page::Project::Job::Show.perform do |job|
               expect(job).to be_successful(timeout: 800)
             end
 
             Page::Project::Menu.perform(&:go_to_package_registry)
+
             Page::Project::Packages::Index.perform do |index|
               expect(index).to have_package(package_name)
 
@@ -93,22 +98,26 @@ module QA
               expect(show).to have_package_info(package_name, package_version)
             end
 
-            gitlab_ci_yaml = ERB.new(read_fixture('package_managers/maven/group/consumer',
-              'gitlab_ci.yaml.erb')).result(binding)
+            gitlab_ci_yaml = ERB.new(read_fixture('package_managers/maven/group/consumer', 'gitlab_ci.yaml.erb')).result(binding)
             pom_xml = ERB.new(read_fixture('package_managers/maven/group/consumer', 'pom.xml.erb')).result(binding)
-            settings_xml = ERB.new(read_fixture('package_managers/maven/group/consumer',
-              'settings.xml.erb')).result(binding)
+            settings_xml = ERB.new(read_fixture('package_managers/maven/group/consumer', 'settings.xml.erb')).result(binding)
 
-            create(:commit, project: client_project, actions: [
-              { action: 'create', file_path: '.gitlab-ci.yml', content: gitlab_ci_yaml },
-              { action: 'create', file_path: 'pom.xml', content: pom_xml },
-              { action: 'create', file_path: 'settings.xml', content: settings_xml }
-            ])
+            Support::Retrier.retry_on_exception(max_attempts: 3, sleep_interval: 2) do
+              create(:commit, project: client_project, actions: [
+                { action: 'create', file_path: '.gitlab-ci.yml', content: gitlab_ci_yaml },
+                { action: 'create', file_path: 'pom.xml', content: pom_xml },
+                { action: 'create', file_path: 'settings.xml', content: settings_xml }
+              ])
+            end
 
             client_project.visit!
-            Flow::Pipeline.wait_for_pipeline_creation_via_api(project: client_project)
 
-            client_project.visit_job('install')
+            Flow::Pipeline.visit_latest_pipeline
+
+            Page::Project::Pipeline::Show.perform do |pipeline|
+              pipeline.click_job('install')
+            end
+
             Page::Project::Job::Show.perform do |job|
               expect(job).to be_successful(timeout: 800)
             end
@@ -116,7 +125,7 @@ module QA
         end
       end
 
-      context 'with duplication setting' do
+      context 'duplication setting' do
         before do
           use_ci_variable(name: 'PERSONAL_ACCESS_TOKEN', value: personal_access_token, project: package_project)
           use_ci_variable(name: 'PERSONAL_ACCESS_TOKEN', value: personal_access_token, project: client_project)
@@ -129,14 +138,19 @@ module QA
             Page::Group::Settings::PackageRegistries.perform(&:set_allow_duplicates_disabled)
           end
 
-          it 'prevents users from publishing duplicates',
-            testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/377491' do
+          it 'prevents users from publishing duplicates', testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/377491' do
             create_package(package_project)
-            package_project.visit_job('deploy')
+            show_latest_deploy_job
+
             Page::Project::Job::Show.perform do |job|
               expect(job).to be_successful(timeout: 400)
+            end
 
-              job.retry!
+            Page::Project::Job::Show.perform(&:retry!)
+
+            show_latest_deploy_job
+
+            Page::Project::Job::Show.perform do |job|
               expect(job).not_to be_successful(timeout: 400)
             end
           end
@@ -147,34 +161,47 @@ module QA
             Page::Group::Settings::PackageRegistries.perform(&:set_allow_duplicates_enabled)
           end
 
-          it 'allows users to publish duplicates', :blocking,
-            testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/377492' do
+          it 'allows users to publish duplicates', testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/377492' do
             create_package(package_project)
-            package_project.visit_job('deploy')
+
+            show_latest_deploy_job
+
             Page::Project::Job::Show.perform do |job|
               expect(job).to be_successful(timeout: 400)
+            end
 
-              job.retry!
+            Page::Project::Job::Show.perform(&:retry!)
+
+            show_latest_deploy_job
+
+            Page::Project::Job::Show.perform do |job|
               expect(job).to be_successful(timeout: 400)
             end
           end
         end
 
         def create_package(project)
-          gitlab_ci_yaml = ERB.new(read_fixture('package_managers/maven/group/producer',
-            'gitlab_ci.yaml.erb')).result(binding)
+          gitlab_ci_yaml = ERB.new(read_fixture('package_managers/maven/group/producer', 'gitlab_ci.yaml.erb')).result(binding)
           pom_xml = ERB.new(read_fixture('package_managers/maven/group/producer', 'pom.xml.erb')).result(binding)
-          settings_xml_with_pat = ERB.new(read_fixture('package_managers/maven/group',
-            'settings_with_pat.xml.erb')).result(binding)
+          settings_xml_with_pat = ERB.new(read_fixture('package_managers/maven/group', 'settings_with_pat.xml.erb')).result(binding)
 
-          create(:commit, project: project, commit_message: 'Add .gitlab-ci.yml', actions: [
-            { action: 'create', file_path: '.gitlab-ci.yml', content: gitlab_ci_yaml },
-            { action: 'create', file_path: 'pom.xml', content: pom_xml },
-            { action: 'create', file_path: 'settings.xml', content: settings_xml_with_pat }
-          ])
+          Support::Retrier.retry_on_exception(max_attempts: 3, sleep_interval: 2) do
+            create(:commit, project: project, commit_message: 'Add .gitlab-ci.yml', actions: [
+              { action: 'create', file_path: '.gitlab-ci.yml', content: gitlab_ci_yaml },
+              { action: 'create', file_path: 'pom.xml', content: pom_xml },
+              { action: 'create', file_path: 'settings.xml', content: settings_xml_with_pat }
+            ])
+          end
+        end
 
-          Flow::Pipeline.wait_for_pipeline_creation_via_api(project: project)
-          Flow::Pipeline.wait_for_latest_pipeline_to_start(project: project)
+        def show_latest_deploy_job
+          package_project.visit!
+
+          Flow::Pipeline.visit_latest_pipeline
+
+          Page::Project::Pipeline::Show.perform do |pipeline|
+            pipeline.click_job('deploy')
+          end
         end
       end
     end

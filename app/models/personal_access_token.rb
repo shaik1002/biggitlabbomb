@@ -20,7 +20,6 @@ class PersonalAccessToken < ApplicationRecord
   serialize :scopes, Array # rubocop:disable Cop/ActiveRecordSerialize
 
   belongs_to :user
-  belongs_to :organization, class_name: 'Organizations::Organization'
   belongs_to :previous_personal_access_token, class_name: 'PersonalAccessToken'
 
   after_initialize :set_default_scopes, if: :persisted?
@@ -29,17 +28,14 @@ class PersonalAccessToken < ApplicationRecord
   scope :active, -> { not_revoked.not_expired }
   scope :expiring_and_not_notified, ->(date) { where(["revoked = false AND expire_notification_delivered = false AND expires_at >= CURRENT_DATE AND expires_at <= ?", date]) }
   scope :expired_today_and_not_notified, -> { where(["revoked = false AND expires_at = CURRENT_DATE AND after_expiry_notification_delivered = false"]) }
-  scope :expired_before, ->(date) { expired.where(arel_table[:expires_at].lt(date)) }
   scope :inactive, -> { where("revoked = true OR expires_at < CURRENT_DATE") }
   scope :last_used_before_or_unused, ->(date) { where("personal_access_tokens.created_at < :date AND (last_used_at < :date OR last_used_at IS NULL)", date: date) }
   scope :with_impersonation, -> { where(impersonation: true) }
   scope :without_impersonation, -> { where(impersonation: false) }
   scope :revoked, -> { where(revoked: true) }
-  scope :revoked_before, ->(date) { revoked.where(arel_table[:updated_at].lt(date)) }
   scope :not_revoked, -> { where(revoked: [false, nil]) }
   scope :for_user, ->(user) { where(user: user) }
   scope :for_users, ->(users) { where(user: users) }
-  scope :for_organization, ->(organization) { where(organization_id: organization) }
   scope :preload_users, -> { preload(:user) }
   scope :order_expires_at_asc_id_desc, -> { reorder(expires_at: :asc, id: :desc) }
   scope :project_access_token, -> { includes(:user).references(:user).merge(User.project_bot) }
@@ -108,7 +104,7 @@ class PersonalAccessToken < ApplicationRecord
   end
 
   def allow_expires_at_to_be_empty?
-    !Gitlab::CurrentSettings.require_personal_access_token_expiry?
+    false
   end
 
   def expires_at_before_instance_max_expiry_date

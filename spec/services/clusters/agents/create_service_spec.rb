@@ -3,13 +3,11 @@
 require 'spec_helper'
 
 RSpec.describe Clusters::Agents::CreateService, feature_category: :deployment_management do
-  subject(:service) { described_class.new(project, user, params) }
-
-  let_it_be(:project) { create(:project, :public) }
-  let_it_be(:user) { create(:user) }
+  subject(:service) { described_class.new(project, user, { name: name }) }
 
   let(:name) { 'some-agent' }
-  let(:params) { { name: name } }
+  let(:project) { create(:project, :public, :repository) }
+  let(:user) { create(:user) }
 
   describe '#execute' do
     context 'without user permissions' do
@@ -22,7 +20,7 @@ RSpec.describe Clusters::Agents::CreateService, feature_category: :deployment_ma
     end
 
     context 'with user permissions' do
-      before_all do
+      before do
         project.add_maintainer(user)
       end
 

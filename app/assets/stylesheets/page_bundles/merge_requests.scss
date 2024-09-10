@@ -33,6 +33,7 @@
     .diff-comments-more-count {
       padding-left: 2px;
       padding-right: 2px;
+      width: auto;
     }
   }
 }
@@ -47,6 +48,7 @@
   border-color: var(--white, $white);
   cursor: pointer;
   transition: all 0.1s ease-out;
+  @include code-icon-size();
 
   @for $i from 1 through 4 {
     &:nth-child(#{$i}) {
@@ -63,6 +65,7 @@
   padding-left: 0;
   padding-right: 0;
   overflow: hidden;
+  @include code-icon-size();
 }
 
 .diff-file-changes {
@@ -492,7 +495,7 @@
 }
 
 .mr-state-widget {
-  color: var(--gl-text-color-default);
+  color: var(--gl-text-color, $gl-text-color);
 
   .commit-message-edit {
     border-radius: $gl-border-radius-base;
@@ -544,7 +547,7 @@
   }
 
   .ci-widget {
-    color: var(--gl-text-color-default);
+    color: var(--gl-text-color, $gl-text-color);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -723,11 +726,11 @@
   }
 
   .stop-env-container {
-    color: var(--gl-text-color-default);
+    color: var(--gl-text-color, $gl-text-color);
     float: right;
 
     a {
-      color: var(--gl-text-color-default);
+      color: var(--gl-text-color, $gl-text-color);
     }
   }
 }
@@ -807,7 +810,7 @@
 }
 
 .mr-version-controls {
-  color: var(--gl-text-color-default);
+  color: var(--gl-text-color, $gl-text-color);
 
   .mr-version-menus-container {
     display: flex;
@@ -851,7 +854,7 @@
   }
 
   .dropdown-title {
-    color: var(--gl-text-color-strong);
+    color: var(--gl-text-color, $gl-text-color);
   }
 }
 
@@ -1089,12 +1092,6 @@
 .diff-file-discussions-wrapper {
   width: 100%;
 
-  .timeline-entry.note-discussion {
-    > .timeline-entry-inner {
-      border-bottom: 0 !important;
-    }
-  }
-
   .diff-discussions:not(:first-child) >.notes {
     padding-top: 0;
   }
@@ -1110,10 +1107,6 @@
     border-bottom-width: 0;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
-
-    .notes {
-      @apply gl-bg-subtle;
-    }
   }
 }
 

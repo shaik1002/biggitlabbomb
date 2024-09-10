@@ -9,7 +9,7 @@ module Projects
       urgency :low
 
       def show
-        @package = project.packages.find(params.permit(:id)[:id])
+        @package = project.packages.find(params[:id])
       end
     end
   end

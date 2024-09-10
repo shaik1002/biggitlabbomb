@@ -49,13 +49,7 @@ RSpec.describe Ci::CreatePipelineService, # rubocop: disable RSpec/FilePath
     context 'when the duration is under the threshold' do
       it 'does not create a log entry but it collects the data',
         quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/464035' do
-        # We do not exect logs for Gitlab::Ci::Pipeline::Logger
-        # but we expect some logs from Gitlab::Ci::Pipeline::CommandLogger,
-        expect(Gitlab::AppJsonLogger)
-          .to receive(:info)
-          .with(hash_including("class" => "Gitlab::Ci::Pipeline::CommandLogger"))
-          .and_call_original
-
+        expect(Gitlab::AppJsonLogger).not_to receive(:info)
         expect(pipeline).to be_created_successfully
 
         expect(service.logger.observations_hash)
@@ -87,12 +81,6 @@ RSpec.describe Ci::CreatePipelineService, # rubocop: disable RSpec/FilePath
           .with(a_hash_including(loggable_data))
           .and_call_original
 
-        # We also expect some logs from Gitlab::Ci::Pipeline::CommandLogger,
-        expect(Gitlab::AppJsonLogger)
-          .to receive(:info)
-          .with(hash_including("class" => "Gitlab::Ci::Pipeline::CommandLogger"))
-          .and_call_original
-
         expect(pipeline).to be_created_successfully
       end
 
@@ -118,12 +106,6 @@ RSpec.describe Ci::CreatePipelineService, # rubocop: disable RSpec/FilePath
             .with(a_hash_including(loggable_data))
             .and_call_original
 
-          # We also expect some logs from Gitlab::Ci::Pipeline::CommandLogger,
-          expect(Gitlab::AppJsonLogger)
-            .to receive(:info)
-            .with(hash_including("class" => "Gitlab::Ci::Pipeline::CommandLogger"))
-            .and_call_original
-
           expect { pipeline }.to raise_error(RuntimeError)
         end
       end
@@ -133,13 +115,8 @@ RSpec.describe Ci::CreatePipelineService, # rubocop: disable RSpec/FilePath
           stub_feature_flags(ci_pipeline_creation_logger: false)
         end
 
-        it 'does not create a log entry for pipeline logger' do
-          # We do not exect logs for Gitlab::Ci::Pipeline::Logger
-          # but we expect some logs from Gitlab::Ci::Pipeline::CommandLogger,
-          expect(Gitlab::AppJsonLogger)
-            .to receive(:info)
-            .with(hash_including("class" => "Gitlab::Ci::Pipeline::CommandLogger"))
-            .and_call_original
+        it 'does not create a log entry' do
+          expect(Gitlab::AppJsonLogger).not_to receive(:info)
 
           expect(pipeline).to be_created_successfully
           expect(service.logger.observations_hash).to eq({})
@@ -158,12 +135,6 @@ RSpec.describe Ci::CreatePipelineService, # rubocop: disable RSpec/FilePath
         expect(Gitlab::AppJsonLogger)
           .to receive(:info)
           .with(a_hash_including(loggable_data))
-          .and_call_original
-
-        # We also expect some logs from Gitlab::Ci::Pipeline::CommandLogger,
-        expect(Gitlab::AppJsonLogger)
-          .to receive(:info)
-          .with(hash_including("class" => "Gitlab::Ci::Pipeline::CommandLogger"))
           .and_call_original
 
         expect(pipeline).to be_created_successfully

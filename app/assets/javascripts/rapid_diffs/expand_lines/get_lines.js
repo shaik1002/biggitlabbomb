@@ -2,7 +2,6 @@ import axios from '~/lib/utils/axios_utils';
 
 const UNFOLD_COUNT = 20;
 
-// eslint-disable-next-line max-params
 const getRequestParams = (expandPrevLine, oldLineNumber, newLineNumber, prevNewLineNumber) => {
   const offset = newLineNumber - oldLineNumber;
   let since;

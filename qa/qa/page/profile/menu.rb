@@ -23,7 +23,7 @@ module QA
         end
 
         def click_access_tokens
-          click_element('nav-item-link', submenu_item: 'Access tokens')
+          click_element('nav-item-link', submenu_item: 'Access Tokens')
         end
       end
     end

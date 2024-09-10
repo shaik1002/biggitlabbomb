@@ -8,7 +8,7 @@ module Preloaders
     end
 
     def execute
-      return if projects.is_a?(ActiveRecord::Relation) && projects.null_relation?
+      return if projects.is_a?(ActiveRecord::NullRelation)
 
       ActiveRecord::Associations::Preloader.new(
         records: projects,

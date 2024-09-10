@@ -72,7 +72,7 @@ export default {
 </script>
 
 <template>
-  <div class="gl-mb-3 gl-inline-block">
+  <div class="gl-display-inline-block gl-mb-3">
     <gl-badge
       v-if="badges.schedule"
       v-gl-tooltip

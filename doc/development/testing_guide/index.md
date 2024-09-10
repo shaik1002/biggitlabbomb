@@ -28,59 +28,59 @@ automated testing means, and what are its principles:
 - [Five Factor Testing](https://madeintandem.com/blog/five-factor-testing/): Why do we need tests?
 - [Principles of Automated Testing](https://www.lihaoyi.com/post/PrinciplesofAutomatedTesting.html): Levels of testing. Prioritize tests. Cost of tests.
 
-## Testing levels
+## [Testing levels](testing_levels.md)
 
-Learn about the different [testing levels](testing_levels.md), and how to decide at what level your
+Learn about the different testing levels, and how to decide at what level your
 changes should be tested.
 
-## Testing best practices
+## [Testing best practices](best_practices.md)
 
-Everything you should know about [how to write good tests](best_practices.md): Test Design, RSpec, FactoryBot,
+Everything you should know about how to write good tests: Test Design, RSpec, FactoryBot,
 system tests, parameterized tests etc.
 
-## Frontend testing standards and style guidelines
+## [Frontend testing standards and style guidelines](frontend_testing.md)
 
-Everything you should know about [how to write good Frontend tests](frontend_testing.md): Jest,
+Everything you should know about how to write good Frontend tests: Jest,
 testing promises, stubbing etc.
 
-## Getting started with Feature tests
+## [Getting started with Feature tests](frontend_testing.md#get-started-with-feature-tests)
 
-Need to [get started with feature tests](frontend_testing.md#get-started-with-feature-tests)? Here are some general guidelines,
+Need to get started with feature tests? Here are some general guidelines,
 tips and tricks to get the most out of white-box testing.
 
-## Flaky tests
+## [Flaky tests](flaky_tests.md)
 
-What are [flaky tests](flaky_tests.md), the different kind of flaky tests we encountered, and what
+What are flaky tests, the different kind of flaky tests we encountered, and what
 we do about them.
 
-## GitLab pipelines
+## [GitLab pipelines](../pipelines/index.md)
 
-How GitLab test suite [is run in the CI context](../pipelines/index.md): setup, caches, artifacts,
+How GitLab test suite is run in the CI context: setup, caches, artifacts,
 parallelization, monitoring.
 
-## Review apps
+## [Review apps](review_apps.md)
 
-How [review apps](review_apps.md) are set up for GitLab CE/EE and how to use them.
+How review apps are set up for GitLab CE/EE and how to use them.
 
-## Testing Rake tasks
+## [Testing Rake tasks](testing_rake_tasks.md)
 
-Everything you should know about [how to test Rake tasks](testing_rake_tasks.md).
+Everything you should know about how to test Rake tasks.
 
-## End-to-end tests
+## [End-to-end tests](end_to_end/index.md)
 
-Everything you should know about [how to run end-to-end tests](end_to_end/index.md) using
+Everything you should know about how to run end-to-end tests using
 [GitLab QA](https://gitlab.com/gitlab-org/gitlab-qa) testing framework.
 
-## Migrations tests
+## [Migrations tests](testing_migrations_guide.md)
 
-Everything you should know about [how to test migrations](testing_migrations_guide.md).
+Everything you should know about how to test migrations.
 
-## Contract tests
+## [Contract tests](contract/index.md)
 
-[Introduction to contract testing](contract/index.md), how to run the tests, and how to write them.
+Introduction to contract testing, how to run the tests, and how to write them.
 
-## Test results tracking
+## [Test results tracking](test_results_tracking.md)
 
-How we track our [test suite run results](test_results_tracking.md).
+How we track our test suite run results.
 
 [Return to Development documentation](../index.md)

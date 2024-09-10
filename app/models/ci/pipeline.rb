@@ -4,7 +4,6 @@ module Ci
   class Pipeline < Ci::ApplicationRecord
     include Ci::Partitionable
     include Ci::HasStatus
-    include Ci::HasCompletionReason
     include Importable
     include AfterCommitQueue
     include Presentable
@@ -18,9 +17,6 @@ module Ci
     include UpdatedAtFilterable
     include EachBatch
     include FastDestroyAll::Helpers
-
-    self.primary_key = :id
-    self.sequence_name = :ci_pipelines_id_seq
 
     MAX_OPEN_MERGE_REQUESTS_REFS = 4
 
@@ -169,7 +165,7 @@ module Ci
     validates :status, presence: { unless: :importing? }
     validate :valid_commit_sha, unless: :importing?
     validates :source, exclusion: { in: %w[unknown], unless: :importing? }, on: :create
-    validates :project, presence: true
+    validates :project, presence: true, on: :create
 
     after_create :keep_around_commits, unless: :importing?
     after_commit :track_ci_pipeline_created_event, on: :create, if: :internal_pipeline?
@@ -477,9 +473,8 @@ module Ci
     # ref - The name (or names) of the branch(es)/tag(s) to limit the list of
     #       pipelines to.
     # sha - The commit SHA (or multiple SHAs) to limit the list of pipelines to.
-    # limit - Number of pipelines to return. Chaining with sampling methods (#pick, #take)
-    #         will cause unnecessary subqueries.
-    def self.newest_first(ref: nil, sha: nil, limit: nil)
+    # limit - This limits a backlog search, default to 100.
+    def self.newest_first(ref: nil, sha: nil, limit: 100)
       relation = order(id: :desc)
       relation = relation.where(ref: ref) if ref
       relation = relation.where(sha: sha) if sha
@@ -610,11 +605,11 @@ module Ci
     end
 
     def tags_count
-      Ci::Tagging.where(taggable: builds).count
+      ActsAsTaggableOn::Tagging.where(taggable: builds).count
     end
 
     def distinct_tags_count
-      Ci::Tagging.where(taggable: builds).count('distinct(tag_id)')
+      ActsAsTaggableOn::Tagging.where(taggable: builds).count('distinct(tag_id)')
     end
 
     def stages_names
@@ -1505,15 +1500,7 @@ module Ci
     end
 
     def track_ci_pipeline_created_event
-      Gitlab::InternalEvents.track_event(
-        'create_ci_internal_pipeline',
-        project: project,
-        user: user,
-        additional_properties: {
-          label: source,
-          property: config_source
-        }
-      )
+      Gitlab::InternalEvents.track_event('create_ci_internal_pipeline', project: project, user: user)
     end
   end
 end

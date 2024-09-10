@@ -2,21 +2,23 @@
 - verification_enabled = Gitlab::CurrentSettings.pages_domain_verification_enabled?
 
 - if can?(current_user, :update_pages, @project)
-  = render ::Layouts::CrudComponent.new(s_('GitLabPages|Domains'),
-    icon: 'earth',
-    count: @domains.size,
-    count_options: { class: 'js-admin-labels-count' },
-    options: { class: 'gl-mt-5' }) do |c|
-    - c.with_actions do
+  = render Pajamas::CardComponent.new(card_options: { class: 'gl-new-card' }, header_options: { class: 'gl-new-card-header gl-flex gl-items-center gl-justify-between' }, body_options: { class: 'gl-new-card-body gl-p-0' }) do |c|
+    - c.with_header do
+      .gl-new-card-title-wrapper
+        %h2.gl-new-card-title
+          = s_('GitLabPages|Domains')
+          .gl-new-card-count
+            = sprite_icon('earth', css_class: 'gl-mr-2')
+            %span.js-admin-labels-count= @domains.size
       - if can_add_new_domain
-        = render Pajamas::ButtonComponent.new(size: :small, href: new_project_pages_domain_path(@project)) do
-          = s_('GitLabPages|New domain')
-
+        .gl-new-card-actions
+          = render Pajamas::ButtonComponent.new(size: :small, href: new_project_pages_domain_path(@project)) do
+            = s_('GitLabPages|New domain')
     - c.with_body do
       - if @domains.any?
-        %ul.content-list
+        %ul.list-group.list-group-flush
           - @domains.each do |domain|
-            %li
+            %li.list-group-item.gl-flex.gl-flex-col.gl-bg-transparent
               .gl-flex.gl-justify-between.gl-items-baseline
                 .gl-flex.gl-gap-3
                   - if verification_enabled
@@ -60,4 +62,5 @@
                           link_start: details_link_start,
                           link_end: details_link_end }
       - else
-        %span.gl-text-subtle= s_("You currently have no custom domains.")
+        .gl-text-secondary.gl-text-center.gl-p-5
+          = s_("You currently have no custom domains.")

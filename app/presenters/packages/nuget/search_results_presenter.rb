@@ -10,19 +10,19 @@ module Packages
 
       def initialize(search)
         @search = search
+        @package_versions = {}
       end
 
       def data
-        return [] if total_count == 0
-
-        grouped_packages.map do |package_name, packages|
-          package_versions, latest_version, latest_package = extract_package_details(packages)
+        @search.results.group_by(&:name).map do |package_name, packages|
+          latest_version = latest_version(packages)
+          latest_package = packages.find { |pkg| pkg.version == latest_version }
 
           {
             type: 'Package',
             name: package_name,
             version: latest_version,
-            versions: package_versions,
+            versions: build_package_versions(packages),
             total_downloads: 0,
             verified: true,
             tags: tags_for(latest_package),
@@ -34,33 +34,19 @@ module Packages
 
       private
 
-      def grouped_packages
-        @search
-          .results
-          .preload_nuget_metadatum
-          .preload_tags
-          .group_by(&:name)
-      end
-
-      def extract_package_details(packages)
-        package_versions = []
-        latest_version = nil
-        latest_package = nil
-
-        packages.each do |pkg|
-          package_versions << {
+      def build_package_versions(packages)
+        packages.map do |pkg|
+          {
             json_url: json_url_for(pkg),
             downloads: 0,
             version: pkg.version
           }
-
-          if sort_versions([latest_version, pkg.version]).last == pkg.version
-            latest_version = pkg.version
-            latest_package = pkg
-          end
         end
+      end
 
-        [package_versions, latest_version, latest_package]
+      def latest_version(packages)
+        versions = packages.filter_map(&:version)
+        sort_versions(versions).last
       end
     end
   end

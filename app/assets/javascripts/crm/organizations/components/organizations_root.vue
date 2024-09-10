@@ -190,7 +190,7 @@ export default {
       @error-alert-dismissed="errorAlertDismissed"
     >
       <template #header-actions>
-        <div class="gl-my-3 gl-mr-5 gl-flex gl-items-center gl-justify-end">
+        <div class="gl-display-flex gl-align-items-center gl-justify-content-end gl-my-3 gl-mr-5">
           <a
             v-if="canReadCrmContact"
             :href="groupContactsPath"

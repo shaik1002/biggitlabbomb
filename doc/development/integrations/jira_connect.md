@@ -1,12 +1,12 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: Any user with at least the Maintainer role can merge updates to this content. For details, see https://docs.gitlab.com/ee/development/development_processes.html#development-guidelines-review.
 ---
 
 # GitLab for Jira Cloud app development
 
-Developers have two options for how set up a development environment for the GitLab for Jira Cloud app:
+Developers have two options for how set up a development environment for the GitLab for Jira app:
 
 1. A full environment [with Jira](#set-up-with-jira). Use this when you need to test interactions with Jira.
 1. A local environment [without Jira](#setup-without-jira). You can use this quicker setup if you do not require Jira, for example when testing the GitLab frontend.
@@ -26,12 +26,12 @@ The following are required to install the app:
   - [GDK in Gitpod](https://www.loom.com/share/9c9711d4876a40869b9294eecb24c54d)
     video.
 
-  <!-- vale gitlab_base.Spelling = NO -->
+  <!-- vale gitlab.Spelling = NO -->
 
   GitLab team members **must not** use tunneling tools such as Serveo or `ngrok`. These are
   security risks, and must not be run on GitLab developer laptops.
 
-  <!-- vale gitlab_base.Spelling = YES -->
+  <!-- vale gitlab.Spelling = YES -->
 
   Jira requires all connections to the app host to be over SSL. If you set up
   your own environment, remember to enable SSL and an appropriate certificate.
@@ -105,7 +105,7 @@ Ensure you have [set up OAuth first](#set-up-the-gitlab-oauth-authentication-flo
 otherwise these steps fail.
 
 1. In Jira, go to **Jira settings > Apps > Manage apps**.
-1. Scroll to **User-installed apps**, find your GitLab for Jira Cloud app and expand it.
+1. Scroll to **User-installed apps**, find your GitLab for Jira app and expand it.
 1. Select **Get started**.
 
 You should be able to authenticate with your GitLab instance and begin linking groups.

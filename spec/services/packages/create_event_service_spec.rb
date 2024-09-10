@@ -43,14 +43,10 @@ RSpec.describe Packages::CreateEventService, feature_category: :package_registry
           expect { service }.to trigger_internal_events('pull_package_from_registry').with(event_attrs)
             .and increment_usage_metrics(
               'counts.package_events_i_package_pull_package_by_user',
-              *common_metrics,
-              'redis_hll_counters.user_packages.user_packages_total_unique_counts_monthly',
-              'redis_hll_counters.user_packages.user_packages_total_unique_counts_weekly'
+              *common_metrics
             ).and not_increment_usage_metrics(
               'counts.package_events_i_package_pull_package_by_deploy_token',
-              'counts.package_events_i_package_pull_package_by_guest',
-              'redis_hll_counters.deploy_token_packages.deploy_token_packages_total_unique_counts_monthly',
-              'redis_hll_counters.deploy_token_packages.deploy_token_packages_total_unique_counts_weekly'
+              'counts.package_events_i_package_pull_package_by_guest'
             )
         end
       end
@@ -64,14 +60,10 @@ RSpec.describe Packages::CreateEventService, feature_category: :package_registry
           expect { service }.to trigger_internal_events('pull_package_from_registry').with(event_attrs)
             .and increment_usage_metrics(
               'counts.package_events_i_package_pull_package_by_deploy_token',
-              *common_metrics,
-              'redis_hll_counters.deploy_token_packages.deploy_token_packages_total_unique_counts_monthly',
-              'redis_hll_counters.deploy_token_packages.deploy_token_packages_total_unique_counts_weekly'
+              *common_metrics
             ).and not_increment_usage_metrics(
               'counts.package_events_i_package_pull_package_by_guest',
-              'counts.package_events_i_package_pull_package_by_user',
-              'redis_hll_counters.user_packages.user_packages_total_unique_counts_monthly',
-              'redis_hll_counters.user_packages.user_packages_total_unique_counts_weekly'
+              'counts.package_events_i_package_pull_package_by_user'
             )
         end
       end
@@ -88,11 +80,7 @@ RSpec.describe Packages::CreateEventService, feature_category: :package_registry
               *common_metrics
             ).and not_increment_usage_metrics(
               'counts.package_events_i_package_pull_package_by_deploy_token',
-              'counts.package_events_i_package_pull_package_by_user',
-              'redis_hll_counters.user_packages.user_packages_total_unique_counts_monthly',
-              'redis_hll_counters.user_packages.user_packages_total_unique_counts_weekly',
-              'redis_hll_counters.deploy_token_packages.deploy_token_packages_total_unique_counts_monthly',
-              'redis_hll_counters.deploy_token_packages.deploy_token_packages_total_unique_counts_weekly'
+              'counts.package_events_i_package_pull_package_by_user'
             )
         end
       end
@@ -107,18 +95,67 @@ RSpec.describe Packages::CreateEventService, feature_category: :package_registry
       it_behaves_like 'updates the correct metrics'
     end
 
-    context "with not allowed event_name used" do
-      let(:event_name) { 'boil_package' }
-      let_it_be(:user) { create(:user) }
+    context 'when using non-internal events' do
+      let(:event_name) { 'push_package' }
 
-      it "doesn't trigger internal events" do
-        expect { service }.not_to trigger_internal_events
+      shared_examples 'redis package unique event creation' do
+        it 'tracks the event' do
+          expect(::Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:track_event).with(/package/, values: user.id)
+
+          subject
+        end
       end
 
-      it "doesn't update RedisHLL keys" do
-        expect(::Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event)
+      shared_examples 'redis package count event creation' do
+        it 'tracks the event' do
+          expect(::Gitlab::UsageDataCounters::PackageEventCounter).to receive(:count).at_least(:once)
 
-        service
+          subject
+        end
+      end
+
+      context 'with a user' do
+        let(:user) { create(:user) }
+
+        it_behaves_like 'redis package unique event creation'
+        it_behaves_like 'redis package count event creation'
+      end
+
+      context 'with a deploy token' do
+        let(:user) { create(:deploy_token) }
+
+        it_behaves_like 'redis package unique event creation'
+        it_behaves_like 'redis package count event creation'
+      end
+
+      context 'with no user' do
+        let(:user) { nil }
+
+        it_behaves_like 'redis package count event creation'
+      end
+
+      context 'with a package as scope' do
+        let(:scope) { create(:npm_package) }
+
+        context 'as guest' do
+          let(:user) { nil }
+
+          it_behaves_like 'redis package count event creation'
+        end
+
+        context 'with user' do
+          let(:user) { create(:user) }
+
+          it_behaves_like 'redis package unique event creation'
+          it_behaves_like 'redis package count event creation'
+        end
+
+        context 'with a deploy token' do
+          let(:user) { create(:deploy_token) }
+
+          it_behaves_like 'redis package unique event creation'
+          it_behaves_like 'redis package count event creation'
+        end
       end
     end
   end

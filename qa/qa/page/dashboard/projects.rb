@@ -4,6 +4,10 @@ module QA
   module Page
     module Dashboard
       class Projects < Page::Base
+        view 'app/views/shared/projects/_search_form.html.haml' do
+          element 'project-filter-form-container', required: true
+        end
+
         view 'app/views/shared/projects/_project.html.haml' do
           element 'project-content'
           element 'user-access-role'
@@ -31,10 +35,9 @@ module QA
         end
 
         def filter_by_name(name)
-          filter_input = find_element('filtered-search-term-input')
-          filter_input.click
-          filter_input.set(name)
-          click_element 'search-button'
+          within_element('project-filter-form-container') do
+            fill_in :name, with: name
+          end
         end
 
         def go_to_project(name)
@@ -52,7 +55,7 @@ module QA
         end
 
         def clear_project_filter
-          click_element 'filtered-search-clear-button'
+          fill_element('project-filter-form-container', "")
         end
 
         private

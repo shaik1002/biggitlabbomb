@@ -24,11 +24,6 @@ export default {
       required: false,
       default: () => ({}),
     },
-    block: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     label: {
       type: String,
       required: false,
@@ -61,11 +56,6 @@ export default {
       type: String, // Two supported values: `descendant_groups` and `subgroups` See app/assets/javascripts/vue_shared/components/entity_select/utils.js.
       required: false,
       default: null,
-    },
-    emptyText: {
-      type: String,
-      required: false,
-      default: GROUP_TOGGLE_TEXT,
     },
   },
   data() {
@@ -117,6 +107,7 @@ export default {
     },
   },
   i18n: {
+    toggleText: GROUP_TOGGLE_TEXT,
     selectGroup: GROUP_HEADER_TEXT,
   },
 };
@@ -130,10 +121,9 @@ export default {
     :initial-selection="initialSelection"
     :clearable="clearable"
     :header-text="$options.i18n.selectGroup"
-    :default-toggle-text="emptyText"
+    :default-toggle-text="$options.i18n.toggleText"
     :fetch-items="fetchGroups"
     :fetch-initial-selection="fetchInitialGroup"
-    :block="block"
     v-on="$listeners"
   >
     <template #error>

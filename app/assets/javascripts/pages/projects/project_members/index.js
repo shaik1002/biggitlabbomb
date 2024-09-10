@@ -1,8 +1,4 @@
-import {
-  PROJECTS_APP_OPTIONS,
-  MEMBERS_TAB_TYPES,
-  CONTEXT_TYPE,
-} from 'ee_else_ce/members/constants';
+import { PROJECTS_APP_OPTIONS, MEMBERS_TAB_TYPES } from 'ee_else_ce/members/constants';
 import initImportProjectMembersTrigger from '~/invite_members/init_import_project_members_trigger';
 import initImportProjectMembersModal from '~/invite_members/init_import_project_members_modal';
 import initInviteGroupTrigger from '~/invite_members/init_invite_group_trigger';
@@ -18,7 +14,7 @@ initInviteGroupTrigger();
 initImportProjectMembersTrigger();
 
 const SHARED_FIELDS = ['account', 'maxRole', 'expiration', 'actions'];
-initMembersApp(document.querySelector('.js-project-members-list-app'), CONTEXT_TYPE.PROJECT, {
+initMembersApp(document.querySelector('.js-project-members-list-app'), {
   [MEMBERS_TAB_TYPES.user]: {
     tableFields: SHARED_FIELDS.concat(['source', 'activity']),
     tableSortableFields: [

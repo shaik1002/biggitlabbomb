@@ -22,11 +22,6 @@ module Types
             ::Types::Analytics::CycleAnalytics::MetricType,
             description: 'Median duration in seconds.'
 
-          field :items,
-            description: 'Items in the stage.',
-            resolver: Resolvers::Analytics::CycleAnalytics::ValueStreams::StageItemsResolver,
-            alpha: { milestone: '17.4' }
-
           def count
             {
               value: object.count,
@@ -58,5 +53,3 @@ module Types
     end
   end
 end
-
-Types::Analytics::CycleAnalytics::ValueStreams::StageMetricsType.prepend_mod

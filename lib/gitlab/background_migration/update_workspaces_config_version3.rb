@@ -4,7 +4,7 @@ module Gitlab
   module BackgroundMigration
     # No op on ce
     class UpdateWorkspacesConfigVersion3 < BatchedMigrationJob
-      feature_category :workspaces
+      feature_category :remote_development
       def perform; end
     end
   end

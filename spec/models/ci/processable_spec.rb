@@ -83,13 +83,13 @@ RSpec.describe Ci::Processable, feature_category: :continuous_integration do
            job_artifacts_requirements job_artifacts_coverage_fuzzing
            job_artifacts_requirements_v2 job_artifacts_repository_xray
            job_artifacts_api_fuzzing terraform_state_versions job_artifacts_cyclonedx
-           job_annotations job_artifacts_annotations job_artifacts_jacoco].freeze
+           job_annotations job_artifacts_annotations].freeze
       end
 
       let(:ignore_accessors) do
         %i[type namespace lock_version target_url base_tags trace_sections
            commit_id deployment erased_by_id project_id project_mirror
-           runner_id tag_taggings taggings tags tag_links trigger_request_id
+           runner_id tag_taggings taggings tags trigger_request_id
            user_id auto_canceled_by_id retried failure_reason
            sourced_pipelines sourced_pipeline artifacts_file_store artifacts_metadata_store
            metadata runner_manager_build runner_manager runner_session trace_chunks
@@ -100,7 +100,7 @@ RSpec.describe Ci::Processable, feature_category: :continuous_integration do
            queuing_entry runtime_metadata trace_metadata
            dast_site_profile dast_scanner_profile stage_id dast_site_profiles_build
            dast_scanner_profiles_build auto_canceled_by_partition_id execution_config_id execution_config
-           build_source id_value].freeze
+           build_source].freeze
       end
 
       before_all do
@@ -459,21 +459,20 @@ RSpec.describe Ci::Processable, feature_category: :continuous_integration do
       let(:build) { create(:ci_build, :created, project: project, resource_group: resource_group) }
 
       it 'is waiting for resource when build is enqueued' do
-        expect(Ci::ResourceGroups::AssignResourceFromResourceGroupWorker).to receive(:perform_async).with(resource_group.id)
+        expect(Ci::ResourceGroups::AssignResourceFromResourceGroupWorkerV2).to receive(:perform_async).with(resource_group.id)
 
         expect { build.enqueue! }.to change { build.status }.from('created').to('waiting_for_resource')
 
         expect(build.waiting_for_resource_at).not_to be_nil
       end
 
-      context 'when `assign_resource_worker_deduplicate_until_executing` FF is enabled and the override is disabled' do
+      context 'when `assign_resource_worker_deduplicate_until_executing` FF is disabled' do
         before do
-          stub_feature_flags(assign_resource_worker_deduplicate_until_executing: true)
-          stub_feature_flags(assign_resource_worker_deduplicate_until_executing_override: false)
+          stub_feature_flags(assign_resource_worker_deduplicate_until_executing: false)
         end
 
         it 'is waiting for resource when build is enqueued' do
-          expect(Ci::ResourceGroups::AssignResourceFromResourceGroupWorkerV2).to receive(:perform_async).with(resource_group.id)
+          expect(Ci::ResourceGroups::AssignResourceFromResourceGroupWorker).to receive(:perform_async).with(resource_group.id)
 
           expect { build.enqueue! }.to change { build.status }.from('created').to('waiting_for_resource')
 
@@ -492,7 +491,7 @@ RSpec.describe Ci::Processable, feature_category: :continuous_integration do
 
         it 'releases a resource when build finished' do
           expect(build.resource_group).to receive(:release_resource_from).with(build).and_return(true).and_call_original
-          expect(Ci::ResourceGroups::AssignResourceFromResourceGroupWorker).to receive(:perform_async).with(build.resource_group_id)
+          expect(Ci::ResourceGroups::AssignResourceFromResourceGroupWorkerV2).to receive(:perform_async).with(build.resource_group_id)
 
           build.enqueue_waiting_for_resource!
           build.success!
@@ -500,20 +499,19 @@ RSpec.describe Ci::Processable, feature_category: :continuous_integration do
 
         it 're-checks the resource group even if the processable does not retain a resource' do
           expect(build.resource_group).to receive(:release_resource_from).with(build).and_return(false).and_call_original
-          expect(Ci::ResourceGroups::AssignResourceFromResourceGroupWorker).to receive(:perform_async).with(build.resource_group_id)
+          expect(Ci::ResourceGroups::AssignResourceFromResourceGroupWorkerV2).to receive(:perform_async).with(build.resource_group_id)
 
           build.success!
         end
 
-        context 'when `assign_resource_worker_deduplicate_until_executing` FF is enabled and the override is disabled' do
+        context 'when `assign_resource_worker_deduplicate_until_executing` FF is disabled' do
           before do
-            stub_feature_flags(assign_resource_worker_deduplicate_until_executing: true)
-            stub_feature_flags(assign_resource_worker_deduplicate_until_executing_override: false)
+            stub_feature_flags(assign_resource_worker_deduplicate_until_executing: false)
           end
 
           it 'releases a resource when build finished' do
             expect(build.resource_group).to receive(:release_resource_from).with(build).and_return(true).and_call_original
-            expect(Ci::ResourceGroups::AssignResourceFromResourceGroupWorkerV2).to receive(:perform_async).with(build.resource_group_id)
+            expect(Ci::ResourceGroups::AssignResourceFromResourceGroupWorker).to receive(:perform_async).with(build.resource_group_id)
 
             build.enqueue_waiting_for_resource!
             build.success!
@@ -521,7 +519,7 @@ RSpec.describe Ci::Processable, feature_category: :continuous_integration do
 
           it 're-checks the resource group even if the processable does not retain a resource' do
             expect(build.resource_group).to receive(:release_resource_from).with(build).and_return(false).and_call_original
-            expect(Ci::ResourceGroups::AssignResourceFromResourceGroupWorkerV2).to receive(:perform_async).with(build.resource_group_id)
+            expect(Ci::ResourceGroups::AssignResourceFromResourceGroupWorker).to receive(:perform_async).with(build.resource_group_id)
 
             build.success!
           end
@@ -667,52 +665,26 @@ RSpec.describe Ci::Processable, feature_category: :continuous_integration do
     end
   end
 
-  describe 'job_dependencies_with_accessible_artifacts' do
-    context 'in the same project' do
-      let(:build) { create(:ci_build, :created, project: project, pipeline: pipeline) }
-      let(:build2) { create(:ci_build, :created, project: project, pipeline: pipeline) }
-      let!(:job_artifact) { create(:ci_job_artifact, :dotenv, job: build2, accessibility: accessibility) }
+  describe 'find_dependencies_with_accessible_artifacts' do
+    let(:build) { create(:ci_build, :created, project: project, pipeline: pipeline) }
+    let(:build2) { create(:ci_build, :created, project: project, pipeline: pipeline) }
+    let!(:job_artifact) { create(:ci_job_artifact, :dotenv, job: build2, accessibility: accessibility) }
 
-      let!(:job_variable_1) { create(:ci_job_variable, :dotenv_source, job: build2) }
-      let!(:job_variable_2) { create(:ci_job_variable, job: build2) }
+    let!(:job_variable_1) { create(:ci_job_variable, :dotenv_source, job: build2) }
+    let!(:job_variable_2) { create(:ci_job_variable, job: build2) }
 
-      subject { build.job_dependencies_with_accessible_artifacts([build2]) }
+    subject { build.find_dependencies_with_accessible_artifacts([build2]) }
 
-      context 'inherits only jobs whose artifacts are public' do
-        let(:accessibility) { 'public' }
+    context 'inherits only jobs whose artifacts are public' do
+      let(:accessibility) { 'public' }
 
-        it { expect(subject).to eq([build2]) }
-      end
-
-      context 'inherits jobs whose artifacts are private' do
-        let(:accessibility) { 'private' }
-
-        it { expect(subject).to eq([build2]) }
-      end
+      it { expect(subject).to eq([build2]) }
     end
 
-    context 'in a different project' do
-      let_it_be(:public_project) { create(:project, :public) }
-      let(:build) { create(:ci_build, :created, project: project, pipeline: pipeline) }
-      let(:build2) { create(:ci_build, :created, project: public_project) }
-      let!(:job_artifact) { create(:ci_job_artifact, :dotenv, job: build2, accessibility: accessibility) }
+    context 'does not inherits jobs whose artifacts are private' do
+      let(:accessibility) { 'private' }
 
-      let!(:job_variable_1) { create(:ci_job_variable, :dotenv_source, job: build2) }
-      let!(:job_variable_2) { create(:ci_job_variable, job: build2) }
-
-      subject { build.job_dependencies_with_accessible_artifacts([build2]) }
-
-      context 'inherits only jobs whose artifacts are public' do
-        let(:accessibility) { 'public' }
-
-        it { expect(subject).to eq([build2]) }
-      end
-
-      context 'does not inherit jobs whose artifacts are private' do
-        let(:accessibility) { 'private' }
-
-        it { expect(subject).to eq([]) }
-      end
+      it { expect(subject).to eq([]) }
     end
   end
 end

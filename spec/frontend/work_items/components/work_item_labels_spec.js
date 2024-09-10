@@ -1,6 +1,7 @@
 import { GlDisclosureDropdown, GlLabel } from '@gitlab/ui';
 import Vue, { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
+import { __ } from '~/locale';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
@@ -82,6 +83,7 @@ describe('WorkItemLabels component', () => {
       ]),
       provide: {
         canAdminLabel: true,
+        isGroup,
         issuesListPath: 'test-project-path/issues',
         labelsManagePath: 'test-project-path/labels',
       },
@@ -89,7 +91,6 @@ describe('WorkItemLabels component', () => {
         workItemId,
         workItemIid,
         canUpdate,
-        isGroup,
         fullPath: 'test-project-path',
         workItemType: 'Task',
       },
@@ -334,44 +335,29 @@ describe('WorkItemLabels component', () => {
   });
 
   it('shows selected labels at top of list', async () => {
-    const [label1, label2, label3] = mockLabels;
-    const label999 = {
-      __typename: 'Label',
-      id: 'gid://gitlab/Label/999',
-      title: 'Label 999',
-      description: 'Label not in the label query result',
-      color: '#fff',
-      textColor: '#000',
-    };
-
     createComponent({
       workItemQueryHandler: workItemQuerySuccess,
-      updateWorkItemMutationHandler: jest.fn().mockResolvedValue(
-        updateWorkItemMutationResponseFactory({
-          labels: [label1, label999],
-        }),
-      ),
+      updateWorkItemMutationHandler: successAddRemoveLabelWorkItemMutationHandler,
     });
 
-    updateLabels([label1Id, label999.id]);
+    updateLabels([label1Id, label3Id]);
 
     showDropdown();
 
     await waitForPromises();
 
+    const [label1, label2, label3] = mockLabels;
+
     const selected = [
       { color: label1.color, text: label1.title, value: label1.id },
-      { color: label999.color, text: label999.title, value: label999.id },
-    ];
-
-    const unselected = [
-      { color: label2.color, text: label2.title, value: label2.id },
       { color: label3.color, text: label3.title, value: label3.id },
     ];
 
+    const unselected = [{ color: label2.color, text: label2.title, value: label2.id }];
+
     expect(findWorkItemSidebarDropdownWidget().props('listItems')).toEqual([
-      { options: selected, text: 'Selected' },
-      { options: unselected, text: 'All', textSrOnly: true },
+      { options: selected, text: __('Selected') },
+      { options: unselected, text: __('All'), textSrOnly: true },
     ]);
   });
 

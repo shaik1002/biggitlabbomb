@@ -11,9 +11,6 @@ info: "To determine the technical writer assigned to the Stage/Group associated 
 Project access tokens are similar to passwords, except you can [limit access to resources](#scopes-for-a-project-access-token),
 select a limited role, and provide an expiry date.
 
-NOTE:
-Actual access to a project is controlled by a combination of [roles and permissions](../../permissions.md), and the [token scopes](#scopes-for-a-project-access-token).
-
 Use a project access token to authenticate:
 
 - With the [GitLab API](../../../api/rest/index.md#personalprojectgroup-access-tokens).
@@ -25,6 +22,9 @@ Project access tokens are similar to [group access tokens](../../group/settings/
 and [personal access tokens](../../profile/personal_access_tokens.md), but project access tokens are scoped to a project, so you cannot use them to access resources from other projects.
 
 In self-managed instances, project access tokens are subject to the same [maximum lifetime limits](../../../administration/settings/account_and_limit_settings.md#limit-the-lifetime-of-access-tokens) as personal access tokens if the limit is set.
+
+WARNING:
+The ability to create project access tokens without expiry was [deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/369122) in GitLab 15.4 and [removed](https://gitlab.com/gitlab-org/gitlab/-/issues/392855) in GitLab 16.0. In GitLab 16.0 and later, existing project access tokens without an expiry date are automatically given an expiry date of 365 days later than the current date. The automatic adding of an expiry date occurs on GitLab.com during the 16.0 milestone. The automatic adding of an expiry date occurs on self-managed instances when they are upgraded to GitLab 16.0. This change is a breaking change.
 
 You can use project access tokens:
 
@@ -44,16 +44,18 @@ configured for personal access tokens.
 > - Ability to create non-expiring project access tokens [removed](https://gitlab.com/gitlab-org/gitlab/-/issues/392855) in GitLab 16.0.
 
 WARNING:
-The ability to create project access tokens without an expiry date was [deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/369122) in GitLab 15.4 and [removed](https://gitlab.com/gitlab-org/gitlab/-/issues/392855) in GitLab 16.0. For more information on expiry dates added to existing tokens, see the documentation on [access token expiration](#access-token-expiration).
+Project access tokens are treated as [internal users](../../../development/internal_users.md).
+If an internal user creates a project access token, that token is able to access
+all projects that have visibility level set to [Internal](../../public_access.md).
 
 To create a project access token:
 
 1. On the left sidebar, select **Search or go to** and find your project.
-1. Select **Settings > Access tokens**.
+1. Select **Settings > Access Tokens**.
 1. Select **Add new token**.
 1. Enter a name. The token name is visible to any user with permissions to view the project.
 1. Enter an expiry date for the token.
-   - The token expires on that date at midnight UTC. A token with the expiration date of 2024-01-01 expires at 00:00:00 UTC on 2024-01-01.
+   - The token expires on that date at midnight UTC.
    - If you do not enter an expiry date, the expiry date is automatically set to 30 days later than the current date.
    - By default, this date can be a maximum of 365 days later than the current date.
    - An instance-wide [maximum lifetime](../../../administration/settings/account_and_limit_settings.md#limit-the-lifetime-of-access-tokens) setting can limit the maximum allowable lifetime in self-managed instances.
@@ -63,11 +65,6 @@ To create a project access token:
 
 A project access token is displayed. Save the project access token somewhere safe. After you leave or refresh the page, you can't view it again.
 
-WARNING:
-Project access tokens are treated as [internal users](../../../development/internal_users.md).
-If an internal user creates a project access token, that token is able to access
-all projects that have visibility level set to [Internal](../../public_access.md).
-
 ## Revoke a project access token
 
 > - Ability to view revoked tokens [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/462217) in GitLab 17.3 [with a flag](../../../administration/feature_flags.md) named `retain_resource_access_token_user_after_revoke`. Disabled by default.
@@ -75,7 +72,7 @@ all projects that have visibility level set to [Internal](../../public_access.md
 To revoke a project access token:
 
 1. On the left sidebar, select **Search or go to** and find your project.
-1. Select **Settings > Access tokens**.
+1. Select **Settings > Access Tokens**.
 1. Next to the project access token to revoke, select **Revoke** (**{remove}**).
 
 In GitLab 17.3 and later, if you enable the `retain_resource_access_token_user_after_revoke`
@@ -126,40 +123,6 @@ To enable or disable project access token creation for all projects in a top-lev
 1. In **Permissions**, select or clear the **Users can create project access tokens and group access tokens in this group** checkbox.
 
 Even when creation is disabled, you can still use and revoke existing project access tokens.
-
-## Access token expiration
-
-Whether your existing project access tokens have expiry dates automatically applied
-depends on what GitLab offering you have, and when you upgraded to GitLab 16.0 or later:
-
-- On GitLab.com, during the 16.0 milestone, existing project access tokens without
-  an expiry date were automatically given an expiry date of 365 days later than the current date.
-- On GitLab self-managed, if you upgraded from GitLab 15.11 or earlier to GitLab 16.0 or later:
-  - On or before July 23, 2024, existing project access tokens without an expiry
-    date were automatically given an expiry date of 365 days later than the current date.
-    This change is a breaking change.
-  - On or after July 24, 2024, existing project access tokens without an expiry
-    date did not have an expiry date set.
-
-On GitLab self-managed, if you do a new install of one of the following GitLab
-versions, your existing project access tokens do not have expiry dates
-automatically applied:
-
-- 16.0.9
-- 16.1.7
-- 16.2.10
-- 16.3.8
-- 16.4.6
-- 16.5.9
-- 16.6.9
-- 16.7.9
-- 16.8.9
-- 16.9.10
-- 16.10.9
-- 16.11.7
-- 17.0.5
-- 17.1.3
-- 17.2.1
 
 ## Bot users for projects
 

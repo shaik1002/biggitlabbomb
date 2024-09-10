@@ -19,6 +19,7 @@ class Group < Namespace
   include BulkUsersByEmailLoad
   include ChronicDurationAttribute
   include RunnerTokenExpirationInterval
+  include Todoable
   include Importable
 
   extend ::Gitlab::Utils::Override
@@ -107,7 +108,7 @@ class Group < Namespace
 
   has_many :todos
 
-  has_many :import_export_uploads, dependent: :destroy, inverse_of: :group # rubocop:disable Cop/ActiveRecordDependent -- Previously was has_one association, dependent: :destroy to be removed in a separate issue and cascade FK will be added
+  has_one :import_export_upload
 
   has_many :import_failures, inverse_of: :group
 
@@ -138,7 +139,7 @@ class Group < Namespace
 
   has_one :group_feature, inverse_of: :group, class_name: 'Groups::FeatureSetting'
 
-  delegate :prevent_sharing_groups_outside_hierarchy, :new_user_signups_cap, :setup_for_company, :jobs_to_be_done, :seat_control, to: :namespace_settings
+  delegate :prevent_sharing_groups_outside_hierarchy, :new_user_signups_cap, :setup_for_company, :jobs_to_be_done, to: :namespace_settings
   delegate :runner_token_expiration_interval, :runner_token_expiration_interval=, :runner_token_expiration_interval_human_readable, :runner_token_expiration_interval_human_readable=, to: :namespace_settings, allow_nil: true
   delegate :subgroup_runner_token_expiration_interval, :subgroup_runner_token_expiration_interval=, :subgroup_runner_token_expiration_interval_human_readable, :subgroup_runner_token_expiration_interval_human_readable=, to: :namespace_settings, allow_nil: true
   delegate :project_runner_token_expiration_interval, :project_runner_token_expiration_interval=, :project_runner_token_expiration_interval_human_readable, :project_runner_token_expiration_interval_human_readable=, to: :namespace_settings, allow_nil: true
@@ -223,9 +224,7 @@ class Group < Namespace
   scope :excluding_restricted_visibility_levels_for_user, ->(user) do
     return all if user.can_admin_all_resources?
 
-    levels = Array.wrap(Gitlab::CurrentSettings.restricted_visibility_levels).sort
-
-    case levels
+    case Gitlab::CurrentSettings.restricted_visibility_levels.sort
     when [Gitlab::VisibilityLevel::PRIVATE, Gitlab::VisibilityLevel::PUBLIC],
          [Gitlab::VisibilityLevel::PRIVATE]
       where.not(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
@@ -302,7 +301,6 @@ class Group < Namespace
   scope :order_path_asc, -> { reorder(self.arel_table['path'].asc) }
   scope :order_path_desc, -> { reorder(self.arel_table['path'].desc) }
   scope :in_organization, ->(organization) { where(organization: organization) }
-  scope :by_min_access_level, ->(user, access_level) { joins(:group_members).where(members: { user: user }).where('members.access_level >= ?', access_level) }
 
   class << self
     def sort_by_attribute(method)
@@ -456,6 +454,10 @@ class Group < Namespace
     # Finds the closest notification_setting with a `notification_email`
     notification_settings = notification_settings_for(user, hierarchy_order: :asc)
     notification_settings.find { |n| n.notification_email.present? }&.notification_email
+  end
+
+  def web_url(only_path: nil)
+    Gitlab::UrlBuilder.build(self, only_path: only_path)
   end
 
   def dependency_proxy_image_prefix
@@ -818,20 +820,16 @@ class Group < Namespace
     false
   end
 
-  def import_export_upload_by_user(user)
-    import_export_uploads.find_by(user_id: user.id)
+  def export_file_exists?
+    import_export_upload&.export_file_exists?
   end
 
-  def export_file_exists?(user)
-    import_export_upload_by_user(user)&.export_file_exists?
+  def export_file
+    import_export_upload&.export_file
   end
 
-  def export_file(user)
-    import_export_upload_by_user(user)&.export_file
-  end
-
-  def export_archive_exists?(user)
-    import_export_upload_by_user(user)&.export_archive_exists?
+  def export_archive_exists?
+    import_export_upload&.export_archive_exists?
   end
 
   def adjourned_deletion?
@@ -945,12 +943,12 @@ class Group < Namespace
     feature_flag_enabled_for_self_or_ancestor?(:work_items_alpha)
   end
 
-  def glql_integration_feature_flag_enabled?
-    feature_flag_enabled_for_self_or_ancestor?(:glql_integration)
+  def work_items_rolledup_dates_feature_flag_enabled?
+    feature_flag_enabled_for_self_or_ancestor?(:work_items_rolledup_dates)
   end
 
   # Note: this method is overridden in EE to check the work_item_epics feature flag  which also enables this feature
-  def namespace_work_items_enabled?(_user = nil)
+  def namespace_work_items_enabled?
     ::Feature.enabled?(:namespace_level_work_items, self, type: :development)
   end
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe DropdownsHelper, feature_category: :design_system do
+RSpec.describe DropdownsHelper do
   before do
     allow(helper).to receive(:sprite_icon).and_return('<span class="icon"></span>'.html_safe)
     allow(helper).to receive(:icon).and_return('<span class="icon"></span>'.html_safe)
@@ -122,7 +122,7 @@ RSpec.describe DropdownsHelper, feature_category: :design_system do
       let(:content) { helper.dropdown_title('Foo', options: { back: true, close: true }) }
 
       it 'applies the justification class to the container', :aggregate_failures do
-        expect(content).to match(/"dropdown-title.*gl-justify-between"/)
+        expect(content).to match(/"dropdown-title.*gl-justify-content-space-between"/)
       end
 
       it_behaves_like 'has a back button'

@@ -16,9 +16,12 @@ Use branches when you:
 - Want to add code to a project but you're not sure if it works properly.
 - Are collaborating on the project with others, and don't want your work to get mixed up.
 
+A new branch is often called **feature branch** to differentiate from the
+[default branch](../../user/project/repository/branches/default.md).
+
 ## Create a branch
 
-To create a branch:
+To create a feature branch:
 
 ```shell
 git checkout -b <name-of-branch>
@@ -58,8 +61,3 @@ To update your branch with the latest changes in the default branch, either:
 - Run `git pull <remote-name> <default-branch-name>`. Use this command when you want your changes to appear in Git logs
   in chronological order with the changes from the default branch, or if you're sharing your branch with others. If
   you're unsure of the correct value for `<remote-name>`, run: `git remote`.
-
-## Related topics
-
-- [Branches](../../user/project/repository/branches/index.md)
-- [Tags](../../user/project/repository/tags/index.md)

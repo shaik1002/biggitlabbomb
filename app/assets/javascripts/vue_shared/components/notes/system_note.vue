@@ -31,12 +31,12 @@ import TimelineEntryItem from './timeline_entry_item.vue';
 
 const MAX_VISIBLE_COMMIT_LIST_COUNT = 3;
 const ICON_COLORS = {
-  check: 'gl-bg-green-100 gl-text-green-700 icon-success',
-  'merge-request-close': 'gl-bg-red-100 gl-text-red-700 icon-danger',
-  merge: 'gl-bg-blue-100 gl-text-blue-700 icon-info',
-  'issue-close': 'gl-bg-blue-100 gl-text-blue-700 icon-info',
-  issues: 'gl-bg-green-100 gl-text-green-700 icon-success',
-  error: 'gl-bg-red-100 gl-text-red-700 icon-danger',
+  check: 'gl-bg-green-100 gl-text-green-700',
+  'merge-request-close': 'gl-bg-red-100 gl-text-red-700',
+  merge: 'gl-bg-blue-100 gl-text-blue-700',
+  'issue-close': 'gl-bg-blue-100 gl-text-blue-700',
+  issues: 'gl-bg-green-100 gl-text-green-700',
+  error: 'gl-bg-red-100 gl-text-red-700',
 };
 
 export default {
@@ -60,11 +60,6 @@ export default {
     note: {
       type: Object,
       required: true,
-    },
-    variant: {
-      type: String,
-      required: false,
-      default: '',
     },
   },
   data() {
@@ -99,12 +94,6 @@ export default {
     },
     descriptionVersion() {
       return this.descriptionVersions[this.note.description_version_id];
-    },
-    singleLineDescription() {
-      return !this.descriptionVersion?.match(/\n/g);
-    },
-    deleteButtonClasses() {
-      return this.singleLineDescription ? 'gl-top-5 gl-right-2 gl-mt-2' : 'gl-top-6 gl-right-3';
     },
     isMergeRequest() {
       return this.getNoteableData.noteableType === 'MergeRequest';
@@ -152,33 +141,28 @@ export default {
 <template>
   <timeline-entry-item
     :id="noteAnchorId"
-    :class="{
-      target: isTargetNote,
-      'pr-0': shouldShowDescriptionVersion,
-      [`system-note-variant-${variant}`]: variant,
-    }"
-    class="system-note"
+    :class="{ target: isTargetNote, 'pr-0': shouldShowDescriptionVersion }"
+    class="note system-note note-wrapper"
   >
     <div
       :class="[
         iconBgClass,
         {
-          'system-note-icon -gl-mt-1 gl-ml-2 gl-h-6 gl-w-6': isAllowedIcon,
-          'system-note-dot -gl-top-1 gl-ml-4 gl-mt-3 gl-h-3 gl-w-3 gl-border-2 gl-border-solid gl-border-gray-50 gl-bg-gray-900':
-            !isAllowedIcon,
+          'system-note-icon': isAllowedIcon,
+          'system-note-tiny-dot gl-bg-gray-900!': !isAllowedIcon,
         },
       ]"
-      class="gl-relative gl-float-left gl-flex gl-items-center gl-justify-center gl-rounded-full"
+      class="gl-float-left gl-flex gl-justify-center gl-items-center gl-rounded-full gl-relative timeline-icon"
     >
       <gl-icon
         v-if="isAllowedIcon"
         :name="systemNoteIconName"
-        :size="14"
+        :size="12"
         data-testid="timeline-icon"
       />
     </div>
-    <div class="gl-ml-7">
-      <div class="gl-flex gl-items-start gl-justify-between">
+    <div class="timeline-content">
+      <div class="note-header">
         <note-header
           :author="note.author"
           :created-at="note.created_at"
@@ -196,7 +180,7 @@ export default {
               variant="link"
               :icon="descriptionVersionToggleIcon"
               data-testid="compare-btn"
-              class="gl-ml-3 gl-align-text-bottom !gl-text-sm"
+              class="gl-vertical-align-text-bottom gl-font-sm! gl-ml-3"
               @click="toggleDescriptionVersion"
               >{{ __('Compare with previous version') }}</gl-button
             >
@@ -205,7 +189,7 @@ export default {
               :icon="showLines ? 'chevron-up' : 'chevron-down'"
               variant="link"
               data-testid="outdated-lines-change-btn"
-              class="gl-align-text-bottom !gl-text-sm"
+              class="gl-vertical-align-text-bottom gl-font-sm!"
               @click="toggleDiff"
             >
               {{ __('Compare changes') }}
@@ -213,37 +197,26 @@ export default {
           </template>
         </note-header>
       </div>
-      <div class="note-body gl-pb-3 gl-pl-3">
+      <div class="note-body">
         <div
           v-safe-html="note.note_html"
-          :class="{
-            'gl-block gl-overflow-hidden': hasMoreCommits,
-            'system-note-commit-list': hasMoreCommits && !expanded,
-          }"
+          :class="{ 'system-note-commit-list': hasMoreCommits, 'hide-shade': expanded }"
           class="note-text md"
         ></div>
         <div v-if="hasMoreCommits" class="flex-list">
           <div
-            class="flex-row gl-relative gl-z-2 gl-cursor-pointer gl-pl-4 gl-pt-3 gl-text-blue-500 hover:gl-underline"
+            class="system-note-commit-list-toggler flex-row gl-pl-4 gl-pt-3"
             @click="expanded = !expanded"
           >
             <gl-icon :name="toggleIcon" :size="12" class="gl-mr-2" />
             <span>{{ __('Toggle commit list') }}</span>
           </div>
         </div>
-        <div
-          v-if="shouldShowDescriptionVersion"
-          class="gl-relative !gl-pt-3"
-          data-testid="description-version"
-        >
+        <div v-if="shouldShowDescriptionVersion" class="description-version pt-2">
           <pre v-if="isLoadingDescriptionVersion" class="loading-state">
             <gl-skeleton-loader />
           </pre>
-          <pre
-            v-else
-            v-safe-html="descriptionVersion"
-            class="gl-mt-3 gl-whitespace-pre-wrap gl-pr-7"
-          ></pre>
+          <pre v-else v-safe-html="descriptionVersion" class="wrapper mt-2"></pre>
           <gl-button
             v-if="displayDeleteButton"
             v-gl-tooltip
@@ -252,15 +225,14 @@ export default {
             variant="default"
             category="tertiary"
             icon="remove"
-            class="gl-absolute"
-            :class="deleteButtonClasses"
+            class="delete-description-history"
             data-testid="delete-description-version-button"
             @click="deleteDescriptionVersion"
           />
         </div>
         <div
           v-if="lines.length && showLines"
-          class="gl-my-2 gl-mr-5 gl-overflow-hidden gl-overflow-visible gl-rounded-small gl-border-1 gl-border-solid gl-border-gray-200 gl-pl-0"
+          class="diff-content outdated-lines-wrapper gl-border-solid gl-border-1 gl-border-gray-200 gl-mt-4 gl-rounded-small gl-overflow-hidden"
         >
           <table
             :class="$options.userColorSchemeClass"
@@ -270,22 +242,25 @@ export default {
             <tr v-for="line in lines" v-once :key="line.line_code" class="line_holder">
               <td
                 :class="line.type"
-                class="diff-line-num old_line !gl-rounded-none !gl-border-0 !gl-border-b-0 !gl-border-t-0"
+                class="diff-line-num old_line gl-border-bottom-0! gl-border-top-0! gl-border-0! gl-rounded-0!"
               >
                 {{ line.old_line }}
               </td>
-              <td :class="line.type" class="diff-line-num new_line !gl-border-b-0 !gl-border-t-0">
+              <td
+                :class="line.type"
+                class="diff-line-num new_line gl-border-bottom-0! gl-border-top-0!"
+              >
                 {{ line.new_line }}
               </td>
               <td
                 :class="line.type"
-                class="line_content !gl-table-cell !gl-rounded-none !gl-border-0"
+                class="line_content gl-display-table-cell! gl-border-0! gl-rounded-0!"
                 v-html="line.rich_text /* eslint-disable-line vue/no-v-html */"
               ></td>
             </tr>
           </table>
         </div>
-        <div v-else-if="showLines" class="gl-mt-4">
+        <div v-else-if="showLines" class="mt-4">
           <gl-skeleton-loader />
         </div>
       </div>

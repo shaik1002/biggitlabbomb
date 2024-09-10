@@ -9,51 +9,24 @@ RSpec.describe 'Issue boards sidebar labels select', :js, feature_category: :por
 
   let(:card) { find('.board:nth-child(1)').first('[data-testid="board-card"]') }
 
-  context 'when work item drawer is disabled' do
-    let_it_be(:group_board) { create(:board, group: group) }
+  context 'group boards' do
+    context 'in the top-level group board' do
+      let_it_be(:group_board) { create(:board, group: group) }
 
-    before do
-      stub_feature_flags(issues_list_drawer: false)
-      load_board group_board_path(group, group_board)
-    end
-
-    context 'group boards' do
-      context 'in the top-level group board' do
-        context 'selecting an issue from a direct descendant project' do
-          let_it_be(:project_issue) { create(:issue, project: project) }
-
-          include_examples 'an issue from a direct descendant project is selected'
-        end
-
-        context "selecting an issue from a subgroup's project" do
-          let_it_be(:subproject_issue) { create(:issue, project: subproject) }
-
-          include_examples "an issue from a subgroup's project is selected"
-        end
+      before do
+        load_board group_board_path(group, group_board)
       end
-    end
-  end
 
-  context 'when work item drawer is ENABLED' do
-    let_it_be(:group_board) { create(:board, group: group) }
+      context 'selecting an issue from a direct descendant project' do
+        let_it_be(:project_issue) { create(:issue, project: project) }
 
-    before do
-      load_board group_board_path(group, group_board)
-    end
+        include_examples 'an issue from a direct descendant project is selected'
+      end
 
-    context 'group boards' do
-      context 'in the top-level group board' do
-        context 'selecting an issue from a direct descendant project' do
-          let_it_be(:project_issue) { create(:issue, project: project) }
+      context "selecting an issue from a subgroup's project" do
+        let_it_be(:subproject_issue) { create(:issue, project: subproject) }
 
-          include_examples 'work item from a direct descendant project is selected'
-        end
-
-        context "selecting an issue from a subgroup's project" do
-          let_it_be(:subproject_issue) { create(:issue, project: subproject) }
-
-          include_examples "work item from a subgroup's project is selected"
-        end
+        include_examples "an issue from a subgroup's project is selected"
       end
     end
   end

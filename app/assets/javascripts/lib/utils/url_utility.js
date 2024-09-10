@@ -313,11 +313,9 @@ export const escapeFileUrl = (fileUrl) => encodeURIComponent(fileUrl).replace(/%
 
 export function webIDEUrl(route = undefined) {
   let returnUrl = `${gon.relative_url_root || ''}/-/ide/`;
-
   if (route) {
-    returnUrl += `project${route.replace(new RegExp(`^${gon.relative_url_root || ''}/`), '/')}`;
+    returnUrl += `project${route.replace(new RegExp(`^${gon.relative_url_root || ''}`), '')}`;
   }
-
   return escapeFileUrl(returnUrl);
 }
 
@@ -427,19 +425,12 @@ export function relativePathToAbsolute(path, basePath) {
 }
 
 /**
- * Checks if the provided URL is a valid URL. Valid URLs are
- * - absolute URLs (`http(s)://...`)
- * - root-relative URLs (`/path/...`)
- * - parsable by the `URL` constructor
- * - has http or https protocol
- *
- * Relative URLs (`../path`), queries (`?...`), and hashes (`#...`) are not
- * considered valid.
+ * Checks if the provided URL is a safe URL (absolute http(s) or root-relative URL)
  *
  * @param {String} url that will be checked
  * @returns {Boolean}
  */
-export function isValidURL(url) {
+export function isSafeURL(url) {
   if (!isAbsoluteOrRootRelative(url)) {
     return false;
   }
@@ -450,6 +441,19 @@ export function isValidURL(url) {
   } catch (e) {
     return false;
   }
+}
+
+/**
+ * Returns the sanitized url when not safe
+ *
+ * @param {String} url
+ * @returns {String}
+ */
+export function sanitizeUrl(url) {
+  if (!isSafeURL(url)) {
+    return 'about:blank';
+  }
+  return url;
 }
 
 /**
@@ -572,7 +576,6 @@ export const setUrlParams = (
   clearParams = false,
   railsArraySyntax = false,
   decodeParams = false,
-  // eslint-disable-next-line max-params
 ) => {
   const urlObj = new URL(url);
   const queryString = urlObj.search;
@@ -718,7 +721,7 @@ export const removeLastSlashInUrlPath = (url) =>
  * Navigates to a URL.
  *
  * If destination is a querystring, it will be automatically transformed into a fully qualified URL.
- * If the URL is not valid (see isValidURL implementation), this function will log an exception into Sentry.
+ * If the URL is not a safe URL (see isSafeURL implementation), this function will log an exception into Sentry.
  * If the URL is external it calls window.open so it has no referrer header or reference to its opener.
  *
  * @param {*} destination - url to navigate to. This can be a fully qualified URL or a querystring.
@@ -733,7 +736,7 @@ export function visitUrl(destination, openWindow = false) {
     url = currentUrl.toString();
   }
 
-  if (!isValidURL(url)) {
+  if (!isSafeURL(url)) {
     throw new RangeError(`Only http and https protocols are allowed: ${url}`);
   }
 
@@ -754,7 +757,7 @@ export function visitUrl(destination, openWindow = false) {
  * Navigates to a URL and display alerts.
  *
  * If destination is a querystring, it will be automatically transformed into a fully qualified URL.
- * If the URL is not valid (see isValidURL implementation), this function will log an exception into Sentry.
+ * If the URL is not a safe URL (see isSafeURL implementation), this function will log an exception into Sentry.
  *
  * @param {*} destination - url to navigate to. This can be a fully qualified URL or a querystring.
  * @param {{id: String, title?: String, message: String, variant: String, dismissible?: Boolean, persistOnPages?: String[]}[]} alerts - Alerts to display
@@ -779,15 +782,4 @@ export function buildURLwithRefType({ base = window.location.origin, path, refTy
     url.searchParams.delete('ref_type');
   }
   return url.pathname + url.search;
-}
-
-export function stripRelativeUrlRootFromPath(path) {
-  const relativeUrlRoot = joinPaths(window.gon.relative_url_root, '/');
-
-  // If we have no relative url root or path doesn't start with it, just return the path
-  if (relativeUrlRoot === '/' || !path.startsWith(relativeUrlRoot)) {
-    return path;
-  }
-
-  return joinPaths('/', path.substring(relativeUrlRoot.length));
 }

@@ -22,7 +22,6 @@ module Issues
 
       copy_email_participants
       queue_copy_designs
-      copy_timelogs
 
       new_entity
     end
@@ -142,12 +141,6 @@ module Issues
       ).execute
 
       log_error(response.message) if response.error?
-    end
-
-    def copy_timelogs
-      return if original_entity.timelogs.empty?
-
-      WorkItems::CopyTimelogsWorker.perform_async(original_entity.id, new_entity.id)
     end
 
     def mark_as_moved

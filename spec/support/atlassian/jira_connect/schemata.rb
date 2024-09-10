@@ -86,17 +86,7 @@ module Atlassian
             'state' => state_type,
             'pipeline' => pipeline_type,
             'environment' => environment_type,
-            'schemaVersion' => schema_version_type,
-            'commands' => {
-              'anyOf' => [
-                {
-                  'type' => %w[array],
-                  'items' => command_type,
-                  'minItems' => 1
-                },
-                { 'type' => 'null' }
-              ]
-            }
+            'schemaVersion' => schema_version_type
           }
         }
       end
@@ -239,17 +229,6 @@ module Atlassian
               'pattern' => '(issueKeys|issueIdOrKeys|serviceIdOrKeys)'
             },
             'values' => issue_keys_type
-          }
-        }
-      end
-
-      def command_type
-        {
-          'type' => 'object',
-          'additionalProperties' => false,
-          'required' => %w[command],
-          'properties' => {
-            'command' => { 'type' => 'string' }
           }
         }
       end

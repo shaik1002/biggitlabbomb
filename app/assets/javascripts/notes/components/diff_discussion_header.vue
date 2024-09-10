@@ -9,7 +9,6 @@ import { s__, __, sprintf } from '~/locale';
 import { FILE_DIFF_POSITION_TYPE } from '~/diffs/constants';
 import NoteEditedText from './note_edited_text.vue';
 import NoteHeader from './note_header.vue';
-import ToggleRepliesWidget from './toggle_replies_widget.vue';
 
 export default {
   name: 'DiffDiscussionHeader',
@@ -18,7 +17,6 @@ export default {
     GlAvatarLink,
     NoteEditedText,
     NoteHeader,
-    ToggleRepliesWidget,
   },
   directives: {
     SafeHtml,
@@ -97,9 +95,6 @@ export default {
     toggleClass() {
       return this.discussion.expanded ? 'expanded' : 'collapsed';
     },
-    replies() {
-      return this.notes.filter((note) => !note.system);
-    },
   },
   methods: {
     ...mapActions(['toggleDiscussion']),
@@ -111,8 +106,8 @@ export default {
 </script>
 
 <template>
-  <div class="discussion-header gl-flex gl-items-center">
-    <div v-once class="timeline-avatar gl-shrink-0 gl-self-start">
+  <div class="discussion-header gl-display-flex gl-align-items-center">
+    <div v-once class="timeline-avatar gl-align-self-start gl-flex-shrink-0 gl-flex-shrink">
       <gl-avatar-link
         v-if="author"
         :href="author.path"
@@ -123,8 +118,15 @@ export default {
         <gl-avatar :src="author.avatar_url" :alt="author.name" :size="32" />
       </gl-avatar-link>
     </div>
-    <div class="timeline-content gl-ml-3 gl-w-full" :class="toggleClass">
-      <note-header :author="author" :created-at="firstNote.created_at" :note-id="firstNote.id">
+    <div class="timeline-content gl-w-full gl-ml-3" :class="toggleClass">
+      <note-header
+        :author="author"
+        :created-at="firstNote.created_at"
+        :note-id="firstNote.id"
+        :include-toggle="true"
+        :expanded="discussion.expanded"
+        @toggleHandler="toggleDiscussionHandler"
+      >
         <span v-safe-html="headerText"></span>
       </note-header>
       <note-edited-text
@@ -132,13 +134,14 @@ export default {
         :edited-at="discussion.resolved_at"
         :edited-by="discussion.resolved_by"
         :action-text="resolvedText"
-        class-name="discussion-headline-light js-discussion-headline gl-mt-1 gl-pl-3"
+        class-name="discussion-headline-light js-discussion-headline gl-pl-3"
       />
-      <toggle-replies-widget
-        :collapsed="!discussion.expanded"
-        :replies="replies"
-        class="gl-border-t -gl-mx-3 -gl-mb-3 gl-mt-4 !gl-border-x-0 !gl-border-b-0 gl-border-t-subtle"
-        @toggle="toggleDiscussionHandler"
+      <note-edited-text
+        v-else-if="lastUpdatedAt"
+        :edited-at="lastUpdatedAt"
+        :edited-by="lastUpdatedBy"
+        :action-text="__('Last updated')"
+        class-name="discussion-headline-light js-discussion-headline gl-pl-3"
       />
     </div>
   </div>

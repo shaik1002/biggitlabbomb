@@ -344,9 +344,9 @@ export default {
         <div
           v-for="{ key, name, color, value } in tooltipContent"
           :key="key"
-          class="gl-flex gl-justify-between"
+          class="gl-display-flex gl-justify-content-space-between"
         >
-          <gl-chart-series-label class="gl-mr-7 gl-text-sm" :color="color">
+          <gl-chart-series-label class="gl-font-sm gl-mr-7" :color="color">
             {{ name }}
           </gl-chart-series-label>
           <div class="gl-font-bold">{{ value }}</div>

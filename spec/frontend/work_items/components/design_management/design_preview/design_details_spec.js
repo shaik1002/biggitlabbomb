@@ -10,7 +10,6 @@ import DesignDetails from '~/work_items/components/design_management/design_prev
 import DesignPresentation from '~/work_items/components/design_management/design_preview/design_presentation.vue';
 import DesignToolbar from '~/work_items/components/design_management/design_preview/design_toolbar.vue';
 import DesignSidebar from '~/work_items/components/design_management/design_preview/design_sidebar.vue';
-import DesignScaler from '~/work_items/components/design_management/design_preview/design_scaler.vue';
 import { DESIGN_NOT_FOUND_ERROR } from '~/work_items/components/design_management/error_messages';
 import * as utils from '~/work_items/components/design_management/utils';
 import { DESIGN_DETAIL_LAYOUT_CLASSLIST } from '~/work_items/components/design_management/constants';
@@ -44,7 +43,6 @@ describe('DesignDetails', () => {
   const findDesignPresentation = () => wrapper.findComponent(DesignPresentation);
   const findDesignToolbar = () => wrapper.findComponent(DesignToolbar);
   const findDesignSidebar = () => wrapper.findComponent(DesignSidebar);
-  const findDesignScaler = () => wrapper.findComponent(DesignScaler);
 
   const getDesignQueryHandler = jest.fn().mockResolvedValue(getDesignResponse);
   const error = new Error('ruh roh some error');
@@ -106,10 +104,6 @@ describe('DesignDetails', () => {
       await nextTick();
 
       expect(findDesignSidebar().props('isOpen')).toBe(false);
-    });
-
-    it('renders `DesignScaler` component', () => {
-      expect(findDesignScaler().exists()).toBe(true);
     });
   });
 

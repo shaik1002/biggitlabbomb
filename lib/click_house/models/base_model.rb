@@ -32,10 +32,6 @@ module ClickHouse
         self.class.new(@query_builder.offset(count))
       end
 
-      def group(...)
-        self.class.new(@query_builder.group(...))
-      end
-
       def select(...)
         self.class.new(@query_builder.select(...))
       end

@@ -2,33 +2,25 @@
 import {
   GlAvatarLabeled,
   GlBadge,
-  GlEmptyState,
   GlKeysetPagination,
   GlLoadingIcon,
   GlTable,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import { createAlert } from '~/alert';
-import { __, s__ } from '~/locale';
-
-import { DEFAULT_PAGE_SIZE } from '~/members/constants';
+import { s__ } from '~/locale';
 
 import {
   PLACEHOLDER_STATUS_KEPT_AS_PLACEHOLDER,
   PLACEHOLDER_STATUS_COMPLETED,
   placeholderUserBadges,
 } from '~/import_entities/import_groups/constants';
-import importSourceUsersQuery from '../graphql/queries/import_source_users.query.graphql';
 import PlaceholderActions from './placeholder_actions.vue';
-
-const MINIMUM_QUERY_LENGTH = 3;
 
 export default {
   name: 'PlaceholdersTable',
   components: {
     GlAvatarLabeled,
     GlBadge,
-    GlEmptyState,
     GlKeysetPagination,
     GlLoadingIcon,
     GlTable,
@@ -37,61 +29,25 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  inject: ['group'],
   props: {
-    queryStatuses: {
-      type: Array,
+    isLoading: {
+      type: Boolean,
       required: true,
     },
-    querySearch: {
-      type: String,
+    items: {
+      type: Array,
       required: false,
-      default: null,
+      default: () => [],
     },
-    querySort: {
-      type: String,
+    pageInfo: {
+      type: Object,
       required: false,
-      default: null,
+      default: () => ({}),
     },
     reassigned: {
       type: Boolean,
       required: false,
       default: false,
-    },
-  },
-  data() {
-    return {
-      cursor: {
-        before: null,
-        after: null,
-      },
-    };
-  },
-  apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
-    sourceUsers: {
-      query: importSourceUsersQuery,
-      variables() {
-        return {
-          fullPath: this.group.path,
-          ...this.cursor,
-          [this.cursor.before ? 'last' : 'first']: DEFAULT_PAGE_SIZE,
-          statuses: this.queryStatuses,
-          search: this.querySearch,
-          sort: this.querySort,
-        };
-      },
-      skip() {
-        return this.isSearchQueryTooShort;
-      },
-      update(data) {
-        return data.namespace?.importSourceUsers;
-      },
-      error() {
-        createAlert({
-          message: s__('UserMapping|There was a problem fetching placeholder users.'),
-        });
-      },
     },
   },
 
@@ -119,26 +75,6 @@ export default {
         },
       ];
     },
-    isLoading() {
-      return this.$apollo.queries.sourceUsers.loading;
-    },
-    nodes() {
-      if (this.isSearchQueryTooShort) {
-        return [];
-      }
-      return this.sourceUsers?.nodes || [];
-    },
-    pageInfo() {
-      return this.sourceUsers?.pageInfo || {};
-    },
-    isSearchQueryTooShort() {
-      return this.querySearch && this.querySearch.trim().length < MINIMUM_QUERY_LENGTH;
-    },
-    emptyText() {
-      return this.isSearchQueryTooShort
-        ? __('Enter at least three characters to search.')
-        : __('Edit your search and try again');
-    },
   },
 
   methods: {
@@ -152,7 +88,7 @@ export default {
         item.status === PLACEHOLDER_STATUS_COMPLETED
       );
     },
-    reassignedUser(item) {
+    reassginedUser(item) {
       if (item.status === PLACEHOLDER_STATUS_KEPT_AS_PLACEHOLDER) {
         return item.placeholderUser;
       }
@@ -162,36 +98,15 @@ export default {
 
       return {};
     },
-    onPrevPage() {
-      this.cursor = {
-        before: this.sourceUsers.pageInfo.startCursor,
-        after: null,
-      };
-    },
-
-    onNextPage() {
-      this.cursor = {
-        after: this.sourceUsers.pageInfo.endCursor,
-        before: null,
-      };
-    },
-
-    onConfirm(item) {
-      this.$emit('confirm', item);
-    },
   },
 };
 </script>
 
 <template>
   <div>
-    <gl-table :items="nodes" :fields="fields" :busy="isLoading" show-empty>
+    <gl-table :items="items" :fields="fields" :busy="isLoading">
       <template #table-busy>
         <gl-loading-icon size="lg" class="gl-my-5" />
-      </template>
-
-      <template #empty>
-        <gl-empty-state :title="__('No results found')" :description="emptyText" />
       </template>
 
       <template #cell(user)="{ item }">
@@ -223,21 +138,21 @@ export default {
         <gl-avatar-labeled
           v-if="isReassignedItem(item)"
           :size="32"
-          :src="reassignedUser(item).avatarUrl"
-          :label="reassignedUser(item).name"
-          :sub-label="`@${reassignedUser(item).username}`"
+          :src="reassginedUser(item).avatarUrl"
+          :label="reassginedUser(item).name"
+          :sub-label="`@${reassginedUser(item).username}`"
         />
-        <placeholder-actions v-else :key="item.id" :source-user="item" @confirm="onConfirm(item)" />
+        <placeholder-actions v-else :source-user="item" />
       </template>
     </gl-table>
 
-    <div v-if="pageInfo.hasNextPage || pageInfo.hasPreviousPage" class="gl-mt-5 gl-text-center">
+    <div v-if="pageInfo.hasNextPage || pageInfo.hasPreviousPage" class="gl-text-center gl-mt-5">
       <gl-keyset-pagination
         v-bind="pageInfo"
         :prev-text="__('Prev')"
         :next-text="__('Next')"
-        @prev="onPrevPage"
-        @next="onNextPage"
+        @prev="$emit('prev')"
+        @next="$emit('next')"
       />
     </div>
   </div>

@@ -65,8 +65,7 @@ module Groups
         @import_file ||= Gitlab::ImportExport::FileImporter.import(
           importable: group,
           archive_file: nil,
-          shared: shared,
-          user: current_user
+          shared: shared
         )
       end
 
@@ -84,7 +83,7 @@ module Groups
       end
 
       def remove_import_file
-        upload = group.import_export_upload_by_user(current_user)
+        upload = group.import_export_upload
 
         return unless upload&.import_file&.file
 

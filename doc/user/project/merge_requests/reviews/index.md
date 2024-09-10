@@ -14,7 +14,7 @@ DETAILS:
 Merge requests are the primary method of making changes to files in a
 GitLab project. [Create and submit](../creating_merge_requests.md) a merge request
 to propose changes. Your team leaves [comments](../../../discussions/index.md) on
-your merge request, and makes [suggestions](suggestions.md) you can accept
+your merge request, and makes [Code Suggestions](suggestions.md) you can accept
 from the user interface. When a teammate reviews your work, they can choose
 to accept or reject it.
 
@@ -22,34 +22,12 @@ To review merge requests, you can use:
 
 - The GitLab interface.
 - Visual Studio Code, if you have configured the
-  [GitLab Workflow extension for VS Code](../../../../editor_extensions/visual_studio_code/index.md).
+  [GitLab Workflow VS Code extension](../../../../editor_extensions/visual_studio_code/index.md).
 - Your terminal window, if you have configured the [GitLab CLI](../../../../editor_extensions/gitlab_cli/index.md).
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For an overview, see [Merge request review](https://www.youtube.com/watch?v=2MayfXKpU08&list=PLFGfElNsQthYDx0A_FaNNfUm9NHsK6zED&index=183).
 <!-- Video published on 2023-04-29 -->
-
-## View the review status of a merge request
-
-To do this:
-
-1. On the left sidebar, select **Search or go to** and find your project.
-1. Select **Code > Merge requests** and find your merge request.
-1. Select the title of the merge request to view it.
-1. Scroll to the [merge request widget](../widgets.md) to see the mergeability and
-   approval status for the merge request. For example, this merge request is blocked
-   because it hasn't received the approvals it needs:
-
-   ![The merge request widget displays 'All required approvals must be given'.](img/reviews_missing_v17_3.png)
-
-To see the individual review status for each reviewer, check the right sidebar
-of a merge request. Each **Reviewer** shows the status to the right of the user's name:
-
-- **{dash-circle}** Awaiting review from this user.
-- **{status_running}** The user's review is in progress.
-- **{check-circle}** Approved by this user.
-- **{comment-lines}** User has requested changes, and [blocked this merge request](#prevent-merge-when-you-request-changes).
-  (If needed, you can [bypass this block](#prevent-merge-when-you-request-changes).)
 
 ## Request a review
 
@@ -170,14 +148,11 @@ DETAILS:
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/430728) in GitLab 16.11 [with a flag](../../../../administration/feature_flags.md) named `mr_reviewer_requests_changes`. Disabled by default.
 > - Enabled by default [on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/451211) and [self-managed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/158226) in GitLab 17.2.
-> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/451211) in GitLab 17.3.
 
 A reviewer [requesting changes](#submit-a-review) blocks a merge request from merging.
 When this happens, the merge request reports area shows the message
 **The change requests must be completed or resolved.** To unblock the merge request,
 the reviewer who requested changes should [re-review and approve](#re-request-a-review) the merge request.
-
-### Bypass a request for changes
 
 If the user who requested changes is unable to re-review or provide an approval,
 another user with permission to merge the merge request can override this check in the
@@ -189,14 +164,7 @@ merge request reports area by selecting **Bypass**:
 1. On the merge request **Overview**, scroll to the merge request reports area.
 1. Next to **The change requests must be completed or resolved**, select **Bypass**:
 
-   ![A merge request that is blocked because a user requested changes](img/bypass_17_2.png)
-
-1. The merge reports area shows `Merge with caution: Override added`. To see which check
-   was bypassed, select **Expand merge checks** (**{chevron-lg-down}**) and find the
-   check that contains a warning (**{status_warning}**) icon. In this example, the
-   author bypassed **The change requests must be completed or resolved**:
-
-   ![This merge request contains a bypassed check, and should be merged with caution.](img/status_warning_v17_4.png)
+   ![A merge request that has been blocked by a user requesting changes](img/bypass_17_2.png)
 
 ### See how reviewers map to approval rules
 
@@ -283,7 +251,7 @@ To download and apply the patch in a one-line CLI command using [`git am`](https
 curl "https://gitlab.com/gitlab-org/gitlab/-/merge_requests/000000.patch" | git am
 ```
 
-## Suggested Reviewers
+## GitLab Duo Suggested Reviewers
 
 DETAILS:
 **Tier:** Ultimate
@@ -296,18 +264,22 @@ DETAILS:
 
 GitLab uses machine learning to suggest reviewers for your merge request.
 
+<i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
+For an overview, see [GitLab Duo Suggested Reviewers](https://www.youtube.com/embed/ivwZQgh4Rxw).
+<!-- Video published on 2023-11-03 -->
+
 To suggest reviewers, GitLab uses:
 
 - The changes in the merge request
 - The project's contribution graph
 
-Suggested Reviewers also integrates with Code Owners, profile status,
+GitLab Duo Suggested Reviewers also integrates with Code Owners, profile status,
 and merge request rules. It helps you make a more informed decision when choosing
 reviewers who can meet your review criteria.
 
-![A list of reviewers.](img/suggested_reviewers_v16_3.png)
+![GitLab Duo Suggested Reviewers](img/suggested_reviewers_v16_3.png)
 
-For more information, see [Data usage in Suggested Reviewers](data_usage.md).
+For more information, see [Data usage in GitLab Duo Suggested Reviewers](data_usage.md).
 
 ### Enable Suggested Reviewers
 
@@ -318,7 +290,7 @@ after a few hours.
 
 Prerequisites:
 
-- You have the Owner or Maintainer role for the project.
+- You have the Owner or Maintainer role in the project.
 
 To do this:
 

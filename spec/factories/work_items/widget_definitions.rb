@@ -2,7 +2,7 @@
 
 FactoryBot.define do
   factory :widget_definition, class: 'WorkItems::WidgetDefinition' do
-    association :work_item_type, :non_default
+    work_item_type
 
     name { 'Description' }
     widget_type { 'description' }

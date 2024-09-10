@@ -1,6 +1,10 @@
 .filter-item {
   vertical-align: top;
 
+  &.reset-filters {
+    padding: 7px;
+  }
+
   &.update-issues-btn {
     float: right;
     margin-right: 0;
@@ -8,6 +12,12 @@
     @include media-breakpoint-down(sm) {
       float: none;
     }
+  }
+}
+
+.filters-section {
+  @include media-breakpoint-down(sm) {
+    display: inline-block;
   }
 }
 
@@ -91,7 +101,7 @@
     padding: 2px 7px;
     @include gl-font-sm;
   }
-
+  
   .name,
   .operator,
   .value-container {
@@ -260,6 +270,11 @@
     max-width: none;
     min-width: 100%;
   }
+
+  .btn-helptext {
+    margin-left: auto;
+    color: var(--gray);
+  }
 }
 
 .filtered-search-history-dropdown-wrapper {
@@ -356,11 +371,36 @@
       top: 0;
     }
   }
+
+  .dropdown-light-content {
+    font-size: 14px;
+    font-weight: $gl-font-weight-normal;
+  }
+
+  .dropdown-user {
+    display: flex;
+  }
+
+  .dropdown-user-details {
+    display: flex;
+    flex-direction: column;
+
+    > span {
+      white-space: normal;
+      word-break: break-all;
+    }
+  }
 }
 
 .filter-dropdown-loading {
   padding: 8px 16px;
   text-align: center;
+}
+
+.search-token-target-branch {
+  .value {
+    @include gl-font-monospace;
+  }
 }
 
 .vue-filtered-search-bar-container {

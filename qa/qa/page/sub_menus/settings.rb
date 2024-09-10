@@ -19,7 +19,7 @@ module QA
         end
 
         def go_to_access_token_settings
-          open_settings_submenu('Access tokens')
+          open_settings_submenu('Access Tokens')
         end
 
         def go_to_repository_settings

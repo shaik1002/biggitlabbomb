@@ -18,7 +18,7 @@ module QA
       let(:package_version) { '1.3.7' }
       let(:package_type) { 'maven_gradle' }
       let(:project) { create(:project, :private, :with_readme, name: "#{package_type}_project") }
-      let!(:runner) do
+      let(:runner) do
         create(:project_runner,
           name: "qa-runner-#{Time.now.to_i}",
           tags: ["runner-for-#{project.name}"],
@@ -50,6 +50,7 @@ module QA
 
       before do
         Flow::Login.sign_in_unless_signed_in
+        runner
       end
 
       where(:case_name, :authentication_token_type, :maven_header_name, :testcase) do
@@ -72,29 +73,40 @@ module QA
         end
 
         it 'pushes and pulls a maven package via gradle', :blocking, testcase: params[:testcase] do
-          gradle_publish_install_yaml = ERB.new(read_fixture('package_managers/maven/gradle',
-            'gradle_upload_install_package.yaml.erb')).result(binding)
-          build_gradle = ERB.new(read_fixture('package_managers/maven/gradle', 'build.gradle.erb')).result(binding)
+          Support::Retrier.retry_on_exception(max_attempts: 3, sleep_interval: 2) do
+            gradle_publish_install_yaml = ERB.new(read_fixture('package_managers/maven/gradle', 'gradle_upload_install_package.yaml.erb')).result(binding)
+            build_gradle = ERB.new(read_fixture('package_managers/maven/gradle', 'build.gradle.erb')).result(binding)
 
-          create(:commit, project: project, commit_message: 'Add .gitlab-ci.yml', actions: [
-            { action: 'create', file_path: '.gitlab-ci.yml', content: gradle_publish_install_yaml },
-            { action: 'create', file_path: 'build.gradle', content: build_gradle }
-          ])
-
-          project.visit!
-          Flow::Pipeline.wait_for_pipeline_creation_via_api(project: project)
-
-          project.visit_job('publish')
-          Page::Project::Job::Show.perform do |job|
-            expect(job).to be_successful(timeout: 800)
+            create(:commit, project: project, commit_message: 'Add .gitlab-ci.yml', actions: [
+              { action: 'create', file_path: '.gitlab-ci.yml', content: gradle_publish_install_yaml },
+              { action: 'create', file_path: 'build.gradle', content: build_gradle }
+            ])
           end
 
-          project.visit_job('install')
+          project.visit!
+
+          Flow::Pipeline.visit_latest_pipeline
+
+          Page::Project::Pipeline::Show.perform do |pipeline|
+            pipeline.click_job('publish')
+          end
+
+          Page::Project::Job::Show.perform do |job|
+            expect(job).to be_successful(timeout: 800)
+
+            job.go_to_pipeline
+          end
+
+          Page::Project::Pipeline::Show.perform do |pipeline|
+            pipeline.click_job('install')
+          end
+
           Page::Project::Job::Show.perform do |job|
             expect(job).to be_successful(timeout: 800)
           end
 
           Page::Project::Menu.perform(&:go_to_package_registry)
+
           Page::Project::Packages::Index.perform do |index|
             expect(index).to have_package(package_name)
 

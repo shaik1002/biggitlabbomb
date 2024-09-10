@@ -367,10 +367,9 @@ class Admin::UsersController < Admin::ApplicationController
       :access_level,
       :avatar,
       :bio,
-      :bluesky,
       :can_create_group,
-      :color_mode_id,
       :color_scheme_id,
+      :color_mode_id,
       :discord,
       :email,
       :extern_uid,
@@ -382,9 +381,7 @@ class Admin::UsersController < Admin::ApplicationController
       :linkedin,
       :mastodon,
       :name,
-      :note,
       :password_expires_at,
-      :private_profile,
       :projects_limit,
       :provider,
       :remember_me,
@@ -393,6 +390,8 @@ class Admin::UsersController < Admin::ApplicationController
       :twitter,
       :username,
       :website_url,
+      :note,
+      :private_profile,
       { credit_card_validation_attributes: [:credit_card_validated_at] }
     ]
   end

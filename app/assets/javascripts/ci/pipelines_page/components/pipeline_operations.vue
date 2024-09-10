@@ -30,7 +30,6 @@ export default {
       isCanceling: false,
       isRetrying: false,
       showConfirmationModal: false,
-      pipelineToCancel: this.pipeline,
     };
   },
   computed: {
@@ -56,11 +55,10 @@ export default {
       this.isCanceling = true;
       this.showConfirmationModal = false;
 
-      this.$emit('cancel-pipeline', this.pipelineToCancel);
+      this.$emit('cancel-pipeline', this.pipeline);
     },
     handleCancelClick() {
       this.showConfirmationModal = true;
-      this.pipelineToCancel = this.pipeline;
 
       this.trackClick('click_cancel_button');
     },
@@ -81,7 +79,7 @@ export default {
 <template>
   <div class="gl-text-right">
     <pipeline-stop-modal
-      :pipeline="pipelineToCancel"
+      :pipeline="pipeline"
       :show-confirmation-modal="showConfirmationModal"
       @submit="onConfirmCancelPipeline"
       @close-modal="onCloseModal"

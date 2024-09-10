@@ -28,10 +28,6 @@ import {
   MORE_ACTIONS_TEXT,
   COPY_IMAGE_PATH_TITLE,
   SIGNATURE_BADGE_TOOLTIP,
-  DOCKER_MEDIA_TYPE,
-  OCI_MEDIA_TYPE,
-  DOCKER_MANIFEST_LIST_TOOLTIP,
-  OCI_INDEX_TOOLTIP,
 } from '../../constants/index';
 import SignatureDetailsModal from './signature_details_modal.vue';
 
@@ -84,8 +80,6 @@ export default {
     MORE_ACTIONS_TEXT,
     COPY_IMAGE_PATH_TITLE,
     SIGNATURE_BADGE_TOOLTIP,
-    DOCKER_MANIFEST_LIST_TOOLTIP,
-    OCI_INDEX_TOOLTIP,
   },
   data() {
     return {
@@ -98,7 +92,7 @@ export default {
         {
           text: this.$options.i18n.REMOVE_TAG_BUTTON_TITLE,
           extraAttrs: {
-            class: '!gl-text-red-500',
+            class: 'gl-text-red-500!',
             'data-testid': 'single-delete-button',
           },
           action: () => {
@@ -153,14 +147,6 @@ export default {
         ({ artifactType }) => artifactType === 'application/vnd.dev.cosign.artifact.sig.v1+json',
       );
     },
-    shouldDisplayLabelsIcon() {
-      return this.tag.mediaType === DOCKER_MEDIA_TYPE || this.tag.mediaType === OCI_MEDIA_TYPE;
-    },
-    labelsIconTooltipText() {
-      return this.tag.mediaType === DOCKER_MEDIA_TYPE
-        ? this.$options.i18n.DOCKER_MANIFEST_LIST_TOOLTIP
-        : this.$options.i18n.OCI_INDEX_TOOLTIP;
-    },
   },
 };
 </script>
@@ -177,11 +163,11 @@ export default {
       />
     </template>
     <template #left-primary>
-      <div class="gl-flex gl-items-center">
+      <div class="gl-display-flex gl-align-items-center">
         <div
           v-gl-tooltip="tag.name"
           data-testid="name"
-          class="gl-overflow-hidden gl-text-ellipsis gl-whitespace-nowrap"
+          class="gl-text-overflow-ellipsis gl-overflow-hidden gl-whitespace-nowrap"
           :class="mobileClasses"
         >
           {{ tag.name }}
@@ -193,23 +179,13 @@ export default {
           :text="tag.location"
           category="tertiary"
           :disabled="disabled"
-          class="gl-ml-2"
-          size="small"
         />
 
         <gl-icon
           v-if="isInvalidTag"
           v-gl-tooltip.d0="$options.i18n.MISSING_MANIFEST_WARNING_TOOLTIP"
           name="warning"
-          class="gl-mr-2 gl-text-orange-500"
-        />
-
-        <gl-icon
-          v-if="shouldDisplayLabelsIcon"
-          v-gl-tooltip.d0="labelsIconTooltipText"
-          name="labels"
-          class="gl-mr-2"
-          data-testid="labels-icon"
+          class="gl-text-orange-500 gl-mr-2"
         />
       </div>
     </template>
@@ -252,7 +228,7 @@ export default {
         category="tertiary"
         no-caret
         placement="bottom-end"
-        :class="{ 'gl-pointer-events-none gl-opacity-0': disabled }"
+        :class="{ 'gl-opacity-0 gl-pointer-events-none': disabled }"
         data-testid="additional-actions"
         :items="items"
       />
@@ -312,8 +288,8 @@ export default {
         icon="pencil"
         data-testid="signatures-detail"
       >
-        <div class="gl-flex">
-          <span class="gl-mr-3 gl-grow gl-basis-0 gl-truncate">
+        <div class="gl-display-flex">
+          <span class="gl-text-truncate gl-mr-3 gl-flex-basis-0 gl-flex-grow-1">
             <gl-sprintf :message="s__('ContainerRegistry|Signature digest: %{digest}')">
               <template #digest>{{ digest }}</template>
             </gl-sprintf>

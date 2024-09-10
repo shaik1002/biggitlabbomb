@@ -5,8 +5,7 @@ workflow:
   name: $PIPELINE_NAME
 
 include:
-  - local: .gitlab/ci/version.yml
-  - component: "gitlab.com/gitlab-org/quality/pipeline-common/allure-report@9.0.0"
+  - component: "gitlab.com/gitlab-org/quality/pipeline-common/allure-report@8.18.4"
     inputs:
       job_name: "e2e-test-report"
       job_stage: "report"
@@ -16,7 +15,7 @@ include:
       gitlab_auth_token_variable_name: "PROJECT_TOKEN_FOR_CI_SCRIPTS_API_USAGE"
       allure_job_name: "${QA_RUN_TYPE}"
   - project: gitlab-org/quality/pipeline-common
-    ref: 9.0.0
+    ref: 8.18.4
     file:
       - /ci/base.gitlab-ci.yml
       - /ci/knapsack-report.yml
@@ -194,24 +193,13 @@ stages:
 # ==========================================
 # Pre stage
 # ==========================================
-.check-release-set:
-  stage: .pre
-  script:
-    - |
-      if [ -z "$RELEASE" ]; then
-        echo "E2E test pipeline requires omnibus installation docker image to be set via $RELEASE environment variable"
-        exit 1
-      else
-        echo "Omnibus installation image is set to '$RELEASE'"
-      fi
-
 dont-interrupt-me:
   stage: .pre
   interruptible: false
   script:
     - echo "This jobs makes sure this pipeline won't be interrupted! See https://docs.gitlab.com/ee/ci/yaml/#interruptible."
   rules:
-    - if: '$PARENT_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH && $CI_MERGE_REQUEST_IID == null'
       allow_failure: true
     - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merged_result" || $CI_MERGE_REQUEST_EVENT_TYPE == "detached"'
       when: manual

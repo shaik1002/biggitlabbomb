@@ -1,4 +1,5 @@
 import { GlSprintf, GlIntersperse } from '@gitlab/ui';
+import { __, s__ } from '~/locale';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import { useFakeDate } from 'helpers/fake_date';
@@ -58,7 +59,7 @@ describe('RunnerDetails', () => {
       ${'Maximum job timeout'} | ${{ maximumTimeout: 10 * 60 + 5 }}                                 | ${'10 minutes 5 seconds'}
       ${'Token expiry'}        | ${{ tokenExpiresAt: mockOneHourAgo }}                              | ${'1 hour ago'}
       ${'Token expiry'}        | ${{ tokenExpiresAt: null }}                                        | ${'Never expires'}
-      ${'Runners'}             | ${{ managers: { count: 2 } }}                                      | ${`2 ${'Show details'}`}
+      ${'Runners'}             | ${{ managers: { count: 2 } }}                                      | ${`2 ${__('Show details')}`}
     `('"$field" field', ({ field, runner, expectedValue }) => {
       beforeEach(() => {
         createComponent({
@@ -93,7 +94,7 @@ describe('RunnerDetails', () => {
           stubs,
         });
 
-        expect(findDdContent('Tags')).toBe('tag-1 tag-2');
+        expect(findDdContent(s__('Runners|Tags'))).toBe('tag-1 tag-2');
       });
 
       it('displays "None" when runner has no tags', () => {
@@ -104,7 +105,7 @@ describe('RunnerDetails', () => {
           stubs,
         });
 
-        expect(findDdContent('Tags')).toBe('None');
+        expect(findDdContent(s__('Runners|Tags'))).toBe('None');
       });
     });
 

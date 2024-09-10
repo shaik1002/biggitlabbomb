@@ -39,20 +39,20 @@ export default {
 </script>
 
 <template>
-  <div class="revision-card gl-min-w-0 gl-basis-1/2">
-    <h2 class="gl-mt-0 gl-text-base">
+  <div class="revision-card gl-flex-basis-half gl-min-w-0">
+    <h2 class="gl-font-base gl-mt-0">
       {{ revisionText }}
     </h2>
-    <div class="gl-flex gl-flex-col gl-gap-3 sm:gl-flex-row">
+    <div class="gl-flex gl-flex-direction-column gl-sm-flex-direction-row gl-gap-3">
       <repo-dropdown
-        class="gl-min-w-0 gl-max-w-full gl-basis-1/2"
+        class="gl-flex-basis-half gl-min-w-0 gl-max-w-full"
         :params-name="paramsName"
         :projects="projects"
         :selected-project="selectedProject"
         v-on="$listeners"
       />
       <revision-dropdown
-        class="gl-min-w-0 gl-max-w-full gl-basis-1/2"
+        class="gl-flex-basis-half gl-min-w-0 gl-max-w-full"
         :refs-project-path="refsProjectPath"
         :params-name="paramsName"
         :params-branch="paramsBranch"

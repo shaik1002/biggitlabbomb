@@ -30,7 +30,13 @@ class GraphqlController < ApplicationController
   protect_from_forgery with: :null_session, only: :execute
 
   # must come first: current_user is set up here
-  before_action(only: [:execute]) { authenticate_sessionless_user!(:graphql_api) }
+  before_action(only: [:execute]) do
+    if Feature.enabled? :graphql_minimal_auth_methods # rubocop:disable Gitlab/FeatureFlagWithoutActor -- reverting MR
+      authenticate_graphql
+    else
+      authenticate_sessionless_user!(:api)
+    end
+  end
 
   before_action :authorize_access_api!
   before_action :set_user_last_activity
@@ -117,6 +123,23 @@ class GraphqlController < ApplicationController
 
   private
 
+  # unwound from SessionlessAuthentication concern
+  # use a minimal subset of Gitlab::Auth::RequestAuthenticator.find_sessionless_user
+  # so only token types allowed for GraphQL can authenticate users
+  # CI_JOB_TOKENs are not allowed for now, since their access is too broad
+  def authenticate_graphql
+    user = request_authenticator.find_user_from_web_access_token(:api, scopes: authorization_scopes)
+    user ||= request_authenticator.find_user_from_personal_access_token_for_api_or_git
+    sessionless_sign_in(user) if user
+  rescue Gitlab::Auth::AuthenticationError
+    nil
+  end
+
+  # Overridden in EE
+  def authorization_scopes
+    [:api, :read_api]
+  end
+
   def permitted_params
     @permitted_params ||= multiplex? ? permitted_multiplex_params : permitted_standalone_query_params
   end
@@ -167,12 +190,11 @@ class GraphqlController < ApplicationController
     disable_reference = request.headers[DISABLE_SQL_QUERY_LIMIT_HEADER]
     return unless disable_reference
 
-    first, second = disable_reference.split(',')
-
-    if first.match?(/^\d+$/)
-      Gitlab::QueryLimiting.disable!(second, new_threshold: first&.to_i)
+    disable_issue, new_threshold = disable_reference.split(';')
+    if new_threshold
+      Gitlab::QueryLimiting.disable!(disable_issue, new_threshold: new_threshold&.to_i)
     else
-      Gitlab::QueryLimiting.disable!(first)
+      Gitlab::QueryLimiting.disable!(disable_issue)
     end
   end
 

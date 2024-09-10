@@ -2,7 +2,6 @@ import {
   humanizeClusterErrors,
   createK8sAccessConfiguration,
   fluxSyncStatus,
-  updateFluxRequested,
 } from '~/environments/helpers/k8s_integration_helper';
 import {
   CLUSTER_AGENT_ERROR_MESSAGES,
@@ -92,21 +91,5 @@ describe('k8s_integration_helper', () => {
         });
       },
     );
-  });
-
-  describe('updateFluxRequested', () => {
-    it('provides JSON with the current date for updating the `requestedAt` field', () => {
-      const now = new Date();
-
-      expect(updateFluxRequested()).toEqual(
-        JSON.stringify([
-          {
-            op: 'replace',
-            path: '/metadata/annotations/reconcile.fluxcd.io~1requestedAt',
-            value: now,
-          },
-        ]),
-      );
-    });
   });
 });

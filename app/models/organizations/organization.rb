@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Organizations
-  class Organization < ApplicationRecord
+  class Organization < MainClusterwide::ApplicationRecord
     include Gitlab::Utils::StrongMemoize
     include Gitlab::SQL::Pattern
     include Gitlab::VisibilityLevel
@@ -9,13 +9,6 @@ module Organizations
     DEFAULT_ORGANIZATION_ID = 1
 
     scope :without_default, -> { where.not(id: DEFAULT_ORGANIZATION_ID) }
-    scope :with_namespace_path, ->(path) {
-      joins(namespaces: :route).where(route: { path: path.to_s })
-    }
-    scope :with_user, ->(user) {
-      joins(:organization_users).merge(Organizations::OrganizationUser.by_user(user))
-                                .order(:id)
-    }
 
     before_destroy :check_if_default_organization
 
@@ -24,7 +17,6 @@ module Organizations
     has_many :root_groups, -> { roots }, class_name: 'Group', inverse_of: :organization
     has_many :projects
     has_many :snippets
-    has_many :topics, class_name: "Projects::Topic"
 
     has_one :settings, class_name: "OrganizationSetting"
     has_one :organization_detail, inverse_of: :organization, autosave: true

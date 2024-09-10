@@ -73,15 +73,9 @@ module Bitbucket
       Bitbucket::Representation::Issue.new(parsed_response['values'].first)
     end
 
-    def issues(repo, options = {})
+    def issues(repo)
       path = "/repositories/#{repo}/issues?sort=created_on"
-
-      if options[:raw]
-        path = options[:next_url] if options[:next_url]
-        connection.get(path)
-      else
-        get_collection(path, :issue)
-      end
+      get_collection(path, :issue)
     end
 
     def issue_comments(repo, issue_id)
@@ -139,7 +133,6 @@ module Bitbucket
     def fetch_data(method, *args)
       case method
       when :pull_requests then pull_requests(*args)
-      when :issues then issues(*args)
       else
         raise ArgumentError, "Unknown data method #{method}"
       end

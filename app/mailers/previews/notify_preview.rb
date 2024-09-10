@@ -373,12 +373,6 @@ class NotifyPreview < ActionMailer::Preview
     Notify.import_source_user_reassign(source_user.id)
   end
 
-  def import_source_user_rejected
-    source_user = Import::SourceUser.last
-
-    Notify.import_source_user_rejected(source_user.id)
-  end
-
   private
 
   def project
@@ -461,7 +455,7 @@ class NotifyPreview < ActionMailer::Preview
   end
 
   def member
-    @member ||= Member.non_invite.last
+    @member ||= Member.last
   end
 
   def key

@@ -16,6 +16,8 @@ module Gitlab
           @globs = Array(clause[:paths])
           @project_path = clause[:project]
           @ref = clause[:ref]
+
+          @top_level_only = @globs.all?(&method(:top_level_glob?))
         end
 
         def satisfied_by?(_pipeline, context)
@@ -24,11 +26,8 @@ module Gitlab
 
           context = change_context(context) if @project_path
 
-          expanded_globs = expand_globs(context)
-          top_level_only = expanded_globs.all?(&method(:top_level_glob?))
-
-          paths = worktree_paths(context, top_level_only)
-          exact_globs, extension_globs, pattern_globs = separate_globs(expanded_globs)
+          paths = worktree_paths(context)
+          exact_globs, extension_globs, pattern_globs = separate_globs(context)
 
           exact_matches?(paths, exact_globs) ||
             matches_extension?(paths, extension_globs) ||
@@ -37,7 +36,9 @@ module Gitlab
 
         private
 
-        def separate_globs(expanded_globs)
+        def separate_globs(context)
+          expanded_globs = expand_globs(context)
+
           grouped = expanded_globs.group_by { |glob| glob_type(glob) }
           grouped.values_at(:exact, :extension, :pattern).map { |globs| Array(globs) }
         end
@@ -48,10 +49,10 @@ module Gitlab
           end
         end
 
-        def worktree_paths(context, top_level_only)
+        def worktree_paths(context)
           return [] unless context.project
 
-          if top_level_only
+          if @top_level_only
             context.top_level_worktree_paths
           else
             context.all_worktree_paths

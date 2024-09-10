@@ -2,7 +2,6 @@ import { GlAlert, GlFormInputGroup, GlProgressBar } from '@gitlab/ui';
 import { nextTick } from 'vue';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import axios from '~/lib/utils/axios_utils';
 import { uploadModel } from '~/ml/model_registry/services/upload_model';
 import ImportArtifactZone from '~/ml/model_registry/components/import_artifact_zone.vue';
 import UploadDropzone from '~/vue_shared/components/upload_dropzone/upload_dropzone.vue';
@@ -29,10 +28,8 @@ describe('ImportArtifactZone', () => {
   const emulateFileDrop = () => zone().vm.$emit('change', file);
   const subfolderInput = () => wrapper.findByTestId('subfolderId');
   const subfolderLabel = () => wrapper.findByTestId('subfolderLabel');
-  const subfolderLabelOptional = () => wrapper.findByTestId('subfolderLabelOptional');
   const subfolderGroup = () => wrapper.findByTestId('subfolderGroup');
   const alert = () => wrapper.findComponent(GlAlert);
-  const cancelUploadButton = () => wrapper.findByTestId('cancel-upload-button');
 
   describe('Successful upload', () => {
     beforeEach(() => {
@@ -46,13 +43,11 @@ describe('ImportArtifactZone', () => {
 
     it('displays the formatted file size', async () => {
       await emulateFileDrop();
-
       expect(formattedFileSizeDiv().text()).toBe('1.00 KiB');
     });
 
     it('displays the formatted file name', async () => {
       await emulateFileDrop();
-
       expect(fileNameDiv().text()).toBe('file.txt');
     });
 
@@ -69,12 +64,11 @@ describe('ImportArtifactZone', () => {
 
     it('resets the file and loading state', async () => {
       await emulateFileDrop();
-      await waitForPromises();
 
+      await waitForPromises();
       expect(progressBar().exists()).toBe(false);
       expect(formattedFileSizeDiv().exists()).toBe(false);
       expect(fileNameDiv().exists()).toBe(false);
-      expect(cancelUploadButton().exists()).toBe(false);
     });
 
     it('submits the request', async () => {
@@ -90,7 +84,6 @@ describe('ImportArtifactZone', () => {
         subfolder: '',
         maxAllowedFileSize: 99999,
         onUploadProgress: expect.any(Function),
-        cancelToken: expect.any(Object),
       });
     });
 
@@ -128,17 +121,12 @@ describe('ImportArtifactZone', () => {
     });
 
     it('displays the subfolder label', () => {
-      expect(subfolderLabel().text()).toBe('Subfolder');
-    });
-
-    it('displays the subfolder as optional', () => {
-      expect(subfolderLabelOptional().text()).toBe('(Optional)');
+      expect(subfolderLabel().text()).toBe('Subfolder (optional)');
     });
 
     it('displays the subfolder description initial state', async () => {
       await subfolderInput().vm.$emit('input', 'subfolder');
       await nextTick();
-
       expect(subfolderGroup().attributes('description')).toBe(
         'Enter a subfolder name to organize your artifacts.',
       );
@@ -150,7 +138,6 @@ describe('ImportArtifactZone', () => {
       async (subfolder) => {
         await subfolderInput().vm.$emit('input', subfolder);
         await nextTick();
-
         expect(subfolderInput().attributes('value')).toBe(subfolder);
         expect(subfolderGroup().attributes('description')).toBe('');
         expect(subfolderGroup().attributes('invalid-feedback')).toBe(
@@ -165,7 +152,6 @@ describe('ImportArtifactZone', () => {
       async (subfolder) => {
         await subfolderInput().vm.$emit('input', subfolder);
         await nextTick();
-
         expect(subfolderInput().attributes('value')).toBe(subfolder);
         expect(subfolderGroup().attributes('description')).toBe(
           'Enter a subfolder name to organize your artifacts.',
@@ -181,7 +167,6 @@ describe('ImportArtifactZone', () => {
     it('displays the formatted file name', async () => {
       await subfolderInput().vm.$emit('input', 'action');
       await emulateFileDrop();
-
       expect(fileNameDiv().text()).toBe('action/file.txt');
     });
 
@@ -199,7 +184,6 @@ describe('ImportArtifactZone', () => {
         subfolder: 'action',
         maxAllowedFileSize: 99999,
         onUploadProgress: expect.any(Function),
-        cancelToken: expect.any(Object),
       });
     });
   });
@@ -215,7 +199,7 @@ describe('ImportArtifactZone', () => {
     });
 
     it('displays an error on failure', async () => {
-      uploadModel.mockRejectedValueOnce('File is too big.');
+      uploadModel.mockRejectedValue('File is too big.');
 
       await emulateFileDrop();
       await waitForPromises();
@@ -225,39 +209,13 @@ describe('ImportArtifactZone', () => {
     });
 
     it('resets the state on failure', async () => {
-      uploadModel.mockRejectedValueOnce('Internal server error.');
+      uploadModel.mockRejectedValue('Internal server error.');
 
       await emulateFileDrop();
       await waitForPromises();
-
       expect(progressBar().exists()).toBe(false);
       expect(formattedFileSizeDiv().exists()).toBe(false);
       expect(fileNameDiv().exists()).toBe(false);
-    });
-  });
-
-  describe('Canceled uploads', () => {
-    beforeEach(() => {
-      wrapper = shallowMountExtended(ImportArtifactZone, {
-        propsData: {
-          ...initialProps,
-        },
-        provide,
-      });
-    });
-
-    it('cancels the upload', async () => {
-      const cancel = jest.fn();
-      jest.spyOn(axios.CancelToken, 'source').mockImplementation(() => ({ cancel, token: {} }));
-      uploadModel.mockRejectedValueOnce(new axios.Cancel(wrapper.vm.$options.i18n.cancelMessage));
-      await emulateFileDrop();
-      cancelUploadButton().vm.$emit('click');
-      await waitForPromises();
-
-      expect(cancel).toHaveBeenCalledTimes(1);
-      expect(progressBar().exists()).toBe(false);
-      expect(alert().text()).toBe('Cancel: User canceled upload.');
-      expect(alert().props().variant).toBe('danger');
     });
   });
 

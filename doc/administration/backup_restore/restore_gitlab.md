@@ -43,7 +43,7 @@ To restore a backup, **you must also restore the GitLab secrets**.
 These include the database encryption key, [CI/CD variables](../../ci/variables/index.md), and
 variables used for [two-factor authentication](../../user/profile/account/two_factor_authentication.md).
 Without the keys, [multiple issues occur](../../administration/backup_restore/troubleshooting_backup_gitlab.md#when-the-secrets-file-is-lost), including loss of access by users with [two-factor authentication enabled](../../user/profile/account/two_factor_authentication.md),
-and GitLab Runners cannot sign in.
+and GitLab Runners cannot log in.
 
 Restore:
 
@@ -106,10 +106,8 @@ after copying over the GitLab secrets file from the original installation.
 Next, restore the backup, specifying the ID of the backup you wish to
 restore:
 
-WARNING:
-The following command overwrites the contents of your GitLab database!
-
 ```shell
+# This command will overwrite the contents of your GitLab database!
 # NOTE: "_gitlab_backup.tar" is omitted from the name
 sudo gitlab-backup restore BACKUP=11493107454_2018_04_25_10.6.4-ce
 ```
@@ -187,7 +185,7 @@ The GitLab Helm chart uses the process documented in
 
 ### Restore for Docker image installations
 
-If you're using [Docker Swarm](../../install/docker/installation.md#install-gitlab-using-docker-swarm-mode),
+If you're using [Docker Swarm](../../install/docker.md#install-gitlab-using-docker-swarm-mode),
 the container might restart during the restore process because Puma is shut down,
 and so the container health check fails. To work around this problem,
 temporarily disable the health check mechanism.
@@ -318,7 +316,7 @@ options.
 
 ### Specify backup to restore when there are more than one
 
-Backup files use a naming scheme [starting with a backup ID](backup_archive_process.md#backup-id). When more than one backup exists, you must specify which
+Backup files use a naming scheme [starting with a backup ID](index.md#backup-id). When more than one backup exists, you must specify which
 `<backup-id>_gitlab_backup.tar` file to restore by setting the environment variable `BACKUP=<backup-id>`.
 
 ### Disable prompts during restore

@@ -8,19 +8,14 @@
 # - project
 # - namespace
 # - category
-# - additional_properties
-# - event_attribute_overrides - is used when its necessary to override the attributes available in parent context.
-#
-# These legacy options are now deprecated:
 # - label
 # - property
 # - value
-# Prefer using additional_properties instead.
+# - event_attribute_overrides
 
 RSpec.shared_examples 'internal event tracking' do
   let(:all_metrics) do
-    additional_properties = try(:additional_properties) || {}
-    base_additional_properties = Gitlab::InternalEvents::BASE_ADDITIONAL_PROPERTIES.to_h do |key, _val|
+    additional_properties = Gitlab::InternalEvents::ALLOWED_ADDITIONAL_PROPERTIES.to_h do |key, _val|
       [key, try(key)]
     end
 
@@ -31,8 +26,7 @@ RSpec.shared_examples 'internal event tracking' do
         # Only include unique metrics if the unique_identifier_name is present in the spec
         next if event_selection_rule.unique_identifier_name && !try(event_selection_rule.unique_identifier_name)
 
-        properties = additional_properties.merge(base_additional_properties)
-        event_selection_rule.matches?(properties)
+        event_selection_rule.matches?(additional_properties)
       end
 
       definition.key if matching_rules.flatten.any?
@@ -46,7 +40,6 @@ RSpec.shared_examples 'internal event tracking' do
       namespace: try(:namespace) || try(:project)&.namespace,
       category: try(:category) || 'InternalEventTracking',
       feature_enabled_by_namespace_ids: try(:feature_enabled_by_namespace_ids),
-      **(try(:additional_properties) || {}),
       **{
         label: try(:label),
         property: try(:property),

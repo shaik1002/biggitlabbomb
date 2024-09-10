@@ -7,7 +7,7 @@ module ClickHouseHelpers
     clickhouse_fixture(:events, events.map do |event|
       {
         id: event.id,
-        path: event.project.reload.project_namespace.traversal_path,
+        path: "#{event.project.reload.project_namespace.traversal_ids.join('/')}/",
         author_id: event.author_id,
         target_id: event.target_id,
         target_type: event.target_type,
@@ -40,10 +40,6 @@ module ClickHouseHelpers
   end
   # rubocop:enable Metrics/CyclomaticComplexity
   # rubocop:enable Metrics/PerceivedComplexity
-
-  def self.default_timezone
-    ActiveRecord.default_timezone
-  end
 
   def clickhouse_fixture(table, data, db = :main)
     return if data.empty?

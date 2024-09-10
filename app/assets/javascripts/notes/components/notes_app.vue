@@ -5,13 +5,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { InternalEvents } from '~/tracking';
 import { getDraft, getAutoSaveKeyFromDiscussion } from '~/lib/utils/autosave';
 import highlightCurrentUser from '~/behaviors/markdown/highlight_current_user';
-import { scrollToTargetOnResize } from '~/lib/utils/resize_observer';
 import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
 import OrderedLayout from '~/vue_shared/components/ordered_layout.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import DraftNote from '~/batch_comments/components/draft_note.vue';
 import { getLocationHash } from '~/lib/utils/url_utility';
-import NotePreview from '~/notes/components/note_preview.vue';
 import PlaceholderNote from '~/vue_shared/components/notes/placeholder_note.vue';
 import PlaceholderSystemNote from '~/vue_shared/components/notes/placeholder_system_note.vue';
 import SkeletonLoadingContainer from '~/vue_shared/components/notes/skeleton_note.vue';
@@ -28,7 +26,6 @@ import NotesActivityHeader from './notes_activity_header.vue';
 export default {
   name: 'NotesApp',
   components: {
-    NotePreview,
     NotesActivityHeader,
     NoteableNote,
     NoteableDiscussion,
@@ -100,17 +97,12 @@ export default {
       'userCanReply',
       'sortDirection',
       'timelineEnabled',
-      'targetNoteHash',
     ]),
     sortDirDesc() {
       return this.sortDirection === constants.DESC;
     },
     noteableType() {
       return this.noteableData.noteableType;
-    },
-    previewNoteId() {
-      if (!this.isLoading || !this.targetNoteHash) return null;
-      return this.targetNoteHash.replace('note_', '');
     },
     allDiscussions() {
       let skeletonNotes = [];
@@ -121,17 +113,6 @@ export default {
         skeletonNotes = new Array(prerenderedNotesCount).fill({
           isSkeletonNote: true,
         });
-
-        if (
-          this.previewNoteId &&
-          !this.discussions.find((d) => d.notes[0].id === this.previewNoteId)
-        ) {
-          const previewNote = {
-            id: this.previewNoteId,
-            isPreviewNote: true,
-          };
-          skeletonNotes.splice(prerenderedNotesCount / 2, 0, previewNote);
-        }
       }
 
       if (this.sortDirDesc) {
@@ -191,10 +172,6 @@ export default {
 
     window.addEventListener('hashchange', this.handleHashChanged);
 
-    if (this.targetNoteHash && this.targetNoteHash.startsWith('note_')) {
-      scrollToTargetOnResize();
-    }
-
     eventHub.$on('notesApp.updateIssuableConfidentiality', this.setConfidentiality);
   },
   updated() {
@@ -236,7 +213,7 @@ export default {
     },
     checkLocationHash() {
       const hash = getLocationHash();
-      const noteId = (hash && hash.startsWith('note_') && hash.replace(/^note_/, '')) ?? null;
+      const noteId = hash && hash.replace(/^note_/, '');
 
       if (noteId) {
         const discussion = this.discussions.find((d) => d.notes.some(({ id }) => id === noteId));
@@ -301,13 +278,6 @@ export default {
               :key="discussion.id"
               class="note-skeleton"
             />
-            <timeline-entry-item
-              v-else-if="discussion.isPreviewNote"
-              :key="discussion.id"
-              class="target note note-wrapper note-comment"
-            >
-              <note-preview :note-id="previewNoteId" />
-            </timeline-entry-item>
             <timeline-entry-item v-else-if="discussion.isDraft" :key="discussion.id">
               <draft-note :draft="discussion" />
             </timeline-entry-item>

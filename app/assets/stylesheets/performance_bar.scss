@@ -57,7 +57,6 @@
   &.development {
     background-color: $perf-bar-development;
 
-    // stylelint-disable-next-line gitlab/no-gl-class
     .gl-dark & {
       background-color: $red-950;
     }

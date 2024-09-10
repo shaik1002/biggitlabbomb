@@ -425,19 +425,4 @@ describe('text_utility', () => {
       },
     );
   });
-
-  describe('uniquifyString', () => {
-    it.each`
-      inputStr            | inputArray                       | inputModifier | outputValue
-      ${'Foo Bar'}        | ${['Foo Bar']}                   | ${' (copy)'}  | ${'Foo Bar (copy)'}
-      ${'Foo Bar'}        | ${['Foo Bar', 'Foo Bar (copy)']} | ${' (copy)'}  | ${'Foo Bar (copy) (copy)'}
-      ${'Foo Bar (copy)'} | ${['Foo Bar (copy)']}            | ${' (copy)'}  | ${'Foo Bar (copy) (copy)'}
-      ${'Foo Bar'}        | ${['Foo']}                       | ${' (copy)'}  | ${'Foo Bar'}
-    `(
-      'returns string $outputValue when called with string $inputStr, $inputArray, $inputModifier',
-      ({ inputStr, inputArray, inputModifier, outputValue }) => {
-        expect(textUtils.uniquifyString(inputStr, inputArray, inputModifier)).toBe(outputValue);
-      },
-    );
-  });
 });

@@ -4,15 +4,13 @@ module PersonalAccessTokens
   class RotateService
     EXPIRATION_PERIOD = 1.week
 
-    def initialize(current_user, token, resource = nil, params = {})
+    def initialize(current_user, token, resource = nil)
       @current_user = current_user
       @token = token
       @resource = resource
-      @params = params.dup
-      @target_user = token.user
     end
 
-    def execute
+    def execute(params = {})
       return error_response(_('token already revoked')) if token.revoked?
 
       response = ServiceResponse.success
@@ -23,7 +21,7 @@ module PersonalAccessTokens
           raise ActiveRecord::Rollback
         end
 
-        response = create_access_token
+        response = create_access_token(params)
 
         raise ActiveRecord::Rollback unless response.success?
       end
@@ -33,14 +31,16 @@ module PersonalAccessTokens
 
     private
 
-    attr_reader :current_user, :token, :resource, :params, :target_user
+    attr_reader :current_user, :token, :resource
 
-    def create_access_token
+    def create_access_token(params)
+      target_user = token.user
+
       unless valid_access_level?
         return error_response(_('Not eligible to rotate token with access level higher than the user'))
       end
 
-      new_token = target_user.personal_access_tokens.create(create_token_params)
+      new_token = target_user.personal_access_tokens.create(create_token_params(token, params))
 
       if new_token.persisted?
         update_bot_membership(target_user, new_token.expires_at)
@@ -65,20 +65,18 @@ module PersonalAccessTokens
         # - retain the membership when this token does eventually expire
         #   or get revoked.
         #
-        # Applies only to resource (group and project) access tokens
-        # not personal access tokens.
+        # Applies only to Resource (Group and Project) Access Tokens
+        # not Personal Access Tokens.
         expires_at = nil
       end
 
       target_user.members.update(expires_at: expires_at)
     end
 
-    def expires_at
-      return params[:expires_at] if params[:expires_at].present?
+    def expires_at(params)
+      return params[:expires_at] if params[:expires_at]
 
-      return default_expiration_date if Gitlab::CurrentSettings.require_personal_access_token_expiry?
-
-      nil
+      params[:expires_at] || EXPIRATION_PERIOD.from_now.to_date
     end
 
     def success_response(new_token)
@@ -89,17 +87,12 @@ module PersonalAccessTokens
       ServiceResponse.error(message: message)
     end
 
-    def create_token_params
+    def create_token_params(token, params)
       { name: token.name,
         previous_personal_access_token_id: token.id,
         impersonation: token.impersonation,
         scopes: token.scopes,
-        expires_at: expires_at,
-        organization: token.organization }
-    end
-
-    def default_expiration_date
-      EXPIRATION_PERIOD.from_now.to_date
+        expires_at: expires_at(params) }
     end
   end
 end

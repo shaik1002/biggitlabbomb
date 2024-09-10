@@ -134,13 +134,7 @@ function mountSidebarReviewers(mediator) {
     return;
   }
 
-  const {
-    id,
-    iid,
-    fullPath,
-    multipleApprovalRulesAvailable = false,
-    directlyInviteMembers = false,
-  } = getSidebarOptions();
+  const { id, iid, fullPath, multipleApprovalRulesAvailable = false } = getSidebarOptions();
   // eslint-disable-next-line no-new
   new Vue({
     el,
@@ -151,7 +145,6 @@ function mountSidebarReviewers(mediator) {
       issuableId: String(id),
       projectPath: fullPath,
       multipleApprovalRulesAvailable: parseBoolean(multipleApprovalRulesAvailable),
-      directlyInviteMembers: parseBoolean(directlyInviteMembers),
     },
     render: (createElement) =>
       createElement(SidebarReviewers, {

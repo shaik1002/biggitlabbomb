@@ -104,7 +104,7 @@ The [backup command](#backup-command) doesn't back up blobs that aren't stored o
   - Hosted by you (like MinIO).
   - A Storage Appliance that exposes an Object Storage-compatible API.
 
-The backup command does not back up registry data when they are stored in Object Storage.
+The backup command backs up registry data when they are stored in the default location on the file system.
 
 ### Storing configuration files
 
@@ -284,8 +284,6 @@ Deleting tmp directories...[DONE]
 Deleting old backups... [SKIPPING]
 ```
 
-For detailed information about the backup process, see [Backup archive process](backup_archive_process.md).
-
 ### Backup options
 
 The command-line tool GitLab provides to back up your instance can accept more
@@ -320,7 +318,7 @@ WARNING:
 If you use a custom backup filename, you can't
 [limit the lifetime of the backups](#limit-backup-lifetime-for-local-files-prune-old-backups).
 
-Backup files are created with filenames according to [specific defaults](backup_archive_process.md#backup-id). However, you can
+Backup files are created with filenames according to [specific defaults](index.md#backup-id). However, you can
 override the `<backup-id>` portion of the filename by setting the `BACKUP`
 environment variable. For example:
 
@@ -457,8 +455,8 @@ Depending on your installation type, slightly different components can be skippe
 - `terraform_state` (Terraform states)
 - `registry` (Container registry images)
 - `packages` (Packages)
-- `ci_secure_files` (Project-level secure files)
-- `external_diffs` (External merge request diffs)
+- `ci_secure_files` (Project-level Secure Files)
+- `external_diffs` (External Merge Request diffs)
 
 :::TabTitle Helm chart (Kubernetes)
 
@@ -626,7 +624,7 @@ The incremental backup archives are not linked to each other: each archive is a 
 to create an incremental backup from.
 
 Use the `PREVIOUS_BACKUP=<backup-id>` option to choose the backup to use. By default, a backup file is created
-as documented in the [Backup ID](backup_archive_process.md#backup-id) section. You can override the `<backup-id>` portion of the filename by setting the
+as documented in the [Backup ID](index.md#backup-id) section. You can override the `<backup-id>` portion of the filename by setting the
 [`BACKUP` environment variable](#backup-filename).
 
 To create an incremental backup, run:

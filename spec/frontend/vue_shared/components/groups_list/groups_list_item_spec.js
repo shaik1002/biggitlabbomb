@@ -3,7 +3,6 @@ import { mountExtended } from 'helpers/vue_test_utils_helper';
 import GroupsListItem from '~/vue_shared/components/groups_list/groups_list_item.vue';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import GroupListItemDeleteModal from 'ee_else_ce/vue_shared/components/groups_list/group_list_item_delete_modal.vue';
-import GroupListItemPreventDeleteModal from '~/vue_shared/components/groups_list/group_list_item_prevent_delete_modal.vue';
 import {
   VISIBILITY_TYPE_ICON,
   VISIBILITY_LEVEL_INTERNAL_STRING,
@@ -40,10 +39,8 @@ describe('GroupsListItem', () => {
   const findVisibilityIcon = () => findAvatarLabeled().findComponent(GlIcon);
   const findListActions = () => wrapper.findComponent(ListActions);
   const findConfirmationModal = () => wrapper.findComponent(GroupListItemDeleteModal);
-  const findPreventDeleteModal = () => wrapper.findComponent(GroupListItemPreventDeleteModal);
   const findAccessLevelBadge = () => wrapper.findByTestId('access-level-badge');
   const findTimeAgoTooltip = () => wrapper.findComponent(TimeAgoTooltip);
-  const fireDeleteAction = () => findListActions().props('actions')[ACTION_DELETE].action();
 
   it('renders group avatar', () => {
     createComponent();
@@ -58,7 +55,6 @@ describe('GroupsListItem', () => {
     expect(avatarLabeled.attributes()).toMatchObject({
       'entity-id': group.id.toString(),
       'entity-name': group.fullName,
-      src: group.avatarUrl,
       shape: 'rect',
     });
   });
@@ -223,18 +219,18 @@ describe('GroupsListItem', () => {
   });
 
   describe('when group has actions', () => {
-    const groupWithDeleteAction = {
-      ...group,
-      actionLoadingStates: { [ACTION_DELETE]: false },
-    };
-
-    it('displays actions dropdown', () => {
+    beforeEach(() => {
       createComponent({
         propsData: {
-          group: groupWithDeleteAction,
+          group: {
+            ...group,
+            actionLoadingStates: { [ACTION_DELETE]: false },
+          },
         },
       });
+    });
 
+    it('displays actions dropdown', () => {
       expect(findListActions().props()).toMatchObject({
         actions: {
           [ACTION_EDIT]: {
@@ -249,78 +245,37 @@ describe('GroupsListItem', () => {
     });
 
     describe('when delete action is fired', () => {
-      describe('when group is linked to a subscription', () => {
-        const groupLinkedToSubscription = {
-          ...groupWithDeleteAction,
-          isLinkedToSubscription: true,
-        };
+      beforeEach(() => {
+        findListActions().props('actions')[ACTION_DELETE].action();
+      });
 
-        beforeEach(() => {
-          createComponent({
-            propsData: {
-              group: groupLinkedToSubscription,
-            },
-          });
-          fireDeleteAction();
-        });
-
-        it('displays prevent delete modal', () => {
-          expect(findPreventDeleteModal().props()).toMatchObject({
-            visible: true,
-            group: groupLinkedToSubscription,
-          });
-        });
-
-        describe('when change is fired', () => {
-          beforeEach(() => {
-            findPreventDeleteModal().vm.$emit('change', false);
-          });
-
-          it('updates visibility prop', () => {
-            expect(findPreventDeleteModal().props('visible')).toBe(false);
-          });
+      it('displays confirmation modal with correct props', () => {
+        expect(findConfirmationModal().props()).toMatchObject({
+          visible: true,
+          phrase: group.fullName,
+          confirmLoading: false,
         });
       });
 
-      describe('when group can be deleted', () => {
+      describe('when deletion is confirmed', () => {
         beforeEach(() => {
-          createComponent({
-            propsData: {
-              group: groupWithDeleteAction,
-            },
-          });
-          fireDeleteAction();
-        });
-
-        it('displays confirmation modal with correct props', () => {
-          expect(findConfirmationModal().props()).toMatchObject({
-            visible: true,
-            phrase: groupWithDeleteAction.fullName,
-            confirmLoading: false,
+          findConfirmationModal().vm.$emit('confirm', {
+            preventDefault: jest.fn(),
           });
         });
 
-        describe('when deletion is confirmed', () => {
-          beforeEach(() => {
-            findConfirmationModal().vm.$emit('confirm', {
-              preventDefault: jest.fn(),
-            });
-            fireDeleteAction();
-          });
+        it('emits `delete` event', () => {
+          expect(wrapper.emitted('delete')).toMatchObject([[group]]);
+        });
+      });
 
-          it('emits `delete` event', () => {
-            expect(wrapper.emitted('delete')).toMatchObject([[groupWithDeleteAction]]);
-          });
+      describe('when change is fired', () => {
+        beforeEach(() => {
+          findConfirmationModal().vm.$emit('change', false);
         });
 
-        describe('when change is fired', () => {
-          beforeEach(() => {
-            findConfirmationModal().vm.$emit('change', false);
-          });
-
-          it('updates visibility prop', () => {
-            expect(findConfirmationModal().props('visible')).toBe(false);
-          });
+        it('updates visibility prop', () => {
+          expect(findConfirmationModal().props('visible')).toBe(false);
         });
       });
     });

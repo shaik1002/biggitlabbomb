@@ -51,9 +51,9 @@ const i18n = {
 
 export default {
   i18n,
-  formElementClasses: 'gl-mr-3 gl-mb-3 gl-basis-1/4 gl-shrink-0 gl-flex-grow-0',
+  formElementClasses: 'gl-mr-3 gl-mb-3 gl-flex-basis-quarter gl-flex-shrink-0 gl-flex-grow-0',
   // this height value is used inline on the textarea to match the input field height
-  // it's used to prevent the overwrite if 'gl-h-7' or '!gl-h-7' were used
+  // it's used to prevent the overwrite if 'gl-h-7' or 'gl-h-7!' were used
   textAreaStyle: { height: '32px' },
   components: {
     GlAlert,
@@ -146,7 +146,6 @@ export default {
     };
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     ciConfigVariables: {
       fetchPolicy: fetchPolicies.NO_CACHE,
       query: ciConfigVariablesQuery,
@@ -303,7 +302,6 @@ export default {
       // Adds empty var at the end of the form
       this.addEmptyVariable(this.refFullName);
     },
-    // eslint-disable-next-line max-params
     setVariable(refValue, type, key, value) {
       const { variables } = this.form[refValue];
 
@@ -468,7 +466,9 @@ export default {
         class="gl-mb-3 gl-pb-2"
         data-testid="ci-variable-row-container"
       >
-        <div class="gl-flex gl-flex-col gl-items-stretch md:gl-flex-row">
+        <div
+          class="gl-display-flex gl-align-items-stretch gl-flex-direction-column gl-md-flex-direction-row"
+        >
           <gl-collapsible-listbox
             :items="variableTypeListboxItems"
             :selected="variable.variable_type"
@@ -490,7 +490,7 @@ export default {
             :items="createListItemsFromVariableOptions(variable.key)"
             :selected="variable.value"
             :class="$options.formElementClasses"
-            class="!gl-mr-0 gl-grow"
+            class="gl-flex-grow-1 gl-mr-0!"
             data-testid="pipeline-form-ci-variable-value-dropdown"
             @select="setVariableAttribute(variable.key, 'value', $event)"
           />
@@ -507,25 +507,25 @@ export default {
           <template v-if="variables.length > 1">
             <gl-button
               v-if="canRemove(index)"
-              class="gl-mb-3 md:gl-ml-3"
+              class="gl-md-ml-3 gl-mb-3"
               data-testid="remove-ci-variable-row"
               variant="danger"
               category="secondary"
               :aria-label="$options.i18n.removeVariableLabel"
               @click="removeVariable(index)"
             >
-              <gl-icon class="!gl-mr-0 gl-hidden md:gl-block" name="clear" />
+              <gl-icon class="gl-mr-0! gl-hidden md:gl-block" name="clear" />
               <span class="md:gl-hidden">{{ $options.i18n.removeVariableLabel }}</span>
             </gl-button>
             <gl-button
               v-else
-              class="gl-invisible gl-mb-3 gl-hidden md:gl-ml-3 md:gl-block"
+              class="gl-md-ml-3 gl-mb-3 gl-hidden md:gl-block gl-invisible"
               icon="clear"
               :aria-label="$options.i18n.removeVariableLabel"
             />
           </template>
         </div>
-        <div v-if="descriptions[variable.key]" class="gl-mb-3 gl-text-gray-500">
+        <div v-if="descriptions[variable.key]" class="gl-text-gray-500 gl-mb-3">
           {{ descriptions[variable.key] }}
         </div>
       </div>
@@ -547,7 +547,7 @@ export default {
         </template>
       </gl-sprintf>
     </div>
-    <div class="gl-flex gl-pt-5">
+    <div class="gl-pt-5 gl-display-flex">
       <gl-button
         type="submit"
         category="primary"

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'airborne'
+
 module QA
   RSpec.describe 'Package', only: { subdomain: %i[staging staging-canary pre] },
     product_group: :container_registry do

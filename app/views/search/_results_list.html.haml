@@ -13,8 +13,6 @@
       %ul.content-list.commit-list
         - @search_objects.each_with_index do |commit, index|
           = render partial: "search/results/commit", locals: { commit: commit, index: index }
-    - elsif should_show_zoekt_results?(@scope, @search_type)
-      %ul#js-search-zoekt-blob-results
     - else
       .search-results.js-search-results
         - if @scope == 'projects'
@@ -33,5 +31,5 @@
           - @search_objects.each_with_index do |result, index|
             = render_if_exists partial: "search/results/#{@scope.singularize}", locals: { result: result, index: index }
 
-    - if @scope != 'projects' && !should_show_zoekt_results?(@scope, @search_type)
+    - if @scope != 'projects'
       = paginate_collection(@search_objects)

@@ -108,7 +108,9 @@ export default {
 <template>
   <dom-element-listener :selector="$options.FORM_SELECTOR" @[$options.EVENT_SUCCESS]="onSuccess">
     <div>
-      <div>
+      <div
+        class="gl-new-card-body gl-px-0 gl-overflow-x-auto gl-bg-gray-10 gl-border-l gl-border-r gl-border-b gl-rounded-bottom-base gl-mb-5 gl-md-mb-0"
+      >
         <gl-table
           data-testid="active-tokens"
           :empty-text="noActiveTokensMessage"
@@ -140,7 +142,7 @@ export default {
 
           <template #cell(expiresAt)="{ item: { expiresAt, expired, expiresSoon } }">
             <template v-if="expiresAt">
-              <span v-if="expired" class="gl-text-danger">{{ $options.i18n.expired }}</span>
+              <span v-if="expired" class="text-danger">{{ $options.i18n.expired }}</span>
               <time-ago-tooltip v-else :class="{ 'text-warning': expiresSoon }" :time="expiresAt" />
             </template>
             <span v-else v-gl-tooltip :title="$options.i18n.tokenValidity">{{
@@ -170,6 +172,10 @@ export default {
         v-model="currentPage"
         :per-page="$options.PAGE_SIZE"
         :total-items="activeAccessTokens.length"
+        :prev-text="__('Prev')"
+        :next-text="__('Next')"
+        :label-next-page="__('Go to next page')"
+        :label-prev-page="__('Go to previous page')"
         align="center"
         class="gl-mt-5"
       />

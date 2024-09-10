@@ -37,7 +37,6 @@ import {
   I18N_WORK_ITEM_ERROR_COPY_REFERENCE,
   I18N_WORK_ITEM_ERROR_COPY_EMAIL,
   TEST_ID_LOCK_ACTION,
-  TEST_ID_REPORT_ABUSE,
 } from '../constants';
 import updateWorkItemMutation from '../graphql/update_work_item.mutation.graphql';
 import updateWorkItemNotificationsMutation from '../graphql/update_work_item_notifications.mutation.graphql';
@@ -56,7 +55,6 @@ export default {
     referenceCopied: __('Reference copied'),
     emailAddressCopied: __('Email address copied'),
     moreActions: __('More actions'),
-    reportAbuse: __('Report abuse'),
   },
   components: {
     GlDisclosureDropdown,
@@ -81,7 +79,6 @@ export default {
   promoteActionTestId: TEST_ID_PROMOTE_ACTION,
   lockDiscussionTestId: TEST_ID_LOCK_ACTION,
   stateToggleTestId: TEST_ID_TOGGLE_ACTION,
-  reportAbuseActionTestId: TEST_ID_REPORT_ABUSE,
   props: {
     fullPath: {
       type: String,
@@ -167,11 +164,6 @@ export default {
       required: false,
       default: false,
     },
-    workItemAuthorId: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
   },
   data() {
     return {
@@ -180,7 +172,6 @@ export default {
     };
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     workItemTypes: {
       query: namespaceWorkItemTypesQuery,
       variables() {
@@ -218,7 +209,7 @@ export default {
         : sprintfWorkItem(I18N_WORK_ITEM_ARE_YOU_SURE_DELETE, this.workItemType);
     },
     canLockWorkItem() {
-      return this.canUpdate;
+      return this.canUpdate && this.glFeatures.workItemsBeta;
     },
     canPromoteToObjective() {
       return this.canUpdate && this.workItemType === WORK_ITEM_TYPE_VALUE_KEY_RESULT;
@@ -236,9 +227,6 @@ export default {
     },
     showDropdownTooltip() {
       return !this.isDropdownVisible ? this.$options.i18n.moreActions : '';
-    },
-    isAuthor() {
-      return this.workItemAuthorId === window.gon.current_user_id;
     },
   },
   methods: {
@@ -368,10 +356,6 @@ export default {
     emitStateToggleError(error) {
       this.$emit('error', error);
     },
-    handleToggleReportAbuseModal() {
-      this.$emit('toggleReportAbuseModal', true);
-      this.closeDropdown();
-    },
   },
 };
 </script>
@@ -394,15 +378,15 @@ export default {
     >
       <template v-if="$options.isLoggedIn && !hideSubscribe">
         <gl-disclosure-dropdown-item
-          class="gl-flex gl-w-full gl-justify-end"
+          class="gl-display-flex gl-justify-content-end gl-w-full"
           :data-testid="$options.notificationsToggleFormTestId"
         >
           <template #list-item>
             <gl-toggle
               :value="subscribedToNotifications"
               :label="$options.i18n.notifications"
+              class="work-item-notification-toggle"
               label-position="left"
-              class="work-item-dropdown-toggle gl-justify-between"
               @change="toggleNotifications($event)"
             />
           </template>
@@ -468,23 +452,15 @@ export default {
         <template #list-item>{{ i18n.copyCreateNoteEmail }}</template>
       </gl-disclosure-dropdown-item>
 
-      <gl-dropdown-divider />
-      <gl-disclosure-dropdown-item
-        v-if="!isAuthor"
-        :data-testid="$options.reportAbuseActionTestId"
-        @action="handleToggleReportAbuseModal"
-      >
-        <template #list-item>{{ $options.i18n.reportAbuse }}</template>
-      </gl-disclosure-dropdown-item>
-
       <template v-if="canDelete">
+        <gl-dropdown-divider />
         <gl-disclosure-dropdown-item
           :data-testid="$options.deleteActionTestId"
           variant="danger"
           @action="handleDelete"
         >
           <template #list-item>
-            <span class="gl-text-danger">{{ i18n.deleteWorkItem }}</span>
+            <span class="text-danger">{{ i18n.deleteWorkItem }}</span>
           </template>
         </gl-disclosure-dropdown-item>
       </template>

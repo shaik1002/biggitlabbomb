@@ -4,7 +4,6 @@ import {
   REPORT_FILE_TYPES,
 } from 'ee_else_ce/vue_shared/security_reports/constants';
 
-// eslint-disable-next-line max-params
 const addReportTypeIfExists = (acc, reportTypes, reportType, getName, downloadPath) => {
   if (reportTypes && reportTypes.includes(reportType)) {
     acc.push({

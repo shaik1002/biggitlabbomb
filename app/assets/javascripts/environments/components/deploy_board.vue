@@ -145,7 +145,7 @@ export default {
         <div class="deploy-board-information gl-w-full">
           <section class="deploy-board-status">
             <span v-gl-tooltip :title="instanceIsCompletedText">
-              <span ref="percentage" class="gl-text-center gl-text-lg gl-text-default"
+              <span ref="percentage" class="gl-text-center text-plain gl-font-lg"
                 >{{ deployBoardData.completion }}%</span
               >
               <span class="text text-center text-secondary">{{ __('Complete') }}</span>
@@ -153,15 +153,15 @@ export default {
           </section>
 
           <section class="deploy-board-instances">
-            <div class="text-secondary gl-text-base">
+            <div class="gl-font-base text-secondary">
               <span class="deploy-board-instances-text"
                 >{{ instanceTitle }} ({{ instanceCount }})</span
               >
               <span ref="legend-icon" data-testid="legend-tooltip-target">
-                <gl-icon class="gl-ml-2 gl-text-blue-500" name="question-o" />
+                <gl-icon class="gl-text-blue-500 gl-ml-2" name="question-o" />
               </span>
               <gl-tooltip :target="() => $refs['legend-icon']" boundary="#content-body">
-                <div class="deploy-board-legend gl-flex gl-flex-col">
+                <div class="deploy-board-legend gl-flex gl-flex-direction-column">
                   <div
                     v-for="status in statuses"
                     :key="status.text"
@@ -174,7 +174,7 @@ export default {
               </gl-tooltip>
             </div>
 
-            <div class="deploy-board-instances-container flex-wrap flex-row gl-flex">
+            <div class="deploy-board-instances-container gl-flex flex-wrap flex-row">
               <template v-for="(instance, i) in deployBoardData.instances">
                 <instance-component
                   :key="i"

@@ -12,7 +12,7 @@ RSpec.describe Packages::Nuget::SearchService, feature_category: :package_regist
   let_it_be(:packages_c) { create_list(:nuget_package, 5, project: project, name: 'DummyPackageC') }
   let_it_be(:package_d) { create(:nuget_package, project: project, name: 'FooBarD') }
   let_it_be(:other_package_a) { create(:nuget_package, name: 'DummyPackageA') }
-  let_it_be(:other_package_b) { create(:nuget_package, name: 'DummyPackageB') }
+  let_it_be(:other_package_a) { create(:nuget_package, name: 'DummyPackageB') }
 
   let(:search_term) { 'ummy' }
   let(:per_page) { 5 }
@@ -80,11 +80,11 @@ RSpec.describe Packages::Nuget::SearchService, feature_category: :package_regist
         it { expect_search_results 4, package_a, packages_b, packages_c, package_d }
       end
 
-      context 'with non-installable packages' do
+      context 'with non-displayable packages' do
         let(:search_term) { '' }
 
         before do
-          package_a.update_column(:status, 2)
+          package_a.update_column(:status, 1)
         end
 
         it { expect_search_results 3, packages_b, packages_c, package_d }
@@ -103,23 +103,19 @@ RSpec.describe Packages::Nuget::SearchService, feature_category: :package_regist
       end
 
       context 'with pre release packages' do
-        let_it_be(:package_e) do
-          create(:nuget_package, project: project, name: 'DummyPackageE', version: '3.2.1-alpha')
-        end
+        let_it_be(:package_e) { create(:nuget_package, project: project, name: 'DummyPackageE', version: '3.2.1-alpha') }
 
-        context 'when including them' do
+        context 'including them' do
           it { expect_search_results 4, package_a, packages_b, packages_c, package_e }
         end
 
-        context 'when excluding them' do
+        context 'excluding them' do
           let(:include_prerelease_versions) { false }
 
           it { expect_search_results 3, package_a, packages_b, packages_c }
 
           context 'when mixed with release versions' do
-            let_it_be(:package_e_release) do
-              create(:nuget_package, project: project, name: 'DummyPackageE', version: '3.2.1')
-            end
+            let_it_be(:package_e_release) { create(:nuget_package, project: project, name: 'DummyPackageE', version: '3.2.1') }
 
             it { expect_search_results 4, package_a, packages_b, packages_c, package_e_release }
           end
@@ -130,7 +126,7 @@ RSpec.describe Packages::Nuget::SearchService, feature_category: :package_regist
     context 'with project' do
       let(:target) { project }
 
-      before_all do
+      before do
         project.add_developer(user)
       end
 
@@ -140,7 +136,7 @@ RSpec.describe Packages::Nuget::SearchService, feature_category: :package_regist
     context 'with subgroup' do
       let(:target) { subgroup }
 
-      before_all do
+      before do
         subgroup.add_developer(user)
       end
 
@@ -150,38 +146,11 @@ RSpec.describe Packages::Nuget::SearchService, feature_category: :package_regist
     context 'with group' do
       let(:target) { group }
 
-      context 'when user is a group member' do
-        before_all do
-          group.add_developer(user)
-        end
-
-        it_behaves_like 'handling all the conditions'
+      before do
+        group.add_developer(user)
       end
 
-      context 'when user is not a group member' do
-        context 'with public registry in private group' do
-          before_all do
-            [subgroup, group, project].each do |entity|
-              entity.update_column(:visibility_level, Gitlab::VisibilityLevel.const_get(:PRIVATE, false))
-            end
-            project.project_feature.update!(package_registry_access_level: ::ProjectFeature::PUBLIC)
-          end
-
-          before do
-            stub_application_setting(package_registry_allow_anyone_to_pull_option: true)
-          end
-
-          it_behaves_like 'handling all the conditions'
-
-          context 'when feaure flag is disabled' do
-            before do
-              stub_feature_flags(allow_anyone_to_pull_public_nuget_packages_on_group_level: false)
-            end
-
-            it { expect_search_results 0, [] }
-          end
-        end
-      end
+      it_behaves_like 'handling all the conditions'
     end
 
     def expect_search_results(total_count, *results)

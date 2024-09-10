@@ -99,12 +99,12 @@ export default {
     <template #footer>
       <div
         v-if="isCreateEnvironmentShown"
-        class="gl-border-t-1 gl-border-t-gray-200 gl-p-2 gl-border-t-solid"
+        class="gl-border-t-solid gl-border-t-1 gl-border-t-gray-200 gl-p-2"
       >
         <gl-button
           category="tertiary"
           block
-          class="!gl-justify-start"
+          class="gl-justify-content-start!"
           data-testid="add-environment-button"
           @click="addEnvironment(environmentSearch)"
         >

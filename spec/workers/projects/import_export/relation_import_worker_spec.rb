@@ -11,12 +11,10 @@ RSpec.describe Projects::ImportExport::RelationImportWorker, feature_category: :
   subject(:perform) { worker.perform(tracker.id, user.id) }
 
   before do
-    create(
+    tracker.project.update!(import_export_upload: create(
       :import_export_upload,
-      import_file: fixture_file_upload('spec/features/projects/import_export/test_project_export.tar.gz'),
-      project: tracker.project,
-      user: user
-    )
+      import_file: fixture_file_upload('spec/features/projects/import_export/test_project_export.tar.gz')
+    ))
   end
 
   context 'when the import succeeds' do

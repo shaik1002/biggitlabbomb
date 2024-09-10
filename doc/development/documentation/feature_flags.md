@@ -44,7 +44,7 @@ To document feature flags:
 ## Add history text
 
 When the state of a flag changes (for example, from disabled by default to enabled by default), add the change to the
-[history](../documentation/styleguide/availability_details.md#history).
+[history](versions.md#add-a-history-item).
 
 Possible history entries are:
 

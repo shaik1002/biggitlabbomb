@@ -24,11 +24,6 @@
       "minimum": 0,
       "description": "Number of requests allowed to the GET /api/v4/groups/:id API."
     },
-    "group_invited_groups_api_limit": {
-      "type": "integer",
-      "minimum": 0,
-      "description": "Number of requests allowed to the GET /api/v4/groups/:id/invited_groups API."
-    },
     "group_projects_api_limit": {
       "type": "integer",
       "minimum": 0,
@@ -48,11 +43,6 @@
       "type": "integer",
       "minimum": 0,
       "description": "Number of requests allowed to the GET /api/v4/projects/:id API."
-    },
-    "project_invited_groups_api_limit": {
-      "type": "integer",
-      "minimum": 0,
-      "description": "Number of requests allowed to the GET /api/v4/projects/:id/invited_groups API."
     },
     "projects_api_limit": {
       "type": "integer",

@@ -50,10 +50,10 @@ export default {
 <template>
   <gl-table-lite :items="storageTypes" :fields="$options.projectTableFields">
     <template #cell(storageType)="{ item }">
-      <div class="gl-flex gl-flex-row">
+      <div class="gl-display-flex gl-flex-direction-row">
         <storage-type-icon :name="item.id" :data-testid="`${item.id}-icon`" />
         <div>
-          <p class="gl-mb-0 gl-font-bold" :data-testid="`${item.id}-name`">
+          <p class="gl-font-bold gl-mb-0" :data-testid="`${item.id}-name`">
             <gl-link
               v-if="item.detailsPath && item.value"
               :data-testid="`${item.id}-details-link`"
@@ -76,11 +76,11 @@ export default {
           <p class="gl-mb-0" :data-testid="`${item.id}-description`">
             {{ item.description }}
           </p>
-          <p v-if="item.warningMessage" class="gl-mb-0 gl-text-sm">
+          <p v-if="item.warningMessage" class="gl-mb-0 gl-font-sm">
             <gl-icon name="warning" :size="12" />
             <gl-sprintf :message="item.warningMessage">
               <template #warningLink="{ content }">
-                <gl-link :href="item.warningLink" target="_blank" class="gl-text-sm">{{
+                <gl-link :href="item.warningLink" target="_blank" class="gl-font-sm">{{
                   content
                 }}</gl-link>
               </template>
@@ -97,7 +97,7 @@ export default {
         <gl-icon
           :id="item.id + '-warning-icon'"
           name="warning"
-          class="gl-mt-2 lg:gl-ml-2 lg:gl-mt-0"
+          class="gl-mt-2 gl-lg-mt-0 gl-lg-ml-2"
           :data-testid="item.id + '-warning-icon'"
         />
         <gl-popover

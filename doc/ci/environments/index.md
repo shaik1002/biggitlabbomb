@@ -51,7 +51,6 @@ Deployments show up in this list only after a deployment job has created them.
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/10754) in GitLab 15.5.
 > - [Searching environments within a folder](https://gitlab.com/gitlab-org/gitlab/-/issues/373850) was introduced in GitLab 15.7 with [Feature flag `enable_environments_search_within_folder`](https://gitlab.com/gitlab-org/gitlab/-/issues/382108). Enabled by default.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/382108) in GitLab 17.4. Feature flag `enable_environments_search_within_folder` removed.
 
 To search environments by name:
 
@@ -240,7 +239,7 @@ Note the following:
 - If the environment URL isn't valid (for example, the URL is malformed), the system doesn't update
   the environment URL.
 - If the script that runs in `stop_review` exists only in your repository and therefore can't use
-  `GIT_STRATEGY: none` or `GIT_STRATEGY: empty`, configure [merge request pipelines](../../ci/pipelines/merge_request_pipelines.md)
+  `GIT_STRATEGY: none`, configure [merge request pipelines](../../ci/pipelines/merge_request_pipelines.md)
   for these jobs. This ensures that runners can fetch the repository even after a feature branch is
   deleted. For more information, see [Ref Specs for Runners](../pipelines/index.md#ref-specs-for-runners).
 
@@ -426,8 +425,8 @@ environment.
 - The job with [`action: stop` might not run](#the-job-with-action-stop-doesnt-run)
   if it's in a later stage than the job that started the environment.
 - If you can't use [merge request pipelines](../pipelines/merge_request_pipelines.md),
-  set [`GIT_STRATEGY`](../runners/configure_runners.md#git-strategy) to `none` or `empty`
-  in the `stop_review` job. Then, the [runner](https://docs.gitlab.com/runner/) doesn't
+  set the [`GIT_STRATEGY`](../runners/configure_runners.md#git-strategy) to `none` in the
+  `stop_review` job. Then the [runner](https://docs.gitlab.com/runner/) doesn't
   try to check out the code after the branch is deleted.
 
 ```yaml
@@ -699,28 +698,6 @@ To delete an environment:
 1. Next to the environment you want to delete, select **Delete environment**.
 1. On the confirmation dialog, select **Delete environment**.
 
-### Clean up stale environments
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/108616) in GitLab 15.8 [with a flag](../../administration/feature_flags.md) named `stop_stale_environments`. Disabled by default.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/112098) in GitLab 15.10. Feature flag `stop_stale_environments` removed.
-
-Clean up stale environments when you want to stop old environments in a project.
-
-Prerequisites:
-
-- You must have at least the Maintainer role.
-
-To clean up stale environments:
-
-1. On the left sidebar, select **Search or go to** and find your project.
-1. Select **Operate > Environments**.
-1. Select **Clean up environments**.
-1. Select the date to use for determining which environments to consider stale.
-1. Select **Clean up**.
-
-Active environments that haven't been updated after the specified date are stopped.
-Protected environments are ignored and not stopped.
-
 ### Access an environment for preparation or verification purposes
 
 You can define a job that accesses an environment for various purposes, such as verification or preparation. This
@@ -784,7 +761,7 @@ DETAILS:
 **Tier:** Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
-If you [set up an alert integration](../../operations/incident_management/integrations.md#configuration),
+If you [set up alerts for Prometheus metrics](../../operations/incident_management/integrations.md#configuration),
 alerts for environments are shown on the environments page. The alert with the highest
 severity is shown, so you can identify which environments need immediate attention.
 
@@ -1051,14 +1028,10 @@ To ensure the `action: stop` can always run when needed, you can:
     when: manual
   ```
 
-### Error: job would create an environment with an invalid parameter
+### Error: "This job could not be executed because it would create an environment with an invalid parameter"
 
 If your project is configured to [create a dynamic environment](#create-a-dynamic-environment),
-you might encounter this error in a deployment job because the dynamically generated parameter can't be used for creating an environment:
-
-```plaintext
-This job could not be executed because it would create an environment with an invalid parameter.
-```
+you might encounter this error in a deployment job because the dynamically generated parameter can't be used for creating an environment.
 
 For example, your project has the following `.gitlab-ci.yml`:
 

@@ -76,7 +76,6 @@ export default {
         @cluster-error="$emit('cluster-error', $event)"
         @show-resource-details="$emit('show-resource-details', $event)"
         @remove-selection="$emit('remove-selection')"
-        @delete-pod="$emit('delete-pod', $event)"
       />
 
       <kubernetes-services

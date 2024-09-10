@@ -33,7 +33,7 @@ RSpec.describe 'ActiveRecord::GitlabPatches::Partitioning::Associations::Belongs
 
     result = QueryRecorder.log do
       job.build_pipeline.save!
-    end.join
+    end
 
     expect(result).to include(create_statement)
   end
@@ -45,7 +45,7 @@ RSpec.describe 'ActiveRecord::GitlabPatches::Partitioning::Associations::Belongs
 
     result = QueryRecorder.log do
       job.create_pipeline!
-    end.join
+    end
 
     expect(result).to include(create_statement)
   end

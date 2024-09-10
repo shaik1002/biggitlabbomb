@@ -29,6 +29,10 @@
   border-bottom: 1px solid $border-color;
   color: $gl-text-color;
 
+  &.white {
+    background-color: $white;
+  }
+
   &.top-block {
     border-top: 0;
 
@@ -40,6 +44,11 @@
   &.middle-block {
     margin-top: $gl-padding-24;
     margin-bottom: 0;
+  }
+
+  &.clear-block {
+    margin-bottom: $gl-padding - 1px;
+    padding-bottom: $gl-padding;
   }
 
   &.second-block {
@@ -72,6 +81,10 @@
   > .controls {
     float: right;
   }
+
+  .new-branch {
+    margin-top: 3px;
+  }
 }
 
 .content-block-small {
@@ -83,10 +96,29 @@
   overflow: hidden;
   display: flex;
   position: relative;
-  border: 1px solid var(--gl-banner-intro-border-color);
+  border: 1px solid $blue-300;
   border-radius: $gl-border-radius-base;
-  background-color: var(--gl-feedback-info-background-color);
+  background-color: $blue-50;
   justify-content: center;
+
+  .dismiss-button {
+    position: absolute;
+    right: $gl-padding-8;
+    top: $gl-padding-8;
+    cursor: pointer;
+    color: $blue-500;
+    z-index: 1;
+    border: 0;
+    background-color: transparent;
+    padding: $gl-padding-8;
+    line-height: 0;
+
+    &:hover,
+    &:focus {
+      border: 0;
+      color: $blue-700;
+    }
+  }
 
   .svg-container {
     align-self: center;

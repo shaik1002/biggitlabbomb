@@ -11,17 +11,9 @@
     "GroupAuditEventStreamingDestination",
     "InstanceAuditEventStreamingDestination"
   ],
-  "BaseDiscussionInterface": [
-    "AbuseReportDiscussion",
-    "Discussion"
-  ],
   "BaseHeaderInterface": [
     "AuditEventStreamingHeader",
     "AuditEventsStreamingInstanceHeader"
-  ],
-  "BaseNoteInterface": [
-    "AbuseReportNote",
-    "Note"
   ],
   "CiRunnerCloudProvisioning": [
     "CiRunnerGoogleCloudProvisioning"
@@ -93,6 +85,7 @@
     "ProjectMember"
   ],
   "NoteableInterface": [
+    "AbuseReport",
     "AlertManagementAlert",
     "BoardEpic",
     "Design",
@@ -123,8 +116,7 @@
     "ConanMetadata",
     "MavenMetadata",
     "NugetMetadata",
-    "PypiMetadata",
-    "TerraformModuleMetadata"
+    "PypiMetadata"
   ],
   "Registrable": [
     "CiSecureFileRegistry",
@@ -145,8 +137,6 @@
     "UploadRegistry"
   ],
   "ResolvableInterface": [
-    "AbuseReportDiscussion",
-    "AbuseReportNote",
     "Discussion",
     "Note"
   ],
@@ -157,11 +147,6 @@
   "Service": [
     "BaseService",
     "JiraService"
-  ],
-  "TerraformModuleMetadataSharedFields": [
-    "TerraformModuleMetadataExample",
-    "TerraformModuleMetadataRoot",
-    "TerraformModuleMetadataSubmodule"
   ],
   "TimeboxReportInterface": [
     "Iteration",
@@ -174,11 +159,8 @@
     "Design",
     "Epic",
     "EpicIssue",
-    "Group",
     "Issue",
     "MergeRequest",
-    "Namespace",
-    "Project",
     "WorkItem"
   ],
   "User": [
@@ -195,7 +177,6 @@
     "VulnerabilityDetailBase",
     "VulnerabilityDetailBoolean",
     "VulnerabilityDetailCode",
-    "VulnerabilityDetailCodeFlows",
     "VulnerabilityDetailCommit",
     "VulnerabilityDetailDiff",
     "VulnerabilityDetailFileLocation",
@@ -227,7 +208,6 @@
     "WorkItemWidgetDescription",
     "WorkItemWidgetDesigns",
     "WorkItemWidgetDevelopment",
-    "WorkItemWidgetEmailParticipants",
     "WorkItemWidgetHealthStatus",
     "WorkItemWidgetHierarchy",
     "WorkItemWidgetIteration",

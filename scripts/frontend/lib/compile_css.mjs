@@ -12,7 +12,6 @@ import tailwindcss from 'tailwindcss/lib/plugin.js';
 import tailwindConfig from '../../../config/tailwind.config.js';
 import IS_EE from '../../../config/helpers/is_ee_env.js';
 import IS_JH from '../../../config/helpers/is_jh_env.js';
-import { postCssColorToHex } from './postcss_color_to_hex.js';
 /* eslint-enable import/extensions */
 
 // Note, in node > 21.2 we could replace the below with import.meta.dirname
@@ -194,7 +193,6 @@ function createPostCSSProcessors() {
         files: [path.join(ROOT_PATH, 'node_modules/@gitlab/ui/src/tokens/build/css/tokens.css')],
       }),
       postcssCustomProperties({ preserve: false }),
-      postCssColorToHex(),
       autoprefixer(),
     ]),
     default: postcss([autoprefixer()]),

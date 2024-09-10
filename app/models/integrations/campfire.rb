@@ -54,11 +54,16 @@ module Integrations
     end
 
     def self.help
-      build_help_page_url(
-        'api/integrations',
-        s_('CampfireService|Send notifications about push events to Campfire chat rooms.'),
-        { anchor: 'campfire' }
+      docs_link = ActionController::Base.helpers.link_to(
+        _('Learn more.'),
+        Rails.application.routes.url_helpers.help_page_url('api/integrations', anchor: 'campfire'),
+        target: '_blank',
+        rel: 'noopener noreferrer'
       )
+
+      format(ERB::Util.html_escape(
+        s_('CampfireService|Send notifications about push events to Campfire chat rooms. %{docs_link}')
+      ), docs_link: docs_link.html_safe)
     end
 
     def self.to_param

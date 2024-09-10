@@ -59,12 +59,6 @@ module TodosHelper
     if todo.resource_parent.is_a?(Group)
       todo.resource_parent.name
     else
-      # Note: A todo with neither project nor group is invalid.
-      # But still we heard from users with such todos in their database,
-      # and for these users the /dashboard/todos page returned 500.
-      # See https://gitlab.com/gitlab-org/gitlab/-/issues/388051
-      return unless todo.project.present?
-
       title = content_tag(:span, todo.project.name, class: 'project-name')
       namespace = content_tag(:span, "#{todo.project.namespace.human_name} / ", class: 'namespace-name')
 
@@ -237,7 +231,7 @@ module TodosHelper
       if is_due_today
         'text-warning'
       elsif is_overdue
-        'gl-text-danger'
+        'text-danger'
       else
         ''
       end

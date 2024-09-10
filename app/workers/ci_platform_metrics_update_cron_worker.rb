@@ -13,6 +13,6 @@ class CiPlatformMetricsUpdateCronWorker # rubocop:disable Scalability/Idempotent
   worker_resource_boundary :cpu
 
   def perform
-    # no-op
+    CiPlatformMetric.insert_auto_devops_platform_targets!
   end
 end

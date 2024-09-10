@@ -62,7 +62,7 @@ describe('AbuseReportsApp', () => {
         value: pagination.currentPage,
         perPage: pagination.perPage,
         totalItems: pagination.totalItems,
-        prevText: 'Previous',
+        prevText: 'Prev',
         nextText: 'Next',
         labelNextPage: 'Go to next page',
         labelPrevPage: 'Go to previous page',

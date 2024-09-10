@@ -41,7 +41,7 @@ export default class LabelsSelect {
       const $form = $dropdown.closest('form, .js-issuable-update');
       const $sidebarCollapsedValue = $block.find('.sidebar-collapsed-icon span');
       const $value = $block.find('.value');
-      const $loading = $block.find('.block-loading').addClass('gl-hidden');
+      const $loading = $block.find('.block-loading').addClass('gl-display-none');
       const fieldName = $dropdown.data('fieldName');
       let initialSelected = $selectbox
         .find(`input[name="${$dropdown.data('fieldName')}"]`)
@@ -78,13 +78,13 @@ export default class LabelsSelect {
         if (!selected.length) {
           data[abilityName].label_ids = [''];
         }
-        $loading.removeClass('gl-hidden');
+        $loading.removeClass('gl-display-none');
         $dropdown.trigger('loading.gl.dropdown');
         axios
           .put(issueUpdateURL, data)
           .then(({ data }) => {
             let template;
-            $loading.addClass('gl-hidden');
+            $loading.addClass('gl-display-none');
             $dropdown.trigger('loaded.gl.dropdown');
             $selectbox.hide();
             data.issueUpdateURL = issueUpdateURL;
@@ -440,7 +440,7 @@ export default class LabelsSelect {
     const tooltipTitleTemplate = template(
       [
         '<% if (isScopedLabel(label) && enableScopedLabels) { %>',
-        "<span class='font-weight-bold'>Scoped label</span>",
+        "<span class='font-weight-bold scoped-label-tooltip-title'>Scoped label</span>",
         '<br>',
         '<%= escapeStr(label.description) %>',
         '<% } else { %>',

@@ -55,7 +55,7 @@ export default {
       return getIdFromGraphQLId(this.author.id);
     },
     showEditButton() {
-      return false;
+      return this.note.userPermissions.resolveNote;
     },
     editedAtClasses() {
       return this.showReplyButton ? 'gl-text-secondary gl-pl-3' : 'gl-text-secondary gl-pl-8';
@@ -89,7 +89,7 @@ export default {
         />
       </gl-avatar-link>
     </div>
-    <div class="timeline-content !gl-pb-4">
+    <div class="timeline-content gl-pb-4!">
       <abuse-report-edit-note
         v-if="isEditing"
         :abuse-report-id="abuseReportId"

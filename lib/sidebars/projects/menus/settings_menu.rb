@@ -88,7 +88,7 @@ module Sidebars
           end
 
           ::Sidebars::MenuItem.new(
-            title: _('Access tokens'),
+            title: _('Access Tokens'),
             link: project_settings_access_tokens_path(context.project),
             active_routes: { path: 'access_tokens#index' },
             item_id: :access_tokens

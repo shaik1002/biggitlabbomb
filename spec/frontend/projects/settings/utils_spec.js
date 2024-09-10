@@ -4,13 +4,13 @@ import {
   getAccessLevelInputFromEdges,
 } from '~/projects/settings/utils';
 import setWindowLocation from 'helpers/set_window_location_helper';
-import { accessLevelsMockResponse, accessLevelsMockResult } from './mock_data';
+import { pushAccessLevelsMockResponse, pushAccessLevelsMockResult } from './mock_data';
 
 describe('Utils', () => {
   describe('getAccessLevels', () => {
     it('takes accessLevels response data and returns accessLevels object', () => {
-      const pushAccessLevels = getAccessLevels(accessLevelsMockResponse);
-      expect(pushAccessLevels).toEqual(accessLevelsMockResult);
+      const pushAccessLevels = getAccessLevels(pushAccessLevelsMockResponse);
+      expect(pushAccessLevels).toEqual(pushAccessLevelsMockResult);
     });
   });
 

@@ -68,8 +68,6 @@ class Todo < ApplicationRecord
   validates :group, presence: true, unless: :project_id
 
   scope :pending, -> { with_state(:pending) }
-  scope :snoozed, -> { where(arel_table[:snoozed_until].gt(Time.current)) }
-  scope :not_snoozed, -> { where(arel_table[:snoozed_until].lteq(Time.current)).or(where(snoozed_until: nil)) }
   scope :done, -> { with_state(:done) }
   scope :for_action, ->(action) { where(action: action) }
   scope :for_author, ->(author) { where(author: author) }
@@ -88,9 +86,6 @@ class Todo < ApplicationRecord
   scope :joins_issue_and_assignees, -> { left_joins(issue: :assignees) }
   scope :for_internal_notes, -> { joins(:note).where(note: { confidential: true }) }
   scope :with_preloaded_user, -> { preload(:user) }
-  scope :without_banned_user, -> { joins("LEFT JOIN banned_users ON todos.author_id = banned_users.user_id").where(banned_users: { user_id: nil }) }
-  scope :pending_without_hidden, -> { pending.without_banned_user }
-  scope :all_without_hidden, -> { without_banned_user.or(where.not(state: :pending)) }
 
   enum resolved_by_action: { system_done: 0, api_all_done: 1, api_done: 2, mark_all_done: 3, mark_done: 4 }, _prefix: :resolved_by
 
@@ -336,29 +331,6 @@ class Todo < ApplicationRecord
     end
   end
 
-  def target_url
-    return if target.nil?
-
-    case target
-    when WorkItem
-      build_work_item_target_url
-    when Issue
-      build_issue_target_url
-    when MergeRequest
-      build_merge_request_target_url
-    when ::DesignManagement::Design
-      build_design_target_url
-    when ::AlertManagement::Alert
-      build_alert_target_url
-    when Commit
-      build_commit_target_url
-    when Project
-      build_project_target_url
-    when Group
-      build_group_target_url
-    end
-  end
-
   def self_added?
     author == user
   end
@@ -371,78 +343,6 @@ class Todo < ApplicationRecord
 
   def keep_around_commit
     project.repository.keep_around(self.commit_id, source: self.class.name)
-  end
-
-  def build_work_item_target_url
-    ::Gitlab::UrlBuilder.build(
-      target,
-      anchor: note.present? ? ActionView::RecordIdentifier.dom_id(note) : nil
-    )
-  end
-
-  def build_issue_target_url
-    ::Gitlab::UrlBuilder.build(
-      target,
-      anchor: note.present? ? ActionView::RecordIdentifier.dom_id(note) : nil
-    )
-  end
-
-  def build_merge_request_target_url
-    path = [target.project, target]
-    path.unshift(:pipelines) if build_failed?
-
-    ::Gitlab::Routing.url_helpers.polymorphic_url(
-      path,
-      {
-        anchor: note.present? ? ActionView::RecordIdentifier.dom_id(note) : nil
-      }
-    )
-  end
-
-  def build_design_target_url
-    ::Gitlab::Routing.url_helpers.designs_project_issue_url(
-      target.project,
-      target.issue,
-      {
-        anchor: note.present? ? ActionView::RecordIdentifier.dom_id(note) : nil,
-        vueroute: target.filename
-      }
-    )
-  end
-
-  def build_alert_target_url
-    ::Gitlab::Routing.url_helpers.details_project_alert_management_url(
-      target.project,
-      target
-    )
-  end
-
-  def build_commit_target_url
-    ::Gitlab::Routing.url_helpers.project_commit_url(
-      target.project,
-      target,
-      {
-        anchor: note.present? ? ActionView::RecordIdentifier.dom_id(note) : nil
-      }
-    )
-  end
-
-  def build_project_target_url
-    return unless member_access_requested?
-
-    ::Gitlab::Routing.url_helpers.project_project_members_url(
-      target,
-      tab: 'access_requests'
-    )
-  end
-
-  def build_group_target_url
-    return unless member_access_requested?
-
-    ::Gitlab::Routing.url_helpers.group_group_members_url(
-      target,
-      tab: 'access_requests'
-    )
   end
 end
 
