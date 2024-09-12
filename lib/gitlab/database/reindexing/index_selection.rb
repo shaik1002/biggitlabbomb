@@ -10,10 +10,9 @@ module Gitlab
         MINIMUM_RELATIVE_BLOAT = 0.2
 
         # Only consider indexes beyond this size (before reindexing)
-        INDEX_SIZE_MINIMUM = 1.gigabyte
+        INDEX_SIZE_MINIMUM = 100.megabyte
 
         VERY_LARGE_TABLES = %i[
-          ci_builds
         ].freeze
 
         delegate :each, to: :indexes
@@ -50,7 +49,7 @@ module Gitlab
         # reindexing action on a large table late on Sunday could span during
         # Monday. We don't want this because it prevents vacuum from running.
         def too_late_for_very_large_table?
-          !Date.today.saturday?
+          false
         end
       end
     end
