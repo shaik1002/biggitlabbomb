@@ -5,7 +5,7 @@ description: Prerequisites for installation.
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
-# Installation system requirements
+# GitLab installation requirements
 
 DETAILS:
 **Tier:** Free, Premium, Ultimate
@@ -13,30 +13,28 @@ DETAILS:
 
 This page contains information about the system requirements to install GitLab.
 
-## Hardware
-
-### Storage
+## Storage
 
 The necessary storage space largely depends on the size of the repositories you want to have in GitLab.
 As a guideline, you should have at least as much free space as all your repositories combined.
 
 The Linux package requires about 2.5 GB of storage space for installation.
 For storage flexibility, consider mounting your hard drive through logical volume management.
-You should have a hard drive with at least 7200 RPM or a solid-state drive to improve the responsiveness of GitLab.
+You should have a hard drive with at least 7,200 RPM or a solid-state drive to improve the responsiveness of GitLab.
 
 Because file system performance might affect the overall performance of GitLab, you should
 [avoid using cloud-based file systems for storage](../administration/nfs.md#avoid-using-cloud-based-file-systems).
 
-### CPU
+## CPU
 
 CPU requirements depend on the number of users and expected workload.
 The workload includes your users' activity, use of automation and mirroring, and repository size.
 
-For a maximum of 20 requests per second or 1,000 users, you should have 8 vCPUs.
+For a maximum of 20 requests per second or 1,000 users, you should have 8 vCPU.
 For more users or higher workload,
 see [reference architectures](../administration/reference_architectures/index.md).
 
-### Memory
+## Memory
 
 Memory requirements depend on the number of users and expected workload.
 The workload includes your users' activity, use of automation and mirroring, and repository size.
@@ -49,9 +47,7 @@ In some cases, GitLab can run with at least 8 GB of memory.
 For more information, see
 [running GitLab in a memory-constrained environment](https://docs.gitlab.com/omnibus/settings/memory_constrained_envs.html).
 
-## Database
-
-### PostgreSQL
+## PostgreSQL
 
 [PostgreSQL](https://www.postgresql.org/) is the only supported database and is bundled with the Linux package.
 You can also use an [external PostgreSQL database](https://docs.gitlab.com/omnibus/settings/database.html#using-a-non-packaged-postgresql-database-management-server).
@@ -81,7 +77,7 @@ To use a later major version of PostgreSQL than specified, check if a
 You must also ensure some extensions are loaded into every GitLab database.
 For more information, see [managing PostgreSQL extensions](postgresql_extensions.md).
 
-#### GitLab Geo
+### GitLab Geo
 
 For [GitLab Geo](../administration/geo/index.md), you should use the Linux package or
 [validated cloud providers](../administration/reference_architectures/index.md#recommended-cloud-providers-and-services)
@@ -90,7 +86,7 @@ Compatibility with other external databases is not guaranteed.
 
 For more information, see [requirements for running Geo](../administration/geo/index.md#requirements-for-running-geo).
 
-#### Locale compatibility
+### Locale compatibility
 
 When you change locale data in `glibc`, PostgreSQL database files are
 no longer fully compatible between different operating systems.
@@ -104,7 +100,7 @@ when you:
 
 For more information, see [upgrading operating systems for PostgreSQL](../administration/postgresql/upgrading_os.md).
 
-#### GitLab schemas
+### GitLab schemas
 
 You should create or use databases exclusively for GitLab, [Geo](../administration/geo/index.md),
 [Gitaly Cluster](../administration/gitaly/praefect.md), or other components.
@@ -125,13 +121,13 @@ If you modify any schema, [GitLab upgrades](../update/index.md) might fail.
 
 ## Puma
 
-The recommended settings for Puma are determined by the infrastructure on which it's running.
-The Linux package defaults to the recommended Puma settings. Regardless of installation method, you can
-tune the Puma settings:
+The recommended Puma settings depend on your [installation method](install_methods.md).
+The Linux package defaults to the recommended settings.
 
-- If you're using the Linux package, see [Puma settings](../administration/operations/puma.md)
-  for instructions on changing the Puma settings.
-- If you're using the GitLab Helm chart, see the
+To update Puma settings:
+
+- For the Linux package, see [Puma settings](../administration/operations/puma.md).
+- For the GitLab Helm chart, see the
   [`webservice` chart](https://docs.gitlab.com/charts/charts/gitlab/webservice/index.html).
 
 ### Workers
@@ -147,7 +143,7 @@ To increase the number of Puma workers, set
 
 Take for example the following scenarios:
 
-- A node with 2 cores / 8 GB memory should be configured with **2 Puma workers**.
+- A node with 2 cores / 8 GB of memory should be configured with **2 Puma workers**.
 
   Calculated as:
 
@@ -201,13 +197,11 @@ optimal settings for your infrastructure.
 
 ### Threads
 
-The recommended number of threads is dependent on several factors, including total memory.
+The recommended number of Puma threads depends on total memory.
+For an operating system:
 
-- If the operating system has a maximum 2 GB of memory, the recommended number of threads is `1`.
-  A higher value results in excess swapping, and decrease performance.
-- In all other cases, the recommended number of threads is `4`. We don't recommend setting this
-  higher, due to how [Ruby MRI multi-threading](https://en.wikipedia.org/wiki/Global_interpreter_lock)
-  works.
+- With a maximum of 2 GB of memory, you should use one thread.
+- With more than 2 GB of memory, you should use four threads.
 
 ## Redis
 
