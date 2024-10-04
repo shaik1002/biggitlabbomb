@@ -60,6 +60,10 @@ default:
 workflow:
   name: '$PIPELINE_NAME'
   rules:
+    - if: $CI_COMMIT_BRANCH
+      variables:
+        <<: *next-ruby-variables
+        PIPELINE_NAME: 'Scheduled Ruby $RUBY_VERSION $CI_COMMIT_BRANCH branch'
     - if: '$CI_PIPELINE_SOURCE == "pipeline" && $GITALY_TEST'
       variables:
         <<: *default-ruby-variables
