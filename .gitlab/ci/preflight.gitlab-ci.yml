@@ -101,10 +101,6 @@ qa:selectors:
     GIT_STRATEGY: none
   script:
     - echo "${CI_JOB_NAME}"
-    - echo "CI_COMMIT_BRANCH = ${CI_COMMIT_BRANCH}"
-    - echo "CI_DEFAULT_BRANCH = ${CI_COMMIT_BRANCH}"
-    - echo "CI_PIPELINE_SOURCE = ${CI_PIPELINE_SOURCE}"
-    - echo "BUILD_WITH_NEXT_RUBY_VERSION = ${BUILD_WITH_NEXT_RUBY_VERSION}"
 
 pipeline-tier-1:
   extends:

@@ -42,6 +42,10 @@ dont-interrupt-me:
   interruptible: false
   script:
     - echo "This jobs makes sure this pipeline won't be interrupted! See https://docs.gitlab.com/ee/ci/yaml/#interruptible."
+    - echo "CI_COMMIT_BRANCH = ${CI_COMMIT_BRANCH}"
+    - echo "CI_DEFAULT_BRANCH = ${CI_COMMIT_BRANCH}"
+    - echo "CI_PIPELINE_SOURCE = ${CI_PIPELINE_SOURCE}"
+    - echo "BUILD_WITH_NEXT_RUBY_VERSION = ${BUILD_WITH_NEXT_RUBY_VERSION}"
 
 clone-gitlab-repo:
   extends:
