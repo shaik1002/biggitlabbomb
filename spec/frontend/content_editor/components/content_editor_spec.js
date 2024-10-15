@@ -140,7 +140,7 @@ describe('ContentEditor', () => {
       beforeEach(async () => {
         renderMarkdown.mockResolvedValueOnce({ body: '' });
 
-        createWrapper({ markdown: '' });
+        createWrapper({ markddown: '' });
         await nextTick();
       });
 

@@ -114,7 +114,6 @@ describe('BoardAddNewColumn', () => {
       expect(wrapper.emitted('highlight-list')).toBeUndefined();
       expect(createBoardListQueryHandler).toHaveBeenCalledWith({
         labelId: mockLabelList.label.id,
-        position: null,
         boardId: 'gid://gitlab/Board/1',
       });
     });

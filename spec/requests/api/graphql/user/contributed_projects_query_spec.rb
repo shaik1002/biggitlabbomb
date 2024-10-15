@@ -12,10 +12,10 @@ RSpec.describe 'Getting contributedProjects of the user', feature_category: :gro
   let_it_be(:user) { create(:user, :with_namespace) }
   let_it_be(:current_user) { create(:user) }
 
-  let_it_be(:public_project) { create(:project, :public, name: 'foo') }
-  let_it_be(:private_project) { create(:project, :private, name: 'bar') }
-  let_it_be(:internal_project) { create(:project, :internal, name: 'baz') }
-  let_it_be(:personal_project) { create(:project, namespace: user.namespace, name: 'biz') }
+  let_it_be(:public_project) { create(:project, :public) }
+  let_it_be(:private_project) { create(:project, :private) }
+  let_it_be(:internal_project) { create(:project, :internal) }
+  let_it_be(:personal_project) { create(:project, namespace: user.namespace) }
 
   let(:path) { %i[user contributed_projects nodes] }
 
@@ -331,41 +331,6 @@ RSpec.describe 'Getting contributedProjects of the user', feature_category: :gro
             a_graphql_entity_for(private_project)
           )
       end
-    end
-  end
-
-  describe 'programming_language_name' do
-    let_it_be(:ruby) { create(:programming_language, name: 'Ruby') }
-    let_it_be(:repository_language) do
-      create(:repository_language, project: internal_project, programming_language: ruby, share: 1)
-    end
-
-    let(:query_with_programming_language_name) do
-      graphql_query_for(:user, user_params, 'contributedProjects(programmingLanguageName: "ruby") { nodes { id } }')
-    end
-
-    it 'returns only projects with ruby programming language' do
-      post_graphql(query_with_programming_language_name, current_user: current_user)
-
-      expect(graphql_data_at(*path))
-        .to contain_exactly(
-          a_graphql_entity_for(internal_project)
-        )
-    end
-  end
-
-  describe 'search' do
-    let(:query_with_search) do
-      graphql_query_for(:user, user_params, 'contributedProjects(search: "foo") { nodes { id } }')
-    end
-
-    it 'returns only projects that match search query' do
-      post_graphql(query_with_search, current_user: current_user)
-
-      expect(graphql_data_at(*path))
-        .to contain_exactly(
-          a_graphql_entity_for(public_project)
-        )
     end
   end
 

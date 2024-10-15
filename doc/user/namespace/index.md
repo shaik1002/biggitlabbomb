@@ -6,8 +6,8 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Namespaces
 
-Namespaces organize projects in GitLab. Because each namespace is separate,
-you can use the same project name in multiple namespaces.
+In GitLab, a namespace provides a place to organize projects. Projects in a namespace are separate
+from other namespaces, enabling you to use the same project name in different namespaces.
 
 ## Types of namespaces
 
@@ -26,9 +26,9 @@ GitLab has two types of namespaces:
   - You can configure settings specifically for each subgroup and project.
   - You can manage the group or subgroup URL independently of the name.
 
-## Determine which type of namespace you're in
+## Determine which type of namespace you're viewing
 
-To determine whether you're in a group or personal namespace, you can view the URL. For example:
+To determine whether you're viewing a group or personal namespace, you can view the URL. For example:
 
 | Namespace for | URL | Namespace |
 | ------------- | --- | --------- |
@@ -36,9 +36,9 @@ To determine whether you're in a group or personal namespace, you can view the U
 | A group named `alex-team`. | `https://gitlab.example.com/alex-team` | `alex-team` |
 | A group named `alex-team` with a subgroup named `marketing`. |  `https://gitlab.example.com/alex-team/marketing` | `alex-team/marketing` |
 
-## Name limitations
+## Naming limitations for namespaces
 
 When you choose a name for your namespace, keep in mind the [character limitations](../reserved_names.md#limitations-on-usernames-project-and-group-names-and-slugs) and [reserved group names](../reserved_names.md#reserved-group-names).
 
 NOTE:
-Namespaces with a period (`.`) cause issues with SSL certificate validation and the source path when [publishing Terraform modules](../packages/terraform_module_registry/index.md#publish-a-terraform-module).
+Namespaces with a period (`.`) cause issues with validating SSL certificates and the source path when [publishing Terraform modules](../packages/terraform_module_registry/index.md#publish-a-terraform-module).

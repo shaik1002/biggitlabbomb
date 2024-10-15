@@ -170,10 +170,6 @@ export default {
       return getLocationHash();
     },
     noteUrl() {
-      const routeParamType = this.$route?.params?.type;
-      if (routeParamType && !this.note.url.includes(routeParamType)) {
-        return this.note.url.replace('work_items', routeParamType);
-      }
       return this.note.url;
     },
     hasAwardEmojiPermission() {
@@ -372,7 +368,7 @@ export default {
             :author="author"
             :created-at="note.createdAt"
             :note-id="note.id"
-            :note-url="noteUrl"
+            :note-url="note.url"
             :is-internal-note="note.internal"
           >
             <span v-if="note.createdAt" class="gl-hidden sm:gl-inline">&middot;</span>

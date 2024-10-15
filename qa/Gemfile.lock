@@ -116,7 +116,7 @@ GEM
     gitlab (4.19.0)
       httparty (~> 0.20)
       terminal-table (>= 1.5.1)
-    gitlab-qa (14.17.0)
+    gitlab-qa (14.15.0)
       activesupport (>= 6.1, < 7.2)
       gitlab (~> 4.19)
       http (~> 5.0)
@@ -125,7 +125,7 @@ GEM
       rainbow (>= 3, < 4)
       table_print (= 1.5.7)
       zeitwerk (>= 2, < 3)
-    gitlab_quality-test_tooling (1.39.0)
+    gitlab_quality-test_tooling (1.38.1)
       activesupport (>= 7.0, < 7.2)
       amatch (~> 0.4.1)
       fog-google (~> 1.24, >= 1.24.1)
@@ -223,9 +223,9 @@ GEM
       sawyer (~> 0.9)
     os (1.1.4)
     parallel (1.26.3)
-    parallel_tests (4.7.2)
+    parallel_tests (4.7.1)
       parallel
-    parser (3.3.5.0)
+    parser (3.3.3.0)
       ast (~> 2.4.1)
       racc
     pastel (0.8.0)
@@ -352,7 +352,7 @@ GEM
     wisper (2.0.1)
     xpath (3.2.0)
       nokogiri (~> 1.8)
-    zeitwerk (2.7.0)
+    zeitwerk (2.6.18)
 
 PLATFORMS
   ruby
@@ -369,9 +369,9 @@ DEPENDENCIES
   fog-core (= 2.1.0)
   fog-google (~> 1.24, >= 1.24.1)
   gitlab-cng!
-  gitlab-qa (~> 14, >= 14.17.0)
+  gitlab-qa (~> 14, >= 14.15.0)
   gitlab-utils!
-  gitlab_quality-test_tooling (~> 1.39.0)
+  gitlab_quality-test_tooling (~> 1.38.1)
   googleauth (~> 1.9.0)
   influxdb-client (~> 3.1)
   junit_merge (~> 0.1.2)
@@ -379,7 +379,7 @@ DEPENDENCIES
   nokogiri (~> 1.16, >= 1.16.7)
   octokit (~> 9.1.0)
   parallel (~> 1.26, >= 1.26.3)
-  parallel_tests (~> 4.7, >= 4.7.2)
+  parallel_tests (~> 4.7, >= 4.7.1)
   pry-byebug (~> 3.10.1)
   rainbow (~> 3.1.1)
   rake (~> 13, >= 13.2.1)
@@ -393,7 +393,7 @@ DEPENDENCIES
   slack-notifier (~> 2.4)
   terminal-table (~> 3.0.2)
   warning (~> 1.4)
-  zeitwerk (~> 2.7)
+  zeitwerk (~> 2.6, >= 2.6.18)
 
 BUNDLED WITH
    2.5.11

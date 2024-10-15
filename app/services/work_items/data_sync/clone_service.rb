@@ -50,13 +50,9 @@ module WorkItems
           target_namespace: target_namespace,
           current_user: current_user,
           target_work_item_type: work_item.work_item_type,
-          params: params.merge(operation: :clone),
+          params: params,
           overwritten_params: {
-            author: current_user, created_at: nil, updated_by: current_user, updated_at: nil,
-            last_edited_at: nil, last_edited_by: nil, closed_at: nil, closed_by: nil,
-            duplicated_to_id: nil, moved_to_id: nil, promoted_to_epic_id: nil, external_key: nil,
-            upvotes_count: 0, blocking_issues_count: 0,
-            state_id: WorkItem.available_states[:opened]
+            author: current_user, created_at: nil, updated_at: nil
           }
         ).execute
 

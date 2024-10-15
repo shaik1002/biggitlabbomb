@@ -90,11 +90,6 @@ export default {
       required: false,
       default: null,
     },
-    pipelinesAnalyticsPath: {
-      type: String,
-      required: false,
-      default: null,
-    },
   },
   data() {
     return {
@@ -370,7 +365,6 @@ export default {
         v-if="shouldRenderButtons"
         :new-pipeline-path="newPipelinePath"
         :reset-cache-path="resetCachePath"
-        :pipelines-analytics-path="pipelinesAnalyticsPath"
         :is-reset-cache-button-loading="isResetCacheButtonLoading"
         @resetRunnersCache="handleResetRunnersCache"
       />

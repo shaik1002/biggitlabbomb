@@ -358,10 +358,6 @@
 .lib-gitlab-patterns: &lib-gitlab-patterns
   - "{,ee/,jh/}lib/{,ee/,jh/}gitlab/**/*"
 
-.db-docs-patterns: &db-docs-patterns
-  - "{,ee/,jh/}{app/models}/**/*"
-  - "db/docs/**/*"
-
 # Patterns to match pure Ruby code
 .ruby-patterns: &ruby-patterns
   - "**/Rakefile"
@@ -933,19 +929,6 @@
       changes: *code-backstage-patterns
     - !reference [".rails:rules:predictive-default-rules", rules]
     - !reference [".rails:rules:system:predictive-default-rules", rules]
-
-######################
-# DB rules #
-######################
-.db:rules:docs-up-to-date:
-  rules:
-    - <<: *if-not-ee
-      when: never
-    - <<: *if-merge-request-labels-pipeline-expedite
-      when: never
-    - <<: *if-merge-request-labels-run-all-rspec
-    - <<: *if-merge-request
-      changes: *db-docs-patterns
 
 ################
 # Shared rules #
@@ -1735,7 +1718,6 @@
     PROCESS_TEST_RESULTS: "true"
     KNAPSACK_GENERATE_REPORT: "true"
     QA_SAVE_TEST_METRICS: "true"
-    QA_RUN_IN_PARALLEL: "false" # disable single job parallelization due to incompatibility with knapsack and coverband
 
 .qa:rules:e2e-schedule-blocking:
   rules:
@@ -1834,37 +1816,32 @@
 
 .qa:rules:e2e:test-on-cng:
   rules:
-    # TODO: Enable for stable branches once cng is fully enabled in mr pipelines
-    - <<: *if-merge-request-targeting-stable-branch
-      when: never
-    # TODO: Check security fork is able to build cng images before enabling
-    - <<: *if-security-merge-request
-      when: never
-    - <<: *if-security-schedule
-      when: never
-    - !reference [".qa:rules:e2e-blocking-base-before", rules]
-    - !reference [".prevent-tier-2-and-below", rules]
-    - !reference [".qa:rules:e2e-blocking-base-after", rules]
+    # Until https://gitlab.com/gitlab-org/quality/quality-engineering/CNG-mirror is stable enough,
+    # test-on-cng should not be part of development flow.
+    # Once it's ready, delete the two following rules, and uncomment the commented lines below.
+    - !reference [".qa:rules:e2e-test-never-run", rules]
     - <<: *if-dot-com-gitlab-org-schedule
       variables:
-        CREATE_TEST_FAILURE_ISSUES: "true"
-        PROCESS_TEST_RESULTS: "true"
-        KNAPSACK_GENERATE_REPORT: "false"
-        QA_SAVE_TEST_METRICS: "true"
-        QA_RUN_IN_PARALLEL: "true"
-    - <<: *if-default-branch-schedule-nightly
-      variables:
-        CREATE_TEST_FAILURE_ISSUES: "true"
-        PROCESS_TEST_RESULTS: "true"
         KNAPSACK_GENERATE_REPORT: "true"
+        PROCESS_TEST_RESULTS: "true"
         QA_SAVE_TEST_METRICS: "true"
-        QA_RUN_IN_PARALLEL: "false" # disable single job parallelization due to incompatibility with knapsack
+      allow_failure: true
+    # - <<: *if-merge-request-targeting-stable-branch
+    #   when: never
+    # - <<: *if-security-merge-request
+    #   when: never
+    # - <<: *if-security-schedule
+    #   when: never
+    # - !reference [".qa:rules:e2e-blocking-base-before", rules]
+    # - !reference [".prevent-tier-2-and-below", rules]
+    # - !reference [".qa:rules:e2e-blocking-base-after", rules]
+    # - !reference [".qa:rules:e2e-schedule-blocking", rules]
+    # - <<: *if-merge-request
+    #   changes: *cng-orchestrator-patterns
 
 .qa:rules:test-on-omnibus-nightly:
   rules:
     - !reference [".qa:rules:e2e-test-never-run", rules]
-    - <<: *if-security-schedule
-      when: never
     - <<: *if-default-branch-schedule-nightly
       allow_failure: true
       variables:
@@ -2038,7 +2015,7 @@
     - if: '$DISABLE_DB_MULTI_VERSION_UPGRADE =~ /true|yes|1/i'
       when: never
     - <<: *if-merge-request-targeting-stable-branch
-      when: never
+      when: manual
     - !reference [".rails:rules:ee-and-foss-migration", rules]
 
 .rails:rules:db-backup:
@@ -2562,13 +2539,6 @@
         RUN_ALL_RUBOCOP: "true"
     - <<: *if-default-refs
       changes: *code-backstage-qa-patterns
-
-.static-analysis:rules:ensure-application-settings-have-definition-file:
-  rules:
-    - <<: *if-default-refs
-      changes:
-        - db/structure.sql
-        - config/application_setting_columns/*.yml
 
 .static-analysis:rules:haml-lint:
   rules:
@@ -3397,12 +3367,6 @@
     - <<: *if-merge-request-labels-pipeline-expedite
       when: never
     - !reference [".releases:rules:canonical-dot-com-security-gitlab-stable-branch-only", rules]
-
-.release-environments:rules:ai-gateway-tagging:
-  rules:
-    - if: '$AIGW_PIPELINE_TRIGGER_TOKEN == null'
-      when: never
-    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+-ee$/'
 
 ###################
 # Benchmark rules #

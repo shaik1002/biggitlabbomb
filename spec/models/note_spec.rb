@@ -105,14 +105,6 @@ RSpec.describe Note, feature_category: :team_planning do
       end
     end
 
-    context 'when noteable is a wiki page' do
-      subject { build(:note, noteable: build_stubbed(:wiki_page_meta), project: nil, namespace: nil) }
-
-      it 'is not valid without project or namespace' do
-        is_expected.to be_invalid
-      end
-    end
-
     describe 'max notes limit' do
       let_it_be(:noteable) { create(:issue) }
       let_it_be(:existing_note) { create(:note, project: noteable.project, noteable: noteable) }
@@ -209,7 +201,7 @@ RSpec.describe Note, feature_category: :team_planning do
         end
 
         context 'when noteable is not allowed to have confidential notes' do
-          let_it_be(:noteable) { create(:project_snippet) }
+          let_it_be(:noteable) { create(:snippet) }
 
           it 'can not be set confidential' do
             expect(subject).not_to be_valid
@@ -1401,12 +1393,6 @@ RSpec.describe Note, feature_category: :team_planning do
 
     it 'returns true for a personal snippet note' do
       expect(build(:note_on_personal_snippet).for_personal_snippet?).to be_truthy
-    end
-  end
-
-  describe '#for_wiki_page?' do
-    it 'returns true for a wiki_page' do
-      expect(build(:note_on_wiki_page).for_wiki_page?).to be_truthy
     end
   end
 

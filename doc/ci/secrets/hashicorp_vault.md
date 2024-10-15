@@ -168,8 +168,7 @@ Success! Uploaded policy: myproject-production
 
 You also need roles that link the JWT with these policies.
 
-For example, one role for staging named `myproject-staging`. The [bound claims](https://developer.hashicorp.com/vault/api-docs/auth/jwt#bound_claims)
-is configured to only allow the policy to be used for the `main` branch in the project with ID `22`:
+One for staging named `myproject-staging`:
 
 ```shell
 $ vault write auth/jwt/role/myproject-staging - <<EOF
@@ -181,15 +180,14 @@ $ vault write auth/jwt/role/myproject-staging - <<EOF
   "bound_audiences": "https://vault.example.com",
   "bound_claims": {
     "project_id": "22",
-    "ref": "main",
+    "ref": "master",
     "ref_type": "branch"
   }
 }
 EOF
 ```
 
-And one role for production named `myproject-production`. The `bound_claims` section
-for this role only allows protected branches that match the `auto-deploy-*` pattern to access the secrets.
+And one for production named `myproject-production`:
 
 ```shell
 $ vault write auth/jwt/role/myproject-production - <<EOF
@@ -209,6 +207,9 @@ $ vault write auth/jwt/role/myproject-production - <<EOF
 }
 EOF
 ```
+
+This example uses [bound claims](https://developer.hashicorp.com/vault/api-docs/auth/jwt#bound_claims)
+to specify that only a JWT with matching values for the specified claims is allowed to authenticate.
 
 Combined with [protected branches](../../user/project/repository/branches/protected.md),
 you can restrict who is able to authenticate and read the secrets.
@@ -352,17 +353,3 @@ and GitLab features. For example, restrict the token by:
   that are restricted to a subset of project users.
 - Scoping the JWT to [GitLab protected tags](../../user/project/protected_tags.md),
   that are restricted to a subset of project users.
-
-## Troubleshooting
-
-## `The secrets provider can not be found. Check your CI/CD variables and try again.` message
-
-You might receive this error when attempting to start a job configured to access HashiCorp Vault:
-
-```plaintext
-The secrets provider can not be found. Check your CI/CD variables and try again.
-```
-
-The job can't be created because the required variable is not defined:
-
-- `VAULT_SERVER_URL`

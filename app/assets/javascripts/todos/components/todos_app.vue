@@ -1,5 +1,5 @@
 <script>
-import { GlLoadingIcon, GlKeysetPagination, GlLink, GlBadge, GlTab, GlTabs } from '@gitlab/ui';
+import { GlLoadingIcon, GlKeysetPagination, GlButton, GlBadge, GlTab, GlTabs } from '@gitlab/ui';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import { createAlert } from '~/alert';
 import { s__ } from '~/locale';
@@ -8,23 +8,21 @@ import getTodosCountQuery from './queries/get_todos_count.query.graphql';
 import TodoItem from './todo_item.vue';
 import TodosEmptyState from './todos_empty_state.vue';
 import TodosFilterBar, { SORT_OPTIONS } from './todos_filter_bar.vue';
-import TodosMarkAllDoneButton from './todos_mark_all_done_button.vue';
 
 const ENTRIES_PER_PAGE = 20;
 const STATUS_BY_TAB = [['pending'], ['done'], ['pending', 'done']];
 
 export default {
   components: {
-    GlLink,
     GlLoadingIcon,
     GlKeysetPagination,
+    GlButton,
     GlBadge,
     GlTabs,
     GlTab,
     TodosEmptyState,
     TodosFilterBar,
     TodoItem,
-    TodosMarkAllDoneButton,
   },
 
   data() {
@@ -40,19 +38,17 @@ export default {
       todos: [],
       currentTab: 0,
       todosCount: {
-        pending: '-',
-        done: '-',
-        all: '-',
+        pending: 0,
+        done: 0,
+        all: 0,
       },
       queryFilterValues: {
         groupId: [],
         projectId: [],
-        authorId: [],
         type: [],
         action: [],
         sort: `${SORT_OPTIONS[0].value}_DESC`,
       },
-      alert: null,
     };
   },
   apollo: {
@@ -60,7 +56,7 @@ export default {
       query: getTodosQuery,
       variables() {
         return {
-          state: this.statusByTab,
+          state: STATUS_BY_TAB[this.currentTab],
           ...this.queryFilterValues,
           ...this.cursor,
         };
@@ -71,7 +67,7 @@ export default {
         return nodes;
       },
       error(error) {
-        this.alert = createAlert({ message: s__('Todos|Something went wrong. Please try again.') });
+        createAlert({ message: s__('Todos|Something went wrong. Please try again.') });
         Sentry.captureException(error);
       },
     },
@@ -96,9 +92,6 @@ export default {
     },
   },
   computed: {
-    statusByTab() {
-      return STATUS_BY_TAB[this.currentTab];
-    },
     isLoading() {
       return this.$apollo.queries.todos.loading;
     },
@@ -114,7 +107,7 @@ export default {
       return !this.isLoading && this.todos.length === 0;
     },
     showMarkAllAsDone() {
-      return this.currentTab === 0 && !this.showEmptyState;
+      return this.currentTab === 0;
     },
     fadeDoneTodo() {
       return this.currentTab === 0;
@@ -147,11 +140,7 @@ export default {
       };
     },
     handleFiltersChanged(data) {
-      this.alert?.dismiss();
       this.queryFilterValues = { ...data };
-    },
-    updateCounts() {
-      this.$apollo.queries.todosCount.refetch();
     },
   },
 };
@@ -184,11 +173,13 @@ export default {
       </gl-tabs>
 
       <div v-if="showMarkAllAsDone" class="gl-my-3 gl-mr-5 gl-flex gl-items-center gl-justify-end">
-        <todos-mark-all-done-button @change="updateCounts" />
+        <gl-button data-testid="btn-mark-all-as-done">
+          {{ s__('Todos|Mark all as done') }}
+        </gl-button>
       </div>
     </div>
 
-    <todos-filter-bar :todos-status="statusByTab" @filters-changed="handleFiltersChanged" />
+    <todos-filter-bar @filters-changed="handleFiltersChanged" />
 
     <div>
       <div class="gl-flex gl-flex-col">
@@ -212,12 +203,6 @@ export default {
           @prev="prevPage"
           @next="nextPage"
         />
-
-        <div class="gl-mt-5 gl-text-center">
-          <gl-link href="https://gitlab.com/gitlab-org/gitlab/-/issues/498315" target="_blank">{{
-            s__('Todos|Leave feedback')
-          }}</gl-link>
-        </div>
       </div>
     </div>
   </div>

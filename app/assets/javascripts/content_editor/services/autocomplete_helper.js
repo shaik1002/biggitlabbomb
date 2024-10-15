@@ -1,6 +1,6 @@
 import { identity, memoize, isEmpty } from 'lodash';
 import { initEmojiMap, getAllEmoji, searchEmoji } from '~/emoji';
-import { newDate } from '~/lib/utils/datetime_utility';
+import { parsePikadayDate } from '~/lib/utils/datetime_utility';
 import axios from '~/lib/utils/axios_utils';
 import { COMMANDS } from '../constants';
 
@@ -38,7 +38,7 @@ function parseMilestone(milestone) {
     return milestone;
   }
 
-  const dueDate = milestone.due_date ? newDate(milestone.due_date) : null;
+  const dueDate = milestone.due_date ? parsePikadayDate(milestone.due_date) : null;
   const expired = dueDate ? Date.now() > dueDate.getTime() : false;
 
   return {
@@ -80,26 +80,27 @@ export function createDataSource({
   sorter = defaultSorter(searchFields),
   cache = true,
   limit = 15,
-  filterOnBackend = false,
 }) {
-  const fetchData = async (query) => {
+  const fetchData = source ? async () => (await axios.get(source)).data : () => [];
+  let items = [];
+
+  const sync = async function sync() {
     try {
-      const queryOptions = filterOnBackend ? { params: { search: query } } : {};
-      return source ? (await axios.get(source, queryOptions)).data : [];
+      items = await fetchData();
     } catch {
-      return [];
+      items = [];
     }
   };
 
   const cacheTimeoutFn = () => (cache ? 0 : Math.floor(Date.now() / 1e4));
-  const memoizedFetchData = memoize(fetchData, cacheTimeoutFn);
+  const init = memoize(sync, cacheTimeoutFn);
 
   return {
     search: async (query) => {
-      let results = filterOnBackend ? await fetchData(query) : await memoizedFetchData();
+      await init();
 
-      results = results.map(mapper);
-      if (filter) results = filter(results, query);
+      let results = items.map(mapper);
+      if (filter) results = filter(items, query);
 
       if (query) {
         results = results.filter((item) => {
@@ -208,7 +209,8 @@ export default class AutocompleteHelper {
       mapper: mappers[referenceType] || mappers.default,
       sorter: sorters[referenceType] || sorters.default,
       filter: filters[referenceType],
-      ...config,
+      cache: config.cache,
+      limit: config.limit,
     });
   };
 }

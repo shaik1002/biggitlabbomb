@@ -998,8 +998,7 @@ RSpec.describe Cli, feature_category: :service_ping do
           user: user,
           additional_properties: {
             label: 'string', # TODO
-            value: 72, # Time the CLI ran before closing (seconds)
-            custom_key: custom_value # The extra custom property name
+            value: 72 # Time the CLI ran before closing (seconds)
           }
         )
 
@@ -1019,8 +1018,7 @@ RSpec.describe Cli, feature_category: :service_ping do
           let(:additional_properties) do
             {
               label: 'string',
-              value: 72,
-              custom_key: custom_value
+              value: 72
             }
           end
         end
@@ -1050,7 +1048,6 @@ RSpec.describe Cli, feature_category: :service_ping do
                 {
                   label: 'string', // TODO
                   value: 72, // Time the CLI ran before closing (seconds)
-                  custom_key: custom_value, // The extra custom property name
                 },
               );
             },
@@ -1079,7 +1076,6 @@ RSpec.describe Cli, feature_category: :service_ping do
             {
               label: 'string', // TODO
               value: 72, // Time the CLI ran before closing (seconds)
-              custom_key: custom_value, // The extra custom property name
             },
           );
 
@@ -1108,7 +1104,6 @@ RSpec.describe Cli, feature_category: :service_ping do
             data-event-tracking="internal_events_cli_used"
             data-event-label="string"
             data-event-value=72
-            data-event-custom_key=custom_value
           >
             Click Me
           </gl-button>
@@ -1130,7 +1125,6 @@ RSpec.describe Cli, feature_category: :service_ping do
             data-event-tracking-load="internal_events_cli_used"
             data-event-label="string"
             data-event-value=72
-            data-event-custom_key=custom_value
           >
             Click Me
           </gl-button>
@@ -1145,18 +1139,18 @@ RSpec.describe Cli, feature_category: :service_ping do
         --------------------------------------------------
         # HAML -- ON-CLICK
 
-        .inline-block{ data: { event_tracking: 'internal_events_cli_used', event_label: 'string', event_value: 72, event_custom_key: custom_value } }
+        .inline-block{ data: { event_tracking: 'internal_events_cli_used', event_label: 'string', event_value: 72 } }
           = _('Important Text')
 
         --------------------------------------------------
         # HAML -- COMPONENT ON-CLICK
 
-        = render Pajamas::ButtonComponent.new(button_options: { data: { event_tracking: 'internal_events_cli_used', event_label: 'string', event_value: 72, event_custom_key: custom_value } })
+        = render Pajamas::ButtonComponent.new(button_options: { data: { event_tracking: 'internal_events_cli_used', event_label: 'string', event_value: 72 } })
 
         --------------------------------------------------
         # HAML -- COMPONENT ON-LOAD
 
-        = render Pajamas::ButtonComponent.new(button_options: { data: { event_tracking_load: true, event_tracking: 'internal_events_cli_used', event_label: 'string', event_value: 72, event_custom_key: custom_value } })
+        = render Pajamas::ButtonComponent.new(button_options: { data: { event_tracking_load: true, event_tracking: 'internal_events_cli_used', event_label: 'string', event_value: 72 } })
 
         --------------------------------------------------
         TEXT

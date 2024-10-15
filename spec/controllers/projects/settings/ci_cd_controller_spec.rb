@@ -115,55 +115,39 @@ RSpec.describe Projects::Settings::CiCdController, feature_category: :continuous
     end
 
     describe '#reset_cache' do
-      subject { post :reset_cache, params: { namespace_id: project.namespace, project_id: project }, format: :json }
-
       before do
         sign_in(user)
+
+        project.add_maintainer(user)
+
+        allow(ResetProjectCacheService).to receive_message_chain(:new, :execute).and_return(true)
       end
 
-      context 'when logged in as a maintainer' do
-        before do
-          project.add_maintainer(user)
+      subject { post :reset_cache, params: { namespace_id: project.namespace, project_id: project }, format: :json }
 
-          allow(ResetProjectCacheService).to receive_message_chain(:new, :execute).and_return(true)
-        end
+      it 'calls reset project cache service' do
+        expect(ResetProjectCacheService).to receive_message_chain(:new, :execute)
 
-        it 'calls reset project cache service' do
-          expect(ResetProjectCacheService).to receive_message_chain(:new, :execute)
+        subject
+      end
 
+      context 'when service returns successfully' do
+        it 'returns a success header' do
           subject
-        end
 
-        context 'when service returns successfully' do
-          it 'returns a success header' do
-            subject
-
-            expect(response).to have_gitlab_http_status(:ok)
-          end
-        end
-
-        context 'when service does not return successfully' do
-          before do
-            allow(ResetProjectCacheService).to receive_message_chain(:new, :execute).and_return(false)
-          end
-
-          it 'returns an error header' do
-            subject
-
-            expect(response).to have_gitlab_http_status(:bad_request)
-          end
+          expect(response).to have_gitlab_http_status(:ok)
         end
       end
 
-      context 'when the user is not authorized to access this action' do
+      context 'when service does not return successfully' do
         before do
-          project.add_guest(user)
+          allow(ResetProjectCacheService).to receive_message_chain(:new, :execute).and_return(false)
         end
 
-        it 'returns not found' do
+        it 'returns an error header' do
           subject
 
-          expect(response).to have_gitlab_http_status(:not_found)
+          expect(response).to have_gitlab_http_status(:bad_request)
         end
       end
     end

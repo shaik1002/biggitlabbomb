@@ -1,7 +1,12 @@
 <script>
 import { GlTooltip, GlIcon } from '@gitlab/ui';
 import dateFormat from '~/lib/dateformat';
-import { getDayDifference, getTimeago, dateInWords, newDate } from '~/lib/utils/datetime_utility';
+import {
+  getDayDifference,
+  getTimeago,
+  dateInWords,
+  parsePikadayDate,
+} from '~/lib/utils/datetime_utility';
 import { __ } from '~/locale';
 
 export default {
@@ -61,7 +66,7 @@ export default {
       return standardDateFormat;
     },
     issueDueDate() {
-      return newDate(this.date);
+      return parsePikadayDate(this.date);
     },
     timeDifference() {
       const today = new Date();

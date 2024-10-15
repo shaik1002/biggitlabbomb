@@ -160,6 +160,10 @@ class NotifyPreview < ActionMailer::Preview
     Notify.changed_milestone_merge_request_email(user.id, merge_request.id, milestone, user.id)
   end
 
+  def member_access_denied_email
+    Notify.member_access_denied_email('project', project.id, user.id).message
+  end
+
   def member_access_granted_email
     Notify.member_access_granted_email(member.source_type, member.id).message
   end
@@ -217,7 +221,7 @@ class NotifyPreview < ActionMailer::Preview
   end
 
   def unknown_sign_in_email
-    Notify.unknown_sign_in_email(user, '127.0.0.1', Time.current, country: 'Germany', city: 'Frankfurt').message
+    Notify.unknown_sign_in_email(user, '127.0.0.1', Time.current).message
   end
 
   def two_factor_otp_attempt_failed_email
@@ -328,10 +332,6 @@ class NotifyPreview < ActionMailer::Preview
 
   def project_was_exported_email
     Notify.project_was_exported_email(user, project).message
-  end
-
-  def repository_cleanup_success_email
-    Notify.repository_cleanup_success_email(project, user).message
   end
 
   def request_review_merge_request_email
@@ -469,7 +469,7 @@ class NotifyPreview < ActionMailer::Preview
   end
 
   def member
-    @member ||= Member.non_invite.non_request.last
+    @member ||= Member.non_invite.last
   end
 
   def key

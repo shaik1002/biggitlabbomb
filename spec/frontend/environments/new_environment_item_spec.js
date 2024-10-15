@@ -1,18 +1,13 @@
 import VueApollo from 'vue-apollo';
 import Vue from 'vue';
-import { GlCollapse, GlLink, GlSprintf, GlButton } from '@gitlab/ui';
+import { GlCollapse, GlIcon } from '@gitlab/ui';
 import createMockApollo from 'helpers/mock_apollo_helper';
-import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
-import waitForPromises from 'helpers/wait_for_promises';
-import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
+import { mountExtended, extendedWrapper } from 'helpers/vue_test_utils_helper';
+import { stubTransition } from 'helpers/stub_transition';
+import { getTimeago, localeDateFormat } from '~/lib/utils/datetime_utility';
+import { sprintf } from '~/locale';
 import EnvironmentItem from '~/environments/components/new_environment_item.vue';
 import EnvironmentActions from '~/environments/components/environment_actions.vue';
-import Rollback from '~/environments/components/environment_rollback.vue';
-import ExternalUrl from '~/environments/components/environment_external_url.vue';
-import StopComponent from '~/environments/components/environment_stop.vue';
-import Pin from '~/environments/components/environment_pin.vue';
-import Terminal from '~/environments/components/environment_terminal_button.vue';
-import Delete from '~/environments/components/environment_delete.vue';
 import Deployment from '~/environments/components/deployment.vue';
 import DeployBoardWrapper from '~/environments/components/deploy_board_wrapper.vue';
 import { resolvedEnvironment, rolloutStatus } from './graphql/mock_data';
@@ -27,7 +22,7 @@ describe('~/environments/components/new_environment_item.vue', () => {
   };
 
   const createWrapper = ({ propsData = {}, provideData = {}, apolloProvider } = {}) =>
-    shallowMountExtended(EnvironmentItem, {
+    mountExtended(EnvironmentItem, {
       apolloProvider,
       propsData: { environment: resolvedEnvironment, ...propsData },
       provide: {
@@ -36,23 +31,24 @@ describe('~/environments/components/new_environment_item.vue', () => {
         projectPath: '/1',
         ...provideData,
       },
-      stubs: { GlSprintf, TimeAgoTooltip, GlCollapse },
+      stubs: { transition: stubTransition() },
     });
 
   const findDeployment = () => wrapper.findComponent(Deployment);
   const findActions = () => wrapper.findComponent(EnvironmentActions);
-  const findNameLink = () => wrapper.findComponent(GlLink);
-  const findCollapse = () => wrapper.findComponent(GlCollapse);
 
   const expandCollapsedSection = async () => {
-    const button = wrapper.findComponent(GlButton);
-    await button.vm.$emit('click');
+    const button = wrapper.findByRole('button', { name: 'Expand' });
+    await button.trigger('click');
+
+    return button;
   };
 
   it('displays the name when not in a folder', () => {
     wrapper = createWrapper({ apolloProvider: createApolloProvider() });
 
-    expect(findNameLink().text()).toBe(resolvedEnvironment.name);
+    const name = wrapper.findByRole('link', { name: resolvedEnvironment.name });
+    expect(name.exists()).toBe(true);
   });
 
   it('displays the name minus the folder prefix when in a folder', () => {
@@ -61,7 +57,8 @@ describe('~/environments/components/new_environment_item.vue', () => {
       apolloProvider: createApolloProvider(),
     });
 
-    expect(findNameLink().text()).toBe(resolvedEnvironment.nameWithoutType);
+    const name = wrapper.findByRole('link', { name: resolvedEnvironment.nameWithoutType });
+    expect(name.exists()).toBe(true);
   });
 
   it('truncates the name if it is very long', () => {
@@ -71,7 +68,11 @@ describe('~/environments/components/new_environment_item.vue', () => {
     };
     wrapper = createWrapper({ propsData: { environment }, apolloProvider: createApolloProvider() });
 
-    expect(findNameLink().text()).toHaveLength(80);
+    const name = wrapper.findByRole('link', {
+      name: (text) => environment.name.startsWith(text.slice(0, -1)),
+    });
+    expect(name.exists()).toBe(true);
+    expect(name.text()).toHaveLength(80);
   });
 
   describe('tier', () => {
@@ -102,13 +103,13 @@ describe('~/environments/components/new_environment_item.vue', () => {
     });
   });
 
-  describe('external url', () => {
-    const findExternalUrl = () => wrapper.findComponent(ExternalUrl);
-
+  describe('url', () => {
     it('shows a link for the url if one is present', () => {
       wrapper = createWrapper({ apolloProvider: createApolloProvider() });
 
-      expect(findExternalUrl().props('externalUrl')).toEqual(resolvedEnvironment.externalUrl);
+      const url = wrapper.findByRole('link', { name: 'Open live environment' });
+
+      expect(url.attributes('href')).toEqual(resolvedEnvironment.externalUrl);
     });
 
     it('does not show a link for the url if one is missing', () => {
@@ -117,7 +118,9 @@ describe('~/environments/components/new_environment_item.vue', () => {
         apolloProvider: createApolloProvider(),
       });
 
-      expect(findExternalUrl().exists()).toBe(false);
+      const url = wrapper.findByRole('link', { name: 'Open live environment' });
+
+      expect(url.exists()).toBe(false);
     });
   });
 
@@ -152,12 +155,12 @@ describe('~/environments/components/new_environment_item.vue', () => {
   });
 
   describe('stop', () => {
-    const findStopComponent = () => wrapper.findComponent(StopComponent);
-
     it('shows a button to stop the environment if the environment is available', () => {
       wrapper = createWrapper({ apolloProvider: createApolloProvider() });
 
-      expect(findStopComponent().props('environment')).toBe(resolvedEnvironment);
+      const stop = wrapper.findByRole('button', { name: 'Stop environment' });
+
+      expect(stop.exists()).toBe(true);
     });
 
     it('does not show a button to stop the environment if the environment is stopped', () => {
@@ -166,40 +169,38 @@ describe('~/environments/components/new_environment_item.vue', () => {
         apolloProvider: createApolloProvider(),
       });
 
-      expect(findStopComponent().exists()).toBe(false);
+      const stop = wrapper.findByRole('button', { name: 'Stop environment' });
+
+      expect(stop.exists()).toBe(false);
     });
   });
 
   describe('rollback', () => {
-    it('renders rollback component with the correct props when lastDeployment is available', async () => {
+    it('shows the option to rollback/re-deploy if available', () => {
       wrapper = createWrapper({ apolloProvider: createApolloProvider() });
-      await waitForPromises();
 
-      const rollback = wrapper.findComponent(Rollback);
-      expect(rollback.props()).toEqual({
-        environment: resolvedEnvironment,
-        isLastDeployment: true,
-        retryUrl: resolvedEnvironment.lastDeployment.deployable.retryPath,
-        graphql: true,
+      const rollback = wrapper.findByRole('button', {
+        name: 'Re-deploy to environment',
       });
+
+      expect(rollback.exists()).toBe(true);
     });
 
-    it("doesn't render rollback component when lastDeployment is not available", async () => {
+    it('does not show the option to rollback/re-deploy if not available', () => {
       wrapper = createWrapper({
         propsData: { environment: { ...resolvedEnvironment, lastDeployment: null } },
         apolloProvider: createApolloProvider(),
       });
-      await waitForPromises();
 
-      const rollback = wrapper.findComponent(Rollback);
+      const rollback = wrapper.findByRole('button', {
+        name: 'Re-deploy to environment',
+      });
+
       expect(rollback.exists()).toBe(false);
     });
   });
 
   describe('pin', () => {
-    const findPin = () => wrapper.findComponent(Pin);
-    const findAutoStopTime = () => wrapper.findByTestId('auto-stop-time');
-
     describe('with autostop', () => {
       let environment;
 
@@ -217,11 +218,17 @@ describe('~/environments/components/new_environment_item.vue', () => {
       });
 
       it('shows the option to pin the environment if there is an autostop date', () => {
-        expect(findPin().props('autoStopUrl')).toBe(resolvedEnvironment.cancelAutoStopPath);
+        const pin = wrapper.findByRole('button', { name: 'Prevent auto-stopping' });
+
+        expect(pin.exists()).toBe(true);
       });
 
-      it('shows time when the environment auto stops', () => {
-        expect(findAutoStopTime().text()).toBe('Auto stop in 1 minute');
+      it('shows when the environment auto stops', () => {
+        const autoStop = wrapper.findByTitle(
+          localeDateFormat.asDateTimeFull.format(environment.autoStopAt),
+        );
+
+        expect(autoStop.text()).toBe('in 1 minute');
       });
     });
 
@@ -233,11 +240,19 @@ describe('~/environments/components/new_environment_item.vue', () => {
       it('does not show the option to pin the environment if there is no autostop date', () => {
         wrapper = createWrapper({ apolloProvider: createApolloProvider() });
 
-        expect(findPin().exists()).toBe(false);
+        const pin = wrapper.findByRole('button', { name: 'Prevent auto-stopping' });
+
+        expect(pin.exists()).toBe(false);
       });
 
       it('does not show when the environment auto stops', () => {
-        expect(findAutoStopTime().exists()).toBe(false);
+        const autoStop = wrapper.findByText(
+          sprintf('Auto stop %{time}', {
+            time: getTimeago().format(resolvedEnvironment.autoStopAt),
+          }),
+        );
+
+        expect(autoStop.exists()).toBe(false);
       });
     });
 
@@ -260,84 +275,100 @@ describe('~/environments/components/new_environment_item.vue', () => {
       it('does not show the option to pin the environment if there is no autostop date', () => {
         wrapper = createWrapper({ apolloProvider: createApolloProvider() });
 
-        expect(findPin().exists()).toBe(false);
+        const pin = wrapper.findByRole('button', { name: 'Prevent auto-stopping' });
+
+        expect(pin.exists()).toBe(false);
       });
 
       it('does not show when the environment auto stops', () => {
-        expect(findAutoStopTime().exists()).toBe(false);
+        const autoStop = wrapper.findByText(
+          sprintf('Auto stop %{time}', {
+            time: getTimeago().format(environment.autoStopAt),
+          }),
+        );
+
+        expect(autoStop.exists()).toBe(false);
       });
     });
   });
 
   describe('terminal', () => {
-    const findTerminal = () => wrapper.findComponent(Terminal);
-
     it('shows the link to the terminal if set up', () => {
       wrapper = createWrapper({
         propsData: { environment: { ...resolvedEnvironment, terminalPath: '/terminal' } },
         apolloProvider: createApolloProvider(),
       });
 
-      expect(findTerminal().props('terminalPath')).toEqual('/terminal');
+      const terminal = wrapper.findByRole('link', { name: 'Terminal' });
+
+      expect(terminal.exists()).toBe(true);
     });
 
     it('does not show the link to the terminal if not set up', () => {
       wrapper = createWrapper({ apolloProvider: createApolloProvider() });
 
-      expect(findTerminal().exists()).toBe(false);
+      const terminal = wrapper.findByRole('link', { name: 'Terminal' });
+
+      expect(terminal.exists()).toBe(false);
     });
   });
 
   describe('delete', () => {
-    const findDelete = () => wrapper.findComponent(Delete);
-
     it('shows the button to delete the environment if possible', () => {
-      const deletableEnvironment = {
-        ...resolvedEnvironment,
-        canDelete: true,
-        deletePath: '/terminal',
-      };
-
       wrapper = createWrapper({
         propsData: {
-          environment: deletableEnvironment,
+          environment: { ...resolvedEnvironment, canDelete: true, deletePath: '/terminal' },
         },
         apolloProvider: createApolloProvider(),
       });
 
-      expect(findDelete().props('environment')).toEqual(deletableEnvironment);
+      const deleteTrigger = wrapper.findByRole('button', {
+        name: 'Delete environment',
+      });
+
+      expect(deleteTrigger.exists()).toBe(true);
     });
 
     it('does not show the button to delete the environment if not possible', () => {
       wrapper = createWrapper({ apolloProvider: createApolloProvider() });
 
-      expect(findDelete().exists()).toBe(false);
+      const deleteTrigger = wrapper.findByRole('button', {
+        name: 'Delete environment',
+      });
+
+      expect(deleteTrigger.exists()).toBe(false);
     });
   });
 
   describe('collapse', () => {
-    const findCollapseButton = () => wrapper.findComponent(GlButton);
+    let icon;
+    let collapse;
+    let environmentName;
 
     beforeEach(() => {
       wrapper = createWrapper({ apolloProvider: createApolloProvider() });
+      collapse = wrapper.findComponent(GlCollapse);
+      icon = wrapper.findComponent(GlIcon);
+      environmentName = wrapper.findByText(resolvedEnvironment.name);
     });
 
     it('is collapsed by default', () => {
-      expect(findCollapse().props('visible')).toBe(false);
-      expect(findCollapseButton().props('icon')).toBe('chevron-lg-right');
-      expect(findNameLink().classes('gl-font-bold')).toBe(false);
+      expect(collapse.props('visible')).toBe(false);
+      expect(icon.props('name')).toBe('chevron-lg-right');
+      expect(environmentName.classes('gl-font-bold')).toBe(false);
     });
 
     it('opens on click', async () => {
-      expect(findDeployment().props('visible')).toBe(false);
+      expect(findDeployment().isVisible()).toBe(false);
 
-      await expandCollapsedSection();
+      const button = await expandCollapsedSection();
 
-      expect(findCollapseButton().attributes('aria-label')).toBe('Collapse');
-      expect(findCollapseButton().props('icon')).toBe('chevron-lg-down');
-      expect(findNameLink().classes('gl-font-bold')).toBe(true);
-      expect(findCollapse().props('visible')).toBe(true);
-      expect(findDeployment().props('visible')).toBe(true);
+      expect(button.attributes('aria-label')).toBe('Collapse');
+      expect(button.props('category')).toBe('secondary');
+      expect(collapse.props('visible')).toBe(true);
+      expect(icon.props('name')).toBe('chevron-lg-down');
+      expect(environmentName.classes('gl-font-bold')).toBe(true);
+      expect(findDeployment().isVisible()).toBe(true);
     });
   });
   describe('last deployment', () => {
@@ -407,10 +438,13 @@ describe('~/environments/components/new_environment_item.vue', () => {
 
       await expandCollapsedSection();
 
-      expect(findCollapse().text()).toBe(
-        'There are no deployments for this environment yet. Learn more about setting up deployments.',
-      );
-      expect(findCollapse().findComponent(GlLink).attributes('href')).toBe('/help');
+      const text =
+        'There are no deployments for this environment yet. Learn more about setting up deployments.';
+      const emptyState = wrapper.findByText((_content, element) => element.textContent === text);
+
+      const link = extendedWrapper(emptyState).findByRole('link');
+
+      expect(link.attributes('href')).toBe('/help');
     });
 
     it('should not link to the documentation when there are deployments', async () => {
@@ -420,7 +454,11 @@ describe('~/environments/components/new_environment_item.vue', () => {
 
       await expandCollapsedSection();
 
-      expect(findCollapse().findComponent(GlLink).exists()).toBe(false);
+      const text =
+        'There are no deployments for this environment yet. Learn more about setting up deployments.';
+      const emptyState = wrapper.findByText((_content, element) => element.textContent === text);
+
+      expect(emptyState.exists()).toBe(false);
     });
   });
 

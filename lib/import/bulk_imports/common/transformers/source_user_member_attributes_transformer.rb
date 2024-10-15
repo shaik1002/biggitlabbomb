@@ -51,8 +51,7 @@ module Import
             context.source_user_mapper.find_or_create_source_user(
               source_user_identifier: source_user_id,
               source_name: source_name,
-              source_username: source_username,
-              cache: false
+              source_username: source_username
             )
           end
         end

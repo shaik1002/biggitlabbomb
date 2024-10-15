@@ -51,7 +51,6 @@ class Projects::IssuesController < Projects::ApplicationController
     push_frontend_feature_flag(:notifications_todos_buttons, current_user)
     push_frontend_feature_flag(:comment_tooltips, current_user)
     push_force_frontend_feature_flag(:glql_integration, project&.glql_integration_feature_flag_enabled?)
-    push_frontend_feature_flag(:issue_autocomplete_backend_filtering, project)
   end
 
   before_action only: [:index, :show] do
@@ -461,7 +460,7 @@ class Projects::IssuesController < Projects::ApplicationController
   def create_vulnerability_issue_feedback(issue); end
 
   def redirect_if_work_item
-    return unless use_work_items_path?(issue) && !show_work_item?
+    return unless use_work_items_path?(issue)
 
     redirect_to project_work_item_path(project, issue.iid, params: request.query_parameters)
   end

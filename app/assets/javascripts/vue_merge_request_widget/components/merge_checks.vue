@@ -82,10 +82,6 @@ export default {
         return 'warning';
       }
 
-      if (this.checkingMergeChecks.length) {
-        return 'loading';
-      }
-
       return this.failedChecks.length ? 'failed' : 'success';
     },
     summaryText() {
@@ -93,10 +89,6 @@ export default {
         return this.state?.userPermissions?.canMerge
           ? __('%{boldStart}Merge with caution%{boldEnd}: Override added')
           : __('%{boldStart}Ready to be merged with caution%{boldEnd}: Override added');
-      }
-
-      if (this.checkingMergeChecks.length) {
-        return __('Checking if merge request can be merged...');
       }
 
       if (!this.failedChecks.length) {
@@ -120,18 +112,15 @@ export default {
       return this.state?.mergeabilityChecks || [];
     },
     sortedChecks() {
-      const order = ['CHECKING', 'FAILED', 'WARNING', 'SUCCESS'];
+      const order = ['FAILED', 'WARNING', 'SUCCESS'];
 
       return [...this.checks]
         .filter((s) => {
           if (this.isStatusInactive(s) || !this.hasMessage(s)) return false;
 
-          return this.collapsed ? this.isStatusFailed(s) || this.isStatusChecking(s) : true;
+          return this.collapsed ? this.isStatusFailed(s) : true;
         })
         .sort((a, b) => order.indexOf(a.status) - order.indexOf(b.status));
-    },
-    checkingMergeChecks() {
-      return this.checks.filter((c) => this.isStatusChecking(c));
     },
     failedChecks() {
       return this.checks.filter((c) => this.isStatusFailed(c));
@@ -140,7 +129,7 @@ export default {
       return this.checks.filter((c) => this.isStatusWarning(c));
     },
     showChecks() {
-      return this.failedChecks.length > 0 || this.checkingMergeChecks.length || !this.collapsed;
+      return this.failedChecks.length > 0 || !this.collapsed;
     },
   },
   methods: {
@@ -161,9 +150,6 @@ export default {
     },
     isStatusWarning(check) {
       return check.status === 'WARNING';
-    },
-    isStatusChecking(check) {
-      return check.status === 'CHECKING';
     },
   },
 };

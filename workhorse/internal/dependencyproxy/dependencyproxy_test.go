@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -26,12 +25,10 @@ import (
 )
 
 type fakeUploadHandler struct {
-	request              *http.Request
-	body                 []byte
-	skipBody             bool
-	handler              func(w http.ResponseWriter, r *http.Request)
-	serveHTTPUsed        bool
-	serveHTTPWithAPIUsed bool
+	request  *http.Request
+	body     []byte
+	skipBody bool
+	handler  func(w http.ResponseWriter, r *http.Request)
 }
 
 const (
@@ -46,18 +43,6 @@ func (f *fakeUploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		f.body, _ = io.ReadAll(r.Body)
 	}
 
-	f.serveHTTPUsed = true
-	f.handler(w, r)
-}
-
-func (f *fakeUploadHandler) ServeHTTPWithAPIResponse(w http.ResponseWriter, r *http.Request, _ *api.Response) {
-	f.request = r
-
-	if !f.skipBody {
-		f.body, _ = io.ReadAll(r.Body)
-	}
-
-	f.serveHTTPWithAPIUsed = true
 	f.handler(w, r)
 }
 
@@ -198,11 +183,9 @@ func TestValidUploadConfiguration(t *testing.T) {
 	defer originResourceServer.Close()
 
 	testCases := []struct {
-		desc                 string
-		uploadConfig         *uploadConfig
-		expectedConfig       uploadConfig
-		serveHTTPUsed        bool
-		serveHTTPWithAPIUsed bool
+		desc           string
+		uploadConfig   *uploadConfig
+		expectedConfig uploadConfig
 	}{
 		{
 			desc: "with the default values",
@@ -210,7 +193,6 @@ func TestValidUploadConfiguration(t *testing.T) {
 				Method: http.MethodPost,
 				URL:    "/target/upload",
 			},
-			serveHTTPUsed: true,
 		}, {
 			desc: "with overridden method",
 			uploadConfig: &uploadConfig{
@@ -220,7 +202,6 @@ func TestValidUploadConfiguration(t *testing.T) {
 				Method: http.MethodPut,
 				URL:    "/target/upload",
 			},
-			serveHTTPUsed: true,
 		}, {
 			desc: "with overridden url",
 			uploadConfig: &uploadConfig{
@@ -230,7 +211,6 @@ func TestValidUploadConfiguration(t *testing.T) {
 				Method: http.MethodPost,
 				URL:    "http://test.org/overriden/upload",
 			},
-			serveHTTPUsed: true,
 		}, {
 			desc: "with overridden headers",
 			uploadConfig: &uploadConfig{
@@ -241,17 +221,6 @@ func TestValidUploadConfiguration(t *testing.T) {
 				Method:  http.MethodPost,
 				URL:     "/target/upload",
 			},
-			serveHTTPUsed: true,
-		}, {
-			desc: "with authorized upload response",
-			uploadConfig: &uploadConfig{
-				AuthorizedUploadResponse: authorizeUploadResponse{TempPath: os.TempDir()},
-			},
-			expectedConfig: uploadConfig{
-				Method: http.MethodPost,
-				URL:    "/target/upload",
-			},
-			serveHTTPWithAPIUsed: true,
 		},
 	}
 
@@ -289,14 +258,11 @@ func TestValidUploadConfiguration(t *testing.T) {
 
 			response := makeRequest(injector, string(sendDataJSONString))
 
-			// check the response
+			// checking the response
 			require.Equal(t, 200, response.Code)
 			require.Equal(t, string(content), response.Body.String())
-			// check remote file request
+			// checking remote file request
 			require.Equal(t, "/remote/file", response.Header().Get(testHeader))
-			// check upload handler
-			require.Equal(t, tc.serveHTTPUsed, uploadHandler.serveHTTPUsed)
-			require.Equal(t, tc.serveHTTPWithAPIUsed, uploadHandler.serveHTTPWithAPIUsed)
 		})
 	}
 }
@@ -455,7 +421,7 @@ func TestFailedOriginServer(t *testing.T) {
 
 	uploadHandler := &fakeUploadHandler{
 		handler: func(_ http.ResponseWriter, _ *http.Request) {
-			t.Error("the error response must not be uploaded")
+			assert.FailNow(t, "the error response must not be uploaded")
 		},
 	}
 
@@ -482,7 +448,7 @@ func TestLongUploadRequest(t *testing.T) {
 	defer originResourceServer.Close()
 
 	// the server receiving the upload request
-	// it makes the upload request artificially long with a sleep
+	// it makes the upload request artifically long with a sleep
 	uploadServer := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
 		time.Sleep(40 * time.Millisecond)
 	}))

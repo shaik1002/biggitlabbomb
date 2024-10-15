@@ -453,11 +453,10 @@ project_security_exclusions:
   - table: projects
     column: project_id
     on_delete: async_delete
-project_security_statistics:
-  - table: projects
-    column: project_id
-    on_delete: async_delete
 projects:
+  - table: organizations
+    column: organization_id
+    on_delete: async_nullify
   - table: users
     column: marked_for_deletion_by_user_id
     on_delete: async_nullify

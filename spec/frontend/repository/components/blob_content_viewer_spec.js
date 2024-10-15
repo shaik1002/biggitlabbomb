@@ -20,8 +20,6 @@ import EmptyViewer from '~/repository/components/blob_viewers/empty_viewer.vue';
 import SourceViewer from '~/vue_shared/components/source_viewer/source_viewer.vue';
 import blobInfoQuery from 'shared_queries/repository/blob_info.query.graphql';
 import projectInfoQuery from '~/repository/queries/project_info.query.graphql';
-import highlightMixin from '~/repository/mixins/highlight_mixin';
-import getRefMixin from '~/repository/mixins/get_ref';
 import CodeIntelligence from '~/code_navigation/components/app.vue';
 import * as urlUtility from '~/lib/utils/url_utility';
 import { isLoggedIn, handleLocationHash } from '~/lib/utils/common_utils';
@@ -36,6 +34,7 @@ import {
   projectMock,
   userPermissionsMock,
   propsMock,
+  refMock,
   axiosMockResponse,
 } from '../mock_data';
 
@@ -128,7 +127,7 @@ const createComponent = async (mockData = {}, mountFn = shallowMount, mockRoute 
       store: createMockStore(),
       apolloProvider: fakeApollo,
       propsData: propsMock,
-      mixins: [getRefMixin, highlightMixin],
+      mixins: [{ data: () => ({ ref: refMock }) }],
       mocks: {
         $route: mockRoute,
         $router: mockRouter,

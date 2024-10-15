@@ -1,25 +1,15 @@
 <script>
-import PageHeading from '~/vue_shared/components/page_heading.vue';
-
 export default {
   name: 'RunnerListHeader',
-  components: {
-    PageHeading,
-  },
 };
 </script>
 <template>
-  <page-heading>
-    <template #heading>
+  <header class="gl-my-5 gl-flex gl-flex-wrap gl-items-start gl-justify-between">
+    <h1 v-if="$scopedSlots.title" class="header-title gl-mb-3 gl-mt-0 gl-text-size-h1">
       <slot name="title"></slot>
-    </template>
-
-    <template #description>
-      <slot name="description"></slot>
-    </template>
-
-    <template v-if="$scopedSlots.actions" #actions>
+    </h1>
+    <div v-if="$scopedSlots.actions" class="gl-flex gl-gap-3">
       <slot name="actions"></slot>
-    </template>
-  </page-heading>
+    </div>
+  </header>
 </template>

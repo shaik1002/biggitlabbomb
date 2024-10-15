@@ -3,6 +3,7 @@ import { GlModal, GlLink, GlSprintf } from '@gitlab/ui';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import { escapeShellString } from '~/lib/utils/text_utility';
 import { __ } from '~/locale';
+import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 
 export default {
   i18n: {
@@ -24,6 +25,7 @@ export default {
         help: __('Push the source branch up to GitLab.'),
       },
     },
+    copyCommands: __('Copy commands'),
     tip: __(
       '%{strongStart}Tip:%{strongEnd} You can also %{linkStart}check out with merge request ID%{linkEnd}.',
     ),
@@ -31,6 +33,7 @@ export default {
   },
   components: {
     GlModal,
+    ClipboardButton,
     GlLink,
     GlSprintf,
   },
@@ -110,7 +113,6 @@ export default {
       }
     });
   },
-  userColorScheme: window.gon.user_color_scheme,
 };
 </script>
 
@@ -130,16 +132,16 @@ export default {
       </strong>
       {{ $options.i18n.steps.step1.help }}
     </p>
-    <pre
-      :class="$options.userColorScheme"
-      class="code highlight js-syntax-highlight gl-rounded-base"
-      data-testid="how-to-merge-instructions"
-      >{{ mergeInfo1 }}</pre
-    >
-    <p
-      v-if="reviewingDocsPath"
-      class="-gl-mt-4 gl-rounded-b-base gl-border-1 gl-border-solid gl-border-default gl-px-4 gl-py-3"
-    >
+    <div class="gl-flex gl-gap-3">
+      <pre class="gl-w-full" data-testid="how-to-merge-instructions">{{ mergeInfo1 }}</pre>
+      <clipboard-button
+        :text="mergeInfo1"
+        :title="$options.i18n.copyCommands"
+        category="tertiary"
+        class="gl-self-start"
+      />
+    </div>
+    <p v-if="reviewingDocsPath">
       <gl-sprintf data-testid="docs-tip" :message="$options.i18n.tip">
         <template #strong="{ content }">
           <strong>{{ content }}</strong>
@@ -151,6 +153,7 @@ export default {
         </template>
       </gl-sprintf>
     </p>
+
     <p>
       <strong>
         {{ $options.i18n.steps.step2.label }}
@@ -175,11 +178,14 @@ export default {
       </strong>
       {{ $options.i18n.steps.step4.help }}
     </p>
-    <pre
-      :class="$options.userColorScheme"
-      class="code highlight js-syntax-highlight language-shell gl-rounded-base"
-      data-testid="how-to-merge-instructions"
-      >{{ mergeInfo2 }}</pre
-    >
+    <div class="gl-flex gl-gap-3">
+      <pre class="gl-w-full" data-testid="how-to-merge-instructions">{{ mergeInfo2 }}</pre>
+      <clipboard-button
+        :text="mergeInfo2"
+        :title="$options.i18n.copyCommands"
+        category="tertiary"
+        class="gl-self-start"
+      />
+    </div>
   </gl-modal>
 </template>

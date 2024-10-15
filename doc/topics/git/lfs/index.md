@@ -77,7 +77,7 @@ It offers both server settings and project-specific settings.
   1. In the root directory of your local copy of the repository, run `git lfs install`. This command
      adds:
      - A pre-push Git hook to your repository.
-     - A [`.gitattributes` file](../../../user/project/repository/files/git_attributes.md) to track
+     - A [`.gitattributes` file](../../../user/project/git_attributes.md) to track
        handling for individual files and file types.
   1. Add the files and file types you want to track with Git LFS.
 
@@ -269,9 +269,8 @@ and clones them over HTTPS. If you run `git clone` with a SSH URL, like
 `user@hostname.com:group/project.git`, you must enter your GitLab credentials again for HTTPS
 authentication.
 
-By default, Git LFS operations occur over HTTPS, even when Git communicates with your repository over SSH.
-In GitLab 17.2, [pure SSH support for LFS](https://gitlab.com/groups/gitlab-org/-/epics/11872) was introduced.
-For information on how to enable this feature, see [Pure SSH transfer protocol](../../../administration/lfs/index.md#pure-ssh-transfer-protocol).
+Even when Git communicates with your repository over SSH, Git LFS objects still use HTTPS.
+Support for a wholly SSH-based protocol is proposed in [epic 11872](https://gitlab.com/groups/gitlab-org/-/epics/11872).
 
 To fetch new LFS objects for a repository you have already cloned, run this command:
 
@@ -304,7 +303,7 @@ Expunging file history requires rewriting Git history. This action is destructiv
 
 If you need to remove large files from your repository's history, to reduce
 the total size of your repository, see
-[Reduce repository size](../../../user/project/repository/repository_size.md#reduce-repository-size).
+[Reduce repository size](../../../user/project/repository/reducing_the_repo_size_using_git.md).
 
 ## Related topics
 
@@ -313,4 +312,4 @@ the total size of your repository, see
 - [Git LFS developer information](../../../development/lfs.md)
 - [GitLab Git Large File Storage (LFS) Administration](../../../administration/lfs/index.md) for self-managed instances
 - [Troubleshooting Git LFS](troubleshooting.md)
-- [The `.gitattributes` file](../../../user/project/repository/files/git_attributes.md)
+- [The `.gitattributes` file](../../../user/project/git_attributes.md)

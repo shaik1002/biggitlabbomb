@@ -5,10 +5,6 @@ module Resolvers
     class UserContributedProjectsResolver < BaseResolver
       type Types::ProjectType.connection_type, null: true
 
-      argument :search, GraphQL::Types::String,
-        required: false,
-        description: 'Search query.'
-
       argument :sort, Types::Projects::ProjectSortEnum,
         description: 'Sort contributed projects.',
         required: false,
@@ -23,10 +19,6 @@ module Resolvers
         required: false,
         default_value: false
 
-      argument :programming_language_name, GraphQL::Types::String,
-        required: false,
-        description: 'Filter projects by programming language name (case insensitive). For example: "css" or "ruby".'
-
       alias_method :user, :object
 
       def resolve(**args)
@@ -34,10 +26,8 @@ module Resolvers
           user: user,
           current_user: current_user,
           params: {
-            search: args[:search],
-            sort: args[:sort],
-            min_access_level: args[:min_access_level],
-            programming_language_name: args[:programming_language_name]
+            order_by: args[:sort],
+            min_access_level: args[:min_access_level]
           }
         ).execute
 

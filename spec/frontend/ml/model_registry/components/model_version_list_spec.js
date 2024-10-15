@@ -66,7 +66,8 @@ describeSkipVue3(skipReason, () => {
 
     it('shows empty state', () => {
       expect(findEmptyState().props()).toMatchObject({
-        title: 'Manage versions of your machine learning model',
+        title:
+          'Manage versions of your machine learning modelManage versions of your machine learning model',
         description: 'Use versions to track performance, parameters, and metadata',
         primaryText: 'Create model version',
         modalId: MODEL_VERSION_CREATION_MODAL_ID,

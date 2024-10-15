@@ -44,7 +44,7 @@ GET /projects/:id/members
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project or group](rest/index.md#namespaced-paths) |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project or group](rest/index.md#namespaced-path-encoding) |
 | `query`   | string | no     | A query string to search for members |
 | `user_ids`   | array of integers | no     | Filter the results on the given user IDs |
 | `skip_users`   | array of integers | no     | Filter skipped users out of the results |
@@ -139,7 +139,7 @@ GET /projects/:id/members/all
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project or group](rest/index.md#namespaced-paths). |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project or group](rest/index.md#namespaced-path-encoding). |
 | `query`   | string | no     | A query string to search for members. |
 | `user_ids`   | array of integers | no     | Filter the results on the given user IDs. |
 | `show_seat_info`   | boolean | no     | Show seat information for users. |
@@ -233,7 +233,7 @@ GET /projects/:id/members/:user_id
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project or group](rest/index.md#namespaced-paths) |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project or group](rest/index.md#namespaced-path-encoding) |
 | `user_id` | integer | yes   | The user ID of the member |
 
 ```shell
@@ -288,7 +288,7 @@ GET /projects/:id/members/all/:user_id
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project or group](rest/index.md#namespaced-paths) |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project or group](rest/index.md#namespaced-path-encoding) |
 | `user_id` | integer | yes   | The user ID of the member |
 
 ```shell
@@ -342,7 +342,7 @@ GET /groups/:id/billable_members
 
 | Attribute                     | Type            | Required  | Description                                                                                                   |
 | ----------------------------- | --------------- | --------- |-------------------------------------------------------------------------------------------------------------- |
-| `id`                          | integer/string  | yes       | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths)  |
+| `id`                          | integer/string  | yes       | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding)  |
 | `search`                      | string          | no        | A query string to search for group members by name, username, or public email.                                |
 | `sort`                        | string          | no        | A query string containing parameters that specify the sort attribute and order. See supported values below.   |
 
@@ -433,7 +433,7 @@ GET /groups/:id/billable_members/:user_id/memberships
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths) |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) |
 | `user_id` | integer        | yes | The user ID of the billable member |
 
 ```shell
@@ -497,7 +497,7 @@ GET /groups/:id/billable_members/:user_id/indirect
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths) |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) |
 | `user_id` | integer        | yes | The user ID of the billable member |
 
 ```shell
@@ -537,7 +537,7 @@ DELETE /groups/:id/billable_members/:user_id
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths) |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) |
 | `user_id` | integer | yes   | The user ID of the member |
 
 ```shell
@@ -558,7 +558,7 @@ PUT /groups/:id/members/:user_id/state
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths). |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding). |
 | `user_id` | integer | yes   | The user ID of the member. |
 | `state`   | string | yes   | The new state for the user. State is either `awaiting` or `active`. |
 
@@ -585,7 +585,7 @@ POST /projects/:id/members
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project or group](rest/index.md#namespaced-paths). |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project or group](rest/index.md#namespaced-path-encoding). |
 | `user_id` | integer/string | yes, if `username` is not provided | The user ID of the new member or multiple IDs separated by commas. |
 | `username` | string | yes, if `user_id` is not provided | The username of the new member or multiple usernames separated by commas. |
 | `access_level` | integer | yes | [A valid access level](access_requests.md#valid-access-levels). |
@@ -626,48 +626,6 @@ Example response:
 }
 ```
 
-NOTE:
-When the setting **[Manage non-billable promotions](../administration/settings/sign_up_restrictions.md#enable-role-promotion-approval)** is enabled, new invited members with billable roles must be approved by an administrator.
-
-To enable **Manage Non-Billable Promotions**,
-you must first enable the `enable_member_promotion_management` application setting.
-
-Example of queueing a single user:
-
-```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
-     --data "user_id=1&access_level=30" "https://gitlab.example.com/api/v4/groups/:id/members"
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
-     --data "user_id=1&access_level=30" "https://gitlab.example.com/api/v4/projects/:id/members"
-```
-
-```json
-{
-  "message":{
-    "username_1":"Request queued for administrator approval."
-  }
-}
-```
-
-Example of queueing multiple users:
-
-```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
-     --data "user_id=1,2&access_level=30" "https://gitlab.example.com/api/v4/groups/:id/members"
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
-     --data "user_id=1,2&access_level=30" "https://gitlab.example.com/api/v4/projects/:id/members"
-```
-
-```json
-{
-  "queued_users": {
-    "username_1": "Request queued for administrator approval.",
-    "username_2": "Request queued for administrator approval."
-  },
-  "status": "success"
-}
-```
-
 ## Edit a member of a group or project
 
 Updates a member of a group or project.
@@ -679,7 +637,7 @@ PUT /projects/:id/members/:user_id
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project or group](rest/index.md#namespaced-paths) |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project or group](rest/index.md#namespaced-path-encoding) |
 | `user_id` | integer | yes   | The user ID of the member |
 | `access_level` | integer | yes | A [valid access level](access_requests.md#valid-access-levels) |
 | `expires_at` | string | no | A date string in the format `YEAR-MONTH-DAY` |
@@ -716,22 +674,6 @@ Example response:
 }
 ```
 
-NOTE:
-When the setting **[Manage non-billable promotions](../administration/settings/sign_up_restrictions.md#enable-role-promotion-approval)** is enabled, new invited users with billable roles must be approved by an administrator.
-
-To enable **Manage non-billable promotions**,
-you must first enable the `enable_member_promotion_management` application setting.
-
-Example response:
-
-```json
-{
-  "message":{
-    "username_1":"Request queued for administrator approval."
-  }
-}
-```
-
 ### Set override flag for a member of a group
 
 By default, the access level of LDAP group members is set to the value specified
@@ -743,7 +685,7 @@ POST /groups/:id/members/:user_id/override
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths) |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) |
 | `user_id` | integer | yes   | The user ID of the member |
 
 ```shell
@@ -787,7 +729,7 @@ DELETE /groups/:id/members/:user_id/override
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths) |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) |
 | `user_id` | integer | yes   | The user ID of the member |
 
 ```shell
@@ -836,7 +778,7 @@ DELETE /projects/:id/members/:user_id
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the project or group](rest/index.md#namespaced-paths) |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the project or group](rest/index.md#namespaced-path-encoding) |
 | `user_id` | integer | yes   | The user ID of the member |
 | `skip_subresources` | boolean | false   | Whether the deletion of direct memberships of the removed member in subgroups and projects should be skipped. Default is `false`. |
 | `unassign_issuables` | boolean | false   | Whether the removed member should be unassigned from any issues or merge requests inside a given group or project. Default is `false`. |
@@ -858,7 +800,7 @@ PUT /groups/:id/members/:member_id/approve
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the root group](rest/index.md#namespaced-paths) |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the root group](rest/index.md#namespaced-path-encoding) |
 | `member_id` | integer | yes   | The ID of the member |
 
 Example request:
@@ -877,7 +819,7 @@ POST /groups/:id/members/approve_all
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the root group](rest/index.md#namespaced-paths) |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the root group](rest/index.md#namespaced-path-encoding) |
 
 Example request:
 
@@ -905,7 +847,7 @@ GET /groups/:id/pending_members
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths) |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) |
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/:id/pending_members"

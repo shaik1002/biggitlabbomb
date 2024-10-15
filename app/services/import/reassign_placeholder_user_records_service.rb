@@ -6,7 +6,6 @@ module Import
     MEMBER_DELETE_BATCH_SIZE = 1_000
     GROUP_FINDER_MEMBER_RELATIONS = %i[direct inherited shared_from_groups].freeze
     PROJECT_FINDER_MEMBER_RELATIONS = %i[direct inherited invited_groups shared_into_ancestors].freeze
-    RELATION_BATCH_SLEEP = 5
 
     def initialize(import_source_user)
       @import_source_user = import_source_user
@@ -74,9 +73,6 @@ module Import
             user_reference_column: user_reference_column
           ) do |model_relation, placeholder_references|
             reassign_placeholder_records_batch(model_relation, placeholder_references, user_reference_column)
-
-            # TODO: Remove with https://gitlab.com/gitlab-org/gitlab/-/issues/493977
-            Kernel.sleep RELATION_BATCH_SLEEP
           end
         rescue NameError => e
           ::Import::Framework::Logger.error(
@@ -128,8 +124,8 @@ module Import
 
       # If user is a member (direct or inherited) with higher level, skip creating the membership.
       if existing_membership
-        if existing_membership.access_level > placeholder_membership.access_level
-          log_create_membership_skipped('Existing membership of higher access level found for user, skipping',
+        if existing_membership.access_level >= placeholder_membership.access_level
+          log_create_membership_skipped('Existing membership of same or higher access level found for user, skipping',
             placeholder_membership, existing_membership)
 
           return
@@ -139,9 +135,7 @@ module Import
         # to this memberable between the time the import finished and the reassignment process began.
         # In this case, we don't override the existing direct membership, we skip creating it.
         if existing_membership.source == memberable
-          log_create_membership_skipped(
-            'Existing direct membership of lower or equal access level found for user, ' \
-              'skipping',
+          log_create_membership_skipped('Existing direct membership of lower access level found for user, skipping',
             placeholder_membership, existing_membership)
 
           return

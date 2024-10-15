@@ -51,16 +51,13 @@ module Gitlab
         belongs_to :component_version
       end
 
-      # rubocop:disable Metrics/AbcSize -- It went above limit when adding support for organization_id sharding key.
       def perform
         each_sub_batch do |sub_batch|
           # rubocop:disable Rails/FindEach -- This already operates on a sub_batch
           sub_batch.where("name LIKE '%/%'").each do |src_component|
             dst_component = Component.find_by(
               name: component_name_without_os_prefix(src_component.name),
-              purl_type: src_component.purl_type,
-              component_type: src_component.component_type,
-              organization_id: src_component.organization_id
+              purl_type: src_component.purl_type
             )
 
             # This uses loop based batching to efficiently iterate over
@@ -93,7 +90,6 @@ module Gitlab
           # rubocop:enable Rails/FindEach
         end
       end
-      # rubocop:enable Metrics/AbcSize
 
       private
 
@@ -108,7 +104,6 @@ module Gitlab
           next unless occurrence.component_version.present?
 
           { component_id: dst_component.id, version: occurrence.component_version.version,
-            organization_id: dst_component.organization_id,
             source_package_name: occurrence.component_version.source_package_name }
         end
       end

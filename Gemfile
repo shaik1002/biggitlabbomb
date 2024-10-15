@@ -260,7 +260,7 @@ gem 'asciidoctor-kroki', '~> 0.10.0', require: false, feature_category: :markdow
 gem 'rouge', '~> 4.3.0', feature_category: :shared
 gem 'truncato', '~> 0.7.12', feature_category: :team_planning
 gem 'nokogiri', '~> 1.16', feature_category: :shared
-gem 'gitlab-glfm-markdown', '~> 0.0.21', feature_category: :markdown
+gem 'gitlab-glfm-markdown', '~> 0.0.20', feature_category: :markdown
 
 # Calendar rendering
 gem 'icalendar', '~> 2.10.1', feature_category: :system_access
@@ -432,7 +432,7 @@ gem 'prometheus-client-mmap', '~> 1.1', '>= 1.1.1', require: 'prometheus/client'
 gem 'async', '~> 2.12.1', require: false # rubocop:disable Gemfile/MissingFeatureCategory -- This is general utility gem
 
 # Security report schemas used to validate CI job artifacts of security jobs
-gem 'gitlab-security_report_schemas', '0.1.2.min15.0.0.max15.2.1', feature_category: :vulnerability_management
+gem 'gitlab-security_report_schemas', '0.1.2.min15.0.0.max15.2.0', feature_category: :vulnerability_management
 
 # OpenTelemetry
 group :opentelemetry do
@@ -481,7 +481,7 @@ group :development do
 
   gem 'listen', '~> 3.7' # rubocop:todo Gemfile/MissingFeatureCategory
 
-  gem 'ruby-lsp', "~> 0.19.0", require: false, feature_category: :tooling
+  gem 'ruby-lsp', "~> 0.17.0", require: false, feature_category: :tooling
 
   gem 'ruby-lsp-rails', "~> 0.3.6", feature_category: :tooling
 
@@ -501,7 +501,7 @@ group :development, :test do
   gem 'awesome_print', require: false # rubocop:todo Gemfile/MissingFeatureCategory
 
   gem 'database_cleaner-active_record', '~> 2.2.0', feature_category: :database
-  gem 'rspec-rails', '~> 7.0.0', feature_category: :shared
+  gem 'rspec-rails', '~> 6.1.1', feature_category: :shared
   gem 'factory_bot_rails', '~> 6.4.3', feature_category: :tooling
 
   # Prevent occasions where minitest is not bundled in packaged versions of ruby (see #3826)
@@ -593,7 +593,7 @@ group :test do
   # Moved in `test` because https://gitlab.com/gitlab-org/gitlab/-/issues/217527
   gem 'derailed_benchmarks', require: false # rubocop:todo Gemfile/MissingFeatureCategory
 
-  gem 'gitlab_quality-test_tooling', '~> 1.39.0', require: false, feature_category: :tooling
+  gem 'gitlab_quality-test_tooling', '~> 1.38.0', require: false, feature_category: :tooling
 end
 
 gem 'octokit', '~> 9.0', feature_category: :importers
@@ -740,5 +740,3 @@ gem 'gitlab-sdk', '~> 0.3.0', feature_category: :application_instrumentation
 gem 'openbao_client', path: 'gems/openbao_client' # rubocop:todo Gemfile/MissingFeatureCategory
 
 gem 'paper_trail', '~> 15.0' # rubocop:todo Gemfile/MissingFeatureCategory
-
-gem "i18n_data", "~> 0.13.1", feature_category: :system_access

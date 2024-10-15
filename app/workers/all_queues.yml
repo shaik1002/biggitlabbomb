@@ -615,15 +615,6 @@
   :weight: 1
   :idempotent: false
   :tags: []
-- :name: cronjob:merge_requests_process_scheduled_merge
-  :worker_name: MergeRequests::ProcessScheduledMergeWorker
-  :feature_category: :code_review_workflow
-  :has_external_dependencies: false
-  :urgency: :low
-  :resource_boundary: :cpu
-  :weight: 1
-  :idempotent: false
-  :tags: []
 - :name: cronjob:metrics_global_metrics_update
   :worker_name: Metrics::GlobalMetricsUpdateWorker
   :feature_category: :observability
@@ -2433,15 +2424,6 @@
   :weight: 1
   :idempotent: true
   :tags: []
-- :name: anti_abuse_ban_duplicate_users
-  :worker_name: AntiAbuse::BanDuplicateUsersWorker
-  :feature_category: :instance_resiliency
-  :has_external_dependencies: false
-  :urgency: :low
-  :resource_boundary: :unknown
-  :weight: 1
-  :idempotent: true
-  :tags: []
 - :name: anti_abuse_spam_abuse_events
   :worker_name: AntiAbuse::SpamAbuseEventsWorker
   :feature_category: :instance_resiliency
@@ -3720,6 +3702,42 @@
   :weight: 2
   :idempotent: false
   :tags: []
+- :name: onboarding_issue_created
+  :worker_name: Onboarding::IssueCreatedWorker
+  :feature_category: :onboarding
+  :has_external_dependencies: false
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: onboarding_pipeline_created
+  :worker_name: Onboarding::PipelineCreatedWorker
+  :feature_category: :onboarding
+  :has_external_dependencies: false
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: onboarding_progress
+  :worker_name: Onboarding::ProgressWorker
+  :feature_category: :onboarding
+  :has_external_dependencies: false
+  :urgency: :low
+  :resource_boundary: :cpu
+  :weight: 1
+  :idempotent: true
+  :tags: []
+- :name: onboarding_user_added
+  :worker_name: Onboarding::UserAddedWorker
+  :feature_category: :onboarding
+  :has_external_dependencies: false
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
+  :tags: []
 - :name: pages
   :worker_name: PagesWorker
   :feature_category: :pages
@@ -3731,15 +3749,6 @@
   :tags: []
 - :name: pages_deactivate_mr_deployments
   :worker_name: Pages::DeactivateMrDeploymentsWorker
-  :feature_category: :pages
-  :has_external_dependencies: false
-  :urgency: :low
-  :resource_boundary: :unknown
-  :weight: 1
-  :idempotent: true
-  :tags: []
-- :name: pages_delete_pages_deployment
-  :worker_name: Pages::DeletePagesDeploymentWorker
   :feature_category: :pages
   :has_external_dependencies: false
   :urgency: :low
@@ -4196,6 +4205,15 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: false
+  :tags: []
+- :name: users_record_last_activity
+  :worker_name: Users::RecordLastActivityWorker
+  :feature_category: :seat_cost_management
+  :has_external_dependencies: false
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
   :tags: []
 - :name: users_track_namespace_visits
   :worker_name: Users::TrackNamespaceVisitsWorker

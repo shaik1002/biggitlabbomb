@@ -10,7 +10,7 @@ import IssueCardTimeInfo from 'ee_else_ce/issues/list/components/issue_card_time
 import createMockApollo from 'helpers/mock_apollo_helper';
 import setWindowLocation from 'helpers/set_window_location_helper';
 import { TEST_HOST } from 'helpers/test_constants';
-import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
+import { mountExtended } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import {
   filteredTokens,
@@ -38,7 +38,6 @@ import {
   TOKEN_TYPE_CREATED,
   TOKEN_TYPE_CLOSED,
 } from '~/vue_shared/components/filtered_search_bar/constants';
-import EmptyResult from '~/vue_shared/components/empty_result.vue';
 import IssuableList from '~/vue_shared/issuable/list/components/issuable_list_root.vue';
 import {
   emptyIssuesQueryResponse,
@@ -84,12 +83,13 @@ describe('IssuesDashboardApp component', () => {
     defaultQueryResponse.data.issues.nodes[0].weight = 5;
   }
 
+  const findCalendarButton = () => wrapper.findByRole('link', { name: 'Subscribe to calendar' });
   const findDisclosureDropdown = () => wrapper.findComponent(GlDisclosureDropdown);
   const findEmptyState = () => wrapper.findComponent(GlEmptyState);
-  const findEmptyResult = () => wrapper.findComponent(EmptyResult);
   const findIssuableList = () => wrapper.findComponent(IssuableList);
   const findIssueCardStatistics = () => wrapper.findComponent(IssueCardStatistics);
   const findIssueCardTimeInfo = () => wrapper.findComponent(IssueCardTimeInfo);
+  const findRssButton = () => wrapper.findByRole('link', { name: 'Subscribe to RSS feed' });
 
   const mountComponent = ({
     provide = {},
@@ -97,7 +97,7 @@ describe('IssuesDashboardApp component', () => {
     issuesCountsQueryHandler = jest.fn().mockResolvedValue(issuesCountsQueryResponse),
     sortPreferenceMutationHandler = jest.fn().mockResolvedValue(setSortPreferenceMutationResponse),
   } = {}) => {
-    wrapper = shallowMountExtended(IssuesDashboardApp, {
+    wrapper = mountExtended(IssuesDashboardApp, {
       apolloProvider: createMockApollo([
         [getIssuesQuery, issuesQueryHandler],
         [getIssuesCountsQuery, issuesCountsQueryHandler],
@@ -109,7 +109,6 @@ describe('IssuesDashboardApp component', () => {
       },
       stubs: {
         GlIntersperse: true,
-        IssuableList,
       },
     });
   };
@@ -175,11 +174,11 @@ describe('IssuesDashboardApp component', () => {
       });
 
       it('renders RSS button link', () => {
-        expect(findDisclosureDropdown().props('items')[0].href).toBe(defaultProvide.rssPath);
+        expect(findRssButton().attributes('href')).toBe(defaultProvide.rssPath);
       });
 
       it('renders calendar button link', () => {
-        expect(findDisclosureDropdown().props('items')[1].href).toBe(defaultProvide.calendarPath);
+        expect(findCalendarButton().attributes('href')).toBe(defaultProvide.calendarPath);
       });
     });
 
@@ -226,7 +225,11 @@ describe('IssuesDashboardApp component', () => {
         });
 
         it('renders empty state', () => {
-          expect(findEmptyResult().exists()).toBe(true);
+          expect(findEmptyState().props()).toMatchObject({
+            description: 'To widen your search, change or remove filters above',
+            svgPath: defaultProvide.emptyStateWithFilterSvgPath,
+            title: 'Sorry, your filter produced no results',
+          });
         });
       });
     });
@@ -246,7 +249,8 @@ describe('IssuesDashboardApp component', () => {
 
       it('renders empty state', () => {
         expect(findEmptyState().props()).toMatchObject({
-          svgPath: defaultProvide.emptyStateWithFilterSvgPath,
+          description: null,
+          svgPath: defaultProvide.emptyStateWithoutFilterSvgPath,
           title: 'Please select at least one filter to see results',
         });
       });

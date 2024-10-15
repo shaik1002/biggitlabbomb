@@ -60,7 +60,7 @@ coverage in the tool's output:
 | Name         | Language     | Command      | Example      |
 |--------------|--------------|--------------|--------------|
 | Simplecov | Ruby | None | `/\(\d+.\d+\%\) covered/` |
-| pytest-cov | Python | None | `/TOTAL.*? (100(?:\.0+)?\%\|[1-9]?\d(?:\.\d+)?\%)$/` |
+| pytest-cov | Python | None | `/TOTAL.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/` |
 | Scoverage | Scala | None | `/(?i)total.*? (100(?:\.0+)?\%\|[1-9]?\d(?:\.\d+)?\%)$/` |
 | pest | PHP | `pest --coverage --colors=never` | `/Statement coverage[A-Za-z\.*]\s*:\s*([^%]+)/` |
 | phpunit | PHP | `phpunit --coverage-text --colors=never` | `/^\s*Lines:\s*\d+.\d+\%/` |
@@ -108,7 +108,7 @@ To view the code coverage history for all projects in a group:
 1. Select **Analyze > Repository analytics**.
 1. Optional. To view a CSV file of the data, select **Download historic test coverage data (.csv)**.
 
-![Code coverage graph of a group over time](img/code_coverage_group_report_v15_11.png)
+![Code coverage graph of a group over time](img/code_coverage_group_report.png)
 
 ### Pipeline badges
 

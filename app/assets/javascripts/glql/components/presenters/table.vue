@@ -1,13 +1,11 @@
 <script>
 import { GlIcon } from '@gitlab/ui';
 import Sorter from '../../core/sorter';
-import ThResizable from '../common/th_resizable.vue';
 
 export default {
   name: 'TablePresenter',
   components: {
     GlIcon,
-    ThResizable,
   },
   inject: ['presenter'],
   props: {
@@ -29,23 +27,16 @@ export default {
       items,
       fields: this.config.fields,
       sorter: new Sorter(items),
-
-      table: null,
     };
-  },
-  async mounted() {
-    await this.$nextTick();
-
-    this.table = this.$refs.table;
   },
 };
 </script>
 <template>
   <div class="!gl-my-4">
-    <table ref="table" class="!gl-mb-2 !gl-mt-0 gl-overflow-y-hidden">
+    <table class="!gl-mb-2 !gl-mt-0">
       <thead>
-        <tr v-if="table">
-          <th-resizable v-for="(field, fieldIndex) in fields" :key="field.key" :table="table">
+        <tr>
+          <th v-for="(field, fieldIndex) in fields" :key="field.key">
             <div
               :data-testid="`column-${fieldIndex}`"
               class="gl-cursor-pointer"
@@ -57,7 +48,7 @@ export default {
                 :name="sorter.options.ascending ? 'arrow-up' : 'arrow-down'"
               />
             </div>
-          </th-resizable>
+          </th>
         </tr>
       </thead>
       <tbody>

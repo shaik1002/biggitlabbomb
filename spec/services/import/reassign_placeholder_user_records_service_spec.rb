@@ -120,12 +120,6 @@ RSpec.describe Import::ReassignPlaceholderUserRecordsService, feature_category: 
   end
 
   describe '#execute', :aggregate_failures do
-    before do
-      # Decrease the sleep in this test, so the test suite runs faster.
-      # TODO: Remove with https://gitlab.com/gitlab-org/gitlab/-/issues/493977
-      stub_const("#{described_class}::RELATION_BATCH_SLEEP", 0.01)
-    end
-
     shared_examples 'a successful reassignment' do
       it 'completes the reassignment' do
         service.execute
@@ -150,12 +144,6 @@ RSpec.describe Import::ReassignPlaceholderUserRecordsService, feature_category: 
 
     context 'when a user can be reassigned without error' do
       it_behaves_like 'a successful reassignment'
-
-      it 'sleeps between processing each model relation batch' do
-        expect(Kernel).to receive(:sleep).with(0.01).exactly(8).times
-
-        service.execute
-      end
 
       it 'updates actual records from the source user\'s placeholder reference records' do
         expect { service.execute }.to change { merge_requests[0].reload.author_id }
@@ -288,20 +276,6 @@ RSpec.describe Import::ReassignPlaceholderUserRecordsService, feature_category: 
         end
       end
 
-      context 'when user has existing same level INHERITED membership' do
-        before_all do
-          namespace.add_reporter(real_user)
-        end
-
-        it 'still creates the project membership' do
-          expect { service.execute }.to change { project.reload.members.count }.to(1)
-        end
-
-        it 'still creates the group membership' do
-          expect { service.execute }.to change { subgroup.reload.members.count }.to(1)
-        end
-      end
-
       context 'when user has existing higher level INHERITED membership' do
         before_all do
           namespace.add_owner(real_user)
@@ -319,7 +293,7 @@ RSpec.describe Import::ReassignPlaceholderUserRecordsService, feature_category: 
 
         it 'does not create the project membership, and logs' do
           expect_skipped_membership_log(
-            'Existing membership of higher access level found for user, skipping',
+            'Existing membership of same or higher access level found for user, skipping',
             { 'project_id' => project.id }, existing_membership_logged_params
           )
 
@@ -328,7 +302,7 @@ RSpec.describe Import::ReassignPlaceholderUserRecordsService, feature_category: 
 
         it 'does not create the group membership, and logs' do
           expect_skipped_membership_log(
-            'Existing membership of higher access level found for user, skipping',
+            'Existing membership of same or higher access level found for user, skipping',
             { 'group_id' => subgroup.id }, existing_membership_logged_params
           )
 
@@ -343,37 +317,13 @@ RSpec.describe Import::ReassignPlaceholderUserRecordsService, feature_category: 
 
         it 'does not create a new membership, and logs' do
           expect_skipped_membership_log(
-            'Existing direct membership of lower or equal access level found for user, skipping',
+            'Existing direct membership of lower access level found for user, skipping',
             {
               'project_id' => project.id
             },
             {
               'id' => real_user.members.first.id,
               'access_level' => Gitlab::Access::GUEST,
-              'source_id' => project.id,
-              'source_type' => 'Project',
-              'user_id' => real_user.id
-            }
-          )
-
-          expect { service.execute }.not_to change { project.reload.members.count }
-        end
-      end
-
-      context 'when user has existing same level DIRECT membership' do
-        before_all do
-          project.add_developer(real_user)
-        end
-
-        it 'does not create a new membership, and logs' do
-          expect_skipped_membership_log(
-            'Existing direct membership of lower or equal access level found for user, skipping',
-            {
-              'project_id' => project.id
-            },
-            {
-              'id' => real_user.members.first.id,
-              'access_level' => Gitlab::Access::DEVELOPER,
               'source_id' => project.id,
               'source_type' => 'Project',
               'user_id' => real_user.id
@@ -479,7 +429,7 @@ RSpec.describe Import::ReassignPlaceholderUserRecordsService, feature_category: 
 
     context 'when the source user is not in reassignment_in_progress status' do
       before do
-        source_user.complete!
+        source_user.update!(status: 1)
       end
 
       it 'does not reassign any contributions or create memberships' do

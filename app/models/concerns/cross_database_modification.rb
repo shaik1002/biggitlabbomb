@@ -99,8 +99,6 @@ module CrossDatabaseModification
       case self.name
       when 'ActiveRecord::Base', 'ApplicationRecord'
         :gitlab_main
-      when 'Gitlab::Database::SecApplicationRecord'
-        :gitlab_sec
       when 'Ci::ApplicationRecord'
         :gitlab_ci
       when 'PackageMetadata::ApplicationRecord'

@@ -6,7 +6,11 @@ module WikiPages
       wiki = Wiki.for_container(container, current_user)
       page = WikiPage.new(wiki)
 
-      if page.create(@params) && page.persisted?
+      wiki.capture_git_error(event_action) do
+        page.create(@params)
+      end
+
+      if page.persisted?
         execute_hooks(page)
         ServiceResponse.success(payload: { page: page })
       else
@@ -28,5 +32,3 @@ module WikiPages
     end
   end
 end
-
-WikiPages::CreateService.prepend_mod_with('WikiPages::CreateService')

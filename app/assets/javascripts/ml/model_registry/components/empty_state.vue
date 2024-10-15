@@ -1,6 +1,6 @@
 <script>
 import { GlEmptyState } from '@gitlab/ui';
-import emptySvgUrl from '@gitlab/svgs/dist/illustrations/status/status-new-md.svg';
+import emptySvgUrl from '@gitlab/svgs/dist/illustrations/empty-state/empty-dag-md.svg?url';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import { s__ } from '~/locale';
 import { MODEL_ENTITIES } from '../constants';
@@ -58,6 +58,7 @@ export default {
     :primary-button-text="emptyStateValues.createNew"
     :primary-button-link="emptyStateValues.helpPath"
     :svg-path="emptyStateValues.emptySvgPath"
+    :svg-height="null"
     :description="emptyStateValues.description"
     class="gl-py-8"
   />

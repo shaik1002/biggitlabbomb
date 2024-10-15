@@ -165,11 +165,11 @@
     margin-left: $note-spacing-left;
 
     .line_holder td:first-of-type {
-      @apply gl-border-l;
+      @include gl-border-l;
     }
 
     .line_holder td:last-of-type {
-      @apply gl-border-r;
+      @include gl-border-r;
     }
 
     .discussion-notes {

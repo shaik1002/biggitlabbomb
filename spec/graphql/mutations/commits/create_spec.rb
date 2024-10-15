@@ -240,6 +240,6 @@ RSpec.describe Mutations::Commits::Create do
 
   def expect_to_contain_deltas(expected_deltas)
     expect(deltas.count).to eq(expected_deltas.count)
-    expect(deltas).to include(*expected_deltas) unless expected_deltas.empty?
+    expect(deltas).to include(*expected_deltas)
   end
 end

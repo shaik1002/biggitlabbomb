@@ -242,8 +242,7 @@ module Gitlab
           'UploadConfig' => {
             'Method' => upload_config[:method],
             'Url' => upload_config[:url],
-            'Headers' => (upload_config[:headers] || {}).transform_values { |v| Array.wrap(v) },
-            'AuthorizedUploadResponse' => upload_config[:authorized_upload_response] || {}
+            'Headers' => (upload_config[:headers] || {}).transform_values { |v| Array.wrap(v) }
           }.compact_blank!
         }
         params.compact_blank!

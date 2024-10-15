@@ -14,11 +14,11 @@ module QA
         end
 
         def total
-          data['total']
+          data.dig('total')
         end
 
         def each
-          data['items']&.each do |item|
+          data.dig('items')&.each do |item|
             yield MessageItem.new(item)
           end
         end

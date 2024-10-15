@@ -29,6 +29,7 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
     it { is_expected.to have_one(:catalog_verified_namespace) }
     it { is_expected.to have_many :custom_emoji }
     it { is_expected.to have_one :package_setting_relation }
+    it { is_expected.to have_one :onboarding_progress }
     it { is_expected.to have_one :admin_note }
     it { is_expected.to have_many :pending_builds }
     it { is_expected.to have_one :namespace_route }
@@ -270,72 +271,6 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
         it 'is not valid and adds an error message' do
           expect(namespace).not_to be_valid
           expect(namespace.errors[:organization_id]).to include("must match the parent organization's ID")
-        end
-      end
-    end
-  end
-
-  describe 'default values' do
-    context 'organzation_id' do
-      context 'when feature flag namespace_model_default_org is enabled' do
-        context 'and database has a default value' do
-          before do
-            described_class.connection.execute("ALTER TABLE namespaces ALTER COLUMN organization_id SET DEFAULT 100")
-            described_class.reset_column_information
-          end
-
-          after do
-            described_class.connection.execute("ALTER TABLE namespaces ALTER COLUMN organization_id SET DEFAULT 1")
-            described_class.reset_column_information
-          end
-
-          it 'uses value from model' do
-            expect(described_class.new.organization_id).to eq(1)
-          end
-        end
-
-        context 'and database has no default value' do
-          before do
-            described_class.connection.execute("ALTER TABLE namespaces ALTER COLUMN organization_id DROP DEFAULT")
-            described_class.reset_column_information
-          end
-
-          after do
-            described_class.connection.execute("ALTER TABLE namespaces ALTER COLUMN organization_id SET DEFAULT 1")
-            described_class.reset_column_information
-          end
-
-          it 'uses value from model' do
-            expect(described_class.new.organization_id).to eq(1)
-          end
-        end
-      end
-
-      context 'when feature flag namespace_model_default_org is disabled' do
-        before do
-          stub_feature_flags(namespace_model_default_org: false)
-        end
-
-        context 'and database has a default value' do
-          before do
-            described_class.connection.execute("ALTER TABLE namespaces ALTER COLUMN organization_id SET DEFAULT 100")
-            described_class.reset_column_information
-          end
-
-          it 'uses database value' do
-            expect(described_class.new.organization_id).to eq(100)
-          end
-        end
-
-        context 'and database has no default value' do
-          before do
-            described_class.connection.execute("ALTER TABLE namespaces ALTER COLUMN organization_id DROP DEFAULT")
-            described_class.reset_column_information
-          end
-
-          it 'is nil' do
-            expect(described_class.new.organization_id).to be_nil
-          end
         end
       end
     end
@@ -636,6 +571,28 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
         it "does not return a namespace not inheriting shared runners" do
           is_expected.not_to include(namespace_not_inheriting_shared_runners)
         end
+      end
+    end
+
+    describe '#by_contains_all_traversal_ids' do
+      let_it_be(:namespace_1) { create(:group) }
+      let_it_be(:namespace_2) { create(:group, parent: namespace_1) }
+      let_it_be(:namespace_3) { create(:namespace) }
+
+      it 'returns groups that contain all provided traversal_ids' do
+        expect(described_class.by_contains_all_traversal_ids(namespace_1.traversal_ids))
+          .to contain_exactly(namespace_1, namespace_2)
+        expect(described_class.by_contains_all_traversal_ids(namespace_2.traversal_ids)).to contain_exactly(namespace_2)
+        expect(described_class.by_contains_all_traversal_ids(namespace_3.traversal_ids)).to contain_exactly(namespace_3)
+      end
+    end
+
+    describe '#by_traversal_ids' do
+      let_it_be(:namespace_1) { create(:namespace) }
+
+      it 'returns groups for the provided traversal_ids' do
+        expect(described_class.by_traversal_ids(namespace.traversal_ids)).to contain_exactly(namespace)
+        expect(described_class.by_traversal_ids(namespace_1.traversal_ids)).to contain_exactly(namespace_1)
       end
     end
   end
@@ -1929,7 +1886,7 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
 
   describe '#root_ancestor' do
     context 'with persisted root group' do
-      let_it_be(:root_group) { create(:group) }
+      let!(:root_group) { create(:group) }
 
       it 'returns root_ancestor for root group without a query' do
         expect { root_group.root_ancestor }.not_to exceed_query_limit(0)
@@ -1951,19 +1908,6 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
         expect(nested_group.root_ancestor).to eq(root_group)
         expect(deep_nested_group.root_ancestor).to eq(root_group)
         expect(very_deep_nested_group.root_ancestor).to eq(root_group)
-      end
-
-      context 'when nested group references parent by id' do
-        let_it_be(:nested_group) { create(:group, parent: root_group) }
-        let_it_be(:deep_nested_group) { Group.new(attributes_for(:group, parent_id: nested_group.id)) }
-
-        it 'performs a single query' do
-          expect { deep_nested_group.root_ancestor }.not_to exceed_query_limit(1)
-        end
-
-        it 'returns the root ancestor' do
-          expect(deep_nested_group.root_ancestor).to eq root_group
-        end
       end
     end
 

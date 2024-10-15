@@ -532,9 +532,7 @@ describe('ErrorTrackingList', () => {
         });
 
         it('fetches the previous page of results', () => {
-          expect(
-            wrapper.find('[data-testid="gl-pagination-prev"]').attributes('aria-disabled'),
-          ).toBe(undefined);
+          expect(wrapper.find('.prev-page-item').attributes('aria-disabled')).toBe(undefined);
           findPagination().vm.$emit('input', currentPage - 1);
           expect(actions.fetchPaginatedResults).toHaveBeenCalled();
           expect(actions.fetchPaginatedResults).toHaveBeenLastCalledWith(

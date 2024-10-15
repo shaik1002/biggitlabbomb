@@ -12,11 +12,8 @@ module Ci
         end
 
         def normalize_params
-          params.merge!({
-            runner_type: 'project_type',
-            sharding_key_id: scope&.id,
-            projects: [scope]
-          })
+          params[:runner_type] = 'project_type'
+          params[:projects] = [scope]
         end
 
         def validate_params

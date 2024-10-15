@@ -1,6 +1,7 @@
 <script>
 import {
   GlCard,
+  GlExperimentBadge,
   GlIcon,
   GlLink,
   GlPopover,
@@ -17,6 +18,7 @@ export default {
   name: 'PreReceiveSecretDetectionFeatureCard',
   components: {
     GlCard,
+    GlExperimentBadge,
     GlIcon,
     GlLink,
     GlPopover,
@@ -69,6 +71,10 @@ export default {
         'gl-shrink-0': true,
         'gl-text-gray-500': !enabled,
         'gl-text-green-500': enabled,
+        'gl-w-full': true,
+        'gl-justify-between': true,
+        'gl-flex': true,
+        'gl-mb-4': true,
       };
     },
     isToggleDisabled() {
@@ -149,7 +155,7 @@ export default {
 
 <template>
   <gl-card :class="cardClasses">
-    <div class="gl-flex gl-items-baseline">
+    <div class="gl-flex gl-flex-col-reverse gl-items-baseline">
       <h3 class="gl-m-0 gl-mr-3 gl-text-lg">
         {{ feature.name }}
         <gl-icon v-if="showLock" id="lockIcon" name="lock" class="gl-mb-1" />
@@ -166,6 +172,8 @@ export default {
         data-testid="feature-status"
         :data-qa-feature="`${feature.type}_${enabled}_status`"
       >
+        <gl-experiment-badge type="beta" popover-placement="top" class="!gl-mx-0" />
+
         <template v-if="enabled">
           <span>
             <gl-icon name="check-circle-filled" />

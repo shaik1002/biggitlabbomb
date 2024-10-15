@@ -8,7 +8,7 @@ import {
   GlDisclosureDropdownItem,
   GlModalDirective,
 } from '@gitlab/ui';
-import CLUSTER_EMPTY_SVG from '@gitlab/svgs/dist/illustrations/empty-state/empty-environment-md.svg';
+import CLUSTER_EMPTY_SVG from '@gitlab/svgs/dist/illustrations/empty-state/empty-state-clusters.svg?url';
 import { isEmpty } from 'lodash';
 import { s__, __ } from '~/locale';
 import { createAlert } from '~/alert';
@@ -160,11 +160,6 @@ export default {
     fluxResourceStatus() {
       return this.fluxKustomization.conditions || this.fluxHelmRelease.conditions;
     },
-    fluxNamespace() {
-      return (
-        this.fluxKustomization?.metadata?.namespace || this.fluxHelmRelease?.metadata?.namespace
-      );
-    },
   },
   methods: {
     handleError(message) {
@@ -292,7 +287,6 @@ export default {
         :flux-resource-path="fluxResourcePath"
         :resource-type="activeTab"
         :flux-resource-status="fluxResourceStatus"
-        :flux-namespace="fluxNamespace"
         :flux-api-error="fluxApiError"
         @error="handleError"
         @show-flux-resource-details="showFluxResourceDetails"

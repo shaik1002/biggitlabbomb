@@ -6,6 +6,7 @@ import MetadataItem from '~/vue_shared/components/registry/metadata_item.vue';
 import TitleArea from '~/vue_shared/components/registry/title_area.vue';
 import { MODEL_ENTITIES } from '~/ml/model_registry/constants';
 import ModelVersionList from '~/ml/model_registry/components/model_version_list.vue';
+import CandidateList from '~/ml/model_registry/components/candidate_list.vue';
 import ModelDetail from '~/ml/model_registry/components/model_detail.vue';
 import ModelVersionCreate from '~/ml/model_registry/components/model_version_create.vue';
 import ActionsDropdown from '~/ml/model_registry/components/actions_dropdown.vue';
@@ -20,6 +21,7 @@ import ModelEdit from '../components/model_edit.vue';
 
 const ROUTE_DETAILS = 'details';
 const ROUTE_VERSIONS = 'versions';
+const ROUTE_CANDIDATES = 'candidates';
 
 const deletionSuccessfulAlert = {
   id: 'ml-model-deleted-successfully',
@@ -37,6 +39,11 @@ const routes = [
     path: '/versions',
     name: ROUTE_VERSIONS,
     component: ModelVersionList,
+  },
+  {
+    path: '/candidates',
+    name: ROUTE_CANDIDATES,
+    component: CandidateList,
   },
   { path: '*', redirect: { name: ROUTE_DETAILS } },
 ];
@@ -135,6 +142,9 @@ export default {
     versionCount() {
       return this.model?.versionCount || 0;
     },
+    candidateCount() {
+      return this.model?.candidateCount || 0;
+    },
     tabIndex() {
       return routes.findIndex(({ name }) => name === this.$route.name);
     },
@@ -175,6 +185,7 @@ export default {
   modelVersionEntity: MODEL_ENTITIES.modelVersion,
   ROUTE_DETAILS,
   ROUTE_VERSIONS,
+  ROUTE_CANDIDATES,
 };
 </script>
 
@@ -216,6 +227,12 @@ export default {
               <template #title>
                 {{ s__('MlModelRegistry|Versions') }}
                 <gl-badge class="gl-tab-counter-badge">{{ versionCount }}</gl-badge>
+              </template>
+            </gl-tab>
+            <gl-tab @click="goTo($options.ROUTE_CANDIDATES)">
+              <template #title>
+                {{ s__('MlModelRegistry|Version candidates') }}
+                <gl-badge class="gl-tab-counter-badge">{{ candidateCount }}</gl-badge>
               </template>
             </gl-tab>
 

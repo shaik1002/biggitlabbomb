@@ -235,10 +235,7 @@ FactoryBot.define do
 
       after :create do |package_file, evaluator|
         unless evaluator.without_loaded_metadatum
-          create :helm_file_metadatum,
-            package_file: package_file,
-            channel: evaluator.channel,
-            description: evaluator.description
+          create :helm_file_metadatum, package_file: package_file, channel: evaluator.channel, description: evaluator.description
         end
       end
     end

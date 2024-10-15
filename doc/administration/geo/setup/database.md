@@ -745,25 +745,6 @@ Leader instance**:
    sudo -i
    ```
 
-1. Edit `/etc/gitlab/gitlab.rb` and add the following:
-
-   ```ruby
-   postgresql['max_wal_senders'] = 2 # Use 2 per secondary site (1 temporary slot for initial Patroni replication + 1 reserved slot for a Geo secondary)
-   postgresql['max_replication_slots'] = 2 # Use 2 per secondary site (1 temporary slot for initial Patroni replication + 1 reserved slot for a Geo secondary)
-   ```
-
-1. Reconfigure GitLab:
-
-   ```shell
-   gitlab-ctl reconfigure
-   ```
-
-1. Restart the PostgreSQL service so the new changes take effect:
-
-   ```shell
-   gitlab-ctl restart postgresql
-   ```
-
 1. Start a Database console
 
    ```shell
@@ -993,43 +974,8 @@ For each node running a Patroni instance on the secondary site:
         rm -rf /var/opt/gitlab/postgresql/data
         /opt/gitlab/embedded/bin/patronictl -c /var/opt/gitlab/patroni/patroni.yaml remove postgresql-ha
         gitlab-ctl reconfigure
-        ```
-
-     1. Start Patroni on the leader Patroni node to initiate the replication process from the primary database:
-
-        ```shell
         gitlab-ctl start patroni
         ```
-
-     1. Check the status of the Patroni cluster:
-
-        ```shell
-        gitlab-ctl patroni members
-        ```
-
-        Verify that:
-
-        - The current Patroni node appears in the output.
-        - The role is `Standby Leader`. The role might initially show `Replica`.
-        - The state is `Running`. The state might initially show `Creating replica`.
-
-        Wait until the node's role stabilizes as `Standby Leader` and the state is `Running`. This might take a few minutes.
-
-     1. When the leader Patroni node is the `Standby Leader` and is `Running`, start Patroni on the other Patroni nodes in the standby cluster:
-
-        ```shell
-        gitlab-ctl start patroni
-        ```
-
-        The other Patroni nodes should join the new standby cluster as replicas and begin replicating from the leader Patroni node automatically.
-
-1. Verify the cluster status:
-
-   ```shell
-   gitlab-ctl patroni members
-   ```
-
-   Ensure all Patroni nodes are listed in the `Running` state. There should be one `Standby Leader` node and multiple `Replica` nodes.
 
 ### Migrating a single tracking database node to Patroni
 

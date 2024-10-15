@@ -12,7 +12,6 @@ module Gitlab
     # GitLab Backup CLI
     module Cli
       autoload :BackupExecutor, 'gitlab/backup/cli/backup_executor'
-      autoload :BaseExecutor, 'gitlab/backup/cli/base_executor'
       autoload :Commands, 'gitlab/backup/cli/commands'
       autoload :Context, 'gitlab/backup/cli/context'
       autoload :Dependencies, 'gitlab/backup/cli/dependencies'
@@ -29,21 +28,6 @@ module Gitlab
       autoload :VERSION, 'gitlab/backup/cli/version'
 
       Error = Class.new(StandardError)
-
-      # Entrypoint for the application
-      # Run any initialization logic from here
-      def self.start(argv)
-        # Set a custom process name
-        update_process_title!
-
-        Gitlab::Backup::Cli::Runner.start(argv)
-      end
-
-      def self.update_process_title!(status_message = nil)
-        process_title = status_message ? "gitlab-backup-cli: #{status_message}" : "gitlab-backup-cli"
-
-        Process.setproctitle(process_title)
-      end
 
       def self.rails_environment!
         require File.join(GITLAB_PATH, 'config/application')

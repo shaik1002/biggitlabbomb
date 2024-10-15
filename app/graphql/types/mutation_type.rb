@@ -107,7 +107,6 @@ module Types
       milestone: '16.0'
     }
     mount_mutation Mutations::Notes::AbuseReport::Create
-    mount_mutation Mutations::Notes::AbuseReport::Update, alpha: { milestone: '17.5' }
     mount_mutation Mutations::Notes::Create::Note, calls_gitaly: true
     mount_mutation Mutations::Notes::Create::DiffNote, calls_gitaly: true
     mount_mutation Mutations::Notes::Create::ImageDiffNote, calls_gitaly: true
@@ -119,7 +118,6 @@ module Types
     mount_mutation Mutations::Notes::Destroy
     mount_mutation Mutations::Organizations::Create, alpha: { milestone: '16.6' }
     mount_mutation Mutations::Organizations::Update, alpha: { milestone: '16.7' }
-    mount_mutation Mutations::Organizations::OrganizationUsers::Update, alpha: { milestone: '17.5' }
     mount_mutation Mutations::Projects::BlobsRemove, calls_gitaly: true, alpha: { milestone: '17.1' }
     mount_mutation Mutations::Projects::SyncFork, calls_gitaly: true, alpha: { milestone: '15.9' }
     mount_mutation Mutations::Projects::TextReplace, calls_gitaly: true, alpha: { milestone: '17.1' }

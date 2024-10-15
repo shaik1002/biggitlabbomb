@@ -4,8 +4,8 @@ textarea {
 
 input {
   border-radius: $border-radius-base;
-  @apply gl-text-default;
-  background-color: var(--gl-control-background-color-default);
+  color: $gl-text-color;
+  background-color: $input-bg;
 }
 
 input[type='text'].danger {
@@ -86,6 +86,7 @@ label {
   margin-right: 0;
 
   .form-control {
+    background: $white;
     font-family: $monospace-font;
   }
 
@@ -100,8 +101,6 @@ label {
 
 .form-control {
   @include box-shadow(none);
-  background: var(--gl-control-background-color-default);
-  @apply gl-text-default;
   border-radius: $gl-border-radius-base;
   padding: $gl-vert-padding $gl-input-padding;
 
@@ -117,9 +116,7 @@ label {
 .form-control,
 [contenteditable=true] {
   &:focus {
-    background: var(--gl-control-background-color-default);
-    border-color: var(--gl-control-border-color-default);
-    @apply gl-text-default;
+    border-color: $gray-400;
     @include gl-focus;
   }
 }
@@ -140,7 +137,7 @@ label {
 }
 
 .form-control::placeholder {
-  color: var(--gl-control-placeholder-color);
+  color: $gl-text-color-tertiary;
 }
 
 .input-group {

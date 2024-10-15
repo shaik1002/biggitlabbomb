@@ -3,7 +3,6 @@ import {
   GlAvatarLabeled,
   GlBadge,
   GlEmptyState,
-  GlIcon,
   GlKeysetPagination,
   GlLoadingIcon,
   GlTable,
@@ -11,7 +10,6 @@ import {
 } from '@gitlab/ui';
 import { createAlert } from '~/alert';
 import { __, s__ } from '~/locale';
-import { fetchPolicies } from '~/lib/graphql';
 
 import { DEFAULT_PAGE_SIZE } from '~/members/constants';
 
@@ -31,7 +29,6 @@ export default {
     GlAvatarLabeled,
     GlBadge,
     GlEmptyState,
-    GlIcon,
     GlKeysetPagination,
     GlLoadingIcon,
     GlTable,
@@ -84,8 +81,6 @@ export default {
           sort: this.querySort,
         };
       },
-      // ensures up-to-date (instead of cached, sometimes inaccurate) results when query executes
-      fetchPolicy: fetchPolicies.NETWORK_ONLY,
       skip() {
         return this.isSearchQueryTooShort;
       },
@@ -157,9 +152,6 @@ export default {
         item.status === PLACEHOLDER_STATUS_COMPLETED
       );
     },
-    isPlaceholderUserDeleted(item) {
-      return item.status === PLACEHOLDER_STATUS_COMPLETED && !item.placeholderUser;
-    },
     reassignedUser(item) {
       if (item.status === PLACEHOLDER_STATUS_KEPT_AS_PLACEHOLDER) {
         return item.placeholderUser;
@@ -210,18 +202,11 @@ export default {
           :label="item.placeholderUser.name"
           :sub-label="`@${item.placeholderUser.username}`"
         />
-        <span v-else-if="isPlaceholderUserDeleted(item)">{{
-          s__('UserMapping|Placeholder deleted')
-        }}</span>
       </template>
 
       <template #cell(source)="{ item }">
-        <div class="gl-flex gl-gap-1">
-          <gl-icon name="location" />
-          <span>{{ item.sourceHostname }}</span>
-        </div>
-        <div class="gl-mt-2">{{ item.sourceName }}</div>
-        <div class="gl-mt-2">@{{ item.sourceUsername }}</div>
+        <div>{{ item.sourceHostname }}</div>
+        <div class="gl-mt-2">{{ item.sourceUsername }}</div>
       </template>
 
       <template #cell(status)="{ item }">
@@ -235,15 +220,13 @@ export default {
       </template>
 
       <template #cell(actions)="{ item }">
-        <template v-if="isReassignedItem(item)">
-          <gl-avatar-labeled
-            v-if="reassignedUser(item)"
-            :size="32"
-            :src="reassignedUser(item).avatarUrl"
-            :label="reassignedUser(item).name"
-            :sub-label="`@${reassignedUser(item).username}`"
-          />
-        </template>
+        <gl-avatar-labeled
+          v-if="isReassignedItem(item)"
+          :size="32"
+          :src="reassignedUser(item).avatarUrl"
+          :label="reassignedUser(item).name"
+          :sub-label="`@${reassignedUser(item).username}`"
+        />
         <placeholder-actions v-else :key="item.id" :source-user="item" @confirm="onConfirm(item)" />
       </template>
     </gl-table>

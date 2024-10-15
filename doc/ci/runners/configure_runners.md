@@ -21,7 +21,10 @@ You can specify a maximum job timeout for each runner to prevent projects
 with longer job timeouts from using the runner. The maximum job timeout is
 used if it is shorter than the job timeout defined in the project.
 
-To set a runner's maximum timeout, set the `maximum_timeout` parameter in the REST API endpoint [`PUT /runners/:id`](../../api/runners.md#update-runners-details).
+You can set a runner's maximum timeout with one of the following methods:
+
+- The REST API endpoint [`PUT /runners/:id`](../../api/runners.md#update-runners-details) by setting `maximum_timeout`
+- The GitLab Helm chart by setting `maximumTimeout`
 
 ### For an instance runner
 
@@ -38,7 +41,7 @@ To set the maximum job timeout:
 1. On the left sidebar, at the bottom, select **Admin**.
 1. Select **CI/CD > Runners**.
 1. To the right of the runner, you want to edit, select **Edit** (**{pencil}**).
-1. In the **Maximum job timeout** field, enter a value in seconds. The minimum value is 600 seconds (10 minutes).
+1. In the **Maximum job timeout** field, enter a value in seconds. The minimum amount is 600 seconds (10 minutes).
 1. Select **Save changes**.
 
 ### For a group runner
@@ -52,7 +55,7 @@ To set the maximum job timeout:
 1. On the left sidebar, select **Search or go to** and find your group.
 1. Select **Build > Runners**.
 1. To the right of the runner you want to edit, select **Edit** (**{pencil}**).
-1. In the **Maximum job timeout** field, enter a value in seconds. The minimum value is 600 seconds (10 minutes).
+1. In the **Maximum job timeout** field, enter a value in seconds. The minimum amount is 600 seconds (10 minutes).
 1. Select **Save changes**.
 
 ### For a project runner
@@ -67,7 +70,7 @@ To set the maximum job timeout:
 1. Select **Settings > CI/CD**.
 1. Expand **Runners**.
 1. To the right of the runner you want to edit, select **Edit** (**{pencil}**).
-1. In the **Maximum job timeout** field, enter a value in seconds. The minimum value is 600 seconds (10 minutes). If not defined, the [job timeout for the project](../pipelines/settings.md#set-a-limit-for-how-long-jobs-can-run) is used instead.
+1. In the **Maximum job timeout** field, enter a value in seconds. The minimum amount is 600 seconds (10 minutes). If not defined, the [job timeout for the project](../pipelines/settings.md#set-a-limit-for-how-long-jobs-can-run) is used instead.
 1. Select **Save changes**.
 
 ## How maximum job timeout works
@@ -186,8 +189,8 @@ you use to provision and register new values.
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/30942) in GitLab 15.3 [with a flag](../../administration/feature_flags.md) named `enforce_runner_token_expires_at`. Disabled by default.
 > - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/377902) in GitLab 15.5. Feature flag `enforce_runner_token_expires_at` removed.
 
-Each runner uses a [runner authentication token](../../api/runners.md#registration-and-authentication-tokens)
-to connect to and authenticate with a GitLab instance.
+Each runner has an [runner authentication token](../../api/runners.md#registration-and-authentication-tokens)
+to connect with the GitLab instance.
 
 To help prevent the token from being compromised, you can have the
 token rotate automatically at specified intervals. When the tokens are rotated,
@@ -200,11 +203,11 @@ For more information about token rotation, see
 If you need to manually update the runner authentication token, you can run a
 command to [reset the token](https://docs.gitlab.com/runner/commands/#gitlab-runner-reset-token).
 
-### Reset the runner configuration authentication token
+### Reset the runner authentication token
 
-If a runner's authentication token is exposed, an attacker could use it to [clone the runner](https://docs.gitlab.com/runner/security/#cloning-a-runner).
+If a runner authentication token is revealed, an attacker could use the token to [clone a runner](https://docs.gitlab.com/runner/security/#cloning-a-runner).
 
-To reset the runner configuration authentication token:
+To reset the runner authentication token:
 
 1. Delete the runner:
    - [Delete an instance runner](runners_scope.md#delete-instance-runners).
@@ -218,8 +221,8 @@ To reset the runner configuration authentication token:
 
 ### Automatically rotate runner authentication tokens
 
-You can specify an interval to rotate runner authentication tokens.
-Regularly rotating runner authentication tokens helps minimize the risk of unauthorized access to your GitLab instance through compromised tokens.
+You can specify an interval for runner authentication tokens to rotate.
+This rotation helps ensure the security of the tokens assigned to your runners.
 
 Prerequisites:
 
@@ -520,8 +523,8 @@ Use the `empty` Git strategy when:
 
 ### Git submodule strategy
 
-The `GIT_SUBMODULE_STRATEGY` variable is used to control if / how
-[Git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) are included when fetching the code before a build. You can set them
+The `GIT_SUBMODULE_STRATEGY` variable is used to control if / how Git
+submodules are included when fetching the code before a build. You can set them
 globally or per-job in the [`variables`](../yaml/index.md#variables) section.
 
 There are three possible values: `none`, `normal`, and `recursive`:
@@ -1172,7 +1175,7 @@ An example of provenance metadata that the GitLab Runner might generate is as fo
 To verify compliance with the in-toto specification,
 see the [in-toto statement](https://in-toto.io/Statement/v0.1).
 
-## Staging directory
+### Staging directory
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-runner/-/merge_requests/3403) in GitLab Runner 15.0.
 
@@ -1186,7 +1189,7 @@ To change the directory, set `ARCHIVER_STAGING_DIR` as a variable in your CI job
 The directory you specify is used as the location for downloading artifacts prior to extraction. If the `fastzip` archiver is
 used, this location is also used as scratch space when archiving.
 
-## Configure `fastzip` to improve performance
+### Configure `fastzip` to improve performance
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab-runner/-/merge_requests/3130) in GitLab Runner 15.0.
 

@@ -74,7 +74,7 @@ module Repositories
 
     def render_access_denied
       help_page = help_page_url(
-        'topics/git/troubleshooting_git.md',
+        'topics/git/troubleshooting_git',
         anchor: 'error-on-git-fetch-http-basic-access-denied'
       )
 

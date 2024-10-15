@@ -41,8 +41,6 @@ const {
   WEBPACK_OUTPUT_PATH,
   WEBPACK_PUBLIC_PATH,
   SOURCEGRAPH_PUBLIC_PATH,
-  PDF_JS_WORKER_PUBLIC_PATH,
-  PDF_JS_CMAPS_PUBLIC_PATH,
   GITLAB_WEB_IDE_PUBLIC_PATH,
   copyFilesPatterns,
 } = require('./webpack.constants');
@@ -123,12 +121,6 @@ const alias = {
     ROOT_PATH,
     'app/assets/javascripts/lib/utils/icons_path.js',
   ),
-
-  // prevent loading of index.js to avoid duplicate instances of classes
-  graphql: path.join(ROOT_PATH, 'node_modules/graphql/index.mjs'),
-
-  // load mjs version instead of cjs
-  'markdown-it': path.join(ROOT_PATH, 'node_modules/markdown-it/index.mjs'),
 
   // test-environment-only aliases duplicated from Jest config
   'spec/test_constants$': path.join(ROOT_PATH, 'spec/frontend/__helpers__/test_constants'),
@@ -287,7 +279,6 @@ module.exports = {
       super_sidebar: './entrypoints/super_sidebar.js',
       tracker: './entrypoints/tracker.js',
       analytics: './entrypoints/analytics.js',
-      graphql_explorer: './entrypoints/graphql_explorer.js',
       ...incrementalCompiler.filterEntryPoints(generateEntries({ defaultEntries, entriesState })),
     };
   },
@@ -373,16 +364,6 @@ module.exports = {
       },
       {
         test: /marked\/.*\.js?$/,
-        include: /node_modules/,
-        loader: 'babel-loader',
-      },
-      {
-        test: /@graphiql\/.*\.m?js$/,
-        include: /node_modules/,
-        loader: 'babel-loader',
-      },
-      {
-        test: /@radix-ui\/.*\.m?js$/,
         include: /node_modules/,
         loader: 'babel-loader',
       },
@@ -548,6 +529,14 @@ module.exports = {
           minChunks: 2,
           reuseExistingChunk: true,
         },
+        graphql: {
+          priority: 16,
+          name: 'graphql',
+          chunks: 'all',
+          test: /[\\/]node_modules[\\/][^\\/]*(immer|apollo|graphql|zen-observable)[^\\/]*[\\/]/,
+          minChunks: 2,
+          reuseExistingChunk: true,
+        },
         monaco: {
           priority: 15,
           name: 'monaco',
@@ -700,6 +689,11 @@ module.exports = {
         );
       }),
 
+    new webpack.NormalModuleReplacementPlugin(/markdown-it/, (resource) => {
+      // eslint-disable-next-line no-param-reassign
+      resource.request = path.join(ROOT_PATH, 'app/assets/javascripts/lib/markdown_it.js');
+    }),
+
     /*
      The following `NormalModuleReplacementPlugin` adds support for exports field in `package.json`.
      It might not necessarily be needed for all packages which expose it, but some packages
@@ -851,8 +845,6 @@ module.exports = {
       // This is used by Sourcegraph because these assets are loaded dnamically
       'process.env.SOURCEGRAPH_PUBLIC_PATH': JSON.stringify(SOURCEGRAPH_PUBLIC_PATH),
       'process.env.GITLAB_WEB_IDE_PUBLIC_PATH': JSON.stringify(GITLAB_WEB_IDE_PUBLIC_PATH),
-      'process.env.PDF_JS_WORKER_PUBLIC_PATH': JSON.stringify(PDF_JS_WORKER_PUBLIC_PATH),
-      'process.env.PDF_JS_CMAPS_PUBLIC_PATH': JSON.stringify(PDF_JS_CMAPS_PUBLIC_PATH),
       'window.IS_VITE': JSON.stringify(false),
       ...(IS_PRODUCTION ? {} : { LIVE_RELOAD: DEV_SERVER_LIVERELOAD }),
     }),

@@ -255,7 +255,6 @@ When the user is authenticated and `simple` is not set, this endpoint returns so
     "shared_with_groups": [],
     "only_allow_merge_if_pipeline_succeeds": false,
     "allow_merge_on_skipped_pipeline": null,
-    "allow_pipeline_trigger_approve_deployment": false,
     "restrict_user_defined_variables": false,
     "request_access_enabled": true,
     "only_allow_merge_if_all_discussions_are_resolved": false,
@@ -435,7 +434,6 @@ Example response:
     "shared_with_groups": [],
     "only_allow_merge_if_pipeline_succeeds": false,
     "allow_merge_on_skipped_pipeline": false,
-    "allow_pipeline_trigger_approve_deployment": false,
     "restrict_user_defined_variables": false,
     "only_allow_merge_if_all_discussions_are_resolved": false,
     "remove_source_branch_after_merge": false,
@@ -559,7 +557,6 @@ Example response:
     "shared_with_groups": [],
     "only_allow_merge_if_pipeline_succeeds": false,
     "allow_merge_on_skipped_pipeline": false,
-    "allow_pipeline_trigger_approve_deployment": false,
     "restrict_user_defined_variables": false,
     "only_allow_merge_if_all_discussions_are_resolved": false,
     "remove_source_branch_after_merge": false,
@@ -701,7 +698,6 @@ Example response:
     "shared_with_groups": [],
     "only_allow_merge_if_pipeline_succeeds": false,
     "allow_merge_on_skipped_pipeline": false,
-    "allow_pipeline_trigger_approve_deployment": false,
     "restrict_user_defined_variables": false,
     "only_allow_merge_if_all_discussions_are_resolved": false,
     "remove_source_branch_after_merge": false,
@@ -810,7 +806,6 @@ Example response:
     "shared_with_groups": [],
     "only_allow_merge_if_pipeline_succeeds": false,
     "allow_merge_on_skipped_pipeline": false,
-    "allow_pipeline_trigger_approve_deployment": false,
     "restrict_user_defined_variables": false,
     "only_allow_merge_if_all_discussions_are_resolved": false,
     "remove_source_branch_after_merge": false,
@@ -863,27 +858,266 @@ Example response:
 ]
 ```
 
-## Search for projects by name
+## List projects starred by a user
 
-Search for projects by name that are accessible to the authenticated user. If this endpoint is accessed without
-authentication, it lists projects that are publicly accessible.
+Get a list of visible projects starred by the given user. When accessed without
+authentication, only public projects are returned.
 
 ```plaintext
-GET /projects
+GET /users/:user_id/starred_projects
 ```
 
-Example attributes:
+Supported attributes:
 
-| Attribute  | Type   | Required | Description |
-|:-----------|:-------|:---------|:------------|
-| `search`   | string | Yes      | A string contained in the project name. |
-| `order_by` | string | No       | Return requests ordered by `id`, `name`, `created_at`, `star_count`, or `last_activity_at` fields. |
-| `sort`     | string | No       | Return requests sorted in `asc` or `desc` order. |
+| Attribute                     | Type     | Required | Description |
+|:------------------------------|:---------|:---------|:------------|
+| `user_id`                     | string   | Yes      | The ID or username of the user. |
+| `archived`                    | boolean  | No       | Limit by archived status. |
+| `membership`                  | boolean  | No       | Limit by projects that the current user is a member of. |
+| `min_access_level`            | integer  | No       | Limit by current user minimal [role (`access_level`)](members.md#roles). |
+| `order_by`                    | string   | No       | Return projects ordered by `id`, `name`, `path`, `created_at`, `updated_at`, `star_count`, or `last_activity_at` fields. Default is `created_at`. |
+| `owned`                       | boolean  | No       | Limit by projects explicitly owned by the current user. |
+| `search`                      | string   | No       | Return list of projects matching the search criteria. |
+| `simple`                      | boolean  | No       | Return only limited fields for each project. Without authentication, this operation is a no-op; only simple fields are returned. |
+| `sort`                        | string   | No       | Return projects sorted in `asc` or `desc` order. Default is `desc`. |
+| `starred`                     | boolean  | No       | Limit by projects starred by the current user. |
+| `statistics`                  | boolean  | No       | Include project statistics. Available only to users with at least the Reporter role. |
+| `updated_after`               | datetime | No       | Limit results to projects last updated after the specified time. Format: ISO 8601 (`YYYY-MM-DDTHH:MM:SSZ`). [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/393979) in GitLab 15.10. |
+| `updated_before`              | datetime | No       | Limit results to projects last updated before the specified time. Format: ISO 8601 (`YYYY-MM-DDTHH:MM:SSZ`). [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/393979) in GitLab 15.10. |
+| `visibility`                  | string   | No       | Limit by visibility `public`, `internal`, or `private`. |
+| `with_custom_attributes`      | boolean  | No       | Include [custom attributes](custom_attributes.md) in response. _(administrator only)_ |
+| `with_issues_enabled`         | boolean  | No       | Limit by enabled issues feature. |
+| `with_merge_requests_enabled` | boolean  | No       | Limit by enabled merge requests feature. |
 
 Example request:
 
 ```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects?search=test"
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/users/5/starred_projects"
+```
+
+Example response:
+
+```json
+[
+  {
+    "id": 4,
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    "description_html": "<p data-sourcepos=\"1:1-1:56\" dir=\"auto\">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>",
+    "default_branch": "main",
+    "visibility": "private",
+    "ssh_url_to_repo": "git@example.com:diaspora/diaspora-client.git",
+    "http_url_to_repo": "http://example.com/diaspora/diaspora-client.git",
+    "web_url": "http://example.com/diaspora/diaspora-client",
+    "readme_url": "http://example.com/diaspora/diaspora-client/blob/main/README.md",
+    "tag_list": [ //deprecated, use `topics` instead
+      "example",
+      "disapora client"
+    ],
+    "topics": [
+      "example",
+      "disapora client"
+    ],
+    "owner": {
+      "id": 3,
+      "name": "Diaspora",
+      "created_at": "2013-09-30T13:46:02Z"
+    },
+    "name": "Diaspora Client",
+    "name_with_namespace": "Diaspora / Diaspora Client",
+    "path": "diaspora-client",
+    "path_with_namespace": "diaspora/diaspora-client",
+    "issues_enabled": true,
+    "open_issues_count": 1,
+    "merge_requests_enabled": true,
+    "jobs_enabled": true,
+    "wiki_enabled": true,
+    "snippets_enabled": false,
+    "can_create_merge_request_in": true,
+    "resolve_outdated_diff_discussions": false,
+    "container_registry_enabled": false, // deprecated, use container_registry_access_level instead
+    "container_registry_access_level": "disabled",
+    "security_and_compliance_access_level": "disabled",
+    "created_at": "2013-09-30T13:46:02Z",
+    "updated_at": "2013-09-30T13:46:02Z",
+    "last_activity_at": "2013-09-30T13:46:02Z",
+    "creator_id": 3,
+    "namespace": {
+      "id": 3,
+      "name": "Diaspora",
+      "path": "diaspora",
+      "kind": "group",
+      "full_path": "diaspora"
+    },
+    "import_status": "none",
+    "archived": false,
+    "avatar_url": "http://example.com/uploads/project/avatar/4/uploads/avatar.png",
+    "shared_runners_enabled": true,
+    "group_runners_enabled": true,
+    "forks_count": 0,
+    "star_count": 0,
+    "runners_token": "b8547b1dc37721d05889db52fa2f02",
+    "public_jobs": true,
+    "shared_with_groups": [],
+    "only_allow_merge_if_pipeline_succeeds": false,
+    "allow_merge_on_skipped_pipeline": false,
+    "restrict_user_defined_variables": false,
+    "only_allow_merge_if_all_discussions_are_resolved": false,
+    "remove_source_branch_after_merge": false,
+    "request_access_enabled": false,
+    "merge_method": "merge",
+    "squash_option": "default_on",
+    "autoclose_referenced_issues": true,
+    "enforce_auth_checks_on_uploads": true,
+    "suggestion_commit_message": null,
+    "merge_commit_template": null,
+    "squash_commit_template": null,
+    "issue_branch_template": "gitlab/%{id}-%{title}",
+    "statistics": {
+      "commit_count": 37,
+      "storage_size": 1038090,
+      "repository_size": 1038090,
+      "lfs_objects_size": 0,
+      "job_artifacts_size": 0,
+      "pipeline_artifacts_size": 0,
+      "packages_size": 0,
+      "snippets_size": 0,
+      "uploads_size": 0,
+      "container_registry_size": 0
+    },
+    "container_registry_image_prefix": "registry.example.com/diaspora/diaspora-client",
+    "_links": {
+      "self": "http://example.com/api/v4/projects",
+      "issues": "http://example.com/api/v4/projects/1/issues",
+      "merge_requests": "http://example.com/api/v4/projects/1/merge_requests",
+      "repo_branches": "http://example.com/api/v4/projects/1/repository_branches",
+      "labels": "http://example.com/api/v4/projects/1/labels",
+      "events": "http://example.com/api/v4/projects/1/events",
+      "members": "http://example.com/api/v4/projects/1/members",
+      "cluster_agents": "http://example.com/api/v4/projects/1/cluster_agents"
+    }
+  },
+  {
+    "id": 6,
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    "description_html": "<p data-sourcepos=\"1:1-1:56\" dir=\"auto\">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>",
+    "default_branch": "main",
+    "visibility": "private",
+    "ssh_url_to_repo": "git@example.com:brightbox/puppet.git",
+    "http_url_to_repo": "http://example.com/brightbox/puppet.git",
+    "web_url": "http://example.com/brightbox/puppet",
+    "readme_url": "http://example.com/brightbox/puppet/blob/main/README.md",
+    "tag_list": [ //deprecated, use `topics` instead
+      "example",
+      "puppet"
+    ],
+    "topics": [
+      "example",
+      "puppet"
+    ],
+    "owner": {
+      "id": 4,
+      "name": "Brightbox",
+      "created_at": "2013-09-30T13:46:02Z"
+    },
+    "name": "Puppet",
+    "name_with_namespace": "Brightbox / Puppet",
+    "path": "puppet",
+    "path_with_namespace": "brightbox/puppet",
+    "issues_enabled": true,
+    "open_issues_count": 1,
+    "merge_requests_enabled": true,
+    "jobs_enabled": true,
+    "wiki_enabled": true,
+    "snippets_enabled": false,
+    "can_create_merge_request_in": true,
+    "resolve_outdated_diff_discussions": false,
+    "container_registry_enabled": false, // deprecated, use container_registry_access_level instead
+    "container_registry_access_level": "disabled",
+    "security_and_compliance_access_level": "disabled",
+    "created_at": "2013-09-30T13:46:02Z",
+    "updated_at": "2013-09-30T13:46:02Z",
+    "last_activity_at": "2013-09-30T13:46:02Z",
+    "creator_id": 3,
+    "namespace": {
+      "id": 4,
+      "name": "Brightbox",
+      "path": "brightbox",
+      "kind": "group",
+      "full_path": "brightbox"
+    },
+    "import_status": "none",
+    "import_error": null,
+    "permissions": {
+      "project_access": {
+        "access_level": 10,
+        "notification_level": 3
+      },
+      "group_access": {
+        "access_level": 50,
+        "notification_level": 3
+      }
+    },
+    "archived": false,
+    "avatar_url": null,
+    "shared_runners_enabled": true,
+    "group_runners_enabled": true,
+    "forks_count": 0,
+    "star_count": 0,
+    "runners_token": "b8547b1dc37721d05889db52fa2f02",
+    "public_jobs": true,
+    "shared_with_groups": [],
+    "only_allow_merge_if_pipeline_succeeds": false,
+    "allow_merge_on_skipped_pipeline": false,
+    "restrict_user_defined_variables": false,
+    "only_allow_merge_if_all_discussions_are_resolved": false,
+    "remove_source_branch_after_merge": false,
+    "request_access_enabled": false,
+    "merge_method": "merge",
+    "squash_option": "default_on",
+    "auto_devops_enabled": true,
+    "auto_devops_deploy_strategy": "continuous",
+    "repository_storage": "default",
+    "approvals_before_merge": 0, // Deprecated. Use merge request approvals API instead.
+    "mirror": false,
+    "mirror_user_id": 45,
+    "mirror_trigger_builds": false,
+    "only_mirror_protected_branches": false,
+    "mirror_overwrites_diverged_branches": false,
+    "external_authorization_classification_label": null,
+    "packages_enabled": true,
+    "service_desk_enabled": false,
+    "service_desk_address": null,
+    "autoclose_referenced_issues": true,
+    "enforce_auth_checks_on_uploads": true,
+    "suggestion_commit_message": null,
+    "merge_commit_template": null,
+    "squash_commit_template": null,
+    "issue_branch_template": "gitlab/%{id}-%{title}",
+    "statistics": {
+      "commit_count": 12,
+      "storage_size": 2066080,
+      "repository_size": 2066080,
+      "lfs_objects_size": 0,
+      "job_artifacts_size": 0,
+      "pipeline_artifacts_size": 0,
+      "packages_size": 0,
+      "snippets_size": 0,
+      "uploads_size": 0,
+      "container_registry_size": 0
+    },
+    "container_registry_image_prefix": "registry.example.com/brightbox/puppet",
+    "_links": {
+      "self": "http://example.com/api/v4/projects",
+      "issues": "http://example.com/api/v4/projects/1/issues",
+      "merge_requests": "http://example.com/api/v4/projects/1/merge_requests",
+      "repo_branches": "http://example.com/api/v4/projects/1/repository_branches",
+      "labels": "http://example.com/api/v4/projects/1/labels",
+      "events": "http://example.com/api/v4/projects/1/events",
+      "members": "http://example.com/api/v4/projects/1/members",
+      "cluster_agents": "http://example.com/api/v4/projects/1/cluster_agents"
+    }
+  }
+]
 ```
 
 ## Get a single project
@@ -899,7 +1133,7 @@ Supported attributes:
 
 | Attribute                | Type              | Required | Description |
 |:-------------------------|:------------------|:---------|:------------|
-| `id`                     | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                     | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `license`                | boolean           | No       | Include project license data. |
 | `statistics`             | boolean           | No       | Include project statistics. Available only to users with at least the Reporter role. |
 | `with_custom_attributes` | boolean           | No       | Include [custom attributes](custom_attributes.md) in response. _(administrators only)_ |
@@ -1023,7 +1257,6 @@ Example response:
   "repository_storage": "default",
   "only_allow_merge_if_pipeline_succeeds": false,
   "allow_merge_on_skipped_pipeline": false,
-  "allow_pipeline_trigger_approve_deployment": false,
   "restrict_user_defined_variables": false,
   "only_allow_merge_if_all_discussions_are_resolved": false,
   "remove_source_branch_after_merge": false,
@@ -1178,7 +1411,7 @@ Supported attributes:
 
 | Attribute    | Type              | Required | Description |
 |:-------------|:------------------|:---------|:------------|
-| `id`         | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`         | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `search`     | string            | No       | Search for specific users. |
 | `skip_users` | integer array     | No       | Filter out users with the specified IDs. |
 
@@ -1217,7 +1450,7 @@ Supported attributes:
 
 | Attribute                 | Type              | Required | Description |
 |:--------------------------|:------------------|:---------|:------------|
-| `id`                      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `search`                  | string            | No       | Search for specific groups. |
 | `shared_min_access_level` | integer           | No       | Limit to shared groups with at least this [role (`access_level`)](members.md#roles). |
 | `shared_visible_only`     | boolean           | No       | Limit to shared groups user has access to. |
@@ -1259,7 +1492,7 @@ Supported attributes:
 
 | Attribute | Type              | Required | Description |
 |:----------|:------------------|:---------|:------------|
-| `id`      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `search`  | string            | No       | Search for specific groups. |
 
 Example response:
@@ -1334,7 +1567,6 @@ Supported general project attributes:
 | `merge_pipelines_enabled`                          | boolean | No                             | Enable or disable merged results pipelines. |
 | `merge_requests_enabled`                           | boolean | No                             | _(Deprecated)_ Enable merge requests for this project. Use `merge_requests_access_level` instead. |
 | `merge_trains_enabled`                             | boolean | No                             | Enable or disable merge trains. |
-| `merge_trains_skip_train_allowed`                  | boolean | No                             | Allows merge train merge requests to be merged without waiting for pipelines to finish. |
 | `mirror_trigger_builds`                            | boolean | No                             | Pull mirroring triggers builds. Premium and Ultimate only. |
 | `mirror`                                           | boolean | No                             | Enables pull mirroring in a project. Premium and Ultimate only. |
 | `namespace_id`                                     | integer | No                             | Namespace for the new project (defaults to the current user's namespace). |
@@ -1533,7 +1765,7 @@ Supported general project attributes:
 
 | Attribute                                          | Type              | Required | Description |
 |:---------------------------------------------------|:------------------|:---------|:------------|
-| `id`                                               | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                                               | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `allow_merge_on_skipped_pipeline`                  | boolean           | No       | Set whether or not merge requests can be merged with skipped jobs. |
 | `allow_pipeline_trigger_approve_deployment`        | boolean           | No       | Set whether or not a pipeline triggerer is allowed to approve deployments. Premium and Ultimate only. |
 | `only_allow_merge_if_all_status_checks_passed`     | boolean           | No       | Indicates that merges of merge requests should be blocked unless all status checks have passed. Defaults to false.<br/><br/>[Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/369859) in GitLab 15.5 with feature flag `only_allow_merge_if_all_status_checks_passed` disabled by default. The feature flag was enabled by default in GitLab 15.9. Ultimate only. |
@@ -1575,7 +1807,6 @@ Supported general project attributes:
 | `merge_requests_enabled`                           | boolean           | No       | _(Deprecated)_ Enable merge requests for this project. Use `merge_requests_access_level` instead. |
 | `merge_requests_template`                          | string            | No       | Default description for merge requests. Description is parsed with GitLab Flavored Markdown. See [Templates for issues and merge requests](#templates-for-issues-and-merge-requests). Premium and Ultimate only. |
 | `merge_trains_enabled`                             | boolean           | No       | Enable or disable merge trains. |
-| `merge_trains_skip_train_allowed`                  | boolean           | No       | Allows merge train merge requests to be merged without waiting for pipelines to finish. |
 | `mirror_overwrites_diverged_branches`              | boolean           | No       | Pull mirror overwrites diverged branches. Premium and Ultimate only. |
 | `mirror_trigger_builds`                            | boolean           | No       | Pull mirroring triggers builds. Premium and Ultimate only. |
 | `mirror_user_id`                                   | integer           | No       | User responsible for all the activity surrounding a pull mirror event. _(administrators only)_ Premium and Ultimate only. |
@@ -1649,6 +1880,469 @@ Supported project visibility attributes:
 | `snippets_access_level`                | string | No       | Set visibility of [snippets](../user/snippets.md#change-default-visibility-of-snippets). |
 | `wiki_access_level`                    | string | No       | Set visibility of [wiki](../user/project/wiki/index.md#enable-or-disable-a-project-wiki). |
 
+## Fork a project
+
+Fork a project into your personal namespace or the namespace provided.
+
+Prerequisites:
+
+- You must be authenticated.
+
+The forking operation for a project is asynchronous and is completed in a
+background job. The request returns immediately. To determine whether the
+fork of the project has completed, query the `import_status` for the new project.
+
+```plaintext
+POST /projects/:id/fork
+```
+
+| Attribute                | Type              | Required | Description |
+|:-------------------------|:------------------|:---------|:------------|
+| `id`                     | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
+| `branches`               | string            | No       | Branches to fork (empty for all branches). |
+| `description`            | string            | No       | The description assigned to the resultant project after forking. |
+| `mr_default_target_self` | boolean           | No       | For forked projects, target merge requests to this project. If `false`, the target is the upstream project. |
+| `name`                   | string            | No       | The name assigned to the resultant project after forking. |
+| `namespace_id`           | integer           | No       | The ID of the namespace that the project is forked to. |
+| `namespace_path`         | string            | No       | The path of the namespace that the project is forked to. |
+| `namespace`              | integer or string | No       | _(Deprecated)_ The ID or path of the namespace that the project is forked to. |
+| `path`                   | string            | No       | The path assigned to the resultant project after forking. |
+| `visibility`             | string            | No       | The [visibility level](#project-visibility-level) assigned to the resultant project after forking. |
+
+## List forks of a project
+
+List the projects accessible to you that have an established forked relationship with the specified project.
+
+```plaintext
+GET /projects/:id/forks
+```
+
+Supported attributes:
+
+| Attribute                     | Type              | Required | Description |
+|:------------------------------|:------------------|:---------|:------------|
+| `id`                          | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
+| `archived`                    | boolean           | No       | Limit by archived status. |
+| `membership`                  | boolean           | No       | Limit by projects that the current user is a member of. |
+| `min_access_level`            | integer           | No       | Limit by current user minimal [role (`access_level`)](members.md#roles). |
+| `order_by`                    | string            | No       | Return projects ordered by `id`, `name`, `path`, `created_at`, `updated_at`, `star_count`, or `last_activity_at` fields. Default is `created_at`. |
+| `owned`                       | boolean           | No       | Limit by projects explicitly owned by the current user. |
+| `search`                      | string            | No       | Return list of projects matching the search criteria. |
+| `simple`                      | boolean           | No       | Return only limited fields for each project. Without authentication, this operation is a no-op; only simple fields are returned. |
+| `sort`                        | string            | No       | Return projects sorted in `asc` or `desc` order. Default is `desc`. |
+| `starred`                     | boolean           | No       | Limit by projects starred by the current user. |
+| `statistics`                  | boolean           | No       | Include project statistics. Available only to users with at least the Reporter role. |
+| `updated_after`               | datetime          | No       | Limit results to projects last updated after the specified time. Format: ISO 8601 (`YYYY-MM-DDTHH:MM:SSZ`). [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/393979) in GitLab 15.10. |
+| `updated_before`              | datetime          | No       | Limit results to projects last updated before the specified time. Format: ISO 8601 (`YYYY-MM-DDTHH:MM:SSZ`). [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/393979) in GitLab 15.10. |
+| `visibility`                  | string            | No       | Limit by visibility `public`, `internal`, or `private`. |
+| `with_custom_attributes`      | boolean           | No       | Include [custom attributes](custom_attributes.md) in response. _(administrators only)_ |
+| `with_issues_enabled`         | boolean           | No       | Limit by enabled issues feature. |
+| `with_merge_requests_enabled` | boolean           | No       | Limit by enabled merge requests feature. |
+
+Example request:
+
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/forks"
+```
+
+Example responses:
+
+```json
+[
+  {
+    "id": 3,
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    "description_html": "<p data-sourcepos=\"1:1-1:56\" dir=\"auto\">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>",
+    "default_branch": "main",
+    "visibility": "internal",
+    "ssh_url_to_repo": "git@example.com:diaspora/diaspora-project-site.git",
+    "http_url_to_repo": "http://example.com/diaspora/diaspora-project-site.git",
+    "web_url": "http://example.com/diaspora/diaspora-project-site",
+    "readme_url": "http://example.com/diaspora/diaspora-project-site/blob/main/README.md",
+    "tag_list": [ //deprecated, use `topics` instead
+      "example",
+      "disapora project"
+    ],
+    "topics": [
+      "example",
+      "disapora project"
+    ],
+    "name": "Diaspora Project Site",
+    "name_with_namespace": "Diaspora / Diaspora Project Site",
+    "path": "diaspora-project-site",
+    "path_with_namespace": "diaspora/diaspora-project-site",
+    "repository_object_format": "sha1",
+    "issues_enabled": true,
+    "open_issues_count": 1,
+    "merge_requests_enabled": true,
+    "jobs_enabled": true,
+    "wiki_enabled": true,
+    "snippets_enabled": false,
+    "can_create_merge_request_in": true,
+    "resolve_outdated_diff_discussions": false,
+    "container_registry_enabled": false, // deprecated, use container_registry_access_level instead
+    "container_registry_access_level": "disabled",
+    "security_and_compliance_access_level": "disabled",
+    "created_at": "2013-09-30T13:46:02Z",
+    "updated_at": "2013-09-30T13:46:02Z",
+    "last_activity_at": "2013-09-30T13:46:02Z",
+    "creator_id": 3,
+    "namespace": {
+      "id": 3,
+      "name": "Diaspora",
+      "path": "diaspora",
+      "kind": "group",
+      "full_path": "diaspora"
+    },
+    "import_status": "none",
+    "archived": true,
+    "avatar_url": "http://example.com/uploads/project/avatar/3/uploads/avatar.png",
+    "shared_runners_enabled": true,
+    "group_runners_enabled": true,
+    "forks_count": 0,
+    "star_count": 1,
+    "public_jobs": true,
+    "shared_with_groups": [],
+    "only_allow_merge_if_pipeline_succeeds": false,
+    "allow_merge_on_skipped_pipeline": false,
+    "restrict_user_defined_variables": false,
+    "only_allow_merge_if_all_discussions_are_resolved": false,
+    "remove_source_branch_after_merge": false,
+    "request_access_enabled": false,
+    "merge_method": "merge",
+    "squash_option": "default_on",
+    "autoclose_referenced_issues": true,
+    "enforce_auth_checks_on_uploads": true,
+    "suggestion_commit_message": null,
+    "merge_commit_template": null,
+    "container_registry_image_prefix": "registry.example.com/diaspora/diaspora-project-site",
+    "_links": {
+      "self": "http://example.com/api/v4/projects",
+      "issues": "http://example.com/api/v4/projects/1/issues",
+      "merge_requests": "http://example.com/api/v4/projects/1/merge_requests",
+      "repo_branches": "http://example.com/api/v4/projects/1/repository_branches",
+      "labels": "http://example.com/api/v4/projects/1/labels",
+      "events": "http://example.com/api/v4/projects/1/events",
+      "members": "http://example.com/api/v4/projects/1/members",
+      "cluster_agents": "http://example.com/api/v4/projects/1/cluster_agents"
+    }
+  }
+]
+```
+
+## Create a fork relationship between projects
+
+Create a fork relationship between projects.
+
+Prerequisites:
+
+- You must be an administrator or be assigned the Owner role on the project.
+
+```plaintext
+POST /projects/:id/fork/:forked_from_id
+```
+
+Supported attributes:
+
+| Attribute        | Type              | Required | Description |
+|:-----------------|:------------------|:---------|:------------|
+| `forked_from_id` | ID                | Yes      | The ID of the project that was forked from. |
+| `id`             | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
+
+## Delete a fork relationship between projects
+
+Delete a fork relationship between projects.
+
+Prerequisites:
+
+- You must be an administrator or be assigned the Owner role on the project.
+
+```plaintext
+DELETE /projects/:id/fork
+```
+
+Supported attributes:
+
+| Attribute | Type              | Required | Description |
+|:----------|:------------------|:---------|:------------|
+| `id`      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
+
+## Star a project
+
+Star a project.
+
+```plaintext
+POST /projects/:id/star
+```
+
+Supported attributes:
+
+| Attribute | Type              | Required | Description |
+|:----------|:------------------|:---------|:------------|
+| `id`      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
+
+Example request:
+
+```shell
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/star"
+```
+
+Example response:
+
+```json
+{
+  "id": 3,
+  "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+  "description_html": "<p data-sourcepos=\"1:1-1:56\" dir=\"auto\">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>",
+  "default_branch": "main",
+  "visibility": "internal",
+  "ssh_url_to_repo": "git@example.com:diaspora/diaspora-project-site.git",
+  "http_url_to_repo": "http://example.com/diaspora/diaspora-project-site.git",
+  "web_url": "http://example.com/diaspora/diaspora-project-site",
+  "readme_url": "http://example.com/diaspora/diaspora-project-site/blob/main/README.md",
+  "tag_list": [ //deprecated, use `topics` instead
+    "example",
+    "disapora project"
+  ],
+  "topics": [
+    "example",
+    "disapora project"
+  ],
+  "name": "Diaspora Project Site",
+  "name_with_namespace": "Diaspora / Diaspora Project Site",
+  "path": "diaspora-project-site",
+  "path_with_namespace": "diaspora/diaspora-project-site",
+  "repository_object_format": "sha1",
+  "issues_enabled": true,
+  "open_issues_count": 1,
+  "merge_requests_enabled": true,
+  "jobs_enabled": true,
+  "wiki_enabled": true,
+  "snippets_enabled": false,
+  "can_create_merge_request_in": true,
+  "resolve_outdated_diff_discussions": false,
+  "container_registry_enabled": false, // deprecated, use container_registry_access_level instead
+  "container_registry_access_level": "disabled",
+  "security_and_compliance_access_level": "disabled",
+  "created_at": "2013-09-30T13:46:02Z",
+  "updated_at": "2013-09-30T13:46:02Z",
+  "last_activity_at": "2013-09-30T13:46:02Z",
+  "creator_id": 3,
+  "namespace": {
+    "id": 3,
+    "name": "Diaspora",
+    "path": "diaspora",
+    "kind": "group",
+    "full_path": "diaspora"
+  },
+  "import_status": "none",
+  "archived": true,
+  "avatar_url": "http://example.com/uploads/project/avatar/3/uploads/avatar.png",
+  "license_url": "http://example.com/diaspora/diaspora-client/blob/main/LICENSE",
+  "license": {
+    "key": "lgpl-3.0",
+    "name": "GNU Lesser General Public License v3.0",
+    "nickname": "GNU LGPLv3",
+    "html_url": "http://choosealicense.com/licenses/lgpl-3.0/",
+    "source_url": "http://www.gnu.org/licenses/lgpl-3.0.txt"
+  },
+  "shared_runners_enabled": true,
+  "group_runners_enabled": true,
+  "forks_count": 0,
+  "star_count": 1,
+  "public_jobs": true,
+  "shared_with_groups": [],
+  "only_allow_merge_if_pipeline_succeeds": false,
+  "allow_merge_on_skipped_pipeline": false,
+  "restrict_user_defined_variables": false,
+  "only_allow_merge_if_all_discussions_are_resolved": false,
+  "remove_source_branch_after_merge": false,
+  "request_access_enabled": false,
+  "merge_method": "merge",
+  "squash_option": "default_on",
+  "autoclose_referenced_issues": true,
+  "enforce_auth_checks_on_uploads": true,
+  "suggestion_commit_message": null,
+  "merge_commit_template": null,
+  "container_registry_image_prefix": "registry.example.com/diaspora/diaspora-project-site",
+  "_links": {
+    "self": "http://example.com/api/v4/projects",
+    "issues": "http://example.com/api/v4/projects/1/issues",
+    "merge_requests": "http://example.com/api/v4/projects/1/merge_requests",
+    "repo_branches": "http://example.com/api/v4/projects/1/repository_branches",
+    "labels": "http://example.com/api/v4/projects/1/labels",
+    "events": "http://example.com/api/v4/projects/1/events",
+    "members": "http://example.com/api/v4/projects/1/members",
+    "cluster_agents": "http://example.com/api/v4/projects/1/cluster_agents"
+  }
+}
+```
+
+Returns status code `304` if the project is already starred.
+
+## Unstar a project
+
+Unstar a project.
+
+```plaintext
+POST /projects/:id/unstar
+```
+
+Supported attributes:
+
+| Attribute | Type              | Required | Description |
+|:----------|:------------------|:---------|:------------|
+| `id`      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
+
+Example request:
+
+```shell
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/unstar"
+```
+
+Example response:
+
+```json
+{
+  "id": 3,
+  "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+  "description_html": "<p data-sourcepos=\"1:1-1:56\" dir=\"auto\">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>",
+  "default_branch": "main",
+  "visibility": "internal",
+  "ssh_url_to_repo": "git@example.com:diaspora/diaspora-project-site.git",
+  "http_url_to_repo": "http://example.com/diaspora/diaspora-project-site.git",
+  "web_url": "http://example.com/diaspora/diaspora-project-site",
+  "readme_url": "http://example.com/diaspora/diaspora-project-site/blob/main/README.md",
+  "tag_list": [ //deprecated, use `topics` instead
+    "example",
+    "disapora project"
+  ],
+  "topics": [
+    "example",
+    "disapora project"
+  ],
+  "name": "Diaspora Project Site",
+  "name_with_namespace": "Diaspora / Diaspora Project Site",
+  "path": "diaspora-project-site",
+  "path_with_namespace": "diaspora/diaspora-project-site",
+  "repository_object_format": "sha1",
+  "issues_enabled": true,
+  "open_issues_count": 1,
+  "merge_requests_enabled": true,
+  "jobs_enabled": true,
+  "wiki_enabled": true,
+  "snippets_enabled": false,
+  "can_create_merge_request_in": true,
+  "resolve_outdated_diff_discussions": false,
+  "container_registry_enabled": false, // deprecated, use container_registry_access_level instead
+  "container_registry_access_level": "disabled",
+  "security_and_compliance_access_level": "disabled",
+  "created_at": "2013-09-30T13:46:02Z",
+  "updated_at": "2013-09-30T13:46:02Z",
+  "last_activity_at": "2013-09-30T13:46:02Z",
+  "creator_id": 3,
+  "namespace": {
+    "id": 3,
+    "name": "Diaspora",
+    "path": "diaspora",
+    "kind": "group",
+    "full_path": "diaspora"
+  },
+  "import_status": "none",
+  "archived": true,
+  "avatar_url": "http://example.com/uploads/project/avatar/3/uploads/avatar.png",
+  "license_url": "http://example.com/diaspora/diaspora-client/blob/main/LICENSE",
+  "license": {
+    "key": "lgpl-3.0",
+    "name": "GNU Lesser General Public License v3.0",
+    "nickname": "GNU LGPLv3",
+    "html_url": "http://choosealicense.com/licenses/lgpl-3.0/",
+    "source_url": "http://www.gnu.org/licenses/lgpl-3.0.txt"
+  },
+  "shared_runners_enabled": true,
+  "group_runners_enabled": true,
+  "forks_count": 0,
+  "star_count": 0,
+  "public_jobs": true,
+  "shared_with_groups": [],
+  "only_allow_merge_if_pipeline_succeeds": false,
+  "allow_merge_on_skipped_pipeline": false,
+  "restrict_user_defined_variables": false,
+  "only_allow_merge_if_all_discussions_are_resolved": false,
+  "remove_source_branch_after_merge": false,
+  "request_access_enabled": false,
+  "merge_method": "merge",
+  "squash_option": "default_on",
+  "autoclose_referenced_issues": true,
+  "enforce_auth_checks_on_uploads": true,
+  "suggestion_commit_message": null,
+  "merge_commit_template": null,
+  "container_registry_image_prefix": "registry.example.com/diaspora/diaspora-project-site",
+  "_links": {
+    "self": "http://example.com/api/v4/projects",
+    "issues": "http://example.com/api/v4/projects/1/issues",
+    "merge_requests": "http://example.com/api/v4/projects/1/merge_requests",
+    "repo_branches": "http://example.com/api/v4/projects/1/repository_branches",
+    "labels": "http://example.com/api/v4/projects/1/labels",
+    "events": "http://example.com/api/v4/projects/1/events",
+    "members": "http://example.com/api/v4/projects/1/members",
+    "cluster_agents": "http://example.com/api/v4/projects/1/cluster_agents"
+  }
+}
+```
+
+Returns status code `304` if the project is not starred.
+
+## List users who starred a project
+
+List the users who starred a project.
+
+```plaintext
+GET /projects/:id/starrers
+```
+
+Supported attributes:
+
+| Attribute | Type              | Required | Description |
+|:----------|:------------------|:---------|:------------|
+| `id`      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
+| `search`  | string            | No       | Search for specific users. |
+
+Example request:
+
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/starrers"
+```
+
+Example responses:
+
+```json
+[
+  {
+    "starred_since": "2019-01-28T14:47:30.642Z",
+    "user": {
+        "id": 1,
+        "username": "jane_smith",
+        "name": "Jane Smith",
+        "state": "active",
+        "avatar_url": "http://localhost:3000/uploads/user/avatar/1/cd8.jpeg",
+        "web_url": "http://localhost:3000/jane_smith"
+    }
+  },
+  {
+    "starred_since": "2018-01-02T11:40:26.570Z",
+    "user": {
+      "id": 2,
+      "username": "janine_smith",
+      "name": "Janine Smith",
+      "state": "blocked",
+      "avatar_url": "http://gravatar.com/../e32131cd8.jpeg",
+      "web_url": "http://localhost:3000/janine_smith"
+    }
+  }
+]
+```
+
 ## List a project's invited groups
 
 Get a list of invited groups in a project. When accessed without authentication, only public invited groups are returned.
@@ -1667,7 +2361,7 @@ Supported attributes:
 
 | Attribute                | Type             | Required | Description |
 |:-------------------------|:-----------------|:---------|:------------|
-| `id`                     | integer/string   | yes      | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths) |
+| `id`                     | integer/string   | yes      | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) |
 | `search`                 | string           | no       | Return the list of authorized groups matching the search criteria |
 | `min_access_level`       | integer          | no       | Limit to groups where current user has at least the specified [role (`access_level`)](members.md#roles) |
 | `relation`               | array of strings | no       | Filter the groups by relation (direct or inherited) |
@@ -1700,7 +2394,7 @@ Supported attributes:
 
 | Attribute | Type              | Required | Description |
 |:----------|:------------------|:---------|:------------|
-| `id`      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 
 Example request:
 
@@ -1737,7 +2431,7 @@ Supported attributes:
 
 | Attribute | Type              | Required | Description |
 |:----------|:------------------|:---------|:------------|
-| `id`      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 
 Example request:
 
@@ -1837,7 +2531,6 @@ Example response:
   "shared_with_groups": [],
   "only_allow_merge_if_pipeline_succeeds": false,
   "allow_merge_on_skipped_pipeline": false,
-  "allow_pipeline_trigger_approve_deployment": false,
   "restrict_user_defined_variables": false,
   "only_allow_merge_if_all_discussions_are_resolved": false,
   "remove_source_branch_after_merge": false,
@@ -1880,7 +2573,7 @@ Supported attributes:
 
 | Attribute | Type              | Required | Description |
 |:----------|:------------------|:---------|:------------|
-| `id`      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 
 Example request:
 
@@ -1980,7 +2673,6 @@ Example response:
   "shared_with_groups": [],
   "only_allow_merge_if_pipeline_succeeds": false,
   "allow_merge_on_skipped_pipeline": false,
-  "allow_pipeline_trigger_approve_deployment": false,
   "restrict_user_defined_variables": false,
   "only_allow_merge_if_all_discussions_are_resolved": false,
   "remove_source_branch_after_merge": false,
@@ -2034,7 +2726,7 @@ Supported attributes:
 
 | Attribute            | Type              | Required | Description |
 |:---------------------|:------------------|:---------|:------------|
-| `id`                 | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                 | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `full_path`          | string            | no       | Full path of project to use with `permanently_remove`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/396500) in GitLab 15.11. To find the project path, use `path_with_namespace` from [get single project](projects.md#get-a-single-project). Premium and Ultimate only. |
 | `permanently_remove` | boolean/string    | no       | Immediately deletes a project if it is marked for deletion. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/396500) in GitLab 15.11. Premium and Ultimate only. |
 
@@ -2054,7 +2746,7 @@ Supported attributes:
 
 | Attribute | Type              | Required | Description |
 |:----------|:------------------|:---------|:------------|
-| `id`      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 
 ## Upload a project avatar
 
@@ -2069,7 +2761,7 @@ Supported attributes:
 | Attribute | Type              | Required | Description |
 |:----------|:------------------|:---------|:------------|
 | `avatar`  | string            | Yes      | The file to be uploaded. |
-| `id`      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 
 To upload an avatar from your file system, use the `--form` argument. This causes
 cURL to post data using the header `Content-Type: multipart/form-data`. The
@@ -2105,7 +2797,7 @@ Supported attributes:
 
 | Attribute | Type              | Required | Description |
 |:----------|:------------------|:---------|:------------|
-| `id`      | integer or string | yes      | ID or [URL-encoded path](rest/index.md#namespaced-paths) of the project. |
+| `id`      | integer or string | yes      | ID or [URL-encoded path](rest/index.md#namespaced-path-encoding) of the project. |
 
 Example request:
 
@@ -2140,7 +2832,7 @@ Supported attributes:
 |:---------------|:------------------|:---------|:------------|
 | `group_access` | integer           | Yes      | The [role (`access_level`)](members.md#roles) to grant the group. |
 | `group_id`     | integer           | Yes      | The ID of the group to share with. |
-| `id`           | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`           | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `expires_at`   | string            | No       | Share expiration date in ISO 8601 format. For example, `2016-09-26`. |
 
 ## Delete a shared project link within a group
@@ -2156,13 +2848,110 @@ Supported attributes:
 | Attribute  | Type              | Required | Description |
 |:-----------|:------------------|:---------|:------------|
 | `group_id` | integer           | Yes      | The ID of the group. |
-| `id`       | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`       | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 
 Example request:
 
 ```shell
 curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/share/17"
 ```
+
+## Import project members
+
+Import members from another project.
+
+If the importing member's role for the target project is:
+
+- Maintainer, then members with the Owner role for the source project are imported with the Maintainer role.
+- Owner, then members with the Owner role for the source project are imported with the Owner role.
+
+```plaintext
+POST /projects/:id/import_project_members/:project_id
+```
+
+Supported attributes:
+
+| Attribute    | Type              | Required | Description |
+|:-------------|:------------------|:---------|:------------|
+| `id`         | integer or string | Yes      | The ID or [URL-encoded path](rest/index.md#namespaced-path-encoding) of the target project to receive the members. |
+| `project_id` | integer or string | Yes      | The ID or [URL-encoded path](rest/index.md#namespaced-path-encoding) of the source project to import the members from. |
+
+Example request:
+
+```shell
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/import_project_members/32"
+```
+
+Returns:
+
+- `200 OK` on success.
+- `404 Project Not Found` if the target or source project does not exist or cannot be accessed by the requester.
+- `422 Unprocessable Entity` if the import of project members does not complete successfully.
+
+Example responses:
+
+- When all emails were successfully sent (`200` HTTP status code):
+
+  ```json
+  {  "status":  "success"  }
+  ```
+
+- When there was any error importing 1 or more members (`200` HTTP status code):
+
+  ```json
+  {
+    "status": "error",
+    "message": {
+                 "john_smith": "Some individual error message",
+                 "jane_smith": "Some individual error message"
+               },
+    "total_members_count": 3
+  }
+  ```
+
+- When there is a system error (`404` and `422` HTTP status codes):
+
+  ```json
+  {  "message":  "Import failed"  }
+  ```
+
+## Search for projects by name
+
+Search for projects by name that are accessible to the authenticated user. If this endpoint is accessed without
+authentication, it lists projects that are publicly accessible.
+
+```plaintext
+GET /projects
+```
+
+Example attributes:
+
+| Attribute  | Type   | Required | Description |
+|:-----------|:-------|:---------|:------------|
+| `search`   | string | Yes      | A string contained in the project name. |
+| `order_by` | string | No       | Return requests ordered by `id`, `name`, `created_at`, `star_count`, or `last_activity_at` fields. |
+| `sort`     | string | No       | Return requests sorted in `asc` or `desc` order. |
+
+Example request:
+
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects?search=test"
+```
+
+## Start the housekeeping task for a project
+
+Start the [housekeeping task](../administration/housekeeping.md) for a project.
+
+```plaintext
+POST /projects/:id/housekeeping
+```
+
+Supported attributes:
+
+| Attribute | Type              | Required | Description |
+|:----------|:------------------|:---------|:------------|
+| `id`      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
+| `task`    | string            | No       | `prune` to trigger manual prune of unreachable objects or `eager` to trigger eager housekeeping. |
 
 ## Get groups to which a user can transfer a project
 
@@ -2178,7 +2967,7 @@ Supported attributes:
 
 | Attribute | Type              | Required | Description |
 |:----------|:------------------|:---------|:------------|
-| `id`      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `search`  | string            | No       | The group names to search for. |
 
 Example request:
@@ -2225,7 +3014,7 @@ Supported attributes:
 
 | Attribute   | Type              | Required | Description |
 |:------------|:------------------|:---------|:------------|
-| `id`        | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`        | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `namespace` | integer or string | Yes      | The ID or path of the namespace to transfer to project to. |
 
 Example request:
@@ -2328,7 +3117,6 @@ Example response:
   "shared_with_groups": [],
   "only_allow_merge_if_pipeline_succeeds": false,
   "allow_merge_on_skipped_pipeline": null,
-  "allow_pipeline_trigger_approve_deployment": false,
   "restrict_user_defined_variables": false,
   "request_access_enabled": true,
   "only_allow_merge_if_all_discussions_are_resolved": false,
@@ -2347,80 +3135,6 @@ Example response:
   "warn_about_potentially_unwanted_characters": true
 }
 ```
-
-## Import project members
-
-Import members from another project.
-
-If the importing member's role for the target project is:
-
-- Maintainer, then members with the Owner role for the source project are imported with the Maintainer role.
-- Owner, then members with the Owner role for the source project are imported with the Owner role.
-
-```plaintext
-POST /projects/:id/import_project_members/:project_id
-```
-
-Supported attributes:
-
-| Attribute    | Type              | Required | Description |
-|:-------------|:------------------|:---------|:------------|
-| `id`         | integer or string | Yes      | The ID or [URL-encoded path](rest/index.md#namespaced-paths) of the target project to receive the members. |
-| `project_id` | integer or string | Yes      | The ID or [URL-encoded path](rest/index.md#namespaced-paths) of the source project to import the members from. |
-
-Example request:
-
-```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/import_project_members/32"
-```
-
-Returns:
-
-- `200 OK` on success.
-- `404 Project Not Found` if the target or source project does not exist or cannot be accessed by the requester.
-- `422 Unprocessable Entity` if the import of project members does not complete successfully.
-
-Example responses:
-
-- When all emails were successfully sent (`200` HTTP status code):
-
-  ```json
-  {  "status":  "success"  }
-  ```
-
-- When there was any error importing 1 or more members (`200` HTTP status code):
-
-  ```json
-  {
-    "status": "error",
-    "message": {
-                 "john_smith": "Some individual error message",
-                 "jane_smith": "Some individual error message"
-               },
-    "total_members_count": 3
-  }
-  ```
-
-- When there is a system error (`404` and `422` HTTP status codes):
-
-```json
-{  "message":  "Import failed"  }
-```
-
-## Start the housekeeping task for a project
-
-Start the [housekeeping task](../administration/housekeeping.md) for a project.
-
-```plaintext
-POST /projects/:id/housekeeping
-```
-
-Supported attributes:
-
-| Attribute | Type              | Required | Description |
-|:----------|:------------------|:---------|:------------|
-| `id`      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
-| `task`    | string            | No       | `prune` to trigger manual prune of unreachable objects or `eager` to trigger eager housekeeping. |
 
 ## Real-time security scan
 
@@ -2441,7 +3155,7 @@ Supported attributes:
 
 | Attribute | Type              | Required | Description |
 |-----------|-------------------|----------|-------------|
-| `id`      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 
 Example request:
 
@@ -2476,6 +3190,127 @@ Example response:
 }
 ```
 
+## Get a project's pull mirror details
+
+DETAILS:
+**Tier:** Premium, Ultimate
+**Offering:** GitLab.com, Self-managed, GitLab Dedicated
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/354506) in GitLab 15.6.
+
+Return the details of a project's [pull mirror](../user/project/repository/mirror/index.md).
+
+```plaintext
+GET /projects/:id/mirror/pull
+```
+
+Supported attributes:
+
+| Attribute | Type              | Required | Description |
+|:----------|:------------------|:---------|:------------|
+| `id`      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
+
+Example request:
+
+```shell
+curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/:id/mirror/pull"
+```
+
+Example response:
+
+```json
+{
+  "id": 101486,
+  "last_error": null,
+  "last_successful_update_at": "2020-01-06T17:32:02.823Z",
+  "last_update_at": "2020-01-06T17:32:02.823Z",
+  "last_update_started_at": "2020-01-06T17:31:55.864Z",
+  "update_status": "finished",
+  "url": "https://*****:*****@gitlab.com/gitlab-org/security/gitlab.git"
+}
+```
+
+## Configure pull mirroring for a project
+
+DETAILS:
+**Tier:** Premium, Ultimate
+**Offering:** GitLab.com, Self-managed, GitLab Dedicated
+
+> - Field `mirror_branch_regex` [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/381667) in GitLab 15.8 [with a flag](../administration/feature_flags.md) named `mirror_only_branches_match_regex`. Disabled by default.
+> - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/381667) in GitLab 16.0.
+> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/410354) in GitLab 16.2. Feature flag `mirror_only_branches_match_regex` removed.
+
+Configure pull mirroring while [creating a new project](#create-a-project) or [updating an existing project](#edit-a-project)
+by using the API if the remote repository is accessible publicly or by using `username:token` authentication.
+
+If your HTTP repository is not publicly accessible, you can add the authentication information to the URL. For example,
+`https://username:token@gitlab.company.com/group/project.git` where `token` is a
+[personal access token](../user/profile/personal_access_tokens.md) with the `api` scope enabled.
+
+Supported attributes:
+
+| Attribute                        | Type    | Required | Description |
+|:---------------------------------|:--------|:---------|:------------|
+| `import_url`                     | string  | Yes      | URL of remote repository being mirrored (with `user:token` if needed). |
+| `mirror`                         | boolean | Yes      | Enables pull mirroring on project when set to `true`. |
+| `mirror_trigger_builds`          | boolean | No       | Trigger pipelines for mirror updates when set to `true`. |
+| `only_mirror_protected_branches` | boolean | No       | Limits mirroring to only protected branches when set to `true`. |
+| `mirror_branch_regex`            | String  | No       | Contains a regular expression. Only branches with names matching the regex are mirrored. Requires `only_mirror_protected_branches` to be disabled. |
+
+Example creating a project with pull mirroring:
+
+```shell
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
+ --header "Content-Type: application/json" \
+ --data '{
+  "name": "new_project",
+  "namespace_id": "1",
+  "mirror": true,
+  "import_url": "https://username:token@gitlab.example.com/group/project.git"
+ }' \
+ --url "https://gitlab.example.com/api/v4/projects/"
+```
+
+Example adding pull mirroring:
+
+```shell
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" \
+ --url "https://gitlab.example.com/api/v4/projects/:id" \
+ --data "mirror=true&import_url=https://username:token@gitlab.example.com/group/project.git"
+```
+
+Example removing pull mirroring:
+
+```shell
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" \
+ --url "https://gitlab.example.com/api/v4/projects/:id"  \
+ --data "mirror=false"
+```
+
+## Start the pull mirroring process for a project
+
+DETAILS:
+**Tier:** Premium, Ultimate
+**Offering:** GitLab.com, Self-managed, GitLab Dedicated
+
+Start the pull mirroring process for a project.
+
+```plaintext
+POST /projects/:id/mirror/pull
+```
+
+Supported attributes:
+
+| Attribute | Type              | Required | Description |
+|:----------|:------------------|:---------|:------------|
+| `id`      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
+
+Example request:
+
+```shell
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/:id/mirror/pull"
+```
+
 ## Download snapshot of a Git repository
 
 This endpoint may only be accessed by an administrative user.
@@ -2495,7 +3330,7 @@ Supported attributes:
 
 | Attribute | Type              | Required | Description |
 |:----------|:------------------|:---------|:------------|
-| `id`      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`      | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `wiki`    | boolean           | No       | Whether to download the wiki, rather than project, repository. |
 
 ## Get the path to repository storage
@@ -2513,7 +3348,7 @@ Supported attributes:
 
 | Attribute | Type              | Required | Description |
 |:----------|:------------------|:---------|:------------|
-| `id`      | integer or string | Yes      | ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`      | integer or string | Yes      | ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 
 ```json
 [

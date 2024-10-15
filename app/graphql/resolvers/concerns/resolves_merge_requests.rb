@@ -16,7 +16,6 @@ module ResolvesMergeRequests
       args[:include_subgroups] = true
     end
 
-    args.delete(:subscribed) if Feature.disabled?(:filter_subscriptions, current_user)
     rewrite_param_name(args, :reviewer_wildcard_id, :reviewer_id)
     rewrite_param_name(args, :assignee_wildcard_id, :assignee_id)
 
@@ -63,8 +62,6 @@ module ResolvesMergeRequests
       diff_stats_summary: [:metrics],
       approved_by: [:approved_by_users],
       merge_after: [:merge_schedule],
-      mergeable: [:merge_schedule],
-      detailed_merge_status: [:merge_schedule],
       milestone: [:milestone],
       security_auto_fix: [:author],
       head_pipeline: [:merge_request_diff, { head_pipeline: [:merge_request] }],

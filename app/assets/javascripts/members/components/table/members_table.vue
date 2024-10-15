@@ -2,7 +2,6 @@
 import { GlTable, GlBadge, GlButton } from '@gitlab/ui';
 // eslint-disable-next-line no-restricted-imports
 import { mapState } from 'vuex';
-import EmptyResult from '~/vue_shared/components/empty_result.vue';
 import MembersTableCell from 'ee_else_ce/members/components/table/members_table_cell.vue';
 import {
   canDisableTwoFactor,
@@ -41,7 +40,6 @@ export default {
     GlTable,
     GlBadge,
     GlButton,
-    EmptyResult,
     MemberAvatar,
     CreatedAt,
     MembersTableCell,
@@ -240,7 +238,6 @@ export default {
   <div>
     <user-limit-reached-alert v-if="onAccessRequestTab" />
     <gl-table
-      v-if="members.length > 0"
       v-bind="tableAttrs.table"
       class="members-table"
       data-testid="members-table"
@@ -248,6 +245,8 @@ export default {
       :fields="filteredAndModifiedFields"
       :items="members"
       primary-key="id"
+      :empty-text="__('No members found')"
+      show-empty
       :tbody-tr-attr="tbodyTrAttr"
     >
       <template #cell(account)="{ item: member }">
@@ -325,7 +324,6 @@ export default {
         <span data-testid="col-actions" class="gl-sr-only">{{ label }}</span>
       </template>
     </gl-table>
-    <empty-result v-else />
     <members-pagination :pagination="pagination" :tab-query-param-value="tabQueryParamValue" />
     <disable-two-factor-modal />
     <remove-group-link-modal />

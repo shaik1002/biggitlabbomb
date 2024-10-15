@@ -32,7 +32,7 @@ describe('Merge requests query component', () => {
               startCursor: null,
               endCursor: null,
             },
-            nodes: [createMockMergeRequest({ title: 'reviewer' })],
+            nodes: [createMockMergeRequest({ titleHtml: 'reviewer' })],
           },
         },
       },
@@ -49,7 +49,7 @@ describe('Merge requests query component', () => {
               endCursor: null,
               __typename: 'PageInfo',
             },
-            nodes: [createMockMergeRequest({ title: 'assignee' })],
+            nodes: [createMockMergeRequest({ titleHtml: 'assignee' })],
           },
         },
       },
@@ -107,7 +107,7 @@ describe('Merge requests query component', () => {
   it.each([
     ['reviewRequestedMergeRequests', 'reviewer'],
     ['assignedMergeRequests', 'assignee'],
-  ])('sets merge request prop for %p', async (query, title) => {
+  ])('sets merge request prop for %p', async (query, titleHtml) => {
     createComponent({ query, variables: { state: 'opened' } });
 
     await waitForPromises();
@@ -116,7 +116,7 @@ describe('Merge requests query component', () => {
       expect.objectContaining({
         mergeRequests: expect.arrayContaining([
           expect.objectContaining({
-            title,
+            titleHtml,
           }),
         ]),
       }),

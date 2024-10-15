@@ -5,7 +5,7 @@ module Gitlab
     class SourceUserMapper
       include Gitlab::ExclusiveLeaseHelpers
 
-      LRU_CACHE_SIZE = 100
+      LRU_CACHE_SIZE = 8000
       LOCK_TTL = 15.seconds.freeze
       LOCK_SLEEP = 0.3.seconds.freeze
       LOCK_RETRIES = 100
@@ -15,7 +15,7 @@ module Gitlab
       def initialize(namespace:, import_type:, source_hostname:)
         @namespace = namespace.root_ancestor
         @import_type = import_type
-        @source_hostname = Gitlab::UrlHelpers.normalized_base_url(source_hostname)
+        @source_hostname = source_hostname
       end
 
       # Finds a source user by the provided `source_user_identifier`.
@@ -31,6 +31,7 @@ module Gitlab
       #
       # @param [String] source_user_identifier The identifier for the source user to find.
       # @return [Import::SourceUser, nil] The found source user object, or `nil` if no match is found.
+      #
       def find_source_user(source_user_identifier)
         cache_from_request_store[source_user_identifier] ||= ::Import::SourceUser.uncached do
           ::Import::SourceUser.find_source_user(
@@ -42,8 +43,7 @@ module Gitlab
         end
       end
 
-      # Finds a source user by the provided `source_user_identifier` or creates a new one
-      def find_or_create_source_user(source_name:, source_username:, source_user_identifier:, cache: true)
+      def find_or_create_source_user(source_name:, source_username:, source_user_identifier:)
         source_user = find_source_user(source_user_identifier)
 
         return source_user if source_user
@@ -54,9 +54,7 @@ module Gitlab
           source_user_identifier: source_user_identifier
         )
 
-        cache_from_request_store[source_user_identifier] = source_user if cache
-
-        source_user
+        cache_from_request_store[source_user_identifier] = source_user
       end
 
       private

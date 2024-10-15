@@ -33,7 +33,7 @@ Prerequisites:
 There are a few ways to view a list of environments for a given project:
 
 - On the project's overview page, if at least one environment is available (that is, not stopped).
-  ![Number of Environments](img/environments_project_home_v15_9.png "Incremental counter of available Environments")
+  ![Number of Environments](img/environments_project_home.png "Incremental counter of available Environments")
 
 - On the left sidebar, select **Operate > Environments**.
   The environments are displayed.
@@ -43,7 +43,7 @@ There are a few ways to view a list of environments for a given project:
 - To view a list of deployments for an environment, select the environment name,
   for example, `staging`.
 
-  ![Deployments list](img/deployments_list_v13_10.png)
+  ![Deployments list](img/deployments_list.png)
 
 Deployments show up in this list only after a deployment job has created them.
 
@@ -387,11 +387,11 @@ The [environment URL](../yaml/index.md#environmenturl) is displayed in a few
 places in GitLab:
 
 - In a merge request as a link:
-  ![Environment URL in merge request](../img/environments_mr_review_app_v11_10.png)
+  ![Environment URL in merge request](../img/environments_mr_review_app.png)
 - In the Environments view as a button:
   ![Open live environment from environments view](img/environments_open_live_environment_v14_8.png)
 - In the Deployments view as a button:
-  ![Environment URL in deployments](../img/deployments_view_v11_10.png)
+  ![Environment URL in deployments](../img/deployments_view.png)
 
 You can see this information in a merge request if:
 
@@ -400,7 +400,7 @@ You can see this information in a merge request if:
 
 For example:
 
-![Environment URLs in merge request](../img/environments_link_url_mr_v10_1.png)
+![Environment URLs in merge request](../img/environments_link_url_mr.png)
 
 #### Go from source files to public pages
 
@@ -788,7 +788,7 @@ If you [set up an alert integration](../../operations/incident_management/integr
 alerts for environments are shown on the environments page. The alert with the highest
 severity is shown, so you can identify which environments need immediate attention.
 
-![Environment alert](img/alert_for_environment_v13_4.png)
+![Environment alert](img/alert_for_environment.png)
 
 When the issue that triggered the alert is resolved, it is removed and is no
 longer visible on the environments page.
@@ -856,7 +856,7 @@ You can also access the terminal button from the page for a specific environment
 
 Select the button to establish the terminal session:
 
-![Terminal page](../img/environments_terminal_page_v8_15.png)
+![Terminal page](../img/environments_terminal_page.png)
 
 This works like any other terminal. You're in the container created
 by your deployment so you can:
@@ -895,7 +895,7 @@ Also, you can still fetch the deployed commit from the repository
 with specifying the commit SHA (for example, `git checkout <deployment-sha>`), even after archive.
 
 NOTE:
-GitLab preserves all commits as [`keep-around` refs](../../user/project/repository/repository_size.md#reduce-repository-size)
+GitLab preserves all commits as [`keep-around` refs](../../user/project/repository/reducing_the_repo_size_using_git.md)
 so that deployed commits are not garbage collected, even if it's not referenced by the deployment refs.
 
 ### Limit the environment scope of a CI/CD variable

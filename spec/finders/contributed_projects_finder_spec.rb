@@ -5,9 +5,9 @@ require 'spec_helper'
 RSpec.describe ContributedProjectsFinder, feature_category: :groups_and_projects do
   let_it_be(:user) { create(:user) }
   let_it_be(:user_2) { create(:user) }
-  let_it_be(:public_project) { create(:project, :public, name: 'foo') }
-  let_it_be(:private_project) { create(:project, :private, name: 'bar') }
-  let_it_be(:internal_project) { create(:project, :internal, name: 'baz') }
+  let_it_be(:public_project) { create(:project, :public) }
+  let_it_be(:private_project) { create(:project, :private) }
+  let_it_be(:internal_project) { create(:project, :internal) }
 
   let(:params) { {} }
   let(:source_user) { user }
@@ -26,8 +26,8 @@ RSpec.describe ContributedProjectsFinder, feature_category: :groups_and_projects
     travel_to(2.hours.from_now) { create(:push_event, project: public_project, author: user) }
   end
 
-  context 'when sort is specified' do
-    let(:params) { { sort: 'latest_activity_desc' } }
+  context 'when order_by is specified' do
+    let(:params) { { order_by: 'latest_activity_desc' } }
 
     subject { finder.execute }
 
@@ -75,14 +75,6 @@ RSpec.describe ContributedProjectsFinder, feature_category: :groups_and_projects
     end
   end
 
-  describe 'with search param' do
-    let(:params) { { search: 'foo' } }
-
-    subject { finder.execute }
-
-    it { is_expected.to eq([public_project]) }
-  end
-
   describe 'with min_access_level param' do
     let_it_be(:project_with_owner_access) { create(:project, :private) }
 
@@ -110,27 +102,6 @@ RSpec.describe ContributedProjectsFinder, feature_category: :groups_and_projects
 
         expect(projects).to eq([project_with_owner_access, private_project])
       end
-    end
-  end
-
-  context 'with programming_language_name param' do
-    let_it_be(:ruby) { create(:programming_language, name: 'Ruby') }
-    let_it_be(:repository_language) do
-      create(:repository_language, project: internal_project, programming_language: ruby)
-    end
-
-    subject { finder.execute }
-
-    context 'when programming_language_name is set to an existing language' do
-      let(:params) { { programming_language_name: 'ruby' } }
-
-      it { is_expected.to match_array([internal_project]) }
-    end
-
-    context 'when programming_language_name is an empty string' do
-      let(:params) { { programming_language_name: '' } }
-
-      it { is_expected.to match_array(default_ordering) }
     end
   end
 end

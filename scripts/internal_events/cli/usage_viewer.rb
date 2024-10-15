@@ -9,8 +9,7 @@ module InternalEventsCli
     PROPERTY_EXAMPLES = {
       'label' => "'string'",
       'property' => "'string'",
-      'value' => '72',
-      'custom_key' => 'custom_value'
+      'value' => '72'
     }.freeze
 
     attr_reader :cli, :event

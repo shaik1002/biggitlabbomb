@@ -2,8 +2,8 @@ import { GlFormCheckbox, GlSprintf, GlTruncate, GlBadge } from '@gitlab/ui';
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import { RouterLinkStub } from '@vue/test-utils';
-import ProtectedBadge from '~/vue_shared/components/badges/protected_badge.vue';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import PackagesListRow from '~/packages_and_registries/package_registry/components/list/package_list_row.vue';
 import PackageTags from '~/packages_and_registries/shared/components/package_tags.vue';
@@ -64,6 +64,9 @@ describe('packages_list_row', () => {
       propsData: {
         packageEntity,
         selected,
+      },
+      directives: {
+        GlTooltip: createMockDirective('gl-tooltip'),
       },
     });
   };
@@ -358,16 +361,22 @@ describe('packages_list_row', () => {
         },
       });
 
-    const findProtectedBadge = () => wrapper.findComponent(ProtectedBadge);
+    const findBadgeProtected = () => wrapper.findComponent(GlBadge);
 
     describe('when package is protected', () => {
       it('shows badge', () => {
         mountComponentForBadgeProtected();
 
-        expect(findProtectedBadge().exists()).toBe(true);
-        expect(findProtectedBadge().props('tooltipText')).toMatch(
-          'A protection rule exists for this package.',
-        );
+        expect(findBadgeProtected().text()).toBe('protected');
+      });
+
+      it('binds tooltip directive', () => {
+        mountComponentForBadgeProtected();
+
+        const badgeProtectedTooltipBinding = getBinding(findBadgeProtected().element, 'gl-tooltip');
+        expect(badgeProtectedTooltipBinding.value).toMatchObject({
+          title: 'A protection rule exists for this package.',
+        });
       });
     });
 
@@ -375,7 +384,7 @@ describe('packages_list_row', () => {
       it('does not show badge', () => {
         mountComponentForBadgeProtected({ packageEntityProtectionRuleExists: false });
 
-        expect(findProtectedBadge().exists()).toBe(false);
+        expect(findBadgeProtected().exists()).toBe(false);
       });
     });
 
@@ -383,7 +392,7 @@ describe('packages_list_row', () => {
       it('does not show badge', () => {
         mountComponentForBadgeProtected({ glFeaturesPackagesProtectedPackages: false });
 
-        expect(findProtectedBadge().exists()).toBe(false);
+        expect(findBadgeProtected().exists()).toBe(false);
       });
     });
   });

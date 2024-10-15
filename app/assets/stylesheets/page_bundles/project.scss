@@ -9,6 +9,12 @@
     .icon {
       vertical-align: 1px;
     }
+
+    .home-panel-topic-list {
+      .icon {
+        top: 3px;
+      }
+    }
   }
 
   .home-panel-description {
@@ -147,7 +153,7 @@
   margin-bottom: 7px;
 
   h5 {
-    @apply gl-text-heading;
+    color: var(--gl-text-color-heading);
   }
 }
 

@@ -241,7 +241,7 @@ Supported attributes:
 
 | Attribute                       | Type           | Required | Description |
 | ------------------------------- | -------------- | -------- | ----------- |
-| `id`                            | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                            | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `approved_by_ids`               | integer array  | No       | Returns merge requests approved by all the users with the given `id`, up to 5 users. `None` returns merge requests with no approvals. `Any` returns merge requests with an approval. Premium and Ultimate only. |
 | `approver_ids`                  | integer array  | No       | Returns merge requests which have specified all the users with the given `id` as individual approvers. `None` returns merge requests without approvers. `Any` returns merge requests with an approver. Premium and Ultimate only. |
 | `approved`                      | string         | No       | Filters merge requests by their `approved` status. `yes` returns only approved merge requests. `no` returns only non-approved merge requests. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3159) in GitLab 15.11. Available only when the feature flag `mr_approved_filter` is enabled. |
@@ -276,7 +276,7 @@ Supported attributes:
 | `with_labels_details`           | boolean        | No       | If `true`, response returns more details for each label in labels field: `:name`, `:color`, `:description`, `:description_html`, `:text_color`. Default is `false`. |
 | `with_merge_status_recheck`     | boolean        | No       | If `true`, this projection requests (but does not guarantee) the asynchronous recalculation of the `merge_status` field. Default is `false`. In GitLab 15.11 and later, enable the `restrict_merge_status_recheck` feature [flag](../administration/feature_flags.md) to ignore this attribute when requested by users without at least the Developer role. |
 
-If successful, returns [`200 OK`](rest/troubleshooting.md#status-codes) and the following
+If successful, returns [`200 OK`](rest/index.md#status-codes) and the following
 response attributes:
 
 | Attribute                          | Type     | Description |
@@ -490,7 +490,7 @@ Supported attributes:
 
 | Attribute                       | Type           | Required | Description |
 | ------------------------------- | -------------- | -------- | ----------- |
-| `id`                            | integer or string | Yes      | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths). |
+| `id`                            | integer or string | Yes      | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding). |
 | `approved_by_ids`               | integer array  | No       | Returns the merge requests approved by all the users with the given `id`, up to 5 users. `None` returns merge requests with no approvals. `Any` returns merge requests with an approval. Premium and Ultimate only. |
 | `approved_by_usernames`         | string array  | No       | Returns the merge requests approved by all the users with the given `username`, up to 5 users. `None` returns merge requests with no approvals. `Any` returns merge requests with an approval. Premium and Ultimate only. |
 | `approver_ids`                  | integer array  | No       | Returns merge requests which have specified all the users with the given `id` as individual approvers. `None` returns merge requests without approvers. `Any` returns merge requests with an approver. Premium and Ultimate only. |
@@ -666,7 +666,7 @@ Supported attributes:
 
 | Attribute                        | Type           | Required | Description |
 |----------------------------------|----------------|----------|-------------|
-| `id`                             | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                             | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid`              | integer        | Yes      | The internal ID of the merge request. |
 | `include_diverged_commits_count` | boolean        | No       | If `true`, response includes the commits behind the target branch. |
 | `include_rebase_in_progress`     | boolean        | No       | If `true`, response includes whether a rebase operation is in progress. |
@@ -909,15 +909,12 @@ Use `detailed_merge_status` instead of `merge_status` to account for all potenti
     [Require associated Jira issue for merge requests to be merged](../integration/jira/issues.md#require-associated-jira-issue-for-merge-requests-to-be-merged).
   - `mergeable`: The branch can merge cleanly into the target branch.
   - `merge_request_blocked`: Blocked by another merge request.
-  - `merge_time`: May not be merged until after the specified time.
   - `need_rebase`: The merge request must be rebased.
   - `not_approved`: Approval is required before merge.
   - `not_open`: The merge request must be open before merge.
   - `preparing`: Merge request diff is being created.
   - `requested_changes`: The merge request has reviewers who have requested changes.
   - `security_policy_evaluation`: All security policies must be evaluated.
-    Requires the `policy_mergability_check` feature flag to be enabled.
-  - `security_policy_violations`: All security policies must be satisfied.
     Requires the `policy_mergability_check` feature flag to be enabled.
   - `status_checks_must_pass`: All status checks must pass before merge.
   - `unchecked`: Git has not yet tested if a valid merge is possible.
@@ -948,7 +945,7 @@ Supported attributes:
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer           | Yes      | The internal ID of the merge request. |
 
 Example response:
@@ -986,7 +983,7 @@ Supported attributes:
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer           | Yes      | The internal ID of the merge request. |
 
 Example response:
@@ -1032,10 +1029,10 @@ Supported attributes:
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer           | Yes      | Internal ID of the merge request. |
 
-If successful, returns [`200 OK`](rest/troubleshooting.md#status-codes) and the following
+If successful, returns [`200 OK`](rest/index.md#status-codes) and the following
 response attributes:
 
 | Attribute                     | Type         | Description |
@@ -1115,7 +1112,7 @@ Supported attributes:
 
 | Attribute           | Type           | Required | Description |
 |---------------------|----------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 
 Example request:
 
@@ -1361,17 +1358,17 @@ Example response:
 
 ## Delete a merge request dependency
 
-Delete a merge request dependency.
+Delete a merge request dependency
 
 ```plaintext
-DELETE /projects/:id/merge_requests/:merge_request_iid/blocks/:block_id
+GET /projects/:id/merge_requests/:merge_request_iid/blocks/:block_id
 ```
 
 Supported attributes:
 
 | Attribute           | Type           | Required | Description |
 |---------------------|----------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths) owned by the authenticated user. |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `merge_request_iid` | integer        | Yes      | The internal ID of the merge request. |
 | `block_id`          | integer        | Yes      | The internal ID of the block. |
 
@@ -1387,158 +1384,6 @@ Returns:
 - `204 No Content` if the dependency is successfully deleted.
 - `403 Forbidden` if the user lacks permissions for updating the merge request.
 - `403 Forbidden` if the user lacks permissions for reading the blocking merge request.
-
-## Create a merge request dependency
-
-Create a merge request dependency.
-
-```plaintext
-POST /projects/:id/merge_requests/:merge_request_iid/blocks
-```
-
-Supported attributes:
-
-| Attribute           | Type           | Required | Description |
-|---------------------|----------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths) owned by the authenticated user. |
-| `merge_request_iid` | integer        | Yes      | The internal ID of the merge request. |
-| `blocking_merge_request_id`          | integer        | Yes      | The internal ID of the blocking merge request. |
-
-Example request:
-
-```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
-  --url "https://gitlab.example.com/api/v4/projects/1/merge_requests/1/blocks?blocking_merge_request_id=2"
-```
-
-Returns:
-
-- `201 Created` if the dependency is successfully created.
-- `400 Bad request` if the blocking merge request fails to save.
-- `403 Forbidden` if the user lacks permissions for reading the blocking merge request.
-- `404 Not found` if the blocking merge request is not found.
-- `409 Conflict` if the block already exists.
-
-Example response:
-
-```json
-[
-  {
-    "id": 1,
-    "blocking_merge_request": {
-      "id": 145,
-      "iid": 12,
-      "project_id": 7,
-      "title": "Interesting MR",
-      "description": "Does interesting things.",
-      "state": "opened",
-      "created_at": "2024-07-05T21:29:11.172Z",
-      "updated_at": "2024-07-05T21:29:11.172Z",
-      "merged_by": null,
-      "merge_user": null,
-      "merged_at": null,
-      "merge_after": "2018-09-07T11:16:00.000Z",
-      "closed_by": null,
-      "closed_at": null,
-      "target_branch": "master",
-      "source_branch": "v2.x",
-      "user_notes_count": 0,
-      "upvotes": 0,
-      "downvotes": 0,
-      "author": {
-        "id": 2,
-        "username": "aiguy123",
-        "name": "AI GUY",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
-        "web_url": "https://localhost/aiguy123"
-      },
-      "assignees": [
-        {
-          "id": 2,
-          "username": "aiguy123",
-          "name": "AI GUY",
-          "state": "active",
-          "locked": false,
-          "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
-          "web_url": "https://localhost/aiguy123"
-        }
-      ],
-      "assignee": {
-        "id": 2,
-        "username": "aiguy123",
-        "name": "AI GUY",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
-        "web_url": "https://localhost/aiguy123"
-      },
-      "reviewers": [
-        {
-          "id": 2,
-          "username": "aiguy123",
-          "name": "AI GUY",
-          "state": "active",
-          "locked": false,
-          "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
-          "web_url": "https://localhost/aiguy123"
-        },
-        {
-          "id": 1,
-          "username": "root",
-          "name": "Administrator",
-          "state": "active",
-          "locked": false,
-          "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
-          "web_url": "https://localhost/root"
-        }
-      ],
-      "source_project_id": 7,
-      "target_project_id": 7,
-      "labels": [],
-      "draft": false,
-      "imported": false,
-      "imported_from": "none",
-      "work_in_progress": false,
-      "milestone": null,
-      "merge_when_pipeline_succeeds": false,
-      "merge_status": "unchecked",
-      "detailed_merge_status": "unchecked",
-      "sha": "ce7e4f2d0ce13cb07479bb39dc10ee3b861c08a6",
-      "merge_commit_sha": null,
-      "squash_commit_sha": null,
-      "discussion_locked": null,
-      "should_remove_source_branch": null,
-      "force_remove_source_branch": true,
-      "prepared_at": null,
-      "reference": "!12",
-      "references": {
-        "short": "!12",
-        "relative": "!12",
-        "full": "my-group/my-project!12"
-      },
-      "web_url": "https://localhost/my-group/my-project/-/merge_requests/12",
-      "time_stats": {
-        "time_estimate": 0,
-        "total_time_spent": 0,
-        "human_time_estimate": null,
-        "human_total_time_spent": null
-      },
-      "squash": false,
-      "squash_on_merge": false,
-      "task_completion_status": {
-        "count": 0,
-        "completed_count": 0
-      },
-      "has_conflicts": false,
-      "blocking_discussions_resolved": true,
-      "approvals_before_merge": null
-    },
-    "project_id": 7
-  }
-]
-```
 
 ## Get single merge request changes
 
@@ -1557,7 +1402,7 @@ Supported attributes:
 
 | Attribute           | Type           | Required | Description |
 |---------------------|----------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer        | Yes      | The internal ID of the merge request. |
 | `access_raw_diffs`  | boolean        | No       | Retrieve change diffs through Gitaly. |
 | `unidiff`           | boolean        | No       | Present change diffs in the [unified diff](https://www.gnu.org/software/diffutils/manual/html_node/Detailed-Unified.html) format. Default is false. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/130610) in GitLab 16.5. |
@@ -1695,13 +1540,13 @@ Supported attributes:
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer           | Yes      | The internal ID of the merge request. |
 | `page`              | integer           | No       | The page of results to return. Defaults to 1. |
 | `per_page`          | integer           | No       | The number of results per page. Defaults to 20. |
 | `unidiff`           | boolean           | No       | Present diffs in the [unified diff](https://www.gnu.org/software/diffutils/manual/html_node/Detailed-Unified.html) format. Default is false. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/130610) in GitLab 16.5. |
 
-If successful, returns [`200 OK`](rest/troubleshooting.md#status-codes) and the
+If successful, returns [`200 OK`](rest/index.md#status-codes) and the
 following response attributes:
 
 | Attribute      | Type    | Description |
@@ -1768,7 +1613,7 @@ Supported attributes:
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer           | Yes      | The internal ID of the merge request. |
 
 To restrict the list of merge request pipelines, use the pagination parameters `page` and
@@ -1807,7 +1652,7 @@ Supported attributes:
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer           | Yes      | The internal ID of the merge request. |
 
 Example response:
@@ -1861,7 +1706,7 @@ POST /projects/:id/merge_requests
 
 | Attribute                  | Type    | Required | Description |
 | ---------                  | ----    | -------- | ----------- |
-| `id`                       | integer or string | Yes | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths) |
+| `id`                       | integer or string | Yes | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) |
 | `source_branch`            | string  | Yes      | The source branch. |
 | `target_branch`            | string  | Yes      | The target branch. |
 | `title`                    | string  | Yes      | Title of MR. |
@@ -2017,7 +1862,7 @@ PUT /projects/:id/merge_requests/:merge_request_iid
 
 | Attribute                  | Type    | Required | Description |
 | ---------                  | ----    | -------- | ----------- |
-| `id`                       | integer or string | Yes  | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                       | integer or string | Yes  | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid`        | integer | Yes      | The ID of a merge request. |
 | `add_labels`               | string  | No       | Comma-separated label names to add to a merge request. If a label does not already exist, this creates a new project label and assigns it to the merge request. |
 | `allow_collaboration`      | boolean | No       | Allow commits from members who can merge to the target branch. |
@@ -2191,7 +2036,7 @@ DELETE /projects/:id/merge_requests/:merge_request_iid
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer           | Yes      | The internal ID of the merge request. |
 
 ```shell
@@ -2212,7 +2057,7 @@ Supported attributes:
 
 | Attribute                      | Type           | Required | Description |
 |--------------------------------|----------------|----------|-------------|
-| `id`                           | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                           | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid`            | integer        | Yes      | The internal ID of the merge request. |
 | `merge_commit_message`         | string         | No       | Custom merge commit message. |
 | `merge_when_pipeline_succeeds` | boolean        | No       | If `true`, the merge request merges when the pipeline succeeds. |
@@ -2392,7 +2237,7 @@ Supported attributes:
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer           | Yes      | The internal ID of the merge request. |
 
 This API returns specific HTTP status codes:
@@ -2422,7 +2267,7 @@ Supported attributes:
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer           | Yes      | The internal ID of the merge request. |
 
 This API returns specific HTTP status codes:
@@ -2586,7 +2431,7 @@ PUT /projects/:id/merge_requests/:merge_request_iid/rebase
 
 | Attribute           | Type           | Required | Description |
 |---------------------|----------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer        | Yes      | The internal ID of the merge request. |
 | `skip_ci`           | boolean        | No       | Set to `true` to skip creating a CI pipeline. |
 
@@ -2662,10 +2507,10 @@ Supported attributes:
 
 | Attribute           | Type           | Required | Description |
 |---------------------|----------------|----------|-------------|
-| `id`                | integer or string | Yes   | ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes   | ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer        | Yes      | Internal ID of the merge request. |
 
-If successful, returns [`200 OK`](rest/troubleshooting.md#status-codes) and the following
+If successful, returns [`200 OK`](rest/index.md#status-codes) and the following
 response attributes when you use the GitLab issue tracker:
 
 | Attribute                   | Type     | Description                                                                                                                       |
@@ -2700,7 +2545,7 @@ response attributes when you use the GitLab issue tracker:
 | `[].web_url`                | string   | Web URL of the issue.                                                                                                             |
 | `[].weight`                 | integer  | Weight of the issue.                                                                                                              |
 
-If successful, returns [`200 OK`](rest/troubleshooting.md#status-codes) and the following
+If successful, returns [`200 OK`](rest/index.md#status-codes) and the following
 response attributes when you use an external issue tracker, like Jira:
 
 | Attribute                   | Type     | Description                                                                                                                       |
@@ -2820,7 +2665,7 @@ GET /projects/:id/merge_requests/:merge_request_iid/related_issues
 
 | Attribute           | Type           | Required | Description |
 |---------------------|----------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer        | Yes      | The internal ID of the merge request. |
 
 ```shell
@@ -2896,7 +2741,7 @@ POST /projects/:id/merge_requests/:merge_request_iid/subscribe
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer           | Yes      | The internal ID of the merge request. |
 
 If the user is already subscribed to the merge request, the endpoint returns the
@@ -3061,7 +2906,7 @@ POST /projects/:id/merge_requests/:merge_request_iid/unsubscribe
 
 | Attribute           | Type           | Required | Description |
 |---------------------|----------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer        | Yes      | The internal ID of the merge request. |
 
 ```shell
@@ -3227,7 +3072,7 @@ POST /projects/:id/merge_requests/:merge_request_iid/todo
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer           | Yes      | The internal ID of the merge request. |
 
 ```shell
@@ -3418,7 +3263,7 @@ Supported attributes:
 | `version_id`        | integer | Yes      | ID of the merge request diff version. |
 | `unidiff`           | boolean | No       | Present diffs in the [unified diff](https://www.gnu.org/software/diffutils/manual/html_node/Detailed-Unified.html) format. Default is false. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/130610) in GitLab 16.5.      |
 
-If successful, returns [`200 OK`](rest/troubleshooting.md#status-codes) and the following
+If successful, returns [`200 OK`](rest/index.md#status-codes) and the following
 response attributes:
 
 | Attribute                     | Type         | Description |
@@ -3552,7 +3397,7 @@ POST /projects/:id/merge_requests/:merge_request_iid/time_estimate
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer           | Yes      | The internal ID of the merge request. |
 | `duration`          | string            | Yes      | The duration in human format, such as `3h30m`. |
 
@@ -3583,7 +3428,7 @@ POST /projects/:id/merge_requests/:merge_request_iid/reset_time_estimate
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer           | Yes      | The internal ID of a project's merge request. |
 
 ```shell
@@ -3613,7 +3458,7 @@ POST /projects/:id/merge_requests/:merge_request_iid/add_spent_time
 
 | Attribute           | Type           | Required | Description |
 |---------------------|----------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer        | Yes      | The internal ID of the merge request. |
 | `duration`          | string         | Yes      | The duration in human format, such as `3h30m` |
 | `summary`           | string         | No       | A summary of how the time was spent. |
@@ -3645,7 +3490,7 @@ POST /projects/:id/merge_requests/:merge_request_iid/reset_spent_time
 
 | Attribute           | Type           | Required | Description |
 |---------------------|----------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer        | Yes      | The internal ID of a project's merge request. |
 
 ```shell
@@ -3673,7 +3518,7 @@ GET /projects/:id/merge_requests/:merge_request_iid/time_stats
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer           | Yes      | The internal ID of the merge request. |
 
 ```shell

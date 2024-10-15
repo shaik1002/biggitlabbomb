@@ -151,6 +151,10 @@
   }
 }
 
+.flex-truncate-parent {
+  display: flex;
+}
+
 .flex-truncate-child {
   flex: 1;
   white-space: nowrap;

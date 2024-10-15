@@ -44,17 +44,6 @@ DETAILS:
 - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [Watch overview](https://www.youtube.com/watch?v=ZQBAuf-CTAY&list=PLFGfElNsQthYDx0A_FaNNfUm9NHsK6zED)
 - [View documentation](../gitlab_duo_chat/index.md).
 
-### Discussion Summary
-
-DETAILS:
-**Tier:** For a limited time, Ultimate. On October 17, 2024, Ultimate with [GitLab Duo Enterprise](https://about.gitlab.com/gitlab-duo/#pricing).
-**Offering:** GitLab.com, Self-managed, GitLab Dedicated
-
-- Helps everyone get up to speed by summarizing the lengthy conversations in an issue.
-- LLM: Anthropic [Claude 3.5 Sonnet](https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-3-5-sonnet)
-- <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [Watch overview](https://www.youtube.com/watch?v=IcdxLfTIUgc)
-- [View documentation](../discussions/index.md#summarize-issue-discussions-with-duo-chat).
-
 ### Code Suggestions
 
 DETAILS:
@@ -148,12 +137,23 @@ DETAILS:
 - Track the progress of AI adoption.
 - [View documentation](../analytics/ai_impact_analytics.md).
 
+### Discussion summary
+
+DETAILS:
+**Tier:** For a limited time, Ultimate. On October 17, 2024, Ultimate with [GitLab Duo Enterprise](https://about.gitlab.com/gitlab-duo/#pricing).
+**Offering:** GitLab.com, Self-managed
+
+- Helps everyone get up to speed by summarizing the lengthy conversations in an issue.
+- LLM: Anthropic [Claude 3.5 Sonnet](https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-3-5-sonnet)
+- <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [Watch overview](https://www.youtube.com/watch?v=IcdxLfTIUgc)
+- [View documentation](../discussions/index.md#summarize-issue-discussions-with-duo-chat).
+
 ## Beta features
 
 ### Self-Hosted Models
 
 DETAILS:
-**Tier:** For a limited time, Ultimate. On October 17, 2024, Ultimate with [GitLab Duo Enterprise](https://about.gitlab.com/gitlab-duo/#pricing).
+**Tier:** For a limited time, Premium and Ultimate. On October 17, 2024, [GitLab Duo Enterprise](https://about.gitlab.com/gitlab-duo/#pricing).
 **Offering:** Self-managed
 **Status:** Beta
 
@@ -195,7 +195,7 @@ DETAILS:
 
 - Helps populate an issue more quickly by generating a more in-depth description, based on a short summary you provide.
 - LLM: Anthropic [Claude 3 Haiku](https://docs.anthropic.com/en/docs/about-claude/models#claude-3-a-new-generation-of-ai)
-- [View documentation](../project/issues/managing_issues.md#populate-an-issue-with-issue-description-generation).
+- [View documentation](experiments.md#populate-an-issue-with-issue-description-generation).
 
 ### Code Review Summary
 
@@ -219,28 +219,6 @@ DETAILS:
 - Processes and responds to your questions about your application's usage data.
 - LLM: Vertex AI Codey [`codechat-bison`](https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/code-chat)
 - [View documentation](../analytics/analytics_dashboards.md#generate-a-custom-visualization-with-gitlab-duo).
-
-### GitLab Duo Workflow
-
-DETAILS:
-**Offering:** GitLab.com
-**Status:** Experiment
-**Tier:** Ultimate
-
-- Automate tasks and help increase productivity in your development workflow.
-- LLM: Anthropic [Claude 3.5 Sonnet](https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-3-5-sonnet)
-- [View documentation](../duo_workflow/index.md).
-
-### GitLab Duo Code Review
-
-DETAILS:
-**Tier:** Ultimate
-**Offering:** GitLab.com
-**Status:** Experiment
-
-- Automated code review of the proposed changes in your merge request.
-- LLM: Anthropic [Claude 3.5 Sonnet](https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-3-5-sonnet)
-- [View documentation](../project/merge_requests/duo_in_merge_requests.md#gitlab-duo-code-review).
 
 ## Disable GitLab Duo features for specific groups or projects or an entire instance
 

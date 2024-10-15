@@ -1,20 +1,13 @@
 import { concatPagination } from '@apollo/client/utilities';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import VueRouter from 'vue-router';
 import createDefaultClient from '~/lib/graphql';
 import App from './components/app.vue';
 
 export function initMergeRequestDashboard(el) {
   Vue.use(VueApollo);
-  Vue.use(VueRouter);
 
-  const { tabs } = JSON.parse(el.dataset.initialData);
-  const router = new VueRouter({
-    mode: 'history',
-    base: el.dataset.basePath,
-    routes: [{ path: '/:filter' }],
-  });
+  const { lists, switch_dashboard_path: switchDashboardPath } = JSON.parse(el.dataset.initialData);
 
   const keyArgs = [
     'state',
@@ -28,7 +21,6 @@ export function initMergeRequestDashboard(el) {
 
   return new Vue({
     el,
-    router,
     apolloProvider: new VueApollo({
       defaultClient: createDefaultClient(
         {},
@@ -64,11 +56,11 @@ export function initMergeRequestDashboard(el) {
         },
       ),
     }),
-    provide: { mergeRequestsSearchDashboardPath: el.dataset.mergeRequestsSearchDashboardPath },
+    provide: { switchDashboardPath },
     render(createElement) {
       return createElement(App, {
         props: {
-          tabs,
+          lists,
         },
       });
     },

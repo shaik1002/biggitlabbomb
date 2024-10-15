@@ -108,7 +108,7 @@
 }
 
 .right-sidebar {
-  @apply gl-border-l;
+  border-left: 1px solid $border-color;
 
   &.right-sidebar-merge-requests {
     @include media-breakpoint-up(lg) {
@@ -257,20 +257,8 @@
 }
 
 .toggle-right-sidebar-button {
-  @apply gl-transition-width;
-  height: $toggle-sidebar-height;
-  padding: 0 $gl-padding;
-  background-color: $gray-10;
-  border: 0;
-  color: $gl-text-color-secondary;
-  display: flex;
-  align-items: center;
+  @include side-panel-toggle;
   border-bottom: 1px solid $border-color;
-
-  &:hover {
-    background-color: $border-color;
-    color: $gl-text-color;
-  }
 }
 
 .edit-link {
@@ -332,7 +320,7 @@
   position: fixed;
   bottom: calc(#{$calc-application-footer-height} + var(--mr-review-bar-height));
   right: 0;
-  @apply gl-bg-default;
+  background-color: $white;
   z-index: 200;
   overflow: hidden;
   @apply gl-transition-width;
@@ -740,7 +728,6 @@
       &:focus,
       &.is-focused {
         @include dropdown-item-hover;
-        background-color: transparent;
       }
     }
 

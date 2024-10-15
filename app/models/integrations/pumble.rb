@@ -34,7 +34,7 @@ module Integrations
 
     def self.help
       build_help_page_url(
-        'user/project/integrations/pumble.md',
+        'user/project/integrations/pumble',
         s_("PumbleIntegration|Send notifications about project events to Pumble.")
       )
     end

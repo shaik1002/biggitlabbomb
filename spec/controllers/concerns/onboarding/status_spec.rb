@@ -9,18 +9,17 @@ RSpec.describe Onboarding::Status, feature_category: :onboarding do
 
   describe '.registration_path_params' do
     let(:params) { { some: 'thing' } }
+    let(:extra_params) { { another_extra: 'param' } }
 
     subject { described_class.registration_path_params(params: params) }
 
     it { is_expected.to eq({}) }
-  end
 
-  describe '#registration_omniauth_params' do
-    let(:params) { { glm_source: 'source', glm_content: 'content', extra: 'param' } }
+    context 'when extra params are passed' do
+      subject { described_class.registration_path_params(params: params, extra_params: extra_params) }
 
-    subject { described_class.new(params, {}, nil).registration_omniauth_params }
-
-    it { is_expected.to eq({}) }
+      it { is_expected.to eq({}) }
+    end
   end
 
   describe '#single_invite?' do

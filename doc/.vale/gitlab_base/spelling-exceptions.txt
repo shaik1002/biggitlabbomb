@@ -226,8 +226,8 @@ cybersecurity
 CycloneDX
 Dangerfile
 DAST
-Database Lab
 Database Lab Engine
+Database Lab
 Databricks
 Datadog
 datasource
@@ -406,7 +406,6 @@ globals
 globbing
 globstar
 globstars
-GLQL's
 Gmail
 Godep
 Golang
@@ -456,9 +455,9 @@ hyperparameter
 hyperparameters
 iCalendar
 iCloud
-IDE's
 idempotence
 IDEs
+IDE's
 idmapper
 Iglu
 IIFEs
@@ -528,8 +527,8 @@ kubectl
 Kubernetes
 Kubesec
 Kucoin
-Kustomization
 Kustomize
+Kustomization
 kwargs
 Laravel
 LaunchDarkly
@@ -537,12 +536,12 @@ ldapsearch
 Lefthook
 Leiningen
 Lemmy
+LLM
+LLMs
 libFuzzer
 Libgcrypt
 Libravatar
 liveness
-LLM
-LLMs
 lockfile
 lockfiles
 Lodash
@@ -696,8 +695,8 @@ pgvector
 Phabricator
 phaser
 phasers
-Phorge
 phpenv
+Phorge
 PHPUnit
 PIDs
 Pinia

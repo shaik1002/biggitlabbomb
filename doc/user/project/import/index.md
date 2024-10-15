@@ -83,17 +83,14 @@ difficult, but several tools exist including:
 ## User contribution and membership mapping
 
 DETAILS:
-**Tier:** Free, Premium, Ultimate
-**Offering:** GitLab.com
+**Status:** Experiment
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/443557) to direct transfer migrations for self-managed instances in GitLab 17.4 [with flags](../../../administration/feature_flags.md) named `importer_user_mapping` and `bulk_import_importer_user_mapping`. Disabled by default.
+> - [Introduced to migration by using direct transfer](https://gitlab.com/gitlab-org/gitlab/-/issues/443557) in GitLab 17.4 [with flags](../../../administration/feature_flags.md) named `importer_user_mapping` and `bulk_import_importer_user_mapping`. Disabled by default. This feature is an [experiment](../../../policy/experiment-beta-support.md).
 
 FLAG:
 The availability of this feature is controlled by feature flags.
 For more information, see the history.
-
-This method of user contributions and membership mapping is enabled for GitLab.com [direct transfer migrations](../../group/import/index.md). For the method available on
-self-managed GitLab instances, see [User contributions and membership mapping](../../group/import/direct_transfer_migrations.md#user-contributions-and-membership-mapping).
+This feature is available for internal testing only, it is not ready for production use.
 
 With user contribution and membership mapping, you can assign imported contributions and memberships to users on the
 destination instance after import has completed. Unlike the previous method of user contribution and membership mapping,
@@ -101,6 +98,12 @@ no preparation is needed before the import.
 
 The process doesn't rely on email addresses, so you can map contributions for users who have different emails on source
 and destination instances.
+
+NOTE:
+This new method of user contribution and membership method is only supported for
+[migrations by using direct transfer](../../group/import/index.md). For information on the other method of user
+contribution and membership mapping for direct transfer migrations, see
+[User contributions and membership mapping](../../group/import/direct_transfer_migrations.md#user-contributions-and-membership-mapping).
 
 Each user on the destination instance that is assigned a mapping can:
 
@@ -153,10 +156,10 @@ To preserve historical context, the placeholder user name and username are deriv
 
 Prerequisites:
 
-- You must have the Owner role for the group.
+- You must have the Owner role of the group.
 
-Placeholder users are created on the destination instance while a group or project is imported.
-To view placeholder users created during imports to a top-level group and its subgroups:
+Placeholder users are created in the top-level group on the destination instance where a group or project are imported
+to. After the import, to view placeholder users for a group:
 
 1. On the left sidebar, select **Search or go to** and find your group.
 1. Select **Manage > Members**.
@@ -237,24 +240,6 @@ starting.
 
 Reassigning contributions and membership to an incorrect user poses a security threat, because the user becomes a member
 of your group. They can, therefore, view information they should not be able to see.
-
-Reassigning contributions to users with administrator access is disabled by default, but you can
-[enable](../../../administration/settings/import_and_export_settings.md#allow-contribution-mapping-to-administrators) it.
-
-##### Membership security considerations
-
-Because of the GitLab permissions model, when a group or project is imported into an existing parent group, members of
-the parent group are granted [inherited membership](../members/index.md#membership-types) of the imported group or project.
-
-Selecting a user for contribution and membership reassignment who already has an
-existing inherited membership of the imported group or project can affect how memberships
-are reassigned to them.
-
-GitLab does not allow a membership in a child project or group to have a lower role
-than an inherited membership. If an imported membership for an assigned user has a lower role
-than their existing inherited membership, the imported membership is not reassigned to the user.
-
-This results in their membership for the imported group or project being higher than it was on the source.
 
 #### Request reassignment in UI
 

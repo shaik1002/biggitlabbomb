@@ -30,16 +30,6 @@
   span.ProseMirror-selectednode {
     background-color: $blue-100;
     box-shadow: 0 2px 0 $blue-100, 0 -2px 0 $blue-100;
-    
-    &.gfm-project_member, .gfm-project_member {
-      &:not(.current-user) {
-        background-color: $blue-200;
-      }
-    }
-
-    &.gfm-project_member {
-      box-shadow: 0 0 0 2px $blue-100;
-    }
   }
 
   pre > code {
@@ -391,7 +381,7 @@
   // stylelint-disable-next-line gitlab/no-gl-class
   li.focused div.gl-new-dropdown-item-content {
     @include gl-focus($inset: true);
-    background-color: var(--gl-dropdown-option-background-color-unselected-hover);
+    background-color: $gray-50;
   }
 }
 

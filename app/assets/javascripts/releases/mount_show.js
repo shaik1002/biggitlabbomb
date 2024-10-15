@@ -20,7 +20,7 @@ export default () => {
     el,
     apolloProvider,
     provide: {
-      projectPath,
+      fullPath: projectPath,
       tagName,
     },
     render: (h) => h(ReleaseShowApp),

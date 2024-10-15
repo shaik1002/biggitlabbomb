@@ -17,7 +17,6 @@ import {
   TODO_ACTION_TYPE_REVIEW_REQUESTED,
   TODO_ACTION_TYPE_REVIEW_SUBMITTED,
   TODO_ACTION_TYPE_UNMERGEABLE,
-  TODO_ACTION_TYPE_SSH_KEY_EXPIRED,
 } from '../constants';
 
 export default {
@@ -50,8 +49,7 @@ export default {
       return (
         this.todo.action !== TODO_ACTION_TYPE_BUILD_FAILED &&
         this.todo.action !== TODO_ACTION_TYPE_MERGE_TRAIN_REMOVED &&
-        this.todo.action !== TODO_ACTION_TYPE_UNMERGEABLE &&
-        this.todo.action !== TODO_ACTION_TYPE_SSH_KEY_EXPIRED
+        this.todo.action !== TODO_ACTION_TYPE_UNMERGEABLE
       );
     },
     userIsAuthor() {
@@ -127,10 +125,6 @@ export default {
         name = sprintf(s__('Todos|requested an OKR update for %{what}'), {
           what: this.todo.targetEntity.title,
         });
-      }
-
-      if (this.todo.action === TODO_ACTION_TYPE_SSH_KEY_EXPIRED) {
-        name = s__('Todos|Your SSH key has expired');
       }
 
       if (!name) {

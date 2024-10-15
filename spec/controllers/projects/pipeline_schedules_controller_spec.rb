@@ -531,15 +531,12 @@ RSpec.describe Projects::PipelineSchedulesController, feature_category: :continu
         expect(response).to have_gitlab_http_status(:found)
       end
 
-      context 'when rate limited' do
-        it 'prevents users from scheduling the same pipeline repeatedly' do
-          allow(Gitlab::ApplicationRateLimiter).to receive(:throttled_request?).and_return(true)
+      it 'prevents users from scheduling the same pipeline repeatedly', :freeze_time do
+        2.times { go }
 
-          go
-
-          expect(flash[:alert]).to eq _('You cannot play this scheduled pipeline at the moment. Please wait a minute.')
-          expect(response).to have_gitlab_http_status(:found)
-        end
+        expect(flash.to_a.size).to eq(2)
+        expect(flash[:alert]).to eq _('You cannot play this scheduled pipeline at the moment. Please wait a minute.')
+        expect(response).to have_gitlab_http_status(:found)
       end
     end
 

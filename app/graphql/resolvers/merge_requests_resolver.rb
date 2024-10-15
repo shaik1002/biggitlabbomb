@@ -86,12 +86,6 @@ module Resolvers
                Available only when the feature flag `mr_approved_filter` is enabled.
       DESC
 
-    argument :subscribed, Types::Issuables::SubscriptionStatusEnum,
-      description: 'Merge requests the current user is subscribed to. Is ignored if ' \
-        '`filter_subscriptions` feature flag is disabled.',
-      alpha: { milestone: '17.5' },
-      required: false
-
     argument :created_after, Types::TimeType,
       required: false,
       description: 'Merge requests created after the timestamp.'

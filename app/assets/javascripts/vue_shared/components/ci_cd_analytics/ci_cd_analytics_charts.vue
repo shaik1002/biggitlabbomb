@@ -23,11 +23,6 @@ export default {
       required: false,
       default: false,
     },
-    formatTooltipText: {
-      type: Function,
-      required: false,
-      default: null,
-    },
   },
   data() {
     return {
@@ -69,7 +64,6 @@ export default {
       :chart-data="chart.data"
       :area-chart-options="chartOptions"
       :loading="loading"
-      :format-tooltip-text="formatTooltipText"
     >
       <slot name="alerts"></slot>
       <p>{{ dateRange }}</p>

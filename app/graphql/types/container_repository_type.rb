@@ -54,7 +54,7 @@ module Types
     end
 
     def protection_rule_exists
-      return false if Feature.disabled?(:container_registry_protected_containers, object.project.root_ancestor)
+      return false if Feature.disabled?(:container_registry_protected_containers, object.project)
 
       BatchLoader::GraphQL.for(object.path).batch do |repository_paths, loader|
         ::ContainerRegistry::Protection::Rule

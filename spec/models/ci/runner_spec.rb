@@ -101,40 +101,30 @@ RSpec.describe Ci::Runner, type: :model, feature_category: :runner do
     it { is_expected.to validate_presence_of(:access_level) }
     it { is_expected.to validate_presence_of(:runner_type) }
     it { is_expected.to validate_presence_of(:registration_type) }
-    it { is_expected.to validate_presence_of(:sharding_key_id) }
-
-    context 'when runner is instance type' do
-      let(:runner) { build(:ci_runner, :instance_type) }
-
-      it { expect(runner).to be_valid }
-
-      context 'when sharding_key_id is present' do
-        let(:runner) { build(:ci_runner, :instance_type, sharding_key_id: non_existing_record_id) }
-
-        it 'is invalid' do
-          expect(runner).to be_invalid
-          expect(runner.errors.full_messages).to contain_exactly('Runner cannot have sharding_key_id assigned')
-        end
-      end
-    end
 
     context 'when runner is not allowed to pick untagged jobs' do
       context 'when runner does not have tags' do
         let(:runner) { build(:ci_runner, tag_list: [], run_untagged: false) }
 
-        it { expect(runner).to be_invalid }
+        it 'is not valid' do
+          expect(runner).to be_invalid
+        end
       end
 
       context 'when runner has too many tags' do
         let(:runner) { build(:ci_runner, tag_list: (1..::Ci::Runner::TAG_LIST_MAX_LENGTH + 1).map { |i| "tag#{i}" }, run_untagged: false) }
 
-        it { expect(runner).to be_invalid }
+        it 'is not valid' do
+          expect(runner).to be_invalid
+        end
       end
 
       context 'when runner has tags' do
         let(:runner) { build(:ci_runner, tag_list: ['tag'], run_untagged: false) }
 
-        it { expect(runner).to be_valid }
+        it 'is valid' do
+          expect(runner).to be_valid
+        end
       end
     end
 
@@ -241,54 +231,6 @@ RSpec.describe Ci::Runner, type: :model, feature_category: :runner do
           expect(runner).not_to be_valid
           expect(runner.errors.full_messages).to include('Runner cannot have allowed plans assigned')
           puts runner.errors.full_messages
-        end
-      end
-    end
-  end
-
-  describe '#ensure_shading_key_id' do
-    context 'with instance runner' do
-      let(:runner) { create(:ci_runner, :instance) }
-
-      it { expect(runner).to be_valid }
-
-      context 'when sharding_key_id points to an invalid record ID' do
-        before do
-          runner.sharding_key_id = non_existing_record_id
-        end
-
-        it 'updates the sharding_key_id before saving' do
-          expect { runner.save! }.to change { runner.sharding_key_id }.to(nil)
-        end
-      end
-    end
-
-    context 'with group runner' do
-      let!(:runner) { create(:ci_runner, :group, groups: [group]) }
-
-      it { expect(runner).to be_valid }
-
-      context 'when sharding_key_id is not present' do
-        before do
-          runner.sharding_key_id = nil
-        end
-
-        it 'updates the sharding_key_id before saving' do
-          expect { runner.save! }.to change { runner.sharding_key_id }.to(group.id)
-        end
-      end
-    end
-
-    context 'with project runner' do
-      let!(:runner) { create(:ci_runner, :project, projects: [project]) }
-
-      context 'when sharding_key_id is not present' do
-        before do
-          runner.sharding_key_id = nil
-        end
-
-        it 'updates the sharding_key_id before saving' do
-          expect { runner.save! }.to change { runner.sharding_key_id }.to(project.id)
         end
       end
     end
@@ -547,10 +489,6 @@ RSpec.describe Ci::Runner, type: :model, feature_category: :runner do
 
         expect(runner).to be_project_type
         expect(runner.runner_projects.pluck(:project_id)).to contain_exactly(project.id, other_project.id)
-      end
-
-      it 'does not change sharding_key_id' do
-        expect { assign_to }.not_to change { runner.sharding_key_id }.from(other_project.id)
       end
     end
   end
@@ -1695,8 +1633,6 @@ RSpec.describe Ci::Runner, type: :model, feature_category: :runner do
       let(:runner) { create(:ci_runner) }
 
       specify { expect(runner.token).not_to start_with(described_class::CREATED_RUNNER_TOKEN_PREFIX) }
-      it { is_expected.to match(/[0-9a-zA-Z_-]{8}/) }
-      it { is_expected.not_to start_with('t1_') }
       it { is_expected.not_to start_with(described_class::CREATED_RUNNER_TOKEN_PREFIX) }
     end
 
@@ -1704,8 +1640,6 @@ RSpec.describe Ci::Runner, type: :model, feature_category: :runner do
       let(:runner) { create(:ci_runner, registration_type: :authenticated_user) }
 
       specify { expect(runner.token).to start_with(described_class::CREATED_RUNNER_TOKEN_PREFIX) }
-      it { is_expected.to match(/[0-9a-zA-Z_-]{8}/) }
-      it { is_expected.not_to start_with('t1_') }
       it { is_expected.not_to start_with(described_class::CREATED_RUNNER_TOKEN_PREFIX) }
     end
   end
@@ -1713,49 +1647,16 @@ RSpec.describe Ci::Runner, type: :model, feature_category: :runner do
   describe '#token' do
     subject(:token) { runner.token }
 
-    let(:runner_type) { :instance_type }
-    let(:attrs) { {} }
-    let(:runner) { create(:ci_runner, runner_type, registration_type: registration_type, **attrs) }
-
     context 'when runner is registered' do
-      let(:registration_type) { :registration_token }
+      let(:runner) { create(:ci_runner) }
 
       it { is_expected.not_to start_with('glrt-') }
-      it { is_expected.to start_with('t1_') }
-
-      context 'when runner is group type' do
-        let(:runner_type) { :group_type }
-        let(:attrs) { { groups: [group] } }
-
-        it { is_expected.to start_with('t2_') }
-      end
-
-      context 'when runner is project type' do
-        let(:runner_type) { :project_type }
-        let(:attrs) { { projects: [project] } }
-
-        it { is_expected.to start_with('t3_') }
-      end
     end
 
     context 'when runner is created via UI' do
-      let(:registration_type) { :authenticated_user }
+      let(:runner) { create(:ci_runner, registration_type: :authenticated_user) }
 
-      it { is_expected.to start_with('glrt-t1_') }
-
-      context 'when runner is group type' do
-        let(:runner_type) { :group_type }
-        let(:attrs) { { groups: [group] } }
-
-        it { is_expected.to start_with('glrt-t2_') }
-      end
-
-      context 'when runner is project type' do
-        let(:runner_type) { :project_type }
-        let(:attrs) { { projects: [project] } }
-
-        it { is_expected.to start_with('glrt-t3_') }
-      end
+      it { is_expected.to start_with('glrt-') }
     end
   end
 

@@ -94,20 +94,35 @@ RSpec.shared_examples 'protected ref deploy_key access' do
       context 'and user is not a project member' do
         before do
           allow(project).to receive(:public?).and_return(true)
+          stub_feature_flags(check_membership_in_protected_ref_access: enable_ff)
         end
 
-        it 'does check membership' do
-          expect(project).to receive(:member?).with(user)
+        context 'when check_membership_in_protected_ref_access is enabled' do
+          let(:enable_ff) { true }
 
-          perform_access_check
+          it 'does check membership' do
+            expect(project).to receive(:member?).with(user)
+
+            perform_access_check
+          end
+
+          it { is_expected.to eq(false) }
+
+          context 'when user has inherited membership' do
+            let!(:inherited_membership) { create(:group_member, group: project.group, user: user) }
+
+            it { is_expected.to eq(true) }
+          end
         end
 
-        it { is_expected.to eq(false) }
+        context 'when check_membership_in_protected_ref_access is disabled' do
+          let(:enable_ff) { false }
 
-        context 'when user has inherited membership' do
-          let!(:inherited_membership) { create(:group_member, group: project.group, user: user) }
+          it 'does not check membership' do
+            expect(project).not_to receive(:member?).with(user)
 
-          it { is_expected.to eq(true) }
+            perform_access_check
+          end
         end
       end
 

@@ -9,7 +9,7 @@ import {
   GlModalDirective,
 } from '@gitlab/ui';
 import { __, s__, sprintf } from '~/locale';
-import { visitUrlWithAlerts } from '~/lib/utils/url_utility';
+import { visitUrl } from '~/lib/utils/url_utility';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import { semverRegex } from '~/lib/utils/regexp';
 import MarkdownEditor from '~/vue_shared/components/markdown/markdown_editor.vue';
@@ -53,7 +53,6 @@ export default {
       submitButtonDisabled: true,
       markdownDocPath: helpPagePath('user/markdown'),
       markdownEditorRestrictedToolBarItems: ['full-screen'],
-      importErrorsText: null,
     };
   },
   computed: {
@@ -91,15 +90,6 @@ export default {
       }
       this.submitAvailable();
       return null;
-    },
-    importErrorsAlert() {
-      return {
-        id: 'import-artifact-alert',
-        variant: this.importErrorsText ? 'danger' : 'info',
-        message: this.importErrorsText
-          ? `${this.$options.i18n.someFailed} ${this.importErrorsText}`
-          : this.$options.i18n.allSucceeded,
-      };
     },
   },
   methods: {
@@ -139,7 +129,7 @@ export default {
           const { showPath, importPath } =
             this.versionData.mlModelVersionCreate.modelVersion._links;
           await this.$refs.importArtifactZoneRef.uploadArtifact(importPath);
-          visitUrlWithAlerts(showPath, [this.importErrorsAlert]);
+          visitUrl(showPath);
         }
       } catch (error) {
         Sentry.captureException(error);
@@ -151,7 +141,6 @@ export default {
       this.description = '';
       this.errorMessage = null;
       this.versionData = null;
-      this.importErrorsText = null;
     },
     hideAlert() {
       this.errorMessage = null;
@@ -161,14 +150,8 @@ export default {
         this.description = newText;
       }
     },
-    onImportError(error) {
-      this.importErrorsText = error;
-    },
   },
-  i18n: {
-    allSucceeded: s__('MlModelRegistry|Artifacts uploaded successfully.'),
-    someFailed: s__('MlModelRegistry|Artifact uploads completed with errors.'),
-  },
+  i18n: {},
   descriptionFormFieldProps: {
     placeholder: s__('MlModelRegistry|Enter a model version description'),
     id: 'model-version-description',
@@ -259,7 +242,6 @@ export default {
             ref="importArtifactZoneRef"
             class="gl-px-3 gl-py-0"
             :submit-on-select="false"
-            @error="onImportError"
           />
         </gl-form-group>
       </gl-form>

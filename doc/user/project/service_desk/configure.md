@@ -1068,7 +1068,7 @@ or completely separately.
 1. Disable `mail_room` on all nodes that should not run email ingestion. For example, in `/etc/gitlab/gitlab.rb`:
 
    ```ruby
-   mailroom['enable'] = false
+   mailroom['enabled'] = false
    ```
 
 1. [Reconfigure GitLab](../../../administration/restart_gitlab.md) for the changes to take effect.
@@ -1085,7 +1085,7 @@ move new unread emails to GitLab.
 1. Enable `mail_room` on this node. For example, in `/etc/gitlab/gitlab.rb`:
 
    ```ruby
-   mailroom['enable'] = true
+   mailroom['enabled'] = true
    ```
 
 1. [Reconfigure GitLab](../../../administration/restart_gitlab.md) on this node for the changes to take effect.

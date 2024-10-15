@@ -3,9 +3,21 @@
 module RapidDiffs
   module Viewers
     module Text
-      class InlineViewComponent < ViewerComponent
+      class InlineViewComponent < TextViewComponent
         def self.viewer_name
           'text_inline'
+        end
+
+        def lines
+          @diff_file.diff_lines_with_match_tail
+        end
+
+        def diff_line(line)
+          line
+        end
+
+        def hunk_view_component
+          InlineHunkComponent
         end
 
         def column_titles

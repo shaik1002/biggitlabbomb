@@ -15,11 +15,6 @@ RSpec.describe Packages::Conan::Package, type: :model, feature_category: :packag
       is_expected.to have_many(:conan_package_references).inverse_of(:package)
         .class_name('Packages::Conan::PackageReference')
     end
-
-    it do
-      is_expected.to have_many(:conan_package_revisions).inverse_of(:package)
-        .class_name('Packages::Conan::PackageRevision')
-    end
   end
 
   describe 'validations' do

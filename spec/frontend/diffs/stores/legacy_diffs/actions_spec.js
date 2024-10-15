@@ -1476,20 +1476,22 @@ describe('legacyDiffs actions', () => {
 
   describe('renderFileForDiscussionId', () => {
     const notesState = {
-      discussions: [
-        {
-          id: '123',
-          diff_file: {
-            file_hash: 'HASH',
+      notes: {
+        discussions: [
+          {
+            id: '123',
+            diff_file: {
+              file_hash: 'HASH',
+            },
           },
-        },
-        {
-          id: '456',
-          diff_file: {
-            file_hash: 'HASH',
+          {
+            id: '456',
+            diff_file: {
+              file_hash: 'HASH',
+            },
           },
-        },
-      ],
+        ],
+      },
     };
     let $emit;
     const state = ({ collapsed, renderIt }) => ({

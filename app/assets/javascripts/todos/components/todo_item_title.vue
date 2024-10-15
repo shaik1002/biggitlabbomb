@@ -81,7 +81,7 @@ export default {
         return '';
       }
 
-      return this.todo.targetEntity?.name ?? '';
+      return this.todo.targetEntity?.title ?? '';
     },
     targetReference() {
       return this.todo.targetEntity?.reference ?? '';

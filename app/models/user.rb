@@ -95,13 +95,13 @@ class User < ApplicationRecord
   attribute :color_mode_id, default: -> { Gitlab::ColorModes::APPLICATION_DEFAULT }
 
   attr_encrypted :otp_secret,
-    key: Gitlab::Application.credentials.otp_key_base,
+    key: Gitlab::Application.secrets.otp_key_base,
     mode: :per_attribute_iv_and_salt,
     insecure_mode: true,
     algorithm: 'aes-256-cbc'
 
   devise :two_factor_authenticatable,
-    otp_secret_encryption_key: Gitlab::Application.credentials.otp_key_base
+    otp_secret_encryption_key: Gitlab::Application.secrets.otp_key_base
 
   devise :two_factor_backupable, otp_number_of_backup_codes: 10
   devise :two_factor_backupable_pbkdf2
@@ -613,9 +613,6 @@ class User < ApplicationRecord
   end
   scope :by_user_email, ->(emails) { iwhere(email: Array(emails)) }
   scope :by_emails, ->(emails) { joins(:emails).where(emails: { email: Array(emails).map(&:downcase) }) }
-  scope :by_detumbled_emails, ->(detumbled_emails) do
-    joins(:emails).where(emails: { detumbled_email: Array(detumbled_emails) })
-  end
   scope :for_todos, ->(todos) { where(id: todos.select(:user_id).distinct) }
   scope :with_emails, -> { preload(:emails) }
   scope :with_dashboard, ->(dashboard) { where(dashboard: dashboard) }
@@ -1106,7 +1103,7 @@ class User < ApplicationRecord
   def valid_password?(password)
     return false unless password_allowed?(password)
     return false if password_automatically_set?
-    return false unless allow_password_authentication_for_web?
+    return false unless allow_password_authentication?
 
     super
   end
@@ -1173,7 +1170,7 @@ class User < ApplicationRecord
   end
 
   def disable_two_factor_otp!
-    update!(
+    update(
       otp_required_for_login: false,
       encrypted_otp_secret: nil,
       encrypted_otp_secret_iv: nil,
@@ -1207,7 +1204,7 @@ class User < ApplicationRecord
   end
 
   def needs_new_otp_secret?
-    !two_factor_otp_enabled? && otp_secret_expired?
+    !two_factor_enabled? && otp_secret_expired?
   end
 
   def otp_secret_expired?
@@ -1247,7 +1244,7 @@ class User < ApplicationRecord
         User.find_by_any_email(email)&.deleted_own_account?
 
       help_page_url = Rails.application.routes.url_helpers.help_page_url(
-        'user/profile/account/delete_account.md',
+        'user/profile/account/delete_account',
         anchor: 'delete-your-own-account'
       )
 
@@ -1297,21 +1294,13 @@ class User < ApplicationRecord
       direct_groups_cte = Gitlab::SQL::CTE.new(:direct_groups, groups)
       direct_groups_cte_alias = direct_groups_cte.table.alias(Group.table_name)
 
-      groups_from_authorized_projects = Group.id_in(authorized_projects.select(:namespace_id))
-      groups_from_shares = Group.joins(:shared_with_group_links)
-                             .where(group_group_links: { shared_with_group_id: Group.from(direct_groups_cte_alias) })
-
-      if Feature.enabled?(:fix_user_authorized_groups, self)
-        groups_from_authorized_projects = groups_from_authorized_projects.self_and_ancestors
-        groups_from_shares = groups_from_shares.self_and_descendants
-      end
-
       Group
         .with(direct_groups_cte.to_arel)
         .from_union([
           Group.from(direct_groups_cte_alias).self_and_descendants,
-          groups_from_authorized_projects,
-          groups_from_shares
+          Group.id_in(authorized_projects.select(:namespace_id)),
+          Group.joins(:shared_with_group_links)
+            .where(group_group_links: { shared_with_group_id: Group.from(direct_groups_cte_alias) })
         ])
     end
   end
@@ -1451,17 +1440,11 @@ class User < ApplicationRecord
   end
 
   def allow_password_authentication_for_web?
-    return false if ldap_user?
-    return false if disable_password_authentication_for_sso_users?
-
-    Gitlab::CurrentSettings.password_authentication_enabled_for_web?
+    Gitlab::CurrentSettings.password_authentication_enabled_for_web? && !ldap_user?
   end
 
   def allow_password_authentication_for_git?
-    return false if password_based_omniauth_user?
-    return false if disable_password_authentication_for_sso_users?
-
-    Gitlab::CurrentSettings.password_authentication_enabled_for_git?
+    Gitlab::CurrentSettings.password_authentication_enabled_for_git? && !password_based_omniauth_user?
   end
 
   # method overriden in EE
@@ -1479,7 +1462,6 @@ class User < ApplicationRecord
 
   def allow_user_to_create_group_and_project?
     return true if Gitlab::CurrentSettings.allow_project_creation_for_guest_and_below
-    return true if can_admin_all_resources?
 
     highest_role > Gitlab::Access::GUEST
   end
@@ -1751,10 +1733,6 @@ class User < ApplicationRecord
     verified_emails << private_commit_email if include_private_email
     verified_emails.concat(emails.confirmed.pluck(:email))
     verified_emails.uniq
-  end
-
-  def verified_detumbled_emails
-    emails.distinct.confirmed.pluck(:detumbled_email).compact
   end
 
   def public_verified_emails
@@ -2533,14 +2511,6 @@ class User < ApplicationRecord
   end
 
   private
-
-  def disable_password_authentication_for_sso_users?
-    ::Gitlab::CurrentSettings.disable_password_authentication_for_users_with_sso_identities? && omniauth_user?
-  end
-
-  def omniauth_user?
-    identities.any?
-  end
 
   def optional_namespace?
     Feature.enabled?(:optional_personal_namespace, self)

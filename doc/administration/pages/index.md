@@ -368,7 +368,7 @@ control over how the Pages daemon runs and serves content in your environment.
 | **`gitlab_pages[]`**                    |                                                                                                                                                                                                                                                                                                            |
 | `access_control`                        | Whether to enable [access control](index.md#access-control).                                                                                                                                                                                                                                               |
 | `api_secret_key`                        | Full path to file with secret key used to authenticate with the GitLab API. Auto-generated when left unset.                                                                                                                                                                                                |
-| `artifacts_server`                      | Enable viewing [artifacts](../cicd/job_artifacts.md) in GitLab Pages.                                                                                                                                                                                                                                           |
+| `artifacts_server`                      | Enable viewing [artifacts](../job_artifacts.md) in GitLab Pages.                                                                                                                                                                                                                                           |
 | `artifacts_server_timeout`              | Timeout (in seconds) for a proxied request to the artifacts server.                                                                                                                                                                                                                                        |
 | `artifacts_server_url`                  | API URL to proxy artifact requests to. Defaults to GitLab `external URL` + `/api/v4`, for example `https://gitlab.com/api/v4`. When running a [separate Pages server](#running-gitlab-pages-on-a-separate-server), this URL must point to the main GitLab server's API.                                    |
 | `auth_redirect_uri`                     | Callback URL for authenticating with GitLab. URL should be subdomain of `pages_external_url` + `/auth`. Defaults to project's subdomain of `pages_external_url` + `/auth`, for example `https://projects.example.io/auth`. When `namespace_in_path` is enabled, defaults to `pages_external_url` + `/projects/auth`, for example `https://example.io/projects/auth`.  |
@@ -561,7 +561,7 @@ To enable it:
 1. On the left sidebar, at the bottom, select **Admin**.
 1. Select **Settings > Preferences**.
 1. Expand **Pages**.
-1. Enter the email address for receiving notifications and accept the Terms of Service for Let's Encrypt.
+1. Enter the email address for receiving notifications and accept Let's Encrypt's Terms of Service.
 1. Select **Save changes**.
 
 ### Access control
@@ -744,7 +744,7 @@ opened) it's refreshed. This extends the time the archive remains in memory from
 After an archive reaches `zip_cache_expiration`, it's marked as expired and removed on the next
 `zip_cache_cleanup` interval.
 
-![A timeline shows the ZIP cache refresh extends the ZIP cache expiration time.](img/zip_cache_configuration.png)
+![ZIP cache configuration](img/zip_cache_configuration.png)
 
 ### HTTP Strict Transport Security (HSTS) support
 
@@ -963,17 +963,6 @@ The following procedure includes steps to back up and edit the
 `gitlab-secrets.json` file. This file contains secrets that control
 database encryption. Proceed with caution.
 
-1. Optionally, to enable [access control](#access-control), add the following to `/etc/gitlab/gitlab.rb` and [reconfigure the **GitLab server**](../restart_gitlab.md#reconfigure-a-linux-package-installation):
-
-   ```ruby
-   gitlab_pages['access_control'] = true
-   ```
-
-   WARNING:
-   If you plan to use GitLab Pages with access control, you must enable it on the first GitLab server before copying `gitlab-secrets.json`.
-   Enabling access control generates a new OAuth application, and information about it propagates to `gitlab-secrets.json`. If it's not done
-   in the correct order, you may face issues with access control.
-
 1. Create a backup of the secrets file on the **GitLab server**:
 
    ```shell
@@ -984,6 +973,12 @@ database encryption. Proceed with caution.
 
    ```ruby
    pages_external_url "http://<pages_server_URL>"
+   ```
+
+1. Optionally, to enable [access control](#access-control), add the following to `/etc/gitlab/gitlab.rb`:
+
+   ```ruby
+   gitlab_pages['access_control'] = true
    ```
 
 1. Set up object storage by either:

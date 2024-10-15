@@ -46,8 +46,6 @@ If there are too many users for manual configuration to be feasible,
 you can set all user profiles to use a public email address using the
 [Rails console](../../../administration/operations/rails_console.md#starting-a-rails-console-session):
 
-<!-- vale gitlab_base.CurrentStatus  = NO -->
-
 ```ruby
 User.where("public_email IS NULL OR public_email = '' ").find_each do |u|
   next if u.bot?
@@ -57,8 +55,6 @@ User.where("public_email IS NULL OR public_email = '' ").find_each do |u|
   u.save!
 end
 ```
-
-<!-- vale gitlab_base.CurrentStatus  = YES -->
 
 ## Import workarounds for large repositories
 
@@ -89,7 +85,7 @@ reduce the repository size for another import attempt:
    ```
 
 1. To reduce the repository size, work on this `smaller-tmp-main` branch:
-   [identify and remove large files](../repository/repository_size.md#reduce-repository-size)
+   [identify and remove large files](../repository/reducing_the_repo_size_using_git.md)
    or [interactively rebase and fixup](../../../topics/git/git_rebase.md#rebase-interactively-by-using-git)
    to reduce the number of commits.
 

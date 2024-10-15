@@ -49,10 +49,6 @@ module Gitlab
                 type: :string,
                 repeatable: true,
                 aliases: "-e"
-              option :retry,
-                desc: "Max number of retries for failed deployment",
-                default: 0,
-                type: :numeric
 
               super(name)
             end
@@ -124,7 +120,7 @@ module Gitlab
           def installation(name, configuration)
             Cng::Deployment::Installation.new(
               name, configuration: configuration,
-              **symbolized_options.slice(:namespace, :set, :ci, :gitlab_domain, :timeout, :chart_sha, :env, :retry)
+              **symbolized_options.slice(:namespace, :set, :ci, :gitlab_domain, :timeout, :chart_sha, :env)
             )
           end
 

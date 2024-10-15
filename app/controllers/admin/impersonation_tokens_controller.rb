@@ -17,9 +17,8 @@ class Admin::ImpersonationTokensController < Admin::ApplicationController
     @impersonation_token.organization = Current.organization
 
     if @impersonation_token.save
-      active_access_tokens = active_impersonation_tokens
       render json: { new_token: @impersonation_token.token,
-                     active_access_tokens: active_access_tokens, total: active_access_tokens.length }, status: :ok
+                     active_access_tokens: active_impersonation_tokens }, status: :ok
     else
       render json: { errors: @impersonation_token.errors.full_messages }, status: :unprocessable_entity
     end
@@ -46,11 +45,11 @@ class Admin::ImpersonationTokensController < Admin::ApplicationController
   # rubocop: enable CodeReuse/ActiveRecord
 
   def verify_impersonation_enabled!
-    access_denied! unless helpers.impersonation_tokens_enabled?
+    access_denied! unless helpers.impersonation_enabled?
   end
 
   def finder(options = {})
-    PersonalAccessTokensFinder.new({ user: user, impersonation: true, organization: Current.organization }.merge(options))
+    PersonalAccessTokensFinder.new({ user: user, impersonation: true }.merge(options))
   end
 
   def active_impersonation_tokens

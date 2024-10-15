@@ -10,7 +10,6 @@ import { n__, sprintf } from '~/locale';
 import { memberName, triggerExternalAlert } from 'ee_else_ce/invite_members/utils/member_utils';
 import { responseFromSuccess } from 'ee_else_ce/invite_members/utils/response_message_parser';
 import { captureException } from '~/ci/runner/sentry_utils';
-import { helpPagePath } from '~/helpers/help_page_helper';
 import {
   BLOCKED_SEAT_OVERAGES_ERROR_REASON,
   BLOCKED_SEAT_OVERAGES_BODY,
@@ -145,11 +144,6 @@ export default {
     },
     labelIntroText() {
       return this.$options.labels[this.inviteTo][this.mode].introText;
-    },
-    accessExpirationHelpLink() {
-      return this.isProject
-        ? helpPagePath('user/project/members/index', { anchor: 'add-users-to-a-project' })
-        : helpPagePath('user/group/index', { anchor: 'add-users-to-a-group' });
     },
     isEmptyInvites() {
       return Boolean(this.newUsersToInvite.length);
@@ -385,7 +379,6 @@ export default {
     :default-access-level="defaultAccessLevel"
     :default-member-role-id="defaultMemberRoleId"
     :help-link="helpLink"
-    :access-expiration-help-link="accessExpirationHelpLink"
     :label-intro-text="labelIntroText"
     :label-search-field="$options.labels.searchField"
     :form-group-description="formGroupDescription"

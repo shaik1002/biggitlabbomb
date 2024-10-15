@@ -47,8 +47,7 @@ Example response:
     "tag_push_events":false,
     "merge_requests_events": true,
     "repository_update_events": true,
-    "enable_ssl_verification":true,
-    "url_variables": []
+    "enable_ssl_verification":true
   }
 ]
 ```
@@ -85,8 +84,7 @@ Example response:
     "tag_push_events": false,
     "merge_requests_events": true,
     "repository_update_events": true,
-    "enable_ssl_verification": true,
-    "url_variables": []
+    "enable_ssl_verification": true
   }
 ]
 ```
@@ -133,8 +131,7 @@ Example response:
     "tag_push_events":false,
     "merge_requests_events": true,
     "repository_update_events": true,
-    "enable_ssl_verification":true,
-    "url_variables": []
+    "enable_ssl_verification":true
   }
 ]
 ```
@@ -208,38 +205,3 @@ Example request:
 ```shell
 curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/hooks/2"
 ```
-
-## Set a URL variable
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/90310) in GitLab 15.2.
-
-```plaintext
-PUT /hooks/:hook_id/url_variables/:key
-```
-
-Supported attributes:
-
-| Attribute | Type              | Required | Description |
-|:----------|:------------------|:---------|:------------|
-| `hook_id` | integer           | Yes      | ID of the system hook. |
-| `key`     | string            | Yes      | Key of the URL variable. |
-| `value`   | string            | Yes      | Value of the URL variable. |
-
-On success, this endpoint returns the response code `204 No Content`.
-
-## Delete a URL variable
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/90310) in GitLab 15.2.
-
-```plaintext
-DELETE /hooks/:hook_id/url_variables/:key
-```
-
-Supported attributes:
-
-| Attribute | Type              | Required | Description |
-|:----------|:------------------|:---------|:------------|
-| `hook_id` | integer           | Yes      | ID of the system hook. |
-| `key`     | string            | Yes      | Key of the URL variable. |
-
-On success, this endpoint returns the response code `204 No Content`.

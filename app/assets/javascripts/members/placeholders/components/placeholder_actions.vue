@@ -12,6 +12,7 @@ import {
   PLACEHOLDER_STATUS_AWAITING_APPROVAL,
   PLACEHOLDER_STATUS_REASSIGNING,
 } from '~/import_entities/import_groups/constants';
+import importSourceUsersQuery from '../graphql/queries/import_source_users.query.graphql';
 import importSourceUserReassignMutation from '../graphql/mutations/reassign.mutation.graphql';
 import importSourceUserKeepAsPlaceholderMutation from '../graphql/mutations/keep_as_placeholder.mutation.graphql';
 import importSourceUseResendNotificationMutation from '../graphql/mutations/resend_notification.mutation.graphql';
@@ -253,6 +254,8 @@ export default {
               id: this.sourceUser.id,
               ...(hasSelectedUser ? { userId: this.selectedUser.id } : {}),
             },
+            // importSourceUsersQuery used in placeholders_table.vue
+            refetchQueries: [hasSelectedUser ? {} : importSourceUsersQuery],
           })
           .then(({ data }) => {
             const { errors } = getFirstPropertyValue(data);
@@ -278,13 +281,13 @@ export default {
 
 <template>
   <div class="gl-flex gl-items-start gl-gap-3">
-    <div class="gl-w-28">
+    <div>
       <gl-collapsible-listbox
         ref="userSelect"
         block
         is-check-centered
-        toggle-class="!gl-w-28"
-        :class="{ 'is-invalid': userSelectInvalid || sourceUser.reassignmentError }"
+        toggle-class="gl-w-28"
+        :class="{ 'is-invalid': userSelectInvalid }"
         :header-text="s__('UserMapping|Re-assign to')"
         :toggle-text="toggleText"
         :disabled="statusIsAwaitingApproval || statusIsReassigning"
@@ -311,7 +314,7 @@ export default {
 
         <template #footer>
           <div
-            class="gl-flex gl-flex-col gl-border-t-1 gl-border-t-dropdown !gl-p-2 !gl-pt-0 gl-border-t-solid"
+            class="gl-flex gl-flex-col gl-border-t-1 gl-border-t-gray-200 !gl-p-2 !gl-pt-0 gl-border-t-solid"
           >
             <gl-button
               category="tertiary"
@@ -327,9 +330,6 @@ export default {
 
       <span v-if="userSelectInvalid" class="invalid-feedback">
         {{ __('This field is required.') }}
-      </span>
-      <span v-if="sourceUser.reassignmentError" class="invalid-feedback">
-        {{ sourceUser.reassignmentError }}
       </span>
     </div>
 

@@ -7,17 +7,13 @@
 #   user: User to find contributed projects for
 #   current_user: The current user
 #   params:
-#     search: Return only projects that match search filter
 #     ignore_visibility: When true the list of projects will include all contributed
 #                        projects, regardless of their visibility to the current_user.
-#     min_access_level: Return only projects where user has at least the access level.
-#     programming_language_name: Return only projects that use the provided programming language.
-#     sort: Order projects
+#     min_access_level: Return only projects where user has at least the access level..
+#     order_by: Order projects
 #
 # Returns an ActiveRecord::Relation.
 class ContributedProjectsFinder
-  include Projects::SearchFilter
-
   attr_reader :user, :current_user, :params
 
   def initialize(user:, current_user: nil, params: {})
@@ -31,9 +27,8 @@ class ContributedProjectsFinder
     return Project.none unless can_read_profile?(current_user)
 
     collection = init_collection
-    collection = filter_projects(collection)
 
-    collection.with_namespace.sort_by_attribute(params[:sort] || 'id_desc')
+    collection.with_namespace.sort_by_attribute(params[:order_by] || 'id_desc')
   end
 
   private
@@ -57,18 +52,5 @@ class ContributedProjectsFinder
     end
 
     contributed_projects.public_to_user
-  end
-
-  def filter_projects(collection)
-    collection = by_search(collection)
-    by_programming_language(collection)
-  end
-
-  def by_programming_language(collection)
-    if params[:programming_language_name].present?
-      return collection.with_programming_language(params[:programming_language_name])
-    end
-
-    collection
   end
 end

@@ -11,7 +11,6 @@ import {
   WIDGET_TYPE_NOTES,
   WIDGET_TYPE_AWARD_EMOJI,
   WIDGET_TYPE_HIERARCHY,
-  WIDGET_TYPE_DESIGNS,
 } from '~/work_items/constants';
 
 import isExpandedHierarchyTreeChildQuery from '~/work_items/graphql/client/is_expanded_hierarchy_tree_child.query.graphql';
@@ -156,11 +155,6 @@ export const config = {
                       nodes: [...existingWidget.children.nodes, ...incomingWidget.children.nodes],
                     },
                   };
-                }
-
-                // Prevent cache being overwritten when opening a design
-                if (incomingWidget?.type === WIDGET_TYPE_DESIGNS && context.variables.filenames) {
-                  return existingWidget;
                 }
 
                 return { ...existingWidget, ...incomingWidget };

@@ -1,6 +1,6 @@
 import { chunk, memoize, uniq } from 'lodash';
 import { getCookie, removeCookie } from '~/lib/utils/common_utils';
-import { initEmojiMap, getEmojiCategoryMap, getAllEmoji, loadCustomEmojiWithNames } from '~/emoji';
+import { initEmojiMap, getEmojiCategoryMap } from '~/emoji';
 import {
   EMOJIS_PER_ROW,
   EMOJI_ROW_HEIGHT,
@@ -22,7 +22,7 @@ const swapCookieToLocalStorage = () => {
   removeCookie(FREQUENTLY_USED_EMOJIS_STORAGE_KEY);
 };
 
-export const getFrequentlyUsedEmojis = async () => {
+export const getFrequentlyUsedEmojis = () => {
   let savedEmojis = localStorage.getItem(FREQUENTLY_USED_EMOJIS_STORAGE_KEY);
 
   if (!savedEmojis) {
@@ -35,13 +35,7 @@ export const getFrequentlyUsedEmojis = async () => {
     swapCookieToLocalStorage();
   }
 
-  const customEmoji = await loadCustomEmojiWithNames();
-  const possibleEmojiNames = [...customEmoji.names, ...getAllEmoji().map((e) => e.n)];
-
-  const emojis = chunk(
-    uniq(savedEmojis.split(',')).filter((name) => possibleEmojiNames.includes(name)),
-    9,
-  );
+  const emojis = chunk(uniq(savedEmojis.split(',')), 9);
 
   return {
     frequently_used: {
@@ -67,13 +61,13 @@ export const addToFrequentlyUsed = (emoji) => {
   localStorage.setItem(FREQUENTLY_USED_EMOJIS_STORAGE_KEY, frequentlyUsedEmojis.join(','));
 };
 
-export const hasFrequentlyUsedEmojis = async () => (await getFrequentlyUsedEmojis()) !== null;
+export const hasFrequentlyUsedEmojis = () => getFrequentlyUsedEmojis() !== null;
 
 export const getEmojiCategories = memoize(async () => {
   await initEmojiMap();
 
   const categories = await getEmojiCategoryMap();
-  const frequentlyUsedEmojis = await getFrequentlyUsedEmojis();
+  const frequentlyUsedEmojis = getFrequentlyUsedEmojis();
   let top = frequentlyUsedEmojis
     ? frequentlyUsedEmojis.frequently_used.top + frequentlyUsedEmojis.frequently_used.height
     : 0;

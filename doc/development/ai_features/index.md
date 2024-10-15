@@ -729,10 +729,6 @@ Gitlab::Llm::Anthropic::Client.new(user, unit_primitive: 'your_feature')
 
 In addition to standard logging in the GitLab Rails Monolith instance, specialized logging is available for features based on large language models (LLMs).
 
-### Logged events
-
-Currently logged events are documented [here](logged_events.md).
-
 ### Implementation
 
 #### Logger Class
@@ -749,7 +745,7 @@ A feature flag named `expanded_ai_logging` controls the logging of sensitive dat
 Use the `conditional_info` helper method for conditional logging based on the feature flag status:
 
 - If the feature flag is enabled for the current user, it logs the information on `info` level (logs are accessible in Kibana).
-- If the feature flag is disabled for the current user, it logs the information on `info` level, but without optional parameters (logs are accessible in Kibana, but only obligatory fields).
+- If the feature flag is disabled for the current user, it logs the information on `debug` level (logs are not accessible in Kibana).
 
 ### Best Practices
 
@@ -763,14 +759,14 @@ When implementing logging for LLM features, consider the following:
 ### Example Usage
 
 ```ruby
-# including concern that handles logging
-include Gitlab::Llm::Concerns::Logger
+# Logging non-sensitive information
+Gitlab::Llm::Logger.build.info("LLM feature initialized")
 
 # Logging potentially sensitive information
-log_conditional_info(user, message:"User prompt processed", event_name: 'ai_event', ai_component: 'abstraction_layer', prompt: sanitized_prompt)
+Gitlab::Llm::Logger.build.conditional_info(user, message:"User prompt processed: #{sanitized_prompt}")
 
 # Logging application error information
-log_error(user, message: "System application error", event_name: 'ai_event', ai_component: 'abstraction_layer', error_message: sanitized_error_message)
+Gitlab::Llm::Logger.build.error(user, message: "System application error: #{sanitized_error_message}")
 ```
 
 **Important**: Please familiarize yourself with our [Data Retention Policy](../../user/gitlab_duo/data_usage.md#data-retention) and remember

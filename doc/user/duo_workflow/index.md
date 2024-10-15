@@ -9,7 +9,6 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 DETAILS:
 **Offering:** GitLab.com
 **Status:** Experiment
-**Tier:** Ultimate
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/14153) in GitLab 17.4 [with a flag](../../administration/feature_flags.md) named `duo_workflow`. Enabled for GitLab team members only. This feature is an [experiment](../../policy/experiment-beta-support.md).
 
@@ -38,6 +37,9 @@ These are examples of known GitLab Duo Workflow that have successfully executed,
 
 Before you can use GitLab Duo Workflow in VS Code:
 
+1. Enable the feature `duo_workflow` feature flag for yourself.
+   - In Slack, in the `#production` channel, type: `/chatops run feature set --user=myusername duo_workflow true`
+   - Or, post a request in the `#f_duo_workflow` Slack channel.
 1. Install the [GitLab Workflow extension for VS Code](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow).
    Minimum version 5.8.0.
 1. In VS Code, [set the Docker socket file path](#install-docker-and-set-the-socket-file-path).
@@ -56,9 +58,7 @@ Before you can use GitLab Duo Workflow in VS Code:
 
 To use GitLab Duo Workflow:
 
-1. In VS Code, open the GitLab project.
-   - The namespace must have an **Ultimate** subscription.
-   - You must check out the branch for the code you would like to change.
+1. In VS Code, open the GitLab project and check out the branch for the code you would like to change.
 1. Access the Command Palette:
    - On Mac: <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd>
    - On Windows and Linux: <kbd>Ctrl</kbd> + <kbd>P</kbd>.

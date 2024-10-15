@@ -28,7 +28,6 @@ issues:
 - own_resource_label_events
 - own_description_versions
 - own_events
-- own_subscriptions
 - sync_object
 - last_edited_by
 - todos
@@ -98,7 +97,6 @@ events:
 - group
 - target
 - push_event_payload
-- personal_namespace
 notes:
 - award_emoji
 - project
@@ -277,7 +275,6 @@ merge_requests:
 - scan_result_policy_reads_through_violations
 - scan_result_policy_reads_through_approval_rules
 - running_scan_result_policy_violations
-- completed_scan_result_policy_violations
 external_pull_requests:
 - project
 merge_request_diff:
@@ -464,7 +461,6 @@ builds:
 - tag_links
 - tag_taggings
 - tags
-- simple_tags
 - security_scans
 - dast_site_profiles_build
 - dast_site_profile
@@ -899,7 +895,6 @@ project:
 - observability_traces
 - observability_logs
 - security_exclusions
-- security_statistics
 award_emoji:
 - awardable
 - user

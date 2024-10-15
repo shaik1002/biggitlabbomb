@@ -16,8 +16,9 @@ module QA
             return false
           end
 
-          # Perform app readiness check before continuing with the whole test suite
-          Tools::ReadinessCheck.perform(wait: 60)
+          QA::Support::Retrier.retry_on_exception do
+            QA::Runtime::Browser.visit(:gitlab, QA::Page::Main::Login)
+          end
 
           # Reset admin password if admin token is present but can't be used due to expired password
           reset_admin_password!

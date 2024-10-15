@@ -7,7 +7,6 @@ import BoardAddNewColumn from 'ee_else_ce/boards/components/board_add_new_column
 import BoardAddNewColumnTrigger from '~/boards/components/board_add_new_column_trigger.vue';
 import WorkItemDrawer from '~/work_items/components/work_item_drawer.vue';
 import { s__ } from '~/locale';
-import { removeParams, updateHistory } from '~/lib/utils/url_utility';
 import { defaultSortableOptions, DRAG_DELAY } from '~/sortable/constants';
 import { mapWorkItemWidgetsToIssuableFields } from '~/issues/list/utils';
 import {
@@ -20,7 +19,6 @@ import {
   DEFAULT_BOARD_LIST_ITEMS_SIZE,
   BoardType,
 } from 'ee_else_ce/boards/constants';
-import { DETAIL_VIEW_QUERY_PARAM_NAME } from '~/work_items/constants';
 import { calculateNewPosition } from 'ee_else_ce/boards/boards_util';
 import { setError } from '../graphql/cache_updates';
 import BoardColumn from './board_column.vue';
@@ -90,7 +88,6 @@ export default {
     return {
       boardHeight: null,
       highlightedLists: [],
-      columnsThatCannotFindActiveItem: 0,
     };
   },
   computed: {
@@ -245,17 +242,6 @@ export default {
           }),
       );
     },
-    isLastList(index) {
-      return this.boardListsToUse.length - 1 === index;
-    },
-    handleCannotFindActiveItem() {
-      this.columnsThatCannotFindActiveItem += 1;
-      if (this.columnsThatCannotFindActiveItem === this.boardListsToUse.length) {
-        updateHistory({
-          url: removeParams([DETAIL_VIEW_QUERY_PARAM_NAME]),
-        });
-      }
-    },
   },
 };
 </script>
@@ -277,27 +263,20 @@ export default {
         v-for="(list, index) in boardListsToUse"
         :key="index"
         ref="board"
-        :column-index="index"
         :board-id="boardId"
         :list="list"
         :filters="filterParams"
         :highlighted-lists="highlightedLists"
         :data-draggable-item-type="$options.draggableItemTypes.list"
         :class="{ '!gl-hidden sm:!gl-inline-block': addColumnFormVisible }"
-        :last="isLastList(index)"
-        :list-query-variables="listQueryVariables"
-        :lists="boardListsById"
-        :can-admin-list="canAdminList"
-        @highlight-list="highlightList"
         @setActiveList="$emit('setActiveList', $event)"
         @setFilters="$emit('setFilters', $event)"
-        @addNewListAfter="$emit('setAddColumnFormVisibility', $event)"
-        @cannot-find-active-item="handleCannotFindActiveItem"
       />
 
       <transition mode="out-in" name="slide" @after-enter="afterFormEnters">
-        <div v-if="!addColumnFormVisible && canAdminList" class="gl-inline-block gl-pl-2">
+        <div v-if="!addColumnFormVisible" class="gl-inline-block gl-pl-2">
           <board-add-new-column-trigger
+            v-if="canAdminList"
             :is-new-list-showing="addColumnFormVisible"
             @setAddColumnFormVisibility="$emit('setAddColumnFormVisibility', $event)"
           />

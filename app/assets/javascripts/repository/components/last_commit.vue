@@ -7,7 +7,6 @@ import CiIcon from '~/vue_shared/components/ci_icon/ci_icon.vue';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import SignatureBadge from '~/commit/components/signature_badge.vue';
 import getRefMixin from '../mixins/get_ref';
-import { getRefType } from '../utils/ref_type';
 import projectPathQuery from '../queries/project_path.query.graphql';
 import eventHub from '../event_hub';
 import { FORK_UPDATED_EVENT } from '../constants';
@@ -38,7 +37,7 @@ export default {
         return {
           projectPath: this.projectPath,
           ref: this.ref,
-          refType: getRefType(this.refType),
+          refType: this.refType?.toUpperCase(),
           path: this.currentPath.replace(/^\//, ''),
         };
       },

@@ -189,7 +189,6 @@ class Project < ApplicationRecord
   belongs_to :creator, class_name: 'User'
   belongs_to :organization, class_name: 'Organizations::Organization'
   belongs_to :group, -> { where(type: Group.sti_name) }, foreign_key: 'namespace_id'
-  alias_method :notification_group, :group
   belongs_to :namespace
   # Sync deletion via DB Trigger to ensure we do not have
   # a project without a project_namespace (or vice-versa)
@@ -3043,7 +3042,7 @@ class Project < ApplicationRecord
     config = Gitlab.config.incoming_email
     wildcard = Gitlab::Email::Common::WILDCARD_PLACEHOLDER
 
-    config.address&.gsub(wildcard, default_service_desk_subaddress_part)
+    config.address&.gsub(wildcard, "#{full_path_slug}-#{default_service_desk_suffix}")
   end
 
   def service_desk_alias_address
@@ -3058,10 +3057,6 @@ class Project < ApplicationRecord
     return unless service_desk_setting&.custom_email_enabled?
 
     service_desk_setting.custom_email
-  end
-
-  def default_service_desk_subaddress_part
-    "#{full_path_slug}-#{default_service_desk_suffix}"
   end
 
   def default_service_desk_suffix
@@ -3169,8 +3164,6 @@ class Project < ApplicationRecord
 
   def ci_inbound_job_token_scope_enabled?
     return true unless ci_cd_settings
-
-    return true if ::Gitlab::CurrentSettings.enforce_ci_inbound_job_token_scope_enabled?
 
     ci_cd_settings.inbound_job_token_scope_enabled?
   end

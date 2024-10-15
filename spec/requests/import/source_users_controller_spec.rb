@@ -25,7 +25,7 @@ RSpec.describe Import::SourceUsersController, feature_category: :importers do
     end
   end
 
-  shared_examples 'it notifies about unavailable reassignments' do
+  shared_examples 'it requires awaiting approval status' do
     it 'shows error message' do
       source_user.accept!
 
@@ -51,10 +51,8 @@ RSpec.describe Import::SourceUsersController, feature_category: :importers do
     create(:import_source_user, :with_reassigned_by_user, :awaiting_approval)
   end
 
-  let!(:reassignment_token) { source_user.reassignment_token }
-
   describe 'POST /accept' do
-    let(:path) { accept_import_source_user_path(reassignment_token: reassignment_token) }
+    let(:path) { accept_import_source_user_path(source_user) }
 
     subject(:accept_invite) { post path }
 
@@ -79,7 +77,7 @@ RSpec.describe Import::SourceUsersController, feature_category: :importers do
       end
 
       it 'cannot be accepted twice' do
-        allow(Import::SourceUser).to receive(:find_by_reassignment_token).and_return(source_user)
+        allow(Import::SourceUser).to receive(:find).and_return(source_user)
         allow(source_user).to receive(:accept).and_return(false)
 
         accept_invite
@@ -88,7 +86,7 @@ RSpec.describe Import::SourceUsersController, feature_category: :importers do
         expect(flash[:alert]).to match(/The invitation could not be accepted/)
       end
 
-      it_behaves_like 'it notifies about unavailable reassignments'
+      it_behaves_like 'it requires awaiting approval status'
       it_behaves_like 'it requires the user is the reassign to user'
     end
 
@@ -97,8 +95,7 @@ RSpec.describe Import::SourceUsersController, feature_category: :importers do
   end
 
   describe 'POST /decline' do
-    let(:path) { decline_import_source_user_path(reassignment_token: reassignment_token) }
-
+    let(:path) { decline_import_source_user_path(source_user) }
     let(:message_delivery) { instance_double(ActionMailer::MessageDelivery) }
 
     subject(:reject_invite) { post path }
@@ -120,7 +117,7 @@ RSpec.describe Import::SourceUsersController, feature_category: :importers do
       end
 
       it 'cannot be declined twice' do
-        allow(Import::SourceUser).to receive(:find_by_reassignment_token).and_return(source_user)
+        allow(Import::SourceUser).to receive(:find).and_return(source_user)
         allow(source_user).to receive(:reject).and_return(false)
 
         reject_invite
@@ -129,7 +126,7 @@ RSpec.describe Import::SourceUsersController, feature_category: :importers do
         expect(flash[:alert]).to match(/The invitation could not be declined/)
       end
 
-      it_behaves_like 'it notifies about unavailable reassignments'
+      it_behaves_like 'it requires awaiting approval status'
       it_behaves_like 'it requires the user is the reassign to user'
     end
 
@@ -138,8 +135,7 @@ RSpec.describe Import::SourceUsersController, feature_category: :importers do
   end
 
   describe 'GET /show' do
-    let(:path) { import_source_user_path(reassignment_token: reassignment_token) }
-    let(:reassignment_token) { source_user.reassignment_token }
+    let(:path) { import_source_user_path(source_user) }
 
     subject(:show_invite) { get path }
 
@@ -154,7 +150,7 @@ RSpec.describe Import::SourceUsersController, feature_category: :importers do
         expect(response).to have_gitlab_http_status(:success)
       end
 
-      it_behaves_like 'it notifies about unavailable reassignments'
+      it_behaves_like 'it requires awaiting approval status'
       it_behaves_like 'it requires the user is the reassign to user'
     end
 

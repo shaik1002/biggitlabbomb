@@ -143,7 +143,7 @@ DETAILS:
 **Offering:** GitLab.com
 **Status:** Beta
 
-> - Introduced in GitLab 17.5.
+> -Introduced in GitLab 17.5.
 
 This feature is in [beta](../../policy/experiment-beta-support.md).
 
@@ -169,6 +169,8 @@ To turn on restricted access:
 When you turn on restricted access, the following known issues might occur and result in overages:
 
 - The number of seats can still be exceeded if:
+  - You promote a user that is a member of the root group and has the Minimal Access role to a higher role.
+  - For Ultimate, you promote a user with the Guest role to a higher role.
   - You use SAML or SCIM to add new members, and have exceeded the number of seats in the subscription.
   - Multiple users with the Owner role add members simultaneously.
   - New billable members delay accepting an invitation.
@@ -243,46 +245,13 @@ To create an email domain allowlist or denylist:
 domains ending in `.io`. Domains must be separated by a whitespace,
 semicolon, comma, or a new line.
 
-   ![The domain denylist settings with the options to upload a file or enter the denylist manually.](img/domain_denylist_v14_1.png)
+   ![Domain Denylist](img/domain_denylist_v14_1.png)
 
 ## Set up LDAP user filter
 
 You can limit GitLab access to a subset of the LDAP users on your LDAP server.
 
 See the [documentation on setting up an LDAP user filter](../auth/ldap/index.md#set-up-ldap-user-filter) for more information.
-
-## Enable role promotion approval
-
-DETAILS:
-**Tier:** Ultimate
-**Offering:** Self-managed, GitLab Dedicated
-**Status:** Beta
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/433166) in GitLab 16.9 [with a flag](../feature_flags.md) named `member_promotion_management`.
-> - Feature flag `member_promotion_management` [changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/167757/) from `wip` to `beta` and enabled by default in GitLab 17.5.
-
-FLAG:
-The availability of this feature is controlled by a feature flag.
-
-In the **Ultimate** tier, [non billable roles](../../subscriptions/gitlab_com/index.md#billable-users), can be promoted to a billable role in any Project or Group, resulting in the increase of billable seats, without admins having any control on this promotion.
-To prevent existing users of the subscription from being promoted to a billable role, you can enable role promotion approval.
-
-When this setting is enabled, any existing user of the subscription when added to a [group](../../user/group/index.md#add-users-to-a-group) or [project](../../user/project/members/index.md#add-users-to-a-project) on a [billable role](../../subscriptions/gitlab_com/index.md#billable-users) will be [pending administrator approval](../moderate_users.md#view-users-pending-role-promotion).
-
-Promotions or updates of user roles for users that already occupy a billable seat do not require administrator approval.
-
-If the user is added to a group or project by an administrator, any membership requests for this user to any other group or project will be approved automatically.
-
-To enable role promotion approval:
-
-1. On the left sidebar, at the bottom, select **Admin**.
-1. Select **Settings > General**.
-1. Expand **Sign-up restrictions**.
-1. In the **Seat controls** section, select **Approve role promotions**.
-
-### Known issues
-
-When you turn on role promotion approval, the billable count can still increase if a user [requests access to a group](../../user/group/index.md) and is approved by the group Owner on a [billable role](../../subscriptions/gitlab_com/index.md#billable-users).
 
 <!-- ## Troubleshooting
 

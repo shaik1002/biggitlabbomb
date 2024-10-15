@@ -32,10 +32,6 @@ In August 2020, a second Deep Dive was hosted, focusing on
 [slides](https://lulalala.gitlab.io/gitlab-elasticsearch-deepdive/) are available.
 Everything covered in this deep dive was accurate as of GitLab 13.3.
 
-In July 2024, Terri Chu hosted a Lunch and Learn on Advanced search basics, integration, indexing and search. The [Google Slides](https://docs.google.com/presentation/d/1Fy3pfFIGK_2ZCoB93EksRKhaS7uuNp81I3L5_joWa04/edit?usp=sharing_) (GitLab team members only) and
- <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>[recording on YouTube](https://youtu.be/5OXK1isDaks) (GitLab team members only) are available.
-Everything covered in this deep dive was accurate as of GitLab 17.0.
-
 ## Supported Versions
 
 See [Version Requirements](../integration/advanced_search/elasticsearch.md#version-requirements).
@@ -114,14 +110,10 @@ during indexing and searching operations. Some of the benefits and tradeoffs to 
 - Routing is not used if too many shards would be hit for global and group scoped searches.
 - Shard size imbalance might occur.
 
-<!-- vale gitlab_base.Spelling = NO -->
-
 ## Existing analyzers and tokenizers
 
 The following analyzers and tokenizers are defined in
 [`ee/lib/elastic/latest/config.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/elastic/latest/config.rb).
-
-<!-- vale gitlab_base.Spelling = YES -->
 
 ### Analyzers
 
@@ -200,10 +192,9 @@ If data cannot be added to one of the [existing indices in Elasticsearch](../int
   ```shell
   curl "http://localhost:9200"
   ```
-<!-- vale gitlab_base.Spelling = NO -->
+
 - [Run Kibana](https://www.elastic.co/guide/en/kibana/current/install.html#_install_kibana_yourself) to interact
   with your local Elasticsearch cluster. Alternatively, you can use [Cerebro](https://github.com/lmenezes/cerebro) or a similar tool.
-<!-- vale gitlab_base.Spelling = YES -->
 - To tail the logs for Elasticsearch, run this command:
 
   ```shell
@@ -353,7 +344,7 @@ Also check that the index is able to handle the index request. For example, chec
 
 #### Transfers and deletes
 
-Project and group transfers and deletes must make updates to the index to avoid orphaned data.
+Project and group transfers and deletes must make updates to the index to avoid orphaned data. 
 
 Indexes that contain a `project_id` field must use the [`Search::Elastic::DeleteWorker`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/workers/search/elastic/delete_worker.rb). Indexes that contain a `namespace_id` field but no `project_id` field must use [`Search::ElasticGroupAssociationDeleteWorker`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/workers/search/elastic_group_association_deletion_worker.rb).
 
@@ -496,7 +487,7 @@ Requires `current_user` and `group_ids` fields. Query based on the permissions t
 }
 ```
 
-##### `by_project_confidentiality`
+##### `by_confidentiality`
 
 Requires `confidential`, `author_id`, `assignee_id`, `project_id` fields. Query with `confidential` in options.
 
@@ -733,7 +724,7 @@ Requires `source_branch` field. Query with `source_branch` or `not_source_branch
 
 ##### `by_group_level_authorization`
 
-Requires `current_user`, `group_ids`, `traversal_id`, `search_level` fields. Query with `search_level` and
+Requires `current_user`, `group_ids`, `traversal_id`, `search_level` fields. Query with `search_level` and 
 filter on `namespace_visibility_level` based on permissions user has for each group.
 
 NOTE:
@@ -903,7 +894,7 @@ Requires `project_id` and `traversal_id` fields. Supports feature `*_access_leve
 
 Filtering is applied for:
 
-- search level for global, group, or project
+- search level for global, group, or project 
 - membership for direct membership to groups and projects or shared membership through direct access to a group
 - any feature access levels passed through `features`
 

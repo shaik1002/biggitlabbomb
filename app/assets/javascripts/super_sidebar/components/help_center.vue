@@ -48,7 +48,19 @@ export default {
   },
   computed: {
     itemGroups() {
-      const groups = {
+      return {
+        versionCheck: {
+          items: [
+            {
+              text: this.$options.i18n.version,
+              href: helpPagePath('update/index'),
+              version: `${this.sidebarData.gitlab_version.major}.${this.sidebarData.gitlab_version.minor}`,
+              extraAttrs: {
+                ...this.trackingAttrs('version_help_dropdown'),
+              },
+            },
+          ],
+        },
         helpLinks: {
           items: [
             {
@@ -145,23 +157,6 @@ export default {
           ].filter(Boolean),
         },
       };
-
-      if (this.sidebarData.show_version_check) {
-        groups.versionCheck = {
-          items: [
-            {
-              text: this.$options.i18n.version,
-              href: helpPagePath('update/index'),
-              version: `${this.sidebarData.gitlab_version.major}.${this.sidebarData.gitlab_version.minor}`,
-              extraAttrs: {
-                ...this.trackingAttrs('version_help_dropdown'),
-              },
-            },
-          ],
-        };
-      }
-
-      return groups;
     },
     updateSeverity() {
       return this.sidebarData.gitlab_version_check?.severity;

@@ -15,7 +15,7 @@ import {
   convertToUrlParams,
 } from 'ee_else_ce/issues/list/utils';
 import { TYPENAME_USER } from '~/graphql_shared/constants';
-import { convertToGraphQLId, getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { convertToGraphQLId } from '~/graphql_shared/utils';
 import {
   STATUS_ALL,
   STATUS_CLOSED,
@@ -65,13 +65,8 @@ import IssuableList from '~/vue_shared/issuable/list/components/issuable_list_ro
 import WorkItemDrawer from '~/work_items/components/work_item_drawer.vue';
 import { DEFAULT_PAGE_SIZE, issuableListTabs } from '~/vue_shared/issuable/list/constants';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { getParameterByName, removeParams, updateHistory } from '~/lib/utils/url_utility';
-import {
-  STATE_CLOSED,
-  STATE_OPEN,
-  WORK_ITEM_TYPE_ENUM_EPIC,
-  DETAIL_VIEW_QUERY_PARAM_NAME,
-} from '../constants';
+import { getParameterByName } from '~/lib/utils/url_utility';
+import { STATE_CLOSED, STATE_OPEN, WORK_ITEM_TYPE_ENUM_EPIC } from '../constants';
 import getWorkItemsQuery from '../graphql/list/get_work_items.query.graphql';
 import getWorkItemStateCountsQuery from '../graphql/list/get_work_item_state_counts.query.graphql';
 import { sortOptions, urlSortParams } from './list/constants';
@@ -149,26 +144,18 @@ export default {
         return this.queryVariables;
       },
       update(data) {
-        return data?.[this.namespace].workItems.nodes ?? [];
-      },
-      skip() {
-        return isEmpty(this.pageParams);
+        return data?.group.workItems.nodes ?? [];
       },
       result({ data }) {
-        this.pageInfo = data?.[this.namespace].workItems.pageInfo ?? {};
+        this.pageInfo = data?.group.workItems.pageInfo ?? {};
 
-        if (data?.[this.namespace]) {
-          if (this.isGroup) {
-            const rootBreadcrumbName =
-              this.workItemType === WORK_ITEM_TYPE_ENUM_EPIC
-                ? __('Epics')
-                : s__('WorkItem|Work items');
-            document.title = `${rootBreadcrumbName} · ${data.group.name} · GitLab`;
-          } else {
-            document.title = `Issues · ${data.project.name} · GitLab`;
-          }
+        if (data?.group) {
+          const rootBreadcrumbName =
+            this.workItemType === WORK_ITEM_TYPE_ENUM_EPIC
+              ? __('Epics')
+              : s__('WorkItem|Work items');
+          document.title = `${rootBreadcrumbName} · ${data.group.name} · GitLab`;
         }
-        this.checkDrawerParams();
       },
       error(error) {
         this.error = s__(
@@ -183,13 +170,10 @@ export default {
         return this.queryVariables;
       },
       update(data) {
-        return data?.[this.namespace].workItemStateCounts ?? {};
-      },
-      skip() {
-        return isEmpty(this.pageParams);
+        return data?.group.workItemStateCounts ?? {};
       },
       result({ data }) {
-        const { all } = data?.[this.namespace].workItemStateCounts ?? {};
+        const { all } = data?.group.workItemStateCounts ?? {};
 
         if (!this.isInitialLoadComplete) {
           this.hasAnyIssues = Boolean(all);
@@ -241,7 +225,6 @@ export default {
         ...this.pageParams,
         includeDescendants: !this.apiFilterParams.fullPath,
         types: this.apiFilterParams.types || this.workItemType || this.defaultWorkItemTypes,
-        isGroup: this.isGroup,
       };
     },
     searchQuery() {
@@ -286,6 +269,15 @@ export default {
           preloadedUsers,
         },
         {
+          type: TOKEN_TYPE_GROUP,
+          icon: 'group',
+          title: TOKEN_TITLE_GROUP,
+          unique: true,
+          token: GroupToken,
+          operators: OPERATORS_IS,
+          fullPath: this.fullPath,
+        },
+        {
           type: TOKEN_TYPE_LABEL,
           title: TOKEN_TITLE_LABEL,
           icon: 'labels',
@@ -318,18 +310,6 @@ export default {
           ],
         },
       ];
-
-      if (this.isGroup) {
-        tokens.push({
-          type: TOKEN_TYPE_GROUP,
-          icon: 'group',
-          title: TOKEN_TITLE_GROUP,
-          unique: true,
-          token: GroupToken,
-          operators: OPERATORS_IS,
-          fullPath: this.fullPath,
-        });
-      }
 
       if (!this.workItemType) {
         tokens.push({
@@ -421,11 +401,6 @@ export default {
     $route(newValue, oldValue) {
       if (newValue.fullPath !== oldValue.fullPath) {
         this.updateData(getParameterByName(PARAM_SORT));
-      }
-      if (newValue.query[DETAIL_VIEW_QUERY_PARAM_NAME] && !this.$apollo.queries.workItems.loading) {
-        this.checkDrawerParams();
-      } else {
-        this.activeItem = null;
       }
     },
   },
@@ -574,29 +549,6 @@ export default {
       this.pageSize = this.pageParams.firstPageSize;
       this.sortKey = deriveSortKey({ sort, sortMap: urlSortParams });
       this.state = state || STATUS_OPEN;
-    },
-    checkDrawerParams() {
-      const queryParam = getParameterByName(DETAIL_VIEW_QUERY_PARAM_NAME);
-
-      if (!queryParam) {
-        return;
-      }
-
-      const params = JSON.parse(atob(queryParam));
-      if (params.id) {
-        const issue = this.workItems.find((i) => getIdFromGraphQLId(i.id) === params.id);
-        if (issue) {
-          this.activeItem = {
-            ...issue,
-            // we need fullPath here to prevent cache invalidation
-            fullPath: params.full_path,
-          };
-        } else {
-          updateHistory({
-            url: removeParams([DETAIL_VIEW_QUERY_PARAM_NAME]),
-          });
-        }
-      }
     },
   },
 };

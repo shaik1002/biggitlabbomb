@@ -3,7 +3,6 @@ import { STATUS_CLOSED, STATUS_MERGED, STATUS_OPEN } from '~/issues/constants';
 import { formatDate, getTimeago, newDate, timeagoLanguageCode } from '~/lib/utils/datetime_utility';
 import { machine } from '~/lib/utils/finite_state_machine';
 import { badgeState } from '~/merge_requests/components/merge_request_header.vue';
-import { cleanLeadingSeparator } from '~/lib/utils/url_utility';
 import {
   MTWPS_MERGE_STRATEGY,
   MT_MERGE_STRATEGY,
@@ -142,10 +141,7 @@ export default class MergeRequestStore {
     this.isPipelineSkipped = this.ciStatus === 'skipped';
     this.pipelineDetailedStatus = pipelineStatus;
     this.isPipelineActive = data.pipeline ? data.pipeline.active : false;
-    this.pipelineIid = data.pipeline?.iid?.toString() || '';
-    this.pipelineProjectPath = data.pipeline?.project_path
-      ? cleanLeadingSeparator(data.pipeline?.project_path)
-      : '';
+    this.pipelineIid = data.pipeline?.iid;
     this.isPipelineBlocked =
       data.only_allow_merge_if_pipeline_succeeds && pipelineStatus?.group === 'manual';
     this.faviconOverlayPath = data.favicon_overlay_path;

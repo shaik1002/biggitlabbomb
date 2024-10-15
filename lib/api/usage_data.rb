@@ -20,8 +20,6 @@ module API
           documentation: { example: 1234 }
         optional :additional_properties, type: Hash, desc: 'Additional properties to be tracked',
           documentation: { example: { label: 'login_button', value: 1 } }
-        optional :send_to_snowplow, type: Boolean, desc: 'Send the tracked event to Snowplow',
-          documentation: { example: true, default: false }
       end
 
       def process_event(params)
@@ -29,13 +27,12 @@ module API
         namespace_id = params[:namespace_id]
         project_id = params[:project_id]
         additional_properties = params.fetch(:additional_properties, {}).symbolize_keys
-        send_snowplow_event = !!params[:send_to_snowplow]
 
         Gitlab::Tracking::AiTracking.track_event(event_name, additional_properties.merge(user: current_user))
 
         track_event(
           event_name,
-          send_snowplow_event: send_snowplow_event,
+          send_snowplow_event: false,
           user: current_user,
           namespace_id: namespace_id,
           project_id: project_id,

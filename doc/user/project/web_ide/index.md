@@ -25,8 +25,7 @@ For a more basic implementation, see [Web Editor](../repository/web_editor.md).
 
 To pair the Web IDE with a remote development environment, see [Remote development](../remote_development/index.md).
 
-Support for [GitLab Flavored Markdown](../../markdown.md) preview in the Web IDE is proposed in
-[issue 645](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/645).
+Support for improvements to Markdown preview when using GitLab Flavored Markdown in the Web IDE is proposed in [issue 645](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/645).
 
 ## Open the Web IDE
 
@@ -246,11 +245,10 @@ DETAILS:
 **Offering:** GitLab.com
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/151352) as a [beta](../../../policy/experiment-beta-support.md#beta) in GitLab 17.0 [with flags](../../../administration/feature_flags.md) named `web_ide_oauth` and `web_ide_extensions_marketplace`. Disabled by default.
-> - Feature flag `web_ide_oauth` [enabled on GitLab.com, self-managed, and GitLab Dedicated](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/163181) and feature flag `web_ide_extensions_marketplace` [enabled on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/459028) in GitLab 17.4.
-> - Feature flag `web_ide_oauth` [removed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/167464) in GitLab 17.5.
+> - [Enabled on GitLab.com](https://gitlab.com/groups/gitlab-org/-/epics/11769) in GitLab 17.4.
 
 FLAG:
-The availability of this feature is controlled by a feature flag.
+The availability of this feature is controlled by feature flags.
 For more information, see the history.
 
 Prerequisites:

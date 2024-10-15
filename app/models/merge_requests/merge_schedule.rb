@@ -2,8 +2,6 @@
 
 module MergeRequests
   class MergeSchedule < ApplicationRecord
-    include FromUnion
-
     self.table_name = 'merge_request_merge_schedules'
 
     belongs_to :merge_request, optional: false, inverse_of: :merge_schedule

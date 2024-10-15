@@ -25,46 +25,40 @@ An instance refers to a GitLab Dedicated deployment, whereas a tenant refers to 
 
 ## Configuration changes
 
-### Configure your instance using Switchboard
+### Configuration change policy
 
-You can use Switchboard to make limited configuration changes to your GitLab Dedicated instance.
+Configuration changes requested with a [support ticket](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=4414917877650) are batched up and applied during your environment's weekly four-hour maintenance window.
 
-The following configuration settings are available in Switchboard:
+This policy does not apply to configuration changes made by a GitLab Dedicated instance admin [using Switchboard](#configuration-changes-in-switchboard).
 
-- [IP allowlist](#ip-allowlist)
-- [SAML settings](#saml)
-- [Custom certificates](#custom-certificates)
+To have a change considered for an upcoming weekly maintenance window, all required information
+must be submitted in full two business days before the start of the window.
 
-Prerequisites:
+A configuration change might not be applied during an upcoming weekly maintenance window, even if
+it meets the minimum lead time. If GitLab needs to perform high-priority maintenance tasks that
+run beyond the maintenance window, configuration changes will be postponed to the following week.
 
-- You must have the [Admin](#add-users-to-an-instance) role.
+Changes requested with a support ticket cannot be applied outside of a weekly maintenance window unless it qualifies for
+[emergency support](https://about.gitlab.com/support/#how-to-engage-emergency-support).
 
-To make a configuration change:
+### Configuration changes in Switchboard
 
-1. Sign in to [Switchboard](https://console.gitlab-dedicated.com/).
-1. At the top of the page, select **Configuration**.
-1. Follow the instructions in the relevant sections below.
+Switchboard empowers the user to make limited configuration changes to their GitLab Dedicated instance. As Switchboard matures further configuration changes will be made available.
 
-For all other instance configurations, submit a support ticket according to the
-[configuration change request policy](#configuration-change-request-policy).
+To change or update the configuration of your GitLab Dedicated instance, use Switchboard following the instructions in the relevant section or open a [support ticket](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=4414917877650) with your request.
 
-#### Applying configuration changes in Switchboard
+You can request configuration changes for some of the options originally specified during onboarding, or for any of the following optional features.
 
-You can apply configuration changes made in Switchboard immediately or defer them until your next scheduled weekly [maintenance window](../../administration/dedicated/create_instance.md#maintenance-window).
+Configuration changes made with Switchboard can be applied immediately or deferred until your next scheduled weekly [maintenance window](../../administration/dedicated/create_instance.md#maintenance-window).
 
-When you apply changes immediately:
+When applied immediately, changes may take up to 90 minutes to be deployed to your environment. Individual changes are applied in the order they are saved, or you may choose to save several changes at once before applying them in one batch. After your change is deployed, you will receive an email notification. You might have to check your spam folder if it does not show up in your main email folder.
 
-- Deployment can take up to 90 minutes.
-- Changes are applied in the order they're saved.
-- You can save multiple changes and apply them in one batch.
-
-After deployment, you'll receive an email notification. Check your spam folder if you don't see it in your main inbox.
-All users with access to view or edit your tenant in Switchboard receive a notification for each change. For more information, see [Manage Switchboard notification preferences](#manage-notification-preferences).
+All users with access to view or edit your tenant in Switchboard will receive a notification for each change made. See how to [manage Switchboard notification preferences](#manage-notification-preferences).
 
 NOTE:
-You will only receive email notifications for changes made by a Switchboard tenant admin. Changes made by a GitLab Operator (for example, a GitLab version update completed during a maintenance window) don't trigger email notifications.
+You will only receive email notifications for changes made by a Switchboard tenant admin. Changes made by a GitLab Operator (e.g. a GitLab version update completed during a maintenance window) will not result in an email notification.
 
-### View the configuration change log
+#### View the configuration change log
 
 You can use the configuration change log to track the changes made to your GitLab Dedicated instance, including:
 
@@ -78,7 +72,7 @@ You can use the configuration change log to track the changes made to your GitLa
 Each configuration change has a status:
 
 - Initiated: Configuration change is made in Switchboard, but not yet deployed to the instance.
-- In progress: Configuration change is actively being deployed to the instance.
+- In progress: Configuration change is currently being deployed to the instance.
 - Complete: Configuration change has been deployed to the instance.
 - Delayed: Initial job to deploy a change has failed and the change has not yet been assigned to a new job.
 
@@ -87,20 +81,6 @@ To view the configuration change log:
 1. Sign in to [Switchboard](https://console.gitlab-dedicated.com/).
 1. Select your tenant.
 1. At the top of the page, select **Configuration change log**.
-
-### Configuration change request policy
-
-This policy does not apply to configuration changes made by a GitLab Dedicated instance admin using Switchboard.
-
-Configuration changes requested with a [support ticket](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=4414917877650):
-
-- Are applied during your environment's weekly four-hour maintenance window.
-- Can be requested for options specified during onboarding or for optional features listed on this page.
-- May be postponed to the following week if GitLab needs to perform high-priority maintenance tasks.
-- Can't be applied outside the weekly maintenance window unless they qualify for [emergency support](https://about.gitlab.com/support/#how-to-engage-emergency-support).
-
-NOTE:
-Even if a change request meets the minimum lead time, it might not be applied during the upcoming maintenance window.
 
 ### Bring your own domain (BYOD)
 
@@ -148,7 +128,7 @@ To enable the Inbound Private Link:
 1. Open a [support ticket](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=4414917877650). In the body of your support ticket, include the IAM principals for the AWS users or roles in your AWS organization that are establishing the VPC endpoints in your AWS account. The IAM principals must be [IAM role principals](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_principal.html#principal-roles) or [IAM user principals](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_principal.html#principal-users). GitLab Dedicated uses these IAM Principals for access-control. These IAM principals are the only ones able to set up an endpoint to the service.
 1. After your IAM Principals have been allowlisted, GitLab [creates the Endpoint Service](https://docs.aws.amazon.com/vpc/latest/privatelink/create-endpoint-service.html) and communicates the `Service Endpoint Name` on the support ticket. The service name is generated by AWS upon creation of the service endpoint.
    - GitLab handles the domain verification for the Private DNS name, so that DNS resolution of the tenant instance domain name in your VPC resolves to the PrivateLink endpoint.
-   - The endpoint service is available in two Availability Zones. These are either the zones you chose during onboarding or two randomly selected zones if you didn't specify any.
+   - GitLab makes the Endpoint Service available in the Availability Zones you specified during the initial onboarding. If you did not specify any Availability Zones, GitLab randomly selects the Availability Zones IDs.
 1. In your own AWS account, create an [Endpoint Interface](https://docs.aws.amazon.com/vpc/latest/privatelink/create-interface-endpoint.html) in your VPC, with the following settings:
    - Service Endpoint Name: use the name provided by GitLab on the support ticket.
    - Private DNS names enabled: yes.
@@ -176,8 +156,8 @@ This type of connection allows GitLab functionality to access private services:
 Consider the following:
 
 - You can only establish private links between VPCs in the same region. Therefore, you can only establish a connection in the regions specified for your Dedicated instance.
-- The connection requires the [Availability Zone IDs (AZ IDs)](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#az-ids) for the two Availability Zones (AZs) in the regions that you selected during onboarding.
-- If you did not specify any AZs during onboarding to Dedicated, GitLab randomly selects both AZ IDs.
+- The connection requires the [Availability Zone IDs (AZ IDs)](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#az-ids) for the Availability Zones (AZs) in the regions that you selected during onboarding.
+- If you did not specify any AZs during onboarding to Dedicated, GitLab randomly selects the AZ IDs.
 
 You can view the `Reverse Private Link IAM Principal` attribute in the **Tenant Details** section of Switchboard.
 
@@ -186,7 +166,7 @@ To enable an Outbound Private Link:
 1. [Create the Endpoint service](https://docs.aws.amazon.com/vpc/latest/privatelink/create-endpoint-service.html) through which your internal service
    will be available to GitLab Dedicated. Provide the associated `Service Endpoint Name` on a new
    [support ticket](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=4414917877650).
-1. Make sure you have configured a Network Load Balancer (NLB) for the endpoint service in the two AZs to which your Dedicated instance was deployed. If you did not specify these during onboarding to Dedicated, you must either:
+1. Make sure you have configured a Network Load Balancer (NLB) for the endpoint service in the AZs to which your Dedicated instance was deployed. If you did not specify these during onboarding to Dedicated, you must either:
    - Submit a [support ticket](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=4414917877650) to request the AZ IDs required to enable the connection and ensure the NLB is enabled in those AZs.
    - Ensure the NLB is enabled in every AZ in the region.
 1. In your [support ticket](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=4414917877650), GitLab will provide you with the ARN of an
@@ -242,7 +222,7 @@ In some cases, the GitLab Dedicated instance can't reach an internal service you
 
 #### Add a custom certificate with a Support Request
 
-If you are unable to use Switchboard to add a custom certificate, you can open a [support ticket](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=4414917877650) and attach your custom public certificate files to request this change..
+To request that GitLab add custom certificates when communicating with your services over PrivateLink, attach the custom public certificate files to your [support ticket](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=4414917877650).
 
 #### Maximum number of reverse PrivateLink connections
 
@@ -252,7 +232,7 @@ GitLab Dedicated limits the number of reverse PrivateLink connections to 10.
 
 GitLab Dedicated allows you to control which IP addresses can access your instance through an IP allowlist. Once the IP allowlist has been enabled, when an IP not on the allowlist tries to access your instance an `HTTP 403 Forbidden` response is returned.
 
-IP addresses that have been added to your IP allowlist can be viewed on the Configuration page in Switchboard. You can add or remove IP addresses from your allowlist with Switchboard.
+IP addresses that have been added to your IP allowlist can be viewed on the Configuration page in Switchboard. You can add or remove IP addresses from your allowlist with Switchboard or a support request.
 
 #### Add an IP to the allowlist with Switchboard
 
@@ -267,7 +247,7 @@ IP addresses that have been added to your IP allowlist can be viewed on the Conf
 
 #### Add an IP to the allowlist with a Support Request
 
-If you are unable to use Switchboard to update your IP allowlist, you can open a [support ticket](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=4414917877650) and specify a comma separated list of IP addresses that can access your GitLab Dedicated instance.
+Specify a comma separated list of IP addresses that can access your GitLab Dedicated instance in your [support ticket](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=4414917877650). The IP addresses are then added to the IP allowlist for your instance.
 
 #### Enable OpenID Connect for your IP allowlist
 
@@ -306,15 +286,14 @@ To activate SAML for your GitLab Dedicated instance:
    - SAML label
    - IdP cert fingerprint
    - IdP SSO target URL
-1. Optional. To configure users based on [SAML group membership](#saml-groups) or use [group sync](#group-sync), complete the following fields:
+1. Optional. To configure users based on SAML group membership, complete the following fields:
    - SAML group attribute
    - Admin groups
    - Auditor groups
    - External groups
    - Required groups
-1. Optional. To configure [SAML request signing](#request-signing), complete the following fields:
+1. Optional. To configure SAML request signing, complete the following fields:
    - Name identifier format
-   - Issuer
    - Attribute statements
    - Security
 1. Select **Save**.
@@ -326,9 +305,9 @@ To activate SAML for your GitLab Dedicated instance:
 
 #### Activate SAML with a Support Request
 
-If you are unable to use Switchboard to activate or update SAML for your GitLab Dedicated instance, you can open a [support ticket](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=4414917877650):
+To activate SAML for your GitLab Dedicated instance:
 
-1. To make the necessary changes, include the desired [SAML configuration block](../../integration/saml.md#configure-saml-support-in-gitlab) for your GitLab application in your support ticket. At a minimum, GitLab needs the following information to enable SAML for your instance:
+1. To make the necessary changes, include the desired [SAML configuration block](../../integration/saml.md#configure-saml-support-in-gitlab) for your GitLab application in your [support ticket](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=4414917877650). At a minimum, GitLab needs the following information to enable SAML for your instance:
    - IDP SSO Target URL
    - Certificate fingerprint or certificate
    - NameID format
@@ -371,23 +350,14 @@ If you are unable to use Switchboard to activate or update SAML for your GitLab 
 #### Request signing
 
 If [SAML request signing](../../integration/saml.md#sign-saml-authentication-requests-optional) is desired, a certificate must be obtained. This certificate can be self-signed which has the advantage of not having to prove ownership of an arbitrary Common Name (CN) to a public Certificate Authority (CA).
-
-NOTE:
-Because SAML request signing requires certificate signing, you must complete these steps to use SAML with this feature enabled.
-
-To enable SAML request signing:
-
-1. Open a [support ticket](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=4414917877650) and indicate that you want request signing enabled.
-1. GitLab will work with you on sending the Certificate Signing Request (CSR) for you to sign. Alternatively, the CSR can be signed with a public CA.
-1. After the certificate is signed, you can then use the certificate and its associated private key to complete the `security` section of the [SAML configuration](#activate-saml-with-switchboard) in Switchboard.
-
-Authentication requests from GitLab to your identity provider can now be signed.
+If you choose to enable SAML request signing, the manual steps below will need to be completed before you are able to use SAML, since it requires certificate signing to happen.
+To enable SAML request signing, indicate on your SAML [support ticket](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=4414917877650) that you want request signing enabled. GitLab works with you on sending the Certificate Signing Request (CSR) for you to sign. Alternatively, the CSR can be signed with a public CA. After the certificate is signed, GitLab adds the certificate and its associated private key to the `security` section of the SAML configuration. Authentication requests from GitLab to your identity provider can then be signed.
 
 #### SAML groups
 
 With SAML groups you can configure GitLab users based on SAML group membership.
 
-To enable SAML groups, add the [required elements](../../integration/saml.md#configure-users-based-on-saml-group-membership) to your SAML configuration in [Switchboard](#activate-saml-with-switchboard) or to the SAML block you provide in a [support ticket](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=4414917877650).
+To enable SAML groups, add the [required elements](../../integration/saml.md#configure-users-based-on-saml-group-membership) to the SAML configuration block you provide in your [support ticket](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=4414917877650).
 
 #### Group sync
 
@@ -395,7 +365,7 @@ With [group sync](../../user/group/saml_sso/group_sync.md), you can sync users a
 
 To enable group sync:
 
-1. Add the [required elements](../../user/group/saml_sso/group_sync.md#configure-saml-group-sync) to your SAML configuration in [Switchboard](#activate-saml-with-switchboard) or to the SAML configuration block you provide in a [support ticket](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=4414917877650).
+1. Add the [required elements](../../user/group/saml_sso/group_sync.md#configure-saml-group-sync) to the SAML configuration block you provide in your [support ticket](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=4414917877650).
 1. Configure the [Group Links](../../user/group/saml_sso/group_sync.md#configure-saml-group-links).
 
 ### Add users to an instance
@@ -454,11 +424,7 @@ You can use the [AWS CLI](https://aws.amazon.com/cli/) to verify that access to 
 
 The S3 bucket contains a combination of **infrastructure logs** and **application logs** from the GitLab [log system](../../administration/logs/index.md). The logs in the bucket are encrypted using an AWS KMS key that is managed by GitLab. If you choose to enable [BYOK](../../administration/dedicated/create_instance.md#encrypted-data-at-rest-byok), the application logs are not encrypted with the key you provide.
 
-<!-- vale gitlab_base.Spelling = NO -->
-
 The logs in the S3 bucket are organized by date in `YYYY/MM/DD/HH` format. For example, there would be a directory like `2023/10/12/13`. That directory would contain the logs from October 12, 2023 at 1300 UTC. The logs are streamed into the bucket with [Amazon Kinesis Data Firehose](https://aws.amazon.com/firehose/).
-
-<!-- vale gitlab_base.Spelling = YES -->
 
 ## Troubleshooting
 

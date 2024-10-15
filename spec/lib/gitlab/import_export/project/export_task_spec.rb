@@ -31,7 +31,7 @@ RSpec.describe Gitlab::ImportExport::Project::ExportTask, :silence_stdout, featu
     around do |example|
       example.run
     ensure
-      FileUtils.rm_f(file_path)
+      File.delete(file_path) if File.exist?(file_path)
     end
 
     include_context 'rake task object storage shared context'

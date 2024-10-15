@@ -41,7 +41,6 @@ export const WORK_ITEM_TYPE_ENUM_OBJECTIVE = 'OBJECTIVE';
 export const WORK_ITEM_TYPE_ENUM_KEY_RESULT = 'KEY_RESULT';
 export const WORK_ITEM_TYPE_ENUM_EPIC = 'EPIC';
 
-export const WORK_ITEM_TYPE_VALUE_WORK_ITEM = 'Work Item';
 export const WORK_ITEM_TYPE_VALUE_EPIC = 'Epic';
 export const WORK_ITEM_TYPE_VALUE_INCIDENT = 'Incident';
 export const WORK_ITEM_TYPE_VALUE_ISSUE = 'Issue';
@@ -270,7 +269,6 @@ export const TEST_ID_COPY_REFERENCE_ACTION = 'copy-reference-action';
 export const TEST_ID_COPY_CREATE_NOTE_EMAIL_ACTION = 'copy-create-note-email-action';
 export const TEST_ID_TOGGLE_ACTION = 'state-toggle-action';
 export const TEST_ID_REPORT_ABUSE = 'report-abuse-action';
-export const TEST_ID_NEW_RELATED_WORK_ITEM = 'new-related-work-item';
 
 export const TODO_ADD_ICON = 'todo-add';
 export const TODO_DONE_ICON = 'todo-done';
@@ -362,16 +360,6 @@ export const ROUTES = {
   workItem: 'workItem',
   new: 'new',
   design: 'design',
-};
-
-export const WORK_ITEM_TYPE_ROUTE_WORK_ITEM = 'work_items';
-export const WORK_ITEM_TYPE_ROUTE_ISSUE = 'issues';
-export const WORK_ITEM_TYPE_ROUTE_EPIC = 'epics';
-
-export const WORK_ITEM_BASE_ROUTE_MAP = {
-  [WORK_ITEM_TYPE_ROUTE_WORK_ITEM]: null,
-  [WORK_ITEM_TYPE_ROUTE_ISSUE]: WORK_ITEM_TYPE_ENUM_ISSUE,
-  [WORK_ITEM_TYPE_ROUTE_EPIC]: WORK_ITEM_TYPE_ENUM_EPIC,
 };
 
 export const WORKITEM_LINKS_SHOWLABELS_LOCALSTORAGEKEY = 'workItemLinks.showLabels';

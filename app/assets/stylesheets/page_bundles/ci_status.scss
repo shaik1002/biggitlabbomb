@@ -21,11 +21,7 @@
   }
 
   &.ci-success {
-    @include status-color(
-      var(--green-100, $green-100),
-      var(--green-500, $green-500),
-      var(--green-700, $green-700)
-    );
+    @include green-status-color;
   }
 
   &.ci-canceling,

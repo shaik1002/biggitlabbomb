@@ -608,11 +608,6 @@ export const mockBlockingLinkedItem = {
             iconName: 'issue-type-task',
             __typename: 'WorkItemType',
           },
-          namespace: {
-            id: 'gid://gitlab/Group/1',
-            fullPath: 'test-project-path',
-            __typename: 'Namespace',
-          },
           reference: 'test-project-path#1',
           title: 'Task 1201',
           state: 'OPEN',
@@ -647,11 +642,6 @@ export const mockBlockedByLinkedItem = {
             iconName: 'issue-type-task',
             __typename: 'WorkItemType',
           },
-          namespace: {
-            id: 'gid://gitlab/Group/1',
-            fullPath: 'test-project-path',
-            __typename: 'Namespace',
-          },
           reference: 'test-project-path#1',
           title: 'Task 1201',
           state: 'OPEN',
@@ -675,11 +665,6 @@ export const mockBlockedByLinkedItem = {
             name: 'Task',
             iconName: 'issue-type-task',
             __typename: 'WorkItemType',
-          },
-          namespace: {
-            id: 'gid://gitlab/Group/1',
-            fullPath: 'test-project-path',
-            __typename: 'Namespace',
           },
           reference: 'test-project-path#1',
           title: 'Task 1202',
@@ -715,11 +700,6 @@ export const mockLinkedItems = {
             iconName: 'issue-type-task',
             __typename: 'WorkItemType',
           },
-          namespace: {
-            id: 'gid://gitlab/Group/1',
-            fullPath: 'test-project-path',
-            __typename: 'Namespace',
-          },
           reference: 'test-project-path#83',
           title: 'Task 1201',
           state: 'OPEN',
@@ -744,11 +724,6 @@ export const mockLinkedItems = {
             iconName: 'issue-type-objective',
             __typename: 'WorkItemType',
           },
-          namespace: {
-            id: 'gid://gitlab/Group/2',
-            fullPath: 'test-project-path',
-            __typename: 'Namespace',
-          },
           reference: 'test-project-path#55',
           title: 'Multilevel Objective 1',
           state: 'OPEN',
@@ -772,11 +747,6 @@ export const mockLinkedItems = {
             name: 'Objective',
             iconName: 'issue-type-objective',
             __typename: 'WorkItemType',
-          },
-          namespace: {
-            id: 'gid://gitlab/Group/3',
-            fullPath: 'test-project-path',
-            __typename: 'Namespace',
           },
           reference: 'test-project-path#56',
           title: 'Multilevel Objective 2',
@@ -857,11 +827,6 @@ export const workItemSingleLinkedItemResponse = {
                       iconName: 'issue-type-task',
                       __typename: 'WorkItemType',
                     },
-                    namespace: {
-                      id: 'gid://gitlab/Group/1',
-                      fullPath: 'test-project-path',
-                      __typename: 'Namespace',
-                    },
                     reference: 'test-project-path#1',
                     title: 'Task 1201',
                     state: 'OPEN',
@@ -899,7 +864,7 @@ export const workItemBlockedByLinkedItemsResponse = {
   },
 };
 
-export const workItemDevelopmentMRNodes = [
+export const workItemDevelopmentNodes = [
   {
     fromMrDescription: true,
     mergeRequest: {
@@ -1084,47 +1049,15 @@ export const workItemDevelopmentMRNodes = [
   },
 ];
 
-export const workItemDevelopmentFeatureFlagNodes = [
-  {
-    active: true,
-    id: 'gid://gitlab/Operations::FeatureFlag/1',
-    name: 'flag1',
-    path: 'http://127.0.0.1:3000/flightjs/Flight/-/feature_flags/1/edit',
-    reference: '[feature_flag:1]',
-    __typename: 'FeatureFlag',
-  },
-  {
-    active: false,
-    id: 'gid://gitlab/Operations::FeatureFlag/2',
-    name: 'flag2',
-    path: 'http://127.0.0.1:3000/flightjs/Flight/-/feature_flags/2/edit',
-    reference: '[feature_flag:2]',
-    __typename: 'FeatureFlag',
-  },
-  {
-    active: false,
-    id: 'gid://gitlab/Operations::FeatureFlag/3',
-    name: 'flag3',
-    path: 'http://127.0.0.1:3000/flightjs/Flight/-/feature_flags/3/edit',
-    reference: '[feature_flag:3]',
-    __typename: 'FeatureFlag',
-  },
-];
-
 export const workItemDevelopmentFragmentResponse = (
-  mrNodes = workItemDevelopmentMRNodes,
+  nodes = workItemDevelopmentNodes,
   willAutoCloseByMergeRequest = false,
-  featureFlagNodes = workItemDevelopmentFeatureFlagNodes,
 ) => {
   return {
     type: 'DEVELOPMENT',
     willAutoCloseByMergeRequest,
-    featureFlags: {
-      nodes: featureFlagNodes,
-      __typename: 'FeatureFlagConnection',
-    },
     closingMergeRequests: {
-      nodes: mrNodes,
+      nodes,
       __typename: 'WorkItemClosingMergeRequestConnection',
     },
     __typename: 'WorkItemWidgetDevelopment',
@@ -1849,7 +1782,6 @@ export const workItemTask = {
   widgets: [
     workItemObjectiveMetadataWidgets.ASSIGNEES,
     workItemObjectiveMetadataWidgets.LINKED_ITEMS,
-    workItemObjectiveMetadataWidgets.MILESTONE,
     {
       type: 'HIERARCHY',
       hasChildren: false,
@@ -2080,7 +2012,6 @@ export const workItemObjectiveWithChild = {
     iconName: 'issue-type-objective',
     __typename: 'WorkItemType',
   },
-  webUrl: 'http://gdk.test/gitlab-org/gitlab/-/issues/1',
   namespace: {
     __typename: 'Project',
     id: '1',
@@ -2136,7 +2067,6 @@ export const workItemObjectiveWithoutChild = {
     iconName: 'issue-type-objective',
     __typename: 'WorkItemType',
   },
-  webUrl: 'http://gdk.test/gitlab-org/gitlab/-/issues/1',
   namespace: {
     __typename: 'Project',
     id: '1',
@@ -5166,103 +5096,3 @@ export const mockUserPreferences = (useWorkItemsView = true) => ({
     },
   },
 });
-
-export const mockProjectPermissionsQueryResponse = ({ createDesign = true } = {}) => ({
-  data: {
-    workspace: {
-      id: 'gid://gitlab/Project/1',
-      userPermissions: {
-        createDesign,
-        __typename: 'ProjectPermissions',
-      },
-      __typename: 'Project',
-    },
-  },
-});
-
-export const mockUploadDesignMutationResponse = {
-  data: {
-    designManagementUpload: {
-      designs: [
-        {
-          id: 'gid://gitlab/DesignManagement::Design/10',
-          event: 'CREATION',
-          filename: 'Screenshot_2024-09-16_at_12.08.41_PM.png',
-          notesCount: 0,
-          image:
-            'http://127.0.0.1:3000/gitlab-org/gitlab-shell/-/design_management/designs/10/316e83ef399ac9ec00250426f7e2ae01fffa8133/raw_image',
-          imageV432x230: null,
-          description: null,
-          descriptionHtml: '',
-          fullPath: 'designs/issue-41/Screenshot_2024-09-16_at_12.08.41_PM.png',
-          currentUserTodos: {
-            nodes: [],
-            __typename: 'TodoConnection',
-          },
-          __typename: 'Design',
-          imported: false,
-          diffRefs: {
-            baseSha: '2ac26f2354eb7f4a18f69db273017393f41bd840',
-            startSha: '2ac26f2354eb7f4a18f69db273017393f41bd840',
-            headSha: '316e83ef399ac9ec00250426f7e2ae01fffa8133',
-            __typename: 'DiffRefs',
-          },
-          discussions: {
-            nodes: [],
-            __typename: 'DiscussionConnection',
-          },
-          versions: {
-            nodes: [
-              {
-                id: 'gid://gitlab/DesignManagement::Version/10',
-                sha: '316e83ef399ac9ec00250426f7e2ae01fffa8133',
-                createdAt: '2024-09-16T23:33:27Z',
-                author: {
-                  id: 'gid://gitlab/User/1',
-                  name: 'Administrator',
-                  avatarUrl:
-                    'https://www.gravatar.com/avatar/f7da9a67cfc0e7a1927ea66dd241a7a31e1df50bb91b0fcd8f6d5fb20fb2f4c3?s=80&d=identicon',
-                  __typename: 'UserCore',
-                },
-                __typename: 'DesignVersion',
-              },
-            ],
-            __typename: 'DesignVersionConnection',
-          },
-        },
-      ],
-      skippedDesigns: [],
-      errors: [],
-      __typename: 'DesignManagementUploadPayload',
-    },
-  },
-};
-
-export const mockUploadSkippedDesignMutationResponse = {
-  data: {
-    designManagementUpload: {
-      designs: [],
-      skippedDesigns: [
-        {
-          id: 'gid://gitlab/DesignManagement::Design/14',
-          filename: 'Version_test_1.png',
-          __typename: 'Design',
-        },
-      ],
-      errors: [],
-      __typename: 'DesignManagementUploadPayload',
-    },
-  },
-};
-
-export const mockUploadErrorDesignMutationResponse = {
-  errors: [
-    {
-      message:
-        "The resource that you are attempting to access does not exist or you don't have permission to perform this action",
-    },
-  ],
-  data: {
-    designManagementUpload: null,
-  },
-};

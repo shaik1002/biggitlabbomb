@@ -6,47 +6,31 @@ import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 
 import { TYPE_EPIC, TYPE_ISSUE } from '~/issues/constants';
-import { DETAIL_VIEW_QUERY_PARAM_NAME } from '~/work_items/constants';
 import WorkItemDrawer from '~/work_items/components/work_item_drawer.vue';
 import WorkItemDetail from '~/work_items/components/work_item_detail.vue';
 import deleteWorkItemMutation from '~/work_items/graphql/delete_work_item.mutation.graphql';
-import workspacePermissionsQuery from '~/work_items/graphql/workspace_permissions.query.graphql';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
-import { visitUrl, updateHistory, setUrlParams, removeParams } from '~/lib/utils/url_utility';
-import { makeDrawerUrlParam } from '~/work_items/utils';
-import { mockProjectPermissionsQueryResponse } from '../mock_data';
-
-jest.mock('~/lib/utils/url_utility');
 
 Vue.use(VueApollo);
 
 const deleteWorkItemMutationHandler = jest
   .fn()
   .mockResolvedValue({ data: { workItemDelete: { errors: [] } } });
-const workspacePermissionsHandler = jest
-  .fn()
-  .mockResolvedValue(mockProjectPermissionsQueryResponse());
 
 describe('WorkItemDrawer', () => {
   let wrapper;
 
   const mockListener = jest.fn();
-  const mockRouterPush = jest.fn();
 
   const findGlDrawer = () => wrapper.findComponent(GlDrawer);
   const findWorkItem = () => wrapper.findComponent(WorkItemDetail);
-  const findLinkButton = () => wrapper.findByTestId('work-item-drawer-link-button');
 
   const createComponent = ({
     open = false,
     activeItem = { iid: '1', webUrl: 'test', fullPath: 'gitlab-org/gitlab' },
     issuableType = TYPE_ISSUE,
     clickOutsideExcludeSelector = undefined,
-    isGroup = true,
-    workItemsViewPreference = false,
   } = {}) => {
-    window.gon.current_user_use_work_items_view = true;
-
     wrapper = shallowMountExtended(WorkItemDrawer, {
       propsData: {
         activeItem,
@@ -58,24 +42,12 @@ describe('WorkItemDrawer', () => {
         customEvent: mockListener,
       },
       provide: {
-        fullPath: 'gitlab-org/gitlab',
+        fullPath: '/gitlab-org',
         reportAbusePath: '',
         groupPath: '',
         hasSubepicsFeature: false,
-        isGroup,
-        glFeatures: {
-          workItemsViewPreference,
-        },
       },
-      mocks: {
-        $router: {
-          push: mockRouterPush,
-        },
-      },
-      apolloProvider: createMockApollo([
-        [deleteWorkItemMutation, deleteWorkItemMutationHandler],
-        [workspacePermissionsQuery, workspacePermissionsHandler],
-      ]),
+      apolloProvider: createMockApollo([[deleteWorkItemMutation, deleteWorkItemMutationHandler]]),
     });
   };
 
@@ -122,21 +94,6 @@ describe('WorkItemDrawer', () => {
       document.dispatchEvent(new MouseEvent('click'));
 
       expect(wrapper.emitted('close')).toHaveLength(1);
-    });
-
-    it('calls `upddateHistory`', () => {
-      createComponent({ open: true });
-
-      findGlDrawer().vm.$emit('close');
-
-      expect(updateHistory).toHaveBeenCalled();
-    });
-    it('calls `removeParams` to remove the `show` param', () => {
-      createComponent({ open: true });
-
-      findGlDrawer().vm.$emit('close');
-
-      expect(removeParams).toHaveBeenCalledWith([DETAIL_VIEW_QUERY_PARAM_NAME]);
     });
 
     describe('`clickOutsideExcludeSelector` prop', () => {
@@ -216,10 +173,10 @@ describe('WorkItemDrawer', () => {
     });
 
     describe('when active issuable has no fullPath property', () => {
-      it('uses injected fullPath if active issuable has no reference path or full path', () => {
+      it('passes empty value if active issuable has no reference path or full path', () => {
         createComponent({ activeItem: {} });
 
-        expect(findWorkItem().props('modalWorkItemFullPath')).toBe('gitlab-org/gitlab');
+        expect(findWorkItem().props('modalWorkItemFullPath')).toBe('');
       });
 
       it('passes correctly calculated path if active issuable is an issue', () => {
@@ -249,60 +206,5 @@ describe('WorkItemDrawer', () => {
     createComponent({ issuableType: TYPE_EPIC });
 
     expect(findWorkItem().props('modalIsGroup')).toBe(true);
-  });
-
-  describe('when redirecting to full screen view', () => {
-    it('calls `visitUrl` when link is not a work item path', () => {
-      createComponent();
-      findLinkButton().vm.$emit('click', new MouseEvent('click'));
-
-      expect(visitUrl).toHaveBeenCalledWith('test');
-    });
-
-    it('calls `router.push` when link is a work item path', () => {
-      createComponent({
-        activeItem: {
-          iid: '1',
-          webUrl: '/groups/gitlab-org/gitlab/-/work_items/1',
-          fullPath: 'gitlab-org/gitlab',
-        },
-      });
-      findLinkButton().vm.$emit('click', new MouseEvent('click'));
-
-      expect(visitUrl).not.toHaveBeenCalled();
-      expect(mockRouterPush).toHaveBeenCalledWith({ name: 'workItem', params: { iid: '1' } });
-    });
-
-    it('calls `router.push` when issue as work item view is enabled', () => {
-      createComponent({ isGroup: false, workItemsViewPreference: true });
-
-      findLinkButton().vm.$emit('click', new MouseEvent('click'));
-
-      expect(visitUrl).not.toHaveBeenCalled();
-      expect(mockRouterPush).toHaveBeenCalledWith({ name: 'workItem', params: { iid: '1' } });
-    });
-  });
-
-  describe('when `activeItem` prop is changed and it contains an `id`', () => {
-    const activeItem = {
-      iid: '1',
-      webUrl: '/groups/gitlab-org/gitlab/-/work_items/1',
-      fullPath: 'gitlab-org/gitlab',
-      id: 'gid://gitlab/WorkItem/1',
-    };
-    const showParam = makeDrawerUrlParam(activeItem, 'gitlab-org/gitlab');
-    beforeEach(async () => {
-      createComponent();
-      await wrapper.setProps({
-        open: true,
-        activeItem,
-      });
-    });
-    it('calls `updateHistory`', () => {
-      expect(updateHistory).toHaveBeenCalled();
-    });
-    it('calls `setUrlParams` with `show` param', () => {
-      expect(setUrlParams).toHaveBeenCalledWith({ [DETAIL_VIEW_QUERY_PARAM_NAME]: showParam });
-    });
   });
 });

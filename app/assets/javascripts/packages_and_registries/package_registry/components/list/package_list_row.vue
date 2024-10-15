@@ -5,8 +5,9 @@ import {
   GlFormCheckbox,
   GlIcon,
   GlTruncate,
+  GlBadge,
+  GlTooltipDirective,
 } from '@gitlab/ui';
-import ProtectedBadge from '~/vue_shared/components/badges/protected_badge.vue';
 import { s__, __ } from '~/locale';
 import ListItem from '~/vue_shared/components/registry/list_item.vue';
 import {
@@ -32,11 +33,14 @@ export default {
     GlFormCheckbox,
     GlIcon,
     GlTruncate,
+    GlBadge,
     PackageTags,
     PublishMessage,
     PublishMethod,
     ListItem,
-    ProtectedBadge,
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
   },
   mixins: [glFeatureFlagsMixin()],
   inject: ['isGroupPage', 'canDeletePackages'],
@@ -141,10 +145,14 @@ export default {
             :tag-display-limit="1"
           />
 
-          <protected-badge
+          <gl-badge
             v-if="showBadgeProtected"
-            :tooltip-text="$options.i18n.badgeProtectedTooltipText"
-          />
+            v-gl-tooltip="{ title: $options.i18n.badgeProtectedTooltipText }"
+            icon-size="sm"
+            variant="neutral"
+          >
+            {{ __('protected') }}
+          </gl-badge>
         </div>
       </div>
     </template>

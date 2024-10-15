@@ -6,7 +6,6 @@ import {
   GlLoadingIcon,
   GlToggle,
   GlTooltipDirective,
-  GlAnimatedNotificationIcon,
 } from '@gitlab/ui';
 import { createAlert } from '~/alert';
 import { TYPE_ISSUE, TYPE_EPIC, WORKSPACE_GROUP, WORKSPACE_PROJECT } from '~/issues/constants';
@@ -36,7 +35,6 @@ export default {
     GlIcon,
     GlLoadingIcon,
     GlToggle,
-    GlAnimatedNotificationIcon,
     SidebarEditableItem,
   },
   mixins: [glFeatureFlagMixin()],
@@ -230,10 +228,7 @@ export default {
       :class="{ 'gl-ml-2': isIssuable, 'btn-icon': isNotificationsTodosButtons }"
       @click="toggleSubscribed"
     >
-      <gl-animated-notification-icon
-        :class="{ '!gl-text-blue-500': subscribed }"
-        :is-on="!subscribed"
-      />
+      <gl-icon :name="notificationIcon" :size="16" :class="{ '!gl-fill-blue-500': subscribed }" />
     </gl-button>
     <gl-button
       v-if="!isMergeRequest"
@@ -245,10 +240,7 @@ export default {
       class="sidebar-collapsed-icon sidebar-collapsed-container !gl-rounded-none !gl-shadow-none"
       @click="toggleSubscribed"
     >
-      <gl-animated-notification-icon
-        :class="{ '!gl-text-blue-500': subscribed }"
-        :is-on="!subscribed"
-      />
+      <gl-icon :name="notificationIcon" :size="16" :class="{ '!gl-fill-blue-500': subscribed }" />
     </gl-button>
   </div>
   <sidebar-editable-item

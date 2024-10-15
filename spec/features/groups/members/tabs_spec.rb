@@ -92,7 +92,7 @@ RSpec.describe 'Groups > Members > Tabs', :js, feature_category: :groups_and_pro
 
       click_link 'Pending invitations'
 
-      page.within '.gl-pagination' do
+      page.within '.pagination' do
         click_link '2'
       end
     end
@@ -103,7 +103,7 @@ RSpec.describe 'Groups > Members > Tabs', :js, feature_category: :groups_and_pro
       before do
         click_link 'Members'
 
-        page.within '.gl-pagination' do
+        page.within '.pagination' do
           click_link '2'
         end
       end

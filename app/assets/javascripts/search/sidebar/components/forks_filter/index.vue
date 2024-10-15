@@ -41,7 +41,9 @@ export default {
   methods: {
     ...mapActions(['setQuery']),
     trackChange() {
-      this.trackEvent(EVENT_CLICK_ZOEKT_INCLUDE_FORKS_ON_SEARCH_RESULTS_PAGE);
+      this.trackEvent(EVENT_CLICK_ZOEKT_INCLUDE_FORKS_ON_SEARCH_RESULTS_PAGE, {
+        property: this.urlQuery.search,
+      });
     },
   },
 };

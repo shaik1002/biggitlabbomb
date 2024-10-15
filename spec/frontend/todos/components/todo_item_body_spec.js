@@ -16,7 +16,6 @@ import {
   TODO_ACTION_TYPE_REVIEW_REQUESTED,
   TODO_ACTION_TYPE_REVIEW_SUBMITTED,
   TODO_ACTION_TYPE_UNMERGEABLE,
-  TODO_ACTION_TYPE_SSH_KEY_EXPIRED,
 } from '~/todos/constants';
 
 describe('TodoItemBody', () => {
@@ -73,7 +72,6 @@ describe('TodoItemBody', () => {
       ${TODO_ACTION_TYPE_REVIEW_REQUESTED}        | ${'requested a review.'}          | ${true}
       ${TODO_ACTION_TYPE_REVIEW_SUBMITTED}        | ${'reviewed your merge request.'} | ${true}
       ${TODO_ACTION_TYPE_UNMERGEABLE}             | ${'Could not merge.'}             | ${false}
-      ${TODO_ACTION_TYPE_SSH_KEY_EXPIRED}         | ${'Your SSH key has expired.'}    | ${false}
     `('renders "$text" for the "$actionName" action', ({ actionName, text, showsAuthor }) => {
       createComponent({ action: actionName });
       expect(wrapper.text()).toContain(text);

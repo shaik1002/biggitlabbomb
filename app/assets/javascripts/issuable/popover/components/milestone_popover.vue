@@ -119,7 +119,7 @@ export default {
       const today = new Date();
       let timeframe = '';
       if (startDate && dueDate) {
-        timeframe = humanTimeframe(newDate(startDate), newDate(dueDate));
+        timeframe = humanTimeframe(startDate, dueDate);
       } else if (startDate && !dueDate) {
         const parsedStartDate = newDate(startDate);
         const startDateInWords = localeDateFormat.asDate.format(parsedStartDate);

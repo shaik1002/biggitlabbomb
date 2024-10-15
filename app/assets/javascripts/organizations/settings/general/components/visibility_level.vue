@@ -48,7 +48,8 @@ export default {
 </script>
 
 <template>
-  <settings-block id="organization-settings-visibility" :title="$options.i18n.settingsBlock.title">
+  <settings-block id="organization-settings-visibility">
+    <template #title>{{ $options.i18n.settingsBlock.title }}</template>
     <template #description>{{ $options.i18n.settingsBlock.description }}</template>
     <template #default>
       <gl-form :id="$options.formId">

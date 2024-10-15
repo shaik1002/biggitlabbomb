@@ -1,13 +1,11 @@
 <script>
 import { GlTabs, GlTab, GlBadge, GlFilteredSearchToken } from '@gitlab/ui';
-import { isEqual, pick } from 'lodash';
+import { isEqual } from 'lodash';
 import { __ } from '~/locale';
 import { TIMESTAMP_TYPE_UPDATED_AT } from '~/vue_shared/components/resource_lists/constants';
-import { QUERY_PARAM_END_CURSOR, QUERY_PARAM_START_CURSOR } from '~/graphql_shared/constants';
 import { numberToMetricPrefix } from '~/lib/utils/number_utils';
 import { createAlert } from '~/alert';
 import FilteredSearchAndSort from '~/groups_projects/components/filtered_search_and_sort.vue';
-import { calculateGraphQLPaginationQueryParams } from '~/graphql_shared/utils';
 import { RECENT_SEARCHES_STORAGE_KEY_PROJECTS } from '~/filtered_search/recent_searches_storage_keys';
 import { OPERATORS_IS } from '~/vue_shared/components/filtered_search_bar/constants';
 import { ACCESS_LEVEL_OWNER_INTEGER } from '~/access_level/constants';
@@ -23,8 +21,6 @@ import {
   CONTRIBUTED_TAB,
   CUSTOM_DASHBOARD_ROUTE_NAMES,
   PROJECT_DASHBOARD_TABS,
-  FILTERED_SEARCH_TOKEN_LANGUAGE,
-  FILTERED_SEARCH_TOKEN_MIN_ACCESS_LEVEL,
 } from '../constants';
 import projectCountsQuery from '../graphql/queries/project_counts.query.graphql';
 import TabView from './tab_view.vue';
@@ -92,7 +88,7 @@ export default {
     filteredSearchTokens() {
       return [
         {
-          type: FILTERED_SEARCH_TOKEN_LANGUAGE,
+          type: 'language',
           icon: 'lock',
           title: __('Language'),
           token: GlFilteredSearchToken,
@@ -105,7 +101,7 @@ export default {
           })),
         },
         {
-          type: FILTERED_SEARCH_TOKEN_MIN_ACCESS_LEVEL,
+          type: 'min_access_level',
           icon: 'user',
           title: __('Role'),
           token: GlFilteredSearchToken,
@@ -136,28 +132,6 @@ export default {
     },
     isAscending() {
       return this.sort.endsWith(SORT_DIRECTION_ASC);
-    },
-    startCursor() {
-      return this.$route.query[QUERY_PARAM_START_CURSOR];
-    },
-    endCursor() {
-      return this.$route.query[QUERY_PARAM_END_CURSOR];
-    },
-    routeQueryWithoutPagination() {
-      const {
-        [QUERY_PARAM_START_CURSOR]: startCursor,
-        [QUERY_PARAM_END_CURSOR]: endCursor,
-        ...routeQuery
-      } = this.$route.query;
-
-      return routeQuery;
-    },
-    filters() {
-      return pick(this.routeQueryWithoutPagination, [
-        FILTERED_SEARCH_TOKEN_LANGUAGE,
-        FILTERED_SEARCH_TOKEN_MIN_ACCESS_LEVEL,
-        FILTERED_SEARCH_TERM_KEY,
-      ]);
     },
   },
   methods: {
@@ -196,22 +170,17 @@ export default {
     onSortDirectionChange(isAscending) {
       const sort = this.createSortQuery({ sortBy: this.activeSortOption.value, isAscending });
 
-      this.pushQuery({ ...this.routeQueryWithoutPagination, sort });
+      this.pushQuery({ ...this.$route.query, sort });
     },
     onSortByChange(sortBy) {
       const sort = this.createSortQuery({ sortBy, isAscending: this.isAscending });
 
-      this.pushQuery({ ...this.routeQueryWithoutPagination, sort });
+      this.pushQuery({ ...this.$route.query, sort });
     },
     onFilter(filters) {
       const { sort } = this.$route.query;
 
       this.pushQuery({ sort, ...filters });
-    },
-    onPageChange(pagination) {
-      this.pushQuery(
-        calculateGraphQLPaginationQueryParams({ ...pagination, routeQuery: this.$route.query }),
-      );
     },
   },
 };
@@ -232,15 +201,7 @@ export default {
           </div>
         </template>
 
-        <tab-view
-          v-if="tab.query"
-          :tab="tab"
-          :start-cursor="startCursor"
-          :end-cursor="endCursor"
-          :sort="sort"
-          :filters="filters"
-          @page-change="onPageChange"
-        />
+        <tab-view v-if="tab.query" :tab="tab" />
         <template v-else>{{ tab.text }}</template>
       </gl-tab>
 

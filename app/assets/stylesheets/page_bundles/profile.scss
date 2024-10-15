@@ -124,6 +124,7 @@ $profile-grid-flex: 1fr;
 }
 
 .ssh-keys-list {
+  .last-used-at,
   .expires,
   .key-created-at {
     line-height: 32px;

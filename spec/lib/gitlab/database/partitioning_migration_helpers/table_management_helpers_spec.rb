@@ -195,7 +195,6 @@ RSpec.describe Gitlab::Database::PartitioningMigrationHelpers::TableManagementHe
 
   before do
     allow(migration).to receive(:puts)
-    allow(described_class).to receive(:allowed_gitlab_schemas).and_return([:gitlab_main])
 
     migration.create_table source_table do |t|
       t.string :name, null: false

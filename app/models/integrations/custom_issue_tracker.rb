@@ -16,7 +16,7 @@ module Integrations
 
     def self.help
       build_help_page_url(
-        'user/project/integrations/custom_issue_tracker.md',
+        'user/project/integrations/custom_issue_tracker',
         s_("IssueTracker|Use a custom issue tracker that is not in the integration list.")
       )
     end

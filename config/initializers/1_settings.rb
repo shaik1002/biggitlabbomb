@@ -726,12 +726,6 @@ Settings.cron_jobs['ci_click_house_finished_pipelines_sync_worker']['job_class']
 Settings.cron_jobs['deactivate_expired_deployments_cron_worker'] ||= {}
 Settings.cron_jobs['deactivate_expired_deployments_cron_worker']['cron'] ||= '*/10 * * * *'
 Settings.cron_jobs['deactivate_expired_deployments_cron_worker']['job_class'] ||= 'Pages::DeactivateExpiredDeploymentsCronWorker'
-Settings.cron_jobs['database_monitor_locked_tables_cron_worker'] ||= {}
-Settings.cron_jobs['database_monitor_locked_tables_cron_worker']['cron'] ||= '30 7 */3 * *'
-Settings.cron_jobs['database_monitor_locked_tables_cron_worker']['job_class'] = 'Database::MonitorLockedTablesWorker'
-Settings.cron_jobs['merge_requests_process_scheduled_merge'] ||= {}
-Settings.cron_jobs['merge_requests_process_scheduled_merge']['cron'] ||= '*/1 * * * *'
-Settings.cron_jobs['merge_requests_process_scheduled_merge']['job_class'] = 'MergeRequests::ProcessScheduledMergeWorker'
 
 Gitlab.ee do
   Settings.cron_jobs['analytics_devops_adoption_create_all_snapshots_worker'] ||= {}
@@ -758,6 +752,9 @@ Gitlab.ee do
   Settings.cron_jobs['adjourned_projects_deletion_cron_worker'] ||= {}
   Settings.cron_jobs['adjourned_projects_deletion_cron_worker']['cron'] ||= '0 7 * * *'
   Settings.cron_jobs['adjourned_projects_deletion_cron_worker']['job_class'] = 'AdjournedProjectsDeletionCronWorker'
+  Settings.cron_jobs['database_monitor_locked_tables_cron_worker'] ||= {}
+  Settings.cron_jobs['database_monitor_locked_tables_cron_worker']['cron'] ||= '30 7 */3 * *'
+  Settings.cron_jobs['database_monitor_locked_tables_cron_worker']['job_class'] = 'Database::MonitorLockedTablesWorker'
   Settings.cron_jobs['geo_verification_cron_worker'] ||= {}
   Settings.cron_jobs['geo_verification_cron_worker']['cron'] ||= '* * * * *'
   Settings.cron_jobs['geo_verification_cron_worker']['job_class'] ||= 'Geo::VerificationCronWorker'

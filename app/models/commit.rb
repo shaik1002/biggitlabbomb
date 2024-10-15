@@ -515,7 +515,6 @@ class Commit
   def diffs(diff_options = {})
     Gitlab::Diff::FileCollection::Commit.new(self, diff_options: diff_options)
   end
-  alias_method :diffs_for_streaming, :diffs
 
   def persisted?
     true
@@ -599,10 +598,6 @@ class Commit
 
   def has_encoded_file_paths?
     raw_diffs.any?(&:encoded_file_path)
-  end
-
-  def valid_full_sha
-    id.match(Gitlab::Git::Commit::FULL_SHA_PATTERN).to_s
   end
 
   private

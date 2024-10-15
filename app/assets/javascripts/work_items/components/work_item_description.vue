@@ -210,7 +210,7 @@ export default {
     },
     formGroupClass() {
       return {
-        'common-note-form': true,
+        'gl-mb-5 common-note-form': true,
       };
     },
     showEditedAt() {
@@ -283,7 +283,7 @@ export default {
         this.isSubmittingWithKeydown = true;
       }
 
-      this.$emit('updateWorkItem', { clearDraft: () => clearDraft(this.autosaveKey) });
+      this.$emit('updateWorkItem');
 
       this.conflictedDescription = '';
       this.initialDescriptionText = this.descriptionText;
@@ -313,6 +313,7 @@ export default {
         label-for="work-item-description"
       >
         <markdown-editor
+          class="gl-mb-5"
           :value="descriptionText"
           :render-markdown-path="markdownPreviewPath"
           :markdown-docs-path="$options.markdownDocsPath"
@@ -327,12 +328,7 @@ export default {
           @keydown.ctrl.enter="updateWorkItem"
         />
         <div class="gl-flex">
-          <gl-alert
-            v-if="hasConflicts"
-            :dismissible="false"
-            variant="danger"
-            class="gl-mt-5 gl-w-full"
-          >
+          <gl-alert v-if="hasConflicts" :dismissible="false" variant="danger" class="gl-w-full">
             <p>
               {{
                 s__(
@@ -368,7 +364,7 @@ export default {
               </gl-button>
             </template>
           </gl-alert>
-          <div v-else-if="showButtonsBelowField" class="gl-mt-5">
+          <template v-else-if="showButtonsBelowField">
             <gl-button
               category="primary"
               variant="confirm"
@@ -380,7 +376,7 @@ export default {
             <gl-button category="secondary" class="gl-ml-3" data-testid="cancel" type="reset"
               >{{ __('Cancel') }}
             </gl-button>
-          </div>
+          </template>
         </div>
       </gl-form-group>
     </gl-form>

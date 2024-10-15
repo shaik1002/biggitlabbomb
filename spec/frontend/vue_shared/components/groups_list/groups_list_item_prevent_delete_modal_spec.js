@@ -53,7 +53,7 @@ describe('GroupListItemPreventDeleteModal', () => {
     );
     expect(findGlModal().findComponent(HelpPageLink).props()).toMatchObject({
       href: 'subscriptions/gitlab_com/index',
-      anchor: 'link-subscription-to-a-group',
+      anchor: 'change-the-linked-group',
     });
   });
 

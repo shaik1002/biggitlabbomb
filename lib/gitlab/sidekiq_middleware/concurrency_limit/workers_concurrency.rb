@@ -54,14 +54,11 @@ module Gitlab
           end
 
           def workers_uncached
-            hash = []
-            Gitlab::SidekiqSharding::Router.with_routed_client do
-              workers = sidekiq_workers.map do |_process_id, _thread_id, work|
-                ::Gitlab::Json.parse(work.payload)['class']
+            Gitlab::Redis::Queues.instances.values.flat_map do |instance| # rubocop:disable Cop/RedisQueueUsage -- iterating over instances is allowed as we pass the pool to Sidekiq
+              Sidekiq::Client.via(instance.sidekiq_redis) do
+                sidekiq_workers.map { |_process_id, _thread_id, work| ::Gitlab::Json.parse(work.payload)['class'] }
               end
-              hash.concat(workers)
-            end
-            hash.tally
+            end.tally
           end
 
           def sidekiq_workers

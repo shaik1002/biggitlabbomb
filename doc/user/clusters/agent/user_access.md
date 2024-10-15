@@ -100,7 +100,8 @@ The installed `agentk` impersonates the given users as follows:
   - `agent.gitlab.com/id`: The agent ID.
   - `agent.gitlab.com/username`: The username of the GitLab user.
   - `agent.gitlab.com/config_project_id`: The agent configuration project ID.
-  - `agent.gitlab.com/access_type`: One of `personal_access_token` or `session_cookie`. Ultimate only.
+  - `agent.gitlab.com/access_type`: One of `personal_access_token`,
+    `oidc_id_token`, or `session_cookie`.
 
 Only projects and groups directly listed in the under `user_access` in the configuration
 file are impersonated. For example:

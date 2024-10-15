@@ -246,7 +246,6 @@ export default {
             v-model.trim="searchTerm"
             :is-loading="isSearchLoading"
             data-testid="transfer-locations-search"
-            @keydown.enter.prevent
           />
         </template>
         <template v-if="showAdditionalDropdownItems">

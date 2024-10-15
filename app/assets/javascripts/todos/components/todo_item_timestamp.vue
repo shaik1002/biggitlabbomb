@@ -1,5 +1,5 @@
 <script>
-import { isInPast, isToday, newDate } from '~/lib/utils/datetime_utility';
+import { isInPast, isToday, newDateAsLocaleTime } from '~/lib/utils/datetime_utility';
 import { formatDate } from '~/lib/utils/datetime/date_format_utility';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 import { s__, sprintf } from '~/locale';
@@ -18,9 +18,6 @@ export default {
     };
   },
   computed: {
-    dueDate() {
-      return newDate(this.todo.targetEntity.dueDate);
-    },
     formattedCreatedAt() {
       return this.timeFormatted(this.todo.createdAt);
     },
@@ -29,7 +26,7 @@ export default {
         return null;
       }
 
-      if (isToday(this.dueDate)) {
+      if (isToday(newDateAsLocaleTime(this.todo.targetEntity.dueDate))) {
         return s__('Todos|Due today');
       }
 
@@ -38,10 +35,10 @@ export default {
       });
     },
     showDueDateAsError() {
-      return this.formattedDueDate && isInPast(this.dueDate);
+      return this.formattedDueDate && isInPast(newDateAsLocaleTime(this.todo.targetEntity.dueDate));
     },
     showDueDateAsWarning() {
-      return this.formattedDueDate && isToday(this.dueDate);
+      return this.formattedDueDate && isToday(newDateAsLocaleTime(this.todo.targetEntity.dueDate));
     },
   },
 };
