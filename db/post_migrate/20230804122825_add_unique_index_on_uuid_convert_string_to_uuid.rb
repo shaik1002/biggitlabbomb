@@ -5,7 +5,6 @@ class AddUniqueIndexOnUuidConvertStringToUuid < Gitlab::Database::Migration[2.1]
 
   INDEX_NAME = "index_vulnerability_occurrences_on_uuid_1"
 
-  # rubocop:disable Migration/PreventIndexCreation -- Legacy migration
   def up
     add_concurrent_index(
       :vulnerability_occurrences,
@@ -14,7 +13,6 @@ class AddUniqueIndexOnUuidConvertStringToUuid < Gitlab::Database::Migration[2.1]
       name: INDEX_NAME
     )
   end
-  # rubocop:enable Migration/PreventIndexCreation
 
   def down
     remove_concurrent_index_by_name(

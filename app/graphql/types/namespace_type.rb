@@ -6,8 +6,6 @@ module Types
 
     authorize :read_namespace
 
-    implements Types::TodoableInterface
-
     field :id, GraphQL::Types::ID, null: false,
       description: 'ID of the namespace.'
 
@@ -46,8 +44,7 @@ module Types
       description: 'Aggregated storage statistics of the namespace. Only available for root namespaces.'
 
     field :projects, Types::ProjectType.connection_type, null: false,
-      description: 'Projects within this namespace. ' \
-        'Returns projects from the parent group if namespace is project.',
+      description: 'Projects within this namespace.',
       resolver: ::Resolvers::NamespaceProjectsResolver
 
     field :package_settings,
@@ -71,7 +68,7 @@ module Types
       null: true,
       alpha: { milestone: '15.8' },
       description: "Achievements for the namespace. " \
-        "Returns `null` if the `achievements` feature flag is disabled.",
+                   "Returns `null` if the `achievements` feature flag is disabled.",
       extras: [:lookahead],
       resolver: ::Resolvers::Achievements::AchievementsResolver
 
@@ -79,38 +76,24 @@ module Types
       null: true,
       alpha: { milestone: '17.0' },
       description: "Path for the namespace's achievements. " \
-        "Returns `null` if the namespace is not a group, or the `achievements` feature flag is disabled."
+                   "Returns `null` if the namespace is not a group, or the `achievements` feature flag is disabled."
 
     field :work_item, Types::WorkItemType,
       null: true,
       resolver: Resolvers::Namespaces::WorkItemResolver,
       alpha: { milestone: '16.10' },
       description: 'Find a work item by IID directly associated with the namespace(project or group).  Returns ' \
-        '`null` for group level work items if the `namespace_level_work_items` feature flag is disabled.'
-
-    field :work_item_types, Types::WorkItems::TypeType.connection_type,
-      resolver: Resolvers::WorkItems::TypesResolver,
-      alpha: { milestone: '17.2' },
-      description: 'Work item types available to the namespace.'
+                   '`null` for group level work items if the `namespace_level_work_items` feature flag is disabled.'
 
     field :pages_deployments, Types::PagesDeploymentType.connection_type, null: true,
       resolver: Resolvers::PagesDeploymentsResolver,
       connection: true,
       description: "List of the namespaces's Pages Deployments."
 
-    field :import_source_users, Import::SourceUserType.connection_type,
-      null: true,
-      alpha: { milestone: '17.2' },
-      resolver: Resolvers::Import::SourceUsersResolver,
-      description: 'Import source users of the namespace. This field can only be resolved for one namespace in any ' \
-        'single request.' do
-      extension(::Gitlab::Graphql::Limit::FieldCallCount, limit: 1)
-    end
-
     markdown_field :description_html, null: true
 
     def achievements_path
-      return unless Feature.enabled?(:achievements, object)
+      return unless Feature.enabled?(:achievements)
 
       ::Gitlab::Routing.url_helpers.group_achievements_path(object) if object.is_a?(Group)
     end

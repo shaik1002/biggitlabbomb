@@ -13,7 +13,6 @@ class NotePolicy < BasePolicy
 
   condition(:can_read_noteable) { can?(:"read_#{@subject.noteable_ability_name}") }
   condition(:commit_is_deleted) { @subject.for_commit? && @subject.noteable.blank? }
-  condition(:for_personal_snippet) { @subject.for_personal_snippet? }
 
   condition(:for_design) { @subject.for_design? }
 
@@ -52,10 +51,6 @@ class NotePolicy < BasePolicy
     enable :resolve_note
   end
 
-  rule { is_noteable_author & for_personal_snippet }.policy do
-    enable :admin_note
-  end
-
   rule { ~is_visible }.policy do
     prevent :read_note
     prevent :admin_note
@@ -82,14 +77,6 @@ class NotePolicy < BasePolicy
 
   rule { can?(:admin_note) | (for_design & can?(:create_note)) }.policy do
     enable :reposition_note
-  end
-
-  rule { admin }.policy do
-    enable :read_note
-    enable :admin_note
-    enable :resolve_note
-    enable :reposition_note
-    enable :award_emoji
   end
 
   def parent_namespace

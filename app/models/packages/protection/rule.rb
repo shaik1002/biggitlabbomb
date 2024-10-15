@@ -4,9 +4,9 @@ module Packages
   module Protection
     class Rule < ApplicationRecord
       enum package_type: Packages::Package.package_types.slice(:npm)
-      enum minimum_access_level_for_push:
-          Gitlab::Access.sym_options_with_admin.slice(:maintainer, :owner, :admin),
-        _prefix: :minimum_access_level_for_push
+      enum push_protected_up_to_access_level:
+             Gitlab::Access.sym_options_with_owner.slice(:developer, :maintainer, :owner),
+        _prefix: :push_protected_up_to
 
       belongs_to :project, inverse_of: :package_protection_rules
 
@@ -19,7 +19,7 @@ module Packages
         },
         if: :npm?
       validates :package_type, presence: true
-      validates :minimum_access_level_for_push, presence: true
+      validates :push_protected_up_to_access_level, presence: true
 
       scope :for_package_name, ->(package_name) do
         return none if package_name.blank?
@@ -30,49 +30,12 @@ module Packages
         )
       end
 
-      scope :for_package_type, ->(package_type) { where(package_type: package_type) }
-
       def self.for_push_exists?(access_level:, package_name:, package_type:)
         return false if [access_level, package_name, package_type].any?(&:blank?)
 
-        for_package_type(package_type)
-          .where(':access_level < minimum_access_level_for_push', access_level: access_level)
+        where(package_type: package_type, push_protected_up_to_access_level: access_level..)
           .for_package_name(package_name)
           .exists?
-      end
-
-      def self.for_push_exists_for_multiple_packages(package_names:, package_types:, project_id:)
-        return none if package_names.blank? || package_types.blank? || project_id.blank?
-        return none if package_names.size != package_types.size
-
-        cte_query =
-          select('*').from(
-            sanitize_sql_array(
-              [
-                "unnest(ARRAY[:package_names], ARRAY[:package_types]) AS x(package_name, package_type)",
-                { package_names: package_names, package_types: package_types }
-              ]
-            )
-          )
-
-        cte_name = :package_names_and_types_cte
-        cte = Gitlab::SQL::CTE.new(cte_name, cte_query)
-
-        rules_cte_package_type = "#{cte_name}.#{connection.quote_column_name('package_type')}"
-        rules_cte_package_name = "#{cte_name}.#{connection.quote_column_name('package_name')}"
-
-        protection_rule_exsits_subquery = select(1)
-          .where(project_id: project_id)
-          .where(arel_table[:package_type].eq(Arel.sql(rules_cte_package_type)))
-          .where("#{rules_cte_package_name} ILIKE #{::Gitlab::SQL::Glob.to_like('package_name_pattern')}")
-
-        query = select(
-          rules_cte_package_type,
-          rules_cte_package_name,
-          sanitize_sql_array(['EXISTS(?) AS protected', protection_rule_exsits_subquery])
-        ).from(Arel.sql(cte_name.to_s))
-
-        connection.exec_query(query.with(cte.to_arel).to_sql)
       end
     end
   end

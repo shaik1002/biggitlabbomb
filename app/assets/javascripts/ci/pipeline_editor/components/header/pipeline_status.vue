@@ -47,14 +47,12 @@ export default {
     },
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     pipelineEtag: {
       query: getPipelineEtag,
       update(data) {
         return data.etags?.pipeline;
       },
     },
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     pipeline: {
       context() {
         return getQueryHeaders(this.pipelineEtag);
@@ -67,14 +65,8 @@ export default {
         };
       },
       update(data) {
-        const {
-          id,
-          iid,
-          commit = {},
-          detailedStatus = {},
-          stages,
-          status,
-        } = data.project?.pipeline || {};
+        const { id, iid, commit = {}, detailedStatus = {}, stages, status } =
+          data.project?.pipeline || {};
 
         return {
           id,
@@ -146,10 +138,12 @@ export default {
 </script>
 
 <template>
-  <div class="gl-flex gl-w-full gl-flex-wrap gl-items-center gl-justify-between">
+  <div
+    class="gl-display-flex gl-justify-content-space-between gl-align-items-center gl-flex-wrap gl-w-full"
+  >
     <template v-if="showLoadingState">
       <div>
-        <gl-loading-icon class="gl-mr-auto gl-inline-block" size="sm" />
+        <gl-loading-icon class="gl-mr-auto gl-display-inline-block" size="sm" />
         <span data-testid="pipeline-loading-msg">{{ $options.i18n.fetchLoading }}</span>
       </div>
     </template>
@@ -160,9 +154,9 @@ export default {
       </div>
     </template>
     <template v-else>
-      <div class="gl-mr-1 gl-truncate md:gl-max-w-1/2">
+      <div class="gl-text-truncate gl-md-max-w-50p gl-mr-1">
         <ci-icon :status="status" data-testid="pipeline-status-icon" />
-        <span class="gl-font-bold">
+        <span class="gl-font-weight-bold">
           <gl-sprintf :message="$options.i18n.pipelineInfo">
             <template #id="{ content }">
               <span data-testid="pipeline-id"> {{ content }}{{ pipelineId }} </span>
@@ -181,7 +175,7 @@ export default {
           </gl-sprintf>
         </span>
       </div>
-      <div class="gl-flex-wrap-wrap gl-flex">
+      <div class="gl-display-flex gl-flex-wrap-wrap">
         <pipeline-mini-graph
           v-if="isUsingPipelineMiniGraphQueries"
           :full-path="projectFullPath"
@@ -190,7 +184,7 @@ export default {
         />
         <pipeline-editor-mini-graph v-else :pipeline="pipeline" v-on="$listeners" />
         <gl-button
-          class="gl-ml-3 gl-self-center"
+          class="gl-ml-3 gl-align-self-center"
           size="small"
           :href="status.detailsPath"
           data-testid="pipeline-view-btn"

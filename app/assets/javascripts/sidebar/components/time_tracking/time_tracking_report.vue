@@ -8,12 +8,12 @@ import { TYPE_ISSUE } from '~/issues/constants';
 import {
   formatDate,
   localeDateFormat,
-  newDate,
   parseSeconds,
   stringifyTime,
 } from '~/lib/utils/datetime_utility';
 import { __, s__ } from '~/locale';
 import { WIDGET_TYPE_TIME_TRACKING } from '~/work_items/constants';
+import groupWorkItemByIidQuery from '~/work_items/graphql/group_work_item_by_iid.query.graphql';
 import workItemByIidQuery from '~/work_items/graphql/work_item_by_iid.query.graphql';
 import { timelogQueries } from '../../queries/constants';
 import deleteTimelogMutation from '../../queries/delete_timelog.mutation.graphql';
@@ -34,6 +34,9 @@ export default {
   },
   inject: {
     fullPath: {
+      default: null,
+    },
+    isGroup: {
       default: null,
     },
     issuableType: {
@@ -90,9 +93,10 @@ export default {
         return Boolean(this.timelogs);
       },
     },
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     workItem: {
-      query: workItemByIidQuery,
+      query() {
+        return this.isGroup ? groupWorkItemByIidQuery : workItemByIidQuery;
+      },
       variables() {
         return {
           fullPath: this.fullPath,
@@ -129,7 +133,7 @@ export default {
       return formatDate(date, TIME_DATE_FORMAT);
     },
     formatShortDate(date) {
-      return localeDateFormat.asDate.format(newDate(date));
+      return localeDateFormat.asDate.format(date);
     },
     getSummary(summary, note) {
       return summary ?? note?.body;
@@ -153,7 +157,7 @@ export default {
             }
             store.updateQuery(
               {
-                query: workItemByIidQuery,
+                query: this.isGroup ? groupWorkItemByIidQuery : workItemByIidQuery,
                 variables: { fullPath: this.fullPath, iid: this.workItemIid },
               },
               (sourceData) =>

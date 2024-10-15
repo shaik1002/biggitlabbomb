@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe API::Users, :aggregate_failures, feature_category: :user_management do
+RSpec.describe API::Users, :aggregate_failures, feature_category: :user_profile do
   include WorkhorseHelpers
   include KeysetPaginationHelpers
   include CryptoHelpers
@@ -508,61 +508,6 @@ RSpec.describe API::Users, :aggregate_failures, feature_category: :user_manageme
         expect(json_response[0]['id']).to eq(external_user.id)
       end
 
-      it "returns an array of human users" do
-        internal_user
-
-        get api("/users?humans=true", user)
-
-        expect(response).to match_response_schema('public_api/v4/user/basics')
-        expect(response).to include_pagination_headers
-        expect(json_response.size).to eq(2)
-        expect(json_response).to contain_exactly(
-          hash_including('id' => user.id),
-          hash_including('id' => admin.id)
-        )
-      end
-
-      it "returns an array of non human users" do
-        internal_user
-
-        get api("/users?exclude_humans=true", user)
-
-        expect(response).to match_response_schema('public_api/v4/user/basics')
-        expect(response).to include_pagination_headers
-        expect(json_response.size).to eq(1)
-        expect(json_response).to contain_exactly(
-          hash_including('id' => internal_user.id)
-        )
-      end
-
-      it "returns active users" do
-        blocked_user
-        banned_user
-
-        get api("/users?active=true", user)
-
-        expect(response).to match_response_schema('public_api/v4/user/basics')
-        expect(response).to include_pagination_headers
-        expect(json_response.size).to eq(2)
-        expect(json_response).to contain_exactly(
-          hash_including('id' => user.id),
-          hash_including('id' => admin.id)
-        )
-      end
-
-      it "returns an array of non-active users" do
-        deactivated_user
-
-        get api("/users?exclude_active=true", user)
-
-        expect(response).to match_response_schema('public_api/v4/user/basics')
-        expect(response).to include_pagination_headers
-        expect(json_response.size).to eq(1)
-        expect(json_response).to contain_exactly(
-          hash_including('id' => deactivated_user.id)
-        )
-      end
-
       it "returns one user" do
         get api("/users?username=#{omniauth_user.username}", user)
 
@@ -1055,10 +1000,6 @@ RSpec.describe API::Users, :aggregate_failures, feature_category: :user_manageme
   end
 
   describe 'GET /users/:id_or_username/status' do
-    before do
-      allow(::Gitlab::ApplicationRateLimiter).to receive(:throttled?).and_return(false)
-    end
-
     context 'when finding the user by id' do
       it_behaves_like 'rendering user status' do
         let(:path) { "/users/#{user.id}/status" }
@@ -1074,23 +1015,6 @@ RSpec.describe API::Users, :aggregate_failures, feature_category: :user_manageme
     context 'when finding the user by username (case insensitive)' do
       it_behaves_like 'rendering user status' do
         let(:path) { "/users/#{user.username.upcase}/status" }
-      end
-    end
-
-    context 'when the rate limit has been reached' do
-      let(:path) { "/users/#{user.username.upcase}/status" }
-
-      before do
-        stub_feature_flags(rate_limiting_user_endpoints: true)
-      end
-
-      it 'returns status 429 Too Many Requests', :aggregate_failures do
-        ip = '1.2.3.4'
-        expect(::Gitlab::ApplicationRateLimiter).to receive(:throttled?).with(:user_status, scope: ip).and_return(true)
-
-        get api(path, user), env: { REMOTE_ADDR: ip }
-
-        expect(response).to have_gitlab_http_status(:too_many_requests)
       end
     end
   end
@@ -1222,10 +1146,6 @@ RSpec.describe API::Users, :aggregate_failures, feature_category: :user_manageme
     let(:followee) { create(:user) }
     let(:path) { "/users/#{user.id}/followers" }
 
-    before do
-      allow(::Gitlab::ApplicationRateLimiter).to receive(:throttled?).and_return(false)
-    end
-
     context 'for an anonymous user' do
       it 'returns 403' do
         get api("/users/#{user.id}")
@@ -1264,25 +1184,15 @@ RSpec.describe API::Users, :aggregate_failures, feature_category: :user_manageme
         expect(json_response).to be_empty
       end
     end
-
-    context 'when the rate limit has been reached' do
-      before do
-        stub_feature_flags(rate_limiting_user_endpoints: true)
-      end
-
-      it 'returns status 429 Too Many Requests', :aggregate_failures do
-        ip = '1.2.3.4'
-        expect(::Gitlab::ApplicationRateLimiter).to receive(:throttled?).with(:user_followers, scope: ip).and_return(true)
-
-        get api(path, user), env: { REMOTE_ADDR: ip }
-
-        expect(response).to have_gitlab_http_status(:too_many_requests)
-      end
-    end
   end
 
-  describe "POST /users", :with_current_organization do
+  describe "POST /users" do
+    let_it_be(:current_organization) { create(:organization) }
     let(:path) { '/users' }
+
+    before do
+      allow(Current).to receive(:organization).and_return(current_organization)
+    end
 
     it_behaves_like 'POST request permissions for admin mode' do
       let(:params) { attributes_for(:user, projects_limit: 3) }
@@ -1698,21 +1608,15 @@ RSpec.describe API::Users, :aggregate_failures, feature_category: :user_manageme
     end
 
     context 'updating password' do
+      # user should have `last_on_activity` set to today,
+      # so that `Users::ActivityService` does not register any more updates.
+      let_it_be(:admin) { create(:admin, :with_last_activity_on_today) }
+
       def update_password(user, admin, password = User.random_password)
         put api("/users/#{user.id}", admin, admin_mode: true), params: { password: password }
       end
 
       context 'admin updates their own password' do
-        # `Users::ActivityService` should not be allowed to execute
-        # as the same fails on update user_details
-        # This prevents a failure we saw in
-        # https://gitlab.com/gitlab-org/quality/engineering-productivity/master-broken-incidents/-/issues/6616
-        before do
-          allow_next_instance_of(Users::ActivityService) do |service|
-            allow(service).to receive(:execute).and_return(true)
-          end
-        end
-
         it 'does not force reset on next login' do
           update_password(admin, admin)
 
@@ -2130,9 +2034,6 @@ RSpec.describe API::Users, :aggregate_failures, feature_category: :user_manageme
     let(:expiration_date) { Date.new(expiration_year, expiration_month, -1) }
     let(:credit_card_validated_at) { Time.utc(2020, 1, 1) }
     let(:zuora_payment_method_xid) { 'abc123' }
-    let(:stripe_setup_intent_xid) { 'seti_abc123' }
-    let(:stripe_payment_method_xid) { 'pm_abc123' }
-    let(:stripe_card_fingerprint) { 'card123' }
 
     let(:path) { "/user/#{user.id}/credit_card_validation" }
     let(:params) do
@@ -2143,10 +2044,7 @@ RSpec.describe API::Users, :aggregate_failures, feature_category: :user_manageme
         credit_card_holder_name: holder_name,
         credit_card_type: network,
         credit_card_mask_number: last_digits,
-        zuora_payment_method_xid: zuora_payment_method_xid,
-        stripe_setup_intent_xid: stripe_setup_intent_xid,
-        stripe_payment_method_xid: stripe_payment_method_xid,
-        stripe_card_fingerprint: stripe_card_fingerprint
+        zuora_payment_method_xid: zuora_payment_method_xid
       }
     end
 
@@ -2181,10 +2079,7 @@ RSpec.describe API::Users, :aggregate_failures, feature_category: :user_manageme
           holder_name_hash: sha256(holder_name.downcase),
           last_digits_hash: sha256(last_digits),
           expiration_date_hash: sha256(expiration_date.to_s),
-          zuora_payment_method_xid: zuora_payment_method_xid,
-          stripe_setup_intent_xid: stripe_setup_intent_xid,
-          stripe_payment_method_xid: stripe_payment_method_xid,
-          stripe_card_fingerprint: stripe_card_fingerprint
+          zuora_payment_method_xid: zuora_payment_method_xid
         )
       end
 
@@ -2199,35 +2094,6 @@ RSpec.describe API::Users, :aggregate_failures, feature_category: :user_manageme
 
         expect(response).to have_gitlab_http_status(:not_found)
         expect(json_response['message']).to eq('404 User Not Found')
-      end
-
-      context 'when the credit card daily verification limit has been exceeded' do
-        before do
-          stub_const("Users::CreditCardValidation::DAILY_VERIFICATION_LIMIT", 1)
-          create(:credit_card_validation, stripe_card_fingerprint: stripe_card_fingerprint)
-        end
-
-        it "returns a 400 error with the reason" do
-          put api(path, admin, admin_mode: true), params: params
-
-          expect(response).to have_gitlab_http_status(:bad_request)
-          expect(json_response['message']).to eq('Credit card verification limit exceeded')
-        end
-      end
-
-      context 'when UpsertCreditCardValidationService returns an unexpected error' do
-        before do
-          allow_next_instance_of(::Users::UpsertCreditCardValidationService) do |instance|
-            allow(instance).to receive(:execute).and_return(ServiceResponse.error(message: 'upsert failed'))
-          end
-        end
-
-        it "returns a generic 400 error" do
-          put api(path, admin, admin_mode: true), params: params
-
-          expect(response).to have_gitlab_http_status(:bad_request)
-          expect(json_response['message']).to eq('400 Bad request')
-        end
       end
     end
   end
@@ -2326,7 +2192,7 @@ RSpec.describe API::Users, :aggregate_failures, feature_category: :user_manageme
     end
   end
 
-  describe 'GET /users/:id/project_deploy_keys', feature_category: :continuous_delivery do
+  describe 'GET /users/:id/project_deploy_keys' do
     let(:project) { create(:project) }
     let(:path) { "/users/#{user.id}/project_deploy_keys" }
 
@@ -2439,10 +2305,6 @@ RSpec.describe API::Users, :aggregate_failures, feature_category: :user_manageme
 
     let(:path) { "/users/#{user.id}/keys" }
 
-    before do
-      allow(::Gitlab::ApplicationRateLimiter).to receive(:throttled?).and_return(false)
-    end
-
     it 'returns 404 for non-existing user' do
       get api("/users/#{non_existing_record_id}/keys")
 
@@ -2490,25 +2352,10 @@ RSpec.describe API::Users, :aggregate_failures, feature_category: :user_manageme
         end.not_to exceed_all_query_limit(control)
       end
     end
-
-    context 'when the rate limit has been reached' do
-      it 'returns status 429 Too Many Requests', :aggregate_failures do
-        ip = '1.2.3.4'
-        expect(::Gitlab::ApplicationRateLimiter).to receive(:throttled?).with(:user_keys, scope: ip).and_return(true)
-
-        get api(path), env: { REMOTE_ADDR: ip }
-
-        expect(response).to have_gitlab_http_status(:too_many_requests)
-      end
-    end
   end
 
   describe 'GET /user/:user_id/keys' do
     let(:path) { "/users/#{user.username}/keys" }
-
-    before do
-      allow(::Gitlab::ApplicationRateLimiter).to receive(:throttled?).and_return(false)
-    end
 
     it 'returns 404 for non-existing user' do
       get api("/users/#{non_existing_record_id}/keys")
@@ -2527,25 +2374,10 @@ RSpec.describe API::Users, :aggregate_failures, feature_category: :user_manageme
       expect(json_response).to be_an Array
       expect(json_response.first['title']).to eq(key.title)
     end
-
-    context 'when the rate limit has been reached' do
-      it 'returns status 429 Too Many Requests', :aggregate_failures do
-        ip = '1.2.3.4'
-        expect(::Gitlab::ApplicationRateLimiter).to receive(:throttled?).with(:user_keys, scope: ip).and_return(true)
-
-        get api(path), env: { REMOTE_ADDR: ip }
-
-        expect(response).to have_gitlab_http_status(:too_many_requests)
-      end
-    end
   end
 
   describe 'GET /user/:id/keys/:key_id' do
     let(:path) { "/users/#{user.id}/keys/#{key.id}" }
-
-    before do
-      allow(::Gitlab::ApplicationRateLimiter).to receive(:throttled?).and_return(false)
-    end
 
     it 'gets existing key' do
       user.keys << key
@@ -2570,17 +2402,6 @@ RSpec.describe API::Users, :aggregate_failures, feature_category: :user_manageme
 
       expect(response).to have_gitlab_http_status(:not_found)
       expect(json_response['message']).to eq('404 Key Not Found')
-    end
-
-    context 'when the rate limit has been reached' do
-      it 'returns status 429 Too Many Requests', :aggregate_failures do
-        ip = '1.2.3.4'
-        expect(::Gitlab::ApplicationRateLimiter).to receive(:throttled?).with(:user_specific_key, scope: ip).and_return(true)
-
-        get api(path), env: { REMOTE_ADDR: ip }
-
-        expect(response).to have_gitlab_http_status(:too_many_requests)
-      end
     end
   end
 
@@ -2661,10 +2482,6 @@ RSpec.describe API::Users, :aggregate_failures, feature_category: :user_manageme
   describe 'GET /user/:id/gpg_keys' do
     let(:path) { "/users/#{user.id}/gpg_keys" }
 
-    before do
-      allow(::Gitlab::ApplicationRateLimiter).to receive(:throttled?).and_return(false)
-    end
-
     it 'returns 404 for non-existing user' do
       get api("/users/#{non_existing_record_id}/gpg_keys")
 
@@ -2682,25 +2499,10 @@ RSpec.describe API::Users, :aggregate_failures, feature_category: :user_manageme
       expect(json_response).to be_an Array
       expect(json_response.first['key']).to eq(gpg_key.key)
     end
-
-    context 'when the rate limit has been reached' do
-      it 'returns status 429 Too Many Requests', :aggregate_failures do
-        ip = '1.2.3.4'
-        expect(::Gitlab::ApplicationRateLimiter).to receive(:throttled?).with(:user_gpg_keys, scope: ip).and_return(true)
-
-        get api(path), env: { REMOTE_ADDR: ip }
-
-        expect(response).to have_gitlab_http_status(:too_many_requests)
-      end
-    end
   end
 
   describe 'GET /user/:id/gpg_keys/:key_id' do
     let(:path) { "/users/#{user.id}/gpg_keys/#{gpg_key.id}" }
-
-    before do
-      allow(::Gitlab::ApplicationRateLimiter).to receive(:throttled?).and_return(false)
-    end
 
     it 'returns 404 for non-existing user' do
       get api("/users/#{non_existing_record_id}/gpg_keys/1")
@@ -2723,17 +2525,6 @@ RSpec.describe API::Users, :aggregate_failures, feature_category: :user_manageme
 
       expect(response).to have_gitlab_http_status(:ok)
       expect(json_response['key']).to eq(gpg_key.key)
-    end
-
-    context 'when the rate limit has been reached' do
-      it 'returns status 429 Too Many Requests', :aggregate_failures do
-        ip = '1.2.3.4'
-        expect(::Gitlab::ApplicationRateLimiter).to receive(:throttled?).with(:user_specific_gpg_key, scope: ip).and_return(true)
-
-        get api(path), env: { REMOTE_ADDR: ip }
-
-        expect(response).to have_gitlab_http_status(:too_many_requests)
-      end
     end
   end
 
@@ -4850,7 +4641,7 @@ RSpec.describe API::Users, :aggregate_failures, feature_category: :user_manageme
     end
   end
 
-  describe 'POST /users/:user_id/personal_access_tokens', :with_current_organization do
+  describe 'POST /users/:user_id/personal_access_tokens' do
     let(:name) { 'new pat' }
     let(:expires_at) { 3.days.from_now.to_date.to_s }
     let(:scopes) { %w[api read_user] }
@@ -4923,7 +4714,7 @@ RSpec.describe API::Users, :aggregate_failures, feature_category: :user_manageme
     end
   end
 
-  describe 'POST /user/personal_access_tokens', :with_current_organization do
+  describe 'POST /user/personal_access_tokens' do
     using RSpec::Parameterized::TableSyntax
 
     let(:name) { 'new pat' }
@@ -5113,7 +4904,7 @@ RSpec.describe API::Users, :aggregate_failures, feature_category: :user_manageme
     end
   end
 
-  describe 'POST /users/:user_id/impersonation_tokens', :with_current_organization do
+  describe 'POST /users/:user_id/impersonation_tokens' do
     let(:name) { 'my new pat' }
     let(:expires_at) { '2016-12-28' }
     let(:scopes) { %w[api read_user] }

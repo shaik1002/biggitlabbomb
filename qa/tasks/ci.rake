@@ -27,39 +27,20 @@ namespace :ci do
     end
 
     run_all_label_present = mr_labels.include?("pipeline:run-all-e2e")
-    run_no_tests_label_present = mr_labels.include?("pipeline:skip-e2e")
-
-    if run_all_label_present && run_no_tests_label_present
-      raise 'cannot have both pipeline:run-all-e2e and pipeline:skip-e2e labels. Please remove one of these labels'
-    end
-
-    if run_no_tests_label_present
-      logger.info(" merge request has pipeline:skip-e2e label, e2e test execution will be skipped.")
-      append_to_file(env_file, "QA_SKIP_ALL_TESTS=true")
-    end
-
     # on run-all label of framework changes do not infer specific tests
     tests = run_all_label_present || qa_changes.framework_changes? ? nil : qa_changes.qa_tests
 
-    # When QA_TESTS only contain folders or exceeds certain size, use KNAPSACK_FILE_PATTERN to limit what specs to run
-    files_pattern = ""
-    tests_array = tests&.split(' ')
-    if tests_array&.none? { |item| item.include?('_spec') }
-      test_paths = tests_array.map { |item| "#{item}**/*" }
+    # When QA_TESTS only contain folders and no specific specs, populate KNAPSACK_TEST_FILE_PATTERN
+    if tests && tests.split(' ').none? { |item| item.include?('_spec') }
+      test_paths = tests.split(' ').map { |item| "#{item}**/*" }
 
       files_pattern = "{#{test_paths.join(',')}}"
-      tests = nil # Unset QA_TESTS when KNAPSACK_FILE_PATTERN is set
-    elsif (tests_array || []).size > 15
-      # When number of QA_TESTS exceeds threshold, set KNAPSACK_FILE_PATTERN for parallel execution
-      files_pattern = "{#{tests_array.join(',')}}"
-      tests = nil # Unset QA_TESTS when KNAPSACK_FILE_PATTERN is set
+
+      logger.info(" Files pattern for tests: #{files_pattern}")
+      append_to_file(env_file, <<~TXT)
+        KNAPSACK_TEST_FILE_PATTERN='#{files_pattern}'
+      TXT
     end
-
-    logger.info(" Files pattern for tests: #{files_pattern}")
-
-    append_to_file(env_file, <<~TXT)
-      KNAPSACK_TEST_FILE_PATTERN='#{files_pattern}'
-    TXT
 
     if run_all_label_present
       logger.info(" merge request has pipeline:run-all-e2e label, full test suite will be executed")
@@ -69,8 +50,6 @@ namespace :ci do
       append_to_file(env_file, "QA_FRAMEWORK_CHANGES=true\n")
     elsif tests
       logger.info(" detected following specs to execute: '#{tests}'")
-    elsif files_pattern
-      logger.info(" detected following specs to execute in parallel: '#{files_pattern}'")
     else
       logger.info(" no specific specs to execute detected")
     end
@@ -92,12 +71,5 @@ namespace :ci do
     raise("Metrics file glob pattern is required") unless args[:glob]
 
     QA::Tools::Ci::TestMetrics.export(args[:glob])
-  end
-
-  desc "Export code paths mapping to GCP"
-  task :export_code_paths_mapping, [:glob] do |_, args|
-    raise("Code paths mapping JSON glob pattern is required") unless args[:glob]
-
-    QA::Tools::Ci::CodePathsMapping.export(args[:glob])
   end
 end

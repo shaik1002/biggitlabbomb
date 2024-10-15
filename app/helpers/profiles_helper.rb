@@ -30,9 +30,9 @@ module ProfilesHelper
   def middle_dot_divider_classes(stacking, breakpoint)
     ['gl-mb-3'].tap do |classes|
       if stacking
-        classes.concat(%w[middle-dot-divider-sm gl-block sm:gl-inline-block])
+        classes.concat(%w[middle-dot-divider-sm gl-display-block gl-sm-display-inline-block])
       else
-        classes << 'gl-inline-block'
+        classes << 'gl-display-inline-block'
         classes << if breakpoint.nil?
                      'middle-dot-divider'
                    else

@@ -10,8 +10,8 @@ RSpec.shared_context 'ProjectPolicy context' do
   let_it_be(:inherited_reporter) { create(:user) }
   let_it_be(:inherited_developer) { create(:user) }
   let_it_be(:inherited_maintainer) { create(:user) }
+  let_it_be(:owner) { create(:user) }
   let_it_be(:organization) { create(:organization, :default) }
-  let_it_be(:owner) { create(:user, namespace: create(:user_namespace, organization: organization)) }
   let_it_be(:organization_owner) { create(:user, :organization_owner) }
   let_it_be(:admin) { create(:admin) }
   let_it_be(:non_member) { create(:user) }
@@ -26,7 +26,7 @@ RSpec.shared_context 'ProjectPolicy context' do
     %i[
       award_emoji create_issue create_note
       create_project read_issue_board read_issue read_issue_iid read_issue_link
-      read_label read_issue_board_list read_milestone read_note read_project
+      read_label read_planning_hierarchy read_issue_board_list read_milestone read_note read_project
       read_project_for_iids read_project_member read_release read_snippet
       read_wiki upload_file
     ]
@@ -39,7 +39,7 @@ RSpec.shared_context 'ProjectPolicy context' do
       download_wiki_code fork_project metrics_dashboard read_build
       read_commit_status read_confidential_issues read_container_image
       read_harbor_registry read_deployment read_environment read_merge_request
-      read_pipeline read_prometheus
+      read_metrics_dashboard_annotation read_pipeline read_prometheus
       read_sentry_issue update_issue create_merge_request_in
       read_external_emails read_internal_note export_work_items
     ]
@@ -54,7 +54,7 @@ RSpec.shared_context 'ProjectPolicy context' do
       admin_merge_request admin_tag create_build
       create_commit_status create_container_image create_deployment
       create_environment create_merge_request_from
-      create_pipeline create_release
+      admin_metrics_dashboard_annotation create_pipeline create_release
       create_wiki destroy_container_image push_code read_pod_logs
       read_terraform_state resolve_note update_build cancel_build update_commit_status
       update_container_image update_deployment update_environment
@@ -66,12 +66,11 @@ RSpec.shared_context 'ProjectPolicy context' do
   let(:base_maintainer_permissions) do
     %i[
       add_cluster admin_build admin_commit_status admin_container_image
-      admin_cicd_variables admin_deployment admin_environment admin_note admin_pipeline
-      admin_project admin_project_member admin_push_rules admin_runner admin_snippet admin_terraform_state
-      admin_wiki create_deploy_token destroy_deploy_token manage_deploy_tokens
+      admin_deployment admin_environment admin_note admin_pipeline
+      admin_project admin_project_member admin_snippet admin_terraform_state
+      admin_wiki create_deploy_token destroy_deploy_token
       push_to_delete_protected_branch read_deploy_token update_snippet
-      admin_upload destroy_upload admin_member_access_request rename_project manage_merge_request_settings
-      admin_integrations create_protected_branch admin_protected_branch
+      destroy_upload admin_member_access_request rename_project
     ]
   end
 
@@ -127,7 +126,6 @@ RSpec.shared_context 'ProjectPolicy context' do
       project.add_reporter(reporter)
       project.add_developer(developer)
       project.add_maintainer(maintainer)
-      project.add_owner(owner)
     end
   end
 end

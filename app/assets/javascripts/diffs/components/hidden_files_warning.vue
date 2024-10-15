@@ -37,7 +37,12 @@ export default {
 </script>
 
 <template>
-  <gl-alert variant="warning" class="gl-mb-5" :title="$options.i18n.title" :dismissible="false">
+  <gl-alert
+    variant="warning"
+    class="gl-mx-5 gl-mb-4 gl-mt-3"
+    :title="$options.i18n.title"
+    :dismissible="false"
+  >
     <gl-sprintf
       :message="
         sprintf(
@@ -53,7 +58,7 @@ export default {
       </template>
     </gl-sprintf>
     <template #actions>
-      <gl-button :href="plainDiffPath" class="gl-alert-action gl-mr-3">
+      <gl-button :href="plainDiffPath" class="gl-mr-3 gl-alert-action">
         {{ $options.i18n.plainDiff }}
       </gl-button>
       <gl-button :href="emailPatchPath" class="gl-alert-action">

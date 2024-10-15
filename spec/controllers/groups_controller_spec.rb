@@ -2,25 +2,21 @@
 
 require 'spec_helper'
 
-RSpec.describe GroupsController, :with_current_organization, factory_default: :keep, feature_category: :code_review_workflow do
+RSpec.describe GroupsController, factory_default: :keep, feature_category: :code_review_workflow do
   include ExternalAuthorizationServiceHelpers
   include AdminModeHelper
 
-  let_it_be(:group_organization) { current_organization }
+  let_it_be(:group_organization) { create(:organization) }
   let_it_be_with_refind(:group) { create_default(:group, :public, organization: group_organization) }
   let_it_be_with_refind(:project) { create(:project, namespace: group) }
   let_it_be(:user) { create(:user) }
   let_it_be(:admin_with_admin_mode) { create(:admin) }
-  let_it_be(:admin_without_admin_mode) { create(:admin) }
+  let_it_be(:admin_without_admin_mode) { create(:admin, :without_default_org) }
   let_it_be(:group_member) { create(:group_member, group: group, user: user) }
   let_it_be(:owner) { group.add_owner(create(:user)).user }
   let_it_be(:maintainer) { group.add_maintainer(create(:user)).user }
   let_it_be(:developer) { group.add_developer(create(:user)).user }
   let_it_be(:guest) { group.add_guest(create(:user)).user }
-
-  before_all do
-    group_organization.users = User.all
-  end
 
   before do
     enable_admin_mode!(admin_with_admin_mode)
@@ -244,7 +240,7 @@ RSpec.describe GroupsController, :with_current_organization, factory_default: :k
 
     context 'authorization' do
       it 'allows an admin to create a group' do
-        sign_in(admin_without_admin_mode)
+        sign_in(create(:admin))
 
         expect do
           post :create, params: { group: { name: 'new_group', path: 'new_group' } }
@@ -305,9 +301,10 @@ RSpec.describe GroupsController, :with_current_organization, factory_default: :k
       end
     end
 
-    context 'when creating a top level group' do
+    context 'when creating a top level group', :with_current_organization do
       before do
         sign_in(developer)
+        Current.organization.users << developer
       end
 
       context 'and can_create_group is enabled' do
@@ -692,7 +689,7 @@ RSpec.describe GroupsController, :with_current_organization, factory_default: :k
         sign_in(user)
       end
 
-      it 'schedules a group destroy', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/469091' do
+      it 'schedules a group destroy' do
         Sidekiq::Testing.fake! do
           expect { delete :destroy, params: { id: group.to_param } }.to change(GroupDestroyWorker.jobs, :size).by(1)
         end
@@ -701,7 +698,6 @@ RSpec.describe GroupsController, :with_current_organization, factory_default: :k
       it 'redirects to the root path' do
         delete :destroy, params: { id: group.to_param }
 
-        expect(flash[:toast]).to eq(format(_("Group '%{group_name}' is being deleted."), group_name: group.full_name))
         expect(response).to redirect_to(root_path)
       end
     end
@@ -1203,6 +1199,12 @@ RSpec.describe GroupsController, :with_current_organization, factory_default: :k
   end
 
   describe 'POST #export' do
+    let(:admin) { create(:admin) }
+
+    before do
+      enable_admin_mode!(admin)
+    end
+
     context 'when the user does not have permission to export the group' do
       before do
         sign_in(guest)
@@ -1215,13 +1217,13 @@ RSpec.describe GroupsController, :with_current_organization, factory_default: :k
       end
     end
 
-    context 'when the user has permission to export the group' do
+    context 'when supplied valid params' do
       before do
-        sign_in(user)
+        sign_in(admin)
       end
 
       it 'triggers the export job' do
-        expect(GroupExportWorker).to receive(:perform_async).with(user.id, group.id, { exported_by_admin: false })
+        expect(GroupExportWorker).to receive(:perform_async).with(admin.id, group.id, {})
 
         post :export, params: { id: group.to_param }
       end
@@ -1233,21 +1235,9 @@ RSpec.describe GroupsController, :with_current_organization, factory_default: :k
       end
     end
 
-    context 'when user is admin' do
-      before do
-        sign_in(admin_with_admin_mode)
-      end
-
-      it 'triggers the export job, and passes `exported_by_admin` correctly in the `params` hash' do
-        expect(GroupExportWorker).to receive(:perform_async).with(admin_with_admin_mode.id, group.id, { exported_by_admin: true })
-
-        post :export, params: { id: group.to_param }
-      end
-    end
-
     context 'when the endpoint receives requests above the rate limit' do
       before do
-        sign_in(user)
+        sign_in(admin)
 
         allow_next_instance_of(Gitlab::ApplicationRateLimiter::BaseStrategy) do |strategy|
           allow(strategy)
@@ -1421,15 +1411,6 @@ RSpec.describe GroupsController, :with_current_organization, factory_default: :k
 
           it 'does not update name' do
             expect { subject }.not_to change { group.reload.name }
-          end
-        end
-
-        context 'when default branch name is invalid' do
-          subject { put :update, params: { id: group.to_param, group: { default_branch_name: "***" } } }
-
-          it 'renders an error message' do
-            expect { subject }.not_to change { group.reload.name }
-            expect(flash[:alert]).to eq('Default branch name is invalid.')
           end
         end
       end

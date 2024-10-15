@@ -64,12 +64,12 @@ describe('PackageTags', () => {
   });
 
   describe('tagBadgeStyle', () => {
-    const defaultStyle = ['badge', 'badge-info', 'gl-hidden'];
+    const defaultStyle = ['badge', 'badge-info', 'gl-display-none'];
 
     it('shows tag badge when there is only one', () => {
       createComponent([mockTags[0]]);
 
-      const expectedStyle = [...defaultStyle, '!gl-flex', 'gl-ml-3'];
+      const expectedStyle = [...defaultStyle, 'gl-display-flex', 'gl-ml-3'];
 
       expect(tagBadges().at(0).classes()).toEqual(expect.arrayContaining(expectedStyle));
     });
@@ -77,7 +77,7 @@ describe('PackageTags', () => {
     it('shows tag badge for medium or heigher resolutions', () => {
       createComponent(mockTags);
 
-      const expectedStyle = [...defaultStyle, 'md:!gl-flex'];
+      const expectedStyle = [...defaultStyle, 'gl-md-display-flex!'];
 
       expect(tagBadges().at(1).classes()).toEqual(expect.arrayContaining(expectedStyle));
     });
@@ -87,7 +87,7 @@ describe('PackageTags', () => {
         tagDisplayLimit: 4,
       });
 
-      const expectedStyleWithoutAppend = [...defaultStyle, 'md:!gl-flex'];
+      const expectedStyleWithoutAppend = [...defaultStyle, 'gl-md-display-flex!'];
       const expectedStyleWithAppend = [...expectedStyleWithoutAppend, 'gl-mr-2'];
 
       const allBadges = tagBadges();

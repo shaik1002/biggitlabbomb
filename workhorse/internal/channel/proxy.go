@@ -11,7 +11,7 @@ import (
 // ANSI "end of channel" code
 var eot = []byte{0x04}
 
-// Connection represents an abstraction of gorilla's *websocket.Conn.
+// An abstraction of gorilla's *websocket.Conn
 type Connection interface {
 	UnderlyingConn() net.Conn
 	ReadMessage() (int, []byte, error)
@@ -19,24 +19,20 @@ type Connection interface {
 	WriteControl(int, []byte, time.Time) error
 }
 
-// Proxy represents a proxy configuration.
 type Proxy struct {
 	StopCh chan error
 }
 
-// NewProxy creates a new Proxy instance with the given number of stoppers.
+// stoppers is the number of goroutines that may attempt to call Stop()
 func NewProxy(stoppers int) *Proxy {
 	return &Proxy{
 		StopCh: make(chan error, stoppers+2), // each proxy() call is a stopper
 	}
 }
 
-// Serve starts serving traffic between upstream and downstream connections.
 func (p *Proxy) Serve(upstream, downstream Connection, upstreamAddr, downstreamAddr string) error {
 	// This signals the upstream channel to kill the exec'd process
-	defer func() {
-		_ = upstream.WriteMessage(websocket.BinaryMessage, eot)
-	}()
+	defer upstream.WriteMessage(websocket.BinaryMessage, eot)
 
 	go p.proxy(upstream, downstream, upstreamAddr, downstreamAddr)
 	go p.proxy(downstream, upstream, downstreamAddr, upstreamAddr)

@@ -1,16 +1,15 @@
-import { GlAlert, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import Vue, { nextTick } from 'vue';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { useMockLocationHelper } from 'helpers/mock_window_location_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import { GlLoadingIcon } from 'jest/packages_and_registries/shared/stubs';
+import { GlCard, GlLoadingIcon } from 'jest/packages_and_registries/shared/stubs';
 import component from '~/packages_and_registries/settings/project/components/container_expiration_policy_form.vue';
 import { UPDATE_SETTINGS_ERROR_MESSAGE } from '~/packages_and_registries/settings/project/constants';
 import updateContainerExpirationPolicyMutation from '~/packages_and_registries/settings/project/graphql/mutations/update_container_expiration_policy.mutation.graphql';
 import expirationPolicyQuery from '~/packages_and_registries/settings/project/graphql/queries/get_expiration_policy.query.graphql';
-import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
+import Tracking from '~/tracking';
 import { expirationPolicyPayload, expirationPolicyMutationPayload } from '../mock_data';
 
 describe('Container Expiration Policy Settings Form', () => {
@@ -47,8 +46,6 @@ describe('Container Expiration Policy Settings Form', () => {
   const findOlderThanDropdown = () => wrapper.find('[data-testid="older-than-dropdown"]');
   const findRemoveRegexInput = () => wrapper.find('[data-testid="remove-regex-input"]');
 
-  const findAlert = () => wrapper.findComponent(GlAlert);
-
   const submitForm = () => {
     findForm().trigger('submit');
     return waitForPromises();
@@ -62,8 +59,8 @@ describe('Container Expiration Policy Settings Form', () => {
   } = {}) => {
     wrapper = shallowMount(component, {
       stubs: {
+        GlCard,
         GlLoadingIcon,
-        GlSprintf,
       },
       propsData: { ...props },
       provide,
@@ -123,20 +120,8 @@ describe('Container Expiration Policy Settings Form', () => {
     });
   };
 
-  describe('alert', () => {
-    beforeEach(() => {
-      mountComponent();
-    });
-
-    it('is not dismissible', () => {
-      expect(findAlert().props('dismissible')).toBe(false);
-    });
-
-    it('contains right text', () => {
-      expect(findAlert().text()).toMatchInterpolatedText(
-        'Both keep and remove regex patterns are automatically surrounded with %{codeStart}\\A%{codeEnd} and %{codeStart}\\Z%{codeEnd} anchors, so you do not need to include them. However, make sure to take this into account when choosing and testing your regex patterns.',
-      );
-    });
+  beforeEach(() => {
+    jest.spyOn(Tracking, 'event');
   });
 
   describe.each`
@@ -284,26 +269,14 @@ describe('Container Expiration Policy Settings Form', () => {
         });
       });
 
-      describe('tracking', () => {
-        let trackingSpy;
-
-        beforeEach(() => {
-          trackingSpy = mockTracking(undefined, undefined, jest.spyOn);
+      it('tracks the submit event', async () => {
+        mountComponentWithApollo({
+          mutationResolver: jest.fn().mockResolvedValue(expirationPolicyMutationPayload()),
         });
 
-        afterEach(() => {
-          unmockTracking();
-        });
+        await submitForm();
 
-        it('tracks the submit event', async () => {
-          mountComponentWithApollo({
-            mutationResolver: jest.fn().mockResolvedValue(expirationPolicyMutationPayload()),
-          });
-
-          await submitForm();
-
-          expect(trackingSpy).toHaveBeenCalledWith(undefined, 'submit_form', trackingPayload);
-        });
+        expect(Tracking.event).toHaveBeenCalledWith(undefined, 'submit_form', trackingPayload);
       });
 
       it('redirects to package and registry project settings page when submitted successfully', async () => {

@@ -62,13 +62,13 @@ export default {
   <gl-disclosure-dropdown
     data-testid="apply-suggestion-dropdown"
     fluid-width
-    placement="bottom-end"
+    placement="right"
     size="small"
     :disabled="disabled"
     :toggle-text="dropdownText"
     @shown="focusCommitMessageInput"
   >
-    <gl-form class="!gl-mx-0 !gl-my-2 gl-flex gl-flex-col !gl-px-4">
+    <gl-form class="gl-display-flex gl-flex-direction-column gl-px-4! gl-mx-0! gl-my-2!">
       <label for="commit-message">{{ __('Commit message') }}</label>
       <gl-alert v-if="errorMessage" variant="danger" :dismissible="false" class="gl-mb-4">
         {{ errorMessage }}
@@ -82,7 +82,6 @@ export default {
         :placeholder="defaultCommitMessage"
         submit-on-enter
         data-testid="commit-message-field"
-        no-resize
         @submit="onApply"
       />
 
@@ -91,7 +90,7 @@ export default {
       </span>
 
       <gl-button
-        class="gl-mt-3 !gl-w-auto gl-self-end"
+        class="gl-w-auto! gl-mt-3 gl-align-self-end"
         category="primary"
         variant="confirm"
         data-testid="commit-with-custom-message-button"

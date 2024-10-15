@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -21,13 +21,10 @@ For an overview, see [Jira development panel integration](https://www.youtube.co
 
 ## Feature availability
 
-> - Ability to delete branches [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/148712) in GitLab 17.1 [with a flag](../../administration/feature_flags.md) named `jira_connect_remove_branches`. Disabled by default.
-> - Ability to delete branches made [generally available](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/158224) in GitLab 17.2. Feature flag `jira_connect_remove_branches` removed.
-
 This table shows the features available with the Jira DVCS connector and the GitLab for Jira Cloud app:
 
 | Feature                              | Jira DVCS connector    | GitLab for Jira Cloud app |
-|:-------------------------------------|:-----------------------|:--------------------------|
+|--------------------------------------|------------------------|---------------------------|
 | Smart Commits                        | **{check-circle}** Yes | **{check-circle}** Yes    |
 | Sync merge requests                  | **{check-circle}** Yes | **{check-circle}** Yes    |
 | Sync branches                        | **{check-circle}** Yes | **{check-circle}** Yes    |
@@ -37,7 +34,7 @@ This table shows the features available with the Jira DVCS connector and the Git
 | Sync deployments                     | **{dotted-circle}** No | **{check-circle}** Yes    |
 | Sync feature flags                   | **{dotted-circle}** No | **{check-circle}** Yes    |
 | Sync interval                        | Up to 60 minutes       | Real time                 |
-| Delete branches                      | **{dotted-circle}** No | **{check-circle}** Yes    |
+| Create branches                      | **{dotted-circle}** No | **{check-circle}** Yes (GitLab.com only) |
 | Create a merge request from a branch | **{check-circle}** Yes | **{check-circle}** Yes    |
 | Create a branch from a Jira issue    | **{dotted-circle}** No | **{check-circle}** Yes    |
 
@@ -104,17 +101,6 @@ For more information about how Smart Commits work and what commands are availabl
 
 - [Process issues with Smart Commits](https://support.atlassian.com/jira-software-cloud/docs/process-issues-with-smart-commits/)
 - [Using Smart Commits](https://confluence.atlassian.com/fisheye/using-smart-commits-960155400.html)
-
-## Jira deployments
-
-You can use Jira deployments to track and visualize the progress of software releases directly in Jira.
-
-GitLab sends information about your environments and deployments to Jira if:
-
-- Your project's `.gitlab-ci.yml` file contains the [`environment`](../../ci/yaml/index.md#environment) keyword.
-- A Jira issue ID is [mentioned in certain parts of GitLab](#information-displayed-in-the-development-panel) and a pipeline is triggered.
-
-For more information, see [environments and deployments](../../ci/environments/index.md).
 
 ## Related topics
 

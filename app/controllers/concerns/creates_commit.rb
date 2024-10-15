@@ -4,7 +4,6 @@ module CreatesCommit
   extend ActiveSupport::Concern
   include Gitlab::Utils::StrongMemoize
   include SafeFormatHelper
-  include ActionView::Helpers::SanitizeHelper
 
   # rubocop:disable Gitlab/ModuleWithInstanceVariables
   def create_commit(service, success_path:, failure_path:, failure_view: nil, success_notice: nil, target_project: nil)
@@ -42,7 +41,7 @@ module CreatesCommit
         format.json { render json: { message: _("success"), filePath: success_path } }
       end
     else
-      flash[:alert] = format_flash_notice(result[:message])
+      flash[:alert] = result[:message]
       failure_path = failure_path.call if failure_path.respond_to?(:call)
 
       respond_to do |format|
@@ -63,11 +62,6 @@ module CreatesCommit
     return if can_collaborate_with_project?(project, ref: branch_name_or_ref)
 
     access_denied!
-  end
-
-  def format_flash_notice(message)
-    formatted_message = message.gsub("\n", "<br>")
-    sanitize(formatted_message, tags: %w[br])
   end
 
   private

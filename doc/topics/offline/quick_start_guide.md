@@ -25,7 +25,7 @@ For a video walkthrough of this process, see [Offline GitLab Installation: Downl
 
 ### Download the GitLab package
 
-You should [manually download the GitLab package](../../update/package/index.md#download-a-package-manually) and relevant dependencies using a server of the same operating system type that has access to the Internet.
+You should [manually download the GitLab package](../../update/package/index.md#upgrade-using-a-manually-downloaded-package) and relevant dependencies using a server of the same operating system type that has access to the Internet.
 
 If your offline environment has no local network access, you must manually transport the relevant package through physical media, such as a USB drive.
 
@@ -58,7 +58,7 @@ sudo cd /path/to/mount
 sudo dpkg -i <package_name>.deb
 ```
 
-[Use the relevant commands for your operating system to install the package](../../update/package/index.md#download-a-package-manually) but make sure to specify an `http`
+[Use the relevant commands for your operating system to install the package](../../update/package/index.md#upgrade-using-a-manually-downloaded-package) but make sure to specify an `http`
 URL for the `EXTERNAL_URL` installation step. Once installed, we can manually
 configure the SSL ourselves.
 
@@ -124,7 +124,7 @@ Follow these steps to enable the container registry. These steps reflect those f
 ## Allow the Docker daemon to trust the registry and GitLab Runner
 
 Provide your Docker daemon with your certs by
-[following the steps for using trusted certificates with your registry](../../administration/packages/container_registry_troubleshooting.md#using-self-signed-certificates-with-container-registry):
+[following the steps for using trusted certificates with your registry](../../administration/packages/container_registry.md#using-self-signed-certificates-with-container-registry):
 
 ```shell
 sudo mkdir -p /etc/docker/certs.d/my-host.internal:5000
@@ -151,14 +151,13 @@ Updating CA certificates...
 Runtime platform                                    arch=amd64 os=linux pid=7 revision=1b659122 version=12.8.0
 Running in system-mode.
 
-Enter the GitLab instance URL (for example, https://gitlab.com/):
+Please enter the gitlab-ci coordinator URL (for example, https://gitlab.com/):
 https://my-host.internal
-Enter the registration token:
+Please enter the gitlab-ci token for this runner:
 XXXXXXXXXXX
-Enter a description for the runner:
+Please enter the gitlab-ci description for this runner:
 [eb18856e13c0]:
-Enter tags for the runner (comma-separated):
-Enter optional maintenance note for the runner:
+Please enter the gitlab-ci tags for this runner (comma separated):
 
 Registering runner... succeeded                     runner=FSMwkvLZ
 Please enter the executor: custom, docker, virtualbox, kubernetes, docker+machine, docker-ssh+machine, docker-ssh, parallels, shell, ssh:
@@ -210,13 +209,6 @@ users are on the most up-to-date instances of GitLab. These two services can be 
 environments so that they do not attempt and fail to reach out to GitLab services.
 
 For more information, see [Enable or disable service ping](../../administration/settings/usage_statistics.md#enable-or-disable-service-ping).
-
-### Disable runner version management
-
-Runner version management retrieves the latest runner versions from GitLab to
-[determine which runners in your environment are out of date](../../ci/runners/runners_scope.md#determine-which-runners-need-to-be-upgraded).
-You must [disable runner version management](../../administration/settings/continuous_integration.md#disable-runner-version-management)
-for offline environments.
 
 ### Configure NTP
 
@@ -382,9 +374,9 @@ The directory for package metadata changed with the release of 16.2 from `vendor
 1. Update any automation scripts or commands saved to change `vendor/package_metadata_db` to `vendor/package_metadata/licenses`.
 1. Update any cron entries to change `vendor/package_metadata_db` to `vendor/package_metadata/licenses`.
 
-   ```shell
-   sed -i '.bckup' -e 's#vendor/package_metadata_db#vendor/package_metadata/licenses#g' [FILE ...]
-   ```
+    ```shell
+    sed -i '.bckup' -e 's#vendor/package_metadata_db#vendor/package_metadata/licenses#g' [FILE ...]
+    ```
 
 ### Troubleshooting
 

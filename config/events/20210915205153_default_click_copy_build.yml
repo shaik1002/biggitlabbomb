@@ -1,9 +1,14 @@
 description: "Copy quickstart dropdown build"
 category: default
 action: click_copy_build
+label_description: "`quickstart_dropdown`"
+property_description: ""
+value_description: ""
 extra_properties:
 identifiers:
-product_group: container_registry
+product_section: ops
+product_stage: package
+product_group: group::package
 milestone: "12.10"
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/27990
 distributions:
@@ -13,6 +18,3 @@ tiers:
 - free
 - premium
 - ultimate
-additional_properties:
-  label:
-    description: "`quickstart_dropdown`"

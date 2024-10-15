@@ -20,25 +20,9 @@ import ServiceDeskTemplateDropdown from './service_desk_template_dropdown.vue';
 export default {
   i18n: {
     toggleLabel: __('Activate Service Desk'),
-    headlines: {
-      ticketVisibility: s__('ServiceDesk|Ticket visibility'),
-      externalParticipants: s__('ServiceDesk|External participants'),
-    },
     issueTrackerEnableMessage: __(
       'To use Service Desk in this project, you must %{linkStart}activate the issue tracker%{linkEnd}.',
     ),
-    areTicketsConfidentialByDefault: {
-      label: s__('ServiceDesk|New tickets are confidential by default'),
-      help: {
-        publicProject: s__(
-          'ServiceDesk|On public projects, tickets are always confidential by default.',
-        ),
-        confidential: s__(
-          'ServiceDesk|Only project members with at least the Reporter role can view new tickets.',
-        ),
-        nonConfidential: s__('ServiceDesk|Any project member can view new tickets.'),
-      },
-    },
     reopenIssueOnExternalParticipantNote: {
       label: s__('ServiceDesk|Reopen issues when an external participant comments'),
       help: s__(
@@ -113,22 +97,12 @@ export default {
       required: false,
       default: '',
     },
-    initialAreTicketsConfidentialByDefault: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
     initialReopenIssueOnExternalParticipantNote: {
       type: Boolean,
       required: false,
       default: false,
     },
     initialAddExternalParticipantsFromCc: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    publicProject: {
       type: Boolean,
       required: false,
       default: false,
@@ -150,12 +124,6 @@ export default {
       selectedFileTemplateProjectId: this.initialSelectedFileTemplateProjectId,
       outgoingName: this.initialOutgoingName || __('GitLab Support Bot'),
       projectKey: this.initialProjectKey,
-      // Tickets will always be confidential for public projects by default. Reflect that also in the frontend
-      // although the backend setting might be `false`. The value will be persisted on save.
-      // Refactoring issue: https://gitlab.com/gitlab-org/gitlab/-/issues/467547
-      areTicketsConfidentialByDefault: this.publicProject
-        ? true
-        : this.initialAreTicketsConfidentialByDefault,
       reopenIssueOnExternalParticipantNote: this.initialReopenIssueOnExternalParticipantNote,
       addExternalParticipantsFromCc: this.initialAddExternalParticipantsFromCc,
       searchTerm: '',
@@ -186,20 +154,9 @@ export default {
       });
     },
     issuesHelpPagePath() {
-      return helpPagePath('user/project/settings/index', {
-        anchor: 'configure-project-features-and-permissions',
+      return helpPagePath('user/project/settings/index.md', {
+        anchor: 'configure-project-visibility-features-and-permissions',
       });
-    },
-    areTicketsConfidentialByDefaultHelp() {
-      if (this.publicProject) {
-        return this.$options.i18n.areTicketsConfidentialByDefault.help.publicProject;
-      }
-
-      if (this.areTicketsConfidentialByDefault) {
-        return this.$options.i18n.areTicketsConfidentialByDefault.help.confidential;
-      }
-
-      return this.$options.i18n.areTicketsConfidentialByDefault.help.nonConfidential;
     },
   },
   methods: {
@@ -211,7 +168,6 @@ export default {
         selectedTemplate: this.selectedTemplate,
         outgoingName: this.outgoingName,
         projectKey: this.projectKey,
-        areTicketsConfidentialByDefault: this.areTicketsConfidentialByDefault,
         reopenIssueOnExternalParticipantNote: this.reopenIssueOnExternalParticipantNote,
         addExternalParticipantsFromCc: this.addExternalParticipantsFromCc,
         fileTemplateProjectId: this.selectedFileTemplateProjectId,
@@ -239,7 +195,7 @@ export default {
       <gl-sprintf :message="$options.i18n.issueTrackerEnableMessage">
         <template #link="{ content }">
           <gl-link
-            class="gl-inline-block"
+            class="gl-display-inline-block"
             data-testid="issue-help-page"
             :href="issuesHelpPagePath"
             target="_blank"
@@ -253,7 +209,7 @@ export default {
       id="service-desk-checkbox"
       :value="isEnabled"
       :disabled="!isIssueTrackerEnabled"
-      class="align-middle mr-1 !gl-inline-block"
+      class="d-inline-block align-middle mr-1"
       :label="$options.i18n.toggleLabel"
       label-position="hidden"
       @change="onCheckboxToggle"
@@ -285,7 +241,7 @@ export default {
             </template>
           </gl-form-input-group>
           <template v-if="email && hasServiceDeskEmail" #description>
-            <span class="gl-mt-2 gl-inline-block">
+            <span class="gl-mt-2 gl-display-inline-block">
               <gl-sprintf :message="__('Emails sent to %{email} are also supported.')">
                 <template #email>
                   <code>{{ incomingEmail }}</code>
@@ -379,29 +335,10 @@ export default {
           </template>
         </gl-form-group>
 
-        <div data-testid="service-desk-are-tickets-confidential-by-default-wrapper">
-          <h5>{{ $options.i18n.headlines.ticketVisibility }}</h5>
-
-          <gl-form-checkbox
-            v-model="areTicketsConfidentialByDefault"
-            :disabled="!isIssueTrackerEnabled || publicProject"
-            data-testid="service-desk-are-tickets-confidential-by-default"
-          >
-            {{ $options.i18n.areTicketsConfidentialByDefault.label }}
-
-            <template #help>
-              {{ areTicketsConfidentialByDefaultHelp }}
-            </template>
-          </gl-form-checkbox>
-        </div>
-
-        <h5>{{ $options.i18n.headlines.externalParticipants }}</h5>
-
         <gl-form-checkbox
           v-model="reopenIssueOnExternalParticipantNote"
           :disabled="!isIssueTrackerEnabled"
           data-testid="reopen-issue-on-external-participant-note"
-          class="gl-mb-3"
         >
           {{ $options.i18n.reopenIssueOnExternalParticipantNote.label }}
 

@@ -6,10 +6,6 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Tutorial: Create a complex pipeline
 
-DETAILS:
-**Tier:** Free, Premium, Ultimate
-**Offering:** GitLab.com, Self-managed, GitLab Dedicated
-
 This tutorial walks you through configuring a progressively more complex CI/CD pipeline
 through small, iterative steps. The pipeline is always fully functional,
 but it gains more functionality with each step. The goal is to build, test, and deploy
@@ -41,7 +37,9 @@ Before adding the pipeline configuration, you must first set up a Docusaurus pro
 on GitLab.com:
 
 1. Create a new project under your username (not a group):
-   1. On the left sidebar, at the top, select **Create new** (**{plus}**) and **New project/repository**.
+   1. On the left sidebar, select **Search or go to**.
+   1. Select **View all my projects**.
+   1. On the right of the page, select **New project**.
    1. Select **Create blank project**.
    1. Enter the project details:
       - In the **Project name** field, enter the name of your project, for example `My Pipeline Tutorial Project`.
@@ -216,7 +214,7 @@ Use the pipeline editor to commit this pipeline configuration to the default bra
 and view the pipeline details from the **Pipelines** list. Verify that:
 
 - The two jobs run in different stages, `build` and `deploy`.
-- After the `pages` job completes a `pages:deploy` job appears, which is the GitLab process
+- After the `pages` job completes a `pages-deploy` job appears, which is the GitLab process
   that deploys the Pages site. When that job completes, you can visit your new Docusaurus
   site.
 

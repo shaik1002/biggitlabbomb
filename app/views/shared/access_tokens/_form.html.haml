@@ -10,7 +10,7 @@
 %h4.gl-mt-0
   = title
 
-= gitlab_ui_form_for token, as: prefix, url: path, method: :post, html: { id: 'js-new-access-token-form' }, remote: ajax do |f|
+= gitlab_ui_form_for token, as: prefix, url: path, method: :post, html: { id: 'js-new-access-token-form', class: 'js-requires-input' }, remote: ajax do |f|
   = form_errors(token)
 
   .form-group
@@ -24,7 +24,7 @@
         = s_("AccessTokens|For example, the application using the token or the purpose of the token.")
 
   .js-access-tokens-expires-at{ data: expires_at_field_data }
-    = f.text_field :expires_at, class: 'form-control gl-form-input', placeholder: 'YYYY-MM-DD', autocomplete: 'off', data: { js_name: 'expiresAt' }
+    = f.text_field :expires_at, class: 'gl-datepicker-input form-control gl-form-input', placeholder: 'YYYY-MM-DD', autocomplete: 'off', data: { js_name: 'expiresAt' }
 
   - if resource
     .form-group

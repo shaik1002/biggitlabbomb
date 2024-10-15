@@ -31,7 +31,8 @@ module Types
 
       field :runner, Types::Ci::RunnerType, null: true, description: 'Runner assigned to execute the job.'
       field :runner_manager, ::Types::Ci::RunnerManagerType, null: true,
-        description: 'Runner manager assigned to the job.'
+        description: 'Runner manager assigned to the job.',
+        alpha: { milestone: '15.11' }
       field :stage, Types::Ci::StageType, null: true,
         description: 'Stage of the job.'
       field :status,
@@ -93,7 +94,7 @@ module Types
       field :previous_stage_jobs_or_needs, Types::Ci::JobNeedUnion.connection_type,
         null: true,
         description: 'Jobs that must complete before the job runs. Returns `BuildNeed`, ' \
-          'which is the needed jobs if the job uses the `needs` keyword, or the previous stage jobs otherwise.',
+                     'which is the needed jobs if the job uses the `needs` keyword, or the previous stage jobs otherwise.',
         deprecated: { reason: 'Replaced by previousStageJobs and needs fields', milestone: '16.4' }
       field :ref_name, GraphQL::Types::String, null: true,
         description: 'Ref name of the job.'
@@ -129,9 +130,6 @@ module Types
       field :failure_message, GraphQL::Types::String, null: true,
         description: 'Message on why the job failed.'
 
-      field :source, GraphQL::Types::String, null: true,
-        description: 'Policy or action that initiated the job. If not set, the value is inherited from the pipeline.'
-
       def can_play_job?
         object.playable? && Ability.allowed?(current_user, :play_job, object)
       end
@@ -164,10 +162,6 @@ module Types
 
       def artifacts
         object.job_artifacts if object.is_a?(::Ci::Build)
-      end
-
-      def source
-        object.source if object.is_a?(::Ci::Build)
       end
 
       def trace
@@ -278,3 +272,5 @@ module Types
     end
   end
 end
+
+Types::Ci::JobType.prepend_mod_with('Types::Ci::JobType')

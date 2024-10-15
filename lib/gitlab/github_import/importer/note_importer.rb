@@ -4,8 +4,6 @@ module Gitlab
   module GithubImport
     module Importer
       class NoteImporter
-        include Gitlab::Import::UsernameMentionRewriter
-
         attr_reader :note, :project, :client, :user_finder
 
         # note - An instance of `Gitlab::GithubImport::Representation::Note`.
@@ -35,8 +33,7 @@ module Gitlab
             discussion_id: note.discussion_id,
             system: false,
             created_at: note.created_at,
-            updated_at: note.updated_at,
-            imported_from: ::Import::HasImportSource::IMPORT_SOURCES[:github]
+            updated_at: note.updated_at
           }
 
           Note.new(attributes.merge(importing: true)).validate!
@@ -59,7 +56,6 @@ module Gitlab
 
         def note_body(author_found)
           text = MarkdownText.convert_ref_links(note.note, project)
-          text = wrap_mentions_in_backticks(text)
           MarkdownText.format(text, note.author, author_found)
         end
       end

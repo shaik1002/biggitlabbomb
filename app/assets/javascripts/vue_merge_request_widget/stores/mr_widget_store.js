@@ -1,15 +1,13 @@
 import getStateKey from 'ee_else_ce/vue_merge_request_widget/stores/get_state_key';
 import { STATUS_CLOSED, STATUS_MERGED, STATUS_OPEN } from '~/issues/constants';
-import { formatDate, getTimeago, newDate, timeagoLanguageCode } from '~/lib/utils/datetime_utility';
+import { formatDate, getTimeago, timeagoLanguageCode } from '~/lib/utils/datetime_utility';
 import { machine } from '~/lib/utils/finite_state_machine';
 import { badgeState } from '~/merge_requests/components/merge_request_header.vue';
-import { cleanLeadingSeparator } from '~/lib/utils/url_utility';
 import {
   MTWPS_MERGE_STRATEGY,
   MT_MERGE_STRATEGY,
   MWCP_MERGE_STRATEGY,
   MWPS_MERGE_STRATEGY,
-  MTWCP_MERGE_STRATEGY,
   STATE_MACHINE,
   stateToTransitionMap,
 } from '../constants';
@@ -32,10 +30,11 @@ export default class MergeRequestStore {
 
     this.stateMachine = machine(STATE_MACHINE.definition);
     this.machineValue = this.stateMachine.value;
+    this.mergeDetailsCollapsed =
+      !window.gon?.features?.mergeBlockedComponent && window.innerWidth < 768;
     this.mergeError = data.mergeError;
     this.multipleApprovalRulesAvailable = data.multiple_approval_rules_available || false;
     this.id = data.id;
-    this.autoMergeEnabled = false;
 
     this.setPaths(data);
 
@@ -142,10 +141,6 @@ export default class MergeRequestStore {
     this.isPipelineSkipped = this.ciStatus === 'skipped';
     this.pipelineDetailedStatus = pipelineStatus;
     this.isPipelineActive = data.pipeline ? data.pipeline.active : false;
-    this.pipelineIid = data.pipeline?.iid?.toString() || '';
-    this.pipelineProjectPath = data.pipeline?.project_path
-      ? cleanLeadingSeparator(data.pipeline?.project_path)
-      : '';
     this.isPipelineBlocked =
       data.only_allow_merge_if_pipeline_succeeds && pipelineStatus?.group === 'manual';
     this.faviconOverlayPath = data.favicon_overlay_path;
@@ -155,7 +150,6 @@ export default class MergeRequestStore {
     this.exposedArtifactsPath = data.exposed_artifacts_path;
     this.cancelAutoMergePath = data.cancel_auto_merge_path;
     this.canCancelAutomaticMerge = Boolean(data.cancel_auto_merge_path);
-    this.ciIntegrationJenkins = data.jenkins_integration_active;
     this.retargeted = data.retargeted;
 
     this.newBlobPath = data.new_blob_path;
@@ -186,6 +180,8 @@ export default class MergeRequestStore {
 
   setGraphqlData(project) {
     const { mergeRequest } = project;
+    const pipeline = mergeRequest.headPipeline;
+    const pipelines = mergeRequest.pipelines?.nodes;
 
     this.updateStatusState(mergeRequest.state);
 
@@ -197,7 +193,13 @@ export default class MergeRequestStore {
     this.autoMergeEnabled = mergeRequest.autoMergeEnabled;
     this.canBeMerged = mergeRequest.mergeStatus === 'can_be_merged';
     this.canMerge = mergeRequest.userPermissions.canMerge;
+    this.ciStatus = pipeline?.status.toLowerCase();
 
+    if (pipeline?.warnings && this.ciStatus === 'success') {
+      this.ciStatus = `${this.ciStatus}-with-warnings`;
+    }
+
+    this.detatchedPipeline = pipelines.length ? pipelines[0].mergeRequestEventType : null;
     this.commitsCount = mergeRequest.commitCount;
     this.branchMissing =
       mergeRequest.detailedMergeStatus !== 'NOT_OPEN' &&
@@ -292,7 +294,6 @@ export default class MergeRequestStore {
     this.isDismissedSuggestPipeline = data.is_dismissed_suggest_pipeline;
     this.securityReportsDocsPath = data.security_reports_docs_path;
     this.securityConfigurationPath = data.security_configuration_path;
-    this.isIntegrationJenkinsDismissed = false;
 
     // code quality
     const blobPath = data.blob_path || {};
@@ -349,7 +350,7 @@ export default class MergeRequestStore {
       return '';
     }
 
-    return format(newDate(date), timeagoLanguageCode);
+    return format(date, timeagoLanguageCode);
   }
 
   static getPreferredAutoMergeStrategy(availableAutoMergeStrategies) {
@@ -367,9 +368,6 @@ export default class MergeRequestStore {
     if (availableAutoMergeStrategies.includes(MWPS_MERGE_STRATEGY)) {
       return MWPS_MERGE_STRATEGY;
     }
-    if (availableAutoMergeStrategies.includes(MTWCP_MERGE_STRATEGY)) {
-      return MTWCP_MERGE_STRATEGY;
-    }
 
     return undefined;
   }
@@ -385,10 +383,6 @@ export default class MergeRequestStore {
     this.setState();
   }
 
-  setRemoveSourceBranch(removeSourceBranch) {
-    this.shouldRemoveSourceBranch = removeSourceBranch;
-  }
-
   // eslint-disable-next-line class-methods-use-this
   get hasMergeChecksFailed() {
     return false;
@@ -399,7 +393,7 @@ export default class MergeRequestStore {
   }
 
   get preventMerge() {
-    return this.isApprovalNeeded && this.preferredAutoMergeStrategy !== MWCP_MERGE_STRATEGY;
+    return this.isApprovalNeeded;
   }
 
   // Because the state machine doesn't yet handle every state and transition,
@@ -428,5 +422,13 @@ export default class MergeRequestStore {
     }
 
     this.transitionStateMachine(transitionOptions);
+  }
+
+  toggleMergeDetails(val = !this.mergeDetailsCollapsed) {
+    if (window.gon?.features?.mergeBlockedComponent) {
+      return;
+    }
+
+    this.mergeDetailsCollapsed = val;
   }
 }

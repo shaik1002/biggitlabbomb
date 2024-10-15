@@ -73,7 +73,6 @@ export default {
     </gl-alert>
 
     <packages-settings
-      id="packages-settings"
       class="settings-section-no-bottom"
       :package-settings="packageSettings"
       :is-loading="isLoading"
@@ -82,14 +81,12 @@ export default {
     />
 
     <packages-forwarding-settings
-      id="packages-forwarding-settings"
       :forward-settings="packageSettings"
       @success="handleSuccess"
       @error="handleError"
     />
 
     <dependency-proxy-settings
-      id="dependency-proxy-settings"
       :dependency-proxy-settings="dependencyProxySettings"
       :dependency-proxy-image-ttl-policy="dependencyProxyImageTtlPolicy"
       :is-loading="isLoading"

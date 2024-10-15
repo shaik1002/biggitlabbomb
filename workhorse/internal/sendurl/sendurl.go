@@ -1,4 +1,3 @@
-// Package sendurl provides functionality for sending URLs.
 package sendurl
 
 import (
@@ -27,9 +26,6 @@ type entry struct{ senddata.Prefix }
 type entryParams struct {
 	URL                   string
 	AllowRedirects        bool
-	AllowLocalhost        bool
-	AllowedURIs           []string
-	SSRFFilter            bool
 	DialTimeout           config.TomlDuration
 	ResponseHeaderTimeout config.TomlDuration
 	ErrorResponseStatus   int
@@ -44,14 +40,10 @@ type cacheKey struct {
 	requestTimeout  time.Duration
 	responseTimeout time.Duration
 	allowRedirects  bool
-	allowLocalhost  bool
-	ssrfFilter      bool
-	allowedURIs     string
 }
 
 var httpClients sync.Map
 
-// SendURL represents the entry for sending a URL.
 var SendURL = &entry{"send-url:"}
 
 var rangeHeaderKeys = []string{
@@ -73,7 +65,7 @@ var preserveHeaderKeys = map[string]bool{
 	"Pragma":        true, // Support for HTTP 1.0 proxies
 }
 
-var httpClientNoRedirect = func(_ *http.Request, _ []*http.Request) error {
+var httpClientNoRedirect = func(req *http.Request, via []*http.Request) error {
 	return http.ErrUseLastResponse
 }
 
@@ -113,8 +105,9 @@ func (e *entry) Inject(w http.ResponseWriter, r *http.Request, sendData string) 
 		fail.Request(w, r, fmt.Errorf("SendURL: unpack sendData: %v", err))
 		return
 	}
-
-	setDefaultMethod(&params)
+	if params.Method == "" {
+		params.Method = http.MethodGet
+	}
 
 	log.WithContextFields(r.Context(), log.Fields{
 		"url":  mask.URL(params.URL),
@@ -127,46 +120,12 @@ func (e *entry) Inject(w http.ResponseWriter, r *http.Request, sendData string) 
 		return
 	}
 
-	newReq, err := e.createNewRequest(w, r, &params)
-	if err != nil {
-		return // Error handling is done in createNewRequest
-	}
-
-	resp, err := cachedClient(params).Do(newReq) //nolint:errcheck
-	if err != nil {
-		e.handleRequestError(w, r, err, &params)
-		return
-	}
-	e.copyResponseHeaders(w, resp, params.ResponseHeaders)
-	w.WriteHeader(resp.StatusCode)
-
-	defer func() {
-		if err = resp.Body.Close(); err != nil {
-			fmt.Printf("Error closing response body: %v\n", err)
-		}
-	}()
-
-	if err := e.streamResponse(w, resp.Body); err != nil {
-		sendURLRequestsRequestFailed.Inc()
-		log.WithRequest(r).WithError(fmt.Errorf("SendURL: Copy response: %v", err)).Error()
-		return
-	}
-
-	sendURLRequestsSucceeded.Inc()
-}
-
-func setDefaultMethod(params *entryParams) {
-	if params.Method == "" {
-		params.Method = http.MethodGet
-	}
-}
-
-func (e *entry) createNewRequest(w http.ResponseWriter, r *http.Request, params *entryParams) (*http.Request, error) {
+	// create new request and copy range headers
 	newReq, err := http.NewRequest(params.Method, params.URL, strings.NewReader(params.Body))
 	if err != nil {
 		sendURLRequestsInvalidData.Inc()
 		fail.Request(w, r, fmt.Errorf("SendURL: NewRequest: %v", err))
-		return nil, err
+		return
 	}
 	newReq = newReq.WithContext(r.Context())
 
@@ -180,43 +139,57 @@ func (e *entry) createNewRequest(w http.ResponseWriter, r *http.Request, params 
 		}
 	}
 
-	return newReq, nil
-}
+	// execute new request
+	resp, err := cachedClient(params).Do(newReq)
+	if err != nil {
+		status := http.StatusInternalServerError
 
-func (e *entry) handleRequestError(w http.ResponseWriter, r *http.Request, err error, params *entryParams) {
-	status := http.StatusInternalServerError
+		if params.TimeoutResponseStatus != 0 && os.IsTimeout(err) {
+			status = params.TimeoutResponseStatus
+		} else if params.ErrorResponseStatus != 0 {
+			status = params.ErrorResponseStatus
+		}
 
-	if params.TimeoutResponseStatus != 0 && os.IsTimeout(err) {
-		status = params.TimeoutResponseStatus
-	} else if params.ErrorResponseStatus != 0 {
-		status = params.ErrorResponseStatus
+		sendURLRequestsRequestFailed.Inc()
+		fail.Request(w, r, fmt.Errorf("SendURL: Do request: %v", err), fail.WithStatus(status))
+		return
 	}
 
-	sendURLRequestsRequestFailed.Inc()
-	fail.Request(w, r, fmt.Errorf("SendURL: Do request: %v", err), fail.WithStatus(status))
-}
-
-func (e *entry) copyResponseHeaders(w http.ResponseWriter, resp *http.Response, responseHeaders map[string][]string) {
+	// Prevent Go from adding a Content-Length header automatically
 	w.Header().Del("Content-Length")
 
+	// copy response headers and body, except the headers from preserveHeaderKeys
 	for key, value := range resp.Header {
 		if !preserveHeaderKeys[key] {
 			w.Header()[key] = value
 		}
 	}
 
-	for key, values := range responseHeaders {
+	// set response headers sent by rails
+	for key, values := range params.ResponseHeaders {
 		w.Header().Del(key)
 		for _, value := range values {
 			w.Header().Add(key, value)
 		}
 	}
-}
 
-func (e *entry) streamResponse(w http.ResponseWriter, body io.Reader) error {
-	n, err := io.Copy(newFlushingResponseWriter(w), body)
+	w.WriteHeader(resp.StatusCode)
+
+	defer resp.Body.Close()
+
+	// Flushes the response right after it received.
+	// Important for streaming responses, where content delivered in chunks.
+	// Without flushing the body gets buffered by the HTTP server's internal buffer.
+	n, err := io.Copy(newFlushingResponseWriter(w), resp.Body)
 	sendURLBytes.Add(float64(n))
-	return err
+
+	if err != nil {
+		sendURLRequestsRequestFailed.Inc()
+		log.WithRequest(r).WithError(fmt.Errorf("SendURL: Copy response: %v", err)).Error()
+		return
+	}
+
+	sendURLRequestsSucceeded.Inc()
 }
 
 func cachedClient(params entryParams) *http.Client {
@@ -224,9 +197,6 @@ func cachedClient(params entryParams) *http.Client {
 		requestTimeout:  params.DialTimeout.Duration,
 		responseTimeout: params.ResponseHeaderTimeout.Duration,
 		allowRedirects:  params.AllowRedirects,
-		allowLocalhost:  params.AllowLocalhost,
-		ssrfFilter:      params.SSRFFilter,
-		allowedURIs:     strings.Join(params.AllowedURIs, ","),
 	}
 	cachedClient, found := httpClients.Load(key)
 	if found {
@@ -240,9 +210,6 @@ func cachedClient(params entryParams) *http.Client {
 	}
 	if params.ResponseHeaderTimeout.Duration != 0 {
 		options = append(options, transport.WithResponseHeaderTimeout(params.ResponseHeaderTimeout.Duration))
-	}
-	if params.SSRFFilter {
-		options = append(options, transport.WithSSRFFilter(params.AllowLocalhost, params.AllowedURIs))
 	}
 
 	client := &http.Client{
@@ -260,7 +227,7 @@ func cachedClient(params entryParams) *http.Client {
 func newFlushingResponseWriter(w http.ResponseWriter) *httpFlushingResponseWriter {
 	return &httpFlushingResponseWriter{
 		ResponseWriter: w,
-		controller:     http.NewResponseController(w), //nolint:bodyclose
+		controller:     http.NewResponseController(w),
 	}
 }
 

@@ -41,7 +41,6 @@ RSpec.describe 'bin/feature-flag', feature_category: :feature_flags do
 
       # ignore stdin
       allow(Readline).to receive(:readline).and_raise('EOF')
-      allow(Gitlab::Popen).to receive(:popen).and_return(["", 0])
     end
 
     subject { creator.execute }
@@ -74,16 +73,6 @@ RSpec.describe 'bin/feature-flag', feature_category: :feature_flags do
         it do
           expect { subject }.to raise_error(ex)
         end
-      end
-    end
-
-    context 'when copy command not found' do
-      before do
-        allow(Gitlab::Popen).to receive(:popen).and_return(["", 1])
-      end
-
-      it 'shows an error' do
-        expect { subject }.to raise_error(FeatureFlagHelpers::Abort, /Could not find a copy to clipboard command./)
       end
     end
   end

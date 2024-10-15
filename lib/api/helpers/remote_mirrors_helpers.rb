@@ -17,6 +17,8 @@ module API
         use :mirror_branches_setting_ce
         use :mirror_branches_setting_ee
       end
+
+      def verify_mirror_branches_setting(attrs); end
     end
   end
 end

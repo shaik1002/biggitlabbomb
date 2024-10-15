@@ -3,20 +3,6 @@
 function retrieve_tests_metadata() {
   mkdir -p $(dirname "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}") $(dirname "${FLAKY_RSPEC_SUITE_REPORT_PATH}") "${RSPEC_PROFILING_FOLDER_PATH}"
 
-  curl --fail --location -o "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" "https://gitlab-org.gitlab.io/gitlab/${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" ||
-    echo "{}" > "${KNAPSACK_RSPEC_SUITE_REPORT_PATH:-unknown_file}"
-
-  curl --fail --location -o "${FLAKY_RSPEC_SUITE_REPORT_PATH}" "https://gitlab-org.gitlab.io/gitlab/${FLAKY_RSPEC_SUITE_REPORT_PATH}" ||
-    echo "{}" > "${FLAKY_RSPEC_SUITE_REPORT_PATH}"
-
-  curl --fail --location -o "${RSPEC_FAST_QUARANTINE_PATH}" "https://gitlab-org.gitlab.io/quality/engineering-productivity/fast-quarantine/${RSPEC_FAST_QUARANTINE_PATH}" ||
-    echo "" > "${RSPEC_FAST_QUARANTINE_PATH}"
-}
-
-function update_tests_metadata() {
-  local rspec_flaky_folder_path="$(dirname "${FLAKY_RSPEC_SUITE_REPORT_PATH:-unknown_folder}")/"
-  local knapsack_folder_path="$(dirname "${KNAPSACK_RSPEC_SUITE_REPORT_PATH:-unknown_folder}")/"
-
   if [[ ! -f "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" ]]; then
     curl --fail --location -o "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" "https://gitlab-org.gitlab.io/gitlab/${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" ||
       echo "{}" > "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}"
@@ -31,6 +17,14 @@ function update_tests_metadata() {
     curl --fail --location -o "${RSPEC_FAST_QUARANTINE_PATH}" "https://gitlab-org.gitlab.io/quality/engineering-productivity/fast-quarantine/${RSPEC_FAST_QUARANTINE_PATH}" ||
       echo "" > "${RSPEC_FAST_QUARANTINE_PATH}"
   fi
+}
+
+function update_tests_metadata() {
+  local rspec_flaky_folder_path="$(dirname "${FLAKY_RSPEC_SUITE_REPORT_PATH:-unknown_folder}")/"
+  local knapsack_folder_path="$(dirname "${KNAPSACK_RSPEC_SUITE_REPORT_PATH:-unknown_folder}")/"
+
+  curl --fail --location -o "${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" "https://gitlab-org.gitlab.io/gitlab/${KNAPSACK_RSPEC_SUITE_REPORT_PATH}" ||
+    echo "{}" > "${KNAPSACK_RSPEC_SUITE_REPORT_PATH:-unknown_file}"
 
   if [[ "$AVERAGE_KNAPSACK_REPORT" == "true" ]]; then
     # a comma separated list of file names matching the glob
@@ -78,25 +72,19 @@ function retrieve_frontend_fixtures_mapping() {
 }
 
 function update_tests_mapping() {
-  pack_and_gzip_mapping "${RSPEC_TESTS_MAPPING_PATH}" "${RSPEC_PACKED_TESTS_MAPPING_PATH}" crystalball/described/rspec*.yml
-
-  pack_and_gzip_mapping "${RSPEC_TESTS_MAPPING_ALT_PATH}" "${RSPEC_PACKED_TESTS_MAPPING_ALT_PATH}" crystalball/coverage/rspec*.yml
-}
-
-function pack_and_gzip_mapping() {
-  local mapping_path="${1}"
-  local packed_path="${2}"
-  local crystal_yaml_files=("${@:3}")
-
-  if test -z "${crystal_yaml_files[1]}"; then
-    echo "No crystalball rspec data for ${mapping_path}"
+  if ! crystalball_rspec_data_exists; then
+    echo "No crystalball rspec data found."
     return 0
   fi
 
-  scripts/generate-test-mapping "${mapping_path}" "${crystal_yaml_files[@]}"
-  scripts/pack-test-mapping "${mapping_path}" "${packed_path}"
-  gzip "${packed_path}"
-  rm -f "${packed_path}" "${mapping_path}" "${crystal_yaml_files[@]}"
+  scripts/generate-test-mapping "${RSPEC_TESTS_MAPPING_PATH:-unknown_file}" crystalball/rspec*.yml
+  scripts/pack-test-mapping "${RSPEC_TESTS_MAPPING_PATH:-unknown_file}" "${RSPEC_PACKED_TESTS_MAPPING_PATH:-unknown_file}"
+  gzip "${RSPEC_PACKED_TESTS_MAPPING_PATH:-unknown_file}"
+  rm -f crystalball/rspec*.yml "${RSPEC_PACKED_TESTS_MAPPING_PATH:-unknown_file}"
+}
+
+function crystalball_rspec_data_exists() {
+  compgen -G "crystalball/rspec*.yml" >/dev/null
 }
 
 function retrieve_failed_tests() {
@@ -137,6 +125,12 @@ function rspec_simple_job_with_retry () {
   rspec_simple_job "${1}" "${2}" "${3}" || rspec_run_status=$?
 
   handle_retry_rspec_in_new_process $rspec_run_status
+}
+
+function rspec_db_library_code() {
+  local db_files="spec/lib/gitlab/database/"
+
+  rspec_simple_job_with_retry "--tag ~click_house -- ${db_files}"
 }
 
 # Below is the list of options (https://linuxcommand.org/lc3_man_pages/seth.html)
@@ -238,7 +232,7 @@ function rspec_parallelized_job() {
   read -ra job_name <<< "${CI_JOB_NAME}"
   local test_tool="${job_name[0]}"
   local test_level="${job_name[1]}"
-  # e.g. 'rspec unit pg14 1/24 278964' would become 'rspec_unit_pg14_1_24_278964'
+  # e.g. 'rspec unit pg13 1/24 278964' would become 'rspec_unit_pg13_1_24_278964'
   local report_name=$(echo "${CI_JOB_NAME} ${CI_PROJECT_ID}" | sed -E 's|[/ ]|_|g')
   local rspec_opts="${1:-}"
   local rspec_tests_mapping_enabled="${RSPEC_TESTS_MAPPING_ENABLED:-}"
@@ -298,23 +292,6 @@ function rspec_parallelized_job() {
   handle_retry_rspec_in_new_process $rspec_run_status
 }
 
-# this function must be executed from 'qa' directory
-function run_e2e_specs() {
-  local url=$1
-  local tests=$2
-  local tags=$3
-
-  export QA_COMMAND="bundle exec bin/qa ${QA_SCENARIO:=Test::Instance::All} $url -- $tests $tags --order random --force-color --format documentation"
-  echo "Running e2e specs via command: '$QA_COMMAND'"
-
-  if eval "$QA_COMMAND"; then
-    echo "Test run finished successfully"
-  else
-    retry_failed_e2e_rspec_examples
-  fi
-}
-
-# this function must be executed from 'qa' directory
 function retry_failed_e2e_rspec_examples() {
   local rspec_run_status=0
 
@@ -331,38 +308,22 @@ function retry_failed_e2e_rspec_examples() {
     exit 1
   fi
 
+  local junit_retry_file="tmp/retried-rspec-${CI_JOB_ID}.xml"
+
   export QA_RSPEC_RETRIED="true"
   export NO_KNAPSACK="true"
 
   echoinfo "Initial test run failed, retrying tests in new process" "yes"
 
-  if eval "$QA_COMMAND --only-failures"; then
+  if eval "$QA_COMMAND --format RspecJunitFormatter --out ${junit_retry_file} --only-failures"; then
     echosuccess "Retry run finished successfully" "yes"
   else
     rspec_run_status=$?
     echoerr "Retry run did not finish successfully, job will be failed!" "yes"
   fi
 
-  # default junit file pattern is set in 'qa/qa/specs/runner.rb'
-  local junit_retry_file=$(ls tmp/rspec-*-retried-true.xml)
-
   echoinfo "Merging junit reports" "yes"
-  if [[ ! -f "${junit_retry_file}" ]]; then
-    echoerr "Junit retry file not found '${junit_retry_file}', skipping report merge"
-    return 0
-  fi
-
-  if [[ "$QA_RUN_IN_PARALLEL" == "true" ]]; then
-    echoinfo "Parallel run detected, merging with parallel reports"
-    bundle exec junit_merge tmp/rspec-*-retried-false*.xml
-    mv "$(ls tmp/rspec-*-retried-false*.xml | tail -n 1)" "tmp/rspec-${CI_JOB_ID}.xml"
-    rm tmp/rspec-*-retried-false*.xml
-
-    bundle exec junit_merge --update-only $junit_retry_file "tmp/rspec-${CI_JOB_ID}.xml"
-  else
-    bundle exec junit_merge --update-only $junit_retry_file tmp/rspec-*-retried-false.xml
-  fi
-  rm $junit_retry_file
+  bundle exec junit_merge ${junit_retry_file} tmp/rspec-${CI_JOB_ID}.xml --update-only
   echosuccess " junit results merged successfully!"
 
   exit $rspec_run_status

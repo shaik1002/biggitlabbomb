@@ -6,7 +6,7 @@ RSpec.describe ::Packages::Composer::PackagesFinder, feature_category: :package_
   let_it_be(:group) { create(:group) }
   let_it_be(:project) { create(:project, group: group) }
 
-  let(:params) { { packages_class: ::Packages::Composer::Package } }
+  let(:params) { { package_type: :composer } }
 
   describe '#execute' do
     let_it_be(:composer_package) { create(:composer_package, project: project) }

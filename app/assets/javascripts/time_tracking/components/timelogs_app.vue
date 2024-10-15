@@ -7,13 +7,10 @@ import {
   GlKeysetPagination,
   GlDatepicker,
 } from '@gitlab/ui';
-import { TYPENAME_GROUP } from '~/graphql_shared/constants';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import { createAlert } from '~/alert';
 import { formatTimeSpent } from '~/lib/utils/datetime_utility';
-import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { s__ } from '~/locale';
-import GroupSelect from '~/vue_shared/components/entity_select/group_select.vue';
 import getTimelogsQuery from './queries/get_timelogs.query.graphql';
 import TimelogsTable from './timelogs_table.vue';
 
@@ -26,10 +23,6 @@ const INITIAL_FROM_DATE_TIME = new Date(new Date().setHours(0, 0, 0, 0));
 // Set the initial 'from' date to 30 days before the current date
 INITIAL_FROM_DATE_TIME.setDate(INITIAL_TO_DATE_TIME.getDate() - 30);
 
-const GROUP_FILTER_API_PARAMS = {
-  min_access_level: 20,
-};
-
 export default {
   components: {
     GlButton,
@@ -38,7 +31,6 @@ export default {
     GlLoadingIcon,
     GlKeysetPagination,
     GlDatepicker,
-    GroupSelect,
     TimelogsTable,
   },
   props: {
@@ -152,9 +144,6 @@ export default {
     clearTimeSpentToDate() {
       this.timeSpentTo = null;
     },
-    handleGroupSelected(group) {
-      this.groupId = group?.id ? convertToGraphQLId(TYPENAME_GROUP, group.id) : null;
-    },
   },
   i18n: {
     username: s__('TimeTrackingReport|Username'),
@@ -163,29 +152,19 @@ export default {
     runReport: s__('TimeTrackingReport|Run report'),
     totalTimeSpentText: s__('TimeTrackingReport|Total time spent: '),
   },
-  GROUP_FILTER_API_PARAMS,
 };
 </script>
 
 <template>
-  <div class="gl-mt-5 gl-flex gl-flex-col gl-gap-5">
-    <form class="gl-flex gl-flex-col gl-gap-3 md:gl-flex-row" @submit.prevent="runReport">
-      <group-select
-        class="gl-md-form-input-md gl-mb-0 gl-w-full"
-        :label="__('Group')"
-        input-name="group"
-        input-id="group"
-        :empty-text="__('Any')"
-        block
-        clearable
-        :api-params="$options.GROUP_FILTER_API_PARAMS"
-        @input="handleGroupSelected"
-        @clear="handleGroupSelected"
-      />
+  <div class="gl-display-flex gl-flex-direction-column gl-gap-5 gl-mt-5">
+    <form
+      class="gl-display-flex gl-flex-direction-column gl-md-flex-direction-row gl-gap-3"
+      @submit.prevent="runReport"
+    >
       <gl-form-group
         :label="$options.i18n.username"
         label-for="timelog-form-username"
-        class="gl-md-form-input-md gl-mb-0 gl-w-full"
+        class="gl-mb-0 gl-md-form-input-md gl-w-full"
       >
         <gl-form-input
           id="timelog-form-username"
@@ -197,7 +176,7 @@ export default {
       <gl-form-group
         key="time-spent-from"
         :label="$options.i18n.from"
-        class="gl-md-form-input-md gl-mb-0 gl-w-full"
+        class="gl-mb-0 gl-md-form-input-md gl-w-full"
       >
         <gl-datepicker
           v-model="timeSpentFrom"
@@ -205,14 +184,14 @@ export default {
           show-clear-button
           autocomplete="off"
           data-testid="form-from-date"
-          class="!gl-max-w-full"
+          class="gl-max-w-full!"
           @clear="clearTimeSpentFromDate"
         />
       </gl-form-group>
       <gl-form-group
         key="time-spent-to"
         :label="$options.i18n.to"
-        class="gl-md-form-input-md gl-mb-0 gl-w-full"
+        class="gl-mb-0 gl-md-form-input-md gl-w-full"
       >
         <gl-datepicker
           v-model="timeSpentTo"
@@ -220,17 +199,24 @@ export default {
           show-clear-button
           autocomplete="off"
           data-testid="form-to-date"
-          class="!gl-max-w-full"
+          class="gl-max-w-full!"
           @clear="clearTimeSpentToDate"
         />
       </gl-form-group>
-      <gl-button class="gl-w-full gl-self-end md:gl-w-auto" variant="confirm" @click="runReport">{{
-        $options.i18n.runReport
-      }}</gl-button>
+      <gl-button
+        class="gl-align-self-end gl-w-full gl-md-w-auto"
+        variant="confirm"
+        @click="runReport"
+        >{{ $options.i18n.runReport }}</gl-button
+      >
     </form>
-    <div v-if="!isLoading" data-testid="table-container" class="gl-flex gl-flex-col">
-      <div v-if="report.length" class="gl-border-t gl-flex gl-gap-2 gl-py-4">
-        <span class="gl-font-bold">{{ $options.i18n.totalTimeSpentText }}</span>
+    <div
+      v-if="!isLoading"
+      data-testid="table-container"
+      class="gl-display-flex gl-flex-direction-column"
+    >
+      <div v-if="report.length" class="gl-display-flex gl-gap-2 gl-border-t gl-py-4">
+        <span class="gl-font-weight-bold">{{ $options.i18n.totalTimeSpentText }}</span>
         <span data-testid="total-time-spent-container">{{ formattedTotalSpentTime }}</span>
       </div>
 
@@ -239,7 +225,7 @@ export default {
       <gl-keyset-pagination
         v-if="showPagination"
         v-bind="pageInfo"
-        class="gl-mt-3 gl-self-center"
+        class="gl-mt-3 gl-align-self-center"
         @prev="prevPage"
         @next="nextPage"
       />

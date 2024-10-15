@@ -9,7 +9,8 @@ class Import::FogbugzController < Import::BaseController
 
   rescue_from Fogbugz::AuthenticationException, with: :fogbugz_unauthorized
 
-  def new; end
+  def new
+  end
 
   def callback
     begin
@@ -24,7 +25,8 @@ class Import::FogbugzController < Import::BaseController
     redirect_to new_user_map_import_fogbugz_path(namespace_id: params[:namespace_id])
   end
 
-  def new_user_map; end
+  def new_user_map
+  end
 
   def create_user_map
     user_map = user_map_params.to_h[:users]
@@ -51,12 +53,9 @@ class Import::FogbugzController < Import::BaseController
   def create
     credentials = { uri: session[:fogbugz_uri], token: session[:fogbugz_token] }
 
-    service_params = params.merge({
-      umap: session[:fogbugz_user_map] || client.user_map,
-      organization_id: Current.organization_id
-    })
+    umap = session[:fogbugz_user_map] || client.user_map
 
-    result = Import::FogbugzService.new(client, current_user, service_params).execute(credentials)
+    result = Import::FogbugzService.new(client, current_user, params.merge(umap: umap)).execute(credentials)
 
     if result[:status] == :success
       render json: ProjectSerializer.new.represent(result[:project], serializer: :import)

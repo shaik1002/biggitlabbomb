@@ -6,6 +6,7 @@ module Packages
       include ActiveRecord::Sanitization::ClassMethods
 
       WILDCARD = '*'
+      RECIPE_SEPARATOR = '@'
 
       def execute
         ServiceResponse.success(payload: { results: search_results })
@@ -16,6 +17,8 @@ module Packages
       def search_results
         return [] if wildcard_query?
 
+        return search_for_single_package(sanitized_query) if params[:query].include?(RECIPE_SEPARATOR)
+
         search_packages
       end
 
@@ -25,6 +28,12 @@ module Packages
 
       def sanitized_query
         @sanitized_query ||= sanitize_sql_like(params[:query].delete(WILDCARD))
+      end
+
+      def search_for_single_package(query)
+        ::Packages::Conan::SinglePackageSearchService
+          .new(query, current_user)
+          .execute[:results]
       end
 
       def search_packages

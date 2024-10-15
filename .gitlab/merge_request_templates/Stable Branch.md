@@ -24,7 +24,7 @@ This checklist encourages us to confirm any changes have been analyzed to reduce
 * [ ] This MR has a [severity label] assigned (if applicable).
 * [ ] Set the milestone of the merge request to match the target backport branch version.
 * [ ] This MR has been approved by a maintainer (only one approval is required).
-* [ ] Ensure the `e2e:test-on-omnibus-ee` job has either succeeded or been approved by a Software Engineer in Test.
+* [ ] Ensure the `e2e:package-and-test-ee` job has either succeeded or been approved by a Software Engineer in Test.
 
 #### Note to the merge request author and maintainer
 
@@ -33,7 +33,7 @@ If you have questions about the patch release process, please:
 * Refer to the [patch release runbook for engineers and maintainers] for guidance.
 * Ask questions on the [`#releases`] Slack channel (internal only).
 
-[severity label]: https://handbook.gitlab.com/handbook/engineering/infrastructure/engineering-productivity/issue-triage/#severity
+[severity label]: https://about.gitlab.com/handbook/engineering/quality/issue-triage/#severity
 [patch release runbook for engineers and maintainers]: https://gitlab.com/gitlab-org/release/docs/-/blob/master/general/patch/engineers.md
 [`#releases`]: https://gitlab.slack.com/archives/C0XM5UU6B
 

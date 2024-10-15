@@ -174,18 +174,6 @@ export const mountExtended = compose(extendedWrapper, mount);
 A setup might be required for type definitions from GitLab codebase and from 3rd party packages to
 be properly displayed in IDEs and tools.
 
-### VS Code settings
-
-If you are having trouble getting VS Code IntelliSense working you may need to increase the amount of
-memory the TS server is allowed to use. To do this, add the following to your `settings.json` file:
-
-```json
-{
-    "typescript.tsserver.maxTsServerMemory": 8192,
-    "typescript.tsserver.nodePath": "node"
-}
-```
-
 ### Aliases
 
 Our codebase uses many aliases for imports. For example, `import Api from '~/api';` would import a
@@ -212,7 +200,7 @@ annotated types or no types at all. To cover that gap, TypeScript community star
 [DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped) initiative, that creates and
 supports standalone type definitions for popular JavaScript libraries. We can use those definitions
 by either explicitly installing the type packages (`yarn add -D "@types/lodash"`) or by using a
-feature called [Automatic Type Acquisition (ATA)](https://www.typescriptlang.org/tsconfig/#typeAcquisition),
+feature called [Automatic Type Acquisition (ATA)](https://www.typescriptlang.org/tsconfig#typeAcquisition),
 that is available in some Language Services
 (for example, [ATA in VS Code](https://github.com/microsoft/TypeScript/wiki/JavaScript-Language-Service-in-Visual-Studio#user-content--automatic-acquisition-of-type-definitions)).
 

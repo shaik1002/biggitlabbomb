@@ -14,7 +14,7 @@ You can use special syntax in [`script`](index.md#script) sections to:
 
 - [Split long commands](#split-long-commands) into multiline commands.
 - [Use color codes](#add-color-codes-to-script-output) to make job logs easier to review.
-- [Create custom collapsible sections](#custom-collapsible-sections)
+- [Create custom collapsible sections](../jobs/index.md#custom-collapsible-sections)
   to simplify job log output.
 
 ## Use special characters with `script`
@@ -96,34 +96,35 @@ job2:
   after_script: []
 ```
 
-## Skip `after_script` commands if a job is canceled
+## Run `after_script` on cancel
 
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/10158) in GitLab 17.0 [with a flag](../../administration/feature_flags.md) named `ci_canceling_status`. Enabled by default. Requires GitLab Runner version 16.11.1.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/460285) in GitLab 17.3. Feature flag `ci_canceling_status` removed.
+DETAILS:
+**Offering:** GitLab.com, Self-managed
 
-[`after_script`](index.md) commands run if a job is canceled while the `before_script`
-or `script` section of that job are running.
+> - [Introduced on self-managed](https://gitlab.com/groups/gitlab-org/-/epics/10158) in GitLab 17.0 [with a flag](../../administration/feature_flags.md) named `ci_canceling_status`. Enabled by default.
+> - [Enabled on GitLab.com](https://gitlab.com/gitlab-com/gl-infra/production/-/issues/17520) in GitLab 17.0.
 
-The job's status in the UI is `canceling` while the `after_script` are executing,
-and changes to `canceled` after the `after_script` commands complete. The `$CI_JOB_STATUS`
-predefined variable has a value of `canceled` while the `after_script` commands are running.
+FLAG:
+The availability of this feature is controlled by a feature flag.
+For more information, see the history.
 
-To prevent `after_script` commands running after canceling a job, configure the `after_script`
-section to:
+`after_script` commands will run after a job is canceled while the `before_script` or `script` section of that job are `running`. This applies when the GitLab Runner version is 16.9 and above and the `ci_canceling_status` flag is enabled.
 
-1. Check the `$CI_JOB_STATUS` predefined variable at the start of the `after_script` section.
-1. End execution early if the value is `canceled`.
+The job status displayed in the UI will be `canceling` while the `after_script` commands are processed, and will transition to `canceled` after the `after_script` commands are finished. The `$CI_JOB_STATUS` predefined variable will have a value of `canceled` while the `after_script` commands are processed.
 
-For example:
+**Additional details:**
 
-```yaml
-job1:
-  script:
-    - my-script.sh
-  after_script:
-    - if [ "$CI_JOB_STATUS" == "canceled" ]; then exit 0; fi
-    - my-after-script.sh
-```
+- To avoid `after_script` commands being executed after canceling a job, you can check the `$CI_JOB_STATUS` predefined variable at the beginning of your `after_script` and end execution early depending on the value, for example:
+  
+  ```shell
+  - if [ "$CI_JOB_STATUS" == "canceled" ]; then exit 0; fi
+  ```
+  
+- GitLab Runner 16.11.1 and above are recommended to support this feature:
+  - In the GitLab Runner 16.11.1 patch release, [`canceled` is supported for `$CI_JOB_STATUS`](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/37485). Before the patch release, the status will be `failed` while `canceling`.
+  - Prior to the GitLab Runner 16.11.1 patch release, a bug caused the `after_script` work to close pre-maturely.
+- For shared runners on GitLab.com, the `ci_canceling_status` flag will be turned on during the last breaking change window on May 8th while runner is on patch version 16.11.1 or above.
+- For self-managed, the `ci_canceling_status` flag will be enabled by default in 17.0 and can be disabled in case administrators need to revert to the old behavior. This flag could be removed in the next milestone and should not be relied on for long-term use.
 
 ## Split long commands
 
@@ -197,13 +198,13 @@ Second command line.
 When you omit the `>` or `|` block scalar indicators, GitLab concatenates non-empty
 lines to form the command. Make sure the lines can run when concatenated.
 
-<!-- vale gitlab_base.MeaningfulLinkWords = NO -->
+<!-- vale gitlab.MeaningfulLinkWords = NO -->
 
 [Shell here documents](https://en.wikipedia.org/wiki/Here_document) work with the
 `|` and `>` operators as well. The example below transliterates lower case letters
 to upper case:
 
-<!-- vale gitlab_base.MeaningfulLinkWords = YES -->
+<!-- vale gitlab.MeaningfulLinkWords = YES -->
 
 ```yaml
 job:
@@ -259,129 +260,6 @@ job:
   script:
     - Write-Host $TXT_RED"This text is red,"$TXT_CLEAR" but this text isn't"$TXT_RED" however this text is red again."
     - Write-Host "This text is not colored"
-```
-
-## Expand and collapse job log sections
-
-> - Support for output of multi-line command bash shell output [Introduced](https://gitlab.com/gitlab-org/gitlab-runner/-/merge_requests/3486) in GitLab 16.5 behind the [GitLab Runner feature flag](https://docs.gitlab.com/runner/configuration/feature-flags.html), `FF_SCRIPT_SECTIONS`.
-
-Job logs are divided into sections that can be collapsed or expanded. Each section displays
-the duration.
-
-In the following example:
-
-- Three sections have been collapsed and can be expanded.
-- Three sections are expanded and can be collapsed.
-
-![Collapsible sections](img/collapsible_log_v13_10.png)
-
-### Custom collapsible sections
-
-You can create [collapsible sections in job logs](#expand-and-collapse-job-log-sections)
-by manually outputting special codes
-that GitLab uses to delimit collapsible sections:
-
-- Section start marker: `\e[0Ksection_start:UNIX_TIMESTAMP:SECTION_NAME\r\e[0K` + `TEXT_OF_SECTION_HEADER`
-- Section end marker: `\e[0Ksection_end:UNIX_TIMESTAMP:SECTION_NAME\r\e[0K`
-
-You must add these codes to the script section of the CI configuration.
-For example, using `echo`:
-
-```yaml
-job1:
-  script:
-    - echo -e "\e[0Ksection_start:`date +%s`:my_first_section\r\e[0KHeader of the 1st collapsible section"
-    - echo 'this line should be hidden when collapsed'
-    - echo -e "\e[0Ksection_end:`date +%s`:my_first_section\r\e[0K"
-```
-
-The escape syntax may differ depending on the shell that your runner uses.
-For example if it is using Zsh, you may need to escape the special characters
-with `\\e` or `\\r`.
-
-In the example above:
-
-- `date +%s`: Command that produces the Unix timestamp (for example `1560896352`).
-- `my_first_section`: The name given to the section. The name can only be composed
-  of letters, numbers, and the `_`, `.`, or `-` characters.
-- `\r\e[0K`: Escape sequence that prevents the section markers from displaying in the
-  rendered (colored) job log. They are displayed when viewing the raw job log, accessed
-  in the upper-right corner of the job log by selecting **Show complete raw** (**{doc-text}**).
-  - `\r`: carriage return (returns the cursor to the start of the line).
-  - `\e[0K`: ANSI escape code to clear the line from the cursor position to the end of the line.
-    (`\e[K` alone does not work; the `0` must be included).
-
-Sample raw job log:
-
-```plaintext
-\e[0Ksection_start:1560896352:my_first_section\r\e[0KHeader of the 1st collapsible section
-this line should be hidden when collapsed
-\e[0Ksection_end:1560896353:my_first_section\r\e[0K
-```
-
-Sample job console log:
-
-![Custom collapsible sections](img/collapsible_job_v16_10.png)
-
-#### Use a script to improve display of collapsible sections
-
-To remove the `echo` statements that create the section markers from the job output,
-you can move the job contents to a script file and invoke it from the job:
-
-1. Create a script that can handle the section headers. For example:
-
-   ```shell
-   # function for starting the section
-   function section_start () {
-     local section_title="${1}"
-     local section_description="${2:-$section_title}"
-
-     echo -e "section_start:`date +%s`:${section_title}[collapsed=true]\r\e[0K${section_description}"
-   }
-
-   # Function for ending the section
-   function section_end () {
-     local section_title="${1}"
-
-     echo -e "section_end:`date +%s`:${section_title}\r\e[0K"
-   }
-
-   # Create sections
-   section_start "my_first_section" "Header of the 1st collapsible section"
-
-   echo "this line should be hidden when collapsed"
-
-   section_end "my_first_section"
-
-   # Repeat as required
-   ```
-
-1. Add the script to the `.gitlab-ci.yml` file:
-
-   ```yaml
-   job:
-     script:
-       - source script.sh
-   ```
-
-### Pre-collapse sections
-
-You can make the job log automatically collapse collapsible sections by adding the `collapsed` option to the section start.
-Add `[collapsed=true]` after the section name and before the `\r`. The section end marker
-remains unchanged:
-
-- Section start marker with `[collapsed=true]`: `\e[0Ksection_start:UNIX_TIMESTAMP:SECTION_NAME[collapsed=true]\r\e[0K` + `TEXT_OF_SECTION_HEADER`
-- Section end marker (unchanged): `\e[0Ksection_end:UNIX_TIMESTAMP:SECTION_NAME\r\e[0K`
-
-Add the updated section start text to the CI configuration. For example,
-using `echo`:
-
-```yaml
-job1:
-  script:
-    - echo -e "\e[0Ksection_start:`date +%s`:my_first_section[collapsed=true]\r\e[0KHeader of the 1st collapsible section"
-    - echo 'this line should be hidden automatically after loading the job log'
-    - echo -e "\e[0Ksection_end:`date +%s`:my_first_section\r\e[0K"
 ```
 
 ## Troubleshooting
@@ -460,6 +338,8 @@ script:
 
 This fails as the indentation causes the line breaks to be preserved:
 
+<!-- vale gitlab.CurlStringsQuoted = NO -->
+
 ```plaintext
 $ RESULT=$(curl --silent # collapsed multi-line command
 curl: no URL specified!
@@ -467,6 +347,8 @@ curl: try 'curl --help' or 'curl --manual' for more information
 /bin/bash: line 149: --header: command not found
 /bin/bash: line 150: https://gitlab.example.com/api/v4/job: No such file or directory
 ```
+
+<!-- vale gitlab.CurlStringsQuoted = YES -->
 
 Resolve this by either:
 
@@ -498,18 +380,10 @@ Resolve this by either:
 Sometimes the formatting in the job log displays incorrectly with tools that rely
 on the `TERM` environment variable for coloring or formatting. For example, with the `mypy` command:
 
-![Example output](img/incorrect_log_rendering_v16_5.png)
+![Example output](img/incorrect_log_rendering.png)
 
 GitLab Runner runs the container's shell in non-interactive mode, so the shell's `TERM`
 environment variable is set to `dumb`. To fix the formatting for these tools, you can:
 
 - Add an additional script line to set `TERM=ansi` in the shell's environment before running the command.
 - Add a `TERM` [CI/CD variable](../variables/index.md) with a value of `ansi`.
-
-### `after_script` section execution stops early and incorrect `$CI_JOB_STATUS` values
-
-In GitLab Runner 16.9.0 to 16.11.0:
-
-- The `after_script` section execution sometimes stops too early.
-- The status of the `$CI_JOB_STATUS` predefined variable is
-  [incorrectly set as `failed` while the job is canceling](https://gitlab.com/gitlab-org/gitlab-runner/-/issues/37485).

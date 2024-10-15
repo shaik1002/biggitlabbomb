@@ -2,7 +2,6 @@
 
 module Projects
   class UpdatePagesService < BaseService
-    include Gitlab::InternalEventsTracking
     include Gitlab::Utils::StrongMemoize
 
     # old deployment can be cached by pages daemon
@@ -28,10 +27,14 @@ module Projects
 
       return error(deployment_validations.errors.first.full_message) unless deployment_validations.valid?
 
-      if ::Feature.enabled?(:ff_pages_use_open_file, project)
-        handle_deployment_with_open_file
-      else
-        handle_deployment_with_file
+      build.artifacts_file.use_file do |artifacts_path|
+        deployment = create_pages_deployment(artifacts_path, build)
+
+        break error('The uploaded artifact size does not match the expected value') unless deployment
+        break error(deployment_validations.errors.first.full_message) unless deployment_validations.valid?
+
+        deactive_old_deployments(deployment)
+        success
       end
     rescue StandardError => e
       error(e.message)
@@ -39,18 +42,6 @@ module Projects
     end
 
     private
-
-    def config
-      build.pages.is_a?(Hash) ? build.pages : {}
-    end
-
-    def extra_deployment?
-      path_prefix.present?
-    end
-
-    def path_prefix
-      ::Gitlab::Utils.slugify(config.fetch(:path_prefix, nil) || '')
-    end
 
     def success
       commit_status.success
@@ -89,13 +80,15 @@ module Projects
     strong_memoize_attr :stage
     # rubocop: enable Performance/ActiveRecordSubtransactionMethods
 
-    def create_pages_deployment(file, build)
-      attributes = pages_deployment_attributes(file, build)
-      deployment = project.pages_deployments.build(**attributes)
+    def create_pages_deployment(artifacts_path, build)
+      File.open(artifacts_path) do |file|
+        attributes = pages_deployment_attributes(file, build)
+        deployment = project.pages_deployments.build(**attributes)
 
-      return if deployment.file.size != file.size
+        break if deployment.file.size != file.size
 
-      deployment.tap(&:save!)
+        deployment.tap(&:save!)
+      end
     end
 
     # overridden on EE
@@ -141,48 +134,6 @@ module Projects
       })
 
       Gitlab::EventStore.publish(event)
-    end
-
-    def handle_deployment_with_open_file
-      build.artifacts_file.use_open_file(unlink_early: false) do |file|
-        handle_deployment(file)
-      end
-    end
-
-    def handle_deployment_with_file
-      build.artifacts_file.use_file do |artifacts_path|
-        File.open(artifacts_path) { |file| handle_deployment(file) }
-      end
-    end
-
-    def handle_deployment(file)
-      deployment = create_pages_deployment(file, build)
-
-      return error('The uploaded artifact size does not match the expected value') unless deployment
-      return error(deployment_validations.errors.first.full_message) unless deployment_validations.valid?
-
-      track_deployment_events
-
-      deactive_old_deployments(deployment)
-      success
-    end
-
-    def track_deployment_events
-      track_internal_event(
-        'create_pages_deployment',
-        project: project,
-        namespace: project.namespace,
-        user: build.user
-      )
-
-      return unless extra_deployment?
-
-      track_internal_event(
-        'create_pages_extra_deployment',
-        project: project,
-        namespace: project.namespace,
-        user: build.user
-      )
     end
   end
 end

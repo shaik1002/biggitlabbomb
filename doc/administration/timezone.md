@@ -4,107 +4,54 @@ group: Distribution
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
-# Change your time zone
+# Changing your time zone
 
 DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** Self-managed
 
+The global time zone configuration parameter can be changed in `config/gitlab.yml`:
+
+```plaintext
+# time_zone: 'UTC'
+```
+
+Uncomment and customize if you want to change the default time zone of the GitLab application.
+
+## Viewing available time zones
+
+To see all available time zones, run `bundle exec rake time:zones:all`.
+
+For Linux package installations, run `gitlab-rake time:zones:all`.
+
 NOTE:
-Users can set their [time zone in their profile](../user/profile/index.md#set-your-time-zone).
-New users do not have a default time zone and must
-explicitly set it before it displays on their profile.
-On GitLab.com, the default time zone is UTC.
+This Rake task does not list time zones in TZInfo format required by a Linux package installation during a reconfigure. For more information,
+see [issue 27209](https://gitlab.com/gitlab-org/gitlab/-/issues/27209).
 
-The default time zone in GitLab is UTC, but you can change it to your liking.
+## Changing time zone in Linux package installations
 
-To update the time zone of your GitLab instance:
+GitLab defaults its time zone to UTC. It has a global time zone configuration parameter in `/etc/gitlab/gitlab.rb`.
 
-1. The specified time zone must be in
-   [tz format](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
-   You can use the `timedatectl` command to see the available time zones:
+To obtain a list of time zones, sign in to your GitLab application server and run a command that generates a list of time zones in TZInfo format for the server. For example, install `timedatectl` and run `timedatectl list-timezones`.
 
-   ```shell
-   timedatectl list-timezones
-   ```
+To update, add the time zone that best applies to your location. For example:
 
-1. Change the time zone, for example to `America/New_York`.
+```ruby
+gitlab_rails['time_zone'] = 'America/New_York'
+```
 
-::Tabs
+After adding the configuration parameter, reconfigure and restart your GitLab instance:
 
-:::TabTitle Linux package (Omnibus)
+```shell
+gitlab-ctl reconfigure
+gitlab-ctl restart
+```
 
-1. Edit `/etc/gitlab/gitlab.rb`:
+## Changing time zone per user
 
-   ```ruby
-   gitlab_rails['time_zone'] = 'America/New_York'
-   ```
+Users can set their time zone in their profile. On GitLab.com, the default time zone is UTC.
 
-1. Save the file, then reconfigure and restart GitLab:
+New users do not have a default time zone. New users must
+explicitly set their time zone before it displays on their profile.
 
-   ```shell
-   sudo gitlab-ctl reconfigure
-   sudo gitlab-ctl restart
-   ```
-
-:::TabTitle Helm chart (Kubernetes)
-
-1. Export the Helm values:
-
-   ```shell
-   helm get values gitlab > gitlab_values.yaml
-   ```
-
-1. Edit `gitlab_values.yaml`:
-
-   ```yaml
-   global:
-     time_zone: 'America/New_York'
-   ```
-
-1. Save the file and apply the new values:
-
-   ```shell
-   helm upgrade -f gitlab_values.yaml gitlab gitlab/gitlab
-   ```
-
-:::TabTitle Docker
-
-1. Edit `docker-compose.yml`:
-
-   ```yaml
-   version: "3.6"
-   services:
-     gitlab:
-       environment:
-         GITLAB_OMNIBUS_CONFIG: |
-           gitlab_rails['time_zone'] = 'America/New_York'
-   ```
-
-1. Save the file and restart GitLab:
-
-   ```shell
-   docker compose up -d
-   ```
-
-:::TabTitle Self-compiled (source)
-
-1. Edit `/home/git/gitlab/config/gitlab.yml`:
-
-   ```yaml
-   production: &base
-     gitlab:
-       time_zone: 'America/New_York'
-   ```
-
-1. Save the file and restart GitLab:
-
-   ```shell
-   # For systems running systemd
-   sudo systemctl restart gitlab.target
-
-   # For systems running SysV init
-   sudo service gitlab restart
-   ```
-
-::EndTabs
+For more information, see [Set your time zone](../user/profile/index.md#set-your-time-zone).

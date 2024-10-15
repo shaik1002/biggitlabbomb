@@ -21,8 +21,7 @@ RSpec.describe Projects::Settings::BranchRulesHelper, feature_category: :source_
         branches_path: project_branches_path(project),
         show_status_checks: 'false',
         show_approvers: 'false',
-        show_code_owners: 'false',
-        can_admin_protected_branches: 'false'
+        show_code_owners: 'false'
       })
     end
   end

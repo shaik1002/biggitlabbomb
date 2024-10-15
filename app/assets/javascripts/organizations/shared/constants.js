@@ -11,7 +11,6 @@ export const FORM_FIELD_ID = 'id';
 export const FORM_FIELD_PATH = 'path';
 export const FORM_FIELD_DESCRIPTION = 'description';
 export const FORM_FIELD_AVATAR = 'avatar';
-export const FORM_FIELD_VISIBILITY_LEVEL = 'visibilityLevel';
 
 export const MAX_DESCRIPTION_COUNT = 1024;
 
@@ -29,6 +28,9 @@ export const FORM_FIELD_DESCRIPTION_VALIDATORS = [
     (val) => val.length <= MAX_DESCRIPTION_COUNT,
   ),
 ];
+
+export const QUERY_PARAM_START_CURSOR = 'start_cursor';
+export const QUERY_PARAM_END_CURSOR = 'end_cursor';
 
 export const SORT_DIRECTION_ASC = 'asc';
 export const SORT_DIRECTION_DESC = 'desc';

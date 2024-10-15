@@ -2,6 +2,8 @@
 data_category: optional
 key_path: counts.groups_mock_monitoring_active
 description: Count of groups with active integrations for Mock Monitoring
+product_section: dev
+product_stage: manage
 product_group: import_and_integrate
 value_type: number
 status: removed
@@ -16,5 +18,4 @@ tier:
 - premium
 - ultimate
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332
 removed_by_url:

@@ -13,7 +13,7 @@ DETAILS:
 
 Reviewers can suggest code changes with a Markdown syntax in merge request diff threads.
 The merge request author (or other users with the appropriate role) can apply any or
-all suggestions from the GitLab UI. Applying suggestions adds a commit to the
+all of the suggestions from the GitLab UI. Applying suggestions adds a commit to the
 merge request, authored by the user who suggested the changes.
 
 ## Create suggestions
@@ -27,7 +27,7 @@ merge request, authored by the user who suggested the changes.
    - To select multiple lines:
      1. Hover over the line number, and select **Add a comment to this line** (**{comment}**):
         ![Comment on any diff file line](img/comment_on_any_diff_line_v16_6.png)
-     1. Select and drag your selection to include all desired lines. To
+     1. Select and drag your selection until all desired lines are included. To
         learn more, see [Multi-line suggestions](#multi-line-suggestions).
 1. In the comment toolbar, select **Insert suggestion** (**{doc-code}**). GitLab
    inserts a pre-populated code block into your comment, like this:
@@ -74,12 +74,12 @@ When applied, the suggestion replaces from 2 lines above to 2 lines below the co
 ![Multi-line suggestion preview](img/multi-line-suggestion-preview_v16_6.png)
 
 Suggestions for multiple lines are limited to 100 lines _above_ and 100
-lines _below_ the commented diff line. This allows for up to 201 changed lines per
+lines _below_ the commented diff line. This allows for up to 200 changed lines per
 suggestion.
 
 Multiline comments display the comment's line numbers above the body of the comment:
 
-![Multiline comment selection displayed above comment](img/multiline-comment-saved_v13_3.png)
+![Multiline comment selection displayed above comment](img/multiline-comment-saved.png)
 
 #### Using the rich text editor
 
@@ -99,7 +99,7 @@ To add or subtract changed lines, next to **From line**, select **+** or **-**.
 
 Prerequisites:
 
-- You must be the author of the merge request, or have at least the Developer role for the project.
+- You must be the author of the merge request, or have at least the Developer role in the project.
 
 To apply suggested changes directly from the merge request:
 
@@ -108,17 +108,16 @@ To apply suggested changes directly from the merge request:
 1. Find the comment containing the suggestion you want to apply.
    - To apply suggestions individually, select **Apply suggestion**.
    - To apply multiple suggestions in a single commit, select **Add suggestion to batch**.
-1. Optional. Provide a custom commit message to describe your change. If you
-   don't provide a custom message, it uses the default commit message.
+1. Optional. Provide a custom commit message to describe your change. If you don't provide a custom message, the default commit message is used.
 1. Select **Apply**.
 
-After you apply a suggestion, GitLab:
+After a suggestion is applied:
 
-- Marks the suggestion as **Applied**.
-- Resolves the comment thread.
-- Creates a new commit with the changes.
-- (If the user has the Developer role) Pushes the suggested change directly into
-  the codebase in the merge request's branch.
+- The suggestion is marked as **Applied**.
+- The comment thread is resolved.
+- GitLab creates a new commit with the changes.
+- If the user has the Developer role, GitLab pushes
+  the suggested change directly into the codebase in the merge request's branch.
 
 ## Nest code blocks in suggestions
 
@@ -138,8 +137,8 @@ git config --global receive.advertisepushoptions true
 
 ## Configure the commit message for applied suggestions
 
-GitLab uses a default commit message when applying suggestions, but you can change
-it. This message supports placeholders. For example, the default message
+GitLab uses a default commit message when applying suggestions. This message
+supports placeholders, and can be changed. For example, the default message
 `Apply %{suggestions_count} suggestion(s) to %{files_count} file(s)` renders
 like this if you apply three suggestions to two different files:
 
@@ -187,7 +186,7 @@ For example, to customize the commit message to output
 
 Prerequisites:
 
-- You must have a role for the project that allows you to commit to the source branch.
+- You must have a role in the project that allows you to commit to the source branch.
 
 To reduce the number of commits added to your branch, apply multiple
 suggestions in a single commit.
@@ -200,13 +199,13 @@ suggestions in a single commit.
 
    WARNING:
    If you apply a batch of suggestions containing changes from multiple authors,
-   the resulting commit credits you as the author. If you configure your project
+   you are credited as the resulting commit's author. If your project is configured
    to [prevent approvals from users who add commits](../approvals/settings.md#prevent-approvals-by-users-who-add-commits), you are no longer an eligible
    approver for this merge request.
 
 1. Optional. Provide a custom commit message for [batch suggestions](#batch-suggestions)
-   to describe your change. If you don't specify one, it uses
-   the default commit message.
+   to describe your change. If you don't specify one,
+   the default commit message is used.
 
 ## Related topics
 

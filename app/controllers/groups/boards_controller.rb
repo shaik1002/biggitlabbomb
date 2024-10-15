@@ -7,8 +7,11 @@ class Groups::BoardsController < Groups::ApplicationController
 
   before_action do
     push_frontend_feature_flag(:board_multi_select, group)
-    push_frontend_feature_flag(:issues_list_drawer, group)
-    push_force_frontend_feature_flag(:work_items_beta, group&.work_items_beta_feature_flag_enabled?)
+    push_frontend_feature_flag(:display_work_item_epic_issue_sidebar, group)
+    experiment(:prominent_create_board_btn, subject: current_user) do |e|
+      e.control {}
+      e.candidate {}
+    end.run
   end
 
   feature_category :team_planning

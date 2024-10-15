@@ -12,7 +12,6 @@ module Ci
       class_name: 'Ci::Build',
       partition_foreign_key: :partition_id
     belongs_to :namespace, inverse_of: :pending_builds, class_name: 'Namespace'
-    belongs_to :plan
 
     partitionable scope: :build
 
@@ -35,13 +34,6 @@ module Ci
         entry.validate!
 
         self.upsert(entry.attributes.compact, returning: %w[build_id], unique_by: :build_id)
-      end
-
-      def namespace_transfer_params(namespace)
-        {
-          namespace_traversal_ids: namespace.traversal_ids,
-          namespace_id: namespace.id
-        }
       end
 
       private

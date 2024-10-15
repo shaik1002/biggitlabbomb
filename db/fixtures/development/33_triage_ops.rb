@@ -44,8 +44,6 @@ class Gitlab::Seeder::TriageOps
   LABELS
 
   OTHER_LABELS = <<~LABELS.split("\n")
-    Community contribution
-    documentation
     ep::contributor tooling
     ep::meta
     ep::metrics
@@ -55,40 +53,28 @@ class Gitlab::Seeder::TriageOps
     master-broken::caching
     master-broken::ci-config
     master-broken::dependency-upgrade
-    master-broken::external-dependency-unavailable
-    master-broken::failed-to-pull-image
     master-broken::flaky-test
     master-broken::fork-repo-test-gap
-    master-broken::gitaly
-    master-broken::gitlab-com-overloaded
     master-broken::infrastructure
-    master-broken::infrastructure::failed-to-pull-image
-    master-broken::gitlab-com-overloaded
-    master-broken::infrastructure::runner-disk-full
-    master-broken::job-timeout
-    master-broken::multi-version-db-upgrade
     master-broken::need-merge-train
     master-broken::pipeline-skipped-before-merge
-    master-broken::runner-disk-full
-    master-broken::state leak
     master-broken::test-selection-gap
     master-broken::undetermined
-    pipeline::expedited
-    pipeline::tier-1
-    pipeline::tier-2
-    pipeline::tier-3
+    pipeline:expedite
+    pipeline:expedite-master-fixing
     pipeline:mr-approved
     pipeline:run-all-jest
     pipeline:run-all-rspec
     pipeline:run-as-if-foss
     pipeline:run-as-if-jh
-    pipeline:run-e2e-omnibus-once
     pipeline:run-flaky-tests
     pipeline:run-praefect-with-db
     pipeline:run-review-app
     pipeline:run-single-db
     pipeline:skip-undercoverage
     pipeline:update-cache
+    documentation
+    Community contribution
   LABELS
 
   def seed!
@@ -108,6 +94,7 @@ class Gitlab::Seeder::TriageOps
 
         puts "Ensuring required projects"
         ensure_project('gitlab-org/gitlab')
+        ensure_project('gitlab-org/security/gitlab')
 
         puts "Ensuring required bot user"
         ensure_bot_user
@@ -143,7 +130,7 @@ class Gitlab::Seeder::TriageOps
       scopes: ['api'],
       name: "API Token #{Time.zone.now}"
     }
-    response = PersonalAccessTokens::CreateService.new(current_user: bot, target_user: bot, organization_id: bot.namespace.organization_id, params: params).execute
+    response = PersonalAccessTokens::CreateService.new(current_user: bot, target_user: bot, params: params).execute
 
     unless response.success?
       raise "Can't create Triage Bot access token: #{response.message}"
@@ -160,8 +147,7 @@ class Gitlab::Seeder::TriageOps
       name: 'Triage Bot',
       email: 'triagebot@example.com',
       confirmed_at: DateTime.now,
-      password: SecureRandom.hex.slice(0, 16),
-      user_type: :project_bot
+      password: SecureRandom.hex.slice(0, 16)
     ) do |user|
       user.assign_personal_namespace(Organizations::Organization.default_organization)
     end

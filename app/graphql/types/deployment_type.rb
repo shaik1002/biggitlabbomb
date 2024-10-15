@@ -16,7 +16,7 @@ module Types
       description: 'Global ID of the deployment.'
 
     field :iid,
-      GraphQL::Types::String,
+      GraphQL::Types::ID,
       description: 'Project-level internal ID of the deployment.'
 
     field :ref,
@@ -68,7 +68,7 @@ module Types
     field :tags,
       [Types::DeploymentTagType],
       description: 'Git tags that contain this deployment. ' \
-        'This field can only be resolved for two deployments in any single request.',
+                   'This field can only be resolved for two deployments in any single request.',
       calls_gitaly: true do
       extension ::Gitlab::Graphql::Limit::FieldCallCount, limit: 2
     end

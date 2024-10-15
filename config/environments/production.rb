@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'gitlab/middleware/strip_cookies'
-
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb
 
@@ -41,7 +39,7 @@ Rails.application.configure do
   # Include generic and useful information about system operation, but avoid logging too much
   # information to avoid inadvertent exposure of personally identifiable information (PII).
   # Note: This configuration does not affect the log level of `Gitlab::Logger` and its subclasses.
-  config.log_level = Gitlab::Utils.to_rails_log_level(ENV["GITLAB_LOG_LEVEL"], :info)
+  config.log_level = :info
 
   # Suppress 'Rendered template ...' messages in the log
   # source: http://stackoverflow.com/a/16369363
@@ -77,8 +75,4 @@ Rails.application.configure do
   config.action_mailer.raise_delivery_errors = true
 
   config.eager_load = true
-
-  config.middleware.insert_before(
-    ActionDispatch::Cookies, Gitlab::Middleware::StripCookies, paths: [%r{^/v2$}, %r{^/v2/}]
-  )
 end

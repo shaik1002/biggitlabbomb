@@ -3,7 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe 'Issues csv', :js, feature_category: :team_planning do
-  include FilteredSearchHelpers
   let(:user) { create(:user) }
   let(:project) { create(:project, :public) }
   let(:milestone) { create(:milestone, title: 'v1.0', project: project) }
@@ -13,10 +12,10 @@ RSpec.describe 'Issues csv', :js, feature_category: :team_planning do
 
   before do
     sign_in(user)
-    visit project_issues_path(project)
   end
 
-  def request_csv
+  def request_csv(params = {})
+    visit project_issues_path(project, params)
     click_button 'Actions'
     click_button 'Export as CSV'
     click_on 'Export issues'
@@ -64,8 +63,7 @@ RSpec.describe 'Issues csv', :js, feature_category: :team_planning do
   end
 
   it 'uses filters from issue index', :sidekiq_inline do
-    click_link 'Closed'
-    request_csv
+    request_csv(state: :closed)
 
     expect(csv.count).to eq 0
   end
@@ -73,8 +71,7 @@ RSpec.describe 'Issues csv', :js, feature_category: :team_planning do
   it 'ignores sorting from issue index', :sidekiq_inline do
     issue2 = create(:labeled_issue, project: project, author: user, labels: [feature_label])
 
-    change_sort_by("Label priority")
-    request_csv
+    request_csv(sort: :label_priority)
 
     expected = [issue.iid.to_s, issue2.iid.to_s]
     expect(csv.map { |row| row['Issue ID'] }).to eq expected
@@ -83,35 +80,8 @@ RSpec.describe 'Issues csv', :js, feature_category: :team_planning do
   it 'uses array filters, such as label_name', :sidekiq_inline do
     issue.update!(labels: [idea_label])
 
-    select_tokens 'Label', '||', feature_label.title, idea_label.title, submit: true
-    request_csv
+    request_csv("label_name[]" => 'Bug')
 
-    expect(csv.count).to eq 1
-  end
-
-  context "with multiple issue authors" do
-    let(:user2) { create(:user, developer_of: project) }
-    let!(:issue2) { create(:issue, project: project, author: user2) }
-
-    it 'exports issues by selected author', :sidekiq_inline do
-      select_tokens 'Author', '=', user2.username, submit: true
-      request_csv
-
-      expect(csv.count).to eq 1
-    end
-
-    it 'exports issues by selected multiple authors', :sidekiq_inline do
-      select_tokens 'Author', '||', user2.username, user.username, submit: true
-      request_csv
-
-      expect(csv.count).to eq 2
-    end
-
-    it 'does not export issues by excluded multiple authors', :sidekiq_inline do
-      select_tokens 'Author', '!=', user.username, user2.username, submit: true
-      request_csv
-
-      expect(csv.count).to eq 0
-    end
+    expect(csv.count).to eq 0
   end
 end

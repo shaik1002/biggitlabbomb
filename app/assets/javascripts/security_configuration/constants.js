@@ -8,11 +8,14 @@ import {
   REPORT_TYPE_SAST,
   REPORT_TYPE_SAST_IAC,
   REPORT_TYPE_SECRET_DETECTION,
+  REPORT_TYPE_CONTAINER_SCANNING,
 } from '~/vue_shared/security_reports/constants';
 
 import configureSastMutation from './graphql/configure_sast.mutation.graphql';
 import configureSastIacMutation from './graphql/configure_iac.mutation.graphql';
 import configureSecretDetectionMutation from './graphql/configure_secret_detection.mutation.graphql';
+
+import ContinuousContainerRegistryScan from './components/continous_container_registry_scan.vue';
 
 /**
  * Translations for Security Configuration Page
@@ -39,8 +42,6 @@ export const DEPENDENCY_SCANNING_NAME = __('Dependency Scanning');
 
 export const CONTAINER_SCANNING_NAME = __('Container Scanning');
 
-export const CONTAINER_SCANNING_FOR_REGISTRY_NAME = __('Container Scanning For Registry');
-
 export const COVERAGE_FUZZING_NAME = __('Coverage Fuzzing');
 
 export const CORPUS_MANAGEMENT_NAME = __('Corpus Management');
@@ -51,7 +52,7 @@ export const CLUSTER_IMAGE_SCANNING_NAME = s__('ciReport|Cluster Image Scanning'
 
 export const PRE_RECEIVE_SECRET_DETECTION = 'pre_receive_secret_detection';
 
-export const PRE_RECEIVE_SECRET_DETECTION_NAME = __('Secret push protection');
+export const PRE_RECEIVE_SECRET_DETECTION_NAME = __('Pre-receive Secret Detection');
 
 export const SCANNER_NAMES_MAP = {
   SAST: SAST_SHORT_NAME,
@@ -59,7 +60,6 @@ export const SCANNER_NAMES_MAP = {
   DAST: DAST_SHORT_NAME,
   API_FUZZING: API_FUZZING_NAME,
   CONTAINER_SCANNING: CONTAINER_SCANNING_NAME,
-  CONTAINER_SCANNING_FOR_REGISTRY: CONTAINER_SCANNING_FOR_REGISTRY_NAME,
   COVERAGE_FUZZING: COVERAGE_FUZZING_NAME,
   SECRET_DETECTION: SECRET_DETECTION_NAME,
   DEPENDENCY_SCANNING: DEPENDENCY_SCANNING_NAME,
@@ -67,6 +67,12 @@ export const SCANNER_NAMES_MAP = {
   CLUSTER_IMAGE_SCANNING: CLUSTER_IMAGE_SCANNING_NAME,
   PRE_RECEIVE_SECRET_DETECTION: PRE_RECEIVE_SECRET_DETECTION_NAME,
   GENERIC: s__('ciReport|Manually added'),
+};
+
+export const securityFeatures = {
+  [REPORT_TYPE_CONTAINER_SCANNING]: {
+    slotComponent: ContinuousContainerRegistryScan,
+  },
 };
 
 export const featureToMutationMap = {

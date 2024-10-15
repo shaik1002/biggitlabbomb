@@ -11,8 +11,6 @@ module Packages
         refs = []
 
         available_packages.each_batch do |batch|
-          batch = batch.preload_pypi_metadatum
-
           batch.each do |package|
             url = build_pypi_package_path(package)
 

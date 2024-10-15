@@ -1,9 +1,14 @@
 description: "Reset Docker form"
 category: default
 action: reset_form
+label_description: "`docker_container_retention_and_expiration_policies`"
+property_description: ""
+value_description: ""
 extra_properties:
 identifiers:
-product_group: container_registry
+product_section: ops
+product_stage: package
+product_group: group::package
 milestone: "12.8"
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/23844
 distributions:
@@ -13,6 +18,3 @@ tiers:
 - free
 - premium
 - ultimate
-additional_properties:
-  label:
-    description: "`docker_container_retention_and_expiration_policies`"

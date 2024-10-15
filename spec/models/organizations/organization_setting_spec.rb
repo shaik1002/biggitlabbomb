@@ -12,12 +12,10 @@ RSpec.describe Organizations::OrganizationSetting, type: :model, feature_categor
 
   describe 'validations' do
     context 'for json schema' do
-      let(:default_group_visibility) { nil }
       let(:restricted_visibility_levels) { [] }
       let(:settings) do
         {
-          restricted_visibility_levels: restricted_visibility_levels,
-          default_group_visibility: default_group_visibility
+          restricted_visibility_levels: restricted_visibility_levels
         }
       end
 
@@ -26,7 +24,6 @@ RSpec.describe Organizations::OrganizationSetting, type: :model, feature_categor
       context 'when trying to store an unsupported key' do
         let(:settings) do
           {
-            restricted_visibility_levels: [Gitlab::VisibilityLevel::PRIVATE],
             unsupported_key: 'some_value'
           }
         end
@@ -34,86 +31,27 @@ RSpec.describe Organizations::OrganizationSetting, type: :model, feature_categor
         it { is_expected.not_to allow_value(settings).for(:settings) }
       end
 
-      context 'when value' do
-        using RSpec::Parameterized::TableSyntax
+      context "when key 'restricted_visibility_levels' is invalid" do
+        let(:restricted_visibility_levels) { ['some_string'] }
 
-        where(:setting_key, :valid_value, :invalid_value) do
-          :restricted_visibility_levels | [Gitlab::VisibilityLevel::PRIVATE] | ['some_string']
-          :default_group_visibility     | Gitlab::VisibilityLevel::PRIVATE   | 'some_string'
-        end
-
-        with_them do
-          subject(:organization_settings) { described_class.new }
-
-          let(:settings) do
-            organization_settings.settings.merge({
-              setting_key => setting_value
-            })
-          end
-
-          context "for key '#{params[:setting_key]}' is invalid" do
-            let(:setting_value) { invalid_value }
-
-            it { is_expected.not_to allow_value(settings).for(:settings) }
-          end
-
-          context "for key '#{params[:setting_key]}' is valid" do
-            let(:setting_value) { valid_value }
-
-            it { is_expected.to allow_value(settings).for(:settings) }
-          end
-        end
+        it { is_expected.not_to allow_value(settings).for(:settings) }
       end
     end
 
     context 'when setting restricted_visibility_levels' do
-      let(:setting) { build(:organization_setting) }
+      it 'is one or more of Gitlab::VisibilityLevel constants' do
+        setting = build(:organization_setting)
 
-      it 'rejects invalid visibility levels' do
         setting.restricted_visibility_levels = [123]
 
-        setting.valid?
-
-        expect(setting.errors).to include(:restricted_visibility_levels)
+        expect(setting.valid?).to be false
         expect(setting.errors.full_messages).to include(
           "Restricted visibility levels '123' is not a valid visibility level"
         )
-      end
 
-      it 'accept one or more of Gitlab::VisibilityLevel constants' do
-        setting.restricted_visibility_levels = [
-          Gitlab::VisibilityLevel::PUBLIC,
-          Gitlab::VisibilityLevel::PRIVATE,
-          Gitlab::VisibilityLevel::INTERNAL
-        ]
-
-        setting.valid?
-
-        expect(setting.errors).not_to include(:restricted_visibility_levels)
-      end
-    end
-
-    context 'when setting default_group_visibility' do
-      subject(:setting) { build(:organization_setting) }
-
-      it 'allows nil' do
-        # This will force the validation to run.
-        allow(setting).to receive(:should_prevent_visibility_restriction?).and_return(true)
-
-        setting.default_group_visibility = nil
-
-        expect(setting).to be_valid
-      end
-
-      it 'allows valid visibility levels' do
-        is_expected.to validate_inclusion_of(:default_group_visibility).in_array(Gitlab::VisibilityLevel.values)
-      end
-
-      it 'prevents setting default_group_visibility to a restricted visibility level' do
-        setting.restricted_visibility_levels = [Gitlab::VisibilityLevel::PUBLIC]
-        setting.default_group_visibility = Gitlab::VisibilityLevel::PUBLIC
-
-        expect(setting).not_to be_valid
+        setting.restricted_visibility_levels = [Gitlab::VisibilityLevel::PUBLIC, Gitlab::VisibilityLevel::PRIVATE,
+          Gitlab::VisibilityLevel::INTERNAL]
+        expect(setting.valid?).to be true
       end
     end
   end

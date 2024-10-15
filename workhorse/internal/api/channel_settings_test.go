@@ -122,19 +122,18 @@ func TestDialer(t *testing.T) {
 
 	subjectOfTestCertificate := []byte{48, 35, 49, 33, 48, 31, 6, 3, 85, 4, 3, 12, 24, 119, 111, 114, 107, 104, 111, 114, 115, 101, 45, 119, 101, 98, 115, 111, 99, 107, 101, 116, 45, 116, 101, 115, 116}
 	//lint:ignore SA1019 Ignore the deprecation warnings
-	// nolint:staticcheck // Ignore the deprecation warnings
 	require.Contains(t, dialer.TLSClientConfig.RootCAs.Subjects(), subjectOfTestCertificate)
 }
 
 func TestIsEqual(t *testing.T) {
 	chann := channel("ws:", "foo")
 
-	channHeader2 := header(chann, "extra")
-	channHeader3 := header(chann)
-	channHeader3.Header.Add("Extra", "extra")
+	chann_header2 := header(chann, "extra")
+	chann_header3 := header(chann)
+	chann_header3.Header.Add("Extra", "extra")
 
-	channCa2 := ca(chann)
-	channCa2.CAPem = "other value"
+	chann_ca2 := ca(chann)
+	chann_ca2.CAPem = "other value"
 
 	for i, tc := range []struct {
 		channelA *ChannelSettings
@@ -149,17 +148,17 @@ func TestIsEqual(t *testing.T) {
 		{chann, channel("foo:"), false},
 		{chann, channel(chann.Url), false},
 		{header(chann), header(chann), true},
-		{channHeader2, channHeader2, true},
-		{channHeader3, channHeader3, true},
-		{header(chann), channHeader2, false},
-		{header(chann), channHeader3, false},
+		{chann_header2, chann_header2, true},
+		{chann_header3, chann_header3, true},
+		{header(chann), chann_header2, false},
+		{header(chann), chann_header3, false},
 		{header(chann), chann, false},
 		{chann, header(chann), false},
 		{ca(chann), ca(chann), true},
 		{ca(chann), chann, false},
 		{chann, ca(chann), false},
 		{ca(header(chann)), ca(header(chann)), true},
-		{channCa2, ca(chann), false},
+		{chann_ca2, ca(chann), false},
 		{chann, timeout(chann), false},
 	} {
 		if actual := tc.channelA.IsEqual(tc.channelB); tc.expected != actual {

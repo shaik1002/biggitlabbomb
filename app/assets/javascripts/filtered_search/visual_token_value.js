@@ -50,7 +50,7 @@ export default class VisualTokenValue {
           tokenValueContainer.dataset.originalValue = tokenValue;
           // eslint-disable-next-line no-unsanitized/property
           tokenValueElement.innerHTML = `
-          <img class="avatar s16 !gl-mr-2" src="${user.avatar_url}" alt="">
+          <img class="avatar s20" src="${user.avatar_url}" alt="">
           ${escape(user.name)}
         `;
           /* eslint-enable no-param-reassign */
@@ -134,8 +134,11 @@ export default class VisualTokenValue {
 
     token.style.backgroundColor = backgroundColor;
     token.style.color = textColor;
-    const removeToken = token.querySelector('.close-icon');
-    removeToken.style.color = textColor;
+
+    if (textColor === '#FFFFFF') {
+      const removeToken = token.querySelector('.remove-token');
+      removeToken.classList.add('inverted');
+    }
 
     return token;
   }

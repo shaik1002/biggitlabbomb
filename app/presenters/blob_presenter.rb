@@ -95,8 +95,10 @@ class BlobPresenter < Gitlab::View::Presenter::Delegated
     url_helpers.project_blame_path(*path_params)
   end
 
-  def base64_encoded_blob
-    Base64.encode64(blob.raw)
+  def unicode_escaped_blob
+    return unless Feature.enabled?(:unicode_escaped_blob)
+
+    encode_uft8_with_unicode_escaping(blob.raw)
   end
 
   def history_path
@@ -138,10 +140,6 @@ class BlobPresenter < Gitlab::View::Presenter::Delegated
 
   def can_modify_blob?
     super(blob, project, commit_id)
-  end
-
-  def can_modify_blob_with_web_ide?
-    super(blob, project)
   end
 
   def can_current_user_push_to_branch?

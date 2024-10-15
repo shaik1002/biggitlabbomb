@@ -5,11 +5,9 @@ import { GlDisclosureDropdownGroup, GlLoadingIcon } from '@gitlab/ui';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import axios from '~/lib/utils/axios_utils';
 import { DEFAULT_DEBOUNCE_AND_THROTTLE_MS } from '~/lib/utils/constants';
-import Tracking, { InternalEvents } from '~/tracking';
-import { logError } from '~/lib/logger';
+import Tracking from '~/tracking';
 import { getFormattedItem } from '../utils';
 
-import { EVENT_CLICK_PROJECT_SETTING_IN_COMMAND_PALETTE } from '../tracking_constants';
 import {
   COMMON_HANDLES,
   COMMAND_HANDLE,
@@ -18,7 +16,6 @@ import {
   ISSUE_HANDLE,
   PATH_HANDLE,
   PAGES_GROUP_TITLE,
-  SETTINGS_GROUP_TITLE,
   PATH_GROUP_TITLE,
   GROUP_TITLES,
   MAX_ROWS,
@@ -28,8 +25,6 @@ import {
 import SearchItem from './search_item.vue';
 import { commandMapper, linksReducer, autocompleteQuery, fileMapper } from './utils';
 
-const trackingMixin = InternalEvents.mixin();
-
 export default {
   name: 'CommandPaletteItems',
   components: {
@@ -37,12 +32,11 @@ export default {
     GlLoadingIcon,
     SearchItem,
   },
-  mixins: [Tracking.mixin(), trackingMixin],
+  mixins: [Tracking.mixin()],
   inject: [
     'commandPaletteCommands',
     'commandPaletteLinks',
     'autocompletePath',
-    'settingsPath',
     'searchContext',
     'projectFilesPath',
     'projectBlobPath',
@@ -88,7 +82,6 @@ export default {
           break;
       }
     }, DEFAULT_DEBOUNCE_AND_THROTTLE_MS),
-    settings: [],
   }),
   computed: {
     isCommandMode() {
@@ -152,9 +145,6 @@ export default {
         // Track immediately on component creation
         const label = TRACKING_HANDLE_LABEL_MAP[value] ?? 'unknown';
         this.track(TRACKING_ACTIVATE_COMMAND_PALETTE, { label });
-
-        // Fetch settings results only for ">"
-        if (value === COMMAND_HANDLE) this.fetchSettings();
       },
       immediate: true,
     },
@@ -163,30 +153,6 @@ export default {
     this.$emit('updated');
   },
   methods: {
-    fetchSettings() {
-      let settingsUrl = null;
-      const projectId = this.searchContext.project?.id;
-      const groupId = this.searchContext.group?.id;
-
-      if (projectId) {
-        settingsUrl = `${this.settingsPath}?project_id=${projectId}`;
-      } else if (groupId) {
-        settingsUrl = `${this.settingsPath}?group_id=${groupId}`;
-      } else {
-        this.settings = [];
-        return;
-      }
-
-      axios
-        .get(settingsUrl)
-        .then((response) => {
-          this.settings = response.data;
-        })
-        .catch((e) => {
-          logError(e);
-          this.settings = [];
-        });
-    },
     filterBySearchQuery(items, key = 'keywords') {
       return fuzzaldrinPlus.filter(items, this.searchQuery, { key });
     },
@@ -227,15 +193,6 @@ export default {
           items: matchedLinks,
         });
       }
-
-      const matchedSettings = this.filterBySearchQuery(this.settings, 'text');
-
-      if (matchedSettings.length) {
-        this.groups.push({
-          name: SETTINGS_GROUP_TITLE,
-          items: matchedSettings,
-        });
-      }
     },
     async getScopedItems() {
       if (this.searchQuery?.length < 3) return;
@@ -264,19 +221,6 @@ export default {
         this.loading = false;
       }
     },
-    trackingCommands({ text: command }) {
-      if (!this.isCommandMode || !this.searchContext.project?.id) {
-        return;
-      }
-      const isSettings = this.settings.some((setting) => setting.text === command);
-      if (!isSettings) {
-        return;
-      }
-
-      this.trackEvent(EVENT_CLICK_PROJECT_SETTING_IN_COMMAND_PALETTE, {
-        label: command,
-      });
-    },
   },
 };
 </script>
@@ -285,14 +229,13 @@ export default {
   <div>
     <gl-loading-icon v-if="loading" size="lg" class="gl-my-5" />
 
-    <ul v-else-if="hasResults" class="gl-m-0 gl-list-none gl-p-0">
+    <ul v-else-if="hasResults" class="gl-p-0 gl-m-0 gl-list-none">
       <gl-disclosure-dropdown-group
         v-for="(group, index) in groups"
         :key="index"
         :group="group"
         bordered
-        :class="{ '!gl-mt-0': index === 0 }"
-        @action="trackingCommands"
+        :class="{ 'gl-mt-0!': index === 0 }"
       >
         <template #list-item="{ item }">
           <search-item :item="item" :search-query="searchQuery" />
@@ -300,7 +243,7 @@ export default {
       </gl-disclosure-dropdown-group>
     </ul>
 
-    <div v-else-if="hasSearchQuery && !hasResults" class="gl-py-3 gl-pl-5 gl-text-gray-700">
+    <div v-else-if="hasSearchQuery && !hasResults" class="gl-text-gray-700 gl-pl-5 gl-py-3">
       {{ __('No results found') }}
     </div>
   </div>

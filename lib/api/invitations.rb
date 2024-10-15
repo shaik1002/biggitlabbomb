@@ -16,10 +16,6 @@ module API
       end
     end
 
-    # rubocop: disable Cop/InjectEnterpriseEditionModule -- params helper needs to be included before the endpoints
-    prepend_mod_with('API::Invitations')
-    # rubocop: enable Cop/InjectEnterpriseEditionModule
-
     %w[group project].each do |source_type|
       params do
         requires :id, type: String, desc: "The #{source_type} ID"
@@ -48,7 +44,7 @@ module API
 
           authorize_admin_source_member!(source_type, source)
 
-          create_service_params = declared_params.merge(source: source)
+          create_service_params = params.merge(source: source)
 
           ::Members::InviteService.new(current_user, create_service_params).execute
         end
@@ -101,7 +97,7 @@ module API
           bad_request! unless update_params.any?
 
           result = ::Members::UpdateService
-            .new(current_user, update_params.merge({ source: source }))
+            .new(current_user, update_params)
             .execute(invite)
 
           updated_member = result[:members].first
@@ -143,3 +139,5 @@ module API
     end
   end
 end
+
+API::Members.prepend_mod

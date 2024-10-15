@@ -93,7 +93,6 @@ describe('gl_emoji', () => {
         '<gl-emoji data-fallback-src="https://cultofthepartyparrot.com/parrots/hd/parrot.gif" data-name="party-parrot" data-unicode-version="custom"><img class="emoji" title=":party-parrot:" alt=":party-parrot:" src="https://cultofthepartyparrot.com/parrots/hd/parrot.gif" align="absmiddle"></gl-emoji>',
         '<gl-emoji data-fallback-src="https://cultofthepartyparrot.com/parrots/hd/parrot.gif" data-name="party-parrot" data-unicode-version="custom"><img class="emoji" title=":party-parrot:" alt=":party-parrot:" src="https://cultofthepartyparrot.com/parrots/hd/parrot.gif" align="absmiddle"></gl-emoji>',
       ],
-      // eslint-disable-next-line max-params
     ])('%s', (name, markup, withEmojiSupport, withoutEmojiSupport) => {
       it(`renders correctly with emoji support`, async () => {
         jest.spyOn(EmojiUnicodeSupport, 'default').mockReturnValue(true);
@@ -156,10 +155,6 @@ describe('gl_emoji', () => {
               group: {
                 id: 1,
                 customEmoji: {
-                  pageInfo: {
-                    hasNextPage: false,
-                    endCursor: 'test',
-                  },
                   nodes: [{ id: 1, name: 'parrot', url: 'parrot.gif' }],
                 },
               },
@@ -168,6 +163,7 @@ describe('gl_emoji', () => {
         ],
       ]);
 
+      window.gon = { features: { customEmoji: true } };
       document.body.dataset.groupFullPath = 'test-group';
 
       await initEmojiMock(emojiData);

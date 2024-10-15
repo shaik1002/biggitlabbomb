@@ -10,14 +10,10 @@ RSpec.describe GroupExportWorker, feature_category: :importers do
 
   describe '#perform' do
     context 'when it succeeds' do
-      it 'calls the ExportService correctly' do
-        expected_params = { group: group, user: user, exported_by_admin: false, params: {} }
+      it 'calls the ExportService' do
+        expect_any_instance_of(::Groups::ImportExport::ExportService).to receive(:execute)
 
-        expect_next_instance_of(::Groups::ImportExport::ExportService, expected_params) do |service|
-          expect(service).to receive(:execute)
-        end
-
-        subject.perform(user.id, group.id, { exported_by_admin: false })
+        subject.perform(user.id, group.id, {})
       end
     end
 

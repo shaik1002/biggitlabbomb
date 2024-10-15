@@ -30,23 +30,6 @@ module Gitlab
         end
       end
 
-      def normalize_email(email)
-        return email unless email.is_a?(String)
-        return email unless Devise.email_regexp.match?(email.strip)
-
-        portions = email.downcase.strip.split('@')
-        mailbox = portions.shift
-        domain = portions.join
-
-        mailbox_root = mailbox.split('+')[0]
-
-        # Gmail addresses strip the "." from their emails.
-        # For example, user.name@gmail.com is the same as username@gmail.com
-        mailbox_root = mailbox_root.tr('.', '') if domain == 'gmail.com'
-
-        [mailbox_root, domain].join('@')
-      end
-
       class Masker
         attr_reader :local_part, :sub_domain, :toplevel_domain, :at, :dot
 

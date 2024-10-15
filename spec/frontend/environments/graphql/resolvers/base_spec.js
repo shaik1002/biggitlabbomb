@@ -1,4 +1,5 @@
 import MockAdapter from 'axios-mock-adapter';
+import { s__ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
 import { HTTP_STATUS_INTERNAL_SERVER_ERROR, HTTP_STATUS_OK } from '~/lib/utils/http_status';
 import { resolvers } from '~/environments/graphql/resolvers';
@@ -288,7 +289,7 @@ describe('~/frontend/environments/graphql/resolvers', () => {
 
       expect(errors).toEqual({
         __typename: 'LocalEnvironmentErrors',
-        errors: ['An error occurred while making the request.'],
+        errors: [s__('Environments|An error occurred while making the request.')],
       });
     });
   });

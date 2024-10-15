@@ -13,7 +13,7 @@ Gitlab::Experiment.configure do |config|
   # Customize the logic of our default rollout, which shouldn't include
   # assigning the control yet -- we specifically set it to false for now.
   #
-  config.default_rollout = Gitlab::Experiment::Rollout.resolve('Gitlab::ExperimentFeatureRollout')
+  config.default_rollout = Gitlab::Experiment::Rollout.resolve(:feature)
 
   # Mount the engine and middleware at a gitlab friendly style path.
   #
@@ -48,7 +48,7 @@ Gitlab::Experiment.configure do |config|
   # so we don't think we should redirect in those cases.
   #
   valid_domains = %w[about.gitlab.com docs.gitlab.com gitlab.com gdk.test localhost]
-  config.redirect_url_validator = ->(url) do
+  config.redirect_url_validator = lambda do |url|
     ApplicationExperiment.available? && (url = URI.parse(url)) && valid_domains.include?(url.host)
   rescue URI::InvalidURIError
     false
@@ -64,7 +64,7 @@ Gitlab::Experiment.configure do |config|
   # This uses the Gitlab::Tracking interface, so arbitrary event properties are
   # permitted, and will be sent along using Gitlab::Tracking::StandardContext.
   #
-  config.tracking_behavior = ->(action, event_args) do
+  config.tracking_behavior = lambda do |action, event_args|
     Gitlab::Tracking.event(name, action, **event_args.merge(
       context: (event_args[:context] || []) << SnowplowTracker::SelfDescribingJson.new(
         'iglu:com.gitlab/gitlab_experiment/jsonschema/1-0-0', signature

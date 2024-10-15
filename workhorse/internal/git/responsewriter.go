@@ -38,18 +38,18 @@ var (
 	)
 )
 
-type HTTPResponseWriter struct {
+type HttpResponseWriter struct {
 	helper.CountingResponseWriter
 }
 
-func NewHTTPResponseWriter(rw http.ResponseWriter) *HTTPResponseWriter {
+func NewHttpResponseWriter(rw http.ResponseWriter) *HttpResponseWriter {
 	gitHTTPSessionsActive.Inc()
-	return &HTTPResponseWriter{
+	return &HttpResponseWriter{
 		CountingResponseWriter: helper.NewCountingResponseWriter(rw),
 	}
 }
 
-func (w *HTTPResponseWriter) Log(r *http.Request, writtenIn int64) {
+func (w *HttpResponseWriter) Log(r *http.Request, writtenIn int64) {
 	service := getService(r)
 	agent := getRequestAgent(r)
 

@@ -84,7 +84,7 @@ export default {
       :link-href="assigneeHref(assignee)"
       :img-alt="avatarUrlTitle(assignee)"
       :img-css-classes="imgCssClasses"
-      img-css-wrapper-classes="gl-inline-flex"
+      img-css-wrapper-classes="gl-display-inline-flex"
       :img-src="avatarUrl(assignee)"
       :img-size="iconSize"
       class="js-no-trigger author-link"
@@ -92,7 +92,7 @@ export default {
       data-testid="assignee-link"
     >
       <span class="js-assignee-tooltip">
-        <span class="gl-block gl-font-bold">{{ s__('Label|Assignee') }}</span> {{ assignee.name }}
+        <span class="bold d-block">{{ s__('Label|Assignee') }}</span> {{ assignee.name }}
         <span v-if="assignee.username" class="text-white-50">@{{ assignee.username }}</span>
       </span>
     </user-avatar-link>

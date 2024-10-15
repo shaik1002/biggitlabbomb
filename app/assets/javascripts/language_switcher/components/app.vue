@@ -45,7 +45,7 @@ export default {
     :toggle-text="preferredLocale.text"
     :items="locales"
     category="tertiary"
-    placement="bottom-end"
+    placement="right"
     icon="earth"
     size="small"
     toggle-class="py-0 gl-h-6"
@@ -58,7 +58,7 @@ export default {
     </template>
     <template #footer>
       <div
-        class="gl-flex gl-justify-center gl-border-t-1 gl-border-t-gray-100 gl-p-3 gl-border-t-solid"
+        class="gl-border-t-solid gl-border-t-1 gl-border-t-gray-100 gl-display-flex gl-justify-content-center gl-p-3"
         data-testid="footer"
       >
         <gl-link :href="$options.HELP_TRANSLATE_HREF">{{ $options.HELP_TRANSLATE_MSG }}</gl-link>

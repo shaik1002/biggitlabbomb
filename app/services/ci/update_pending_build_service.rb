@@ -35,7 +35,7 @@ module Ci
     def validate_params!
       extra_params = @update_params.keys - VALID_PARAMS
 
-      raise InvalidParamsError, "Invalid params: #{extra_params.join(', ')}" if extra_params.any?
+      raise InvalidParamsError, "Unvalid params: #{extra_params.join(', ')}" unless extra_params.empty?
 
       true
     end

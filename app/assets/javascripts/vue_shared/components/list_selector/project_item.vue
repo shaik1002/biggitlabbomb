@@ -1,5 +1,5 @@
 <script>
-import { GlAvatar, GlButton, GlTooltipDirective } from '@gitlab/ui';
+import { GlAvatar, GlButton } from '@gitlab/ui';
 import { sprintf, __ } from '~/locale';
 
 export default {
@@ -7,9 +7,6 @@ export default {
   components: {
     GlAvatar,
     GlButton,
-  },
-  directives: {
-    GlTooltip: GlTooltipDirective,
   },
   props: {
     data: {
@@ -24,7 +21,7 @@ export default {
   },
   computed: {
     deleteButtonLabel() {
-      return sprintf(__('Delete %{name}'), { name: this.name });
+      return sprintf(__('Remove exclusion for %{name}'), { name: this.name });
     },
     name() {
       return this.data.name;
@@ -34,7 +31,7 @@ export default {
 </script>
 
 <template>
-  <span class="gl-flex gl-items-center gl-gap-3" @click="$emit('select', name)">
+  <span class="gl-display-flex gl-align-items-center gl-gap-3" @click="$emit('select', name)">
     <gl-avatar
       :alt="name"
       :entity-name="name"
@@ -43,14 +40,13 @@ export default {
       :src="data.avatarUrl"
       fallback-on-error
     />
-    <span class="gl-flex gl-max-w-30 gl-grow gl-flex-col">
-      <span class="gl-font-bold">{{ name }}</span>
+    <span class="gl-display-flex gl-flex-direction-column gl-flex-grow-1 gl-max-w-30">
+      <span class="gl-font-weight-bold">{{ name }}</span>
       <span class="gl-text-gray-600">{{ data.nameWithNamespace }}</span>
     </span>
 
     <gl-button
       v-if="canDelete"
-      v-gl-tooltip="deleteButtonLabel"
       icon="remove"
       :aria-label="deleteButtonLabel"
       category="tertiary"

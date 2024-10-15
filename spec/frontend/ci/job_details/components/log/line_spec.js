@@ -24,10 +24,9 @@ describe('Job Log Line', () => {
   let wrapper;
   let data;
 
-  const createComponent = (props) => {
+  const createComponent = (props = {}) => {
     wrapper = shallowMount(Line, {
       propsData: {
-        path: '/',
         ...props,
       },
     });
@@ -47,29 +46,12 @@ describe('Job Log Line', () => {
     expect(wrapper.findComponent(LineNumber).exists()).toBe(true);
   });
 
-  it('renders a span with provided text', () => {
+  it('renders a span the provided text', () => {
     expect(findLine().text()).toBe(data.line.content[0].text);
   });
 
-  it('renders a span with multiple parts of text', () => {
-    createComponent({
-      line: {
-        content: [
-          { text: 'A line that ', style: 'style-1' },
-          { text: 'continues.', style: 'style-2' },
-        ],
-        lineNumber: 0,
-      },
-    });
-
-    expect(findLine().text()).toBe('A line that continues.');
-    expect(findLine().element.innerHTML).toBe(
-      '<span class="style-1">A line that </span><span class="style-2">continues.</span>',
-    );
-  });
-
   it('renders the provided style as a class attribute', () => {
-    expect(findLine().find(`.${data.line.content[0].style}`).exists()).toBe(true);
+    expect(findLine().classes()).toContain(data.line.content[0].style);
   });
 
   describe('job urls as links', () => {
@@ -96,7 +78,7 @@ describe('Job Log Line', () => {
     it('renders a link with corresponding styles', () => {
       createComponent(mockProps({ text: httpsUrl }));
 
-      expect(findLink().classes()).toEqual(['!gl-text-inherit', 'gl-underline']);
+      expect(findLink().classes()).toEqual(['gl-reset-color!', 'gl-text-decoration-underline']);
     });
 
     it('renders links with queries, surrounded by questions marks', () => {
@@ -206,25 +188,6 @@ describe('Job Log Line', () => {
     `('does not render a $type link', ({ text }) => {
       createComponent(mockProps({ text }));
       expect(findLink().exists()).toBe(false);
-    });
-  });
-
-  describe('job line time', () => {
-    it('shows a time', () => {
-      const lineNumber = 1;
-      const time = '00:00:01Z';
-      const text = 'text';
-
-      createComponent({
-        line: {
-          time,
-          content: [{ text }],
-          lineNumber,
-        },
-        path: '/',
-      });
-
-      expect(wrapper.text()).toBe(`${lineNumber}${time}${text}`);
     });
   });
 

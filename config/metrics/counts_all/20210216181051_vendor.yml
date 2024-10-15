@@ -3,6 +3,8 @@ data_category: optional
 key_path: container_registry_server.vendor
 description: Identifies if a user is using an external container registry and what
   type
+product_section: ops
+product_stage: package
 product_group: container_registry
 value_type: number
 status: active
@@ -16,4 +18,3 @@ tier:
 - premium
 - ultimate
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

@@ -9,25 +9,6 @@ module Resolvers
     def resolve
       authorize!(object)
 
-      bulk_load_labels
-    end
-
-    def object
-      case super
-      when ::WorkItems::Widgets::Base
-        super.work_item
-      else
-        super
-      end
-    end
-
-    private
-
-    def authorized_resource?(object)
-      Ability.allowed?(current_user, :read_label, object.issuing_parent)
-    end
-
-    def bulk_load_labels
       BatchLoader::GraphQL.for(object.id).batch(key: object.class.name, cache: false) do |ids, loader, args|
         labels = Label.for_targets(object.class.id_in(ids)).group_by(&:target_id)
 
@@ -36,7 +17,11 @@ module Resolvers
         end
       end
     end
+
+    private
+
+    def authorized_resource?(object)
+      Ability.allowed?(current_user, :read_label, object.issuing_parent)
+    end
   end
 end
-
-Resolvers::BulkLabelsResolver.prepend_mod

@@ -33,8 +33,7 @@ module Gitlab
                 }
               ),
               created_at: issue_event.created_at,
-              updated_at: issue_event.created_at,
-              imported_from: imported_from
+              updated_at: issue_event.created_at
             )
           end
 

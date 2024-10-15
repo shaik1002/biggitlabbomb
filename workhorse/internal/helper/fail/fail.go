@@ -1,4 +1,3 @@
-// Package fail provides functionality for handling failure responses in HTTP requests
 package fail
 
 import (
@@ -13,7 +12,6 @@ type failure struct {
 	fields log.Fields
 }
 
-// Option represents a function that modifies a failure object
 type Option func(*failure)
 
 // WithStatus sets the HTTP status and body text of the failure response.

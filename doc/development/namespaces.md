@@ -116,7 +116,7 @@ namespace_object.descendant_ids
 
 ### Ancestor namespaces
 
-The ancestors of a namespace are its parent, its parent's parent, and so on.
+The ancestors of a namespace are its children, their children, and so on.
 
 ```mermaid
 graph TD
@@ -213,24 +213,6 @@ namespace_object.recursive_ancestors
 namespace_object.recursive_self_and_ancestor_ids
 namespace_object.recursive_ancestor_ids
 namespace_object.recursive_self_and_hierarchy
-```
-
-### Search using trie data structure
-
-`Namespaces::Traversal::TrieNode` implements a trie data structure to efficiently search within
-`namespaces.traveral_ids` hierarchy for a set of Namespaces.
-
-```ruby
-traversal_ids = Namespace.where(...).map(&:traversal_ids)
-
-# contains [9970, 123] and [9970, 456]
-trie = Namespaces::Traversal::TrieNode.build(traversal_ids)
-
-trie.prefix_search([9970]) # returns [[9970, 123], [9970, 456]] 
-
-trie.covered?([9970]) # returns false
-trie.covered?([9970, 123]) # returns true
-trie.covered?([9970, 123, 789]) # returns true
 ```
 
 ## Namespace query implementation

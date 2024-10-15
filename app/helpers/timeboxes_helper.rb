@@ -18,7 +18,7 @@ module TimeboxesHelper
 
   def milestone_badge_variant(milestone)
     if milestone.closed?
-      :info
+      :danger
     elsif milestone.expired?
       :warning
     elsif milestone.upcoming?
@@ -91,7 +91,7 @@ module TimeboxesHelper
   def milestone_progress_bar(milestone)
     render Pajamas::ProgressComponent.new(
       value: milestone.percent_complete,
-      variant: :primary
+      variant: :success
     )
   end
 
@@ -129,11 +129,11 @@ module TimeboxesHelper
     content = []
 
     if opened > 0
-      content << (n_("1 open issue", "%{issues} open issues", opened) % { issues: opened })
+      content << n_("1 open issue", "%{issues} open issues", opened) % { issues: opened }
     end
 
     if closed > 0
-      content << (n_("1 closed issue", "%{issues} closed issues", closed) % { issues: closed })
+      content << n_("1 closed issue", "%{issues} closed issues", closed) % { issues: closed }
     end
 
     content.join('<br />').html_safe
@@ -146,9 +146,9 @@ module TimeboxesHelper
 
     content = []
 
-    content << (n_("1 open merge request", "%{merge_requests} open merge requests", merge_requests.opened.count) % { merge_requests: merge_requests.opened.count }) if merge_requests.opened.any?
-    content << (n_("1 closed merge request", "%{merge_requests} closed merge requests", merge_requests.closed.count) % { merge_requests: merge_requests.closed.count }) if merge_requests.closed.any?
-    content << (n_("1 merged merge request", "%{merge_requests} merged merge requests", merge_requests.merged.count) % { merge_requests: merge_requests.merged.count }) if merge_requests.merged.any?
+    content << n_("1 open merge request", "%{merge_requests} open merge requests", merge_requests.opened.count) % { merge_requests: merge_requests.opened.count } if merge_requests.opened.any?
+    content << n_("1 closed merge request", "%{merge_requests} closed merge requests", merge_requests.closed.count) % { merge_requests: merge_requests.closed.count } if merge_requests.closed.any?
+    content << n_("1 merged merge request", "%{merge_requests} merged merge requests", merge_requests.merged.count) % { merge_requests: merge_requests.merged.count } if merge_requests.merged.any?
 
     content.join('<br />').html_safe
   end
@@ -168,12 +168,6 @@ module TimeboxesHelper
     recent_releases = milestone.releases.recent.filter { |release| Ability.allowed?(user, :read_release, release) }
     more_count = total_count - recent_releases.size
     [recent_releases, total_count, more_count]
-  end
-
-  def milestone_releases_tooltip_list(releases, more_count = 0)
-    list = releases.map(&:name).join(", ")
-    list += format(_(", and %{number} more"), number: more_count) if more_count > 0
-    list
   end
 
   def milestone_tooltip_due_date(milestone)

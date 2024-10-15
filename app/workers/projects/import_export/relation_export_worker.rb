@@ -10,7 +10,7 @@ module Projects
       data_consistency :always
       deduplicate :until_executed
       feature_category :importers
-      sidekiq_options dead: false, status_expiration: StuckExportJobsWorker::EXPORT_JOBS_EXPIRATION, retry: 6
+      sidekiq_options dead: false, status_expiration: StuckExportJobsWorker::EXPORT_JOBS_EXPIRATION
       urgency :low
       worker_resource_boundary :memory
 

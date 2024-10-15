@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"gitlab.com/gitlab-org/gitlab/workhorse/internal/testhelper"
@@ -19,7 +18,7 @@ import (
 func testEntryServer(t *testing.T, archive string, entry string) *httptest.ResponseRecorder {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/url/path", func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, "GET", r.Method)
+		require.Equal(t, "GET", r.Method)
 
 		encodedEntry := base64.StdEncoding.EncodeToString([]byte(entry))
 		jsonParams := fmt.Sprintf(`{"Archive":"%s","Entry":"%s"}`, archive, encodedEntry)

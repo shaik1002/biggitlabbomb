@@ -18,11 +18,6 @@ RSpec.describe LooseForeignKeys::BatchCleanerService, feature_category: :databas
       t.bigint :parent_id_with_different_column
     end
 
-    migration.create_table :_test_loose_fk_child_table_3 do |t|
-      t.bigint  :parent_id
-      t.integer :status, limit: 2
-    end
-
     migration.track_record_deletions(:_test_loose_fk_parent_table)
   end
 
@@ -45,17 +40,6 @@ RSpec.describe LooseForeignKeys::BatchCleanerService, feature_category: :databas
           on_delete: :async_nullify,
           gitlab_schema: :gitlab_main
         }
-      ),
-      ActiveRecord::ConnectionAdapters::ForeignKeyDefinition.new(
-        '_test_loose_fk_child_table_3',
-        '_test_loose_fk_parent_table',
-        {
-          column: 'parent_id',
-          on_delete: :update_column_to,
-          gitlab_schema: :gitlab_main,
-          target_column: 'status',
-          target_value: 4
-        }
       )
     ]
   end
@@ -63,7 +47,6 @@ RSpec.describe LooseForeignKeys::BatchCleanerService, feature_category: :databas
   let(:loose_fk_parent_table) { table(:_test_loose_fk_parent_table) }
   let(:loose_fk_child_table_1) { table(:_test_loose_fk_child_table_1) }
   let(:loose_fk_child_table_2) { table(:_test_loose_fk_child_table_2) }
-  let(:loose_fk_child_table_3) { table(:_test_loose_fk_child_table_3) }
   let(:parent_record_1) { loose_fk_parent_table.create! }
   let(:other_parent_record) { loose_fk_parent_table.create! }
 
@@ -87,13 +70,6 @@ RSpec.describe LooseForeignKeys::BatchCleanerService, feature_category: :databas
     # these will not be deleted
     loose_fk_child_table_2.create!(parent_id_with_different_column: other_parent_record.id)
     loose_fk_child_table_2.create!(parent_id_with_different_column: other_parent_record.id)
-
-    loose_fk_child_table_3.create!(parent_id: parent_record_1.id, status: 1)
-    loose_fk_child_table_3.create!(parent_id: parent_record_1.id, status: 1)
-
-    # these will not be updated
-    loose_fk_child_table_3.create!(parent_id: other_parent_record.id, status: 1)
-    loose_fk_child_table_3.create!(parent_id: other_parent_record.id, status: 1)
   end
 
   after(:all) do
@@ -101,7 +77,6 @@ RSpec.describe LooseForeignKeys::BatchCleanerService, feature_category: :databas
     migration.drop_table :_test_loose_fk_parent_table
     migration.drop_table :_test_loose_fk_child_table_1
     migration.drop_table :_test_loose_fk_child_table_2
-    migration.drop_table :_test_loose_fk_child_table_3
   end
 
   context 'when parent records are deleted' do
@@ -126,10 +101,6 @@ RSpec.describe LooseForeignKeys::BatchCleanerService, feature_category: :databas
       expect(loose_fk_child_table_2.where(parent_id_with_different_column: nil).count).to eq(2)
     end
 
-    it 'updates the child records' do
-      expect(loose_fk_child_table_3.where(parent_id: parent_record_1.id, status: 4).count).to eq(2)
-    end
-
     it 'cleans up the pending parent DeletedRecord' do
       expect(LooseForeignKeys::DeletedRecord.status_pending.count).to eq(0)
       expect(LooseForeignKeys::DeletedRecord.status_processed.count).to eq(1)
@@ -144,10 +115,6 @@ RSpec.describe LooseForeignKeys::BatchCleanerService, feature_category: :databas
     it 'does not delete unrelated records' do
       expect(loose_fk_child_table_1.where(parent_id: other_parent_record.id).count).to eq(2)
       expect(loose_fk_child_table_2.where(parent_id_with_different_column: other_parent_record.id).count).to eq(2)
-    end
-
-    it 'does not update unrelated records' do
-      expect(loose_fk_child_table_3.where(parent_id: other_parent_record.id, status: 1).count).to eq(2)
     end
   end
 
@@ -283,50 +250,6 @@ RSpec.describe LooseForeignKeys::BatchCleanerService, feature_category: :databas
           end
         end
       end
-    end
-  end
-
-  describe 'when the definition is invalid' do
-    let(:loose_foreign_key_definitions) do
-      [
-        ActiveRecord::ConnectionAdapters::ForeignKeyDefinition.new(
-          '_test_loose_fk_child_table_1',
-          '_test_loose_fk_parent_table',
-          {
-            column: 'parent_id',
-            on_delete: :async_delete,
-            gitlab_schema: :gitlab_main
-          }
-        ),
-        ActiveRecord::ConnectionAdapters::ForeignKeyDefinition.new(
-          '_test_loose_fk_child_table_2',
-          '_test_loose_fk_parent_table',
-          {
-            column: 'parent_id_with_different_column',
-            on_delete: :not_valid,
-            gitlab_schema: :gitlab_main
-          }
-        )
-      ]
-    end
-
-    before do
-      parent_record_1.delete
-    end
-
-    it 'logs error and skips the definition' do
-      expect(Sidekiq.logger).to receive(:error).with("Invalid on_delete argument: not_valid").twice
-      expect(Sidekiq.logger).to receive(:error).with("Invalid on_delete argument for definition: _test_loose_fk_child_table_2").twice
-
-      described_class.new(
-        parent_table: '_test_loose_fk_parent_table',
-        loose_foreign_key_definitions: loose_foreign_key_definitions,
-        deleted_parent_records: LooseForeignKeys::DeletedRecord.load_batch_for_table('public._test_loose_fk_parent_table', 100),
-        connection: ::ApplicationRecord.connection
-      ).execute
-
-      expect(loose_fk_child_table_1.where(parent_id: parent_record_1.id)).to be_empty
-      expect(loose_fk_child_table_2.where(parent_id_with_different_column: parent_record_1.id).count).to eq(2)
     end
   end
 end

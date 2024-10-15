@@ -2,6 +2,8 @@
 data_category: optional
 key_path: counts.packages
 description: The total number of packages published to the registry
+product_section: ops
+product_stage: package
 product_group: package_registry
 value_type: number
 status: active
@@ -16,4 +18,3 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

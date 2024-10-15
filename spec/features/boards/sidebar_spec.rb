@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Project issue boards sidebar', :js, feature_category: :portfolio_management do
+RSpec.describe 'Project issue boards sidebar', :js, feature_category: :team_planning do
   include BoardHelpers
 
   let_it_be(:user)    { create(:user) }
@@ -16,35 +16,20 @@ RSpec.describe 'Project issue boards sidebar', :js, feature_category: :portfolio
 
   before do
     project.add_maintainer(user)
+
+    sign_in(user)
+
+    create(:callout, feature_name: :board_add_new_column_trigger_popover, user: user)
+
+    visit project_board_path(project, board)
+
+    wait_for_requests
   end
 
-  context 'when issues drawer is disabled' do
-    before do
-      stub_feature_flags(issues_list_drawer: false)
-      sign_in(user)
-
-      visit project_board_path(project, board)
-
-      wait_for_requests
-    end
-
-    it_behaves_like 'issue boards sidebar'
-  end
-
-  context 'when issues drawer is enabled' do
-    before do
-      sign_in(user)
-
-      visit project_board_path(project, board)
-
-      wait_for_requests
-    end
-
-    it_behaves_like 'work item drawer'
-  end
+  it_behaves_like 'issue boards sidebar'
 
   def first_card
-    find('[data-testid="board-list"]:nth-child(1)').first("[data-testid='board-card']")
+    find('.board:nth-child(1)').first("[data-testid='board-card']")
   end
 
   def click_first_issue_card

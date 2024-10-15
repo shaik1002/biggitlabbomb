@@ -11,7 +11,6 @@ class ProjectSetting < ApplicationRecord
   belongs_to :project, inverse_of: :project_setting
 
   scope :for_projects, ->(projects) { where(project_id: projects) }
-  scope :with_namespace, -> { joins(project: :namespace) }
 
   attr_encrypted :cube_api_key,
     mode: :per_attribute_iv,
@@ -53,11 +52,6 @@ class ProjectSetting < ApplicationRecord
 
   attribute :legacy_open_source_license_available, default: -> do
     Feature.enabled?(:legacy_open_source_license_available, type: :ops)
-  end
-
-  # Checks if a given domain is already assigned to any existing project
-  def self.unique_domain_exists?(domain)
-    where(pages_unique_domain: domain).exists?
   end
 
   def squash_enabled_by_default?

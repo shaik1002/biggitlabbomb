@@ -55,6 +55,7 @@ function createComponent(options = {}) {
     stubs = defaultStubs,
     data = {},
     listeners = {},
+    groupMultiSelectTokens = false,
   } = options;
   return mount(UserToken, {
     apolloProvider: mockApollo,
@@ -65,6 +66,9 @@ function createComponent(options = {}) {
       cursorPosition: 'start',
     },
     provide: {
+      glFeatures: {
+        groupMultiSelectTokens,
+      },
       portalName: 'fake target',
       alignSuggestions: function fakeAlignSuggestions() {},
       suggestionsListClass: () => 'custom-class',
@@ -206,7 +210,7 @@ describe('UserToken', () => {
 
       expect(baseTokenEl.props()).toMatchObject({
         suggestions: mockUsers,
-        valueIdentifier: expect.any(Function),
+        valueIdentifier: 'username',
         getActiveTokenValue: baseTokenEl.props('getActiveTokenValue'),
       });
     });
@@ -345,6 +349,7 @@ describe('UserToken', () => {
           config: { ...mockAuthorToken, multiSelect: true },
           active: true,
           stubs: { Portal: true },
+          groupMultiSelectTokens: true,
         });
         await activateSuggestionsList();
         const suggestions = wrapper.findAllComponents(GlFilteredSearchSuggestion);
@@ -362,6 +367,7 @@ describe('UserToken', () => {
             users: mockUsers,
           },
           config: { ...mockAuthorToken, multiSelect: true, initialUsers: mockUsers },
+          groupMultiSelectTokens: true,
         });
         await nextTick();
         const tokenSegments = wrapper.findAllComponents(GlFilteredSearchTokenSegment);

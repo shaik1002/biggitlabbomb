@@ -2,7 +2,9 @@
 data_category: optional
 key_path: counts_monthly.aggregated_metrics.incident_management_alerts_total_unique_counts
 description: Count of unique users per month to take an action on an alert
-product_group: platform_insights
+product_section: ops
+product_stage: monitor
+product_group: respond
 value_type: number
 status: active
 time_frame: 28d
@@ -26,4 +28,3 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

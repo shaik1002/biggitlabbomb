@@ -54,9 +54,25 @@ such as the value of a setting or the count of rows in a database table.
 
 ## Instrumentation
 
-- To create an instrumentation plan, use this [template](https://gitlab.com/gitlab-org/gitlab/-/issues/new?issuable_template=Usage+Data+Instrumentation).
 - To instrument an event-based metric, see the [internal event tracking quick start guide](internal_event_instrumentation/quick_start.md).
 - To instrument a metric that observes the GitLab instances state, see [the metrics instrumentation](metrics/metrics_instrumentation.md).
+
+## Data availability
+
+For GitLab there is an essential difference in analytics setup between SaaS and self-managed or GitLab Dedicated instances.
+On our SaaS instance both individual events and pre-computed metrics are available for analysis.
+Additionally for SaaS page views are automatically instrumented.
+For self-managed only the metrics instrumented on the version installed on the instance are available.
+
+### Events
+
+Events are collected in real-time but processed in an asynchronous manner.
+In general events are available in the data warehouse at the latest 48 hours after being fired but can already be available earlier.
+
+### Metrics
+
+Metrics are being computed and sent once per week for every instance. On GitLab.com this happens on Sunday and newest values become available throughout Monday.
+On self-managed this depends on the particular instance. In general, only the metrics instrumented for the installed GitLab version will be sent.
 
 ## Data discovery
 
@@ -64,9 +80,6 @@ Event and metrics data is ultimately stored in our [Snowflake data warehouse](ht
 It can either be accessed directly via SQL in Snowflake for [ad-hoc analyses](https://handbook.gitlab.com/handbook/business-technology/data-team/platform/#snowflake-analyst) or visualized in our data visualization tool
 [Tableau](https://handbook.gitlab.com/handbook/business-technology/data-team/platform/tableau/), which has access to Snowflake.
 Both platforms need an access request ([Snowflake](https://handbook.gitlab.com/handbook/business-technology/data-team/platform/#warehouse-access), [Tableau](https://handbook.gitlab.com/handbook/business-technology/data-team/platform/tableau/#tableau-online-access)).
-
-NOTE:
-To track user interactions in the browser, Do-Not-Track (DNT) needs to be disabled. DNT is disabled by default for most browsers.
 
 ### Tableau
 
@@ -85,11 +98,6 @@ You can scroll down to the "Structured Events Firing in Production Last 30 Days"
 
 You can visit the [Metrics exploration dashboard](https://10az.online.tableau.com/#/site/gitlab/views/PDServicePingExplorationDashboard/MetricsExploration).
 On the side there is a filter for metric path which is the `key_path` of your metric and a filter for the installation ID including guidance on how to filter for GitLab.com.
-
-#### Custom charts and dashboards
-
-Within Tableau, more advanced charts, such as this [funnel analysis](https://10az.online.tableau.com/#/site/gitlab/views/SaaSRegistrationFunnel/RegistrationFunnelAnalyses) can be accomplished as well.
-Custom charts and dashboards can be requested from the Product Data Insights team by creating an [issue in their project](https://gitlab.com/gitlab-data/product-analytics/-/issues/new?issuable_template=Ad%20Hoc%20Request).
 
 ### Snowflake
 
@@ -130,51 +138,6 @@ ORDER BY ping_created_at DESC
 
 For a list of other metrics tables refer to the [Data Models Cheat Sheet](https://handbook.gitlab.com/handbook/product/product-analysis/data-model-cheat-sheet/#commonly-used-data-models).
 
-### Product Analytics
-
-Internal Analytics is dogfooding the GitLab [Product Analytics](https://www.youtube.com/watch?v=i8Mze9lRZiY?) functionality, which allows you to visualize events as well.
-The [Analytics Dashboards documentation](../../user/analytics/analytics_dashboards.md#define-a-dashboard) explains how to build custom visualizations and dashboards.
-The custom dashboards accessible [within the GitLab project](https://gitlab.com/gitlab-org/gitlab/-/analytics/dashboards) are defined in a [separate repository](https://gitlab.com/gitlab-org/analytics-section/gitlab-com-dashboards).
-It is possible to build dashboards based on events instrumented via the Internal events system. Only events emitted by the .com installation will be counted in those visualizations.
-
-The [Product Analytics group's dashboard](https://gitlab.com/gitlab-org/analytics-section/gitlab-com-dashboards/-/blob/main/.gitlab/analytics/dashboards/product_analytics/product_analytics.yaml) can serve as inspiration on how to build charts based on individual events.
-
-## Data availability
-
-For GitLab there is an essential difference in analytics setup between GitLab.com and self-managed or GitLab Dedicated instances.
-
-### Self-Managed and Dedicated
-
-For Self-Managed and Dedicated instances only pre-computed metrics are available. These are computed once per week on a randomly chosen day and forwarded to our [version app](https://version.gitlab.com) via a process called Service Ping.
-Only the metrics that were instrumented until the version the instance is running are available. For example, if a metric is instrumented during the development of version 16.9, it will be available on instances running versions equal to or bigger than 16.9 but not on instances running previous versions such as 16.8.
-The received payloads are imported into our Data Warehouse once per day.
-
-### GitLab.com
-
-On our GitLab.com instance both individual events and pre-computed metrics are available for analysis. Additionally, page views are automatically instrumented.
-
-#### Individual events & page views
-
-Individual events and page views are forwarded directly to our collection infrastructure and from there into our data warehouse.
-However, at this stage the data is in a raw format that is difficult to query. For this reason the data is cleaned and propagated through the warehouse until it is available in the tables and diagrams pointed out in the [data discovery section](#data-discovery).
-
-The propagation process takes multiple hours to complete. The following diagram illustrates the availability of events:
-
-![A timeline of event collection and propagation on GitLab.com](https://lucid.app/publicSegments/view/17761ac4-85cf-42c2-8f6c-f36192224e6c/image.png)
-
-[Source](https://lucid.app/lucidchart/fec2d72c-89d9-45a0-b40c-1d81ca13f671/edit?page=OCha14OI0mRw)
-
-#### Pre-computed metrics
-
-Metrics are computed once per week like on Self-Managed, with the only difference being that most of the computation takes place within the Warehouse rather than within the instance.
-For GitLab.com this process is started on Monday morning and computes metrics for the time-frame from Sunday 23:59 UTC and this Sunday 23:59 UTC.
-
-The following diagram illustrates the process:
-
-![A timeline of Service Ping Computation on GitLab.com](https://lucid.app/publicSegments/view/4459bc54-2cb0-4376-b247-ebfe1957b56d/image.png)
-
-[Source](https://lucid.app/lucidchart/fec2d72c-89d9-45a0-b40c-1d81ca13f671/edit?page=0_0)
-
 ## Data flow
 
 On SaaS event records are directly sent to a collection system, called Snowplow, and imported into our data warehouse.
@@ -210,11 +173,5 @@ flowchart LR;
 
 ## Data Privacy
 
-GitLab only receives event counts or similarly aggregated information from self-managed instances. User identifiers for individual events on the SaaS version of GitLab are [pseudonymized](https://metrics.gitlab.com/identifiers/).
+GitLab only receives event counts or similarly aggregated information from self-managed instances. User identifiers for individual events on the SaaS version of GitLab are [pseudonymized](https://metrics.gitlab.com/identifiers).
 An exact description on what kind of data is being collected through the Internal Analytics system is given in our [handbook](https://handbook.gitlab.com/handbook/legal/privacy/customer-product-usage-information/).
-
-## Contribution guidelines
-
-- [Instrumenting features with internal analytics](review_guidelines.md)
-- [Reviewing internal analytics contributions](review_guidelines.md#the-analytics-instrumentation-reviewer-should)
-- [Contributing to the Internal Events CLI](cli_contribution_guidelines.md)

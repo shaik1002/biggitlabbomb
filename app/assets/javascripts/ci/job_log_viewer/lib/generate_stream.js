@@ -19,27 +19,26 @@ async function* getIterableFileStream(path) {
 }
 
 /**
- * Obtains lines as an async iterable
- * from a binary stream.
+ * Obtains stream lines as an async iterable
+ *
+ * NOTE: This code wrongly assumes each chunk has no cut lines.
+ * Large logs may contain several chunk and this may effectively
+ * split some lines in two.
  */
 async function* getLogStreamLines(stream) {
   const textDecoder = new TextDecoder();
 
-  let chunkRemainder = '';
-
   for await (const chunk of stream) {
     const decodedChunk = textDecoder.decode(chunk);
     const lines = decodedChunk.split('\n');
-
-    lines[0] = chunkRemainder + lines[0];
-    chunkRemainder = lines.pop() || '';
-
     for (const line of lines) {
-      yield line;
+      if (line.trim() !== '') {
+        yield {
+          text: line,
+        };
+      }
     }
   }
-
-  yield chunkRemainder;
 }
 
 /**
@@ -54,20 +53,8 @@ export async function fetchLogLines(path) {
   const scanner = new Scanner();
 
   for await (const line of lines) {
-    const scanned = scanner.scan(line);
-
-    if (scanned) {
-      if (scanned.append) {
-        const last = res[res.length - 1];
-
-        last.content = [...last.content, ...scanned.content];
-        last.timestamp = scanned.timestamp; // time is updated by most recent line
-
-        res[res.length - 1] = last;
-      } else {
-        res.push(scanned);
-      }
-    }
+    const scanned = scanner.scan(line.text);
+    res.push(scanned);
   }
 
   return res;

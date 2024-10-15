@@ -283,9 +283,9 @@ To run several tests inside one directory:
 
 - `bin/rspec spec/requests/api/` for the RSpec tests if you want to test API only
 
-### Run RSpec tests which failed in merge request pipeline on your machine
+### Run RSpec tests which failed in Merge Request pipeline on your machine
 
-If your merge request pipeline failed with RSpec test failures,
+If your Merge Request pipeline failed with RSpec test failures,
 you can run all the failed tests on your machine with the following Rake task:
 
 ```shell
@@ -294,7 +294,7 @@ bin/rake spec:merge_request_rspec_failure
 
 There are a few caveats for this Rake task:
 
-- You need to be on the same branch on your machine as the source branch of the merge request.
+- You need to be on the same branch on your machine as the source branch of the Merge Request.
 - The pipeline must have been completed.
 - You may need to wait for the test report to be parsed and retry again.
 
@@ -500,7 +500,7 @@ To edit the content, you may need to edit the following:
   which is then used by the `rake` task described earlier.
 
 `@parsed_schema` is an instance variable that the `graphql-docs` gem expects to have available.
-`Gitlab::Graphql::Docs::Helper` defines the `object` method we use. This is also where you
+`Gitlab::Graphql::Docs::Helper` defines the `object` method we currently use. This is also where you
 should implement any new methods for new types you'd like to display.
 
 ### Update machine-readable schema files

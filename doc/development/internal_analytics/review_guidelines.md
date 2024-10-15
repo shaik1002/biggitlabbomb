@@ -20,7 +20,7 @@ This includes but is not limited to:
   - files in [`ee/config/metrics`](https://gitlab.com/gitlab-org/gitlab/-/tree/master/ee/config/metrics).
   - [`schema.json`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/metrics/schema.json).
 - Internal events, for example files in [`config/events`](https://gitlab.com/gitlab-org/gitlab/-/tree/master/config/events).
-- Analytics Instrumentation tooling, for example [`Internal events CLI`](https://gitlab.com/gitlab-org/gitlab/blob/master/scripts/internal_events/cli.rb).
+- Analytics Instrumentation tooling, for example [`InternalEventsGenerator`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/generators/gitlab/analytics/internal_events_generator.rb).
 
 In most cases, an Analytics Instrumentation review is automatically added, but it can also be requested manually if the automations miss the relevant change.
 
@@ -53,18 +53,9 @@ In most cases, an Analytics Instrumentation review is automatically added, but i
   - For a metric's YAML definition:
     - Check the metric's `description`.
     - Check the metric's `key_path`.
-    - Check the `product_group` field.
+    - Check the `product_section`, `product_stage`, and `product_group` fields.
       They should correspond to the [stages file](https://gitlab.com/gitlab-com/www-gitlab-com/blob/master/data/stages.yml).
     - Check the file location. Consider the time frame, and if the file should be under `ee`.
     - Check the tiers.
   - If a metric was changed or removed: Make sure the MR author notified the Customer Success Ops team (`@csops-team`), Analytics Engineers (`@gitlab-data/analytics-engineers`), and Product Analysts (`@gitlab-data/product-analysts`) by `@` mentioning those groups in a comment on the issue for the MR and all of these groups have acknowledged the removal.
-- If a change to the Internal Events CLI is a part of the review:
-  - Check the changes follow the [CLI style guide](cli_contribution_guidelines.md).
-  - Run the CLI & check the UX of the changes:
-    - Is the content easy to skim?
-    - Would this content make sense to people outside the team?
-    - Is this information necessary? Helpful?
-    - What reservations would I have if I'd never gone through this flow before?
-    - Is the meaning or effect of every input clear?
-    - If we describe edge cases or caveats, are there instructions to validate whether the user needs to worry about it?
 - Approve the MR, and relabel the MR with `~"analytics instrumentation::approved"`.

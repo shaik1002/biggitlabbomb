@@ -6,15 +6,14 @@ import {
 } from '~/environments/constants';
 import { updateConnectionStatus } from '~/environments/graphql/resolvers/kubernetes/k8s_connection_status';
 import { connectionStatus } from '~/environments/graphql/resolvers/kubernetes/constants';
-import { buildKubernetesErrors } from '~/environments/helpers/k8s_integration_helper';
-import fluxKustomizationQuery from '../queries/flux_kustomization.query.graphql';
-import fluxHelmReleaseQuery from '../queries/flux_helm_release.query.graphql';
+import fluxKustomizationStatusQuery from '../queries/flux_kustomization_status.query.graphql';
+import fluxHelmReleaseStatusQuery from '../queries/flux_helm_release_status.query.graphql';
 
 const helmReleasesApiVersion = 'helm.toolkit.fluxcd.io/v2beta1';
 const kustomizationsApiVersion = 'kustomize.toolkit.fluxcd.io/v1';
 
-const helmReleaseField = 'fluxHelmRelease';
-const kustomizationField = 'fluxKustomization';
+const helmReleaseField = 'fluxHelmReleaseStatus';
+const kustomizationField = 'fluxKustomizationStatus';
 
 const handleClusterError = (err) => {
   const error = err?.response?.data?.message ? new Error(err.response.data.message) : err;
@@ -27,28 +26,6 @@ const buildFluxResourceUrl = ({ basePath, namespace, apiVersion, resourceType })
 
 export const buildFluxResourceWatchPath = ({ namespace, apiVersion, resourceType }) => {
   return `/apis/${apiVersion}/namespaces/${namespace}/${resourceType}`;
-};
-
-const mapFluxItems = (fluxItem, resourceType) => {
-  const metadata = {
-    ...fluxItem.metadata,
-    annotations: fluxItem.metadata?.annotations || {},
-    labels: fluxItem.metadata?.labels || {},
-  };
-
-  const result = {
-    kind: fluxItem?.kind || '',
-    status: fluxItem.status || {},
-    spec: fluxItem.spec || {},
-    metadata,
-    conditions: fluxItem.status?.conditions || [],
-    __typename: 'LocalWorkloadItem',
-  };
-
-  if (resourceType === KUSTOMIZATIONS_RESOURCE_TYPE) {
-    result.inventory = fluxItem.status?.inventory?.entries || [];
-  }
-  return result;
 };
 
 const watchFluxResource = ({
@@ -78,7 +55,7 @@ const watchFluxResource = ({
       let result = [];
 
       watcher.on(EVENT_DATA, (data) => {
-        result = mapFluxItems(data[0], resourceType);
+        result = data[0]?.status?.conditions;
 
         client.writeQuery({
           query,
@@ -108,7 +85,7 @@ const watchFluxResource = ({
     });
 };
 
-const getFluxResource = ({ query, variables, field, resourceType, client }) => {
+const getFluxResourceStatus = ({ query, variables, field, resourceType, client }) => {
   const { headers } = variables.configuration;
   const withCredentials = true;
   const url = `${variables.configuration.basePath}/apis/${variables.fluxResourcePath}`;
@@ -121,7 +98,7 @@ const getFluxResource = ({ query, variables, field, resourceType, client }) => {
       const namespace = fluxData?.metadata?.namespace;
       const apiVersion = fluxData?.apiVersion;
 
-      if (resourceName) {
+      if (gon.features?.k8sWatchApi && resourceName) {
         const watchPath = buildFluxResourceWatchPath({ namespace, apiVersion, resourceType });
 
         watchFluxResource({
@@ -136,7 +113,7 @@ const getFluxResource = ({ query, variables, field, resourceType, client }) => {
         });
       }
 
-      return mapFluxItems(fluxData, resourceType);
+      return fluxData?.status?.conditions || [];
     })
     .catch((err) => {
       handleClusterError(err);
@@ -144,21 +121,21 @@ const getFluxResource = ({ query, variables, field, resourceType, client }) => {
 };
 
 export const watchFluxKustomization = ({ configuration, client, fluxResourcePath }) => {
-  const query = fluxKustomizationQuery;
+  const query = fluxKustomizationStatusQuery;
   const variables = { configuration, fluxResourcePath };
   const field = kustomizationField;
   const resourceType = KUSTOMIZATIONS_RESOURCE_TYPE;
 
-  getFluxResource({ query, variables, field, resourceType, client });
+  getFluxResourceStatus({ query, variables, field, resourceType, client });
 };
 
 export const watchFluxHelmRelease = ({ configuration, client, fluxResourcePath }) => {
-  const query = fluxHelmReleaseQuery;
+  const query = fluxHelmReleaseStatusQuery;
   const variables = { configuration, fluxResourcePath };
   const field = helmReleaseField;
   const resourceType = HELM_RELEASES_RESOURCE_TYPE;
 
-  getFluxResource({ query, variables, field, resourceType, client });
+  getFluxResourceStatus({ query, variables, field, resourceType, client });
 };
 
 const getFluxResources = (configuration, url) => {
@@ -186,40 +163,19 @@ const getFluxResources = (configuration, url) => {
     });
 };
 
-export const fluxMutations = {
-  updateFluxResource(_, { configuration, fluxResourcePath, data }) {
-    const headers = {
-      ...configuration.headers,
-      'Content-Type': 'application/json-patch+json',
-    };
-    const withCredentials = true;
-    const url = `${configuration.basePath}/apis/${fluxResourcePath}`;
-
-    return axios
-      .patch(url, data, { withCredentials, headers })
-      .then(() => {
-        return buildKubernetesErrors();
-      })
-      .catch((err) => {
-        const error = err?.response?.data?.message || err;
-        return buildKubernetesErrors([error]);
-      });
-  },
-};
-
-export const fluxQueries = {
-  fluxKustomization(_, { configuration, fluxResourcePath }, { client }) {
-    return getFluxResource({
-      query: fluxKustomizationQuery,
+export default {
+  fluxKustomizationStatus(_, { configuration, fluxResourcePath }, { client }) {
+    return getFluxResourceStatus({
+      query: fluxKustomizationStatusQuery,
       variables: { configuration, fluxResourcePath },
       field: kustomizationField,
       resourceType: KUSTOMIZATIONS_RESOURCE_TYPE,
       client,
     });
   },
-  fluxHelmRelease(_, { configuration, fluxResourcePath }, { client }) {
-    return getFluxResource({
-      query: fluxHelmReleaseQuery,
+  fluxHelmReleaseStatus(_, { configuration, fluxResourcePath }, { client }) {
+    return getFluxResourceStatus({
+      query: fluxHelmReleaseStatusQuery,
       variables: { configuration, fluxResourcePath },
       field: helmReleaseField,
       resourceType: HELM_RELEASES_RESOURCE_TYPE,

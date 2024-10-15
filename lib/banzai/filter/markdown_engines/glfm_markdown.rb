@@ -20,15 +20,13 @@ module Banzai
           math_code: true,
           math_dollars: true,
           multiline_block_quotes: true,
-          relaxed_autolinks: true,
+          relaxed_autolinks: false,
           sourcepos: true,
-          experimental_inline_sourcepos: true,
           smart: false,
           strikethrough: true,
           table: true,
           tagfilter: false,
-          tasklist: false, # still handled by a banzai filter/gem,
-          wikilinks_title_before_pipe: true,
+          tasklist: false, # still handled by a banzai filter/gem
           unsafe: true
         }.freeze
 
@@ -39,24 +37,17 @@ module Banzai
         private
 
         def render_options
-          return OPTIONS unless sourcepos_disabled? || headers_disabled? || autolink_disabled? || raw_html_disabled?
+          return OPTIONS unless sourcepos_disabled? || headers_disabled? || raw_html_disabled?
 
           OPTIONS.merge(
             sourcepos: !sourcepos_disabled?,
-            experimental_inline_sourcepos: sourcepos_disabled? ? false : OPTIONS[:experimental_inline_sourcepos],
             header_ids: headers_disabled? ? nil : OPTIONS[:header_ids],
-            autolink: !autolink_disabled?,
-            relaxed_autolinks: !autolink_disabled?,
             unsafe: !raw_html_disabled?
           )
         end
 
         def headers_disabled?
           context[:no_header_anchors]
-        end
-
-        def autolink_disabled?
-          context[:autolink] == false
         end
 
         def raw_html_disabled?

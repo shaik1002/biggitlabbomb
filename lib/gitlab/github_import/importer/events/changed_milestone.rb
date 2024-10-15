@@ -26,8 +26,7 @@ module Gitlab
               created_at: issue_event.created_at,
               milestone_id: milestone.id,
               action: action(issue_event.event),
-              state: DEFAULT_STATE,
-              imported_from: imported_from
+              state: DEFAULT_STATE
             }.merge(resource_event_belongs_to(issue_event))
 
             ResourceMilestoneEvent.create!(attrs)

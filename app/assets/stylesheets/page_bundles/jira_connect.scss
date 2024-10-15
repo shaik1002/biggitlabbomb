@@ -1,8 +1,9 @@
 @import 'mixins_and_variables_and_functions';
-@import '@gitlab/ui/src/tokens/build/css/tokens';
 
 @import '@gitlab/ui/src/scss/bootstrap';
-@import '@gitlab/ui/src/scss/bootstrap_vue';
+@import 'bootstrap-vue/src/index';
+
+@import '@gitlab/ui/src/scss/utilities';
 
 // We should only import styles that we actually use.
 @import '@gitlab/ui/src/components/base/alert/alert';

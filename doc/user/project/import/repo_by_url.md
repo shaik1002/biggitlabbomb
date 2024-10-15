@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -23,8 +23,6 @@ If the repository is too large, the import can timeout.
   must be enabled. If not enabled, ask your GitLab administrator to enable it. The Repository by URL import source is enabled
   by default on GitLab.com.
 - At least the Maintainer role on the destination group to import to.
-- If importing a private repository, an access token for authenticated access to the source repository might be required
-  instead of a password.
 
 ## Import project by URL
 
@@ -32,8 +30,7 @@ If the repository is too large, the import can timeout.
 1. Select **Import project**.
 1. Select **Repository by URL**.
 1. Enter a **Git repository URL**.
-1. Complete the remaining fields. A username and password (or access token) is required for imports from private
-   repositories.
+1. Complete the remaining fields.
 1. Select **Create project**.
 
 Your newly created project is displayed.

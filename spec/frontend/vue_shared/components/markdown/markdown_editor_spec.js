@@ -17,10 +17,10 @@ import ContentEditor from '~/content_editor/components/content_editor.vue';
 import BubbleMenu from '~/content_editor/components/bubble_menus/bubble_menu.vue';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import MarkdownField from '~/vue_shared/components/markdown/field.vue';
+import { assertProps } from 'helpers/assert_props';
 import { stubComponent } from 'helpers/stub_component';
 import { useLocalStorageSpy } from 'helpers/local_storage_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import { useFakeRequestAnimationFrame } from 'helpers/fake_request_animation_frame';
 
 jest.mock('~/emoji');
 jest.mock('autosize');
@@ -204,31 +204,6 @@ describe('vue_shared/component/markdown/markdown_editor', () => {
     });
   });
 
-  describe('when additional restricted tool bar items are given', () => {
-    beforeEach(() => {
-      buildWrapper({ propsData: { restrictedToolBarItems: ['full-screen'] } });
-    });
-
-    it('passes them to restrictedToolBarItems', () => {
-      expect(findMarkdownField().props().restrictedToolBarItems).toContain('full-screen');
-    });
-
-    describe('when attachments are disabled', () => {
-      beforeEach(() => {
-        buildWrapper({
-          propsData: { disableAttachments: true, restrictedToolBarItems: ['full-screen'] },
-        });
-      });
-
-      it('passes `attach-file` and `full-screen` restrictedToolBarItems', () => {
-        expect(findMarkdownField().props().restrictedToolBarItems).toEqual([
-          'full-screen',
-          'attach-file',
-        ]);
-      });
-    });
-  });
-
   describe('disabled', () => {
     it('disables markdown field when disabled prop is true', () => {
       buildWrapper({ propsData: { disabled: true } });
@@ -368,6 +343,12 @@ describe('vue_shared/component/markdown/markdown_editor', () => {
     );
 
     expect(findTextarea().element.value).toBe(value);
+  });
+
+  it('fails to render if textarea id and name is not passed', () => {
+    expect(() => assertProps(MarkdownEditor, { ...defaultProps, formFieldProps: {} })).toThrow(
+      'Invalid prop: custom validator check failed for prop "formFieldProps"',
+    );
   });
 
   it(`emits ${EDITING_MODE_CONTENT_EDITOR} event when enableContentEditor emitted from markdown editor`, async () => {
@@ -640,53 +621,6 @@ describe('vue_shared/component/markdown/markdown_editor', () => {
       expect(wrapper.findComponent(GlAlert).text()).toContain(
         'Applying a template will replace the existing content. Any changes you have made will be lost.',
       );
-    });
-  });
-
-  describe('append public API', () => {
-    useFakeRequestAnimationFrame();
-
-    it('updates editor value', async () => {
-      buildWrapper({
-        propsData: { value: '' },
-      });
-      const focusSpy = jest.spyOn(findTextarea().element, 'focus');
-      wrapper.vm.append('foo');
-      await nextTick();
-      expect(findTextarea().element.value).toBe('foo\n\n');
-      expect(focusSpy).toHaveBeenCalled();
-    });
-
-    it('updates rich text editor value', async () => {
-      buildWrapper({
-        enableContentEditor: true,
-        propsData: { value: '' },
-      });
-      await enableContentEditor();
-      const focusSpy = jest.spyOn(findContentEditor().vm, 'focus');
-      wrapper.vm.append('foo');
-      await nextTick();
-      expect(findContentEditor().props('markdown')).toBe('foo\n\n');
-      expect(focusSpy).toHaveBeenCalled();
-    });
-
-    it('appends to existing value', async () => {
-      buildWrapper({
-        propsData: { value: 'existing text' },
-      });
-      wrapper.vm.append('foo');
-      await nextTick();
-      expect(findTextarea().element.value).toBe('existing text\n\nfoo\n\n');
-    });
-
-    it('apples focus when no value is given', async () => {
-      buildWrapper({
-        propsData: { value: '' },
-      });
-      const focusSpy = jest.spyOn(findTextarea().element, 'focus');
-      wrapper.vm.append();
-      await nextTick();
-      expect(focusSpy).toHaveBeenCalled();
     });
   });
 });

@@ -5,9 +5,8 @@ module BulkImports
     private
 
     def normalize_path(path)
-      return path.downcase if Gitlab::Regex.oci_repository_path_regex.match?(path)
-
       path = path.parameterize.downcase
+      return path if path =~ Gitlab::Regex.oci_repository_path_regex
 
       # remove invalid characters from end and start of path
       delete_invalid_edge_characters(delete_invalid_edge_characters(path))

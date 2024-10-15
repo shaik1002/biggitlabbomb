@@ -29,7 +29,7 @@ module Types
         description: 'Name of the cluster agent.'
 
       field :project, Types::ProjectType,
-        description: 'Project the cluster agent is associated with.',
+        description: 'Project this cluster agent is associated with.',
         null: true,
         authorize: :read_project
 
@@ -60,11 +60,6 @@ module Types
         null: true,
         description: 'Recent activity for the cluster agent.',
         resolver: Resolvers::Clusters::AgentActivityEventsResolver
-
-      field :user_access_authorizations,
-        Clusters::Agents::Authorizations::UserAccessType,
-        null: true,
-        description: 'User access config for the cluster agent.'
 
       def project
         Gitlab::Graphql::Loaders::BatchModelLoader.new(Project, object.project_id).find

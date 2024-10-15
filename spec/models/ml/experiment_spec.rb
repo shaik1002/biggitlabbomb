@@ -5,8 +5,7 @@ require 'spec_helper'
 RSpec.describe Ml::Experiment, feature_category: :mlops do
   let_it_be(:exp) { create(:ml_experiments) }
   let_it_be(:exp2) { create(:ml_experiments, project: exp.project) }
-  let_it_be(:model) { create(:ml_models, project: exp.project) }
-  let_it_be(:model_experiment) { model.default_experiment }
+  let_it_be(:model_experiment) { create(:ml_models, project: exp.project).default_experiment }
 
   let(:iid) { exp.iid }
   let(:exp_name) { exp.name }
@@ -30,27 +29,12 @@ RSpec.describe Ml::Experiment, feature_category: :mlops do
       experiment = create(:ml_models, project: exp.project).default_experiment
 
       expect { experiment.destroy! }.to raise_error(ActiveRecord::ActiveRecordError)
-      expect(experiment.errors.full_messages).to include('Cannot delete an experiment associated to a model')
     end
   end
 
   describe '.package_name' do
-    it { expect(exp.package_name).to eq("ml_experiment_#{exp.iid}") }
-
-    context 'when model belongs to package' do
-      it 'is the model name' do
-        expect(model_experiment.package_name).to eq(model.name)
-      end
-    end
-  end
-
-  describe '.for_model?' do
-    it 'is false if it is not the default experiment for a model' do
-      expect(exp.for_model?).to be(false)
-    end
-
-    it 'is true if it is not the default experiment for a model' do
-      expect(model_experiment.for_model?).to be(true)
+    describe '.package_name' do
+      it { expect(exp.package_name).to eq("ml_experiment_#{exp.iid}") }
     end
   end
 

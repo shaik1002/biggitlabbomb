@@ -38,8 +38,7 @@ trusted_cidrs_for_x_forwarded_for = ["127.0.0.1/8", "192.168.0.1/8"]
 trusted_cidrs_for_propagation = ["10.0.0.1/8"]
 
 [redis]
-Password = "redis password"
-SentinelUsername = "sentinel-user"
+password = "redis password"
 SentinelPassword = "sentinel password"
 [object_storage]
 provider = "test provider"
@@ -75,7 +74,6 @@ key = "/path/to/private/key"
 	// fields in each section; that should happen in the tests of the
 	// internal/config package.
 	require.Equal(t, "redis password", cfg.Redis.Password)
-	require.Equal(t, "sentinel-user", cfg.Redis.SentinelUsername)
 	require.Equal(t, "sentinel password", cfg.Redis.SentinelPassword)
 	require.Equal(t, "test provider", cfg.ObjectStorageCredentials.Provider)
 	require.Equal(t, uint32(123), cfg.ImageResizerConfig.MaxScalerProcs, "image resizer max_scaler_procs")
@@ -87,7 +85,7 @@ key = "/path/to/private/key"
 		{
 			Network: "tcp",
 			Addr:    "localhost:3445",
-			TLS: &config.TLSConfig{
+			Tls: &config.TlsConfig{
 				Certificate: "/path/to/certificate",
 				Key:         "/path/to/private/key",
 			},
@@ -95,7 +93,7 @@ key = "/path/to/private/key"
 		{
 			Network: "tcp",
 			Addr:    "localhost:3443",
-			TLS: &config.TLSConfig{
+			Tls: &config.TlsConfig{
 				Certificate: "/path/to/certificate",
 				Key:         "/path/to/private/key",
 				MinVersion:  "tls1.1",
@@ -117,13 +115,13 @@ key = "/path/to/private/key"
 	}
 
 	for i, cfg := range []config.ListenerConfig{*cfg.MetricsListener, cfg.Listeners[0]} {
-		require.Equal(t, listenerConfigs[i].TLS.Certificate, cfg.TLS.Certificate)
-		require.Equal(t, listenerConfigs[i].TLS.Key, cfg.TLS.Key)
-		require.Equal(t, listenerConfigs[i].TLS.MinVersion, cfg.TLS.MinVersion)
-		require.Equal(t, listenerConfigs[i].TLS.MaxVersion, cfg.TLS.MaxVersion)
+		require.Equal(t, listenerConfigs[i].Tls.Certificate, cfg.Tls.Certificate)
+		require.Equal(t, listenerConfigs[i].Tls.Key, cfg.Tls.Key)
+		require.Equal(t, listenerConfigs[i].Tls.MinVersion, cfg.Tls.MinVersion)
+		require.Equal(t, listenerConfigs[i].Tls.MaxVersion, cfg.Tls.MaxVersion)
 	}
 
-	require.Nil(t, cfg.Listeners[1].TLS)
+	require.Nil(t, cfg.Listeners[1].Tls)
 }
 
 func TestTwoMetricsAddrsAreSpecifiedError(t *testing.T) {
@@ -330,7 +328,7 @@ func TestLoadConfigCommand(t *testing.T) {
 	}{
 		{
 			desc: "nonexistent executable",
-			setup: func(_ *testing.T) setupData {
+			setup: func(t *testing.T) setupData {
 				return setupData{
 					cfg: config.Config{
 						ConfigCommand: "/does/not/exist",
@@ -562,7 +560,7 @@ func TestLoadConfigCommand(t *testing.T) {
 							{
 								Network: "tcp",
 								Addr:    "127.0.0.1:3443",
-								TLS: &config.TLSConfig{
+								Tls: &config.TlsConfig{
 									Certificate: "/path/to/certificate",
 									Key:         "/path/to/private/key",
 								},
@@ -672,6 +670,8 @@ func TestLoadConfigCommand(t *testing.T) {
 			},
 		},
 	} {
+		tc := tc
+
 		t.Run(tc.desc, func(t *testing.T) {
 			t.Parallel()
 

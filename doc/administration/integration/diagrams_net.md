@@ -2,7 +2,6 @@
 stage: Create
 group: Source Code
 info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments"
-description: "Configure a Diagrams.net integration for your self-managed GitLab instance."
 ---
 
 # Diagrams.net
@@ -14,12 +13,12 @@ DETAILS:
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/86206) in GitLab 15.10.
 > - Offline environment support [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/116281) in GitLab 16.1.
 
-With the [diagrams.net](https://www.drawio.com/) integration, you can create and embed SVG diagrams in wikis.
+With the [diagrams.net](https://www.diagrams.net/) integration, you can create and embed SVG diagrams in wikis.
 The diagram editor is available in both the plain text editor and the rich text editor.
 
 On GitLab.com, this integration is enabled for all SaaS users and does not require any additional configuration.
 
-On self-managed GitLab, you can choose to integrate with the free [diagrams.net](https://www.drawio.com/)
+On self-managed GitLab, you can choose to integrate with the free [diagrams.net](https://www.diagrams.net/)
 website, or use a self-managed diagrams.net site in offline environments.
 
 To set up the integration on a self-managed instance, you must:
@@ -34,7 +33,7 @@ After completing the integration, the diagrams.net editor opens with the URL you
 
 You can set up your own diagrams.net server to generate the diagrams.
 
-It's a required step for users on an offline environment self-managed GitLab installations.
+This is a required step for users on offline (or "air-gapped") self-managed GitLab installations.
 
 For example, to run a diagrams.net container in Docker, run the following command:
 
@@ -50,7 +49,7 @@ For more information, see [Run your own diagrams.net server with Docker](https:/
 ## Enable Diagrams.net integration
 
 1. Sign in to GitLab as an [Administrator](../../user/permissions.md) user.
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Settings > General**.
 1. Expand **Diagrams.net**.
 1. Select the **Enable Diagrams.net** checkbox.

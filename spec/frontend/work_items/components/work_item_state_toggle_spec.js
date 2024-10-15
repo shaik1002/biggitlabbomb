@@ -15,12 +15,10 @@ import {
 } from '~/work_items/constants';
 import updateWorkItemMutation from '~/work_items/graphql/update_work_item.mutation.graphql';
 import workItemByIidQuery from '~/work_items/graphql/work_item_by_iid.query.graphql';
-import workItemLinkedItemsQuery from '~/work_items/graphql/work_item_linked_items.query.graphql';
 import {
   updateWorkItemMutationResponse,
   mockBlockedByLinkedItem,
   workItemByIidResponseFactory,
-  workItemBlockedByLinkedItemsResponse,
 } from '../mock_data';
 
 describe('Work Item State toggle button component', () => {
@@ -28,13 +26,12 @@ describe('Work Item State toggle button component', () => {
 
   Vue.use(VueApollo);
 
-  const workItemQueryResponse = workItemByIidResponseFactory();
+  const workItemQueryResponse = workItemByIidResponseFactory({
+    linkedItems: mockBlockedByLinkedItem,
+  });
 
   const mutationSuccessHandler = jest.fn().mockResolvedValue(updateWorkItemMutationResponse);
   const querySuccessHander = jest.fn().mockResolvedValue(workItemQueryResponse);
-  const workItemBlockedByItemsSuccessHandler = jest
-    .fn()
-    .mockResolvedValue(workItemBlockedByLinkedItemsResponse);
 
   const findStateToggleButton = () => wrapper.findComponent(GlButton);
   const findModal = () => wrapper.findComponent(GlModal);
@@ -44,18 +41,20 @@ describe('Work Item State toggle button component', () => {
 
   const createComponent = ({
     mutationHandler = mutationSuccessHandler,
-    workItemLinkedItemsHandler = workItemBlockedByItemsSuccessHandler,
     canUpdate = true,
     workItemState = STATE_OPEN,
     workItemType = 'Task',
     hasComment = false,
+    isGroup = false,
   } = {}) => {
     wrapper = shallowMount(WorkItemStateToggle, {
       apolloProvider: createMockApollo([
         [updateWorkItemMutation, mutationHandler],
         [workItemByIidQuery, querySuccessHander],
-        [workItemLinkedItemsQuery, workItemLinkedItemsHandler],
       ]),
+      provide: {
+        isGroup,
+      },
       propsData: {
         workItemId: id,
         workItemIid: iid,
@@ -187,6 +186,17 @@ describe('Work Item State toggle button component', () => {
       expect(findModal().text()).toContain(
         'This task is currently blocked by the following items:',
       );
+    });
+
+    it('calls apollo mutation when primary button is clicked', () => {
+      findModal().vm.$emit('primary');
+
+      expect(mutationSuccessHandler).toHaveBeenCalledWith({
+        input: {
+          id,
+          stateEvent: STATE_EVENT_CLOSE,
+        },
+      });
     });
 
     describe.each`

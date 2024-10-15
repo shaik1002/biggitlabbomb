@@ -76,9 +76,6 @@ export default {
     canShowJobRetryButton() {
       return this.restJob.retry_path && !this.$apollo.queries.job.loading;
     },
-    jobConfirmationMessage() {
-      return this.restJob.status.action.confirmation_message;
-    },
     isManualJob() {
       return this.job?.manualJob;
     },
@@ -102,9 +99,9 @@ export default {
 </script>
 
 <template>
-  <div class="!gl-py-3">
-    <div class="gl-flex gl-justify-between gl-gap-3">
-      <div class="gl-flex gl-gap-3">
+  <div class="gl-py-3!">
+    <div class="gl-display-flex gl-justify-content-space-between gl-gap-3">
+      <div class="gl-display-flex gl-gap-3">
         <template v-if="jobHasPath">
           <gl-button
             v-if="restJob.erase_path"
@@ -147,8 +144,6 @@ export default {
             :is-manual-job="isManualJob"
             :category="retryButtonCategory"
             :href="restJob.retry_path"
-            :confirmation-message="jobConfirmationMessage"
-            :job-name="restJob.name"
             :modal-id="$options.forwardDeploymentFailureModalId"
             variant="confirm"
             data-testid="retry-button"
@@ -171,7 +166,7 @@ export default {
       <gl-button
         :aria-label="$options.i18n.toggleSidebar"
         category="secondary"
-        class="lg:gl-hidden"
+        class="gl-lg-display-none"
         icon="chevron-double-lg-right"
         @click="toggleSidebar"
       />

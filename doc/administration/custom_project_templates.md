@@ -2,7 +2,6 @@
 stage: Create
 group: Source Code
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
-description: "Configure project templates and make them available to all projects on your GitLab instance."
 ---
 
 # Custom instance-level project templates
@@ -29,7 +28,7 @@ might modify the template projects without understanding the side effects.
 
 To select the group to manage the project templates for your instance:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Settings > Templates**.
 1. Expand **Custom project templates**.
 1. Select a group to use.
@@ -57,7 +56,7 @@ Prerequisites:
 1. Review the project's
    [feature settings](../user/project/settings/index.md#configure-project-features-and-permissions).
    All enabled project features should be set to **Everyone With Access**, except
-   **GitLab Pages** and **Security and compliance**.
+   **GitLab Pages** and **Security and Compliance**.
 
 Repository and database information that are copied over to each new project are
 identical to the data exported with the [GitLab Project Import/Export](../user/project/settings/import_export.md).

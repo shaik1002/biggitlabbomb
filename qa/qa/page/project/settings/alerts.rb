@@ -14,6 +14,10 @@ module QA
             element 'enable-email-notification-checkbox'
           end
 
+          view 'app/assets/javascripts/alerts_settings/components/alerts_settings_wrapper.vue' do
+            element 'add-integration-button'
+          end
+
           view 'app/assets/javascripts/alerts_settings/components/alerts_settings_form.vue' do
             element 'integration-type-dropdown'
             element 'integration-name-field'
@@ -54,7 +58,7 @@ module QA
 
           def add_new_integration
             wait_for_requests
-            click_element('crud-form-toggle')
+            click_element('add-integration-button')
           end
 
           def select_http_endpoint

@@ -24,7 +24,7 @@
 
   &.gl-responsive-table-row-clickable {
     &:hover {
-      background-color: $gray-10;
+      background-color: $gray-light;
 
       .underline {
         text-decoration: underline;
@@ -80,6 +80,10 @@
       flex-wrap: wrap;
     }
   }
+
+  &.section-align-top {
+    align-self: flex-start;
+  }
 }
 
 .table-button-footer {
@@ -91,7 +95,7 @@
     display: block;
     align-self: stretch;
     min-height: 0;
-    background-color: $gray-50;
+    background-color: $gray-normal;
     border-top: 1px solid $border-color;
 
     .table-action-buttons {
@@ -149,6 +153,10 @@
     @include flex-max-width(60);
     text-align: right;
   }
+}
+
+.flex-truncate-parent {
+  display: flex;
 }
 
 .flex-truncate-child {

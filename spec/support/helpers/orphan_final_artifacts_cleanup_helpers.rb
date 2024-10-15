@@ -59,11 +59,8 @@ module OrphanFinalArtifactsCleanupHelpers
     expect_log_message("Resuming from last page marker: #{marker}", times: 1)
   end
 
-  def expect_resuming_from_cursor_position_log_message(filename, position)
-    expect_log_message(
-      "Resuming from last cursor position tracked in #{cursor_tracker_redis_key(filename)}: #{position}",
-      times: 1
-    )
+  def expect_resuming_from_cursor_position_log_message(position)
+    expect_log_message("Resuming from last cursor position: #{position}", times: 1)
   end
 
   def expect_no_resuming_from_marker_log_message
@@ -179,13 +176,9 @@ module OrphanFinalArtifactsCleanupHelpers
     end
   end
 
-  def fetch_saved_cursor_position(filename)
+  def fetch_saved_cursor_position
     Gitlab::Redis::SharedState.with do |redis|
-      redis.get(cursor_tracker_redis_key(filename))
+      redis.get(described_class::CURSOR_TRACKER_REDIS_KEY)
     end
-  end
-
-  def cursor_tracker_redis_key(filename)
-    "#{described_class::CURSOR_TRACKER_REDIS_KEY_PREFIX}#{File.basename(filename)}"
   end
 end

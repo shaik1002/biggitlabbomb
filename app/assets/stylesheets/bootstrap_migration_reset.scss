@@ -61,8 +61,8 @@ hr {
 code {
   padding: 2px 4px;
   color: $code-color;
-  background-color: var(--gl-background-color-strong);
-  border-radius: $gl-border-radius-base;
+  background-color: $gray-50;
+  border-radius: $border-radius-default;
 
   .code > &,
   .build-log & {

@@ -1,8 +1,14 @@
-import { GlDisclosureDropdown, GlModal, GlToggle, GlDisclosureDropdownItem } from '@gitlab/ui';
-import Vue, { nextTick } from 'vue';
+import {
+  GlDisclosureDropdown,
+  GlDropdownDivider,
+  GlModal,
+  GlToggle,
+  GlDisclosureDropdownItem,
+} from '@gitlab/ui';
+import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 
-import namespaceWorkItemTypesQueryResponse from 'test_fixtures/graphql/work_items/namespace_work_item_types.query.graphql.json';
+import projectWorkItemTypesQueryResponse from 'test_fixtures/graphql/work_items/project_work_item_types.query.graphql.json';
 
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { stubComponent } from 'helpers/stub_component';
@@ -13,9 +19,7 @@ import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import { isLoggedIn } from '~/lib/utils/common_utils';
 import toast from '~/vue_shared/plugins/global_toast';
 import WorkItemActions from '~/work_items/components/work_item_actions.vue';
-import WorkItemAbuseModal from '~/work_items/components/work_item_abuse_modal.vue';
 import WorkItemStateToggle from '~/work_items/components/work_item_state_toggle.vue';
-import CreateWorkItemModal from '~/work_items/components/create_work_item_modal.vue';
 import {
   STATE_OPEN,
   TEST_ID_CONFIDENTIALITY_TOGGLE_ACTION,
@@ -26,12 +30,10 @@ import {
   TEST_ID_NOTIFICATIONS_TOGGLE_FORM,
   TEST_ID_PROMOTE_ACTION,
   TEST_ID_TOGGLE_ACTION,
-  TEST_ID_REPORT_ABUSE,
-  TEST_ID_NEW_RELATED_WORK_ITEM,
 } from '~/work_items/constants';
 import updateWorkItemMutation from '~/work_items/graphql/update_work_item.mutation.graphql';
 import updateWorkItemNotificationsMutation from '~/work_items/graphql/update_work_item_notifications.mutation.graphql';
-import namespaceWorkItemTypesQuery from '~/work_items/graphql/namespace_work_item_types.query.graphql';
+import projectWorkItemTypesQuery from '~/work_items/graphql/project_work_item_types.query.graphql';
 import convertWorkItemMutation from '~/work_items/graphql/work_item_convert.mutation.graphql';
 
 import {
@@ -62,16 +64,12 @@ describe('WorkItemActions component', () => {
   const findWorkItemToggleOption = () => wrapper.findComponent(WorkItemStateToggle);
   const findCopyCreateNoteEmailButton = () =>
     wrapper.findByTestId(TEST_ID_COPY_CREATE_NOTE_EMAIL_ACTION);
-  const findReportAbuseButton = () => wrapper.findByTestId(TEST_ID_REPORT_ABUSE);
-  const findNewRelatedItemButton = () => wrapper.findByTestId(TEST_ID_NEW_RELATED_WORK_ITEM);
-  const findReportAbuseModal = () => wrapper.findComponent(WorkItemAbuseModal);
-  const findCreateWorkItemModal = () => wrapper.findComponent(CreateWorkItemModal);
   const findMoreDropdown = () => wrapper.findByTestId('work-item-actions-dropdown');
   const findMoreDropdownTooltip = () => getBinding(findMoreDropdown().element, 'gl-tooltip');
   const findDropdownItems = () => wrapper.findAll('[data-testid="work-item-actions-dropdown"] > *');
   const findDropdownItemsActual = () =>
     findDropdownItems().wrappers.map((x) => {
-      if (x.element.tagName === 'GL-DROPDOWN-DIVIDER-STUB') {
+      if (x.is(GlDropdownDivider)) {
         return { divider: true };
       }
 
@@ -88,7 +86,7 @@ describe('WorkItemActions component', () => {
     hide: jest.fn(),
   };
 
-  const typesQuerySuccessHandler = jest.fn().mockResolvedValue(namespaceWorkItemTypesQueryResponse);
+  const typesQuerySuccessHandler = jest.fn().mockResolvedValue(projectWorkItemTypesQueryResponse);
   const convertWorkItemMutationSuccessHandler = jest
     .fn()
     .mockResolvedValue(convertWorkItemMutationResponse);
@@ -123,12 +121,11 @@ describe('WorkItemActions component', () => {
     workItemCreateNoteEmail = mockWorkItemCreateNoteEmail,
     hideSubscribe = undefined,
     hasChildren = false,
-    canCreateRelatedItem = true,
   } = {}) => {
     wrapper = shallowMountExtended(WorkItemActions, {
       isLoggedIn: isLoggedIn(),
       apolloProvider: createMockApollo([
-        [namespaceWorkItemTypesQuery, typesQuerySuccessHandler],
+        [projectWorkItemTypesQuery, typesQuerySuccessHandler],
         [convertWorkItemMutation, convertWorkItemMutationHandler],
         [updateWorkItemNotificationsMutation, notificationsMutationHandler],
         [updateWorkItemMutation, lockDiscussionMutationHandler],
@@ -152,13 +149,13 @@ describe('WorkItemActions component', () => {
         workItemCreateNoteEmail,
         hideSubscribe,
         hasChildren,
-        canCreateRelatedItem,
+      },
+      provide: {
+        isGroup: false,
+        glFeatures: { workItemsBeta: true, workItemsMvc2: true },
       },
       mocks: {
         $toast,
-      },
-      provide: {
-        fullPath: 'gitlab-org/gitlab-test',
       },
       stubs: {
         GlModal: stubComponent(GlModal, {
@@ -221,27 +218,10 @@ describe('WorkItemActions component', () => {
         divider: true,
       },
       {
-        testId: TEST_ID_REPORT_ABUSE,
-        text: 'Report abuse',
-      },
-      {
         testId: TEST_ID_DELETE_ACTION,
         text: 'Delete task',
       },
     ]);
-  });
-
-  it('includes a new related item option when the work item is the correct type', () => {
-    createComponent({ workItemType: 'Epic' });
-
-    expect(findDropdownItemsActual()).toEqual(
-      expect.arrayContaining([
-        {
-          testId: TEST_ID_NEW_RELATED_WORK_ITEM,
-          text: 'New related Epic',
-        },
-      ]),
-    );
   });
 
   describe('lock discussion action', () => {
@@ -520,35 +500,6 @@ describe('WorkItemActions component', () => {
       createComponent();
 
       expect(findMoreDropdownTooltip().value).toBe('More actions');
-    });
-  });
-
-  describe('report abuse action', () => {
-    it('renders the report abuse button', () => {
-      createComponent();
-
-      expect(findReportAbuseButton().exists()).toBe(true);
-      expect(findReportAbuseModal().exists()).toBe(false);
-    });
-
-    it('opens the report abuse modal', async () => {
-      createComponent();
-
-      findReportAbuseButton().vm.$emit('action');
-      await nextTick();
-
-      expect(wrapper.emitted('toggleReportAbuseModal')).toEqual([[true]]);
-    });
-  });
-
-  describe('new related item', () => {
-    it('opens the create work item modal', async () => {
-      createComponent({ workItemType: 'Epic' });
-
-      findNewRelatedItemButton().vm.$emit('action');
-      await nextTick();
-
-      expect(findCreateWorkItemModal().props('visible')).toBe(true);
     });
   });
 });

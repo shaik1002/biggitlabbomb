@@ -1,5 +1,5 @@
 ---
-stage: Govern
+stage: Verify
 group: Pipeline Security
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -98,16 +98,9 @@ assume role:
 
 ## Troubleshooting
 
-### Error: `Not authorized to perform sts:AssumeRoleWithWebIdentity`
+### `An error occurred (AccessDenied) when calling the AssumeRoleWithWebIdentity operation: Not authorized to perform sts:AssumeRoleWithWebIdentity`
 
-If you see this error:
-
-```plaintext
-An error occurred (AccessDenied) when calling the AssumeRoleWithWebIdentity operation:
-Not authorized to perform sts:AssumeRoleWithWebIdentity
-```
-
-It can occur for multiple reasons:
+This error can occur for multiple reasons:
 
 - The cloud administrator has not configured the project to use OIDC with GitLab.
 - The role is restricted from being run on the branch or tag. See [configure a conditional role](../index.md).

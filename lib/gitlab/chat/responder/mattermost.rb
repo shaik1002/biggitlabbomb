@@ -40,7 +40,7 @@ module Gitlab
                   {
                     short: true,
                     title: "ID",
-                    value: build_ref.to_s
+                    value: "#{build_ref}"
                   },
                   {
                     short: true,
@@ -70,7 +70,7 @@ module Gitlab
                   {
                     short: true,
                     title: "ID",
-                    value: build_ref.to_s
+                    value: "#{build_ref}"
                   },
                   {
                     short: true,

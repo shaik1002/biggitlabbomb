@@ -12,7 +12,7 @@ DETAILS:
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
 Merge conflicts happen when the two branches in a merge request (the source and target) each have different
-changes. You must decide which change to accept. In a merge request, Git compares
+changes, and you must decide which change to accept. In a merge request, Git compares
 the two versions of the files line by line. In most cases, GitLab can merge changes
 together. However, if two branches both change the same lines, GitLab blocks the merge,
 and you must choose which change you want to keep:
@@ -47,7 +47,7 @@ When you resolve a conflict, you delete:
 
 ## Conflicts you can resolve in the user interface
 
-If your merge conflict meets all of these conditions, you can resolve the
+If your merge conflict meets all of the following conditions, you can resolve the
 merge conflict in the GitLab user interface:
 
 - The file is text, not binary.
@@ -58,6 +58,16 @@ merge conflict in the GitLab user interface:
 
 If any file in your merge request contains conflicts, but can't meet all of these
 criteria, you must resolve the conflict manually.
+
+## Conflicts GitLab can't detect
+
+GitLab does not detect conflicts when both branches rename a file to different names.
+For example, these changes don't create a conflict:
+
+1. Branch `one` renames `example.txt` to `example1.txt`
+1. Branch `two` renames `example.txt` to `example_old.txt`.
+
+When these branches merge, both `example1.txt` and `example_old` are present.
 
 ## Methods of resolving conflicts
 
@@ -86,17 +96,17 @@ To resolve less-complex conflicts from the GitLab user interface:
 1. For each conflict, select **Use ours** or **Use theirs** to mark the version
    of the conflicted lines you want to keep. This decision is known as
    "resolving the conflict."
-1. When you've resolved all the conflicts, enter a **Commit message**.
+1. When you've resolved all of the conflicts, enter a **Commit message**.
 1. Select **Commit to source branch**.
 
 Resolving conflicts merges the target branch of the merge request into the
 source branch, using the version of the text you chose. If the source branch is
-`feature` and the target branch is `main`, these actions are like running
+`feature` and the target branch is `main`, these actions are similar to running
 `git switch feature; git merge main` locally.
 
 ### In the inline editor
 
-Some merge conflicts are more complex, and you must manually edit lines to
+Some merge conflicts are more complex, and you must manually modify lines to
 resolve their conflicts. The merge conflict resolution editor helps you resolve
 these complex conflicts in the GitLab interface:
 
@@ -116,7 +126,7 @@ these complex conflicts in the GitLab interface:
 
 ### From the command line
 
-While you can resolve most conflicts through the GitLab user interface, some are too complex.
+While most conflicts can be resolved through the GitLab user interface, some are too complex.
 Complex conflicts are best fixed locally, from the command line, to give you the
 most control over each change.
 

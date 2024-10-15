@@ -21,7 +21,7 @@ module Users
 
     # Asynchronously destroys +user+
     # Migrating the associated user records, and post-migration cleanup is
-    # handled by the Users::MigrateRecordsToGhostUserInBatchesWorker cron worker.
+    # handled by the Users::MigrateRecordsToGhostUserWorker cron worker.
     #
     # The operation will fail if the user is the sole owner of any groups. To
     # force the groups to be destroyed, pass `delete_solo_owned_groups: true` in
@@ -43,23 +43,15 @@ module Users
         raise Gitlab::Access::AccessDeniedError, "#{current_user} tried to destroy user #{user}!"
       end
 
-      if user.solo_owned_organizations.present?
-        user.errors.add(:base, 'You must transfer ownership of organizations before you can remove user')
-      end
-
       if !delete_solo_owned_groups && user.solo_owned_groups.present?
         user.errors.add(:base, 'You must transfer ownership or delete groups before you can remove user')
+        return user
       end
-
-      return user if user.errors.any?
 
       user.block
 
       # Load the records. Groups are unavailable after membership is destroyed.
       solo_owned_groups = user.solo_owned_groups.load
-
-      # Load the project_bot user resource. It is unavailable after membership is destroyed.
-      options[:project_bot_resource] ||= user.resource_bot_resource
 
       user.members.each_batch { |batch| batch.destroy_all } # rubocop:disable Cop/DestroyAll
 
@@ -74,7 +66,12 @@ module Users
 
       yield(user) if block_given?
 
-      create_ghost_user(user, options)
+      hard_delete = options.fetch(:hard_delete, false)
+      Users::GhostUserMigration.create!(
+        user: user,
+        initiator_user: current_user,
+        hard_delete: hard_delete
+      )
 
       update_metrics
     end
@@ -82,17 +79,6 @@ module Users
     private
 
     attr_reader :scheduled_records_gauge, :lag_gauge
-
-    def create_ghost_user(user, options)
-      hard_delete = options.fetch(:hard_delete, false)
-      Users::GhostUserMigration.create!(
-        user: user,
-        initiator_user: current_user,
-        hard_delete: hard_delete
-      )
-    rescue ActiveRecord::RecordNotUnique
-      # GhostUserMigration was already created by other worker process. Do nothing
-    end
 
     def update_metrics
       update_scheduled_records_gauge

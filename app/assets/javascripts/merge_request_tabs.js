@@ -5,7 +5,7 @@ import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
 import { createAlert } from '~/alert';
 import { getCookie, isMetaClick, parseBoolean, scrollToElement } from '~/lib/utils/common_utils';
-import { parseUrlPathname, visitUrl } from '~/lib/utils/url_utility';
+import { parseUrlPathname } from '~/lib/utils/url_utility';
 import createEventHub from '~/helpers/event_hub_factory';
 import { renderGFM } from '~/behaviors/markdown/render_gfm';
 import BlobForkSuggestion from './blob/blob_fork_suggestion';
@@ -119,7 +119,6 @@ function mountPipelines() {
           targetProjectFullPath: mrWidgetData?.target_project_full_path || '',
           projectId: pipelineTableViewEl.dataset.projectId,
           mergeRequestId: mrWidgetData ? mrWidgetData.iid : null,
-          isMergeRequestTable: true,
         },
       });
     },
@@ -132,7 +131,7 @@ function mountPipelines() {
   return table;
 }
 
-export function destroyPipelines(app) {
+function destroyPipelines(app) {
   if (app && app.$destroy) {
     app.$destroy();
 
@@ -168,12 +167,12 @@ function loadDiffs({ url, tabs }) {
   });
 }
 
-export function toggleLoader(state) {
+function toggleLoader(state) {
   $('.mr-loading-status .loading').toggleClass('hide', !state);
 }
 
 export function getActionFromHref(pathName) {
-  let action = pathName.match(/\/(\d+)\/(commits|diffs|pipelines|reports).*$/);
+  let action = pathName.match(/\/(\d+)\/(commits|diffs|pipelines).*$/);
 
   if (action) {
     action = action.at(-1).replace(/(^\/|\.html)/g, '');
@@ -184,10 +183,9 @@ export function getActionFromHref(pathName) {
   return action;
 }
 
-export const pageBundles = {
+const pageBundles = {
   show: () => import(/* webpackPrefetch: true */ '~/mr_notes/mount_app'),
   diffs: () => import(/* webpackPrefetch: true */ '~/diffs'),
-  reports: () => import('ee_else_ce/merge_requests/reports'),
 };
 
 export default class MergeRequestTabs {
@@ -210,7 +208,6 @@ export default class MergeRequestTabs {
     this.pageLayout = document.querySelector('.layout-page');
     this.expandSidebar = document.querySelectorAll('.js-expand-sidebar, .js-sidebar-toggle');
     this.paddingTop = 16;
-    this.actionRegex = /\/(commits|diffs|pipelines|reports)(\.html)?\/?$/;
 
     this.scrollPositions = {};
 
@@ -285,7 +282,7 @@ export default class MergeRequestTabs {
 
       if (isMetaClick(e)) {
         const targetLink = e.currentTarget.getAttribute('href');
-        visitUrl(targetLink, true);
+        window.open(targetLink, '_blank');
       } else if (action) {
         const href = e.currentTarget.getAttribute('href');
         this.tabShown(action, href);
@@ -334,7 +331,9 @@ export default class MergeRequestTabs {
           });
       }
 
-      this.expandSidebar?.forEach((el) => el.classList.toggle('!gl-hidden', action !== 'show'));
+      this.expandSidebar?.forEach((el) =>
+        el.classList.toggle('gl-display-none!', action !== 'show'),
+      );
 
       if (action === 'commits') {
         if (!this.commitsLoaded) {
@@ -367,8 +366,6 @@ export default class MergeRequestTabs {
         // this.hideSidebar();
         this.resetViewContainer();
         this.mountPipelinesView();
-      } else if (action === 'reports') {
-        this.resetViewContainer();
       } else {
         const notesTab = this.mergeRequestTabs.querySelector('.notes-tab');
         const notesPane = this.mergeRequestTabPanes.querySelector('#notes');
@@ -437,20 +434,18 @@ export default class MergeRequestTabs {
   setCurrentAction(action) {
     this.currentAction = action;
 
-    const pathname = location.pathname.replace(/\/*$/, '');
-
     // Remove a trailing '/commits' '/diffs' '/pipelines'
-    let newStatePathname = pathname.replace(this.actionRegex, '');
+    let newState = location.pathname.replace(/\/(commits|diffs|pipelines)(\.html)?\/?$/, '');
 
     // Append the new action if we're on a tab other than 'notes'
     if (this.currentAction !== 'show' && this.currentAction !== 'new') {
-      newStatePathname += `/${this.currentAction}`;
+      newState += `/${this.currentAction}`;
     }
 
     // Ensure parameters and hash come along for the ride
-    const newState = newStatePathname + location.search + location.hash;
+    newState += location.search + location.hash;
 
-    if (pathname !== newStatePathname) {
+    if (window.location.pathname !== newState) {
       window.history.pushState(
         {
           url: newState,

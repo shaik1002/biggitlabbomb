@@ -15,7 +15,7 @@ module Gitlab
         ordered_relation = add_default_order(relation, skip_default_order: skip_default_order)
 
         paginate_with_limit_optimization(ordered_relation, without_count: without_count).tap do |data|
-          add_pagination_headers(data, exclude_total_headers, without_count)
+          add_pagination_headers(data, exclude_total_headers)
         end
       end
 
@@ -57,21 +57,16 @@ module Gitlab
         relation
       end
 
-      def add_pagination_headers(paginated_data, exclude_total_headers, without_count)
+      def add_pagination_headers(paginated_data, exclude_total_headers)
         Gitlab::Pagination::OffsetHeaderBuilder.new(
           request_context: self, per_page: paginated_data.limit_value, page: paginated_data.current_page,
           next_page: paginated_data.next_page, prev_page: paginated_data.prev_page,
           total: total_count(paginated_data), total_pages: total_pages(paginated_data)
-        ).execute(exclude_total_headers: exclude_total_headers, data_without_counts: without_count || data_without_counts?(paginated_data))
+        ).execute(exclude_total_headers: exclude_total_headers, data_without_counts: data_without_counts?(paginated_data))
       end
 
       def data_without_counts?(paginated_data)
-        paginated_data.is_a?(Kaminari::PaginatableWithoutCount) || paginatable_array_exceeds_count?(paginated_data)
-      end
-
-      def paginatable_array_exceeds_count?(paginated_data)
-        paginated_data.is_a?(Kaminari::PaginatableArray) &&
-          paginated_data.total_count >= Kaminari::ActiveRecordRelationMethods::MAX_COUNT_LIMIT
+        paginated_data.is_a?(Kaminari::PaginatableWithoutCount)
       end
 
       def total_count(paginated_data)

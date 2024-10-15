@@ -61,12 +61,12 @@ RSpec.shared_examples 'User views a wiki page' do
 
       first(:link, text: 'three').click
 
-      expect(find('[data-testid="page-heading"]')).to have_content('three')
+      expect(find('[data-testid="wiki-page-title"]')).to have_content('three')
 
       click_on('Edit')
 
       expect(page).to have_current_path(%r{one/two/three-test})
-      expect(page).to have_css('#wiki_title')
+      expect(page).to have_content('Edit Page')
 
       fill_in('Content', with: 'Updated Wiki Content')
       click_on('Save changes')
@@ -115,7 +115,7 @@ RSpec.shared_examples 'User views a wiki page' do
       click_on('image')
 
       expect(page).to have_current_path(%r{wikis/#{path}})
-      expect(page).to have_content('New page')
+      expect(page).to have_content('New Page')
     end
   end
 
@@ -215,7 +215,7 @@ RSpec.shared_examples 'User views a wiki page' do
     it 'preserves the special characters' do
       visit(wiki_page_path(wiki, wiki_page))
 
-      expect(page).to have_css('[data-testid="page-heading"]', text: title)
+      expect(page).to have_css('[data-testid="wiki-page-title"]', text: title)
       expect(page).to have_css('.wiki-pages li', text: title)
     end
   end
@@ -230,7 +230,7 @@ RSpec.shared_examples 'User views a wiki page' do
     it 'safely displays the page' do
       visit(wiki_page_path(wiki, wiki_page))
 
-      expect(page).to have_selector('[data-testid="page-heading"]', text: title)
+      expect(page).to have_selector('[data-testid="wiki-page-title"]', text: title)
       expect(page).to have_content('foo bar')
     end
   end
@@ -244,25 +244,6 @@ RSpec.shared_examples 'User views a wiki page' do
       visit(wiki_page_path(wiki, wiki_page, action: :history))
 
       expect(page).to have_content('<script>alert(true)<script>')
-    end
-  end
-
-  context 'when a page has headings' do
-    before do
-      wiki_page.update(content: "# Heading 1\n\n## Heading 1.1\n\n### Heading 1.1.1\n\n# Heading 2") # rubocop:disable Rails/SaveBang -- not an ActiveRecord
-    end
-
-    it 'displays the table of contents for the page' do
-      visit(wiki_page_path(wiki, wiki_page))
-
-      within '.js-wiki-toc' do
-        expect(page).to have_content('On this page')
-
-        expect(page).to have_content('Heading 1')
-        expect(page).to have_content('Heading 1.1')
-        expect(page).to have_content('Heading 1.1.1')
-        expect(page).to have_content('Heading 2')
-      end
     end
   end
 
@@ -296,6 +277,6 @@ RSpec.shared_examples 'User views a wiki page' do
 
     click_link "Create your first page"
 
-    expect(page).to have_content('New page')
+    expect(page).to have_content('New Page')
   end
 end

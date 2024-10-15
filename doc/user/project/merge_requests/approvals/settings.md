@@ -146,7 +146,7 @@ Prerequisites:
    - Password authentication, see
      [sign-in restrictions documentation](../../../../administration/settings/sign_in_restrictions.md#password-authentication-enabled).
    - SAML authentication for GitLab.com groups, see
-     [SAML SSO for GitLab.com groups documentation](../../../../user/group/saml_sso/index.md).
+     [SAML SSO for GitLab.com groups documentation](../../../../user/group/saml_sso).
    - SAML authentication for self-managed instances, see [SAML SSO for self-managed GitLab instances](../../../../integration/saml.md).
 1. On the left sidebar, select **Settings > Merge requests**.
 1. In the **Merge request approvals** section, scroll to **Approval settings** and
@@ -169,12 +169,9 @@ after more changes are added to the merge request:
    clear the **Remove all approvals** checkbox.
 1. Select **Save changes**.
 
-GitLab uses [`git patch-id`](https://git-scm.com/docs/git-patch-id) to identify diffs
-in merge requests. This value is a reasonably stable and unique identifier, and it enables
-smarter decisions about resetting approvals inside a merge request. When you push new changes
-to a merge request, the `patch-id` is evaluated against the previous `patch-id` to determine
-if the approvals should be reset. This enables GitLab to make better reset decisions when
-you perform commands like `git rebase` or `git merge <target>` on a feature branch.
+Approvals aren't removed when a merge request is
+[rebased from the UI](../methods/index.md#rebasing-in-semi-linear-merge-methods)
+However, approvals are reset if the target branch changes.
 
 ## Remove approvals by Code Owners if their files changed
 

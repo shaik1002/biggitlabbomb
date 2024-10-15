@@ -325,7 +325,7 @@ RSpec.describe 'Pipeline Schedules', :js, feature_category: :continuous_integrat
             end
 
             it 'shows Not Found page' do
-              expect(page).to have_content('Page not found')
+              expect(page).to have_content('Page Not Found')
             end
           end
         end
@@ -344,7 +344,7 @@ RSpec.describe 'Pipeline Schedules', :js, feature_category: :continuous_integrat
   end
 
   def visit_new_pipeline_schedule
-    visit new_project_pipeline_schedule_path(project)
+    visit new_project_pipeline_schedule_path(project, pipeline_schedule)
   end
 
   def edit_pipeline_schedule

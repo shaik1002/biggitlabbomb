@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Resolvers::Clusters::AgentsResolver, feature_category: :deployment_management do
+RSpec.describe Resolvers::Clusters::AgentsResolver do
   include GraphqlHelpers
 
   specify do
@@ -49,7 +49,7 @@ RSpec.describe Resolvers::Clusters::AgentsResolver, feature_category: :deploymen
   end
 end
 
-RSpec.describe Resolvers::Clusters::AgentsResolver.single, feature_category: :deployment_management do
+RSpec.describe Resolvers::Clusters::AgentsResolver.single do
   it { expect(described_class).to be < Resolvers::Clusters::AgentsResolver }
 
   it { expect(described_class.type).to eq(::Types::Clusters::AgentType) }

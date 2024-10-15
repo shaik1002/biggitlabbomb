@@ -207,8 +207,11 @@ export default {
     <p>
       {{ modalText }}
     </p>
-    <form class="js-quick-submit gl-flex gl-flex-col" @submit.prevent="registerTimeSpent">
-      <div class="gl-flex gl-gap-3">
+    <form
+      class="gl-display-flex gl-flex-direction-column js-quick-submit"
+      @submit.prevent="registerTimeSpent"
+    >
+      <div class="gl-display-flex gl-gap-3">
         <gl-form-group
           key="time-spent"
           label-for="time-spent"
@@ -241,7 +244,7 @@ export default {
         </gl-form-group>
       </div>
       <gl-form-group :label="s__('CreateTimelogForm|Summary')" optional label-for="summary">
-        <gl-form-textarea id="summary" v-model="summary" rows="3" no-resize />
+        <gl-form-textarea id="summary" v-model="summary" rows="3" :no-resize="true" />
       </gl-form-group>
       <gl-alert v-if="saveError" variant="danger" class="gl-mb-3" :dismissible="false">
         {{ saveError }}

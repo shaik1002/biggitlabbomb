@@ -42,13 +42,15 @@ module Gitlab
       end
     end
 
-    def self.file_size_limit
-      Gitlab.config.extra['maximum_text_highlight_size_kilobytes'].kilobytes
-    end
-
     private
 
     attr_reader :context
+
+    def self.file_size_limit
+      Gitlab.config.extra['maximum_text_highlight_size_kilobytes']
+    end
+
+    private_class_method :file_size_limit
 
     def custom_language
       return unless @language

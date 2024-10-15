@@ -3,19 +3,15 @@
 require 'spec_helper'
 
 RSpec.describe Groups::ImportExport::ExportService, feature_category: :importers do
-  let_it_be(:user) { create(:user) }
-  let_it_be_with_refind(:group) { create(:group) }
-
-  let(:exported_by_admin) { false }
-
   describe '#async_execute' do
+    let(:user) { create(:user) }
+    let(:group) { create(:group) }
+
     context 'when the job can be successfully scheduled' do
-      let(:export_service) { described_class.new(group: group, user: user, exported_by_admin: exported_by_admin) }
+      let(:export_service) { described_class.new(group: group, user: user) }
 
       it 'enqueues an export job' do
-        expect(GroupExportWorker)
-          .to receive(:perform_async)
-          .with(user.id, group.id, { exported_by_admin: exported_by_admin })
+        allow(GroupExportWorker).to receive(:perform_async).with(user.id, group.id, {})
 
         export_service.async_execute
       end
@@ -23,20 +19,10 @@ RSpec.describe Groups::ImportExport::ExportService, feature_category: :importers
       it 'returns truthy' do
         expect(export_service.async_execute).to be_present
       end
-
-      context 'when the user was an admin' do
-        let(:exported_by_admin) { true }
-
-        it 'passes `exported_by_admin` correctly in the `params` hash' do
-          expect(GroupExportWorker).to receive(:perform_async).with(user.id, group.id, { exported_by_admin: true })
-
-          export_service.async_execute
-        end
-      end
     end
 
     context 'when the job cannot be scheduled' do
-      let(:export_service) { described_class.new(group: group, user: user, exported_by_admin: exported_by_admin) }
+      let(:export_service) { described_class.new(group: group, user: user) }
 
       before do
         allow(GroupExportWorker).to receive(:perform_async).and_return(nil)
@@ -49,18 +35,13 @@ RSpec.describe Groups::ImportExport::ExportService, feature_category: :importers
   end
 
   describe '#execute' do
+    let!(:user) { create(:user) }
+    let(:group) { create(:group) }
     let(:shared) { Gitlab::ImportExport::Shared.new(group) }
     let(:archive_path) { shared.archive_path }
-    let(:service) do
-      described_class.new(
-        group: group,
-        user: user,
-        exported_by_admin: exported_by_admin,
-        params: { shared: shared }
-      )
-    end
+    let(:service) { described_class.new(group: group, user: user, params: { shared: shared }) }
 
-    before_all do
+    before do
       group.add_owner(user)
     end
 
@@ -98,46 +79,6 @@ RSpec.describe Groups::ImportExport::ExportService, feature_category: :importers
       service.execute
     end
 
-    it 'creates an audit event' do
-      expect(Gitlab::Audit::Auditor).to receive(:audit).with(
-        {
-          name: 'group_export_created',
-          author: user,
-          scope: group,
-          target: group,
-          message: 'Group file export was created'
-        }
-      )
-
-      service.execute
-    end
-
-    context 'when the user was an admin' do
-      let(:exported_by_admin) { true }
-
-      it 'logs group exported audit event' do
-        expect(Gitlab::Audit::Auditor).to receive(:audit).with(hash_including(name: 'group_export_created'))
-
-        service.execute
-      end
-
-      context 'when silent exports are enabled' do
-        before do
-          stub_application_setting(silent_admin_exports_enabled: true)
-        end
-
-        it 'does not create an audit event' do
-          expect(Gitlab::Audit::Auditor).not_to receive(:audit)
-
-          expect { service.execute }.not_to change { AuditEvent.count }
-        end
-
-        it 'does not create any Todos' do
-          expect { service.execute }.not_to change { Todo.count }
-        end
-      end
-    end
-
     context 'when saver succeeds' do
       it 'saves the group in the file system' do
         service.execute
@@ -149,16 +90,8 @@ RSpec.describe Groups::ImportExport::ExportService, feature_category: :importers
     end
 
     context 'when user does not have admin_group permission' do
-      let_it_be(:another_user) { create(:user) }
-
-      let(:service) do
-        described_class.new(
-          group: group,
-          user: another_user,
-          exported_by_admin: exported_by_admin,
-          params: { shared: shared }
-        )
-      end
+      let!(:another_user) { create(:user) }
+      let(:service) { described_class.new(group: group, user: another_user, params: { shared: shared }) }
 
       let(:expected_message) do
         "User with ID: %s does not have required permissions for Group: %s with ID: %s" %
@@ -240,7 +173,7 @@ RSpec.describe Groups::ImportExport::ExportService, feature_category: :importers
     end
 
     context 'when there is an existing export file' do
-      subject(:export_service) { described_class.new(group: group, user: user, exported_by_admin: exported_by_admin) }
+      subject(:export_service) { described_class.new(group: group, user: user) }
 
       let(:import_export_upload) do
         create(

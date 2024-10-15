@@ -28,15 +28,13 @@ RSpec.describe API::GroupImport, feature_category: :importers do
 
   describe 'POST /groups/import' do
     let(:file_upload) { fixture_file_upload(file) }
-    let(:base_params) do
+    let(:params) do
       {
         path: 'test-import-group',
         name: 'test-import-group',
         file: fixture_file_upload(file)
       }
     end
-
-    let(:params) { base_params }
 
     subject { upload_archive(file_upload, workhorse_headers, params) }
 
@@ -245,9 +243,11 @@ RSpec.describe API::GroupImport, feature_category: :importers do
     end
 
     context 'when organization_id is missing' do
-      context 'and current organization is defined', :with_current_organization do
+      context 'and current organization is defined' do
+        let_it_be(:current_organization) { create(:organization, users: [user]) }
+
         before do
-          current_organization.users << user
+          allow(Current).to receive(:organization_id).and_return(current_organization.id)
         end
 
         it 'assigns current organization' do
@@ -256,22 +256,7 @@ RSpec.describe API::GroupImport, feature_category: :importers do
           expect(Group.last.organization_id).to eq(current_organization.id)
         end
 
-        context 'when importing to a parent group' do
-          let_it_be(:group) { create(:group, organization: current_organization) }
-
-          before do
-            group.add_owner(user)
-          end
-
-          it 'creates new group and accepts request' do
-            params[:parent_id] = group.id
-
-            subject
-
-            expect(response).to have_gitlab_http_status(:accepted)
-            expect(group.children.count).to eq(1)
-          end
-        end
+        include_examples 'when all params are correct'
       end
 
       context 'and current organization is not defined' do
@@ -282,25 +267,6 @@ RSpec.describe API::GroupImport, feature_category: :importers do
 
           expect(Group.last.organization_id).to eq(default_organization.id)
         end
-      end
-    end
-
-    context 'when organization_id param is different than parent group organization' do
-      let_it_be(:current_organization) { create(:organization, users: [user]) }
-      let(:params) { base_params.merge(organization_id: current_organization.id) }
-
-      before do
-        group.add_owner(user)
-      end
-
-      it 'rejects the request' do
-        params[:parent_id] = group.id
-
-        subject
-
-        error_message = "You can't create a group in a different organization than the parent group."
-        expect(response).to have_gitlab_http_status(:bad_request)
-        expect(json_response["message"]).to include(error_message)
       end
     end
 

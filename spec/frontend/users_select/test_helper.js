@@ -10,9 +10,7 @@ import UsersSelect from '~/users_select';
 const getUserSearchHTML = memoize((fixture) => {
   const parser = new DOMParser();
 
-  const el = parser
-    .parseFromString(fixture, 'text/html')
-    .querySelector('[data-testid=merge-request-assignee]');
+  const el = parser.parseFromString(fixture, 'text/html').querySelector('.assignee');
 
   return el.outerHTML;
 });
@@ -90,7 +88,7 @@ export const findDropdownItemsModel = () =>
 export const setAssignees = (...users) => {
   findAssigneesInputs().forEach((x) => x.remove());
 
-  const container = document.querySelector('.selectbox');
+  const container = document.querySelector('.js-sidebar-assignee-data');
 
   container.prepend(
     ...users.map((user) => {
@@ -147,7 +145,6 @@ export const createInputsModelExpectation = (users) =>
       can_update_merge_request: user.can_update_merge_request.toString(),
       id: user.id.toString(),
       name: user.name,
-      meta: user.name,
       show_status: user.show_status.toString(),
       state: user.state,
       locked: user.locked.toString(),

@@ -27,7 +27,6 @@ RSpec.describe MergeRequests::MergeService, feature_category: :code_review_workf
 
     shared_examples 'with valid params' do
       before do
-        merge_request.update!(merge_jid: 'abc123')
         allow(service).to receive(:execute_hooks)
         expect(merge_request).to receive(:update_and_mark_in_progress_merge_commit_sha).twice.and_call_original
 
@@ -47,10 +46,6 @@ RSpec.describe MergeRequests::MergeService, feature_category: :code_review_workf
         email = ActionMailer::Base.deliveries.last
         expect(email.to.first).to eq(user2.email)
         expect(email.subject).to include(merge_request.title)
-      end
-
-      it 'clears merge_jid' do
-        expect(merge_request.reload.merge_jid).to be_nil
       end
 
       context 'note creation' do
@@ -250,130 +245,41 @@ RSpec.describe MergeRequests::MergeService, feature_category: :code_review_workf
       end
     end
 
-    context 'closes related issues', :sidekiq_inline do
-      let_it_be_with_refind(:group) { create(:group) }
-      let_it_be_with_refind(:other_project) { create(:project, group: group) }
-      let_it_be(:other_issue) { create(:issue, project: other_project) }
-      let_it_be(:group_issue) { create(:issue, :group_level, namespace: group) }
-      let(:issue1) { create(:issue, project: project) }
-      let(:issue2) { create(:issue, project: project) }
+    context 'closes related issues' do
+      let(:issue) { create(:issue, project: project) }
       let(:commit) do
-        double('commit', safe_message: "Fixes #{issue1.to_reference}", date: Time.current, authored_date: Time.current)
+        double('commit', safe_message: "Fixes #{issue.to_reference}", date: Time.current, authored_date: Time.current)
       end
 
       before do
         allow(project).to receive(:default_branch).and_return(merge_request.target_branch)
         allow(merge_request).to receive(:commits).and_return([commit])
-        create(
-          :merge_requests_closing_issues,
-          issue: issue2,
-          merge_request: merge_request,
-          from_mr_description: false
-        )
       end
 
-      it 'closes GitLab issue tracker issues' do
+      it 'closes GitLab issue tracker issues', :sidekiq_inline do
         merge_request.cache_merge_request_closes_issues!
 
         expect do
           service.execute(merge_request)
-        end.to change { issue1.reload.closed? }.from(false).to(true).and(
-          change { issue2.reload.closed? }.from(false).to(true)
+        end.to change { issue.reload.closed? }.from(false).to(true)
+      end
+
+      it 'does not close issues when merge_requests_closing_issues.closes_work_item = false', :sidekiq_inline do
+        not_closing_issue = create(:issue, project: project)
+        create(
+          :merge_requests_closing_issues,
+          issue: not_closing_issue,
+          merge_request: merge_request,
+          closes_work_item: false
         )
-      end
 
-      context 'when closing issues exist in a namespace the merging user doesn\'t have access to' do
-        context 'when the closing work item was created in the merge request description' do
-          before do
-            create(
-              :merge_requests_closing_issues,
-              issue: other_issue,
-              merge_request: merge_request,
-              from_mr_description: true
-            )
-            create(
-              :merge_requests_closing_issues,
-              issue: group_issue,
-              merge_request: merge_request,
-              from_mr_description: true
-            )
-          end
+        merge_request.cache_merge_request_closes_issues!
 
-          it 'does not close the related issues' do
-            merge_request.cache_merge_request_closes_issues!
-
-            expect do
-              service.execute(merge_request)
-            end.to not_change { other_issue.reload.opened? }.from(true).and(
-              not_change { group_issue.reload.opened? }.from(true)
-            )
-          end
-        end
-
-        context 'when the closing work item was not created in the merge request description' do
-          before do
-            create(
-              :merge_requests_closing_issues,
-              issue: other_issue,
-              merge_request: merge_request,
-              from_mr_description: false
-            )
-            create(
-              :merge_requests_closing_issues,
-              issue: group_issue,
-              merge_request: merge_request,
-              from_mr_description: false
-            )
-          end
-
-          it 'closes the related issues' do
-            merge_request.cache_merge_request_closes_issues!
-
-            expect do
-              service.execute(merge_request)
-            end.to change { other_issue.reload.opened? }.from(true).to(false).and(
-              # Autoclose is disabled for group level issues until we introduce a setting at the grouo level
-              # TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/472907
-              not_change { group_issue.reload.opened? }.from(true)
-            )
-          end
-        end
-      end
-
-      context 'when issue project has auto close disabled' do
-        before_all do
-          other_project.update!(autoclose_referenced_issues: false)
-          group.add_developer(user)
-        end
-
-        before do
-          create(
-            :merge_requests_closing_issues,
-            issue: other_issue,
-            merge_request: merge_request,
-            from_mr_description: false
-          )
-          create(
-            :merge_requests_closing_issues,
-            issue: group_issue,
-            merge_request: merge_request,
-            from_mr_description: false
-          )
-        end
-
-        it 'only closes project issues where the setting is enabled' do
-          merge_request.cache_merge_request_closes_issues!
-
-          expect do
-            service.execute(merge_request)
-          end.to change { issue1.reload.closed? }.from(false).to(true).and(
-            change { issue2.reload.closed? }.from(false).to(true)
-          ).and(
-            not_change { other_issue.reload.opened? }.from(true)
-          ).and(
-            not_change { group_issue.reload.opened? }.from(true)
-          )
-        end
+        expect do
+          service.execute(merge_request)
+        end.to change { issue.reload.closed? }.from(false).to(true).and(
+          not_change { not_closing_issue.reload.opened? }.from(true)
+        )
       end
 
       context 'with Jira integration' do

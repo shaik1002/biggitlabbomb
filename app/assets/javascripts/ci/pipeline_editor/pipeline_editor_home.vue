@@ -136,7 +136,7 @@ export default {
 </script>
 
 <template>
-  <div class="gl-w-full gl-transition-all">
+  <div class="gl-transition-medium gl-w-full">
     <gl-modal
       v-if="showSwitchBranchModal"
       visible
@@ -159,13 +159,13 @@ export default {
       @toggle-file-tree="toggleFileTree"
       v-on="$listeners"
     />
-    <div class="gl-flex gl-w-full gl-flex-col md:gl-flex-row">
+    <div class="gl-display-flex gl-w-full gl-flex-direction-column gl-md-flex-direction-row">
       <pipeline-editor-file-tree
         v-if="showFileTree"
-        class="gl-shrink-0"
+        class="gl-flex-shrink-0"
         :includes="includesFiles"
       />
-      <div class="gl-min-w-0 gl-grow">
+      <div class="gl-flex-grow-1 gl-min-w-0">
         <pipeline-editor-header
           :ci-config-data="ciConfigData"
           :commit-sha="commitSha"

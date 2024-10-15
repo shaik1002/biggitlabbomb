@@ -1,6 +1,6 @@
 %tr{ role: 'row' }
   %td{ role: 'cell', data: { label: _('Migration') } }
-    = link_to admin_background_migration_path(migration, database: params[:database]), class: 'gl-break-anywhere' do
+    = link_to admin_background_migration_path(migration, database: params[:database]) do
       = migration.job_class_name + ': ' + migration.table_name
   %td{ role: 'cell', data: { label: _('Progress') } }
     - progress = batched_migration_progress(migration, @successful_rows_counts[migration.id])
@@ -9,7 +9,7 @@
     - else
       = _('Unknown')
   %td{ role: 'cell', data: { label: _('Status') } }
-    = gl_badge_tag migration.status_name.to_s.humanize, { variant: batched_migration_status_badge_variant(migration) }
+    = gl_badge_tag migration.status_name.to_s.humanize, { size: :sm, variant: batched_migration_status_badge_variant(migration) }
   %td{ role: 'cell', data: { label: _('Action') } }
     - if migration.active?
       = render Pajamas::ButtonComponent.new(icon: 'pause',

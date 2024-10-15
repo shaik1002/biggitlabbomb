@@ -9,6 +9,7 @@ module QA
         include SubMenus::CreateNewMenu
         include SubMenus::SuperSidebar::GlobalSearchModal
         include SubMenus::Explore
+        include SubMenus::Help
 
         view 'app/assets/javascripts/super_sidebar/components/super_sidebar.vue' do
           element 'super-sidebar', required: true
@@ -16,10 +17,6 @@ module QA
 
         view 'app/assets/javascripts/super_sidebar/components/user_bar.vue' do
           element 'canary-badge-link'
-        end
-
-        view 'app/assets/javascripts/super_sidebar/components/brand_logo.vue' do
-          element 'brand-header-default-logo'
         end
 
         view 'app/assets/javascripts/super_sidebar/components/user_menu.vue' do
@@ -67,8 +64,7 @@ module QA
         end
 
         def go_to_workspaces
-          # skip_finished_loading_check in case there are workspaces currently being terminated
-          click_element('nav-item-link', submenu_item: 'Workspaces', skip_finished_loading_check: true)
+          click_element('nav-item-link', submenu_item: 'Workspaces')
         end
 
         def go_to_menu_dropdown_option(option_name)
@@ -77,10 +73,6 @@ module QA
 
         def go_to_todos
           click_element('todos-shortcut-button')
-        end
-
-        def go_to_homepage
-          click_element('brand-header-default-logo')
         end
 
         def signed_in?

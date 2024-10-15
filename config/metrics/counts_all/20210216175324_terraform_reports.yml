@@ -2,6 +2,8 @@
 data_category: optional
 key_path: counts.terraform_reports
 description: Count of Terraform MR reports generated
+product_section: ops
+product_stage: deploy
 product_group: environments
 value_type: number
 status: active
@@ -15,4 +17,3 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

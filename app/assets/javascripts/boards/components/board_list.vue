@@ -7,7 +7,6 @@ import { ESC_KEY_CODE } from '~/lib/utils/keycodes';
 import { defaultSortableOptions, DRAG_DELAY } from '~/sortable/constants';
 import { sortableStart, sortableEnd } from '~/sortable/utils';
 import Tracking from '~/tracking';
-import { getParameterByName } from '~/lib/utils/url_utility';
 import listQuery from 'ee_else_ce/boards/graphql/board_lists_deferred.query.graphql';
 import setActiveBoardItemMutation from 'ee_else_ce/boards/graphql/client/set_active_board_item.mutation.graphql';
 import BoardNewIssue from 'ee_else_ce/boards/components/board_new_issue.vue';
@@ -19,7 +18,6 @@ import {
   listIssuablesQueries,
   ListType,
 } from 'ee_else_ce/boards/constants';
-import { DETAIL_VIEW_QUERY_PARAM_NAME } from '~/work_items/constants';
 import {
   addItemToList,
   removeItemFromList,
@@ -77,10 +75,6 @@ export default {
       required: false,
       default: false,
     },
-    columnIndex: {
-      type: Number,
-      required: true,
-    },
   },
   data() {
     return {
@@ -92,11 +86,9 @@ export default {
       addItemToListInProgress: false,
       updateIssueOrderInProgress: false,
       dragCancelled: false,
-      hasMadeDrawerAttempt: false,
     };
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     boardList: {
       query: listQuery,
       variables() {
@@ -130,28 +122,6 @@ export default {
           error,
           message: s__('Boards|An error occurred while fetching a list. Please try again.'),
         });
-      },
-      result({ data }) {
-        if (this.hasMadeDrawerAttempt) {
-          return;
-        }
-        const queryParam = getParameterByName(DETAIL_VIEW_QUERY_PARAM_NAME);
-
-        if (!data || !queryParam) {
-          return;
-        }
-
-        const { iid, full_path: fullPath } = JSON.parse(atob(queryParam));
-        const boardItem = this.boardListItems.find(
-          (item) => item.iid === iid && item.referencePath.includes(fullPath),
-        );
-
-        if (boardItem) {
-          this.setActiveWorkItem(boardItem);
-        } else {
-          this.$emit('cannot-find-active-item');
-        }
-        this.hasMadeDrawerAttempt = true;
       },
     },
     toList: {
@@ -442,6 +412,7 @@ export default {
               boardId: this.boardId,
               itemToMove,
             }),
+            withColor: this.isEpicBoard && this.glFeatures.epicColorHighlight,
           },
           update: (cache, { data: { issuableMoveList } }) =>
             this.updateCacheAfterMovingItem({
@@ -534,6 +505,7 @@ export default {
               itemToMove: item,
             }),
             positionInList,
+            withColor: this.isEpicBoard && this.glFeatures.epicColorHighlight,
           },
           optimisticResponse: {
             issuableMoveList: {
@@ -586,6 +558,7 @@ export default {
           mutation: listIssuablesQueries[this.issuableType].createMutation,
           variables: {
             input: this.isEpicBoard ? input : { ...input, moveAfterId: this.boardListItems[0]?.id },
+            withColor: this.isEpicBoard && this.glFeatures.epicColorHighlight,
           },
           update: (cache, { data: { createIssuable } }) => {
             issuable = createIssuable.issuable;
@@ -628,18 +601,15 @@ export default {
         });
       } finally {
         this.addItemToListInProgress = false;
-        this.setActiveWorkItem(issuable);
+        this.$apollo.mutate({
+          mutation: setActiveBoardItemMutation,
+          variables: {
+            boardItem: issuable,
+            listId: this.list.id,
+            isIssue: this.isIssueBoard,
+          },
+        });
       }
-    },
-    setActiveWorkItem(boardItem) {
-      this.$apollo.mutate({
-        mutation: setActiveBoardItemMutation,
-        variables: {
-          boardItem,
-          listId: this.list.id,
-          isIssue: this.isIssueBoard,
-        },
-      });
     },
   },
 };
@@ -648,7 +618,7 @@ export default {
 <template>
   <div
     v-show="!list.collapsed"
-    class="board-list-component gl-relative gl-flex gl-h-full gl-min-h-0 gl-flex-col"
+    class="board-list-component gl-relative gl-h-full gl-display-flex gl-flex-direction-column gl-min-h-0"
     data-testid="board-list-cards-area"
   >
     <div
@@ -681,14 +651,12 @@ export default {
       :data-board="list.id"
       :data-board-type="list.listType"
       :class="{
-        'gl-rounded-bl-base gl-rounded-br-base gl-bg-red-50': boardItemsSizeExceedsMax,
+        'gl-bg-red-50 gl-rounded-bottom-left-base gl-rounded-bottom-right-base': boardItemsSizeExceedsMax,
         'gl-overflow-hidden': disableScrollingWhenMutationInProgress,
         'gl-overflow-y-auto': !disableScrollingWhenMutationInProgress,
-        'list-empty': !listItemsCount,
-        'list-collapsed': list.collapsed,
       }"
-      :draggable="canMoveIssue ? '.board-card' : false"
-      class="board-list gl-mb-0 gl-h-full gl-w-full gl-list-none gl-overflow-x-hidden gl-p-3 gl-pt-2"
+      draggable=".board-card"
+      class="board-list gl-w-full gl-h-full gl-list-none gl-mb-0 gl-p-3 gl-pt-0 gl-overflow-x-hidden"
       data-testid="tree-root-wrapper"
       @start="handleDragOnStart"
       @end="handleDragOnEnd"
@@ -700,7 +668,6 @@ export default {
         :index="index"
         :list="list"
         :item="item"
-        :column-index="columnIndex"
         :data-draggable-item-type="$options.draggableItemTypes.card"
         :show-work-item-type-icon="!isEpicBoard"
         @setFilters="$emit('setFilters', $event)"
@@ -724,13 +691,11 @@ export default {
         v-for="(item, index) in afterCutLine"
         ref="issue"
         :key="item.id"
-        :index="index + list.maxIssueCount"
+        :index="index"
         :list="list"
         :item="item"
-        :column-index="columnIndex"
         :data-draggable-item-type="$options.draggableItemTypes.card"
         :show-work-item-type-icon="!isEpicBoard"
-        :list-items-length="boardListItems.length"
         @setFilters="$emit('setFilters', $event)"
       >
         <board-card-move-to-position
@@ -751,7 +716,7 @@ export default {
         <!-- for supporting previous structure with intersection observer -->
         <li
           v-if="showCount"
-          class="board-list-count gl-py-4 gl-text-center gl-text-secondary"
+          class="board-list-count gl-text-center gl-text-secondary gl-py-4"
           data-issue-id="-1"
         >
           <gl-loading-icon

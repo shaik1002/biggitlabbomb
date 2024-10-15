@@ -22,8 +22,7 @@ module LooseForeignKeys
       in_lock(self.class.name.underscore, ttl: lock_ttl, retries: 0) do
         stats = ProcessDeletedRecordsService.new(
           connection: base_model.connection,
-          modification_tracker: modification_tracker,
-          logger: Sidekiq.logger
+          modification_tracker: modification_tracker
         ).execute
         stats[:connection] = connection_name
         stats[:turbo_mode] = turbo_mode

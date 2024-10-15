@@ -1,8 +1,8 @@
 - content_for(:title, 'Encoding Error')
-
-.error-container
-  = image_tag('illustrations/error/error-422-lg.svg', alt: '412', lazy: false)
+%img{ :alt => "GitLab Logo", :src => image_path('logo.svg') }
   %h1
-    = s_('412|412: Precondition failed')
-  %p
-    = s_("412|Page cannot be loaded because of invalid parameters.")
+    412
+.container
+  %h3 Precondition failed
+  %hr
+  %p Page can't be loaded because of invalid parameters.

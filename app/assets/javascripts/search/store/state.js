@@ -6,12 +6,9 @@ const createState = ({
   navigation,
   searchType,
   searchLevel,
-  advancedSearchAvailable,
-  zoektAvailable,
   groupInitialJson,
   projectInitialJson,
   defaultBranchName,
-  repositoryRef,
 }) => ({
   urlQuery: cloneDeep(query),
   query,
@@ -33,12 +30,9 @@ const createState = ({
   searchLabelString: '',
   searchType,
   searchLevel,
-  advancedSearchAvailable,
-  zoektAvailable,
   groupInitialJson,
   projectInitialJson,
   defaultBranchName,
-  repositoryRef,
 });
 
 export default createState;

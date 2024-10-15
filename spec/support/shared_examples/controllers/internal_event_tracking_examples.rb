@@ -8,56 +8,74 @@
 # - project
 # - namespace
 # - category
-# - additional_properties
-# - event_attribute_overrides - is used when its necessary to override the attributes available in parent context.
-#
-# These legacy options are now deprecated:
 # - label
 # - property
 # - value
-# Prefer using additional_properties instead.
 
 RSpec.shared_examples 'internal event tracking' do
-  let(:all_metrics) do
-    additional_properties = try(:additional_properties) || {}
-    base_additional_properties = Gitlab::Tracking::EventValidator::BASE_ADDITIONAL_PROPERTIES.to_h do |key, _val|
-      [key, try(key)]
-    end
+  let(:fake_tracker) { instance_spy(Gitlab::Tracking::Destinations::Snowplow) }
+  let(:fake_counter) { class_spy(Gitlab::UsageDataCounters::HLLRedisCounter) }
 
-    Gitlab::Usage::MetricDefinition.all.filter_map do |definition|
-      matching_rules = definition.event_selection_rules.map do |event_selection_rule|
-        next unless event_selection_rule.name == event
+  before do
+    allow(Gitlab::Tracking).to receive(:tracker).and_return(fake_tracker)
+    stub_const('Gitlab::UsageDataCounters::HLLRedisCounter', fake_counter)
 
-        # Only include unique metrics if the unique_identifier_name is present in the spec
-        next if event_selection_rule.unique_identifier_name && !try(event_selection_rule.unique_identifier_name)
-
-        properties = additional_properties.merge(base_additional_properties)
-        event_selection_rule.matches?(properties)
-      end
-
-      definition.key if matching_rules.flatten.any?
-    end
+    allow(Gitlab::Tracking::StandardContext).to receive(:new).and_call_original
+    allow(Gitlab::Tracking::ServicePingContext).to receive(:new).and_call_original
   end
 
-  it 'logs to Snowplow, Redis, and product analytics tooling', :clean_gitlab_redis_shared_state, :aggregate_failures do
-    expected_attributes = {
-      project: try(:project),
-      user: try(:user),
-      namespace: try(:namespace) || try(:project)&.namespace,
-      category: try(:category) || 'InternalEventTracking',
-      feature_enabled_by_namespace_ids: try(:feature_enabled_by_namespace_ids),
-      **(try(:additional_properties) || {}),
-      **{
-        label: try(:label),
-        property: try(:property),
-        value: try(:value)
-      }.compact
-    }.merge(try(:event_attribute_overrides) || {})
+  it 'logs to Snowplow and Redis', :aggregate_failures do
+    subject
 
-    expect { subject }
-      .to trigger_internal_events(event)
-      .with(expected_attributes)
-      .and increment_usage_metrics(*all_metrics)
+    project = try(:project)
+    user = try(:user)
+    namespace = try(:namespace) || project&.namespace
+    category = try(:category) || 'InternalEventTracking'
+
+    additional_properties = {
+      label: try(:label),
+      property: try(:property),
+      value: try(:value)
+    }.compact
+
+    expect(Gitlab::Tracking::StandardContext)
+      .to have_received(:new)
+        .with(
+          feature_enabled_by_namespace_ids: try(:feature_enabled_by_namespace_ids),
+          project_id: project&.id,
+          user_id: user&.id,
+          namespace_id: namespace&.id,
+          plan_name: namespace&.actual_plan_name
+        ).at_least(:once)
+
+    expect(Gitlab::Tracking::ServicePingContext)
+      .to have_received(:new)
+        .with(data_source: :redis_hll, event: event)
+        .at_least(:once)
+
+    expect(fake_tracker).to have_received(:event)
+      .with(
+        category.to_s,
+        event,
+        a_hash_including(
+          context: [
+            an_instance_of(SnowplowTracker::SelfDescribingJson),
+            an_instance_of(SnowplowTracker::SelfDescribingJson)
+          ],
+          **additional_properties
+        )
+      ).at_least(:once)
+
+    Gitlab::InternalEvents::EventDefinitions.unique_properties(event).each do |property|
+      expect(fake_counter).to have_received(:track_event)
+        .with(
+          event,
+          a_hash_including(
+            values: send(property)&.id,
+            property_name: property
+          )
+        )
+    end
   end
 end
 

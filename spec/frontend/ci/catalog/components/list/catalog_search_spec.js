@@ -5,8 +5,7 @@ import {
   SORT_ASC,
   SORT_DESC,
   SORT_OPTION_CREATED,
-  SORT_OPTION_POPULARITY,
-  SORT_OPTION_STAR_COUNT,
+  SORT_OPTION_RELEASED,
 } from '~/ci/catalog/constants';
 
 describe('CatalogSearch', () => {
@@ -17,34 +16,30 @@ describe('CatalogSearch', () => {
   const findAllSortingItems = () => findSorting().props('sortOptions');
 
   const createComponent = () => {
-    wrapper = shallowMountExtended(CatalogSearch);
+    wrapper = shallowMountExtended(CatalogSearch, {});
   };
 
-  describe('default UI', () => {
-    beforeEach(() => {
-      createComponent();
-    });
+  beforeEach(() => {
+    createComponent();
+  });
 
+  describe('default UI', () => {
     it('renders the search bar', () => {
       expect(findSearchBar().exists()).toBe(true);
     });
 
-    it('adds sorting options', () => {
+    it('sets sorting options', () => {
       const sortOptionsProp = findAllSortingItems();
-      expect(sortOptionsProp).toHaveLength(4);
-      expect(sortOptionsProp[0].text).toBe('Popularity');
+      expect(sortOptionsProp).toHaveLength(2);
+      expect(sortOptionsProp[0].text).toBe('Released at');
     });
 
-    it('renders the `Popularity` option as the default', () => {
-      expect(findSorting().props('text')).toBe('Popularity');
+    it('renders the `Released at` option as the default', () => {
+      expect(findSorting().props('text')).toBe('Released at');
     });
   });
 
   describe('search', () => {
-    beforeEach(() => {
-      createComponent();
-    });
-
     it('passes down the search value to the search component', async () => {
       const newSearchTerm = 'cat';
 
@@ -89,10 +84,6 @@ describe('CatalogSearch', () => {
   });
 
   describe('sort', () => {
-    beforeEach(() => {
-      createComponent();
-    });
-
     describe('when changing sort order', () => {
       it('changes the `isAscending` prop to the sorting component', async () => {
         expect(findSorting().props().isAscending).toBe(false);
@@ -113,25 +104,18 @@ describe('CatalogSearch', () => {
         await findSorting().vm.$emit('sortDirectionChange');
 
         expect(wrapper.emitted('update-sorting')).toEqual([
-          [`${SORT_OPTION_POPULARITY}_${SORT_ASC}`],
-          [`${SORT_OPTION_POPULARITY}_${SORT_DESC}`],
+          [`${SORT_OPTION_RELEASED}_${SORT_ASC}`],
+          [`${SORT_OPTION_RELEASED}_${SORT_DESC}`],
         ]);
       });
     });
 
     describe('when changing sort option', () => {
-      it('changes the sort option to `Created date`', async () => {
+      it('changes the sort option to `Created at`', async () => {
         await findSorting().vm.$emit('sortByChange', SORT_OPTION_CREATED);
 
         expect(findSorting().props().sortBy).toBe(SORT_OPTION_CREATED);
-        expect(findSorting().props().text).toBe('Created date');
-      });
-
-      it('changes the sort option to `Star count`', async () => {
-        await findSorting().vm.$emit('sortByChange', SORT_OPTION_STAR_COUNT);
-
-        expect(findSorting().props('sortBy')).toBe(SORT_OPTION_STAR_COUNT);
-        expect(findSorting().props('text')).toBe('Star count');
+        expect(findSorting().props().text).toBe('Created at');
       });
     });
   });

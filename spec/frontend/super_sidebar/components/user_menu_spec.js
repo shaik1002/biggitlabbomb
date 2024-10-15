@@ -287,7 +287,7 @@ describe('UserMenu component', () => {
     });
   });
 
-  describe('Buy compute minutes item', () => {
+  describe('Buy Pipeline Minutes item', () => {
     let item;
 
     const setItem = ({
@@ -306,12 +306,12 @@ describe('UserMenu component', () => {
       item = wrapper.findByTestId('buy-pipeline-minutes-item');
     };
 
-    describe('When does NOT meet the condition to buy compute minutes', () => {
+    describe('When does NOT meet the condition to buy CI minutes', () => {
       beforeEach(() => {
         setItem();
       });
 
-      it('does NOT render the buy compute minutes item', () => {
+      it('does NOT render the buy pipeline minutes item', () => {
         expect(item.exists()).toBe(false);
       });
 
@@ -321,7 +321,7 @@ describe('UserMenu component', () => {
       });
     });
 
-    describe('When does meet the condition to buy compute minutes', () => {
+    describe('When does meet the condition to buy CI minutes', () => {
       it('does render the menu item', () => {
         setItem({ show_buy_pipeline_minutes: true });
         expect(item.exists()).toBe(true);

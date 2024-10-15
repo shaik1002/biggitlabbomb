@@ -2,6 +2,8 @@
 data_category: optional
 key_path: usage_activity_by_stage.configure.projects_slack_slash_active
 description: Unique projects with Slack ‘/’ commands enabled
+product_section: dev
+product_stage: manage
 product_group: import_and_integrate
 value_type: number
 status: active
@@ -16,4 +18,3 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

@@ -16,11 +16,9 @@ to AI that you think could benefit from being in this list, add it!
   service is ready. Eventually, the AI Gateway will be used to host endpoints that
   proxy requests to AI providers, removing the need for the GitLab Rails monolith
   to integrate and communicate directly with third-party Large Language Models (LLMs).
-  [Design document](https://handbook.gitlab.com/handbook/engineering/architecture/design-documents/ai_gateway/).
-- **AI Gateway Prompt**: An encapsulation of prompt templates, model selection, and model parameters. As part of the [AI Gateway as the Sole Access Point for Monolith to Access Models](https://gitlab.com/groups/gitlab-org/-/epics/13024) effort we're migrating these components from the GitLab Rails monolith into [the `prompts` package in the AI Gateway](https://gitlab.com/gitlab-org/modelops/applied-ml/code-suggestions/ai-assist/-/tree/main/ai_gateway/prompts).
-- **AI Gateway Prompt Registry**: A component responsible for maintaining a list of AI Gateway Prompts available to perform specific actions. Currently, we use a [`LocalPromptRegistry`](https://gitlab.com/gitlab-org/modelops/applied-ml/code-suggestions/ai-assist/-/blob/874e05281cab50012a53685e051583e620dac8c4/ai_gateway/prompts/registry.py#L18) that reads definitions from YAML files in the AI Gateway.
+  [Blueprint](../../architecture/blueprints/ai_gateway/index.md).
 - **Air-Gapped Model**: A hosted model that is internal to an organisations intranet only. In the context of GitLab AI features, this could be connected to an air-gapped GitLab instance.
-- **Bring Your Own Model (BYOM)**: A third-party model to be connected to one or more GitLab Duo features. Could be an off-the-shelf Open Source (OS) model, a fine-tuned model, or a closed source model. GitLab is planning to support specific, validated BYOMs for GitLab Duo features, but does not plan to support general BYOM use for GitLab Duo features.
+- **Bring Your Own Model (BYOM)**: A third-party model to be connected to one or more GitLab Duo features. Could be an off-the-shelf Open Source (OS) model, a fine-tuned model, or a closed source model. GitLab is planning to support specific, validated BYOMs for GitLab Duo features, but does not currently support or plan to support general BYOM use for GitLab Duo features.
 - **Chat Evaluation**: automated mechanism for determining the helpfulness and
   accuracy of GitLab Duo Chat to various user questions. The MVC is an RSpec test
   run via GitLab CI that asks a set of questions to Chat and then has a
@@ -28,7 +26,7 @@ to AI that you think could benefit from being in this list, add it!
   [MVC](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/134610).
   [Design doc for next iteration](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/136127).
 - **Cloud Connector**: Cloud Connector is a way to access services common to
-  multiple GitLab deployments, instances, and cells. We use it as an umbrella term to refer to the
+multiple GitLab deployments, instances, and cells. We use it as an umbrella term to refer to the
   set of technical solutions and APIs used to make such services available to all GitLab customers.
   For more information, see the [Cloud Connector architecture](../cloud_connector/architecture.md).
 - **Closed Source Model**: A private model fine-tuned or built from scratch by an organisation. These may be hosted as cloud services, for example ChatGPT.
@@ -49,8 +47,7 @@ to AI that you think could benefit from being in this list, add it!
   `embeddings` database. The embeddings search is done in Postgres using the
   `vector` extension. The vertex embeddings database is updated based on the
   latest version of GitLab documentation on a daily basis by running `Llm::Embedding::GitlabDocumentation::CreateEmbeddingsRecordsWorker` as a cronjob.
-- **Fine Tuning**: Altering an existing model using a supervised learning process that utilizes a dataset of labeled examples to update the weights of the LLM, improving its output for specific tasks such as code completion or Chat.
-**Foundational Model**: A general purpose LLM trained using a generic objective, typically next token prediction. These models are capable and flexible, and can be adjusted to solved many domain-specific tasks (through finetuning or prompt engineering). This means that these general purpose models are ideal to serve as the foundation of many downstream models. Examples of foundational models are: GPT-4o, Claude 3.5 Sonnet.
+- **Fine Tuning**: Altering an existing model using a supervised learning process that utilizes a dataset of labeled examples to update the weights of the LLM, improving its output for specific tasks such as code completion or chat.
 - **Frozen Model**: A LLM which cannot be fine-tuned (also Frozen LLM).
 - **GitLab Duo**: AI-assisted features across the GitLab DevSecOps platform. These features aim to help increase velocity and solve key pain points across the software development lifecycle. See also the [GitLab Duo](../../user/ai_features.md) features page.
 - **GitLab Managed Model**: A LLM that is managed by GitLab. Currently all [GitLab Managed Models](https://gitlab.com/gitlab-com/g**l-infra/scalability/-/issues/2864#note_1787040242) are hosted externally and accessed through the AI Gateway. GitLab-owned API keys are used to access the models.
@@ -71,7 +68,7 @@ to AI that you think could benefit from being in this list, add it!
   on prompts with various third-party AI Services.
   [Code](https://gitlab.com/gitlab-org/modelops/applied-ml/code-suggestions/prompt-library).
 - **Prompt Registry**: stored, versioned prompts used to interact with third-party
-  AI Services. [Design document proposal MR (closed)](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/135872).
+  AI Services. [Blueprint](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/135872).
 - **Prompt**: Natural language instructions sent to an LLM to perform certain tasks. [Prompt guidelines](prompts.md).
 - **RAG (Retrieval Augmented Generation)**: RAG provide contextual data to an LLM as part of a query to personalise results. RAG is used to inject additional context into a prompt to decrease hallucinations and improve the quality of outputs.
 - **RAG Pipeline**: A mechanism used to take
@@ -80,12 +77,11 @@ to AI that you think could benefit from being in this list, add it!
   synthesize the information to generate a coherent, contextualy-relevant answer.
   This design pattern is helpful in open-domain question answering with LLMs,
   which is why we use this design pattern for answering questions to GitLab Duo Chat.
-- **Self-hosted model**: A LLM hosted externally to GitLab by an organisation and interacting with GitLab AI features.
+- **Self-Hosted Model**: A LLM hosted externally to GitLab by an organisation and interacting with GitLab AI features.
 - **Similarity Score**: A mathematical method to determine the likeness between answers produced by an LLM and the reference ground truth answers.
   See also the [Model Validation direction page](https://about.gitlab.com/direction/ai-powered/ai_model_validation/ai_evaluation/metrics/#similarity-scores)
 - **Tool**: logic that performs a specific LLM-related task; each tool has a
   description and its own prompt. [How to add a new tool](duo_chat.md#adding-a-new-tool).
- **Unit Primitive**: GitLab-specific term that refers to the fundamental logical feature that a permission or access scope can control. Examples: [`duo_chat`](../../user/gitlab_duo_chat.md)  and [`code_suggestions`](../../api/code_suggestions.md). These features are both currently part of the GitLab Duo Pro license but we are building the concept of a Unit Primitive around each Duo feature so that Duo features are easily composable into different groupings to accommodate potential future product packaging needs.
 - **Word-Level Metrics**: method for LLM evaluation that compares aspects of
   text at the granularity of individual words.
   [Issue from Model Validation team](https://gitlab.com/gitlab-org/modelops/applied-ml/code-suggestions/prompt-library/-/issues/98#metric-3-word-level-metrics).
@@ -101,16 +97,3 @@ to AI that you think could benefit from being in this list, add it!
   the zero-shot agent to evaluate if the answer is sufficient or if an additional
   tool must be used to answer the question.
   [Code](https://gitlab.com/gitlab-org/gitlab/-/blob/6b747cbd7c6a71145a8bfb8201db3c857b5aed6a/ee/lib/gitlab/llm/chain/agents/zero_shot/executor.rb). [Zero-shot agent in action](https://gitlab.com/gitlab-org/gitlab/-/issues/427979).
-
-## Duo Workflow Terminology
-
-- **Agent**: A general term for a software entity that performs tasks. Agents can range from simple, rule-based systems to complex AI-driven entities that learn and adapt over time. For our purposes, we typically use "Agent" to refer to an AI-driven entity.
-- **Autonomous Agents**: Agents that operate independently without direct input or supervision from humans. They make decisions and perform actions based on their programming and the data they perceive from their environment. These often receive instructions from a Supervisor Agent.
-- **Frameworks**: These are platforms or environments that support the development and operation of multi-agent systems. Frameworks provide the necessary infrastructure, tools, and libraries that developers can use to build, deploy, and manage agents. Langchain, for example, is a framework that facilitates building language-based agents integrated with different AI technologies.
-- **General Agent or Generic Agent**: An agent capable of performing a variety of tasks, not limited to a specific domain or set of actions. This type of agent usually has broader capabilities and can adapt to a wide range of scenarios.
-- **Hand-crafted Agents**: These are agents specifically designed by developers with tailored rules and behaviors to perform specific tasks. They are usually fine-tuned to operate within well-defined scenarios.
-- **Multi-agent Workflows**: A system or process where multiple agents interact or collaborate to complete tasks or solve problems. Each agent in the workflow might have a specific role or expertise, contributing to a collective outcome.
-- **Specialized Agents**: Agents designed to perform specific, often complex tasks where specialized knowledge or skills are required. These agents are usually highly effective within their domain of expertise but may not perform well outside of it.
-- **Subagent**: A term used to describe an agent that operates under the supervision of another agent. Subagents typically handle specific tasks or components of a larger process within a multi-agent system.
-- **Supervisor Agent**: An agent tasked with overseeing and coordinating the actions of other agents within a workflow. This type of agent ensures that tasks are assigned appropriately, and that the workflow progresses smoothly and efficiently.
-- **Tool**: In the context of multi-agent workflows, a tool is a utility or application that agents can use to perform tasks. Tools are used to communicate with the outside world, and are an interface to something other than an LLM, like reading GitLab issues, cloning a repository, or reading documentation.

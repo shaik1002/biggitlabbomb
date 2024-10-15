@@ -163,7 +163,7 @@ RSpec.describe 'User browses commits', feature_category: :source_code_management
 
         fill_in 'commits-search', with: 'bogus12345'
 
-        expect(page).to have_content "No results found"
+        expect(page).to have_content "Your search didn't match any commits"
 
         fill_in 'commits-search', with: 'Glob'
 
@@ -195,7 +195,7 @@ RSpec.describe 'User browses commits', feature_category: :source_code_management
       end
     end
 
-    context 'master branch', :js do
+    context 'master branch' do
       before do
         visit_commits_page
       end

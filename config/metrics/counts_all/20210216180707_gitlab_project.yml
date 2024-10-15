@@ -2,6 +2,8 @@
 data_category: optional
 key_path: usage_activity_by_stage.manage.projects_imported.gitlab_project
 description: Distinct count of users that imported projects using Project Import/Export
+product_section: dev
+product_stage: manage
 product_group: import_and_integrate
 value_type: number
 status: removed
@@ -15,6 +17,5 @@ tier:
 - premium
 - ultimate
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332
 removed_by_url:
 milestone_removed: "<16.4"

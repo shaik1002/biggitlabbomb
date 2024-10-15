@@ -2,7 +2,9 @@
 data_category: optional
 key_path: counts.operations_dashboard_default_dashboard
 description: Active users with enabled operations dashboard
-product_group: platform_insights
+product_section: ops
+product_stage: monitor
+product_group: respond
 value_type: number
 status: active
 time_frame: all
@@ -16,4 +18,3 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

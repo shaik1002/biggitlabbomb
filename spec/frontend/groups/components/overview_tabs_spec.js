@@ -1,4 +1,4 @@
-import { GlTab } from '@gitlab/ui';
+import { GlSorting, GlTab } from '@gitlab/ui';
 import Vue, { nextTick } from 'vue';
 import AxiosMockAdapter from 'axios-mock-adapter';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
@@ -17,13 +17,12 @@ import {
   ACTIVE_TAB_SUBGROUPS_AND_PROJECTS,
   ACTIVE_TAB_SHARED,
   ACTIVE_TAB_INACTIVE,
+  OVERVIEW_TABS_SORTING_ITEMS,
   SORTING_ITEM_NAME,
   SORTING_ITEM_UPDATED,
   SORTING_ITEM_STARS,
-  OVERVIEW_TABS_FILTERED_SEARCH_TERM_KEY,
 } from '~/groups/constants';
 import axios from '~/lib/utils/axios_utils';
-import FilteredSearchAndSort from '~/groups_projects/components/filtered_search_and_sort.vue';
 import waitForPromises from 'helpers/wait_for_promises';
 
 Vue.component('GroupFolder', GroupFolderComponent);
@@ -42,8 +41,11 @@ describe('OverviewTabs', () => {
     },
     newSubgroupPath: '/groups/new',
     newProjectPath: 'projects/new',
+    newSubgroupIllustration: '',
+    newProjectIllustration: '',
     emptyProjectsIllustration: '',
     emptySubgroupIllustration: '',
+    emptySearchIllustration: '',
     canCreateSubgroups: false,
     canCreateProjects: false,
     initialSort: 'name_asc',
@@ -54,11 +56,7 @@ describe('OverviewTabs', () => {
   };
 
   const createComponent = async ({
-    route = {
-      name: ACTIVE_TAB_SUBGROUPS_AND_PROJECTS,
-      params: { group: 'foo/bar/baz' },
-      query: {},
-    },
+    route = { name: ACTIVE_TAB_SUBGROUPS_AND_PROJECTS, params: { group: 'foo/bar/baz' } },
     provide = {},
   } = {}) => {
     wrapper = mountExtended(OverviewTabs, {
@@ -76,16 +74,8 @@ describe('OverviewTabs', () => {
   const findTabPanels = () => wrapper.findAllComponents(GlTab);
   const findTab = (name) => wrapper.findByRole('tab', { name });
   const findSelectedTab = () => wrapper.findByRole('tab', { selected: true });
-  const findFilteredSearchAndSort = () => wrapper.findComponent(FilteredSearchAndSort);
-
-  const emitFilter = (searchTerm) =>
-    findFilteredSearchAndSort().vm.$emit('filter', {
-      [OVERVIEW_TABS_FILTERED_SEARCH_TERM_KEY]: searchTerm,
-    });
-
-  const emitSortByChange = (sort) => findFilteredSearchAndSort().vm.$emit('sort-by-change', sort);
-  const emitSortDirectionChange = (isAscending) =>
-    findFilteredSearchAndSort().vm.$emit('sort-direction-change', isAscending);
+  const findSearchInput = () => wrapper.findByPlaceholderText(OverviewTabs.i18n.searchPlaceholder);
+  const findGlSorting = () => wrapper.findComponent(GlSorting);
 
   beforeEach(() => {
     axiosMock = new AxiosMockAdapter(axios);
@@ -173,9 +163,7 @@ describe('OverviewTabs', () => {
   });
 
   it('sets `lazy` prop to `false` for initially active tab and `true` for all other tabs', async () => {
-    await createComponent({
-      route: { name: ACTIVE_TAB_SHARED, params: { group: 'foo/bar' }, query: {} },
-    });
+    await createComponent({ route: { name: ACTIVE_TAB_SHARED, params: { group: 'foo/bar' } } });
 
     expect(findTabPanels().at(0).vm.$attrs.lazy).toBe(true);
     expect(findTabPanels().at(1).vm.$attrs.lazy).toBe(false);
@@ -184,61 +172,51 @@ describe('OverviewTabs', () => {
 
   describe.each([
     [
-      { name: ACTIVE_TAB_SUBGROUPS_AND_PROJECTS, params: { group: 'foo/bar/baz' }, query: {} },
+      { name: ACTIVE_TAB_SUBGROUPS_AND_PROJECTS, params: { group: 'foo/bar/baz' } },
       OverviewTabs.i18n[ACTIVE_TAB_SHARED],
       {
         name: ACTIVE_TAB_SHARED,
         params: { group: ['foo', 'bar', 'baz'] },
-        query: {},
       },
     ],
     [
-      {
-        name: ACTIVE_TAB_SUBGROUPS_AND_PROJECTS,
-        params: { group: ['foo', 'bar', 'baz'] },
-        query: {},
-      },
+      { name: ACTIVE_TAB_SUBGROUPS_AND_PROJECTS, params: { group: ['foo', 'bar', 'baz'] } },
       OverviewTabs.i18n[ACTIVE_TAB_SHARED],
       {
         name: ACTIVE_TAB_SHARED,
         params: { group: ['foo', 'bar', 'baz'] },
-        query: {},
       },
     ],
     [
-      { name: ACTIVE_TAB_SUBGROUPS_AND_PROJECTS, params: { group: 'foo' }, query: {} },
+      { name: ACTIVE_TAB_SUBGROUPS_AND_PROJECTS, params: { group: 'foo' } },
       OverviewTabs.i18n[ACTIVE_TAB_SHARED],
       {
         name: ACTIVE_TAB_SHARED,
         params: { group: ['foo'] },
-        query: {},
       },
     ],
     [
-      { name: ACTIVE_TAB_SHARED, params: { group: 'foo/bar' }, query: {} },
+      { name: ACTIVE_TAB_SHARED, params: { group: 'foo/bar' } },
       OverviewTabs.i18n[ACTIVE_TAB_INACTIVE],
       {
         name: ACTIVE_TAB_INACTIVE,
         params: { group: ['foo', 'bar'] },
-        query: {},
       },
     ],
     [
-      { name: ACTIVE_TAB_SHARED, params: { group: 'foo/bar' }, query: {} },
+      { name: ACTIVE_TAB_SHARED, params: { group: 'foo/bar' } },
       OverviewTabs.i18n[ACTIVE_TAB_SUBGROUPS_AND_PROJECTS],
       {
         name: ACTIVE_TAB_SUBGROUPS_AND_PROJECTS,
         params: { group: ['foo', 'bar'] },
-        query: {},
       },
     ],
     [
-      { name: ACTIVE_TAB_INACTIVE, params: { group: ['foo'] }, query: {} },
+      { name: ACTIVE_TAB_INACTIVE, params: { group: ['foo'] } },
       OverviewTabs.i18n[ACTIVE_TAB_SHARED],
       {
         name: ACTIVE_TAB_SHARED,
         params: { group: ['foo'] },
-        query: {},
       },
     ],
   ])('when current route is %j', (currentRoute, tabToClick, expectedRoute) => {
@@ -258,9 +236,9 @@ describe('OverviewTabs', () => {
   });
 
   describe('searching and sorting', () => {
-    const setup = async ({ route } = {}) => {
+    const setup = async () => {
       jest.spyOn(eventHub, '$emit');
-      await createComponent({ route });
+      await createComponent();
 
       // Click through tabs so they are all loaded
       await findTab(OverviewTabs.i18n[ACTIVE_TAB_SHARED]).trigger('click');
@@ -268,7 +246,7 @@ describe('OverviewTabs', () => {
       await findTab(OverviewTabs.i18n[ACTIVE_TAB_SUBGROUPS_AND_PROJECTS]).trigger('click');
     };
 
-    const sharedAssertions = ({ searchTerm, sort }) => {
+    const sharedAssertions = ({ search, sort }) => {
       it('sets `lazy` prop to `true` for all of the non-active tabs so they are reloaded after sort or search is applied', () => {
         expect(findTabPanels().at(0).vm.$attrs.lazy).toBe(false);
         expect(findTabPanels().at(1).vm.$attrs.lazy).toBe(true);
@@ -279,7 +257,7 @@ describe('OverviewTabs', () => {
         expect(eventHub.$emit).toHaveBeenCalledWith(
           `${ACTIVE_TAB_SUBGROUPS_AND_PROJECTS}fetchFilteredAndSortedGroups`,
           {
-            filterGroupsBy: searchTerm,
+            filterGroupsBy: search,
             sortBy: sort,
           },
         );
@@ -288,58 +266,36 @@ describe('OverviewTabs', () => {
 
     describe('when search is typed in', () => {
       describe('when search is greater than or equal to 3 characters', () => {
-        const searchTerm = 'Foo bar';
+        const search = 'Foo bar';
 
         beforeEach(async () => {
           await setup();
-
-          emitFilter(searchTerm);
+          await findSearchInput().setValue(search);
         });
 
         it('updates query string with `filter` key', () => {
-          expect(routerMock.push).toHaveBeenCalledWith({ query: { filter: searchTerm } });
+          expect(routerMock.push).toHaveBeenCalledWith({ query: { filter: search } });
         });
 
-        sharedAssertions({ searchTerm, sort: defaultProvide.initialSort });
+        sharedAssertions({ search, sort: defaultProvide.initialSort });
       });
 
       describe('when search is less than 3 characters', () => {
-        const searchTerm = 'Fo';
+        const search = 'Fo';
 
         beforeEach(async () => {
           await setup();
-          emitFilter(searchTerm);
+          await findSearchInput().setValue(search);
         });
 
         it('does not emit `fetchFilteredAndSortedGroups` event from `eventHub`', () => {
           expect(eventHub.$emit).not.toHaveBeenCalledWith(
             `${ACTIVE_TAB_SUBGROUPS_AND_PROJECTS}fetchFilteredAndSortedGroups`,
             {
-              filterGroupsBy: searchTerm,
+              filterGroupsBy: search,
               sortBy: defaultProvide.initialSort,
             },
           );
-        });
-      });
-
-      describe('when search is the same', () => {
-        const searchTerm = 'Foo';
-
-        beforeEach(async () => {
-          await setup({
-            route: {
-              name: ACTIVE_TAB_SUBGROUPS_AND_PROJECTS,
-              params: { group: 'foo/bar/baz' },
-              query: { [OVERVIEW_TABS_FILTERED_SEARCH_TERM_KEY]: searchTerm },
-            },
-          });
-          emitFilter(searchTerm);
-        });
-
-        it('does not call router.push', () => {
-          expect(routerMock.push).not.toHaveBeenCalledWith({
-            query: { [OVERVIEW_TABS_FILTERED_SEARCH_TERM_KEY]: searchTerm },
-          });
         });
       });
     });
@@ -347,7 +303,7 @@ describe('OverviewTabs', () => {
     describe('when sort is changed', () => {
       beforeEach(async () => {
         await setup();
-        emitSortByChange(SORTING_ITEM_UPDATED.asc);
+        findGlSorting().vm.$emit('sortByChange', SORTING_ITEM_UPDATED.label);
         await nextTick();
       });
 
@@ -357,7 +313,7 @@ describe('OverviewTabs', () => {
         });
       });
 
-      sharedAssertions({ searchTerm: '', sort: SORTING_ITEM_UPDATED.asc });
+      sharedAssertions({ search: '', sort: SORTING_ITEM_UPDATED.asc });
     });
 
     describe('when tab is changed', () => {
@@ -409,7 +365,7 @@ describe('OverviewTabs', () => {
     describe('when sort direction is changed', () => {
       beforeEach(async () => {
         await setup();
-        emitSortDirectionChange(false);
+        await wrapper.findByRole('button', { name: 'Sort direction: Ascending' }).trigger('click');
       });
 
       it('updates query string with `sort` key', () => {
@@ -418,39 +374,45 @@ describe('OverviewTabs', () => {
         });
       });
 
-      sharedAssertions({ searchTerm: '', sort: SORTING_ITEM_NAME.desc });
+      sharedAssertions({ search: '', sort: SORTING_ITEM_NAME.desc });
     });
 
     describe('when `filter` and `sort` query strings are set', () => {
-      const route = {
-        name: ACTIVE_TAB_SUBGROUPS_AND_PROJECTS,
-        params: { group: 'foo/bar/baz' },
-        query: { filter: 'Foo bar', sort: SORTING_ITEM_UPDATED.desc },
-      };
-
       beforeEach(async () => {
         await createComponent({
-          route,
-        });
-      });
-
-      it('sets correct props on `FilteredSearchAndSort` component', () => {
-        expect(findFilteredSearchAndSort().props()).toMatchObject({
-          filteredSearchQuery: route.query,
-          activeSortOption: {
-            value: SORTING_ITEM_UPDATED.desc,
-            text: SORTING_ITEM_UPDATED.label,
+          route: {
+            name: ACTIVE_TAB_SUBGROUPS_AND_PROJECTS,
+            params: { group: 'foo/bar/baz' },
+            query: { filter: 'Foo bar', sort: SORTING_ITEM_UPDATED.desc },
           },
         });
       });
 
+      it('sets value of search input', () => {
+        expect(
+          wrapper.findByPlaceholderText(OverviewTabs.i18n.searchPlaceholder).element.value,
+        ).toBe('Foo bar');
+      });
+
       describe('when search is cleared', () => {
-        it('removes `filter` key from query string', () => {
-          emitFilter('');
+        it('removes `filter` key from query string', async () => {
+          await findSearchInput().setValue('');
 
           expect(routerMock.push).toHaveBeenCalledWith({
             query: { sort: SORTING_ITEM_UPDATED.desc },
           });
+        });
+      });
+
+      it('sets sort dropdown', () => {
+        const expectedSortOptions = OVERVIEW_TABS_SORTING_ITEMS.map(({ label }) => {
+          return { value: label, text: label };
+        });
+        expect(findGlSorting().props()).toMatchObject({
+          text: SORTING_ITEM_UPDATED.label,
+          isAscending: false,
+          sortBy: SORTING_ITEM_UPDATED.label,
+          sortOptions: expectedSortOptions,
         });
       });
     });

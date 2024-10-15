@@ -183,7 +183,7 @@ export default {
           :checked="linkedIssueType"
         />
       </gl-form-group>
-      <p class="gl-mb-2 gl-font-bold">
+      <p class="bold gl-mb-2">
         {{ issuableInputText }}
       </p>
     </template>
@@ -209,7 +209,7 @@ export default {
     <p v-if="hasError" class="gl-field-error">
       {{ addRelatedErrorMessage }}
     </p>
-    <div class="gl-mt-5 gl-flex gl-gap-3">
+    <div class="gl-mt-5">
       <gl-button
         ref="addButton"
         category="primary"
@@ -218,6 +218,7 @@ export default {
         :loading="isSubmitting"
         type="submit"
         size="small"
+        class="gl-mr-2"
         data-testid="add-issue-button"
       >
         {{ __('Add') }}

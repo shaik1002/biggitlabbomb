@@ -19,7 +19,6 @@ Vue.use(Vuex);
 
 jest.mock('~/search/store/utils', () => ({
   loadDataFromLS: jest.fn(() => true),
-  LS_REGEX_HANDLE: jest.fn(() => 'test'),
 }));
 
 describe('GlobalSearchTopbar', () => {
@@ -44,6 +43,11 @@ describe('GlobalSearchTopbar', () => {
       store,
       propsData: { defaultBranchName },
       stubs,
+      provide: {
+        glFeatures: {
+          zoektExactSearch: true,
+        },
+      },
     });
   };
 
@@ -180,7 +184,7 @@ describe('GlobalSearchTopbar', () => {
   describe.each`
     search    | reload
     ${''}     | ${0}
-    ${'test'} | ${1}
+    ${'test'} | ${2}
   `('clicking regular expression button', ({ search, reload }) => {
     beforeEach(() => {
       createComponent({ query: { search }, searchType: 'zoekt' }, '', { GlSearchBoxByType });

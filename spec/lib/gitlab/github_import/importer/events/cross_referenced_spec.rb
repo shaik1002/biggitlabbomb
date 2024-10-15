@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::GithubImport::Importer::Events::CrossReferenced, :clean_gitlab_redis_shared_state, feature_category: :importers do
+RSpec.describe Gitlab::GithubImport::Importer::Events::CrossReferenced, :clean_gitlab_redis_cache, feature_category: :importers do
   subject(:importer) { described_class.new(project, client) }
 
   let_it_be(:project) { create(:project, :repository) }
@@ -42,8 +42,7 @@ RSpec.describe Gitlab::GithubImport::Importer::Events::CrossReferenced, :clean_g
       project_id: project.id,
       author_id: user.id,
       note: expected_note_body,
-      created_at: issue_event.created_at,
-      imported_from: 'github'
+      created_at: issue_event.created_at
     }.stringify_keys
   end
 
@@ -72,12 +71,6 @@ RSpec.describe Gitlab::GithubImport::Importer::Events::CrossReferenced, :clean_g
       it_behaves_like 'internal event tracking' do
         let(:event) { 'g_project_management_issue_cross_referenced' }
         let(:subject) { importer.execute(issue_event) }
-
-        before do
-          # Trigger g_project_management_issue_created event before executing subject
-          # as this has a different author & increments total issue-action metrics
-          issuable
-        end
       end
     end
 

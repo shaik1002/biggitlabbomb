@@ -136,6 +136,7 @@ RSpec.describe Gitlab::ImportExport::AttributesPermitter, feature_category: :imp
       :timelogs                    | true
       :container_expiration_policy | true
       :project_feature             | true
+      :prometheus_metrics          | true
       :service_desk_setting        | true
       :external_pull_request       | true
       :external_pull_requests      | true

@@ -2,12 +2,11 @@
 
 module Ci
   class PipelineSchedulesFinder
-    attr_reader :project, :pipeline_schedules, :params
+    attr_reader :project, :pipeline_schedules
 
-    def initialize(project, params = {})
+    def initialize(project)
       @project = project
       @pipeline_schedules = project.pipeline_schedules
-      @params = params
     end
 
     def execute(scope: nil, ids: nil)
@@ -39,10 +38,10 @@ module Ci
       end
     end
 
+    # rubocop:disable CodeReuse/ActiveRecord
     def sort_items(items)
-      return items unless params[:sort]
-
-      items.sort_by_attribute(params[:sort])
+      items.order(id: :desc)
     end
+    # rubocop:enable CodeReuse/ActiveRecord
   end
 end

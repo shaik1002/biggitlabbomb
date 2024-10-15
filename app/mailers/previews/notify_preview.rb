@@ -160,6 +160,10 @@ class NotifyPreview < ActionMailer::Preview
     Notify.changed_milestone_merge_request_email(user.id, merge_request.id, milestone, user.id)
   end
 
+  def member_access_denied_email
+    Notify.member_access_denied_email('project', project.id, user.id).message
+  end
+
   def member_access_granted_email
     Notify.member_access_granted_email(member.source_type, member.id).message
   end
@@ -179,6 +183,10 @@ class NotifyPreview < ActionMailer::Preview
       'invite@example.com',
       user.id
     ).message
+  end
+
+  def member_invited_email
+    Notify.member_invited_email('project', member.id, '1234').message
   end
 
   def member_about_to_expire_email
@@ -217,7 +225,7 @@ class NotifyPreview < ActionMailer::Preview
   end
 
   def unknown_sign_in_email
-    Notify.unknown_sign_in_email(user, '127.0.0.1', Time.current, country: 'Germany', city: 'Frankfurt').message
+    Notify.unknown_sign_in_email(user, '127.0.0.1', Time.current).message
   end
 
   def two_factor_otp_attempt_failed_email
@@ -330,10 +338,6 @@ class NotifyPreview < ActionMailer::Preview
     Notify.project_was_exported_email(user, project).message
   end
 
-  def repository_cleanup_success_email
-    Notify.repository_cleanup_success_email(project, user).message
-  end
-
   def request_review_merge_request_email
     Notify.request_review_merge_request_email(user.id, merge_request.id, user.id).message
   end
@@ -351,40 +355,6 @@ class NotifyPreview < ActionMailer::Preview
 
   def github_gists_import_errors_email
     Notify.github_gists_import_errors_email(user.id, { '12345' => 'Snippet maximum file count exceeded', '67890' => 'error message 2' }).message
-  end
-
-  def bulk_import_complete
-    bulk_import = BulkImport.last
-
-    Notify.bulk_import_complete(user.id, bulk_import.id)
-  end
-
-  def bulk_import_csv_user_mapping_success
-    Notify.bulk_import_csv_user_mapping(user.id, group.id, 94125, 0)
-  end
-
-  def bulk_import_csv_user_mapping_failed
-    Notify.bulk_import_csv_user_mapping(user.id, group.id, 71249, 824)
-  end
-
-  def import_source_user_reassign
-    source_user = Import::SourceUser.last
-
-    Notify.import_source_user_reassign(source_user.id)
-  end
-
-  def import_source_user_rejected
-    source_user = Import::SourceUser.last
-
-    Notify.import_source_user_rejected(source_user.id)
-  end
-
-  def repository_rewrite_history_success_email
-    Notify.repository_rewrite_history_success_email(project, user)
-  end
-
-  def repository_rewrite_history_failure_email
-    Notify.repository_rewrite_history_failure_email(project, user, 'Error message')
   end
 
   private
@@ -469,7 +439,7 @@ class NotifyPreview < ActionMailer::Preview
   end
 
   def member
-    @member ||= Member.non_invite.non_request.last
+    @member ||= Member.last
   end
 
   def key
@@ -486,9 +456,10 @@ class NotifyPreview < ActionMailer::Preview
 
   def note_email(method)
     ensure_visual_review_bot_exists
-    # NOTE: This code path is only accessible in development mode so
-    # using Gitlab::ExclusiveLease.skipping_transaction_check doesn't cause
-    # production issues.
+    # TODO: Investigate enqueue_diff_file_creation_job in app/models/diff_note.rb
+    # for preview note_merge_request_email_for_diff_discussion because
+    # it obtains an exclusive lease.
+    # See issue: https://gitlab.com/gitlab-org/gitlab/-/issues/441523
     Gitlab::ExclusiveLease.skipping_transaction_check do
       cleanup do
         note = yield

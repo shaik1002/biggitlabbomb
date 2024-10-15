@@ -2,8 +2,7 @@ import { GlLoadingIcon, GlKeysetPagination } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import UsersView from '~/organizations/users/components/users_view.vue';
 import UsersTable from '~/vue_shared/components/users_table/users_table.vue';
-import { pageInfoMultiplePages } from 'jest/organizations/mock_data';
-import { MOCK_PATHS, MOCK_USERS_FORMATTED } from '../mock_data';
+import { MOCK_PATHS, MOCK_USERS_FORMATTED, MOCK_PAGE_INFO } from '../mock_data';
 
 describe('UsersView', () => {
   let wrapper;
@@ -13,7 +12,7 @@ describe('UsersView', () => {
       propsData: {
         loading: false,
         users: MOCK_USERS_FORMATTED,
-        pageInfo: pageInfoMultiplePages,
+        pageInfo: MOCK_PAGE_INFO,
         ...props,
       },
       provide: {

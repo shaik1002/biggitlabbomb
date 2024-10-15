@@ -5,7 +5,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import { modalData } from 'jest/members/mock_data';
 import RemoveMemberDropdownItem from '~/members/components/action_dropdowns/remove_member_dropdown_item.vue';
-import { MEMBERS_TAB_TYPES, MEMBER_MODEL_TYPE_GROUP_MEMBER } from '~/members/constants';
+import { MEMBER_TYPES, MEMBER_MODEL_TYPE_GROUP_MEMBER } from '~/members/constants';
 
 Vue.use(Vuex);
 
@@ -20,7 +20,7 @@ describe('RemoveMemberDropdownItem', () => {
   const createStore = (state = {}) => {
     return new Vuex.Store({
       modules: {
-        [MEMBERS_TAB_TYPES.user]: {
+        [MEMBER_TYPES.user]: {
           namespaced: true,
           state: {
             memberPath: '/groups/foo-bar/-/group_members/:id',
@@ -36,7 +36,7 @@ describe('RemoveMemberDropdownItem', () => {
     wrapper = shallowMount(RemoveMemberDropdownItem, {
       store: createStore(state),
       provide: {
-        namespace: MEMBERS_TAB_TYPES.user,
+        namespace: MEMBER_TYPES.user,
       },
       propsData: {
         memberId: 1,

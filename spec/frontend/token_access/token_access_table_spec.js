@@ -19,9 +19,7 @@ describe('Token access table', () => {
 
   const findTable = () => wrapper.findComponent(GlTableLite);
   const findDeleteButton = () => wrapper.findComponent(GlButton);
-  const findAllTableRows = () => wrapper.findAllByTestId('token-access-table-row');
-  const findIcon = (type) => wrapper.findByTestId(`token-access-${type}-icon`);
-  const findProjectAvatar = (type) => wrapper.findByTestId(`token-access-${type}-avatar`);
+  const findAllTableRows = (type) => wrapper.findAllByTestId(`${type}s-token-table-row`);
   const findName = (type) => wrapper.findByTestId(`token-access-${type}-name`);
 
   describe.each`
@@ -51,14 +49,8 @@ describe('Token access table', () => {
       expect(wrapper.emitted('removeItem')).toEqual([[items[0]]]);
     });
 
-    it('displays icon and avatar', () => {
-      expect(findIcon(type).props('name')).toBe(type);
-      expect(findProjectAvatar(type).props('projectName')).toBe(items[0].name);
-    });
-
-    it('displays fullpath as a link to the project', () => {
+    it('displays fullpath', () => {
       expect(findName(type).text()).toBe(items[0].fullPath);
-      expect(findName(type).attributes('href')).toBe(`/${items[0].fullPath}`);
     });
   });
 });

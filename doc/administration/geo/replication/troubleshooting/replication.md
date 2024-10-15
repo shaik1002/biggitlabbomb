@@ -10,13 +10,205 @@ DETAILS:
 **Tier:** Premium, Ultimate
 **Offering:** Self-managed
 
+## Fixing PostgreSQL database replication errors
+
+The following sections outline troubleshooting steps for fixing replication error messages (indicated by `Database replication working? ... no` in the
+[`geo:check` output](common.md#health-check-rake-task).
+The instructions present here mostly assume a single-node Geo Linux package deployment, and might need to be adapted to different environments.
+
+### Removing an inactive replication slot
+
+Replication slots are marked as 'inactive' when the replication client (a secondary site) connected to the slot disconnects.
+Inactive replication slots cause WAL files to be retained, because they are sent to the client when it reconnects and the slot becomes active once more.
+If the secondary site is not able to reconnect, use the following steps to remove its corresponding inactive replication slot:
+
+1. [Start a PostgreSQL console session](https://docs.gitlab.com/omnibus/settings/database.html#connecting-to-the-postgresql-database) on the Geo primary site's database node:
+
+   ```shell
+   sudo gitlab-psql -d gitlabhq_production
+   ```
+
+   NOTE:
+   Using `gitlab-rails dbconsole` does not work, because managing replication slots requires superuser permissions.
+
+1. View the replication slots and remove them if they are inactive:
+
+   ```sql
+   SELECT * FROM pg_replication_slots;
+   ```
+
+   Slots where `active` is `f` are inactive.
+
+   - When this slot should be active, because you have a **secondary** site configured using that slot,
+     look for the [PostgreSQL logs](../../../logs/index.md#postgresql-logs) for the **secondary** site,
+     to view why the replication is not running.
+   - If you are no longer using the slot (for example, you no longer have Geo enabled), or the secondary site is no longer able to reconnect,
+     you should remove it using the PostgreSQL console session:
+
+     ```sql
+     SELECT pg_drop_replication_slot('<name_of_inactive_slot>');
+     ```
+
+1. Follow either the steps [to remove that Geo site](../remove_geo_site.md) if it's no longer required,
+   or [re-initiate the replication process](../../setup/database.md#step-3-initiate-the-replication-process), which recreates the replication slot correctly.
+
+### Message: `WARNING: oldest xmin is far in the past` and `pg_wal` size growing
+
+If a replication slot is inactive,
+the `pg_wal` logs corresponding to the slot are reserved forever
+(or until the slot is active again). This causes continuous disk usage growth
+and the following messages appear repeatedly in the
+[PostgreSQL logs](../../../logs/index.md#postgresql-logs):
+
+```plaintext
+WARNING: oldest xmin is far in the past
+HINT: Close open transactions soon to avoid wraparound problems.
+You might also need to commit or roll back old prepared transactions, or drop stale replication slots.
+```
+
+To fix this, you should [remove the inactive replication slot](#removing-an-inactive-replication-slot) and re-initiate the replication.
+
+### Message: `ERROR:  replication slots can only be used if max_replication_slots > 0`?
+
+This means that the `max_replication_slots` PostgreSQL variable needs to
+be set on the **primary** database. This setting defaults to 1. You may need to
+increase this value if you have more **secondary** sites.
+
+Be sure to restart PostgreSQL for this to take effect. See the
+[PostgreSQL replication setup](../../setup/database.md#postgresql-replication) guide for more details.
+
+### Message: `FATAL:  could not start WAL streaming: ERROR:  replication slot "geo_secondary_my_domain_com" does not exist`?
+
+This occurs when PostgreSQL does not have a replication slot for the
+**secondary** site by that name.
+
+You may want to rerun the [replication process](../../setup/database.md) on the **secondary** site .
+
+### Message: "Command exceeded allowed execution time" when setting up replication?
+
+This may happen while [initiating the replication process](../../setup/database.md#step-3-initiate-the-replication-process) on the **secondary** site,
+and indicates your initial dataset is too large to be replicated in the default timeout (30 minutes).
+
+Re-run `gitlab-ctl replicate-geo-database`, but include a larger value for
+`--backup-timeout`:
+
+```shell
+sudo gitlab-ctl \
+   replicate-geo-database \
+   --host=<primary_node_hostname> \
+   --slot-name=<secondary_slot_name> \
+   --backup-timeout=21600
+```
+
+This gives the initial replication up to six hours to complete, rather than
+the default 30 minutes. Adjust as required for your installation.
+
+### Message: "PANIC: could not write to file `pg_xlog/xlogtemp.123`: No space left on device"
+
+Determine if you have any unused replication slots in the **primary** database. This can cause large amounts of
+log data to build up in `pg_xlog`.
+
+[Removing the inactive slots](#removing-an-inactive-replication-slot) can reduce the amount of space used in the `pg_xlog`.
+
+### Message: "ERROR: canceling statement due to conflict with recovery"
+
+This error message occurs infrequently under typical usage, and the system is resilient
+enough to recover.
+
+However, under certain conditions, some database queries on secondaries may run
+excessively long, which increases the frequency of this error message. This can lead to a situation
+where some queries never complete due to being canceled on every replication.
+
+These long-running queries are
+[planned to be removed in the future](https://gitlab.com/gitlab-org/gitlab/-/issues/34269),
+but as a workaround, we recommend enabling
+[`hot_standby_feedback`](https://www.postgresql.org/docs/10/hot-standby.html#HOT-STANDBY-CONFLICT).
+This increases the likelihood of bloat on the **primary** site as it prevents
+`VACUUM` from removing recently-dead rows. However, it has been used
+successfully in production on GitLab.com.
+
+To enable `hot_standby_feedback`, add the following to `/etc/gitlab/gitlab.rb`
+on the **secondary** site:
+
+```ruby
+postgresql['hot_standby_feedback'] = 'on'
+```
+
+Then reconfigure GitLab:
+
+```shell
+sudo gitlab-ctl reconfigure
+```
+
+To help us resolve this problem, consider commenting on
+[the issue](https://gitlab.com/gitlab-org/gitlab/-/issues/4489).
+
+### Message: `FATAL:  could not connect to the primary server: server certificate for "PostgreSQL" does not match host name`
+
+This happens because the PostgreSQL certificate that the Linux package automatically creates contains
+the Common Name `PostgreSQL`, but the replication is connecting to a different host and GitLab attempts to use
+the `verify-full` SSL mode by default.
+
+To fix this issue, you can either:
+
+- Use the `--sslmode=verify-ca` argument with the `replicate-geo-database` command.
+- For an already replicated database, change `sslmode=verify-full` to `sslmode=verify-ca`
+  in `/var/opt/gitlab/postgresql/data/gitlab-geo.conf` and run `gitlab-ctl restart postgresql`.
+- [Configure SSL for PostgreSQL](https://docs.gitlab.com/omnibus/settings/database.html#configuring-ssl)
+  with a custom certificate (including the host name that's used to connect to the database in the CN or SAN)
+  instead of using the automatically generated certificate.
+
+### Message: `LOG:  invalid CIDR mask in address`
+
+This happens on wrongly-formatted addresses in `postgresql['md5_auth_cidr_addresses']`.
+
+```plaintext
+2020-03-20_23:59:57.60499 LOG:  invalid CIDR mask in address "***"
+2020-03-20_23:59:57.60501 CONTEXT:  line 74 of configuration file "/var/opt/gitlab/postgresql/data/pg_hba.conf"
+```
+
+To fix this, update the IP addresses in `/etc/gitlab/gitlab.rb` under `postgresql['md5_auth_cidr_addresses']`
+to respect the CIDR format (for example, `10.0.0.1/32`).
+
+### Message: `LOG:  invalid IP mask "md5": Name or service not known`
+
+This happens when you have added IP addresses without a subnet mask in `postgresql['md5_auth_cidr_addresses']`.
+
+```plaintext
+2020-03-21_00:23:01.97353 LOG:  invalid IP mask "md5": Name or service not known
+2020-03-21_00:23:01.97354 CONTEXT:  line 75 of configuration file "/var/opt/gitlab/postgresql/data/pg_hba.conf"
+```
+
+To fix this, add the subnet mask in `/etc/gitlab/gitlab.rb` under `postgresql['md5_auth_cidr_addresses']`
+to respect the CIDR format (for example, `10.0.0.1/32`).
+
+### Message: `Found data in the gitlabhq_production database!` when running `gitlab-ctl replicate-geo-database`
+
+This happens if data is detected in the `projects` table. When one or more projects are detected, the operation
+is aborted to prevent accidental data loss. To bypass this message, pass the `--force` option to the command.
+
+### Message: `FATAL:  could not map anonymous shared memory: Cannot allocate memory`
+
+If you see this message, it means that the secondary site's PostgreSQL tries to request memory that is higher than the available memory. There is an [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/381585) that tracks this problem.
+
+Example error message in Patroni logs (located at `/var/log/gitlab/patroni/current` for Linux package installations):
+
+```plaintext
+2023-11-21_23:55:18.63727 FATAL:  could not map anonymous shared memory: Cannot allocate memory
+2023-11-21_23:55:18.63729 HINT:  This error usually means that PostgreSQL's request for a shared memory segment exceeded available memory, swap space, or huge pages. To reduce the request size (currently 17035526144 bytes), reduce PostgreSQL's shared memory usage, perhaps by reducing shared_buffers or max_connections.
+```
+
+The workaround is to increase the memory available to the secondary site's PostgreSQL nodes to match the memory requirements of the primary site's PostgreSQL nodes.
+
+## Fixing non-PostgreSQL replication failures
+
 If you notice replication failures in `Admin > Geo > Sites` or the [Sync status Rake task](common.md#sync-status-rake-task), you can try to resolve the failures with the following general steps:
 
 1. Geo automatically retries failures. If the failures are new and few in number, or if you suspect the root cause is already resolved, then you can wait to see if the failures go away.
 1. If failures were present for a long time, then many retries have already occurred, and the interval between automatic retries has increased to up to 4 hours depending on the type of failure. If you suspect the root cause is already resolved, you can [manually retry replication or verification](#manually-retry-replication-or-verification).
 1. If the failures persist, use the following sections to try to resolve them.
 
-## Manually retry replication or verification
+### Manually retry replication or verification
 
 A Geo data type is a specific class of data that is required by one or more GitLab features to store relevant information and is replicated by Geo to secondary sites.
 
@@ -34,14 +226,13 @@ The following Geo data types exist:
   - `Upload`
   - `DependencyProxy::Manifest`
   - `DependencyProxy::Blob`
-- **Git Repository types:**
+- **Repository types:**
+  - `ContainerRepositoryRegistry`
   - `DesignManagement::Repository`
   - `ProjectRepository`
   - `ProjectWikiRepository`
   - `SnippetRepository`
   - `GroupWikiRepository`
-- **Other types:**
-  - `ContainerRepository`
 
 The main kinds of classes are Registry, Model, and Replicator. If you have an instance of one of these classes, you can get the others. The Registry and Model mostly manage PostgreSQL DB state. The Replicator knows how to replicate/verify (or it can call a service to do it):
 
@@ -55,7 +246,7 @@ With all this information, you can:
 - [Manually resync and reverify individual components](#resync-and-reverify-individual-components)
 - [Manually resync and reverify multiple components](#resync-and-reverify-multiple-components)
 
-### Resync and reverify individual components
+#### Resync and reverify individual components
 
 [You can force a resync and reverify individual items](https://gitlab.com/gitlab-org/gitlab/-/issues/364727)
 for all component types managed by the [self-service framework](../../../../development/geo/framework.md) using the UI.
@@ -80,29 +271,6 @@ to enact the following, basic troubleshooting steps:
     Geo::PackageFileRegistry.failed
     ```
 
-    The term registry records, in this case, refers to registry tables in the
-    Geo tracking database. Each record, or row, tracks a single replicable in the
-    main GitLab database, such as an LFS file, or a project Git repository. Here
-    are some other Rails models that correspond to Geo registry tables that can
-    be queried like the above:
-
-    ```plaintext
-    CiSecureFileRegistry
-    ContainerRepositoryRegistry
-    DependencyProxyBlobRegistry
-    DependencyProxyManifestRegistry
-    JobArtifactRegistry
-    LfsObjectRegistry
-    MergeRequestDiffRegistry
-    PackageFileRegistry
-    PagesDeploymentRegistry
-    PipelineArtifactRegistry
-    ProjectWikiRepositoryRegistry
-    SnippetRepositoryRegistry
-    TerraformStateVersionRegistry
-    UploadRegistry
-    ```
-
   - Find registry records that are missing on the primary site:
 
     ```ruby
@@ -113,14 +281,14 @@ to enact the following, basic troubleshooting steps:
 
     ```ruby
     model_record = Packages::PackageFile.find(id)
-    model_record.replicator.sync
+    model_record.replicator.send(:download)
     ```
 
   - Resync a package file, synchronously, given a registry ID:
 
     ```ruby
     registry = Geo::PackageFileRegistry.find(registry_id)
-    registry.replicator.sync
+    registry.replicator.send(:download)
     ```
 
   - Resync a package file, asynchronously, given a registry ID.
@@ -145,14 +313,14 @@ to enact the following, basic troubleshooting steps:
 
     ```ruby
     model_record = Geo::SnippetRepositoryRegistry.find(id)
-    model_record.replicator.sync
+    model_record.replicator.sync_repository
     ```
 
   - Resync a snippet repository, synchronously, given a registry ID
 
     ```ruby
     registry = Geo::SnippetRepositoryRegistry.find(registry_id)
-    registry.replicator.sync
+    registry.replicator.sync_repository
     ```
 
   - Resync a snippet repository, asynchronously, given a registry ID.
@@ -171,10 +339,10 @@ to enact the following, basic troubleshooting steps:
     registry.replicator.verify_async
     ```
 
-### Resync and reverify multiple components
+#### Resync and reverify multiple components
 
 NOTE:
-There is an [issue to implement this functionality in the **Admin** area UI](https://gitlab.com/gitlab-org/gitlab/-/issues/364729).
+There is an [issue to implement this functionality in the Admin Area UI](https://gitlab.com/gitlab-org/gitlab/-/issues/364729).
 
 WARNING:
 Commands that change data can cause damage if not run correctly or under the right conditions. Always run commands in a test environment first and have a backup instance ready to restore.
@@ -182,7 +350,7 @@ Commands that change data can cause damage if not run correctly or under the rig
 The following sections describe how to use internal application commands in the [Rails console](../../../../administration/operations/rails_console.md#starting-a-rails-console-session)
 to cause bulk replication or verification.
 
-#### Reverify all components (or any SSF data type which supports verification)
+##### Reverify all components (or any SSF data type which supports verification)
 
 For GitLab 16.4 and earlier:
 
@@ -201,7 +369,7 @@ For GitLab 16.4 and earlier:
 
 For other SSF data types replace `Upload` in the command above with the desired model class.
 
-#### Verify blob files on the secondary manually
+##### Verify blob files on the secondary manually
 
 This iterates over all package files on the secondary, looking at the
 `verification_checksum` stored in the database (which came from the primary)
@@ -266,107 +434,39 @@ end
 p "#{uploads_deleted} remote objects were destroyed."
 ```
 
-### Error: `Error syncing repository: 13:fatal: could not read Username`
+## Investigate causes of database replication lag
 
-The `last_sync_failure` error
-`Error syncing repository: 13:fatal: could not read Username for 'https://gitlab.example.com': terminal prompts disabled`
-indicates that JWT authentication is failing during a Geo clone or fetch request.
-See [Geo (development) > Authentication](../../../../development/geo.md#authentication) for more context.
+If the output of `sudo gitlab-rake geo:status` shows that `Database replication lag` remains significantly high over time, the primary node in database replication can be checked to determine the status of lag for
+different parts of the database replication process. These values are known as `write_lag`, `flush_lag`, and `replay_lag`. For more information, see
+[the official PostgreSQL documentation](https://www.postgresql.org/docs/current/monitoring-stats.html#MONITORING-PG-STAT-REPLICATION-VIEW).
 
-First, check that system clocks are synced. Run the [Health check Rake task](common.md#health-check-rake-task), or
-manually check that `date`, on all Sidekiq nodes on the secondary site and all Puma nodes on the primary site, are the
-same.
+Run the following command from the primary Geo node's database to provide relevant output:
 
-If system clocks are synced, then the JWT token may be expiring while Git fetch is performing calculations between its
-two separate HTTP requests. See [issue 464101](https://gitlab.com/gitlab-org/gitlab/-/issues/464101), which existed in
-all GitLab versions until it was fixed in GitLab 17.1.0, 17.0.5, and 16.11.7.
+```shell
+gitlab-psql -xc 'SELECT write_lag,flush_lag,replay_lag FROM pg_stat_replication;'
 
-To validate if you are experiencing this issue:
-
-1. Monkey patch the code in a [Rails console](../../../operations/rails_console.md#starting-a-rails-console-session) to increase the validity period of the token from 1 minute to 10 minutes. Run
-   this in Rails console on the secondary site:
-
-   ```ruby
-   module Gitlab; module Geo; class BaseRequest
-     private
-     def geo_auth_token(message)
-       signed_data = Gitlab::Geo::SignedData.new(geo_node: requesting_node, validity_period: 10.minutes).sign_and_encode_data(message)
-
-       "#{GITLAB_GEO_AUTH_TOKEN_TYPE} #{signed_data}"
-     end
-   end;end;end
-   ```
-
-1. In the same Rails console, resync an affected project:
-
-   ```ruby
-   Project.find_by_full_path('mygroup/mysubgroup/myproject').replicator.resync
-   ```
-
-1. Look at the sync state:
-
-   ```ruby
-   Project.find_by_full_path('mygroup/mysubgroup/myproject').replicator.registry
-   ```
-
-1. If `last_sync_failure` no longer includes the error `fatal: could not read Username`, then you are
-   affected by this issue. The state should now be `2`, meaning "synced". If so, then you should upgrade to
-   a GitLab version with the fix. You may also wish to upvote or comment on
-   [issue 466681](https://gitlab.com/gitlab-org/gitlab/-/issues/466681) which would have reduced the severity of this
-   issue.
-
-To workaround the issue, you must hot-patch all Sidekiq nodes in the secondary site to extend the JWT expiration time:
-
-1. Edit `/opt/gitlab/embedded/service/gitlab-rails/ee/lib/gitlab/geo/signed_data.rb`.
-1. Find `Gitlab::Geo::SignedData.new(geo_node: requesting_node)` and add `, validity_period: 10.minutes` to it:
-
-   ```diff
-   - Gitlab::Geo::SignedData.new(geo_node: requesting_node)
-   + Gitlab::Geo::SignedData.new(geo_node: requesting_node, validity_period: 10.minutes)
-   ```
-
-1. Restart Sidekiq:
-
-   ```shell
-   sudo gitlab-ctl restart sidekiq
-   ```
-
-1. Unless you upgrade to a version containing the fix, you would have to repeat this workaround after every GitLab upgrade.
-
-### Error: `fetch remote: signal: terminated: context deadline exceeded` at exactly 3 hours
-
-If Git fetch fails at exactly three hours while syncing a Git repository:
-
-1. Edit `/etc/gitlab/gitlab.rb` to increase the Git timeout from the default of 10800 seconds:
-
-   ```ruby
-   # Git timeout in seconds
-   gitlab_rails['gitlab_shell_git_timeout'] = 21600
-   ```
-
-1. Reconfigure GitLab:
-
-   ```shell
-   sudo gitlab-ctl reconfigure
-   ```
-
-### Error `Failed to open TCP connection to localhost:5000` on secondary when configuring registry replication
-
-You may face the following error when configuring container registry replication on the secondary site:
-
-```plaintext
-Failed to open TCP connection to localhost:5000 (Connection refused - connect(2) for \"localhost\" port 5000)"
+-[ RECORD 1 ]---------------
+write_lag  | 00:00:00.072392
+flush_lag  | 00:00:00.108168
+replay_lag | 00:00:00.108283
 ```
 
-It happens if the container registry is not enabled on the secondary site. To fix it, check that the container registry
-is [enabled on the secondary site](../../../packages/container_registry.md#enable-the-container-registry). Note that if [Let’s Encrypt integration is disabled](https://docs.gitlab.com/omnibus/settings/ssl/#configure-https-manually), container registry is disabled as well, and you must [configure it manually](../../../packages/container_registry.md#configure-container-registry-under-its-own-domain).
+If one or more of these values is significantly high, this could indicate a problem and should be investigated further. When determining the cause, consider that:
+
+- `write_lag` indicates the time since when WAL bytes have been sent by the primary, then received to the secondary, but not yet flushed or applied.
+- A high `write_lag` value may indicate degraded network performance or insufficient network speed between the primary and secondary nodes.
+- A high `flush_lag` value may indicate degraded or sub-optimal disk I/O performance with the secondary node's storage device.
+- A high `replay_lag` value may indicate long running transactions in PostgreSQL, or the saturation of a needed resource like the CPU.
+- The difference in time between `write_lag` and `flush_lag` indicates that WAL bytes have been sent to the underlying storage system, but it has not reported that they were flushed.
+  This data is most likely not fully written to a persistent storage, and likely held in some kind of volatile write cache.
+- The difference between `flush_lag` and `replay_lag` indicates WAL bytes that have been successfully persisted to storage, but could not be replayed by the database system.
 
 ## Resetting Geo **secondary** site replication
 
 If you get a **secondary** site in a broken state and want to reset the replication state,
 to start again from scratch, there are a few steps that can help you:
 
-1. Stop Sidekiq and the Geo Log Cursor.
+1. Stop Sidekiq and the Geo LogCursor.
 
    It's possible to make Sidekiq stop gracefully, but making it stop getting new jobs and
    wait until the current jobs to finish processing.
@@ -389,55 +489,13 @@ to start again from scratch, there are a few steps that can help you:
    gitlab-ctl tail sidekiq
    ```
 
-1. Clear Gitaly/Gitaly Cluster data.
-
-   ::Tabs
-
-   :::TabTitle Gitaly
+1. Rename repository storage folders and create new ones. If you are not concerned about possible orphaned directories and files, you can skip this step.
 
    ```shell
    mv /var/opt/gitlab/git-data/repositories /var/opt/gitlab/git-data/repositories.old
-   sudo gitlab-ctl reconfigure
+   mkdir -p /var/opt/gitlab/git-data/repositories
+   chown git:git /var/opt/gitlab/git-data/repositories
    ```
-
-   :::TabTitle Gitaly Cluster
-
-   1. Optional. Disable the Praefect internal load balancer.
-   1. Stop Praefect on each Praefect server:
-
-      ```shell
-      sudo gitlab-ctl stop praefect
-      ```
-
-   1. Reset the Praefect database:
-
-      ```shell
-      sudo /opt/gitlab/embedded/bin/psql -U praefect -d template1 -h localhost -c "DROP DATABASE praefect_production WITH (FORCE);"
-      sudo /opt/gitlab/embedded/bin/psql -U praefect -d template1 -h localhost -c "CREATE DATABASE praefect_production WITH OWNER=praefect ENCODING=UTF8;"
-      ```
-
-   1. Rename/delete repository data from each Gitaly node:
-
-      ```shell
-      sudo mv /var/opt/gitlab/git-data/repositories /var/opt/gitlab/git-data/repositories.old
-      sudo gitlab-ctl reconfigure
-      ```
-
-   1. On your Praefect deploy node run reconfigure to set up the database:
-
-      ```shell
-      sudo gitlab-ctl reconfigure
-      ```
-
-   1. Start Praefect on each Praefect server:
-
-      ```shell
-      sudo gitlab-ctl start praefect
-      ```
-
-   1. Optional. If you disabled it, reactivate the Praefect internal load balancer.
-
-   ::EndTabs
 
    NOTE:
    You may want to remove the `/var/opt/gitlab/git-data/repositories.old` in the future

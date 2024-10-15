@@ -39,7 +39,6 @@ RSpec.describe GpgKeys::ValidateIntegrationsService, feature_category: :source_c
 
       expect(service.execute).to eq(true)
       expect(gpg_key.externally_verified).to be_truthy
-      expect(gpg_key.externally_verified_at).to be_present
     end
 
     context 'when the check is unsuccessful' do
@@ -59,7 +58,6 @@ RSpec.describe GpgKeys::ValidateIntegrationsService, feature_category: :source_c
           expect(service.execute).to eq(false)
           expect(gpg_key.errors.full_messages).to eq(["BeyondIdentity: #{error_message}"])
           expect(gpg_key.externally_verified).to be_falsey
-          expect(gpg_key.externally_verified_at).not_to be_present
         end
       end
 

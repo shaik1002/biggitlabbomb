@@ -59,14 +59,14 @@ module Ci
         pipeline_schedules_path: pipeline_schedules_path(project),
         can_create_pipeline: can?(current_user, :create_pipeline, project).to_s,
         new_pipeline_path: can?(current_user, :create_pipeline, project) && new_project_pipeline_path(project),
-        reset_cache_path: can_any?(current_user, [:admin_pipeline, :admin_runner], project) && reset_cache_project_settings_ci_cd_path(project),
+        ci_lint_path: can?(current_user, :create_pipeline, project) && project_ci_lint_path(project),
+        reset_cache_path: can?(current_user, :admin_pipeline, project) && reset_cache_project_settings_ci_cd_path(project),
         has_gitlab_ci: has_gitlab_ci?(project).to_s,
         pipeline_editor_path: can?(current_user, :create_pipeline, project) && project_ci_pipeline_editor_path(project),
         suggested_ci_templates: suggested_ci_templates.to_json,
         full_path: project.full_path,
         visibility_pipeline_id_type: visibility_pipeline_id_type,
-        show_jenkins_ci_prompt: show_jenkins_ci_prompt(project).to_s,
-        pipelines_analytics_path: charts_project_pipelines_path(project)
+        show_jenkins_ci_prompt: show_jenkins_ci_prompt(project).to_s
       }
     end
 
@@ -74,23 +74,6 @@ module Ci
       return 'id' unless current_user.present?
 
       current_user.user_preference.visibility_pipeline_id_type
-    end
-
-    def new_pipeline_data(project)
-      {
-        project_id: project.id,
-        pipelines_path: project_pipelines_path(project),
-        default_branch: project.default_branch,
-        pipelines_editor_path: project_ci_pipeline_editor_path(project),
-        can_view_pipeline_editor: can_view_pipeline_editor?(project),
-        ref_param: params[:ref] || project.default_branch,
-        var_param: params[:var].to_json,
-        file_param: params[:file_var].to_json,
-        project_path: project.full_path,
-        project_refs_endpoint: refs_project_path(project, sort: 'updated_desc'),
-        settings_link: project_settings_ci_cd_path(project),
-        max_warnings: ::Gitlab::Ci::Warnings::MAX_LIMIT
-      }
     end
 
     private

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe NotifyHelper, feature_category: :shared do
+RSpec.describe NotifyHelper do
   using RSpec::Parameterized::TableSyntax
 
   describe 'merge_request_reference_link' do
@@ -24,6 +24,30 @@ RSpec.describe NotifyHelper, feature_category: :shared do
       url = "http://test.host/#{project.full_path}/-/issues/#{issue.iid}"
 
       expect(issue_reference_link(issue)).to eq(reference_link(issue, url))
+    end
+  end
+
+  describe '#invited_to_description' do
+    where(:source, :description) do
+      build(:project, description: nil) | /Projects are/
+      build(:group, description: nil) | /Groups assemble/
+      build(:project, description: '_description_') | '_description_'
+      build(:group, description: '_description_') | '_description_'
+    end
+
+    with_them do
+      specify do
+        expect(helper.invited_to_description(source)).to match description
+      end
+    end
+
+    it 'truncates long descriptions', :aggregate_failures do
+      description = '_description_ ' * 30
+      project = build(:project, description: description)
+
+      result = helper.invited_to_description(project)
+      expect(result).not_to match description
+      expect(result.length).to be <= 200
     end
   end
 
@@ -60,25 +84,6 @@ RSpec.describe NotifyHelper, feature_category: :shared do
       expect(result[:reviewer_highlight]).to eq '<span>'.html_safe
       expect(result[:reviewer_avatar]).to eq reviewer_avatar
       expect(result[:reviewer_link]).to eq reviewer_link
-    end
-  end
-
-  describe '#work_item_type_for' do
-    where(:work_item, :expected_type) do
-      build(:issue)              | 'issue'
-      build(:issue, :task)       | 'issue'
-      build(:issue, :test_case)  | 'issue'
-      build(:issue, :key_result) | 'issue'
-      build(:issue, :objective)  | 'issue'
-      build(:issue, :ticket)     | 'issue'
-      build(:incident)           | 'issue'
-      build(:issue, :epic)       | 'epic'
-    end
-
-    with_them do
-      it do
-        expect(helper.work_item_type_for(work_item)).to eq(expected_type)
-      end
     end
   end
 

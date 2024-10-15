@@ -3,9 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe Ci::RunnerManager, feature_category: :fleet_visibility, type: :model do
-  let_it_be(:group) { create(:group) }
-  let_it_be(:project) { create(:project, group: group) }
-
   it_behaves_like 'having unique enum values'
 
   it_behaves_like 'it has loose foreign keys' do
@@ -21,31 +18,11 @@ RSpec.describe Ci::RunnerManager, feature_category: :fleet_visibility, type: :mo
     it { is_expected.to validate_presence_of(:runner) }
     it { is_expected.to validate_presence_of(:system_xid) }
     it { is_expected.to validate_length_of(:system_xid).is_at_most(64) }
-    it { is_expected.to validate_presence_of(:runner_type).on(:create) }
-    it { is_expected.to validate_presence_of(:sharding_key_id).on(:create) }
     it { is_expected.to validate_length_of(:version).is_at_most(2048) }
     it { is_expected.to validate_length_of(:revision).is_at_most(255) }
     it { is_expected.to validate_length_of(:platform).is_at_most(255) }
     it { is_expected.to validate_length_of(:architecture).is_at_most(255) }
     it { is_expected.to validate_length_of(:ip_address).is_at_most(1024) }
-
-    context 'when runner manager is instance type', :aggregate_failures do
-      let(:runner_manager) { build(:ci_runner_machine, runner_type: :instance_type) }
-
-      it { expect(runner_manager).to be_valid }
-
-      context 'when sharding_key_id is present' do
-        let(:runner_manager) do
-          build(:ci_runner_machine, runner: build(:ci_runner, sharding_key_id: non_existing_record_id))
-        end
-
-        it 'is invalid' do
-          expect(runner_manager).to be_invalid
-          expect(runner_manager.errors.full_messages).to contain_exactly(
-            'Runner manager cannot have sharding_key_id assigned')
-        end
-      end
-    end
 
     context 'when runner has config' do
       it 'is valid' do
@@ -62,75 +39,14 @@ RSpec.describe Ci::RunnerManager, feature_category: :fleet_visibility, type: :mo
         expect(runner_manager).not_to be_valid
       end
     end
-
-    describe 'shading_key_id validations' do
-      let(:runner_manager) { build(:ci_runner_machine, runner: runner) }
-
-      context 'with instance runner' do
-        let(:runner) { build(:ci_runner, :instance) }
-
-        it { expect(runner).to be_valid }
-
-        context 'when sharding_key_id is not present' do
-          before do
-            runner.sharding_key_id = nil
-            runner_manager.sharding_key_id = nil
-          end
-
-          it { expect(runner_manager).to be_valid }
-        end
-      end
-
-      context 'with group runner' do
-        let(:runner) { build(:ci_runner, :group, groups: [group]) }
-
-        it { expect(runner_manager).to be_valid }
-
-        context 'when sharding_key_id is not present' do
-          before do
-            runner.sharding_key_id = nil
-            runner_manager.sharding_key_id = nil
-          end
-
-          it 'adds error to model', :aggregate_failures do
-            expect(runner_manager).not_to be_valid
-            expect(runner_manager.errors[:sharding_key_id]).to contain_exactly("can't be blank")
-          end
-        end
-      end
-
-      context 'with project runner' do
-        let(:runner) { build(:ci_runner, :project, projects: [project]) }
-
-        it { expect(runner).to be_valid }
-
-        context 'when sharding_key_id is not present' do
-          before do
-            runner.sharding_key_id = nil
-          end
-
-          it 'adds error to model', :aggregate_failures do
-            expect(runner_manager).not_to be_valid
-            expect(runner_manager.errors[:sharding_key_id]).to contain_exactly("can't be blank")
-          end
-        end
-      end
-    end
   end
 
-  describe 'status scopes', :freeze_time do
-    before_all do
-      freeze_time # Freeze time before `let_it_be` runs, so that runner statuses are frozen during execution
-    end
-
-    after :all do
-      unfreeze_time
-    end
-
+  describe 'status scopes' do
     let_it_be(:runner) { create(:ci_runner, :instance) }
+
+    let_it_be(:offline_runner_manager) { create(:ci_runner_machine, runner: runner, contacted_at: 2.hours.ago) }
+    let_it_be(:online_runner_manager) { create(:ci_runner_machine, runner: runner, contacted_at: 1.second.ago) }
     let_it_be(:never_contacted_runner_manager) { create(:ci_runner_machine, :unregistered, runner: runner) }
-    let_it_be(:offline_runner_manager) { create(:ci_runner_machine, :offline, runner: runner) }
-    let_it_be(:online_runner_manager) { create(:ci_runner_machine, :almost_offline, runner: runner) }
 
     describe '.online' do
       subject(:runner_managers) { described_class.online }
@@ -283,33 +199,21 @@ RSpec.describe Ci::RunnerManager, feature_category: :fleet_visibility, type: :mo
     end
   end
 
-  describe '.with_executing_builds' do
-    subject(:scope) { described_class.with_executing_builds }
+  describe '.with_running_builds' do
+    subject(:scope) { described_class.with_running_builds }
 
     let_it_be(:runner) { create(:ci_runner) }
-    let_it_be(:runner_managers_by_status) do
-      Ci::HasStatus::AVAILABLE_STATUSES.index_with { |_status| create(:ci_runner_machine, runner: runner) }
+    let_it_be(:runner_manager1) { create(:ci_runner_machine, runner: runner) }
+    let_it_be(:runner_manager2) { create(:ci_runner_machine, runner: runner) }
+
+    before_all do
+      create(:ci_runner_machine_build, runner_manager: runner_manager1,
+        build: create(:ci_build, :success, runner: runner))
+      create(:ci_runner_machine_build, runner_manager: runner_manager2,
+        build: create(:ci_build, :running, runner: runner))
     end
 
-    let_it_be(:busy_runner_managers) do
-      Ci::HasStatus::EXECUTING_STATUSES.map { |status| runner_managers_by_status[status] }
-    end
-
-    context 'with no builds running' do
-      it { is_expected.to be_empty }
-    end
-
-    context 'with builds' do
-      before_all do
-        Ci::HasStatus::AVAILABLE_STATUSES.each do |status|
-          runner_manager = runner_managers_by_status[status]
-          build = create(:ci_build, status, runner: runner)
-          create(:ci_runner_machine_build, runner_manager: runner_manager, build: build)
-        end
-      end
-
-      it { is_expected.to match_array(busy_runner_managers) }
-    end
+    it { is_expected.to contain_exactly runner_manager2 }
   end
 
   describe '.order_id_desc' do
@@ -439,37 +343,31 @@ RSpec.describe Ci::RunnerManager, feature_category: :fleet_visibility, type: :mo
     subject { runner_manager.status }
 
     context 'if never connected' do
-      let(:runner_manager) { build(:ci_runner_machine, :unregistered, :stale) }
+      let(:runner_manager) { build(:ci_runner_machine, :unregistered, created_at: 8.days.ago) }
 
       it { is_expected.to eq(:stale) }
 
       context 'if created recently' do
-        let(:runner_manager) { build(:ci_runner_machine, :unregistered, :created_within_stale_deadline) }
+        let(:runner_manager) { build(:ci_runner_machine, :unregistered, created_at: 1.day.ago) }
 
         it { is_expected.to eq(:never_contacted) }
       end
     end
 
-    context 'if contacted just now' do
-      let(:runner_manager) { build(:ci_runner_machine, :online) }
-
-      it { is_expected.to eq(:online) }
-    end
-
-    context 'if almost offline' do
-      let(:runner_manager) { build(:ci_runner_machine, :almost_offline) }
+    context 'if contacted 1s ago' do
+      let(:runner_manager) { build(:ci_runner_machine, contacted_at: 1.second.ago) }
 
       it { is_expected.to eq(:online) }
     end
 
     context 'if contacted recently' do
-      let(:runner_manager) { build(:ci_runner_machine, :offline) }
+      let(:runner_manager) { build(:ci_runner_machine, contacted_at: 2.hours.ago) }
 
       it { is_expected.to eq(:offline) }
     end
 
     context 'if contacted long time ago' do
-      let(:runner_manager) { build(:ci_runner_machine, :stale) }
+      let(:runner_manager) { build(:ci_runner_machine, created_at: 8.days.ago, contacted_at: 7.days.ago) }
 
       it { is_expected.to eq(:stale) }
     end
@@ -657,52 +555,12 @@ RSpec.describe Ci::RunnerManager, feature_category: :fleet_visibility, type: :mo
     it { is_expected.to be_empty }
 
     context 'with an existing build' do
-      let!(:existing_build) { create(:ci_build) }
+      let!(:build) { create(:ci_build) }
       let!(:runner_machine_build) do
-        create(:ci_runner_machine_build, runner_manager: runner_manager, build: existing_build)
+        create(:ci_runner_machine_build, runner_manager: runner_manager, build: build)
       end
 
-      it { is_expected.to contain_exactly existing_build }
-    end
-  end
-
-  describe '#copy_runner_fields' do
-    let(:runner_manager) { build(:ci_runner_machine, runner: runner) }
-
-    before do
-      runner_manager.runner_type = nil
-      runner_manager.sharding_key_id = nil
-    end
-
-    shared_examples 'when sharding_key_id is not present' do
-      before do
-        runner_manager.save!
-      end
-
-      it 'sets runner_type and sharding_key_id from runner', :aggregate_failures do
-        expect(runner_manager.runner_type).to eq(runner.runner_type)
-        expect(runner_manager.sharding_key_id).to eq(runner.sharding_key_id)
-      end
-    end
-
-    context 'with instance runner' do
-      let(:runner) { build(:ci_runner, :instance) }
-
-      it { expect(runner).to be_valid }
-
-      it_behaves_like 'when sharding_key_id is not present'
-    end
-
-    context 'with group runner' do
-      let(:runner) { build(:ci_runner, :group, groups: [group]) }
-
-      it_behaves_like 'when sharding_key_id is not present'
-    end
-
-    context 'with project runner' do
-      let(:runner) { build(:ci_runner, :project, projects: [project]) }
-
-      it_behaves_like 'when sharding_key_id is not present'
+      it { is_expected.to contain_exactly build }
     end
   end
 end

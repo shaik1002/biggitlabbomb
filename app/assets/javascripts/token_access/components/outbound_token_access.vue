@@ -2,18 +2,17 @@
 import {
   GlAlert,
   GlButton,
+  GlCard,
   GlLink,
   GlIcon,
   GlLoadingIcon,
   GlSprintf,
   GlToggle,
-  GlTooltipDirective,
 } from '@gitlab/ui';
 import { createAlert } from '~/alert';
-import { __, s__, n__, sprintf } from '~/locale';
+import { __, s__ } from '~/locale';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
 import addProjectCIJobTokenScopeMutation from '../graphql/mutations/add_project_ci_job_token_scope.mutation.graphql';
 import removeProjectCIJobTokenScopeMutation from '../graphql/mutations/remove_project_ci_job_token_scope.mutation.graphql';
 import updateCIJobTokenScopeMutation from '../graphql/mutations/update_ci_job_token_scope.mutation.graphql';
@@ -21,7 +20,7 @@ import getCIJobTokenScopeQuery from '../graphql/queries/get_ci_job_token_scope.q
 import getProjectsWithCIJobTokenScopeQuery from '../graphql/queries/get_projects_with_ci_job_token_scope.query.graphql';
 import TokenAccessTable from './token_access_table.vue';
 
-// Note: This component will be removed in 18.0, as the outbound access token is getting deprecated
+// Note: This component will be removed in 17.0, as the outbound access token is getting deprecated
 export default {
   i18n: {
     toggleLabelTitle: s__(
@@ -40,26 +39,34 @@ export default {
     projectsFetchError: __('There was a problem fetching the projects'),
     scopeFetchError: __('There was a problem fetching the job token scope value'),
     outboundTokenAlertDeprecationMessage: s__(
-      `CICD|The %{boldStart}Limit access %{boldEnd}%{italicAndBoldStart}from%{italicAndBoldEnd}%{boldStart} this project%{boldEnd} setting is deprecated and scheduled for removal in the 18.0 milestone. Use the %{boldStart}Authorized groups and projects%{boldEnd} setting and allowlist instead. %{linkStart}How do I do this?%{linkEnd}`,
+      `CICD|The %{boldStart}Limit access %{boldEnd}%{italicAndBoldStart}from%{italicAndBoldEnd}%{boldStart} this project%{boldEnd} setting is deprecated and will be removed in the 18.0 milestone. Use the %{boldStart}Limit access %{boldEnd}%{italicAndBoldStart}to%{italicAndBoldEnd}%{boldStart} this project%{boldEnd} setting and allowlist instead. %{linkStart}How do I do this?%{linkEnd}`,
     ),
     disableToggleWarning: s__('CICD|Disabling this feature is a permanent change.'),
   },
   deprecationDocumentationLink: helpPagePath('ci/jobs/ci_job_token', {
-    anchor: 'limit-your-projects-job-token-access-deprecated',
+    anchor: 'limit-your-projects-job-token-access',
   }),
+  fields: [
+    {
+      key: 'fullPath',
+      label: __('Project that can be accessed'),
+    },
+    {
+      key: 'actions',
+      label: '',
+      tdClass: 'gl-text-right',
+    },
+  ],
   components: {
     GlAlert,
     GlButton,
+    GlCard,
     GlLink,
     GlIcon,
     GlLoadingIcon,
     GlSprintf,
     GlToggle,
-    CrudComponent,
     TokenAccessTable,
-  },
-  directives: {
-    GlTooltip: GlTooltipDirective,
   },
   mixins: [glFeatureFlagMixin()],
   inject: {
@@ -109,18 +116,10 @@ export default {
       return this.targetProjectPath === '';
     },
     ciJobTokenHelpPage() {
-      return helpPagePath('ci/jobs/ci_job_token#limit-your-projects-job-token-access-deprecated');
+      return helpPagePath('ci/jobs/ci_job_token#limit-your-projects-job-token-access');
     },
     disableTokenToggle() {
       return !this.jobTokenScopeEnabled;
-    },
-    projectCountTooltip() {
-      return sprintf(
-        n__('%{count} project has access', '%{count} projects have access', this.projects.length),
-        {
-          count: this.projects.length,
-        },
-      );
     },
   },
   methods: {
@@ -209,10 +208,10 @@ export default {
 </script>
 <template>
   <div>
-    <gl-loading-icon v-if="$apollo.loading" size="md" class="gl-mt-5" />
+    <gl-loading-icon v-if="$apollo.loading" size="lg" class="gl-mt-5" />
     <template v-else>
       <gl-alert
-        class="gl-mb-3 gl-mt-5"
+        class="gl-mt-5 gl-mb-3"
         variant="warning"
         :dismissible="false"
         :show-icon="false"
@@ -264,20 +263,29 @@ export default {
       </gl-toggle>
 
       <div>
-        <crud-component :title="$options.i18n.cardHeaderTitle" class="gl-mt-5">
-          <template #count>
-            <span v-gl-tooltip :title="projectCountTooltip">
-              <gl-icon name="project" class="gl-mr-2" />
-              {{ projects.length }}
-            </span>
+        <gl-card
+          class="gl-new-card"
+          header-class="gl-new-card-header"
+          body-class="gl-new-card-body gl-px-0"
+        >
+          <template #header>
+            <div class="gl-new-card-title-wrapper">
+              <h5 class="gl-new-card-title">{{ $options.i18n.cardHeaderTitle }}</h5>
+              <span class="gl-new-card-count">
+                <gl-icon name="project" class="gl-mr-2" />
+                {{ projects.length }}
+              </span>
+            </div>
+            <div class="gl-new-card-actions">
+              <gl-button size="small" disabled>{{ $options.i18n.addProject }}</gl-button>
+            </div>
           </template>
-
-          <template #actions>
-            <gl-button size="small" disabled>{{ $options.i18n.addProject }}</gl-button>
-          </template>
-
-          <token-access-table :items="projects" @removeItem="removeProject" />
-        </crud-component>
+          <token-access-table
+            :items="projects"
+            :table-fields="$options.fields"
+            @removeItem="removeProject"
+          />
+        </gl-card>
       </div>
     </template>
   </div>

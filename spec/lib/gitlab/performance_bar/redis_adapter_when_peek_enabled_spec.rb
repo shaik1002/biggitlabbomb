@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::PerformanceBar::RedisAdapterWhenPeekEnabled, feature_category: :observability do
+RSpec.describe Gitlab::PerformanceBar::RedisAdapterWhenPeekEnabled, feature_category: :metrics do
   include ExclusiveLeaseHelpers
 
   let(:peek_adapter) do

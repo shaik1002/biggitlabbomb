@@ -1,4 +1,5 @@
 import { createWrapper } from '@vue/test-utils';
+import { __ } from '~/locale';
 import { setHTMLFixture, resetHTMLFixture } from 'helpers/fixtures';
 import renderMermaid, {
   MAX_CHAR_LIMIT,
@@ -76,7 +77,7 @@ describe('Mermaid diagrams renderer', () => {
         expect(document.querySelector('pre').classList).toContain(LAZY_ALERT_SHOWN_CLASS);
         expect(findDangerousMermaidAlert().exists()).toBe(true);
         expect(findDangerousMermaidAlert().text()).toContain(
-          'Warning: Displaying this diagram might cause performance issues on this page.',
+          __('Warning: Displaying this diagram might cause performance issues on this page.'),
         );
       });
 

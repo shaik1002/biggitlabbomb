@@ -5,7 +5,6 @@ fragment CatalogResourceFields on CiCatalogResource {
   icon
   name
   starCount
-  last30DayUsageCount
   starrersPath
   verificationLevel
   versions(first: 1) {

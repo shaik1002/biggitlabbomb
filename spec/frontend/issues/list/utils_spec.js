@@ -2,14 +2,14 @@ import setWindowLocation from 'helpers/set_window_location_helper';
 import { TEST_HOST } from 'helpers/test_constants';
 import {
   apiParams,
-  apiParamsWithWildcardValues,
+  apiParamsWithSpecialValues,
   filteredTokens,
-  filteredTokensWithWildcardValues,
+  filteredTokensWithSpecialValues,
   groupedFilteredTokens,
   locationSearch,
-  locationSearchWithWildcardValues,
+  locationSearchWithSpecialValues,
   urlParams,
-  urlParamsWithWildcardValues,
+  urlParamsWithSpecialValues,
 } from 'jest/issues/list/mock_data';
 import { STATUS_CLOSED } from '~/issues/constants';
 import { CREATED_DESC, UPDATED_DESC, urlSortParams } from '~/issues/list/constants';
@@ -18,51 +18,12 @@ import {
   convertToSearchQuery,
   convertToUrlParams,
   deriveSortKey,
-  getDefaultWorkItemTypes,
   getFilterTokens,
   getInitialPageParams,
   getSortOptions,
-  getTypeTokenOptions,
   groupMultiSelectFilterTokens,
 } from '~/issues/list/utils';
 import { DEFAULT_PAGE_SIZE } from '~/vue_shared/issuable/list/constants';
-import {
-  WORK_ITEM_TYPE_ENUM_INCIDENT,
-  WORK_ITEM_TYPE_ENUM_ISSUE,
-  WORK_ITEM_TYPE_ENUM_TASK,
-} from '~/work_items/constants';
-
-describe('getDefaultWorkItemTypes', () => {
-  it('returns default work item types', () => {
-    const types = getDefaultWorkItemTypes({
-      hasEpicsFeature: true,
-      hasOkrsFeature: true,
-      hasQualityManagementFeature: true,
-    });
-
-    expect(types).toEqual([
-      WORK_ITEM_TYPE_ENUM_ISSUE,
-      WORK_ITEM_TYPE_ENUM_INCIDENT,
-      WORK_ITEM_TYPE_ENUM_TASK,
-    ]);
-  });
-});
-
-describe('getTypeTokenOptions', () => {
-  it('returns options for the Type token', () => {
-    const options = getTypeTokenOptions({
-      hasEpicsFeature: true,
-      hasOkrsFeature: true,
-      hasQualityManagementFeature: true,
-    });
-
-    expect(options).toEqual([
-      { icon: 'issue-type-issue', title: 'Issue', value: 'issue' },
-      { icon: 'issue-type-incident', title: 'Incident', value: 'incident' },
-      { icon: 'issue-type-task', title: 'Task', value: 'task' },
-    ]);
-  });
-});
 
 describe('getInitialPageParams', () => {
   it('returns page params with a default page size when no arguments are given', () => {
@@ -171,9 +132,9 @@ describe('getFilterTokens', () => {
     expect(getFilterTokens(locationSearch)).toEqual(filteredTokens);
   });
 
-  it('returns filtered tokens given "window.location.search" with wildcard values', () => {
-    expect(getFilterTokens(locationSearchWithWildcardValues)).toEqual(
-      filteredTokensWithWildcardValues,
+  it('returns filtered tokens given "window.location.search" with special values', () => {
+    expect(getFilterTokens(locationSearchWithSpecialValues)).toEqual(
+      filteredTokensWithSpecialValues,
     );
   });
 });
@@ -187,10 +148,10 @@ describe('convertToApiParams', () => {
     expect(convertToApiParams(filteredTokens)).toEqual(apiParams);
   });
 
-  it('returns api params given filtered tokens with wildcard values', () => {
-    expect(convertToApiParams(filteredTokensWithWildcardValues)).toEqual(
-      apiParamsWithWildcardValues,
-    );
+  it('returns api params given filtered tokens with special values', () => {
+    setWindowLocation('?assignee_id=123');
+
+    expect(convertToApiParams(filteredTokensWithSpecialValues)).toEqual(apiParamsWithSpecialValues);
   });
 });
 
@@ -203,12 +164,10 @@ describe('convertToUrlParams', () => {
     expect(convertToUrlParams(filteredTokens)).toEqual(urlParams);
   });
 
-  it('returns url params given filtered tokens with wildcard values', () => {
+  it('returns url params given filtered tokens with special values', () => {
     setWindowLocation('?assignee_id=123');
 
-    expect(convertToUrlParams(filteredTokensWithWildcardValues)).toEqual(
-      urlParamsWithWildcardValues,
-    );
+    expect(convertToUrlParams(filteredTokensWithSpecialValues)).toEqual(urlParamsWithSpecialValues);
   });
 });
 

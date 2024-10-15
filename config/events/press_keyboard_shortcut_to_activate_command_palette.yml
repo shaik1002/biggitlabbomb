@@ -5,8 +5,10 @@ action: press_keyboard_shortcut_to_activate_command_palette
 identifiers:
 - namespace
 - user
+product_section: core_platform
+product_stage: data_stores
 product_group: global_search
-milestone: '17.1'
+milestone: '17.0'
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/151645
 distributions:
 - ce

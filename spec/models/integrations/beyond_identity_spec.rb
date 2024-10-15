@@ -21,6 +21,7 @@ RSpec.describe Integrations::BeyondIdentity, feature_category: :integrations do
 
   describe 'attributes' do
     it 'configures attributes' do
+      is_expected.not_to be_inheritable
       expect(integration.supported_events).to be_blank
       expect(integration.to_param).to eq('beyond_identity')
       expect(integration.title).to eq('Beyond Identity')
@@ -35,9 +36,9 @@ RSpec.describe Integrations::BeyondIdentity, feature_category: :integrations do
     end
   end
 
-  describe '.api_arguments' do
-    it 'returns api arguments' do
-      expect(described_class.api_arguments).to eq([{
+  describe '.api_fields' do
+    it 'returns api fields' do
+      expect(described_class.api_fields).to eq([{
         required: true,
         name: :token,
         type: String,

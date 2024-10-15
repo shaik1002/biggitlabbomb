@@ -21,7 +21,7 @@ RSpec.describe ::Ci::Runners::UnregisterRunnerManagerService, '#execute', :freez
   context 'with runner created in UI' do
     let!(:runner_manager1) { create(:ci_runner_machine, runner: runner, system_xid: 'system_id_1') }
     let!(:runner_manager2) { create(:ci_runner_machine, runner: runner, system_xid: 'system_id_2') }
-    let!(:runner) { create(:ci_runner, :online, registration_type: :authenticated_user) }
+    let!(:runner) { create(:ci_runner, registration_type: :authenticated_user, contacted_at: Time.current) }
 
     context 'with system_id specified' do
       let(:system_id) { runner_manager1.system_xid }
@@ -49,9 +49,7 @@ RSpec.describe ::Ci::Runners::UnregisterRunnerManagerService, '#execute', :freez
 
           expect do
             expect(execute).to be_success
-          end.to change { runner.reload.read_attribute(:contacted_at) }
-            .from(a_kind_of(ActiveSupport::TimeWithZone))
-            .to(nil)
+          end.to change { runner.reload.read_attribute(:contacted_at) }.from(Time.current).to(nil)
         end
       end
     end

@@ -175,9 +175,9 @@ export const setIdTypePreferenceMutationResponseWithErrors = {
 export const locationSearch = [
   '?search=find+issues',
   'author_username=homer',
-  'not[author_username][]=marge',
-  'or[author_username][]=burns',
-  'or[author_username][]=smithers',
+  'not[author_username]=marge',
+  'or[author_username]=burns',
+  'or[author_username]=smithers',
   'assignee_username[]=bart',
   'assignee_username[]=lisa',
   'assignee_username[]=5',
@@ -220,8 +220,8 @@ export const locationSearch = [
   'not[health_status]=onTrack',
 ].join('&');
 
-export const locationSearchWithWildcardValues = [
-  'assignee_id=Any',
+export const locationSearchWithSpecialValues = [
+  'assignee_id=123',
   'assignee_username=bart',
   'my_reaction_emoji=None',
   'iteration_id=Current',
@@ -311,8 +311,8 @@ const makeFilteredTokens = ({ grouped }) => [
 export const filteredTokens = makeFilteredTokens({ grouped: false });
 export const groupedFilteredTokens = makeFilteredTokens({ grouped: true });
 
-export const filteredTokensWithWildcardValues = [
-  { type: TOKEN_TYPE_ASSIGNEE, value: { data: 'Any', operator: OPERATOR_IS } },
+export const filteredTokensWithSpecialValues = [
+  { type: TOKEN_TYPE_ASSIGNEE, value: { data: '123', operator: OPERATOR_IS } },
   { type: TOKEN_TYPE_ASSIGNEE, value: { data: 'bart', operator: OPERATOR_IS } },
   { type: TOKEN_TYPE_MY_REACTION, value: { data: 'None', operator: OPERATOR_IS } },
   { type: TOKEN_TYPE_ITERATION, value: { data: 'Current', operator: OPERATOR_IS } },
@@ -360,24 +360,24 @@ export const apiParams = {
   },
 };
 
-export const apiParamsWithWildcardValues = {
-  assigneeWildcardId: 'ANY',
+export const apiParamsWithSpecialValues = {
+  assigneeId: '123',
   assigneeUsernames: 'bart',
   labelName: 'None',
   myReactionEmoji: 'None',
   releaseTagWildcardId: 'NONE',
   iterationWildcardId: 'CURRENT',
   milestoneWildcardId: 'UPCOMING',
-  epicWildcardId: 'NONE',
-  weightWildcardId: 'NONE',
+  epicId: 'None',
+  weight: 'None',
   healthStatusFilter: 'NONE',
 };
 
 export const urlParams = {
   search: 'find issues',
   author_username: 'homer',
-  'not[author_username][]': 'marge',
-  'or[author_username][]': ['burns', 'smithers'],
+  'not[author_username]': 'marge',
+  'or[author_username]': ['burns', 'smithers'],
   'assignee_username[]': ['bart', 'lisa', '5'],
   'not[assignee_username][]': ['patty', 'selma'],
   'or[assignee_username][]': ['carl', 'lenny'],
@@ -405,8 +405,8 @@ export const urlParams = {
   'not[health_status]': 'onTrack',
 };
 
-export const urlParamsWithWildcardValues = {
-  assignee_id: 'Any',
+export const urlParamsWithSpecialValues = {
+  assignee_id: '123',
   'assignee_username[]': 'bart',
   'label_name[]': 'None',
   release_tag: 'None',

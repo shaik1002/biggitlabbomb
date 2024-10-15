@@ -97,7 +97,7 @@ module Import
     end
 
     def log_error(message)
-      ::Import::Framework::Logger.error(
+      Gitlab::Import::Logger.error(
         message: 'BitBucket Cloud import failed',
         error: message
       )

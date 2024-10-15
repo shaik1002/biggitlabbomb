@@ -77,10 +77,10 @@ export default {
 
 <template>
   <div class="ide-commit-list-container">
-    <header class="multi-file-commit-panel-header gl-mb-0 gl-flex">
-      <div class="flex-fill gl-flex gl-items-center">
+    <header class="multi-file-commit-panel-header gl-display-flex gl-mb-0">
+      <div class="gl-display-flex gl-align-items-center flex-fill">
         <strong> {{ __('Changes') }} </strong>
-        <div class="gl-ml-auto gl-flex">
+        <div class="gl-display-flex gl-ml-auto">
           <gl-button
             v-if="!stagedList"
             v-gl-tooltip
@@ -90,9 +90,9 @@ export default {
             :class="{
               'disabled-content': !filesLength,
             }"
-            class="!gl-shadow-none"
+            class="gl-shadow-none!"
             category="tertiary"
-            icon="remove"
+            icon="remove-all"
             data-placement="bottom"
             data-container="body"
             data-boundary="viewport"
@@ -111,7 +111,7 @@ export default {
         />
       </li>
     </ul>
-    <p v-else class="multi-file-commit-list form-text gl-text-center gl-text-gray-600">
+    <p v-else class="multi-file-commit-list form-text gl-text-gray-600 gl-text-center">
       {{ emptyStateText }}
     </p>
     <gl-modal

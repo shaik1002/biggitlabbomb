@@ -24,16 +24,13 @@ module Types
       field :admin_url, GraphQL::Types::String, null: true,
         description: 'Admin URL of the runner. Only available for administrators.'
       field :contacted_at, Types::TimeType, null: true,
-        description: 'Timestamp of last contact from the runner.'
+        description: 'Timestamp of last contact from this runner.',
+        method: :contacted_at
       field :created_at, Types::TimeType, null: true,
-        description: 'Timestamp of creation of the runner.'
+        description: 'Timestamp of creation of this runner.'
       field :created_by, Types::UserType, null: true,
-        description: 'User that created the runner.',
+        description: 'User that created this runner.',
         method: :creator
-      field :creation_method, Types::Ci::RunnerCreationMethodEnum, null: true,
-        method: :registration_type,
-        description: 'Type of runner registration.',
-        alpha: { milestone: '17.0' }
       field :description, GraphQL::Types::String, null: true,
         description: 'Description of the runner.'
       field :edit_admin_url, GraphQL::Types::String, null: true,
@@ -51,8 +48,8 @@ module Types
       field :id, ::Types::GlobalIDType[::Ci::Runner], null: false, description: 'ID of the runner.'
       field :job_count, GraphQL::Types::Int, null: true,
         description: "Number of jobs processed by the runner (limited to #{JOB_COUNT_LIMIT}, plus one to " \
-          "indicate that more items exist).\n`jobCount` is an optimized version of `jobs { count }`, " \
-          "and can be requested for multiple runners on the same request.",
+                     "indicate that more items exist).\n`jobCount` is an optimized version of `jobs { count }`, " \
+                     "and can be requested for multiple runners on the same request.",
         resolver: ::Resolvers::Ci::RunnerJobCountResolver
       field :job_execution_status,
         Types::Ci::RunnerJobExecutionStatusEnum,
@@ -69,7 +66,8 @@ module Types
         description: 'Runner\'s maintenance notes.'
       field :managers, ::Types::Ci::RunnerManagerType.connection_type, null: true,
         description: 'Runner managers associated with the runner configuration.',
-        resolver: Resolvers::Ci::RunnerManagersResolver
+        resolver: Resolvers::Ci::RunnerManagersResolver,
+        alpha: { milestone: '15.10' }
       field :maximum_timeout, GraphQL::Types::Int, null: true,
         description: 'Maximum timeout (in seconds) for jobs processed by the runner.'
       field :owner_project, ::Types::ProjectType, null: true,
@@ -99,7 +97,8 @@ module Types
       field :tag_list, [GraphQL::Types::String], null: true,
         description: 'Tags associated with the runner.'
       field :token_expires_at, Types::TimeType, null: true,
-        description: 'Runner token expiration time.'
+        description: 'Runner token expiration time.',
+        method: :token_expires_at
 
       markdown_field :maintenance_note_html, null: true
 
@@ -153,10 +152,10 @@ module Types
 
       def job_execution_status
         BatchLoader::GraphQL.for(runner.id).batch(key: :running_builds_exist) do |runner_ids, loader|
-          statuses = ::Ci::Runner.id_in(runner_ids).with_executing_builds.index_by(&:id)
+          statuses = ::Ci::Runner.id_in(runner_ids).with_running_builds.index_by(&:id)
 
           runner_ids.each do |runner_id|
-            loader.call(runner_id, statuses[runner_id] ? :active : :idle)
+            loader.call(runner_id, statuses[runner_id] ? :running : :idle)
           end
         end
       end

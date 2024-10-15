@@ -1,73 +1,104 @@
-import { ROUGE_TO_HLJS_LANGUAGE_MAP } from '~/vue_shared/components/source_viewer/constants';
-import {
-  highlight,
-  splitIntoChunks,
-} from '~/vue_shared/components/source_viewer/workers/highlight_utils';
-import { highlightContent } from '~/highlight_js';
+import hljs from 'highlight.js/lib/core';
+import { registerPlugins } from '~/vue_shared/components/source_viewer/plugins/index';
+import { highlight } from '~/vue_shared/components/source_viewer/workers/highlight_utils';
+import { LINES_PER_CHUNK, NEWLINE } from '~/vue_shared/components/source_viewer/constants';
 
-jest.mock('~/highlight_js');
+jest.mock('highlight.js/lib/core', () => ({
+  highlight: jest.fn().mockReturnValue({ value: 'highlighted content' }),
+  registerLanguage: jest.fn(),
+  getLanguage: jest.fn(),
+}));
 
-describe('highlight', () => {
-  const fileType = 'javascript';
-  const rawContent = 'const a = 1;\nconst b = 2;\n';
-  const lang = 'javascript';
-  const highlightedContent =
-    '<span class="hljs-keyword">const</span> a = 1;\n<span class="hljs-keyword">const</span> b = 2;\n';
+jest.mock('~/vue_shared/components/source_viewer/plugins/index', () => ({
+  registerPlugins: jest.fn(),
+}));
 
-  beforeEach(() => {
-    ROUGE_TO_HLJS_LANGUAGE_MAP[lang.toLowerCase()] = lang;
-    highlightContent.mockResolvedValue(highlightedContent);
+const fileType = 'text';
+const rawContent = 'function test() { return true }; \n // newline';
+const highlightedContent = 'highlighted content';
+const language = 'json';
+
+describe('Highlight utility', () => {
+  beforeEach(() => highlight(fileType, rawContent, language));
+
+  it('registers the language', () => {
+    expect(hljs.registerLanguage).toHaveBeenCalledWith(language, expect.any(Function));
   });
 
-  afterEach(() => {
-    jest.resetAllMocks();
+  it('registers the plugins', () => {
+    expect(registerPlugins).toHaveBeenCalled();
   });
 
-  it('should highlight content and split into chunks', async () => {
-    const expectedChunks = [
+  describe('sub-languages', () => {
+    const languageDefinition = {
+      subLanguage: 'xml',
+      contains: [{ subLanguage: 'javascript' }, { subLanguage: 'typescript' }],
+    };
+
+    beforeEach(async () => {
+      jest.spyOn(hljs, 'getLanguage').mockReturnValue(languageDefinition);
+      await highlight(fileType, rawContent, language);
+    });
+
+    it('registers the primary sub-language', () => {
+      expect(hljs.registerLanguage).toHaveBeenCalledWith(
+        languageDefinition.subLanguage,
+        expect.any(Function),
+      );
+    });
+
+    it.each(languageDefinition.contains)(
+      'registers the rest of the sub-languages',
+      ({ subLanguage }) => {
+        expect(hljs.registerLanguage).toHaveBeenCalledWith(subLanguage, expect.any(Function));
+      },
+    );
+  });
+
+  it('highlights the content', () => {
+    expect(hljs.highlight).toHaveBeenCalledWith(rawContent, { language });
+  });
+
+  it('splits the content into chunks', async () => {
+    const contentArray = Array.from({ length: 140 }, () => 'newline'); // simulate 140 lines of code
+
+    const chunks = [
       {
+        language,
         highlightedContent,
-        rawContent,
-        totalLines: 3,
+        rawContent: contentArray.slice(0, 70).join(NEWLINE), // first 70 lines
         startingFrom: 0,
-        language: lang,
+        totalLines: LINES_PER_CHUNK,
+      },
+      {
+        language,
+        highlightedContent: '',
+        rawContent: contentArray.slice(70, 140).join(NEWLINE), // last 70 lines
+        startingFrom: 70,
+        totalLines: LINES_PER_CHUNK,
       },
     ];
-    const result = await highlight(fileType, rawContent, lang);
 
-    expect(highlightContent).toHaveBeenCalledWith(lang, rawContent, expect.any(Array));
-    expect(result).toEqual(expectedChunks);
-  });
-
-  it('should return undefined for an unknown language', async () => {
-    ROUGE_TO_HLJS_LANGUAGE_MAP[lang.toLowerCase()] = undefined;
-    const result = await highlight(fileType, rawContent, lang);
-
-    expect(result).toBeUndefined();
+    expect(await highlight(fileType, contentArray.join(NEWLINE), language)).toEqual(
+      expect.arrayContaining(chunks),
+    );
   });
 });
 
-describe('splitIntoChunks', () => {
-  it('should split content into chunks', () => {
-    const language = 'javascript';
-    const rawContent = 'const a = 1;\nconst b = 2;\nconst c = 3;\nconst d = 4;\n';
-    const highlightedContent =
-      '<span class="hljs-keyword">const</span> a = 1;\n<span class="hljs-keyword">const</span> b = 2;\n<span class="hljs-keyword">const</span> c = 3;\n<span class="hljs-keyword">const</span> d = 4;\n';
+describe('unsupported languages', () => {
+  const unsupportedLanguage = 'some_unsupported_language';
 
-    const expectedChunks = [
-      {
-        highlightedContent:
-          '<span class="hljs-keyword">const</span> a = 1;\n' +
-          '<span class="hljs-keyword">const</span> b = 2;\n' +
-          '<span class="hljs-keyword">const</span> c = 3;\n' +
-          '<span class="hljs-keyword">const</span> d = 4;\n',
-        rawContent: 'const a = 1;\nconst b = 2;\nconst c = 3;\nconst d = 4;\n',
-        totalLines: 5,
-        startingFrom: 0,
-        language: 'javascript',
-      },
-    ];
-    const result = splitIntoChunks(language, rawContent, highlightedContent);
-    expect(result).toEqual(expectedChunks);
+  beforeEach(() => highlight(fileType, rawContent, unsupportedLanguage));
+
+  it('does not register plugins', () => {
+    expect(registerPlugins).not.toHaveBeenCalled();
+  });
+
+  it('does not attempt to highlight the content', () => {
+    expect(hljs.highlight).not.toHaveBeenCalled();
+  });
+
+  it('does not return a result', async () => {
+    expect(await highlight(fileType, rawContent, unsupportedLanguage)).toBe(undefined);
   });
 });

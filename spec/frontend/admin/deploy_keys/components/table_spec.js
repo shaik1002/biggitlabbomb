@@ -1,8 +1,8 @@
 import { merge } from 'lodash';
-import { GlLoadingIcon, GlEmptyState, GlPagination, GlModal } from '@gitlab/ui';
+import { GlCard, GlLoadingIcon, GlEmptyState, GlPagination, GlModal } from '@gitlab/ui';
 import { nextTick } from 'vue';
+
 import responseBody from 'test_fixtures/api/deploy_keys/index.json';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import { stubComponent } from 'helpers/stub_component';
@@ -45,8 +45,8 @@ describe('DeployKeysTable', () => {
     });
   };
 
-  const findCrud = () => wrapper.findComponent(CrudComponent);
-  const findCrudTitle = () => wrapper.findByTestId('crud-title');
+  const findCard = () => wrapper.findComponent(GlCard);
+  const findCardTitle = () => findCard().find('.gl-new-card-title-wrapper');
   const findEditButton = (index) =>
     wrapper.findAllByLabelText(DeployKeysTable.i18n.edit, { selector: 'a' }).at(index);
   const findRemoveButton = (index) =>
@@ -132,11 +132,11 @@ describe('DeployKeysTable', () => {
       });
 
       it('renders card with the deploy keys', () => {
-        expect(findCrud().exists()).toBe(true);
+        expect(findCard().exists()).toBe(true);
       });
 
       it('shows the correct number of deploy keys', () => {
-        expect(findCrudTitle().text()).toMatchInterpolatedText(
+        expect(findCardTitle().text()).toMatchInterpolatedText(
           `Public deploy keys ${responseBody.length}`,
         );
       });
@@ -189,6 +189,8 @@ describe('DeployKeysTable', () => {
           value: 1,
           perPage: DEFAULT_PER_PAGE,
           totalItems: responseBody.length,
+          nextText: DeployKeysTable.i18n.pagination.next,
+          prevText: DeployKeysTable.i18n.pagination.prev,
           align: 'center',
         });
       });

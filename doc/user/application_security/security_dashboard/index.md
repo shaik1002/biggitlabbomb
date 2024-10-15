@@ -34,10 +34,9 @@ You can view vulnerability metrics also in the [Value Streams Dashboard](../../.
 
 To view the Security Dashboards, the following is required:
 
-- You must have the Developer role for the group or project.
+- [Maintainer Role](../../permissions.md#roles) for the project or group.
 - At least one [security scanner](../index.md#application-coverage) configured within your project.
-- A successful security scan performed on the [default branch](../../project/repository/branches/default.md) of your project.
-- At least 1 detected vulnerability in the project.
+- A successful security scan performed on the [default branch](../../project/repository/branches/default.md) of your project
 
 **Note**:
 The Security Dashboards show results of scans from the most recent completed pipeline on the
@@ -51,9 +50,8 @@ Each dashboard provides a unique viewpoint of your security posture.
 ### Project Security Dashboard
 
 The Project Security Dashboard shows the total number of vulnerabilities detected over time,
-with up to 365 days of historical data for a given project. The dashboard is an historical view of open vulnerabilities in the default branch. Open vulnerabilities are those of only `Needs triage` or `Confirmed` status (`Dismissed` or `Resolved` vulnerabilities are excluded).
-
-To view a project's security dashboard:
+with up to 365 days of historical data for a given project. You can view the Project Security
+Dashboard:
 
 1. On the left sidebar, select **Search or go to** and find your project.
 1. Select **Secure > Security dashboard**.
@@ -64,7 +62,7 @@ To view a project's security dashboard:
      across the chart.
    - To reset to the original range, select **Remove Selection** (**{redo}**).
 
-![Project Security Dashboard](img/project_security_dashboard_v16_6.png)
+![Project Security Dashboard](img/project_security_dashboard.png)
 
 #### Downloading the vulnerability chart
 
@@ -107,7 +105,7 @@ To view group security dashboard:
    - You can see how many vulnerabilities of a particular severity are found in a project
    - You can select a project's name to directly access its project security dashboard
 
-![Group Security Dashboard](img/group_security_dashboard_v16_6.png)
+![Group Security Dashboard](img/group_security_dashboard.png)
 
 ## Security Center
 

@@ -17,27 +17,6 @@ If you are unable to resolve pipeline issues, you can get help from:
 - The [GitLab community forum](https://forum.gitlab.com/)
 - GitLab [Support](https://about.gitlab.com/support/)
 
-If you are having issues with a specific CI/CD feature, see the related troubleshooting section
-for that feature:
-
-- [Caching](caching/index.md#troubleshooting).
-- [CI/CD job tokens](jobs/ci_job_token.md#troubleshooting).
-- [Container registry](../user/packages/container_registry/troubleshoot_container_registry.md).
-- [Docker](docker/using_docker_build.md#troubleshooting).
-- [Downstream pipelines](pipelines/downstream_pipelines_troubleshooting.md).
-- [Environments](environments/index.md#troubleshooting).
-- [GitLab Runner](https://docs.gitlab.com/runner/faq/).
-- [ID tokens](secrets/id_token_authentication.md#troubleshooting).
-- [Jobs](jobs/index.md#troubleshooting).
-- [Job artifacts](jobs/job_artifacts_troubleshooting.md).
-- [Merge request pipelines](pipelines/mr_pipeline_troubleshooting.md),
-  [merged results pipelines](pipelines/merged_results_pipelines.md#troubleshooting),
-  and [merge trains](pipelines/merge_trains.md#troubleshooting).
-- [Pipeline editor](pipeline_editor/index.md#troubleshooting).
-- [Variables](variables/index.md#troubleshooting).
-- [YAML `includes` keyword](yaml/includes.md#troubleshooting).
-- [YAML `script` keyword](yaml/script.md#troubleshooting).
-
 ## Debugging techniques
 
 ### Verify syntax
@@ -73,12 +52,12 @@ latest version of the schema.
 
 #### Verify syntax with CI Lint tool
 
-You can use the [CI Lint tool](yaml/lint.md) to verify that the syntax of a CI/CD configuration
+You can use the [CI Lint tool](lint.md) to verify that the syntax of a CI/CD configuration
 snippet is correct. Paste in full `.gitlab-ci.yml` files or individual job configurations,
 to verify the basic syntax.
 
 When a `.gitlab-ci.yml` file is present in a project, you can also use the CI Lint
-tool to [simulate the creation of a full pipeline](yaml/lint.md#simulate-a-pipeline).
+tool to [simulate the creation of a full pipeline](lint.md#simulate-a-pipeline).
 It does deeper verification of the configuration syntax.
 
 ### Use pipeline names
@@ -140,7 +119,7 @@ my-flaky-job:
 ```
 
 In this example, `DEBUG_VARS` is blank by default in standard pipelines. If you need to
-debug the job's behavior, run the pipeline manually and set `DEBUG_VARS` to `--verbose`
+debug the job's behavior, run the pipeline manually and set `DEBUG_VARS` to `--vebose`
 for additional output.
 
 ### Dependencies
@@ -241,10 +220,6 @@ You can use a tool like [Rancher Desktop](https://rancherdesktop.io/) or [simila
 to run the job's container image on your local machine. Then, run the job's `script` commands
 in the container and verify the behavior.
 
-### Troubleshoot a failed job with Root Cause Analysis
-
-You can use GitLab Duo Root Cause Analysis in GitLab Duo Chat to [troubleshoot failed CI/CD jobs](../user/gitlab_duo_chat/examples.md#troubleshoot-failed-cicd-jobs-with-root-cause-analysis).
-
 ## Job configuration issues
 
 A lot of common pipeline issues can be fixed by analyzing the behavior of the `rules`
@@ -287,7 +262,7 @@ Some text editors could insert a BOM character if configured to do so.
 
 If your pipeline has confusing behavior, you can check for the presence of BOM characters
 with a tool capable of displaying them. The pipeline editor cannot display the characters,
-so you must use an external tool. See [issue 354026](https://gitlab.com/gitlab-org/gitlab/-/issues/354026)
+so you must use an external tool. See [issue 35402](https://gitlab.com/gitlab-org/gitlab/-/issues/354026)
 for more details.
 
 ### A job with the `changes` keyword runs unexpectedly
@@ -339,7 +314,7 @@ configuration into more independent [parent-child pipelines](../ci/pipelines/pip
 
 Pipeline configuration warnings are shown when you:
 
-- [Validate configuration with the CI Lint tool](yaml/lint.md).
+- [Validate configuration with the CI Lint tool](lint.md).
 - [Manually run a pipeline](pipelines/index.md#run-a-pipeline-manually).
 
 ### `Job may allow multiple pipelines to run for a single action` warning
@@ -352,7 +327,31 @@ To [prevent duplicate pipelines](jobs/job_rules.md#avoid-duplicate-pipelines), u
 [`workflow: rules`](yaml/index.md#workflow) or rewrite your rules to control
 which pipelines can run.
 
-## Pipeline errors
+## Troubleshooting
+
+For help with a specific area, see:
+
+- [Caching](caching/index.md#troubleshooting).
+- [CI/CD job tokens](jobs/ci_job_token.md).
+- [Container registry](../user/packages/container_registry/troubleshoot_container_registry.md).
+- [Docker](docker/using_docker_build.md#troubleshooting).
+- [Downstream pipelines](pipelines/downstream_pipelines.md#troubleshooting).
+- [Environments](environments/deployment_safety.md#ensure-only-one-deployment-job-runs-at-a-time).
+- [GitLab Runner](https://docs.gitlab.com/runner/faq/).
+- [ID tokens](secrets/id_token_authentication.md#troubleshooting).
+- [Jobs](jobs/index.md#troubleshooting).
+- [Job control](jobs/job_control.md).
+- [Job artifacts](jobs/job_artifacts_troubleshooting.md).
+- [Merge request pipelines](pipelines/mr_pipeline_troubleshooting.md),
+  [merged results pipelines](pipelines/merged_results_pipelines.md#troubleshooting),
+  and [Merge trains](pipelines/merge_trains.md#troubleshooting).
+- [Pipeline editor](pipeline_editor/index.md#troubleshooting).
+- [Variables](variables/index.md#troubleshooting).
+- [YAML `includes` keyword](yaml/includes.md#troubleshooting).
+- [YAML `script` keyword](yaml/script.md#troubleshooting).
+
+Otherwise, review the following troubleshooting sections for known status messages
+and error messages.
 
 ### `A CI/CD pipeline must run and be successful before merge` message
 
@@ -379,8 +378,8 @@ This issue is [resolved](https://gitlab.com/gitlab-org/gitlab/-/issues/229352) i
 
 ### `Checking pipeline status` message
 
-This message displays with a spinning status icon (**{spinner}**) when the merge request
-does not yet have a pipeline associated with the latest commit. This might be because:
+This message displays when the merge request does not yet have a pipeline associated with the
+latest commit. This might be because:
 
 - GitLab hasn't finished creating the pipeline yet.
 - You are using an external CI service and GitLab hasn't heard back from the service yet.
@@ -390,11 +389,6 @@ does not yet have a pipeline associated with the latest commit. This might be be
 - The source branch of the merge request is on a private fork.
 
 After the pipeline is created, the message updates with the pipeline status.
-
-In some of these cases, the message might get stuck with the icon spinning endlessly
-if the [**Pipelines must succeed**](../user/project/merge_requests/auto_merge.md#require-a-successful-pipeline-for-merge)
-setting is enabled. See [issue 334281](https://gitlab.com/gitlab-org/gitlab/-/issues/334281)
-for more details.
 
 ### `Project <group/project> not found or access denied` message
 
@@ -408,7 +402,7 @@ To resolve this, check that:
 - The path of the project is in the format `my-group/my-project` and does not include
   any folders in the repository.
 - The user running the pipeline is a [member of the projects](../user/project/members/index.md#add-users-to-a-project)
-  that contain the included files. Users must also have the [permission](../user/permissions.md#cicd)
+  that contain the included files. Users must also have the [permission](../user/permissions.md#job-permissions)
   to run CI/CD jobs in the same projects.
 
 ### `The parsed YAML is too big` message
@@ -484,19 +478,4 @@ You might receive the following pipeline errors:
 
 These errors can happen if records of internal IDs become out of sync after a project is imported.
 
-To resolve this, see the [workaround in issue 352382](https://gitlab.com/gitlab-org/gitlab/-/issues/352382#workaround).
-
-### `config should be an array of hashes` error message
-
-You might see an error similar to the following when using [`!reference` tags](../ci/yaml/yaml_optimization.md#reference-tags)
-with the [`parallel:matrix` keyword](../ci/yaml/index.md#parallelmatrix):
-
-```plaintext
-This GitLab CI configuration is invalid: jobs:my_job_name:parallel:matrix config should be an array of hashes.
-```
-
-The `parallel:matrix` keyword does not support multiple `!reference` tags at the same time.
-Try using [YAML anchors](yaml/yaml_optimization.md#anchors) instead.
-
-[Issue 439828](https://gitlab.com/gitlab-org/gitlab/-/issues/439828) proposes improving
-`!reference` tag support in `parallel:matrix`.
+To resolve this, see the [Workaround](https://gitlab.com/gitlab-org/gitlab/-/issues/352382#workaround) in issue #352382.

@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# require 'fast_spec_helper' -- this no longer runs under fast_spec_helper
-require 'spec_helper'
+require 'fast_spec_helper'
 
 RSpec.describe Sidebars::Concerns::SuperSidebarPanel, feature_category: :navigation do
   let(:menu_class_foo) { Class.new(Sidebars::Menu) }

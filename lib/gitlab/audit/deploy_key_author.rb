@@ -8,7 +8,7 @@ module Gitlab
       end
 
       def name
-        @name || _('Deploy key')
+        @name || _('Deploy Key')
       end
     end
   end

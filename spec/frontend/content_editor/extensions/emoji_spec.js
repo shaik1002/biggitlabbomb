@@ -1,13 +1,13 @@
-import { builders, eq } from 'prosemirror-test-builder';
 import { initEmojiMock } from 'helpers/emoji';
 import Emoji from '~/content_editor/extensions/emoji';
-import { createTestEditor, triggerNodeInputRule } from '../test_utils';
+import { createTestEditor, createDocBuilder, triggerNodeInputRule } from '../test_utils';
 
 describe('content_editor/extensions/emoji', () => {
   let tiptapEditor;
   let doc;
   let p;
   let emoji;
+  let eq;
 
   beforeEach(async () => {
     await initEmojiMock();
@@ -15,7 +15,15 @@ describe('content_editor/extensions/emoji', () => {
 
   beforeEach(() => {
     tiptapEditor = createTestEditor({ extensions: [Emoji] });
-    ({ doc, paragraph: p, emoji } = builders(tiptapEditor.schema));
+    ({
+      builders: { doc, p, emoji },
+      eq,
+    } = createDocBuilder({
+      tiptapEditor,
+      names: {
+        loading: { nodeType: Emoji.name },
+      },
+    }));
   });
 
   describe('when typing a valid emoji input rule', () => {

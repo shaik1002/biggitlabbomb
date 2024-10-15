@@ -34,9 +34,7 @@ export default {
   },
   computed: {
     completedCount() {
-      // The new Work Item GraphQL endpoint returns `completedCount` instead, so added a fallback
-      // to it for the work item view
-      return this.taskCompletionStatus.completed_count ?? this.taskCompletionStatus.completedCount;
+      return this.taskCompletionStatus.completed_count;
     },
     count() {
       return this.taskCompletionStatus.count;
@@ -67,10 +65,7 @@ export default {
 </script>
 
 <template>
-  <small
-    v-if="taskStatus || updatedAt"
-    class="js-issue-widgets gl-inline-block gl-text-sm gl-text-subtle"
-  >
+  <small class="edited-text js-issue-widgets">
     <template v-if="taskStatus">
       <template v-if="showCheck">&check;</template>
       {{ taskStatus }}
@@ -88,7 +83,7 @@ export default {
           <time-ago-tooltip :time="updatedAt" tooltip-placement="bottom" />
         </template>
         <template #author>
-          <gl-link :href="updatedByPath" class="gl-text-gray-700 hover:gl-text-gray-900">
+          <gl-link :href="updatedByPath" class="gl-font-sm gl-hover-text-gray-900 gl-text-gray-700">
             {{ updatedByName }}
           </gl-link>
         </template>

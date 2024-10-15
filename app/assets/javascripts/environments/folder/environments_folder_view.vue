@@ -46,12 +46,12 @@ export default {
     <delete-environment-modal :environment="environmentInDeleteModal" />
     <confirm-rollback-modal :environment="environmentInRollbackModal" />
 
-    <h4 class="gl-font-normal" data-testid="folder-name">
+    <h4 class="gl-font-weight-normal" data-testid="folder-name">
       {{ s__('Environments|Environments') }} /
       <b>{{ folderName }}</b>
     </h4>
 
-    <gl-tabs v-if="!isLoading" scope="environments" content-class="gl-hidden">
+    <gl-tabs v-if="!isLoading" scope="environments" content-class="gl-display-none">
       <gl-tab
         v-for="(tab, i) in tabs"
         :key="`${tab.name}-${i}`"
@@ -64,12 +64,11 @@ export default {
       >
         <template #title>
           <span>{{ tab.name }}</span>
-          <gl-badge class="gl-tab-counter-badge">{{ tab.count }}</gl-badge>
+          <gl-badge size="sm" class="gl-tab-counter-badge">{{ tab.count }}</gl-badge>
         </template>
       </gl-tab>
     </gl-tabs>
 
-    <!-- eslint-disable-next-line vue/no-undef-components -->
     <container
       :is-loading="isLoading"
       :environments="state.environments"

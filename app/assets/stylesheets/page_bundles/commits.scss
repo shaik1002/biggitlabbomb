@@ -7,7 +7,6 @@
 }
 
 .add-review-item {
-  // stylelint-disable-next-line gitlab/no-gl-class
   .gl-tab-nav-item {
     height: 100%;
   }
@@ -20,10 +19,9 @@
   }
 
   .title-hint-text {
-    color: var(--gl-text-color-subtle);
+    color: var(--gray-700, $gl-text-color-secondary);
   }
 
-  // stylelint-disable-next-line gitlab/no-gl-class
   .gl-filtered-search-suggestion-list.dropdown-menu {
     width: $gl-max-dropdown-max-height;
   }

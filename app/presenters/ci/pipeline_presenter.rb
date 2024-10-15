@@ -3,7 +3,6 @@
 module Ci
   class PipelinePresenter < Gitlab::View::Presenter::Delegated
     include Gitlab::Utils::StrongMemoize
-    include SafeFormatHelper
 
     delegator_override_with Gitlab::Utils::StrongMemoize # This module inclusion is expected. See https://gitlab.com/gitlab-org/gitlab/-/issues/352884.
 
@@ -13,13 +12,14 @@ module Ci
       { unknown_failure: 'The reason for the pipeline failure is unknown.',
         config_error: 'The pipeline failed due to an error on the CI/CD configuration file.',
         external_validation_failure: 'The external pipeline validation failed.',
-        user_not_verified: 'The pipeline failed due to the user not being verified.',
+        user_not_verified: 'The pipeline failed due to the user not being verified',
         size_limit_exceeded: 'The pipeline size limit was exceeded.',
         job_activity_limit_exceeded: 'The pipeline job activity limit was exceeded.',
         deployments_limit_exceeded: 'The pipeline deployments limit was exceeded.',
         project_deleted: 'The project associated with this pipeline was deleted.',
-        filtered_by_rules: Ci::Pipeline.rules_failure_message,
-        filtered_by_workflow_rules: Ci::Pipeline.workflow_rules_failure_message }
+        filtered_by_rules: 'Pipeline will not run for the selected trigger. ' \
+                           'The rules configuration prevented any jobs from being added to the pipeline.',
+        filtered_by_workflow_rules: 'Pipeline filtered out by workflow rules.' }
     end
 
     presents ::Ci::Pipeline, as: :pipeline
@@ -70,9 +70,18 @@ module Ci
 
     def ref_text
       if pipeline.detached_merge_request_pipeline?
-        safe_format(_("Related merge request %{link_to_merge_request} to merge %{link_to_merge_request_source_branch}"), link_to_merge_request: link_to_merge_request, link_to_merge_request_source_branch: link_to_merge_request_source_branch)
+        _("Related merge request %{link_to_merge_request} to merge %{link_to_merge_request_source_branch}")
+          .html_safe % {
+            link_to_merge_request: link_to_merge_request,
+            link_to_merge_request_source_branch: link_to_merge_request_source_branch
+          }
       elsif pipeline.merged_result_pipeline?
-        safe_format(_("Related merge request %{link_to_merge_request} to merge %{link_to_merge_request_source_branch} into %{link_to_merge_request_target_branch}"), link_to_merge_request: link_to_merge_request, link_to_merge_request_source_branch: link_to_merge_request_source_branch, link_to_merge_request_target_branch: link_to_merge_request_target_branch)
+        _("Related merge request %{link_to_merge_request} to merge %{link_to_merge_request_source_branch} into %{link_to_merge_request_target_branch}")
+          .html_safe % {
+            link_to_merge_request: link_to_merge_request,
+            link_to_merge_request_source_branch: link_to_merge_request_source_branch,
+            link_to_merge_request_target_branch: link_to_merge_request_target_branch
+          }
       elsif all_related_merge_requests.any?
         (_("%{count} related %{pluralized_subject}: %{links}") % {
           count: all_related_merge_requests.count,
@@ -80,9 +89,10 @@ module Ci
           links: all_related_merge_request_links.join(', ')
         }).html_safe
       elsif pipeline.ref && pipeline.ref_exists?
-        safe_format(_("For %{link_to_pipeline_ref}"), link_to_pipeline_ref: link_to_pipeline_ref)
+        _("For %{link_to_pipeline_ref}")
+        .html_safe % { link_to_pipeline_ref: link_to_pipeline_ref }
       elsif pipeline.ref
-        safe_format(_("For %{ref}"), ref: plain_ref_name)
+        _("For %{ref}").html_safe % { ref: plain_ref_name }
       end
     end
 

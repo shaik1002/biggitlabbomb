@@ -435,13 +435,6 @@ RSpec.describe Gitlab::Ci::Trace::Stream, :clean_gitlab_redis_cache do
         it { is_expected.to eq("65") }
       end
 
-      context 'using a regex capture with timestamped data' do
-        let(:data) { '2024-08-06T09:24:35.138094Z 00O TOTAL      9926   3489    65%' }
-        let(:regex) { 'TOTAL\s+\d+\s+\d+\s+(\d{1,3}\%)' }
-
-        it { is_expected.to eq('65') }
-      end
-
       context 'malicious regexp' do
         let(:data) { malicious_text }
         let(:regex) { malicious_regexp_re2 }
@@ -456,26 +449,15 @@ RSpec.describe Gitlab::Ci::Trace::Stream, :clean_gitlab_redis_cache do
         it { is_expected.to eq('65') }
       end
 
-      context 'multi-line timestamped data with rooted regexp' do
-        let(:data) do
-          "2024-08-06T09:24:35.138088Z 00O Timestamped!\n" \
-            "2024-08-06T09:24:35.138094Z 00O TOTAL      9926   3489    65%\n"
-        end
-
-        let(:regex) { '^TOTAL\s+\d+\s+\d+\s+(\d{1,3}\%)$' }
-
-        it { is_expected.to eq('65') }
-      end
-
       context 'long line' do
-        let(:data) { ('a' * 80000) + '100%' + ('a' * 80000) }
+        let(:data) { 'a' * 80000 + '100%' + 'a' * 80000 }
         let(:regex) { '\d+\%' }
 
         it { is_expected.to eq('100') }
       end
 
       context 'many lines' do
-        let(:data) { ("foo\n" * 80000) + "100%\n" + ("foo\n" * 80000) }
+        let(:data) { "foo\n" * 80000 + "100%\n" + "foo\n" * 80000 }
         let(:regex) { '\d+\%' }
 
         it { is_expected.to eq('100') }

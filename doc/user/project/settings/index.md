@@ -94,35 +94,8 @@ Prerequisites:
 
 1. On the left sidebar, select **Search or go to** and find your project.
 1. Select **Settings > General**.
-1. Expand the **Visibility, project features, permissions** section.
-1. Clear the **Enable email notifications** checkbox.
-
-### Disable diff previews in project email notifications
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/24733) in GitLab 15.6 [with the flag](../../../administration/feature_flags.md) named `diff_preview_in_email`. Disabled by default.
-> - [Enabled](https://gitlab.com/gitlab-org/gitlab/-/issues/382055) the flag `diff_preview_in_email` on GitLab.com, self-managed, and GitLab Dedicated in GitLab 17.1.
-
-FLAG:
-The availability of this feature is controlled by a feature flag.
-For more information, see the history.
-
-When you review code in a merge request and comment on a line of code, GitLab
-includes a few lines of the diff in the email notification to participants.
-Some organizational policies treat email as a less secure system, or might not
-control their own infrastructure for email. This can present risks to IP or
-access control of source code.
-
-Prerequisites:
-
-- You must have the Owner role for the project.
-
-To disable diff previews for a project:
-
-1. On the left sidebar, select **Search or go to** and find your project.
-1. Select **Settings > General**.
-1. Expand the **Visibility, project features, permissions** section.
-1. Clear **Include diff previews**.
-1. Select **Save changes**.
+1. Expand **Visibility, project features, permissions**.
+1. Clear the **Disable email notifications** checkbox.
 
 ## Configure merge request settings for a project
 
@@ -133,10 +106,10 @@ Configure your project's merge request settings:
 - Enable:
   - [Merge request approvals](../merge_requests/approvals/index.md).
   - [Status checks](../merge_requests/status_checks.md).
-  - [Merge only if pipeline succeeds](../merge_requests/auto_merge.md).
+  - [Merge only if pipeline succeeds](../merge_requests/merge_when_pipeline_succeeds.md).
   - [Merge only when all threads are resolved](../merge_requests/index.md#prevent-merge-unless-all-threads-are-resolved).
   - [Required associated issue from Jira](../../../integration/jira/issues.md#require-associated-jira-issue-for-merge-requests-to-be-merged).
-  - [Suggested Reviewers](../merge_requests/reviews/index.md#suggested-reviewers)
+  - [GitLab Duo Suggested Reviewers](../merge_requests/reviews/index.md#gitlab-duo-suggested-reviewers)
   - [**Delete source branch when merge request is accepted** option by default](#delete-the-source-branch-on-merge-by-default).
 - Configure:
   - [Suggested changes commit messages](../merge_requests/reviews/suggestions.md#configure-the-commit-message-for-applied-suggestions).

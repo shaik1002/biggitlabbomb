@@ -22,8 +22,14 @@ export const ROW_SCHEDULED_FOR_DELETION = s__(
 export const FETCH_IMAGES_LIST_ERROR_MESSAGE = s__(
   'ContainerRegistry|Something went wrong while fetching the repository list.',
 );
+export const FETCH_TAGS_LIST_ERROR_MESSAGE = s__(
+  'ContainerRegistry|Something went wrong while fetching the tags list.',
+);
 export const DELETE_IMAGE_ERROR_MESSAGE = s__(
   'ContainerRegistry|Something went wrong while scheduling %{title} for deletion. Please try again.',
+);
+export const ASYNC_DELETE_IMAGE_ERROR_MESSAGE = s__(
+  `ContainerRegistry|There was an error during the deletion of this image repository, please try again.`,
 );
 export const DELETE_IMAGE_SUCCESS_MESSAGE = s__(
   'ContainerRegistry|%{title} was successfully scheduled for deletion',
@@ -31,9 +37,6 @@ export const DELETE_IMAGE_SUCCESS_MESSAGE = s__(
 export const EMPTY_RESULT_TITLE = s__('ContainerRegistry|Sorry, your filter produced no results.');
 export const EMPTY_RESULT_MESSAGE = s__(
   'ContainerRegistry|To widen your search, change or remove the filters above.',
-);
-export const SIGNATURE_BADGE_TOOLTIP = s__(
-  'ContainerRegistry|GitLab is unable to validate this signature automatically. Validate the signature manually before trusting it.',
 );
 
 export const COPY_IMAGE_PATH_TITLE = s__('ContainerRegistry|Copy image path');
@@ -50,7 +53,6 @@ export const TRACKING_ACTION_CLICK_SHOW_FULL_PATH = 'click_show_full_path';
 export const IMAGE_DELETE_SCHEDULED_STATUS = 'DELETE_SCHEDULED';
 export const IMAGE_MIGRATING_STATE = 'importing';
 export const GRAPHQL_PAGE_SIZE = 10;
-export const GRAPHQL_PAGE_SIZE_METADATA_ENABLED = 20;
 
 export const SORT_FIELDS = [
   { orderBy: 'UPDATED', label: __('Updated') },

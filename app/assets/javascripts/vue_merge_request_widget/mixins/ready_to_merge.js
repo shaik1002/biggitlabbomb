@@ -10,8 +10,6 @@ export const PIPELINE_MUST_SUCCEED_CONFLICT_TEXT = __(
 );
 export const PIPELINE_SKIPPED_STATUS = 'SKIPPED';
 
-const MERGE_WHEN_CHECKS_PASS_HELP = helpPagePath('user/project/merge_requests/auto_merge');
-
 export default {
   computed: {
     isMergeButtonDisabled() {
@@ -30,25 +28,11 @@ export default {
       return __('Set to auto-merge');
     },
     autoMergeHelperText() {
-      if (this.isPreferredAutoMergeStrategyMWPC) {
-        return __('Merge when all merge checks pass');
-      }
-
       return __('Merge when pipeline succeeds');
     },
     autoMergePopoverSettings() {
-      if (this.isPreferredAutoMergeStrategyMWPC) {
-        return {
-          helpLink: MERGE_WHEN_CHECKS_PASS_HELP,
-          bodyText: __(
-            'When all the merge checks for this merge request pass, it will %{linkStart}automatically merge%{linkEnd}.',
-          ),
-          title: __('Merge when checks pass'),
-        };
-      }
-
       return {
-        helpLink: helpPagePath('user/project/merge_requests/auto_merge'),
+        helpLink: helpPagePath('/user/project/merge_requests/merge_when_pipeline_succeeds.html'),
         bodyText: __(
           'When the pipeline for this merge request succeeds, it will %{linkStart}automatically merge%{linkEnd}.',
         ),
@@ -59,7 +43,10 @@ export default {
       return false;
     },
     shouldShowMergeImmediatelyDropdown() {
-      return this.isAutoMergeAvailable && this.isMergeAllowed;
+      if (window.gon?.features?.autoMergeWhenIncompletePipelineSucceeds) {
+        return this.isAutoMergeAvailable && this.isMergeAllowed;
+      }
+      return this.isPipelineActive && !this.state.onlyAllowMergeIfPipelineSucceeds;
     },
     isMergeImmediatelyDangerous() {
       return false;

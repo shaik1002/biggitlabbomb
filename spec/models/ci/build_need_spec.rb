@@ -9,7 +9,6 @@ RSpec.describe Ci::BuildNeed, model: true, feature_category: :continuous_integra
 
   it { is_expected.to validate_presence_of(:build) }
   it { is_expected.to validate_presence_of(:name) }
-  it { is_expected.to validate_presence_of(:project_id) }
   it { is_expected.to validate_length_of(:name).is_at_most(255) }
 
   describe 'scopes' do
@@ -66,7 +65,7 @@ RSpec.describe Ci::BuildNeed, model: true, feature_category: :continuous_integra
     end
 
     context 'without build' do
-      let(:build_need) { FactoryBot.build(:ci_build_need, build: nil, project_id: nil) }
+      let(:build_need) { FactoryBot.build(:ci_build_need, build: nil) }
 
       it { is_expected.to validate_presence_of(:partition_id) }
 
@@ -82,10 +81,10 @@ RSpec.describe Ci::BuildNeed, model: true, feature_category: :continuous_integra
       let(:ci_build) { build(:ci_build, pipeline: new_pipeline) }
 
       before do
-        stub_current_partition_id(ci_testing_partition_id)
+        stub_current_partition_id
       end
 
-      it 'creates build needs successfully', :aggregate_failures do
+      it 'creates build needs successfully', :aggregate_failures, :ci_partitionable do
         ci_build.needs_attributes = [
           { name: "build", artifacts: true },
           { name: "build2", artifacts: true },

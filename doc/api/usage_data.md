@@ -4,19 +4,19 @@ group: Analytics Instrumentation
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
-# Service Ping API
+# Service Data API
 
 DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** Self-managed, GitLab Dedicated
 
-The Service Ping API is associated with [Service Ping](../development/internal_analytics/service_ping/index.md).
+The Service Data API is associated with [Service Ping](../development/internal_analytics/service_ping/index.md).
 
 ## Export Service Ping data
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/141446) in GitLab 16.9.
 
-Requires a personal access token with `read_service_ping` scope.
+Requires a Personal Access Token with `read_service_ping` scope.
 
 Returns the JSON payload collected in Service Ping. If no payload data is available in the application cache, it returns empty response.
 If payload data is empty, make sure the [Service Ping feature is enabled](../administration/settings/usage_statistics.md#enable-or-disable-service-ping) and
@@ -65,6 +65,8 @@ Example response:
 - key_path: redis_hll_counters.search.i_search_paid_monthly
   description: Calculated unique users to perform a search with a paid license enabled
     by month
+  product_section: enablement
+  product_stage: enablement
   product_group: global_search
   value_type: number
   status: active
@@ -191,57 +193,4 @@ Sample response:
     "operating_system": "mac_os_x-11.2.2"
   },
 ...
-```
-
-## Events Tracking API
-
-Tracks internal events in GitLab. Requires a personal access token with the `api` or `ai_workflows` scope.
-
-To track events to Snowplow, set the `send_to_snowplow` parameter to `true`.
-
-Example request:
-
-```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" \
-     --header "Content-Type: application/json" \
-     --request POST \
-     --data '{
-       "event": "mr_name_changed",
-       "send_to_snowplow": true,
-       "namespace_id": 1,
-       "project_id": 1,
-       "additional_properties": {
-         "lang": "eng"
-       }
-     }' \
-     "https://gitlab.example.com/api/v4/usage_data/track_event"
-```
-
-If multiple events tracking is required, send an array of events to the `/track_events` endpoint:
-
-```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" \
-     --header "Content-Type: application/json" \
-     --request POST \
-     --data '{
-       "events": [
-         {
-           "event": "mr_name_changed",
-           "namespace_id": 1,
-           "project_id": 1,
-           "additional_properties": {
-             "lang": "eng"
-           }
-         },
-         {
-           "event": "mr_name_changed",
-           "namespace_id": 2,
-           "project_id": 2,
-           "additional_properties": {
-             "lang": "eng"
-           }
-         }
-       ]
-     }' \
-     "https://gitlab.example.com/api/v4/usage_data/track_events"
 ```

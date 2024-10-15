@@ -20,11 +20,12 @@ module QA
       end
 
       let!(:runner) do
-        create(:project_runner,
-          name: "qa-runner-#{SecureRandom.hex(6)}",
-          tags: ["runner-for-#{project.name}"],
-          executor: :docker,
-          project: project)
+        Resource::ProjectRunner.fabricate! do |runner|
+          runner.name = "qa-runner-#{Time.now.to_i}"
+          runner.tags = ["runner-for-#{project.name}"]
+          runner.executor = :docker
+          runner.project = project
+        end
       end
 
       let(:personal_access_token) { Runtime::Env.personal_access_token }
@@ -37,17 +38,56 @@ module QA
       context "when tls is disabled" do
         where do
           {
-            'using docker:24.0.1 and a personal access token' => {
+            'using docker:20.10.23 and a personal access token' => {
+              docker_client_version: 'docker:20.10.23',
               authentication_token_type: :personal_access_token,
-              token_name: 'Personal access token',
+              token_name: 'Personal Access Token',
+              testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/412807'
+            },
+            'using docker:20.10.23 and a project deploy token' => {
+              docker_client_version: 'docker:20.10.23',
+              authentication_token_type: :project_deploy_token,
+              token_name: 'Deploy Token',
+              testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/412808'
+            },
+            'using docker:20.10.23 and a ci job token' => {
+              docker_client_version: 'docker:20.10.23',
+              authentication_token_type: :ci_job_token,
+              token_name: 'Job Token',
+              testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/412809'
+            },
+            'using docker:23.0.6 and a personal access token' => {
+              docker_client_version: 'docker:23.0.6',
+              authentication_token_type: :personal_access_token,
+              token_name: 'Personal Access Token',
+              testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/412810'
+            },
+            'using docker:23.0.6 and a project deploy token' => {
+              docker_client_version: 'docker:23.0.6',
+              authentication_token_type: :project_deploy_token,
+              token_name: 'Deploy Token',
+              testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/412813'
+            },
+            'using docker:23.0.6 and a ci job token' => {
+              docker_client_version: 'docker:23.0.6',
+              authentication_token_type: :ci_job_token,
+              token_name: 'Job Token',
+              testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/412814'
+            },
+            'using docker:24.0.1 and a personal access token' => {
+              docker_client_version: 'docker:24.0.1',
+              authentication_token_type: :personal_access_token,
+              token_name: 'Personal Access Token',
               testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/412817'
             },
             'using docker:24.0.1 and a project deploy token' => {
+              docker_client_version: 'docker:24.0.1',
               authentication_token_type: :project_deploy_token,
               token_name: 'Deploy Token',
               testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/412818'
             },
             'using docker:24.0.1 and a ci job token' => {
+              docker_client_version: 'docker:24.0.1',
               authentication_token_type: :ci_job_token,
               token_name: 'Job Token',
               testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/412819'
@@ -78,37 +118,44 @@ module QA
             end
           end
 
-          it "pushes image and deletes tag", :blocking, :registry, testcase: params[:testcase] do
-            create(:commit, project: project, commit_message: 'Add .gitlab-ci.yml', actions: [
-              {
-                action: 'create',
-                file_path: '.gitlab-ci.yml',
-                content: <<~YAML
-                  build:
-                    image: "docker:24.0.1"
-                    stage: build
-                    services:
-                    - name: "docker:24.0.1-dind"
-                      command: ["--insecure-registry=gitlab.test:5050"]
-                    variables:
-                      IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
-                    script:
-                      - docker login -u #{auth_user} -p #{auth_token} gitlab.test:5050
-                      - docker build -t $IMAGE_TAG .
-                      - docker push $IMAGE_TAG
-                    tags:
-                      - "runner-for-#{project.name}"
-                YAML
-              }
-            ])
+          it "pushes image and deletes tag", :registry, testcase: params[:testcase] do
+            Support::Retrier.retry_on_exception(max_attempts: 3, sleep_interval: 2) do
+              create(:commit, project: project, commit_message: 'Add .gitlab-ci.yml', actions: [
+                {
+                  action: 'create',
+                  file_path: '.gitlab-ci.yml',
+                  content: <<~YAML
+                    build:
+                      image: "#{docker_client_version}"
+                      stage: build
+                      services:
+                      - name: "#{docker_client_version}-dind"
+                        command: ["--insecure-registry=gitlab.test:5050"]
+                      variables:
+                        IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+                      script:
+                        - docker login -u #{auth_user} -p #{auth_token} gitlab.test:5050
+                        - docker build -t $IMAGE_TAG .
+                        - docker push $IMAGE_TAG
+                      tags:
+                        - "runner-for-#{project.name}"
+                  YAML
+                }
+              ])
+            end
 
-            Flow::Pipeline.wait_for_pipeline_creation_via_api(project: project)
-            project.visit_job('build')
+            Flow::Pipeline.visit_latest_pipeline
+
+            Page::Project::Pipeline::Show.perform do |pipeline|
+              pipeline.click_job('build')
+            end
+
             Page::Project::Job::Show.perform do |job|
               expect(job).to be_successful(timeout: 800)
             end
 
             Page::Project::Menu.perform(&:go_to_container_registry)
+
             Page::Project::Registry::Show.perform do |registry|
               expect(registry).to have_registry_repository(project.name)
 
@@ -125,16 +172,17 @@ module QA
           :registry_tls,
           testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347591'
         ) do
-          create(:commit, project: project, commit_message: 'Add .gitlab-ci.yml', actions: [
-            {
-              action: 'create',
-              file_path: '.gitlab-ci.yml',
-              content: <<~YAML
+          Support::Retrier.retry_on_exception(max_attempts: 3, sleep_interval: 2) do
+            create(:commit, project: project, commit_message: 'Add .gitlab-ci.yml', actions: [
+              {
+                action: 'create',
+                file_path: '.gitlab-ci.yml',
+                content: <<~YAML
                   build:
-                    image: "docker:24.0.1"
+                    image: docker:23.0.6
                     stage: build
                     services:
-                      - name: "docker:24.0.1-dind"
+                      - name: docker:23.0.6-dind
                         command:
                           - /bin/sh
                           - -c
@@ -151,18 +199,27 @@ module QA
                       - docker push $IMAGE_TAG
                     tags:
                       - "runner-for-#{project.name}"
-              YAML
-            }
-          ])
+                YAML
+              }
+            ])
+          end
 
-          Flow::Pipeline.wait_for_pipeline_creation_via_api(project: project)
-          project.visit_job('build')
+          Flow::Pipeline.visit_latest_pipeline
+
+          Page::Project::Pipeline::Show.perform do |pipeline|
+            pipeline.click_job('build')
+          end
+
           Page::Project::Job::Show.perform do |job|
             expect(job).to be_successful(timeout: 200)
           end
 
-          Flow::Pipeline.wait_for_latest_pipeline_to_have_status(project: project, status: 'success')
+          Support::Retrier.retry_until(max_duration: 500, sleep_interval: 10) do
+            project.pipelines.last[:status] == 'success'
+          end
+
           Page::Project::Menu.perform(&:go_to_container_registry)
+
           Page::Project::Registry::Show.perform do |registry|
             expect(registry).to have_registry_repository(project.name)
 

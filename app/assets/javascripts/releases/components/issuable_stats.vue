@@ -54,13 +54,13 @@ export default {
 </script>
 
 <template>
-  <div class="gl-mb-5 gl-mr-6 gl-flex gl-shrink-0 gl-flex-col">
+  <div class="gl-display-flex gl-flex-direction-column gl-flex-shrink-0 gl-mr-6 gl-mb-5">
     <span class="gl-mb-2">
       {{ label }}
-      <gl-badge variant="muted">{{ total }}</gl-badge>
+      <gl-badge variant="muted" size="sm">{{ total }}</gl-badge>
     </span>
-    <div class="gl-flex">
-      <span class="gl-whitespace-pre-wrap" data-testid="open-stat">
+    <div class="gl-display-flex">
+      <span class="gl-white-space-pre-wrap" data-testid="open-stat">
         <gl-sprintf :message="__('Open: %{open}')">
           <template #open>
             <gl-link v-if="openedPath" :href="openedPath">{{ opened }}</gl-link>
@@ -72,7 +72,7 @@ export default {
       <template v-if="showMerged">
         <span class="gl-mx-2">&bull;</span>
 
-        <span class="gl-whitespace-pre-wrap" data-testid="merged-stat">
+        <span class="gl-white-space-pre-wrap" data-testid="merged-stat">
           <gl-sprintf :message="__('Merged: %{merged}')">
             <template #merged>
               <gl-link v-if="mergedPath" :href="mergedPath">{{ merged }}</gl-link>
@@ -84,7 +84,7 @@ export default {
 
       <span class="gl-mx-2">&bull;</span>
 
-      <span class="gl-whitespace-pre-wrap" data-testid="closed-stat">
+      <span class="gl-white-space-pre-wrap" data-testid="closed-stat">
         <gl-sprintf :message="__('Closed: %{closed}')">
           <template #closed>
             <gl-link v-if="closedPath" :href="closedPath">{{ closed }}</gl-link>

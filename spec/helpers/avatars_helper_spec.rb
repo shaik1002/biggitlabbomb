@@ -479,7 +479,7 @@ RSpec.describe AvatarsHelper, feature_category: :source_code_management do
           gl-avatar-s32\s+
           gl-avatar-circle\s+
           gl-mr-3\s+
-          !gl-rounded-base\s+
+          gl-rounded-base!\s+
           gl-avatar-identicon\s+
           gl-avatar-identicon-bg\d+"\s*>
           \s*F\s*
@@ -527,7 +527,7 @@ RSpec.describe AvatarsHelper, feature_category: :source_code_management do
     context "when css_class option is not passed" do
       it "uses the default class" do
         expect(helper).to receive(:user_avatar).with(
-          hash_including(css_class: "gl-hidden sm:gl-inline-block")
+          hash_including(css_class: "gl-display-none gl-sm-display-inline-block")
         )
 
         subject

@@ -24,7 +24,7 @@ export default {
 <template>
   <gl-disclosure-dropdown
     :items="items"
-    placement="bottom"
+    placement="center"
     @shown="$emit('shown')"
     @hidden="$emit('hidden')"
   >
@@ -32,9 +32,9 @@ export default {
       <slot></slot>
     </template>
     <template #list-item="{ item }">
-      <span class="gl-flex gl-items-center gl-justify-between">
+      <span class="gl-display-flex gl-align-items-center gl-justify-content-space-between">
         {{ item.text }}
-        <gl-badge pill variant="neutral">{{ getCount(item) }}</gl-badge>
+        <gl-badge pill size="sm" variant="neutral">{{ getCount(item) }}</gl-badge>
       </span>
     </template>
   </gl-disclosure-dropdown>

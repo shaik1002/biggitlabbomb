@@ -1,6 +1,5 @@
-import { builders } from 'prosemirror-test-builder';
 import Heading from '~/content_editor/extensions/heading';
-import { createTestEditor, triggerNodeInputRule } from '../test_utils';
+import { createTestEditor, createDocBuilder, triggerNodeInputRule } from '../test_utils';
 
 describe('content_editor/extensions/heading', () => {
   let tiptapEditor;
@@ -10,7 +9,14 @@ describe('content_editor/extensions/heading', () => {
 
   beforeEach(() => {
     tiptapEditor = createTestEditor({ extensions: [Heading] });
-    ({ doc, paragraph: p, heading } = builders(tiptapEditor.schema));
+    ({
+      builders: { doc, p, heading },
+    } = createDocBuilder({
+      tiptapEditor,
+      names: {
+        heading: { nodeType: Heading.name },
+      },
+    }));
   });
 
   describe('when typing a valid heading input rule', () => {

@@ -19,7 +19,7 @@ lag behind the current release for up to three years and still expect to have
 support for upgrades.
 
 For example, a GitLab user upgrading from GitLab 14.0.12 to GitLab 16.1,
-which is a fully supported [upgrade path](../update/upgrade_paths.md), may have
+which is a fully supported [upgrade path](../update/index.md#upgrade-paths), may have
 the following required stops: `14.3.6`, `14.9.5`, `14.10.5`, `15.0.5`, `15.1.6`,
 `15.4.6`, and `15.11.11` before upgrading to the latest `16.1.z` version.
 
@@ -31,13 +31,21 @@ across greater than 1-3 minor releases.
 Wherever possible, a required stop should be avoided. If it can't be avoided,
 the required stop should be aligned to a _scheduled_ required stop.
 
+In cases where we are considering retroactively declaring an unplanned required stop,
+contact the [Distribution team product manager](https://handbook.gitlab.com/handbook/product/categories/#distributionbuild-group) to advise on next steps. If there
+is uncertainty about whether we should declare a required stop, the Distribution product
+manager may escalate to GitLab product leadership (VP or Chief Product Officer) to make
+a final determination. This may happen, for example, if a change might require a stop for
+a small subset of very large self-managed installations and there are well-defined workarounds
+if customers run into issues.
+
 Scheduled required stops are often implemented for the previous `major`.`minor`
 release just prior to a `major` version release in order to accommodate multiple
 [planned deprecations](../update/terminology.md#deprecation) and known
 [breaking changes](../update/terminology.md#breaking-change).
 
 Additionally, as of GitLab 16, we have introduced
-[_scheduled_ `major`.`minor` required stops](../update/upgrade_paths.md):
+[_scheduled_ `major`.`minor` required stops](../update/index.md#upgrade-paths):
 
 >>>
 During GitLab 16.x, we are scheduling two or three required upgrade stops.
@@ -47,16 +55,6 @@ upgrade stop. The first planned required upgrade stop is scheduled for GitLab
 16.3. If nothing is introduced requiring an upgrade stop, GitLab 16.3 will be
 treated as a regular upgrade.
 >>>
-
-## Retroactively adding required stops
-
-In cases where we are considering retroactively declaring an unplanned required stop,
-contact the [Distribution team product manager](https://handbook.gitlab.com/handbook/product/categories/#distributionbuild-group) to advise on next steps. If there
-is uncertainty about whether we should declare a required stop, the Distribution product
-manager may escalate to GitLab product leadership (VP or Chief Product Officer) to make
-a final determination. This may happen, for example, if a change might require a stop for
-a small subset of very large self-managed installations and there are well-defined workarounds
-if customers run into issues.
 
 ## Causes of required stops
 
@@ -126,85 +124,22 @@ a new `major` release, and potentially the latest `major.0` patch release, and
 to date, discovered required stops related to deprecations have been limited to
 these releases.
 
-Not every deprecation is granted a required stop, as in most cases, the user
-is able to tweak their configuration before they start their upgrade without causing
-downtime or other major issues.
-
 #### Examples
 
-Examples of deprecations are too numerous to be listed here, but can found in the:
-
-- [Deprecations and removals by version](../update/deprecations.md).
-- Version-specific upgrading instructions:
-  - [GitLab 17](../update/versions/gitlab_17_changes.md)
-  - [GitLab 16](../update/versions/gitlab_16_changes.md)
-  - [GitLab 15](../update/versions/gitlab_15_changes.md)
-- [GitLab chart upgrade notes](https://docs.gitlab.com/charts/installation/upgrade.html).
-
-## Adding required stops
-
-### Planning the required stop milestone
-
-We can't add required stops to every milestone, as this hurts our user experience
-while upgrading GitLab. The Distribution group is responsible for helping planning and defining
-when required stops are introduced.
-
-From GitLab 17.5, we will introduce required stops in the X.2, X.5, X.8, and X.11 minor milestones. If you introduce code changes or features that require an upgrade stop, you
-must align your changes with these milestones in mind.
-
-### Before the required stop is released
-
-Before releasing a known required stop, complete these steps. If the required stop
-is identified after release, the following steps must still be completed:
-
-1. In the same MR, update the [upgrade paths](../update/upgrade_paths.md) documentation to include the new
-   required stop, and the [`upgrade_path.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/config/upgrade_path.yml).
-   The `upgrade_path.yml` is the single source of truth (SSoT) for all our required stops.
-1. Communicate the changes with the customer Support and Release management teams.
-1. File an issue with the Database group to squash migrations to that version in the next release. Use this
-   template for your issue:
-
-   ```markdown
-   Title: `Squash migrations to <Required stop version>`
-   As a result of the required stop added for <required stop version> we should squash
-   migrations up to that version, and update the minimum schema version.
-
-   Deliverables:
-   - [ ] Migrations are squashed up to <required stop version>
-   - [ ] `Gitlab::Database::MIN_SCHEMA_VERSION` matches init_schema version
-
-   /label ~"group::database" ~"section::enablement" ~"devops::data_stores" ~"Category:Database" ~"type::maintenance"
-   /cc @gitlab-org/database-team/triage
-   ```
-
-### In the release following the required stop
-
-1. In the `charts` project, update the
-   [upgrade check hook](https://docs.gitlab.com/charts/development/upgrade_stop.html)
-   to the required stop version.
-
-## GitLab-maintained projects which depend on `upgrade_path.yml`
-
-We have multiple projects depending on the `upgrade_path.yml` SSoT. Therefore,
-any change to the structure of this file needs to take into consideration that
-it might affect one of the following projects:
-
-- [Release Tools](https://gitlab.com/gitlab-org/release-tools)
-- [Support Upgrade Path](https://gitlab.com/gitlab-com/support/toolbox/upgrade-path)
-- [Upgrade Tester](https://gitlab.com/gitlab-org/quality/upgrade-tester)
-- [GitLab QA](https://gitlab.com/gitlab-org/gitlab-qa)
-- [PostgreSQL Dump Generator](https://gitlab.com/gitlab-org/quality/pg-dump-generator)
+Examples of deprecations are too numerous to be listed here, but can found
+in the [deprecations and removals by version](../update/deprecations.md) as well
+as the [version-specific upgrading instructions](../update/index.md#version-specific-upgrading-instructions),
+[version-specific changes for the GitLab package (Omnibus)](../update/package/index.md#version-specific-changes),
+and [GitLab chart upgrade notes](https://docs.gitlab.com/charts/installation/upgrade.html).
 
 ## Further reading
 
-- [Documentation: Database required stops](database/required_stops.md)
+- [Documentation: Database - Adding required stops](database/required_stops.md)
 - [Documentation: Upgrading GitLab](../update/index.md)
   - [Package (Omnibus) upgrade](../update/package/index.md)
-  - [Docker upgrade](../install/docker/upgrade.md)
+  - [Docker upgrade](../install/docker.md#upgrade)
   - [GitLab chart](https://docs.gitlab.com/charts/installation/upgrade.html)
-- [Example of required stop planning issue (17.3)](https://gitlab.com/gitlab-org/gitlab/-/issues/457453)
 - [Issue: Put in place measures to avoid addition/proliferation of GitLab upgrade path stops](https://gitlab.com/gitlab-org/gitlab/-/issues/375553)
 - [Issue: Brainstorm ways for background migrations to be finalized without introducing a required upgrade step](https://gitlab.com/gitlab-org/gitlab/-/issues/357561)
 - [Issue: Scheduled required paths for GitLab upgrades to improve UX](https://gitlab.com/gitlab-org/gitlab/-/issues/358417)
-- [Issue: Automate upgrade stop planning process](https://gitlab.com/gitlab-org/gitlab/-/issues/438921)
 - [Epic: GitLab Releases and Maintenance policies](https://gitlab.com/groups/gitlab-com/gl-infra/-/epics/988)

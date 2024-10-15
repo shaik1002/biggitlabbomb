@@ -20,7 +20,7 @@ module Types
       description: 'Description of the issue.'
     field :id, GraphQL::Types::ID, null: false,
       description: "ID of the issue."
-    field :iid, GraphQL::Types::String, null: false,
+    field :iid, GraphQL::Types::ID, null: false,
       description: "Internal ID of the issue."
     field :state, IssueStateEnum, null: false,
       description: 'State of the issue.'
@@ -162,7 +162,7 @@ module Types
     field :timelogs, Types::TimelogType.connection_type, null: false,
       description: 'Timelogs on the issue.'
 
-    field :project_id, GraphQL::Types::Int, null: true,
+    field :project_id, GraphQL::Types::Int, null: true, method: :project_id,
       description: 'ID of the issue project.'
 
     field :customer_relations_contacts, Types::CustomerRelations::ContactType.connection_type, null: true,

@@ -15,8 +15,6 @@ module Ci
       ::Ci::Runner.belonging_to_project(project_id).recent
     end
 
-    validates :runner, presence: true
     validates :runner_id, uniqueness: { scope: :project_id }
-    validates :project, presence: true
   end
 end

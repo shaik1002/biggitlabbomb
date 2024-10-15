@@ -266,16 +266,6 @@ RSpec.describe ::Gitlab::Housekeeper::GitlabClient do
         expect(non_housekeeper_changes).to eq([])
       end
     end
-
-    context 'when the event user is nil' do
-      let(:resource_label_events) do
-        [{ id: 274504558, user: nil, label: { id: 2492649, name: "good label" }, action: "add" }]
-      end
-
-      it 'does not raise an error and return an empty array' do
-        expect(non_housekeeper_changes).to eq([])
-      end
-    end
   end
 
   describe '#create_or_update_merge_request' do
@@ -343,8 +333,7 @@ RSpec.describe ::Gitlab::Housekeeper::GitlabClient do
             target_project_id: 456,
             remove_source_branch: true,
             assignee_ids: [assignee_id],
-            reviewer_ids: [reviewer_id],
-            squash: true
+            reviewer_ids: [reviewer_id]
           },
           headers: {
             'Content-Type' => 'application/json',

@@ -19,10 +19,6 @@ describe('ServiceDeskSetting', () => {
   const findSuffixFormGroup = () => wrapper.findByTestId('suffix-form-group');
   const findIssueTrackerInfo = () => wrapper.findComponent(GlAlert);
   const findIssueHelpLink = () => wrapper.findByTestId('issue-help-page');
-  const findAreTicketsConfidentialByDefaultWrapper = () =>
-    wrapper.findByTestId('service-desk-are-tickets-confidential-by-default-wrapper');
-  const findAreTicketsConfidentialByDefaultCheckbox = () =>
-    wrapper.findByTestId('service-desk-are-tickets-confidential-by-default');
   const findReopenIssueOnExternalParticipantNoteCheckbox = () =>
     wrapper.findByTestId('reopen-issue-on-external-participant-note');
   const findAddExternalParticipantsFromCcCheckbox = () =>
@@ -62,8 +58,8 @@ describe('ServiceDeskSetting', () => {
       expect(findIssueTrackerInfo().exists()).toBe(true);
       expect(findIssueHelpLink().text()).toEqual('activate the issue tracker');
       expect(findIssueHelpLink().attributes('href')).toBe(
-        helpPagePath('user/project/settings/index', {
-          anchor: 'configure-project-features-and-permissions',
+        helpPagePath('user/project/settings/index.md', {
+          anchor: 'configure-project-visibility-features-and-permissions',
         }),
       );
     });
@@ -219,73 +215,6 @@ describe('ServiceDeskSetting', () => {
     });
   });
 
-  describe('are tickets confidential by default checkbox', () => {
-    it('is rendered', () => {
-      wrapper = createComponent();
-
-      expect(findAreTicketsConfidentialByDefaultCheckbox().exists()).toBe(true);
-    });
-
-    describe('when project is public', () => {
-      beforeEach(() => {
-        wrapper = createComponent({
-          props: { publicProject: true, initialAreTicketsConfidentialByDefault: false },
-        });
-      });
-
-      it('displays correct help text', () => {
-        expect(findAreTicketsConfidentialByDefaultWrapper().text()).toContain(
-          ServiceDeskSetting.i18n.areTicketsConfidentialByDefault.help.publicProject,
-        );
-      });
-
-      it('checks and disables the checkbox', () => {
-        const { element } = findAreTicketsConfidentialByDefaultCheckbox().find('input');
-
-        expect(element.checked).toBe(true);
-        expect(element.disabled).toBe(true);
-      });
-    });
-
-    describe('when project is not public', () => {
-      describe('when tickets are confidential by default', () => {
-        beforeEach(() => {
-          wrapper = createComponent({ props: { initialAreTicketsConfidentialByDefault: true } });
-        });
-
-        it('forwards true as initial value to the checkbox', () => {
-          expect(findAreTicketsConfidentialByDefaultCheckbox().find('input').element.checked).toBe(
-            true,
-          );
-        });
-
-        it('displays correct help text', () => {
-          expect(findAreTicketsConfidentialByDefaultWrapper().text()).toContain(
-            ServiceDeskSetting.i18n.areTicketsConfidentialByDefault.help.confidential,
-          );
-        });
-      });
-
-      describe('when tickets are not confidential by default', () => {
-        beforeEach(() => {
-          wrapper = createComponent({ props: { initialAreTicketsConfidentialByDefault: false } });
-        });
-
-        it('forwards false as initial value to the checkbox', () => {
-          expect(findAreTicketsConfidentialByDefaultCheckbox().find('input').element.checked).toBe(
-            false,
-          );
-        });
-
-        it('displays correct help text', () => {
-          expect(findAreTicketsConfidentialByDefaultWrapper().text()).toContain(
-            ServiceDeskSetting.i18n.areTicketsConfidentialByDefault.help.nonConfidential,
-          );
-        });
-      });
-    });
-  });
-
   describe('reopen issue on external participant note checkbox', () => {
     it('is rendered', () => {
       wrapper = createComponent();
@@ -344,7 +273,6 @@ describe('ServiceDeskSetting', () => {
           initialSelectedFileTemplateProjectId: 42,
           initialOutgoingName: 'GitLab Support Bot',
           initialProjectKey: 'key',
-          initialAreTicketsConfidentialByDefault: false,
           initialReopenIssueOnExternalParticipantNote: true,
           initialAddExternalParticipantsFromCc: true,
         },
@@ -359,7 +287,6 @@ describe('ServiceDeskSetting', () => {
         fileTemplateProjectId: 42,
         outgoingName: 'GitLab Support Bot',
         projectKey: 'key',
-        areTicketsConfidentialByDefault: false,
         reopenIssueOnExternalParticipantNote: true,
         addExternalParticipantsFromCc: true,
       };

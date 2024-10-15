@@ -1,5 +1,5 @@
 <script>
-import { GlAvatar, GlButton, GlTooltipDirective } from '@gitlab/ui';
+import { GlAvatar, GlButton } from '@gitlab/ui';
 import { sprintf, __ } from '~/locale';
 
 export default {
@@ -7,9 +7,6 @@ export default {
   components: {
     GlAvatar,
     GlButton,
-  },
-  directives: {
-    GlTooltip: GlTooltipDirective,
   },
   props: {
     data: {
@@ -40,20 +37,19 @@ export default {
 </script>
 
 <template>
-  <span class="gl-flex gl-items-center gl-gap-3">
-    <gl-avatar :alt="name" :entity-name="name" :size="32" :src="avatarUrl" fallback-on-error />
-    <span class="gl-flex gl-grow gl-flex-col">
-      <span class="gl-font-bold">{{ name }}</span>
+  <span class="gl-display-flex gl-align-items-center gl-gap-3" @click="$emit('select', username)">
+    <gl-avatar :alt="name" :size="32" :src="avatarUrl" />
+    <span class="gl-display-flex gl-flex-direction-column gl-flex-grow-1">
+      <span class="gl-font-weight-bold">{{ name }}</span>
       <span class="gl-text-gray-600">@{{ username }}</span>
     </span>
 
     <gl-button
       v-if="canDelete"
-      v-gl-tooltip="deleteButtonLabel"
       icon="remove"
       :aria-label="deleteButtonLabel"
       category="tertiary"
-      @click="$emit('delete', data.id)"
+      @click="$emit('delete', username)"
     />
   </span>
 </template>

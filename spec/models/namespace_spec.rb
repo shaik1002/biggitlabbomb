@@ -3,7 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe Namespace, feature_category: :groups_and_projects do
-  include ContainerRegistryHelpers
   include ProjectForksHelper
   include ReloadHelpers
 
@@ -29,6 +28,7 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
     it { is_expected.to have_one(:catalog_verified_namespace) }
     it { is_expected.to have_many :custom_emoji }
     it { is_expected.to have_one :package_setting_relation }
+    it { is_expected.to have_one :onboarding_progress }
     it { is_expected.to have_one :admin_note }
     it { is_expected.to have_many :pending_builds }
     it { is_expected.to have_one :namespace_route }
@@ -89,7 +89,6 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
     it { is_expected.to validate_presence_of(:path) }
     it { is_expected.to validate_length_of(:path).is_at_most(255) }
     it { is_expected.to validate_presence_of(:owner) }
-    it { is_expected.to validate_presence_of(:organization) }
     it { is_expected.to validate_numericality_of(:max_artifacts_size).only_integer.is_greater_than(0) }
 
     context 'validating the parent of a namespace' do
@@ -252,93 +251,6 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
         end
       end
     end
-
-    describe '#parent_organization_match' do
-      let_it_be(:group) { create(:group, :with_organization) }
-
-      subject(:namespace) { build(:group, parent: group, organization: organization) }
-
-      context "when namespace belongs to parent's organization" do
-        let(:organization) { group.organization }
-
-        it { is_expected.to be_valid }
-      end
-
-      context "when namespace does not belong to parent's organization" do
-        let(:organization) { build(:organization) }
-
-        it 'is not valid and adds an error message' do
-          expect(namespace).not_to be_valid
-          expect(namespace.errors[:organization_id]).to include("must match the parent organization's ID")
-        end
-      end
-    end
-  end
-
-  describe 'default values' do
-    context 'organzation_id' do
-      context 'when feature flag namespace_model_default_org is enabled' do
-        context 'and database has a default value' do
-          before do
-            described_class.connection.execute("ALTER TABLE namespaces ALTER COLUMN organization_id SET DEFAULT 100")
-            described_class.reset_column_information
-          end
-
-          after do
-            described_class.connection.execute("ALTER TABLE namespaces ALTER COLUMN organization_id SET DEFAULT 1")
-            described_class.reset_column_information
-          end
-
-          it 'uses value from model' do
-            expect(described_class.new.organization_id).to eq(1)
-          end
-        end
-
-        context 'and database has no default value' do
-          before do
-            described_class.connection.execute("ALTER TABLE namespaces ALTER COLUMN organization_id DROP DEFAULT")
-            described_class.reset_column_information
-          end
-
-          after do
-            described_class.connection.execute("ALTER TABLE namespaces ALTER COLUMN organization_id SET DEFAULT 1")
-            described_class.reset_column_information
-          end
-
-          it 'uses value from model' do
-            expect(described_class.new.organization_id).to eq(1)
-          end
-        end
-      end
-
-      context 'when feature flag namespace_model_default_org is disabled' do
-        before do
-          stub_feature_flags(namespace_model_default_org: false)
-        end
-
-        context 'and database has a default value' do
-          before do
-            described_class.connection.execute("ALTER TABLE namespaces ALTER COLUMN organization_id SET DEFAULT 100")
-            described_class.reset_column_information
-          end
-
-          it 'uses database value' do
-            expect(described_class.new.organization_id).to eq(100)
-          end
-        end
-
-        context 'and database has no default value' do
-          before do
-            described_class.connection.execute("ALTER TABLE namespaces ALTER COLUMN organization_id DROP DEFAULT")
-            described_class.reset_column_information
-          end
-
-          it 'is nil' do
-            expect(described_class.new.organization_id).to be_nil
-          end
-        end
-      end
-    end
   end
 
   describe "ReferencePatternValidation" do
@@ -399,7 +311,7 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
       ref(:group)             | true  | nil                                       | lazy { group.full_path }
       ref(:group)             | false | ref(:group)                               | nil
       ref(:group)             | true  | ref(:group)                               | lazy { group.full_path }
-      ref(:group)             | false | ref(:parent)                              | lazy { group.full_path }
+      ref(:group)             | false | ref(:parent)                              | lazy { group.path }
       ref(:group)             | true  | ref(:parent)                              | lazy { group.full_path }
       ref(:group)             | false | ref(:project)                             | lazy { group.path }
       ref(:group)             | true  | ref(:project)                             | lazy { group.full_path }
@@ -522,16 +434,6 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
     let_it_be(:namespace1sub) { create(:group, name: 'Sub Namespace', path: 'sub-namespace', parent: namespace1) }
     let_it_be(:namespace2sub) { create(:group, name: 'Sub Namespace', path: 'sub-namespace', parent: namespace2) }
 
-    describe '.without_deleted' do
-      before do
-        namespace1.namespace_details.update!(pending_delete: true)
-      end
-
-      it 'does not include namespace marked as deleted' do
-        expect(described_class.without_deleted).to contain_exactly(namespace, namespace2, namespace1sub, namespace2sub)
-      end
-    end
-
     describe '.by_parent' do
       it 'includes correct namespaces' do
         expect(described_class.by_parent(namespace1.id)).to match_array([namespace1sub])
@@ -546,14 +448,6 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
         expect(described_class.by_root_id(namespace2.id)).to match_array([namespace2, namespace2sub])
         expect(described_class.by_root_id(namespace1sub.id)).to be_empty
         expect(described_class.by_root_id(nil)).to be_empty
-      end
-    end
-
-    describe '.by_not_in_root_id' do
-      it 'returns correct namespaces' do
-        expect(described_class.by_not_in_root_id(namespace1.id)).to contain_exactly(namespace, namespace2, namespace2sub)
-        expect(described_class.by_not_in_root_id(namespace2.id)).to contain_exactly(namespace, namespace1, namespace1sub)
-        expect(described_class.by_not_in_root_id(namespace1sub.id)).to match_array(described_class.all)
       end
     end
 
@@ -590,19 +484,6 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
         expect(described_class.sorted_by_similarity_and_parent_id_desc(namespace2.path)).to eq([namespace2, namespace1, namespace2sub, namespace1sub, namespace])
         expect(described_class.sorted_by_similarity_and_parent_id_desc(namespace2sub.name)).to eq([namespace2sub, namespace1sub, namespace2, namespace1, namespace])
         expect(described_class.sorted_by_similarity_and_parent_id_desc('Namespace')).to eq([namespace2, namespace1, namespace2sub, namespace1sub, namespace])
-      end
-    end
-
-    describe '.group_namespaces' do
-      let_it_be(:user_namespace) { create(:user_namespace) }
-      let_it_be(:project) { create(:project) }
-      let_it_be(:project_namespace) { project.project_namespace }
-      let_it_be(:group_namespace) { create(:group) }
-
-      it 'only returns group namespaces' do
-        group_namespaces = described_class.group_namespaces
-        expect(group_namespaces).to include(group_namespace)
-        expect(group_namespaces).not_to include(project_namespace, user_namespace)
       end
     end
 
@@ -654,9 +535,6 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
     it { is_expected.to delegate_method(:math_rendering_limits_enabled).to(:namespace_settings) }
     it { is_expected.to delegate_method(:math_rendering_limits_enabled?).to(:namespace_settings) }
     it { is_expected.to delegate_method(:lock_math_rendering_limits_enabled?).to(:namespace_settings) }
-    it { is_expected.to delegate_method(:add_creator).to(:namespace_details) }
-    it { is_expected.to delegate_method(:pending_delete).to(:namespace_details) }
-    it { is_expected.to delegate_method(:pending_delete=).to(:namespace_details).with_arguments(:args) }
 
     it do
       is_expected.to delegate_method(:prevent_sharing_groups_outside_hierarchy=).to(:namespace_settings)
@@ -787,26 +665,6 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
     it { is_expected.to include_module(Namespaces::Traversal::Linear) }
     it { is_expected.to include_module(Namespaces::Traversal::RecursiveScopes) }
     it { is_expected.to include_module(Namespaces::Traversal::LinearScopes) }
-  end
-
-  context 'when feature flag require_organization is disabled', :request_store do
-    before do
-      stub_feature_flags(require_organization: false)
-    end
-
-    it 'does not require organization' do
-      namespace.organization = nil
-
-      expect(namespace.valid?).to eq(true)
-    end
-  end
-
-  context 'when feature flag require_organization is enabled', :request_store do
-    it 'does require organization' do
-      namespace.organization = nil
-
-      expect(namespace.valid?).to eq(false)
-    end
   end
 
   describe '#traversal_ids' do
@@ -1060,7 +918,7 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
     context 'when Gitlab API is not supported' do
       before do
         stub_container_registry_config(enabled: true)
-        stub_gitlab_api_client_to_support_gitlab_api(supported: false)
+        allow(ContainerRegistry::GitlabApiClient).to receive(:supports_gitlab_api?).and_return(false)
       end
 
       it 'returns the project' do
@@ -1091,7 +949,7 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
     context 'when Gitlab API is supported' do
       before do
         allow(Gitlab).to receive(:com_except_jh?).and_return(true)
-        stub_gitlab_api_client_to_support_gitlab_api(supported: true)
+        allow(ContainerRegistry::GitlabApiClient).to receive(:supports_gitlab_api?).and_return(true)
         stub_container_registry_config(enabled: true, api_url: 'http://container-registry', key: 'spec/fixtures/x509_certificate_pk.key')
       end
 
@@ -1117,71 +975,52 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
 
     subject { project_namespace.container_repositories_size }
 
-    context 'for a root' do
-      context 'when the GitLab API is supported' do
-        before do
-          stub_gitlab_api_client_to_support_gitlab_api(supported: true)
-        end
+    context 'on gitlab.com' do
+      using RSpec::Parameterized::TableSyntax
 
-        context 'when there are non-empty container repositories' do
-          before do
-            allow(project_namespace).to receive_message_chain(:all_container_repositories, :empty?).and_return(false)
-          end
-
-          shared_examples "caching the result" do
-            it 'caches the result' do
-              expect(Rails.cache)
-                .to receive(:fetch)
-                .with(project_namespace.container_repositories_size_cache_key, expires_in: 7.days)
-
-              subject
-            end
-          end
-
-          context 'when the Gitlab API client returns a value for deduplicated_size' do
-            before do
-              allow(ContainerRegistry::GitlabApiClient).to receive(:deduplicated_size).with(project_namespace.full_path).and_return(321)
-            end
-
-            it { is_expected.to eq(321) }
-
-            it_behaves_like 'caching the result'
-          end
-
-          context 'when the Gitlab API client returns nil for deduplicated_size' do
-            before do
-              allow(ContainerRegistry::GitlabApiClient).to receive(:deduplicated_size).with(project_namespace.full_path).and_return(nil)
-            end
-
-            it { is_expected.to be_nil }
-
-            it_behaves_like 'caching the result'
-          end
-        end
-
-        context 'when all the container repositories are empty' do
-          before do
-            allow(project_namespace).to receive_message_chain(:all_container_repositories, :empty?).and_return(true)
-          end
-
-          it { is_expected.to eq(0) }
-        end
+      where(:gitlab_api_supported, :no_container_repositories, :all_migrated, :returned_size, :expected_result) do
+        nil   | nil   | nil   | nil | nil
+        false | nil   | nil   | nil | nil
+        true  | true  | nil   | nil | 0
+        true  | false | false | nil | nil
+        true  | false | true  | 555 | 555
+        true  | false | true  | nil | nil
       end
 
-      context 'when the GitLab API is not supported' do
+      with_them do
         before do
-          stub_gitlab_api_client_to_support_gitlab_api(supported: false)
+          allow(ContainerRegistry::GitlabApiClient).to receive(:one_project_with_container_registry_tag).and_return(nil)
+          stub_container_registry_config(enabled: true, api_url: 'http://container-registry', key: 'spec/fixtures/x509_certificate_pk.key')
+          allow(Gitlab).to receive(:com_except_jh?).and_return(true)
+          allow(ContainerRegistry::GitlabApiClient).to receive(:supports_gitlab_api?).and_return(gitlab_api_supported)
+          allow(project_namespace).to receive_message_chain(:all_container_repositories, :empty?).and_return(no_container_repositories)
+          allow(project_namespace).to receive_message_chain(:all_container_repositories, :all_migrated?).and_return(all_migrated)
+          allow(ContainerRegistry::GitlabApiClient).to receive(:deduplicated_size).with(project_namespace.full_path).and_return(returned_size)
         end
 
-        it { is_expected.to be_nil }
+        it { is_expected.to eq(expected_result) }
+
+        it 'caches the result when all migrated' do
+          if all_migrated
+            expect(Rails.cache)
+              .to receive(:fetch)
+              .with(project_namespace.container_repositories_size_cache_key, expires_in: 7.days)
+
+            subject
+          end
+        end
       end
+    end
+
+    context 'not on gitlab.com' do
+      it { is_expected.to eq(nil) }
     end
 
     context 'for a sub-group' do
       let(:parent_namespace) { create(:group) }
       let(:project_namespace) { create(:group, parent: parent_namespace) }
 
-      it { is_expected.to be_nil }
+      it { is_expected.to eq(nil) }
     end
   end
 
@@ -1356,9 +1195,29 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
 
   describe '.with_statistics' do
     let_it_be(:namespace) { create(:namespace) }
-    let_it_be(:project_outside_namespace) do
+
+    let(:project1) do
+      create(:project,
+        namespace: namespace,
+        statistics: build(
+          :project_statistics,
+          namespace: namespace,
+          repository_size: 101,
+          wiki_size: 505,
+          lfs_objects_size: 202,
+          build_artifacts_size: 303,
+          pipeline_artifacts_size: 707,
+          packages_size: 404,
+          snippets_size: 605,
+          uploads_size: 808
+        )
+      )
+    end
+
+    let(:project2) do
       create(
         :project,
+        namespace: namespace,
         statistics: build(
           :project_statistics,
           namespace: namespace,
@@ -1374,85 +1233,35 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
       )
     end
 
-    subject(:statistics) { described_class.with_statistics.find(namespace.id) }
+    it "sums all project storage counters in the namespace" do
+      project1
+      project2
+      statistics = described_class.with_statistics.find(namespace.id)
+      expected_storage_size = project1.statistics.storage_size + project2.statistics.storage_size
 
-    context 'with projects' do
-      let_it_be(:project1) do
-        create(:project,
-          namespace: namespace,
-          statistics: build(
-            :project_statistics,
-            namespace: namespace,
-            repository_size: 101,
-            wiki_size: 505,
-            lfs_objects_size: 202,
-            build_artifacts_size: 303,
-            pipeline_artifacts_size: 707,
-            packages_size: 404,
-            snippets_size: 605,
-            uploads_size: 808
-          )
-        )
-      end
-
-      let_it_be(:project2) do
-        create(
-          :project,
-          namespace: namespace,
-          statistics: build(
-            :project_statistics,
-            namespace: namespace,
-            repository_size: 10,
-            wiki_size: 50,
-            lfs_objects_size: 20,
-            build_artifacts_size: 30,
-            pipeline_artifacts_size: 70,
-            packages_size: 40,
-            snippets_size: 60,
-            uploads_size: 80
-          )
-        )
-      end
-
-      shared_examples 'returns statistics' do
-        it "sums all project storage counters in the namespace" do
-          expected_storage_size = project1.statistics.storage_size + project2.statistics.storage_size
-
-          expect(statistics.storage_size).to eq expected_storage_size
-          expect(statistics.repository_size).to eq 111
-          expect(statistics.wiki_size).to eq 555
-          expect(statistics.lfs_objects_size).to eq 222
-          expect(statistics.build_artifacts_size).to eq 333
-          expect(statistics.pipeline_artifacts_size).to eq 777
-          expect(statistics.packages_size).to eq 444
-          expect(statistics.snippets_size).to eq 665
-          expect(statistics.uploads_size).to eq 888
-        end
-      end
-
-      it_behaves_like 'returns statistics'
-
-      context 'with relations having subquery' do
-        subject(:statistics) do
-          described_class.from(described_class.all, :namespaces).with_statistics.find(namespace.id)
-        end
-
-        it_behaves_like 'returns statistics'
-      end
+      expect(statistics.storage_size).to eq expected_storage_size
+      expect(statistics.repository_size).to eq 111
+      expect(statistics.wiki_size).to eq 555
+      expect(statistics.lfs_objects_size).to eq 222
+      expect(statistics.build_artifacts_size).to eq 333
+      expect(statistics.pipeline_artifacts_size).to eq 777
+      expect(statistics.packages_size).to eq 444
+      expect(statistics.snippets_size).to eq 665
+      expect(statistics.uploads_size).to eq 888
     end
 
-    context 'without projects' do
-      it "returns correct statistics" do
-        expect(statistics.storage_size).to eq 0
-        expect(statistics.repository_size).to eq 0
-        expect(statistics.wiki_size).to eq 0
-        expect(statistics.lfs_objects_size).to eq 0
-        expect(statistics.build_artifacts_size).to eq 0
-        expect(statistics.pipeline_artifacts_size).to eq 0
-        expect(statistics.packages_size).to eq 0
-        expect(statistics.snippets_size).to eq 0
-        expect(statistics.uploads_size).to eq 0
-      end
+    it "correctly handles namespaces without projects" do
+      statistics = described_class.with_statistics.find(namespace.id)
+
+      expect(statistics.storage_size).to eq 0
+      expect(statistics.repository_size).to eq 0
+      expect(statistics.wiki_size).to eq 0
+      expect(statistics.lfs_objects_size).to eq 0
+      expect(statistics.build_artifacts_size).to eq 0
+      expect(statistics.pipeline_artifacts_size).to eq 0
+      expect(statistics.packages_size).to eq 0
+      expect(statistics.snippets_size).to eq 0
+      expect(statistics.uploads_size).to eq 0
     end
   end
 
@@ -1511,47 +1320,6 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
       it "sanitizes the name by replacing all invalid char sequences with a space" do
         expect(described_class.clean_name("Green'! Test~~~")).to eq("Green Test")
       end
-    end
-  end
-
-  describe ".username_reserved?" do
-    subject(:username_reserved) { described_class.username_reserved?(username) }
-
-    let(:username) { 'capyabra' }
-
-    let_it_be(:user) { create(:user, name: 'capybara') }
-    let_it_be(:group) { create(:group, name: 'capybara-group') }
-    let_it_be(:subgroup) { create(:group, parent: group, name: 'capybara-subgroup') }
-    let_it_be(:project) { create(:project, group: group, name: 'capybara-project') }
-
-    context 'when given a project name' do
-      let(:username) { 'capyabra-project' }
-
-      it { is_expected.to eq(false) }
-    end
-
-    context 'when given a sub-group name' do
-      let(:username) { 'capybara-subgroup' }
-
-      it { is_expected.to eq(false) }
-    end
-
-    context 'when given a top-level group' do
-      let(:username) { 'capybara-group' }
-
-      it { is_expected.to eq(true) }
-    end
-
-    context 'when given an existing username' do
-      let(:username) { 'capybara' }
-
-      it { is_expected.to eq(true) }
-    end
-
-    context 'when given a username with varying capitalization' do
-      let(:username) { 'CaPyBaRa' }
-
-      it { is_expected.to eq(true) }
     end
   end
 
@@ -1929,7 +1697,7 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
 
   describe '#root_ancestor' do
     context 'with persisted root group' do
-      let_it_be(:root_group) { create(:group) }
+      let!(:root_group) { create(:group) }
 
       it 'returns root_ancestor for root group without a query' do
         expect { root_group.root_ancestor }.not_to exceed_query_limit(0)
@@ -1951,19 +1719,6 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
         expect(nested_group.root_ancestor).to eq(root_group)
         expect(deep_nested_group.root_ancestor).to eq(root_group)
         expect(very_deep_nested_group.root_ancestor).to eq(root_group)
-      end
-
-      context 'when nested group references parent by id' do
-        let_it_be(:nested_group) { create(:group, parent: root_group) }
-        let_it_be(:deep_nested_group) { Group.new(attributes_for(:group, parent_id: nested_group.id)) }
-
-        it 'performs a single query' do
-          expect { deep_nested_group.root_ancestor }.not_to exceed_query_limit(1)
-        end
-
-        it 'returns the root ancestor' do
-          expect(deep_nested_group.root_ancestor).to eq root_group
-        end
       end
     end
 
@@ -2134,8 +1889,13 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
         end
 
         context 'then the parent is deleted' do
-          it 'throws an InvalidForeignKey exception' do
-            expect { parent.destroy! }.to raise_error(ActiveRecord::InvalidForeignKey)
+          before do
+            parent.delete
+            group.reload
+          end
+
+          it 'returns its own config with status based on the instance settings' do
+            expect(group.first_auto_devops_config).to eq({ scope: :instance, status: instance_autodevops_status })
           end
         end
       end
@@ -2642,20 +2402,6 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
     it_behaves_like 'cleanup by a loose foreign key' do
       let_it_be(:parent) { create(:organization) }
       let_it_be(:model) { create(:namespace, organization: parent) }
-    end
-  end
-
-  describe '#web_url' do
-    let_it_be(:group) { create(:group) }
-
-    it 'returns the canonical URL' do
-      expect(group.web_url).to include("groups/#{group.name}")
-    end
-
-    context 'nested group' do
-      let(:nested_group) { create(:group, :nested) }
-
-      it { expect(nested_group.web_url).to include("groups/#{nested_group.full_path}") }
     end
   end
 end

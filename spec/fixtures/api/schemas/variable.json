@@ -26,9 +26,6 @@
     "masked": {
       "type": "boolean"
     },
-    "hidden": {
-      "type": "boolean"
-    },
     "protected": {
       "type": "boolean"
     },

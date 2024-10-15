@@ -5,7 +5,7 @@ module API
     class BroadcastMessages < ::API::Base
       include PaginationParams
 
-      feature_category :notifications
+      feature_category :onboarding
       urgency :low
 
       resource :broadcast_messages do

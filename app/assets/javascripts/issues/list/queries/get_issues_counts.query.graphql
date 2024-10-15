@@ -3,9 +3,7 @@ query getIssuesCount(
   $fullPath: ID!
   $iid: String
   $search: String
-  $in: [IssuableSearchableField!]
   $assigneeId: String
-  $assigneeWildcardId: AssigneeWildcardId
   $assigneeUsernames: [String!]
   $authorUsername: String
   $confidential: Boolean
@@ -32,9 +30,7 @@ query getIssuesCount(
       state: opened
       iid: $iid
       search: $search
-      in: $in
       assigneeId: $assigneeId
-      assigneeWildcardId: $assigneeWildcardId
       assigneeUsernames: $assigneeUsernames
       authorUsername: $authorUsername
       confidential: $confidential
@@ -59,9 +55,7 @@ query getIssuesCount(
       state: closed
       iid: $iid
       search: $search
-      in: $in
       assigneeId: $assigneeId
-      assigneeWildcardId: $assigneeWildcardId
       assigneeUsernames: $assigneeUsernames
       authorUsername: $authorUsername
       confidential: $confidential
@@ -86,9 +80,7 @@ query getIssuesCount(
       state: all
       iid: $iid
       search: $search
-      in: $in
       assigneeId: $assigneeId
-      assigneeWildcardId: $assigneeWildcardId
       assigneeUsernames: $assigneeUsernames
       authorUsername: $authorUsername
       confidential: $confidential
@@ -115,9 +107,7 @@ query getIssuesCount(
       state: opened
       iid: $iid
       search: $search
-      in: $in
       assigneeId: $assigneeId
-      assigneeWildcardId: $assigneeWildcardId
       assigneeUsernames: $assigneeUsernames
       authorUsername: $authorUsername
       confidential: $confidential
@@ -143,9 +133,7 @@ query getIssuesCount(
       state: closed
       iid: $iid
       search: $search
-      in: $in
       assigneeId: $assigneeId
-      assigneeWildcardId: $assigneeWildcardId
       assigneeUsernames: $assigneeUsernames
       authorUsername: $authorUsername
       confidential: $confidential
@@ -171,9 +159,7 @@ query getIssuesCount(
       state: all
       iid: $iid
       search: $search
-      in: $in
       assigneeId: $assigneeId
-      assigneeWildcardId: $assigneeWildcardId
       assigneeUsernames: $assigneeUsernames
       authorUsername: $authorUsername
       confidential: $confidential

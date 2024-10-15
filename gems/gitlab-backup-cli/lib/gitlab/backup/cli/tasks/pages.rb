@@ -17,7 +17,7 @@ module Gitlab
 
           private
 
-          def local
+          def target
             ::Backup::Targets::Files.new(nil, storage_path, options: options, excludes: [LEGACY_PAGES_TMP_PATH])
           end
 

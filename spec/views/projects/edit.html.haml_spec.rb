@@ -104,6 +104,14 @@ RSpec.describe 'projects/edit' do
     end
   end
 
+  describe 'pages menu entry callout' do
+    it 'does show a callout' do
+      render
+
+      expect(rendered).to have_content(_('GitLab Pages has moved'))
+    end
+  end
+
   describe 'notifications on renaming the project path' do
     context 'when the GitlabAPI is supported' do
       before do

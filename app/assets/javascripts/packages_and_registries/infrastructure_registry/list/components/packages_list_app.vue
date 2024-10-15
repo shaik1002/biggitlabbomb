@@ -25,15 +25,6 @@ export default {
     InfrastructureSearch,
   },
   inject: {
-    isGroupPage: {
-      default: false,
-    },
-    emptyListIllustration: {
-      default: '',
-    },
-    resourceId: {
-      default: '',
-    },
     noResultsText: {
       from: 'noResultsText',
       default: s__(
@@ -43,7 +34,9 @@ export default {
   },
   computed: {
     ...mapState({
+      emptyListIllustration: (state) => state.config.emptyListIllustration,
       filter: (state) => state.filter,
+      isGroupPage: (state) => state.config.isGroupPage,
       selectedType: (state) => state.selectedType,
       packagesCount: (state) => state.pagination?.total,
     }),
@@ -63,12 +56,12 @@ export default {
         : s__('PackageRegistry|Sorry, your filter produced no results');
     },
   },
-  created() {
+  mounted() {
     const queryParams = getQueryParams(window.document.location.search);
     const { sorting, filters } = extractFilterAndSorting(queryParams);
     this.setSorting(sorting);
     this.setFilter(filters);
-    this.requestPackagesList({ isGroupPage: this.isGroupPage, resourceId: this.resourceId });
+    this.requestPackagesList();
     this.checkDeleteAlert();
   },
   methods: {
@@ -80,18 +73,10 @@ export default {
       'setFilter',
     ]),
     onPageChanged(page) {
-      return this.requestPackagesList({
-        page,
-        isGroupPage: this.isGroupPage,
-        resourceId: this.resourceId,
-      });
+      return this.requestPackagesList({ page });
     },
     onPackageDeleteRequest(item) {
-      return this.requestDeletePackage({
-        _links: item._links,
-        isGroupPage: this.isGroupPage,
-        resourceId: this.resourceId,
-      });
+      return this.requestDeletePackage(item);
     },
     checkDeleteAlert() {
       const urlParams = new URLSearchParams(window.location.search);
@@ -101,9 +86,6 @@ export default {
         const cleanUrl = window.location.href.split('?')[0];
         historyReplaceState(cleanUrl);
       }
-    },
-    searchPackages() {
-      this.requestPackagesList({ isGroupPage: this.isGroupPage, resourceId: this.resourceId });
     },
   },
   i18n: {
@@ -120,7 +102,7 @@ export default {
       :help-url="$options.terraformRegistryHelpUrl"
       :count="packagesCount"
     />
-    <infrastructure-search v-if="packagesCount > 0" @update="searchPackages" />
+    <infrastructure-search v-if="packagesCount > 0" @update="requestPackagesList" />
 
     <package-list @page:changed="onPageChanged" @package:delete="onPackageDeleteRequest">
       <template #empty-state>

@@ -2,6 +2,8 @@
 data_category: optional
 key_path: reply_by_email_enabled
 description: Whether incoming email is setup
+product_section: dev
+product_stage: plan
 product_group: product_planning
 value_type: boolean
 status: active
@@ -17,4 +19,3 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/51974

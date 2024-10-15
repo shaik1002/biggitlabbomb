@@ -1,5 +1,15 @@
 /* eslint-disable no-restricted-imports */
-import { captureException, SDK_VERSION } from '@sentry/browser';
+import {
+  BrowserClient,
+  defaultStackParser,
+  makeFetchTransport,
+  defaultIntegrations,
+  BrowserTracing,
+
+  // exports
+  captureException,
+  SDK_VERSION,
+} from '@sentry/browser';
 import * as Sentry from '@sentry/browser';
 
 import { initSentry } from '~/sentry/init_sentry';
@@ -19,13 +29,19 @@ jest.mock('@sentry/browser', () => {
     ...jest.createMockFromModule('@sentry/browser'),
 
     // unmock actual configuration options
-    browserTracingIntegration: jest.requireActual('@sentry/browser').browserTracingIntegration,
+    defaultStackParser: jest.requireActual('@sentry/browser').defaultStackParser,
+    makeFetchTransport: jest.requireActual('@sentry/browser').makeFetchTransport,
+    defaultIntegrations: jest.requireActual('@sentry/browser').defaultIntegrations,
   };
 });
 
 describe('SentryConfig', () => {
-  let mockScope;
-  let mockSentryInit;
+  let mockBindClient;
+  let mockSetTags;
+  let mockSetUser;
+  let mockBrowserClient;
+  let mockStartSession;
+  let mockCaptureSession;
 
   beforeEach(() => {
     window.gon = {
@@ -41,11 +57,20 @@ describe('SentryConfig', () => {
 
     document.body.dataset.page = mockPage;
 
-    mockSentryInit = jest.spyOn(Sentry, 'init');
-    mockScope = {
-      setTags: jest.fn(),
-      setUser: jest.fn(),
-    };
+    mockBindClient = jest.fn();
+    mockSetTags = jest.fn();
+    mockSetUser = jest.fn();
+    mockStartSession = jest.fn();
+    mockCaptureSession = jest.fn();
+    mockBrowserClient = jest.spyOn(Sentry, 'BrowserClient');
+
+    jest.spyOn(Sentry, 'getCurrentHub').mockReturnValue({
+      bindClient: mockBindClient,
+      setTags: mockSetTags,
+      setUser: mockSetUser,
+      startSession: mockStartSession,
+      captureSession: mockCaptureSession,
+    });
   });
 
   afterEach(() => {
@@ -59,38 +84,37 @@ describe('SentryConfig', () => {
         initSentry();
       });
 
-      it('calls Sentry.init with gon values and configuration', () => {
-        expect(mockSentryInit).toHaveBeenCalledWith(
+      it('creates BrowserClient with gon values and configuration', () => {
+        expect(mockBrowserClient).toHaveBeenCalledWith(
           expect.objectContaining({
             dsn: mockDsn,
             release: mockRevision,
             allowUrls: [mockGitlabUrl, 'webpack-internal://'],
             environment: mockEnvironment,
-            autoSessionTracking: true,
-            enableTracing: true,
-            tracePropagationTargets: [/^\//],
             tracesSampleRate: mockSentryClientsideTracesSampleRate,
-            integrations: [{ afterAllSetup: expect.any(Function), name: 'BrowserTracing' }],
-            initialScope: expect.any(Function),
+            tracePropagationTargets: [/^\//],
+
+            transport: makeFetchTransport,
+            stackParser: defaultStackParser,
+            integrations: [...defaultIntegrations, expect.any(BrowserTracing)],
           }),
         );
       });
 
-      it('Uses data-page to set browserTracingIntegration transaction name', () => {
-        const mockBrowserTracingIntegration = jest.spyOn(Sentry, 'browserTracingIntegration');
-
-        initSentry();
-
-        const context = mockBrowserTracingIntegration.mock.calls[0][0].beforeStartSpan();
+      it('Uses data-page to set BrowserTracing transaction name', () => {
+        const context = BrowserTracing.mock.calls[0][0].beforeNavigate();
 
         expect(context).toMatchObject({ name: mockPage });
       });
 
-      it('calls Sentry.setTags with gon values', () => {
-        mockSentryInit.mock.calls[0][0].initialScope(mockScope);
+      it('binds the BrowserClient to the hub', () => {
+        expect(mockBindClient).toHaveBeenCalledTimes(1);
+        expect(mockBindClient).toHaveBeenCalledWith(expect.any(BrowserClient));
+      });
 
-        expect(mockScope.setTags).toHaveBeenCalledTimes(1);
-        expect(mockScope.setTags).toHaveBeenCalledWith({
+      it('calls Sentry.setTags with gon values', () => {
+        expect(mockSetTags).toHaveBeenCalledTimes(1);
+        expect(mockSetTags).toHaveBeenCalledWith({
           page: mockPage,
           version: mockVersion,
           feature_category: mockFeatureCategory,
@@ -98,10 +122,8 @@ describe('SentryConfig', () => {
       });
 
       it('calls Sentry.setUser with gon values', () => {
-        mockSentryInit.mock.calls[0][0].initialScope(mockScope);
-
-        expect(mockScope.setUser).toHaveBeenCalledTimes(1);
-        expect(mockScope.setUser).toHaveBeenCalledWith({
+        expect(mockSetUser).toHaveBeenCalledTimes(1);
+        expect(mockSetUser).toHaveBeenCalledWith({
           id: mockCurrentUserId,
         });
       });
@@ -122,9 +144,7 @@ describe('SentryConfig', () => {
       });
 
       it('does not call Sentry.setUser', () => {
-        mockSentryInit.mock.calls[0][0].initialScope(mockScope);
-
-        expect(mockScope.setUser).not.toHaveBeenCalled();
+        expect(mockSetUser).not.toHaveBeenCalled();
       });
     });
 
@@ -135,7 +155,8 @@ describe('SentryConfig', () => {
       });
 
       it('Sentry.init is not called', () => {
-        expect(mockSentryInit).not.toHaveBeenCalled();
+        expect(mockBrowserClient).not.toHaveBeenCalled();
+        expect(mockBindClient).not.toHaveBeenCalled();
 
         // eslint-disable-next-line no-underscore-dangle
         expect(window._Sentry).toBe(undefined);
@@ -149,7 +170,8 @@ describe('SentryConfig', () => {
       });
 
       it('Sentry.init is not called', () => {
-        expect(mockSentryInit).not.toHaveBeenCalled();
+        expect(mockBrowserClient).not.toHaveBeenCalled();
+        expect(mockBindClient).not.toHaveBeenCalled();
 
         // eslint-disable-next-line no-underscore-dangle
         expect(window._Sentry).toBe(undefined);
@@ -163,24 +185,16 @@ describe('SentryConfig', () => {
       });
 
       it('calls Sentry.setTags with gon values', () => {
-        mockSentryInit.mock.calls[0][0].initialScope(mockScope);
-
-        expect(mockScope.setTags).toHaveBeenCalledTimes(1);
-        expect(mockScope.setTags).toHaveBeenCalledWith(
+        expect(mockSetTags).toHaveBeenCalledTimes(1);
+        expect(mockSetTags).toHaveBeenCalledWith(
           expect.objectContaining({
             page: undefined,
           }),
         );
       });
 
-      it('Uses location.path to set browserTracingIntegration transaction name', () => {
-        const mockBrowserTracingIntegration = jest.spyOn(Sentry, 'browserTracingIntegration');
-
-        initSentry();
-
-        const context = mockBrowserTracingIntegration.mock.calls[0][0].beforeStartSpan({
-          op: 'pageload',
-        });
+      it('Uses location.path to set BrowserTracing transaction name', () => {
+        const context = BrowserTracing.mock.calls[0][0].beforeNavigate({ op: 'pageload' });
 
         expect(context).toEqual({ op: 'pageload', name: window.location.pathname });
       });

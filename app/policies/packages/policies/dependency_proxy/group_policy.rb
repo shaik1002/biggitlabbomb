@@ -10,9 +10,6 @@
 # - a Group DeployToken
 #
 # We use this custom policy class for JWT requests
-#
-# TODO: Split this into multiple policies, one per supported user type
-# https://gitlab.com/gitlab-org/gitlab/-/issues/463501
 module Packages
   module Policies
     module DependencyProxy
@@ -21,14 +18,18 @@ module Packages
 
         desc "Deploy token with read access to dependency proxy"
         condition(:read_dependency_proxy_deploy_token) do
-          deploy_token_user? && @user&.valid_for_dependency_proxy? && @user&.has_access_to_group?(@subject.group)
+          @user.is_a?(DeployToken) && @user&.valid_for_dependency_proxy? && @user&.has_access_to_group?(@subject.group)
         end
 
-        # TODO: Remove the deploy token check when we create a deploy token policy
-        # https://gitlab.com/gitlab-org/gitlab/-/issues/463501
-        desc "Non deploy token with read access to dependency proxy"
+        desc "Personal access or group access token with read access to dependency proxy"
         condition(:read_dependency_proxy_personal_access_token) do
-          !deploy_token_user? && (access_level(for_any_session: true) >= GroupMember::GUEST)
+          user_is_personal_access_token? &&
+            (
+              user.user.human? ||
+              user.user.service_account? ||
+              (user.user.project_bot? && user.user.resource_bot_resource.is_a?(::Group))
+            ) &&
+            (access_level(for_any_session: true) >= GroupMember::GUEST)
         end
 
         condition(:dependency_proxy_disabled, scope: :subject) do
@@ -55,8 +56,8 @@ module Packages
           @subject.max_member_access_for_user(@user.user)
         end
 
-        def deploy_token_user?
-          @user.is_a?(DeployToken)
+        def user_is_personal_access_token?
+          user.is_a?(PersonalAccessToken)
         end
       end
     end

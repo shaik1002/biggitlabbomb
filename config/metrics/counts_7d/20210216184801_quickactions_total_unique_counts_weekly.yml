@@ -2,6 +2,8 @@
 data_category: optional
 key_path: redis_hll_counters.quickactions.quickactions_total_unique_counts_weekly
 description: Count of WAU using one or more quick actions
+product_section: dev
+product_stage: plan
 product_group: project_management
 value_type: number
 status: active
@@ -158,4 +160,3 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

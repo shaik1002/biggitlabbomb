@@ -61,44 +61,23 @@ RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotes::Appro
     end
 
     context 'when a user with a matching username does not exist' do
-      let(:approved_event) { super().merge(approver_username: 'another_username') }
-
-      it 'does not set an approver' do
-        expect_log(
-          stage: 'import_approved_event',
-          message: 'skipped due to missing user',
-          iid: merge_request.iid,
-          event_id: 4
-        )
-
-        expect { importer.execute(approved_event) }
-          .to not_change { merge_request.approvals.count }
-          .and not_change { merge_request.notes.count }
-          .and not_change { merge_request.reviewers.count }
-
-        expect(merge_request.approvals).to be_empty
+      before do
+        pull_request_author.update!(username: 'another_username')
       end
 
-      context 'when bitbucket_server_user_mapping_by_username flag is disabled' do
-        before do
-          stub_feature_flags(bitbucket_server_user_mapping_by_username: false)
-        end
+      it 'finds the user based on email' do
+        importer.execute(approved_event)
 
-        it 'finds the user based on email' do
-          importer.execute(approved_event)
+        approval = merge_request.approvals.first
 
-          approval = merge_request.approvals.first
-
-          expect(approval.user).to eq(pull_request_author)
-        end
+        expect(approval.user).to eq(pull_request_author)
       end
 
       context 'when no users match email or username' do
-        let(:approved_event) do
-          super().merge(
-            approver_username: 'another_username',
-            approver_email: 'anotheremail@example.com'
-          )
+        let_it_be(:another_author) { create(:user) }
+
+        before do
+          pull_request_author.destroy!
         end
 
         it 'does not set an approver' do

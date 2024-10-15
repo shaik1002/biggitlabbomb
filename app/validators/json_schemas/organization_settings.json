@@ -9,12 +9,6 @@
       "items": {
         "type": "integer"
       }
-    },
-    "default_group_visibility": {
-      "type": [
-        "integer",
-        "null"
-      ]
     }
   }
 }

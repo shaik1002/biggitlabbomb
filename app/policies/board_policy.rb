@@ -24,10 +24,6 @@ class BoardPolicy < BasePolicy
       .exists?
   end
 
-  rule { admin }.policy do
-    enable :create_non_backlog_issues
-  end
-
   rule { is_group_board & reporter_of_group_projects }.policy do
     enable :create_non_backlog_issues
   end

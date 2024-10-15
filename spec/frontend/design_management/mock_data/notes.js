@@ -20,7 +20,6 @@ const DISCUSSION_2 = {
         },
         awardEmoji: mockAwardEmoji,
         createdAt: '2020-05-08T07:10:45Z',
-        imported: false,
         userPermissions: {
           adminNote: true,
           awardEmoji: true,
@@ -50,7 +49,6 @@ export const DISCUSSION_3 = {
         },
         awardEmoji: mockAwardEmoji,
         createdAt: '2020-05-09T07:10:45Z',
-        imported: false,
         userPermissions: {
           adminNote: true,
           awardEmoji: true,

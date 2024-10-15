@@ -1,7 +1,12 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Plan', :blocking, product_group: :knowledge do
+  RSpec.describe 'Plan', :blocking, product_group: :knowledge,
+    quarantine: {
+      only: { job: 'relative-url' },
+      issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/409541',
+      type: :bug
+    } do
     describe 'Testing project wiki file upload' do
       let(:initial_wiki) { create(:project_wiki_page) }
       let(:page_title) { 'Content Editor Page' }

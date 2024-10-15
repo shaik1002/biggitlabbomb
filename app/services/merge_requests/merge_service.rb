@@ -11,12 +11,13 @@ module MergeRequests
     include Gitlab::Utils::StrongMemoize
 
     GENERIC_ERROR_MESSAGE = 'An error occurred while merging'
+    LEASE_TIMEOUT = 15.minutes.to_i
 
     delegate :merge_jid, :state, to: :@merge_request
 
     def execute(merge_request, options = {})
       return if merge_request.merged?
-      return unless exclusive_lease(merge_request).try_obtain
+      return unless exclusive_lease(merge_request.id).try_obtain
 
       merge_strategy_class = options[:merge_strategy] || MergeRequests::MergeStrategies::FromSourceBranch
       @merge_strategy = merge_strategy_class.new(merge_request, current_user, merge_params: params, options: options)
@@ -30,6 +31,7 @@ module MergeRequests
       merge_request.in_locked_state do
         if commit
           after_merge
+          clean_merge_jid
           success
         end
       end
@@ -38,7 +40,7 @@ module MergeRequests
     rescue MergeError, MergeRequests::MergeStrategies::StrategyError => e
       handle_merge_error(log_message: e.message, save_message_on_model: true)
     ensure
-      exclusive_lease(merge_request).cancel
+      exclusive_lease(merge_request.id).cancel
     end
 
     private
@@ -100,20 +102,19 @@ module MergeRequests
     end
 
     def after_merge
-      # Need to store `merge_jid` in a variable since `MergeRequests::PostMergeService`
-      # will call `MergeRequest#mark_as_merged` and will unset `merge_jid`.
-      jid = merge_jid
-
-      log_info("Post merge started on JID #{jid} with state #{state}")
-      MergeRequests::PostMergeService.new(project: project, current_user: current_user, params: { delete_source_branch:
-                                          delete_source_branch? }).execute(merge_request)
-      log_info("Post merge finished on JID #{jid} with state #{state}")
+      log_info("Post merge started on JID #{merge_jid} with state #{state}")
+      MergeRequests::PostMergeService.new(project: project, current_user: current_user).execute(merge_request)
+      log_info("Post merge finished on JID #{merge_jid} with state #{state}")
 
       if delete_source_branch?
         MergeRequests::DeleteSourceBranchWorker.perform_async(@merge_request.id, @merge_request.source_branch_sha, branch_deletion_user.id)
       end
 
       merge_request_merge_param
+    end
+
+    def clean_merge_jid
+      merge_request.update_column(:merge_jid, nil)
     end
 
     def branch_deletion_user
@@ -171,9 +172,11 @@ module MergeRequests
       params.with_indifferent_access[:sha] == merge_request.diff_head_sha
     end
 
-    def exclusive_lease(merge_request)
-      strong_memoize(:"exclusive_lease_#{merge_request.id}") do
-        merge_request.merge_exclusive_lease
+    def exclusive_lease(merge_request_id)
+      strong_memoize(:"exclusive_lease_#{merge_request_id}") do
+        lease_key = ['merge_requests_merge_service', merge_request_id].join(':')
+
+        Gitlab::ExclusiveLease.new(lease_key, timeout: LEASE_TIMEOUT)
       end
     end
   end

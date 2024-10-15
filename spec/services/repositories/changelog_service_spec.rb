@@ -79,7 +79,7 @@ RSpec.describe Repositories::ChangelogService, feature_category: :source_code_ma
       recorder = ActiveRecord::QueryRecorder.new { service.execute(commit_to_changelog: commit_to_changelog) }
       changelog = project.repository.blob_at('master', 'CHANGELOG.md')&.data
 
-      expect(recorder.count).to eq(14)
+      expect(recorder.count).to eq(12)
       expect(changelog).to include('Title 1', 'Title 2')
     end
 
@@ -185,6 +185,16 @@ RSpec.describe Repositories::ChangelogService, feature_category: :source_code_ma
       it 'raises an exception' do
         expect { service.execute(commit_to_changelog: false) }.to raise_error(Gitlab::Changelog::Error)
       end
+
+      context 'when feature flag is off' do
+        before do
+          stub_feature_flags(changelog_commits_limitation: false)
+        end
+
+        it 'returns the changelog' do
+          expect(service.execute(commit_to_changelog: false)).to include('Title 1', 'Title 2', 'Title 3')
+        end
+      end
     end
 
     context 'with specified changelog config file path' do
@@ -265,8 +275,6 @@ RSpec.describe Repositories::ChangelogService, feature_category: :source_code_ma
   end
 
   def create_commit(project, user, params)
-    RequestStore.clear!
-
     params = { start_branch: 'master', branch_name: 'master' }.merge(params)
     Files::MultiService.new(project, user, params).execute.fetch(:result)
   end

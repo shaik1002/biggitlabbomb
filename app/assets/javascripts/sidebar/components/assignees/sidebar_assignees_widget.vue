@@ -101,9 +101,6 @@ export default {
       update(data) {
         return data.workspace?.issuable;
       },
-      skip() {
-        return !this.iid;
-      },
       result({ data }) {
         if (!data) {
           return;
@@ -297,7 +294,7 @@ export default {
           :issuable-type="issuableType"
           :is-editing="edit"
           :issuable-author="issuableAuthor"
-          class="dropdown-menu-user -gl-mt-3 gl-w-full"
+          class="gl-w-full dropdown-menu-user -gl-mt-3"
           @toggle="collapseWidget"
           @error="showError"
           @input="setDirtyState"

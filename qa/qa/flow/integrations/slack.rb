@@ -18,15 +18,15 @@ module QA
 
           Page::Project::Settings::Integrations.perform(&:click_slack_application_link)
 
-          Page::Project::Settings::Services::Slack.perform(&:install_slack)
-          Vendor::Slack::Page::OAuth.perform(&:submit_oauth)
+          EE::Page::Project::Settings::Services::Slack.perform(&:start_slack_install)
+          ::Slack::Page::Oauth.perform(&:submit_oauth)
         end
 
         # @param [QA::Resource::Project] project
         # @option [String | Nil] channel
         # @return [Boolean] is this account already authorized?
         def start_gitlab_connect(project, channel: nil)
-          Vendor::Slack::Page::Chat.perform do |chat_page|
+          ::Slack::Page::Chat.perform do |chat_page|
             # sometimes Slack will present a blocking page
             # for downloading the app instead of using a browser
             chat_page.skip_download_screen
@@ -37,11 +37,11 @@ module QA
             # The only way to know if we are authorized is to send a slash command to the channel.
             # If the account / chat_name is already authorized, the Slack app will try to look up the issue
             # and return a 404 because it doesn't exist
-            Support::Waiter.wait_until(max_duration: 4, raise_on_failure: false) do
+            QA::Support::Waiter.wait_until(max_duration: 4, raise_on_failure: false) do
               chat_page.messages.last.text =~ /connect your GitLab account|404 not found!/i
             end
 
-            break(true) if /404 not found!/i.match?(chat_page.messages.last.text)
+            break(true) if chat_page.messages.last.text =~ /404 not found!/i
 
             chat_page.click_connect_account_link
 

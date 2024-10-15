@@ -44,8 +44,6 @@ module API
         response_with_status(code: 503, success: false, message: e.message)
       rescue Gitlab::GitAccess::NotFoundError => e
         response_with_status(code: 404, success: false, message: e.message)
-      rescue Gitlab::GitAccessProject::CreationError => e
-        response_with_status(code: 422, success: false, message: e.message)
       end
 
       # rubocop:disable Gitlab/ModuleWithInstanceVariables
@@ -91,19 +89,11 @@ module API
 
       def log_user_activity(actor)
         commands = Gitlab::GitAccess::DOWNLOAD_COMMANDS
+        commands += Gitlab::GitAccess::PUSH_COMMANDS if Feature.enabled?(:log_user_git_push_activity)
 
         return unless commands.include?(params[:action])
 
         ::Users::ActivityService.new(author: actor, namespace: project&.namespace, project: project).execute
-
-        return unless project && actor
-
-        Gitlab::EventStore.publish(
-          ::Users::ActivityEvent.new(data: {
-            user_id: actor.id,
-            namespace_id: project.root_ancestor.id
-          })
-        )
       end
 
       def redis_ping

@@ -1,6 +1,7 @@
 import { GlForm, GlCollapsibleListbox, GlLoadingIcon } from '@gitlab/ui';
 import { nextTick } from 'vue';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
+import { __ } from '~/locale';
 import { groupIterationsResponse } from 'jest/work_items/mock_data';
 import WorkItemSidebarDropdownWidget from '~/work_items/components/shared/work_item_sidebar_dropdown_widget.vue';
 
@@ -31,13 +32,13 @@ describe('WorkItemSidebarDropdownWidget component', () => {
   } = {}) => {
     wrapper = mountExtended(WorkItemSidebarDropdownWidget, {
       propsData: {
-        dropdownLabel: 'Iteration',
+        dropdownLabel: __('Iteration'),
         dropdownName: 'iteration',
         listItems,
         itemValue,
         canUpdate,
         updateInProgress,
-        headerText: 'Select iteration',
+        headerText: __('Select iteration'),
         showFooter,
         multiSelect,
         infiniteScroll,
@@ -187,10 +188,7 @@ describe('WorkItemSidebarDropdownWidget component', () => {
     });
 
     it('clears search on item select when props passes', async () => {
-      const listItems = groupIterationsResponse.data.workspace.attributes.nodes.map((item) => ({
-        value: item.id,
-        ...item,
-      }));
+      const listItems = groupIterationsResponse.data.workspace.attributes.nodes;
       createComponent({
         isEditing: true,
         clearSearchOnItemSelect: true,
@@ -229,32 +227,6 @@ describe('WorkItemSidebarDropdownWidget component', () => {
       await nextTick();
 
       expect(findCollapsibleListbox().props('toggleText')).toBe('No iteration');
-    });
-  });
-
-  describe('watcher', () => {
-    describe('when createdLabelId prop is updated', () => {
-      it('appends itself to the selected items list', async () => {
-        createComponent({
-          isEditing: true,
-          itemValue: ['gid://gitlab/Label/11', 'gid://gitlab/Label/22'],
-          multiSelect: true,
-        });
-        await nextTick();
-
-        expect(findCollapsibleListbox().props('selected')).toEqual([
-          'gid://gitlab/Label/11',
-          'gid://gitlab/Label/22',
-        ]);
-
-        await wrapper.setProps({ createdLabelId: 'gid://gitlab/Label/33' });
-
-        expect(findCollapsibleListbox().props('selected')).toEqual([
-          'gid://gitlab/Label/11',
-          'gid://gitlab/Label/22',
-          'gid://gitlab/Label/33',
-        ]);
-      });
     });
   });
 });

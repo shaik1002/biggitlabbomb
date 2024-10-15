@@ -167,12 +167,16 @@ class Projects::BlobController < Projects::ApplicationController
   end
 
   def assign_blob_vars
-    ref_extractor = ExtractsRef::RefExtractor.new(@project, {})
     @id = params[:id]
-
-    @ref, @path = ref_extractor.extract_ref(@id)
+    @ref, @path = extract_ref(@id)
   rescue InvalidPathError
     render_404
+  end
+
+  def rectify_renamed_default_branch!
+    @commit ||= @repository.commit(@ref)
+
+    super
   end
 
   # rubocop: disable CodeReuse/ActiveRecord
@@ -214,7 +218,7 @@ class Projects::BlobController < Projects::ApplicationController
   end
 
   def fetch_file_path
-    file_params = params.permit(:file, :file_name, :file_path)
+    file_params = params.permit(:file, :file_name)
 
     if action_name.to_s == 'create'
       file_name = file_params[:file].present? ? file_params[:file].original_filename : file_params[:file_name]

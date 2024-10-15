@@ -11,7 +11,6 @@ module Ci
         # we want to preserve historical usage data.
         class Usage < ::ApplicationRecord
           include PartitionedTable
-          include EachBatch
 
           self.table_name = 'p_catalog_resource_component_usages'
           self.primary_key = :id

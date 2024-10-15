@@ -13,7 +13,7 @@ module Projects
         end
 
         @tag_names = params[:tags]
-        return error('no tags specified') if @tag_names.blank?
+        return error('not tags specified') if @tag_names.blank?
 
         delete_tags
       end
@@ -56,5 +56,3 @@ module Projects
     end
   end
 end
-
-Projects::ContainerRepository::DeleteTagsService.prepend_mod_with('Projects::ContainerRepository::DeleteTagsService')

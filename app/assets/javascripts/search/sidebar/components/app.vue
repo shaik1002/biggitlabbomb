@@ -96,12 +96,12 @@ export default {
   <section>
     <dom-element-listener selector="#js-open-mobile-filters" @click="toggleFiltersFromSidebar" />
     <sidebar-portal>
+      <all-scopes-start-filters />
       <div
-        class="super-sidebar-context-header gl-m-0 gl-px-4 gl-py-3 gl-font-bold gl-leading-reset"
+        class="gl-px-5 gl-pt-3 gl-pb-2 gl-m-0 gl-reset-line-height gl-font-weight-bold gl-font-sm super-sidebar-context-header"
       >
         {{ $options.i18n.headerText }}
       </div>
-      <all-scopes-start-filters />
       <scope-sidebar-navigation />
       <issues-filters v-if="showIssuesFilters" />
       <merge-requests-filters v-if="showMergeRequestFilters" />

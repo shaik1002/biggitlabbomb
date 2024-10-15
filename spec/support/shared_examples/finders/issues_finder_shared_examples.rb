@@ -219,6 +219,16 @@ RSpec.shared_examples 'issues or work items finder' do |factory, execute_context
           it 'returns items created by any of the given users' do
             expect(items).to contain_exactly(item3, item6)
           end
+
+          context 'when feature flag is disabled' do
+            before do
+              stub_feature_flags(or_issuable_queries: false)
+            end
+
+            it 'does not add any filter' do
+              expect(items).to contain_exactly(item1, item2, item3, item4, item5, item6)
+            end
+          end
         end
 
         context 'filtering by NOT author ID' do
@@ -491,6 +501,16 @@ RSpec.shared_examples 'issues or work items finder' do |factory, execute_context
 
           it 'returns items that have at least one of the given labels' do
             expect(items).to contain_exactly(item2, item3)
+          end
+
+          context 'when feature flag is disabled' do
+            before do
+              stub_feature_flags(or_issuable_queries: false)
+            end
+
+            it 'does not add any filter' do
+              expect(items).to contain_exactly(item1, item2, item3, item4, item5)
+            end
           end
         end
       end
@@ -817,52 +837,6 @@ RSpec.shared_examples 'issues or work items finder' do |factory, execute_context
 
           it 'returns only public items' do
             expect(items).to contain_exactly(item1, item2, item3, item4, item5)
-          end
-        end
-      end
-
-      context 'filtering by subscribed' do
-        let_it_be(:subscribed_item) { create(factory, project: project1) }
-        let_it_be(:unsubscribed_item) { create(factory, project: project1) }
-        let_it_be(:regular_item) { create(factory, project: project1) }
-        let_it_be(:subscription) { create(:subscription, subscribable: subscribed_item, user: user, subscribed: true) }
-        let_it_be(:unsubscription) do
-          create(:subscription, subscribable: unsubscribed_item, user: user, subscribed: false)
-        end
-
-        context 'no filtering' do
-          it 'returns all items' do
-            expect(items)
-              .to contain_exactly(item1, item2, item3, item4, item5, subscribed_item, unsubscribed_item, regular_item)
-          end
-        end
-
-        context 'user filters for subscribed items' do
-          let(:params) { { subscribed: :explicitly_subscribed } }
-
-          it 'returns only subscribed items' do
-            expect(items).to contain_exactly(subscribed_item)
-          end
-        end
-
-        context 'user filters out subscribed items' do
-          let(:params) { { subscribed: :explicitly_unsubscribed } }
-
-          it 'returns only unsubscribed items' do
-            expect(items).to contain_exactly(unsubscribed_item)
-          end
-        end
-
-        context 'when filter_subscriptions FF is disabled' do
-          let(:params) { { subscribed: :explicitly_subscribed } }
-
-          before do
-            stub_feature_flags(filter_subscriptions: false)
-          end
-
-          it 'does not apply filter' do
-            expect(items)
-              .to contain_exactly(item1, item2, item3, item4, item5, subscribed_item, unsubscribed_item, regular_item)
           end
         end
       end

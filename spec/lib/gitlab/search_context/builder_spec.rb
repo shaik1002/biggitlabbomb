@@ -15,19 +15,19 @@ RSpec.describe Gitlab::SearchContext::Builder, type: :controller do
     return {} if project.nil?
 
     a_hash_including(project_path: project.path,
-      name: project.name,
-      issues_path: a_string_including("/issues"),
-      mr_path: a_string_including("/merge_requests"),
-      issues_disabled: !project.issues_enabled?)
+                     name: project.name,
+                     issues_path: a_string_including("/issues"),
+                     mr_path: a_string_including("/merge_requests"),
+                     issues_disabled: !project.issues_enabled?)
   end
 
   def expected_group_metadata(group)
     return {} if group.nil?
 
     a_hash_including(group_path: group.path,
-      name: group.name,
-      issues_path: a_string_including("/issues"),
-      mr_path: a_string_including("/merge_requests"))
+                     name: group.name,
+                     issues_path: a_string_including("/issues"),
+                     mr_path: a_string_including("/merge_requests"))
   end
 
   def expected_search_url(project, group)
@@ -85,7 +85,7 @@ RSpec.describe Gitlab::SearchContext::Builder, type: :controller do
 
   describe '#with_snippet' do
     context 'when there is a single snippet' do
-      let(:snippet) { create(:project_snippet) }
+      let(:snippet) { create(:snippet) }
 
       subject { builder.with_snippet(snippet) }
 
@@ -100,7 +100,7 @@ RSpec.describe Gitlab::SearchContext::Builder, type: :controller do
     end
 
     context 'when there are multiple snippets' do
-      let(:snippets) { create_list(:project_snippet, 3) }
+      let(:snippets) { create_list(:snippet, 3) }
 
       describe '#build!' do
         subject(:context) do

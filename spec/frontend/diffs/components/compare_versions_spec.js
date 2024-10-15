@@ -1,4 +1,3 @@
-import { GlAnimatedSidebarIcon } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import getDiffWithCommit from 'test_fixtures/merge_request_diffs/with_commit.json';
@@ -23,18 +22,19 @@ describe('CompareVersions', () => {
   const targetBranchName = 'tmp-wine-dev';
   const { commit } = getDiffWithCommit;
 
-  const createWrapper = ({ props = {}, commitArgs = {}, createCommit = true } = {}) => {
+  const createWrapper = (props = {}, commitArgs = {}, createCommit = true) => {
     if (createCommit) {
       store.state.diffs.commit = { ...store.state.diffs.commit, ...commitArgs };
     }
 
     wrapper = mount(CompareVersionsComponent, {
-      propsData: {
-        toggleFileTreeVisible: true,
-        ...props,
-      },
       mocks: {
         $store: store,
+      },
+      propsData: {
+        mergeRequestDiffs: diffsMockData,
+        diffFilesCountText: '1',
+        ...props,
       },
     });
   };
@@ -77,7 +77,7 @@ describe('CompareVersions', () => {
 
   describe('template', () => {
     beforeEach(() => {
-      createWrapper({ createCommit: false });
+      createWrapper({}, {}, false);
     });
 
     it('should render Tree List toggle button with correct attribute values', () => {
@@ -85,7 +85,7 @@ describe('CompareVersions', () => {
 
       expect(treeListBtn.exists()).toBe(true);
       expect(treeListBtn.attributes('aria-label')).toBe('Hide file browser');
-      expect(treeListBtn.findComponent(GlAnimatedSidebarIcon).exists()).toBe(true);
+      expect(treeListBtn.props('icon')).toBe('file-tree');
     });
 
     it('should render comparison dropdowns with correct values', () => {
@@ -99,11 +99,17 @@ describe('CompareVersions', () => {
     });
   });
 
-  it('should not render Tree List toggle button when a prop is false', () => {
-    createWrapper({ props: { toggleFileTreeVisible: false } });
-    const treeListBtn = wrapper.find('.js-toggle-tree-list');
+  describe('noChangedFiles', () => {
+    beforeEach(() => {
+      store.state.diffs.diffFiles = [];
+    });
 
-    expect(treeListBtn.exists()).toBe(false);
+    it('should not render Tree List toggle button when there are no changes', () => {
+      createWrapper();
+      const treeListBtn = wrapper.find('.js-toggle-tree-list');
+
+      expect(treeListBtn.exists()).toBe(false);
+    });
   });
 
   describe('commit', () => {
@@ -141,7 +147,7 @@ describe('CompareVersions', () => {
 
   describe('without neighbor commits', () => {
     beforeEach(() => {
-      createWrapper({ commitArgs: { ...commit, prev_commit_id: null, next_commit_id: null } });
+      createWrapper({ commit: { ...commit, prev_commit_id: null, next_commit_id: null } });
     });
 
     it('does not render any navigation buttons', () => {
@@ -159,16 +165,20 @@ describe('CompareVersions', () => {
         prev_commit_id: 'prev',
       };
 
-      createWrapper({ commitArgs: mrCommit });
+      createWrapper({}, mrCommit);
     });
 
     it('renders the commit navigation buttons', () => {
       expect(getCommitNavButtonsElement().exists()).toEqual(true);
 
-      createWrapper({ commitArgs: { ...mrCommit, next_commit_id: null } });
+      createWrapper({
+        commit: { ...mrCommit, next_commit_id: null },
+      });
       expect(getCommitNavButtonsElement().exists()).toEqual(true);
 
-      createWrapper({ commitArgs: { ...mrCommit, prev_commit_id: null } });
+      createWrapper({
+        commit: { ...mrCommit, prev_commit_id: null },
+      });
       expect(getCommitNavButtonsElement().exists()).toEqual(true);
     });
 
@@ -194,7 +204,7 @@ describe('CompareVersions', () => {
       });
 
       it('renders a disabled button when there is no prev commit', () => {
-        createWrapper({ commitArgs: { ...mrCommit, prev_commit_id: null } });
+        createWrapper({}, { ...mrCommit, prev_commit_id: null });
 
         const button = getPrevCommitNavElement();
 
@@ -224,7 +234,7 @@ describe('CompareVersions', () => {
       });
 
       it('renders a disabled button when there is no next commit', () => {
-        createWrapper({ commitArgs: { ...mrCommit, next_commit_id: null } });
+        createWrapper({}, { ...mrCommit, next_commit_id: null });
 
         const button = getNextCommitNavElement();
 

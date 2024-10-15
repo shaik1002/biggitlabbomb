@@ -19,12 +19,6 @@ fragment WorkItemNote on Note {
   }
   discussion {
     id
-    resolved
-    resolvable
-    resolvedBy {
-      id
-      name
-    }
   }
   author {
     ...User
@@ -44,5 +38,9 @@ fragment WorkItemNote on Note {
   }
   systemNoteMetadata {
     id
+    descriptionVersion {
+      id
+      description
+    }
   }
 }

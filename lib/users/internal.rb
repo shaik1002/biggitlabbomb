@@ -23,8 +23,6 @@ module Users
           u.bio = 'The GitLab alert bot'
           u.name = 'GitLab Alert Bot'
           u.avatar = bot_avatar(image: 'alert-bot.png')
-          u.confirmed_at = Time.zone.now
-          u.private_profile = true
         end
       end
 
@@ -35,7 +33,6 @@ module Users
           u.bio = 'The GitLab migration bot'
           u.name = 'GitLab Migration Bot'
           u.confirmed_at = Time.zone.now
-          u.private_profile = true
         end
       end
 
@@ -49,7 +46,6 @@ module Users
           u.website_url = Gitlab::Routing.url_helpers.help_page_url('user/application_security/security_bot/index.md')
           u.avatar = bot_avatar(image: 'security-bot.png')
           u.confirmed_at = Time.zone.now
-          u.private_profile = true
         end
       end
 
@@ -61,7 +57,6 @@ module Users
           u.name = 'GitLab Support Bot'
           u.avatar = bot_avatar(image: 'support-bot.png')
           u.confirmed_at = Time.zone.now
-          u.private_profile = true
         end
       end
 
@@ -72,8 +67,6 @@ module Users
           u.bio = 'The GitLab automation bot used for automated workflows and tasks'
           u.name = 'GitLab Automation Bot'
           u.avatar = bot_avatar(image: 'support-bot.png') # todo: add an avatar for automation-bot
-          u.confirmed_at = Time.zone.now
-          u.private_profile = true
         end
       end
 
@@ -85,19 +78,6 @@ module Users
           u.name = 'GitLab LLM Bot'
           u.avatar = bot_avatar(image: 'support-bot.png') # todo: add an avatar for llm-bot
           u.confirmed_at = Time.zone.now
-          u.private_profile = true
-        end
-      end
-
-      def duo_code_review_bot
-        email_pattern = "duo-code-review-bot%s@#{Settings.gitlab.host}"
-
-        unique_internal(User.where(user_type: :duo_code_review_bot), 'GitLab-Duo-Code-Reviewer', email_pattern) do |u|
-          u.bio = 'The reviewer bot for GitLab Duo Code Review'
-          u.name = 'Duo Code Reviewer'
-          u.avatar = bot_avatar(image: 'support-bot.png') # todo: add an avatar for duo_code_review_bot
-          u.confirmed_at = Time.zone.now
-          u.private_profile = true
         end
       end
 
@@ -110,7 +90,6 @@ module Users
           u.avatar = bot_avatar(image: 'admin-bot.png')
           u.admin = true
           u.confirmed_at = Time.zone.now
-          u.private_profile = true
         end
       end
 
@@ -150,7 +129,7 @@ module Users
 
         uniquify = Gitlab::Utils::Uniquify.new
 
-        username = uniquify.string(username) { |s| Namespace.by_path(s) }
+        username = uniquify.string(username) { |s| User.find_by_username(s) }
 
         email = uniquify.string(->(n) { Kernel.sprintf(email_pattern, n) }) do |s|
           User.find_by_email(s)

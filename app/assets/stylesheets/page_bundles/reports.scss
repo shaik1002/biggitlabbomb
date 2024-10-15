@@ -1,12 +1,23 @@
 @import 'mixins_and_variables_and_functions';
 
+.mr-widget-grouped-section {
+  .report-block-container {
+    max-height: 170px;
+    overflow: auto;
+  }
+}
+
 .report-block-container {
-  border-top: 1px solid var(--gl-border-color-default);
+  border-top: 1px solid var(--border-color, $border-color);
   padding: $gl-padding - 2;
-  background-color: var(--gl-background-color-subtle);
+  background-color: var(--gray-50, $gray-10);
 
   // Clean MR widget CSS
   line-height: 20px;
+}
+
+.report-block-child-icon {
+  height: 20px;
 }
 
 .report-block-list {
@@ -59,5 +70,9 @@
     word-wrap: break-word;
     word-break: break-all;
   }
+}
+
+.report-block-issue-code {
+  width: 600px;
 }
 

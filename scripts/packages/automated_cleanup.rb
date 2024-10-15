@@ -2,11 +2,8 @@
 
 # frozen_string_literal: true
 
-# We need to take some precautions when using the `gitlab` gem in this project.
-#
-# See https://docs.gitlab.com/ee/development/pipelines/internals.html#using-the-gitlab-ruby-gem-in-the-canonical-project.
-require 'gitlab'
 require 'optparse'
+require 'gitlab'
 
 module Packages
   class AutomatedCleanup
@@ -42,9 +39,9 @@ module Packages
       puts "Checking for '#{package_name}' packages created at least #{days_for_delete} days ago..."
 
       gitlab.project_packages(project_path,
-        package_type: 'generic',
-        package_name: package_name,
-        per_page: PACKAGES_PER_PAGE).auto_paginate do |package|
+                              package_type: 'generic',
+                              package_name: package_name,
+                              per_page: PACKAGES_PER_PAGE).auto_paginate do |package|
         next unless package.name == package_name # the search is fuzzy, so we better check the actual package name
 
         if old_enough(package, days_for_delete) && not_recently_downloaded(package, days_for_delete)
@@ -65,7 +62,7 @@ module Packages
     end
 
     def time_ago(days:)
-      Time.now - (days * 24 * 3600)
+      Time.now - days * 24 * 3600
     end
 
     def old_enough(package, days_for_delete)

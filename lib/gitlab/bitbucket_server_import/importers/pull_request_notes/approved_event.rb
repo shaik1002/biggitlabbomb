@@ -15,11 +15,8 @@ module Gitlab
               event_id: approved_event[:id]
             )
 
-            user_id = if Feature.enabled?(:bitbucket_server_user_mapping_by_username, project, type: :ops)
-                        user_finder.find_user_id(by: :username, value: approved_event[:approver_username])
-                      else
-                        user_finder.find_user_id(by: :email, value: approved_event[:approver_email])
-                      end
+            user_id = user_finder.find_user_id(by: :username, value: approved_event[:approver_username]) ||
+              user_finder.find_user_id(by: :email, value: approved_event[:approver_email])
 
             if user_id.nil?
               log_info(

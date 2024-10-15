@@ -107,9 +107,7 @@ export default {
       }
     },
     onInputValidationStateChange(inputId, value) {
-      const copy = [...this.inputValidStates];
-      copy[inputId] = value;
-      this.inputValidStates = copy;
+      this.$set(this.inputValidStates, inputId, value);
     },
     onHighlight(path) {
       this.$emit('update:highlight', path);
@@ -131,7 +129,6 @@ export default {
       :validate="validate"
       :widget="input.widget"
       class="gl-mb-8"
-      :monospace="input.monospace"
       v-bind="input"
       @highlight="onHighlight"
       @update:valid="(validationState) => onInputValidationStateChange(i, validationState)"

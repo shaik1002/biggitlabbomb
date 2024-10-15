@@ -110,7 +110,7 @@ module Routing
       if @snippet.is_a?(PersonalSnippet)
         preview_markdown_snippets_path
       else
-        project_preview_markdown_path(parent, *args)
+        preview_markdown_project_path(parent, *args)
       end
     end
 

@@ -331,14 +331,14 @@ RSpec.describe WorkItems::UpdateService, feature_category: :team_planning do
 
       let(:supported_widgets) do
         [
-          { klass: Issuable::Callbacks::Description, callback: :after_initialize },
-          { klass: WorkItems::Callbacks::Hierarchy, callback: :after_update }
+          { klass: WorkItems::Callbacks::Description, callback: :after_initialize },
+          { klass: WorkItems::Widgets::HierarchyService::UpdateService, callback: :before_update_in_transaction, params: { parent: parent } }
         ]
       end
     end
 
     context 'when updating widgets' do
-      let(:widget_service_class) { Issuable::Callbacks::Description }
+      let(:widget_service_class) { WorkItems::Callbacks::Description }
       let(:widget_params) { { description_widget: { description: 'changed' } } }
 
       context 'when widget service is not present' do
@@ -418,6 +418,16 @@ RSpec.describe WorkItems::UpdateService, feature_category: :team_planning do
           it 'returns validation errors' do
             expect(update_work_item[:message]).to contain_exactly("Title can't be blank")
           end
+
+          it 'does not execute after-update widgets', :aggregate_failures do
+            expect(service).to receive(:update).and_call_original
+            expect(service).not_to receive(:execute_widgets).with(callback: :update, widget_params: widget_params)
+
+            expect do
+              update_work_item
+              work_item.reload
+            end.not_to change(work_item, :description)
+          end
         end
       end
 
@@ -442,40 +452,12 @@ RSpec.describe WorkItems::UpdateService, feature_category: :team_planning do
           let(:widget_params) { { start_and_due_date_widget: { due_date: updated_date } } }
 
           it_behaves_like 'update service that triggers graphql dates updated subscription'
-
-          it 'updates the dates as expected' do
-            expect { update_work_item }
-              .to change { work_item.dates_source&.due_date }
-          end
-
-          context 'when work item validation fails' do
-            let(:opts) { { title: '' } }
-
-            it 'does not change the dates_source' do
-              expect { update_work_item }
-                .not_to change { work_item.dates_source&.due_date }
-            end
-          end
         end
 
         context 'when start_date is updated' do
           let(:widget_params) { { start_and_due_date_widget: { start_date: updated_date } } }
 
           it_behaves_like 'update service that triggers graphql dates updated subscription'
-
-          it 'updates the dates as expected' do
-            expect { update_work_item }
-              .to change { work_item&.dates_source&.start_date }
-          end
-
-          context 'when work item validation fails' do
-            let(:opts) { { title: '' } }
-
-            it 'does not change the dates_source' do
-              expect { update_work_item }
-                .not_to change { work_item&.dates_source&.start_date }
-            end
-          end
         end
 
         context 'when no date param is updated' do
@@ -495,19 +477,17 @@ RSpec.describe WorkItems::UpdateService, feature_category: :team_planning do
 
         let(:widget_params) { { hierarchy_widget: { children: [child_work_item] } } }
 
-        context 'when quarantined shared example', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/485044' do
-          include_examples 'publish WorkItems::WorkItemUpdatedEvent event',
-            attributes: %w[
-              title
-              title_html
-              lock_version
-              updated_at
-              updated_by_id
-            ],
-            widgets: %w[
-              hierarchy_widget
-            ]
-        end
+        include_examples 'publish WorkItems::WorkItemUpdatedEvent event',
+          attributes: %w[
+            title
+            title_html
+            lock_version
+            updated_at
+            updated_by_id
+          ],
+          widgets: %w[
+            hierarchy_widget
+          ]
 
         it 'updates the children of the work item' do
           expect do
@@ -519,8 +499,6 @@ RSpec.describe WorkItems::UpdateService, feature_category: :team_planning do
         end
 
         it_behaves_like 'update service that triggers GraphQL work_item_updated subscription' do
-          let(:trigger_call_counter) { 2 }
-
           subject(:execute_service) { update_work_item }
         end
 
@@ -529,9 +507,8 @@ RSpec.describe WorkItems::UpdateService, feature_category: :team_planning do
 
           it 'returns error status' do
             expect(subject[:status]).to be(:error)
-            expect(subject[:message]).to match(
-              "#{child_work_item.to_reference} cannot be added: it's not allowed to add this type of parent item"
-            )
+            expect(subject[:message])
+              .to match("#{child_work_item.to_reference} cannot be added: is not allowed to add this type of parent")
           end
 
           it 'does not update work item attributes' do
@@ -549,6 +526,14 @@ RSpec.describe WorkItems::UpdateService, feature_category: :team_planning do
 
           it 'returns validation errors' do
             expect(update_work_item[:message]).to contain_exactly("Title can't be blank")
+          end
+
+          it 'does not execute after-update widgets', :aggregate_failures do
+            expect(service).to receive(:update).and_call_original
+            expect(service).not_to receive(:execute_widgets).with(callback: :before_update_in_transaction, widget_params: widget_params)
+            expect(work_item.work_item_children).not_to include(child_work_item)
+
+            update_work_item
           end
         end
       end
@@ -662,18 +647,14 @@ RSpec.describe WorkItems::UpdateService, feature_category: :team_planning do
           end.to change(work_item, :assignees).from([developer]).to([assignee]).and change(work_item, :updated_at)
         end
 
-        context 'when quarantined shared example', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/485027' do
-          it_behaves_like 'publish WorkItems::WorkItemUpdatedEvent event',
-            attributes:
-            %w[
-              updated_at
-              updated_by_id
-            ],
-            widgets:
-            %w[
-              assignees_widget
-            ]
-        end
+        it_behaves_like 'publish WorkItems::WorkItemUpdatedEvent event',
+          attributes: %w[
+            updated_at
+            updated_by_id
+          ],
+          widgets: %w[
+            assignees_widget
+          ]
 
         context 'when work item validation fails' do
           let(:opts) { { title: '' } }

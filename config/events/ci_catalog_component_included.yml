@@ -2,13 +2,12 @@
 description: When a CI/CD Catalog component is included in a pipeline.
 internal_events: true
 action: ci_catalog_component_included
-additional_properties:
-  label:
-    description: Id of the component being included
 identifiers:
 - project
 - namespace
 - user
+product_section: ci
+product_stage: verify
 product_group: pipeline_authoring
 milestone: '16.11'
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/146834
@@ -19,4 +18,3 @@ tiers:
 - free
 - premium
 - ultimate
-

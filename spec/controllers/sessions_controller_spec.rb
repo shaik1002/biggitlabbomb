@@ -234,49 +234,8 @@ RSpec.describe SessionsController, feature_category: :system_access do
         end
       end
 
-      context 'when user has dismissed broadcast_messages' do
-        let_it_be(:user) { create(:user) }
-        let_it_be(:message_banner) { create(:broadcast_message, broadcast_type: :banner, message: 'banner') }
-        let_it_be(:message_notification) { create(:broadcast_message, broadcast_type: :notification, message: 'notification') }
-        let_it_be(:other_message) { create(:broadcast_message, broadcast_type: :banner, message: 'other') }
-
-        before_all do
-          create(:broadcast_message_dismissal, broadcast_message: message_banner, user: user)
-          create(:broadcast_message_dismissal, broadcast_message: message_notification, user: user)
-          create(:broadcast_message_dismissal, broadcast_message: other_message, user: build(:user))
-        end
-
-        it 'creates dismissed cookies based on db records' do
-          expect(cookies["hide_broadcast_message_#{message_banner.id}"]).to be_nil
-          expect(cookies["hide_broadcast_message_#{message_notification.id}"]).to be_nil
-          expect(cookies["hide_broadcast_message_#{other_message.id}"]).to be_nil
-
-          post_action
-
-          expect(cookies["hide_broadcast_message_#{message_banner.id}"]).to be(true)
-          expect(cookies["hide_broadcast_message_#{message_notification.id}"]).to be(true)
-          expect(cookies["hide_broadcast_message_#{other_message.id}"]).to be_nil
-        end
-
-        context 'when dismissal is expired' do
-          let_it_be(:message) { create(:broadcast_message, broadcast_type: :banner, message: 'banner') }
-
-          before do
-            create(:broadcast_message_dismissal, :expired, broadcast_message: message, user: user)
-          end
-
-          it 'does not create cookie' do
-            expect(cookies["hide_broadcast_message_#{message.id}"]).to be_nil
-
-            post_action
-
-            expect(cookies["hide_broadcast_message_#{message.id}"]).to be_nil
-          end
-        end
-      end
-
       context 'with reCAPTCHA' do
-        def unsuccessful_login(user_params, sesion_params: {})
+        def unsuccesful_login(user_params, sesion_params: {})
           # Without this, `verify_recaptcha` arbitrarily returns true in test env
           Recaptcha.configuration.skip_verify_env.delete('test')
           counter = double(:counter)
@@ -289,7 +248,7 @@ RSpec.describe SessionsController, feature_category: :system_access do
           post(:create, params: { user: user_params }, session: sesion_params)
         end
 
-        def successful_login(user_params, sesion_params: {})
+        def succesful_login(user_params, sesion_params: {})
           # Avoid test ordering issue and ensure `verify_recaptcha` returns true
           Recaptcha.configuration.skip_verify_env << 'test'
           counter = double(:counter)
@@ -314,7 +273,7 @@ RSpec.describe SessionsController, feature_category: :system_access do
 
           context 'when the reCAPTCHA is not solved' do
             it 'displays an error' do
-              unsuccessful_login(user_params)
+              unsuccesful_login(user_params)
 
               expect(response).to render_template(:new)
               expect(flash[:alert]).to include _('There was an error with the reCAPTCHA. Please solve the reCAPTCHA again.')
@@ -324,7 +283,7 @@ RSpec.describe SessionsController, feature_category: :system_access do
             it 'sets gon variables' do
               Gon.clear
 
-              unsuccessful_login(user_params)
+              unsuccesful_login(user_params)
 
               expect(response).to render_template(:new)
               expect(Gon.all_variables).not_to be_empty
@@ -332,7 +291,7 @@ RSpec.describe SessionsController, feature_category: :system_access do
           end
 
           it 'successfully logs in a user when reCAPTCHA is solved' do
-            successful_login(user_params)
+            succesful_login(user_params)
 
             expect(subject.current_user).to eq user
           end
@@ -348,7 +307,7 @@ RSpec.describe SessionsController, feature_category: :system_access do
 
           context 'when user tried to login 5 times' do
             it 'displays an error when the reCAPTCHA is not solved' do
-              unsuccessful_login(user_params, sesion_params: { failed_login_attempts: 6 })
+              unsuccesful_login(user_params, sesion_params: { failed_login_attempts: 6 })
 
               expect(response).to render_template(:new)
               expect(flash[:alert]).to include _('There was an error with the reCAPTCHA. Please solve the reCAPTCHA again.')
@@ -356,7 +315,7 @@ RSpec.describe SessionsController, feature_category: :system_access do
             end
 
             it 'successfully logs in a user when reCAPTCHA is solved' do
-              successful_login(user_params, sesion_params: { failed_login_attempts: 6 })
+              succesful_login(user_params, sesion_params: { failed_login_attempts: 6 })
 
               expect(subject.current_user).to eq user
             end
@@ -368,7 +327,7 @@ RSpec.describe SessionsController, feature_category: :system_access do
             end
 
             it 'displays an error when the reCAPTCHA is not solved' do
-              unsuccessful_login(user_params)
+              unsuccesful_login(user_params)
 
               expect(response).to render_template(:new)
               expect(flash[:alert]).to include _('There was an error with the reCAPTCHA. Please solve the reCAPTCHA again.')
@@ -378,7 +337,7 @@ RSpec.describe SessionsController, feature_category: :system_access do
             it 'successfully logs in a user when reCAPTCHA is solved' do
               expect(Gitlab::AnonymousSession).to receive_message_chain(:new, :cleanup_session_per_ip_count)
 
-              successful_login(user_params)
+              succesful_login(user_params)
 
               expect(subject.current_user).to eq user
             end
@@ -679,6 +638,61 @@ RSpec.describe SessionsController, feature_category: :system_access do
     end
   end
 
+  describe '#set_current_context' do
+    let_it_be(:user) { create(:user) }
+
+    context 'when signed in' do
+      before do
+        sign_in(user)
+      end
+
+      it 'sets the username and caller_id in the context' do
+        expect(controller).to receive(:destroy).and_wrap_original do |m, *args|
+          expect(Gitlab::ApplicationContext.current)
+            .to include('meta.user' => user.username, 'meta.caller_id' => 'SessionsController#destroy')
+
+          m.call(*args)
+        end
+
+        delete :destroy
+      end
+    end
+
+    context 'when not signed in' do
+      it 'sets the caller_id in the context' do
+        expect(controller).to receive(:new).and_wrap_original do |m, *args|
+          expect(Gitlab::ApplicationContext.current)
+            .to include('meta.caller_id' => 'SessionsController#new')
+          expect(Gitlab::ApplicationContext.current)
+            .not_to include('meta.user')
+
+          m.call(*args)
+        end
+
+        get :new
+      end
+    end
+
+    context 'when the user becomes locked' do
+      before do
+        user.update!(failed_attempts: User.maximum_attempts.pred)
+      end
+
+      it 'sets the caller_id in the context' do
+        allow_any_instance_of(User).to receive(:lock_access!).and_wrap_original do |m, *args|
+          expect(Gitlab::ApplicationContext.current)
+            .to include('meta.caller_id' => 'SessionsController#create')
+          expect(Gitlab::ApplicationContext.current)
+            .not_to include('meta.user')
+
+          m.call(*args)
+        end
+
+        post :create, params: { user: { login: user.username, password: user.password.succ } }
+      end
+    end
+  end
+
   describe '#destroy' do
     before do
       sign_in(user)
@@ -692,31 +706,6 @@ RSpec.describe SessionsController, feature_category: :system_access do
 
         expect(response).to redirect_to(new_user_session_path)
         expect(controller.current_user).to be_nil
-      end
-    end
-
-    context 'clearing browser data' do
-      let(:user) { create(:user) }
-
-      before do
-        cookies[:test_cookie] = 'test-value'
-        cookies.encrypted[:test_encrypted_cookie] = 'test-value'
-        cookies.signed[:test_signed_cookie] = 'test-value'
-      end
-
-      it 'clears all cookies known by Rails' do
-        delete :destroy
-
-        %w[test_cookie test_encrypted_cookie test_signed_cookie].each do |key|
-          expect(response.cookies).to have_key(key)
-          expect(response.cookies[key]).to be_nil
-        end
-      end
-
-      it 'sends Clear-Site-Data header for all non-cookie data' do
-        delete :destroy
-
-        expect(response.headers['Clear-Site-Data']).to eq('"cache", "storage", "executionContexts", "clientHints"')
       end
     end
   end

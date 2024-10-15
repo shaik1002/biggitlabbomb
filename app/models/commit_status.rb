@@ -8,6 +8,18 @@ class CommitStatus < Ci::ApplicationRecord
   include Presentable
   include BulkInsertableAssociations
   include TaggableQueries
+  include IgnorableColumns
+
+  ignore_columns %i[
+    auto_canceled_by_id_convert_to_bigint
+    commit_id_convert_to_bigint
+    erased_by_id_convert_to_bigint
+    project_id_convert_to_bigint
+    runner_id_convert_to_bigint
+    trigger_request_id_convert_to_bigint
+    upstream_pipeline_id_convert_to_bigint
+    user_id_convert_to_bigint
+  ], remove_with: '17.0', remove_after: '2024-04-22'
 
   self.table_name = :p_ci_builds
   self.sequence_name = :ci_builds_id_seq
@@ -36,9 +48,7 @@ class CommitStatus < Ci::ApplicationRecord
 
   validates :pipeline, presence: true, unless: :importing?
   validates :name, presence: true, unless: :importing?
-  validates :ci_stage, presence: true, on: :create, unless: :importing?
-  validates :ref, :target_url, :description, length: { maximum: 255 }
-  validates :project, presence: true
+  validates :stage, :ref, :target_url, :description, length: { maximum: 255 }
 
   alias_attribute :author, :user
   alias_attribute :pipeline_id, :commit_id
@@ -56,12 +66,12 @@ class CommitStatus < Ci::ApplicationRecord
   scope :latest_ordered, -> { latest.ordered.includes(project: :namespace) }
   scope :retried_ordered, -> { retried.order(name: :asc, id: :desc).includes(project: :namespace) }
   scope :ordered_by_pipeline, -> { order(pipeline_id: :asc) }
-  scope :before_stage, ->(index) { where('stage_idx < ?', index) }
-  scope :for_stage, ->(index) { where(stage_idx: index) }
-  scope :after_stage, ->(index) { where('stage_idx > ?', index) }
-  scope :for_project, ->(project_id) { where(project_id: project_id) }
-  scope :for_ref, ->(ref) { where(ref: ref) }
-  scope :by_name, ->(name) { where(name: name) }
+  scope :before_stage, -> (index) { where('stage_idx < ?', index) }
+  scope :for_stage, -> (index) { where(stage_idx: index) }
+  scope :after_stage, -> (index) { where('stage_idx > ?', index) }
+  scope :for_project, -> (project_id) { where(project_id: project_id) }
+  scope :for_ref, -> (ref) { where(ref: ref) }
+  scope :by_name, -> (name) { where(name: name) }
   scope :in_pipelines, ->(pipelines) { where(pipeline: pipelines) }
   scope :with_pipeline, -> { joins(:pipeline) }
   scope :updated_at_before, ->(date) { where("#{quoted_table_name}.updated_at < ?", date) }
@@ -73,7 +83,7 @@ class CommitStatus < Ci::ApplicationRecord
   scope :with_type, ->(type) { where(type: type) }
 
   # The scope applies `pluck` to split the queries. Use with care.
-  scope :for_project_paths, ->(paths) do
+  scope :for_project_paths, -> (paths) do
     # Pluck is used to split this query. Splitting the query is required for database decomposition for `ci_*` tables.
     # https://docs.gitlab.com/ee/development/database/transaction_guidelines.html#database-decomposition-and-sharding
     project_ids = Project.where_full_path_in(Array(paths), preload_routes: false).pluck(:id)
@@ -94,7 +104,7 @@ class CommitStatus < Ci::ApplicationRecord
     .where(arel_table[:partition_id].eq(Ci::Pipeline.arel_table[:partition_id]))
   end
 
-  scope :match_id_and_lock_version, ->(items) do
+  scope :match_id_and_lock_version, -> (items) do
     # it expects that items are an array of attributes to match
     # each hash needs to have `id` and `lock_version`
     or_conditions = items.inject(none) do |relation, item|
@@ -104,6 +114,21 @@ class CommitStatus < Ci::ApplicationRecord
     end
 
     merge(or_conditions)
+  end
+
+  ##
+  # We still create some CommitStatuses outside of CreatePipelineService.
+  #
+  # These are pages deployments and external statuses.
+  #
+  before_create unless: :importing? do
+    next if Feature.enabled?(:ci_remove_ensure_stage_service, project)
+
+    # rubocop: disable CodeReuse/ServiceClass
+    Ci::EnsureStageService.new(project, user).execute(self) do |stage|
+      self.run_after_commit { StageUpdateWorker.perform_async(stage.id) }
+    end
+    # rubocop: enable CodeReuse/ServiceClass
   end
 
   before_save if: :status_changed?, unless: :importing? do

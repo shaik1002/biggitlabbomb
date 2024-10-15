@@ -6,7 +6,7 @@ import Vuex from 'vuex';
 import setWindowLocation from 'helpers/set_window_location_helper';
 import * as urlUtilities from '~/lib/utils/url_utility';
 import SortDropdown from '~/members/components/filter_sort/sort_dropdown.vue';
-import { MEMBERS_TAB_TYPES, FIELD_KEY_MAX_ROLE } from '~/members/constants';
+import { MEMBER_TYPES, FIELD_KEY_MAX_ROLE } from '~/members/constants';
 
 Vue.use(Vuex);
 
@@ -18,7 +18,7 @@ describe('SortDropdown', () => {
   const createComponent = (state) => {
     const store = new Vuex.Store({
       modules: {
-        [MEMBERS_TAB_TYPES.user]: {
+        [MEMBER_TYPES.user]: {
           namespaced: true,
           state: {
             tableSortableFields: ['account', 'granted', 'expires', 'maxRole', 'lastSignIn'],
@@ -38,7 +38,7 @@ describe('SortDropdown', () => {
     wrapper = mount(SortDropdown, {
       provide: {
         sourceId: 1,
-        namespace: MEMBERS_TAB_TYPES.user,
+        namespace: MEMBER_TYPES.user,
       },
       store,
     });
@@ -69,7 +69,7 @@ describe('SortDropdown', () => {
           value: 'granted',
         },
         {
-          text: 'Role',
+          text: 'Max role',
           value: 'maxRole',
         },
         {
@@ -102,7 +102,7 @@ describe('SortDropdown', () => {
 
       createComponent();
 
-      expect(findDropdownToggle().text()).toBe('Role');
+      expect(findDropdownToggle().text()).toBe('Max role');
     });
 
     describe('select new sort field', () => {

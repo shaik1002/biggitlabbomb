@@ -50,8 +50,8 @@ export default {
 
 <template>
   <div
-    class="runner-platforms-radio gl-border gl-rounded-base gl-px-5 gl-pb-5 gl-pt-6"
-    :class="{ 'gl-border-blue-500 gl-bg-blue-50': isChecked, 'gl-cursor-pointer': value }"
+    class="runner-platforms-radio gl-border gl-rounded-base gl-px-5 gl-pt-6 gl-pb-5"
+    :class="{ 'gl-bg-blue-50 gl-border-blue-500': isChecked, 'gl-cursor-pointer': value }"
     @click="onInput(value)"
   >
     <gl-form-radio
@@ -62,11 +62,11 @@ export default {
       @change="onChange($event)"
     >
       <img v-if="image" :src="image" :class="imgClass" aria-hidden="true" />
-      <span class="gl-font-bold"><slot></slot></span>
+      <span class="gl-font-weight-bold"><slot></slot></span>
     </gl-form-radio>
     <div v-else class="gl-mb-3">
       <img v-if="image" :src="image" :class="imgClass" aria-hidden="true" />
-      <span class="gl-font-bold"><slot></slot></span>
+      <span class="gl-font-weight-bold"><slot></slot></span>
     </div>
   </div>
 </template>

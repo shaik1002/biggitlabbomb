@@ -6,9 +6,14 @@ class Explore::GroupsController < Explore::ApplicationController
   feature_category :groups_and_projects
   urgency :low
 
-  MAX_QUERY_SIZE = 10_000
-
   def index
-    render_group_tree GroupsFinder.new(current_user).execute.limit(MAX_QUERY_SIZE)
+    # For gitlab.com, including internal visibility groups here causes
+    # a major performance issue: https://gitlab.com/gitlab-org/gitlab/-/issues/358944
+    #
+    # For self-hosted users, not including internal groups here causes
+    # a lack of visibility: https://gitlab.com/gitlab-org/gitlab/-/issues/389041
+    user = Gitlab.com? ? nil : current_user
+
+    render_group_tree GroupsFinder.new(user).execute
   end
 end

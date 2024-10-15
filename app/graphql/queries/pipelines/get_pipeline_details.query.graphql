@@ -25,6 +25,7 @@ fragment LinkedPipelineData on Pipeline {
   }
   status: detailedStatus {
     __typename
+    id
     group
     label
     icon
@@ -60,12 +61,10 @@ query getPipelineDetails($projectPath: ID!, $iid: ID!) {
       downstream {
         __typename
         nodes {
-          # eslint-disable-next-line @graphql-eslint/require-id-when-available -- for detailedStatus.id
           ...LinkedPipelineData
         }
       }
       upstream {
-        # eslint-disable-next-line @graphql-eslint/require-id-when-available -- for detailedStatus.id
         ...LinkedPipelineData
       }
       stages {
@@ -74,16 +73,15 @@ query getPipelineDetails($projectPath: ID!, $iid: ID!) {
           __typename
           id
           name
-          # eslint-disable-next-line @graphql-eslint/require-id-when-available
           status: detailedStatus {
             __typename
+            id
             action {
               __typename
               id
               icon
               path
               title
-              confirmationMessage
             }
           }
           groups {
@@ -91,9 +89,9 @@ query getPipelineDetails($projectPath: ID!, $iid: ID!) {
             nodes {
               __typename
               id
-              # eslint-disable-next-line @graphql-eslint/require-id-when-available
               status: detailedStatus {
                 __typename
+                id
                 label
                 group
                 icon
@@ -123,9 +121,9 @@ query getPipelineDetails($projectPath: ID!, $iid: ID!) {
                       ...CiNeeds
                     }
                   }
-                  # eslint-disable-next-line @graphql-eslint/require-id-when-available
                   status: detailedStatus {
                     __typename
+                    id
                     icon
                     tooltip
                     hasDetails
@@ -137,7 +135,6 @@ query getPipelineDetails($projectPath: ID!, $iid: ID!) {
                       __typename
                       id
                       buttonTitle
-                      confirmationMessage
                       icon
                       path
                       title

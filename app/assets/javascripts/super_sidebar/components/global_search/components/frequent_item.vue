@@ -27,16 +27,16 @@ export default {
       :project-id="item.id"
       :project-name="item.title"
       :project-avatar-url="item.avatar"
-      :size="32"
+      :size="24"
       aria-hidden="true"
     />
 
-    <div class="gl-grow gl-truncate">
+    <div class="gl-flex-grow-1 gl-text-truncate">
       {{ item.title }}
       <div
         v-if="item.subtitle"
         data-testid="subtitle"
-        class="gl-truncate gl-text-sm gl-text-gray-500"
+        class="gl-font-sm gl-text-gray-500 gl-text-truncate"
       >
         {{ item.subtitle }}
       </div>

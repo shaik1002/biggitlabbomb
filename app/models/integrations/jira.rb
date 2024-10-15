@@ -25,8 +25,7 @@ module Integrations
       server_info: "/rest/api/2/serverInfo",
       transition_issue: "/rest/api/2/issue/%s/transitions",
       issue_comments: "/rest/api/2/issue/%s/comment",
-      link_remote_issue: "/rest/api/2/issue/%s/remotelink",
-      client_info: "/rest/api/2/myself"
+      link_remote_issue: "/rest/api/2/issue/%s/remotelink"
     }.freeze
 
     SECTION_TYPE_JIRA_TRIGGER = 'jira_trigger'
@@ -150,7 +149,6 @@ module Integrations
     data_field :project_key
     data_field :vulnerabilities_enabled
     data_field :vulnerabilities_issuetype
-    data_field :customize_jira_issue_enabled
 
     # When these are false GitLab does not create cross reference
     # comments on Jira except when an issue gets transitioned.
@@ -224,7 +222,7 @@ module Integrations
 
     def self.help
       jira_doc_link_start = format('<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe,
-        url: Gitlab::Routing.url_helpers.help_page_path('integration/jira/index.md'))
+        url: Gitlab::Routing.url_helpers.help_page_path('integration/jira/index'))
       format(
         s_("JiraService|You must configure Jira before enabling this integration. " \
            "%{jira_doc_link_start}Learn more.%{link_end}"),
@@ -400,10 +398,10 @@ module Integrations
     end
 
     def test(_)
-      result = {}.merge!(server_info, client_info) if server_info && client_info
-
-      success = server_info.present? && client_info.present?
+      result = server_info
+      success = result.present?
       result = @error&.message unless success
+
       { success: success, result: result }
     end
 
@@ -452,11 +450,6 @@ module Integrations
     def branch_name(commit)
       commit.first_ref_by_oid(project.repository)
     end
-
-    def client_info
-      client_url.present? ? jira_request(API_ENDPOINTS[:client_info]) { client.User.myself.attrs } : nil
-    end
-    strong_memoize_attr :client_info
 
     def server_info
       client_url.present? ? jira_request(API_ENDPOINTS[:server_info]) { client.ServerInfo.all.attrs } : nil

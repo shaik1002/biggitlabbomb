@@ -2,7 +2,8 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::GithubImport::Importer::PullRequests::MergedByImporter, :clean_gitlab_redis_shared_state, feature_category: :importers do
+RSpec.describe Gitlab::GithubImport::Importer::PullRequests::MergedByImporter,
+  :clean_gitlab_redis_cache, feature_category: :importers do
   let_it_be(:merge_request) { create(:merged_merge_request) }
 
   let(:project) { merge_request.project }
@@ -43,7 +44,6 @@ RSpec.describe Gitlab::GithubImport::Importer::PullRequests::MergedByImporter, :
       expect(last_note.created_at).to eq(merged_at)
       expect(last_note.author).to eq(project.creator)
       expect(last_note.note).to eq("*Merged by: merger at #{merged_at}*")
-      expect(last_note.imported_from).to eq('github')
     end
   end
 

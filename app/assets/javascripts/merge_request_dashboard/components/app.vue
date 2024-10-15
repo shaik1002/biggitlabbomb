@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlIcon, GlAlert, GlTabs, GlTab, GlLink } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 import MergeRequestsQuery from './merge_requests_query.vue';
 import CollapsibleSection from './collapsible_section.vue';
 import MergeRequest from './merge_request.vue';
@@ -7,31 +7,14 @@ import MergeRequest from './merge_request.vue';
 export default {
   components: {
     GlButton,
-    GlIcon,
-    GlAlert,
-    GlTabs,
-    GlTab,
-    GlLink,
     MergeRequestsQuery,
     CollapsibleSection,
     MergeRequest,
   },
-  inject: ['mergeRequestsSearchDashboardPath'],
   props: {
-    tabs: {
+    lists: {
       type: Array,
       required: true,
-    },
-  },
-  data() {
-    return {
-      currentTab: this.$route.params.filter || '',
-    };
-  },
-  methods: {
-    clickTab({ key }) {
-      this.currentTab = key;
-      this.$router.push({ path: key || '/' });
     },
   },
 };
@@ -39,112 +22,31 @@ export default {
 
 <template>
   <div>
-    <gl-tabs>
-      <gl-tab
-        v-for="tab in tabs"
-        :key="tab.title"
-        :title="tab.title"
-        :active="tab.key === currentTab"
-        lazy
-        @click="clickTab(tab)"
-      >
-        <merge-requests-query
-          v-for="(list, i) in tab.lists"
-          :key="`list_${i}`"
-          :query="list.query"
-          :variables="list.variables"
-          :class="{ 'gl-mb-4': i !== tab.lists.length - 1 }"
-        >
-          <template #default="{ mergeRequests, count, hasNextPage, loadMore, loading, error }">
-            <collapsible-section :count="count" :loading="loading || error" :title="list.title">
-              <div>
-                <div class="gl-overflow-x-auto">
-                  <table class="gl-w-full">
-                    <colgroup>
-                      <col style="width: 60px" />
-                      <col style="width: 70px" />
-                      <col style="width: 47%; min-width: 200px" />
-                      <col style="width: 120px" />
-                      <col style="width: 120px" />
-                      <col style="min-width: 200px" />
-                    </colgroup>
-                    <thead class="gl-border-b gl-bg-gray-10">
-                      <tr>
-                        <th class="gl-pb-3 gl-pl-5 gl-pr-3" :aria-label="__('Pipeline status')">
-                          <gl-icon name="pipeline" />
-                        </th>
-                        <th class="gl-px-3 gl-pb-3" :aria-label="__('Approvals')">
-                          <gl-icon name="approval" />
-                        </th>
-                        <th class="gl-px-3 gl-pb-3 gl-text-sm gl-text-gray-700">
-                          {{ __('Title') }}
-                        </th>
-                        <th class="gl-px-3 gl-pb-3 gl-text-center gl-text-sm gl-text-gray-700">
-                          {{ __('Assignee') }}
-                        </th>
-                        <th class="gl-px-3 gl-pb-3 gl-text-center gl-text-sm gl-text-gray-700">
-                          {{ __('Reviewers') }}
-                        </th>
-                        <th
-                          class="gl-pb-3 gl-pl-3 gl-pr-5 gl-text-right gl-text-sm gl-text-gray-700"
-                        >
-                          {{ __('Activity') }}
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <template v-if="mergeRequests.length">
-                        <merge-request
-                          v-for="(mergeRequest, index) in mergeRequests"
-                          :key="mergeRequest.id"
-                          :merge-request="mergeRequest"
-                          :is-last="index === mergeRequests.length - 1"
-                        />
-                      </template>
-                      <tr v-else>
-                        <td colspan="6" :class="{ 'gl-py-6 gl-text-center': !error }">
-                          <template v-if="loading">
-                            {{ __('Loading...') }}
-                          </template>
-                          <template v-else-if="error">
-                            <gl-alert variant="danger" :dismissible="false">
-                              {{
-                                __('There was an error fetching merge requests. Please try again.')
-                              }}
-                            </gl-alert>
-                          </template>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              <template #pagination>
-                <div v-if="hasNextPage" class="gl-mt-4 gl-flex gl-justify-center">
-                  <gl-button :loading="loading" data-testid="load-more" @click="loadMore">{{
-                    __('Show more')
-                  }}</gl-button>
-                </div>
-              </template>
-            </collapsible-section>
-          </template>
-        </merge-requests-query>
-      </gl-tab>
-      <template #tabs-end>
-        <li class="nav-item">
-          <gl-link
-            :href="mergeRequestsSearchDashboardPath"
-            class="nav-link gl-tab-nav-item !gl-no-underline"
-          >
-            {{ __('Search') }}
-          </gl-link>
-        </li>
-      </template>
-    </gl-tabs>
-    <div class="gl-mt-6 gl-text-center">
-      <gl-link href="https://gitlab.com/gitlab-org/gitlab/-/issues/497573">
-        {{ __('Leave feedback') }}
-      </gl-link>
+    <div class="page-title-holder">
+      <h1 class="page-title gl-font-size-h-display">{{ __('Merge Requests') }}</h1>
     </div>
+    <merge-requests-query
+      v-for="(list, i) in lists"
+      :key="`list_${i}`"
+      :query="list.query"
+      :variables="list.variables"
+      :class="{ 'gl-mb-4': i !== lists.length - 1 }"
+    >
+      <template #default="{ mergeRequests, count, hasNextPage, loadMore, loadingMore }">
+        <collapsible-section :count="count" :title="list.title">
+          <merge-request
+            v-for="(mergeRequest, index) in mergeRequests"
+            :key="mergeRequest.id"
+            :merge-request="mergeRequest"
+            :class="{ 'gl-mb-3': index !== mergeRequests.length - 1 }"
+          />
+          <div v-if="hasNextPage" class="gl-display-flex gl-justify-content-center gl-mt-4">
+            <gl-button :loading="loadingMore" data-testid="load-more" @click="loadMore">{{
+              __('Show more')
+            }}</gl-button>
+          </div>
+        </collapsible-section>
+      </template>
+    </merge-requests-query>
   </div>
 </template>

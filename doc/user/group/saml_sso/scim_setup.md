@@ -195,7 +195,7 @@ Prerequisites:
 To configure Okta for SCIM:
 
 1. Sign in to Okta.
-1. In the upper-right corner, select **Admin**. The button is not visible from the **Admin** area.
+1. In the upper-right corner, select **Admin**. The button is not visible from the Admin Area.
 1. In the **Application** tab, select **Browse App Catalog**.
 1. Search for **GitLab**, find and select the **GitLab** application.
 1. On the GitLab application overview page, select **Add**.
@@ -226,11 +226,7 @@ During the synchronization process, all new users:
 The following diagram describes what happens when you add users to your SCIM app:
 
 ```mermaid
-%%{init: { "fontFamily": "GitLab Sans" }}%%
 graph TD
-accTitle: Adding users to your SCIM application
-accDescr: How GitLab determines whether or not to associate a SCIM identity with a user.
-
   A[Add User to SCIM app] -->|IdP sends user info to GitLab| B(GitLab: Does the email exist?)
   B -->|No| C[GitLab creates user with SCIM identity]
   B -->|Yes| D(GitLab: Is the user part of the group?)
@@ -289,11 +285,7 @@ NOTE:
 Deprovisioning does not delete the GitLab user account.
 
 ```mermaid
-%%{init: { "fontFamily": "GitLab Sans" }}%%
 graph TD
-accTitle: Deprovisioning users
-accDescr: How removing users from your SCIM app removes them from GitLab groups.
-
   A[Remove User from SCIM app] -->|IdP sends request to GitLab| B(GitLab: Is the user part of the group?)
   B -->|No| C[Nothing to do]
   B -->|Yes| D[GitLab removes user from GitLab group]

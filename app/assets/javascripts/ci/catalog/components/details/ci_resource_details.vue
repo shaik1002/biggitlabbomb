@@ -11,7 +11,6 @@ export default {
     GlTab,
     GlTabs,
   },
-  componentStyles: ['gl-mt-3'],
   props: {
     resourcePath: {
       type: String,
@@ -33,15 +32,11 @@ export default {
 
 <template>
   <gl-tabs>
-    <gl-tab :title="$options.i18n.tabs.components" lazy>
-      <ci-resource-components :class="$options.componentStyles" :resource-path="resourcePath" />
-    </gl-tab>
     <gl-tab :title="$options.i18n.tabs.readme" lazy>
-      <ci-resource-readme
-        :class="$options.componentStyles"
-        :resource-path="resourcePath"
-        :version="version"
-      />
+      <ci-resource-readme :resource-path="resourcePath" :version="version" />
+    </gl-tab>
+    <gl-tab :title="$options.i18n.tabs.components" lazy>
+      <ci-resource-components :resource-path="resourcePath" />
     </gl-tab>
   </gl-tabs>
 </template>

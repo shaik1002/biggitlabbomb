@@ -98,16 +98,9 @@ module Gitlab
           Gitlab::Metrics.counter(name, comment)
         end
 
-        def self.job_token_inbound_access_counter
-          name = :gitlab_ci_job_token_inbound_access
-          comment = 'Count of inbound accesses via CI job token'
-
-          Gitlab::Metrics.counter(name, comment)
-        end
-
         def ci_minutes_exceeded_builds_counter
           name = :ci_minutes_exceeded_builds_counter
-          comment = 'Count of builds dropped due to compute minutes exceeded'
+          comment = 'Count of builds dropped due to CI minutes exceeded'
 
           Gitlab::Metrics.counter(name, comment)
         end

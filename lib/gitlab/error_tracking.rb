@@ -42,7 +42,7 @@ module Gitlab
           config.metrics.enable_code_locations = false
           config.propagate_traces = false
           config.trace_propagation_targets = []
-          config.enabled_patches = [:sidekiq_cron]
+          config.enabled_patches = []
           config.enable_tracing = false
 
           yield config if block_given?
@@ -82,8 +82,7 @@ module Gitlab
         raise exception if should_raise_for_dev?
       end
 
-      # This should be used when you want to track the exception and not raise
-      # with the default trackers (Sentry and Logger).
+      # This should be used when you only want to track the exception.
       #
       # If the exception implements the method `sentry_extra_data` and that method
       # returns a Hash, then the return value of that method will be merged into
@@ -94,7 +93,7 @@ module Gitlab
       end
 
       # This should be used when you only want to log the exception,
-      # but not send it to Sentry or raise.
+      # but not send it to Sentry.
       #
       # If the exception implements the method `sentry_extra_data` and that method
       # returns a Hash, then the return value of that method will be merged into

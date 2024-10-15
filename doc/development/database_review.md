@@ -213,7 +213,7 @@ Include in the MR description:
 - Add foreign keys to any columns pointing to data in other tables, including [an index](migration_style_guide.md#adding-foreign-key-constraints).
 - Add indexes for fields that are used in statements such as `WHERE`, `ORDER BY`, `GROUP BY`, and `JOIN`s.
 - New tables must be seeded by a file in `db/fixtures/development/`. These fixtures are also used
-  to ensure that [upgrades complete successfully](database/dbmigrate_multi_version_upgrade_job.md),
+  to ensure that [upgrades complete successfully](database/dbmigrate:multi-version-upgrade-job.md),
   so it's important that new tables are always populated.
 - New tables and columns are not necessarily risky, but over time some access patterns are inherently
   difficult to scale. To identify these risky patterns in advance, we must document expectations for
@@ -236,10 +236,10 @@ Using `update`, `upsert`, `delete`, `update_all`, `upsert_all`, `delete_all` or 
 ActiveRecord methods requires extra care because they modify data and can perform poorly, or they
 can destroy data if improperly scoped. These methods are also
 [incompatible with Common Table Expression (CTE) statements](sql.md#when-to-use-common-table-expressions).
-Danger will comment on a merge request diff when these methods are used.
+Danger will comment on a Merge Request Diff when these methods are used.
 
 Follow documentation for [preparation when adding or modifying queries](#preparation-when-adding-or-modifying-queries)
-to add the raw SQL query and query plan to the merge request description, and request a database review.
+to add the raw SQL query and query plan to the Merge Request description, and request a database review.
 
 ### How to review for database
 
@@ -297,9 +297,3 @@ to add the raw SQL query and query plan to the merge request description, and re
     to queries (changing the query, schema or adding indexes and similar)
   - General guideline is for queries to come in below [100ms execution time](database/query_performance.md#timing-guidelines-for-queries)
   - Avoid N+1 problems and minimize the [query count](merge_request_concepts/performance.md#query-counts).
-
-### Useful tips
-
-- If you often find yourself applying and reverting migrations from a specific branch, you might want to try out
-[`scripts/database/migrate.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/scripts/database/migrate.rb)
-to make this process more efficient.

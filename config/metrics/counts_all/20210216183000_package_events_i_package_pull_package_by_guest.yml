@@ -3,15 +3,19 @@ data_category: operational
 key_path: counts.package_events_i_package_pull_package_by_guest
 description: A count of packages that have been downloaded from the package registry
   by a guest
+product_section: ops
+product_stage: package
 product_group: package_registry
 value_type: number
 status: active
 time_frame: all
-data_source: internal_events
+data_source: redis
+instrumentation_class: RedisMetric
+options:
+  prefix: package_events
+  event: i_package_pull_package_by_guest
 events:
-  - name: pull_package_from_registry
-    filter:
-      property: guest
+  - name: package_pulled_by_guest
 distribution:
 - ee
 - ce
@@ -22,4 +26,3 @@ tier:
 performance_indicator_type:
 - customer_health_score
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

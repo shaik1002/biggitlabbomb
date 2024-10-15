@@ -28,7 +28,7 @@ class RegistrationsController < Devise::RegistrationsController
 
   feature_category :instance_resiliency
 
-  helper_method :arkose_labs_enabled?, :preregistration_tracking_label, :onboarding_status
+  helper_method :arkose_labs_enabled?, :registration_path_params, :registration_tracking_label
 
   def new
     @resource = build_resource
@@ -42,9 +42,10 @@ class RegistrationsController < Devise::RegistrationsController
       if new_user.persisted?
         after_successful_create_hook(new_user)
       else
-        track_error(new_user)
+        track_weak_password_error(new_user, self.class.name, 'create')
       end
     end
+
     # Devise sets a flash message on both successful & failed signups,
     # but we only want to show a message if the resource is blocked by a pending approval.
     flash[:notice] = nil unless allow_flash_content?(resource)
@@ -100,13 +101,8 @@ class RegistrationsController < Devise::RegistrationsController
   def after_successful_create_hook(user)
     accept_pending_invitations
     persist_accepted_terms_if_required(user)
-    execute_system_hooks(user)
     notify_new_instance_access_request(user)
     track_successful_user_creation(user)
-  end
-
-  def execute_system_hooks(user)
-    SystemHooksService.new.execute_hooks_for(user, :create)
   end
 
   def notify_new_instance_access_request(user)
@@ -151,16 +147,19 @@ class RegistrationsController < Devise::RegistrationsController
   end
   strong_memoize_attr :onboarding_status
 
-  # rubocop:disable Gitlab/NoCodeCoverageComment -- Fully tested in EE and tested in Foss through feature specs in spec/features/invites_spec.rb
-  # :nocov:
   def onboarding_status_params
-    # Onboarding::Status does not use any params in CE, we'll override in EE
-    {}
+    # We'll override this in the trial registrations controller so we can add on trial param
+    # and make it so we can figure out the registration_type with the same code.
+    params.to_unsafe_h.deep_symbolize_keys
   end
-  # rubocop:enable Gitlab/NoCodeCoverageComment
 
   def allow_flash_content?(user)
     user.blocked_pending_approval? || onboarding_status.single_invite?
+  end
+
+  # overridden in EE
+  def registration_path_params
+    {}
   end
 
   def track_successful_user_creation(user)
@@ -236,8 +235,7 @@ class RegistrationsController < Devise::RegistrationsController
   def resource
     @resource ||= Users::RegistrationsBuildService
                     .new(current_user, sign_up_params.merge({ skip_confirmation: skip_confirmation?,
-                                                              preferred_language: preferred_language,
-                                                              organization_id: Current.organization_id }))
+                                                              preferred_language: preferred_language }))
                     .execute
   end
 
@@ -297,7 +295,7 @@ class RegistrationsController < Devise::RegistrationsController
 
     return unless member
 
-    Gitlab::Tracking.event(self.class.name, 'accepted', label: 'invite_email', user: resource)
+    Gitlab::Tracking.event(self.class.name, 'accepted', label: 'invite_email', property: member.id.to_s, user: resource)
   end
 
   def context_user
@@ -317,13 +315,8 @@ class RegistrationsController < Devise::RegistrationsController
     false
   end
 
-  def preregistration_tracking_label
+  def registration_tracking_label
     # overridden by EE module
-  end
-
-  # overridden by EE module
-  def track_error(new_user)
-    track_weak_password_error(new_user, self.class.name, 'create')
   end
 end
 

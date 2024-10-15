@@ -16,14 +16,13 @@ import {
   DELETE_IMAGE_SUCCESS_MESSAGE,
   DELETE_IMAGE_ERROR_MESSAGE,
   GRAPHQL_PAGE_SIZE,
-  GRAPHQL_PAGE_SIZE_METADATA_ENABLED,
   SORT_FIELDS,
   SETTINGS_TEXT,
 } from '~/packages_and_registries/container_registry/explorer/constants';
 import deleteContainerRepositoryMutation from '~/packages_and_registries/container_registry/explorer/graphql/mutations/delete_container_repository.mutation.graphql';
 import getContainerRepositoriesDetails from '~/packages_and_registries/container_registry/explorer/graphql/queries/get_container_repositories_details.query.graphql';
 import component from '~/packages_and_registries/container_registry/explorer/pages/list.vue';
-import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
+import Tracking from '~/tracking';
 import PersistedPagination from '~/packages_and_registries/shared/components/persisted_pagination.vue';
 import PersistedSearch from '~/packages_and_registries/shared/components/persisted_search.vue';
 import MetadataDatabaseAlert from '~/packages_and_registries/shared/components/container_registry_metadata_database_alert.vue';
@@ -104,8 +103,6 @@ describe('List Page', () => {
         RegistryHeader,
         TitleArea,
         DeleteImage,
-        MetadataContainerScanning: true,
-        ContainerScanningCounts: true,
       },
       mocks: {
         $toast,
@@ -648,63 +645,6 @@ describe('List Page', () => {
           }),
         );
       });
-
-      describe('with metadata database enabled', () => {
-        it.each`
-          event     | expected
-          ${'prev'} | ${{ before: pageInfo.startCursor, first: null, last: GRAPHQL_PAGE_SIZE_METADATA_ENABLED }}
-          ${'next'} | ${{ after: pageInfo.endCursor, first: GRAPHQL_PAGE_SIZE_METADATA_ENABLED }}
-        `('$event event triggers correct page request', async ({ event, expected }) => {
-          const resolver = jest.fn().mockResolvedValue(graphQLImageListMock);
-          const detailsResolver = jest
-            .fn()
-            .mockResolvedValue(graphQLProjectImageRepositoriesDetailsMock);
-          const config = {
-            isMetadataDatabaseEnabled: true,
-            isGroupPage: false,
-          };
-
-          mountComponent({ resolver, detailsResolver, config });
-          fireFirstSortUpdate();
-          await waitForApolloRequestRender();
-
-          findPersistedPagination().vm.$emit(event);
-          await waitForPromises();
-
-          expect(resolver).toHaveBeenCalledWith(expect.objectContaining(expected));
-          expect(detailsResolver).toHaveBeenCalledWith(expect.objectContaining(expected));
-        });
-
-        it.each`
-          cursor                              | expected
-          ${{ before: pageInfo.startCursor }} | ${{ sort: 'UPDATED_DESC', before: pageInfo.startCursor, first: null, last: GRAPHQL_PAGE_SIZE_METADATA_ENABLED }}
-          ${{ after: pageInfo.endCursor }}    | ${{ sort: 'UPDATED_DESC', after: pageInfo.endCursor, first: GRAPHQL_PAGE_SIZE_METADATA_ENABLED }}
-        `(
-          'calls resolver correctly when persisted search returns $cursor',
-          async ({ cursor, expected }) => {
-            const resolver = jest.fn().mockResolvedValue(graphQLImageListMock);
-            const detailsResolver = jest
-              .fn()
-              .mockResolvedValue(graphQLProjectImageRepositoriesDetailsMock);
-            const config = {
-              isMetadataDatabaseEnabled: true,
-              isGroupPage: false,
-            };
-
-            mountComponent({ resolver, detailsResolver, config });
-
-            findPersistedSearch().vm.$emit('update', {
-              sort: 'UPDATED_DESC',
-              filters: [],
-              pageInfo: cursor,
-            });
-            await waitForApolloRequestRender();
-
-            expect(resolver).toHaveBeenCalledWith(expect.objectContaining(expected));
-            expect(detailsResolver).toHaveBeenCalledWith(expect.objectContaining(expected));
-          },
-        );
-      });
     });
   });
 
@@ -731,26 +671,22 @@ describe('List Page', () => {
   });
 
   describe('tracking', () => {
-    let trackingSpy;
-
     beforeEach(() => {
-      trackingSpy = mockTracking(undefined, undefined, jest.spyOn);
       mountComponent();
       fireFirstSortUpdate();
     });
 
-    afterEach(() => {
-      unmockTracking();
-    });
-
     const testTrackingCall = (action) => {
-      expect(trackingSpy).toHaveBeenCalledWith(undefined, action, {
+      expect(Tracking.event).toHaveBeenCalledWith(undefined, action, {
         label: 'registry_repository_delete',
       });
     };
 
-    it('send an event when delete button is clicked', async () => {
-      await waitForPromises();
+    beforeEach(() => {
+      jest.spyOn(Tracking, 'event');
+    });
+
+    it('send an event when delete button is clicked', () => {
       findImageList().vm.$emit('delete', {});
 
       testTrackingCall('click_button');

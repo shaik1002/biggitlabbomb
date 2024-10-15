@@ -156,7 +156,7 @@ export function getFormData(params) {
     width: params.width,
     height: params.height,
     line_range: lineRange,
-    ignore_whitespace_change: diffFile.whitespaceOnlyChange ? false : !showWhitespace,
+    ignore_whitespace_change: !showWhitespace,
   });
 
   const postData = {
@@ -215,7 +215,6 @@ export function removeMatchLine(diffFile, lineNumbers, bottom) {
   }
 }
 
-// eslint-disable-next-line max-params
 export function addLineReferences(lines, lineNumbers, bottom, isExpandDown, nextLineNumbers) {
   const { oldLineNumber, newLineNumber } = lineNumbers;
   const lineCount = lines.length;
@@ -391,7 +390,6 @@ function finalizeDiffFile(file) {
     isLoadingFullFile: false,
     discussions: [],
     renderingLines: false,
-    whitespaceOnlyChange: file.viewer?.whitespace_only,
   });
 
   return file;
@@ -554,6 +552,21 @@ function getLinesFromFileByLineCode(file, lineCode) {
 
 export const updateLineInFile = (selectedFile, lineCode, updateFn) => {
   getLinesFromFileByLineCode(selectedFile, lineCode).forEach(updateFn);
+};
+
+export const allDiscussionWrappersExpanded = (diff) => {
+  let discussionsExpanded = true;
+  const changeExpandedResult = (line) => {
+    if (line && line.discussions.length) {
+      discussionsExpanded = discussionsExpanded && line.discussionsExpanded;
+    }
+  };
+
+  diff[INLINE_DIFF_LINES_KEY].forEach((line) => {
+    changeExpandedResult(line);
+  });
+
+  return discussionsExpanded;
 };
 
 export function isUrlHashNoteLink(urlHash = '') {

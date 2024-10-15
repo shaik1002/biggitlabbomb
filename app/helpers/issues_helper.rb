@@ -21,7 +21,7 @@ module IssuesHelper
   end
 
   def confidential_icon(issue)
-    sprite_icon('eye-slash', css_class: 'gl-align-text-bottom') if issue.confidential?
+    sprite_icon('eye-slash', css_class: 'gl-vertical-align-text-bottom') if issue.confidential?
   end
 
   def issue_hidden?(issue)
@@ -135,16 +135,17 @@ module IssuesHelper
     {
       autocomplete_award_emojis_path: autocomplete_award_emojis_path,
       calendar_path: url_for(safe_params.merge(calendar_url_options)),
+      empty_state_svg_path: image_path('illustrations/empty-state/empty-service-desk-md.svg'),
       full_path: namespace.full_path,
-      has_issue_date_filter_feature: has_issue_date_filter_feature?(namespace, current_user).to_s,
       initial_sort: current_user&.user_preference&.issues_sort,
       is_issue_repositioning_disabled: issue_repositioning_disabled?.to_s,
       is_public_visibility_restricted:
         Gitlab::CurrentSettings.restricted_visibility_levels&.include?(Gitlab::VisibilityLevel::PUBLIC).to_s,
       is_signed_in: current_user.present?.to_s,
+      jira_integration_path: help_page_url('integration/jira/issues', anchor: 'view-jira-issues'),
       rss_path: url_for(safe_params.merge(rss_url_options)),
       sign_in_path: new_user_session_path,
-      wi: work_items_show_data(namespace, current_user)
+      has_issue_date_filter_feature: has_issue_date_filter_feature?(namespace, current_user).to_s
     }
   end
 
@@ -167,20 +168,22 @@ module IssuesHelper
       can_read_crm_contact: can?(current_user, :read_crm_contact, project.group).to_s,
       can_read_crm_organization: can?(current_user, :read_crm_organization, project.group).to_s,
       email: current_user&.notification_email_or_default,
-      emails_help_page_path: help_page_path('development/emails.md', anchor: 'email-namespace'),
+      emails_help_page_path: help_page_path('development/emails', anchor: 'email-namespace'),
       export_csv_path: export_csv_project_issues_path(project),
       has_any_issues: project_issues(project).exists?.to_s,
       import_csv_issues_path: import_csv_namespace_project_issues_path,
       initial_email: project.new_issuable_address(current_user, 'issue'),
       is_project: true.to_s,
-      markdown_help_path: help_page_path('user/markdown.md'),
+      markdown_help_path: help_page_path('user/markdown'),
       max_attachment_size: number_to_human_size(Gitlab::CurrentSettings.max_attachment_size.megabytes),
       new_issue_path: new_project_issue_path(project),
       project_import_jira_path: project_import_jira_path(project),
-      quick_actions_help_path: help_page_path('user/project/quick_actions.md'),
+      quick_actions_help_path: help_page_path('user/project/quick_actions'),
       releases_path: project_releases_path(project, format: :json),
       reset_path: new_issuable_address_project_path(project, issuable_type: 'issue'),
-      show_new_issue_link: show_new_issue_link?(project).to_s
+      show_new_issue_link: show_new_issue_link?(project).to_s,
+      report_abuse_path: add_category_abuse_reports_path,
+      register_path: new_user_registration_path(redirect_to_referer: 'yes')
     )
   end
 
@@ -189,10 +192,10 @@ module IssuesHelper
       can_create_projects: can?(current_user, :create_projects, group).to_s,
       can_read_crm_contact: can?(current_user, :read_crm_contact, group).to_s,
       can_read_crm_organization: can?(current_user, :read_crm_organization, group).to_s,
-      group_id: group.id,
       has_any_issues: @has_issues.to_s,
       has_any_projects: @has_projects.to_s,
-      new_project_path: new_project_path(namespace_id: group.id)
+      new_project_path: new_project_path(namespace_id: group.id),
+      group_id: group.id
     )
   end
 

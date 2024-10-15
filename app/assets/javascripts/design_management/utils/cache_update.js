@@ -52,7 +52,6 @@ const addNewVersionToStore = (store, query, version) => {
   });
 };
 
-// eslint-disable-next-line max-params
 const addImageDiffNoteToStore = (store, createImageDiffNote, query, variables) => {
   const sourceData = store.readQuery({
     query,
@@ -100,7 +99,6 @@ const addImageDiffNoteToStore = (store, createImageDiffNote, query, variables) =
   });
 };
 
-// eslint-disable-next-line max-params
 const updateImageDiffNoteInStore = (store, repositionImageDiffNote, query, variables) => {
   const sourceData = store.readQuery({
     query,
@@ -191,7 +189,6 @@ const moveDesignInStore = (store, designManagementMove, query) => {
   });
 };
 
-// eslint-disable-next-line max-params
 export const addPendingTodoToStore = (store, pendingTodo, query, queryVariables) => {
   const sourceData = store.readQuery({
     query,
@@ -216,7 +213,6 @@ export const addPendingTodoToStore = (store, pendingTodo, query, queryVariables)
   store.writeQuery({ query, variables: queryVariables, data });
 };
 
-// eslint-disable-next-line max-params
 export const deletePendingTodoFromStore = (store, todoMarkDone, query, queryVariables) => {
   const sourceData = store.readQuery({
     query,
@@ -251,7 +247,6 @@ export const hasErrors = ({ errors = [] }) => errors?.length;
  * @param {Object} query
  * @param {Array} designs
  */
-// eslint-disable-next-line max-params
 export const updateStoreAfterDesignsDelete = (store, data, query, designs) => {
   if (hasErrors(data)) {
     onError(data, designDeletionError(designs.length));
@@ -261,7 +256,6 @@ export const updateStoreAfterDesignsDelete = (store, data, query, designs) => {
   }
 };
 
-// eslint-disable-next-line max-params
 export const updateStoreAfterAddImageDiffNote = (store, data, query, queryVariables) => {
   if (hasErrors(data)) {
     onError(data, ADD_IMAGE_DIFF_NOTE_ERROR);
@@ -270,7 +264,6 @@ export const updateStoreAfterAddImageDiffNote = (store, data, query, queryVariab
   }
 };
 
-// eslint-disable-next-line max-params
 export const updateStoreAfterRepositionImageDiffNote = (store, data, query, queryVariables) => {
   if (hasErrors(data)) {
     onError(data, UPDATE_IMAGE_DIFF_NOTE_ERROR);
@@ -295,7 +288,6 @@ export const updateDesignsOnStoreAfterReorder = (store, data, query) => {
   }
 };
 
-// eslint-disable-next-line max-params
 export const updateStoreAfterDeleteDesignTodo = (store, data, query, queryVariables) => {
   if (hasErrors(data)) {
     onError(data, DELETE_DESIGN_TODO_ERROR);

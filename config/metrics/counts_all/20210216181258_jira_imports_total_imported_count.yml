@@ -2,6 +2,8 @@
 data_category: optional
 key_path: counts.jira_imports_total_imported_count
 description: Count of Jira imports completed
+product_section: dev
+product_stage: manage
 product_group: import_and_integrate
 value_type: number
 status: active
@@ -16,4 +18,3 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

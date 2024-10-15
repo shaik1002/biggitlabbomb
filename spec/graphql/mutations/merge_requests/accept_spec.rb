@@ -2,16 +2,21 @@
 
 require 'spec_helper'
 
-RSpec.describe Mutations::MergeRequests::Accept, feature_category: :api do
+RSpec.describe Mutations::MergeRequests::Accept do
   include GraphqlHelpers
   include AfterNextHelpers
 
-  let_it_be(:user) { create(:user) }
-  let(:project) { create(:project, :public, :repository) }
-  let(:query) { GraphQL::Query.new(empty_schema, document: nil, context: {}, variables: {}) }
-  let(:context) { GraphQL::Query::Context.new(query: query, values: { current_user: user }) }
-
   subject(:mutation) { described_class.new(context: context, object: nil, field: nil) }
+
+  let_it_be(:user) { create(:user) }
+
+  let(:project) { create(:project, :public, :repository) }
+  let(:context) do
+    GraphQL::Query::Context.new(
+      query: query_double(schema: GitlabSchema),
+      values: { current_user: user }
+    )
+  end
 
   before do
     project.repository.expire_all_method_caches
@@ -85,31 +90,14 @@ RSpec.describe Mutations::MergeRequests::Accept, feature_category: :api do
 
     context 'when MR has head pipeline' do
       let(:merge_request) { create(:merge_request, :with_head_pipeline, source_project: project) }
-      let(:strategy) { ::Types::MergeStrategyEnum.values['MERGE_WHEN_CHECKS_PASS'].value }
+      let(:strategy) { ::Types::MergeStrategyEnum.values['MERGE_WHEN_PIPELINE_SUCCEEDS'].value }
       let(:additional_args) { { auto_merge_strategy: strategy } }
 
-      it "can use the MERGE_WHEN_CHECKS_PASS strategy" do
+      it "can use the MERGE_WHEN_PIPELINE_SUCCEEDS strategy" do
         expect_next_found_instance_of(MergeRequest) do |instance|
           expect(instance).not_to receive(:merge_async)
         end
         expect(result).to include(errors: be_empty, merge_request: be_auto_merge_enabled)
-      end
-
-      context 'when merge_when_checks_pass is off' do
-        before do
-          stub_feature_flags(merge_when_checks_pass: false)
-        end
-
-        let(:merge_request) { create(:merge_request, :with_head_pipeline, source_project: project) }
-        let(:strategy) { ::Types::MergeStrategyEnum.values['MERGE_WHEN_PIPELINE_SUCCEEDS'].value }
-        let(:additional_args) { { auto_merge_strategy: strategy } }
-
-        it "can use the MERGE_WHEN_PIPELINE_SUCCEEDS strategy" do
-          expect_next_found_instance_of(MergeRequest) do |instance|
-            expect(instance).not_to receive(:merge_async)
-          end
-          expect(result).to include(errors: be_empty, merge_request: be_auto_merge_enabled)
-        end
       end
     end
   end

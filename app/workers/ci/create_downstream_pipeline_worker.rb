@@ -10,8 +10,6 @@ module Ci
     urgency :high
 
     def perform(bridge_id)
-      Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/-/issues/464668')
-
       ::Ci::Bridge.find_by_id(bridge_id).try do |bridge|
         result = ::Ci::CreateDownstreamPipelineService
           .new(bridge.project, bridge.user)

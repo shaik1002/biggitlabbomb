@@ -5,7 +5,7 @@
         = s_('AdminUsers|Access')
 
   .form-group.gl-form-group{ role: 'group' }
-    = f.label :projects_limit, class: 'gl-block col-form-label'
+    = f.label :projects_limit, class: 'gl-display-block col-form-label'
     = f.number_field :projects_limit, min: 0, max: Gitlab::Database::MAX_INT_VALUE, class: 'form-control gl-form-input gl-form-input-sm'
 
   .form-group.gl-form-group{ role: 'group' }
@@ -37,7 +37,7 @@
       s_('AdminUsers|External'),
       help_text: s_('AdminUsers|External users cannot see internal or private projects unless access is explicitly granted. Also, external users cannot create projects, groups, or personal snippets.')
     .hidden{ data: user_internal_regex_data }
-    .gl-flex.gl-items-baseline
+    .gl-display-flex.gl-align-items-baseline
       %row.hidden#warning_external_automatically_set
         = gl_badge_tag s_('AdminUsers|Automatically marked as default internal user'), variant: :warning
 
@@ -46,5 +46,5 @@
     = f.fields_for :credit_card_validation do |ff|
       = ff.gitlab_ui_checkbox_component :credit_card_validated_at,
         s_('AdminUsers|Validate user account'),
-        help_text: s_('AdminUsers|A user can validate themselves by inputting a credit/debit card, or an admin can manually validate a user. Validated users can use free compute minutes on instance runners.'),
+        help_text: s_('AdminUsers|A user can validate themselves by inputting a credit/debit card, or an admin can manually validate a user. Validated users can use free CI minutes on instance runners.'),
         checkbox_options: { checked: @user.credit_card_validated_at.present? }

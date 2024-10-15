@@ -2,6 +2,7 @@ import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import { GlSprintf, GlSkeletonLoader } from '@gitlab/ui';
 
+import { s__ } from '~/locale';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
@@ -130,7 +131,7 @@ describe('RegistrationInstructions', () => {
     it('when runner is loading, shows default heading', () => {
       createComponent();
 
-      expect(findHeading().text()).toBe('Register runner');
+      expect(findHeading().text()).toBe(s__('Runners|Register runner'));
     });
   });
 
@@ -350,6 +351,9 @@ describe('RegistrationInstructions', () => {
           platform: GOOGLE_CLOUD_PLATFORM,
           groupPath: 'mock/group/path',
         },
+        provide: {
+          glFeatures: { googleCloudSupportFeatureFlag: true },
+        },
       });
 
       await waitForPromises();
@@ -367,6 +371,9 @@ describe('RegistrationInstructions', () => {
           platform: GOOGLE_CLOUD_PLATFORM,
           projectPath: 'mock/project/path',
         },
+        provide: {
+          glFeatures: { googleCloudSupportFeatureFlag: true },
+        },
       });
 
       await waitForPromises();
@@ -378,11 +385,30 @@ describe('RegistrationInstructions', () => {
       });
     });
 
+    it('does not show google instructions when disabled', async () => {
+      createComponent({
+        props: {
+          platform: GOOGLE_CLOUD_PLATFORM,
+          projectPath: 'mock/project/path',
+        },
+        provide: {
+          glFeatures: { googleCloudSupportFeatureFlag: false },
+        },
+      });
+
+      await waitForPromises();
+
+      expect(findGoogleCloudRegistrationInstructions().exists()).toBe(false);
+    });
+
     it('does not show google instructions when on another platform', async () => {
       createComponent({
         props: {
           platform: WINDOWS_PLATFORM,
           projectPath: 'mock/project/path',
+        },
+        provide: {
+          glFeatures: { googleCloudSupportFeatureFlag: true },
         },
       });
 

@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: Any user with at least the Maintainer role can merge updates to this content. For details, see https://docs.gitlab.com/ee/development/development_processes.html#development-guidelines-review.
 description: "GitLab's development guidelines for Integrations"
@@ -224,7 +224,6 @@ This method should return an array of hashes for each field, where the keys can 
 | `placeholder:` | string  | false    |                              | A placeholder for the form field. |
 | `help:`        | string  | false    |                              | A help text that displays below the form field. |
 | `api_only:`    | boolean | false    | `false`                      | Specify if the field should only be available through the API, and excluded from the frontend form. |
-| `description`  | string  | false   |                               | Description of the API field. |
 | `if:`          | boolean or lambda | false | `true`                | Specify if the field should be available. The value can be a boolean or a lambda. |
 
 ### Additional keys for `type: :checkbox`
@@ -293,7 +292,7 @@ If the existing sections do not meet your requirements for UI customization, you
    module Integrations
      class FooBar < Integration
        SECTION_TYPE_SUPER = :my_custom_section
-
+ 
        def sections
          [
            {
@@ -354,12 +353,7 @@ end
 To expose the integration in the [REST API](../../api/integrations.md):
 
 1. Add the integration's class (`::Integrations::FooBar`) to `API::Helpers::IntegrationsHelpers.integration_classes`.
-1. Add the integration's API arguments to `API::Helpers::IntegrationsHelpers.integrations`, for example:
-
-   ```ruby
-   'foo-bar' => ::Integrations::FooBar.api_arguments
-   ```
-
+1. Add all properties that should be exposed to `API::Helpers::IntegrationsHelpers.integrations`.
 1. Update the reference documentation in `doc/api/integrations.md`, add a new section for your integration, and document all properties.
 
 You can also refer to our [REST API style guide](../api_styleguide.md).
@@ -375,35 +369,27 @@ Sensitive fields are not exposed over the API. Sensitive fields are those fields
 
 ## Availability of integrations
 
-By default, integrations can apply to a specific project or group, or
-to an entire instance.
+By default, integrations are available on the project, group, and instance level.
 Most integrations only act in a project context, but can be still configured
-for the group and instance.
+from the group and instance levels.
 
-For some integrations it can make sense to only make it available on certain levels (project, group, or instance).
-To do that, the integration must be removed from `Integration::INTEGRATION_NAMES` and instead added to:
-
-- `Integration::PROJECT_LEVEL_ONLY_INTEGRATION_NAMES` to only allow enabling on the project level.
-- `Integration::INSTANCE_LEVEL_ONLY_INTEGRATION_NAMES` to only allow enabling on the instance level.
-- `Integration::PROJECT_AND_GROUP_LEVEL_ONLY_INTEGRATION_NAMES` to prevent enabling on the instance level.
+For some integrations it can make sense to only make it available on the project level.
+To do that, the integration must be removed from `Integration::INTEGRATION_NAMES` and
+added to `Integration::PROJECT_SPECIFIC_INTEGRATION_NAMES` instead.
 
 When developing a new integration, we also recommend you gate the availability behind a
 [feature flag](../feature_flags/index.md) in `Integration.available_integration_names`.
 
 ## Documentation
 
-Add documentation for the integration:
-
-- Add a page in `doc/user/project/integrations`.
-- Link it from the [Integrations overview](../../user/project/integrations/index.md).
-- After the documentation has merged, [add an entry](../../development/documentation/site_architecture/global_nav.md#add-a-navigation-entry)
-  to the documentation navigation under the [Integrations category title](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/24c8ab629383b47a6d6351a9d48325cb43ed5287/content/_data/navigation.yaml?page=3#L2822).
-
-You can also refer to our general [documentation guidelines](../documentation/index.md).
-
 You can provide help text in the integration form, including links to off-site documentation,
 as described above in [Customize the frontend form](#customize-the-frontend-form). Refer to
 our [usability guidelines](https://design.gitlab.com/usability/contextual-help) for help text.
+
+For more detailed documentation, provide a page in `doc/user/project/integrations`,
+and link it from the [Integrations overview](../../user/project/integrations/index.md).
+
+You can also refer to our general [documentation guidelines](../documentation/index.md).
 
 ## Testing
 
@@ -437,7 +423,7 @@ You must announce any deprecation [no later than the third milestone preceding i
 To deprecate an integration:
 
 - [Add a deprecation entry](../../development/deprecation_guidelines/index.md#update-the-deprecations-and-removals-documentation).
-- [Mark the integration documentation as deprecated](../../development/documentation/styleguide/deprecations_and_removals.md).
+- [Mark the integration documentation as deprecated](../../development/documentation/versions.md#deprecate-a-page-or-topic).
 - Optional. To prevent any new project-level records from
   being created, add the integration to `Project#disabled_integrations` (see [example merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/114835)).
 
@@ -450,7 +436,7 @@ In the major milestone of intended removal (M.0), disable the integration and de
 - Remove the integration from `Integration::INTEGRATION_NAMES`.
 - Delete the integration model's `#execute` and `#test` methods (if defined), but keep the model.
 - Add a post-migration to delete the integration records from PostgreSQL (see [example merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/114721)).
-- [Mark the integration documentation as removed](../../development/documentation/styleguide/deprecations_and_removals.md#remove-a-page).
+- [Mark the integration documentation as removed](../../development/documentation/versions.md#remove-a-page).
 - [Update the integration API documentation](../../api/integrations.md).
 
 In the next minor release (M.1):

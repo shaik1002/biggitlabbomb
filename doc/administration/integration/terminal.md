@@ -81,7 +81,7 @@ front of GitLab, you may need to make some changes to your configuration. These
 guides document the necessary steps for a selection of popular reverse proxies:
 
 - [Apache](https://httpd.apache.org/docs/2.4/mod/mod_proxy_wstunnel.html)
-- [NGINX](https://www.f5.com/company/blog/nginx/websocket-nginx/)
+- [NGINX](https://www.nginx.com/blog/websocket-nginx/)
 - [HAProxy](https://www.haproxy.com/blog/websockets-load-balancing-with-haproxy)
 - [Varnish](https://varnish-cache.org/docs/4.1/users-guide/vcl-example-websockets.html)
 
@@ -115,6 +115,6 @@ they receive a `Connection failed` message.
 By default, terminal sessions do not expire. To limit the terminal session
 lifetime in your GitLab instance:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Settings > Web terminal**.
 1. Set a `max session time`.

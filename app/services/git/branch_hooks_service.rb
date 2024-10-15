@@ -2,7 +2,6 @@
 
 module Git
   class BranchHooksService < ::Git::BaseHooksService
-    include Gitlab::InternalEventsTracking
     extend ::Gitlab::Utils::Override
 
     JIRA_SYNC_BATCH_SIZE = 20
@@ -51,7 +50,7 @@ module Git
       strong_memoize(:commits_count) do
         next threshold_commits.count if
           strong_memoized?(:threshold_commits) &&
-            threshold_commits.count <= PROCESS_COMMIT_LIMIT
+          threshold_commits.count <= PROCESS_COMMIT_LIMIT
 
         if creating_default_branch?
           project.repository.commit_count_for_ref(ref)
@@ -100,7 +99,6 @@ module Git
     end
 
     def branch_remove_hooks
-      enqueue_jira_connect_remove_branches
       project.repository.after_remove_branch(expire_cache: false)
     end
 
@@ -108,7 +106,9 @@ module Git
       return unless default_branch?
 
       commits_changing_ci_config.each do |commit|
-        track_internal_event('commit_change_to_ciconfigfile', user: commit.author, project: commit.project)
+        Gitlab::UsageDataCounters::HLLRedisCounter.track_event(
+          'o_pipeline_authoring_unique_users_committing_ciconfigfile', values: commit.author&.id
+        )
       end
     end
 
@@ -166,19 +166,6 @@ module Git
           Atlassian::JiraConnect::Client.generate_update_sequence_id
         )
       end
-    end
-
-    def enqueue_jira_connect_remove_branches
-      return unless project.jira_subscription_exists?
-
-      return unless Atlassian::JiraIssueKeyExtractors::Branch.has_keys?(project, branch_name)
-
-      Integrations::JiraConnect::RemoveBranchWorker.perform_async(
-        project.id,
-        {
-          branch_name: branch_name
-        }
-      )
     end
 
     def filtered_commit_shas

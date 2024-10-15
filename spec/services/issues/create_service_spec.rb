@@ -96,6 +96,20 @@ RSpec.describe Issues::CreateService, feature_category: :team_planning do
         end
       end
 
+      context 'when rely_on_work_item_type_seeder feature flag is disabled' do
+        before do
+          stub_feature_flags(rely_on_work_item_type_seeder: false)
+        end
+
+        it 'works if base work item types were not created yet' do
+          WorkItems::Type.delete_all
+
+          expect do
+            issue
+          end.to change(Issue, :count).by(1)
+        end
+      end
+
       it 'raises an error if work item types have not been created yet' do
         WorkItems::Type.delete_all
 
@@ -472,7 +486,8 @@ RSpec.describe Issues::CreateService, feature_category: :team_planning do
               iid: { current: kind_of(Integer), previous: nil },
               project_id: { current: project.id, previous: nil },
               title: { current: opts[:title], previous: nil },
-              updated_at: { current: kind_of(Time), previous: nil }
+              updated_at: { current: kind_of(Time), previous: nil },
+              time_estimate: { current: 0, previous: nil }
             },
             object_attributes: include(
               opts.merge(
@@ -538,6 +553,12 @@ RSpec.describe Issues::CreateService, feature_category: :team_planning do
             expect(issue.user_mentions.count).to eq 0
           end
         end
+      end
+
+      it 'schedules a namespace onboarding create action worker' do
+        expect(Onboarding::IssueCreatedWorker).to receive(:perform_async).with(project.project_namespace_id)
+
+        issue
       end
     end
 

@@ -2,6 +2,8 @@
 data_category: operational
 key_path: container_registry_enabled
 description: A count of projects where the container registry is enabled
+product_section: ops
+product_stage: package
 product_group: container_registry
 value_type: boolean
 status: active
@@ -21,4 +23,3 @@ tier:
 performance_indicator_type:
 - customer_health_score
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/51974

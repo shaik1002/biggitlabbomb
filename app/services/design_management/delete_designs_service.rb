@@ -4,7 +4,6 @@ module DesignManagement
   class DeleteDesignsService < DesignService
     include RunsDesignActions
     include OnSuccessCallbacks
-    include Gitlab::InternalEventsTracking
 
     def initialize(project, user, params = {})
       super
@@ -56,10 +55,14 @@ module DesignManagement
 
     def design_action(design)
       on_success do
-        track_internal_event('delete_design_management_design', user: current_user, project: project)
+        counter.count(:delete)
       end
 
       DesignManagement::DesignAction.new(design, :delete)
+    end
+
+    def counter
+      ::Gitlab::UsageDataCounters::DesignsCounter
     end
 
     def formatted_file_list

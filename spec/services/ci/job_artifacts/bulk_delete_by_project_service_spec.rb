@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ::Ci::JobArtifacts::BulkDeleteByProjectService, "#execute", feature_category: :job_artifacts do
+RSpec.describe ::Ci::JobArtifacts::BulkDeleteByProjectService, "#execute", feature_category: :build_artifacts do
   subject(:execute) do
     described_class.new(
       job_artifact_ids: job_artifact_ids,
@@ -56,12 +56,7 @@ RSpec.describe ::Ci::JobArtifacts::BulkDeleteByProjectService, "#execute", featu
         result = execute
 
         expect(result).to be_error
-
-        expected_ids = deleted_job_artifacts.map(&:id).sort
-        result_ids = result[:message].scan(/\d+/).map(&:to_i).sort
-
-        expect(result_ids).to eq(expected_ids)
-        expect(result[:message]).to match(/Artifacts \(\d+,\d+,\d+\) not found/)
+        expect(result[:message]).to eq("Artifacts (#{deleted_job_artifacts.map(&:id).join(',')}) not found")
       end
     end
 
@@ -74,10 +69,10 @@ RSpec.describe ::Ci::JobArtifacts::BulkDeleteByProjectService, "#execute", featu
         result = execute
 
         expect(result).to be_success
-        expect(result.payload[:destroyed_ids]).to match_array(job_artifact_ids)
-        expect(result.payload.except(:destroyed_ids)).to eq(
+        expect(result.payload).to eq(
           {
             destroyed_count: job_artifact_ids.count,
+            destroyed_ids: job_artifact_ids,
             errors: []
           }
         )

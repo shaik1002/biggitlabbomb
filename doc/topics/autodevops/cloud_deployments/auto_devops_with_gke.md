@@ -48,7 +48,7 @@ NOTE:
 Every new Google Cloud Platform (GCP) account receives [$300 in credit](https://console.cloud.google.com/freetrial),
 and in partnership with Google, GitLab is able to offer an additional $200 for new
 GCP accounts to get started with the GitLab integration with Google Kubernetes Engine.
-[Follow this link](https://cloud.google.com/partners?pcn_code=0014M00001h35gDQAQ#contact-form)
+[Follow this link](https://cloud.google.com/partners/partnercredit/?pcn_code=0014M00001h35gDQAQ#contact-form)
 and apply for credit.
 
 ## Create a Kubernetes cluster
@@ -136,8 +136,8 @@ Follow these steps to configure the base domain and other settings required for 
 
 ## Enable Auto DevOps and run the pipeline
 
-While Auto DevOps is enabled by default, Auto DevOps can be disabled for both
-the instance (for self-managed instances) and the group. Complete
+While Auto DevOps is enabled by default, Auto DevOps can be disabled at both
+the instance level (for self-managed instances) and the group level. Complete
 these steps to enable Auto DevOps if it's disabled:
 
 1. On the left sidebar, select **Search or go to** and find the application project.
@@ -273,11 +273,13 @@ bin/rails test test/controllers/welcome_controller_test.rb:4
 To fix the broken test:
 
 1. Return to your merge request.
-1. In the upper right corner, select **Code**, then select **Open in Web IDE**.
+1. In the upper-right corner, select **Code**, then select **Open in Gitpod**.
 1. In the left-hand directory of files, find the `test/controllers/welcome_controller_test.rb`
    file, and select it to open it.
 1. Change line 7 to say `You're on Rails! Powered by GitLab Auto DevOps.`
-1. On the left sidebar, select **Source Control** (**{merge}**).
+1. Select **Commit**.
+1. In the left-hand column, under **Unstaged changes**, select the checkmark icon
+   (**{stage-all}**) to stage the changes.
 1. Write a commit message, and select **Commit**.
 
 Return to the **Overview** page of your merge request, and you should not only

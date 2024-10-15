@@ -15,7 +15,7 @@ module Gitlab
       scope :private_only,              -> { where(visibility_level: PRIVATE) }
       scope :non_public_only,           -> { where.not(visibility_level: PUBLIC) }
 
-      scope :public_to_user, ->(user = nil) do
+      scope :public_to_user, -> (user = nil) do
         where(visibility_level: VisibilityLevel.levels_for_user(user))
       end
 
@@ -82,23 +82,6 @@ module Gitlab
       # Return true if the specified level is allowed for the current user.
       def allowed_level?(level)
         valid_level?(level) && non_restricted_level?(level)
-      end
-
-      def allowed_levels_for_user(user, subject)
-        return [] if user.nil?
-
-        visibility_levels = if user.can_admin_all_resources?
-                              # admin can create groups even with restricted visibility levels
-                              self.values
-                            else
-                              self.allowed_levels
-                            end
-
-        # visibility_level_allowed? is not supporting root-groups, so we have to create a dummy sub-group.
-        subgroup = Group.new(parent_id: subject.id)
-
-        # return the allowed visibility levels for the subject
-        visibility_levels.select { |level| subgroup.visibility_level_allowed?(level) }
       end
 
       def non_restricted_level?(level)

@@ -10,7 +10,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"gitlab.com/gitlab-org/gitlab/workhorse/internal/testhelper"
@@ -26,7 +25,7 @@ type option struct {
 
 func testEntryServer(t *testing.T, requestURL string, httpHeaders http.Header, allowRedirects bool, options ...option) *httptest.ResponseRecorder {
 	requestHandler := func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, "GET", r.Method)
+		require.Equal(t, "GET", r.Method)
 
 		sendData := map[string]interface{}{
 			"URL":            r.URL.String() + "/file",
@@ -38,8 +37,8 @@ func testEntryServer(t *testing.T, requestURL string, httpHeaders http.Header, a
 		}
 
 		jsonParams, err := json.Marshal(sendData)
-		assert.NoError(t, err)
-		data := base64.URLEncoding.EncodeToString(jsonParams)
+		require.NoError(t, err)
+		data := base64.URLEncoding.EncodeToString([]byte(jsonParams))
 
 		// The server returns a Content-Disposition
 		w.Header().Set("Content-Disposition", "attachment; filename=\"archive.txt\"")
@@ -51,14 +50,14 @@ func testEntryServer(t *testing.T, requestURL string, httpHeaders http.Header, a
 		SendURL.Inject(w, r, data)
 	}
 	serveFile := func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, "GET", r.Method)
+		require.Equal(t, "GET", r.Method)
 
 		tempFile, err := os.CreateTemp("", "download_file")
-		assert.NoError(t, err)
-		assert.NoError(t, os.Remove(tempFile.Name()))
+		require.NoError(t, err)
+		require.NoError(t, os.Remove(tempFile.Name()))
 		defer tempFile.Close()
 		_, err = tempFile.Write([]byte(testData))
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		w.Header().Set("Etag", testDataEtag)
 		w.Header().Set("Cache-Control", "public")
@@ -69,10 +68,10 @@ func testEntryServer(t *testing.T, requestURL string, httpHeaders http.Header, a
 		http.ServeContent(w, r, "archive.txt", time.Now(), tempFile)
 	}
 	redirectFile := func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, "GET", r.Method)
+		require.Equal(t, "GET", r.Method)
 		http.Redirect(w, r, r.URL.String()+"/download", http.StatusTemporaryRedirect)
 	}
-	timeoutFile := func(_ http.ResponseWriter, _ *http.Request) {
+	timeoutFile := func(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(20 * time.Millisecond)
 	}
 
@@ -218,7 +217,7 @@ func TestPostRequest(t *testing.T) {
 	body := "any string"
 	header := map[string][]string{"Authorization": {"Bearer token"}}
 	postRequestHandler := func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, "POST", r.Method)
+		require.Equal(t, "POST", r.Method)
 
 		url := r.URL.String() + "/external/url"
 
@@ -229,26 +228,26 @@ func TestPostRequest(t *testing.T) {
 			"Method": "POST",
 		}
 		jsonParams, err := json.Marshal(sendData)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
-		data := base64.URLEncoding.EncodeToString(jsonParams)
+		data := base64.URLEncoding.EncodeToString([]byte(jsonParams))
 
 		SendURL.Inject(w, r, data)
 	}
-	externalPostURLHandler := func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, "POST", r.Method)
+	externalPostUrlHandler := func(w http.ResponseWriter, r *http.Request) {
+		require.Equal(t, "POST", r.Method)
 
 		b, err := io.ReadAll(r.Body)
-		assert.NoError(t, err)
-		assert.Equal(t, body, string(b))
+		require.NoError(t, err)
+		require.Equal(t, body, string(b))
 
-		assert.Equal(t, []string{"Bearer token"}, r.Header["Authorization"])
+		require.Equal(t, []string{"Bearer token"}, r.Header["Authorization"])
 
 		w.Write([]byte(testData))
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/post/request/external/url", externalPostURLHandler)
+	mux.HandleFunc("/post/request/external/url", externalPostUrlHandler)
 
 	server := httptest.NewServer(mux)
 	defer server.Close()
@@ -289,7 +288,7 @@ func TestErrorWithCustomStatusCode(t *testing.T) {
 
 	jsonParams, err := json.Marshal(sendData)
 	require.NoError(t, err)
-	data := base64.URLEncoding.EncodeToString(jsonParams)
+	data := base64.URLEncoding.EncodeToString([]byte(jsonParams))
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest("GET", "/target", nil)
@@ -310,23 +309,10 @@ func TestHttpClientReuse(t *testing.T) {
 	response := testEntryServer(t, "/get/request", nil, false)
 	require.Equal(t, http.StatusOK, response.Code)
 	_, found := httpClients.Load(expectedKey)
-	require.True(t, found)
+	require.Equal(t, true, found)
 
 	storedClient := &http.Client{}
 	httpClients.Store(expectedKey, storedClient)
 	require.Equal(t, cachedClient(entryParams{}), storedClient)
 	require.NotEqual(t, cachedClient(entryParams{AllowRedirects: true}), storedClient)
-}
-
-func TestSSRFFilter(t *testing.T) {
-	response := testEntryServer(t, "/get/request", nil, false, option{Key: "SSRFFilter", Value: true})
-
-	// Test uses loopback IP like 127.0.0.x and thus fails
-	require.Equal(t, http.StatusInternalServerError, response.Code)
-}
-
-func TestSSRFFilterWithAllowLocalhost(t *testing.T) {
-	response := testEntryServer(t, "/get/request", nil, false, option{Key: "SSRFFilter", Value: true}, option{Key: "AllowLocalhost", Value: true})
-
-	require.Equal(t, http.StatusOK, response.Code)
 }

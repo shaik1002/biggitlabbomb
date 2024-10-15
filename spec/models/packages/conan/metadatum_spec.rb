@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Packages::Conan::Metadatum, type: :model, feature_category: :package_registry do
+RSpec.describe Packages::Conan::Metadatum, type: :model do
   using RSpec::Parameterized::TableSyntax
 
   describe 'relationships' do
@@ -68,6 +68,16 @@ RSpec.describe Packages::Conan::Metadatum, type: :model, feature_category: :pack
         end
 
         it { is_expected.to eq(valid) }
+      end
+    end
+
+    describe '#conan_package_type' do
+      it 'will not allow a package with a different package_type' do
+        package = build('package')
+        conan_metadatum = build('conan_metadatum', package: package)
+
+        expect(conan_metadatum).not_to be_valid
+        expect(conan_metadatum.errors.to_a).to include('Package type must be Conan')
       end
     end
   end

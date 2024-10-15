@@ -2,6 +2,8 @@
 data_category: optional
 key_path: redis_hll_counters.user_packages.i_package_maven_user_weekly
 description: A weekly count of users that have published a Maven package to the registry
+product_section: ops
+product_stage: package
 product_group: package_registry
 value_type: number
 status: active
@@ -20,4 +22,3 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/60541

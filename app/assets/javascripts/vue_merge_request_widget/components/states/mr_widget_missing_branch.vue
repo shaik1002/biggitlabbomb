@@ -62,9 +62,9 @@ export default {
   <div class="mr-widget-body media">
     <status-icon :show-disabled-button="true" status="failed" />
 
-    <div class="media-body">
+    <div class="media-body space-children">
       <span class="js-branch-text" data-testid="widget-content">
-        <span class="gl-font-bold">
+        <span class="gl-font-weight-bold">
           <gl-sprintf :message="warning">
             <template #code="{ content }">
               <code>{{ content }}</code>
@@ -77,7 +77,7 @@ export default {
           :title="message"
           :aria-label="message"
           name="question-o"
-          class="gl-cursor-pointer gl-text-blue-600"
+          class="gl-text-blue-600 gl-cursor-pointer"
         />
       </span>
     </div>

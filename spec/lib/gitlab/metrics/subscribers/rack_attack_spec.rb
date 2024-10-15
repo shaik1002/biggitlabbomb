@@ -99,7 +99,7 @@ RSpec.describe Gitlab::Metrics::Subscribers::RackAttack, :request_store do
               remote_ip: '1.2.3.4',
               request_method: 'GET',
               path: '/api/v4/internal/authorized_keys?non_sensitive_query_param=' \
-                'non_sensitive_info&password=%5BFILTERED%5D',
+                    'non_sensitive_info&password=%5BFILTERED%5D',
               matched: 'throttle_unauthenticated'
             )
 

@@ -384,17 +384,6 @@ RSpec.describe API::Ci::Pipelines, feature_category: :continuous_integration do
         expect(json_response).to be_an Array
       end
 
-      context 'with oauth token that has ai_workflows scope' do
-        let(:token) { create(:oauth_access_token, user: user, scopes: [:ai_workflows]) }
-
-        it "allows access", :skip_before_request do
-          get api("/projects/#{project.id}/pipelines/#{pipeline.id}/jobs", oauth_access_token: token), params: query
-          project.update!(public_builds: false)
-
-          expect(response).to have_gitlab_http_status(:ok)
-        end
-      end
-
       it 'returns correct values', :aggregate_failures do
         expect(json_response).not_to be_empty
         expect(json_response.first['commit']['id']).to eq project.commit.id
@@ -553,7 +542,7 @@ RSpec.describe API::Ci::Pipelines, feature_category: :continuous_integration do
   end
 
   describe 'GET /projects/:id/pipelines/:pipeline_id/bridges' do
-    let_it_be(:bridge) { create(:ci_bridge, pipeline: pipeline, user: pipeline.user) }
+    let_it_be(:bridge) { create(:ci_bridge, pipeline: pipeline) }
 
     let(:downstream_pipeline) { create(:ci_pipeline) }
 
@@ -677,7 +666,7 @@ RSpec.describe API::Ci::Pipelines, feature_category: :continuous_integration do
         end
       end
 
-      it 'avoids N+1 queries', :use_sql_query_cache, :request_store do
+      it 'avoids N+1 queries' do
         control = ActiveRecord::QueryRecorder.new(skip_cached: false) do
           get api("/projects/#{project.id}/pipelines/#{pipeline.id}/bridges", api_user), params: query
         end
@@ -686,7 +675,7 @@ RSpec.describe API::Ci::Pipelines, feature_category: :continuous_integration do
 
         expect do
           get api("/projects/#{project.id}/pipelines/#{pipeline.id}/bridges", api_user), params: query
-        end.to issue_same_number_of_queries_as(control)
+        end.not_to exceed_all_query_limit(control)
       end
     end
 
@@ -731,7 +720,7 @@ RSpec.describe API::Ci::Pipelines, feature_category: :continuous_integration do
     end
 
     def create_bridge(pipeline, status = :created)
-      create(:ci_bridge, status: status, pipeline: pipeline, user: pipeline.user).tap do |bridge|
+      create(:ci_bridge, status: status, pipeline: pipeline).tap do |bridge|
         downstream_pipeline = create(:ci_pipeline)
         create(
           :ci_sources_pipeline,
@@ -882,16 +871,6 @@ RSpec.describe API::Ci::Pipelines, feature_category: :continuous_integration do
         expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['sha']).to match(/\A\h{40}\z/)
         expect(json_response['name']).to eq('Build pipeline')
-      end
-
-      context 'with oauth token that has ai_workflows scope' do
-        let(:token) { create(:oauth_access_token, user: user, scopes: [:ai_workflows]) }
-
-        it "allows access", :skip_before_request do
-          get api("/projects/#{project.id}/pipelines/#{pipeline.id}", oauth_access_token: token)
-
-          expect(response).to have_gitlab_http_status(:ok)
-        end
       end
 
       it 'returns 404 when it does not exist', :aggregate_failures do
@@ -1286,7 +1265,11 @@ RSpec.describe API::Ci::Pipelines, feature_category: :continuous_integration do
           expect(json_response['status']).to eq('canceling')
         end
 
-        context 'when cancel_gracefully is not supported by the runner' do
+        context 'when ci_canceling_status is disabled' do
+          before do
+            stub_feature_flags(ci_canceling_status: false)
+          end
+
           it 'cancels builds', :sidekiq_inline do
             post api("/projects/#{project.id}/pipelines/#{pipeline.id}/cancel", user)
 

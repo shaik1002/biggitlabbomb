@@ -31,7 +31,7 @@
         = link_to avatar_icon_for_user(@user, 400), target: '_blank', rel: 'noopener noreferrer' do
           = render Pajamas::AvatarComponent.new(@user, size: 96, alt: "", class: 'gl-float-left gl-mr-5')
       %h5.gl-mt-0= s_("Profiles|Upload new avatar")
-      .gl-flex.gl-items-center.gl-my-3
+      .gl-display-flex.gl-align-items-center.gl-my-3
         = render Pajamas::ButtonComponent.new(button_options: { class: 'js-choose-user-avatar-button' }) do
           = s_("Profiles|Choose file...")
         %span.gl-ml-3.js-avatar-filename= s_("Profiles|No file chosen.")
@@ -110,7 +110,9 @@
         = f.label :twitter, _('X (formerly Twitter)')
         = f.text_field :twitter, class: 'gl-form-input form-control gl-md-form-input-lg', placeholder: s_("Profiles|@username")
       .form-group.gl-form-group
-        - external_accounts_docs_link = safe_format(s_('Profiles|Your Discord user ID.'))
+        - external_accounts_help_url = help_page_path('user/profile/index', anchor: 'add-external-accounts-to-your-user-profile-page')
+        - external_accounts_link = link_to '', external_accounts_help_url, target: "_blank", rel: "noopener noreferrer"
+        - external_accounts_docs_link = safe_format(s_('Profiles|Your Discord user ID. %{external_accounts_link_start}Learn more%{external_accounts_link_end}.'), tag_pair(external_accounts_link, :external_accounts_link_start, :external_accounts_link_end))
         - min_discord_length = 17
         - max_discord_length = 20
         = f.label :discord
@@ -125,11 +127,8 @@
         %small.form-text.gl-text-secondary
           = external_accounts_docs_link
       .form-group.gl-form-group
-        = f.label :bluesky
-        = f.text_field :bluesky, class: 'gl-form-input form-control gl-md-form-input-lg', placeholder: "did:plc:ewvi7nxzyoun6zhxrhs64oiz"
-      .form-group.gl-form-group
         = f.label :mastodon
-        = f.text_field :mastodon, class: 'gl-form-input form-control gl-md-form-input-lg', placeholder: "@username@server_name"
+        = f.text_field :mastodon, class: 'gl-form-input form-control gl-md-form-input-lg', placeholder: "@robin@example.com"
 
       .form-group.gl-form-group
         = f.label :website_url, s_('Profiles|Website URL')
@@ -159,7 +158,9 @@
         %fieldset.form-group.gl-form-group
           %legend.col-form-label
             = _('Private profile')
-          = render_if_exists 'user_settings/profiles/private_profile', form: f, user: @user
+          - private_profile_help_link = link_to _("Learn more"), help_page_path('user/profile/index', anchor: 'make-your-user-profile-page-private')
+          - private_profile_label = safe_format(s_("Profiles|Don't display activity-related personal information on your profile. %{private_profile_help_link_start}Learn more%{private_profile_help_link_end}."), tag_pair(private_profile_help_link, :private_profile_help_link_start, :private_profile_help_link_end))
+          = f.gitlab_ui_checkbox_component :private_profile, private_profile_label
         %fieldset.form-group.gl-form-group
           %legend.col-form-label
             = s_("Profiles|Private contributions")

@@ -8,7 +8,6 @@ module Gitlab
           include Gitlab::Utils::UsageData
           include Gitlab::Usage::TimeFrame
 
-          attr_reader :metric_definition
           attr_reader :time_frame
           attr_reader :options
           attr_reader :events
@@ -25,11 +24,10 @@ module Gitlab
             attr_reader :metric_available
           end
 
-          def initialize(attributes)
-            @metric_definition = MetricDefinition.new(nil, attributes)
-            @time_frame = attributes.fetch(:time_frame)
-            @options = attributes.fetch(:options, {})
-            @events = attributes.fetch(:events, {})
+          def initialize(metric_definition)
+            @time_frame = metric_definition.fetch(:time_frame)
+            @options = metric_definition.fetch(:options, {})
+            @events = metric_definition.fetch(:events, {})
           end
 
           def instrumentation

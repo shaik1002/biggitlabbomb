@@ -211,8 +211,8 @@ the related documentation.
 |----------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|------------------------|
 | Artifacts maximum size (compressed)                                              | 1 GB                                                                                                                      | See [Maximum artifacts size](../../administration/settings/continuous_integration.md#maximum-artifacts-size). |
 | Artifacts [expiry time](../../ci/yaml/index.md#artifactsexpire_in)               | From June 22, 2020, deleted after 30 days unless otherwise specified (artifacts created before that date have no expiry). | See [Default artifacts expiration](../../administration/settings/continuous_integration.md#default-artifacts-expiration). |
-| Scheduled Pipeline Cron                                                          | `*/5 * * * *`                                                                                                             | See [Pipeline schedules advanced configuration](../../administration/cicd/index.md#change-maximum-scheduled-pipeline-frequency). |
-| Maximum jobs in active pipelines                                                 | `500` for Free tier, `1000` for all trial tiers, `20000` for Premium, and `100000` for Ultimate.                          | See [Number of jobs in active pipelines](../../administration/instance_limits.md#number-of-jobs-in-active-pipelines). |
+| Scheduled Pipeline Cron                                                          | `*/5 * * * *`                                                                                                             | See [Pipeline schedules advanced configuration](../../administration/cicd.md#change-maximum-scheduled-pipeline-frequency). |
+| Maximum jobs in active pipelines                                                 | `500` for Free tier, `1000` for all trial tiers, `20000` for Premium, and `100000` for Ultimate.                                                 | See [Number of jobs in active pipelines](../../administration/instance_limits.md#number-of-jobs-in-active-pipelines). |
 | Maximum CI/CD subscriptions to a project                                         | `2`                                                                                                                       | See [Number of CI/CD subscriptions to a project](../../administration/instance_limits.md#number-of-cicd-subscriptions-to-a-project). |
 | Maximum number of pipeline triggers in a project                                 | `25000` for all tiers                                                                                                     | See [Limit the number of pipeline triggers](../../administration/instance_limits.md#limit-the-number-of-pipeline-triggers). |
 | Maximum pipeline schedules in projects                                           | `10` for Free tier, `50` for all paid tiers                                                                               | See [Number of pipeline schedules](../../administration/instance_limits.md#number-of-pipeline-schedules). |
@@ -260,7 +260,7 @@ the default value [is the same as for self-managed instances](../../administrati
 
 If you are near or over the repository size limit, you can either:
 
-- [Reduce your repository size with Git](../project/repository/repository_size.md#reduce-repository-size).
+- [Reduce your repository size with Git](../project/repository/reducing_the_repo_size_using_git.md).
 - [Purchase additional storage](https://about.gitlab.com/pricing/licensing-faq/#can-i-buy-more-storage).
 
 NOTE:
@@ -273,15 +273,9 @@ this limit. Repository limits apply to both public and private projects.
 The [import sources](../project/import/index.md#supported-import-sources) that are available to you by default depend on
 which GitLab you use:
 
-- GitLab.com: All available import sources are enabled by default.
-- GitLab self-managed: No import sources are enabled by default and must be
+- GitLab.com: all available import sources are enabled by default.
+- GitLab self-managed: no import sources are enabled by default and must be
   [enabled](../../administration/settings/import_and_export_settings.md#configure-allowed-import-sources).
-
-## Import placeholder user limits
-
-The number of [placeholder users](../../user/project/import/index.md#placeholder-users) created during an import on GitLab.com is limited per top-level namespace. The limits
-differ depending on your plan and seat count.
-For more information, see the [table of placeholder user limits for GitLab.com](../../user/project/import/index.md#placeholder-user-limits).
 
 ## IP range
 
@@ -292,10 +286,9 @@ from those IPs and allow them.
 GitLab.com is fronted by Cloudflare. For incoming connections to GitLab.com, you might need to allow CIDR blocks of Cloudflare ([IPv4](https://www.cloudflare.com/ips-v4/) and [IPv6](https://www.cloudflare.com/ips-v6/)).
 
 For outgoing connections from CI/CD runners, we are not providing static IP addresses.
-Most GitLab.com instance runners are deployed into Google Cloud in `us-east1`, except _Linux GPU-enabled_ and _Linux Arm64_, hosted in `us-central1`.
-You can configure any IP-based firewall by looking up
+All GitLab.com instance runners are deployed into Google Cloud Platform (GCP) in `us-east1`.
+Any IP-based firewall can be configured by looking up
 [IP address ranges or CIDR blocks for GCP](https://cloud.google.com/compute/docs/faq#find_ip_range).
-MacOS runners are hosted on AWS with runner managers hosted on Google Cloud. To configure IP-based firewall, you must allow both [AWS IP address ranges](https://docs.aws.amazon.com/vpc/latest/userguide/aws-ip-ranges.html) and [Google Cloud](https://cloud.google.com/compute/docs/faq#find_ip_range).
 
 ## Hostname list
 
@@ -341,13 +334,13 @@ For self-managed instance limits, see:
 - [Webhook rate limit](../../administration/instance_limits.md#webhook-rate-limit).
 - [Number of webhooks](../../administration/instance_limits.md#number-of-webhooks).
 - [Webhook timeout](../../administration/instance_limits.md#webhook-timeout).
-- [Parallel Pages deployments](../../administration/instance_limits.md#number-of-parallel-pages-deployments).
+- [Multiple Pages deployments](../../administration/instance_limits.md#number-of-extra-pages-deployments-when-using-multiple-deployments).
 
-## GitLab-hosted runners
+## Runner SaaS
 
-You can use GitLab-hosted runners to run your CI/CD jobs on GitLab.com and GitLab Dedicated to seamlessly build, test, and deploy your application on different environments.
+Runner SaaS is the hosted, secure, and managed build environment you can use to run CI/CD jobs for your GitLab.com hosted project.
 
-For more information, see [GitLab-hosted runners](../../ci/runners/index.md).
+For more information, see [Runner SaaS](../../ci/runners/index.md).
 
 ## Puma
 
@@ -396,7 +389,6 @@ The following table describes the rate limits for GitLab.com:
 | [Pull mirroring](../project/repository/mirror/pull.md) intervals | 5 minutes                     |
 | API requests from a user to `/api/v4/users/:id`                  | 300 requests per 10 minutes   |
 | GitLab package cloud requests for an IP address ([introduced](https://gitlab.com/gitlab-com/gl-infra/production-engineering/-/issues/24083) in GitLab 16.11) | 3,000 requests per minute |
-| GitLab repository files | 500 requests per minute |
 
 More details are available on the rate limits for
 [protected paths](#protected-paths-throttle) and
@@ -406,7 +398,7 @@ GitLab can rate-limit requests at several layers. The rate limits listed here
 are configured in the application. These limits are the most
 restrictive per IP address. For more information about the rate limits
 for GitLab.com, see
-[the documentation in the handbook](https://handbook.gitlab.com/handbook/engineering/infrastructure/rate-limiting).
+[an overview](https://gitlab.com/gitlab-com/runbooks/-/tree/master/docs/rate-limiting).
 
 ### Rate limiting responses
 
@@ -443,17 +435,17 @@ with details, such as the affected IP address.
 
 #### Git and container registry failed authentication ban
 
-GitLab.com responds with HTTP status code `403` for 15 minutes, if 300 failed
-authentication requests were received in a 1-minute period from a single IP address.
+GitLab.com responds with HTTP status code `403` for 1 hour, if 30 failed
+authentication requests were received in a 3-minute period from a single IP address.
 
 This applies only to Git requests and container registry (`/jwt/auth`) requests
 (combined).
 
 This limit:
 
-- Is reset by requests that authenticate successfully. For example, 299
+- Is reset by requests that authenticate successfully. For example, 29
   failed authentication requests followed by 1 successful request, followed by
-  299 more failed authentication requests would not trigger a ban.
+  29 more failed authentication requests would not trigger a ban.
 - Does not apply to JWT requests authenticated by `gitlab-ci-token`.
 
 No response headers are provided.

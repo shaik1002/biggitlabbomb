@@ -1,38 +1,18 @@
 <script>
+import { GlDaterangePicker } from '@gitlab/ui';
 import { periodToDate } from '~/observability/utils';
 import DateRangesDropdown from '~/analytics/shared/components/date_ranges_dropdown.vue';
 import { TIME_RANGE_OPTIONS, CUSTOM_DATE_RANGE_OPTION } from '~/observability/constants';
 import { dayAfter, getCurrentUtcDate } from '~/lib/utils/datetime_utility';
-import DateTimeRangePicker from './datetime_range_picker.vue';
 
 export default {
   components: {
     DateRangesDropdown,
-    DateTimeRangePicker,
+    GlDaterangePicker,
   },
   props: {
     selected: {
       type: Object,
-      required: false,
-      default: null,
-    },
-    maxDateRange: {
-      type: Number,
-      required: false,
-      default: null,
-    },
-    dateOptions: {
-      type: Array,
-      required: false,
-      default: () => TIME_RANGE_OPTIONS,
-    },
-    defaultMinDate: {
-      type: Date,
-      required: false,
-      default: null,
-    },
-    dateTimeRangePickerState: {
-      type: Boolean,
       required: false,
       default: null,
     },
@@ -48,7 +28,7 @@ export default {
   },
   computed: {
     dateRangeOptions() {
-      return this.dateOptions.map((option) => {
+      return TIME_RANGE_OPTIONS.map((option) => {
         const dateRange = periodToDate(option.value);
         return {
           value: option.value,
@@ -99,23 +79,22 @@ export default {
 </script>
 
 <template>
-  <div class="gl-flex gl-flex-col gl-gap-3 lg:gl-flex-row" data-testid="date-range-filter">
+  <div class="gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-gap-3">
     <date-ranges-dropdown
       :selected="dateRange.value"
       :date-range-options="dateRangeOptions"
-      disable-date-range-string
+      disable-selected-day-count
+      tooltip=""
+      include-end-date-in-days-selected
       @selected="onSelectPredefinedDateRange"
       @customDateRangeSelected="onSelectCustomDateRange"
     />
-    <date-time-range-picker
+    <gl-daterange-picker
       v-if="shouldShowDateRangePicker"
       :start-opened="shouldStartOpened"
       :default-start-date="dateRange.startDate"
       :default-end-date="dateRange.endDate"
-      :max-date-range="maxDateRange"
       :default-max-date="defaultMaxDate"
-      :default-min-date="defaultMinDate"
-      :state="dateTimeRangePickerState"
       @input="onCustomRangeSelected"
     />
   </div>

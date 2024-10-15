@@ -1,7 +1,6 @@
 import { GlDisclosureDropdown, GlDisclosureDropdownItem, GlIcon } from '@gitlab/ui';
 import VueApollo from 'vue-apollo';
 import Vue from 'vue';
-import ProtectedBadge from '~/vue_shared/components/badges/protected_badge.vue';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
 import { useFakeDate } from 'helpers/fake_date';
 import createMockApollo from 'helpers/mock_apollo_helper';
@@ -36,7 +35,6 @@ describe('Details Header', () => {
   useFakeDate(2020, 11, 4);
 
   const findCreatedAndVisibility = () => wrapper.findByTestId('created-and-visibility');
-  const findLastPublishedAt = () => wrapper.findByTestId('last-published-at');
   const findTitle = () => wrapper.findByTestId('title');
   const findTagsCount = () => wrapper.findByTestId('tags-count');
   const findCleanup = () => wrapper.findByTestId('cleanup');
@@ -45,15 +43,8 @@ describe('Details Header', () => {
   const findMenu = () => wrapper.findComponent(GlDisclosureDropdown);
   const findSize = () => wrapper.findByTestId('image-size');
 
-  const defaultProvide = {
-    config: {
-      isMetadataDatabaseEnabled: true,
-    },
-  };
-
   const mountComponent = ({
     propsData = { image: defaultImage },
-    provide = defaultProvide,
     resolver = jest.fn().mockResolvedValue(imageTagsCountMock()),
   } = {}) => {
     Vue.use(VueApollo);
@@ -64,7 +55,6 @@ describe('Details Header', () => {
     wrapper = shallowMountExtended(component, {
       apolloProvider,
       propsData,
-      provide,
       directives: {
         GlTooltip: createMockDirective('gl-tooltip'),
       },
@@ -74,39 +64,6 @@ describe('Details Header', () => {
   afterEach(() => {
     // if we want to mix createMockApollo and manual mocks we need to reset everything
     apolloProvider = undefined;
-  });
-
-  it('calls the resolver with the correct arguments', () => {
-    const resolver = jest.fn().mockResolvedValue(imageTagsCountMock());
-    mountComponent({ resolver });
-
-    expect(resolver).toHaveBeenCalledWith({
-      id: defaultImage.id,
-      metadataDatabaseEnabled: true,
-    });
-  });
-
-  describe('when metadata database is disabled', () => {
-    const resolver = jest.fn().mockResolvedValue(imageTagsCountMock());
-
-    beforeEach(() => {
-      mountComponent({
-        provide: {
-          ...defaultProvide,
-          config: {
-            isMetadataDatabaseEnabled: false,
-          },
-        },
-        resolver,
-      });
-    });
-
-    it('calls the resolver with the correct arguments', () => {
-      expect(resolver).toHaveBeenCalledWith({
-        id: defaultImage.id,
-        metadataDatabaseEnabled: false,
-      });
-    });
   });
 
   describe('image name', () => {
@@ -176,7 +133,7 @@ describe('Details Header', () => {
       expect(findMenu().props()).toMatchObject({
         category: 'tertiary',
         icon: 'ellipsis_v',
-        placement: 'bottom-end',
+        placement: 'right',
         textSrOnly: true,
         noCaret: true,
         toggleText: 'More actions',
@@ -320,79 +277,6 @@ describe('Details Header', () => {
 
           expect(findCreatedAndVisibility().props('icon')).toBe('eye-slash');
         });
-      });
-    });
-
-    describe('last published at', () => {
-      it('is rendered when exists', async () => {
-        mountComponent();
-
-        await waitForPromises();
-
-        expect(findLastPublishedAt().props()).toMatchObject({
-          icon: 'calendar',
-          text: 'Last published at Nov 5, 2020 13:29',
-        });
-      });
-
-      it('is hidden when null', async () => {
-        mountComponent({
-          resolver: jest.fn().mockResolvedValue(imageTagsCountMock({ lastPublishedAt: null })),
-        });
-
-        await waitForPromises();
-        expect(findLastPublishedAt().exists()).toBe(false);
-      });
-    });
-  });
-
-  describe('badge "protected"', () => {
-    const createComponentForBadgeProtected = async ({
-      imageProtectionRuleExists = true,
-      glFeaturesContainerRegistryProtectedContainers = true,
-    } = {}) => {
-      await mountComponent({
-        propsData: {
-          image: {
-            ...defaultImage,
-            protectionRuleExists: imageProtectionRuleExists,
-          },
-        },
-        provide: {
-          ...defaultProvide,
-          glFeatures: {
-            containerRegistryProtectedContainers: glFeaturesContainerRegistryProtectedContainers,
-          },
-        },
-      });
-    };
-
-    const findProtectedBadge = () => wrapper.findComponent(ProtectedBadge);
-
-    describe('when a protection rule exists for the given package', () => {
-      it('shows badge', () => {
-        createComponentForBadgeProtected();
-
-        expect(findProtectedBadge().exists()).toBe(true);
-        expect(findProtectedBadge().props('tooltipText')).toBe(
-          'A protection rule exists for this container repository.',
-        );
-      });
-    });
-
-    describe('when no protection rule exists for the given package', () => {
-      it('does not show badge', () => {
-        createComponentForBadgeProtected({ imageProtectionRuleExists: false });
-
-        expect(findProtectedBadge().exists()).toBe(false);
-      });
-    });
-
-    describe('when feature flag ":container_registry_protected_container" is disabled', () => {
-      it('does not show badge', () => {
-        createComponentForBadgeProtected({ glFeaturesContainerRegistryProtectedContainers: false });
-
-        expect(findProtectedBadge().exists()).toBe(false);
       });
     });
   });

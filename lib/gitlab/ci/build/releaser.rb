@@ -40,7 +40,7 @@ module Gitlab
         end
 
         def stringified_json(object)
-          object.to_json.to_json.to_s
+          "#{object.to_json.to_json}"
         end
 
         def catalog_publish?

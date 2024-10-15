@@ -74,12 +74,11 @@ Follow the progress of the remaining checks in the epic [Remaining active checks
 ## Changes to CI/CD variables
 
 The following table outlines migration actions required for each browser-based analyzer DAST version 4 CI/CD variable.
-See [configuration](browser/configuration/index.md) for more information on configuring the browser-based analyzer.
+See [configuration](browser/configuration) for more information on configuring the browser-based analyzer.
 
 | DAST version 4 CI/CD variable               | Required action    | Notes                                         |
 |:--------------------------------------------|:-------------------|:----------------------------------------------|
 | `DAST_ADVERTISE_SCAN`                       | Rename             | To `DAST_REQUEST_ADVERTISE_SCAN`              |
-| `DAST_AFTER_LOGIN_ACTIONS`                  | Rename             | To `DAST_AUTH_AFTER_LOGIN_ACTIONS`            |
 | `DAST_AUTH_COOKIES`                         | Rename             | To `DAST_AUTH_COOKIE_NAMES`                   |
 | `DAST_AUTH_DISABLE_CLEAR_FIELDS`            | Rename             | To `DAST_AUTH_CLEAR_INPUT_FIELDS`             |
 | `DAST_AUTH_REPORT`                          | No action required |                                               |
@@ -92,7 +91,6 @@ See [configuration](browser/configuration/index.md) for more information on conf
 | `DAST_BROWSER_ACTION_STABILITY_TIMEOUT`     | Replace            | With `DAST_PAGE_DOM_READY_TIMEOUT`            |
 | `DAST_BROWSER_ACTION_TIMEOUT`               | Remove             | Not supported                                 |
 | `DAST_BROWSER_ALLOWED_HOSTS`                | Rename             | To `DAST_SCOPE_ALLOW_HOSTS`                   |
-| `DAST_BROWSER_CACHE`                        | Rename             | To `DAST_USE_CACHE`                           |
 | `DAST_BROWSER_COOKIES`                      | Rename             | To `DAST_REQUEST_COOKIES`                     |
 | `DAST_BROWSER_CRAWL_GRAPH`                  | Rename             | To `DAST_CRAWL_GRAPH`                         |
 | `DAST_BROWSER_CRAWL_TIMEOUT`                | Rename             | To `DAST_CRAWL_TIMEOUT`                       |

@@ -45,12 +45,6 @@ const duoProTrialStatusWidgetStubTestId = 'duo-pro-trial-status-widget';
 const DuoProTrialStatusWidgetStub = {
   template: `<div data-testid="${duoProTrialStatusWidgetStubTestId}" />`,
 };
-const duoProTrialStatusPopoverStubTestId = 'duo-pro-trial-status-popover';
-const DuoProTrialStatusPopoverStub = {
-  template: `<div data-testid="${duoProTrialStatusPopoverStubTestId}" />`,
-};
-const trialWidgetStubTestId = 'trial-widget';
-const TrialWidgetStub = { template: `<div data-testid="${trialWidgetStubTestId}" />` };
 const UserBarStub = {
   template: `<div><a href="#">link</a></div>`,
 };
@@ -73,9 +67,6 @@ describe('SuperSidebar component', () => {
   const findTrialStatusWidget = () => wrapper.findByTestId(trialStatusWidgetStubTestId);
   const findTrialStatusPopover = () => wrapper.findByTestId(trialStatusPopoverStubTestId);
   const findDuoProTrialStatusWidget = () => wrapper.findByTestId(duoProTrialStatusWidgetStubTestId);
-  const findDuoProTrialStatusPopover = () =>
-    wrapper.findByTestId(duoProTrialStatusPopoverStubTestId);
-  const findTrialWidget = () => wrapper.findByTestId(trialWidgetStubTestId);
   const findSidebarMenu = () => wrapper.findComponent(SidebarMenu);
   const findAdminLink = () => wrapper.findByTestId('sidebar-admin-link');
   const findContextHeader = () => wrapper.findComponent('#super-sidebar-context-header');
@@ -92,7 +83,6 @@ describe('SuperSidebar component', () => {
       provide: {
         showTrialStatusWidget: false,
         showDuoProTrialStatusWidget: false,
-        showTrialWidget: false,
         ...provide,
       },
       propsData: {
@@ -102,8 +92,6 @@ describe('SuperSidebar component', () => {
         TrialStatusWidget: TrialStatusWidgetStub,
         TrialStatusPopover: TrialStatusPopoverStub,
         DuoProTrialStatusWidget: DuoProTrialStatusWidgetStub,
-        DuoProTrialStatusPopover: DuoProTrialStatusPopoverStub,
-        TrialWidget: TrialWidgetStub,
         UserBar: stubComponent(UserBar, UserBarStub),
       },
       attachTo: document.body,
@@ -189,7 +177,7 @@ describe('SuperSidebar component', () => {
 
       expect(link.exists()).toBe(true);
       expect(link.attributes('href')).toBe(linkAttrs.href);
-      expect(link.attributes('class')).toContain('gl-hidden');
+      expect(link.attributes('class')).toContain('gl-display-none');
     });
 
     it('sets up the sidebar toggle shortcut', () => {
@@ -233,13 +221,6 @@ describe('SuperSidebar component', () => {
       createWrapper();
 
       expect(findDuoProTrialStatusWidget().exists()).toBe(false);
-      expect(findDuoProTrialStatusPopover().exists()).toBe(false);
-    });
-
-    it('does not render trial widget', () => {
-      createWrapper();
-
-      expect(findTrialWidget().exists()).toBe(false);
     });
 
     it('does not have peek behaviors', () => {
@@ -376,7 +357,6 @@ describe('SuperSidebar component', () => {
 
     it('renders duo pro trial status widget', () => {
       expect(findDuoProTrialStatusWidget().exists()).toBe(true);
-      expect(findDuoProTrialStatusPopover().exists()).toBe(true);
     });
   });
 
@@ -391,17 +371,6 @@ describe('SuperSidebar component', () => {
       expect(findTrialStatusWidget().exists()).toBe(true);
       expect(findTrialStatusPopover().exists()).toBe(true);
       expect(findDuoProTrialStatusWidget().exists()).toBe(false);
-      expect(findDuoProTrialStatusPopover().exists()).toBe(false);
-    });
-  });
-
-  describe('when a trial widget is active', () => {
-    beforeEach(() => {
-      createWrapper({ provide: { showTrialWidget: true } });
-    });
-
-    it('renders trial widget', () => {
-      expect(findTrialWidget().exists()).toBe(true);
     });
   });
 

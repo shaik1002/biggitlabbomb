@@ -213,8 +213,7 @@ RSpec.describe BulkImports::Entity, type: :model, feature_category: :importers d
 
   describe '.all_human_statuses' do
     it 'returns all human readable entity statuses' do
-      expect(described_class.all_human_statuses)
-        .to contain_exactly('created', 'started', 'finished', 'failed', 'timeout', 'canceled')
+      expect(described_class.all_human_statuses).to contain_exactly('created', 'started', 'finished', 'failed', 'timeout')
     end
   end
 
@@ -572,30 +571,6 @@ RSpec.describe BulkImports::Entity, type: :model, feature_category: :importers d
 
           expect(entity.checksums).to eq({})
         end
-      end
-    end
-  end
-
-  describe 'entity canceling' do
-    let(:entity) { create(:bulk_import_entity, :started) }
-
-    it 'marks entity as canceled' do
-      entity.cancel!
-
-      expect(entity.canceled?).to eq(true)
-    end
-
-    context 'when entity has trackers' do
-      it 'marks trackers as canceled' do
-        tracker = create(
-          :bulk_import_tracker,
-          entity: entity,
-          relation: 'BulkImports::Common::Pipelines::MilestonesPipeline'
-        )
-
-        entity.cancel!
-
-        expect(tracker.reload.canceled?).to eq(true)
       end
     end
   end

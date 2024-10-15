@@ -1,6 +1,5 @@
-import { builders } from 'prosemirror-test-builder';
 import HTMLMarks from '~/content_editor/extensions/html_marks';
-import { createTestEditor } from '../test_utils';
+import { createTestEditor, createDocBuilder } from '../test_utils';
 
 describe('content_editor/extensions/html_marks', () => {
   let tiptapEditor;
@@ -26,24 +25,37 @@ describe('content_editor/extensions/html_marks', () => {
     tiptapEditor = createTestEditor({ extensions: [...HTMLMarks] });
 
     ({
-      doc,
-      ins,
-      abbr,
-      bdo,
-      cite,
-      dfn,
-      small,
-      span,
-      time,
-      kbd,
-      q,
-      samp,
-      var: varMark,
-      ruby,
-      rp,
-      rt,
-      paragraph: p,
-    } = builders(tiptapEditor.schema));
+      builders: {
+        doc,
+        ins,
+        abbr,
+        bdo,
+        cite,
+        dfn,
+        small,
+        span,
+        time,
+        kbd,
+        q,
+        samp,
+        var: varMark,
+        ruby,
+        rp,
+        rt,
+        p,
+      },
+    } = createDocBuilder({
+      tiptapEditor,
+      names: {
+        ...HTMLMarks.reduce(
+          (builders, htmlMark) => ({
+            ...builders,
+            [htmlMark.name]: { markType: htmlMark.name },
+          }),
+          {},
+        ),
+      },
+    }));
   });
 
   it.each`

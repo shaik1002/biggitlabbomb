@@ -53,10 +53,10 @@ export default {
           :value="option.value"
           class="gl-mb-3"
         >
-          <div class="gl-flex gl-items-center">
+          <div class="gl-display-flex gl-align-items-center">
             <gl-icon :size="16" :name="option.icon" />
             <span
-              class="js-visibility-option gl-ml-2 gl-font-semibold"
+              class="gl-font-weight-semibold gl-ml-2 js-visibility-option"
               data-testid="visibility-content"
               :data-qa-visibility="option.label"
               >{{ option.label }}</span

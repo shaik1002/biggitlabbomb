@@ -27,17 +27,15 @@ module UpdateRepositoryStorageMethods
     return response if response
 
     unless same_filesystem?
-      # Mirror the object pool first, as we'll later provide the pool's disk path as
-      # partitioning hints when mirroring member repositories.
-      mirror_object_pool(destination_storage_name)
       mirror_repositories
+      mirror_object_pool(destination_storage_name)
     end
+
+    repository_storage_move.finish_replication!
 
     repository_storage_move.transaction do
       track_repository(destination_storage_name)
     end
-
-    repository_storage_move.finish_replication!
 
     remove_old_paths unless same_filesystem?
 
@@ -93,14 +91,7 @@ module UpdateRepositoryStorageMethods
       full_path
     )
 
-    # Provide the object pool's disk path as a partitioning hint to Gitaly. This
-    # ensures Gitaly creates the repository in the same partition as its pool, so
-    # they can be correctly linked.
-    object_pool = repository.project&.pool_repository&.object_pool
-    hint = object_pool ? object_pool.relative_path : ""
-
-    Repositories::ReplicateService.new(raw_repository)
-      .execute(new_repository, type.name, partition_hint: hint)
+    Repositories::ReplicateService.new(raw_repository).execute(new_repository, type.name)
   end
 
   def same_filesystem?

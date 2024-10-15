@@ -1,8 +1,7 @@
 ---
 stage: Create
-group: Remote Development
+group: IDE
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
-description: "Workspaces are virtual sandbox environments for creating and managing your GitLab development environments."
 ---
 
 # Workspaces
@@ -22,18 +21,16 @@ These environments ensure that different projects don't interfere with each othe
 Each workspace includes its own set of dependencies, libraries, and tools,
 which you can customize to meet the specific needs of each project.
 
-For a click-through demo, see [GitLab workspaces](https://tech-marketing.gitlab.io/static-demos/workspaces/ws_html.html).
-
 ## Workspaces and projects
 
 Workspaces are scoped to a project.
-When you [create a workspace](configuration.md#create-a-workspace), you must:
+When you [create a workspace](configuration.md#set-up-a-workspace), you must:
 
 - Assign the workspace to a specific project.
-- Select a project with a [devfile](#devfile).
+- Select a project with a [`.devfile.yaml`](#devfile) file.
 
 The workspace can interact with the GitLab API, with the access level defined by current user permissions.
-A running workspace remains accessible to the user even if user permissions are later revoked.
+A running workspace remains accessible even if user permissions are later revoked.
 
 ### Manage workspaces from a project
 
@@ -51,10 +48,9 @@ WARNING:
 When you terminate a workspace, any unsaved or uncommitted data
 in that workspace is deleted and cannot be recovered.
 
-### Deleting resources associated with a workspace
+### Deleting data associated with a workspace
 
-When you terminate a workspace, all resources associated with the workspace are deleted.
-When you delete a project, agent, user, or token associated with a running workspace:
+When you delete a project, agent, user, or token associated with a workspace:
 
 - The workspace is deleted from the user interface.
 - In the Kubernetes cluster, the running workspace resources become orphaned and are not automatically deleted.
@@ -96,7 +92,7 @@ A devfile is a file that defines a development environment by specifying the nec
 tools, languages, runtimes, and other components for a GitLab project.
 
 Workspaces have built-in support for devfiles.
-The default location is `.devfile.yaml`, but you can also use a custom location.
+You can specify a devfile for your project in the GitLab configuration file.
 The devfile is used to automatically configure the development environment with the defined specifications.
 
 This way, you can create consistent and reproducible development environments
@@ -177,53 +173,15 @@ must meet the following system requirements:
 These requirements have been tested on Debian 10.13 and Ubuntu 20.04.
 For more information, see the [VS Code documentation](https://code.visualstudio.com/docs/remote/linux).
 
-## Workspace add-ons
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/385157) in GitLab 17.2.
-
-The GitLab Workflow extension for VS Code is configured by default in workspaces.
-
-With this extension, you can view issues, create merge requests, and manage CI/CD pipelines.
-This extension also powers AI features like [GitLab Duo Code Suggestions](../project/repository/code_suggestions/index.md)
-and [GitLab Duo Chat](../gitlab_duo_chat/index.md).
-
-For more information, see [GitLab Workflow extension for VS Code](https://gitlab.com/gitlab-org/gitlab-vscode-extension).
-
-## Extension marketplace
-
-DETAILS:
-**Status:** Beta
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/438491) as a [beta](../../policy/experiment-beta-support.md#beta) in GitLab 16.9 [with a flag](../../administration/feature_flags.md) named `allow_extensions_marketplace_in_workspace`. Disabled by default.
-
-FLAG:
-The availability of this feature is controlled by a feature flag.
-For more information, see the history.
-
-When `allow_extensions_marketplace_in_workspace` is enabled, you can use the
-[extension marketplace](../project/web_ide/index.md#extension-marketplace) in workspaces.
-An administrator can enable or disable the flag for top-level groups only.
-
-The extension marketplace connects to the [Open VSX Registry](https://open-vsx.org/).
-
 ## Personal access token
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/129715) in GitLab 16.4.
-> - `api` permission [added](https://gitlab.com/gitlab-org/gitlab/-/issues/385157) in GitLab 17.2.
 
-When you [create a workspace](configuration.md#create-a-workspace), you get a personal access token
-with `write_repository` and `api` permissions.
-This token is used to initially clone the project while starting the workspace
-and to configure the GitLab Workflow extension for VS Code.
+When you [create a workspace](configuration.md#set-up-a-workspace), you get a personal access token with `write_repository` permission.
+This token is used to initially clone the project while starting the workspace.
 
 Any Git operation you perform in the workspace uses this token for authentication and authorization.
 When you terminate the workspace, the token is revoked.
-
-The `GIT_CONFIG_COUNT`, `GIT_CONFIG_KEY_n`, and `GIT_CONFIG_VALUE_n`
-[environment variables](https://git-scm.com/docs/git-config/#Documentation/git-config.txt-GITCONFIGCOUNT)
-are used for Git authentication in the workspace.
-Support for these variables was added in Git 2.31, so the Git version
-you use in the workspace container must be 2.31 and later.
 
 ## Pod interaction in a cluster
 
@@ -262,3 +220,7 @@ see [Create a custom workspace image that supports arbitrary user IDs](../worksp
 
 For more information, see the
 [OpenShift documentation](https://docs.openshift.com/container-platform/4.12/openshift_images/create-images.html#use-uid_create-images).
+
+## Related topics
+
+- [GitLab workspaces demo](https://go.gitlab.com/qtu66q)

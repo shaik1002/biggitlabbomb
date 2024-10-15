@@ -10,14 +10,14 @@ module QA
         Flow::Login.sign_in
       end
 
-      it 'can change the directory path of a page', :blocking,
+      it 'can change the directory path of a page',
         testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347821' do
         initial_wiki.visit!
 
         Page::Project::Wiki::Show.perform(&:click_edit)
 
         Page::Project::Wiki::Edit.perform do |edit|
-          edit.set_path("#{new_path}/home")
+          edit.set_title("#{new_path}/home")
           edit.set_message('changing the path of the home page')
         end
 

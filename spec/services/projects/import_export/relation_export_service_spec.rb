@@ -39,9 +39,15 @@ RSpec.describe Projects::ImportExport::RelationExportService, feature_category: 
         end
       end
 
-      it 'raises error and logs failed message' do
+      it 'flags export as failed' do
+        service.execute
+
+        expect(relation_export.failed?).to eq(true)
+      end
+
+      it 'logs failed message' do
         expect_next_instance_of(Gitlab::Export::Logger) do |logger|
-          expect(logger).to receive(:warn).with(
+          expect(logger).to receive(:error).with(
             export_error: '',
             message: 'Project relation export failed',
             relation: relation_export.relation,
@@ -51,7 +57,37 @@ RSpec.describe Projects::ImportExport::RelationExportService, feature_category: 
           )
         end
 
-        expect { service.execute }.to raise_error(Gitlab::ImportExport::Error)
+        service.execute
+      end
+    end
+
+    context 'when an exception is raised' do
+      before do
+        allow_next_instance_of(Gitlab::ImportExport::Project::RelationSaver) do |saver|
+          allow(saver).to receive(:save).and_raise('Error!')
+        end
+      end
+
+      it 'flags export as failed' do
+        service.execute
+
+        expect(relation_export.failed?).to eq(true)
+        expect(relation_export.export_error).to eq('Error!')
+      end
+
+      it 'logs exception error message' do
+        expect_next_instance_of(Gitlab::Export::Logger) do |logger|
+          expect(logger).to receive(:error).with(
+            export_error: 'Error!',
+            message: 'Project relation export failed',
+            relation: relation_export.relation,
+            project_export_job_id: project_export_job.id,
+            project_id: project_export_job.project.id,
+            project_name: project_export_job.project.name
+          )
+        end
+
+        service.execute
       end
     end
 

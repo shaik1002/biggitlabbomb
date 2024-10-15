@@ -313,11 +313,9 @@ export const escapeFileUrl = (fileUrl) => encodeURIComponent(fileUrl).replace(/%
 
 export function webIDEUrl(route = undefined) {
   let returnUrl = `${gon.relative_url_root || ''}/-/ide/`;
-
   if (route) {
-    returnUrl += `project${route.replace(new RegExp(`^${gon.relative_url_root || ''}/`), '/')}`;
+    returnUrl += `project${route.replace(new RegExp(`^${gon.relative_url_root || ''}`), '')}`;
   }
-
   return escapeFileUrl(returnUrl);
 }
 
@@ -375,39 +373,17 @@ export function isAbsoluteOrRootRelative(url) {
 }
 
 /**
- * Returns a list of path segments of the given URL instance.
+ * Returns true if url is an external URL
  *
- * @param {URL} url - URL instance (not a string!)
- * @returns {Array<string>} List of path segments of the given URL
- */
-export function pathSegments(url) {
-  const pathname = url.pathname.endsWith(PATH_SEPARATOR) ? url.pathname.slice(0, -1) : url.pathname;
-  return pathname.split(PATH_SEPARATOR).slice(1);
-}
-
-/**
- * Returns `true` if the `url` is an external URL.
- * The query and hash of the url are ignored.
- *
- * @param {string} url
- * @returns {boolean}
+ * @param {String} url
+ * @returns {Boolean}
  */
 export function isExternal(url) {
-  const gitlabURL = new URL(gon.gitlab_url);
-  const newURL = new URL(url, window.location.href);
-
-  if (gitlabURL.origin !== newURL.origin) {
-    return true;
+  if (isRootRelative(url)) {
+    return false;
   }
 
-  const gitlabURLpathSegments = pathSegments(gitlabURL);
-  const newURLpathSegments = pathSegments(newURL);
-
-  const isInternal = gitlabURLpathSegments.every(
-    (pathSegment, i) => pathSegment === newURLpathSegments[i],
-  );
-
-  return !isInternal;
+  return !url.includes(gon.gitlab_url);
 }
 
 /**
@@ -427,19 +403,12 @@ export function relativePathToAbsolute(path, basePath) {
 }
 
 /**
- * Checks if the provided URL is a valid URL. Valid URLs are
- * - absolute URLs (`http(s)://...`)
- * - root-relative URLs (`/path/...`)
- * - parsable by the `URL` constructor
- * - has http or https protocol
- *
- * Relative URLs (`../path`), queries (`?...`), and hashes (`#...`) are not
- * considered valid.
+ * Checks if the provided URL is a safe URL (absolute http(s) or root-relative URL)
  *
  * @param {String} url that will be checked
  * @returns {Boolean}
  */
-export function isValidURL(url) {
+export function isSafeURL(url) {
   if (!isAbsoluteOrRootRelative(url)) {
     return false;
   }
@@ -450,6 +419,19 @@ export function isValidURL(url) {
   } catch (e) {
     return false;
   }
+}
+
+/**
+ * Returns the sanitized url when not safe
+ *
+ * @param {String} url
+ * @returns {String}
+ */
+export function sanitizeUrl(url) {
+  if (!isSafeURL(url)) {
+    return 'about:blank';
+  }
+  return url;
 }
 
 /**
@@ -572,7 +554,6 @@ export const setUrlParams = (
   clearParams = false,
   railsArraySyntax = false,
   decodeParams = false,
-  // eslint-disable-next-line max-params
 ) => {
   const urlObj = new URL(url);
   const queryString = urlObj.search;
@@ -715,16 +696,24 @@ export const removeLastSlashInUrlPath = (url) =>
   url.replace(/\/$/, '').replace(/\/(\?|#){1}([^/]*)$/, '$1$2');
 
 /**
+ * Navigates to a URL
+ * @deprecated Use visitUrl from ~/lib/utils/url_utility.js instead
+ * @param {*} url
+ */
+export function redirectTo(url) {
+  return window.location.assign(url);
+}
+
+/**
  * Navigates to a URL.
  *
  * If destination is a querystring, it will be automatically transformed into a fully qualified URL.
- * If the URL is not valid (see isValidURL implementation), this function will log an exception into Sentry.
- * If the URL is external it calls window.open so it has no referrer header or reference to its opener.
+ * If the URL is not a safe URL (see isSafeURL implementation), this function will log an exception into Sentry.
  *
  * @param {*} destination - url to navigate to. This can be a fully qualified URL or a querystring.
- * @param {*} openWindow - if true, open a new window or tab
+ * @param {*} external - if true, open a new page or tab
  */
-export function visitUrl(destination, openWindow = false) {
+export function visitUrl(destination, external = false) {
   let url = destination;
 
   if (destination.startsWith('?')) {
@@ -733,18 +722,16 @@ export function visitUrl(destination, openWindow = false) {
     url = currentUrl.toString();
   }
 
-  if (!isValidURL(url)) {
+  if (!isSafeURL(url)) {
     throw new RangeError(`Only http and https protocols are allowed: ${url}`);
   }
 
-  if (isExternal(url)) {
-    const target = openWindow ? '_blank' : '_self';
-    // Sets window.opener to null and avoids leaking referrer information.
-    // eslint-disable-next-line no-restricted-properties
-    window.open(url, target, 'noreferrer');
-  } else if (openWindow) {
-    // eslint-disable-next-line no-restricted-properties
-    window.open(url);
+  if (external) {
+    // Simulate `target="_blank" rel="noopener noreferrer"`
+    // See https://mathiasbynens.github.io/rel-noopener/
+    const otherWindow = window.open();
+    otherWindow.opener = null;
+    otherWindow.location.assign(url);
   } else {
     window.location.assign(url);
   }
@@ -754,7 +741,7 @@ export function visitUrl(destination, openWindow = false) {
  * Navigates to a URL and display alerts.
  *
  * If destination is a querystring, it will be automatically transformed into a fully qualified URL.
- * If the URL is not valid (see isValidURL implementation), this function will log an exception into Sentry.
+ * If the URL is not a safe URL (see isSafeURL implementation), this function will log an exception into Sentry.
  *
  * @param {*} destination - url to navigate to. This can be a fully qualified URL or a querystring.
  * @param {{id: String, title?: String, message: String, variant: String, dismissible?: Boolean, persistOnPages?: String[]}[]} alerts - Alerts to display
@@ -779,15 +766,4 @@ export function buildURLwithRefType({ base = window.location.origin, path, refTy
     url.searchParams.delete('ref_type');
   }
   return url.pathname + url.search;
-}
-
-export function stripRelativeUrlRootFromPath(path) {
-  const relativeUrlRoot = joinPaths(window.gon.relative_url_root, '/');
-
-  // If we have no relative url root or path doesn't start with it, just return the path
-  if (relativeUrlRoot === '/' || !path.startsWith(relativeUrlRoot)) {
-    return path;
-  }
-
-  return joinPaths('/', path.substring(relativeUrlRoot.length));
 }

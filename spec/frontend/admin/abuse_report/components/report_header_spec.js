@@ -1,4 +1,4 @@
-import { GlBadge, GlAvatar, GlLink, GlButton } from '@gitlab/ui';
+import { GlBadge, GlIcon, GlAvatar, GlLink, GlButton } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import ReportHeader from '~/admin/abuse_report/components/report_header.vue';
 import ReportActions from '~/admin/abuse_report/components/report_actions.vue';
@@ -11,6 +11,7 @@ describe('ReportHeader', () => {
   const { user, report } = mockAbuseReport;
 
   const findBadge = () => wrapper.findComponent(GlBadge);
+  const findIcon = () => wrapper.findComponent(GlIcon);
   const findAvatar = () => wrapper.findComponent(GlAvatar);
   const findLink = () => wrapper.findComponent(GlLink);
   const findButton = () => wrapper.findComponent(GlButton);
@@ -74,7 +75,7 @@ describe('ReportHeader', () => {
     });
 
     it(`has an icon with the ${badgeIcon} name`, () => {
-      expect(findBadge().props('icon')).toBe(badgeIcon);
+      expect(findIcon().props('name')).toBe(badgeIcon);
     });
   });
 

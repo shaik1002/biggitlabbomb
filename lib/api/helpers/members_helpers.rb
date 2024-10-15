@@ -88,8 +88,14 @@ module API
         present_members members
       end
 
-      def add_single_member(create_service_params)
-        check_existing_membership(create_service_params)
+      def add_single_member_by_user_id(create_service_params)
+        source = create_service_params[:source]
+        user_id = create_service_params[:user_id]
+        user = User.find_by(id: user_id) # rubocop: disable CodeReuse/ActiveRecord
+
+        not_found!('User') unless user
+
+        conflict!('Member already exists') if member_already_exists?(source, user_id)
 
         instance = ::Members::CreateService.new(current_user, create_service_params)
         result = instance.execute
@@ -105,28 +111,21 @@ module API
         member = instance.single_member
         render_validation_error!(member) if member&.invalid?
 
-        present_add_single_member_response(result, member)
-      end
-
-      def present_put_membership_response(result)
-        updated_member = result[:members].first
-
-        if result[:status] == :success
-          present_members updated_member
+        # if errors occurred besides model validations or authorization failures,
+        # render those appropriately
+        if result[:status] == :error
+          render_structured_api_error!(result, :bad_request)
         else
-          render_validation_error!(updated_member)
+          present_members(member)
         end
       end
 
-      def check_existing_membership(create_service_params)
-        user_id = User.get_ids_by_ids_or_usernames(create_service_params[:user_id], create_service_params[:username]).first
-
-        not_found!('User') unless user_id
-        conflict!('Member already exists') if member_already_exists?(create_service_params[:source], user_id)
+      def add_multiple_members?(user_id)
+        user_id.include?(',')
       end
 
-      def add_multiple_members?(user_id, username)
-        user_id&.include?(',') || username&.include?(',')
+      def add_single_member?(user_id)
+        user_id.present?
       end
 
       def self.member_access_levels
@@ -137,16 +136,6 @@ module API
 
       def member_already_exists?(source, user_id)
         source.members.exists?(user_id: user_id) # rubocop: disable CodeReuse/ActiveRecord
-      end
-
-      def present_add_single_member_response(result, member)
-        # if errors occurred besides model validations or authorization failures,
-        # render those appropriately
-        if result[:status] == :error
-          render_structured_api_error!(result, :bad_request)
-        else
-          present_members(member)
-        end
       end
     end
   end

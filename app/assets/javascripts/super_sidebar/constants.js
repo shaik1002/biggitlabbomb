@@ -21,9 +21,8 @@ export const sidebarState = Vue.observable({
   wasHoverPeek: false,
 });
 
-export const duoChatGlobalState = Vue.observable({
-  commands: [],
-  isShown: false,
+export const helpCenterState = Vue.observable({
+  showTanukiBotChatDrawer: false,
 });
 
 export const SUPER_SIDEBAR_PEEK_OPEN_DELAY = 200;

@@ -58,7 +58,6 @@ module Gitlab
       project_params = {
         path: project_path,
         namespace_id: namespace.id,
-        organization_id: namespace.organization_id,
         visibility_level: Gitlab::VisibilityLevel::PRIVATE
       }
 

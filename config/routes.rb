@@ -38,11 +38,6 @@ InitializerConnections.raise_if_new_database_connection do
       controllers discovery: 'jwks'
     end
 
-    use_doorkeeper_device_authorization_grant do
-      controller device_authorizations: 'oauth/device_authorizations',
-        device_codes: 'oauth/device_codes'
-    end
-
     # Add OPTIONS method for CORS preflight requests
     match '/oauth/userinfo' => 'doorkeeper/openid_connect/userinfo#show', via: :options
     match '/oauth/discovery/keys' => 'jwks#keys', via: :options
@@ -68,7 +63,6 @@ InitializerConnections.raise_if_new_database_connection do
     # Search
     get 'search' => 'search#show', as: :search
     get 'search/autocomplete' => 'search#autocomplete', as: :search_autocomplete
-    get 'search/settings' => 'search#settings'
     get 'search/count' => 'search#count', as: :search_count
     get 'search/opensearch' => 'search#opensearch', as: :search_opensearch
 
@@ -109,18 +103,10 @@ InitializerConnections.raise_if_new_database_connection do
       get '/sandbox/mermaid' => 'sandbox#mermaid'
       get '/sandbox/swagger' => 'sandbox#swagger'
 
-      get '/:model/:model_id/uploads/:secret/:filename',
-        to: 'banzai/uploads#show',
-        constraints: {
-          model: /project|group/,
-          filename: %r{[^/]+}
-        },
-        as: 'banzai_upload'
-
       get '/whats_new' => 'whats_new#index'
 
       get 'offline' => "pwa#offline"
-      get 'manifest' => "pwa#manifest", constraints: ->(req) { req.format == :json }
+      get 'manifest' => "pwa#manifest", constraints: lambda { |req| req.format == :json }
 
       scope module: 'clusters' do
         scope module: 'agents' do
@@ -128,11 +114,6 @@ InitializerConnections.raise_if_new_database_connection do
           get '/kubernetes/:agent_id(/*vueroute)', to: 'dashboard#show', as: 'kubernetes_dashboard'
         end
       end
-
-      # HTTP Router
-      # Creating a black hole for /-/http_router/version since it is taken by the
-      # cloudflare worker, see: https://gitlab.com/gitlab-org/cells/http-router/-/issues/47
-      match '/http_router/version', to: proc { [204, {}, ['']] }, via: :all
 
       # '/-/health' implemented by BasicHealthCheck middleware
       get 'liveness' => 'health#liveness'
@@ -150,7 +131,6 @@ InitializerConnections.raise_if_new_database_connection do
       scope :ide, as: :ide, format: false do
         get '/', to: 'ide#index'
         get '/project', to: 'ide#index'
-        # note: This path has a hardcoded reference in the FE `app/assets/javascripts/ide/constants.js`
         get '/oauth_redirect', to: 'ide#oauth_redirect'
 
         scope path: 'project/:project_id', as: :project, constraints: { project_id: Gitlab::PathRegex.full_namespace_route_regex } do
@@ -165,7 +145,11 @@ InitializerConnections.raise_if_new_database_connection do
           get '/', to: 'ide#index'
         end
 
-        post '/reset_oauth_application_settings' => 'admin/applications#reset_web_ide_oauth_application_settings'
+        # Remote host can contain "." characters so it needs a constraint
+        post 'remote/:remote_host(/*remote_path)',
+          as: :remote,
+          to: 'web_ide/remote_ide#index',
+          constraints: { remote_host: %r{[^/?]+} }
       end
 
       draw :operations
@@ -180,7 +164,6 @@ InitializerConnections.raise_if_new_database_connection do
         draw :country
         draw :country_state
         draw :subscription
-        draw :gitlab_subscriptions
         draw :phone_verification
 
         scope '/push_from_secondary/:geo_node_id' do
@@ -213,7 +196,7 @@ InitializerConnections.raise_if_new_database_connection do
 
       resources :sent_notifications, only: [], constraints: { id: /\h{32}/ } do
         member do
-          match :unsubscribe, via: [:get, :post]
+          get :unsubscribe
         end
       end
 
@@ -273,22 +256,24 @@ InitializerConnections.raise_if_new_database_connection do
       end
     end
 
-    resources :groups, only: [:index, :new, :create]
-
-    get '/-/g/:id' => 'groups/redirect#redirect_from_id'
+    resources(:groups, only: [:index, :new, :create]) do
+      # The constraints ensure that the `group_id` parameter in the URL allows for multiple levels
+      # of subgroups, permitting both regular and encoded slashes (%2F).
+      # Deprecated in favor of /groups/*group_id/-/preview_markdown
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/442218
+      post :preview_markdown, constraints: { group_id: %r{#{Gitlab::PathRegex.full_namespace_route_regex.source}(%2F#{Gitlab::PathRegex.full_namespace_route_regex.source})*} }
+    end
 
     draw :group
 
     resources :projects, only: [:index, :new, :create]
 
     get '/projects/:id' => 'projects/redirect#redirect_from_id'
-    get '/-/p/:id' => 'projects/redirect#redirect_from_id'
 
     draw :git_http
     draw :api
     draw :activity_pub
     draw :customers_dot
-    draw :device_auth
     draw :sidekiq
     draw :help
     draw :google_api

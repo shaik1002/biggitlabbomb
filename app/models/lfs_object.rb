@@ -11,7 +11,7 @@ class LfsObject < ApplicationRecord
 
   scope :with_files_stored_locally, -> { where(file_store: LfsObjectUploader::Store::LOCAL) }
   scope :with_files_stored_remotely, -> { where(file_store: LfsObjectUploader::Store::REMOTE) }
-  scope :for_oids, ->(oids) { where(oid: oids) }
+  scope :for_oids, -> (oids) { where(oid: oids) }
 
   validates :oid, presence: true, uniqueness: true, format: { with: /\A\h{64}\z/ }
 
@@ -23,12 +23,10 @@ class LfsObject < ApplicationRecord
     find_by(oid: oid, size: size)
   end
 
-  def self.not_linked_to_project(project, repository_type: nil)
-    linked_to_project = project.lfs_objects_projects.where('lfs_objects_projects.lfs_object_id = lfs_objects.id')
-    linked_to_project = linked_to_project.where(repository_type: repository_type) if repository_type
+  def self.not_linked_to_project(project)
     where(
       'NOT EXISTS (?)',
-      linked_to_project.select(1)
+      project.lfs_objects_projects.select(1).where('lfs_objects_projects.lfs_object_id = lfs_objects.id')
     )
   end
 

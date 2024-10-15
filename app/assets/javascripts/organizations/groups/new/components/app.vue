@@ -3,7 +3,7 @@ import { GlSprintf, GlLink } from '@gitlab/ui';
 import { s__, __, sprintf } from '~/locale';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import axios from '~/lib/utils/axios_utils';
-import NewEditForm from '~/groups/components/new_edit_form.vue';
+import NewGroupForm from '~/groups/components/new_group_form.vue';
 import { FORM_FIELD_NAME, FORM_FIELD_PATH, FORM_FIELD_VISIBILITY_LEVEL } from '~/groups/constants';
 import { VISIBILITY_LEVELS_INTEGER_TO_STRING } from '~/visibility_level/constants';
 import { createAlert } from '~/alert';
@@ -29,12 +29,13 @@ export default {
   components: {
     GlLink,
     GlSprintf,
-    NewEditForm,
+    NewGroupForm,
   },
   inject: [
     'basePath',
     'groupsAndProjectsOrganizationPath',
     'groupsOrganizationPath',
+    'mattermostEnabled',
     'availableVisibilityLevels',
     'restrictedVisibilityLevels',
     'defaultVisibilityLevel',
@@ -90,7 +91,7 @@ export default {
 
 <template>
   <div class="gl-py-6">
-    <h1 class="gl-mt-0 gl-text-size-h-display">{{ $options.i18n.pageTitle }}</h1>
+    <h1 class="gl-mt-0 gl-font-size-h-display">{{ $options.i18n.pageTitle }}</h1>
     <p>
       <gl-sprintf :message="$options.i18n.description1">
         <template #link="{ content }">
@@ -105,7 +106,7 @@ export default {
         </template>
       </gl-sprintf>
     </p>
-    <new-edit-form
+    <new-group-form
       :loading="loading"
       :base-path="basePath"
       :path-maxlength="pathMaxlength"

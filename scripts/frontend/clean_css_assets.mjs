@@ -5,7 +5,7 @@ import { join, resolve, relative, dirname } from 'node:path';
 import { mkdir, stat, readFile, writeFile } from 'node:fs/promises';
 import glob from 'glob';
 import * as esbuild from 'esbuild';
-import * as prettier from 'prettier';
+import prettier from 'prettier';
 
 /**
  * VISION: This script could be made more generalizable, to be able to

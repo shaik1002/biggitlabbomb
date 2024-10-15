@@ -6,7 +6,7 @@ RSpec.describe Snippets::UpdateRepositoryStorageService, feature_category: :sour
   subject { described_class.new(repository_storage_move) }
 
   describe "#execute" do
-    let_it_be_with_reload(:snippet) { create(:project_snippet, :repository) }
+    let_it_be_with_reload(:snippet) { create(:snippet, :repository) }
     let_it_be(:destination) { 'test_second_storage' }
     let_it_be(:checksum) { snippet.repository.checksum }
 
@@ -31,7 +31,7 @@ RSpec.describe Snippets::UpdateRepositoryStorageService, feature_category: :sour
     context 'when the move succeeds' do
       it 'moves the repository to the new storage and unmarks the repository as read-only' do
         expect(snippet_repository_double).to receive(:replicate)
-          .with(snippet.repository.raw, partition_hint: "")
+          .with(snippet.repository.raw)
         expect(snippet_repository_double).to receive(:checksum)
           .and_return(checksum)
         expect(original_snippet_repository_double).to receive(:remove)
@@ -53,7 +53,7 @@ RSpec.describe Snippets::UpdateRepositoryStorageService, feature_category: :sour
         expect(Gitlab::GitalyClient).to receive(:filesystem_id).twice.and_return(SecureRandom.uuid)
       end
 
-      it 'updates the database without trying to move the repository', :aggregate_failures do
+      it 'updates the database without trying to move the repostory', :aggregate_failures do
         result = subject.execute
         snippet.reload
 
@@ -67,7 +67,7 @@ RSpec.describe Snippets::UpdateRepositoryStorageService, feature_category: :sour
     context 'when the move fails' do
       it 'unmarks the repository as read-only without updating the repository storage' do
         expect(snippet_repository_double).to receive(:replicate)
-          .with(snippet.repository.raw, partition_hint: "")
+          .with(snippet.repository.raw)
           .and_raise(Gitlab::Git::CommandError, 'Boom')
         expect(snippet_repository_double).to receive(:remove)
 
@@ -85,7 +85,7 @@ RSpec.describe Snippets::UpdateRepositoryStorageService, feature_category: :sour
     context 'when the cleanup fails' do
       it 'sets the correct state' do
         expect(snippet_repository_double).to receive(:replicate)
-          .with(snippet.repository.raw, partition_hint: "")
+          .with(snippet.repository.raw)
         expect(snippet_repository_double).to receive(:checksum)
           .and_return(checksum)
         expect(original_snippet_repository_double).to receive(:remove)
@@ -102,7 +102,7 @@ RSpec.describe Snippets::UpdateRepositoryStorageService, feature_category: :sour
     context 'when the checksum does not match' do
       it 'unmarks the repository as read-only without updating the repository storage' do
         expect(snippet_repository_double).to receive(:replicate)
-          .with(snippet.repository.raw, partition_hint: "")
+          .with(snippet.repository.raw)
         expect(snippet_repository_double).to receive(:checksum)
           .and_return('not matching checksum')
         expect(snippet_repository_double).to receive(:remove)

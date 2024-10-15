@@ -5,26 +5,20 @@ module Clusters
     module Authorizations
       module CiAccess
         class FilterService
-          def initialize(authorizations, filter_params, project)
+          def initialize(authorizations, filter_params)
             @authorizations = authorizations
             @filter_params = filter_params
-            @project = project
 
             @environments_matcher = {}
           end
 
           def execute
-            filtered_authorizations = filter_by_environment(authorizations)
-            if Feature.enabled?(:kubernetes_agent_protected_branches, project)
-              filtered_authorizations = filter_protected_ref(filtered_authorizations)
-            end
-
-            filtered_authorizations
+            filter_by_environment(authorizations)
           end
 
           private
 
-          attr_reader :authorizations, :filter_params, :project
+          attr_reader :authorizations, :filter_params
 
           def filter_by_environment(auths)
             return auths unless filter_by_environment?
@@ -52,26 +46,6 @@ module Clusters
 
           def environments_matcher(environment_pattern)
             @environments_matcher[environment_pattern] ||= ::Gitlab::Ci::EnvironmentMatcher.new(environment_pattern)
-          end
-
-          def filter_protected_ref(authorizations)
-            # we deny all if the protected_ref is not set, since we can't check if the branch is protected:
-            return [] unless protected_ref_filter_present?
-
-            # when the branch is protected we don't need to check the authorization settings
-            return authorizations if filter_params[:protected_ref]
-
-            authorizations.reject do |authorization|
-              only_run_on_protected_ref?(authorization)
-            end
-          end
-
-          def protected_ref_filter_present?
-            filter_params.has_key?(:protected_ref)
-          end
-
-          def only_run_on_protected_ref?(authorization)
-            authorization.config['protected_branches_only']
           end
         end
       end

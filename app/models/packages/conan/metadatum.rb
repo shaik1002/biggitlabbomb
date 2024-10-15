@@ -1,13 +1,9 @@
 # frozen_string_literal: true
 
 class Packages::Conan::Metadatum < ApplicationRecord
-  include IgnorableColumns
-
-  ignore_columns %i[os architecture build_type compiler compiler_version compiler_libcxx compiler_cppstd],
-    remove_with: '17.6', remove_after: '2024-10-22'
   NONE_VALUE = '_'
 
-  belongs_to :package, class_name: 'Packages::Conan::Package', inverse_of: :conan_metadatum
+  belongs_to :package, -> { where(package_type: :conan) }, inverse_of: :conan_metadatum
 
   validates :package, presence: true
 
@@ -16,6 +12,7 @@ class Packages::Conan::Metadatum < ApplicationRecord
     presence: true,
     format: { with: Gitlab::Regex.conan_recipe_user_channel_regex }
 
+  validate :conan_package_type
   validate :username_channel_none_values
 
   def recipe
@@ -45,9 +42,15 @@ class Packages::Conan::Metadatum < ApplicationRecord
 
   private
 
+  def conan_package_type
+    unless package&.conan?
+      errors.add(:base, _('Package type must be Conan'))
+    end
+  end
+
   def username_channel_none_values
     self.class.validate_username_and_channel(package_username, package_channel) do |none_field|
-      errors.add(:"package_#{none_field}", _("can't be solely blank"))
+      errors.add("package_#{none_field}".to_sym, _("can't be solely blank"))
     end
   end
 end

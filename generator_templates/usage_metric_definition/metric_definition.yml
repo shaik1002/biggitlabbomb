@@ -1,6 +1,8 @@
 ---
 key_path: <%= args.second %>
 description:
+product_section:
+product_stage:
 product_group:
 value_type: <%= value_type %>
 status: active

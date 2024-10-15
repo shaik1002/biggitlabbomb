@@ -225,19 +225,6 @@ RSpec.describe Users::DestroyService, feature_category: :user_management do
       end
     end
 
-    context 'when running the service twice for a user with no personal projects' do
-      let!(:project) { nil }
-
-      it 'does not create a second ghost user migration and does not raise an exception' do
-        expect { described_class.new(user).execute(user) }
-          .to change { Users::GhostUserMigration.where(user: user).count }.by(1)
-
-        expect do
-          expect { described_class.new(user).execute(user) }.not_to raise_exception
-        end.not_to change { Users::GhostUserMigration.where(user: user).count }
-      end
-    end
-
     it 'allows users to delete their own account' do
       expect { described_class.new(user).execute(user) }
         .to(
@@ -256,21 +243,6 @@ RSpec.describe Users::DestroyService, feature_category: :user_management do
         change do
           Users::GhostUserMigration.where(user: other_user, initiator_user: user).exists?
         end.from(false).to(true))
-    end
-
-    describe 'user is the only organization owner' do
-      let(:organization) { create(:organization) }
-
-      before do
-        organization.add_owner(user)
-      end
-
-      it 'returns the user with attached errors' do
-        described_class.new(user).execute(user)
-
-        expect(user.errors.full_messages).to(
-          contain_exactly('You must transfer ownership of organizations before you can remove user'))
-      end
     end
   end
 end

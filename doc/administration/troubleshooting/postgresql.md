@@ -130,11 +130,11 @@ idle_in_transaction_session_timeout = 60s
 
 Quoting from issue [#30528](https://gitlab.com/gitlab-org/gitlab/-/issues/30528):
 
-<!-- vale gitlab_base.FutureTense = NO -->
+<!-- vale gitlab.FutureTense = NO -->
 
 > "If a deadlock is hit, and we resolve it through aborting the transaction after a short period, then the retry mechanisms we already have will make the deadlocked piece of work try again, and it's unlikely we'll deadlock multiple times in a row."
 
-<!-- vale gitlab_base.FutureTense = YES -->
+<!-- vale gitlab.FutureTense = YES -->
 
 NOTE:
 In Support, our general approach to reconfiguring timeouts (applies also to the
@@ -261,7 +261,7 @@ To resolve the error, run `VACUUM` manually:
 
 ### GitLab database requirements
 
-See [database requirements](../../install/requirements.md#postgresql) and review and install the
+See [database requirements](../../install/requirements.md#database) and review and install the
 [required extension list](../../install/postgresql_extensions.md).
 
 ### Serialization errors in the `production/sidekiq` log
@@ -286,7 +286,7 @@ HINT:  Free one or increase max_replication_slots.
 ### Geo replication errors
 
 If you receive errors like this example, read about how to resolve
-[Geo replication errors](../geo/replication/troubleshooting/postgresql_replication.md):
+[Geo replication errors](../geo/replication/troubleshooting/replication.md#fixing-postgresql-database-replication-errors):
 
 ```plaintext
 ERROR: replication slots can only be used if max_replication_slots > 0

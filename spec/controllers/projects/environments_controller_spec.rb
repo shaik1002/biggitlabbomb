@@ -108,6 +108,22 @@ RSpec.describe Projects::EnvironmentsController, feature_category: :continuous_d
           end
         end
 
+        context 'when enable_environments_search_within_folder FF is disabled' do
+          before do
+            stub_feature_flags(enable_environments_search_within_folder: false)
+          end
+
+          it 'ignores name inside folder' do
+            create(:environment, project: project, name: 'review-app', state: :available)
+
+            get :index, params: environment_params(format: :json, search: 'review')
+
+            expect(environments.map { |env| env['name'] }).to contain_exactly('review-app')
+            expect(json_response['available_count']).to eq 1
+            expect(json_response['stopped_count']).to eq 0
+          end
+        end
+
         it 'sets the polling interval header' do
           subject
 
@@ -252,26 +268,6 @@ RSpec.describe Projects::EnvironmentsController, feature_category: :continuous_d
     end
   end
 
-  describe 'GET k8s' do
-    context 'with valid id' do
-      it 'responds with a status code 200' do
-        get :k8s, params: environment_params
-
-        expect(response).to be_ok
-      end
-    end
-
-    context 'with invalid id' do
-      it 'responds with a status code 404' do
-        params = environment_params
-        params[:id] = non_existing_record_id
-        get :k8s, params: params
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
-    end
-  end
-
   describe 'GET show' do
     context 'with valid id' do
       it 'responds with a status code 200' do
@@ -398,11 +394,8 @@ RSpec.describe Projects::EnvironmentsController, feature_category: :continuous_d
       it 'returns job url for a stop action when job is build' do
         action = create(:ci_build, :manual)
 
-        allow_next_instance_of(Environments::StopService) do |service|
-          response = ServiceResponse.success(payload: { environment: environment, actions: [action] })
-
-          allow(service).to receive(:execute).with(environment).and_return(response)
-        end
+        allow_any_instance_of(Environment)
+          .to receive_messages(available?: true, stop_with_actions!: [action])
 
         subject
 
@@ -415,11 +408,8 @@ RSpec.describe Projects::EnvironmentsController, feature_category: :continuous_d
       it 'returns pipeline url for a stop action when job is bridge' do
         action = create(:ci_bridge, :manual)
 
-        allow_next_instance_of(Environments::StopService) do |service|
-          response = ServiceResponse.success(payload: { environment: environment, actions: [action] })
-
-          allow(service).to receive(:execute).with(environment).and_return(response)
-        end
+        allow_any_instance_of(Environment)
+          .to receive_messages(available?: true, stop_with_actions!: [action])
 
         subject
 
@@ -432,11 +422,8 @@ RSpec.describe Projects::EnvironmentsController, feature_category: :continuous_d
       it 'returns environment url for multiple stop actions' do
         actions = create_list(:ci_build, 2, :manual)
 
-        allow_next_instance_of(Environments::StopService) do |service|
-          response = ServiceResponse.success(payload: { environment: environment, actions: actions })
-
-          allow(service).to receive(:execute).with(environment).and_return(response)
-        end
+        allow_any_instance_of(Environment)
+        .to receive_messages(available?: true, stop_with_actions!: actions)
 
         subject
 
@@ -444,18 +431,6 @@ RSpec.describe Projects::EnvironmentsController, feature_category: :continuous_d
         expect(json_response).to eq(
           { 'redirect_url' =>
               project_environment_url(project, environment) })
-      end
-
-      it 'returns 403 if there was an error stopping the environment' do
-        allow_next_instance_of(Environments::StopService) do |service|
-          response = ServiceResponse.error(message: 'error message')
-
-          allow(service).to receive(:execute).with(environment).and_return(response)
-        end
-
-        subject
-
-        expect(response).to have_gitlab_http_status(:forbidden)
       end
 
       it_behaves_like 'tracking unique visits', :stop do
@@ -466,11 +441,8 @@ RSpec.describe Projects::EnvironmentsController, feature_category: :continuous_d
 
     context 'when no stop action' do
       it 'returns env url' do
-        allow_next_instance_of(Environments::StopService) do |service|
-          response = ServiceResponse.success(payload: { environment: environment, actions: [] })
-
-          allow(service).to receive(:execute).with(environment).and_return(response)
-        end
+        allow_any_instance_of(Environment)
+          .to receive_messages(available?: true, stop_with_actions!: nil)
 
         subject
 

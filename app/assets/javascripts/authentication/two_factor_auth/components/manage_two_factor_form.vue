@@ -96,7 +96,13 @@ export default {
 </script>
 
 <template>
-  <gl-form ref="form" class="sm:gl-inline-block" method="post" :action="action" @submit.prevent>
+  <gl-form
+    ref="form"
+    class="gl-sm-display-inline-block"
+    method="post"
+    :action="action"
+    @submit.prevent
+  >
     <input type="hidden" name="_method" data-testid="test-2fa-method-field" :value="method" />
     <input :value="$options.csrf.token" type="hidden" name="authenticity_token" />
 
@@ -116,10 +122,10 @@ export default {
       />
     </gl-form-group>
 
-    <div class="gl-flex gl-flex-wrap">
+    <div class="gl-display-flex gl-flex-wrap">
       <gl-button
         type="submit"
-        class="gl-w-full sm:gl-mr-3 sm:gl-w-auto"
+        class="gl-sm-mr-3 gl-w-full gl-sm-w-auto"
         data-testid="test-2fa-disable-button"
         variant="danger"
         @click.prevent="
@@ -134,7 +140,7 @@ export default {
       </gl-button>
       <gl-button
         type="submit"
-        class="gl-mt-3 gl-w-full sm:gl-mt-0 sm:gl-w-auto"
+        class="gl-mt-3 gl-sm-mt-0 gl-w-full gl-sm-w-auto"
         data-testid="test-2fa-regenerate-codes-button"
         @click.prevent="
           handleSubmitButtonClick({

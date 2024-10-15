@@ -117,8 +117,8 @@ export default {
     },
     regexButtonHighlightClass() {
       return {
-        '!gl-bg-blue-50': this.regexButtonState,
-        '!gl-shadow-none': !this.regexButtonState,
+        'gl-bg-blue-50!': this.regexButtonState,
+        'gl-shadow-none!': !this.regexButtonState,
       };
     },
   },
@@ -187,13 +187,13 @@ export default {
         />
       </div>
       <!-- @slot Items are placed between right edge and clear button. -->
-      <div class="gl-ml-1 gl-mr-2">
+      <div class="gl-mr-2 gl-ml-1">
         <gl-button
           v-if="regexButtonIsVisible"
           v-gl-tooltip.hover
           :title="$options.i18n.label"
           :aria-label="$options.i18n.label"
-          class="gl-ml-2 gl-hidden sm:gl-block"
+          class="gl-sm-display-block gl-display-none gl-ml-2"
           :class="regexButtonHighlightClass"
           category="secondary"
           variant="default"

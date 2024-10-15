@@ -9,6 +9,10 @@ class Admin::UsersController < Admin::ApplicationController
   before_action :ensure_destroy_prerequisites_met, only: [:destroy]
   before_action :set_shared_view_parameters, only: [:show, :projects, :keys]
 
+  before_action only: [:index] do
+    push_frontend_feature_flag(:simplified_badges, current_user)
+  end
+
   feature_category :user_management
 
   PAGINATION_WITH_COUNT_LIMIT = 1000
@@ -17,13 +21,7 @@ class Admin::UsersController < Admin::ApplicationController
     return redirect_to admin_cohorts_path if params[:tab] == 'cohorts'
 
     @users = User.filter_items(params[:filter]).order_name_asc
-
-    if params[:search_query].present?
-      # rubocop:disable Gitlab/AvoidGitlabInstanceChecks -- available only for self-managed instances
-      @users = @users.search(params[:search_query], with_private_emails: true, partial_email_search: !Gitlab.com?)
-      # rubocop:enable Gitlab/AvoidGitlabInstanceChecks
-    end
-
+    @users = @users.search(params[:search_query], with_private_emails: true) if params[:search_query].present?
     @users = users_with_included_associations(@users)
     @sort = params[:sort].presence || sort_value_name
     @users = @users.sort_by_attribute(@sort)
@@ -367,10 +365,9 @@ class Admin::UsersController < Admin::ApplicationController
       :access_level,
       :avatar,
       :bio,
-      :bluesky,
       :can_create_group,
-      :color_mode_id,
       :color_scheme_id,
+      :color_mode_id,
       :discord,
       :email,
       :extern_uid,
@@ -382,9 +379,7 @@ class Admin::UsersController < Admin::ApplicationController
       :linkedin,
       :mastodon,
       :name,
-      :note,
       :password_expires_at,
-      :private_profile,
       :projects_limit,
       :provider,
       :remember_me,
@@ -393,6 +388,8 @@ class Admin::UsersController < Admin::ApplicationController
       :twitter,
       :username,
       :website_url,
+      :note,
+      :private_profile,
       { credit_card_validation_attributes: [:credit_card_validated_at] }
     ]
   end

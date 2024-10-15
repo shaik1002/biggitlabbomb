@@ -5,16 +5,8 @@ module Projects
     include LabelsAsHash
     include Routing::WikiHelper
 
-    SEARCH_LIMIT = 5
-
     def issues
-      relation = IssuesFinder.new(current_user, project_id: project.id, state: 'opened').execute
-
-      relation = relation.gfm_autocomplete_search(params[:search]).limit(SEARCH_LIMIT) if params[:search]
-
-      relation
-        .with_work_item_type
-        .select([:iid, :title, 'work_item_types.icon_name'])
+      IssuesFinder.new(current_user, project_id: project.id, state: 'opened').execute.select([:iid, :title])
     end
 
     def milestones
@@ -48,9 +40,9 @@ module Projects
       return [] unless can?(current_user, :read_wiki, wiki.container)
 
       wiki
-        .list_pages(limit: 5000, load_content: true, size_limit: 512)
+        .list_pages(limit: 5000)
         .reject { |page| page.slug.start_with?('templates/') }
-        .map { |page| { path: wiki_page_path(page.wiki, page), slug: page.slug, title: page.human_title } }
+        .map { |page| { path: wiki_page_path(page.wiki, page), slug: page.slug, title: page.title } }
     end
 
     def contacts(target)

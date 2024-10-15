@@ -38,8 +38,12 @@ export default function initAddContextCommitsTriggers() {
       el: addContextCommitsModalWrapperEl,
       store,
       data() {
-        const { contextCommitsPath, targetBranch, mergeRequestIid, projectId } =
-          this.$options.el.dataset;
+        const {
+          contextCommitsPath,
+          targetBranch,
+          mergeRequestIid,
+          projectId,
+        } = this.$options.el.dataset;
         return {
           contextCommitsPath,
           targetBranch,

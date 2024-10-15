@@ -32,7 +32,7 @@ module Gitlab
           return false unless project
           return true if start(project.latest_jira_import)
 
-          ::Import::Framework::Logger.info(
+          Gitlab::Import::Logger.info(
             {
               project_id: project.id,
               project_path: project.full_path,

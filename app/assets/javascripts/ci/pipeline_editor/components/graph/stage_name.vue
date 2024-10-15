@@ -15,7 +15,7 @@ export default {
 </script>
 <template>
   <tooltip-on-truncate :title="stageName" truncate-target="child" placement="top">
-    <div class="gl-w-20 gl-truncate gl-py-2 gl-font-bold">
+    <div class="gl-py-2 gl-text-truncate gl-font-weight-bold gl-w-20">
       {{ stageName }}
     </div>
   </tooltip-on-truncate>

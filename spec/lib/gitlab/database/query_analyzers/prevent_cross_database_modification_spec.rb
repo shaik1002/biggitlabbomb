@@ -178,10 +178,10 @@ RSpec.describe Gitlab::Database::QueryAnalyzers::PreventCrossDatabaseModificatio
 
       context 'when data modification happens in a transaction' do
         include_examples 'cross-database modification errors', model: Project,
-          sql_log_contains: [/UPDATE "projects"/, /SELECT "ci_pipelines"\.\* FROM "ci_pipelines" .*FOR UPDATE/]
+          sql_log_contains: [/UPDATE "projects"/, /SELECT .*"ci_pipelines"\."id".* FROM "ci_pipelines" .*FOR UPDATE/]
 
         context 'when the modification is inside a factory save! call' do
-          let(:runner) { create(:ci_runner, :project, projects: [create(:project)]) }
+          let(:runner) { create(:ci_runner, :project, projects: [build(:project)]) }
 
           it 'does not raise an error' do
             runner
@@ -235,7 +235,7 @@ RSpec.describe Gitlab::Database::QueryAnalyzers::PreventCrossDatabaseModificatio
         end
       rescue StandardError
         # Ensures that standard rescue does not silence errors
-      end.to raise_error(/Cross-database data modification/)
+      end.to raise_error /Cross-database data modification/
     end
   end
 
@@ -267,7 +267,7 @@ RSpec.describe Gitlab::Database::QueryAnalyzers::PreventCrossDatabaseModificatio
 
           # the ensure of `.transaction` executes `ROLLBACK TO SAVEPOINT`
         end
-      end.to raise_error(/force rollback/)
+      end.to raise_error /force rollback/
     end
   end
 end

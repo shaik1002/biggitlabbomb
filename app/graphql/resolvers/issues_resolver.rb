@@ -14,7 +14,7 @@ module Resolvers
       description: 'Whether to include issues from archived projects. Defaults to `false`.'
     argument :state, Types::IssuableStateEnum,
       required: false,
-      description: 'Current state of the issue.',
+      description: 'Current state of this issue.',
       prepare: ->(state, _ctx) {
         return state unless state == 'locked'
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Banzai::Pipeline::PlainMarkdownPipeline, feature_category: :markdown do
+RSpec.describe Banzai::Pipeline::PlainMarkdownPipeline, feature_category: :team_planning do
   using RSpec::Parameterized::TableSyntax
 
   # TODO: This is legacy code, and is only used with the Ruby parser.
@@ -105,10 +105,10 @@ RSpec.describe Banzai::Pipeline::PlainMarkdownPipeline, feature_category: :markd
     end
 
     it 'does not have a polynomial regex' do
-      markdown = "x \\#\n\n#{'mliteralcmliteral-' * 450000}mliteral"
+      markdown = "x \\#\n\n#{'mliteralcmliteral-' * 1550000}mliteral"
 
       expect do
-        Timeout.timeout(BANZAI_FILTER_TIMEOUT_MAX) { described_class.to_html(markdown, project: project) }
+        Timeout.timeout(2.seconds) { described_class.to_html(markdown, project: project) }
       end.not_to raise_error
     end
   end

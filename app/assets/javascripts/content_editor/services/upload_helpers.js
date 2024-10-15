@@ -3,7 +3,6 @@ import { VARIANT_DANGER } from '~/alert';
 import axios from '~/lib/utils/axios_utils';
 import { __, sprintf } from '~/locale';
 import { bytesToMiB } from '~/lib/utils/number_utils';
-import { getRetinaDimensions } from '~/lib/utils/image_utils';
 import TappablePromise from '~/lib/utils/tappable_promise';
 import { ALERT_EVENT } from '../constants';
 
@@ -11,19 +10,16 @@ const chain = (editor) => editor.chain().setMeta('preventAutolink', true);
 
 const findUploadedFilePosition = (editor, fileId) => {
   let position;
-  let node;
 
   editor.view.state.doc.descendants((descendant, pos) => {
     if (descendant.attrs.uploading === fileId) {
       position = pos;
-      node = descendant;
       return false;
     }
 
     for (const mark of descendant.marks) {
       if (mark.type.name === 'link' && mark.attrs.uploading === fileId) {
         position = pos + 1;
-        node = descendant;
         return false;
       }
     }
@@ -31,7 +27,7 @@ const findUploadedFilePosition = (editor, fileId) => {
     return true;
   });
 
-  return { position, node };
+  return position;
 };
 
 export const acceptedMimes = {
@@ -132,7 +128,7 @@ export const uploadFile = ({ uploadsPath, renderMarkdown, file }) => {
       onUploadProgress: (e) => tap(e.loaded / e.total),
     });
     const { markdown } = data.link;
-    const { body: rendered } = await renderMarkdown(markdown);
+    const rendered = await renderMarkdown(markdown);
 
     return extractAttachmentLinkUrl(rendered);
   });
@@ -150,19 +146,11 @@ const uploadMedia = async ({ type, editor, file, uploadsPath, renderMarkdown, ev
   const fileId = uniqueId(type);
 
   let position = selection.to;
-  let node;
   let content = {
     type,
     attrs: { uploading: fileId, src: objectUrl, alt: file.name },
   };
   let selectionIncrement = 0;
-  getRetinaDimensions(file)
-    .then(({ width, height } = {}) => {
-      if (width && height) {
-        chain(editor).updateAttributes(type, { width, height }).run();
-      }
-    })
-    .catch(() => {});
 
   // if the current node is not empty, we need to wrap the content in a new paragraph
   if (currentNode.content.size > 0 || currentNode.type.name === 'doc') {
@@ -184,13 +172,12 @@ const uploadMedia = async ({ type, editor, file, uploadsPath, renderMarkdown, ev
     })
     .then(({ canonicalSrc }) => {
       // the position might have changed while uploading, so we need to find it again
-      ({ node, position } = findUploadedFilePosition(editor, fileId));
+      position = findUploadedFilePosition(editor, fileId);
 
       uploadingStates[fileId] = true;
 
       editor.view.dispatch(
         editor.state.tr.setMeta('preventAutolink', true).setNodeMarkup(position, undefined, {
-          ...node.attrs,
           uploading: false,
           src: objectUrl,
           alt: file.name,
@@ -201,7 +188,7 @@ const uploadMedia = async ({ type, editor, file, uploadsPath, renderMarkdown, ev
       chain(editor).setNodeSelection(position).run();
     })
     .catch((e) => {
-      ({ position } = findUploadedFilePosition(editor, fileId));
+      position = findUploadedFilePosition(editor, fileId);
 
       chain(editor)
         .deleteRange({ from: position, to: position + 1 })
@@ -245,7 +232,7 @@ const uploadAttachment = async ({ editor, file, uploadsPath, renderMarkdown, eve
     })
     .then(({ src, canonicalSrc }) => {
       // the position might have changed while uploading, so we need to find it again
-      ({ position } = findUploadedFilePosition(editor, fileId));
+      position = findUploadedFilePosition(editor, fileId);
 
       chain(editor)
         .setTextSelection(position)
@@ -254,7 +241,7 @@ const uploadAttachment = async ({ editor, file, uploadsPath, renderMarkdown, eve
         .run();
     })
     .catch((e) => {
-      ({ position } = findUploadedFilePosition(editor, fileId));
+      position = findUploadedFilePosition(editor, fileId);
 
       chain(editor)
         .setTextSelection(position)

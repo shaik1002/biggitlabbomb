@@ -13,28 +13,9 @@ the [Elasticsearch integration documentation](../integration/advanced_search/ela
 
 ## Deep Dive
 
-In June 2019, Mario de la Ossa hosted a Deep Dive (GitLab team members only:
-`https://gitlab.com/gitlab-org/create-stage/-/issues/1`) on the GitLab
-[Elasticsearch integration](../integration/advanced_search/elasticsearch.md) to
-share his domain specific knowledge with anyone who may work in this part of the
-codebase in the future. You can find the
-<i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
-[recording on YouTube](https://www.youtube.com/watch?v=vrvl-tN2EaA), and the slides on
-[Google Slides](https://docs.google.com/presentation/d/1H-pCzI_LNrgrL5pJAIQgvLX8Ji0-jIKOg1QeJQzChug/edit) and in
-[PDF](https://gitlab.com/gitlab-org/create-stage/uploads/c5aa32b6b07476fa8b597004899ec538/Elasticsearch_Deep_Dive.pdf).
-Everything covered in this deep dive was accurate as of GitLab 12.0, and while
-specific details might have changed, it should still serve as a good introduction.
+In June 2019, Mario de la Ossa hosted a Deep Dive (GitLab team members only: `https://gitlab.com/gitlab-org/create-stage/-/issues/1`) on the GitLab [Elasticsearch integration](../integration/advanced_search/elasticsearch.md) to share his domain specific knowledge with anyone who may work in this part of the codebase in the future. You can find the <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [recording on YouTube](https://www.youtube.com/watch?v=vrvl-tN2EaA), and the slides on [Google Slides](https://docs.google.com/presentation/d/1H-pCzI_LNrgrL5pJAIQgvLX8Ji0-jIKOg1QeJQzChug/edit) and in [PDF](https://gitlab.com/gitlab-org/create-stage/uploads/c5aa32b6b07476fa8b597004899ec538/Elasticsearch_Deep_Dive.pdf). Everything covered in this deep dive was accurate as of GitLab 12.0, and while specific details might have changed, it should still serve as a good introduction.
 
-In August 2020, a second Deep Dive was hosted, focusing on
-[GitLab-specific architecture for multi-indices support](#zero-downtime-reindexing-with-multiple-indices). The
-<i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
-[recording on YouTube](https://www.youtube.com/watch?v=0WdPR9oB2fg) and the
-[slides](https://lulalala.gitlab.io/gitlab-elasticsearch-deepdive/) are available.
-Everything covered in this deep dive was accurate as of GitLab 13.3.
-
-In July 2024, Terri Chu hosted a Lunch and Learn on Advanced search basics, integration, indexing and search. The [Google Slides](https://docs.google.com/presentation/d/1Fy3pfFIGK_2ZCoB93EksRKhaS7uuNp81I3L5_joWa04/edit?usp=sharing_) (GitLab team members only) and
- <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>[recording on YouTube](https://youtu.be/5OXK1isDaks) (GitLab team members only) are available.
-Everything covered in this deep dive was accurate as of GitLab 17.0.
+In August 2020, a second Deep Dive was hosted, focusing on [GitLab-specific architecture for multi-indices support](#zero-downtime-reindexing-with-multiple-indices). The <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [recording on YouTube](https://www.youtube.com/watch?v=0WdPR9oB2fg) and the [slides](https://lulalala.gitlab.io/gitlab-elasticsearch-deepdive/) are available. Everything covered in this deep dive was accurate as of GitLab 13.3.
 
 ## Supported Versions
 
@@ -55,54 +36,11 @@ Additionally, if you need large repositories or multiple forks for testing, cons
 
 ## How does it work?
 
-The Elasticsearch integration depends on an external indexer. We ship an
-[indexer written in Go](https://gitlab.com/gitlab-org/gitlab-elasticsearch-indexer).
-The user must trigger the initial indexing via a Rake task but, after this is done,
-GitLab itself will trigger reindexing when required via `after_` callbacks on create,
-update, and destroy that are inherited from
-[`/ee/app/models/concerns/elastic/application_versioned_search.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/models/concerns/elastic/application_versioned_search.rb).
+The Elasticsearch integration depends on an external indexer. We ship an [indexer written in Go](https://gitlab.com/gitlab-org/gitlab-elasticsearch-indexer). The user must trigger the initial indexing via a Rake task but, after this is done, GitLab itself will trigger reindexing when required via `after_` callbacks on create, update, and destroy that are inherited from [`/ee/app/models/concerns/elastic/application_versioned_search.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/models/concerns/elastic/application_versioned_search.rb).
 
-After initial indexing is complete, create, update, and delete operations for all
-models except projects (see [#207494](https://gitlab.com/gitlab-org/gitlab/-/issues/207494))
-are tracked in a Redis [`ZSET`](https://redis.io/docs/latest/develop/data-types/#sorted-sets).
-A regular `sidekiq-cron` `ElasticIndexBulkCronWorker` processes this queue, updating
-many Elasticsearch documents at a time with the
-[Bulk Request API](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html).
+After initial indexing is complete, create, update, and delete operations for all models except projects (see [#207494](https://gitlab.com/gitlab-org/gitlab/-/issues/207494)) are tracked in a Redis [`ZSET`](https://redis.io/docs/latest/develop/data-types/#sorted-sets). A regular `sidekiq-cron` `ElasticIndexBulkCronWorker` processes this queue, updating many Elasticsearch documents at a time with the [Bulk Request API](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html).
 
-Search queries are generated by the concerns found in
-[`ee/app/models/concerns/elastic`](https://gitlab.com/gitlab-org/gitlab/-/tree/master/ee/app/models/concerns/elastic).
-These concerns are also in charge of access control, and have been a historic
-source of security bugs so pay close attention to them!
-
-### Architecture
-
-NOTE:
-We are migrating away from this architecture pattern in
-[this epic](https://gitlab.com/groups/gitlab-org/-/epics/13873).
-
-The traditional setup, provided by `elasticsearch-rails`, is to communicate through its internal proxy classes.
-Developers would write model-specific logic in a module for the model to include in (for example, `SnippetsSearch`).
-The `__elasticsearch__` methods would return a proxy object, for example:
-
-- `Issue.__elasticsearch__` returns an instance of `Elasticsearch::Model::Proxy::ClassMethodsProxy`
-- `Issue.first.__elasticsearch__` returns an instance of `Elasticsearch::Model::Proxy::InstanceMethodsProxy`.
-
-These proxy objects would talk to Elasticsearch server directly (see top half of the diagram).
-
-![Elasticsearch Architecture](img/elasticsearch_architecture.svg)
-
-In the planned new design, each model would have a pair of corresponding sub-classed proxy objects, in which
-model-specific logic is located. For example, `Snippet` would have `SnippetClassProxy` being a subclass
-of `Elasticsearch::Model::Proxy::ClassMethodsProxy`. `Snippet` would have `SnippetInstanceProxy` being a subclass
-of `Elasticsearch::Model::Proxy::InstanceMethodsProxy`.
-
-`__elasticsearch__` would represent another layer of proxy object, keeping track of multiple actual proxy objects. It
-would forward method calls to the appropriate index. For example:
-
-- `model.__elasticsearch__.search` would be forwarded to the one stable index, since it is a read operation.
-- `model.__elasticsearch__.update_document` would be forwarded to all indices, to keep all indices up-to-date.
-
-The global configurations per version are now in the `Elastic::(Version)::Config` class. You can change mappings there.
+Search queries are generated by the concerns found in [`ee/app/models/concerns/elastic`](https://gitlab.com/gitlab-org/gitlab/-/tree/master/ee/app/models/concerns/elastic). These concerns are also in charge of access control, and have been a historic source of security bugs so pay close attention to them!
 
 ### Custom routing
 
@@ -114,14 +52,9 @@ during indexing and searching operations. Some of the benefits and tradeoffs to 
 - Routing is not used if too many shards would be hit for global and group scoped searches.
 - Shard size imbalance might occur.
 
-<!-- vale gitlab_base.Spelling = NO -->
-
 ## Existing analyzers and tokenizers
 
-The following analyzers and tokenizers are defined in
-[`ee/lib/elastic/latest/config.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/elastic/latest/config.rb).
-
-<!-- vale gitlab_base.Spelling = YES -->
+The following analyzers and tokenizers are defined in [`ee/lib/elastic/latest/config.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/elastic/latest/config.rb).
 
 ### Analyzers
 
@@ -139,9 +72,7 @@ See the `sha_tokenizer` explanation later below for an example.
 
 #### `code_analyzer`
 
-Used when indexing a blob's filename and content. Uses the `whitespace` tokenizer
-and the [`word_delimiter_graph`](https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-word-delimiter-graph-tokenfilter.html),
-`lowercase`, and `asciifolding` filters.
+Used when indexing a blob's filename and content. Uses the `whitespace` tokenizer and the [`word_delimiter_graph`](https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-word-delimiter-graph-tokenfilter.html), `lowercase`, and `asciifolding` filters.
 
 The `whitespace` tokenizer was selected to have more control over how tokens are split. For example the string `Foo::bar(4)` needs to generate tokens like `Foo` and `bar(4)` to be properly searched.
 
@@ -154,9 +85,7 @@ The [Elasticsearch `code_analyzer` doesn't account for all code cases](../integr
 
 #### `sha_tokenizer`
 
-This is a custom tokenizer that uses the
-[`edgeNGram` tokenizer](https://www.elastic.co/guide/en/elasticsearch/reference/5.5/analysis-edgengram-tokenizer.html)
-to allow SHAs to be searchable by any sub-set of it (minimum of 5 chars).
+This is a custom tokenizer that uses the [`edgeNGram` tokenizer](https://www.elastic.co/guide/en/elasticsearch/reference/5.5/analysis-edgengram-tokenizer.html) to allow SHAs to be searchable by any sub-set of it (minimum of 5 chars).
 
 Example:
 
@@ -171,9 +100,7 @@ Example:
 
 #### `path_tokenizer`
 
-This is a custom tokenizer that uses the
-[`path_hierarchy` tokenizer](https://www.elastic.co/guide/en/elasticsearch/reference/5.5/analysis-pathhierarchy-tokenizer.html)
-with `reverse: true` to allow searches to find paths no matter how much or how little of the path is given as input.
+This is a custom tokenizer that uses the [`path_hierarchy` tokenizer](https://www.elastic.co/guide/en/elasticsearch/reference/5.5/analysis-pathhierarchy-tokenizer.html) with `reverse: true` to allow searches to find paths no matter how much or how little of the path is given as input.
 
 Example:
 
@@ -188,1032 +115,6 @@ Example:
 
 - Searches can have their own analyzers. Remember to check when editing analyzers.
 - `Character` filters (as opposed to token filters) always replace the original character. These filters can hinder exact searches.
-
-## Add a new document type to Elasticsearch
-
-If data cannot be added to one of the [existing indices in Elasticsearch](../integration/advanced_search/elasticsearch.md#advanced-search-index-scopes), follow these instructions to set up a new index and populate it.
-
-### Recommendations
-
-- Ensure [Elasticsearch is running](#setting-up-development-environment):
-
-  ```shell
-  curl "http://localhost:9200"
-  ```
-<!-- vale gitlab_base.Spelling = NO -->
-- [Run Kibana](https://www.elastic.co/guide/en/kibana/current/install.html#_install_kibana_yourself) to interact
-  with your local Elasticsearch cluster. Alternatively, you can use [Cerebro](https://github.com/lmenezes/cerebro) or a similar tool.
-<!-- vale gitlab_base.Spelling = YES -->
-- To tail the logs for Elasticsearch, run this command:
-
-  ```shell
-  tail -f log/elasticsearch.log`
-  ```
-
-See [Recommended process for adding a new document type](#recommended-process-for-adding-a-new-document-type) for how to structure the rollout.
-
-### Create the index
-
-NOTE
-All new indexes must have:
-
-- `project_id` and `namespace_id` fields (if available). One of the fields must be used for routing.
-- A `traversal_ids` field for efficient global and group search. Populate the field with `object.namespace.elastic_namespace_ancestry`
-
-1. Create a `Search::Elastic::Types::` class in `ee/lib/search/elastic/types/`.
-1. Define the following class methods:
-   - `index_name`: in the format `gitlab-<env>-<type>` (for example, `gitlab-production-work_items`).
-   - `mappings`: a hash containing the index schema such as fields, data types, and analyzers.
-   - `settings`: a hash containing the index settings such as replicas and tokenizers.
-     The default is good enough for most cases.
-1. Add a new [advanced search migration](search/advanced_search_migration_styleguide.md) to create the index
-   by executing `scripts/elastic-migration` and following the instructions.
-   The migration name must be in the format `Create<Name>Index`.
-1. Use the [`Elastic::MigrationCreateIndex`](search/advanced_search_migration_styleguide.md#elasticmigrationcreateindex)
-   helper and the `'migration creates a new index'` shared example for the specification file created.
-1. Add the target class to `Gitlab::Elastic::Helper::ES_SEPARATE_CLASSES`.
-1. To test the index creation, run `Elastic::MigrationWorker.new.perform` in a console and check that the index
-   has been created with the correct mappings and settings:
-
-   ```shell
-   curl "http://localhost:9200/gitlab-development-<type>/_mappings" | jq .`
-   ```
-
-   ```shell
-   curl "http://localhost:9200/gitlab-development-<type>/_settings" | jq .`
-   ```
-
-### Create a new Elastic Reference
-
-Create a `Search::Elastic::References::` class in `ee/lib/search/elastic/references/`.
-
-The reference is used to perform bulk operations in Elasticsearch.
-The file must inherit from `Search::Elastic::Reference` and define the following methods:
-
-```ruby
-include Search::Elastic::Concerns::DatabaseReference # if there is a corresponding database record for every document
-
-override :serialize
-def self.serialize(record)
-   # a string representation of the reference
-end
-
-override :instantiate
-def self.instantiate(string)
-   # deserialize the string and call initialize
-end
-
-override :preload_indexing_data
-def self.preload_indexing_data(refs)
-   # remove this method if `Search::Elastic::Concerns::DatabaseReference` is included
-   # otherwise return refs
-end
-
-def initialize
-   # initialize with instance variables
-end
-
-override :identifier
-def identifier
-   # a way to identify the reference
-end
-
-override :routing
-def routing
-   # Optional: an identifier to route the document in Elasticsearch
-end
-
-override :operation
-def operation
-   # one of `:index`, `:upsert` or `:delete`
-end
-
-override :serialize
-def serialize
-   # a string representation of the reference
-end
-
-override :as_indexed_json
-def as_indexed_json
-   # a hash containing the document represenation for this reference
-end
-
-override :index_name
-def index_name
-   # index name
-end
-
-def model_klass
-   # set to the model class if `Search::Elastic::Concerns::DatabaseReference` is included
-end
-```
-
-To add data to the index, an instance of the new reference class is called in
-`Elastic::ProcessBookkeepingService.track!()` to add the data to a queue of
-references for indexing.
-A cron worker pulls queued references and bulk-indexes the items into Elasticsearch.
-
-To test that the indexing operation works, call `Elastic::ProcessBookkeepingService.track!()`
-with an instance of the reference class and run `Elastic::ProcessBookkeepingService.new.execute`.
-The logs show the updates. To check the document in the index, run this command:
-
-```shell
-curl "http://localhost:9200/gitlab-development-<type>/_search"
-```
-
-### Data consistency
-
-Now that we have an index and a way to bulk index the new document type into Elasticsearch, we need to add data into the index. This consists of doing a backfill and doing continuous updates to ensure the index data is up to date.
-
-The backfill is done by calling `Elastic::ProcessInitialBookkeepingService.track!()` with an instance of `Search::Elastic::Reference` for every document that should be indexed.
-
-The continuous update is done by calling `Elastic::ProcessBookkeepingService.track!()` with an instance of `Search::Elastic::Reference` for every document that should be created/updated/deleted.
-
-#### Backfilling data
-
-Add a new [Advanced Search migration](search/advanced_search_migration_styleguide.md) to backfill data by executing `scripts/elastic-migration` and following the instructions.
-
-The backfill should execute `Elastic::ProcessInitialBookkeepingService.track!()` with an instance of the `Search::Elastic::Reference` created before for every document that should be indexed. The `BackfillEpics` migration can be used as an example.
-
-To test the backfill, run `Elastic::MigrationWorker.new.perform` in a console a couple of times and see that the index was populated.
-
-Tail the logs to see the progress of the migration:
-
-```shell
-tail -f log/elasticsearch.log
-```
-
-#### Continuous updates
-
-For `ActiveRecord` objects, the `ApplicationVersionedSearch` concern can be included on the model to index data based on callbacks. If that's not suitable, call `Elastic::ProcessBookkeepingService.track!()` with an instance of `Search::Elastic::Reference` whenever a document should be indexed.
-
-Always check for `Gitlab::CurrentSettings.elasticsearch_indexing?` and `use_elasticsearch?` because some self-managed instances do not have Elasticsearch enabled and [namespace limiting](../integration/advanced_search/elasticsearch.md#limit-the-amount-of-namespace-and-project-data-to-index) can be enabled.
-
-Also check that the index is able to handle the index request. For example, check that the index exists if it was added in the current major release by verifying that the migration to add the index was completed: `Elastic::DataMigrationService.migration_has_finished?`.
-
-#### Transfers and deletes
-
-Project and group transfers and deletes must make updates to the index to avoid orphaned data.
-
-Indexes that contain a `project_id` field must use the [`Search::Elastic::DeleteWorker`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/workers/search/elastic/delete_worker.rb). Indexes that contain a `namespace_id` field but no `project_id` field must use [`Search::ElasticGroupAssociationDeleteWorker`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/workers/search/elastic_group_association_deletion_worker.rb).
-
-1. Add the indexed class to `excluded_classes` in [`ElasticDeleteProjectWorker`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/workers/elastic_delete_project_worker.rb)
-1. Update the worker to remove documents from the index
-
-### Recommended process for adding a new document type
-
-Create the following MRs and have them reviewed by a member of the Global Search team:
-
-1. [Create the index](#create-the-index).
-1. [Create a new Elasticsearch reference](#create-a-new-elastic-reference).
-1. Perform [continuous updates](#continuous-updates) behind a feature flag. Enable the flag fully before the backfill.
-1. [Backfill the data](#backfilling-data).
-
-After indexing is done, the index is ready for search.
-
-### Adding a new scope to search service
-
-Search data is available in [`SearchController`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/controllers/search_controller.rb) and
-[Search API](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/api/search.rb). Both use the [`SearchService`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/services/search_service.rb) to return results.
-The `SearchService` can be used to return results outside of the `SearchController` and `Search API`.
-
-#### Search scopes
-
-The `SearchService` exposes searching at [global](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/services/search/global_service.rb),
-[group](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/services/search/group_service.rb), and [project](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/services/search/project_service.rb) levels.
-
-New scopes must be added to the following constants:
-
-- `ALLOWED_SCOPES` (or override `allowed_scopes` method) in each EE `SearchService` file
-- `ALLOWED_SCOPES` in `Gitlab::Search::AbuseDetection`
-- `search_tab_ability_map` method in `Search::Navigation`. Override in the EE version if needed
-
-NOTE:
-Global search can be disabled for a scope. Create an ops feature flag named `global_search_SCOPE_tab` that defaults to `true`
-and add it to the `global_search_enabled_for_scope?` method in [`SearchService`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/services/search_service.rb).
-
-#### Results classes
-
-The search results class available are:
-
-| Search type | Search level | Class |
-| -- | -- | -- |
-| Basic search | global | `Gitlab::SearchResults` |
-| Basic search | group | `Gitlab::GroupSearchResults` |
-| Basic search | project | `Gitlab::ProjectSearchResults` |
-| Advanced search | global | `Gitlab::Elastic::SearchResults` |
-| Advanced search | group | `Gitlab::Elastic::GroupSearchResults` |
-| Advanced search | project | `Gitlab::Elastic::ProjectSearchResults` |
-| Exact code search | global | `Search::Zoekt::SearchResults` |
-| Exact code search | group | `Search::Zoekt::SearchResults` |
-| Exact code search | project | `Search::Zoekt::SearchResults` |
-| All search types | All levels | `Search::EmptySearchResults` |
-
-The result class returns the following data:
-
-1. `objects` - paginated from Elasticsearch transformed into database records or POROs
-1. `formatted_count` - document count returned from Elasticsearch
-1. `highlight_map` - map of highlighted fields from Elasticsearch
-1. `failed?` - if a failure occurred
-1. `error` - error message returned from Elasticsearch
-1. `aggregations` - (optional) aggregations from Elasticsearch
-
-New scopes must add support to these methods within `Gitlab::Elastic::SearchResults` class:
-
-- `objects`
-- `formatted_count`
-- `highlight_map`
-- `failed?`
-- `error`
-
-### Building a query
-
-The query builder framework is used to build Elasticsearch queries.
-
-A query is built using:
-
-- a query from `Search::Elastic::Queries`
-- one or more filters from `::Search::Elastic::Filters`
-- (optional) aggregations from `::Search::Elastic::Aggregations`
-- one or more formats from `::Search::Elastic::Formats`
-
-New scopes must create a new query builder class that inherits from `Search::Elastic::QueryBuilder`.
-
-#### Filters
-
-The filters below may be used to build Elasticsearch queries. To use a filter, the index must
-have the required fields in the mapping. Filters use the `options` hash to build JSON which is added to the `query_hash`
-
-##### `by_type`
-
-Requires `type` field. Query with `doc_type` in options.
-
-```json
-{
-  "term": {
-    "type": {
-      "_name": "filters:doc:is_a:milestone",
-      "value": "milestone"
-    }
-  }
-}
-```
-
-##### `by_group_level_confidentiality`
-
-Requires `current_user` and `group_ids` fields. Query based on the permissions to user to read confidential group entities.
-
-```json
-{
-  "bool": {
-    "must": [
-      {
-        "term": {
-          "confidential": {
-            "value": true,
-            "_name": "confidential:true"
-          }
-        }
-      },
-      {
-        "terms": {
-          "namespace_id": [
-            1
-          ],
-          "_name": "groups:can:read_confidential_work_items"
-        }
-      }
-    ]
-  },
-  "should": {
-    "term": {
-      "confidential": {
-        "value": false,
-        "_name": "confidential:false"
-      }
-    }
-  }
-}
-```
-
-##### `by_project_confidentiality`
-
-Requires `confidential`, `author_id`, `assignee_id`, `project_id` fields. Query with `confidential` in options.
-
-```json
-{
-  "bool": {
-    "should": [
-      {
-        "term": {
-          "confidential": {
-            "_name": "filters:non_confidential",
-            "value": false
-          }
-        }
-      },
-      {
-        "bool": {
-          "must": [
-            {
-              "term": {
-                "confidential": {
-                  "_name": "filters:confidential",
-                  "value": true
-                }
-              }
-            },
-            {
-              "bool": {
-                "should": [
-                  {
-                    "term": {
-                      "author_id": {
-                        "_name": "filters:confidential:as_author",
-                        "value": 1
-                      }
-                    }
-                  },
-                  {
-                    "term": {
-                      "assignee_id": {
-                        "_name": "filters:confidential:as_assignee",
-                        "value": 1
-                      }
-                    }
-                  },
-                  {
-                    "terms": {
-                      "_name": "filters:confidential:project:membership:id",
-                      "project_id": [
-                        12345
-                      ]
-                    }
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      }
-    ]
-  }
-}
-```
-
-##### `by_label_ids`
-
-Requires `label_ids` field. Query with `label_names` in options.
-
-```json
-{
-  "bool": {
-    "must": [
-      {
-        "terms": {
-          "_name": "filters:label_ids",
-          "label_ids": [
-            1
-          ]
-        }
-      }
-    ]
-  }
-}
-```
-
-##### `by_archived`
-
-Requires `archived` field. Query with `search_level` and `include_archived` in options.
-
-```json
-{
-  "bool": {
-    "_name": "filters:non_archived",
-    "should": [
-      {
-        "bool": {
-          "filter": {
-            "term": {
-              "archived": {
-                "value": false
-              }
-            }
-          }
-        }
-      },
-      {
-        "bool": {
-          "must_not": {
-            "exists": {
-              "field": "archived"
-            }
-          }
-        }
-      }
-    ]
-  }
-}
-```
-
-##### `by_state`
-
-Requires `state` field. Supports values: `all`, `opened`, `closed`, and `merged`. Query with `state` in options.
-
-```json
-{
-  "match": {
-    "state": {
-      "_name": "filters:state",
-      "query": "opened"
-    }
-  }
-}
-```
-
-##### `by_not_hidden`
-
-Requires `hidden` field. Not applied for admins.
-
-```json
-{
-  "term": {
-    "hidden": {
-      "_name": "filters:not_hidden",
-      "value": false
-    }
-  }
-}
-```
-
-##### `by_work_item_type_ids`
-
-Requires `work_item_type_id` field. Query with `work_item_type_ids` or `not_work_item_type_ids` in options.
-
-```json
-{
-  "bool": {
-    "must_not": {
-      "terms": {
-        "_name": "filters:not_work_item_type_ids",
-        "work_item_type_id": [
-          8
-        ]
-      }
-    }
-  }
-}
-```
-
-##### `by_author`
-
-Requires `author_id` field. Query with `author_username` or `not_author_username` in options.
-
-```json
-{
-  "bool": {
-    "should": [
-      {
-        "term": {
-          "author_id": {
-            "_name": "filters:author",
-            "value": 1
-          }
-        }
-      }
-    ],
-    "minimum_should_match": 1
-  }
-}
-```
-
-##### `by_target_branch`
-
-Requires `target_branch` field. Query with `target_branch` or `not_target_branch` in options.
-
-```json
-{
-  "bool": {
-    "should": [
-      {
-        "term": {
-          "target_branch": {
-            "_name": "filters:target_branch",
-            "value": "master"
-          }
-        }
-      }
-    ],
-    "minimum_should_match": 1
-  }
-}
-```
-
-##### `by_source_branch`
-
-Requires `source_branch` field. Query with `source_branch` or `not_source_branch` in options.
-
-```json
-{
-  "bool": {
-    "should": [
-      {
-        "term": {
-          "source_branch": {
-            "_name": "filters:source_branch",
-            "value": "master"
-          }
-        }
-      }
-    ],
-    "minimum_should_match": 1
-  }
-}
-```
-
-##### `by_group_level_authorization`
-
-Requires `current_user`, `group_ids`, `traversal_id`, `search_level` fields. Query with `search_level` and
-filter on `namespace_visibility_level` based on permissions user has for each group.
-
-NOTE:
-Examples are shown for a logged in user. The JSON may be different for users with authorizations, admins, external, or anonymous users
-
-###### global
-
-```json
-{
-  "bool": {
-    "should": [
-      {
-        "bool": {
-          "filter": [
-            {
-              "term": {
-                "namespace_visibility_level": {
-                  "value": 20,
-                  "_name": "filters:namespace_visibility_level:public"
-                }
-              }
-            }
-          ]
-        }
-      },
-      {
-        "bool": {
-          "filter": [
-            {
-              "term": {
-                "namespace_visibility_level": {
-                  "value": 10,
-                  "_name": "filters:namespace_visibility_level:internal"
-                }
-              }
-            }
-          ]
-        }
-      },
-      {
-        "bool": {
-          "filter": [
-            {
-              "term": {
-                "namespace_visibility_level": {
-                  "value": 0,
-                  "_name": "filters:namespace_visibility_level:private"
-                }
-              }
-            },
-            {
-              "terms": {
-                "namespace_id": [
-                  33,
-                  22
-                ]
-              }
-            }
-          ]
-        }
-      }
-    ],
-    "minimum_should_match": 1
-  }
-}
-```
-
-###### group
-
-```json
-[
-  {
-    "bool": {
-      "_name": "filters:level:group",
-      "minimum_should_match": 1,
-      "should": [
-        {
-          "prefix": {
-            "traversal_ids": {
-              "_name": "filters:level:group:ancestry_filter:descendants",
-              "value": "22-"
-            }
-          }
-        }
-      ]
-    }
-  },
-  {
-    "bool": {
-      "should": [
-        {
-          "bool": {
-            "filter": [
-              {
-                "term": {
-                  "namespace_visibility_level": {
-                    "value": 20,
-                    "_name": "filters:namespace_visibility_level:public"
-                  }
-                }
-              }
-            ]
-          }
-        },
-        {
-          "bool": {
-            "filter": [
-              {
-                "term": {
-                  "namespace_visibility_level": {
-                    "value": 10,
-                    "_name": "filters:namespace_visibility_level:internal"
-                  }
-                }
-              }
-            ]
-          }
-        },
-        {
-          "bool": {
-            "filter": [
-              {
-                "term": {
-                  "namespace_visibility_level": {
-                    "value": 0,
-                    "_name": "filters:namespace_visibility_level:private"
-                  }
-                }
-              },
-              {
-                "terms": {
-                  "namespace_id": [
-                    22
-                  ]
-                }
-              }
-            ]
-          }
-        }
-      ],
-      "minimum_should_match": 1
-    }
-  },
-  {
-    "bool": {
-      "_name": "filters:level:group",
-      "minimum_should_match": 1,
-      "should": [
-        {
-          "prefix": {
-            "traversal_ids": {
-              "_name": "filters:level:group:ancestry_filter:descendants",
-              "value": "22-"
-            }
-          }
-        }
-      ]
-    }
-  }
-]
-```
-
-##### `by_search_level_and_membership`
-
-Requires `project_id` and `traversal_id` fields. Supports feature `*_access_level` fields. Query with `search_level`
- and optionally `project_ids`, `group_ids`, `features`, and `current_user` in options.
-
-Filtering is applied for:
-
-- search level for global, group, or project
-- membership for direct membership to groups and projects or shared membership through direct access to a group
-- any feature access levels passed through `features`
-
-NOTE:
-Examples are shown for a logged in user. The JSON may be different for users with authorizations, admins, external, or anonymous users
-
-###### global
-
-```json
-{
-  "bool": {
-    "_name": "filters:permissions:global",
-    "should": [
-      {
-        "bool": {
-          "must": [
-            {
-              "terms": {
-                "_name": "filters:permissions:global:visibility_level:public_and_internal",
-                "visibility_level": [
-                  20,
-                  10
-                ]
-              }
-            }
-          ],
-          "should": [
-            {
-              "terms": {
-                "_name": "filters:permissions:global:repository_access_level:enabled",
-                "repository_access_level": [
-                  20
-                ]
-              }
-            }
-          ],
-          "minimum_should_match": 1
-        }
-      },
-      {
-        "bool": {
-          "must": [
-            {
-              "bool": {
-                "should": [
-                  {
-                    "terms": {
-                      "_name": "filters:permissions:global:repository_access_level:enabled_or_private",
-                      "repository_access_level": [
-                        20,
-                        10
-                      ]
-                    }
-                  }
-                ],
-                "minimum_should_match": 1
-              }
-            }
-          ],
-          "should": [
-            {
-              "prefix": {
-                "traversal_ids": {
-                  "_name": "filters:permissions:global:ancestry_filter:descendants",
-                  "value": "123-"
-                }
-              }
-            },
-            {
-              "terms": {
-                "_name": "filters:permissions:global:project:member",
-                "project_id": [
-                  456
-                ]
-              }
-            }
-          ],
-          "minimum_should_match": 1
-        }
-      }
-    ],
-    "minimum_should_match": 1
-  }
-}
-```
-
-###### group
-
-```json
-[
-  {
-    "bool": {
-      "_name": "filters:level:group",
-      "minimum_should_match": 1,
-      "should": [
-        {
-          "prefix": {
-            "traversal_ids": {
-              "_name": "filters:level:group:ancestry_filter:descendants",
-              "value": "123-"
-            }
-          }
-        }
-      ]
-    }
-  },
-  {
-    "bool": {
-      "_name": "filters:permissions:group",
-      "should": [
-        {
-          "bool": {
-            "must": [
-              {
-                "terms": {
-                  "_name": "filters:permissions:group:visibility_level:public_and_internal",
-                  "visibility_level": [
-                    20,
-                    10
-                  ]
-                }
-              }
-            ],
-            "should": [
-              {
-                "terms": {
-                  "_name": "filters:permissions:group:repository_access_level:enabled",
-                  "repository_access_level": [
-                    20
-                  ]
-                }
-              }
-            ],
-            "minimum_should_match": 1
-          }
-        },
-        {
-          "bool": {
-            "must": [
-              {
-                "bool": {
-                  "should": [
-                    {
-                      "terms": {
-                        "_name": "filters:permissions:group:repository_access_level:enabled_or_private",
-                        "repository_access_level": [
-                          20,
-                          10
-                        ]
-                      }
-                    }
-                  ],
-                  "minimum_should_match": 1
-                }
-              }
-            ],
-            "should": [
-              {
-                "prefix": {
-                  "traversal_ids": {
-                    "_name": "filters:permissions:group:ancestry_filter:descendants",
-                    "value": "123-"
-                  }
-                }
-              }
-            ],
-            "minimum_should_match": 1
-          }
-        }
-      ],
-      "minimum_should_match": 1
-    }
-  }
-]
-```
-
-###### project
-
-```json
-[
-  {
-    "bool": {
-      "_name": "filters:level:project",
-      "must": {
-        "terms": {
-          "project_id": [
-            456
-          ]
-        }
-      }
-    }
-  },
-  {
-    "bool": {
-      "_name": "filters:permissions:project",
-      "should": [
-        {
-          "bool": {
-            "must": [
-              {
-                "terms": {
-                  "_name": "filters:permissions:project:visibility_level:public_and_internal",
-                  "visibility_level": [
-                    20,
-                    10
-                  ]
-                }
-              }
-            ],
-            "should": [
-              {
-                "terms": {
-                  "_name": "filters:permissions:project:repository_access_level:enabled",
-                  "repository_access_level": [
-                    20
-                  ]
-                }
-              }
-            ],
-            "minimum_should_match": 1
-          }
-        },
-        {
-          "bool": {
-            "must": [
-              {
-                "bool": {
-                  "should": [
-                    {
-                      "terms": {
-                        "_name": "filters:permissions:project:repository_access_level:enabled_or_private",
-                        "repository_access_level": [
-                          20,
-                          10
-                        ]
-                      }
-                    }
-                  ],
-                  "minimum_should_match": 1
-                }
-              }
-            ],
-            "should": [
-              {
-                "prefix": {
-                  "traversal_ids": {
-                    "_name": "filters:permissions:project:ancestry_filter:descendants",
-                    "value": "123-"
-                  }
-                }
-              }
-            ],
-            "minimum_should_match": 1
-          }
-        }
-      ],
-      "minimum_should_match": 1
-    }
-  }
-]
-```
-
-### Sending queries to Elasticsearch
-
-The queries are sent to `::Gitlab::Search::Client` from `Gitlab::Elastic::SearchResults`.
-Results are parsed through a `Search::Elastic::ResponseMapper` to translate
-the response from Elasticsearch.
-
-#### Model requirements
-
-The model must response to the `to_ability_name` method so that the redaction logic can check if it has
-`Ability.allowed?(current_user, :"read_#{object.to_ability_name}", object)?`. The method must be added if
-it does not exist.
-
-The model must define a `preload_search_data` scope to avoid N+1s.
-
-### Permissions tests
-
-Search code has a final security check in `SearchService#redact_unauthorized_results`. This prevents
-unauthorized results from being returned to users who don't have permission to view them. The check is
-done in Ruby to handle inconsistencies in Elasticsearch permissions data due to bugs or indexing delays.
-
-New scopes must add visibility specs to ensure proper access control.
-To test that permissions are properly enforced, add tests using the [`'search respects visibility'` shared example](https://gitlab.com/gitlab-org/gitlab/-/blob/a489ad0fe4b4d1e392272736b020cf9bd43646da/ee/spec/support/shared_examples/services/search_service_shared_examples.rb)
-in the EE specs:
-
-- `ee/spec/services/search/global_service_spec.rb`
-- `ee/spec/services/search/group_service_spec.rb`
-- `ee/spec/services/search/project_service_spec.rb`
-
-### Testing the new scope
-
-Test your new scope in the Rails console
-
-```ruby
-search_service = ::SearchService.new(User.first, { search: 'foo', scope: 'SCOPE_NAME' })
-search_service.search_objects
-```
-
-### Recommended process for implementing search for a new document type
-
-Create the following MRs and have them reviewed by a member of the Global Search team:
-
-1. [Enable the new scope](#search-scopes).
-1. Create a [query builder](#building-a-query).
-1. Implement all [model requirements](#model-requirements).
-1. [Add the new scope to `Gitlab::Elastic::SearchResults`](#results-classes) behind a feature flag.
-1. Add specs which must include [permissions tests](#permissions-tests)
-1. [Test the new scope](#testing-the-new-scope)
-1. Update documentation for [Advanced search](../user/search/advanced_search.md) and [Search API](../api/search.md) (if applicable)
 
 ## Zero-downtime reindexing with multiple indices
 
@@ -1233,6 +134,44 @@ index.
 This is also helpful for migrating to new servers, for example, moving to/from AWS.
 
 Currently we are on the process of migrating to this new design. Everything is hardwired to work with one single version for now.
+
+### Architecture
+
+The traditional setup, provided by `elasticsearch-rails`, is to communicate through its internal proxy classes. Developers would write model-specific logic in a module for the model to include in (for example, `SnippetsSearch`). The `__elasticsearch__` methods would return a proxy object, for example:
+
+- `Issue.__elasticsearch__` returns an instance of `Elasticsearch::Model::Proxy::ClassMethodsProxy`
+- `Issue.first.__elasticsearch__` returns an instance of `Elasticsearch::Model::Proxy::InstanceMethodsProxy`.
+
+These proxy objects would talk to Elasticsearch server directly (see top half of the diagram).
+
+![Elasticsearch Architecture](img/elasticsearch_architecture.svg)
+
+In the planned new design, each model would have a pair of corresponding sub-classed proxy objects, in which model-specific logic is located. For example, `Snippet` would have `SnippetClassProxy` being a subclass of `Elasticsearch::Model::Proxy::ClassMethodsProxy`. `Snippet` would have `SnippetInstanceProxy` being a subclass of `Elasticsearch::Model::Proxy::InstanceMethodsProxy`.
+
+`__elasticsearch__` would represent another layer of proxy object, keeping track of multiple actual proxy objects. It would forward method calls to the appropriate index. For example:
+
+- `model.__elasticsearch__.search` would be forwarded to the one stable index, since it is a read operation.
+- `model.__elasticsearch__.update_document` would be forwarded to all indices, to keep all indices up-to-date.
+
+The global configurations per version are now in the `Elastic::(Version)::Config` class. You can change mappings there.
+
+### Creating new version of schema
+
+NOTE:
+This is not applicable yet as multiple indices functionality is not fully implemented.
+
+Folders like `ee/lib/elastic/v12p1` contain snapshots of search logic from different versions. To keep a continuous Git history, the latest version lives under `ee/lib/elastic/latest`, but its classes are aliased under an actual version (for example, `ee/lib/elastic/v12p3`). When referencing these classes, never use the `Latest` namespace directly, but use the actual version (for example, `V12p3`).
+
+The version name basically follows the GitLab release version. If setting is changed in 12.3, we will create a new namespace called `V12p3` (p stands for "point"). Raise an issue if there is a need to name a version differently.
+
+If the current version is `v12p1`, and we need to create a new version for `v12p3`, the steps are as follows:
+
+1. Copy the entire folder of `v12p1` as `v12p3`
+1. Change the namespace for files under `v12p3` folder from `V12p1` to `V12p3` (which are still aliased to `Latest`)
+1. Delete `v12p1` folder
+1. Copy the entire folder of `latest` as `v12p1`
+1. Change the namespace for files under `v12p1` folder from `Latest` to `V12p1`
+1. Make changes to files under the `latest` folder as needed
 
 ## Performance Monitoring
 
@@ -1290,19 +229,6 @@ in the cluster back the request in GitLab.
 
 ## Troubleshooting
 
-### Debugging Elasticsearch queries
-
-The `ELASTIC_CLIENT_DEBUG` environment variable enables the [debug option for the Elasticsearch client](https://gitlab.com/gitlab-org/gitlab/-/blob/76bd885119795096611cb94e364149d1ef006fef/ee/lib/gitlab/elastic/client.rb#L50)
-in development or test environments. If you need to debug Elasticsearch HTTP queries generated from
-code or tests, it can be enabled before running specs or starting the Rails console:
-
-```console
-ELASTIC_CLIENT_DEBUG=1 bundle exec rspec ee/spec/workers/search/elastic/trigger_indexing_worker_spec.rb
-
-export ELASTIC_CLIENT_DEBUG=1
-rails console
-```
-
 ### Getting `flood stage disk watermark [95%] exceeded`
 
 You might get an error such as
@@ -1342,3 +268,48 @@ cluster.routing.allocation.disk.watermark.high: 10gb
 Restart Elasticsearch, and the `read_only_allow_delete` will clear on its own.
 
 _from "Disk-based Shard Allocation | Elasticsearch Reference" [5.6](https://www.elastic.co/guide/en/elasticsearch/reference/5.6/disk-allocator.html#disk-allocator) and [6.x](https://www.elastic.co/guide/en/elasticsearch/reference/6.7/disk-allocator.html)_
+
+### Disaster recovery/data loss/backups
+
+The use of Elasticsearch in GitLab is only ever as a secondary data store.
+This means that all of the data stored in Elasticsearch can always be derived
+again from other data sources, specifically PostgreSQL and Gitaly. Therefore if
+the Elasticsearch data store is ever corrupted for whatever reason you can reindex
+everything from scratch.
+
+If your Elasticsearch index is incredibly large it may be too time consuming or
+cause too much downtime to reindex from scratch. There aren't any built in
+mechanisms for automatically finding discrepancies and resyncing an
+Elasticsearch index if it gets out of sync but one tool that may be useful is
+looking at the logs for all the updates that occurred in a time range you
+believe may have been missed. This information is very low level and only
+useful for operators that are familiar with the GitLab codebase. It is
+documented here in case it is useful for others. The relevant logs that could
+theoretically be used to figure out what needs to be replayed are:
+
+1. All non-repository updates that were synced can be found in
+   [`elasticsearch.log`](../administration/logs/index.md#elasticsearchlog) by
+   searching for
+   [`track_items`](https://gitlab.com/gitlab-org/gitlab/-/blob/1e60ea99bd8110a97d8fc481e2f41cab14e63d31/ee/app/services/elastic/process_bookkeeping_service.rb#L25)
+   and these can be replayed by sending these items again through
+   `::Elastic::ProcessBookkeepingService.track!`
+1. All repository updates that occurred can be found in
+   [`elasticsearch.log`](../administration/logs/index.md#elasticsearchlog) by
+   searching for
+   [`indexing_commit_range`](https://gitlab.com/gitlab-org/gitlab/-/blob/6f9d75dd3898536b9ec2fb206e0bd677ab59bd6d/ee/lib/gitlab/elastic/indexer.rb#L41).
+   Replaying these requires resetting the
+   [`IndexStatus#last_commit/last_wiki_commit`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/models/index_status.rb)
+   to the oldest `from_sha` in the logs and then triggering another index of
+   the project using
+   [`ElasticCommitIndexerWorker`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/workers/elastic_commit_indexer_worker.rb)
+1. All project deletes that occurred can be found in
+   [`sidekiq.log`](../administration/logs/index.md#sidekiqlog) by searching for
+   [`ElasticDeleteProjectWorker`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/app/workers/elastic_delete_project_worker.rb).
+   These updates can be replayed by triggering another
+   `ElasticDeleteProjectWorker`.
+
+With the above methods and taking regular
+[Elasticsearch snapshots](https://www.elastic.co/guide/en/elasticsearch/reference/current/snapshot-restore.html)
+we should be able to recover from different kinds of data loss issues in a
+relatively short period of time compared to indexing everything from
+scratch.

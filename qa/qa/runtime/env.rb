@@ -2,7 +2,6 @@
 
 require 'active_support/deprecation'
 require 'uri'
-require 'etc'
 
 module QA
   module Runtime
@@ -89,14 +88,6 @@ module QA
 
       def ci_project_path
         ENV['CI_PROJECT_PATH']
-      end
-
-      def coverband_enabled?
-        enabled?(ENV['COVERBAND_ENABLED'], default: false)
-      end
-
-      def selective_execution_improved_enabled?
-        enabled?(ENV['SELECTIVE_EXECUTION_IMPROVED'], default: false)
       end
 
       def schedule_type
@@ -264,10 +255,6 @@ module QA
 
       def use_selenoid?
         enabled?(ENV['USE_SELENOID'], default: false)
-      end
-
-      def use_sha256_repository_object_storage
-        enabled?(ENV['QA_USE_SHA256_REPOSITORY_OBJECT_STORAGE'], default: false)
       end
 
       def save_all_videos?
@@ -486,10 +473,6 @@ module QA
         ENV.fetch("WORKSPACES_OAUTH_SIGNING_KEY")
       end
 
-      def workspaces_proxy_version
-        ENV.fetch("WORKSPACES_PROXY_VERSION", '0.1.12')
-      end
-
       def workspaces_proxy_domain
         ENV.fetch("WORKSPACES_PROXY_DOMAIN")
       end
@@ -573,6 +556,10 @@ module QA
 
       def geo_environment?
         QA::Runtime::Scenario.attributes.include?(:geo_secondary_address)
+      end
+
+      def gitlab_agentk_version
+        ENV.fetch('GITLAB_AGENTK_VERSION', 'v16.6.0')
       end
 
       def transient_trials
@@ -735,26 +722,6 @@ module QA
         enabled?(ENV['QA_RSPEC_RETRIED'], default: false)
       end
 
-      def parallel_processes
-        ENV.fetch('QA_PARALLEL_PROCESSES') do
-          [Etc.nprocessors / 2, 1].max
-        end.to_i
-      end
-
-      # Execution was started by parallel runner
-      #
-      # @return [Boolean]
-      def parallel_run?
-        ENV["TEST_ENV_NUMBER"].present?
-      end
-
-      # Execute tests in multiple parallel processes
-      #
-      # @return [Boolean]
-      def run_in_parallel?
-        enabled?(ENV["QA_RUN_IN_PARALLEL"], default: false)
-      end
-
       private
 
       def remote_grid_credentials
@@ -772,7 +739,7 @@ module QA
       def enabled?(value, default: true)
         return default if value.nil?
 
-        value.to_s.match?(/^(true|yes|1)$/i)
+        (value.to_s =~ /^(false|no|0)$/i) != 0
       end
     end
   end

@@ -40,19 +40,8 @@ export default {
       required: false,
       default: true,
     },
-    columnIndex: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
-    rowIndex: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     activeBoardItem: {
       query: activeBoardItemQuery,
       variables() {
@@ -61,7 +50,6 @@ export default {
         };
       },
     },
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     selectedBoardItems: {
       query: selectedBoardItemsQuery,
     },
@@ -82,11 +70,14 @@ export default {
     isDraggable() {
       return !this.isDisabled;
     },
-    itemColor() {
-      return this.item.color;
-    },
     cardStyle() {
-      return this.itemColor ? { borderLeftColor: this.itemColor } : '';
+      return this.isColorful && this.item.color ? { borderColor: this.item.color } : '';
+    },
+    isColorful() {
+      return gon?.features?.epicColorHighlight;
+    },
+    colorClass() {
+      return this.isColorful ? 'gl-pl-4 gl-border-l-solid gl-border-4' : '';
     },
     formattedItem() {
       return {
@@ -95,25 +86,16 @@ export default {
         labels: this.item.labels?.nodes || [],
       };
     },
-    showFocusBackground() {
-      return !this.isActive && !this.multiSelectVisible;
-    },
   },
   methods: {
     toggleIssue(e) {
       // Don't do anything if this happened on a no trigger element
       if (e.target.closest('.js-no-trigger')) return;
 
-      if (e.target.closest('.js-no-trigger-title') && (e.ctrlKey || e.metaKey || e.button === 1)) {
-        return;
-      }
-      e.preventDefault();
-
       const isMultiSelect = e.ctrlKey || e.metaKey;
       if (isMultiSelect && gon?.features?.boardMultiSelect) {
         this.toggleBoardItemMultiSelection(this.item);
       } else {
-        e.currentTarget.focus();
         this.toggleItem();
         this.track('click_card', { label: 'right_sidebar' });
       }
@@ -151,54 +133,6 @@ export default {
         },
       });
     },
-    changeFocusInColumn(currentCard, i) {
-      // Building a list using data-col-index instead of just traversing the ul is necessary for swimlanes
-      const columnCards = [
-        ...document.querySelectorAll(
-          `button.board-card-button[data-col-index="${this.columnIndex}"]`,
-        ),
-      ];
-      const currentIndex = columnCards.indexOf(currentCard);
-      if (currentIndex + i < 0 || currentIndex + i > columnCards.length - 1) {
-        return;
-      }
-      columnCards[currentIndex + i].focus();
-    },
-    focusNext(e) {
-      this.changeFocusInColumn(e.target, 1);
-    },
-    focusPrev(e) {
-      this.changeFocusInColumn(e.target, -1);
-    },
-    changeFocusInRow(currentCard, i) {
-      const currentList = currentCard.closest('ul');
-      // Find next in line list/cell with cards. If none, don't move.
-      let listSelector = 'board-list';
-      // Account for swimlanes using different structure. Swimlanes traverse within their lane.
-      if (currentList.classList.contains('board-cell')) {
-        listSelector = `board-cell[data-row-index="${this.rowIndex}"]`;
-      }
-      const lists = [
-        ...document.querySelectorAll(`ul.${listSelector}:not(.list-empty):not(.list-collapsed)`),
-      ];
-      const currentIndex = lists.indexOf(currentList);
-      if (currentIndex + i < 0 || currentIndex + i > lists.length - 1) {
-        return;
-      }
-      // Focus the same index if possible, or last card
-      const targetCards = lists[currentIndex + i].querySelectorAll('button.board-card-button');
-      if (targetCards.length <= this.index) {
-        targetCards[targetCards.length - 1].focus();
-      } else {
-        targetCards[this.index].focus();
-      }
-    },
-    focusLeft(e) {
-      this.changeFocusInRow(e.target, -1);
-    },
-    focusRight(e) {
-      this.changeFocusInRow(e.target, 1);
-    },
   },
 };
 </script>
@@ -207,49 +141,32 @@ export default {
   <li
     :class="[
       {
-        'multi-select gl-border-blue-200 gl-bg-blue-50': multiSelectVisible,
+        'multi-select gl-bg-blue-50 gl-border-blue-200': multiSelectVisible,
         'gl-cursor-grab': isDraggable,
-        'is-active !gl-bg-blue-50 hover:!gl-bg-blue-50': isActive,
         'is-disabled': isDisabled,
+        'is-active gl-bg-blue-50': isActive,
         'gl-cursor-not-allowed gl-bg-gray-10': item.isLoading,
       },
+      colorClass,
     ]"
     :index="index"
     :data-item-id="item.id"
     :data-item-iid="item.iid"
     :data-item-path="item.referencePath"
+    :style="cardStyle"
     data-testid="board-card"
-    class="board-card gl-border gl-relative gl-mb-3 gl-rounded-base gl-leading-normal hover:gl-bg-gray-10"
+    class="board-card gl-p-5 gl-rounded-base gl-line-height-normal gl-relative gl-mb-3"
+    @click="toggleIssue($event)"
   >
-    <button
-      :class="[
-        {
-          'focus:gl-bg-gray-10': showFocusBackground,
-          'gl-border-l-4 gl-pl-4 gl-border-l-solid': itemColor,
-        },
-      ]"
-      :aria-label="item.title"
-      :data-col-index="columnIndex"
-      :data-row-index="rowIndex"
-      :style="cardStyle"
-      data-testid="board-card-button"
-      class="board-card-button btn-transparent gl-block gl-h-full gl-w-full gl-rounded-base gl-p-4 gl-text-left gl-outline-none focus:gl-focus"
-      @click="toggleIssue"
-      @keydown.left.exact.prevent="focusLeft"
-      @keydown.right.exact.prevent="focusRight"
-      @keydown.down.exact.prevent="focusNext"
-      @keydown.up.exact.prevent="focusPrev"
+    <board-card-inner
+      :list="list"
+      :item="formattedItem"
+      :update-filters="true"
+      :index="index"
+      :show-work-item-type-icon="showWorkItemTypeIcon"
+      @setFilters="$emit('setFilters', $event)"
     >
-      <board-card-inner
-        :list="list"
-        :item="formattedItem"
-        :update-filters="true"
-        :index="index"
-        :show-work-item-type-icon="showWorkItemTypeIcon"
-        @setFilters="$emit('setFilters', $event)"
-      >
-        <slot></slot>
-      </board-card-inner>
-    </button>
+      <slot></slot>
+    </board-card-inner>
   </li>
 </template>

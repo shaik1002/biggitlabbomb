@@ -4,10 +4,6 @@ require 'spec_helper'
 
 # rubocop: disable RSpec/MultipleMemoizedHelpers
 RSpec.describe Gitlab::SidekiqMiddleware::ServerMetrics, feature_category: :shared do
-  before do
-    allow(Thread.current).to receive(:name=)
-  end
-
   shared_examples "a metrics middleware" do
     context "with mocked prometheus" do
       include_context 'server metrics with mocked prometheus'
@@ -29,7 +25,7 @@ RSpec.describe Gitlab::SidekiqMiddleware::ServerMetrics, feature_category: :shar
                                      worker: 'MergeWorker',
                                      urgency: 'high',
                                      external_dependencies: 'no',
-                                     feature_category: 'code_review_workflow',
+                                     feature_category: 'source_code_management',
                                      boundary: '',
                                      job_status: 'done',
                                      destination_shard_redis: 'main' })
@@ -39,7 +35,7 @@ RSpec.describe Gitlab::SidekiqMiddleware::ServerMetrics, feature_category: :shar
                                      worker: 'MergeWorker',
                                      urgency: 'high',
                                      external_dependencies: 'no',
-                                     feature_category: 'code_review_workflow',
+                                     feature_category: 'source_code_management',
                                      boundary: '',
                                      job_status: 'fail',
                                      destination_shard_redis: 'main' })
@@ -107,7 +103,7 @@ RSpec.describe Gitlab::SidekiqMiddleware::ServerMetrics, feature_category: :shar
               {
                 worker: 'MergeWorker',
                 urgency: 'high',
-                feature_category: 'code_review_workflow',
+                feature_category: 'source_code_management',
                 external_dependencies: 'no',
                 queue: 'merge',
                 destination_shard_redis: 'main'

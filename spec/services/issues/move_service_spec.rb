@@ -22,7 +22,6 @@ RSpec.describe Issues::MoveService, feature_category: :team_planning do
       description: description,
       project: old_project,
       author: author,
-      imported_from: :gitlab_migration,
       created_at: 1.day.ago,
       updated_at: 1.day.ago
     )
@@ -82,11 +81,6 @@ RSpec.describe Issues::MoveService, feature_category: :team_planning do
 
         it 'copies issue description' do
           expect(new_issue.description).to eq description
-        end
-
-        it 'restores imported_from to none' do
-          expect(new_issue.imported_from).to eq 'none'
-          expect(old_issue.reload.imported_from).to eq 'gitlab_migration'
         end
 
         it 'adds system note to old issue at the end' do
@@ -150,6 +144,18 @@ RSpec.describe Issues::MoveService, feature_category: :team_planning do
           expect(new_project.issues.pluck(:title)).to match_array(
             [old_issue, task1, task2].map(&:title)
           )
+        end
+
+        context 'when move_issue_children feature flag is disabled' do
+          before do
+            stub_feature_flags(move_issue_children: false)
+          end
+
+          it "does not move the issue's children", :aggregate_failures do
+            expect { move_service.execute(old_issue, new_project) }.to change { Issue.count }.by(1)
+            expect(new_project.issues.count).to eq(1)
+            expect(new_project.issues.pluck(:title)).to contain_exactly(old_issue.title)
+          end
         end
       end
 
@@ -294,23 +300,10 @@ RSpec.describe Issues::MoveService, feature_category: :team_planning do
         end
 
         it 'executes project issue hooks for both projects' do
-          expect_next_instance_of(
-            WebHookService,
-            new_project_hook,
-            expected_new_project_hook_payload,
-            'issue_hooks',
-            idempotency_key: anything
-          ) do |service|
+          expect_next_instance_of(WebHookService, new_project_hook, expected_new_project_hook_payload, 'issue_hooks') do |service|
             expect(service).to receive(:async_execute).once
           end
-
-          expect_next_instance_of(
-            WebHookService,
-            old_project_hook,
-            expected_old_project_hook_payload,
-            'issue_hooks',
-            idempotency_key: anything
-          ) do |service|
+          expect_next_instance_of(WebHookService, old_project_hook, expected_old_project_hook_payload, 'issue_hooks') do |service|
             expect(service).to receive(:async_execute).once
           end
 
@@ -323,8 +316,8 @@ RSpec.describe Issues::MoveService, feature_category: :team_planning do
       context 'issue with notes' do
         let!(:notes) do
           [
-            create(:note, noteable: old_issue, project: old_project, created_at: 2.weeks.ago, updated_at: 1.week.ago, imported_from: :gitlab_migration),
-            create(:note, noteable: old_issue, project: old_project, imported_from: :gitlab_migration)
+            create(:note, noteable: old_issue, project: old_project, created_at: 2.weeks.ago, updated_at: 1.week.ago),
+            create(:note, noteable: old_issue, project: old_project)
           ]
         end
 
@@ -334,12 +327,6 @@ RSpec.describe Issues::MoveService, feature_category: :team_planning do
 
         it 'copies existing notes in order' do
           expect(copied_notes.order('id ASC').pluck(:note)).to eq(notes.map(&:note))
-        end
-
-        it 'resets the imported_from value to none' do
-          expect(notes.map(&:reload)).to all(have_attributes(imported_from: 'gitlab_migration'))
-
-          expect(copied_notes.pluck(:imported_from)).to all(eq('none'))
         end
       end
 
@@ -382,18 +369,6 @@ RSpec.describe Issues::MoveService, feature_category: :team_planning do
 
           expect(new_issue.designs.size).to eq(1)
           expect(new_issue.designs.first.notes.size).to eq(1)
-        end
-      end
-
-      context 'issue with timelogs' do
-        before do
-          create(:timelog, issue: old_issue)
-        end
-
-        it 'calls CopyTimelogsWorker' do
-          expect(WorkItems::CopyTimelogsWorker).to receive(:perform_async).with(old_issue.id, kind_of(Integer))
-
-          move_service.execute(old_issue, new_project)
         end
       end
 

@@ -29,12 +29,12 @@ to store its objects so that they take up as little space as
 possible. Packfiles are also used to transfer objects when cloning,
 fetching, or pushing between a Git client and a Git server. Using packfiles is
 usually good because it reduces the amount of disk space and network
-bandwidth required.
+bandwith required.
 
 However, creating packfiles requires a lot of CPU and memory to compress object
 content. So when repositories are large, every Git operation
 that requires creating packfiles becomes expensive and slow as more
-and bigger objects need to be processed and transferred.
+and bigger objects need to be processed and transfered.
 
 ### Consequences for GitLab
 
@@ -87,12 +87,11 @@ For more information, see [Pack-objects cache](../../../../administration/gitaly
 
 ### Reduce concurrent clones in CI/CD
 
-CI/CD loads tend to be concurrent because pipelines are [scheduled during set times](../../../../ci/pipelines/pipeline_efficiency.md#reduce-how-often-jobs-run).
+CI/CD loads tend to be concurrent because pipelines are scheduled during set times.
 As a result, the Git requests against the repositories can spike notably during
 these times and lead to reduced performance for both CI/CD and users alike.
 
-Reduce CI/CD pipeline concurrency by [staggering them](../../../../ci/pipelines/schedules.md#view-and-optimize-pipeline-schedules)
-to run at different times.
+Reduce CI/CD pipeline concurrency by staggering them to run at different times.
 For example, a set running at one time and another set running several minutes
 later.
 
@@ -122,28 +121,6 @@ test:
   script:
     - ls -al
 ```
-
-#### Avoid shallow clones for development
-
-Avoid shallow clones for development because they greatly increase the time it takes to push changes. Shallow clones
-work well with CI/CD jobs because the repository contents aren't changed after being checked out.
-
-Instead, for local development use
-[partial clones](https://www.git-scm.com/docs/git-clone#Documentation/git-clone.txt---filterltfilter-specgt) to:
-
-1. Filter out blobs:
-
-   ```shell
-   git clone --filter=blob:none
-   ```
-
-1. Filter out trees:
-
-   ```shell
-   git clone --filter=tree:0
-   ```
-
-For more information, see [Reduce clone size](../../../../topics/git/clone.md#reduce-clone-size).
 
 ### Git strategy
 
@@ -241,25 +218,7 @@ performance problems.
 You can use [`git-sizer`](https://github.com/github/git-sizer) to get a snapshot
 of repository characteristics and discover problem aspects of your monorepo.
 
-To get a _full_ clone of your repository, you need a full Git mirror or bare clone to
-ensure all Git references are present. To profile your repository:
-
-1. [Install `git-sizer`](https://github.com/github/git-sizer?tab=readme-ov-file#getting-started).
-1. Get a full clone of your repository:
-
-   ```shell
-   git clone --mirror <git_repo_url>
-   ```
-
-   After cloning, the repository will be in the bare Git format that is compatible with `git-sizer`.
-1. Run `git-sizer` with all statistics in the directory of your Git repository:
-
-   ```shell
-   git-sizer -v
-   ```
-
-After processing, the output of `git-sizer` should look like the following with a level of concern
-on each aspect of the repository:
+For example:
 
 ```shell
 Processing blobs: 1652370
@@ -388,7 +347,7 @@ when doing an object graph walk.
 
 Blobs are the [Git objects](https://git-scm.com/book/en/v2/Git-Internals-Git-Objects)
 that are used to store and manage the content of the files that users
-have committed into Git repositories.
+have commited into Git repositories.
 
 #### Issues with large blobs
 
@@ -418,7 +377,7 @@ For more information, refer to the [Git LFS documentation](../../../../topics/gi
 
 ### Reference architectures
 
-Large repositories tend to be found in larger organizations with many users. The
+Large repositories tend to be found in larger organisations with many users. The
 GitLab Test Platform and Support teams provide several [reference architectures](../../../../administration/reference_architectures/index.md) that
 are the recommended way to deploy GitLab at scale.
 

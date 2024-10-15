@@ -6,11 +6,8 @@ RSpec.describe Projects::BlobController, feature_category: :source_code_manageme
   include ProjectForksHelper
 
   let_it_be(:project) { create(:project, :public, :repository) }
-  let(:mutable_project) { create(:project, :public, :repository) }
 
   describe "GET show" do
-    let_it_be(:head_sha) { project.repository.commit.id }
-
     let(:params) { { namespace_id: project.namespace, project_id: project, id: id, ref_type: ref_type } }
     let(:ref_type) { nil }
     let(:request) do
@@ -57,39 +54,6 @@ RSpec.describe Projects::BlobController, feature_category: :source_code_manageme
 
       context "invalid branch, valid file" do
         let(:id) { 'invalid-branch/README.md' }
-
-        it { is_expected.to respond_with(:not_found) }
-      end
-
-      context 'valid branch, valid file, correct ref_type' do
-        let(:id) { 'master/README.md' }
-        let(:ref_type) { 'heads' }
-
-        it { is_expected.to respond_with(:success) }
-      end
-
-      context 'valid branch, valid file, wrong ref_type' do
-        let(:id) { 'master/README.md' }
-        let(:ref_type) { 'tags' }
-
-        it { is_expected.to respond_with(:not_found) }
-      end
-
-      context 'sha ref, valid file' do
-        let(:id) { "#{head_sha}/README.md" }
-
-        it { is_expected.to respond_with(:success) }
-      end
-
-      context 'wrong sha ref, valid file' do
-        let(:id) { '0000000000000000000000000000000000000000/README.md' }
-
-        it { is_expected.to respond_with(:not_found) }
-      end
-
-      context 'sha ref, valid file, non-empty ref_type' do
-        let(:id) { "#{head_sha}/README.md" }
-        let(:ref_type) { 'heads' }
 
         it { is_expected.to respond_with(:not_found) }
       end
@@ -166,41 +130,6 @@ RSpec.describe Projects::BlobController, feature_category: :source_code_manageme
         it 'redirects' do
           expect(subject)
             .to redirect_to("/#{project.full_path}/-/tree/markdown/doc")
-        end
-      end
-    end
-
-    context 'when rendering a GitLab CI file' do
-      let_it_be(:files_to_create) do
-        {
-          '.gitlab-ci.yml' => <<~YAML
-            rspec:
-              script: exit 0
-          YAML
-        }
-      end
-
-      let_it_be(:project) { create(:project, :public, :custom_repo, files: files_to_create) }
-
-      let(:id) { "#{project.default_branch}/.gitlab-ci.yml" }
-
-      it 'displays the validation section' do
-        request
-
-        is_expected.to respond_with(:success)
-
-        expect(response.body).to include('Validating GitLab CI configuration')
-      end
-
-      context 'when the blob ref is a commit SHA' do
-        let(:id) { "#{project.repository.commit.id}/.gitlab-ci.yml" }
-
-        it 'does not display the validation section' do
-          request
-
-          is_expected.to respond_with(:success)
-
-          expect(response.body).not_to include('Validating GitLab CI configuration')
         end
       end
     end
@@ -355,7 +284,6 @@ RSpec.describe Projects::BlobController, feature_category: :source_code_manageme
 
     before do
       project.add_maintainer(user)
-      mutable_project.add_maintainer(user)
 
       sign_in(user)
     end
@@ -364,27 +292,6 @@ RSpec.describe Projects::BlobController, feature_category: :source_code_manageme
       put :update, params: default_params
 
       expect(response).to redirect_to(blob_after_edit_path)
-    end
-
-    context 'when file is renamed' do
-      let(:default_params) do
-        {
-          namespace_id: mutable_project.namespace,
-          project_id: mutable_project,
-          id: 'master/CHANGELOG',
-          file_path: 'CHANGELOG2',
-          branch_name: 'master',
-          content: 'Added changes',
-          commit_message: 'Rename CHANGELOG'
-        }
-      end
-
-      it 'redirects to blob' do
-        put :update, params: default_params
-
-        expect(response).to redirect_to(project_blob_path(mutable_project, 'master/CHANGELOG2'))
-        expect(assigns[:commit_params]).to include(file_path: 'CHANGELOG2', previous_path: 'CHANGELOG')
-      end
     end
 
     context '?from_merge_request_iid' do

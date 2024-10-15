@@ -14,11 +14,13 @@ You can deploy your application internally or to the public.
 Preview a release in a review app, and use feature flags to
 release features incrementally.
 
-| | | |
-|--|--|--|
-| [**Getting started**](../user/get_started/get_started_deploy_release.md)<br>Overview of how features fit together. | [**Packages and registries**](../user/packages/index.md)<br>Package management, container registry, artifact storage, dependency management. | [**Environments and deployments**](../ci/environments/index.md)<br>Environments, deployments, rollbacks, safety, approvals. |
-| [**Releases**](../user/project/releases/index.md)<br>Releases, versioning, assets, tags, milestones, evidence. | [**Roll out an application incrementally**](../ci/environments/incremental_rollouts.md)<br>Kubernetes, CI/CD, risk mitigation, deployment. | [**Feature flags**](../operations/feature_flags.md)<br>Progressive delivery, controlled deployment, risk reduction. |
-| [**GitLab Pages**](../user/project/pages/index.md)<br>Static site hosting, documentation publishing, project websites, custom domains. | | |
+- [Getting started](../user/get_started/get_started_deploy_release.md)
+- [Packages and registries](../user/packages/index.md)
+- [Environments and deployments](../ci/environments/index.md)
+- [Releases](../user/project/releases/index.md)
+- [Roll out an application incrementally](../ci/environments/incremental_rollouts.md)
+- [Feature flags](../operations/feature_flags.md)
+- [GitLab Pages](../user/project/pages/index.md)
 
 ## Related topics
 
@@ -29,7 +31,7 @@ release features incrementally.
   deployment using GitLab CI/CD. Auto Deploy has built-in support for EC2 and ECS deployments.
 - Deploy to Kubernetes clusters by using the [GitLab agent](../user/clusters/agent/install/index.md).
 - Use Docker images to run AWS commands from GitLab CI/CD, and a template to
-  facilitate [deployment to AWS](../ci/cloud_deployment/index.md).
+  facilitate [deployment to AWS](../ci/cloud_deployment).
 - Use GitLab CI/CD to target any type of infrastructure accessible by GitLab Runner.
   [User and pre-defined environment variables](../ci/variables/index.md) and CI/CD templates
   support setting up a vast number of deployment strategies.

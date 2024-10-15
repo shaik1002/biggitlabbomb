@@ -40,7 +40,7 @@ describe('InputCopyToggleVisibility', () => {
     return event;
   };
   const triggerCopyShortcut = () => {
-    wrapper.vm.mousetrap.trigger(MOUSETRAP_COPY_KEYBOARD_SHORTCUT);
+    wrapper.vm.$options.mousetrap.trigger(MOUSETRAP_COPY_KEYBOARD_SHORTCUT);
   };
 
   function expectInputToBeMasked() {
@@ -319,25 +319,6 @@ describe('InputCopyToggleVisibility', () => {
           expect(input.element.selectionStart).toBe(selectionStart);
           expect(input.element.selectionEnd).toBe(selectionEnd);
         });
-      });
-    });
-
-    describe('and the input is invalid', () => {
-      beforeEach(() => {
-        createComponent({
-          props: {
-            value: '',
-            readonly: false,
-            formInputGroupProps: { state: false },
-          },
-          attrs: {
-            'invalid-feedback': 'Oh no, something is invalid',
-          },
-        });
-      });
-
-      it('should add class to force validation message visibility', () => {
-        expect(wrapper.classes('input-copy-toggle-visibility-is-invalid')).toBe(true);
       });
     });
   });

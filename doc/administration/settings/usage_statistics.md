@@ -42,7 +42,7 @@ There are several other benefits to enabling Service Ping:
 In GitLab versions 14.1 and later, GitLab Free customers with a self-managed instance running
 GitLab Enterprise Edition can receive paid features by registering with GitLab and sending us
 activity data through Service Ping. Features introduced here do not remove the feature from its paid
-tier. Instances on a paid tier are subject to our [Product Usage Data policy](https://handbook.gitlab.com/handbook/legal/privacy/customer-product-usage-information/) managed by [Cloud Licensing](https://about.gitlab.com/pricing/licensing-faq/cloud-licensing/).
+tier. Instances on a paid tier are subject to our [Product Usage Data policy](https://handbook.gitlab.com/handbook/legal/privacy/customer-product-usage-information/) managed by [Cloud Licensing](https://about.gitlab.com/pricing/licensing-faq/cloud-licensing/).  
 
 NOTE:
 Registration is not required for participation.
@@ -84,7 +84,7 @@ In the following table, you can see:
 ### Enable registration features
 
 1. Sign in as a user with administrator access.
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Settings > Metrics and profiling**.
 1. Expand the **Usage statistics** section.
 1. If not enabled, select the **Enable Service Ping** checkbox.
@@ -95,18 +95,18 @@ In the following table, you can see:
 
 If enabled, version check informs you if a new version is available and the
 importance of it through a status. The status displays on the help pages (`/help`)
-for all authenticated users, and on the **Admin** area pages. The statuses are:
+for all authenticated users, and on the Admin Area pages. The statuses are:
 
 - Green: You are running the latest version of GitLab.
 - Orange: An updated version of GitLab is available.
 - Red: The version of GitLab you are running is vulnerable. You should install
   the latest version with security fixes as soon as possible.
 
-![Orange version check example](../settings/img/update_available_v10_6.png)
+![Orange version check example](../settings/img/update-available.png)
 
 ### Enable or disable version check
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Settings > Metrics and profiling**.
 1. Expand **Usage statistics**.
 1. Select or clear the **Enable version check** checkbox.
@@ -146,16 +146,16 @@ The payload is available in the [Metrics and profiling](#manually-upload-service
 
 To enable or disable Service Ping:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Settings > Metrics and profiling**.
 1. Expand **Usage statistics**.
-1. Select or clear the **Enable Service Ping** checkbox.
+1. Select or clear the  **Enable Service Ping** checkbox.
 1. Select **Save changes**.
 
 ### Through the configuration file
 
 To disable Service Ping and prevent it from being configured in the future through
-the **Admin** area.
+the Admin Area.
 
 ::Tabs
 
@@ -202,7 +202,7 @@ For more information, see [Customer product usage information](https://handbook.
 
 To enable or disable optional data in Service Ping:
 
-1. In the left sidebar, at the bottom, select **Admin**.
+1. In the left sidebar, at the bottom, select on **Admin Area**.
 1. Go to **Settings > Metrics and Profiling**.
 1. Expand the **Usage Statistics** section.
 1. To enable optional data, select the **Include optional data in Service Ping** checkbox. To disable it, clear the box.
@@ -246,21 +246,16 @@ To enable or disable optional data in Service Ping:
 
 ::EndTabs
 
-## Access the Service Ping payload
+## View the Service Ping payload
 
-You can access the exact JSON payload sent to GitLab Inc. in the **Admin** area or through the API.
-See an [example Service Ping payload](../../development/internal_analytics/service_ping/index.md#example-service-ping-payload).
-
-### In the UI
+You can view the exact JSON payload sent to GitLab Inc. in the Admin Area. To view the payload:
 
 1. Sign in as a user with administrator access.
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Settings > Metrics and profiling > Usage statistics**.
 1. Select **Preview payload**.
 
-### Through the API
-
-See [service ping API documentation](../../api/usage_data.md).
+For an example payload, see [Example Service Ping payload](../../development/internal_analytics/service_ping/index.md#example-service-ping-payload).
 
 ## Manually upload Service Ping payload
 
@@ -270,7 +265,7 @@ or if the Service Ping [cron job](../../development/internal_analytics/service_p
 To upload the payload manually:
 
 1. Sign in as a user with administrator access.
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Settings > Metrics and profiling > Usage statistics**.
 1. Select **Download payload**.
 1. Save the JSON file.

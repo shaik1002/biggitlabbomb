@@ -57,13 +57,9 @@ export default {
 
       return (
         milestones.find(
-          (milestone) =>
-            this.getMilestoneTitle(milestone).toLowerCase() === stripQuotes(data).toLowerCase(),
+          (milestone) => milestone.title.toLowerCase() === stripQuotes(data).toLowerCase(),
         ) || this.defaultMilestones.find(({ value }) => value === data)
       );
-    },
-    getMilestoneTitle(milestone) {
-      return milestone.title;
     },
     fetchMilestonesBySearchTerm(search) {
       return this.$apollo
@@ -79,20 +75,10 @@ export default {
         .then((response) => {
           const data = Array.isArray(response) ? response : response.data;
 
-          const uniqueData = data.reduce((acc, current) => {
-            const existingItem = acc.find((item) => item.title === current.title);
-
-            if (!existingItem) {
-              acc.push(current);
-            }
-
-            return acc;
-          }, []);
-
           if (this.config.shouldSkipSort) {
-            this.milestones = uniqueData;
+            this.milestones = data;
           } else {
-            this.milestones = uniqueData.slice().sort(sortMilestonesByDueDate);
+            this.milestones = data.slice().sort(sortMilestonesByDueDate);
           }
         })
         .catch(() => {
@@ -115,21 +101,20 @@ export default {
     :suggestions="milestones"
     :suggestions-loading="loading"
     :get-active-token-value="getActiveMilestone"
-    :value-identifier="getMilestoneTitle"
     v-bind="$attrs"
     @fetch-suggestions="fetchMilestones"
     v-on="$listeners"
   >
     <template #view="{ viewTokenProps: { inputValue, activeTokenValue } }">
-      %{{ activeTokenValue ? getMilestoneTitle(activeTokenValue) : inputValue }}
+      %{{ activeTokenValue ? activeTokenValue.title : inputValue }}
     </template>
     <template #suggestions-list="{ suggestions }">
       <gl-filtered-search-suggestion
         v-for="milestone in suggestions"
         :key="milestone.id"
-        :value="getMilestoneTitle(milestone)"
+        :value="milestone.title"
       >
-        {{ getMilestoneTitle(milestone) }}
+        {{ milestone.title }}
       </gl-filtered-search-suggestion>
     </template>
   </base-token>

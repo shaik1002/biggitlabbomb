@@ -275,37 +275,11 @@ describe('Jobs Store Mutations', () => {
   });
 
   describe('RECEIVE_JOB_ERROR', () => {
-    it("resets job data when the job doesn't have a log", () => {
-      stateCopy = {
-        isLoading: true,
-        hasError: false,
-        job: {},
-      };
-
+    it('resets job data', () => {
       mutations[types.RECEIVE_JOB_ERROR](stateCopy);
 
-      expect(stateCopy.hasError).toEqual(true);
       expect(stateCopy.isLoading).toEqual(false);
       expect(stateCopy.job).toEqual({});
-    });
-
-    it("doesn't reset job data when the job has a log", () => {
-      stateCopy = {
-        isLoading: true,
-        hasError: false,
-        job: {
-          has_trace: true,
-          status: {
-            group: 'running',
-          },
-        },
-      };
-
-      mutations[types.RECEIVE_JOB_ERROR](stateCopy);
-
-      expect(stateCopy.hasError).toEqual(true);
-      expect(stateCopy.isLoading).toEqual(false);
-      expect(stateCopy.job).toMatchObject(stateCopy.job);
     });
   });
 

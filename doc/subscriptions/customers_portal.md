@@ -12,8 +12,7 @@ For some management tasks for your subscription and account, such as purchasing 
 - [GitLab SaaS subscription](gitlab_com/index.md)
 - [Self-managed subscription](self_managed/index.md)
 
-If you made your purchase through an authorized reseller, you must contact them directly to make changes to your subscription.
-For more information, see [Customers that purchased through a reseller](#customers-that-purchased-through-a-reseller).
+If you made your purchase through an authorized reseller, you must contact them directly to make changes to your subscription (your subscriptions are read-only).
 
 ## Sign in to Customers Portal
 
@@ -25,13 +24,14 @@ If you registered for Customers Portal with your GitLab.com account, sign in wit
 To sign in to Customers Portal using your GitLab.com account:
 
 1. Go to [Customers Portal](https://customers.gitlab.com/customers/sign_in).
-1. Select **Continue with GitLab.com account**.
+1. Select **Continue with your GitLab.com account**.
 
 To sign in to Customers Portal with your email and to receive a one-time sign-in link:
 
 1. Go to [Customers Portal](https://customers.gitlab.com/customers/sign_in).
 1. Select **Sign in with your email**.
-1. Provide the **Email** for your Customers Portal profile. You will receive an email with a one-time sign-in link.
+1. Provide the **Email** for your Customers Portal profile. You will receive
+   an email with a one-time, sign-in link for your Customers Portal profile.
 1. In the email you received, select **Sign in**.
 
 NOTE:
@@ -49,9 +49,7 @@ if required.
 
 ## Change profile owner information
 
-The profile owner's email address is used for the [Customers Portal legacy sign-in](#sign-in-to-customers-portal).
-If the profile owner is also a [billing account manager](#subscription-and-billing-contacts),
-their personal details are used on invoices, and for license and subscription-related emails.
+The profile owner's personal details are used on invoices. The profile owner's email address is used for the [Customers Portal legacy sign-in](#sign-in-to-customers-portal) and license-related email.
 
 To change profile details, including name and email address:
 
@@ -89,13 +87,6 @@ To change the subscription contact:
 1. To select a different subscription contact, select from the **Billing account manager** dropdown list.
 1. Edit the contact details.
 1. Select **Save changes**.
-
-### Add a secondary contact
-
-To add a secondary contact for your account:
-
-1. Ensure an account exists in the [Customers Portal](https://customers.gitlab.com/customers/sign_in) for the user you want to add.
-1. [Create a ticket with the Support team](https://support.gitlab.com/hc/en-us/requests/new?ticket_form_id=360000071293). Include any relevant material in your request.
 
 ### Change your billing contact
 
@@ -166,7 +157,7 @@ method as the default:
 
 ## Link a GitLab.com account
 
-Follow this guideline if you have a legacy Customers Portal profile to sign in.
+Follow this guideline if you have a legacy Customers Portal profile to log in.
 
 To link a GitLab.com account to your Customers Portal profile:
 
@@ -178,13 +169,7 @@ To link a GitLab.com account to your Customers Portal profile:
 
 ## Change the linked account
 
-If you want to link your Customers Portal account to a different GitLab.com account,
-you must use your GitLab.com account to register for a new Customers Portal profile.
-
-If you want to change subscription contacts, you can instead do either of the following:
-
-- [Change the billing contact](#change-your-billing-contact).
-- [Change the subscription contact](#change-your-subscription-contact).
+Customers are required to use their GitLab.com account to register for a new Customers Portal profile.
 
 If you have a legacy Customers Portal profile that is not linked to a GitLab.com account, you may still [sign in](https://customers.gitlab.com/customers/sign_in?legacy=true) using a one-time sign-in link sent to your email. However, you should [create](https://gitlab.com/users/sign_up) and [link a GitLab.com account](#change-the-linked-account) to ensure continued access to the Customers Portal.
 
@@ -214,5 +199,5 @@ Resellers do not have access to the Customers Portal, or their customers' accoun
 
 After your subscription order is processed, you will receive several emails:
 
-- A "Welcome to the Customers Portal" email, including instructions on how to sign in.
+- A "Welcome to the Customers Portal" email, including instructions on how to log in.
 - A purchase confirmation email with instructions on how to provision access.

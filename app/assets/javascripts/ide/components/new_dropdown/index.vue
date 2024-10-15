@@ -60,12 +60,12 @@ export default {
       :class="{
         show: isOpen,
       }"
-      class="dropdown gl-flex"
+      class="dropdown d-flex"
     >
       <button
         :aria-label="__('Create new file or directory')"
         type="button"
-        class="rounded border-0 ide-entry-dropdown-toggle gl-flex"
+        class="rounded border-0 d-flex ide-entry-dropdown-toggle"
         @click.stop="openDropdown()"
       >
         <gl-icon name="ellipsis_v" />
@@ -75,7 +75,7 @@ export default {
           <li>
             <item-button
               :label="__('New file')"
-              class="gl-flex"
+              class="d-flex"
               icon="doc-new"
               icon-classes="mr-2"
               @click="createNewItem('blob')"
@@ -85,7 +85,7 @@ export default {
           <li>
             <item-button
               :label="__('New directory')"
-              class="gl-flex"
+              class="d-flex"
               icon="folder-new"
               icon-classes="mr-2"
               @click="createNewItem($options.modalTypes.tree)"
@@ -96,7 +96,7 @@ export default {
         <li>
           <item-button
             :label="__('Rename/Move')"
-            class="gl-flex"
+            class="d-flex"
             icon="pencil"
             icon-classes="mr-2"
             @click="createNewItem($options.modalTypes.rename)"
@@ -105,7 +105,7 @@ export default {
         <li>
           <item-button
             :label="__('Delete')"
-            class="gl-flex"
+            class="d-flex"
             icon="remove"
             icon-classes="mr-2"
             @click="deleteEntry(path)"

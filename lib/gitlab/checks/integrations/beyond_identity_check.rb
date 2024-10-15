@@ -28,19 +28,9 @@ module Gitlab
 
             commits.each do |commit|
               signature = commit.signature
-              unless signature.verified?
+              if !signature.verified?
                 raise ::Gitlab::GitAccess::ForbiddenError, "Signature of the commit #{commit.sha} is not verified"
-              end
-
-              key = signature.gpg_key
-              unless key
-                gpg_commit = commit.gpg_commit
-                gpg_commit.update_signature!(signature)
-
-                key = gpg_commit.signature.gpg_key
-              end
-
-              unless reverified_with_integration?(key)
+              elsif !reverified_with_integration?(signature.gpg_key)
                 raise ::Gitlab::GitAccess::ForbiddenError, "GPG Key used to sign commit #{commit.sha} is not verified"
               end
             end
@@ -62,11 +52,11 @@ module Gitlab
             break false unless key.present?
 
             gpg_key = key.is_a?(GpgKeySubkey) ? key.gpg_key : key
-
-            break gpg_key.externally_verified? unless require_reverification?(gpg_key)
+            break false unless key.externally_verified?
+            break true if gpg_key.updated_at > INTEGRATION_VERIFICATION_PERIOD.ago
 
             verified_externally?(gpg_key).tap do |verified_externally|
-              key.update!(externally_verified: verified_externally, externally_verified_at: Time.current)
+              key.update!(externally_verified: verified_externally)
             end
           end
         end
@@ -77,12 +67,6 @@ module Gitlab
           true
         rescue ::Gitlab::BeyondIdentity::Client::ApiError => _
           false
-        end
-
-        def require_reverification?(key)
-          return true unless key.externally_verified_at.present?
-
-          key.externally_verified_at <= INTEGRATION_VERIFICATION_PERIOD.ago
         end
 
         def integration

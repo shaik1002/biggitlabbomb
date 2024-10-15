@@ -1,9 +1,9 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
-<!--- start_remove The following content will be removed on remove_date: '2025-05-15' -->
+<!--- start_remove The following content will be removed on remove_date: '2024-05-22' -->
 
 # Slack notifications (deprecated)
 
@@ -100,13 +100,13 @@ If your Slack integration is not working, start troubleshooting by
 searching through the [Sidekiq logs](../../../administration/logs/index.md#sidekiqlog)
 for errors relating to your Slack service.
 
-### Error: `Something went wrong on our end`
+### Something went wrong on our end
 
 You might get this generic error message in the GitLab UI.
 Review [the logs](../../../administration/logs/index.md#productionlog) to find
 the error message and keep troubleshooting from there.
 
-### Error: `certificate verify failed`
+### `certificate verify failed`
 
 You might see an entry like the following in your Sidekiq log:
 

@@ -4,7 +4,6 @@ import { GlSingleStat } from '@gitlab/ui/dist/charts';
 import { createAlert } from '~/alert';
 import { number } from '~/lib/utils/unit_format';
 import { __, s__ } from '~/locale';
-import PageHeading from '~/vue_shared/components/page_heading.vue';
 import usageTrendsCountQuery from '../graphql/queries/usage_trends_count.query.graphql';
 
 const defaultPrecision = 0;
@@ -14,7 +13,6 @@ export default {
   components: {
     GlSkeletonLoader,
     GlSingleStat,
-    PageHeading,
   },
   data() {
     return {
@@ -55,21 +53,24 @@ export default {
       pipelines: s__('UsageTrends|Pipelines'),
     },
     loadCountsError: __('Could not load usage counts. Please refresh the page to try again.'),
-    pageTitle: __('Usage trends'),
   },
 };
 </script>
 
 <template>
   <div>
-    <page-heading :heading="$options.i18n.pageTitle" />
-    <div class="gl-my-6 gl-flex gl-flex-col gl-items-start md:gl-flex-row">
+    <h2>
+      {{ __('Usage Trends') }}
+    </h2>
+    <div
+      class="gl-display-flex gl-flex-direction-column gl-md-flex-direction-row gl-my-6 gl-align-items-flex-start"
+    >
       <gl-skeleton-loader v-if="$apollo.queries.counts.loading" />
       <template v-else>
         <gl-single-stat
           v-for="count in counts"
           :key="count.key"
-          class="gl-my-4 gl-pr-9 md:gl-mb-0 md:gl-mt-0"
+          class="gl-pr-9 gl-my-4 gl-md-mt-0 gl-md-mb-0"
           :value="`${count.value}`"
           :title="count.label"
           :should-animate="true"

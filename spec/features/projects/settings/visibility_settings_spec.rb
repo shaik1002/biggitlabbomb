@@ -25,7 +25,7 @@ RSpec.describe 'Projects > Settings > Visibility settings', :js, feature_categor
       visibility_select.select('Private')
 
       expect(visibility_select.value).to eq '0'
-      expect(visibility_select_container).to have_content 'Only accessible by project members. Membership must be explicitly granted.'
+      expect(visibility_select_container).to have_content 'Only accessible by project members. Membership must be explicitly granted to each user.'
     end
 
     context 'disable email notifications' do
@@ -65,7 +65,7 @@ RSpec.describe 'Projects > Settings > Visibility settings', :js, feature_categor
   end
 
   def save_permissions_group
-    within_testid('visibility-features-permissions-content') do
+    page.within('.sharing-permissions') do
       click_button 'Save changes'
       wait_for_requests
     end

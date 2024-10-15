@@ -1,9 +1,8 @@
-import { GlTable, GlModal } from '@gitlab/ui';
+import { GlCard, GlTable } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 // eslint-disable-next-line no-restricted-imports
 import Vuex from 'vuex';
-import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
 import BadgeSettings from '~/badges/components/badge_settings.vue';
 import BadgeList from '~/badges/components/badge_list.vue';
 import BadgeForm from '~/badges/components/badge_form.vue';
@@ -21,10 +20,10 @@ describe('BadgeSettings component', () => {
     store.state.kind = 'project';
     store.state.isEditing = isEditing;
 
-    wrapper = shallowMountExtended(BadgeSettings, {
+    wrapper = shallowMount(BadgeSettings, {
       store,
       stubs: {
-        CrudComponent,
+        GlCard,
         GlTable,
         'badge-list': BadgeList,
         'badge-form': BadgeForm,
@@ -36,12 +35,11 @@ describe('BadgeSettings component', () => {
     createComponent();
   });
 
-  const findModal = () => wrapper.findComponent(GlModal);
-
   it('renders a header with the badge count', () => {
     createComponent();
-    const cardTitle = wrapper.findByTestId('crud-title');
-    const cardCount = wrapper.findByTestId('crud-count');
+
+    const cardTitle = wrapper.find('.gl-new-card-title');
+    const cardCount = wrapper.find('.gl-new-card-count');
 
     expect(cardTitle.text()).toContain('Your badges');
     expect(cardCount.text()).toContain('1');
@@ -61,29 +59,11 @@ describe('BadgeSettings component', () => {
 
   describe('when editing', () => {
     beforeEach(() => {
-      createComponent(true);
+      createComponent({ isEditing: true });
     });
 
-    it('sets `GlModal` `visible` prop to `true`', () => {
-      expect(wrapper.findComponent(GlModal).props('visible')).toBe(true);
-    });
-
-    it('renders `BadgeForm` in modal', () => {
-      expect(findModal().findComponent(BadgeForm).props('isEditing')).toBe(true);
-    });
-
-    describe('when modal primary event is fired', () => {
-      it('emits submit event on form', () => {
-        const dispatchEventSpy = jest.spyOn(
-          findModal().findComponent(BadgeForm).element,
-          'dispatchEvent',
-        );
-        findModal().vm.$emit('primary', { preventDefault: jest.fn() });
-
-        expect(dispatchEventSpy).toHaveBeenCalledWith(
-          new CustomEvent('submit', { cancelable: true }),
-        );
-      });
+    it('displays a form to edit a badge', () => {
+      expect(wrapper.find('[data-testid="edit-badge"]').isVisible()).toBe(true);
     });
   });
 });

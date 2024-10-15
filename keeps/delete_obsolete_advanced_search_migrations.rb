@@ -82,7 +82,7 @@ module Keeps
         'maintenance::removal',
         GROUP_LABEL
       ]
-      change.assignees = groups_helper.pick_reviewer(group_data, change.identifiers)
+      change.reviewers = groups_helper.pick_reviewer(group_data, change.identifiers)
       change.changelog_ee = true
 
       # rubocop:disable Gitlab/DocUrl -- Not running inside rails application
@@ -96,11 +96,6 @@ module Keeps
         [required stop](https://docs.gitlab.com/ee/development/database/required_stops.html) as obsolete migrations
         before removing the migration code from the project. Therefore we can remove code for all Advanced search
         migrations that were made obsolete before the last required stop.
-
-        ## Tasks to complete before merging
-
-        - [ ] Update the archive of migrations in https://gitlab.com/gitlab-org/search-team/migration-graveyard
-        - [ ] Remove references to affected migration or spec files from Rubocop TODOs
       MARKDOWN
       # rubocop:enable Gitlab/DocUrl
 
@@ -112,10 +107,8 @@ module Keeps
         FileUtils.rm_f(migration_data[:file])
         change.changed_files << migration_data[:file]
 
-        if File.exist?(migration_data[:spec_file])
-          FileUtils.rm_f(migration_data[:spec_file])
-          change.changed_files << migration_data[:spec_file]
-        end
+        FileUtils.rm_f(migration_data[:spec_file])
+        change.changed_files << migration_data[:spec_file]
       rescue StandardError => e
         warn "Error deleting #{version} migration and spec: #{e}"
         nil

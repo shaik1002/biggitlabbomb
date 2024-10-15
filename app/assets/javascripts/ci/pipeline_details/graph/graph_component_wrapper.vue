@@ -15,7 +15,6 @@ import {
   SKIP_RETRY_MODAL_KEY,
   STAGE_VIEW,
   VIEW_TYPE_KEY,
-  POLL_INTERVAL,
 } from './constants';
 import PipelineGraph from './components/graph_component.vue';
 import GraphViewSelector from './components/graph_view_selector.vue';
@@ -105,7 +104,6 @@ export default {
         );
       },
     },
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     headerPipeline: {
       query: getPipelineQuery,
       // this query is already being called in pipeline_header.vue, which shares the same cache as this component
@@ -131,7 +129,7 @@ export default {
         return getQueryHeaders(this.graphqlResourceEtag);
       },
       query: getPipelineDetails,
-      pollInterval: POLL_INTERVAL,
+      pollInterval: 10000,
       variables() {
         return {
           projectPath: this.pipelineProjectPath,

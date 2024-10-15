@@ -107,7 +107,6 @@ export const modelVersionWithCandidate = {
   version: '1.0.4999',
   packageId: 'gid://gitlab/Packages::Package/12',
   description: 'A model version description',
-  descriptionHtml: 'A model version description',
   candidate,
   _links: {
     showPath: '/root/test-project/-/ml/models/1/versions/5000',
@@ -212,65 +211,17 @@ export const createModelResponses = {
   },
 };
 
-export const editModelResponses = {
-  success: {
-    data: {
-      mlModelEdit: {
-        model: {
-          id: 'gid://gitlab/Ml::Model/1',
-          _links: {
-            showPath: '/some/project/-/ml/models/1',
-          },
-        },
-        errors: [],
-      },
-    },
-  },
-  validationFailure: {
-    data: {
-      mlModelEdit: {
-        model: null,
-        errors: ['Unable to update model'],
-      },
-    },
-  },
-};
-
-export const editModelVersionResponses = {
-  success: {
-    data: {
-      mlModelVersionEdit: {
-        modelVersion: {
-          id: 'gid://gitlab/Ml::ModelVersion/1',
-          _links: {
-            showPath: '/some/project/-/ml/models/1',
-          },
-        },
-        errors: [],
-      },
-    },
-  },
-  validationFailure: {
-    data: {
-      mlModelVersionEdit: {
-        modelVersion: null,
-        errors: ['Unable to update model version'],
-      },
-    },
-  },
-};
-
 export const destroyModelResponses = {
   success: {
     data: {
-      mlModelDelete: {
+      mlModelDestroy: {
         errors: [],
       },
     },
   },
   failure: {
     data: {
-      mlModelDelete: {
+      mlModelDestroy: {
         errors: ['Model not found'],
       },
     },
@@ -325,7 +276,6 @@ export const modelWithoutVersion = {
 export const model = {
   id: 'gid://gitlab/Ml::Model/1',
   description: 'A model description',
-  descriptionHtml: 'A model description',
   name: 'gitlab_amazing_model',
   versionCount: 1,
   candidateCount: 0,
@@ -336,11 +286,6 @@ export const modelDetailQuery = {
   data: {
     mlModel: model,
   },
-};
-
-export const modelWithVersion = {
-  ...model,
-  version: modelVersionWithCandidate,
 };
 
 export const modelsQuery = (
@@ -365,49 +310,6 @@ export const modelVersionQuery = {
       id: 'gid://gitlab/Ml::Model/1',
       name: 'blah',
       version: modelVersionWithCandidate,
-    },
-  },
-};
-
-export const deleteModelVersionResponses = {
-  success: {
-    data: {
-      mlModelVersionDelete: {
-        errors: [],
-      },
-    },
-  },
-  failure: {
-    data: {
-      mlModelVersionDelete: {
-        errors: ['Model version not found', 'Project not found'],
-      },
-    },
-  },
-};
-
-export const createModelVersionResponses = {
-  success: {
-    data: {
-      mlModelVersionCreate: {
-        modelVersion: {
-          id: 'gid://gitlab/Ml::ModelVersion/1',
-          _links: {
-            showPath: '/some/project/-/ml/models/1/versions/1',
-            packagePath: '/some/project/-/packages/19',
-            importPath: '/api/v4/projects/1/packages/ml_models/1/files/',
-          },
-        },
-        errors: [],
-      },
-    },
-  },
-  failure: {
-    data: {
-      mlModelVersionCreate: {
-        modelVersion: null,
-        errors: ['Version is invalid'],
-      },
     },
   },
 };

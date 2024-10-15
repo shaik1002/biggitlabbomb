@@ -21,7 +21,7 @@ module API
         optional :skip_groups, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'Array of group ids to exclude from list'
         optional :all_available, type: Boolean, desc: 'Show all group that you have access to'
         optional :visibility, type: String, values: Gitlab::VisibilityLevel.string_values,
-          desc: 'Limit by visibility'
+                              desc: 'Limit by visibility'
         optional :search, type: String, desc: 'Search for a specific group'
         optional :owned, type: Boolean, default: false, desc: 'Limit by owned by authenticated user'
         optional :order_by, type: String, values: %w[name path id similarity], default: 'name', desc: 'Order by name, path, id or similarity if searching'
@@ -34,7 +34,14 @@ module API
 
       # rubocop: disable CodeReuse/ActiveRecord
       def find_groups(params, parent_id = nil)
-        find_params = params.slice(*allowable_find_params)
+        find_params = params.slice(
+          :all_available,
+          :custom_attributes,
+          :owned, :min_access_level,
+          :include_parent_descendants,
+          :repository_storage,
+          :search, :visibility
+        )
 
         find_params[:parent] = if params[:top_level_only]
                                  [nil]
@@ -52,13 +59,6 @@ module API
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
-      def allowable_find_params
-        [:all_available,
-          :custom_attributes,
-          :owned, :min_access_level,
-          :include_parent_descendants, :search, :visibility]
-      end
-
       # This is a separate method so that EE can extend its behaviour, without
       # having to modify this code directly.
       #
@@ -68,22 +68,12 @@ module API
           .execute
       end
 
-      def authorized_params?(group, params)
-        return true if can?(current_user, :admin_group, group)
-
-        can?(current_user, :admin_runner, group) &&
-          params.keys == [:shared_runners_setting]
-      end
-
       # This is a separate method so that EE can extend its behaviour, without
       # having to modify this code directly.
       #
       def update_group(group)
-        safe_params = translate_params_for_compatibility
-        return unauthorized! unless authorized_params?(group, safe_params)
-
         ::Groups::UpdateService
-          .new(group, current_user, safe_params)
+          .new(group, current_user, translate_params_for_compatibility)
           .execute
       end
 
@@ -220,7 +210,7 @@ module API
       end
 
       def check_subscription!(group)
-        render_api_error!("This group can't be removed because it is linked to a subscription.", :bad_request) if group.linked_to_subscription?
+        render_api_error!("This group can't be removed because it is linked to a subscription.", :bad_request) if group.prevent_delete?
       end
     end
 
@@ -237,10 +227,6 @@ module API
         use :with_custom_attributes
       end
       get feature_category: :groups_and_projects do
-        if Feature.enabled?(:rate_limit_groups_and_projects_api, current_user)
-          check_rate_limit_by_user_or_ip!(:groups_api)
-        end
-
         groups = find_groups(declared_params(include_missing: false), params[:id])
         present_groups_with_pagination_strategies params, groups
       end
@@ -301,7 +287,7 @@ module API
         group.preload_shared_group_links
 
         mark_throttle! :update_namespace_name, scope: group if params.key?(:name) && params[:name].present?
-        authorize_any! [:admin_group, :admin_runner], group
+        authorize! :admin_group, group
 
         group.remove_avatar! if params.key?(:avatar) && params[:avatar].nil?
 
@@ -322,10 +308,6 @@ module API
       end
       # TODO: Set higher urgency after resolving https://gitlab.com/gitlab-org/gitlab/-/issues/357841
       get ":id", feature_category: :groups_and_projects, urgency: :low do
-        if Feature.enabled?(:rate_limit_groups_and_projects_api, current_user)
-          check_rate_limit_by_user_or_ip!(:group_api)
-        end
-
         group = find_group!(params[:id])
         group.preload_shared_group_links
 
@@ -343,54 +325,6 @@ module API
         delete_group(group)
       end
 
-      desc 'Get a list of shared groups this group was invited to' do
-        success Entities::Group
-        is_array true
-        tags %w[groups]
-      end
-      params do
-        optional :skip_groups, type: Array[Integer], coerce_with: ::API::Validations::Types::CommaSeparatedToIntegerArray.coerce, desc: 'Array of group ids to exclude from list'
-        optional :visibility, type: String, values: Gitlab::VisibilityLevel.string_values, desc: 'Limit by visibility'
-        optional :search, type: String, desc: 'Search for a specific group'
-        optional :min_access_level, type: Integer, values: Gitlab::Access.all_values, desc: 'Minimum access level of authenticated user'
-        optional :order_by, type: String, values: %w[name path id similarity], default: 'name', desc: 'Order by name, path, id or similarity if searching'
-        optional :sort, type: String, values: %w[asc desc], default: 'asc', desc: 'Sort by asc (ascending) or desc (descending)'
-
-        use :pagination
-        use :with_custom_attributes
-      end
-      get ":id/groups/shared", feature_category: :groups_and_projects do
-        if Feature.enabled?(:rate_limit_groups_and_projects_api, current_user)
-          check_rate_limit_by_user_or_ip!(:group_shared_groups_api)
-        end
-
-        group = find_group!(params[:id])
-        groups = ::Namespaces::Groups::SharedGroupsFinder.new(group, current_user, declared(params)).execute
-        groups = order_groups(groups).with_api_scopes
-        present_groups params, groups
-      end
-
-      desc 'Get a list of invited groups in this group' do
-        success Entities::Group
-        is_array true
-        tags %w[groups]
-      end
-      params do
-        optional :relation, type: Array[String], coerce_with: ::API::Validations::Types::CommaSeparatedToArray.coerce, values: %w[direct inherited], desc: 'Include group relations'
-        optional :search, type: String, desc: 'Search for a specific group'
-        optional :min_access_level, type: Integer, values: Gitlab::Access.all_values, desc: 'Minimum access level of authenticated user'
-
-        use :pagination
-        use :with_custom_attributes
-      end
-      get ":id/invited_groups", feature_category: :groups_and_projects do
-        check_rate_limit_by_user_or_ip!(:group_invited_groups_api)
-
-        group = find_group!(params[:id])
-        groups = ::Namespaces::Groups::InvitedGroupsFinder.new(group, current_user, declared_params).execute
-        present_groups params, groups
-      end
-
       desc 'Get a list of projects in this group.' do
         success Entities::Project
         is_array true
@@ -399,14 +333,14 @@ module API
       params do
         optional :archived, type: Boolean, desc: 'Limit by archived status'
         optional :visibility, type: String, values: Gitlab::VisibilityLevel.string_values,
-          desc: 'Limit by visibility'
+                              desc: 'Limit by visibility'
         optional :search, type: String, desc: 'Return list of authorized projects matching the search criteria'
         optional :order_by, type: String, values: %w[id name path created_at updated_at last_activity_at similarity star_count],
-          default: 'created_at', desc: 'Return projects ordered by field'
+                            default: 'created_at', desc: 'Return projects ordered by field'
         optional :sort, type: String, values: %w[asc desc], default: 'desc',
-          desc: 'Return projects sorted in ascending and descending order'
+                        desc: 'Return projects sorted in ascending and descending order'
         optional :simple, type: Boolean, default: false,
-          desc: 'Return only the ID, URL, name, and path of each project'
+                          desc: 'Return only the ID, URL, name, and path of each project'
         optional :owned, type: Boolean, default: false, desc: 'Limit by owned by authenticated user'
         optional :starred, type: Boolean, default: false, desc: 'Limit by starred status'
         optional :with_issues_enabled, type: Boolean, default: false, desc: 'Limit by enabled issues feature'
@@ -422,10 +356,6 @@ module API
       end
       # TODO: Set higher urgency after resolving https://gitlab.com/gitlab-org/gitlab/-/issues/211498
       get ":id/projects", feature_category: :groups_and_projects, urgency: :low do
-        if Feature.enabled?(:rate_limit_groups_and_projects_api, current_user)
-          check_rate_limit_by_user_or_ip!(:group_projects_api)
-        end
-
         finder_options = {
           exclude_shared: !params[:with_shared],
           include_subgroups: params[:include_subgroups],
@@ -445,14 +375,14 @@ module API
       params do
         optional :archived, type: Boolean, desc: 'Limit by archived status'
         optional :visibility, type: String, values: Gitlab::VisibilityLevel.string_values,
-          desc: 'Limit by visibility'
+                              desc: 'Limit by visibility'
         optional :search, type: String, desc: 'Return list of authorized projects matching the search criteria'
         optional :order_by, type: String, values: %w[id name path created_at updated_at last_activity_at star_count],
-          default: 'created_at', desc: 'Return projects ordered by field'
+                            default: 'created_at', desc: 'Return projects ordered by field'
         optional :sort, type: String, values: %w[asc desc], default: 'desc',
-          desc: 'Return projects sorted in ascending and descending order'
+                        desc: 'Return projects sorted in ascending and descending order'
         optional :simple, type: Boolean, default: false,
-          desc: 'Return only the ID, URL, name, and path of each project'
+                          desc: 'Return only the ID, URL, name, and path of each project'
         optional :starred, type: Boolean, default: false, desc: 'Limit by starred status'
         optional :with_issues_enabled, type: Boolean, default: false, desc: 'Limit by enabled issues feature'
         optional :with_merge_requests_enabled, type: Boolean, default: false, desc: 'Limit by enabled merge requests feature'
@@ -541,9 +471,9 @@ module API
       end
       params do
         optional :group_id,
-          type: Integer,
-          desc: 'The ID of the target group to which the group needs to be transferred to.'\
-                'If not provided, the source group will be promoted to a root group.'
+                 type: Integer,
+                 desc: 'The ID of the target group to which the group needs to be transferred to.'\
+                       'If not provided, the source group will be promoted to a root group.'
       end
       post ':id/transfer', feature_category: :groups_and_projects do
         group = find_group!(params[:id])
@@ -569,15 +499,13 @@ module API
         requires :group_id, type: Integer, desc: 'The ID of the group to share'
         requires :group_access, type: Integer, values: Gitlab::Access.all_values, desc: 'The group access level'
         optional :expires_at, type: Date, desc: 'Share expiration date'
-        optional :member_role_id, type: Integer, desc: 'The ID of the Member Role to be assigned to the group'
       end
       post ":id/share", feature_category: :groups_and_projects, urgency: :low do
         shared_with_group = find_group!(params[:group_id])
 
         group_link_create_params = {
           shared_group_access: params[:group_access],
-          expires_at: params[:expires_at],
-          member_role_id: params[:member_role_id]
+          expires_at: params[:expires_at]
         }
 
         result = ::Groups::GroupLinks::CreateService.new(user_group, shared_with_group, current_user, group_link_create_params).execute
@@ -605,49 +533,6 @@ module API
         no_content!
       end
       # rubocop: enable CodeReuse/ActiveRecord
-
-      desc 'Revoke a single token' do
-        detail <<-DETAIL
-Revoke a token, if it has access to the group or any of its subgroups
-and projects. If the token is revoked, or was already revoked, its
-details are returned in the response.
-
-The following criteria must be met:
-
-- The group must be a top-level group.
-- You must have Owner permission in the group.
-- The token type is one of:
-  - Personal access token
-  - Group access token
-  - Project access token
-  - Group deploy token
-  - User feed token
-
-This feature is gated by the :group_agnostic_token_revocation feature flag.
-        DETAIL
-      end
-      params do
-        requires :id, type: String, desc: 'The ID of a top-level group'
-        requires :token, type: String, desc: 'The token to revoke'
-      end
-      post ":id/tokens/revoke", urgency: :low, feature_category: :groups_and_projects do
-        group = find_group!(params[:id])
-        not_found! unless Feature.enabled?(:group_agnostic_token_revocation, group)
-        bad_request!('Must be a top-level group') if group.subgroup?
-        authorize! :admin_group, group
-
-        result = ::Groups::AgnosticTokenRevocationService.new(group, current_user, params[:token]).execute
-
-        if result.success?
-          status :ok
-          present result.payload[:revocable], with: "API::Entities::#{result.payload[:api_entity]}".constantize
-        else
-          # No matter the error, we always return a 422.
-          # This prevents disclosing cases like: token is invalid,
-          # or token is valid but in a different group.
-          unprocessable_entity!
-        end
-      end
     end
   end
 end

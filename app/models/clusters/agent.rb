@@ -4,7 +4,6 @@ module Clusters
   class Agent < ApplicationRecord
     include FromUnion
     include Gitlab::Utils::StrongMemoize
-    include IgnorableColumns
 
     self.table_name = 'cluster_agents'
 
@@ -34,10 +33,8 @@ module Clusters
     has_many :environments, class_name: '::Environment', inverse_of: :cluster_agent, foreign_key: :cluster_agent_id
 
     scope :ordered_by_name, -> { order(:name) }
-    scope :with_name, ->(name) { where(name: name) }
-    scope :has_vulnerabilities, ->(value = true) { where(has_vulnerabilities: value) }
-
-    ignore_column :connection_mode, remove_with: '17.6', remove_after: '2024-11-01'
+    scope :with_name, -> (name) { where(name: name) }
+    scope :has_vulnerabilities, -> (value = true) { where(has_vulnerabilities: value) }
 
     validates :name,
       presence: true,
@@ -84,14 +81,10 @@ module Clusters
     # As of today, all config values of associated authorization rows have the same value.
     # See `UserAccess::RefreshService` for more information.
     def user_access_config
-      user_access_authorizations&.config
-    end
-
-    def user_access_authorizations
       self.class.from_union(
         user_access_project_authorizations.select('config').limit(1),
         user_access_group_authorizations.select('config').limit(1)
-      ).select('config').compact.first
+      ).compact.first&.config
     end
 
     private
@@ -102,7 +95,7 @@ module Clusters
                .joins(:namespace)
                .where(agent_project_authorizations: { agent_id: id })
                .where(project_authorizations: { user_id: user.id, access_level: Gitlab::Access::DEVELOPER.. })
-               .where("namespaces.traversal_ids @> '{?}'", root_namespace.id)
+               .where('namespaces.traversal_ids @> ARRAY[?]', root_namespace.id)
     end
 
     def all_ci_access_authorized_namespaces_for(user)
@@ -119,9 +112,9 @@ module Clusters
     def all_ci_access_authorized_namespaces
       Namespace.select("traversal_ids[array_length(traversal_ids, 1)] AS id")
                .joins("INNER JOIN agent_group_authorizations ON " \
-                      "agent_group_authorizations.group_id = ANY(namespaces.traversal_ids)")
+                      "namespaces.traversal_ids @> ARRAY[agent_group_authorizations.group_id::integer]")
                .where(agent_group_authorizations: { agent_id: id })
-               .where("namespaces.traversal_ids @> '{?}'", root_namespace.id)
+               .where('namespaces.traversal_ids @> ARRAY[?]', root_namespace.id)
     end
 
     def root_namespace

@@ -33,7 +33,7 @@ First, define a job in your `.gitlab-ci.yml` file that generates the
 GitLab checks this report, compares key load performance metrics
 between the source and target branches, and then shows the information in a merge request widget:
 
-![Load Performance Widget](img/load_performance_testing_v13_2.png)
+![Load Performance Widget](img/load_performance_testing.png)
 
 Next, you need to configure the test environment and write the k6 test.
 
@@ -94,7 +94,7 @@ template that is included with GitLab.
 NOTE:
 For large scale k6 tests you need to ensure the GitLab Runner instance performing the actual
 test is able to handle running the test. Refer to [k6's guidance](https://k6.io/docs/testing-guides/running-large-tests#hardware-considerations)
-for spec details. The [default shared GitLab.com runners](../runners/hosted_runners/linux.md)
+for spec details. The [default shared GitLab.com runners](../runners/saas/linux_saas_runner.md)
 likely have insufficient specs to handle most large k6 tests.
 
 This template runs the

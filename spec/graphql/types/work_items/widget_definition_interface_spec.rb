@@ -15,19 +15,19 @@ RSpec.describe Types::WorkItems::WidgetDefinitionInterface, feature_category: :t
     subject { described_class.resolve_type(object, {}) }
 
     context 'for assignees widget' do
-      let(:object) { build(:widget_definition, widget_type: 'assignees') }
+      let(:object) { WorkItems::Widgets::Assignees }
 
       it { is_expected.to eq(Types::WorkItems::WidgetDefinitions::AssigneesType) }
     end
 
     context 'for hierarchy widget' do
-      let(:object) { build(:widget_definition, widget_type: 'hierarchy') }
+      let(:object) { WorkItems::Widgets::Hierarchy }
 
       it { is_expected.to eq(Types::WorkItems::WidgetDefinitions::HierarchyType) }
     end
 
     context 'for other widgets' do
-      let(:object) { build(:widget_definition, widget_type: 'description') }
+      let(:object) { WorkItems::Widgets::Description }
 
       it { is_expected.to eq(Types::WorkItems::WidgetDefinitions::GenericType) }
     end

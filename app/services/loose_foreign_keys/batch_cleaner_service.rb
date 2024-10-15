@@ -5,20 +5,12 @@ module LooseForeignKeys
     CLEANUP_ATTEMPTS_BEFORE_RESCHEDULE = 3
     CONSUME_AFTER_RESCHEDULE = 5.minutes
 
-    def initialize(
-      parent_table:,
-      loose_foreign_key_definitions:,
-      deleted_parent_records:,
-      connection:,
-      logger: Sidekiq.logger,
-      modification_tracker: LooseForeignKeys::ModificationTracker.new
-    )
+    def initialize(parent_table:, loose_foreign_key_definitions:, deleted_parent_records:, connection:, modification_tracker: LooseForeignKeys::ModificationTracker.new)
       @parent_table = parent_table
       @loose_foreign_key_definitions = loose_foreign_key_definitions
       @deleted_parent_records = deleted_parent_records
       @modification_tracker = modification_tracker
       @connection = connection
-      @logger = logger
       @deleted_records_counter = Gitlab::Metrics.counter(
         :loose_foreign_key_processed_deleted_records,
         'The number of processed loose foreign key deleted records'
@@ -62,7 +54,7 @@ module LooseForeignKeys
 
     private
 
-    attr_reader :parent_table, :loose_foreign_key_definitions, :deleted_parent_records, :modification_tracker, :deleted_records_counter, :deleted_records_rescheduled_count, :deleted_records_incremented_count, :connection, :logger
+    attr_reader :parent_table, :loose_foreign_key_definitions, :deleted_parent_records, :modification_tracker, :deleted_records_counter, :deleted_records_rescheduled_count, :deleted_records_incremented_count, :connection
 
     def handle_over_limit
       records_to_reschedule = []
@@ -88,11 +80,8 @@ module LooseForeignKeys
     def record_result(cleaner, result)
       if cleaner.async_delete?
         modification_tracker.add_deletions(result[:table], result[:affected_rows])
-      elsif cleaner.async_nullify? || cleaner.update_column_to?
+      elsif cleaner.async_nullify?
         modification_tracker.add_updates(result[:table], result[:affected_rows])
-      else
-        logger.error("Invalid on_delete argument for definition: #{result[:table]}")
-        false
       end
     end
 
@@ -115,15 +104,14 @@ module LooseForeignKeys
           loose_foreign_key_definition: loose_foreign_key_definition,
           connection: base_model.connection,
           deleted_parent_records: deleted_parent_records,
-          with_skip_locked: with_skip_locked,
-          logger: logger
+          with_skip_locked: with_skip_locked
         )
 
         loop do
           result = cleaner.execute
-          recorded = record_result(cleaner, result)
+          record_result(cleaner, result)
 
-          break if modification_tracker.over_limit? || result[:affected_rows] == 0 || !recorded
+          break if modification_tracker.over_limit? || result[:affected_rows] == 0
         end
       end
     end

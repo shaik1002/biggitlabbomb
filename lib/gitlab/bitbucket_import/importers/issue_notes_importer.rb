@@ -29,8 +29,7 @@ module Gitlab
                 note: comment_note(comment),
                 author_id: user_finder.gitlab_user_id(project, comment.author),
                 created_at: comment.created_at,
-                updated_at: comment.updated_at,
-                imported_from: ::Import::SOURCE_BITBUCKET
+                updated_at: comment.updated_at
               )
             end
           end
@@ -46,7 +45,7 @@ module Gitlab
 
         def comment_note(comment)
           note = ''
-          note += formatter.author_line(comment.author_nickname) unless user_finder.find_user_id(comment.author)
+          note += formatter.author_line(comment.author) unless user_finder.find_user_id(comment.author)
           note += ref_converter.convert_note(comment.note)
 
           mentions_converter.convert(note)

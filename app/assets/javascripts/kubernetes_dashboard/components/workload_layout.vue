@@ -1,16 +1,19 @@
 <script>
-import { GlLoadingIcon, GlAlert } from '@gitlab/ui';
+import { GlLoadingIcon, GlAlert, GlDrawer } from '@gitlab/ui';
+import { DRAWER_Z_INDEX } from '~/lib/utils/constants';
+import { getContentWrapperHeight } from '~/lib/utils/dom_utils';
 import WorkloadStats from './workload_stats.vue';
 import WorkloadTable from './workload_table.vue';
-import WorkloadDetailsDrawer from './workload_details_drawer.vue';
+import WorkloadDetails from './workload_details.vue';
 
 export default {
   components: {
     GlLoadingIcon,
     GlAlert,
+    GlDrawer,
     WorkloadStats,
     WorkloadTable,
-    WorkloadDetailsDrawer,
+    WorkloadDetails,
   },
   props: {
     loading: {
@@ -39,24 +42,25 @@ export default {
   },
   data() {
     return {
-      filterOption: '',
+      showDetailsDrawer: false,
+      selectedItem: {},
     };
   },
   computed: {
-    filteredItems() {
-      if (!this.filterOption) return this.items;
-
-      return this.items.filter((item) => item.status === this.filterOption);
+    getDrawerHeaderHeight() {
+      return getContentWrapperHeight();
     },
   },
   methods: {
-    onItemSelect(item) {
-      this.$refs.detailsDrawer?.toggle(item);
+    closeDetailsDrawer() {
+      this.showDetailsDrawer = false;
     },
-    filterItems(status) {
-      this.filterOption = status;
+    onItemSelect(item) {
+      this.selectedItem = item;
+      this.showDetailsDrawer = true;
     },
   },
+  DRAWER_Z_INDEX,
 };
 </script>
 <template>
@@ -65,13 +69,29 @@ export default {
     {{ errorMessage }}
   </gl-alert>
   <div v-else>
-    <workload-stats :stats="stats" @select="filterItems" />
+    <workload-stats :stats="stats" />
     <workload-table
-      :items="filteredItems"
+      :items="items"
       :fields="fields"
       class="gl-mt-8"
       @select-item="onItemSelect"
+      @remove-selection="closeDetailsDrawer"
     />
-    <workload-details-drawer ref="detailsDrawer" />
+
+    <gl-drawer
+      :open="showDetailsDrawer"
+      :header-height="getDrawerHeaderHeight"
+      :z-index="$options.DRAWER_Z_INDEX"
+      @close="closeDetailsDrawer"
+    >
+      <template #title>
+        <h4 class="gl-font-weight-bold gl-font-size-h2 gl-m-0 gl-word-break-word">
+          {{ selectedItem.name }}
+        </h4>
+      </template>
+      <template #default>
+        <workload-details :item="selectedItem" />
+      </template>
+    </gl-drawer>
   </div>
 </template>

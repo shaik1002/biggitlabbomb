@@ -1,11 +1,10 @@
 import { mount } from '@vue/test-utils';
-import MockAdapter from 'axios-mock-adapter';
-import axios from '~/lib/utils/axios_utils';
+import { nextTick } from 'vue';
 import { trimText } from 'helpers/text_helper';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import autoMergeEnabledComponent from '~/vue_merge_request_widget/components/states/mr_widget_auto_merge_enabled.vue';
-import { MWPS_MERGE_STRATEGY, MWCP_MERGE_STRATEGY } from '~/vue_merge_request_widget/constants';
+import { MWPS_MERGE_STRATEGY } from '~/vue_merge_request_widget/constants';
 import eventHub from '~/vue_merge_request_widget/event_hub';
 import MRWidgetService from '~/vue_merge_request_widget/services/mr_widget_service';
 
@@ -37,14 +36,7 @@ function factory(propsData, stateOverride = {}) {
         service: new MRWidgetService({}),
       },
       data() {
-        return {
-          state: {
-            mergeRequest: {
-              ...convertPropsToGraphqlState(propsData),
-              ...stateOverride,
-            },
-          },
-        };
+        return { ...convertPropsToGraphqlState(propsData), ...stateOverride };
       },
       mocks: {
         $apollo: {
@@ -74,14 +66,11 @@ const defaultMrProps = () => ({
 });
 
 const getStatusText = () => wrapper.findByTestId('statusText').text();
-const findCancelAutoMergeButton = () => wrapper.find('[data-testid="cancelAutomaticMergeButton"]');
 
 describe('MRWidgetAutoMergeEnabled', () => {
   let oldWindowGl;
-  let mock;
 
   beforeEach(() => {
-    mock = new MockAdapter(axios);
     jest.spyOn(eventHub, '$emit').mockImplementation(() => {});
 
     oldWindowGl = window.gl;
@@ -93,7 +82,6 @@ describe('MRWidgetAutoMergeEnabled', () => {
   });
 
   afterEach(() => {
-    mock.restore();
     window.gl = oldWindowGl;
   });
 
@@ -142,8 +130,13 @@ describe('MRWidgetAutoMergeEnabled', () => {
       factory({
         ...defaultMrProps(),
       });
+      // setData usage is discouraged. See https://gitlab.com/groups/gitlab-org/-/epics/7330 for details
+      // eslint-disable-next-line no-restricted-syntax
+      wrapper.setData({
+        isCancellingAutoMerge: true,
+      });
 
-      await findCancelAutoMergeButton().trigger('click');
+      await nextTick();
 
       expect(wrapper.find('.js-cancel-auto-merge').props('loading')).toBe(true);
     });
@@ -155,15 +148,6 @@ describe('MRWidgetAutoMergeEnabled', () => {
       });
 
       expect(getStatusText()).toContain('to be merged automatically when the pipeline succeeds');
-    });
-
-    it('should render the status text as "to be merged automatically..." if MWCP is selected', () => {
-      factory({
-        ...defaultMrProps(),
-        autoMergeStrategy: MWCP_MERGE_STRATEGY,
-      });
-
-      expect(getStatusText()).toContain('to be merged automatically when all merge checks pass');
     });
 
     it('should render the cancel button as "Cancel" if MWPS is selected', () => {

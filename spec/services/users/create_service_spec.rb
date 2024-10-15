@@ -4,19 +4,17 @@ require 'spec_helper'
 
 RSpec.describe Users::CreateService, feature_category: :user_management do
   describe '#execute' do
-    let_it_be(:organization) { create(:organization) }
     let(:password) { User.random_password }
     let(:admin_user) { create(:admin) }
-    let(:email) { 'jd@example.com' }
-    let(:base_params) do
-      { name: 'John Doe', username: 'jduser', email: email, password: password, organization_id: organization.id }
-    end
 
     context 'with an admin user' do
       let(:service) { described_class.new(admin_user, params) }
+      let(:email) { 'jd@example.com' }
 
       context 'when required parameters are provided' do
-        let(:params) { base_params }
+        let(:params) do
+          { name: 'John Doe', username: 'jduser', email: email, password: password }
+        end
 
         it 'returns a persisted user' do
           expect(service.execute).to be_persisted
@@ -33,12 +31,6 @@ RSpec.describe Users::CreateService, feature_category: :user_management do
             password: params[:password],
             created_by_id: admin_user.id
           )
-        end
-
-        context 'with user_detail created' do
-          it 'creates the user_detail record' do
-            expect { service.execute }.to change { UserDetail.count }.by(1)
-          end
         end
 
         context 'when the current_user is not persisted' do
@@ -90,7 +82,9 @@ RSpec.describe Users::CreateService, feature_category: :user_management do
       end
 
       context 'when force_random_password parameter is true' do
-        let(:params) { base_params.merge(force_random_password: true) }
+        let(:params) do
+          { name: 'John Doe', username: 'jduser', email: 'jd@example.com', password: password, force_random_password: true }
+        end
 
         it 'generates random password' do
           user = service.execute
@@ -101,7 +95,15 @@ RSpec.describe Users::CreateService, feature_category: :user_management do
       end
 
       context 'when password_automatically_set parameter is true' do
-        let(:params) { base_params.merge(password_automatically_set: true) }
+        let(:params) do
+          {
+            name: 'John Doe',
+            username: 'jduser',
+            email: 'jd@example.com',
+            password: password,
+            password_automatically_set: true
+          }
+        end
 
         it 'persists the given attributes' do
           user = service.execute
@@ -119,7 +121,9 @@ RSpec.describe Users::CreateService, feature_category: :user_management do
       end
 
       context 'when skip_confirmation parameter is true' do
-        let(:params) { base_params.merge(skip_confirmation: true) }
+        let(:params) do
+          { name: 'John Doe', username: 'jduser', email: 'jd@example.com', password: password, skip_confirmation: true }
+        end
 
         it 'confirms the user' do
           expect(service.execute).to be_confirmed
@@ -127,7 +131,9 @@ RSpec.describe Users::CreateService, feature_category: :user_management do
       end
 
       context 'when reset_password parameter is true' do
-        let(:params) { base_params.merge(reset_password: true) }
+        let(:params) do
+          { name: 'John Doe', username: 'jduser', email: 'jd@example.com', password: password, reset_password: true }
+        end
 
         it 'resets password even if a password parameter is given' do
           expect(service.execute).to be_recently_sent_password_reset
@@ -146,7 +152,9 @@ RSpec.describe Users::CreateService, feature_category: :user_management do
     end
 
     context 'with nil user' do
-      let(:params) { base_params.merge(skip_confirmation: true) }
+      let(:params) do
+        { name: 'John Doe', username: 'jduser', email: 'jd@example.com', password: password, skip_confirmation: true }
+      end
 
       let(:service) { described_class.new(nil, params) }
 
@@ -162,12 +170,6 @@ RSpec.describe Users::CreateService, feature_category: :user_management do
           created_by_id: nil,
           admin: false
         )
-      end
-
-      context 'with user_detail created' do
-        it 'creates the user_detail record' do
-          expect { service.execute }.to change { UserDetail.count }.by(1)
-        end
       end
     end
   end

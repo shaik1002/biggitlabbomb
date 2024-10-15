@@ -136,7 +136,9 @@ RSpec.shared_examples 'conan authenticate endpoint' do
           response.body, jwt_secret).first
         expect(payload['access_token']).to eq(personal_access_token.token)
         expect(payload['user_id']).to eq(personal_access_token.user_id)
-        expect(payload['exp']).to eq(personal_access_token.expires_at.at_beginning_of_day.to_i)
+
+        duration = payload['exp'] - payload['iat']
+        expect(duration).to eq(::Gitlab::ConanToken::CONAN_TOKEN_EXPIRE_TIME)
       end
     end
   end
@@ -215,7 +217,7 @@ end
 RSpec.shared_examples 'handling validation error for package' do
   context 'with validation error' do
     before do
-      allow_next_instance_of(::Packages::Conan::Package) do |instance|
+      allow_next_instance_of(Packages::Package) do |instance|
         instance.errors.add(:base, 'validation error')
 
         allow(instance).to receive(:valid?).and_return(false)
@@ -591,11 +593,7 @@ RSpec.shared_examples 'delete package endpoint' do
       project.add_maintainer(user)
     end
 
-    it 'triggers an internal event' do
-      expect { subject }
-        .to trigger_internal_events('delete_package_from_registry')
-          .with(user: user, project: project, property: 'user', label: 'conan', category: 'InternalEventTracking')
-    end
+    it_behaves_like 'a package tracking event', 'API::ConanPackages', 'delete_package'
 
     it 'deletes a package' do
       expect { subject }.to change { Packages::Package.count }.from(2).to(1)
@@ -788,7 +786,7 @@ RSpec.shared_examples 'workhorse package file upload endpoint' do
 end
 
 RSpec.shared_examples 'creates build_info when there is a job' do
-  context 'with job token' do
+  context 'with job token', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/294047' do
     let(:jwt) { build_jwt_from_job(job) }
 
     it 'creates a build_info record' do

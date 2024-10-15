@@ -87,7 +87,6 @@ export function test(received) {
   return received instanceof Element && !visited.has(received);
 }
 
-// eslint-disable-next-line max-params
 export function serialize(received, config, indentation, depth, refs, printer) {
   // Explicitly set empty string values of img.src to `null` as Vue3 does
   // We need to do this before `clone`, otherwise src prop diff will be lost

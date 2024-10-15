@@ -4,13 +4,10 @@ module API
   module Ci
     class Jobs < ::API::Base
       include PaginationParams
-      include APIGuard
 
       helpers ::API::Helpers::ProjectStatsRefreshConflictsHelpers
 
       before { authenticate! }
-
-      allow_access_with_scope :ai_workflows, if: ->(request) { request.get? || request.head? }
 
       resource :projects, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
         params do
@@ -20,20 +17,20 @@ module API
         helpers do
           params :optional_scope do
             optional :scope, type: Array[String], desc: 'The scope of builds to show',
-              values: ::CommitStatus::AVAILABLE_STATUSES,
-              coerce_with: ->(scope) {
-                case scope
-                when String
-                  [scope]
-                when ::Hash
-                  scope.values
-                when ::Array
-                  scope
-                else
-                  ['unknown']
-                end
-              },
-              documentation: { example: %w[pending running] }
+                             values: ::CommitStatus::AVAILABLE_STATUSES,
+                             coerce_with: ->(scope) {
+                               case scope
+                               when String
+                                 [scope]
+                               when ::Hash
+                                 scope.values
+                               when ::Array
+                                 scope
+                               else
+                                 ['unknown']
+                               end
+                             },
+                             documentation: { example: %w[pending running] }
           end
         end
 
@@ -58,7 +55,7 @@ module API
 
           builds = user_project.builds.order(id: :desc)
           builds = filter_builds(builds, params[:scope])
-          builds = builds.eager_load_for_api
+          builds = builds.preload(:user, :job_artifacts_archive, :job_artifacts, :runner, :tags, pipeline: :project)
 
           present paginate_with_strategies(builds, user_project, paginator_params: { without_count: true }), with: Entities::Ci::Job
         end
@@ -148,8 +145,6 @@ module API
         end
         # This endpoint can be used for retrying both builds and bridges.
         post ':id/jobs/:job_id/retry', urgency: :low, feature_category: :continuous_integration do
-          Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/-/issues/473419')
-
           authorize_update_builds!
 
           job = find_job!(params[:job_id])
@@ -203,7 +198,7 @@ module API
         params do
           requires :job_id, type: Integer, desc: 'The ID of a Job', documentation: { example: 88 }
           optional :job_variables_attributes,
-            type: Array, desc: 'User defined variables that will be included when running the job' do
+                   type: Array, desc: 'User defined variables that will be included when running the job' do
             requires :key, type: String, desc: 'The name of the variable', documentation: { example: 'foo' }
             requires :value, type: String, desc: 'The value of the variable', documentation: { example: 'bar' }
           end
@@ -274,9 +269,7 @@ module API
 
           agent_authorizations = ::Clusters::Agents::Authorizations::CiAccess::FilterService.new(
             ::Clusters::Agents::Authorizations::CiAccess::Finder.new(project).execute,
-            { environment: persisted_environment&.name,
-              protected_ref: pipeline.protected_ref? },
-            pipeline.project
+            environment: persisted_environment&.name
           ).execute
 
           # See https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/blob/master/doc/kubernetes_ci_access.md#apiv4joballowed_agents-api

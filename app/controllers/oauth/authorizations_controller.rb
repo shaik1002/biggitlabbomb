@@ -8,7 +8,7 @@ class Oauth::AuthorizationsController < Doorkeeper::AuthorizationsController
   before_action :add_gon_variables
   before_action :verify_confirmed_email!, :verify_admin_allowed!
 
-  layout 'minimal'
+  layout 'profile'
 
   # Overridden from Doorkeeper::AuthorizationsController to
   # include the call to session.delete

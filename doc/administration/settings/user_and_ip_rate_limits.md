@@ -33,7 +33,7 @@ counted as web traffic.
 
 To enable the unauthenticated API request rate limit:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Settings > Network**.
 1. Expand **User and IP rate limits**.
 1. Select **Enable unauthenticated API request rate limit**.
@@ -47,7 +47,7 @@ To enable the unauthenticated API request rate limit:
 
 To enable the unauthenticated request rate limit:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Settings > Network**.
 1. Expand **User and IP rate limits**.
 1. Select **Enable unauthenticated web request rate limit**.
@@ -61,7 +61,7 @@ To enable the unauthenticated request rate limit:
 
 To enable the authenticated API request rate limit:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Settings > Network**.
 1. Expand **User and IP rate limits**.
 1. Select **Enable authenticated API request rate limit**.
@@ -75,7 +75,7 @@ To enable the authenticated API request rate limit:
 
 To enable the authenticated request rate limit:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Settings > Network**.
 1. Expand **User and IP rate limits**.
 1. Select **Enable authenticated web request rate limit**.
@@ -92,7 +92,7 @@ plain-text body, which by default is `Retry later`.
 
 To use a custom response:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Settings > Network**.
 1. Expand **User and IP rate limits**.
 1. In the **Plain-text response to send to clients that hit a rate limit** text box,
@@ -106,7 +106,7 @@ To reduce timeouts, the `project/:id/jobs` endpoint has a default [rate limit](.
 
 To modify the maximum number of requests:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Settings > Network**.
 1. Expand **User and IP rate limits**.
 1. Update the **Maximum authenticated requests to `project/:id/jobs` per minute** value.
@@ -120,7 +120,7 @@ attached into the response headers.
 
 | Header                | Example                         | Description                                                                                                                                                                                                      |
 |:----------------------|:--------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `RateLimit-Limit`     | `60`                            | The request quota for the client **each minute**. If the rate limit period set in the **Admin** area is different from 1 minute, the value of this header is adjusted to approximately the nearest 60-minute period. |
+| `RateLimit-Limit`     | `60`                            | The request quota for the client **each minute**. If the rate limit period set in the Admin Area is different from 1 minute, the value of this header is adjusted to approximately the nearest 60-minute period. |
 | `RateLimit-Name`      | `throttle_authenticated_web`    | Name of the throttle blocking the requests.                                                                                                                                                                      |
 | `RateLimit-Observed`  | `67`                            | Number of requests associated to the client in the time window.                                                                                                                                                  |
 | `RateLimit-Remaining` | `0`                             | Remaining quota in the time window. The result of `RateLimit-Limit` - `RateLimit-Observed`.                                                                                                                     |
@@ -223,26 +223,18 @@ request continue. The log message contains an `env` field set to `track`. The `m
 field contains the name of throttle that was hit.
 
 It is important to set the environment variable **before** enabling
-the rate limiting in the settings. The settings in the **Admin** area
+the rate limiting in the settings. The settings in the Admin Area
 take effect immediately, while setting the environment variable
 requires a restart of all the Puma processes.
 
-## Troubleshooting
+<!-- ## Troubleshooting
 
-### Disable throttling after accidentally locking administrators out
+Include any troubleshooting steps that you can foresee. If you know beforehand what issues
+one might have when setting this up, or when something is changed, or on upgrading, it's
+important to describe those, too. Think of things that may go wrong and include them here.
+This is important to minimize requests for support, and to avoid doc comments with
+questions that you know someone might ask.
 
-If many users connect to GitLab through the same proxy or network gateway,
-it is possible that, if a rate limit is too low, that limit will also lock administrators out,
-because GitLab sees them using the same IP as the requests that triggered the throttling.
-
-Administrators can use [the Rails console](../operations/rails_console.md) to disable the same limits as listed for
-[the `GITLAB_THROTTLE_DRY_RUN` variable](#try-out-throttling-settings-before-enforcing-them).
-For example:
-
-```ruby
-Gitlab::CurrentSettings.update!(throttle_authenticated_web_enabled: false)
-```
-
-In this example, the `throttle_authenticated_web` parameter has the `_enabled` name suffix.
-
-To set numeric values for the limits, replace the `_enabled` name suffix with the `_period_in_seconds` and `_requests_per_period` suffixes.
+Each scenario can be a third-level heading, for example `### Getting error message X`.
+If you have none to add when creating a doc, leave this section in place
+but commented out to help encourage others to add to it in the future. -->

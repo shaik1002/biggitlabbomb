@@ -75,29 +75,6 @@ describe('InternalEvents', () => {
       );
     });
 
-    it('trackEvent calls Tracking.event with event name, category, base and custom properties', () => {
-      jest.spyOn(Tracking, 'event').mockImplementation(() => {});
-
-      const additionalProps = {
-        ...allowedAdditionalProps,
-        key: 'value',
-      };
-
-      InternalEvents.trackEvent(event, additionalProps, category);
-
-      expect(Tracking.event).toHaveBeenCalledWith(
-        category,
-        event,
-        expect.objectContaining({
-          context: expect.any(Object),
-          value: 2,
-          property: 'value',
-          label: 'value',
-          extra: { key: 'value' },
-        }),
-      );
-    });
-
     it('trackEvent calls trackBrowserSDK with event name', () => {
       jest.spyOn(InternalEvents, 'trackBrowserSDK').mockImplementation(() => {});
 
@@ -120,41 +97,22 @@ describe('InternalEvents', () => {
       });
     });
 
-    it('throws an error if base property has incorrect type', () => {
+    it('throws an error if unallowed additionalProperties are passed', () => {
       jest.spyOn(InternalEvents, 'trackBrowserSDK').mockImplementation(() => {});
       jest.spyOn(Tracking, 'event').mockImplementation(() => {});
 
       const additionalProps = {
         ...allowedAdditionalProps,
-        value: 'invalidType',
+        unallowedKey: 'value',
       };
 
       expect(() => {
         InternalEvents.trackEvent(event, additionalProps, category);
-      }).toThrow('value should be of type: number. Provided type is: string.');
+      }).toThrow(/Disallowed additional properties were provided:/);
 
       expect(InternalEvents.trackBrowserSDK).not.toHaveBeenCalled();
       expect(Tracking.event).not.toHaveBeenCalled();
       expect(API.trackInternalEvent).not.toHaveBeenCalled();
-    });
-
-    it('does not throw an error for custom properties', () => {
-      jest.spyOn(InternalEvents, 'trackBrowserSDK').mockImplementation(() => {});
-      jest.spyOn(Tracking, 'event').mockImplementation(() => {});
-
-      const additionalProps = {
-        ...allowedAdditionalProps,
-        key1: 'value1',
-        key2: 2,
-      };
-
-      expect(() => {
-        InternalEvents.trackEvent(event, additionalProps, category);
-      }).not.toThrow();
-
-      expect(InternalEvents.trackBrowserSDK).toHaveBeenCalled();
-      expect(Tracking.event).toHaveBeenCalled();
-      expect(API.trackInternalEvent).toHaveBeenCalled();
     });
   });
 
@@ -377,22 +335,10 @@ describe('InternalEvents', () => {
 
   describe('trackBrowserSDK', () => {
     beforeEach(() => {
-      window.glClient = { track: jest.fn() };
-      Tracker.enabled = jest.fn();
-    });
-
-    afterEach(() => {
-      window.glClient = null;
-      window.gl = null;
-    });
-
-    const mockSnowplowContext = (projectId, namespaceId) => {
-      window.gl = {
-        snowplowStandardContext: {
-          data: { project_id: projectId, namespace_id: namespaceId },
-        },
+      window.glClient = {
+        track: jest.fn(),
       };
-    };
+    });
 
     it('should not call glClient.track if Tracker is not enabled', () => {
       Tracker.enabled.mockReturnValue(false);
@@ -402,30 +348,25 @@ describe('InternalEvents', () => {
       expect(window.glClient.track).not.toHaveBeenCalled();
     });
 
-    it('should call glClient.track with event name if Tracker is enabled and no project_id and namespace_id present', () => {
-      mockSnowplowContext(null, null);
+    it('should call glClient.track with event name if Tracker is enabled', () => {
       Tracker.enabled.mockReturnValue(true);
 
       InternalEvents.trackBrowserSDK(event);
 
       expect(window.glClient.track).toHaveBeenCalledTimes(1);
-      expect(window.glClient.track).toHaveBeenCalledWith(event, {
-        project_id: null,
-        namespace_id: null,
-      });
+      expect(window.glClient.track).toHaveBeenCalledWith(event, {});
     });
 
     it('should call glClient.track with event name and additional properties if Tracker is enabled', () => {
-      mockSnowplowContext(123, 456);
       Tracker.enabled.mockReturnValue(true);
 
       InternalEvents.trackBrowserSDK(event, allowedAdditionalProps);
 
       expect(window.glClient.track).toHaveBeenCalledTimes(1);
       expect(window.glClient.track).toHaveBeenCalledWith(event, {
-        project_id: 123,
-        namespace_id: 456,
-        ...allowedAdditionalProps,
+        property: 'value',
+        label: 'value',
+        value: 2,
       });
     });
   });

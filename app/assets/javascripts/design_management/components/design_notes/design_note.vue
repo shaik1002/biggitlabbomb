@@ -15,11 +15,9 @@ import { getIdFromGraphQLId, convertToGraphQLId } from '~/graphql_shared/utils';
 import { TYPENAME_USER } from '~/graphql_shared/constants';
 import { __ } from '~/locale';
 import { setUrlFragment } from '~/lib/utils/url_utility';
-import ImportedBadge from '~/vue_shared/components/imported_badge.vue';
 import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import EmojiPicker from '~/emoji/components/picker.vue';
-import { TYPE_COMMENT } from '~/import/constants';
 import getDesignQuery from '../../graphql/queries/get_design.query.graphql';
 import updateNoteMutation from '../../graphql/mutations/update_note.mutation.graphql';
 import designNoteAwardEmojiToggleMutation from '../../graphql/mutations/design_note_award_emoji_toggle.mutation.graphql';
@@ -44,7 +42,6 @@ export default {
     GlButton,
     GlDisclosureDropdown,
     GlLink,
-    ImportedBadge,
     TimeAgoTooltip,
     TimelineEntryItem,
   },
@@ -127,9 +124,6 @@ export default {
     isEditingAndHasPermissions() {
       return !this.isEditing && this.adminPermissions;
     },
-    isImported() {
-      return this.note.imported;
-    },
     adminPermissions() {
       return this.note.userPermissions.adminNote;
     },
@@ -141,7 +135,7 @@ export default {
             this.isEditing = true;
           },
           extraAttrs: {
-            class: 'sm:!gl-hidden',
+            class: 'gl-sm-display-none!',
           },
         },
         {
@@ -162,7 +156,7 @@ export default {
             this.$emit('delete-note', this.note);
           },
           extraAttrs: {
-            class: '!gl-text-red-500',
+            class: 'gl-text-red-500!',
           },
         },
       ];
@@ -248,10 +242,11 @@ export default {
             const sourceData = cache.readQuery(query);
 
             const newData = produce(sourceData, (draftState) => {
-              const { awardEmoji } =
-                draftState.project.issue.designCollection.designs.nodes[0].discussions.nodes
-                  .find((d) => d.id === this.note.discussion.id)
-                  .notes.nodes.find((n) => n.id === this.note.id);
+              const {
+                awardEmoji,
+              } = draftState.project.issue.designCollection.designs.nodes[0].discussions.nodes
+                .find((d) => d.id === this.note.discussion.id)
+                .notes.nodes.find((n) => n.id === this.note.id);
 
               awardEmoji.nodes = this.getAwardEmojiNodes(name, toggledOn);
             });
@@ -266,7 +261,6 @@ export default {
     },
   },
   updateNoteMutation,
-  TYPE_COMMENT,
 };
 </script>
 
@@ -276,12 +270,12 @@ export default {
       :href="author.webUrl"
       :data-user-id="authorId"
       :data-username="author.username"
-      class="link-inherit-color js-user-link gl-float-left gl-mr-3"
+      class="gl-float-left gl-mr-3 link-inherit-color js-user-link"
     >
       <gl-avatar :size="32" :src="author.avatarUrl" :entity-name="author.username" />
     </gl-avatar-link>
 
-    <div class="gl-flex gl-justify-between">
+    <div class="gl-display-flex gl-justify-content-space-between">
       <div>
         <gl-link
           v-if="hasAuthor"
@@ -292,7 +286,7 @@ export default {
           :data-user-id="authorId"
           :data-username="author.username"
         >
-          <span class="note-header-author-name gl-font-bold">{{ author.name }}</span>
+          <span class="note-header-author-name gl-font-weight-bold">{{ author.name }}</span>
           <span v-if="author.status_tooltip_html" v-safe-html="author.status_tooltip_html"></span>
           <span class="note-headline-light">@{{ author.username }}</span>
         </gl-link>
@@ -300,15 +294,14 @@ export default {
         <span class="note-headline-light note-headline-meta">
           <span class="system-note-message"> <slot></slot> </span>
           <gl-link
-            class="note-timestamp system-note-separator link-inherit-color gl-mb-2 gl-inline-block gl-text-sm"
+            class="note-timestamp system-note-separator gl-display-block gl-mb-2 gl-font-sm link-inherit-color"
             :href="`#note_${noteAnchorId}`"
           >
             <time-ago-tooltip :time="note.createdAt" tooltip-placement="bottom" />
           </gl-link>
-          <imported-badge v-if="isImported" :importable-type="$options.TYPE_COMMENT" />
         </span>
       </div>
-      <div class="-gl-mr-2 -gl-mt-2 gl-flex gl-items-start">
+      <div class="gl-display-flex gl-align-items-flex-start gl-mt-n2 gl-mr-n2">
         <slot name="resolve-discussion"></slot>
         <emoji-picker
           v-if="canAwardEmoji"
@@ -320,7 +313,7 @@ export default {
         <gl-button
           v-if="isEditingAndHasPermissions"
           v-gl-tooltip
-          class="gl-hidden sm:!gl-flex"
+          class="gl-display-none gl-sm-display-inline-flex!"
           :aria-label="$options.i18n.editCommentLabel"
           :title="$options.i18n.editCommentLabel"
           category="tertiary"

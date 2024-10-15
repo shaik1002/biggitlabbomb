@@ -1,11 +1,12 @@
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
-import { localeDateFormat, newDate } from '~/lib/utils/datetime_utility';
+
+import { formatDate } from '~/lib/utils/datetime_utility';
 import RichTimestampTooltip from '~/vue_shared/components/rich_timestamp_tooltip.vue';
 
 describe('RichTimestampTooltip', () => {
   const currentDate = new Date();
   const mockRawTimestamp = currentDate.toISOString();
-  const mockTimestamp = localeDateFormat.asDateTimeFull.format(newDate(currentDate));
+  const mockTimestamp = formatDate(currentDate);
   let wrapper;
 
   const createComponent = ({

@@ -6,6 +6,7 @@ import * as builtInExtensions from '../extensions';
 import { ContentEditor } from './content_editor';
 import MarkdownSerializer from './markdown_serializer';
 import createGlApiMarkdownDeserializer from './gl_api_markdown_deserializer';
+import createRemarkMarkdownDeserializer from './remark_markdown_deserializer';
 import AssetResolver from './asset_resolver';
 import trackInputRulesAndShortcuts from './track_input_rules_and_shortcuts';
 import AutocompleteHelper from './autocomplete_helper';
@@ -39,9 +40,11 @@ export const createContentEditor = ({
     dataSourceUrls: autocompleteDataSources,
     sidebarMediator,
   });
-  const deserializer = createGlApiMarkdownDeserializer({
-    render: renderMarkdown,
-  });
+  const deserializer = window.gon?.features?.preserveUnchangedMarkdown
+    ? createRemarkMarkdownDeserializer()
+    : createGlApiMarkdownDeserializer({
+        render: renderMarkdown,
+      });
 
   const { Suggestions, DrawioDiagram, ...otherExtensions } = builtInExtensions;
 
@@ -73,6 +76,5 @@ export const createContentEditor = ({
     assetResolver,
     drawioEnabled,
     codeSuggestionsConfig,
-    autocompleteHelper,
   });
 };

@@ -1,7 +1,6 @@
-# Default variables for e2e test pipelines
+# Default variables for package-and-test
 
 variables:
-  FF_TIMESTAMPS: "true"
   REGISTRY_HOST: "registry.gitlab.com"
   REGISTRY_GROUP: "gitlab-org"
   ALLURE_JOB_NAME: $CI_PROJECT_NAME
@@ -9,7 +8,7 @@ variables:
   FEATURE_FLAGS: ""
   QA_LOG_LEVEL: "info"
   QA_TESTS: ""
-  # run all tests by default when test-on-omnibus is included natively in other projects
+  # run all tests by default when package-and-test is included natively in other projects
   # this will be overridden when selective test execution is used in gitlab canonical project
   QA_RUN_ALL_TESTS: "true"
   # Used by gitlab-qa to set up a volume for `${CI_PROJECT_DIR}/qa/rspec:/home/gitlab/qa/rspec/`
@@ -17,5 +16,3 @@ variables:
   QA_OMNIBUS_MR_TESTS: "only-smoke"
   # Retry failed specs in separate process
   QA_RETRY_FAILED_SPECS: "true"
-  # helm chart ref used by test-on-cng pipeline
-  GITLAB_HELM_CHART_REF: "80a96c81b738380df53b2983988cc2984526d579"

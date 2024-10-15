@@ -18,8 +18,8 @@ module MarkdownMatchers
       link = actual.at_css('a:contains("Relative Upload Link")')
       image = actual.at_css('img[alt="Relative Upload Image"]')
 
-      expect(link['href']).to eq("/-/project/#{project.id}/uploads/e90decf88d8f96fe9e1389afc2e4a91f/test.jpg")
-      expect(image['data-src']).to eq("/-/project/#{project.id}/uploads/e90decf88d8f96fe9e1389afc2e4a91f/test.jpg")
+      expect(link['href']).to eq("/#{project.full_path}/uploads/e90decf88d8f96fe9e1389afc2e4a91f/test.jpg")
+      expect(image['data-src']).to eq("/#{project.full_path}/uploads/e90decf88d8f96fe9e1389afc2e4a91f/test.jpg")
     end
   end
 
@@ -41,7 +41,7 @@ module MarkdownMatchers
     set_default_markdown_messages
 
     match do |actual|
-      expect(actual).to have_selector('gl-emoji', count: 10)
+      expect(actual).to have_selector('gl-emoji', count: 12)
 
       emoji_element = actual.at_css('gl-emoji')
       expect(emoji_element['data-name'].to_s).not_to be_empty
@@ -56,7 +56,7 @@ module MarkdownMatchers
     match do |actual|
       expect(actual).to have_selector('h1 a#user-content-gitlab-markdown')
       expect(actual).to have_selector('h2 a#user-content-markdown')
-      expect(actual).to have_selector('h3 a#user-content-autolinking-in-markdownfilter')
+      expect(actual).to have_selector('h3 a#user-content-autolinkfilter')
     end
   end
 
@@ -70,7 +70,7 @@ module MarkdownMatchers
     end
   end
 
-  # Autolinking in MarkdownFilter
+  # AutolinkFilter
   matcher :create_autolinks do
     def have_autolink(link)
       have_link(link, href: link)
@@ -93,7 +93,7 @@ module MarkdownMatchers
   end
 
   # GollumTagsFilter
-  matcher :parse_wiki_link_gollum_tags do
+  matcher :parse_gollum_tags do
     def have_image(src)
       have_css("img[data-src$='#{src}']")
     end

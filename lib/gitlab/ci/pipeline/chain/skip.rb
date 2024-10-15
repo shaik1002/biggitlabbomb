@@ -49,5 +49,3 @@ module Gitlab
     end
   end
 end
-
-Gitlab::Ci::Pipeline::Chain::Skip.prepend_mod

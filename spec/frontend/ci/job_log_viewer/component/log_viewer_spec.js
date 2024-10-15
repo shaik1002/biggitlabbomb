@@ -15,12 +15,11 @@ describe('LogViewer', () => {
   };
 
   const findLogLineAt = (i) => wrapper.findAll('.log-line').at(i);
-  const normalize = (text) => text.replace(/\s+/g, ' ').trim();
   const getShownLines = () => {
     return wrapper
       .findAll('.log-line')
       .wrappers.filter((w) => w.isVisible())
-      .map((w) => normalize(w.text()));
+      .map((w) => w.text());
   };
 
   it('displays an empty log', () => {
@@ -40,7 +39,7 @@ describe('LogViewer', () => {
       },
     });
 
-    expect(normalize(wrapper.text())).toBe('1 line');
+    expect(wrapper.text()).toBe('1 line');
   });
 
   it('displays log with style', () => {
@@ -57,7 +56,7 @@ describe('LogViewer', () => {
       },
     });
 
-    expect(normalize(wrapper.text())).toBe('1 key:value');
+    expect(wrapper.text()).toBe('1 key:value');
 
     expect(wrapper.find('.class-a').text()).toBe('key:');
     expect(wrapper.find('.class-b').text()).toBe('value');
@@ -76,80 +75,55 @@ describe('LogViewer', () => {
   });
 
   describe('when displaying a section', () => {
-    let log;
-
     beforeEach(() => {
-      log = [
-        {
-          sections: [],
-          header: 'section_1',
-          content: [{ text: 'level 0' }],
+      createWrapper({
+        props: {
+          log: [
+            {
+              sections: [],
+              content: [{ text: 'log:' }],
+            },
+            {
+              sections: [],
+              header: 'section_1',
+              content: [{ text: 'header' }],
+            },
+            {
+              sections: ['section_1'],
+              header: 'section_1_1',
+              content: [{ text: 'line 1' }],
+            },
+            {
+              sections: ['section_1', 'section_1_1'],
+              content: [{ text: 'line 1.1' }],
+            },
+            {
+              sections: [],
+              content: [{ text: 'done!' }],
+            },
+          ],
         },
-        {
-          sections: ['section_1'],
-          header: 'section_1_1',
-          content: [{ text: 'level 1' }],
-        },
-        {
-          sections: ['section_1', 'section_1_1'],
-          content: [{ text: 'level 2' }],
-        },
-      ];
-
-      createWrapper({ props: { log } });
+      });
     });
 
-    it('shows a section', () => {
-      expect(findLogLineAt(0).findComponent(GlIcon).props('name')).toBe('chevron-lg-down');
+    it('shows an open section', () => {
       expect(findLogLineAt(1).findComponent(GlIcon).props('name')).toBe('chevron-lg-down');
 
-      expect(getShownLines()).toEqual(['1 level 0', '2 level 1', '3 level 2']);
+      expect(getShownLines()).toEqual(['1 log:', '2 header', '3 line 1', '4 line 1.1', '5 done!']);
     });
 
     it('collapses a section', async () => {
-      await findLogLineAt(0).trigger('click');
-
-      expect(findLogLineAt(0).findComponent(GlIcon).props('name')).toBe('chevron-lg-right');
-      expect(getShownLines()).toEqual(['1 level 0']);
-    });
-
-    it('collapses a subsection', async () => {
       await findLogLineAt(1).trigger('click');
 
       expect(findLogLineAt(1).findComponent(GlIcon).props('name')).toBe('chevron-lg-right');
-      expect(getShownLines()).toEqual(['1 level 0', '2 level 1']);
+      expect(getShownLines()).toEqual(['1 log:', '2 header', '5 done!']);
     });
 
-    describe('when displaying a pre-collapsed section', () => {
-      beforeEach(() => {
-        log[1].options = { collapsed: 'true' };
+    it('collapses a subsection', async () => {
+      await findLogLineAt(2).trigger('click');
 
-        createWrapper({
-          props: { log },
-        });
-      });
-
-      it('shows a collapsed section', () => {
-        expect(findLogLineAt(1).findComponent(GlIcon).props('name')).toBe('chevron-lg-right');
-
-        expect(getShownLines()).toEqual(['1 level 0', '2 level 1']);
-      });
-    });
-
-    describe('when displaying a collapsed section', () => {
-      beforeEach(() => {
-        log[1].options = { collapsed: 'false' };
-
-        createWrapper({
-          props: { log },
-        });
-      });
-
-      it('shows a collapsed section', () => {
-        expect(findLogLineAt(1).findComponent(GlIcon).props('name')).toBe('chevron-lg-down');
-
-        expect(getShownLines()).toEqual(['1 level 0', '2 level 1', '3 level 2']);
-      });
+      expect(findLogLineAt(2).findComponent(GlIcon).props('name')).toBe('chevron-lg-right');
+      expect(getShownLines()).toEqual(['1 log:', '2 header', '3 line 1', '5 done!']);
     });
   });
 });

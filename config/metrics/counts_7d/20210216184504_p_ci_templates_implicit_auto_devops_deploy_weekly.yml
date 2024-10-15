@@ -2,6 +2,8 @@
 data_category: optional
 key_path: redis_hll_counters.ci_templates.p_ci_templates_implicit_auto_devops_deploy_weekly
 description: Count of pipelines with implicit Auto Deploy runs
+product_section: ops
+product_stage: configure
 product_group: environments
 value_type: number
 status: removed
@@ -21,5 +23,4 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332
 removed_by_url:

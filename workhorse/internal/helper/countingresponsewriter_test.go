@@ -52,9 +52,8 @@ func TestCountingResponseWriterWrite(t *testing.T) {
 
 func TestCountingResponseWriterFlushable(t *testing.T) {
 	rw := httptest.NewRecorder()
-
 	crw := countingResponseWriter{rw: rw}
-	rc := http.NewResponseController(&crw) //nolint:bodyclose // false-positive https://github.com/timakin/bodyclose/issues/52
+	rc := http.NewResponseController(&crw)
 
 	err := rc.Flush()
 	require.NoError(t, err, "the underlying response writer is not flushable")

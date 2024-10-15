@@ -13,9 +13,5 @@ module Keys
     def notification_service
       NotificationService.new
     end
-
-    def todo_service
-      TodoService.new
-    end
   end
 end

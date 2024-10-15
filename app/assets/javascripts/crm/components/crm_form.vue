@@ -265,7 +265,7 @@ export default {
         <h3>{{ title }}</h3>
       </template>
       <gl-alert v-if="errorMessages.length" variant="danger" @dismiss="errorMessages = []">
-        <ul class="!gl-mb-0 gl-ml-5">
+        <ul class="gl-mb-0! gl-ml-5">
           <li v-for="error in errorMessages" :key="error">
             {{ error }}
           </li>
@@ -285,13 +285,15 @@ export default {
             :options="field.values"
           />
           <gl-form-checkbox v-else-if="field.bool" :id="field.name" v-model="model[field.name]"
-            ><span class="gl-font-bold">{{ field.label }}</span></gl-form-checkbox
+            ><span class="gl-font-weight-bold">{{ field.label }}</span></gl-form-checkbox
           >
           <gl-form-input v-else :id="field.name" v-bind="field.input" v-model="model[field.name]" />
         </gl-form-group>
-        <div class="gl-flex">
+        <span class="gl-float-right">
+          <gl-button data-testid="cancel-button" @click="close(false)">
+            {{ $options.MSG_CANCEL }}
+          </gl-button>
           <gl-button
-            class="gl-mr-3"
             variant="confirm"
             :disabled="isInvalid"
             :loading="submitting"
@@ -299,10 +301,7 @@ export default {
             type="submit"
             >{{ buttonLabel }}</gl-button
           >
-          <gl-button data-testid="cancel-button" @click="close(false)">
-            {{ $options.MSG_CANCEL }}
-          </gl-button>
-        </div>
+        </span>
       </form>
     </gl-drawer>
   </mounting-portal>

@@ -2,13 +2,13 @@
 - release = @releases.find { |release| release.tag == tag.name }
 - commit_status = @tag_pipeline_statuses[tag.name] unless @tag_pipeline_statuses.nil?
 
-%li.gl-justify-between{ class: "md:!gl-flex !gl-items-start !gl-px-5", data: { testid: 'tag-row' } }
+%li.gl-justify-content-space-between{ class: "gl-md-display-flex! gl-align-items-flex-start!", data: { testid: 'tag-row' } }
   .row-main-content
-    = sprite_icon('tag', css_class: "gl-text-subtle")
-    = link_to tag.name, project_tag_path(@project, tag.name), class: 'gl-font-bold'
+    = sprite_icon('tag', css_class: "gl-text-secondary")
+    = link_to tag.name, project_tag_path(@project, tag.name), class: 'item-title ref-name'
 
     - if protected_tag?(@project, tag)
-      = gl_badge_tag s_('TagsPage|protected'), variant: :neutral, class: 'gl-ml-2'
+      = gl_badge_tag s_('TagsPage|protected'), variant: :neutral, size: :sm, class: 'gl-ml-2'
 
     - if commit
       .block-truncated
@@ -30,13 +30,13 @@
         = render partial: 'projects/commit/signature', object: tag.signature
 
     - if commit_status
-      = render 'ci/status/icon', status: commit_status, option_css_classes: 'gl-inline-flex gl-align-middle gl-mr-5'
+      = render 'ci/status/icon', status: commit_status, option_css_classes: 'gl-display-inline-flex gl-align-middle gl-mr-5'
     - elsif @tag_pipeline_statuses && @tag_pipeline_statuses.any?
-      .gl-inline-flex.gl-align-middle.gl-mr-5
+      .gl-display-inline-flex.gl-align-middle.gl-mr-5
         %svg.s24
 
     - if can?(current_user, :admin_tag, @project)
-      = render 'edit_release_button', tag: tag, project: @project, release: release, option_css_classes: '!gl-mr-3'
+      = render 'edit_release_button', tag: tag, project: @project, release: release, option_css_classes: 'gl-mr-3!'
 
     .gl-mr-3
       = render 'projects/buttons/download', project: @project, ref: tag.name, pipeline: @tags_pipelines[tag.name]

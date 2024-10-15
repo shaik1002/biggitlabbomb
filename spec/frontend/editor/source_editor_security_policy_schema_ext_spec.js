@@ -16,76 +16,31 @@ jest.mock('~/ide/utils');
 
 const mockNamespacePath = 'mock-namespace';
 
-const $defs = {
-  reused_policy: { items: { properties: { flam: 'jam' } } },
-  policy_scope: { type: 'object' },
-};
-
 const mockSchema = {
-  $defs,
+  $id: 1,
   title: 'mockSchema',
   description: 'mockDescriptions',
   type: 'Object',
   properties: {
     scan_execution_policy: { items: { properties: { foo: 'bar' } } },
-    approval_policy: { items: { properties: { fizz: 'buzz' } } },
-    reused_policy: { $ref: '#/$defs/reused_policy' },
+    scan_result_policy: { items: { properties: { fizz: 'buzz' } } },
   },
 };
 
-const mockCommonData = {
-  title: 'mockSchema',
-  description: 'mockDescriptions',
-  type: 'Object',
-  $defs,
-};
-
-const mockScanExecutionPolicyProperties = {
-  ...mockCommonData,
+const createMockOutput = (policyType) => ({
+  $id: mockSchema.$id,
+  title: mockSchema.title,
+  description: mockSchema.description,
+  type: mockSchema.type,
   properties: {
     type: {
       type: 'string',
       description: 'Specifies the type of policy to be enforced.',
-      enum: 'scan_execution_policy',
+      enum: policyType,
     },
-    foo: 'bar',
+    ...mockSchema.properties[policyType].items.properties,
   },
-};
-
-const mockApprovalPolicyProperties = {
-  ...mockCommonData,
-  properties: {
-    type: {
-      type: 'string',
-      description: 'Specifies the type of policy to be enforced.',
-      enum: 'approval_policy',
-    },
-    fizz: 'buzz',
-  },
-};
-
-const mockReusedPolicyProperties = {
-  ...mockCommonData,
-  properties: {
-    type: {
-      type: 'string',
-      description: 'Specifies the type of policy to be enforced.',
-      enum: 'reused_policy',
-    },
-    flam: 'jam',
-  },
-};
-
-const mockNonExistentPolicyProperties = {
-  ...mockCommonData,
-  properties: {
-    type: {
-      type: 'string',
-      description: 'Specifies the type of policy to be enforced.',
-      enum: 'non_existent_policy',
-    },
-  },
-};
+});
 
 describe('getSecurityPolicyListUrl', () => {
   it.each`
@@ -128,25 +83,20 @@ describe('getSinglePolicySchema', () => {
   });
 
   it.each`
-    policyType                 | expected
-    ${'scan_execution_policy'} | ${mockScanExecutionPolicyProperties}
-    ${'approval_policy'}       | ${mockApprovalPolicyProperties}
-    ${'reused_policy'}         | ${mockReusedPolicyProperties}
-    ${'non_existent_policy'}   | ${mockNonExistentPolicyProperties}
-  `(
-    'returns the appropriate schema on request success for $policyType',
-    async ({ policyType, expected }) => {
-      mock.onGet().reply(HTTP_STATUS_OK, mockSchema);
+    policyType
+    ${'scan_execution_policy'}
+    ${'scan_result_policy'}
+  `('returns the appropriate schema on request success for $policyType', async ({ policyType }) => {
+    mock.onGet().reply(HTTP_STATUS_OK, mockSchema);
 
-      await expect(
-        getSinglePolicySchema({
-          namespacePath: mockNamespacePath,
-          namespaceType: 'project',
-          policyType,
-        }),
-      ).resolves.toStrictEqual(expected);
-    },
-  );
+    await expect(
+      getSinglePolicySchema({
+        namespacePath: mockNamespacePath,
+        namespaceType: 'project',
+        policyType,
+      }),
+    ).resolves.toStrictEqual(createMockOutput(policyType));
+  });
 
   it('returns an empty schema on request failure', async () => {
     await expect(
@@ -154,6 +104,16 @@ describe('getSinglePolicySchema', () => {
         namespacePath: mockNamespacePath,
         namespaceType: 'project',
         policyType: 'scan_execution_policy',
+      }),
+    ).resolves.toStrictEqual({});
+  });
+
+  it('returns an empty schema on non-existing policy type', async () => {
+    await expect(
+      getSinglePolicySchema({
+        namespacePath: mockNamespacePath,
+        namespaceType: 'project',
+        policyType: 'non_existent_policy',
       }),
     ).resolves.toStrictEqual({});
   });
@@ -189,16 +149,17 @@ describe('SecurityPolicySchemaExtension', () => {
   describe('registerSecurityPolicyEditorSchema', () => {
     describe('register validations options with monaco for yaml language', () => {
       it('registers the schema', async () => {
+        const policyType = 'scan_execution_policy';
         await instance.registerSecurityPolicyEditorSchema({
           namespacePath: mockNamespacePath,
           namespaceType: 'project',
-          policyType: 'scan_execution_policy',
+          policyType,
         });
 
         expect(registerSchema).toHaveBeenCalledTimes(1);
         expect(registerSchema).toHaveBeenCalledWith({
           uri: `${TEST_HOST}/${mockNamespacePath}/-/security/policies/schema`,
-          schema: mockScanExecutionPolicyProperties,
+          schema: createMockOutput(policyType),
           fileMatch: ['policy.yml'],
         });
       });

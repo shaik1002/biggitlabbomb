@@ -13,7 +13,7 @@ RSpec.describe 'Projects > Snippets > User views snippets', feature_category: :s
 
   context 'snippets list' do
     let!(:project_snippet) { create(:project_snippet, project: project, author: user) }
-    let!(:snippet) { create(:project_snippet, author: user) }
+    let!(:snippet) { create(:snippet, author: user) }
     let(:snippets) { [project_snippet, snippet] } # Used by the shared examples
 
     before do
@@ -60,7 +60,7 @@ RSpec.describe 'Projects > Snippets > User views snippets', feature_category: :s
       it 'hides New Snippet button' do
         visit_project_snippets
 
-        page.within(find('.gl-empty-state')) do
+        page.within(find('.empty-state')) do
           expect(page).not_to have_link('New snippet')
         end
       end
@@ -89,7 +89,7 @@ RSpec.describe 'Projects > Snippets > User views snippets', feature_category: :s
       it 'shows New Snippet button' do
         visit_project_snippets
 
-        page.within(find('.gl-empty-state')) do
+        page.within(find('.empty-state')) do
           expect(page).to have_link('New snippet')
         end
       end

@@ -7,8 +7,8 @@
 - preview_url = preview_markdown_path(project, target_type: model.class.name)
 
 .form-group
-  .gl-flex
-    = form.label :description, _('Description'), class: 'gl-block'
+  .gl-display-flex
+    = form.label :description, _('Description'), class: 'gl-display-block'
     - if model.is_a?(MergeRequest)
       = render_if_exists "/shared/form_elements/summarize_merge_request"
   - if model.is_a?(MergeRequest)
@@ -22,8 +22,8 @@
     = render 'shared/form_elements/apply_generated_description_warning', issuable: model
 
   .js-markdown-editor{ data: { render_markdown_path: preview_url,
-                               markdown_docs_path: help_page_path('user/markdown.md'),
-                               quick_actions_docs_path: help_page_path('user/project/quick_actions.md'),
+                               markdown_docs_path: help_page_path('user/markdown'),
+                               quick_actions_docs_path: help_page_path('user/project/quick_actions'),
                                testid: 'issuable-form-description-field',
                                form_field_placeholder: placeholder,
                                autofocus: 'false',

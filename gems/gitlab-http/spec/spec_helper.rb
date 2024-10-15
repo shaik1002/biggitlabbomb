@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-ENV["RAILS_ENV"] ||= 'test'
-
 require 'rspec/mocks'
 
 require 'gitlab/rspec/all'

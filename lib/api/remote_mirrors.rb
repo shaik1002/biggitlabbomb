@@ -11,12 +11,6 @@ module API
       unauthorized! unless can?(current_user, :admin_remote_mirror, user_project)
     end
 
-    helpers do
-      def find_remote_mirror
-        user_project.remote_mirrors.find(params[:mirror_id])
-      end
-    end
-
     params do
       requires :id, types: [String, Integer], desc: 'The ID or URL-encoded path of the project'
     end
@@ -50,7 +44,7 @@ module API
         requires :mirror_id, type: String, desc: 'The ID of a remote mirror'
       end
       get ':id/remote_mirrors/:mirror_id' do
-        mirror = find_remote_mirror
+        mirror = user_project.remote_mirrors.find(params[:mirror_id])
 
         present mirror, with: Entities::RemoteMirror
       end
@@ -68,7 +62,7 @@ module API
         requires :mirror_id, type: String, desc: 'The ID of a remote mirror'
       end
       post ':id/remote_mirrors/:mirror_id/sync' do
-        mirror = find_remote_mirror
+        mirror = user_project.remote_mirrors.find(params[:mirror_id])
 
         result = ::RemoteMirrors::SyncService.new(user_project, current_user).execute(mirror)
 
@@ -92,24 +86,36 @@ module API
         requires :url, type: String, desc: 'The URL for a remote mirror', documentation: { example: 'https://*****:*****@example.com/gitlab/example.git' }
         optional :enabled, type: Boolean, desc: 'Determines if the mirror is enabled', documentation: { example: false }
         optional :auth_method, type: String, desc: 'Determines the mirror authentication method',
-          values: %w[ssh_public_key password]
+                               values: %w[ssh_public_key password]
         optional :keep_divergent_refs, type: Boolean, desc: 'Determines if divergent refs are kept on the target',
-          documentation: { example: false }
+                                       documentation: { example: false }
         use :mirror_branches_setting
       end
       post ':id/remote_mirrors' do
-        service = ::RemoteMirrors::CreateService.new(
-          user_project,
-          current_user,
-          declared_params(include_missing: false)
-        )
+        if Feature.enabled?(:use_remote_mirror_create_service, user_project)
+          service = ::RemoteMirrors::CreateService.new(
+            user_project,
+            current_user,
+            declared_params(include_missing: false)
+          )
 
-        result = service.execute
+          result = service.execute
 
-        if result.success?
-          present result.payload[:remote_mirror], with: Entities::RemoteMirror
+          if result.success?
+            present result.payload[:remote_mirror], with: Entities::RemoteMirror
+          else
+            render_api_error!(result.message, 400)
+          end
         else
-          render_api_error!(result.message, 400)
+          create_params = declared_params(include_missing: false)
+          verify_mirror_branches_setting(create_params)
+          new_mirror = user_project.remote_mirrors.create(create_params)
+
+          if new_mirror.persisted?
+            present new_mirror, with: Entities::RemoteMirror
+          else
+            render_validation_error!(new_mirror)
+          end
         end
       end
 
@@ -127,23 +133,27 @@ module API
         optional :enabled, type: Boolean, desc: 'Determines if the mirror is enabled', documentation: { example: true }
         optional :auth_method, type: String, desc: 'Determines the mirror authentication method'
         optional :keep_divergent_refs, type: Boolean, desc: 'Determines if divergent refs are kept on the target',
-          documentation: { example: false }
+                                       documentation: { example: false }
         use :mirror_branches_setting
       end
       put ':id/remote_mirrors/:mirror_id' do
-        mirror = find_remote_mirror
+        mirror = user_project.remote_mirrors.find(params[:mirror_id])
 
-        service = ::RemoteMirrors::UpdateService.new(
-          user_project,
-          current_user,
-          declared_params(include_missing: false)
-        )
+        mirror_params = declared_params(include_missing: false)
+        mirror_params[:id] = mirror_params.delete(:mirror_id)
 
-        result = service.execute(mirror)
+        verify_mirror_branches_setting(mirror_params)
+        update_params = { remote_mirrors_attributes: mirror_params }
 
-        render_api_error!(result.message, 400) if result.error?
+        result = ::Projects::UpdateService
+          .new(user_project, current_user, update_params)
+          .execute
 
-        present result.payload[:remote_mirror], with: Entities::RemoteMirror
+        if result[:status] == :success
+          present mirror.reset, with: Entities::RemoteMirror
+        else
+          render_api_error!(result[:message], result[:http_status])
+        end
       end
 
       desc 'Delete a single remote mirror' do
@@ -160,12 +170,19 @@ module API
         requires :mirror_id, type: String, desc: 'The ID of a remote mirror'
       end
       delete ':id/remote_mirrors/:mirror_id' do
-        mirror = find_remote_mirror
+        mirror = user_project.remote_mirrors.find(params[:mirror_id])
 
         destroy_conditionally!(mirror) do
-          result = ::RemoteMirrors::DestroyService.new(user_project, current_user).execute(mirror)
+          mirror_params = declared_params(include_missing: false).merge(_destroy: 1)
+          mirror_params[:id] = mirror_params.delete(:mirror_id)
+          update_params = { remote_mirrors_attributes: mirror_params }
 
-          render_api_error!(result.message, 400) if result.error?
+          # Note: We are using the update service to be consistent with how the controller handles deletion
+          result = ::Projects::UpdateService.new(user_project, current_user, update_params).execute
+
+          if result[:status] != :success
+            render_api_error!(result[:message], 400)
+          end
         end
       end
     end

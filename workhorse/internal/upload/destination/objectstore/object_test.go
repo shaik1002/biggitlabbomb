@@ -9,7 +9,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"gitlab.com/gitlab-org/gitlab/workhorse/internal/upload/destination/objectstore/test"
@@ -121,10 +120,10 @@ func (e *endlessReader) Read(p []byte) (n int, err error) {
 // This is important for troubleshooting in production.
 func TestObjectUploadBrokenConnection(t *testing.T) {
 	// This test server closes connection immediately
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		hj, ok := w.(http.Hijacker)
 		if !ok {
-			assert.Fail(t, "webserver doesn't support hijacking")
+			require.FailNow(t, "webserver doesn't support hijacking")
 		}
 		conn, _, err := hj.Hijack()
 		if err != nil {

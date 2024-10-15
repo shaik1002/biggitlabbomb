@@ -24,12 +24,7 @@ import {
   COMMAND_PALETTE_FILES_CHAR,
 } from '~/vue_shared/global_search/constants';
 import { getFormattedItem } from '../utils';
-import {
-  TRACKING_CLICK_COMMAND_PALETTE_ITEM,
-  SCOPE_SEARCH_PROJECT,
-  SCOPE_SEARCH_GROUP,
-  SCOPE_SEARCH_ALL,
-} from '../command_palette/constants';
+import { TRACKING_CLICK_COMMAND_PALETTE_ITEM } from '../command_palette/constants';
 
 import {
   ICON_GROUP,
@@ -183,7 +178,7 @@ export const scopedSearchOptions = (state, getters) => {
 
   if (state.searchContext?.project) {
     items.push({
-      text: SCOPE_SEARCH_PROJECT,
+      text: 'scoped-in-project',
       scope: state.searchContext.project?.name || '',
       scopeCategory: PROJECTS_CATEGORY,
       icon: ICON_PROJECT,
@@ -197,7 +192,7 @@ export const scopedSearchOptions = (state, getters) => {
 
   if (state.searchContext?.group) {
     items.push({
-      text: SCOPE_SEARCH_GROUP,
+      text: 'scoped-in-group',
       scope: state.searchContext.group?.name || '',
       scopeCategory: GROUPS_CATEGORY,
       icon: state.searchContext.group?.full_name?.includes('/') ? ICON_SUBGROUP : ICON_GROUP,
@@ -210,7 +205,7 @@ export const scopedSearchOptions = (state, getters) => {
   }
 
   items.push({
-    text: SCOPE_SEARCH_ALL,
+    text: 'scoped-in-all',
     description: MSG_IN_ALL_GITLAB,
     href: getters.allUrl,
     extraAttrs: {

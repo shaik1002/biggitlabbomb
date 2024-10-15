@@ -80,8 +80,6 @@ module IpynbDiff
     end
 
     def transform_outputs(outputs, symbol)
-      return [] unless outputs
-
       transformed = outputs.map
                            .with_index { |output, i| @out_transformer.transform(output, symbol / ['outputs', i]) }
                            .compact

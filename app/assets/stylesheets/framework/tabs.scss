@@ -1,5 +1,5 @@
 .gitlab-tabs {
-  background: $gray-10;
+  background: $gray-light;
   border: 1px solid $border-color;
   flex-wrap: nowrap;
 
@@ -28,5 +28,9 @@
 
   .tab-pane {
     padding: $gl-padding;
+
+    &.no-padding {
+      padding: 0;
+    }
   }
 }

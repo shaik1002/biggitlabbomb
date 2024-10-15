@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -48,7 +48,7 @@ POST /groups/:id/export
 
 | Attribute | Type           | Required | Description                              |
 | --------- | -------------- | -------- | ---------------------------------------- |
-| `id`      | integer/string | yes      | ID of the group |
+| `id`      | integer/string | yes      | ID of the group owned by the authenticated user |
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/1/export"
@@ -70,7 +70,7 @@ GET /groups/:id/export/download
 
 | Attribute | Type           | Required | Description                              |
 | --------- | -------------- | -------- | ---------------------------------------- |
-| `id`      | integer/string | yes      | ID of the group |
+| `id`      | integer/string | yes      | ID of the group owned by the authenticated user |
 
 ```shell
 group=1
@@ -97,7 +97,7 @@ returns either:
 The maximum import file size can be set by the Administrator on self-managed instances (default is `0` (unlimited)).
 As an administrator, you can modify the maximum import file size either:
 
-- In the [**Admin** area](../administration/settings/import_and_export_settings.md).
+- In the [Admin Area](../administration/settings/import_and_export_settings.md).
 - By using the `max_import_size` option in the [Application settings API](settings.md#change-application-settings).
 
 For information on the maximum import file size on GitLab.com, see

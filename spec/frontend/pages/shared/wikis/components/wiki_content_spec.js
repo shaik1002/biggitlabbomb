@@ -19,10 +19,7 @@ describe('pages/shared/wikis/components/wiki_content', () => {
 
   function buildWrapper(propsData = {}) {
     wrapper = shallowMount(WikiContent, {
-      provide: {
-        contentApi: PATH,
-      },
-      propsData: { ...propsData },
+      propsData: { getWikiContentUrl: PATH, ...propsData },
       stubs: {
         GlSkeletonLoader,
         GlAlert,
@@ -74,7 +71,7 @@ describe('pages/shared/wikis/components/wiki_content', () => {
     it('calls renderGFM after nextTick', async () => {
       await nextTick();
 
-      expect(renderGFM).toHaveBeenCalled();
+      expect(renderGFM).toHaveBeenCalledWith(wrapper.element);
     });
 
     it('handles hash after render', async () => {

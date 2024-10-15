@@ -64,11 +64,10 @@ describe('Catalog Verification Badge', () => {
   });
 
   describe.each`
-    verificationLevel                | describeText
-    ${'GITLAB_MAINTAINED'}           | ${'GitLab'}
-    ${'GITLAB_PARTNER_MAINTAINED'}   | ${'a GitLab partner'}
-    ${'VERIFIED_CREATOR_MAINTAINED'} | ${'a verified creator'}
-  `('when the resource is maintained by $describeText', ({ verificationLevel }) => {
+    verificationLevel              | describeText
+    ${'GITLAB_MAINTAINED'}         | ${'GitLab'}
+    ${'GITLAB_PARTNER_MAINTAINED'} | ${'partner'}
+  `('when the resource is $describeText maintained', ({ verificationLevel }) => {
     beforeEach(() => {
       createComponent({ ...defaultProps, verificationLevel });
     });

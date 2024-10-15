@@ -3,6 +3,7 @@ import { GlDisclosureDropdown, GlAvatar, GlIcon, GlLoadingIcon, GlLink } from '@
 import getCurrentUserOrganizations from '~/organizations/shared/graphql/queries/organizations.query.graphql';
 import { AVATAR_SHAPE_OPTION_RECT } from '~/vue_shared/constants';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
+import { defaultOrganization } from '~/organizations/mock_data';
 import { s__, __ } from '~/locale';
 import { helpPagePath } from '~/helpers/help_page_helper';
 
@@ -11,12 +12,12 @@ export default {
   ITEM_LOADING: {
     id: 'loading',
     text: 'loading',
-    extraAttrs: { disabled: true, class: '!gl-shadow-none' },
+    extraAttrs: { disabled: true, class: 'gl-shadow-none!' },
   },
   ITEM_EMPTY: {
     id: 'empty',
     text: s__('Organization|No organizations available to switch to.'),
-    extraAttrs: { disabled: true, class: '!gl-shadow-none gl-text-secondary' },
+    extraAttrs: { disabled: true, class: 'gl-shadow-none! gl-text-secondary' },
   },
   i18n: {
     currentOrganization: s__('Organization|Current organization'),
@@ -66,7 +67,9 @@ export default {
       return this.$apollo.queries.organizations.loading;
     },
     currentOrganization() {
-      return window.gon.current_organization;
+      // TODO - use `gon.current_organization` when backend supports it.
+      // https://gitlab.com/gitlab-org/gitlab/-/issues/437095
+      return defaultOrganization;
     },
     nodes() {
       return this.organizations.nodes || [];
@@ -129,10 +132,15 @@ export default {
 </script>
 
 <template>
-  <gl-disclosure-dropdown :items="items" class="gl-block" placement="bottom" @shown="onShown">
+  <gl-disclosure-dropdown
+    :items="items"
+    class="gl-display-block"
+    placement="center"
+    @shown="onShown"
+  >
     <template #toggle>
       <button
-        class="user-bar-button organization-switcher-button gl-flex gl-w-full gl-items-center gl-gap-3 gl-rounded-base gl-border-none gl-p-3 gl-text-left gl-leading-1"
+        class="organization-switcher-button gl-display-flex gl-align-items-center gl-gap-3 gl-p-3 gl-rounded-base gl-border-none gl-line-height-1 gl-w-full"
         data-testid="toggle-button"
       >
         <gl-avatar
@@ -150,7 +158,7 @@ export default {
     <template #list-item="{ item }">
       <gl-loading-icon v-if="item.id === $options.ITEM_LOADING.id" />
       <span v-else-if="item.id === $options.ITEM_EMPTY.id">{{ item.text }}</span>
-      <div v-else class="gl-flex gl-items-center gl-gap-3">
+      <div v-else class="gl-display-flex gl-align-items-center gl-gap-3">
         <gl-avatar
           :size="24"
           :shape="$options.AVATAR_SHAPE_OPTION_RECT"
@@ -163,14 +171,14 @@ export default {
     </template>
 
     <template v-if="!organizationSwitchingEnabled" #footer>
-      <div class="gl-border-t gl-mt-2 gl-border-t-dropdown gl-px-4 gl-pt-3">
-        <div class="gl-text-sm gl-font-bold">
+      <div class="gl-border-t gl-border-t-gray-200 gl-px-4 gl-pt-3 gl-mt-2">
+        <div class="gl-font-sm gl-font-weight-bold">
           {{ $options.i18n.switchOrganizations }}
         </div>
         <div class="gl-py-3">
-          <p class="gl-m-0 gl-text-sm gl-text-secondary">
+          <p class="gl-m-0 gl-text-secondary gl-font-sm">
             {{ $options.i18n.switchingNotSupportedMessage }}
-            <gl-link class="gl-text-sm" :href="$options.switchingOrganizationsDocsPath">{{
+            <gl-link class="gl-font-sm" :href="$options.switchingOrganizationsDocsPath">{{
               $options.i18n.learnMore
             }}</gl-link
             >.

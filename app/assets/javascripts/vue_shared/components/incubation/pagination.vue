@@ -42,7 +42,7 @@ export default {
 </script>
 
 <template>
-  <div v-if="isPaginationVisible" class="gl-flex gl-items-center gl-justify-center">
+  <div v-if="isPaginationVisible" class="gl--flex-center">
     <gl-keyset-pagination
       :start-cursor="startCursor"
       :end-cursor="endCursor"

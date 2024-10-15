@@ -7,31 +7,6 @@ module Gitlab
         include ParallelScheduling
 
         def execute
-          bitbucket_import_resumable_worker =
-            project.import_data&.data&.dig('bitbucket_import_resumable_worker')
-
-          if bitbucket_import_resumable_worker
-            resumable_execute
-          else
-            non_resumable_execute
-          end
-        end
-
-        private
-
-        def resumable_execute
-          log_info(import_stage: 'import_pull_requests', message: 'importing pull requests')
-
-          each_object_to_import do |object|
-            job_delay = calculate_job_delay(job_waiter.jobs_remaining)
-
-            sidekiq_worker_class.perform_in(job_delay, project.id, object.to_hash, job_waiter.key)
-          end
-
-          job_waiter
-        end
-
-        def non_resumable_execute
           log_info(import_stage: 'import_pull_requests', message: 'importing pull requests')
 
           pull_requests = client.pull_requests(project.import_source)
@@ -54,6 +29,8 @@ module Gitlab
           job_waiter
         end
 
+        private
+
         def sidekiq_worker_class
           ImportPullRequestWorker
         end
@@ -62,22 +39,8 @@ module Gitlab
           :pull_requests
         end
 
-        def collection_options
-          { raw: true }
-        end
-
-        def representation_type
-          :pull_request
-        end
-
         def id_for_already_enqueued_cache(object)
-          if object.is_a?(Hash)
-            # used for `resumable_execute`
-            object[:iid]
-          else
-            # used for `non_resumable_execute`
-            object.iid
-          end
+          object.iid
         end
 
         # To avoid overloading Gitaly, we use a smaller limit for pull requests than the one defined in the

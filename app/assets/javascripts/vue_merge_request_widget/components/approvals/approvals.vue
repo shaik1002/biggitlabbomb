@@ -66,17 +66,11 @@ export default {
       required: false,
       default: false,
     },
-    actionButtons: {
-      type: Array,
-      required: false,
-      default: () => [],
-    },
   },
   data() {
     return {
       hasApprovalAuthError: false,
       isApproving: false,
-      userPermissions: {},
     };
   },
   computed: {
@@ -272,7 +266,7 @@ export default {
 };
 </script>
 <template>
-  <div v-if="approvals" class="js-mr-approvals mr-section-container">
+  <div v-if="approvals" class="js-mr-approvals mr-section-container mr-widget-workflow">
     <state-container
       :is-loading="isLoading"
       :mr="mr"
@@ -282,13 +276,12 @@ export default {
       :collapsed="collapsed"
       :expand-details-tooltip="__('Expand eligible approvers')"
       :collapse-details-tooltip="__('Collapse eligible approvers')"
-      :actions="actionButtons"
       @toggle="() => $emit('toggle')"
     >
       <template v-if="isLoading">{{ $options.FETCH_LOADING }}</template>
       <template v-else>
-        <div class="gl-flex gl-flex-col">
-          <div class="gl-flex gl-flex-col gl-items-baseline gl-gap-3 sm:gl-flex-row">
+        <div class="gl-display-flex gl-flex-direction-column">
+          <div class="gl-display-flex gl-flex-direction-column gl-sm-flex-direction-row gl-gap-3">
             <div v-if="requireSamlAuthToApprove && showApprove">
               <gl-form
                 ref="form"
@@ -333,10 +326,10 @@ export default {
               :multiple-approval-rules-available="mr.multipleApprovalRulesAvailable"
             />
           </div>
-          <div v-if="hasInvalidRules" class="gl-mt-2 gl-text-secondary" data-testid="invalid-rules">
+          <div v-if="hasInvalidRules" class="gl-text-secondary gl-mt-2" data-testid="invalid-rules">
             <gl-sprintf :message="pluralizedRuleText">
               <template #danger="{ content }">
-                <span class="gl-font-bold gl-text-danger">{{ content }}</span>
+                <span class="gl-font-weight-bold text-danger">{{ content }}</span>
               </template>
             </gl-sprintf>
           </div>

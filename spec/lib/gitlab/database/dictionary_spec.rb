@@ -75,7 +75,7 @@ RSpec.describe Gitlab::Database::Dictionary, feature_category: :database do
     it 'returns an array of entries having desired sharding key migration job' do
       entries = dictionary.find_all_having_desired_sharding_key_migration_job
       expect(entries).to all(be_instance_of(Gitlab::Database::Dictionary::Entry))
-      expect(entries.map(&:desired_sharding_key_migration_job_name)).to all(be_present)
+      expect(entries).to all(have_attributes(desired_sharding_key_migration_job_name: String))
     end
   end
 
@@ -195,7 +195,7 @@ RSpec.describe Gitlab::Database::Dictionary, feature_category: :database do
         describe '#allow_cross_to_schemas' do
           it 'returns the list of allowed schemas' do
             expect(database_dictionary.allow_cross_to_schemas(:joins))
-              .to be_empty
+              .to contain_exactly(:gitlab_main_clusterwide)
           end
         end
       end
@@ -206,7 +206,7 @@ RSpec.describe Gitlab::Database::Dictionary, feature_category: :database do
         describe '#allow_cross_to_schemas' do
           it 'returns the list of allowed schemas' do
             expect(database_dictionary.allow_cross_to_schemas(:transactions))
-              .to be_empty
+              .to contain_exactly(:gitlab_main_clusterwide)
           end
         end
       end

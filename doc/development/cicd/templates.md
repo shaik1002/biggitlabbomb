@@ -4,7 +4,7 @@ group: Pipeline Authoring
 info: Any user with at least the Maintainer role can merge updates to this content. For details, see https://docs.gitlab.com/ee/development/development_processes.html#development-guidelines-review.
 ---
 
-# Development guide for GitLab CI/CD templates (Deprecated)
+# Development guide for GitLab CI/CD templates
 
 NOTE:
 With the introduction of the [CI/CD Catalog](../../ci/components/index.md#cicd-catalog),
@@ -249,7 +249,7 @@ separating words.
 .with_login:
   before_script:
     # SECRET_TOKEN should be provided via the project settings
-    - echo "$SECRET_TOKEN" | docker login -u my-user --password-stdin my-registry
+    - docker login -u my-user -p "$SECRET_TOKEN my-registry
 ```
 
 Lower-case naming can optionally be used for variables which are defined locally in

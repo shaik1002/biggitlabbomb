@@ -9,6 +9,7 @@ class ProjectsController < Projects::ApplicationController
   include ImportUrlParams
   include FiltersEvents
   include SourcegraphDecorator
+  include PlanningHierarchy
 
   REFS_LIMIT = 100
 
@@ -39,6 +40,7 @@ class ProjectsController < Projects::ApplicationController
     push_frontend_feature_flag(:remove_monitor_metrics, @project)
     push_frontend_feature_flag(:explain_code_chat, current_user)
     push_frontend_feature_flag(:issue_email_participants, @project)
+    push_frontend_feature_flag(:service_desk_tickets_confidentiality, @project)
     push_frontend_feature_flag(:edit_branch_rules, @project)
     # TODO: We need to remove the FF eventually when we rollout page_specific_styles
     push_frontend_feature_flag(:page_specific_styles, current_user)
@@ -50,8 +52,7 @@ class ProjectsController < Projects::ApplicationController
 
     push_force_frontend_feature_flag(:work_items, @project&.work_items_feature_flag_enabled?)
     push_force_frontend_feature_flag(:work_items_beta, @project&.work_items_beta_feature_flag_enabled?)
-    push_force_frontend_feature_flag(:work_items_alpha, @project&.work_items_alpha_feature_flag_enabled?)
-    push_frontend_feature_flag(:namespace_level_work_items, @project&.group)
+    push_force_frontend_feature_flag(:work_items_mvc_2, @project&.work_items_mvc_2_feature_flag_enabled?)
   end
 
   layout :determine_layout
@@ -65,13 +66,14 @@ class ProjectsController < Projects::ApplicationController
   feature_category :team_planning, [:preview_markdown, :new_issuable_address]
   feature_category :importers, [:export, :remove_export, :generate_new_export, :download_export]
   feature_category :code_review_workflow, [:unfoldered_environment_names]
+  feature_category :portfolio_management, [:planning_hierarchy]
 
   urgency :low, [:export, :remove_export, :generate_new_export, :download_export]
   urgency :low, [:preview_markdown, :new_issuable_address]
   # TODO: Set high urgency for #show https://gitlab.com/gitlab-org/gitlab/-/issues/334444
 
   urgency :low, [:refs, :show, :toggle_star, :transfer, :archive, :destroy, :update, :create,
-    :activity, :edit, :new, :export, :remove_export, :generate_new_export, :download_export]
+                 :activity, :edit, :new, :export, :remove_export, :generate_new_export, :download_export]
 
   urgency :high, [:unfoldered_environment_names]
 
@@ -192,7 +194,7 @@ class ProjectsController < Projects::ApplicationController
     return access_denied! unless can?(current_user, :remove_project, @project)
 
     ::Projects::DestroyService.new(@project, current_user, {}).async_execute
-    flash[:toast] = format(_("Project '%{project_name}' is being deleted."), project_name: @project.full_name)
+    flash[:notice] = _("Project '%{project_name}' is in the process of being deleted.") % { project_name: @project.full_name }
 
     redirect_to dashboard_projects_path, status: :found
   rescue Projects::DestroyService::DestroyError => e
@@ -569,11 +571,7 @@ class ProjectsController < Projects::ApplicationController
     # behaviour when the user isn't authorized to see the project
     return if project.nil? || performed?
 
-    uri = URI(request.original_url)
-    # Strip the '.git' part from the path
-    uri.path = uri.path.sub(%r{\.git/?\Z}, '')
-
-    redirect_to(uri.to_s)
+    redirect_to(request.original_url.sub(%r{\.git/?\Z}, ''))
   end
 
   def disable_query_limiting

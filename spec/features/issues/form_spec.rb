@@ -441,7 +441,7 @@ RSpec.describe 'New/edit issue', :js, feature_category: :team_planning do
       visit edit_project_issue_path(project, issue)
     end
 
-    it 'allows user to update issue', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/435787' do
+    it 'allows user to update issue' do
       expect(find('input[name="issue[assignee_ids][]"]', visible: false).value).to match(user.id.to_s)
       expect(find('input[name="issue[milestone_id]"]', visible: false).value).to match(milestone.id.to_s)
       expect(find('a', text: 'Assign to me', visible: false)).not_to be_visible
@@ -575,9 +575,17 @@ RSpec.describe 'New/edit issue', :js, feature_category: :team_planning do
 
         within_testid 'sidebar-labels' do
           click_button _('Create project label')
-          fill_in _('Label name'), with: 'test label'
+
+          wait_for_requests
+        end
+
+        page.within '.js-labels-create' do
+          find_by_testid('label-title-input').fill_in with: 'test label'
           first('.suggest-colors-dropdown a').click
+
           click_button 'Create'
+
+          wait_for_all_requests
         end
 
         page.within '.js-labels-list' do

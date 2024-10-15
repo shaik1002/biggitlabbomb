@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Group Boards', feature_category: :portfolio_management do
+RSpec.describe 'Group Boards', feature_category: :team_planning do
   include DragTo
   include MobileHelpers
   include BoardHelpers
@@ -21,7 +21,7 @@ RSpec.describe 'Group Boards', feature_category: :portfolio_management do
       visit group_boards_path(group)
     end
 
-    it 'adds an issue to the backlog', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/458723' do
+    it 'adds an issue to the backlog' do
       page.within(find('.board', match: :first)) do
         issue_title = 'Create new issue'
         click_button issue_title
@@ -70,20 +70,20 @@ RSpec.describe 'Group Boards', feature_category: :portfolio_management do
     end
 
     it 'allows user to move issue of project where they are a Reporter' do
-      expect(all('[data-testid="board-list"]')[0]).to have_content(issue2.title)
+      expect(find('.board:nth-child(1)')).to have_content(issue2.title)
 
       drag(list_from_index: 0, from_index: 0, list_to_index: 1)
 
-      expect(all('[data-testid="board-list"]')[1]).to have_content(issue2.title)
+      expect(find('.board:nth-child(2)')).to have_content(issue2.title)
       expect(issue2.reload.labels).to contain_exactly(group_label1)
     end
 
     it 'does not allow user to move issue of project where they are a Guest' do
-      expect(all('[data-testid="board-list"]')[2]).to have_content(issue1.title)
+      expect(find('.board:nth-child(3)')).to have_content(issue1.title)
 
       drag(list_from_index: 2, from_index: 0, list_to_index: 1)
 
-      expect(all('[data-testid="board-list"]')[2]).to have_content(issue1.title)
+      expect(find('.board:nth-child(3)')).to have_content(issue1.title)
       expect(issue1.reload.labels).to contain_exactly(group_label2)
       expect(issue2.reload.labels).to eq([])
     end
@@ -91,27 +91,10 @@ RSpec.describe 'Group Boards', feature_category: :portfolio_management do
     it 'does not allow user to re-position lists' do
       drag(list_from_index: 1, list_to_index: 2, selector: '.board-header')
 
-      expect(all('[data-testid="board-list"]')[1]).to have_content(group_label1.title)
-      expect(all('[data-testid="board-list"]')[2]).to have_content(group_label2.title)
+      expect(find('.board:nth-child(2) [data-testid="board-list-header"]')).to have_content(group_label1.title)
+      expect(find('.board:nth-child(3) [data-testid="board-list-header"]')).to have_content(group_label2.title)
       expect(list1.reload.position).to eq(0)
       expect(list2.reload.position).to eq(1)
-    end
-
-    context "when user is navigating via keyboard", :js do
-      it 'allows user to traverse cards forward and backward across board columns' do
-        # Focus issue2 in Open list then move to issue1 in list2 and back
-        click_button 'issue2'
-
-        expect(page).to have_selector('button.board-card-button[data-col-index="0"]', focused: true)
-
-        send_keys :right
-
-        expect(page).to have_selector('button.board-card-button[data-col-index="2"]', focused: true)
-
-        send_keys :left
-
-        expect(page).to have_selector('button.board-card-button[data-col-index="0"]', focused: true)
-      end
     end
   end
 end

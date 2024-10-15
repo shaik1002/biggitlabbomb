@@ -15,7 +15,6 @@ export const INFO = 'info';
 export const MWPS_MERGE_STRATEGY = 'merge_when_pipeline_succeeds';
 export const MWCP_MERGE_STRATEGY = 'merge_when_checks_pass';
 export const MTWPS_MERGE_STRATEGY = 'add_to_merge_train_when_pipeline_succeeds';
-export const MTWCP_MERGE_STRATEGY = 'add_to_merge_train_when_checks_pass';
 export const MT_MERGE_STRATEGY = 'merge_train';
 
 export const PIPELINE_FAILED_STATE = 'failed';
@@ -23,7 +22,6 @@ export const PIPELINE_FAILED_STATE = 'failed';
 export const AUTO_MERGE_STRATEGIES = [
   MWPS_MERGE_STRATEGY,
   MTWPS_MERGE_STRATEGY,
-  MTWCP_MERGE_STRATEGY,
   MT_MERGE_STRATEGY,
   MWCP_MERGE_STRATEGY,
 ];
@@ -37,11 +35,6 @@ export const SP_HELP_CONTENT = s__(
 );
 export const SP_HELP_URL = `${DOCS_URL_IN_EE_DIR}/ci/quick_start/`;
 export const SP_ICON_NAME = 'status_notfound';
-
-// JM - "Jenkins Migration"
-export const JM_JENKINS_TITLE_ICON_NAME = 'information';
-export const JM_EVENT_NAME = 'click_dismiss_button_jenkins_migration_callout';
-export const JM_MIGRATION_LINK = helpPagePath('ci/migration/jenkins.md');
 
 export const MERGE_ACTIVE_STATUS_PHRASES = [
   {
@@ -182,10 +175,9 @@ export const EXTENSION_ICON_CLASS = {
   severityUnknown: 'gl-text-gray-400',
 };
 
-export const VIEW_MERGE_REQUEST_WIDGET = 'view_merge_request_widget';
-export const EXPAND_MERGE_REQUEST_WIDGET = 'expand_merge_request_widget';
-export const CLICK_FULL_REPORT_ON_MERGE_REQUEST_WIDGET =
-  'click_full_report_on_merge_request_widget';
+export const TELEMETRY_WIDGET_VIEWED = 'WIDGET_VIEWED';
+export const TELEMETRY_WIDGET_EXPANDED = 'WIDGET_EXPANDED';
+export const TELEMETRY_WIDGET_FULL_REPORT_CLICKED = 'WIDGET_FULL_REPORT_CLICKED';
 
 export { STATE_MACHINE };
 
@@ -212,30 +204,3 @@ export const DETAILED_MERGE_STATUS = {
 
 export const MT_SKIP_TRAIN = 'skip';
 export const MT_RESTART_TRAIN = 'restart';
-
-// Pipeline event type names
-
-export const PIPELINE_EVENT_TYPE_MERGE_TRAIN = 'Merge train pipeline';
-export const PIPELINE_EVENT_TYPE_MERGED_RESULT = 'Merged result pipeline';
-export const PIPELINE_EVENT_TYPE_MERGE_REQUEST = 'Merge request pipeline';
-
-export const PIPELINE_EVENT_TYPE_MAP = {
-  [PIPELINE_EVENT_TYPE_MERGE_TRAIN]: {
-    title: s__('Pipeline|What is a merge train pipeline?'),
-    content: s__(
-      'Pipeline|Merge train pipeline runs on the contents of the merge request combined with the contents of all other merge requests queued for merging into the target branch.',
-    ),
-  },
-  [PIPELINE_EVENT_TYPE_MERGED_RESULT]: {
-    title: s__('Pipeline|What is a merged result pipeline?'),
-    content: s__(
-      'Pipeline|Merged result pipeline runs on the contents of the merge request combined with the contents of the target branch.',
-    ),
-  },
-  [PIPELINE_EVENT_TYPE_MERGE_REQUEST]: {
-    title: s__('Pipeline|What is a merge request pipeline?'),
-    content: s__(
-      "Pipeline|Merge request pipeline runs on the contents of the merge request's source branch, not the target branch.",
-    ),
-  },
-};

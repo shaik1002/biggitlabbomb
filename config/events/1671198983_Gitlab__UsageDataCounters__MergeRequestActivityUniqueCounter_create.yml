@@ -2,11 +2,16 @@
 description: A merge request was created
 internal_events: true
 action: i_code_review_user_create_mr
+label_description:
+property_description:
+value_description:
 extra_properties:
 identifiers:
 - project
 - user
 - namespace
+product_section: dev
+product_stage: create
 product_group: code_review
 milestone: "15.7"
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/106869

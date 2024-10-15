@@ -57,6 +57,7 @@ module Gitlab
         {
           counts: {
             assignee_lists: count(List.assignee),
+            ci_builds: count(::Ci::Build),
             ci_external_pipelines: count(::Ci::Pipeline.external),
             ci_pipeline_config_auto_devops: count(::Ci::Pipeline.auto_devops_source),
             ci_pipeline_config_repository: count(::Ci::Pipeline.repository_source),
@@ -86,11 +87,14 @@ module Gitlab
             kubernetes_agents: count(::Clusters::Agent),
             kubernetes_agents_with_token: distinct_count(::Clusters::AgentToken, :agent_id),
             in_review_folder: count(::Environment.in_review_folder),
+            grafana_integrated_projects: count(GrafanaIntegration.enabled),
             groups: count(Group),
             issues: add_metric('CountIssuesMetric', time_frame: 'all'),
             issues_created_from_gitlab_error_tracking_ui: count(SentryIssue),
             issues_with_associated_zoom_link: count(ZoomMeeting.added_to_issue),
             issues_using_zoom_quick_actions: distinct_count(ZoomMeeting, :issue_id),
+            issues_with_embedded_grafana_charts_approx: grafana_embed_usage_data,
+            issues_created_from_alerts: total_alert_issues,
             incident_issues: count(::Issue.with_issue_type(:incident), start: minimum_id(Issue), finish: maximum_id(Issue)),
             alert_bot_incident_issues: count(::Issue.authored(::Users::Internal.alert_bot), start: minimum_id(Issue), finish: maximum_id(Issue)),
             keys: count(Key),
@@ -144,6 +148,14 @@ module Gitlab
           counts_weekly: {}
         }
       end
+
+      # rubocop:disable CodeReuse/ActiveRecord
+      def grafana_embed_usage_data
+        count(Issue.joins('JOIN grafana_integrations USING (project_id)')
+          .where("issues.description LIKE '%' || grafana_integrations.grafana_url || '%'")
+          .where(grafana_integrations: { enabled: true }))
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
 
       def features_usage_data = {}
 
@@ -349,8 +361,8 @@ module Gitlab
           clusters: distinct_count(::Clusters::Cluster.where(time_period), :user_id),
           clusters_integrations_prometheus: cluster_integrations_user_distinct_count(::Clusters::Integrations::Prometheus, time_period),
           operations_dashboard_default_dashboard: count(::User.active.with_dashboard('operations').where(time_period),
-            start: minimum_id(User),
-            finish: maximum_id(User)),
+                                                        start: minimum_id(User),
+                                                        finish: maximum_id(User)),
           projects_with_error_tracking_enabled: distinct_count(::Project.with_enabled_error_tracking.where(time_period), :creator_id),
           projects_with_incidents: distinct_count(::Issue.with_issue_type(:incident).where(time_period), :project_id),
           # We are making an assumption here that all alert_management_alerts are associated with an issue of type
@@ -488,6 +500,12 @@ module Gitlab
         }
       end
       # rubocop: enable CodeReuse/ActiveRecord
+
+      def total_alert_issues
+        # Remove prometheus table queries once they are deprecated
+        # To be removed with https://gitlab.com/gitlab-org/gitlab/-/issues/217407.
+        add_metric('IssuesCreatedFromAlertsMetric')
+      end
 
       def clear_memoized
         CE_MEMOIZED_VALUES.each { |v| clear_memoization(v) }

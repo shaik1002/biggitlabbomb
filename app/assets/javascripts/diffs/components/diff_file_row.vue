@@ -42,7 +42,7 @@ export default {
     },
     fileClasses() {
       return this.file.type === 'blob' && !this.viewedFiles[this.file.fileHash]
-        ? 'gl-font-bold'
+        ? 'gl-font-weight-bold'
         : '';
     },
     isActive() {

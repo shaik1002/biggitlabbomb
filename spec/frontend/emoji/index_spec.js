@@ -59,42 +59,24 @@ const emptySupportMap = {
   1.1: false,
 };
 
-function createMockEmojiClient(hasNextPage = false) {
-  mockClient = createMockClient(
+function createMockEmojiClient() {
+  mockClient = createMockClient([
     [
-      [
-        customEmojiQuery,
-        ({ after }) =>
-          Promise.resolve({
-            data: {
-              group: {
-                id: 1,
-                customEmoji: {
-                  pageInfo: {
-                    hasNextPage: after ? false : hasNextPage,
-                    endCursor: 'test',
-                  },
-                  nodes: [{ id: 1, name: `parrot${after ? `-${after}` : ''}`, url: 'parrot.gif' }],
-                },
-              },
-            },
-          }),
-      ],
-    ],
-    {},
-    {
-      typePolicies: {
-        Query: {
-          fields: {
-            group: {
-              merge: true,
+      customEmojiQuery,
+      jest.fn().mockResolvedValue({
+        data: {
+          group: {
+            id: 1,
+            customEmoji: {
+              nodes: [{ id: 1, name: 'parrot', url: 'parrot.gif' }],
             },
           },
         },
-      },
-    },
-  );
+      }),
+    ],
+  ]);
 
+  window.gon = { features: { customEmoji: true } };
   document.body.dataset.groupFullPath = 'test-group';
 }
 
@@ -934,9 +916,12 @@ describe('emoji', () => {
   });
 
   describe('loadCustomEmojiWithNames', () => {
+    beforeEach(() => {
+      createMockEmojiClient();
+    });
+
     describe('when not in a group', () => {
       beforeEach(() => {
-        createMockEmojiClient();
         delete document.body.dataset.groupFullPath;
       });
 
@@ -968,10 +953,8 @@ describe('emoji', () => {
       });
     });
 
-    describe('when in a group', () => {
+    describe('when in a group with flag enabled', () => {
       it('returns emoji data', async () => {
-        createMockEmojiClient();
-
         const result = await loadCustomEmojiWithNames();
 
         expect(result).toEqual({
@@ -986,34 +969,6 @@ describe('emoji', () => {
             },
           },
           names: ['parrot'],
-        });
-      });
-
-      it('paginates custom emoji emoji', async () => {
-        createMockEmojiClient(true);
-
-        const result = await loadCustomEmojiWithNames();
-
-        expect(result).toEqual({
-          emojis: {
-            parrot: {
-              c: 'custom',
-              d: 'parrot',
-              e: undefined,
-              name: 'parrot',
-              src: 'parrot.gif',
-              u: 'custom',
-            },
-            'parrot-test': {
-              c: 'custom',
-              d: 'parrot-test',
-              e: undefined,
-              name: 'parrot-test',
-              src: 'parrot.gif',
-              u: 'custom',
-            },
-          },
-          names: ['parrot', 'parrot-test'],
         });
       });
     });

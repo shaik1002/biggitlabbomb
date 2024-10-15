@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -71,7 +71,6 @@ The following API resources are available in the project context:
 | [Merge requests](merge_requests.md)                                     | `/projects/:id/merge_requests` (also available for groups and standalone)                                                                                                                             |
 | [Merge trains](merge_trains.md)                                         | `/projects/:id/merge_trains`                                                                                                                                                                          |
 | [Metadata](metadata.md)                                                 | `/metadata`                                                                                                                                                                                           |
-| [Model registry](model_registry.md)                                     | `/projects/:id/packages/ml_models/`                                                                                                                                                                    |
 | [Notes](notes.md) (comments)                                            | `/projects/:id/issues/.../notes`, `/projects/:id/snippets/.../notes`, `/projects/:id/merge_requests/.../notes` (also available for groups)                                                            |
 | [Notification settings](notification_settings.md)                       | `/projects/:id/notification_settings` (also available for groups and standalone)                                                                                                                      |
 | [NPM repository](packages/npm.md)                                       | `/projects/:id/packages/npm`                                                                                                                                                                          |
@@ -93,9 +92,7 @@ The following API resources are available in the project context:
 | [Project-level variables](project_level_variables.md)                   | `/projects/:id/variables`                                                                                                                                                                             |
 | [Projects](projects.md) including setting Webhooks                      | `/projects`, `/projects/:id/hooks` (also available for users)                                                                                                                                         |
 | [Protected branches](protected_branches.md)                             | `/projects/:id/protected_branches`                                                                                                                                                                    |
-| [Protected container registry](project_container_registry_protection_rules.md)                             | `/projects/:id/registry/protection/rules`                                                                                                                                                                 |
 | [Protected environments](protected_environments.md)                     | `/projects/:id/protected_environments`                                                                                                                                                                |
-| [Protected packages](project_packages_protection_rules.md)         | `/projects/:id/packages/protection/rules`                                                                                                                                                                    |
 | [Protected tags](protected_tags.md)                                     | `/projects/:id/protected_tags`                                                                                                                                                                        |
 | [PyPI packages](packages/pypi.md)                                       | `/projects/:id/packages/pypi` (also available for groups)                                                                                                                                             |
 | [Release links](releases/links.md)                                      | `/projects/:id/releases/.../assets/links`                                                                                                                                                             |
@@ -110,6 +107,7 @@ The following API resources are available in the project context:
 | [Search](search.md)                                                     | `/projects/:id/search` (also available for groups and standalone)                                                                                                                                     |
 | [Tags](tags.md)                                                         | `/projects/:id/repository/tags`                                                                                                                                                                       |
 | [Terraform modules](packages/terraform-modules.md)                      | `/projects/:id/packages/terraform/modules` (also available standalone)                                                                                                                                |
+| [User-starred metrics dashboards](metrics_user_starred_dashboards.md )  | `/projects/:id/metrics/user_starred_dashboards`                                                                                                                                                       |
 | [Vulnerabilities](vulnerabilities.md)                                   | `/vulnerabilities/:id`                                                                                                                                                                                |
 | [Vulnerability exports](vulnerability_exports.md)                       | `/projects/:id/vulnerability_exports`                                                                                                                                                                 |
 | [Vulnerability findings](vulnerability_findings.md)                     | `/projects/:id/vulnerability_findings`                                                                                                                                                                |
@@ -159,7 +157,7 @@ The following API resources are available outside of project and group contexts 
 |:---------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------|
 | [Appearance](appearance.md)                                                                  | `/application/appearance`                                                                        |
 | [Applications](applications.md)                                                              | `/applications`                                                                                  |
-| [Audit events](audit_events.md)                                                              | `/audit_events`                                                                                  |
+| [Audit Events](audit_events.md)                                                              | `/audit_events`                                                                                  |
 | [Avatar](avatar.md)                                                                          | `/avatar`                                                                                        |
 | [Broadcast messages](broadcast_messages.md)                                                  | `/broadcast_messages`                                                                            |
 | [Code snippets](snippets.md)                                                                 | `/snippets`                                                                                      |
@@ -184,6 +182,7 @@ The following API resources are available outside of project and group contexts 
 | [License](license.md)                                                                        | `/license`                                                                                       |
 | [Markdown](markdown.md)                                                                      | `/markdown`                                                                                      |
 | [Merge requests](merge_requests.md)                                                          | `/merge_requests` (also available for groups and projects)                                       |
+| [Metrics dashboard annotations](metrics_dashboard_annotations.md)                            | `/environments/:id/metrics_dashboard/annotations`, `/clusters/:id/metrics_dashboard/annotations` |
 | [Namespaces](namespaces.md)                                                                  | `/namespaces`                                                                                    |
 | [Notification settings](notification_settings.md)                                            | `/notification_settings` (also available for groups and projects)                                |
 | [Pages domains](pages_domains.md)                                                            | `/pages/domains` (also available for projects)                                                   |
@@ -202,11 +201,9 @@ The following API resources are available outside of project and group contexts 
 | [Suggestions](suggestions.md)                                                                | `/suggestions`                                                                                   |
 | [System hooks](system_hooks.md)                                                              | `/hooks`                                                                                         |
 | [To-dos](todos.md)                                                                           | `/todos`                                                                                         |
-| [Token information](admin/token.md)                                                          | `/admin/token`                                                                                   |
 | [Topics](topics.md)                                                                          | `/topics`                                                                                        |
 | [Users](users.md)                                                                            | `/users`                                                                                         |
 | [Validate `.gitlab-ci.yml` file](lint.md)                                                    | `/lint`                                                                                          |
-| [Web commits](web_commits.md)                                                                | `/web_commits/public_key`                                                                                   |
 | [Version](version.md)                                                                        | `/version`                                                                                       |
 
 ## Templates API resources

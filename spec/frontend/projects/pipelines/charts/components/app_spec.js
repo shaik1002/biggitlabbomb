@@ -7,7 +7,6 @@ import { TEST_HOST } from 'helpers/test_constants';
 import { mergeUrlParams, updateHistory, getParameterValues } from '~/lib/utils/url_utility';
 import Component from '~/projects/pipelines/charts/components/app.vue';
 import PipelineCharts from '~/projects/pipelines/charts/components/pipeline_charts.vue';
-import PipelineChartsNew from '~/projects/pipelines/charts/components/pipeline_charts_new.vue';
 import API from '~/api';
 import { mockTracking } from 'helpers/tracking_helper';
 import { SNOWPLOW_DATA_SOURCE, SNOWPLOW_SCHEMA } from '~/projects/pipelines/charts/constants';
@@ -55,7 +54,6 @@ describe('ProjectsPipelinesChartsApp', () => {
   const findChangeFailureRateCharts = () => wrapper.findComponent(ChangeFailureRateChartsStub);
   const findDeploymentFrequencyCharts = () => wrapper.findComponent(DeploymentFrequencyChartsStub);
   const findPipelineCharts = () => wrapper.findComponent(PipelineCharts);
-  const findPipelineChartsNew = () => wrapper.findComponent(PipelineChartsNew);
   const findProjectQualitySummary = () => wrapper.findComponent(ProjectQualitySummaryStub);
 
   describe('when all charts are available', () => {
@@ -125,14 +123,28 @@ describe('ProjectsPipelinesChartsApp', () => {
     });
 
     describe('event tracking', () => {
-      describe('Internal Events RedisHLL events', () => {
+      describe('RedisHLL events', () => {
         it.each`
           testId                           | event
-          ${'pipelines-tab'}               | ${'p_analytics_ci_cd_pipelines'}
-          ${'deployment-frequency-tab'}    | ${'p_analytics_ci_cd_deployment_frequency'}
-          ${'lead-time-tab'}               | ${'p_analytics_ci_cd_lead_time'}
-          ${'time-to-restore-service-tab'} | ${'visit_ci_cd_time_to_restore_service_tab'}
-          ${'change-failure-rate-tab'}     | ${'visit_ci_cd_failure_rate_tab'}
+          ${'time-to-restore-service-tab'} | ${'p_analytics_ci_cd_time_to_restore_service'}
+          ${'change-failure-rate-tab'}     | ${'p_analytics_ci_cd_change_failure_rate'}
+        `('tracks the $event event when clicked', ({ testId, event }) => {
+          const trackApiSpy = jest.spyOn(API, 'trackRedisHllUserEvent');
+
+          expect(trackApiSpy).not.toHaveBeenCalled();
+
+          wrapper.findByTestId(testId).vm.$emit('click');
+
+          expect(trackApiSpy).toHaveBeenCalledWith(event);
+        });
+      });
+
+      describe('Internal Events RedisHLL events', () => {
+        it.each`
+          testId                        | event
+          ${'pipelines-tab'}            | ${'p_analytics_ci_cd_pipelines'}
+          ${'deployment-frequency-tab'} | ${'p_analytics_ci_cd_deployment_frequency'}
+          ${'lead-time-tab'}            | ${'p_analytics_ci_cd_lead_time'}
         `('tracks the $event event when clicked', ({ testId, event }) => {
           const trackApiSpy = jest.spyOn(API, 'trackInternalEvent');
 
@@ -164,6 +176,18 @@ describe('ProjectsPipelinesChartsApp', () => {
               },
             },
           });
+        });
+
+        it.each`
+          tab
+          ${'time-to-restore-service-tab'}
+          ${'change-failure-rate-tab'}
+        `('does not track when tab $tab is clicked', ({ tab }) => {
+          const trackingSpy = mockTracking(undefined, wrapper.element, jest.spyOn);
+
+          wrapper.findByTestId(tab).vm.$emit('click');
+
+          expect(trackingSpy).not.toHaveBeenCalled();
         });
       });
     });
@@ -245,26 +269,6 @@ describe('ProjectsPipelinesChartsApp', () => {
 
     it('does not render the tab', () => {
       expect(findProjectQualitySummary().exists()).toBe(false);
-    });
-  });
-
-  describe('ci_improved_project_pipeline_analytics feature flag', () => {
-    describe.each`
-      status   | finderFn
-      ${false} | ${findPipelineCharts}
-      ${true}  | ${findPipelineChartsNew}
-    `('when flag is $status', ({ status, finderFn }) => {
-      it('renders component', () => {
-        createComponent({
-          provide: {
-            glFeatures: {
-              ciImprovedProjectPipelineAnalytics: status,
-            },
-          },
-        });
-
-        expect(finderFn().exists()).toBe(true);
-      });
     });
   });
 });

@@ -158,11 +158,11 @@ export default {
           <template v-if="isLoading">
             <tr v-for="i in 5" :key="i" aria-hidden="true">
               <td><gl-skeleton-loader :lines="1" /></td>
-              <td class="gl-hidden sm:gl-block">
+              <td class="gl-display-none gl-sm-display-block">
                 <gl-skeleton-loader :lines="1" />
               </td>
               <td>
-                <div class="gl-flex lg:gl-justify-end">
+                <div class="gl-display-flex gl-lg-justify-content-end">
                   <gl-skeleton-loader :equal-width-lines="true" :lines="1" />
                 </div>
               </td>
@@ -170,10 +170,10 @@ export default {
           </template>
           <template v-if="hasMore">
             <tr>
-              <td align="center" colspan="3" class="!gl-p-0">
+              <td align="center" colspan="3" class="gl-p-0!">
                 <gl-button
                   variant="link"
-                  class="gl-flex gl-w-full !gl-py-4"
+                  class="gl-display-flex gl-w-full gl-py-4!"
                   :loading="isLoading"
                   @click="showMore"
                 >

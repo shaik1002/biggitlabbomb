@@ -13,7 +13,6 @@ import {
   UNAVAILABLE_FEATURE_INTRO_TEXT,
   UNAVAILABLE_USER_FEATURE_TEXT,
 } from '~/packages_and_registries/settings/project/constants';
-import SettingsSection from '~/vue_shared/components/settings/settings_section.vue';
 import expirationPolicyQuery from '~/packages_and_registries/settings/project/graphql/queries/get_expiration_policy.query.graphql';
 
 import {
@@ -38,14 +37,13 @@ describe('Cleanup image tags project settings', () => {
 
   const findFormComponent = () => wrapper.findComponent(ContainerExpirationPolicyForm);
   const findAlert = () => wrapper.findComponent(GlAlert);
-  const findSettingsSectionComponent = () => wrapper.findComponent(SettingsSection);
-  const findDescription = () => wrapper.findByTestId('settings-section-description');
+  const findTitle = () => wrapper.findByTestId('title');
+  const findDescription = () => wrapper.findByTestId('description');
 
   const mountComponent = (provide = defaultProvidedValues, config) => {
     wrapper = shallowMountExtended(component, {
       stubs: {
         GlSprintf,
-        SettingsSection,
       },
       provide,
       ...config,
@@ -93,7 +91,7 @@ describe('Cleanup image tags project settings', () => {
     await waitForPromises();
 
     expect(findFormComponent().exists()).toBe(true);
-    expect(findSettingsSectionComponent().props('heading')).toBe(CONTAINER_CLEANUP_POLICY_TITLE);
+    expect(findTitle().text()).toMatchInterpolatedText(CONTAINER_CLEANUP_POLICY_TITLE);
     expect(findDescription().text()).toMatchInterpolatedText(CONTAINER_CLEANUP_POLICY_DESCRIPTION);
   });
 

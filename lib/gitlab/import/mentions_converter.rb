@@ -51,8 +51,11 @@ module Gitlab
       end
 
       def pluck_mentions_from_text(text)
-        mentions = text.scan(GITLAB_MENTIONS_REGEX) + text.scan(BITBUCKET_MENTIONS_REGEX)
-        mentions.flatten
+        gitlab_like_mentions = text.scan(GITLAB_MENTIONS_REGEX)
+
+        return gitlab_like_mentions unless Feature.enabled?(:bitbucket_cloud_convert_mentions_to_users, project_creator)
+
+        (gitlab_like_mentions + text.scan(BITBUCKET_MENTIONS_REGEX)).flatten
       end
     end
   end

@@ -8,18 +8,13 @@ module Projects
       NUMBER_OF_RUNNERS_PER_PAGE = 20
 
       layout 'project_settings'
-      before_action :authorize_admin_pipeline!, except: [:reset_cache, :show]
-      before_action :authorize_show_cicd_settings!, only: :show
-      before_action :authorize_reset_cache!, only: :reset_cache
+      before_action :authorize_admin_pipeline!, except: :show
+      before_action :authorize_admin_cicd_variables!, only: :show
       before_action :check_builds_available!
       before_action :define_variables
 
       before_action do
         push_frontend_feature_flag(:ci_variables_pages, current_user)
-        push_frontend_feature_flag(:allow_push_repository_for_job_token, @project)
-        push_frontend_feature_flag(:ci_hidden_variables, @project.root_ancestor)
-
-        push_frontend_ability(ability: :admin_project, resource: @project, user: current_user)
       end
 
       helper_method :highlight_badge
@@ -79,24 +74,6 @@ module Projects
       end
 
       private
-
-      def authorize_reset_cache!
-        return if can_any?(current_user, [
-          :admin_pipeline,
-          :admin_runner
-        ], project)
-
-        access_denied!
-      end
-
-      def authorize_show_cicd_settings!
-        return if can_any?(current_user, [
-          :admin_cicd_variables,
-          :admin_runner
-        ], project)
-
-        access_denied!
-      end
 
       def highlight_badge(name, content, language = nil)
         Gitlab::Highlight.highlight(name, content, language: language)
@@ -179,7 +156,7 @@ module Projects
         @ref = params[:ref] || @project.default_branch_or_main
 
         @badges = [Gitlab::Ci::Badge::Pipeline::Status,
-          Gitlab::Ci::Badge::Coverage::Report]
+                   Gitlab::Ci::Badge::Coverage::Report]
 
         @badges.map! do |badge|
           badge.new(@project, @ref).metadata

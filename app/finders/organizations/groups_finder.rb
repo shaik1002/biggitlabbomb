@@ -4,7 +4,6 @@ module Organizations
   class GroupsFinder < GroupsFinder
     def execute
       groups = find_union(filtered_groups, Group)
-      groups = groups.without_deleted
 
       unless default_organization?
         cte = Gitlab::SQL::CTE.new(:filtered_groups_cte, groups, materialized: false)
@@ -24,12 +23,6 @@ module Organizations
       return [membership_groups, Group.none].compact if default_organization?
 
       super
-    end
-
-    def membership_groups
-      return unless current_user
-
-      current_user.groups.self_and_descendants
     end
   end
 end

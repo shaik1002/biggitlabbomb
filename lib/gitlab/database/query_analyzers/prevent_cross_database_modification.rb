@@ -30,7 +30,7 @@ module Gitlab
 
           begin
             prev_ignored_tables = context[:ignored_tables]
-            context[:ignored_tables] = prev_ignored_tables + tables.map(&:to_s)
+            context[:ignored_tables] = prev_ignored_tables + tables
             yield
           ensure
             context[:ignored_tables] = prev_ignored_tables
@@ -60,9 +60,6 @@ module Gitlab
 
         # rubocop:disable Metrics/AbcSize
         def self.analyze(parsed)
-          # This analyzer requires the PgQuery parsed query to be present
-          return unless parsed.pg
-
           database = ::Gitlab::Database.db_config_name(parsed.connection)
           sql = parsed.sql
 

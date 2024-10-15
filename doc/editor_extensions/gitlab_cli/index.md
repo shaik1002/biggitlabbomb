@@ -11,7 +11,7 @@ DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
-`glab` is an open source GitLab CLI tool. It brings GitLab to your terminal:
+GLab is an open source GitLab CLI tool. It brings GitLab to your terminal:
 next to where you are already working with Git and your code, without
 switching between windows and browser tabs.
 
@@ -50,6 +50,7 @@ glab mr merge
 
 - [`glab alias`](https://gitlab.com/gitlab-org/cli/-/tree/main/docs/source/alias)
 - [`glab api`](https://gitlab.com/gitlab-org/cli/-/tree/main/docs/source/api)
+- [`glab ask`](https://gitlab.com/gitlab-org/cli/-/tree/main/docs/source/ask)
 - [`glab auth`](https://gitlab.com/gitlab-org/cli/-/tree/main/docs/source/auth)
 - [`glab changelog`](https://gitlab.com/gitlab-org/cli/-/tree/main/docs/source/changelog)
 - [`glab check-update`](https://gitlab.com/gitlab-org/cli/-/tree/main/docs/source/check-update)
@@ -57,7 +58,6 @@ glab mr merge
 - [`glab cluster`](https://gitlab.com/gitlab-org/cli/-/tree/main/docs/source/cluster)
 - [`glab completion`](https://gitlab.com/gitlab-org/cli/-/tree/main/docs/source/completion)
 - [`glab config`](https://gitlab.com/gitlab-org/cli/-/tree/main/docs/source/config)
-- [`glab duo`](https://gitlab.com/gitlab-org/cli/-/tree/main/docs/source/duo)
 - [`glab incident`](https://gitlab.com/gitlab-org/cli/-/tree/main/docs/source/incident)
 - [`glab issue`](https://gitlab.com/gitlab-org/cli/-/tree/main/docs/source/issue)
 - [`glab label`](https://gitlab.com/gitlab-org/cli/-/tree/main/docs/source/label)
@@ -70,22 +70,14 @@ glab mr merge
 - [`glab user`](https://gitlab.com/gitlab-org/cli/-/tree/main/docs/source/user)
 - [`glab variable`](https://gitlab.com/gitlab-org/cli/-/tree/main/docs/source/variable)
 
-## GitLab Duo for the CLI
+## GitLab Duo commands
 
-DETAILS:
-**Tier: GitLab.com and Self-managed:** For a limited time, Ultimate. On October 17, 2024, Ultimate with [GitLab Duo Enterprise](https://about.gitlab.com/gitlab-duo/#pricing). **GitLab Dedicated:** GitLab Duo Enterprise.
-**Offering:** GitLab.com, Self-managed, GitLab Dedicated
+The GitLab CLI also provides support for GitLab Duo AI/ML powered features. These include:
 
-The GitLab CLI includes features powered by [GitLab Duo](../../user/ai_features.md). These include:
+- [`glab ask`](https://gitlab.com/gitlab-org/cli/-/tree/main/docs/source/ask)
 
-- [`glab duo ask`](https://gitlab.com/gitlab-org/cli/-/blob/main/docs/source/duo/ask.md)
-
-To ask questions about `git` commands while you work, type:
-
-- [`glab duo ask`](https://gitlab.com/gitlab-org/cli/-/blob/main/docs/source/duo/ask.md)
-
-The `glab duo ask` command can help you remember a `git` command you forgot,
-or provide suggestions on how to run `git` commands to perform other tasks.
+Use `glab ask` to ask questions about `git` commands. It can help you remember a
+command you forgot, or provide suggestions on how to run commands to perform other tasks.
 
 ## Install the CLI
 

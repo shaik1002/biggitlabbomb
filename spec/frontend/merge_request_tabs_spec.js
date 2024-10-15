@@ -8,15 +8,10 @@ import axios from '~/lib/utils/axios_utils';
 import MergeRequestTabs, { getActionFromHref } from '~/merge_request_tabs';
 import Diff from '~/diff';
 import '~/lib/utils/common_utils';
-import { visitUrl } from '~/lib/utils/url_utility';
+import '~/lib/utils/url_utility';
 
 jest.mock('~/lib/utils/webpack', () => ({
   resetServiceWorkersPublicPath: jest.fn(),
-}));
-
-jest.mock('~/lib/utils/url_utility', () => ({
-  ...jest.requireActual('~/lib/utils/url_utility'),
-  visitUrl: jest.fn(),
 }));
 
 describe('MergeRequestTabs', () => {
@@ -132,7 +127,7 @@ describe('MergeRequestTabs', () => {
         testContext.class.bindEvents();
         $('.merge-request-tabs .commits-tab a').trigger(metakeyEvent);
 
-        expect(visitUrl).toHaveBeenCalledWith(expect.any(String), true);
+        expect(window.open).toHaveBeenCalled();
       });
 
       it('opens page when commits badge is clicked', () => {
@@ -144,7 +139,7 @@ describe('MergeRequestTabs', () => {
         testContext.class.bindEvents();
         $('.merge-request-tabs .commits-tab a .badge').trigger(metakeyEvent);
 
-        expect(visitUrl).toHaveBeenCalledWith(expect.any(String), true);
+        expect(window.open).toHaveBeenCalled();
       });
     });
 
@@ -156,7 +151,7 @@ describe('MergeRequestTabs', () => {
 
       testContext.class.clickTab({ ...clickTabParams, metaKey: true });
 
-      expect(visitUrl).toHaveBeenCalledWith(expect.any(String), true);
+      expect(window.open).toHaveBeenCalled();
     });
 
     it('opens page tab in a new browser tab with Cmd+Click - Mac', () => {
@@ -167,7 +162,7 @@ describe('MergeRequestTabs', () => {
 
       testContext.class.clickTab({ ...clickTabParams, ctrlKey: true });
 
-      expect(visitUrl).toHaveBeenCalledWith(expect.any(String), true);
+      expect(window.open).toHaveBeenCalled();
     });
 
     it('opens page tab in a new browser tab with Middle-click - Mac/PC', () => {
@@ -178,7 +173,7 @@ describe('MergeRequestTabs', () => {
 
       testContext.class.clickTab({ ...clickTabParams, which: 2 });
 
-      expect(visitUrl).toHaveBeenCalledWith(expect.any(String), true);
+      expect(window.open).toHaveBeenCalled();
     });
   });
 
@@ -229,24 +224,6 @@ describe('MergeRequestTabs', () => {
       });
 
       expect(testContext.subject('diffs')).toBe('/foo/bar/-/merge_requests/1/diffs');
-      expect(testContext.subject('commits')).toBe('/foo/bar/-/merge_requests/1/commits');
-    });
-
-    it('changes from notes ending with a trailing slash', () => {
-      setLocation({
-        pathname: '/foo/bar/-/merge_requests/1/',
-      });
-
-      expect(testContext.subject('diffs')).toBe('/foo/bar/-/merge_requests/1/diffs');
-      expect(testContext.subject('commits')).toBe('/foo/bar/-/merge_requests/1/commits');
-    });
-
-    it('changes from diffs ending with a trailing slash', () => {
-      setLocation({
-        pathname: '/foo/bar/-/merge_requests/1/diffs/',
-      });
-
-      expect(testContext.subject('show')).toBe('/foo/bar/-/merge_requests/1');
       expect(testContext.subject('commits')).toBe('/foo/bar/-/merge_requests/1/commits');
     });
 
@@ -394,7 +371,7 @@ describe('MergeRequestTabs', () => {
       testContext.class.tabShown(tab, 'foobar');
 
       testContext.class.expandSidebar.forEach((el) => {
-        expect(el.classList.contains('!gl-hidden')).toBe(hides);
+        expect(el.classList.contains('gl-display-none!')).toBe(hides);
       });
     });
 
@@ -508,7 +485,6 @@ describe('MergeRequestTabs', () => {
       ${'/user/pipelines/-/merge_requests/1/commits'} | ${'commits'}
       ${'/user/pipelines/1/-/merge_requests/1/diffs'} | ${'diffs'}
       ${'/user/pipelines/-/merge_requests/1'}         | ${'show'}
-      ${'/user/pipelines/-/merge_requests/1/reports'} | ${'reports'}
     `('returns $action for $location', ({ pathName, action }) => {
       expect(getActionFromHref(pathName)).toBe(action);
     });

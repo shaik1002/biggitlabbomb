@@ -1,19 +1,23 @@
-import { omitBy } from 'lodash';
 import Api from '~/api';
 import { createAlert } from '~/alert';
 import axios from '~/lib/utils/axios_utils';
-import { visitUrl, setUrlParams, getNormalizedURL, updateHistory } from '~/lib/utils/url_utility';
+import {
+  visitUrl,
+  setUrlParams,
+  getBaseURL,
+  queryToObject,
+  objectToQuery,
+} from '~/lib/utils/url_utility';
 import { logError } from '~/lib/logger';
 import { __ } from '~/locale';
-import { LABEL_FILTER_PARAM } from '~/search/sidebar/components/label_filter/data';
-import { SCOPE_BLOB, SEARCH_TYPE_ZOEKT } from '~/search/sidebar/constants';
+import { labelFilterData } from '~/search/sidebar/components/label_filter/data';
 import {
   GROUPS_LOCAL_STORAGE_KEY,
   PROJECTS_LOCAL_STORAGE_KEY,
   SIDEBAR_PARAMS,
-  REGEX_PARAM,
-  LS_REGEX_HANDLE,
-} from '~/search/store/constants';
+  PRESERVED_PARAMS,
+  LOCAL_STORAGE_NAME_SPACE_EXTENSION,
+} from './constants';
 import * as types from './mutation_types';
 import {
   loadDataFromLS,
@@ -103,30 +107,20 @@ export const setFrequentProject = ({ state, commit }, item) => {
   commit(types.LOAD_FREQUENT_ITEMS, { key: PROJECTS_LOCAL_STORAGE_KEY, data: frequentItems });
 };
 
-export const setQuery = ({ state, commit, getters }, { key, value }) => {
+export const setQuery = ({ state, commit }, { key, value }) => {
   commit(types.SET_QUERY, { key, value });
 
   if (SIDEBAR_PARAMS.includes(key)) {
     commit(types.SET_SIDEBAR_DIRTY, isSidebarDirty(state.query, state.urlQuery));
   }
 
-  if (key === REGEX_PARAM) {
-    setDataToLS(LS_REGEX_HANDLE, value);
-  }
-
-  if (
-    state.searchType === SEARCH_TYPE_ZOEKT &&
-    getters.currentScope === SCOPE_BLOB &&
-    gon.features.zoektMultimatchFrontend
-  ) {
-    const newUrl = setUrlParams({ ...state.query }, window.location.href, false, true);
-    updateHistory({ state: state.query, url: newUrl, replace: true });
+  if (PRESERVED_PARAMS.includes(key)) {
+    setDataToLS(`${key}_${LOCAL_STORAGE_NAME_SPACE_EXTENSION}`, value);
   }
 };
 
 export const applyQuery = ({ state }) => {
-  const query = omitBy(state.query, (item) => item === '');
-  visitUrl(setUrlParams({ ...query, page: null }, window.location.href, true, true));
+  visitUrl(setUrlParams({ ...state.query, page: null }, window.location.href, false, true));
 };
 
 export const resetQuery = ({ state }) => {
@@ -148,13 +142,24 @@ export const resetQuery = ({ state }) => {
   );
 };
 
-export const closeLabel = ({ state, commit }, { title }) => {
-  const labels = state?.query?.[LABEL_FILTER_PARAM].filter((labelName) => labelName !== title);
-  setQuery({ state, commit }, { key: LABEL_FILTER_PARAM, value: labels });
+export const closeLabel = ({ state, commit }, { key }) => {
+  const labels = state?.query?.labels.filter((labelKey) => labelKey !== key);
+
+  setQuery({ state, commit }, { key: labelFilterData.filterParam, value: labels });
 };
 
 export const setLabelFilterSearch = ({ commit }, { value }) => {
   commit(types.SET_LABEL_SEARCH_STRING, value);
+};
+
+const injectWildCardSearch = (state, link) => {
+  const urlObject = new URL(`${getBaseURL()}${link}`);
+  if (!state.urlQuery.search) {
+    const queryObject = queryToObject(urlObject.search);
+    urlObject.search = objectToQuery({ ...queryObject, search: '*' });
+  }
+
+  return urlObject.href;
 };
 
 export const fetchSidebarCount = ({ commit, state }) => {
@@ -162,18 +167,10 @@ export const fetchSidebarCount = ({ commit, state }) => {
     .filter((navigationItem) => !navigationItem.active && navigationItem.count_link)
     .map((navItem) => {
       const navigationItem = { ...navItem };
-      const modifications = {
-        search: state.query?.search || '*',
-      };
 
-      if (navigationItem.scope === SCOPE_BLOB && loadDataFromLS(LS_REGEX_HANDLE)) {
-        modifications[REGEX_PARAM] = true;
+      if (navigationItem.count_link) {
+        navigationItem.count_link = injectWildCardSearch(state, navigationItem.count_link);
       }
-
-      navigationItem.count_link = setUrlParams(
-        modifications,
-        getNormalizedURL(navigationItem.count_link),
-      );
 
       return navigationItem;
     });

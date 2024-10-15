@@ -1,11 +1,11 @@
 <script>
-import { GlAlert } from '@gitlab/ui';
+import { GlAlert, GlLink } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
-import PromoPageLink from '~/vue_shared/components/promo_page_link/promo_page_link.vue';
+import { PROMO_URL } from '~/lib/utils/url_utility';
 
 export default {
   name: 'IncubationAlert',
-  components: { GlAlert, PromoPageLink },
+  components: { GlAlert, GlLink },
   props: {
     featureName: {
       type: String,
@@ -42,7 +42,7 @@ export default {
     learnMoreLabel: s__('Incubation|Learn more about incubating features'),
     feedbackLabel: s__('Incubation|Give feedback on this feature'),
   },
-  learnMorePath: '/handbook/engineering/incubation/',
+  learnMoreUrl: `${PROMO_URL}/handbook/engineering/incubation/`,
 };
 </script>
 
@@ -56,8 +56,8 @@ export default {
     @dismiss="dismissAlert"
   >
     {{ $options.i18n.contentLabel }}
-    <promo-page-link :path="$options.learnMorePath" target="_blank">
-      {{ $options.i18n.learnMoreLabel }}
-    </promo-page-link>
+    <gl-link :href="$options.learnMoreUrl" target="_blank">{{
+      $options.i18n.learnMoreLabel
+    }}</gl-link>
   </gl-alert>
 </template>

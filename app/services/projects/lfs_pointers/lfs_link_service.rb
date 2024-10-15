@@ -26,12 +26,8 @@ module Projects
       private
 
       def validate!(oids)
-        if oids.size <= MAX_OIDS
-          Gitlab::Metrics::Lfs.validate_link_objects_error_rate.increment(error: false, labels: {})
-          return
-        end
+        return if oids.size <= MAX_OIDS
 
-        Gitlab::Metrics::Lfs.validate_link_objects_error_rate.increment(error: true, labels: {})
         raise TooManyOidsError, 'Too many LFS object ids to link, please push them manually'
       end
 
@@ -60,7 +56,7 @@ module Projects
       end
 
       def log_lfs_link_results(lfs_objects_linked_count, iterations)
-        ::Import::Framework::Logger.info(
+        Gitlab::Import::Logger.info(
           class: self.class.name,
           project_id: project.id,
           project_path: project.full_path,

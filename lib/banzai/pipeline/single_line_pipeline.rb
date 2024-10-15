@@ -7,7 +7,6 @@ module Banzai
         @filters ||= FilterArray[
           Filter::HtmlEntityFilter,
           Filter::SanitizationFilter,
-          Filter::SanitizeLinkFilter,
           Filter::AssetProxyFilter,
           Filter::EmojiFilter,
           Filter::CustomEmojiFilter,
@@ -21,7 +20,6 @@ module Banzai
         [
           Filter::References::UserReferenceFilter,
           Filter::References::IssueReferenceFilter,
-          Filter::References::WorkItemReferenceFilter,
           Filter::References::ExternalIssueReferenceFilter,
           Filter::References::MergeRequestReferenceFilter,
           Filter::References::SnippetReferenceFilter,

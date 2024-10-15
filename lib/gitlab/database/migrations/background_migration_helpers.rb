@@ -47,7 +47,7 @@ module Gitlab
               'in the body of your migration class'
           end
 
-          # Background migrations do not work well for in cases requiring to update `gitlab_shared`
+          # Background Migrations do not work well for in cases requiring to update `gitlab_shared`
           # Once the decomposition is done, enqueued jobs for `gitlab_shared` tables (on CI database)
           # will not be executed since the queue (which is stored in Redis) is tied to main database, not to schema.
           # The batched background migrations do not have those limitations since the tracking tables
@@ -81,7 +81,7 @@ module Gitlab
             # `SingleDatabaseWorker.bulk_perform_in` schedules all jobs for
             # the same time, which is not helpful in most cases where we wish to
             # spread the work over time.
-            final_delay = initial_delay + (delay_interval * index)
+            final_delay = initial_delay + delay_interval * index
             full_job_arguments = [start_id, end_id] + other_job_arguments
 
             track_in_database(job_class_name, full_job_arguments) if track_jobs
@@ -90,7 +90,7 @@ module Gitlab
             batch_counter += 1
           end
 
-          duration = initial_delay + (delay_interval * batch_counter)
+          duration = initial_delay + delay_interval * batch_counter
           say <<~SAY
             Scheduled #{batch_counter} #{job_class_name} jobs with a maximum of #{batch_size} records per batch and an interval of #{delay_interval} seconds.
 
@@ -133,7 +133,7 @@ module Gitlab
           jobs = Gitlab::Database::BackgroundMigrationJob.pending.where(class_name: job_class_name)
           jobs.each_batch(of: batch_size) do |job_batch|
             job_batch.each do |job|
-              final_delay = initial_delay + (delay_interval * job_counter)
+              final_delay = initial_delay + delay_interval * job_counter
 
               migrate_in(final_delay, job_class_name, job.arguments, coordinator: job_coordinator)
 
@@ -141,7 +141,7 @@ module Gitlab
             end
           end
 
-          duration = initial_delay + (delay_interval * job_counter)
+          duration = initial_delay + delay_interval * job_counter
           say <<~SAY
             Scheduled #{job_counter} #{job_class_name} jobs with an interval of #{delay_interval} seconds.
 
@@ -200,11 +200,14 @@ module Gitlab
           end
         end
 
+        # rubocop: disable Style/ArgumentsForwarding
+        # Reason: the default argument will not apply if we just forward via `...`
         def migrate_in(*args, coordinator: coordinator_for_tracking_database)
           with_migration_context do
             coordinator.perform_in(*args)
           end
         end
+        # rubocop: enable Style/ArgumentsForwarding
 
         def delete_queued_jobs(class_name)
           coordinator_for_tracking_database.steal(class_name) do |job|
@@ -226,8 +229,8 @@ module Gitlab
           self.allowed_gitlab_schemas if self.respond_to?(:allowed_gitlab_schemas)
         end
 
-        def with_migration_context(&)
-          Gitlab::ApplicationContext.with_context(caller_id: self.class.to_s, &)
+        def with_migration_context(&block)
+          Gitlab::ApplicationContext.with_context(caller_id: self.class.to_s, &block)
         end
 
         def track_in_database(class_name, arguments)

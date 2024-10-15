@@ -106,7 +106,7 @@ export default {
 </script>
 
 <template>
-  <div class="gl-flex gl-justify-between">
+  <div class="gl-display-flex gl-justify-content-space-between">
     <span
       ref="tooltip"
       v-gl-tooltip.viewport.left

@@ -7,8 +7,8 @@ module Mutations
         class Update < ::Mutations::BaseMutation
           graphql_name 'UpdateContainerRegistryProtectionRule'
           description 'Updates a container registry protection rule to restrict access to project containers. ' \
-            'You can prevent users without certain roles from altering containers. ' \
-            'Available only when feature flag `container_registry_protected_containers` is enabled.'
+                      'You can prevent users without certain roles from altering containers. ' \
+                      'Available only when feature flag `container_registry_protected_containers` is enabled.'
 
           authorize :admin_container_image
 
@@ -21,41 +21,36 @@ module Mutations
             GraphQL::Types::String,
             required: false,
             validates: { allow_blank: false },
-            alpha: { milestone: '16.7' },
-            description: copy_field_description(
-              Types::ContainerRegistry::Protection::RuleType,
-              :repository_path_pattern
-            )
+            description:
+            'Container\'s repository path pattern of the protection rule. ' \
+            'For example, `my-scope/my-project/container-dev-*`. ' \
+            'Wildcard character `*` allowed.'
 
           argument :minimum_access_level_for_delete,
             Types::ContainerRegistry::Protection::RuleAccessLevelEnum,
             required: false,
-            alpha: { milestone: '16.7' },
-            description: copy_field_description(
-              Types::ContainerRegistry::Protection::RuleType,
-              :minimum_access_level_for_delete
-            )
+            validates: { allow_blank: false },
+            description:
+            'Minimum GitLab access level allowed to delete container images to the container registry. ' \
+            'For example, `MAINTAINER`, `OWNER`, or `ADMIN`.'
 
           argument :minimum_access_level_for_push,
             Types::ContainerRegistry::Protection::RuleAccessLevelEnum,
             required: false,
-            alpha: { milestone: '16.7' },
-            description: copy_field_description(
-              Types::ContainerRegistry::Protection::RuleType,
-              :minimum_access_level_for_push
-            )
+            validates: { allow_blank: false },
+            description:
+              'Minimum GitLab access level allowed to push container images to the container registry. ' \
+              'For example, `MAINTAINER`, `OWNER`, or `ADMIN`.'
 
           field :container_registry_protection_rule,
             Types::ContainerRegistry::Protection::RuleType,
             null: true,
-            alpha: { milestone: '16.7' },
             description: 'Container registry protection rule after mutation.'
 
           def resolve(id:, **kwargs)
             container_registry_protection_rule = authorized_find!(id: id)
-            project = container_registry_protection_rule.project
 
-            if Feature.disabled?(:container_registry_protected_containers, project.root_ancestor)
+            if Feature.disabled?(:container_registry_protected_containers, container_registry_protection_rule.project)
               raise_resource_not_available_error!("'container_registry_protected_containers' feature flag is disabled")
             end
 

@@ -32,8 +32,7 @@ module Gitlab
             work_item_type_id: object[:issue_type_id],
             label_ids: [object[:label_id]].compact,
             created_at: object[:created_at],
-            updated_at: object[:updated_at],
-            imported_from: ::Import::SOURCE_BITBUCKET
+            updated_at: object[:updated_at]
           }
 
           project.issues.create!(attributes)
@@ -60,7 +59,7 @@ module Gitlab
         def author_line
           return '' if find_user_id
 
-          formatter.author_line(object[:author_nickname])
+          formatter.author_line(object[:author])
         end
 
         def find_user_id

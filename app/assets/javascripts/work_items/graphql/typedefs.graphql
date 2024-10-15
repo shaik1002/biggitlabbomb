@@ -23,31 +23,9 @@ input LocalUserInput {
   avatarUrl: String
 }
 
-input LocalLabelInput {
-  color: String
-  description: String
-  id: ID!
-  textColor: String
-  title: String
-}
-
-input LocalCrmContactsInput {
-  firstName: String
-  lastName: String
-  organizationName: String
-  id: ID!
-}
-
 input LocalUpdateWorkItemInput {
   id: WorkItemID!
   assignees: [LocalUserInput!]
-}
-
-input LocalRolledUpDatesInput {
-  dueDateIsFixed: Boolean!
-  startDateIsFixed: Boolean!
-  dueDateFixed: String
-  startDateFixed: String
 }
 
 type LocalWorkItemPayload {
@@ -55,36 +33,6 @@ type LocalWorkItemPayload {
   errors: [String!]
 }
 
-input LocalUpdateNewWorkItemInput {
-  fullPath: String!
-  workItemType: String!
-  healthStatus: String
-  assignees: [LocalUserInput]
-  color: String
-  title: String
-  description: String
-  confidential: Boolean
-  labels: [LocalLabelInput]
-  rolledUpDates: [LocalRolledUpDatesInput]
-  crmContacts: [LocalCrmContactsInput]
-}
-
 extend type Mutation {
-  updateNewWorkItem(input: LocalUpdateNewWorkItemInput!): LocalWorkItemPayload
   localUpdateWorkItem(input: LocalUpdateWorkItemInput!): LocalWorkItemPayload
-  updateActiveDesignDiscussion(id: ID!, source: String!): Boolean
-}
-
-type ActiveDesignDiscussion {
-  id: ID
-  source: String
-}
-
-extend type Query {
-  activeDesignDiscussion: ActiveDesignDiscussion
-}
-
-type LocalWorkItemChildIsExpanded {
-  id: WorkItemID!
-  isExpanded: Boolean!
 }

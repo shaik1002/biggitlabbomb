@@ -19,7 +19,6 @@ module Backup
       :repositories, # Repositories
       :packages, # Packages
       :ci_secure_files, # Project-level Secure Files
-      :external_diffs, # External Merge Request diffs
       keyword_init: true
     )
 
@@ -149,13 +148,6 @@ module Backup
     # @return [Boolean] whether to use `--rsyncable` flag with gzip
     attr_accessor :gzip_rsyncable
 
-    # If the container registry is using object storage, this is the bucket that is used
-    # @return [String|Nil]
-    attr_accessor :container_registry_bucket
-
-    # If we are backing up object storage in GCP, this is a file containing the service account credentials to use
-    attr_accessor :service_account_file
-
     # rubocop:disable Metrics/ParameterLists -- This is a data object with all possible CMD options
     def initialize(
       backup_id: nil, previous_backup: nil, incremental: false, force: false, strategy: Strategy::STREAM,
@@ -163,8 +155,7 @@ module Backup
       max_parallelism: nil, max_storage_parallelism: nil,
       repository_storages: [], repository_paths: [], skip_repository_paths: [],
       repositories_server_side_backup: false, remote_directory: nil,
-      compression_options: CompressionOptions.new, gzip_rsyncable: false, container_registry_bucket: nil,
-      service_account_file: nil)
+      compression_options: CompressionOptions.new, gzip_rsyncable: false)
       @backup_id = backup_id
       @previous_backup = previous_backup
       @incremental = incremental
@@ -181,8 +172,6 @@ module Backup
       @skip_repositories_paths = skip_repository_paths
       @compression_options = compression_options
       @gzip_rsyncable = gzip_rsyncable
-      @container_registry_bucket = container_registry_bucket
-      @service_account_file = service_account_file
     end
     # rubocop:enable Metrics/ParameterLists
 
@@ -230,7 +219,7 @@ module Backup
       extract_skippables!(backup_information[:skipped]) if backup_information[:skipped]
     end
 
-    # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity -- TODO: Complexity will be solved in the Unified Backup implementation (https://gitlab.com/groups/gitlab-org/-/epics/11635)
+    # rubocop:disable Metrics/CyclomaticComplexity -- TODO: Complexity will be solved in the Unified Backup implementation (https://gitlab.com/groups/gitlab-org/-/epics/11635)
     # Return a String with a list of skippables, separated by commas
     #
     # @return [String] a list of skippables
@@ -249,10 +238,9 @@ module Backup
       list << 'repositories' if skippable_tasks.repositories
       list << 'packages' if skippable_tasks.packages
       list << 'ci_secure_files' if skippable_tasks.ci_secure_files
-      list << 'external_diffs' if skippable_tasks.external_diffs
       list.join(',')
     end
-    # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+    # rubocop:enable Metrics/CyclomaticComplexity
 
     # Extract skippables from provided data field
     # Current callers will provide either ENV['SKIP'] or backup_information[:skipped] content
@@ -291,7 +279,6 @@ module Backup
       skippable_tasks.repositories ||= list.include?('repositories') # SKIP=repositories
       skippable_tasks.packages ||= list.include?('packages') # SKIP=packages
       skippable_tasks.ci_secure_files ||= list.include?('ci_secure_files') # SKIP=ci_secure_files
-      skippable_tasks.external_diffs ||= list.include?('external_diffs') # SKIP=external_diffs
     end
   end
 end

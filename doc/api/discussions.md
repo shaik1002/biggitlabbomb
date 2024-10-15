@@ -10,7 +10,7 @@ DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
-Discussions are attached to:
+Discussions are a set of related notes on:
 
 - Snippets
 - Issues
@@ -18,23 +18,10 @@ Discussions are attached to:
 - Merge requests
 - Commits
 
-This includes [comments, threads](../user/discussions/index.md), and system notes.
+This includes [comments and threads](../user/discussions/index.md) and system notes.
 System notes are notes about changes to the object (for example, when a milestone changes).
-
 Label notes are not part of this API, but recorded as separate events in
 [resource label events](resource_label_events.md).
-
-## Understand note types in the API
-
-Not all discussion types are equally available in the API:
-
-- **Note**: A comment left on the _root_ of an issue, merge request, commit,
-  or snippet.
-- **Discussion**: A collection, often called a _thread_, of `DiscussionNotes` in
-  an issue, merge request, commit, or snippet.
-- **DiscussionNote**: An individual item in a discussion on an issue, merge request,
-  commit, or snippet. These are not returned as part of the Note API.
-  Not available in the [Events API](events.md).
 
 ## Discussions pagination
 
@@ -54,7 +41,7 @@ GET /projects/:id/issues/:issue_iid/discussions
 
 | Attribute           | Type             | Required   | Description  |
 | ------------------- | ---------------- | ---------- | ------------ |
-| `id`                | integer/string   | yes        | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer/string   | yes        | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `issue_iid`         | integer          | yes        | The IID of an issue. |
 
 ```json
@@ -156,7 +143,7 @@ Parameters:
 
 | Attribute       | Type           | Required | Description |
 | --------------- | -------------- | -------- | ----------- |
-| `id`            | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`            | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `issue_iid`     | integer        | yes      | The IID of an issue. |
 | `discussion_id` | integer        | yes      | The ID of a discussion item. |
 
@@ -178,7 +165,7 @@ Parameters:
 | Attribute       | Type           | Required | Description |
 | --------------- | -------------- | -------- | ----------- |
 | `body`          | string         | yes      | The content of the thread. |
-| `id`            | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`            | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `issue_iid`     | integer        | yes      | The IID of an issue. |
 | `created_at`    | string         | no       | Date time string, ISO 8601 formatted, such as `2016-03-11T03:45:40Z`. Requires administrator or project/group owner rights. |
 
@@ -204,7 +191,7 @@ Parameters:
 | --------------- | -------------- | -------- | ----------- |
 | `body`          | string         | yes      | The content of the note or reply. |
 | `discussion_id` | integer        | yes      | The ID of a thread. |
-| `id`            | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`            | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `issue_iid`     | integer        | yes      | The IID of an issue. |
 | `note_id`       | integer        | yes      | The ID of a thread note. |
 | `created_at`    | string         | no       | Date time string, ISO 8601 formatted, such as `2016-03-11T03:45:40Z`. Requires administrator or project/group owner rights. |
@@ -228,7 +215,7 @@ Parameters:
 | --------------- | -------------- | -------- | ----------- |
 | `body`          | string         | yes      | The content of the note or reply. |
 | `discussion_id` | integer        | yes      | The ID of a thread. |
-| `id`            | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`            | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `issue_iid`     | integer        | yes      | The IID of an issue. |
 | `note_id`       | integer        | yes      | The ID of a thread note. |
 
@@ -250,7 +237,7 @@ Parameters:
 | Attribute       | Type           | Required | Description |
 | --------------- | -------------- | -------- | ----------- |
 | `discussion_id` | integer        | yes      | The ID of a discussion. |
-| `id`            | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`            | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `issue_iid`     | integer        | yes      | The IID of an issue. |
 | `note_id`       | integer        | yes      | The ID of a discussion note. |
 
@@ -271,7 +258,7 @@ GET /projects/:id/snippets/:snippet_id/discussions
 
 | Attribute           | Type             | Required   | Description |
 | ------------------- | ---------------- | ---------- | ------------|
-| `id`                | integer/string   | yes        | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer/string   | yes        | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `snippet_id`        | integer          | yes        | The ID of an snippet. |
 
 ```json
@@ -374,7 +361,7 @@ Parameters:
 | Attribute       | Type           | Required | Description |
 | --------------- | -------------- | -------- | ----------- |
 | `discussion_id` | integer        | yes      | The ID of a discussion item. |
-| `id`            | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`            | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `snippet_id`    | integer        | yes      | The ID of an snippet. |
 
 ```shell
@@ -396,7 +383,7 @@ Parameters:
 | Attribute       | Type           | Required | Description |
 | --------------- | -------------- | -------- | ----------- |
 | `body`          | string         | yes      | The content of a discussion. |
-| `id`            | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`            | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `snippet_id`    | integer        | yes      | The ID of an snippet. |
 | `created_at`    | string         | no       | Date time string, ISO 8601 formatted, such as `2016-03-11T03:45:40Z`. Requires administrator or project/group owner rights. |
 
@@ -419,7 +406,7 @@ Parameters:
 | --------------- | -------------- | -------- | ----------- |
 | `body`          | string         | yes      | The content of the note or reply. |
 | `discussion_id` | integer        | yes      | The ID of a thread. |
-| `id`            | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`            | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `note_id`       | integer        | yes      | The ID of a thread note. |
 | `snippet_id`    | integer        | yes      | The ID of an snippet. |
 | `created_at`    | string         | no       | Date time string, ISO 8601 formatted, such as `2016-03-11T03:45:40Z`. Requires administrator or project/group owner rights. |
@@ -443,7 +430,7 @@ Parameters:
 | --------------- | -------------- | -------- | ----------- |
 | `body`          | string         | yes      | The content of the note or reply. |
 | `discussion_id` | integer        | yes      | The ID of a thread. |
-| `id`            | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`            | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `note_id`       | integer        | yes      | The ID of a thread note. |
 | `snippet_id`    | integer        | yes      | The ID of an snippet. |
 
@@ -465,7 +452,7 @@ Parameters:
 | Attribute       | Type           | Required | Description |
 | --------------- | -------------- | -------- | ----------- |
 | `discussion_id` | integer        | yes      | The ID of a discussion. |
-| `id`            | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`            | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `note_id`       | integer        | yes      | The ID of a discussion note. |
 | `snippet_id`    | integer        | yes      | The ID of an snippet. |
 
@@ -480,13 +467,6 @@ DETAILS:
 **Tier:** Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
-WARNING:
-The Epics REST API was [deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/460668) in GitLab 17.0
-and is planned for removal in v5 of the API.
-In GitLab 17.4 or later, if your administrator [enabled the new look for epics](../user/group/epics/epic_work_items.md), use the
-[Work Items API](https://handbook.gitlab.com/handbook/engineering/architecture/design-documents/work_items/) instead.
-This change is a breaking change.
-
 ### List group epic discussion items
 
 Gets a list of all discussion items for a single epic.
@@ -498,7 +478,7 @@ GET /groups/:id/epics/:epic_id/discussions
 | Attribute           | Type             | Required   | Description  |
 | ------------------- | ---------------- | ---------- | ------------ |
 | `epic_id`           | integer          | yes        | The ID of an epic. |
-| `id`                | integer or string   | yes        | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths). |
+| `id`                | integer or string   | yes        | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding). |
 
 ```json
 [
@@ -602,7 +582,7 @@ Parameters:
 | --------------- | -------------- | -------- | ----------- |
 | `discussion_id` | integer        | yes      | The ID of a discussion item. |
 | `epic_id`       | integer        | yes      | The ID of an epic. |
-| `id`            | integer or string | yes      | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths). |
+| `id`            | integer or string | yes      | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding). |
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
@@ -624,7 +604,7 @@ Parameters:
 | --------------- | -------------- | -------- | ----------- |
 | `body`          | string         | yes      | The content of the thread. |
 | `epic_id`       | integer        | yes      | The ID of an epic. |
-| `id`            | integer or string | yes      | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths). |
+| `id`            | integer or string | yes      | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding). |
 | `created_at`    | string         | no       | Date time string, ISO 8601 formatted, such as `2016-03-11T03:45:40Z`. Requires administrator or project/group owner rights. |
 
 ```shell
@@ -648,7 +628,7 @@ Parameters:
 | `body`          | string         | yes      | The content of the note or reply. |
 | `discussion_id` | integer        | yes      | The ID of a thread. |
 | `epic_id`       | integer        | yes      | The ID of an epic. |
-| `id`            | integer or string | yes      | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths). |
+| `id`            | integer or string | yes      | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding). |
 | `note_id`       | integer        | yes      | The ID of a thread note. |
 | `created_at`    | string         | no       | Date time string, ISO 8601 formatted, such as `2016-03-11T03:45:40Z`. Requires administrator or project/group owner rights. |
 
@@ -672,7 +652,7 @@ Parameters:
 | `body`          | string         | yes      | The content of note or reply. |
 | `discussion_id` | integer        | yes      | The ID of a thread. |
 | `epic_id`       | integer        | yes      | The ID of an epic. |
-| `id`            | integer/string | yes      | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths). |
+| `id`            | integer/string | yes      | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding). |
 | `note_id`       | integer        | yes      | The ID of a thread note. |
 
 ```shell
@@ -694,7 +674,7 @@ Parameters:
 | --------------- | -------------- | -------- | ----------- |
 | `discussion_id` | integer        | yes      | The ID of a thread. |
 | `epic_id`       | integer        | yes      | The ID of an epic. |
-| `id`            | integer or string | yes      | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths). |
+| `id`            | integer or string | yes      | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding). |
 | `note_id`       | integer        | yes      | The ID of a thread note. |
 
 ```shell
@@ -714,7 +694,7 @@ GET /projects/:id/merge_requests/:merge_request_iid/discussions
 
 | Attribute           | Type             | Required   | Description  |
 | ------------------- | ---------------- | ---------- | ------------ |
-| `id`                | integer or string   | yes        | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string   | yes        | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer          | yes        | The IID of a merge request. |
 
 ```json
@@ -883,7 +863,7 @@ Parameters:
 | Attribute           | Type           | Required | Description |
 | ------------------- | -------------- | -------- | ----------- |
 | `discussion_id`     | string        | yes      | The ID of a discussion item. |
-| `id`                | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer        | yes      | The IID of a merge request. |
 
 ```shell
@@ -907,14 +887,14 @@ Parameters for all comments:
 | Attribute                                | Type           | Required                             | Description |
 | ---------------------------------------- | -------------- |--------------------------------------| ----------- |
 | `body`                                   | string         | yes                                  | The content of the thread. |
-| `id`                                     | integer/string | yes                                  | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                                     | integer/string | yes                                  | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid`                      | integer        | yes                                  | The IID of a merge request. |
 | `position[base_sha]`                     | string         | yes (if `position*` is supplied)     | Base commit SHA in the source branch. |
 | `position[head_sha]`                     | string         | yes (if `position*` is supplied)     | SHA referencing HEAD of this merge request. |
 | `position[start_sha]`                    | string         | yes (if `position*` is supplied)     | SHA referencing commit in target branch. |
 | `position[new_path]`                     | string         | yes (if the position type is `text`) | File path after change. |
 | `position[old_path]`                     | string         | yes (if the position type is `text`) | File path before change. |
-| `position[position_type]`                | string         | yes (if position* is supplied)       | Type of the position reference. Allowed values: `text`, `image`, or `file`. `file` [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/423046) in GitLab 16.4. |
+| `position[position_type]`                | string         | yes (if position* is supplied)       | Type of the position reference. Allowed values: `text` or `image`. |
 | `commit_id`                              | string         | no                                   | SHA referencing commit to start this thread on. |
 | `created_at`                             | string         | no                                   | Date time string, ISO 8601 formatted, such as `2016-03-11T03:45:40Z`. Requires administrator or project/group owner rights. |
 | `position`                               | hash           | no                                   | Position when creating a diff note. |
@@ -1047,7 +1027,7 @@ Parameters:
 
 | Attribute           | Type           | Required | Description |
 | ------------------- | -------------- | -------- | ----------- |
-| `id`                | integer/string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer/string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `discussion_id`     | string        | yes      | The ID of a thread. |
 | `merge_request_iid` | integer        | yes      | The IID of a merge request. |
 | `resolved`          | boolean        | yes      | Resolve or unresolve the discussion. |
@@ -1071,7 +1051,7 @@ Parameters:
 | Attribute           | Type           | Required | Description |
 | ------------------- | -------------- | -------- | ----------- |
 | `body`              | string         | yes      | The content of the note or reply. |
-| `id`                | integer/string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer/string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `discussion_id`     | string        | yes      | The ID of a thread. |
 | `merge_request_iid` | integer        | yes      | The IID of a merge request. |
 | `note_id`           | integer        | yes      | The ID of a thread note. |
@@ -1095,7 +1075,7 @@ Parameters:
 | Attribute           | Type           | Required | Description |
 | ------------------- | -------------- | -------- | ----------- |
 | `discussion_id`     | string        | yes      | The ID of a thread. |
-| `id`                | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer        | yes      | The IID of a merge request. |
 | `note_id`           | integer        | yes      | The ID of a thread note. |
 | `body`              | string         | no       | The content of the note or reply. Exactly one of `body` or `resolved` must be set. |
@@ -1126,7 +1106,7 @@ Parameters:
 | Attribute           | Type           | Required | Description |
 | ------------------- | -------------- | -------- | ----------- |
 | `discussion_id`     | string        | yes      | The ID of a thread. |
-| `id`                | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer        | yes      | The IID of a merge request. |
 | `note_id`           | integer        | yes      | The ID of a thread note. |
 
@@ -1148,7 +1128,7 @@ GET /projects/:id/repository/commits/:commit_id/discussions
 | Attribute           | Type             | Required   | Description  |
 | ------------------- | ---------------- | ---------- | ------------ |
 | `commit_id`         | string           | yes        | The SHA of a commit. |
-| `id`                | integer or string   | yes        | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string   | yes        | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 
 ```json
 [
@@ -1297,7 +1277,7 @@ Parameters:
 | ------------------- | -------------- | -------- | ----------- |
 | `commit_id`         | string         | yes      | The SHA of a commit. |
 | `discussion_id`     | string         | yes      | The ID of a discussion item. |
-| `id`                | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" \
@@ -1319,11 +1299,11 @@ Parameters:
 | ------------------------- | -------------- |----------------------------------| ----------- |
 | `body`                    | string         | yes                              | The content of the thread. |
 | `commit_id`               | string         | yes                              | The SHA of a commit. |
-| `id`                      | integer/string | yes                              | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                      | integer/string | yes                              | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `position[base_sha]`      | string         | yes (if `position*` is supplied) | SHA of the parent commit. |
 | `position[head_sha]`      | string         | yes (if `position*` is supplied) | The SHA of this commit. Same as `commit_id`. |
 | `position[start_sha]`     | string         | yes (if `position*` is supplied) | SHA of the parent commit. |
-| `position[position_type]` | string         | yes (if `position*` is supplied) | Type of the position reference. Allowed values: `text`, `image`, or `file`. `file` [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/423046) in GitLab 16.4. |
+| `position[position_type]` | string         | yes (if `position*` is supplied) | Type of the position reference. Allowed values: `text` or `image`. |
 | `created_at`              | string         | no                               | Date time string, ISO 8601 formatted, such as `2016-03-11T03:45:40Z`. Requires administrator or project/group owner rights. |
 | `position`                | hash           | no                               | Position when creating a diff note. |
 
@@ -1364,7 +1344,7 @@ Parameters:
 | `body`              | string         | yes      | The content of the note or reply. |
 | `commit_id`         | string         | yes      | The SHA of a commit. |
 | `discussion_id`     | string         | yes      | The ID of a thread. |
-| `id`                | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `note_id`           | integer        | yes      | The ID of a thread note. |
 | `created_at`        | string         | no       | Date time string, ISO 8601 formatted, such `2016-03-11T03:45:40Z`. Requires administrator or project/group owner rights. |
 
@@ -1387,7 +1367,7 @@ Parameters:
 | ------------------- | -------------- | -------- | ----------- |
 | `commit_id`         | string         | yes      | The SHA of a commit. |
 | `discussion_id`     | string         | yes      | The ID of a thread. |
-| `id`                | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `note_id`           | integer        | yes      | The ID of a thread note. |
 | `body`              | string         | no       | The content of a note. |
 
@@ -1415,7 +1395,7 @@ Parameters:
 
 | Attribute           | Type           | Required | Description |
 | ------------------- | -------------- | -------- | ----------- |
-| `id`                | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `commit_id`         | string         | yes      | The SHA of a commit. |
 | `discussion_id`     | string         | yes      | The ID of a thread. |
 | `note_id`           | integer        | yes      | The ID of a thread note. |

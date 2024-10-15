@@ -56,7 +56,7 @@ export default {
 </script>
 <template>
   <div>
-    <div class="title gl-font-bold">
+    <div class="title gl-font-weight-bold">
       <span class="gl-mr-2">{{ $options.i18n.jobArtifacts }}</span>
       <gl-link :href="$options.artifactsHelpPath" data-testid="artifacts-help-link">
         <gl-icon id="artifacts-help" name="question-o" />
@@ -93,7 +93,7 @@ export default {
         {{ $options.i18n.lockedText }}
       </span>
     </p>
-    <gl-button-group class="gl-mt-3 gl-flex">
+    <gl-button-group class="gl-display-flex gl-mt-3">
       <gl-button
         v-if="artifact.keepPath"
         :href="artifact.keepPath"

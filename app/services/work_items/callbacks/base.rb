@@ -6,8 +6,9 @@ module WorkItems
       alias_method :work_item, :issuable
 
       def raise_error(message)
-        raise Error, message
+        raise ::WorkItems::Widgets::BaseService::WidgetError, message
       end
     end
   end
 end
+WorkItems::Callbacks::Base.prepend_mod

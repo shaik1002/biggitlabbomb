@@ -26,7 +26,7 @@ To change the color theme:
 
 ### Dark mode
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28252) in GitLab 13.1 as an [experiment](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28252).
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28252) in GitLab 13.1 as an [Experiment](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/28252).
 
 Dark mode makes elements on the GitLab UI stand out on a dark background.
 
@@ -309,34 +309,6 @@ To customize the time format:
 1. Under **Time format**, select either the **System**, **12-hour**, or **24-hour** option.
 1. Select **Save changes**.
 
-## Disable exact code search
-
-DETAILS:
-**Tier:** Premium, Ultimate
-**Offering:** GitLab.com, Self-managed
-**Status:** Beta
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/105049) as a [beta](../../policy/experiment-beta-support.md#beta) in GitLab 15.9 [with flags](../../administration/feature_flags.md) named `index_code_with_zoekt` and `search_code_with_zoekt`. Disabled by default.
-> - [Enabled on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/388519) in GitLab 16.6.
-> - Feature flags `index_code_with_zoekt` and `search_code_with_zoekt` [removed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/148378) in GitLab 17.1.
-
-WARNING:
-This feature is in [beta](../../policy/experiment-beta-support.md#beta) and subject to change without notice.
-For more information, see [epic 9404](https://gitlab.com/groups/gitlab-org/-/epics/9404).
-
-Prerequisites:
-
-- For [GitLab self-managed](../../subscriptions/self_managed/index.md), an administrator must
-  [enable exact code search](../../integration/exact_code_search/zoekt.md#enable-exact-code-search).
-
-To disable [exact code search](../../user/search/exact_code_search.md) in user preferences:
-
-1. On the left sidebar, select your avatar.
-1. Select **Preferences**.
-1. Go to the **Exact code search** section.
-1. Clear the **Enable exact code search** checkbox.
-1. Select **Save changes**.
-
 ## User identities in CI job JSON web tokens
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/387537) in GitLab 16.0.
@@ -400,22 +372,18 @@ You must be the administrator of the GitLab instance to configure GitLab with So
 
 ### Integrate with the extension marketplace
 
-DETAILS:
-**Offering:** GitLab.com
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/151352) as a [beta](../../policy/experiment-beta-support.md#beta) in GitLab 17.0 [with flags](../../administration/feature_flags.md) named `web_ide_oauth` and `web_ide_extensions_marketplace`. Disabled by default.
-> - Feature flag `web_ide_oauth` [enabled on GitLab.com, self-managed, and GitLab Dedicated](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/163181) and feature flag `web_ide_extensions_marketplace` [enabled on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/459028) in GitLab 17.4.
-> - Feature flag `web_ide_oauth` [removed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/167464) in GitLab 17.5.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/151352) in GitLab 17.0 [with flags](../../administration/feature_flags.md) named `web_ide_oauth` and `web_ide_extensions_marketplace`. Disabled by default.
+> - [Enabled on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/459028) in GitLab 17.0.
 
 FLAG:
-The availability of this feature is controlled by a feature flag.
+The availability of this feature is controlled by feature flags.
 For more information, see the history.
 
-You can use the [extension marketplace](../project/web_ide/index.md#extension-marketplace) to search and
-manage extensions for the [Web IDE](../project/web_ide/index.md) and [workspaces](../workspace/index.md).
+You can use the [extension marketplace](../project/web_ide/index.md#extension-marketplace)
+to search and manage extensions for the Web IDE.
 For third-party extensions, you must enable the marketplace in user preferences.
 
-To enable the extension marketplace for the Web IDE and workspaces:
+To enable the extension marketplace for the Web IDE:
 
 1. On the left sidebar, select your avatar.
 1. Select **Preferences**.

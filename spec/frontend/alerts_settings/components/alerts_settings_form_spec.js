@@ -8,7 +8,7 @@ import {
   GlLink,
   GlModal,
 } from '@gitlab/ui';
-import { mount, shallowMount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 import Vue, { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
 import { extendedWrapper } from 'helpers/vue_test_utils_helper';
@@ -40,7 +40,6 @@ describe('AlertsSettingsForm', () => {
   });
 
   const createComponent = async ({
-    mountFn = mount,
     props = {},
     multiIntegrations = true,
     currentIntegration = null,
@@ -60,7 +59,7 @@ describe('AlertsSettingsForm', () => {
     );
 
     wrapper = extendedWrapper(
-      mountFn(AlertsSettingsForm, {
+      mount(AlertsSettingsForm, {
         apolloProvider,
         propsData: {
           loading: false,
@@ -91,7 +90,7 @@ describe('AlertsSettingsForm', () => {
   const findSubmitButton = () => wrapper.findByTestId('integration-form-submit');
   const findMultiSupportText = () => wrapper.findByTestId('multi-integrations-not-supported');
   const findJsonTestSubmit = () => wrapper.findByTestId('send-test-alert');
-  const findJsonTextArea = () => wrapper.findByTestId('test-payload-field');
+  const findJsonTextArea = () => wrapper.find(`[id = "test-payload"]`);
   const findActionBtn = () => wrapper.findByTestId('payload-action-btn');
   const findTabs = () => wrapper.findAllComponents(GlTab);
 
@@ -131,7 +130,7 @@ describe('AlertsSettingsForm', () => {
     });
 
     it('disables the dropdown and shows help text when multi integrations are not supported', async () => {
-      await createComponent({ mountFn: shallowMount, props: { canAddIntegration: false } });
+      await createComponent({ props: { canAddIntegration: false } });
 
       expect(findSelect().attributes('disabled')).toBeDefined();
       expect(findMultiSupportText().exists()).toBe(true);

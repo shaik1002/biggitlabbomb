@@ -138,8 +138,13 @@ describe('NewDirectoryModal', () => {
       });
 
       it('passes the formData', async () => {
-        const { dirName, branchName, commitMessage, originalBranch, createNewMr } =
-          defaultFormValue;
+        const {
+          dirName,
+          branchName,
+          commitMessage,
+          originalBranch,
+          createNewMr,
+        } = defaultFormValue;
         mock.onPost(initialProps.path).reply(HTTP_STATUS_OK, {});
         await fillForm();
         await submitForm();

@@ -1,9 +1,6 @@
 query getBranchRulesDetails($projectPath: ID!) {
   project(fullPath: $projectPath) {
     id
-    group {
-      id
-    }
     branchRules {
       nodes {
         id

@@ -217,9 +217,7 @@ export default {
       this.$refs.form.$el.submit();
     },
   },
-  deleteLfsHelpPath: helpPagePath('topics/git/lfs', {
-    anchor: 'delete-a-git-lfs-file-from-repository-history',
-  }),
+  deleteLfsHelpPath: helpPagePath('topics/git/lfs/index', { anchor: 'removing-objects-from-lfs' }),
 };
 </script>
 
@@ -276,7 +274,6 @@ export default {
               v-model="form.fields['commit_message'].value"
               v-validation:[form.showValidation]
               name="commit_message"
-              no-resize
               data-testid="commit-message-field"
               :state="form.fields['commit_message'].state"
               :disabled="loading"

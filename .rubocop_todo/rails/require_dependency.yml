@@ -1,5 +1,6 @@
 ---
 Rails/RequireDependency:
+  Details: grace period
   Exclude:
     - 'app/models/alert_management/alert.rb'
     - 'app/models/design_management/action.rb'
@@ -8,6 +9,7 @@ Rails/RequireDependency:
     - 'config/initializers/query_limiting.rb'
     - 'config/initializers/zz_metrics.rb'
     - 'ee/app/finders/status_page/incident_comments_finder.rb'
+    - 'ee/app/models/compliance_management/compliance_framework/project_settings.rb'
     - 'ee/app/services/group_saml/saml_provider/create_service.rb'
     - 'ee/app/services/group_saml/saml_provider/update_service.rb'
     - 'ee/app/services/vulnerabilities/confirm_service.rb'
@@ -16,6 +18,7 @@ Rails/RequireDependency:
     - 'ee/app/services/vulnerabilities/resolve_service.rb'
     - 'ee/app/services/vulnerabilities/revert_to_detected_service.rb'
     - 'ee/spec/lib/gitlab/insights/validators/params_validator_spec.rb'
+    - 'lib/api/terraform/state.rb'
     - 'lib/gitlab/ci/pipeline/expression/lexeme/pattern/regular_expression.rb'
     - 'lib/gitlab/email/receiver.rb'
     - 'lib/gitlab/omniauth_initializer.rb'
@@ -26,6 +29,7 @@ Rails/RequireDependency:
     - 'lib/tasks/gitlab/assets.rake'
     - 'spec/lib/gitlab/ci/config/entry/include/rules/rule_spec.rb'
     - 'spec/lib/gitlab/ci/config/entry/include/rules_spec.rb'
+    - 'spec/lib/gitlab/ci/config/entry/include_spec.rb'
     - 'spec/lib/gitlab/ci/config/entry/includes_spec.rb'
     - 'spec/lib/gitlab/ci/config/entry/product/matrix_spec.rb'
     - 'spec/lib/gitlab/ci/config/entry/product/parallel_spec.rb'

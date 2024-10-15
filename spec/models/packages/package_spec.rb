@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-
 require 'spec_helper'
 
 RSpec.describe Packages::Package, type: :model, feature_category: :package_registry do
@@ -18,12 +17,58 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
     it { is_expected.to have_many(:tags).inverse_of(:package) }
     it { is_expected.to have_many(:build_infos).inverse_of(:package) }
     it { is_expected.to have_many(:installable_nuget_package_files).inverse_of(:package) }
+    it { is_expected.to have_one(:conan_metadatum).inverse_of(:package) }
     it { is_expected.to have_one(:maven_metadatum).inverse_of(:package) }
+    it { is_expected.to have_one(:debian_publication).inverse_of(:package).class_name('Packages::Debian::Publication') }
+    it { is_expected.to have_one(:debian_distribution).through(:debian_publication).source(:distribution).inverse_of(:packages).class_name('Packages::Debian::ProjectDistribution') }
     it { is_expected.to have_one(:nuget_metadatum).inverse_of(:package) }
     it { is_expected.to have_one(:npm_metadatum).inverse_of(:package) }
+    it { is_expected.to have_one(:rpm_metadatum).inverse_of(:package) }
     it { is_expected.to have_one(:terraform_module_metadatum).inverse_of(:package) }
     it { is_expected.to have_many(:nuget_symbols).inverse_of(:package) }
     it { is_expected.to have_many(:matching_package_protection_rules).through(:project).source(:package_protection_rules) }
+  end
+
+  describe '.with_debian_codename' do
+    let_it_be(:publication) { create(:debian_publication) }
+
+    subject { described_class.with_debian_codename(publication.distribution.codename).to_a }
+
+    it { is_expected.to contain_exactly(publication.package) }
+  end
+
+  describe '.with_debian_codename_or_suite' do
+    let_it_be(:distribution1) { create(:debian_project_distribution, :with_suite) }
+    let_it_be(:distribution2) { create(:debian_project_distribution, :with_suite) }
+
+    let_it_be(:package1) { create(:debian_package, published_in: distribution1) }
+    let_it_be(:package2) { create(:debian_package, published_in: distribution2) }
+
+    context 'with a codename' do
+      subject { described_class.with_debian_codename_or_suite(distribution1.codename).to_a }
+
+      it { is_expected.to contain_exactly(package1) }
+    end
+
+    context 'with a suite' do
+      subject { described_class.with_debian_codename_or_suite(distribution2.suite).to_a }
+
+      it { is_expected.to contain_exactly(package2) }
+    end
+  end
+
+  describe '.with_composer_target' do
+    let!(:package1) { create(:composer_package, :with_metadatum, sha: '123') }
+    let!(:package2) { create(:composer_package, :with_metadatum, sha: '123') }
+    let!(:package3) { create(:composer_package, :with_metadatum, sha: '234') }
+
+    subject { described_class.with_composer_target('123').to_a }
+
+    it 'selects packages with the specified sha' do
+      expect(subject).to include(package1)
+      expect(subject).to include(package2)
+      expect(subject).not_to include(package3)
+    end
   end
 
   describe '.sort_by_attribute' do
@@ -112,6 +157,61 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
       it { is_expected.to allow_value("my.app-11.07.2018").for(:name) }
       it { is_expected.not_to allow_value("my(dom$$$ain)com.my-app").for(:name) }
 
+      context 'conan package' do
+        subject { build_stubbed(:conan_package) }
+
+        let(:fifty_one_characters) { 'f_b' * 17 }
+
+        it { is_expected.to allow_value('foo+bar').for(:name) }
+        it { is_expected.to allow_value('foo_bar').for(:name) }
+        it { is_expected.to allow_value('foo.bar').for(:name) }
+        it { is_expected.not_to allow_value(fifty_one_characters).for(:name) }
+        it { is_expected.not_to allow_value('+foobar').for(:name) }
+        it { is_expected.not_to allow_value('.foobar').for(:name) }
+        it { is_expected.not_to allow_value('%foo%bar').for(:name) }
+      end
+
+      context 'debian package' do
+        subject { build(:debian_package) }
+
+        it { is_expected.to allow_value('0ad').for(:name) }
+        it { is_expected.to allow_value('g++').for(:name) }
+        it { is_expected.not_to allow_value('a_b').for(:name) }
+      end
+
+      context 'debian incoming' do
+        subject { create(:debian_incoming) }
+
+        # Only 'incoming' is accepted
+        it { is_expected.to allow_value('incoming').for(:name) }
+        it { is_expected.not_to allow_value('0ad').for(:name) }
+        it { is_expected.not_to allow_value('g++').for(:name) }
+        it { is_expected.not_to allow_value('a_b').for(:name) }
+      end
+
+      context 'generic package' do
+        subject { build_stubbed(:generic_package) }
+
+        it { is_expected.to allow_value('123').for(:name) }
+        it { is_expected.to allow_value('foo').for(:name) }
+        it { is_expected.to allow_value('foo.bar.baz-2.0-20190901.47283-1').for(:name) }
+        it { is_expected.not_to allow_value('../../foo').for(:name) }
+        it { is_expected.not_to allow_value('..\..\foo').for(:name) }
+        it { is_expected.not_to allow_value('%2f%2e%2e%2f%2essh%2fauthorized_keys').for(:name) }
+        it { is_expected.not_to allow_value('$foo/bar').for(:name) }
+        it { is_expected.not_to allow_value('my file name').for(:name) }
+        it { is_expected.not_to allow_value('!!().for(:name)().for(:name)').for(:name) }
+      end
+
+      context 'helm package' do
+        subject { build(:helm_package) }
+
+        it { is_expected.to allow_value('prometheus').for(:name) }
+        it { is_expected.to allow_value('rook-ceph').for(:name) }
+        it { is_expected.not_to allow_value('a+b').for(:name) }
+        it { is_expected.not_to allow_value('Hé').for(:name) }
+      end
+
       context 'nuget package' do
         subject { build_stubbed(:nuget_package) }
 
@@ -154,6 +254,59 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
     end
 
     describe '#version' do
+      RSpec.shared_examples 'validating version to be SemVer compliant for' do |factory_name|
+        context "for #{factory_name}" do
+          subject { build_stubbed(factory_name) }
+
+          it { is_expected.to allow_value('1.2.3').for(:version) }
+          it { is_expected.to allow_value('1.2.3-beta').for(:version) }
+          it { is_expected.to allow_value('1.2.3-alpha.3').for(:version) }
+          it { is_expected.not_to allow_value('1').for(:version) }
+          it { is_expected.not_to allow_value('1.2').for(:version) }
+          it { is_expected.not_to allow_value('1./2.3').for(:version) }
+          it { is_expected.not_to allow_value('../../../../../1.2.3').for(:version) }
+          it { is_expected.not_to allow_value('%2e%2e%2f1.2.3').for(:version) }
+        end
+      end
+
+      context 'conan package' do
+        subject { build_stubbed(:conan_package) }
+
+        let(:fifty_one_characters) { '1.2' * 17 }
+
+        it { is_expected.to allow_value('1.2').for(:version) }
+        it { is_expected.to allow_value('1.2.3-beta').for(:version) }
+        it { is_expected.to allow_value('1.2.3-pre1+build2').for(:version) }
+        it { is_expected.not_to allow_value('1').for(:version) }
+        it { is_expected.not_to allow_value(fifty_one_characters).for(:version) }
+        it { is_expected.not_to allow_value('1./2.3').for(:version) }
+        it { is_expected.not_to allow_value('.1.2.3').for(:version) }
+        it { is_expected.not_to allow_value('+1.2.3').for(:version) }
+        it { is_expected.not_to allow_value('%2e%2e%2f1.2.3').for(:version) }
+      end
+
+      context 'composer package' do
+        it_behaves_like 'validating version to be SemVer compliant for', :composer_package
+
+        it { is_expected.to allow_value('dev-master').for(:version) }
+        it { is_expected.to allow_value('2.x-dev').for(:version) }
+      end
+
+      context 'debian package' do
+        subject { build(:debian_package) }
+
+        it { is_expected.to allow_value('2:4.9.5+dfsg-5+deb10u1').for(:version) }
+        it { is_expected.not_to allow_value('1_0').for(:version) }
+      end
+
+      context 'debian incoming' do
+        subject { create(:debian_incoming) }
+
+        it { is_expected.to allow_value(nil).for(:version) }
+        it { is_expected.not_to allow_value('2:4.9.5+dfsg-5+deb10u1').for(:version) }
+        it { is_expected.not_to allow_value('1_0').for(:version) }
+      end
+
       context 'maven package' do
         subject { build_stubbed(:maven_package) }
 
@@ -180,6 +333,109 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
         it { is_expected.not_to allow_value('1.2.3-4%2e%2e%').for(:version) }
         it { is_expected.not_to allow_value('../../../../../1.2.3').for(:version) }
         it { is_expected.not_to allow_value('%2e%2e%2f1.2.3').for(:version) }
+      end
+
+      context 'pypi package' do
+        subject { create(:pypi_package) }
+
+        it { is_expected.to allow_value('0.1').for(:version) }
+        it { is_expected.to allow_value('2.0').for(:version) }
+        it { is_expected.to allow_value('1.2.0').for(:version) }
+        it { is_expected.to allow_value('0100!0.0').for(:version) }
+        it { is_expected.to allow_value('00!1.2').for(:version) }
+        it { is_expected.to allow_value('1.0a').for(:version) }
+        it { is_expected.to allow_value('1.0-a').for(:version) }
+        it { is_expected.to allow_value('1.0.a1').for(:version) }
+        it { is_expected.to allow_value('1.0a1').for(:version) }
+        it { is_expected.to allow_value('1.0-a1').for(:version) }
+        it { is_expected.to allow_value('1.0alpha1').for(:version) }
+        it { is_expected.to allow_value('1.0b1').for(:version) }
+        it { is_expected.to allow_value('1.0beta1').for(:version) }
+        it { is_expected.to allow_value('1.0rc1').for(:version) }
+        it { is_expected.to allow_value('1.0pre1').for(:version) }
+        it { is_expected.to allow_value('1.0preview1').for(:version) }
+        it { is_expected.to allow_value('1.0.dev1').for(:version) }
+        it { is_expected.to allow_value('1.0.DEV1').for(:version) }
+        it { is_expected.to allow_value('1.0.post1').for(:version) }
+        it { is_expected.to allow_value('1.0.rev1').for(:version) }
+        it { is_expected.to allow_value('1.0.r1').for(:version) }
+        it { is_expected.to allow_value('1.0c2').for(:version) }
+        it { is_expected.to allow_value('2012.15').for(:version) }
+        it { is_expected.to allow_value('1.0+5').for(:version) }
+        it { is_expected.to allow_value('1.0+abc.5').for(:version) }
+        it { is_expected.to allow_value('1!1.1').for(:version) }
+        it { is_expected.to allow_value('1.0c3').for(:version) }
+        it { is_expected.to allow_value('1.0rc2').for(:version) }
+        it { is_expected.to allow_value('1.0c1').for(:version) }
+        it { is_expected.to allow_value('1.0b2-346').for(:version) }
+        it { is_expected.to allow_value('1.0b2.post345').for(:version) }
+        it { is_expected.to allow_value('1.0b2.post345.dev456').for(:version) }
+        it { is_expected.to allow_value('1.2.rev33+123456').for(:version) }
+        it { is_expected.to allow_value('1.1.dev1').for(:version) }
+        it { is_expected.to allow_value('1.0b1.dev456').for(:version) }
+        it { is_expected.to allow_value('1.0a12.dev456').for(:version) }
+        it { is_expected.to allow_value('1.0b2').for(:version) }
+        it { is_expected.to allow_value('1.0.dev456').for(:version) }
+        it { is_expected.to allow_value('1.0c1.dev456').for(:version) }
+        it { is_expected.to allow_value('1.0.post456').for(:version) }
+        it { is_expected.to allow_value('1.0.post456.dev34').for(:version) }
+        it { is_expected.to allow_value('1.2+123abc').for(:version) }
+        it { is_expected.to allow_value('1.2+abc').for(:version) }
+        it { is_expected.to allow_value('1.2+abc123').for(:version) }
+        it { is_expected.to allow_value('1.2+abc123def').for(:version) }
+        it { is_expected.to allow_value('1.2+1234.abc').for(:version) }
+        it { is_expected.to allow_value('1.2+123456').for(:version) }
+        it { is_expected.to allow_value('1.2.r32+123456').for(:version) }
+        it { is_expected.to allow_value('1!1.2.rev33+123456').for(:version) }
+        it { is_expected.to allow_value('1.0a12').for(:version) }
+        it { is_expected.to allow_value('1.2.3-45+abcdefgh').for(:version) }
+        it { is_expected.to allow_value('v1.2.3').for(:version) }
+        it { is_expected.not_to allow_value('1.2.3-45-abcdefgh').for(:version) }
+        it { is_expected.not_to allow_value('..1.2.3').for(:version) }
+        it { is_expected.not_to allow_value('  1.2.3').for(:version) }
+        it { is_expected.not_to allow_value("1.2.3  \r\t").for(:version) }
+        it { is_expected.not_to allow_value("\r\t 1.2.3").for(:version) }
+        it { is_expected.not_to allow_value('1./2.3').for(:version) }
+        it { is_expected.not_to allow_value('1.2.3-4/../../').for(:version) }
+        it { is_expected.not_to allow_value('1.2.3-4%2e%2e%').for(:version) }
+        it { is_expected.not_to allow_value('../../../../../1.2.3').for(:version) }
+        it { is_expected.not_to allow_value('%2e%2e%2f1.2.3').for(:version) }
+      end
+
+      context 'generic package' do
+        subject { build_stubbed(:generic_package) }
+
+        it { is_expected.to validate_presence_of(:version) }
+        it { is_expected.to allow_value('1.2.3').for(:version) }
+        it { is_expected.to allow_value('1.3.350').for(:version) }
+        it { is_expected.to allow_value('1.3.350-20201230123456').for(:version) }
+        it { is_expected.to allow_value('1.2.3-rc1').for(:version) }
+        it { is_expected.to allow_value('1.2.3g').for(:version) }
+        it { is_expected.to allow_value('1.2').for(:version) }
+        it { is_expected.to allow_value('1.2.bananas').for(:version) }
+        it { is_expected.to allow_value('v1.2.4-build').for(:version) }
+        it { is_expected.to allow_value('d50d836eb3de6177ce6c7a5482f27f9c2c84b672').for(:version) }
+        it { is_expected.to allow_value('this_is_a_string_only').for(:version) }
+        it { is_expected.not_to allow_value('..1.2.3').for(:version) }
+        it { is_expected.not_to allow_value('  1.2.3').for(:version) }
+        it { is_expected.not_to allow_value("1.2.3  \r\t").for(:version) }
+        it { is_expected.not_to allow_value("\r\t 1.2.3").for(:version) }
+        it { is_expected.not_to allow_value('1.2.3-4/../../').for(:version) }
+        it { is_expected.not_to allow_value('1.2.3-4%2e%2e%').for(:version) }
+        it { is_expected.not_to allow_value('../../../../../1.2.3').for(:version) }
+        it { is_expected.not_to allow_value('%2e%2e%2f1.2.3').for(:version) }
+        it { is_expected.not_to allow_value('').for(:version) }
+        it { is_expected.not_to allow_value(nil).for(:version) }
+      end
+
+      context 'helm package' do
+        subject { build_stubbed(:helm_package) }
+
+        it { is_expected.not_to allow_value(nil).for(:version) }
+        it { is_expected.not_to allow_value('').for(:version) }
+        it { is_expected.to allow_value('v1.2.3').for(:version) }
+        it { is_expected.to allow_value('1.2.3').for(:version) }
+        it { is_expected.not_to allow_value('v1.2').for(:version) }
       end
 
       it_behaves_like 'validating version to be SemVer compliant for', :npm_package
@@ -383,6 +639,83 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
       end
     end
 
+    context "recipe uniqueness for conan packages" do
+      let_it_be(:package) { create(:conan_package) }
+
+      it "will allow a conan package with same project, name, version and package_type" do
+        new_package = build(:conan_package, project: package.project, name: package.name, version: package.version)
+        new_package.conan_metadatum.package_channel = 'beta'
+        expect(new_package).to be_valid
+      end
+
+      it "will not allow a conan package with same recipe (name, version, metadatum.package_channel, metadatum.package_username, and package_type)" do
+        new_package = build(:conan_package, project: package.project, name: package.name, version: package.version)
+        expect(new_package).not_to be_valid
+        expect(new_package.errors.to_a).to include("Package recipe already exists")
+      end
+
+      context 'with pending destruction package' do
+        let_it_be(:package) { create(:conan_package, :pending_destruction) }
+
+        it 'will allow a conan package with same recipe (name, version, metadatum.package_channel, metadatum.package_username, and package_type)' do
+          new_package = build(:conan_package, project: package.project, name: package.name, version: package.version)
+          expect(new_package).to be_valid
+        end
+      end
+    end
+
+    describe '#valid_composer_global_name' do
+      let_it_be(:package) { create(:composer_package) }
+
+      context 'with different name and different project' do
+        let(:new_package) { build(:composer_package, name: 'different_name') }
+
+        it { expect(new_package).to be_valid }
+      end
+
+      context 'with same name and different project' do
+        let(:new_package) { build(:composer_package, name: package.name) }
+
+        it 'will not validate second package' do
+          expect(new_package).not_to be_valid
+          expect(new_package.errors.to_a).to include('Name is already taken by another project')
+        end
+
+        context 'with pending destruction package' do
+          let_it_be(:package) { create(:composer_package, :pending_destruction) }
+
+          it { expect(new_package).to be_valid }
+        end
+      end
+    end
+
+    describe "uniqueness for package type debian" do
+      let!(:package) { create(:debian_package) }
+
+      it "will not allow a Debian package with same project, name, version and distribution" do
+        new_package = build(:debian_package, project: package.project, name: package.name, version: package.version)
+        new_package.debian_publication.distribution = package.debian_publication.distribution
+        expect(new_package).not_to be_valid
+        expect(new_package.errors.to_a).to include('Name has already been taken')
+      end
+
+      it "will not allow a Debian package with same project, name, version, but no distribution" do
+        new_package = build(:debian_package, project: package.project, name: package.name, version: package.version, published_in: nil)
+        expect(new_package).not_to be_valid
+        expect(new_package.errors.to_a).to include('Name has already been taken')
+      end
+
+      context 'with pending_destruction package' do
+        let!(:package) { create(:debian_package, :pending_destruction) }
+
+        it "will allow a Debian package with same project, name, version and distribution" do
+          new_package = build(:debian_package, project: package.project, name: package.name, version: package.version)
+          new_package.debian_publication.distribution = package.debian_publication.distribution
+          expect(new_package).to be_valid
+        end
+      end
+    end
+
     Packages::Package.package_types.keys.without('conan').each do |pt|
       context "project id, name, version and package type uniqueness for package type #{pt}" do
         let(:package) { create("#{pt}_package") }
@@ -431,6 +764,23 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
 
     it 'will raise error if not found' do
       expect { subject.by_name_and_file_name('foo', 'foo-5.5.5.tgz') }.to raise_error(ActiveRecord::RecordNotFound)
+    end
+  end
+
+  describe '.debian_incoming_package!' do
+    let!(:debian_package) { create(:debian_package) }
+    let!(:debian_processing_incoming) { create(:debian_incoming, :processing) }
+
+    subject { described_class.debian_incoming_package! }
+
+    context 'when incoming exists' do
+      let!(:debian_incoming) { create(:debian_incoming) }
+
+      it { is_expected.to eq(debian_incoming) }
+    end
+
+    context 'when incoming not found' do
+      it { expect { subject }.to raise_error(ActiveRecord::RecordNotFound) }
     end
   end
 
@@ -486,6 +836,38 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
 
       it 'includes packages without the version pattern' do
         is_expected.to match_array([package2, package3])
+      end
+    end
+  end
+
+  context 'conan scopes' do
+    let!(:package) { create(:conan_package) }
+
+    describe '.with_conan_channel' do
+      subject { described_class.with_conan_channel('stable') }
+
+      it 'includes only packages with specified version' do
+        is_expected.to include(package)
+      end
+    end
+
+    describe '.with_conan_username' do
+      subject do
+        described_class.with_conan_username(
+          Packages::Conan::Metadatum.package_username_from(full_path: package.project.full_path)
+        )
+      end
+
+      it 'includes only packages with specified version' do
+        is_expected.to match_array([package])
+      end
+    end
+
+    describe '.preload_conan_metadatum' do
+      subject { described_class.preload_conan_metadatum }
+
+      it 'loads conan metadatum' do
+        expect(subject.first.association(:conan_metadatum)).to be_loaded
       end
     end
   end
@@ -575,6 +957,14 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
       it { is_expected.to match_array([package1, package2]) }
     end
 
+    describe '.with_normalized_pypi_name' do
+      let_it_be(:pypi_package) { create(:pypi_package, name: 'Foo.bAr---BAZ_buz') }
+
+      subject { described_class.with_normalized_pypi_name('foo-bar-baz-buz') }
+
+      it { is_expected.to match_array([pypi_package]) }
+    end
+
     describe '.with_case_insensitive_version' do
       let_it_be(:nuget_package) { create(:nuget_package, version: '1.0.0-ABC') }
 
@@ -629,7 +1019,17 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
       end
 
       describe '.installable' do
-        it_behaves_like 'installable packages', :maven_package
+        subject { described_class.installable }
+
+        it 'does not include non-installable packages', :aggregate_failures do
+          is_expected.not_to include(error_package)
+          is_expected.not_to include(processing_package)
+        end
+
+        it 'includes installable packages', :aggregate_failures do
+          is_expected.to include(default_package)
+          is_expected.to include(hidden_package)
+        end
       end
 
       describe '.with_status' do
@@ -711,10 +1111,6 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
     end
   end
 
-  describe '.installable_statuses' do
-    it_behaves_like 'installable statuses'
-  end
-
   describe '#versions' do
     let_it_be(:project) { create(:project) }
     let_it_be(:package) { create(:maven_package, project: project) }
@@ -783,12 +1179,12 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
 
     let_it_be(:package_protection_rule) do
       create(:package_protection_rule, project: package.project, package_name_pattern: package.name, package_type: :npm,
-        minimum_access_level_for_push: :maintainer)
+        push_protected_up_to_access_level: :maintainer)
     end
 
     let_it_be(:package_protection_rule_no_match) do
       create(:package_protection_rule, project: package.project, package_name_pattern: "other-#{package.name}", package_type: :npm,
-        minimum_access_level_for_push: :maintainer)
+        push_protected_up_to_access_level: :maintainer)
     end
 
     subject { package.matching_package_protection_rules }
@@ -811,6 +1207,46 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
       end
 
       it { is_expected.to contain_exactly(*tags) }
+    end
+  end
+
+  describe '#debian_incoming?' do
+    let(:package) { build(:package) }
+
+    subject { package.debian_incoming? }
+
+    it { is_expected.to eq(false) }
+
+    context 'with debian_incoming' do
+      let(:package) { create(:debian_incoming) }
+
+      it { is_expected.to eq(true) }
+    end
+
+    context 'with debian_package' do
+      let(:package) { create(:debian_package) }
+
+      it { is_expected.to eq(false) }
+    end
+  end
+
+  describe '#debian_package?' do
+    let(:package) { build(:package) }
+
+    subject { package.debian_package? }
+
+    it { is_expected.to eq(false) }
+
+    context 'with debian_incoming' do
+      let(:package) { create(:debian_incoming) }
+
+      it { is_expected.to eq(false) }
+    end
+
+    context 'with debian_package' do
+      let(:package) { create(:debian_package) }
+
+      it { is_expected.to eq(true) }
     end
   end
 
@@ -1026,6 +1462,26 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
     end
   end
 
+  describe '#normalized_pypi_name' do
+    let_it_be(:package) { create(:pypi_package) }
+
+    subject { package.normalized_pypi_name }
+
+    where(:package_name, :normalized_name) do
+      'ASDF' | 'asdf'
+      'a.B_c-d' | 'a-b-c-d'
+      'a-------b....c___d' | 'a-b-c-d'
+    end
+
+    with_them do
+      before do
+        package.update_column(:name, package_name)
+      end
+
+      it { is_expected.to eq(normalized_name) }
+    end
+  end
+
   describe '#normalized_nuget_version' do
     let_it_be(:package) { create(:nuget_package, :with_metadatum, version: '1.0') }
     let(:normalized_version) { '1.0.0' }
@@ -1039,21 +1495,35 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
     it { is_expected.to eq(normalized_version) }
   end
 
-  describe '#publish_creation_event' do
+  describe "#publish_creation_event" do
     let_it_be(:project) { create(:project) }
 
-    let(:package) { build_stubbed(:generic_package) }
+    let(:version) { '-' }
+    let(:package_type) { :generic }
 
-    it 'publishes an event' do
-      expect { package.publish_creation_event }
-        .to publish_event(::Packages::PackageCreatedEvent)
-              .with({
-                project_id: package.project_id,
-                id: package.id,
-                name: package.name,
-                version: package.version,
-                package_type: package.package_type
-              })
+    subject { described_class.create!(project: project, name: 'incoming', version: version, package_type: package_type) }
+
+    context 'when package is generic' do
+      it 'publishes an event' do
+        expect { subject }
+          .to publish_event(::Packages::PackageCreatedEvent)
+                .with({
+                  project_id: project.id,
+                  id: kind_of(Numeric),
+                  name: "incoming",
+                  version: "-",
+                  package_type: 'generic'
+                })
+      end
+    end
+
+    context 'when package is not generic' do
+      let(:package_type) { :debian }
+      let(:version) { 1 }
+
+      it 'does not create event' do
+        expect { subject }.not_to publish_event(::Packages::PackageCreatedEvent)
+      end
     end
   end
 

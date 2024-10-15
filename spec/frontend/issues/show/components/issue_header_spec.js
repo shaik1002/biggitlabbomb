@@ -2,6 +2,7 @@ import { GlLink, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import { STATUS_CLOSED, STATUS_OPEN } from '~/issues/constants';
 import IssueHeader from '~/issues/show/components/issue_header.vue';
+import { __, s__ } from '~/locale';
 import IssuableHeader from '~/vue_shared/issuable/show/components/issuable_header.vue';
 
 describe('IssueHeader component', () => {
@@ -60,7 +61,7 @@ describe('IssueHeader component', () => {
       });
 
       it('renders Open text', () => {
-        expect(findIssuableHeader().text()).toBe('Open');
+        expect(findIssuableHeader().text()).toBe(__('Open'));
       });
 
       it('renders correct icon', () => {
@@ -74,7 +75,7 @@ describe('IssueHeader component', () => {
       });
 
       it('renders Closed text', () => {
-        expect(findIssuableHeader().text()).toBe('Closed');
+        expect(findIssuableHeader().text()).toBe(s__('IssuableStatus|Closed'));
       });
 
       it('renders correct icon', () => {

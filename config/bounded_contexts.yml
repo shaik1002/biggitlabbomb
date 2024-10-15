@@ -31,7 +31,6 @@ domains:
       - ai_abstraction_layer
       - code_suggestions # Also in CodeSuggestions
       - cloud_connector  # Also in CloudConnector
-      - duo_workflow
 
   Analytics:
     description:
@@ -39,18 +38,13 @@ domains:
       - value_stream_management
       - devops_reports
       - dora_metrics
-      - product_analytics
+      - product_analytics_data_management
 
   AntiAbuse:
     description:
     feature_categories:
       - insider_threat
       - instance_resiliency
-
-  AppConfig:
-    description: Top-level configuration at the GitLab instance level
-    feature_categories:
-      - settings
 
   AuditEvents:
     description:
@@ -68,11 +62,6 @@ domains:
       - permissions
       - system_access
 
-  Backup:
-    description: Backup and restore
-    feature_categories:
-      - backup_restore
-
   Boards:
     description:
     feature_categories:
@@ -84,10 +73,9 @@ domains:
     feature_categories:
       - continuous_integration
       - pipeline_composition
+      - secrets_management
       - fleet_visibility
-      - job_artifacts
-      - pipeline_reports
-      - secure_artifacts
+      - build_artifacts
       - code_testing
 
   CloudConnector:
@@ -105,7 +93,7 @@ domains:
     feature_categories:
       - code_suggestions
 
-  ComplianceManagement:
+  Compliance:
     description:
     feature_categories:
       - compliance_management
@@ -116,10 +104,15 @@ domains:
     feature_categories:
       - container_registry
 
-  DependencyProxy:
-    description: Dependency Proxy for container images.
+  DependencyManagement:
+    description:
     feature_categories:
-      - virtual_registry
+      - dependency_management
+
+  DependencyProxy:
+    description:
+    feature_categories:
+      - dependency_proxy
       - package_registry
 
   DesignManagement:
@@ -141,12 +134,13 @@ domains:
       - geo_replication
 
   GitlabSubscriptions:
-    description: Managing subscription related code for GitLab.com and Self-Managed
+    description:
     feature_categories:
       - seat_cost_management
-      - plan_provisioning
+      - saas_provisioning
+      - sm_provisioning
       - subscription_management
-      - add-on_provisioning
+      - purchase
 
   Import:
     description:
@@ -200,18 +194,11 @@ domains:
     feature_categories:
       - navigation
 
-  Notes:
-    description: Notes, discussions on issuables and abuse reports
-    feature_categories:
-      - team_planning
-      - portfolio_management
-      - code_review_workflow
-      - insider_threat
-
   Observability:
     description:
     feature_categories:
-      - observability
+      - metrics
+      - error_tracking
       - incident_management
 
   Onboarding:
@@ -226,7 +213,7 @@ domains:
       - cell
 
   Packages:
-    description: Package registry implementation for each supported format (such as Maven, NPM, NuGet, ...).
+    description:
     feature_categories:
       - package_registry
       - mlops
@@ -241,11 +228,6 @@ domains:
     feature_categories:
       - groups_and_projects
 
-  ResourceAccessTokens:
-    description: Managing groups and projects access tokens
-    feature_categories:
-      - system_access
-
   Releases:
     description:
     feature_categories:
@@ -255,7 +237,7 @@ domains:
   RemoteDevelopment:
     description:
     feature_categories:
-      - workspaces
+      - remote_development
 
   Repositories:
     description: Git repositories and workflow including Gitaly client
@@ -263,31 +245,20 @@ domains:
       - source_code_management
       - gitaly
 
-  Sbom:
-    description: SBOM related ingestion
-    feature_categories:
-      - software_composition_analysis
-      - dependency_management
-
   Search:
     description: Code and content global search feature, including RAG, Elasticsearch and Zoekt integrations.
     feature_categories:
       - global_search
 
-  SecretsManagement:
-    description: Management of native and external secrets
-    feature_categories:
-      - secrets_management
-
   Security:
-    description: Manage and execute security scanners and policies
+    description: Manage and execute security scanners and policies 
     feature_categories:
       - container_scanning
       - dynamic_application_security_testing
       - security_policy_management
       - software_composition_analysis
       - static_application_security_testing
-      - secret_detection
+      - vulnerability_management
 
   ServiceDesk:
     description:
@@ -299,11 +270,6 @@ domains:
     feature_categories:
       - service_ping
 
-  Snippets:
-    description: Snippets to store and share bits of code and text with other users.
-    feature_categories:
-      - source_code_management
-
   StatusPage:
     description:
     feature_categories:
@@ -313,11 +279,6 @@ domains:
     description:
     feature_categories:
       - infrastructure_as_code
-
-  Todos:
-    description: User todos management
-    feature_categories:
-      - notifications
 
   Users:
     description: Behavior related to user lifecycle and profile settings. Feature specific behavior must not go here.
@@ -330,22 +291,12 @@ domains:
     feature_categories:
       - consumables_cost_management
 
-  VirtualRegistries:
-    description: Virtual registries implementation that manage artifacts (packages or container images) from external upstreams.
-    feature_categories:
-      - virtual_registry
-
-  Vulnerabilities:
-    description: Vulnerability management
-    feature_categories:
-      - vulnerability_management
-
   WebHooks:
     description: Outbound integration of GitLab with external tools and workflows
     feature_categories:
       - webhooks
 
-  WebIde:
+  WebIDE:
     description:
     feature_categories:
       - web_ide
@@ -368,9 +319,7 @@ domains:
 # This is where all shared concepts live, from Base classes to utilities.
 # Modules from the platform layer could potentially be extracted as gems.
 platform:
-  Gitlab:
-    description: Platform layer containing infrastructure and technical concerns.
-      For example observability tools, generic base classes, utilities, database helpers, etc.
-      Each functionality in this layer should be isolated and extracted into gems.
+  Gitlab::Database:
+    description: Utilities for GitLab Rails persistence layer built for Postgres database
   Banzai:
     description: Parsing and rendering for GitLab Flavored Markdown

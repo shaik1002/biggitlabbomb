@@ -2,9 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Mutations::AlertManagement::Alerts::SetAssignees, feature_category: :api do
-  include GraphqlHelpers
-
+RSpec.describe Mutations::AlertManagement::Alerts::SetAssignees do
   let_it_be(:starting_assignee) { create(:user) }
   let_it_be(:unassigned_user) { create(:user) }
   let_it_be(:alert) { create(:alert_management_alert, assignees: [starting_assignee]) }
@@ -172,7 +170,7 @@ RSpec.describe Mutations::AlertManagement::Alerts::SetAssignees, feature_categor
     end
   end
 
-  def mutation_for(project, _user)
-    described_class.new(object: project, context: query_context, field: nil)
+  def mutation_for(project, user)
+    described_class.new(object: project, context: { current_user: user }, field: nil)
   end
 end

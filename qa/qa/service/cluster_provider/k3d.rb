@@ -10,7 +10,8 @@ module QA
           Runtime::ApplicationSettings.set_application_settings(allow_local_requests_from_web_hooks_and_services: true)
         end
 
-        def set_credentials(admin_user); end
+        def set_credentials(admin_user)
+        end
 
         def setup
           shell "k3d create --workers 1 --name #{cluster_name} --wait 0"
@@ -53,7 +54,7 @@ module QA
         def fetch_kubeconfig
           retry_until do
             config = `k3d get-kubeconfig --name #{cluster_name}`.chomp
-            config if /kubeconfig.yaml/.match?(config)
+            config if config =~ /kubeconfig.yaml/
           end
         end
 

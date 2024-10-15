@@ -2,7 +2,6 @@
 
 module API
   module Helpers
-    include Gitlab::Allowable
     include Gitlab::Utils
     include Helpers::Caching
     include Helpers::Pagination
@@ -13,6 +12,8 @@ module API
 
     SUDO_HEADER = "HTTP_SUDO"
     GITLAB_SHARED_SECRET_HEADER = "Gitlab-Shared-Secret"
+    GITLAB_SHELL_API_HEADER = "Gitlab-Shell-Api-Request"
+    GITLAB_SHELL_JWT_ISSUER = "gitlab-shell"
     SUDO_PARAM = :sudo
     API_USER_ENV = 'gitlab.api.user'
     API_EXCEPTION_ENV = 'gitlab.api.exception'
@@ -148,13 +149,12 @@ module API
     def find_project!(id)
       project = find_project(id)
 
-      return forbidden!("This project's CI/CD job token cannot be used to authenticate with the container registry of a different project.") unless authorized_project_scope?(project)
-      return not_found!('Project') if project.nil?
+      return forbidden! unless authorized_project_scope?(project)
 
       unless can?(current_user, read_project_ability, project)
         return unauthorized! if authenticate_non_public?
 
-        return handle_job_token_failure!(project)
+        return not_found!('Project')
       end
 
       if project_moved?(id, project)
@@ -181,7 +181,7 @@ module API
     def find_pipeline(id)
       return unless id
 
-      if INTEGER_ID_REGEX.match?(id.to_s)
+      if id.to_s =~ INTEGER_ID_REGEX
         ::Ci::Pipeline.find_by(id: id)
       end
     end
@@ -202,7 +202,7 @@ module API
     end
 
     def find_organization!(id)
-      organization = ::Organizations::Organization.find_by_id(id)
+      organization = Organizations::Organization.find_by_id(id)
       check_organization_access(organization)
     end
 
@@ -210,7 +210,7 @@ module API
     def find_group(id, organization: nil)
       collection = organization.present? ? Group.in_organization(organization) : Group.all
 
-      if INTEGER_ID_REGEX.match?(id.to_s)
+      if id.to_s =~ INTEGER_ID_REGEX
         collection.find_by(id: id)
       else
         collection.find_by_full_path(id)
@@ -220,10 +220,6 @@ module API
 
     def find_group!(id, organization: nil)
       group = find_group(id, organization: organization)
-      # We need to ensure the namespace is in the context since
-      # it's possible a method such as bypass_session! might log
-      # a message before @group is set.
-      ::Gitlab::ApplicationContext.push(namespace: group) if group
       check_group_access(group)
     end
 
@@ -250,7 +246,7 @@ module API
     # find_namespace returns the namespace regardless of user access level on the namespace
     # rubocop: disable CodeReuse/ActiveRecord
     def find_namespace(id)
-      if INTEGER_ID_REGEX.match?(id.to_s)
+      if id.to_s =~ INTEGER_ID_REGEX
         Namespace.without_project_namespaces.find_by(id: id)
       else
         find_namespace_by_path(id)
@@ -335,11 +331,15 @@ module API
     end
 
     def authenticate_by_gitlab_shell_token!
-      unauthorized! unless Gitlab::Shell.verify_api_request(headers)
+      payload, _ = JSONWebToken::HMACToken.decode(headers[GITLAB_SHELL_API_HEADER], secret_token)
+      unauthorized! unless payload['iss'] == GITLAB_SHELL_JWT_ISSUER
+    rescue JWT::DecodeError, JWT::ExpiredSignature, JWT::ImmatureSignature => ex
+      Gitlab::ErrorTracking.track_exception(ex)
+      unauthorized!
     end
 
     def authenticate_by_gitlab_shell_or_workhorse_token!
-      return require_gitlab_workhorse! unless Gitlab::Shell.header_set?(headers)
+      return require_gitlab_workhorse! unless headers[GITLAB_SHELL_API_HEADER].present?
 
       authenticate_by_gitlab_shell_token!
     end
@@ -358,10 +358,6 @@ module API
       forbidden!(reason) unless can?(current_user, action, subject)
     end
 
-    def authorize_any!(abilities, subject = :global, reason = nil)
-      forbidden!(reason) unless can_any?(current_user, abilities, subject)
-    end
-
     def authorize_push_project
       authorize! :push_code, user_project
     end
@@ -372,10 +368,6 @@ module API
 
     def authorize_admin_project
       authorize! :admin_project, user_project
-    end
-
-    def authorize_admin_integrations
-      authorize! :admin_integrations, user_project
     end
 
     def authorize_admin_group
@@ -444,6 +436,10 @@ module API
 
     def require_pages_config_enabled!
       not_found! unless Gitlab.config.pages.enabled
+    end
+
+    def can?(object, action, subject = :global)
+      Ability.allowed?(object, action, subject)
     end
 
     # Checks the occurrences of required attributes, each attribute must be present in the params hash
@@ -577,18 +573,14 @@ module API
       render_api_error!('201 Created', 201)
     end
 
-    def accepted!(message = '202 Accepted')
-      render_api_error!(message, 202)
+    def accepted!
+      render_api_error!('202 Accepted', 202)
     end
 
-    def render_validation_error!(models, status = 400)
-      models = Array(models)
-
-      errors = models.map { |m| model_errors(m) }.filter(&:present?)
-      messages = errors.map(&:messages)
-      messages = messages.count == 1 ? messages.first : messages.join(" ")
-
-      render_api_error!(messages || '400 Bad Request', status) if errors.any?
+    def render_validation_error!(model, status = 400)
+      if model.errors.any?
+        render_api_error!(model_errors(model).messages || '400 Bad Request', status)
+      end
     end
 
     def model_errors(model)
@@ -685,29 +677,24 @@ module API
       present_carrierwave_file!(file, **args)
     end
 
-    def present_carrierwave_file!(file, supports_direct_download: true, content_disposition: nil, content_type: nil)
+    def present_carrierwave_file!(file, supports_direct_download: true, content_disposition: nil)
       return not_found! unless file&.exists?
 
-      if content_disposition
-        response_disposition = ActionDispatch::Http::ContentDisposition.format(disposition: content_disposition, filename: file.filename)
-      end
-
       if file.file_storage?
-        file_content_type = content_type || 'application/octet-stream'
-        present_disk_file!(file.path, file.filename, file_content_type)
+        present_disk_file!(file.path, file.filename)
       elsif supports_direct_download && file.class.direct_download_enabled?
         return redirect(ObjectStorage::S3.signed_head_url(file)) if request.head? && file.fog_credentials[:provider] == 'AWS'
 
         redirect_params = {}
         if content_disposition
-          redirect_params[:query] = { 'response-content-disposition' => response_disposition, 'response-content-type' => content_type || file.content_type }
+          response_disposition = ActionDispatch::Http::ContentDisposition.format(disposition: content_disposition, filename: file.filename)
+          redirect_params[:query] = { 'response-content-disposition': response_disposition, 'response-content-type': file.content_type }
         end
 
         file_url = ObjectStorage::CDN::FileUrl.new(file: file, ip_address: ip_address, redirect_params: redirect_params)
         redirect(file_url.url)
       else
-        response_headers = { 'Content-Type' => content_type, 'Content-Disposition' => response_disposition }.compact_blank
-        header(*Gitlab::Workhorse.send_url(file.url, response_headers: response_headers))
+        header(*Gitlab::Workhorse.send_url(file.url))
         status :ok
         body '' # to avoid an error from API::APIGuard::ResponseCoercerMiddleware
       end
@@ -729,7 +716,7 @@ module API
       Gitlab::AppLogger.warn("Redis tracking event failed for event: #{event_name}, message: #{error.message}")
     end
 
-    def track_event(event_name, user:, send_snowplow_event: true, namespace_id: nil, project_id: nil, additional_properties: {})
+    def track_event(event_name, user:, send_snowplow_event: true, namespace_id: nil, project_id: nil, additional_properties: Gitlab::InternalEvents::DEFAULT_ADDITIONAL_PROPERTIES)
       return unless user.present?
 
       namespace = Namespace.find(namespace_id) if namespace_id
@@ -743,7 +730,7 @@ module API
         namespace: namespace,
         project: project
       )
-    rescue Gitlab::Tracking::EventValidator::UnknownEventError => e
+    rescue Gitlab::InternalEvents::UnknownEventError => e
       Gitlab::ErrorTracking.track_exception(e, event_name: event_name)
 
       # We want to keep the error silent on production to keep the behavior
@@ -776,12 +763,12 @@ module API
       finder_params.merge!(
         params
           .slice(:search,
-            :custom_attributes,
-            :last_activity_after,
-            :last_activity_before,
-            :topic,
-            :topic_id,
-            :repository_storage)
+                 :custom_attributes,
+                 :last_activity_after,
+                 :last_activity_before,
+                 :topic,
+                 :topic_id,
+                 :repository_storage)
           .symbolize_keys
           .compact
       )
@@ -838,7 +825,7 @@ module API
       end
 
       unless access_token
-        forbidden!('Must be authenticated using an OAuth or personal access token to use sudo')
+        forbidden!('Must be authenticated using an OAuth or Personal Access Token to use sudo')
       end
 
       validate_and_save_access_token!(scopes: [:sudo])
@@ -950,17 +937,6 @@ module API
       Rack::Request.new(env).tap do |r|
         r.path_info = "/#{new_path}"
       end.url
-    end
-
-    def handle_job_token_failure!(project)
-      if current_user&.from_ci_job_token? && current_user&.ci_job_token_scope
-        source_project = current_user.ci_job_token_scope.current_project
-        error_message = format("Authentication by CI/CD job token not allowed from %{source_project_path} to %{target_project_path}.", source_project_path: source_project.path, target_project_path: project.path)
-
-        forbidden!(error_message)
-      else
-        not_found!('Project')
-      end
     end
   end
 end

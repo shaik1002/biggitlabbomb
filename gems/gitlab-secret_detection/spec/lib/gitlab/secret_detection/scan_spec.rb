@@ -9,10 +9,6 @@ RSpec.describe Gitlab::SecretDetection::Scan, feature_category: :secret_detectio
     Struct.new(:id, :data).new(id, data)
   end
 
-  def create_exclusion(value:)
-    Struct.new(:value).new(value)
-  end
-
   let(:ruleset) do
     {
       "title" => "gitleaks config",
@@ -40,7 +36,7 @@ RSpec.describe Gitlab::SecretDetection::Scan, feature_category: :secret_detectio
         },
         {
           "id" => "gitlab_feed_token_v2",
-          "description" => "GitLab Feed token",
+          "description" => "GitLab Feed Token",
           "regex" => "\bglft-[0-9a-zA-Z_-]{20}\b",
           "tags" => ["gitlab"],
           "keywords" => ["glft"]
@@ -206,6 +202,13 @@ RSpec.describe Gitlab::SecretDetection::Scan, feature_category: :secret_detectio
           expect(scan.secrets_scan(blobs, subprocess: true)).to eq(expected_response)
         end
 
+        it "takes at least same time to run as running in main process" do
+          expect { scan.secrets_scan(large_blobs, subprocess: true) }.to perform_faster_than {
+                                                                           scan.secrets_scan(large_blobs,
+                                                                             subprocess: false)
+                                                                         }.once
+        end
+
         it "allocates less memory than when running in main process" do
           forked_stats = Benchmark::Malloc.new.run { scan.secrets_scan(large_blobs, subprocess: true) }
           non_forked_stats = Benchmark::Malloc.new.run { scan.secrets_scan(large_blobs, subprocess: false) }
@@ -249,23 +252,9 @@ RSpec.describe Gitlab::SecretDetection::Scan, feature_category: :secret_detectio
       it "whole secret detection scan operation times out" do
         scan_timeout_secs = 0.000_001 # 1 micro-sec to intentionally timeout large blob
 
-        expected_response = Gitlab::SecretDetection::Response.new(Gitlab::SecretDetection::Status::SCAN_TIMEOUT)
+        response = Gitlab::SecretDetection::Response.new(Gitlab::SecretDetection::Status::SCAN_TIMEOUT)
 
-        begin
-          response = scan.secrets_scan(blobs, timeout: scan_timeout_secs)
-          expect(response).to eq(expected_response)
-        rescue ArgumentError
-          # When RSpec's main process terminates and attempts to clean up child processes upon completion, it terminates
-          # subprocesses where the scans might be still ongoing. This behavior is not recognized by the
-          # upstream library (parallel), which manages all forked subprocesses it created for running scans. When the
-          # upstream library attempts to close its forked subprocesses which already terminated, it raises an
-          # 'ArgumentError' with the message 'bad signal type NilClass,' resulting in flaky failures in the test
-          # expectations.
-          #
-          # Example: https://gitlab.com/gitlab-org/gitlab/-/jobs/6935051992
-          #
-          puts "skipping the test since the subprocesses forked for SD scanning are terminated by main process"
-        end
+        expect(scan.secrets_scan(blobs, timeout: scan_timeout_secs)).to eq(response)
       end
 
       it "one of the blobs times out while others continue to get scanned" do
@@ -281,7 +270,7 @@ RSpec.describe Gitlab::SecretDetection::Scan, feature_category: :secret_detectio
             ),
             Gitlab::SecretDetection::Finding.new(
               blobs[2].id,
-              Gitlab::SecretDetection::Status::PAYLOAD_TIMEOUT
+              Gitlab::SecretDetection::Status::BLOB_TIMEOUT
             )
           ]
         )
@@ -298,117 +287,20 @@ RSpec.describe Gitlab::SecretDetection::Scan, feature_category: :secret_detectio
           [
             Gitlab::SecretDetection::Finding.new(
               all_large_blobs[0].id,
-              Gitlab::SecretDetection::Status::PAYLOAD_TIMEOUT
+              Gitlab::SecretDetection::Status::BLOB_TIMEOUT
             ),
             Gitlab::SecretDetection::Finding.new(
               all_large_blobs[1].id,
-              Gitlab::SecretDetection::Status::PAYLOAD_TIMEOUT
+              Gitlab::SecretDetection::Status::BLOB_TIMEOUT
             ),
             Gitlab::SecretDetection::Finding.new(
               all_large_blobs[2].id,
-              Gitlab::SecretDetection::Status::PAYLOAD_TIMEOUT
+              Gitlab::SecretDetection::Status::BLOB_TIMEOUT
             )
           ]
         )
 
         expect(scan.secrets_scan(all_large_blobs, blob_timeout: each_blob_timeout_secs)).to eq(expected_response)
-      end
-    end
-
-    context "when using exclusions" do
-      let(:blobs) do
-        [
-          new_blob(id: 111, data: "data with no secret"),
-          new_blob(id: 222, data: "GR134894145645645645645645645"), # gitleaks:allow
-          new_blob(id: 333, data: "GR134894145645645645645645789"), # gitleaks:allow
-          new_blob(id: 444, data: "GR134894112312312312312312312"), # gitleaks:allow
-          new_blob(id: 555, data: "glpat-12312312312312312312"), # gitleaks:allow,
-          new_blob(
-            id: 666, data: "test data\nglptt-1231231231231231231212312312312312312312\nline contd" # gitleaks:allow
-          )
-        ]
-      end
-
-      context "when excluding secrets based on raw values" do
-        let(:exclusions) do
-          {
-            raw_value: [
-              create_exclusion(value: 'GR134894112312312312312312312'), # gitleaks:allow
-              create_exclusion(value: 'glpat-12312312312312312312') # gitleaks:allow
-            ]
-          }
-        end
-
-        let(:valid_lines) do
-          [
-            blobs[1].data,
-            blobs[2].data,
-            *blobs[5].data.lines
-          ]
-        end
-
-        it "excludes values from being detected" do
-          expected_scan_status = Gitlab::SecretDetection::Status::FOUND
-
-          expected_response = Gitlab::SecretDetection::Response.new(
-            expected_scan_status,
-            [
-              Gitlab::SecretDetection::Finding.new(
-                blobs[1].id,
-                expected_scan_status,
-                1,
-                ruleset['rules'][2]['id'],
-                ruleset['rules'][2]['description']
-              ),
-              Gitlab::SecretDetection::Finding.new(
-                blobs[2].id,
-                expected_scan_status,
-                1,
-                ruleset['rules'][2]['id'],
-                ruleset['rules'][2]['description']
-              ),
-              Gitlab::SecretDetection::Finding.new(
-                blobs[5].id,
-                expected_scan_status,
-                2,
-                ruleset['rules'][1]['id'],
-                ruleset['rules'][1]['description']
-              )
-            ]
-          )
-
-          expect(scan.secrets_scan(blobs, exclusions: exclusions)).to eq(expected_response)
-        end
-      end
-
-      context "when excluding secrets based on rules from default ruleset" do
-        let(:exclusions) do
-          {
-            rule: [
-              create_exclusion(value: "gitlab_runner_registration_token"),
-              create_exclusion(value: "gitlab_personal_access_token")
-            ]
-          }
-        end
-
-        it 'filters out secrets matching excluded rules from detected findings' do
-          expected_scan_status = Gitlab::SecretDetection::Status::FOUND
-
-          expected_response = Gitlab::SecretDetection::Response.new(
-            expected_scan_status,
-            [
-              Gitlab::SecretDetection::Finding.new(
-                blobs[5].id,
-                expected_scan_status,
-                2,
-                ruleset['rules'][1]['id'],
-                ruleset['rules'][1]['description']
-              )
-            ]
-          )
-
-          expect(scan.secrets_scan(blobs, exclusions: exclusions)).to eq(expected_response)
-        end
       end
     end
   end

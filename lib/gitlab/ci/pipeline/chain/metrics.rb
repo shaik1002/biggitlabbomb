@@ -15,14 +15,7 @@ module Gitlab
           end
 
           def increment_pipeline_created_counter
-            labels = {
-              source: @pipeline.source,
-              partition_id: @pipeline.partition_id
-            }
-
-            ::Gitlab::Ci::Pipeline::Metrics
-              .pipelines_created_counter
-              .increment(labels)
+            ::Gitlab::Ci::Pipeline::Metrics.pipelines_created_counter.increment(source: @pipeline.source)
           end
 
           def create_snowplow_event_for_pipeline_name

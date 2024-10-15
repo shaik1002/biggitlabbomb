@@ -32,7 +32,7 @@ To access your user settings:
 
 Your username has a unique [namespace](../namespace/index.md),
 which is updated when you change your username. Before you change your username, read about
-[how redirects behave](../project/repository/index.md#repository-path-changes).
+[how redirects behave](../project/repository/index.md#what-happens-when-a-repository-path-changes).
 If you do not want to update the namespace, you can create a new user or group and transfer projects to it instead.
 
 Prerequisites:
@@ -45,7 +45,7 @@ Prerequisites:
   - Must be between 2 and 255 characters in length.
   - Must only include non-accented letters, digits, `_`, `-`, and `.`.
   - Must not:
-    - Start with `_`, `-`, or `.`.
+    - Start with `-`.
     - Contain emoji.
     - End with `.` or `.<reserved file extension>`, for example `jon.png`, `jon.git` or `jon.atom`. However,
       `jonpng` is valid.
@@ -60,7 +60,7 @@ To change your username:
 
 ## Add emails to your user profile
 
-To add a new email address to your account:
+To add new email to your account:
 
 1. On the left sidebar, select your avatar.
 1. Select **Edit profile**.
@@ -70,15 +70,11 @@ To add a new email address to your account:
 1. Select **Add email address**.
 1. Verify your email address with the verification email received.
 
-The new email address is added as a secondary email address.
-You can use secondary email addresses to reset passwords but not to authenticate.
-You can update your [primary email address](#change-your-primary-email).
-
 NOTE:
 [Making your email non-public](#set-your-public-email) does not prevent it from being used for commit matching,
 [project imports](../project/import/index.md), and [group migrations](../group/import/index.md).
 
-## Delete email addresses from your user profile
+## Delete emails from your user profile
 
 > - Automatic deletion of unverified secondary email addresses [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/151562) in GitLab 17.0.
 
@@ -101,14 +97,11 @@ To delete an email address from your account:
 1. On the left sidebar, select **Emails**.
 1. Select **Delete** (**{remove}**) and confirm you want to **Remove**.
 
-You can also [use the API to delete a secondary email address](../../api/user_email_addresses.md#delete-one-of-your-email-addresses).
+You can also [use the API to delete a secondary email address](../../api/users.md#delete-email-for-current-user).
 
 ## Make your user profile page private
 
 You can make your user profile visible to only you and GitLab administrators.
-
-NOTE:
-A GitLab administrator can [disable](../../administration/settings/account_and_limit_settings.md#allow-users-to-make-their-profiles-private) this setting, forcing all profiles to be made public.
 
 To make your profile private:
 
@@ -153,13 +146,12 @@ To create a new project and add its README to your profile:
    - In the **Project name** field, enter the name for your new project.
    - In the **Project URL** field, select your GitLab username.
    - In the **Project slug** field, enter your GitLab username.
-     All of these fields are case sensitive. If your username has capital letters, enter it into the project slug field with the capitals included.
 1. For **Visibility Level**, select **Public**.
    ![Proper project path for an individual on the hosted product](img/personal_readme_setup_v14_5.png)
 1. For **Project Configuration**, ensure **Initialize repository with a README** is selected.
 1. Select **Create project**.
-1. Create a README file inside this project. The file can be any valid [README or index file](../project/repository/files/index.md#readme-and-index-files).
-1. Populate the README file with [Markdown](../markdown.md), or another [supported markup language](../project/repository/files/index.md#supported-markup-languages).
+1. Create a README file inside this project. The file can be any valid [README or index file](../project/repository/index.md#readme-and-index-files).
+1. Populate the README file with [Markdown](../markdown.md), or another [supported markup language](../project/repository/index.md#supported-markup-languages).
 
 GitLab displays the contents of your README below your contribution graph.
 
@@ -173,7 +165,6 @@ to match your username.
 
 > - Mastodon user account [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/132892) in GitLab 16.6 [with a flag](../feature_flags.md) named `mastodon_social_ui`. Disabled by default.
 > - Mastodon user account [generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/428163) in GitLab 16.7. Feature flag `mastodon_social_ui` removed.
-> - Ability to verify Mastodon account using your GitLab user profile [added](https://gitlab.com/gitlab-org/gitlab/-/issues/433391) in GitLab 17.4 [with a flag](../feature_flags.md) named `verify_mastodon_user`. Disabled by default.
 
 You can add links to certain other external accounts you might have, like Skype and X (formerly Twitter).
 They can help other users connect with you on other platforms.
@@ -185,8 +176,7 @@ To add links to other accounts:
 1. In the **Main settings** section, add your:
    - Discord [user ID](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-).
    - LinkedIn profile name.
-   - Bluesky [did:plc identifier](https://atproto.com/specs/did). To find your identifier, [resolve your user handle](https://bsky.social/xrpc/com.atproto.identity.resolveHandle?handle=USER_HANDLE).
-   - Mastodon handle. In GitLab 17.4 and later, you can use your [GitLab profile](#access-your-user-profile) to verify your Mastodon account.
+   - Mastodon username.
    - Skype username.
    - X (formerly Twitter) @username.
 
@@ -244,7 +234,7 @@ To set your current status:
 1. Select a value from the **Clear status after** dropdown list.
 1. Select **Set status**. Alternatively, you can select **Remove status** to remove your user status entirely.
 
-You can also set your current status from [your user settings](#access-your-user-settings) or by [using the API](../../api/users.md#set-your-user-status).
+You can also set your current status from [your user settings](#access-your-user-settings) or by [using the API](../../api/users.md#user-status).
 
 If you select the **Busy** checkbox, remember to clear it when you become available again.
 
@@ -365,6 +355,20 @@ You can disable following and being followed by other users.
 NOTE:
 When this feature is being disabled, all current followed/following connections are deleted.
 
+## Advanced code search with zoekt
+
+### Disable searching code with Zoekt
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/388519) as a beta feature [with a flag](../feature_flags.md) named `search_code_with_zoekt`. Enabled by default.
+
+You can disable searching with Zoekt and use Elasticsearch instead.
+
+1. On the left sidebar, select your avatar.
+1. Select **Edit profile**.
+1. Select **Preferences**.
+1. Clear the **Enable advanced code search** checkbox.
+1. Select **Save changes**.
+
 ## View a user's activity
 
 GitLab tracks [user contribution activity](contributions_calendar.md).
@@ -475,7 +479,7 @@ a session if the browser is closed or the existing session expires.
   - [Sign-ins from unknown IP addresses or devices](notifications.md#notifications-for-unknown-sign-ins)
   - [Attempted sign-ins using incorrect verification codes](notifications.md#notifications-for-attempted-sign-ins-using-incorrect-verification-codes)
 - Manage applications that can [use GitLab as an OAuth provider](../../integration/oauth_provider.md)
-- Manage [personal access tokens](personal_access_tokens.md) to access your account through the API and authorized applications
-- Manage [SSH keys](../ssh.md) to access your account by using SSH
+- Manage [personal access tokens](personal_access_tokens.md) to access your account via API and authorized applications
+- Manage [SSH keys](../ssh.md) to access your account via SSH
 - [Change the syntax highlighting theme](preferences.md#change-the-syntax-highlighting-theme)
 - [View your active sessions](active_sessions.md) and revoke any of them if necessary

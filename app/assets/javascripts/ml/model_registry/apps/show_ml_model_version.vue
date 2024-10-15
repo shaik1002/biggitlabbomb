@@ -1,35 +1,22 @@
 <script>
 import TitleArea from '~/vue_shared/components/registry/title_area.vue';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
-import { createAlert, VARIANT_DANGER } from '~/alert';
-import { s__, sprintf } from '~/locale';
-import { setUrlFragment, visitUrlWithAlerts } from '~/lib/utils/url_utility';
 import getModelVersionQuery from '~/ml/model_registry/graphql/queries/get_model_version.query.graphql';
-import deleteModelVersionMutation from '~/ml/model_registry/graphql/mutations/delete_model_version.mutation.graphql';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { makeLoadVersionsErrorMessage } from '~/ml/model_registry/translations';
 import ModelVersionDetail from '../components/model_version_detail.vue';
 import LoadOrErrorOrShow from '../components/load_or_error_or_show.vue';
-import ModelVersionActionsDropdown from '../components/model_version_actions_dropdown.vue';
-import ModelVersionEdit from '../components/model_version_edit.vue';
 
 export default {
   name: 'ShowMlModelVersionApp',
   components: {
     LoadOrErrorOrShow,
     ModelVersionDetail,
-    ModelVersionActionsDropdown,
     TitleArea,
-    ModelVersionEdit,
   },
   provide() {
     return {
       projectPath: this.projectPath,
-      canWriteModelRegistry: this.canWriteModelRegistry,
-      importPath: this.importPath,
-      versionName: this.versionName,
-      maxAllowedFileSize: this.maxAllowedFileSize,
-      markdownPreviewPath: this.markdownPreviewPath,
     };
   },
   props: {
@@ -50,26 +37,6 @@ export default {
       required: true,
     },
     projectPath: {
-      type: String,
-      required: true,
-    },
-    canWriteModelRegistry: {
-      type: Boolean,
-      required: true,
-    },
-    importPath: {
-      type: String,
-      required: true,
-    },
-    modelPath: {
-      type: String,
-      required: true,
-    },
-    maxAllowedFileSize: {
-      type: Number,
-      required: true,
-    },
-    markdownPreviewPath: {
       type: String,
       required: true,
     },
@@ -95,9 +62,6 @@ export default {
     };
   },
   computed: {
-    modelVersionsPath() {
-      return setUrlFragment(this.modelPath, '#versions');
-    },
     modelVersion() {
       return this.modelWithModelVersion?.version;
     },
@@ -113,15 +77,6 @@ export default {
         modelVersionId: convertToGraphQLId('Ml::ModelVersion', this.modelVersionId),
       };
     },
-    deletionSuccessfulAlert() {
-      return {
-        id: 'ml-model-version_deleted-successfully',
-        message: sprintf(s__('MlModelRegistry|Model version %{versionName} deleted successfully'), {
-          versionName: this.versionName,
-        }),
-        variant: 'success',
-      };
-    },
   },
   methods: {
     handleError(error) {
@@ -132,59 +87,15 @@ export default {
         },
       });
     },
-    handleDeleteError(error) {
-      Sentry.captureException(error, {
-        tags: {
-          vue_component: 'show_ml_model_version',
-        },
-      });
-      createAlert({
-        message: s__(
-          'MLOps|Something went wrong while trying to delete the model version. Please try again later.',
-        ),
-        variant: VARIANT_DANGER,
-      });
-    },
-    async deleteModelVersion() {
-      try {
-        const TYPENAME_MODEL_VERSION = 'Ml::ModelVersion';
-        const { data } = await this.$apollo.mutate({
-          mutation: deleteModelVersionMutation,
-          variables: {
-            id: convertToGraphQLId(TYPENAME_MODEL_VERSION, this.modelVersionId),
-          },
-        });
-
-        if (data.mlModelVersionDelete?.errors?.length > 0) {
-          throw data.mlModelVersionDelete.errors.join(', ');
-        }
-
-        visitUrlWithAlerts(this.modelVersionsPath, [this.deletionSuccessfulAlert]);
-      } catch (error) {
-        this.handleDeleteError(error);
-      }
-    },
   },
 };
 </script>
 
 <template>
   <div>
-    <div class="gl-flex gl-flex-wrap gl-justify-between gl-py-3 sm:gl-flex-nowrap">
-      <div class="gl-min-w-0 gl-grow gl-flex-col">
-        <title-area :title="title" />
-      </div>
-      <div class="gl-mt-3 gl-flex gl-items-start gl-gap-3">
-        <model-version-edit
-          v-if="modelVersion && canWriteModelRegistry"
-          :model-with-version="modelWithModelVersion"
-        />
-        <model-version-actions-dropdown @delete-model-version="deleteModelVersion" />
-      </div>
-    </div>
-
+    <title-area :title="title" />
     <load-or-error-or-show :is-loading="isLoading" :error-message="errorMessage">
-      <model-version-detail :model-version="modelVersion" allow-artifact-import />
+      <model-version-detail :model-version="modelVersion" />
     </load-or-error-or-show>
   </div>
 </template>

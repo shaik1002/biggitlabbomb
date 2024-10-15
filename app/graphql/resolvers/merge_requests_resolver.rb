@@ -13,9 +13,6 @@ module Resolvers
       argument :assignee_username, GraphQL::Types::String,
         required: false,
         description: 'Username of the assignee.'
-      argument :assignee_wildcard_id, ::Types::AssigneeWildcardIdEnum,
-        required: false,
-        description: 'Filter by assignee presence. Incompatible with assigneeUsernames and assigneeUsername.'
     end
 
     def self.accept_author
@@ -32,24 +29,6 @@ module Resolvers
         required: false,
         description: 'Filter by reviewer presence. Incompatible with reviewerUsername.'
     end
-
-    argument :approved_by, [GraphQL::Types::String],
-      required: false,
-      as: :approved_by_usernames,
-      description: 'Usernames of the approvers.'
-
-    argument :release_tag, GraphQL::Types::String,
-      required: false,
-      description: 'Filter by release tag.'
-
-    argument :merged_by, GraphQL::Types::String,
-      required: false,
-      as: :merge_user_username,
-      description: 'Username of the merger.'
-
-    argument :my_reaction_emoji, GraphQL::Types::String,
-      required: false,
-      description: 'Filter by your reaction emoji.'
 
     argument :iids, [GraphQL::Types::String],
       required: false,
@@ -73,7 +52,7 @@ module Resolvers
 
     argument :state, ::Types::MergeRequestStateEnum,
       required: false,
-      description: 'Merge request state. If provided, all resolved merge requests will have the state.'
+      description: 'Merge request state. If provided, all resolved merge requests will have this state.'
 
     argument :draft, GraphQL::Types::Boolean,
       required: false,
@@ -86,58 +65,32 @@ module Resolvers
                Available only when the feature flag `mr_approved_filter` is enabled.
       DESC
 
-    argument :subscribed, Types::Issuables::SubscriptionStatusEnum,
-      description: 'Merge requests the current user is subscribed to. Is ignored if ' \
-        '`filter_subscriptions` feature flag is disabled.',
-      alpha: { milestone: '17.5' },
-      required: false
-
     argument :created_after, Types::TimeType,
       required: false,
-      description: 'Merge requests created after the timestamp.'
+      description: 'Merge requests created after this timestamp.'
     argument :created_before, Types::TimeType,
       required: false,
-      description: 'Merge requests created before the timestamp.'
-    argument :deployed_after, Types::TimeType,
-      required: false,
-      description: 'Merge requests deployed after the timestamp.'
-    argument :deployed_before, Types::TimeType,
-      required: false,
-      description: 'Merge requests deployed before the timestamp.'
-    argument :deployment_id, GraphQL::Types::String,
-      required: false,
-      description: 'ID of the deployment.'
-    argument :environment_name, GraphQL::Types::String,
-      as: :environment,
-      required: false,
-      description: 'Environment merge requests have been deployed to.'
+      description: 'Merge requests created before this timestamp.'
     argument :updated_after, Types::TimeType,
       required: false,
-      description: 'Merge requests updated after the timestamp.'
+      description: 'Merge requests updated after this timestamp.'
     argument :updated_before, Types::TimeType,
       required: false,
-      description: 'Merge requests updated before the timestamp.'
+      description: 'Merge requests updated before this timestamp.'
 
-    argument :label_name, [GraphQL::Types::String, { null: true }],
-      required: false,
-      description: 'Labels applied to the merge request.'
     argument :labels, [GraphQL::Types::String],
       required: false,
       as: :label_name,
-      description: 'Array of label names. All resolved merge requests will have all of these labels.',
-      deprecated: { reason: 'Use `labelName`', milestone: '17.1' }
+      description: 'Array of label names. All resolved merge requests will have all of these labels.'
     argument :merged_after, Types::TimeType,
       required: false,
-      description: 'Merge requests merged after the date.'
+      description: 'Merge requests merged after this date.'
     argument :merged_before, Types::TimeType,
       required: false,
-      description: 'Merge requests merged before the date.'
+      description: 'Merge requests merged before this date.'
     argument :milestone_title, GraphQL::Types::String,
       required: false,
-      description: 'Title of the milestone. Incompatible with milestoneWildcardId.'
-    argument :milestone_wildcard_id, ::Types::MilestoneWildcardIdEnum,
-      required: false,
-      description: 'Filter issues by milestone ID wildcard. Incompatible with milestoneTitle.'
+      description: 'Title of the milestone.'
     argument :review_state, ::Types::MergeRequestReviewStateEnum,
       required: false,
       description: 'Reviewer state of the merge request.',
@@ -147,40 +100,19 @@ module Resolvers
       description: 'Reviewer states of the merge request.',
       alpha: { milestone: '17.0' }
     argument :sort, Types::MergeRequestSortEnum,
-      description: 'Sort merge requests by the criteria.',
+      description: 'Sort merge requests by this criteria.',
       required: false,
       default_value: :created_desc
 
     negated do
-      argument :approved_by, [GraphQL::Types::String],
-        required: false,
-        as: :approved_by_usernames,
-        description: 'Usernames of approvers to exclude.'
-      argument :assignee_usernames, [GraphQL::Types::String],
-        as: :assignee_username,
-        required: false,
-        description: 'Usernames of the assignee to exclude.'
       argument :labels, [GraphQL::Types::String],
         required: false,
         as: :label_name,
         description: 'Array of label names. All resolved merge requests will not have these labels.'
       argument :milestone_title, GraphQL::Types::String,
         required: false,
-        description: 'Title of the milestone to exclude.'
-      argument :my_reaction_emoji, GraphQL::Types::String,
-        required: false,
-        description: 'Filter by reaction emoji to exclude.'
-      argument :release_tag, GraphQL::Types::String,
-        required: false,
-        description: 'Filter by release tag to exclude.'
-      argument :reviewer_username, GraphQL::Types::String,
-        required: false,
-        description: 'Username of the reviewer to exclude.'
+        description: 'Title of the milestone.'
     end
-
-    validates mutually_exclusive: [:assignee_username, :assignee_wildcard_id]
-    validates mutually_exclusive: [:reviewer_username, :reviewer_wildcard_id]
-    validates mutually_exclusive: [:milestone_title, :milestone_wildcard_id]
 
     def self.single
       ::Resolvers::MergeRequestResolver
@@ -195,5 +127,3 @@ module Resolvers
     end
   end
 end
-
-Resolvers::MergeRequestsResolver.prepend_mod

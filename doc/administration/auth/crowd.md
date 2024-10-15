@@ -11,7 +11,8 @@ DETAILS:
 **Offering:** Self-managed
 
 WARNING:
-This feature was [deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/369117) in GitLab 15.3 and is [planned for removal in 18.0](https://gitlab.com/gitlab-org/gitlab/-/issues/457241).
+This feature was [deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/369117) in GitLab 15.3 and is planned for
+removal in 17.0.
 
 Authenticate to GitLab using the Atlassian Crowd OmniAuth provider. Enabling
 this provider also allows Crowd authentication for Git-over-https requests.
@@ -22,7 +23,7 @@ this provider also allows Crowd authentication for Git-over-https requests.
 1. Go through the 'Add application' steps, entering the appropriate details.
    The screenshot below shows an example configuration.
 
-   ![Final confirmation page in Crowd for application configuration](img/crowd_application.png)
+   ![Example Crowd application configuration](img/crowd_application.png)
 
 ## Configure GitLab
 
@@ -96,4 +97,4 @@ Ensure the Crowd users who must sign in to GitLab are authorized to the
 [application](#configure-a-new-crowd-application) in the **Authorization** step.
 This could be verified by trying "Authentication test" for Crowd (as of 2.11).
 
-![Authorization stage settings in Crowd](img/crowd_application_authorisation.png)
+![Example Crowd application authorization configuration](img/crowd_application_authorisation.png)

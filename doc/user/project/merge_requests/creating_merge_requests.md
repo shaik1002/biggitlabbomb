@@ -11,7 +11,7 @@ DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
-GitLab provides many different ways to create a merge request, including by [using Git commands](../../../topics/git/merge.md).
+GitLab provides many different ways to create a merge request.
 
 NOTE:
 GitLab enforces [branch naming rules](../repository/branches/index.md#name-your-branch)
@@ -109,9 +109,49 @@ You can create a merge request when you create a branch.
 1. On the left sidebar, select **Search or go to** and find your project.
 1. Select **Code > Branches**.
 1. Type a branch name and select **New branch**.
-1. Above the file list, select **Create merge request**.
+1. Above the file list, on the right side, select **Create merge request**.
    A merge request is created. The default branch is the target.
 1. Fill out the fields and select **Create merge request**.
+
+## When you use Git commands locally
+
+You can create a merge request by running Git commands on your local machine.
+
+1. Create a branch:
+
+   ```shell
+   git checkout -b my-new-branch
+   ```
+
+1. Create, edit, or delete files as needed.
+
+1. Mark the files as ready to commit (staging them) and commit them locally:
+
+   ```shell
+   # Mark the files as ready to commit
+   git add .
+   # Commit the changes locally
+   git commit -m "My commit message"
+   ```
+
+1. Push your branch and its commits to GitLab:
+
+   ```shell
+   git push origin my-new-branch
+   ```
+
+   To reduce the number of fields to edit later in the merge request, use
+   [push options](../push_options.md) to set the value of fields.
+
+1. In the response to the `git push`, GitLab provides a direct link to create the merge request:
+
+   ```plaintext
+   ...
+   remote: To create a merge request for my-new-branch, visit:
+   remote:   https://gitlab.example.com/my-group/my-project/merge_requests/new?merge_request%5Bsource_branch%5D=my-new-branch
+   ```
+
+1. Copy the link and paste it in your browser.
 
 ## When you work in a fork
 
@@ -170,9 +210,7 @@ Prerequisites:
 
 - The merge request must target the current project, not an upstream project.
 - A GitLab administrator must configure [incoming email](../../../administration/incoming_email.md).
-  This setting is enabled on GitLab.com.
 - A GitLab administrator must configure [Reply by email](../../../administration/reply_by_email.md).
-  This setting is enabled on GitLab.com.
 - You must have at least the Developer role, or be allowed to create merge requests in the project.
 
 To create a merge request by sending an email:

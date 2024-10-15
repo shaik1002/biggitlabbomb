@@ -22,25 +22,7 @@ module Issuables
       label_names_from_params
     end
 
-    # rubocop: disable CodeReuse/ActiveRecord
-    def label_link_query(issuables, label_ids: nil, label_names: nil)
-      target_model = issuables.klass
-      base_target_model = issuables.base_class
-
-      # passing the original target_model just to avoid running the labels union query on group level issues pages
-      # as the query becomes more expensive at group level. This is to be removed altogether as we migrate labels off
-      # Epic altogether, planned as a high priority follow-up for Epic to WorkItem migration:
-      # re https://gitlab.com/gitlab-org/gitlab/-/issues/465725
-      relation = target_label_links_query(target_model, base_target_model, label_ids)
-      relation = relation.joins(:label).where(labels: { name: label_names }) if label_names
-
-      relation
-    end
-    # rubocop: enable CodeReuse/ActiveRecord
-
     private
-
-    attr_reader :project, :group
 
     # rubocop: disable CodeReuse/ActiveRecord
     def by_label(issuables)
@@ -58,7 +40,7 @@ module Issuables
 
     # rubocop: disable CodeReuse/ActiveRecord
     def by_label_union(issuables)
-      return issuables unless label_names_from_or_params.present?
+      return issuables unless or_filters_enabled? && label_names_from_or_params.present?
 
       if root_namespace
         all_label_ids = find_label_ids(label_names_from_or_params).flatten
@@ -159,10 +141,16 @@ module Issuables
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
-    # overridden in EE
-    def target_label_links_query(_target_model, base_target_model, label_ids)
-      LabelLink.by_target_for_exists_query(base_target_model.name, base_target_model.arel_table['id'], label_ids)
+    # rubocop: disable CodeReuse/ActiveRecord
+    def label_link_query(issuables, label_ids: nil, label_names: nil)
+      target_model = issuables.base_class
+
+      relation = LabelLink.by_target_for_exists_query(target_model.name, target_model.arel_table['id'], label_ids)
+      relation = relation.joins(:label).where(labels: { name: label_names }) if label_names
+
+      relation
     end
+    # rubocop: enable CodeReuse/ActiveRecord
 
     def label_names_from_params
       return if params[:label_name].blank?

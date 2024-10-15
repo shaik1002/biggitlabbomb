@@ -96,15 +96,6 @@ INSERT/UPDATE/DELETE timings by 10 milliseconds. In this case, the new index may
 it. A new index is more valuable when SELECT timings are reduced and INSERT/UPDATE/DELETE
 timings are unaffected.
 
-### Some tables should not have any more indexes
-
-We have RuboCop checks (`PreventIndexCreation`) against further new indexes on selected tables
-that are frequently accessed.
-This is due to [LockManager LWLock contention](https://gitlab.com/groups/gitlab-org/-/epics/11543).
-
-For the same reason, there are also RuboCop checks (`AddColumnsToWideTables`) against adding
-new columns to these tables.
-
 ### Add index and make application code change together if possible
 
 To minimize the risk of creating unnecessary indexes, do these in the same merge request if possible:
@@ -245,7 +236,7 @@ determining whether existing indexes are still required. More information on
 the meaning of the various columns can be found at
 <https://www.postgresql.org/docs/current/monitoring-stats.html>.
 
-To determine if an index is still being used on production, use [Grafana](https://dashboards.gitlab.net/explore?schemaVersion=1&panes=%7B%22pum%22%3A%7B%22datasource%22%3A%22mimir-gitlab-gprd%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22expr%22%3A%22sum+by+%28type%29%28rate%28pg_stat_user_indexes_idx_scan%7Benv%3D%5C%22gprd%5C%22%2C+indexrelname%3D%5C%22INSERT+INDEX+NAME+HERE%5C%22%7D%5B30d%5D%29%29%22%2C%22range%22%3Atrue%2C%22instant%22%3Atrue%2C%22datasource%22%3A%7B%22type%22%3A%22prometheus%22%2C%22uid%22%3A%22mimir-gitlab-gprd%22%7D%2C%22editorMode%22%3A%22code%22%2C%22legendFormat%22%3A%22__auto%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22now-1h%22%2C%22to%22%3A%22now%22%7D%7D%7D&orgId=1):
+To determine if an index is still being used on production, use [Thanos](https://thanos-query.ops.gitlab.net/graph?g0.expr=sum%20by%20(type)(rate(pg_stat_user_indexes_idx_scan%7Benv%3D%22gprd%22%2C%20indexrelname%3D%22INSERT%20INDEX%20NAME%20HERE%22%7D%5B30d%5D))&g0.tab=1&g0.stacked=0&g0.range_input=1h&g0.max_source_resolution=0s&g0.deduplicate=1&g0.partial_response=0&g0.store_matches=%5B%5D):
 
 ```sql
 sum by (type)(rate(pg_stat_user_indexes_idx_scan{env="gprd", indexrelname="INSERT INDEX NAME HERE"}[30d]))
@@ -501,29 +492,6 @@ def down
 end
 ```
 
-For partitioned table, use:
-
-```ruby
-# in db/post_migrate/
-
-include Gitlab::Database::PartitioningMigrationHelpers
-
-PARTITIONED_INDEX_NAME = 'index_p_ci_builds_on_some_column'
-
-# TODO: Partitioned index to be created synchronously in https://gitlab.com/gitlab-org/gitlab/-/issues/XXXXX
-def up
-  prepare_partitioned_async_index :p_ci_builds, :some_column, name: PARTITIONED_INDEX_NAME
-end
-
-def down
-  unprepare_partitioned_async_index :p_ci_builds, :some_column, name: PARTITIONED_INDEX_NAME
-end
-```
-
-NOTE:
-`prepare_partitioned_async_index` only creates the indexes for partitions asynchronously. It doesn't attach the partition indexes to the partitioned table.
-In the [next step for the partitioned table](#create-the-index-synchronously-for-partitioned-table), `add_concurrent_partitioned_index` will not only add the index synchronously but also attach the partition indexes to the partitioned table.
-
 ### Verify the MR was deployed and the index exists in production
 
 1. Verify that the post-deploy migration was executed on GitLab.com using ChatOps with
@@ -563,26 +531,6 @@ end
 
 def down
   remove_concurrent_index_by_name :ci_builds, INDEX_NAME
-end
-```
-
-#### Create the index synchronously for partitioned table
-
-```ruby
-# in db/post_migrate/
-
-include Gitlab::Database::PartitioningMigrationHelpers
-
-PARTITIONED_INDEX_NAME = 'index_p_ci_builds_on_some_column'
-
-disable_ddl_transaction!
-
-def up
-  add_concurrent_partitioned_index :p_ci_builds, :some_column, name: PARTITIONED_INDEX_NAME
-end
-
-def down
-  remove_concurrent_partitioned_index_by_name :p_ci_builds, PARTITIONED_INDEX_NAME
 end
 ```
 

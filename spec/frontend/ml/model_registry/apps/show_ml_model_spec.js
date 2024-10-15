@@ -9,9 +9,7 @@ import CandidateList from '~/ml/model_registry/components/candidate_list.vue';
 import TitleArea from '~/vue_shared/components/registry/title_area.vue';
 import MetadataItem from '~/vue_shared/components/registry/metadata_item.vue';
 import createMockApollo from 'helpers/mock_apollo_helper';
-import ModelVersionCreate from '~/ml/model_registry/components/model_version_create.vue';
 import ModelDetail from '~/ml/model_registry/components/model_detail.vue';
-import ModelEdit from '~/ml/model_registry/components/model_edit.vue';
 import waitForPromises from 'helpers/wait_for_promises';
 import setWindowLocation from 'helpers/set_window_location_helper';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
@@ -90,9 +88,6 @@ describe('ml/model_registry/apps/show_ml_model', () => {
         indexModelsPath: 'index/path',
         mlflowTrackingUrl: 'path/to/tracking',
         canWriteModelRegistry,
-        maxAllowedFileSize: 99999,
-        latestVersion: '',
-        markdownPreviewPath: '/markdown-preview',
       },
       stubs: { GlTab, DeleteModel, LoadOrErrorOrShow },
     });
@@ -106,21 +101,25 @@ describe('ml/model_registry/apps/show_ml_model', () => {
   const findVersionsCountBadge = () => findVersionsTab().findComponent(GlBadge);
   const findModelVersionList = () => wrapper.findComponent(ModelVersionList);
   const findModelDetail = () => wrapper.findComponent(ModelDetail);
+  const findCandidateTab = () => wrapper.findAllComponents(GlTab).at(2);
   const findCandidateList = () => wrapper.findComponent(CandidateList);
+  const findCandidatesCountBadge = () => findCandidateTab().findComponent(GlBadge);
   const findTitleArea = () => wrapper.findComponent(TitleArea);
   const findVersionCountMetadataItem = () => findTitleArea().findComponent(MetadataItem);
   const findActionsDropdown = () => wrapper.findComponent(ActionsDropdown);
   const findDeleteButton = () => wrapper.findComponent(DeleteDisclosureDropdownItem);
   const findDeleteModel = () => wrapper.findComponent(DeleteModel);
-  const findModelVersionCreate = () => wrapper.findComponent(ModelVersionCreate);
   const findLoadOrErrorOrShow = () => wrapper.findComponent(LoadOrErrorOrShow);
-  const findModelEdit = () => wrapper.findComponent(ModelEdit);
 
   describe('Title', () => {
     beforeEach(() => createWrapper());
 
     it('title is set to model name', () => {
       expect(findTitleArea().props('title')).toBe('MyModel');
+    });
+
+    it('subheader is set to description', () => {
+      expect(findTitleArea().text()).toContain(model.description);
     });
 
     it('sets version metadata item to version count', () => {
@@ -150,50 +149,19 @@ describe('ml/model_registry/apps/show_ml_model', () => {
     });
   });
 
-  describe('ModelVersionCreate', () => {
-    beforeEach(() => createWrapper());
-
-    it('displays version creation button', () => {
-      expect(findModelVersionCreate().props()).toEqual({
-        modelGid: 'gid://gitlab/Ml::Model/1',
-        disableAttachments: false,
-      });
-    });
-
-    describe('when user has no permission to write model registry', () => {
-      it('does not display version creation', () => {
-        createWrapper({ canWriteModelRegistry: false });
-
-        expect(findModelVersionCreate().exists()).toBe(false);
-      });
-    });
-  });
-
-  describe('ModelEdit', () => {
-    beforeEach(() => createWrapper());
-
-    it('displays model edit button', () => {
-      expect(findModelEdit().props('model')).toEqual(model);
-      expect(findModelEdit().props('disableAttachments')).toBe(false);
-    });
-
-    describe('when user has no permission to write model registry', () => {
-      it('does not display model edit button', () => {
-        createWrapper({ canWriteModelRegistry: false });
-        expect(findModelEdit().exists()).toBe(false);
-      });
-    });
-  });
-
   describe('Tabs', () => {
     beforeEach(() => createWrapper());
 
     it('has a details tab', () => {
-      expect(findDetailTab().attributes('title')).toBe('Model card');
+      expect(findDetailTab().attributes('title')).toBe('Details');
     });
 
     it('shows the number of versions in the tab', () => {
       expect(findVersionsCountBadge().text()).toBe(model.versionCount.toString());
+    });
+
+    it('shows the number of candidates in the tab', () => {
+      expect(findCandidatesCountBadge().text()).toBe(model.candidateCount.toString());
     });
   });
 
@@ -237,6 +205,17 @@ describe('ml/model_registry/apps/show_ml_model', () => {
       expect(findModelDetail().exists()).toBe(false);
       expect(findModelVersionList().props('modelId')).toBe(model.id);
       expect(findCandidateList().exists()).toBe(false);
+    });
+
+    it('shows candidate list when location hash is `#/candidates`', async () => {
+      await createWrapper({ mountFn: mountExtended });
+
+      await findCandidateTab().vm.$emit('click');
+
+      expect(findTabs().props('value')).toBe(2);
+      expect(findModelDetail().exists()).toBe(false);
+      expect(findModelVersionList().exists()).toBe(false);
+      expect(findCandidateList().props('modelId')).toBe(model.id);
     });
 
     describe.each`

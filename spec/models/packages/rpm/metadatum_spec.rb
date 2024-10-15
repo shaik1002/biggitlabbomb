@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-RSpec.describe Packages::Rpm::Metadatum, type: :model, feature_category: :package_registry do
+RSpec.describe Packages::Rpm::Metadatum, type: :model do
   describe 'relationships' do
-    it { is_expected.to belong_to(:package).class_name('Packages::Rpm::Package') }
+    it { is_expected.to belong_to(:package) }
   end
 
   describe 'validations' do
@@ -22,5 +22,15 @@ RSpec.describe Packages::Rpm::Metadatum, type: :model, feature_category: :packag
     it { is_expected.to validate_length_of(:arch).is_at_most(255) }
     it { is_expected.to validate_length_of(:license).is_at_most(1000) }
     it { is_expected.to validate_length_of(:url).is_at_most(1000) }
+
+    describe '#rpm_package_type' do
+      it 'will not allow a package with a different package_type' do
+        package = build('conan_package')
+        rpm_metadatum = build('rpm_metadatum', package: package)
+
+        expect(rpm_metadatum).not_to be_valid
+        expect(rpm_metadatum.errors.to_a).to include('Package type must be RPM')
+      end
+    end
   end
 end

@@ -6,7 +6,7 @@ import Vuex from 'vuex';
 import { useFakeDate } from 'helpers/fake_date';
 import waitForPromises from 'helpers/wait_for_promises';
 import ExpirationDatepicker from '~/members/components/table/expiration_datepicker.vue';
-import { MEMBERS_TAB_TYPES } from '~/members/constants';
+import { MEMBER_TYPES } from '~/members/constants';
 import { member } from '../../mock_data';
 
 Vue.use(Vuex);
@@ -34,7 +34,7 @@ describe('ExpirationDatepicker', () => {
 
     return new Vuex.Store({
       modules: {
-        [MEMBERS_TAB_TYPES.user]: { namespaced: true, actions },
+        [MEMBER_TYPES.user]: { namespaced: true, actions },
       },
     });
   };
@@ -47,7 +47,7 @@ describe('ExpirationDatepicker', () => {
         ...propsData,
       },
       provide: {
-        namespace: MEMBERS_TAB_TYPES.user,
+        namespace: MEMBER_TYPES.user,
       },
       store: createStore(),
       mocks: {

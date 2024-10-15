@@ -9,12 +9,16 @@ module NotifyHelper
     link_to(entity.to_reference(full: full), issue_url(entity, *args))
   end
 
-  def work_item_type_for(work_item)
-    type = work_item.work_item_type
+  def invited_to_description(source)
+    default_description =
+      case source
+      when Project
+        s_('InviteEmail|Projects are used to host and collaborate on code, track issues, and continuously build, test, and deploy your app with built-in GitLab CI/CD.')
+      when Group
+        s_('InviteEmail|Groups assemble related projects together and grant members access to several projects at once.')
+      end
 
-    # For now we are limiting the scope of the change only for epic work items,
-    # we can remove this check to support all work item types.
-    type.epic? ? type.base_type : 'issue'
+    (source.description || default_description).truncate(200, separator: ' ')
   end
 
   def merge_request_hash_param(merge_request, reviewer)

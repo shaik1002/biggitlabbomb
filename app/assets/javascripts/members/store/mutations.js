@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import { s__ } from '~/locale';
 import * as types from './mutation_types';
 import { findMember } from './utils';
@@ -16,7 +17,7 @@ export default {
       return;
     }
 
-    member.expiresAt = expiresAt;
+    Vue.set(member, 'expiresAt', expiresAt);
   },
   [types.RECEIVE_MEMBER_EXPIRATION_ERROR](state, { error }) {
     state.errorMessage =

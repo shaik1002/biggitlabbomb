@@ -16,9 +16,7 @@ module ResolvesMergeRequests
       args[:include_subgroups] = true
     end
 
-    args.delete(:subscribed) if Feature.disabled?(:filter_subscriptions, current_user)
     rewrite_param_name(args, :reviewer_wildcard_id, :reviewer_id)
-    rewrite_param_name(args, :assignee_wildcard_id, :assignee_id)
 
     mr_finder = MergeRequestsFinder.new(current_user, args.compact)
     finder = Gitlab::Graphql::Loaders::IssuableLoader.new(mr_parent, mr_finder)
@@ -58,13 +56,9 @@ module ResolvesMergeRequests
       participants: MergeRequest.participant_includes,
       author: [:author],
       merged_at: [:metrics],
-      closed_at: [:metrics],
       commit_count: [:metrics],
       diff_stats_summary: [:metrics],
       approved_by: [:approved_by_users],
-      merge_after: [:merge_schedule],
-      mergeable: [:merge_schedule],
-      detailed_merge_status: [:merge_schedule],
       milestone: [:milestone],
       security_auto_fix: [:author],
       head_pipeline: [:merge_request_diff, { head_pipeline: [:merge_request] }],

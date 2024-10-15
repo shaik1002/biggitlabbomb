@@ -1,6 +1,6 @@
 import { createWrapper } from '@vue/test-utils';
 import MembersTabs from '~/members/components/members_tabs.vue';
-import { CONTEXT_TYPE, MEMBERS_TAB_TYPES } from '~/members/constants';
+import { MEMBER_TYPES } from '~/members/constants';
 import { initMembersApp } from '~/members/index';
 import membersStore from '~/members/store';
 import { parseDataAttributes } from '~/members/utils';
@@ -17,20 +17,17 @@ describe('initMembersApp', () => {
   let wrapper;
 
   const options = {
-    [MEMBERS_TAB_TYPES.user]: {
+    [MEMBER_TYPES.user]: {
       tableFields: ['account'],
       tableAttrs: { table: { 'data-testid': 'members-list' } },
       tableSortableFields: ['account'],
       requestFormatter: () => ({}),
       filteredSearchBar: { show: false },
     },
-    [MEMBERS_TAB_TYPES.placeholder]: {
-      requestFormatter: () => ({}),
-    },
   };
 
   const setup = () => {
-    vm = initMembersApp(el, CONTEXT_TYPE.GROUP, options);
+    vm = initMembersApp(el, options);
     wrapper = createWrapper(vm);
   };
 
@@ -57,17 +54,8 @@ describe('initMembersApp', () => {
       setup();
 
       expect(membersStore).toHaveBeenCalledWith({
-        ...parsedData[MEMBERS_TAB_TYPES.user],
-        ...options[MEMBERS_TAB_TYPES.user],
-      });
-    });
-
-    it('inits placeholders store', () => {
-      setup();
-
-      expect(membersStore).toHaveBeenCalledTimes(Object.keys(options).length);
-      expect(membersStore).toHaveBeenCalledWith({
-        ...options[MEMBERS_TAB_TYPES.placeholder],
+        ...parsedData[MEMBER_TYPES.user],
+        ...options[MEMBER_TYPES.user],
       });
     });
   });

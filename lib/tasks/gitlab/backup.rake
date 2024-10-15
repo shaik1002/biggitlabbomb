@@ -75,10 +75,7 @@ module Tasks
           yield
         ensure
           backup_progress.puts(
-            "#{Time.current} " +
-              Rainbow('-- Deleting backup and restore PID file at [').blue +
-              PID_FILE.to_s + Rainbow('] ... ').blue +
-              Rainbow('done').green
+            "#{Time.current} #{Rainbow('-- Deleting backup and restore PID file ...').blue} #{Rainbow('done').green}"
           )
           File.delete(PID_FILE)
         end
@@ -235,16 +232,6 @@ namespace :gitlab do
 
       task restore: :gitlab_environment do
         Tasks::Gitlab::Backup.restore_task('ci_secure_files')
-      end
-    end
-
-    namespace :external_diffs do
-      task create: :gitlab_environment do
-        Tasks::Gitlab::Backup.create_task('external_diffs')
-      end
-
-      task restore: :gitlab_environment do
-        Tasks::Gitlab::Backup.restore_task('external_diffs')
       end
     end
   end

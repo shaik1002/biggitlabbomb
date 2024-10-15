@@ -141,9 +141,7 @@ export default {
       return url.split(value).join(`{${key}}`);
     },
     onItemInput({ index, key, value }) {
-      const copy = [...this.items];
-      copy[index] = { key, value };
-      this.items = copy;
+      this.$set(this.items, index, { key, value });
     },
     addItem() {
       this.items.push({});
@@ -195,7 +193,7 @@ export default {
         v-if="urlHasChanged"
         variant="warning"
         :dismissible="false"
-        class="gl-form-input-xl gl-my-4"
+        class="gl-my-4 gl-form-input-xl"
       >
         {{ $options.i18n.tokenWillBeCleared }}
       </gl-alert>

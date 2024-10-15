@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe "User browses artifacts", feature_category: :job_artifacts do
+RSpec.describe "User browses artifacts", feature_category: :build_artifacts do
   let(:project) { create(:project, :public) }
   let(:pipeline) { create(:ci_empty_pipeline, project: project) }
   let(:job) { create(:ci_build, :artifacts, pipeline: pipeline) }
@@ -21,7 +21,7 @@ RSpec.describe "User browses artifacts", feature_category: :job_artifacts do
       visit(browse_project_job_artifacts_path(project, job))
     end
 
-    it "renders a link to the job in the breadcrumbs", :js do
+    it "renders a link to the job in the breadcrumbs" do
       within_testid('breadcrumb-links') do
         expect(page).to have_link("##{job.id}", href: project_job_path(project, job))
       end

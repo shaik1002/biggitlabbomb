@@ -1,6 +1,5 @@
-import { builders } from 'prosemirror-test-builder';
 import InlineDiff from '~/content_editor/extensions/inline_diff';
-import { createTestEditor, triggerMarkInputRule } from '../test_utils';
+import { createTestEditor, createDocBuilder, triggerMarkInputRule } from '../test_utils';
 
 describe('content_editor/extensions/inline_diff', () => {
   let tiptapEditor;
@@ -10,7 +9,14 @@ describe('content_editor/extensions/inline_diff', () => {
 
   beforeEach(() => {
     tiptapEditor = createTestEditor({ extensions: [InlineDiff] });
-    ({ doc, paragraph: p, inlineDiff } = builders(tiptapEditor.schema));
+    ({
+      builders: { doc, p, inlineDiff },
+    } = createDocBuilder({
+      tiptapEditor,
+      names: {
+        inlineDiff: { markType: InlineDiff.name },
+      },
+    }));
   });
 
   it.each`

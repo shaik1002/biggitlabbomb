@@ -3,7 +3,7 @@ import Vue from 'vue';
 // eslint-disable-next-line no-restricted-imports
 import Vuex from 'vuex';
 import MembersTableCell from '~/members/components/table/members_table_cell.vue';
-import { MEMBERS_TAB_TYPES } from '~/members/constants';
+import { MEMBER_TYPES } from '~/members/constants';
 import { canRemoveBlockedByLastOwner } from '~/members/utils';
 import {
   member as memberMock,
@@ -24,6 +24,10 @@ describe('MembersTableCell', () => {
     props: {
       memberType: {
         type: String,
+        required: true,
+      },
+      isDirectMember: {
+        type: Boolean,
         required: true,
       },
       isCurrentUser: {
@@ -64,6 +68,7 @@ describe('MembersTableCell', () => {
         default: `
           <wrapped-component
             :member-type="props.memberType"
+            :is-direct-member="props.isDirectMember"
             :is-current-user="props.isCurrentUser"
             :permissions="props.permissions"
           />
@@ -95,10 +100,10 @@ describe('MembersTableCell', () => {
 
   it.each`
     member           | expectedMemberType
-    ${memberMock}    | ${MEMBERS_TAB_TYPES.user}
-    ${group}         | ${MEMBERS_TAB_TYPES.group}
-    ${invite}        | ${MEMBERS_TAB_TYPES.invite}
-    ${accessRequest} | ${MEMBERS_TAB_TYPES.accessRequest}
+    ${memberMock}    | ${MEMBER_TYPES.user}
+    ${group}         | ${MEMBER_TYPES.group}
+    ${invite}        | ${MEMBER_TYPES.invite}
+    ${accessRequest} | ${MEMBER_TYPES.accessRequest}
   `(
     'sets scoped slot prop `memberType` to $expectedMemberType',
     ({ member, expectedMemberType }) => {
@@ -107,6 +112,28 @@ describe('MembersTableCell', () => {
       expect(findWrappedComponent().props('memberType')).toBe(expectedMemberType);
     },
   );
+
+  describe('isDirectMember', () => {
+    it('returns `true` when member source has same ID as `sourceId`', () => {
+      createComponentWithDirectMember();
+
+      expect(findWrappedComponent().props('isDirectMember')).toBe(true);
+    });
+
+    it('returns `false` when member is inherited', () => {
+      createComponentWithInheritedMember();
+
+      expect(findWrappedComponent().props('isDirectMember')).toBe(false);
+    });
+
+    it('returns `true` for linked groups', () => {
+      createComponent({
+        member: group,
+      });
+
+      expect(findWrappedComponent().props('isDirectMember')).toBe(true);
+    });
+  });
 
   describe('isCurrentUser', () => {
     it('returns `true` when `member.user` has the same ID as `currentUserId`', () => {

@@ -6,26 +6,26 @@ info: Any user with at least the Maintainer role can merge updates to this conte
 
 # Audit event development guidelines
 
-This guide provides an overview of how audit events work, and how to instrument
+This guide provides an overview of how Audit Events work, and how to instrument
 new audit events.
 
-## What are audit events?
+## What are Audit Events?
 
-Audit events are a tool for GitLab owners and administrators to view records of important
+Audit Events are a tool for GitLab owners and administrators to view records of important
 actions performed across the application.
 
-## What should not be audit events?
+## What should not be Audit Events?
 
-While any events could trigger an audit event, not all events should. In general, events that are not good candidates for audit events are:
+While any events could trigger an Audit Event, not all events should. In general, events that are not good candidates for audit events are:
 
 - Not attributable to one specific user.
 - Not of specific interest to an administrator or owner persona.
 - Are tracking information for product feature adoption.
 - Are covered in the direction page's discussion on [what is not planned](https://about.gitlab.com/direction/govern/compliance/audit-events/#what-is-not-planned-right-now).
 
-If you have any questions, reach out to `@gitlab-org/govern/compliance` to see if an audit event, or some other approach, may be best for your event.
+If you have any questions, reach out to `@gitlab-org/govern/compliance` to see if an Audit Event, or some other approach, may be best for your event.
 
-## Audit event schemas
+## Audit Event Schemas
 
 To instrument an audit event, the following attributes should be provided:
 
@@ -38,7 +38,7 @@ To instrument an audit event, the following attributes should be provided:
 | `message`    | String                              | true      | Message describing the action ([not translated](#i18n-and-the-audit-event-message-attribute)) |
 | `created_at` | DateTime                            | false     | The time when the action occurred. Defaults to `DateTime.current` |
 
-## How to instrument new audit events
+## How to instrument new Audit Events
 
 1. Create a [YAML type definition](#add-a-new-audit-event-type) for the new audit event.
 1. Call `Gitlab::Audit::Auditor.audit`, passing an action block.
@@ -122,7 +122,7 @@ audit events. For new audit events that produce a lot of data in the database, c
 [streaming-only audit event](#event-streaming) instead. If you have questions about this, feel free to ping
 `@gitlab-org/govern/compliance/backend` in an issue or merge request.
 
-## Audit event instrumentation flows
+## Audit Event instrumentation flows
 
 The two ways we can instrument audit events have different flows.
 
@@ -133,7 +133,7 @@ initial audit context (that is, `author`, `scope`, `target`) object that are
 available at the time the operation is initiated.
 
 Extra instrumentation is required in the interacted classes in the chain with
-`Auditable` mixin to add audit events to the audit event queue via `Gitlab::Audit::EventQueue`.
+`Auditable` mixin to add audit events to the Audit Event queue via `Gitlab::Audit::EventQueue`.
 
 The `EventQueue` is stored in a local thread via `SafeRequestStore` and then later
 extracted when we record an audit event in `Gitlab::Audit::Auditor`.
@@ -224,11 +224,10 @@ To add a new audit event type:
 | `milestone` | yes | Milestone in which this type was added |
 | `saved_to_database` | yes | Indicate whether to persist events to database and JSON logs |
 | `streamed` | yes | Indicate that events should be streamed to external services (if configured) |
-| `scope` | yes | List of scopes that this audit event type is available for. Should be an Array containing one or more of `Project`, `User`, `Group` or `Instance` |
 
 ### Generate documentation
 
-Audit event types documentation is automatically generated and [published](../../user/compliance/audit_event_types.md)
+Audit event types documentation is automatically generated and [published](../../administration/audit_event_types.md)
 to the GitLab documentation site.
 
 If you add a new audit event type, run the
@@ -260,7 +259,7 @@ for an example.
 This feature is under heavy development. Follow the [parent epic](https://gitlab.com/groups/gitlab-org/-/epics/5925) for updates on feature
 development.
 
-### I18N and the audit event `:message` attribute
+### I18N and the Audit Event `:message` attribute
 
 We intentionally do not translate audit event messages because translated messages would be saved in the database and served to users, regardless of their locale settings.
 

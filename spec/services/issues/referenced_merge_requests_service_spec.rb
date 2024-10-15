@@ -53,7 +53,7 @@ RSpec.describe Issues::ReferencedMergeRequestsService, feature_category: :team_p
         # to avoid false negatives
         reloaded_issue = Issue.find(issue.id)
 
-        pipeline_routes = ->(merge_requests) do
+        pipeline_routes = lambda do |merge_requests|
           merge_requests.map { |mr| mr.head_pipeline&.project&.full_path }
         end
 
@@ -77,11 +77,11 @@ RSpec.describe Issues::ReferencedMergeRequestsService, feature_category: :team_p
   describe '#referenced_merge_requests' do
     it 'returns the referenced merge requests' do
       expect(service.referenced_merge_requests(issue)).to match_array([
-        closing_mr,
-        closing_mr_other_project,
-        referencing_mr,
-        referencing_mr_other_project
-      ])
+                                                                        closing_mr,
+                                                                        closing_mr_other_project,
+                                                                        referencing_mr,
+                                                                        referencing_mr_other_project
+                                                                      ])
     end
 
     it 'excludes cross project references if the user cannot read cross project' do
@@ -112,6 +112,12 @@ RSpec.describe Issues::ReferencedMergeRequestsService, feature_category: :team_p
       create_closing_mr(source_project: project, state: 'closed')
 
       expect(service.closed_by_merge_requests(issue)).to match_array([closing_mr, closing_mr_other_project])
+    end
+
+    it 'excludes merge requests that do not close the issue as flagged in the merge requests closing issues table' do
+      MergeRequestsClosingIssues.where(merge_request: closing_mr).update_all(closes_work_item: false)
+
+      expect(service.closed_by_merge_requests(issue)).to contain_exactly(closing_mr_other_project)
     end
 
     it 'returns an empty array when the current issue is closed already' do

@@ -9,9 +9,9 @@ module SystemCheck
         $stdout.print "#{result.labels[:shard]} ... "
 
         if result.success
-          $stdout.puts Rainbow('OK').green
+          $stdout.puts 'OK'.color(:green)
         else
-          $stdout.puts Rainbow("FAIL: #{result.message}").red
+          $stdout.puts "FAIL: #{result.message}".color(:red)
         end
       end
     end

@@ -10,10 +10,10 @@ import {
   ZOEKT_SEARCH_TYPE,
   ADVANCED_SEARCH_TYPE,
   REGEX_PARAM,
-  LS_REGEX_HANDLE,
+  LOCAL_STORAGE_NAME_SPACE_EXTENSION,
 } from '~/search/store/constants';
-import { loadDataFromLS } from '~/search/store/utils';
 import { SYNTAX_OPTIONS_ADVANCED_DOCUMENT, SYNTAX_OPTIONS_ZOEKT_DOCUMENT } from '../constants';
+import { loadDataFromLS } from '../../store/utils';
 
 import SearchTypeIndicator from './search_type_indicator.vue';
 import GlSearchBoxByType from './search_box_by_type.vue';
@@ -66,12 +66,26 @@ export default {
       return !this.query.repository_ref || this.query.repository_ref === this.defaultBranchName;
     },
     isRegexButtonVisible() {
-      return this.searchType === ZOEKT_SEARCH_TYPE && this.isDefaultBranch;
+      return (
+        this.searchType === ZOEKT_SEARCH_TYPE &&
+        this.isDefaultBranch &&
+        this.glFeatures.zoektExactSearch
+      );
+    },
+    localstorageReguralExpressionItem() {
+      return `${REGEX_PARAM}_${LOCAL_STORAGE_NAME_SPACE_EXTENSION}`;
+    },
+    loadRegexStateFromLocalStorage() {
+      return loadDataFromLS(this.localstorageReguralExpressionItem);
     },
   },
   created() {
     this.preloadStoredFrequentItems();
-    this.regexEnabled = loadDataFromLS(LS_REGEX_HANDLE);
+    this.regexEnabled = this.loadRegexStateFromLocalStorage;
+
+    if (!this.urlQuery?.[REGEX_PARAM] && this.regexEnabled) {
+      this.addReguralExpressionToQuery(this.regexEnabled);
+    }
   },
   methods: {
     ...mapActions(['applyQuery', 'setQuery', 'preloadStoredFrequentItems']),
@@ -98,7 +112,7 @@ export default {
     <div class="search-page-form gl-mt-5">
       <search-type-indicator />
       <template v-if="showSyntaxOptions">
-        <div class="gl-inline-block">
+        <div class="gl-display-inline-block">
           <gl-button category="tertiary" variant="link" @click="onToggleDrawer"
             >{{ $options.i18n.syntaxOptionsLabel }}
           </gl-button>

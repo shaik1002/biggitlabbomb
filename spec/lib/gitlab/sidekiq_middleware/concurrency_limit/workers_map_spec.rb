@@ -3,8 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::SidekiqMiddleware::ConcurrencyLimit::WorkersMap, feature_category: :global_search do
-  using RSpec::Parameterized::TableSyntax
-
   let(:worker_class) do
     Class.new do
       def self.name
@@ -48,31 +46,22 @@ RSpec.describe Gitlab::SidekiqMiddleware::ConcurrencyLimit::WorkersMap, feature_
   describe '.over_the_limit?' do
     subject(:over_the_limit?) { described_class.over_the_limit?(worker: worker_class) }
 
-    where(:limit, :current, :result) do
-      nil        | 0   | false
-      nil        | 5   | false
-      -> { nil } | 0   | false
-      -> { nil } | 5   | false
-      -> { 0 }   | 0   | false
-      -> { 0 }   | 10  | false
-      -> { 5 }   | 10  | true
-      -> { 10 }  | 0   | false
-      -> { 10 }  | 5   | false
-      -> { -1 }  | 0   | true
-      -> { -1 }  | 1   | true
-      -> { -10 } | 10  | true
+    it 'returns false if no limit is set' do
+      expect(described_class).to receive(:limit_for).and_return(nil)
+
+      expect(over_the_limit?).to be_falsey
     end
 
-    with_them do
-      before do
-        allow(described_class).to receive(:limit_for).and_return(limit)
-        allow(::Gitlab::SidekiqMiddleware::ConcurrencyLimit::WorkersConcurrency).to receive(:current_for)
-          .and_return(current)
-      end
+    it 'returns false if under the limit' do
+      allow(::Gitlab::SidekiqMiddleware::ConcurrencyLimit::WorkersConcurrency).to receive(:current_for).and_return(50)
 
-      it 'returns correct result' do
-        expect(over_the_limit?).to eq(result)
-      end
+      expect(over_the_limit?).to be_falsey
+    end
+
+    it 'returns true if over the limit' do
+      allow(::Gitlab::SidekiqMiddleware::ConcurrencyLimit::WorkersConcurrency).to receive(:current_for).and_return(100)
+
+      expect(over_the_limit?).to be_truthy
     end
   end
 

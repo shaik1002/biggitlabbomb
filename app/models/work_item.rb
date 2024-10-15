@@ -17,16 +17,12 @@ class WorkItem < Issue
 
   has_one :parent_link, class_name: '::WorkItems::ParentLink', foreign_key: :work_item_id
   has_one :work_item_parent, through: :parent_link, class_name: 'WorkItem'
-  has_one :dates_source,
-    class_name: 'WorkItems::DatesSource',
-    foreign_key: 'issue_id',
-    inverse_of: :work_item,
-    autosave: true
+  has_one :dates_source, class_name: 'WorkItems::DatesSource', foreign_key: 'issue_id', inverse_of: :work_item
 
   has_many :child_links, class_name: '::WorkItems::ParentLink', foreign_key: :work_item_parent_id
   has_many :work_item_children, through: :child_links, class_name: 'WorkItem',
     foreign_key: :work_item_id, source: :work_item
-  has_many :work_item_children_by_relative_position, ->(work_item) { work_item_children_keyset_order(work_item) },
+  has_many :work_item_children_by_relative_position, -> { work_item_children_keyset_order },
     through: :child_links, class_name: 'WorkItem',
     foreign_key: :work_item_id, source: :work_item
 
@@ -45,57 +41,30 @@ class WorkItem < Issue
       'issues.id'
     end
 
-    def namespace_reference_pattern
-      %r{
-        (?<!#{Gitlab::PathRegex::PATH_START_CHAR})
-        ((?<group_or_project_namespace>#{Gitlab::PathRegex::FULL_NAMESPACE_FORMAT_REGEX}))
-      }xo
-    end
-
-    def reference_pattern
-      @reference_pattern ||= %r{
-        (?:
-          (#{namespace_reference_pattern})?#{Regexp.escape(reference_prefix)} |
-          #{Regexp.escape(alternative_reference_prefix)}
-        )#{Gitlab::Regex.work_item}
-      }x
-    end
+    # def reference_pattern
+    #   # no-op: We currently only support link_reference_pattern parsing
+    # end
 
     def link_reference_pattern
-      @link_reference_pattern ||= project_or_group_link_reference_pattern(
-        'work_items',
-        namespace_reference_pattern,
-        Gitlab::Regex.work_item
-      )
+      @link_reference_pattern ||= compose_link_reference_pattern('work_items', Gitlab::Regex.work_item)
     end
 
-    def work_item_children_keyset_order_config
-      Gitlab::Pagination::Keyset::Order.build(
-        [
-          Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
-            attribute_name: 'state_id',
-            column_expression: WorkItem.arel_table[:state_id],
-            order_expression: WorkItem.arel_table[:state_id].asc
-          ),
-          Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
-            attribute_name: 'parent_link_relative_position',
-            column_expression: WorkItems::ParentLink.arel_table[:relative_position],
-            order_expression: WorkItems::ParentLink.arel_table[:relative_position].asc.nulls_last,
-            add_to_projections: true,
-            nullable: :nulls_last
-          ),
-          Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
-            attribute_name: 'work_item_id',
-            order_expression: WorkItems::ParentLink.arel_table['work_item_id'].asc
-          )
-        ]
-      )
-    end
+    def work_item_children_keyset_order
+      keyset_order = Gitlab::Pagination::Keyset::Order.build([
+        Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+          attribute_name: :relative_position,
+          column_expression: WorkItems::ParentLink.arel_table[:relative_position],
+          order_expression: WorkItems::ParentLink.arel_table[:relative_position].asc.nulls_last,
+          nullable: :nulls_last
+        ),
+        Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+          attribute_name: :created_at,
+          order_expression: WorkItem.arel_table[:created_at].asc,
+          nullable: :not_nullable
+        )
+      ])
 
-    def work_item_children_keyset_order(_work_item)
-      keyset_order = work_item_children_keyset_order_config
-
-      keyset_order.apply_cursor_conditions(joins(:parent_link)).reorder(keyset_order)
+      includes(:parent_link).order(keyset_order)
     end
 
     def linked_items_keyset_order
@@ -104,7 +73,7 @@ class WorkItem < Issue
           ::Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
             attribute_name: 'issue_link_id',
             column_expression: IssueLink.arel_table[:id],
-            order_expression: IssueLink.arel_table[:id].desc,
+            order_expression: IssueLink.arel_table[:id].asc,
             nullable: :not_nullable
           )
         ])
@@ -128,8 +97,8 @@ class WorkItem < Issue
 
   def widgets
     strong_memoize(:widgets) do
-      work_item_type.widgets(resource_parent).map do |widget_definition|
-        widget_definition.widget_class.new(self, widget_definition: widget_definition)
+      work_item_type.widgets(resource_parent).map do |widget_class|
+        widget_class.new(self)
       end
     end
   end
@@ -148,10 +117,6 @@ class WorkItem < Issue
     hierarchy.ancestors(hierarchy_order: :asc)
   end
 
-  def descendants
-    hierarchy.descendants
-  end
-
   def same_type_base_and_ancestors
     hierarchy(same_type: true).base_and_ancestors(hierarchy_order: :asc)
   end
@@ -161,7 +126,7 @@ class WorkItem < Issue
   end
 
   def supported_quick_action_commands
-    commands_for_widgets = work_item_type.widget_classes(resource_parent).flat_map(&:quick_action_commands).uniq
+    commands_for_widgets = work_item_type.widgets(resource_parent).flat_map(&:quick_action_commands).uniq
 
     COMMON_QUICK_ACTIONS_COMMANDS + commands_for_widgets
   end
@@ -172,7 +137,7 @@ class WorkItem < Issue
     common_params = command_params.dup
     widget_params = {}
 
-    work_item_type.widget_classes(resource_parent)
+    work_item_type.widgets(resource_parent)
           .filter { |widget| widget.respond_to?(:quick_action_params) }
           .each do |widget|
             widget.quick_action_params
@@ -212,34 +177,12 @@ class WorkItem < Issue
     work_item_type.supports_time_tracking?(resource_parent)
   end
 
-  def due_date
-    dates_source&.due_date || read_attribute(:due_date)
-  end
-
-  def start_date
-    dates_source&.start_date || read_attribute(:start_date)
-  end
-
-  def max_depth_reached?(child_type)
-    restriction = ::WorkItems::HierarchyRestriction.find_by_parent_type_id_and_child_type_id(
-      work_item_type_id,
-      child_type.id
-    )
-    return false unless restriction&.maximum_depth
-
-    if work_item_type_id == child_type.id
-      same_type_base_and_ancestors.count >= restriction.maximum_depth
-    else
-      hierarchy(different_type_id: child_type.id).base_and_ancestors.count >= restriction.maximum_depth
-    end
-  end
-
   private
 
   override :parent_link_confidentiality
   def parent_link_confidentiality
     if confidential? && work_item_children.public_only.exists?
-      errors.add(:base, _('All child items must be confidential in order to turn on confidentiality.'))
+      errors.add(:base, _('A confidential work item cannot have a parent that already has non-confidential children.'))
     end
 
     if !confidential? && work_item_parent&.confidential?
@@ -256,7 +199,6 @@ class WorkItem < Issue
   def hierarchy(options = {})
     base = self.class.where(id: id)
     base = base.where(work_item_type_id: work_item_type_id) if options[:same_type]
-    base = base.where(work_item_type_id: options[:different_type_id]) if options[:different_type_id]
 
     ::Gitlab::WorkItems::WorkItemHierarchy.new(base, options: options)
   end

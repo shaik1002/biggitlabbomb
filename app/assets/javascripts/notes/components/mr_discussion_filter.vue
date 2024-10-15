@@ -138,7 +138,7 @@ export default {
         :show-select-all-button-label="__('Select all')"
         :reset-button-label="__('Deselect all')"
         multiple
-        placement="bottom-end"
+        placement="right"
         @shown="filterListShown"
         @hidden="applyFilters"
         @reset="deselectAll"
@@ -146,7 +146,7 @@ export default {
         @select="select"
       >
         <template #toggle>
-          <gl-button class="!gl-rounded-br-none !gl-rounded-tr-none">
+          <gl-button class="gl-rounded-top-right-none! gl-rounded-bottom-right-none!">
             <gl-sprintf :message="selectedFilterText">
               <template #strong="{ content }">
                 <strong>{{ content }}</strong>

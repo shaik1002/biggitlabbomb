@@ -253,18 +253,6 @@ RSpec.describe GroupPolicy, feature_category: :system_access do
       expect_allowed(*owner_permissions)
       expect_allowed(*admin_permissions)
     end
-
-    context 'when user is also an admin' do
-      before do
-        organization_owner.update!(admin: true)
-      end
-
-      it { expect_disallowed(:admin_organization) }
-
-      context 'with admin mode', :enable_admin_mode do
-        it { expect_allowed(:admin_organization) }
-      end
-    end
   end
 
   context 'migration bot' do
@@ -1126,6 +1114,7 @@ RSpec.describe GroupPolicy, feature_category: :system_access do
     end
   end
 
+  # This block can be removed when packages_dependency_proxy_pass_token_to_policy is rolled out
   describe 'dependency proxy' do
     shared_examples 'disallows all dependency proxy access' do
       it { is_expected.to be_disallowed(:read_dependency_proxy) }
@@ -1179,24 +1168,47 @@ RSpec.describe GroupPolicy, feature_category: :system_access do
         end
       end
 
-      context 'placeholder user' do
-        let_it_be(:placeholder_user) { create(:user, user_type: :placeholder, developer_of: group) }
+      context 'deploy token user' do
+        let!(:group_deploy_token) do
+          create(:group_deploy_token, group: group, deploy_token: deploy_token)
+        end
 
-        subject { described_class.new(placeholder_user, group) }
+        subject { described_class.new(deploy_token, group) }
 
-        it_behaves_like 'disallows all dependency proxy access'
+        context 'with insufficient scopes' do
+          let_it_be(:deploy_token) { create(:deploy_token, :group) }
+
+          it_behaves_like 'disallows all dependency proxy access'
+        end
+
+        context 'with sufficient scopes' do
+          let_it_be(:deploy_token) { create(:deploy_token, :group, :dependency_proxy_scopes) }
+
+          it_behaves_like 'allows dependency proxy read access but not admin'
+        end
       end
 
-      context 'import user' do
-        let_it_be(:import_user) { create(:user, user_type: :import_user, developer_of: group) }
+      context 'group access token user' do
+        let_it_be(:bot_user) { create(:user, :project_bot) }
+        let_it_be(:token) { create(:personal_access_token, user: bot_user, scopes: [Gitlab::Auth::READ_API_SCOPE]) }
 
-        subject { described_class.new(import_user, group) }
+        subject { described_class.new(bot_user, group) }
 
-        it_behaves_like 'disallows all dependency proxy access'
+        context 'not a member of the group' do
+          it_behaves_like 'disallows all dependency proxy access'
+        end
+
+        context 'a member of the group' do
+          before do
+            group.add_guest(bot_user)
+          end
+
+          it_behaves_like 'allows dependency proxy read access but not admin'
+        end
       end
 
       context 'all other user types' do
-        User::USER_TYPES.except(:human, :project_bot, :placeholder, :import_user).each_value do |user_type|
+        User::USER_TYPES.except(:human, :project_bot).each_value do |user_type|
           context "with user_type #{user_type}" do
             before do
               current_user.update!(user_type: user_type)

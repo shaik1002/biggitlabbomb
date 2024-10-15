@@ -6,7 +6,7 @@ RSpec.describe 'shared/_token_expiration_banner.html.haml', feature_category: :s
   context 'when all conditions are true' do
     before do
       allow(view).to receive(:show_token_expiration_banner?).and_return(true)
-      allow(view).to receive(:cookies).and_return(hide_token_expiration_banner: false)
+      allow(view).to receive(:cookies).and_return({ 'hide_broadcast_message_token_expiration_banner' => nil })
     end
 
     it 'renders banner' do

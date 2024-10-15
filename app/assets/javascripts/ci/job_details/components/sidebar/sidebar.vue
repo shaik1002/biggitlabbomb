@@ -89,42 +89,42 @@ export default {
     <div class="sidebar-container">
       <div class="blocks-container gl-p-4 gl-pt-0">
         <sidebar-header
-          class="gl-border-b gl-border-gray-50 gl-py-4"
+          class="gl-py-4 gl-border-b gl-border-gray-50"
           :rest-job="job"
           :job-id="job.id"
           @updateVariables="$emit('updateVariables')"
         />
 
-        <job-sidebar-details-container class="gl-border-b gl-border-gray-50 gl-py-4" />
+        <job-sidebar-details-container class="gl-py-4 gl-border-b gl-border-gray-50" />
 
         <artifacts-block
           v-if="hasArtifact"
-          class="gl-border-b gl-border-gray-50 gl-py-4"
+          class="gl-py-4 gl-border-b gl-border-gray-50"
           :artifact="artifact"
           :help-url="artifactHelpUrl"
         />
 
         <external-links-block
           v-if="hasExternalLinks"
-          class="gl-border-b gl-border-gray-50 gl-py-4"
+          class="gl-py-4 gl-border-b gl-border-gray-50"
           :external-links="externalLinks"
         />
 
         <trigger-block
           v-if="hasTriggers"
-          class="gl-border-b gl-border-gray-50 gl-py-4"
+          class="gl-py-4 gl-border-b gl-border-gray-50"
           :trigger="job.trigger"
         />
 
         <commit-block
-          class="gl-border-b gl-border-gray-50 gl-py-4"
+          class="gl-py-4 gl-border-b gl-border-gray-50"
           :commit="commit"
           :merge-request="job.merge_request"
         />
 
         <stages-dropdown
           v-if="job.pipeline"
-          class="gl-border-b gl-border-gray-50 gl-py-4"
+          class="gl-py-4 gl-border-b gl-border-gray-50"
           :pipeline="job.pipeline"
           :selected-stage="selectedStage"
           :stages="stages"

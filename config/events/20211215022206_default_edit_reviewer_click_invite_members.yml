@@ -1,9 +1,14 @@
 description: "Click edit reviewer button when inviting members"
 category: default
 action: click_invite_members
+label_description: "`edit_reviewer`"
+property_description: ""
+value_description: ""
 extra_properties:
 identifiers:
-product_group: activation
+product_section: growth
+product_stage: growth
+product_group: group::expansion
 milestone: "14.0"
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62505
 distributions:
@@ -13,6 +18,3 @@ tiers:
 - free
 - premium
 - ultimate
-additional_properties:
-  label:
-    description: "`edit_reviewer`"

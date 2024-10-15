@@ -279,12 +279,12 @@ export default {
       <span v-safe-html="serverErrorMessage || i18n.errorMsg"></span>
     </gl-alert>
 
-    <div class="list-header gl-flex gl-justify-between">
+    <div class="list-header gl-display-flex gl-justify-content-space-between">
       <gl-tabs content-class="gl-p-0" @input="filterItemsByStatus">
         <gl-tab v-for="tab in statusTabs" :key="tab.status" :data-testid="tab.status">
           <template #title>
             <span>{{ tab.title }}</span>
-            <gl-badge v-if="itemsCount" pill class="gl-tab-counter-badge">
+            <gl-badge v-if="itemsCount" pill size="sm" class="gl-tab-counter-badge">
               {{ itemsCount[tab.status.toLowerCase()] }}
             </gl-badge>
           </template>
@@ -301,13 +301,13 @@ export default {
         :initial-filter-value="filteredSearchValue"
         initial-sortby="created_desc"
         :recent-searches-storage-key="filterSearchKey"
-        :class="{ 'gl-border-b-0': showItems }"
+        :class="{ 'gl-border-bottom-0': showItems }"
         class="row-content-block"
         @onFilter="handleFilterItems"
       />
     </div>
 
-    <h4 class="my-3 gl-block md:gl-hidden">
+    <h4 class="gl-display-block d-md-none my-3">
       <slot name="title"></slot>
     </h4>
 

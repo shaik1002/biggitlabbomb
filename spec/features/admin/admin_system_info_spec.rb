@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Admin System information', feature_category: :shared do
+RSpec.describe 'Admin System Info', feature_category: :shared do
   before do
     admin = create(:admin)
     sign_in(admin)
@@ -22,8 +22,8 @@ RSpec.describe 'Admin System information', feature_category: :shared do
 
       it 'shows system info page' do
         expect(page).to have_content 'CPU 2 cores'
-        expect(page).to have_content 'Memory usage 4 GiB / 16 GiB'
-        expect(page).to have_content 'Disk usage'
+        expect(page).to have_content 'Memory Usage 4 GiB / 16 GiB'
+        expect(page).to have_content 'Disk Usage'
         expect(page).to have_content 'System started'
       end
     end
@@ -36,9 +36,9 @@ RSpec.describe 'Admin System information', feature_category: :shared do
       end
 
       it 'shows system info page with no CPU info' do
-        expect(page).to have_content 'Unable to collect CPU information'
-        expect(page).to have_content 'Memory usage 4 GiB / 16 GiB'
-        expect(page).to have_content 'Disk usage'
+        expect(page).to have_content 'CPU Unable to collect CPU info'
+        expect(page).to have_content 'Memory Usage 4 GiB / 16 GiB'
+        expect(page).to have_content 'Disk Usage'
         expect(page).to have_content 'System started'
       end
     end
@@ -52,36 +52,8 @@ RSpec.describe 'Admin System information', feature_category: :shared do
 
       it 'shows system info page with no CPU info' do
         expect(page).to have_content 'CPU 2 cores'
-        expect(page).to have_content 'Unable to collect memory information'
-        expect(page).to have_content 'Disk usage'
-        expect(page).to have_content 'System started'
-      end
-    end
-
-    context 'when disk stat has zero bytes' do
-      let(:disk_stat) do
-        instance_double(Sys::Filesystem::Stat, bytes_total: 0, bytes_used: 0, path: '/run/snapd/ns/lxd.mnt')
-      end
-
-      let(:mounts) do
-        [double(:mount, options: 'valid_option', mount_type: 'nsfs', name: 'nsfs', mount_point: double(:mount_point))]
-      end
-
-      before do
-        allow(Vmstat).to receive(:cpu).and_return(cpu)
-        allow(Vmstat).to receive(:memory).and_return(memory)
-        allow(Sys::Filesystem).to receive(:mounts).and_return(mounts)
-        allow(Sys::Filesystem).to receive(:stat).and_return(disk_stat)
-
-        visit admin_system_info_path
-      end
-
-      it 'shows system info page with disk usage info' do
-        expect(page.status_code).to eq 200
-
-        expect(page).to have_content 'CPU 2 cores'
-        expect(page).to have_content 'Memory usage 4 GiB / 16 GiB'
-        expect(page).to have_content 'Disk usage 0 B / 0 B'
+        expect(page).to have_content 'Memory Usage Unable to collect memory info'
+        expect(page).to have_content 'Disk Usage'
         expect(page).to have_content 'System started'
       end
     end

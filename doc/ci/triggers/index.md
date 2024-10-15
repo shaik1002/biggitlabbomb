@@ -22,7 +22,7 @@ When authenticating with the API, you can use:
 - A [pipeline trigger token](#create-a-pipeline-trigger-token) to trigger a branch or tag pipeline
   with the [pipeline triggers API endpoint](../../api/pipeline_triggers.md).
 - A [CI/CD job token](../jobs/ci_job_token.md) to [trigger a multi-project pipeline](../pipelines/downstream_pipelines.md#trigger-a-multi-project-pipeline-by-using-the-api).
-- Another [token with API access](../../security/tokens/index.md) to create a new pipeline
+- Another [token with API access](../../security/token_overview.md) to create a new pipeline
   with the [project pipeline API endpoint](../../api/pipelines.md#create-a-new-pipeline).
 
 ## Create a pipeline trigger token
@@ -50,7 +50,7 @@ in a way that malicious users could access them. A leaked trigger token could be
 used to force an unscheduled deployment, attempt to access CI/CD variables,
 or other malicious uses. [Masked CI/CD variables](../variables/index.md#mask-a-cicd-variable)
 help improve the security of trigger tokens. For more information about keeping tokens secure,
-see the [security considerations](../../security/tokens/index.md#security-considerations).
+see the [security considerations](../../security/token_overview.md#security-considerations).
 
 ## Trigger a pipeline
 
@@ -84,7 +84,7 @@ In each example, replace:
 - `<token>` with your trigger token.
 - `<ref_name>` with a branch or tag name, like `main`.
 - `<project_id>` with your project ID, like `123456`. The project ID is displayed
-  on the [project overview page](../../user/project/working_with_projects.md#access-a-project-by-using-the-project-id).
+  on the [project overview page](../../user/project/working_with_projects.md#access-the-project-overview-page-by-using-the-project-id).
 
 ### Use a CI/CD job
 
@@ -107,9 +107,9 @@ trigger_pipeline:
 In this example:
 
 - `1234` is the project ID for `project-B`. The project ID is displayed on the
-  [project overview page](../../user/project/working_with_projects.md#access-a-project-by-using-the-project-id).
+  [project overview page](../../user/project/working_with_projects.md#access-the-project-overview-page-by-using-the-project-id).
 - The [`rules`](../yaml/index.md#rules) cause the job to run every time a tag is added to `project-A`.
-- `MY_TRIGGER_TOKEN` is a [masked CI/CD variable](../variables/index.md#mask-a-cicd-variable)
+- `MY_TRIGGER_TOKEN` is a [masked CI/CD variables](../variables/index.md#mask-a-cicd-variable)
   that contains the trigger token.
 
 ### Use a webhook
@@ -125,7 +125,7 @@ Replace:
 
 - The URL with `https://gitlab.com` or the URL of your instance.
 - `<project_id>` with your project ID, like `123456`. The project ID is displayed
-  on the [project overview page](../../user/project/working_with_projects.md#access-a-project-by-using-the-project-id).
+  on the [project overview page](../../user/project/working_with_projects.md#access-the-project-overview-page-by-using-the-project-id).
 - `<ref_name>` with a branch or tag name, like `main`. This value takes precedence over the `ref_name` in the webhook payload.
   The payload's `ref` is the branch that fired the trigger in the source repository.
   You must URL-encode the `ref_name` if it contains slashes.
@@ -157,7 +157,7 @@ curl --request POST \
 CI/CD variables in triggered pipelines display on each job's page, but only
 users with the Owner and Maintainer role can view the values.
 
-![Job variables in UI](img/trigger_variables_v11_6.png)
+![Job variables in UI](img/trigger_variables.png)
 
 ## Revoke a pipeline trigger token
 
@@ -191,7 +191,7 @@ in pipelines triggered with a pipeline trigger token.
 You can see which pipeline trigger token caused a job to run by visiting the single job page.
 A part of the trigger token displays on the right of the page, under the job details:
 
-![Marked as triggered on a single job page](img/trigger_single_job_v8.png)
+![Marked as triggered on a single job page](img/trigger_single_job.png)
 
 In pipelines triggered with a trigger token, jobs are labeled as `triggered` in
 **Build > Jobs**.

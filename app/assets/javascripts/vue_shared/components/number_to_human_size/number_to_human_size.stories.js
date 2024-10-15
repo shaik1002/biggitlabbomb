@@ -29,6 +29,6 @@ PlainZero.args = {
 export const CustomStyles = Template.bind({});
 CustomStyles.args = {
   ...Default.args,
-  class: 'gl-font-bold',
-  labelClass: 'gl-text-sm gl-text-gray-500',
+  class: 'gl-font-weight-bold',
+  labelClass: 'gl-font-sm gl-text-gray-500',
 };

@@ -1,6 +1,9 @@
 ---
 category: IssueLinks::DestroyService
 action: incident_management_incident_unrelate
+label_description: "Mirrored Service Ping total metric key_path: redis_hll_counters.incident_management.incident_management_total_unique_counts_monthly"
+property_description:
+value_description:
 extra_properties:
 identifiers:
 - project
@@ -8,7 +11,9 @@ identifiers:
 - namespace
 milestone: "15.7"
 description: "Count of unique users removing issue that are related to an incident. Migrated from Service Ping metric"
-product_group: platform_insights
+product_section: ops
+product_stage: monitor
+product_group: respond
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/105223
 distributions:
 - ce
@@ -17,7 +22,4 @@ tiers:
 - free
 - premium
 - ultimate
-additional_properties:
-  label:
-    description: "Mirrored Service Ping total metric key_path: redis_hll_counters.incident_management.incident_management_total_unique_counts_monthly"
 

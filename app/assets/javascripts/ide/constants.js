@@ -110,9 +110,3 @@ export const MAX_MR_FILES_AUTO_OPEN = 10;
 export const DEFAULT_BRANCH = 'main';
 
 export const GITLAB_WEB_IDE_FEEDBACK_ISSUE = 'https://gitlab.com/gitlab-org/gitlab/-/issues/377367';
-
-export const IDE_ELEMENT_ID = 'ide';
-
-// note: This path comes from `config/routes.rb`
-export const IDE_PATH = '/-/ide';
-export const WEB_IDE_OAUTH_CALLBACK_URL_PATH = '/-/ide/oauth_redirect';

@@ -75,17 +75,6 @@ eslint:
     - yarn_install_script
     - run_timed_command "yarn run lint:eslint:all"
 
-eslint-docs:
-  extends:
-    - .static-analysis-base
-    - .yarn-cache
-    - .frontend:rules:default-frontend-jobs-with-docs-changes
-  variables:
-    USE_BUNDLE_INSTALL: "false"
-  script:
-    - yarn_install_script
-    - run_timed_command "scripts/frontend/lint_docs_links.mjs"
-
 haml-lint:
   extends:
     - .static-analysis-base
@@ -135,24 +124,31 @@ rubocop:
         fi
       fi
 
-rails-next-dependency-check:
-  stage: lint
-  needs: []
+qa:metadata-lint:
   extends:
-    - .rails:rules:rails-next-dependency-check
-  variables:
-    BUNDLE_GEMFILE: Gemfile.next
+    - .static-analysis-base
+    - .static-analysis:rules:qa:metadata-lint
+  before_script:
+    - !reference [.default-before_script, before_script]
+    - cd qa/
+    - bundle_install_script
   script:
-    - bundle install
-    - cp Gemfile.lock Gemfile.next.lock
-    - bundle lock
-    - bundle install
-  after_script:
-    - |
-      if [ "$CI_JOB_STATUS" == "failed" ]; then
-        echo "Gemfile.next.lock contains outdated dependencies, please run the following command and push the changes:"
-        echo "cp Gemfile.lock Gemfile.next.lock && BUNDLE_GEMFILE=Gemfile.next bundle lock && BUNDLE_GEMFILE=Gemfile.next bundle exec bundler-checksum init"
-      fi
+    - run_timed_command "bundle exec bin/qa Test::Instance::All http://localhost:3000 --test-metadata-only"
+    - cd ..
+    - run_timed_command "./scripts/qa/testcases-check qa/tmp/test-metadata.json"
+    - run_timed_command "./scripts/qa/quarantine-types-check qa/tmp/test-metadata.json"
+  variables:
+    USE_BUNDLE_INSTALL: "false"
+    SETUP_DB: "false"
+    QA_EXPORT_TEST_METRICS: "false"
+    # Disable warnings in browserslist which can break on backports
+    # https://github.com/browserslist/browserslist/blob/a287ec6/node.js#L367-L384
+    BROWSERSLIST_IGNORE_OLD_DATA: "true"
+  artifacts:
+    expire_in: 31d
+    when: always
+    paths:
+      - qa/tmp/
 
 feature-flags-usage:
   extends:
@@ -168,16 +164,6 @@ feature-flags-usage:
     when: always
     paths:
       - tmp/feature_flags/
-
-ensure-application-settings-have-definition-file:
-  image: ruby:${RUBY_VERSION}-alpine
-  extends:
-    - .static-analysis-base
-    - .static-analysis:rules:ensure-application-settings-have-definition-file
-  variables:
-    USE_BUNDLE_INSTALL: "false"
-  script:
-    - run_timed_command "scripts/cells/ci-ensure-application-settings-have-definition-file.rb"
 
 semgrep-appsec-custom-rules:
   stage: lint
@@ -255,7 +241,17 @@ ping-appsec-for-sast-findings:
   script:
     - apk update
     - apk add ruby
-    - ruby scripts/semgrep_result_processor.rb
+    - ruby scripts/process_custom_semgrep_results.rb
+
+trigger-depsaster:
+  extends: .static-analysis:rules:trigger-depsaster
+  stage: lint
+  variables:
+    MERGE_REQUEST_PROJECT_ID: $CI_MERGE_REQUEST_PROJECT_ID
+    MERGE_REQUEST_IID: $CI_MERGE_REQUEST_IID
+  trigger:
+    project: "gitlab-com/gl-security/product-security/appsec/tooling/depsaster"
+  allow_failure: true
 
 ping-appsec-for-dependency-review:
   stage: lint

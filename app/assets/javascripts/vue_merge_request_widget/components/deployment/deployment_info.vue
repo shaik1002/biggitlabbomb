@@ -77,7 +77,7 @@ export default {
         :href="deployment.url"
         target="_blank"
         rel="noopener noreferrer nofollow"
-        class="js-deploy-meta gl-pb-1 gl-text-sm"
+        class="js-deploy-meta gl-font-sm gl-pb-1"
       >
         <gl-truncate
           class="js-deploy-env-name"

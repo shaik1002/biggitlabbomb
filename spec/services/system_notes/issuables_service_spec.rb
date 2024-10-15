@@ -445,18 +445,6 @@ RSpec.describe ::SystemNotes::IssuablesService, feature_category: :team_planning
         end
       end
 
-      describe 'note_date' do
-        let(:mentioned_in) { project.repository.commit }
-
-        it 'uses commit date with USE_COMMIT_DATE_FOR_CROSS_REFERENCE_NOTE' do
-          stub_const("#{described_class}::USE_COMMIT_DATE_FOR_CROSS_REFERENCE_NOTE", true)
-
-          note = service.cross_reference(mentioned_in)
-
-          expect(note.created_at).to be_like_time(mentioned_in.created_at)
-        end
-      end
-
       context 'with external issue' do
         let(:noteable) { ExternalIssue.new('JIRA-123', project) }
         let(:mentioned_in) { project.commit }
@@ -725,37 +713,32 @@ RSpec.describe ::SystemNotes::IssuablesService, feature_category: :team_planning
       end
     end
 
-    context 'metrics', :clean_gitlab_redis_shared_state do
+    context 'metrics' do
       context 'cloned from' do
         let(:direction) { :from }
 
-        it 'does not track usage' do
-          expect { subject }
-            .to not_trigger_internal_events(Gitlab::UsageDataCounters::IssueActivityUniqueCounter::ISSUE_CLONED)
-            .and not_increment_usage_metrics(
-              'redis_hll_counters.issues_edit.g_project_management_issue_cloned_monthly',
-              'redis_hll_counters.issues_edit.g_project_management_issue_cloned_weekly'
-            )
+        it 'does not tracks usage' do
+          expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter)
+            .not_to receive(:track_issue_cloned_action).with(author: author)
+
+          subject
         end
       end
 
-      context 'cloned to' do
+      context 'cloned to', :snowplow do
         let(:direction) { :to }
 
-        it 'tracks internal events and increments usage metrics' do
-          expect { subject }
-            .to trigger_internal_events(Gitlab::UsageDataCounters::IssueActivityUniqueCounter::ISSUE_CLONED)
-              .with(project: project, user: author, category: 'InternalEventTracking')
-            .and increment_usage_metrics(
-              'redis_hll_counters.issues_edit.g_project_management_issue_cloned_monthly',
-              'redis_hll_counters.issues_edit.g_project_management_issue_cloned_weekly'
-            ).by(1)
-            .and increment_usage_metrics(
-              # Cloner and original issue author are two unique users
-              # --> Not great that we're tracking the original author as an active user...
-              'redis_hll_counters.issues_edit.issues_edit_total_unique_counts_monthly',
-              'redis_hll_counters.issues_edit.issues_edit_total_unique_counts_weekly'
-            ).by(2)
+        it 'tracks usage' do
+          expect(Gitlab::UsageDataCounters::IssueActivityUniqueCounter)
+            .to receive(:track_issue_cloned_action).with(author: author, project: project)
+
+          subject
+        end
+
+        it_behaves_like 'internal event tracking' do
+          let(:event) { Gitlab::UsageDataCounters::IssueActivityUniqueCounter::ISSUE_CLONED }
+          let(:user) { author }
+          let(:namespace) { project.namespace }
         end
       end
     end
@@ -982,16 +965,6 @@ RSpec.describe ::SystemNotes::IssuablesService, feature_category: :team_planning
         expect(work_item.notes.last.note).to eq("added ##{task.iid} as child task")
         expect(task.notes.last.note).to eq("added ##{work_item.iid} as parent issue")
       end
-
-      context 'when the parent belongs to a different namespace' do
-        let(:work_item) { create(:work_item, :group_level, namespace: group) }
-
-        it 'uses full references on the system notes' do
-          expect { subject }.to change { Note.system.count }.by(2)
-          expect(work_item.notes.last.note).to eq("added #{task.namespace.full_path}##{task.iid} as child task")
-          expect(task.notes.last.note).to eq("added #{work_item.namespace.full_path}##{work_item.iid} as parent issue")
-        end
-      end
     end
 
     context 'when child task is removed' do
@@ -1006,16 +979,6 @@ RSpec.describe ::SystemNotes::IssuablesService, feature_category: :team_planning
         expect { subject }.to change { Note.system.count }.by(2)
         expect(work_item.notes.last.note).to eq("removed child task ##{task.iid}")
         expect(task.notes.last.note).to eq("removed parent issue ##{work_item.iid}")
-      end
-
-      context 'when the parent belongs to a different namespace' do
-        let(:work_item) { create(:work_item, :group_level, namespace: group) }
-
-        it 'uses full references on the system notes' do
-          expect { subject }.to change { Note.system.count }.by(2)
-          expect(work_item.notes.last.note).to eq("removed child task #{task.namespace.full_path}##{task.iid}")
-          expect(task.notes.last.note).to eq("removed parent issue #{work_item.namespace.full_path}##{work_item.iid}")
-        end
       end
     end
   end

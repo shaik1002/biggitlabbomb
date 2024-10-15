@@ -14,7 +14,6 @@ const extractPersistDirectivePaths = (originalQuery, directive = 'persist') => {
   const fragmentPersistPaths = {};
 
   const query = visit(originalQuery, {
-    // eslint-disable-next-line max-params
     FragmentSpread: ({ name: { value: name } }, _key, _parent, _path, ancestors) => {
       const root = ancestors.find(
         ({ kind }) => kind === 'OperationDefinition' || kind === 'FragmentDefinition',
@@ -28,7 +27,6 @@ const extractPersistDirectivePaths = (originalQuery, directive = 'persist') => {
 
       fragmentPaths[name] = [rootKey].concat(fieldPath);
     },
-    // eslint-disable-next-line max-params
     Directive: ({ name: { value: name } }, _key, _parent, _path, ancestors) => {
       if (name === directive) {
         const fieldPath = ancestors
@@ -51,7 +49,6 @@ const extractPersistDirectivePaths = (originalQuery, directive = 'persist') => {
   // In case there are any FragmentDefinition items, we need to combine paths.
   if (Object.keys(fragmentPersistPaths).length) {
     visit(originalQuery, {
-      // eslint-disable-next-line max-params
       FragmentSpread: ({ name: { value: name } }, _key, _parent, _path, ancestors) => {
         if (fragmentPersistPaths[name]) {
           let fieldPath = ancestors

@@ -2,6 +2,8 @@
 data_category: optional
 key_path: usage_activity_by_stage.verify.ci_external_pipelines
 description: Distinct users triggering pipelines in external repositories
+product_section: ops
+product_stage: verify
 product_group: pipeline_execution
 value_type: number
 status: active
@@ -15,4 +17,3 @@ tier:
 - premium
 - ultimate
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

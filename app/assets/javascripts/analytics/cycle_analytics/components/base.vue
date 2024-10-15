@@ -11,7 +11,6 @@ import StageTable from '~/analytics/cycle_analytics/components/stage_table.vue';
 import ValueStreamFilters from '~/analytics/cycle_analytics/components/value_stream_filters.vue';
 import UrlSync from '~/vue_shared/components/url_sync.vue';
 import { __, s__ } from '~/locale';
-import PageHeading from '~/vue_shared/components/page_heading.vue';
 import { SUMMARY_METRICS_REQUEST, METRICS_REQUESTS } from '../constants';
 
 const OVERVIEW_DIALOG_COOKIE = 'cycle_analytics_help_dismissed';
@@ -19,7 +18,6 @@ const OVERVIEW_DIALOG_COOKIE = 'cycle_analytics_help_dismissed';
 export default {
   name: 'CycleAnalytics',
   components: {
-    PageHeading,
     GlLoadingIcon,
     PathNavigation,
     StageTable,
@@ -111,8 +109,9 @@ export default {
       return Boolean(this.features?.groupLevelAnalyticsDashboard && this.groupPath);
     },
     dashboardsPath() {
+      const { fullPath } = this.namespace;
       return this.showLinkToDashboard
-        ? generateValueStreamsDashboardLink(this.namespace.fullPath)
+        ? generateValueStreamsDashboardLink(this.groupPath, [fullPath])
         : null;
     },
     query() {
@@ -166,7 +165,7 @@ export default {
 </script>
 <template>
   <div>
-    <page-heading :heading="$options.i18n.pageTitle" />
+    <h3>{{ $options.i18n.pageTitle }}</h3>
     <value-stream-filters
       :namespace-path="filterBarNamespacePath"
       :has-project-filter="false"
@@ -177,11 +176,11 @@ export default {
       @setDateRange="onSetDateRange"
       @setPredefinedDateRange="setPredefinedDateRange"
     />
-    <div class="gl-flex gl-flex-col md:gl-flex-row">
+    <div class="gl-display-flex gl-flex-direction-column gl-md-flex-direction-row">
       <path-navigation
         v-if="displayPathNavigation"
         data-testid="vsa-path-navigation"
-        class="gl-mt-4 gl-w-full"
+        class="gl-w-full gl-mt-4"
         :loading="isLoading || isLoadingStage"
         :stages="pathNavigationData"
         :selected-stage="selectedStage"

@@ -5,10 +5,10 @@ FactoryBot.define do
     project
 
     after(:build) do |runner_project, evaluator|
-      if runner_project.runner.nil?
-        runner_project.project = evaluator.project
-        runner_project.runner =
-          build(:ci_runner, :project, runner_projects: [runner_project], sharding_key_id: evaluator.project.id)
+      unless runner_project.runner.present?
+        runner_project.runner = build(
+          :ci_runner, :project, runner_projects: [runner_project]
+        )
       end
     end
   end

@@ -17,7 +17,7 @@ avoid confusion, the official policy is that at any point of time, all the
 operating systems supported by GitLab are listed in the
 [installation page](https://about.gitlab.com/install/).
 
-The following lists the supported OSs and their possible EOL dates.
+The following lists the currently supported OSs and their possible EOL dates.
 
 NOTE:
 `amd64` and `x86_64` refer to the same 64-bit architecture.
@@ -38,20 +38,22 @@ architecture.
 | SLES 12                                                      | GitLab EE 9.0.0                | x86_64          | [Use OpenSUSE Install Documentation](https://about.gitlab.com/install/#opensuse-leap) | Oct 2027   | <https://www.suse.com/lifecycle/>                            |
 | SLES 15                                                      | GitLab EE 14.8.0                | x86_64          | [Use OpenSUSE Install Documentation](https://about.gitlab.com/install/#opensuse-leap) | Dec 2024   | <https://www.suse.com/lifecycle/>                            |
 | Oracle Linux 7                                               | GitLab CE / GitLab EE 8.14.0   | x86_64          | [Use CentOS Install Documentation](https://about.gitlab.com/install/#centos-7) | Dec 2024         | <https://www.oracle.com/a/ocom/docs/elsp-lifetime-069338.pdf>                                                           |
-| Oracle Linux 8                                               | GitLab CE / GitLab EE 12.8.1   | x86_64          | [Use AlmaLinux Install Documentation](https://about.gitlab.com/install/#almalinux) | July 2029         | <https://www.oracle.com/a/ocom/docs/elsp-lifetime-069338.pdf>                                                           |
-| Oracle Linux 9                                               | GitLab CE / GitLab EE 16.0.0   | x86_64          | [Use AlmaLinux Install Documentation](https://about.gitlab.com/install/#almalinux) | June 2032         | <https://www.oracle.com/a/ocom/docs/elsp-lifetime-069338.pdf>                                                           |
 | Scientific Linux                                             | GitLab CE / GitLab EE 8.14.0   | x86_64          | [Use CentOS Install Documentation](https://about.gitlab.com/install/#centos-7) | June 2024         | <https://scientificlinux.org/downloads/sl-versions/sl7/>                                                           |
 | Ubuntu 20.04                                                 | GitLab CE / GitLab EE 13.2.0   | amd64, arm64    | [Ubuntu Install Documentation](https://about.gitlab.com/install/#ubuntu) | April 2025 | <https://wiki.ubuntu.com/Releases>                           |
 | Ubuntu 22.04                                                 | GitLab CE / GitLab EE 15.5.0   | amd64, arm64    | [Ubuntu Install Documentation](https://about.gitlab.com/install/#ubuntu) | April 2027 | <https://wiki.ubuntu.com/Releases>                           |
-| Ubuntu 24.04                                                 | GitLab CE / GitLab EE 17.1.0   | amd64, arm64    | [Ubuntu Install Documentation](https://about.gitlab.com/install/#ubuntu) | April 2029 | <https://wiki.ubuntu.com/Releases>                           |
 | Amazon Linux 2                                               | GitLab CE / GitLab EE 14.9.0   | amd64, arm64    | [Amazon Linux 2 Install Documentation](https://about.gitlab.com/install/#amazonlinux-2) | June 2025  | <https://aws.amazon.com/amazon-linux-2/faqs/>                |
 | Amazon Linux 2023                                            | GitLab CE / GitLab EE 16.3.0   | amd64, arm64    | [Amazon Linux 2023 Install Documentation](https://about.gitlab.com/install/#amazonlinux-2023) | 2028  | <https://docs.aws.amazon.com/linux/al2023/ug/release-cadence.html>                |
 | Raspberry Pi OS (Buster) (formerly known as Raspbian Buster) | GitLab CE 12.2.0               | armhf           | [Raspberry Pi Install Documentation](https://about.gitlab.com/install/#raspberry-pi-os) | June 2024       | [Raspberry Pi Details](https://www.raspberrypi.com/news/new-old-functionality-with-raspberry-pi-os-legacy/) |
 | Raspberry Pi OS (Bullseye) | GitLab CE 15.5.0               | armhf           | [Raspberry Pi Install Documentation](https://about.gitlab.com/install/#raspberry-pi-os) | 2026       | [Raspberry Pi Details](https://www.raspberrypi.com/news/raspberry-pi-os-debian-bullseye/) |
 
 NOTE:
+CentOS 8 was EOL on December 31, 2021. In GitLab 14.5 and later,
+[CentOS builds work in AlmaLinux](https://gitlab.com/gitlab-org/distribution/team-tasks/-/issues/954#note_730198505).
 We officially support all distributions that are binary compatible with Red Hat Enterprise Linux.
-AlmaLinux packages can be used in place of packages for the binary-compatible operating systems not explicitly listed.
+This gives users a path forward for their CentOS 8 builds at its end of life.
+
+NOTE:
+The [CentOS major version and a minor version](https://en.wikipedia.org/wiki/CentOS#CentOS_releases) up to CentOS8 ([when CentOS Stream](https://en.wikipedia.org/wiki/CentOS#CentOS_Stream) was released) correspond to the set of major version and update versions of RHEL.
 
 ## Update GitLab package sources after upgrading the OS
 
@@ -71,12 +73,6 @@ To upgrade both the operating system (OS) and GitLab:
 1. Upgrade the OS.
 1. Check if it's necessary to [update the GitLab package sources](#update-gitlab-package-sources-after-upgrading-the-os).
 1. [Upgrade GitLab](../../update/index.md).
-
-## Corrupted Postgres indexes after upgrading the OS
-
-As part of upgrading the operating system, if your `glibc` version changes, then you must follow
-[Upgrading operating systems for PostgreSQL](../postgresql/upgrading_os.md) to avoid corrupted
-indexes.
 
 ## Packages for ARM64
 

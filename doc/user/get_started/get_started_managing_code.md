@@ -2,7 +2,6 @@
 stage: Create
 group: Source Code
 info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments"
-description: "Learn about the GitLab tools for building, tracking, and delivering the code for your project."
 ---
 
 # Get started managing code
@@ -36,7 +35,7 @@ For details, see:
 
 ## Step 2: Write your code
 
-You have many options for how and where you write your code.
+You have many options for how and where you'll write your code.
 
 You can use the GitLab UI and develop right in your browser.
 You have two options:
@@ -59,7 +58,7 @@ For details, see:
 
 - [Create a file in the repository from the UI](../project/repository/index.md#add-a-file-from-the-ui)
 - [Open a file in the Web IDE](../project/web_ide/index.md#from-a-file-or-directory)
-- [Create a remote development environment with workspaces](../workspace/index.md)
+- [Create a remote development environment](../project/remote_development/connect_machine.md)
 - [Available editor extensions](../../editor_extensions/index.md)
 - [Use Code Suggestions to write code more quickly](../project/repository/code_suggestions/index.md)
 
@@ -68,14 +67,14 @@ For details, see:
 When your changes are ready, you should commit them to GitLab,
 where you can share them with others on your team.
 
-To commit your changes, first copy them:
+To commit your changes, you'll copy them:
 
 - From your local computer, in your own branch
 - To GitLab, on a remote computer, to the default branch, usually called `main` or `master`.
 
 To copy files between branches, you create a merge request.
-There are different ways to create a merge request. It depends on
-where you authored the code and the tools you use to create it.
+There are many different ways to create a merge request. It largely
+depends on where you authored the code and the tools you'll use to create it.
 But the idea is to create a merge request that takes the contents of your source branch
 and proposes combining it into the target branch.
 
@@ -104,7 +103,7 @@ For details, see:
 
 - [Request a review of your merge request](../project/merge_requests/reviews/index.md#request-a-review)
 - [Add suggestions to a merge request](../project/merge_requests/reviews/suggestions.md#create-suggestions)
-- [Merge request approvals](../project/merge_requests/approvals/index.md)
+- [How approvals work](../project/merge_requests/approvals/index.md#how-approvals-work)
 
 ## Step 5: Merge the merge request
 

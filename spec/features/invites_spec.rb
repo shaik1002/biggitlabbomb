@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Group or Project invitations', :with_current_organization, :aggregate_failures, feature_category: :acquisition do
+RSpec.describe 'Group or Project invitations', :aggregate_failures, feature_category: :acquisition do
   let_it_be(:owner) { create(:user, name: 'John Doe') }
   # private will ensure we really have access to the group when we land on the group page
   let_it_be(:group) { create(:group, :private, name: 'Owned') }
@@ -51,7 +51,7 @@ RSpec.describe 'Group or Project invitations', :with_current_organization, :aggr
 
         context 'when invite clicked and not signed in' do
           before do
-            visit invite_path(group_invite.raw_invite_token, invite_type: ::Members::InviteMailer::INITIAL_INVITE)
+            visit invite_path(group_invite.raw_invite_token, invite_type: Emails::Members::INITIAL_INVITE)
           end
 
           it 'sign in, grants access and redirects to group page' do
@@ -87,8 +87,7 @@ RSpec.describe 'Group or Project invitations', :with_current_organization, :aggr
             end
 
             it 'accepts invite' do
-              expect(page)
-                .to have_content('You have been granted access to the Owned group with the following role: Developer.')
+              expect(page).to have_content('You have been granted Developer access to group Owned.')
             end
           end
         end
@@ -132,7 +131,7 @@ RSpec.describe 'Group or Project invitations', :with_current_organization, :aggr
     let(:new_user) { build_stubbed(:user) }
     let(:invite_email) { new_user.email }
     let(:group_invite) { create(:group_member, :invited, group: group, invite_email: invite_email, created_by: owner) }
-    let(:extra_params) { { invite_type: ::Members::InviteMailer::INITIAL_INVITE } }
+    let(:extra_params) { { invite_type: Emails::Members::INITIAL_INVITE } }
 
     before do
       stub_application_setting_enum('email_confirmation_setting', 'hard')
@@ -168,8 +167,7 @@ RSpec.describe 'Group or Project invitations', :with_current_organization, :aggr
             fill_in_sign_up_form(new_user, invite: true)
 
             expect(page).to have_current_path(group_path(group), ignore_query: true)
-            expect(page)
-              .to have_content('You have been granted access to the Owned group with the following role: Owner.')
+            expect(page).to have_content('You have been granted Owner access to group Owned.')
           end
         end
       end
@@ -194,6 +192,7 @@ RSpec.describe 'Group or Project invitations', :with_current_organization, :aggr
               category: 'RegistrationsController',
               action: 'accepted',
               label: 'invite_email',
+              property: group_invite.id.to_s,
               user: group_invite.reload.user
             )
           end
@@ -228,11 +227,10 @@ RSpec.describe 'Group or Project invitations', :with_current_organization, :aggr
 
         expect(page).to have_current_path(new_user_registration_path, ignore_query: true)
 
-        fill_in_sign_up_form(new_user, invite: true)
+        fill_in_sign_up_form(new_user, 'Register', invite: true)
 
         expect(page).to have_current_path(group_path(group))
-        expect(page)
-          .to have_content('You have been granted access to the Owned group with the following role: Owner.')
+        expect(page).to have_content('You have been granted Owner access to group Owned.')
       end
     end
 

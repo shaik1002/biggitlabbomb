@@ -16,6 +16,8 @@ module Gitlab
           @globs = Array(clause[:paths])
           @project_path = clause[:project]
           @ref = clause[:ref]
+
+          @top_level_only = @globs.all?(&method(:top_level_glob?))
         end
 
         def satisfied_by?(_pipeline, context)
@@ -24,11 +26,8 @@ module Gitlab
 
           context = change_context(context) if @project_path
 
-          expanded_globs = expand_globs(context)
-          top_level_only = expanded_globs.all?(&method(:top_level_glob?))
-
-          paths = worktree_paths(context, top_level_only)
-          exact_globs, extension_globs, pattern_globs = separate_globs(expanded_globs)
+          paths = worktree_paths(context)
+          exact_globs, extension_globs, pattern_globs = separate_globs(context)
 
           exact_matches?(paths, exact_globs) ||
             matches_extension?(paths, extension_globs) ||
@@ -37,7 +36,9 @@ module Gitlab
 
         private
 
-        def separate_globs(expanded_globs)
+        def separate_globs(context)
+          expanded_globs = expand_globs(context)
+
           grouped = expanded_globs.group_by { |glob| glob_type(glob) }
           grouped.values_at(:exact, :extension, :pattern).map { |globs| Array(globs) }
         end
@@ -48,10 +49,10 @@ module Gitlab
           end
         end
 
-        def worktree_paths(context, top_level_only)
+        def worktree_paths(context)
           return [] unless context.project
 
-          if top_level_only
+          if @top_level_only
             context.top_level_worktree_paths
           else
             context.all_worktree_paths
@@ -85,13 +86,29 @@ module Gitlab
         end
 
         def pattern_matches?(paths, pattern_globs, context)
-          return true if (paths.size * pattern_globs.size) > MAX_PATTERN_COMPARISONS
+          if ::Feature.disabled?(:ci_rules_exists_pattern_matches_cache, context.project)
+            return legacy_pattern_matches?(paths, pattern_globs)
+          end
+
+          comparisons = 0
 
           pattern_globs.any? do |glob|
             Gitlab::SafeRequestStore.fetch("ci_rules_exists_pattern_matches_#{context.project&.id}_#{glob}") do
               paths.any? do |path|
-                pattern_match?(glob, path)
+                comparisons += 1
+                comparisons > MAX_PATTERN_COMPARISONS || pattern_match?(glob, path)
               end
+            end
+          end
+        end
+
+        def legacy_pattern_matches?(paths, pattern_globs)
+          comparisons = 0
+
+          pattern_globs.any? do |glob|
+            paths.any? do |path|
+              comparisons += 1
+              comparisons > MAX_PATTERN_COMPARISONS || pattern_match?(glob, path)
             end
           end
         end
@@ -102,19 +119,19 @@ module Gitlab
 
         # matches glob patterns that only match files in the top level directory
         def top_level_glob?(glob)
-          glob.exclude?('/') && glob.exclude?('**')
+          !glob.include?('/') && !glob.include?('**')
         end
 
         # matches glob patterns that have no metacharacters for File#fnmatch?
         def exact_glob?(glob)
-          glob.exclude?('*') && glob.exclude?('?') && glob.exclude?('[') && glob.exclude?('{')
+          !glob.include?('*') && !glob.include?('?') && !glob.include?('[') && !glob.include?('{')
         end
 
         # matches glob patterns like **/*.js or **/*.so.1 to optimize with path.end_with?('.js')
         def extension_glob?(glob)
           without_nested = without_wildcard_nested_pattern(glob)
 
-          without_nested.start_with?('.') && without_nested.exclude?('/') && exact_glob?(without_nested)
+          without_nested.start_with?('.') && !without_nested.include?('/') && exact_glob?(without_nested)
         end
 
         def without_wildcard_nested_pattern(glob)

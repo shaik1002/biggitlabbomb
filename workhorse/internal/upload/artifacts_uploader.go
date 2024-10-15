@@ -59,7 +59,7 @@ func Artifacts(myAPI *api.API, h http.Handler, p Preparer, cfg *config.Config) h
 	}, "/authorize")
 }
 
-func (a *artifactsUploadProcessor) generateMetadataFromZip(ctx context.Context, file *destination.FileHandler, readerLimit int64) (*destination.FileHandler, error) { //nolint: funlen
+func (a *artifactsUploadProcessor) generateMetadataFromZip(ctx context.Context, file *destination.FileHandler, readerLimit int64) (*destination.FileHandler, error) {
 	metaOpts := &destination.UploadOpts{
 		LocalTempPath: a.tempDir,
 	}
@@ -72,15 +72,8 @@ func (a *artifactsUploadProcessor) generateMetadataFromZip(ctx context.Context, 
 		fileName = file.RemoteURL
 	}
 
-	logWriter := log.ContextLogger(ctx).Writer()
-	defer func() {
-		if closeErr := logWriter.Close(); closeErr != nil {
-			log.ContextLogger(ctx).WithError(closeErr).Error("failed to close gitlab-zip-metadata log writer")
-		}
-	}()
-
 	zipMd := exec.CommandContext(ctx, "gitlab-zip-metadata", "-zip-reader-limit", strconv.FormatInt(readerLimit, 10), fileName)
-	zipMd.Stderr = logWriter
+	zipMd.Stderr = log.ContextLogger(ctx).Writer()
 	zipMd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 
 	zipMdOut, err := zipMd.StdoutPipe()

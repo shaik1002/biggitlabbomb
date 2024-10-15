@@ -3,120 +3,69 @@
 require 'spec_helper'
 require Rails.root.join('ee', 'spec', 'db', 'schema_support') if Gitlab.ee?
 
-RSpec.describe 'Database schema',
-  # These skip a bit of unnecessary setup for each spec invocation,
-  # and there are thousands of specs in this file. In total, this improves runtime by roughly 30%
-  :do_not_mock_admin_mode_setting, :do_not_stub_snowplow_by_default,
-  stackprof: { interval: 101000 },
-  feature_category: :database do
+RSpec.describe 'Database schema', feature_category: :database do
   prepend_mod_with('DB::SchemaSupport')
 
   let(:tables) { connection.tables }
   let(:columns_name_with_jsonb) { retrieve_columns_name_with_jsonb }
 
   IGNORED_INDEXES_ON_FKS = {
-    ai_testing_terms_acceptances: %w[user_id], # testing terms only have 1 entry, and if the user is deleted the record should remain
-    ci_build_trace_metadata: [%w[partition_id build_id], %w[partition_id trace_artifact_id]], # the index on build_id is enough
-    ci_builds: [%w[partition_id stage_id], %w[partition_id execution_config_id], %w[auto_canceled_by_partition_id auto_canceled_by_id], %w[upstream_pipeline_partition_id upstream_pipeline_id], %w[partition_id commit_id]], # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/142804#note_1745483081
-    ci_build_needs: %w[project_id], # we will create async index, see https://gitlab.com/gitlab-org/gitlab/-/merge_requests/163429#note_2065627176
-    ci_daily_build_group_report_results: [%w[partition_id last_pipeline_id]], # index on last_pipeline_id is sufficient
-    ci_pipeline_artifacts: [%w[partition_id pipeline_id]], # index on pipeline_id is sufficient
-    ci_pipeline_chat_data: [%w[partition_id pipeline_id]], # index on pipeline_id is sufficient
-    ci_pipeline_messages: [%w[partition_id pipeline_id]], # index on pipeline_id is sufficient
-    ci_pipeline_metadata: [%w[partition_id pipeline_id]], # index on pipeline_id is sufficient
-    ci_pipeline_variables: [%w[partition_id pipeline_id]], # index on pipeline_id is sufficient
-    ci_pipelines: [%w[auto_canceled_by_partition_id auto_canceled_by_id]], # index on auto_canceled_by_id is sufficient
-    ci_pipelines_config: [%w[partition_id pipeline_id]], # index on pipeline_id is sufficient
-    ci_sources_pipelines: [%w[source_partition_id source_pipeline_id], %w[partition_id pipeline_id]],
-    ci_sources_projects: [%w[partition_id pipeline_id]], # index on pipeline_id is sufficient
-    ci_stages: [%w[partition_id pipeline_id]], # the index on pipeline_id is sufficient
-    issues: [%w[correct_work_item_type_id]],
-    notes: %w[namespace_id], # this index is added in an async manner, hence it needs to be ignored in the first phase.
-    p_ci_build_trace_metadata: [%w[partition_id build_id], %w[partition_id trace_artifact_id]], # the index on build_id is enough
-    p_ci_builds: [%w[partition_id stage_id], %w[partition_id execution_config_id], %w[auto_canceled_by_partition_id auto_canceled_by_id], %w[upstream_pipeline_partition_id upstream_pipeline_id], %w[partition_id commit_id]], # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/142804#note_1745483081
-    p_ci_builds_execution_configs: [%w[partition_id pipeline_id]], # the index on pipeline_id is enough
-    p_ci_pipelines: [%w[auto_canceled_by_partition_id auto_canceled_by_id]], # index on auto_canceled_by_id is sufficient
-    p_ci_pipeline_variables: [%w[partition_id pipeline_id]], # index on pipeline_id is sufficient
-    p_ci_stages: [%w[partition_id pipeline_id]], # the index on pipeline_id is sufficient
+    application_settings: %w[instance_administration_project_id instance_administrators_group_id],
     # `search_index_id index_type` is the composite foreign key configured for `search_namespace_index_assignments`,
     # but in Search::NamespaceIndexAssignment model, only `search_index_id` is used as foreign key and indexed
     search_namespace_index_assignments: [%w[search_index_id index_type]],
     slack_integrations_scopes: [%w[slack_api_scope_id]],
-    snippets: %w[organization_id], # this index is added in an async manner, hence it needs to be ignored in the first phase.
+    notes: %w[namespace_id], # this index is added in an async manner, hence it needs to be ignored in the first phase.
     users: [%w[accepted_term_id]],
-    subscription_add_on_purchases: [["subscription_add_on_id"]] # index handled via composite index with namespace_id
+    ci_builds: [%w[partition_id stage_id]], # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/142804#note_1745483081
+    p_ci_builds: [%w[partition_id stage_id]] # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/142804#note_1745483081
   }.with_indifferent_access.freeze
+
+  TABLE_PARTITIONS = %w[ci_builds_metadata].freeze
 
   # If splitting FK and table removal into two MRs as suggested in the docs, use this constant in the initial FK removal MR.
   # In the subsequent table removal MR, remove the entries.
   # See: https://docs.gitlab.com/ee/development/migration_style_guide.html#dropping-a-database-table
   REMOVED_FKS = {
     # example_table: %w[example_column]
-    alert_management_alerts: %w[prometheus_alert_id]
   }.with_indifferent_access.freeze
 
   # List of columns historically missing a FK, don't add more columns
   # See: https://docs.gitlab.com/ee/development/database/foreign_keys.html#naming-foreign-keys
   IGNORED_FK_COLUMNS = {
     abuse_reports: %w[reporter_id user_id],
-    abuse_report_notes: %w[discussion_id],
-    ai_code_suggestion_events: %w[user_id],
     application_settings: %w[performance_bar_allowed_group_id slack_app_id snowplow_app_id eks_account_id eks_access_key_id],
-    approvals: %w[user_id project_id],
+    approvals: %w[user_id],
     approver_groups: %w[target_id],
     approvers: %w[target_id user_id],
     analytics_cycle_analytics_aggregations: %w[last_full_issues_id last_full_merge_requests_id last_incremental_issues_id last_full_run_issues_id last_full_run_merge_requests_id last_incremental_merge_requests_id last_consistency_check_issues_stage_event_hash_id last_consistency_check_issues_issuable_id last_consistency_check_merge_requests_stage_event_hash_id last_consistency_check_merge_requests_issuable_id],
     analytics_cycle_analytics_merge_request_stage_events: %w[author_id group_id merge_request_id milestone_id project_id stage_event_hash_id state_id],
     analytics_cycle_analytics_issue_stage_events: %w[author_id group_id issue_id milestone_id project_id stage_event_hash_id state_id sprint_id],
-    analytics_cycle_analytics_stage_event_hashes: %w[organization_id],
     audit_events: %w[author_id entity_id target_id],
-    user_audit_events: %w[author_id user_id target_id],
-    group_audit_events: %w[author_id group_id target_id],
-    project_audit_events: %w[author_id project_id target_id],
-    instance_audit_events: %w[author_id target_id],
     award_emoji: %w[awardable_id user_id],
     aws_roles: %w[role_external_id],
     boards: %w[milestone_id iteration_id],
     broadcast_messages: %w[namespace_id],
     chat_names: %w[chat_id team_id user_id],
     chat_teams: %w[team_id],
-    ci_builds: %w[project_id runner_id user_id erased_by_id trigger_request_id partition_id auto_canceled_by_partition_id execution_config_id upstream_pipeline_partition_id],
-    ci_builds_metadata: %w[partition_id project_id build_id],
-    ci_build_needs: %w[project_id],
-    ci_builds_runner_session: %w[project_id],
-    ci_daily_build_group_report_results: %w[partition_id],
-    ci_deleted_objects: %w[project_id],
+    ci_builds: %w[project_id runner_id user_id erased_by_id trigger_request_id partition_id auto_canceled_by_partition_id execution_config_id],
     ci_job_artifacts: %w[partition_id project_id job_id],
     ci_namespace_monthly_usages: %w[namespace_id],
     ci_pipeline_artifacts: %w[partition_id],
-    ci_pipeline_chat_data: %w[partition_id project_id],
-    ci_pipeline_messages: %w[partition_id],
+    ci_pipeline_chat_data: %w[partition_id],
+    ci_pipelines_config: %w[partition_id],
     ci_pipeline_metadata: %w[partition_id],
-    ci_pipeline_schedule_variables: %w[project_id],
-    ci_pipeline_variables: %w[partition_id pipeline_id project_id],
-    ci_pipelines_config: %w[partition_id project_id],
-    ci_pipelines: %w[partition_id auto_canceled_by_partition_id],
-    ci_secure_file_states: %w[project_id],
-    ci_unit_test_failures: %w[project_id],
-    ci_resources: %w[project_id],
-    p_ci_pipelines: %w[partition_id auto_canceled_by_partition_id auto_canceled_by_id],
-    p_ci_runner_machine_builds: %w[project_id],
-    ci_runners: %w[sharding_key_id], # This value is meant to populate the partitioned table, no other usage
-    ci_runner_machines: %w[sharding_key_id], # This value is meant to populate the partitioned table, no other usage
+    ci_pipeline_variables: %w[partition_id],
+    ci_pipelines: %w[partition_id],
     ci_runner_projects: %w[runner_id],
     ci_sources_pipelines: %w[partition_id source_partition_id source_job_id],
-    ci_sources_projects: %w[partition_id],
     ci_stages: %w[partition_id project_id pipeline_id],
     ci_trigger_requests: %w[commit_id],
-    ci_job_artifact_states: %w[partition_id project_id],
+    ci_job_artifact_states: %w[partition_id],
     cluster_providers_aws: %w[security_group_id vpc_id access_key_id],
     cluster_providers_gcp: %w[gcp_project_id operation_id],
     compliance_management_frameworks: %w[group_id],
     commit_user_mentions: %w[commit_id],
-    dast_site_profiles_builds: %w[project_id],
-    dast_scanner_profiles_builds: %w[project_id],
-    dast_profiles_pipelines: %w[project_id],
-    dependency_list_export_parts: %w[start_id end_id],
     dep_ci_build_trace_sections: %w[build_id],
     deploy_keys_projects: %w[deploy_key_id],
     deployments: %w[deployable_id user_id],
@@ -124,7 +73,7 @@ RSpec.describe 'Database schema',
     epics: %w[updated_by_id last_edited_by_id state_id],
     events: %w[target_id],
     forked_project_links: %w[forked_from_project_id],
-    geo_event_log: %w[hashed_storage_attachments_event_id repositories_changed_event_id],
+    geo_event_log: %w[hashed_storage_attachments_event_id],
     geo_node_statuses: %w[last_event_id cursor_last_event_id],
     geo_nodes: %w[oauth_application_id],
     geo_repository_deleted_events: %w[project_id],
@@ -132,7 +81,7 @@ RSpec.describe 'Database schema',
     gitlab_subscription_histories: %w[gitlab_subscription_id hosted_plan_id namespace_id],
     identities: %w[user_id],
     import_failures: %w[project_id],
-    issues: %w[last_edited_by_id state_id correct_work_item_type_id],
+    issues: %w[last_edited_by_id state_id],
     issue_emails: %w[email_message_id],
     jira_tracker_data: %w[jira_issue_transition_id],
     keys: %w[user_id],
@@ -145,11 +94,10 @@ RSpec.describe 'Database schema',
     merge_request_diff_commits: %w[commit_author_id committer_id],
     # merge_request_diff_commits_b5377a7a34 is the temporary table for the merge_request_diff_commits partitioning
     # backfill. It will get foreign keys after the partitioning is finished.
-    merge_request_diff_commits_b5377a7a34: %w[merge_request_diff_id commit_author_id committer_id project_id],
+    merge_request_diff_commits_b5377a7a34: %w[merge_request_diff_id commit_author_id committer_id],
     # merge_request_diff_files_99208b8fac is the temporary table for the merge_request_diff_commits partitioning
     # backfill. It will get foreign keys after the partitioning is finished.
-    merge_request_diff_files_99208b8fac: %w[merge_request_diff_id project_id],
-    merge_request_user_mentions: %w[project_id],
+    merge_request_diff_files_99208b8fac: %w[merge_request_diff_id],
     namespaces: %w[owner_id parent_id],
     namespace_descendants: %w[namespace_id],
     notes: %w[author_id commit_id noteable_id updated_by_id resolved_by_id confirmed_by_id discussion_id namespace_id],
@@ -157,20 +105,13 @@ RSpec.describe 'Database schema',
     oauth_access_grants: %w[resource_owner_id application_id],
     oauth_access_tokens: %w[resource_owner_id application_id],
     oauth_applications: %w[owner_id],
-    oauth_device_grants: %w[resource_owner_id application_id],
-    packages_nuget_symbols: %w[project_id],
-    packages_package_files: %w[project_id],
-    p_ci_builds: %w[erased_by_id trigger_request_id partition_id auto_canceled_by_partition_id execution_config_id upstream_pipeline_partition_id],
-    p_ci_builds_metadata: %w[project_id build_id partition_id],
+    p_ci_builds: %w[erased_by_id trigger_request_id partition_id auto_canceled_by_partition_id execution_config_id],
     p_batched_git_ref_updates_deletions: %w[project_id partition_id],
     p_catalog_resource_sync_events: %w[catalog_resource_id project_id partition_id],
     p_catalog_resource_component_usages: %w[used_by_project_id], # No FK constraint because we want to preserve historical usage data
     p_ci_finished_build_ch_sync_events: %w[build_id],
-    p_ci_finished_pipeline_ch_sync_events: %w[pipeline_id project_namespace_id],
-    p_ci_job_annotations: %w[partition_id job_id project_id],
     p_ci_job_artifacts: %w[partition_id project_id job_id],
-    p_ci_pipeline_variables: %w[partition_id pipeline_id project_id],
-    p_ci_pipelines_config: %w[partition_id project_id],
+    p_ci_pipeline_variables: %w[partition_id],
     p_ci_builds_execution_configs: %w[partition_id],
     p_ci_stages: %w[partition_id project_id pipeline_id],
     project_build_artifacts_size_refreshes: %w[last_job_artifact_id],
@@ -189,46 +130,34 @@ RSpec.describe 'Database schema',
     subscriptions: %w[user_id subscribable_id],
     suggestions: %w[commit_id],
     taggings: %w[tag_id taggable_id tagger_id],
+    # temp_notes_backup is a temporary table created to store orphaned records from the notes table to insure against data loss.
+    temp_notes_backup: %w[author_id project_id commit_id noteable_id updated_by_id resolved_by_id discussion_id review_id namespace_id],
     timelogs: %w[user_id],
     todos: %w[target_id commit_id],
     uploads: %w[model_id],
     user_agent_details: %w[subject_id],
     users: %w[color_mode_id color_scheme_id created_by_id theme_id managing_group_id],
     users_star_projects: %w[user_id],
-    vulnerability_occurrence_pipelines: %w[project_id],
-    vulnerability_finding_links: %w[project_id],
     vulnerability_identifiers: %w[external_id],
-    vulnerability_occurrence_identifiers: %w[project_id],
     vulnerability_scanners: %w[external_id],
-    security_scans: %w[pipeline_id project_id], # foreign key is not added as ci_pipeline table will be moved into different db soon
+    security_scans: %w[pipeline_id], # foreign key is not added as ci_pipeline table will be moved into different db soon
     dependency_list_exports: %w[pipeline_id], # foreign key is not added as ci_pipeline table is in different db
-    vulnerability_reads: %w[cluster_agent_id namespace_id], # namespace_id is a denormalization of `project.namespace`
+    vulnerability_reads: %w[cluster_agent_id],
     # See: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/87584
     # Fixes performance issues with the deletion of web-hooks with many log entries
     web_hook_logs: %w[web_hook_id],
     webauthn_registrations: %w[u2f_registration_id], # this column will be dropped
     ml_candidates: %w[internal_id],
     value_stream_dashboard_counts: %w[namespace_id],
-    vulnerability_export_parts: %w[start_id end_id],
     zoekt_indices: %w[namespace_id], # needed for cells sharding key
     zoekt_repositories: %w[namespace_id project_identifier], # needed for cells sharding key
-    zoekt_tasks: %w[project_identifier partition_id zoekt_repository_id], # needed for: cells sharding key, partitioning, and performance reasons
-    # TODO: To remove with https://gitlab.com/gitlab-org/gitlab/-/merge_requests/155256
-    approval_group_rules: %w[approval_policy_rule_id],
-    approval_project_rules: %w[approval_policy_rule_id],
-    approval_merge_request_rules: %w[approval_policy_rule_id],
-    scan_result_policy_violations: %w[approval_policy_rule_id],
-    software_license_policies: %w[approval_policy_rule_id],
-    ai_testing_terms_acceptances: %w[user_id], # testing terms only have 1 entry, and if the user is deleted the record should remain
-    namespace_settings: %w[early_access_program_joined_by_id], # isn't used inside product itself. Only through Snowflake
-    workspaces_agent_config_versions: %w[item_id], # polymorphic associations
-    work_item_types: %w[correct_id] # temporary column that is not a foreign key
+    zoekt_tasks: %w[project_identifier partition_id zoekt_repository_id] # needed for: cells sharding key, partitioning, and performance reasons
   }.with_indifferent_access.freeze
 
   context 'for table' do
     Gitlab::Database::EachDatabase.each_connection do |connection, _|
       schemas_for_connection = Gitlab::Database.gitlab_schemas_for_connection(connection)
-      connection.tables.sort.each do |table|
+      (connection.tables - TABLE_PARTITIONS).sort.each do |table|
         table_schema = Gitlab::Database::GitlabSchema.table_schema(table)
         next unless schemas_for_connection.include?(table_schema)
 
@@ -292,7 +221,7 @@ RSpec.describe 'Database schema',
             it 'only has existing indexes in the ignored duplicate indexes duplicate_indexes.yml' do
               table_ignored_indexes = (ignored_indexes[table] || {}).to_a.flatten.uniq
               indexes_by_name = indexes.map(&:name)
-              expect(indexes_by_name).to include(*table_ignored_indexes) unless table_ignored_indexes.empty?
+              expect(indexes_by_name).to include(*table_ignored_indexes)
             end
 
             it 'does not have any duplicated indexes' do
@@ -351,9 +280,11 @@ RSpec.describe 'Database schema',
     'NotificationSetting' => %w[level],
     'Project' => %w[auto_cancel_pending_pipelines],
     'ProjectAutoDevops' => %w[deploy_strategy],
+    'PrometheusMetric' => %w[group],
     'ResourceLabelEvent' => %w[action],
     'User' => %w[layout dashboard project_view],
-    'Users::Callout' => %w[feature_name]
+    'Users::Callout' => %w[feature_name],
+    'PrometheusAlert' => %w[operator]
   }.freeze
 
   context 'for enums', :eager_load do
@@ -386,9 +317,7 @@ RSpec.describe 'Database schema',
     "Packages::Composer::Metadatum" => %w[composer_json],
     "RawUsageData" => %w[payload], # Usage data payload changes often, we cannot use one schema
     "Releases::Evidence" => %w[summary],
-    "Vulnerabilities::Finding::Evidence" => %w[data], # Validation work in progress
-    "Ai::DuoWorkflows::Checkpoint" => %w[checkpoint metadata], # https://gitlab.com/gitlab-org/gitlab/-/issues/468632
-    "RemoteDevelopment::WorkspacesAgentConfigVersion" => %w[object object_changes] # Managed by paper_trail gem
+    "Vulnerabilities::Finding::Evidence" => %w[data] # Validation work in progress
   }.freeze
 
   # We are skipping GEO models for now as it adds up complexity
@@ -409,7 +338,7 @@ RSpec.describe 'Database schema',
   end
 
   context 'existence of Postgres schemas' do
-    let_it_be(:schemas) do
+    def get_schemas
       sql = <<~SQL
         SELECT schema_name FROM
         information_schema.schemata
@@ -424,17 +353,17 @@ RSpec.describe 'Database schema',
     end
 
     it 'we have a public schema' do
-      expect(schemas).to include('public')
+      expect(get_schemas).to include('public')
     end
 
     Gitlab::Database::EXTRA_SCHEMAS.each do |schema|
       it "we have a '#{schema}' schema'" do
-        expect(schemas).to include(schema.to_s)
+        expect(get_schemas).to include(schema.to_s)
       end
     end
 
     it 'we do not have unexpected schemas' do
-      expect(schemas.size).to eq(Gitlab::Database::EXTRA_SCHEMAS.size + 1)
+      expect(get_schemas.size).to eq(Gitlab::Database::EXTRA_SCHEMAS.size + 1)
     end
   end
 
@@ -461,8 +390,6 @@ RSpec.describe 'Database schema',
       partitionable_models = Ci::Partitionable::Testing.partitionable_models
       (partitionable_models - skip_tables).each do |klass|
         model = klass.safe_constantize
-        next unless model
-
         table_name = model.table_name
 
         primary_key_columns = Array.wrap(model.connection.primary_key(table_name))
@@ -487,10 +414,6 @@ RSpec.describe 'Database schema',
 
       expect(problematic_indexes).to be_empty
     end
-  end
-
-  context 'ID columns' do
-    it_behaves_like 'All IDs are bigint'
   end
 
   private

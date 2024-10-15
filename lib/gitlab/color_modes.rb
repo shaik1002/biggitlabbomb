@@ -35,7 +35,7 @@ module Gitlab
     #
     # Returns a Mode
     def self.default
-      by_id(default_id)
+      by_id(1)
     end
 
     # Iterate through each Mode
@@ -60,13 +60,6 @@ module Gitlab
 
     def self.valid_ids
       available_modes.map(&:id)
-    end
-
-    def self.default_id
-      @default_id ||= begin
-        id = Gitlab.config.gitlab['default_color_mode']&.to_i
-        available_modes.detect { |s| s.id == id }&.id || APPLICATION_DEFAULT
-      end
     end
   end
 end

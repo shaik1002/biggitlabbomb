@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -51,7 +51,6 @@ The `upload[url]` parameter is required if the `upload` parameter is present.
 
 For uploads to Amazon S3, refer to [Generating a pre-signed URL for uploading objects](https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html)
 documentation scripts to generate the `upload[url]`.
-Because of a [known issue](https://gitlab.com/gitlab-org/gitlab/-/issues/430277), you can only upload files with a maximum file size of 5 GB to Amazon S3.
 
 ```plaintext
 POST /projects/:id/export
@@ -59,7 +58,7 @@ POST /projects/:id/export
 
 | Attribute | Type           | Required | Description                              |
 | --------- | -------------- | -------- | ---------------------------------------- |
-| `id`                  | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                  | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `upload[url]`         | string | yes      | The URL to upload the project. |
 | `description`         | string | no | Overrides the project description. |
 | `upload`              | hash | no | Hash that contains the information to upload the exported project to a web server. |
@@ -69,7 +68,7 @@ POST /projects/:id/export
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
     "https://gitlab.example.com/api/v4/projects/1/export" \
     --data "upload[http_method]=PUT" \
-    --data-urlencode "upload[url]=https://example-bucket.s3.eu-west-3.amazonaws.com/backup?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=<your_access_token>%2F20180312%2Feu-west-3%2Fs3%2Faws4_request&X-Amz-Date=20180312T110328Z&X-Amz-Expires=900&X-Amz-SignedHeaders=host&X-Amz-Signature=8413facb20ff33a49a147a0b4abcff4c8487cc33ee1f7e450c46e8f695569dbd"
+    --data-urlencode "upload[url]=https://example-bucket.s3.eu-west-3.amazonaws.com/backup?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIMBJHN2O62W8IELQ%2F20180312%2Feu-west-3%2Fs3%2Faws4_request&X-Amz-Date=20180312T110328Z&X-Amz-Expires=900&X-Amz-SignedHeaders=host&X-Amz-Signature=8413facb20ff33a49a147a0b4abcff4c8487cc33ee1f7e450c46e8f695569dbd"
 ```
 
 ```json
@@ -88,7 +87,7 @@ GET /projects/:id/export
 
 | Attribute | Type           | Required | Description                              |
 | --------- | -------------- | -------- | ---------------------------------------- |
-| `id`      | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`      | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" \
@@ -137,7 +136,7 @@ GET /projects/:id/export/download
 
 | Attribute | Type              | Required | Description                              |
 | --------- | ----------------- | -------- | ---------------------------------------- |
-| `id`      | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`      | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" --remote-header-name \
@@ -214,7 +213,7 @@ requests.post(url, headers=headers, data=data, files=files)
 
 NOTE:
 The maximum import file size can be set by the Administrator. It defaults to `0` (unlimited).
-As an administrator, you can modify the maximum import file size. To do so, use the `max_import_size` option in the [Application settings API](settings.md#change-application-settings) or the [**Admin** area](../administration/settings/account_and_limit_settings.md).
+As an administrator, you can modify the maximum import file size. To do so, use the `max_import_size` option in the [Application settings API](settings.md#change-application-settings) or the [Admin Area](../administration/settings/account_and_limit_settings.md).
 
 ## Import a file from a remote object storage
 
@@ -269,8 +268,7 @@ The `Content-Type` header must be `application/gzip`.
 
 ## Import a single relation
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/425798) in GitLab 16.11 in [beta](../policy/experiment-beta-support.md#beta)), [with a flag](../administration/feature_flags.md) named `single_relation_import`. Disabled by default.
-> - [Enabled on GitLab.com, self-managed and Dedicated](https://gitlab.com/gitlab-org/gitlab/-/issues/455889) in 17.1.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/425798) in GitLab 16.11 in [Beta](../policy/experiment-beta-support.md#beta)), [with a flag](../administration/feature_flags.md) named `single_relation_import`. Disabled by default.
 
 This endpoint accepts a project export archive and a named relation (issues,
 merge requests, pipelines, or milestones) and re-imports that relation, skipping
@@ -328,7 +326,7 @@ GET /projects/:id/relation-imports
 
 | Attribute | Type               | Required | Description                                                                          |
 | --------- |--------------------| -------- |--------------------------------------------------------------------------------------|
-| `id`      | integer or string  | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`      | integer or string  | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" \
@@ -365,7 +363,7 @@ POST /projects/remote-import-s3
 
 | Attribute           | Type           | Required | Description                              |
 | ------------------- | -------------- | -------- | ---------------------------------------- |
-| `access_key_id`     | string         | yes      | [AWS S3 access key ID](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html). |
+| `access_key_id`     | string         | yes      | [AWS S3 access key ID](https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys). |
 | `bucket_name`       | string         | yes      | [AWS S3 bucket name](https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html) where the file is stored. |
 | `file_key`          | string         | yes      | [AWS S3 file key](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingObjects.html) to identify the file. |
 | `path`              | string         | yes      | The full path of the new project. |
@@ -439,7 +437,7 @@ GET /projects/:id/import
 
 | Attribute | Type           | Required | Description                              |
 | --------- | -------------- | -------- | ---------------------------------------- |
-| `id`      | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`      | integer or string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" \

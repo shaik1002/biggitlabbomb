@@ -6,6 +6,9 @@ export const ACTIVE_TAB_SUBGROUPS_AND_PROJECTS = 'subgroups_and_projects';
 export const ACTIVE_TAB_SHARED = 'shared';
 export const ACTIVE_TAB_INACTIVE = 'inactive';
 
+export const GROUPS_LIST_HOLDER_CLASS = '.js-groups-list-holder';
+export const CONTENT_LIST_CLASS = '.groups-list';
+
 export const COMMON_STR = {
   FAILURE: __('An error occurred. Please try again.'),
   LEAVE_FORBIDDEN: s__(
@@ -46,18 +49,13 @@ export const SORTING_ITEM_STARS = {
   desc: 'stars_desc',
 };
 
-export const GROUPS_LIST_FILTERED_SEARCH_TERM_KEY = 'filter';
-export const GROUPS_LIST_SORTING_ITEMS = [
+export const EXPLORE_FILTERED_SEARCH_TERM_KEY = 'filter';
+export const EXPLORE_FILTERED_SEARCH_NAMESPACE = 'explore';
+export const EXPLORE_SORTING_ITEMS = [
   SORTING_ITEM_NAME,
   SORTING_ITEM_CREATED,
   SORTING_ITEM_UPDATED,
 ];
-
-export const EXPLORE_FILTERED_SEARCH_NAMESPACE = 'explore';
-export const DASHBOARD_FILTERED_SEARCH_NAMESPACE = 'dashboard';
-
-export const OVERVIEW_TABS_FILTERED_SEARCH_TERM_KEY = 'filter';
-export const OVERVIEW_TABS_FILTERED_SEARCH_NAMESPACE = 'overview';
 
 export const OVERVIEW_TABS_SORTING_ITEMS = [
   SORTING_ITEM_NAME,
@@ -74,5 +72,4 @@ export const OVERVIEW_TABS_ARCHIVED_PROJECTS_SORTING_ITEMS = [
 
 export const FORM_FIELD_NAME = 'name';
 export const FORM_FIELD_PATH = 'path';
-export const FORM_FIELD_ID = 'id';
 export const FORM_FIELD_VISIBILITY_LEVEL = 'visibilityLevel';

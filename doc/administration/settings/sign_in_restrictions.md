@@ -16,7 +16,7 @@ You can use **Sign-in restrictions** to customize authentication restrictions fo
 
 To access sign-in restriction settings:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Settings > General**.
 1. Expand the **Sign-in restrictions** section.
 
@@ -27,18 +27,10 @@ You can restrict the password authentication for web interface and Git over HTTP
 - **Web interface**: When this feature is disabled, the **Standard** sign-in tab
   is removed and an [external authentication provider](../auth/index.md)
   must be used.
-- **Git over HTTP(S)**: When this feature is disabled, a [personal access token](../../user/profile/personal_access_tokens.md)
+- **Git over HTTP(S)**: When this feature is disabled, a [Personal Access Token](../../user/profile/personal_access_tokens.md)
   or LDAP password must be used to authenticate.
 
 In the event of an external authentication provider outage, use the [GitLab Rails console](../operations/rails_console.md) to [re-enable the standard web sign-in form](#re-enable-standard-web-sign-in-form-in-rails-console). This configuration can also be changed over the [Application settings REST API](../../api/settings.md#change-application-settings) while authenticating with an administrator account's personal access token.
-
-### Disable password authentication for users with an SSO identity
-
-Even when password authentication is enabled, it may be desirable to restrict SSO users ability to sign in with a
-password. Select **Disable password authentication for users with an SSO identity** to ensure SSO users always sign in
-with their external provider.
-
-This restricts password authentication for both the web interface and Git over HTTP(S).
 
 ## Admin Mode
 
@@ -55,7 +47,7 @@ When Admin Mode is enabled, it applies to all administrators on the instance.
 When Admin Mode is enabled for an instance, administrators:
 
 - Are allowed to access group and projects for which they are members.
-- Cannot access the **Admin area**.
+- Cannot access the **Admin Area**.
 
 ### Enable Admin Mode for your instance
 
@@ -85,7 +77,7 @@ Open the [Rails console](../operations/rails_console.md) and run the following:
 
 To enable Admin Mode through the UI:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Settings > General**.
 1. Expand **Sign-in restrictions**.
 1. Select **Enable Admin Mode**.
@@ -136,7 +128,7 @@ Admin Mode times out after six hours, and you cannot change this timeout limit.
 
 The following access methods are **not** protected by Admin Mode:
 
-- Git client access (SSH using public keys or HTTPS using Personal access tokens).
+- Git client access (SSH using public keys or HTTPS using Personal Access Tokens).
 
 In other words, administrators who are otherwise limited by Admin Mode can still use
 Git clients without additional authentication steps.
@@ -175,14 +167,14 @@ After the two-factor authentication is configured as mandatory, users are allowe
 to skip forced configuration of two-factor authentication for the configurable grace
 period in hours.
 
-![The two-factor grace period set to 48 hours.](img/two_factor_grace_period_v12_5.png)
+![Two-factor grace period](img/two_factor_grace_period.png)
 
 ## Email notification for unknown sign-ins
 
 When enabled, GitLab notifies users of sign-ins from unknown IP addresses or devices. For more information,
 see [Email notification for unknown sign-ins](../../user/profile/notifications.md#notifications-for-unknown-sign-ins).
 
-![Email notifications enabled for unknown sign-ins.](img/email_notification_for_unknown_sign_ins_v13_2.png)
+![Email notification for unknown sign-ins](img/email_notification_for_unknown_sign_ins_v13_2.png)
 
 ## Sign-in information
 

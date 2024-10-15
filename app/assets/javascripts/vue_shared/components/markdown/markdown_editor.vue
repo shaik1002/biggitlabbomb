@@ -68,6 +68,7 @@ export default {
     formFieldProps: {
       type: Object,
       required: true,
+      validator: (prop) => prop.id && prop.name,
     },
     autofocus: {
       type: Boolean,
@@ -119,11 +120,6 @@ export default {
       required: false,
       default: () => ({}),
     },
-    restrictedToolBarItems: {
-      type: Array,
-      required: false,
-      default: () => [],
-    },
   },
   data() {
     const editingMode =
@@ -144,13 +140,16 @@ export default {
       return this.autofocus && !this.autofocused ? 'end' : false;
     },
     markdownFieldRestrictedToolBarItems() {
-      const restrictAttachments = this.disableAttachments ? ['attach-file'] : [];
-
-      return [...this.restrictedToolBarItems, ...restrictAttachments];
+      return this.disableAttachments ? ['attach-file'] : [];
     },
   },
   watch: {
-    value: 'updateValue',
+    value(val) {
+      this.markdown = val;
+
+      this.saveDraft();
+      this.autosizeTextarea();
+    },
   },
   mounted() {
     this.autofocusTextarea();
@@ -173,24 +172,11 @@ export default {
       return this.markdown;
     },
     setValue(value) {
-      this.$emit('input', value);
-      this.updateValue(value);
-    },
-    updateValue(value) {
       this.markdown = value;
+      this.$emit('input', value);
+
       this.saveDraft();
       this.autosizeTextarea();
-    },
-    append(value) {
-      if (!value) {
-        this.focus();
-        return;
-      }
-      const newValue = [this.markdown.trim(), value].filter(Boolean).join('\n\n');
-      this.updateValue(`${newValue}\n\n`);
-      this.$nextTick(() => {
-        this.focus();
-      });
     },
     setTemplate(template, force = false) {
       if (!this.markdown || force) {
@@ -231,12 +217,7 @@ export default {
         { render_quick_actions: this.supportsQuickActions },
         joinPaths(window.location.origin, this.renderMarkdownPath),
       );
-      return axios
-        .post(url, { text: markdown })
-        .then(({ data: { html, body, ...otherData } = {} } = {}) => ({
-          body: body || html,
-          ...otherData,
-        }));
+      return axios.post(url, { text: markdown }).then(({ data }) => data.body || data.html);
     },
     onEditingModeChange(editingMode) {
       this.editingMode = editingMode;
@@ -266,13 +247,6 @@ export default {
       if (this.autofocus && this.editingMode === EDITING_MODE_MARKDOWN_FIELD) {
         this.$refs.textarea.focus();
         this.setEditorAsAutofocused();
-      }
-    },
-    focus() {
-      if (this.editingMode === EDITING_MODE_MARKDOWN_FIELD) {
-        this.$refs.textarea.focus();
-      } else {
-        this.$refs.contentEditor.focus();
       }
     },
     setEditorAsAutofocused() {
@@ -320,7 +294,7 @@ export default {
 };
 </script>
 <template>
-  <div class="!gl-px-0">
+  <div class="gl-px-0!">
     <local-storage-sync
       :value="editingMode"
       as-string

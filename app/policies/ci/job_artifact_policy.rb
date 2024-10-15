@@ -12,7 +12,7 @@ module Ci
       @subject.none_access?
     end
 
-    condition(:can_read_project_build) do
+    condition(:can_read_project_build, scope: :subject) do
       can?(:read_build, @subject.job.project)
     end
 

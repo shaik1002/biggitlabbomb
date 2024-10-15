@@ -3,8 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe 'User closes/reopens a merge request', :js, feature_category: :code_review_workflow do
-  let(:project) { create(:project, :repository) }
-  let(:user) { create(:user) }
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:user) { create(:user) }
 
   before do
     project.add_developer(user)
@@ -52,7 +52,7 @@ RSpec.describe 'User closes/reopens a merge request', :js, feature_category: :co
     end
 
     context 'when clicking the top `Reopen merge request` button', :aggregate_failures do
-      it 'reopens the merge request', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/444681' do
+      it 'reopens the merge request' do
         expect(page).to have_css('.gl-badge', text: 'Closed')
 
         within '.detail-page-header' do

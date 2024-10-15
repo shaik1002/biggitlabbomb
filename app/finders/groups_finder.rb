@@ -29,7 +29,6 @@
 # public groups instead, even if `all_available` is set to false.
 class GroupsFinder < UnionFinder
   include CustomAttributesFilter
-  include Namespaces::GroupsFilter
 
   attr_reader :current_user, :params
 
@@ -59,6 +58,7 @@ class GroupsFinder < UnionFinder
     return [Group.all] if current_user&.can_read_all_resources? && all_available?
 
     groups = [
+      membership_groups,
       authorized_groups,
       public_groups
     ].compact
@@ -80,6 +80,12 @@ class GroupsFinder < UnionFinder
       .self_and_descendants
   end
   # rubocop: enable CodeReuse/ActiveRecord
+
+  def membership_groups
+    return unless current_user
+
+    current_user.groups.self_and_descendants
+  end
 
   def authorized_groups
     return unless current_user
@@ -116,6 +122,12 @@ class GroupsFinder < UnionFinder
     groups.in_organization(organization)
   end
 
+  def by_visibility(groups)
+    return groups unless params[:visibility]
+
+    groups.by_visibility_level(params[:visibility])
+  end
+
   def by_parent(groups)
     return groups unless params[:parent]
 
@@ -150,12 +162,28 @@ class GroupsFinder < UnionFinder
     groups.id_not_in(params[:exclude_group_ids])
   end
 
+  def by_search(groups)
+    return groups unless params[:search].present?
+
+    groups.search(params[:search], include_parents: params[:parent].blank?)
+  end
+
+  def sort(groups)
+    return groups.order_id_desc unless params[:sort]
+
+    groups.sort_by_attribute(params[:sort])
+  end
+
   def include_parent_shared_groups?
     params.fetch(:include_parent_shared_groups, false)
   end
 
   def include_parent_descendants?
     params.fetch(:include_parent_descendants, false)
+  end
+
+  def min_access_level?
+    current_user && params[:min_access_level].present?
   end
 
   def include_public_groups?

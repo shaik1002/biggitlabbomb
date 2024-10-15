@@ -204,10 +204,10 @@ describe('graph component', () => {
 
     it(`has correct titleClasses on stageColumnTitle`, () => {
       const titleClasses = [
-        'gl-font-bold',
+        'gl-font-weight-bold',
         'gl-pipeline-job-width',
-        'gl-truncate',
-        'gl-leading-36',
+        'gl-text-truncate',
+        'gl-line-height-36',
         'gl-pl-4',
         '-gl-mb-2',
       ];
@@ -219,11 +219,11 @@ describe('graph component', () => {
       const jobClasses = [
         'gl-p-3',
         'gl-border-0',
-        '!gl-rounded-base',
-        'hover:gl-bg-strong',
-        'focus:gl-bg-strong',
-        'hover:gl-text-gray-900',
-        'focus:gl-text-gray-900',
+        'gl-rounded-base',
+        'gl-hover-bg-gray-50',
+        'gl-focus-bg-gray-50',
+        'gl-hover-text-gray-900',
+        'gl-focus-text-gray-900',
       ];
 
       expect(findJobItem().props('cssClassJobName')).toEqual(expect.arrayContaining(jobClasses));

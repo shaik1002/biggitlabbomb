@@ -80,7 +80,7 @@ Available documentation suggests ED25519 is more secure than RSA.
 If you use an RSA key, the US National Institute of Standards and Technology in
 [Publication 800-57 Part 3 (PDF)](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57Pt3r1.pdf)
 recommends a key size of at least 2048 bits. Due to limitations in Go,
-RSA keys [cannot exceed 8192 bits](ssh_troubleshooting.md#tls-server-sent-certificate-containing-rsa-key-larger-than-8192-bits).
+RSA keys [cannot exceed 8192 bits](#tls-server-sent-certificate-containing-rsa-key-larger-than-8192-bits).
 
 The default key size depends on your version of `ssh-keygen`.
 Review the `man` page for your installed `ssh-keygen` command for details.
@@ -472,7 +472,7 @@ on the files make them readable to you but not accessible to others.
 ## Configure two-factor authentication (2FA)
 
 You can set up two-factor authentication (2FA) for
-[Git over SSH](../security/two_factor_authentication.md#2fa-for-git-over-ssh-operations). You should use
+[Git over SSH](../security/two_factor_authentication.md#2fa-for-git-over-ssh-operations). We recommend using
 [ED25519_SK](#ed25519_sk-ssh-keys) or [ECDSA_SK](#ecdsa_sk-ssh-keys) SSH keys.
 
 ## Use EGit on Eclipse
@@ -534,28 +534,53 @@ Git user has default SSH configuration? ... no
 Remove the custom configuration as soon as you can. These customizations
 are **explicitly not supported** and may stop working at any time.
 
-## Verify GitLab SSH ownership and permissions
+## Troubleshooting
 
-The GitLab SSH folder and files must have the following permissions:
+### TLS: server sent certificate containing RSA key larger than 8192 bits
 
-- The folder `/var/opt/gitlab/.ssh/` must be owned by the `git` group and the `git` user, with permissions set to `700`.
-- The `authorized_keys` file must have permissions set to `600`.
-- The `authorized_keys.lock` file must have permissions set to `644`.
-
-To verify that these permissions are correct, run the following:
+In GitLab 16.3 and later, Go limits RSA keys to a maximum of 8192 bits.
+To check the length of a key:
 
 ```shell
-stat -c "%a %n" /var/opt/gitlab/.ssh/.
+openssl rsa -in <your-key-file> -text -noout | grep "Key:"
 ```
 
-### Set permissions
+Replace any key longer than 8192 bits with a shorter key.
 
-If the permissions are wrong, sign in to the application server and run:
+### Password prompt with `git clone`
+
+When you run `git clone`, you may be prompted for a password, like `git@gitlab.example.com's password:`.
+This indicates that something is wrong with your SSH setup.
+
+- Ensure that you generated your SSH key pair correctly and added the public SSH
+  key to your GitLab profile.
+- Try to manually register your private SSH key by using `ssh-agent`.
+- Try to debug the connection by running `ssh -Tv git@example.com`.
+  Replace `example.com` with your GitLab URL.
+- Ensure you followed all the instructions in [Use SSH on Microsoft Windows](#use-ssh-on-microsoft-windows).
+
+### `Could not resolve hostname` error
+
+You may receive the following error when [verifying that you can connect](#verify-that-you-can-connect):
 
 ```shell
-cd /var/opt/gitlab/
-chown git:git /var/opt/gitlab/.ssh/
-chmod 700  /var/opt/gitlab/.ssh/
-chmod 600  /var/opt/gitlab/.ssh/authorized_keys
-chmod 644  /var/opt/gitlab/.ssh/authorized_keys.lock
+ssh: Could not resolve hostname gitlab.example.com: nodename nor servname provided, or not known
 ```
+
+If you receive this error, restart your terminal and try the command again.
+
+### `Key enrollment failed: invalid format` error
+
+You may receive the following error when [generating an SSH key pair for a FIDO2 hardware security key](#generate-an-ssh-key-pair-for-a-fido2-hardware-security-key):
+
+```shell
+Key enrollment failed: invalid format
+```
+
+You can troubleshoot this by trying the following:
+
+- Run the `ssh-keygen` command using `sudo`.
+- Verify your FIDO2 hardware security key supports
+  the key type provided.
+- Verify the version of OpenSSH is 8.2 or greater by
+  running `ssh -V`.

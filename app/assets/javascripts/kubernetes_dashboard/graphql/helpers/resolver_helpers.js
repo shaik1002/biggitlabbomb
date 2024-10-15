@@ -44,15 +44,6 @@ export const mapWorkloadItem = (item) => {
   return { status, spec, metadata, __typename: 'LocalWorkloadItem' };
 };
 
-export const mapEventItem = ({
-  lastTimestamp = '',
-  eventTime = '',
-  message,
-  reason,
-  source,
-  type,
-}) => ({ lastTimestamp, eventTime, message, reason, source, type });
-
 export const watchWorkloadItems = ({
   client,
   query,
@@ -122,6 +113,7 @@ export const getK8sPods = ({
   query,
   configuration,
   namespace = '',
+  enableWatch = false,
   mapFn = mapWorkloadItem,
   queryField = 'k8sPods',
 }) => {
@@ -134,15 +126,17 @@ export const getK8sPods = ({
 
   return podsApi
     .then((res) => {
-      const watchPath = buildWatchPath({ resource: 'pods', namespace });
-      watchWorkloadItems({
-        client,
-        query,
-        configuration,
-        namespace,
-        watchPath,
-        queryField,
-      });
+      if (enableWatch) {
+        const watchPath = buildWatchPath({ resource: 'pods', namespace });
+        watchWorkloadItems({
+          client,
+          query,
+          configuration,
+          namespace,
+          watchPath,
+          queryField,
+        });
+      }
 
       const data = res?.items || [];
       return data.map(mapFn);

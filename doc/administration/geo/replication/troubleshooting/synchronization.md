@@ -19,27 +19,13 @@ DETAILS:
 WARNING:
 Commands that change data can cause damage if not run correctly or under the right conditions. Always run commands in a test environment first and have a backup instance ready to restore.
 
-### Reverify all uploads
+   ```ruby
+   Upload.verification_state_table_class.each_batch do |relation|
+     relation.update_all(verification_state: 0)
+   end
+   ```
 
-```ruby
-Upload.verification_state_table_class.each_batch do |relation|
-  relation.update_all(verification_state: 0)
-end
-```
-
-### Reverify failed uploads only
-
-```ruby
-Upload.verification_state_table_class.where(verification_state: 3).each_batch do |relation|
-  relation.update_all(verification_state: 0)
-end
-```
-
-### How the reverification process works
-
-When you [reverify all uploads](#reverify-all-uploads) or [reverify failed uploads only](#reverify-failed-uploads-only):
-
-1. This causes the primary to start checksumming the Uploads depending on which commands were executed.
+1. This causes the primary to start checksumming all Uploads.
 1. When a primary successfully checksums a record, then all secondaries recalculate the checksum as well, and they compare the values.
 
 You can perform a similar operation with other the Models handled by the [Geo Self-Service Framework](../../../../development/geo/framework.md) which have implemented verification:
@@ -57,7 +43,7 @@ You can perform a similar operation with other the Models handled by the [Geo Se
 
 NOTE:
 `GroupWikiRepository` is not in the previous list since verification is not implemented.
-There is an [issue to implement this functionality in the **Admin** area UI](https://gitlab.com/gitlab-org/gitlab/-/issues/364729).
+There is an [issue to implement this functionality in the Admin Area UI](https://gitlab.com/gitlab-org/gitlab/-/issues/364729).
 
 ## Message: `Synchronization failed - Error syncing repository`
 
@@ -173,25 +159,20 @@ To solve this:
 1. Enter the [Rails console](../../../operations/rails_console.md) and run:
 
    ```ruby
-   failed_project_registries = Geo::ProjectRepositoryRegistry.failed
-
-   if failed_project_registries.any?
-     puts "Found #{failed_project_registries.count} failed project repository registry entries:"
-
-     failed_project_registries.each do |registry|
-       puts "ID: #{registry.id}, Project ID: #{registry.project_id}, Last Sync Failure: '#{registry.last_sync_failure}'"
-     end
-   else
-     puts "No failed project repository registry entries found."
+   failed_geo_syncs = Geo::ProjectRegistry.failed.pluck(:id)
+   failed_geo_syncs.each do |fgs|
+     puts Geo::ProjectRegistry.failed.find(fgs).project_id
    end
    ```
 
-1. Run the following commands to execute a new sync for each project:
+1. Run the following commands to reset each project's
+   Geo-related attributes and execute a new sync:
 
    ```ruby
-   failed_project_registries.each do |registry|
-     registry.replicator.sync
-     puts "Sync initiated for registry ID: #{registry.id}, Project ID: #{registry.project_id}"
+   failed_geo_syncs.each do |fgs|
+     registry = Geo::ProjectRegistry.failed.find(fgs)
+     registry.update(resync_repository: true, force_to_redownload_repository: false, repository_retry_count: 0)
+     Geo::RepositorySyncService.new(registry.project).execute
    end
    ```
 
@@ -200,17 +181,10 @@ To solve this:
 During a [backfill](../../index.md#backfill), failures are scheduled to be retried at the end
 of the backfill queue, therefore these failures only clear up **after** the backfill completes.
 
-## Message: `unexpected disconnect while reading sideband packet`
+## Message: curl 18 transfer closed with outstanding read data remaining & fetch-pack: unexpected disconnect while reading sideband packet
 
 Unstable networking conditions can cause Gitaly to fail when trying to fetch large repository
-data from the primary site. Those conditions can result in this error:
-
-```plaintext
-curl 18 transfer closed with outstanding read data remaining & fetch-pack:
-unexpected disconnect while reading sideband packet
-```
-
-This error is more likely to happen if a repository has to be
+data from the primary site. This is more likely to happen if a repository has to be
 replicated from scratch between sites.
 
 Geo retries several times, but if the transmission is consistently interrupted
@@ -223,70 +197,46 @@ to transfer each affected repository from the primary to the secondary site.
 
 ## Project or project wiki repositories
 
-### Resync all Geo-replicable objects
+### Find repository verification failures
 
-You can schedule a full resync or reverification of all Geo-replicable objects
-from the UI:
-
-1. On the left sidebar, at the bottom, select **Admin**.
-1. Select **Geo > Sites**.
-1. Under **Replication details**, select the desired object.
-1. Select **Resync all** or **Reverify all**.
-
-Alternatively, [start a Rails console session](../../../../administration/operations/rails_console.md#starting-a-rails-console-session)
-**on the secondary Geo site** to gather more information, or execute these operations manually using the snippets below.
+[Start a Rails console session](../../../../administration/operations/rails_console.md#starting-a-rails-console-session)
+**on the secondary Geo site** to gather more information.
 
 WARNING:
 Commands that change data can cause damage if not run correctly or under the right conditions. Always run commands in a test environment first and have a backup instance ready to restore.
 
-### Find repository verification failures
-
 #### Get the number of verification failed repositories
 
 ```ruby
-Geo::ProjectRepositoryRegistry.verification_failed.count
+Geo::ProjectRegistry.verification_failed('repository').count
 ```
 
 #### Find the verification failed repositories
 
 ```ruby
-Geo::ProjectRepositoryRegistry.verification_failed
+Geo::ProjectRegistry.verification_failed('repository')
 ```
 
 #### Find repositories that failed to sync
 
 ```ruby
-Geo::ProjectRepositoryRegistry.failed
-```
-
-#### Mark all repositories for reverification
-
-The following snippet marks all project repositories for reverification. After a minute or two, the system should begin to schedule Sidekiq jobs according to your concurrency limits:
-
-```ruby
-Geo::ProjectRepositoryRegistry.update_all(verification_state: 0)
-```
-
-If there's a very large number of repositories to reverify, the single update query can time out. If this happens, you should run update queries in batches of rows using the same code as the **Reverify all** feature in the admin area:
-
-```ruby
-::Geo::RegistryBulkUpdateService.new(:reverify_all, Geo::ProjectRepositoryRegistry).execute
+Geo::ProjectRegistry.sync_failed('repository')
 ```
 
 ### Resync project and project wiki repositories
 
+[Start a Rails console session](../../../../administration/operations/rails_console.md#starting-a-rails-console-session)
+**on the secondary Geo site** to perform the following changes.
+
+WARNING:
+Commands that change data can cause damage if not run correctly or under the right conditions. Always run commands in a test environment first and have a backup instance ready to restore.
+
 #### Queue up all repositories for resync
 
-The following snippet marks all project repositories for reverification. After a minute or two, the system should begin to schedule Sidekiq jobs according to your concurrency limits:
+When you run this, the sync is handled in the background by Sidekiq.
 
 ```ruby
-Geo::ProjectRepositoryRegistry.update_all(state: 0, last_synced_at: nil)
-```
-
-If there's a very large number of repositories to reverify, the single update query can time out. If this happens, you should run update queries in batches of rows using the same code as the **Reverify all** feature in the admin area:
-
-```ruby
-::Geo::RegistryBulkUpdateService.new(:resync_all, Geo::ProjectRepositoryRegistry).execute
+Geo::ProjectRegistry.update_all(resync_repository: true, resync_wiki: true)
 ```
 
 #### Sync individual repository now
@@ -294,14 +244,14 @@ If there's a very large number of repositories to reverify, the single update qu
 ```ruby
 project = Project.find_by_full_path('<group/project>')
 
-project.replicator.sync
+Geo::RepositorySyncService.new(project).execute
 ```
 
 #### Sync all failed repositories now
 
 The following script:
 
-- Loops over all failed repositories.
+- Loops over all currently failed repositories.
 - Displays the project details and the reasons for the last failure.
 - Attempts to resync the repository.
 - Reports back if a failure occurs, and why.
@@ -312,23 +262,18 @@ The following script:
   and `nohup`.
 
 ```ruby
-Geo::ProjectRepositoryRegistry.failed.find_each do |registry|
+Geo::ProjectRegistry.sync_failed('repository').find_each do |p|
    begin
-     puts "ID: #{registry.id}, Project ID: #{registry.project_id}, Last Sync Failure: '#{registry.last_sync_failure}'"
-     registry.replicator.sync
-     puts "Sync initiated for registry ID: #{registry.id}"
+     project = p.project
+     puts "#{project.full_path} | id: #{p.project_id} | last error: '#{p.last_repository_sync_failure}'"
+     Geo::RepositorySyncService.new(project).execute
    rescue => e
-     puts "ID: #{registry.id}, Project ID: #{registry.project_id}, Failed: '#{e}'", e.backtrace.join("\n")
+     puts "ID: #{p.project_id} failed: '#{e}'", e.backtrace.join("\n")
    end
 end ; nil
 ```
 
 ## Find repository check failures in a Geo secondary site
-
-NOTE:
-All repositories data types have been migrated to the Geo Self-Service Framework in GitLab 16.3. There is an [issue to implement this functionality back in the Geo Self-Service Framework](https://gitlab.com/gitlab-org/gitlab/-/issues/426659).
-
-For GitLab 16.2 and earlier:
 
 When [enabled for all projects](../../../repository_checks.md#enable-repository-checks-for-all-projects), [Repository checks](../../../repository_checks.md) are also performed on Geo secondary sites. The metadata is stored in the Geo tracking database.
 
@@ -357,4 +302,16 @@ Geo::ProjectRegistry.where(last_repository_check_failed: true).count
 
 ```ruby
 Geo::ProjectRegistry.where(last_repository_check_failed: true)
+```
+
+### Recheck repositories that failed the repository check
+
+When you run this, `fsck` is executed against each failed repository.
+
+The [`fsck` Rake command](../../../raketasks/check.md#check-project-code-repositories) can be used on the secondary site to understand why the repository check might be failing.
+
+```ruby
+Geo::ProjectRegistry.where(last_repository_check_failed: true).each do |pr|
+    RepositoryCheck::SingleRepositoryWorker.new.perform(pr.project_id)
+end
 ```

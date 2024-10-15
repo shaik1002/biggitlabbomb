@@ -2,6 +2,7 @@
 
 class DeployKey < Key
   include FromUnion
+  include IgnorableColumns
   include PolicyActor
   include Presentable
   include Gitlab::SQL::Pattern

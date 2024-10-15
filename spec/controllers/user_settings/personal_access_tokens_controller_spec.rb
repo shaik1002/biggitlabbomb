@@ -10,7 +10,7 @@ RSpec.describe UserSettings::PersonalAccessTokensController, feature_category: :
     sign_in(access_token_user)
   end
 
-  describe '#create', :with_current_organization do
+  describe '#create' do
     def created_token
       PersonalAccessToken.order(:created_at).last
     end
@@ -25,16 +25,6 @@ RSpec.describe UserSettings::PersonalAccessTokensController, feature_category: :
       expect(created_token.name).to eq(name)
       expect(created_token.scopes).to eq(scopes)
       expect(PersonalAccessToken.active).to include(created_token)
-    end
-
-    it "does not allow creation of a token with workflow scope" do
-      name = 'My PAT'
-      scopes = %w[ai_workflow]
-
-      post :create, params: { personal_access_token: token_attributes.merge(scopes: scopes, name: name) }
-
-      expect(created_token).to be_nil
-      expect(response).to have_gitlab_http_status(:unprocessable_entity)
     end
 
     it "allows creation of a token with an expiry date" do
@@ -114,16 +104,6 @@ RSpec.describe UserSettings::PersonalAccessTokensController, feature_category: :
       get :index, params: { format: :json }
 
       expect(json_response.count).to eq(1)
-    end
-
-    it 'returns an iCalendar after redirect for ics format' do
-      get :index, params: { format: :ics }
-
-      expect(response).to redirect_to(%r{/-/user_settings/personal_access_tokens\?feed_token=})
-
-      get :index, params: { format: :ics, feed_token: response.location.split('=').last }
-
-      expect(response.body).to include('BEGIN:VCALENDAR')
     end
 
     it 'sets available scopes' do

@@ -17,8 +17,9 @@ class Projects::MirrorsController < Projects::ApplicationController
   end
 
   def update
-    if push_mirror_create_or_destroy?
-      result = execute_push_mirror_service
+    if push_mirror_create? && Feature.enabled?(:use_remote_mirror_create_service, project)
+      service = ::RemoteMirrors::CreateService.new(project, current_user, push_mirror_attributes)
+      result = service.execute
 
       if result.success?
         flash[:notice] = notice_message
@@ -37,14 +38,7 @@ class Projects::MirrorsController < Projects::ApplicationController
         end
       end
     else
-      flash[:alert] = alert_error('Invalid mirror update request')
-
-      respond_to do |format|
-        format.html { redirect_to_repository_settings(project, anchor: 'js-push-remote-settings') }
-        format.json do
-          render json: { error: flash[:alert] }, status: :bad_request
-        end
-      end
+      deprecated_update_procedure
     end
   end
 
@@ -75,32 +69,6 @@ class Projects::MirrorsController < Projects::ApplicationController
 
   private
 
-  def push_mirror_create_or_destroy?
-    push_mirror_create? || push_mirror_destroy?
-  end
-
-  def push_mirror_create?
-    push_mirror_attributes.present?
-  end
-
-  def push_mirror_destroy?
-    ::Gitlab::Utils.to_boolean(mirror_params.dig(:remote_mirrors_attributes, '_destroy'))
-  end
-
-  def push_mirror_attributes
-    mirror_params.dig(:remote_mirrors_attributes, '0')
-  end
-
-  def execute_push_mirror_service
-    if push_mirror_create?
-      return ::RemoteMirrors::CreateService.new(project, current_user, push_mirror_attributes).execute
-    end
-
-    return unless push_mirror_destroy?
-
-    ::RemoteMirrors::DestroyService.new(project, current_user).execute(push_mirror_to_destroy)
-  end
-
   def safe_mirror_params
     mirror_params
   end
@@ -109,10 +77,33 @@ class Projects::MirrorsController < Projects::ApplicationController
     _('Mirroring settings were successfully updated.')
   end
 
-  def push_mirror_to_destroy
-    push_mirror_to_destroy_id = safe_mirror_params.dig(:remote_mirrors_attributes, 'id')
+  def push_mirror_create?
+    push_mirror_attributes.present?
+  end
 
-    project.remote_mirrors.find(push_mirror_to_destroy_id)
+  def push_mirror_attributes
+    mirror_params.dig(:remote_mirrors_attributes, '0')
+  end
+
+  def deprecated_update_procedure
+    result = ::Projects::UpdateService.new(project, current_user, safe_mirror_params).execute
+
+    if result[:status] == :success
+      flash[:notice] = notice_message
+    else
+      flash[:alert] = project.errors.full_messages.join(', ').html_safe
+    end
+
+    respond_to do |format|
+      format.html { redirect_to_repository_settings(project, anchor: 'js-push-remote-settings') }
+      format.json do
+        if project.errors.present?
+          render json: project.errors, status: :unprocessable_entity
+        else
+          render json: ProjectMirrorSerializer.new.represent(project)
+        end
+      end
+    end
   end
 
   def remote_mirror

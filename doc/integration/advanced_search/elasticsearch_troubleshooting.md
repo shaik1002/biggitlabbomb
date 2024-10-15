@@ -108,7 +108,7 @@ There are a couple of ways to achieve that:
   This is always correctly identifying whether the current project/namespace
   being searched is using Elasticsearch.
 
-- From the **Admin** area under **Settings > Search** check that the
+- From the Admin Area under **Settings > Advanced Search** check that the
   advanced search settings are checked.
 
   Those same settings there can be obtained from the Rails console if necessary:
@@ -142,49 +142,6 @@ There are a couple of ways to achieve that:
   ::Gitlab::CurrentSettings.search_using_elasticsearch?(scope: Namespace.find_by_full_path("/my-namespace"))
   ::Gitlab::CurrentSettings.search_using_elasticsearch?(scope: Project.find_by_full_path("/my-namespace/my-project"))
   ```
-
-## Troubleshooting access
-
-### User: anonymous is not authorized to perform: es:ESHttpGet
-
-When using a domain level access policy with AWS OpenSearch or Elasticsearch, the AWS role is not assigned to the
-correct GitLab nodes. The GitLab Rails and Sidekiq nodes require permission to communicate with the search cluster.
-
-```plaintext
-User: anonymous is not authorized to perform: es:ESHttpGet because no resource-based policy allows the es:ESHttpGet
-action
-```
-
-To fix this, ensure the AWS role is assigned to the correct GitLab nodes.
-
-### Credential should be scoped to a valid region
-
-When using AWS authorization with Advanced search, the region must be valid.
-
-### No permissions for `[indices:data/write/bulk]`
-
-When using fine-grained access control with an IAM role or a role created using AWS OpenSearch Dashboards, you might
-encounter the following error:
-
-```json
-{
-  "error": {
-    "root_cause": [
-      {
-        "type": "security_exception",
-        "reason": "no permissions for [indices:data/write/bulk] and User [name=arn:aws:iam::xxx:role/INSERT_ROLE_NAME_HERE, backend_roles=[arn:aws:iam::xxx:role/INSERT_ROLE_NAME_HERE], requestedTenant=null]"
-      }
-    ],
-    "type": "security_exception",
-    "reason": "no permissions for [indices:data/write/bulk] and User [name=arn:aws:iam::xxx:role/INSERT_ROLE_NAME_HERE, backend_roles=[arn:aws:iam::xxx:role/INSERT_ROLE_NAME_HERE], requestedTenant=null]"
-  },
-  "status": 403
-}
-```
-
-To fix this, you need
-to [map the roles to users](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/fgac.html#fgac-mapping)
-in the AWS OpenSearch Dashboards.
 
 ## Troubleshooting indexing
 
@@ -236,7 +193,7 @@ We continuously make updates to our indexing strategies and aim to support
 newer versions of Elasticsearch. When indexing changes are made, it may
 be necessary for you to [reindex](elasticsearch.md#zero-downtime-reindexing) after updating GitLab.
 
-### No search results in the UI after indexing all repositories
+### You indexed all the repositories but you can't get any hits for your search term in the UI
 
 Make sure you [indexed all the database data](elasticsearch.md#enable-advanced-search).
 
@@ -266,7 +223,7 @@ The above instructions are not to be used for scenarios that only index a [subse
 
 See [Elasticsearch Index Scopes](elasticsearch.md#advanced-search-index-scopes) for more information on searching for specific types of data.
 
-### All repositories indexed, but no results after switching Elasticsearch servers
+### You indexed all the repositories but then switched Elasticsearch servers and now you can't find anything
 
 You must re-run all the Rake tasks to reindex the database, repositories, and wikis.
 
@@ -315,26 +272,6 @@ A large Sidekiq backlog might accompany this error. To fix the indexing failures
    ```shell
    sudo gitlab-rake gitlab:elastic:resume_indexing
    ```
-
-### Indexing keeps pausing with `elasticsearch_pause_indexing setting is enabled`
-
-You might notice that new data is not being detected when you run a search.
-
-This error occurs when that new data is not being indexed properly.
-
-To resolve this error, [reindex your data](elasticsearch.md#zero-downtime-reindexing).
-
-However, when reindexing, you might get an error where the indexing process keeps pausing, and the Elasticsearch logs show the following:
-
-```shell
-"message":"elasticsearch_pause_indexing setting is enabled. Job was added to the waiting queue"
-```
-
-If reindexing does not resolve this issue, and you did not pause the indexing process manually, this error might be happening because two GitLab instances share one Elasticsearch cluster.
-
-To resolve this error, disconnect one of the GitLab instances from using the Elasticsearch cluster.
-
-For more information, see [issue 3421](https://gitlab.com/gitlab-org/gitlab/-/issues/3421).
 
 ### Last resort to recreate an index
 
@@ -448,8 +385,8 @@ These settings limit indexing to 2000 documents per minute.
 
 To adjust worker settings:
 
-1. On the left sidebar, at the bottom, select **Admin**.
-1. Select **Settings > Search**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
+1. Select **Settings > Advanced Search**.
 1. Expand **Advanced Search**.
 1. Select the **Requeue indexing workers** checkbox.
 1. In the **Number of shards for non-code indexing** text box, enter a value higher than `2`.
@@ -461,7 +398,7 @@ Ensure you've read about [Elasticsearch Migrations](../advanced_search/elasticse
 
 If there is a halted migration and your [`elasticsearch.log`](../../administration/logs/index.md#elasticsearchlog) file contain errors, this could potentially be a bug/issue. Escalate to GitLab support if retrying migrations does not succeed.
 
-## Error: `Can't specify parent if no parent field has been configured`
+## `Can't specify parent if no parent field has been configured` error
 
 If you enabled Elasticsearch before GitLab 8.12 and have not rebuilt indices, you get
 exceptions in lots of different cases:
@@ -483,12 +420,12 @@ Elasticsearch::Transport::Transport::Errors::BadRequest([400] {
 This is because we changed the index mapping in GitLab 8.12 and the old indices should be removed and built from scratch again,
 see details in the [update guide](../../update/upgrading_from_source.md).
 
-## Error: `Elasticsearch::Transport::Transport::Errors::BadRequest`
+## `Elasticsearch::Transport::Transport::Errors::BadRequest`
 
 If you have this exception (just like in the case above but the actual message is different), check that you have the correct Elasticsearch version and you met the other [requirements](elasticsearch.md#system-requirements).
 There is also an easy way to check it automatically with `sudo gitlab-rake gitlab:check` command.
 
-## Error: `Elasticsearch::Transport::Transport::Errors::RequestEntityTooLarge`
+## `Elasticsearch::Transport::Transport::Errors::RequestEntityTooLarge`
 
 ```plaintext
 [413] {"Message":"Request size exceeded 10485760 bytes"}
@@ -498,13 +435,11 @@ This exception is seen when your Elasticsearch cluster is configured to reject r
 
 AWS has [network limits](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/limits.html#network-limits) on the maximum size of HTTP request payloads based on the size of the underlying instance. Set the maximum bulk request size to a value lower than 10 MiB.
 
-## Error: `Faraday::TimeoutError (execution expired)`
+## `Faraday::TimeoutError (execution expired)` error when using a proxy
 
-When you use a proxy, set a custom `gitlab_rails['env']` environment variable
-named [`no_proxy`](https://docs.gitlab.com/omnibus/settings/environment-variables.html)
-with the IP address of your Elasticsearch host.
+Set a custom `gitlab_rails['env']` environment variable, called [`no_proxy`](https://docs.gitlab.com/omnibus/settings/environment-variables.html) with the IP address of your Elasticsearch host.
 
-## My single node Elasticsearch cluster status never goes from `yellow` to `green`
+## My single node Elasticsearch cluster status never goes from `yellow` to `green` even though everything seems to be running properly
 
 **For a single node Elasticsearch cluster the functional cluster health status is yellow** (never green) because the primary shard is allocated but replicas cannot be as there is no other node to which Elasticsearch can assign a replica. This also applies if you are using the [Amazon OpenSearch](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/aes-handling-errors.html#aes-handling-errors-yellow-cluster-status) service.
 
@@ -522,7 +457,7 @@ curl --request PUT localhost:9200/gitlab-production/_settings --header 'Content-
      }'
 ```
 
-## Error: `health check timeout: no Elasticsearch node available`
+## `health check timeout: no Elasticsearch node available` error in Sidekiq
 
 If you're getting a `health check timeout: no Elasticsearch node available` error in Sidekiq during the indexing process:
 
@@ -556,6 +491,16 @@ Advanced search stores all the projects in the same Elasticsearch indices,
 however, searches only surface results that can be viewed by the user.
 Advanced search honors all permission checks in the application by
 filtering out projects that a user does not have access to at search time.
+
+### Role mapping when using fine-grained access control with AWS Elasticsearch or OpenSearch
+
+When using fine-grained access control with an IAM role or a role created using OpenSearch Dashboards, you might encounter the following error:
+
+```plaintext
+{"error":{"root_cause":[{"type":"security_exception","reason":"no permissions for [indices:data/write/bulk] and User [name=arn:aws:iam::xxx:role/INSERT_ROLE_NAME_HERE, backend_roles=[arn:aws:iam::xxx:role/INSERT_ROLE_NAME_HERE], requestedTenant=null]"}],"type":"security_exception","reason":"no permissions for [indices:data/write/bulk] and User [name=arn:aws:iam::xxx:role/INSERT_ROLE_NAME_HERE, backend_roles=[arn:aws:iam::xxx:role/INSERT_ROLE_NAME_HERE], requestedTenant=null]"},"status":403}
+```
+
+To fix this, you need to [map the roles to users](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/fgac.html#fgac-mapping) in Kibana.
 
 ## Elasticsearch workers overload Sidekiq
 
@@ -595,7 +540,7 @@ $ jq '.class' sidekiq/current | sort | uniq -c | sort -nr
 In this case, `free -m` on the overloaded GitLab node would also show
 unexpectedly high `buff/cache` usage.
 
-## Error: `Couldn't load task status`
+## `Couldn't load task status` error when reindexing
 
 When you reindex, you might get a `Couldn't load task status` error. A `sliceId must be greater than 0 but was [-1]` error might also appear on the Elasticsearch host. As a workaround, consider [reindexing from scratch](../../integration/advanced_search/elasticsearch_troubleshooting.md#last-resort-to-recreate-an-index) or upgrading to GitLab 16.3.
 

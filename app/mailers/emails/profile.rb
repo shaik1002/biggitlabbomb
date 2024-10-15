@@ -71,7 +71,7 @@ module Emails
         @reason_text = _('You are receiving this email because you are an Owner of the Group.')
       else
         @target_url = project_settings_access_tokens_url(resource)
-        @reason_text = _('You are receiving this email because you are either an Owner or Maintainer of the project.')
+        @reason_text = _('You are receiving this email because you are a Maintainer of the Project.')
       end
 
       mail_with_locale(
@@ -147,11 +147,9 @@ module Emails
       mail_with_locale(to: @user.notification_email_or_default, subject: subject(_("Your SSH key is expiring soon.")))
     end
 
-    def unknown_sign_in_email(user, ip, time, request_info = {})
+    def unknown_sign_in_email(user, ip, time)
       @user = user
       @ip = ip
-      @city = request_info[:city]
-      @country = request_info[:country]
       @time = time
       @target_url = edit_user_settings_password_url
 

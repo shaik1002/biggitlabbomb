@@ -2,19 +2,15 @@
 
 require 'uri'
 
-# This filter handles autolinking when a pipeline does not
-# use the MarkdownFilter, which handles it's own autolinking.
-# This happens in particular for the SingleLinePipeline and the
-# CommitDescriptionPipeline.
-#
-# rubocop:disable Rails/OutputSafety -- this is legacy/unused, no need fixing.
-# rubocop:disable Gitlab/NoCodeCoverageComment -- no coverage needed for a legacy filter
-# :nocov: undercoverage
 module Banzai
   module Filter
     # HTML Filter for auto-linking URLs in HTML.
     #
     # Based on HTML::Pipeline::AutolinkFilter
+    #
+    # Note that our CommonMark parser, `commonmarker` (using the autolink extension)
+    # handles standard autolinking, like http/https. We detect additional
+    # schemes (smb, rdar, etc).
     #
     # Context options:
     #   :autolink  - Boolean, skips all processing done by this filter when false
@@ -52,7 +48,7 @@ module Banzai
       TEXT_QUERY = %(descendant-or-self::text()[
         not(#{IGNORE_PARENTS.map { |p| "ancestor::#{p}" }.join(' or ')})
         and contains(., '://')
-      ]).freeze
+      ])
 
       PUNCTUATION_PAIRS = {
         "'" => "'",
@@ -63,12 +59,6 @@ module Banzai
       }.freeze
 
       def call
-        if MarkdownFilter.glfm_markdown?(context) &&
-            context[:pipeline] != :single_line &&
-            context[:pipeline] != :commit_description
-          return doc
-        end
-
         return doc if context[:autolink] == false
 
         doc.xpath(TEXT_QUERY).each do |node|
@@ -139,10 +129,9 @@ module Banzai
       end
 
       def autolink_filter(text)
-        Gitlab::StringRegexMarker.new(CGI.unescapeHTML(text), text.html_safe)
-          .mark(LINK_PATTERN) do |link, _left, _right, _mode|
-            autolink_match(link).html_safe
-          end
+        Gitlab::StringRegexMarker.new(CGI.unescapeHTML(text), text.html_safe).mark(LINK_PATTERN) do |link, left:, right:, mode:|
+          autolink_match(link).html_safe
+        end
       end
 
       def link_options
@@ -151,6 +140,3 @@ module Banzai
     end
   end
 end
-# :nocov:
-# rubocop:enable Gitlab/NoCodeCoverageComment
-# rubocop:enable Rails/OutputSafety

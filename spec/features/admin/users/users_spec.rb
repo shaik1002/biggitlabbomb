@@ -17,7 +17,7 @@ RSpec.describe 'Admin::Users', feature_category: :user_management do
 
   describe 'GET /admin/users', :js do
     before do
-      visit admin_users_path(filter: 'active')
+      visit admin_users_path
     end
 
     it "is ok" do
@@ -50,17 +50,15 @@ RSpec.describe 'Admin::Users', feature_category: :user_management do
       expect(page).to have_content('Password')
     end
 
-    it 'shows the user popover on hover', :js do
+    it 'shows the user popover on hover', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/444684' do
       expect(has_testid?('user-popover', count: 0)).to eq(true)
 
-      within('body.page-initialised') do
-        find_link(user.email).hover
+      find_link(user.email).hover
 
-        within_testid('user-popover') do
-          expect(page).to have_content user.name
-          expect(page).to have_content user.username
-          expect(page).to have_button 'Follow'
-        end
+      within_testid('user-popover') do
+        expect(page).to have_content user.name
+        expect(page).to have_content user.username
+        expect(page).to have_button 'Follow'
       end
     end
 
@@ -499,7 +497,7 @@ RSpec.describe 'Admin::Users', feature_category: :user_management do
       within(:css, '.gl-mb-3 + .gl-card') do
         click_link group.name
       end
-      expect(page).to have_content group.name
+      expect(page).to have_content "Group: #{group.name}"
       expect(page).to have_content project.name
     end
 
@@ -522,7 +520,7 @@ RSpec.describe 'Admin::Users', feature_category: :user_management do
     end
   end
 
-  describe 'show breadcrumbs', :js do
+  describe 'show breadcrumbs' do
     it do
       visit admin_user_path(user)
 
@@ -556,22 +554,13 @@ RSpec.describe 'Admin::Users', feature_category: :user_management do
     end
 
     def check_breadcrumb(content)
-      expect(find_by_testid('breadcrumb-links').find('li:last-of-type')).to have_content(content)
+      expect(find_by_testid('breadcrumb-current-link')).to have_content(content)
     end
   end
 
   describe 'GET /admin/users/:id/edit' do
     before do
       visit edit_admin_user_path(user)
-    end
-
-    it 'shows all breadcrumbs', :js do
-      expect(page_breadcrumbs).to eq([
-        { text: 'Admin area', href: admin_root_path },
-        { text: 'Users', href: admin_users_path },
-        { text: user.name, href: admin_user_path(user) },
-        { text: 'Edit', href: edit_admin_user_path(user) }
-      ])
     end
 
     describe 'Update user' do

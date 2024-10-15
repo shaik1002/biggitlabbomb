@@ -1,12 +1,10 @@
 # frozen_string_literal: true
 
 module Types
+  # rubocop: disable Graphql/AuthorizeTypes
+  # Only used to render the current user's own preferences
   class UserPreferencesType < BaseObject
     graphql_name 'UserPreferences'
-
-    authorize :read_user_preference
-
-    alias_method :user_preference, :object
 
     field :extensions_marketplace_opt_in_status, Types::ExtensionsMarketplaceOptInStatusEnum,
       description: 'Status of the Web IDE Extension Marketplace opt-in for the user.',
@@ -20,30 +18,13 @@ module Types
       description: 'Determines whether the pipeline list shows ID or IID.',
       null: true
 
-    # rubocop:disable GraphQL/ExtractType -- These are stored as user preferences
-    field :use_work_items_view, GraphQL::Types::Boolean,
-      description: 'Use work item view instead of legacy issue view.',
-      null: true
-
-    field :organization_groups_projects_sort,
-      Types::Organizations::GroupsProjectsSortEnum,
-      description: 'Sort order for organization groups and projects.',
-      null: true,
-      alpha: { milestone: '17.2' }
-
-    field :organization_groups_projects_display,
-      Types::Organizations::GroupsProjectsDisplayEnum,
+    field :use_web_ide_extension_marketplace, GraphQL::Types::Boolean,
+      description: 'Whether Web IDE Extension Marketplace is enabled for the user.',
       null: false,
-      description: 'Default list view for organization groups and projects.',
-      alpha: { milestone: '17.2' }
-    # rubocop:enable GraphQL/ExtractType
+      deprecated: { reason: 'Use `extensions_marketplace_opt_in_status` instead', milestone: '16.11' }
 
     def issues_sort
-      user_preference.issues_sort&.to_sym
-    end
-
-    def organization_groups_projects_sort
-      user_preference.organization_groups_projects_sort&.to_sym
+      object.issues_sort.to_sym
     end
   end
 end

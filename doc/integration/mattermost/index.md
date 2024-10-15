@@ -356,17 +356,12 @@ If this is not the case, there are two options:
 
 For a complete list of upgrade notices and special considerations for older versions, see the [Mattermost documentation](https://docs.mattermost.com/administration/important-upgrade-notes.html).
 
-### GitLab Mattermost versions and edition shipped with the Linux package
+### GitLab Mattermost versions shipped with the Linux package
 
 Below is a list of Mattermost version changes for GitLab 15.0 and later:
 
 | GitLab version | Mattermost version | Notes                                                                                    |
 | :------------- | :----------------- | ---------------------------------------------------------------------------------------- |
-| 17.5           | 10.0               |                                                                                          |
-| 17.4           | 9.11               |                                                                                          |
-| 17.3           | 9.10               |                                                                                          |
-| 17.2           | 9.9                |                                                                                          |
-| 17.1           | 9.8                |                                                                                          |
 | 17.0           | 9.7                |                                                                                          |
 | 16.11          | 9.6                |                                                                                          |
 | 16.10          | 9.5                |                                                                                          |
@@ -392,9 +387,6 @@ Below is a list of Mattermost version changes for GitLab 15.0 and later:
 NOTE:
 The Mattermost upgrade notes refer to different impacts when used with a PostgreSQL versus a MySQL database. The GitLab Mattermost included with the Linux package uses a PostgreSQL database.
 
-The Linux package bundles the [Mattermost Team Edition](https://docs.mattermost.com/about/editions-and-offerings.html#mattermost-team-edition), which is a free and open source edition and does not include its commercial features.
-To upgrade to the [Mattermost Enterprise Edition](https://docs.mattermost.com/about/editions-and-offerings.html#mattermost-enterprise-edition) see the Mattermost [documentation on upgrading](https://docs.mattermost.com/install/enterprise-install-upgrade.html#upgrading-to-enterprise-edition-in-gitlab-omnibus).
-
 ## OAuth 2.0 sequence diagram
 
 The following image is a sequence diagram for how GitLab works as an OAuth 2.0
@@ -402,11 +394,7 @@ provider for Mattermost. You can use this to troubleshoot errors
 in getting the integration to work:
 
 ```mermaid
-%%{init: { "fontFamily": "GitLab Sans" }}%%
 sequenceDiagram
-accTitle: GitLab as OAuth 2.0 provider
-accDescr: Sequence of actions that happen when a user authenticates to GitLab through Mattermost.
-
     User->>Mattermost: GET https://mm.domain.com
     Note over Mattermost, GitLab: Obtain access code
     Mattermost->>GitLab: GET https://gitlab.domain.com/oauth/authorize
@@ -432,4 +420,4 @@ accDescr: Sequence of actions that happen when a user authenticates to GitLab th
 For help and support around your GitLab Mattermost deployment, see:
 
 - [Troubleshooting Mattermost issues](https://docs.mattermost.com/install/troubleshooting.html).
-- [Mattermost forum](https://forum.mattermost.com/search?q=gitlab).
+- [Mattermost GitLab Issues Support Handbook](https://docs.mattermost.com/process/support.html?highlight=omnibus#gitlab-issues).

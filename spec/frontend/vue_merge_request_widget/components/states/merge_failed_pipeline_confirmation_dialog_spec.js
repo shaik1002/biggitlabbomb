@@ -4,10 +4,6 @@ import waitForPromises from 'helpers/wait_for_promises';
 import Api from '~/api';
 import { createAlert } from '~/alert';
 import MergeFailedPipelineConfirmationDialog from '~/vue_merge_request_widget/components/states/merge_failed_pipeline_confirmation_dialog.vue';
-import {
-  HTTP_STATUS_UNAUTHORIZED,
-  HTTP_STATUS_INTERNAL_SERVER_ERROR,
-} from '~/lib/utils/http_status';
 import { trimText } from 'helpers/text_helper';
 
 jest.mock('~/alert');
@@ -103,7 +99,7 @@ describe('MergeFailedPipelineConfirmationDialog', () => {
     describe('when user has permission to create a pipeline', () => {
       beforeEach(() => {
         Api.postMergeRequestPipeline.mockRejectedValue({
-          response: { status: HTTP_STATUS_INTERNAL_SERVER_ERROR },
+          response: { status: 500 },
         });
       });
 
@@ -133,7 +129,7 @@ describe('MergeFailedPipelineConfirmationDialog', () => {
     describe('when user does not have permission to create a pipeline', () => {
       beforeEach(() => {
         Api.postMergeRequestPipeline.mockRejectedValue({
-          response: { status: HTTP_STATUS_UNAUTHORIZED },
+          response: { status: 401 },
         });
       });
 

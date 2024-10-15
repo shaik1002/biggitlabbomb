@@ -23,7 +23,7 @@ module Integrations
       help: -> {
         docs_link = ActionController::Base.helpers.link_to(
           _('service accounts'),
-          Rails.application.routes.url_helpers.help_page_url('user/profile/service_accounts.md'),
+          Rails.application.routes.url_helpers.help_page_url('user/profile/service_accounts'),
           target: '_blank', rel: 'noopener noreferrer')
 
         format(s_(
@@ -43,10 +43,13 @@ module Integrations
     end
 
     def self.help
-      build_help_page_url(
-        'user/project/integrations/beyond_identity.md',
-        s_('Verify that GPG keys are authorized by Beyond Identity Authenticator.')
-      )
+      docs_link = ActionController::Base.helpers.link_to(
+        _('Learn more'),
+        Rails.application.routes.url_helpers.help_page_url('user/project/integrations/beyond_identity'),
+        target: '_blank', rel: 'noopener noreferrer')
+
+      format(_('Verify that GPG keys are authorized by Beyond Identity Authenticator. %{docs_link}').html_safe, # rubocop:disable Rails/OutputSafety -- It is fine to call html_safe here
+        docs_link: docs_link.html_safe) # rubocop:disable Rails/OutputSafety -- It is fine to call html_safe here
     end
 
     def self.to_param
@@ -61,8 +64,8 @@ module Integrations
       !!::Integrations::BeyondIdentity.for_instance.first&.activated?
     end
 
-    def self.instance_specific?
-      true
+    def inheritable?
+      false
     end
 
     def execute(params)

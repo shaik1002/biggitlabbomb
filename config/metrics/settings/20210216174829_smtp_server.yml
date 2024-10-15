@@ -2,6 +2,8 @@
 data_category: optional
 key_path: mail.smtp_server
 description: The value of the SMTP server that is used
+product_section: growth
+product_stage: growth
 product_group: activation
 value_type: number
 status: active
@@ -16,4 +18,3 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

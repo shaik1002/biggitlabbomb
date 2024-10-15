@@ -73,18 +73,6 @@ export default {
                   value: { data: queryStringValue, operator: OPERATOR_IS },
                 },
               ];
-            case 'name':
-              if (!this.glFeatures.populateAndUseBuildNamesTable) {
-                return acc;
-              }
-
-              return [
-                ...acc,
-                {
-                  type: 'filtered-search-term',
-                  value: { data: queryStringValue },
-                },
-              ];
             default:
               return acc;
           }
@@ -103,16 +91,6 @@ export default {
 
 <template>
   <gl-filtered-search
-    v-if="glFeatures.populateAndUseBuildNamesTable"
-    :placeholder="s__('Jobs|Search or filter jobs...')"
-    :available-tokens="tokens"
-    :value="filteredSearchValue"
-    :search-text-option-label="__('Search for this text')"
-    terms-as-tokens
-    @submit="onSubmit"
-  />
-  <gl-filtered-search
-    v-else
     :placeholder="s__('Jobs|Filter jobs')"
     :available-tokens="tokens"
     :value="filteredSearchValue"

@@ -107,6 +107,18 @@ RSpec.describe Projects::ProjectMembersController, feature_category: :groups_and
         shared_examples 'users are invited through groups' do
           let_it_be(:invited_group_member) { create(:user) }
 
+          context 'when webui_members_inherited_users is disabled' do
+            before do
+              stub_feature_flags(webui_members_inherited_users: false)
+            end
+
+            it 'lists only direct members' do
+              get :index, params: { namespace_id: project.namespace, project_id: project }
+
+              expect(assigns(:project_members).map(&:user_id)).not_to include(invited_group_member.id)
+            end
+          end
+
           it 'lists invited group members by default' do
             get :index, params: { namespace_id: project.namespace, project_id: project }
 
@@ -332,7 +344,7 @@ RSpec.describe Projects::ProjectMembersController, feature_category: :groups_and
 
         context 'when `expires_at` is set' do
           it 'returns correct json response' do
-            expect(json_response).to include({
+            expect(json_response).to eq({
               "expires_soon" => false,
               "expires_at_formatted" => expiry_date.to_time.in_time_zone.to_fs(:medium)
             })
@@ -342,9 +354,8 @@ RSpec.describe Projects::ProjectMembersController, feature_category: :groups_and
         context 'when `expires_at` is not set' do
           let(:expiry_date) { nil }
 
-          it 'returns json response without expiration data' do
-            expect(json_response).not_to have_key(:expires_soon)
-            expect(json_response).not_to have_key(:expires_at_formatted)
+          it 'returns empty json response' do
+            expect(json_response).to be_empty
           end
         end
       end

@@ -6,7 +6,7 @@ RSpec.shared_examples 'Deploy keys with protected branches' do
     sign_in(user)
   end
 
-  let(:dropdown_sections_minus_deploy_keys) { all_dropdown_sections - ['Deploy keys'] }
+  let(:dropdown_sections_minus_deploy_keys) { all_dropdown_sections - ['Deploy Keys'] }
 
   context 'when deploy keys are enabled to this project' do
     let!(:deploy_key_1) { create(:deploy_key, title: 'title 1', projects: [project]) }
@@ -59,28 +59,6 @@ RSpec.shared_examples 'Deploy keys with protected branches' do
           dropdown_headers = page.all('.dropdown-header').map(&:text)
 
           expect(dropdown_headers).to contain_exactly(*all_dropdown_sections)
-        end
-      end
-
-      context 'when deploy key is already selected for protected branch' do
-        let(:protected_branch) { create(:protected_branch, :no_one_can_push, project: project, name: 'master') }
-
-        before do
-          create(:protected_branch_push_access_level, protected_branch: protected_branch, deploy_key: deploy_key_1)
-        end
-
-        it 'displays a preselected deploy key' do
-          visit project_protected_branches_path(project)
-
-          within(".js-protected-branch-edit-form") do
-            find(".js-allowed-to-push").click
-            wait_for_requests
-
-            within('[data-testid="deploy_key-dropdown-item"]') do
-              deploy_key_checkbox = find('[data-testid="dropdown-item-checkbox"]')
-              expect(deploy_key_checkbox).to have_no_css("gl-invisible")
-            end
-          end
         end
       end
     end

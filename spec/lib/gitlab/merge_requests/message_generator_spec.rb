@@ -16,7 +16,7 @@ RSpec.describe Gitlab::MergeRequests::MessageGenerator, feature_category: :code_
   end
 
   let(:current_user) { create(:user, name: 'John Doe', email: 'john.doe@example.com') }
-  let(:author) { current_user }
+  let(:author) { project.creator }
   let(:source_branch) { 'feature' }
   let(:merge_request_description) { "Merge Request Description\nNext line" }
   let(:merge_request_title) { 'Bugfix' }
@@ -684,7 +684,6 @@ RSpec.describe Gitlab::MergeRequests::MessageGenerator, feature_category: :code_
         approved_by:%{approved_by}
         merged_by:%{merged_by}
         co_authored_by:%{co_authored_by}
-        merge_request_author:%{merge_request_author}
         all_commits:%{all_commits}
       MSG
 
@@ -707,7 +706,6 @@ RSpec.describe Gitlab::MergeRequests::MessageGenerator, feature_category: :code_
           approved_by:
           merged_by:#{current_user.name} <#{current_user.commit_email_or_default}>
           co_authored_by:Co-authored-by: Dmitriy Zaporozhets <dmitriy.zaporozhets@gmail.com>
-          merge_request_author:John Doe <john.doe@example.com>
           all_commits:* Feature added
 
           Signed-off-by: Dmitriy Zaporozhets <dmitriy.zaporozhets@gmail.com>
@@ -795,27 +793,6 @@ RSpec.describe Gitlab::MergeRequests::MessageGenerator, feature_category: :code_
         end
       end
     end
-
-    context 'when project has merge commit template with merge_request_author' do
-      let(:source_branch) { 'signed-commits' }
-      let(:merge_commit_template) { <<~MSG.rstrip }
-        %{title}
-
-        %{merge_request_author}
-      MSG
-
-      context 'when author is one of the commit authors' do
-        let(:author) { create(:user, name: 'Nannie Bernhard', email: 'nannie.bernhard@example.com') }
-
-        it 'uses the merge request author' do
-          expect(result_message).to eq <<~MSG.rstrip
-            Bugfix
-
-            Nannie Bernhard <nannie.bernhard@example.com>
-          MSG
-        end
-      end
-    end
   end
 
   describe '#squash_commit_message' do
@@ -846,23 +823,6 @@ RSpec.describe Gitlab::MergeRequests::MessageGenerator, feature_category: :code_
             Co-authored-by: Winnie Hellmann <winnie@gitlab.com>
           MSG
         end
-      end
-    end
-
-    context 'when project has merge commit template with merge_request_author' do
-      let(:author) { create(:user, name: 'Nannie Bernhard', email: 'nannie.bernhard@example.com') }
-      let(:squash_commit_template) { <<~MSG.rstrip }
-        %{title}
-
-        %{merge_request_author}
-      MSG
-
-      it 'uses the merge request author' do
-        expect(result_message).to eq <<~MSG.rstrip
-          Bugfix
-
-          Nannie Bernhard <nannie.bernhard@example.com>
-        MSG
       end
     end
   end
@@ -909,7 +869,6 @@ RSpec.describe Gitlab::MergeRequests::MessageGenerator, feature_category: :code_
         approved_by:%{approved_by}
         merged_by:%{merged_by}
         co_authored_by:%{co_authored_by}
-        merge_request_author:%{merge_request_author}
         all_commits:%{all_commits}
       MSG
 
@@ -930,7 +889,6 @@ RSpec.describe Gitlab::MergeRequests::MessageGenerator, feature_category: :code_
           approved_by:
           merged_by:
           co_authored_by:Co-authored-by: Dmitriy Zaporozhets <dmitriy.zaporozhets@gmail.com>
-          merge_request_author:
           all_commits:* Feature added
 
           Signed-off-by: Dmitriy Zaporozhets <dmitriy.zaporozhets@gmail.com>
@@ -953,7 +911,6 @@ RSpec.describe Gitlab::MergeRequests::MessageGenerator, feature_category: :code_
             approved_by:
             merged_by:
             co_authored_by:
-            merge_request_author:
             all_commits:
           MSG
         end

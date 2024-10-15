@@ -8,11 +8,15 @@ class Projects::ProjectMembersController < Projects::ApplicationController
   # Authorize
   before_action :authorize_admin_project_member!, except: [:index, :leave, :request_access]
 
+  before_action only: [:index] do
+    push_frontend_feature_flag(:webui_members_inherited_users, current_user)
+  end
+
   feature_category :groups_and_projects
   urgency :low
 
   def index
-    @sort = pagination_params[:sort].presence || sort_value_name
+    @sort = params[:sort].presence || sort_value_name
     @include_relations ||= requested_relations(:groups_with_inherited_permissions)
 
     if can?(current_user, :admin_project_member, @project)
@@ -20,7 +24,7 @@ class Projects::ProjectMembersController < Projects::ApplicationController
       @requesters = present_members(AccessRequestsFinder.new(@project).execute(current_user))
     end
 
-    @project_members = present_members(non_invited_members.page(pagination_params[:page]))
+    @project_members = present_members(non_invited_members.page(params[:page]))
   end
 
   # MembershipActions concern
@@ -43,7 +47,7 @@ class Projects::ProjectMembersController < Projects::ApplicationController
   end
 
   def filter_params
-    params.permit(:search, :max_role).merge(sort: @sort)
+    params.permit(:search).merge(sort: @sort)
   end
 
   def membershipable_members
@@ -56,10 +60,6 @@ class Projects::ProjectMembersController < Projects::ApplicationController
 
   def source_type
     _("project")
-  end
-
-  def source
-    project
   end
 
   def members_page_url

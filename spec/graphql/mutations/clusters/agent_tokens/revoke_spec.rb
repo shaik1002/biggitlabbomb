@@ -3,15 +3,13 @@
 require 'spec_helper'
 
 RSpec.describe Mutations::Clusters::AgentTokens::Revoke do
-  include GraphqlHelpers
-
   let_it_be(:token) { create(:cluster_agent_token) }
-  let_it_be(:current_user) { create(:user) }
+  let_it_be(:user) { create(:user) }
 
   let(:mutation) do
     described_class.new(
       object: double,
-      context: query_context,
+      context: { current_user: user },
       field: double
     )
   end
@@ -34,7 +32,7 @@ RSpec.describe Mutations::Clusters::AgentTokens::Revoke do
 
     context 'user has permission' do
       before do
-        token.agent.project.add_maintainer(current_user)
+        token.agent.project.add_maintainer(user)
       end
 
       it 'revokes the token' do

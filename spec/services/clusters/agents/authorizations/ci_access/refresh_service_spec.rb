@@ -23,13 +23,12 @@ RSpec.describe Clusters::Agents::Authorizations::CiAccess::RefreshService, featu
           groups: [
             { id: added_group.full_path, default_namespace: 'default' },
             # Uppercase path verifies case-insensitive matching.
-            { id: modified_group.full_path.upcase, default_namespace: 'new-namespace', protected_branches_only: 'true' }
+            { id: modified_group.full_path.upcase, default_namespace: 'new-namespace' }
           ],
           projects: [
             { id: added_project.full_path, default_namespace: 'default' },
             # Uppercase path verifies case-insensitive matching.
-            { id: modified_project.full_path.upcase, default_namespace: 'new-namespace',
-              protected_branches_only: 'true' }
+            { id: modified_project.full_path.upcase, default_namespace: 'new-namespace' }
           ]
         }
       }.deep_stringify_keys
@@ -85,8 +84,7 @@ RSpec.describe Clusters::Agents::Authorizations::CiAccess::RefreshService, featu
         expect(added_authorization.config).to eq({ 'default_namespace' => 'default' })
 
         modified_authorization = agent.ci_access_group_authorizations.find_by(group: modified_group)
-        expect(modified_authorization.config).to eq({ 'default_namespace' => 'new-namespace',
-                                                      'protected_branches_only' => 'true' })
+        expect(modified_authorization.config).to eq({ 'default_namespace' => 'new-namespace' })
       end
 
       context 'config contains too many groups' do
@@ -114,8 +112,7 @@ RSpec.describe Clusters::Agents::Authorizations::CiAccess::RefreshService, featu
         expect(added_authorization.config).to eq({ 'default_namespace' => 'default' })
 
         modified_authorization = agent.ci_access_project_authorizations.find_by(project: modified_project)
-        expect(modified_authorization.config).to eq({ 'default_namespace' => 'new-namespace',
-                                                      'protected_branches_only' => 'true' })
+        expect(modified_authorization.config).to eq({ 'default_namespace' => 'new-namespace' })
       end
 
       context 'project does not belong to a group, and is in the same namespace as the agent' do

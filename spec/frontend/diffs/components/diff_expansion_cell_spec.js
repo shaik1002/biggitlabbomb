@@ -177,8 +177,9 @@ describe('DiffExpansionCell', () => {
           });
 
           it('on expand down clicked, dispatch loadMoreLines', () => {
-            mockFile[lineSources[diffViewType]][lineIndex + 1] =
-              getDiffFileMock()[lineSources[diffViewType]][lineIndex];
+            mockFile[lineSources[diffViewType]][lineIndex + 1] = getDiffFileMock()[
+              lineSources[diffViewType]
+            ][lineIndex];
             const nextLine = getLine(mockFile, diffViewType, lineIndex + 1);
 
             nextLine.meta_data.old_pos = 300;

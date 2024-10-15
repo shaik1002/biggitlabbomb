@@ -63,10 +63,6 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
       end
 
       it 'change Visibility and Access Controls' do
-        expect(current_settings.project_export_enabled).to be(true)
-        expect(current_settings.bulk_import_enabled).to be(false)
-        expect(current_settings.silent_admin_exports_enabled).to be(false)
-
         within_testid('admin-import-export-settings') do
           within_testid('project-export') do
             uncheck 'Enabled'
@@ -76,16 +72,11 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
             check 'Enabled'
           end
 
-          within_testid('silent-admin-exports') do
-            check 'Enabled'
-          end
-
           click_button 'Save changes'
         end
 
-        expect(current_settings.project_export_enabled).to be(false)
+        expect(current_settings.project_export_enabled).to be_falsey
         expect(current_settings.bulk_import_enabled).to be(true)
-        expect(current_settings.silent_admin_exports_enabled).to be(true)
         expect(page).to have_content 'Application settings saved successfully'
       end
 
@@ -233,7 +224,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
       context 'Change Sign-up restrictions' do
         context 'Require Admin approval for new signup setting' do
           it 'changes the setting', :js do
-            within_testid('sign-up-restrictions-settings-content') do
+            page.within('.as-signup') do
               check 'Require admin approval for new sign-ups'
               click_button 'Save changes'
             end
@@ -249,7 +240,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
           end
 
           it 'changes the setting', :js do
-            within_testid('sign-up-restrictions-settings-content') do
+            page.within('.as-signup') do
               choose 'Hard'
               click_button 'Save changes'
             end
@@ -261,7 +252,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
       end
 
       it 'change Sign-in restrictions' do
-        within_testid('signin-settings') do
+        page.within('.as-signin') do
           fill_in 'Home page URL', with: 'https://about.gitlab.com/'
           click_button 'Save changes'
         end
@@ -275,7 +266,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
         _existing_terms = create(:term)
         accept_terms(admin)
 
-        within_testid('terms-settings') do
+        page.within('.as-terms') do
           check 'All users must accept the Terms of Service and Privacy Policy to access GitLab'
           fill_in 'Terms of Service Agreement', with: 'Be nice!'
           click_button 'Save changes'
@@ -292,7 +283,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
       it 'modify oauth providers' do
         expect(current_settings.disabled_oauth_sign_in_sources).to be_empty
 
-        within_testid('signin-settings') do
+        page.within('.as-signin') do
           uncheck 'Google'
           click_button 'Save changes'
         end
@@ -300,7 +291,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
         expect(page).to have_content 'Application settings saved successfully'
         expect(current_settings.disabled_oauth_sign_in_sources).to include('google_oauth2')
 
-        within_testid('signin-settings') do
+        page.within('.as-signin') do
           check "Google"
           click_button 'Save changes'
         end
@@ -312,7 +303,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
       it 'oauth providers do not raise validation errors when saving unrelated changes' do
         expect(current_settings.disabled_oauth_sign_in_sources).to be_empty
 
-        within_testid('signin-settings') do
+        page.within('.as-signin') do
           uncheck 'Google'
           click_button 'Save changes'
         end
@@ -324,7 +315,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
         allow(Devise).to receive(:omniauth_providers).and_return([])
 
         # Save an unrelated setting
-        within_testid('terms-settings') do
+        page.within('.as-terms') do
           click_button 'Save changes'
         end
 
@@ -333,7 +324,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
       end
 
       it 'configure web terminal' do
-        within_testid('terminal-settings') do
+        page.within('.as-terminal') do
           fill_in 'Max session time', with: 15
           click_button 'Save changes'
         end
@@ -378,7 +369,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
         let(:update_heading) { 'Update your Slack app' }
 
         it 'has all sections' do
-          within_testid('slack-settings') do
+          page.within('.as-slack') do
             expect(page).to have_content(create_heading)
             expect(page).to have_content(configure_heading)
             expect(page).to have_content(update_heading)
@@ -387,7 +378,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
 
         context 'when GitLab.com', :saas do
           it 'only has the configure section' do
-            within_testid('slack-settings') do
+            page.within('.as-slack') do
               expect(page).to have_content(configure_heading)
 
               expect(page).not_to have_content(create_heading)
@@ -397,7 +388,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
         end
 
         it 'changes the settings' do
-          within_testid('slack-settings') do
+          page.within('.as-slack') do
             check 'Enable GitLab for Slack app'
             fill_in 'Client ID', with: 'slack_app_id'
             fill_in 'Client secret', with: 'slack_app_secret'
@@ -424,7 +415,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
       end
 
       it 'enable hiding third party offers' do
-        within_testid('third-party-offers-settings') do
+        page.within('.as-third-party-offers') do
           check 'Do not display content for customer experience improvement and offers from third parties'
           click_button 'Save changes'
         end
@@ -434,7 +425,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
       end
 
       it 'enabling Mailgun events', :aggregate_failures do
-        within_testid('mailgun-settings') do
+        page.within('.as-mailgun') do
           check 'Enable Mailgun event receiver'
           fill_in 'Mailgun HTTP webhook signing key', with: 'MAILGUN_SIGNING_KEY'
           click_button 'Save changes'
@@ -462,7 +453,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
       it 'changes CI/CD settings' do
         visit ci_cd_admin_application_settings_path
 
-        within_testid('ci-cd-settings') do
+        page.within('.as-ci-cd') do
           check 'Default to Auto DevOps pipeline for all projects'
           fill_in 'application_setting_auto_devops_domain', with: 'domain.com'
           uncheck 'Keep the latest artifacts for all jobs in the latest successful pipelines'
@@ -484,10 +475,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
       it 'changes CI/CD limits', :aggregate_failures do
         visit ci_cd_admin_application_settings_path
 
-        within_testid('ci-cd-settings') do
-          fill_in 'plan_limits_ci_instance_level_variables', with: 5
-          fill_in 'plan_limits_dotenv_size', with: 6
-          fill_in 'plan_limits_dotenv_variables', with: 7
+        page.within('.as-ci-cd') do
           fill_in 'plan_limits_ci_pipeline_size', with: 10
           fill_in 'plan_limits_ci_active_jobs', with: 20
           fill_in 'plan_limits_ci_project_subscriptions', with: 30
@@ -499,9 +487,6 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
         end
 
         limits = default_plan.reload.limits
-        expect(limits.ci_instance_level_variables).to eq(5)
-        expect(limits.dotenv_size).to eq(6)
-        expect(limits.dotenv_variables).to eq(7)
         expect(limits.ci_pipeline_size).to eq(10)
         expect(limits.ci_active_jobs).to eq(20)
         expect(limits.ci_project_subscriptions).to eq(30)
@@ -534,7 +519,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
 
           expect(current_settings.valid_runner_registrars).to eq(ApplicationSetting::VALID_RUNNER_REGISTRAR_TYPES)
 
-          within_testid('runner-settings') do
+          page.within('.as-runner') do
             find_all('input[type="checkbox"]').each(&:click)
 
             click_button 'Save changes'
@@ -566,7 +551,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
             it 'changes the setting' do
               visit ci_cd_admin_application_settings_path
 
-              within_testid('registry-settings') do
+              page.within('.as-registry') do
                 fill_in "application_setting_#{setting}", with: 400
                 click_button 'Save changes'
               end
@@ -583,7 +568,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
 
             visit ci_cd_admin_application_settings_path
 
-            within_testid('registry-settings') do
+            page.within('.as-registry') do
               find('#application_setting_container_registry_expiration_policies_caching').click
               click_button 'Save changes'
             end
@@ -599,7 +584,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
       it 'change Repository storage settings' do
         visit repository_admin_application_settings_path
 
-        within_testid('repository-storage-settings') do
+        page.within('.as-repository-storage') do
           fill_in 'application_setting_repository_storages_weighted_default', with: 50
           click_button 'Save changes'
         end
@@ -612,7 +597,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
 
         visit repository_admin_application_settings_path
 
-        within_testid('repository-storage-settings') do
+        page.within('.as-repository-storage') do
           fill_in 'application_setting_repository_storages_weighted_default', with: 50
           click_button 'Save changes'
         end
@@ -627,7 +612,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
 
           visit repository_admin_application_settings_path
 
-          within_testid('repository-static-objects-settings') do
+          page.within('.as-repository-static-objects') do
             fill_in 'application_setting_static_objects_external_storage_url', with: 'http://example.com'
             fill_in 'application_setting_static_objects_external_storage_auth_token', with: 'Token'
             click_button 'Save changes'
@@ -643,7 +628,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
       it 'change Spam settings' do
         visit reporting_admin_application_settings_path
 
-        within_testid('spam-settings') do
+        page.within('.as-spam') do
           fill_in 'reCAPTCHA site key', with: 'key'
           fill_in 'reCAPTCHA private key', with: 'key'
           find('#application_setting_recaptcha_enabled').set(true)
@@ -670,7 +655,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
       end
 
       it 'change Prometheus settings' do
-        within_testid('prometheus-settings') do
+        page.within('.as-prometheus') do
           check 'Enable GitLab Prometheus metrics endpoint'
           click_button 'Save changes'
         end
@@ -682,7 +667,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
       it 'change Performance bar settings' do
         group = create(:group)
 
-        within_testid('performance-bar-settings-content') do
+        page.within('.as-performance-bar') do
           check 'Allow non-administrators access to the performance bar'
           fill_in 'Allow access to members of the following group', with: group.path
           click_on 'Save changes'
@@ -692,7 +677,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
         expect(find_field('Allow non-administrators access to the performance bar')).to be_checked
         expect(find_field('Allow access to members of the following group').value).to eq group.path
 
-        within_testid('performance-bar-settings-content') do
+        page.within('.as-performance-bar') do
           uncheck 'Allow non-administrators access to the performance bar'
           click_on 'Save changes'
         end
@@ -751,7 +736,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
       it 'changes Outbound requests settings' do
         visit network_admin_application_settings_path
 
-        within_testid('outbound-requests-content') do
+        page.within('.as-outbound') do
           check 'Allow requests to the local network from webhooks and integrations'
           # Enabled by default
           uncheck 'Allow requests to the local network from system hooks'
@@ -769,7 +754,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
       it 'changes User and IP rate limits settings' do
         visit network_admin_application_settings_path
 
-        within_testid('ip-limits-content') do
+        page.within('.as-ip-limits') do
           check 'Enable unauthenticated API request rate limit'
           fill_in 'Maximum unauthenticated API requests per rate limit period per IP', with: 100
           fill_in 'Unauthenticated API rate limit period in seconds', with: 200
@@ -816,7 +801,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
       it 'changes Issues rate limits settings' do
         visit network_admin_application_settings_path
 
-        within_testid('issue-limits-settings') do
+        page.within('.as-issue-limits') do
           fill_in 'Maximum number of requests per minute', with: 0
           click_button 'Save changes'
         end
@@ -828,7 +813,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
       it 'changes Pipelines rate limits settings' do
         visit network_admin_application_settings_path
 
-        within_testid('pipeline-limits-settings') do
+        page.within('.as-pipeline-limits') do
           fill_in 'Maximum number of requests per minute', with: 10
           click_button 'Save changes'
         end
@@ -840,7 +825,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
       it 'changes Users API rate limits settings' do
         visit network_admin_application_settings_path
 
-        within_testid('users-api-limits-settings') do
+        page.within('.as-users-api-limits') do
           fill_in 'Maximum requests per 10 minutes per user', with: 0
           fill_in 'Users to exclude from the rate limit', with: 'someone, someone_else'
           click_button 'Save changes'
@@ -863,168 +848,23 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
         expect(current_settings.gitlab_shell_operation_limit).to eq(100)
       end
 
-      shared_examples 'API rate limit setting' do
-        it 'changes the rate limits settings' do
-          visit network_admin_application_settings_path
+      it 'changes Projects API rate limits settings' do
+        visit network_admin_application_settings_path
 
-          new_rate_limit = 1234
-          within_testid(network_settings_section) do
-            fill_in rate_limit_field, with: new_rate_limit
-            click_button 'Save changes'
-          end
-
-          expect(page).to have_content 'Application settings saved successfully'
-          expect(current_settings[application_setting_key]).to eq(new_rate_limit)
-        end
-      end
-
-      describe 'organizations API rate limits' do
-        let_it_be(:network_settings_section) { 'organizations-api-limits-settings' }
-
-        context 'for POST /organizations API requests' do
-          let(:rate_limit_field) do
-            format(_('Maximum requests to the %{api_name} API per %{timeframe} per user'), api_name: 'POST /organizations', timeframe: 'minute')
-          end
-
-          let(:application_setting_key) { :create_organization_api_limit }
-
-          it_behaves_like 'API rate limit setting'
-        end
-      end
-
-      describe 'groups API rate limits' do
-        let_it_be(:network_settings_section) { 'groups-api-limits-settings' }
-
-        context 'for unauthenticated GET /groups API requests' do
-          let_it_be(:rate_limit_field) do
-            format(_('Maximum requests to the %{api_name} API per %{timeframe} per user or IP address'), api_name: 'GET /groups', timeframe: 'minute')
-          end
-
-          let_it_be(:application_setting_key) { :groups_api_limit }
-
-          it_behaves_like 'API rate limit setting'
+        page.within('.as-projects-api-limits') do
+          fill_in 'Maximum requests per 10 minutes per IP address', with: 100
+          click_button 'Save changes'
         end
 
-        context 'for GET /groups/:id API requests' do
-          let_it_be(:rate_limit_field) do
-            format(_('Maximum requests to the %{api_name} API per %{timeframe} per user or IP address'), api_name: 'GET /groups/:id', timeframe: 'minute')
-          end
-
-          let_it_be(:application_setting_key) { :group_api_limit }
-
-          it_behaves_like 'API rate limit setting'
-        end
-
-        context 'for GET /groups/:id/projects API requests' do
-          let_it_be(:rate_limit_field) do
-            format(_('Maximum requests to the %{api_name} API per %{timeframe} per user or IP address'), api_name: 'GET /groups/:id/projects', timeframe: 'minute')
-          end
-
-          let_it_be(:application_setting_key) { :group_projects_api_limit }
-
-          it_behaves_like 'API rate limit setting'
-        end
-
-        context 'for GET /groups/:id/groups/shared API requests' do
-          let(:rate_limit_field) do
-            format(_('Maximum requests to the %{api_name} API per %{timeframe} per user or IP address'), api_name: 'GET /groups/:id/groups/shared', timeframe: 'minute')
-          end
-
-          let(:application_setting_key) { :group_shared_groups_api_limit }
-
-          it_behaves_like 'API rate limit setting'
-        end
-
-        context 'for GET /groups/:id/invited_groups API requests' do
-          let(:rate_limit_field) do
-            format(_('Maximum requests to the %{api_name} API per %{timeframe} per user or IP address'), api_name: 'GET /groups/:id/invited_groups', timeframe: 'minute')
-          end
-
-          let(:application_setting_key) { :group_invited_groups_api_limit }
-
-          it_behaves_like 'API rate limit setting'
-        end
-      end
-
-      describe 'projects API rate limits' do
-        let_it_be(:network_settings_section) { 'projects-api-limits-settings' }
-
-        context 'for unauthenticated GET /projects API requests' do
-          let_it_be(:rate_limit_field) do
-            format(_('Maximum requests to the %{api_name} API per %{timeframe} per IP address for unauthenticated requests'), api_name: 'GET /projects', timeframe: '10 minutes')
-          end
-
-          let_it_be(:application_setting_key) { :projects_api_rate_limit_unauthenticated }
-
-          it_behaves_like 'API rate limit setting'
-        end
-
-        context 'for GET /projects API requests' do
-          let_it_be(:rate_limit_field) do
-            format(_('Maximum requests to the %{api_name} API per %{timeframe} per user for authenticated requests'), api_name: 'GET /projects', timeframe: '10 minutes')
-          end
-
-          let_it_be(:application_setting_key) { :projects_api_limit }
-
-          it_behaves_like 'API rate limit setting'
-        end
-
-        context 'for GET /projects/:id API requests' do
-          let_it_be(:rate_limit_field) do
-            format(_('Maximum requests to the %{api_name} API per %{timeframe} per user or IP address'), api_name: 'GET /projects/:id', timeframe: 'minute')
-          end
-
-          let_it_be(:application_setting_key) { :project_api_limit }
-
-          it_behaves_like 'API rate limit setting'
-        end
-
-        context 'for GET /projects/:id/invited_groups API requests' do
-          let_it_be(:rate_limit_field) do
-            format(_('Maximum requests to the %{api_name} API per %{timeframe} per user or IP address'), api_name: 'GET /projects/:id/invited_groups', timeframe: 'minute')
-          end
-
-          let_it_be(:application_setting_key) { :project_invited_groups_api_limit }
-
-          it_behaves_like 'API rate limit setting'
-        end
-
-        context 'for GET /users/:user_id/projects API requests' do
-          let_it_be(:rate_limit_field) do
-            format(_('Maximum requests to the %{api_name} API per %{timeframe} per user or IP address'), api_name: 'GET /users/:user_id/projects', timeframe: 'minute')
-          end
-
-          let_it_be(:application_setting_key) { :user_projects_api_limit }
-
-          it_behaves_like 'API rate limit setting'
-        end
-
-        context 'for GET /users/:user_id/contributed_projects API requests' do
-          let_it_be(:rate_limit_field) do
-            format(_('Maximum requests to the %{api_name} API per %{timeframe} per user or IP address'), api_name: 'GET /users/:user_id/contributed_projects', timeframe: 'minute')
-          end
-
-          let_it_be(:application_setting_key) { :user_contributed_projects_api_limit }
-
-          it_behaves_like 'API rate limit setting'
-        end
-
-        context 'for GET /users/:user_id/starred_projects API requests' do
-          let_it_be(:rate_limit_field) do
-            format(_('Maximum requests to the %{api_name} API per %{timeframe} per user or IP address'), api_name: 'GET /users/:user_id/starred_projects', timeframe: 'minute')
-          end
-
-          let_it_be(:application_setting_key) { :user_starred_projects_api_limit }
-
-          it_behaves_like 'API rate limit setting'
-        end
+        expect(page).to have_content 'Application settings saved successfully'
+        expect(current_settings.projects_api_rate_limit_unauthenticated).to eq(100)
       end
 
       shared_examples 'regular throttle rate limit settings' do
         it 'changes rate limit settings' do
           visit network_admin_application_settings_path
 
-          within_testid(selector) do
+          page.within(".#{selector}") do
             check 'Enable unauthenticated API request rate limit'
             fill_in 'Maximum unauthenticated API requests per rate limit period per IP', with: 12
             fill_in 'Unauthenticated API rate limit period in seconds', with: 34
@@ -1050,21 +890,21 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
       end
 
       context 'Package Registry API rate limits' do
-        let(:selector) { 'packages-limits-settings' }
+        let(:selector) { 'as-packages-limits' }
         let(:fragment) { :packages_api }
 
         include_examples 'regular throttle rate limit settings'
       end
 
       context 'Files API rate limits' do
-        let(:selector) { 'files-limits-settings' }
+        let(:selector) { 'as-files-limits' }
         let(:fragment) { :files_api }
 
         include_examples 'regular throttle rate limit settings'
       end
 
       context 'Deprecated API rate limits' do
-        let(:selector) { 'deprecated-api-rate-limits-settings' }
+        let(:selector) { 'as-deprecated-limits' }
         let(:fragment) { :deprecated_api }
 
         include_examples 'regular throttle rate limit settings'
@@ -1073,7 +913,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
       it 'changes search rate limits' do
         visit network_admin_application_settings_path
 
-        within_testid('search-limits-settings') do
+        page.within('.as-search-limits') do
           fill_in 'Maximum number of requests per minute for an authenticated user', with: 98
           fill_in 'Maximum number of requests per minute for an unauthenticated IP address', with: 76
           click_button 'Save changes'
@@ -1095,7 +935,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
           it 'shows deactivation email additional text field' do
             expect(page).to have_field 'Additional text for deactivation email'
 
-            within_testid('email-content') do
+            page.within('.as-email') do
               fill_in 'Additional text for deactivation email', with: 'So long and thanks for all the fish!'
               click_button 'Save changes'
             end
@@ -1110,7 +950,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
         new_support_url = 'http://example.com/help'
         new_documentation_url = 'https://docs.gitlab.com'
 
-        within_testid('help-page-content') do
+        page.within('.as-help-page') do
           fill_in 'Additional text to show on the Help page', with: 'Example text'
           check 'Hide marketing-related entries from the Help page'
           fill_in 'Support page URL', with: new_support_url
@@ -1126,7 +966,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
       end
 
       it 'change Pages settings' do
-        within_testid('pages-content') do
+        page.within('.as-pages') do
           fill_in 'Maximum size of pages (MiB)', with: 15
           check 'Require users to prove ownership of custom domains'
           click_button 'Save changes'
@@ -1138,7 +978,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
       end
 
       it 'change Real-time features settings' do
-        within_testid('realtime-content') do
+        page.within('.as-realtime') do
           fill_in 'Polling interval multiplier', with: 5.0
           click_button 'Save changes'
         end
@@ -1148,7 +988,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
       end
 
       it 'shows an error when validation fails' do
-        within_testid('realtime-content') do
+        page.within('.as-realtime') do
           fill_in 'Polling interval multiplier', with: -1.0
           click_button 'Save changes'
         end
@@ -1160,7 +1000,7 @@ RSpec.describe 'Admin updates settings', feature_category: :shared do
 
       it "change Pages Let's Encrypt settings" do
         visit preferences_admin_application_settings_path
-        within_testid('pages-content') do
+        page.within('.as-pages') do
           fill_in "Let's Encrypt email", with: 'my@test.example.com'
           check "I have read and agree to the Let's Encrypt Terms of Service"
           click_button 'Save changes'

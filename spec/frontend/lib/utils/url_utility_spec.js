@@ -2,7 +2,7 @@ import setWindowLocation from 'helpers/set_window_location_helper';
 import { TEST_HOST } from 'helpers/test_constants';
 import * as urlUtils from '~/lib/utils/url_utility';
 import { setGlobalAlerts } from '~/lib/utils/global_alerts';
-import { validURLs, invalidURLs } from './mock_data';
+import { safeUrls, unsafeUrls } from './mock_data';
 
 jest.mock('~/lib/utils/global_alerts', () => ({
   getGlobalAlerts: jest.fn().mockImplementation(() => [
@@ -76,12 +76,10 @@ describe('URL utility', () => {
         gon.relative_url_root = '/gitlab';
       });
 
-      it.each`
-        route                                                | result
-        ${'/gitlab/gitlab-org/gitlab-foss/merge_requests/1'} | ${'/gitlab/-/ide/project/gitlab-org/gitlab-foss/merge_requests/1'}
-        ${'/gitlab-org/gitlab-foss/edit/main/-/'}            | ${'/gitlab/-/ide/project/gitlab-org/gitlab-foss/edit/main/-/'}
-      `('returns $result for $route', ({ route, result }) => {
-        expect(urlUtils.webIDEUrl(route)).toBe(result);
+      it('returns IDE path with route', () => {
+        expect(urlUtils.webIDEUrl('/gitlab/gitlab-org/gitlab-foss/merge_requests/1')).toBe(
+          '/gitlab/-/ide/project/gitlab-org/gitlab-foss/merge_requests/1',
+        );
       });
     });
   });
@@ -435,24 +433,20 @@ describe('URL utility', () => {
     let originalLocation;
     const mockUrl = 'http://example.com/page';
 
-    beforeEach(() => {
+    beforeAll(() => {
       originalLocation = window.location;
 
-      const { protocol, host, href } = new URL(mockUrl);
       Object.defineProperty(window, 'location', {
         writable: true,
         value: {
           assign: jest.fn(),
-          protocol,
-          host,
-          href,
+          protocol: 'http:',
+          host: TEST_HOST,
         },
       });
-
-      gon.gitlab_url = 'http://example.com';
     });
 
-    afterEach(() => {
+    afterAll(() => {
       window.location = originalLocation;
     });
 
@@ -461,6 +455,7 @@ describe('URL utility', () => {
       ${'?scope=all&state=merged'} | ${'?scope=all&state=merged'}
       ${'?'}                       | ${'?'}
     `('handles query string: $inputQuery', ({ inputQuery, expectedQuery }) => {
+      window.location.href = mockUrl;
       urlUtils.visitUrl(inputQuery);
       expect(window.location.assign).toHaveBeenCalledWith(`${mockUrl}${expectedQuery}`);
     });
@@ -480,65 +475,42 @@ describe('URL utility', () => {
       expect(window.location.assign).toHaveBeenCalledWith(mockUrl);
     });
 
-    it('opens a new window', () => {
+    it('navigates to a new page', () => {
+      const otherWindow = {
+        location: {
+          assign: jest.fn(),
+        },
+      };
+
       Object.defineProperty(window, 'open', {
         writable: true,
-        value: jest.fn(),
+        value: jest.fn().mockReturnValue(otherWindow),
       });
 
       urlUtils.visitUrl(mockUrl, true);
 
-      expect(window.open).toHaveBeenCalledWith(mockUrl);
-    });
-
-    describe('when the URL is external', () => {
-      beforeEach(() => {
-        gon.gitlab_url = 'http://other.com';
-      });
-
-      it('navigates (on the same window) with no referrer or opener information', () => {
-        Object.defineProperty(window, 'open', {
-          writable: true,
-          value: jest.fn(),
-        });
-
-        urlUtils.visitUrl(mockUrl);
-
-        expect(window.open).toHaveBeenCalledWith(mockUrl, '_self', 'noreferrer');
-      });
-
-      it('opens a new window with no referrer or opener information', () => {
-        Object.defineProperty(window, 'open', {
-          writable: true,
-          value: jest.fn(),
-        });
-
-        urlUtils.visitUrl(mockUrl, true);
-
-        expect(window.open).toHaveBeenCalledWith(mockUrl, '_blank', 'noreferrer');
-      });
+      expect(otherWindow.opener).toBe(null);
+      expect(otherWindow.location.assign).toHaveBeenCalledWith(mockUrl);
     });
   });
 
   describe('visitUrlWithAlerts', () => {
     let originalLocation;
 
-    beforeEach(() => {
+    beforeAll(() => {
       originalLocation = window.location;
 
-      const { protocol, host, href } = new URL(TEST_HOST);
       Object.defineProperty(window, 'location', {
         writable: true,
         value: {
           assign: jest.fn(),
-          protocol,
-          host,
-          href,
+          protocol: 'http:',
+          host: TEST_HOST,
         },
       });
     });
 
-    afterEach(() => {
+    afterAll(() => {
       window.location = originalLocation;
     });
 
@@ -661,68 +633,21 @@ describe('URL utility', () => {
     });
   });
 
-  describe('pathSegments', () => {
-    it.each`
-      url                              | segments
-      ${'https://foo.test'}            | ${[]}
-      ${'https://foo.test/'}           | ${[]}
-      ${'https://foo.test/..'}         | ${[]}
-      ${'https://foo.test//'}          | ${['']}
-      ${'https://foo.test/bar'}        | ${['bar']}
-      ${'https://foo.test/bar//'}      | ${['bar', '']}
-      ${'https://foo.test/bar/qux'}    | ${['bar', 'qux']}
-      ${'https://foo.test/bar/../qux'} | ${['qux']}
-      ${'https://foo.test/bar/.'}      | ${['bar']}
-    `('returns $segments for $url', ({ url, segments }) => {
-      expect(urlUtils.pathSegments(new URL(url))).toEqual(segments);
-    });
-  });
-
   describe('isExternal', () => {
-    describe('when installed on the root path', () => {
-      const gitlabUrl = 'https://gitlab.com';
+    const gitlabUrl = 'https://gitlab.com/';
 
-      beforeEach(() => {
-        setWindowLocation(gitlabUrl);
-        gon.gitlab_url = gitlabUrl;
-      });
-
-      it.each`
-        url                                           | urlType                    | external
-        ${'/gitlab-org/gitlab-test/-/issues/2'}       | ${'relative'}              | ${false}
-        ${gitlabUrl}                                  | ${'absolute and internal'} | ${false}
-        ${`${gitlabUrl}/gitlab-org/gitlab-test`}      | ${'absolute and internal'} | ${false}
-        ${`${gitlabUrl}:8080/gitlab-org/gitlab-test`} | ${'absolute and internal'} | ${true}
-        ${'http://jira.atlassian.net/browse/IG-1'}    | ${'absolute and external'} | ${true}
-      `('returns $external for $url ($urlType)', ({ url, external }) => {
-        expect(urlUtils.isExternal(url)).toBe(external);
-      });
+    beforeEach(() => {
+      gon.gitlab_url = gitlabUrl;
     });
 
-    describe('when installed on a relative path', () => {
-      const gitlabUrl = 'https://foo.test/gitlab';
-
-      beforeEach(() => {
-        setWindowLocation(gitlabUrl);
-        gon.gitlab_url = gitlabUrl;
-      });
-
-      it.each`
-        url                                        | urlType                    | external
-        ${'/gitlab-org/gitlab-test/-/issues/2'}    | ${'relative'}              | ${true}
-        ${'../'}                                   | ${'relative'}              | ${true}
-        ${'a'}                                     | ${'relative'}              | ${true}
-        ${'#test'}                                 | ${'relative'}              | ${false}
-        ${'?test'}                                 | ${'relative'}              | ${false}
-        ${'/gitlab/a/..'}                          | ${'relative'}              | ${false}
-        ${gitlabUrl}                               | ${'absolute and internal'} | ${false}
-        ${`${gitlabUrl}/gitlab-org/gitlab-test`}   | ${'absolute and internal'} | ${false}
-        ${'http://jira.atlassian.net/browse/IG-1'} | ${'absolute and external'} | ${true}
-        ${'https://foo.test/'}                     | ${'absolute and external'} | ${true}
-        ${'https://foo.test/not-gitlab'}           | ${'absolute and external'} | ${true}
-      `('returns $external for $url ($urlType)', ({ url, external }) => {
-        expect(urlUtils.isExternal(url)).toBe(external);
-      });
+    it.each`
+      url                                        | urlType                    | external
+      ${'/gitlab-org/gitlab-test/-/issues/2'}    | ${'relative'}              | ${false}
+      ${gitlabUrl}                               | ${'absolute and internal'} | ${false}
+      ${`${gitlabUrl}/gitlab-org/gitlab-test`}   | ${'absolute and internal'} | ${false}
+      ${'http://jira.atlassian.net/browse/IG-1'} | ${'absolute and external'} | ${true}
+    `('returns $external for $url ($urlType)', ({ url, external }) => {
+      expect(urlUtils.isExternal(url)).toBe(external);
     });
   });
 
@@ -783,15 +708,25 @@ describe('URL utility', () => {
     );
   });
 
-  describe('isValidURL', () => {
+  describe('isSafeUrl', () => {
     describe('with URL constructor support', () => {
-      it.each(validURLs)('returns true for %s', (url) => {
-        expect(urlUtils.isValidURL(url)).toBe(true);
+      it.each(safeUrls)('returns true for %s', (url) => {
+        expect(urlUtils.isSafeURL(url)).toBe(true);
       });
 
-      it.each(invalidURLs)('returns false for %s', (url) => {
-        expect(urlUtils.isValidURL(url)).toBe(false);
+      it.each(unsafeUrls)('returns false for %s', (url) => {
+        expect(urlUtils.isSafeURL(url)).toBe(false);
       });
+    });
+  });
+
+  describe('sanitizeUrl', () => {
+    it.each(safeUrls)('returns the url for %s', (url) => {
+      expect(urlUtils.sanitizeUrl(url)).toBe(url);
+    });
+
+    it.each(unsafeUrls)('returns `about:blank` for %s', (url) => {
+      expect(urlUtils.sanitizeUrl(url)).toBe('about:blank');
     });
   });
 
@@ -1295,22 +1230,5 @@ describe('URL utility', () => {
     `('path $path with ref $refType becomes $output', ({ path, refType, output }) => {
       expect(urlUtils.buildURLwithRefType({ base, path, refType })).toBe(output);
     });
-  });
-
-  describe('stripRelativeUrlRootFromPath', () => {
-    it.each`
-      relativeUrlRoot | path                   | expectation
-      ${''}           | ${'/foo/bar'}          | ${'/foo/bar'}
-      ${'/'}          | ${'/foo/bar'}          | ${'/foo/bar'}
-      ${'/foo'}       | ${'/foo/bar'}          | ${'/bar'}
-      ${'/gitlab/'}   | ${'/gitlab/-/ide/foo'} | ${'/-/ide/foo'}
-    `(
-      'with relative_url_root="$relativeUrlRoot", "$path" should return "$expectation"',
-      ({ relativeUrlRoot, path, expectation }) => {
-        window.gon.relative_url_root = relativeUrlRoot;
-
-        expect(urlUtils.stripRelativeUrlRootFromPath(path)).toBe(expectation);
-      },
-    );
   });
 });

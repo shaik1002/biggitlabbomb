@@ -2,6 +2,8 @@
 data_category: optional
 key_path: counts.clusters_applications_knative
 description: Total GitLab Managed clusters with GitLab Managed App:Knative installed
+product_section: ops
+product_stage: configure
 product_group: environments
 product_category: deployment_management
 value_type: number
@@ -17,6 +19,5 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332
 milestone_removed: "14.4"
 removed_by_url:

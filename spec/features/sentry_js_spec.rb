@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Sentry', feature_category: :observability do
+RSpec.describe 'Sentry', feature_category: :error_tracking do
   it 'does not load sentry if sentry settings are disabled' do
     allow(Gitlab::CurrentSettings).to receive(:sentry_enabled).and_return(false)
 
@@ -18,7 +18,7 @@ RSpec.describe 'Sentry', feature_category: :observability do
     visit new_user_session_path
 
     expect(has_requested_sentry).to eq(true)
-    expect(evaluate_script('window._Sentry.SDK_VERSION')).to match(%r{^8\.})
+    expect(evaluate_script('window._Sentry.SDK_VERSION')).to match(%r{^7\.})
   end
 
   def has_requested_sentry

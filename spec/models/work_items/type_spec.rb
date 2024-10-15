@@ -9,6 +9,7 @@ RSpec.describe WorkItems::Type, feature_category: :team_planning do
 
   describe 'associations' do
     it { is_expected.to have_many(:work_items).with_foreign_key('work_item_type_id') }
+    it { is_expected.to belong_to(:namespace) }
 
     it 'has many `widget_definitions`' do
       is_expected.to have_many(:widget_definitions)
@@ -17,9 +18,9 @@ RSpec.describe WorkItems::Type, feature_category: :team_planning do
     end
 
     it 'has many `enabled_widget_definitions`' do
-      type = create(:work_item_type, :non_default)
-      widget1 = create(:widget_definition, work_item_type: type, name: 'Enabled widget')
-      create(:widget_definition, work_item_type: type, disabled: true, name: 'Disabled widget')
+      type = create(:work_item_type)
+      widget1 = create(:widget_definition, work_item_type: type)
+      create(:widget_definition, work_item_type: type, disabled: true)
 
       expect(type.enabled_widget_definitions).to match_array([widget1])
     end
@@ -28,12 +29,6 @@ RSpec.describe WorkItems::Type, feature_category: :team_planning do
       is_expected.to have_many(:child_restrictions)
         .class_name('WorkItems::HierarchyRestriction')
         .with_foreign_key('parent_type_id')
-    end
-
-    it 'has many `parent_restrictions`' do
-      is_expected.to have_many(:parent_restrictions)
-        .class_name('WorkItems::HierarchyRestriction')
-        .with_foreign_key('child_type_id')
     end
 
     describe 'allowed_child_types_by_name' do
@@ -46,41 +41,13 @@ RSpec.describe WorkItems::Type, feature_category: :team_planning do
 
       it 'sorts by name ascending' do
         expected_type_names = %w[Atype Ztype gtype]
-        parent_type = create(:work_item_type, :non_default)
+        parent_type = create(:work_item_type)
 
         expected_type_names.shuffle.each do |name|
-          create(
-            :hierarchy_restriction,
-            parent_type: parent_type,
-            child_type: create(:work_item_type, :non_default, name: name)
-          )
+          create(:hierarchy_restriction, parent_type: parent_type, child_type: create(:work_item_type, name: name))
         end
 
         expect(parent_type.allowed_child_types_by_name.pluck(:name)).to match_array(expected_type_names)
-      end
-    end
-
-    describe 'allowed_parent_types_by_name' do
-      it 'defines association' do
-        is_expected.to have_many(:allowed_parent_types_by_name)
-          .through(:parent_restrictions)
-          .class_name('::WorkItems::Type')
-          .with_foreign_key(:parent_type_id)
-      end
-
-      it 'sorts by name ascending' do
-        expected_type_names = %w[Atype Ztype gtype]
-        child_type = create(:work_item_type, :non_default)
-
-        expected_type_names.shuffle.each do |name|
-          create(
-            :hierarchy_restriction,
-            parent_type: create(:work_item_type, :non_default, name: name),
-            child_type: child_type
-          )
-        end
-
-        expect(child_type.allowed_parent_types_by_name.pluck(:name)).to match_array(expected_type_names)
       end
     end
   end
@@ -103,9 +70,9 @@ RSpec.describe WorkItems::Type, feature_category: :team_planning do
       before do
         # Deletes all so we have control on the entire list of names
         described_class.delete_all
-        create(:work_item_type, :non_default, name: 'Ztype')
-        create(:work_item_type, :non_default, name: 'atype')
-        create(:work_item_type, :non_default, name: 'gtype')
+        create(:work_item_type, name: 'Ztype')
+        create(:work_item_type, name: 'atype')
+        create(:work_item_type, name: 'gtype')
       end
 
       it { is_expected.to match(%w[atype gtype Ztype]) }
@@ -117,7 +84,7 @@ RSpec.describe WorkItems::Type, feature_category: :team_planning do
 
     context 'when there are no work items of that type' do
       it 'deletes type but not unrelated issues' do
-        type = create(:work_item_type, :non_default)
+        type = create(:work_item_type)
 
         expect(described_class.count).to eq(10)
 
@@ -138,14 +105,14 @@ RSpec.describe WorkItems::Type, feature_category: :team_planning do
     describe 'name uniqueness' do
       subject { create(:work_item_type) }
 
-      it { is_expected.to validate_uniqueness_of(:name).case_insensitive }
+      it { is_expected.to validate_uniqueness_of(:name).case_insensitive.scoped_to([:namespace_id]) }
     end
 
     it { is_expected.not_to allow_value('s' * 256).for(:icon_name) }
   end
 
   describe '.default_by_type' do
-    let(:default_issue_type) { described_class.find_by(base_type: :issue) }
+    let(:default_issue_type) { described_class.find_by(namespace_id: nil, base_type: :issue) }
     let(:base_type) { :issue }
 
     subject { described_class.default_by_type(base_type) }
@@ -192,6 +159,39 @@ RSpec.describe WorkItems::Type, feature_category: :team_planning do
           end.not_to raise_error
         end
       end
+
+      context 'when rely_on_work_item_type_seeder feature flag is disabled' do
+        before do
+          stub_feature_flags(rely_on_work_item_type_seeder: false)
+        end
+
+        it 'creates types and restrictions and returns default work item type by base type' do
+          expect(Gitlab::DatabaseImporters::WorkItems::BaseTypeImporter).to receive(:upsert_types).and_call_original
+          expect(Gitlab::DatabaseImporters::WorkItems::BaseTypeImporter).to receive(:upsert_widgets)
+          expect(Gitlab::DatabaseImporters::WorkItems::HierarchyRestrictionsImporter).to receive(:upsert_restrictions)
+          expect(
+            Gitlab::DatabaseImporters::WorkItems::RelatedLinksRestrictionsImporter
+          ).to receive(:upsert_restrictions)
+
+          expect(subject).to eq(default_issue_type)
+        end
+      end
+    end
+  end
+
+  describe '#default?' do
+    subject { build(:work_item_type, namespace: namespace).default? }
+
+    context 'when namespace is nil' do
+      let(:namespace) { nil }
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'when namespace is present' do
+      let(:namespace) { build(:namespace) }
+
+      it { is_expected.to be_falsey }
     end
   end
 
@@ -206,7 +206,7 @@ RSpec.describe WorkItems::Type, feature_category: :team_planning do
 
   describe '#supports_assignee?' do
     let(:parent) { build_stubbed(:project) }
-    let_it_be_with_reload(:work_item_type) { create(:work_item_type, :non_default) }
+    let_it_be_with_reload(:work_item_type) { create(:work_item_type) }
     let_it_be_with_reload(:widget_definition) do
       create(:widget_definition, work_item_type: work_item_type, widget_type: :assignees)
     end
@@ -226,7 +226,7 @@ RSpec.describe WorkItems::Type, feature_category: :team_planning do
 
   describe '#supports_time_tracking?' do
     let(:parent) { build_stubbed(:project) }
-    let_it_be_with_reload(:work_item_type) { create(:work_item_type, :non_default) }
+    let_it_be_with_reload(:work_item_type) { create(:work_item_type) }
     let_it_be_with_reload(:widget_definition) do
       create(:widget_definition, work_item_type: work_item_type, widget_type: :time_tracking)
     end
@@ -254,7 +254,7 @@ RSpec.describe WorkItems::Type, feature_category: :team_planning do
     end
 
     context 'when work item type is not Issue' do
-      let(:work_item_type) { build(:work_item_type, :non_default) }
+      let(:work_item_type) { build(:work_item_type) }
 
       it 'returns false' do
         expect(work_item_type.default_issue?).to be(false)
@@ -263,8 +263,8 @@ RSpec.describe WorkItems::Type, feature_category: :team_planning do
   end
 
   describe '#allowed_child_types' do
-    let_it_be(:work_item_type) { create(:work_item_type, :non_default) }
-    let_it_be(:child_type) { create(:work_item_type, :non_default) }
+    let_it_be(:work_item_type) { create(:work_item_type) }
+    let_it_be(:child_type) { create(:work_item_type) }
     let_it_be(:restriction) { create(:hierarchy_restriction, parent_type: work_item_type, child_type: child_type) }
 
     subject { work_item_type.allowed_child_types(cache: cached) }
@@ -293,55 +293,6 @@ RSpec.describe WorkItems::Type, feature_category: :team_planning do
     end
   end
 
-  describe '#allowed_parent_types' do
-    let_it_be(:work_item_type) { create(:work_item_type, :non_default) }
-    let_it_be(:parent_type) { create(:work_item_type, :non_default) }
-    let_it_be(:restriction) { create(:hierarchy_restriction, parent_type: parent_type, child_type: work_item_type) }
-
-    subject { work_item_type.allowed_parent_types(cache: cached) }
-
-    context 'when cache is true' do
-      let(:cached) { true }
-
-      before do
-        allow(work_item_type).to receive(:with_reactive_cache).and_call_original
-      end
-
-      it 'returns the cached data' do
-        expect(work_item_type).to receive(:with_reactive_cache)
-        expect(Rails.cache).to receive(:exist?).with("work_items_type:#{work_item_type.id}:alive")
-        is_expected.to eq([parent_type])
-      end
-    end
-
-    context 'when cache is false' do
-      let(:cached) { false }
-
-      it 'returns queried data' do
-        expect(work_item_type).not_to receive(:with_reactive_cache)
-        is_expected.to eq([parent_type])
-      end
-    end
-  end
-
-  describe '#descendant_types' do
-    let(:epic_type) { create(:work_item_type, :non_default) }
-    let(:issue_type) { create(:work_item_type, :non_default) }
-    let(:task_type) { create(:work_item_type, :non_default) }
-
-    subject { epic_type.descendant_types }
-
-    before do
-      create(:hierarchy_restriction, parent_type: epic_type, child_type: epic_type)
-      create(:hierarchy_restriction, parent_type: epic_type, child_type: issue_type)
-      create(:hierarchy_restriction, parent_type: issue_type, child_type: task_type)
-    end
-
-    it 'returns all possible descendant types' do
-      is_expected.to contain_exactly(epic_type, issue_type, task_type)
-    end
-  end
-
   describe '#calculate_reactive_cache' do
     let(:work_item_type) { build(:work_item_type) }
 
@@ -349,30 +300,9 @@ RSpec.describe WorkItems::Type, feature_category: :team_planning do
 
     it 'returns cache data for allowed child types' do
       child_types = create_list(:work_item_type, 2)
-      parent_types = create_list(:work_item_type, 2)
-      cache_data = { allowed_child_types_by_name: child_types, allowed_parent_types_by_name: parent_types }
-
       expect(work_item_type).to receive(:allowed_child_types_by_name).and_return(child_types)
-      expect(work_item_type).to receive(:allowed_parent_types_by_name).and_return(parent_types)
 
-      is_expected.to eq(cache_data)
-    end
-  end
-
-  describe '.allowed_group_level_types' do
-    let_it_be(:group) { create(:group) }
-    let_it_be(:non_ee_types) { described_class.base_types.keys.excluding('epic') }
-
-    subject { described_class.allowed_group_level_types(group) }
-
-    it { is_expected.to include(*non_ee_types) }
-
-    context 'when create_group_level_work_items feature flag is disabled' do
-      before do
-        stub_feature_flags(create_group_level_work_items: false)
-      end
-
-      it { is_expected.to be_empty }
+      is_expected.to eq(child_types)
     end
   end
 end

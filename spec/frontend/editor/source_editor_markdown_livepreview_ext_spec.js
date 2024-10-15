@@ -14,14 +14,11 @@ import SourceEditor from '~/editor/source_editor';
 import { createAlert } from '~/alert';
 import axios from '~/lib/utils/axios_utils';
 import { HTTP_STATUS_INTERNAL_SERVER_ERROR, HTTP_STATUS_OK } from '~/lib/utils/http_status';
-import { renderGFM } from '~/behaviors/markdown/render_gfm';
+import syntaxHighlight from '~/syntax_highlight';
 import { spyOnApi } from './helpers';
 
 jest.mock('~/syntax_highlight');
 jest.mock('~/alert');
-jest.mock('~/behaviors/markdown/render_gfm', () => ({
-  renderGFM: jest.fn(),
-}));
 
 describe('Markdown Live Preview Extension for Source Editor', () => {
   let editor;
@@ -35,8 +32,7 @@ describe('Markdown Live Preview Extension for Source Editor', () => {
   const firstLine = 'This is a';
   const secondLine = 'multiline';
   const thirdLine = 'string with some **markup**';
-  const forthLine = 'This math is inline: $`a^2+b^2=c^2`$';
-  const text = `${firstLine}\n${secondLine}\n${thirdLine}\n${forthLine}`;
+  const text = `${firstLine}\n${secondLine}\n${thirdLine}`;
   const markdownPath = 'foo.md';
   const responseData = '<div>FooBar</div>';
   const observeSpy = jest.fn();
@@ -316,10 +312,10 @@ describe('Markdown Live Preview Extension for Source Editor', () => {
       expect(instance.markdownPreview.el.innerHTML).toEqual(responseData);
     });
 
-    it('renders gfm in preview content', async () => {
+    it('applies syntax highlighting to the preview content', async () => {
       instance.markdownPreview.el = editorEl.parentElement;
       await fetchPreview();
-      expect(renderGFM).toHaveBeenCalled();
+      expect(syntaxHighlight).toHaveBeenCalled();
     });
 
     it('catches the errors when fetching the preview', async () => {

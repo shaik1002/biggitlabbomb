@@ -36,11 +36,6 @@ export default {
       required: false,
       default: null,
     },
-    isEditing: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
   data() {
     return {
@@ -66,7 +61,7 @@ export default {
   },
   created() {
     const validatePath = async () => {
-      if (this.isEditing && this.value === this.initialValue) return;
+      if (this.isEditingGroup && this.value === this.initialValue) return;
 
       this.suggestedPath = '';
 
@@ -153,7 +148,7 @@ export default {
     </template>
     <gl-form-input
       :id="id"
-      class="gl-field-error-ignore !gl-h-auto"
+      class="gl-field-error-ignore gl-h-auto!"
       :value="value"
       :placeholder="$options.i18n.placeholder"
       :state="state"

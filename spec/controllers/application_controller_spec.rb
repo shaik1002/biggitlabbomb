@@ -56,31 +56,6 @@ RSpec.describe ApplicationController, feature_category: :shared do
     end
   end
 
-  describe '#set_current_organization' do
-    let_it_be(:current_organization) { create(:organization, :default) }
-
-    before do
-      sign_in user
-    end
-
-    controller(described_class) do
-      def index; end
-    end
-
-    it 'sets current organization' do
-      expect { get :index, format: :json }.to change { Current.organization }.from(nil).to(current_organization)
-    end
-
-    context 'when multiple calls in one example are done' do
-      it 'does not update the organization' do
-        expect(Current).to receive(:organization=).once.and_call_original
-
-        get :index, format: :json
-        get :index, format: :json
-      end
-    end
-  end
-
   describe '#add_gon_variables' do
     before do
       Gon.clear
@@ -113,6 +88,13 @@ RSpec.describe ApplicationController, feature_category: :shared do
       let(:format) { :html }
 
       it_behaves_like 'setting gon variables'
+
+      it 'provides the organization_http_header_name' do
+        get :index, format: format
+
+        expect(json_response.to_h)
+          .to include('organization_http_header_name' => ::Organizations::ORGANIZATION_HTTP_HEADER)
+      end
     end
 
     context 'with json format' do
@@ -936,6 +918,12 @@ RSpec.describe ApplicationController, feature_category: :shared do
       get :index, format: :json
 
       expect(json_response['meta.project']).to eq(project.full_path)
+    end
+
+    it 'sets the caller_id as controller#action' do
+      get :index, format: :json
+
+      expect(json_response['meta.caller_id']).to eq('AnonymousController#index')
     end
 
     it 'sets the feature_category as defined in the controller' do

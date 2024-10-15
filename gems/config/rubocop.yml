@@ -49,17 +49,8 @@ Gemspec/AvoidExecutingGit:
 Gemspec/RequiredRubyVersion:
   Enabled: false
 
-# This cop enforces domain bounded contexts which generally
-# are not applicable to gems.
-Gitlab/BoundedContexts:
-  Enabled: false
-
 # This cop doesn't make sense in the context of gems
 Gitlab/DocUrl:
-  Enabled: false
-
-# This cop doesn't make sense in the context of gems
-Gitlab/EeOnlyClass:
   Enabled: false
 
 # This cop doesn't make sense in the context of gems
@@ -135,15 +126,4 @@ Style/HashSyntax:
 
 # This cop doesn't make sense in the context of gems
 Migration/EnsureFactoryForTable:
-  Enabled: false
-
-# This cop doesn't make sense in the context of gems unless they're
-# adding Controller code
-Rails/StrongParams:
-  Enabled: true
-  Include:
-    - '**/controllers/**/*'
-
-# This cop doesn't make sense in the context of gems
-Gitlab/NoFindInWorkers:
   Enabled: false

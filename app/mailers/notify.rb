@@ -4,9 +4,8 @@ class Notify < ApplicationMailer
   include ActionDispatch::Routing::PolymorphicRoutes
   include GitlabRoutingHelper
   include EmailsHelper
+  include ReminderEmailsHelper
   include IssuablesHelper
-
-  mattr_accessor :override_layout_lookup_table, default: {}
 
   include Emails::Shared
   include Emails::Issues
@@ -33,15 +32,13 @@ class Notify < ApplicationMailer
   helper DiffHelper
   helper BlobHelper
   helper EmailsHelper
+  helper ReminderEmailsHelper
   helper MembersHelper
   helper AvatarsHelper
   helper GitlabRoutingHelper
   helper IssuablesHelper
+  helper InProductMarketingHelper
   helper RegistrationsHelper
-
-  layout :determine_layout
-
-  after_action :check_rate_limit
 
   def test_email(recipient_email, subject, body)
     mail_with_locale(
@@ -72,10 +69,6 @@ class Notify < ApplicationMailer
   end
 
   private
-
-  def determine_layout
-    override_layout_lookup_table[action_name&.to_sym]
-  end
 
   # Return an email address that displays the name of the sender.
   # Override sender_email if you want to hard replace the sender address (e.g. custom email for Service Desk)
@@ -117,10 +110,10 @@ class Notify < ApplicationMailer
 
     subject << @project.name if @project
     subject << @group.name if @group
-    subject << @namespace.name if @namespace && !@project
     subject.concat(extra) if extra.present?
+    subject << Gitlab.config.gitlab.email_subject_suffix if Gitlab.config.gitlab.email_subject_suffix.present?
 
-    subject_with_suffix(subject)
+    subject.join(' | ')
   end
 
   # Return a string suitable for inclusion in the 'Message-Id' mail header.
@@ -155,9 +148,8 @@ class Notify < ApplicationMailer
     mail_with_locale(headers)
   end
 
-  def reply_display_name(model)
-    return model.namespace.full_name if model.is_a?(Issue)
-
+  # `model` is used on EE code
+  def reply_display_name(_model)
     @project.full_name
   end
 
@@ -230,18 +222,13 @@ class Notify < ApplicationMailer
   def add_unsubscription_headers_and_links
     return unless !@labels_url && @sent_notification && @sent_notification.unsubscribable?
 
-    @unsubscribe_url = unsubscribe_sent_notification_url(@sent_notification)
-
-    list_unsubscribe_methods = [@unsubscribe_url]
+    list_unsubscribe_methods = [unsubscribe_sent_notification_url(@sent_notification, force: true)]
     if Gitlab::Email::IncomingEmail.enabled? && Gitlab::Email::IncomingEmail.supports_wildcard?
       list_unsubscribe_methods << "mailto:#{Gitlab::Email::IncomingEmail.unsubscribe_address(reply_key)}"
     end
 
     headers['List-Unsubscribe'] = list_unsubscribe_methods.map { |e| "<#{e}>" }.join(',')
-    # Based on RFC 8058 one-click unsubscribe functionality should
-    # be signalled with using the List-Unsubscribe-Post header
-    # See https://datatracker.ietf.org/doc/html/rfc8058
-    headers['List-Unsubscribe-Post'] = 'List-Unsubscribe=One-Click'
+    @unsubscribe_url = unsubscribe_sent_notification_url(@sent_notification)
   end
 
   def email_with_layout(to:, subject:, layout: 'mailer')
@@ -249,42 +236,6 @@ class Notify < ApplicationMailer
       format.html { render layout: layout }
       format.text { render layout: layout }
     end
-  end
-
-  def check_rate_limit
-    return if rate_limit_scope.nil? || @recipient.nil?
-
-    already_notified = throttled?(peek: true)
-
-    return unless throttled?
-
-    message.perform_deliveries = false
-
-    return if already_notified
-
-    Gitlab::AppLogger.info(
-      event: 'notification_emails_rate_limited',
-      user_id: @recipient.id,
-      project_id: @project&.id,
-      group_id: @group&.id
-    )
-
-    Namespaces::RateLimiterMailer.project_or_group_emails(
-      rate_limit_scope,
-      @recipient.notification_email_for(rate_limit_scope)
-    ).deliver_later
-  end
-
-  def throttled?(peek: false)
-    ::Gitlab::ApplicationRateLimiter.throttled?(
-      :notification_emails,
-      scope: [rate_limit_scope, @recipient].flatten,
-      peek: peek
-    )
-  end
-
-  def rate_limit_scope
-    @project || @group
   end
 end
 

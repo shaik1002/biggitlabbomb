@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: Platform Insights
+group: Respond
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
@@ -34,25 +34,25 @@ To add an incident to an [iteration](../../user/group/iterations/index.md):
 
 Alternatively, you can use the `/iteration` [quick action](../../user/project/quick_actions.md#issues-merge-requests-and-epics).
 
-### From the Incidents page
+### From the incidents list
 
 Prerequisites:
 
 - You must have at least the Reporter role for the project.
 
-To create an incident from the **Incidents** page:
+To create an incident from the incidents list:
 
 1. On the left sidebar, select **Search or go to** and find your project.
 1. Select **Monitor > Incidents**.
 1. Select **Create incident**.
 
-### From the Issues page
+### From the issues list
 
 Prerequisites:
 
 - You must have at least the Reporter role for the project.
 
-To create an incident from the **Issues** page:
+To create an incident from the issues list:
 
 1. On the left sidebar, select **Search or go to** and find your project.
 1. Select **Plan > Issues**, and select **New issue**.
@@ -117,9 +117,9 @@ To set up a webhook with PagerDuty:
 To confirm the integration is successful, trigger a test incident from PagerDuty to
 check if a GitLab incident is created from the incident.
 
-## View a list of incidents
+## View incidents list
 
-To view a list of the [incidents](incidents.md#incidents-list):
+To view the [incidents list](incidents.md#incidents-list):
 
 1. On the left sidebar, select **Search or go to** and find your project.
 1. Select **Monitor > Incidents**.
@@ -151,7 +151,7 @@ To assign a user:
 
 ## Change severity
 
-See the [incidents list](incidents.md#incidents-list) topic for a full description of the severity levels available.
+See [incident list](incidents.md#incidents-list) for a full description of the severity levels available.
 
 Prerequisites:
 

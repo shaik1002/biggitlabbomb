@@ -50,7 +50,7 @@ export default {
   <gl-disclosure-dropdown
     :toggle-text="$options.i18n.QUICK_START"
     variant="confirm"
-    placement="bottom-end"
+    placement="right"
     @shown="track('click_dropdown')"
   >
     <div class="gl-px-3 gl-py-2">

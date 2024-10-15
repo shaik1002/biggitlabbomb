@@ -7,7 +7,6 @@ import (
 	"strconv"
 )
 
-// Ranges represents a collection of range data
 type Ranges struct {
 	DefRefs    map[ID]Item
 	References *References
@@ -15,34 +14,29 @@ type Ranges struct {
 	Cache      *cache
 }
 
-// RawRange represents a raw range with an ID and start position
 type RawRange struct {
-	ID   ID    `json:"id"`
+	Id   ID    `json:"id"`
 	Data Range `json:"start"`
 }
 
-// Range represents a range with line and character positions
 type Range struct {
 	Line        int32 `json:"line"`
 	Character   int32 `json:"character"`
-	ResultSetID ID
+	ResultSetId ID
 }
 
-// RawItem represents a raw item
 type RawItem struct {
 	Property string `json:"property"`
-	RefID    ID     `json:"outV"`
-	RangeIDs []ID   `json:"inVs"`
-	DocID    ID     `json:"document"`
+	RefId    ID     `json:"outV"`
+	RangeIds []ID   `json:"inVs"`
+	DocId    ID     `json:"document"`
 }
 
-// Item represents an item with line and document ID
 type Item struct {
 	Line  int32
-	DocID ID
+	DocId ID
 }
 
-// SerializedRange represents a serialized range
 type SerializedRange struct {
 	StartLine      int32                 `json:"start_line"`
 	StartChar      int32                 `json:"start_char"`
@@ -51,7 +45,6 @@ type SerializedRange struct {
 	References     []SerializedReference `json:"references,omitempty"`
 }
 
-// NewRanges creates a new instance of Ranges
 func NewRanges() (*Ranges, error) {
 	resultSet, err := NewResultSet()
 	if err != nil {
@@ -76,7 +69,6 @@ func NewRanges() (*Ranges, error) {
 	}, nil
 }
 
-// Read processes a label and line, adding ranges or items as appropriate
 func (r *Ranges) Read(label string, line []byte) error {
 	switch label {
 	case "range":
@@ -94,17 +86,16 @@ func (r *Ranges) Read(label string, line []byte) error {
 	return nil
 }
 
-// Serialize serializes the ranges to the provided writer
-func (r *Ranges) Serialize(f io.Writer, rangeIDs []ID, docs map[ID]string) error {
+func (r *Ranges) Serialize(f io.Writer, rangeIds []ID, docs map[ID]string) error {
 	encoder := json.NewEncoder(f)
-	n := len(rangeIDs)
+	n := len(rangeIds)
 
 	if _, err := f.Write([]byte("[")); err != nil {
 		return err
 	}
 
-	for i, rangeID := range rangeIDs {
-		entry, err := r.getRange(rangeID)
+	for i, rangeId := range rangeIds {
+		entry, err := r.getRange(rangeId)
 		if err != nil {
 			continue
 		}
@@ -112,9 +103,9 @@ func (r *Ranges) Serialize(f io.Writer, rangeIDs []ID, docs map[ID]string) error
 		serializedRange := SerializedRange{
 			StartLine:      entry.Line,
 			StartChar:      entry.Character,
-			DefinitionPath: r.definitionPathFor(docs, entry.ResultSetID),
-			Hover:          r.ResultSet.Hovers.For(entry.ResultSetID),
-			References:     r.References.For(docs, entry.ResultSetID),
+			DefinitionPath: r.definitionPathFor(docs, entry.ResultSetId),
+			Hover:          r.ResultSet.Hovers.For(entry.ResultSetId),
+			References:     r.References.For(docs, entry.ResultSetId),
 		}
 		if err := encoder.Encode(serializedRange); err != nil {
 			return err
@@ -133,7 +124,6 @@ func (r *Ranges) Serialize(f io.Writer, rangeIDs []ID, docs map[ID]string) error
 	return nil
 }
 
-// Close closes all resources associated with Ranges
 func (r *Ranges) Close() error {
 	for _, err := range []error{
 		r.Cache.Close(),
@@ -147,13 +137,13 @@ func (r *Ranges) Close() error {
 	return nil
 }
 
-func (r *Ranges) definitionPathFor(docs map[ID]string, refID ID) string {
-	defRef, ok := r.DefRefs[refID]
+func (r *Ranges) definitionPathFor(docs map[ID]string, refId ID) string {
+	defRef, ok := r.DefRefs[refId]
 	if !ok {
 		return ""
 	}
 
-	defPath := docs[defRef.DocID] + "#L" + strconv.Itoa(int(defRef.Line))
+	defPath := docs[defRef.DocId] + "#L" + strconv.Itoa(int(defRef.Line))
 
 	return defPath
 }
@@ -164,7 +154,7 @@ func (r *Ranges) addRange(line []byte) error {
 		return err
 	}
 
-	return r.Cache.SetEntry(rg.ID, &rg.Data)
+	return r.Cache.SetEntry(rg.Id, &rg.Data)
 }
 
 func (r *Ranges) addItem(line []byte) error {
@@ -173,55 +163,55 @@ func (r *Ranges) addItem(line []byte) error {
 		return err
 	}
 
-	if len(rawItem.RangeIDs) == 0 {
+	if len(rawItem.RangeIds) == 0 {
 		return errors.New("no range IDs")
 	}
 
-	resultSetRef, err := r.ResultSet.RefByID(rawItem.RefID)
+	resultSetRef, err := r.ResultSet.RefById(rawItem.RefId)
 	if err != nil {
 		return nil
 	}
 
 	var references []Item
-	for _, rangeID := range rawItem.RangeIDs {
-		rg, err := r.getRange(rangeID)
+	for _, rangeId := range rawItem.RangeIds {
+		rg, err := r.getRange(rangeId)
 		if err != nil {
 			break
 		}
 
-		rg.ResultSetID = resultSetRef.ID
+		rg.ResultSetId = resultSetRef.Id
 
-		if err := r.Cache.SetEntry(rangeID, rg); err != nil {
+		if err := r.Cache.SetEntry(rangeId, rg); err != nil {
 			return err
 		}
 
 		item := Item{
 			Line:  rg.Line + 1,
-			DocID: rawItem.DocID,
+			DocId: rawItem.DocId,
 		}
 
-		definitionItem := r.DefRefs[resultSetRef.ID]
+		definitionItem := r.DefRefs[resultSetRef.Id]
 		if item == definitionItem {
 			continue
 		}
 
 		if resultSetRef.IsDefinition() {
-			r.DefRefs[resultSetRef.ID] = item
+			r.DefRefs[resultSetRef.Id] = item
 		} else {
 			references = append(references, item)
 		}
 	}
 
-	if err := r.References.Store(resultSetRef.ID, references); err != nil {
+	if err := r.References.Store(resultSetRef.Id, references); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *Ranges) getRange(rangeID ID) (*Range, error) {
+func (r *Ranges) getRange(rangeId ID) (*Range, error) {
 	var rg Range
-	if err := r.Cache.Entry(rangeID, &rg); err != nil {
+	if err := r.Cache.Entry(rangeId, &rg); err != nil {
 		return nil, err
 	}
 

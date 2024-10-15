@@ -1,5 +1,12 @@
 @import 'mixins_and_variables_and_functions';
 
+$mr-widget-min-height: 69px;
+$tabs-holder-z-index: 250;
+
+.compare-versions-container {
+  min-width: 0;
+}
+
 .diff-comment-avatar-holders {
   position: absolute;
   margin-left: -$gl-padding;
@@ -29,6 +36,7 @@
     .diff-comments-more-count {
       padding-left: 2px;
       padding-right: 2px;
+      width: auto;
     }
   }
 }
@@ -43,6 +51,7 @@
   border-color: var(--white, $white);
   cursor: pointer;
   transition: all 0.1s ease-out;
+  @include code-icon-size();
 
   @for $i from 1 through 4 {
     &:nth-child(#{$i}) {
@@ -59,6 +68,7 @@
   padding-left: 0;
   padding-right: 0;
   overflow: hidden;
+  @include code-icon-size();
 }
 
 .diff-file-changes {
@@ -137,6 +147,10 @@
   .diff-grid-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
+
+    &.diff-grid-row-full {
+      grid-template-columns: 1fr;
+    }
   }
 
   .diff-grid-left,
@@ -165,7 +179,7 @@
     grid-template-columns: 1fr 1fr;
 
     .content + .content {
-      @apply gl-border-t;
+      @include gl-border-t;
     }
 
     .notes-content {
@@ -265,8 +279,21 @@
   }
 }
 
+.tree-list-scroll {
+  max-height: 100%;
+  padding-bottom: $grid-size;
+  overflow-y: scroll;
+  overflow-x: auto;
+}
+
 .tree-list-gutter {
   height: $grid-size;
+}
+
+.tree-list-clear-icon {
+  right: 10px;
+  left: auto;
+  line-height: 0;
 }
 
 .file-row-header {
@@ -336,7 +363,6 @@
       margin-bottom: $gl-padding-8;
     }
 
-    // stylelint-disable-next-line gitlab/no-gl-class
     .gl-button {
       margin-left: 0;
     }
@@ -382,12 +408,16 @@
   }
 
   &:not(:last-child) {
-    border-bottom: 1px solid var(--gl-border-color-default);
+    border-bottom: 1px solid var(--border-color, $border-color);
   }
 }
 
 .diff-file-row.is-active {
   background-color: var(--gray-50, $gray-50);
+}
+
+.mr-widget-body-loading svg {
+  vertical-align: middle;
 }
 
 .mr-info-list {
@@ -435,33 +465,15 @@
 }
 
 .mr-section-container {
-  border: 1px solid var(--gl-border-color-default);
-  border-radius: $gl-border-radius-base;
+  border: 1px solid var(--border-color, $border-color);
+  border-radius: $border-radius-default;
   background: var(--white, $white);
 
-  &:not(:first-child) {
-    @apply gl-mt-5;
-  }
-
-  &:empty {
-    display: none;
-  }
-
-  // stylelint-disable-next-line gitlab/no-gl-class
-  .gl-skeleton-loader {
-    display: block;
-  }
-
   > .mr-widget-section {
-    &:first-child {
-      border-top-left-radius: $gl-border-radius-base-inner;
-      border-top-right-radius: $gl-border-radius-base-inner;
-    }
-
     > :last-child,
     .deploy-heading:last-child {
-      border-bottom-left-radius: $gl-border-radius-base-inner;
-      border-bottom-right-radius: $gl-border-radius-base-inner;
+      border-bottom-left-radius: $border-radius-default-inner;
+      border-bottom-right-radius: $border-radius-default-inner;
     }
   }
 
@@ -470,11 +482,70 @@
   }
 }
 
+.mr-source-target {
+  flex-wrap: wrap;
+  padding: $gl-padding;
+  background: var(--white, $white);
+  min-height: $mr-widget-min-height;
+
+  @include media-breakpoint-up(md) {
+    align-items: center;
+  }
+
+  .git-merge-container {
+    justify-content: space-between;
+    flex: 1;
+    flex-direction: row;
+    align-items: center;
+
+    @include media-breakpoint-down(md) {
+      flex-direction: column;
+      align-items: stretch;
+
+      .branch-actions {
+        margin-top: 16px;
+      }
+    }
+
+    @include media-breakpoint-up(lg) {
+      .branch-actions {
+        align-self: center;
+        margin-left: $gl-padding;
+        white-space: nowrap;
+      }
+    }
+  }
+
+  .diverged-commits-count {
+    color: var(--gray-500, $gl-text-color-secondary);
+  }
+}
+
 .mr-state-widget {
-  color: var(--gl-text-color-default);
+  color: var(--gl-text-color, $gl-text-color);
 
   .commit-message-edit {
-    border-radius: $gl-border-radius-base;
+    border-radius: $border-radius-default;
+  }
+
+  .mr-widget-section:not(:first-child) > div,
+  .mr-widget-section:not(:first-child) > section,
+  .mr-widget-section .mr-widget-section > div:not(:first-child) {
+    border-top: solid 1px var(--border-color, $border-color);
+    // Avoid two lines being rendered
+    // instead of exessively adressing those
+    // edge cases we can use this as a boring
+    // solution
+    margin-top: -1px;
+  }
+
+  .mr-widget-alert-container + .mr-widget-section {
+    border-top: 0;
+  }
+
+  .mr-fast-forward-message {
+    padding-left: $gl-spacing-scale-9;
+    padding-bottom: $gl-padding;
   }
 
   .commits-list {
@@ -511,8 +582,15 @@
     font-size: $gl-font-size;
   }
 
+  .accept-merge-holder {
+    .accept-action {
+      display: inline-block;
+      float: left;
+    }
+  }
+
   .ci-widget {
-    color: var(--gl-text-color-default);
+    color: var(--gl-text-color, $gl-text-color);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -530,6 +608,10 @@
 
   .mr-widget-icon {
     font-size: 22px;
+  }
+
+  .mr-loading-icon {
+    margin: 3px 0;
   }
 
   .normal {
@@ -552,7 +634,7 @@
   }
 
   .label-branch {
-    @apply gl-font-monospace;
+    @include gl-font-monospace;
     overflow: hidden;
     word-break: break-all;
   }
@@ -603,6 +685,11 @@
       margin: 0 0 0 10px;
     }
 
+    .state-label {
+      font-weight: $gl-font-weight-bold;
+      padding-right: 10px;
+    }
+
     .danger {
       color: var(--red-500, $red-500);
     }
@@ -610,6 +697,14 @@
     .dropdown-menu {
       li a {
         padding: 5px;
+      }
+
+      .merge-opt-icon {
+        line-height: 1.5;
+      }
+
+      .merge-opt-title {
+        margin-left: 8px;
       }
     }
 
@@ -635,15 +730,59 @@
       }
     }
 
-    &.mr-pipeline-suggest {
-      border-radius: $gl-border-radius-base;
+    &.mr-widget-empty-state {
       line-height: 20px;
-      border: 1px solid var(--gl-border-color-default);
+      padding: $gl-padding;
 
-      .circle-icon-container {
-        color: var(--gray-100, $gray-100);
+      .artwork {
+
+        @include media-breakpoint-down(md) {
+          margin-bottom: $gl-padding;
+        }
+      }
+
+      .text {
+        p {
+          margin-top: $gl-padding;
+        }
+
+        .highlight {
+          margin: 0 0 $gl-padding;
+          font-weight: $gl-font-weight-bold;
+        }
       }
     }
+
+    &.mr-pipeline-suggest {
+      border-radius: $border-radius-default;
+      line-height: 20px;
+      border: 1px solid var(--border-color, $border-color);
+
+      .circle-icon-container {
+        color: var(--gray-100, $gl-text-color-quaternary);
+      }
+    }
+  }
+
+  .ci-coverage {
+    float: right;
+  }
+
+  .stop-env-container {
+    color: var(--gl-text-color, $gl-text-color);
+    float: right;
+
+    a {
+      color: var(--gl-text-color, $gl-text-color);
+    }
+  }
+}
+
+.mr-widget-alert-container {
+  border-radius: $border-radius-default-inner $border-radius-default-inner 0 0;
+
+  .gl-alert:not(:last-child) {
+    margin-bottom: 1px;
   }
 }
 
@@ -661,18 +800,23 @@
 }
 
 .mr-widget-border-top {
-  border-top: 1px solid var(--gl-border-color-default);
+  border-top: 1px solid var(--border-color, $border-color);
 
   &:last-child {
     .report-block-container {
-      border-bottom-left-radius: $gl-border-radius-base-inner;
-      border-bottom-right-radius: $gl-border-radius-base-inner;
+      border-bottom-left-radius: $border-radius-default-inner;
+      border-bottom-right-radius: $border-radius-default-inner;
     }
   }
 }
 
+.mr-widget-grouped-section .report-block-container {
+  border-bottom-left-radius: $border-radius-default;
+  border-bottom-right-radius: $border-radius-default;
+}
+
 .mr-widget-extension {
-  border-top: 1px solid var(--gl-border-color-default);
+  border-top: 1px solid var(--border-color, $border-color);
   background-color: var(--gray-10, $gray-10);
   container-name: mr-widget-extension;
   container-type: inline-size;
@@ -715,14 +859,38 @@
   transform: translate(-50%, -50%);
 }
 
+.mr-widget-heading {
+  position: relative;
+  border: 1px solid var(--border-color, $border-color);
+  border-radius: $border-radius-default;
+  background: var(--white, $white);
+
+  .gl-skeleton-loader {
+    display: block;
+  }
+}
+
+.mr-widget-info {
+  padding-left: $gl-padding;
+  padding-right: $gl-padding;
+}
+
 .mr-widget-section {
   .code-text {
     flex: 1;
   }
 }
 
+.mr-widget-workflow {
+  position: relative;
+
+  &:not(:first-child) {
+    margin-top: $gl-padding;
+  }
+}
+
 .mr-version-controls {
-  color: var(--gl-text-color-default);
+  color: var(--gl-text-color, $gl-text-color);
 
   .mr-version-menus-container {
     display: flex;
@@ -731,7 +899,6 @@
     z-index: 199;
     white-space: nowrap;
 
-    // stylelint-disable-next-line gitlab/no-gl-class
     .gl-dropdown-toggle {
       width: auto;
       max-width: 170px;
@@ -753,12 +920,10 @@
     top: 1px;
     margin: 0 $gl-spacing-scale-1;
 
-    // stylelint-disable-next-line gitlab/no-gl-class
     .dropdown-toggle.gl-button {
       padding: $gl-spacing-scale-2 2px $gl-spacing-scale-2 $gl-spacing-scale-2;
       font-weight: $gl-font-weight-bold;
 
-      // stylelint-disable-next-line gitlab/no-gl-class
       .gl-button-icon {
         margin-left: $gl-spacing-scale-1;
       }
@@ -766,12 +931,25 @@
   }
 
   .dropdown-title {
-    color: var(--gl-text-color-strong);
+    color: var(--gl-text-color, $gl-text-color);
   }
 }
 
 .mr-section-container .resize-observer > object {
   height: 0;
+}
+
+// TODO: Move to GitLab UI
+.mr-extenson-scrim {
+  background: linear-gradient(to bottom, rgba($gray-light, 0), rgba($gray-light, 1));
+
+  .gl-dark & {
+    background: linear-gradient(to bottom, rgba(#333, 0), rgba(#333, 1));
+  }
+}
+
+.attention-request-sidebar-popover {
+  z-index: 999;
 }
 
 .merge-request-overview {
@@ -804,7 +982,6 @@
   }
 }
 
-// stylelint-disable-next-line gitlab/no-gl-class
 .submit-review-dropdown .gl-new-dropdown-panel {
   max-width: none;
 }
@@ -865,12 +1042,10 @@
 }
 
 .merge-request-notification-toggle {
-  // stylelint-disable-next-line gitlab/no-gl-class
   .gl-toggle {
     margin-left: auto;
   }
 
-  // stylelint-disable-next-line gitlab/no-gl-class
   .gl-toggle-label {
     font-weight: $gl-font-weight-normal;
   }
@@ -915,11 +1090,11 @@
   align-items: center;
   width: 100%;
   height: var(--mr-review-bar-height);
-  padding-left: $super-sidebar-width;
+  padding-left: $contextual-sidebar-width;
   padding-right: $right-sidebar-collapsed-width;
-  background: var(--gl-background-color-default);
-  border-top: 1px solid var(--gl-border-color-default);
-  @apply gl-transition-padding;
+  background: var(--white, $white);
+  border-top: 1px solid var(--border-color, $border-color);
+  transition: padding $gl-transition-duration-medium;
 
   @media (max-width: map-get($grid-breakpoints, sm)-1) {
     padding-left: 0;
@@ -995,7 +1170,6 @@
     vertical-align: middle;
   }
 
-  // stylelint-disable-next-line gitlab/no-gl-class
   .gl-skeleton-loader {
     max-width: 334px;
   }
@@ -1003,12 +1177,6 @@
 
 .diff-file-discussions-wrapper {
   width: 100%;
-
-  .timeline-entry.note-discussion {
-    > .timeline-entry-inner {
-      border-bottom: 0 !important;
-    }
-  }
 
   .diff-discussions:not(:first-child) >.notes {
     padding-top: 0;
@@ -1025,10 +1193,6 @@
     border-bottom-width: 0;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
-
-    .notes {
-      @apply gl-bg-subtle;
-    }
   }
 }
 

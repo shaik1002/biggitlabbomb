@@ -311,7 +311,7 @@ export default {
 <template>
   <gl-dropdown ref="dropdown" :text="text" @toggle="$emit('toggle')" @shown="focusSearch">
     <template #header>
-      <p class="gl-mb-4 gl-mt-2 gl-text-center gl-font-bold">{{ headerText }}</p>
+      <p class="gl-font-weight-bold gl-text-center gl-mt-2 gl-mb-4">{{ headerText }}</p>
       <gl-dropdown-divider />
       <gl-search-box-by-type
         ref="search"
@@ -325,7 +325,7 @@ export default {
         v-if="isLoading"
         data-testid="loading-participants"
         size="md"
-        class="gl-absolute gl-left-0 gl-right-0 gl-top-0"
+        class="gl-absolute gl-left-0 gl-top-0 gl-right-0"
       />
       <template v-else>
         <template v-if="shouldShowParticipants">
@@ -334,9 +334,9 @@ export default {
             :is-checked="selectedIsEmpty"
             is-check-centered
             data-testid="unassign"
-            @click.capture.native.stop="unassign"
+            @click.native.capture.stop="unassign"
           >
-            <span :class="selectedIsEmpty ? 'gl-pl-0' : 'gl-pl-6'" class="gl-font-bold">{{
+            <span :class="selectedIsEmpty ? 'gl-pl-0' : 'gl-pl-6'" class="gl-font-weight-bold">{{
               $options.i18n.unassigned
             }}</span>
           </gl-dropdown-item>
@@ -351,7 +351,7 @@ export default {
           is-checked
           is-check-centered
           data-testid="selected-participant"
-          @click.capture.native.stop="unselect(item.username)"
+          @click.native.capture.stop="unselect(item.username)"
         >
           <sidebar-participant :user="item" :issuable-type="issuableType" selected />
         </gl-dropdown-item>
@@ -359,24 +359,24 @@ export default {
           <gl-dropdown-divider />
           <gl-dropdown-item
             data-testid="current-user"
-            @click.capture.native.stop="selectAssignee(currentUser)"
+            @click.native.capture.stop="selectAssignee(currentUser)"
           >
             <sidebar-participant
               :user="currentUser"
               :issuable-type="issuableType"
-              class="!gl-pl-6"
+              class="gl-pl-6!"
             />
           </gl-dropdown-item>
         </template>
         <gl-dropdown-item
           v-if="showAuthor"
           data-testid="issuable-author"
-          @click.capture.native.stop="selectAssignee(issuableAuthor)"
+          @click.native.capture.stop="selectAssignee(issuableAuthor)"
         >
           <sidebar-participant
             :user="issuableAuthor"
             :issuable-type="issuableType"
-            class="!gl-pl-6"
+            class="gl-pl-6!"
           />
         </gl-dropdown-item>
         <gl-dropdown-item
@@ -386,15 +386,15 @@ export default {
           :title="tooltipText(unselectedUser)"
           boundary="viewport"
           data-testid="unselected-participant"
-          @click.capture.native.stop="selectAssignee(unselectedUser)"
+          @click.native.capture.stop="selectAssignee(unselectedUser)"
         >
           <sidebar-participant
             :user="unselectedUser"
             :issuable-type="issuableType"
-            class="!gl-pl-6"
+            class="gl-pl-6!"
           />
         </gl-dropdown-item>
-        <gl-dropdown-item v-if="noUsersFound" data-testid="empty-results" class="!gl-pl-6">
+        <gl-dropdown-item v-if="noUsersFound" data-testid="empty-results" class="gl-pl-6!">
           {{ __('No matching results') }}
         </gl-dropdown-item>
       </template>

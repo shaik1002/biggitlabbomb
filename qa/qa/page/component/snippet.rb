@@ -76,6 +76,7 @@ module QA
 
           base.view 'app/views/layouts/nav/breadcrumbs/_breadcrumbs.html.haml' do
             element 'breadcrumb-links'
+            element 'breadcrumb-current-link'
           end
         end
 
@@ -280,7 +281,7 @@ module QA
 
         def snippet_id
           within_element('breadcrumb-links') do
-            find('li:last-of-type').text.delete_prefix('$')
+            find_element('breadcrumb-current-link').text.delete_prefix('$')
           end
         end
       end

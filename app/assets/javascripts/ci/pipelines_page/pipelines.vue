@@ -41,8 +41,6 @@ export default {
     PipelinesFilteredSearch,
     PipelinesTable,
     TablePagination,
-    PipelineAccountVerificationAlert: () =>
-      import('ee_component/vue_shared/components/pipeline_account_verification_alert.vue'),
   },
   mixins: [PipelinesMixin, Tracking.mixin()],
   props: {
@@ -61,6 +59,11 @@ export default {
     canCreatePipeline: {
       type: Boolean,
       required: true,
+    },
+    ciLintPath: {
+      type: String,
+      required: false,
+      default: null,
     },
     resetCachePath: {
       type: String,
@@ -86,11 +89,6 @@ export default {
       required: true,
     },
     defaultVisibilityPipelineIdType: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    pipelinesAnalyticsPath: {
       type: String,
       required: false,
       default: null,
@@ -166,7 +164,9 @@ export default {
     },
 
     shouldRenderButtons() {
-      return (this.newPipelinePath || this.resetCachePath) && this.shouldRenderTabs;
+      return (
+        (this.newPipelinePath || this.resetCachePath || this.ciLintPath) && this.shouldRenderTabs
+      );
     },
 
     shouldRenderPagination() {
@@ -351,7 +351,6 @@ export default {
 </script>
 <template>
   <div class="pipelines-container gl-mt-2">
-    <pipeline-account-verification-alert class="gl-mt-5" />
     <div
       v-if="shouldRenderTabs || shouldRenderButtons"
       class="top-area scrolling-tabs-container inner-page-scroll-tabs gl-border-none"
@@ -370,18 +369,16 @@ export default {
         v-if="shouldRenderButtons"
         :new-pipeline-path="newPipelinePath"
         :reset-cache-path="resetCachePath"
-        :pipelines-analytics-path="pipelinesAnalyticsPath"
+        :ci-lint-path="ciLintPath"
         :is-reset-cache-button-loading="isResetCacheButtonLoading"
         @resetRunnersCache="handleResetRunnersCache"
       />
     </div>
 
-    <div v-if="stateToRender !== $options.stateMap.emptyState" class="gl-flex">
-      <div
-        class="row-content-block gl-flex gl-max-w-full gl-flex-grow gl-flex-wrap gl-gap-4 gl-border-b-0 sm:gl-flex-nowrap"
-      >
+    <div v-if="stateToRender !== $options.stateMap.emptyState" class="gl-display-flex">
+      <div class="row-content-block gl-display-flex gl-flex-grow-1 gl-border-b-0">
         <pipelines-filtered-search
-          class="gl-flex gl-max-w-full gl-flex-grow"
+          class="gl-display-flex gl-flex-grow-1 gl-mr-4"
           :project-id="projectId"
           :default-branch-name="defaultBranchName"
           :params="validatedParams"
@@ -389,8 +386,6 @@ export default {
         />
         <gl-collapsible-listbox
           v-model="visibilityPipelineIdType"
-          class="gl-grow sm:gl-grow-0"
-          toggle-class="gl-grow"
           :toggle-text="selectedPipelineKeyOption.text"
           :items="$options.pipelineKeyOptions"
           @select="changeVisibilityPipelineIDType"

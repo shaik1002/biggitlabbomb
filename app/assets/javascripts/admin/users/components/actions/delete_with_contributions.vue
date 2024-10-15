@@ -59,8 +59,7 @@ export default {
         i18n: {
           title: s__('AdminUsers|Delete User %{username} and contributions?'),
           primaryButtonLabel: s__('AdminUsers|Delete user and contributions'),
-          messageBody:
-            s__(`AdminUsers|You are about to permanently delete the user %{username}. This will delete all issues,
+          messageBody: s__(`AdminUsers|You are about to permanently delete the user %{username}. This will delete all issues,
                             merge requests, groups, and projects linked to them. To avoid data loss,
                             consider using the %{strongStart}Block user%{strongEnd} feature instead. After you %{strongStart}Delete user%{strongEnd},
                             you cannot undo this action or recover the data.`),
@@ -74,7 +73,7 @@ export default {
 <template>
   <gl-disclosure-dropdown-item :disabled="loading" :aria-busy="loading" @action="onClick">
     <template #list-item>
-      <div v-if="loading" class="gl-flex gl-items-center">
+      <div v-if="loading" class="gl-display-flex gl-align-items-center">
         <gl-loading-icon class="gl-mr-3" />
         {{ $options.i18n.loading }}
       </div>

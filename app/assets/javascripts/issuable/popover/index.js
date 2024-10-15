@@ -4,7 +4,6 @@ import createDefaultClient from '~/lib/graphql';
 import IssuePopover from './components/issue_popover.vue';
 import MRPopover from './components/mr_popover.vue';
 import MilestonePopover from './components/milestone_popover.vue';
-import CommentPopover from './components/comment_popover.vue';
 
 export const componentsByReferenceTypeMap = {
   issue: IssuePopover,
@@ -24,24 +23,6 @@ const handleIssuablePopoverMouseOut = ({ target }) => {
 };
 
 const popoverMountedAttr = 'data-popover-mounted';
-
-function isCommentPopover(target) {
-  const targetUrl = new URL(target.href);
-  const noteId = targetUrl.hash;
-
-  return window?.gon?.features?.commentTooltips && noteId && noteId.startsWith('#note_');
-}
-
-export function handleCommentPopoverMount({ target, apolloProvider }) {
-  const PopoverComponent = Vue.extend(CommentPopover);
-
-  new PopoverComponent({
-    propsData: {
-      target,
-    },
-    apolloProvider,
-  }).$mount();
-}
 
 /**
  * Adds a Popover component for issuables and work items to the body,
@@ -64,22 +45,17 @@ export const handleIssuablePopoverMount = ({
   target.addEventListener('mouseleave', handleIssuablePopoverMouseOut);
 
   renderFn = setTimeout(() => {
-    if (isCommentPopover(target)) {
-      handleCommentPopoverMount({ target, apolloProvider });
-    } else {
-      const PopoverComponent = Vue.extend(componentsByReferenceType[referenceType]);
-
-      new PopoverComponent({
-        propsData: {
-          target,
-          namespacePath,
-          iid,
-          milestoneId: milestone,
-          cachedTitle: title || innerText,
-        },
-        apolloProvider,
-      }).$mount();
-    }
+    const PopoverComponent = Vue.extend(componentsByReferenceType[referenceType]);
+    new PopoverComponent({
+      propsData: {
+        target,
+        namespacePath,
+        iid,
+        milestoneId: milestone,
+        cachedTitle: title || innerText,
+      },
+      apolloProvider,
+    }).$mount();
 
     target.setAttribute(popoverMountedAttr, true);
   }, 200); // 200ms delay so not every mouseover triggers Popover + API Call
@@ -96,10 +72,9 @@ export default (elements, issuablePopoverMount = handleIssuablePopoverMount) => 
 
     elements.forEach((el) => {
       const { projectPath, groupPath, iid, referenceType, milestone, project } = el.dataset;
-      let { namespacePath } = el.dataset;
       const title = el.dataset.mrTitle || el.title;
       const { innerText } = el;
-      namespacePath = namespacePath || groupPath || projectPath;
+      const namespacePath = groupPath || projectPath;
       const isIssuable = Boolean(namespacePath && title && iid);
       const isMilestone = Boolean(milestone && project);
 

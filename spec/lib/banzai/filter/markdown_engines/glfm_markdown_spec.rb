@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Banzai::Filter::MarkdownEngines::GlfmMarkdown, feature_category: :markdown do
+RSpec.describe Banzai::Filter::MarkdownEngines::GlfmMarkdown, feature_category: :team_planning do
   it 'defaults to generating sourcepos' do
     engine = described_class.new({})
     expected = <<~TEXT
@@ -28,14 +28,5 @@ RSpec.describe Banzai::Filter::MarkdownEngines::GlfmMarkdown, feature_category: 
     TEXT
 
     expect(engine.render('# hi')).to eq expected
-  end
-
-  it 'turns off autolinking' do
-    engine = described_class.new({ autolink: false, no_sourcepos: true })
-    expected = <<~TEXT
-      <p>http://example.com</p>
-    TEXT
-
-    expect(engine.render('http://example.com')).to eq expected
   end
 end

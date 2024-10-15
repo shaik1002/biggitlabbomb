@@ -1,66 +1,16 @@
-query getMergeRequestsCount(
-  $fullPath: ID!
-  $assigneeWildcardId: AssigneeWildcardId
-  $assigneeUsernames: String
-  $milestoneTitle: String
-  $milestoneWildcardId: MilestoneWildcardId
-  $deployedBefore: Time
-  $deployedAfter: Time
-  $environmentName: String
-  $not: MergeRequestsResolverNegatedParams
-) {
+query getMergeRequestsCount($fullPath: ID!) {
   project(fullPath: $fullPath) {
     id
-    openedMergeRequests: mergeRequests(
-      state: opened
-      assigneeUsername: $assigneeUsernames
-      assigneeWildcardId: $assigneeWildcardId
-      milestoneTitle: $milestoneTitle
-      milestoneWildcardId: $milestoneWildcardId
-      deployedBefore: $deployedBefore
-      deployedAfter: $deployedAfter
-      environmentName: $environmentName
-      not: $not
-    ) {
+    openedMergeRequests: mergeRequests(state: opened) {
       count
     }
-    mergedMergeRequests: mergeRequests(
-      state: merged
-      assigneeUsername: $assigneeUsernames
-      assigneeWildcardId: $assigneeWildcardId
-      milestoneTitle: $milestoneTitle
-      milestoneWildcardId: $milestoneWildcardId
-      deployedBefore: $deployedBefore
-      deployedAfter: $deployedAfter
-      environmentName: $environmentName
-      not: $not
-    ) {
+    mergedMergeRequests: mergeRequests(state: merged) {
       count
     }
-    closedMergeRequests: mergeRequests(
-      state: closed
-      assigneeUsername: $assigneeUsernames
-      assigneeWildcardId: $assigneeWildcardId
-      milestoneTitle: $milestoneTitle
-      milestoneWildcardId: $milestoneWildcardId
-      deployedBefore: $deployedBefore
-      deployedAfter: $deployedAfter
-      environmentName: $environmentName
-      not: $not
-    ) {
+    closedMergeRequests: mergeRequests(state: closed) {
       count
     }
-    allMergeRequests: mergeRequests(
-      state: all
-      assigneeUsername: $assigneeUsernames
-      assigneeWildcardId: $assigneeWildcardId
-      milestoneTitle: $milestoneTitle
-      milestoneWildcardId: $milestoneWildcardId
-      deployedBefore: $deployedBefore
-      deployedAfter: $deployedAfter
-      environmentName: $environmentName
-      not: $not
-    ) {
+    allMergeRequests: mergeRequests(state: all) {
       count
     }
   }

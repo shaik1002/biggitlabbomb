@@ -5,7 +5,7 @@ import PipelineWizard from '~/pipeline_wizard/pipeline_wizard.vue';
 import PagesWizardTemplate from '~/pipeline_wizard/templates/pages.yml?raw';
 import { logError } from '~/lib/logger';
 import { s__ } from '~/locale';
-import { visitUrl } from '~/lib/utils/url_utility';
+import { redirectTo } from '~/lib/utils/url_utility'; // eslint-disable-line import/no-deprecated
 import pagesMarkOnboardingComplete from '../queries/mark_onboarding_complete.graphql';
 
 export const i18n = {
@@ -57,7 +57,7 @@ export default {
     async onDone() {
       this.loading = true;
       await this.updateOnboardingState();
-      visitUrl(this.redirectToWhenDone);
+      redirectTo(this.redirectToWhenDone); // eslint-disable-line import/no-deprecated
     },
   },
 };
@@ -67,7 +67,7 @@ export default {
   <div>
     <div
       v-if="loading"
-      class="gl-rounded-base gl-p-3 gl-text-center"
+      class="gl-p-3 gl-rounded-base gl-text-center"
       data-testid="onboarding-mutation-loading"
     >
       <gl-loading-icon />

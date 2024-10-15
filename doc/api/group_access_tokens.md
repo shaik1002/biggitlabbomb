@@ -14,21 +14,15 @@ You can read more about [group access tokens](../user/group/settings/group_acces
 
 ## List group access tokens
 
-> - `state` attribute [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/462217) in GitLab 17.2.
-
 Get a list of [group access tokens](../user/group/settings/group_access_tokens.md).
 
-In GitLab 17.2 and later, you can use the `state` attribute to limit the response to group access tokens with a specified state.
-
 ```plaintext
-GET /groups/:id/access_tokens
-GET /groups/:id/access_tokens?state=inactive
+GET groups/:id/access_tokens
 ```
 
 | Attribute | Type    | required | Description         |
 |-----------|---------|----------|---------------------|
-| `id` | integer or string | yes | ID or [URL-encoded path of the group](rest/index.md#namespaced-paths) |
-| `state` | string | No | Limit results to tokens with specified state. Valid values are `active` and `inactive`. By default both states are returned. |
+| `id` | integer or string | yes | ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) |
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/<group_id>/access_tokens"
@@ -47,21 +41,6 @@ curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/a
       "active" : true,
       "created_at" : "2021-01-20T22:11:48.151Z",
       "revoked" : false,
-      "last_used_at": null,
-      "access_level": 40
-   },
-   {
-      "user_id" : 141,
-      "scopes" : [
-         "read_api"
-      ],
-      "name" : "token-2",
-      "expires_at" : "2021-01-31",
-      "id" : 43,
-      "active" : false,
-      "created_at" : "2021-01-21T12:12:38.123Z",
-      "revoked" : true,
-      "last_used_at": "2021-02-13T10:34:57.178Z",
       "access_level": 40
    }
 ]
@@ -72,12 +51,12 @@ curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/a
 Get a [group access token](../user/group/settings/group_access_tokens.md) by ID.
 
 ```plaintext
-GET /groups/:id/access_tokens/:token_id
+GET groups/:id/access_tokens/:token_id
 ```
 
 | Attribute | Type    | required | Description         |
 |-----------|---------|----------|---------------------|
-| `id` | integer or string | yes | ID or [URL-encoded path of the group](rest/index.md#namespaced-paths) |
+| `id` | integer or string | yes | ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) |
 | `token_id` | integer | yes | ID of the group access token |
 
 ```shell
@@ -108,16 +87,16 @@ Create a [group access token](../user/group/settings/group_access_tokens.md). Yo
 group to create group access tokens.
 
 ```plaintext
-POST /groups/:id/access_tokens
+POST groups/:id/access_tokens
 ```
 
 | Attribute | Type    | required | Description         |
 |-----------|---------|----------|---------------------|
-| `id` | integer or string | yes | ID or [URL-encoded path of the group](rest/index.md#namespaced-paths) |
+| `id` | integer or string | yes | ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) |
 | `name` | String | yes | Name of the group access token  |
 | `scopes` | `Array[String]` | yes | [List of scopes](../user/group/settings/group_access_tokens.md#scopes-for-a-group-access-token) |
 | `access_level` | Integer | no | Access level. Valid values are `10` (Guest), `20` (Reporter), `30` (Developer), `40` (Maintainer), and `50` (Owner). |
-| `expires_at` | Date    | yes | Expiration date of the access token in ISO format (`YYYY-MM-DD`). The date cannot be set later than the [maximum allowable lifetime of an access token](../user/profile/personal_access_tokens.md#access-token-expiration). |
+| `expires_at` | Date    | yes | Expiration date of the access token in ISO format (`YYYY-MM-DD`). The date cannot be set later than the [maximum allowable lifetime of an access token](../user/profile/personal_access_tokens.md#when-personal-access-tokens-expire). |
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
@@ -162,7 +141,7 @@ POST /groups/:id/access_tokens/:token_id/rotate
 
 | Attribute | Type       | required | Description         |
 |-----------|------------|----------|---------------------|
-| `id` | integer or string  | yes      | ID or [URL-encoded path of the group](rest/index.md#namespaced-paths) |
+| `id` | integer or string  | yes      | ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) |
 | `token_id` | integer | yes | ID of the access token |
 | `expires_at` | date    | no       | Expiration date of the access token in ISO format (`YYYY-MM-DD`). [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/416795) in GitLab 16.6. |
 
@@ -207,12 +186,12 @@ for more information.
 Revoke a [group access token](../user/group/settings/group_access_tokens.md).
 
 ```plaintext
-DELETE /groups/:id/access_tokens/:token_id
+DELETE groups/:id/access_tokens/:token_id
 ```
 
 | Attribute | Type    | required | Description         |
 |-----------|---------|----------|---------------------|
-| `id` | integer or string | yes | ID or [URL-encoded path of the group](rest/index.md#namespaced-paths) |
+| `id` | integer or string | yes | ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) |
 | `token_id` | integer | yes | ID of the group access token |
 
 ```shell

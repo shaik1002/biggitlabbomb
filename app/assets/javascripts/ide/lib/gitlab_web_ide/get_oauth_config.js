@@ -1,6 +1,4 @@
-import { getOAuthCallbackUrl } from './oauth_callback_urls';
-
-export const getOAuthConfig = ({ clientId }) => {
+export const getOAuthConfig = ({ clientId, callbackUrl }) => {
   if (!clientId) {
     return undefined;
   }
@@ -8,7 +6,7 @@ export const getOAuthConfig = ({ clientId }) => {
   return {
     type: 'oauth',
     clientId,
-    callbackUrl: getOAuthCallbackUrl(),
+    callbackUrl,
     protectRefreshToken: true,
   };
 };

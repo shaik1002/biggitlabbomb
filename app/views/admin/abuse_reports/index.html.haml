@@ -1,6 +1,6 @@
-- page_title _('Abuse reports')
+- page_title _('Abuse Reports')
 
-= render ::Layouts::PageHeadingComponent.new(_('Abuse reports'), options: { data: { event_tracking_load: 'true', event_tracking: 'view_admin_abuse_reports_pageload' } })
+%h1.page-title.gl-font-size-h-display= _('Abuse Reports')
 
 #js-abuse-reports-list-app{ data: abuse_reports_list_data(@abuse_reports) }
   = gl_loading_icon(css_class: 'gl-my-5', size: 'md')

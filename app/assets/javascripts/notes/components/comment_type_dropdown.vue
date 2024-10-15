@@ -49,11 +49,6 @@ export default {
       type: String,
       required: true,
     },
-    isReviewDropdown: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
   computed: {
     isNoteTypeComment() {
@@ -74,16 +69,10 @@ export default {
     },
     commentButtonTitle() {
       const { comment, internalComment, startThread, startInternalThread } = this.$options.i18n;
-      const { saveThread, saveComment } = this.$options.i18n.addToReviewButton;
 
       if (this.isInternalNote) {
         return this.noteType === constants.COMMENT ? internalComment : startInternalThread;
       }
-
-      if (this.isReviewDropdown) {
-        return this.noteType === constants.COMMENT ? saveComment : saveThread;
-      }
-
       return this.noteType === constants.COMMENT ? comment : startThread;
     },
     startDiscussionDescription() {
@@ -137,12 +126,12 @@ export default {
 
 <template>
   <gl-button-group
-    class="js-comment-button js-comment-submit-button comment-type-dropdown gl-mb-3 gl-w-full sm:gl-mb-0 sm:gl-w-auto"
+    class="js-comment-button js-comment-submit-button comment-type-dropdown gl-w-full gl-mb-3 gl-md-w-auto gl-md-mb-0"
     :data-track-label="trackingLabel"
     data-track-action="click_button"
     data-testid="comment-button"
   >
-    <gl-button type="submit" variant="confirm" :disabled="disabled" @click="handleClick">
+    <gl-button variant="confirm" :disabled="disabled" @click="handleClick">
       {{ commentButtonTitle }}
     </gl-button>
     <gl-collapsible-listbox

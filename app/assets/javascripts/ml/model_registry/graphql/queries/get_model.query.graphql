@@ -2,7 +2,6 @@ query getModel($id: MlModelID!) {
   mlModel(id: $id) {
     id
     description
-    descriptionHtml
     name
     versionCount
     candidateCount
@@ -11,7 +10,6 @@ query getModel($id: MlModelID!) {
       version
       packageId
       description
-      descriptionHtml
       candidate {
         id
         name

@@ -3,12 +3,10 @@
 module UserSettings
   class PersonalAccessTokensController < ApplicationController
     include RenderAccessTokens
-    include FeedTokenHelper
 
     feature_category :system_access
 
     before_action :check_personal_access_tokens_enabled
-    prepend_before_action(only: [:index]) { authenticate_sessionless_user!(:ics) }
 
     def index
       set_index_vars
@@ -23,14 +21,6 @@ module UserSettings
         format.json do
           render json: @active_access_tokens
         end
-        format.ics do
-          if params[:feed_token]
-            response.headers['Content-Type'] = 'text/plain'
-            render plain: expiry_ics(@active_access_tokens)
-          else
-            redirect_to "#{request.path}?feed_token=#{generate_feed_token_with_path(:ics, request.path)}"
-          end
-        end
       end
     end
 
@@ -38,17 +28,15 @@ module UserSettings
       result = ::PersonalAccessTokens::CreateService.new(
         current_user: current_user,
         target_user: current_user,
-        organization_id: Current.organization_id,
         params: personal_access_token_params,
         concatenate_errors: false
       ).execute
 
       @personal_access_token = result.payload[:personal_access_token]
 
-      tokens, size = active_access_tokens(current_user)
       if result.success?
         render json: { new_token: @personal_access_token.token,
-                       active_access_tokens: tokens, total: size }, status: :ok
+                       active_access_tokens: active_access_tokens }, status: :ok
       else
         render json: { errors: result.errors }, status: :unprocessable_entity
       end
@@ -74,7 +62,7 @@ module UserSettings
 
     def set_index_vars
       @scopes = Gitlab::Auth.available_scopes_for(current_user)
-      @active_access_tokens, @active_access_tokens_size = active_access_tokens(current_user)
+      @active_access_tokens = active_access_tokens
     end
 
     def represent(tokens)

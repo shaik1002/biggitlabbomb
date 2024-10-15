@@ -1,6 +1,6 @@
 <script>
 import { GlSingleStat } from '@gitlab/ui/dist/charts';
-import { visitUrl } from '~/lib/utils/url_utility';
+import { redirectTo } from '~/lib/utils/url_utility'; // eslint-disable-line import/no-deprecated
 import MetricPopover from './metric_popover.vue';
 
 export default {
@@ -27,7 +27,7 @@ export default {
   methods: {
     clickHandler({ links }) {
       if (this.hasLinks) {
-        visitUrl(links[0].url);
+        redirectTo(links[0].url); // eslint-disable-line import/no-deprecated
       }
     },
   },
@@ -42,7 +42,7 @@ export default {
       :unit="metric.unit || ''"
       :should-animate="true"
       :animation-decimal-places="decimalPlaces"
-      :class="{ 'hover:gl-cursor-pointer': hasLinks }"
+      :class="{ 'gl-hover-cursor-pointer': hasLinks }"
       tabindex="0"
       use-delimiters
       @click="clickHandler(metric)"

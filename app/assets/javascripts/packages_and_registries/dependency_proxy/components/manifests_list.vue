@@ -42,7 +42,7 @@ export default {
 
 <template>
   <div class="gl-mt-6">
-    <h3 class="gl-mb-0 gl-border-b-1 gl-border-gray-100 gl-pb-3 gl-text-base gl-border-b-solid">
+    <h3 class="gl-font-base gl-pb-3 gl-mb-0 gl-border-b-1 gl-border-gray-100 gl-border-b-solid">
       {{ $options.i18n.listTitle }}
     </h3>
 
@@ -53,15 +53,15 @@ export default {
     <manifests-empty-state v-else-if="manifests.length === 0" />
 
     <div v-else data-testid="main-area">
-      <ul class="gl-list-none gl-pl-0">
-        <li v-for="(manifest, index) in manifests" :key="index">
-          <manifest-row
-            :dependency-proxy-image-prefix="dependencyProxyImagePrefix"
-            :manifest="manifest"
-          />
-        </li>
-      </ul>
-      <div class="gl-flex gl-justify-center">
+      <div class="gl-display-flex gl-flex-direction-column">
+        <manifest-row
+          v-for="(manifest, index) in manifests"
+          :key="index"
+          :dependency-proxy-image-prefix="dependencyProxyImagePrefix"
+          :manifest="manifest"
+        />
+      </div>
+      <div class="gl-display-flex gl-justify-content-center">
         <gl-keyset-pagination
           v-bind="pagination"
           class="gl-mt-3"

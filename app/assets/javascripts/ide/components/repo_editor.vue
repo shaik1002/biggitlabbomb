@@ -489,7 +489,7 @@ export default {
 
 <template>
   <div id="ide" class="blob-viewer-container blob-editor-container">
-    <gl-tabs v-if="showTabs" content-class="gl-hidden">
+    <gl-tabs v-if="showTabs" content-class="gl-display-none">
       <gl-tab
         :title="__('Edit')"
         data-testid="edit-tab"

@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -34,11 +34,9 @@ After you link a group, the following GitLab data is synced to Jira for all proj
   - The last 400 branches and the last commit to each of those branches (GitLab 15.11 and later)
 - New project data (after you linked the group):
   - Merge requests
-    - Merge request author
   - Branches
   - Commits
-    - Commit author
-  - Pipelines
+  - Builds
   - Deployments
   - Feature flags
 
@@ -65,7 +63,6 @@ You can now [configure the GitLab for Jira Cloud app](#configure-the-gitlab-for-
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For an overview, see
 [Configure the GitLab for Jira Cloud app from the Atlassian Marketplace](https://youtu.be/SwR-g1s1zTo).
-<!-- Video published on 2020-02-01 -->
 
 ## Configure the GitLab for Jira Cloud app
 
@@ -93,60 +90,16 @@ To configure the GitLab for Jira Cloud app:
 1. Optional. To link a self-managed GitLab instance with Jira, select **Change GitLab version**.
    1. Select all checkboxes, then select **Next**.
    1. Enter your **GitLab instance URL**, then select **Save**.
-1. Select **Sign in to GitLab**.
-
-   NOTE:
-   [Enterprise users](../../user/enterprise_user/index.md) with [disabled password authentication for their group](../../user/group/saml_sso/index.md#disable-password-authentication-for-enterprise-users)
-   must first sign in to GitLab with their group's single sign-on URL.
-
+1. Select **Sign in to GitLab**, then enter your credentials.
 1. Select **Authorize**. A list of groups is now visible.
 1. Select **Link groups**.
 1. To link to a group, select **Link**.
 
 <!-- markdownlint-enable MD044 -->
 
-After you link to a GitLab group:
-
-- Data is synced to Jira for all projects in that group. The initial data sync happens in batches of 20 projects per minute.
-  For groups with many projects, the data sync for some projects is delayed.
-- A GitLab for Jira Cloud app integration is automatically enabled for the group, and all subgroups or projects in that group.
-  The integration allows you to [configure Jira Service Management](#configure-jira-service-management).
-
-## Configure Jira Service Management
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/460663) in GitLab 17.2 [with a flag](../../administration/feature_flags.md) named `enable_jira_connect_configuration`. Disabled by default.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/467117) in GitLab 17.4. Feature flag `enable_jira_connect_configuration` removed.
-
-Prerequisites:
-
-- The GitLab for Jira Cloud app must be [installed](#install-the-gitlab-for-jira-cloud-app).
-- A [GitLab group to be linked](#configure-the-gitlab-for-jira-cloud-app) in the GitLab for Jira Cloud app configuration.
-
-You can connect GitLab to your IT service project to track your deployments.
-
-Configuration happens in GitLab, in the GitLab for
-Jira Cloud app integration. The integration is enabled for a group, its subgroups, and projects in GitLab after a [GitLab group has been linked](#configure-the-gitlab-for-jira-cloud-app).
-
-Enabling and disabling the GitLab for Jira Cloud app integration happens entirely automatically through group linking,
-and not through the GitLab integrations form or API.
-
-In Jira Service Management:
-
-1. In your service project, go to **Project settings > Change management**.
-1. Select **Connect Pipeline > GitLab**, then copy the **Service ID** at the end of the setup flow.
-
-In GitLab:
-
-1. On the left sidebar, select **Search or go to** and find your project.
-1. Select **Settings > Integrations**.
-1. Select **GitLab for Jira Cloud app**. If the integration is disabled, first [link a GitLab group](#configure-the-gitlab-for-jira-cloud-app)
-   which enables the GitLab for Jira Cloud app integration for the group, its subgroups, and projects.
-1. In the **Service ID** field, enter the service ID that you want to map into this project. To use multiple service IDs,
-   add a comma between each service ID.
-
-You can map up to 100 services.
-
-For more information about deployment tracking in Jira, see [Set up deployment tracking](https://support.atlassian.com/jira-service-management-cloud/docs/set-up-deployment-tracking/).
+After you link to a GitLab group, data is synced to Jira for all projects in that group.
+The initial data sync happens in batches of 20 projects per minute.
+For groups with many projects, the data sync for some projects is delayed.
 
 ## Update the GitLab for Jira Cloud app
 
@@ -159,37 +112,12 @@ If the app requires additional permissions, [you must manually approve the updat
 
 The GitLab for Jira Cloud app connects GitLab and Jira. Data must be shared between the two applications, and access must be granted in both directions.
 
-### GitLab access to Jira
+### Access to Jira through access token
 
-When you [configure the GitLab for Jira Cloud app](#configure-the-gitlab-for-jira-cloud-app), GitLab receives a **shared secret token** from Jira.
-The token grants GitLab `READ`, `WRITE`, and `DELETE` [app scopes](https://developer.atlassian.com/cloud/jira/software/scopes-for-connect-apps/#scopes-for-atlassian-connect-apps) for the Jira project.
-These scopes are required to update information in the Jira project's development panel.
-The token does not grant GitLab access to any other Atlassian product besides the Jira project the app was installed in.
-
-The token is encrypted with `AES256-GCM` and stored on GitLab.
-When the GitLab for Jira Cloud app is uninstalled from your Jira project, GitLab deletes the token.
-
-### Jira access to GitLab
-
-Jira does not gain any access to GitLab.
-
-### Data sent from GitLab to Jira
-
-For all the data sent to Jira, see [GitLab data synced to Jira](#gitlab-data-synced-to-jira).
-
-For more information about the specific data properties sent to Jira, see the [serializer classes](https://gitlab.com/gitlab-org/gitlab/-/tree/master/lib/atlassian/jira_connect/serializers) involved in data synchronization.
-
-### Data sent from Jira to GitLab
-
-GitLab receives a [lifecycle event](https://developer.atlassian.com/cloud/jira/platform/connect-app-descriptor/#lifecycle) from Jira when the GitLab for Jira Cloud app is installed or uninstalled.
-The event includes a [token](#gitlab-access-to-jira) to verify subsequent lifecycle events and to authenticate when [sending data to Jira](#data-sent-from-gitlab-to-jira).
-Lifecycle event requests from Jira are [verified](https://developer.atlassian.com/cloud/jira/platform/security-for-connect-apps/#validating-installation-lifecycle-requests).
-
-For self-managed instances that use the GitLab for Jira Cloud app from the Atlassian Marketplace, GitLab.com handles lifecycle events and forwards them to the self-managed instance. For more information, see [GitLab.com handling of app lifecycle events](../../administration/settings/jira_cloud_app.md#gitlabcom-handling-of-app-lifecycle-events).
-
-### Privacy and security details in the Atlassian Marketplace
-
-For more information, see the [privacy and security details of the Atlassian Marketplace listing](https://marketplace.atlassian.com/apps/1221011/gitlab-for-jira-cloud?tab=privacy-and-security&hosting=cloud).
+Jira shares an access token with GitLab to authenticate and authorize data pushes to Jira.
+As part of the app installation process, Jira sends a handshake request to GitLab containing the access token.
+The handshake is signed with an [asymmetric JWT](https://developer.atlassian.com/cloud/jira/platform/understanding-jwt-for-connect-apps/),
+and the access token is stored encrypted with `AES256-GCM` on GitLab.
 
 ## Troubleshooting
 
@@ -197,7 +125,7 @@ When working with the GitLab for Jira Cloud app, you might encounter the followi
 
 For administrator documentation, see [GitLab for Jira Cloud app administration](../../administration/settings/jira_cloud_app_troubleshooting.md).
 
-### Error: `Failed to link group`
+### Error when connecting the app
 
 When you connect the GitLab for Jira Cloud app, you might get this error:
 

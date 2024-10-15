@@ -10,23 +10,17 @@ DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
-> - Time tracking for tasks [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/438577) in GitLab 17.0.
-> - Time tracking for epics [introduced](https://gitlab.com/groups/gitlab-org/-/epics/12396) in GitLab 17.5. Your administrator must have [enabled the new look for epics](../group/epics/epic_work_items.md).
+You can estimate and track the time you spend on [issues](issues/index.md)
+and [merge requests](merge_requests/index.md).
 
-You can estimate and track the time you spend on an item, such as:
-
-- [Epic](../group/epics/index.md). Your administrator must have [enabled the new look for epics](../group/epics/epic_work_items.md).
-- [Issue](issues/index.md).
-- [Task](../tasks.md).
-- [Merge request](merge_requests/index.md).
-
-Then you can [view a report](#view-an-items-time-tracking-report) that shows totals over time.
+Then you can [view a report](#view-a-time-tracking-report) that shows totals over time.
 
 Use time tracking for these tasks:
 
-- Record the time spent working on an item.
-- Add or update an estimate of the total time to complete an item.
-- View a breakdown of time spent working on an item.
+- Record the time spent working on an issue or a merge request.
+- Add or update an estimate of the total time to complete an issue or a merge
+  request.
+- View a breakdown of time spent working on an issue or a merge request.
 
 You don't have to indicate an estimate to enter the time spent, and vice versa.
 
@@ -34,13 +28,13 @@ To enter and remove time tracking data, you must use [quick actions](quick_actio
 Type all quick actions on their own lines.
 If you use any quick action more than once in a single comment, only its last occurrence is applied.
 
-You can see the data about time tracking on the right sidebar:
+You can see the data about time tracking on the right sidebar in issues and merge requests:
 
 ![Time tracking in the sidebar](img/time_tracking_sidebar_v13_12.png)
 
 ## Estimates
 
-The estimate is designed to show the total time needed to complete an item.
+The estimate is designed to show the total time needed to complete an issue or merge request.
 
 You can see the estimated time remaining when you hover over the time tracking information in the right sidebar.
 
@@ -51,7 +45,6 @@ You can see the estimated time remaining when you hover over the time tracking i
 Prerequisites:
 
 - In issues, you must have at least the Reporter role for the project.
-- In tasks, you must have at least the Reporter role for the project.
 - In merge requests, you must have at least the Developer role for the project.
 
 To enter an estimate, use the `/estimate` [quick action](quick_actions.md), followed by the time.
@@ -60,7 +53,7 @@ For example, if you need to enter an estimate of 1 month, 2 weeks, 3 days, 4 hou
 type `/estimate 1mo 2w 3d 4h 5m`.
 Check the [time units you can use](#available-time-units).
 
-An item can have only one estimate.
+An issue or a merge request can have only one estimate.
 Every time you enter a new time estimate, it overwrites the previous value.
 
 ### Remove an estimate
@@ -68,7 +61,6 @@ Every time you enter a new time estimate, it overwrites the previous value.
 Prerequisites:
 
 - In issues, you must have at least the Reporter role for the project.
-- In tasks, you must have at least the Reporter role for the project.
 - In merge requests, you must have at least the Developer role for the project.
 
 To remove an estimate entirely, use the `/remove_estimate` [quick action](quick_actions.md).
@@ -78,9 +70,9 @@ To remove an estimate entirely, use the `/remove_estimate` [quick action](quick_
 As you work, you can log the time you've spent.
 
 Every new time spent entry is added to the current total time spent for the
-issue, task, or the merge request.
+issue or the merge request.
 
-The total amount of time spent on an issue, task, or merge request cannot exceed a year.
+The total amount of time spent on an issue or merge request cannot exceed a year.
 
 ### Add time spent
 
@@ -104,7 +96,7 @@ To add a time entry using the user interface:
 
 1. Select **Save**.
 
-The **Spent** total in the sidebar is updated and you can view all entries in a [time tracking report](#view-an-items-time-tracking-report).
+The **Spent** total in the sidebar is updated and you can view all entries in a [time tracking report](#view-a-time-tracking-report).
 
 #### Using a quick action
 
@@ -114,7 +106,7 @@ For example, if you need
 to log 1 month, 2 weeks, 3 days, 4 hours, and 5 minutes, type `/spend 1mo 2w 3d 4h 5m`.
 Check the [time units you can use](#available-time-units).
 
-To add a [time tracking report](#view-an-items-time-tracking-report) entry with a note, create a comment
+To add a [time tracking report](#view-a-time-tracking-report) entry with a note, create a comment
 with a description and the quick action.
 It then shows in the time tracking report **Summary/Notes** column. For example:
 
@@ -164,25 +156,20 @@ Prerequisites:
 
 To delete all the time spent at once, use the `/remove_time_spent` [quick action](quick_actions.md).
 
-## View an item's time tracking report
+## View a time tracking report
 
-To view a time tracking report of time spent on an item:
+### For an issue or merge request
 
-- For an issue or a merge request:
+To view a time tracking report of time spent on an issue or merge request:
 
-  1. Go to an issue or a merge request.
-  1. In the right sidebar, select **Time tracking report**.
-
-- For an epic or a task:
-
-  1. Go to an epic or a task.
-  1. In the right sidebar, select the time next to **Spent**.
+1. Go to an issue or a merge request.
+1. In the right sidebar, select **Time tracking report**.
 
 ![Time tracking report](img/time_tracking_report_v15_1.png)
 
 The breakdown of spent time displayed is limited to a maximum of 100 entries.
 
-## Global time tracking report
+### Global time tracking report
 
 DETAILS:
 **Status**: Experiment
@@ -195,9 +182,9 @@ On self-managed GitLab, by default this feature is not available. To make it ava
 On GitLab.com, this feature is available. On GitLab Dedicated, this feature is not available.
 This feature is not ready for production use.
 
-View a report of time spent in issues, tasks, and merge requests across all of GitLab.
+View a report of time spent in issues and merge requests across all of GitLab.
 
-This feature is an [experiment](../../policy/experiment-beta-support.md).
+This feature is an [Experiment](../../policy/experiment-beta-support.md).
 If you find a bug, let us know in the [feedback issue](https://gitlab.com/gitlab-org/gitlab/-/issues/435222).
 
 To view the global time tracking report:

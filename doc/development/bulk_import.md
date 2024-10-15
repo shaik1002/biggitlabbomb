@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: Any user with at least the Maintainer role can merge updates to this content. For details, see https://docs.gitlab.com/ee/development/development_processes.html#development-guidelines-review.
 ---
@@ -21,7 +21,7 @@ works with a set of [ETL](#etl) Pipelines leveraging from the current [GitLab AP
 
 ![Simplified Component Overview](img/bulk_imports_overview_v13_7.png)
 
-### ETL
+### [ETL](https://www.ibm.com/topics/etl)
 
 <!-- Direct quote from the IBM URL link -->
 
@@ -29,7 +29,7 @@ works with a set of [ETL](#etl) Pipelines leveraging from the current [GitLab AP
 > combines data from multiple data sources into a single, consistent data store
 > that is loaded into a data warehouse or other target system.
 
-Using [ETL](https://www.ibm.com/topics/etl) architecture makes the code more explicit and easier to follow, test and extend. The
+Using ETL architecture makes the code more explicit and easier to follow, test and extend. The
 idea is to have one ETL pipeline for each relation to be imported.
 
 ### API

@@ -2,6 +2,8 @@
 data_category: optional
 key_path: object_store.lfs.enabled
 description: Whether Object Storage is enabled for LFS
+product_section: enablement
+product_stage: enablement
 product_group: cloud_connector
 value_type: boolean
 status: active
@@ -16,4 +18,3 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

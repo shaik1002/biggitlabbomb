@@ -132,7 +132,6 @@ export default {
     },
     async submitReview() {
       this.isSubmitting = true;
-      if (this.userLastNoteWatcher) this.userLastNoteWatcher();
 
       trackSavedUsingEditor(this.$refs.markdownEditor.isContentEditorActive, 'MergeRequest_review');
 
@@ -147,40 +146,26 @@ export default {
         this.noteData.reviewer_state = 'reviewed';
         this.noteData.approval_password = '';
 
-        if (note) {
-          this.userLastNoteWatcher = this.$watch(
-            'getCurrentUserLastNote',
-            () => {
-              if (note) {
-                window.location.hash = `note_${this.getCurrentUserLastNote.id}`;
-              }
-
-              window.mrTabs?.tabShown('show');
-
-              setTimeout(() => {
-                scrollToElement(document.getElementById(`note_${this.getCurrentUserLastNote.id}`));
-
-                this.clearDrafts();
-              });
-
-              this.userLastNoteWatcher();
-            },
-            { deep: true },
-          );
-        } else {
-          if (reviewerState === 'approved') {
-            window.mrTabs?.tabShown('show');
+        if (window.mrTabs && (note || reviewerState === 'approved')) {
+          if (note) {
+            window.location.hash = `note_${this.getCurrentUserLastNote.id}`;
           }
 
-          this.clearDrafts();
+          window.mrTabs.tabShown('show');
+
+          setTimeout(() =>
+            scrollToElement(document.getElementById(`note_${this.getCurrentUserLastNote.id}`)),
+          );
         }
+
+        this.clearDrafts();
       } catch (e) {
         if (e.data?.message) {
           createAlert({ message: e.data.message, captureError: true });
         }
-
-        this.isSubmitting = false;
       }
+
+      this.isSubmitting = false;
     },
     updateNote(note) {
       this.noteData.note = note;
@@ -206,7 +191,7 @@ export default {
 <template>
   <gl-disclosure-dropdown
     ref="submitDropdown"
-    placement="bottom-end"
+    placement="right"
     class="submit-review-dropdown"
     :class="{ 'submit-review-dropdown-animated': shouldAnimateReviewButton }"
     data-testid="submit-review-dropdown"
@@ -227,7 +212,7 @@ export default {
         data-testid="submit-gl-form"
         @submit.prevent="submitReview"
       >
-        <div class="gl-mb-4 gl-flex gl-items-center">
+        <div class="gl-display-flex gl-mb-4 gl-align-items-center">
           <label for="review-note-body" class="gl-mb-0">
             {{ __('Summary comment (optional)') }}
           </label>
@@ -272,7 +257,7 @@ export default {
           class="gl-mt-3"
           data-testid="approve_password"
         />
-        <div class="gl-mt-4 gl-flex gl-justify-start">
+        <div class="gl-display-flex gl-justify-content-start gl-mt-4">
           <gl-button
             :loading="isSubmitting"
             variant="confirm"

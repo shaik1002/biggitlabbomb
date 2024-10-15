@@ -12,8 +12,9 @@ import {
 import NewMergeRequestOption from './new_merge_request_option.vue';
 import RadioGroup from './radio_group.vue';
 
-const { mapState: mapCommitState, mapActions: mapCommitActions } =
-  createNamespacedHelpers('commit');
+const { mapState: mapCommitState, mapActions: mapCommitActions } = createNamespacedHelpers(
+  'commit',
+);
 
 export default {
   components: {
@@ -72,7 +73,7 @@ export default {
 </script>
 
 <template>
-  <div class="ide-commit-options gl-mb-5">
+  <div class="gl-mb-5 ide-commit-options">
     <radio-group
       :value="$options.commitToCurrentBranch"
       :disabled="!canPushToBranch"

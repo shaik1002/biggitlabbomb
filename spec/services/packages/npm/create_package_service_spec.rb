@@ -50,12 +50,8 @@ RSpec.describe Packages::Npm::CreatePackageService, feature_category: :package_r
       end
 
       context 'with build info' do
-        let_it_be_with_reload(:job) { create(:ci_build, user: nil) }
+        let_it_be(:job) { create(:ci_build, user: user) }
         let(:params) { super().merge(build: job) }
-
-        before do
-          job.update!(user: user)
-        end
 
         it_behaves_like 'assigns build to package' do
           subject { super().payload.fetch(:package) }
@@ -337,22 +333,6 @@ RSpec.describe Packages::Npm::CreatePackageService, feature_category: :package_r
       end
     end
 
-    described_class::INSTALL_SCRIPT_KEYS.each do |field|
-      context "with script #{field}" do
-        let(:package) { subject[:package] }
-
-        before do
-          params[:versions][version][:scripts] = { field => "echo 'script #{field}'" }
-        end
-
-        it "sets `hasInstallScript` attribute to `true` for package's metadata" do
-          execute_service
-
-          expect(package.npm_metadatum.package_json['hasInstallScript']).to eq(true)
-        end
-      end
-    end
-
     it 'obtains a lease to create a new package' do
       expect_to_obtain_exclusive_lease(lease_key, timeout: described_class::DEFAULT_LEASE_TIMEOUT)
 
@@ -384,17 +364,17 @@ RSpec.describe Packages::Npm::CreatePackageService, feature_category: :package_r
 
         let(:package_name_pattern_no_match) { "#{package_name}_no_match" }
 
-        where(:package_name_pattern, :minimum_access_level_for_push) do
-          ref(:package_name)                  | :maintainer
+        where(:package_name_pattern, :push_protected_up_to_access_level) do
+          ref(:package_name)                  | :developer
           ref(:package_name)                  | :owner
-          ref(:package_name_pattern_no_match) | :maintainer
+          ref(:package_name_pattern_no_match) | :developer
           ref(:package_name_pattern_no_match) | :owner
         end
 
         with_them do
           before do
             package_protection_rule.update!(package_name_pattern: package_name_pattern,
-              minimum_access_level_for_push: minimum_access_level_for_push)
+              push_protected_up_to_access_level: push_protected_up_to_access_level)
           end
 
           it_behaves_like 'valid package'
@@ -402,7 +382,7 @@ RSpec.describe Packages::Npm::CreatePackageService, feature_category: :package_r
       end
     end
 
-    context 'with package protection rule for different roles and package_name_patterns', :enable_admin_mode do
+    context 'with package protection rule for different roles and package_name_patterns' do
       using RSpec::Parameterized::TableSyntax
 
       let_it_be_with_reload(:package_protection_rule) do
@@ -411,10 +391,11 @@ RSpec.describe Packages::Npm::CreatePackageService, feature_category: :package_r
 
       let_it_be(:project_developer) { create(:user, developer_of: project) }
       let_it_be(:project_maintainer) { create(:user, maintainer_of: project) }
-      let_it_be(:project_owner) { project.owner }
-      let_it_be(:project_admin) { create(:admin) }
 
+      let(:project_owner) { project.owner }
       let(:package_name_pattern_no_match) { "#{package_name}_no_match" }
+
+      let(:service) { described_class.new(project, current_user, params) }
 
       shared_examples 'protected package' do
         it_behaves_like 'returning an error service response', message: 'Package protected.' do
@@ -430,51 +411,22 @@ RSpec.describe Packages::Npm::CreatePackageService, feature_category: :package_r
         end
       end
 
-      where(:package_name_pattern, :minimum_access_level_for_push, :user, :shared_examples_name) do
-        ref(:package_name)                  | :maintainer | ref(:project_developer)  | 'protected package'
-        ref(:package_name)                  | :maintainer | ref(:project_owner)      | 'valid package'
-        ref(:package_name)                  | :maintainer | ref(:project_admin)      | 'valid package'
-        ref(:package_name)                  | :owner      | ref(:project_maintainer) | 'protected package'
-        ref(:package_name)                  | :owner      | ref(:project_owner)      | 'valid package'
-        ref(:package_name)                  | :owner      | ref(:project_admin)      | 'valid package'
-        ref(:package_name)                  | :admin      | ref(:project_owner)      | 'protected package'
-        ref(:package_name)                  | :admin      | ref(:project_admin)      | 'valid package'
-
+      where(:package_name_pattern, :push_protected_up_to_access_level, :current_user, :shared_examples_name) do
+        ref(:package_name)                  | :developer  | ref(:project_developer)  | 'protected package'
+        ref(:package_name)                  | :developer  | ref(:project_owner)      | 'valid package'
+        ref(:package_name)                  | :maintainer | ref(:project_maintainer) | 'protected package'
+        ref(:package_name)                  | :owner      | ref(:project_owner)      | 'protected package'
+        ref(:package_name_pattern_no_match) | :developer  | ref(:project_owner)      | 'valid package'
         ref(:package_name_pattern_no_match) | :owner      | ref(:project_owner)      | 'valid package'
-        ref(:package_name_pattern_no_match) | :admin      | ref(:project_owner)      | 'valid package'
       end
 
       with_them do
         before do
           package_protection_rule.update!(package_name_pattern: package_name_pattern,
-            minimum_access_level_for_push: minimum_access_level_for_push)
+            push_protected_up_to_access_level: push_protected_up_to_access_level)
         end
 
         it_behaves_like params[:shared_examples_name]
-      end
-
-      context 'with deploy token' do
-        let_it_be(:deploy_token) { create(:deploy_token, projects: [project]) }
-        let_it_be(:user) { nil }
-
-        let(:service) { described_class.new(project, deploy_token, params) }
-
-        where(:package_name_pattern, :minimum_access_level_for_push, :shared_examples_name) do
-          ref(:package_name)                  | :maintainer | 'protected package'
-          ref(:package_name)                  | :owner      | 'protected package'
-          ref(:package_name)                  | :admin      | 'protected package'
-
-          ref(:package_name_pattern_no_match) | :owner      | 'valid package'
-        end
-
-        with_them do
-          before do
-            package_protection_rule.update!(package_name_pattern: package_name_pattern,
-              minimum_access_level_for_push: minimum_access_level_for_push)
-          end
-
-          it_behaves_like params[:shared_examples_name]
-        end
       end
     end
 
@@ -507,7 +459,7 @@ RSpec.describe Packages::Npm::CreatePackageService, feature_category: :package_r
 
     subject { service.execute }
 
-    it 'only creates one package', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/448644' do
+    it 'only creates one package' do
       expect { create_packages(project, user, params) }.to change { Packages::Package.count }.by(1)
     end
 

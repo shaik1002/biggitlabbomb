@@ -1,12 +1,8 @@
 <script>
-import { GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import UserDate from '~/vue_shared/components/user_date.vue';
 
 export default {
-  components: { UserDate, GlIcon },
-  directives: {
-    GlTooltip: GlTooltipDirective,
-  },
+  components: { UserDate },
   props: {
     member: {
       type: Object,
@@ -20,43 +16,22 @@ export default {
     lastActivity() {
       return this.member.user?.lastActivityOn;
     },
-    accessGranted() {
-      return this.member.requestAcceptedAt || this.member.createdAt;
-    },
   },
 };
 </script>
 
 <template>
-  <div class="gl-flex gl-flex-col gl-gap-2">
-    <div v-if="userCreated" class="gl-flex gl-gap-3">
-      <gl-icon
-        ref="userCreated"
-        v-gl-tooltip.${userCreated}
-        class="-gl-mr-2 gl-ml-2 gl-text-gray-500"
-        name="assignee"
-        :title="s__('Members|User created')"
-      />
+  <div>
+    <div v-if="userCreated">
+      <strong>{{ s__('Members|User created') }}:</strong>
       <user-date :date="userCreated" />
     </div>
-    <div v-if="accessGranted" class="gl-flex gl-gap-3">
-      <gl-icon
-        ref="memberCreatedAt"
-        v-gl-tooltip.${memberCreatedAt}
-        class="gl-text-gray-500"
-        name="check"
-        :title="s__('Members|Access granted')"
-      />
-      <user-date :date="accessGranted" />
+    <div v-if="member.createdAt">
+      <strong>{{ s__('Members|Access granted') }}:</strong>
+      <user-date :date="member.createdAt" />
     </div>
-    <div v-if="lastActivity" class="gl-flex gl-gap-3">
-      <gl-icon
-        ref="lastActivity"
-        v-gl-tooltip.${lastActivity}
-        class="gl-text-gray-500"
-        name="hourglass"
-        :title="s__('Members|Last activity')"
-      />
+    <div v-if="lastActivity">
+      <strong>{{ s__('Members|Last activity') }}:</strong>
       <user-date :date="lastActivity" />
     </div>
   </div>

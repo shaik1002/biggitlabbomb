@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Banzai::Filter::References::UserReferenceFilter, feature_category: :markdown do
+RSpec.describe Banzai::Filter::References::UserReferenceFilter, feature_category: :team_planning do
   include FilterSpecHelper
 
   def get_reference(user)
@@ -23,19 +23,19 @@ RSpec.describe Banzai::Filter::References::UserReferenceFilter, feature_category
   end
 
   it 'ignores invalid users' do
-    act = "Hey #{invalidate_reference(reference)}"
-    expect(reference_filter(act).to_html).to include act
+    exp = act = "Hey #{invalidate_reference(reference)}"
+    expect(reference_filter(act).to_html).to eq(exp)
   end
 
   it 'ignores references with text before the @ sign' do
-    act = "Hey foo#{reference}"
-    expect(reference_filter(act).to_html).to include act
+    exp = act = "Hey foo#{reference}"
+    expect(reference_filter(act).to_html).to eq(exp)
   end
 
   %w[pre code a style].each do |elem|
     it "ignores valid references contained inside '#{elem}' element" do
-      act = "<#{elem}>Hey #{reference}</#{elem}>"
-      expect(reference_filter(act).to_html).to include act
+      exp = act = "<#{elem}>Hey #{reference}</#{elem}>"
+      expect(reference_filter(act).to_html).to eq exp
     end
   end
 

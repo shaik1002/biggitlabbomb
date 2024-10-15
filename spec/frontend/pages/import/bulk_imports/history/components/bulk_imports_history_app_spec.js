@@ -24,7 +24,7 @@ describe('BulkImportsHistoryApp', () => {
   };
   const DUMMY_RESPONSE = [
     {
-      id: 361,
+      id: 1,
       bulk_import_id: 1,
       status: 'finished',
       entity_type: 'group',
@@ -44,7 +44,7 @@ describe('BulkImportsHistoryApp', () => {
       },
     },
     {
-      id: 843,
+      id: 2,
       bulk_import_id: 2,
       status: 'failed',
       entity_type: 'project',
@@ -74,15 +74,14 @@ describe('BulkImportsHistoryApp', () => {
 
   let wrapper;
   let mock;
-  const mockDetailsPath = '/import/:id/history/:entity_id/failures';
   const mockRealtimeChangesPath = '/import/realtime_changes.json';
 
-  function createComponent({ shallow = true, props = {} } = {}) {
+  function createComponent({ shallow = true, provide, props = {} } = {}) {
     const mountFn = shallow ? shallowMount : mount;
     wrapper = mountFn(BulkImportsHistoryApp, {
       provide: {
-        detailsPath: mockDetailsPath,
         realtimeChangesPath: mockRealtimeChangesPath,
+        ...provide,
       },
       propsData: {
         ...props,
@@ -147,7 +146,7 @@ describe('BulkImportsHistoryApp', () => {
   });
 
   describe('when id prop is present', () => {
-    const mockId = '2';
+    const mockId = 2;
 
     beforeEach(async () => {
       createComponent({
@@ -257,14 +256,17 @@ describe('BulkImportsHistoryApp', () => {
     it('renders failed import status with details link', async () => {
       createComponent({
         shallow: false,
+        provide: {
+          detailsPath: '/mock-details',
+        },
       });
       await waitForPromises();
 
       const failedImportStatus = findImportStatusAt(1);
       const failedImportStatusLink = failedImportStatus.find('a');
       expect(failedImportStatus.text()).toContain('Failed');
-      expect(failedImportStatusLink.text()).toBe('Show errors >');
-      expect(failedImportStatusLink.attributes('href')).toBe('/import/2/history/843/failures');
+      expect(failedImportStatusLink.text()).toBe('See failures');
+      expect(failedImportStatusLink.attributes('href')).toContain('/mock-details');
     });
 
     it('renders import stats', () => {

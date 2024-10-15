@@ -2,7 +2,9 @@
 data_category: optional
 key_path: redis_hll_counters.incident_management.incident_management_alert_assigned_weekly
 description: Count of unique users assigning an alert per week
-product_group: platform_insights
+product_section: ops
+product_stage: monitor
+product_group: respond
 value_type: number
 status: active
 time_frame: 7d
@@ -20,4 +22,3 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

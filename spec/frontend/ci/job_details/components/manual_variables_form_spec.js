@@ -8,12 +8,11 @@ import { TYPENAME_CI_BUILD } from '~/graphql_shared/constants';
 import { JOB_GRAPHQL_ERRORS } from '~/ci/constants';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import waitForPromises from 'helpers/wait_for_promises';
-import { visitUrl } from '~/lib/utils/url_utility';
+import { redirectTo } from '~/lib/utils/url_utility'; // eslint-disable-line import/no-deprecated
 import ManualVariablesForm from '~/ci/job_details/components/manual_variables_form.vue';
 import getJobQuery from '~/ci/job_details/graphql/queries/get_job.query.graphql';
 import playJobMutation from '~/ci/job_details/graphql/mutations/job_play_with_variables.mutation.graphql';
 import retryJobMutation from '~/ci/job_details/graphql/mutations/job_retry_with_variables.mutation.graphql';
-import { confirmAction } from '~/lib/utils/confirm_via_gl_modal/confirm_via_gl_modal';
 
 import {
   mockFullPath,
@@ -24,13 +23,12 @@ import {
   mockJobRetryMutationData,
 } from '../mock_data';
 
-jest.mock('~/lib/utils/confirm_via_gl_modal/confirm_action');
 jest.mock('~/alert');
 Vue.use(VueApollo);
 
 jest.mock('~/lib/utils/url_utility', () => ({
   ...jest.requireActual('~/lib/utils/url_utility'),
-  visitUrl: jest.fn(),
+  redirectTo: jest.fn(),
 }));
 
 const defaultProvide = {
@@ -68,7 +66,6 @@ describe('Manual Variables Form', () => {
     wrapper = mountExtended(ManualVariablesForm, {
       propsData: {
         jobId: mockId,
-        jobName: 'job-name',
         isRetryable: false,
         ...props,
       },
@@ -116,7 +113,9 @@ describe('Manual Variables Form', () => {
 
     it('renders help text with provided link', () => {
       expect(findHelpText().exists()).toBe(true);
-      expect(findHelpLink().attributes('href')).toBe('/help/ci/variables/index#for-a-project');
+      expect(findHelpLink().attributes('href')).toBe(
+        '/help/ci/variables/index#add-a-cicd-variable-to-a-project',
+      );
     });
   });
 
@@ -210,7 +209,7 @@ describe('Manual Variables Form', () => {
       await waitForPromises();
 
       expect(requestHandlers.playJobMutationHandler).toHaveBeenCalledTimes(1);
-      expect(visitUrl).toHaveBeenCalledWith(mockJobPlayMutationData.data.jobPlay.job.webPath);
+      expect(redirectTo).toHaveBeenCalledWith(mockJobPlayMutationData.data.jobPlay.job.webPath); // eslint-disable-line import/no-deprecated
     });
 
     it('does not refetch variables after job is run', async () => {
@@ -259,60 +258,12 @@ describe('Manual Variables Form', () => {
       expect(findCancelBtn().exists()).toBe(true);
     });
 
-    it('not render confirmation modal if confirmation message is null', async () => {
-      findRunBtn().vm.$emit('click');
-      await waitForPromises();
-
-      expect(confirmAction).not.toHaveBeenCalled();
-    });
-
-    describe('with confirmation message', () => {
-      beforeEach(async () => {
-        await createComponent({
-          props: {
-            isRetryable: true,
-            confirmationMessage: 'Are you sure?',
-          },
-          handlers: {
-            getJobQueryResponseHandlerWithVariables: jest
-              .fn()
-              .mockResolvedValue(mockJobWithVariablesResponse),
-            retryJobMutationHandler: jest.fn().mockResolvedValue(mockJobRetryMutationData),
-          },
-        });
-      });
-
-      it('render confirmation modal after click run button', async () => {
-        findRunBtn().vm.$emit('click');
-        await nextTick();
-        await waitForPromises();
-
-        expect(confirmAction).toHaveBeenCalledWith(
-          null,
-          expect.objectContaining({
-            primaryBtnText: `Yes, run job-name`,
-            title: `Are you sure you want to run job-name?`,
-            modalHtmlMessage: expect.stringContaining('Are you sure?'),
-          }),
-        );
-      });
-
-      it('redirect to job properly after confirmation', async () => {
-        confirmAction.mockResolvedValueOnce(true);
-        findRunBtn().vm.$emit('click');
-        await waitForPromises();
-
-        expect(requestHandlers.retryJobMutationHandler).toHaveBeenCalledTimes(1);
-        expect(visitUrl).toHaveBeenCalledWith(mockJobRetryMutationData.data.jobRetry.job.webPath);
-      });
-    });
-
     it('redirects to job properly after rerun', async () => {
       findRunBtn().vm.$emit('click');
       await waitForPromises();
 
       expect(requestHandlers.retryJobMutationHandler).toHaveBeenCalledTimes(1);
-      expect(visitUrl).toHaveBeenCalledWith(mockJobRetryMutationData.data.jobRetry.job.webPath);
+      expect(redirectTo).toHaveBeenCalledWith(mockJobRetryMutationData.data.jobRetry.job.webPath); // eslint-disable-line import/no-deprecated
     });
 
     it('does not refetch variables after job is rerun', async () => {

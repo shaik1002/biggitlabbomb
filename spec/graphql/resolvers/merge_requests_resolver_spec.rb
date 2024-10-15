@@ -2,10 +2,9 @@
 
 require 'spec_helper'
 
-RSpec.describe Resolvers::MergeRequestsResolver, feature_category: :code_review_workflow do
+RSpec.describe Resolvers::MergeRequestsResolver do
   include GraphqlHelpers
   include SortingHelper
-  include MrResolverHelpers
 
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:other_project) { create(:project, :repository) }
@@ -14,8 +13,8 @@ RSpec.describe Resolvers::MergeRequestsResolver, feature_category: :code_review_
   let_it_be(:other_user) { create(:user) }
   let_it_be(:common_attrs) { { author: current_user, source_project: project, target_project: project } }
   let_it_be(:merge_request_1) { create(:merge_request, :simple, reviewers: create_list(:user, 2), **common_attrs) }
-  let_it_be(:merge_request_2) { create(:merge_request, :rebased, reviewers: [current_user], **common_attrs) }
-  let_it_be(:merge_request_3) { create(:merge_request, :unique_branches, assignees: [current_user], **common_attrs) }
+  let_it_be(:merge_request_2) { create(:merge_request, :rebased, **common_attrs) }
+  let_it_be(:merge_request_3) { create(:merge_request, :unique_branches, **common_attrs) }
   let_it_be(:merge_request_4) { create(:merge_request, :unique_branches, :locked, **common_attrs) }
   let_it_be(:merge_request_5) { create(:merge_request, :simple, :locked, **common_attrs) }
   let_it_be(:merge_request_6) do
@@ -241,195 +240,6 @@ RSpec.describe Resolvers::MergeRequestsResolver, feature_category: :code_review_
       end
     end
 
-    context 'with merged_by argument' do
-      before_all do
-        merge_request_1.metrics.update!(merged_by: other_user)
-      end
-
-      context "for matching arguments" do
-        it 'returns merge requests merged by user' do
-          result = resolve_mr(project, merged_by: other_user.username)
-
-          expect(result).to contain_exactly(merge_request_1)
-        end
-
-        it 'does not return anything' do
-          result = resolve_mr(project, merged_by: "cool_guy_123")
-
-          expect(result).to be_empty
-        end
-      end
-    end
-
-    context 'with release argument' do
-      let_it_be(:release_in_project) { create(:release, :with_milestones, project: merge_request_1.project) }
-      let_it_be(:milestone) { release_in_project.milestones.last }
-
-      before_all do
-        merge_request_1.update!(milestone: milestone)
-      end
-
-      it 'returns merge requests in release' do
-        result = resolve_mr(project, release_tag: release_in_project.name)
-
-        expect(result).to contain_exactly(merge_request_1)
-      end
-
-      it 'does not return anything' do
-        result = resolve_mr(project, release_tag: "8675309.0")
-
-        expect(result).to be_empty
-      end
-
-      it 'filters out merge requests with given milestone title' do
-        result = resolve_mr(project, not: { release_tag: release_in_project.name })
-
-        expect(result).not_to include(merge_request_1)
-      end
-    end
-
-    context 'with approved_by argument' do
-      let(:username) { other_user.username }
-
-      before_all do
-        merge_request_1.approvals.create!(user: other_user)
-      end
-
-      it 'returns merge requests approved by user' do
-        result = resolve_mr(project, approved_by: [username])
-
-        expect(result).to contain_exactly(merge_request_1)
-      end
-
-      it 'does not return anything' do
-        result = resolve_mr(project, approved_by: ["cool_guy_123"])
-
-        expect(result).to be_empty
-      end
-
-      context 'with negated approved by argument' do
-        it 'filters out merge requests with given approved user' do
-          result = resolve_mr(project, not: { approved_by: [username] })
-
-          expect(result).not_to include(merge_request_1)
-        end
-      end
-    end
-
-    context 'with my_reaction_emoji argument' do
-      before_all do
-        merge_request_1.award_emoji.create!(name: "poop", user: current_user)
-      end
-
-      it 'returns merge requests with a reaction emoji set by user' do
-        result = resolve_mr(project, my_reaction_emoji: "poop")
-
-        expect(result).to contain_exactly(merge_request_1)
-      end
-
-      it 'does not return anything' do
-        result = resolve_mr(project, my_reaction_emoji: "thumbsup")
-
-        expect(result).to be_empty
-      end
-
-      context 'with negated my_reaction_emoji argument' do
-        it 'filters out merge requests with given reaction emoji' do
-          result = resolve_mr(project, not: { my_reaction_emoji: "poop" })
-
-          expect(result).not_to include(merge_request_1)
-        end
-      end
-    end
-
-    context 'when filtering by the merge request deployments' do
-      let_it_be(:gstg) { create(:environment, project: project, name: 'gstg') }
-      let_it_be(:gprd) { create(:environment, project: project, name: 'gprd') }
-
-      let_it_be(:deploy1) do
-        create(
-          :deployment,
-          :success,
-          deployable: nil,
-          environment: gstg,
-          project: project,
-          sha: merge_request_1.diff_head_sha,
-          finished_at: 10.days.ago
-        )
-      end
-
-      let_it_be(:deploy2) do
-        create(
-          :deployment,
-          :success,
-          deployable: nil,
-          environment: gprd,
-          project: project,
-          sha: merge_request_2.diff_head_sha,
-          finished_at: 3.days.ago
-        )
-      end
-
-      before do
-        deploy1.link_merge_requests(MergeRequest.where(id: merge_request_1.id))
-        deploy2.link_merge_requests(MergeRequest.where(id: merge_request_2.id))
-      end
-
-      context 'with deployed_after and deployed_before arguments' do
-        it 'returns merge requests deployed between the given period' do
-          result = resolve_mr(project, deployed_after: 20.days.ago, deployed_before: 5.days.ago)
-
-          expect(result).to contain_exactly(merge_request_1)
-        end
-
-        it 'does not return anything when there are no merge requests within the given period' do
-          result = resolve_mr(project, deployed_after: 2.days.ago)
-
-          expect(result).to be_empty
-        end
-      end
-
-      context 'with deployment' do
-        it 'returns merge request with matching deployment' do
-          result = resolve_mr(project, deployment_id: deploy2.id)
-
-          expect(result).to contain_exactly(merge_request_2)
-        end
-      end
-    end
-
-    context 'when filtering by environment' do
-      let_it_be(:gstg) { create(:environment, project: project, name: 'gstg') }
-      let_it_be(:gprd) { create(:environment, project: project, name: 'gprd') }
-
-      let_it_be(:deploy1) do
-        create(
-          :deployment,
-          :success,
-          deployable: nil,
-          environment: gstg,
-          project: project,
-          sha: merge_request_1.diff_head_sha
-        )
-      end
-
-      before do
-        deploy1.link_merge_requests(MergeRequest.where(id: merge_request_1.id))
-      end
-
-      it 'returns merge requests for a given environment' do
-        result = resolve_mr(project, environment_name: gstg.name)
-
-        expect(result).to contain_exactly(merge_request_1)
-      end
-
-      it 'returns an empty list when no merge requests exist in a given environment' do
-        result = resolve_mr(project, environment_name: gprd.name)
-
-        expect(result).to be_empty
-      end
-    end
-
     context 'with created_after and created_before arguments' do
       before do
         merge_request_1.update!(created_at: 4.days.ago)
@@ -518,8 +328,6 @@ RSpec.describe Resolvers::MergeRequestsResolver, feature_category: :code_review_
       end
     end
 
-    # subscribed filtering handled in request spec, spec/requests/api/graphql/merge_requests/merge_requests_spec.rb
-
     describe 'combinations' do
       it 'requires all filters' do
         create(:merge_request, :closed, **common_attrs, source_branch: merge_request_4.source_branch)
@@ -527,24 +335,6 @@ RSpec.describe Resolvers::MergeRequestsResolver, feature_category: :code_review_
         result = resolve_mr(project, source_branches: [merge_request_4.source_branch], state: 'locked')
 
         expect(result).to contain_exactly(merge_request_4)
-      end
-    end
-
-    context 'when using negated argument' do
-      context 'with assignee' do
-        it do
-          result = resolve_mr(project, not: { assignee_usernames: [current_user.username] })
-
-          expect(result).to contain_exactly(merge_request_1, merge_request_2, merge_request_4, merge_request_5, merge_request_6, merge_request_with_milestone)
-        end
-      end
-
-      context 'with reviewer' do
-        it do
-          result = resolve_mr(project, not: { reviewer_username: current_user.username })
-
-          expect(result).to contain_exactly(merge_request_1, merge_request_3, merge_request_4, merge_request_5, merge_request_6, merge_request_with_milestone)
-        end
       end
     end
 
@@ -636,5 +426,9 @@ RSpec.describe Resolvers::MergeRequestsResolver, feature_category: :code_review_
 
   def resolve_mr_single(project, iid)
     resolve_mr(project, resolver: described_class.single, iid: iid.to_s)
+  end
+
+  def resolve_mr(project, resolver: described_class, user: current_user, **args)
+    resolve(resolver, obj: project, args: args, ctx: { current_user: user }, arg_style: :internal)
   end
 end

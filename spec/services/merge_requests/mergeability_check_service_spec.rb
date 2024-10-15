@@ -112,9 +112,7 @@ RSpec.describe MergeRequests::MergeabilityCheckService, :clean_gitlab_redis_shar
         mr = MergeRequest.find(merge_request.id)
 
         threads << Thread.new do
-          Gitlab::ExclusiveLease.skipping_transaction_check do
-            described_class.new(mr).execute(retry_lease: retry_lease)
-          end
+          described_class.new(mr).execute(retry_lease: retry_lease)
         end
       end
 

@@ -18,7 +18,6 @@ module Users
     def execute
       build_user
       build_identity
-      build_user_detail
       update_canonical_email
 
       user
@@ -140,11 +139,6 @@ module Users
       return if identity_params.empty?
 
       user.identities.build(identity_params)
-    end
-
-    def build_user_detail
-      # This will ensure we either load an existing record or create it.
-      user.user_detail
     end
 
     def update_canonical_email

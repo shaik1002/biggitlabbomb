@@ -17,8 +17,7 @@ class SyntheticNote < Note
       noteable: resource,
       event: event,
       system_note_metadata: ::SystemNoteMetadata.new(action: action, id: event.discussion_id),
-      resource_parent: resource_parent,
-      imported_from: event.respond_to?(:imported_from) ? event.imported_from : 'none'
+      resource_parent: resource_parent
     }
 
     if resource_parent.is_a?(Project)

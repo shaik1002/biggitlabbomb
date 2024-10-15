@@ -19,23 +19,10 @@ module Gitlab
           end
         end
 
-        def type_from_path(path)
-          dir = File.dirname(path)
-          return :post if dir.match?(%r{db/(\w+/)?post_migrate})
-          return :regular if dir.match?(%r{db/(\w+/)?migrate})
-
-          raise 'unknown migration path'
-        end
-
-        def initialize(name = self.class.name, version = nil)
+        def initialize(name = self.class.name, version = nil, _type = nil)
           raise MilestoneNotSetError, "Milestone is not set for #{name}" if milestone.nil?
 
           super(name, version)
-          @version = Gitlab::Database::Migrations::Version.new(
-            version,
-            milestone,
-            type_from_path(self.class.instance_variable_get(:@_defining_file))
-          )
         end
 
         def milestone # rubocop:disable Lint/DuplicateMethods

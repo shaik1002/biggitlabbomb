@@ -1,4 +1,3 @@
-// Package exception provides utility functions for handling exceptions
 package exception
 
 import (
@@ -7,19 +6,17 @@ import (
 
 	raven "github.com/getsentry/raven-go"
 
-	"gitlab.com/gitlab-org/labkit/correlation"
+	//lint:ignore SA1019 this was recently deprecated. Update workhorse to use labkit errortracking package.
+	correlation "gitlab.com/gitlab-org/labkit/correlation/raven"
 
 	"gitlab.com/gitlab-org/labkit/log"
 )
-
-const ravenSentryExtraKey = "gitlab.CorrelationID"
 
 var ravenHeaderBlacklist = []string{
 	"Authorization",
 	"Private-Token",
 }
 
-// Track captures and reports an exception
 func Track(r *http.Request, err error, fields log.Fields) {
 	client := raven.DefaultClient
 	extra := raven.Extra{}
@@ -33,9 +30,8 @@ func Track(r *http.Request, err error, fields log.Fields) {
 		CleanHeaders(r)
 		interfaces = append(interfaces, raven.NewHttp(r))
 
-		if correlationID := correlation.ExtractFromContext(r.Context()); correlationID != "" {
-			extra[ravenSentryExtraKey] = correlationID
-		}
+		//lint:ignore SA1019 this was recently deprecated. Update workhorse to use labkit errortracking package.
+		extra = correlation.SetExtra(r.Context(), extra)
 	}
 
 	exception := &raven.Exception{
@@ -49,7 +45,6 @@ func Track(r *http.Request, err error, fields log.Fields) {
 	client.Capture(packet, nil)
 }
 
-// CleanHeaders redacts sensitive headers in the request
 func CleanHeaders(r *http.Request) {
 	if r == nil {
 		return

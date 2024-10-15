@@ -5,7 +5,7 @@ module AuthorizedProjectUpdate
     include ApplicationWorker
 
     sidekiq_options retry: 3
-    feature_category :permissions
+    feature_category :system_access
     urgency :low
     data_consistency :always
     queue_namespace :authorized_project_update

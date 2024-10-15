@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Projects::ProjectMembersHelper, feature_category: :groups_and_projects do
+RSpec.describe Projects::ProjectMembersHelper do
   include MembersPresentation
 
   let_it_be(:current_user) { create(:user) }
@@ -16,9 +16,6 @@ RSpec.describe Projects::ProjectMembersHelper, feature_category: :groups_and_pro
     let_it_be(:members) { create_list(:project_member, 2, project: project) }
     let_it_be(:invited) { create_list(:project_member, 2, :invited, project: project) }
     let_it_be(:access_requests) { create_list(:project_member, 2, :access_request, project: project) }
-    let(:available_roles) do
-      Gitlab::Access.options_with_owner.map { |name, access_level| { title: name, value: "static-#{access_level}" } }
-    end
 
     let(:members_collection) { members }
 
@@ -32,7 +29,7 @@ RSpec.describe Projects::ProjectMembersHelper, feature_category: :groups_and_pro
             access_requests: present_members(access_requests),
             include_relations: [:inherited, :direct],
             search: nil,
-            pending_members_count: []
+            pending_members: []
           )
         )
       end
@@ -48,10 +45,7 @@ RSpec.describe Projects::ProjectMembersHelper, feature_category: :groups_and_pro
           can_manage_members: true,
           can_manage_access_requests: true,
           group_name: project.group.name,
-          group_path: project.group.path,
-          project_path: project.full_path,
-          can_approve_access_requests: true,
-          available_roles: available_roles
+          group_path: project.group.path
         }.as_json
 
         expect(subject).to include(expected)
@@ -142,7 +136,7 @@ RSpec.describe Projects::ProjectMembersHelper, feature_category: :groups_and_pro
                 access_requests: present_members(access_requests),
                 include_relations: include_relations,
                 search: nil,
-                pending_members_count: []
+                pending_members: []
               )
             )
           end

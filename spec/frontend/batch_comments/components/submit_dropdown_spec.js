@@ -21,7 +21,6 @@ Vue.use(Vuex);
 let wrapper;
 let publishReview;
 let trackingSpy;
-let getCurrentUserLastNote;
 
 function factory({ canApprove = true, shouldAnimateReviewButton = false } = {}) {
   publishReview = jest.fn().mockResolvedValue();
@@ -46,7 +45,6 @@ function factory({ canApprove = true, shouldAnimateReviewButton = false } = {}) 
     ],
   ];
   const apolloProvider = createMockApollo(requestHandlers);
-  getCurrentUserLastNote = Vue.observable({ id: 1 });
 
   const store = new Vuex.Store({
     getters: {
@@ -59,7 +57,7 @@ function factory({ canApprove = true, shouldAnimateReviewButton = false } = {}) 
         preview_note_path: '/preview',
       }),
       noteableType: () => 'merge_request',
-      getCurrentUserLastNote: () => getCurrentUserLastNote,
+      getCurrentUserLastNote: () => ({ id: 1 }),
     },
     modules: {
       diffs: {
@@ -73,7 +71,6 @@ function factory({ canApprove = true, shouldAnimateReviewButton = false } = {}) 
         state: { shouldAnimateReviewButton },
         actions: {
           publishReview,
-          clearDrafts: jest.fn(),
         },
       },
     },
@@ -159,11 +156,6 @@ describe('Batch comments submit dropdown', () => {
     findCommentTextarea().setValue('Hello world');
 
     await findForm().vm.$emit('submit', { preventDefault: jest.fn() });
-
-    await waitForPromises();
-
-    getCurrentUserLastNote.id = 2;
-
     await Vue.nextTick();
 
     expect(window.mrTabs.tabShown).toHaveBeenCalledWith('show');

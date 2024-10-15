@@ -275,16 +275,8 @@ module Gitlab
       package_name_regex
     end
 
-    def ml_model_version_name_regex
-      Regexp.union(semver_regex, /candidate_\d+/)
-    end
-
     def ml_model_file_name_regex
-      @ml_model_file_name_regex ||= %r{\A[A-Za-z0-9\.\_\-\+ ]+\z}
-    end
-
-    def vs_code_user_agent_regex
-      /\Avs-code-gitlab-workflow/
+      maven_file_name_regex
     end
   end
 end

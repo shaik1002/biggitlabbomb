@@ -45,10 +45,10 @@ export default {
 </script>
 <template>
   <div class="mr-widget-extension">
-    <div class="pl-3 gl-flex gl-items-center gl-py-3">
+    <div class="d-flex gl-align-items-center pl-3 gl-py-3">
       <div v-if="hasError" class="ci-widget media">
         <div class="media-body">
-          <span class="js-error-state gl-ml-7 gl-text-sm gl-leading-24">
+          <span class="gl-font-sm gl-ml-7 gl-line-height-24 js-error-state">
             {{ title }}
           </span>
         </div>

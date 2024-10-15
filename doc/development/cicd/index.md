@@ -54,7 +54,7 @@ processing it, and returns any syntax or semantic errors. The `YAML Processor` c
 
 The `CreatePipelineService` receives the abstract data structure returned by the `YAML Processor`,
 which then converts it to persisted models (like pipeline, stages, and jobs). After that, the pipeline is ready
-to be processed. Processing a pipeline means running the jobs in order of execution (stage or `needs`)
+to be processed. Processing a pipeline means running the jobs in order of execution (stage or DAG)
 until either one of the following:
 
 - All expected jobs have been executed.
@@ -109,7 +109,7 @@ A job with the `created` state isn't seen by the runner yet. To make it possible
 1. The job is created in the very first stage of the pipeline.
 1. The job required a manual start and it has been triggered.
 1. All jobs from the previous stage have completed successfully. In this case we transition all jobs from the next stage to `pending`.
-1. The job specifies needs dependencies using `needs:` and all the dependent jobs are completed.
+1. The job specifies DAG dependencies using `needs:` and all the dependent jobs are completed.
 1. The job has not been [dropped](#dropping-stuck-builds) because of its not-runnable state by [`Ci::PipelineCreation::DropNotRunnableBuildsService`](https://gitlab.com/gitlab-org/gitlab/-/blob/v16.0.4-ee/ee/app/services/ci/pipeline_creation/drop_not_runnable_builds_service.rb).
 
 When the runner is connected, it requests the next `pending` job to run by polling the server continuously.
@@ -143,7 +143,7 @@ This API endpoint runs [`Ci::RegisterJobService`](https://gitlab.com/gitlab-org/
 
 There are 3 top level queries that this service uses to gather the majority of the jobs and they are selected based on the level where the runner is registered to:
 
-- Select jobs for shared runner (instance-wide)
+- Select jobs for shared runner (instance level)
   - Utilizes a fair scheduling algorithm which prioritizes projects with fewer running builds
 - Select jobs for group runner
 - Select jobs for project runner
@@ -165,18 +165,18 @@ As we increase the number of runners in the pool we also increase the chances of
 There are two ways of marking builds as "stuck" and drop them.
 
 1. When a build is created, [`Ci::PipelineCreation::DropNotRunnableBuildsService`](https://gitlab.com/gitlab-org/gitlab/-/blob/v16.0.4-ee/ee/app/services/ci/pipeline_creation/drop_not_runnable_builds_service.rb) checks for upfront known conditions that would make jobs not executable:
-   - If there is not enough [CI/CD Minutes](#compute-quota) to run the build, then the build is immediately dropped with `ci_quota_exceeded`.
-   - [In the future](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/121761), if the project is not on the plan that available runners for the build require via `allowed_plans`, then the build is immediately dropped with `no_matching_runner`.
+    - If there is not enough [CI/CD Minutes](#compute-quota) to run the build, then the build is immediately dropped with `ci_quota_exceeded`.
+    - [In the future](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/121761), if the project is not on the plan that available runners for the build require via `allowed_plans`, then the build is immediately dropped with `no_matching_runner`.
 1. If there is no available Runner to pick up a build, it is dropped after 1 hour by [`Ci::StuckBuilds::DropPendingService`](https://gitlab.com/gitlab-org/gitlab/-/blob/v16.0.4-ee/app/services/ci/stuck_builds/drop_pending_service.rb).
-   - If a job is not picked up by a runner in 24 hours it is automatically removed from
-     the processing queue after that time.
-   - If a pending job is **stuck**, when there is no
-     runner available that can process it, it is removed from the queue after 1 hour.
-   - In both cases the job's status is changed to `failed` with an appropriate failure reason.
+    - If a job is not picked up by a runner in 24 hours it is automatically removed from
+      the processing queue after that time.
+    - If a pending job is **stuck**, when there is no
+      runner available that can process it, it is removed from the queue after 1 hour.
+    - In both cases the job's status is changed to `failed` with an appropriate failure reason.
 
 #### The reason behind this difference
 
-Compute minutes quota mechanism is handled early when the job is created because it is a constant decision for most of the time.
+CI Minutes quota mechanism is handled early when the job is created because it is a constant decision for most of the time.
 Once a project exceeds the limit, every next job matching it will be applicable for it until next month starts.
 Of course, the project owner can buy additional minutes, but that is a manual action that the project need to take.
 
@@ -227,7 +227,7 @@ See [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/16111) for the fu
 
 > - [Renamed](https://gitlab.com/groups/gitlab-com/-/epics/2150) from "CI/CD minutes" to "compute quota" and "compute minutes" in GitLab 16.1.
 
-This diagram shows how the [Compute quota](../../ci/pipelines/compute_minutes.md)
+This diagram shows how the [Compute quota](../../ci/pipelines/cicd_minutes.md)
 feature and its components work.
 
 ![compute quota architecture](img/ci_minutes.png)

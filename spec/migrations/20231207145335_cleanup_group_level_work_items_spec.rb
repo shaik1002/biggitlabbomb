@@ -3,7 +3,9 @@
 require 'spec_helper'
 require_migration!
 
-RSpec.describe CleanupGroupLevelWorkItems, :migration_with_transaction, feature_category: :team_planning do
+RSpec.describe CleanupGroupLevelWorkItems, feature_category: :team_planning do
+  include MigrationHelpers::WorkItemTypesHelper
+
   let(:users) { table(:users) }
   let(:projects) { table(:projects) }
   let(:namespaces) { table(:namespaces) }
@@ -43,6 +45,12 @@ RSpec.describe CleanupGroupLevelWorkItems, :migration_with_transaction, feature_
   # associated labels
   let!(:label1) { labels.create!(title: 'label1', group_id: group1.id) }
   let!(:label2) { labels.create!(title: 'label2', group_id: group2.id) }
+
+  after(:all) do
+    # Make sure base types are recreated after running the migration
+    # because migration specs are not run in a transaction
+    reset_work_item_types
+  end
 
   describe '#up' do
     before do

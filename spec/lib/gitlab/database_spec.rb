@@ -258,22 +258,6 @@ RSpec.describe Gitlab::Database, feature_category: :database do
     end
   end
 
-  describe '.db_config_database' do
-    let(:model) { ActiveRecord::Base }
-
-    it 'returns the db_config database for the connection' do
-      # This is a ConnectionProxy
-      expect(described_class.db_config_database(model.connection)).to eq('gitlabhq_test')
-
-      # This is an actual connection
-      expect(described_class.db_config_database(model.retrieve_connection)).to eq('gitlabhq_test')
-    end
-
-    it 'returns unknown if .database returns nil' do
-      expect(described_class.db_config_database(nil)).to eq('unknown')
-    end
-  end
-
   describe '.db_config_names' do
     using RSpec::Parameterized::TableSyntax
 
@@ -566,32 +550,27 @@ RSpec.describe Gitlab::Database, feature_category: :database do
         event = events.first
         expect(event).not_to be_nil
         expect(event.duration).to be > 0.0
-
-        unless ::Gitlab.next_rails?
-          expect(event.payload).to a_hash_including(
-            connection: be_a(Gitlab::Database::LoadBalancing::ConnectionProxy)
-          )
-        end
+        expect(event.payload).to a_hash_including(
+          connection: be_a(Gitlab::Database::LoadBalancing::ConnectionProxy)
+        )
       end
     end
 
-    unless ::Gitlab.next_rails?
-      context 'within an empty transaction block' do
-        it 'publishes a transaction event' do
-          events = subscribe_events do
-            ApplicationRecord.transaction {}
-            Ci::ApplicationRecord.transaction {}
-          end
-
-          expect(events.length).to be(2)
-
-          event = events.first
-          expect(event).not_to be_nil
-          expect(event.duration).to be > 0.0
-          expect(event.payload).to a_hash_including(
-            connection: be_a(Gitlab::Database::LoadBalancing::ConnectionProxy)
-          )
+    context 'within an empty transaction block' do
+      it 'publishes a transaction event' do
+        events = subscribe_events do
+          ApplicationRecord.transaction {}
+          Ci::ApplicationRecord.transaction {}
         end
+
+        expect(events.length).to be(2)
+
+        event = events.first
+        expect(event).not_to be_nil
+        expect(event.duration).to be > 0.0
+        expect(event.payload).to a_hash_including(
+          connection: be_a(Gitlab::Database::LoadBalancing::ConnectionProxy)
+        )
       end
     end
 
@@ -599,12 +578,8 @@ RSpec.describe Gitlab::Database, feature_category: :database do
       it 'publishes multiple transaction events' do
         events = subscribe_events do
           ApplicationRecord.transaction do
-            User.first
-
-            ApplicationRecord.transaction(requires_new: true) do
-              User.first
-
-              ApplicationRecord.transaction(requires_new: true) do
+            ApplicationRecord.transaction do
+              ApplicationRecord.transaction do
                 User.first
               end
             end
@@ -616,6 +591,9 @@ RSpec.describe Gitlab::Database, feature_category: :database do
         events.each do |event|
           expect(event).not_to be_nil
           expect(event.duration).to be > 0.0
+          expect(event.payload).to a_hash_including(
+            connection: be_a(Gitlab::Database::LoadBalancing::ConnectionProxy)
+          )
         end
       end
     end
@@ -634,6 +612,9 @@ RSpec.describe Gitlab::Database, feature_category: :database do
         event = events.first
         expect(event).not_to be_nil
         expect(event.duration).to be > 0.0
+        expect(event.payload).to a_hash_including(
+          connection: be_a(Gitlab::Database::LoadBalancing::ConnectionProxy)
+        )
       end
     end
   end

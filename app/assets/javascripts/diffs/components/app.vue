@@ -1,7 +1,7 @@
 <script>
 import { GlLoadingIcon, GlPagination, GlSprintf, GlAlert } from '@gitlab/ui';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
-import { debounce, throttle } from 'lodash';
+import { debounce } from 'lodash';
 // eslint-disable-next-line no-restricted-imports
 import { mapState, mapGetters, mapActions } from 'vuex';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
@@ -16,9 +16,10 @@ import {
 } from '~/behaviors/shortcuts/keybindings';
 import { createAlert } from '~/alert';
 import { InternalEvents } from '~/tracking';
+import { isSingleViewStyle } from '~/helpers/diffs_helper';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import { parseBoolean, handleLocationHash } from '~/lib/utils/common_utils';
-import { BV_HIDE_TOOLTIP, DEFAULT_DEBOUNCE_AND_THROTTLE_MS } from '~/lib/utils/constants';
+import { DEFAULT_DEBOUNCE_AND_THROTTLE_MS } from '~/lib/utils/constants';
 import { Mousetrap } from '~/lib/mousetrap';
 import { updateHistory, getLocationHash } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
@@ -59,7 +60,6 @@ import HiddenFilesWarning from './hidden_files_warning.vue';
 import NoChanges from './no_changes.vue';
 import VirtualScrollerScrollSync from './virtual_scroller_scroll_sync';
 import DiffsFileTree from './diffs_file_tree.vue';
-import DiffAppControls from './diff_app_controls.vue';
 import getMRCodequalityAndSecurityReports from './graphql/get_mr_codequality_and_security_reports.query.graphql';
 
 export const FINDINGS_STATUS_PARSED = 'PARSED';
@@ -71,7 +71,6 @@ export default {
   FINDINGS_STATUS_PARSED,
   FINDINGS_STATUS_ERROR,
   components: {
-    DiffAppControls,
     DiffsFileTree,
     FindingsDrawer,
     DynamicScroller,
@@ -144,7 +143,7 @@ export default {
       required: false,
       default: '',
     },
-    linkedFileUrl: {
+    pinnedFileUrl: {
       type: String,
       required: false,
       default: '',
@@ -158,15 +157,12 @@ export default {
       autoScrolled: false,
       activeProject: undefined,
       hasScannerError: false,
-      linkedFileStatus: '',
+      pinnedFileStatus: '',
       codequalityData: {},
       sastData: {},
-      keydownTime: undefined,
-      listenersAttached: false,
     };
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     getMRCodequalityAndSecurityReports: {
       query: getMRCodequalityAndSecurityReports,
       pollInterval: FINDINGS_POLL_INTERVAL,
@@ -238,9 +234,6 @@ export default {
       'showWhitespace',
       'targetBranchName',
       'branchName',
-      'showTreeList',
-      'addedLines',
-      'removedLines',
     ]),
     ...mapGetters('diffs', [
       'whichCollapsedTypes',
@@ -310,19 +303,6 @@ export default {
     resourceId() {
       return convertToGraphQLId('MergeRequest', this.getNoteableData.id);
     },
-    renderFileTree() {
-      return this.renderDiffFiles && this.showTreeList;
-    },
-    hideTooltips() {
-      const hide = () => {
-        if (!this.shouldShow) return;
-        this.$root.$emit(BV_HIDE_TOOLTIP);
-      };
-      return throttle(hide, 100);
-    },
-    hasChanges() {
-      return this.diffFiles.length > 0;
-    },
   },
   watch: {
     commit(newCommit, oldCommit) {
@@ -357,7 +337,6 @@ export default {
       this.adjustView();
       this.subscribeToVirtualScrollingEvents();
     },
-    renderFileTree: 'adjustView',
     isLoading: 'adjustView',
   },
   mounted() {
@@ -401,7 +380,6 @@ export default {
 
     this.subscribeToVirtualScrollingEvents();
     window.addEventListener('hashchange', this.handleHashChange);
-    window.addEventListener('scroll', this.hideTooltips);
   },
   beforeCreate() {
     diffsApp.instrument();
@@ -429,7 +407,6 @@ export default {
     this.removeEventListeners();
 
     window.removeEventListener('hashchange', this.handleHashChange);
-    window.removeEventListener('scroll', this.hideTooltips);
 
     diffsEventHub.$off('scrollToFileHash', this.scrollVirtualScrollerToFileHash);
     diffsEventHub.$off('scrollToIndex', this.scrollVirtualScrollerToIndex);
@@ -454,10 +431,7 @@ export default {
       'navigateToDiffFileIndex',
       'setFileByFile',
       'disableVirtualScroller',
-      'fetchLinkedFile',
-      'toggleTreeList',
-      'expandAllFiles',
-      'collapseAllFiles',
+      'fetchPinnedFile',
     ]),
     ...mapActions('findingsDrawer', ['setDrawer']),
     closeDrawer() {
@@ -538,18 +512,24 @@ export default {
     refetchDiffData({ refetchMeta = true } = {}) {
       this.fetchData({ toggleTree: false, fetchMeta: refetchMeta });
     },
+    needsReload() {
+      return this.diffFiles.length && isSingleViewStyle(this.diffFiles[0]);
+    },
+    needsFirstLoad() {
+      return !this.diffFiles.length;
+    },
     fetchData({ toggleTree = true, fetchMeta = true } = {}) {
-      if (this.linkedFileUrl && this.linkedFileStatus !== 'loaded') {
-        this.linkedFileStatus = 'loading';
-        this.fetchLinkedFile(this.linkedFileUrl)
+      if (this.pinnedFileUrl && this.pinnedFileStatus !== 'loaded') {
+        this.pinnedFileStatus = 'loading';
+        this.fetchPinnedFile(this.pinnedFileUrl)
           .then(() => {
-            this.linkedFileStatus = 'loaded';
+            this.pinnedFileStatus = 'loaded';
             if (toggleTree) this.setTreeDisplay();
           })
           .catch(() => {
-            this.linkedFileStatus = 'error';
+            this.pinnedFileStatus = 'error';
             createAlert({
-              message: __("Couldn't fetch the linked file."),
+              message: __("Couldn't fetch the pinned file."),
             });
           });
       }
@@ -583,7 +563,7 @@ export default {
       }
 
       if (!this.viewDiffsFileByFile) {
-        this.fetchDiffFilesBatch(Boolean(this.linkedFileUrl))
+        this.fetchDiffFilesBatch(Boolean(this.pinnedFileUrl))
           .then(() => {
             if (toggleTree) this.setTreeDisplay();
             // Guarantee the discussions are assigned after the batch finishes.
@@ -627,8 +607,6 @@ export default {
       }
     },
     setEventListeners() {
-      if (this.listenersAttached) return;
-
       Mousetrap.bind(keysFor(MR_PREVIOUS_FILE_IN_DIFF), () => this.jumpToFile(-1));
       Mousetrap.bind(keysFor(MR_NEXT_FILE_IN_DIFF), () => this.jumpToFile(+1));
 
@@ -641,36 +619,32 @@ export default {
         );
       }
 
+      let keydownTime;
       Mousetrap.bind(['mod+f', 'mod+g'], () => {
-        this.keydownTime = new Date().getTime();
+        keydownTime = new Date().getTime();
       });
 
-      window.addEventListener('blur', this.handleBrowserFindActivation);
+      window.addEventListener('blur', () => {
+        if (keydownTime) {
+          const delta = new Date().getTime() - keydownTime;
 
-      this.listenersAttached = true;
+          // To make sure the user is using the find function we need to wait for blur
+          // and max 1000ms to be sure it the search box is filtered
+          if (delta >= 0 && delta < 1000) {
+            this.disableVirtualScroller();
+
+            api.trackRedisHllUserEvent('i_code_review_user_searches_diff');
+            api.trackRedisCounterEvent('diff_searches');
+          }
+        }
+      });
     },
     removeEventListeners() {
       Mousetrap.unbind(keysFor(MR_PREVIOUS_FILE_IN_DIFF));
       Mousetrap.unbind(keysFor(MR_NEXT_FILE_IN_DIFF));
       Mousetrap.unbind(keysFor(MR_COMMITS_NEXT_COMMIT));
       Mousetrap.unbind(keysFor(MR_COMMITS_PREVIOUS_COMMIT));
-      Mousetrap.unbind(['ctrl+f', 'command+f', 'mod+f', 'mod+g']);
-      window.removeEventListener('blur', this.handleBrowserFindActivation);
-      this.listenersAttached = false;
-    },
-    handleBrowserFindActivation() {
-      if (!this.keydownTime) return;
-
-      const delta = new Date().getTime() - this.keydownTime;
-
-      // To make sure the user is using the find function we need to wait for blur
-      // and max 1000ms to be sure it the search box is filtered
-      if (delta >= 0 && delta < 1000) {
-        this.disableVirtualScroller();
-
-        api.trackRedisHllUserEvent('i_code_review_user_searches_diff');
-        api.trackRedisCounterEvent('diff_searches');
-      }
+      Mousetrap.unbind(['ctrl+f', 'command+f']);
     },
     jumpToFile(step) {
       const targetIndex = this.currentDiffIndex + step;
@@ -735,10 +709,6 @@ export default {
         this.trackEvent(types[event.name]);
       }
     },
-    fileTreeToggled() {
-      this.toggleTreeList();
-      this.adjustView();
-    },
   },
   howToMergeDocsPath: helpPagePath('user/project/merge_requests/merge_request_troubleshooting.md', {
     anchor: 'check-out-merge-requests-locally-through-the-head-ref',
@@ -751,28 +721,24 @@ export default {
     <findings-drawer :project="activeProject" :drawer="activeDrawer" @close="closeDrawer" />
     <div v-if="isLoading || !isTreeLoaded" class="loading"><gl-loading-icon size="lg" /></div>
     <div v-else id="diffs" :class="{ active: shouldShow }" class="diffs tab-pane">
-      <div class="gl-flex gl-flex-wrap">
-        <compare-versions :toggle-file-tree-visible="hasChanges" />
-        <diff-app-controls
-          class="gl-ml-auto"
-          :has-changes="hasChanges"
-          :diffs-count="numTotalFiles"
-          :added-lines="addedLines"
-          :removed-lines="removedLines"
-          @expandAllFiles="expandAllFiles"
-          @collapseAllFiles="collapseAllFiles"
-        />
-      </div>
+      <compare-versions :diff-files-count-text="numTotalFiles" />
 
       <template v-if="!isBatchLoadingError">
+        <hidden-files-warning
+          v-if="visibleWarning == $options.alerts.ALERT_OVERFLOW_HIDDEN"
+          :visible="numVisibleFiles"
+          :total="numTotalFiles"
+          :plain-diff-path="plainDiffPath"
+          :email-patch-path="emailPatchPath"
+        />
         <collapsed-files-warning v-if="visibleWarning == $options.alerts.ALERT_COLLAPSED_FILES" />
       </template>
 
       <div
         :data-can-create-note="getNoteableData.current_user.can_create_note"
-        class="files gl-mt-2 gl-flex"
+        class="files d-flex gl-mt-2"
       >
-        <diffs-file-tree :visible="renderFileTree" @toggled="fileTreeToggled" />
+        <diffs-file-tree :render-diff-files="renderDiffFiles" @toggled="adjustView" />
         <div class="col-12 col-md-auto diff-files-holder">
           <commit-widget v-if="commit" :commit="commit" :collapsible="false" />
           <gl-alert
@@ -788,16 +754,9 @@ export default {
             <gl-loading-icon size="lg" />
           </div>
           <template v-else-if="renderDiffFiles">
-            <div v-if="linkedFileStatus === 'loading'" class="loading">
+            <div v-if="pinnedFileStatus === 'loading'" class="loading">
               <gl-loading-icon size="lg" />
             </div>
-            <hidden-files-warning
-              v-if="visibleWarning == $options.alerts.ALERT_OVERFLOW_HIDDEN"
-              :visible="numVisibleFiles"
-              :total="numTotalFiles"
-              :plain-diff-path="plainDiffPath"
-              :email-patch-path="emailPatchPath"
-            />
             <dynamic-scroller
               v-if="isVirtualScrollingEnabled"
               :items="diffs"
@@ -849,7 +808,7 @@ export default {
             <div
               v-if="showFileByFileNavigation"
               data-testid="file-by-file-navigation"
-              class="gl-grid gl-text-center"
+              class="gl-display-grid gl-text-center"
             >
               <gl-pagination
                 class="gl-mx-auto"

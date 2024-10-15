@@ -2,9 +2,6 @@
 
 module Pajamas
   class SpinnerComponent < Pajamas::Component
-    COLOR_OPTIONS = [:light, :dark].freeze
-    SIZE_OPTIONS = [:sm, :md, :lg, :xl].freeze
-
     # @param [Symbol] color
     # @param [Boolean] inline
     # @param [String] label
@@ -17,10 +14,13 @@ module Pajamas
       @html_options = html_options
     end
 
+    COLOR_OPTIONS = [:light, :dark].freeze
+    SIZE_OPTIONS = [:sm, :md, :lg, :xl].freeze
+
     private
 
     def spinner_class
-      ["gl-spinner", "gl-spinner-#{@size}", "gl-spinner-#{@color} !gl-align-text-bottom"]
+      ["gl-spinner", "gl-spinner-#{@size}", "gl-spinner-#{@color} gl-vertical-align-text-bottom!"]
     end
 
     def html_options

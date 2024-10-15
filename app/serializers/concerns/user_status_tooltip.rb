@@ -5,10 +5,10 @@ module UserStatusTooltip
   include ActionView::Helpers::TagHelper
   include ActionView::Context
   include EmojiHelper
-  include ::UsersHelper
+  include UsersHelper
 
   included do
-    expose :status_tooltip_html, if: ->(*) { status_loaded? } do |user|
+    expose :status_tooltip_html, if: -> (*) { status_loaded? } do |user|
       user_status(user)
     end
 
@@ -16,7 +16,7 @@ module UserStatusTooltip
       status_loaded? && !!user.status&.customized?
     end
 
-    expose :availability, if: ->(*) { status_loaded? } do |user|
+    expose :availability, if: -> (*) { status_loaded? } do |user|
       user.status&.availability
     end
 

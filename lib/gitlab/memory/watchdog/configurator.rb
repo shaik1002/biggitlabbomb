@@ -9,9 +9,7 @@ module Gitlab
         DEFAULT_SIDEKIQ_SLEEP_INTERVAL_S = 3
         MIN_SIDEKIQ_SLEEP_INTERVAL_S = 2
         DEFAULT_MAX_STRIKES = 5
-        # This disables the heap fragmentation check since it doesn't work with Variable Width Allocation:
-        # https://gitlab.com/gitlab-org/gitlab/-/issues/407327
-        DEFAULT_MAX_HEAP_FRAG = 1
+        DEFAULT_MAX_HEAP_FRAG = 0.5
         DEFAULT_MAX_MEM_GROWTH = 3.0
         # grace_time / sleep_interval = max_strikes allowed for Sidekiq process to violate defined limits.
         DEFAULT_SIDEKIQ_GRACE_TIME_S = 900
@@ -52,18 +50,18 @@ module Gitlab
 
                 # stack.push MonitorClass, args*, max_strikes:, kwargs**, &block
                 stack.push Gitlab::Memory::Watchdog::Monitor::HeapFragmentation,
-                  max_heap_fragmentation: max_heap_frag,
-                  max_strikes: max_strikes
+                           max_heap_fragmentation: max_heap_frag,
+                           max_strikes: max_strikes
 
                 stack.push Gitlab::Memory::Watchdog::Monitor::UniqueMemoryGrowth,
-                  max_mem_growth: max_mem_growth,
-                  max_strikes: max_strikes
+                           max_mem_growth: max_mem_growth,
+                           max_strikes: max_strikes
               else
                 memory_limit = ENV.fetch('PUMA_WORKER_MAX_MEMORY', DEFAULT_PUMA_WORKER_RSS_LIMIT_MB).to_i
 
                 stack.push Gitlab::Memory::Watchdog::Monitor::RssMemoryLimit,
-                  memory_limit_bytes: memory_limit.megabytes,
-                  max_strikes: max_strikes
+                           memory_limit_bytes: memory_limit.megabytes,
+                           max_strikes: max_strikes
               end
             end
           end
@@ -83,18 +81,18 @@ module Gitlab
                 max_strikes = grace_time / sidekiq_sleep_time
 
                 stack.push Gitlab::Memory::Watchdog::Monitor::RssMemoryLimit,
-                  memory_limit_bytes: soft_limit_bytes,
-                  max_strikes: max_strikes.to_i,
-                  monitor_name: :rss_memory_soft_limit
+                           memory_limit_bytes: soft_limit_bytes,
+                           max_strikes: max_strikes.to_i,
+                           monitor_name: :rss_memory_soft_limit
               end
 
               if ENV['SIDEKIQ_MEMORY_KILLER_HARD_LIMIT_RSS'].to_i.nonzero?
                 hard_limit_bytes = ENV['SIDEKIQ_MEMORY_KILLER_HARD_LIMIT_RSS'].to_i.kilobytes
 
                 stack.push Gitlab::Memory::Watchdog::Monitor::RssMemoryLimit,
-                  memory_limit_bytes: hard_limit_bytes,
-                  max_strikes: 0,
-                  monitor_name: :rss_memory_hard_limit
+                           memory_limit_bytes: hard_limit_bytes,
+                           max_strikes: 0,
+                           monitor_name: :rss_memory_hard_limit
               end
             end
           end

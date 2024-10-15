@@ -26,22 +26,22 @@ export default class NewBranchForm {
   setupRestrictions() {
     const startsWith = {
       pattern: /^(\/|\.)/g,
-      prefix: 'Branch name cannot start with',
+      prefix: "can't start with",
       conjunction: 'or',
     };
     const endsWith = {
       pattern: /(\/|\.|\.lock)$/g,
-      prefix: 'Branch name cannot end in',
+      prefix: "can't end in",
       conjunction: 'or',
     };
     const invalid = {
       pattern: /(\s|~|\^|:|\?|\*|\[|\\|\.\.|@\{|\/{2,}){1}/g,
-      prefix: 'Branch name cannot contain',
-      conjunction: ' or ',
+      prefix: "can't contain",
+      conjunction: ', ',
     };
     const single = {
       pattern: /^@+$/g,
-      prefix: 'Branch name cannot be',
+      prefix: "can't be",
       conjunction: 'or',
     };
     return (this.restrictions = [startsWith, invalid, endsWith, single]);
@@ -79,7 +79,7 @@ export default class NewBranchForm {
     };
     const errors = this.restrictions.reduce(validator, []);
     if (errors.length > 0) {
-      this.branchNameError.textContent = errors.join('. ');
+      this.branchNameError.textContent = errors.join(', ');
       this.name.classList.add(NAME_ERROR_CLASS);
       this.name.focus();
     } else {

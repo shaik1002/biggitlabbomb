@@ -17,15 +17,12 @@ import (
 
 var (
 	// See doc/channel.md for documentation of this subprotocol
-	subprotocols = []string{"terminal.gitlab.com", "base64.terminal.gitlab.com"}
-	upgrader     = &websocket.Upgrader{Subprotocols: subprotocols}
-	// ReauthenticationInterval specifies the interval for reauthentication.
+	subprotocols             = []string{"terminal.gitlab.com", "base64.terminal.gitlab.com"}
+	upgrader                 = &websocket.Upgrader{Subprotocols: subprotocols}
 	ReauthenticationInterval = 5 * time.Minute
-	// BrowserPingInterval specifies the interval for browser pings.
-	BrowserPingInterval = 30 * time.Second
+	BrowserPingInterval      = 30 * time.Second
 )
 
-// Handler returns an HTTP handler for handling API requests using the provided API instance.
 func Handler(myAPI *api.API) http.Handler {
 	return myAPI.PreAuthorizeHandler(func(w http.ResponseWriter, r *http.Request, a *api.Response) {
 		if err := a.Channel.Validate(); err != nil {
@@ -39,9 +36,7 @@ func Handler(myAPI *api.API) http.Handler {
 			a.Channel,
 			proxy.StopCh,
 		)
-		defer func() {
-			_ = checker.Close()
-		}()
+		defer checker.Close()
 		go checker.Loop(ReauthenticationInterval)
 		go closeAfterMaxTime(proxy, a.Channel.MaxSessionTime)
 
@@ -49,7 +44,6 @@ func Handler(myAPI *api.API) http.Handler {
 	}, "authorize")
 }
 
-// ProxyChannel handles proxying of HTTP requests.
 func ProxyChannel(w http.ResponseWriter, r *http.Request, settings *api.ChannelSettings, proxy *Proxy) {
 	server, err := connectToServer(settings, r)
 	if err != nil {
@@ -57,11 +51,7 @@ func ProxyChannel(w http.ResponseWriter, r *http.Request, settings *api.ChannelS
 		log.ContextLogger(r.Context()).WithError(err).Print("Channel: connecting to server failed")
 		return
 	}
-	defer func() {
-		if err = server.UnderlyingConn().Close(); err != nil {
-			fmt.Printf("Error closing server connection: %v", err)
-		}
-	}()
+	defer server.UnderlyingConn().Close()
 	serverAddr := server.UnderlyingConn().RemoteAddr().String()
 
 	client, err := upgradeClient(w, r)
@@ -74,9 +64,7 @@ func ProxyChannel(w http.ResponseWriter, r *http.Request, settings *api.ChannelS
 	// being timed out by intervening proxies.
 	go pingLoop(client)
 
-	defer func() {
-		_ = client.UnderlyingConn().Close()
-	}()
+	defer client.UnderlyingConn().Close()
 	clientAddr := getClientAddr(r) // We can't know the port with confidence
 
 	logEntry := log.WithContextFields(r.Context(), log.Fields{

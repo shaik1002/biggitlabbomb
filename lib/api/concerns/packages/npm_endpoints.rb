@@ -8,6 +8,10 @@
 # https://docs.gitlab.com/ee/user/packages/npm_registry/
 #
 # Technical debt: https://gitlab.com/gitlab-org/gitlab/issues/35798
+#
+# Caution: This Concern has to be included at the end of the API class
+# The last route of this Concern has a globbing wildcard that will match all urls.
+# As such, routes declared after the last route of this Concern will not match any url.
 module API
   module Concerns
     module Packages
@@ -16,7 +20,6 @@ module API
 
         included do
           helpers ::API::Helpers::Packages::DependencyProxyHelpers
-          helpers ::API::Helpers::Packages::Npm
 
           rescue_from ActiveRecord::RecordInvalid do |e|
             render_structured_api_error!({ message: e.message, error: e.message }, 400)
@@ -28,6 +31,8 @@ module API
           end
 
           helpers do
+            include Gitlab::Utils::StrongMemoize
+
             params :package_name do
               requires :package_name, type: String, file_path: true, desc: 'Package name',
                 documentation: { example: 'mypackage' }
@@ -53,11 +58,11 @@ module API
               ::Packages::Npm::GenerateMetadataService.new(params[:package_name], packages)
             end
 
-            def bad_request_missing_attribute!(attribute)
-              reason = "\"#{attribute}\" not given"
-              message = "400 Bad request - #{reason}"
-              render_structured_api_error!({ message: message, error: reason }, 400)
+            def metadata_cache
+              ::Packages::Npm::MetadataCache
+                .find_by_package_name_and_project_id(params[:package_name], project.id)
             end
+            strong_memoize_attr :metadata_cache
           end
 
           params do
@@ -78,7 +83,7 @@ module API
               tags %w[npm_packages]
             end
             route_setting :authentication, job_token_allowed: true, deploy_token_allowed: true,
-              authenticate_non_public: true
+                                           authenticate_non_public: true
             get 'dist-tags', format: false, requirements: ::API::Helpers::Packages::Npm::NPM_ENDPOINT_REQUIREMENTS do
               package_name = params[:package_name]
 
@@ -172,6 +177,80 @@ module API
 
                 no_content!
               end
+            end
+          end
+
+          desc 'NPM registry metadata endpoint' do
+            detail 'This feature was introduced in GitLab 11.8'
+            success [
+              { code: 200, model: ::API::Entities::NpmPackage, message: 'Ok' },
+              { code: 302, message: 'Found (redirect)' }
+            ]
+            failure [
+              { code: 400, message: 'Bad Request' },
+              { code: 401, message: 'Unauthorized' },
+              { code: 403, message: 'Forbidden' },
+              { code: 404, message: 'Not Found' }
+            ]
+            tags %w[npm_packages]
+          end
+          params do
+            use :package_name
+          end
+          route_setting :authentication, job_token_allowed: true, deploy_token_allowed: true,
+                                         authenticate_non_public: true
+          get '*package_name', format: false, requirements: ::API::Helpers::Packages::Npm::NPM_ENDPOINT_REQUIREMENTS do
+            package_name = params[:package_name]
+            available_packages =
+              if endpoint_scope != :project &&
+                  Feature.enabled?(:npm_allow_packages_in_multiple_projects, group_or_namespace)
+                finder_for_endpoint_scope(package_name).execute
+              else
+                ::Packages::Npm::PackageFinder.new(package_name, project: project_or_nil)
+                                              .execute
+              end
+
+            # In order to redirect a request, packages should not exist (without taking the user into account).
+            redirect_request = project_or_nil.blank? || available_packages.empty?
+
+            redirect_registry_request(
+              forward_to_registry: redirect_request,
+              package_type: :npm,
+              target: project_or_nil,
+              package_name: package_name
+            ) do
+              if endpoint_scope != :project &&
+                  Feature.enabled?(:npm_allow_packages_in_multiple_projects, group_or_namespace)
+                available_packages_to_user = ::Packages::Npm::PackagesForUserFinder.new(
+                  current_user,
+                  group_or_namespace,
+                  package_name: params[:package_name]
+                ).execute
+
+                if available_packages.any? && available_packages_to_user.empty?
+                  current_user ? forbidden! : unauthorized!
+                end
+
+                available_packages = available_packages_to_user
+              else
+                authorize_read_package!(project)
+              end
+
+              not_found!('Packages') if available_packages.empty?
+
+              if endpoint_scope == :project
+                if metadata_cache&.file&.exists?
+                  metadata_cache.touch_last_downloaded_at
+                  present_carrierwave_file!(metadata_cache.file)
+
+                  break
+                end
+
+                enqueue_sync_metadata_cache_worker(project, package_name)
+              end
+
+              metadata = generate_metadata_service(available_packages).execute.payload
+              present metadata, with: ::API::Entities::NpmPackage
             end
           end
 

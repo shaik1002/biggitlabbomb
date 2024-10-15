@@ -32,9 +32,7 @@ describe('Branch Protections', () => {
 
   it('renders help text', () => {
     expect(findHelpText().text()).toMatchInterpolatedText(i18n.protectionsHelpText);
-    expect(findHelpLink().attributes('href')).toBe(
-      '/help/user/project/repository/branches/protected',
-    );
+    expect(findHelpLink().attributes('href')).toBe('/help/user/project/protected_branches');
   });
 
   it('renders a PushProtections component with correct props', () => {

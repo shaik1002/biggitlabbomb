@@ -242,7 +242,7 @@ module Gitlab
     private
 
     def memoizable_name(name)
-      name.to_s.tr('?!', '').to_s
+      "#{name.to_s.tr('?!', '')}"
     end
 
     def expire_request_store_method_caches(methods)

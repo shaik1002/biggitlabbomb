@@ -1,14 +1,11 @@
 import setHighlightClass from 'ee_else_ce/search/highlight_blob_search_result';
 import { queryToObject } from '~/lib/utils/url_utility';
-import { parseBoolean } from '~/lib/utils/common_utils';
 import syntaxHighlight from '~/syntax_highlight';
 import { initSidebar } from './sidebar';
 import { initSearchSort } from './sort';
 import createStore from './store';
 import { initTopbar } from './topbar';
 import { initBlobRefSwitcher } from './under_topbar';
-import { SEARCH_TYPE_ZOEKT, SCOPE_BLOB } from './sidebar/constants/index';
-import { initZoektBlobResult } from './results/index';
 
 const sidebarInitState = () => {
   const el = document.getElementById('js-search-sidebar');
@@ -18,11 +15,8 @@ const sidebarInitState = () => {
     navigationJson,
     searchType,
     searchLevel,
-    advancedSearchAvailable,
-    zoektAvailable,
     groupInitialJson,
     projectInitialJson,
-    ref,
   } = el.dataset;
 
   const navigationJsonParsed = JSON.parse(navigationJson);
@@ -33,11 +27,8 @@ const sidebarInitState = () => {
     navigationJsonParsed,
     searchType,
     searchLevel,
-    advancedSearchAvailable: parseBoolean(advancedSearchAvailable),
-    zoektAvailable: parseBoolean(zoektAvailable),
     groupInitialJsonParsed,
     projectInitialJsonParsed,
-    ref,
   };
 };
 
@@ -59,11 +50,8 @@ export const initSearchApp = () => {
     navigationJsonParsed: navigation,
     searchType,
     searchLevel,
-    advancedSearchAvailable,
-    zoektAvailable,
     groupInitialJsonParsed: groupInitialJson,
     projectInitialJsonParsed: projectInitialJson,
-    ref,
   } = sidebarInitState() || {};
 
   const { defaultBranchName } = topBarInitState() || {};
@@ -73,12 +61,9 @@ export const initSearchApp = () => {
     navigation,
     searchType,
     searchLevel,
-    advancedSearchAvailable,
-    zoektAvailable,
     groupInitialJson,
     projectInitialJson,
     defaultBranchName,
-    repositoryRef: ref,
   });
 
   initTopbar(store);
@@ -87,12 +72,4 @@ export const initSearchApp = () => {
 
   setHighlightClass(query.search); // Code Highlighting
   initBlobRefSwitcher(); // Code Search Branch Picker
-
-  if (
-    searchType === SEARCH_TYPE_ZOEKT &&
-    store.getters.currentScope === SCOPE_BLOB &&
-    gon.features.zoektMultimatchFrontend
-  ) {
-    initZoektBlobResult(store);
-  }
 };

@@ -23,7 +23,6 @@ module BulkImports
 
     validate :portable_relation?
 
-    scope :for_status, ->(status) { where(status: status) }
     scope :for_user, ->(user) { where(user: user) }
     scope :for_user_and_relation, ->(user, relation) { where(user: user, relation: relation) }
 
@@ -42,12 +41,6 @@ module BulkImports
 
       event :fail_op do
         transition any => :failed
-      end
-
-      after_transition any => :finished do |export|
-        if export.config.user_contributions_relation?(export.relation)
-          UserContributionsExportMapper.new(export.portable).clear_cache
-        end
       end
     end
 
@@ -78,10 +71,6 @@ module BulkImports
 
       upload.remove_export_file!
       upload.save!
-    end
-
-    def relation_has_user_contributions?
-      config.relation_has_user_contributions?(relation)
     end
   end
 end

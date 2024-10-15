@@ -160,14 +160,14 @@ describe('Upload dropzone component', () => {
 
   it('applies correct classes when displaying as a standalone item', () => {
     createComponent({ props: { displayAsCard: false } });
-    expect(findDropzoneArea().classes()).not.toContain('gl-flex-col');
-    expect(findIcon().classes()).toEqual(['gl-mr-3']);
+    expect(findDropzoneArea().classes()).not.toContain('gl-flex-direction-column');
+    expect(findIcon().classes()).toEqual(['gl-mr-3', 'gl-text-gray-500']);
     expect(findIcon().props('size')).toBe(16);
   });
 
   it('applies correct classes when displaying in card mode', () => {
     createComponent({ props: { displayAsCard: true } });
-    expect(findDropzoneArea().classes()).toContain('gl-flex-col');
+    expect(findDropzoneArea().classes()).toContain('gl-flex-direction-column');
     expect(findIcon().classes()).toEqual(['gl-mb-2']);
     expect(findIcon().props('size')).toBe(24);
   });
@@ -184,27 +184,6 @@ describe('Upload dropzone component', () => {
     });
 
     expect(wrapper.element).toMatchSnapshot();
-  });
-
-  it('correctly overrides single upload messages', () => {
-    createComponent({
-      props: {
-        singleFileSelection: true,
-        uploadSingleMessage: 'Drop or select file to attach',
-      },
-    });
-    expect(findUploadText()).toContain('Drop or select file to attach');
-  });
-
-  it('correctly overrides multiple upload messages', () => {
-    createComponent({
-      props: {
-        singleFileSelection: false,
-        uploadMultipleMessage: 'Drop or select files to attach',
-      },
-    });
-
-    expect(findUploadText()).toContain('Drop or select files to attach');
   });
 
   describe('file input form name', () => {

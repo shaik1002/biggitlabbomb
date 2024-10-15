@@ -143,43 +143,12 @@ RSpec.describe Import::ValidateRemoteGitEndpointService, feature_category: :impo
       end
     end
 
-    context 'with auth credentials' do
-      before do
-        allow(Gitlab::HTTP).to receive(:get)
-      end
+    it 'passes basic auth when credentials are provided' do
+      allow(Gitlab::HTTP).to receive(:get)
 
-      let(:user) { 'u$er' }
-      let(:password) { 'pa$$w@rd' }
+      described_class.new(url: "#{base_url}#somehash", user: 'user', password: 'password').execute
 
-      context 'when credentials are provided via params' do
-        let(:url) { "#{base_url}#somehash" }
-
-        it 'sets basic auth from these credentials' do
-          described_class.new(url: url, user: user, password: password).execute
-
-          expect(Gitlab::HTTP).to have_received(:get).with(endpoint_url, basic_auth: { username: user, password: password }, stream_body: true, follow_redirects: false)
-        end
-      end
-
-      context 'when credentials are provided in url' do
-        let(:url) { "http://#{user}:#{password}@demo.host/path#somehash" }
-
-        it 'passes basic auth from uri credentials' do
-          described_class.new(url: url).execute
-
-          expect(Gitlab::HTTP).to have_received(:get).with(endpoint_url, basic_auth: { username: user, password: password }, stream_body: true, follow_redirects: false)
-        end
-      end
-
-      context 'when credentials are set via both params and url' do
-        let(:url) { "http://uri_user:url_password@demo.host/path#somehash" }
-
-        it 'prefers credentials via params' do
-          described_class.new(url: url, user: user, password: password).execute
-
-          expect(Gitlab::HTTP).to have_received(:get).with(endpoint_url, basic_auth: { username: user, password: password }, stream_body: true, follow_redirects: false)
-        end
-      end
+      expect(Gitlab::HTTP).to have_received(:get).with(endpoint_url, basic_auth: { username: 'user', password: 'password' }, stream_body: true, follow_redirects: false)
     end
   end
 end

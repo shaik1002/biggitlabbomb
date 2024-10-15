@@ -17,14 +17,17 @@ module Gitlab
             #
             pipeline.stages = @command.pipeline_seed.stages
 
-            if no_pipeline_to_create?
+            if stage_names.empty?
               return error(
-                ::Ci::Pipeline.rules_failure_message,
-                failure_reason: :filtered_by_rules
+                'Pipeline will not run for the selected trigger. ' \
+                  'The rules configuration prevented any jobs from being added to the pipeline.',
+                drop_reason: :filtered_by_rules
               )
             end
 
-            return error('Failed to build the pipeline!') if pipeline.invalid?
+            if pipeline.invalid?
+              return error('Failed to build the pipeline!')
+            end
 
             raise Populate::PopulateError if pipeline.persisted?
           end
@@ -34,12 +37,6 @@ module Gitlab
           end
 
           private
-
-          def no_pipeline_to_create?
-            # If there are security policy pipelines,
-            # they will be merged onto the pipeline in PipelineExecutionPolicies::MergeJobs
-            stage_names.empty? && @command.execution_policy_pipelines.blank?
-          end
 
           def stage_names
             # We filter out `.pre/.post` stages, as they alone are not considered

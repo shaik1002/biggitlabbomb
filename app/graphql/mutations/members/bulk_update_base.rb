@@ -26,13 +26,14 @@ module Mutations
       INVALID_MEMBERS_ERROR = 'Only access level of direct members can be updated.'
 
       def resolve(**args)
-        source = authorized_find!(source_id: args[source_id_param_name])
-
         result = ::Members::UpdateService
-                   .new(current_user, args.except(:user_ids, source_id_param_name).merge({ source: source }))
+                   .new(current_user, args.except(:user_ids, source_id_param_name))
                    .execute(@updatable_members)
 
-        present_result(result)
+        {
+          source_members_key => result[:members],
+          errors: Array.wrap(result[:message])
+        }
       rescue Gitlab::Access::AccessDeniedError
         {
           errors: ["Unable to update members, please check user permissions."]
@@ -79,18 +80,9 @@ module Mutations
         source_type.name.downcase
       end
 
-      def present_result(result)
-        {
-          source_members_key => result[:members],
-          errors: Array.wrap(result[:message])
-        }
-      end
-
       def source_type
         raise NotImplementedError
       end
     end
   end
 end
-
-Mutations::Members::BulkUpdateBase.prepend_mod

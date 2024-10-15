@@ -35,7 +35,7 @@ RSpec.describe Gitlab::SidekiqMiddleware::PauseControl::Server, :clean_gitlab_re
   describe '#call' do
     context 'when strategy is enabled' do
       before do
-        allow(Gitlab::CurrentSettings).to receive(:zoekt_indexing_paused?).and_return(true)
+        stub_feature_flags(zoekt_pause_indexing: true)
       end
 
       it 'puts the job to another queue without execution' do
@@ -55,7 +55,7 @@ RSpec.describe Gitlab::SidekiqMiddleware::PauseControl::Server, :clean_gitlab_re
 
     context 'when strategy is disabled' do
       before do
-        allow(Gitlab::CurrentSettings).to receive(:zoekt_indexing_paused?).and_return(false)
+        stub_feature_flags(zoekt_pause_indexing: false)
       end
 
       it 'executes the job' do

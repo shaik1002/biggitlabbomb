@@ -2,6 +2,8 @@
 data_category: operational
 key_path: usage_activity_by_stage_monthly.create.action_monthly_active_users_project_repo
 description: Count of monthly active users who have performed any Git operation (read/write/push)
+product_section: dev
+product_stage: create
 product_group: source_code
 value_type: number
 status: active
@@ -24,4 +26,3 @@ performance_indicator_type:
 - paid_gmau
 - customer_health_score
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

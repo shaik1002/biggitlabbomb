@@ -9,10 +9,14 @@ describe('IssueCardStatistics CE component', () => {
   const findUpvotes = () => wrapper.findByTestId('issuable-upvotes');
   const findDownvotes = () => wrapper.findByTestId('issuable-downvotes');
 
-  const mountComponent = (issue = {}) => {
+  const mountComponent = ({ mergeRequestsCount, upvotes, downvotes } = {}) => {
     wrapper = shallowMountExtended(IssueCardStatistics, {
       propsData: {
-        issue,
+        issue: {
+          mergeRequestsCount,
+          upvotes,
+          downvotes,
+        },
       },
     });
   };
@@ -28,9 +32,8 @@ describe('IssueCardStatistics CE component', () => {
   });
 
   describe('when issue attributes are defined', () => {
-    const issue = { mergeRequestsCount: 1, upvotes: 5, downvotes: 9 };
     beforeEach(() => {
-      mountComponent(issue);
+      mountComponent({ mergeRequestsCount: 1, upvotes: 5, downvotes: 9 });
     });
 
     it('renders merge requests', () => {
@@ -55,18 +58,6 @@ describe('IssueCardStatistics CE component', () => {
       expect(downvotes.text()).toBe('9');
       expect(downvotes.attributes('title')).toBe('Downvotes');
       expect(downvotes.findComponent(GlIcon).props('name')).toBe('thumb-down');
-    });
-  });
-
-  describe('with work item object', () => {
-    it('renders upvotes and downvotes', () => {
-      const issue = {
-        widgets: [{ type: 'AWARD_EMOJI', downvotes: '4', upvotes: '8' }],
-      };
-      mountComponent(issue);
-
-      expect(findDownvotes().text()).toBe('4');
-      expect(findUpvotes().text()).toBe('8');
     });
   });
 });

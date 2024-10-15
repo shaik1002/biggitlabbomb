@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"gitlab.com/gitlab-org/gitlab/workhorse/internal/testhelper"
@@ -29,8 +28,8 @@ func TestIfErrorPageIsPresented(t *testing.T) {
 		w.WriteHeader(404)
 		upstreamBody := "Not Found"
 		n, err := fmt.Fprint(w, upstreamBody)
-		assert.NoError(t, err)
-		assert.Len(t, upstreamBody, n, "bytes written")
+		require.NoError(t, err)
+		require.Len(t, upstreamBody, n, "bytes written")
 	})
 	st := &Static{DocumentRoot: dir}
 	st.ErrorPagesUnless(false, ErrorFormatHTML, h).ServeHTTP(w, nil)
@@ -135,8 +134,8 @@ func TestIfErrorPageIsPresentedJSON(t *testing.T) {
 		w.WriteHeader(404)
 		upstreamBody := "This string is ignored"
 		n, err := fmt.Fprint(w, upstreamBody)
-		assert.NoError(t, err)
-		assert.Len(t, upstreamBody, n, "bytes written")
+		require.NoError(t, err)
+		require.Len(t, upstreamBody, n, "bytes written")
 	})
 	st := &Static{}
 	st.ErrorPagesUnless(false, ErrorFormatJSON, h).ServeHTTP(w, nil)
@@ -155,8 +154,8 @@ func TestIfErrorPageIsPresentedText(t *testing.T) {
 		w.WriteHeader(404)
 		upstreamBody := "This string is ignored"
 		n, err := fmt.Fprint(w, upstreamBody)
-		assert.NoError(t, err)
-		assert.Len(t, upstreamBody, n, "bytes written")
+		require.NoError(t, err)
+		require.Len(t, upstreamBody, n, "bytes written")
 	})
 	st := &Static{}
 	st.ErrorPagesUnless(false, ErrorFormatText, h).ServeHTTP(w, nil)

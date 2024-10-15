@@ -17,7 +17,7 @@ info: Any user with at least the Maintainer role can merge updates to this conte
 
 **GraphQL at GitLab**:
 
-<!-- vale gitlab_base.Spelling = NO -->
+<!-- vale gitlab.Spelling = NO -->
 
 - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [GitLab Unfiltered GraphQL playlist](https://www.youtube.com/watch?v=wHPKZBDMfxE&list=PL05JrBw4t0KpcjeHjaRMB7IGB2oDWyJzv)
 - <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [GraphQL at GitLab: Deep Dive](../api_graphql_styleguide.md#deep-dive) (video) by Nick Thomas
@@ -30,7 +30,7 @@ info: Any user with at least the Maintainer role can merge updates to this conte
 - [🛠 Vuex -> Apollo Migration: a proof-of-concept project](https://gitlab.com/ntepluhina/vuex-to-apollo/blob/master/README.md)
   - A collection of examples that show the possible approaches for state management with Vue+GraphQL+(Vuex or Apollo) apps
 
-<!-- vale gitlab_base.Spelling = YES -->
+<!-- vale gitlab.Spelling = YES -->
 
 ### Libraries
 
@@ -47,15 +47,15 @@ see [Immutability and cache updates](#immutability-and-cache-updates) for more i
 
 ### Tooling
 
-<!-- vale gitlab_base.Spelling = NO -->
+<!-- vale gitlab.Spelling = NO -->
 
 - [Apollo Client Devtools](https://github.com/apollographql/apollo-client-devtools)
 
-<!-- vale gitlab_base.Spelling = YES -->
+<!-- vale gitlab.Spelling = YES -->
 
-#### Apollo GraphQL VS Code extension
+#### [Apollo GraphQL VS Code extension](https://marketplace.visualstudio.com/items?itemName=apollographql.vscode-apollo)
 
-If you use VS Code, the [Apollo GraphQL extension](https://marketplace.visualstudio.com/items?itemName=apollographql.vscode-apollo) supports autocompletion in `.graphql` files. To set up
+If you use VS Code, the Apollo GraphQL extension supports autocompletion in `.graphql` files. To set up
 the GraphQL extension, follow these steps:
 
 1. Generate the schema: `bundle exec rake gitlab:graphql:schema:dump`
@@ -80,7 +80,7 @@ the GraphQL extension, follow these steps:
 
 Our GraphQL API can be explored via GraphiQL at your instance's
 `/-/graphql-explorer` or at [GitLab.com](https://gitlab.com/-/graphql-explorer). Consult the
-[GitLab GraphQL API Reference documentation](../../api/graphql/reference/index.md)
+[GitLab GraphQL API Reference documentation](../../api/graphql/reference)
 where needed.
 
 To check all existing queries and mutations, on the right side of GraphiQL, select **Documentation explorer**.
@@ -198,45 +198,6 @@ query allReleases(...) {
         hasPreviousPage
         hasNextPage
         endCursor
-      }
-    }
-  }
-}
-```
-
-## Skip query with async variables
-
-Whenever a query has one or more variable that requires another query to have executed before it can run, it is **vital** to add a `skip()` property to the query with all relations.
-
-Failing to do so will result in the query executing twice: once with the default value (whatever was defined on the `data` property or `undefined`) and once more once the initial query is resolved, triggering a new variable value to be injected in the smart query and then refetched by Apollo.
-
-```javascript
-data() {
-  return {
-    // Define data properties for all apollo queries
-    project: null,
-    issues: null
-  }
-},
-apollo: {
-  project: {
-    query: getProject,
-    variables() {
-      return {
-        projectId: this.projectId
-      }
-    }
-  },
-  releaseName: {
-    query: getReleaseName,
-    // Without this skip, the query would run initially with `projectName: null`
-    // Then when `getProject` resolves, it will run again.
-    skip() {
-      return !this.project?.name
-    },
-    variables() {
-      return {
-        projectName: this.project?.name
       }
     }
   }
@@ -452,16 +413,13 @@ For each attempt to fetch a version, our client fetches `id` and `sha` from the 
 
 Read more about local state management with Apollo in the [Vue Apollo documentation](https://vue-apollo.netlify.app/guide/local-state.html#local-state).
 
-### Using with Pinia
-
-Combining [Pinia](pinia.md) and Apollo in a single Vue application is generally discouraged.
-[Learn about the restrictions and circumstances around combining Apollo and Pinia](state_management.md#combining-pinia-and-apollo).
-
 ### Using with Vuex
 
-We do not recommend combining Vuex and Apollo Client. [Vuex is deprecated in GitLab](vuex.md#deprecated).
-If you have an existing Vuex store that's used alongside Apollo we strongly recommend [migrating away from Vuex entirely](migrating_from_vuex.md).
-[Learn more about state management in GitLab](state_management.md).
+We do not recommend creating new applications with Vuex and Apollo Client combined. There are a few reasons:
+
+- VueX and Apollo are both **global stores**, which means sharing responsibilities and having two sources of truth.
+- Keeping VueX and Apollo in sync can be high maintenance.
+- Bugs that would come from the communication between Apollo and VueX would be subtle and hard to debug.
 
 ### Working on GraphQL-based features when frontend and backend are not in sync
 
@@ -1716,7 +1674,8 @@ When [using Vuex](#using-with-vuex), disable the cache when:
   if the data is being cached elsewhere, or if there is no need for it for the given use case.
 
 ```javascript
-import createDefaultClient, { fetchPolicies } from '~/lib/graphql';
+import createDefaultClient from '~/lib/graphql';
+import fetchPolicies from '~/graphql_shared/fetch_policy_constants';
 
 const defaultClient = createDefaultClient(
   {},

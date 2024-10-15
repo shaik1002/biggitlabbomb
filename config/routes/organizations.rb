@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-resources(:organizations, only: [:show, :index, :new], param: :organization_path, module: :organizations) do
+resources(:organizations, only: [:show, :index, :new, :create], param: :organization_path, module: :organizations) do
   collection do
     post :preview_markdown
   end
@@ -14,19 +14,7 @@ resources(:organizations, only: [:show, :index, :new], param: :organization_path
       get :general
     end
 
-    resource :groups, only: [:new, :create, :destroy], as: :groups_organization
-
-    scope(
-      path: 'groups/*id',
-      constraints: { id: Gitlab::PathRegex.full_namespace_route_regex }
-    ) do
-      resource(
-        :groups,
-        path: '/',
-        only: [:edit],
-        as: :groups_organization
-      )
-    end
+    resource :groups, only: [:new, :create], as: :groups_organization
 
     scope(
       path: 'projects/*namespace_id',

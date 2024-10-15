@@ -30,15 +30,11 @@ module CapybaraHelpers
     end
   end
 
-  def visit_blank_page
-    visit 'about:blank'
-  end
-
   # Refresh the page. Calling `visit current_url` doesn't seem to work consistently.
   #
   def refresh
     url = current_url
-    visit_blank_page
+    visit 'about:blank'
     visit url
   end
 

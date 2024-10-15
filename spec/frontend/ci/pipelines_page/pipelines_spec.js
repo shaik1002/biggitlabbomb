@@ -42,8 +42,7 @@ import {
   setIdTypePreferenceMutationResponse,
   setIdTypePreferenceMutationResponseWithErrors,
 } from 'jest/issues/list/mock_data';
-import { legacyStageReply } from 'jest/ci/pipeline_mini_graph/mock_data';
-import { describeSkipVue3, SkipReason } from 'helpers/vue3_conditional';
+import { stageReply } from 'jest/ci/pipeline_mini_graph/mock_data';
 import { users, mockSearch, branches } from '../pipeline_details/mock_data';
 
 Vue.use(VueApollo);
@@ -60,13 +59,7 @@ const mockPipelineWithStages = mockPipelinesResponse.pipelines.find(
   (p) => p.details.stages && p.details.stages.length,
 );
 
-const skipReason = new SkipReason({
-  name: 'Pipelines',
-  reason: 'OOM on the worker',
-  issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/458411',
-});
-
-describeSkipVue3(skipReason, () => {
+describe('Pipelines', () => {
   let wrapper;
   let mockApollo;
   let mock;
@@ -74,6 +67,7 @@ describeSkipVue3(skipReason, () => {
   let mutationMock;
 
   const withPermissionsProps = {
+    ciLintPath: '/ci/lint',
     resetCachePath: `${mockProjectPath}/settings/ci_cd/reset_cache`,
     newPipelinePath: `${mockProjectPath}/pipelines/new`,
     ciRunnerSettingsPath: `${mockProjectPath}/-/settings/ci_cd#js-runners-settings`,
@@ -99,9 +93,10 @@ describeSkipVue3(skipReason, () => {
 
   const findTab = (tab) => wrapper.findByTestId(`pipelines-tab-${tab}`);
   const findRunPipelineButton = () => wrapper.findByTestId('run-pipeline-button');
+  const findCiLintButton = () => wrapper.findByTestId('ci-lint-button');
   const findCleanCacheButton = () => wrapper.findByTestId('clear-cache-button');
   const findStagesDropdownToggle = () =>
-    wrapper.find('[data-testid="pipeline-mini-graph-dropdown-toggle"]');
+    wrapper.find('.mini-pipeline-graph-dropdown [data-testid="base-dropdown-toggle"]');
   const findPipelineUrlLinks = () => wrapper.findAll('[data-testid="pipeline-url-link"]');
 
   const createComponent = ({ props = {}, withPermissions = true } = {}) => {
@@ -116,8 +111,6 @@ describeSkipVue3(skipReason, () => {
           ciRunnerSettingsPath: defaultProps.ciRunnerSettingsPath,
           anyRunnersAvailable: true,
           showJenkinsCiPrompt: false,
-          identityVerificationRequired: false,
-          identityVerificationPath: '#',
         },
         propsData: {
           ...defaultProps,
@@ -189,6 +182,7 @@ describeSkipVue3(skipReason, () => {
         expect(findNavigationControls().exists()).toBe(false);
 
         expect(findRunPipelineButton().exists()).toBe(false);
+        expect(findCiLintButton().exists()).toBe(false);
         expect(findCleanCacheButton().exists()).toBe(false);
       });
 
@@ -235,6 +229,10 @@ describeSkipVue3(skipReason, () => {
         expect(findRunPipelineButton().attributes('href')).toBe(
           withPermissionsProps.newPipelinePath,
         );
+      });
+
+      it('renders CI lint link', () => {
+        expect(findCiLintButton().attributes('href')).toBe(withPermissionsProps.ciLintPath);
       });
 
       it('renders Clear runner cache button', () => {
@@ -641,6 +639,10 @@ describeSkipVue3(skipReason, () => {
         );
       });
 
+      it('renders CI lint link', () => {
+        expect(findCiLintButton().attributes('href')).toBe(withPermissionsProps.ciLintPath);
+      });
+
       it('renders Clear runner cache button', () => {
         expect(findCleanCacheButton().text()).toBe('Clear runner caches');
       });
@@ -695,6 +697,7 @@ describeSkipVue3(skipReason, () => {
         expect(findNavigationTabs().exists()).toBe(false);
         expect(findTab('all').exists()).toBe(false);
         expect(findRunPipelineButton().exists()).toBe(false);
+        expect(findCiLintButton().exists()).toBe(false);
         expect(findCleanCacheButton().exists()).toBe(false);
       });
     });
@@ -716,6 +719,7 @@ describeSkipVue3(skipReason, () => {
       it('does not render tabs or buttons', () => {
         expect(findTab('all').exists()).toBe(false);
         expect(findRunPipelineButton().exists()).toBe(false);
+        expect(findCiLintButton().exists()).toBe(false);
         expect(findCleanCacheButton().exists()).toBe(false);
       });
     });
@@ -733,6 +737,7 @@ describeSkipVue3(skipReason, () => {
 
       it('does not render buttons', () => {
         expect(findRunPipelineButton().exists()).toBe(false);
+        expect(findCiLintButton().exists()).toBe(false);
         expect(findCleanCacheButton().exists()).toBe(false);
       });
 
@@ -762,7 +767,7 @@ describeSkipVue3(skipReason, () => {
 
         mock
           .onGet(mockPipelineWithStages.details.stages[0].dropdown_path)
-          .reply(HTTP_STATUS_OK, legacyStageReply);
+          .reply(HTTP_STATUS_OK, stageReply);
 
         // cancelMock is getting overwritten in pipelines_service.js#L29
         // so we have to spy on it again here
@@ -794,7 +799,7 @@ describeSkipVue3(skipReason, () => {
           expect(cancelMock.cancel).toHaveBeenCalled();
           expect(stopMock).toHaveBeenCalled();
           expect(restartMock).toHaveBeenCalledWith(
-            `${mockPipelinesResponse.pipelines[0].path}/stage.json?stage=test`,
+            `${mockPipelinesResponse.pipelines[0].path}/stage.json?stage=build`,
           );
         });
 
@@ -806,7 +811,7 @@ describeSkipVue3(skipReason, () => {
           expect(cancelMock.cancel).not.toHaveBeenCalled();
           expect(stopMock).toHaveBeenCalled();
           expect(restartMock).toHaveBeenCalledWith(
-            `${mockPipelinesResponse.pipelines[0].path}/stage.json?stage=test`,
+            `${mockPipelinesResponse.pipelines[0].path}/stage.json?stage=build`,
           );
         });
       });
@@ -834,6 +839,7 @@ describeSkipVue3(skipReason, () => {
 
       it('does not render buttons', () => {
         expect(findRunPipelineButton().exists()).toBe(false);
+        expect(findCiLintButton().exists()).toBe(false);
         expect(findCleanCacheButton().exists()).toBe(false);
       });
 
@@ -860,6 +866,8 @@ describeSkipVue3(skipReason, () => {
         expect(findRunPipelineButton().attributes('href')).toBe(
           withPermissionsProps.newPipelinePath,
         );
+
+        expect(findCiLintButton().attributes('href')).toBe(withPermissionsProps.ciLintPath);
         expect(findCleanCacheButton().text()).toBe('Clear runner caches');
       });
 

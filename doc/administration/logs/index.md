@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: Platform Insights
+group: Respond
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
@@ -58,6 +58,7 @@ Some of these services have their own environment variables to override the log 
 
 | Service              | Log level | Environment variable |
 |:---------------------|:----------|:---------------------|
+| GitLab API           | `INFO`    |                      |
 | GitLab Cleanup       | `INFO`    | `DEBUG`              |
 | GitLab Doctor        | `INFO`    | `VERBOSE`            |
 | GitLab Export        | `INFO`    | `EXPORT_DEBUG`       |
@@ -416,7 +417,7 @@ like this example:
   "project_id":8,
   "project_path":"h5bp/html5-boilerplate",
   "message":"Error sending message",
-  "client_url":"http://jira.gitlab.com:8080",
+  "client_url":"http://jira.gitlap.com:8080",
   "error":"execution expired"
 }
 {
@@ -1024,31 +1025,14 @@ can be used.
 
 DETAILS:
 **Tier:** Ultimate
-**Offering:** GitLab.com, Self-managed, GitLab Dedicated
+**Offering:** GitLab.com
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/120506) in GitLab 16.0.
 
 The `llm.log` file logs information related to
-[AI features](../../user/ai_features.md). Logging includes information about AI events.
+[AI features](../../user/ai_features.md).
 
-### LLM input and output logging
-
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/13401) in GitLab 17.2 [with a flag](../../administration/feature_flags.md) named `expanded_ai_logging`. Disabled by default.
-
-FLAG:
-The availability of this feature is controlled by a feature flag.
-For more information, see the history.
-This feature is available for testing, but not ready for production use.
-
-LLM prompt input and response output can be logged by enabling the `expanded_ai_logging` feature flag.
-This flag is disabled by default and can only be enabled:
-
-- For GitLab.com, when you provide consent through a GitLab [Support Ticket](https://about.gitlab.com/support/portal/).
-- For self-managed, when you enable this feature flag.
-
-By default, the log does not contain LLM prompt input and response output to support [data retention policies](../../user/gitlab_duo/data_usage.md#data-retention) of AI feature data.
-
-The log file is located at:
+This file is located at:
 
 - `/var/log/gitlab/gitlab-rails/llm.log` on Linux package installations.
 - `/home/git/gitlab/log/llm.log` on self-compiled installations.
@@ -1067,21 +1051,6 @@ This file is located at:
 
 - `/var/log/gitlab/gitlab-rails/epic_work_item_sync.log` on Linux package installations.
 - `/home/git/gitlab/log/epic_work_item_sync.log` on self-compiled installations.
-
-## `secret_push_protection.log`
-
-DETAILS:
-**Tier:** Ultimate
-**Offering:** GitLab.com, GitLab Dedicated
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/137812) in GitLab 16.7.
-
-The `secret_push_protection.log` file logs information related to [Secret Push Protection](../../user/application_security/secret_detection/secret_push_protection/index.md) feature.
-
-This file is located at:
-
-- `/var/log/gitlab/gitlab-rails/secret_push_protection.log` on Linux package installations.
-- `/home/git/gitlab/log/secret_push_protection.log` on self-compiled installations.
 
 ## Registry logs
 
@@ -1174,13 +1143,13 @@ For Linux package installations, Redis logs are in `/var/log/gitlab/redis/curren
 
 For Linux package installations, Alertmanager logs are in `/var/log/gitlab/alertmanager/current`.
 
-<!-- vale gitlab_base.Spelling = NO -->
+<!-- vale gitlab.Spelling = NO -->
 
 ## crond logs
 
 For Linux package installations, crond logs are in `/var/log/gitlab/crond/`.
 
-<!-- vale gitlab_base.Spelling = YES -->
+<!-- vale gitlab.Spelling = YES -->
 
 ## Grafana logs
 

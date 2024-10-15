@@ -36,7 +36,7 @@ export const I18N_STATUS_OFFLINE = s__('Runners|Offline');
 export const I18N_STATUS_STALE = s__('Runners|Stale');
 
 // Executor Status
-export const I18N_JOB_STATUS_ACTIVE = s__('Runners|Active');
+export const I18N_JOB_STATUS_RUNNING = s__('Runners|Running');
 export const I18N_JOB_STATUS_IDLE = s__('Runners|Idle');
 
 // Status tooltips
@@ -51,7 +51,7 @@ export const I18N_DISCONNECTED_TOOLTIP = s__(
 
 // Default online/stale status timeouts, actual values
 export const ONLINE_CONTACT_TIMEOUT_SECS = 2 * 60 * 60; // 2 hours
-export const STALE_TIMEOUT_SECS = 604800; // 7.days
+export const STALE_TIMEOUT_SECS = 7889238; // Ruby's `3.months`
 
 // Registration dropdown
 export const I18N_REGISTER_INSTANCE_TYPE = s__('Runners|Register an instance runner');
@@ -102,6 +102,10 @@ export const I18N_STILL_USING_REGISTRATION_TOKENS = s__('Runners|Still using reg
 export const I18N_CONTACT_ADMIN_TO_REGISTER = s__(
   'Runners|To register new runners, contact your administrator.',
 );
+
+// No runners found
+export const I18N_NO_RESULTS = s__('Runners|No results found');
+export const I18N_EDIT_YOUR_SEARCH = s__('Runners|Edit your search and try again');
 
 // Runner details
 
@@ -159,7 +163,7 @@ export const STATUS_STALE = 'STALE';
 
 // CiRunnerJobExecutionStatus
 
-export const JOB_STATUS_ACTIVE = 'ACTIVE';
+export const JOB_STATUS_RUNNING = 'RUNNING';
 export const JOB_STATUS_IDLE = 'IDLE';
 
 // CiRunnerAccessLevel
@@ -215,4 +219,3 @@ export const CHANGELOG_URL = `https://gitlab.com/gitlab-org/gitlab-runner/blob/m
 export const DOCKER_HELP_URL = `${DOCS_URL}/runner/install/docker.html`;
 export const KUBERNETES_HELP_URL = `${DOCS_URL}/runner/install/kubernetes.html`;
 export const RUNNER_MANAGERS_HELP_URL = `${DOCS_URL}/runner/fleet_scaling/#workers-executors-and-autoscaling-capabilities`;
-export const SINGLE_RUNNER_ENTRY_HELP_URL = `${DOCS_URL}/runner/configuration/advanced-configuration#the-runners-section`;

@@ -118,7 +118,7 @@ RSpec.describe Gitlab::ImportExport::MembersMapper do
       end
 
       context 'logging' do
-        let(:logger) { ::Import::Framework::Logger.build }
+        let(:logger) { Gitlab::Import::Logger.build }
 
         before do
           allow(logger).to receive(:info)

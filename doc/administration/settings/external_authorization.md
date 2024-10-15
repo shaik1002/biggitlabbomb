@@ -49,7 +49,7 @@ Alternatively, learn where to install custom certificates by using
 
 The external authorization service can be enabled by an administrator:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Settings > General**.
 1. Expand **External authorization**.
 1. Complete the fields.
@@ -69,7 +69,7 @@ Prerequisites:
 
 To allow authorization with deploy tokens and keys:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Settings > General**.
 1. Expand **External authorization**, and:
    - Leave the service URL field empty.
@@ -131,7 +131,7 @@ label defined in the [global settings](#configuration) is used.
 
 On all project pages, in the upper-right corner, the label appears.
 
-![A red overridden label with an open lock icon displays in the upper-right corner of a project.](img/classification_label_on_project_page_v14_8.png)
+![classification label on project page](img/classification_label_on_project_page_v14_8.png)
 
 <!-- ## Troubleshooting
 

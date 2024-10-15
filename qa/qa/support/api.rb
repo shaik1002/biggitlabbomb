@@ -10,7 +10,6 @@ module QA
       HTTP_STATUS_NO_CONTENT = 204
       HTTP_STATUS_ACCEPTED = 202
       HTTP_STATUS_PERMANENT_REDIRECT = 308
-      HTTP_STATUS_UNAUTHORIZED = 401
       HTTP_STATUS_NOT_FOUND = 404
       HTTP_STATUS_TOO_MANY_REQUESTS = 429
       HTTP_STATUS_SERVER_ERROR = 500
@@ -134,7 +133,7 @@ module QA
 
           if response.code == HTTP_STATUS_TOO_MANY_REQUESTS
             wait_seconds = response.headers[:retry_after].to_i
-            QA::Runtime::Logger.warn("Received 429 - Too many requests. Waiting for #{wait_seconds} seconds.")
+            QA::Runtime::Logger.debug("Received 429 - Too many requests. Waiting for #{wait_seconds} seconds.")
 
             sleep wait_seconds
           end

@@ -2,38 +2,15 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::RunnerNamespace, feature_category: :runner do
+RSpec.describe Ci::RunnerNamespace do
   it_behaves_like 'includes Limitable concern' do
-    let_it_be(:group) { create(:group, :nested) }
-    let_it_be(:another_group) { create(:group) }
-    let_it_be(:runner) { create(:ci_runner, :group, groups: [another_group]) }
-
-    subject { build(:ci_runner_namespace, namespace: group, runner: runner) }
+    subject { build(:ci_runner_namespace, group: create(:group, :nested), runner: create(:ci_runner, :group)) }
   end
 
   it_behaves_like 'cleanup by a loose foreign key' do
-    let!(:parent) { create(:group) }
-    let!(:runner) { create(:ci_runner, :group, groups: [parent]) }
-    let(:model) { runner.runner_namespaces.first }
-  end
+    let!(:model) { create(:ci_runner_namespace) }
 
-  describe 'validations' do
-    let_it_be(:runner) { create(:ci_runner, :group, groups: [create(:group)]) }
-
-    it { is_expected.to validate_presence_of(:namespace).on([:create, :update]) }
-    it { is_expected.to validate_uniqueness_of(:runner_id).scoped_to(:namespace_id) }
-
-    it 'validates that runner_id is valid' do
-      runner_namespace = runner.runner_namespaces.first
-      runner_namespace.runner_id = nil
-      expect(runner_namespace).not_to be_valid
-    end
-  end
-
-  describe 'associations' do
-    it { is_expected.to belong_to(:runner) }
-    it { is_expected.to belong_to(:namespace) }
-    it { is_expected.to belong_to(:group).class_name('::Group').with_foreign_key(:namespace_id) }
+    let!(:parent) { model.namespace }
   end
 
   describe '.for_runner' do

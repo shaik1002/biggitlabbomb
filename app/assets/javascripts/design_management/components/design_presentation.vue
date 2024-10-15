@@ -298,7 +298,7 @@ export default {
 <template>
   <div
     ref="presentationViewport"
-    class="overflow-auto gl-relative gl-h-full gl-w-full gl-p-5"
+    class="gl-h-full gl-w-full gl-p-5 overflow-auto gl-relative"
     :style="presentationStyle"
     @mousedown="onPresentationMousedown"
     @mousemove="onPresentationMousemove"
@@ -309,8 +309,12 @@ export default {
     @touchend="onPresentationMouseup"
     @touchcancel="onPresentationMouseup"
   >
-    <gl-loading-icon v-if="isLoading" size="xl" class="gl-flex gl-h-full gl-items-center" />
-    <div v-else class="gl-relative gl-flex gl-h-full gl-w-full gl-items-center">
+    <gl-loading-icon
+      v-if="isLoading"
+      size="xl"
+      class="gl-display-flex gl-h-full gl-align-items-center"
+    />
+    <div v-else class="gl-h-full gl-w-full gl-display-flex gl-align-items-center gl-relative">
       <design-image
         v-if="image"
         :image="image"

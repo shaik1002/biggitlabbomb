@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Mutations::Metrics::Dashboard::Annotations::Create, feature_category: :observability do
+RSpec.describe Mutations::Metrics::Dashboard::Annotations::Create, feature_category: :metrics do
   include GraphqlHelpers
 
   let_it_be(:current_user) { create(:user) }
@@ -18,6 +18,8 @@ RSpec.describe Mutations::Metrics::Dashboard::Annotations::Create, feature_categ
   def mutation_response
     graphql_mutation_response(:create_annotation)
   end
+
+  specify { expect(described_class).to require_graphql_authorizations(:admin_metrics_dashboard_annotation) }
 
   context 'when annotation source is environment' do
     let(:mutation) do

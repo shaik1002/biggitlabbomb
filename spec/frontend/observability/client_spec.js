@@ -4,7 +4,6 @@ import { buildClient } from '~/observability/client';
 import axios from '~/lib/utils/axios_utils';
 import { logError } from '~/lib/logger';
 import { DEFAULT_SORTING_OPTION, SORTING_OPTIONS } from '~/observability/constants';
-import { HTTP_STATUS_OK } from '~/lib/utils/http_status';
 
 jest.mock('~/lib/utils/axios_utils');
 jest.mock('~/sentry/sentry_browser_wrapper');
@@ -16,6 +15,7 @@ describe('buildClient', () => {
 
   const tracingUrl = 'https://example.com/tracing';
   const tracingAnalyticsUrl = 'https://example.com/tracing/analytics';
+  const provisioningUrl = 'https://example.com/provisioning';
   const servicesUrl = 'https://example.com/services';
   const operationsUrl = 'https://example.com/services/$SERVICE_NAME$/operations';
   const metricsUrl = 'https://example.com/metrics';
@@ -23,12 +23,12 @@ describe('buildClient', () => {
   const metricsSearchMetadataUrl = 'https://example.com/metrics/searchmetadata';
   const logsSearchUrl = 'https://example.com/metrics/logs/search';
   const logsSearchMetadataUrl = 'https://example.com/metrics/logs/search';
-  const analyticsUrl = 'https://example.com/analytics';
   const FETCHING_TRACES_ERROR = 'traces are missing/invalid in the response';
 
   const apiConfig = {
     tracingUrl,
     tracingAnalyticsUrl,
+    provisioningUrl,
     servicesUrl,
     operationsUrl,
     metricsUrl,
@@ -36,7 +36,6 @@ describe('buildClient', () => {
     metricsSearchMetadataUrl,
     logsSearchUrl,
     logsSearchMetadataUrl,
-    analyticsUrl,
   };
 
   const getQueryParam = () => decodeURIComponent(axios.get.mock.calls[0][1].params.toString());
@@ -73,6 +72,77 @@ describe('buildClient', () => {
     });
   });
 
+  describe('isObservabilityEnabled', () => {
+    it('returns true if requests succeedes', async () => {
+      axiosMock.onGet(provisioningUrl).reply(200, {
+        status: 'ready',
+      });
+
+      const enabled = await client.isObservabilityEnabled();
+
+      expect(enabled).toBe(true);
+    });
+
+    it('returns false if response is 404', async () => {
+      axiosMock.onGet(provisioningUrl).reply(404);
+
+      const enabled = await client.isObservabilityEnabled();
+
+      expect(enabled).toBe(false);
+    });
+
+    // we currently ignore the 'status' payload and just check if the request was successful
+    // We might improve this as part of https://gitlab.com/gitlab-org/opstrace/opstrace/-/issues/2315
+    it('returns true for any status', async () => {
+      axiosMock.onGet(provisioningUrl).reply(200, {
+        status: 'not ready',
+      });
+
+      const enabled = await client.isObservabilityEnabled();
+
+      expect(enabled).toBe(true);
+    });
+
+    it('throws in case of any non-404 error', async () => {
+      axiosMock.onGet(provisioningUrl).reply(500);
+
+      const e = 'Request failed with status code 500';
+      await expect(client.isObservabilityEnabled()).rejects.toThrow(e);
+      expectErrorToBeReported(new Error(e));
+    });
+
+    it('throws in case of unexpected response', async () => {
+      axiosMock.onGet(provisioningUrl).reply(200, {});
+
+      const e = 'Failed to check provisioning';
+      await expect(client.isObservabilityEnabled()).rejects.toThrow(e);
+      expectErrorToBeReported(new Error(e));
+    });
+  });
+
+  describe('enableObservability', () => {
+    it('makes a PUT request to the provisioning URL', async () => {
+      let putConfig;
+      axiosMock.onPut(provisioningUrl).reply((config) => {
+        putConfig = config;
+        return [200];
+      });
+
+      await client.enableObservability();
+
+      expect(putConfig.withCredentials).toBe(true);
+    });
+
+    it('reports an error if the req fails', async () => {
+      axiosMock.onPut(provisioningUrl).reply(401);
+
+      const e = 'Request failed with status code 401';
+
+      await expect(client.enableObservability()).rejects.toThrow(e);
+      expectErrorToBeReported(new Error(e));
+    });
+  });
+
   describe('fetchTrace', () => {
     it('fetches the trace from the tracing URL', async () => {
       const mockTrace = {
@@ -80,7 +150,7 @@ describe('buildClient', () => {
         duration_nano: 3000,
         spans: [{ duration_nano: 1000 }, { duration_nano: 2000 }],
       };
-      axiosMock.onGet(`${tracingUrl}/trace-1`).reply(HTTP_STATUS_OK, mockTrace);
+      axiosMock.onGet(`${tracingUrl}/trace-1`).reply(200, mockTrace);
 
       const result = await client.fetchTrace('trace-1');
 
@@ -109,7 +179,7 @@ describe('buildClient', () => {
         ],
       };
 
-      axiosMock.onGet(tracingUrl).reply(HTTP_STATUS_OK, mockResponse);
+      axiosMock.onGet(tracingUrl).reply(200, mockResponse);
 
       const result = await client.fetchTraces();
 
@@ -122,21 +192,21 @@ describe('buildClient', () => {
     });
 
     it('rejects if traces are missing', async () => {
-      axiosMock.onGet(tracingUrl).reply(HTTP_STATUS_OK, {});
+      axiosMock.onGet(tracingUrl).reply(200, {});
 
       await expect(client.fetchTraces()).rejects.toThrow(FETCHING_TRACES_ERROR);
       expectErrorToBeReported(new Error(FETCHING_TRACES_ERROR));
     });
 
     it('rejects if traces are invalid', async () => {
-      axiosMock.onGet(tracingUrl).reply(HTTP_STATUS_OK, { traces: 'invalid' });
+      axiosMock.onGet(tracingUrl).reply(200, { traces: 'invalid' });
 
       await expect(client.fetchTraces()).rejects.toThrow(FETCHING_TRACES_ERROR);
       expectErrorToBeReported(new Error(FETCHING_TRACES_ERROR));
     });
 
     it('passes the abort controller to axios', async () => {
-      axiosMock.onGet(tracingUrl).reply(HTTP_STATUS_OK, { traces: [] });
+      axiosMock.onGet(tracingUrl).reply(200, { traces: [] });
 
       const abortController = new AbortController();
       await client.fetchTraces({ abortController });
@@ -150,7 +220,7 @@ describe('buildClient', () => {
 
     describe('sort order', () => {
       beforeEach(() => {
-        axiosMock.onGet(tracingUrl).reply(HTTP_STATUS_OK, {
+        axiosMock.onGet(tracingUrl).reply(200, {
           traces: [],
         });
       });
@@ -175,7 +245,7 @@ describe('buildClient', () => {
 
     describe('query filter', () => {
       beforeEach(() => {
-        axiosMock.onGet(tracingUrl).reply(HTTP_STATUS_OK, {
+        axiosMock.onGet(tracingUrl).reply(200, {
           traces: [],
         });
       });
@@ -198,147 +268,144 @@ describe('buildClient', () => {
         expect(getQueryParam()).toContain('page_size=10');
       });
 
-      describe('date range filter', () => {
-        it('handle predefined date range value', async () => {
-          await client.fetchTraces({
-            filters: { dateRange: { value: '5m' } },
-          });
-          expect(getQueryParam()).toContain(`period=5m`);
+      it('converts filter to proper query params', async () => {
+        await client.fetchTraces({
+          filters: {
+            durationMs: [
+              { operator: '>', value: '100' },
+              { operator: '<', value: '1000' },
+            ],
+            operation: [
+              { operator: '=', value: 'op' },
+              { operator: '!=', value: 'not-op' },
+            ],
+            service: [
+              { operator: '=', value: 'service' },
+              { operator: '!=', value: 'not-service' },
+            ],
+            period: [{ operator: '=', value: '5m' }],
+            status: [
+              { operator: '=', value: 'ok' },
+              { operator: '!=', value: 'error' },
+            ],
+            traceId: [
+              { operator: '=', value: 'trace-id' },
+              { operator: '!=', value: 'not-trace-id' },
+            ],
+            attribute: [{ operator: '=', value: 'name1=value1' }],
+          },
         });
-
-        it('handle custom date range value', async () => {
+        expect(getQueryParam()).toContain(
+          'gt[duration_nano]=100000000&lt[duration_nano]=1000000000' +
+            '&operation=op&not[operation]=not-op' +
+            '&service_name=service&not[service_name]=not-service' +
+            '&period=5m' +
+            '&trace_id=trace-id&not[trace_id]=not-trace-id' +
+            '&attr_name=name1&attr_value=value1' +
+            '&status=ok&not[status]=error',
+        );
+      });
+      describe('date range time filter', () => {
+        it('handles custom date range period filter', async () => {
           await client.fetchTraces({
             filters: {
-              dateRange: {
-                endDate: new Date('2023-04-01T12:00:00'),
-                startDate: new Date('2023-04-01T00:00:00'),
-                value: 'custom',
-              },
+              period: [{ operator: '=', value: '2023-01-01 - 2023-02-01' }],
             },
           });
+          expect(getQueryParam()).not.toContain('period=');
           expect(getQueryParam()).toContain(
-            'start_time=2023-04-01T00:00:00.000Z&end_time=2023-04-01T12:00:00.000Z',
+            'start_time=2023-01-01T00:00:00.000Z&end_time=2023-02-01T00:00:00.000Z',
           );
         });
 
-        it('fails if the date range is larger than 12h', async () => {
-          await expect(
-            client.fetchTraces({
-              filters: {
-                dateRange: {
-                  endDate: new Date('2023-04-01T12:00:01'),
-                  startDate: new Date('2023-04-01T00:00:00'),
-                  value: 'custom',
-                },
-              },
-            }),
-          ).rejects.toThrow();
+        it.each([
+          'invalid - 2023-02-01',
+          '2023-02-01 - invalid',
+          'invalid - invalid',
+          '2023-01-01 / 2023-02-01',
+          '2023-01-01 2023-02-01',
+          '2023-01-01 - 2023-02-01 - 2023-02-01',
+        ])('ignore invalid values', async (val) => {
+          await client.fetchTraces({
+            filters: {
+              period: [{ operator: '=', value: val }],
+            },
+          });
+
+          expect(getQueryParam()).not.toContain('start_time=');
+          expect(getQueryParam()).not.toContain('end_time=');
+          expect(getQueryParam()).not.toContain('period=');
         });
       });
 
-      describe('attributes filters', () => {
-        it('converts filter to proper query params', async () => {
-          await client.fetchTraces({
-            filters: {
-              attributes: {
-                durationMs: [
-                  { operator: '>', value: '100' },
-                  { operator: '<', value: '1000' },
-                ],
-                operation: [
-                  { operator: '=', value: 'op' },
-                  { operator: '!=', value: 'not-op' },
-                ],
-                service: [
-                  { operator: '=', value: 'service' },
-                  { operator: '!=', value: 'not-service' },
-                ],
-                status: [
-                  { operator: '=', value: 'ok' },
-                  { operator: '!=', value: 'error' },
-                ],
-                traceId: [
-                  { operator: '=', value: 'trace-id' },
-                  { operator: '!=', value: 'not-trace-id' },
-                ],
-                attribute: [{ operator: '=', value: 'name1=value1' }],
-              },
-            },
-          });
-          expect(getQueryParam()).toContain(
-            'gt[duration_nano]=100000000&lt[duration_nano]=1000000000' +
-              '&operation=op&not[operation]=not-op' +
-              '&service_name=service&not[service_name]=not-service' +
-              '&trace_id=trace-id&not[trace_id]=not-trace-id' +
-              '&attr_name=name1&attr_value=value1' +
-              '&status=ok&not[status]=error',
-          );
+      it('handles repeated params', async () => {
+        await client.fetchTraces({
+          filters: {
+            operation: [
+              { operator: '=', value: 'op' },
+              { operator: '=', value: 'op2' },
+            ],
+          },
+        });
+        expect(getQueryParam()).toContain('operation=op&operation=op2');
+      });
+
+      it('ignores unsupported filters', async () => {
+        await client.fetchTraces({
+          filters: {
+            unsupportedFilter: [{ operator: '=', value: 'foo' }],
+          },
         });
 
-        it('ignores unsupported filters', async () => {
-          await client.fetchTraces({
-            filters: {
-              attributes: {
-                unsupportedFilter: [{ operator: '=', value: 'foo' }],
-              },
-            },
-          });
+        expect(getQueryParam()).toBe(`sort=${SORTING_OPTIONS.TIMESTAMP_DESC}`);
+      });
 
-          expect(getQueryParam()).toBe(`sort=${SORTING_OPTIONS.TIMESTAMP_DESC}`);
+      it('ignores empty filters', async () => {
+        await client.fetchTraces({
+          filters: {
+            durationMs: null,
+            traceId: undefined,
+          },
         });
 
-        it('ignores empty filters', async () => {
-          await client.fetchTraces({
-            filters: {
-              attributes: {
-                durationMs: null,
-                traceId: undefined,
-              },
-            },
-          });
+        expect(getQueryParam()).toBe(`sort=${SORTING_OPTIONS.TIMESTAMP_DESC}`);
+      });
 
-          expect(getQueryParam()).toBe(`sort=${SORTING_OPTIONS.TIMESTAMP_DESC}`);
+      it('ignores non-array filters', async () => {
+        await client.fetchTraces({
+          filters: {
+            traceId: { operator: '=', value: 'foo' },
+          },
         });
 
-        it('ignores non-array filters', async () => {
-          await client.fetchTraces({
-            filters: {
-              attributes: {
-                traceId: { operator: '=', value: 'foo' },
-              },
-            },
-          });
+        expect(getQueryParam()).toBe(`sort=${SORTING_OPTIONS.TIMESTAMP_DESC}`);
+      });
 
-          expect(getQueryParam()).toBe(`sort=${SORTING_OPTIONS.TIMESTAMP_DESC}`);
+      it('ignores unsupported operators', async () => {
+        await client.fetchTraces({
+          filters: {
+            durationMs: [
+              { operator: '*', value: 'foo' },
+              { operator: '=', value: 'foo' },
+              { operator: '!=', value: 'foo' },
+            ],
+            operation: [
+              { operator: '>', value: 'foo' },
+              { operator: '<', value: 'foo' },
+            ],
+            service: [
+              { operator: '>', value: 'foo' },
+              { operator: '<', value: 'foo' },
+            ],
+            period: [{ operator: '!=', value: 'foo' }],
+            traceId: [
+              { operator: '>', value: 'foo' },
+              { operator: '<', value: 'foo' },
+            ],
+          },
         });
 
-        it('ignores unsupported operators', async () => {
-          await client.fetchTraces({
-            filters: {
-              attributes: {
-                durationMs: [
-                  { operator: '*', value: 'foo' },
-                  { operator: '=', value: 'foo' },
-                  { operator: '!=', value: 'foo' },
-                ],
-                operation: [
-                  { operator: '>', value: 'foo' },
-                  { operator: '<', value: 'foo' },
-                ],
-                service: [
-                  { operator: '>', value: 'foo' },
-                  { operator: '<', value: 'foo' },
-                ],
-                traceId: [
-                  { operator: '>', value: 'foo' },
-                  { operator: '<', value: 'foo' },
-                ],
-              },
-            },
-          });
-
-          expect(getQueryParam()).toBe(`sort=${SORTING_OPTIONS.TIMESTAMP_DESC}`);
-        });
+        expect(getQueryParam()).toBe(`sort=${SORTING_OPTIONS.TIMESTAMP_DESC}`);
       });
     });
   });
@@ -361,7 +428,7 @@ describe('buildClient', () => {
         ],
       };
 
-      axiosMock.onGet(tracingAnalyticsUrl).reply(HTTP_STATUS_OK, mockResponse);
+      axiosMock.onGet(tracingAnalyticsUrl).reply(200, mockResponse);
 
       const result = await client.fetchTracesAnalytics();
 
@@ -374,13 +441,13 @@ describe('buildClient', () => {
     });
 
     it('returns empty array if analytics are missing', async () => {
-      axiosMock.onGet(tracingAnalyticsUrl).reply(HTTP_STATUS_OK, {});
+      axiosMock.onGet(tracingAnalyticsUrl).reply(200, {});
 
       expect(await client.fetchTracesAnalytics()).toEqual([]);
     });
 
     it('passes the abort controller to axios', async () => {
-      axiosMock.onGet(tracingAnalyticsUrl).reply(HTTP_STATUS_OK, {});
+      axiosMock.onGet(tracingAnalyticsUrl).reply(200, {});
 
       const abortController = new AbortController();
       await client.fetchTracesAnalytics({ abortController });
@@ -394,7 +461,7 @@ describe('buildClient', () => {
 
     describe('query filter', () => {
       beforeEach(() => {
-        axiosMock.onGet(tracingAnalyticsUrl).reply(HTTP_STATUS_OK, {
+        axiosMock.onGet(tracingAnalyticsUrl).reply(200, {
           results: [],
         });
       });
@@ -405,133 +472,143 @@ describe('buildClient', () => {
         expect(getQueryParam()).toBe(``);
       });
 
-      describe('date range filter', () => {
-        it('handle predefined date range value', async () => {
-          await client.fetchTracesAnalytics({
-            filters: { dateRange: { value: '5m' } },
-          });
-          expect(getQueryParam()).toContain(`period=5m`);
+      it('converts filter to proper query params', async () => {
+        await client.fetchTracesAnalytics({
+          filters: {
+            durationMs: [
+              { operator: '>', value: '100' },
+              { operator: '<', value: '1000' },
+            ],
+            operation: [
+              { operator: '=', value: 'op' },
+              { operator: '!=', value: 'not-op' },
+            ],
+            service: [
+              { operator: '=', value: 'service' },
+              { operator: '!=', value: 'not-service' },
+            ],
+            period: [{ operator: '=', value: '5m' }],
+            status: [
+              { operator: '=', value: 'ok' },
+              { operator: '!=', value: 'error' },
+            ],
+            traceId: [
+              { operator: '=', value: 'trace-id' },
+              { operator: '!=', value: 'not-trace-id' },
+            ],
+            attribute: [{ operator: '=', value: 'name1=value1' }],
+          },
         });
-
-        it('handle custom date range value', async () => {
+        expect(getQueryParam()).toContain(
+          'gt[duration_nano]=100000000&lt[duration_nano]=1000000000' +
+            '&operation=op&not[operation]=not-op' +
+            '&service_name=service&not[service_name]=not-service' +
+            '&period=5m' +
+            '&trace_id=trace-id&not[trace_id]=not-trace-id' +
+            '&attr_name=name1&attr_value=value1' +
+            '&status=ok&not[status]=error',
+        );
+      });
+      describe('date range time filter', () => {
+        it('handles custom date range period filter', async () => {
           await client.fetchTracesAnalytics({
             filters: {
-              dateRange: {
-                endDate: new Date('2020-07-06'),
-                startDate: new Date('2020-07-05'),
-                value: 'custom',
-              },
+              period: [{ operator: '=', value: '2023-01-01 - 2023-02-01' }],
             },
           });
+          expect(getQueryParam()).not.toContain('period=');
           expect(getQueryParam()).toContain(
-            'start_time=2020-07-05T00:00:00.000Z&end_time=2020-07-06T00:00:00.000Z',
+            'start_time=2023-01-01T00:00:00.000Z&end_time=2023-02-01T00:00:00.000Z',
           );
+        });
+
+        it.each([
+          'invalid - 2023-02-01',
+          '2023-02-01 - invalid',
+          'invalid - invalid',
+          '2023-01-01 / 2023-02-01',
+          '2023-01-01 2023-02-01',
+          '2023-01-01 - 2023-02-01 - 2023-02-01',
+        ])('ignore invalid values', async (val) => {
+          await client.fetchTracesAnalytics({
+            filters: {
+              period: [{ operator: '=', value: val }],
+            },
+          });
+
+          expect(getQueryParam()).not.toContain('start_time=');
+          expect(getQueryParam()).not.toContain('end_time=');
+          expect(getQueryParam()).not.toContain('period=');
         });
       });
 
-      describe('attributes filters', () => {
-        it('converts filter to proper query params', async () => {
-          await client.fetchTracesAnalytics({
-            filters: {
-              attributes: {
-                durationMs: [
-                  { operator: '>', value: '100' },
-                  { operator: '<', value: '1000' },
-                ],
-                operation: [
-                  { operator: '=', value: 'op' },
-                  { operator: '!=', value: 'not-op' },
-                ],
-                service: [
-                  { operator: '=', value: 'service' },
-                  { operator: '!=', value: 'not-service' },
-                ],
-                status: [
-                  { operator: '=', value: 'ok' },
-                  { operator: '!=', value: 'error' },
-                ],
-                traceId: [
-                  { operator: '=', value: 'trace-id' },
-                  { operator: '!=', value: 'not-trace-id' },
-                ],
-                attribute: [{ operator: '=', value: 'name1=value1' }],
-              },
-            },
-          });
-          expect(getQueryParam()).toContain(
-            'gt[duration_nano]=100000000&lt[duration_nano]=1000000000' +
-              '&operation=op&not[operation]=not-op' +
-              '&service_name=service&not[service_name]=not-service' +
-              '&trace_id=trace-id&not[trace_id]=not-trace-id' +
-              '&attr_name=name1&attr_value=value1' +
-              '&status=ok&not[status]=error',
-          );
+      it('handles repeated params', async () => {
+        await client.fetchTracesAnalytics({
+          filters: {
+            operation: [
+              { operator: '=', value: 'op' },
+              { operator: '=', value: 'op2' },
+            ],
+          },
+        });
+        expect(getQueryParam()).toContain('operation=op&operation=op2');
+      });
+
+      it('ignores unsupported filters', async () => {
+        await client.fetchTracesAnalytics({
+          filters: {
+            unsupportedFilter: [{ operator: '=', value: 'foo' }],
+          },
         });
 
-        it('ignores unsupported filters', async () => {
-          await client.fetchTracesAnalytics({
-            filters: {
-              attributes: {
-                unsupportedFilter: [{ operator: '=', value: 'foo' }],
-              },
-            },
-          });
+        expect(getQueryParam()).toBe(``);
+      });
 
-          expect(getQueryParam()).toBe(``);
+      it('ignores empty filters', async () => {
+        await client.fetchTracesAnalytics({
+          filters: {
+            durationMs: null,
+          },
         });
 
-        it('ignores empty filters', async () => {
-          await client.fetchTracesAnalytics({
-            filters: {
-              attributes: {
-                durationMs: null,
-                traceId: undefined,
-              },
-            },
-          });
+        expect(getQueryParam()).toBe(``);
+      });
 
-          expect(getQueryParam()).toBe(``);
+      it('ignores non-array filters', async () => {
+        await client.fetchTracesAnalytics({
+          filters: {
+            traceId: { operator: '=', value: 'foo' },
+          },
         });
 
-        it('ignores non-array filters', async () => {
-          await client.fetchTracesAnalytics({
-            filters: {
-              attributes: {
-                traceId: { operator: '=', value: 'foo' },
-              },
-            },
-          });
+        expect(getQueryParam()).toBe(``);
+      });
 
-          expect(getQueryParam()).toBe(``);
+      it('ignores unsupported operators', async () => {
+        await client.fetchTracesAnalytics({
+          filters: {
+            durationMs: [
+              { operator: '*', value: 'foo' },
+              { operator: '=', value: 'foo' },
+              { operator: '!=', value: 'foo' },
+            ],
+            operation: [
+              { operator: '>', value: 'foo' },
+              { operator: '<', value: 'foo' },
+            ],
+            service: [
+              { operator: '>', value: 'foo' },
+              { operator: '<', value: 'foo' },
+            ],
+            period: [{ operator: '!=', value: 'foo' }],
+            traceId: [
+              { operator: '>', value: 'foo' },
+              { operator: '<', value: 'foo' },
+            ],
+          },
         });
 
-        it('ignores unsupported operators', async () => {
-          await client.fetchTracesAnalytics({
-            filters: {
-              attributes: {
-                durationMs: [
-                  { operator: '*', value: 'foo' },
-                  { operator: '=', value: 'foo' },
-                  { operator: '!=', value: 'foo' },
-                ],
-                operation: [
-                  { operator: '>', value: 'foo' },
-                  { operator: '<', value: 'foo' },
-                ],
-                service: [
-                  { operator: '>', value: 'foo' },
-                  { operator: '<', value: 'foo' },
-                ],
-                traceId: [
-                  { operator: '>', value: 'foo' },
-                  { operator: '<', value: 'foo' },
-                ],
-              },
-            },
-          });
-
-          expect(getQueryParam()).toBe(``);
-        });
+        expect(getQueryParam()).toBe(``);
       });
     });
   });
@@ -542,7 +619,7 @@ describe('buildClient', () => {
         services: [{ name: 'service-1' }, { name: 'service-2' }],
       };
 
-      axiosMock.onGet(servicesUrl).reply(HTTP_STATUS_OK, mockResponse);
+      axiosMock.onGet(servicesUrl).reply(200, mockResponse);
 
       const result = await client.fetchServices();
 
@@ -554,7 +631,7 @@ describe('buildClient', () => {
     });
 
     it('rejects if services are missing', async () => {
-      axiosMock.onGet(servicesUrl).reply(HTTP_STATUS_OK, {});
+      axiosMock.onGet(servicesUrl).reply(200, {});
 
       const e = 'failed to fetch services. invalid response';
       await expect(client.fetchServices()).rejects.toThrow(e);
@@ -571,7 +648,7 @@ describe('buildClient', () => {
         operations: [{ name: 'operation-1' }, { name: 'operation-2' }],
       };
 
-      axiosMock.onGet(parsedOperationsUrl).reply(HTTP_STATUS_OK, mockResponse);
+      axiosMock.onGet(parsedOperationsUrl).reply(200, mockResponse);
 
       const result = await client.fetchOperations(serviceName);
 
@@ -599,7 +676,7 @@ describe('buildClient', () => {
     });
 
     it('rejects if operations are missing', async () => {
-      axiosMock.onGet(parsedOperationsUrl).reply(HTTP_STATUS_OK, {});
+      axiosMock.onGet(parsedOperationsUrl).reply(200, {});
 
       const e = 'failed to fetch operations. invalid response';
       await expect(client.fetchOperations(serviceName)).rejects.toThrow(e);
@@ -628,7 +705,7 @@ describe('buildClient', () => {
         ],
       };
 
-      axiosMock.onGet(metricsUrl).reply(HTTP_STATUS_OK, mockResponse);
+      axiosMock.onGet(metricsUrl).reply(200, mockResponse);
 
       const result = await client.fetchMetrics();
 
@@ -642,7 +719,7 @@ describe('buildClient', () => {
 
     describe('query filter', () => {
       beforeEach(() => {
-        axiosMock.onGet(metricsUrl).reply(HTTP_STATUS_OK, {
+        axiosMock.onGet(metricsUrl).reply(200, {
           metrics: [],
         });
       });
@@ -655,15 +732,15 @@ describe('buildClient', () => {
 
       it('sets the search query param based on the search filter', async () => {
         await client.fetchMetrics({
-          filters: { search: [{ value: 'foo' }, { value: 'bar' }] },
+          filters: { search: [{ value: 'foo' }, { value: 'bar' }, { value: ' ' }] },
         });
-        expect(getQueryParam()).toBe('search=foo&search=bar');
+        expect(getQueryParam()).toBe('search=foo+bar');
       });
 
       it('ignores empty search', async () => {
         await client.fetchMetrics({
           filters: {
-            search: [{ value: '' }, { value: null }, { value: undefined }],
+            search: [{ value: ' ' }, { value: '' }, { value: null }, { value: undefined }],
           },
         });
         expect(getQueryParam()).toBe('');
@@ -712,7 +789,7 @@ describe('buildClient', () => {
         expect(getQueryParam()).toBe('');
       });
 
-      it('handles attributes filter', async () => {
+      it('handles attribute filter', async () => {
         await client.fetchMetrics({
           filters: {
             attribute: [
@@ -720,28 +797,22 @@ describe('buildClient', () => {
               { value: 'foo.baz', operator: '=' },
               { value: 'not-supported', operator: '!=' },
             ],
-            traceId: [
-              { operator: '=', value: 'traceId' },
-              { operator: '=', value: 'traceId2' },
-            ],
             unsupported: [{ value: 'foo.bar', operator: '=' }],
           },
         });
-        expect(getQueryParam()).toBe(
-          'attributes=foo.bar&attributes=foo.baz&trace_id=traceId&trace_id=traceId2',
-        );
+        expect(getQueryParam()).toBe('attributes=foo.bar&attributes=foo.baz');
       });
     });
 
     it('rejects if metrics are missing', async () => {
-      axiosMock.onGet(metricsUrl).reply(HTTP_STATUS_OK, {});
+      axiosMock.onGet(metricsUrl).reply(200, {});
 
       await expect(client.fetchMetrics()).rejects.toThrow(FETCHING_METRICS_ERROR);
       expectErrorToBeReported(new Error(FETCHING_METRICS_ERROR));
     });
 
     it('rejects if metrics are invalid', async () => {
-      axiosMock.onGet(metricsUrl).reply(HTTP_STATUS_OK, { traces: 'invalid' });
+      axiosMock.onGet(metricsUrl).reply(200, { traces: 'invalid' });
 
       await expect(client.fetchMetrics()).rejects.toThrow(FETCHING_METRICS_ERROR);
       expectErrorToBeReported(new Error(FETCHING_METRICS_ERROR));
@@ -751,7 +822,7 @@ describe('buildClient', () => {
   describe('fetchMetric', () => {
     it('fetches the metric from the API', async () => {
       const data = { results: [] };
-      axiosMock.onGet(metricsSearchUrl).reply(HTTP_STATUS_OK, data);
+      axiosMock.onGet(metricsSearchUrl).reply(200, data);
 
       const result = await client.fetchMetric('name', 'type');
 
@@ -764,7 +835,7 @@ describe('buildClient', () => {
     });
 
     it('passes the abort controller to axios', async () => {
-      axiosMock.onGet(metricsSearchUrl).reply(HTTP_STATUS_OK, { results: [] });
+      axiosMock.onGet(metricsSearchUrl).reply(200, { results: [] });
 
       const abortController = new AbortController();
       await client.fetchMetric('name', 'type', { abortController });
@@ -777,7 +848,7 @@ describe('buildClient', () => {
     });
 
     it('sets the visual param when specified', async () => {
-      axiosMock.onGet(metricsSearchUrl).reply(HTTP_STATUS_OK, { results: [] });
+      axiosMock.onGet(metricsSearchUrl).reply(200, { results: [] });
 
       await client.fetchMetric('name', 'type', { visual: 'heatmap' });
 
@@ -790,7 +861,7 @@ describe('buildClient', () => {
 
     describe('query filter params', () => {
       beforeEach(() => {
-        axiosMock.onGet(metricsSearchUrl).reply(HTTP_STATUS_OK, { results: [] });
+        axiosMock.onGet(metricsSearchUrl).reply(200, { results: [] });
       });
 
       describe('attribute filter', () => {
@@ -962,7 +1033,7 @@ describe('buildClient', () => {
     });
 
     it('rejects if results is missing from the response', async () => {
-      axiosMock.onGet(metricsSearchUrl).reply(HTTP_STATUS_OK, {});
+      axiosMock.onGet(metricsSearchUrl).reply(200, {});
       const e = 'metrics are missing/invalid in the response';
 
       await expect(client.fetchMetric('name', 'type')).rejects.toThrow(e);
@@ -996,7 +1067,7 @@ describe('buildClient', () => {
         default_group_by_function: 'sum',
       };
 
-      axiosMock.onGet(metricsSearchMetadataUrl).reply(HTTP_STATUS_OK, data);
+      axiosMock.onGet(metricsSearchMetadataUrl).reply(200, data);
 
       const result = await client.fetchMetricSearchMetadata('name', 'type');
 
@@ -1036,7 +1107,7 @@ describe('buildClient', () => {
     const FETCHING_LOGS_ERROR = 'logs are missing/invalid in the response';
 
     beforeEach(() => {
-      axiosMock.onGet(logsSearchUrl).reply(HTTP_STATUS_OK, mockResponse);
+      axiosMock.onGet(logsSearchUrl).reply(200, mockResponse);
     });
 
     it('fetches logs from the logs URL', async () => {
@@ -1066,30 +1137,19 @@ describe('buildClient', () => {
     });
 
     it('rejects if logs are missing', async () => {
-      axiosMock.onGet(logsSearchUrl).reply(HTTP_STATUS_OK, {});
+      axiosMock.onGet(logsSearchUrl).reply(200, {});
 
       await expect(client.fetchLogs()).rejects.toThrow(FETCHING_LOGS_ERROR);
       expectErrorToBeReported(new Error(FETCHING_LOGS_ERROR));
     });
 
     it('rejects if logs are invalid', async () => {
-      axiosMock.onGet(logsSearchUrl).reply(HTTP_STATUS_OK, { results: 'invalid' });
+      axiosMock.onGet(logsSearchUrl).reply(200, { results: 'invalid' });
 
       await expect(client.fetchLogs()).rejects.toThrow(FETCHING_LOGS_ERROR);
       expectErrorToBeReported(new Error(FETCHING_LOGS_ERROR));
     });
 
-    it('passes the abort controller to axios', async () => {
-      const abortController = new AbortController();
-      await client.fetchLogs({ abortController });
-
-      expect(axios.get).toHaveBeenCalledWith(logsSearchUrl, {
-        withCredentials: true,
-        params: expect.any(URLSearchParams),
-        signal: abortController.signal,
-      });
-    });
-
     describe('filters', () => {
       describe('date range filter', () => {
         it('handle predefined date range value', async () => {
@@ -1205,249 +1265,6 @@ describe('buildClient', () => {
         });
         expect(getQueryParam()).toBe('');
       });
-    });
-  });
-
-  describe('fetchLogsSearchMetadata', () => {
-    const mockResponse = {
-      start_ts: 1713513680617331200,
-      end_ts: 1714723280617331200,
-      summary: {
-        service_names: ['adservice', 'cartservice', 'quoteservice', 'recommendationservice'],
-        trace_flags: [0, 1],
-        severity_names: ['info', 'warn'],
-        severity_numbers: [9, 13],
-      },
-      severity_numbers_counts: [
-        {
-          time: 1713519360000000000,
-          counts: {
-            13: 0,
-            9: 0,
-          },
-        },
-        {
-          time: 1713545280000000000,
-          counts: {
-            13: 0,
-            9: 0,
-          },
-        },
-      ],
-    };
-
-    beforeEach(() => {
-      axiosMock.onGet(logsSearchMetadataUrl).reply(HTTP_STATUS_OK, mockResponse);
-    });
-
-    it('fetches logs metadata from the logs URL', async () => {
-      const result = await client.fetchLogsSearchMetadata();
-
-      expect(axios.get).toHaveBeenCalledTimes(1);
-      expect(axios.get).toHaveBeenCalledWith(logsSearchMetadataUrl, {
-        withCredentials: true,
-        params: expect.any(URLSearchParams),
-      });
-      expect(result).toEqual(mockResponse);
-    });
-
-    it('passes the abort controller to axios', async () => {
-      const abortController = new AbortController();
-      await client.fetchLogsSearchMetadata({ abortController });
-
-      expect(axios.get).toHaveBeenCalledWith(logsSearchMetadataUrl, {
-        withCredentials: true,
-        params: expect.any(URLSearchParams),
-        signal: abortController.signal,
-      });
-    });
-
-    describe('filters', () => {
-      describe('date range filter', () => {
-        it('handle predefined date range value', async () => {
-          await client.fetchLogsSearchMetadata({
-            filters: { dateRange: { value: '5m' } },
-          });
-          expect(getQueryParam()).toContain(`period=5m`);
-        });
-
-        it('handle custom date range value', async () => {
-          await client.fetchLogsSearchMetadata({
-            filters: {
-              dateRange: {
-                endDate: new Date('2020-07-06'),
-                startDate: new Date('2020-07-05'),
-                value: 'custom',
-              },
-            },
-          });
-          expect(getQueryParam()).toContain(
-            'start_time=2020-07-05T00:00:00.000Z&end_time=2020-07-06T00:00:00.000Z',
-          );
-        });
-
-        it('handles exact timestamps', async () => {
-          await client.fetchLogsSearchMetadata({
-            filters: {
-              dateRange: {
-                timestamp: '2024-02-19T16:10:15.4433398Z',
-                endDate: new Date('2024-02-19'),
-                startDate: new Date('2024-02-19'),
-                value: 'custom',
-              },
-            },
-          });
-          expect(getQueryParam()).toContain(
-            'start_time=2024-02-19T16:10:15.4433398Z&end_time=2024-02-19T16:10:15.4433398Z',
-          );
-        });
-      });
-
-      describe('attributes filters', () => {
-        it('converts filter to proper query params', async () => {
-          await client.fetchLogsSearchMetadata({
-            filters: {
-              attributes: {
-                service: [
-                  { operator: '=', value: 'serviceName' },
-                  { operator: '!=', value: 'serviceName2' },
-                ],
-                severityName: [
-                  { operator: '=', value: 'info' },
-                  { operator: '!=', value: 'warning' },
-                ],
-                severityNumber: [
-                  { operator: '=', value: '9' },
-                  { operator: '!=', value: '10' },
-                ],
-                traceId: [{ operator: '=', value: 'traceId' }],
-                spanId: [{ operator: '=', value: 'spanId' }],
-                fingerprint: [{ operator: '=', value: 'fingerprint' }],
-                traceFlags: [
-                  { operator: '=', value: '1' },
-                  { operator: '!=', value: '2' },
-                ],
-                attribute: [{ operator: '=', value: 'attr=bar' }],
-                resourceAttribute: [{ operator: '=', value: 'res=foo' }],
-                search: [{ value: 'some-search' }],
-              },
-            },
-          });
-          expect(getQueryParam()).toEqual(
-            `service_name=serviceName&not[service_name]=serviceName2` +
-              `&severity_name=info&not[severity_name]=warning` +
-              `&severity_number=9&not[severity_number]=10` +
-              `&trace_id=traceId` +
-              `&span_id=spanId` +
-              `&fingerprint=fingerprint` +
-              `&trace_flags=1&not[trace_flags]=2` +
-              `&log_attr_name=attr&log_attr_value=bar` +
-              `&res_attr_name=res&res_attr_value=foo` +
-              `&body=some-search`,
-          );
-        });
-
-        it('ignores unsupported operators', async () => {
-          await client.fetchLogsSearchMetadata({
-            filters: {
-              attributes: {
-                traceId: [{ operator: '!=', value: 'traceId2' }],
-                spanId: [{ operator: '!=', value: 'spanId2' }],
-                fingerprint: [{ operator: '!=', value: 'fingerprint2' }],
-                attribute: [{ operator: '!=', value: 'bar' }],
-                resourceAttribute: [{ operator: '!=', value: 'resourceAttribute2' }],
-                unsupported: [{ value: 'something', operator: '=' }],
-              },
-            },
-          });
-          expect(getQueryParam()).toEqual('');
-        });
-      });
-
-      it('ignores empty filter', async () => {
-        await client.fetchLogsSearchMetadata({
-          filters: { attributes: {}, dateRange: {} },
-        });
-        expect(getQueryParam()).toBe('');
-      });
-
-      it('ignores undefined filter', async () => {
-        await client.fetchLogsSearchMetadata({
-          filters: { dateRange: undefined, attributes: undefined },
-        });
-        expect(getQueryParam()).toBe('');
-      });
-    });
-  });
-
-  describe('fetchUsageData', () => {
-    const mockResponse = {
-      events: {
-        6: {
-          start_ts: 1717200000000000000,
-          end_ts: 1719705600000000000,
-          aggregated_total: 132,
-          aggregated_per_feature: {
-            metrics: 50,
-            logs: 32,
-            tracing: 50,
-          },
-          data: {
-            metrics: [[1719446400000000000, 100]],
-          },
-          data_breakdown: 'daily',
-          data_unit: '',
-        },
-      },
-      storage: {
-        6: {
-          start_ts: 1717200000000000000,
-          end_ts: 1719705600000000000,
-          aggregated_total: 58476,
-          aggregated_per_feature: {
-            metrics: 15000,
-            logs: 15000,
-            tracing: 28476,
-          },
-          data: {
-            metrics: [[1719446400000000000, 58476]],
-          },
-          data_breakdown: 'daily',
-          data_unit: 'bytes',
-        },
-      },
-    };
-    beforeEach(() => {
-      axiosMock.onGet(analyticsUrl).reply(HTTP_STATUS_OK, mockResponse);
-    });
-
-    it('fetches analytics data from URL', async () => {
-      const result = await client.fetchUsageData();
-
-      expect(axios.get).toHaveBeenCalledTimes(1);
-      expect(axios.get).toHaveBeenCalledWith(analyticsUrl, {
-        withCredentials: true,
-        params: expect.any(URLSearchParams),
-      });
-      expect(result).toEqual(mockResponse);
-    });
-
-    it('adds a month query param if specified', async () => {
-      await client.fetchUsageData({ period: { month: '06' } });
-
-      expect(getQueryParam()).toBe('month=06');
-    });
-
-    it('adds a year query param if specified', async () => {
-      await client.fetchUsageData({ period: { year: '2024' } });
-
-      expect(getQueryParam()).toBe('year=2024');
-    });
-
-    it('ignores empty period param', async () => {
-      await client.fetchUsageData({ period: {} });
-
-      expect(getQueryParam()).toBe('');
     });
   });
 });

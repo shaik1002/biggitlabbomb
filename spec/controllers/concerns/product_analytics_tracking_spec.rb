@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe ProductAnalyticsTracking, :snowplow, feature_category: :product_analytics do
+RSpec.describe ProductAnalyticsTracking, :snowplow, feature_category: :product_analytics_data_management do
   include TrackingHelpers
   include SnowplowHelpers
 
@@ -57,17 +57,8 @@ RSpec.describe ProductAnalyticsTracking, :snowplow, feature_category: :product_a
       expect(Gitlab::InternalEvents).not_to receive(:track_event)
     end
 
-    let(:all_time_total_count) { Gitlab::Usage::EventSelectionRule.new(name: event_name, time_framed: false) }
-    let(:time_framed_total_count) { Gitlab::Usage::EventSelectionRule.new(name: event_name, time_framed: true) }
-
     before do
-      allow(Gitlab::Tracking::EventDefinition).to receive(:internal_event_exists?).with('an_event').and_return(true)
-      event_definition = instance_double(
-        Gitlab::Tracking::EventDefinition,
-        event_selection_rules: [all_time_total_count, time_framed_total_count],
-        to_h: {}
-      )
-      allow(Gitlab::Tracking::EventDefinition).to receive(:find).with(event_name).and_return(event_definition)
+      allow(Gitlab::InternalEvents::EventDefinitions).to receive(:known_event?).with('an_event').and_return(true)
     end
 
     context 'when user is logged in' do
@@ -118,8 +109,8 @@ RSpec.describe ProductAnalyticsTracking, :snowplow, feature_category: :product_a
       end
 
       it 'tracks total Redis counters' do
-        expect(all_time_total_count).to receive(:redis_key_for_date).and_call_original
-        expect(time_framed_total_count).to receive(:redis_key_for_date).and_call_original
+        expect(Gitlab::Usage::Metrics::Instrumentations::TotalCountMetric).to receive(:redis_key)
+          .twice.and_call_original # total and 7d
 
         get :index
       end

@@ -34,14 +34,12 @@ export default {
     setRowsAndCols(rows, cols) {
       this.rows = rows;
       this.cols = cols;
-      this.maxRows = clamp(rows + 1, this.maxRows, MAX_ROWS);
-      this.maxCols = clamp(cols + 1, this.maxCols, MAX_COLS);
+      this.maxRows = clamp(rows + 1, MIN_ROWS, MAX_ROWS);
+      this.maxCols = clamp(cols + 1, MIN_COLS, MAX_COLS);
     },
     resetState() {
       this.rows = 1;
       this.cols = 1;
-      this.maxRows = MIN_ROWS;
-      this.maxCols = MIN_COLS;
     },
     insertTable() {
       this.tiptapEditor
@@ -76,8 +74,6 @@ export default {
       this.setRowsAndCols(rows, cols);
     },
     setFocus(row, col) {
-      this.resetState();
-
       this.$refs[`table-${row}-${col}`][0].$el.focus();
     },
   },
@@ -86,7 +82,7 @@ export default {
 };
 </script>
 <template>
-  <div class="gl-inline-flex gl-align-middle">
+  <div class="gl-display-inline-flex gl-align-middle">
     <gl-disclosure-dropdown
       ref="dropdown"
       :toggle-id="toggleId"
@@ -101,7 +97,6 @@ export default {
       text-sr-only
       :fluid-width="true"
       @shown="setFocus(1, 1)"
-      @hidden="resetState"
     >
       <div
         class="gl-p-3 gl-pt-2"
@@ -109,13 +104,13 @@ export default {
         :aria-colcount="$options.MAX_COLS"
         :aria-rowcount="$options.MAX_ROWS"
       >
-        <div v-for="r of list(maxRows)" :key="r" class="gl-flex" role="row">
+        <div v-for="r of list(maxRows)" :key="r" class="gl-display-flex" role="row">
           <div v-for="c of list(maxCols)" :key="c" role="gridcell">
             <gl-button
               :ref="`table-${r}-${c}`"
-              :class="{ 'active !gl-bg-blue-50': r <= rows && c <= cols }"
+              :class="{ 'active gl-bg-blue-50!': r <= rows && c <= cols }"
               :aria-label="getButtonLabel(r, c)"
-              class="table-creator-grid-item gl-inline !gl-h-6 !gl-w-6 !gl-rounded-none !gl-p-0"
+              class="table-creator-grid-item gl-display-inline gl-rounded-0! gl-w-6! gl-h-6! gl-p-0!"
               @mouseover="setRowsAndCols(r, c)"
               @focus="setRowsAndCols(r, c)"
               @click="insertTable()"
@@ -124,7 +119,7 @@ export default {
           </div>
         </div>
       </div>
-      <div class="gl-border-t gl-px-4 gl-pb-2 gl-pt-3">
+      <div class="gl-border-t gl-px-4 gl-pt-3 gl-pb-2">
         {{ getButtonLabel(rows, cols) }}
       </div>
     </gl-disclosure-dropdown>

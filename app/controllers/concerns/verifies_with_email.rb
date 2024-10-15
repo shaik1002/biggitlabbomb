@@ -11,6 +11,7 @@ module VerifiesWithEmail
     prepend_before_action :verify_with_email, only: :create, unless: -> { skip_verify_with_email? }
   end
 
+  # rubocop:disable Metrics/PerceivedComplexity
   def verify_with_email
     return unless user = find_user || find_verification_user
 
@@ -22,10 +23,24 @@ module VerifiesWithEmail
       # when the password is correct, which could be a giveaway when brute-forced.
       return render_sign_in_rate_limited if check_rate_limit!(:user_sign_in, scope: user) { true }
 
-      # Verify the email if the user has logged in successfully.
-      verify_email(user) if user.valid_password?(user_params[:password])
+      if user.valid_password?(user_params[:password])
+        # The user has logged in successfully.
+
+        if user.unlock_token
+          # Prompt for the token if it already has been set
+          prompt_for_email_verification(user)
+        elsif user.access_locked? || !trusted_ip_address?(user)
+          # require email verification if:
+          # - their account has been locked because of too many failed login attempts, or
+          # - they have logged in before, but never from the current ip address
+          reason = 'sign in from untrusted IP address' unless user.access_locked?
+          send_verification_instructions(user, reason: reason) unless send_rate_limited?(user)
+          prompt_for_email_verification(user)
+        end
+      end
     end
   end
+  # rubocop:enable Metrics/PerceivedComplexity
 
   def resend_verification_code
     return unless user = find_verification_user
@@ -37,14 +52,7 @@ module VerifiesWithEmail
       )
       render json: { status: :failure, message: message }
     else
-      secondary_email = user_secondary_email(user, email_params[:email])
-
-      if email_params[:email].present? && secondary_email.present?
-        send_verification_instructions(user, secondary_email: secondary_email)
-      elsif email_params[:email].blank?
-        send_verification_instructions(user)
-      end
-
+      send_verification_instructions(user)
       render json: { status: :success }
     end
   end
@@ -83,36 +91,21 @@ module VerifiesWithEmail
     User.find_by_id(session[:verification_user_id])
   end
 
-  def send_verification_instructions(user, secondary_email: nil, reason: nil)
+  def send_verification_instructions(user, reason: nil)
     service = Users::EmailVerification::GenerateTokenService.new(attr: :unlock_token, user: user)
     raw_token, encrypted_token = service.execute
     user.unlock_token = encrypted_token
     user.lock_access!({ send_instructions: false, reason: reason })
-    send_verification_instructions_email(user, raw_token, secondary_email)
+    send_verification_instructions_email(user, raw_token)
   end
 
-  def send_verification_instructions_email(user, token, secondary_email)
+  def send_verification_instructions_email(user, token)
     return unless user.can?(:receive_notifications)
 
-    email = secondary_email || verification_email(user)
+    email = verification_email(user)
     Notify.verification_instructions_email(email, token: token).deliver_later
 
     log_verification(user, :instructions_sent)
-  end
-
-  def verify_email(user)
-    if user.unlock_token
-      # Prompt for the token if it already has been set. If the token has expired, send a new one.
-      send_verification_instructions(user) if unlock_token_expired?(user)
-      prompt_for_email_verification(user)
-    elsif user.access_locked? || !trusted_ip_address?(user)
-      # require email verification if:
-      # - their account has been locked because of too many failed login attempts, or
-      # - they have logged in before, but never from the current ip address
-      reason = 'sign in from untrusted IP address' unless user.access_locked?
-      send_verification_instructions(user, reason: reason) unless send_rate_limited?(user)
-      prompt_for_email_verification(user)
-    end
   end
 
   def verify_token(user, token)
@@ -185,10 +178,6 @@ module VerifiesWithEmail
     params.require(:user).permit(:email)
   end
 
-  def user_secondary_email(user, email)
-    user.emails.confirmed.find_by_email(email)&.email
-  end
-
   def log_verification(user, event, reason = nil)
     Gitlab::AppLogger.info(
       message: 'Email Verification',
@@ -202,11 +191,5 @@ module VerifiesWithEmail
   def require_email_verification_enabled?(user)
     Feature.enabled?(:require_email_verification, user) &&
       Feature.disabled?(:skip_require_email_verification, user, type: :ops)
-  end
-
-  def unlock_token_expired?(user)
-    return false unless user.locked_at
-
-    user.locked_at < Users::EmailVerification::ValidateTokenService::TOKEN_VALID_FOR_MINUTES.minutes.ago
   end
 end

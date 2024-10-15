@@ -97,7 +97,7 @@ export default {
 <template>
   <span ref="userAvatar">
     <gl-avatar
-      class="gl-bg-cover"
+      class="gl-bg-size-cover"
       :class="{
         lazy: lazy,
         [cssClasses]: true,

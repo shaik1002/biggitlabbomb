@@ -2,20 +2,17 @@
 
 require 'spec_helper'
 
-RSpec.describe 'gitlab:backup namespace rake tasks', :reestablished_active_record_base, :delete, feature_category: :backup_restore do
+RSpec.describe 'gitlab:backup namespace rake tasks', :delete, feature_category: :backup_restore do
   let(:enable_registry) { true }
   let(:backup_restore_pid_path) { "#{Rails.application.root}/tmp/backup_restore.pid" }
   let(:backup_rake_task_names) do
-    %w[db repo uploads builds artifacts pages lfs terraform_state registry packages ci_secure_files external_diffs]
+    %w[db repo uploads builds artifacts pages lfs terraform_state registry packages ci_secure_files]
   end
 
   let(:progress) { StringIO.new }
 
   let(:backup_task_ids) do
-    %w[
-      db repositories uploads builds artifacts pages lfs terraform_state registry packages ci_secure_files
-      external_diffs
-    ]
+    %w[db repositories uploads builds artifacts pages lfs terraform_state registry packages ci_secure_files]
   end
 
   def tars_glob
@@ -24,6 +21,24 @@ RSpec.describe 'gitlab:backup namespace rake tasks', :reestablished_active_recor
 
   def backup_tar
     tars_glob.first
+  end
+
+  def backup_files
+    %w[
+      backup_information.yml
+      artifacts.tar.gz
+      builds.tar.gz
+      lfs.tar.gz
+      terraform_state.tar.gz
+      pages.tar.gz
+      packages.tar.gz
+      ci_secure_files.tar.gz
+      uploads.tar.gz
+    ]
+  end
+
+  def backup_directories
+    %w[db repositories]
   end
 
   def backup_path
@@ -41,6 +56,8 @@ RSpec.describe 'gitlab:backup namespace rake tasks', :reestablished_active_recor
   before do
     stub_env('force', 'yes')
     FileUtils.rm(tars_glob, force: true)
+    FileUtils.rm(backup_files, force: true)
+    FileUtils.rm_rf(backup_directories, secure: true)
     FileUtils.mkdir_p('tmp/tests/public/uploads')
     reenable_backup_sub_tasks
     stub_container_registry_config(enabled: enable_registry)
@@ -48,7 +65,9 @@ RSpec.describe 'gitlab:backup namespace rake tasks', :reestablished_active_recor
 
   after do
     FileUtils.rm(tars_glob, force: true)
+    FileUtils.rm(backup_files, force: true)
     FileUtils.rm(backup_restore_pid_path, force: true)
+    FileUtils.rm_rf(backup_directories, secure: true)
     FileUtils.rm_rf('tmp/tests/public/uploads', secure: true)
   end
 
@@ -60,7 +79,7 @@ RSpec.describe 'gitlab:backup namespace rake tasks', :reestablished_active_recor
 
   describe 'lock parallel backups' do
     let(:progress) { $stdout }
-    let(:delete_message) { /-- Deleting backup and restore PID file at/ }
+    let(:delete_message) { /-- Deleting backup and restore PID file/ }
     let(:pid_file) do
       File.open(backup_restore_pid_path, File::RDWR | File::CREAT)
     end
@@ -315,9 +334,7 @@ RSpec.describe 'gitlab:backup namespace rake tasks', :reestablished_active_recor
           "Dumping packages ... ",
           "Dumping packages ... done",
           "Dumping ci secure files ... ",
-          "Dumping ci secure files ... done",
-          "Dumping external diffs ... ",
-          "Dumping external diffs ... done"
+          "Dumping ci secure files ... done"
         ])
 
         backup_rake_task_names.each do |task|
@@ -404,7 +421,6 @@ RSpec.describe 'gitlab:backup namespace rake tasks', :reestablished_active_recor
             registry.tar.gz
             packages.tar.gz
             ci_secure_files.tar.gz
-            external_diffs.tar.gz
           ]
         )
 
@@ -420,7 +436,6 @@ RSpec.describe 'gitlab:backup namespace rake tasks', :reestablished_active_recor
         expect(tar_contents).to match('registry.tar.gz')
         expect(tar_contents).to match('packages.tar.gz')
         expect(tar_contents).to match('ci_secure_files.tar.gz')
-        expect(tar_contents).to match('external_diffs.tar.gz')
         expect(tar_contents).not_to match(%r{^.{4,9}[rwx].* (database.sql.gz|uploads.tar.gz|repositories|builds.tar.gz|
                                                              pages.tar.gz|artifacts.tar.gz|registry.tar.gz)/$})
       end
@@ -681,8 +696,7 @@ RSpec.describe 'gitlab:backup namespace rake tasks', :reestablished_active_recor
         'registry.tar.gz',
         'packages.tar.gz',
         'repositories',
-        'ci_secure_files.tar.gz',
-        'external_diffs.tar.gz'
+        'ci_secure_files.tar.gz'
       )
     end
 
@@ -724,11 +738,9 @@ RSpec.describe 'gitlab:backup namespace rake tasks', :reestablished_active_recor
   end
 
   def expect_logger_to_receive_messages(messages)
-    [Gitlab::BackupLogger, Gitlab::Backup::JsonLogger].each do |log_class|
-      expect_any_instance_of(log_class) do |logger|
-        messages.each do |message|
-          allow(logger).to receive(:info).with(message).ordered
-        end
+    expect_any_instance_of(Gitlab::BackupLogger) do |logger|
+      messages.each do |message|
+        allow(logger).to receive(:info).with(message).ordered
       end
     end
   end

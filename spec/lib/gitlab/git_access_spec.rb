@@ -6,7 +6,6 @@ RSpec.describe Gitlab::GitAccess, :aggregate_failures, feature_category: :system
   include TermsHelper
   include AdminModeHelper
   include ExternalAuthorizationServiceHelpers
-  include Ci::JobTokenScopeHelpers
 
   let(:user) { create(:user) }
   let(:actor) { user }
@@ -981,7 +980,7 @@ RSpec.describe Gitlab::GitAccess, :aggregate_failures, feature_category: :system
           context "when the merge request is in progress" do
             before do
               create(:merge_request, source_project: project, source_branch: unprotected_branch, target_branch: 'feature',
-                state: 'locked', in_progress_merge_commit_sha: merge_into_protected_branch)
+                                     state: 'locked', in_progress_merge_commit_sha: merge_into_protected_branch)
             end
 
             run_permission_checks(permissions_matrix.deep_merge(developer: { merge_into_protected_branch: true }))
@@ -1012,8 +1011,8 @@ RSpec.describe Gitlab::GitAccess, :aggregate_failures, feature_category: :system
         let(:protected_branch) { build(:protected_branch, :no_one_can_push, name: protected_branch_name, project: project) }
 
         run_permission_checks(permissions_matrix.deep_merge(developer: { push_protected_branch: false, push_all: false, merge_into_protected_branch: false },
-          maintainer: { push_protected_branch: false, push_all: false, merge_into_protected_branch: false },
-          admin_with_admin_mode: { push_protected_branch: false, push_all: false, merge_into_protected_branch: false }))
+                                                            maintainer: { push_protected_branch: false, push_all: false, merge_into_protected_branch: false },
+                                                            admin_with_admin_mode: { push_protected_branch: false, push_all: false, merge_into_protected_branch: false }))
       end
     end
 
@@ -1127,16 +1126,6 @@ RSpec.describe Gitlab::GitAccess, :aggregate_failures, feature_category: :system
     end
   end
 
-  context 'when the project is archived' do
-    let(:project) { create(:project, :repository, :archived) }
-
-    it 'denies push access' do
-      project.add_maintainer(user)
-
-      expect { push_access_check }.to raise_forbidden(described_class::ERROR_MESSAGES[:archived])
-    end
-  end
-
   describe 'deploy key permissions' do
     let(:key) { create(:deploy_key, user: user) }
     let(:actor) { key }
@@ -1148,14 +1137,6 @@ RSpec.describe Gitlab::GitAccess, :aggregate_failures, feature_category: :system
         end
 
         it { expect { push_access_check }.not_to raise_error }
-
-        context 'when project is archived' do
-          before do
-            project.update!(archived: true)
-          end
-
-          it { expect { push_access_check }.to raise_forbidden(described_class::ERROR_MESSAGES[:archived]) }
-        end
       end
 
       context 'when unauthorized' do
@@ -1298,129 +1279,15 @@ RSpec.describe Gitlab::GitAccess, :aggregate_failures, feature_category: :system
         end
       end
     end
-
-    describe 'when request is authorized with job token' do
-      let(:source_project) { create(:project) }
-      let(:auth_result_type) { :build }
-      let(:job) { build_stubbed(:ci_build, project: source_project, user: user) }
-      let(:scope) { user.set_ci_job_token_scope!(job) }
-
-      before do
-        accept_terms(user)
-
-        source_project.add_maintainer(user)
-        source_project.save!
-
-        allow(user).to receive(:ci_job_token_scope).and_return(scope)
-      end
-
-      context 'and target project in the allow list' do
-        let(:access) { access_class.new(user, project, 'web', authentication_abilities: [:download_code], repository_path: repository_path) }
-
-        before do
-          project.add_maintainer(user)
-          project.save!
-
-          allow(scope).to receive(:accessible?).with(project).and_return(true)
-        end
-
-        it 'does not block http pull' do
-          expect { pull_access_check }.not_to raise_error
-        end
-      end
-
-      context 'and target_project in the allow list, but user does not have permissions' do
-        let(:access) { access_class.new(user, project, 'web', authentication_abilities: [:download_code], repository_path: repository_path) }
-
-        before do
-          allow(scope).to receive(:accessible?).with(project).and_return(true)
-        end
-
-        it 'blocks http pull' do
-          expect { pull_access_check }.to raise_forbidden_by_job_token(project)
-        end
-      end
-
-      context 'and target project is not in the allow list' do
-        let(:access) { access_class.new(user, project, 'web', authentication_abilities: [:download_code], repository_path: repository_path) }
-
-        before do
-          project.add_maintainer(user)
-          project.save!
-
-          allow(scope).to receive(:accessible?).with(project).and_return(false)
-        end
-
-        it 'blocks http pull' do
-          expect { pull_access_check }.to raise_forbidden_by_job_token_allowlist(source_project, project)
-        end
-      end
-    end
-
-    describe 'when request is made from CI' do
-      let(:auth_result_type) { :build }
-      let(:job) { build_stubbed(:ci_build, project: project, user: user) }
-
-      before do
-        accept_terms(user)
-        project.add_maintainer(user)
-        project.ci_push_repository_for_job_token_allowed = ci_push_repository_for_job_token_allowed
-        project.save!
-
-        allow(user).to receive(:ci_job_token_scope).and_return(user.set_ci_job_token_scope!(job))
-      end
-
-      context 'when push to repositry is allowed by project settings' do
-        let(:ci_push_repository_for_job_token_allowed) { true }
-
-        it "doesn't block push" do
-          expect { push_access_check_build(project, changes) }.not_to raise_error
-        end
-
-        context 'when push is requested to a different project' do
-          let(:another_project) do
-            create(:project, :repository, :public).tap do |accessible_project|
-              add_inbound_accessible_linkage(project, accessible_project)
-            end
-          end
-
-          before do
-            another_project.add_maintainer(user)
-            another_project.ci_push_repository_for_job_token_allowed = ci_push_repository_for_job_token_allowed
-            another_project.save!
-          end
-
-          it 'raises forbidden exception on push' do
-            expect { push_access_check_build(another_project, changes) }.to raise_error(Gitlab::GitAccess::ForbiddenError)
-          end
-        end
-      end
-
-      context 'when push to repositry is not allowed by project settings' do
-        let(:ci_push_repository_for_job_token_allowed) { false }
-
-        it 'raises forbidden exception on push' do
-          expect { push_access_check_build(project, changes) }.to raise_error(Gitlab::GitAccess::ForbiddenError)
-        end
-      end
-    end
   end
 
   private
 
   def access
     access_class.new(actor, project, protocol,
-      authentication_abilities: authentication_abilities,
-      repository_path: repository_path,
-      redirected_path: redirected_path, auth_result_type: auth_result_type)
-  end
-
-  def push_access_check_build(access_project, changes)
-    access_class.new(actor, access_project, protocol,
-      authentication_abilities: build_authentication_abilities_allowed_push,
-      repository_path: "#{access_project.full_path}.git",
-      redirected_path: redirected_path, auth_result_type: auth_result_type)
-    .check('git-receive-pack', changes)
+                        authentication_abilities: authentication_abilities,
+                        repository_path: repository_path,
+                        redirected_path: redirected_path, auth_result_type: auth_result_type)
   end
 
   def push_changes(changes)
@@ -1435,28 +1302,10 @@ RSpec.describe Gitlab::GitAccess, :aggregate_failures, feature_category: :system
     raise_error(described_class::NotFoundError, described_class::ERROR_MESSAGES[:project_not_found])
   end
 
-  def raise_forbidden_by_job_token(target_project)
-    raise_error(described_class::ForbiddenError, format(described_class::ERROR_MESSAGES[:auth_by_job_token_forbidden],
-      target_project_path: target_project.path))
-  end
-
-  def raise_forbidden_by_job_token_allowlist(source_project, target_project)
-    raise_error(described_class::ForbiddenError, format(described_class::ERROR_MESSAGES[:auth_by_job_token_project_not_in_allowlist],
-      source_project_path: source_project.path, target_project_path: target_project.path))
-  end
-
   def build_authentication_abilities
     [
       :read_project,
       :build_download_code
-    ]
-  end
-
-  def build_authentication_abilities_allowed_push
-    [
-      :read_project,
-      :build_download_code,
-      :build_push_code
     ]
   end
 

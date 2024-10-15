@@ -3,7 +3,7 @@
 module Groups
   module DeployTokens
     class RevokeService < BaseService
-      attr_accessor :token, :source
+      attr_accessor :token
 
       def execute
         @token = group.deploy_tokens.find(params[:id])

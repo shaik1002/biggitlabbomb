@@ -225,7 +225,7 @@ Some key details about runners:
 - You can use the [`tags` keyword](../runners/configure_runners.md#control-jobs-that-a-runner-can-run)
   for finer control, and associate runners with specific jobs. For example, you can use a tag for jobs that
   require dedicated, more powerful, or specific hardware.
-- GitLab has [autoscaling for runners](https://docs.gitlab.com/runner/runner_autoscale/).
+- GitLab has [autoscaling for runners](https://docs.gitlab.com/runner/runner_autoscale).
   Use autoscaling to provision runners only when needed and scale down when not needed.
 
 ### TeamCity build features & plugins
@@ -235,7 +235,7 @@ is supported in GitLab CI/CD natively with CI/CD keywords and features.
 
 | TeamCity plugin                                                                                                                    | GitLab feature |
 |------------------------------------------------------------------------------------------------------------------------------------|----------------|
-| [Code coverage](https://www.jetbrains.com/help/teamcity/configuring-test-reports-and-code-coverage.html#Code+Coverage+in+TeamCity) | [Code coverage](../testing/code_coverage.md) and [Test coverage visualization](../testing/test_coverage_visualization/index.md) |
+| [Code coverage](https://www.jetbrains.com/help/teamcity/configuring-test-reports-and-code-coverage.html#Code+Coverage+in+TeamCity) | [Code coverage](../testing/code_coverage.md) and [Test coverage visualization](../testing/test_coverage_visualization.md) |
 | [Unit Test Report](https://www.jetbrains.com/help/teamcity/configuring-test-reports-and-code-coverage.html)                        | [JUnit test report artifacts](../yaml/artifacts_reports.md#artifactsreportsjunit) and [Unit test reports](../testing/unit_test_reports.md) |
 | [Notifications](https://www.jetbrains.com/help/teamcity/configuring-notifications.html)                                            | [Notification emails](../../user/profile/notifications.md) and [Slack](../../user/project/integrations/gitlab_slack_application.md) |
 

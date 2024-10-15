@@ -8,7 +8,8 @@ class Profiles::PreferencesController < Profiles::ApplicationController
   urgency :low, [:show]
   urgency :medium, [:update]
 
-  def show; end
+  def show
+  end
 
   def update
     result = Users::UpdateService.new(current_user, preferences_params.merge(user: user)).execute
@@ -62,8 +63,7 @@ class Profiles::PreferencesController < Profiles::ApplicationController
       :markdown_surround_selection,
       :markdown_automatic_lists,
       :use_new_navigation,
-      :enabled_following,
-      :use_work_items_view
+      :enabled_following
     ]
   end
 end

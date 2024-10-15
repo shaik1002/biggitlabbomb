@@ -3,18 +3,21 @@ import { s__ } from '~/locale';
 import BoardsSelector from 'ee_else_ce/boards/components/boards_selector.vue';
 import IssueBoardFilteredSearch from 'ee_else_ce/boards/components/issue_board_filtered_search.vue';
 import { getBoardQuery } from 'ee_else_ce/boards/boards_util';
+import ToggleLabels from '~/vue_shared/components/toggle_labels.vue';
 import { setError } from '../graphql/cache_updates';
 import ConfigToggle from './config_toggle.vue';
+import NewBoardButton from './new_board_button.vue';
 import ToggleFocus from './toggle_focus.vue';
-import BoardOptions from './board_options.vue';
 
 export default {
   components: {
-    BoardOptions,
     BoardsSelector,
     IssueBoardFilteredSearch,
     ConfigToggle,
+    NewBoardButton,
     ToggleFocus,
+    ToggleLabels,
+    ToggleEpicsSwimlanes: () => import('ee_component/boards/components/toggle_epics_swimlanes.vue'),
     EpicBoardFilteredSearch: () =>
       import('ee_component/boards/components/epic_filtered_search.vue'),
   },
@@ -88,29 +91,20 @@ export default {
 <template>
   <div class="issues-filters">
     <div
-      class="issues-details-filters filtered-search-block row-content-block second-block gl-flex gl-flex-col gl-gap-3 gl-px-5 md:gl-flex-row xl:gl-px-6"
+      class="issues-details-filters filtered-search-block gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row row-content-block second-block gl-px-5 xl:gl-px-6"
     >
-      <div class="gl-mb-0 gl-flex gl-w-full gl-min-w-0 gl-grow gl-flex-col gl-gap-3 md:gl-flex-row">
-        <div class="gl-flex gl-items-center gl-gap-3 md:gl-mb-0">
-          <boards-selector
-            :board="board"
-            :is-current-board-loading="isLoading"
-            :board-modal-form="currentForm"
-            class="gl-flex-grow"
-            @switchBoard="$emit('switchBoard', $event)"
-            @updateBoard="$emit('updateBoard', $event)"
-            @showBoardModal="setCurrentForm"
-          />
-          <div class="gl-flex gl-items-center gl-gap-2 md:!gl-hidden">
-            <board-options
-              :show-epic-lane-option="swimlanesFeatureAvailable && isSignedIn"
-              :is-swimlanes-on="isSwimlanesOn"
-              @toggleSwimlanes="$emit('toggleSwimlanes', $event)"
-            />
-            <config-toggle @showBoardModal="setCurrentForm" />
-          </div>
-        </div>
-
+      <div
+        class="gl-display-flex gl-flex-direction-column gl-md-flex-direction-row gl-flex-grow-1 gl-lg-mb-0 gl-mb-3 gl-w-full gl-min-w-0"
+      >
+        <boards-selector
+          :board="board"
+          :is-current-board-loading="isLoading"
+          :board-modal-form="currentForm"
+          @switchBoard="$emit('switchBoard', $event)"
+          @updateBoard="$emit('updateBoard', $event)"
+          @showBoardModal="setCurrentForm"
+        />
+        <new-board-button @showBoardModal="setCurrentForm" />
         <issue-board-filtered-search
           v-if="isIssueBoard"
           :board="board"
@@ -125,12 +119,19 @@ export default {
           @setFilters="$emit('setFilters', $event)"
         />
       </div>
-      <div class="gl-hidden gl-gap-2 md:gl-flex">
-        <board-options
-          :show-epic-lane-option="swimlanesFeatureAvailable && isSignedIn"
-          :is-swimlanes-on="isSwimlanesOn"
-          @toggleSwimlanes="$emit('toggleSwimlanes', $event)"
-        />
+      <div
+        class="filter-dropdown-container gl-md-display-flex gl-flex-direction-column gl-md-flex-direction-row gl-align-items-flex-start"
+      >
+        <div
+          class="gl-display-flex gl-flex-direction-row gl-sm-align-items-flex-start gl-xs-justify-content-end gl-flex-wrap gl-md-flex-nowrap"
+        >
+          <toggle-labels />
+          <toggle-epics-swimlanes
+            v-if="swimlanesFeatureAvailable && isSignedIn"
+            :is-swimlanes-on="isSwimlanesOn"
+            @toggleSwimlanes="$emit('toggleSwimlanes', $event)"
+          />
+        </div>
         <config-toggle @showBoardModal="setCurrentForm" />
 
         <toggle-focus />

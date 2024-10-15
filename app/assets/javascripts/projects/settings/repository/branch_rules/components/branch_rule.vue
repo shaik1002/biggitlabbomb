@@ -1,26 +1,27 @@
 <script>
 import { GlBadge, GlButton } from '@gitlab/ui';
-import ProtectedBadge from '~/vue_shared/components/badges/protected_badge.vue';
 import { s__, sprintf, n__ } from '~/locale';
 import { getAccessLevels } from '../../../utils';
 
+export const i18n = {
+  defaultLabel: s__('BranchRules|default'),
+  protectedLabel: s__('BranchRules|protected'),
+  detailsButtonLabel: s__('BranchRules|View details'),
+  allowForcePush: s__('BranchRules|Allowed to force push'),
+  codeOwnerApprovalRequired: s__('BranchRules|Requires CODEOWNERS approval'),
+  statusChecks: s__('BranchRules|%{total} status %{subject}'),
+  approvalRules: s__('BranchRules|%{total} approval %{subject}'),
+  matchingBranches: s__('BranchRules|%{total} matching %{subject}'),
+  pushAccessLevels: s__('BranchRules|Allowed to push and merge'),
+  mergeAccessLevels: s__('BranchRules|Allowed to merge'),
+};
+
 export default {
   name: 'BranchRule',
-  i18n: {
-    defaultLabel: s__('BranchRules|default'),
-    detailsButtonLabel: s__('BranchRules|View details'),
-    allowForcePush: s__('BranchRules|Allowed to force push'),
-    codeOwnerApprovalRequired: s__('BranchRules|Requires CODEOWNERS approval'),
-    statusChecks: s__('BranchRules|%{total} status %{subject}'),
-    approvalRules: s__('BranchRules|%{total} approval %{subject}'),
-    matchingBranches: s__('BranchRules|%{total} matching %{subject}'),
-    pushAccessLevels: s__('BranchRules|Allowed to push and merge'),
-    mergeAccessLevels: s__('BranchRules|Allowed to merge'),
-  },
+  i18n,
   components: {
     GlBadge,
     GlButton,
-    ProtectedBadge,
   },
   inject: {
     branchRulesPath: {
@@ -154,25 +155,27 @@ export default {
 <template>
   <li>
     <div
-      class="gl-flex gl-justify-between"
+      class="gl-display-flex gl-justify-content-space-between"
       data-testid="branch-content"
       :data-qa-branch-name="name"
     >
       <div>
         <strong class="gl-font-monospace">{{ name }}</strong>
 
-        <gl-badge v-if="isDefault" variant="info" class="gl-ml-2">{{
+        <gl-badge v-if="isDefault" variant="info" size="sm" class="gl-ml-2">{{
           $options.i18n.defaultLabel
         }}</gl-badge>
 
-        <protected-badge v-if="isProtected" />
+        <gl-badge v-if="isProtected" variant="neutral" size="sm" class="gl-ml-2">{{
+          $options.i18n.protectedLabel
+        }}</gl-badge>
 
-        <ul v-if="hasApprovalDetails" class="gl-mb-0 gl-mt-2 gl-pl-6 gl-text-gray-500">
+        <ul v-if="hasApprovalDetails" class="gl-pl-6 gl-mt-2 gl-mb-0 gl-text-gray-500">
           <li v-for="(detail, index) in approvalDetails" :key="index">{{ detail }}</li>
         </ul>
       </div>
       <gl-button
-        class="gl-self-start"
+        class="gl-align-self-start"
         category="tertiary"
         size="small"
         data-testid="details-button"

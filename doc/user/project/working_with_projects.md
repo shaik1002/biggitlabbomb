@@ -13,61 +13,6 @@ DETAILS:
 Most work in GitLab is done in a [project](../../user/project/index.md). Files and
 code are saved in projects, and most features are in the scope of projects.
 
-## Project overview
-
-> - Project creation date [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/19452) in GitLab 16.10.
-
-When you select a project, the **Project overview** page shows the project contents:
-
-- Files in the repository
-- Project information (description)
-- Topics
-- Badges
-- Number of stars, forks, commits, branches, tags, releases, and environments in the project
-- Project storage size
-- Optional files and configurations
-- `README` or index file
-  - Wiki page
-  - License
-  - Changelog
-  - Contributing guidelines
-  - Kubernetes cluster
-  - CI/CD configuration
-  - Integrations
-  - GitLab Pages
-- Creation date
-
-For public projects, and members of internal and private projects
-with [permissions to view the project's code](../permissions.md#project-members-permissions),
-the project overview page shows:
-
-- A [`README` or index file](repository/files/index.md#readme-and-index-files).
-- A list of directories in the project's repository.
-
-For users without permission to view the project's code, the overview page shows:
-
-- The wiki homepage.
-- The list of issues in the project.
-
-### Access a project by using the project ID
-
-> - Project ID [moved](https://gitlab.com/gitlab-org/gitlab/-/issues/431539) to the Actions menu in GitLab 16.7.
-
-You can access a project by using its ID instead of its name at `https://gitlab.example.com/projects/<id>`.
-For example, if in your personal namespace `alex` you have a project `my-project` with the ID `123456`,
-you can access the project either at `https://gitlab.example.com/alex/my-project` or `https://gitlab.example.com/projects/123456`.
-
-NOTE:
-From GitLab 17.5, you can also use `https://gitlab.example.com/-/p/<id>` for this endpoint.
-
-You might also need the project ID if you want to interact with the project using the [GitLab API](../../api/index.md).
-
-To copy the project ID:
-
-1. On the left sidebar, select **Search or go to** and find your project.
-1. On the project overview page, in the upper-right corner, select **Actions** (**{ellipsis_v}**).
-1. Select **Copy project ID**.
-
 ## View all projects for the instance
 
 To view all projects for the GitLab instance:
@@ -85,7 +30,7 @@ If you are not authenticated, then the list shows public projects only.
 To view projects you are a member of:
 
 1. On the left sidebar, select **Search or go to**.
-1. Select **View all my projects**.
+1. Select **Your work**.
 
 On the left sidebar, **Projects** is selected. On the list, on the **Yours** tab,
 all the projects you are a member of are displayed.
@@ -99,24 +44,12 @@ called `my-project` under your username, the project is created at `https://gitl
 
 To view your personal projects:
 
-1. On the left sidebar, select **Search or go to**.
-1. Select **View all my projects**.
-1. Select the **Personal** tab.
-
-Or
-
 1. On the left sidebar, select your avatar and then your username.
 1. On the left sidebar, select **Personal projects**.
 
 ## View starred projects
 
 To view projects you have [starred](#star-a-project):
-
-1. On the left sidebar, select **Search or go to**.
-1. Select **View all my projects**.
-1. Select the **Starred** tab.
-
-Or
 
 1. On the left sidebar, select your avatar and then your username.
 1. On the left sidebar, select **Starred projects**.
@@ -133,7 +66,6 @@ Prerequisites:
 1. Select **Settings > General**.
 1. In the **Project name** text box, enter your project name. See the [limitations on project names](../../user/reserved_names.md).
 1. Optional. In the **Project description** text box, enter your project description. The description is limited to 2,000 characters.
-Components published in the CI/CD catalog require a project description.
 1. Optional. Under **Project avatar**, to change your project avatar, select **Choose file**. The ideal image size is 192 x 192 pixels, and the maximum file size allowed is 200 KB.
 1. Select **Save changes**.
 
@@ -160,7 +92,6 @@ After you delete a project:
 Prerequisites:
 
 - You must have the Owner role for a project.
-- Owners must be [allowed to delete projects](../../administration/settings/visibility_and_access_controls.md#restrict-project-deletion-to-administrators).
 
 To delete a project:
 
@@ -203,7 +134,7 @@ DETAILS:
 **Tier:** Premium, Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
-> - Option to delete projects immediately from the **Admin** area and as a group setting removed [on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/393622) and [on self-managed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/119606) in GitLab 16.0.
+> - Option to delete projects immediately from the Admin Area and as a group setting removed [on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/393622) and [on self-managed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/119606) in GitLab 16.0.
 
 Prerequisites:
 
@@ -261,8 +192,6 @@ To restore a project marked for deletion:
 
 ## Archive a project
 
-> - Pages removal [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/343109) in GitLab 17.5.
-
 When you archive a project, some features become read-only.
 These features are still accessible, but not writable.
 
@@ -275,13 +204,11 @@ These features are still accessible, but not writable.
 
 Active pipeline schedules of archived projects don't become read-only.
 
-If the project has deployed Pages, they are removed along with any custom domains,
-and the Pages link is no longer accessible.
-
 Archived projects are:
 
 - Labeled with an `archived` badge on the project page.
-- Listed in the **Inactive** tab on the group page, **Your work** page, and **Explore** page.
+- Listed on the group page in the **Inactive** tab.
+- Hidden from project lists in **Your Work** and **Explore**.
 - Read-only.
 
 Prerequisites:
@@ -318,8 +245,6 @@ Prerequisites:
 1. In the **Unarchive project** section, select **Unarchive project**.
 1. To confirm, select **OK**.
 
-The deployed Pages are not restored and you must rerun the pipeline.
-
 ## View project activity
 
 To view the activity of a project:
@@ -351,7 +276,9 @@ You can sort projects by:
 - Name
 - Created date
 - Updated date
-- Stars
+- Owner
+
+You can also choose to hide or show archived projects.
 
 ### Filter projects by language
 
@@ -364,21 +291,9 @@ You can filter projects by the programming language they use. To do this:
 1. Select either:
    - **View all your projects**, to filter your projects.
    - **Explore**, to filter all projects you can access.
-1. Above the list of projects, select **Search or filter results**.
 1. From the **Language** dropdown list, select the language you want to filter projects by.
 
 A list of projects that use the selected language is displayed.
-
-### View only projects you own
-
-To view only the projects you are the owner of:
-
-1. On the left sidebar, select **Search or go to**.
-1. Select either:
-   - **View all your projects**, to filter your projects.
-   - **Explore**, to filter all projects you can access.
-1. Above the list of projects, select **Search or filter results**.
-1. From the **Role** dropdown list, select **Owner**.
 
 ## Rename a repository
 
@@ -391,7 +306,7 @@ Prerequisites:
 
 NOTE:
 When you change the repository path, users may experience issues if they push to, or pull from, the old URL. For more information, see
-[redirects when renaming repositories](../project/repository/index.md#repository-path-changes).
+[redirects when renaming repositories](../project/repository/index.md#what-happens-when-a-repository-path-changes).
 
 To rename a repository:
 
@@ -400,6 +315,40 @@ To rename a repository:
 1. Expand **Advanced**.
 1. In the **Change path** text box, edit the path.
 1. Select **Change path**.
+
+## Access the project overview page by using the project ID
+
+> - Project ID [moved](https://gitlab.com/gitlab-org/gitlab/-/issues/431539) to the Actions menu in GitLab 16.7.
+
+To access a project by using the project ID instead of its name,
+go to `https://gitlab.example.com/projects/<id>`.
+
+To copy the project ID:
+
+1. On the left sidebar, select **Search or go to** and find your project.
+1. On the project overview page, in the upper-right corner, select **Actions** (**{ellipsis_v}**).
+1. Select **Copy project ID**.
+
+For example, if in your personal namespace `alex` you have a project `my-project` with the ID `123456`, you can access the project
+either at `https://gitlab.example.com/alex/my-project` or `https://gitlab.example.com/projects/123456`.
+
+You might also need the project ID if you want to interact with it using the [GitLab API](../../api/index.md).
+
+## Who can view the Project overview page
+
+When you select a project, the **Project overview** page shows the project contents.
+
+For public projects, and members of internal and private projects
+with [permissions to view the project's code](../permissions.md#project-members-permissions),
+the project landing page shows:
+
+- A [`README` or index file](repository/index.md#readme-and-index-files).
+- A list of directories in the project's repository.
+
+For users without permission to view the project's code, the landing page shows:
+
+- The wiki homepage.
+- The list of issues in the project.
 
 ## Leave a project
 
@@ -432,7 +381,7 @@ You can add compliance frameworks to projects in a group that has a [compliance 
 
 ## Manage project access through LDAP groups
 
-You can [use LDAP to manage group membership](../group/access_and_permissions.md#manage-group-memberships-with-ldap).
+You can [use LDAP to manage group membership](../group/access_and_permissions.md#manage-group-memberships-via-ldap).
 
 You cannot use LDAP groups to manage project access, but you can use the following workaround.
 
@@ -472,4 +421,4 @@ repository. For example, if an administrator creates the alias `gitlab` for the 
 - [Connect an external repository to GitLab CI/CD](../../ci/ci_cd_for_external_repos/index.md).
 - [Fork a project](repository/forking_workflow.md#create-a-fork).
 - Adjust [project visibility](../../user/public_access.md#change-project-visibility) and [permissions](settings/index.md#configure-project-features-and-permissions).
-- [Limitations on project and group names](../../user/reserved_names.md#limitations-on-usernames-project-and-group-names-and-slugs)
+- [Limitations on project and group names](../../user/reserved_names.md#limitations-on-usernames-project-and-group-names)

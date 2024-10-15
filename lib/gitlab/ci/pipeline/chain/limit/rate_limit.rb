@@ -11,10 +11,10 @@ module Gitlab
 
             def perform!
               # We exclude child-pipelines from the rate limit because they represent
-              # sub-pipelines, as well as execution policy pipelines
-              # that would otherwise hit the rate limit due to having the same scope (project, user, sha).
+              # sub-pipelines that would otherwise hit the rate limit due to having the
+              # same scope (project, user, sha).
               #
-              return if pipeline.parent_pipeline? || command.execution_policy_dry_run
+              return if pipeline.parent_pipeline?
 
               if rate_limit_throttled?
                 create_log_entry

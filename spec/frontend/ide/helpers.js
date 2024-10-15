@@ -1,8 +1,7 @@
 import * as pathUtils from 'path';
-import { WEB_IDE_OAUTH_CALLBACK_URL_PATH, commitActionTypes } from '~/ide/constants';
+import { commitActionTypes } from '~/ide/constants';
 import { decorateData } from '~/ide/stores/utils';
 
-// eslint-disable-next-line max-params
 export const file = (name = 'name', id = name, type = '', parent = null) =>
   decorateData({
     id,
@@ -49,6 +48,3 @@ export const createTriggerUpdatePayload = (path) => ({
 
 export const createTriggerRenameAction = (path, newPath) =>
   createTriggerChangeAction(createTriggerRenamePayload(path, newPath));
-
-export const getMockCallbackUrl = () =>
-  new URL(WEB_IDE_OAUTH_CALLBACK_URL_PATH, window.location.origin).toString();

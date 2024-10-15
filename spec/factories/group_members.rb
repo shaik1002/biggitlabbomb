@@ -15,15 +15,11 @@ FactoryBot.define do
     trait(:access_request) { requested_at { Time.now } }
 
     trait(:invited) do
-      user { nil }
+      user_id { nil }
       invite_token { 'xxx' }
       sequence :invite_email do |n|
         "email#{n}@email.com"
       end
-    end
-
-    trait(:created_by) do
-      created_by { association(:user) }
     end
 
     trait(:ldap) do
@@ -32,6 +28,12 @@ FactoryBot.define do
 
     trait :blocked do
       after(:build) { |group_member, _| group_member.user.block! }
+    end
+
+    trait :banned do
+      after(:create) do |member|
+        create(:namespace_ban, namespace: member.member_namespace.root_ancestor, user: member.user) unless member.owner?
+      end
     end
 
     trait :minimal_access do

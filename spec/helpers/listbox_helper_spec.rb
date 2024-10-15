@@ -11,7 +11,7 @@ RSpec.describe ListboxHelper do
   before do
     allow(helper).to receive(:sprite_icon).with(
       'chevron-down',
-      css_class: 'gl-button-icon gl-new-dropdown-chevron gl-icon'
+      css_class: 'gl-button-icon dropdown-chevron gl-icon'
     ).and_return('<span class="icon"></span>'.html_safe)
   end
 
@@ -28,7 +28,9 @@ RSpec.describe ListboxHelper do
     it 'creates root element with expected classes' do
       expect(subject.classes).to include(
         *%w[
-          gl-new-dropdown
+          dropdown
+          b-dropdown
+          gl-dropdown
           js-redirect-listbox
         ])
     end
@@ -41,12 +43,17 @@ RSpec.describe ListboxHelper do
     it 'adds styled button' do
       expect(subject.at_css('button').classes).to include(
         *%w[
-          gl-new-dropdown-toggle
+          btn
+          dropdown-toggle
+          btn-default
+          btn-md
+          gl-button
+          gl-dropdown-toggle
         ])
     end
 
     it 'sets button text to selected item' do
-      expect(subject.at_css('button').content.strip).to eq('Bar')
+      expect(subject.at_css('button').content).to eq('Bar')
     end
 
     context 'given html_options' do
@@ -63,7 +70,7 @@ RSpec.describe ListboxHelper do
 
       with_them do
         it 'selects first item' do
-          expect(subject.at_css('button').content.strip).to eq('Foo')
+          expect(subject.at_css('button').content).to eq('Foo')
           expect(subject.attributes['data-selected'].value).to eq('foo')
         end
       end

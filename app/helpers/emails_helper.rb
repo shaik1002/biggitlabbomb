@@ -4,14 +4,6 @@ module EmailsHelper
   include AppearancesHelper
   include SafeFormatHelper
 
-  def subject_with_suffix(subject_line)
-    subject_line << Gitlab.config.gitlab.email_subject_suffix if Gitlab.config.gitlab.email_subject_suffix.present?
-
-    subject_line.join(' | ')
-  end
-
-  module_function :subject_with_suffix
-
   # Google Actions
   # https://developers.google.com/gmail/markup/reference/go-to-action
   def email_action(url)
@@ -24,7 +16,7 @@ module EmailsHelper
   def action_title(url)
     return unless url
 
-    %w[merge_requests issues work_items commit].each do |action|
+    %w[merge_requests issues commit].each do |action|
       if url.split("/").include?(action)
         return "View #{action.humanize.singularize}"
       end
@@ -100,7 +92,6 @@ module EmailsHelper
 
   def closure_reason_text(closed_via, format:, name:)
     name = sanitize_name(name)
-
     case closed_via
     when MergeRequest
       merge_request = MergeRequest.find(closed_via[:id]).present
@@ -110,10 +101,10 @@ module EmailsHelper
       case format
       when :html
         merge_request_link = link_to(merge_request.to_reference, merge_request.web_url)
-        safe_format(_("Issue was closed by %{name} with merge request %{link}"), name: name, link: merge_request_link)
+        safe_format(_("Issue was closed by %{name} via merge request %{link}"), name: name, link: merge_request_link)
       else
         # If it's not HTML nor text then assume it's text to be safe
-        _("Issue was closed by %{name} with merge request %{link}") % { name: name, link: "#{merge_request.to_reference} (#{merge_request.web_url})" }
+        _("Issue was closed by %{name} via merge request %{link}") % { name: name, link: "#{merge_request.to_reference} (#{merge_request.web_url})" }
       end
     when String
       # Technically speaking this should be Commit but per
@@ -121,12 +112,10 @@ module EmailsHelper
       # we can't deserialize Commit without custom serializer for ActiveJob
       return "" unless Ability.allowed?(@recipient, :download_code, @project)
 
-      _("Issue was closed by %{name} with %{closed_via}") % { name: name, closed_via: closed_via }
+      _("Issue was closed by %{name} via %{closed_via}") % { name: name, closed_via: closed_via }
     else
-      type = work_item_type_for(@issue).capitalize
-
       if name
-        _("%{type} was closed by %{name}") % { name: name, type: type }
+        _("Issue was closed by %{name}") % { name: name }
       else
         ""
       end

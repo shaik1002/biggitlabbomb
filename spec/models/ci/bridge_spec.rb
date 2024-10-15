@@ -52,7 +52,7 @@ RSpec.describe Ci::Bridge, feature_category: :continuous_integration do
     end
 
     it 'returns an empty TagList for tag_list' do
-      expect(bridge.tag_list).to be_a(Gitlab::Ci::Tags::TagList)
+      expect(bridge.tag_list).to be_a(ActsAsTaggableOn::TagList)
     end
   end
 
@@ -640,11 +640,7 @@ RSpec.describe Ci::Bridge, feature_category: :continuous_integration do
         create(:project, :repository, :in_group, creator: bridge_creator_user, group: bridge_group)
       end
 
-      let(:ci_stage) { create(:ci_stage, pipeline: pipeline, project: pipeline.project) }
-      let(:bridge) do
-        build(:ci_bridge, :playable, pipeline: pipeline, downstream: downstream_project, ci_stage: ci_stage)
-      end
-
+      let(:bridge) { build(:ci_bridge, :playable, pipeline: pipeline, downstream: downstream_project) }
       let!(:pipeline) { create(:ci_pipeline, project: project) }
 
       let!(:ci_variable) do
@@ -1165,15 +1161,11 @@ RSpec.describe Ci::Bridge, feature_category: :continuous_integration do
     end
   end
 
-  describe 'metadata partitioning' do
-    let(:pipeline) do
-      create(:ci_pipeline, project: project, partition_id: ci_testing_partition_id)
-    end
-
-    let(:ci_stage) { create(:ci_stage, pipeline: pipeline) }
+  describe 'metadata partitioning', :ci_partitionable do
+    let(:pipeline) { create(:ci_pipeline, project: project, partition_id: ci_testing_partition_id) }
 
     let(:bridge) do
-      build(:ci_bridge, pipeline: pipeline, ci_stage: ci_stage)
+      build(:ci_bridge, pipeline: pipeline)
     end
 
     it 'creates the metadata record and assigns its partition' do

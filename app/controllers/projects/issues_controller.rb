@@ -44,14 +44,12 @@ class Projects::IssuesController < Projects::ApplicationController
   before_action :authorize_read_code!, only: [:related_branches]
 
   before_action do
-    push_frontend_feature_flag(:preserve_markdown, project)
+    push_frontend_feature_flag(:preserve_unchanged_markdown, project)
     push_frontend_feature_flag(:issues_grid_view)
     push_frontend_feature_flag(:service_desk_ticket)
     push_frontend_feature_flag(:issues_list_drawer, project)
+    push_frontend_feature_flag(:display_work_item_epic_issue_sidebar, project)
     push_frontend_feature_flag(:notifications_todos_buttons, current_user)
-    push_frontend_feature_flag(:comment_tooltips, current_user)
-    push_force_frontend_feature_flag(:glql_integration, project&.glql_integration_feature_flag_enabled?)
-    push_frontend_feature_flag(:issue_autocomplete_backend_filtering, project)
   end
 
   before_action only: [:index, :show] do
@@ -59,21 +57,24 @@ class Projects::IssuesController < Projects::ApplicationController
   end
 
   before_action only: [:index, :service_desk] do
+    push_frontend_feature_flag(:or_issuable_queries, project)
     push_frontend_feature_flag(:frontend_caching, project&.group)
+    push_frontend_feature_flag(:group_multi_select_tokens, project)
   end
 
   before_action only: :show do
     push_frontend_feature_flag(:work_items_beta, project&.group)
     push_force_frontend_feature_flag(:work_items_beta, project&.work_items_beta_feature_flag_enabled?)
-    push_force_frontend_feature_flag(:work_items_alpha, project&.work_items_alpha_feature_flag_enabled?)
+    push_force_frontend_feature_flag(:work_items_mvc_2, project&.work_items_mvc_2_feature_flag_enabled?)
     push_frontend_feature_flag(:epic_widget_edit_confirmation, project)
-    push_frontend_feature_flag(:namespace_level_work_items, project&.group)
-    push_frontend_feature_flag(:work_items_view_preference, current_user)
+    push_frontend_feature_flag(:display_work_item_epic_issue_sidebar, project)
   end
 
   around_action :allow_gitaly_ref_name_caching, only: [:discussions]
 
   respond_to :html
+
+  alias_method :designs, :show
 
   feature_category :team_planning, [
     :index, :calendar, :show, :new, :create, :edit, :update,
@@ -121,7 +122,6 @@ class Projects::IssuesController < Projects::ApplicationController
     build_params = issue_params.merge(
       merge_request_to_resolve_discussions_of: params[:merge_request_to_resolve_discussions_of],
       discussion_to_resolve: params[:discussion_to_resolve],
-      observability_links: { metrics: params[:observability_metric_details], logs: params[:observability_log_details], tracing: params[:observability_trace_details] },
       confidential: !!Gitlab::Utils.to_boolean(issue_params[:confidential])
     )
     service = ::Issues::BuildService.new(container: project, current_user: current_user, params: build_params)
@@ -140,17 +140,6 @@ class Projects::IssuesController < Projects::ApplicationController
     respond_with(@issue)
   end
 
-  def show
-    return super unless show_work_item? && request.format.html?
-
-    @right_sidebar = false
-    @work_item = issue.becomes(::WorkItem) # rubocop:disable Cop/AvoidBecomes -- We need the instance to be a work item
-
-    render 'projects/work_items/show'
-  end
-
-  alias_method :designs, :show
-
   def edit
     respond_with(@issue)
   end
@@ -159,7 +148,6 @@ class Projects::IssuesController < Projects::ApplicationController
     create_params = issue_params.merge(
       add_related_issue: add_related_issue,
       merge_request_to_resolve_discussions_of: params[:merge_request_to_resolve_discussions_of],
-      observability_links: params[:observability_links],
       discussion_to_resolve: params[:discussion_to_resolve]
     )
 
@@ -401,10 +389,6 @@ class Projects::IssuesController < Projects::ApplicationController
 
   private
 
-  def show_work_item?
-    Feature.enabled?(:work_items_view_preference, current_user) && current_user&.user_preference&.use_work_items_view
-  end
-
   def work_item_redirect_except_actions
     ISSUES_EXCEPT_ACTIONS
   end
@@ -461,7 +445,7 @@ class Projects::IssuesController < Projects::ApplicationController
   def create_vulnerability_issue_feedback(issue); end
 
   def redirect_if_work_item
-    return unless use_work_items_path?(issue) && !show_work_item?
+    return unless use_work_items_path?(issue)
 
     redirect_to project_work_item_path(project, issue.iid, params: request.query_parameters)
   end

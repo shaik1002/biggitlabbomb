@@ -10,12 +10,10 @@ module Ci
     STARTED_STATUSES = %w[running success failed].freeze
     ACTIVE_STATUSES = %w[waiting_for_resource preparing waiting_for_callback pending running].freeze
     COMPLETED_STATUSES = %w[success failed canceled skipped].freeze
-    COMPLETED_WITH_MANUAL_STATUSES = COMPLETED_STATUSES + %w[manual]
     STOPPED_STATUSES = COMPLETED_STATUSES + BLOCKED_STATUS
     ORDERED_STATUSES = %w[failed preparing pending running waiting_for_callback waiting_for_resource manual scheduled canceling canceled success skipped created].freeze
     PASSED_WITH_WARNINGS_STATUSES = %w[failed canceled].to_set.freeze
     IGNORED_STATUSES = %w[manual].to_set.freeze
-    EXECUTING_STATUSES = %w[running canceling].freeze
     ALIVE_STATUSES = ORDERED_STATUSES - COMPLETED_STATUSES - BLOCKED_STATUS
     CANCELABLE_STATUSES = (ALIVE_STATUSES + ['scheduled'] - ['canceling']).freeze
     STATUSES_ENUM = { created: 0, pending: 1, running: 2, success: 3,
@@ -50,7 +48,7 @@ module Ci
       end
 
       def completed_with_manual_statuses
-        COMPLETED_WITH_MANUAL_STATUSES.map(&:to_sym)
+        completed_statuses + [:manual]
       end
 
       def stopped_statuses
@@ -94,7 +92,6 @@ module Ci
       scope :alive, -> { with_status(*ALIVE_STATUSES) }
       scope :created_or_pending, -> { with_status(:created, :pending) }
       scope :running_or_pending, -> { with_status(:running, :pending) }
-      scope :executing, -> { with_status(*EXECUTING_STATUSES) }
       scope :finished, -> { with_status(:success, :failed, :canceled) }
       scope :failed_or_canceled, -> { with_status(:failed, :canceled, :canceling) }
       scope :complete, -> { with_status(completed_statuses) }
@@ -106,7 +103,7 @@ module Ci
         where(status: klass::CANCELABLE_STATUSES)
       end
 
-      scope :without_statuses, ->(names) do
+      scope :without_statuses, -> (names) do
         with_status(all_state_names - names.to_a)
       end
     end
@@ -124,7 +121,7 @@ module Ci
     end
 
     def complete_or_manual?
-      COMPLETED_WITH_MANUAL_STATUSES.include?(status)
+      self.class.completed_with_manual_statuses.map(&:to_s).include?(status)
     end
 
     def incomplete?

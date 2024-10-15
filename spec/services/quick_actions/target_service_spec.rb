@@ -7,8 +7,7 @@ RSpec.describe QuickActions::TargetService, feature_category: :team_planning do
   let_it_be_with_reload(:project) { create(:project, group: group) }
   let_it_be(:user) { create(:user, maintainer_of: project) }
   let(:container) { project }
-  let(:service) { described_class.new(container: container, current_user: user, params: params) }
-  let(:params) { {} }
+  let(:service) { described_class.new(container: container, current_user: user) }
 
   describe '#execute' do
     shared_examples 'no target' do |type_iid:|
@@ -53,29 +52,11 @@ RSpec.describe QuickActions::TargetService, feature_category: :team_planning do
 
       it_behaves_like 'find target'
 
-      context 'when work item type id is passed', :aggregate_failures do
-        let(:task_type) { WorkItems::Type.default_by_type(:task) }
-        let(:params) { { work_item_type_id: task_type.id } }
+      context 'when work item belongs to a group' do
+        let(:container) { group }
+        let(:target) { create(:work_item, :group_level, namespace: group) }
 
-        it 'returns the target' do
-          found_target = service.execute(type, nil)
-
-          expect(found_target).to be_instance_of(WorkItem)
-          expect(found_target.work_item_type).to eq(task_type)
-          expect(found_target.project).to eq(project)
-        end
-
-        context 'when container is a group' do
-          let(:container) { group }
-
-          it 'returns the target' do
-            found_target = service.execute(type, nil)
-
-            expect(found_target).to be_instance_of(WorkItem)
-            expect(found_target.work_item_type).to eq(task_type)
-            expect(found_target.namespace).to eq(group)
-          end
-        end
+        it_behaves_like 'find target'
       end
     end
 

@@ -54,8 +54,8 @@ export default {
 </script>
 
 <template>
-  <div class="labels-select-contents-create">
-    <div class="dropdown-title pt-0 pb-2 gl-mb-0 gl-flex gl-items-center">
+  <div class="labels-select-contents-create js-labels-create">
+    <div class="dropdown-title d-flex gl-align-items-center pt-0 pb-2 gl-mb-0">
       <gl-button
         :aria-label="__('Go back')"
         category="tertiary"
@@ -77,7 +77,7 @@ export default {
     <div class="dropdown-input">
       <gl-form-input
         v-model.trim="labelTitle"
-        :placeholder="__('Label name')"
+        :placeholder="__('Name new label')"
         :autofocus="true"
         data-testid="label-title"
       />
@@ -93,10 +93,10 @@ export default {
           @click.prevent="handleColorClick(color)"
         />
       </div>
-      <div class="color-input-container gl-flex">
+      <div class="color-input-container gl-display-flex">
         <gl-form-input
           v-model.trim="selectedColor"
-          class="-gl-mr-1 gl-mb-2 gl-w-8 gl-rounded-br-none gl-rounded-tr-none"
+          class="gl-rounded-top-right-none gl-rounded-bottom-right-none -gl-mr-1 gl-mb-2 gl-w-8"
           type="color"
           :value="selectedColor"
           :placeholder="__('Open color picker')"
@@ -104,7 +104,7 @@ export default {
         />
         <gl-form-input
           v-model.trim="selectedColor"
-          class="gl-mb-2 gl-rounded-bl-none gl-rounded-tl-none"
+          class="gl-rounded-top-left-none gl-rounded-bottom-left-none gl-mb-2"
           :placeholder="__('Use custom color #FF0000')"
         />
       </div>
@@ -114,7 +114,7 @@ export default {
         :disabled="disableCreate"
         category="primary"
         variant="confirm"
-        class="float-left gl-flex gl-items-center"
+        class="float-left d-flex gl-align-items-center"
         data-testid="create-click"
         @click="handleCreateClick"
       >
@@ -122,7 +122,7 @@ export default {
         {{ __('Create') }}
       </gl-button>
       <gl-button
-        class="js-btn-cancel-create gl-float-right"
+        class="gl-float-right js-btn-cancel-create"
         @click="toggleDropdownContentsCreateView"
       >
         {{ __('Cancel') }}

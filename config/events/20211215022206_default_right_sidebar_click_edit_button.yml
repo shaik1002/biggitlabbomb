@@ -1,11 +1,16 @@
 description: "Click edit reviewer button on right sidebar"
 category: default
 action: click_edit_button
+label_description: "`right_sidebar`"
+property_description: "`reviewer`"
+value_description: ""
 extra_properties:
 identifiers:
-product_group: code_review
+product_section: ""
+product_stage: ""
+product_group: ""
 milestone:
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/73809
+introduced_by_url:
 distributions:
 - ce
 - ee
@@ -13,8 +18,3 @@ tiers:
 - free
 - premium
 - ultimate
-additional_properties:
-  label:
-    description: "`right_sidebar`"
-  property:
-    description: "`reviewer`"

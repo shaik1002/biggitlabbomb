@@ -1,30 +1,16 @@
 # frozen_string_literal: true
 
-# On .com partitions are not created on application startup,
-# they are created by the PartitionManagementWorker cron worker
-# which is executed several times per day. If a partition must be present
-# on startup, it could be created using a regular migration.
-# https://gitlab.com/gitlab-com/gl-infra/production/-/issues/2446
-
 Gitlab::Database::Partitioning.register_models(
   [
     AuditEvent,
-    AuditEvents::UserAuditEvent,
-    AuditEvents::GroupAuditEvent,
-    AuditEvents::ProjectAuditEvent,
-    AuditEvents::InstanceAuditEvent,
     BatchedGitRefUpdates::Deletion,
     Ci::BuildMetadata,
     Ci::BuildExecutionConfig,
     Ci::BuildName,
-    Ci::BuildTag,
-    Ci::BuildSource,
     Ci::Catalog::Resources::Components::Usage,
     Ci::Catalog::Resources::SyncEvent,
-    Ci::FinishedPipelineChSyncEvent,
     Ci::JobAnnotation,
     Ci::JobArtifact,
-    Ci::PipelineConfig,
     Ci::PipelineVariable,
     Ci::RunnerManagerBuild,
     Ci::Stage,
@@ -44,8 +30,7 @@ if Gitlab.ee?
       Security::Finding,
       Analytics::ValueStreamDashboard::Count,
       Ci::FinishedBuildChSyncEvent,
-      Search::Zoekt::Task,
-      Ai::CodeSuggestionEvent
+      Search::Zoekt::Task
     ])
 else
   Gitlab::Database::Partitioning.register_tables(
@@ -102,22 +87,4 @@ Gitlab::Database::Partitioning.register_tables(
     }
   ]
 )
-
-Gitlab::Database::Partitioning.register_tables(
-  [
-    {
-      limit_connection_names: %i[ci],
-      table_name: 'p_ci_build_trace_metadata',
-      partitioned_column: :partition_id,
-      strategy: :ci_sliding_list,
-      next_partition_if: ->(latest_partition) {
-                           ::Feature.enabled?(:partition_ci_build_trace_metadata, :instance) &&
-                            latest_partition &&
-                            [100, 101].include?(latest_partition.values.max)
-                         },
-      detach_partition_if: proc { false }
-    }
-  ]
-)
-
 Gitlab::Database::Partitioning.sync_partitions_ignore_db_error

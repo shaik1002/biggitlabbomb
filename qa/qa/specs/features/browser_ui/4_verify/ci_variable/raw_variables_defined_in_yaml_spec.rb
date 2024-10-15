@@ -2,11 +2,18 @@
 
 module QA
   RSpec.describe 'Verify', :runner do
-    describe 'Pipeline with raw variables in YAML', product_group: :pipeline_authoring do
-      let(:executor) { "qa-runner-#{SecureRandom.hex(6)}" }
+    describe 'Pipeline with raw variables in YAML', product_group: :pipeline_security do
+      let(:executor) { "qa-runner-#{Time.now.to_i}" }
       let(:pipeline_job_name) { 'rspec' }
       let(:project) { create(:project, name: 'project-with-raw-variable-pipeline') }
-      let!(:runner) { create(:project_runner, project: project, name: executor, tags: [executor]) }
+
+      let!(:runner) do
+        Resource::ProjectRunner.fabricate! do |runner|
+          runner.project = project
+          runner.name = executor
+          runner.tags = [executor]
+        end
+      end
 
       let!(:commit_ci_file) do
         create(:commit, project: project, commit_message: 'Add .gitlab-ci.yml', actions: [

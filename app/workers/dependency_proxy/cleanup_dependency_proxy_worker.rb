@@ -8,12 +8,11 @@ module DependencyProxy
     data_consistency :always
     idempotent!
 
-    feature_category :virtual_registry
+    feature_category :dependency_proxy
 
     def perform
       enqueue_blob_cleanup_job if DependencyProxy::Blob.pending_destruction.any?
       enqueue_manifest_cleanup_job if DependencyProxy::Manifest.pending_destruction.any?
-      enqueue_vreg_packages_cached_response_cleanup_job
     end
 
     private
@@ -24,14 +23,6 @@ module DependencyProxy
 
     def enqueue_manifest_cleanup_job
       DependencyProxy::CleanupManifestWorker.perform_with_capacity
-    end
-
-    def enqueue_vreg_packages_cached_response_cleanup_job
-      [::VirtualRegistries::Packages::Maven::CachedResponse].each do |klass|
-        if klass.pending_destruction.any?
-          ::VirtualRegistries::Packages::DestroyOrphanCachedResponsesWorker.perform_with_capacity(klass.name)
-        end
-      end
     end
   end
 end

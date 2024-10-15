@@ -2,6 +2,8 @@
 data_category: optional
 key_path: usage_activity_by_stage_monthly.create.merge_requests
 description: Count distinct authors of merge requests
+product_section: dev
+product_stage: create
 product_group: code_review
 value_type: number
 status: removed
@@ -18,5 +20,4 @@ tier:
 performance_indicator_type:
 - customer_health_score
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332
 removed_by_url:

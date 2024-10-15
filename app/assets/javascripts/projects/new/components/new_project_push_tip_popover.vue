@@ -33,7 +33,7 @@ export default {
     placement="top"
   >
     <p>
-      <label for="push-to-create-tip" class="gl-font-normal">
+      <label for="push-to-create-tip" class="gl-font-weight-normal">
         {{ $options.i18n.labelText }}
       </label>
     </p>
@@ -57,7 +57,7 @@ export default {
     <p>
       <a
         :href="`${projectHelpPath}#create-a-new-project-with-git-push`"
-        class="gl-text-sm"
+        class="gl-font-sm"
         target="_blank"
         >{{ $options.i18n.helpLinkText }}</a
       >

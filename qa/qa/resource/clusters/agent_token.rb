@@ -10,7 +10,8 @@ module QA
           QA::Resource::Clusters::Agent.fabricate_via_api!
         end
 
-        def fabricate!; end
+        def fabricate!
+        end
 
         def resource_web_url(resource)
           super

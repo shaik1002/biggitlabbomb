@@ -66,9 +66,6 @@ export default {
       update(data) {
         return data.workspace?.issuable?.confidential || false;
       },
-      skip() {
-        return !this.iid;
-      },
       result({ data }) {
         if (!data) {
           return;

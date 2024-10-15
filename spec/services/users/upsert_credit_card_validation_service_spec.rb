@@ -17,9 +17,6 @@ RSpec.describe Users::UpsertCreditCardValidationService, feature_category: :user
   let(:expiration_date) { Date.new(expiration_year, expiration_month, -1) }
   let(:credit_card_validated_at) { Time.utc(2020, 1, 1) }
   let(:zuora_payment_method_xid) { 'abc123' }
-  let(:stripe_setup_intent_xid) { 'seti_abc123' }
-  let(:stripe_payment_method_xid) { 'pm_abc123' }
-  let(:stripe_card_fingerprint) { 'card123' }
 
   let(:params) do
     {
@@ -30,10 +27,7 @@ RSpec.describe Users::UpsertCreditCardValidationService, feature_category: :user
       credit_card_holder_name: holder_name,
       credit_card_type: network,
       credit_card_mask_number: last_digits,
-      zuora_payment_method_xid: zuora_payment_method_xid,
-      stripe_setup_intent_xid: stripe_setup_intent_xid,
-      stripe_payment_method_xid: stripe_payment_method_xid,
-      stripe_card_fingerprint: stripe_card_fingerprint
+      zuora_payment_method_xid: zuora_payment_method_xid
     }
   end
 
@@ -58,10 +52,7 @@ RSpec.describe Users::UpsertCreditCardValidationService, feature_category: :user
             holder_name_hash: sha256(holder_name.downcase),
             last_digits_hash: sha256(last_digits),
             expiration_date_hash: sha256(expiration_date.to_s),
-            zuora_payment_method_xid: 'abc123',
-            stripe_setup_intent_xid: 'seti_abc123',
-            stripe_payment_method_xid: 'pm_abc123',
-            stripe_card_fingerprint: 'card123'
+            zuora_payment_method_xid: 'abc123'
           )
         end
       end
@@ -122,28 +113,6 @@ RSpec.describe Users::UpsertCreditCardValidationService, feature_category: :user
       end
     end
 
-    context 'when the stripe identifiers are missing' do
-      let(:stripe_setup_intent_xid) { nil }
-      let(:stripe_payment_method_xid) { nil }
-      let(:stripe_card_fingerprint) { nil }
-
-      it 'successfully validates the credit card' do
-        service_result = service.execute
-
-        expect(service_result).to be_success
-        expect(service_result.message).to eq(_('Credit card validation record saved'))
-
-        user.reload
-
-        expect(user.credit_card_validated_at).to be_present
-        expect(user.credit_card_validation).to have_attributes(
-          stripe_setup_intent_xid: nil,
-          stripe_payment_method_xid: nil,
-          stripe_card_fingerprint: nil
-        )
-      end
-    end
-
     context 'when the user_id does not exist' do
       let(:user_id) { non_existing_record_id }
 
@@ -196,22 +165,6 @@ RSpec.describe Users::UpsertCreditCardValidationService, feature_category: :user
 
         expect(service_result.status).to eq(:error)
         expect(service_result.message).to eq(_('Error saving credit card validation record'))
-      end
-    end
-
-    context 'when the credit card verification limit has been reached' do
-      before do
-        allow_next_instance_of(Users::CreditCardValidation) do |instance|
-          allow(instance).to receive(:exceeded_daily_verification_limit?).and_return(true)
-        end
-      end
-
-      it 'returns an error', :aggregate_failures do
-        service_result = service.execute
-
-        expect(service_result).to be_error
-        expect(service_result.message).to eq('Credit card verification limit exceeded')
-        expect(service_result.reason).to eq(:rate_limited)
       end
     end
   end

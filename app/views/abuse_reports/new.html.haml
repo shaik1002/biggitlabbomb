@@ -1,7 +1,7 @@
 - page_title _("Report abuse to administrator")
 .row
   .col-lg-8
-    %h1.page-title.gl-text-size-h-display
+    %h1.page-title.gl-font-size-h-display
       = _("Report abuse to administrator")
     %p
       = _("Please use this form to report to the administrator users who create spam issues, comments or behave inappropriately.")
@@ -32,7 +32,7 @@
       = f.label :screenshot do
         %span
           = s_('ReportAbuse|Screenshot')
-        .gl-font-normal
+        .gl-font-weight-normal
           = s_('ReportAbuse|Screenshot of abuse')
       %div
         = render 'shared/file_picker_button', f: f, field: :screenshot, help_text: _("Screenshot must be less than 1 MB."), mime_types: valid_image_mimetypes

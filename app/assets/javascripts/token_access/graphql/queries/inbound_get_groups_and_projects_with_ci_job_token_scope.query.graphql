@@ -7,7 +7,6 @@ query inboundGetGroupsAndProjectsWithCIJobTokenScope($fullPath: ID!) {
           id
           name
           fullPath
-          avatarUrl
         }
       }
       inboundAllowlist {
@@ -15,7 +14,6 @@ query inboundGetGroupsAndProjectsWithCIJobTokenScope($fullPath: ID!) {
           id
           name
           fullPath
-          avatarUrl
         }
       }
     }

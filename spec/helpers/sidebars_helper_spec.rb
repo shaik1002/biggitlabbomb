@@ -66,14 +66,10 @@ RSpec.describe SidebarsHelper, feature_category: :navigation do
 
     let_it_be(:user) { build(:user) }
     let_it_be(:group) { build(:group) }
-    let_it_be(:group_with_id) { build_stubbed(:group) }
     let_it_be(:panel) { {} }
     let_it_be(:panel_type) { 'project' }
     let(:project) { nil }
     let(:current_user_mode) { Gitlab::Auth::CurrentUserMode.new(user) }
-    let(:context_with_group_id) do
-      helper.super_sidebar_context(user, group: group_with_id, project: project, panel: panel, panel_type: panel_type)
-    end
 
     let(:global_shortcut_links) do
       [
@@ -118,14 +114,11 @@ RSpec.describe SidebarsHelper, feature_category: :navigation do
       allow(helper).to receive(:current_user_mode).and_return(current_user_mode)
       allow(panel).to receive(:super_sidebar_menu_items).and_return(nil)
       allow(panel).to receive(:super_sidebar_context_header).and_return(nil)
-
-      if user
-        allow(user).to receive(:assigned_open_issues_count).and_return(1)
-        allow(user).to receive(:assigned_open_merge_requests_count).and_return(4)
-        allow(user).to receive(:review_requested_open_merge_requests_count).and_return(0)
-        allow(user).to receive(:todos_pending_count).and_return(3)
-        allow(user).to receive(:pinned_nav_items).and_return({ panel_type => %w[foo bar], 'another_panel' => %w[baz] })
-      end
+      allow(user).to receive(:assigned_open_issues_count).and_return(1)
+      allow(user).to receive(:assigned_open_merge_requests_count).and_return(4)
+      allow(user).to receive(:review_requested_open_merge_requests_count).and_return(0)
+      allow(user).to receive(:todos_pending_count).and_return(3)
+      allow(user).to receive(:pinned_nav_items).and_return({ panel_type => %w[foo bar], 'another_panel' => %w[baz] })
     end
 
     # Tests for logged-out sidebar context
@@ -134,16 +127,6 @@ RSpec.describe SidebarsHelper, feature_category: :navigation do
     # Tests for logged-in sidebar context below
     it_behaves_like 'shared super sidebar context'
     it { is_expected.to include({ is_logged_in: true }) }
-
-    it 'returns terms if defined' do
-      stub_application_setting(terms: "My custom Terms of Use")
-
-      is_expected.to include({ terms: "/-/users/terms" })
-    end
-
-    it 'does not return terms if not set' do
-      is_expected.to include({ terms: nil })
-    end
 
     it 'returns sidebar values from user', :use_clean_rails_memory_store_caching do
       expect(subject).to include({
@@ -187,7 +170,7 @@ RSpec.describe SidebarsHelper, feature_category: :navigation do
         can_sign_out: helper.current_user_menu?(:sign_out),
         sign_out_link: destroy_user_session_path,
         issues_dashboard_path: issues_dashboard_path(assignee_username: user.username),
-        todos_dashboard_path: vue_dashboard_todos_path,
+        todos_dashboard_path: dashboard_todos_path,
         projects_path: dashboard_projects_path,
         groups_path: dashboard_groups_path,
         gitlab_com_but_not_canary: Gitlab.com_but_not_canary?,
@@ -197,29 +180,7 @@ RSpec.describe SidebarsHelper, feature_category: :navigation do
         update_pins_url: pins_path,
         shortcut_links: global_shortcut_links,
         track_visits_path: track_namespace_visits_path,
-        work_items: nil
-      })
-    end
-
-    context 'when todos_vue_application is disabled' do
-      it 'returns the legacy todo dashboard path' do
-        stub_feature_flags(todos_vue_application: false)
-
-        expect(subject).to include({
-          todos_dashboard_path: dashboard_todos_path
-        })
-      end
-    end
-
-    it 'returns sidebar values for work item context with group id', :use_clean_rails_memory_store_caching do
-      expect(context_with_group_id).to include({
-        work_items: {
-          full_path: group_with_id.full_path,
-          has_issuable_health_status_feature: "false",
-          issues_list_path: issues_group_path(group_with_id),
-          labels_manage_path: group_labels_path(group_with_id),
-          can_admin_label: "true"
-        }
+        work_items: { full_path: group.full_path }
       })
     end
 
@@ -229,58 +190,6 @@ RSpec.describe SidebarsHelper, feature_category: :navigation do
       end
 
       it { is_expected.to include({ is_admin: true }) }
-    end
-
-    describe "what's new information" do
-      context 'when display_whats_new? is true' do
-        before do
-          allow(helper).to receive(:display_whats_new?).and_return(true)
-        end
-
-        it do
-          is_expected.to include({
-            whats_new_most_recent_release_items_count: helper.whats_new_most_recent_release_items_count,
-            whats_new_version_digest: helper.whats_new_version_digest
-          })
-        end
-      end
-
-      context 'when display_whats_new? is false' do
-        before do
-          allow(helper).to receive(:display_whats_new?).and_return(false)
-        end
-
-        it do
-          is_expected.not_to have_key(:whats_new_most_recent_release_items_count)
-          is_expected.not_to have_key(:whats_new_version_digest)
-        end
-      end
-    end
-
-    describe 'instance version information' do
-      context 'when show_version_check? is true' do
-        before do
-          allow(helper).to receive(:show_version_check?).and_return(true)
-        end
-
-        it do
-          is_expected.to include({
-            gitlab_version: Gitlab.version_info,
-            gitlab_version_check: helper.gitlab_version_check
-          })
-        end
-      end
-
-      context 'when show_version_check? is false' do
-        before do
-          allow(helper).to receive(:show_version_check?).and_return(false)
-        end
-
-        it do
-          is_expected.not_to have_key(:gitlab_version)
-          is_expected.not_to have_key(:gitlab_version_check)
-        end
-      end
     end
 
     describe "shortcut links" do
@@ -538,7 +447,7 @@ RSpec.describe SidebarsHelper, feature_category: :navigation do
       end
 
       let_it_be(:admin_area_link) do
-        { title: s_('Navigation|Admin area'), link: '/admin', icon: 'admin' }
+        { title: s_('Navigation|Admin Area'), link: '/admin', icon: 'admin' }
       end
 
       subject do

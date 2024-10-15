@@ -2,6 +2,8 @@
 data_category: optional
 key_path: database.version
 description: The version of the PostgreSQL database.
+product_section: enablement
+product_stage: enablement
 product_group: distribution_deploy
 value_type: string
 status: active
@@ -16,4 +18,3 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

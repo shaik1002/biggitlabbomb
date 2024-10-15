@@ -2,10 +2,7 @@
 
 module Ci
   class Partition < Ci::ApplicationRecord
-    MAX_PARTITION_SIZE = 100.gigabytes
-
     validates :id, :status, presence: true
-    validates :status, uniqueness: { if: ->(partition) { partition.status_changed? && partition.current? } }
 
     state_machine :status, initial: :preparing do
       state :preparing, value: 0
@@ -15,14 +12,6 @@ module Ci
 
       event :ready do
         transition preparing: :ready
-      end
-
-      event :switch_writes do
-        transition ready: :current
-      end
-
-      before_transition [:ready] => :current do
-        Ci::Partition.with_status(:current).update_all(status: Ci::Partition.statuses[:active])
       end
     end
 
@@ -40,40 +29,25 @@ module Ci
       def create_next!
         create!(id: last.id.next, status: statuses[:preparing])
       end
-
-      def next_available(partition_id)
-        Ci::Partition
-          .with_status(:ready)
-          .id_after(partition_id)
-          .order(id: :asc)
-          .first
-      end
-
-      def provisioning(partition_id)
-        Ci::Partition
-          .with_status(:preparing)
-          .id_after(partition_id)
-          .order(id: :asc)
-          .first
-      end
     end
 
     def above_threshold?(threshold)
       with_ci_connection do
-        Gitlab::Database::PostgresPartition
-          .with_parent_tables(parent_table_names)
-          .with_list_constraint(id)
-          .above_threshold(threshold)
-          .exists?
+        Ci::Partitionable.registered_models.any? do |model|
+          database_partition =  model.partitioning_strategy.partition_for_id(id)
+          database_partition && database_partition.data_size > threshold
+        end
       end
     end
 
     def all_partitions_exist?
       with_ci_connection do
-        Gitlab::Database::PostgresPartition
-          .with_parent_tables(parent_table_names)
-          .with_list_constraint(id)
-          .count == parent_table_names.size
+        Ci::Partitionable.registered_models.all? do |model|
+          model
+            .partitioning_strategy
+            .partition_for_id(id)
+            .present?
+        end
       end
     end
 
@@ -81,10 +55,6 @@ module Ci
 
     def with_ci_connection(&block)
       Gitlab::Database::SharedModel.using_connection(connection, &block)
-    end
-
-    def parent_table_names
-      Ci::Partitionable.registered_models.map(&:table_name)
     end
   end
 end

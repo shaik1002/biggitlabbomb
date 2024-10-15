@@ -67,12 +67,6 @@ RSpec.describe Atlassian::JiraConnect::Client, feature_category: :integrations d
         merge_requests: :c
       ).and_return(:dev_stored)
 
-      expect(subject).to receive(:remove_branch_info).with(
-        project: project,
-        update_sequence_id: :x,
-        remove_branch_info: :j
-      ).and_return(:branch_removed)
-
       args = {
         project: project,
         update_sequence_id: :x,
@@ -81,12 +75,11 @@ RSpec.describe Atlassian::JiraConnect::Client, feature_category: :integrations d
         merge_requests: :c,
         pipelines: :y,
         deployments: :q,
-        feature_flags: :r,
-        remove_branch_info: :j
+        feature_flags: :r
       }
 
       expect(subject.send_info(**args))
-        .to contain_exactly(:dev_stored, :build_stored, :deploys_stored, :ff_stored, :branch_removed)
+        .to contain_exactly(:dev_stored, :build_stored, :deploys_stored, :ff_stored)
     end
 
     it 'only calls methods that we need to call' do
@@ -111,9 +104,9 @@ RSpec.describe Atlassian::JiraConnect::Client, feature_category: :integrations d
     end
   end
 
-  def expected_headers(path, method)
+  def expected_headers(path)
     expected_jwt = Atlassian::Jwt.encode(
-      Atlassian::Jwt.build_claims(Atlassian::JiraConnect.app_key, path, method),
+      Atlassian::Jwt.build_claims(Atlassian::JiraConnect.app_key, path, 'POST'),
       'sample_secret'
     )
 
@@ -245,7 +238,7 @@ RSpec.describe Atlassian::JiraConnect::Client, feature_category: :integrations d
     before do
       path = '/rest/deployments/0.1/bulk'
       stub_full_request("https://gitlab-test.atlassian.net#{path}", method: :post)
-        .with(body: body, headers: expected_headers(path, 'POST'))
+        .with(body: body, headers: expected_headers(path))
         .to_return(body: response_body, headers: { 'Content-Type': 'application/json' })
     end
 
@@ -261,26 +254,14 @@ RSpec.describe Atlassian::JiraConnect::Client, feature_category: :integrations d
       subject.send(:store_deploy_info, project: project, deployments: deployments)
     end
 
-    it 'calls the API if no issue keys are found, but there are service IDs' do
+    it 'does not call the API if no issue keys are found' do
       allow_next_instances_of(Atlassian::JiraConnect::Serializers::DeploymentEntity, nil) do |entity|
         allow(entity).to receive(:issue_keys).and_return([])
-        allow(entity).to receive(:service_ids_from_integration_configuration).and_return([{ associationType: 'serviceIdOrKeys', values: ['foo'] }])
-      end
-
-      expect(subject).to receive(:post).with(
-        '/rest/deployments/0.1/bulk', { deployments: have_attributes(size: 1) }
-      ).and_call_original
-
-      subject.send(:store_deploy_info, project: project, deployments: deployments)
-    end
-
-    it 'does not call the API if no issue keys or service IDs are found' do
-      allow_next_instances_of(Atlassian::JiraConnect::Serializers::DeploymentEntity, nil) do |entity|
-        allow(entity).to receive(:issue_keys).and_return([])
-        allow(entity).to receive(:service_ids_from_integration_configuration).and_return([])
       end
 
       expect(subject).not_to receive(:post)
+
+      subject.send(:store_deploy_info, project: project, deployments: deployments)
     end
 
     context 'when there are errors' do
@@ -325,7 +306,7 @@ RSpec.describe Atlassian::JiraConnect::Client, feature_category: :integrations d
       feature_flags.second.update!(description: 'RELEVANT-123')
       path = '/rest/featureflags/0.1/bulk'
       stub_full_request("https://gitlab-test.atlassian.net#{path}", method: :post)
-        .with(body: body, headers: expected_headers(path, 'POST'))
+        .with(body: body, headers: expected_headers(path))
         .to_return(body: response_body, headers: { 'Content-Type': 'application/json' })
     end
 
@@ -386,7 +367,7 @@ RSpec.describe Atlassian::JiraConnect::Client, feature_category: :integrations d
     before do
       path = '/rest/builds/0.1/bulk'
       stub_full_request("https://gitlab-test.atlassian.net#{path}", method: :post)
-        .with(body: body, headers: expected_headers(path, 'POST'))
+        .with(body: body, headers: expected_headers(path))
         .to_return(body: response_body, headers: { 'Content-Type': 'application/json' })
     end
 
@@ -444,7 +425,7 @@ RSpec.describe Atlassian::JiraConnect::Client, feature_category: :integrations d
       path = '/rest/devinfo/0.10/bulk'
 
       stub_full_request("https://gitlab-test.atlassian.net#{path}", method: :post)
-        .with(headers: expected_headers(path, 'POST'))
+        .with(headers: expected_headers(path))
     end
 
     it "calls the API with auth headers" do
@@ -460,39 +441,8 @@ RSpec.describe Atlassian::JiraConnect::Client, feature_category: :integrations d
 
       expect do
         subject.send(:store_dev_info, project: project,
-          merge_requests: merge_requests)
+                                      merge_requests: merge_requests)
       end.not_to exceed_query_limit(control)
-    end
-  end
-
-  describe '#remove_branch_info' do
-    let_it_be(:merge_requests) { create_list(:merge_request, 2, :unique_branches, source_project: project) }
-    let(:branch_name) { merge_requests.first.source_branch }
-    let(:jira_branch_id) { Digest::SHA256.hexdigest(branch_name) }
-    let(:additional_headers) do
-      { 'Accept' => 'application/json',
-        'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-        'User-Agent' => 'Ruby' }
-    end
-
-    context 'when the branch exists' do
-      before do
-        delete_path = "/rest/devinfo/0.10/repository/#{project.id}/branch/#{jira_branch_id}"
-        stub_full_request("https://gitlab-test.atlassian.net#{delete_path}", method: :delete)
-          .with(headers: expected_headers(delete_path, 'DELETE').merge(additional_headers))
-          .to_return(status: 200, body: "", headers: {})
-      end
-
-      it 'sends delete branch info' do
-        expect(subject).to receive(:delete)
-          .with("/rest/devinfo/0.10/repository/#{project.id}/branch/#{jira_branch_id}")
-          .and_call_original
-        expect(Gitlab::IntegrationsLogger).to receive(:info)
-          .with({ message: "deleting jira branch id: #{jira_branch_id}, gitlab branch name: #{branch_name}" })
-          .and_call_original
-
-        subject.send(:remove_branch_info, project: project, remove_branch_info: branch_name)
-      end
     end
   end
 

@@ -21,7 +21,7 @@ import {
   ALTERNATIVE_FILTER,
   API_PARAM,
   NORMAL_FILTER,
-  WILDCARD_FILTER,
+  SPECIAL_FILTER,
   URL_PARAM,
 } from '~/issues/list/constants';
 
@@ -58,12 +58,12 @@ export const filtersMap = {
   [TOKEN_TYPE_ASSIGNEE]: {
     [API_PARAM]: {
       [NORMAL_FILTER]: 'assigneeUsernames',
-      [WILDCARD_FILTER]: 'assigneeId',
+      [SPECIAL_FILTER]: 'assigneeId',
     },
     [URL_PARAM]: {
       [OPERATOR_IS]: {
         [NORMAL_FILTER]: 'assignee_username[]',
-        [WILDCARD_FILTER]: 'assignee_id',
+        [SPECIAL_FILTER]: 'assignee_id',
         [ALTERNATIVE_FILTER]: 'assignee_username',
       },
       [OPERATOR_NOT]: {
@@ -77,29 +77,29 @@ export const filtersMap = {
   [TOKEN_TYPE_MILESTONE]: {
     [API_PARAM]: {
       [NORMAL_FILTER]: 'milestoneTitle',
-      [WILDCARD_FILTER]: 'milestoneWildcardId',
+      [SPECIAL_FILTER]: 'milestoneWildcardId',
     },
     [URL_PARAM]: {
       [OPERATOR_IS]: {
         [NORMAL_FILTER]: 'milestone_title',
-        [WILDCARD_FILTER]: 'milestone_title',
+        [SPECIAL_FILTER]: 'milestone_title',
       },
       [OPERATOR_NOT]: {
         [NORMAL_FILTER]: 'not[milestone_title]',
-        [WILDCARD_FILTER]: 'not[milestone_title]',
+        [SPECIAL_FILTER]: 'not[milestone_title]',
       },
     },
   },
   [TOKEN_TYPE_LABEL]: {
     [API_PARAM]: {
       [NORMAL_FILTER]: 'labelName',
-      [WILDCARD_FILTER]: 'labelName',
+      [SPECIAL_FILTER]: 'labelName',
       [ALTERNATIVE_FILTER]: 'labelNames',
     },
     [URL_PARAM]: {
       [OPERATOR_IS]: {
         [NORMAL_FILTER]: 'label_name[]',
-        [WILDCARD_FILTER]: 'label_name[]',
+        [SPECIAL_FILTER]: 'label_name[]',
         [ALTERNATIVE_FILTER]: 'label_name',
       },
       [OPERATOR_NOT]: {
@@ -126,12 +126,12 @@ export const filtersMap = {
   [TOKEN_TYPE_RELEASE]: {
     [API_PARAM]: {
       [NORMAL_FILTER]: 'releaseTag',
-      [WILDCARD_FILTER]: 'releaseTagWildcardId',
+      [SPECIAL_FILTER]: 'releaseTagWildcardId',
     },
     [URL_PARAM]: {
       [OPERATOR_IS]: {
         [NORMAL_FILTER]: 'release_tag',
-        [WILDCARD_FILTER]: 'release_tag',
+        [SPECIAL_FILTER]: 'release_tag',
       },
       [OPERATOR_NOT]: {
         [NORMAL_FILTER]: 'not[release_tag]',
@@ -141,12 +141,12 @@ export const filtersMap = {
   [TOKEN_TYPE_MY_REACTION]: {
     [API_PARAM]: {
       [NORMAL_FILTER]: 'myReactionEmoji',
-      [WILDCARD_FILTER]: 'myReactionEmoji',
+      [SPECIAL_FILTER]: 'myReactionEmoji',
     },
     [URL_PARAM]: {
       [OPERATOR_IS]: {
         [NORMAL_FILTER]: 'my_reaction_emoji',
-        [WILDCARD_FILTER]: 'my_reaction_emoji',
+        [SPECIAL_FILTER]: 'my_reaction_emoji',
       },
       [OPERATOR_NOT]: {
         [NORMAL_FILTER]: 'not[my_reaction_emoji]',
@@ -166,28 +166,28 @@ export const filtersMap = {
   [TOKEN_TYPE_ITERATION]: {
     [API_PARAM]: {
       [NORMAL_FILTER]: 'iterationId',
-      [WILDCARD_FILTER]: 'iterationWildcardId',
+      [SPECIAL_FILTER]: 'iterationWildcardId',
     },
     [URL_PARAM]: {
       [OPERATOR_IS]: {
         [NORMAL_FILTER]: 'iteration_id',
-        [WILDCARD_FILTER]: 'iteration_id',
+        [SPECIAL_FILTER]: 'iteration_id',
       },
       [OPERATOR_NOT]: {
         [NORMAL_FILTER]: 'not[iteration_id]',
-        [WILDCARD_FILTER]: 'not[iteration_id]',
+        [SPECIAL_FILTER]: 'not[iteration_id]',
       },
     },
   },
   [TOKEN_TYPE_EPIC]: {
     [API_PARAM]: {
       [NORMAL_FILTER]: 'epicId',
-      [WILDCARD_FILTER]: 'epicId',
+      [SPECIAL_FILTER]: 'epicId',
     },
     [URL_PARAM]: {
       [OPERATOR_IS]: {
         [NORMAL_FILTER]: 'epic_id',
-        [WILDCARD_FILTER]: 'epic_id',
+        [SPECIAL_FILTER]: 'epic_id',
       },
       [OPERATOR_NOT]: {
         [NORMAL_FILTER]: 'not[epic_id]',
@@ -197,12 +197,12 @@ export const filtersMap = {
   [TOKEN_TYPE_WEIGHT]: {
     [API_PARAM]: {
       [NORMAL_FILTER]: 'weight',
-      [WILDCARD_FILTER]: 'weight',
+      [SPECIAL_FILTER]: 'weight',
     },
     [URL_PARAM]: {
       [OPERATOR_IS]: {
         [NORMAL_FILTER]: 'weight',
-        [WILDCARD_FILTER]: 'weight',
+        [SPECIAL_FILTER]: 'weight',
       },
       [OPERATOR_NOT]: {
         [NORMAL_FILTER]: 'not[weight]',
@@ -212,12 +212,12 @@ export const filtersMap = {
   [TOKEN_TYPE_HEALTH]: {
     [API_PARAM]: {
       [NORMAL_FILTER]: 'healthStatusFilter',
-      [WILDCARD_FILTER]: 'healthStatusFilter',
+      [SPECIAL_FILTER]: 'healthStatusFilter',
     },
     [URL_PARAM]: {
       [OPERATOR_IS]: {
         [NORMAL_FILTER]: 'health_status',
-        [WILDCARD_FILTER]: 'health_status',
+        [SPECIAL_FILTER]: 'health_status',
       },
       [OPERATOR_NOT]: {
         [NORMAL_FILTER]: 'not[health_status]',

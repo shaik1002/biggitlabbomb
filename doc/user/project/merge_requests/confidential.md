@@ -11,8 +11,8 @@ DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
-Merge requests in a public repository are also public, even when you create a
-merge request for a [confidential issue](../issues/confidential_issues.md).
+Merge requests in a public repository are also public, even when the merge
+request is created for a [confidential issue](../issues/confidential_issues.md).
 To avoid leaking confidential information when working on a confidential issue,
 create your merge request from a private fork in the same namespace.
 
@@ -23,7 +23,7 @@ developers receive the same permissions in your fork. This inheritance ensures:
 - Developer users have the needed permissions to view confidential issues and resolve them.
 - You do not need grant individual users access to your fork.
 
-To learn more, see [Patch release runbook for GitLab engineers: Preparing security fixes for a patch release](https://gitlab.com/gitlab-org/release/docs/blob/master/general/security/engineer.md).
+The [security practices for confidential merge requests](https://gitlab.com/gitlab-org/release/docs/blob/master/general/security/engineer.md#security-releases-critical-non-critical-as-a-developer) at GitLab are available to read.
 
 ## Create a confidential merge request
 
@@ -31,17 +31,17 @@ Branches are public by default. To protect the confidentiality of your work, you
 must create your branches and merge requests in the same namespace, but downstream
 in a private fork. If you create your private fork in the same namespace as the
 public repository, your fork inherits the permissions of the upstream public repository.
-Users with the Developer role for the upstream public repository inherit those upstream
+Users with the Developer role in the upstream public repository inherit those upstream
 permissions in your downstream private fork without action by you. These users can
 immediately push code to branches in your private fork to help fix the confidential issue.
 
 WARNING:
-Your private fork might expose confidential information if you create it in a different
+Your private fork might expose confidential information, if you create it in a different
 namespace than the upstream repository. The two namespaces might not contain the same users.
 
 Prerequisites:
 
-- You have the Owner or Maintainer role for the public repository, as you need one
+- You have the Owner or Maintainer role in the public repository, as you need one
   of these roles to [create a subgroup](../../group/subgroups/index.md).
 - You have [forked](../repository/forking_workflow.md) the public repository.
 - Your fork has a **Visibility level** of _Private_.
@@ -71,7 +71,7 @@ prematurely revealing confidential information.
 Open a merge request
 [from your fork to the upstream repository](../repository/forking_workflow.md#merge-changes-back-upstream) when:
 
-- You believe the problem is resolved in your private fork.
+- You are satisfied the problem is resolved in your private fork.
 - You are ready to make the confidential commits public.
 
 ## Related topics

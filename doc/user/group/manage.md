@@ -9,19 +9,19 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 Use groups to manage one or more related projects at the same time.
 
 NOTE:
-On self-managed GitLab, if you want to see an overview of your entire organization, you should create one top-level group.
-For more information about efforts to create an organization view of all groups,
-[see epic 9266](https://gitlab.com/groups/gitlab-org/-/epics/9266).
-A top-level group offers insights in your entire organization through a complete
+For self-managed customers it could be beneficial to create one single top-level group, so you can see an overview of
+your entire organization. For more information about efforts to create an
+organization view of all groups, [see epic 9266](https://gitlab.com/groups/gitlab-org/-/epics/9266).
+A single top-level group provides insights in your entire organization via a complete
 [Security Dashboard and Center](../application_security/security_dashboard/index.md),
-[Vulnerability Report](../application_security/vulnerability_report/index.md#vulnerability-report),
-[compliance center](../compliance/compliance_center/index.md), and
-[value stream analytics](../group/value_stream_analytics/index.md).
+[Vulnerability](../application_security/vulnerability_report/index.md#vulnerability-report) and
+[Compliance center](../compliance/compliance_center/index.md), and
+[Value stream analytics](../group/value_stream_analytics/index.md).
 
 ## Add a group README
 
-You can add a README file to provide information about your team and invite users to contribute to your projects.
-The README displays on the group overview page. All group members can view and edit the README.
+As a group owner or member, you can use a README to provide more information about your team, and invite users to contribute to your projects.
+The README is displayed on the group overview page, and can be changed in the group settings. All group members can edit the README.
 
 Prerequisites:
 
@@ -35,27 +35,27 @@ To add a group README:
 1. On the prompt for creating a README, select **Create and add README**. You're redirected to the Web IDE, where a README file is created.
 1. In the Web IDE, edit and commit the `README.md` file.
 
-## Change the Owner of a group
+## Change the owner of a group
 
-You can change the Owner of a group. Each group must always have at least one
+You can change the owner of a group. Each group must always have at least one
 member with the Owner role.
 
 - As an administrator:
   1. On the left sidebar, select **Search or go to** and find your group.
   1. Select **Manage > Members**.
-  1. Give a different member the Owner role.
-  1. Refresh the page. You can now remove the Owner role from the original Owner.
-- As the current group's Owner:
+  1. Give a different member the **Owner** role.
+  1. Refresh the page. You can now remove the **Owner** role from the original owner.
+- As the current group's owner:
   1. On the left sidebar, select **Search or go to** and find your group.
   1. Select **Manage > Members**.
-  1. Give a different member the Owner role.
-  1. Have the new Owner sign in and remove the Owner role from you.
+  1. Give a different member the **Owner** role.
+  1. Have the new owner sign in and remove the **Owner** role from you.
 
 ## Change a group's path
 
 Changing a group's path (group URL) can have unintended side effects. Read how redirects behave
-for [projects](../project/repository/index.md#repository-path-changes)
-and in the [API](../../api/rest/index.md#redirects)
+[on the project-level](../project/repository/index.md#what-happens-when-a-repository-path-changes)
+and [in the API](../../api/rest/index.md#redirects)
 before you proceed.
 
 If you are changing the path so it can be claimed by another group or user,
@@ -92,14 +92,47 @@ To change this setting for a specific group, see [group level default branch pro
 To change this setting globally, see [initial default branch protection](../project/repository/branches/default.md#instance-level-default-branch-protection).
 
 NOTE:
-In [GitLab Premium or Ultimate](https://about.gitlab.com/pricing/), GitLab administrators can choose to [disable group Owners from updating the default branch protection](../project/repository/branches/default.md#prevent-overrides-of-default-branch-protection).
+In [GitLab Premium or Ultimate](https://about.gitlab.com/pricing/), GitLab administrators can choose to [disable group owners from updating the default branch protection](../project/repository/branches/default.md#prevent-overrides-of-default-branch-protection).
 
 ## Use a custom name for the initial branch
 
 When you create a new project in GitLab, a default branch is created with the
-first push. The group Owner can
+first push. The group owner can
 [customize the initial branch](../project/repository/branches/default.md#group-level-custom-initial-branch-name)
 for the group's projects to meet your group's needs.
+
+## Share a group with another group
+
+Similar to how you [share a project with a group](../project/members/share_project_with_groups.md),
+you can share a group with another group by invitation.
+For more information about sharing conditions and behavior, see [Sharing projects and groups](../project/members/sharing_projects_groups.md).
+
+Prerequisites:
+
+- You must be a member of the invited and inviting groups.
+
+To invite a group to your group:
+
+1. On the left sidebar, select **Search or go to** and find your group.
+1. Select **Manage > Members**.
+1. Select **Invite a group**.
+1. In the **Select a group to invite** list, select the group you want to invite.
+1. Select a [role](../permissions.md) as maximum access level.
+1. Select **Invite**.
+
+## Remove an invited group
+
+To remove an invited group:
+
+1. On the left sidebar, select **Search or go to** and find your group.
+1. Select **Manage > Members**.
+1. Select the **Groups** tab.
+1. To the right of the account you want to remove, select **Remove group** (**{remove}**).
+
+When you remove the invited group from your group:
+
+- All direct members of the invited group no longer have access to the inviting group.
+- Members of the invited group no longer count towards the billable members of the inviting group.
 
 ## Transfer a group
 
@@ -114,15 +147,15 @@ If you need to copy a group to a different GitLab instance,
 
 When transferring groups, note:
 
-- Changing a group's parent can have unintended side effects. See [what happens when a repository path changes](../project/repository/index.md#repository-path-changes).
-- You must have the Owner role for the source and target group.
+- Changing a group's parent can have unintended side effects. See [what happens when a repository path changes](../project/repository/index.md#what-happens-when-a-repository-path-changes).
+- You must have the Owner role in the source and target group.
 - You must update your local repositories to point to the new location.
 - If the immediate parent group's visibility is lower than the group's current visibility, visibility levels for subgroups and projects change to match the new parent group's visibility.
-- Only explicit group membership is transferred, not inherited membership. If the group's Owners have only inherited membership, this leaves the group without an Owner. In this case, the user transferring the group becomes the group's Owner.
-- Transfers fail if the group is a top-level group and [npm packages](../packages/npm_registry/index.md) following the [naming convention](../packages/npm_registry/index.md#naming-convention) exist in any of the projects in the group, or in any of its subgroups.
-- `container_registry` images in the archived projects must be deleted before the transfer. For more information, see the [troubleshooting section](troubleshooting.md#missing-or-insufficient-permission-delete-button-disabled).
-- Existing packages that use a group-level endpoint (Maven, NuGet, PyPI, Composer, and Debian) need to be updated per the package's steps for setting up the group-level endpoint.
-- Existing package names need to be updated if the package uses an instance-level endpoint ([Maven](../packages/maven_repository/index.md#naming-convention), [npm](../packages/npm_registry/index.md#naming-convention), [Conan](../packages/conan_repository/index.md#package-recipe-naming-convention-for-instance-remotes)) and the group was moved to another top-level group.
+- Only explicit group membership is transferred, not inherited membership. If the group's owners have only inherited membership, this leaves the group without an owner. In this case, the user transferring the group becomes the group's owner.
+- Transfers fail if [npm packages](../packages/npm_registry/index.md) exist in any of the projects in the group, or in any of its subgroups.
+- Existing packages that use a group-level endpoint (Maven, NuGet, PyPI, Composer, and Debian) need to be updated per the package's steps for setting up the group level endpoint.
+- Existing package names need to be updated if the package uses an instance level endpoint ([Maven](../packages/maven_repository/index.md#naming-convention), [npm](../packages/npm_registry/index.md#naming-convention), [Conan](../packages/conan_repository/index.md#package-recipe-naming-convention-for-instance-remotes)) and the group was moved to another root level namespace.
+- [Maven packages](../packages/maven_repository/index.md#naming-convention) follow a naming convention that prevent installing or publishing the respective package from a group level endpoint after group transfer.
 - Top-level groups that have a subscription on GitLab.com cannot be transferred. To make the transfer possible, the top-level group's subscription must be removed first. Then the top-level group can be transferred as a subgroup to another top-level group.
 
 To transfer a group:
@@ -130,7 +163,7 @@ To transfer a group:
 1. On the left sidebar, select **Search or go to** and find your group.
 1. Select **Settings > General**.
 1. Expand the **Advanced** section.
-1. Select **Transfer group**.
+1. In the **Remove group** section, select **Transfer group**.
 1. Select the group name in the drop down menu.
 1. Select **Transfer group**.
 
@@ -143,33 +176,7 @@ To disable email notifications:
 1. On the left sidebar, select **Search or go to** and find your group.
 1. Select **Settings > General**.
 1. Expand the **Permissions and group features** section.
-1. Clear the **Enable email notifications** checkbox.
-
-### Disable diff previews in email notifications
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/24733) in GitLab 15.6 [with the flag](../../administration/feature_flags.md) named `diff_preview_in_email`. Disabled by default.
-> - [Enabled](https://gitlab.com/gitlab-org/gitlab/-/issues/382055) the flag `diff_preview_in_email` on GitLab.com, self-managed, and GitLab Dedicated in GitLab 17.1.
-
-FLAG:
-A feature flag controls the availability of this feature.
-For more information, see the history.
-
-When you comment on code in a merge request, GitLab
-includes a few lines of the diff in the email notification to participants.
-Some organizational policies treat email as a less secure system, or might not
-control their own infrastructure for email. This can present risks to IP or
-access control of source code.
-
-Prerequisites:
-
-- You must have the Owner role for the group.
-
-To disable diff previews for all projects in a group:
-
-1. On the left sidebar, select **Search or go to** and find your group.
-1. Select **Settings > General**.
-1. Expand the **Permissions and group features** section.
-1. Clear **Include diff previews**.
+1. Select **Email notifications are disabled**.
 1. Select **Save changes**.
 
 ## Disable group mentions
@@ -180,7 +187,7 @@ in which those users are members.
 
 Groups with disabled mentions are visualized accordingly in the autocompletion dropdown list.
 
-These visual cues are particularly helpful for groups with many users.
+This is particularly helpful for groups with a large number of users.
 
 To disable group mentions:
 
@@ -199,7 +206,7 @@ DETAILS:
 You can export a list of members in a group or subgroup as a CSV.
 
 1. On the left sidebar, select **Search or go to** and find your group or subgroup.
-1. Select **Manage > Members**.
+1. Select  **Manage > Members**.
 1. Select **Export as CSV**.
 1. After the CSV file has been generated, it is emailed as an attachment to the user that requested it.
 
@@ -209,14 +216,15 @@ For members with `Minimal Access` in the selected group, their `Max Role` and `S
 
 ## User cap for groups
 
+> - Behind a [feature flag](../../administration/feature_flags.md) named `saas_user_caps`. Disabled by default.
 > - [Enabled on GitLab.com](https://gitlab.com/groups/gitlab-org/-/epics/9263) in GitLab 16.3.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/421693) in GitLab 17.1 Feature flag `saas_user_caps` removed.
 
 For more information about user caps for GitLab self-managed, see [User cap](../../administration/settings/sign_up_restrictions.md#user-cap).
 
-When the number of billable members reaches the user cap, the group Owner must approve new members.
+When the number of billable members reaches the user cap, new users can't be added to the group
+without being approved by the group owner.
 
-Groups with the user cap feature enabled have [group sharing](../project/members/sharing_projects_groups.md#invite-a-group-to-a-group)
+Groups with the user cap feature enabled have [group sharing](#share-a-group-with-another-group)
 disabled for the group and its subgroups.
 
 ### Specify a user cap for a group
@@ -231,7 +239,7 @@ To specify a user cap:
    You can set a cap on the top-level group only.
 1. Select **Settings > General**.
 1. Expand **Permissions and group features**.
-1. From **Seat controls**, select the **Set user cap** checkbox and enter the number of users in the field.
+1. In the **User cap** box, enter the desired number of users.
 1. Select **Save changes**.
 
 If you already have more users in the group than the user cap value, users
@@ -252,7 +260,7 @@ To remove the user cap:
 1. On the left sidebar, select **Search or go to** and find your group.
 1. Select **Settings > General**.
 1. Expand **Permissions and group features**.
-1. From **Seat controls**, select **Open access**.
+1. In the **User cap** box, delete the value.
 1. Select **Save changes**.
 
 Decreasing the user cap does not approve pending members.
@@ -281,9 +289,9 @@ The user cap cannot be enabled if a group, subgroup, or project is shared extern
 or project is shared externally, it is shared outside of the namespace hierarchy, regardless of its level
 in the hierarchy.
 
-To ensure that the user cap applies when groups, subgroups, or projects are shared externally, restrict group sharing only in the top-level namespace. A top-level namespace restriction allows invitations in the same namespace and prevents new user (seat) additions from external shares.
+To ensure that the user cap applies when groups, subgroups, or projects are shared externally, restrict group sharing only within the top-level namespace. This ensure that groups in the same top-leve namespace can be invited, and prevents the addition of new users (seats) when the group is shared.
 
-GitLab.com Ultimate has a [known issue](https://gitlab.com/gitlab-org/gitlab/-/issues/441504) where you cannot add guest users to a group when billable users exceed the user cap. For example, suppose you have a user cap of 5, with 3 developers, and 2 guests. After you add 2 more developers, you cannot add any more users, even if they are guest users that don't consume a billable seat.
+On GitLab.com, on the Ultimate tier, there is a [known issue](https://gitlab.com/gitlab-org/gitlab/-/issues/441504) where you cannot add new guest users to a group when the amount of billable users exceeds the user cap. For example, suppose you have a user cap of 5, with 3 developers and 2 guests. After you add 2 more developers, you cannot add any more users, even if they are guest users that don't consume a billable seat.
 
 ## Group file templates
 
@@ -334,7 +342,7 @@ DETAILS:
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/372040) in GitLab 15.9 [with a flag](../../administration/feature_flags.md) name `support_group_level_merge_checks_setting`. Disabled by default.
 > - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/142708) in GitLab 16.9. Feature flag `support_group_level_merge_checks_setting` removed.
 
-Group Owners can set up merge request checks on a top-level group, which apply to all subgroups and projects.
+Group owners can set up merge request checks on a top-level group, which apply to all subgroups and projects.
 
 If the settings are inherited by a subgroup or project, they cannot be changed in the subgroup or project
 that inherited them.
@@ -348,7 +356,7 @@ See also [the project-level setting](../project/merge_requests/auto_merge.md#req
 
 Prerequisites:
 
-- You must be the Owner of the group.
+- You must be the owner of the group.
 
 To enable this setting:
 
@@ -367,7 +375,7 @@ See also [the project-level setting](../project/merge_requests/auto_merge.md#all
 
 Prerequisites:
 
-- You must be the Owner of the group.
+- You must be the owner of the group.
 
 To change this behavior:
 
@@ -381,11 +389,12 @@ To change this behavior:
 
 ### Prevent merge unless all threads are resolved
 
-You can prevent merge requests from being merged until all threads are resolved. When this setting is enabled, child projects in your group display unresolved thread counts in orange on merge requests with at least one unresolved thread.
+You can prevent merge requests from being merged until all threads are resolved. When this setting is enabled, for all child projects in your group, the
+**Unresolved threads** count in a merge request is shown in orange when at least one thread remains unresolved.
 
 Prerequisites:
 
-- You must be the Owner of the group.
+- You must be the owner of the group.
 
 To enable this setting:
 
@@ -416,6 +425,32 @@ To view the merge request approval settings for a group:
 Approval settings should not be confused with [approval rules](../project/merge_requests/approvals/rules.md). Support
 for the ability to set merge request approval rules for groups is tracked in
 [epic 4367](https://gitlab.com/groups/gitlab-org/-/epics/4367).
+
+## Enable Experiment and Beta features
+
+DETAILS:
+**Tier:** Premium, Ultimate
+**Offering:** GitLab.com, Self-managed
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/118222) in GitLab 16.0.
+> - [Added to GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/147833) in GitLab 16.11.
+
+WARNING:
+[Experiment and Beta features](../../policy/experiment-beta-support.md) may produce unexpected results
+(for example, the results might be low-quality, incomplete, incoherent, offensive, or insensitive,
+and might include insecure code or failed pipelines).
+
+You can give all users in a top-level group access to Experiment and Beta features.
+This setting [cascades to all projects](../project/merge_requests/approvals/settings.md#cascade-settings-from-the-instance-or-top-level-group)
+that belong to the group.
+
+To enable Experiment features for a top-level group:
+
+1. On the left sidebar, select **Search or go to** and find your group.
+1. Select **Settings > General**.
+1. Expand **Permissions and group features**.
+1. Under **Experiment and Beta features**, select the **Use Experiment and Beta features** checkbox.
+1. Select **Save changes**.
 
 ## Group activity analytics
 

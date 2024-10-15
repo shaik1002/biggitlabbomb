@@ -577,6 +577,7 @@ RSpec.describe API::Internal::Base, feature_category: :system_access do
           expect(json_response["gl_root_namespace_id"]).to eq(project.root_namespace.id)
           expect(json_response["gl_key_type"]).to eq("key")
           expect(json_response["gl_key_id"]).to eq(key.id)
+          expect(user.reload.last_activity_on).to eql(Date.today)
         end
 
         # Wiki repositories don't invoke any Gitaly RPCs to check for changes, so we can only test for the
@@ -596,6 +597,7 @@ RSpec.describe API::Internal::Base, feature_category: :system_access do
           expect(json_response["gl_repository"]).to eq("wiki-#{project.id}")
           expect(json_response["gl_project_id"]).to eq(project.id)
           expect(json_response["gl_root_namespace_id"]).to eq(project.root_namespace.id)
+          expect(user.reload.last_activity_on).to eql(Date.today)
         end
       end
 
@@ -625,6 +627,7 @@ RSpec.describe API::Internal::Base, feature_category: :system_access do
           expect(json_response["gl_repository"]).to eq("snippet-#{personal_snippet.id}")
           expect(json_response["gl_project_id"]).to be_nil
           expect(json_response["gl_root_namespace_id"]).to be_nil
+          expect(user.reload.last_activity_on).to eql(Date.today)
         end
 
         it_behaves_like 'sets hook env and routes to primary' do
@@ -665,6 +668,7 @@ RSpec.describe API::Internal::Base, feature_category: :system_access do
           expect(json_response["gl_repository"]).to eq("snippet-#{project_snippet.id}")
           expect(json_response["gl_project_id"]).to eq(project.id)
           expect(json_response["gl_root_namespace_id"]).to eq(project.root_namespace.id)
+          expect(user.reload.last_activity_on).to eql(Date.today)
         end
 
         it_behaves_like 'sets hook env and routes to primary' do
@@ -800,6 +804,7 @@ RSpec.describe API::Internal::Base, feature_category: :system_access do
             expect(json_response["gitaly"]["repository"]["relative_path"]).to eq(project.repository.gitaly_repository.relative_path)
             expect(json_response["gitaly"]["address"]).to eq(Gitlab::GitalyClient.address(project.repository_storage))
             expect(json_response["gitaly"]["token"]).to eq(Gitlab::GitalyClient.token(project.repository_storage))
+            expect(user.reload.last_activity_on).to eql(Date.today)
           end
 
           it_behaves_like 'rate limited request' do
@@ -893,6 +898,8 @@ RSpec.describe API::Internal::Base, feature_category: :system_access do
     end
 
     context 'with a pending membership' do
+      let_it_be(:project) { create(:project, :repository) }
+
       before_all do
         create(:project_member, :awaiting, :developer, source: project, user: user)
       end
@@ -958,6 +965,7 @@ RSpec.describe API::Internal::Base, feature_category: :system_access do
           expect(json_response['status']).to be_truthy
           expect(json_response['payload']).to eql(payload)
           expect(json_response['gl_console_messages']).to eql(console_messages)
+          expect(user.reload.last_activity_on).to eql(Date.today)
         end
       end
     end
@@ -1130,13 +1138,11 @@ RSpec.describe API::Internal::Base, feature_category: :system_access do
     end
 
     context 'project does not exist' do
-      let_it_be(:destroy_project) { create(:project, :repository, :wiki_repo) }
-
       context 'git pull' do
         it 'returns a 200 response with status: false' do
-          destroy_project.destroy!
+          project.destroy!
 
-          pull(key, destroy_project)
+          pull(key, project)
 
           expect(response).to have_gitlab_http_status(:not_found)
           expect(json_response["status"]).to be_falsey
@@ -1176,18 +1182,6 @@ RSpec.describe API::Internal::Base, feature_category: :system_access do
 
             expect(response).to have_gitlab_http_status(:ok)
             expect(json_response['status']).to be_truthy
-          end
-        end
-
-        context 'when push path is invalid' do
-          let!(:path) { "#{user.namespace.path}/cannot_end_with_dot." }
-
-          it 'returns an error' do
-            expect { subject }.not_to change { Project.count }
-
-            expect(response).to have_gitlab_http_status(:unprocessable_entity)
-            expect(json_response['message']).to include('Could not create project')
-            expect(json_response['status']).to be_falsey
           end
         end
 

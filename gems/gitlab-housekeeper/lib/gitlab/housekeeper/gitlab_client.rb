@@ -63,7 +63,7 @@ module Gitlab
         )
 
         resource_label_events.each do |event|
-          next if event.dig("user", "id") == current_user_id
+          next if event["user"]["id"] == current_user_id
 
           # Labels are routinely added by both humans and bots, so addition events aren't cause for concern.
           # However, if labels have been removed it may mean housekeeper added an incorrect label, and we shouldn't
@@ -153,8 +153,7 @@ module Gitlab
           target_project_id: target_project_id,
           remove_source_branch: true,
           assignee_ids: usernames_to_ids(change.assignees),
-          reviewer_ids: usernames_to_ids(change.reviewers),
-          squash: true
+          reviewer_ids: usernames_to_ids(change.reviewers)
         })
       end
 

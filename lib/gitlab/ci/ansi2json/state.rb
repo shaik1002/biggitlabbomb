@@ -58,10 +58,9 @@ module Gitlab
           @open_sections.key?(section)
         end
 
-        def new_line!(timestamps: [], offset: nil, style: nil)
+        def new_line!(style: nil)
           new_line = Line.new(
-            offset: offset || @offset,
-            timestamps: timestamps,
+            offset: @offset,
             style: style || @current_line.style,
             sections: @open_sections.keys
           )

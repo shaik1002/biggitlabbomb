@@ -1,6 +1,6 @@
 ---
-stage: Plan
-group: Project Management
+stage: Monitor
+group: Respond
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
@@ -124,7 +124,7 @@ To keep your emails on brand, you can create a custom new note email template. T
    email. Be sure to include the `%{NOTE_TEXT}` in the template to make sure the email recipient can
    read the contents of the comment.
 
-### Instance-wide email header, footer, and additional text
+### Instance-level email header, footer, and additional text
 
 DETAILS:
 **Tier:** Free, Premium, Ultimate
@@ -186,29 +186,6 @@ To edit the custom email display name:
 1. Below **Email display name**, enter a new name.
 1. Select **Save changes**.
 
-## Default ticket visibility
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/33091) in GitLab 17.2.
-
-New tickets are confidential by default, so only project members with at least the Reporter role
-can view them.
-
-In private and internal projects, you can configure GitLab so that new tickets are not confidential by default, and any project member can view them.
-
-In public projects, this setting is not available because new tickets are always confidential by default.
-
-Prerequisites:
-
-- You must have at least the Maintainer role for the project.
-
-To disable this setting:
-
-1. On the left sidebar, select **Search or go to** and find your project.
-1. Select **Settings > General**.
-1. Expand **Service Desk**.
-1. Clear the **New tickets are confidential by default** checkbox.
-1. Select **Save changes**.
-
 ## Reopen issues when an external participant comments
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/8549) in GitLab 16.7
@@ -251,9 +228,9 @@ Maintain brand identity and instill confidence among support requesters with a d
 For an overview, see [a short showcase video](https://youtu.be/_moD5U3xcQs).
 <!-- Video published on 2023-09-12 -->
 
-This feature is in [beta](../../../policy/experiment-beta-support.md#beta).
-A beta feature is not production-ready, but is unlikely to change drastically
-before it's released. We encourage users to try beta features and provide feedback
+This feature is in [Beta](../../../policy/experiment-beta-support.md#beta).
+A Beta feature is not production-ready, but is unlikely to change drastically
+before it's released. We encourage users to try Beta features and provide feedback
 in [the feedback issue](https://gitlab.com/gitlab-org/gitlab/-/issues/416637).
 
 ### Prerequisites
@@ -316,7 +293,7 @@ notification email with the verification result.
 If the verification failed, the email also contains details of the reason.
 
 If the verification was successful, the custom email address is ready to be used.
-You can now enable sending Service Desk emails with the custom email address.
+You can now enable sending Service Desk emails via the custom email address.
 
 #### Troubleshooting your configuration
 
@@ -334,8 +311,7 @@ To troubleshoot this:
 1. Sometimes GitLab cannot automatically select an authentication method that the SMTP server supports. Either:
    - Try the available authentication methods (**Plain**, **Login** and **CRAM-MD5**).
    - Check which authentication methods your SMTP server supports, using the
-     [`swaks` command line tool](https://www.jetmore.org/john/code/swaks/):
-
+   [`swaks` command line tool](https://www.jetmore.org/john/code/swaks/):
      1. Run the following command with your credentials and look for a line that starts with `250-AUTH`:
 
         ```shell
@@ -371,7 +347,7 @@ To troubleshoot this:
 
 ### Enable or disable the custom email address
 
-After the custom email address has been verified, administrators can enable or disable sending Service Desk emails with the custom email address.
+After the custom email address has been verified, administrators can enable or disable sending Service Desk emails via the custom email address.
 
 To **enable** the custom email address:
 
@@ -507,7 +483,7 @@ DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** Self-managed
 
-You can use an additional alias email address for Service Desk for an instance.
+You can use an additional alias email address for Service Desk on an instance level.
 
 To do this, you must configure
 a [`service_desk_email`](#configure-service-desk-alias-email) in the instance configuration. You can also configure a
@@ -1006,7 +982,7 @@ or completely separately.
 
 1. GitLab offers two methods to transport emails from `mail_room` to the GitLab
    application. You can configure the `delivery_method` for each email setting individually:
-   1. Recommended: `webhook` (default in GitLab 15.3 and later) sends the email payload with an API POST request to your GitLab
+   1. Recommended: `webhook` (default in GitLab 15.3 and later) sends the email payload via an API POST request to your GitLab
       application. It uses a shared token to authenticate. If you choose this method,
       make sure the `mail_room` process can access the API endpoint and distribute the shared
       token across all application nodes.
@@ -1019,7 +995,7 @@ or completely separately.
       gitlab_rails['incoming_email_delivery_method'] = "webhook"
 
       # The URL that mail_room can contact. You can also use an internal URL or IP,
-      # just make sure mail_room can access the GitLab API with that address.
+      # just make sure mail_room can access the GitLab API via that address.
       # Do not end with "/".
       gitlab_rails['incoming_email_gitlab_url'] = "https://gitlab.example.com"
 
@@ -1033,7 +1009,7 @@ or completely separately.
       gitlab_rails['service_desk_email_delivery_method'] = "webhook"
 
       # The URL that mail_room can contact. You can also use an internal URL or IP,
-      # just make sure mail_room can access the GitLab API with that address.
+      # just make sure mail_room can access the GitLab API via that address.
       # Do not end with "/".
 
       gitlab_rails['service_desk_email_gitlab_url'] = "https://gitlab.example.com"
@@ -1068,7 +1044,7 @@ or completely separately.
 1. Disable `mail_room` on all nodes that should not run email ingestion. For example, in `/etc/gitlab/gitlab.rb`:
 
    ```ruby
-   mailroom['enable'] = false
+   mailroom['enabled'] = false
    ```
 
 1. [Reconfigure GitLab](../../../administration/restart_gitlab.md) for the changes to take effect.
@@ -1085,7 +1061,7 @@ move new unread emails to GitLab.
 1. Enable `mail_room` on this node. For example, in `/etc/gitlab/gitlab.rb`:
 
    ```ruby
-   mailroom['enable'] = true
+   mailroom['enabled'] = true
    ```
 
 1. [Reconfigure GitLab](../../../administration/restart_gitlab.md) on this node for the changes to take effect.

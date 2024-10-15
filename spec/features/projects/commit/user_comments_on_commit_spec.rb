@@ -38,7 +38,10 @@ RSpec.describe "User comments on commit", :js, feature_category: :source_code_ma
 
         expect(page).to have_field("note[note]", with: "#{comment_text} #{emoji_code}")
 
-        send_keys([:meta, :enter])
+        # Submit comment from the `Preview` tab to get rid of a separate `it` block
+        # which would specially tests if everything gets cleared from the note form.
+        click_button("Preview")
+        click_button("Comment")
       end
 
       wait_for_requests

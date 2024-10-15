@@ -27,11 +27,11 @@ module Gitlab
           @primary_keys = if @model_class.primary_key.nil?
                             @model_class.connection.primary_keys(@model_class.table_name)
                           else
-                            Array.wrap(@model_class.primary_key)
+                            [@model_class.primary_key]
                           end
         end
 
-        def build_order
+        def build
           order = if order_values.empty?
                     primary_key_descending_order
                   elsif Gitlab::Pagination::Keyset::Order.keyset_aware?(scope)
@@ -56,12 +56,7 @@ module Gitlab
                     columns_with_tie_breaker_order(order_values[0...-1], tie_breaker_column_order)
                   end
 
-          order ? [order, true] : [nil, false]
-        end
-
-        def build
-          keyset_order, success = build_order
-          success ? [scope.reorder!(keyset_order), success] : [scope, false]
+          order ? [scope.reorder!(order), true] : [scope, false] # [scope, success]
         end
 
         private

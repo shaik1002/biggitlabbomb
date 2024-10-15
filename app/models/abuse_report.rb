@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class AbuseReport < ApplicationRecord
+class AbuseReport < MainClusterwide::ApplicationRecord
   include CacheMarkdownField
   include Sortable
   include Gitlab::FileTypeDetection
@@ -27,10 +27,10 @@ class AbuseReport < ApplicationRecord
   has_many :admin_abuse_report_assignees, class_name: "Admin::AbuseReportAssignee"
   has_many :assignees, class_name: "User", through: :admin_abuse_report_assignees
 
-  has_many :abuse_events, class_name: 'AntiAbuse::Event', inverse_of: :abuse_report
+  has_many :abuse_events, class_name: 'Abuse::Event', inverse_of: :abuse_report
 
-  has_many :notes, class_name: 'AntiAbuse::Reports::Note'
-  has_many :user_mentions, class_name: 'AntiAbuse::Reports::UserMention'
+  has_many :notes, as: :noteable
+  has_many :user_mentions, class_name: 'Abuse::Reports::UserMention'
 
   validates :reporter, presence: true, on: :create
   validates :user, presence: true, on: :create

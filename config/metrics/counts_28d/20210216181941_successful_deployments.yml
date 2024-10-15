@@ -2,6 +2,8 @@
 data_category: operational
 key_path: usage_activity_by_stage_monthly.release.successful_deployments
 description: Disinct users who initiated a successful deployment.
+product_section: ops
+product_stage: deploy
 product_group: environments
 value_type: number
 status: active
@@ -17,4 +19,3 @@ tier:
 performance_indicator_type:
 - customer_health_score
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

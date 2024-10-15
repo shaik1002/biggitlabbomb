@@ -38,6 +38,12 @@ module Gitlab
           super || initial_partition
         end
 
+        def partition_for_id(partition_id)
+          current_partitions.find do |partition|
+            partition_id.in?(partition.values)
+          end
+        end
+
         private
 
         def desired_partitions

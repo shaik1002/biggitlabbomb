@@ -173,7 +173,7 @@ Upgrading to an [officially supported operating system](https://about.gitlab.com
 
 This problem comes from the permissions of the GitLab Pages OAuth application. To fix it:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Applications > GitLab Pages**.
 1. Edit the application.
 1. Under **Scopes**, ensure that the `api` scope is selected.
@@ -216,7 +216,7 @@ You may see this error if `pages_external_url` was updated at some point of time
 
 1. Check the [System OAuth application](../../integration/oauth_provider.md#create-an-instance-wide-application):
 
-   1. On the left sidebar, at the bottom, select **Admin**.
+   1. On the left sidebar, at the bottom, select **Admin Area**.
    1. Select **Applications** and then **Add new application**.
    1. Ensure the **Callback URL/Redirect URI** is using the protocol (HTTP or HTTPS) that
       `pages_external_url` is configured to use.
@@ -265,7 +265,7 @@ both servers.
 
 If the **pages** job succeeds but the **deploy** job gives the error "is not a recognized provider":
 
-![A GitLab Pages pipeline shows success for the pages job but an error for the deploy job.](img/pages_deploy_failure_v14_8.png)
+![Pages Deploy Failure](img/pages_deploy_failure_v14_8.png)
 
 The error message `is not a recognized provider` could be coming from the `fog` gem that GitLab uses to connect to cloud providers for object storage.
 
@@ -287,16 +287,9 @@ If you get a `404 Page Not Found` response from GitLab Pages:
 
 Without the `pages:deploy` job, the updates to your GitLab Pages site are never published.
 
-## 503 error `Client authentication failed due to unknown client`
+## 503 error `Client authentication failed due to unknown client, no client authentication included, or unsupported authentication method.`
 
-If Pages is a registered OAuth application and [access control is enabled](../../user/project/pages/pages_access_control.md), this error indicates that the authentication token stored in `/etc/gitlab/gitlab-secrets.json` has become invalid:
-
-```plaintext
-Client authentication failed due to unknown client, no client authentication included,
-or unsupported authentication method.
-```
-
-To resolve:
+If Pages is a registered OAuth application and [access control is enabled](../../user/project/pages/pages_access_control.md), this error indicates that the authentication token stored in `/etc/gitlab/gitlab-secrets.json` has become invalid. To resolve:
 
 1. Back up your secrets file:
 

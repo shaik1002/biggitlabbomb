@@ -44,7 +44,7 @@ RSpec.describe Gitlab::GithubImport::Clients::Proxy, :manage, feature_category: 
     end
   end
 
-  describe '#count_repos_by', :clean_gitlab_redis_shared_state do
+  describe '#count_by', :clean_gitlab_redis_cache do
     let(:client_stub) { instance_double(Gitlab::GithubImport::Client) }
     let(:client_response) { { data: { search: { repositoryCount: 1 } } } }
 

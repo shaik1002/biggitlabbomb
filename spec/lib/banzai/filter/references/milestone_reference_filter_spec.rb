@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Banzai::Filter::References::MilestoneReferenceFilter, feature_category: :markdown do
+RSpec.describe Banzai::Filter::References::MilestoneReferenceFilter, feature_category: :team_planning do
   include FilterSpecHelper
 
   let_it_be(:parent_group) { create(:group, :public) }
@@ -18,8 +18,8 @@ RSpec.describe Banzai::Filter::References::MilestoneReferenceFilter, feature_cat
   shared_examples 'reference parsing' do
     %w[pre code a style].each do |elem|
       it "ignores valid references contained inside '#{elem}' element" do
-        act = "<#{elem}>milestone #{reference}</#{elem}>"
-        expect(reference_filter(act).to_html).to include act
+        exp = act = "<#{elem}>milestone #{reference}</#{elem}>"
+        expect(reference_filter(act).to_html).to eq exp
       end
     end
 
@@ -67,9 +67,9 @@ RSpec.describe Banzai::Filter::References::MilestoneReferenceFilter, feature_cat
     end
 
     it 'ignores invalid milestone IIDs' do
-      act = "Milestone #{invalidate_reference(reference)}"
+      exp = act = "Milestone #{invalidate_reference(reference)}"
 
-      expect(reference_filter(act).to_html).to include act
+      expect(reference_filter(act).to_html).to eq exp
     end
   end
 
@@ -98,9 +98,9 @@ RSpec.describe Banzai::Filter::References::MilestoneReferenceFilter, feature_cat
     end
 
     it 'ignores invalid milestone names' do
-      act = "Milestone #{Milestone.reference_prefix}#{milestone.name.reverse}"
+      exp = act = "Milestone #{Milestone.reference_prefix}#{milestone.name.reverse}"
 
-      expect(reference_filter(act).to_html).to include act
+      expect(reference_filter(act).to_html).to eq exp
     end
   end
 
@@ -124,9 +124,9 @@ RSpec.describe Banzai::Filter::References::MilestoneReferenceFilter, feature_cat
     end
 
     it 'ignores invalid milestone names' do
-      act = %(Milestone #{Milestone.reference_prefix}"#{milestone.name.reverse}")
+      exp = act = %(Milestone #{Milestone.reference_prefix}"#{milestone.name.reverse}")
 
-      expect(reference_filter(act).to_html).to include act
+      expect(reference_filter(act).to_html).to eq exp
     end
   end
 
@@ -319,7 +319,7 @@ RSpec.describe Banzai::Filter::References::MilestoneReferenceFilter, feature_cat
     it 'ignores invalid milestone names and escapes entities' do
       act = %(Milestone %"&lt;non valid&gt;")
 
-      expect(reference_filter(act).to_html).to include act
+      expect(reference_filter(act).to_html).to eq act
     end
   end
 
@@ -427,9 +427,9 @@ RSpec.describe Banzai::Filter::References::MilestoneReferenceFilter, feature_cat
       end
 
       it 'ignores internal references' do
-        act = "See %#{milestone.iid}"
+        exp = act = "See %#{milestone.iid}"
 
-        expect(reference_filter(act, context).to_html).to include act
+        expect(reference_filter(act, context).to_html).to eq exp
       end
 
       it_behaves_like 'absolute references' do
@@ -468,9 +468,9 @@ RSpec.describe Banzai::Filter::References::MilestoneReferenceFilter, feature_cat
       end
 
       it 'ignores internal references' do
-        act = "See %#{group_milestone.iid}"
+        exp = act = "See %#{group_milestone.iid}"
 
-        expect(reference_filter(act, context).to_html).to include act
+        expect(reference_filter(act, context).to_html).to eq exp
       end
     end
 

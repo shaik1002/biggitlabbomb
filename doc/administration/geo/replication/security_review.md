@@ -171,12 +171,9 @@ from [owasp.org](https://owasp.org/).
 - GitLab is "cloud native" and this applies to Geo as much as to the rest of the
   product. Deployment in clouds is a common and supported scenario.
 
-## If applicable, what approaches to cloud computing are taken?
+## If applicable, what approach(es) to cloud computing is taken (Managed Hosting versus "Pure" Cloud, a "full machine" approach such as AWS-EC2 versus a "hosted database" approach such as AWS-RDS and Azure, etc)?
 
-- Whether to use these is to be decided by our customers, according to their operational needs:
-
-  - Managed hosting versus "pure" cloud
-  - A "full machine" approach, such as AWS-ED2, versus a "hosted database" approach such as AWS-RDS and Azure
+- To be decided by our customers, according to their operational needs.
 
 ## Environment
 
@@ -192,7 +189,7 @@ from [owasp.org](https://owasp.org/).
 
 - PostgreSQL >= 12, Redis, Sidekiq, Puma.
 
-### How to protect database connection strings, encryption keys, and other sensitive components?
+### How can database connection strings, encryption keys, and other sensitive components be stored, accessed, and protected from unauthorized detection?
 
 - There are some Geo-specific values. Some are shared secrets which must be
   securely transmitted from the **primary** site to the **secondary** site at setup time. Our
@@ -235,7 +232,7 @@ from [owasp.org](https://owasp.org/).
 
 - Git repositories and files, tracking information related to them, and the GitLab database contents.
 
-### What data should be encrypted? What key management requirements are defined?
+### What data is or may need to be encrypted and what key management requirements have been defined?
 
 - Neither **primary** sites or **secondary** sites encrypt Git repository or file system data at
   rest. A subset of database columns are encrypted at rest using the `db_otp_key`.
@@ -250,9 +247,8 @@ from [owasp.org](https://owasp.org/).
 
 - Comprehensive system logs exist, tracking every connection to GitLab and PostgreSQL.
 
-### What encryption requirements have been defined for data in transit?
+### What encryption requirements have been defined for data in transit - including transmission over WAN, LAN, SecureFTP, or publicly accessible protocols such as http: and https:?
 
-- (This includes transmission over WAN, LAN, SecureFTP, or publicly accessible protocols such as `http:` and `https:`.)
 - Data must have the option to be encrypted in transit, and be secure against
   both passive and active attack (for example, MITM attacks should not be possible).
 
@@ -272,7 +268,7 @@ from [owasp.org](https://owasp.org/).
 
 ### What user authorization requirements have been defined?
 
-- **Secondary** sites must only be able to *read* data. They cannot mutate data on the **primary** site.
+- **Secondary** sites must only be able to *read* data. They are not currently able to mutate data on the **primary** site.
 
 ### What session management requirements have been defined?
 
@@ -292,7 +288,7 @@ from [owasp.org](https://owasp.org/).
 
 ## Application Monitoring
 
-### How are audit and debug logs accessed, stored, and secured?
+### What application auditing requirements have been defined? How are audit and debug logs accessed, stored, and secured?
 
 - Structured JSON log is written to the file system, and can also be ingested
   into a Kibana installation for further analysis.

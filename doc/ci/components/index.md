@@ -13,8 +13,8 @@ DETAILS:
 > - Introduced as an [experimental feature](../../policy/experiment-beta-support.md#experiment) in GitLab 16.0, [with a flag](../../administration/feature_flags.md) named `ci_namespace_catalog_experimental`. Disabled by default.
 > - [Enabled on GitLab.com and self-managed](https://gitlab.com/groups/gitlab-org/-/epics/9897) in GitLab 16.2.
 > - [Feature flag `ci_namespace_catalog_experimental` removed](https://gitlab.com/gitlab-org/gitlab/-/issues/394772) in GitLab 16.3.
-> - [Moved](https://gitlab.com/gitlab-com/www-gitlab-com/-/merge_requests/130824) to [beta](../../policy/experiment-beta-support.md#beta) in GitLab 16.6.
-> - [Made generally available](https://gitlab.com/gitlab-com/www-gitlab-com/-/merge_requests/134062) in GitLab 17.0.
+> - [Moved](https://gitlab.com/gitlab-com/www-gitlab-com/-/merge_requests/130824) to [Beta](../../policy/experiment-beta-support.md#beta) in GitLab 16.6.
+> - [Made Generally Available](https://gitlab.com/gitlab-com/www-gitlab-com/-/merge_requests/134062) in GitLab 17.0.
 
 A CI/CD component is a reusable single pipeline configuration unit. Use components
 to create a small part of a larger pipeline, or even to compose a complete pipeline configuration.
@@ -35,9 +35,6 @@ that have the functionality you need in the [CI/CD Catalog](#cicd-catalog).
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For an introduction and hands-on examples, see [Efficient DevSecOps workflows with reusable CI/CD components](https://www.youtube.com/watch?v=-yvfSFKAgbA).
 <!-- Video published on 2024-01-22. DRI: Developer Relations, https://gitlab.com/groups/gitlab-com/marketing/developer-relations/-/epics/399 -->
-
-For common questions and additional support, see the [FAQ: GitLab CI/CD Catalog](https://about.gitlab.com/blog/2024/08/01/faq-gitlab-ci-cd-catalog/)
-blog post.
 
 ## Component project
 
@@ -137,15 +134,14 @@ for example:
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/my-org/security-components/secret-detection@1.0.0
+  - component: gitlab.example.com/my-org/security-components/secret-detection@1.0.0
     inputs:
       stage: build
 ```
 
 In this example:
 
-- `$CI_SERVER_FQDN` is a [predefined variable](../variables/predefined_variables.md)
-  for the fully qualified domain name (FQDN) matching the GitLab host.
+- `gitlab.example.com` is the Fully Qualified Domain Name (FQDN) matching the GitLab host.
   You can only reference components in the same GitLab instance as your project.
 - `my-org/security-components` is the full path of the project containing the component.
 - `secret-detection` is the component name that is defined as either a single file `templates/secret-detection.yml`
@@ -158,27 +154,19 @@ the pipeline's configuration.
 To use GitLab.com components in a self-managed instance, you must
 [mirror the component project](#use-a-gitlabcom-component-in-a-self-managed-instance).
 
-WARNING:
-If a component requires the use of tokens, passwords, or other sensitive data to function,
-be sure to audit the component's source code to verify that the data is only used to
-perform actions that you expect and authorize. You should also use tokens and secrets
-with the minimum permissions, access, or scope required to complete the action.
-
 ### Component versions
 
 In order of highest priority first, the component version can be:
 
 - A commit SHA, for example `e3262fdd0914fa823210cdb79a8c421e2cef79d8`.
 - A tag, for example: `1.0.0`. If a tag and commit SHA exist with the same name,
-  the commit SHA takes precedence over the tag. Components released to the CI/CD Catalog
+  the commit SHA takes precedence over the tag. Components released to the CI/CD
   should be tagged with a [semantic version](#semantic-versioning).
 - A branch name, for example `main`. If a branch and tag exist with the same name,
   the tag takes precedence over the branch.
 - `~latest`, which always points to the latest semantic version
   published in the CI/CD Catalog. Use `~latest` only if you want to use the absolute
-  latest version at all times, which could include breaking changes. `~latest`
-  does not include pre-releases, for example `1.0.1-rc`, which are not considered
-  production-ready.
+  latest version at all times, which could include breaking changes.
 
 You can use any version supported by the component, but using a version published
 to the CI/CD catalog is recommended. The version referenced with a commit SHA or branch name
@@ -217,10 +205,141 @@ In this example, referencing the component with:
 - `1.1` would use the `1.1.1` version.
 - `~latest` would use the `2.1.0` version.
 
-Pre-release versions are never fetched when referencing a version range. To fetch
-a pre-release version, specify the full version, for example `1.0.1-rc`.
+## CI/CD Catalog
 
-## Write a component
+DETAILS:
+**Tier:** Free, Premium, Ultimate
+**Offering:** GitLab.com, Self-managed, GitLab Dedicated
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/407249) as an [experiment](../../policy/experiment-beta-support.md#experiment) in GitLab 16.1.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/432045) to [beta](../../policy/experiment-beta-support.md#beta) in GitLab 16.7.
+> - [Made Generally Available](https://gitlab.com/gitlab-org/gitlab/-/issues/454306) in GitLab 17.0.
+
+The CI/CD Catalog is a list of projects with published CI/CD components you can use
+to extend your CI/CD workflow.
+
+Anyone can [create a component project](#create-a-component-project) and add it to
+the CI/CD Catalog, or contribute to an existing project to improve the available components.
+
+For a click-through demo, see [the CI/CD Catalog beta Product Tour](https://gitlab.navattic.com/cicd-catalog).
+<!-- Demo published on 2024-01-24 -->
+
+### View the CI/CD Catalog
+
+To access the CI/CD Catalog and view the published components that are available to you:
+
+1. On the left sidebar, select **Search or go to**.
+1. Select **Explore**.
+1. Select **CI/CD Catalog**.
+
+Alternatively, if you are already in the [pipeline editor](../pipeline_editor/index.md)
+in your project, you can select **Browse CI/CD Catalog**.
+
+Visibility of components in the CI/CD catalog follows the component source project's
+[visibility setting](../../user/public_access.md). Components with source projects set to:
+
+- Private are visible only to users assigned at least the Guest role in the source component project.
+- Internal are visible only to users logged into the GitLab instance.
+- Public are visible to anyone with access to the GitLab instance.
+
+### Publish a component project
+
+To publish a component project in the CI/CD catalog, you must:
+
+1. Set the project as a catalog project.
+1. Publish a new release.
+
+#### Set a component project as a catalog project
+
+To make published versions of a component project visible in the CI/CD catalog,
+you must set the project as a catalog project.
+
+Prerequisites:
+
+- You must have the Owner role in the project.
+
+To set the project as a catalog project:
+
+1. On the left sidebar, select **Search or go to** and find your project.
+1. Select **Settings > General**.
+1. Expand **Visibility, project features, permissions**.
+1. Turn on the **CI/CD Catalog project** toggle.
+
+The project only becomes findable in the catalog after you publish a new release.
+
+#### Publish a new release
+
+CI/CD components can be [used](#use-a-component) without being listed in the CI/CD catalog.
+However, publishing a component's releases in the catalog makes it discoverable to other users.
+
+Prerequisites:
+
+- The project must:
+  - Be set as a [catalog project](#set-a-component-project-as-a-catalog-project).
+  - Have a [project description](../../user/project/working_with_projects.md#edit-project-name-description-and-avatar) defined.
+  - Have a `README.md` file in the root directory for the commit SHA of the tag being released.
+  - Have at least one [CI/CD component in the `templates/` directory](#directory-structure)
+    for the commit SHA of the tag being released.
+
+To publish a new version of the component to the catalog:
+
+1. Add a job to the project's `.gitlab-ci.yml` file that uses the [`release`](../yaml/index.md#release)
+   keyword to create the new release when a tag is created.
+   You should configure the tag pipeline to [test the components](#test-the-component) before
+   running the release job. For example:
+
+   ```yaml
+   create-release:
+     stage: release
+     image: registry.gitlab.com/gitlab-org/release-cli:latest
+     script: echo "Creating release $CI_COMMIT_TAG"
+     rules:
+       - if: $CI_COMMIT_TAG
+     release:
+       tag_name: $CI_COMMIT_TAG
+       description: "Release $CI_COMMIT_TAG of components in $CI_PROJECT_PATH"
+   ```
+
+1. Create a [new tag](../../user/project/repository/tags/index.md#create-a-tag) for the release,
+   which should trigger a tag pipeline that contains the job responsible for creating the release.
+   The tag must use [semantic versioning](#semantic-versioning).
+
+After the release job completes successfully, the release is created and the new version
+is published to the CI/CD catalog.
+
+#### Semantic versioning
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/427286) in GitLab 16.10.
+
+When tagging and [releasing new versions](#publish-a-new-release) of components to the Catalog,
+you must use [semantic versioning](https://semver.org). Semantic versioning is the standard
+for communicating that a change is a major, minor, patch, or other kind of change.
+
+For example, `1.0.0`, `2.3.4`, and `1.0.0-alpha` are all valid semantic versions.
+
+### Unpublish a component project
+
+To remove a component project from the catalog, turn off the [**CI/CD Catalog resource**](#set-a-component-project-as-a-catalog-project)
+toggle in the project settings.
+
+WARNING:
+This action destroys the metadata about the component project and its versions published
+in the catalog. The project and its repository still exist, but are not visible in the catalog.
+
+To publish the component project in the catalog again, you need to [publish a new release](#publish-a-new-release).
+
+### Verified component creators
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/433443) in GitLab 16.11
+
+Some CI/CD components are badged with an icon to show that the component was created
+and is maintained by users verified by GitLab:
+
+- GitLab-maintained (**{tanuki-verified}**): Components that are created and maintained by GitLab.
+- GitLab Partner (**{partner-verified}**): Components that are created and maintained by
+  a GitLab-verified partner.
+
+## Best practices
 
 This section describes some best practices for creating high quality component projects.
 
@@ -244,7 +363,7 @@ write a good `README.md` file:
 
 - The documentation should start with a summary of the capabilities that the components in the project provide.
 - If the project contains multiple components, use a [table of contents](../../user/markdown.md#table-of-contents)
-  to help users quickly jump to a specific component's details.
+   to help users quickly jump to a specific component's details.
 - Add a `## Components` section with sub-sections like `### Component A` for each component in the project.
 - In each component section:
   - Add a description of what the component does.
@@ -334,27 +453,6 @@ You can include sample files like these directly in the component project, to be
 during component testing.
 
 You can learn more in [examples for testing a component](examples.md#test-a-component).
-
-### Avoid hard-coding instance or project-specific values
-
-When [using another component](#use-a-component) in your component, use `$CI_SERVER_FQDN`
-instead of your instance's Fully Qualified Domain Name (like `gitlab.com`).
-
-When accessing the GitLab API in your component, use the `$CI_API_V4_URL` instead of the
-full URL and path for your instance (like `https://gitlab.com/api/v4`).
-
-These [predefined variables](../variables/predefined_variables.md)
-ensure that your component also works when used on another instance, for example when using
-[a GitLab.com component in a self-managed instance](#use-a-gitlabcom-component-in-a-self-managed-instance).
-
-### Do not assume API resources are always public
-
-Ensure that the component and its testing pipeline work also [in a self-managed instance](#use-a-gitlabcom-component-in-a-self-managed-instance).
-While some API resources of public projects on GitLab.com could be accessed via unauthenticated requests
-on self-managed a component project could be mirrored as private or internal project.
-
-It's important that an access token can optionally be provided via inputs or variables to
-authenticate requests on self-managed instances.
 
 ### Avoid using global keywords
 
@@ -459,38 +557,6 @@ For example, to create a component with `stage` configuration that can be define
         stage: verify
   ```
 
-#### Define job names with inputs
-
-Similar to the values for the `stage` keyword, you should avoid hard-coding job names
-in CI/CD components. When your component's users can customize job names, they can prevent conflicts
-with the existing names in their pipelines. Users could also include a component
-multiple times with different input options by using different names.
-
-Use `inputs` to allow your component's users to define a specific job name, or a prefix for the
-job name. For example:
-
-```yaml
-spec:
-  inputs:
-    job-prefix:
-      description: "Define a prefix for the job name"
-    job-name:
-      description: "Alternatively, define the job's name"
-    job-stage:
-      default: test
----
-
-"$[[ inputs.job-prefix ]]-scan-website":
-  stage: $[[ inputs.job-stage ]]
-  script:
-    - scan-website-1
-
-"$[[ inputs.job-name ]]":
-  stage: $[[ inputs.job-stage ]]
-  script:
-    - scan-website-2
-```
-
 ### Replace custom CI/CD variables with inputs
 
 When using CI/CD variables in a component, evaluate if the `inputs` keyword
@@ -530,158 +596,6 @@ In other cases, CI/CD variables might still be preferred. For example:
   a component to match a user's project.
 - Ask users to store sensitive values as [masked or protected CI/CD variables in project settings](../variables/index.md#define-a-cicd-variable-in-the-ui).
 
-## CI/CD Catalog
-
-DETAILS:
-**Tier:** Free, Premium, Ultimate
-**Offering:** GitLab.com, Self-managed, GitLab Dedicated
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/407249) as an [experiment](../../policy/experiment-beta-support.md#experiment) in GitLab 16.1.
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/432045) to [beta](../../policy/experiment-beta-support.md#beta) in GitLab 16.7.
-> - [Made Generally Available](https://gitlab.com/gitlab-org/gitlab/-/issues/454306) in GitLab 17.0.
-
-The CI/CD Catalog is a list of projects with published CI/CD components you can use
-to extend your CI/CD workflow.
-
-Anyone can [create a component project](#create-a-component-project) and add it to
-the CI/CD Catalog, or contribute to an existing project to improve the available components.
-
-For a click-through demo, see [the CI/CD Catalog beta Product Tour](https://gitlab.navattic.com/cicd-catalog).
-<!-- Demo published on 2024-01-24 -->
-
-### View the CI/CD Catalog
-
-To access the CI/CD Catalog and view the published components that are available to you:
-
-1. On the left sidebar, select **Search or go to**.
-1. Select **Explore**.
-1. Select **CI/CD Catalog**.
-
-Alternatively, if you are already in the [pipeline editor](../pipeline_editor/index.md)
-in your project, you can select **CI/CD Catalog**.
-
-Visibility of components in the CI/CD catalog follows the component source project's
-[visibility setting](../../user/public_access.md). Components with source projects set to:
-
-- Private are visible only to users assigned at least the Guest role for the source component project.
-- Internal are visible only to users logged into the GitLab instance.
-- Public are visible to anyone with access to the GitLab instance.
-
-### Publish a component project
-
-To publish a component project in the CI/CD catalog, you must:
-
-1. Set the project as a catalog project.
-1. Publish a new release.
-
-#### Set a component project as a catalog project
-
-To make published versions of a component project visible in the CI/CD catalog,
-you must set the project as a catalog project.
-
-Prerequisites:
-
-- You must have the Owner role for the project.
-
-To set the project as a catalog project:
-
-1. On the left sidebar, select **Search or go to** and find your project.
-1. Select **Settings > General**.
-1. Expand **Visibility, project features, permissions**.
-1. Turn on the **CI/CD Catalog project** toggle.
-
-The project only becomes findable in the catalog after you publish a new release.
-
-To use automation to enable this setting, you can use the [`mutationcatalogresourcescreate`](../../api/graphql/reference/index.md#mutationcatalogresourcescreate)
-GraphQL endpoint. [Issue 463043](https://gitlab.com/gitlab-org/gitlab/-/issues/463043)
-proposes to expose this in the REST API as well.
-
-#### Publish a new release
-
-CI/CD components can be [used](#use-a-component) without being listed in the CI/CD catalog.
-However, publishing a component's releases in the catalog makes it discoverable to other users.
-
-Prerequisites:
-
-- You must have at least the Maintainer role for the project.
-- The project must:
-  - Be set as a [catalog project](#set-a-component-project-as-a-catalog-project).
-  - Have a [project description](../../user/project/working_with_projects.md#edit-project-name-description-and-avatar) defined.
-  - Have a `README.md` file in the root directory for the commit SHA of the tag being released.
-  - Have at least one [CI/CD component in the `templates/` directory](#directory-structure)
-    for the commit SHA of the tag being released.
-
-To publish a new version of the component to the catalog:
-
-1. Add a job to the project's `.gitlab-ci.yml` file that uses the [`release`](../yaml/index.md#release)
-   keyword to create the new release when a tag is created.
-   You should configure the tag pipeline to [test the components](#test-the-component) before
-   running the release job. For example:
-
-   ```yaml
-   create-release:
-     stage: release
-     image: registry.gitlab.com/gitlab-org/release-cli:latest
-     script: echo "Creating release $CI_COMMIT_TAG"
-     rules:
-       - if: $CI_COMMIT_TAG
-     release:
-       tag_name: $CI_COMMIT_TAG
-       description: "Release $CI_COMMIT_TAG of components in $CI_PROJECT_PATH"
-   ```
-
-1. Create a [new tag](../../user/project/repository/tags/index.md#create-a-tag) for the release,
-   which should trigger a tag pipeline that contains the job responsible for creating the release.
-   The tag must use [semantic versioning](#semantic-versioning).
-
-After the release job completes successfully, the release is created and the new version
-is published to the CI/CD catalog.
-
-#### Semantic versioning
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/427286) in GitLab 16.10.
-
-When tagging and [releasing new versions](#publish-a-new-release) of components to the Catalog,
-you must use [semantic versioning](https://semver.org). Semantic versioning is the standard
-for communicating that a change is a major, minor, patch, or other kind of change.
-
-For example, `1.0.0`, `2.3.4`, and `1.0.0-alpha` are all valid semantic versions.
-
-### Unpublish a component project
-
-To remove a component project from the catalog, turn off the [**CI/CD Catalog resource**](#set-a-component-project-as-a-catalog-project)
-toggle in the project settings.
-
-WARNING:
-This action destroys the metadata about the component project and its versions published
-in the catalog. The project and its repository still exist, but are not visible in the catalog.
-
-To publish the component project in the catalog again, you need to [publish a new release](#publish-a-new-release).
-
-### Verified component creators
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/433443) in GitLab 16.11
-
-Some CI/CD components are badged with an icon to show that the component was created
-and is maintained by users verified by GitLab:
-
-- GitLab-maintained (**{tanuki-verified}**): Components that are created and maintained by GitLab.
-- GitLab Partner (**{partner-verified}**): Components that are independently created
-  and maintained by a GitLab-verified partner.
-
-  GitLab partners can contact a member of the GitLab Partner Alliance to have their
-  namespace flagged as GitLab-verified. Then any CI/CD components located in the
-  namespace are badged as GitLab Partner components. The Partner Alliance member
-  creates an internal request issue on behalf of the verified partner:
-  `https://gitlab.com/gitlab-com/support/internal-requests/-/issues/new?issuable_template=CI%20Catalog%20Badge%20Request`.
-
-  DISCLAIMER:
-  GitLab Partner-created components are provided **as-is**, without warranty of any kind.
-  An end user's use of a GitLab Partner-created component is at their own risk and
-  GitLab shall have no indemnification obligations nor any liability of any type
-  with respect to the end user's use of the component. The end user's use of such content
-  and any liability related thereto shall be between the publisher of the content and the end user.
-
 ## Convert a CI/CD template to a component
 
 Any existing CI/CD template that you use in projects by using the `include:` syntax
@@ -692,7 +606,7 @@ can be converted to a CI/CD component:
 1. Create a YAML file in the component project according to the [directory structure](index.md#directory-structure).
 1. Copy the content of the original template YAML file into the new component YAML file.
 1. Refactor the new component's configuration to:
-   - Follow the guidance on [writing a component](#write-a-component).
+   - Follow the [best practices](index.md#best-practices) for components.
    - Improve the configuration, for example by enabling [merge request pipelines](../pipelines/merge_request_pipelines.md)
      or making it [more efficient](../pipelines/pipeline_efficiency.md).
 1. Leverage the `.gitlab-ci.yml` in the components repository to [test changes to the component](index.md#test-the-component).
@@ -731,7 +645,7 @@ You might receive an error message similar to the following when using the `~lat
 version qualifier to reference a component hosted by a [catalog project](#set-a-component-project-as-a-catalog-project):
 
 ```plaintext
-This GitLab CI configuration is invalid: Component 'gitlab.com/my-namespace/my-project/my-component@~latest' - content not found
+This GitLab CI configuration is invalid: component 'gitlab.com/my-namespace/my-project/my-component@~latest' - content not found
 ```
 
 The `~latest` behavior [was updated](https://gitlab.com/gitlab-org/gitlab/-/issues/442238)

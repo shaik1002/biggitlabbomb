@@ -40,20 +40,6 @@ RSpec.describe 'Projects > Settings > Repository settings', feature_category: :s
       end
     end
 
-    context 'Repository maintenance', :js do
-      before do
-        visit project_settings_repository_path(project)
-      end
-
-      it 'does not render remove blobs section' do
-        expect(page).not_to have_content('Remove blobs')
-      end
-
-      it 'does not render redact text section' do
-        expect(page).not_to have_content('Redact text')
-      end
-    end
-
     context 'Branch rules', :js do
       it 'renders branch rules settings' do
         visit project_settings_repository_path(project)
@@ -61,7 +47,7 @@ RSpec.describe 'Projects > Settings > Repository settings', feature_category: :s
       end
     end
 
-    context 'Deploy keys', :js do
+    context 'Deploy Keys', :js do
       let_it_be(:private_deploy_key) { create(:deploy_key, title: 'private_deploy_key', public: false) }
       let_it_be(:public_deploy_key) { create(:another_deploy_key, title: 'public_deploy_key', public: true) }
 
@@ -265,7 +251,7 @@ RSpec.describe 'Projects > Settings > Repository settings', feature_category: :s
         end
 
         it 'hides remote mirror settings' do
-          expect(find_by_testid('mirroring-repositories-settings-content')).not_to have_selector('form')
+          expect(page.find('.project-mirror-settings')).not_to have_selector('form')
           expect(page).to have_content('Mirror settings are only available to GitLab administrators.')
         end
       end
@@ -337,7 +323,7 @@ RSpec.describe 'Projects > Settings > Repository settings', feature_category: :s
   context 'for admin' do
     shared_examples_for 'shows mirror settings' do
       it 'shows mirror settings' do
-        expect(find_by_testid('mirroring-repositories-settings-content')).to have_selector('form')
+        expect(page.find('.project-mirror-settings')).to have_selector('form')
         expect(page).not_to have_content('Changing mirroring setting is disabled for non-admin users.')
       end
     end
@@ -358,18 +344,6 @@ RSpec.describe 'Projects > Settings > Repository settings', feature_category: :s
       let(:mirror_available) { false }
 
       include_examples 'shows mirror settings'
-    end
-
-    context 'Repository maintenance', :enable_admin_mode do
-      let(:mirror_available) { false }
-
-      it 'renders remove blobs section' do
-        expect(page).to have_content('Remove blobs')
-      end
-
-      it 'renders redact text section' do
-        expect(page).to have_content('Redact text')
-      end
     end
   end
 end

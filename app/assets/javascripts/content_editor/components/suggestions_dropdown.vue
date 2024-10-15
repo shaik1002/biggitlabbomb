@@ -139,7 +139,7 @@ export default {
           return `${this.char}${item.username}`;
         case 'issue':
         case 'merge_request':
-          return item.reference || `${this.char}${item.iid}`;
+          return `${this.char}${item.iid}`;
         case 'snippet':
           return `${this.char}${item.id}`;
         case 'milestone':
@@ -257,7 +257,7 @@ export default {
       return this.query
         ? String(escape(text)).replace(
             new RegExp(this.query, 'i'),
-            (match) => `<strong class="!gl-text-primary">${match}</strong>`,
+            (match) => `<strong class="gl-text-body!">${match}</strong>`,
           )
         : escape(text);
     },
@@ -268,7 +268,10 @@ export default {
 
 <template>
   <div class="gl-new-dropdown content-editor-suggestions-dropdown">
-    <div v-if="!loading && items.length > 0" class="gl-new-dropdown-panel gl-absolute !gl-block">
+    <div
+      v-if="!loading && items.length > 0"
+      class="gl-new-dropdown-panel gl-display-block! gl-absolute"
+    >
       <div class="gl-new-dropdown-inner">
         <ul class="gl-new-dropdown-contents" data-testid="content-editor-suggestions-dropdown">
           <li
@@ -286,7 +289,7 @@ export default {
               @click="selectItem(index)"
             >
               <div class="gl-new-dropdown-item-text-wrapper">
-                <span v-if="isUser" class="gl-flex gl-items-center gl-gap-3">
+                <span v-if="isUser" class="gl-display-flex gl-align-items-center gl-gap-3">
                   <gl-avatar
                     :src="item.avatar_url"
                     :entity-name="item.username"
@@ -302,13 +305,8 @@ export default {
                   </span>
                 </span>
                 <span v-if="isIssue || isMergeRequest">
-                  <gl-icon
-                    v-if="item.icon_name"
-                    class="gl-mr-2 gl-text-secondary"
-                    :name="item.icon_name"
-                  />
                   <small
-                    v-safe-html:[$options.safeHtmlConfig]="highlight(item.reference || item.iid)"
+                    v-safe-html:[$options.safeHtmlConfig]="highlight(item.iid)"
                     class="gl-text-gray-500"
                   ></small>
                   <span v-safe-html:[$options.safeHtmlConfig]="highlight(item.title)"></span>
@@ -340,10 +338,10 @@ export default {
                     class="gl-text-gray-500"
                   ></small>
                 </span>
-                <span v-if="isLabel" class="gl-flex">
+                <span v-if="isLabel" class="gl-display-flex">
                   <span
                     data-testid="label-color-box"
-                    class="dropdown-label-box gl-top-0 gl-mr-3 gl-shrink-0"
+                    class="dropdown-label-box gl-flex-shrink-0 gl-top-0 gl-mr-3"
                     :style="{ backgroundColor: item.color }"
                   ></span>
                   <span v-safe-html:[$options.safeHtmlConfig]="highlight(item.title)"></span>
@@ -351,15 +349,15 @@ export default {
                 <div v-if="isCommand">
                   <div class="gl-mb-1">
                     /<span v-safe-html:[$options.safeHtmlConfig]="highlight(item.name)"></span>
-                    <span class="gl-text-sm gl-text-gray-500">{{ item.params[0] }}</span>
+                    <span class="gl-text-gray-500 gl-font-sm">{{ item.params[0] }}</span>
                   </div>
                   <em
                     v-safe-html:[$options.safeHtmlConfig]="highlight(item.description)"
-                    class="gl-text-sm gl-text-gray-500"
+                    class="gl-text-gray-500 gl-font-sm"
                   ></em>
                 </div>
-                <div v-if="isEmoji" class="gl-flex gl-items-center">
-                  <div class="gl-pr-4 gl-text-lg">
+                <div v-if="isEmoji" class="gl-display-flex gl-align-items-center">
+                  <div class="gl-pr-4 gl-font-lg">
                     <gl-emoji
                       :key="item.emoji.e"
                       :data-name="item.emoji.name"
@@ -369,7 +367,7 @@ export default {
                       >{{ item.emoji.e }}</gl-emoji
                     >
                   </div>
-                  <div class="gl-grow">
+                  <div class="gl-flex-grow-1">
                     <span v-safe-html:[$options.safeHtmlConfig]="highlight(item.fieldValue)"></span>
                   </div>
                 </div>
@@ -379,10 +377,10 @@ export default {
         </ul>
       </div>
     </div>
-    <div v-if="loading" class="gl-new-dropdown-panel gl-absolute !gl-block">
+    <div v-if="loading" class="gl-new-dropdown-panel gl-display-block! gl-absolute">
       <div class="gl-new-dropdown-inner">
         <div class="gl-px-4 gl-py-3">
-          <gl-loading-icon size="sm" class="gl-inline-block" /> {{ __('Loading...') }}
+          <gl-loading-icon size="sm" class="gl-display-inline-block" /> {{ __('Loading...') }}
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
 <script>
-import { GlAvatar, GlButton, GlTooltipDirective } from '@gitlab/ui';
+import { GlAvatar, GlButton } from '@gitlab/ui';
 import { sprintf, __ } from '~/locale';
 
 export default {
@@ -7,10 +7,6 @@ export default {
   components: {
     GlAvatar,
     GlButton,
-    HiddenGroupsItem: () => import('ee_component/approvals/components/hidden_groups_item.vue'),
-  },
-  directives: {
-    GlTooltip: GlTooltipDirective,
   },
   props: {
     data: {
@@ -28,7 +24,7 @@ export default {
       return sprintf(__('Delete %{name}'), { name: this.name });
     },
     fullName() {
-      return this.data.fullName || this.data.name;
+      return this.data.fullName;
     },
     name() {
       return this.data.name;
@@ -36,37 +32,31 @@ export default {
     avatarUrl() {
       return this.data.avatarUrl;
     },
-    isHiddenGroups() {
-      return this.data.type === 'hidden_groups';
-    },
   },
 };
 </script>
 
 <template>
-  <div class="gl-flex gl-items-center gl-gap-3">
-    <hidden-groups-item v-if="isHiddenGroups" class="gl-grow" />
-    <div v-else class="gl-flex gl-grow gl-items-center gl-gap-3">
-      <gl-avatar
-        :alt="fullName"
-        :entity-name="fullName"
-        :size="32"
-        :src="avatarUrl"
-        fallback-on-error
-      />
-      <span class="gl-flex gl-flex-col">
-        <span class="gl-font-bold">{{ fullName }}</span>
-        <span class="gl-text-gray-600">@{{ name }}</span>
-      </span>
-    </div>
+  <span class="gl-display-flex gl-align-items-center gl-gap-3" @click="$emit('select', name)">
+    <gl-avatar
+      :alt="fullName"
+      :entity-name="fullName"
+      :size="32"
+      shape="rect"
+      :src="avatarUrl"
+      fallback-on-error
+    />
+    <span class="gl-display-flex gl-flex-direction-column gl-flex-grow-1">
+      <span class="gl-font-weight-bold">{{ name }}</span>
+      <span class="gl-text-gray-600">{{ fullName }}</span>
+    </span>
 
     <gl-button
       v-if="canDelete"
-      v-gl-tooltip="deleteButtonLabel"
       icon="remove"
       :aria-label="deleteButtonLabel"
       category="tertiary"
-      @click="$emit('delete', data.id)"
+      @click="$emit('delete', name)"
     />
-  </div>
+  </span>
 </template>

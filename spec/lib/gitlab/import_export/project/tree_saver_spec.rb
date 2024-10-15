@@ -40,14 +40,7 @@ RSpec.describe Gitlab::ImportExport::Project::TreeSaver, :with_license, feature_
       end
 
       context 'with project root' do
-        it do
-          is_expected.to include({
-            'description' => 'description',
-            'visibility_level' => 20,
-            'merge_commit_template' => 'merge commit message template',
-            'squash_commit_template' => 'squash commit message template'
-          })
-        end
+        it { is_expected.to include({ 'description' => 'description', 'visibility_level' => 20 }) }
 
         it { is_expected.not_to include("runners_token" => 'token') }
 
@@ -400,7 +393,7 @@ RSpec.describe Gitlab::ImportExport::Project::TreeSaver, :with_license, feature_
         end
 
         context 'as admin' do
-          let(:user) { create(:admin) }
+          let(:user) { create(:admin, :without_default_org) }
 
           before do
             project_tree_saver.save # rubocop:disable Rails/SaveBang
@@ -508,9 +501,7 @@ RSpec.describe Gitlab::ImportExport::Project::TreeSaver, :with_license, feature_
       description: 'description',
       releases: [release],
       group: group,
-      approvals_before_merge: 1,
-      merge_commit_template: 'merge commit message template',
-      squash_commit_template: 'squash commit message template')
+      approvals_before_merge: 1)
 
     issue = create(:issue, :task, assignees: [user], project: project)
     snippet = create(:project_snippet, project: project)

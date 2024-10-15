@@ -139,7 +139,7 @@ export default {
 <template>
   <bubble-menu
     data-testid="code-block-bubble-menu"
-    class="gl-rounded-base gl-bg-white gl-shadow"
+    class="gl-shadow gl-rounded-base gl-bg-white"
     plugin-key="bubbleMenuCodeBlock"
     :should-show="shouldShow"
     :tippy-options="tippyOptions()"
@@ -157,7 +157,7 @@ export default {
             <div class="gl-relative">
               <gl-button
                 v-gl-tooltip
-                class="gl-absolute -gl-mt-3 gl-ml-2"
+                class="gl-absolute gl-mt-n3 gl-ml-2"
                 variant="default"
                 category="tertiary"
                 size="medium"
@@ -166,7 +166,7 @@ export default {
                 icon="arrow-left"
                 @click.prevent.stop="showCustomLanguageInput = false"
               />
-              <p class="gl-dropdown-header-top !gl-mb-0 !gl-border-none !gl-pb-1 gl-text-center">
+              <p class="gl-text-center gl-dropdown-header-top gl-mb-0! gl-border-none! gl-pb-1!">
                 {{ __('Create custom type') }}
               </p>
             </div>
@@ -197,16 +197,16 @@ export default {
           </template>
           <template v-else #default>
             <gl-dropdown-form @submit.prevent="applyCustomLanguage">
-              <div class="gl-mx-4 gl-mb-3 gl-mt-2">
+              <div class="gl-mx-4 gl-mt-2 gl-mb-3">
                 <gl-form-input v-model="customLanguageType" :placeholder="__('Language type')" />
               </div>
               <gl-dropdown-divider />
-              <div class="gl-mx-4 gl-mt-3 gl-flex gl-justify-end">
+              <div class="gl-mx-4 gl-mt-3 gl-display-flex gl-justify-content-end">
                 <gl-button
                   variant="default"
                   size="medium"
                   category="primary"
-                  class="gl-mr-2 !gl-w-auto"
+                  class="gl-mr-2 gl-w-auto!"
                   @click.prevent.stop="showCustomLanguageInput = false"
                 >
                   {{ __('Cancel') }}
@@ -216,7 +216,7 @@ export default {
                   size="medium"
                   category="primary"
                   type="submit"
-                  class="!gl-w-auto"
+                  class="gl-w-auto!"
                 >
                   {{ __('Apply') }}
                 </gl-button>
@@ -250,7 +250,7 @@ export default {
           variant="default"
           category="tertiary"
           size="medium"
-          :class="{ '!gl-bg-gray-100': showPreview }"
+          :class="{ 'gl-bg-gray-100!': showPreview }"
           data-testid="preview-diagram"
           :aria-label="__('Preview diagram')"
           :title="__('Preview diagram')"

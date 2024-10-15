@@ -20,7 +20,5 @@ FactoryBot.define do
     trait :failed do
       status { ProjectExportJob::STATUS[:failed] }
     end
-
-    exported_by_admin { user&.can_admin_all_resources? }
   end
 end

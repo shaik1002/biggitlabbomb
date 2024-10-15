@@ -9,7 +9,7 @@ RSpec.describe Gitlab::ActionCable::RequestStoreCallbacks do
 
       described_class.wrapper.call(
         nil,
-        -> do
+        lambda do
           expect(RequestStore.active?).to eq(true)
         end
       )

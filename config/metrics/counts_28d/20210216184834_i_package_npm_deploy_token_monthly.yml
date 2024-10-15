@@ -3,6 +3,8 @@ data_category: optional
 key_path: redis_hll_counters.deploy_token_packages.i_package_npm_deploy_token_monthly
 description: A monthly count of npm packages published to the registry using a deploy
   token
+product_section: ops
+product_stage: package
 product_group: package_registry
 value_type: number
 status: active
@@ -21,4 +23,3 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

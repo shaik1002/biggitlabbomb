@@ -23,7 +23,7 @@ A DAST job has two executing processes:
 
 Enable the `DAST_DEBUG` CI/CD variable to debug scripts. This can help when troubleshooting the job,
 and outputs statements indicating what percentage of the scan is complete.
-For details on using variables, see [Overriding the DAST template](browser/index.md).
+For details on using variables, see [Overriding the DAST template](proxy-based.md#customize-dast-settings).
 
 Debug mode of the ZAP server can be enabled using the `DAST_ZAP_LOG_CONFIGURATION` variable.
 The following table outlines examples of values that can be set and the effect that they have on the output that is logged.
@@ -75,7 +75,7 @@ tips for optimizing DAST scans in a [blog post](https://about.gitlab.com/blog/20
 
 For information on this, see the [general Application Security troubleshooting section](../../../ci/jobs/job_artifacts_troubleshooting.md#error-message-no-files-to-upload).
 
-## Getting error `dast job: chosen stage dast does not exist` when including DAST CI template
+## Getting error `dast job: chosen stage does not exist` when including DAST CI template
 
 To avoid overwriting stages from other CI files, newer versions of the DAST CI template do not
 define stages. If you recently started using `DAST.latest.gitlab-ci.yml` or upgraded to a new major

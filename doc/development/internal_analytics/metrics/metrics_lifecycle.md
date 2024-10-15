@@ -37,14 +37,14 @@ Currently, the [Metrics Dictionary](https://metrics.gitlab.com/) is built automa
    - **If the metric has at least one `performance_indicator_type` of the `[x]mau` kind**:
      Notify the Customer Success Ops team (`@csops-team`), Analytics Engineers (`@gitlab-data/analytics-engineers`), and Product Analysts (`@gitlab-data/product-analysts`) by `@` mentioning the groups in a comment in the issue. Unexpected changes to these metric could break reporting.
    - **If the metric is owned by a different group than the one doing the removal**:
-     Tag the PM and EM of the owning group according to the [stages file](https://gitlab.com/gitlab-com/www-gitlab-com/blob/master/data/stages.yml).
+    Tag the PM and EM of the owning group according to the [stages file](https://gitlab.com/gitlab-com/www-gitlab-com/blob/master/data/stages.yml).
 
 1. Remove the metric instrumentation code, depending on `data_source`:
 
    - **`database/system`**: If the metric has an `instrumentation_class` and the assigned class is no longer used by any other metric you can remove the class and specs.
-     If the metric is instrumented within [`lib/gitlab/usage_data.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data.rb)
-     or [`ee/lib/ee/gitlab/usage_data.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/ee/gitlab/usage_data.rb) then remove the associated code and specs
-     ([example](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/60149/diffs#6335dc533bd21df26db9de90a02dd66278c2390d_167_167)).
+   If the metric is instrumented within [`lib/gitlab/usage_data.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data.rb)
+   or [`ee/lib/ee/gitlab/usage_data.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/ee/lib/ee/gitlab/usage_data.rb) then remove the associated code and specs
+   ([example](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/60149/diffs#6335dc533bd21df26db9de90a02dd66278c2390d_167_167)).
    - **`redis_hll/redis/internal_events`**: Remove the tracking code e.g. `track_internal_event` and associated specs.
 
 1. Update the attributes of the metric's YAML definition:
@@ -66,7 +66,7 @@ The `product_group_renamer` script can update all the definitions so you do not 
 For example, if the group 5-min-app was renamed to 2-min-app, you can update the relevant files like this:
 
 ```shell
-$ scripts/internal_events/product_group_renamer.rb 5-min-app 2-min-app
+$ ruby scripts/internal_events/product_group_renamer.rb 5-min-app 2-min-app
 Updated '5-min-app' to '2-min-app' in 3 files
 
 Updated files:
@@ -76,7 +76,5 @@ Updated files:
 ```
 
 After running the script, you must commit all the modified files to Git and create a merge request.
-
-The script is part of GDK and a frontend or backend developer can run the script and prepare the merge request.
 
 If a group is split into multiple groups, you need to manually update the product_group.

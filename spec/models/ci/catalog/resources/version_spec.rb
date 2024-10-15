@@ -20,12 +20,9 @@ RSpec.describe Ci::Catalog::Resources::Version, type: :model, feature_category: 
     create(:ci_catalog_resource_version, semver: '2.0.0', catalog_resource: resource, release: major_release)
   end
 
-  subject(:version) { v1_1_0 }
-
   it { is_expected.to belong_to(:release) }
   it { is_expected.to belong_to(:catalog_resource).class_name('Ci::Catalog::Resource') }
   it { is_expected.to belong_to(:project) }
-  it { is_expected.to belong_to(:published_by).class_name('User') }
   it { is_expected.to have_many(:components).class_name('Ci::Catalog::Resources::Component') }
   it { is_expected.to delegate_method(:sha).to(:release) }
   it { is_expected.to delegate_method(:author_id).to(:release) }
@@ -34,7 +31,6 @@ RSpec.describe Ci::Catalog::Resources::Version, type: :model, feature_category: 
     it { is_expected.to validate_presence_of(:release) }
     it { is_expected.to validate_presence_of(:catalog_resource) }
     it { is_expected.to validate_presence_of(:project) }
-    it { is_expected.to validate_presence_of(:published_by).on(:create) }
 
     describe 'semver validation' do
       where(:version, :valid, :semver_major, :semver_minor, :semver_patch, :semver_prerelease) do
@@ -56,15 +52,6 @@ RSpec.describe Ci::Catalog::Resources::Version, type: :model, feature_category: 
           expect(catalog_version.semver_patch).to be semver_patch
           expect(catalog_version.semver_prerelease).to eq semver_prerelease
         end
-      end
-    end
-
-    describe 'validate_published_by_is_release_author' do
-      it 'validates that the published_by user is the release author' do
-        version = build(:ci_catalog_resource_version, release: major_release, published_by: current_user)
-
-        expect(version).to be_invalid
-        expect(version.errors.full_messages).to include('Published by must be the same as the release author')
       end
     end
   end
@@ -105,31 +92,9 @@ RSpec.describe Ci::Catalog::Resources::Version, type: :model, feature_category: 
     end
   end
 
-  describe '.without_prerelease' do
-    subject { described_class.without_prerelease }
-
-    it 'excludes pre-releases' do
-      beta_release = create(:release, project: project, tag: '3.1.3-beta')
-      create(:ci_catalog_resource_version, semver: '3.1.3-beta', catalog_resource: resource,
-        release: beta_release)
-
-      is_expected.to match_array([v2_0_0, v1_1_0, v1_1_3])
-    end
-  end
-
   describe '.latest' do
     context 'when providing the ~latest tag' do
       it 'returns the latest version' do
-        latest_version = described_class.latest
-
-        expect(latest_version).to eq(v2_0_0)
-      end
-
-      it 'excludes pre-release versions' do
-        beta_release = create(:release, project: project, tag: '3.1.3-beta', created_at: Date.today)
-        create(:ci_catalog_resource_version, semver: '3.1.3-beta', catalog_resource: resource,
-          release: beta_release)
-
         latest_version = described_class.latest
 
         expect(latest_version).to eq(v2_0_0)
@@ -204,13 +169,13 @@ RSpec.describe Ci::Catalog::Resources::Version, type: :model, feature_category: 
       v1_2_3 = create(:release, :with_catalog_resource_version, project: project, tag: '1.2.3',
         sha: project.commit('1.2.3').sha)
 
-      expect(v1_1_0.readme).to include('testme')
-      expect(v1_2_3.catalog_resource_version.readme).to include('Patch v1.2.3')
+      expect(v1_1_0.readme.data).to include('testme')
+      expect(v1_2_3.catalog_resource_version.readme.data).to include('Patch v1.2.3')
     end
   end
 
   describe 'synchronizing released_at with `releases` table using model callbacks' do
-    let_it_be(:project) { create(:project, :repository) }
+    let_it_be(:project) { create(:project) }
     let_it_be(:resource) { create(:ci_catalog_resource, project: project) }
 
     let_it_be_with_reload(:release) do

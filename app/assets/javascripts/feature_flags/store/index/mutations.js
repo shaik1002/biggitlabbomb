@@ -1,11 +1,10 @@
+import Vue from 'vue';
 import { parseIntPagination, normalizeHeaders } from '~/lib/utils/common_utils';
 import * as types from './mutation_types';
 
 const updateFlag = (state, flag) => {
   const index = state.featureFlags.findIndex(({ id }) => id === flag.id);
-  const copy = [...state.featureFlags];
-  copy[index] = flag;
-  state.featureFlags = copy;
+  Vue.set(state.featureFlags, index, flag);
 };
 
 const createPaginationInfo = (headers) => {

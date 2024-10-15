@@ -18,21 +18,21 @@ module SystemCheck
 
       $stdout.print "GitLab Shell version >= #{required_version} ? ... "
       if current_version.valid? && required_version <= current_version
-        $stdout.puts Rainbow("OK (#{current_version})").green
+        $stdout.puts "OK (#{current_version})".color(:green)
       else
-        $stdout.puts Rainbow("FAIL. Please update gitlab-shell to #{required_version} from #{current_version}").red
+        $stdout.puts "FAIL. Please update gitlab-shell to #{required_version} from #{current_version}".color(:red)
       end
     end
 
     def check_gitlab_shell_self_test
       gitlab_shell_repo_base = gitlab_shell_path
-      check_cmd = File.expand_path('bin/gitlab-shell-check', gitlab_shell_repo_base)
+      check_cmd = File.expand_path('bin/check', gitlab_shell_repo_base)
       $stdout.puts "Running #{check_cmd}"
 
       if system(check_cmd, chdir: gitlab_shell_repo_base)
-        $stdout.puts Rainbow('gitlab-shell self-check successful').green
+        $stdout.puts 'gitlab-shell self-check successful'.color(:green)
       else
-        $stdout.puts Rainbow('gitlab-shell self-check failed').red
+        $stdout.puts 'gitlab-shell self-check failed'.color(:red)
         try_fixing_it(
           'Make sure GitLab is running;',
           'Check the gitlab-shell configuration file:',

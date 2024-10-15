@@ -76,20 +76,20 @@ export default {
 </script>
 
 <template>
-  <div class="gl-flex gl-flex-wrap gl-gap-5">
+  <div class="gl-display-flex gl-flex-wrap gl-gap-5">
     <input-copy-toggle-visibility
       v-if="secret"
       :copy-button-title="$options.COPY_SECRET"
       :value="secret"
       readonly
-      class="-gl-mt-3 gl-mb-0"
+      class="gl-mt-n3 gl-mb-0"
     >
       <template #description>
         {{ $options.DESCRIPTION_SECRET }}
       </template>
     </input-copy-toggle-visibility>
 
-    <gl-button category="secondary" class="gl-self-start" @click="displayModal">{{
+    <gl-button category="secondary" class="gl-align-self-start" @click="displayModal">{{
       $options.RENEW_SECRET
     }}</gl-button>
 

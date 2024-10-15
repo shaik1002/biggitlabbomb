@@ -21,7 +21,7 @@ Before attempting more advanced troubleshooting:
 
 On the **primary** site:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Geo > Sites**.
 
 We perform the following health checks on each **secondary** site
@@ -40,11 +40,7 @@ A site shows as "Unhealthy" if the site's status is more than 10 minutes old. In
 Geo::MetricsUpdateWorker.new.perform
 ```
 
-If it raises an error, then the error is probably also preventing the jobs from completing. If it takes longer than 10 minutes, then the status might flap or persist as "Unhealthy", even if the status does occasionally get updated. This might be due to growth in usage, growth in data over time, or performance bugs such as a missing database index.
-
-You can monitor system CPU load with a utility like `top` or `htop`. If PostgreSQL is using a significant amount of CPU, it might indicate that there's a problem, or that the system is underprovisioned. System memory should also be monitored.
-
-If you increase memory, you should also check the PostgreSQL memory-related settings in your `/etc/gitlab/gitlab.rb` configuration.
+If it raises an error, then the error is probably also preventing the jobs from completing. If it takes longer than 10 minutes, then there may be a performance issue, and the UI may always show "Unhealthy" even if the status eventually does get updated.
 
 If it successfully updates the status, then something may be wrong with Sidekiq. Is it running? Do the logs show errors? This job is supposed to be enqueued every minute and might not run if a [job deduplication idempotency](../../../sidekiq/sidekiq_troubleshooting.md#clearing-a-sidekiq-job-deduplication-idempotency-key) key was not cleared properly. It takes an exclusive lease in Redis to ensure that only one of these jobs can run at a time. The primary site updates its status directly in the PostgreSQL database. Secondary sites send an HTTP Post request to the primary site with their status data.
 
@@ -211,7 +207,7 @@ The 3 status items are defined as follows:
 To find more details about failed items, check
 [the `gitlab-rails/geo.log` file](../../../logs/log_parsing.md#find-most-common-geo-sync-errors)
 
-If you notice synchronization or verification failures, you can try to [resolve them](replication.md).
+If you notice replication or verification failures, you can try to [resolve them](replication.md#fixing-non-postgresql-replication-failures).
 
 If there are Repository check failures, you can try to [resolve them](synchronization.md#find-repository-check-failures-in-a-geo-secondary-site).
 
@@ -266,7 +262,7 @@ sudo gitlab-rake gitlab:geo:check
   ```
 
   Verify the correct password is set for `gitlab_rails['db_password']` that was
-  used when creating the hash in `postgresql['sql_user_password']` by running
+  used when creating the hash in  `postgresql['sql_user_password']` by running
   `gitlab-ctl pg-password-md5 gitlab` and entering the password.
 
 - Check returns `not a secondary node`.
@@ -282,9 +278,9 @@ sudo gitlab-rake gitlab:geo:check
   Checking Geo ... Finished
   ```
 
-  Ensure you have added the secondary site in the **Admin** area under **Geo > Sites** on the web interface for the **primary** site.
+  Ensure you have added the secondary site in the Admin Area under **Geo > Sites** on the web interface for the **primary** site.
   Also ensure you entered the `gitlab_rails['geo_node_name']`
-  when adding the secondary site in the **Admin** area of the **primary** site.
+  when adding the secondary site in the Admin Area of the **primary** site.
 
 - Check returns `Exception: PG::UndefinedTable: ERROR:  relation "geo_nodes" does not exist`.
 
@@ -370,7 +366,7 @@ generate an error because containers in Kubernetes do not have access to the hos
 Machine clock is synchronized ... Exception: getaddrinfo: Servname not supported for ai_socktype
 ```
 
-##### Message: `cannot execute INSERT in a read-only transaction`
+##### Message: `ActiveRecord::StatementInvalid: PG::ReadOnlySqlTransaction: ERROR:  cannot execute INSERT in a read-only transaction`
 
 When this error is encountered on a secondary site, it likely affects all usages of GitLab Rails such as `gitlab-rails` or `gitlab-rake` commands, as well the Puma, Sidekiq, and Geo Log Cursor services.
 
@@ -457,7 +453,7 @@ This machine's Geo node name matches a database record ... no
 ```
 
 For more information about recommended site names in the description of the Name field, see
-[Geo **Admin** area Common Settings](../../../../administration/geo_sites.md#common-settings).
+[Geo Admin Area Common Settings](../../../../administration/geo_sites.md#common-settings).
 
 ### Check OS locale data compatibility
 
@@ -472,7 +468,7 @@ See the [PostgreSQL wiki for more details](https://wiki.postgresql.org/wiki/Loca
 
 ## Fixing common errors
 
-This section documents common error messages reported in the **Admin** area on the web interface, and how to fix them.
+This section documents common error messages reported in the Admin Area on the web interface, and how to fix them.
 
 ### Geo database configuration file is missing
 
@@ -495,14 +491,14 @@ It is risky to reuse a secondary site without resetting it because the secondary
 
 If these kinds of risks do not apply, for example in a test environment, or if you know that the main Postgres database still contains all Geo events since the Geo site was added, then you can bypass this health check:
 
-1. Get the last processed event time. In Rails console in the **secondary** site, run:
+1. Get the last processed event time. In Rails console in the secondary site, run:
 
    ```ruby
    Geo::EventLogState.last.created_at.utc
    ```
 
 1. Copy the output, for example `2024-02-21 23:50:50.676918 UTC`.
-1. Update the created time of the secondary site to make it appear older. In Rails console in the **primary** site, run:
+1. Update the created time of the secondary site to make it appear older. In Rails console in the primary site, run:
 
    ```ruby
    GeoNode.secondary_nodes.last.update_column(:created_at, DateTime.parse('2024-02-21 23:50:50.676918 UTC') - 1.second)
@@ -510,7 +506,7 @@ If these kinds of risks do not apply, for example in a test environment, or if y
 
    This command assumes that the affected secondary site is the one that was created last.
 
-1. Update the secondary site's status in **Admin > Geo > Sites**. In Rails console in the **secondary** site, run:
+1. Update the secondary site's status in **Admin > Geo > Sites**. In Rails console in the secondary site, run:
 
    ```ruby
    Geo::MetricsUpdateWorker.new.perform
@@ -521,11 +517,10 @@ If these kinds of risks do not apply, for example in a test environment, or if y
 1. Under the secondary site select **Replication Details**.
 1. Select **Reverify all** for every data type.
 
-### Geo site has a database that is writable
+### Geo site has a database that is writable which is an indication it is not configured for replication with the primary site
 
 This error message refers to a problem with the database replica on a **secondary** site,
-which Geo expects to have access to. A secondary site database that is writable
-is an indication the database is not configured for replication with the primary site. It usually means, either:
+which Geo expects to have access to. It usually means, either:
 
 - An unsupported replication method was used (for example, logical replication).
 - The instructions to set up a [Geo database replication](../../setup/database.md) were not followed correctly.
@@ -571,7 +566,7 @@ If you are using the Linux package installation, something might have failed dur
 This can be caused by orphaned records in the project registry. They are being cleaned
 periodically using a registry worker, so give it some time to fix it itself.
 
-### Secondary site shows "Unhealthy" in UI
+### Secondary site shows "Unhealthy" in UI after changing the value of `external_url` for the primary site
 
 If you have updated the value of `external_url` in `/etc/gitlab/gitlab.rb` for the primary site or changed the protocol from `http` to `https`, you may see that secondary sites are shown as `Unhealthy`. You may also find the following error in `geo.log`:
 
@@ -584,7 +579,7 @@ If you have updated the value of `external_url` in `/etc/gitlab/gitlab.rb` for t
 
 In this case, make sure to update the changed URL on all your sites:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Geo > Sites**.
 1. Change the URL and save the change.
 
@@ -608,40 +603,3 @@ create the following empty file:
 ```shell
 sudo touch /etc/gitlab/skip-auto-backup
 ```
-
-### High CPU usage on primary during object verification
-
-From GitLab 16.11 to GitLab 17.2, a missing PostgreSQL index causes high CPU
-usage and slow artifact verification progress. Additionally, the Geo secondary
-sites might report as unhealthy. [Issue 471727](https://gitlab.com/gitlab-org/gitlab/-/issues/471727) describes the behavior in detail.
-
-To determine if you might be experiencing this issue, follow the steps to
-[confirm if you are affected](https://gitlab.com/gitlab-org/gitlab/-/issues/471727#to-confirm-if-you-are-affected).
-
-If you are affected, follow the steps in the [workaround](https://gitlab.com/gitlab-org/gitlab/-/issues/471727#workaround)
-to manually create the index. Creating the index causes PostgreSQL to
-consume slightly more resources until it finishes. Afterward, CPU usage might
-remain high while verification continues, but queries should complete
-significantly faster, and secondary site status should update correctly.
-
-### Error `end of file reached` when running Geo Rake check task on secondary
-
-You may face the following error when running the [health check Rake task](common.md#health-check-rake-task) on the secondary site:
-
-```plaintext
-Can connect to the primary node ... no
-Reason:
-end of file reached
-```
-
-It might happen if the incorrect URL to the primary site was specified in the setting. To troubleshoot it,
-run the following commands in [the Rails Console](../../../operations/rails_console.md):
-
-```ruby
-primary = Gitlab::Geo.primary_node
-primary.internal_uri
-Gitlab::HTTP.get(primary.internal_uri, allow_local_requests: true, limit: 10)
-```
-
-Make sure that the value of `internal_uri` is correct in the output above.
-If the URL of the primary site is incorrect, double-check it in `/etc/gitlab/gitlab.rb`, and in **Admin > Geo > Sites**.

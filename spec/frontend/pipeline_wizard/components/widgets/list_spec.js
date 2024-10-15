@@ -57,12 +57,6 @@ describe('Pipeline Wizard - List Widget', () => {
       expect(findFirstGlFormInputGroup().attributes('type')).toBe('text');
     });
 
-    it('uses monospace font for input', () => {
-      createComponent({ monospace: true });
-
-      expect(findFirstGlFormInputGroup().props('inputClass')).toBe('!gl-font-monospace');
-    });
-
     it('passes the placeholder to the first input field', () => {
       createComponent();
 

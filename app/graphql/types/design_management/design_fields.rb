@@ -11,14 +11,14 @@ module Types
       field :project, Types::ProjectType, null: false, description: 'Project the design belongs to.'
       field :issue, Types::IssueType, null: false, description: 'Issue the design belongs to.'
       field :filename, GraphQL::Types::String, null: false, description: 'Filename of the design.'
-      field :full_path, GraphQL::Types::ID, null: false, description: 'Full path to the design file.'
+      field :full_path, GraphQL::Types::String, null: false, description: 'Full path to the design file.'
       field :image, GraphQL::Types::String, null: false, extras: [:parent], description: 'URL of the full-sized image.'
       field :image_v432x230,
         GraphQL::Types::String,
         null: true,
         extras: [:parent],
         description: 'The URL of the design resized to fit within the bounds of 432x230. ' \
-          'This will be `null` if the image has not been generated'
+                     'This will be `null` if the image has not been generated'
       field :diff_refs, Types::DiffRefsType,
         null: false,
         calls_gitaly: true,

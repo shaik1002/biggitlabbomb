@@ -70,7 +70,7 @@ gitaly['env'] = {
 }
 gitaly['configuration'] = {
     bundle_uri: {
-        go_cloud_url: 'azblob://<bucket>'
+        go_cloud_url: 'azblob://gitaly-bundleuri'
     }
 }
 ```
@@ -81,7 +81,7 @@ Edit `/home/git/gitaly/config.toml` and configure `go_cloud_url`:
 
 ```toml
 [bundle_uri]
-go_cloud_url = "azblob://<bucket>"
+go_cloud_url = "azblob://gitaly-bundleuri"
 ```
 
 ::EndTabs
@@ -113,7 +113,7 @@ gitaly['env'] = {
 }
 gitaly['configuration'] = {
     bundle_uri: {
-        go_cloud_url: 'gs://<bucket>'
+        go_cloud_url: 'gs://gitaly-bundleuri'
     }
 }
 ```
@@ -124,7 +124,7 @@ Edit `/home/git/gitaly/config.toml` and configure `go_cloud_url`:
 
 ```toml
 [bundle_uri]
-go_cloud_url = "gs://<bucket>"
+go_cloud_url = "gs://gitaly-bundle_uri"
 ```
 
 ::EndTabs
@@ -156,7 +156,7 @@ gitaly['env'] = {
 }
 gitaly['configuration'] = {
     bundle_uri: {
-        go_cloud_url: 's3://<bucket>?region=us-west-1'
+        go_cloud_url: 's3://gitaly-bundle_uri?region=us-west-1'
     }
 }
 ```
@@ -167,7 +167,7 @@ Edit `/home/git/gitaly/config.toml` and configure `go_cloud_url`:
 
 ```toml
 [bundle_uri]
-go_cloud_url = "s3://<bucket>?region=us-west-1"
+go_cloud_url = "s3://gitaly-bundle_uri?region=us-west-1"
 ```
 
 ::EndTabs
@@ -197,7 +197,7 @@ gitaly['env'] = {
 }
 gitaly['configuration'] = {
     bundle_uri: {
-        go_cloud_url: 's3://<bucket>?region=minio&endpoint=my.minio.local:8080&disableSSL=true&s3ForcePathStyle=true'
+        go_cloud_url: 's3://gitaly-bundleuri?region=minio&endpoint=my.minio.local:8080&disableSSL=true&s3ForcePathStyle=true'
     }
 }
 ```
@@ -208,7 +208,7 @@ Edit `/home/git/gitaly/config.toml` and configure `go_cloud_url`:
 
 ```toml
 [bundle_uri]
-go_cloud_url = "s3://<bucket>?region=minio&endpoint=my.minio.local:8080&disableSSL=true&s3ForcePathStyle=true"
+go_cloud_url = "s3://gitaly-bundleuri?region=minio&endpoint=my.minio.local:8080&disableSSL=true&s3ForcePathStyle=true"
 ```
 
 ::EndTabs
@@ -219,15 +219,15 @@ After Gitaly is properly configured, Gitaly can generate bundles, which is a
 manual process. To generate a bundle for Bundle URI, run:
 
 ```shell
-sudo -u git -- /opt/gitlab/embedded/bin/gitaly bundle-uri \
-                                               --config=<config-file> \
-                                               --storage=<storage-name> \
-                                               --repository=<relative-path>
+sudo /opt/gitlab/embedded/bin/gitaly bundle-uri \
+                                     --config=<config-file> \
+                                     --storage=<storage-name> \
+                                     --repository=<relative-path>
 ```
 
 This command generates the bundle and stores it on the configured storage service.
-Gitaly does not automatically refresh the generated bundle. When you want to generate
-a more recent version of a bundle, you must run the command again.
+Gitaly does not automatically refresh the generated bundle. When want to generate
+a more recent version of a bundle, you must the run command again.
 
 You can schedule this command with a tool like `cron(8)`.
 
@@ -272,5 +272,5 @@ downloaded the bundle from the storage server.
 
 The bundles are made accessible to the client using signed URLs. A signed URL is
 a URL that provides limited permissions and time to make a request. To see if
-your storage service supports signed URLs, see the documentation of your storage
+your storage service supports sighed URLs, see the documentation of your storage
 service.

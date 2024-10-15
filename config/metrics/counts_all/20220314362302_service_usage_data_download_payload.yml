@@ -2,6 +2,8 @@
 key_path: counts.service_usage_data_download_payload_click
 description: Count Download Payload button clicks
 data_category: optional
+product_section: analytics
+product_stage: analytics
 product_group: analytics_instrumentation
 value_type: number
 status: active
@@ -18,4 +20,3 @@ tier:
   - ultimate
 performance_indicator_type: []
 milestone: "14.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/82660

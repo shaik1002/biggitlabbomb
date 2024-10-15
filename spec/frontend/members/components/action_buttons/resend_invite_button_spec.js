@@ -5,7 +5,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import ResendInviteButton from '~/members/components/action_buttons/resend_invite_button.vue';
-import { MEMBERS_TAB_TYPES } from '~/members/constants';
+import { MEMBER_TYPES } from '~/members/constants';
 
 jest.mock('~/lib/utils/csrf', () => ({ token: 'mock-csrf-token' }));
 
@@ -17,7 +17,7 @@ describe('ResendInviteButton', () => {
   const createStore = (state = {}) => {
     return new Vuex.Store({
       modules: {
-        [MEMBERS_TAB_TYPES.invite]: {
+        [MEMBER_TYPES.invite]: {
           namespaced: true,
           state: {
             memberPath: '/groups/foo-bar/-/group_members/:id',
@@ -32,7 +32,7 @@ describe('ResendInviteButton', () => {
     wrapper = shallowMount(ResendInviteButton, {
       store: createStore(state),
       provide: {
-        namespace: MEMBERS_TAB_TYPES.invite,
+        namespace: MEMBER_TYPES.invite,
       },
       propsData: {
         memberId: 1,

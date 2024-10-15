@@ -1,10 +1,12 @@
 - page_title _("Terminal for environment"), @environment.name
 - add_page_specific_style 'page_bundles/terminal'
+- content_for :page_specific_javascripts do
+  = universal_stylesheet_link_tag "xterm.css"
 
 .top-area
   .row
     .col-sm-6
-      %h1.page-title.gl-text-size-h-display
+      %h1.page-title.gl-font-size-h-display
         = _("Terminal for environment")
         = @environment.name
 

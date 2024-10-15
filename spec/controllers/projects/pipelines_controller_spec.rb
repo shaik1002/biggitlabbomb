@@ -768,53 +768,59 @@ RSpec.describe Projects::PipelinesController, feature_category: :continuous_inte
     [
       {
         chart_param: 'time-to-restore-service',
-        event: 'visit_ci_cd_time_to_restore_service_tab'
+        event: 'p_analytics_ci_cd_time_to_restore_service'
       },
       {
         chart_param: 'change-failure-rate',
-        event: 'visit_ci_cd_failure_rate_tab'
+        event: 'p_analytics_ci_cd_change_failure_rate'
       }
     ].each do |tab|
-      it 'tracks internal events' do
-        request_params = { namespace_id: project.namespace, project_id: project, id: pipeline.id, chart: tab[:chart_param] }
-
-        expect { get :charts, params: request_params, format: :html }.to trigger_internal_events(tab[:event])
-      end
-    end
-
-    using RSpec::Parameterized::TableSyntax
-
-    where(:chart, :event, :additional_metrics) do
-      ''                        | 'p_analytics_ci_cd_pipelines'               | ['analytics_unique_visits.p_analytics_ci_cd_pipelines']
-      'pipelines'               | 'p_analytics_ci_cd_pipelines'               | ['analytics_unique_visits.p_analytics_ci_cd_pipelines']
-      'deployment-frequency'    | 'p_analytics_ci_cd_deployment_frequency'    | []
-      'lead-time'               | 'p_analytics_ci_cd_lead_time'               | []
-    end
-
-    with_them do
-      let!(:params) { { namespace_id: project.namespace, project_id: project, id: pipeline.id, chart: chart } }
-
       it_behaves_like 'tracking unique visits', :charts do
-        let(:request_params) { params }
-        let(:target_id) { ['p_analytics_pipelines', event] }
+        let(:request_params) { { namespace_id: project.namespace, project_id: project, id: pipeline.id, chart: tab[:chart_param] } }
+        let(:target_id) { ['p_analytics_pipelines', tab[:event]] }
       end
 
-      it 'tracks events and increment usage metrics', :clean_gitlab_redis_shared_state do
-        expect { get :charts, params: params, format: :html }
-          .to trigger_internal_events(event).with(project: project, user: user, category: 'InternalEventTracking')
-          .and increment_usage_metrics(
-            # These are currently double-counted --- what's up with this?; is it the mix of track_internal_events and track_events?
-            # Or that track_internal_events is being used with events which aren't actually internal_events?
-            'analytics_unique_visits.analytics_unique_visits_for_any_target',
-            'analytics_unique_visits.analytics_unique_visits_for_any_target_monthly',
-            'redis_hll_counters.analytics.analytics_total_unique_counts_monthly',
-            'redis_hll_counters.analytics.analytics_total_unique_counts_weekly'
-          ).by(2)
-          .and increment_usage_metrics(
-            "redis_hll_counters.analytics.#{event}_monthly",
-            "redis_hll_counters.analytics.#{event}_weekly",
-            *additional_metrics
-          ).by(1)
+      it_behaves_like 'Snowplow event tracking with RedisHLL context' do
+        subject { get :charts, params: request_params, format: :html }
+
+        let(:request_params) { { namespace_id: project.namespace, project_id: project, id: pipeline.id, chart: tab[:chart_param] } }
+        let(:category) { described_class.name }
+        let(:action) { 'perform_analytics_usage_action' }
+        let(:namespace) { project.namespace }
+        let(:label) { 'redis_hll_counters.analytics.analytics_total_unique_counts_monthly' }
+        let(:property) { 'p_analytics_pipelines' }
+      end
+    end
+
+    [
+      {
+        chart_param: '',
+        event: 'p_analytics_ci_cd_pipelines'
+      },
+      {
+        chart_param: 'pipelines',
+        event: 'p_analytics_ci_cd_pipelines'
+      },
+      {
+        chart_param: 'deployment-frequency',
+        event: 'p_analytics_ci_cd_deployment_frequency'
+      },
+      {
+        chart_param: 'lead-time',
+        event: 'p_analytics_ci_cd_lead_time'
+      }
+    ].each do |tab|
+      it_behaves_like 'tracking unique visits', :charts do
+        let(:request_params) { { namespace_id: project.namespace, project_id: project, id: pipeline.id, chart: tab[:chart_param] } }
+        let(:target_id) { ['p_analytics_pipelines', tab[:event]] }
+      end
+
+      it_behaves_like 'internal event tracking' do
+        subject { get :charts, params: request_params, format: :html }
+
+        let(:request_params) { { namespace_id: project.namespace, project_id: project, id: pipeline.id, chart: tab[:chart_param] } }
+        let(:event) { tab[:event] }
+        let(:namespace) { project.namespace }
       end
     end
   end
@@ -935,8 +941,8 @@ RSpec.describe Projects::PipelinesController, feature_category: :continuous_inte
 
         expect(response).to have_gitlab_http_status(:bad_request)
         expect(json_response['errors']).to eq([
-          'test job: chosen stage invalid does not exist; available stages are .pre, build, test, deploy, .post'
-        ])
+                                                'test job: chosen stage does not exist; available stages are .pre, build, test, deploy, .post'
+                                              ])
         expect(json_response['warnings'][0]).to include(
           'jobs:build may allow multiple pipelines to run for a single action due to `rules:when`'
         )
@@ -1188,28 +1194,6 @@ RSpec.describe Projects::PipelinesController, feature_category: :continuous_inte
     def clear_controller_memoization
       controller.clear_memoization(:pipeline_test_report)
       controller.remove_instance_variable(:@pipeline)
-    end
-  end
-
-  describe 'GET manual_variables' do
-    context 'when FF ci_show_manual_variables_in_pipeline is enabled' do
-      let(:pipeline) { create(:ci_pipeline, project: project) }
-
-      it_behaves_like 'the show page', 'manual_variables'
-    end
-
-    context 'when FF ci_show_manual_variables_in_pipeline is disabled' do
-      let(:pipeline) { create(:ci_pipeline, project: project) }
-
-      before do
-        stub_feature_flags(ci_show_manual_variables_in_pipeline: false)
-      end
-
-      it 'renders 404' do
-        get 'manual_variables', params: { namespace_id: project.namespace, project_id: project, id: pipeline }
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
     end
   end
 

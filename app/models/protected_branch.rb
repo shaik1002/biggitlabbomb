@@ -10,6 +10,7 @@ class ProtectedBranch < ApplicationRecord
   belongs_to :group, foreign_key: :namespace_id, touch: true, inverse_of: :protected_branches
 
   validate :validate_either_project_or_top_group
+  validates :name, presence: true
   validates :name, uniqueness: { scope: [:project_id, :namespace_id] }, if: :name_changed?
 
   scope :requiring_code_owner_approval, -> { where(code_owner_approval_required: true) }
@@ -52,7 +53,23 @@ class ProtectedBranch < ApplicationRecord
   end
 
   def self.allow_force_push?(project, ref_name)
-    project.all_protected_branches.allowing_force_push.matching(ref_name).any?
+    if allow_protected_branches_for_group?(project.group)
+      protected_branches = project.all_protected_branches.matching(ref_name)
+
+      project_protected_branches, group_protected_branches = protected_branches.partition(&:project_id)
+
+      # Group owner can be able to enforce the settings
+      return group_protected_branches.any?(&:allow_force_push) if group_protected_branches.present?
+      return project_protected_branches.any?(&:allow_force_push) if project_protected_branches.present?
+
+      false
+    else
+      project.protected_branches.allowing_force_push.matching(ref_name).any?
+    end
+  end
+
+  def self.allow_protected_branches_for_group?(group)
+    Feature.enabled?(:group_protected_branches, group) || Feature.enabled?(:allow_protected_branches_for_group, group)
   end
 
   def self.any_protected?(project, ref_names)
@@ -78,13 +95,15 @@ class ProtectedBranch < ApplicationRecord
     where(fuzzy_arel_match(:name, query.downcase))
   end
 
+  def allow_multiple?(type)
+    type == :push
+  end
+
   def self.downcase_humanized_name
     name.underscore.humanize.downcase
   end
 
   def default_branch?
-    return false unless project.present?
-
     name == project.default_branch
   end
 

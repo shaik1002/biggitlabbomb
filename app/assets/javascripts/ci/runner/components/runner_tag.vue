@@ -15,6 +15,11 @@ export default {
       type: String,
       required: true,
     },
+    size: {
+      type: String,
+      required: false,
+      default: 'sm',
+    },
   },
   data() {
     return {
@@ -30,8 +35,8 @@ export default {
     },
   },
   methods: {
-    onResize({ target }) {
-      const { scrollWidth, offsetWidth } = target;
+    onResize() {
+      const { scrollWidth, offsetWidth } = this.$el;
       this.overflowing = scrollWidth > offsetWidth;
     },
   },
@@ -41,11 +46,11 @@ export default {
 <template>
   <gl-badge
     v-gl-tooltip="tooltip"
-    class="gl-inline-block gl-overflow-hidden"
+    v-gl-resize-observer="onResize"
+    class="gl-display-inline-block gl-max-w-full gl-text-truncate"
+    :size="size"
     :variant="$options.RUNNER_TAG_BADGE_VARIANT"
   >
-    <span v-gl-resize-observer="onResize" class="gl-truncate">
-      {{ tag }}
-    </span>
+    {{ tag }}
   </gl-badge>
 </template>

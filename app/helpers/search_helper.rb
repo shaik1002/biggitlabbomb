@@ -50,11 +50,11 @@ module SearchHelper
 
   def scope_specific_results(term, scope)
     case scope&.to_sym
-    when :projects
+    when :project
       projects_autocomplete(term)
-    when :users
+    when :user
       users_autocomplete(term)
-    when :issues
+    when :issue
       recent_issues_autocomplete(term)
     else
       []
@@ -248,15 +248,6 @@ module SearchHelper
     end
   end
 
-  def should_show_work_items_as_epics_in_results?
-    ::Feature.enabled?(:search_epics_uses_work_items_index, current_user) &&
-      ::Elastic::DataMigrationService.migration_has_finished?(:backfill_work_items)
-  end
-
-  def should_show_zoekt_results?(_scope, _search_type)
-    false
-  end
-
   private
 
   # Autocomplete results for various settings pages
@@ -271,21 +262,21 @@ module SearchHelper
   # Autocomplete results for settings pages, for admins
   def default_autocomplete_admin
     [
-      { category: "Jump to", label: _("Admin area / Dashboard"), url: admin_root_path }
+      { category: "Jump to", label: _("Admin Area / Dashboard"), url: admin_root_path }
     ]
   end
 
   # Autocomplete results for internal help pages
   def help_autocomplete
     [
-      { category: "Help", label: _("API Help"),                     url: help_page_path("api/index.md") },
-      { category: "Help", label: _("Markdown Help"),                url: help_page_path("user/markdown.md") },
-      { category: "Help", label: _("Permissions Help"),             url: help_page_path("user/permissions.md") },
-      { category: "Help", label: _("Public Access Help"),           url: help_page_path("user/public_access.md") },
-      { category: "Help", label: _("Rake Tasks Help"),              url: help_page_path("raketasks/index.md") },
-      { category: "Help", label: _("SSH Keys Help"),                url: help_page_path("user/ssh.md") },
-      { category: "Help", label: s_("Webhooks|System hooks help"),  url: help_page_path("administration/system_hooks.md") },
-      { category: "Help", label: _("Webhooks Help"),                url: help_page_path("user/project/integrations/webhooks.md") }
+      { category: "Help", label: _("API Help"),           url: help_page_path("api/index") },
+      { category: "Help", label: _("Markdown Help"),      url: help_page_path("user/markdown") },
+      { category: "Help", label: _("Permissions Help"),   url: help_page_path("user/permissions") },
+      { category: "Help", label: _("Public Access Help"), url: help_page_path("user/public_access") },
+      { category: "Help", label: _("Rake Tasks Help"),    url: help_page_path("raketasks/index") },
+      { category: "Help", label: _("SSH Keys Help"),      url: help_page_path("user/ssh") },
+      { category: "Help", label: _("System Hooks Help"),  url: help_page_path("administration/system_hooks") },
+      { category: "Help", label: _("Webhooks Help"),      url: help_page_path("user/project/integrations/webhooks") }
     ]
   end
 
@@ -298,26 +289,26 @@ module SearchHelper
 
       if can?(current_user, :read_code, @project)
         result.concat([
-          { category: "In this project", label: _("Files"),          url: project_tree_path(@project, ref) },
-          { category: "In this project", label: _("Commits"),        url: project_commits_path(@project, ref) }
-        ])
+                        { category: "In this project", label: _("Files"),          url: project_tree_path(@project, ref) },
+                        { category: "In this project", label: _("Commits"),        url: project_commits_path(@project, ref) }
+                      ])
       end
 
       if can?(current_user, :read_repository_graphs, @project)
         result.concat([
-          { category: "In this project", label: _("Network"),        url: project_network_path(@project, ref) },
-          { category: "In this project", label: _("Graph"),          url: project_graph_path(@project, ref) }
-        ])
+                        { category: "In this project", label: _("Network"),        url: project_network_path(@project, ref) },
+                        { category: "In this project", label: _("Graph"),          url: project_graph_path(@project, ref) }
+                      ])
       end
 
       result.concat([
-        { category: "In this project", label: _("Issues"), url: project_issues_path(@project) },
-        { category: "In this project", label: _("Merge requests"), url: project_merge_requests_path(@project) },
-        { category: "In this project", label: _("Milestones"),     url: project_milestones_path(@project) },
-        { category: "In this project", label: _("Snippets"),       url: project_snippets_path(@project) },
-        { category: "In this project", label: _("Members"),        url: project_project_members_path(@project) },
-        { category: "In this project", label: _("Wiki"),           url: project_wikis_path(@project) }
-      ])
+                      { category: "In this project", label: _("Issues"), url: project_issues_path(@project) },
+                      { category: "In this project", label: _("Merge requests"), url: project_merge_requests_path(@project) },
+                      { category: "In this project", label: _("Milestones"),     url: project_milestones_path(@project) },
+                      { category: "In this project", label: _("Snippets"),       url: project_snippets_path(@project) },
+                      { category: "In this project", label: _("Members"),        url: project_project_members_path(@project) },
+                      { category: "In this project", label: _("Wiki"),           url: project_wikis_path(@project) }
+                    ])
 
       if can?(current_user, :read_feature_flag, @project)
         result << { category: "In this project", label: _("Feature Flags"), url: project_feature_flags_path(@project) }
@@ -354,11 +345,11 @@ module SearchHelper
 
     [
       {
-        category: 'In this project',
-        id: issue.id,
-        label: search_result_sanitize("#{issue.title} (#{issue.to_reference})"),
-        url: issue_path(issue),
-        avatar_url: issue.project.avatar_url || ''
+          category: 'In this project',
+          id: issue.id,
+          label: search_result_sanitize("#{issue.title} (#{issue.to_reference})"),
+          url: issue_path(issue),
+          avatar_url: issue.project.avatar_url || ''
       }
     ]
   end
@@ -379,11 +370,7 @@ module SearchHelper
   end
 
   def users_autocomplete(term, limit = 5)
-    unless current_user &&
-        Ability.allowed?(current_user, :read_users_list) &&
-        Feature.enabled?(:global_search_users_tab, current_user, type: :ops)
-      return []
-    end
+    return [] unless current_user && Ability.allowed?(current_user, :read_users_list)
 
     ::SearchService
       .new(current_user, { scope: 'users', per_page: limit, search: term })
@@ -454,7 +441,7 @@ module SearchHelper
       link_to search_path(search_params) do
         concat label
         concat ' '
-        concat gl_badge_tag(count, { class: badge_class, data: badge_data })
+        concat gl_badge_tag(count, { size: :sm }, { class: badge_class, data: badge_data })
       end
     end
   end
@@ -494,7 +481,6 @@ module SearchHelper
     opts =
       {
         id: "filtered-search-#{type}",
-        'aria-label': _('Add search filter'),
         placeholder: placeholder,
         data: {
           'username-params' => UserSerializer.new.represent(@users)

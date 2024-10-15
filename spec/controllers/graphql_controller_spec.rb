@@ -566,7 +566,7 @@ RSpec.describe GraphqlController, feature_category: :integrations do
     end
 
     context 'when querying an IntrospectionQuery', :use_clean_rails_memory_store_caching do
-      let_it_be(:query) { CachedIntrospectionQuery.query_string }
+      let_it_be(:query) { File.read(Rails.root.join('spec/fixtures/api/graphql/introspection.graphql')) }
 
       context 'in dev or test env' do
         before do
@@ -584,20 +584,6 @@ RSpec.describe GraphqlController, feature_category: :integrations do
       context 'in env different from dev or test' do
         before do
           allow(Gitlab).to receive(:dev_or_test_env?).and_return(false)
-        end
-
-        context 'with legacy introspection query' do
-          let_it_be(:legacy_query) { CachedIntrospectionQuery.legacy_query_string }
-
-          it 'caches the legacy and non-legacy query separately' do
-            expect(GitlabSchema).to receive(:execute).exactly(:twice)
-
-            post :execute, params: { query: query, operationName: 'IntrospectionQuery' }
-            post :execute, params: { query: query, operationName: 'IntrospectionQuery' }
-
-            post :execute, params: { query: legacy_query, operationName: 'IntrospectionQuery' }
-            post :execute, params: { query: legacy_query, operationName: 'IntrospectionQuery' }
-          end
         end
 
         it 'caches IntrospectionQuery even when operationName is not given' do
@@ -649,7 +635,7 @@ RSpec.describe GraphqlController, feature_category: :integrations do
         end
 
         it 'hits the cache even if the whitespace in the query differs' do
-          query_1 = CachedIntrospectionQuery.query_string
+          query_1 = File.read(Rails.root.join('spec/fixtures/api/graphql/introspection.graphql'))
           query_2 = "#{query_1}  " # add a couple of spaces to change the fingerprint
 
           expect(GitlabSchema).to receive(:execute).exactly(:once)
@@ -688,34 +674,12 @@ RSpec.describe GraphqlController, feature_category: :integrations do
             params: { query: query, operationName: 'IntrospectionQuery', _json: ["[query]=query {__typename}"] }
         end
       end
-    end
 
-    context 'when X_GITLAB_DISABLE_SQL_QUERY_LIMIT is set' do
-      let(:issue_url) { "http://some/issue/url" }
-      let(:limit) { 205 }
-
-      context 'and it specifies a new query limit' do
-        let(:header_value) { "#{limit},#{issue_url}" }
-
-        it 'respects the new query limit' do
-          expect(Gitlab::QueryLimiting).to receive(:disable!).with(issue_url, new_threshold: limit)
-
-          request.env['HTTP_X_GITLAB_DISABLE_SQL_QUERY_LIMIT'] = header_value
-
-          post :execute
-        end
-      end
-
-      context 'and it does not specify a new limit' do
-        let(:header_value) { issue_url }
-
-        it 'disables limit' do
-          expect(Gitlab::QueryLimiting).to receive(:disable!).with(issue_url)
-
-          request.env['HTTP_X_GITLAB_DISABLE_SQL_QUERY_LIMIT'] = header_value
-
-          post :execute
-        end
+      it 'fails if the GraphiQL gem version is not 1.8.0' do
+        # We cache the IntrospectionQuery based on the default IntrospectionQuery by GraphiQL. If this spec fails,
+        # GraphiQL has been updated, so we should check whether the IntropsectionQuery we cache is still valid.
+        # It is stored in `app/graphql/cached_introspection_query.rb#query_string`
+        expect(GraphiQL::Rails::VERSION).to eq("1.8.0")
       end
     end
   end
@@ -820,7 +784,7 @@ RSpec.describe GraphqlController, feature_category: :integrations do
       post :execute, params: { _json: graphql_queries }
 
       expect(controller).to have_received(:append_info_to_payload)
-      expect(log_payload[:exception_object]).to eq(exception)
+      expect(log_payload.dig(:exception_object)).to eq(exception)
     end
   end
 end

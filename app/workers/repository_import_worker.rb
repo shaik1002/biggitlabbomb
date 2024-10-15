@@ -15,8 +15,6 @@ class RepositoryImportWorker # rubocop:disable Scalability/IdempotentWorker
   worker_resource_boundary :memory
 
   def perform(project_id)
-    Gitlab::QueryLimiting.disable!('https://gitlab.com/gitlab-org/gitlab/-/issues/464677')
-
     @project = Project.find_by_id(project_id)
     return if project.nil? || !start_import?
 
@@ -30,7 +28,6 @@ class RepositoryImportWorker # rubocop:disable Scalability/IdempotentWorker
     return if service.async?
 
     if result[:status] == :error
-      project.reset_counters_and_iids
       fail_import(result[:message])
     else
       project.after_import
@@ -44,7 +41,7 @@ class RepositoryImportWorker # rubocop:disable Scalability/IdempotentWorker
   def start_import?
     return true if start(project.import_state)
 
-    ::Import::Framework::Logger.info(
+    Gitlab::Import::Logger.info(
       message: 'Project was in inconsistent state while importing',
       project_full_path: project.full_path,
       project_import_status: project.import_status

@@ -89,7 +89,7 @@ module API
 
         paginated_tags =
           if params[:pagination] == 'keyset'
-            not_allowed! unless repository.gitlab_api_client.supports_gitlab_api?
+            not_allowed! unless repository.migrated?
 
             per_page_param = params[:per_page] || DEFAULT_PAGE_COUNT
             sort_param = params[:sort] == 'desc' ? '-name' : 'name'
@@ -215,7 +215,7 @@ module API
       def obtain_new_cleanup_container_lease
         Gitlab::ExclusiveLease
           .new("container_repository:cleanup_tags:#{repository.id}",
-            timeout: 1.hour)
+               timeout: 1.hour)
           .try_obtain
       end
 

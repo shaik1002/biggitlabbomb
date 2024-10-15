@@ -24,16 +24,7 @@ For an overview, see [Project Dependency](https://www.youtube.com/watch?v=ckqkn9
 
 ## Prerequisites
 
-To list your project's dependencies the SBOM document must:
-
-- Comply with [the CycloneDX specification](https://github.com/CycloneDX/specification) version `1.4` or `1.5`. Online validator available on [CycloneDX Web Tool](https://cyclonedx.github.io/cyclonedx-web-tool/validate).
-- Be uploaded as [a CI/CD artifact report](../../../ci/yaml/artifacts_reports.md#artifactsreportscyclonedx) from a successful pipeline on the default branch.
-
-NOTE:
-Although this is not mandatory for populating the dependency list, the SBOM document must include and comply with the
-[GitLab CycloneDX property taxonomy](../../../development/sec/cyclonedx_property_taxonomy.md) to provide some properties and to enable some security features.
-
-GitLab already generates this document when the following requirements are met:
+To view your project's dependencies, ensure you meet the following requirements:
 
 - The [Dependency Scanning](../dependency_scanning/index.md)
   or [Container Scanning](../container_scanning/index.md)
@@ -46,9 +37,6 @@ GitLab already generates this document when the following requirements are met:
   [application security jobs](../../application_security/index.md#application-coverage) to fail.
 
 ## View project dependencies
-
-> - In GitLab 17.2, the `location` field no longer links to the commit where the dependency was last detected when the feature flag `skip_sbom_occurrences_update_on_pipeline_id_change` is enabled. The flag is disabled by default.
-> - In GitLab 17.3 the `location` field always links to the commit where the dependency was first detected. Feature flag `skip_sbom_occurrences_update_on_pipeline_id_change` removed.
 
 To view the dependencies of a project or all projects in a group:
 
@@ -93,13 +81,9 @@ The dependency list shows only dependencies that match your filters.
 If a dependency has known vulnerabilities, view them by selecting the arrow next to the
 dependency's name or the badge that indicates how many known vulnerabilities exist. For each
 vulnerability, its severity and description appears below it. To view more details of a vulnerability,
-select the vulnerability's description. The [vulnerability's details](../vulnerabilities/index.md) page is opened.
+select the vulnerability's description. The [vulnerability's details](../vulnerabilities) page is opened.
 
 ## Dependency paths
-
-> - Dependency path information from CycloneDX SBOM was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/393061) in GitLab 16.9 [with a flag](../../../administration/feature_flags.md) named `project_level_sbom_occurrences`. Disabled by default.
-> - Dependency path information from CycloneDX SBOM was [enabled on GitLab.com, self-managed, and GitLab Dedicated](https://gitlab.com/gitlab-org/gitlab/-/issues/434371) in GitLab 17.0.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/457633) in GitLab 17.4. Feature flag `project_level_sbom_occurrences` removed.
 
 The dependency list shows the path between a dependency and a top-level dependency it's connected
 to, if any. Multiple paths may connect a transient dependency to top-level
@@ -107,6 +91,12 @@ dependencies, but the user interface shows only one of the shortest paths.
 
 NOTE:
 The dependency path is only displayed for dependencies that have vulnerabilities.
+
+WARNING:
+The dependency path based on the `dependency_files` property from the Dependency Scanning report was
+[deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/396376) in GitLab
+16.9 and is planned for removal in 17.0.
+This will be replaced with data from the [CycloneDX report](https://gitlab.com/gitlab-org/gitlab/-/issues/441118).
 
 ![Dependency path](img/yarn_dependency_path_v13_6.png)
 

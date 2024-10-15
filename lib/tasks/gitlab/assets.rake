@@ -9,11 +9,12 @@ module Tasks
       # In the new caching strategy, we check the assets hash sum *before* compiling
       # the app/assets/javascripts/locale/**/app.js files. That means the hash sum
       # must depend on locale/**/gitlab.po.
-      JS_ASSET_PATTERNS = %w[*.js config/**/*.js scripts/frontend/*.{mjs,js} locale/**/gitlab.po].freeze
+      JS_ASSET_PATTERNS = %w[*.js config/**/*.js locale/**/gitlab.po].freeze
       JS_ASSET_FILES = %w[
         package.json
         yarn.lock
         babel.config.js
+        config/webpack.config.js
         .nvmrc
       ].freeze
       # Ruby gems might emit assets which have an impact on compilation
@@ -126,9 +127,6 @@ namespace :gitlab do
           log_path_message += "\nWritten webpack log written to #{log_path}"
           log_path_message += "\nYou can inspect the webpack full log here: #{ENV['CI_JOB_URL']}/artifacts/file/#{log_path}" if ENV['CI_JOB_URL']
         end
-
-        ENV['NODE_OPTIONS'] = '--max-old-space-size=8192' if ENV.has_key?('CI')
-        ENV['NODE_OPTIONS'] = '--max-old-space-size=16384' if ENV['GITLAB_LARGE_RUNNER_OPTIONAL'] == "saas-linux-large-amd64"
 
         unless system(cmd)
           puts Rainbow('Error: Unable to compile webpack production bundle.').red

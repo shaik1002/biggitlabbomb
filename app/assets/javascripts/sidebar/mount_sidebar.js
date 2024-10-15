@@ -8,6 +8,7 @@ import {
   isInDesignPage,
   isInIncidentPage,
   isInIssuePage,
+  isInMRPage,
   parseBoolean,
 } from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
@@ -15,6 +16,7 @@ import { apolloProvider } from '~/graphql_shared/issuable_client';
 import Translate from '~/vue_shared/translate';
 import UserSelect from '~/vue_shared/components/user_select/user_select.vue';
 import CollapsedAssigneeList from './components/assignees/collapsed_assignee_list.vue';
+import SidebarAssignees from './components/assignees/sidebar_assignees.vue';
 import SidebarAssigneesWidget from './components/assignees/sidebar_assignees_widget.vue';
 import SidebarConfidentialityWidget from './components/confidential/sidebar_confidentiality_widget.vue';
 import CopyEmailToClipboard from './components/copy/copy_email_to_clipboard.vue';
@@ -82,6 +84,51 @@ function mountSidebarTodoWidget() {
   });
 }
 
+function getSidebarAssigneeAvailabilityData() {
+  const sidebarAssigneeEl = document.querySelectorAll('.js-sidebar-assignee-data input');
+  return Array.from(sidebarAssigneeEl)
+    .map((el) => el.dataset)
+    .reduce(
+      (acc, { username, availability = '' }) => ({
+        ...acc,
+        [username]: availability,
+      }),
+      {},
+    );
+}
+
+function mountSidebarAssigneesDeprecated(mediator) {
+  const el = document.querySelector('.js-sidebar-assignees-root');
+
+  if (!el) {
+    return null;
+  }
+
+  const { id, iid, fullPath } = getSidebarOptions();
+  const assigneeAvailabilityStatus = getSidebarAssigneeAvailabilityData();
+
+  return new Vue({
+    el,
+    name: 'SidebarAssigneesRoot',
+    apolloProvider,
+    render: (createElement) =>
+      createElement(SidebarAssignees, {
+        props: {
+          mediator,
+          issuableIid: String(iid),
+          projectPath: fullPath,
+          field: el.dataset.field,
+          issuableType:
+            isInIssuePage() || isInIncidentPage() || isInDesignPage()
+              ? TYPE_ISSUE
+              : TYPE_MERGE_REQUEST,
+          issuableId: id,
+          assigneeAvailabilityStatus,
+        },
+      }),
+  });
+}
+
 function mountSidebarAssigneesWidget() {
   const el = document.querySelector('.js-sidebar-assignees-root');
 
@@ -125,6 +172,12 @@ function mountSidebarAssigneesWidget() {
         },
       }),
   });
+
+  const assigneeDropdown = document.querySelector('.js-sidebar-assignee-dropdown');
+
+  if (assigneeDropdown) {
+    trackShowInviteMemberLink(assigneeDropdown);
+  }
 }
 
 function mountSidebarReviewers(mediator) {
@@ -134,13 +187,7 @@ function mountSidebarReviewers(mediator) {
     return;
   }
 
-  const {
-    id,
-    iid,
-    fullPath,
-    multipleApprovalRulesAvailable = false,
-    directlyInviteMembers = false,
-  } = getSidebarOptions();
+  const { id, iid, fullPath, multipleApprovalRulesAvailable = false } = getSidebarOptions();
   // eslint-disable-next-line no-new
   new Vue({
     el,
@@ -151,7 +198,6 @@ function mountSidebarReviewers(mediator) {
       issuableId: String(id),
       projectPath: fullPath,
       multipleApprovalRulesAvailable: parseBoolean(multipleApprovalRulesAvailable),
-      directlyInviteMembers: parseBoolean(directlyInviteMembers),
     },
     render: (createElement) =>
       createElement(SidebarReviewers, {
@@ -501,8 +547,15 @@ function mountSidebarSubscriptionsWidget() {
 function mountSidebarTimeTracking() {
   const el = document.querySelector('.js-sidebar-time-tracking-root');
 
-  const { id, iid, fullPath, issuableType, timeTrackingLimitToHours, canCreateTimelogs, editable } =
-    getSidebarOptions();
+  const {
+    id,
+    iid,
+    fullPath,
+    issuableType,
+    timeTrackingLimitToHours,
+    canCreateTimelogs,
+    editable,
+  } = getSidebarOptions();
 
   if (!el) {
     return null;
@@ -755,9 +808,15 @@ export function mountAssigneesDropdown() {
   });
 }
 
+const isAssigneesWidgetShown = isInIssuePage() || isInDesignPage() || isInMRPage();
+
 export function mountSidebar(mediator, store) {
   mountSidebarTodoWidget();
-  mountSidebarAssigneesWidget();
+  if (isAssigneesWidgetShown) {
+    mountSidebarAssigneesWidget();
+  } else {
+    mountSidebarAssigneesDeprecated(mediator);
+  }
   mountSidebarReviewers(mediator);
   mountSidebarCrmContacts();
   mountSidebarLabelsWidget();

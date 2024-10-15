@@ -1,9 +1,14 @@
 description: "Delete package"
 category: "`UI:[MavenPackages | NpmPackages | ConanPackages | undefined]`"
 action: delete_package
+label_description: ""
+property_description: ""
+value_description: ""
 extra_properties:
 identifiers:
-product_group: package_registry
+product_section: dev
+product_stage: manage
+product_group: foundations
 milestone: "13.4"
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/41668
 distributions:

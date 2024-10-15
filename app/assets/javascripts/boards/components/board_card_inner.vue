@@ -1,9 +1,15 @@
 <script>
-import { GlLabel, GlTooltipDirective, GlIcon, GlLoadingIcon } from '@gitlab/ui';
+import {
+  GlLabel,
+  GlTooltip,
+  GlTooltipDirective,
+  GlIcon,
+  GlLoadingIcon,
+  GlSprintf,
+} from '@gitlab/ui';
 import { sortBy } from 'lodash';
 import boardCardInner from 'ee_else_ce/boards/mixins/board_card_inner';
 import { isScopedLabel, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { updateHistory, queryToObject } from '~/lib/utils/url_utility';
 import { sprintf, __, n__ } from '~/locale';
 import isShowingLabelsQuery from '~/graphql_shared/client/is_showing_labels.query.graphql';
@@ -18,26 +24,26 @@ import IssueTimeEstimate from './issue_time_estimate.vue';
 
 export default {
   components: {
+    GlTooltip,
     GlLabel,
     GlLoadingIcon,
     GlIcon,
     UserAvatarLink,
     IssueDueDate,
     IssueTimeEstimate,
-    IssueWeight: () => import('ee_component/issues/components/issue_weight.vue'),
+    IssueCardWeight: () => import('ee_component/boards/components/issue_card_weight.vue'),
     IssueIteration: () => import('ee_component/boards/components/issue_iteration.vue'),
     IssuableBlockedIcon,
+    GlSprintf,
     WorkItemTypeIcon,
     IssueMilestone,
     IssueHealthStatus: () =>
       import('ee_component/related_items_tree/components/issue_health_status.vue'),
-    EpicCountables: () =>
-      import('ee_else_ce/vue_shared/components/epic_countables/epic_countables.vue'),
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [boardCardInner, glFeatureFlagsMixin()],
+  mixins: [boardCardInner],
   inject: [
     'allowSubEpics',
     'rootPath',
@@ -45,7 +51,6 @@ export default {
     'isEpicBoard',
     'issuableType',
     'isGroupBoard',
-    'disabled',
   ],
   props: {
     item: {
@@ -80,7 +85,6 @@ export default {
     };
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     isShowingLabels: {
       query: isShowingLabelsQuery,
       update: (data) => data.isShowingLabels,
@@ -138,8 +142,11 @@ export default {
     shouldRenderEpicCountables() {
       return this.isEpicBoard && this.hasChildren;
     },
+    shouldRenderEpicProgress() {
+      return this.totalWeight > 0;
+    },
     showLabelFooter() {
-      return this.isShowingLabels && this.item.labels.filter(this.isNonListLabel).length > 0;
+      return this.isShowingLabels && this.item.labels.find(this.showLabel);
     },
     itemReferencePath() {
       const { referencePath } = this.item;
@@ -157,17 +164,19 @@ export default {
       }
       return __('Blocked issue');
     },
-    descendantCounts() {
-      return this.item.descendantCounts;
-    },
-    descendantWeightSum() {
-      return this.item.descendantWeightSum;
-    },
     totalEpicsCount() {
-      return this.descendantCounts.openedEpics + this.descendantCounts.closedEpics;
+      return this.item.descendantCounts.openedEpics + this.item.descendantCounts.closedEpics;
     },
     totalIssuesCount() {
-      return this.descendantCounts.openedIssues + this.descendantCounts.closedIssues;
+      return this.item.descendantCounts.openedIssues + this.item.descendantCounts.closedIssues;
+    },
+    totalWeight() {
+      return (
+        this.item.descendantWeightSum.openedIssues + this.item.descendantWeightSum.closedIssues
+      );
+    },
+    totalProgress() {
+      return Math.round((this.item.descendantWeightSum.closedIssues / this.totalWeight) * 100);
     },
     showReferencePath() {
       return this.isGroupBoard && this.itemReferencePath;
@@ -177,9 +186,6 @@ export default {
     },
     showBoardCardNumber() {
       return this.item.referencePath && !this.isLoading;
-    },
-    hasActions() {
-      return !this.disabled && this.list.listType !== ListType.closed;
     },
   },
   methods: {
@@ -196,6 +202,10 @@ export default {
     },
     avatarUrl(assignee) {
       return assignee.avatarUrl || assignee.avatar || gon.default_avatar_url;
+    },
+    showLabel(label) {
+      if (!label.id) return false;
+      return true;
     },
     isNonListLabel(label) {
       return (
@@ -230,10 +240,9 @@ export default {
 </script>
 <template>
   <div>
-    <div class="gl-flex" dir="auto">
+    <div class="gl-display-flex" dir="auto">
       <h4
-        class="board-card-title gl-mb-0 gl-mt-0 gl-min-w-0 gl-hyphens-auto gl-break-words gl-text-base"
-        :class="{ 'gl-mr-6': hasActions }"
+        class="board-card-title gl-min-w-0 gl-mb-0 gl-mt-0 gl-mr-3 gl-font-base gl-overflow-break-word"
       >
         <issuable-blocked-icon
           v-if="item.blocked"
@@ -247,7 +256,7 @@ export default {
           v-gl-tooltip
           name="eye-slash"
           :title="__('Confidential')"
-          class="confidential-icon gl-mr-2 gl-cursor-help gl-text-orange-500"
+          class="confidential-icon gl-mr-2 gl-text-orange-500 gl-cursor-help"
           :aria-label="__('Confidential')"
         />
         <gl-icon
@@ -255,30 +264,25 @@ export default {
           v-gl-tooltip
           name="spam"
           :title="__('This issue is hidden because its author has been banned.')"
-          class="hidden-icon gl-mr-2 gl-cursor-help gl-text-orange-500"
+          class="gl-mr-2 hidden-icon gl-text-orange-500 gl-cursor-help"
           data-testid="hidden-icon"
         />
         <a
           :href="item.path || item.webUrl || ''"
           :title="item.title"
-          :class="{
-            '!gl-text-gray-400': isLoading,
-            'js-no-trigger': !glFeatures.issuesListDrawer,
-            'js-no-trigger-title': glFeatures.issuesListDrawer,
-          }"
-          class="gl-text-primary hover:gl-text-gray-900"
-          data-testid="board-card-title-link"
+          :class="{ 'gl-text-gray-400!': isLoading }"
+          class="js-no-trigger gl-text-body gl-hover-text-gray-900"
           @mousemove.stop
           >{{ item.title }}</a
         >
       </h4>
       <slot></slot>
     </div>
-    <div v-if="showLabelFooter" class="board-card-labels gl-mt-2 gl-flex gl-flex-wrap">
+    <div v-if="showLabelFooter" class="board-card-labels gl-mt-2 gl-display-flex gl-flex-wrap">
       <template v-for="label in orderedLabels">
         <gl-label
           :key="label.id"
-          class="js-no-trigger gl-mr-2 gl-mt-2"
+          class="js-no-trigger gl-mt-2 gl-mr-2"
           :background-color="label.color"
           :title="label.title"
           :description="label.description"
@@ -288,16 +292,18 @@ export default {
         />
       </template>
     </div>
-    <div class="board-card-footer gl-mt-3 gl-flex gl-items-end gl-justify-between">
+    <div
+      class="board-card-footer gl-display-flex gl-justify-content-space-between gl-align-items-flex-end"
+    >
       <div
-        class="align-items-start board-card-number-container gl-flex gl-flex-wrap-reverse gl-overflow-hidden"
+        class="gl-display-flex align-items-start gl-flex-wrap-reverse board-card-number-container gl-overflow-hidden"
       >
-        <span class="board-info-items gl-inline-block gl-leading-20">
+        <span class="board-info-items gl-mt-3 gl-line-height-20 gl-display-inline-block">
           <gl-loading-icon v-if="isLoading" size="lg" class="gl-mt-5" />
           <span
             v-if="showBoardCardNumber"
-            class="board-card-number gl-mr-3 gl-mt-3 gl-gap-2 gl-overflow-hidden gl-text-sm gl-text-secondary"
-            :class="{ 'gl-text-base': isEpicBoard }"
+            class="board-card-number gl-overflow-hidden gl-gap-2 gl-mr-3 gl-mt-3 gl-font-sm gl-text-secondary"
+            :class="{ 'gl-font-base': isEpicBoard }"
           >
             <work-item-type-icon
               v-if="showWorkItemTypeIcon"
@@ -309,35 +315,106 @@ export default {
               v-gl-tooltip
               :title="itemReferencePath"
               data-placement="bottom"
-              class="board-item-path gl-cursor-help gl-truncate gl-font-bold"
+              class="board-item-path gl-text-truncate gl-font-weight-bold gl-cursor-help"
             >
               {{ directNamespaceReference }}
             </span>
             {{ itemId }}
           </span>
-          <epic-countables
-            v-if="shouldRenderEpicCountables"
-            :allow-sub-epics="allowSubEpics"
-            :opened-epics-count="descendantCounts.openedEpics"
-            :closed-epics-count="descendantCounts.closedEpics"
-            :opened-issues-count="descendantCounts.openedIssues"
-            :closed-issues-count="descendantCounts.closedIssues"
-            :opened-issues-weight="descendantWeightSum.openedIssues"
-            :closed-issues-weight="descendantWeightSum.closedIssues"
-          />
+          <span v-if="shouldRenderEpicCountables" data-testid="epic-countables">
+            <gl-tooltip :target="() => $refs.countBadge">
+              <p v-if="allowSubEpics" class="gl-font-weight-bold gl-m-0">
+                {{ __('Epics') }} &#8226;
+                <span class="gl-font-weight-normal">
+                  <gl-sprintf :message="__('%{openedEpics} open, %{closedEpics} closed')">
+                    <template #openedEpics>{{ item.descendantCounts.openedEpics }}</template>
+                    <template #closedEpics>{{ item.descendantCounts.closedEpics }}</template>
+                  </gl-sprintf>
+                </span>
+              </p>
+              <p class="gl-font-weight-bold gl-m-0">
+                {{ __('Issues') }} &#8226;
+                <span class="gl-font-weight-normal">
+                  <gl-sprintf :message="__('%{openedIssues} open, %{closedIssues} closed')">
+                    <template #openedIssues>{{ item.descendantCounts.openedIssues }}</template>
+                    <template #closedIssues>{{ item.descendantCounts.closedIssues }}</template>
+                  </gl-sprintf>
+                </span>
+              </p>
+              <p class="gl-font-weight-bold gl-m-0">
+                {{ __('Total weight') }} &#8226;
+                <span class="gl-font-weight-normal" data-testid="epic-countables-total-weight">
+                  {{ totalWeight }}
+                </span>
+              </p>
+            </gl-tooltip>
+
+            <gl-tooltip
+              v-if="shouldRenderEpicProgress"
+              :target="() => $refs.progressBadge"
+              data-testid="epic-progress-tooltip"
+            >
+              <p class="gl-font-weight-bold gl-m-0">
+                {{ __('Progress') }} &#8226;
+                <span class="gl-font-weight-normal" data-testid="epic-progress-tooltip-content">
+                  <gl-sprintf
+                    :message="__('%{completedWeight} of %{totalWeight} weight completed')"
+                  >
+                    <template #completedWeight>{{
+                      item.descendantWeightSum.closedIssues
+                    }}</template>
+                    <template #totalWeight>{{ totalWeight }}</template>
+                  </gl-sprintf>
+                </span>
+              </p>
+            </gl-tooltip>
+
+            <span
+              ref="countBadge"
+              class="board-card-info gl-mr-0 gl-pr-0 gl-pl-3 gl-text-secondary gl-cursor-help"
+            >
+              <span v-if="allowSubEpics" class="gl-mr-3">
+                <gl-icon name="epic" />
+                {{ totalEpicsCount }}
+              </span>
+              <span class="gl-mr-3" data-testid="epic-countables-counts-issues">
+                <gl-icon name="issues" />
+                {{ totalIssuesCount }}
+              </span>
+              <span class="gl-mr-3" data-testid="epic-countables-weight-issues">
+                <gl-icon name="weight" />
+                {{ totalWeight }}
+              </span>
+            </span>
+
+            <span
+              v-if="shouldRenderEpicProgress"
+              ref="progressBadge"
+              class="board-card-info gl-pl-0 gl-text-secondary gl-cursor-help"
+            >
+              <span class="gl-mr-3" data-testid="epic-progress">
+                <gl-icon name="progress" />
+                {{ totalProgress }}%
+              </span>
+            </span>
+          </span>
           <span v-if="!isEpicBoard">
-            <issue-weight v-if="validIssueWeight(item)" :weight="item.weight" />
+            <issue-card-weight
+              v-if="validIssueWeight(item)"
+              :weight="item.weight"
+              @click="filterByWeight(item.weight)"
+            />
             <issue-milestone
               v-if="item.milestone"
               data-testid="issue-milestone"
               :milestone="item.milestone"
-              class="gl-mr-3 gl-inline-flex gl-max-w-15 gl-cursor-help gl-items-center gl-align-bottom gl-text-sm gl-text-gray-500"
+              class="gl-display-inline-flex gl-align-items-center gl-max-w-15 gl-font-sm gl-text-gray-500! gl-cursor-help! gl-align-bottom gl-mr-3"
             />
             <issue-iteration
               v-if="item.iteration"
               data-testid="issue-iteration"
               :iteration="item.iteration"
-              class="gl-align-bottom"
+              class="gl-align-bottom gl-whitespace-nowrap"
             />
             <issue-due-date
               v-if="item.dueDate"
@@ -349,7 +426,7 @@ export default {
           </span>
         </span>
       </div>
-      <div class="board-card-assignee gl-flex">
+      <div class="board-card-assignee gl-display-flex gl-mb-n2">
         <user-avatar-link
           v-for="assignee in cappedAssignees"
           :key="assignee.id"
@@ -361,7 +438,7 @@ export default {
           tooltip-placement="bottom"
         >
           <span class="js-assignee-tooltip">
-            <span class="gl-block gl-font-bold">{{ __('Assignee') }}</span>
+            <span class="gl-font-weight-bold gl-display-block">{{ __('Assignee') }}</span>
             {{ assignee.name }}
             <span class="text-white-50">@{{ assignee.username }}</span>
           </span>
@@ -370,7 +447,7 @@ export default {
           v-if="shouldRenderCounter"
           v-gl-tooltip
           :title="assigneeCounterTooltip"
-          class="avatar-counter -gl-ml-3 gl-cursor-help gl-border-0 gl-bg-gray-100 gl-font-bold gl-leading-24 gl-text-gray-900"
+          class="avatar-counter gl-bg-gray-100 gl-text-gray-900 gl-cursor-help gl-font-weight-bold gl-border-0 gl-line-height-24 gl-ml-n3"
           data-placement="bottom"
           >{{ assigneeCounterLabel }}</span
         >

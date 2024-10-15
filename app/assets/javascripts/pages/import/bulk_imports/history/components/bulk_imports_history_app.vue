@@ -24,7 +24,7 @@ import PaginationBar from '~/vue_shared/components/pagination_bar/pagination_bar
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 
-import { isFailed, isImporting } from '../utils';
+import { isImporting } from '../utils';
 import { DEFAULT_ERROR } from '../utils/error_messages';
 
 const DEFAULT_PER_PAGE = 20;
@@ -35,7 +35,7 @@ const tableCell = (config) => ({
   tdClass: (value, key, item) => {
     return {
       // eslint-disable-next-line no-underscore-dangle
-      '!gl-border-b-0': item._showDetails,
+      'gl-border-b-0!': item._showDetails,
     };
   },
   ...config,
@@ -59,14 +59,7 @@ export default {
     GlTooltip,
   },
 
-  inject: {
-    detailsPath: {
-      default: undefined,
-    },
-    realtimeChangesPath: {
-      default: undefined,
-    },
-  },
+  inject: ['realtimeChangesPath'],
 
   props: {
     id: {
@@ -161,13 +154,10 @@ export default {
         const updateItem = this.historyItems[updateItemIndex];
 
         if (updateItem.status !== update.status_name) {
-          const copy = [...this.historyItems];
-          copy[updateItemIndex] = {
+          this.$set(this.historyItems, updateItemIndex, {
             ...updateItem,
             status: update.status_name,
-          };
-
-          this.historyItems = copy;
+          });
         }
       },
     });
@@ -221,28 +211,6 @@ export default {
       return !isEmpty(item.stats);
     },
 
-    showFailuresLinkInStatus(item) {
-      if (isFailed(item.status)) {
-        return true;
-      }
-      // Import has failures but no stats
-      if (item.has_failures && !this.hasStats(item)) {
-        return true;
-      }
-
-      return false;
-    },
-
-    failuresLinkHref(item) {
-      if (!item.has_failures) {
-        return '';
-      }
-
-      return this.detailsPath
-        .replace(':id', encodeURIComponent(item.bulk_import_id))
-        .replace(':entity_id', encodeURIComponent(item.id));
-    },
-
     getEntityTooltip(item) {
       switch (item.entity_type) {
         case WORKSPACE_PROJECT:
@@ -268,9 +236,9 @@ export default {
 
 <template>
   <div>
-    <h1 class="gl-my-0 gl-flex gl-items-center gl-gap-3 gl-py-4 gl-text-size-h1">
-      <img :src="$options.gitlabLogo" :alt="__('GitLab Logo')" class="gl-h-6 gl-w-6" />
-      <span>{{ s__('BulkImport|Migration history') }}</span>
+    <h1 class="gl-font-size-h1 gl-my-0 gl-py-4 gl-display-flex gl-align-items-center gl-gap-3">
+      <img :src="$options.gitlabLogo" :alt="__('GitLab Logo')" class="gl-w-6 gl-h-6" />
+      <span>{{ s__('BulkImport|Direct transfer history') }}</span>
     </h1>
 
     <gl-loading-icon v-if="loading" size="lg" class="gl-mt-5" />
@@ -298,19 +266,19 @@ export default {
           </gl-link>
           <span v-else>{{ destinationText(item) }}</span>
         </template>
-        <template #cell(created_at)="{ value = '' }">
+        <template #cell(created_at)="{ value }">
           <time-ago :time="value" />
         </template>
         <template #cell(status)="{ value, item }">
           <div>
             <import-status
+              :id="item.bulk_import_id"
+              :entity-id="item.id"
               :has-failures="item.has_failures"
-              :failures-href="showFailuresLinkInStatus(item) ? failuresLinkHref(item) : null"
               :status="value"
             />
             <import-stats
               v-if="hasStats(item)"
-              :failures-href="failuresLinkHref(item)"
               :stats="item.stats"
               :stats-mapping="$options.BULK_IMPORT_STATIC_ITEMS"
               :status="value"

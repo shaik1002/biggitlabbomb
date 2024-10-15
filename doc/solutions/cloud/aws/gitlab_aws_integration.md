@@ -37,15 +37,7 @@ These integrations have to do with using GitLab to build application workloads a
 
 [12/28/2023 AWS Release Announcement for Self-Managed / Dedicated](https://aws.amazon.com/about-aws/whats-new/2023/12/codepipeline-gitlab-self-managed/)
 
-**AWS CodeStar Connections** - enables SCM connections to multiple AWS Services.
-[Configure GitLab](https://docs.aws.amazon.com/dtconsole/latest/userguide/connections-create-gitlab.html).
-[Supported Providers](https://docs.aws.amazon.com/dtconsole/latest/userguide/supported-versions-connections.html).
-[Supported AWS Services](https://docs.aws.amazon.com/dtconsole/latest/userguide/integrations-connections.html) -
-each one may have to make updates to support GitLab, so here is the subset that
-support GitLab. This works with GitLab.com SaaS, GitLab Self-Managed and GitLab Dedicated.
-AWS CodeStar connections are not available in all AWS regions - the exclusion list is
-[documented here](https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodestarConnectionSource.html).
-([12/28/2023](https://aws.amazon.com/about-aws/whats-new/2023/12/codepipeline-gitlab-self-managed/)) `[AWS Built]`
+**AWS CodeStar Connections** - enables SCM connections to multiple AWS Services. [Configure GitLab](https://docs.aws.amazon.com/dtconsole/latest/userguide/connections-create-gitlab.html). [Supported Providers](https://docs.aws.amazon.com/dtconsole/latest/userguide/supported-versions-connections.html). [Supported AWS Services](https://docs.aws.amazon.com/dtconsole/latest/userguide/integrations-connections.html) - each one may have to make updates to support GitLab, so here is the subset that support GitLab. This works with GitLab.com SaaS, GitLab Self-Managed and GitLab Dedicated. AWS CodeStar connections are not available in all AWS regions - the exclusion list is [documented here](https://docs.aws.amazon.com/codepipeline/latest/userguide/action-reference-CodestarConnectionSource.html). ([12/28/2023](https://aws.amazon.com/about-aws/whats-new/2023/12/codepipeline-gitlab-self-managed/)) `[AWS Built]`
 
 [Video Explanation of AWS CodeStar Connection Integration for AWS (1 min)](https://youtu.be/f7qTSa_bNig)
 
@@ -83,7 +75,7 @@ Documentation and References:
 
 - **Amazon SageMaker Notebooks** [allow Git repositories to be specified by the Git clone URL](https://docs.aws.amazon.com/sagemaker/latest/dg/nbi-git-resource.html) and configuration of a secret - so GitLab is configurable. ([12/28/2023](https://aws.amazon.com/about-aws/whats-new/2023/12/codepipeline-gitlab-self-managed/)) `[AWS Configuration]`
 - **AWS Amplify** - [uses a Git integration mechanism designed by the AWS Amplify team](https://docs.aws.amazon.com/amplify/latest/userguide/getting-started.html). `[AWS Built]`
-- **AWS Glue Notebook Jobs** support for GitLab repository URL with personal access token (PAT) authentication at the "job" level. ([10/03/2022](https://aws.amazon.com/about-aws/whats-new/2022/10/aws-glue-git-integration/)) [AWS Docs about configuring GitLab](https://docs.aws.amazon.com/glue/latest/dg/edit-job-add-source-control-integration.html) `[AWS Configuration]`
+- **AWS Glue Notebook Jobs** support for GitLab respository URL with Personal Access Token (PAT) authentication at the "job" level. ([10/03/2022](https://aws.amazon.com/about-aws/whats-new/2022/10/aws-glue-git-integration/)) [AWS Docs about configuring GitLab](https://docs.aws.amazon.com/glue/latest/dg/edit-job-add-source-control-integration.html) `[AWS Configuration]`
 
 #### Other SCM Integration Options
 
@@ -104,7 +96,6 @@ See [CD and Operations Integrations](#cd-and-operations-integrations) below for 
 - [Integrate EKS clusters for application deployment](../../../user/infrastructure/clusters/connect/new_eks_cluster.md). `[GitLab Built]`
 - [GitLab pushing a build Artifact to a CodePipeline monitored S3 location](https://docs.aws.amazon.com/codepipeline/latest/userguide/pipelines-about-starting.html#change-detection-methods) `[AWS Built]`
 - [GitLab Pushing a container to a CodePipeline monitored AWS ECR](https://docs.aws.amazon.com/codepipeline/latest/userguide/pipelines-about-starting.html#change-detection-methods) `[AWS Built]`
-- [Use GitLab.com's Container Registry as an Upstream Registry for AWS ECR via Pull-Through Cache Rules](https://docs.aws.amazon.com/AmazonECR/latest/userguide/pull-through-cache-creating-rule.html) [Configuration Tutorial](tutorials/aws_ecr_pull_through_cache.md) `[AWS Built]`
 
 ## End-to-End Solutions for development and deployment of specific development frameworks or ecosystems
 
@@ -114,7 +105,7 @@ Generally solutions demonstrate end-to-end capabilities for the development fram
 
 - [Enterprise DevOps Blueprint: Serverless Framework Apps on AWS](https://gitlab.com/guided-explorations/aws/serverless/serverless-framework-aws) - working example code and tutorials. `[GitLab Solution]` `[CI Solution]`
   - [Tutorial: Serverless Framework Deployment to AWS with GitLab Serverless SAST Scanning](https://gitlab.com/guided-explorations/aws/serverless/serverless-framework-aws/-/blob/master/TUTORIAL.md) `[GitLab Solution]` `[CI Solution]`
-  - [Tutorial: Secure Serverless Framework Development with GitLab Security Policy Approval Rules and Managed DevOps Environments](https://gitlab.com/guided-explorations/aws/serverless/serverless-framework-aws/-/blob/prod/TUTORIAL2-SecurityAndManagedEnvs.md?ref_type=heads) `[GitLab Solution]` `[CI Solution]`
+  - [Tutorial: Secure Serverless Framework Development with GitLab Security Policy Approval Rules and Managed DevOps Environments](https://gitlab.com/guided-explorations/aws/serverless/serverless-framework-aws/-/blob/master/TUTORIAL2-SecurityAndManagedEnvs.md) `[GitLab Solution]` `[CI Solution]`
 
 ### Terraform
 

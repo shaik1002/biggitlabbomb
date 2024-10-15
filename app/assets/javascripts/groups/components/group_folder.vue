@@ -39,8 +39,7 @@ export default {
 </script>
 
 <template>
-  <ul class="groups-list group-list-tree gl-m-0 gl-flex gl-flex-col">
-    <!-- eslint-disable-next-line vue/no-undef-components -->
+  <ul class="groups-list group-list-tree gl-display-flex gl-flex-direction-column gl-m-0">
     <group-item
       v-for="(group, index) in groups"
       :key="index"
@@ -49,7 +48,7 @@ export default {
       :action="action"
     />
     <li v-if="hasMoreChildren" class="group-row">
-      <a :href="parentGroup.relativePath" class="group-row-contents has-more-items gl-py-3">
+      <a :href="parentGroup.relativePath" class="group-row-contents has-more-items py-2">
         <gl-icon name="external-link" /> {{ moreChildrenStats }}
       </a>
     </li>

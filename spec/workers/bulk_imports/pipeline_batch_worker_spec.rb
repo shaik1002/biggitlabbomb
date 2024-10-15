@@ -99,20 +99,6 @@ RSpec.describe BulkImports::PipelineBatchWorker, feature_category: :importers do
           expect(batch.reload).to be_skipped
         end
       end
-
-      context 'when tracker is canceled' do
-        let(:tracker) { create(:bulk_import_tracker, :canceled) }
-
-        it 'skips and logs the batch' do
-          expect_next_instance_of(BulkImports::Logger) do |logger|
-            expect(logger).to receive(:info).with(a_hash_including('message' => 'Batch tracker canceled'))
-          end
-
-          worker.perform(batch.id)
-
-          expect(batch.reload).to be_canceled
-        end
-      end
     end
 
     context 'with batch status' do
@@ -143,18 +129,6 @@ RSpec.describe BulkImports::PipelineBatchWorker, feature_category: :importers do
           worker.perform(batch.id)
 
           expect(batch.reload).to be_finished
-        end
-      end
-
-      context 'when batch status is canceled' do
-        let(:batch) { create(:bulk_import_batch_tracker, :canceled, tracker: tracker) }
-
-        it 'stays canceled and does not execute' do
-          expect(batch).not_to receive(:start!)
-
-          worker.perform(batch.id)
-
-          expect(batch.reload).to be_canceled
         end
       end
     end

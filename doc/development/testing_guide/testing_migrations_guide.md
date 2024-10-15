@@ -106,7 +106,7 @@ application code which can change after the migration has run, and cause the tes
 to fail. For example, to create a record in the `projects` table:
 
 ```ruby
-project = table(:projects).create!(name: 'gitlab1', path: 'gitlab1')
+project = table(:projects).create!(id: 1, name: 'gitlab1', path: 'gitlab1')
 ```
 
 #### `migrate!`
@@ -448,7 +448,3 @@ end
 
 These tests do not run within a database transaction, as we use a deletion database
 cleanup strategy. Do not depend on a transaction being present.
-
-When testing migrations that alter seeded data in `deletion_except_tables`, you may add the
-`:migration_with_transaction` metadata so the test runs within a transaction and the data
-is rolled back to their original values.

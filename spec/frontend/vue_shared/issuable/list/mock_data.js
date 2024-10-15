@@ -41,7 +41,6 @@ export const mockCurrentUserTodo = {
 };
 
 export const mockIssuable = {
-  id: '1',
   iid: '30',
   title: 'Dismiss Cipher with no integrity',
   titleHtml: 'Dismiss Cipher with no integrity',
@@ -75,7 +74,6 @@ export const mockIssuableItems = (n) =>
 export const mockIssuables = [
   mockIssuable,
   {
-    id: '2',
     iid: '28',
     title: 'Dismiss Cipher with no integrity',
     description: null,
@@ -88,7 +86,6 @@ export const mockIssuables = [
     },
   },
   {
-    id: '3',
     iid: '7',
     title: 'Temporibus in veritatis labore explicabo velit molestiae sed.',
     description: 'Quo consequatur rem aliquid laborum quibusdam molestiae saepe.',
@@ -101,7 +98,6 @@ export const mockIssuables = [
     },
   },
   {
-    id: '4',
     iid: '17',
     title: 'Vel voluptatem quaerat est hic incidunt qui ut aliquid sit exercitationem.',
     description: 'Incidunt accusamus perspiciatis aut excepturi.',
@@ -114,7 +110,6 @@ export const mockIssuables = [
     },
   },
   {
-    id: '5',
     iid: '16',
     title: 'Vero qui quo labore libero omnis quisquam et cumque.',
     description: 'Ipsa ipsum magni nostrum alias aut exercitationem.',

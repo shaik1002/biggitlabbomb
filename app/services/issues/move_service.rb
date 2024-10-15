@@ -22,7 +22,6 @@ module Issues
 
       copy_email_participants
       queue_copy_designs
-      copy_timelogs
 
       new_entity
     end
@@ -37,6 +36,8 @@ module Issues
     end
 
     def move_children
+      return if Feature.disabled?(:move_issue_children, original_entity.resource_parent, type: :beta)
+
       WorkItems::ParentLink.for_parents(original_entity).each do |link|
         new_child = self.class.new(
           container: container,
@@ -110,8 +111,7 @@ module Issues
         project: target_project,
         author: original_entity.author,
         assignee_ids: original_entity.assignee_ids,
-        moved_issue: true,
-        imported_from: :none
+        moved_issue: true
       }
 
       new_params = original_entity.serializable_hash.symbolize_keys.merge(new_params)
@@ -142,12 +142,6 @@ module Issues
       ).execute
 
       log_error(response.message) if response.error?
-    end
-
-    def copy_timelogs
-      return if original_entity.timelogs.empty?
-
-      WorkItems::CopyTimelogsWorker.perform_async(original_entity.id, new_entity.id)
     end
 
     def mark_as_moved

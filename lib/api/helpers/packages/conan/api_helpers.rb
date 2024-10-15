@@ -136,26 +136,24 @@ module API
           strong_memoize_attr :project
 
           def package
-            ::Packages::Conan::Package
-              .for_projects(project)
-              .with_name(params[:package_name])
-              .with_version(params[:package_version])
-              .with_conan_username(params[:package_username])
-              .with_conan_channel(params[:package_channel])
-              .order_created
-              .not_pending_destruction
-              .last
+            project.packages
+                .conan
+                .with_name(params[:package_name])
+                .with_version(params[:package_version])
+                .with_conan_username(params[:package_username])
+                .with_conan_channel(params[:package_channel])
+                .order_created
+                .not_pending_destruction
+                .last
           end
           strong_memoize_attr :package
 
           def token
-            if find_personal_access_token
-              ::Gitlab::ConanToken.from_personal_access_token(access_token_from_request, find_personal_access_token)
-            elsif deploy_token_from_request
-              ::Gitlab::ConanToken.from_deploy_token(deploy_token_from_request)
-            else
-              ::Gitlab::ConanToken.from_job(find_job_from_token)
-            end
+            token = nil
+            token = ::Gitlab::ConanToken.from_personal_access_token(find_personal_access_token.user_id, access_token_from_request) if find_personal_access_token
+            token = ::Gitlab::ConanToken.from_deploy_token(deploy_token_from_request) if deploy_token_from_request
+            token = ::Gitlab::ConanToken.from_job(find_job_from_token) if find_job_from_token
+            token
           end
           strong_memoize_attr :token
 
@@ -191,15 +189,10 @@ module API
 
           def file_names
             json_payload = Gitlab::Json.parse(request.body.read)
+
+            bad_request!(nil) unless json_payload.is_a?(Hash)
+
             json_payload.keys
-          rescue JSON::ParserError,
-            Encoding::UndefinedConversionError,
-            Encoding::InvalidByteSequenceError,
-            Encoding::CompatibilityError
-            nil
-          rescue StandardError => e
-            Gitlab::ErrorTracking.track_exception(e)
-            bad_request!(nil)
           end
 
           def create_package_file_with_type(file_type, current_package)
@@ -231,7 +224,7 @@ module API
           # We override this method from auth_finders because we need to
           # extract the token from the Conan JWT which is specific to the Conan API
           def find_personal_access_token
-            PersonalAccessToken.active.find_by_token(access_token_from_request)
+            PersonalAccessToken.find_by_token(access_token_from_request)
           end
           strong_memoize_attr :find_personal_access_token
 
@@ -268,7 +261,8 @@ module API
 
           # We need to override this one because it
           # looks into Bearer authorization header
-          def find_oauth_access_token; end
+          def find_oauth_access_token
+          end
 
           def find_personal_access_token_from_conan_jwt
             token = decode_oauth_token_from_jwt

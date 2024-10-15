@@ -13,15 +13,9 @@ module MailScheduler
 
     # rubocop: disable CodeReuse/ActiveRecord
     def perform(project_id)
-      Issue
-        .with_issue_type(:issue)
-        .opened
-        .due_tomorrow
-        .in_projects(project_id)
-        .preload(:project)
-        .find_each do |issue|
-          notification_service.issue_due(issue)
-        end
+      Issue.opened.due_tomorrow.in_projects(project_id).preload(:project).find_each do |issue|
+        notification_service.issue_due(issue)
+      end
     end
     # rubocop: enable CodeReuse/ActiveRecord
   end

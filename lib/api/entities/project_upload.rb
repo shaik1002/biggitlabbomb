@@ -5,15 +5,11 @@ module API
     class ProjectUpload < Grape::Entity
       include Gitlab::Routing
 
-      expose :id do |uploader|
-        uploader.upload.id
-      end
       expose :markdown_name, as: :alt
       expose :secure_url, as: :url
       expose :full_path do |uploader|
-        banzai_upload_path(
-          'project',
-          uploader.model.id,
+        show_project_uploads_path(
+          uploader.model,
           uploader.secret,
           uploader.filename
         )

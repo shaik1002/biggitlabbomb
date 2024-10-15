@@ -13,7 +13,7 @@ A first step is to search for your error in Slack, or search for `GitLab <my err
 
 Available `RAILS_ENV`:
 
-- `production` (generally not for your main GDK database, but you might need this for other installations such as Omnibus).
+- `production` (generally not for your main GDK database, but you may need this for other installations such as Omnibus).
 - `development` (this is your main GDK db).
 - `test` (used for tests like RSpec).
 
@@ -47,7 +47,7 @@ bundle exec rake db:reset RAILS_ENV=test
 
 ## Migration wrangling
 
-- `bundle exec rake db:migrate RAILS_ENV=development`: Execute any pending migrations that you might have picked up from a MR
+- `bundle exec rake db:migrate RAILS_ENV=development`: Execute any pending migrations that you may have picked up from a MR
 - `bundle exec rake db:migrate:status RAILS_ENV=development`: Check if all migrations are `up` or `down`
 - `bundle exec rake db:migrate:down:main VERSION=20170926203418 RAILS_ENV=development`: Tear down a migration
 - `bundle exec rake db:migrate:up:main VERSION=20170926203418 RAILS_ENV=development`: Set up a migration
@@ -57,7 +57,7 @@ Replace `main` in the above commands to execute against the `ci` database instea
 
 ## Manually access the database
 
-Access the database with one of these commands. They all get you to the same place.
+Access the database via one of these commands (they all get you to the same place)
 
 ```shell
 gdk psql -d gitlabhq_development
@@ -98,63 +98,33 @@ are needed:
    ```
 
 1. On your database GUI, select `localhost` as host, `5432` as port and `gitlabhq_development` as database.
-   You can also use the connection string `postgresql://localhost:5432/gitlabhq_development`.
+   Alternatively, you can use the connection string `postgresql://localhost:5432/gitlabhq_development`.
 
 The new connection should be working now.
 
 ## Access the GDK database with Visual Studio Code
 
-Create a database connection using the PostgreSQL extension in Visual Studio Code to access and
-explore the GDK database.
+Use these instructions for exploring the GitLab database while developing with the GDK:
 
-Prerequisites:
+1. Install or open [Visual Studio Code](https://code.visualstudio.com/download).
+1. Install the [PostgreSQL VS Code Extension](https://marketplace.visualstudio.com/items?itemName=ckolkman.vscode-postgres).
+1. In Visual Studio Code select **PostgreSQL Explorer** in the left toolbar.
+1. In the top bar of the new window, select `+` to **Add Database Connection**, and follow the prompts to fill in the details:
+   1. **Hostname**: the path to the PostgreSQL folder in your GDK directory (for example `/dev/gitlab-development-kit/postgresql`).
+   1. **PostgreSQL user to authenticate as**: usually your local username, unless otherwise specified during PostgreSQL installation.
+   1. **Password of the PostgreSQL user**: the password you set when installing PostgreSQL.
+   1. **Port number to connect to**: `5432` (default).
+   1. **Use an SSL connection?** This depends on your installation. Options are:
+      - **Use Secure Connection**
+      - **Standard Connection** (default)
+   1. **Optional. The database to connect to**: `gitlabhq_development`.
+   1. **The display name for the database connection**: `gitlabhq_development`.
 
-- [Visual Studio (VS) Code](https://code.visualstudio.com/download).
-- [PostgreSQL](https://marketplace.visualstudio.com/items?itemName=ckolkman.vscode-postgres) VS Code extension.
-
-To create a database connection:
-
-1. In the activity bar, select the **PostgreSQL Explorer** icon.
-1. From the opened pane, select **+** to add a new database connection:
-1. Enter the **hostname** of the database. Use the path to the PostgreSQL folder in your GDK directory.
-   - Example: `/dev/gitlab-development-kit/postgresql`
-1. Enter a **PostgreSQL user to authenticate as**.
-   Use your local username unless otherwise specified during PostgreSQL installation.
-   To verify your PostgreSQL username:
-   1. Ensure you are in the `gitlab` directory.
-   1. Access the PostgreSQL database. Run `rails db`. The output should look like:
-
-         ```shell
-         psql (14.9)
-         Type "help" for help.
-
-         gitlabhq_development=#
-         ```
-
-   1. In the returned PostgreSQL prompt, run `\conninfo` to display the connected user and
-      the port used to establish the connection. For example:
-
-         ```shell
-         You are connected to database "gitlabhq_development" as user "root" on host "localhost" (address "127.0.0.1") at port "5432".
-         ```
-
-1. When prompted to enter the **password of the PostgreSQL user**, enter the password you set or leave the field blank.
-   - As you are logged in to the same machine that the Postgres server is running on, a password is not required.
-1. Enter**Port number to connect to**. The default port number is`5432`.
-1. In the **use an SSL connection?** field, select the appropriate connection for your
-installation. The options are:
-   - **Use Secure Connection**
-   - **Standard Connection** (default)
-1. In the optional **database to connect to** field, enter `gitlabhq_development`.
-1. In the **display name for the database connection** field, enter `gitlabhq_development`.
-
-Your `gitlabhq_development` database connection is now displayed in the **PostgreSQL Explorer** pane.
-Use the arrows to expand and explore the contents of the GDK database.
-
-If you cannot connect, first ensure that GDK is running and try again. For further instructions on how
-to use the PostgreSQL Explorer extension for VS Code, see
-the [usage section](https://marketplace.visualstudio.com/items?itemName=ckolkman.vscode-postgres#usage)
-of the extension's documentation.
+Your database connection should now be displayed in the PostgreSQL Explorer pane and
+you can explore the `gitlabhq_development` database. If you cannot connect, ensure
+that GDK is running. For further instructions on how to use the PostgreSQL Explorer
+Extension for Visual Studio Code, read the [usage section](https://marketplace.visualstudio.com/items?itemName=ckolkman.vscode-postgres#usage)
+of the extension documentation.
 
 ## FAQ
 
@@ -199,7 +169,7 @@ module.
 Over time we cleanup/combine old migrations in the codebase, so it is not always
 possible to migrate GitLab from every previous version.
 
-In some cases you might want to bypass this check. For example, if you were on a version
+In some cases you may want to bypass this check. For example, if you were on a version
 of GitLab schema later than the `MIN_SCHEMA_VERSION`, and then rolled back the
 to an older migration, from before. In this case, to migrate forward again,
 you should set the `SKIP_SCHEMA_VERSION_CHECK` environment variable.
@@ -225,146 +195,3 @@ a small amount of latency, in exchange for up to more than 90% performance impro
 
 PgBouncer can be fine-tuned to fit different installations. See our documentation on
 [fine-tuning PgBouncer](../../administration/postgresql/pgbouncer.md#fine-tuning) for more information.
-
-### Run ANALYZE to regenerate database statistics
-
-The `ANALYZE` command is a good first approach for solving many performance issues.
-By regenerating table statistics, the query planner creates more efficient query execution paths.
-
-Up to date statistics never hurt!
-
-- For Linux packages, run:
-
-  ```shell
-  gitlab-psql -c 'SET statement_timeout = 0; ANALYZE VERBOSE;'
-  ```
-
-- On the SQL prompt, run:
-
-  ```sql
-  -- needed because this is likely to run longer than the default statement_timeout
-  SET statement_timeout = 0;
-  ANALYZE VERBOSE;
-  ```
-
-### Collect data on ACTIVE workload
-
-Active queries are the only ones actually consuming significant resources from the database.
-
-This query gathers meta information from all existing **active** queries, along with:
-
-- their age
-- originating service
-- `wait_event` (if it's in the waiting state)
-- other possibly relevant information:
-
-```sql
--- long queries are usually easier to read with the fields arranged vertically
-\x
-
-SELECT
-    pid
-    ,datname
-    ,usename
-    ,application_name
-    ,client_hostname
-    ,backend_start
-    ,query_start
-    ,query
-    ,age(now(), query_start) AS "age"
-    ,state
-    ,wait_event
-    ,wait_event_type
-    ,backend_type
-FROM pg_stat_activity
-WHERE state = 'active';
-```
-
-This query captures a single snapshot, so consider running the query 3-5 times
-in a few minutes while the environment is unresponsive:
-
-```sql
--- redirect output to a file
--- this location must be writable by `gitlab-psql`
-\o /tmp/active1304.out
---
--- now execute the query above
---
--- all output goes to the file - if the prompt is = then it ran
--- cancel writing output
-\o
-```
-
-[This Python script](https://gitlab.com/-/snippets/3680015) can help you parse the
-output of `pg_stat_activity` into numbers that are easier to understand and correlate to performance issues.
-
-### Investigate queries that seem slow
-
-When you identify a query is taking too long to finish, or hogging too much database resources,
-check how the query planner is executing it with `EXPLAIN`:
-
-```sql
-EXPLAIN (ANALYZE, BUFFERS) SELECT ... FROM ...
-```
-
-`BUFFERS` also show approximately how much memory is involved. I/O might cause
-the problem, so make sure to add `BUFFERS` when running `EXPLAIN`.
-
-If the database is sometimes performant, and sometimes slow, capture this output
-for the same queries while the environment is in either state.
-
-### Investigate index bloat
-
-Index bloat shouldn't typically cause noticeable performance problems, but it can lead to high disk usage, particularly if there are [autovacuum issues](https://gitlab.com/gitlab-org/gitlab/-/issues/412672#note_1401807864).
-
-The query below calculates bloat percentage from PostgreSQL's own `postgres_index_bloat_estimates`
-table, and orders the results by percentage value. PostgresSQL needs some amount of
-bloat to run correctly, so around 25% still represents standard behavior.
-
-```sql
-select  a.identifier, a.bloat_size_bytes, b.tablename, b.ondisk_size_bytes,
-    (a.bloat_size_bytes/b.ondisk_size_bytes::float)*100 as percentage
-from postgres_index_bloat_estimates a
-join postgres_indexes b on a.identifier=b.identifier
-where
-   -- to ensure the percentage calculation doesn't encounter zeroes
-   a.bloat_size_bytes>0 and
-   b.ondisk_size_bytes>1000000000
-order by  percentage desc;
-```
-
-### Rebuild indexes
-
-If you identify a bloated table, you can rebuild its indexes using the query below.
-You should also re-run [ANALYZE](#run-analyze-to-regenerate-database-statistics)
-afterward, as statistics can be reset after indexes are rebuilt.
-
-```sql
-SET statement_timeout = 0;
-REINDEX TABLE CONCURRENTLY <table_name>;
-```
-
-Monitor the index rebuild process by running the query below with `\watch 30` added after the semicolon:
-
-```sql
-SELECT
-  t.tablename, indexname, c.reltuples AS num_rows,
-  pg_size_pretty(pg_relation_size(quote_ident(t.tablename)::text)) AS table_size,
-  pg_size_pretty(pg_relation_size(quote_ident(indexrelname)::text)) AS index_size,
-CASE WHEN indisvalid THEN 'Y'
-  ELSE 'N'
-END AS VALID
-FROM pg_tables t
-LEFT OUTER JOIN pg_class c ON t.tablename=c.relname
-LEFT OUTER JOIN
-  ( SELECT c.relname AS ctablename, ipg.relname AS indexname, x.indnatts AS
-  number_of_columns, indexrelname, indisvalid FROM pg_index x
-JOIN pg_class c ON c.oid = x.indrelid
-JOIN pg_class ipg ON ipg.oid = x.indexrelid
-JOIN pg_stat_all_indexes psai ON x.indexrelid = psai.indexrelid )
-AS foo
-ON t.tablename = foo.ctablename
-WHERE
-  t.tablename in ('<comma_separated_table_names>')
-  ORDER BY 1,2; \watch 30
-```

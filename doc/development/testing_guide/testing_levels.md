@@ -138,7 +138,7 @@ graph RL
 - **Methods of the class under test**:
   By mocking methods of the class under test, the mocks are tested and not the real methods.
 - **Utility functions (pure functions, or those that only modify parameters)**:
-  If a function has no side effects because it has no state, it is safe to not mock it in tests.
+ If a function has no side effects because it has no state, it is safe to not mock it in tests.
 - **Full HTML pages**:
   Avoid loading the HTML of a full page in unit tests, as it slows down tests.
 
@@ -517,7 +517,7 @@ trade-off:
 - Integration tests are a bit more expensive, but don't abuse them. A system test
   is often better than an integration test that is stubbing a lot of internals.
 - System tests are expensive (compared to unit tests), even more if they require
-  a JavaScript driver. Make sure to follow the guidelines in the [Speed](best_practices.md#test-slowness)
+  a JavaScript driver. Make sure to follow the guidelines in the [Speed](best_practices.md#test-speed)
   section.
 
 Another way to see it is to think about the "cost of tests", this is well

@@ -2,7 +2,6 @@
 stage: Create
 group: Source Code
 info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments"
-description: "Configure snippets settings for your GitLab instance."
 ---
 
 # Snippets
@@ -24,7 +23,7 @@ or the [Application settings API](../../api/settings.md).
 
 The limit **must** be in bytes.
 
-This setting is not available in the [**Admin** area settings](../settings/index.md).
+This setting is not available in the [Admin Area settings](../settings/index.md).
 
 ### Use the Rails console
 

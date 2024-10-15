@@ -32,7 +32,6 @@ AllCops:
   TargetRailsVersion: 7.0
   Exclude:
     - 'gems/**/*'
-    - 'qa/gems/**/*'
     - 'vendor/**/*'
     - 'node_modules/**/*'
     - 'db/fixtures/**/*'
@@ -94,11 +93,6 @@ Cop/StaticTranslationDefinition:
   Exclude:
     - 'spec/**/*'
     - 'ee/spec/**/*'
-
-# Disable old cop, needs to be removed when gitlab-styles 13.0.0 is merged
-# see: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/164582
-Cop/WithoutReactiveCache:
-  Enabled: false
 
 InternalAffairs/DeprecateCopHelper:
   Enabled: true
@@ -451,7 +445,6 @@ Gitlab/DocUrl:
     - danger/**/*
     - ee/spec/**/*
     - haml_lint/**/*
-    - keeps/**/*
     - qa/**/*
     - rubocop/**/*
     - scripts/**/*
@@ -524,7 +517,6 @@ Gitlab/AvoidCurrentOrganization:
     - 'ee/lib/api/**/*'
     - 'app/graphql/**/*'
     - 'ee/app/graphql/**/*'
-    - 'lib/gitlab/current_settings.rb'
     - 'lib/gitlab/middleware/organizations/current.rb'
     - 'spec/**/*'
     - 'ee/spec/**/*'
@@ -537,43 +529,15 @@ Gitlab/AvoidGitlabInstanceChecks:
     - 'db/post_migrate/*.rb'
     - 'ee/db/fixtures/**/*'
 
-Gitlab/EeOnlyClass:
-  Enabled: true
-  Include:
-    - 'ee/**/ee/**/*.rb'
-
 # See https://gitlab.com/gitlab-org/gitlab/-/issues/373194
 Gitlab/RSpec/AvoidSetup:
   Enabled: true
   Include:
     - 'ee/spec/features/registrations/saas/**/*'
-    - 'ee/spec/features/gitlab_subscriptions/trials/creation_*'
-    - 'ee/spec/features/gitlab_subscriptions/trials/duo_pro/**/*'
-    - 'ee/spec/features/gitlab_subscriptions/trials/duo_enterprise/**/*'
+    - 'ee/spec/features/trials/saas/**/*'
 
 RSpec/DuplicateSpecLocation:
   Enabled: true
-
-# https://docs.gitlab.com/ee/development/software_design.html#bounded-contexts
-Gitlab/BoundedContexts:
-  Enabled: true
-  Exclude:
-    - '**/lib/api/**/*'
-    - 'ee/lib/ee/api/**/*'
-    - '**/app/assets/**/*'
-    - '**/app/channels/**/*'
-    - '**/app/components/**/*'
-    - '**/app/controllers/**/*'
-    - '**/app/helpers/**/*'
-    - '**/app/presenters/**/*'
-    - '**/app/serializers/**/*'
-    - '**/lib/tasks/**/*'
-    - '**/app/views/**/*'
-  Include:
-    - 'app/**/*'
-    - 'ee/app/**/*'
-    - 'lib/**/*'
-    - 'ee/lib/**/*'
 
 Gitlab/PolicyRuleBoolean:
   Enabled: true
@@ -970,7 +934,6 @@ Gitlab/NamespacedClass:
     - 'ee/db/**/*.rb'
     - 'ee/elastic/**/*.rb'
     - 'scripts/**/*'
-    - 'spec/fixtures/migrations/**/*.rb'
     - 'spec/migrations/**/*.rb'
     - 'app/experiments/**/*_experiment.rb'
     - 'ee/app/experiments/**/*_experiment.rb'
@@ -1028,11 +991,6 @@ QA/SelectorUsage:
   Exclude:
     - 'spec/rubocop/**/*_spec.rb'
 
-QA/FeatureFlags:
-  Enabled: true
-  Include:
-    - 'qa/qa/specs/features/**/*.rb'
-
 Performance/ActiveRecordSubtransactions:
   Exclude:
     - 'spec/**/*.rb'
@@ -1043,7 +1001,7 @@ Performance/ActiveRecordSubtransactionMethods:
     - 'spec/**/*.rb'
     - 'ee/spec/**/*.rb'
 
-Migration/BatchedMigrationBaseClass:
+Migration/BackgroundMigrationBaseClass:
   Enabled: false
 
 BackgroundMigration/AvoidSilentRescueExceptions:
@@ -1133,8 +1091,6 @@ Search/NamespacedClass:
     - 'spec/migrations/**/*.rb'
     - 'app/experiments/**/*_experiment.rb'
     - 'ee/app/experiments/**/*_experiment.rb'
-    - 'lib/gitlab/background_migration/**/*.rb'
-    - 'ee/lib/ee/gitlab/background_migration/**/*.rb'
     - 'lib/gitlab/instrumentation/**/*.rb'
     - 'lib/gitlab/usage/metrics/instrumentations/**/*.rb'
     - 'ee/lib/gitlab/usage/metrics/instrumentations/**/*.rb'
@@ -1215,20 +1171,3 @@ Gitlab/TokenWithoutPrefix:
     - 'lib/**/*'
     - 'ee/app/**/*'
     - 'ee/lib/**/*'
-
-Rails/StrongParams:
-  Enabled: true
-  SafeAutoCorrect: false
-  Include:
-    - 'app/controllers/**/*'
-    - 'ee/app/controllers/**/*'
-
-QA/FabricateUsage:
-  Include:
-    - 'qa/qa/specs/**/*_spec.rb'
-
-Gitlab/NoFindInWorkers:
-  Enabled: true
-  Include:
-    - app/workers/**/*
-    - ee/app/workers/**/*

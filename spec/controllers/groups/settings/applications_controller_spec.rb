@@ -4,7 +4,6 @@ require 'spec_helper'
 
 RSpec.describe Groups::Settings::ApplicationsController do
   let_it_be(:user)  { create(:user) }
-  let_it_be(:admin) { create(:user, :admin) }
   let_it_be(:group) { create(:group) }
   let_it_be(:application) { create(:oauth_application, owner_id: group.id, owner_type: 'Namespace') }
 
@@ -26,7 +25,7 @@ RSpec.describe Groups::Settings::ApplicationsController do
       end
 
       context 'when admin mode is enabled' do
-        let(:user) { admin }
+        let!(:user) { create(:user, :admin) }
 
         before do
           Gitlab::Session.with_session(controller.session) do
@@ -57,7 +56,7 @@ RSpec.describe Groups::Settings::ApplicationsController do
         end
 
         context "when admin mode is enabled for the admin user who is a #{role} of a group" do
-          let(:user) { admin }
+          let!(:user) { create(:user, :admin) }
 
           before do
             Gitlab::Session.with_session(controller.session) do
@@ -91,7 +90,7 @@ RSpec.describe Groups::Settings::ApplicationsController do
       end
 
       context 'when admin mode is enabled' do
-        let(:user) { admin }
+        let!(:user) { create(:user, :admin) }
 
         before do
           Gitlab::Session.with_session(controller.session) do
@@ -122,7 +121,7 @@ RSpec.describe Groups::Settings::ApplicationsController do
         end
 
         context "when admin mode is enabled for the admin user who is a #{role} of a group" do
-          let(:user) { admin }
+          let!(:user) { create(:user, :admin) }
 
           before do
             Gitlab::Session.with_session(controller.session) do
@@ -200,7 +199,7 @@ RSpec.describe Groups::Settings::ApplicationsController do
       end
 
       context 'when admin mode is enabled' do
-        let(:user) { admin }
+        let!(:user) { create(:user, :admin) }
 
         before do
           Gitlab::Session.with_session(controller.session) do
@@ -240,7 +239,7 @@ RSpec.describe Groups::Settings::ApplicationsController do
         end
 
         context "when admin mode is enabled for the admin user who is a #{role} of a group" do
-          let(:user) { admin }
+          let!(:user) { create(:user, :admin) }
 
           before do
             Gitlab::Session.with_session(controller.session) do
@@ -292,7 +291,7 @@ RSpec.describe Groups::Settings::ApplicationsController do
       end
 
       context 'when admin mode is enabled' do
-        let(:user) { admin }
+        let!(:user) { create(:user, :admin) }
 
         before do
           Gitlab::Session.with_session(controller.session) do
@@ -343,7 +342,7 @@ RSpec.describe Groups::Settings::ApplicationsController do
         end
 
         context "when admin mode is enabled for the admin user who is a #{role} of a group" do
-          let(:user) { admin }
+          let!(:user) { create(:user, :admin) }
 
           before do
             Gitlab::Session.with_session(controller.session) do
@@ -402,7 +401,7 @@ RSpec.describe Groups::Settings::ApplicationsController do
       end
 
       context 'when admin mode is enabled' do
-        let(:user) { admin }
+        let!(:user) { create(:user, :admin) }
 
         before do
           Gitlab::Session.with_session(controller.session) do
@@ -440,7 +439,7 @@ RSpec.describe Groups::Settings::ApplicationsController do
         end
 
         context "when admin mode is enabled for the admin user who is a #{role} of a group" do
-          let(:user) { admin }
+          let!(:user) { create(:user, :admin) }
 
           before do
             Gitlab::Session.with_session(controller.session) do
@@ -479,7 +478,7 @@ RSpec.describe Groups::Settings::ApplicationsController do
       end
 
       context 'when admin mode is enabled' do
-        let(:user) { admin }
+        let!(:user) { create(:user, :admin) }
 
         before do
           Gitlab::Session.with_session(controller.session) do
@@ -510,7 +509,7 @@ RSpec.describe Groups::Settings::ApplicationsController do
         end
 
         context "when admin mode is enabled for the admin user who is a #{role} of a group" do
-          let(:user) { admin }
+          let!(:user) { create(:user, :admin) }
 
           before do
             Gitlab::Session.with_session(controller.session) do

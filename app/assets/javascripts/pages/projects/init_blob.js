@@ -1,6 +1,5 @@
 import { addShortcutsExtension } from '~/behaviors/shortcuts';
 import ShortcutsBlob from '~/behaviors/shortcuts/shortcuts_blob';
-import { shortcircuitPermalinkButton } from '~/blob/utils';
 import ShortcutsNavigation from '~/behaviors/shortcuts/shortcuts_navigation';
 import BlobForkSuggestion from '~/blob/blob_fork_suggestion';
 import BlobLinePermalinkUpdater from '~/blob/blob_line_permalink_updater';
@@ -16,10 +15,15 @@ export default () => {
     document.querySelectorAll('.js-data-file-blob-permalink-url, .js-blob-blame-link'),
   );
 
-  shortcircuitPermalinkButton();
+  const fileBlobPermalinkUrlElement = document.querySelector('.js-data-file-blob-permalink-url');
+  const fileBlobPermalinkUrl =
+    fileBlobPermalinkUrlElement && fileBlobPermalinkUrlElement.getAttribute('href');
 
   addShortcutsExtension(ShortcutsNavigation);
-  addShortcutsExtension(ShortcutsBlob);
+  addShortcutsExtension(ShortcutsBlob, {
+    fileBlobPermalinkUrl,
+    fileBlobPermalinkUrlElement,
+  });
 
   new BlobForkSuggestion({
     openButtons: document.querySelectorAll('.js-edit-blob-link-fork-toggler'),

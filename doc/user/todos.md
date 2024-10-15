@@ -1,6 +1,6 @@
 ---
-stage: Foundations
-group: Personal Productivity
+stage: Plan
+group: Project Management
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
@@ -60,8 +60,6 @@ To change this behavior, enable
 [multiple to-do items per object](#multiple-to-do-items-per-object).
 
 To-do items aren't affected by [GitLab notification email settings](profile/notifications.md).
-The only exception: If your notification setting is set to **Custom** and **Added as approver** is
-selected, you get a to-do item when you are eligible to approve a merge request.
 
 ### Multiple to-do items per object
 
@@ -103,7 +101,7 @@ You can manually add an item to your To-Do List.
    - [Objective or key result](../user/okrs.md)
    - [Task](tasks.md)
 
-1. In the upper-right corner, select **Add a to do** (**{todo-add}**).
+1. In the upper-right corner, select  **Add a to do** (**{todo-add}**).
 
 ### Create a to-do item by mentioning someone
 

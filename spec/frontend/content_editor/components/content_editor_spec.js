@@ -19,7 +19,6 @@ import LoadingIndicator from '~/content_editor/components/loading_indicator.vue'
 import waitForPromises from 'helpers/wait_for_promises';
 import { KEYDOWN_EVENT } from '~/content_editor/constants';
 import EditorModeSwitcher from '~/vue_shared/components/markdown/editor_mode_switcher.vue';
-import { HTTP_STATUS_OK } from '~/lib/utils/http_status';
 import { mockChainedCommands } from '../test_utils';
 
 describe('ContentEditor', () => {
@@ -57,7 +56,7 @@ describe('ContentEditor', () => {
   beforeEach(() => {
     mock = new MockAdapter(axios);
     // ignore /-/emojis requests
-    mock.onGet().reply(HTTP_STATUS_OK, []);
+    mock.onGet().reply(200, []);
 
     renderMarkdown = jest.fn();
   });
@@ -77,7 +76,7 @@ describe('ContentEditor', () => {
 
     createWrapper({ markdown });
 
-    renderMarkdown.mockResolvedValueOnce({ body: markdown });
+    renderMarkdown.mockResolvedValueOnce(markdown);
 
     await nextTick();
 
@@ -138,9 +137,9 @@ describe('ContentEditor', () => {
 
     describe('succeeds', () => {
       beforeEach(async () => {
-        renderMarkdown.mockResolvedValueOnce({ body: '' });
+        renderMarkdown.mockResolvedValueOnce('');
 
-        createWrapper({ markdown: '' });
+        createWrapper({ markddown: '' });
         await nextTick();
       });
 
@@ -190,7 +189,7 @@ describe('ContentEditor', () => {
 
       describe('when clicking the retry button in the loading error alert and loading succeeds', () => {
         beforeEach(async () => {
-          renderMarkdown.mockResolvedValueOnce({ body: 'hello markdown' });
+          renderMarkdown.mockResolvedValueOnce('hello markdown');
           await wrapper.findComponent(GlAlert).vm.$emit('primaryAction');
         });
 
@@ -239,7 +238,7 @@ describe('ContentEditor', () => {
     beforeEach(async () => {
       markdown = 'Loaded content';
 
-      renderMarkdown.mockResolvedValueOnce({ body: markdown });
+      renderMarkdown.mockResolvedValueOnce(markdown);
 
       createWrapper({ markdown: 'initial content' });
 
@@ -300,7 +299,7 @@ describe('ContentEditor', () => {
 
     createWrapper({ markdown });
 
-    renderMarkdown.mockResolvedValueOnce({ body: markdown });
+    renderMarkdown.mockResolvedValueOnce(markdown);
 
     await waitForPromises();
 

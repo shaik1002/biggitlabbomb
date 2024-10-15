@@ -14,8 +14,8 @@
 .navbar-empty {
   justify-content: center;
   height: var(--header-height);
-  background: var(--gl-background-color-default);
-  border-bottom: 1px solid var(--gl-border-color-default);
+  background: $white;
+  border-bottom: 1px solid $gray-100;
 
   .tanuki-logo,
   .brand-header-logo {
@@ -67,7 +67,7 @@
   top: $calc-system-headers-height;
   left: 0;
   right: 0;
-  background-color: var(--gl-color-brand-charcoal);
+  background-color: $brand-charcoal;
 
   @media (forced-colors: active) {
     border-bottom: 1px solid;
@@ -86,11 +86,11 @@
   margin-left: -4px;
   height: 32px;
   width: auto;
-  border-radius: $gl-border-radius-base;
+  border-radius: $border-radius-default;
 
   &:hover,
   &:focus {
-    background-color: var(--gl-color-brand-gray-04);
+    background-color: $brand-gray-04;
   }
 
   &:focus,
@@ -99,7 +99,7 @@
   }
 
   &:active {
-    background-color: var(--gl-color-brand-gray-03);
+    background-color: $brand-gray-03;
   }
 
   img {
@@ -112,7 +112,7 @@
   appearance: none;
   border: 0;
   background-color: transparent;
-  border-radius: $gl-border-radius-base;
+  border-radius: $border-radius-default;
 }
 
 .header-logged-out-dropdown {
@@ -131,20 +131,20 @@
     display: inline-block;
     padding: 6px 8px;
     height: 32px;
-    border-radius: $gl-border-radius-base;
-    color: var(--gl-color-neutral-100);
+    border-radius: $border-radius-default;
+    color: $gray-100;
     font-weight: $gl-font-weight-normal;
     font-size: $gl-font-size;
 
     &:hover,
     &:focus,
     &:active {
-      color: var(--gl-color-neutral-0);
+      color: $white;
     }
 
     &:hover,
     &:focus {
-      background-color: var(--gl-color-brand-gray-04);
+      background-color: $brand-gray-04;
       text-decoration: none;
     }
 
@@ -154,13 +154,7 @@
     }
 
     &:active {
-      background-color: var(--gl-color-brand-gray-03);
+      background-color: $brand-gray-03;
     }
   }
-}
-
-// Override Bootstrap class with offset for system-header and
-// performance bar when present
-.fixed-top {
-  top: $calc-system-headers-height;
 }

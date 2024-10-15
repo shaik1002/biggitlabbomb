@@ -2,7 +2,6 @@
 issues:
 - subscriptions
 - award_emoji
-- own_award_emoji
 - author
 - assignees
 - updated_by
@@ -20,16 +19,7 @@ issues:
 - sentry_issue
 - issuable_severity
 - label_links
-- own_label_links
 - labels
-- own_labels
-- own_notes
-- own_resource_state_events
-- own_resource_label_events
-- own_description_versions
-- own_events
-- own_subscriptions
-- sync_object
 - last_edited_by
 - todos
 - user_agent_detail
@@ -45,7 +35,6 @@ issues:
 - issuable_severity
 - issuable_sla
 - issue_assignees
-- issue_stage_events
 - search_data
 - closed_by
 - epic_issue
@@ -55,6 +44,9 @@ issues:
 - designs
 - design_versions
 - description_versions
+- prometheus_alerts
+- prometheus_alert_events
+- self_managed_prometheus_alert_events
 - zoom_meetings
 - vulnerability_links
 - related_vulnerabilities
@@ -79,9 +71,6 @@ issues:
 - email
 - issuable_resource_links
 - synced_epic
-- observability_metrics
-- observability_logs
-- observability_traces
 work_item_type:
 - issues
 - namespace
@@ -89,16 +78,13 @@ work_item_type:
 - widget_definitions
 - enabled_widget_definitions
 - child_restrictions
-- parent_restrictions
 - allowed_child_types_by_name
-- allowed_parent_types_by_name
 events:
 - author
 - project
 - group
 - target
 - push_event_payload
-- personal_namespace
 notes:
 - award_emoji
 - project
@@ -140,7 +126,6 @@ commit_notes:
 label_links:
 - target
 - label
-- own_label
 label:
 - subscriptions
 - project
@@ -174,7 +159,6 @@ snippets:
 - snippet_repository
 - statistics
 - repository_storage_moves
-- organization
 releases:
 - author
 - project
@@ -228,10 +212,9 @@ merge_requests:
 - merge_head_diff
 - merge_request_context_commits
 - merge_request_context_commit_diff_files
-- merge_request_stage_events
-- merge_schedule
 - events
 - merge_requests_closing_issues
+- merge_requests_closing_issues_closes_work_item
 - cached_closes_issues
 - metrics
 - timelogs
@@ -274,10 +257,6 @@ merge_requests:
 - scan_result_policy_violations
 - applicable_post_merge_approval_rules
 - requested_changes
-- scan_result_policy_reads_through_violations
-- scan_result_policy_reads_through_approval_rules
-- running_scan_result_policy_violations
-- completed_scan_result_policy_violations
 external_pull_requests:
 - project
 merge_request_diff:
@@ -286,6 +265,7 @@ merge_request_diff:
 - merge_request_diff_detail
 - merge_request_diff_files
 - merge_request_diff_llm_summary
+- merge_request_review_llm_summaries
 merge_request_diff_commits:
 - merge_request_diff
 - commit_author
@@ -297,8 +277,6 @@ merge_request_diff_files:
 merge_request_context_commits:
 - merge_request
 - diff_files
-merge_schedule:
-- merge_request
 cleanup_schedule:
 - merge_request
 ci_pipelines:
@@ -351,6 +329,7 @@ ci_pipelines:
 - job_artifacts
 - vulnerabilities_finding_pipelines
 - vulnerability_findings
+- vulnerability_state_transitions
 - pipeline_config
 - security_scans
 - security_findings
@@ -371,7 +350,6 @@ ci_pipelines:
 - build_trace_chunks
 - pipeline_metadata
 - build_execution_configs
-- project_mirror
 pipeline_metadata:
 - project
 - pipeline
@@ -440,7 +418,6 @@ builds:
 - job_artifacts_lsif
 - job_artifacts_dotenv
 - job_artifacts_cobertura
-- job_artifacts_jacoco
 - job_artifacts_terraform
 - job_artifacts_accessibility
 - job_artifacts_cluster_applications
@@ -461,10 +438,8 @@ builds:
 - terraform_state_versions
 - taggings
 - base_tags
-- tag_links
 - tag_taggings
 - tags
-- simple_tags
 - security_scans
 - dast_site_profiles_build
 - dast_site_profile
@@ -473,7 +448,6 @@ builds:
 - job_annotations
 - job_artifacts_annotations
 - project_mirror
-- build_source
 bridges:
 - user
 - pipeline
@@ -613,7 +587,6 @@ project:
 - google_play_integration
 - pipelines_email_integration
 - mattermost_slash_commands_integration
-- matrix_integration
 - slack_slash_commands_integration
 - harbor_integration
 - irker_integration
@@ -635,7 +608,6 @@ project:
 - teamcity_integration
 - pushover_integration
 - jira_integration
-- jira_cloud_app_integration
 - zentao_integration
 # dingtalk_integration JiHu-specific, see https://jihulab.com/gitlab-cn/gitlab/-/merge_requests/417
 - dingtalk_integration
@@ -665,14 +637,12 @@ project:
 - notes
 - snippets
 - hooks
-- all_protected_branches
 - protected_branches
 - protected_tags
 - project_members
 - project_repository
 - users
 - maintainers
-- owners_and_maintainers
 - requesters
 - namespace_members
 - namespace_requesters
@@ -768,6 +738,7 @@ project:
 - wiki_repository_state
 - source_pipelines
 - sourced_pipelines
+- prometheus_metrics
 - vulnerabilities
 - vulnerability_exports
 - vulnerability_findings
@@ -783,9 +754,11 @@ project:
 - operations_feature_flags
 - operations_feature_flags_client
 - operations_feature_flags_user_lists
+- prometheus_alerts
+- prometheus_alert_events
+- self_managed_prometheus_alert_events
 - software_license_policies
 - software_licenses
-- custom_software_licenses
 - project_registry
 - packages
 - package_files
@@ -822,8 +795,9 @@ project:
 - export_jobs
 - daily_build_group_report_results
 - jira_imports
-- compliance_framework_settings
-- compliance_management_frameworks
+- compliance_framework_setting
+- compliance_management_framework
+- metrics_users_starred_dashboards
 - alert_management_alerts
 - repository_storage_moves
 - freeze_periods
@@ -833,7 +807,6 @@ project:
 - build_report_results
 - vulnerability_statistic
 - vulnerability_historical_statistics
-- vulnerability_namespace_historical_statistics
 - vulnerability_remediations
 - product_analytics_events
 - pipeline_artifacts
@@ -873,7 +846,6 @@ project:
 - design_management_repository
 - design_management_repository_state
 - compliance_standards_adherence
-- compliance_requirements
 - scan_result_policy_reads
 - scan_result_policy_violations
 - project_state
@@ -887,24 +859,16 @@ project:
 - security_policy_management_project_linked_configurations
 - security_policy_project_linked_projects
 - security_policy_project_linked_namespaces
-- security_policy_project_linked_groups
 - relation_import_trackers
 - saved_replies
-- security_policy_project_links
-- security_policies
-- approval_policy_rule_project_links
-- approval_policy_rules
-- secrets_manager
-- observability_metrics
-- observability_traces
-- observability_logs
-- security_exclusions
-- security_statistics
 award_emoji:
 - awardable
 - user
 priorities:
 - label
+prometheus_metrics:
+- project
+- prometheus_alerts
 timelogs:
 - issue
 - merge_request
@@ -960,6 +924,13 @@ unprotect_access_levels:
 - user
 - protected_branch
 - group
+prometheus_alerts:
+- project
+- prometheus_alert_events
+prometheus_alert_events:
+- project
+self_managed_prometheus_alert_events:
+- project
 epic_issues:
 - issue
 - epic
@@ -1033,7 +1004,6 @@ design_versions: *version
 epic:
 - subscriptions
 - award_emoji
-- own_award_emoji
 - description_versions
 - author
 - assignee
@@ -1042,15 +1012,7 @@ epic:
 - milestone
 - notes
 - label_links
-- own_label_links
 - labels
-- own_labels
-- own_notes
-- own_resource_state_events
-- own_resource_label_events
-- own_description_versions
-- own_events
-- sync_object
 - todos
 - metrics
 - group
@@ -1072,7 +1034,6 @@ epic:
 - boards_epic_user_preferences
 - epic_board_positions
 - work_item
-- own_subscriptions
 epic_issue:
 - epic
 - issue
@@ -1146,7 +1107,6 @@ approval_rules:
   - approval_project_rules_users
   - approval_project_rules_protected_branches
   - scan_result_policy_read
-  - approval_policy_rule
 approval_project_rules_users:
   - user
   - approval_project_rule

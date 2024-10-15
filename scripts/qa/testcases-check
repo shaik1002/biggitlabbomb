@@ -3,10 +3,7 @@
 
 require 'json'
 
-TESTCASE_FORMAT = %r{
-  (https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/\d+)|
-  (https://jihulab.com/gitlab-cn/quality/testcases/-/quality/test_cases/\d+)
-}x
+TESTCASE_FORMAT = %r{https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/\d+}
 
 testcases = []
 missing_testcases = []
@@ -25,7 +22,7 @@ end
 
 file = File.read(test_metadata_file)
 
-unless %r{.*\"examples\":\[\{\"id\"\:.*}.match?(file)
+unless file =~ %r{.*\"examples\":\[\{\"id\"\:.*}
   puts "\nRspec output did not match regex. Check test-metadata.json file.\n"
   exit 1
 end
@@ -36,12 +33,12 @@ data_hash = JSON.parse(file)
 tests = data_hash['examples']
 
 tests.each do |test|
-  next if %r{.\/qa\/specs\/features\/sanity\/*}.match?(test['id'])
+  next if test['id'] =~ %r{.\/qa\/specs\/features\/sanity\/*}
 
   if test['testcase']
     testcases.push([(test['testcase']).to_s, "#{test['id']} - #{test['full_description']}"])
 
-    unless TESTCASE_FORMAT.match?(test['testcase'])
+    unless TESTCASE_FORMAT =~ test['testcase']
       testcase_format_errors.push(
         <<~FORMAT_ERRORS
            ==> #{test['testcase']} in file: #{test['id']} with title:
@@ -77,8 +74,7 @@ else
   puts missing_message % missing_testcases.join("\n") unless missing_testcases.empty?
   puts format_message % testcase_format_errors.join("\n") unless testcase_format_errors.empty?
   puts "\n*** Please link a unique test case from the GitLab project for the errors listed above.\n"
-  puts "    See: https://docs.gitlab.com/ee/development/testing_guide/end_to_end/" \
-       "best_practices.html#link-a-test-to-its-test-case " \
-       "for further details on how to create test cases"
+  puts "    See: https://docs.gitlab.com/ee/development/testing_guide/end_to_end/best_practices.html#link-a-test-to-its-test-case"\
+       " for further details on how to create test cases"
   exit 1
 end

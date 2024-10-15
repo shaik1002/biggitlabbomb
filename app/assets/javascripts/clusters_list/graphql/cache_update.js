@@ -2,7 +2,6 @@ import produce from 'immer';
 
 export const hasErrors = ({ errors = [] }) => errors?.length;
 
-// eslint-disable-next-line max-params
 export function addAgentConfigToStore(
   store,
   clusterAgentTokenCreate,
@@ -34,7 +33,6 @@ export function addAgentConfigToStore(
   }
 }
 
-// eslint-disable-next-line max-params
 export function removeAgentFromStore(store, deleteClusterAgent, query, variables) {
   if (!hasErrors(deleteClusterAgent)) {
     const sourceData = store.readQuery({
@@ -46,14 +44,12 @@ export function removeAgentFromStore(store, deleteClusterAgent, query, variables
       draftData.project.clusterAgents.nodes = draftData.project.clusterAgents.nodes.filter(
         ({ id }) => id !== deleteClusterAgent.id,
       );
-      draftData.project.ciAccessAuthorizedAgents.nodes =
-        draftData.project.ciAccessAuthorizedAgents.nodes.filter(
-          ({ agent }) => agent.id !== deleteClusterAgent.id,
-        );
-      draftData.project.userAccessAuthorizedAgents.nodes =
-        draftData.project.userAccessAuthorizedAgents.nodes.filter(
-          ({ agent }) => agent.id !== deleteClusterAgent.id,
-        );
+      draftData.project.ciAccessAuthorizedAgents.nodes = draftData.project.ciAccessAuthorizedAgents.nodes.filter(
+        ({ agent }) => agent.id !== deleteClusterAgent.id,
+      );
+      draftData.project.userAccessAuthorizedAgents.nodes = draftData.project.userAccessAuthorizedAgents.nodes.filter(
+        ({ agent }) => agent.id !== deleteClusterAgent.id,
+      );
     });
 
     store.writeQuery({

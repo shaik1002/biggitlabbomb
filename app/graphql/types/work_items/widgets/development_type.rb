@@ -12,20 +12,16 @@ module Types
 
         implements Types::WorkItems::WidgetInterface
 
-        field :closing_merge_requests,
-          Types::WorkItems::ClosingMergeRequestType.connection_type,
+        field :related_merge_requests,
+          Types::WorkItems::RelatedMergeRequestType.connection_type,
           null: true,
-          description: 'Merge requests that will close the work item when merged.'
-        field :will_auto_close_by_merge_request,
-          GraphQL::Types::Boolean,
-          null: false,
-          description: 'Whether the work item will automatically be closed when a closing merge request is merged.'
+          description: 'Merge requests related to the work item.'
 
-        def closing_merge_requests
-          if object.closing_merge_requests.loaded?
-            object.closing_merge_requests
+        def related_merge_requests
+          if object.related_merge_requests.loaded?
+            object.related_merge_requests
           else
-            object.closing_merge_requests.preload_merge_request_for_authorization
+            object.related_merge_requests.preload_merge_request_for_authorization
           end
         end
       end

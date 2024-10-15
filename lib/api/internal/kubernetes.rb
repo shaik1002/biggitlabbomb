@@ -8,7 +8,6 @@ module API
         authenticate_gitlab_kas_request!
       end
 
-      helpers ::API::Helpers::KasHelpers
       helpers ::API::Helpers::Kubernetes::AgentHelpers
 
       namespace 'internal' do
@@ -131,8 +130,8 @@ module API
               optional :k8s_api_proxy_requests_unique_agents_via_ci_access, type: Array[Integer], desc: 'An array of agents that have interacted with the CI tunnel via `ci_access`'
               optional :k8s_api_proxy_requests_unique_users_via_user_access, type: Array[Integer], desc: 'An array of users that have interacted with the CI tunnel via `user_access`'
               optional :k8s_api_proxy_requests_unique_agents_via_user_access, type: Array[Integer], desc: 'An array of agents that have interacted with the CI tunnel via `user_access`'
-              optional :k8s_api_proxy_requests_unique_users_via_pat_access, type: Array[Integer], desc: 'An array of users that have interacted with the CI tunnel via personal access token'
-              optional :k8s_api_proxy_requests_unique_agents_via_pat_access, type: Array[Integer], desc: 'An array of agents that have interacted with the CI tunnel via personal access token'
+              optional :k8s_api_proxy_requests_unique_users_via_pat_access, type: Array[Integer], desc: 'An array of users that have interacted with the CI tunnel via Personal Access Token'
+              optional :k8s_api_proxy_requests_unique_agents_via_pat_access, type: Array[Integer], desc: 'An array of agents that have interacted with the CI tunnel via Personal Access Token'
               optional :flux_git_push_notified_unique_projects, type: Array[Integer], desc: 'An array of projects that have been notified to reconcile their Flux workloads'
             end
           end
@@ -164,11 +163,6 @@ module API
               optional :k8s_api_proxy_requests_unique_users_via_pat_access, type: Array, desc: 'An array of events that have interacted with the CI tunnel via `ci_access`' do
                 optional :user_id, type: Integer, desc: 'User ID'
                 optional :project_id, type: Integer, desc: 'Project ID'
-              end
-              optional :register_agent_at_kas, type: Array, desc: 'An array of events that indicate an agent has been registered' do
-                optional :project_id, type: Integer, desc: 'Project ID'
-                optional :agent_version, type: String, desc: 'Agent version'
-                optional :architecture, type: String, desc: 'CPU architecture of the agent'
               end
             end
           end

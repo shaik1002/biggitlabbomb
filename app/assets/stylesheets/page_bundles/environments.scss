@@ -48,7 +48,6 @@
   }
 }
 
-// stylelint-disable-next-line gitlab/no-gl-class
 .gl-responsive-table-row {
   .branch-commit {
     max-width: 100%;
@@ -102,6 +101,10 @@
 
 .rect-axis-text {
   fill: var(--white, $white);
+}
+
+.text-metric {
+  font-size: 12px;
 }
 
 .selected-metric-line {
@@ -174,6 +177,12 @@
       justify-content: center;
     }
 
+    .deploy-board-empty-state-svg {
+      order: 1;
+      width: 90px;
+      margin: auto 0 auto 20px;
+    }
+
     .deploy-board-empty-state-text {
       order: 2;
       flex-wrap: wrap;
@@ -191,7 +200,7 @@
     color: var(--gray-900, $gray-900);
     font-size: $gl-font-size-small;
     font-weight: $gl-font-weight-bold;
-    line-height: 1;
+    line-height: $gl-line-height-14;
   }
 }
 
@@ -207,27 +216,5 @@
     cursor: pointer;
     color: var(--gray-200, $gray-200);
     padding-right: 10px;
-  }
-}
-
-/**
-* Kubernetes Tree view
-**/
-
-.kubernetes-tree-view {
-  .connector {
-    width: calc(100% + #{$gl-spacing-scale-6});
-    height: calc(100% + #{$gl-spacing-scale-4});
-
-    &::after {
-      content: '';
-      left: calc(50% + #{$gl-spacing-scale-2});
-      top: -4.5px;
-      position: absolute;
-      border-style: solid;
-      border-color: transparent;
-      border-width: $gl-spacing-scale-2 $gl-spacing-scale-3;
-      border-left-color: var(--gray-200, $gray-200);
-    }
   }
 }

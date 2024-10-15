@@ -49,7 +49,7 @@ export default {
   },
   computed: {
     dropdownClass() {
-      return this.isDropdownShowing ? 'show' : 'gl-hidden';
+      return this.isDropdownShowing ? 'show' : 'gl-display-none';
     },
   },
   methods: {
@@ -77,7 +77,7 @@ export default {
 <template>
   <div
     class="alert-status gl-py-5"
-    :class="{ 'gl-border-b-1 gl-border-b-gray-100 gl-border-b-solid': !sidebarCollapsed }"
+    :class="{ 'gl-border-b-1 gl-border-b-solid gl-border-b-gray-100': !sidebarCollapsed }"
   >
     <template v-if="sidebarCollapsed">
       <div ref="status" class="gl-ml-6" data-testid="status-icon" @click="$emit('toggle-sidebar')">
@@ -94,11 +94,13 @@ export default {
     </template>
 
     <div v-else>
-      <p class="gl-mb-2 gl-flex gl-justify-between gl-leading-20 gl-text-default">
+      <p
+        class="gl-text-gray-900 gl-mb-2 gl-line-height-20 gl-display-flex gl-justify-content-space-between"
+      >
         {{ s__('AlertManagement|Status') }}
         <gl-button
           v-if="isEditable"
-          class="!gl-text-default"
+          class="gl-text-black-normal!"
           category="tertiary"
           size="small"
           @click="toggleFormDropdown"

@@ -34,11 +34,12 @@ module Integrations
       '<p>Use this service to send notifications about events in GitLab projects to your Microsoft Teams channels. <a href="https://docs.gitlab.com/ee/user/project/integrations/microsoft_teams.html" target="_blank" rel="noopener noreferrer">How do I configure this integration?</a></p>'
     end
 
-    def default_channel_placeholder; end
+    def default_channel_placeholder
+    end
 
     def self.supported_events
       %w[push issue confidential_issue merge_request note confidential_note tag_push
-        pipeline wiki_page]
+         pipeline wiki_page]
     end
 
     private
@@ -46,6 +47,7 @@ module Integrations
     def notify(message, opts)
       ::MicrosoftTeams::Notifier.new(webhook).ping(
         title: message.project_name,
+        summary: message.summary,
         activity: message.activity,
         attachments: message.attachments
       )

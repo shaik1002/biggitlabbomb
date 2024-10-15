@@ -4,6 +4,7 @@ import {
   GlFormGroup,
   GlFormInputGroup,
   GlFormInput,
+  GlFormText,
   GlLink,
   GlSprintf,
 } from '@gitlab/ui';
@@ -17,6 +18,7 @@ export default {
     GlFormGroup,
     GlFormInputGroup,
     GlFormInput,
+    GlFormText,
     GlLink,
     GlSprintf,
   },
@@ -62,22 +64,6 @@ export default {
     },
     isSendWarningEmailAfterMonthsValid() {
       return parseInt(this.sendWarningEmailAfterMonths, 10) > 0;
-    },
-  },
-  watch: {
-    isSendWarningEmailAfterMonthsValid() {
-      this.checkValidity(
-        this.$refs.sendWarningEmailAfterMonthsInput,
-        this.$options.i18n.sendWarningEmailAfterMonthsInvalidFeedback,
-        this.isSendWarningEmailAfterMonthsValid,
-      );
-    },
-    isDeleteAfterMonthsValid() {
-      this.checkValidity(
-        this.$refs.deleteAfterMonthsInput,
-        this.$options.i18n.deleteAfterMonthsInvalidFeedback,
-        this.isDeleteAfterMonthsValid,
-      );
     },
   },
   methods: {
@@ -142,13 +128,15 @@ export default {
     <div v-if="enabled" class="gl-ml-6" data-testid="inactive-project-deletion-settings">
       <gl-form-group
         :label="$options.i18n.minSizeMbLabel"
-        :label-description="$options.i18n.minSizeMbDescription"
         :state="isMinSizeMbValid"
         data-testid="min-size-group"
       >
         <template #invalid-feedback>
           <div class="gl-w-2/5">{{ $options.i18n.minSizeMbInvalidFeedback }}</div>
         </template>
+        <gl-form-text class="gl-mt-0 gl-mb-3 gl-text-body!">
+          {{ $options.i18n.minSizeMbDescription }}
+        </gl-form-text>
         <gl-form-input-group data-testid="min-size-input-group">
           <gl-form-input
             ref="minSizeMbInput"
@@ -174,7 +162,7 @@ export default {
         </gl-form-input-group>
       </gl-form-group>
 
-      <div class="gl-border-l gl-pl-6">
+      <div class="gl-pl-6 gl-border-l">
         <gl-form-group
           :label="$options.i18n.deleteAfterMonthsLabel"
           :state="isDeleteAfterMonthsValid"
@@ -193,6 +181,13 @@ export default {
               type="number"
               :min="0"
               data-testid="delete-after-months-input"
+              @change="
+                checkValidity(
+                  $refs.deleteAfterMonthsInput,
+                  $options.i18n.deleteAfterMonthsInvalidFeedback,
+                  isDeleteAfterMonthsValid,
+                )
+              "
             />
 
             <template #append>
@@ -203,9 +198,7 @@ export default {
 
         <gl-form-group
           :label="$options.i18n.sendWarningEmailAfterMonthsLabel"
-          :label-description="$options.i18n.sendWarningEmailAfterMonthsDescription"
           :state="isSendWarningEmailAfterMonthsValid"
-          class="gl-max-w-26"
           data-testid="send-warning-email-after-months-group"
         >
           <template #invalid-feedback>
@@ -213,6 +206,9 @@ export default {
               {{ $options.i18n.sendWarningEmailAfterMonthsInvalidFeedback }}
             </div>
           </template>
+          <gl-form-text class="gl-max-w-26 gl-mt-0 gl-mb-3 gl-text-body!">
+            {{ $options.i18n.sendWarningEmailAfterMonthsDescription }}
+          </gl-form-text>
           <gl-form-input-group data-testid="send-warning-email-after-months-input-group">
             <gl-form-input
               ref="sendWarningEmailAfterMonthsInput"
@@ -223,6 +219,13 @@ export default {
               type="number"
               :min="0"
               data-testid="send-warning-email-after-months-input"
+              @change="
+                checkValidity(
+                  $refs.sendWarningEmailAfterMonthsInput,
+                  $options.i18n.sendWarningEmailAfterMonthsInvalidFeedback,
+                  isSendWarningEmailAfterMonthsValid,
+                )
+              "
             />
 
             <template #append>

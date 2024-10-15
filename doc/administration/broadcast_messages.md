@@ -1,6 +1,6 @@
 ---
-stage: Foundations
-group: Personal Productivity
+stage: Growth
+group: Acquisition
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
@@ -13,7 +13,7 @@ DETAILS:
 > - Target roles [introduced](https://gitlab.com/gitlab-org/growth/team-tasks/-/issues/461) in GitLab 14.8 [with a flag](../administration/feature_flags.md) named `role_targeted_broadcast_messages`. Disabled by default.
 > - Theme [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/83251) and background color removed in GitLab 14.10.
 
-GitLab can display two types of broadcast messages to users of a GitLab instance:
+GitLab can display broadcast messages to users of a GitLab instance. There are two types of broadcast messages:
 
 - Banners
 - Notifications
@@ -24,7 +24,7 @@ Broadcast messages can be managed using the [broadcast messages API](../api/broa
 
 Banners are shown on the top of a page and optionally in the command line as a Git remote response.
 
-![A broadcast message banner displaying a welcome message.](img/broadcast_messages_banner_v15_0.png)
+![Broadcast Message Banner](img/broadcast_messages_banner_v15_0.png)
 
 ```shell
 $ git push
@@ -50,7 +50,7 @@ The available placeholders are:
 
 If the user is not signed in, user related values are empty.
 
-![A broadcast message notification using the name placeholder.](img/broadcast_messages_notification_v12_10.png)
+![Broadcast Message Notification](img/broadcast_messages_notification_v12_10.png)
 
 If more than one notification is active at one time, only the newest is shown.
 
@@ -60,7 +60,7 @@ To display messages to users on your GitLab instance, add a broadcast message.
 
 To add a broadcast message:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Messages**.
 1. Select **Add new message**.
 1. Add the text for the message to the **Message** field. You can style a message's content using Markdown, emoji, and the `a` and `br` HTML tags.
@@ -88,7 +88,7 @@ If you must make changes to a broadcast message, you can edit it.
 
 To edit a broadcast message:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Messages**.
 1. From the list of broadcast messages, select the edit button for the message.
 1. After making the required changes, select **Update broadcast message**.
@@ -102,7 +102,7 @@ You can delete a broadcast message while it's active.
 
 To delete a broadcast message:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Messages**.
 1. From the list of broadcast messages, select the delete button for the message.
 

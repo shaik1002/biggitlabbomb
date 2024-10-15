@@ -7,17 +7,8 @@ import isShowingLabelsQuery from '~/graphql_shared/client/is_showing_labels.quer
 import getIssueStateQuery from '~/issues/show/queries/get_issue_state.query.graphql';
 import createDefaultClient from '~/lib/graphql';
 import typeDefs from '~/work_items/graphql/typedefs.graphql';
-import {
-  WIDGET_TYPE_NOTES,
-  WIDGET_TYPE_AWARD_EMOJI,
-  WIDGET_TYPE_HIERARCHY,
-  WIDGET_TYPE_DESIGNS,
-} from '~/work_items/constants';
-
-import isExpandedHierarchyTreeChildQuery from '~/work_items/graphql/client/is_expanded_hierarchy_tree_child.query.graphql';
+import { WIDGET_TYPE_NOTES, WIDGET_TYPE_AWARD_EMOJI } from '~/work_items/constants';
 import activeBoardItemQuery from 'ee_else_ce/boards/graphql/client/active_board_item.query.graphql';
-import activeDiscussionQuery from '~/work_items/components/design_management/graphql/client/active_design_discussion.query.graphql';
-import { updateNewWorkItemCache, workItemBulkEdit } from '~/work_items/graphql/resolvers';
 
 export const config = {
   typeDefs,
@@ -41,8 +32,6 @@ export const config = {
           epicBoardList: {
             keyArgs: ['id'],
           },
-          isExpandedHierarchyTreeChild: (_, { variables, toReference }) =>
-            toReference({ __typename: 'LocalWorkItemChildIsExpanded', id: variables.id }),
         },
       },
       Project: {
@@ -90,15 +79,6 @@ export const config = {
           },
         },
       },
-      WorkItemWidgetHierarchy: {
-        fields: {
-          // If we add any key args, the children field becomes children({"first":10}) and
-          // kills any possibility to handle it on the widget level without hardcoding a string.
-          children: {
-            keyArgs: false,
-          },
-        },
-      },
       WorkItem: {
         fields: {
           // widgets policy because otherwise the subscriptions invalidate the cache
@@ -142,27 +122,6 @@ export const config = {
                   };
                 }
 
-                // we want to concat next page of children work items within Hierarchy widget to the existing ones
-                if (
-                  incomingWidget?.type === WIDGET_TYPE_HIERARCHY &&
-                  context.variables.endCursor &&
-                  incomingWidget.children?.nodes
-                ) {
-                  // concatPagination won't work because we were placing new widget here so we have to do this manually
-                  return {
-                    ...incomingWidget,
-                    children: {
-                      ...incomingWidget.children,
-                      nodes: [...existingWidget.children.nodes, ...incomingWidget.children.nodes],
-                    },
-                  };
-                }
-
-                // Prevent cache being overwritten when opening a design
-                if (incomingWidget?.type === WIDGET_TYPE_DESIGNS && context.variables.filenames) {
-                  return existingWidget;
-                }
-
                 return { ...existingWidget, ...incomingWidget };
               });
             },
@@ -172,6 +131,42 @@ export const config = {
       MemberInterfaceConnection: {
         fields: {
           nodes: concatPagination(),
+        },
+      },
+      BoardList: {
+        fields: {
+          issues: {
+            keyArgs: ['filters'],
+          },
+        },
+      },
+      IssueConnection: {
+        merge(existing = { nodes: [] }, incoming, { args }) {
+          if (!args?.after) {
+            return incoming;
+          }
+          return {
+            ...incoming,
+            nodes: [...existing.nodes, ...incoming.nodes],
+          };
+        },
+      },
+      EpicList: {
+        fields: {
+          epics: {
+            keyArgs: ['filters'],
+          },
+        },
+      },
+      EpicConnection: {
+        merge(existing = { nodes: [] }, incoming, { args }) {
+          if (!args?.after) {
+            return incoming;
+          }
+          return {
+            ...incoming,
+            nodes: [...existing.nodes, ...incoming.nodes],
+          };
         },
       },
       Group: {
@@ -194,8 +189,23 @@ export const config = {
           nodes: concatPagination(),
         },
       },
-      MergeRequestApprovalState: {
-        merge: true,
+      Board: {
+        fields: {
+          epics: {
+            keyArgs: ['boardId'],
+          },
+        },
+      },
+      BoardEpicConnection: {
+        merge(existing = { nodes: [] }, incoming, { args }) {
+          if (!args.after) {
+            return incoming;
+          }
+          return {
+            ...incoming,
+            nodes: [...existing.nodes, ...incoming.nodes],
+          };
+        },
       },
     },
   },
@@ -261,36 +271,6 @@ export const resolvers = {
         data: { isShowingLabels },
       });
       return isShowingLabels;
-    },
-    updateNewWorkItem(_, { input }, { cache }) {
-      updateNewWorkItemCache(input, cache);
-    },
-    localWorkItemBulkUpdate(_, { input }) {
-      return workItemBulkEdit(input);
-    },
-    toggleHierarchyTreeChild(_, { id, isExpanded = false }, { cache }) {
-      cache.writeQuery({
-        query: isExpandedHierarchyTreeChildQuery,
-        variables: { id },
-        data: {
-          isExpandedHierarchyTreeChild: {
-            id,
-            isExpanded,
-            __typename: 'LocalWorkItemChildIsExpanded',
-          },
-        },
-      });
-    },
-    updateActiveDesignDiscussion: (_, { id = null, source }, { cache }) => {
-      const data = {
-        activeDesignDiscussion: {
-          __typename: 'ActiveDesignDiscussion',
-          id,
-          source,
-        },
-      };
-
-      cache.writeQuery({ query: activeDiscussionQuery, data });
     },
   },
 };

@@ -126,13 +126,15 @@ export const fetchMetricsData = (requests = [], requestPath, params) => {
  * and project paths passed into the method.
  *
  * @param {String} groupPath - Path of the specified group
+ * @param {Array} projectPaths - Array of project paths to include in the `query` parameter
  * @returns a URL or blank string if there is no groupPath set
  */
-export const generateValueStreamsDashboardLink = (namespacePath) => {
+export const generateValueStreamsDashboardLink = (namespacePath, projectPaths = []) => {
   if (namespacePath.length) {
+    const query = projectPaths.length ? `?query=${projectPaths.join(',')}` : '';
     const dashboardsSlug = '/-/analytics/dashboards/value_streams_dashboard';
     const segments = [gon.relative_url_root || '', '/', namespacePath, dashboardsSlug];
-    return joinPaths(...segments);
+    return joinPaths(...segments).concat(query);
   }
   return '';
 };
@@ -149,5 +151,5 @@ export const extractVSAFeaturesFromGON = () => ({
   cycleAnalyticsForProjects: Boolean(gon?.licensed_features?.cycleAnalyticsForProjects),
   groupLevelAnalyticsDashboard: Boolean(gon?.licensed_features?.groupLevelAnalyticsDashboard),
   // feature flags
-  vsaStandaloneSettingsPage: Boolean(gon?.features?.vsaStandaloneSettingsPage),
+  vsaGroupAndProjectParity: Boolean(gon?.features?.vsaGroupAndProjectParity),
 });

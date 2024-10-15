@@ -1,12 +1,5 @@
 import { nextTick } from 'vue';
-import {
-  GlAlert,
-  GlButton,
-  GlFormInput,
-  GlFormGroup,
-  GlCollapsibleListbox,
-  GlFormCheckbox,
-} from '@gitlab/ui';
+import { GlAlert, GlButton, GlFormInput, GlFormGroup, GlCollapsibleListbox } from '@gitlab/ui';
 import { mount, shallowMount } from '@vue/test-utils';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
@@ -29,18 +22,14 @@ describe('WikiForm', () => {
 
   const findForm = () => wrapper.find('form');
   const findTitle = () => wrapper.find('#wiki_title');
-  const findPath = () => wrapper.find('#wiki_path');
-  const findGeneratePathCheckbox = () => wrapper.findComponent(GlFormCheckbox);
   const findFormat = () => wrapper.find('#wiki_format');
   const findMessage = () => wrapper.find('#wiki_message');
   const findMarkdownEditor = () => wrapper.findComponent(MarkdownEditor);
   const findSubmitButton = () => wrapper.findByTestId('wiki-submit-button');
   const findCancelButton = () => wrapper.findByTestId('wiki-cancel-button');
-
+  const findTitleHelpLink = () => wrapper.findByText('Learn more.');
   const findMarkdownHelpLink = () => wrapper.findByTestId('wiki-markdown-help-link');
   const findTemplatesDropdown = () => wrapper.findComponent(WikiTemplate);
-
-  const getFormData = () => new FormData(findForm().element);
 
   const setFormat = (value) => {
     const format = findFormat();
@@ -67,21 +56,11 @@ describe('WikiForm', () => {
   const pageInfoPersisted = {
     ...pageInfoNew,
     persisted: true,
-    slug: 'My-page',
     title: 'My page',
     content: '  My page content  ',
     format: 'markdown',
     path: '/project/path/-/wikis/home',
   };
-
-  const pageInfoWithFrontmatter = () => ({
-    frontMatter: { foo: 'bar', title: 'real page title' },
-    persisted: true,
-    lastCommitSha: 'abcdef123',
-    slug: 'foo/bar',
-    title: 'bar',
-    content: 'foo bar',
-  });
 
   const formatOptions = {
     Markdown: 'markdown',
@@ -94,13 +73,12 @@ describe('WikiForm', () => {
     persisted = false,
     pageInfo,
     glFeatures = { wikiSwitchBetweenContentEditorRawMarkdown: false },
-    provide = {},
+    provide = { drawioUrl: null },
     templates = [],
   } = {}) {
     wrapper = extendedWrapper(
       mountFn(WikiForm, {
         provide: {
-          isEditingPath: true,
           templates,
           formatOptions,
           glFeatures,
@@ -108,11 +86,6 @@ describe('WikiForm', () => {
             ...(persisted ? pageInfoPersisted : pageInfoNew),
             ...pageInfo,
           },
-          wikiUrl: '',
-          pageHeading: '',
-          csrfToken: '',
-          pagePersisted: false,
-          drawioUrl: null,
           ...provide,
         },
         stubs: {
@@ -160,6 +133,7 @@ describe('WikiForm', () => {
 
     expect(markdownEditor.props('formFieldProps')).toMatchObject({
       id: 'wiki_content',
+      name: 'wiki[content]',
     });
   });
 
@@ -328,6 +302,20 @@ describe('WikiForm', () => {
     expect(wrapper.text()).toContain(text);
   });
 
+  it.each`
+    persisted | titleHelpText                                                                                              | titleHelpLink
+    ${true}   | ${'You can move this page by adding the path to the beginning of the title.'}                              | ${'/help/user/project/wiki/index#move-a-wiki-page'}
+    ${false}  | ${'You can specify the full path for the new file. We will automatically create any missing directories.'} | ${'/help/user/project/wiki/index#create-a-new-wiki-page'}
+  `(
+    'shows appropriate title help text and help link for when persisted=$persisted',
+    ({ persisted, titleHelpLink, titleHelpText }) => {
+      createWrapper({ persisted });
+
+      expect(wrapper.text()).toContain(titleHelpText);
+      expect(findTitleHelpLink().attributes().href).toBe(titleHelpLink);
+    },
+  );
+
   it('shows correct link for wiki specific markdown docs', () => {
     createWrapper({ mountFn: mount });
 
@@ -346,18 +334,6 @@ describe('WikiForm', () => {
     describe('form submit', () => {
       beforeEach(async () => {
         await triggerFormSubmit();
-      });
-
-      it('submits the content', () => {
-        expect([...getFormData().entries()]).toEqual([
-          ['authenticity_token', ''],
-          ['_method', 'put'],
-          ['wiki[last_commit_sha]', ''],
-          ['wiki[title]', 'My-page'],
-          ['wiki[format]', 'markdown'],
-          ['wiki[content]', ' Lorem ipsum dolar sit! '],
-          ['wiki[message]', 'Update My page'],
-        ]);
       });
 
       it('triggers wiki format tracking event', () => {
@@ -389,8 +365,9 @@ describe('WikiForm', () => {
       title          | content        | buttonState   | disabledAttr
       ${'something'} | ${'something'} | ${'enabled'}  | ${false}
       ${''}          | ${'something'} | ${'disabled'} | ${true}
-      ${'something'} | ${''}          | ${'disabled'} | ${false}
+      ${'something'} | ${''}          | ${'disabled'} | ${true}
       ${''}          | ${''}          | ${'disabled'} | ${true}
+      ${'   '}       | ${'   '}       | ${'disabled'} | ${true}
     `(
       "when title='$title', content='$content', then the button is $buttonState'",
       async ({ title, content, disabledAttr }) => {
@@ -490,71 +467,6 @@ describe('WikiForm', () => {
       createWrapper();
 
       expect(findMarkdownEditor().props().drawioEnabled).toBe(false);
-    });
-  });
-
-  describe('path field', () => {
-    beforeEach(() => {
-      createWrapper({
-        mountFn: mount,
-        pageInfo: pageInfoWithFrontmatter(),
-      });
-    });
-
-    it('shows the path field', () => {
-      expect(findPath().exists()).toBe(true);
-    });
-
-    it("retains page's frontmatter on form submit", async () => {
-      await findForm().trigger('submit');
-
-      expect([...getFormData().entries()]).toEqual([
-        ['authenticity_token', ''],
-        ['_method', 'put'],
-        ['wiki[last_commit_sha]', 'abcdef123'],
-        ['wiki[title]', 'foo/bar'],
-        ['wiki[format]', 'markdown'],
-        ['wiki[content]', '---\nfoo: bar\ntitle: real page title\n---\nfoo bar'],
-        ['wiki[message]', 'Update real page title'],
-      ]);
-    });
-
-    describe('if generate path from title is unchecked', () => {
-      it("saves page's title in frontmatter on submit", async () => {
-        await findTitle().setValue('new title');
-        await findForm().trigger('submit');
-
-        expect([...getFormData().entries()]).toEqual([
-          ['authenticity_token', ''],
-          ['_method', 'put'],
-          ['wiki[last_commit_sha]', 'abcdef123'],
-          ['wiki[title]', 'foo/bar'],
-          ['wiki[format]', 'markdown'],
-          ['wiki[content]', '---\nfoo: bar\ntitle: new title\n---\nfoo bar'],
-          ['wiki[message]', 'Update new title'],
-        ]);
-      });
-    });
-
-    describe('if generate path from title is checked', () => {
-      beforeEach(async () => {
-        await findGeneratePathCheckbox().vm.$emit('input', true);
-      });
-
-      it("does not save page's title in frontmatter on submit", async () => {
-        await findTitle().setValue('new title');
-        await findForm().trigger('submit');
-
-        expect([...getFormData().entries()]).toEqual([
-          ['authenticity_token', ''],
-          ['_method', 'put'],
-          ['wiki[last_commit_sha]', 'abcdef123'],
-          ['wiki[title]', 'new-title'],
-          ['wiki[format]', 'markdown'],
-          ['wiki[content]', '---\nfoo: bar\n---\nfoo bar'],
-          ['wiki[message]', 'Update new title'],
-        ]);
-      });
     });
   });
 });

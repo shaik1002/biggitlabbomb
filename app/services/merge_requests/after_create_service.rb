@@ -38,14 +38,12 @@ module MergeRequests
       merge_request.diffs(include_stats: false).write_cache
       merge_request.create_cross_references!(current_user)
 
+      Onboarding::ProgressService.new(merge_request.target_project.namespace).execute(action: :merge_request_created)
+
       todo_service.new_merge_request(merge_request, current_user)
       merge_request.cache_merge_request_closes_issues!(current_user)
 
-      Gitlab::InternalEvents.track_event(
-        'create_merge_request',
-        user: current_user,
-        project: merge_request.target_project
-      )
+      Gitlab::UsageDataCounters::MergeRequestCounter.count(:create)
       link_lfs_objects(merge_request)
     end
 

@@ -1,7 +1,7 @@
 <script>
 import { GlButton } from '@gitlab/ui';
 import { unionBy } from 'lodash';
-import { sortNameAlphabetically, newWorkItemId } from '~/work_items/utils';
+import { sortNameAlphabetically } from '~/work_items/utils';
 import currentUserQuery from '~/graphql_shared/queries/current_user.query.graphql';
 import usersSearchQuery from '~/graphql_shared/queries/workspace_autocomplete_users.query.graphql';
 import InviteMembersTrigger from '~/invite_members/components/invite_members_trigger.vue';
@@ -11,7 +11,6 @@ import WorkItemSidebarDropdownWidget from '~/work_items/components/shared/work_i
 import { s__, sprintf, __ } from '~/locale';
 import Tracking from '~/tracking';
 import updateWorkItemMutation from '../graphql/update_work_item.mutation.graphql';
-import updateNewWorkItemMutation from '../graphql/update_new_work_item.mutation.graphql';
 import { i18n, TRACKING_CATEGORY_SHOW } from '../constants';
 
 export default {
@@ -23,13 +22,10 @@ export default {
     UncollapsedAssigneeList,
   },
   mixins: [Tracking.mixin()],
+  inject: ['isGroup'],
   props: {
     fullPath: {
       type: String,
-      required: true,
-    },
-    isGroup: {
-      type: Boolean,
       required: true,
     },
     workItemId: {
@@ -113,12 +109,6 @@ export default {
     },
     currentUser: {
       query: currentUserQuery,
-      result({ data }) {
-        if (!data) {
-          return;
-        }
-        this.localUsers = unionBy(this.localUsers, [data.currentUser], 'id');
-      },
     },
   },
   computed: {
@@ -245,22 +235,6 @@ export default {
       this.updateInProgress = true;
       const { localAssigneeIds } = this;
 
-      if (this.workItemId === newWorkItemId(this.workItemType)) {
-        this.$apollo.mutate({
-          mutation: updateNewWorkItemMutation,
-          variables: {
-            input: {
-              workItemType: this.workItemType,
-              fullPath: this.fullPath,
-              assignees: this.localAssignees,
-            },
-          },
-        });
-
-        this.updateInProgress = false;
-        return;
-      }
-
       try {
         const {
           data: {
@@ -282,7 +256,6 @@ export default {
           return;
         }
         this.track('updated_assignees');
-        this.$emit('assigneesUpdated', localAssigneeIds);
       } catch {
         this.throwUpdateError();
       } finally {
@@ -347,23 +320,23 @@ export default {
       <sidebar-participant v-if="item" :user="item" />
     </template>
     <template v-if="canInviteMembers" #footer>
-      <gl-button category="tertiary" block class="!gl-justify-start">
+      <gl-button category="tertiary" block class="gl-justify-content-start!">
         <invite-members-trigger
           :display-text="__('Invite members')"
           trigger-element="side-nav"
           icon="plus"
           trigger-source="work-item-assignees"
-          classes="hover:!gl-no-underline gl-pb-2"
+          classes="gl-hover-text-decoration-none! gl-pb-2"
         />
       </gl-button>
     </template>
     <template #none>
-      <div class="gl-flex gl-items-center gl-gap-2 gl-text-gray-500">
+      <div class="gl-display-flex gl-align-items-center gl-text-gray-500 gl-gap-2">
         <span>{{ __('None') }}</span>
         <template v-if="currentUser && canUpdate">
           <span>-</span>
           <gl-button variant="link" data-testid="assign-self" @click.stop="assignToCurrentUser"
-            ><span class="gl-text-gray-500 hover:gl-text-blue-800">{{
+            ><span class="gl-text-gray-500 gl-hover-text-blue-800">{{
               __('assign yourself')
             }}</span></gl-button
           >
@@ -373,7 +346,7 @@ export default {
     <template #readonly>
       <uncollapsed-assignee-list
         :users="localAssignees"
-        show-less-assignees-class="hover:!gl-bg-transparent"
+        show-less-assignees-class="gl-hover-bg-transparent!"
       />
     </template>
   </work-item-sidebar-dropdown-widget>

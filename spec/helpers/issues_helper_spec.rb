@@ -47,12 +47,8 @@ RSpec.describe IssuesHelper, feature_category: :team_planning do
   end
 
   describe '#award_state_class' do
-    let_it_be(:upvote) { create(:award_emoji) }
+    let!(:upvote) { create(:award_emoji) }
     let(:awardable) { upvote.awardable }
-
-    before_all do
-      upvote.awardable.project.add_guest(upvote.user)
-    end
 
     before do
       allow(helper).to receive(:can?) do |*args|
@@ -216,7 +212,8 @@ RSpec.describe IssuesHelper, feature_category: :team_planning do
         can_edit: 'true',
         can_import_issues: 'true',
         email: current_user&.notification_email_or_default,
-        emails_help_page_path: help_page_path('development/emails.md', anchor: 'email-namespace'),
+        emails_help_page_path: help_page_path('development/emails', anchor: 'email-namespace'),
+        empty_state_svg_path: '#',
         export_csv_path: export_csv_project_issues_path(project),
         full_path: project.full_path,
         has_any_issues: project_issues(project).exists?.to_s,
@@ -227,11 +224,12 @@ RSpec.describe IssuesHelper, feature_category: :team_planning do
         is_project: 'true',
         is_public_visibility_restricted: Gitlab::CurrentSettings.restricted_visibility_levels ? 'false' : '',
         is_signed_in: current_user.present?.to_s,
-        markdown_help_path: help_page_path('user/markdown.md'),
+        jira_integration_path: help_page_url('integration/jira/issues', anchor: 'view-jira-issues'),
+        markdown_help_path: help_page_path('user/markdown'),
         max_attachment_size: number_to_human_size(Gitlab::CurrentSettings.max_attachment_size.megabytes),
         new_issue_path: new_project_issue_path(project),
         project_import_jira_path: project_import_jira_path(project),
-        quick_actions_help_path: help_page_path('user/project/quick_actions.md'),
+        quick_actions_help_path: help_page_path('user/project/quick_actions'),
         releases_path: project_releases_path(project, format: :json),
         reset_path: new_issuable_address_project_path(project, issuable_type: 'issue'),
         rss_path: '#',
@@ -283,10 +281,12 @@ RSpec.describe IssuesHelper, feature_category: :team_planning do
         autocomplete_award_emojis_path: autocomplete_award_emojis_path,
         calendar_path: '#',
         can_create_projects: 'true',
+        empty_state_svg_path: '#',
         full_path: group.full_path,
         has_any_issues: false.to_s,
         has_any_projects: true.to_s,
         is_signed_in: current_user.present?.to_s,
+        jira_integration_path: help_page_url('integration/jira/issues', anchor: 'view-jira-issues'),
         new_project_path: new_project_path(namespace_id: group.id),
         rss_path: '#',
         sign_in_path: new_user_session_path,

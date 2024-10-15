@@ -7,12 +7,12 @@ import {
   GRAPHQL_PAGE_SIZE,
   LIST_KEY_CREATED_AT,
   LIST_KEY_VERSION,
-  MODEL_VERSION_CREATION_MODAL_ID,
+  MODEL_ENTITIES,
   SORT_KEY_CREATED_AT,
   SORT_KEY_ORDER,
 } from '../constants';
 import SearchableList from './searchable_list.vue';
-import EmptyState from './model_list_empty_state.vue';
+import EmptyState from './empty_state.vue';
 import ModelVersionRow from './model_version_row.vue';
 
 export default {
@@ -84,6 +84,7 @@ export default {
       Sentry.captureException(error);
     },
   },
+  modelVersionEntity: MODEL_ENTITIES.modelVersion,
   sortableFields: [
     {
       orderBy: LIST_KEY_VERSION,
@@ -94,12 +95,6 @@ export default {
       label: s__('MlExperimentTracking|Created at'),
     },
   ],
-  emptyState: {
-    title: s__('MlModelRegistry|Manage versions of your machine learning model'),
-    description: s__('MlModelRegistry|Use versions to track performance, parameters, and metadata'),
-    primaryText: s__('MlModelRegistry|Create model version'),
-    modalId: MODEL_VERSION_CREATION_MODAL_ID,
-  },
 };
 </script>
 <template>
@@ -113,12 +108,7 @@ export default {
     @fetch-page="fetchPage"
   >
     <template #empty-state>
-      <empty-state
-        :title="$options.emptyState.title"
-        :description="$options.emptyState.description"
-        :primary-text="$options.emptyState.primaryText"
-        :modal-id="$options.emptyState.modalId"
-      />
+      <empty-state :entity-type="$options.modelVersionEntity" />
     </template>
 
     <template #item="{ item }">

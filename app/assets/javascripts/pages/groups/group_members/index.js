@@ -3,12 +3,12 @@ import initInviteGroupTrigger from '~/invite_members/init_invite_group_trigger';
 import initInviteGroupsModal from '~/invite_members/init_invite_groups_modal';
 import { s__ } from '~/locale';
 import { initMembersApp } from '~/members';
-import { CONTEXT_TYPE, GROUPS_APP_OPTIONS, MEMBERS_TAB_TYPES } from 'ee_else_ce/members/constants';
+import { EE_GROUPS_APP_OPTIONS, MEMBER_TYPES } from 'ee_else_ce/members/constants';
 import { groupLinkRequestFormatter } from '~/members/utils';
 
 const SHARED_FIELDS = ['account', 'maxRole', 'expiration', 'actions'];
 const APP_OPTIONS = {
-  [MEMBERS_TAB_TYPES.user]: {
+  [MEMBER_TYPES.user]: {
     tableFields: SHARED_FIELDS.concat(['source', 'activity']),
     tableSortableFields: [
       'account',
@@ -21,13 +21,13 @@ const APP_OPTIONS = {
     requestFormatter: groupMemberRequestFormatter,
     filteredSearchBar: {
       show: true,
-      tokens: ['two_factor', 'with_inherited_permissions', 'enterprise', 'user_type', 'max_role'],
+      tokens: ['two_factor', 'with_inherited_permissions', 'enterprise', 'user_type'],
       searchParam: 'search',
       placeholder: s__('Members|Filter members'),
       recentSearchesStorageKey: 'group_members',
     },
   },
-  [MEMBERS_TAB_TYPES.group]: {
+  [MEMBER_TYPES.group]: {
     tableFields: SHARED_FIELDS.concat(['source', 'granted']),
     requestFormatter: groupLinkRequestFormatter,
     filteredSearchBar: {
@@ -38,7 +38,7 @@ const APP_OPTIONS = {
       recentSearchesStorageKey: 'group_links_members',
     },
   },
-  [MEMBERS_TAB_TYPES.invite]: {
+  [MEMBER_TYPES.invite]: {
     tableFields: SHARED_FIELDS.concat('invited'),
     requestFormatter: groupMemberRequestFormatter,
     filteredSearchBar: {
@@ -49,21 +49,14 @@ const APP_OPTIONS = {
       recentSearchesStorageKey: 'group_invited_members',
     },
   },
-  [MEMBERS_TAB_TYPES.accessRequest]: {
+  [MEMBER_TYPES.accessRequest]: {
     tableFields: SHARED_FIELDS.concat('requested'),
     requestFormatter: groupMemberRequestFormatter,
   },
-  [MEMBERS_TAB_TYPES.placeholder]: {
-    requestFormatter: groupMemberRequestFormatter,
-  },
-  ...GROUPS_APP_OPTIONS,
+  ...EE_GROUPS_APP_OPTIONS,
 };
 
-initMembersApp(
-  document.querySelector('.js-group-members-list-app'),
-  CONTEXT_TYPE.GROUP,
-  APP_OPTIONS,
-);
+initMembersApp(document.querySelector('.js-group-members-list-app'), APP_OPTIONS);
 
 initInviteGroupsModal();
 initInviteGroupTrigger();

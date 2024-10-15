@@ -4,13 +4,13 @@ exports[`Expand button on click when short text is provided renders button after
 <span>
   <button
     aria-label="Click to expand text"
-    class="!gl-bg-transparent !gl-outline-none !gl-shadow-none btn btn-default btn-icon btn-md button-ellipsis-horizontal gl-border-none gl-button gl-p-0 gl-rounded-none js-text-expander-prepend text-expander"
+    class="btn btn-blank btn-default btn-icon btn-md button-ellipsis-horizontal gl-button js-text-expander-prepend text-expander"
     style="display: none;"
     type="button"
   >
     <svg
       aria-hidden="true"
-      class="gl-button-icon gl-fill-current gl-icon s16"
+      class="gl-button-icon gl-icon s16"
       data-testid="ellipsis_h-icon"
       role="img"
     >
@@ -26,13 +26,13 @@ exports[`Expand button on click when short text is provided renders button after
   </span>
   <button
     aria-label="Click to expand text"
-    class="!gl-bg-transparent !gl-outline-none !gl-shadow-none btn btn-default btn-icon btn-md button-ellipsis-horizontal gl-border-none gl-button gl-p-0 gl-rounded-none js-text-expander-append text-expander"
+    class="btn btn-blank btn-default btn-icon btn-md button-ellipsis-horizontal gl-button js-text-expander-append text-expander"
     style=""
     type="button"
   >
     <svg
       aria-hidden="true"
-      class="gl-button-icon gl-fill-current gl-icon s16"
+      class="gl-button-icon gl-icon s16"
       data-testid="ellipsis_h-icon"
       role="img"
     >
@@ -48,12 +48,12 @@ exports[`Expand button when short text is provided renders button before text 1`
 <span>
   <button
     aria-label="Click to expand text"
-    class="!gl-bg-transparent !gl-outline-none !gl-shadow-none btn btn-default btn-icon btn-md button-ellipsis-horizontal gl-border-none gl-button gl-p-0 gl-rounded-none js-text-expander-prepend text-expander"
+    class="btn btn-blank btn-default btn-icon btn-md button-ellipsis-horizontal gl-button js-text-expander-prepend text-expander"
     type="button"
   >
     <svg
       aria-hidden="true"
-      class="gl-button-icon gl-fill-current gl-icon s16"
+      class="gl-button-icon gl-icon s16"
       data-testid="ellipsis_h-icon"
       role="img"
     >
@@ -69,13 +69,13 @@ exports[`Expand button when short text is provided renders button before text 1`
   </span>
   <button
     aria-label="Click to expand text"
-    class="!gl-bg-transparent !gl-outline-none !gl-shadow-none btn btn-default btn-icon btn-md button-ellipsis-horizontal gl-border-none gl-button gl-p-0 gl-rounded-none js-text-expander-append text-expander"
+    class="btn btn-blank btn-default btn-icon btn-md button-ellipsis-horizontal gl-button js-text-expander-append text-expander"
     style="display: none;"
     type="button"
   >
     <svg
       aria-hidden="true"
-      class="gl-button-icon gl-fill-current gl-icon s16"
+      class="gl-button-icon gl-icon s16"
       data-testid="ellipsis_h-icon"
       role="img"
     >

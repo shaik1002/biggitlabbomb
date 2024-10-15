@@ -123,10 +123,10 @@ export default {
 </script>
 
 <template>
-  <div class="js-preferences-form gl-contents">
+  <div class="gl-display-contents js-preferences-form">
     <div
       v-if="integrationViews.length"
-      class="settings-section js-search-settings-section gl-border-t !gl-pt-6"
+      class="settings-section gl-border-t gl-pt-6! js-search-settings-section"
     >
       <div class="settings-sticky-header">
         <div class="settings-sticky-header-inner">

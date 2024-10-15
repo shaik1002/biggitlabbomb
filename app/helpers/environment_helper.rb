@@ -18,7 +18,6 @@ module EnvironmentHelper
       name: environment.name,
       id: environment.id,
       project_full_path: project.full_path,
-      base_path: project_environment_path(project, environment),
       external_url: environment.external_url,
       can_update_environment: can?(current_user, :update_environment, environment),
       can_destroy_environment: can_destroy_environment?(environment),
@@ -32,7 +31,6 @@ module EnvironmentHelper
       environment_terminal_path: terminal_project_environment_path(project, environment),
       has_terminals: environment.has_terminals?,
       is_environment_available: environment.available?,
-      description_html: markdown_field(environment, :description),
       auto_stop_at: environment.auto_stop_at,
       graphql_etag_key: environment.etag_cache_key
     }

@@ -19,7 +19,7 @@ RSpec.describe InviteMembersHelper do
         name: project.name,
         default_access_level: Gitlab::Access::GUEST,
         invalid_groups: project.related_group_ids,
-        help_link: help_page_url('user/permissions.md'),
+        help_link: help_page_url('user/permissions'),
         is_project: 'true',
         access_levels: ProjectMember.access_level_roles.to_json,
         full_path: project.full_path
@@ -91,28 +91,6 @@ RSpec.describe InviteMembersHelper do
 
           expect(helper.can_invite_members_for_project?(project)).to eq false
         end
-      end
-    end
-  end
-
-  describe '#invite_accepted_notice' do
-    context 'for group invites' do
-      let_it_be(:group) { create(:group, name: 'My group') }
-      let_it_be(:member) { build(:group_member, :guest, group: group) }
-
-      it 'returns the expected message' do
-        expect(helper.invite_accepted_notice(member))
-          .to eq('You have been granted access to the My group group with the following role: Guest.')
-      end
-    end
-
-    context 'for project invites' do
-      let_it_be(:project) { create(:project, name: 'My project') }
-      let_it_be(:member) { build(:project_member, :guest, project: project) }
-
-      it 'returns the expected message' do
-        expect(helper.invite_accepted_notice(member))
-          .to eq('You have been granted access to the My project project with the following role: Guest.')
       end
     end
   end

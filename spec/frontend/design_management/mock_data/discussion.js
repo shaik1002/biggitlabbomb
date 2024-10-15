@@ -17,7 +17,6 @@ export default {
       author: mockAuthor,
       awardEmoji: mockAwardEmoji,
       createdAt: '2020-05-08T07:10:45Z',
-      imported: false,
       userPermissions: {
         repositionNote: true,
         awardEmoji: true,
@@ -40,7 +39,6 @@ export default {
       },
       awardEmoji: mockAwardEmoji,
       createdAt: '2020-05-08T07:10:45Z',
-      imported: false,
       userPermissions: {
         adminNote: true,
         awardEmoji: true,

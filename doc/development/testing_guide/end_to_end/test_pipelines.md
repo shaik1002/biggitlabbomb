@@ -6,9 +6,9 @@ info: Any user with at least the Maintainer role can merge updates to this conte
 
 # End-to-end test pipelines
 
-## e2e:test-on-omnibus child pipeline
+## e2e:package-and-test child pipeline
 
-The `e2e:test-on-omnibus` child pipeline is the main executor of E2E testing for the GitLab platform. The pipeline definition has several dynamic
+The `e2e:package-and-test` child pipeline is the main executor of E2E testing for the GitLab platform. The pipeline definition has several dynamic
 components to reduce the number of tests being executed in merge request pipelines.
 
 ### Setup
@@ -16,7 +16,7 @@ components to reduce the number of tests being executed in merge request pipelin
 Pipeline setup consists of:
 
 - The `e2e-test-pipeline-generate` job in the `prepare` stage of the main GitLab pipeline.
-- The `e2e:test-on-omnibus` job in the `qa` stage, which triggers the child pipeline that is responsible for building the `omnibus` package and
+- The `e2e:package-and-test` job in the `qa` stage, which triggers the child pipeline that is responsible for building the `omnibus` package and
   running E2E tests.
 
 #### e2e-test-pipeline-generate
@@ -31,7 +31,7 @@ This job consists of two components that implement selective test execution:
 - [`generate-e2e-pipeline`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/scripts/generate-e2e-pipeline) is executed, which generates a child
   pipeline YAML definition file with appropriate environment variables.
 
-#### e2e:test-on-omnibus execution pipeline
+#### e2e:package-and-test execution pipeline
 
 E2E test execution pipeline consists of several stages which all support execution of E2E tests.
 
@@ -99,7 +99,7 @@ Considering example above, perform the following steps to create a new job:
    end
    ```
 
-1. Add new job definition in the [`main.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/test-on-omnibus/main.gitlab-ci.yml) pipeline definition:
+1. Add new job definition in the [`main.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/package-and-test/main.gitlab-ci.yml) pipeline definition:
 
    ```yaml
    ee:my-new-job:
@@ -138,7 +138,7 @@ ee:my-new-job:
 ## `e2e:test-on-gdk`
 
 The `e2e:test-on-gdk` child pipeline supports development of the GitLab platform by providing feedback to engineers on
-end-to-end test execution faster than via `e2e:test-on-omnibus`.
+end-to-end test execution faster than via `e2e:package-and-test` or [review apps](../review_apps.md).
 
 This is achieved by running tests against the [GitLab Development Kit](https://gitlab.com/gitlab-org/gitlab-development-kit) (GDK),
 which can be built and installed in less time than when testing against [Omnibus GitLab](https://gitlab.com/gitlab-org/omnibus-gitlab).
@@ -153,7 +153,7 @@ GDK day-to-day can benefit from automated tests catching bugs that only appear o
 The pipeline setup consists of several jobs in the main GitLab pipeline:
 
 - The [`e2e-test-pipeline-generate` job](https://gitlab.com/gitlab-org/gitlab/-/blob/9456299b995084bfceb8bc6d082229c0198a0f72/.gitlab/ci/setup.gitlab-ci.yml#L158)
-  in the `prepare` stage. This is the same job as in the `e2e:test-on-omnibus` pipeline.
+  in the `prepare` stage. This is the same job as in the `e2e:package-and-test` pipeline.
 - The [`build-gdk-image` job](https://gitlab.com/gitlab-org/gitlab/-/blob/07504c34b28ac656537cd60810992aa15e9e91b8/.gitlab/ci/build-images.gitlab-ci.yml#L32)
   in the `build-images` stage.
 - The `e2e:test-on-gdk` trigger job in the `qa` stage, which triggers the child pipeline that runs E2E tests.
@@ -170,7 +170,7 @@ the job will rebuild the base image before building the image that will be used 
 
 #### `e2e:test-on-gdk` child pipeline
 
-Like the `e2e:test-on-omnibus` pipeline, the `e2e:test-on-gdk` pipeline consists of several stages that support
+Like the `e2e:package-and-test` pipeline, the `e2e:test-on-gdk` pipeline consists of several stages that support
 execution of E2E tests.
 
 ##### .pre
@@ -194,20 +194,14 @@ This stage is responsible for [allure test report](index.md#allure-report) gener
 The `e2e:test-on-cng` child pipeline runs tests against [Cloud Native GitLab](https://gitlab.com/gitlab-org/build/CNG) installation.
 Unlike `review-apps`, this pipeline uses local [kind](https://github.com/kubernetes-sigs/kind) Kubernetes cluster.
 
-Deployment is managed by the [`cng`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/qa/gems/gitlab-cng/README.md)
-orchestrator tool, which you can also use to locally recreate CI/CD deployments.
-
-This pipeline is executed every two hours on scheduled pipelines and runs the following validations:
-
-- Main test suite against the `CNG` deployment using default chart configuration.
-- Minimal `health_check` test suite against the `CNG` deployment that uses minimal supported `redis` version.
+Currently this pipeline is executed on nightly scheduled pipelines and is mainly responsible for testing compatibility with minimal supported version of `redis`.
 
 ### Setup
 
 The pipeline setup consists of several jobs in the main GitLab pipeline:
 
 - `compile-production-assets` and `build-assets-image` jobs are responsible for compiling frontend assets which are required
-  by [CNG](https://gitlab.com/gitlab-org/build/CNG-mirror) build pipeline.
+by [CNG](https://gitlab.com/gitlab-org/build/CNG-mirror) build pipeline.
 - `e2e-test-pipeline-generate` job is responsible for generating `e2e:test-on-cng` child pipeline
 
 ### `e2e:test-on-cng` child pipeline
@@ -230,11 +224,3 @@ Jobs in `test` stage perform following actions:
 #### report
 
 This stage is responsible for [allure test report](index.md#allure-report) generation as well as test metrics upload.
-
-### Debugging
-
-To help with debugging:
-
-- Each test job prints a list of arguments that you can pass to the [`cng`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/qa/gems/gitlab-cng/README.md)
-  orchestrator to exactly recreate the same deployment for local debugging.
-- Cluster events log and all pod logs are saved in E2E test job artifacts.

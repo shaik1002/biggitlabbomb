@@ -8,12 +8,8 @@ class Projects::PipelinesController < Projects::ApplicationController
   urgency :low, [
     :index, :new, :builds, :show, :failures, :create,
     :stage, :retry, :dag, :cancel, :test_report,
-    :charts, :destroy, :status, :manual_variables
+    :charts, :destroy, :status
   ]
-
-  before_action only: [:charts] do
-    push_frontend_feature_flag(:ci_improved_project_pipeline_analytics, project)
-  end
 
   before_action :disable_query_limiting, only: [:create, :retry]
   before_action :pipeline, except: [:index, :new, :create, :charts]
@@ -27,9 +23,6 @@ class Projects::PipelinesController < Projects::ApplicationController
   before_action :authorize_cancel_pipeline!, only: [:cancel]
   before_action :ensure_pipeline, only: [:show, :downloadable_artifacts]
   before_action :reject_if_build_artifacts_size_refreshing!, only: [:destroy]
-  before_action only: [:show, :dag, :builds, :failures, :test_report, :manual_variables] do
-    push_frontend_feature_flag(:ci_show_manual_variables_in_pipeline, project)
-  end
 
   # Will be removed with https://gitlab.com/gitlab-org/gitlab/-/issues/225596
   before_action :redirect_for_legacy_scope_filter, only: [:index], if: -> { request.format.html? }
@@ -45,8 +38,8 @@ class Projects::PipelinesController < Projects::ApplicationController
   track_internal_event :charts, name: 'p_analytics_ci_cd_pipelines', conditions: -> { should_track_ci_cd_pipelines? }
   track_internal_event :charts, name: 'p_analytics_ci_cd_deployment_frequency', conditions: -> { should_track_ci_cd_deployment_frequency? }
   track_internal_event :charts, name: 'p_analytics_ci_cd_lead_time', conditions: -> { should_track_ci_cd_lead_time? }
-  track_internal_event :charts, name: 'visit_ci_cd_time_to_restore_service_tab', conditions: -> { should_track_visit_ci_cd_time_to_restore_service_tab? }
-  track_internal_event :charts, name: 'visit_ci_cd_failure_rate_tab', conditions: -> { should_track_visit_ci_cd_change_failure_tab? }
+  track_event :charts, name: 'p_analytics_ci_cd_time_to_restore_service', conditions: -> { should_track_ci_cd_time_to_restore_service? }
+  track_event :charts, name: 'p_analytics_ci_cd_change_failure_rate', conditions: -> { should_track_ci_cd_change_failure_rate? }
 
   wrap_parameters Ci::Pipeline
 
@@ -55,11 +48,10 @@ class Projects::PipelinesController < Projects::ApplicationController
   feature_category :continuous_integration, [
     :charts, :show, :stage, :cancel, :retry,
     :builds, :dag, :failures, :status,
-    :index, :new, :destroy, :manual_variables
+    :index, :create, :new, :destroy
   ]
-  feature_category :pipeline_composition, [:create]
   feature_category :code_testing, [:test_report]
-  feature_category :job_artifacts, [:downloadable_artifacts]
+  feature_category :build_artifacts, [:downloadable_artifacts]
 
   def index
     @pipelines = Ci::PipelinesFinder
@@ -225,12 +217,6 @@ class Projects::PipelinesController < Projects::ApplicationController
     end
   end
 
-  def manual_variables
-    return render_404 unless ::Feature.enabled?(:ci_show_manual_variables_in_pipeline, project)
-
-    render_show
-  end
-
   def downloadable_artifacts
     render json: Ci::DownloadableArtifactSerializer.new(
       project: project,
@@ -297,7 +283,7 @@ class Projects::PipelinesController < Projects::ApplicationController
 
     pipelines =
       if find_latest_pipeline?
-        project.latest_pipelines(ref: params['ref'], limit: 100)
+        project.latest_pipelines(params['ref'])
       else
         project.all_pipelines.id_in(params[:id])
       end
@@ -370,11 +356,11 @@ class Projects::PipelinesController < Projects::ApplicationController
     params[:chart] == 'lead-time'
   end
 
-  def should_track_visit_ci_cd_time_to_restore_service_tab?
+  def should_track_ci_cd_time_to_restore_service?
     params[:chart] == 'time-to-restore-service'
   end
 
-  def should_track_visit_ci_cd_change_failure_tab?
+  def should_track_ci_cd_change_failure_rate?
     params[:chart] == 'change-failure-rate'
   end
 

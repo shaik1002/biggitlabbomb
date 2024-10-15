@@ -1,8 +1,13 @@
 description: "Dismiss Terraform banner"
 category: default
 action: dismiss_banner
+label_description: "`terraform_banner`"
+property_description: ""
+value_description: ""
 extra_properties:
 identifiers:
+product_section: ops
+product_stage: deploy
 product_group: environments
 milestone: "14.3"
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/68467
@@ -13,6 +18,3 @@ tiers:
 - free
 - premium
 - ultimate
-additional_properties:
-  label:
-    description: "`terraform_banner`"

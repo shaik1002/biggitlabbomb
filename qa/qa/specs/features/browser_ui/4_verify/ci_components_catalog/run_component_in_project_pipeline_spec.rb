@@ -17,7 +17,13 @@ module QA
         create(:project, :with_readme, name: 'project-to-test-component')
       end
 
-      let!(:runner) { create(:project_runner, project: test_project, name: executor, tags: [executor]) }
+      let!(:runner) do
+        Resource::ProjectRunner.fabricate! do |runner|
+          runner.project = test_project
+          runner.name = executor
+          runner.tags = [executor]
+        end
+      end
 
       let(:component_content) do
         <<~YAML
@@ -71,7 +77,7 @@ module QA
         runner.remove_via_api!
       end
 
-      it 'runs in project pipeline with correct inputs', :blocking, :aggregate_failures,
+      it 'runs in project pipeline with correct inputs', :aggregate_failures,
         testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/451582' do
         Flow::Pipeline.visit_latest_pipeline
 

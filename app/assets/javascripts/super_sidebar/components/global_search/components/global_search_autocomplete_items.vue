@@ -2,8 +2,6 @@
 import { GlAvatar, GlAlert, GlLoadingIcon, GlDisclosureDropdownGroup } from '@gitlab/ui';
 // eslint-disable-next-line no-restricted-imports
 import { mapState, mapGetters } from 'vuex';
-import { s__ } from '~/locale';
-import { InternalEvents } from '~/tracking';
 import SafeHtml from '~/vue_shared/directives/safe_html';
 import highlight from '~/lib/utils/highlight';
 import { AVATAR_SHAPE_OPTION_RECT } from '~/vue_shared/constants';
@@ -12,30 +10,17 @@ import {
   NO_SEARCH_RESULTS,
 } from '~/vue_shared/global_search/constants';
 import {
-  EVENT_CLICK_PROJECT_RESULT_IN_COMMAND_PALETTE,
-  EVENT_CLICK_GROUP_RESULT_IN_COMMAND_PALETTE,
-  EVENT_CLICK_MERGE_REQUEST_RESULT_IN_COMMAND_PALETTE,
-  EVENT_CLICK_ISSUE_RESULT_IN_COMMAND_PALETTE,
-  EVENT_CLICK_RECENT_ISSUE_RESULT_IN_COMMAND_PALETTE,
-  EVENT_CLICK_RECENT_EPIC_RESULT_IN_COMMAND_PALETTE,
-  EVENT_CLICK_RECENT_MERGE_REQUEST_RESULT_IN_COMMAND_PALETTE,
-  EVENT_CLICK_USER_RESULT_IN_COMMAND_PALETTE,
-} from '~/super_sidebar/components/global_search/tracking_constants';
-import {
   OVERLAY_GOTO,
   OVERLAY_PROFILE,
   OVERLAY_PROJECT,
   OVERLAY_FILE,
   USERS_GROUP_TITLE,
   PROJECTS_GROUP_TITLE,
-  ISSUES_GROUP_TITLE,
+  ISSUE_GROUP_TITLE,
   PAGES_GROUP_TITLE,
-  GROUPS_GROUP_TITLE,
 } from '../command_palette/constants';
 import SearchResultHoverLayover from './global_search_hover_overlay.vue';
 import GlobalSearchNoResults from './global_search_no_results.vue';
-
-const trackingMixin = InternalEvents.mixin();
 
 export default {
   name: 'GlobalSearchAutocompleteItems',
@@ -48,13 +33,8 @@ export default {
     OVERLAY_FILE,
     USERS_GROUP_TITLE,
     PROJECTS_GROUP_TITLE,
-    ISSUES_GROUP_TITLE,
+    ISSUE_GROUP_TITLE,
     PAGES_GROUP_TITLE,
-    GROUPS_GROUP_TITLE,
-    MERGE_REQUESTS_GROUP_TITLE: s__('GlobalSearch|Merge requests'),
-    RECENT_ISSUES_GROUP_TITLE: s__('GlobalSearch|Recent issues'),
-    RECENT_EPICS_GROUP_TITLE: s__('GlobalSearch|Recent epics'),
-    RECENT_MERGE_REQUESTS_GROUP_TITLE: s__('GlobalSearch|Recent merge requests'),
   },
   components: {
     GlAvatar,
@@ -67,7 +47,6 @@ export default {
   directives: {
     SafeHtml,
   },
-  mixins: [trackingMixin],
   computed: {
     ...mapState(['search', 'loading', 'autocompleteError']),
     ...mapGetters(['autocompleteGroupedSearchOptions', 'scopedSearchOptions']),
@@ -79,7 +58,8 @@ export default {
             return {
               ...item,
               extraAttrs: {
-                class: 'show-hover-layover gl-flex gl-items-center gl-justify-between',
+                class:
+                  'show-hover-layover gl-display-flex gl-align-items-center gl-justify-content-space-between',
               },
             };
           }),
@@ -107,7 +87,7 @@ export default {
         case this.$options.i18n.PROJECTS_GROUP_TITLE:
           text = this.$options.i18n.OVERLAY_PROJECT;
           break;
-        case this.$options.i18n.ISSUES_GROUP_TITLE:
+        case this.$options.i18n.ISSUE_GROUP_TITLE:
           text = this.$options.i18n.OVERLAY_GOTO;
           break;
         case this.$options.i18n.PAGES_GROUP_TITLE:
@@ -116,42 +96,6 @@ export default {
         default:
       }
       return text;
-    },
-    trackingTypes({ name }) {
-      switch (name) {
-        case this.$options.i18n.PROJECTS_GROUP_TITLE: {
-          this.trackEvent(EVENT_CLICK_PROJECT_RESULT_IN_COMMAND_PALETTE);
-          break;
-        }
-        case this.$options.i18n.GROUPS_GROUP_TITLE: {
-          this.trackEvent(EVENT_CLICK_GROUP_RESULT_IN_COMMAND_PALETTE);
-          break;
-        }
-        case this.$options.i18n.MERGE_REQUESTS_GROUP_TITLE: {
-          this.trackEvent(EVENT_CLICK_MERGE_REQUEST_RESULT_IN_COMMAND_PALETTE);
-          break;
-        }
-        case this.$options.i18n.ISSUES_GROUP_TITLE: {
-          this.trackEvent(EVENT_CLICK_ISSUE_RESULT_IN_COMMAND_PALETTE);
-          break;
-        }
-        case this.$options.i18n.RECENT_ISSUES_GROUP_TITLE: {
-          this.trackEvent(EVENT_CLICK_RECENT_ISSUE_RESULT_IN_COMMAND_PALETTE);
-          break;
-        }
-        case this.$options.i18n.RECENT_EPICS_GROUP_TITLE: {
-          this.trackEvent(EVENT_CLICK_RECENT_EPIC_RESULT_IN_COMMAND_PALETTE);
-          break;
-        }
-        case this.$options.i18n.RECENT_MERGE_REQUESTS_GROUP_TITLE: {
-          this.trackEvent(EVENT_CLICK_RECENT_MERGE_REQUEST_RESULT_IN_COMMAND_PALETTE);
-          break;
-        }
-
-        default: {
-          this.trackEvent(EVENT_CLICK_USER_RESULT_IN_COMMAND_PALETTE);
-        }
-      }
     },
   },
   AVATAR_SHAPE_OPTION_RECT,
@@ -162,21 +106,20 @@ export default {
   <div>
     <gl-alert
       v-if="autocompleteError"
-      class="gl-mt-2 gl-text-primary"
+      class="gl-text-body gl-mt-2"
       :dismissible="false"
       variant="danger"
     >
       {{ $options.i18n.AUTOCOMPLETE_ERROR_MESSAGE }}
     </gl-alert>
 
-    <ul v-if="!loading && hasResults" class="gl-m-0 gl-list-none gl-p-0">
+    <ul v-if="!loading && hasResults" class="gl-m-0 gl-p-0 gl-list-none">
       <gl-disclosure-dropdown-group
         v-for="(group, index) in groups"
         :key="group.name"
-        :class="{ '!gl-mt-0': index === 0 }"
+        :class="{ 'gl-mt-0!': index === 0 }"
         :group="group"
         bordered
-        @action="trackingTypes"
       >
         <template #list-item="{ item }">
           <search-result-hover-layover :text-message="overlayText(group.name)">
@@ -189,16 +132,16 @@ export default {
               :shape="$options.AVATAR_SHAPE_OPTION_RECT"
               aria-hidden="true"
             />
-            <span class="gl-flex gl-min-w-0 gl-grow gl-flex-col">
+            <span class="gl-display-flex gl-flex-direction-column gl-flex-grow-1 gl-min-w-0">
               <span
                 v-safe-html="highlightedName(item.text)"
-                class="gl-truncate gl-text-gray-900"
+                class="gl-text-gray-900 gl-text-truncate"
                 data-testid="autocomplete-item-name"
               ></span>
               <span
                 v-if="item.value"
                 v-safe-html="item.namespace"
-                class="gl-truncate gl-text-sm gl-text-gray-500"
+                class="gl-font-sm gl-text-gray-500 gl-text-truncate"
                 data-testid="autocomplete-item-namespace"
               ></span>
             </span>

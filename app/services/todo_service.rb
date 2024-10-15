@@ -164,25 +164,6 @@ class TodoService
     resolve_todos_for_target(awardable, current_user)
   end
 
-  # When a SSH key expired we should:
-  #
-  # * create a todo for the user owning that SSH key
-  #
-  def ssh_key_expired(ssh_keys)
-    ssh_keys = Array(ssh_keys)
-
-    ssh_keys.each do |ssh_key|
-      user = ssh_key.user
-      attributes = {
-        target_id: ssh_key.id,
-        target_type: Key,
-        action: ::Todo::SSH_KEY_EXPIRED,
-        author_id: user.id
-      }
-      create_todos(user, attributes, nil, nil)
-    end
-  end
-
   # When user marks a target as todo
   def mark_todo(target, current_user)
     project = target.project
@@ -203,8 +184,6 @@ class TodoService
     attributes = attributes_for_target(target)
 
     resolve_todos(pending_todos([current_user], attributes), current_user)
-
-    GraphqlTriggers.issuable_todo_updated(target, current_user)
   end
 
   # Resolves all todos related to target for all users
@@ -232,8 +211,6 @@ class TodoService
     return if todo.done?
 
     todo.update(state: resolution, resolved_by_action: resolved_by_action)
-
-    GraphqlTriggers.issuable_todo_updated(todo.target, current_user)
 
     current_user.update_todos_count_cache
   end
@@ -354,16 +331,10 @@ class TodoService
     return unless note.can_create_todo?
 
     project = note.project
-    noteable = note.noteable
-    discussion = note.discussion
-
-    # Only update todos associated with the discussion if note is part of a thread
-    # Otherwise, update all todos associated with the noteable
-    #
-    target = discussion.individual_note? ? noteable : discussion
+    target = note.noteable
 
     resolve_todos_for_target(target, author)
-    create_mention_todos(project, noteable, author, note, skip_users)
+    create_mention_todos(project, target, author, note, skip_users)
   end
 
   def create_assignment_todo(target, author, old_assignees = [])
@@ -420,8 +391,6 @@ class TodoService
     when Issue
       attributes[:issue_type] = target.issue_type
       attributes[:group] = target.namespace if target.project.blank?
-    when DiscussionNote
-      attributes.merge!(target_type: nil, target_id: nil, discussion: target.discussion)
     when Discussion
       attributes.merge!(target_type: nil, target_id: nil, discussion: target)
     end

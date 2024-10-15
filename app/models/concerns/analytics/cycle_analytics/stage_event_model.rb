@@ -7,26 +7,25 @@ module Analytics
 
       included do
         include FromUnion
-        include Awardable
 
         scope :by_stage_event_hash_id, ->(id) { where(stage_event_hash_id: id) }
         scope :by_project_id, ->(id) { where(project_id: id) }
         scope :by_group_id, ->(id) { where(group_id: id) }
-        scope :end_event_timestamp_after, ->(date) { where(arel_table[:end_event_timestamp].gteq(date)) }
-        scope :end_event_timestamp_before, ->(date) { where(arel_table[:end_event_timestamp].lteq(date)) }
-        scope :start_event_timestamp_after, ->(date) { where(arel_table[:start_event_timestamp].gteq(date)) }
-        scope :start_event_timestamp_before, ->(date) { where(arel_table[:start_event_timestamp].lteq(date)) }
+        scope :end_event_timestamp_after, -> (date) { where(arel_table[:end_event_timestamp].gteq(date)) }
+        scope :end_event_timestamp_before, -> (date) { where(arel_table[:end_event_timestamp].lteq(date)) }
+        scope :start_event_timestamp_after, -> (date) { where(arel_table[:start_event_timestamp].gteq(date)) }
+        scope :start_event_timestamp_before, -> (date) { where(arel_table[:start_event_timestamp].lteq(date)) }
         scope :authored, ->(user) { where(author_id: user) }
         scope :with_milestone_id, ->(milestone_id) { where(milestone_id: milestone_id) }
-        scope :without_milestone_id, ->(milestone_id) { where('milestone_id <> ? or milestone_id IS NULL', milestone_id) }
+        scope :without_milestone_id, -> (milestone_id) { where('milestone_id <> ? or milestone_id IS NULL', milestone_id) }
         scope :end_event_is_not_happened_yet, -> { where(end_event_timestamp: nil) }
-        scope :for_consistency_check_worker, ->(direction) do
+        scope :for_consistency_check_worker, -> (direction) do
           keyset_order(
             :end_event_timestamp => { order_expression: arel_order(arel_table[:end_event_timestamp], direction), nullable: direction == :asc ? :nulls_last : :nulls_first },
             issuable_id_column => { order_expression: arel_order(arel_table[issuable_id_column], direction), nullable: :not_nullable }
           )
         end
-        scope :order_by_end_event, ->(direction) do
+        scope :order_by_end_event, -> (direction) do
           # ORDER BY end_event_timestamp, merge_request_id/issue_id, start_event_timestamp
           # start_event_timestamp must be included in the ORDER BY clause for the duration
           # calculation to work: SELECT end_event_timestamp - start_event_timestamp
@@ -36,7 +35,7 @@ module Analytics
             :start_event_timestamp => { order_expression: arel_order(arel_table[:start_event_timestamp], direction) }
           )
         end
-        scope :order_by_end_event_with_db_duration, ->(direction) do
+        scope :order_by_end_event_with_db_duration, -> (direction) do
           # ORDER BY end_event_timestamp, merge_request_id/issue_id, start_event_timestamp
           # start_event_timestamp must be included in the ORDER BY clause for the duration
           # calculation to work: SELECT end_event_timestamp - start_event_timestamp
@@ -50,7 +49,7 @@ module Analytics
             }
           )
         end
-        scope :order_by_db_duration, ->(direction) do
+        scope :order_by_db_duration, -> (direction) do
           # start_event_timestamp and end_event_timestamp do not really influence the order,
           # but are included so that they are part of the returned result, for example when
           # using Gitlab::Analytics::CycleAnalytics::Aggregated::RecordsFetcher
@@ -63,15 +62,6 @@ module Analytics
             :end_event_timestamp => { order_expression: arel_order(arel_table[:end_event_timestamp], direction) },
             :start_event_timestamp => { order_expression: arel_order(arel_table[:start_event_timestamp], direction) }
           )
-        end
-
-        scope :not_authored, ->(user_id) { where(author_id: nil).or(where.not(author_id: user_id)) }
-        scope :not_assigned_to, ->(user) do
-          condition = assignees_model
-            .where(user_id: user)
-            .where(arel_table[issuable_id_column].eq(assignees_model.arel_table[issuable_id_column]))
-
-          where(condition.arel.exists.not)
         end
       end
 

@@ -21,25 +21,19 @@ class Integration < ApplicationRecord
   INTEGRATION_NAMES = %w[
     asana assembla bamboo bugzilla buildkite campfire clickup confluence custom_issue_tracker
     datadog diffblue_cover discord drone_ci emails_on_push ewm external_wiki
-    gitlab_slack_application hangouts_chat harbor irker jira matrix
+    gitlab_slack_application hangouts_chat harbor irker jira
     mattermost mattermost_slash_commands microsoft_teams packagist phorge pipelines_email
     pivotaltracker prometheus pumble pushover redmine slack slack_slash_commands squash_tm teamcity telegram
     unify_circuit webex_teams youtrack zentao
   ].freeze
 
-  # Integrations that can only be enabled on the instance-level
-  INSTANCE_LEVEL_ONLY_INTEGRATION_NAMES = %w[
+  INSTANCE_SPECIFIC_INTEGRATION_NAMES = %w[
     beyond_identity
   ].freeze
 
-  # Integrations that can only be enabled on the project-level
-  PROJECT_LEVEL_ONLY_INTEGRATION_NAMES = %w[
+  # See: https://gitlab.com/gitlab-org/gitlab/-/issues/345677
+  PROJECT_SPECIFIC_INTEGRATION_NAMES = %w[
     apple_app_store google_play jenkins
-  ].freeze
-
-  # Integrations that cannot be enabled on the instance-level
-  PROJECT_AND_GROUP_LEVEL_ONLY_INTEGRATION_NAMES = %w[
-    jira_cloud_app
   ].freeze
 
   # Fake integrations to help with local development.
@@ -135,12 +129,12 @@ class Integration < ApplicationRecord
   scope :with_default_settings, -> { where.not(inherit_from_id: nil) }
   scope :with_custom_settings, -> { where(inherit_from_id: nil) }
   scope :for_group, ->(group) {
-    types = available_integration_types(include_project_specific: false)
+    types = available_integration_types(include_project_specific: false, include_instance_specific: false)
     where(group_id: group, type: types)
   }
 
   scope :for_instance, -> {
-    types = available_integration_types(include_project_specific: false, include_group_specific: false)
+    types = available_integration_types(include_project_specific: false, include_instance_specific: true)
     where(instance: true, type: types)
   }
 
@@ -291,18 +285,14 @@ class Integration < ApplicationRecord
   end
 
   def self.find_or_initialize_non_project_specific_integration(name, instance: false, group_id: nil)
-    return unless name.in?(available_integration_names(
-      include_project_specific: false,
-      include_group_specific: group_id.present?,
+    return unless name.in?(available_integration_names(include_project_specific: false,
       include_instance_specific: instance))
 
     integration_name_to_model(name).find_or_initialize_by(instance: instance, group_id: group_id)
   end
 
   def self.find_or_initialize_all_non_project_specific(scope, include_instance_specific: false)
-    scope + build_nonexistent_integrations_for(scope,
-      include_group_specific: !include_instance_specific,
-      include_instance_specific: include_instance_specific)
+    scope + build_nonexistent_integrations_for(scope, include_instance_specific: include_instance_specific)
   end
 
   def self.build_nonexistent_integrations_for(...)
@@ -314,12 +304,11 @@ class Integration < ApplicationRecord
 
   # Returns a list of integration types that do not exist in the given scope.
   # Example: ["AsanaService", ...]
-  def self.nonexistent_integration_types_for(scope, include_group_specific: false, include_instance_specific: false)
+  def self.nonexistent_integration_types_for(scope, include_instance_specific: false)
     # Using #map instead of #pluck to save one query count. This is because
     # ActiveRecord loaded the object here, so we don't need to query again later.
     available_integration_types(
       include_project_specific: false,
-      include_group_specific: include_group_specific,
       include_instance_specific: include_instance_specific
     ) - scope.map(&:type)
   end
@@ -328,14 +317,12 @@ class Integration < ApplicationRecord
   # Returns a list of available integration names.
   # Example: ["asana", ...]
   def self.available_integration_names(
-    include_project_specific: true, include_group_specific: true, include_instance_specific: true, include_dev: true,
-    include_disabled: false
+    include_project_specific: true, include_dev: true, include_instance_specific: true, include_disabled: false
   )
-    names = integration_names.dup
-    names.concat(project_specific_integration_names) if include_project_specific
-    names.concat(dev_integration_names) if include_dev
-    names.concat(instance_specific_integration_names) if include_instance_specific
-    names.concat(project_and_group_specific_integration_names) if include_project_specific || include_group_specific
+    names = integration_names
+    names += project_specific_integration_names if include_project_specific
+    names += dev_integration_names if include_dev
+    names += instance_specific_integration_names if include_instance_specific
     names -= disabled_integration_names unless include_disabled
 
     names.sort_by(&:downcase)
@@ -353,11 +340,7 @@ class Integration < ApplicationRecord
   end
 
   def self.instance_specific_integration_names
-    INSTANCE_LEVEL_ONLY_INTEGRATION_NAMES
-  end
-
-  def self.instance_specific_integration_types
-    instance_specific_integration_names.map { |name| integration_name_to_type(name) }
+    INSTANCE_SPECIFIC_INTEGRATION_NAMES
   end
 
   def self.dev_integration_names
@@ -367,7 +350,7 @@ class Integration < ApplicationRecord
   end
 
   def self.project_specific_integration_names
-    names = PROJECT_LEVEL_ONLY_INTEGRATION_NAMES.dup
+    names = PROJECT_SPECIFIC_INTEGRATION_NAMES.dup
 
     if Feature.disabled?(:gitlab_for_slack_app_instance_and_group_level, type: :beta) &&
         (Gitlab::CurrentSettings.slack_app_enabled || Gitlab.dev_or_test_env?)
@@ -376,11 +359,6 @@ class Integration < ApplicationRecord
 
     names
   end
-
-  def self.project_and_group_specific_integration_names
-    PROJECT_AND_GROUP_LEVEL_ONLY_INTEGRATION_NAMES.dup
-  end
-  private_class_method :project_and_group_specific_integration_names
 
   # Returns a list of available integration types.
   # Example: ["Integrations::Asana", ...]
@@ -395,9 +373,7 @@ class Integration < ApplicationRecord
   def self.disabled_integration_names
     # The GitLab for Slack app integration is only available when enabled through settings.
     # The Slack Slash Commands integration is only available for customers who cannot use the GitLab for Slack app.
-    disabled = Gitlab::CurrentSettings.slack_app_enabled ? ['slack_slash_commands'] : ['gitlab_slack_application']
-    disabled += ['jira_cloud_app'] unless Gitlab::CurrentSettings.jira_connect_application_key.present?
-    disabled
+    Gitlab::CurrentSettings.slack_app_enabled ? ['slack_slash_commands'] : ['gitlab_slack_application']
   end
   private_class_method :disabled_integration_names
 
@@ -477,45 +453,17 @@ class Integration < ApplicationRecord
   end
   private_class_method :instance_level_integration
 
-  def self.default_integrations(owner, scope)
-    group_ids = sorted_ancestors(owner).select(:id)
-    array = group_ids.to_sql.present? ? "array(#{group_ids.to_sql})" : 'ARRAY[]'
-    order = Arel.sql("type_new ASC, array_position(#{array}::bigint[], #{table_name}.group_id), instance DESC")
-    from_union([scope.where(instance: true), scope.where(group_id: group_ids, inherit_from_id: nil)])
-      .order(order)
-      .group_by(&:type)
-      .transform_values(&:first)
-  end
-  private_class_method :default_integrations
-
-  def self.create_from_default_integrations(owner, association)
-    active_default_count = create_from_active_default_integrations(owner, association)
-    default_instance_specific_count = create_from_default_instance_specific_integrations(owner, association)
-    active_default_count + default_instance_specific_count
-  end
-
   # Returns the number of successfully saved integrations
   # Duplicate integrations are excluded from this count by their validations.
   def self.create_from_active_default_integrations(owner, association)
-    default_integrations(
-      owner,
-      active.where.not(type: instance_specific_integration_types)
-    ).count { |_type, integration| build_from_integration(integration, association => owner.id).save }
-  end
+    group_ids = sorted_ancestors(owner).select(:id)
+    array = group_ids.to_sql.present? ? "array(#{group_ids.to_sql})" : 'ARRAY[]'
+    order = Arel.sql("type_new ASC, array_position(#{array}::bigint[], #{table_name}.group_id), instance DESC")
 
-  def self.create_from_default_instance_specific_integrations(owner, association)
-    default_integrations(
-      owner,
-      where(type: instance_specific_integration_types)
-    ).count { |_type, integration| build_from_integration(integration, association => owner.id).save }
-  end
-
-  def self.descendants_from_self_or_ancestors_from(integration)
-    scope = where(type: integration.type)
-    from_union([
-      scope.where(group: integration.group.descendants),
-      scope.where(project: Project.in_namespace(integration.group.self_and_descendants))
-    ])
+    from_union([active.where(instance: true), active.where(group_id: group_ids, inherit_from_id: nil)])
+      .order(order)
+      .group_by(&:type)
+      .count { |_type, parents| build_from_integration(parents.first, association => owner.id).save }
   end
 
   def self.inherited_descendants_from_self_or_ancestors_from(integration)
@@ -538,7 +486,7 @@ class Integration < ApplicationRecord
     active && persisted?
   end
 
-  def manual_activation?
+  def show_active_box?
     true
   end
 
@@ -630,7 +578,7 @@ class Integration < ApplicationRecord
     fields.reject { _1[:type] == :password || _1[:name] == 'webhook' || (_1.key?(:if) && _1[:if] != true) }.pluck(:name)
   end
 
-  def self.api_arguments
+  def self.api_fields
     fields.filter_map do |field|
       next if field.if != true
 
@@ -641,14 +589,6 @@ class Integration < ApplicationRecord
         desc: field.description
       }
     end
-  end
-
-  def self.instance_specific?
-    false
-  end
-
-  def self.pluck_group_id
-    pluck(:group_id)
   end
 
   def form_fields
@@ -722,16 +662,7 @@ class Integration < ApplicationRecord
 
   def async_execute(data)
     return if ::Gitlab::SilentMode.enabled?
-
-    # Temporarily log when we return within this method to gather data for
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/382999
-    unless supported_events.include?(data[:object_kind])
-      log_info(
-        'async_execute did nothing due to event not being supported',
-        event: data[:object_kind]
-      )
-      return
-    end
+    return unless supported_events.include?(data[:object_kind])
 
     Integrations::ExecuteWorker.perform_async(id, data.deep_stringify_keys)
   end
@@ -762,18 +693,6 @@ class Integration < ApplicationRecord
   end
 
   private
-
-  def self.build_help_page_url(url_path, help_text, link_text = _("Learn More"), options = {})
-    docs_link = ActionController::Base.helpers.link_to(
-      '',
-      Rails.application.routes.url_helpers.help_page_url(url_path, **options),
-      target: '_blank',
-      rel: 'noopener noreferrer'
-    )
-    tag_pair_docs_link = tag_pair(docs_link, :link_start, :link_end)
-
-    safe_format(help_text + " %{link_start}#{link_text}%{link_end}.", tag_pair_docs_link)
-  end
 
   # Ancestors sorted by hierarchy depth in bottom-top order.
   def self.sorted_ancestors(scope)

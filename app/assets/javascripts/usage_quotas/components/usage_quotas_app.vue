@@ -1,14 +1,10 @@
 <script>
 import { GlAlert, GlSprintf, GlTab, GlTabs } from '@gitlab/ui';
 import { updateHistory } from '~/lib/utils/url_utility';
-import { InternalEvents } from '~/tracking';
-
-const trackingMixin = InternalEvents.mixin();
 
 export default {
   name: 'UsageQuotasApp',
   components: { GlAlert, GlSprintf, GlTab, GlTabs },
-  mixins: [trackingMixin],
   inject: ['tabs'],
   methods: {
     glTabLinkAttributes(tab) {
@@ -19,20 +15,16 @@ export default {
 
       return activeTabHash === hash;
     },
-    updateActiveTab(tab) {
+    updateActiveTab(hash) {
       const url = new URL(window.location.href);
 
-      url.hash = tab.hash;
+      url.hash = hash;
 
       updateHistory({
         url,
         title: document.title,
         replace: true,
       });
-
-      if (tab.tracking?.action) {
-        this.trackEvent(tab.tracking.action);
-      }
     },
   },
 };
@@ -43,7 +35,7 @@ export default {
     <gl-alert v-if="!tabs.length" variant="danger" :dismissible="false">
       {{ s__('UsageQuota|Something went wrong while loading Usage Quotas Tabs.') }}
     </gl-alert>
-    <gl-tabs v-else content-class="gl-leading-[unset]">
+    <gl-tabs v-else>
       <gl-tab
         v-for="tab in tabs"
         :key="tab.hash"
@@ -51,8 +43,7 @@ export default {
         :active="isActive(tab.hash)"
         :data-testid="`${tab.testid}-tab-content`"
         :title-link-attributes="glTabLinkAttributes(tab)"
-        lazy
-        @click="updateActiveTab(tab)"
+        @click="updateActiveTab(tab.hash)"
       >
         <component :is="tab.component" :data-testid="`${tab.testid}-app`" />
       </gl-tab>

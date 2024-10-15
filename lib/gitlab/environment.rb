@@ -2,12 +2,8 @@
 
 module Gitlab
   module Environment
-    extend ::Gitlab::Utils::StrongMemoize
-
     def self.hostname
-      strong_memoize(:hostname) do
-        ENV['HOSTNAME'] || Socket.gethostname
-      end
+      @hostname ||= ENV['HOSTNAME'] || Socket.gethostname
     end
 
     # Check whether codebase is going through static verification
@@ -16,10 +12,9 @@ module Gitlab
     # @return [Boolean] Is the code going through static verification?
     def self.static_verification?
       static_verification = Gitlab::Utils.to_boolean(ENV['STATIC_VERIFICATION'], default: false)
+      env_production = ENV['RAILS_ENV'] == 'production'
 
-      if static_verification && Rails.env.production?
-        warn '[WARNING] Static Verification bypass is enabled in Production.'
-      end
+      warn '[WARNING] Static Verification bypass is enabled in Production.' if static_verification && env_production
 
       static_verification
     end

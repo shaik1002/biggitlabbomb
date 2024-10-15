@@ -1,6 +1,6 @@
 ---
-stage: Foundations
-group: Design System
+stage: Manage
+group: Foundations
 info: Any user with at least the Maintainer role can merge updates to this content. For details, see https://docs.gitlab.com/ee/development/development_processes.html#development-guidelines-review.
 ---
 
@@ -24,7 +24,7 @@ available as a ViewComponent in `app/components/pajamas`.
 
 NOTE:
 We are still in the process of creating these components, so not every Pajamas component is available as ViewComponent.
-Reach out to the [Design Systems team](https://handbook.gitlab.com/handbook/engineering/development/dev/foundations/design-system/)
+Reach out to the [Foundations team](https://handbook.gitlab.com/handbook/engineering/development/dev/manage/foundations/)
 if the component you are looking for is not yet available.
 
 ### Available components
@@ -211,46 +211,6 @@ Layout components can be used to create common layout patterns used in GitLab.
 
 ### Available components
 
-#### Page heading
-
-A standard page header with a page title and optional actions.
-
-**Example:**
-
-```haml
-= render ::Layouts::PageHeadingComponent.new(_('Page title')) do |c|
-  - c.with_actions do
-    = buttons
-```
-
-For the full list of options, see its
-[source](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/components/layouts/page_heading_component.rb).
-
-#### CRUD component
-
-A list container being used to host a table or list with user actions such as create, read, update, delete.
-
-**Example:**
-
-```haml
-= render ::Layouts::CrudComponent.new(_('CRUD title'), icon: 'ICONNAME', count: COUNT) do |c|
-  - c.with_description do
-    = description
-  - c.with_actions do
-    = buttons
-  - c.with_form do
-    = add item form
-  - c.with_body do
-    = body
-  - c.with_pagination do
-    = pagination component
-  - c.with_footer do
-    = optional footer
-```
-
-For the full list of options, see its
-[source](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/components/layouts/crud_component.rb).
-
 #### Horizontal section
 
 Many of the settings pages use a layout where the title and description are on the left and the settings fields are on the right. The `Layouts::HorizontalSectionComponent` can be used to create this layout.
@@ -272,40 +232,6 @@ Many of the settings pages use a layout where the title and description are on t
 For the full list of options, see its
 [source](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/components/layouts/horizontal_section_component.rb).
 
-#### Settings block
-
-A settings block (accordion) to group related settings.
-
-**Example:**
-
-```haml
-= render ::Layouts::SettingsBlock.new(_('Settings block heading')) do |c|
-  - c.with_description do
-    = description
-  - c.with_body do
-    = body
-```
-
-For the full list of options, see its
-[source](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/components/layouts/settings_block_component.rb).
-
-#### Settings section
-
-Similar to SettingsBlock (see above) this component is used to group related settings together. Unlike SettingsBlock it doesn't provide accordion functionality. Uses a sticky header.
-
-**Example:**
-
-```haml
-= render ::Layouts::SettingsSection.new(_('Settings section heading')) do |c|
-  - c.with_description do
-    = description
-  - c.with_body do
-    = body
-```
-
-For the full list of options, see its
-[source](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/components/layouts/settings_section_component.rb).
-
 ## Best practices
 
 - If you are about to create a new view in Haml, use the available components
@@ -314,13 +240,3 @@ For the full list of options, see its
   button that is still implemented with plain Haml, consider migrating it to use a ViewComponent.
 - If you decide to create a new component, consider creating [previews](https://viewcomponent.org/guide/previews.html) for it, too.
   This will help others to discover your component with Lookbook, also it makes it much easier to test its different states.
-
-### Preview layouts
-
-If you need to have a custom layout for your ViewComponent preview consider using these paths for the layout code:
-
-- `app/views/layouts/lookbook` — for your layout HAML file
-- `app/assets/javascripts/entrypoints/lookbook` — for your custom JavaScript code
-- `app/assets/stylesheets/lookbook` — for your custom SASS code
-
-Please note that JavaScript and SASS code has to be manually included in the layout.

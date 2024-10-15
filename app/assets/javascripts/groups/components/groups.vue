@@ -41,12 +41,11 @@ export default {
 
 <template>
   <div class="groups-list-tree-container" data-testid="groups-list-tree-container">
-    <!-- eslint-disable-next-line vue/no-undef-components -->
     <group-folder :groups="groups" :action="action" />
     <pagination-links
       :change="change"
       :page-info="pageInfo"
-      class="gl-mt-3 gl-flex gl-justify-center"
+      class="d-flex justify-content-center gl-mt-3"
     />
   </div>
 </template>

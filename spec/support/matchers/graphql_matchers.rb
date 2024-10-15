@@ -106,6 +106,16 @@ end
 RSpec::Matchers.define :have_graphql_arguments do |*expected|
   include GraphqlHelpers
 
+  def expected_names(field)
+    @names ||= Array.wrap(expected).map { |name| GraphqlHelpers.fieldnamerize(name) }
+
+    if field.type.try(:ancestors)&.include?(GraphQL::Types::Relay::BaseConnection)
+      @names | %w[after before first last]
+    else
+      @names
+    end
+  end
+
   match do |field|
     names = expected_names(field)
 
@@ -117,24 +127,6 @@ RSpec::Matchers.define :have_graphql_arguments do |*expected|
     args = field.arguments.keys.inspect
 
     "expected #{field.name} to have the following arguments: #{names}, but it has #{args}."
-  end
-end
-
-RSpec::Matchers.define :include_graphql_arguments do |*expected|
-  include GraphqlHelpers
-
-  match do |field|
-    names = expected_names(field)
-
-    expect(field.arguments.keys).to include(*names)
-  end
-
-  failure_message do |field|
-    names = expected_names(field).inspect
-    args = field.arguments.keys.inspect
-
-    missing = names - args
-    "is missing fields: <#{missing.inspect}>" if missing.any?
   end
 end
 
@@ -298,15 +290,5 @@ RSpec::Matchers.define :have_graphql_description do |expected|
     else
       "have_graphql_description expected value cannot be blank"
     end
-  end
-end
-
-def expected_names(field)
-  @names ||= Array.wrap(expected).map { |name| GraphqlHelpers.fieldnamerize(name) }
-
-  if field.try(:type).try(:ancestors)&.include?(GraphQL::Types::Relay::BaseConnection)
-    @names | %w[after before first last]
-  else
-    @names
   end
 end

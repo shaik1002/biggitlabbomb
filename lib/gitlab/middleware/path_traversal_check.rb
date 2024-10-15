@@ -3,29 +3,29 @@
 module Gitlab
   module Middleware
     class PathTraversalCheck
-      PATH_TRAVERSAL_MESSAGE = 'Potential path traversal attempt detected.'
-      # Query param names known to have string parts detected as path traversal even though
-      # they are valid genuine requests
-      EXCLUDED_QUERY_PARAM_NAMES = %w[
-        search
-        search_title
-        search_query
-        term
-        name
-        filter
-        filter_projects
-        note
-        body
-        commit_message
-        content
-        description
-      ].freeze
-      NESTED_PARAMETERS_MAX_LEVEL = 5
-      REJECT_RESPONSE = [
-        Rack::Utils::SYMBOL_TO_STATUS_CODE[:bad_request],
-        { 'Content-Type' => 'text/plain' },
-        [PATH_TRAVERSAL_MESSAGE]
-      ].freeze
+      PATH_TRAVERSAL_MESSAGE = 'Potential path traversal attempt detected'
+
+      EXCLUDED_EXACT_PATHS = %w[/search].freeze
+      EXCLUDED_PATH_PREFIXES = %w[/search/].freeze
+
+      EXCLUDED_API_PATHS = %w[/search].freeze
+      EXCLUDED_PROJECT_API_PATHS = %w[/search].freeze
+      EXCLUDED_GROUP_API_PATHS = %w[/search].freeze
+
+      API_PREFIX = %r{/api/[^/]+}
+      API_SUFFIX = %r{(?:\.[^/]+)?}
+
+      EXCLUDED_API_PATHS_REGEX = [
+        EXCLUDED_API_PATHS.map do |path|
+          %r{\A#{API_PREFIX}#{path}#{API_SUFFIX}\z}
+        end.freeze,
+        EXCLUDED_PROJECT_API_PATHS.map do |path|
+          %r{\A#{API_PREFIX}/projects/[^/]+(?:/-)?#{path}#{API_SUFFIX}\z}
+        end.freeze,
+        EXCLUDED_GROUP_API_PATHS.map do |path|
+          %r{\A#{API_PREFIX}/groups/[^/]+(?:/-)?#{path}#{API_SUFFIX}\z}
+        end.freeze
+      ].flatten.freeze
 
       def initialize(app)
         @app = app
@@ -35,54 +35,53 @@ module Gitlab
         return @app.call(env) unless Feature.enabled?(:check_path_traversal_middleware, Feature.current_request)
 
         log_params = {}
-        request = ::Rack::Request.new(env.dup)
 
-        return @app.call(env) unless path_traversal_attempt?(request, log_params)
-
-        if Feature.enabled?(:check_path_traversal_middleware_reject_requests, Feature.current_request)
-          result = REJECT_RESPONSE
-          log_params[:path_traversal_attempt_rejected] = true
-        else
-          result = @app.call(env)
-          log_params[:status] = result.first
+        execution_time = measure_execution_time do
+          request = ::Rack::Request.new(env.dup)
+          check(request, log_params) unless excluded?(request)
         end
+        log_params[:duration_ms] = execution_time.round(5) if execution_time
 
-        log(log_params)
+        result = @app.call(env)
+
+        unless log_params.empty?
+          log_params[:status] = result.first
+          log(log_params)
+        end
 
         result
       end
 
       private
 
-      def path_traversal_attempt?(request, log_params)
-        original_fullpath = request.fullpath
-        exclude_query_parameters(request)
+      def measure_execution_time(&blk)
+        if Feature.enabled?(:log_execution_time_path_traversal_middleware, Feature.current_request)
+          Benchmark.ms(&blk)
+        else
+          yield
 
+          nil
+        end
+      end
+
+      def check(request, log_params)
         decoded_fullpath = CGI.unescape(request.fullpath)
 
-        return false unless Gitlab::PathTraversal.path_traversal?(decoded_fullpath, match_new_line: false)
+        return unless Gitlab::PathTraversal.path_traversal?(decoded_fullpath, match_new_line: false)
 
         log_params[:method] = request.request_method
-        log_params[:fullpath] = original_fullpath
+        log_params[:fullpath] = request.fullpath
         log_params[:message] = PATH_TRAVERSAL_MESSAGE
-
-        true
       end
 
-      def exclude_query_parameters(request)
-        query_params = request.GET
-        return if query_params.empty?
+      def excluded?(request)
+        path = request.path
 
-        cleanup_query_parameters!(query_params)
+        return true if path.in?(EXCLUDED_EXACT_PATHS)
+        return true if EXCLUDED_PATH_PREFIXES.any? { |p| path.start_with?(p) }
+        return true if EXCLUDED_API_PATHS_REGEX.any? { |r| path.match?(r) }
 
-        request.set_header(Rack::QUERY_STRING, Rack::Utils.build_nested_query(query_params))
-      end
-
-      def cleanup_query_parameters!(params, level: 1)
-        return params if params.empty? || level > NESTED_PARAMETERS_MAX_LEVEL
-
-        params.except!(*EXCLUDED_QUERY_PARAM_NAMES)
-        params.each { |k, v| params[k] = cleanup_query_parameters!(v, level: level + 1) if v.is_a?(Hash) }
+        false
       end
 
       def log(payload)

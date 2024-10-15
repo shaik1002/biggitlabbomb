@@ -7,7 +7,7 @@ module Admin
     before_action :find_broadcast_message, only: [:edit, :update, :destroy]
     before_action :find_broadcast_messages, only: [:index, :create]
 
-    feature_category :notifications
+    feature_category :onboarding
     urgency :low
 
     def index
@@ -76,11 +76,11 @@ module Admin
     protected
 
     def find_broadcast_message
-      @broadcast_message = System::BroadcastMessage.find(params.permit(:id)[:id])
+      @broadcast_message = System::BroadcastMessage.find(params[:id])
     end
 
     def find_broadcast_messages
-      @broadcast_messages = System::BroadcastMessage.order(ends_at: :desc).page(pagination_params[:page]) # rubocop: disable CodeReuse/ActiveRecord
+      @broadcast_messages = System::BroadcastMessage.order(ends_at: :desc).page(params[:page]) # rubocop: disable CodeReuse/ActiveRecord
     end
 
     def broadcast_message_params

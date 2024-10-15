@@ -11,11 +11,16 @@ describe('Group import status component', () => {
     status: STATUSES.FINISHED,
   };
 
+  const mockDetailsPath = '/:id/failures/:entity_id';
+
   const createComponent = ({ props } = {}) => {
     wrapper = shallowMount(ImportStatus, {
       propsData: {
         ...defaultProps,
         ...props,
+      },
+      provide: {
+        detailsPath: mockDetailsPath,
       },
     });
   };
@@ -70,24 +75,24 @@ describe('Group import status component', () => {
     });
   });
 
-  describe('failures link', () => {
+  describe('details link', () => {
     it('does not render by default', () => {
       createComponent();
 
       expect(findGlLink().exists()).toBe(false);
     });
 
-    it('renders with correct link when failuresHref is passed', () => {
-      const mockFailuresHref = '/failures/11';
-
+    it('renders with correct link when import is partial', () => {
       createComponent({
         props: {
-          failuresHref: mockFailuresHref,
+          id: 2,
+          entityId: 11,
+          hasFailures: true,
           status: STATUSES.FINISHED,
         },
       });
 
-      expect(findGlLink().attributes('href')).toBe(mockFailuresHref);
+      expect(findGlLink().attributes('href')).toBe('/2/failures/11');
     });
   });
 });

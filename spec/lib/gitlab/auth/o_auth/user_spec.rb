@@ -2,12 +2,11 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Auth::OAuth::User, aggregate_failures: true, feature_category: :system_access do
+RSpec.describe Gitlab::Auth::OAuth::User, feature_category: :system_access do
   include LdapHelpers
 
-  let_it_be(:organization) { create(:organization) }
-  let(:oauth_user) { described_class.new(auth_hash, organization_id: organization.id) }
-  let(:oauth_user_2) { described_class.new(auth_hash_2, organization_id: organization.id) }
+  let(:oauth_user) { described_class.new(auth_hash) }
+  let(:oauth_user_2) { described_class.new(auth_hash_2) }
   let(:gl_user) { oauth_user.gl_user }
   let(:gl_user_2) { oauth_user_2.gl_user }
   let(:uid) { 'my-uid' }
@@ -70,6 +69,77 @@ RSpec.describe Gitlab::Auth::OAuth::User, aggregate_failures: true, feature_cate
       end
     end
 
+    # This context should be removed by https://gitlab.com/gitlab-org/gitlab/-/issues/456424
+    context 'for fallback that allows sign-ins to GitLab with Bitbucket identity with untrusted extern_uid when email matches' do
+      let(:provider) { 'bitbucket' }
+      let(:bitbucket_username) { user.username }
+      let(:bitbucket_email) { user.email }
+      let!(:identity) { create(:identity, provider: provider, extern_uid: user.username, user: user, trusted_extern_uid: false) }
+
+      let(:auth_hash) do
+        OmniAuth::AuthHash.new(uid: uid, provider: provider, username: bitbucket_username, email: bitbucket_email)
+      end
+
+      context 'when Bitbucket and GitLab accounts have the same email' do
+        it "updates the identity's extern_uid; updates the identity's trusted_extern_uid to true; returns the user" do
+          expect(identity.reload.extern_uid).not_to eq(uid)
+          expect(identity.reload.extern_uid).to eq(user.username)
+          expect(identity.reload.trusted_extern_uid).to eq(false)
+
+          expect(described_class.find_by_uid_and_provider(uid, provider, auth_hash)).to eq user
+
+          expect(identity.reload.extern_uid).to eq(uid)
+          expect(identity.reload.trusted_extern_uid).to eq(true)
+        end
+      end
+
+      context 'when auth_hash argument is not provided' do
+        it 'returns nil' do
+          expect(described_class.find_by_uid_and_provider(uid, provider)).to eq nil
+        end
+      end
+
+      context 'when Bitbucket and GitLab accounts have different emails' do
+        let(:bitbucket_email) { 'bitbucketuser@example.com' }
+
+        it 'raises Gitlab::Auth::OAuth::User::IdentityWithUntrustedExternUidError' do
+          expect { described_class.find_by_uid_and_provider(uid, provider, auth_hash) }
+            .to raise_error(Gitlab::Auth::OAuth::User::IdentityWithUntrustedExternUidError)
+        end
+      end
+
+      context 'when there is no Bitbucket identity with untrusted extern_uid' do
+        let(:bitbucket_username) { 'bitbucketuser' }
+
+        it 'returns nil' do
+          expect(described_class.find_by_uid_and_provider(uid, provider, auth_hash)).to eq nil
+        end
+      end
+
+      context 'when identity exists for given untrusted uid and provider but is not tied to a user' do
+        before do
+          identity.update!(user: nil)
+        end
+
+        it 'raises Gitlab::Auth::OAuth::User::IdentityWithUntrustedExternUidError' do
+          expect { described_class.find_by_uid_and_provider(uid, provider, auth_hash) }
+            .to raise_error(Gitlab::Auth::OAuth::User::IdentityWithUntrustedExternUidError)
+        end
+      end
+
+      context 'when bitbucket identity with trusted_extern_uid' do
+        let!(:identity) { create(:identity, provider: provider, extern_uid: uid, user: user) }
+
+        it "does not update the identity and returns the user" do
+          identity_updated_at = identity.reload.updated_at
+
+          expect(described_class.find_by_uid_and_provider(uid, provider, auth_hash)).to eq user
+
+          expect(identity.reload.updated_at).to eq(identity_updated_at)
+        end
+      end
+    end
+
     context 'for LDAP' do
       let(:dn) { 'CN=John Åström, CN=Users, DC=Example, DC=com' }
 
@@ -80,7 +150,7 @@ RSpec.describe Gitlab::Auth::OAuth::User, aggregate_failures: true, feature_cate
           nickname: 'jastrom'
         }
         special_hash = OmniAuth::AuthHash.new(uid: dn, provider: 'ldapmain', info: special_info)
-        special_chars_user = described_class.new(special_hash, organization_id: organization.id)
+        special_chars_user = described_class.new(special_hash)
         user = special_chars_user.save
 
         expect(described_class.find_by_uid_and_provider(dn, 'ldapmain')).to eq user
@@ -173,28 +243,6 @@ RSpec.describe Gitlab::Auth::OAuth::User, aggregate_failures: true, feature_cate
           oauth_user.save # rubocop:disable Rails/SaveBang
 
           expect(gl_user).to be_persisted
-        end
-      end
-
-      context 'when email address is too long' do
-        def long_email_local_part
-          "reallylongemail" * 300
-        end
-
-        let(:info_hash) do
-          {
-            email: "#{long_email_local_part}@example.com"
-          }
-        end
-
-        it 'generates an empty username and produces an error' do
-          oauth_user.save # rubocop:disable Rails/SaveBang -- Not an ActiveRecord object
-
-          expect(gl_user.username).to eq("blank")
-          expect(gl_user.errors.full_messages.to_sentence)
-            .to eq("Identity provider email " + _("must be 254 characters or less."))
-          expect(oauth_user).not_to be_valid
-          expect(oauth_user).not_to be_valid_sign_in
         end
       end
 
@@ -677,7 +725,7 @@ RSpec.describe Gitlab::Auth::OAuth::User, aggregate_failures: true, feature_cate
                 uid: uid,
                 username: uid,
                 name: 'John Doe',
-                email: ['John@mail.com'],
+                email: ['john@mail.com'],
                 dn: dn
               )
             end
@@ -722,13 +770,11 @@ RSpec.describe Gitlab::Auth::OAuth::User, aggregate_failures: true, feature_cate
             context "and LDAP user has an account already" do
               let!(:existing_user) { create(:omniauth_user, name: 'John Doe', email: 'john@mail.com', extern_uid: dn, provider: 'ldapmain', username: 'john') }
 
-              before do
+              it "adds the omniauth identity to the LDAP account" do
                 allow(Gitlab::Auth::Ldap::Person).to receive(:find_by_uid).and_return(ldap_user)
 
                 oauth_user.save # rubocop:disable Rails/SaveBang
-              end
 
-              it "adds the omniauth identity to the LDAP account" do
                 expect(gl_user).to be_valid
                 expect(gl_user.username).to eql 'john'
                 expect(gl_user.name).to eql 'John Doe'
@@ -741,16 +787,6 @@ RSpec.describe Gitlab::Auth::OAuth::User, aggregate_failures: true, feature_cate
                     { provider: 'twitter', extern_uid: uid }
                   ]
                 )
-              end
-
-              it "has name and email set as synced" do
-                expect(gl_user.user_synced_attributes_metadata.name_synced).to be_truthy
-                expect(gl_user.user_synced_attributes_metadata.email_synced).to be_truthy
-              end
-
-              it "has name and email set as read-only" do
-                expect(gl_user.read_only_attribute?(:name)).to be_truthy
-                expect(gl_user.read_only_attribute?(:email)).to be_truthy
               end
             end
           end
@@ -1016,6 +1052,17 @@ RSpec.describe Gitlab::Auth::OAuth::User, aggregate_failures: true, feature_cate
       it 'creates valid user with sanitized username' do
         expect(gl_user).to be_valid
         expect(gl_user.username).to eq('opie.the_opossum')
+      end
+
+      context 'and extra_slug_path_sanitization feature is disabled' do
+        before do
+          stub_feature_flags(extra_slug_path_sanitization: false)
+        end
+
+        it 'fails to create user' do
+          expect(gl_user).not_to be_valid
+          expect(gl_user.errors[:username]).to be_present
+        end
       end
     end
   end

@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'moves repository to another storage' do |repository_type|
-  let(:project_repository_double_destination) { double(:repository) }
-  let(:project_repository_double_source) { double(:repository) }
+  let(:project_repository_double) { double(:repository) }
+  let(:original_project_repository_double) { double(:repository) }
   let!(:project_repository_checksum) { project.repository.checksum }
 
   let(:repository_double) { double(:repository) }
@@ -15,10 +15,10 @@ RSpec.shared_examples 'moves repository to another storage' do |repository_type|
 
     allow(Gitlab::Git::Repository).to receive(:new)
       .with('test_second_storage', project.repository.raw.relative_path, project.repository.gl_repository, project.repository.full_path)
-      .and_return(project_repository_double_destination)
+      .and_return(project_repository_double)
     allow(Gitlab::Git::Repository).to receive(:new)
       .with('default', project.repository.raw.relative_path, nil, nil)
-      .and_return(project_repository_double_source)
+      .and_return(original_project_repository_double)
 
     allow(Gitlab::Git::Repository).to receive(:new)
       .with('test_second_storage', repository.raw.relative_path, repository.gl_repository, repository.full_path)
@@ -33,17 +33,17 @@ RSpec.shared_examples 'moves repository to another storage' do |repository_type|
       allow(Gitlab::GitalyClient).to receive(:filesystem_id).with('default').and_call_original
       allow(Gitlab::GitalyClient).to receive(:filesystem_id).with('test_second_storage').and_return(SecureRandom.uuid)
 
-      allow(project_repository_double_destination).to receive(:replicate)
-        .with(project.repository.raw, partition_hint: "")
-      allow(project_repository_double_destination).to receive(:checksum)
+      allow(project_repository_double).to receive(:replicate)
+        .with(project.repository.raw)
+      allow(project_repository_double).to receive(:checksum)
         .and_return(project_repository_checksum)
 
       allow(repository_double).to receive(:replicate)
-        .with(repository.raw, partition_hint: "")
+        .with(repository.raw)
       allow(repository_double).to receive(:checksum)
         .and_return(repository_checksum)
 
-      expect(project_repository_double_source).to receive(:remove)
+      expect(original_project_repository_double).to receive(:remove)
       expect(original_repository_double).to receive(:remove)
     end
 
@@ -62,7 +62,7 @@ RSpec.shared_examples 'moves repository to another storage' do |repository_type|
       expect(Gitlab::GitalyClient).to receive(:filesystem_id).twice.and_return(SecureRandom.uuid)
     end
 
-    it 'updates the database without trying to move the repository', :aggregate_failures do
+    it 'updates the database without trying to move the repostory', :aggregate_failures do
       result = subject.execute
       project.reload
 
@@ -77,13 +77,13 @@ RSpec.shared_examples 'moves repository to another storage' do |repository_type|
     it 'unmarks the repository as read-only without updating the repository storage' do
       allow(Gitlab::GitalyClient).to receive(:filesystem_id).with('default').and_call_original
       allow(Gitlab::GitalyClient).to receive(:filesystem_id).with('test_second_storage').and_return(SecureRandom.uuid)
-      expect(project_repository_double_destination).to receive(:replicate)
-        .with(project.repository.raw, partition_hint: "")
-      expect(project_repository_double_destination).to receive(:checksum)
+      expect(project_repository_double).to receive(:replicate)
+        .with(project.repository.raw)
+      expect(project_repository_double).to receive(:checksum)
         .and_return(project_repository_checksum)
 
       expect(repository_double).to receive(:replicate)
-        .with(repository.raw, partition_hint: "")
+        .with(repository.raw)
         .and_raise(Gitlab::Git::CommandError)
       expect(repository_double).to receive(:remove)
 
@@ -101,13 +101,13 @@ RSpec.shared_examples 'moves repository to another storage' do |repository_type|
     it 'sets the correct state' do
       allow(Gitlab::GitalyClient).to receive(:filesystem_id).with('default').and_call_original
       allow(Gitlab::GitalyClient).to receive(:filesystem_id).with('test_second_storage').and_return(SecureRandom.uuid)
-      allow(project_repository_double_destination).to receive(:replicate)
-        .with(project.repository.raw, partition_hint: "")
-      allow(project_repository_double_destination).to receive(:checksum)
+      allow(project_repository_double).to receive(:replicate)
+        .with(project.repository.raw)
+      allow(project_repository_double).to receive(:checksum)
         .and_return(project_repository_checksum)
-      allow(project_repository_double_source).to receive(:remove)
+      allow(original_project_repository_double).to receive(:remove)
       allow(repository_double).to receive(:replicate)
-        .with(repository.raw, partition_hint: "")
+        .with(repository.raw)
       allow(repository_double).to receive(:checksum)
         .and_return(repository_checksum)
 
@@ -126,13 +126,13 @@ RSpec.shared_examples 'moves repository to another storage' do |repository_type|
     it 'unmarks the repository as read-only without updating the repository storage' do
       allow(Gitlab::GitalyClient).to receive(:filesystem_id).with('default').and_call_original
       allow(Gitlab::GitalyClient).to receive(:filesystem_id).with('test_second_storage').and_return(SecureRandom.uuid)
-      allow(project_repository_double_destination).to receive(:replicate)
-        .with(project.repository.raw, partition_hint: "")
-      allow(project_repository_double_destination).to receive(:checksum)
+      allow(project_repository_double).to receive(:replicate)
+        .with(project.repository.raw)
+      allow(project_repository_double).to receive(:checksum)
         .and_return(project_repository_checksum)
 
       expect(repository_double).to receive(:replicate)
-        .with(repository.raw, partition_hint: "")
+        .with(repository.raw)
       expect(repository_double).to receive(:checksum)
         .and_return('not matching checksum')
       expect(repository_double).to receive(:remove)

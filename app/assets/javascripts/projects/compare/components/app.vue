@@ -8,7 +8,6 @@ import {
   GlSprintf,
   GlLink,
 } from '@gitlab/ui';
-import PageHeading from '~/vue_shared/components/page_heading.vue';
 import csrf from '~/lib/utils/csrf';
 import { joinPaths } from '~/lib/utils/url_utility';
 import {
@@ -29,7 +28,6 @@ export default {
     GlIcon,
     GlLink,
     GlSprintf,
-    PageHeading,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -123,23 +121,29 @@ export default {
 </script>
 
 <template>
-  <form ref="form" class="js-signature-container" method="POST" :action="projectCompareIndexPath">
+  <form
+    ref="form"
+    class="js-requires-input js-signature-container"
+    method="POST"
+    :action="projectCompareIndexPath"
+  >
     <input :value="$options.csrf.token" type="hidden" name="authenticity_token" />
-    <page-heading :heading="$options.i18n.title">
-      <template #description>
-        <gl-sprintf :message="$options.i18n.subtitle">
-          <template #bold="{ content }">
-            <strong>{{ content }}</strong>
-          </template>
-          <template #link="{ content }">
-            <gl-link target="_blank" :href="$options.docsLink" data-testid="help-link">{{
-              content
-            }}</gl-link>
-          </template>
-        </gl-sprintf>
-      </template>
-    </page-heading>
-    <div class="compare-revision-cards gl-items-center lg:gl-flex lg:gl-flex-row">
+    <h1 class="gl-font-size-h1 gl-mt-4">{{ $options.i18n.title }}</h1>
+    <p>
+      <gl-sprintf :message="$options.i18n.subtitle">
+        <template #bold="{ content }">
+          <strong>{{ content }}</strong>
+        </template>
+        <template #link="{ content }">
+          <gl-link target="_blank" :href="$options.docsLink" data-testid="help-link">{{
+            content
+          }}</gl-link>
+        </template>
+      </gl-sprintf>
+    </p>
+    <div
+      class="gl-lg-flex-direction-row gl-lg-display-flex gl-align-items-center compare-revision-cards"
+    >
       <revision-card
         data-testid="sourceRevisionCard"
         :refs-project-path="to.refsProjectPath"
@@ -153,8 +157,7 @@ export default {
       />
       <gl-button
         v-gl-tooltip="$options.i18n.swapRevisions"
-        class="gl-mx-3 gl-hidden gl-self-end md:gl-flex"
-        :aria-label="$options.i18n.swap"
+        class="gl-display-flex gl-mx-3 gl-align-self-end swap-button"
         data-testid="swapRevisionsButton"
         category="tertiary"
         @click="onSwapRevision"
@@ -163,7 +166,7 @@ export default {
       </gl-button>
       <gl-button
         v-gl-tooltip="$options.i18n.swapRevisions"
-        class="gl-my-5 gl-flex gl-self-end md:gl-hidden"
+        class="gl-display-none gl-align-self-end gl-my-5 swap-button-mobile"
         @click="onSwapRevision"
       >
         {{ $options.i18n.swap }}
@@ -188,7 +191,7 @@ export default {
         required
       />
     </gl-form-group>
-    <div class="gl-flex gl-gap-3 gl-pb-4">
+    <div class="gl-display-flex gl-gap-3 gl-pb-4">
       <gl-button
         category="primary"
         variant="confirm"

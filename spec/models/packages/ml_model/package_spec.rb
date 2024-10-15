@@ -40,46 +40,28 @@ RSpec.describe Packages::MlModel::Package, feature_category: :mlops do
       expect(errors).to be_empty
     end
 
-    context 'when name' do
-      where(:case_name, :name) do
-        'is blank'                     | ''
-        'is nil'                       | nil
-        'is not valid package name'    | '!!()()'
-        'is too large'                 | ('a' * 256)
+    describe 'name' do
+      where(:ctx, :name) do
+        'name is blank'                     | ''
+        'name is nil'                       | nil
+        'name is not valid package name'    | '!!()()'
+        'name is too large'                 | ('a' * 256)
       end
       with_them do
-        it 'is invalid' do
-          expect(errors).to include(:name)
-        end
+        it { expect(errors).to include(:name) }
       end
     end
 
-    context 'when version' do
-      where(:case_name, :version) do
-        'is semver'            | '1.2.0-rc.1+metadata'
-        'is candidate_(id)'    | 'candidate_123'
+    describe 'version' do
+      where(:ctx, :version) do
+        'version is blank'            | ''
+        'version is nil'              | nil
+        'version is not valid semver' | 'v1.0.0'
+        'version is too large'        | ('a' * 256)
       end
       with_them do
-        it 'is valid' do
-          expect(errors).not_to include(:version)
-        end
-      end
-
-      where(:case_name, :version) do
-        'is blank'            | ''
-        'is nil'              | nil
-        'is not valid semver' | 'v1.0.0'
-        'is too large'        | ('a' * 256)
-      end
-      with_them do
-        it 'is invalid' do
-          expect(errors).to include(:version)
-        end
+        it { expect(errors).to include(:version) }
       end
     end
-  end
-
-  describe '.installable' do
-    it_behaves_like 'installable packages', :ml_model_package
   end
 end

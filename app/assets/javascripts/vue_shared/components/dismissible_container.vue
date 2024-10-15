@@ -35,17 +35,17 @@ export default {
 
 <template>
   <div>
-    <div class="gl-flex gl-items-center">
+    <div class="gl-display-flex gl-align-items-center">
       <slot name="title"></slot>
       <div class="ml-auto">
         <button
           :aria-label="__('Close')"
-          class="gl-rounded-none gl-border-none !gl-bg-transparent gl-p-0 !gl-shadow-none !gl-outline-none"
+          class="btn-blank"
           type="button"
           data-testid="close"
           @click="dismiss"
         >
-          <gl-icon name="close" variant="subtle" />
+          <gl-icon name="close" class="gl-text-gray-500" />
         </button>
       </div>
     </div>

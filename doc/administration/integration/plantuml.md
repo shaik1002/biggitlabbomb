@@ -2,7 +2,6 @@
 stage: Create
 group: Source Code
 info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments"
-description: "Configure PlantUML integration with your self-managed GitLab instance."
 ---
 
 # PlantUML
@@ -118,8 +117,6 @@ services:
   plantuml:
     image: 'plantuml/plantuml-server:tomcat'
     container_name: plantuml
-    ports:
-     - "8005:8080"
 ```
 
 #### Configure local PlantUML access
@@ -324,7 +321,7 @@ stop;
 After configuring your local PlantUML server, you're ready to enable the PlantUML integration:
 
 1. Sign in to GitLab as an [Administrator](../../user/permissions.md) user.
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. On the left sidebar, go to **Settings > General** and expand the **PlantUML** section.
 1. Select the **Enable PlantUML** checkbox.
 1. Set the PlantUML instance as `https://gitlab.example.com/-/plantuml/`,
@@ -355,18 +352,3 @@ these steps:
 - `deflate` is the default encoding type for PlantUML. To use a different encoding type, PlantUML integration
   [requires a header prefix in the URL](https://plantuml.com/text-encoding)
   to distinguish different encoding types.
-
-## Troubleshooting
-
-### Rendered diagram URL remains the same after update
-
-Rendered diagrams are cached. To see the updates, try these steps:
-
-- If the diagram is in a Markdown file, make a small change to the Markdown file, and commit it. This triggers a re-render.
-- [Clear your GitLab cache](../raketasks/maintenance.md#clear-redis-cache).
-
-If you're still not seeing the updated URL, check the following:
-
-- Ensure the PlantUML server is accessible from your GitLab instance.
-- Verify that the PlantUML integration is enabled in your GitLab settings.
-- Check the GitLab logs for errors related to PlantUML rendering.

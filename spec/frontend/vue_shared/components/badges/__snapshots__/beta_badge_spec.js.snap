@@ -3,41 +3,37 @@
 exports[`Beta badge component renders the badge 1`] = `
 <div>
   <a
-    class="badge badge-neutral badge-pill gl-badge gl-cursor-pointer"
+    class="badge badge-neutral badge-pill gl-badge gl-cursor-pointer md"
     href="#"
     target="_self"
   >
-    <span
-      class="gl-badge-content"
-    >
-      Beta
-    </span>
+    Beta
   </a>
   <div
     class="gl-popover"
   >
     <p>
-      A beta feature is not yet production-ready, but is ready for testing and unlikely to change significantly before it's released.
+      A Beta feature is not production-ready, but is unlikely to change drastically before it's released. We encourage users to try Beta features and provide feedback.
     </p>
     <p
       class="gl-mb-0"
     >
-      Beta features:
+      A Beta feature:
     </p>
     <ul
       class="gl-pl-4"
     >
       <li>
-        Have a low risk of data loss, but might still be unstable.
+        May be unstable.
       </li>
       <li>
-        Are supported on a commercially-reasonable effort basis.
+        Should not cause data loss.
       </li>
       <li>
-        Have a near complete user experience.
+        Is supported by a commercially reasonable effort.
       </li>
       <li>
-        Are subject to the GitLab Testing Agreement.
+        Is complete or near completion.
       </li>
     </ul>
   </div>

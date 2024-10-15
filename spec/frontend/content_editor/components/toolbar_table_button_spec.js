@@ -22,7 +22,6 @@ describe('content_editor/components/toolbar_table_button', () => {
   const findDropdown = () => wrapper.findComponent(GlDisclosureDropdown);
   const findButton = (row, col) => wrapper.findComponent({ ref: `table-${row}-${col}` });
   const getNumButtons = () => findDropdown().findAllComponents(GlButton).length;
-  const triggerMouseover = (row, rol) => findButton(row, rol).trigger('mouseover');
 
   beforeEach(() => {
     editor = createTestEditor();
@@ -58,14 +57,16 @@ describe('content_editor/components/toolbar_table_button', () => {
       ${'focus'}     | ${(button) => button.element.dispatchEvent(new FocusEvent('focus'))}
     `('on $event', ({ triggerEvent }) => {
       beforeEach(async () => {
-        const button = findButton(row, col);
+        const button = wrapper.findComponent({ ref: `table-${row}-${col}` });
         await triggerEvent(button);
       });
 
       it('marks all rows and cols before it as active', () => {
         const prevRow = Math.max(1, row - 1);
         const prevCol = Math.max(1, col - 1);
-        expect(findButton(prevRow, prevCol).element).toHaveClass('active');
+        expect(wrapper.findComponent({ ref: `table-${prevRow}-${prevCol}` }).element).toHaveClass(
+          'active',
+        );
       });
 
       it('shows a help text indicating the size of the table being inserted', () => {
@@ -83,7 +84,7 @@ describe('content_editor/components/toolbar_table_button', () => {
       beforeEach(async () => {
         commands = mockChainedCommands(editor, ['focus', 'insertTable', 'run']);
 
-        const button = findButton(row, col);
+        const button = wrapper.findComponent({ ref: `table-${row}-${col}` });
         await button.trigger('mouseover');
         await button.trigger('click');
       });
@@ -102,40 +103,6 @@ describe('content_editor/components/toolbar_table_button', () => {
     });
   });
 
-  it('does not reduce the size of the grid when focusing on a smaller table', async () => {
-    await triggerMouseover(5, 5);
-    expect(getNumButtons()).toBe(6 * 6);
-
-    await triggerMouseover(6, 6);
-    expect(getNumButtons()).toBe(7 * 7);
-
-    await triggerMouseover(7, 7);
-    expect(getNumButtons()).toBe(8 * 8);
-
-    await triggerMouseover(8, 8);
-    expect(getNumButtons()).toBe(9 * 9);
-
-    await triggerMouseover(9, 9);
-    expect(getNumButtons()).toBe(10 * 10);
-
-    await triggerMouseover(5, 5);
-    expect(getNumButtons()).toBe(10 * 10);
-
-    await triggerMouseover(4, 4);
-    expect(getNumButtons()).toBe(10 * 10);
-  });
-
-  it('resets the grid when closing the dropdown', async () => {
-    await triggerMouseover(5, 5);
-    await triggerMouseover(6, 6);
-    await triggerMouseover(7, 7);
-    await triggerMouseover(8, 8);
-    expect(getNumButtons()).toBe(9 * 9);
-
-    await findDropdown().vm.$emit('hidden');
-    expect(getNumButtons()).toBe(5 * 5);
-  });
-
   it('does not create more buttons than a 10x10 grid', async () => {
     for (let i = 5; i < 10; i += 1) {
       expect(getNumButtons()).toBe(i * i);
@@ -145,7 +112,7 @@ describe('content_editor/components/toolbar_table_button', () => {
       expect(findDropdown().element).toHaveText(`Insert a ${i}×${i} table`);
     }
 
-    expect(getNumButtons()).toBe(10 * 10); // 10x10 (and not 11x11)
+    expect(getNumButtons()).toBe(100); // 10x10 (and not 11x11)
   });
 
   describe('a11y tests', () => {
@@ -158,7 +125,7 @@ describe('content_editor/components/toolbar_table_button', () => {
     });
 
     it('renders a role=grid of 5x5 gridcells to create a table', () => {
-      expect(getNumButtons()).toBe(5 * 5);
+      expect(getNumButtons()).toBe(25); // 5x5
       expect(wrapper.find('[role="grid"]').exists()).toBe(true);
       wrapper.findAll('[role="row"]').wrappers.forEach((row) => {
         expect(row.findAll('[role="gridcell"]')).toHaveLength(5);

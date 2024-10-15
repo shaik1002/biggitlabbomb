@@ -459,7 +459,7 @@ RSpec.describe SearchHelper, feature_category: :global_search do
 
     context 'with a search scope' do
       let(:term) { 'bla' }
-      let(:scope) { 'projects' }
+      let(:scope) { 'project' }
 
       it 'returns only scope-specific results' do
         expect(self).to receive(:scope_specific_results).with(term, scope).and_return([])
@@ -469,18 +469,6 @@ RSpec.describe SearchHelper, feature_category: :global_search do
         expect(self).not_to receive(:issue_autocomplete)
 
         resource_results(term, scope: scope)
-      end
-    end
-
-    context 'when global_search_users_tab feature flag is disabled' do
-      before do
-        stub_feature_flags(global_search_users_tab: false)
-      end
-
-      it 'does not return results' do
-        results = resource_results('use')
-
-        expect(results).to be_empty
       end
     end
   end
@@ -504,9 +492,9 @@ RSpec.describe SearchHelper, feature_category: :global_search do
     end
 
     where(:scope, :category) do
-      'users'    | 'Users'
-      'projects' | 'Projects'
-      'issues'   | 'Recent issues'
+      'user'    | 'Users'
+      'project' | 'Projects'
+      'issue'   | 'Recent issues'
     end
 
     with_them do
@@ -520,18 +508,6 @@ RSpec.describe SearchHelper, feature_category: :global_search do
     context 'when scope is unknown' do
       it 'does not return any results' do
         expect(scope_specific_results('sea', 'other')).to eq([])
-      end
-    end
-
-    context 'when global_search_users_tab feature flag is disabled' do
-      before do
-        stub_feature_flags(global_search_users_tab: false)
-      end
-
-      it 'does not return results' do
-        results = scope_specific_results('sea', 'users')
-
-        expect(results).to be_empty
       end
     end
   end
@@ -1067,7 +1043,7 @@ RSpec.describe SearchHelper, feature_category: :global_search do
 
     context 'snippet' do
       context 'when searching from snippets' do
-        let(:snippet) { create(:project_snippet) }
+        let(:snippet) { create(:snippet) }
 
         it 'adds :for_snippets true correctly to hash' do
           expect(header_search_context[:for_snippets]).to eq(true)
@@ -1186,15 +1162,5 @@ RSpec.describe SearchHelper, feature_category: :global_search do
     end
 
     it { expect(wiki_blob_link(wiki_blob)).to eq("/#{project.namespace.path}/#{project.path}/-/wikis/#{wiki_blob.path}") }
-  end
-
-  describe '#should_show_zoekt_results?' do
-    before do
-      allow(self).to receive(:current_user).and_return(nil)
-    end
-
-    it 'returns false for any scope and search type' do
-      expect(should_show_zoekt_results?(:some_scope, :some_type)).to be false
-    end
   end
 end

@@ -1,5 +1,5 @@
 ---
-stage: Govern
+stage: Verify
 group: Pipeline Security
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -57,11 +57,7 @@ Each job can be configured with ID tokens, which are provided as a CI/CD variabl
 ### Authorization workflow
 
 ```mermaid
-%%{init: { "fontFamily": "GitLab Sans" }}%%
 sequenceDiagram
-accTitle: Authorization workflow
-accDescr: The flow of authorization requests between GitLab and a cloud provider.
-
     participant GitLab
     Note right of Cloud: Create OIDC identity provider
     Note right of Cloud: Create role with conditionals

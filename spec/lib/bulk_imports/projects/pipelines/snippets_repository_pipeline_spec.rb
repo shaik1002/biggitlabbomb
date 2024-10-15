@@ -7,7 +7,7 @@ RSpec.describe BulkImports::Projects::Pipelines::SnippetsRepositoryPipeline, fea
   let(:project) { create(:project) }
   let(:bulk_import) { create(:bulk_import, user: user) }
   let(:bulk_import_configuration) { create(:bulk_import_configuration, bulk_import: bulk_import) }
-  let!(:matched_snippet) { create(:project_snippet, project: project, created_at: "1981-12-13T23:59:59Z") }
+  let!(:matched_snippet) { create(:snippet, project: project, created_at: "1981-12-13T23:59:59Z") }
   let(:entity) do
     create(
       :bulk_import_entity,
@@ -59,8 +59,8 @@ RSpec.describe BulkImports::Projects::Pipelines::SnippetsRepositoryPipeline, fea
     end
   end
 
-  describe '#run', :clean_gitlab_redis_shared_state do
-    let(:validation_response) { double(Hash, error?: false) }
+  describe '#run', :clean_gitlab_redis_cache do
+    let(:validation_response) { double(Hash, 'error?': false) }
 
     before do
       allow_next_instance_of(BulkImports::Common::Extractors::GraphqlExtractor) do |extractor|
@@ -172,7 +172,7 @@ RSpec.describe BulkImports::Projects::Pipelines::SnippetsRepositoryPipeline, fea
       end
 
       context 'when snippet is invalid' do
-        let(:validation_response) { double(Hash, error?: true) }
+        let(:validation_response) { double(Hash, 'error?': true) }
 
         before do
           allow_next_instance_of(Repository) do |repository|

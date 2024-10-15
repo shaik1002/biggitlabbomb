@@ -53,13 +53,13 @@ module QA
         def check_element(name, click_by_js = false, **kwargs)
           log_by_js("checking", name, click_by_js, **kwargs)
 
-          log_slow_code(name, **kwargs) { super }
+          super
         end
 
         def uncheck_element(name, click_by_js = false, **kwargs)
           log_by_js("unchecking", name, click_by_js, **kwargs)
 
-          log_slow_code(name, **kwargs) { super }
+          super
         end
 
         def log_by_js(action, name, click_by_js, **kwargs)
@@ -72,7 +72,7 @@ module QA
         def click_element_coordinates(name, **kwargs)
           log(%(clicking the coordinates of :#{highlight_element(name)}), :info)
 
-          log_slow_code(name, **kwargs) { super }
+          super
         end
 
         # @param name [Symbol, String] name of the data_qa_selector or data-testid element
@@ -98,7 +98,7 @@ module QA
 
           log(%(filling :#{highlight_element(name)} with "#{masked_content}"), :info)
 
-          log_slow_code(name) { super }
+          super
         end
 
         def select_element(name, value)
@@ -147,7 +147,7 @@ module QA
         def wait_for_animated_element(name)
           log("waiting for animated element: #{name}")
 
-          log_slow_code(name) { super }
+          super
         end
 
         def within_element(name, **kwargs)
@@ -189,15 +189,7 @@ module QA
           element.to_s.underline.bright
         end
 
-        # Log message for has_element? and has_no_element? methods
-        #
-        # @param [String] method the method name
-        # @param [Symbol, String, QA::Page::Element] name the name of the element
-        # @param [Boolean] found the result of the method
-        # @param [Hash] kwargs
         def log_has_element_or_not(method, name, found, **kwargs)
-          name = name.name if name.is_a? QA::Page::Element
-
           msg = ["#{method} :#{name}"]
           msg << %(with text "#{kwargs[:text]}") if kwargs[:text]
           msg << "class: #{kwargs[:class]}" if kwargs[:class]
@@ -214,17 +206,9 @@ module QA
           result = yield
           ending = kwargs.fetch(:ending_time, Time.now)
           duration = (ending - starting).round(3)
-          method_name = caller_locations(1, 1).first.label
-          called_from = caller_locations(2, 1).first.path
-          CodeRuntimeTracker.record_method_call(
-            name: method_name,
-            runtime: duration,
-            filename: called_from.gsub("#{Runtime::Path.qa_root}/", ''),
-            call_arg: param_info.is_a?(QA::Page::Element) ? param_info.name : param_info
-          )
-
-          if duration > kwargs.fetch(:log_slow_threshold, 1)
-            Runtime::Logger.warn("Potentially Slow Code '#{method_name} #{param_info}' took #{duration}s")
+          if duration > kwargs.fetch(:log_slow_threshold, 0.5)
+            caller_method_name = caller_locations(1, 1).first.label
+            QA::Runtime::Logger.warn("Potentially Slow Code '#{caller_method_name} #{param_info}' took #{duration}s")
           end
 
           result

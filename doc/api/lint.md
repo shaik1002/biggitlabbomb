@@ -10,13 +10,10 @@ DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
-## Validate sample CI/CD configuration
+## Validate the CI/CD configuration for a namespace
 
-Checks if a sample CI/CD YAML configuration is valid. This endpoint validates the
-CI/CD configuration in the context of the project, including:
-
-- Using the project's CI/CD variables.
-- Searching the project's files for `include:local` entries.
+Checks if CI/CD YAML configuration is valid. This endpoint has namespace
+specific context.
 
 ```plaintext
 POST /projects/:id/ci/lint
@@ -25,14 +22,14 @@ POST /projects/:id/ci/lint
 | Attribute      | Type    | Required | Description |
 |----------------|---------|----------|-------------|
 | `content`      | string  | Yes      | The CI/CD configuration content. |
-| `dry_run`      | boolean | No       | Run [pipeline creation simulation](../ci/yaml/lint.md#simulate-a-pipeline), or only do static check. Default: `false`. |
+| `dry_run`      | boolean | No       | Run [pipeline creation simulation](../ci/lint.md#simulate-a-pipeline), or only do static check. Default: `false`. |
 | `include_jobs` | boolean | No       | If the list of jobs that would exist in a static check or pipeline simulation should be included in the response. Default: `false`. |
 | `ref`          | string  | No       | When `dry_run` is `true`, sets the branch or tag context to use to validate the CI/CD YAML configuration. Defaults to the project's default branch when not set. |
 
 Example request:
 
 ```shell
-curl --header "Content-Type: application/json" "https://gitlab.example.com/api/v4/projects/:id/ci/lint" --data '{"content": "{ \"image\": \"ruby:2.6\", \"services\": [\"postgres\"], \"before_script\": [\"bundle install\", \"bundle exec rake db:create\"], \"variables\": {\"DB_NAME\": \"postgres\"}, \"stages\": [\"test\", \"deploy\", \"notify\"], \"rspec\": { \"script\": \"rake spec\", \"tags\": [\"ruby\", \"postgres\"], \"only\": [\"branches\"]}}"}'
+curl --header "Content-Type: application/json" "https://gitlab.example.com/api/v4/projects/:id/ci/lint" --data '{"content": "{ \"image\": \"ruby:2.6\", \"services\": [\"postgres\"], \"before_script\": [\"bundle install\", \"bundle exec rake db:create\"], \"variables\": {\"DB_NAME\": \"postgres\"}, \"types\": [\"test\", \"deploy\", \"notify\"], \"rspec\": { \"script\": \"rake spec\", \"tags\": [\"ruby\", \"postgres\"], \"only\": [\"branches\"]}}"}'
 ```
 
 Example responses:
@@ -42,7 +39,7 @@ Example responses:
   ```json
   {
     "valid": true,
-    "merged_yaml": "---\ntest_job:\n  script: echo 1\n",
+    "merged_yaml": "---\n:test_job:\n  :script: echo 1\n",
     "errors": [],
     "warnings": []
   }
@@ -53,7 +50,7 @@ Example responses:
   ```json
   {
     "valid": false,
-    "merged_yaml": "---\ntest_job:\n  script: echo 1\n",
+    "merged_yaml": "---\n:test_job:\n  :script: echo 1\n",
     "errors": [
       "jobs config should contain at least one visible job"
     ],
@@ -61,17 +58,15 @@ Example responses:
   }
   ```
 
-## Validate a project's CI/CD configuration
+## Validate a project's CI configuration
 
 > - `sha` attribute [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/369212) in GitLab 16.5.
 > - `sha` and `ref` [renamed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/143098) to `content_ref` and `dry_run_ref` in GitLab 16.10.
 
 Checks if a project's `.gitlab-ci.yml` configuration in a given ref (the
 `content_ref` parameter, by default `HEAD` of the project's default branch) is valid.
-This endpoint validates the CI/CD configuration, including:
-
-- Using the project's CI/CD variables.
-- Searching the project's files for `include:local` entries.
+This endpoint uses all namespace specific data available, including variables
+and local includes.
 
 ```plaintext
 GET /projects/:id/ci/lint
@@ -99,7 +94,7 @@ Example responses:
 ```json
 {
   "valid": true,
-  "merged_yaml": "---\ntest_job:\n  script: echo 1\n",
+  "merged_yaml": "---\n:test_job:\n  :script: echo 1\n",
   "errors": [],
   "warnings": []
 }
@@ -110,7 +105,7 @@ Example responses:
 ```json
 {
   "valid": false,
-  "merged_yaml": "---\ntest_job:\n  script: echo 1\n",
+  "merged_yaml": "---\n:test_job:\n  :script: echo 1\n",
   "errors": [
     "jobs config should contain at least one visible job"
   ],
@@ -155,7 +150,7 @@ GitLab API using `curl` and `jq` in a one-line command:
 
 ```shell
 jq --null-input --arg yaml "$(<example-gitlab-ci.yml)" '.content=$yaml' \
-| curl "https://gitlab.com/api/v4/projects/:id/ci/lint?include_merged_yaml=true" \
+| curl "https://gitlab.com/api/v4/ci/lint?include_merged_yaml=true" \
 --header 'Content-Type: application/json' \
 --data @-
 ```
@@ -172,24 +167,24 @@ jq --raw-output '.merged_yaml | fromjson' <your_input_here>
 Example input:
 
 ```json
-{"status":"valid","errors":[],"merged_yaml":"---\n.api_test:\n  rules:\n  - if: $CI_PIPELINE_SOURCE==\"merge_request_event\"\n    changes:\n    - src/api/*\ndeploy:\n  rules:\n  - when: manual\n    allow_failure: true\n  extends:\n  - \".api_test\"\n  script:\n  - echo \"hello world\"\n"}
+{"status":"valid","errors":[],"merged_yaml":"---\n:.api_test:\n  :rules:\n  - :if: $CI_PIPELINE_SOURCE==\"merge_request_event\"\n    :changes:\n    - src/api/*\n:deploy:\n  :rules:\n  - :when: manual\n    :allow_failure: true\n  :extends:\n  - \".api_test\"\n  :script:\n  - echo \"hello world\"\n"}
 ```
 
 Becomes:
 
 ```yaml
-.api_test:
-  rules:
-  - if: $CI_PIPELINE_SOURCE=="merge_request_event"
-    changes:
+:.api_test:
+  :rules:
+  - :if: $CI_PIPELINE_SOURCE=="merge_request_event"
+    :changes:
     - src/api/*
-deploy:
-  rules:
-  - when: manual
-    allow_failure: true
-  extends:
+:deploy:
+  :rules:
+  - :when: manual
+    :allow_failure: true
+  :extends:
   - ".api_test"
-  script:
+  :script:
   - echo "hello world"
 ```
 
@@ -202,7 +197,7 @@ With a one-line command, you can:
 
 ```shell
 jq --null-input --arg yaml "$(<example-gitlab-ci.yml)" '.content=$yaml' \
-| curl "https://gitlab.com/api/v4/projects/:id/ci/lint?include_merged_yaml=true" \
+| curl "https://gitlab.com/api/v4/ci/lint?include_merged_yaml=true" \
 --header 'Content-Type: application/json' --data @- \
 | jq --raw-output '.merged_yaml | fromjson'
 ```

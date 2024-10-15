@@ -75,7 +75,7 @@ RSpec.shared_examples 'groups routing' do
   end
 end
 
-RSpec.describe "Groups", "routing", feature_category: :groups_and_projects do
+RSpec.describe "Groups", "routing" do
   context 'complex group path with dot' do
     include_examples 'groups routing' do
       let(:group_path) { 'complex.group-namegit' }
@@ -151,12 +151,6 @@ RSpec.describe "Groups", "routing", feature_category: :groups_and_projects do
         expect(get('/v2/gitlabhq/dependency_proxy/containers/foo/bar/blobs/abc12345'))
           .to route_to('groups/dependency_proxy_for_containers#blob', group_id: 'gitlabhq', image: 'foo/bar', sha: 'abc12345')
       end
-    end
-  end
-
-  describe Groups::RedirectController, 'routing' do
-    it 'to #redirect_from_id' do
-      expect(get('/-/g/1')).to route_to('groups/redirect#redirect_from_id', id: '1')
     end
   end
 end

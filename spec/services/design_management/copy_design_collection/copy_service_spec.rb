@@ -58,7 +58,7 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
 
         context 'when design collection has designs' do
           let_it_be(:designs) do
-            create_list(:design, 3, :with_lfs_file, :with_relative_position, issue: issue, project: project, imported_from: :github)
+            create_list(:design, 3, :with_lfs_file, :with_relative_position, issue: issue, project: project)
           end
 
           context 'when target issue already has designs' do
@@ -91,14 +91,6 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
               design_iids = target_issue.project.designs.map(&:id)
 
               expect(design_iids).to match_array(design_iids.uniq)
-            end
-
-            it 'sets imported_from for new designs to :none' do
-              subject
-
-              expect(designs.map(&:reload)).to all(have_attributes(imported_from: 'github'))
-
-              expect(new_designs).to all(have_attributes(imported_from: 'none'))
             end
           end
 
@@ -192,23 +184,6 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
 
           it 'links the LfsObjects' do
             expect { subject }.to change { target_issue.project.lfs_objects.count }.by(3)
-            .and change { target_issue.project.lfs_objects_projects.count }.by(3)
-          end
-
-          context 'when some LfsObjects are already linked to the design repository' do
-            let!(:lfs_objects_project) do
-              create(
-                :lfs_objects_project,
-                lfs_object: project.lfs_objects.first,
-                project: target_issue.project,
-                repository_type: :design
-              )
-            end
-
-            it 'links the LfsObjects' do
-              expect { subject }.to change { target_issue.project.lfs_objects.count }.by(2)
-              .and change { target_issue.project.lfs_objects_projects.count }.by(2)
-            end
           end
 
           it 'copies the Git repository data', :aggregate_failures do
@@ -282,21 +257,6 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
 
           def commits_on_master(limit: 10)
             target_repository.commits(target_repository.root_ref, limit: limit).map(&:id)
-          end
-
-          context 'with an invalid target_sha' do
-            before do
-              allow_next_instance_of(Gitlab::GitalyClient::OperationService) do |instance|
-                allow(instance).to receive(:user_delete_branch).and_raise(Gitlab::Git::CommandError, 'Invalid target_sha')
-              end
-            end
-
-            it 'returns a service error with the correct message' do
-              result = subject
-
-              expect(result).to be_error
-              expect(result.message).to eq({ message: "Invalid target_sha" })
-            end
           end
         end
       end

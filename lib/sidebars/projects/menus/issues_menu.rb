@@ -97,7 +97,7 @@ module Sidebars
           title = if context.is_super_sidebar
                     multi_issue_boards? ? s_('Issue boards') : s_('Issue board')
                   else
-                    multi_issue_boards? ? s_('Boards|Boards') : s_('Boards|Board')
+                    multi_issue_boards? ? s_('IssueBoards|Boards') : s_('IssueBoards|Board')
                   end
 
           ::Sidebars::MenuItem.new(
@@ -111,8 +111,6 @@ module Sidebars
         end
 
         def service_desk_menu_item
-          return ::Sidebars::NilMenuItem.new(item_id: :service_desk) unless context.project.service_desk_enabled?
-
           ::Sidebars::MenuItem.new(
             title: _('Service Desk'),
             link: service_desk_project_issues_path(context.project),

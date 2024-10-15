@@ -98,22 +98,6 @@ RSpec.describe RuboCop::Formatter::TodoFormatter, feature_category: :tooling do
       YAML
     end
 
-    context 'with empty exclusions' do
-      before do
-        todo_dir.write('C/EmptyList', <<~YAML)
-          ---
-          C/EmptyList:
-            Exclude:
-        YAML
-
-        todo_dir.inspect_all
-      end
-
-      it 'does not raise an error' do
-        expect { run_formatter }.not_to raise_error
-      end
-    end
-
     context 'with existing HAML exclusions' do
       before do
         todo_dir.write('B/TooManyOffenses', <<~YAML)
@@ -121,10 +105,12 @@ RSpec.describe RuboCop::Formatter::TodoFormatter, feature_category: :tooling do
           B/TooManyOffenses:
             Exclude:
               - 'd.rb'
-              - 'app/views/project.html.haml'
-              - 'app/views/project.haml'
-              - 'app/views/project.text.haml'
+              - 'app/views/project.html.haml.rb'
+              - 'app/views/project.haml.rb'
+              - 'app/views/project.text.haml.rb'
+              - 'app/views/unrelated.html.haml.rb.ext'
               - 'app/views/unrelated.html.haml.ext'
+              - 'app/views/unrelated.html.haml'
         YAML
 
         todo_dir.inspect_all
@@ -138,9 +124,9 @@ RSpec.describe RuboCop::Formatter::TodoFormatter, feature_category: :tooling do
           B/TooManyOffenses:
             Exclude:
               - 'a.rb'
-              - 'app/views/project.haml'
-              - 'app/views/project.html.haml'
-              - 'app/views/project.text.haml'
+              - 'app/views/project.haml.rb'
+              - 'app/views/project.html.haml.rb'
+              - 'app/views/project.text.haml.rb'
               - 'c.rb'
         YAML
       end

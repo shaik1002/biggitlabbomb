@@ -36,19 +36,19 @@ export default {
 </script>
 
 <template>
-  <div class="gl-border-b-1 gl-border-b-gray-100 gl-px-6 gl-py-6 gl-border-b-solid">
+  <div class="gl-py-6 gl-px-6 gl-border-b-1 gl-border-b-solid gl-border-b-gray-100">
     <gl-link
       v-if="feature.image_url"
       :href="feature.documentation_link"
       target="_blank"
-      class="gl-block"
+      class="gl-display-block"
       data-testid="whats-new-image-link"
       data-track-action="click_whats_new_item"
       :data-track-label="feature.name"
       :data-track-property="feature.documentation_link"
     >
       <div
-        class="gl-h-31 gl-border-subtle gl-bg-cover"
+        class="whats-new-item-image gl-bg-size-cover"
         :style="`background-image: url(${feature.image_url});`"
       >
         <span class="gl-sr-only">{{ feature.name }}</span>
@@ -57,19 +57,19 @@ export default {
     <gl-link
       :href="feature.documentation_link"
       target="_blank"
-      class="gl-mb-1 gl-mt-4 gl-block !gl-text-inherit"
+      class="whats-new-item-title-link gl-display-block gl-mt-4 gl-mb-1"
       data-track-action="click_whats_new_item"
-      data-testid="whats-new-item-link"
       :data-track-label="feature.name"
       :data-track-property="feature.documentation_link"
     >
-      <h5 class="gl-my-0 gl-text-lg" data-testid="feature-name">{{ feature.name }}</h5>
+      <h5 class="gl-font-lg gl-my-0" data-test-id="feature-name">{{ feature.name }}</h5>
     </gl-link>
     <div v-if="releaseDate" class="gl-mb-3" data-testid="release-date">{{ releaseDate }}</div>
     <div v-if="feature.available_in" class="gl-mb-3">
       <gl-badge
         v-for="packageName in feature.available_in"
         :key="packageName"
+        size="md"
         variant="tier"
         icon="license"
         class="gl-mr-2"
@@ -79,7 +79,7 @@ export default {
     </div>
     <div
       v-safe-html:[$options.safeHtmlConfig]="feature.description"
-      class="gl-pt-3 gl-leading-20"
+      class="gl-pt-3 gl-line-height-20"
     ></div>
     <gl-button
       :href="feature.documentation_link"

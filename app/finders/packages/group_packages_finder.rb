@@ -4,20 +4,14 @@ module Packages
   class GroupPackagesFinder
     include ::Packages::FinderHelper
 
-    def initialize(
-      current_user, group, params = { exclude_subgroups: false,
-                                      exact_name: false,
-                                      order_by: 'created_at',
-                                      sort: 'asc',
-                                      packages_class: ::Packages::Package }
-    )
+    def initialize(current_user, group, params = { exclude_subgroups: false, exact_name: false, order_by: 'created_at', sort: 'asc' })
       @current_user = current_user
       @group = group
       @params = params
     end
 
     def execute
-      return packages_class.none unless group
+      return ::Packages::Package.none unless group
 
       packages_for_group_projects
     end
@@ -27,7 +21,7 @@ module Packages
     attr_reader :current_user, :group, :params
 
     def packages_for_group_projects(installable_only: false)
-      packages = packages_class
+      packages = ::Packages::Package
         .including_project_namespace_route
         .including_tags
         .for_projects(group_projects_visible_to_current_user.select(:id))
@@ -45,30 +39,18 @@ module Packages
       # according to project_policy.rb
       # access to packages is ruled by:
       # - project is public or the current user has access to it with at least the reporter level
-      # - project has a public package registry if the within_public_package_registry param is true
       # - the repository feature is available to the current_user
       projects = if current_user.is_a?(DeployToken)
                    current_user.accessible_projects
                  else
-                   visible_projects
-                     .with_feature_available_for_user(:repository, current_user)
+                   ::Project
                      .in_namespace(groups)
+                     .public_or_visible_to_user(current_user, Gitlab::Access::REPORTER)
+                     .with_feature_available_for_user(:repository, current_user)
                  end
 
       projects = projects.with_package_registry_enabled if params[:with_package_registry_enabled]
       projects
-    end
-
-    def visible_projects
-      public_or_visible = ::Project.public_or_visible_to_user(current_user, Gitlab::Access::REPORTER)
-
-      return public_or_visible.or(with_public_package_registry) if params[:within_public_package_registry]
-
-      public_or_visible
-    end
-
-    def with_public_package_registry
-      ::ProjectFeature.with_feature_access_level(:package_registry, ::ProjectFeature::PUBLIC)
     end
 
     def groups
@@ -83,10 +65,6 @@ module Packages
 
     def preload_pipelines
       params.fetch(:preload_pipelines, true)
-    end
-
-    def packages_class
-      params.fetch(:packages_class, ::Packages::Package)
     end
   end
 end

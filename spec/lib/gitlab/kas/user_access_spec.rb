@@ -3,13 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Kas::UserAccess, feature_category: :deployment_management do
-  before do
-    session_options = Rails.application.config.session_options
-
-    allow(Rails.application.config).to receive(:session_options)
-      .and_return(session_options.merge(session_cookie_token_prefix: 'cell1-'))
-  end
-
   describe '.enabled?' do
     subject { described_class.enabled? }
 
@@ -23,7 +16,7 @@ RSpec.describe Gitlab::Kas::UserAccess, feature_category: :deployment_management
   describe '.{encrypt,decrypt}_public_session_id' do
     let(:data) { 'the data' }
     let(:encrypted) { described_class.encrypt_public_session_id(data) }
-    let(:decrypted) { described_class.decrypt_public_session_id("cell1-#{encrypted}") }
+    let(:decrypted) { described_class.decrypt_public_session_id(encrypted) }
 
     it { expect(encrypted).not_to include data }
     it { expect(decrypted).to eq data }
@@ -40,10 +33,6 @@ RSpec.describe Gitlab::Kas::UserAccess, feature_category: :deployment_management
         gitlab: { host: 'example.com', https: true },
         gitlab_kas: { external_k8s_proxy_url: external_k8s_proxy_url }
       )
-    end
-
-    it 'adds the session cookie prefix' do
-      expect(cookie_data[:value]).to start_with('cell1-')
     end
 
     it 'is encrypted, secure, httponly', :aggregate_failures do

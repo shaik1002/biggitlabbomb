@@ -1,24 +1,22 @@
-import { GlProgressBar, GlSprintf } from '@gitlab/ui';
+import { GlIcon, GlProgressBar } from '@gitlab/ui';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
-import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
+import { mountExtended } from 'helpers/vue_test_utils_helper';
 import WorkItemTimeTracking from '~/work_items/components/work_item_time_tracking.vue';
 
 describe('WorkItemTimeTracking component', () => {
   let wrapper;
 
-  const findAddEstimateButton = () => wrapper.findComponentByTestId('add-estimate-button');
-  const findSetEstimateButton = () => wrapper.findComponentByTestId('set-estimate-button');
-  const findAddTimeEntryButton = () => wrapper.findComponentByTestId('add-time-entry-button');
+  const findAddEstimateButton = () => wrapper.findByRole('button', { name: 'Add estimate' });
+  const findAddTimeEntryButton = () => wrapper.findByRole('button', { name: 'Add time entry' });
   const findButton = (name) => wrapper.findByRole('button', { name });
-  const findViewTimeSpentButton = () => wrapper.findComponentByTestId('view-time-spent-button');
-  const findEstimateButton = () => wrapper.findComponentByTestId('add-estimate-button');
+  const findEstimateButton = () => wrapper.findByRole('button', { name: 'estimate' });
   const findProgressBar = () => wrapper.findComponent(GlProgressBar);
-  const findAddTimeSpentButton = () => wrapper.findComponentByTestId('add-time-spent-button');
+  const findTimeSpentButton = () => wrapper.findByRole('button', { name: 'time spent' });
   const findTimeTrackingBody = () => wrapper.findByTestId('time-tracking-body');
   const getProgressBarTooltip = () => getBinding(findProgressBar().element, 'gl-tooltip');
 
   const createComponent = ({ canUpdate = true, timeEstimate = 0, totalTimeSpent = 0 } = {}) => {
-    wrapper = shallowMountExtended(WorkItemTimeTracking, {
+    wrapper = mountExtended(WorkItemTimeTracking, {
       directives: {
         GlModal: createMockDirective('gl-modal'),
         GlTooltip: createMockDirective('gl-tooltip'),
@@ -33,9 +31,10 @@ describe('WorkItemTimeTracking component', () => {
       },
       provide: {
         fullPath: 'gitlab-org/gitlab',
+        isGroup: false,
       },
       stubs: {
-        GlSprintf,
+        GlProgressBar: true,
       },
     });
   };
@@ -52,7 +51,7 @@ describe('WorkItemTimeTracking component', () => {
     });
 
     it('renders as "plus" icon', () => {
-      expect(findAddTimeEntryButton().props('icon')).toBe('plus');
+      expect(findAddTimeEntryButton().findComponent(GlIcon).props('name')).toBe('plus');
     });
 
     it('shows tooltip', () => {
@@ -87,8 +86,8 @@ describe('WorkItemTimeTracking component', () => {
     });
 
     it('allows user to add a time entry by clicking "time spent"', () => {
-      expect(findAddTimeSpentButton().props('variant')).toBe('link');
-      expect(getBinding(findAddTimeSpentButton().element, 'gl-modal').value).toBe(
+      expect(findTimeSpentButton().props('variant')).toBe('link');
+      expect(getBinding(findTimeSpentButton().element, 'gl-modal').value).toBe(
         'create-timelog-modal',
       );
     });
@@ -105,11 +104,9 @@ describe('WorkItemTimeTracking component', () => {
     });
 
     it('time spent links to time tracking report', () => {
-      expect(findViewTimeSpentButton().props('variant')).toBe('link');
-      expect(getBinding(findViewTimeSpentButton().element, 'gl-modal').value).toBe(
-        'time-tracking-report',
-      );
-      expect(getBinding(findViewTimeSpentButton().element, 'gl-tooltip').value).toBe(
+      expect(findButton('3h').props('variant')).toBe('link');
+      expect(getBinding(findButton('3h').element, 'gl-modal').value).toBe('time-tracking-report');
+      expect(getBinding(findButton('3h').element, 'gl-tooltip').value).toBe(
         'View time tracking report',
       );
     });
@@ -140,11 +137,11 @@ describe('WorkItemTimeTracking component', () => {
     });
 
     it('estimate links to "Add estimate" modal', () => {
-      expect(findSetEstimateButton().props('variant')).toBe('link');
-      expect(getBinding(findSetEstimateButton().element, 'gl-modal').value).toBe(
+      expect(findButton('3h').props('variant')).toBe('link');
+      expect(getBinding(findButton('3h').element, 'gl-modal').value).toBe(
         'set-time-estimate-modal',
       );
-      expect(getBinding(findSetEstimateButton().element, 'gl-tooltip').value).toBe('Set estimate');
+      expect(getBinding(findButton('3h').element, 'gl-tooltip').value).toBe('Set estimate');
     });
   });
 
@@ -207,7 +204,7 @@ describe('WorkItemTimeTracking component', () => {
       });
 
       it('does not allow user to add a time entry by clicking "time spent"', () => {
-        expect(findAddTimeSpentButton().exists()).toBe(false);
+        expect(findTimeSpentButton().exists()).toBe(false);
       });
     });
 

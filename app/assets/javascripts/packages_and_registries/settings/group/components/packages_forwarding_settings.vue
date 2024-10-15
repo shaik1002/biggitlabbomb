@@ -15,7 +15,7 @@ import updateNamespacePackageSettings from '~/packages_and_registries/settings/g
 import { updateGroupPackageSettings } from '~/packages_and_registries/settings/group/graphql/utils/cache_update';
 import { updateGroupPackagesSettingsOptimisticResponse } from '~/packages_and_registries/settings/group/graphql/utils/optimistic_responses';
 
-import SettingsSection from '~/vue_shared/components/settings/settings_section.vue';
+import SettingsBlock from '~/packages_and_registries/shared/components/settings_block.vue';
 import ForwardingSettings from '~/packages_and_registries/settings/group/components/forwarding_settings.vue';
 
 export default {
@@ -31,7 +31,7 @@ export default {
     GlButton,
     GlLink,
     GlSprintf,
-    SettingsSection,
+    SettingsBlock,
   },
   mixins: [glFeatureFlagsMixin()],
   inject: ['groupPath'],
@@ -152,10 +152,7 @@ export default {
       }
     },
     updateWorkingCopy(type, value) {
-      this.workingCopy = {
-        ...this.workingCopy,
-        [type]: value,
-      };
+      this.$set(this.workingCopy, type, value);
     },
   },
   links: {
@@ -165,9 +162,10 @@ export default {
 </script>
 
 <template>
-  <settings-section :heading="$options.i18n.PACKAGE_FORWARDING_SETTINGS_HEADER">
+  <settings-block>
+    <template #title> {{ $options.i18n.PACKAGE_FORWARDING_SETTINGS_HEADER }}</template>
     <template #description>
-      <span class="gl-mb-2 gl-block" data-testid="description">
+      <span class="gl-display-block gl-mb-2" data-testid="description">
         {{ $options.i18n.PACKAGE_FORWARDING_SETTINGS_DESCRIPTION }}
       </span>
       <gl-sprintf :message="$options.i18n.PACKAGE_FORWARDING_SECURITY_DESCRIPTION">
@@ -176,29 +174,30 @@ export default {
         </template>
       </gl-sprintf>
     </template>
-
-    <form @submit.prevent="submit">
-      <forwarding-settings
-        v-for="forwardingFields in packageForwardingFields"
-        :key="forwardingFields.label"
-        :data-testid="forwardingFields.testid"
-        :disabled="isForwardingFieldsDisabled(forwardingFields)"
-        :forwarding="forwardingFieldsForwarding(forwardingFields)"
-        :label="forwardingFields.label"
-        :lock-forwarding="forwardingFieldsLockForwarding(forwardingFields)"
-        :model-names="forwardingFields.modelNames"
-        @update="updateWorkingCopy"
-      />
-      <gl-button
-        type="submit"
-        :disabled="isDisabled"
-        :loading="mutationLoading"
-        category="primary"
-        variant="confirm"
-        class="js-no-auto-disable gl-mr-4"
-      >
-        {{ $options.i18n.PACKAGE_FORWARDING_FORM_BUTTON }}
-      </gl-button>
-    </form>
-  </settings-section>
+    <template #default>
+      <form @submit.prevent="submit">
+        <forwarding-settings
+          v-for="forwardingFields in packageForwardingFields"
+          :key="forwardingFields.label"
+          :data-testid="forwardingFields.testid"
+          :disabled="isForwardingFieldsDisabled(forwardingFields)"
+          :forwarding="forwardingFieldsForwarding(forwardingFields)"
+          :label="forwardingFields.label"
+          :lock-forwarding="forwardingFieldsLockForwarding(forwardingFields)"
+          :model-names="forwardingFields.modelNames"
+          @update="updateWorkingCopy"
+        />
+        <gl-button
+          type="submit"
+          :disabled="isDisabled"
+          :loading="mutationLoading"
+          category="primary"
+          variant="confirm"
+          class="js-no-auto-disable gl-mr-4"
+        >
+          {{ $options.i18n.PACKAGE_FORWARDING_FORM_BUTTON }}
+        </gl-button>
+      </form>
+    </template>
+  </settings-block>
 </template>

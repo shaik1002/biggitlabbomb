@@ -67,13 +67,13 @@ Prerequisites:
 1. Define some rules in the file following the [Code Owners syntax reference](reference.md).
    Some suggestions:
    - Configure [All eligible approvers](../merge_requests/approvals/rules.md#code-owners-as-eligible-approvers) approval rule.
-   - [Require Code Owner approval](../repository/branches/protected.md#require-code-owner-approval-on-a-protected-branch) on a protected branch.
+   - [Require Code Owner approval](../protected_branches.md#require-code-owner-approval-on-a-protected-branch) on a protected branch.
 1. Commit your changes, and push them up to GitLab.
 
 ### `CODEOWNERS` file
 
 A `CODEOWNERS` file (with no extension) specifies the users or
-[shared groups](../members/sharing_projects_groups.md) responsible for
+[shared groups](../members/share_project_with_groups.md) responsible for
 specific files and directories in a repository.
 
 Each repository uses a single `CODEOWNERS` file. GitLab checks these locations
@@ -116,8 +116,6 @@ file.md @group-x @group-x/subgroup-y
 ```mermaid
 %%{init: { "fontFamily": "GitLab Sans" }}%%
 graph TD
-    accTitle: Diagram of group inheritance
-    accDescr: If a subgroup owns a project, the parent group inherits ownership.
     A[Parent group X] -->|owns| B[Project A]
     A -->|contains| C[Subgroup Y]
     C -->|owns| D[Project B]
@@ -137,14 +135,12 @@ The eligible Code Owners are:
 
 ##### Inviting subgroups to projects in parent groups
 
-You can [invite](../members/sharing_projects_groups.md) **Subgroup Y** to **Project A**
+You can [invite](../members/share_project_with_groups.md) **Subgroup Y** to **Project A**
 so that their members also become eligible Code Owners.
 
 ```mermaid
 %%{init: { "fontFamily": "GitLab Sans" }}%%
 graph LR
-    accTitle: Diagram of subgroup inheritance
-    accDescr: Inviting a subgroup directly to a project affects whether their approvals can be made required.
     A[Parent group X] -->|owns| B[Project A]
     A -->|also contains| C[Subgroup Y]
     C -.->D{Invite Subgroup Y<br/>to Project A?} -.->|yes| E[Members of Subgroup Y<br/>can submit Approvals]
@@ -187,24 +183,10 @@ terms.md @legal-team
 
 The Code Owner for `terms.md` would be `@legal-team`.
 
-### Organize Code Owners by putting them into sections
-
-In a Code Owners file, _sections_ are named areas of the file that are analyzed separately,
-and always enforced. Until you define a section, GitLab treats your entire Code Owners file
-as a single section. Adding more sections
-[changes how GitLab evaluates your Code Owners file](#use-regular-entries-and-sections-together):
-
-- GitLab treats [entries without sections](#use-regular-entries-and-sections-together), including rules defined
-  before the first section header, as if they were another, unnamed section.
-- Each section enforces its rules separately.
-- Only one CODEOWNERS pattern per section is matched to a file path.
-- In a section, GitLab uses the _last_ pattern matching the file or directory for each section.
-
-For example, in a `CODEOWNERS` file using sections, let's look at the ownership of a `README` file:
+If you use sections, the last pattern matching the file or directory for each section is used.
+For example, in a `CODEOWNERS` file using sections:
 
 ```plaintext
-* @admin
-
 [README Owners]
 README.md @user1 @user2
 internal/README.md @user4
@@ -213,15 +195,17 @@ internal/README.md @user4
 README.md @user3
 ```
 
-- The Code Owners for the `README.md` in the _root_ directory are:
-  - `@admin`, from the unnamed section.
-  - `@user1` and `@user2`, from `[README Owners]`.
-  - `@user3`, from `[README other owners]`.
-- The Code Owners for `internal/README.md` are:
-  - `@admin`, from the unnamed section.
-  - `@user4`, from the last entry in `[README Owners]`.
-  - `@user3` from `[README other owners]`. (Both lines in `[README Owners]` match this file's name,
-    but only the last line in the section is kept.)
+The Code Owners for the `README.md` in the root directory are `@user1`, `@user2`,
+and `@user3`. The Code Owners for `internal/README.md` are `@user4` and `@user3`.
+
+Only one CODEOWNERS pattern per section is matched to a file path.
+
+### Organize Code Owners by putting them into sections
+
+You can organize Code Owners by putting them into named sections.
+
+You can use sections for shared directories, so that multiple
+teams can be reviewers.
 
 To add a section to the `CODEOWNERS` file, enter a section name in square brackets,
 followed by the files or directories, and users, groups, or subgroups:
@@ -233,9 +217,9 @@ internal/README.md @user2
 ```
 
 Each Code Owner in the merge request widget is listed under a label.
-The following image shows **Default**, **Frontend**, and **Technical Writing** sections:
+The following image shows **Groups** and **Documentation** sections:
 
-![MR widget - Sectional Code Owners](../img/sectional_code_owners_v17_4.png)
+![MR widget - Sectional Code Owners](../img/sectional_code_owners_v13.2.png)
 
 #### Set default owner for a section
 
@@ -365,7 +349,7 @@ In this example, the `[Go]` section is optional:
 
 The optional Code Owners section displays in merge requests under the description:
 
-![MR widget - Optional Code Owners sections](../img/optional_code_owners_sections_v17_4.png)
+![MR widget - Optional Code Owners sections](../img/optional_code_owners_sections_v13_8.png)
 
 If a section is duplicated in the file, and one of them is marked as optional and the other isn't, the section is required.
 
@@ -427,3 +411,74 @@ All changes from users _without_ the **Allowed to push** permission must be rout
 
 - [Syntax reference](reference.md)
 - [Development guidelines](../../../development/code_owners/index.md)
+
+## Troubleshooting
+
+When working with Code Owners, you might encounter the following issues.
+
+For more information about how the Code Owners feature handles errors, see the
+[Code Owners reference](reference.md).
+
+### Approvals shown as optional
+
+A Code Owner approval rule is optional if any of these conditions are true:
+
+- The user or group is not a member of the project.
+  Code Owners [cannot inherit members from parent groups](https://gitlab.com/gitlab-org/gitlab/-/issues/288851/).
+- [Code Owner approval on a protected branch](../protected_branches.md#require-code-owner-approval-on-a-protected-branch) has not been set up.
+- The section is [marked as optional](#make-a-code-owners-section-optional).
+- No eligible code owners are available to approve the merge request due to conflicts
+  with other [merge request approval settings](../merge_requests/approvals/settings.md).
+
+### Approvals do not show
+
+Code Owner approval rules only update when the merge request is created.
+If you update the `CODEOWNERS` file, close the merge request and create a new one.
+
+### User not shown as possible approver
+
+A user might not show as an approver on the Code Owner merge request approval rules
+if any of these conditions are true:
+
+- A rule prevents the specific user from approving the merge request.
+  Check the project [merge request approval](../merge_requests/approvals/settings.md#edit-merge-request-approval-settings) settings.
+- A Code Owner group has a visibility of **private**, and the current user is not a
+  member of the Code Owner group.
+- Current user is an external user who does not have permission to the internal Code Owner group.
+
+### Approval rule is invalid
+
+You might get an error that states:
+
+```plaintext
+Approval rule is invalid.
+GitLab has approved this rule automatically to unblock the merge request.
+```
+
+This issue occurs when an approval rule uses a Code Owner that is not a direct member of the project.
+
+The workaround is to check that the group or user has been invited to the project.
+
+### User or group not shown when viewing Code Owners for a directory
+
+Code Owners might not show the intended user or group based on your configured rules when viewing a directory,
+but correctly show the Code Owners for files beneath the directory.
+
+For example:
+
+```plaintext
+* @dev-team
+docs/ @tech-writer-team
+```
+
+All files beneath the `docs/` directory show `@tech-writer-team` as Code Owners, but the directory itself will show `@dev-team`.
+
+This behavior occurs when viewing a directory because the [syntax rule](../../project/codeowners/reference.md#directory-paths)
+applies to all files beneath the directory, which does not include the directory itself. To resolve this, update the `CODEOWNERS` file to include the
+directory specifically along with all files beneath the directory. For example:
+
+```plaintext
+* @dev-team
+docs @tech-writer-team
+docs/ @tech-writer-team
+```

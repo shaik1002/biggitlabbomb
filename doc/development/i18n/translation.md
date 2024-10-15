@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: Any user with at least the Maintainer role can merge updates to this content. For details, see https://docs.gitlab.com/ee/development/development_processes.html#development-guidelines-review.
 ---
@@ -21,7 +21,7 @@ GitLab is being translated into many languages. To select a language to contribu
    - If the language you want is available, proceed to the next step.
    - If the language you want is not available,
      [open an issue](https://gitlab.com/gitlab-org/gitlab/-/issues?scope=all&utf8=✓&state=all&label_name[]=Category%3AInternationalization).
-     Notify our Crowdin administrators by including `@gitlab-org/manage/import-and-integrate` in your issue.
+      Notify our Crowdin administrators by including `@gitlab-org/manage/import` in your issue.
    - After the issue and any merge requests are complete, restart this procedure.
 
 1. View the list of files and folders. Select `gitlab.pot` to open the translation editor.
@@ -87,12 +87,12 @@ are GitLab values. We ask you to avoid translations that exclude people based on
 ethnicity. In languages that distinguish between a male and female form, use both or choose a
 neutral formulation.
 
-<!-- vale gitlab_base.Spelling = NO -->
+<!-- vale gitlab.Spelling = NO -->
 
 For example, in German, the word _user_ can be translated into _Benutzer_ (male) or _Benutzerin_
 (female). Therefore, _create a new user_ translates to _Benutzer(in) anlegen_.
 
-<!-- vale gitlab_base.Spelling = YES -->
+<!-- vale gitlab.Spelling = YES -->
 
 ### Updating the glossary
 
@@ -101,10 +101,10 @@ To propose additions to the glossary,
 
 ## French translation guidelines
 
-<!-- vale gitlab_base.Spelling = NO -->
+<!-- vale gitlab.Spelling = NO -->
 
 In French, the _écriture inclusive_ is now over (see on [Legifrance](https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000036068906/)).
 To include both genders, write _Utilisateurs et utilisatrices_ instead of _Utilisateur·rice·s_. If
 there is not enough space, use the male gender alone.
 
-<!-- vale gitlab_base.Spelling = YES -->
+<!-- vale gitlab.Spelling = YES -->

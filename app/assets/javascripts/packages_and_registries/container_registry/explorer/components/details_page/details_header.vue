@@ -5,17 +5,14 @@ import {
   GlIcon,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import ProtectedBadge from '~/vue_shared/components/badges/protected_badge.vue';
 import { sprintf, n__, s__ } from '~/locale';
 import MetadataItem from '~/vue_shared/components/registry/metadata_item.vue';
 import TitleArea from '~/vue_shared/components/registry/title_area.vue';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import {
   CREATED_AT,
-  LAST_PUBLISHED_AT,
   CLEANUP_UNSCHEDULED_TEXT,
   CLEANUP_SCHEDULED_TEXT,
   CLEANUP_ONGOING_TEXT,
@@ -33,24 +30,17 @@ import {
   ONGOING_STATUS,
   ROOT_IMAGE_TOOLTIP,
 } from '../../constants/index';
+
 import getContainerRepositoryMetadata from '../../graphql/queries/get_container_repository_metadata.query.graphql';
 import { getImageName } from '../../utils';
 
 export default {
   name: 'DetailsHeader',
-  components: {
-    GlDisclosureDropdown,
-    GlDisclosureDropdownItem,
-    GlIcon,
-    TitleArea,
-    MetadataItem,
-    ProtectedBadge,
-  },
+  components: { GlDisclosureDropdown, GlDisclosureDropdownItem, GlIcon, TitleArea, MetadataItem },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [timeagoMixin, glFeatureFlagsMixin()],
-  inject: ['config'],
+  mixins: [timeagoMixin],
   props: {
     image: {
       type: Object,
@@ -73,7 +63,6 @@ export default {
       variables() {
         return {
           id: this.image.id,
-          metadataDatabaseEnabled: this.config.isMetadataDatabaseEnabled,
         };
       },
     },
@@ -86,21 +75,10 @@ export default {
       return this.imageDetails?.project?.visibility === 'public' ? 'eye' : 'eye-slash';
     },
     formattedCreatedAtDate() {
-      return this.formatDate(this.imageDetails.createdAt);
-    },
-    containsLastPublishedAtDate() {
-      return Boolean(this.imageDetails.lastPublishedAt);
-    },
-    formattedLastPublishedAtDate() {
-      return this.containsLastPublishedAtDate
-        ? this.formatDate(this.imageDetails.lastPublishedAt)
-        : '';
+      return formatDate(this.imageDetails.createdAt, 'mmm d, yyyy HH:MM', true);
     },
     createdText() {
       return sprintf(CREATED_AT, { time: this.formattedCreatedAtDate });
-    },
-    lastPublishedAtText() {
-      return sprintf(LAST_PUBLISHED_AT, { time: this.formattedLastPublishedAtDate });
     },
     tagCountText() {
       if (this.$apollo.queries.containerRepository.loading) {
@@ -136,24 +114,10 @@ export default {
       const { size } = this.imageDetails;
       return size ? numberToHumanSize(Number(size)) : null;
     },
-    showBadgeProtected() {
-      return (
-        Boolean(this.glFeatures.containerRegistryProtectedContainers) &&
-        Boolean(this.image?.protectionRuleExists)
-      );
-    },
-  },
-  methods: {
-    formatDate(date) {
-      return formatDate(date, 'mmm d, yyyy HH:MM', true);
-    },
   },
   i18n: {
     DELETE_IMAGE_TEXT,
     MORE_ACTIONS_TEXT,
-    BADGE_PROTECTED_TOOLTIP_TEXT: s__(
-      'ContainerRegistry|A protection rule exists for this container repository.',
-    ),
   },
 };
 </script>
@@ -204,28 +168,11 @@ export default {
         data-testid="created-and-visibility"
       />
     </template>
-
-    <template v-if="containsLastPublishedAtDate" #metadata-last-published-at>
-      <metadata-item
-        icon="calendar"
-        :text="lastPublishedAtText"
-        size="xl"
-        data-testid="last-published-at"
-      />
-    </template>
-
-    <template #metadata-protection-rule-exists>
-      <protected-badge
-        v-if="showBadgeProtected"
-        :tooltip-text="$options.i18n.BADGE_PROTECTED_TOOLTIP_TEXT"
-      />
-    </template>
-
     <template v-if="!deleteButtonDisabled" #right-actions>
       <gl-disclosure-dropdown
         category="tertiary"
         icon="ellipsis_v"
-        placement="bottom-end"
+        placement="right"
         :toggle-text="$options.i18n.MORE_ACTIONS_TEXT"
         text-sr-only
         no-caret

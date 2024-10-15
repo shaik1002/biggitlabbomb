@@ -2,13 +2,17 @@
 data_category: optional
 key_path: counts.design_management_designs_update
 description: Number of updates to designs
+product_section: dev
+product_stage: plan
 product_group: product_planning
 value_type: number
 status: active
 time_frame: all
-data_source: internal_events
-events:
-  - name: update_design_management_design
+data_source: redis
+instrumentation_class: RedisMetric
+options:
+  prefix: design_management_designs
+  event: update
 distribution:
 - ce
 - ee
@@ -18,4 +22,3 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

@@ -12,7 +12,7 @@ module Admin
       end
 
       def update
-        service = ::Ci::UpdateInstanceVariablesService.new(variables_params, current_user)
+        service = ::Ci::UpdateInstanceVariablesService.new(variables_params)
 
         if service.execute
           respond_to do |format|

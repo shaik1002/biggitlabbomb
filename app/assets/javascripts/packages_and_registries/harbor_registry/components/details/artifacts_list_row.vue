@@ -81,9 +81,9 @@ export default {
 <template>
   <list-item v-bind="$attrs">
     <template #left-primary>
-      <div class="gl-flex gl-items-center">
+      <div class="gl-display-flex gl-align-items-center">
         <router-link
-          class="gl-break-all gl-font-bold gl-text-primary"
+          class="gl-text-body gl-font-weight-bold gl-break-all"
           data-testid="name"
           :to="linkTo"
         >
@@ -102,7 +102,7 @@ export default {
       <span class="gl-mr-3" data-testid="size">
         {{ formattedSize }}
       </span>
-      <span id="tagsCount" class="gl-flex gl-items-center" data-testid="tags-count">
+      <span id="tagsCount" class="gl-display-flex gl-align-items-center" data-testid="tags-count">
         <gl-icon name="tag" class="gl-mr-2" />
         {{ tagsCountText }}
       </span>

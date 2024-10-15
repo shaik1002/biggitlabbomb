@@ -6,7 +6,6 @@ module Projects
     include ValidatesClassificationLabel
 
     ValidationError = Class.new(StandardError)
-    ApiError = Class.new(StandardError)
 
     def execute
       build_topics
@@ -39,9 +38,7 @@ module Projects
       else
         update_failed!
       end
-    rescue ApiError => e
-      error(e.message, status: :api_error)
-    rescue ValidationError, Gitlab::Pages::UniqueDomainGenerationFailure => e
+    rescue ValidationError => e
       error(e.message)
     end
 
@@ -66,21 +63,6 @@ module Projects
 
       validate_default_branch_change
       validate_renaming_project_with_tags
-      validate_restrict_user_defined_variables_change
-    end
-
-    def validate_restrict_user_defined_variables_change
-      return unless changing_restrict_user_defined_variables? || changing_pipeline_variables_minimum_override_role?
-
-      if changing_pipeline_variables_minimum_override_role? &&
-          params[:ci_pipeline_variables_minimum_override_role] == 'owner' &&
-          !can?(current_user, :owner_access, project)
-        raise_api_error(s_("UpdateProject|Changing the ci_pipeline_variables_minimum_override_role to the owner role is not allowed"))
-      end
-
-      return if can?(current_user, :change_restrict_user_defined_variables, project)
-
-      raise_api_error(s_("UpdateProject|Changing the restrict_user_defined_variables or ci_pipeline_variables_minimum_override_role is not allowed"))
     end
 
     def validate_default_branch_change
@@ -129,7 +111,7 @@ module Projects
     end
 
     def ambiguous_head_documentation_link
-      url = Rails.application.routes.url_helpers.help_page_path('user/project/repository/branches/index.md', anchor: 'error-ambiguous-head-branch-exists')
+      url = Rails.application.routes.url_helpers.help_page_path('user/project/repository/branches/index', anchor: 'error-ambiguous-head-branch-exists')
 
       format('<a href="%{url}" target="_blank" rel="noopener noreferrer">', url: url)
     end
@@ -142,9 +124,6 @@ module Projects
     def after_default_branch_change(previous_default_branch)
       # overridden by EE module
     end
-
-    # overridden by EE module
-    def audit_topic_change(from:); end
 
     # overridden by EE module
     def remove_unallowed_params
@@ -177,8 +156,6 @@ module Projects
 
       update_pending_builds if runners_settings_toggled?
 
-      audit_topic_change(from: @previous_topics)
-
       publish_events
     end
 
@@ -188,10 +165,6 @@ module Projects
 
     def raise_validation_error(message)
       raise ValidationError, message
-    end
-
-    def raise_api_error(message)
-      raise ApiError, message
     end
 
     def update_failed!
@@ -213,20 +186,6 @@ module Projects
 
       new_branch && project.repository.exists? &&
         new_branch != project.default_branch
-    end
-
-    def changing_restrict_user_defined_variables?
-      new_restrict_user_defined_variables = params[:restrict_user_defined_variables]
-      return false if new_restrict_user_defined_variables.nil?
-
-      project.restrict_user_defined_variables != new_restrict_user_defined_variables
-    end
-
-    def changing_pipeline_variables_minimum_override_role?
-      new_pipeline_variables_minimum_override_role = params[:ci_pipeline_variables_minimum_override_role]
-      return false if new_pipeline_variables_minimum_override_role.nil?
-
-      project.ci_pipeline_variables_minimum_override_role != new_pipeline_variables_minimum_override_role
     end
 
     def enabling_wiki?
@@ -251,9 +210,6 @@ module Projects
     end
 
     def build_topics
-      # Used in EE. Can't be cached in override due to Gitlab/ModuleWithInstanceVariables cop
-      @previous_topics = project.topic_list
-
       topics = params.delete(:topics)
       tag_list = params.delete(:tag_list)
       topic_list = topics || tag_list

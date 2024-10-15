@@ -7,10 +7,15 @@ import {
   CLUSTER_HEALTH_ERROR,
   HEALTH_BADGES,
   SYNC_STATUS_BADGES,
+  STATUS_TRUE,
+  STATUS_FALSE,
+  STATUS_UNKNOWN,
+  REASON_PROGRESSING,
   HELM_RELEASES_RESOURCE_TYPE,
   KUSTOMIZATIONS_RESOURCE_TYPE,
 } from '~/environments/constants';
-import { fluxSyncStatus } from '~/environments/helpers/k8s_integration_helper';
+import fluxKustomizationStatusQuery from '~/environments/graphql/queries/flux_kustomization_status.query.graphql';
+import fluxHelmReleaseStatusQuery from '~/environments/graphql/queries/flux_helm_release_status.query.graphql';
 import KubernetesConnectionStatus from '~/environments/environment_details/components/kubernetes/kubernetes_connection_status.vue';
 import KubernetesConnectionStatusBadge from '~/environments/environment_details/components/kubernetes/kubernetes_connection_status_badge.vue';
 import {
@@ -59,24 +64,46 @@ export default {
       type: String,
       required: true,
     },
-    fluxResourceStatus: {
-      type: Array,
-      required: false,
-      default: () => [],
+  },
+  apollo: {
+    fluxKustomizationStatus: {
+      query: fluxKustomizationStatusQuery,
+      variables() {
+        return {
+          configuration: this.configuration,
+          fluxResourcePath: this.fluxResourcePath,
+        };
+      },
+      skip() {
+        return Boolean(
+          !this.fluxResourcePath || this.fluxResourcePath?.includes(HELM_RELEASES_RESOURCE_TYPE),
+        );
+      },
+      error(err) {
+        this.fluxApiError = err.message;
+      },
     },
-    fluxNamespace: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    fluxApiError: {
-      type: String,
-      required: false,
-      default: '',
+    fluxHelmReleaseStatus: {
+      query: fluxHelmReleaseStatusQuery,
+      variables() {
+        return {
+          configuration: this.configuration,
+          fluxResourcePath: this.fluxResourcePath,
+        };
+      },
+      skip() {
+        return Boolean(
+          !this.fluxResourcePath || this.fluxResourcePath?.includes(KUSTOMIZATIONS_RESOURCE_TYPE),
+        );
+      },
+      error(err) {
+        this.fluxApiError = err.message;
+      },
     },
   },
   data() {
     return {
+      fluxApiError: '',
       clusterResourceTypeParams: {
         [k8sResourceType.k8sServices]: {
           resourceType: k8sResourceType.k8sServices,
@@ -130,61 +157,94 @@ export default {
     healthBadge() {
       return HEALTH_BADGES[this.clusterHealthStatus];
     },
+    hasKustomizations() {
+      return this.fluxKustomizationStatus?.length;
+    },
+    hasHelmReleases() {
+      return this.fluxHelmReleaseStatus?.length;
+    },
+    isLoading() {
+      return (
+        this.$apollo.queries.fluxKustomizationStatus.loading ||
+        this.$apollo.queries.fluxHelmReleaseStatus.loading
+      );
+    },
     fluxBadgeId() {
       return `${this.environmentName}-flux-sync-badge`;
     },
+    fluxCRD() {
+      if (!this.hasKustomizations && !this.hasHelmReleases) {
+        return [];
+      }
+
+      return this.hasKustomizations ? this.fluxKustomizationStatus : this.fluxHelmReleaseStatus;
+    },
+    fluxAnyStalled() {
+      return this.fluxCRD.find((condition) => {
+        return condition.status === STATUS_TRUE && condition.type === 'Stalled';
+      });
+    },
+    fluxAnyReconcilingWithBadConfig() {
+      return this.fluxCRD.find((condition) => {
+        return (
+          condition.status === STATUS_UNKNOWN &&
+          condition.type === 'Ready' &&
+          condition.reason === REASON_PROGRESSING
+        );
+      });
+    },
+    fluxAnyReconciling() {
+      return this.fluxCRD.find((condition) => {
+        return condition.status === STATUS_TRUE && condition.type === 'Reconciling';
+      });
+    },
+    fluxAnyReconciled() {
+      return this.fluxCRD.find((condition) => {
+        return condition.status === STATUS_TRUE && condition.type === 'Ready';
+      });
+    },
+    fluxAnyFailed() {
+      return this.fluxCRD.find((condition) => {
+        return condition.status === STATUS_FALSE && condition.type === 'Ready';
+      });
+    },
     syncStatusBadge() {
-      if (!this.fluxResourcePresent && this.fluxApiError) {
+      if (!this.fluxCRD.length && this.fluxApiError) {
         return { ...SYNC_STATUS_BADGES.unavailable, popoverText: this.fluxApiError };
       }
-      if (!this.fluxResourcePresent) {
+      if (!this.fluxCRD.length) {
         return SYNC_STATUS_BADGES.unavailable;
       }
-
-      const fluxStatus = fluxSyncStatus(this.fluxResourceStatus);
-
-      switch (fluxStatus.status) {
-        case 'failed':
-          return {
-            ...SYNC_STATUS_BADGES.failed,
-            popoverText: fluxStatus.message,
-          };
-        case 'stalled':
-          return {
-            ...SYNC_STATUS_BADGES.stalled,
-            popoverText: fluxStatus.message,
-          };
-        case 'reconcilingWithBadConfig':
-          return {
-            ...SYNC_STATUS_BADGES.reconciling,
-            popoverText: fluxStatus.message,
-          };
-        case 'reconciling':
-          return SYNC_STATUS_BADGES.reconciling;
-        case 'reconciled':
-          return SYNC_STATUS_BADGES.reconciled;
-        default:
-          return SYNC_STATUS_BADGES.unknown;
+      if (this.fluxAnyFailed) {
+        return { ...SYNC_STATUS_BADGES.failed, popoverText: this.fluxAnyFailed.message };
       }
+      if (this.fluxAnyStalled) {
+        return { ...SYNC_STATUS_BADGES.stalled, popoverText: this.fluxAnyStalled.message };
+      }
+      if (this.fluxAnyReconcilingWithBadConfig) {
+        return {
+          ...SYNC_STATUS_BADGES.reconciling,
+          popoverText: this.fluxAnyReconcilingWithBadConfig.message,
+        };
+      }
+      if (this.fluxAnyReconciling) {
+        return SYNC_STATUS_BADGES.reconciling;
+      }
+      if (this.fluxAnyReconciled) {
+        return SYNC_STATUS_BADGES.reconciled;
+      }
+      return SYNC_STATUS_BADGES.unknown;
+    },
+    isReconnectButtonShown() {
+      return this.glFeatures.k8sWatchApi;
     },
     isFluxConnectionStatus() {
-      return Boolean(this.fluxConnectionParams.resourceType);
-    },
-    fluxResourcePresent() {
-      return Boolean(this.fluxResourceStatus?.length);
-    },
-    fluxBadgeHref() {
-      return this.fluxResourcePresent ? '#' : null;
+      return this.isReconnectButtonShown && Boolean(this.fluxConnectionParams.resourceType);
     },
   },
   methods: {
     handleError(error) {
       this.$emit('error', error);
-    },
-    toggleFluxResource() {
-      if (!this.fluxResourcePresent) return;
-
-      this.$emit('show-flux-resource-details');
     },
   },
   i18n: {
@@ -215,7 +275,7 @@ export default {
       data-testid="flux-connection-status"
       :class="$options.badgeContainerClasses"
       :configuration="configuration"
-      :namespace="fluxNamespace"
+      :namespace="namespace"
       :resource-type-param="fluxConnectionParams"
     >
       <span class="gl-mr-3">{{ $options.i18n.syncStatusLabel }}</span>
@@ -229,21 +289,19 @@ export default {
         :connection-status="connectionProps.connectionStatus"
         @reconnect="connectionProps.reconnect"
       />
-      <template v-else>
+      <template v-else-if="syncStatusBadge">
         <gl-badge
           :id="fluxBadgeId"
           :icon="syncStatusBadge.icon"
           :variant="syncStatusBadge.variant"
           data-testid="sync-badge"
           tabindex="0"
-          :href="fluxBadgeHref"
-          @click.native="toggleFluxResource"
           >{{ syncStatusBadge.text }}
         </gl-badge>
         <gl-popover :target="fluxBadgeId" :title="syncStatusBadge.popoverTitle">
           <gl-sprintf :message="syncStatusBadge.popoverText">
             <template #link="{ content }">
-              <gl-link :href="syncStatusBadge.popoverLink" class="gl-text-sm">{{
+              <gl-link :href="syncStatusBadge.popoverLink" class="gl-font-sm">{{
                 content
               }}</gl-link></template
             >
@@ -252,6 +310,7 @@ export default {
       </template>
     </kubernetes-connection-status>
     <kubernetes-connection-status
+      v-if="isReconnectButtonShown"
       #default="{ connectionProps }"
       data-testid="dashboard-status-badge"
       :configuration="configuration"

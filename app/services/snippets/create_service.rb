@@ -40,24 +40,12 @@ module Snippets
 
     attr_reader :snippet, :perform_spam_check
 
-    # If the snippet is a "project snippet", specifically set it to nil to override the default database value of 1.
-    # We only want organization_id on the PersonalSnippet subclass.
-    #
-    # See https://gitlab.com/gitlab-org/gitlab/-/issues/460827
     def build_from_params
       if project
-        project.snippets.build(
-          create_params.merge(organization_id: nil)
-        )
+        project.snippets.build(create_params)
       else
-        PersonalSnippet.new(
-          create_params.merge(organization_id: organization_id)
-        )
+        PersonalSnippet.new(create_params)
       end
-    end
-
-    def organization_id
-      params[:organization_id].presence || Organizations::Organization::DEFAULT_ORGANIZATION_ID
     end
 
     # If the snippet_actions param is present
@@ -123,10 +111,6 @@ module Snippets
 
     def restricted_files_actions
       :create
-    end
-
-    def commit_attrs(snippet, msg)
-      super.merge(skip_target_sha: true)
     end
   end
 end

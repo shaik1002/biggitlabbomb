@@ -1,9 +1,14 @@
 description: "Click registry tag delete button"
 category: default
 action: click_button
+label_description: "`[bulk_registry_tag_delete | registry_tag_delete]`"
+property_description: ""
+value_description: ""
 extra_properties:
 identifiers:
-product_group: package_registry
+product_section: ops
+product_stage: package
+product_group: group::package
 milestone: "12.8"
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/23154
 distributions:
@@ -13,6 +18,3 @@ tiers:
 - free
 - premium
 - ultimate
-additional_properties:
-  label:
-    description: "`[bulk_registry_tag_delete | registry_tag_delete]`"

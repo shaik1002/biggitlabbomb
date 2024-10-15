@@ -24,11 +24,11 @@ export default {
   render(h, { props }) {
     const { line, path, isHighlighted } = props;
 
-    const parts = line.content.map((content) => {
+    const chars = line.content.map((content) => {
       return h(
         'span',
         {
-          class: [content.style],
+          class: ['gl-white-space-pre-wrap', content.style],
         },
         // Simple "tokenization": Split text in chunks of text
         // which alternate between text and urls.
@@ -42,7 +42,7 @@ export default {
             {
               attrs: {
                 href: chunk,
-                class: '!gl-text-inherit gl-underline',
+                class: 'gl-reset-color! gl-text-decoration-underline',
                 rel: 'nofollow noopener noreferrer', // eslint-disable-line @gitlab/require-i18n-strings
               },
             },
@@ -79,24 +79,7 @@ export default {
             path,
           },
         }),
-        ...(line.time
-          ? [
-              h(
-                'span',
-                {
-                  class: 'job-log-time',
-                },
-                line.time,
-              ),
-            ]
-          : []),
-        h(
-          'span',
-          {
-            class: 'job-log-line-content',
-          },
-          parts,
-        ),
+        ...chars,
       ],
     );
   },

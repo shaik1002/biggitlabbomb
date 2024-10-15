@@ -194,7 +194,7 @@ module ExceedQueryLimitHelpers
       #{sections.join("\n\n")}
       MSG
     else
-      query_log(@recorder).join("\n\n")
+      @recorder.log_message
     end
   end
 
@@ -348,12 +348,7 @@ RSpec::Matchers.define :exceed_all_query_limit do |expected|
   include ExceedQueryLimitHelpers
 
   match do |block|
-    if block.is_a?(ActiveRecord::QueryRecorder)
-      @recorder = block
-      verify_count
-    else
-      verify_count(&block)
-    end
+    verify_count(&block)
   end
 
   failure_message_when_negated do |actual|
@@ -390,10 +385,6 @@ RSpec::Matchers.define :match_query_count do |expected|
 
   include ExceedQueryLimitHelpers
 
-  chain :ignoring_cached_queries do
-    @skip_cached = true
-  end
-
   def verify_count(&block)
     @subject_block = block
     actual_count == maximum
@@ -406,7 +397,7 @@ RSpec::Matchers.define :match_query_count do |expected|
   end
 
   def skip_cached
-    @skip_cached || false
+    false
   end
 
   match do |block|

@@ -15,10 +15,10 @@ module Banzai
         self.reference_type = :issue
         self.object_class   = Issue
 
-        def url_for_object(issue, _parent)
-          return issue_path(issue) if only_path?
+        def url_for_object(issue, project)
+          return issue_path(issue, project) if only_path?
 
-          issue_url(issue)
+          issue_url(issue, project)
         end
 
         def parent_records(parent, ids)
@@ -34,12 +34,7 @@ module Banzai
         end
 
         def data_attributes_for(text, parent, object, **data)
-          additional_attributes = { iid: object.iid, namespace_path: parent.full_path }
-          if parent.is_a?(Namespaces::ProjectNamespace) || parent.is_a?(Project)
-            additional_attributes[:project_path] = parent.full_path
-          end
-
-          super.merge(additional_attributes)
+          super.merge(project_path: parent.full_path, iid: object.iid)
         end
 
         private
@@ -48,12 +43,12 @@ module Banzai
           { issue_type: issue.work_item_type.base_type }
         end
 
-        def issue_path(issue)
-          Gitlab::UrlBuilder.build(issue, only_path: true)
+        def issue_path(issue, project)
+          Gitlab::Routing.url_helpers.namespace_project_issue_path(namespace_id: project.namespace, project_id: project, id: issue.iid)
         end
 
-        def issue_url(issue)
-          Gitlab::UrlBuilder.build(issue)
+        def issue_url(issue, project)
+          Gitlab::Routing.url_helpers.namespace_project_issue_url(namespace_id: project.namespace, project_id: project, id: issue.iid)
         end
 
         def design_link_extras(issue, path)

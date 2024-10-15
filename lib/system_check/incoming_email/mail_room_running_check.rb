@@ -4,7 +4,6 @@ module SystemCheck
   module IncomingEmail
     class MailRoomRunningCheck < SystemCheck::BaseCheck
       include ::SystemCheck::InitHelpers
-
       set_name 'MailRoom running?'
 
       def skip?

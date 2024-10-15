@@ -11,7 +11,7 @@ DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
-## General information
+## General Information
 
 This section covers some general information and recommendations regarding the platform.
 
@@ -24,22 +24,7 @@ This section covers some general information and recommendations regarding the p
 
 The [Hardening Guide](hardening.md) contains additional general recommendations that can be implemented for hardening an install.
 
-### Antivirus software
-
-Generally, running an antivirus software on the GitLab host is not recommended.
-
-However, if you must use one, all of the location of GitLab on the system should be excluded from scanning as it could be quarantined as a false positive.
-
-Specifically, you should exclude the following GitLab directories from scanning:
-
-- `/var/opt/gitlab`
-- `/etc/gitlab/`
-- `/var/log/gitlab/`
-- `/opt/gitlab/`
-
-You can find all those directories listed in the [Linux package configuration documentation](https://docs.gitlab.com/omnibus/settings/configuration.html).
-
-### User accounts
+### User Accounts
 
 - [Review authentication options](../administration/auth/index.md).
 - [Configure password length limits](password_length_limits.md).
@@ -51,13 +36,13 @@ You can find all those directories listed in the [Linux package configuration do
 - [How to reset a user password](reset_user_password.md).
 - [How to unlock a locked user](unlock_user.md).
 
-### Data access
+### Data Access
 
 - [Information exclusivity](information_exclusivity.md).
 - [Protecting and removing user file uploads](user_file_uploads.md).
 - [Proxying linked images for user privacy](asset_proxy.md).
 
-### Platform usage and settings
+### Platform Usage & Settings
 
 - [Review GitLab token type and usages](token_overview.md).
 - [How to configure rate limits improve security and availability](rate_limits.md).
@@ -76,16 +61,12 @@ Self-managed GitLab customers and administrators are responsible for the securit
 ### Logs
 
 - [Review the log types and contents produced by GitLab](../administration/logs/index.md).
-- [Review Runner job logs information](../administration/cicd/job_logs.md).
+- [Review Runner job logs information](../administration/job_logs.md).
 - [How to use correlation ID to trace logs](../administration/logs/tracing_correlation_id.md).
 - [Logging configuration and access](https://docs.gitlab.com/omnibus/settings/logs.html).
-- [How to configure audit event streaming](../administration/audit_event_streaming/index.md).
+- [How to configure Audit Event Streaming](../administration/audit_event_streaming/index.md).
 - [Providing assistance to GitLab.com customers during customer-based security incidents](https://handbook.gitlab.com/handbook/security/customer-requests/#conditions-and-requirements).
 
 ## Response
 
 - [Responding to security incidents](responding_to_security_incidents.md).
-
-## Rate limits
-
-For information about rate limits, see [Rate limits](rate_limits.md).

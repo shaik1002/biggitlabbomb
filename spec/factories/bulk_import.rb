@@ -26,9 +26,5 @@ FactoryBot.define do
     trait :timeout do
       status { 3 }
     end
-
-    trait :with_configuration do
-      configuration { association(:bulk_import_configuration, bulk_import: instance) }
-    end
   end
 end

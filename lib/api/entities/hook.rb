@@ -19,20 +19,11 @@ module API
       expose :url_variables,
         if: ->(_, options) { options[:with_url_variables] != false },
         documentation: { type: 'Hash', example: { "token" => "secr3t" }, is_array: true }
-      expose :push_events_branch_filter, documentation: { type: 'string', example: 'my-branch-*' }
-      expose :branch_filter_strategy, documentation: { type: 'string', example: 'wildcard' }
 
       expose :custom_webhook_template, documentation: { type: 'string', example: '{"event":"{{object_kind}}"}' }
-      expose :custom_headers,
-        if: ->(_, options) { options[:with_custom_headers] != false },
-        documentation: { type: 'Hash', example: { "X-Custom-Header" => "value" }, is_array: true }
 
       def url_variables
         object.url_variables.keys.map { { key: _1 } }
-      end
-
-      def custom_headers
-        object.custom_headers.keys.map { { key: _1 } }
       end
     end
   end

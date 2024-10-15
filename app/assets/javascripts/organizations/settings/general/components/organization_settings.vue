@@ -100,11 +100,8 @@ export default {
 </script>
 
 <template>
-  <settings-block
-    id="organization-settings"
-    :title="$options.i18n.settingsBlock.title"
-    default-expanded
-  >
+  <settings-block id="organization-settings" default-expanded>
+    <template #title>{{ $options.i18n.settingsBlock.title }}</template>
     <template #description>{{ $options.i18n.settingsBlock.description }}</template>
     <template #default>
       <form-errors-alert v-model="errors" :scroll-on-error="true" />

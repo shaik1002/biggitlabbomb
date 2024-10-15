@@ -1,15 +1,12 @@
-- index = local_assigns.fetch(:index, nil)
-- note = local_assigns.fetch(:result, nil)
-- position = index + 1
 - project = note.project
 - note_url = Gitlab::UrlBuilder.build(note)
 - noteable_identifier = note.noteable.try(:iid) || note.noteable.try(:id)
 
 .search-result-row
   .note-search-caption.gl-max-w-full
-    .gl-text-sm.gl-text-secondary.gl-float-right= time_ago_with_tooltip(note.created_at, placement: 'bottom', html_class: 'note-created-ago')
-    .gl-inline-block.gl-truncate.search-max-w-inherit.gl-align-bottom
-      .gl-font-bold= link_to_member(note.author, avatar: true, extra_class: 'gl-text-default')
+    .gl-font-sm.gl-text-secondary.gl-float-right= time_ago_with_tooltip(note.created_at, placement: 'bottom', html_class: 'note-created-ago')
+    .gl-display-inline-block.gl-text-truncate.search-max-w-inherit.gl-align-bottom
+      .gl-font-bold= link_to_member(project, note.author, avatar: true, extra_class: 'gl-text-black-normal')
       .gl-text-secondary
         = _("Commented on %{link_to_project}").html_safe % { link_to_project: link_to(project.full_name, project) }
     &middot;
@@ -22,7 +19,7 @@
     - else
       %span #{note.noteable_type.titleize} ##{noteable_identifier}
       &middot;
-      = link_to note.noteable.title, note_url, data: { event_tracking: 'click_search_result', event_label: @scope, event_value: position }
+      = link_to note.noteable.title, note_url, data: {track_action: 'click_text', track_label: 'noteable_title', track_property: 'search_result'}
 
   .note-search-result
     .term

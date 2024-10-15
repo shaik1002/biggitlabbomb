@@ -2,14 +2,14 @@
 
 exports[`StatisticsList displays the counts data with labels 1`] = `
 <div
-  class="gl-flex gl-flex-wrap gl-gap-6 gl-mb-6"
+  class="gl-display-flex gl-flex-wrap gl-gap-6 gl-mb-6"
 >
   <div>
     <gl-single-stat-stub
       animationdecimalplaces="0"
       id="reference-0"
       shouldanimate="true"
-      title="Total pipeline runs"
+      title="Total pipelines"
       titleiconclass=""
       unit=""
       usedelimiters="true"
@@ -22,33 +22,45 @@ exports[`StatisticsList displays the counts data with labels 1`] = `
       animationdecimalplaces="0"
       id="reference-1"
       shouldanimate="true"
-      title="Failure rate"
+      title="Success ratio"
       titleiconclass=""
       unit=""
       usedelimiters="true"
-      value="50%"
+      value="50.00%"
       variant="muted"
     />
-    <gl-link-stub
-      class="gl-p-2"
-      data-event-tracking="click_view_all_link_in_pipeline_analytics"
-      href="/flightjs/Flight/-/pipelines?page=1&scope=all&status=failed"
-    >
-      View all
-    </gl-link-stub>
   </div>
   <div>
     <gl-single-stat-stub
       animationdecimalplaces="0"
       id="reference-2"
       shouldanimate="true"
-      title="Success rate"
+      title="Successful pipelines"
       titleiconclass=""
       unit=""
       usedelimiters="true"
-      value="50%"
+      value="20,000"
       variant="muted"
     />
+  </div>
+  <div>
+    <gl-single-stat-stub
+      animationdecimalplaces="0"
+      id="reference-3"
+      shouldanimate="true"
+      title="Failed pipelines"
+      titleiconclass=""
+      unit=""
+      usedelimiters="true"
+      value="20,000"
+      variant="muted"
+    />
+    <gl-link-stub
+      class="gl-p-2"
+      href="/flightjs/Flight/-/pipelines?page=1&scope=all&status=failed"
+    >
+      See details
+    </gl-link-stub>
   </div>
 </div>
 `;

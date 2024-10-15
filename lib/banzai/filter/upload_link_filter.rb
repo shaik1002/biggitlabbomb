@@ -34,9 +34,9 @@ module Banzai
         path_parts = [unescape_and_scrub_uri(html_attr.value)]
 
         if project
-          path_parts.unshift(relative_url_root, '-', 'project', project.id.to_s)
+          path_parts.unshift(relative_url_root, project.full_path)
         elsif group
-          path_parts.unshift(relative_url_root, '-', 'group', group.id.to_s)
+          path_parts.unshift(relative_url_root, 'groups', group.full_path, '-')
         else
           path_parts.unshift(relative_url_root)
         end

@@ -1,7 +1,9 @@
 ---
 key_path: redis_hll_counters.error_tracking.error_tracking_view_list_monthly
 description: Unique users viewing the list of errors in the project
-product_group: platform_insights
+product_section: ops
+product_stage: monitor
+product_group: respond
 value_type: number
 status: active
 milestone: "14.9"

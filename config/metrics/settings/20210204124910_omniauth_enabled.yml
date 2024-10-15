@@ -2,6 +2,8 @@
 data_category: optional
 key_path: omniauth_enabled
 description: Whether OmniAuth is enabled
+product_section: sec
+product_stage: govern
 product_group: authentication
 value_type: boolean
 status: active
@@ -17,4 +19,3 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/51974

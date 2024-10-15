@@ -16,7 +16,6 @@ import ConfirmRemovalModal from '~/integrations/beyond_identity/components/remov
 import showToast from '~/vue_shared/plugins/global_toast';
 import {
   projectExclusionsMock,
-  groupExclusionsMock,
   fetchExclusionsResponse,
   createExclusionMutationResponse,
   deleteExclusionMutationResponse,
@@ -70,9 +69,7 @@ describe('ExclusionsList component', () => {
 
     it('renders help text', () => {
       expect(
-        findByText(
-          'Groups and projects in this list no longer require commits to be signed.',
-        ).exists(),
+        findByText('Projects in this list no longer require commits to be signed.').exists(),
       ).toBe(true);
     });
 
@@ -148,7 +145,7 @@ describe('ExclusionsList component', () => {
 
     describe('Exclusions added', () => {
       beforeEach(async () => {
-        findDrawer().vm.$emit('add', [...projectExclusionsMock, ...groupExclusionsMock]);
+        findDrawer().vm.$emit('add', projectExclusionsMock);
         await waitForPromises();
       });
 
@@ -157,7 +154,6 @@ describe('ExclusionsList component', () => {
           input: {
             integrationName: 'BEYOND_IDENTITY',
             projectIds: ['gid://gitlab/Project/1', 'gid://gitlab/Project/2'],
-            groupIds: ['gid://gitlab/Group/1', 'gid://gitlab/Group/2'],
           },
         });
       });
@@ -199,76 +195,66 @@ describe('ExclusionsList component', () => {
     });
   });
 
-  describe.each`
-    exclusionIndex | type         | name             | mutationPayload                                             | successMessage
-    ${1}           | ${'project'} | ${'project bar'} | ${{ projectIds: ['gid://gitlab/Project/2'], groupIds: [] }} | ${'Project exclusion removed'}
-    ${2}           | ${'group'}   | ${'group foo'}   | ${{ projectIds: [], groupIds: ['gid://gitlab/Group/2'] }}   | ${'Group exclusion removed'}
-  `(
-    'removes $type exclusion',
-    ({ exclusionIndex, type, name, mutationPayload, successMessage }) => {
-      beforeEach(() => {
-        findListItems().at(exclusionIndex).vm.$emit('remove');
+  describe('removing Exclusions', () => {
+    beforeEach(() => {
+      findListItems().at(1).vm.$emit('remove');
+    });
+
+    it('opens a confirmation modal', () => {
+      expect(findConfirmRemoveModal().props()).toMatchObject({
+        name: 'project bar',
+        type: 'project',
+        visible: true,
+      });
+    });
+
+    describe('confirmation modal primary action', () => {
+      beforeEach(async () => {
+        findConfirmRemoveModal().vm.$emit('primary');
+        await waitForPromises();
       });
 
-      it('opens a confirmation modal', () => {
-        expect(findConfirmRemoveModal().props()).toMatchObject({
-          name,
-          type,
-          visible: true,
+      it('calls a GraphQL mutation to remove the exclusion', () => {
+        expect(deleteMutationMock).toHaveBeenCalledWith({
+          input: { integrationName: 'BEYOND_IDENTITY', projectIds: ['gid://gitlab/Project/2'] },
         });
       });
 
-      describe('confirmation modal primary action', () => {
-        beforeEach(async () => {
-          findConfirmRemoveModal().vm.$emit('primary');
-          await waitForPromises();
+      it('renders a toast', () => {
+        expect(showToast).toHaveBeenCalledWith('Project exclusion removed', {
+          action: {
+            text: 'Undo',
+            onClick: expect.any(Function),
+          },
         });
+      });
+    });
 
-        it('calls a GraphQL mutation to remove the exclusion', () => {
-          expect(deleteMutationMock).toHaveBeenCalledWith({
-            input: {
-              integrationName: 'BEYOND_IDENTITY',
-              ...mutationPayload,
+    describe('Error handling', () => {
+      beforeEach(async () => {
+        const response = {
+          data: {
+            integrationExclusionDelete: {
+              ...deleteExclusionMutationResponse.data.integrationExclusionDelete,
+              errors: ['some error'],
             },
-          });
-        });
+          },
+        };
 
-        it('renders a toast', () => {
-          expect(showToast).toHaveBeenCalledWith(successMessage, {
-            action: {
-              text: 'Undo',
-              onClick: expect.any(Function),
-            },
-          });
-        });
+        createComponent({ deleteSuccessHandler: jest.fn().mockResolvedValue(response) });
+        await waitForPromises();
+
+        findListItems().at(1).vm.$emit('remove');
+        await waitForPromises();
+        findConfirmRemoveModal().vm.$emit('primary');
+        await waitForPromises();
       });
 
-      describe('Error handling', () => {
-        beforeEach(async () => {
-          const response = {
-            data: {
-              integrationExclusionDelete: {
-                ...deleteExclusionMutationResponse.data.integrationExclusionDelete,
-                errors: ['some error'],
-              },
-            },
-          };
-
-          createComponent({ deleteSuccessHandler: jest.fn().mockResolvedValue(response) });
-          await waitForPromises();
-
-          findListItems().at(1).vm.$emit('remove');
-          await waitForPromises();
-          findConfirmRemoveModal().vm.$emit('primary');
-          await waitForPromises();
-        });
-
-        it('renders an error', () => {
-          expect(createAlert).toHaveBeenCalledWith({
-            message: 'Failed to remove the exclusion. Try removing it again.',
-          });
+      it('renders an error', () => {
+        expect(createAlert).toHaveBeenCalledWith({
+          message: 'Failed to remove the exclusion. Try removing it again.',
         });
       });
-    },
-  );
+    });
+  });
 });

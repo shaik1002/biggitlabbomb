@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Verify', :runner, product_group: :pipeline_execution do
+  RSpec.describe 'Verify', :runner, product_group: :pipeline_security do
     describe 'Project artifacts' do
       context 'when user tries bulk deletion' do
         let(:total_jobs_count) { 20 }
@@ -27,12 +27,17 @@ module QA
           end
         end
 
-        it 'successfully delete them', :blocking,
-          testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/425725' do
+        it 'successfully delete them', testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/425725' do
           Page::Project::Artifacts::Index.perform do |index|
             index.delete_selected_artifacts
+            position = rand(1..20)
+            artifacts_count = index.job_artifacts_count_by_row(row: position)
+            artifacts_size = index.job_artifacts_size_by_row(row: position)
 
-            expect(index).to have_no_artifacts
+            aggregate_failures 'job artifacts count and size' do
+              expect(artifacts_count).to eq(0), 'Failed to delete artifact'
+              expect(artifacts_size).to eq(0), 'Failed to delete artifact'
+            end
           end
         end
       end

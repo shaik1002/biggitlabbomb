@@ -14,10 +14,6 @@ class SystemNoteMetadata < ApplicationRecord
     moved merge
     label milestone
     relate unrelate
-    unrelate_from_parent
-    unrelate_from_child
-    relate_to_parent
-    relate_to_child
     cloned
   ].freeze
 

@@ -186,7 +186,7 @@ RSpec.describe Import::BitbucketService, feature_category: :importers do
           allow(client).to receive(:user).and_return(bitbucket_user)
         end
 
-        expect(::Import::Framework::Logger)
+        expect(Gitlab::Import::Logger)
           .to receive(:error)
           .with(
             message: 'BitBucket Cloud import failed',

@@ -22,13 +22,10 @@ describe('IDE review mode', () => {
     store.state.currentProjectId = 'abcproject';
     store.state.currentBranchId = 'main';
     store.state.projects.abcproject = { ...projectData };
-    store.state.trees = {
-      ...store.state.trees,
-      'abcproject/main': {
-        tree: [file('fileName')],
-        loading: false,
-      },
-    };
+    Vue.set(store.state.trees, 'abcproject/main', {
+      tree: [file('fileName')],
+      loading: false,
+    });
 
     dispatch = jest.spyOn(store, 'dispatch');
 

@@ -754,12 +754,11 @@ RSpec.describe UsersController, feature_category: :user_management do
         allow(::Gitlab::ApplicationRateLimiter).to receive(:throttled?).and_return(false)
       end
 
-      let(:exists_true_response_body) { { exists: true }.to_json }
-
       it 'returns JSON indicating the user exists' do
         get user_exists_url user.username
 
-        expect(response.body).to eq(exists_true_response_body)
+        expected_json = { exists: true }.to_json
+        expect(response.body).to eq(expected_json)
       end
 
       context 'when the casing is different' do
@@ -768,24 +767,8 @@ RSpec.describe UsersController, feature_category: :user_management do
         it 'returns JSON indicating the user exists' do
           get user_exists_url user.username.downcase
 
-          expect(response.body).to eq(exists_true_response_body)
-        end
-      end
-
-      context 'when a group with the username exists' do
-        let_it_be(:group) { create(:group, name: 'get-user-exists') }
-        let_it_be(:subgroup) { create(:group, name: 'get-user-exists-child', parent: group) }
-
-        it 'treats the top-level group as a reserved name' do
-          get user_exists_url 'get-user-exists'
-
-          expect(response.body).to eq(exists_true_response_body)
-        end
-
-        it 'treats the sub-group as not a reserved name' do
-          get user_exists_url 'get-user-exists-child'
-
-          expect(response.body).to eq({ exists: false }.to_json)
+          expected_json = { exists: true }.to_json
+          expect(response.body).to eq(expected_json)
         end
       end
     end
@@ -835,7 +818,7 @@ RSpec.describe UsersController, feature_category: :user_management do
         ip = '1.2.3.4'
         expect(::Gitlab::ApplicationRateLimiter).to receive(:throttled?).with(:username_exists, scope: ip).and_return(true)
 
-        get user_exists_url(user.username), env: { REMOTE_ADDR: ip }
+        get user_exists_url(user.username), env: { 'REMOTE_ADDR': ip }
 
         expect(response).to have_gitlab_http_status(:too_many_requests)
       end

@@ -19,8 +19,7 @@ Merge requests containing changes to Markdown (`.md`) files run these CI/CD jobs
   - Miscellaneous tests: [`lint-docs.sh`](#tests-in-lint-docsh), including
     [`mermaidlint`](#mermaid-chart-linting) for invalid Mermaid charts
 - `docs-lint links`: Checks the validity of internal links in the documentation suite.
-- `ui-docs-links lint` and `eslint-docs`: Checks the validity of links from UI elements, such as files in `app/views`
-  files.
+- `ui-docs-links lint`: Checks the validity of links from UI elements, such as files in `app/views` files.
 
 ## Tests in `lint-doc.sh`
 
@@ -53,21 +52,35 @@ error if any Markdown files return a Mermaid syntax error.
 To help debug your Mermaid charts, use the
 [Mermaid Live Editor](https://mermaid-js.github.io/mermaid-live-editor/edit).
 
-## Tests in `docs-lint links` and other jobs
+## Tests in `docs-lint links`
 
-To check for broken links, merge requests containing changes to Markdown (`.md`) files run these jobs in their
-pipelines:
+Merge requests containing changes to Markdown (`.md`) files run a `docs-lint links`
+job, which runs two types of link checks. In both cases, links with destinations
+that begin with `http` or `https` are considered external links, and skipped:
 
-- `docs-lint links` job in the `gitlab` project. For example: <https://gitlab.com/gitlab-org/gitlab/-/jobs/7065686331>.
-- `docs-lint links` job in the `omnibus-gitlab` project. For example: <https://gitlab.com/gitlab-org/omnibus-gitlab/-/jobs/7065337075>.
-- `docs-lint links` job in the `gitlab-operator` project.
-- `docs:lint markdown` job in the `gitlab-runner` project, which includes link checking. For example:
-  <https://gitlab.com/gitlab-org/gitlab-runner/-/jobs/7056674997>.
-- `check_docs_links` job in the `charts/gitlab` project. For example:
-  <https://gitlab.com/gitlab-org/charts/gitlab/-/jobs/7066011619>.
+- `bundle exec nanoc check internal_links`: Tests links to internal pages.
+- `bundle exec nanoc check internal_anchors`: Tests links to topic title anchors on internal pages.
 
-These jobs check links, including anchor links, and report any problems. Any link that requires a network
-connection is skipped.
+Failures from these tests are displayed at the end of the test results in the **Issues found!** area.
+For example, failures in the `internal_anchors` test follow this format:
+
+```plaintext
+[ ERROR ] internal_anchors - Broken anchor detected!
+  - source file `/tmp/gitlab-docs/public/ee/user/application_security/api_fuzzing/index.html`
+  - destination `/tmp/gitlab-docs/public/ee/development/code_review.html`
+  - link `../../../development/code_review.html#review-response-slo`
+  - anchor `#review-response-slo`
+```
+
+- **Source file**: The full path to the file containing the error. To find the
+  file in the `gitlab` repository, replace `/tmp/gitlab-docs/public/ee` with `doc`, and `.html` with `.md`.
+- **Destination**: The full path to the file not found by the test. To find the
+  file in the `gitlab` repository, replace `/tmp/gitlab-docs/public/ee` with `doc`, and `.html` with `.md`.
+- **Link**: The actual link the script attempted to find.
+- **Anchor**: If present, the topic title anchor the script attempted to find.
+
+Check for multiple instances of the same broken link on each page reporting an error.
+Even if a specific broken link appears multiple times on a page, the test reports it only once.
 
 ## Tests in `ui-docs-links lint`
 
@@ -99,13 +112,10 @@ It's important to:
   run in CI/CD pipelines. It's important to use same configuration we use in
   CI/CD pipelines, which can be different than the default configuration of the tool.
 
-### Run Vale, markdownlint, or link checks locally
+### Run Vale or markdownlint locally
 
-Installation and configuration instructions are available for:
-
-- [markdownlint](markdownlint.md).
-- [Vale](vale.md).
-- [Lychee](links.md) and UI link checkers.
+Installation and configuration instructions for [markdownlint](markdownlint.md)
+and [Vale](vale.md) are available.
 
 ### Run `lint-doc.sh` locally
 
@@ -144,6 +154,54 @@ The output should be similar to:
 ✔ Linting passed
 ```
 
+### Run documentation link tests locally
+
+To test links in the documentation locally:
+
+1. Go to the [`gitlab-docs`](https://gitlab.com/gitlab-org/gitlab-docs) directory.
+1. Run the following commands:
+
+   ```shell
+   # Check for broken internal links
+   bundle exec nanoc check internal_links
+
+   # Check for broken external links (might take a lot of time to complete).
+   # This test is allowed to fail, and is run only in the gitlab-docs project CI
+   bundle exec nanoc check internal_anchors
+   ```
+
+### Run UI link tests locally
+
+To test documentation links in the GitLab UI locally:
+
+1. Open the `gitlab` directory in a terminal window.
+1. Run:
+
+   ```shell
+   bundle exec haml-lint -i DocumentationLinks
+   ```
+
+If you receive an error the first time you run this test, run `bundle install`, which
+installs the dependencies for GitLab, and try again.
+
+If you don't want to install all of the dependencies to test the links, you can:
+
+1. Open the `gitlab` directory in a terminal window.
+1. Install `haml-lint`:
+
+   ```shell
+   gem install haml_lint
+   ```
+
+1. Run:
+
+   ```shell
+   haml-lint -i DocumentationLinks
+   ```
+
+If you manually install `haml-lint` with this process, it does not update automatically
+and you should make sure your version matches the version used by GitLab.
+
 ## Update linter configuration
 
 Vale and markdownlint configurations are under source control in each
@@ -155,59 +213,12 @@ and all updates should first be made there.
 On a regular basis, the changes made in `gitlab` project to the Vale and markdownlint configuration should be
 synchronized to the other projects. In each of the [supported projects](#supported-projects):
 
-1. Create a new branch. Add `docs-` to the beginning or `-docs` to the end of the branch name. Some projects use this
-   convention to limit the jobs that run.
-1. Copy the configuration files from the `gitlab` project. For example, in the root directory of the project, run:
-
-   ```shell
-   # Copy markdownlint configuration file
-   cp ../gitlab/.markdownlint-cli2.yaml .
-   # Remove existing Vale configuration in case some rules have been removed from the GitLab project
-   rm -r docs/.vale/gitlab
-   # Copy gitlab_base Vale configuration files for a project with documentation stored in 'docs' directory
-   cp -r ../gitlab/doc/.vale/gitlab_base docs/.vale
-   ```
-
-1. If updating `gitlab-runner`, `gitlab-omnibus`, `charts/gitlab`, or `gitlab-operator`, also copy the `gitlab-docs`
-   Vale configuration from the `gitlab` project. For example, in the root directory of the project, run:
-
-   ```shell
-   # Copy gitlab-docs Vale configuration files for a project with documentation stored in 'docs' directory
-   cp -r ../gitlab/doc/.vale/gitlab_docs docs/.vale
-   ```
-
-1. Review the diff created for `.markdownlint-cli2.yaml`. For example, run:
-
-   ```shell
-   git diff .markdownlint-cli2.yaml
-   ```
-
-1. Remove any changes that aren't required. For example, `customRules` is only used in the `gitlab` project.
-1. Review the diffs created for the Vale configuration. For example, run:
-
-   ```shell
-   git diff docs
-   ```
-
-1. Remove unneeded changes to `RelativeLinks.yml`. This rule is specific to each project.
-1. Remove any `.tmpl` files. These files are only used in the `gitlab` project.
-1. Run `markdownlint-cli2` to check for any violations of the new rules. For example:
-
-   ```shell
-   markdownlint-cli2 docs/**/*.md
-   ```
-
-1. Run Vale to check for any violations of the new rules. For example:
-
-   ```shell
-   vale --minAlertLevel error docs
-   ```
-
-1. Commit the changes to the new branch. Some projects require
-   [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) so check the contributing information for the
-   project before committing.
-
-1. Submit a merge request for review.
+1. Create a new branch.
+1. Copy the configuration files from the `gitlab` project into this branch, overwriting
+   the project's old configuration. Make sure no project-specific changes from the `gitlab`
+   project are included. For example, [`RelativeLinks.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/RelativeLinks.yml)
+   is hard coded for specific projects.
+1. Create a merge request and submit it to a technical writer for review and merge.
 
 ## Update linting images
 
@@ -222,19 +233,16 @@ To update the linting images:
 
 1. In `gitlab-docs`, open a merge request to update `.gitlab-ci.yml` to use the new tooling
    version. ([Example MR](https://gitlab.com/gitlab-org/gitlab-docs/-/merge_requests/2571))
-1. When merged, start a `Build docker images manually` [scheduled pipeline](https://gitlab.com/gitlab-org/gitlab-docs/-/pipeline_schedules).
-1. Go the pipeline you started, and wait for the relevant `test:image` job to complete,
-   for example `test:image:docs-lint-markdown`. If the job:
-   - Passes, start the relevant `image:` job, for example, `image:docs-lint-markdown`.
-   - Fails, review the test job log and start troubleshooting the issue. The image configuration
-     likely needs some manual tweaks to work with the updated dependency.
-1. After the `image:` job passes, check the job's log for the name of the new image.
+1. When merged, start a `Build docs.gitlab.com every hour` [scheduled pipeline](https://gitlab.com/gitlab-org/gitlab-docs/-/pipeline_schedules).
+1. Go the pipeline you started, and manually run the relevant build-images job,
+   for example, `image:docs-lint-markdown`.
+1. In the job output, get the name of the new image.
    ([Example job output](https://gitlab.com/gitlab-org/gitlab-docs/-/jobs/2335033884#L334))
 1. Verify that the new image was added to the container registry.
 1. Open merge requests to update each of these configuration files to point to the new image.
    In each merge request, include a small doc update to trigger the job that uses the image.
    - <https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/docs.gitlab-ci.yml> ([Example MR](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/85177))
-   - <https://gitlab.com/gitlab-org/gitlab-runner/-/blob/main/.gitlab/ci/docs.gitlab-ci.yml> ([Example MR](https://gitlab.com/gitlab-org/gitlab-runner/-/merge_requests/3408))
+   - <https://gitlab.com/gitlab-org/gitlab-runner/-/blob/main/.gitlab/ci/test.gitlab-ci.yml> ([Example MR](https://gitlab.com/gitlab-org/gitlab-runner/-/merge_requests/3408))
    - <https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/gitlab-ci-config/gitlab-com.yml> ([Example MR](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/6037))
    - <https://gitlab.com/gitlab-org/charts/gitlab/-/blob/master/.gitlab-ci.yml> ([Example MR](https://gitlab.com/gitlab-org/charts/gitlab/-/merge_requests/2511))
    - <https://gitlab.com/gitlab-org/cloud-native/gitlab-operator/-/blob/master/.gitlab-ci.yml> ([Example MR](https://gitlab.com/gitlab-org/cloud-native/gitlab-operator/-/merge_requests/462))
@@ -266,8 +274,8 @@ Some, but not all, linting can be disabled on documentation files:
 
 - [Vale tests can be disabled](vale.md#disable-vale-tests) for all or part of a file.
 - [`markdownlint` tests can be disabled](markdownlint.md#disable-markdownlint-tests) for all or part of a file.
-- [Documentation link tests](links.md#run-documentation-link-tests-locally) cannot be disabled.
-- [UI link tests](links.md#run-ui-link-tests-locally) cannot be disabled.
+- [Documentation link tests](#run-documentation-link-tests-locally) cannot be disabled.
+- [UI link tests](#run-ui-link-tests-locally) cannot be disabled.
 
 ## Tool versions used in CI/CD pipelines
 
@@ -302,16 +310,14 @@ in the relevant projects:
 - <https://gitlab.com/gitlab-org/charts/gitlab/-/blob/master/.gitlab-ci.yml>
 - <https://gitlab.com/gitlab-org/cloud-native/gitlab-operator/-/blob/master/.gitlab-ci.yml>
 
-We also run some documentation tests in these projects:
+We also run some documentation tests in the:
 
-- GitLab CLI: <https://gitlab.com/gitlab-org/cli/-/blob/main/.gitlab-ci.yml>
-- GitLab Development Kit:
-  <https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/main/.gitlab/ci/test.gitlab-ci.yml>
-- Gitaly: <https://gitlab.com/gitlab-org/gitaly/-/blob/master/.gitlab-ci.yml>
+- GitLab CLI project: <https://gitlab.com/gitlab-org/cli/-/blob/main/.gitlab-ci.yml>
+- GitLab Development Kit project:
+  <https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/main/.gitlab/ci/test.gitlab-ci.yml>.
+- Gitaly project: <https://gitlab.com/gitlab-org/gitaly/-/blob/master/.gitlab-ci.yml>.
 - GitLab Duo Plugin for JetBrains: <https://gitlab.com/gitlab-org/editor-extensions/gitlab-jetbrains-plugin/-/blob/main/.gitlab-ci.yml>
-- GitLab Workflow extension for VS Code: <https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/.gitlab-ci.yml>
-- GitLab Plugin for Neovim: <https://gitlab.com/gitlab-org/editor-extensions/gitlab.vim/-/blob/main/.gitlab-ci.yml>
-- GitLab Language Server: <https://gitlab.com/gitlab-org/editor-extensions/gitlab-lsp/-/blob/main/.gitlab-ci.yml>
-- GitLab Extension for Visual Studio: <https://gitlab.com/gitlab-org/editor-extensions/gitlab-visual-studio-extension/-/blob/main/.gitlab-ci.yml>
-- AI Gateway: <https://gitlab.com/gitlab-org/modelops/applied-ml/code-suggestions/ai-assist/-/blob/main/.gitlab/ci/lint.gitlab-ci.yml>
-- Prompt Library: <https://gitlab.com/gitlab-org/modelops/ai-model-validation-and-research/ai-evaluation/prompt-library/-/blob/main/.gitlab-ci.yml>
+- GitLab VS Code Extension project: <https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/.gitlab-ci.yml>.
+- GitLab Plugin for Neovim project: <https://gitlab.com/gitlab-org/editor-extensions/gitlab.vim/-/blob/main/.gitlab-ci.yml>.
+- GitLab Language Server project: <https://gitlab.com/gitlab-org/editor-extensions/gitlab-lsp/-/blob/main/.gitlab-ci.yml>.
+- GitLab Extension for Visual Studio project: <https://gitlab.com/gitlab-org/editor-extensions/gitlab-visual-studio-extension/-/blob/main/.gitlab-ci.yml>.

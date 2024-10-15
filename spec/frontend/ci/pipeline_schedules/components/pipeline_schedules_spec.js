@@ -10,12 +10,11 @@ import PipelineSchedules from '~/ci/pipeline_schedules/components/pipeline_sched
 import DeletePipelineScheduleModal from '~/ci/pipeline_schedules/components/delete_pipeline_schedule_modal.vue';
 import TakeOwnershipModal from '~/ci/pipeline_schedules/components/take_ownership_modal.vue';
 import PipelineSchedulesTable from '~/ci/pipeline_schedules/components/table/pipeline_schedules_table.vue';
-import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import deletePipelineScheduleMutation from '~/ci/pipeline_schedules/graphql/mutations/delete_pipeline_schedule.mutation.graphql';
 import playPipelineScheduleMutation from '~/ci/pipeline_schedules/graphql/mutations/play_pipeline_schedule.mutation.graphql';
 import takeOwnershipMutation from '~/ci/pipeline_schedules/graphql/mutations/take_ownership.mutation.graphql';
 import getPipelineSchedulesQuery from '~/ci/pipeline_schedules/graphql/queries/get_pipeline_schedules.query.graphql';
-import { SCHEDULES_PER_PAGE, TABLE_SORT_STORAGE_KEY } from '~/ci/pipeline_schedules/constants';
+import { SCHEDULES_PER_PAGE } from '~/ci/pipeline_schedules/constants';
 import {
   mockGetPipelineSchedulesGraphQLResponse,
   mockPipelineScheduleNodes,
@@ -99,7 +98,6 @@ describe('Pipeline schedules app', () => {
   const findSchedulesCharacteristics = () =>
     wrapper.findByTestId('pipeline-schedules-characteristics');
   const findPagination = () => wrapper.findComponent(GlPagination);
-  const findLocalStorageSync = () => wrapper.findComponent(LocalStorageSync);
   const setPage = async (page) => {
     findPagination().vm.$emit('input', page);
     await waitForPromises();
@@ -367,7 +365,6 @@ describe('Pipeline schedules app', () => {
         last: null,
         nextPageCursor: '',
         prevPageCursor: '',
-        sortValue: 'ID_DESC',
       });
     });
   });
@@ -429,7 +426,6 @@ describe('Pipeline schedules app', () => {
         last: null,
         nextPageCursor: '',
         prevPageCursor: '',
-        sortValue: 'ID_DESC',
       });
     });
 
@@ -443,7 +439,6 @@ describe('Pipeline schedules app', () => {
         last: null,
         prevPageCursor: '',
         nextPageCursor: pageInfo.endCursor,
-        sortValue: 'ID_DESC',
       });
       expect(findPagination().props('value')).toEqual(2);
     });
@@ -455,97 +450,6 @@ describe('Pipeline schedules app', () => {
 
       await findInactiveTab().trigger('click');
 
-      await waitForPromises();
-
-      expect(findPagination().props('value')).toEqual(1);
-    });
-  });
-
-  describe('restores sorting from local storage', () => {
-    beforeEach(async () => {
-      localStorage.setItem(
-        TABLE_SORT_STORAGE_KEY,
-        JSON.stringify({
-          sortValue: 'DESCRIPTION_DESC',
-          sortBy: 'ID',
-          sortDesc: true,
-        }),
-      );
-      createComponent([[getPipelineSchedulesQuery, successHandler]]);
-      await waitForPromises();
-    });
-
-    afterEach(() => {
-      localStorage.clear();
-    });
-
-    it('has local storage sync', () => {
-      expect(findLocalStorageSync().exists()).toBe(true);
-    });
-
-    it('sets localStorage storageKey to the expected key', () => {
-      expect(findLocalStorageSync().props('storageKey')).toBe(TABLE_SORT_STORAGE_KEY);
-    });
-
-    it('fetches results with saved sort settings', () => {
-      expect(successHandler).toHaveBeenCalledWith({
-        projectPath: 'gitlab-org/gitlab',
-        ids: null,
-        first: SCHEDULES_PER_PAGE,
-        last: null,
-        nextPageCursor: '',
-        prevPageCursor: '',
-        sortValue: 'DESCRIPTION_DESC',
-      });
-    });
-  });
-
-  describe('when sorting changes', () => {
-    const newSort = 'DESCRIPTION_ASC';
-
-    beforeEach(async () => {
-      createComponent([[getPipelineSchedulesQuery, successHandler]]);
-
-      await waitForPromises();
-      await findTable().vm.$emit('update-sorting', newSort, 'description', false);
-    });
-
-    it('updates the local storage', () => {
-      expect(findLocalStorageSync().props('value')).toEqual({
-        sortValue: 'DESCRIPTION_ASC',
-        sortBy: 'description',
-        sortDesc: false,
-      });
-    });
-
-    it('passes it to the graphql query', () => {
-      expect(successHandler).toHaveBeenCalledTimes(2);
-      expect(successHandler.mock.calls[1][0]).toEqual({
-        projectPath: 'gitlab-org/gitlab',
-        ids: null,
-        first: SCHEDULES_PER_PAGE,
-        last: null,
-        nextPageCursor: '',
-        prevPageCursor: '',
-        sortValue: newSort,
-      });
-    });
-  });
-
-  describe('when update-sorting event is emitted', () => {
-    beforeEach(async () => {
-      createComponent([[getPipelineSchedulesQuery, successHandlerWithPagination]]);
-      await waitForPromises();
-    });
-
-    it('resets the page count', async () => {
-      expect(findPagination().props('value')).toEqual(1);
-
-      await setPage(2);
-
-      expect(findPagination().props('value')).toEqual(2);
-
-      await findTable().vm.$emit('update-sorting', 'DESCRIPTION_DESC', 'description', true);
       await waitForPromises();
 
       expect(findPagination().props('value')).toEqual(1);

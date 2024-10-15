@@ -1,9 +1,10 @@
 import MockAdapter from 'axios-mock-adapter';
 import { TEST_HOST } from 'helpers/test_constants';
 import confidentialState from '~/confidential_merge_request/state';
-import { NON_INPUT_KEY_EVENTS } from '~/issues/constants';
 import CreateMergeRequestDropdown from '~/issues/create_merge_request_dropdown';
 import axios from '~/lib/utils/axios_utils';
+
+const REFS_PATH = `${TEST_HOST}/dummy/refs?search=`;
 
 describe('CreateMergeRequestDropdown', () => {
   let axiosMock;
@@ -13,7 +14,7 @@ describe('CreateMergeRequestDropdown', () => {
     axiosMock = new MockAdapter(axios);
 
     document.body.innerHTML = `
-      <div id="dummy-wrapper-element">
+      <div id="dummy-wrapper-element" data-refs-path="${REFS_PATH}">
         <div class="available"></div>
         <div class="unavailable">
           <div class="js-create-mr-spinner"></div>
@@ -31,7 +32,6 @@ describe('CreateMergeRequestDropdown', () => {
 
     const dummyElement = document.getElementById('dummy-wrapper-element');
     dropdown = new CreateMergeRequestDropdown(dummyElement);
-    dropdown.refsPath = `${TEST_HOST}/dummy/refs?search=`;
   });
 
   afterEach(() => {
@@ -40,7 +40,7 @@ describe('CreateMergeRequestDropdown', () => {
 
   describe('getRef', () => {
     it('escapes branch names correctly', async () => {
-      const endpoint = `${dropdown.refsPath}contains%23hash`;
+      const endpoint = `${REFS_PATH}contains%23hash`;
       jest.spyOn(axios, 'get');
       axiosMock.onGet(endpoint).replyOnce({});
 
@@ -93,33 +93,9 @@ describe('CreateMergeRequestDropdown', () => {
     `('toggle loading spinner when loading is $loading', ({ loading, hasClass }) => {
       dropdown.setLoading(loading);
 
-      expect(document.querySelector('.js-spinner').classList.contains('gl-hidden')).toEqual(
+      expect(document.querySelector('.js-spinner').classList.contains('gl-display-none')).toEqual(
         hasClass,
       );
     });
-  });
-
-  describe('onChangeInput', () => {
-    it('returns early if the user copies the branch name', () => {
-      const ctrlEvent = {
-        keyCode: 67, // 'c' key
-        ctrlKey: true,
-      };
-      expect(dropdown.onChangeInput(ctrlEvent)).toBe(undefined);
-      const cmdEvent = {
-        keyCode: 67, // 'c' key
-        metaKey: true,
-      };
-      expect(dropdown.onChangeInput(cmdEvent)).toBe(undefined);
-    });
-    it.each(NON_INPUT_KEY_EVENTS)(
-      'returns early when the user releases $label key',
-      ({ keyCode }) => {
-        const event = {
-          keyCode,
-        };
-        expect(dropdown.onChangeInput(event)).toBe(undefined);
-      },
-    );
   });
 });

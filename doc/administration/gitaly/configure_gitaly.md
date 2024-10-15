@@ -20,11 +20,6 @@ Configure Gitaly in one of two ways:
    [Gitaly settings](https://gitlab.com/gitlab-org/gitaly/-/blob/master/config.toml.example).
 1. Save the file and [reconfigure GitLab](../restart_gitlab.md#reconfigure-a-linux-package-installation).
 
-:::TabTitle Helm chart (Kubernetes)
-
-1. Configure the [Gitaly chart](https://docs.gitlab.com/charts/charts/gitlab/gitaly/).
-1. [Upgrade your Helm release](https://docs.gitlab.com/charts/installation/deployment.html).
-
 :::TabTitle Self-compiled (source)
 
 1. Edit `/home/git/gitaly/config.toml` and add or change the [Gitaly settings](https://gitlab.com/gitlab-org/gitaly/blob/master/config.toml.example).
@@ -96,10 +91,10 @@ The following list depicts the network architecture of Gitaly:
 - Authentication is done through a static token which is shared among the Gitaly and GitLab Rails
   nodes.
 
-The following diagram illustrates communication between Gitaly servers and GitLab Rails showing
+The following digraph illustrates communication between Gitaly servers and GitLab Rails showing
 the default ports for HTTP and HTTPs communication.
 
-![Two Gitaly servers and a GitLab Rails exchanging information.](img/gitaly_network_v13_9.png)
+![Gitaly network architecture diagram](img/gitaly_network_13_9.png)
 
 WARNING:
 Gitaly servers must not be exposed to the public internet as Gitaly network traffic is unencrypted
@@ -229,6 +224,7 @@ Configure Gitaly server.
    puma['enable'] = false
    sidekiq['enable'] = false
    gitlab_workhorse['enable'] = false
+   grafana['enable'] = false
    gitlab_exporter['enable'] = false
    gitlab_kas['enable'] = false
 
@@ -309,8 +305,8 @@ Configure Gitaly server.
 
 1. Save the file and [reconfigure GitLab](../restart_gitlab.md#reconfigure-a-linux-package-installation).
 1. Confirm that Gitaly can perform callbacks to the GitLab internal API:
-   - For GitLab 15.3 and later, run `sudo -u git -- /opt/gitlab/embedded/bin/gitaly check /var/opt/gitlab/gitaly/config.toml`.
-   - For GitLab 15.2 and earlier, run `sudo -u git -- /opt/gitlab/embedded/bin/gitaly-hooks check /var/opt/gitlab/gitaly/config.toml`.
+   - For GitLab 15.3 and later, run `sudo /opt/gitlab/embedded/bin/gitaly check /var/opt/gitlab/gitaly/config.toml`.
+   - For GitLab 15.2 and earlier, run `sudo /opt/gitlab/embedded/bin/gitaly-hooks check /var/opt/gitlab/gitaly/config.toml`.
 
 :::TabTitle Self-compiled (source)
 
@@ -357,8 +353,8 @@ Configure Gitaly server.
 
 1. Save the files and [restart GitLab](../restart_gitlab.md#self-compiled-installations).
 1. Confirm that Gitaly can perform callbacks to the GitLab internal API:
-   - For GitLab 15.3 and later, run `sudo -u git -- /opt/gitlab/embedded/bin/gitaly check /var/opt/gitlab/gitaly/config.toml`.
-   - For GitLab 15.2 and earlier, run `sudo -u git -- /opt/gitlab/embedded/bin/gitaly-hooks check /var/opt/gitlab/gitaly/config.toml`.
+   - For GitLab 15.3 and later, run `sudo /opt/gitlab/embedded/bin/gitaly check /var/opt/gitlab/gitaly/config.toml`.
+   - For GitLab 15.2 and earlier, run `sudo /opt/gitlab/embedded/bin/gitaly-hooks check /var/opt/gitlab/gitaly/config.toml`.
 
 ::EndTabs
 
@@ -395,7 +391,7 @@ You can't define Gitaly servers with some as a local Gitaly server
 server (with `gitaly_address`) unless you use
 [mixed configuration](#mixed-configuration).
 
-Configure Gitaly clients in one of two ways. These instructions are for unencrypted connections but you can also enable [TLS support](tls_support.md):
+Configure Gitaly clients in one of two ways:
 
 ::Tabs
 
@@ -531,7 +527,7 @@ reconfigure the GitLab application servers to remove the `default` entry from `g
 To work around the limitation:
 
 1. Define an additional storage location on the new Gitaly service and configure the additional storage to be `default`.
-1. In the [**Admin** area](../repository_storage_paths.md#configure-where-new-repositories-are-stored), set `default` to a weight of zero
+1. In the [Admin Area](../repository_storage_paths.md#configure-where-new-repositories-are-stored), set `default` to a weight of zero
    to prevent repositories being stored there.
 
 ### Disable Gitaly where not required (optional)
@@ -614,7 +610,6 @@ When these limits are reached, performance may be reduced and users may be disco
 
 > - This method of configuring repository cgroups was introduced in GitLab 15.1.
 > - `cpu_quota_us`[introduced](https://gitlab.com/gitlab-org/gitaly/-/merge_requests/5422) in GitLab 15.10.
-> - `max_cgroups_per_repo` [introduced](https://gitlab.com/gitlab-org/gitaly/-/issues/5689) in GitLab 16.7.
 
 To configure repository cgroups in Gitaly using the new method, use the following settings for the new configuration method
 to `gitaly['configuration'][:cgroups]` in `/etc/gitlab/gitlab.rb`:
@@ -646,14 +641,8 @@ to `gitaly['configuration'][:cgroups]` in `/etc/gitlab/gitlab.rb`:
   that is imposed on all Git processes contained in a repository cgroup. A Git
   process can't use more then the given quota. We set
   `cfs_period_us` to `100ms` so 1 core is `100000`. 0 implies no limit.
-- `repositories.max_cgroups_per_repo` is the number of repository cgroups that Git processes
-  targeting a specific repository can be distributed across. This enables more conservative
-  CPU and memory limits to be configured for repository cgroups while still allowing for
-  bursty workloads. For instance, with a `max_cgroups_per_repo` of `2` and a `memory_bytes`
-  limit of 10GB, independent Git operations against a specific repository can consume up
-  to 20GB of memory.
 
-For example (not necessarily recommended settings):
+For example:
 
 ```ruby
 # in /etc/gitlab/gitlab.rb
@@ -669,8 +658,7 @@ gitaly['configuration'] = {
       count: 1000,
       memory_bytes: 32212254720, # 20gb
       cpu_shares: 512,
-      cpu_quota_us: 200000, # 2 cores
-      max_cgroups_per_repo: 2
+      cpu_quota_us: 200000 # 2 cores
     },
   },
 }
@@ -903,10 +891,10 @@ fetch responses. This can reduce server load when your server receives
 lots of CI fetch traffic.
 
 The pack-objects cache wraps `git pack-objects`, an internal part of
-Git that gets invoked indirectly by using the PostUploadPack and
+Git that gets invoked indirectly via the PostUploadPack and
 SSHUploadPack Gitaly RPCs. Gitaly runs PostUploadPack when a
-user does a Git fetch by using HTTP, or SSHUploadPack when a
-user does a Git fetch by using SSH.
+user does a Git fetch via HTTP, or SSHUploadPack when a
+user does a Git fetch via SSH.
 When the cache is enabled, anything that uses PostUploadPack or SSHUploadPack can
 benefit from it. It is orthogonal to:
 
@@ -1297,7 +1285,6 @@ Gitaly fails to start up if either:
 > - [Introduced](https://gitlab.com/gitlab-org/gitaly/-/issues/4941) in GitLab 16.3.
 > - Server-side support for restoring a specified backup instead of the latest backup [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/132188) in GitLab 16.6.
 > - Server-side support for creating incremental backups [introduced](https://gitlab.com/gitlab-org/gitaly/-/merge_requests/6475) in GitLab 16.6.
-> - Server-side support added to Helm chart installations in GitLab 17.0.
 
 Repository backups can be configured so that the Gitaly node that hosts each
 repository is responsible for creating the backup and streaming it to
@@ -1327,15 +1314,10 @@ gitaly['env'] = {
 }
 gitaly['configuration'] = {
     backup: {
-        go_cloud_url: 'azblob://<bucket>'
+        go_cloud_url: 'azblob://gitaly-backups'
     }
 }
 ```
-
-:::TabTitle Helm chart (Kubernetes)
-
-For Helm-based deployments, see the
-[server-side backup documentation for Gitaly chart](https://docs.gitlab.com/charts/charts/gitlab/gitaly/index.html#server-side-backups).
 
 :::TabTitle Self-compiled (source)
 
@@ -1343,7 +1325,7 @@ Edit `/home/git/gitaly/config.toml` and configure `go_cloud_url`:
 
 ```toml
 [backup]
-go_cloud_url = "azblob://<bucket>"
+go_cloud_url = "azblob://gitaly-backups"
 ```
 
 ::EndTabs
@@ -1372,15 +1354,10 @@ gitaly['env'] = {
 }
 gitaly['configuration'] = {
     backup: {
-        go_cloud_url: 'gs://<bucket>'
+        go_cloud_url: 'gs://gitaly-backups'
     }
 }
 ```
-
-:::TabTitle Helm chart (Kubernetes)
-
-For Helm-based deployments, see the
-[server-side backup documentation for Gitaly chart](https://docs.gitlab.com/charts/charts/gitlab/gitaly/index.html#server-side-backups).
 
 :::TabTitle Self-compiled (source)
 
@@ -1388,7 +1365,7 @@ Edit `/home/git/gitaly/config.toml` and configure `go_cloud_url`:
 
 ```toml
 [backup]
-go_cloud_url = "gs://<bucket>"
+go_cloud_url = "gs://gitaly-backups"
 ```
 
 ::EndTabs
@@ -1418,15 +1395,10 @@ gitaly['env'] = {
 }
 gitaly['configuration'] = {
     backup: {
-        go_cloud_url: 's3://<bucket>?region=us-west-1'
+        go_cloud_url: 's3://gitaly-backups?region=us-west-1'
     }
 }
 ```
-
-:::TabTitle Helm chart (Kubernetes)
-
-For Helm-based deployments, see the
-[server-side backup documentation for Gitaly chart](https://docs.gitlab.com/charts/charts/gitlab/gitaly/index.html#server-side-backups).
 
 :::TabTitle Self-compiled (source)
 
@@ -1434,7 +1406,7 @@ Edit `/home/git/gitaly/config.toml` and configure `go_cloud_url`:
 
 ```toml
 [backup]
-go_cloud_url = "s3://<bucket>?region=us-west-1"
+go_cloud_url = "s3://gitaly-backups?region=us-west-1"
 ```
 
 ::EndTabs
@@ -1452,11 +1424,6 @@ The following parameters are supported:
 
 ::Tabs
 
-:::TabTitle Helm chart (Kubernetes)
-
-For Helm-based deployments, see the
-[server-side backup documentation for Gitaly chart](https://docs.gitlab.com/charts/charts/gitlab/gitaly/index.html#server-side-backups).
-
 :::TabTitle Linux package (Omnibus)
 
 Edit `/etc/gitlab/gitlab.rb` and configure the `go_cloud_url`:
@@ -1468,7 +1435,7 @@ gitaly['env'] = {
 }
 gitaly['configuration'] = {
     backup: {
-        go_cloud_url: 's3://<bucket>?region=minio&endpoint=my.minio.local:8080&disableSSL=true&s3ForcePathStyle=true'
+        go_cloud_url: 's3://gitaly-backups?region=minio&endpoint=my.minio.local:8080&disableSSL=true&s3ForcePathStyle=true'
     }
 }
 ```
@@ -1479,7 +1446,7 @@ Edit `/home/git/gitaly/config.toml` and configure `go_cloud_url`:
 
 ```toml
 [backup]
-go_cloud_url = "s3://<bucket>?region=minio&endpoint=my.minio.local:8080&disableSSL=true&s3ForcePathStyle=true"
+go_cloud_url = "s3://gitaly-backups?region=minio&endpoint=my.minio.local:8080&disableSSL=true&s3ForcePathStyle=true"
 ```
 
 ::EndTabs

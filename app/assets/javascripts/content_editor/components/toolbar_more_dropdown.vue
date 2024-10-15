@@ -25,17 +25,17 @@ export default {
         {
           text: __('Bullet list'),
           action: () => this.insertList('bulletList', 'listItem'),
-          wrapperClass: 'sm:!gl-hidden',
+          wrapperClass: 'gl-sm-display-none!',
         },
         {
           text: __('Ordered list'),
           action: () => this.insertList('orderedList', 'listItem'),
-          wrapperClass: 'sm:!gl-hidden',
+          wrapperClass: 'gl-sm-display-none!',
         },
         {
           text: __('Task list'),
           action: () => this.insertList('taskList', 'taskItem'),
-          wrapperClass: 'sm:!gl-hidden',
+          wrapperClass: 'gl-sm-display-none!',
         },
         {
           text: __('Horizontal rule'),
@@ -95,7 +95,7 @@ export default {
 };
 </script>
 <template>
-  <div class="gl-inline-flex gl-align-middle">
+  <div class="gl-display-inline-flex gl-align-middle">
     <gl-disclosure-dropdown
       :items="items"
       :toggle-id="toggleId"

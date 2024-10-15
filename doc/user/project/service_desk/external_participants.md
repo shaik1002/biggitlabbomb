@@ -1,6 +1,6 @@
 ---
-stage: Plan
-group: Project Management
+stage: Service Management
+group: Respond
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
@@ -16,10 +16,6 @@ External participants are users without a GitLab account that can interact with 
 They get notified of public comments on an issue or ticket by [Service Desk emails](configure.md#customize-emails-sent-to-external-participants).
 
 The maximum number of external participants on an issue or ticket is 10.
-
-<i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
-For an overview, see [Multiple external participants in GitLab Service Desk](https://www.youtube.com/watch?v=eKNe7fYQCLc).
-<!-- Video published on 2024-05-13 -->
 
 ## Service Desk tickets
 
@@ -117,11 +113,6 @@ To see a list of all external participants:
 
 ### Add an external participant
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/350460) in GitLab 13.8 [with a flag](../../../user/feature_flags.md) named `issue_email_participants`. Enabled by default.
-
-FLAG:
-The availability of this feature is controlled by a feature flag. For more information, see the history.
-
 Add an external participant using the `/add_email` [quick action](../quick_actions.md) when you want
 to include them in the conversation at any time.
 
@@ -146,11 +137,6 @@ To add an external participant to an issue or ticket:
 You should see a success message and a new system note with the email address.
 
 ### Remove an external participant
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/350460) in GitLab 13.8 [with a flag](../../../user/feature_flags.md) named `issue_email_participants`. Enabled by default.
-
-FLAG:
-The availability of this feature is controlled by a feature flag. For more information, see the history.
 
 Remove an external participant from an issue or Service Desk ticket using the `/remove_email`
 [quick action](../quick_actions.md) when they should stop receiving notifications.

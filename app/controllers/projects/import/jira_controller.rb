@@ -9,7 +9,8 @@ module Projects
 
       feature_category :integrations
 
-      def show; end
+      def show
+      end
 
       private
 

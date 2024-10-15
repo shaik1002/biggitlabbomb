@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Admin::ImpersonationTokensController, :enable_admin_mode, feature_category: :system_access do
-  let(:admin) { create(:admin, organizations: [build(:organization)]) }
+  let(:admin) { create(:admin) }
   let!(:user) { create(:user) }
 
   before do
@@ -48,10 +48,9 @@ RSpec.describe Admin::ImpersonationTokensController, :enable_admin_mode, feature
     end
   end
 
-  describe "#create", :with_current_organization do
+  describe "#create" do
     it_behaves_like "#create access token" do
       let(:url) { admin_user_impersonation_tokens_path(user_id: user.username) }
-      let(:token_attributes) { attributes_for(:personal_access_token, impersonation: true) }
     end
   end
 end

@@ -27,12 +27,10 @@ module InternalEventsCli
                                '(ex - service_desk_request_received)',
       %w[namespace] => 'Use case: For namespace-level events without user interaction ' \
                        '(ex - stale_runners_cleaned_up)',
-      %w[feature_enabled_by_namespace_ids user] => 'Use case: For user actions attributable to multiple namespaces ' \
-                                                   '(ex - Code-Suggestions / Duo Pro)',
       %w[] => "Use case: For instance-level events without user interaction [LEAST COMMON]"
     }.freeze
 
-    IDENTIFIER_FORMATTING_BUFFER = "[#{IDENTIFIER_OPTIONS.keys.map { |k| k.join(', ') }.max_by(&:length)}]".length
+    IDENTIFIER_FORMATTING_BUFFER = "[#{IDENTIFIER_OPTIONS.keys.max_by(&:length).join(', ')}]".length
 
     attr_reader :cli, :event
 
@@ -44,9 +42,9 @@ module InternalEventsCli
     def run
       prompt_for_description
       prompt_for_action
-      prompt_for_context
+      prompt_for_identifiers
       prompt_for_url
-      prompt_for_product_group
+      prompt_for_product_ownership
       prompt_for_tier
 
       outcome = create_event_file
@@ -74,7 +72,7 @@ module InternalEventsCli
 
       event.action = cli.ask("Define the event name: #{input_required_text}", **input_opts) do |q|
         q.required true
-        q.validate ->(input) { input =~ NAME_REGEX && cli.global.events.map(&:action).none?(input) }
+        q.validate ->(input) { input =~ /\A[a-z1-9_]+\z/ && !events_by_filepath.values.map(&:action).include?(input) } # rubocop:disable Rails/NegateInclude -- Not rails
         q.modify :trim
         q.messages[:valid?] = format_warning("Invalid event name. Only lowercase/numbers/underscores allowed. " \
                                              "Ensure %{value} is not an existing event.")
@@ -82,23 +80,13 @@ module InternalEventsCli
       end
     end
 
-    def prompt_for_context
-      new_page!(3, 7, STEPS)
-      cli.say format_prompt("EVENT CONTEXT #{counter(0, 2)}")
-      prompt_for_identifiers
-
-      new_page!(3, 7, STEPS) # Same "step" but increment counter
-      cli.say format_prompt("EVENT CONTEXT #{counter(1, 2)}")
-      prompt_for_additional_properties
-    end
-
     def prompt_for_identifiers
+      new_page!(3, 7, STEPS)
       cli.say Text::EVENT_IDENTIFIERS_INTRO % event.action
 
       identifiers = prompt_for_array_selection(
         'Which identifiers are available when the event occurs?',
-        IDENTIFIER_OPTIONS.keys,
-        per_page: IDENTIFIER_OPTIONS.length
+        IDENTIFIER_OPTIONS.keys
       ) { |choice| format_identifier_choice(choice) }
 
       event.identifiers = identifiers if identifiers.any?
@@ -111,98 +99,22 @@ module InternalEventsCli
       "#{formatted_choice}#{' ' * buffer} -- #{IDENTIFIER_OPTIONS[choice]}"
     end
 
-    def prompt_for_additional_properties
-      cli.say Text::ADDITIONAL_PROPERTIES_INTRO
-
-      available_props = [:label, :property, :value, :add_extra_prop]
-
-      while available_props.any?
-        disabled = format_help('(already defined)')
-
-        # rubocop:disable Rails/NegateInclude -- this isn't Rails
-        options = [
-          { value: :none, name: 'None! Continue to next section!' },
-          disableable_option(
-            value: :label,
-            name: 'String 1 (attribute will be named `label`)',
-            disabled: disabled
-          ) { !available_props.include?(:label) },
-          disableable_option(
-            value: :property,
-            name: 'String 2 (attribute will be named `property`)',
-            disabled: disabled
-          ) { !available_props.include?(:property) },
-          disableable_option(
-            value: :value,
-            name: 'Number (attribute will be named `value`)',
-            disabled: disabled
-          ) { !available_props.include?(:value) },
-          disableable_option(
-            value: :add_extra_prop,
-            name: 'Add extra property (attribute will be named the input custom name)',
-            disabled: format_warning('(option disabled - use label/property/value first)')
-          ) do
-            !((!available_props.include?(:label) &&
-                !available_props.include?(:property)) ||
-                !available_props.include?(:value))
-          end
-        ]
-        # rubocop:enable Rails/NegateInclude
-
-        selected_property = cli.select(
-          "Which additional property do you want to add to the event?",
-          options,
-          help: format_help("(will reprompt for multiple)"),
-          **select_opts,
-          &disabled_format_callback
-        )
-
-        if selected_property == :none
-          available_props.clear
-        elsif selected_property == :add_extra_prop
-          property_name = prompt_for_add_extra_properties
-          property_description = prompt_for_text('Describe what the field will include:')
-          assign_extra_properties(property_name, property_description)
-        else
-          available_props.delete(selected_property)
-          property_description = prompt_for_text('Describe what the field will include:')
-          assign_extra_properties(selected_property, property_description)
-        end
-      end
-    end
-
-    def assign_extra_properties(property, description = nil)
-      event.additional_properties ||= {}
-      event.additional_properties[property.to_s] = {
-        'description' => description || 'TODO'
-      }
-    end
-
-    def prompt_for_add_extra_properties
-      primary_props = %w[label property value]
-
-      prompt_for_text('Define a name for the attribute:', **input_opts) do |q|
-        q.required true
-        q.validate ->(input) { input =~ NAME_REGEX && primary_props.none?(input) }
-        q.modify :trim
-        q.messages[:required?] = Text::ADDITIONAL_PROPERTIES_ADD_MORE_HELP
-        q.messages[:valid?] = format_warning("Invalid property name. Only lowercase/numbers/underscores allowed. " \
-                                             "Ensure %{value} is not one of `property, label, value`.")
-      end
-    end
-
     def prompt_for_url
       new_page!(4, 7, STEPS)
 
       event.introduced_by_url = prompt_for_text('Which MR URL will merge the event definition?')
     end
 
-    def prompt_for_product_group
+    def prompt_for_product_ownership
       new_page!(5, 7, STEPS)
 
-      product_group = prompt_for_group_ownership('Which group will own the event?')
+      ownership = prompt_for_group_ownership({
+        product_section: 'Which section will own the event?',
+        product_stage: 'Which stage will own the event?',
+        product_group: 'Which group will own the event?'
+      })
 
-      event.product_group = product_group
+      event.bulk_assign(ownership)
     end
 
     def prompt_for_tier
@@ -233,11 +145,7 @@ module InternalEventsCli
 
         #{divider}
 
-          Do you need to create a metric? Probably!
-
-          Metrics are required to pull any usage data from self-managed instances or GitLab-Dedicated through Service Ping. Collected metric data can viewed in Tableau. Individual event details from GitLab.com can also be accessed through Snowflake.
-
-          Typical flow: Define event > Define metric > Instrument app code > Merge/Deploy MR > Verify data in Tableau/Snowflake
+          Want to have data reported in Snowflake/Tableau/ServicePing? Add a new metric for your event!
 
       TEXT
     end
@@ -246,24 +154,17 @@ module InternalEventsCli
       next_step = cli.select("How would you like to proceed?", **select_opts) do |menu|
         menu.enum "."
 
-        menu.choice "New Event -- define another event", :new_event
-
-        choice = if File.exist?(event.file_path)
-                   ["Create Metric -- define a new metric using #{event.action}.yml", :add_metric]
-                 else
-                   ["Save & Create Metric -- save #{event.action}.yml and define a matching metric", :save_and_add]
-                 end
-
-        menu.default choice[0]
-        menu.choice(*choice)
+        if File.exist?(event.file_path)
+          menu.choice "Create Metric -- define a new metric using #{event.action}.yml", :add_metric
+        else
+          menu.choice "Save & Create Metric -- save #{event.action}.yml and define a matching metric", :save_and_add
+        end
 
         menu.choice "View Usage -- look at code examples for #{event.action}.yml", :view_usage
         menu.choice 'Exit', :exit
       end
 
       case next_step
-      when :new_event
-        InternalEventsCli::EventDefiner.new(cli).run
       when :add_metric
         MetricDefiner.new(cli, event.file_path).run
       when :save_and_add

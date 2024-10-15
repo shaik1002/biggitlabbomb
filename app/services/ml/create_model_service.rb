@@ -35,7 +35,6 @@ module Ml
         )
 
         add_metadata(model, @metadata)
-        audit_creation_event(model)
 
         success(model)
       end
@@ -69,18 +68,6 @@ module Ml
 
     def experiment_name
       Ml::Model.prefixed_experiment(@name)
-    end
-
-    def audit_creation_event(model)
-      audit_context = {
-        name: 'ml_model_created',
-        author: @user,
-        scope: @project,
-        target: model,
-        message: "MlModel #{model.name} created"
-      }
-
-      ::Gitlab::Audit::Auditor.audit(audit_context)
     end
   end
 end

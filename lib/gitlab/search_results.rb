@@ -7,6 +7,11 @@ module Gitlab
     DEFAULT_PAGE = 1
     DEFAULT_PER_PAGE = 20
 
+    SCOPE_ONLY_SORT = {
+      popularity_asc: %w[issues],
+      popularity_desc: %w[issues]
+    }.freeze
+
     attr_reader :current_user, :query, :order_by, :sort, :filters
 
     # Limit search results by passed projects
@@ -113,20 +118,20 @@ module Gitlab
     end
 
     # highlighting is only performed by Elasticsearch backed results
-    def highlight_map(*)
+    def highlight_map(_scope)
       {}
     end
 
     # aggregations are only performed by Elasticsearch backed results
-    def aggregations(*)
+    def aggregations(_scope)
       []
     end
 
-    def failed?(*)
+    def failed?
       false
     end
 
-    def error(*)
+    def error
       nil
     end
 
@@ -154,10 +159,7 @@ module Gitlab
       sort_by = ::Gitlab::Search::SortOptions.sort_and_direction(order_by, sort)
 
       # Reset sort to default if the chosen one is not supported by scope
-      if Gitlab::Search::SortOptions::SCOPE_ONLY_SORT[sort_by] &&
-          Gitlab::Search::SortOptions::SCOPE_ONLY_SORT[sort_by].exclude?(scope)
-        sort_by = nil
-      end
+      sort_by = nil if SCOPE_ONLY_SORT[sort_by] && SCOPE_ONLY_SORT[sort_by].exclude?(scope)
 
       case sort_by
       when :created_at_asc

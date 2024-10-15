@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe MergeRequests::CreatePipelineWorker, feature_category: :pipeline_composition do
+RSpec.describe MergeRequests::CreatePipelineWorker, feature_category: :continuous_integration do
   describe '#perform' do
     let(:user) { create(:user) }
     let(:project) { create(:project) }

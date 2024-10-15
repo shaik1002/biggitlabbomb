@@ -4,7 +4,6 @@ module SystemCheck
   module IncomingEmail
     class MailRoomEnabledCheck < SystemCheck::BaseCheck
       include ::SystemCheck::InitHelpers
-
       set_name 'Mailroom enabled?'
 
       def skip?

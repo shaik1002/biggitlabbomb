@@ -3,5 +3,6 @@ export default {
     validIssueWeight() {
       return false;
     },
+    filterByWeight() {},
   },
 };

@@ -7,8 +7,8 @@ RSpec.describe Gitlab::Ci::Config::Entry::Jobs do
 
   let(:config) do
     {
-      ".hidden_job": { script: 'something' },
-      ".hidden_bridge": { trigger: 'my/project' },
+      '.hidden_job'.to_sym => { script: 'something' },
+      '.hidden_bridge'.to_sym => { trigger: 'my/project' },
       regular_job: { script: 'something' },
       my_trigger: { trigger: 'my/project' }
     }
@@ -68,20 +68,20 @@ RSpec.describe Gitlab::Ci::Config::Entry::Jobs do
           let(:config) { { rspec: nil } }
 
           it 'reports error' do
-            expect(entry.errors).to include 'jobs rspec config should implement the script:, run:, or trigger: keyword'
+            expect(entry.errors).to include 'jobs rspec config should implement a script: or a trigger: keyword'
           end
 
           context 'when the job name cannot be cast directly to a symbol' do
             let(:config) { { true => nil } }
 
             it 'properly parses the job name without raising a NoMethodError' do
-              expect(entry.errors).to include 'jobs true config should implement the script:, run:, or trigger: keyword'
+              expect(entry.errors).to include 'jobs true config should implement a script: or a trigger: keyword'
             end
           end
         end
 
         context 'when no visible jobs present' do
-          let(:config) { { ".hidden": { script: [] } } }
+          let(:config) { { '.hidden'.to_sym => { script: [] } } }
 
           it 'returns error about no visible jobs defined' do
             expect(entry.errors)

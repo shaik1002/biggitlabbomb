@@ -69,56 +69,6 @@ RSpec.describe Groups::GroupMembersController, feature_category: :groups_and_pro
           expect(assigns(:members).map(&:user_id)).to match_array([service_account.id])
         end
       end
-
-      context 'when there are import source users available' do
-        it 'returns import source users count' do
-          create(:import_source_user, :pending_reassignment, namespace: group)
-          create(:import_source_user, :awaiting_approval, namespace: group)
-          create(:import_source_user, :completed, namespace: group)
-
-          get :index, params: { group_id: group }
-
-          expect(assigns(:placeholder_users_count)).to eq(
-            pagination: {
-              total_items: 3,
-              awaiting_reassignment_items: 2,
-              reassigned_items: 1
-            }
-          )
-        end
-
-        context 'where there are no import source users available' do
-          it 'returns 0 counts' do
-            get :index, params: { group_id: group }
-
-            expect(assigns(:placeholder_users_count)).to eq(
-              pagination: {
-                total_items: 0,
-                awaiting_reassignment_items: 0,
-                reassigned_items: 0
-              }
-            )
-          end
-        end
-
-        context 'when importer_user_mapping feature flag is disabled' do
-          it 'returns 0 counts' do
-            stub_feature_flags(importer_user_mapping: false)
-
-            create(:import_source_user, :pending_reassignment, namespace: group)
-
-            get :index, params: { group_id: group }
-
-            expect(assigns(:placeholder_users_count)).to eq(
-              pagination: {
-                total_items: 0,
-                awaiting_reassignment_items: 0,
-                reassigned_items: 0
-              }
-            )
-          end
-        end
-      end
     end
 
     context 'when user cannot manage members' do
@@ -178,6 +128,25 @@ RSpec.describe Groups::GroupMembersController, feature_category: :groups_and_pro
         get :index, params: { group_id: nested_group, with_inherited_permissions: 'only' }
 
         expect(assigns(:members).map(&:user_id)).to contain_exactly(user.id, shared_group_user.id)
+      end
+    end
+
+    context 'when webui_members_inherited_users is disabled' do
+      let_it_be(:shared_group) { create(:group) }
+      let_it_be(:shared_group_user) { create(:user) }
+      let_it_be(:group_link) { create(:group_group_link, shared_group: shared_group, shared_with_group: group) }
+
+      before do
+        group.add_owner(user)
+        shared_group.add_owner(shared_group_user)
+        stub_feature_flags(webui_members_inherited_users: false)
+        sign_in(user)
+      end
+
+      it 'lists inherited group members only' do
+        get :index, params: { group_id: shared_group }
+
+        expect(assigns(:members).map(&:user_id)).to contain_exactly(shared_group_user.id)
       end
     end
   end
@@ -267,7 +236,7 @@ RSpec.describe Groups::GroupMembersController, feature_category: :groups_and_pro
 
       context 'when `expires_at` is set' do
         it 'returns correct json response' do
-          expect(json_response).to include({
+          expect(json_response).to eq({
             "expires_soon" => false,
             "expires_at_formatted" => expiry_date.to_time.in_time_zone.to_fs(:medium)
           })
@@ -277,9 +246,8 @@ RSpec.describe Groups::GroupMembersController, feature_category: :groups_and_pro
       context 'when `expires_at` is not set' do
         let(:expiry_date) { nil }
 
-        it 'returns json response without expiration data' do
-          expect(json_response).not_to have_key(:expires_soon)
-          expect(json_response).not_to have_key(:expires_at_formatted)
+        it 'returns empty json response' do
+          expect(json_response).to be_empty
         end
       end
     end
@@ -327,7 +295,7 @@ RSpec.describe Groups::GroupMembersController, feature_category: :groups_and_pro
           expect(controller).to set_flash.to 'User was successfully removed from group.'
           expect(response).to redirect_to(group_group_members_path(group))
           expect(group.members).not_to include member
-          expect(sub_group.reload.members).to include sub_member
+          expect(sub_group.members).to include sub_member
         end
 
         it '[HTML] removes user from members including subgroups and projects', :aggregate_failures do
@@ -336,7 +304,7 @@ RSpec.describe Groups::GroupMembersController, feature_category: :groups_and_pro
           expect(controller).to set_flash.to 'User was successfully removed from group and any subgroups and projects.'
           expect(response).to redirect_to(group_group_members_path(group))
           expect(group.members).not_to include member
-          expect(sub_group.reload.members).not_to include sub_member
+          expect(sub_group.members).not_to include sub_member
         end
 
         it '[JS] removes user from members', :aggregate_failures do

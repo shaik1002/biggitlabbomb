@@ -14,7 +14,7 @@ DETAILS:
 Customize and configure your self-managed GitLab installation.
 
 - [Authentication](auth/index.md)
-- [CI/CD](../administration/cicd/index.md)
+- [CI/CD](../administration/cicd.md)
 - [Configuration](../administration/admin_area.md)
 - [Consul](../administration/consul.md)
 - [Environment variables](../administration/environment_variables.md)
@@ -47,4 +47,3 @@ Customize and configure your self-managed GitLab installation.
 - [Issue closing pattern](../administration/issue_closing_pattern.md)
 - [Snippets](../administration/snippets/index.md)
 - [Host the product documentation](../administration/docs_self_host.md)
-- [Custom HTML header tags](../administration/custom_html_header_tags.md)

@@ -2,7 +2,6 @@
 
 module Ci
   class BuildName < Ci::ApplicationRecord
-    include PgFullTextSearchable
     include Ci::Partitionable
 
     MAX_JOB_NAME_LENGTH = 255

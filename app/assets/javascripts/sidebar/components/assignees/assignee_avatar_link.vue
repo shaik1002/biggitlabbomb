@@ -42,17 +42,17 @@ export default {
 </script>
 
 <template>
-  <!-- must be `gl-inline-block` or parent flex-basis causes width issues -->
+  <!-- must be `d-inline-block` or parent flex-basis causes width issues -->
   <gl-link
     :href="assigneeUrl"
     :data-user-id="assigneeId"
     :data-username="user.username"
     :data-cannot-merge="cannotMerge"
     data-placement="left"
-    class="js-user-link gl-inline-block"
+    class="gl-display-inline-block js-user-link"
   >
-    <!-- use gl-flex so that slot can be appropriately styled -->
-    <span class="gl-flex">
+    <!-- use d-flex so that slot can be appropriately styled -->
+    <span class="gl-display-flex">
       <assignee-avatar :user="user" :img-size="24" :issuable-type="issuableType" />
       <slot></slot>
     </span>

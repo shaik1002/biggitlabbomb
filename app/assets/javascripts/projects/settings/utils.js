@@ -23,38 +23,16 @@ export const getAccessLevels = (accessLevels = {}) => {
   const total = accessLevels.edges?.length;
   const accessLevelTypes = { total, users: [], groups: [], roles: [] };
 
-  (accessLevels.edges || []).forEach(({ node }) => {
+  accessLevels.edges?.forEach(({ node }) => {
     if (node.user) {
       const src = node.user.avatarUrl;
       accessLevelTypes.users.push({ src, ...node.user });
     } else if (node.group) {
-      accessLevelTypes.groups.push(node.group);
+      accessLevelTypes.groups.push(node);
     } else {
-      accessLevelTypes.roles.push(node.accessLevel);
+      accessLevelTypes.roles.push({ accessLevelDescription: node.accessLevelDescription });
     }
   });
 
   return accessLevelTypes;
-};
-
-export const getAccessLevelInputFromEdges = (edges) => {
-  return edges.flatMap(({ node }) => {
-    const result = {};
-
-    if (node.accessLevel !== undefined) {
-      result.accessLevel = node.accessLevel;
-    }
-
-    if (node.group?.id !== undefined) {
-      result.groupId = node.group.id;
-      delete result.accessLevel; // backend only expects groupId
-    }
-
-    if (node.user?.id !== undefined) {
-      result.userId = node.user.id;
-      delete result.accessLevel; // backend only expects userId
-    }
-
-    return Object.keys(result).length > 0 ? [result] : [];
-  });
 };

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Pajamas::BroadcastBannerComponent, :aggregate_failures, type: :component, feature_category: :notifications do
+RSpec.describe Pajamas::BroadcastBannerComponent, :aggregate_failures, type: :component, feature_category: :navigation do
   before do
     render_inline described_class.new(message: message,
       id: id,
@@ -10,9 +10,7 @@ RSpec.describe Pajamas::BroadcastBannerComponent, :aggregate_failures, type: :co
       dismissable: dismissable,
       expire_date: expire_date,
       cookie_key: cookie_key,
-      dismissal_path: dismissal_path,
-      button_testid: button_testid,
-      banner: banner
+      dismissal_path: dismissal_path
     )
   end
 
@@ -23,8 +21,6 @@ RSpec.describe Pajamas::BroadcastBannerComponent, :aggregate_failures, type: :co
   let(:expire_date) { Time.now.iso8601 }
   let(:cookie_key) { '_cookie_key_' }
   let(:dismissal_path) { '/-/my-path' }
-  let(:button_testid) { 'my-close-button' }
-  let(:banner) { true }
 
   it 'sets the correct classes' do
     expect(page).to have_selector(".js-broadcast-notification-#{id}")
@@ -63,13 +59,5 @@ RSpec.describe Pajamas::BroadcastBannerComponent, :aggregate_failures, type: :co
     it 'does not display close button' do
       expect(page).not_to have_selector('button.js-dismiss-current-broadcast-notification')
     end
-  end
-
-  it 'sets the button testid' do
-    expect(page).to have_selector("button[data-testid='#{button_testid}']")
-  end
-
-  it 'adds data-broadcast-banner when banner is true' do
-    expect(page).to have_selector("[data-broadcast-banner]")
   end
 end

@@ -21,7 +21,6 @@ module Gitlab
           import_source: repository[:url],
           import_type: 'manifest',
           namespace_id: group.id,
-          organization_id: group.organization_id,
           path: project_path,
           name: project_path,
           visibility_level: destination.visibility_level
@@ -35,8 +34,7 @@ module Gitlab
       def create_group_with_parents(full_path)
         params = {
           group_path: full_path,
-          visibility_level: destination.visibility_level,
-          organization_id: destination.organization_id
+          visibility_level: destination.visibility_level
         }
 
         Groups::NestedCreateService.new(current_user, params).execute

@@ -7,7 +7,7 @@ RSpec.describe ::Ci::Runners::CreateRunnerService, "#execute", feature_category:
 
   let(:runner) { execute.payload[:runner] }
 
-  let_it_be(:admin) { create(:admin) }
+  let_it_be(:admin) { create(:admin, :without_default_org) }
   let_it_be(:non_admin_user) { create(:user) }
   let_it_be(:anonymous) { nil }
   let_it_be(:group_owner) { create(:user) }
@@ -220,10 +220,6 @@ RSpec.describe ::Ci::Runners::CreateRunnerService, "#execute", feature_category:
 
       it_behaves_like 'it can create a runner'
 
-      it 'populates sharding_key_id correctly' do
-        expect(runner.sharding_key_id).to eq(group.id)
-      end
-
       context 'with missing scope param' do
         let(:params) { { runner_type: 'group_type' } }
 
@@ -264,10 +260,6 @@ RSpec.describe ::Ci::Runners::CreateRunnerService, "#execute", feature_category:
       let(:current_user) { group_owner }
 
       it_behaves_like 'it can create a runner'
-
-      it 'populates sharding_key_id correctly' do
-        expect(runner.sharding_key_id).to eq(project.id)
-      end
 
       context 'with missing scope param' do
         let(:params) { { runner_type: 'project_type' } }

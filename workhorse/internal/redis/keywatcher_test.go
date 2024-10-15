@@ -25,7 +25,7 @@ func initRdb(t *testing.T) *redis.Client {
 	require.NoError(t, err)
 	cfg, err := config.LoadConfig(string(buf))
 	require.NoError(t, err)
-	rdb, err := Configure(cfg)
+	rdb, err := Configure(cfg.Redis)
 	require.NoError(t, err)
 	t.Cleanup(func() {
 		assert.NoError(t, rdb.Close())
@@ -118,6 +118,7 @@ func TestKeyChangesInstantReturn(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
+
 			// setup
 			if !tc.isKeyMissing {
 				rdb.Set(ctx, runnerKey, tc.returnValue, 0)
@@ -185,8 +186,8 @@ func TestKeyChangesWhenWatching(t *testing.T) {
 				<-ready
 				val, err := kw.WatchKey(ctx, runnerKey, tc.watchValue, time.Second)
 
-				assert.NoError(t, err, "Expected no error")
-				assert.Equal(t, tc.expectedStatus, val, "Expected value")
+				require.NoError(t, err, "Expected no error")
+				require.Equal(t, tc.expectedStatus, val, "Expected value")
 			}()
 
 			processMessages(t, kw, 1, tc.processedValue, ready, wg)
@@ -237,8 +238,8 @@ func TestKeyChangesParallel(t *testing.T) {
 					<-ready
 					val, err := kw.WatchKey(ctx, runnerKey, tc.watchValue, time.Second)
 
-					assert.NoError(t, err, "Expected no error")
-					assert.Equal(t, tc.expectedStatus, val, "Expected value")
+					require.NoError(t, err, "Expected no error")
+					require.Equal(t, tc.expectedStatus, val, "Expected value")
 				}()
 			}
 
@@ -263,13 +264,13 @@ func TestShutdown(t *testing.T) {
 		defer wg.Done()
 		val, err := kw.WatchKey(ctx, runnerKey, "something", 10*time.Second)
 
-		assert.NoError(t, err, "Expected no error")
-		assert.Equal(t, WatchKeyStatusNoChange, val, "Expected value not to change")
+		require.NoError(t, err, "Expected no error")
+		require.Equal(t, WatchKeyStatusNoChange, val, "Expected value not to change")
 	}()
 
 	go func() {
 		defer wg.Done()
-		assert.Eventually(t, func() bool { return countSubscribers(kw, runnerKey) == 1 }, 10*time.Second, time.Millisecond)
+		require.Eventually(t, func() bool { return countSubscribers(kw, runnerKey) == 1 }, 10*time.Second, time.Millisecond)
 
 		kw.Shutdown()
 	}()

@@ -85,20 +85,20 @@ export default {
 </script>
 
 <template>
-  <div class="gl-flex gl-items-start">
+  <div class="gl-display-flex gl-align-items-flex-start">
     <gl-disclosure-dropdown
       :items="dropdownItems"
       icon="ellipsis_v"
       no-caret
       category="tertiary"
-      placement="bottom-end"
+      placement="right"
       text-sr-only
       size="small"
-      toggle-class="!gl-p-2"
-      class="gl-block md:!gl-hidden"
+      toggle-class="gl-p-2!"
+      class="gl-display-block gl-md-display-none!"
     >
       <template #list-item="{ item }">
-        <span class="gl-flex gl-items-center gl-justify-between">
+        <span class="gl-display-flex gl-align-items-center gl-justify-content-space-between">
           {{ item.text }}
           <gl-loading-icon v-if="item.loading" size="sm" />
           <gl-icon v-else-if="item.icon" :name="item.icon" />
@@ -123,7 +123,7 @@ export default {
       :disabled="btn.loading"
       category="tertiary"
       size="small"
-      class="gl-float-left gl-hidden md:gl-block"
+      class="gl-display-none gl-md-display-block gl-float-left"
       @click="onClickAction(btn)"
     >
       <template v-if="btn.text">

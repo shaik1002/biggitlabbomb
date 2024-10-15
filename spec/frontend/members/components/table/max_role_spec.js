@@ -7,7 +7,7 @@ import Vuex from 'vuex';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import waitForPromises from 'helpers/wait_for_promises';
 import MaxRole from '~/members/components/table/max_role.vue';
-import { MEMBERS_TAB_TYPES } from '~/members/constants';
+import { MEMBER_TYPES } from '~/members/constants';
 import { guestOverageConfirmAction } from 'ee_else_ce/members/guest_overage_confirm_action';
 import { logError } from '~/lib/logger';
 import * as utils from 'ee_else_ce/members/utils';
@@ -36,7 +36,7 @@ describe('MaxRole', () => {
 
     return new Vuex.Store({
       modules: {
-        [MEMBERS_TAB_TYPES.user]: { namespaced: true, actions },
+        [MEMBER_TYPES.user]: { namespaced: true, actions },
       },
     });
   };
@@ -44,7 +44,7 @@ describe('MaxRole', () => {
   const createComponent = (propsData = {}, store = createStore()) => {
     wrapper = mount(MaxRole, {
       provide: {
-        namespace: MEMBERS_TAB_TYPES.user,
+        namespace: MEMBER_TYPES.user,
         group: {
           name: 'groupname',
           path: '/grouppath/',
@@ -120,6 +120,7 @@ describe('MaxRole', () => {
         expect(actions.updateMemberRole).toHaveBeenCalledWith(expect.any(Object), {
           memberId: member.id,
           accessLevel: 30,
+          memberRoleId: null,
         });
       });
 
@@ -196,7 +197,7 @@ describe('MaxRole', () => {
 
     await nextTick();
 
-    expect(findListbox().props('placement')).toBe('bottom-end');
+    expect(findListbox().props('placement')).toBe('right');
   });
 
   it('sets the dropdown alignment to left on desktop', async () => {
@@ -205,6 +206,6 @@ describe('MaxRole', () => {
 
     await nextTick();
 
-    expect(findListbox().props('placement')).toBe('bottom-start');
+    expect(findListbox().props('placement')).toBe('left');
   });
 });

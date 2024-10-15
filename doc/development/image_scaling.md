@@ -31,14 +31,14 @@ The hard-coded rules only permit:
 
 Furthermore, configuration in Workhorse can lead to the image scaler rejecting a request if:
 
-- The image file is too large (controlled by `max_filesize`, we only rescale images that do not exceed a configured size in bytes, see [`max_filesize`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/workhorse/config.toml.example#L22)).
+- The image file is too large (controlled by [`max_filesize`](- we only rescale images that do not exceed a configured size in bytes (see [`max_filesize`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/workhorse/config.toml.example#L22)))).
 - Too many image scalers are already running (controlled by [`max_scaler_procs`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/workhorse/config.toml.example#L21)).
 
 For instance, here are two different URLs that serve the GitLab project avatar both in its
 original size and scaled down to 64 pixels. Only the second request will trigger the image scaler:
 
-- [`https://gitlab.com/gitlab-com/www-gitlab-com/-/blob/master/source/images/gitlab-logo-extra-whitespace.png`](https://gitlab.com/gitlab-com/www-gitlab-com/-/blob/master/source/images/gitlab-logo-extra-whitespace.png)
-- [`https://gitlab.com/gitlab-com/www-gitlab-com/-/blob/master/source/images/gitlab-logo-extra-whitespace.png?width=64`](https://gitlab.com/gitlab-com/www-gitlab-com/-/blob/master/source/images/gitlab-logo-extra-whitespace.png?width=64)
+- [`/uploads/-/system/project/avatar/278964/logo-extra-whitespace.png`](https://gitlab.com/uploads/-/system/project/avatar/278964/logo-extra-whitespace.png)
+- [`/uploads/-/system/project/avatar/278964/logo-extra-whitespace.png?width=64`](https://gitlab.com/uploads/-/system/project/avatar/278964/logo-extra-whitespace.png?width=64)
 
 ## Where do we scale images?
 

@@ -40,9 +40,7 @@ describe('ExclusionsListItem component', () => {
     });
 
     it('renders a remove button', () => {
-      expect(findFindRemoveButton().attributes('aria-label')).toBe(
-        `Remove exclusion for ${exclusion.name}`,
-      );
+      expect(findFindRemoveButton().attributes('aria-label')).toBe('Remove');
 
       expect(findFindRemoveButton().props()).toMatchObject({
         icon: 'remove',

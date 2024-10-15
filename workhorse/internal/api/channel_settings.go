@@ -1,4 +1,3 @@
-// Package api provides internal APIs for gitlab-workhorse.
 package api
 
 import (
@@ -12,14 +11,13 @@ import (
 	"gitlab.com/gitlab-org/labkit/log"
 )
 
-// ChannelSettings holds the configuration settings for establishing a websocket channel.
 type ChannelSettings struct {
 	// The channel provider may require use of a particular subprotocol. If so,
 	// it must be specified here, and Workhorse must have a matching codec.
 	Subprotocols []string
 
 	// The websocket URL to connect to.
-	Url string //nolint:revive,stylecheck // when JSON decoding, the value is provided via 'url'
+	Url string
 
 	// Any headers (e.g., Authorization) to send with the websocket request
 	Header http.Header
@@ -33,12 +31,10 @@ type ChannelSettings struct {
 	MaxSessionTime int
 }
 
-// URL parses the websocket URL in the ChannelSettings and returns a *url.URL.
 func (t *ChannelSettings) URL() (*url.URL, error) {
 	return url.Parse(t.Url)
 }
 
-// Dialer returns a websocket Dialer configured with the settings from ChannelSettings.
 func (t *ChannelSettings) Dialer() *websocket.Dialer {
 	dialer := &websocket.Dialer{
 		Subprotocols: t.Subprotocols,
@@ -58,7 +54,6 @@ func (t *ChannelSettings) Dialer() *websocket.Dialer {
 	return dialer
 }
 
-// Clone creates and returns a deep copy of the ChannelSettings instance.
 func (t *ChannelSettings) Clone() *ChannelSettings {
 	// Doesn't clone the strings, but that's OK as strings are immutable in go
 	cloned := *t
@@ -69,13 +64,10 @@ func (t *ChannelSettings) Clone() *ChannelSettings {
 	return &cloned
 }
 
-// Dial establishes a websocket connection using the settings from ChannelSettings.
-// It returns a websocket connection, an HTTP response, and an error if any.
 func (t *ChannelSettings) Dial() (*websocket.Conn, *http.Response, error) {
 	return t.Dialer().Dial(t.Url, t.Header)
 }
 
-// Validate checks if the ChannelSettings instance is valid.
 func (t *ChannelSettings) Validate() error {
 	if t == nil {
 		return fmt.Errorf("channel details not specified")
@@ -97,8 +89,6 @@ func (t *ChannelSettings) Validate() error {
 	return nil
 }
 
-// IsEqual compares the current ChannelSettings with another ChannelSettings instance.
-// It returns true if both instances are equal (or both nil), otherwise false.
 func (t *ChannelSettings) IsEqual(other *ChannelSettings) bool {
 	if t == nil && other == nil {
 		return true

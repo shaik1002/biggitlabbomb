@@ -4,7 +4,7 @@ module Gitlab
   module Database
     module Partitioning
       class IntRangeStrategy
-        attr_reader :model, :partitioning_key, :partition_size, :analyze_interval
+        attr_reader :model, :partitioning_key, :partition_size
 
         # We create this many partitions in the future
         HEADROOM = 6
@@ -12,11 +12,10 @@ module Gitlab
 
         delegate :table_name, to: :model
 
-        def initialize(model, partitioning_key, partition_size:, analyze_interval: nil)
+        def initialize(model, partitioning_key, partition_size:)
           @model = model
           @partitioning_key = partitioning_key
           @partition_size = partition_size
-          @analyze_interval = analyze_interval
         end
 
         def current_partitions

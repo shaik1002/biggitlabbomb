@@ -7,8 +7,13 @@ export default () => {
   const selector = '#js-error_tracking';
 
   const domEl = document.querySelector(selector);
-  const { indexPath, enableErrorTrackingLink, illustrationPath, projectPath, listPath } =
-    domEl.dataset;
+  const {
+    indexPath,
+    enableErrorTrackingLink,
+    illustrationPath,
+    projectPath,
+    listPath,
+  } = domEl.dataset;
   let {
     errorTrackingEnabled,
     userCanEnableErrorTracking,

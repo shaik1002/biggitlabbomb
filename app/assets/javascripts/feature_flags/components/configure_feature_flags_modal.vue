@@ -193,7 +193,7 @@ export default {
         <gl-loading-icon
           v-if="isRotating"
           size="sm"
-          class="gl-absolute gl-right-5 gl-mr-7 gl-self-center"
+          class="gl-absolute gl-align-self-center gl-right-5 gl-mr-7"
         />
 
         <template #append>
@@ -208,7 +208,7 @@ export default {
     </gl-form-group>
     <div
       v-if="hasRotateError"
-      class="gl-mb-3 gl-flex gl-items-center gl-font-normal gl-text-red-500"
+      class="gl-text-red-500 gl-display-flex gl-align-items-center gl-font-weight-normal gl-mb-3"
       data-testid="rotate-error"
     >
       <gl-icon name="warning" class="gl-mr-2" />
@@ -226,7 +226,7 @@ export default {
         "
       >
         <template #projectName>
-          <span class="gl-font-bold gl-text-red-500">{{ projectName }}</span>
+          <span class="gl-font-weight-bold gl-text-red-500">{{ projectName }}</span>
         </template>
       </gl-sprintf>
     </p>

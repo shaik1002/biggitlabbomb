@@ -202,8 +202,9 @@ module API
         get 'archives/*package_name', urgency: :default do
           project = authorized_user_project(action: :read_package)
 
-          package = ::Packages::Composer::Package
-            .for_projects(project)
+          package = project
+            .packages
+            .composer
             .with_name(params[:package_name])
             .with_composer_target(params[:sha])
             .first

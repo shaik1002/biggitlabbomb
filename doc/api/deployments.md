@@ -22,7 +22,7 @@ GET /projects/:id/deployments
 
 | Attribute         | Type           | Required | Description                                                                                                     |
 |-------------------|----------------|----------|-----------------------------------------------------------------------------------------------------------------|
-| `id`              | integer/string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`              | integer/string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `order_by`        | string         | no       | Return deployments ordered by either one of `id`, `iid`, `created_at`, `updated_at`, `finished_at` or `ref` fields. Default is `id`.    |
 | `sort`            | string         | no       | Return deployments sorted in `asc` or `desc` order. Default is `asc`.                                            |
 | `updated_after`   | datetime       | no       | Return deployments updated after the specified date. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`). |
@@ -200,7 +200,7 @@ GET /projects/:id/deployments/:deployment_id
 
 | Attribute | Type    | Required | Description         |
 |-----------|---------|----------|---------------------|
-| `id`      | integer/string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths) |
+| `id`      | integer/string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user |
 | `deployment_id` | integer | yes      | The ID of the deployment |
 
 ```shell
@@ -284,7 +284,32 @@ Example response:
 }
 ```
 
-When [multiple approval rules](../ci/environments/deployment_approvals.md#add-multiple-approval-rules) are configured, deployments created by users on GitLab Premium or Ultimate include the `approval_summary` property:
+When the [unified approval setting](../ci/environments/deployment_approvals.md#unified-approval-setting-deprecated) is configured, deployments created by users on GitLab Premium or Ultimate include the `approvals` and `pending_approval_count` properties:
+
+```json
+{
+  "status": "created",
+  "pending_approval_count": 0,
+  "approvals": [
+    {
+      "user": {
+        "id": 49,
+        "username": "project_6_bot",
+        "name": "****",
+        "state": "active",
+        "avatar_url": "https://www.gravatar.com/avatar/e83ac685f68ea07553ad3054c738c709?s=80&d=identicon",
+        "web_url": "http://localhost:3000/project_6_bot"
+      },
+      "status": "approved",
+      "created_at": "2022-02-24T20:22:30.097Z",
+      "comment": "Looks good to me"
+    }
+  ],
+  ...
+}
+```
+
+When the [multiple approval rules](../ci/environments/deployment_approvals.md#add-multiple-approval-rules) is configured, deployments created by users on GitLab Premium or Ultimate include the `approval_summary` property:
 
 ```json
 {
@@ -334,7 +359,7 @@ POST /projects/:id/deployments
 
 | Attribute     | Type           | Required | Description                                                                                                     |
 |---------------|----------------|----------|-----------------------------------------------------------------------------------------------------------------|
-| `id`          | integer/string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths).|
+| `id`          | integer/string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user.|
 | `environment` | string         | yes      | The [name of the environment](../ci/environments/index.md) to create the deployment for.                        |
 | `sha`         | string         | yes      | The SHA of the commit that is deployed.                                                                         |
 | `ref`         | string         | yes      | The name of the branch or tag that is deployed.                                                                 |
@@ -392,7 +417,7 @@ PUT /projects/:id/deployments/:deployment_id
 
 | Attribute        | Type           | Required | Description         |
 |------------------|----------------|----------|---------------------|
-| `id`             | integer/string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`             | integer/string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `deployment_id`  | integer        | yes      | The ID of the deployment to update. |
 | `status`         | string         | yes      | The new status of the deployment. One of `running`, `success`, `failed`, or `canceled`.                         |
 
@@ -462,7 +487,7 @@ DELETE /projects/:id/deployments/:deployment_id
 
 | Attribute | Type    | Required | Description         |
 |-----------|---------|----------|---------------------|
-| `id`      | integer/string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths) |
+| `id`      | integer/string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user |
 | `deployment_id` | integer | yes      | The ID of the deployment |
 
 ```shell
@@ -500,7 +525,7 @@ This API retrieves the list of merge requests shipped with a given deployment:
 GET /projects/:id/deployments/:deployment_id/merge_requests
 ```
 
-It supports the same parameters as the [Merge requests API](merge_requests.md#list-merge-requests) and returns a response using the same format:
+It supports the same parameters as the [Merge Requests API](merge_requests.md#list-merge-requests) and returns a response using the same format:
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/deployments/42/merge_requests"
@@ -523,7 +548,7 @@ POST /projects/:id/deployments/:deployment_id/approval
 
 | Attribute       | Type           | Required | Description                                                                                                     |
 |-----------------|----------------|----------|-----------------------------------------------------------------------------------------------------------------|
-| `id`            | integer/string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`            | integer/string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `deployment_id` | integer        | yes      | The ID of the deployment.                                                                                       |
 | `status`        | string         | yes      | The status of the approval (either `approved` or `rejected`).                                                   |
 | `comment`       | string         | no       | A comment to go with the approval                                                                               |

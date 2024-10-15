@@ -1,13 +1,19 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Verify', :runner, product_group: :pipeline_authoring do
+  RSpec.describe 'Verify', :runner, product_group: :pipeline_security do
     describe 'Pipeline with customizable variable' do
-      let(:executor) { "qa-runner-#{SecureRandom.hex(6)}" }
+      let(:executor) { "qa-runner-#{Time.now.to_i}" }
       let(:pipeline_job_name) { 'customizable-variable' }
       let(:variable_custom_value) { 'Custom Foo' }
       let(:project) { create(:project, name: 'project-with-customizable-variable-pipeline') }
-      let!(:runner) { create(:project_runner, project: project, name: executor, tags: [executor]) }
+      let!(:runner) do
+        Resource::ProjectRunner.fabricate! do |runner|
+          runner.project = project
+          runner.name = executor
+          runner.tags = [executor]
+        end
+      end
 
       let!(:commit) do
         create(:commit, project: project, commit_message: 'Add .gitlab-ci.yml', actions: [

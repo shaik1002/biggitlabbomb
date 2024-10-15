@@ -9,7 +9,8 @@ const Template = (args, { argTypes }) => ({
   components: { SettingsBlock },
   props: Object.keys(argTypes),
   template: `
-  <settings-block v-bind="$props" title="Settings section title">
+  <settings-block v-bind="$props">
+    <template #title>Settings section title</template>
     <template #description>Settings section description</template>
     <template #default>
       <p>Content</p>

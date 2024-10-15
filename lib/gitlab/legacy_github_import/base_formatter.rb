@@ -25,13 +25,6 @@ module Gitlab
       def url
         raw_data[:url] || ''
       end
-
-      def imported_from
-        return ::Import::SOURCE_GITEA if project.gitea_import?
-        return ::Import::SOURCE_GITHUB if project.github_import?
-
-        ::Import::SOURCE_NONE
-      end
     end
   end
 end

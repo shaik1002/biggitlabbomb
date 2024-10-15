@@ -76,11 +76,8 @@ module Gitlab
             event_id: approved_event.id
           )
 
-          user_id = if Feature.enabled?(:bitbucket_server_user_mapping_by_username, project, type: :ops)
-                      user_finder.find_user_id(by: :username, value: approved_event.approver_username)
-                    else
-                      user_finder.find_user_id(by: :email, value: approved_event.approver_email)
-                    end
+          user_id = user_finder.find_user_id(by: :username, value: approved_event.approver_username) ||
+            user_finder.find_user_id(by: :email, value: approved_event.approver_email)
 
           return unless user_id
 
@@ -217,8 +214,7 @@ module Gitlab
             note: note,
             author_id: author,
             created_at: comment.created_at,
-            updated_at: comment.updated_at,
-            imported_from: ::Import::SOURCE_BITBUCKET_SERVER
+            updated_at: comment.updated_at
           }
         end
 

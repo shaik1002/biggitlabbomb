@@ -1,12 +1,12 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments"
 ---
 
 # Troubleshooting file export project migrations
 
-If you have problems with [migrating projects by using file exports](import_export.md), see the possible solutions below.
+If you have problems with [migrating projects using file exports](import_export.md), see the possible solutions below.
 
 ## Troubleshooting commands
 
@@ -46,8 +46,6 @@ If there are too many users for manual configuration to be feasible,
 you can set all user profiles to use a public email address using the
 [Rails console](../../../administration/operations/rails_console.md#starting-a-rails-console-session):
 
-<!-- vale gitlab_base.CurrentStatus  = NO -->
-
 ```ruby
 User.where("public_email IS NULL OR public_email = '' ").find_each do |u|
   next if u.bot?
@@ -57,8 +55,6 @@ User.where("public_email IS NULL OR public_email = '' ").find_each do |u|
   u.save!
 end
 ```
-
-<!-- vale gitlab_base.CurrentStatus  = YES -->
 
 ## Import workarounds for large repositories
 
@@ -89,7 +85,7 @@ reduce the repository size for another import attempt:
    ```
 
 1. To reduce the repository size, work on this `smaller-tmp-main` branch:
-   [identify and remove large files](../repository/repository_size.md#reduce-repository-size)
+   [identify and remove large files](../repository/reducing_the_repo_size_using_git.md)
    or [interactively rebase and fixup](../../../topics/git/git_rebase.md#rebase-interactively-by-using-git)
    to reduce the number of commits.
 
@@ -114,7 +110,7 @@ reduce the repository size for another import attempt:
    use `git remote set-url origin <new-url> && git push --force --all`
    to complete the import.
 1. Update the imported repository's
-   [branch protection rules](../repository/branches/protected.md) and
+   [branch protection rules](../protected_branches.md) and
    its [default branch](../repository/branches/default.md), and
    delete the temporary, `smaller-tmp-main` branch, and
    the local, temporary data.
@@ -203,13 +199,6 @@ e.send(:design_repo_saver).send(:save)
 # The following line should show you the export_path similar to /var/opt/gitlab/gitlab-rails/shared/tmp/gitlab_exports/@hashed/49/94/4994....
 s = Gitlab::ImportExport::Saver.new(exportable: p, shared: p.import_export_shared, user: u)
 
-# Prior to GitLab 17.0, the `user` parameter was not supported. If you encounter an
-# error with the above or are unsure whether or not to supply the `user`
-# argument, use the following check:
-Gitlab::ImportExport::Saver.instance_method(:initialize).parameters.include?([:keyreq, :user])
-# If the preceding check returns false, omit the user argument:
-s = Gitlab::ImportExport::Saver.new(exportable: p, shared: p.import_export_shared)
-
 # To try and upload use:
 s.send(:compress_and_save)
 s.send(:save_upload)
@@ -230,23 +219,6 @@ Validation failed: User project bots cannot be added to other groups / projects
 
 To use [Import REST API](../../../api/project_import_export.md),
 pass regular user account credentials such as [personal access tokens](../../profile/personal_access_tokens.md).
-
-## Error: `PG::QueryCanceled: ERROR: canceling statement due to statement timeout`
-
-Some migrations can time out with the error: `PG::QueryCanceled: ERROR: canceling statement due to statement timeout`.
-One way to avoid this problem is to have the migration batch size reduced. This makes a migration less likely to time
-out, but makes migrations slower.
-
-To have the batch sized reduced, you must have a feature flag enabled. For more information, see
-[issue 456948](https://gitlab.com/gitlab-org/gitlab/-/issues/456948).
-
-## Error: `command exited with error code 15 and Unable to save [FILTERED] into [FILTERED]`
-
-You might receive the error `command exited with error code 15 and Unable to save [FILTERED] into [FILTERED]` in logs
-when migrating projects by using file exports. If you receive this error:
-
-- When exporting a file export, you can safely ignore the error. GitLab retries the exited command.
-- When importing a file import, you must retry the import. GitLab doesn't automatically retry the import.
 
 ## Troubleshooting performance issues
 

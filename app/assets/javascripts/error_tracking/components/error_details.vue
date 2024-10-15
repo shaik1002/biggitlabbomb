@@ -298,11 +298,11 @@ export default {
       </gl-alert>
 
       <div
-        class="error-details-header gl-border-b gl-flex gl-flex-col gl-justify-between gl-py-3 md:gl-flex-row"
+        class="error-details-header gl-border-b gl-display-flex gl-flex-direction-column gl-md-flex-direction-row gl-py-3 gl-justify-content-space-between"
       >
         <div
           v-if="!loadingStacktrace && stacktrace"
-          class="gl-my-auto gl-truncate"
+          class="gl-my-auto gl-text-truncate"
           data-testid="reported-text"
         >
           <gl-sprintf :message="__('Reported %{timeAgo} by %{reportedBy}')">
@@ -315,7 +315,7 @@ export default {
           </gl-sprintf>
         </div>
         <div>
-          <div class="gl-hidden md:gl-inline-flex">
+          <div class="gl-display-none gl-md-display-inline-flex">
             <gl-button
               :loading="updatingIgnoreStatus"
               data-testid="update-ignore-status-btn"
@@ -346,7 +346,7 @@ export default {
               ref="sentryIssueForm"
               :action="projectIssuesPath"
               method="POST"
-              class="gl-ml-3 gl-inline-block"
+              class="gl-display-inline-block gl-ml-3"
             >
               <gl-form-input class="hidden" name="issue[title]" :value="issueTitle" />
               <input name="issue[description]" :value="issueDescription" type="hidden" />
@@ -371,8 +371,8 @@ export default {
           <gl-disclosure-dropdown
             block
             :toggle-text="__('Options')"
-            toggle-class="md:gl-hidden"
-            placement="bottom-end"
+            toggle-class="gl-md-display-none"
+            placement="right"
             :disabled="issueUpdateInProgress"
             :items="dropdownItems"
           />
@@ -380,7 +380,7 @@ export default {
       </div>
       <div>
         <tooltip-on-truncate :title="error.title" truncate-target="child" placement="top">
-          <h2 class="gl-truncate">{{ error.title }}</h2>
+          <h2 class="gl-text-truncate">{{ error.title }}</h2>
         </tooltip-on-truncate>
         <template v-if="error.tags">
           <gl-badge v-if="error.tags.level" :variant="errorSeverityVariant" class="gl-mr-3">

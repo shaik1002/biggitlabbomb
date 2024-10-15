@@ -16,7 +16,6 @@ describe('IssueBoardFilter', () => {
     wrapper = shallowMount(IssueBoardFilteredSpec, {
       propsData: {
         boardId: 'gid://gitlab/Board/1',
-        filters: {},
       },
       provide: {
         isSignedIn,

@@ -35,7 +35,6 @@ query getProjectContainerRepositories(
           id
           path
         }
-        protectionRuleExists
         userPermissions {
           destroyContainerRepository
         }
@@ -75,11 +74,8 @@ query getProjectContainerRepositories(
         expirationPolicyCleanupStatus
         project {
           id
-          name
           path
-          webUrl
         }
-        protectionRuleExists
         userPermissions {
           destroyContainerRepository
         }

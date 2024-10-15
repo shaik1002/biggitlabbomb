@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe ProjectStatistics, feature_category: :source_code_management do
+RSpec.describe ProjectStatistics do
   let(:project) { create :project }
   let(:statistics) { project.statistics }
 
@@ -20,7 +20,7 @@ RSpec.describe ProjectStatistics, feature_category: :source_code_management do
 
         requested_stats = described_class.for_project_ids(project_ids).pluck(:id)
 
-        expect(requested_stats).to match_array(expected_ids)
+        expect(requested_stats).to eq(expected_ids)
       end
     end
   end
@@ -290,6 +290,10 @@ RSpec.describe ProjectStatistics, feature_category: :source_code_management do
         refresh_statistics
       end
     end
+
+    it_behaves_like 'obtaining lease to update database' do
+      let(:model) { statistics }
+    end
   end
 
   describe '#update_commit_count' do
@@ -437,6 +441,10 @@ RSpec.describe ProjectStatistics, feature_category: :source_code_management do
         expect { refresh_storage_size }.to change { statistics.reload.storage_size }.from(0).to(2)
       end
     end
+
+    it_behaves_like 'obtaining lease to update database' do
+      let(:model) { statistics }
+    end
   end
 
   describe '.increment_statistic' do
@@ -489,7 +497,7 @@ RSpec.describe ProjectStatistics, feature_category: :source_code_management do
       it 'schedules a worker to update the statistic and storage_size async', :sidekiq_inline do
         expect(FlushCounterIncrementsWorker)
           .to receive(:perform_in)
-          .with(Gitlab::Counters::BufferedCounter::WORKER_DELAY, described_class.name, statistics.id, stat.to_s)
+          .with(Gitlab::Counters::BufferedCounter::WORKER_DELAY, described_class.name, statistics.id, stat)
           .and_call_original
 
         expect { described_class.increment_statistic(project, stat, increment) }
@@ -594,7 +602,7 @@ RSpec.describe ProjectStatistics, feature_category: :source_code_management do
       it 'schedules a worker to update the statistic and storage_size async', :sidekiq_inline do
         expect(FlushCounterIncrementsWorker)
           .to receive(:perform_in)
-                .with(Gitlab::Counters::BufferedCounter::WORKER_DELAY, described_class.name, statistics.id, stat.to_s)
+                .with(Gitlab::Counters::BufferedCounter::WORKER_DELAY, described_class.name, statistics.id, stat)
                 .and_call_original
 
         expect { described_class.bulk_increment_statistic(project, stat, increments) }

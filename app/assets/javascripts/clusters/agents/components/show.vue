@@ -8,13 +8,9 @@ import {
   GlSprintf,
   GlTab,
   GlTabs,
-  GlButton,
-  GlModalDirective,
 } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
-import { CONNECT_MODAL_ID } from '~/clusters_list/constants';
-import ConnectToAgentModal from '~/clusters_list/components/connect_to_agent_modal.vue';
 import { MAX_LIST_COUNT } from '../constants';
 import getClusterAgentQuery from '../graphql/queries/get_cluster_agent.query.graphql';
 import TokenTable from './token_table.vue';
@@ -28,11 +24,8 @@ export default {
     tokens: s__('ClusterAgents|Access tokens'),
     unknownUser: s__('ClusterAgents|Unknown user'),
     activity: __('Activity'),
-    connectButtonText: s__('ClusterAgents|Connect to %{agentName}'),
   },
-  connectModalId: CONNECT_MODAL_ID,
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     clusterAgent: {
       query: getClusterAgentQuery,
       variables() {
@@ -56,15 +49,10 @@ export default {
     GlSprintf,
     GlTab,
     GlTabs,
-    GlButton,
     TimeAgoTooltip,
     TokenTable,
     ActivityEvents,
     IntegrationStatus,
-    ConnectToAgentModal,
-  },
-  directives: {
-    GlModalDirective,
   },
   inject: ['agentName', 'projectPath'],
   data() {
@@ -97,9 +85,6 @@ export default {
     tokens() {
       return this.clusterAgent?.tokens?.nodes || [];
     },
-    isUserAccessConfigured() {
-      return Boolean(this.clusterAgent?.userAccessAuthorizations);
-    },
   },
   methods: {
     nextPage() {
@@ -122,19 +107,7 @@ export default {
 
 <template>
   <section>
-    <header class="gl-flex gl-flex-wrap gl-items-center gl-justify-between">
-      <h1>{{ agentName }}</h1>
-      <gl-button
-        v-gl-modal-directive="$options.connectModalId"
-        :disabled="!clusterAgent"
-        category="secondary"
-        variant="confirm"
-      >
-        <gl-sprintf :message="$options.i18n.connectButtonText"
-          ><template #agentName>{{ agentName }}</template></gl-sprintf
-        >
-      </gl-button>
-    </header>
+    <h1>{{ agentName }}</h1>
 
     <gl-loading-icon v-if="isLoading && clusterAgent == null" size="lg" class="gl-m-3" />
 
@@ -153,13 +126,13 @@ export default {
 
       <integration-status
         :tokens="tokens"
-        class="gl-border-t-1 gl-border-t-gray-100 gl-py-5 gl-border-t-solid"
+        class="gl-py-5 gl-border-t-1 gl-border-t-solid gl-border-t-gray-100"
       />
 
       <gl-tabs
         sync-active-tab-with-query-params
         lazy
-        class="gl-border-t-1 gl-border-t-gray-100 gl-border-t-solid"
+        class="gl-border-t-1 gl-border-t-solid gl-border-t-gray-100"
       >
         <gl-tab :title="$options.i18n.activity" query-param-value="activity">
           <activity-events :agent-name="agentName" :project-path="projectPath" />
@@ -172,7 +145,9 @@ export default {
             <span data-testid="cluster-agent-token-count">
               {{ $options.i18n.tokens }}
 
-              <gl-badge v-if="tokenCount" class="gl-tab-counter-badge">{{ tokenCount }}</gl-badge>
+              <gl-badge v-if="tokenCount" size="sm" class="gl-tab-counter-badge">{{
+                tokenCount
+              }}</gl-badge>
             </span>
           </template>
 
@@ -181,7 +156,7 @@ export default {
           <div v-else>
             <token-table :tokens="tokens" :cluster-agent-id="clusterAgent.id" :cursor="cursor" />
 
-            <div v-if="showPagination" class="gl-mt-5 gl-flex gl-justify-center">
+            <div v-if="showPagination" class="gl-display-flex gl-justify-content-center gl-mt-5">
               <gl-keyset-pagination v-bind="tokenPageInfo" @prev="prevPage" @next="nextPage" />
             </div>
           </div>
@@ -189,12 +164,6 @@ export default {
 
         <slot name="ee-workspaces-tab" :agent-name="agentName" :project-path="projectPath"></slot>
       </gl-tabs>
-
-      <connect-to-agent-modal
-        :agent-id="clusterAgent.id"
-        :project-path="projectPath"
-        :is-configured="isUserAccessConfigured"
-      />
     </template>
 
     <gl-alert v-else variant="danger" :dismissible="false">

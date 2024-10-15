@@ -2,7 +2,6 @@
 stage: Create
 group: Source Code
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
-description: "Configure rate limits on Git HTTP requests to your self-managed GitLab instance."
 ---
 
 # Rate limits on Git HTTP
@@ -28,7 +27,7 @@ are applied to Git HTTP requests.
 
 To configure Git HTTP rate limits:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Settings > Network**.
 1. Expand **Git HTTP rate limits**.
 1. Select **Enable unauthenticated Git HTTP request rate limit**.

@@ -473,21 +473,13 @@ RSpec.describe ProjectsFinder, feature_category: :groups_and_projects do
         it { is_expected.to match_array([project]) }
       end
 
-      describe 'filtering by programming language' do
+      describe 'filter by language' do
         let_it_be(:ruby) { create(:programming_language, name: 'Ruby') }
         let_it_be(:repository_language) { create(:repository_language, project: internal_project, programming_language: ruby) }
 
-        context 'when language ID is provided' do
-          let(:params) { { language: ruby.id } }
+        let(:params) { { language: ruby.id } }
 
-          it { is_expected.to match_array([internal_project]) }
-        end
-
-        context 'when language name is provided' do
-          let(:params) { { language_name: 'ruby' } }
-
-          it { is_expected.to match_array([internal_project]) }
-        end
+        it { is_expected.to match_array([internal_project]) }
       end
 
       describe 'filter by organization' do

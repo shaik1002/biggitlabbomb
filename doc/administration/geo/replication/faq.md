@@ -48,7 +48,7 @@ Read the documentation for [Disaster Recovery](../disaster_recovery/index.md).
 
 ## What data is replicated to a **secondary** site?
 
-We replicate the whole rails database, project repositories, LFS objects, generated
+We currently replicate the whole rails database, project repositories, LFS objects, generated
 attachments, avatars and more. This means information such as user accounts,
 issues, merge requests, groups, and project data are available for
 query.
@@ -69,7 +69,7 @@ connectivity between your sites, and your hardware.
 
 That's totally fine. We use HTTP(s) to fetch repository changes from the **primary** site to all **secondary** sites.
 
-## Can I make a container registry for a secondary site to mirror the primary?
+## Is it possible to set up a container registry for a **secondary** site that mirrors the one on the **primary** site?
 
 Yes, however, we only support this for Disaster Recovery scenarios. See [container registry for a **secondary** site](container_registry.md).
 
@@ -83,11 +83,11 @@ No, Geo sites can be based on different reference architectures. For example, yo
 
 ## Does Geo replicate archived projects?
 
-Yes, provided they are not excluded through [selective sync](../replication/selective_synchronization.md).
+Yes, provided they are not excluded through [selective sync](../replication/configuration.md#selective-synchronization).
 
 ## Does Geo replicate personal projects?
 
-Yes, provided they are not excluded through [selective sync](../replication/selective_synchronization.md).
+Yes, provided they are not excluded through [selective sync](../replication/configuration.md#selective-synchronization).
 
 ## Are delayed deletion projects replicated to secondary sites?
 

@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class MergeRequest < ApplicationRecord
-  extend Gitlab::Cache::RequestCache
-
   include AtomicInternalId
   include IidRoutes
   include Issuable
@@ -19,12 +17,15 @@ class MergeRequest < ApplicationRecord
   include FromUnion
   include DeprecatedAssignee
   include ShaAttribute
+  include IgnorableColumns
   include MilestoneEventable
   include StateEventable
   include Approvable
   include IdInOrdered
   include Todoable
   include Spammable
+
+  ignore_columns :head_pipeline_id_convert_to_bigint, remove_with: '17.1', remove_after: '2024-06-14'
 
   extend ::Gitlab::Utils::Override
 
@@ -38,7 +39,6 @@ class MergeRequest < ApplicationRecord
 
   SORTING_PREFERENCE_FIELD = :merge_requests_sort
   CI_MERGE_REQUEST_DESCRIPTION_MAX_LENGTH = 2700
-  MERGE_LEASE_TIMEOUT = 15.minutes.to_i
 
   belongs_to :target_project, class_name: "Project"
   belongs_to :source_project, class_name: "Project"
@@ -65,8 +65,6 @@ class MergeRequest < ApplicationRecord
   has_one :cleanup_schedule, inverse_of: :merge_request
   has_one :predictions, inverse_of: :merge_request
   delegate :suggested_reviewers, to: :predictions
-
-  has_one :merge_schedule, class_name: 'MergeRequests::MergeSchedule', inverse_of: :merge_request
 
   belongs_to :latest_merge_request_diff, class_name: 'MergeRequestDiff'
   manual_inverse_association :latest_merge_request_diff, :merge_request
@@ -100,8 +98,12 @@ class MergeRequest < ApplicationRecord
     class_name: 'MergeRequestsClosingIssues',
     inverse_of: :merge_request,
     dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
+  has_many :merge_requests_closing_issues_closes_work_item,
+    -> { closes_work_item },
+    class_name: 'MergeRequestsClosingIssues',
+    inverse_of: :merge_request
 
-  has_many :cached_closes_issues, through: :merge_requests_closing_issues, source: :issue
+  has_many :cached_closes_issues, through: :merge_requests_closing_issues_closes_work_item, source: :issue
   has_many :pipelines_for_merge_request, foreign_key: 'merge_request_id', class_name: 'Ci::Pipeline', inverse_of: :merge_request
   has_many :suggestions, through: :notes
   has_many :unresolved_notes, -> { unresolved }, as: :noteable, class_name: 'Note', inverse_of: :noteable
@@ -195,7 +197,7 @@ class MergeRequest < ApplicationRecord
       transition locked: :opened
     end
 
-    before_transition any => [:opened, :merged] do |merge_request|
+    before_transition any => :opened do |merge_request|
       merge_request.merge_jid = nil
     end
 
@@ -330,19 +332,19 @@ class MergeRequest < ApplicationRecord
   scope :by_commit_sha, ->(sha) do
     where('EXISTS (?)', MergeRequestDiff.select(1).where('merge_requests.latest_merge_request_diff_id = merge_request_diffs.id').by_commit_sha(sha)).reorder(nil)
   end
-  scope :by_merge_commit_sha, ->(sha) do
+  scope :by_merge_commit_sha, -> (sha) do
     where(merge_commit_sha: sha)
   end
-  scope :by_squash_commit_sha, ->(sha) do
+  scope :by_squash_commit_sha, -> (sha) do
     where(squash_commit_sha: sha)
   end
-  scope :by_merged_commit_sha, ->(sha) do
+  scope :by_merged_commit_sha, -> (sha) do
     where(merged_commit_sha: sha)
   end
-  scope :by_merged_or_merge_or_squash_commit_sha, ->(sha) do
+  scope :by_merged_or_merge_or_squash_commit_sha, -> (sha) do
     from_union([by_squash_commit_sha(sha), by_merge_commit_sha(sha), by_merged_commit_sha(sha)])
   end
-  scope :by_related_commit_sha, ->(sha) do
+  scope :by_related_commit_sha, -> (sha) do
     from_union(
       [
         by_commit_sha(sha),
@@ -352,11 +354,11 @@ class MergeRequest < ApplicationRecord
       ]
     )
   end
-  scope :by_latest_merge_request_diffs, ->(merge_request_diffs) do
+  scope :by_latest_merge_request_diffs, -> (merge_request_diffs) do
     where(latest_merge_request_diff_id: merge_request_diffs)
   end
   scope :join_project, -> { joins(:target_project) }
-  scope :join_metrics, ->(target_project_id = nil) do
+  scope :join_metrics, -> (target_project_id = nil) do
     # Do not join the relation twice
     return self if self.arel.join_sources.any? { |join| join.left.try(:name).eql?(MergeRequest::Metrics.table_name) }
 
@@ -380,7 +382,6 @@ class MergeRequest < ApplicationRecord
     preload_routables.preload(
       :assignees, :author, :unresolved_notes, :labels, :milestone,
       :timelogs, :latest_merge_request_diff, :reviewers,
-      :merge_schedule,
       target_project: :project_feature,
       metrics: [:latest_closed_by, :merged_by]
     )
@@ -394,14 +395,29 @@ class MergeRequest < ApplicationRecord
   end
   scope :by_target_branch, ->(branch_name) { where(target_branch: branch_name) }
   scope :order_by_metric, ->(metric, direction) do
-    order = order_by_metric_column(metric, direction)
+    column_expression = MergeRequest::Metrics.arel_table[metric]
+    column_expression_with_direction = direction == 'ASC' ? column_expression.asc : column_expression.desc
+
+    order = Gitlab::Pagination::Keyset::Order.build(
+      [
+        Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+          attribute_name: "merge_request_metrics_#{metric}",
+          column_expression: column_expression,
+          order_expression: column_expression_with_direction.nulls_last,
+          reversed_order_expression: column_expression_with_direction.reverse.nulls_first,
+          order_direction: direction,
+          nullable: :nulls_last,
+          add_to_projections: true
+        ),
+        Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+          attribute_name: 'merge_request_metrics_id',
+          order_expression: MergeRequest::Metrics.arel_table[:id].desc,
+          add_to_projections: true
+        )
+      ])
+
     order.apply_cursor_conditions(join_metrics).order(order)
   end
-  scope :reorder_by_metric, ->(metric, direction) do
-    order = order_by_metric_column(metric, direction)
-    order.apply_cursor_conditions(join_metrics).reorder(order)
-  end
-
   scope :order_merged_at_asc, -> { order_by_metric(:merged_at, 'ASC') }
   scope :order_merged_at_desc, -> { order_by_metric(:merged_at, 'DESC') }
   scope :order_closed_at_asc, -> { order_by_metric(:latest_closed_at, 'ASC') }
@@ -417,7 +433,7 @@ class MergeRequest < ApplicationRecord
   end
   scope :preload_author, -> { preload(:author) }
   scope :preload_approved_by_users, -> { preload(:approved_by_users) }
-  scope :preload_metrics, ->(relation) { preload(metrics: relation) }
+  scope :preload_metrics, -> (relation) { preload(metrics: relation) }
   scope :preload_project_and_latest_diff, -> { preload(:source_project, :latest_merge_request_diff) }
   scope :preload_latest_diff_commit, -> { preload(latest_merge_request_diff: { merge_request_diff_commits: [:commit_author, :committer] }) }
   scope :preload_milestoneish_associations, -> { preload_routables.preload(:assignees, :labels) }
@@ -468,16 +484,6 @@ class MergeRequest < ApplicationRecord
     )
   end
 
-  scope :assignee_or_reviewer, ->(user, assigned_review_states, reviewer_state) do
-    assigned_to_scope = assigned_to(user)
-    assigned_to_scope = assigned_to_scope.review_states(assigned_review_states) if assigned_review_states
-
-    from_union(
-      assigned_to_scope,
-      review_requested_to(user, reviewer_state)
-    )
-  end
-
   scope :without_hidden, -> {
     if Feature.enabled?(:hide_merge_requests_from_banned_users)
       where_not_exists(Users::BannedUser.where('merge_requests.author_id = banned_users.user_id'))
@@ -520,29 +526,6 @@ class MergeRequest < ApplicationRecord
 
   def self.reference_prefix
     '!'
-  end
-
-  def self.order_by_metric_column(metric, direction)
-    column_expression = MergeRequest::Metrics.arel_table[metric]
-    column_expression_with_direction = direction == 'ASC' ? column_expression.asc : column_expression.desc
-
-    Gitlab::Pagination::Keyset::Order.build(
-      [
-        Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
-          attribute_name: "merge_request_metrics_#{metric}",
-          column_expression: column_expression,
-          order_expression: column_expression_with_direction.nulls_last,
-          reversed_order_expression: column_expression_with_direction.reverse.nulls_first,
-          order_direction: direction,
-          nullable: :nulls_last,
-          add_to_projections: true
-        ),
-        Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
-          attribute_name: 'merge_request_metrics_id',
-          order_expression: MergeRequest::Metrics.arel_table[:id].desc,
-          add_to_projections: true
-        )
-      ])
   end
 
   # Returns the top 100 target branches
@@ -706,10 +689,6 @@ class MergeRequest < ApplicationRecord
     [:assignees, :reviewers] + super
   end
 
-  def self.use_locked_set?
-    Feature.enabled?(:unstick_locked_merge_requests_redis) # rubocop: disable Gitlab/FeatureFlagWithoutActor -- no actor needed
-  end
-
   def committers(with_merge_commits: false, lazy: false, include_author_when_signed: false)
     strong_memoize_with(:committers, with_merge_commits, lazy, include_author_when_signed) do
       commits.committers(
@@ -852,18 +831,6 @@ class MergeRequest < ApplicationRecord
     compare.present? ? compare.raw_diffs(*args) : merge_request_diff.raw_diffs(*args)
   end
 
-  def diffs_for_streaming(diff_options = {}, &)
-    diff = diffable_merge_ref? ? merge_head_diff : merge_request_diff
-
-    offset = diff_options[:offset_index].to_i || 0
-
-    if block_given?
-      source_project.repository.diffs_by_changed_paths(diff.diff_refs, offset, &)
-    else
-      diff.diffs(diff_options)
-    end
-  end
-
   def diffs(diff_options = {})
     if compare
       # When saving MR diffs, `expanded` is implicitly added (because we need
@@ -934,11 +901,6 @@ class MergeRequest < ApplicationRecord
       merge_request_diff.modified_paths(fallback_on_overflow: fallback_on_overflow)
     end
   end
-
-  def changed_paths
-    project.repository.find_changed_paths(commits, merge_commit_diff_mode: :all_parents)
-  end
-  request_cache(:changed_paths) { [id, diff_head_sha] }
 
   def new_paths
     diffs.diff_files.map(&:new_path)
@@ -1136,7 +1098,7 @@ class MergeRequest < ApplicationRecord
     return true unless reviewers.size > MAX_NUMBER_OF_ASSIGNEES_OR_REVIEWERS
 
     errors.add :reviewers,
-      ->(_object, _data) { self.class.max_number_of_assignees_or_reviewers_message }
+      -> (_object, _data) { self.class.max_number_of_assignees_or_reviewers_message }
   end
 
   def merge_ongoing?
@@ -1284,21 +1246,19 @@ class MergeRequest < ApplicationRecord
   alias_method :wip_title, :draft_title
 
   def skipped_mergeable_checks(options = {})
-    merge_when_checks_pass_strat = options[:auto_merge_strategy] == ::AutoMergeService::STRATEGY_MERGE_WHEN_CHECKS_PASS || options[:auto_merge_strategy] == ::AutoMergeService::STRATEGY_ADD_TO_MERGE_TRAIN_WHEN_CHECKS_PASS
+    merge_when_checks_pass_strat = options[:auto_merge_strategy] == ::AutoMergeService::STRATEGY_MERGE_WHEN_CHECKS_PASS
+
+    skip_additional_checks = merge_when_checks_pass_strat &&
+      ::Feature.enabled?(:additional_merge_when_checks_ready, project)
 
     {
       skip_ci_check: options.fetch(:auto_merge_requested, false),
       skip_approved_check: merge_when_checks_pass_strat,
-      skip_draft_check: merge_when_checks_pass_strat,
-      skip_blocked_check: merge_when_checks_pass_strat,
-      skip_discussions_check: merge_when_checks_pass_strat,
-      skip_external_status_check: merge_when_checks_pass_strat,
-      skip_requested_changes_check: merge_when_checks_pass_strat,
-      skip_locked_paths_check: merge_when_checks_pass_strat,
-      skip_jira_check: merge_when_checks_pass_strat,
-      skip_locked_lfs_files_check: merge_when_checks_pass_strat,
-      skip_security_policy_check: merge_when_checks_pass_strat,
-      skip_merge_time_check: merge_when_checks_pass_strat
+      skip_draft_check: skip_additional_checks,
+      skip_blocked_check: skip_additional_checks,
+      skip_discussions_check: skip_additional_checks,
+      skip_external_status_check: skip_additional_checks,
+      skip_requested_changes_check: skip_additional_checks
     }
   end
 
@@ -1310,9 +1270,6 @@ class MergeRequest < ApplicationRecord
   # skip_blocked_check
   # skip_external_status_check
   # skip_requested_changes_check
-  # skip_locked_paths_check
-  # skip_jira_check
-  # skip_locked_lfs_files_check
   def mergeable?(check_mergeability_retry_lease: false, skip_rebase_check: false, **mergeable_state_check_params)
     return false unless mergeable_state?(**mergeable_state_check_params)
 
@@ -1326,12 +1283,10 @@ class MergeRequest < ApplicationRecord
     #
     [
       ::MergeRequests::Mergeability::CheckOpenStatusService,
-      ::MergeRequests::Mergeability::CheckMergeTimeService,
       ::MergeRequests::Mergeability::CheckDraftStatusService,
       ::MergeRequests::Mergeability::CheckCommitsStatusService,
       ::MergeRequests::Mergeability::CheckDiscussionsStatusService,
-      ::MergeRequests::Mergeability::CheckCiStatusService,
-      ::MergeRequests::Mergeability::CheckLfsFileLocksService
+      ::MergeRequests::Mergeability::CheckCiStatusService
     ]
   end
 
@@ -1354,7 +1309,6 @@ class MergeRequest < ApplicationRecord
   # skip_blocked_check
   # skip_external_status_check
   # skip_requested_changes_check
-  # skip_jira_check
   def mergeable_state?(**params)
     results = check_mergeability_states(checks: self.class.mergeable_state_checks, **params)
 
@@ -1410,15 +1364,7 @@ class MergeRequest < ApplicationRecord
   def auto_merge_strategy
     return unless auto_merge_enabled?
 
-    merge_params['auto_merge_strategy'] || default_auto_merge_strategy
-  end
-
-  def default_auto_merge_strategy
-    if Feature.enabled?(:merge_when_checks_pass, project)
-      AutoMergeService::STRATEGY_MERGE_WHEN_CHECKS_PASS
-    else
-      AutoMergeService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS
-    end
+    merge_params['auto_merge_strategy'] || AutoMergeService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS
   end
 
   def auto_merge_strategy=(strategy)
@@ -1484,58 +1430,25 @@ class MergeRequest < ApplicationRecord
   def cache_merge_request_closes_issues!(current_user = self.author)
     return if closed? || merged?
 
-    issues_to_close_ids = closes_issues(current_user).reject { |issue| issue.is_a?(ExternalIssue) }.map(&:id)
-
     transaction do
-      merge_requests_closing_issues.from_mr_description.delete_all
+      self.merge_requests_closing_issues.closes_work_item.delete_all
 
-      # These might have been created manually from the work item interface
-      issue_ids_to_update = merge_requests_closing_issues
-        .where(from_mr_description: false, issue_id: issues_to_close_ids)
-        .pluck(:issue_id)
+      closes_issues(current_user).each do |issue|
+        next if issue.is_a?(ExternalIssue)
 
-      if issue_ids_to_update.any?
-        merge_requests_closing_issues.where(issue_id: issue_ids_to_update).update_all(from_mr_description: true)
+        self.merge_requests_closing_issues.create!(issue: issue, closes_work_item: true)
       end
-
-      issue_ids_to_create = issues_to_close_ids - issue_ids_to_update
-      next unless issue_ids_to_create.any?
-
-      now = Time.zone.now
-      new_associations = issue_ids_to_create.map do |issue_id|
-        MergeRequestsClosingIssues.new(
-          issue_id: issue_id,
-          merge_request_id: id,
-          from_mr_description: true,
-          created_at: now,
-          updated_at: now
-        )
-      end
-
-      # We can't skip validations here in bulk insert as we don't have a unique constraint on the DB.
-      # We can skip validations once we have validated the unique constraint
-      # TODO: https://gitlab.com/gitlab-org/gitlab/-/issues/456965
-      MergeRequestsClosingIssues.bulk_insert!(new_associations, batch_size: 100)
     end
   end
 
   def visible_closing_issues_for(current_user = self.author)
     strong_memoize(:visible_closing_issues_for) do
-      visible_issues = if self.target_project.has_external_issue_tracker?
-                         closes_issues(current_user)
-                       else
-                         cached_closes_issues.select do |issue|
-                           Ability.allowed?(current_user, :read_issue, issue)
-                         end
-                       end
-
-      ActiveRecord::Associations::Preloader.new(
-        records: visible_issues.select { |issue| issue.is_a?(Issue) },
-        associations: :project
-      ).call
-      # Exclude isues that have been cached but their project setting has been disabled, or they belong to a group
-      visible_issues.select do |issue|
-        !issue.is_a?(Issue) || issue.autoclose_by_merged_closing_merge_request?
+      if self.target_project.has_external_issue_tracker?
+        closes_issues(current_user)
+      else
+        cached_closes_issues.select do |issue|
+          Ability.allowed?(current_user, :read_issue, issue)
+        end
       end
     end
   end
@@ -1560,18 +1473,6 @@ class MergeRequest < ApplicationRecord
     ext.analyze("#{title}\n#{description}")
 
     ext.issues - visible_closing_issues_for(current_user)
-  end
-
-  def related_issues(user)
-    visible_notes = user.can?(:read_internal_note, project) ? notes : notes.not_internal
-
-    messages = [title, description, *visible_notes.pluck(:note)]
-    messages += commits.map(&:safe_message) if merge_request_diff.persisted?
-
-    ext = Gitlab::ReferenceExtractor.new(project, user)
-    ext.analyze(messages.join("\n"))
-
-    ext.issues
   end
 
   def target_project_path
@@ -1698,13 +1599,9 @@ class MergeRequest < ApplicationRecord
     project.only_allow_merge_if_all_discussions_are_resolved?(inherit_group_setting: true)
   end
 
-  def has_ci_enabled?
-    has_ci? || project.has_ci?
-  end
-
   def mergeable_ci_state?
     # When using MWCP auto merge strategy, the ci must be mergeable, regardless of the project setting
-    return true unless only_allow_merge_if_pipeline_succeeds? || (auto_merge_strategy == ::AutoMergeService::STRATEGY_MERGE_WHEN_CHECKS_PASS && has_ci_enabled?)
+    return true unless only_allow_merge_if_pipeline_succeeds? || (auto_merge_strategy == ::AutoMergeService::STRATEGY_MERGE_WHEN_CHECKS_PASS && project.has_ci?)
     return false unless diff_head_pipeline
 
     return true if project.allow_merge_on_skipped_pipeline?(inherit_group_setting: true) && diff_head_pipeline.skipped?
@@ -1776,19 +1673,10 @@ class MergeRequest < ApplicationRecord
   end
 
   def in_locked_state
-    # This method raises an error when adding to Redis set fails. This is so
-    # we can retry merging if it wasn't added to ensure that the MR gets added
-    # to locked set for unsticking in case it gets into a stuck state during
-    # the merge process.
-    add_to_locked_set
     lock_mr
     yield
   ensure
     unlock_mr if locked?
-
-    # We only remove it from the locked set if it's no longer locked as it means
-    # the MR is either unlocked or merged.
-    remove_from_locked_set unless locked?
   end
 
   def update_and_mark_in_progress_merge_commit_sha(commit_id)
@@ -2369,61 +2257,27 @@ class MergeRequest < ApplicationRecord
     # "Pipelines must succeed" is disabled, immediate merges are neither blocked
     # nor discouraged on blocked pipelines, so auto merge should not wait for
     # the pipeline to finish.
-    if only_allow_merge_if_pipeline_succeeds?
-      !pipeline.complete?
+    if auto_merge_when_incomplete_pipeline_succeeds_enabled?
+      if only_allow_merge_if_pipeline_succeeds?
+        !pipeline.complete?
+      else
+        pipeline.active? || pipeline.created?
+      end
     else
-      pipeline.active? || pipeline.created?
+      pipeline.active?
     end
+  end
+
+  def auto_merge_when_incomplete_pipeline_succeeds_enabled?
+    Feature.enabled?(
+      :auto_merge_when_incomplete_pipeline_succeeds,
+      Project.actor_from_id(target_project_id),
+      type: :beta
+    )
   end
 
   def temporarily_unapproved?
     false
-  end
-
-  def has_jira_issue_keys?
-    return false unless project&.jira_integration&.reference_pattern
-
-    Atlassian::JiraIssueKeyExtractor.has_keys?(
-      title,
-      description,
-      custom_regex: project.jira_integration.reference_pattern
-    )
-  end
-
-  def merge_exclusive_lease
-    lease_key = ['merge_requests_merge_service', id].join(':')
-
-    Gitlab::ExclusiveLease.new(lease_key, timeout: MERGE_LEASE_TIMEOUT)
-  end
-
-  def source_and_target_branches_exist?
-    source_branch_sha.present? && target_branch_sha.present?
-  end
-
-  def has_diffs?
-    Gitlab::Git::Compare.new(
-      project.repository.raw_repository,
-      target_branch_sha,
-      source_branch_sha
-    ).diffs.any?
-  end
-
-  def add_to_locked_set
-    return unless self.class.use_locked_set?
-
-    Gitlab::MergeRequests::LockedSet.add(self.id, rescue_connection_error: false)
-  end
-
-  def remove_from_locked_set
-    return unless self.class.use_locked_set?
-
-    Gitlab::MergeRequests::LockedSet.remove(self.id)
-  end
-
-  def first_diffs_slice(limit)
-    diff = diffable_merge_ref? ? merge_head_diff : merge_request_diff
-
-    diff.paginated_diffs(1, limit).diff_files
   end
 
   private

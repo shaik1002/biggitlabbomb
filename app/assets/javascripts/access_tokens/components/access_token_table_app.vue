@@ -1,23 +1,12 @@
 <script>
 import { GlButton, GlIcon, GlLink, GlPagination, GlTable, GlTooltipDirective } from '@gitlab/ui';
 import { helpPagePath } from '~/helpers/help_page_helper';
-import axios from '~/lib/utils/axios_utils';
-import {
-  convertObjectPropsToCamelCase,
-  normalizeHeaders,
-  parseIntPagination,
-} from '~/lib/utils/common_utils';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { __, sprintf } from '~/locale';
 import DomElementListener from '~/vue_shared/components/dom_element_listener.vue';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import UserDate from '~/vue_shared/components/user_date.vue';
 import { EVENT_SUCCESS, FIELDS, FORM_SELECTOR, INITIAL_PAGE, PAGE_SIZE } from './constants';
-
-/**
- * This component supports two different types of pagination:
- * 1. Frontend only pagination: all the data is passed to the frontend. The UI slices and displays the tokens.
- * 2. Backend pagination: backend sends only the data corresponding to the `page` parameter.
- */
 
 export default {
   EVENT_SUCCESS,
@@ -52,21 +41,16 @@ export default {
   inject: [
     'accessTokenType',
     'accessTokenTypePlural',
-    'backendPagination',
     'initialActiveAccessTokens',
     'noActiveTokensMessage',
     'showRole',
   ],
   data() {
-    const activeAccessTokens = this.convert(this.initialActiveAccessTokens);
-
     return {
-      activeAccessTokens,
-      busy: false,
-      currentPage: INITIAL_PAGE, // This is the page use in the GlTable. It stays 1 if the backend pagination is on.
-      page: INITIAL_PAGE, // This is the page use in the GlPagination component
-      perPage: PAGE_SIZE,
-      totalItems: activeAccessTokens.length,
+      activeAccessTokens: convertObjectPropsToCamelCase(this.initialActiveAccessTokens, {
+        deep: true,
+      }),
+      currentPage: INITIAL_PAGE,
     };
   },
   computed: {
@@ -86,67 +70,17 @@ export default {
         ignoredFields.push('role');
       }
 
-      const fields = FIELDS.filter(({ key }) => !ignoredFields.includes(key));
-
-      // Remove the sortability of the columns if backend pagination is on.
-      if (this.backendPagination) {
-        return fields.map((field) => ({
-          ...field,
-          sortable: false,
-        }));
-      }
-
-      return fields;
+      return FIELDS.filter(({ key }) => !ignoredFields.includes(key));
     },
     showPagination() {
-      return this.totalItems > this.perPage;
+      return this.activeAccessTokens.length > PAGE_SIZE;
     },
-  },
-  created() {
-    if (this.backendPagination) {
-      this.fetchData();
-    }
   },
   methods: {
-    convert(accessTokens) {
-      return convertObjectPropsToCamelCase(accessTokens, { deep: true });
-    },
-    async fetchData(newPage) {
-      const url = new URL(document.location.href);
-      url.pathname = `${url.pathname}.json`;
-
-      if (newPage) {
-        url.searchParams.delete('page');
-        url.searchParams.append('page', newPage);
-      }
-
-      this.busy = true;
-      const { data, headers } = await axios.get(url.toString());
-
-      const { page, perPage, total } = parseIntPagination(normalizeHeaders(headers));
-      this.page = page;
-      this.perPage = perPage;
-      this.totalItems = total;
-      this.busy = false;
-
-      if (newPage) {
-        this.activeAccessTokens = this.convert(data);
-        this.replaceHistory(newPage);
-      }
-    },
-    replaceHistory(page) {
-      window.history.replaceState(null, '', `?page=${page}`);
-    },
     onSuccess(event) {
-      const [{ active_access_tokens: activeAccessTokens, total: totalItems }] = event.detail;
-      this.activeAccessTokens = this.convert(activeAccessTokens);
-      this.totalItems = totalItems;
+      const [{ active_access_tokens: activeAccessTokens }] = event.detail;
+      this.activeAccessTokens = convertObjectPropsToCamelCase(activeAccessTokens, { deep: true });
       this.currentPage = INITIAL_PAGE;
-      this.page = INITIAL_PAGE;
-
-      if (this.backendPagination) {
-        this.replaceHistory(INITIAL_PAGE);
-      }
     },
     modalMessage(tokenName) {
       return sprintf(this.$options.i18n.modalMessage, {
@@ -167,15 +101,6 @@ export default {
       // For other columns the default sorting works OK
       return false;
     },
-    async pageChanged(newPage) {
-      if (this.backendPagination) {
-        await this.fetchData(newPage);
-      } else {
-        this.currentPage = newPage;
-        this.page = newPage;
-      }
-      window.scrollTo({ top: 0 });
-    },
   },
 };
 </script>
@@ -183,18 +108,19 @@ export default {
 <template>
   <dom-element-listener :selector="$options.FORM_SELECTOR" @[$options.EVENT_SUCCESS]="onSuccess">
     <div>
-      <div>
+      <div
+        class="gl-new-card-body gl-px-0 gl-overflow-hidden gl-bg-gray-10 gl-border-l gl-border-r gl-border-b gl-rounded-bottom-base gl-mb-5 gl-md-mb-0"
+      >
         <gl-table
           data-testid="active-tokens"
           :empty-text="noActiveTokensMessage"
           :fields="filteredFields"
           :items="activeAccessTokens"
-          :per-page="perPage"
+          :per-page="$options.PAGE_SIZE"
           :current-page="currentPage"
           :sort-compare="sortingChanged"
           show-empty
           stacked="sm"
-          :busy="busy"
         >
           <template #cell(createdAt)="{ item: { createdAt } }">
             <user-date :date="createdAt" />
@@ -216,7 +142,7 @@ export default {
 
           <template #cell(expiresAt)="{ item: { expiresAt, expired, expiresSoon } }">
             <template v-if="expiresAt">
-              <span v-if="expired" class="gl-text-danger">{{ $options.i18n.expired }}</span>
+              <span v-if="expired" class="text-danger">{{ $options.i18n.expired }}</span>
               <time-ago-tooltip v-else :class="{ 'text-warning': expiresSoon }" :time="expiresAt" />
             </template>
             <span v-else v-gl-tooltip :title="$options.i18n.tokenValidity">{{
@@ -243,13 +169,15 @@ export default {
       </div>
       <gl-pagination
         v-if="showPagination"
-        :value="page"
-        :per-page="perPage"
-        :total-items="totalItems"
-        :disabled="busy"
+        v-model="currentPage"
+        :per-page="$options.PAGE_SIZE"
+        :total-items="activeAccessTokens.length"
+        :prev-text="__('Prev')"
+        :next-text="__('Next')"
+        :label-next-page="__('Go to next page')"
+        :label-prev-page="__('Go to previous page')"
         align="center"
         class="gl-mt-5"
-        @input="pageChanged"
       />
     </div>
   </dom-element-listener>

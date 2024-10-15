@@ -76,7 +76,7 @@ export default {
             this.openModal();
           },
           extraAttrs: {
-            class: 'js-delete-branch-button !gl-text-red-500',
+            class: 'js-delete-branch-button gl-text-red-500!',
             'aria-label': this.deleteBranchText,
             'data-testid': 'delete-branch-button',
           },
@@ -116,7 +116,7 @@ export default {
     :toggle-text="$options.i18n.toggleText"
     icon="ellipsis_v"
     category="tertiary"
-    placement="bottom-end"
+    placement="right"
     data-testid="branch-more-actions"
     text-sr-only
     no-caret

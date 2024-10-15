@@ -12,19 +12,11 @@ module Gitlab
     READ_API_SCOPE = :read_api
     READ_USER_SCOPE = :read_user
     CREATE_RUNNER_SCOPE = :create_runner
-    MANAGE_RUNNER_SCOPE = :manage_runner
-    API_SCOPES = [
-      API_SCOPE, READ_API_SCOPE,
-      READ_USER_SCOPE,
-      CREATE_RUNNER_SCOPE, MANAGE_RUNNER_SCOPE,
-      K8S_PROXY_SCOPE
-    ].freeze
+    API_SCOPES = [API_SCOPE, READ_API_SCOPE, READ_USER_SCOPE, CREATE_RUNNER_SCOPE, K8S_PROXY_SCOPE].freeze
 
     # Scopes for Duo
     AI_FEATURES = :ai_features
     AI_FEATURES_SCOPES = [AI_FEATURES].freeze
-    AI_WORKFLOW = :ai_workflows
-    AI_WORKFLOW_SCOPES = [AI_WORKFLOW].freeze
 
     PROFILE_SCOPE = :profile
     EMAIL_SCOPE = :email
@@ -84,7 +76,7 @@ module Gitlab
           service_request_check(login, password, project) ||
           build_access_token_check(login, password) ||
           lfs_token_check(login, password, project) ||
-          oauth_access_token_check(password) ||
+          oauth_access_token_check(login, password) ||
           personal_access_token_check(password, project) ||
           deploy_token_check(login, password, project) ||
           user_with_password_for_git(login, password) ||
@@ -224,8 +216,8 @@ module Gitlab
         Gitlab::Auth::Result.new(user, nil, :gitlab_or_ldap, full_authentication_abilities)
       end
 
-      def oauth_access_token_check(password)
-        if password.present?
+      def oauth_access_token_check(login, password)
+        if login == "oauth2" && password.present?
           token = Doorkeeper::AccessToken.by_token(password)
 
           if valid_oauth_token?(token)
@@ -280,13 +272,11 @@ module Gitlab
         abilities_by_scope = {
           api: full_authentication_abilities,
           read_api: read_only_authentication_abilities,
-          read_registry: %i[read_container_image],
-          write_registry: %i[create_container_image],
-          read_repository: %i[download_code],
-          write_repository: %i[download_code push_code],
-          create_runner: %i[create_instance_runner create_runner],
-          manage_runner: %i[assign_runner update_runner delete_runner],
-          ai_workflows: %i[push_code download_code]
+          read_registry: [:read_container_image],
+          write_registry: [:create_container_image],
+          read_repository: [:download_code],
+          write_repository: [:download_code, :push_code],
+          create_runner: [:create_instance_runner, :create_runner]
         }
 
         scopes.flat_map do |scope|
@@ -369,7 +359,6 @@ module Gitlab
         [
           :read_project,
           :build_download_code,
-          :build_push_code,
           :build_read_container_image,
           :build_create_container_image,
           :build_destroy_container_image
@@ -418,7 +407,7 @@ module Gitlab
 
       # Other available scopes
       def optional_scopes
-        all_available_scopes + OPENID_SCOPES + PROFILE_SCOPES - DEFAULT_SCOPES + AI_WORKFLOW_SCOPES
+        all_available_scopes + OPENID_SCOPES + PROFILE_SCOPES - DEFAULT_SCOPES
       end
 
       def registry_scopes
@@ -451,12 +440,7 @@ module Gitlab
       end
 
       def unavailable_scopes_for_resource(resource)
-        unavailable_ai_features_scopes +
-          unavailable_observability_scopes_for_resource(resource)
-      end
-
-      def unavailable_ai_features_scopes
-        AI_WORKFLOW_SCOPES
+        unavailable_observability_scopes_for_resource(resource)
       end
 
       def unavailable_observability_scopes_for_resource(resource)

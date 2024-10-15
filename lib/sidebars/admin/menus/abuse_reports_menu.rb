@@ -11,7 +11,7 @@ module Sidebars
 
         override :title
         def title
-          s_('Admin|Abuse reports')
+          s_('Admin|Abuse Reports')
         end
 
         override :sprite_icon

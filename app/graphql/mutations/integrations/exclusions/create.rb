@@ -6,9 +6,7 @@ module Mutations
       class Create < BaseMutation
         graphql_name 'IntegrationExclusionCreate'
         include ResolvesIds
-
-        MAX_PROJECT_IDS = ::Integrations::Exclusions::CreateService::MAX_PROJECTS
-        MAX_GROUP_IDS = ::Integrations::Exclusions::CreateService::MAX_GROUPS
+        MAX_PROJECT_IDS = 100
 
         field :exclusions, [::Types::Integrations::ExclusionType],
           null: true,
@@ -21,25 +19,23 @@ module Mutations
 
         argument :project_ids,
           [::Types::GlobalIDType[::Project]],
-          required: false,
-          validates: { length: { maximum: MAX_PROJECT_IDS } },
+          required: true,
           description: "IDs of projects to exclude up to a maximum of #{MAX_PROJECT_IDS}."
-
-        argument :group_ids,
-          [::Types::GlobalIDType[::Group]],
-          required: false,
-          validates: { length: { maximum: MAX_GROUP_IDS } },
-          description: "IDs of groups to exclude up to a maximum of #{MAX_GROUP_IDS}."
 
         authorize :admin_all_resources
 
-        def resolve(integration_name:, project_ids: [], group_ids: [])
+        def resolve(integration_name:, project_ids:)
           authorize!(:global)
+
+          if project_ids.length > MAX_PROJECT_IDS
+            raise Gitlab::Graphql::Errors::ArgumentError, "Count of projectIds should be less than #{MAX_PROJECT_IDS}"
+          end
+
+          projects = Project.id_in(resolve_ids(project_ids)).limit(MAX_PROJECT_IDS)
 
           result = ::Integrations::Exclusions::CreateService.new(
             current_user: current_user,
-            projects: projects(project_ids),
-            groups: groups(group_ids),
+            projects: projects,
             integration_name: integration_name
           ).execute
 
@@ -47,20 +43,6 @@ module Mutations
             exclusions: result.payload,
             errors: result.errors
           }
-        end
-
-        private
-
-        def groups(group_ids)
-          return [] unless group_ids.present?
-
-          Group.id_in(resolve_ids(group_ids)).limit(MAX_GROUP_IDS)
-        end
-
-        def projects(project_ids)
-          return [] unless project_ids.present?
-
-          Project.id_in(resolve_ids(project_ids)).with_group.limit(MAX_PROJECT_IDS)
         end
       end
     end

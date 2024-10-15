@@ -6,12 +6,12 @@
 }
 
 .boards-app {
-  height: calc(#{$calc-application-viewport-height} - var(--header-height, 48px) - var(--broadcast-message-height, 0px));
+  height: calc(#{$calc-application-viewport-height} - var(--header-height, 48px));
   display: flex;
   flex-direction: column;
 
   @include media-breakpoint-up(sm) {
-    @apply gl-transition-width;
+    transition: width $gl-transition-duration-medium;
     width: 100%;
 
     &.is-compact {
@@ -20,19 +20,10 @@
   }
 }
 
-.board-swimlanes-headers {
-  background-color: $white;
-
-  // stylelint-disable-next-line gitlab/no-gl-class
-  .gl-dark & {
-    background-color: var(--gray-10);
-  }
-}
-
 .boards-list,
 .board-swimlanes {
   flex-grow: 1;
-  border-left: 8px solid var(--gl-background-color-default);
+  border-left: 8px solid var(--gray-10, $white);
 
   min-height: calc(#{$calc-application-viewport-height} - var(--header-height));
 
@@ -86,7 +77,7 @@
   right: -1px;
   pointer-events: none;
   opacity: 0;
-  border-radius: $gl-border-radius-base;
+  border-radius: $border-radius-default;
   animation-name: board-column-flash-border;
   animation-duration: 1.2s;
   animation-fill-mode: forwards;
@@ -106,15 +97,24 @@
 }
 
 .board-card {
-  background: var(--gl-background-color-default);
+  background: var(--gray-10, $white);
+  box-shadow: 0 1px 2px rgba(var(--black, $black), 0.1);
 
   &:last-child {
     margin-bottom: 0;
   }
 
-  @include media-breakpoint-up(md) {
-    &:not(:hover, :focus, :focus-within, :active) .move-to-position {
-      visibility: hidden;
+  .move-to-position {
+    visibility: hidden;
+  }
+
+  &:hover .move-to-position {
+    visibility: visible;
+  }
+
+  @include media-breakpoint-down(sm) {
+    .move-to-position {
+      visibility: visible;
     }
   }
 }
@@ -170,7 +170,9 @@
 }
 
 .board-card-info {
-  @apply gl-whitespace-nowrap;
+  &.board-card-weight:hover {
+    color: initial;
+  }
 
   .board-card-info-icon {
     vertical-align: text-top;

@@ -17,11 +17,6 @@ export default {
     PackagesListRow,
   },
   mixins: [Tracking.mixin()],
-  inject: {
-    isGroupPage: {
-      default: false,
-    },
-  },
   data() {
     return {
       itemToBeDeleted: null,
@@ -32,6 +27,7 @@ export default {
       perPage: (state) => state.pagination.perPage,
       totalItems: (state) => state.pagination.total,
       page: (state) => state.pagination.page,
+      isGroupPage: (state) => state.config.isGroupPage,
       isLoading: 'isLoading',
     }),
     ...mapGetters({ list: 'getList' }),
@@ -71,7 +67,7 @@ export default {
 </script>
 
 <template>
-  <div class="gl-flex gl-flex-col">
+  <div class="gl-display-flex gl-flex-direction-column">
     <slot v-if="isListEmpty && !isLoading" name="empty-state"></slot>
 
     <div v-else-if="isLoading">
@@ -79,23 +75,23 @@ export default {
     </div>
 
     <template v-else>
-      <ul data-testid="packages-table" class="gl-pl-0">
-        <li v-for="packageEntity in list" :key="packageEntity.id" class="gl-list-none">
-          <packages-list-row
-            :package-entity="packageEntity"
-            :package-link="packageEntity._links.web_path"
-            :is-group="isGroupPage"
-            @packageToDelete="setItemToBeDeleted"
-          />
-        </li>
-      </ul>
+      <div data-testid="packages-table">
+        <packages-list-row
+          v-for="packageEntity in list"
+          :key="packageEntity.id"
+          :package-entity="packageEntity"
+          :package-link="packageEntity._links.web_path"
+          :is-group="isGroupPage"
+          @packageToDelete="setItemToBeDeleted"
+        />
+      </div>
 
       <gl-pagination
         v-model="currentPage"
         :per-page="perPage"
         :total-items="totalItems"
         align="center"
-        class="gl-mt-3 gl-w-full"
+        class="gl-w-full gl-mt-3"
       />
 
       <delete-package-modal

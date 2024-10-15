@@ -11,8 +11,6 @@ module Types
 
       present_using ::Ml::ModelPresenter
 
-      markdown_field :description_html, null: true
-
       field :id, ::Types::GlobalIDType[::Ml::Model], null: false, description: 'ID of the model.'
 
       field :name, ::GraphQL::Types::String, null: false, description: 'Name of the model.'

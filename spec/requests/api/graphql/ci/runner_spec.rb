@@ -12,33 +12,46 @@ RSpec.describe 'Query.runner(id)', :freeze_time, feature_category: :fleet_visibi
   let_it_be_with_reload(:group) { create(:group) }
 
   let_it_be(:active_instance_runner) do
-    create(:ci_runner, :instance, :with_runner_manager, :tagged_only, :offline,
+    create(:ci_runner, :instance, :with_runner_manager,
       description: 'Runner 1',
       creator: user,
+      contacted_at: 2.hours.ago,
       active: true,
       locked: true,
       maximum_timeout: 600,
       access_level: 0,
+      tag_list: %w[tag1 tag2],
+      run_untagged: true,
       maintenance_note: '**Test maintenance note**')
   end
 
-  let_it_be(:paused_instance_runner) do
-    create(:ci_runner, :instance, :offline, :paused, :tagged_only,
+  let_it_be(:inactive_instance_runner) do
+    create(:ci_runner, :instance,
       description: 'Runner 2',
       creator: another_admin,
-      access_level: 1)
+      contacted_at: 1.day.ago,
+      active: false,
+      access_level: 1,
+      run_untagged: true)
   end
 
   let_it_be(:active_group_runner) do
-    create(:ci_runner, :group, :offline, :tagged_only, :locked,
+    create(:ci_runner, :group,
       groups: [group],
       description: 'Group runner 1',
+      contacted_at: 2.hours.ago,
+      active: true,
+      locked: true,
       maximum_timeout: 600,
-      access_level: 0)
+      access_level: 0,
+      tag_list: %w[tag1 tag2],
+      run_untagged: true)
   end
 
   let_it_be(:project1) { create(:project) }
-  let_it_be(:active_project_runner) { create(:ci_runner, :project, :with_runner_manager, projects: [project1]) }
+  let_it_be(:active_project_runner) do
+    create(:ci_runner, :project, :with_runner_manager, projects: [project1])
+  end
 
   shared_examples 'runner details fetch' do
     let(:query) do
@@ -70,12 +83,11 @@ RSpec.describe 'Query.runner(id)', :freeze_time, feature_category: :fleet_visibi
         active: runner.active,
         paused: !runner.active,
         status: runner.status.to_s.upcase,
-        job_execution_status: runner.builds.executing.any? ? 'ACTIVE' : 'IDLE',
+        job_execution_status: runner.builds.running.any? ? 'RUNNING' : 'IDLE',
         maximum_timeout: runner.maximum_timeout,
         access_level: runner.access_level.to_s.upcase,
         run_untagged: runner.run_untagged,
         runner_type: runner.instance_type? ? 'INSTANCE_TYPE' : 'PROJECT_TYPE',
-        creation_method: runner.authenticated_user_registration_type? ? 'AUTHENTICATED_USER' : 'REGISTRATION_TOKEN',
         ephemeral_authentication_token: nil,
         maintenance_note: runner.maintenance_note,
         maintenance_note_html:
@@ -109,7 +121,7 @@ RSpec.describe 'Query.runner(id)', :freeze_time, feature_category: :fleet_visibi
               architecture_name: runner_manager.architecture,
               platform_name: runner_manager.platform,
               status: runner_manager.status.to_s.upcase,
-              job_execution_status: runner_manager.builds.executing.any? ? 'ACTIVE' : 'IDLE'
+              job_execution_status: runner_manager.builds.running.any? ? 'RUNNING' : 'IDLE'
             )
           end,
           "pageInfo" => anything
@@ -187,9 +199,9 @@ RSpec.describe 'Query.runner(id)', :freeze_time, feature_category: :fleet_visibi
     context 'with runner managers' do
       let_it_be(:runner) { create(:ci_runner) }
       let_it_be(:runner_manager) do
-        create(:ci_runner_machine, :online,
+        create(:ci_runner_machine,
           runner: runner, ip_address: '127.0.0.1', version: '16.3', revision: 'a', architecture: 'arm', platform: 'osx',
-          executor_type: 'docker')
+          contacted_at: 1.second.ago, executor_type: 'docker')
       end
 
       describe 'managers' do
@@ -198,8 +210,7 @@ RSpec.describe 'Query.runner(id)', :freeze_time, feature_category: :fleet_visibi
         let_it_be(:runner_manager2_2) { create(:ci_runner_machine, runner: runner2) }
 
         context 'when filtering by status' do
-          let!(:offline_runner_manager) { create(:ci_runner_machine, :offline, runner: runner2) }
-
+          let!(:offline_runner_manager) { create(:ci_runner_machine, runner: runner2, contacted_at: 2.hours.ago) }
           let(:query) do
             %(
               query {
@@ -311,9 +322,11 @@ RSpec.describe 'Query.runner(id)', :freeze_time, feature_category: :fleet_visibi
   describe 'for project runner' do
     let_it_be_with_refind(:project_runner) do
       create(
-        :ci_runner, :project, :paused, :offline,
-        projects: [project1],
+        :ci_runner,
+        :project,
         description: 'Runner 3',
+        contacted_at: 1.day.ago,
+        active: false,
         locked: false,
         access_level: 1,
         run_untagged: true
@@ -360,7 +373,7 @@ RSpec.describe 'Query.runner(id)', :freeze_time, feature_category: :fleet_visibi
             runner1: runner(id: "#{active_project_runner.to_global_id}") { id jobCount(statuses: [RUNNING]) }
             runner2: runner(id: "#{active_project_runner.to_global_id}") { id jobCount(statuses: FAILED) }
             runner3: runner(id: "#{active_project_runner.to_global_id}") { id jobCount }
-            runner4: runner(id: "#{paused_instance_runner.to_global_id}") { id jobCount }
+            runner4: runner(id: "#{inactive_instance_runner.to_global_id}") { id jobCount }
           }
         )
       end
@@ -372,7 +385,7 @@ RSpec.describe 'Query.runner(id)', :freeze_time, feature_category: :fleet_visibi
           'runner1' => a_graphql_entity_for(active_project_runner, job_count: 2),
           'runner2' => a_graphql_entity_for(active_project_runner, job_count: 0),
           'runner3' => a_graphql_entity_for(active_project_runner, job_count: 2),
-          'runner4' => a_graphql_entity_for(paused_instance_runner, job_count: 0)
+          'runner4' => a_graphql_entity_for(inactive_instance_runner, job_count: 0)
         )
       end
 
@@ -388,7 +401,7 @@ RSpec.describe 'Query.runner(id)', :freeze_time, feature_category: :fleet_visibi
             'runner1' => a_graphql_entity_for(active_project_runner, job_count: 1),
             'runner2' => a_graphql_entity_for(active_project_runner, job_count: 0),
             'runner3' => a_graphql_entity_for(active_project_runner, job_count: 1),
-            'runner4' => a_graphql_entity_for(paused_instance_runner, job_count: 0)
+            'runner4' => a_graphql_entity_for(inactive_instance_runner, job_count: 0)
           )
         end
       end
@@ -523,14 +536,14 @@ RSpec.describe 'Query.runner(id)', :freeze_time, feature_category: :fleet_visibi
     end
   end
 
-  describe 'for paused runner' do
-    let(:runner) { paused_instance_runner }
+  describe 'for inactive runner' do
+    let(:runner) { inactive_instance_runner }
 
     it_behaves_like 'runner details fetch'
   end
 
-  describe 'for creation method' do
-    context 'when created with registration token' do
+  describe 'for registration type' do
+    context 'when registered with registration token' do
       let(:runner) do
         create(:ci_runner, registration_type: :registration_token)
       end
@@ -538,7 +551,7 @@ RSpec.describe 'Query.runner(id)', :freeze_time, feature_category: :fleet_visibi
       it_behaves_like 'runner details fetch'
     end
 
-    context 'when created by authenticated user' do
+    context 'when registered with authenticated user' do
       let(:runner) do
         create(:ci_runner, registration_type: :authenticated_user)
       end
@@ -596,7 +609,7 @@ RSpec.describe 'Query.runner(id)', :freeze_time, feature_category: :fleet_visibi
       end
     end
 
-    context 'with an instance runner' do
+    context 'with an instance runner', :freeze_time do
       let(:creator) { user }
       let(:runner) { create(:ci_runner, **runner_args) }
 
@@ -608,7 +621,7 @@ RSpec.describe 'Query.runner(id)', :freeze_time, feature_category: :fleet_visibi
 
       context 'when runner ephemeral registration has expired' do
         let(:runner) do
-          create(:ci_runner, created_at: Ci::Runner::REGISTRATION_AVAILABILITY_TIME.ago, **runner_args)
+          create(:ci_runner, created_at: (Ci::Runner::REGISTRATION_AVAILABILITY_TIME + 1.second).ago, **runner_args)
         end
 
         it_behaves_like 'has no register url'
@@ -665,45 +678,53 @@ RSpec.describe 'Query.runner(id)', :freeze_time, feature_category: :fleet_visibi
   end
 
   describe 'for runner with status' do
-    before_all do
-      freeze_time # Freeze time before `let_it_be` runs, so that runner statuses are frozen during execution
+    let_it_be(:stale_runner) do
+      create(
+        :ci_runner,
+        description: 'Stale runner 1',
+        created_at: (3.months + 1.second).ago,
+        contacted_at: (3.months + 1.second).ago
+      )
     end
 
-    after :all do
-      unfreeze_time
+    let_it_be(:never_contacted_instance_runner) do
+      create(:ci_runner, :unregistered, description: 'Missing runner 1', created_at: 1.month.ago)
     end
-
-    let_it_be(:stale_runner) { create(:ci_runner, :stale) }
-    let_it_be(:never_contacted_instance_runner) { create(:ci_runner, :unregistered, :created_within_stale_deadline) }
 
     let(:query) do
       %(
         query {
           staleRunner: runner(id: "#{stale_runner.to_global_id}") { status }
-          pausedRunner: runner(id: "#{paused_instance_runner.to_global_id}") { status }
+          pausedRunner: runner(id: "#{inactive_instance_runner.to_global_id}") { status }
           neverContactedInstanceRunner: runner(id: "#{never_contacted_instance_runner.to_global_id}") { status }
         }
       )
     end
 
-    it 'retrieves status fields with expected values', :aggregate_failures do
+    it 'retrieves status fields with expected values' do
       post_graphql(query, current_user: user)
 
       stale_runner_data = graphql_data_at(:stale_runner)
-      expect(stale_runner_data).to eq({ 'status' => 'STALE' })
+      expect(stale_runner_data).to match a_hash_including(
+        'status' => 'STALE'
+      )
 
       paused_runner_data = graphql_data_at(:paused_runner)
-      expect(paused_runner_data).to eq({ 'status' => 'OFFLINE' })
+      expect(paused_runner_data).to match a_hash_including(
+        'status' => 'OFFLINE'
+      )
 
       never_contacted_instance_runner_data = graphql_data_at(:never_contacted_instance_runner)
-      expect(never_contacted_instance_runner_data).to eq({ 'status' => 'NEVER_CONTACTED' })
+      expect(never_contacted_instance_runner_data).to match a_hash_including(
+        'status' => 'NEVER_CONTACTED'
+      )
     end
   end
 
   describe 'for multiple runners' do
     let_it_be(:project2) { create(:project, :test_repo) }
     let_it_be(:project_runner1) { create(:ci_runner, :project, projects: [project1, project2], description: 'Runner 1') }
-    let_it_be(:project_runner2) { create(:ci_runner, :project, :without_projects, description: 'Runner 2') }
+    let_it_be(:project_runner2) { create(:ci_runner, :project, projects: [], description: 'Runner 2') }
 
     let!(:job) { create(:ci_build, runner: project_runner1) }
 
@@ -841,7 +862,7 @@ RSpec.describe 'Query.runner(id)', :freeze_time, feature_category: :fleet_visibi
     end
   end
 
-  describe 'ephemeralAuthenticationToken' do
+  describe 'ephemeralAuthenticationToken', :freeze_time do
     subject(:request) { post_graphql(query, current_user: user) }
 
     let_it_be(:creator) { create(:user) }
@@ -989,8 +1010,7 @@ RSpec.describe 'Query.runner(id)', :freeze_time, feature_category: :fleet_visibi
     # - createdBy: Known N+1 issues, but only on exotic fields which we don't normally use
     # - ownerProject.pipeline: Needs arguments (iid or sha)
     # - project.productAnalyticsState: Can be requested only for 1 Project(s) at a time.
-    # - project.mergeTrains: Is a licensed feature
-    let(:excluded_fields) { %w[createdBy jobs pipeline productAnalyticsState mergeTrains] }
+    let(:excluded_fields) { %w[createdBy jobs pipeline productAnalyticsState] }
 
     it 'avoids N+1 queries', :use_sql_query_cache do
       discrete_runners_control = ActiveRecord::QueryRecorder.new(skip_cached: false) do
@@ -1161,7 +1181,9 @@ RSpec.describe 'Query.runner(id)', :freeze_time, feature_category: :fleet_visibi
     context 'with project search term' do
       let_it_be(:project1) { create(:project, description: 'abc') }
       let_it_be(:project2) { create(:project, description: 'def') }
-      let_it_be(:project_runner) { create(:ci_runner, :project, projects: [project1, project2]) }
+      let_it_be(:project_runner) do
+        create(:ci_runner, :project, projects: [project1, project2])
+      end
 
       let(:variables) { { id: project_runner.to_global_id.to_s, n: n, project_search_term: search_term } }
 

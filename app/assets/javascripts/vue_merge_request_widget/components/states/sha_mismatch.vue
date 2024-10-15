@@ -24,8 +24,16 @@ export default {
 </script>
 
 <template>
-  <state-container status="failed" is-collapsible>
-    <span class="!gl-ml-0 gl-grow !gl-text-primary md:gl-mr-3" data-testid="head-mismatch-content">
+  <state-container
+    status="failed"
+    is-collapsible
+    :collapsed="mr.mergeDetailsCollapsed"
+    @toggle="() => mr.toggleMergeDetails()"
+  >
+    <span
+      class="gl-md-mr-3 gl-flex-grow-1 gl-ml-0! gl-text-body!"
+      data-testid="head-mismatch-content"
+    >
       <bold-text :message="$options.i18n.I18N_SHA_MISMATCH.warningMessage" />
     </span>
     <template #actions>
@@ -34,7 +42,7 @@ export default {
         size="small"
         category="primary"
         variant="confirm"
-        class="gl-self-start"
+        class="gl-align-self-start"
         :href="mr.mergeRequestDiffsPath"
       >
         {{ $options.i18n.I18N_SHA_MISMATCH.actionButtonLabel }}

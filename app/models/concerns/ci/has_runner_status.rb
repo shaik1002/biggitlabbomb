@@ -18,7 +18,7 @@ module Ci
 
     class_methods do
       def available_statuses
-        self::AVAILABLE_STATUSES_INCL_DEPRECATED
+        self::AVAILABLE_STATUSES
       end
 
       def online_contact_time_deadline

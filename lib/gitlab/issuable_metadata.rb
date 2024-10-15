@@ -50,7 +50,7 @@ module Gitlab
 
     def validate_collection!
       # ActiveRecord uses Object#extend for null relations.
-      if !(issuable_collection.is_a?(ActiveRecord::Relation) && issuable_collection.null_relation?) &&
+      if !(issuable_collection.singleton_class < ActiveRecord::NullRelation) &&
           issuable_collection.respond_to?(:limit_value) &&
           issuable_collection.limit_value.nil?
 
@@ -89,7 +89,7 @@ module Gitlab
     def grouped_issuable_merge_requests_count
       strong_memoize(:grouped_issuable_merge_requests_count) do
         if collection_type == 'Issue'
-          ::MergeRequestsClosingIssues.count_for_collection(issuable_ids, current_user)
+          ::MergeRequestsClosingIssues.closing_count_for_collection(issuable_ids, current_user)
         else
           []
         end

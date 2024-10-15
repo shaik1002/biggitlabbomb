@@ -58,7 +58,7 @@ export default {
         </div>
         <div class="col-4 col-md-3 gl-pl-0">
           <gl-button
-            class="js-error-tracking-connect gl-ml-2 gl-inline-flex"
+            class="js-error-tracking-connect gl-ml-2 d-inline-flex"
             category="secondary"
             variant="default"
             :loading="isLoadingProjects"
@@ -69,7 +69,7 @@ export default {
 
           <gl-icon
             v-show="connectSuccessful"
-            class="js-error-tracking-connect-success align-middle gl-ml-2 gl-text-success"
+            class="js-error-tracking-connect-success gl-ml-2 text-success align-middle"
             :aria-label="__('Projects Successfully Retrieved')"
             name="check"
           />

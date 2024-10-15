@@ -123,11 +123,11 @@ The `gitlab:check` Rake task runs the following Rake tasks:
 - `gitlab:incoming_email:check`
 - `gitlab:ldap:check`
 - `gitlab:app:check`
-- `gitlab:geo:check` (only if you're running [Geo](../geo/replication/troubleshooting/common.md#health-check-rake-task))
 
 It checks that each component was set up according to the installation guide and suggest fixes
 for issues found. This command must be run from your application server and doesn't work correctly on
 component servers like [Gitaly](../gitaly/configure_gitaly.md#run-gitaly-on-its-own-server).
+If you're running Geo, see also the [Geo Health check Rake task](../geo/replication/troubleshooting/common.md#health-check-rake-task).
 
 You may also have a look at our troubleshooting guides for:
 
@@ -336,23 +336,15 @@ sudo gitlab-rake db:migrate:status:geo
 ```
 
 This outputs a table with a `Status` of `up` or `down` for
-each migration. Example:
+each Migration ID.
 
 ```shell
 database: gitlabhq_production
 
- Status   Migration ID    Type     Milestone    Name
+ Status   Migration ID    Migration Name
 --------------------------------------------------
-   up     20240701074848  regular  17.2         AddGroupIdToPackagesDebianGroupComponents
-   up     20240701153843  regular  17.2         AddWorkItemsDatesSourcesSyncToIssuesTrigger
-   up     20240702072515  regular  17.2         AddGroupIdToPackagesDebianGroupArchitectures
-   up     20240702133021  regular  17.2         AddWorkspaceTerminationTimeoutsToRemoteDevelopmentAgentConfigs
-   up     20240604064938  post     17.2         FinalizeBackfillPartitionIdCiPipelineMessage
-   up     20240604111157  post     17.2         AddApprovalPolicyRulesFkOnApprovalGroupRules
+   up     migration_id    migration_name
 ```
-
-Starting with GitLab 17.1, migrations are executed in an
-[order](../../development/database/migration_ordering.md#171-logic) that conforms to the GitLab release cadence.
 
 ## Run incomplete database migrations
 
@@ -373,9 +365,6 @@ status in the output of the `sudo gitlab-rake db:migrate:status` command.
    sudo gitlab-ctl hup puma
    sudo gitlab-ctl restart sidekiq
    ```
-
-Starting with GitLab 17.1, migrations are executed in an
-[order](../../development/database/migration_ordering.md#171-logic) that conforms to the GitLab release cadence.
 
 ## Rebuild database indexes
 
@@ -447,16 +436,16 @@ To determine if there are any differences:
    Select the branch that matches your GitLab version. For example, the file for GitLab 16.2: <https://gitlab.com/gitlab-org/gitlab/-/blob/16-2-stable-ee/db/structure.sql>.
 1. Compare `/tmp/structure.sql` with the `db/structure.sql` file for your version.
 
-## Check the database for schema inconsistencies
+## Import common metrics
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/390719) in GitLab 15.11.
+Sometimes you may need to re-import the common metrics that power the Metrics dashboards.
 
-This Rake task checks the database schema for any inconsistencies and prints them in the terminal.
-This task is a diagnostic tool to be used under the guidance of GitLab Support.
-You should not use the task for routine checks as database inconsistencies might be expected.
+This could be as a result of [updating existing metrics](../../development/prometheus_metrics.md#update-existing-metrics).
+
+To re-import the metrics you can run:
 
 ```shell
-gitlab-rake gitlab:db:schema_checker:run
+sudo gitlab-rake metrics:setup_common_metrics
 ```
 
 ## Troubleshooting

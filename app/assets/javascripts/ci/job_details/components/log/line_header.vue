@@ -75,12 +75,13 @@ export default {
   >
     <gl-icon :name="iconName" class="arrow gl-absolute gl-top-2" />
     <line-number :line-number="line.lineNumber" :path="path" />
-    <span v-if="line.time" class="job-log-time">{{ line.time }}</span>
-    <span class="job-log-line-content">
-      <span v-for="(content, i) in line.content" :key="i" :class="content.style">{{
-        content.text
-      }}</span>
-    </span>
+    <span
+      v-for="(content, i) in line.content"
+      :key="i"
+      class="gl-flex-grow-1 gl-white-space-pre-wrap"
+      :class="content.style"
+      >{{ content.text }}</span
+    >
     <duration-badge v-if="duration && !hideDuration" :duration="duration" />
   </div>
 </template>

@@ -71,11 +71,11 @@ DETAILS:
 
 To create an application for your GitLab instance:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Applications**.
 1. Select **New application**.
 
-When creating application in the **Admin area** , mark it as **trusted**.
+When creating application in the **Admin Area** , mark it as **trusted**.
 The user authorization step is automatically skipped for this application.
 
 ## View all authorized applications
@@ -106,14 +106,13 @@ different actions. See the following table for all available scopes.
 | `profile`          | Grants read-only access to the user's profile data using [OpenID Connect](openid_connect_provider.md). |
 | `email`            | Grants read-only access to the user's primary email address using [OpenID Connect](openid_connect_provider.md). |
 | `create_runner`    | Grants permission to create runners. |
-| `manage_runner`    | Grants permission to manage runners. |
 | `k8s_proxy`        | Grants permission to perform Kubernetes API calls using the agent for Kubernetes. |
 
 At any time you can revoke any access by selecting **Revoke**.
 
 ## Access token expiration
 
-> - Database validation on `expires_in` [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/112765) in GitLab 15.10. If your GitLab instance has any remaining OAuth access tokens without `expires_in` set when you are upgrading to 15.10 or later, the database migration will raise an error. For workaround instructions, see the [GitLab 15.10.0 upgrade documentation](../update/versions/gitlab_15_changes.md#15100).
+> - Database validation on `expires_in` [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/112765) in GitLab 15.10. If your GitLab instance has any remaining OAuth Access Tokens without `expires_in` set when you are upgrading to 15.10 or later, the database migration will raise an error. For workaround instructions, see the [GitLab 15.10.0 upgrade documentation](../update/versions/gitlab_15_changes.md#15100).
 
 WARNING:
 The ability to opt out of expiring access tokens was

@@ -17,13 +17,14 @@ DETAILS:
 > - Paginated merge request discussions [generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/370075) in GitLab 15.8. Feature flag `paginated_mr_discussions` removed.
 
 GitLab encourages communication through comments, threads, and
-[suggesting changes for code](../project/merge_requests/reviews/suggestions.md).
-Comments support [Markdown](../markdown.md) and [quick actions](../project/quick_actions.md).
+[Code Suggestions](../project/merge_requests/reviews/suggestions.md).
 
 Two types of comments are available:
 
 - A standard comment.
-- A comment in a thread, which you can [resolve](../project/merge_requests/index.md#resolve-a-thread).
+- A comment in a thread, which can be [resolved](../project/merge_requests/index.md#resolve-a-thread).
+
+In a comment, you can enter [Markdown](../markdown.md) and use [quick actions](../project/quick_actions.md).
 
 You can [suggest code changes](../project/merge_requests/reviews/suggestions.md) in your commit diff comment,
 which the user can accept through the user interface.
@@ -47,29 +48,31 @@ Each object can have as many as 5,000 comments.
 ## Mentions
 
 You can mention a user or a group (including [subgroups](../group/subgroups/index.md#mention-subgroups)) in your GitLab
-instance with `@username` or `@groupname`. GitLab notifies all mentioned users with to-do items and emails.
+instance with `@username` or `@groupname`. All mentioned users are notified with to-do items and emails.
 Users can change this setting for themselves in the [notification settings](../profile/notifications.md).
 
-You can quickly see which comments involve you, because GitLab highlights
-mentions for yourself (the signed-in user) in a different color.
+You can quickly see which comments involve you, because
+mentions for yourself (the user who is signed in) are highlighted
+in a different color.
 
 ### Mentioning all members
 
 > - [Flag](../../administration/feature_flags.md) named `disable_all_mention` [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/110586) in GitLab 16.1. Disabled by default. [Enabled on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/18442).
 
 FLAG:
-The availability of this feature is controlled by a feature flag.
-For more information, see the history.
+On self-managed GitLab, by default this flag is not enabled. To make it available, an administrator can [enable the feature flag](../../administration/feature_flags.md)
+named `disable_all_mention`.
+On GitLab.com, this flag is enabled.
 
-Avoid mentioning `@all` in comments and descriptions. `@all` mentions more than
-just the participants of the project, issue, or merge request, but all members
-of that project's parent group. All these users receive an email notification
-and a to-do item, and might interpret it as spam.
-
-When you enable this feature flag, typing `@all` in comments and descriptions
-results in plain text instead of mentioning all users.
-When you disable this feature, existing `@all` mentions in the Markdown texts are unchanged,
+When this feature flag is enabled, typing `@all` in comments and descriptions
+results in plain text instead of a mention.
+When you disable this feature, existing `@all` mentions in the Markdown texts are not affected
 and remain as links. Only future `@all` mentions appear as plain text.
+
+Avoid mentioning `@all` in comments and descriptions.
+When you do it, you don't only mention the participants of the project, issue, or merge request,
+but to all members of that project's parent group.
+All these users receive an email notification and a to-do item. It might be interpreted as spam.
 
 Notifications and mentions can be disabled in
 [a group's settings](../group/manage.md#disable-email-notifications).
@@ -77,7 +80,7 @@ Notifications and mentions can be disabled in
 ### Mention a group in an issue or merge request
 
 When you mention a group in a comment, every member of the group gets a to-do item
-added to their to-do list.
+added to their To-do list.
 
 1. On the left sidebar, select **Search or go to** and find your project.
 1. For merge requests, select **Code > Merge requests**, and find your merge request.
@@ -86,13 +89,14 @@ added to their to-do list.
    For example, `@alex`, `@alex-team`, or `@alex-team/marketing`.
 1. Select **Comment**.
 
-GitLab creates a to-do item for all the group and subgroup members.
+A to-do item is created for all the group and subgroup members.
 
-For more information on mentioning subgroups, see [Mention subgroups](../group/subgroups/index.md#mention-subgroups).
+For more information on mentioning subgroups see [Mention subgroups](../group/subgroups/index.md#mention-subgroups).
 
 ## Add a comment to a merge request diff
 
-When you add comments to a merge request diff, these comments persist, even when you:
+You can add comments to a merge request diff. These comments
+persist, even when you:
 
 - Force-push after a rebase.
 - Amend a commit.
@@ -145,7 +149,7 @@ To edit a comment:
 1. Make your edits.
 1. Select **Save changes**.
 
-### Edit a comment to add a mention
+### Editing a comment to add a mention
 
 By default, when you mention a user, GitLab [creates a to-do item](../todos.md#actions-that-create-to-do-items)
 for them, and sends them a [notification email](../profile/notifications.md).
@@ -170,13 +174,11 @@ To lock an issue or merge request:
 1. On the left sidebar, select **Search or go to** and find your project.
 1. For merge requests, select **Code > Merge requests**, and find your merge request.
 1. For issues, select **Plan > Issues**, and find your issue.
-1. In the upper-right corner, select **Merge request actions** or **Issue actions**
-   (**{ellipsis_v}**), then select **Lock discussion**.
+1. In the upper-right corner, select **Merge request actions** or **Issue actions** (**{ellipsis_v}**), then select **Lock discussion**.
 
-GitLab adds a system note to the page details.
+A system note is added to the page details.
 
-You must unlock all locked discussions in closed issues or merge requests before you can
-reopen the issue or merge request.
+If an issue or merge request is closed with a locked discussion, then you cannot reopen it until the discussion is unlocked.
 
 ## Add an internal note
 
@@ -186,14 +188,10 @@ reopen the issue or merge request.
 > - [Changed](https://gitlab.com/gitlab-org/gitlab/-/issues/363045) permissions in GitLab 15.6 to at least the Reporter role. In GitLab 15.5 and earlier, issue or epic authors and assignees could also read and create internal notes.
 > - Internal comments [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/142003) for merge requests in GitLab 16.9.
 
-Use internal notes to protect information added to a _public_ issue, epic, or merge request.
-Internal notes differ from public comments:
-
-- Only project members with least the Reporter role can view the internal note.
-- You can't convert internal notes to regular comments.
-- All replies to internal notes are also internal.
-- Internal notes display an **Internal note** badge and are shown in a different
-  color than public comments:
+When you add an internal note to a _public_ issue, epic, or merge request, only project members
+with least the Reporter role can view the note. Internal notes cannot be converted to regular comments,
+and all replies to internal notes are also internal. Internal notes are shown in a different
+color than public comments, and display an **Internal note** badge:
 
 ![Internal notes](img/add_internal_note_v16_9.png)
 
@@ -203,8 +201,8 @@ Prerequisites:
 
 To add an internal note:
 
-1. On the issue, epic, or merge request, in the **Comment** text box, enter a comment.
-1. Below the comment, select **Make this an internal note**.
+1. On the issue, epic, or merge request, in the **Comment** text box, type a comment.
+1. Below the comment, select the **Make this an internal note** checkbox.
 1. Select **Add internal note**.
 
 You can also mark an entire [issue as confidential](../project/issues/confidential_issues.md),
@@ -265,12 +263,14 @@ Prerequisites:
 
 To create a thread by replying to a comment:
 
-1. In the upper-right corner of the comment, select **Reply to comment** (**{reply}**)
-   to display the reply section.
+1. In the upper-right corner of the comment, select **Reply to comment** (**{reply}**).
+
+   The reply section is displayed.
+
 1. Enter your reply.
 1. Select **Reply** or **Add comment now** (depending on where in the UI you are replying).
 
-GitLab converts the top comment to a thread.
+The top comment is converted to a thread.
 
 ## Create a thread without replying to a comment
 
@@ -290,19 +290,19 @@ To create a thread:
 
 ![Create a thread](img/create_thread_v16_6.png)
 
+A threaded comment is created.
+
 ## Resolve a thread
 
 > - Resolvable threads for issues [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/31114) in GitLab 16.3 [with a flag](../../administration/feature_flags.md) named `resolvable_issue_threads`. Disabled by default.
 > - Resolvable threads for issues [enabled on GitLab.com and self-managed](https://gitlab.com/gitlab-org/gitlab/-/issues/31114) in GitLab 16.4.
 > - Resolvable threads for issues [generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/31114) in GitLab 16.7. Feature flag `resolvable_issue_threads` removed.
-> - Resolvable threads for tasks, objectives, and key results [generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/458818) in GitLab 17.3.
-> - Resolvable threads for epics [introduced](https://gitlab.com/groups/gitlab-org/-/issues/458818) in GitLab 17.5. Your administrator must have [enabled the new look for epics](../group/epics/epic_work_items.md).
 
 You can resolve a thread when you want to finish a conversation.
 
 Prerequisites:
 
-- You must be in an epic, issue, task, objective, key result, or merge request. For epics, your administrator must have [enabled the new look for epics](../group/epics/epic_work_items.md).
+- You must be in an issue or merge request.
 - You must have at least the Developer role or be the author of the issue or merge request.
 
 To resolve a thread:
@@ -312,33 +312,3 @@ To resolve a thread:
    - In the upper-right corner of the original comment, select **Resolve thread** (**{check-circle}**).
    - Below the last reply, in the **Reply** field, select **Resolve thread**.
    - Below the last reply, in the **Reply** field, enter text, select the **Resolve thread** checkbox, and select **Add comment now**.
-
-Additionally, in merge requests, you can [do more with threads](../project/merge_requests/index.md#resolve-a-thread),
-such as move unresolved threads to an issue or prevent merging until all threads are resolved.
-
-## Summarize issue discussions with Duo Chat
-
-DETAILS:
-**Tier:** For a limited time, Ultimate. On October 17, 2024, Ultimate with [GitLab Duo Enterprise](https://about.gitlab.com/gitlab-duo/#pricing).
-**Offering:** GitLab.com, Self-managed, GitLab Dedicated
-
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/10344) in GitLab 16.0 as an [experiment](../../policy/experiment-beta-support.md#experiment).
-> - [Moved](https://gitlab.com/gitlab-org/gitlab/-/issues/454550) to GitLab Duo and promoted to [beta](../../policy/experiment-beta-support.md#beta) in GitLab 17.3 [with a flag](../../administration/feature_flags.md) named `summarize_notes_with_duo`. Disabled by default.
-> - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/162122) in GitLab 17.4.
-
-Generate a summary of discussions on an issue.
-
-Prerequisites:
-
-- You must have permission to view the issue.
-
-To generate a summary of issue discussions:
-
-1. In an issue, scroll to the **Activity** section.
-1. Select **View summary**.
-
-The comments in the issue are summarized in as many as 10 list items.
-You can ask follow up questions based on the response.
-
-**Data usage**: When you use this feature, the text of all comments on the issue are sent to
-the large [language model listed on the GitLab Duo page](../gitlab_duo/index.md#discussion-summary).

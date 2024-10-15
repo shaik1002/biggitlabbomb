@@ -2,6 +2,8 @@
 data_category: optional
 key_path: redis_hll_counters.issues_edit.g_project_management_issue_assignee_changed_weekly
 description: Count of WAU changing issue assignees
+product_section: dev
+product_stage: plan
 product_group: project_management
 value_type: number
 status: active
@@ -19,4 +21,3 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

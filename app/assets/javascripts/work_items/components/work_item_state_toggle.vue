@@ -10,13 +10,13 @@ import {
   STATE_EVENT_CLOSE,
   STATE_EVENT_REOPEN,
   TRACKING_CATEGORY_SHOW,
+  WIDGET_TYPE_LINKED_ITEMS,
   LINKED_CATEGORIES_MAP,
   i18n,
 } from '../constants';
-import { findLinkedItemsWidget } from '../utils';
 import updateWorkItemMutation from '../graphql/update_work_item.mutation.graphql';
+import groupWorkItemByIidQuery from '../graphql/group_work_item_by_iid.query.graphql';
 import workItemByIidQuery from '../graphql/work_item_by_iid.query.graphql';
-import workItemLinkedItemsQuery from '../graphql/work_item_linked_items.query.graphql';
 
 export default {
   components: {
@@ -27,6 +27,7 @@ export default {
     GlLink,
   },
   mixins: [Tracking.mixin()],
+  inject: ['isGroup'],
   props: {
     workItemState: {
       type: String,
@@ -62,13 +63,14 @@ export default {
   data() {
     return {
       updateInProgress: false,
-      blockerItems: [],
+      blockers: [],
     };
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     workItem: {
-      query: workItemByIidQuery,
+      query() {
+        return this.isGroup ? groupWorkItemByIidQuery : workItemByIidQuery;
+      },
       variables() {
         return {
           fullPath: this.fullPath,
@@ -86,31 +88,10 @@ export default {
         this.$emit('error', msg);
         Sentry.captureException(new Error(msg));
       },
-    },
-    blockerItems: {
-      query: workItemLinkedItemsQuery,
-      variables() {
-        return {
-          fullPath: this.fullPath,
-          iid: this.workItemIid,
-        };
-      },
-      skip() {
-        return !this.workItemIid;
-      },
-      update({ workspace }) {
-        if (!workspace?.workItem) return [];
-
-        const linkedWorkItems = findLinkedItemsWidget(workspace.workItem).linkedItems?.nodes || [];
-
-        return linkedWorkItems.filter((item) => {
+      async result() {
+        this.blockers = this.linkedWorkItems.filter((item) => {
           return item.linkType === LINKED_CATEGORIES_MAP.IS_BLOCKED_BY;
         });
-      },
-      error(e) {
-        const msg = e.message || i18n.fetchError;
-        this.$emit('error', msg);
-        Sentry.captureException(new Error(msg));
       },
     },
   },
@@ -144,13 +125,19 @@ export default {
       return sprintfWorkItem(baseText, this.workItemType);
     },
     isBlocked() {
-      return this.blockerItems.length > 0;
+      return this.blockers.length > 0;
     },
     action() {
       if (this.isBlocked && this.isWorkItemOpen) {
         return () => this.$refs.blockedByIssuesModal.show();
       }
       return this.updateWorkItem;
+    },
+    linkedWorkItemsWidget() {
+      return this.workItem?.widgets?.find((widget) => widget.type === WIDGET_TYPE_LINKED_ITEMS);
+    },
+    linkedWorkItems() {
+      return this.linkedWorkItemsWidget?.linkedItems?.nodes || [];
     },
     modalTitle() {
       return sprintfWorkItem(
@@ -206,7 +193,6 @@ export default {
       if (this.hasComment) {
         this.$emit('submit-comment');
       }
-      this.$emit('workItemStateUpdated');
 
       this.updateInProgress = false;
     },
@@ -242,7 +228,7 @@ export default {
     >
       <p>{{ modalBody }}</p>
       <ul>
-        <li v-for="issue in blockerItems" :key="issue.workItem.iid">
+        <li v-for="issue in blockers" :key="issue.workItem.iid">
           <gl-link :href="issue.workItem.webUrl">#{{ issue.workItem.iid }}</gl-link>
         </li>
       </ul>

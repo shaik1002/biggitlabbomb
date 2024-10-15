@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Users
-  class Callout < ApplicationRecord
+  class Callout < MainClusterwide::ApplicationRecord
     include Users::Calloutable
 
     self.table_name = 'user_callouts'
@@ -33,7 +33,7 @@ module Users
       pipeline_needs_hover_tip: 30,
       web_ide_ci_environments_guidance: 31,
       security_configuration_upgrade_banner: 32,
-      # 33 removed in https://gitlab.com/gitlab-org/gitlab/-/merge_requests/159243
+      cloud_licensing_subscription_activation_banner: 33, # EE-only
       trial_status_reminder_d14: 34,             # EE-only
       trial_status_reminder_d3: 35,              # EE-only
       security_configuration_devops_alert: 36,   # EE-only
@@ -60,7 +60,7 @@ module Users
       namespace_storage_limit_alert_alert_threshold: 57, # EE-only
       namespace_storage_limit_alert_error_threshold: 58, # EE-only
       project_quality_summary_feedback: 59, # EE-only
-      # 60 removed in https://gitlab.com/gitlab-org/gitlab/-/merge_requests/154140
+      merge_request_settings_moved_callout: 60,
       new_top_level_group_alert: 61,
       # 62, removed in https://gitlab.com/gitlab-org/gitlab/-/merge_requests/131314
       # 63 and 64 were removed with https://gitlab.com/gitlab-org/gitlab/-/merge_requests/120233
@@ -77,7 +77,7 @@ module Users
       vsd_feedback_banner: 75, # EE-only
       security_policy_protected_branch_modification: 76, # EE-only
       vulnerability_report_grouping: 77, # EE-only
-      # 78 removed in https://gitlab.com/gitlab-org/gitlab/-/merge_requests/161010,
+      new_nav_for_everyone_callout: 78,
       # 79 removed in https://gitlab.com/gitlab-org/gitlab/-/merge_requests/143862
       duo_chat_callout: 80, # EE-only
       # 81 removed in https://gitlab.com/gitlab-org/gitlab/-/merge_requests/146322
@@ -85,16 +85,12 @@ module Users
       joining_a_project_alert: 83, # EE-only
       transition_to_jihu_callout: 84,
       summarize_code_changes: 85, # EE-only
-      # 86 removed in https://gitlab.com/gitlab-org/gitlab/-/merge_requests/152619
+      duo_pro_trial_alert: 86, # EE-only
       deployment_details_feedback: 87,
-      # 88 removed in https://gitlab.com/gitlab-org/gitlab/-/merge_requests/152999
-      # 89 removed in https://gitlab.com/gitlab-org/gitlab/-/merge_requests/152981
+      duo_chat_ga_alert: 88, # EE-only
+      board_add_new_column_trigger_popover: 89,
       deployment_approvals_empty_state: 90,
-      period_in_terraform_state_name_alert: 91,
-      work_item_epic_feedback: 92, # EE-only
-      branch_rules_tip_callout: 93,
-      openssl_callout: 94,
-      duo_free_access_ending_banner: 95 # EE-only
+      period_in_terraform_state_name_alert: 91
     }
 
     validates :feature_name,
@@ -102,6 +98,6 @@ module Users
       uniqueness: { scope: :user_id },
       inclusion: { in: Users::Callout.feature_names.keys }
 
-    scope :with_feature_name, ->(feature_name) { where(feature_name: feature_name) }
+    scope :with_feature_name, -> (feature_name) { where(feature_name: feature_name) }
   end
 end

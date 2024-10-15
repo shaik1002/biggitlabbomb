@@ -13,10 +13,6 @@ RSpec.describe Ml::Candidate, factory_default: :keep, feature_category: :mlops d
     create(:ml_model_versions, model: existing_model, candidate: candidate2)
   end
 
-  let_it_be(:candidate_for_model) do
-    create(:ml_candidates, experiment: existing_model.default_experiment, project: existing_model.project)
-  end
-
   let(:project) { candidate.project }
 
   describe 'associations' do
@@ -108,68 +104,18 @@ RSpec.describe Ml::Candidate, factory_default: :keep, feature_category: :mlops d
         .and change { Ml::CandidateMetric.count }.by(-2)
         .and not_change { Packages::Package.count }
     end
-
-    context 'when candidate is associated to a model version' do
-      let(:candidate_to_destroy) { candidate2 }
-
-      it 'does not destroy the candidate' do
-        expect { candidate_to_destroy.destroy! }.to raise_error(ActiveRecord::ActiveRecordError)
-        expect(candidate_to_destroy.errors.full_messages).to include('Cannot delete a candidate associated ' \
-          'to a model version')
-      end
-    end
   end
 
   describe '.artifact_root' do
-    let(:tested_candidate) { candidate }
-
-    subject { tested_candidate.artifact_root }
+    subject { candidate.artifact_root }
 
     it { is_expected.to eq("/#{candidate.package_name}/#{candidate.iid}/") }
-
-    context 'when candidate belongs to model' do
-      let(:tested_candidate) { candidate_for_model }
-
-      it do
-        is_expected.to eq("/#{existing_model.name}/candidate_#{tested_candidate.iid}/")
-      end
-    end
   end
 
   describe '.package_version' do
-    let(:tested_candidate) { candidate }
-
-    subject { tested_candidate.package_version }
+    subject { candidate.package_version }
 
     it { is_expected.to eq(candidate.iid) }
-
-    context 'when candidate belongs to model' do
-      let(:tested_candidate) { candidate_for_model }
-
-      it { is_expected.to eq("candidate_#{candidate_for_model.iid}") }
-    end
-  end
-
-  describe '.for_model?' do
-    subject { tested_candidate.for_model? }
-
-    context 'when candidate is not for a model experiment' do
-      let(:tested_candidate) { candidate }
-
-      it { is_expected.to eq(false) }
-    end
-
-    context 'when candidate belongs to model version' do
-      let(:tested_candidate) { candidate2 }
-
-      it { is_expected.to eq(false) }
-    end
-
-    context 'when candidate belongs to model but not to model version' do
-      let(:tested_candidate) { candidate_for_model }
-
-      it { is_expected.to eq(true) }
-    end
   end
 
   describe '.eid' do
@@ -306,7 +252,7 @@ RSpec.describe Ml::Candidate, factory_default: :keep, feature_category: :mlops d
     subject { described_class.without_model_version }
 
     it 'finds only candidates without model version' do
-      expect(subject).to match_array([candidate, candidate_for_model])
+      expect(subject).to match_array([candidate])
     end
   end
 

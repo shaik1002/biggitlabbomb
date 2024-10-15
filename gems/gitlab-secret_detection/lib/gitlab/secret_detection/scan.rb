@@ -58,8 +58,6 @@ module Gitlab
       #           it instead groups the blobs into smaller array where each array contains blobs with cumulative size of
       #           +MIN_CHUNK_SIZE_PER_PROC_BYTES+ bytes and each group runs in a separate sub-process. Default value
       #           is true.
-      # +exclusions+:: A hash containing arrays of exclusions by their type. Types handled here are
-      #                `raw_value` and `rule`.
       #
       # NOTE:
       # Running the scan in fork mode primarily focuses on reducing the memory consumption of the scan by
@@ -78,8 +76,7 @@ module Gitlab
         blobs,
         timeout: DEFAULT_SCAN_TIMEOUT_SECS,
         blob_timeout: DEFAULT_BLOB_TIMEOUT_SECS,
-        subprocess: RUN_IN_SUBPROCESS,
-        exclusions: {}
+        subprocess: RUN_IN_SUBPROCESS
       )
         return SecretDetection::Response.new(SecretDetection::Status::INPUT_ERROR) unless validate_scan_input(blobs)
 
@@ -89,9 +86,9 @@ module Gitlab
           next SecretDetection::Response.new(SecretDetection::Status::NOT_FOUND) if matched_blobs.empty?
 
           secrets = if subprocess
-                      run_scan_within_subprocess(matched_blobs, blob_timeout, exclusions)
+                      run_scan_within_subprocess(matched_blobs, blob_timeout)
                     else
-                      run_scan(matched_blobs, blob_timeout, exclusions)
+                      run_scan(matched_blobs, blob_timeout)
                     end
 
           scan_status = overall_scan_status(secrets)
@@ -158,52 +155,50 @@ module Gitlab
         matched_blobs.freeze
       end
 
-      def run_scan(blobs, blob_timeout, exclusions)
-        blobs.flat_map do |blob|
+      def run_scan(blobs, blob_timeout)
+        found_secrets = blobs.flat_map do |blob|
           Timeout.timeout(blob_timeout) do
-            find_secrets(blob, exclusions)
+            find_secrets(blob)
           end
         rescue Timeout::Error => e
           logger.error "Secret Detection scan timed out on the blob(id:#{blob.id}): #{e}"
           SecretDetection::Finding.new(blob.id,
-            SecretDetection::Status::PAYLOAD_TIMEOUT)
+            SecretDetection::Status::BLOB_TIMEOUT)
         end
+
+        found_secrets.freeze
       end
 
-      def run_scan_within_subprocess(blobs, blob_timeout, exclusions)
+      def run_scan_within_subprocess(blobs, blob_timeout)
         blob_sizes = blobs.map(&:size)
         grouped_blob_indicies = group_by_chunk_size(blob_sizes)
 
         grouped_blobs = grouped_blob_indicies.map { |idx_arr| idx_arr.map { |i| blobs[i] } }
 
-        Parallel.flat_map(
+        found_secrets = Parallel.flat_map(
           grouped_blobs,
           in_processes: MAX_PROCS_PER_REQUEST,
           isolation: true # do not reuse sub-processes
         ) do |grouped_blob|
           grouped_blob.flat_map do |blob|
             Timeout.timeout(blob_timeout) do
-              find_secrets(blob, exclusions)
+              find_secrets(blob)
             end
           rescue Timeout::Error => e
             logger.error "Secret Detection scan timed out on the blob(id:#{blob.id}): #{e}"
             SecretDetection::Finding.new(blob.id,
-              SecretDetection::Status::PAYLOAD_TIMEOUT)
+              SecretDetection::Status::BLOB_TIMEOUT)
           end
         end
+
+        found_secrets.freeze
       end
 
       # finds secrets in the given blob with a timeout circuit breaker
-      def find_secrets(blob, exclusions)
+      def find_secrets(blob)
         secrets = []
 
         blob.data.each_line.with_index do |line, index|
-          exclusions[:raw_value]&.each do |exclusion|
-            line.gsub!(exclusion.value, '') # remove excluded raw value from the line.
-          end
-
-          next if line.empty?
-
           patterns = pattern_matcher.match(line, exception: false)
 
           next unless patterns.any?
@@ -211,9 +206,6 @@ module Gitlab
           line_number = index + 1
           patterns.each do |pattern|
             type = rules[pattern]["id"]
-
-            next if exclusions[:rule]&.any? { |exclusion| exclusion.value == type }
-
             description = rules[pattern]["description"]
 
             secrets << SecretDetection::Finding.new(
@@ -246,7 +238,7 @@ module Gitlab
       def overall_scan_status(found_secrets)
         return SecretDetection::Status::NOT_FOUND if found_secrets.empty?
 
-        timed_out_blobs = found_secrets.count { |el| el.status == SecretDetection::Status::PAYLOAD_TIMEOUT }
+        timed_out_blobs = found_secrets.count { |el| el.status == SecretDetection::Status::BLOB_TIMEOUT }
 
         case timed_out_blobs
         when 0

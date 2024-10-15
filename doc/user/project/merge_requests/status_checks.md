@@ -72,18 +72,18 @@ External status checks have the following states:
 If something changes outside of GitLab, you can [set the status of an external status check](../../../api/status_checks.md#set-status-of-an-external-status-check)
 using the API. You don't need to wait for a merge request webhook payload to be sent first.
 
-## View status check services
+## View the status checks on a project
 
-To view a list of status check services added to a project from the merge request settings:
+Within each project's settings, you can see a list of status check services added to the project:
 
 1. On the left sidebar, select **Search or go to** and find your project.
 1. Select **Settings > Merge requests**.
-1. Scroll down to **Status checks**. This list shows the service name, API URL, targeted branch,
-   and HMAC authentication status.
+1. Scroll down to **Status checks**.
 
 ![Status checks list](img/status_checks_list_view_v14_0.png)
 
-You can also view a list of status check services from the [Branch rules](../repository/branches/branch_rules.md#add-a-status-check-service) settings.
+This list shows the service name, API URL, and targeted branch.
+It also provides actions to allow you to create, edit, or remove status checks.
 
 ## Add or update a status check service
 
@@ -103,9 +103,6 @@ next to the status check you want to edit.
 The **Update status check** form is then shown.
 
 ![Status checks update form](img/status_checks_update_form_v14_0.png)
-
-NOTE:
-You cannot see or modify the value of the HMAC shared secret. To change the shared secret, delete and recreate the external status check with a new value for the shared secret.
 
 Changing the values in the form and selecting the **Update status check** button updates the status check.
 
@@ -132,7 +129,7 @@ you can use this field to set this limit.
 
 ![Status checks branch selector](img/status_checks_branches_selector_v14_0.png)
 
-The branches list is populated from the projects [protected branches](../repository/branches/protected.md).
+The branches list is populated from the projects [protected branches](../protected_branches.md).
 
 You can scroll through the list of branches or use the search box
 when there are a lot of branches and the branch you are looking
@@ -141,11 +138,6 @@ for doesn't appear immediately. The search box requires
 
 If you want the status check to be applied to **all** merge requests,
 you can select the **All branches** option.
-
-#### HMAC shared secret
-
-HMAC authentication prevents tampering with requests
-and ensures they come from a legitimate source.
 
 ## Delete a status check service
 

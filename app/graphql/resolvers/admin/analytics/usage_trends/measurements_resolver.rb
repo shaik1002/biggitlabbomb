@@ -15,11 +15,11 @@ module Resolvers
 
           argument :recorded_after, Types::TimeType,
                     required: false,
-                    description: 'Measurement recorded after the date.'
+                    description: 'Measurement recorded after this date.'
 
           argument :recorded_before, Types::TimeType,
                     required: false,
-                    description: 'Measurement recorded before the date.'
+                    description: 'Measurement recorded before this date.'
 
           def resolve(identifier:, recorded_before: nil, recorded_after: nil)
             authorize!

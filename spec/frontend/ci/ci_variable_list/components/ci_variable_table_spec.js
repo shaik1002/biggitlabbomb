@@ -1,7 +1,6 @@
-import { GlAlert, GlBadge, GlKeysetPagination, GlIcon } from '@gitlab/ui';
+import { GlAlert, GlBadge, GlKeysetPagination, GlCard, GlIcon } from '@gitlab/ui';
 import { sprintf } from '~/locale';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
 import CiVariableTable from '~/ci/ci_variable_list/components/ci_variable_table.vue';
 import { EXCEEDS_VARIABLE_LIMIT_TEXT, projectString } from '~/ci/ci_variable_list/constants';
 import { mockInheritedVariables, mockVariables } from '../mocks';
@@ -53,7 +52,7 @@ describe('Ci variable table', () => {
   const findGroupCiCdSettingsLink = (rowIndex) =>
     wrapper.findAllByTestId('ci-variable-table-row-cicd-path').at(rowIndex).attributes('href');
   const findKeysetPagination = () => wrapper.findComponent(GlKeysetPagination);
-  const findCrud = () => wrapper.findComponent(CrudComponent);
+  const findCard = () => wrapper.findComponent(GlCard);
 
   const generateExceedsVariableLimitText = (entity, currentVariableCount, maxVariableLimit) => {
     return sprintf(EXCEEDS_VARIABLE_LIMIT_TEXT, { entity, currentVariableCount, maxVariableLimit });
@@ -62,18 +61,18 @@ describe('Ci variable table', () => {
   describe('card', () => {
     it('displays the correct title', () => {
       createComponent();
-      expect(findCrud().text()).toContain('CI/CD Variables');
+      expect(findCard().text()).toContain('CI/CD Variables');
     });
 
     it('displays the correct icon', () => {
       createComponent();
-      expect(findCrud().findComponent(GlIcon).props('name')).toBe('code');
+      expect(findCard().findComponent(GlIcon).props('name')).toBe('code');
     });
 
     it('displays the number of added CI/CD Variables', () => {
       const variables = [1, 2, 3];
       createComponent({ props: { variables } });
-      expect(findCrud().text()).toContain(String(variables.length));
+      expect(findCard().text()).toContain(String(variables.length));
     });
   });
 
@@ -128,7 +127,6 @@ describe('Ci variable table', () => {
         ${0}     | ${1}           | ${'Expanded'}
         ${1}     | ${0}           | ${'File'}
         ${1}     | ${1}           | ${'Masked'}
-        ${2}     | ${2}           | ${'Hidden'}
       `(
         'displays variable attribute $text for row $rowIndex',
         ({ rowIndex, attributeIndex, text }) => {
@@ -162,8 +160,9 @@ describe('Ci variable table', () => {
       it.each`
         index | text
         ${0}  | ${'Key'}
-        ${1}  | ${'Environments'}
-        ${2}  | ${'Group'}
+        ${1}  | ${'Attributes'}
+        ${2}  | ${'Environments'}
+        ${3}  | ${'Group'}
       `('renders the $text column', ({ index, text }) => {
         expect(findTableColumnText(index)).toEqual(text);
       });
@@ -185,7 +184,7 @@ describe('Ci variable table', () => {
         ${0}     | ${1}           | ${'Masked'}
         ${0}     | ${2}           | ${'Expanded'}
         ${2}     | ${0}           | ${'File'}
-        ${3}     | ${2}           | ${'Hidden'}
+        ${2}     | ${1}           | ${'Protected'}
       `(
         'displays variable attribute $text for row $rowIndex',
         ({ rowIndex, attributeIndex, text }) => {
@@ -265,17 +264,13 @@ describe('Ci variable table', () => {
       });
 
       it('reveals secret values when button is clicked', async () => {
-        expect(findHiddenValues()).toHaveLength(
-          defaultProps.variables.filter((variable) => !variable.hidden).length,
-        );
+        expect(findHiddenValues()).toHaveLength(defaultProps.variables.length);
         expect(findRevealedValues()).toHaveLength(0);
 
         await findRevealButton().trigger('click');
 
         expect(findHiddenValues()).toHaveLength(0);
-        expect(findRevealedValues()).toHaveLength(
-          defaultProps.variables.filter((variable) => !variable.hidden).length,
-        );
+        expect(findRevealedValues()).toHaveLength(defaultProps.variables.length);
       });
 
       it('dispatches `setSelectedVariable` with correct variable to edit', async () => {

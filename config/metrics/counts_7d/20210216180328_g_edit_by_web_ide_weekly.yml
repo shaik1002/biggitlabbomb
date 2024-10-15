@@ -2,7 +2,9 @@
 data_category: optional
 key_path: redis_hll_counters.ide_edit.g_edit_by_web_ide_weekly
 description: Weekly number of users editing using the Web IDE
-product_group: remote_development
+product_section: dev
+product_stage: create
+product_group: ide
 value_type: number
 status: active
 time_frame: 7d
@@ -19,4 +21,3 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

@@ -37,7 +37,7 @@ FactoryBot.define do
 
   factory :wiki_page_meta, class: 'WikiPage::Meta' do
     title { generate(:wiki_page_title) }
-    project { association(:project) unless namespace.present? || container.present? }
+    project { association(:project) }
 
     trait :for_wiki_page do
       transient do

@@ -10,12 +10,27 @@ module Ci
 
         free_resources = resource_group.resources.free.count
 
-        return if free_resources == 0
+        if free_resources == 0
+          if resource_group.waiting_processables.any?
+            # if the resource group is still 'tied up' in other processables,
+            #   and there are more upcoming processables
+            # kick off the worker again for the current resource group
+            respawn_assign_resource_worker(resource_group)
+          end
+
+          return
+        end
 
         enqueue_upcoming_processables(free_resources, resource_group)
       end
 
       private
+
+      def respawn_assign_resource_worker(resource_group)
+        return if Feature.disabled?(:respawn_assign_resource_worker, project, type: :gitlab_com_derisk)
+
+        Ci::ResourceGroups::AssignResourceFromResourceGroupWorker.perform_in(RESPAWN_WAIT_TIME, resource_group.id)
+      end
 
       # rubocop: disable CodeReuse/ActiveRecord
       def enqueue_upcoming_processables(free_resources, resource_group)

@@ -245,14 +245,14 @@ RSpec.describe Projects::MergeRequestsController, feature_category: :code_review
         end
       end
 
-      context 'when has linked file' do
+      context 'when has pinned file' do
         let(:file) { merge_request.merge_request_diff.diffs.diff_files.first }
         let(:file_hash) { file.file_hash }
 
-        it 'adds linked file url' do
-          go(file: file_hash)
+        it 'adds pinned file url' do
+          go(pin: file_hash)
 
-          expect(assigns['linked_file_url']).to eq(
+          expect(assigns['pinned_file_url']).to eq(
             diff_by_file_hash_namespace_project_merge_request_path(
               format: 'json',
               id: merge_request.iid,
@@ -363,9 +363,7 @@ RSpec.describe Projects::MergeRequestsController, feature_category: :code_review
       }
     end
 
-    context 'when the test is flaky', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/450217' do
-      it_behaves_like "issuables list meta-data", :merge_request
-    end
+    it_behaves_like "issuables list meta-data", :merge_request
 
     it_behaves_like 'set sort order from user preference' do
       let(:sorting_param) { 'updated_asc' }
@@ -653,25 +651,83 @@ RSpec.describe Projects::MergeRequestsController, feature_category: :code_review
           create(:ci_empty_pipeline, project: project, sha: merge_request.diff_head_sha, ref: merge_request.source_branch, head_pipeline_of: merge_request)
         end
 
-        def set_auto_merge
+        def merge_when_pipeline_succeeds
           post :merge, params: base_params.merge(sha: merge_request.diff_head_sha, merge_when_pipeline_succeeds: '1')
         end
 
-        it_behaves_like 'api merge with auto merge' do
-          let(:service_class) { AutoMerge::MergeWhenChecksPassService }
-          let(:status) { 'merge_when_checks_pass' }
-          let(:not_current_pipeline_status) { 'merge_when_checks_pass' }
+        it 'returns :merge_when_pipeline_succeeds' do
+          merge_when_pipeline_succeeds
+
+          expect(json_response).to eq('status' => 'merge_when_pipeline_succeeds')
         end
 
-        context 'when merge_when_checks_pass is false' do
+        it 'sets the MR to merge when the pipeline succeeds' do
+          service = double(:merge_when_pipeline_succeeds_service)
+          allow(service).to receive(:available_for?) { true }
+
+          expect(AutoMerge::MergeWhenPipelineSucceedsService)
+            .to receive(:new).with(project, anything, anything)
+            .and_return(service)
+          expect(service).to receive(:execute).with(merge_request)
+
+          merge_when_pipeline_succeeds
+        end
+
+        context 'for logging' do
+          let(:expected_params) { { merge_action_status: 'merge_when_pipeline_succeeds' } }
+          let(:subject_proc) { proc { subject } }
+
+          subject { merge_when_pipeline_succeeds }
+
+          it_behaves_like 'storing arguments in the application context'
+          it_behaves_like 'not executing any extra queries for the application context'
+        end
+
+        context 'when project.only_allow_merge_if_pipeline_succeeds? is true' do
           before do
-            stub_feature_flags(merge_when_checks_pass: false)
+            project.update_column(:only_allow_merge_if_pipeline_succeeds, true)
           end
 
-          it_behaves_like 'api merge with auto merge' do
-            let(:service_class) { AutoMerge::MergeWhenPipelineSucceedsService }
-            let(:status) { 'merge_when_pipeline_succeeds' }
-            let(:not_current_pipeline_status) { 'failed' }
+          context 'and head pipeline is not the current one' do
+            before do
+              head_pipeline.update!(sha: 'not_current_sha')
+            end
+
+            it 'returns :failed' do
+              merge_when_pipeline_succeeds
+
+              expect(json_response).to eq('status' => 'failed')
+            end
+          end
+
+          it 'returns :merge_when_pipeline_succeeds' do
+            merge_when_pipeline_succeeds
+
+            expect(json_response).to eq('status' => 'merge_when_pipeline_succeeds')
+          end
+        end
+
+        context 'when auto merge has not been enabled yet' do
+          it 'calls AutoMergeService#execute' do
+            expect_next_instance_of(AutoMergeService) do |service|
+              expect(service).to receive(:execute).with(merge_request, 'merge_when_pipeline_succeeds')
+            end
+
+            merge_when_pipeline_succeeds
+          end
+        end
+
+        context 'when auto merge has already been enabled' do
+          before do
+            merge_request.update!(auto_merge_enabled: true, merge_user: user)
+          end
+
+          it 'calls AutoMergeService#update' do
+            expect_next_instance_of(AutoMergeService) do |service|
+              expect(service).to receive(:update).with(merge_request)
+            end
+
+            merge_when_pipeline_succeeds
           end
         end
       end

@@ -33,7 +33,7 @@ module Types
           by_pipeline = keys.group_by(&:pipeline)
           include_needs = keys.any? do |k|
             k.requires?(%i[nodes jobs nodes needs]) ||
-              k.requires?(%i[nodes jobs nodes previousStageJobsOrNeeds])
+            k.requires?(%i[nodes jobs nodes previousStageJobsOrNeeds])
           end
 
           by_pipeline.each do |pl, key_group|
@@ -52,7 +52,7 @@ module Types
 
       def jobs
         GraphQL::Pagination::ActiveRecordRelationConnection.new(
-          object.ordered_latest_statuses,
+          object.latest_statuses,
           max_page_size: Gitlab::CurrentSettings.current_application_settings.jobs_per_stage_page_size
         )
       end

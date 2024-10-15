@@ -5,18 +5,15 @@ import { mountExtended, extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { getBinding } from 'helpers/vue_mock_directive';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
 import ContainerProtectionRuleForm from '~/packages_and_registries/settings/project/components/container_protection_rule_form.vue';
 import ContainerProtectionRules from '~/packages_and_registries/settings/project/components/container_protection_rules.vue';
-import SettingsSection from '~/vue_shared/components/settings/settings_section.vue';
+import SettingsBlock from '~/packages_and_registries/shared/components/settings_block.vue';
 import ContainerProtectionRuleQuery from '~/packages_and_registries/settings/project/graphql/queries/get_container_protection_rules.query.graphql';
 import deleteContainerProtectionRuleMutation from '~/packages_and_registries/settings/project/graphql/mutations/delete_container_protection_rule.mutation.graphql';
-import updateContainerProtectionRuleMutation from '~/packages_and_registries/settings/project/graphql/mutations/update_container_registry_protection_rule.mutation.graphql';
 import {
   containerProtectionRulesData,
   containerProtectionRuleQueryPayload,
   deleteContainerProtectionRuleMutationPayload,
-  updateContainerProtectionRuleMutationPayload,
 } from '../mock_data';
 
 Vue.use(VueApollo);
@@ -31,7 +28,7 @@ describe('Container protection rules project settings', () => {
 
   const $toast = { show: jest.fn() };
 
-  const findSettingsBlock = () => wrapper.findComponent(SettingsSection);
+  const findSettingsBlock = () => wrapper.findComponent(SettingsBlock);
   const findTable = () =>
     extendedWrapper(wrapper.findByRole('table', { name: /protected containers/i }));
   const findTableBody = () => extendedWrapper(findTable().findAllByRole('rowgroup').at(1));
@@ -47,8 +44,7 @@ describe('Container protection rules project settings', () => {
   const mountComponent = (mountFn = mountExtended, provide = defaultProvidedValues, config) => {
     wrapper = mountFn(ContainerProtectionRules, {
       stubs: {
-        SettingsSection,
-        CrudComponent,
+        SettingsBlock,
         GlModal: true,
       },
       mocks: {
@@ -68,15 +64,11 @@ describe('Container protection rules project settings', () => {
     deleteContainerProtectionRuleMutationResolver = jest
       .fn()
       .mockResolvedValue(deleteContainerProtectionRuleMutationPayload()),
-    updateContainerProtectionRuleMutationResolver = jest
-      .fn()
-      .mockResolvedValue(updateContainerProtectionRuleMutationPayload()),
     config = {},
   } = {}) => {
     const requestHandlers = [
       [ContainerProtectionRuleQuery, containerProtectionRuleQueryResolver],
       [deleteContainerProtectionRuleMutation, deleteContainerProtectionRuleMutationResolver],
-      [updateContainerProtectionRuleMutation, updateContainerProtectionRuleMutationResolver],
     ];
 
     fakeApollo = createMockApollo(requestHandlers);
@@ -97,10 +89,7 @@ describe('Container protection rules project settings', () => {
   });
 
   describe('table "container protection rules"', () => {
-    const findTableRowCell = (i, j) => extendedWrapper(findTableRow(i).findAllByRole('cell').at(j));
-    const findTableRowCellCombobox = (i, j) => findTableRowCell(i, j).findByRole('combobox');
-    const findTableRowCellComboboxSelectedOption = (i, j) =>
-      findTableRowCellCombobox(i, j).element.selectedOptions.item(0);
+    const findTableRowCell = (i, j) => findTableRow(i).findAllByRole('cell').at(j);
 
     it('renders table with container protection rules', async () => {
       createComponent();
@@ -112,27 +101,10 @@ describe('Container protection rules project settings', () => {
       containerProtectionRuleQueryPayload().data.project.containerRegistryProtectionRules.nodes.forEach(
         (protectionRule, i) => {
           expect(findTableRowCell(i, 0).text()).toBe(protectionRule.repositoryPathPattern);
-          expect(findTableRowCellComboboxSelectedOption(i, 1).text).toBe('Maintainer');
-          expect(findTableRowCellComboboxSelectedOption(i, 2).text).toBe('Maintainer');
+          expect(findTableRowCell(i, 1).text()).toBe('Maintainer');
+          expect(findTableRowCell(i, 2).text()).toBe('Maintainer');
         },
       );
-    });
-
-    it('renders table with container protection rule with blank minimumAccessLevelForDelete', async () => {
-      const containerProtectionRuleQueryResolver = jest.fn().mockResolvedValue(
-        containerProtectionRuleQueryPayload({
-          nodes: [{ ...containerProtectionRulesData[0], minimumAccessLevelForDelete: null }],
-        }),
-      );
-      createComponent({ containerProtectionRuleQueryResolver });
-
-      await waitForPromises();
-
-      expect(findTableRowCell(0, 0).text()).toBe(
-        containerProtectionRulesData[0].repositoryPathPattern,
-      );
-      expect(findTableRowCellComboboxSelectedOption(0, 1).text).toBe('Maintainer');
-      expect(findTableRowCellComboboxSelectedOption(0, 2).text).toBe('Developer (default)');
     });
 
     it('displays table in busy state and shows loading icon inside table', async () => {
@@ -297,160 +269,6 @@ describe('Container protection rules project settings', () => {
       });
     });
 
-    describe.each`
-      comboboxName                         | minimumAccessLevelAttribute
-      ${'Minimum access level for push'}   | ${'minimumAccessLevelForPush'}
-      ${'Minimum access level for delete'} | ${'minimumAccessLevelForDelete'}
-    `(
-      'column "$comboboxName" with selectbox (combobox)',
-      ({ comboboxName, minimumAccessLevelAttribute }) => {
-        const findComboboxInTableRow = (i) =>
-          extendedWrapper(findTableRow(i).findByRole('combobox', { name: comboboxName }));
-        const findAllComboboxesInTableRow = (i) =>
-          extendedWrapper(findTableRow(i).findAllByRole('combobox'));
-
-        it('contains correct access level as options', async () => {
-          createComponent();
-
-          await waitForPromises();
-
-          expect(findComboboxInTableRow(0).isVisible()).toBe(true);
-          expect(findComboboxInTableRow(0).attributes('disabled')).toBeUndefined();
-          expect(findComboboxInTableRow(0).element.value).toBe(
-            containerProtectionRulesData[0][minimumAccessLevelAttribute],
-          );
-
-          const accessLevelOptions = findComboboxInTableRow(0)
-            .findAllComponents('option')
-            .wrappers.map((w) => w.text());
-
-          expect(accessLevelOptions).toEqual([
-            'Developer (default)',
-            'Maintainer',
-            'Owner',
-            'Admin',
-          ]);
-        });
-
-        describe('when value changes', () => {
-          const accessLevelValueOwner = 'OWNER';
-          const accessLevelValueMaintainer = 'MAINTAINER';
-
-          it('only changes the value of the selectbox in the same row', async () => {
-            createComponent();
-
-            await waitForPromises();
-
-            expect(findComboboxInTableRow(0).props('value')).toBe(accessLevelValueMaintainer);
-            expect(findComboboxInTableRow(1).props('value')).toBe(accessLevelValueMaintainer);
-
-            await findComboboxInTableRow(0).setValue(accessLevelValueOwner);
-
-            expect(findComboboxInTableRow(0).props('value')).toBe(accessLevelValueOwner);
-            expect(findComboboxInTableRow(1).props('value')).toBe(accessLevelValueMaintainer);
-          });
-
-          it('sends graphql mutation', async () => {
-            const updateContainerProtectionRuleMutationResolver = jest
-              .fn()
-              .mockResolvedValue(updateContainerProtectionRuleMutationPayload());
-
-            createComponent({ updateContainerProtectionRuleMutationResolver });
-
-            await waitForPromises();
-
-            await findComboboxInTableRow(0).setValue(accessLevelValueOwner);
-
-            expect(updateContainerProtectionRuleMutationResolver).toHaveBeenCalledTimes(1);
-            expect(updateContainerProtectionRuleMutationResolver).toHaveBeenCalledWith({
-              input: {
-                id: containerProtectionRulesData[0].id,
-                [minimumAccessLevelAttribute]: accessLevelValueOwner,
-              },
-            });
-          });
-
-          it('disables all fields in relevant row when graphql mutation is in progress', async () => {
-            createComponent();
-
-            await waitForPromises();
-
-            await findComboboxInTableRow(0).setValue(accessLevelValueOwner);
-
-            findAllComboboxesInTableRow(0).wrappers.forEach((combobox) =>
-              expect(combobox.props('disabled')).toBe(true),
-            );
-            expect(findTableRowButtonDelete(0).props('disabled')).toBe(true);
-            findAllComboboxesInTableRow(1).wrappers.forEach((combobox) =>
-              expect(combobox.props('disabled')).toBe(false),
-            );
-            expect(findTableRowButtonDelete(1).props('disabled')).toBe(false);
-
-            await waitForPromises();
-
-            findAllComboboxesInTableRow(0).wrappers.forEach((combobox) =>
-              expect(combobox.props('disabled')).toBe(false),
-            );
-            expect(findTableRowButtonDelete(0).props('disabled')).toBe(false);
-            findAllComboboxesInTableRow(1).wrappers.forEach((combobox) =>
-              expect(combobox.props('disabled')).toBe(false),
-            );
-            expect(findTableRowButtonDelete(1).props('disabled')).toBe(false);
-          });
-
-          it('handles erroneous graphql mutation', async () => {
-            const updateContainerProtectionRuleMutationResolver = jest
-              .fn()
-              .mockRejectedValue(new Error('error'));
-
-            createComponent({ updateContainerProtectionRuleMutationResolver });
-
-            await waitForPromises();
-
-            await findComboboxInTableRow(0).setValue(accessLevelValueOwner);
-
-            await waitForPromises();
-
-            expect(findAlert().isVisible()).toBe(true);
-            expect(findAlert().text()).toBe('error');
-          });
-
-          it('handles graphql mutation with error response', async () => {
-            const serverErrorMessage = 'Server error message';
-            const updateContainerProtectionRuleMutationResolver = jest.fn().mockResolvedValue(
-              updateContainerProtectionRuleMutationPayload({
-                containerRegistryProtectionRule: null,
-                errors: [serverErrorMessage],
-              }),
-            );
-
-            createComponent({ updateContainerProtectionRuleMutationResolver });
-
-            await waitForPromises();
-
-            await findComboboxInTableRow(0).setValue(accessLevelValueOwner);
-
-            await waitForPromises();
-
-            expect(findAlert().isVisible()).toBe(true);
-            expect(findAlert().text()).toBe(serverErrorMessage);
-          });
-
-          it('shows a toast with success message', async () => {
-            createComponent();
-
-            await waitForPromises();
-
-            await findComboboxInTableRow(0).setValue(accessLevelValueOwner);
-
-            await waitForPromises();
-
-            expect($toast.show).toHaveBeenCalledWith('Container protection rule updated.');
-          });
-        });
-      },
-    );
-
     describe('column "rowActions"', () => {
       describe('button "Delete"', () => {
         it('exists in table', async () => {
@@ -599,7 +417,7 @@ describe('Container protection rules project settings', () => {
 
         await waitForPromises();
 
-        expect($toast.show).toHaveBeenCalledWith('Container protection rule deleted.');
+        expect($toast.show).toHaveBeenCalledWith('Protection rule deleted.');
       });
     });
   });
@@ -635,8 +453,8 @@ describe('Container protection rules project settings', () => {
         expect(findAddProtectionRuleForm().isVisible()).toBe(true);
       });
 
-      it('hides the button "add protection rule"', () => {
-        expect(findAddProtectionRuleFormSubmitButton().exists()).toBe(false);
+      it('disables the button "add protection rule"', () => {
+        expect(findAddProtectionRuleFormSubmitButton().attributes('disabled')).toBeDefined();
       });
     });
   });

@@ -28,7 +28,7 @@ GET /projects/:id/jobs
 
 | Attribute | Type                           | Required | Description |
 |-----------|--------------------------------|----------|-------------|
-| `id`      | integer/string                 | Yes      | ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`      | integer/string                 | Yes      | ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `scope`   | string **or** array of strings | No       | Scope of jobs to show. Either one of or an array of the following: `created`, `pending`, `running`, `failed`, `success`, `canceled`, `skipped`, `waiting_for_resource`, or `manual`. All jobs are returned if `scope` is not provided. |
 
 ```shell
@@ -82,30 +82,7 @@ Example of response
       "status": "pending"
     },
     "ref": "main",
-    "runner": {
-      "id": 32,
-      "description": "",
-      "ip_address": null,
-      "active": true,
-      "paused": false,
-      "is_shared": true,
-      "runner_type": "instance_type",
-      "name": null,
-      "online": false,
-      "status": "offline"
-    },
-    "runner_manager": {
-      "id": 1,
-      "system_id": "s_89e5e9956577",
-      "version": "16.11.1",
-      "revision": "535ced5f",
-      "platform": "linux",
-      "architecture": "amd64",
-      "created_at": "2024-05-01T10:12:02.507Z",
-      "contacted_at": "2024-05-07T06:30:09.355Z",
-      "ip_address": "127.0.0.1",
-      "status": "offline"
-    },
+    "runner": null,
     "stage": "test",
     "status": "failed",
     "failure_reason": "script_failure",
@@ -167,7 +144,6 @@ Example of response
     "ref": "main",
     "artifacts": [],
     "runner": null,
-    "runner_manager": null,
     "stage": "test",
     "status": "failed",
     "failure_reason": "stuck_or_timeout_failure",
@@ -215,7 +191,7 @@ GET /projects/:id/pipelines/:pipeline_id/jobs
 
 | Attribute         | Type                           | Required | Description |
 |-------------------|--------------------------------|----------|-------------|
-| `id`              | integer/string                 | Yes      | ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`              | integer/string                 | Yes      | ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `pipeline_id`     | integer                        | Yes      | ID of a pipeline. Can also be obtained in CI jobs via the [predefined CI variable](../ci/variables/predefined_variables.md) `CI_PIPELINE_ID`. |
 | `include_retried` | boolean                        | No       | Include retried jobs in the response. Defaults to `false`. |
 | `scope`           | string **or** array of strings | No       | Scope of jobs to show. Either one of or an array of the following: `created`, `pending`, `running`, `failed`, `success`, `canceled`, `skipped`, `waiting_for_resource`, or `manual`. All jobs are returned if `scope` is not provided. |
@@ -262,29 +238,7 @@ Example of response
     },
     "ref": "main",
     "artifacts": [],
-    "runner": {
-      "id": 32,
-      "description": "",
-      "ip_address": null,
-      "active": true,
-      "paused": false,
-      "is_shared": true,
-      "runner_type": "instance_type",
-      "name": null,
-      "online": false,
-      "status": "offline"
-    },
-    "runner_manager": {
-      "id": 1,
-      "system_id": "s_89e5e9956577",
-      "version": "16.11.1",
-      "revision": "535ced5f",
-      "platform": "linux",
-      "architecture": "amd64",
-      "created_at": "2024-05-01T10:12:02.507Z",
-      "contacted_at": "2024-05-07T06:30:09.355Z",
-      "ip_address": "127.0.0.1",
-    },
+    "runner": null,
     "stage": "test",
     "status": "failed",
     "failure_reason": "stuck_or_timeout_failure",
@@ -355,7 +309,6 @@ Example of response
     },
     "ref": "main",
     "runner": null,
-    "runner_manager": null,
     "stage": "test",
     "status": "failed",
     "failure_reason": "script_failure",
@@ -395,7 +348,7 @@ GET /projects/:id/pipelines/:pipeline_id/bridges
 
 | Attribute     | Type                           | Required | Description |
 |---------------|--------------------------------|----------|-------------|
-| `id`          | integer/string                 | Yes      | ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`          | integer/string                 | Yes      | ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `pipeline_id` | integer                        | Yes      | ID of a pipeline. |
 | `scope`       | string **or** array of strings | No       | Scope of jobs to show. Either one of or an array of the following: `created`, `pending`, `running`, `failed`, `success`, `canceled`, `skipped`, `waiting_for_resource`, or `manual`. All jobs are returned if `scope` is not provided. |
 
@@ -527,7 +480,6 @@ Example of response
   "ref": "main",
   "artifacts": [],
   "runner": null,
-  "runner_manager": null,
   "stage": "test",
   "status": "failed",
   "failure_reason": "script_failure",
@@ -641,7 +593,7 @@ GET /projects/:id/jobs/:job_id
 
 | Attribute | Type           | Required | Description |
 |-----------|----------------|----------|-------------|
-| `id`      | integer/string | Yes      | ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`      | integer/string | Yes      | ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `job_id`  | integer        | Yes      | ID of a job. |
 
 ```shell
@@ -686,7 +638,6 @@ Example of response
   "ref": "main",
   "artifacts": [],
   "runner": null,
-  "runner_manager": null,
   "stage": "test",
   "status": "failed",
   "tag": false,
@@ -724,7 +675,7 @@ GET /projects/:id/jobs/:job_id/trace
 
 | Attribute | Type           | Required | Description |
 |-----------|----------------|----------|-------------|
-| `id`      | integer/string | Yes      | ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`      | integer/string | Yes      | ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `job_id`  | integer        | Yes      | ID of a job. |
 
 ```shell
@@ -748,7 +699,7 @@ POST /projects/:id/jobs/:job_id/cancel
 
 | Attribute | Type           | Required | Description |
 |-----------|----------------|----------|-------------|
-| `id`      | integer/string | Yes      | ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`      | integer/string | Yes      | ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `job_id`  | integer        | Yes      | ID of a job. |
 
 ```shell
@@ -782,7 +733,6 @@ Example of response
   "ref": "main",
   "artifacts": [],
   "runner": null,
-  "runner_manager": null,
   "stage": "test",
   "status": "canceled",
   "tag": false,
@@ -804,7 +754,7 @@ POST /projects/:id/jobs/:job_id/retry
 
 | Attribute | Type           | Required | Description |
 |-----------|----------------|----------|-------------|
-| `id`      | integer/string | Yes      | ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`      | integer/string | Yes      | ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `job_id`  | integer        | Yes      | ID of a job. |
 
 ```shell
@@ -838,7 +788,6 @@ Example of response
   "ref": "main",
   "artifacts": [],
   "runner": null,
-  "runner_manager": null,
   "stage": "test",
   "status": "pending",
   "tag": false,
@@ -865,7 +814,7 @@ Parameters
 
 | Attribute | Type           | Required | Description |
 |-----------|----------------|----------|-------------|
-| `id`      | integer/string | Yes      | ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`      | integer/string | Yes      | ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `job_id`  | integer        | Yes      | ID of a job. |
 
 Example of request
@@ -896,7 +845,6 @@ Example of response
   "ref": "main",
   "artifacts": [],
   "runner": null,
-  "runner_manager": null,
   "stage": "test",
   "created_at": "2016-01-11T10:13:33.506Z",
   "started_at": "2016-01-11T10:13:33.506Z",
@@ -916,7 +864,7 @@ Example of response
 
 NOTE:
 You can't delete archived jobs with the API, but you can
-[delete job artifacts and logs from jobs completed before a specific date](../administration/cicd/job_artifacts_troubleshooting.md#delete-old-builds-and-artifacts)
+[delete job artifacts and logs from jobs completed before a specific date](../administration/job_artifacts_troubleshooting.md#delete-old-builds-and-artifacts)
 
 ## Run a job
 
@@ -928,7 +876,7 @@ POST /projects/:id/jobs/:job_id/play
 
 | Attribute                  | Type            | Required | Description |
 |----------------------------|-----------------|----------|-------------|
-| `id`                       | integer/string  | Yes      | ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                       | integer/string  | Yes      | ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `job_id`                   | integer         | Yes      | ID of a job. |
 | `job_variables_attributes` | array of hashes | No       | An array containing the custom variables available to the job. |
 
@@ -985,7 +933,6 @@ Example response:
   "ref": "main",
   "artifacts": [],
   "runner": null,
-  "runner_manager": null,
   "stage": "test",
   "status": "pending",
   "tag": false,

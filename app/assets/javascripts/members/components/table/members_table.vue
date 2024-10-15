@@ -1,8 +1,7 @@
 <script>
-import { GlTable, GlBadge, GlButton } from '@gitlab/ui';
+import { GlTable, GlBadge } from '@gitlab/ui';
 // eslint-disable-next-line no-restricted-imports
 import { mapState } from 'vuex';
-import EmptyResult from '~/vue_shared/components/empty_result.vue';
 import MembersTableCell from 'ee_else_ce/members/components/table/members_table_cell.vue';
 import {
   canDisableTwoFactor,
@@ -13,7 +12,6 @@ import {
   canResend,
   canUpdate,
 } from 'ee_else_ce/members/utils';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import {
   FIELD_KEY_ACTIONS,
   FIELDS,
@@ -22,7 +20,6 @@ import {
   USER_STATE_BLOCKED,
   BADGE_LABELS_AWAITING_SIGNUP,
   BADGE_LABELS_PENDING,
-  TAB_QUERY_PARAM_VALUES,
 } from '../../constants';
 import RemoveGroupLinkModal from '../modals/remove_group_link_modal.vue';
 import RemoveMemberModal from '../modals/remove_member_modal.vue';
@@ -34,14 +31,12 @@ import MemberSource from './member_source.vue';
 import MemberActivity from './member_activity.vue';
 import MaxRole from './max_role.vue';
 import MembersPagination from './members_pagination.vue';
-import RoleDetailsDrawer from './drawer/role_details_drawer.vue';
 
 export default {
+  name: 'MembersTable',
   components: {
     GlTable,
     GlBadge,
-    GlButton,
-    EmptyResult,
     MemberAvatar,
     CreatedAt,
     MembersTableCell,
@@ -53,16 +48,11 @@ export default {
     ExpirationDatepicker,
     MemberActivity,
     MembersPagination,
-    RoleDetailsDrawer,
     DisableTwoFactorModal: () =>
       import('ee_component/members/components/modals/disable_two_factor_modal.vue'),
     LdapOverrideConfirmationModal: () =>
       import('ee_component/members/components/modals/ldap_override_confirmation_modal.vue'),
-    UserLimitReachedAlert: () =>
-      import('ee_component/members/components/table/user_limit_reached_alert.vue'),
-    RoleBadges: () => import('ee_component/members/components/table/role_badges.vue'),
   },
-  mixins: [glFeatureFlagsMixin()],
   inject: ['namespace', 'currentUserId', 'canManageMembers'],
   props: {
     tabQueryParamValue: {
@@ -71,21 +61,10 @@ export default {
       default: '',
     },
   },
-  data() {
-    return {
-      selectedMember: null,
-      isRoleDrawerBusy: false,
-    };
-  },
   computed: {
     ...mapState({
       members(state) {
-        return state[this.namespace].members.map((member) => ({
-          ...member,
-          memberPath: state[this.namespace].memberPath.replace(':id', member.id),
-          ldapOverridePath: state[this.namespace].ldapOverridePath?.replace(':id', member.id),
-          namespace: this.namespace,
-        }));
+        return state[this.namespace].members;
       },
       tableFields(state) {
         return state[this.namespace].tableFields;
@@ -104,9 +83,6 @@ export default {
     },
     userIsLoggedIn() {
       return this.currentUserId !== null;
-    },
-    onAccessRequestTab() {
-      return this.tabQueryParamValue === TAB_QUERY_PARAM_VALUES.accessRequest;
     },
   },
   methods: {
@@ -149,7 +125,7 @@ export default {
         return ['col-actions', '!gl-align-middle'];
       }
 
-      return ['col-actions', '!gl-hidden', 'lg:!gl-table-cell', '!gl-align-middle'];
+      return ['col-actions', 'gl-display-none!', 'gl-lg-display-table-cell!', '!gl-align-middle'];
     },
     tbodyTrAttr(member) {
       return {
@@ -238,9 +214,7 @@ export default {
 
 <template>
   <div>
-    <user-limit-reached-alert v-if="onAccessRequestTab" />
     <gl-table
-      v-if="members.length > 0"
       v-bind="tableAttrs.table"
       class="members-table"
       data-testid="members-table"
@@ -248,8 +222,13 @@ export default {
       :fields="filteredAndModifiedFields"
       :items="members"
       primary-key="id"
+      :empty-text="__('No members found')"
+      show-empty
       :tbody-tr-attr="tbodyTrAttr"
     >
+      <template #head()="{ label }">
+        {{ label }}
+      </template>
       <template #cell(account)="{ item: member }">
         <members-table-cell #default="{ memberType, isCurrentUser }" :member="member">
           <member-avatar
@@ -261,7 +240,14 @@ export default {
       </template>
 
       <template #cell(source)="{ item: member }">
-        <member-source :member="member" />
+        <members-table-cell #default="{ isDirectMember }" :member="member">
+          <member-source
+            :is-direct-member="isDirectMember"
+            :member-source="member.source"
+            :created-by="member.createdBy"
+            :is-shared-with-group-private="member.isSharedWithGroupPrivate"
+          />
+        </members-table-cell>
       </template>
 
       <template #cell(granted)="{ item: { createdAt, createdBy } }">
@@ -270,7 +256,7 @@ export default {
 
       <template #cell(invited)="{ item: { createdAt, createdBy, invite, state } }">
         <div
-          class="gl-flex gl-flex-wrap gl-items-center gl-justify-end gl-gap-3 lg:gl-justify-start"
+          class="gl-display-flex gl-align-items-center gl-justify-content-end gl-lg-justify-content-start gl-flex-wrap gl-gap-3"
         >
           <created-at :date="createdAt" :created-by="createdBy" />
           <gl-badge v-if="inviteBadge(invite, state)" data-testid="invited-badge"
@@ -284,19 +270,8 @@ export default {
       </template>
 
       <template #cell(maxRole)="{ item: member }">
-        <members-table-cell #default="{ permissions }" :member="member" data-testid="max-role">
-          <div v-if="glFeatures.showRoleDetailsInDrawer">
-            <gl-button
-              variant="link"
-              :disabled="isRoleDrawerBusy"
-              class="gl-block"
-              @click="selectedMember = member"
-            >
-              {{ member.accessLevel.stringValue }}
-            </gl-button>
-            <role-badges :member="member" :role="member.accessLevel" class="gl-mt-3" />
-          </div>
-          <max-role v-else :permissions="permissions" :member="member" />
+        <members-table-cell #default="{ permissions }" :member="member">
+          <max-role :permissions="permissions" :member="member" />
         </members-table-cell>
       </template>
 
@@ -325,18 +300,10 @@ export default {
         <span data-testid="col-actions" class="gl-sr-only">{{ label }}</span>
       </template>
     </gl-table>
-    <empty-result v-else />
     <members-pagination :pagination="pagination" :tab-query-param-value="tabQueryParamValue" />
     <disable-two-factor-modal />
     <remove-group-link-modal />
     <remove-member-modal />
     <ldap-override-confirmation-modal />
-
-    <role-details-drawer
-      v-if="glFeatures.showRoleDetailsInDrawer"
-      :member="selectedMember"
-      @busy="isRoleDrawerBusy = $event"
-      @close="selectedMember = null"
-    />
   </div>
 </template>

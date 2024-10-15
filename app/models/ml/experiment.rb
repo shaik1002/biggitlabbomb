@@ -30,19 +30,13 @@ module Ml
     before_destroy :stop_destroy
 
     def package_name
-      return model.name if for_model?
-
       "#{PACKAGE_PREFIX}#{iid}"
-    end
-
-    def for_model?
-      model.present?
     end
 
     def stop_destroy
       return unless model_id
 
-      errors.add(:base, "Cannot delete an experiment associated to a model")
+      errors[:base] << "Cannot delete an experiment associated to a model"
       # According to docs, throw is the correct way to stop on a callback
       # https://api.rubyonrails.org/classes/ActiveRecord/Callbacks.html#module-ActiveRecord::Callbacks-label-Canceling+callbacks
       throw :abort # rubocop:disable Cop/BanCatchThrow

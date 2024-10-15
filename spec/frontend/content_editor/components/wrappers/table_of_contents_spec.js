@@ -1,4 +1,3 @@
-import { builders } from 'prosemirror-test-builder';
 import { nextTick } from 'vue';
 import { NodeViewWrapper } from '@tiptap/vue-2';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
@@ -7,7 +6,7 @@ import eventHubFactory from '~/helpers/event_hub_factory';
 import Heading from '~/content_editor/extensions/heading';
 import Diagram from '~/content_editor/extensions/diagram';
 import TableOfContentsWrapper from '~/content_editor/components/wrappers/table_of_contents.vue';
-import { createTestEditor, emitEditorEvent } from '../../test_utils';
+import { createTestEditor, createDocBuilder, emitEditorEvent } from '../../test_utils';
 
 describe('content/components/wrappers/table_of_contents', () => {
   let wrapper;
@@ -44,7 +43,14 @@ describe('content/components/wrappers/table_of_contents', () => {
     buildEditor();
     createWrapper();
 
-    const { heading, doc } = builders(tiptapEditor.schema);
+    const {
+      builders: { heading, doc },
+    } = createDocBuilder({
+      tiptapEditor,
+      names: {
+        heading: { nodeType: Heading.name },
+      },
+    });
 
     const initialDoc = doc(
       heading({ level: 1 }, 'Heading 1'),

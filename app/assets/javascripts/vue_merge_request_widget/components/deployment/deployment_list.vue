@@ -41,10 +41,10 @@ export default {
 <template>
   <mr-collapsible-extension v-if="showCollapsedDeployments" :title="__('View all environments.')">
     <template #header>
-      <div class="gl-mr-3 gl-leading-normal">
+      <div class="gl-mr-3 gl-line-height-normal">
         <gl-sprintf :message="multipleDeploymentsTitle">
           <template #deployments>
-            <span class="gl-mr-2 gl-font-bold">{{ deployments.length }}</span>
+            <span class="gl-font-weight-bold gl-mr-2">{{ deployments.length }}</span>
           </template>
         </gl-sprintf>
       </div>

@@ -43,28 +43,6 @@ RSpec.describe NamespaceSettings::AssignAttributesService, feature_category: :gr
           .to change { group.namespace_settings.default_branch_name }
                 .from(nil).to(example_branch_name)
       end
-
-      context 'when default branch name is invalid' do
-        let(:settings) { { default_branch_name: '****' } }
-
-        it "does not update the default branch" do
-          expect { service.execute }.not_to change { group.namespace_settings.default_branch_name }
-
-          expect(group.namespace_settings.errors[:default_branch_name]).to include('is invalid.')
-        end
-      end
-
-      context 'when default branch name is changed to empty' do
-        before do
-          group.namespace_settings.update!(default_branch_name: 'main')
-        end
-
-        let(:settings) { { default_branch_name: '' } }
-
-        it 'updates the default branch' do
-          expect { service.execute }.to change { group.namespace_settings.default_branch_name }.from('main').to('')
-        end
-      end
     end
 
     context 'when default_branch_protection is updated' do
@@ -164,58 +142,6 @@ RSpec.describe NamespaceSettings::AssignAttributesService, feature_category: :gr
       end
     end
 
-    context 'when early_access_program_joined_by_id is updated' do
-      let(:is_participating) { false }
-      let!(:namespace_settings) do
-        group.namespace_settings.update!(early_access_program_participant: is_participating)
-        group.namespace_settings
-      end
-
-      context 'with true' do
-        let(:settings) { { early_access_program_participant: true } }
-
-        context 'with previously unset' do
-          it 'sets early_access_program_joined_by' do
-            expect { service.execute }
-              .to change { namespace_settings.early_access_program_participant }.from(false).to(true)
-              .and change { namespace_settings.early_access_program_joined_by_id }.from(nil).to(user.id)
-          end
-        end
-
-        context 'with previously true' do
-          let(:is_participating) { true }
-
-          it "doesn't change early_access_program_joined_by" do
-            expect { service.execute }
-              .to not_change { namespace_settings.early_access_program_participant }
-              .and not_change { namespace_settings.early_access_program_joined_by_id }
-          end
-        end
-      end
-
-      context 'with false' do
-        let(:settings) { { early_access_program_participant: false } }
-
-        context 'with previously unset' do
-          it "doesn't change early_access_program_joined_by" do
-            expect { service.execute }
-              .to not_change { namespace_settings.early_access_program_participant }
-              .and not_change { namespace_settings.early_access_program_joined_by_id }
-          end
-        end
-
-        context 'with previously true' do
-          let(:is_participating) { true }
-
-          it "doesn't change early_access_program_joined_by" do
-            expect { service.execute }
-              .to change { namespace_settings.early_access_program_participant }.from(true).to(false)
-              .and not_change { namespace_settings.early_access_program_joined_by_id }
-          end
-        end
-      end
-    end
-
     context "updating :resource_access_token_creation_allowed" do
       let(:settings) { { resource_access_token_creation_allowed: false } }
 
@@ -253,7 +179,6 @@ RSpec.describe NamespaceSettings::AssignAttributesService, feature_category: :gr
       where(:setting_key, :setting_changes_from, :setting_changes_to) do
         :prevent_sharing_groups_outside_hierarchy | false | true
         :new_user_signups_cap | nil | 100
-        :seat_control | 'off' | 'user_cap'
         :enabled_git_access_protocol | 'all' | 'ssh'
       end
 

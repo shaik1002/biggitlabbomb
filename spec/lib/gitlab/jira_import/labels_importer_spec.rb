@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::JiraImport::LabelsImporter, :clean_gitlab_redis_shared_state do
+RSpec.describe Gitlab::JiraImport::LabelsImporter do
   include JiraIntegrationHelpers
 
   let_it_be(:user) { create(:user) }
@@ -18,7 +18,7 @@ RSpec.describe Gitlab::JiraImport::LabelsImporter, :clean_gitlab_redis_shared_st
     stub_const('Gitlab::JiraImport::LabelsImporter::MAX_LABELS', 2)
   end
 
-  describe '#execute' do
+  describe '#execute', :clean_gitlab_redis_cache do
     before do
       stub_jira_integration_test
     end

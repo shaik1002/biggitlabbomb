@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe WorkItems::ParentLinks::ReorderService, feature_category: :portfolio_management do
   describe '#execute' do
+    let_it_be(:reporter) { create(:user) }
     let_it_be(:guest) { create(:user) }
     let_it_be(:project) { create(:project) }
     let_it_be_with_reload(:parent) { create(:work_item, :objective, project: project) }
@@ -12,13 +13,14 @@ RSpec.describe WorkItems::ParentLinks::ReorderService, feature_category: :portfo
     let_it_be_with_reload(:last_adjacent) { create(:work_item, :objective, project: project) }
 
     let(:parent_link_class) { WorkItems::ParentLink }
-    let(:user) { guest }
+    let(:user) { reporter }
     let(:params) { { target_issuable: work_item } }
     let(:relative_range) { [top_adjacent, last_adjacent].map(&:parent_link).map(&:relative_position) }
 
-    subject(:reorder) { described_class.new(parent, user, params).execute }
+    subject { described_class.new(parent, user, params).execute }
 
     before do
+      project.add_reporter(reporter)
       project.add_guest(guest)
 
       create(:parent_link, work_item: top_adjacent, work_item_parent: parent)
@@ -61,15 +63,10 @@ RSpec.describe WorkItems::ParentLinks::ReorderService, feature_category: :portfo
 
         expect(last_adjacent.parent_link.relative_position).to be_between(*relative_range)
       end
-
-      it_behaves_like 'update service that triggers GraphQL work_item_updated subscription' do
-        let(:update_subject) { parent }
-        let(:execute_service) { subject }
-      end
     end
 
     context 'when user has insufficient permissions' do
-      let(:user) { create(:user) }
+      let(:user) { guest }
 
       it_behaves_like 'returns not found error'
 
@@ -164,22 +161,6 @@ RSpec.describe WorkItems::ParentLinks::ReorderService, feature_category: :portfo
 
             it_behaves_like 'updates hierarchy order and creates notes'
           end
-        end
-      end
-
-      context 'when no adjacent item or relative position is provided' do
-        let(:params) { { target_issuable: work_item } }
-
-        it 'returns success status and processed links', :aggregate_failures do
-          expect(reorder.keys).to match_array([:status, :created_references])
-          expect(reorder[:status]).to eq(:success)
-          expect(reorder[:created_references].map(&:work_item_id)).to match_array([work_item.id])
-        end
-
-        it 'places the item at the top of the list' do
-          reorder
-
-          expect(work_item.parent_link.relative_position).to be < top_adjacent.parent_link.relative_position
         end
       end
     end

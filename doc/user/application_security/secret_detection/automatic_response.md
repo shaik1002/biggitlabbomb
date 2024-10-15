@@ -22,7 +22,7 @@ GitLab supports automatic response for the following types of secrets:
 
 | Secret type | Action taken | Supported on GitLab.com | Supported in self-managed |
 | ----- | --- | --- | --- |
-| GitLab [personal access tokens](../../profile/personal_access_tokens.md) | Immediately revoke token, send email to owner | ✅ | ✅ [15.9 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/371658) |
+| GitLab [Personal access tokens](../../profile/personal_access_tokens.md) | Immediately revoke token, send email to owner | ✅ | ✅ [15.9 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/371658) |
 | Amazon Web Services (AWS) [IAM access keys](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html) | Notify AWS | ✅ | ⚙ |
 | Google Cloud [service account keys](https://cloud.google.com/iam/docs/best-practices-for-managing-service-account-keys), [API keys](https://cloud.google.com/docs/authentication/api-keys), and [OAuth client secrets](https://support.google.com/cloud/answer/6158849#rotate-client-secret) | Notify Google Cloud | ✅ | ⚙ |
 | Postman [API keys](https://learning.postman.com/docs/developer/postman-api/authentication/) | Notify Postman; Postman [notifies the key owner](https://learning.postman.com/docs/administration/managing-your-team/secret-scanner/#protect-postman-api-keys-in-gitlab) | ✅ | ⚙ |
@@ -47,10 +47,8 @@ This diagram describes how a post-processing hook revokes a secret in the GitLab
 
 ```mermaid
 %%{init: { "fontFamily": "GitLab Sans" }}%%
-sequenceDiagram
-accTitle: Architecture diagram
-accDescr: How a post-processing hook revokes a secret in the GitLab application.
 
+sequenceDiagram
     autonumber
     GitLab Rails-->+GitLab Rails: gl-secret-detection-report.json
     GitLab Rails->>+GitLab Sidekiq: StoreScansService
@@ -88,11 +86,7 @@ body. We strongly recommend that you verify incoming requests using this signatu
 request from GitLab. The diagram below details the necessary steps to receive, verify, and revoke leaked tokens:
 
 ```mermaid
-%%{init: { "fontFamily": "GitLab Sans" }}%%
 sequenceDiagram
-accTitle: Partner API data flow
-accDescr: How a Partner API should receive and respond to leaked token revocation requests.
-
     autonumber
     GitLab Token Revocation API-->>+Partner API: Send new leaked credentials
     Partner API-->>+GitLab Public Keys endpoint: Get active public keys
@@ -109,8 +103,8 @@ accDescr: How a Partner API should receive and respond to leaked token revocatio
 1. The Partner API [verifies the signature](#verifying-the-request) against the actual request body, using the public key (**4**).
 1. The Partner API processes the leaked tokens, which may involve automatic revocation (**5**).
 1. The Partner API responds to the GitLab Token Revocation API (**6**) with the appropriate HTTP status code:
-   - A successful response code (HTTP 200 through 299) acknowledges that the partner has received and processed the request.
-   - An error code (HTTP 400 or higher) causes the GitLab Token Revocation API to retry the request.
+    - A successful response code (HTTP 200 through 299) acknowledges that the partner has received and processed the request.
+    - An error code (HTTP 400 or higher) causes the GitLab Token Revocation API to retry the request.
 
 #### Revocation request
 

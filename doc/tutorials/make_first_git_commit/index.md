@@ -35,11 +35,7 @@ Each time you push a change, Git records it as a unique *commit*. These commits 
 the history of when and how a file changed, and who changed it.
 
 ```mermaid
-%%{init: { "fontFamily": "GitLab Sans" }}%%
 graph LR
-    accTitle: Repository commit history
-    accDescr: Flowchart showing linear changes to a repository history
-
     subgraph Repository commit history
     direction LR
     A(Author: Alex<br>Date: 3 Jan at 1PM<br>Commit message: Added sales figures<br> Commit ID: 123abc12) --->  B
@@ -57,11 +53,7 @@ of a repository are in a default branch. To make changes, you:
 1. When you're ready, *merge* your branch into the default branch.
 
 ```mermaid
-%%{init: { "fontFamily": "GitLab Sans" }}%%
 flowchart LR
-    accTitle: Use branches in Git
-    accDescr: The flow of creating, then using, a branch in Git
-
     subgraph Default branch
     A[Commit] --> B[Commit] --> C[Commit] --> D[Commit]
     end
@@ -274,8 +266,3 @@ Nice work.
 
 - Get a complete introduction to Git in the <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [Git for GitLab](https://www.youtube.com/watch?v=4lxvVj7wlZw) beginner's course (1h 33m).
 - Find other tutorials about Git and GitLab on the [tutorials page](../index.md).
-- PDF download: [GitLab Git Cheat Sheet](https://about.gitlab.com/images/press/git-cheat-sheet.pdf).
-- Blog post: [Git Tips & Tricks](https://about.gitlab.com/blog/2016/12/08/git-tips-and-tricks/).
-- Blog post: [Eight Tips to help you work better with Git](https://about.gitlab.com/blog/2015/02/19/8-tips-to-help-you-work-better-with-git/).
-- Official [Git documentation](https://git-scm.com), including
-  [Git on the Server - GitLab](https://git-scm.com/book/en/v2/Git-on-the-Server-GitLab).

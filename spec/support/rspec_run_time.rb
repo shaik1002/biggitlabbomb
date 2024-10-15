@@ -10,7 +10,7 @@ module Support
     class RSpecFormatter < RSpec::Core::Formatters::BaseFormatter
       include Tooling::Helpers::DurationFormatter
 
-      TIME_LIMIT_IN_MINUTES = Integer(ENV['RSPEC_TIME_LIMIT_IN_MINUTES'] || 80)
+      TIME_LIMIT_IN_MINUTES = 80
 
       RSpec::Core::Formatters.register self, :example_group_started, :example_group_finished
 
@@ -88,8 +88,7 @@ module Support
           output.puts \
             "# [RSpecRunTime] RSpec elapsed time: #{readable_duration(elapsed_seconds)}. " \
             "#{current_rss_in_megabytes}. " \
-            "Threads: #{threads_count}. " \
-            "#{load_average}.\n\n" \
+            "#{load_average}\n\n"
         end
 
         @last_elapsed_seconds = elapsed_seconds
@@ -107,10 +106,6 @@ module Support
         else
           `uptime`[/(load average:[^\n]+)/, 1] || '(uptime failed)'
         end
-      end
-
-      def threads_count
-        Thread.list.size
       end
     end
   end

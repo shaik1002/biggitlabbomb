@@ -9,7 +9,6 @@ module Banzai
           Filter::DollarMathPreLegacyFilter,
           Filter::BlockquoteFenceLegacyFilter,
           Filter::MarkdownFilter,
-          Filter::ConvertTextToDocFilter,
           Filter::DollarMathPostLegacyFilter,
           Filter::MarkdownPostEscapeLegacyFilter
         ]

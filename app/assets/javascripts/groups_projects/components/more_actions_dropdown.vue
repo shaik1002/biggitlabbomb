@@ -71,7 +71,7 @@ export default {
           'data-confirm-btn-variant': 'danger',
           'data-testid': `leave-${this.namespaceType}-link`,
           rel: 'nofollow',
-          class: '!gl-text-red-500 js-leave-link',
+          class: 'gl-text-red-500! js-leave-link',
         },
       };
     },
@@ -155,14 +155,14 @@ export default {
     :toggle-text="$options.i18n.actionsLabel"
     text-sr-only
     data-testid="groups-projects-more-actions-dropdown"
-    class="gl-relative gl-w-full sm:gl-w-auto"
+    class="gl-relative gl-w-full gl-sm-w-auto"
     @shown="showDropdown"
     @hidden="hideDropdown"
   >
     <template #toggle>
       <div class="gl-min-h-7">
         <gl-button
-          class="gl-new-dropdown-toggle gl-absolute gl-left-0 gl-top-0 gl-w-full sm:gl-w-auto md:!gl-hidden"
+          class="gl-md-display-none! gl-new-dropdown-toggle gl-absolute gl-top-0 gl-left-0 gl-w-full gl-sm-w-auto"
           button-text-classes="gl-w-full"
           category="secondary"
           :aria-label="$options.i18n.actionsLabel"
@@ -173,7 +173,7 @@ export default {
         </gl-button>
         <gl-button
           ref="moreActionsDropdown"
-          class="gl-new-dropdown-toggle gl-new-dropdown-icon-only gl-new-dropdown-toggle-no-caret gl-hidden md:!gl-flex"
+          class="gl-display-none gl-md-display-flex! gl-new-dropdown-toggle gl-new-dropdown-icon-only gl-new-dropdown-toggle-no-caret"
           category="tertiary"
           icon="ellipsis_v"
           :aria-label="$options.i18n.actionsLabel"

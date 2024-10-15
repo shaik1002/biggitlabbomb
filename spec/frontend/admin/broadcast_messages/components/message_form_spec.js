@@ -1,7 +1,6 @@
-import { GlBroadcastMessage, GlForm, GlFormGroup, GlFormSelect } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
+import { GlBroadcastMessage, GlForm } from '@gitlab/ui';
 import AxiosMockAdapter from 'axios-mock-adapter';
-import { nextTick } from 'vue';
-import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import { createAlert } from '~/alert';
 import axios from '~/lib/utils/axios_utils';
 import { HTTP_STATUS_BAD_REQUEST } from '~/lib/utils/http_status';
@@ -13,8 +12,8 @@ import {
   TARGET_OPTIONS,
 } from '~/admin/broadcast_messages/constants';
 import waitForPromises from 'helpers/wait_for_promises';
+import { extendedWrapper } from 'helpers/vue_test_utils_helper';
 import { MOCK_TARGET_ACCESS_LEVELS } from '../mock_data';
-import { stubComponent } from '../../../__helpers__/stub_component';
 
 jest.mock('~/alert');
 
@@ -35,22 +34,20 @@ describe('MessageForm', () => {
 
   const messagesPath = '_messages_path_';
 
-  const findPreview = () => wrapper.findComponent(GlBroadcastMessage);
-  const findThemeSelect = () => wrapper.findByTestId('theme-select');
-  const findDismissable = () => wrapper.findByTestId('dismissable-checkbox');
-  const findTargetRoles = () => wrapper.findByTestId('target-roles-checkboxes');
-  const findTargetAccessLevelsCheckboxGroup = () =>
-    wrapper.findByTestId('target-access-levels-checkbox-group');
-  const findSubmitButton = () => wrapper.findByTestId('submit-button');
-  const findCancelButton = () => wrapper.findByTestId('cancel-button');
+  const findPreview = () => extendedWrapper(wrapper.findComponent(GlBroadcastMessage));
+  const findThemeSelect = () => wrapper.findComponent('[data-testid=theme-select]');
+  const findDismissable = () => wrapper.findComponent('[data-testid=dismissable-checkbox]');
+  const findTargetRoles = () => wrapper.findComponent('[data-testid=target-roles-checkboxes]');
+  const findSubmitButton = () => wrapper.findComponent('[data-testid=submit-button]');
+  const findCancelButton = () => wrapper.findComponent('[data-testid=cancel-button]');
   const findForm = () => wrapper.findComponent(GlForm);
-  const findShowInCli = () => wrapper.findByTestId('show-in-cli-checkbox');
-  const findTargetSelect = () => wrapper.findByTestId('target-select');
-  const findTargetPath = () => wrapper.findByTestId('target-path-input');
+  const findShowInCli = () => wrapper.findComponent('[data-testid=show-in-cli-checkbox]');
+  const findTargetSelect = () => wrapper.findComponent('[data-testid=target-select]');
+  const findTargetPath = () => wrapper.findComponent('[data-testid=target-path-input]');
   const emitSubmitForm = () => findForm().vm.$emit('submit', { preventDefault: () => {} });
 
   function createComponent({ broadcastMessage = {} } = {}) {
-    wrapper = shallowMountExtended(MessageForm, {
+    wrapper = mount(MessageForm, {
       provide: {
         targetAccessLevelOptions: MOCK_TARGET_ACCESS_LEVELS,
         messagesPath,
@@ -61,14 +58,6 @@ describe('MessageForm', () => {
           ...defaultProps,
           ...broadcastMessage,
         },
-      },
-      stubs: {
-        GlFormSelect: stubComponent(GlFormSelect, {
-          props: ['value'],
-        }),
-        GlFormGroup: stubComponent(GlFormGroup, {
-          props: ['state', 'invalidFeedback', 'description'],
-        }),
       },
     });
   }
@@ -134,7 +123,7 @@ describe('MessageForm', () => {
   describe('target select', () => {
     it('renders the first option and hide target path and target roles when creating message', () => {
       createComponent();
-      expect(findTargetSelect().props('value')).toBe(TARGET_OPTIONS[0].value);
+      expect(findTargetSelect().element.value).toBe(TARGET_OPTIONS[0].value);
       expect(findTargetRoles().isVisible()).toBe(false);
       expect(findTargetPath().isVisible()).toBe(false);
     });
@@ -142,36 +131,30 @@ describe('MessageForm', () => {
     it('triggers displaying target path and target roles when selecting different options', async () => {
       createComponent();
       const targetPath = findTargetPath();
-      const targetSelect = findTargetSelect();
-
-      targetSelect.vm.$emit('input', TARGET_OPTIONS[1].value);
-      await nextTick();
-
+      const options = findTargetSelect().findAll('option');
+      await options.at(1).setSelected();
       expect(targetPath.isVisible()).toBe(true);
-      expect(targetPath.props('description')).toBe(MessageForm.i18n.targetPathDescription);
+      expect(targetPath.text()).toContain(MessageForm.i18n.targetPathDescription);
       expect(targetPath.text()).not.toContain(MessageForm.i18n.targetPathWithRolesReminder);
       expect(findTargetRoles().isVisible()).toBe(false);
 
-      targetSelect.vm.$emit('input', TARGET_OPTIONS[2].value);
-      await nextTick();
+      await options.at(2).setSelected();
       expect(targetPath.isVisible()).toBe(true);
-      expect(targetPath.props('description')).toContain(MessageForm.i18n.targetPathDescription);
-      expect(targetPath.props('description')).toContain(
-        MessageForm.i18n.targetPathWithRolesReminder,
-      );
+      expect(targetPath.text()).toContain(MessageForm.i18n.targetPathDescription);
+      expect(targetPath.text()).toContain(MessageForm.i18n.targetPathWithRolesReminder);
       expect(findTargetRoles().isVisible()).toBe(true);
     });
 
     it('renders the second option and hide target roles when editing message with path specified', () => {
       createComponent({ broadcastMessage: { targetPath: '/welcome' } });
-      expect(findTargetSelect().props('value')).toBe(TARGET_OPTIONS[1].value);
+      expect(findTargetSelect().element.value).toBe(TARGET_OPTIONS[1].value);
       expect(findTargetRoles().isVisible()).toBe(false);
       expect(findTargetPath().isVisible()).toBe(true);
     });
 
     it('renders the third option when editing message with path and roles specified', () => {
       createComponent({ broadcastMessage: { targetPath: '/welcome', targetAccessLevels: [20] } });
-      expect(findTargetSelect().props('value')).toBe(TARGET_OPTIONS[2].value);
+      expect(findTargetSelect().element.value).toBe(TARGET_OPTIONS[2].value);
       expect(findTargetRoles().isVisible()).toBe(true);
       expect(findTargetPath().isVisible()).toBe(true);
     });
@@ -279,23 +262,16 @@ describe('MessageForm', () => {
       });
 
       it('does not submit if target roles is required, and later does submit when validation is corrected', async () => {
-        const targetSelect = findTargetSelect();
-        targetSelect.vm.$emit('input', TARGET_OPTIONS[2].value);
-        await nextTick();
+        const options = findTargetSelect().findAll('option');
+        await options.at(2).setSelected();
 
         emitSubmitForm();
         await waitForPromises();
 
-        const targetRolesGroup = findTargetRoles();
         expect(axiosMock.history.patch).toHaveLength(0);
-        expect(targetRolesGroup.props('invalidFeedback')).toBe(
-          MessageForm.i18n.targetRolesValidationMsg,
-        );
+        expect(wrapper.text()).toContain(MessageForm.i18n.targetRolesValidationMsg);
 
-        expect(targetRolesGroup.props('state')).toBe(false);
-
-        findTargetAccessLevelsCheckboxGroup().vm.$emit('input', [MOCK_TARGET_ACCESS_LEVELS[0][1]]);
-        await nextTick();
+        await findTargetRoles().find('input[type="checkbox"]').setChecked();
 
         emitSubmitForm();
         await waitForPromises();

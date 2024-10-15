@@ -8,7 +8,7 @@ table.ml-candidate-table {
 
     > * {
       display: block;
-      @apply gl-truncate;
+      @include gl-text-truncate;
     }
   }
 }

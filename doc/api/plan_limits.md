@@ -37,7 +37,6 @@ Example response:
 
 ```json
 {
-  "ci_instance_level_variables": 25,
   "ci_pipeline_size": 0,
   "ci_active_jobs": 0,
   "ci_project_subscriptions": 2,
@@ -45,8 +44,6 @@ Example response:
   "ci_needs_size_limit": 50,
   "ci_registered_group_runners": 1000,
   "ci_registered_project_runners": 1000,
-  "dotenv_size": 5120,
-  "dotenv_variables": 20,
   "conan_max_file_size": 3221225472,
   "enforcement_limit": 10000,
   "generic_packages_max_file_size": 5368709120,
@@ -72,16 +69,13 @@ PUT /application/plan_limits
 | Attribute                         | Type    | Required | Description |
 | --------------------------------- | ------- | -------- | ----------- |
 | `plan_name`                       | string  | yes      | Name of the plan to update. |
-| `ci_instance_level_variables`     | integer | no       | Maximum number of Instance-level CI/CD variables that can be defined. |
 | `ci_pipeline_size`                | integer | no       | Maximum number of jobs in a single pipeline. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/85895) in GitLab 15.0. |
 | `ci_active_jobs`                  | integer | no       | Total number of jobs in currently active pipelines. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/85895) in GitLab 15.0. |
 | `ci_project_subscriptions`        | integer | no       | Maximum number of pipeline subscriptions to and from a project. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/85895) in GitLab 15.0. |
 | `ci_pipeline_schedules`           | integer | no       | Maximum number of pipeline schedules. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/85895) in GitLab 15.0. |
-| `ci_needs_size_limit`             | integer | no       | Maximum number of [`needs`](../ci/yaml/needs.md) dependencies that a job can have. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/85895) in GitLab 15.0. |
+| `ci_needs_size_limit`             | integer | no       | Maximum number of [DAG](../ci/directed_acyclic_graph/index.md) dependencies that a job can have. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/85895) in GitLab 15.0. |
 | `ci_registered_group_runners`     | integer | no       | Maximum number of runners registered per group. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/85895) in GitLab 15.0. |
 | `ci_registered_project_runners`   | integer | no       | Maximum number of runners registered per project. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/85895) in GitLab 15.0. |
-| `dotenv_size`                     | integer | no       | Maximum size of a dotenv artifact in bytes. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/432529) in GitLab 17.1. |
-| `dotenv_variables`                | integer | no       | Maximum number of variables in a dotenv artifact. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/432529) in GitLab 17.1. |
 | `conan_max_file_size`             | integer | no       | Maximum Conan package file size in bytes. |
 | `enforcement_limit`               | integer | no       | Maximum storage size for root namespace limit enforcement in MiB. |
 | `generic_packages_max_file_size`  | integer | no       | Maximum generic package file size in bytes. |
@@ -102,7 +96,6 @@ Example response:
 
 ```json
 {
-  "ci_instance_level_variables": 25,
   "ci_pipeline_size": 0,
   "ci_active_jobs": 0,
   "ci_project_subscriptions": 2,
@@ -111,8 +104,6 @@ Example response:
   "ci_registered_group_runners": 1000,
   "ci_registered_project_runners": 1000,
   "conan_max_file_size": 3221225472,
-  "dotenv_variables": 20,
-  "dotenv_size": 5120,
   "generic_packages_max_file_size": 5368709120,
   "helm_max_file_size": 5242880,
   "maven_max_file_size": 3221225472,

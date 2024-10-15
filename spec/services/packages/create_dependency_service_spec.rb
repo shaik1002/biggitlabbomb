@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-
 require 'spec_helper'
 
 RSpec.describe Packages::CreateDependencyService, feature_category: :package_registry do
@@ -27,7 +26,7 @@ RSpec.describe Packages::CreateDependencyService, feature_category: :package_reg
 
       it 'creates dependencies and links' do
         expect(Packages::Dependency)
-            .to receive(:ids_for_package_project_id_names_and_version_patterns)
+            .to receive(:ids_for_package_names_and_version_patterns)
             .once
             .and_call_original
 
@@ -43,7 +42,7 @@ RSpec.describe Packages::CreateDependencyService, feature_category: :package_reg
 
         it 'creates dependencies and links' do
           expect(Packages::Dependency)
-            .to receive(:ids_for_package_project_id_names_and_version_patterns)
+            .to receive(:ids_for_package_names_and_version_patterns)
             .exactly(4).times
             .and_call_original
 
@@ -66,7 +65,7 @@ RSpec.describe Packages::CreateDependencyService, feature_category: :package_reg
               call_count.times { original_bulk_insert.call(table, rows, return_ids: return_ids, disable_quote: disable_quote, on_conflict: on_conflict) }
             end.twice
           expect(Packages::Dependency)
-            .to receive(:ids_for_package_project_id_names_and_version_patterns)
+            .to receive(:ids_for_package_names_and_version_patterns)
             .twice
             .and_call_original
 
@@ -79,55 +78,16 @@ RSpec.describe Packages::CreateDependencyService, feature_category: :package_reg
       end
 
       context 'with existing dependencies' do
-        let(:name_and_version_pattern) { dependencies['dependencies'].to_a.flatten }
+        let(:other_package) { create(:npm_package) }
 
-        let!(:dependency) do
-          create(
-            :packages_dependency,
-            name: name_and_version_pattern[0],
-            version_pattern: name_and_version_pattern[1],
-            project: project
-          )
+        before do
+          described_class.new(other_package, dependencies).execute
         end
 
-        shared_examples 'reuses dependencies' do
-          it do
-            expect { subject }
-              .to not_change { Packages::Dependency.count }
-              .and change { Packages::DependencyLink.count }.by(1)
-          end
-        end
-
-        context 'with project' do
-          context 'in the same project' do
-            let(:project) { package.project }
-
-            it_behaves_like 'reuses dependencies'
-          end
-
-          context 'in the different project' do
-            let_it_be(:project) { create(:project) }
-
-            it 'does not reuse them' do
-              expect { subject }
-                .to change { Packages::Dependency.count }.by(1)
-                .and change { Packages::DependencyLink.count }.by(1)
-            end
-          end
-        end
-
-        # TODO: remove the test when all packages dependencies have a `project_id`.
-        # https://gitlab.com/gitlab-org/gitlab/-/issues/481541
-        context 'without project' do
-          let(:project) { nil }
-
-          it_behaves_like 'reuses dependencies'
-
-          it 'updates the project for existing dependency' do
-            subject
-
-            expect(dependency.reload.project_id).to eq(package.project_id)
-          end
+        it 'reuses them' do
+          expect { subject }
+            .to not_change { Packages::Dependency.count }
+            .and change { Packages::DependencyLink.count }.by(1)
         end
       end
 
@@ -138,7 +98,7 @@ RSpec.describe Packages::CreateDependencyService, feature_category: :package_reg
 
         it 'creates dependencies and links' do
           expect(Packages::Dependency)
-              .to receive(:ids_for_package_project_id_names_and_version_patterns)
+              .to receive(:ids_for_package_names_and_version_patterns)
               .once
               .and_call_original
 

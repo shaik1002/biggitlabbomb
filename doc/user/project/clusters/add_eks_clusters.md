@@ -57,7 +57,7 @@ cluster certificates:
 1. Go to your:
    - Project's **Operate > Kubernetes clusters** page, for a project-level cluster.
    - Group's **Kubernetes** page, for a group-level cluster.
-   - The **Admin** area's **Kubernetes** page, for an instance-level cluster.
+   - The Admin Area's **Kubernetes** page, for an instance-level cluster.
 1. Select **Integrate with a cluster certificate**.
 1. Under the **Create new cluster** tab, select **Amazon EKS** to display an
    `Account ID` and `External ID` needed for later steps.
@@ -204,19 +204,19 @@ With RBAC disabled and services deployed,
 [Auto DevOps](../../../topics/autodevops/index.md) can now be leveraged
 to build, test, and deploy the app.
 
-[Enable Auto DevOps](../../../topics/autodevops/index.md#per-project)
+[Enable Auto DevOps](../../../topics/autodevops/index.md#at-the-project-level)
 if not already enabled. If a wildcard DNS entry was created resolving to the
 Load Balancer, enter it in the `domain` field under the Auto DevOps settings.
 Otherwise, the deployed app isn't externally available outside of the cluster.
 
-![Deploy Pipeline](img/pipeline_v11_0.png)
+![Deploy Pipeline](img/pipeline.png)
 
 GitLab creates a new pipeline, which begins to build, test, and deploy the app.
 
 After the pipeline has finished, your app runs in EKS, and is available
 to users. Select **Operate > Environments**.
 
-![Deployed Environment](img/environment_v11_0.png)
+![Deployed Environment](img/environment.png)
 
 GitLab displays a list of the environments and their deploy status, as well as
 options to browse to the app, view monitoring metrics, and even access a shell
@@ -253,7 +253,7 @@ For example, the following policy document allows assuming a role whose name sta
 To configure Amazon authentication in GitLab, generate an access key for the
 IAM user in the Amazon AWS console, and follow these steps:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Settings > General**.
 1. Expand **Amazon EKS**.
 1. Check **Enable Amazon EKS integration**.
@@ -281,17 +281,11 @@ Check that the `Provision Role ARN` is correct. An example of a valid ARN:
 arn:aws:iam::123456789012:role/gitlab-eks-provision'
 ```
 
-### Access denied: User is not authorized to perform: `sts:AssumeRole` on resource: `arn:aws:iam::y`
+### Access denied: User `arn:aws:iam::x` is not authorized to perform: `sts:AssumeRole` on resource: `arn:aws:iam::y`
 
 This error occurs when the credentials defined in the
 [Configure Amazon authentication](#configure-amazon-authentication) cannot assume the role defined by the
-Provision Role ARN:
-
-```plaintext
-User `arn:aws:iam::x` is not authorized to perform: `sts:AssumeRole` on resource: `arn:aws:iam::y`
-```
-
-Check that:
+Provision Role ARN. Check that:
 
 1. The initial set of AWS credentials [has the AssumeRole policy](#additional-requirements-for-self-managed-instances).
 1. The Provision Role has access to create clusters in the given region.
@@ -299,7 +293,7 @@ Check that:
    [external ID](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-user_externalid.html)
    match the value defined in the **Trust relationships** tab in AWS:
 
-   ![AWS IAM Trust relationships](img/aws_iam_role_trust_v13_7.png)
+   ![AWS IAM Trust relationships](img/aws_iam_role_trust.png)
 
 ### Could not load Security Groups for this VPC
 

@@ -14,8 +14,8 @@ RSpec.describe Banzai::Filter::References::MergeRequestReferenceFilter, feature_
 
   %w[pre code a style].each do |elem|
     it "ignores valid references contained inside '#{elem}' element" do
-      act = "<#{elem}>Merge #{merge.to_reference}</#{elem}>"
-      expect(reference_filter(act).to_html).to include act
+      exp = act = "<#{elem}>Merge #{merge.to_reference}</#{elem}>"
+      expect(reference_filter(act).to_html).to eq exp
     end
   end
 
@@ -66,15 +66,15 @@ RSpec.describe Banzai::Filter::References::MergeRequestReferenceFilter, feature_
     end
 
     it 'ignores invalid merge IDs' do
-      act = "Merge #{invalidate_reference(reference)}"
+      exp = act = "Merge #{invalidate_reference(reference)}"
 
-      expect(reference_filter(act).to_html).to include act
+      expect(reference_filter(act).to_html).to eq exp
     end
 
     it 'ignores out-of-bounds merge request IDs on the referenced project' do
-      act = "Merge !#{Gitlab::Database::MAX_INT_VALUE + 1}"
+      exp = act = "Merge !#{Gitlab::Database::MAX_INT_VALUE + 1}"
 
-      expect(reference_filter(act).to_html).to include act
+      expect(reference_filter(act).to_html).to eq exp
     end
 
     it 'has the MR title in the title attribute' do
@@ -181,9 +181,9 @@ RSpec.describe Banzai::Filter::References::MergeRequestReferenceFilter, feature_
     end
 
     it 'ignores invalid merge IDs on the referenced project' do
-      act = "Merge #{invalidate_reference(reference)}"
+      exp = act = "Merge #{invalidate_reference(reference)}"
 
-      expect(reference_filter(act).to_html).to include act
+      expect(reference_filter(act).to_html).to eq exp
     end
   end
 
@@ -214,9 +214,9 @@ RSpec.describe Banzai::Filter::References::MergeRequestReferenceFilter, feature_
     end
 
     it 'ignores invalid merge IDs on the referenced project' do
-      act = "Merge #{invalidate_reference(reference)}"
+      exp = act = "Merge #{invalidate_reference(reference)}"
 
-      expect(reference_filter(act).to_html).to include act
+      expect(reference_filter(act).to_html).to eq exp
     end
   end
 
@@ -247,9 +247,9 @@ RSpec.describe Banzai::Filter::References::MergeRequestReferenceFilter, feature_
     end
 
     it 'ignores invalid merge IDs on the referenced project' do
-      act = "Merge #{invalidate_reference(reference)}"
+      exp = act = "Merge #{invalidate_reference(reference)}"
 
-      expect(reference_filter(act).to_html).to include act
+      expect(reference_filter(act).to_html).to eq exp
     end
   end
 
@@ -316,20 +316,6 @@ RSpec.describe Banzai::Filter::References::MergeRequestReferenceFilter, feature_
       result = reference_filter("See #{reference}", { project: nil, group: create(:group) } )
 
       expect(result.css('a').first.attr('href')).to eq(urls.project_merge_request_url(project, merge))
-    end
-  end
-
-  context 'checking N+1' do
-    let(:merge_request1) { create(:merge_request, source_project: project, source_branch: 'branch1') }
-    let(:merge_request2) { create(:merge_request, source_project: project, source_branch: 'branch2') }
-
-    it 'does not have a N+1 query problem' do
-      single_reference = "Merge request #{merge_request1.to_reference}"
-      multiple_references = "Merge requests #{merge_request1.to_reference} and #{merge_request2.to_reference}"
-
-      control = ActiveRecord::QueryRecorder.new { reference_filter(single_reference).to_html }
-
-      expect { reference_filter(multiple_references).to_html }.not_to exceed_query_limit(control)
     end
   end
 end

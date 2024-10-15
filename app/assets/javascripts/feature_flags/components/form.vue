@@ -2,6 +2,7 @@
 <script>
 import { GlButton } from '@gitlab/ui';
 import { memoize, cloneDeep, isNumber, uniqueId } from 'lodash';
+import Vue from 'vue';
 import { s__ } from '~/locale';
 import RelatedIssuesRoot from '~/related_issues/components/related_issues_root.vue';
 import featureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
@@ -113,7 +114,7 @@ export default {
 
     deleteStrategy(s) {
       if (isNumber(s.id)) {
-        Object.assign(s, { shouldBeDestroyed: true });
+        Vue.set(s, 'shouldBeDestroyed', true);
       } else {
         this.formStrategies = this.formStrategies.filter((strategy) => strategy !== s);
       }
@@ -157,18 +158,18 @@ export default {
 <template>
   <form class="feature-flags-form">
     <fieldset>
-      <div class="-gl-mx-5 gl-flex gl-flex-wrap">
-        <div class="gl-mb-5 gl-w-full gl-px-5 md:gl-basis-1/3">
-          <label for="feature-flag-name" class="gl-font-bold"
+      <div class="gl-display-flex gl-flex-wrap gl-mx-n5">
+        <div class="gl-mb-5 gl-px-5 gl-w-full col-md-4">
+          <label for="feature-flag-name" class="gl-font-weight-bold"
             >{{ s__('FeatureFlags|Name') }} *</label
           >
           <input id="feature-flag-name" v-model="formName" class="form-control" />
         </div>
       </div>
 
-      <div class="-gl-mx-5 gl-flex gl-flex-wrap">
-        <div class="gl-mb-5 gl-w-full gl-px-5 md:gl-basis-1/3">
-          <label for="feature-flag-description" class="gl-font-bold">
+      <div class="gl-display-flex gl-flex-wrap gl-mx-n5">
+        <div class="gl-mb-5 gl-px-5 gl-w-full col-md-4">
+          <label for="feature-flag-description" class="gl-font-weight-bold">
             {{ s__('FeatureFlags|Description') }}
           </label>
           <textarea
@@ -187,10 +188,10 @@ export default {
         :show-categorized-issues="false"
       />
 
-      <div class="-gl-mx-5 gl-flex gl-flex-wrap">
-        <div class="gl-mb-5 gl-w-full gl-px-5">
+      <div class="gl-display-flex gl-flex-wrap gl-mx-n5">
+        <div class="gl-mb-5 gl-px-5 gl-w-full">
           <h4>{{ s__('FeatureFlags|Strategies') }}</h4>
-          <div class="gl-flex gl-items-baseline gl-justify-between">
+          <div class="gl-display-flex gl-align-items-baseline gl-justify-content-space-between">
             <p class="gl-mr-5">{{ $options.translations.newHelpText }}</p>
             <gl-button variant="confirm" category="secondary" @click="addStrategy">
               {{ s__('FeatureFlags|Add strategy') }}
@@ -208,7 +209,7 @@ export default {
           @delete="deleteStrategy(strategy)"
         />
       </div>
-      <div v-else class="gl-border-t gl-flex gl-w-full gl-justify-center gl-py-6">
+      <div v-else class="gl-display-flex gl-justify-content-center gl-border-t gl-py-6 gl-w-full">
         <span>{{ $options.translations.noStrategiesText }}</span>
       </div>
     </fieldset>

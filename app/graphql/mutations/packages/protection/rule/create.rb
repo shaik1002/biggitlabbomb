@@ -7,7 +7,7 @@ module Mutations
         class Create < ::Mutations::BaseMutation
           graphql_name 'CreatePackagesProtectionRule'
           description 'Creates a protection rule to restrict access to project packages. ' \
-            'Available only when feature flag `packages_protected_packages` is enabled.'
+                      'Available only when feature flag `packages_protected_packages` is enabled.'
 
           include FindsProject
 
@@ -30,15 +30,15 @@ module Mutations
             required: true,
             description: 'Package type protected by the protection rule. For example `NPM`.'
 
-          argument :minimum_access_level_for_push,
+          argument :push_protected_up_to_access_level,
             Types::Packages::Protection::RuleAccessLevelEnum,
             required: true,
-            description: copy_field_description(Types::Packages::Protection::RuleType, :minimum_access_level_for_push)
+            description:
+            'Max GitLab access level unable to push a package. For example `DEVELOPER`, `MAINTAINER`, `OWNER`.'
 
           field :package_protection_rule,
             Types::Packages::Protection::RuleType,
             null: true,
-            alpha: { milestone: '16.5' },
             description: 'Packages protection rule after mutation.'
 
           def resolve(project_path:, **kwargs)

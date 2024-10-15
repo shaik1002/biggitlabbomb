@@ -13,7 +13,7 @@ module Packages
         length: { maximum: 255 }
 
       validates :version,
-        format: Gitlab::Regex.ml_model_version_name_regex,
+        format: Gitlab::Regex.semver_regex,
         presence: true,
         length: { maximum: 255 }
     end

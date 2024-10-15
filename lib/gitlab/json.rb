@@ -167,6 +167,9 @@ module Gitlab
       # @return [Boolean, String, Array, Hash, Object]
       # @raise [JSON::ParserError]
       def handle_legacy_mode!(data)
+        return data unless Feature::FlipperFeature.table_exists?
+        return data unless Feature.enabled?(:json_wrapper_legacy_mode)
+
         raise parser_error if INVALID_LEGACY_TYPES.any? { |type| data.is_a?(type) }
       end
     end
@@ -188,7 +191,7 @@ module Gitlab
       def self.call(object, env = nil)
         return object.to_s if object.is_a?(PrecompiledJson)
 
-        ::Gitlab::Json.dump(object)
+        Gitlab::Json.dump(object)
       end
     end
 
@@ -260,7 +263,7 @@ module Gitlab
       # class method to use our generator, and it's monkey-patched in
       # config/initializers/active_support_json.rb
       def stringify(jsonified)
-        ::Gitlab::Json.dump(jsonified)
+        Gitlab::Json.dump(jsonified)
       rescue EncodingError => ex
         # Raise the same error as the default implementation if we encounter
         # an error. These are usually related to invalid UTF-8 errors.

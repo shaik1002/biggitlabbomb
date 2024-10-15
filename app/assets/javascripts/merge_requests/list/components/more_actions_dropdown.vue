@@ -68,8 +68,8 @@ export default {
     <template #toggle>
       <div class="gl-min-h-7">
         <gl-button
-          class="gl-w-full md:!gl-hidden"
-          button-text-classes="gl-flex gl-justify-between gl-w-full"
+          class="gl-md-display-none! gl-w-full"
+          button-text-classes="gl-display-flex gl-justify-content-space-between gl-w-full"
           category="secondary"
           :aria-label="$options.i18n.toggleText"
         >
@@ -77,7 +77,7 @@ export default {
           <gl-icon class="dropdown-chevron" name="chevron-down" />
         </gl-button>
         <gl-button
-          class="!gl-hidden md:!gl-flex"
+          class="gl-display-none! gl-md-display-flex!"
           category="tertiary"
           icon="ellipsis_v"
           :aria-label="$options.i18n.toggleText"

@@ -23,7 +23,6 @@ describe('moreActionsDropdown', () => {
     issueCount: 1,
     mergeRequestCount: 2,
     isDetailPage: false,
-    size: 'medium',
   };
 
   const createComponent = ({ provideData = {}, propsData = {} } = {}) => {
@@ -174,7 +173,7 @@ describe('moreActionsDropdown', () => {
         },
       });
 
-      expect(findCloseItem().attributes('class')).toContain('sm:!gl-hidden');
+      expect(findCloseItem().attributes('class')).toContain('gl-sm-display-none!');
     });
   });
 
@@ -213,7 +212,7 @@ describe('moreActionsDropdown', () => {
         },
       });
 
-      expect(findReopenItem().attributes('class')).toContain('sm:!gl-hidden');
+      expect(findReopenItem().attributes('class')).toContain('gl-sm-display-none!');
     });
   });
 

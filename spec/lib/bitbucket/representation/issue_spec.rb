@@ -17,14 +17,8 @@ RSpec.describe Bitbucket::Representation::Issue, feature_category: :importers do
   end
 
   describe '#author' do
-    it { expect(described_class.new({ 'reporter' => { 'uuid' => '{123}' } }).author).to eq('{123}') }
-    it { expect(described_class.new({ 'reporter' => { 'nickname' => 'Ben' } }).author).to be_nil }
+    it { expect(described_class.new({ 'reporter' => { 'nickname' => 'Ben' } }).author).to eq('Ben') }
     it { expect(described_class.new({}).author).to be_nil }
-  end
-
-  describe '#author_nickname' do
-    it { expect(described_class.new({ 'reporter' => { 'nickname' => 'Ben' } }).author_nickname).to eq('Ben') }
-    it { expect(described_class.new({}).author_nickname).to be_nil }
   end
 
   describe '#description' do
@@ -60,7 +54,7 @@ RSpec.describe Bitbucket::Representation::Issue, feature_category: :importers do
         'title' => 'title',
         'content' => { 'raw' => 'description' },
         'state' => 'resolved',
-        'reporter' => { 'nickname' => 'User1', 'uuid' => '{123}' },
+        'reporter' => { 'nickname' => 'User1' },
         'milestone' => { 'name' => 1 },
         'created_on' => 'created_at',
         'edited_on' => 'updated_at'
@@ -71,8 +65,7 @@ RSpec.describe Bitbucket::Representation::Issue, feature_category: :importers do
         title: 'title',
         description: 'description',
         state: 'closed',
-        author: '{123}',
-        author_nickname: 'User1',
+        author: 'User1',
         milestone: 1,
         created_at: 'created_at',
         updated_at: 'updated_at'

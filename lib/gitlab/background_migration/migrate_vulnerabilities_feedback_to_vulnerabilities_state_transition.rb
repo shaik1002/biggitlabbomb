@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# rubocop:disable Style/Documentation -- not needed
+# rubocop:disable Style/Documentation
 module Gitlab
   module BackgroundMigration
     class MigrateVulnerabilitiesFeedbackToVulnerabilitiesStateTransition < BatchedMigrationJob

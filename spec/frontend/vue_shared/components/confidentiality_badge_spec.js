@@ -51,19 +51,21 @@ describe('ConfidentialityBadge', () => {
     },
   );
 
-  describe('hideTextInSmallScreens', () => {
-    it('does not have `gl-sr-only` and `sm:gl-not-sr-only` when `hideTextInSmallScreens` is false', () => {
-      wrapper = createComponent({ hideTextInSmallScreens: false });
+  it('does not have `gl-sm-display-block` and `gl-display-none` when `hideTextInSmallScreens` is false', () => {
+    wrapper = createComponent({ hideTextInSmallScreens: false });
 
-      expect(findConfidentialityBadgeText().classes()).not.toContain('gl-sr-only');
-      expect(findConfidentialityBadgeText().classes()).not.toContain('sm:gl-not-sr-only');
-    });
+    expect(findConfidentialityBadgeText().classes()).not.toContain(
+      'gl-display-none',
+      'gl-sm-display-block',
+    );
+  });
 
-    it('has `gl-sr-only` and `sm:gl-not-sr-only` when `hideTextInSmallScreens` is true', () => {
-      wrapper = createComponent({ hideTextInSmallScreens: true });
+  it('has `gl-sm-display-block` and `gl-display-none` when `hideTextInSmallScreens` is true', () => {
+    wrapper = createComponent({ hideTextInSmallScreens: true });
 
-      expect(findConfidentialityBadgeText().classes()).toContain('gl-sr-only');
-      expect(findConfidentialityBadgeText().classes()).toContain('sm:gl-not-sr-only');
-    });
+    expect(findConfidentialityBadgeText().classes()).toContain(
+      'gl-display-none',
+      'gl-sm-display-block',
+    );
   });
 });

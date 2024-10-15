@@ -96,58 +96,59 @@ RSpec.describe Ci::Partitionable, feature_category: :continuous_integration do
 
         subject(:value) { partitioning_strategy.next_partition_if.call(active_partition) }
 
-        context 'when not using ci partitioning automation' do
-          before do
-            stub_feature_flags(ci_partitioning_automation: false)
-          end
+        context 'without any existing partitions' do
+          it { is_expected.to eq(true) }
 
-          context 'without any existing partitions' do
-            it { is_expected.to eq(true) }
-          end
-
-          context 'with initial partition attached' do
+          context 'with ci_partitioning_first_records disabled' do
             before do
-              ci_model.connection.execute(<<~SQL)
-                CREATE TABLE IF NOT EXISTS _test_table_name_100 PARTITION OF _test_table_name FOR VALUES IN (100);
-              SQL
+              stub_feature_flags(ci_partitioning_first_records: false)
             end
 
-            it { is_expected.to eq(true) }
+            it 'does not create the first record' do
+              expect { subject }.not_to change { Ci::Partition.count }
+            end
           end
 
-          context 'with an existing partition for partition_id = 101' do
+          context 'with ci_partitioning_first_records enabled' do
             before do
-              ci_model.connection.execute(<<~SQL)
-                CREATE TABLE IF NOT EXISTS _test_table_name_101 PARTITION OF _test_table_name FOR VALUES IN (101);
-              SQL
+              stub_feature_flags(ci_partitioning_first_records: true)
+              Ci::Partitionable::Organizer.clear_memoization(:insert_first_partitions)
             end
 
-            it { is_expected.to eq(false) }
-          end
-
-          context 'with an existing partition for partition_id in 100, 101' do
-            before do
-              ci_model.connection.execute(<<~SQL)
-                CREATE TABLE IF NOT EXISTS _test_table_name_101 PARTITION OF _test_table_name FOR VALUES IN (100, 101);
-              SQL
+            it 'creates the first record' do
+              expect { subject }.to change { Ci::Partition.count }
             end
-
-            it { is_expected.to eq(false) }
           end
         end
 
-        context 'when using ci partitioning automation' do
-          context 'when current ci_partition exists' do
-            before do
-              create_list(:ci_partition, 2)
-            end
-
-            it { is_expected.to eq(true) }
+        context 'with initial partition attached' do
+          before do
+            ci_model.connection.execute(<<~SQL)
+              CREATE TABLE IF NOT EXISTS _test_table_name_100 PARTITION OF _test_table_name FOR VALUES IN (100);
+            SQL
           end
 
-          context 'when current ci_partition does not exist' do
-            it { is_expected.to eq(false) }
+          it { is_expected.to eq(true) }
+        end
+
+        context 'with an existing partition for partition_id = 101' do
+          before do
+            ci_model.connection.execute(<<~SQL)
+              CREATE TABLE IF NOT EXISTS _test_table_name_101 PARTITION OF _test_table_name FOR VALUES IN (101);
+            SQL
           end
+
+          it { is_expected.to eq(false) }
+        end
+
+        context 'with an existing partition for partition_id in 100, 101' do
+          before do
+            ci_model.connection.execute(<<~SQL)
+              CREATE TABLE IF NOT EXISTS _test_table_name_101 PARTITION OF _test_table_name FOR VALUES IN (100, 101);
+            SQL
+          end
+
+          it { is_expected.to eq(false) }
         end
       end
     end
@@ -167,9 +168,7 @@ RSpec.describe Ci::Partitionable, feature_category: :continuous_integration do
       ci_model.include(described_class)
     end
 
-    subject(:scope_values) { ci_model.in_partition(value, **options).where_values_hash }
-
-    let(:options) { {} }
+    subject(:scope_values) { ci_model.in_partition(value).where_values_hash }
 
     context 'with integer parameters' do
       let(:value) { 101 }
@@ -186,15 +185,6 @@ RSpec.describe Ci::Partitionable, feature_category: :continuous_integration do
         expect(scope_values).to include('partition_id' => 101)
       end
     end
-
-    context 'with given partition_foreign_key' do
-      let(:options) { { partition_foreign_key: :auto_canceled_by_partition_id } }
-      let(:value) { build_stubbed(:ci_build, auto_canceled_by_partition_id: 102) }
-
-      it 'adds a partition_id filter' do
-        expect(scope_values).to include('partition_id' => 102)
-      end
-    end
   end
 
   describe '.registered_models' do
@@ -205,11 +195,8 @@ RSpec.describe Ci::Partitionable, feature_category: :continuous_integration do
         Ci::BuildMetadata
         Ci::BuildExecutionConfig
         Ci::BuildName
-        Ci::BuildTag
-        Ci::BuildSource
         Ci::JobAnnotation
         Ci::JobArtifact
-        Ci::PipelineConfig
         Ci::PipelineVariable
         Ci::RunnerManagerBuild
         Ci::Stage

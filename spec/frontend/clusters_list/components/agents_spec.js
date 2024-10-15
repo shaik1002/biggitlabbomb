@@ -5,22 +5,22 @@ import Vue, { nextTick } from 'vue';
 import AgentEmptyState from '~/clusters_list/components/agent_empty_state.vue';
 import AgentTable from '~/clusters_list/components/agent_table.vue';
 import Agents from '~/clusters_list/components/agents.vue';
-import { AGENT_FEEDBACK_KEY, AGENT_FEEDBACK_ISSUE } from '~/clusters_list/constants';
-import getAgentsQuery from 'ee_else_ce/clusters_list/graphql/queries/get_agents.query.graphql';
-import getTreeListQuery from '~/clusters_list/graphql/queries/get_tree_list.query.graphql';
+import GitopsDeprecationAlert from '~/clusters_list/components/gitops_deprecation_alert.vue';
+import {
+  ACTIVE_CONNECTION_TIME,
+  AGENT_FEEDBACK_KEY,
+  AGENT_FEEDBACK_ISSUE,
+} from '~/clusters_list/constants';
+import getAgentsQuery from '~/clusters_list/graphql/queries/get_agents.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
-import {
-  clusterAgentsResponse,
-  treeListResponseData,
-  expectedAgentsList,
-} from 'ee_else_ce_jest/clusters_list/components/mock_data';
 
 Vue.use(VueApollo);
 
 describe('Agents', () => {
   let wrapper;
+  let testDate = new Date();
 
   const defaultProps = {
     defaultBranchName: 'default',
@@ -29,18 +29,39 @@ describe('Agents', () => {
     projectPath: 'path/to/project',
   };
 
-  const createWrapper = async ({ props = {}, glFeatures = {}, queryResponse = null } = {}) => {
-    const agentQueryResponse = queryResponse || jest.fn().mockResolvedValue(clusterAgentsResponse);
-    const treeListQueryResponse = jest.fn().mockResolvedValue(treeListResponseData);
+  const createWrapper = async ({
+    props = {},
+    glFeatures = {},
+    agents = [],
+    ciAccessAuthorizedAgentsNodes = [],
+    userAccessAuthorizedAgentsNodes = [],
+    trees = [],
+    queryResponse = null,
+  }) => {
+    const provide = provideData;
+    const queryResponseData = {
+      data: {
+        project: {
+          id: 'gid://gitlab/Project/1',
+          clusterAgents: {
+            nodes: agents,
+            connections: { nodes: [] },
+            tokens: { nodes: [] },
+          },
+          ciAccessAuthorizedAgents: {
+            nodes: ciAccessAuthorizedAgentsNodes,
+          },
+          userAccessAuthorizedAgents: {
+            nodes: userAccessAuthorizedAgentsNodes,
+          },
+          repository: { tree: { trees: { nodes: trees } } },
+        },
+      },
+    };
+    const agentQueryResponse =
+      queryResponse || jest.fn().mockResolvedValue(queryResponseData, provide);
 
-    const apolloProvider = createMockApollo(
-      [
-        [getAgentsQuery, agentQueryResponse],
-        [getTreeListQuery, treeListQueryResponse],
-      ],
-      {},
-      { typePolicies: { Query: { fields: { project: { merge: true } } } } },
-    );
+    const apolloProvider = createMockApollo([[getAgentsQuery, agentQueryResponse]]);
 
     wrapper = shallowMount(Agents, {
       apolloProvider,
@@ -65,14 +86,121 @@ describe('Agents', () => {
   const findEmptyState = () => wrapper.findComponent(AgentEmptyState);
   const findAlert = () => wrapper.findComponent(GlAlert);
   const findBanner = () => wrapper.findComponent(GlBanner);
+  const findGitopsDeprecationAlert = () => wrapper.findComponent(GitopsDeprecationAlert);
 
   afterEach(() => {
     localStorage.removeItem(AGENT_FEEDBACK_KEY);
   });
 
   describe('when there is a list of agents', () => {
+    const agents = [
+      {
+        __typename: 'ClusterAgent',
+        id: '1',
+        name: 'agent-1',
+        webPath: '/agent-1',
+        createdAt: testDate,
+        connections: null,
+        tokens: null,
+      },
+      {
+        __typename: 'ClusterAgent',
+        id: '2',
+        name: 'agent-2',
+        webPath: '/agent-2',
+        createdAt: testDate,
+        connections: null,
+        tokens: {
+          nodes: [
+            {
+              id: 'token-1',
+              lastUsedAt: testDate,
+            },
+          ],
+        },
+      },
+    ];
+    const ciAccessAuthorizedAgentsNodes = [
+      {
+        agent: {
+          __typename: 'ClusterAgent',
+          id: '3',
+          name: 'ci-agent-1',
+          webPath: 'shared-project/agent-1',
+          createdAt: testDate,
+          connections: null,
+          tokens: null,
+        },
+      },
+    ];
+    const userAccessAuthorizedAgentsNodes = [
+      {
+        agent: {
+          ...agents[0],
+        },
+      },
+    ];
+
+    const trees = [
+      {
+        id: 'tree-1',
+        name: 'agent-2',
+        path: '.gitlab/agents/agent-2',
+        webPath: '/project/path/.gitlab/agents/agent-2',
+      },
+    ];
+
+    const expectedAgentsList = [
+      {
+        id: '1',
+        name: 'agent-1',
+        webPath: '/agent-1',
+        configFolder: undefined,
+        status: 'unused',
+        lastContact: null,
+        connections: null,
+        tokens: null,
+      },
+      {
+        id: '2',
+        name: 'agent-2',
+        configFolder: {
+          name: 'agent-2',
+          path: '.gitlab/agents/agent-2',
+          webPath: '/project/path/.gitlab/agents/agent-2',
+        },
+        webPath: '/agent-2',
+        status: 'active',
+        lastContact: new Date(testDate).getTime(),
+        connections: null,
+        tokens: {
+          nodes: [
+            {
+              lastUsedAt: testDate,
+            },
+          ],
+        },
+      },
+      {
+        id: '3',
+        name: 'ci-agent-1',
+        configFolder: undefined,
+        webPath: 'shared-project/agent-1',
+        status: 'unused',
+        isShared: true,
+        lastContact: null,
+        connections: null,
+        tokens: null,
+      },
+    ];
+
     beforeEach(() => {
-      return createWrapper();
+      return createWrapper({
+        agents,
+        ciAccessAuthorizedAgentsNodes,
+        userAccessAuthorizedAgentsNodes,
+        trees,
+      });
     });
 
     it('should render agent table', () => {
@@ -105,7 +233,7 @@ describe('Agents', () => {
             localStorage.setItem(AGENT_FEEDBACK_KEY, true);
           }
 
-          return createWrapper({ glFeatures });
+          return createWrapper({ glFeatures, agents, trees });
         });
 
         it(`should ${bannerShown ? 'show' : 'hide'} the feedback banner`, () => {
@@ -119,7 +247,7 @@ describe('Agents', () => {
         showGitlabAgentFeedback: true,
       };
       beforeEach(() => {
-        return createWrapper({ glFeatures });
+        return createWrapper({ glFeatures, agents, trees });
       });
 
       it('should render the correct title', () => {
@@ -130,27 +258,39 @@ describe('Agents', () => {
         expect(findBanner().props('buttonLink')).toBe(AGENT_FEEDBACK_ISSUE);
       });
     });
+
+    describe('when the agent has recently connected tokens', () => {
+      it('should set agent status to active', () => {
+        expect(findAgentTable().props('agents')).toMatchObject(expectedAgentsList);
+      });
+    });
+
+    describe('when the agent has tokens connected more then 8 minutes ago', () => {
+      const now = new Date();
+      testDate = new Date(now.getTime() - ACTIVE_CONNECTION_TIME);
+      it('should set agent status to inactive', () => {
+        expect(findAgentTable().props('agents')).toMatchObject(expectedAgentsList);
+      });
+    });
+
+    describe('when the agent has no connected tokens', () => {
+      testDate = null;
+      it('should set agent status to unused', () => {
+        expect(findAgentTable().props('agents')).toMatchObject(expectedAgentsList);
+      });
+    });
+
+    it('should show agent gitops deprecation alert', () => {
+      expect(findGitopsDeprecationAlert().props()).toEqual({
+        agentConfigs: ['.gitlab/agents/agent-2'],
+        projectGid: 'gid://gitlab/Project/1',
+      });
+    });
   });
 
   describe('when the agent list is empty', () => {
     beforeEach(() => {
-      const emptyResponse = {
-        data: {
-          project: {
-            id: 'gid://gitlab/Project/1',
-            clusterAgents: {
-              nodes: [],
-            },
-            ciAccessAuthorizedAgents: {
-              nodes: [],
-            },
-            userAccessAuthorizedAgents: {
-              nodes: [],
-            },
-          },
-        },
-      };
-      return createWrapper({ queryResponse: jest.fn().mockResolvedValue(emptyResponse) });
+      return createWrapper({ agents: [] });
     });
 
     it('should render empty state', () => {
@@ -160,6 +300,10 @@ describe('Agents', () => {
 
     it('should not show agent feedback alert', () => {
       expect(findAlert().exists()).toBe(false);
+    });
+
+    it('should not show agent gitops deprecation alert', () => {
+      expect(findGitopsDeprecationAlert().exists()).toBe(false);
     });
   });
 

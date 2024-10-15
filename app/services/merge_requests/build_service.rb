@@ -66,12 +66,16 @@ module MergeRequests
       # merge_request.assign_attributes(...) below is a Rails
       # method that only work if all the params it is passed have
       # corresponding fields in the database. As there are no fields
-      # in the database for :add_assignee_ids and :remove_assignee_ids, we
+      # in the database for :add_label_ids, :remove_label_ids,
+      # :add_assignee_ids and :remove_assignee_ids, we
       # need to remove them from the params before the call to
       # merge_request.assign_attributes(...)
       #
-      # IssuableBaseService#process_assignee_ids takes care
+      # IssuableBaseService#process_label_ids and
+      # IssuableBaseService#process_assignee_ids take care
       # of the removal.
+      params[:label_ids] = process_label_ids(params, issuable: merge_request, extra_label_ids: merge_request.label_ids.to_a)
+
       params[:assignee_ids] = process_assignee_ids(params, extra_assignee_ids: merge_request.assignee_ids.to_a)
 
       merge_request.assign_attributes(params.to_h.compact)
@@ -88,6 +92,7 @@ module MergeRequests
       filter_params(merge_request)
 
       # Filter out the following from params:
+      #  - :add_label_ids and :remove_label_ids
       #  - :add_assignee_ids and :remove_assignee_ids
       filter_id_params
     end
@@ -197,11 +202,11 @@ module MergeRequests
     end
 
     def source_branch_exists?
-      source_branch.blank? || source_project.branch_exists?(source_branch)
+      source_branch.blank? || source_project.commit(source_branch)
     end
 
     def target_branch_exists?
-      target_branch.blank? || target_project.branch_exists?(target_branch)
+      target_branch.blank? || target_project.commit(target_branch)
     end
 
     def set_draft_title_if_needed
@@ -251,7 +256,7 @@ module MergeRequests
     def append_closes_description
       return unless issue&.to_reference.present?
 
-      closes_issue = "#{target_project.autoclose_referenced_issues ? 'Closes' : 'Related to'} #{issue.to_reference}"
+      closes_issue = "#{target_project.autoclose_referenced_issues ? 'Closes' : 'Related to'} #{issue.to_reference(target_project)}"
 
       if description.present?
         descr_parts = [merge_request.description, closes_issue]
@@ -343,7 +348,8 @@ module MergeRequests
 
     def issue
       strong_memoize(:issue) do
-        target_project.get_issue(issue_iid, current_user)
+        issue_project = same_source_and_target_project? ? target_project : source_project
+        issue_project.get_issue(issue_iid, current_user)
       end
     end
   end

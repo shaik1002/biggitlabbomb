@@ -99,7 +99,7 @@ module Gitlab
         project = Project.find_by_id(project_id)
         strategy = project.import_data&.data&.dig("timeout_strategy") || ProjectImportData::PESSIMISTIC_TIMEOUT
 
-        ::Import::Framework::Logger.info(
+        Gitlab::Import::Logger.info(
           message: 'Timeout reached, no longer retrying',
           project_id: project_id,
           jobs_remaining: new_job_count,

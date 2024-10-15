@@ -85,7 +85,9 @@ export default {
     >
       <template #meta>
         <div v-if="isUserBusy" class="gl-p-1">
-          <span class="gl-text-sm gl-font-normal gl-text-gray-500">({{ $options.i18n.busy }})</span>
+          <span class="gl-text-gray-500 gl-font-sm gl-font-weight-normal"
+            >({{ $options.i18n.busy }})</span
+          >
         </div>
         <div v-if="statusEmoji" class="gl-p-1">
           <span
@@ -94,7 +96,7 @@ export default {
           ></span>
         </div>
         <div v-for="badge in badges" :key="badge.text" class="gl-p-1">
-          <gl-badge :variant="badge.variant">
+          <gl-badge size="sm" :variant="badge.variant">
             {{ badge.text }}
           </gl-badge>
         </div>

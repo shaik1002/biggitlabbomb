@@ -4,7 +4,7 @@ require 'spec_helper'
 
 require 'googleauth'
 
-RSpec.describe Integrations::Prometheus, :use_clean_rails_memory_store_caching, :snowplow, feature_category: :observability do
+RSpec.describe Integrations::Prometheus, :use_clean_rails_memory_store_caching, :snowplow, feature_category: :metrics do
   include PrometheusHelpers
   include ReactiveCachingHelpers
 
@@ -18,7 +18,7 @@ RSpec.describe Integrations::Prometheus, :use_clean_rails_memory_store_caching, 
     it 'does not follow redirects' do
       redirect_to = 'https://redirected.example.com'
       redirect_req_stub = stub_prometheus_request(prometheus_query_url('1'), status: 302, headers: { location: redirect_to })
-      redirected_req_stub = stub_prometheus_request(redirect_to, body: { status: 'success' })
+      redirected_req_stub = stub_prometheus_request(redirect_to, body: { 'status': 'success' })
 
       result = integration.test
 

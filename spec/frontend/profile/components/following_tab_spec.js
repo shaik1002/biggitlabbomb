@@ -1,6 +1,7 @@
 import { GlBadge, GlTab } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import following from 'test_fixtures/api/users/following/get.json';
+import { s__ } from '~/locale';
 import FollowingTab from '~/profile/components/following_tab.vue';
 import Follow from '~/profile/components/follow.vue';
 import { getUserFollowing } from '~/rest_api';
@@ -53,10 +54,11 @@ describe('FollowingTab', () => {
     });
 
     it('renders `GlTab` and sets title', () => {
-      expect(wrapper.findComponent(GlTab).text()).toContain('Following');
+      expect(wrapper.findComponent(GlTab).text()).toContain(s__('UserProfile|Following'));
     });
 
-    it('renders `GlBadge`, sets content', () => {
+    it('renders `GlBadge`, sets size and content', () => {
+      expect(findGlBadge().props('size')).toBe('sm');
       expect(findGlBadge().text()).toBe(`${MOCK_FOLLOWEES_COUNT}`);
     });
 

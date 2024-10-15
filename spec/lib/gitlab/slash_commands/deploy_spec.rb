@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::SlashCommands::Deploy, feature_category: :environment_management do
+RSpec.describe Gitlab::SlashCommands::Deploy, feature_category: :team_planning do
   describe '#execute' do
     let(:project) { create(:project, :repository) }
     let(:user) { create(:user) }
@@ -15,7 +15,7 @@ RSpec.describe Gitlab::SlashCommands::Deploy, feature_category: :environment_man
       project.add_developer(user)
 
       create(:protected_branch, :developers_can_merge,
-        name: 'master', project: project)
+             name: 'master', project: project)
     end
 
     subject do
@@ -45,8 +45,8 @@ RSpec.describe Gitlab::SlashCommands::Deploy, feature_category: :environment_man
       context 'when single action has been matched' do
         before do
           create(:ci_build, :manual, pipeline: pipeline,
-            name: 'first',
-            environment: 'production')
+                                     name: 'first',
+                                     environment: 'production')
         end
 
         it 'returns success result' do
@@ -60,12 +60,12 @@ RSpec.describe Gitlab::SlashCommands::Deploy, feature_category: :environment_man
         context 'when there is no specific actions with a environment name' do
           before do
             create(:ci_build, :manual, pipeline: pipeline,
-              name: 'first',
-              environment: 'production')
+                                       name: 'first',
+                                       environment: 'production')
 
             create(:ci_build, :manual, pipeline: pipeline,
-              name: 'second',
-              environment: 'production')
+                                       name: 'second',
+                                       environment: 'production')
           end
 
           it 'returns error about too many actions defined' do
@@ -77,12 +77,12 @@ RSpec.describe Gitlab::SlashCommands::Deploy, feature_category: :environment_man
         context 'when one of the actions is environement specific action' do
           before do
             create(:ci_build, :manual, pipeline: pipeline,
-              name: 'first',
-              environment: 'production')
+                                       name: 'first',
+                                       environment: 'production')
 
             create(:ci_build, :manual, pipeline: pipeline,
-              name: 'production',
-              environment: 'production')
+                                       name: 'production',
+                                       environment: 'production')
           end
 
           it 'deploys to production' do
@@ -95,11 +95,11 @@ RSpec.describe Gitlab::SlashCommands::Deploy, feature_category: :environment_man
         context 'when one of the actions is a teardown action' do
           before do
             create(:ci_build, :manual, pipeline: pipeline,
-              name: 'first',
-              environment: 'production')
+                                       name: 'first',
+                                       environment: 'production')
 
             create(:ci_build, :manual, :teardown_environment,
-              pipeline: pipeline, name: 'teardown', environment: 'production')
+                   pipeline: pipeline, name: 'teardown', environment: 'production')
           end
 
           it 'deploys to production' do
@@ -169,17 +169,13 @@ RSpec.describe Gitlab::SlashCommands::Deploy, feature_category: :environment_man
         Time.zone.now - start
       end
 
-      it 'has smaller than linear execution time growth with a malformed "to"', :aggregate_failures,
-        quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/469617' do
-        expect do
-          Timeout.timeout(3.seconds) do
-            sample1 = duration_for { described_class.match("deploy abc t" + ("o" * 100000) + "X") }
-            sample2 = duration_for { described_class.match("deploy abc t" + ("o" * 400000) + "X") }
+      it 'has smaller than linear execution time growth with a malformed "to"' do
+        Timeout.timeout(3.seconds) do
+          sample1 = duration_for { described_class.match("deploy abc t" + "o" * 1000 + "X") }
+          sample2 = duration_for { described_class.match("deploy abc t" + "o" * 4000 + "X") }
 
-            # Expectation uses 2x as linear function to allow for runtime variations and avoid flakyness
-            expect(sample2 / sample1).to be < 8
-          end
-        end.not_to raise_error
+          expect((sample2 / sample1) < 4).to be_truthy
+        end
       end
     end
   end

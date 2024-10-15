@@ -2,6 +2,8 @@
 data_category: optional
 key_path: search_unique_visits.search_unique_visits_for_any_target_monthly
 description: Removed as duplicate of redis_hll_counters.search.search_total_unique_counts_monthly
+product_section: enablement
+product_stage: enablement
 product_group: global_search
 value_type: number
 status: removed
@@ -23,6 +25,5 @@ tier:
 - premium
 - ultimate
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332
 milestone_removed: "17.0"
 removed_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/150302

@@ -19,10 +19,33 @@ RSpec.describe Label, feature_category: :team_planning do
     it { is_expected.to have_many(:priorities).class_name('LabelPriority') }
   end
 
-  it_behaves_like 'BaseLabel'
-
   describe 'validation' do
     it { is_expected.to validate_uniqueness_of(:title).scoped_to([:group_id, :project_id]) }
+
+    it 'validates color code' do
+      is_expected.not_to allow_value('G-ITLAB').for(:color)
+      is_expected.not_to allow_value('AABBCC').for(:color)
+      is_expected.not_to allow_value('#AABBCCEE').for(:color)
+      is_expected.not_to allow_value('GGHHII').for(:color)
+      is_expected.not_to allow_value('#').for(:color)
+      is_expected.not_to allow_value('').for(:color)
+
+      is_expected.to allow_value('#AABBCC').for(:color)
+      is_expected.to allow_value('#abcdef').for(:color)
+    end
+
+    it 'validates title' do
+      is_expected.not_to allow_value('G,ITLAB').for(:title)
+      is_expected.not_to allow_value('').for(:title)
+      is_expected.not_to allow_value('s' * 256).for(:title)
+
+      is_expected.to allow_value('GITLAB').for(:title)
+      is_expected.to allow_value('gitlab').for(:title)
+      is_expected.to allow_value('G?ITLAB').for(:title)
+      is_expected.to allow_value('G&ITLAB').for(:title)
+      is_expected.to allow_value("customer's request").for(:title)
+      is_expected.to allow_value('s' * 255).for(:title)
+    end
 
     describe 'description length' do
       let(:invalid_description) { 'x' * (::Label::DESCRIPTION_LENGTH_MAX + 1) }
@@ -229,6 +252,56 @@ RSpec.describe Label, feature_category: :team_planning do
     end
   end
 
+  describe '#color' do
+    it 'strips color' do
+      label = described_class.new(color: '   #abcdef   ')
+      label.valid?
+
+      expect(label.color).to be_color('#abcdef')
+    end
+
+    it 'uses default color if color is missing' do
+      label = described_class.new(color: nil)
+
+      expect(label.color).to be_color(Label::DEFAULT_COLOR)
+    end
+  end
+
+  describe '#text_color' do
+    it 'uses default color if color is missing' do
+      label = described_class.new(color: nil)
+
+      expect(label.text_color).to eq(Label::DEFAULT_COLOR.contrast)
+    end
+  end
+
+  describe '#title' do
+    it 'sanitizes title' do
+      label = described_class.new(title: '<b>foo & bar?</b>')
+      expect(label.title).to eq('foo & bar?')
+    end
+
+    it 'strips title' do
+      label = described_class.new(title: '   label   ')
+      label.valid?
+
+      expect(label.title).to eq('label')
+    end
+  end
+
+  describe '#description' do
+    it 'sanitizes description' do
+      label = described_class.new(description: '<b>foo & bar?</b>')
+      expect(label.description).to eq('foo & bar?')
+    end
+
+    it 'accepts an empty string' do
+      label = described_class.new(title: 'foo', description: 'bar')
+      label.update!(description: '')
+      expect(label.description).to eq('')
+    end
+  end
+
   describe '#hook_attrs' do
     let_it_be(:label) { build_stubbed(:label) }
 
@@ -261,6 +334,14 @@ RSpec.describe Label, feature_category: :team_planning do
       it 'has the group ID' do
         is_expected.to include(group_id: group.id)
       end
+    end
+
+    context 'when flag is disabled' do
+      before do
+        stub_feature_flags(webhooks_static_label_hook_attrs: false)
+      end
+
+      it { is_expected.to eq(label.attributes) }
     end
   end
 
@@ -317,6 +398,22 @@ RSpec.describe Label, feature_category: :team_planning do
           expect(label.priority(project)).to eq 1
         end
       end
+    end
+  end
+
+  describe '.search' do
+    let(:label) { create(:label, title: 'bug', description: 'incorrect behavior') }
+
+    it 'returns labels with a partially matching title' do
+      expect(described_class.search(label.title[0..2])).to eq([label])
+    end
+
+    it 'returns labels with a partially matching description' do
+      expect(described_class.search(label.description[0..5])).to eq([label])
+    end
+
+    it 'returns nothing' do
+      expect(described_class.search('feature')).to be_empty
     end
   end
 

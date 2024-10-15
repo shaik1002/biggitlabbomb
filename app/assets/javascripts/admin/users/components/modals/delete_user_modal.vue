@@ -116,7 +116,7 @@ export default {
     <p>
       <gl-sprintf :message="s__('AdminUsers|To confirm, type %{username}.')">
         <template #username>
-          <code data-testid="confirm-username" class="gl-whitespace-pre-wrap">{{
+          <code data-testid="confirm-username" class="gl-white-space-pre-wrap">{{
             trimmedUsername
           }}</code>
         </template>

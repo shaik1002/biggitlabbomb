@@ -15,12 +15,17 @@ to keep it in the same project as your code, you can use the wiki GitLab provide
 in each GitLab project. Every wiki is a separate Git repository, so you can create
 wiki pages in the web interface, or [locally using Git](#create-or-edit-wiki-pages-locally).
 
-GitLab wikis support Markdown, RDoc, AsciiDoc, and Org for content.
+GitLab wikis support Markdown, Rdoc, AsciiDoc, and Org for content.
 Wiki pages written in Markdown support all [Markdown features](../../markdown.md),
 and also provide some [wiki-specific behavior](../../markdown.md#wiki-specific-markdown)
 for links.
 
-Wiki pages also display a [sidebar](#sidebar), which [you can customize](#customize-sidebar).
+Wiki pages display a sidebar, which you [can customize](#customize-sidebar). This
+sidebar contains a partial list of pages in the wiki, displayed as a nested tree,
+with sibling pages listed in alphabetical order. To view a list of all pages, select
+**View All Pages** in the sidebar:
+
+![Wiki sidebar](img/wiki_sidebar_v13_5.png)
 
 ## View a project wiki
 
@@ -50,19 +55,15 @@ for previously created wikis.
 
 ## Create the wiki home page
 
-> - Separation of page title and path [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/30758) in GitLab 17.2 [with flags](../../../administration/feature_flags.md) named `wiki_front_matter` and `wiki_front_matter_title`. Enabled by default.
-> - Feature flags `wiki_front_matter` and `wiki_front_matter_title` removed in GitLab 17.3.
-
 When a wiki is created, it is empty. On your first visit, you can create the
-home page users see when viewing the wiki. This page requires a specific path
+home page users see when viewing the wiki. This page requires a specific title
 to be used as your wiki's home page. To create it:
 
 1. On the left sidebar, select **Search or go to** and find your project or group.
 1. Select **Plan > Wiki**.
 1. Select **Create your first page**.
-1. Optional. Change the **Title** of the home page.
-1. GitLab requires this first page to have path `home`. The page on this
-   path serves as the front page for your wiki.
+1. GitLab requires this first page be titled `home`. The page with this
+   title serves as the front page for your wiki.
 1. Select a **Format** for styling your text.
 1. Add a welcome message for your home page in the **Content** section. You can
    always edit it later.
@@ -72,22 +73,16 @@ to be used as your wiki's home page. To create it:
 
 ## Create a new wiki page
 
-> - Separation of page title and path [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/30758) in GitLab 17.2 [with flags](../../../administration/feature_flags.md) named `wiki_front_matter` and `wiki_front_matter_title`. Enabled by default.
-> - Feature flags `wiki_front_matter` and `wiki_front_matter_title` removed in GitLab 17.3.
-
-Prerequisites:
-
-- You must have at least the Developer role.
+Users with at least the Developer role can create new wiki pages:
 
 1. On the left sidebar, select **Search or go to** and find your project or group.
 1. Select **Plan > Wiki**.
-1. Select **Wiki actions** (**{ellipsis_v}**), then **New page** on this page, or any other wiki page.
+1. Select **New page** on this page, or any other wiki page.
 1. Select a content format.
-1. Add a **Title** for your new page.
-1. Optional. Uncheck **Generate page path from title** and change the **Path** of the page.
-   Page paths use [special characters](#special-characters-in-page-paths) for subdirectories and formatting,
+1. Add a title for your new page. Page titles use
+   [special characters](#special-characters-in-page-titles) for subdirectories and formatting,
    and have [length restrictions](#length-restrictions-for-file-and-directory-names).
-1. Optional. Add content to your wiki page.
+1. Add content to your wiki page.
 1. Optional. Attach a file, and GitLab stores it in the wiki's Git repository.
 1. Add a **Commit message**. Git requires a commit message, so GitLab creates one
    if you don't enter one yourself.
@@ -101,7 +96,7 @@ locally:
 
 1. On the left sidebar, select **Search or go to** and find your project or group.
 1. Select **Plan > Wiki**.
-1. Select **Wiki actions** (**{ellipsis_v}**), then **Clone repository**.
+1. On the right sidebar, select **Clone repository**.
 1. Follow the on-screen instructions.
 
 Files you add to your wiki locally must use one of the following
@@ -112,30 +107,16 @@ Files with unsupported extensions don't display when pushed to GitLab:
 - AsciiDoc extensions: `.adoc`, `.ad`, `.asciidoc`.
 - Other markup extensions: `.textile`, `.rdoc`, `.org`, `.creole`, `.wiki`, `.mediawiki`, `.rst`.
 
-### Special characters in page paths
+### Special characters in page titles
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/133521) front matter based titles in GitLab 16.7 [with flags](../../../administration/feature_flags.md) named `wiki_front_matter` and `wiki_front_matter_title`. Disabled by default.
-> - Feature flags [`wiki_front_matter`](https://gitlab.com/gitlab-org/gitlab/-/issues/435056) and [`wiki_front_matter_title`](https://gitlab.com/gitlab-org/gitlab/-/issues/428259) enabled by default in GitLab 17.2.
-> - Feature flags `wiki_front_matter` and `wiki_front_matter_title` removed in GitLab 17.3.
-
-Wiki pages are stored as files in a Git repository, and by default, the filename of
-a page is also its title. Certain characters in the filename have a special meaning:
+Wiki pages are stored as files in a Git repository, so certain characters have a special meaning:
 
 - Spaces are converted into hyphens when storing a page.
 - Hyphens (`-`) are converted back into spaces when displaying a page.
 - Slashes (`/`) are used as path separators, and can't be displayed in titles. If you
-  create a file with title containing `/` characters, GitLab creates all the subdirectories
+  create a title containing `/` characters, GitLab creates all the subdirectories
   needed to build that path. For example, a title of `docs/my-page` creates a wiki
   page with a path `/wikis/docs/my-page`.
-
-To circumvent these limitations, you can also store the title of a wiki page in a
-front matter block before a page's contents. For example:
-
-```yaml
----
-title: Page title
----
-```
 
 ### Length restrictions for file and directory names
 
@@ -145,7 +126,7 @@ those limits. However, if your file system enforces these limits, you cannot che
 local copy of a wiki that contains filenames exceeding this limit. To prevent this
 problem, the GitLab web interface and API enforce these limits:
 
-- 245 bytes for filenames (reserving 10 bytes for the file extension).
+- 245 bytes for page titles (reserving 10 bytes for the file extension).
 - 255 bytes for directory names.
 
 Non-ASCII characters take up more than one byte.
@@ -155,15 +136,13 @@ may not be able to check out the wiki locally afterward.
 
 ## Edit a wiki page
 
-Prerequisites:
-
-- You must have at least the Developer role.
+You need at least the Developer role to edit a wiki page:
 
 1. On the left sidebar, select **Search or go to** and find your project or group.
 1. Select **Plan > Wiki**.
 1. Go to the page you want to edit, and either:
    - Use the <kbd>e</kbd> wiki [keyboard shortcut](../../shortcuts.md#wiki-pages).
-   - Select **Edit**.
+   - Select the edit icon (**{pencil}**).
 1. Edit the content.
 1. Select **Save changes**.
 
@@ -171,14 +150,8 @@ Unsaved changes to a wiki page are preserved in local browser storage to prevent
 
 ### Create a table of contents
 
-> - Table of contents in the wiki sidebar [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/281570) in GitLab 17.2.
-
-Wiki pages with headings in their contents automatically display a table of contents
-section in the sidebar.
-
-You can also choose to optionally display a separate table of contents section on the page
-itself. To generate a table of contents from a wiki page's subheadings, use the
-`[[_TOC_]]` tag. For an example, read [Table of contents](../../markdown.md#table-of-contents).
+To generate a table of contents from a wiki page's subheadings, use the `[[_TOC_]]` tag.
+For an example, read [Table of contents](../../markdown.md#table-of-contents).
 
 ## Delete a wiki page
 
@@ -189,18 +162,11 @@ Prerequisites:
 1. On the left sidebar, select **Search or go to** and find your project or group.
 1. Select **Plan > Wiki**.
 1. Go to the page you want to delete.
-1. Select **Wiki actions** (**{ellipsis_v}**), then **Delete page**.
+1. Select the edit icon (**{pencil}**).
+1. Select **Delete page**.
 1. Confirm the deletion.
 
-## Move or rename a wiki page
-
-> - Redirects for moved or renamed wiki pages [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/257892) in GitLab 17.1 [with a flag](../../../administration/feature_flags.md) named `wiki_redirection`. Enabled by default.
-> - Separation of page title and path [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/30758) in GitLab 17.2 [with flags](../../../administration/feature_flags.md) named `wiki_front_matter` and `wiki_front_matter_title`. Enabled by default.
-> - Feature flags `wiki_redirection`, `wiki_front_matter` and `wiki_front_matter_title` removed in GitLab 17.3.
-
-In GitLab 17.1 and later, when you move or rename a page, a redirect is
-automatically set up from the old page to the new page. A list of redirects
-is stored in the `.gitlab/redirects.yml` file in the Wiki repository.
+## Move a wiki page
 
 Prerequisites:
 
@@ -208,12 +174,11 @@ Prerequisites:
 
 1. On the left sidebar, select **Search or go to** and find your project or group.
 1. Select **Plan > Wiki**.
-1. Go to the page you want to move or rename.
-1. Select **Edit**.
-1. To move the page, add the new path to the **Path** field. For example,
-   if you have a wiki page called `About` under `Company` and you want to
-   move it to the wiki's root, change the **Path** from `About` to `/About`.
-1. To rename the page, change the **Path**.
+1. Go to the page you want to move.
+1. Select the edit icon (**{pencil}**).
+1. Add the new path to the **Title** field. For example, if you have a wiki page
+   called `about` under `company` and you want to move it to the wiki's root,
+   change the **Title** from `about` to `/about`.
 1. Select **Save changes**.
 
 ## Export a wiki page
@@ -227,7 +192,7 @@ You can export a wiki page as a PDF file:
 1. On the left sidebar, select **Search or go to** and find your project or group.
 1. Select **Plan > Wiki**.
 1. Go to the page you want to export.
-1. On the top right, select **Wiki actions** (**{ellipsis_v}**), then select **Print as PDF**.
+1. Select the vertical ellipsis (**{ellipsis_v}**), and then select **Print as PDF**.
 
 A PDF of the wiki page is created.
 
@@ -247,7 +212,7 @@ Prerequisites:
 
 1. On the left sidebar, select **Search or go to** and find your project or group.
 1. Select **Plan > Wiki**.
-1. Select **Wiki actions** (**{ellipsis_v}**), then **Templates**.
+1. On the right sidebar, select **Templates**.
 1. Select **New Template**.
 1. Enter template title, format and content, as if creating a regular wiki page.
 
@@ -273,7 +238,9 @@ Prerequisites:
 The changes of a wiki page over time are recorded in the wiki's Git repository.
 The history page shows:
 
-- The revision of the page.
+![Wiki page history](img/wiki_page_history.png)
+
+- The revision (Git commit SHA) of the page.
 - The page author.
 - The commit message.
 - The last update.
@@ -284,7 +251,7 @@ To view the changes for a wiki page:
 1. On the left sidebar, select **Search or go to** and find your project or group.
 1. Select **Plan > Wiki**.
 1. Go to the page you want to view history for.
-1. Select **Wiki actions** (**{ellipsis_v}**), then **Page history**.
+1. Select **Page history**.
 
 ### View changes between page versions
 
@@ -293,24 +260,23 @@ You can see the changes made in a version of a wiki page, similar to versioned d
 1. On the left sidebar, select **Search or go to** and find your project or group.
 1. Select **Plan > Wiki**.
 1. Go to the wiki page you're interested in.
-1. Select **Wiki actions** (**{ellipsis_v}**), then **Page history** to see all page versions.
-1. Select the commit message in the **Diff** column for the version you're interested in.
+1. Select **Page history** to see all page versions.
+1. Select the commit message in the **Changes** column for the version you're interested in.
 
-## Sidebar
+   ![Wiki page changes](img/wiki_page_diffs_v13_2.png)
 
-> - Searching by title in the sidebar [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/156054) in GitLab 17.1.
-> - Limit of 15 items in the sidebar [removed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/158084) in GitLab 17.2.
+## Track wiki events
 
-Wiki pages display a sidebar that contains a list of pages in the wiki,
-displayed as a nested tree, with sibling pages listed in alphabetical order.
+GitLab tracks wiki creation, deletion, and update events. These events are displayed on these pages:
 
-You can quickly find a page by its title in the wiki using the search box in
-the sidebar.
+- [User profile](../../profile/index.md#access-your-user-profile).
+- Activity pages, depending on the type of wiki:
+  - [Group activity](../../group/manage.md#view-group-activity).
+  - [Project activity](../working_with_projects.md#view-project-activity).
 
-For performance reasons, the sidebar is limited to displaying 5000 entries. To
-view a list of all pages, select **View All Pages** in the sidebar.
+Commits to wikis are not counted in [repository analytics](../../analytics/repository_analytics.md).
 
-### Customize sidebar
+## Customize sidebar
 
 You can manually edit the contents of the sidebar navigation.
 
@@ -323,13 +289,13 @@ replaces the default sidebar navigation:
 
 1. On the left sidebar, select **Search or go to** and find your project or group.
 1. Select **Plan > Wiki**.
-1. In the upper-right corner of the page, select **Add custom sidebar** (**{settings}**).
+1. In the upper-right corner of the page, select **Edit sidebar**.
 1. When complete, select **Save changes**.
 
 A `_sidebar` example, formatted with Markdown:
 
 ```markdown
-### Home
+### [Home](home)
 
 - [Hello World](hello)
 - [Foo](foo)
@@ -401,7 +367,7 @@ to disable the wiki but toggle it on (in blue).
 
 > - [Renamed](https://gitlab.com/gitlab-org/gitlab/-/issues/398152) from content editor to rich text editor in GitLab 16.2.
 
-GitLab provides a rich text editing experience for GitLab Flavored Markdown in wikis.
+GitLab provides a WYSIWYG editing experience for GitLab Flavored Markdown in wikis.
 
 Support includes:
 
@@ -409,21 +375,24 @@ Support includes:
 - Formatting ordered lists, unordered lists, and checklists.
 - Creating and editing table structure.
 - Inserting and formatting code blocks with syntax highlighting.
-- Previewing Mermaid, PlantUML, and Kroki diagrams.
+- Previewing Mermaid, PlantUML, and Kroki diagrams ([introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/86701) in GitLab 15.2).
+- Creating and editing HTML comments ([introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/104084) in GitLab 15.7).
 
 ### Use the rich text editor
 
 1. [Create](#create-a-new-wiki-page) a new wiki page, or [edit](#edit-a-wiki-page) an existing one.
 1. Select **Markdown** as your format.
-1. Under **Content**, in the lower-left corner, select **Switch to rich text editing**.
+1. Above **Content**, select **Edit rich text**.
 1. Customize your page's content using the various formatting options available in the rich text editor.
 1. Select **Create page** for a new page, or **Save changes** for an existing page.
 
-To switch back to plain text, select **Switch to plain text editing**.
+The rich text editing mode remains the default until you switch back to
+[edit the raw source](#switch-back-to-the-old-editor).
 
-See also:
+### Switch back to the old editor
 
-- [Rich text editor](../../rich_text_editor.md)
+1. *If you're editing the page in the rich text editor,* scroll to **Content**.
+1. Select **Edit source**.
 
 ### GitLab Flavored Markdown support
 
@@ -433,16 +402,13 @@ For the status of the ongoing development for CommonMark and GitLab Flavored Mar
 - [Basic Markdown formatting extensions](https://gitlab.com/groups/gitlab-org/-/epics/5404) epic.
 - [GitLab Flavored Markdown extensions](https://gitlab.com/groups/gitlab-org/-/epics/5438) epic.
 
-## Track wiki events
+## Related topics
 
-GitLab tracks wiki creation, deletion, and update events. These events are displayed on the following pages:
-
-- [User profile](../../profile/index.md#access-your-user-profile).
-- Activity pages, depending on the type of wiki:
-  - [Group activity](../../group/manage.md#view-group-activity).
-  - [Project activity](../working_with_projects.md#view-project-activity).
-
-Commits to wikis are not counted in [repository analytics](../../analytics/repository_analytics.md).
+- [Wiki settings for administrators](../../../administration/wikis/index.md)
+- [Project wikis API](../../../api/wikis.md)
+- [Group repository storage moves API](../../../api/group_repository_storage_moves.md)
+- [Group wikis API](../../../api/group_wikis.md)
+- [Wiki keyboard shortcuts](../../shortcuts.md#wiki-pages)
 
 ## Troubleshooting
 
@@ -484,13 +450,3 @@ To clear all data from a project wiki and recreate it in a blank state:
    ```
 
 All data from the wiki has been cleared, and the wiki is ready for use.
-
-## Related topics
-
-- [Wiki settings for administrators](../../../administration/wikis/index.md)
-- [Project wikis API](../../../api/wikis.md)
-- [Group wikis API](../../../api/group_wikis.md)
-- [Group repository storage moves API](../../../api/group_repository_storage_moves.md)
-- [Wiki keyboard shortcuts](../../shortcuts.md#wiki-pages)
-- [GitLab Flavored Markdown](../../markdown.md)
-- [Asciidoc](../../asciidoc.md)

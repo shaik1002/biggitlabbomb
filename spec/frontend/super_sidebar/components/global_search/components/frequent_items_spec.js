@@ -90,13 +90,8 @@ describe('FrequentlyVisitedItems', () => {
     });
   });
 
-  describe.each`
-    description              | relativeUrl
-    ${'with relativeUrl'}    | ${'/gitlab'}
-    ${'without relativeUrl'} | ${''}
-  `('when there are items $description', ({ relativeUrl }) => {
+  describe('when there are items', () => {
     beforeEach(() => {
-      gon.relative_url_root = relativeUrl;
       createComponent({
         items: frecentGroupsMock,
       });
@@ -111,7 +106,7 @@ describe('FrequentlyVisitedItems', () => {
         // Check GlDisclosureDropdownItem's item has the right structure
         expect(dropdownItem.props('item')).toMatchObject({
           text: item.name,
-          href: `${relativeUrl}/${item.fullPath}`,
+          href: item.webUrl,
         });
 
         // Check FrequentItem's item has the right structure

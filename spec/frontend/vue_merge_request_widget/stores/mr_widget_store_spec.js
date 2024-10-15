@@ -189,15 +189,5 @@ describe('MergeRequestStore', () => {
         expect(store.preventMerge).toBe(false);
       });
     });
-
-    describe('setRemoveSourceBranch', () => {
-      it('updates removeSourceBranch', () => {
-        store.setRemoveSourceBranch(true);
-        expect(store.shouldRemoveSourceBranch).toBe(true);
-
-        store.setRemoveSourceBranch(false);
-        expect(store.shouldRemoveSourceBranch).toBe(false);
-      });
-    });
   });
 });

@@ -34,20 +34,14 @@ RSpec.describe Ci::Components::Usages::CreateService, feature_category: :pipelin
     end
 
     context 'when usage is invalid' do
-      before do
+      it 'does not create a usage record and returns error' do
         usage = instance_double(
-          Ci::Catalog::Resources::Components::Usage, save: false,
+          Ci::Catalog::Resources::Components::Usage, valid?: false,
           errors: instance_double(ActiveModel::Errors, full_messages: ['msg 1', 'msg 2'], size: 2))
 
         allow(Ci::Catalog::Resources::Components::Usage).to receive(:new).and_return(usage)
-      end
 
-      it 'does not create a usage record' do
         expect { execute }.not_to change { Ci::Catalog::Resources::Components::Usage.count }
-      end
-
-      it 'tracks exception and returns error response' do
-        expect(Gitlab::ErrorTracking).to receive(:track_exception).once
         expect(execute).to be_error
         expect(execute.message).to eq('msg 1, msg 2')
       end

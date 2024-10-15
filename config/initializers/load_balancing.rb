@@ -40,5 +40,3 @@ Gitlab::Database::LoadBalancing.base_models.each do |model|
       .setup
   end
 end
-
-ActiveSupport.run_load_hooks(:gitlab_db_load_balancer)

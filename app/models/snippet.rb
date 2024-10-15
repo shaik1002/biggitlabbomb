@@ -13,6 +13,7 @@ class Snippet < ApplicationRecord
   include Editable
   include Gitlab::SQL::Pattern
   include FromUnion
+  include IgnorableColumns
   include HasRepository
   include CanMoveRepositoryStorage
   include AfterCommitQueue
@@ -20,9 +21,6 @@ class Snippet < ApplicationRecord
   include CreatedAtFilterable
   include EachBatch
   include Import::HasImportSource
-  include SafelyChangeColumnDefault
-
-  columns_changing_default :organization_id
 
   MAX_FILE_COUNT = 10
 
@@ -47,7 +45,6 @@ class Snippet < ApplicationRecord
 
   belongs_to :author, class_name: 'User'
   belongs_to :project
-  belongs_to :organization, class_name: 'Organizations::Organization'
   alias_method :resource_parent, :project
 
   has_many :notes, as: :noteable, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
@@ -251,6 +248,10 @@ class Snippet < ApplicationRecord
   end
 
   def hook_attrs
+    if Feature.disabled?(:webhooks_static_snippet_hook_attrs, Project.actor_from_id(project_id))
+      return attributes.merge('url' => Gitlab::UrlBuilder.build(self))
+    end
+
     {
       id: id,
       title: title,

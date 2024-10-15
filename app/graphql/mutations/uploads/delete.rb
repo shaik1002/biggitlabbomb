@@ -25,9 +25,7 @@ module Mutations
       def resolve(args)
         parent = authorized_resource_parent_find!(args)
 
-        upload = Banzai::UploadsFinder.new(parent: parent)
-                  .find_by_secret_and_filename(args[:secret], args[:filename])
-        result = ::Uploads::DestroyService.new(parent, current_user).execute(upload)
+        result = ::Uploads::DestroyService.new(parent, current_user).execute(args[:secret], args[:filename])
 
         {
           upload: result[:status] == :success ? result[:upload] : nil,

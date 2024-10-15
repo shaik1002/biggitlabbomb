@@ -16,8 +16,6 @@ module Types
 
     present_using MergeRequestPresenter
 
-    field :closed_at, Types::TimeType, null: true, complexity: 5,
-      description: 'Timestamp of when the merge request was closed, null if not closed.'
     field :created_at, Types::TimeType, null: false,
       description: 'Timestamp of when the merge request was created.'
     field :description, GraphQL::Types::String, null: true,
@@ -56,9 +54,6 @@ module Types
       description: 'State of the merge request.'
     field :target_branch, GraphQL::Types::String, null: false,
       description: 'Target branch of the merge request.'
-    field :target_branch_path, GraphQL::Types::String, method: :target_branch_commits_path, null: true,
-      calls_gitaly: true,
-      description: 'Path to the target branch of the merge request.'
     field :target_project, Types::ProjectType, null: false,
       description: 'Target project of the merge request.'
     field :target_project_id, GraphQL::Types::Int, null: false,
@@ -102,11 +97,6 @@ module Types
     field :merge_status_enum, ::Types::MergeRequests::MergeStatusEnum,
       method: :public_merge_status, null: true,
       description: 'Merge status of the merge request.'
-
-    field :merge_after, ::Types::TimeType,
-      null: true,
-      description: 'Date after which the merge request can be merged.',
-      alpha: { milestone: '17.5' }
 
     field :detailed_merge_status, ::Types::MergeRequests::DetailedMergeStatusEnum, null: true,
       calls_gitaly: true,
@@ -185,12 +175,6 @@ module Types
       description: 'Labels of the merge request.',
       resolver: Resolvers::BulkLabelsResolver
 
-    field :auto_merge_enabled, GraphQL::Types::Boolean, null: false,
-      description: 'Indicates if auto merge is enabled for the merge request.'
-    field :commit_count, GraphQL::Types::Int, null: true, method: :commits_count,
-      description: 'Number of commits in the merge request.'
-    field :conflicts, GraphQL::Types::Boolean, null: false, method: :cannot_be_merged?,
-      description: 'Indicates if the merge request has conflicts.'
     field :milestone, Types::MilestoneType, null: true,
       description: 'Milestone of the merge request.'
     field :participants, Types::MergeRequests::ParticipantType.connection_type, null: true, complexity: 15,
@@ -201,6 +185,12 @@ module Types
       argument :full, GraphQL::Types::Boolean, required: false, default_value: false,
         description: 'Boolean option specifying whether the reference should be returned in full.'
     end
+    field :auto_merge_enabled, GraphQL::Types::Boolean, null: false,
+      description: 'Indicates if auto merge is enabled for the merge request.'
+    field :commit_count, GraphQL::Types::Int, null: true, method: :commits_count,
+      description: 'Number of commits in the merge request.'
+    field :conflicts, GraphQL::Types::Boolean, null: false, method: :cannot_be_merged?,
+      description: 'Indicates if the merge request has conflicts.'
     field :reviewers,
       type: Types::MergeRequests::ReviewerType.connection_type,
       null: true,
@@ -335,10 +325,6 @@ module Types
       AutoMergeService.new(object.project, current_user).available_strategies(object)
     end
 
-    def closed_at
-      object.metrics&.latest_closed_at
-    end
-
     def commits
       object.commits.commits
     end
@@ -353,10 +339,6 @@ module Types
 
     def merge_user
       object.metrics&.merged_by || object.merge_user
-    end
-
-    def merge_after
-      object.merge_schedule&.merge_after
     end
 
     def detailed_merge_status

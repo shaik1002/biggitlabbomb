@@ -3,7 +3,6 @@
 module Gitlab
   class GitPostReceive
     include Gitlab::Identifier
-
     attr_reader :container, :identifier, :changes, :push_options
 
     def initialize(container, identifier, changes, push_options = {})
@@ -14,7 +13,7 @@ module Gitlab
     end
 
     def identify
-      super(identifier) || identify_using_deploy_key(identifier)&.user
+      super(identifier)
     end
 
     def includes_branches?

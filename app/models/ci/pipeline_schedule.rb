@@ -11,22 +11,7 @@ module Ci
     include BatchNullifyDependentAssociations
     include Gitlab::Utils::StrongMemoize
 
-    VALID_REF_FORMAT_REGEX = %r{\A(#{Gitlab::Git::TAG_REF_PREFIX}|#{Gitlab::Git::BRANCH_REF_PREFIX})[\S]+}
-
-    SORT_ORDERS = {
-      id_asc: { order_by: 'id', sort: 'asc' },
-      id_desc: { order_by: 'id', sort: 'desc' },
-      description_asc: { order_by: 'description', sort: 'asc' },
-      description_desc: { order_by: 'description', sort: 'desc' },
-      ref_asc: { order_by: 'ref', sort: 'asc' },
-      ref_desc: { order_by: 'ref', sort: 'desc' },
-      next_run_at_asc: { order_by: 'next_run_at', sort: 'asc' },
-      next_run_at_desc: { order_by: 'next_run_at', sort: 'desc' },
-      created_at_asc: { order_by: 'created_at', sort: 'asc' },
-      created_at_desc: { order_by: 'created_at', sort: 'desc' },
-      updated_at_asc: { order_by: 'updated_at', sort: 'asc' },
-      updated_at_desc: { order_by: 'updated_at', sort: 'desc' }
-    }.freeze
+    VALID_REF_FORMAT_REGEX = %r{\A(#{Gitlab::Git::TAG_REF_PREFIX}|#{Gitlab::Git::BRANCH_REF_PREFIX}).[^\/]+}
 
     self.limit_name = 'ci_pipeline_schedules'
     self.limit_scope = :project
@@ -55,13 +40,6 @@ module Ci
 
     alias_attribute :real_next_run, :next_run_at
 
-    def self.sort_by_attribute(method)
-      sort_order = SORT_ORDERS[method]
-      raise ArgumentError, "order undefined" unless sort_order
-
-      reorder(sort_order[:order_by] => sort_order[:sort])
-    end
-
     def owned_by?(current_user)
       owner == current_user
     end
@@ -83,7 +61,6 @@ module Ci
     end
 
     override :set_next_run_at
-
     def set_next_run_at
       self.next_run_at = ::Ci::PipelineSchedules::CalculateNextRunService # rubocop: disable CodeReuse/ServiceClass
                            .new(project)

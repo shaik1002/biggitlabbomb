@@ -2,17 +2,9 @@
 
 module Members
   class UpdateService < Members::BaseService
-    def initialize(*args)
-      super
-
-      @source = params[:source]
-    end
-
     # @param members [Member, Array<Member>]
     # returns the updated member(s)
     def execute(members, permission: :update)
-      validate_source_type!
-
       members = Array.wrap(members)
 
       old_access_level_expiry_map = members.to_h do |member|
@@ -25,24 +17,17 @@ module Members
       end
 
       prepare_response(members)
-
-    rescue ActiveRecord::RecordInvalid
-      prepare_response(members)
     end
 
     private
-
-    attr_reader :source
-
-    def validate_source_type!
-      raise "Unknown source type: #{source.class}!" unless source.is_a?(Group) || source.is_a?(Project)
-    end
 
     def update_members(members, permission)
       # `filter_map` avoids the `post_update` call for the member that resulted in no change
       Member.transaction do
         members.filter_map { |member| update_member(member, permission) }
       end
+    rescue ActiveRecord::RecordInvalid
+      []
     end
 
     def update_member(member, permission)
@@ -52,7 +37,6 @@ module Members
       return unless member.changed?
 
       member.expiry_notified_at = nil if member.expires_at_changed?
-
       member.tap(&:save!)
     end
 

@@ -5,7 +5,7 @@
 }
 
 .appearance-light-logo-preview {
-  background-color: $gray-10;
+  background-color: $gray-light;
   max-width: 72px;
   padding: 10px;
   margin-bottom: 10px;
@@ -32,6 +32,11 @@
   }
 }
 
+@mixin svg-size($size) {
+  width: $size;
+  height: $size;
+}
+
 svg {
   fill: currentColor;
 }
@@ -41,8 +46,7 @@ svg {
   $svg-sizes: 8 10 12 14 16 18 24 32 48 72;
   @each $svg-size in $svg-sizes {
     &.s#{$svg-size} {
-      width: #{$svg-size}px;
-      height: #{$svg-size}px;
+      @include svg-size(#{$svg-size}px);
     }
   }
 

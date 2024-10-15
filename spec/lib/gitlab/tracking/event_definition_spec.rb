@@ -12,6 +12,8 @@ RSpec.describe Gitlab::Tracking::EventDefinition, feature_category: :service_pin
       property_description: 'The string "issue_id"',
       value_description: 'ID of the issue',
       extra_properties: { confidential: false },
+      product_stage: 'growth',
+      product_section: 'dev',
       product_group: 'group::product analytics',
       distributions: %w[ee ce],
       tiers: %w[free premium ultimate],
@@ -41,7 +43,7 @@ RSpec.describe Gitlab::Tracking::EventDefinition, feature_category: :service_pin
     definitions_by_action = described_class
                               .definitions
                               .select { |d| d.attributes[:internal_events] }
-                              .group_by(&:action)
+                              .group_by { |d| d.attributes[:action] }
 
     definitions_by_action.each do |action, definitions|
       expect(definitions.size).to eq(1),
@@ -61,9 +63,9 @@ RSpec.describe Gitlab::Tracking::EventDefinition, feature_category: :service_pin
   end
 
   it 'has event definitions for all events used in Internal Events metric definitions', :aggregate_failures do
-    from_metric_definitions = Gitlab::Usage::MetricDefinition.not_removed
+    from_metric_definitions = Gitlab::Usage::MetricDefinition.definitions
       .values
-      .select(&:internal_events?)
+      .select { |m| m.attributes[:data_source] == 'internal_events' }
       .flat_map { |m| m.events&.keys }
       .compact
       .uniq
@@ -73,6 +75,35 @@ RSpec.describe Gitlab::Tracking::EventDefinition, feature_category: :service_pin
     from_metric_definitions.each do |event|
       expect(event_names).to include(event),
         "Event '#{event}' is used in Internal Events but does not have an event definition yet. Please define it."
+    end
+  end
+
+  describe '#validate' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:attribute, :value) do
+      :description          | 1
+      :category             | nil
+      :action               | nil
+      :label_description    | 1
+      :property_description | 1
+      :value_description    | 1
+      :extra_properties     | 'smth'
+      :product_stage        | 1
+      :product_section      | nil
+      :product_group        | nil
+      :distributions        | %(be eb)
+      :tiers                | %(pro)
+    end
+
+    with_them do
+      before do
+        attributes[attribute] = value
+      end
+
+      it 'has validation errors' do
+        expect(described_class.new(path, attributes).validation_errors).not_to be_empty
+      end
     end
   end
 
@@ -115,30 +146,6 @@ RSpec.describe Gitlab::Tracking::EventDefinition, feature_category: :service_pin
       it 'does not read any files' do
         expect(Dir).not_to receive(:glob)
         described_class.definitions
-      end
-    end
-  end
-
-  describe '.find' do
-    let(:event_definition1) { described_class.new(nil, { action: 'event1' }) }
-    let(:event_definition2) { described_class.new(nil, { action: 'event2' }) }
-
-    before do
-      described_class.clear_memoization(:find)
-      allow(described_class).to receive(:definitions).and_return([event_definition1, event_definition2])
-    end
-
-    it 'finds the event definition by action' do
-      expect(described_class.find('event1')).to eq(event_definition1)
-    end
-
-    it 'memorizes results' do
-      expect(described_class).to receive(:definitions).exactly(3).times.and_call_original
-
-      10.times do
-        described_class.find('event1')
-        described_class.find('event2')
-        described_class.find('non-existing-event')
       end
     end
   end

@@ -34,10 +34,6 @@ module Gitlab
               comment_id: comment[:id]
             )
           end
-
-          def pull_request_comment_attributes(comment)
-            super(comment).merge(imported_from: ::Import::SOURCE_BITBUCKET_SERVER)
-          end
         end
       end
     end

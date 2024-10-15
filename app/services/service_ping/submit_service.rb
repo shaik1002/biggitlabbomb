@@ -10,7 +10,8 @@ module ServicePing
 
     SubmissionError = Class.new(StandardError)
 
-    def initialize(payload: nil)
+    def initialize(skip_db_write: false, payload: nil)
+      @skip_db_write = skip_db_write
       @payload = payload
     end
 
@@ -35,7 +36,7 @@ module ServicePing
 
     private
 
-    attr_reader :payload
+    attr_reader :payload, :skip_db_write
 
     def metadata(service_ping_payload)
       {
@@ -64,10 +65,7 @@ module ServicePing
         URI.join(base_url, path),
         body: Gitlab::Json.dump(payload),
         allow_local_requests: true,
-        headers: {
-          'Content-type' => 'application/json',
-          'Accept' => 'application/json'
-        }
+        headers: { 'Content-type' => 'application/json' }
       )
     end
 
@@ -84,6 +82,8 @@ module ServicePing
       unless version_usage_data_id.is_a?(Integer) && version_usage_data_id > 0
         raise SubmissionError, "Invalid usage_data_id in response: #{version_usage_data_id}"
       end
+
+      return if skip_db_write
 
       raw_usage_data = save_raw_usage_data(payload)
       raw_usage_data.update_version_metadata!(usage_data_id: version_usage_data_id)

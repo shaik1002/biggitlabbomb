@@ -2,6 +2,7 @@ import PortalVue from 'portal-vue';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import BoardApp from '~/boards/components/board_app.vue';
+import '~/boards/filters/due_date_filters';
 import { TYPE_ISSUE, WORKSPACE_GROUP, WORKSPACE_PROJECT } from '~/issues/constants';
 import {
   navigationType,
@@ -16,48 +17,12 @@ import { fullBoardId } from './boards_util';
 Vue.use(VueApollo);
 Vue.use(PortalVue);
 
-defaultClient.cache.policies.addTypePolicies({
-  BoardList: {
-    fields: {
-      issues: {
-        keyArgs: ['filters'],
-      },
-    },
-  },
-  IssueConnection: {
-    merge(existing = { nodes: [] }, incoming, { args }) {
-      if (!args?.after) {
-        return incoming;
-      }
-      return {
-        ...incoming,
-        nodes: [...existing.nodes, ...incoming.nodes],
-      };
-    },
-  },
-  Board: {
-    fields: {
-      epics: {
-        keyArgs: ['boardId'],
-      },
-    },
-  },
-});
-
 const apolloProvider = new VueApollo({
   defaultClient,
 });
 
 function mountBoardApp(el) {
-  const {
-    boardId,
-    groupId,
-    fullPath,
-    rootPath,
-    wiHasScopedLabelsFeature,
-    wiGroupPath,
-    wiCanAdminLabel,
-  } = el.dataset;
+  const { boardId, groupId, fullPath, rootPath } = el.dataset;
 
   const rawFilterParams = queryToObject(window.location.search, { gatherArrays: true });
 
@@ -78,11 +43,9 @@ function mountBoardApp(el) {
       groupId: Number(groupId),
       rootPath,
       fullPath,
-      groupPath: wiGroupPath,
       initialFilterParams,
       boardBaseUrl: el.dataset.boardBaseUrl,
       boardType,
-      isGroup: boardType === WORKSPACE_GROUP,
       isGroupBoard: boardType === WORKSPACE_GROUP,
       isProjectBoard: boardType === WORKSPACE_PROJECT,
       currentUserId: gon.current_user_id || null,
@@ -97,8 +60,6 @@ function mountBoardApp(el) {
       weights: el.dataset.weights ? JSON.parse(el.dataset.weights) : [],
       isIssueBoard: true,
       isEpicBoard: false,
-      reportAbusePath: el.dataset.wiReportAbusePath,
-      issuesListPath: el.dataset.wiIssuesListPath,
       // Permissions
       canUpdate: parseBoolean(el.dataset.canUpdate),
       canAdminList: parseBoolean(el.dataset.canAdminList),
@@ -106,7 +67,6 @@ function mountBoardApp(el) {
       allowLabelCreate: parseBoolean(el.dataset.canUpdate),
       allowLabelEdit: parseBoolean(el.dataset.canUpdate),
       isSignedIn: isLoggedIn(),
-      canAdminLabel: parseBoolean(wiCanAdminLabel),
       // Features
       multipleAssigneesFeatureAvailable: parseBoolean(el.dataset.multipleAssigneesFeatureAvailable),
       epicFeatureAvailable: parseBoolean(el.dataset.epicFeatureAvailable),
@@ -122,11 +82,6 @@ function mountBoardApp(el) {
       multipleIssueBoardsAvailable: parseBoolean(el.dataset.multipleBoardsAvailable),
       scopedIssueBoardFeatureEnabled: parseBoolean(el.dataset.scopedIssueBoardFeatureEnabled),
       allowSubEpics: false,
-      hasScopedLabelsFeature: parseBoolean(wiHasScopedLabelsFeature),
-      hasIterationsFeature: parseBoolean(el.dataset.iterationFeatureAvailable),
-      hasIssueWeightsFeature: parseBoolean(el.dataset.weightFeatureAvailable),
-      hasIssuableHealthStatusFeature: parseBoolean(el.dataset.healthStatusFeatureAvailable),
-      hasSubepicsFeature: parseBoolean(el.dataset.subEpicsFeatureAvailable),
     },
     render: (createComponent) => createComponent(BoardApp),
   });

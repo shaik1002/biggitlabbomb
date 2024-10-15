@@ -8,7 +8,8 @@
       margin-bottom: $gl-padding-4;
     }
 
-    .milestone-progress {
+    .milestone-progress,
+    .milestone-release-links {
       a {
         color: var(--blue-600, $blue-600);
       }
@@ -24,7 +25,6 @@
         word-wrap: break-word;
       }
 
-      // stylelint-disable-next-line gitlab/no-gl-class
       .gl-label-link {
         color: inherit;
       }
@@ -43,9 +43,13 @@
       margin: 0;
     }
 
-    .sidebar-collapsed-icon .progress {
-      margin: 5px 0;
-      width: calc( 100% - 1.5rem );
+    .sidebar-collapsed-icon {
+      clear: both;
+      padding: 15px 5px 5px;
+
+      .progress {
+        margin: 5px 0;
+      }
     }
   }
 
@@ -113,5 +117,35 @@
     > a:not(:last-of-type) {
       margin-right: 5px;
     }
+  }
+}
+
+@include media-breakpoint-down(md) {
+  .milestone-actions {
+    @include clearfix();
+    padding-top: $gl-vert-padding;
+
+    .btn:first-child {
+      margin-left: 0;
+    }
+  }
+}
+
+.issuable-row {
+  background-color: var(--white, $white);
+}
+
+.milestone-popover-instructions-list {
+  padding-left: 2em;
+
+  > li {
+    padding-left: 1em;
+  }
+}
+
+@include media-breakpoint-down(xs) {
+  .milestone-banner-text,
+  .milestone-banner-link {
+    display: inline;
   }
 }

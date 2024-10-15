@@ -8,7 +8,6 @@ RSpec.describe 'Pages edits pages settings', :js, feature_category: :pages do
   let_it_be(:user) { create(:user) }
 
   before do
-    stub_feature_flags(new_pages_ui: false)
     allow(Gitlab.config.pages).to receive(:enabled).and_return(true)
 
     project.add_maintainer(user)
@@ -30,6 +29,16 @@ RSpec.describe 'Pages edits pages settings', :js, feature_category: :pages do
         visit project_pages_path(project)
 
         expect(page).to have_content('Access pages')
+      end
+
+      context 'when pages are disabled in the project settings' do
+        it 'renders disabled warning' do
+          project.project_feature.update!(pages_access_level: ProjectFeature::DISABLED)
+
+          visit project_pages_path(project)
+
+          expect(page).to have_content('GitLab Pages are disabled for this project')
+        end
       end
 
       shared_examples 'does not render access control warning' do
@@ -201,6 +210,16 @@ RSpec.describe 'Pages edits pages settings', :js, feature_category: :pages do
         expect(page).to have_content('Pages were scheduled for removal')
         expect(project.reload.pages_deployed?).to be_falsey
       end
+    end
+  end
+
+  context 'when pages are disabled for project' do
+    let_it_be_with_reload(:project) { create(:project, :pages_disabled) }
+
+    it 'renders warning message' do
+      visit project_pages_path(project)
+
+      expect(page).to have_content('GitLab Pages are disabled for this project')
     end
   end
 end

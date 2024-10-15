@@ -8,8 +8,9 @@ class Packages::Debian::GroupDistribution < ApplicationRecord
   include Packages::Debian::Distribution
 
   def packages
-    ::Packages::Debian::Package
+    Packages::Package
       .for_projects(group.all_projects.public_only)
-      .with_codename(codename)
+      .debian
+      .with_debian_codename(codename)
   end
 end

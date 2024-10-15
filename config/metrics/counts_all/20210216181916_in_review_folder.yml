@@ -2,6 +2,8 @@
 data_category: optional
 key_path: counts.in_review_folder
 description: A number of environments with name review/*
+product_section: ops
+product_stage: deploy
 product_group: environments
 value_type: number
 status: active
@@ -16,4 +18,3 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

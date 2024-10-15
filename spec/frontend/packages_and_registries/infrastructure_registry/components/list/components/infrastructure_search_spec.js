@@ -28,8 +28,11 @@ describe('Infrastructure Search', () => {
   const findRegistrySearch = () => wrapper.findComponent(RegistrySearch);
   const findUrlSync = () => wrapper.findComponent(UrlSync);
 
-  const createStore = () => {
+  const createStore = (isGroupPage) => {
     const state = {
+      config: {
+        isGroupPage,
+      },
       sorting: {
         orderBy: 'version',
         sort: 'desc',
@@ -43,13 +46,10 @@ describe('Infrastructure Search', () => {
   };
 
   const mountComponent = (isGroupPage = false) => {
-    createStore();
+    createStore(isGroupPage);
 
     wrapper = shallowMount(component, {
       store,
-      provide: {
-        isGroupPage,
-      },
       stubs: {
         UrlSync,
       },

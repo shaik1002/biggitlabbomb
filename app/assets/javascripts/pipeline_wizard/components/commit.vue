@@ -116,7 +116,6 @@ export default {
     },
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     project: {
       query: getFileMetaDataQuery,
       variables() {
@@ -185,7 +184,6 @@ export default {
           v-model="message"
           :placeholder="defaultMessage"
           data-testid="commit_message"
-          no-resize
           size="md"
           @input="(v) => $emit('update:message', v)"
         />

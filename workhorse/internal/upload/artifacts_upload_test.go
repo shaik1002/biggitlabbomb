@@ -4,7 +4,6 @@ import (
 	"archive/zip"
 	"bytes"
 	"compress/gzip"
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -27,7 +26,6 @@ import (
 	"gitlab.com/gitlab-org/gitlab/workhorse/internal/upstream/roundtripper"
 	"gitlab.com/gitlab-org/gitlab/workhorse/internal/zipartifacts"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -43,7 +41,7 @@ func TestMain(m *testing.M) {
 		log.WithError(err).Fatal()
 	}
 
-	testhelper.VerifyNoGoroutines(m)
+	os.Exit(m.Run())
 }
 
 func testArtifactsUploadServer(t *testing.T, authResponse *api.Response, bodyProcessor func(w http.ResponseWriter, r *http.Request)) *httptest.Server {
@@ -63,7 +61,7 @@ func testArtifactsUploadServer(t *testing.T, authResponse *api.Response, bodyPro
 	})
 	mux.HandleFunc(Path, func(w http.ResponseWriter, r *http.Request) {
 		opts, err := destination.GetOpts(authResponse)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		if r.Method != "POST" {
 			t.Fatal("Expected POST request")
@@ -157,10 +155,7 @@ func setupWithTmpPath(t *testing.T, filename string, includeFormat bool, format 
 }
 
 func testUploadArtifacts(t *testing.T, contentType, url string, body io.Reader) *httptest.ResponseRecorder {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	httpRequest, err := http.NewRequestWithContext(ctx, "POST", url, body)
+	httpRequest, err := http.NewRequest("POST", url, body)
 	require.NoError(t, err)
 
 	httpRequest.Header.Set("Content-Type", contentType)
@@ -201,30 +196,30 @@ func TestUploadHandlerAddingMetadata(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
 			s := setupWithTmpPath(t, "file", tc.includeFormat, tc.format, nil,
-				func(_ http.ResponseWriter, r *http.Request) {
+				func(w http.ResponseWriter, r *http.Request) {
 					token, err := jwt.ParseWithClaims(r.Header.Get(RewrittenFieldsHeader), &MultipartClaims{}, testhelper.ParseJWT)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					rewrittenFields := token.Claims.(*MultipartClaims).RewrittenFields
-					assert.Len(t, rewrittenFields, 2)
+					require.Len(t, rewrittenFields, 2)
 
-					assert.Contains(t, rewrittenFields, "file")
-					assert.Contains(t, rewrittenFields, "metadata")
-					assert.Contains(t, r.PostForm, "file.gitlab-workhorse-upload")
-					assert.Contains(t, r.PostForm, "metadata.gitlab-workhorse-upload")
+					require.Contains(t, rewrittenFields, "file")
+					require.Contains(t, rewrittenFields, "metadata")
+					require.Contains(t, r.PostForm, "file.gitlab-workhorse-upload")
+					require.Contains(t, r.PostForm, "metadata.gitlab-workhorse-upload")
 				},
 			)
 
 			archive := zip.NewWriter(s.fileWriter)
 			file, err := archive.Create("test.file")
-			assert.NotNil(t, file)
-			assert.NoError(t, err)
+			require.NotNil(t, file)
+			require.NoError(t, err)
 
-			assert.NoError(t, archive.Close())
-			assert.NoError(t, s.writer.Close())
+			require.NoError(t, archive.Close())
+			require.NoError(t, s.writer.Close())
 
 			response := testUploadArtifacts(t, s.writer.FormDataContentType(), s.url, s.buffer)
-			assert.Equal(t, http.StatusOK, response.Code)
+			require.Equal(t, http.StatusOK, response.Code)
 			testhelper.RequireResponseHeader(t, response, MetadataHeaderKey, MetadataHeaderPresent)
 		})
 	}
@@ -232,15 +227,15 @@ func TestUploadHandlerAddingMetadata(t *testing.T) {
 
 func TestUploadHandlerTarArtifact(t *testing.T) {
 	s := setupWithTmpPath(t, "file", true, "tar", nil,
-		func(_ http.ResponseWriter, r *http.Request) {
+		func(w http.ResponseWriter, r *http.Request) {
 			token, err := jwt.ParseWithClaims(r.Header.Get(RewrittenFieldsHeader), &MultipartClaims{}, testhelper.ParseJWT)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			rewrittenFields := token.Claims.(*MultipartClaims).RewrittenFields
-			assert.Len(t, rewrittenFields, 1)
+			require.Len(t, rewrittenFields, 1)
 
-			assert.Contains(t, rewrittenFields, "file")
-			assert.Contains(t, r.PostForm, "file.gitlab-workhorse-upload")
+			require.Contains(t, rewrittenFields, "file")
+			require.Contains(t, r.PostForm, "file.gitlab-workhorse-upload")
 		},
 	)
 

@@ -49,10 +49,7 @@ export default {
       {{ $options.i18n.storageUsed }}
     </template>
     <template #right-secondary-text>
-      <number-to-human-size
-        :value="dependencyProxyTotalSize"
-        data-testid="dependency-proxy-size-content"
-      />
+      <number-to-human-size :value="dependencyProxyTotalSize" data-testid="dependency-proxy-size" />
     </template>
   </usage-banner>
 </template>

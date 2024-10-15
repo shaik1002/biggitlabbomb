@@ -4,70 +4,68 @@ group: Optimize
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
-# DevOps adoption by instance
+# DevOps Reports
 
 DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** Self-managed
 
 DevOps Reports give you an overview of your entire instance's adoption of
-development, security, and operations features, along with a DevOps score.
+[DevOps](https://about.gitlab.com/topics/devops/)
+from planning to monitoring.
 
-For more information about this feature, see also [DevOps adoption by group](../../user/group/devops_adoption/index.md).
+To see DevOps Reports:
 
-## DevOps score
+1. On the left sidebar, at the bottom, select **Admin Area**.
+1. Select **Analytics > DevOps Reports**.
+
+## DevOps Score
 
 NOTE:
-To view the DevOps score, you must activate your GitLab instance's [Service Ping](../settings/usage_statistics.md#service-ping).
-DevOps Score is a comparative tool, so your score data must be centrally processed by GitLab Inc. first.
-If Service Ping is not activated, the DevOps score value is 0.
+To see the DevOps score, you must activate your GitLab instance's [Service Ping](../settings/usage_statistics.md#service-ping). DevOps Score is a comparative tool, so your score data must be centrally processed by GitLab Inc. first.
 
 You can use the DevOps score to compare your DevOps status to other organizations.
 
-The **DevOps Score** displays usage of major GitLab features on your instance over
+The DevOps Score tab displays usage of major GitLab features on your instance over
 the last 30 days, averaged over the number of billable users in that time period.
+You can also see the Leader usage score, calculated from top-performing instances based on
+[Service Ping data](../settings/usage_statistics.md#service-ping) that GitLab has collected.
+Your score is compared to the lead score of each feature and then expressed
+as a percentage at the bottom of said feature. Your overall **DevOps Score** is an average of your
+feature scores.
 
-- **Your score** represents the average of your feature scores.
-- **Your usage** represents the average usage of a feature per billable user in the last 30 days.
-- The **Leader usage** is calculated from top-performing instances based on
-[Service Ping data](../settings/usage_statistics.md#service-ping) collected by GitLab.
+Service Ping data is aggregated on GitLab servers for analysis. Your usage
+information is **not sent** to any other GitLab instances.
+If you have just started using GitLab, it might take a few weeks for data to be collected before this
+feature is available.
 
-Service Ping data is aggregated on GitLab servers for analysis.
-Your usage information is **not sent** to any other GitLab instances.
-If you have just started using GitLab, it might take a few weeks for data to be collected
-before this feature becomes available.
+## DevOps Adoption
 
-## View DevOps Reports
+DETAILS:
+**Tier:** Ultimate
+**Offering:** Self-managed
 
-To view DevOps Reports for your instance:
+DevOps Adoption shows feature adoption for development, security, and operations.
 
-1. On the left sidebar, at the bottom, select **Admin**.
-1. Select **Analytics > DevOps Reports**.
+| Category    | Feature |
+|-------------|---------|
+| Development | Approvals<br>Code owners<br>Issues<br>Merge requests |
+| Security    | DAST<br>Dependency Scanning<br>Fuzz Testing<br>SAST |
+| Operations  | Deployments<br>Pipelines<br>Runners |
 
-## Add a group to DevOps Reports
+You can use Group DevOps Adoption to:
 
-Prerequisites:
+- Identify specific subgroups that are lagging in their adoption of GitLab features, so you can guide them on
+  their DevOps journey.
+- Find subgroups that have adopted certain features, and provide guidance to other subgroups on
+  how to use those features.
+- Verify if you are getting the return on investment that you expected from GitLab.
 
-- You must have at least the Reporter role for the group.
+## Add or remove a group
 
-To add a group to the DevOps Reports:
+To add or remove a subgroup from the DevOps Adoption report:
 
-1. On the left sidebar, at the bottom, select **Admin**.
-1. Select **Analytics > DevOps Reports**.
-1. From the **Add or remove groups** dropdown list, select the group you want to add.
+1. Select **Add or remove groups**.
+1. Select the subgroup you want to add or remove and select **Save changes**.
 
-## Remove a group from DevOps Reports
-
-Prerequisites:
-
-- You must have at least the Reporter role for the group.
-
-To remove a group from the DevOps Reports:
-
-1. On the left sidebar, at the bottom, select **Admin area**.
-1. Select **Analytics > DevOps Reports**.
-1. Either:
-
-- From the **Add or remove groups** dropdown list, clear the group you want to remove.
-- From the **Adoption by group** table, in the row of the group you want to remove, select
-**Remove Group from the table** (**{remove}**).
+![DevOps Adoption](img/admin_devops_adoption_v14_2.png)

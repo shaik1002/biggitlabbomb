@@ -44,8 +44,7 @@ RSpec.describe ObjectStorage::DeleteStaleDirectUploadsService, :direct_uploads, 
         )
     end
 
-    it 'only deletes stale entries', :aggregate_failures,
-      quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/461534' do
+    it 'only deletes stale entries', :aggregate_failures do
       prepare_pending_direct_upload(stale_path_1, 5.hours.ago)
       prepare_pending_direct_upload(stale_path_2, 4.hours.ago)
       prepare_pending_direct_upload(non_stale_path, 3.minutes.ago)
@@ -68,8 +67,7 @@ RSpec.describe ObjectStorage::DeleteStaleDirectUploadsService, :direct_uploads, 
     end
 
     context 'when a stale entry does not have a matching object in the storage' do
-      it 'does not fail and still remove the stale entry',
-        quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/444747' do
+      it 'does not fail and still remove the stale entry' do
         stale_no_object_path = 'some/other/path'
         prepare_pending_direct_upload(stale_path_1, 5.hours.ago)
         prepare_pending_direct_upload(stale_no_object_path, 5.hours.ago)

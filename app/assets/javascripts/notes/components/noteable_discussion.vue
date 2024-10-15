@@ -12,7 +12,7 @@ import { s__, __, sprintf } from '~/locale';
 import diffLineNoteFormMixin from '~/notes/mixins/diff_line_note_form';
 import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
-import { detectAndConfirmSensitiveTokens } from '~/lib/utils/secret_detection';
+import { containsSensitiveToken, confirmSensitiveAction } from '~/lib/utils/secret_detection';
 import eventHub from '../event_hub';
 import noteable from '../mixins/noteable';
 import resolvable from '../mixins/resolvable';
@@ -178,9 +178,10 @@ export default {
     },
     discussionHolderClass() {
       return {
-        'is-replying': this.isReplying,
+        'is-replying gl-pt-0!': this.isReplying,
         'internal-note': this.isDiscussionInternal,
-        '!gl-pt-0': !this.discussion.diff_discussion && this.isReplying,
+        'public-note': !this.isDiscussionInternal,
+        'gl-pt-0!': !this.discussion.diff_discussion && this.isReplying,
       };
     },
     hasDraft() {
@@ -204,17 +205,11 @@ export default {
       'removeConvertedDiscussion',
       'expandDiscussion',
     ]),
-    showReplyForm(text) {
+    showReplyForm() {
       this.isReplying = true;
 
       if (!this.discussion.expanded) {
         this.expandDiscussion({ discussionId: this.discussion.id });
-      }
-
-      if (typeof text !== 'undefined') {
-        this.$nextTick(() => {
-          this.$refs.noteForm.append(text);
-        });
       }
     },
     cancelReplyForm: ignoreWhilePending(async function cancelReplyForm(shouldConfirm, isDirty) {
@@ -248,11 +243,12 @@ export default {
         return;
       }
 
-      const confirmSubmit = await detectAndConfirmSensitiveTokens({ content: noteText });
-
-      if (!confirmSubmit) {
-        callback();
-        return;
+      if (containsSensitiveToken(noteText)) {
+        const confirmed = await confirmSensitiveAction();
+        if (!confirmed) {
+          callback();
+          return;
+        }
       }
 
       const postData = {
@@ -347,7 +343,7 @@ export default {
                 <li
                   v-else-if="canShowReplyActions && showReplies"
                   data-testid="reply-wrapper"
-                  class="discussion-reply-holder clearfix gl-bg-subtle"
+                  class="discussion-reply-holder gl-border-t-0! gl-pb-5! clearfix"
                   :class="discussionHolderClass"
                 >
                   <discussion-actions

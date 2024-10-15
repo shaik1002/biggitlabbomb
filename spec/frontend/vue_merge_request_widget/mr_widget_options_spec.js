@@ -19,6 +19,7 @@ import { SUCCESS } from '~/vue_merge_request_widget/components/deployment/consta
 import eventHub from '~/vue_merge_request_widget/event_hub';
 import MrWidgetOptions from '~/vue_merge_request_widget/mr_widget_options.vue';
 import Approvals from '~/vue_merge_request_widget/components/approvals/approvals.vue';
+import ConflictsState from '~/vue_merge_request_widget/components/states/mr_widget_conflicts.vue';
 import Preparing from '~/vue_merge_request_widget/components/states/mr_widget_preparing.vue';
 import ShaMismatch from '~/vue_merge_request_widget/components/states/sha_mismatch.vue';
 import MergedState from '~/vue_merge_request_widget/components/states/mr_widget_merged.vue';
@@ -28,14 +29,12 @@ import MrWidgetAlertMessage from '~/vue_merge_request_widget/components/mr_widge
 import getStateQuery from '~/vue_merge_request_widget/queries/get_state.query.graphql';
 import getStateSubscription from '~/vue_merge_request_widget/queries/get_state.subscription.graphql';
 import readyToMergeSubscription from '~/vue_merge_request_widget/queries/states/ready_to_merge.subscription.graphql';
-import securityReportMergeRequestDownloadPathsQuery from '~/vue_merge_request_widget/widgets/security_reports/graphql/security_report_merge_request_download_paths.query.graphql';
+import securityReportMergeRequestDownloadPathsQuery from '~/vue_merge_request_widget/extensions/security_reports/graphql/security_report_merge_request_download_paths.query.graphql';
 import readyToMergeQuery from 'ee_else_ce/vue_merge_request_widget/queries/states/ready_to_merge.query.graphql';
 import approvalsQuery from 'ee_else_ce/vue_merge_request_widget/components/approvals/queries/approvals.query.graphql';
 import approvedBySubscription from 'ee_else_ce/vue_merge_request_widget/components/approvals/queries/approvals.subscription.graphql';
 import userPermissionsQuery from '~/vue_merge_request_widget/queries/permissions.query.graphql';
 import conflictsStateQuery from '~/vue_merge_request_widget/queries/states/conflicts.query.graphql';
-import mergeChecksQuery from '~/vue_merge_request_widget/queries/merge_checks.query.graphql';
-import mergeChecksSubscription from '~/vue_merge_request_widget/queries/merge_checks.subscription.graphql';
 import MRWidgetStore from 'ee_else_ce/vue_merge_request_widget/stores/mr_widget_store';
 
 import { faviconDataUrl, overlayDataUrl } from '../lib/utils/mock_data';
@@ -105,24 +104,12 @@ describe('MrWidgetOptions', () => {
         jest.fn().mockResolvedValue({ data: { project: { mergeRequest: {} } } }),
       ],
       [securityReportMergeRequestDownloadPathsQuery, jest.fn().mockResolvedValue(null)],
-      [
-        mergeChecksQuery,
-        jest.fn().mockResolvedValue({
-          data: {
-            project: {
-              id: 1,
-              mergeRequest: { id: 1, userPermissions: { canMerge: true }, mergeabilityChecks: [] },
-            },
-          },
-        }),
-      ],
       ...(options.apolloMock || []),
     ];
     const subscriptionHandlers = [
       [approvedBySubscription, () => mockedApprovalsSubscription],
       [getStateSubscription, stateSubscriptionHandler],
       [readyToMergeSubscription, () => createMockApolloSubscription()],
-      [mergeChecksSubscription, () => createMockApolloSubscription()],
     ];
     const apolloProvider = createMockApollo(queryHandlers);
 
@@ -171,18 +158,13 @@ describe('MrWidgetOptions', () => {
     describe('computed', () => {
       describe('componentName', () => {
         it.each`
-          state            | componentName    | component
-          ${STATUS_MERGED} | ${'MergedState'} | ${MergedState}
-          ${'shaMismatch'} | ${'ShaMismatch'} | ${ShaMismatch}
+          state            | componentName       | component
+          ${STATUS_MERGED} | ${'MergedState'}    | ${MergedState}
+          ${'conflicts'}   | ${'ConflictsState'} | ${ConflictsState}
+          ${'shaMismatch'} | ${'ShaMismatch'}    | ${ShaMismatch}
         `('should translate $state into $componentName component', async ({ state, component }) => {
           await createComponent();
-
-          wrapper.vm.mr = {
-            ...wrapper.vm.mr,
-            setGraphqlData: jest.fn(),
-            state,
-          };
-
+          Vue.set(wrapper.vm.mr, 'state', state);
           await nextTick();
           expect(wrapper.findComponent(component).exists()).toBe(true);
         });
@@ -255,12 +237,7 @@ describe('MrWidgetOptions', () => {
             },
           });
           await nextTick();
-          wrapper.vm.mt = {
-            ...wrapper.vm.mr,
-            setGraphqlData: jest.fn(),
-            mergePipelinesEnabled: true,
-          };
-
+          Vue.set(wrapper.vm.mr, 'mergePipelinesEnabled', true);
           await nextTick();
           expect(findMergePipelineForkAlert().exists()).toBe(false);
         });
@@ -284,13 +261,7 @@ describe('MrWidgetOptions', () => {
             },
           });
           await nextTick();
-
-          wrapper.vm.mr = {
-            ...wrapper.vm.mr,
-            setGraphqlData: jest.fn(),
-            mergePipelinesEnabled: true,
-          };
-
+          Vue.set(wrapper.vm.mr, 'mergePipelinesEnabled', true);
           await nextTick();
           expect(findMergePipelineForkAlert().exists()).toBe(true);
         });
@@ -347,7 +318,7 @@ describe('MrWidgetOptions', () => {
           jest.spyOn(notify, 'notifyMe').mockImplementation(() => {});
           const logoFilename = 'logo.png';
           await createComponent({
-            updatedMrData: { gitlabLogo: logoFilename, ci_status: 'failed' },
+            updatedMrData: { gitlabLogo: logoFilename },
           });
           eventHub.$emit('MRWidgetUpdateRequested');
           await waitForPromises();
@@ -522,10 +493,10 @@ describe('MrWidgetOptions', () => {
           beforeEach(() => {
             mock
               .onGet(mockData.merge_request_widget_path)
-              .reply(HTTP_STATUS_OK, { ...mockData, ...updatedMrData, ci_status: 'failed' });
+              .reply(HTTP_STATUS_OK, { ...mockData, ...updatedMrData });
             mock
               .onGet(mockData.merge_request_cached_widget_path)
-              .reply(HTTP_STATUS_OK, { ...mockData, ...updatedMrData, ci_status: 'failed' });
+              .reply(HTTP_STATUS_OK, { ...mockData, ...updatedMrData });
           });
 
           it('should call notifyMe', async () => {

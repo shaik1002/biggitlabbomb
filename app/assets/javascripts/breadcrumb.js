@@ -24,7 +24,7 @@ export default () => {
 
     $expanderBtn.on('click', () => {
       const detailItems = $('.gl-breadcrumb-item');
-      const hiddenClass = '!gl-hidden';
+      const hiddenClass = 'gl-display-none!';
 
       $.each(detailItems, (_key, item) => {
         $(item).removeClass(hiddenClass);

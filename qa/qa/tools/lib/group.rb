@@ -11,9 +11,8 @@ module QA
 
           group_search_response = get Runtime::API::Request.new(api_client, "/groups/#{group_name}").url
 
-          if group_search_response.code != HTTP_STATUS_OK
+          if group_search_response.code != 200
             logger.error("Response code #{group_search_response.code}: #{group_search_response.body}")
-            exit 1 if group_search_response.code == HTTP_STATUS_UNAUTHORIZED
             return
           end
 

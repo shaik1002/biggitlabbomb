@@ -11,6 +11,12 @@ class Projects::MergeRequests::CreationsController < Projects::MergeRequests::Ap
   before_action :apply_diff_view_cookie!, only: [:diffs, :diff_for_path]
   before_action :build_merge_request, except: [:create]
 
+  before_action only: [:new] do
+    if can?(current_user, :fill_in_merge_request_template, project)
+      push_frontend_feature_flag(:fill_in_mr_template, project)
+    end
+  end
+
   urgency :low, [
     :new,
     :create,
@@ -173,11 +179,7 @@ class Projects::MergeRequests::CreationsController < Projects::MergeRequests::Ap
   end
 
   def incr_count_webide_merge_request
-    webide_source? && Gitlab::InternalEvents.track_event(
-      'create_merge_request_from_web_ide',
-      project: project,
-      user: current_user
-    )
+    webide_source? && Gitlab::UsageDataCounters::WebIdeCounter.increment_merge_requests_count
   end
 
   def tracking_project_source

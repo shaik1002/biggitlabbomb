@@ -29,7 +29,6 @@ import {
   EMPTY_RESULT_TITLE,
   EMPTY_RESULT_MESSAGE,
   GRAPHQL_PAGE_SIZE,
-  GRAPHQL_PAGE_SIZE_METADATA_ENABLED,
   FETCH_IMAGES_LIST_ERROR_MESSAGE,
   SORT_FIELDS,
   SETTINGS_TEXT,
@@ -160,18 +159,13 @@ export default {
     graphqlResource() {
       return this.config.isGroupPage ? WORKSPACE_GROUP : WORKSPACE_PROJECT;
     },
-    pageSize() {
-      return this.config.isMetadataDatabaseEnabled
-        ? GRAPHQL_PAGE_SIZE_METADATA_ENABLED
-        : GRAPHQL_PAGE_SIZE;
-    },
     queryVariables() {
       return {
         name: this.name,
         sort: this.sorting,
         fullPath: this.config.isGroupPage ? this.config.groupPath : this.config.projectPath,
         isGroupPage: this.config.isGroupPage,
-        first: this.pageSize,
+        first: GRAPHQL_PAGE_SIZE,
         ...this.pageParams,
       };
     },
@@ -209,17 +203,17 @@ export default {
       this.itemToDelete = {};
     },
     fetchNextPage() {
-      this.pageParams = getNextPageParams(this.pageInfo?.endCursor, this.pageSize);
+      this.pageParams = getNextPageParams(this.pageInfo?.endCursor);
     },
     fetchPreviousPage() {
-      this.pageParams = getPreviousPageParams(this.pageInfo?.startCursor, this.pageSize);
+      this.pageParams = getPreviousPageParams(this.pageInfo?.startCursor);
     },
     startDelete() {
       this.track('confirm_delete');
       this.mutationLoading = true;
     },
     handleSearchUpdate({ sort, filters, pageInfo }) {
-      this.pageParams = getPageParams(pageInfo, this.pageSize);
+      this.pageParams = getPageParams(pageInfo);
       this.sorting = sort;
 
       const search = filters.find((i) => i.type === FILTERED_SEARCH_TERM);
@@ -348,7 +342,7 @@ export default {
         </template>
       </template>
 
-      <div v-if="!mutationLoading" class="gl-flex gl-justify-center">
+      <div v-if="!mutationLoading" class="gl-display-flex gl-justify-content-center">
         <persisted-pagination
           class="gl-mt-3"
           :pagination="pageInfo"

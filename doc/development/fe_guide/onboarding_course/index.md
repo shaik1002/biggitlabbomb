@@ -1,6 +1,6 @@
 ---
-stage: none
-group: unassigned
+stage: Manage
+group: Foundations
 info: Any user with at least the Maintainer role can merge updates to this content. For details, see https://docs.gitlab.com/ee/development/development_processes.html#development-guidelines-review.
 ---
 
@@ -40,7 +40,7 @@ Each week consists of the following sessions:
 
 - 1-hour relaxed discussion-style lesson with explanation of how GitLab frontend works. Each week features a different guest and includes an AMA portion.
 - 2-hour live coding lesson with a practical task for participants to complete.
-- 2 x 2-hour dedicated office hours sessions where participants can work on the task assigned in the lesson with GitLab frontend engineers. (2 sessions in different timezones as this will require participants to join synchronously)
+- 2 x 2-hour dedicated “Office Hours” sessions where participants can work on the task assigned in the lesson with GitLab frontend engineers. (2 sessions in different timezones as this will require participants to join synchronously)
 
 A fortnightly 1-on-1 mentoring sessions are also available to each participant.
 

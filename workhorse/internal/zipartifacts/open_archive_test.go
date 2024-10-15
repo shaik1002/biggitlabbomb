@@ -12,7 +12,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -119,8 +118,8 @@ func TestMinimalRangeRequests(t *testing.T) {
 
 func TestOpenHTTPArchiveNotSendingAcceptEncodingHeader(t *testing.T) {
 	requestHandler := func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, "GET", r.Method)
-		assert.Nil(t, r.Header["Accept-Encoding"])
+		require.Equal(t, "GET", r.Method)
+		require.Nil(t, r.Header["Accept-Encoding"])
 		w.WriteHeader(http.StatusOK)
 	}
 

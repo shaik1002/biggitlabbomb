@@ -216,12 +216,12 @@ export default {
       @close="close(false)"
     >
       <template #title>
-        <div class="gl-text-size-h2 gl-font-bold">
+        <div class="gl-font-weight-bold gl-font-size-h2">
           {{ s__('Achievements|New achievement') }}
         </div>
       </template>
       <gl-alert v-if="errorMessages.length" variant="danger" @dismiss="errorMessages = []">
-        <ul class="!gl-mb-0 gl-ml-5">
+        <ul class="gl-mb-0! gl-ml-5">
           <li v-for="error in errorMessages" :key="error">
             {{ error }}
           </li>
@@ -235,10 +235,10 @@ export default {
           @submit="save"
         >
           <template #input(avatar)>
-            <div class="gl-flex">
-              <gl-avatar :src="previewImage" shape="rect" class="gl-mr-5 gl-border-none" />
+            <div class="gl-display-flex">
+              <gl-avatar :src="previewImage" shape="rect" class="gl-border-none gl-mr-5" />
               <div class="gl-overflow-hidden">
-                <div class="gl-flex">
+                <div class="gl-display-flex">
                   <gl-button data-testid="select-file-button" @click="$refs.fileUpload.click()">
                     {{ __('Choose File...') }}
                   </gl-button>
@@ -265,7 +265,7 @@ export default {
                   type="file"
                   accept="image/*"
                   name="avatar_file"
-                  class="gl-hidden"
+                  class="gl-display-none"
                   @change="selectFile"
                 />
               </div>

@@ -26,7 +26,6 @@ module Ci
       return Ci::Pipeline.none unless Ability.allowed?(current_user, :read_pipeline, project)
 
       items = prefiltered_pipelines
-      items = by_ids(items)
       items = by_iids(items)
       items = by_scope(items)
       items = by_status(items)
@@ -44,15 +43,8 @@ module Ci
     private
 
     # rubocop: disable CodeReuse/ActiveRecord
-    def ids_for_ref(items, refs)
-      unfiltered_items =
-        if Feature.enabled?(:exclude_child_pipelines_from_tag_branch_query, project)
-          items
-        else
-          pipelines
-        end
-
-      unfiltered_items.where(ref: refs).group(:ref).select('max(id)')
+    def ids_for_ref(refs)
+      pipelines.where(ref: refs).group(:ref).select('max(id)')
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
@@ -77,14 +69,6 @@ module Ci
       pipelines.no_child
     end
 
-    def by_ids(items)
-      if params[:ids].present?
-        items.id_in(params[:ids])
-      else
-        items
-      end
-    end
-
     def by_iids(items)
       if params[:iids].present?
         items.for_iid(params[:iids])
@@ -102,9 +86,9 @@ module Ci
       when ALLOWED_SCOPES[:FINISHED]
         items.finished
       when ALLOWED_SCOPES[:BRANCHES]
-        from_ids(ids_for_ref(items, branches))
+        from_ids(ids_for_ref(branches))
       when ALLOWED_SCOPES[:TAGS]
-        from_ids(ids_for_ref(items, tags))
+        from_ids(ids_for_ref(tags))
       else
         items
       end

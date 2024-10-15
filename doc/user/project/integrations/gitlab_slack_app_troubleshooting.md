@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -18,7 +18,9 @@ For administrator documentation, see [GitLab for Slack app administration](../..
 
 The GitLab for Slack app might not appear in the list of integrations. To have the GitLab for Slack app on your self-managed instance, an administrator must [enable the integration](../../../administration/settings/slack_app.md). On GitLab.com, the GitLab for Slack app is available by default.
 
-## Error: `Project or alias not found`
+The GitLab for Slack app is enabled at the project level only. Support for the app at the group and instance levels is proposed in [issue 391526](https://gitlab.com/gitlab-org/gitlab/-/issues/391526).
+
+## `Project or alias not found`
 
 Some Slack commands must have a project full path or alias and fail with the following error
 if the project cannot be found:
@@ -49,17 +51,3 @@ If you're not receiving notifications to a Slack channel, ensure:
 ## App Home does not display properly
 
 If the [App Home](https://api.slack.com/start/overview#app_home) does not display properly, ensure your [app is up to date](gitlab_slack_application.md#reinstall-the-gitlab-for-slack-app).
-
-## Error: `This alias has already been taken`
-
-You might encounter error `422: The change you requested was rejected` when trying to set up on a new project. The returned Rails error might be:
-
-```plaintext
-"exception.message": "Validation failed: Alias This alias has already been taken"
-```
-
-To resolve this issue:
-
-1. Search in your namespace for projects with similar names and have the GitLab for Slack app enabled.
-1. Check among these projects for those with the same alias name as the failed project.
-1. Edit the alias, make it different, and retry enabling GitLab for Slack app for the failed project.

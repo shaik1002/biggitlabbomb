@@ -2,9 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Ci::Pipeline::Chain::Populate, feature_category: :pipeline_composition do
-  include Ci::PipelineMessageHelpers
-
+RSpec.describe Gitlab::Ci::Pipeline::Chain::Populate, feature_category: :continuous_integration do
   let_it_be(:project) { create(:project, :repository) }
   let_it_be(:user) { create(:user) }
 
@@ -77,8 +75,8 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::Populate, feature_category: :pipelin
   context 'when pipeline is empty' do
     let(:config) do
       { rspec: {
-        script: 'ls',
-        only: ['something']
+          script: 'ls',
+          only: ['something']
       } }
     end
 
@@ -92,7 +90,8 @@ RSpec.describe Gitlab::Ci::Pipeline::Chain::Populate, feature_category: :pipelin
 
     it 'appends an error about missing stages' do
       expect(pipeline.errors.to_a)
-        .to include sanitize_message(::Ci::Pipeline.rules_failure_message)
+        .to include 'Pipeline will not run for the selected trigger. ' \
+          'The rules configuration prevented any jobs from being added to the pipeline.'
     end
 
     it 'wastes pipeline iid' do

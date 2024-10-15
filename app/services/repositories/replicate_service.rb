@@ -4,8 +4,8 @@ module Repositories
   class ReplicateService < Repositories::BaseService
     Error = Class.new(StandardError)
 
-    def execute(new_repository, type, partition_hint: "")
-      new_repository.replicate(repository, partition_hint: partition_hint)
+    def execute(new_repository, type)
+      new_repository.replicate(repository)
 
       new_checksum = new_repository.checksum
       checksum = repository.checksum

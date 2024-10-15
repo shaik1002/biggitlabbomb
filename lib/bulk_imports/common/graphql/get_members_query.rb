@@ -30,7 +30,6 @@ module BulkImports
                     user_gid: id
                     public_email: publicEmail
                     username: username
-                    name: name
                   }
                 }
               }

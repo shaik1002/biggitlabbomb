@@ -48,7 +48,7 @@ module Gitlab
     #
     # How to format the dates in the resulting hash.
     class DateFiller
-      DEFAULT_DATE_FORMATTER = ->(date) { date }
+      DEFAULT_DATE_FORMATTER = -> (date) { date }
       PERIOD_STEPS = {
         day: 1.day,
         week: 1.week,
@@ -85,6 +85,8 @@ module Gitlab
 
           current_date = (current_date + PERIOD_STEPS.fetch(period)).to_date
         end
+
+        raise "Input contains values which doesn't fall under the given period!" if input.any?
 
         data
       end

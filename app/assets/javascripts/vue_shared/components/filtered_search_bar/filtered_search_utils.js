@@ -267,24 +267,14 @@ export function urlQueryToFilter(
  * based on provided recentSuggestionsStorageKey
  *
  * @param {String} recentSuggestionsStorageKey
- * @param {Array} appliedTokens
- * @param {Function} valueIdentifier
  * @returns
  */
-export function getRecentlyUsedSuggestions(
-  recentSuggestionsStorageKey,
-  appliedTokens,
-  valueIdentifier,
-) {
+export function getRecentlyUsedSuggestions(recentSuggestionsStorageKey) {
   let recentlyUsedSuggestions = [];
   if (AccessorUtilities.canUseLocalStorage()) {
     recentlyUsedSuggestions = JSON.parse(localStorage.getItem(recentSuggestionsStorageKey)) || [];
   }
-  return recentlyUsedSuggestions.filter((suggestion) => {
-    return !appliedTokens?.some(
-      (appliedToken) => appliedToken.value.data === valueIdentifier(suggestion),
-    );
-  });
+  return recentlyUsedSuggestions;
 }
 
 /**

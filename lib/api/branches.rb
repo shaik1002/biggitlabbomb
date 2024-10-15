@@ -48,6 +48,8 @@ module API
       end
       get ':id/repository/branches', urgency: :low do
         cache_action([user_project, :branches, current_user, declared_params], expires_in: 30.seconds) do
+          user_project.preload_protected_branches
+
           repository = user_project.repository
 
           branches_finder = BranchesFinder.new(repository, declared_params(include_missing: false))
@@ -55,7 +57,6 @@ module API
 
           merged_branch_names = repository.merged_branch_names(branches.map(&:name))
 
-          user_project.preload_protected_branches if branches.present?
           present_cached(
             branches,
             with: Entities::Branch,
@@ -63,13 +64,7 @@ module API
             project: user_project,
             merged_branch_names: merged_branch_names,
             expires_in: 60.minutes,
-            cache_context: ->(branch) {
-              [
-                current_user&.cache_key,
-                merged_branch_names.include?(branch.name),
-                user_project.default_branch
-              ]
-            }
+            cache_context: -> (branch) { [current_user&.cache_key, merged_branch_names.include?(branch.name)] }
           )
         end
       end
@@ -185,9 +180,9 @@ module API
 
         if result[:status] == :success
           present result[:branch],
-            with: Entities::Branch,
-            current_user: current_user,
-            project: user_project
+                  with: Entities::Branch,
+                  current_user: current_user,
+                  project: user_project
         else
           render_api_error!(result[:message], 400)
         end

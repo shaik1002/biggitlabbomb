@@ -1,4 +1,3 @@
-import { GlAvatar } from '@gitlab/ui';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
 import Commit from '~/environments/components/commit.vue';
 import { resolvedEnvironment } from './graphql/mock_data';
@@ -6,8 +5,6 @@ import { resolvedEnvironment } from './graphql/mock_data';
 describe('~/environments/components/commit.vue', () => {
   let commit;
   let wrapper;
-
-  const findAvatar = () => wrapper.findComponent(GlAvatar);
 
   beforeEach(() => {
     commit = resolvedEnvironment.lastDeployment.commit;
@@ -36,7 +33,8 @@ describe('~/environments/components/commit.vue', () => {
     });
 
     it('displays the user avatar', () => {
-      expect(findAvatar().props('src')).toBe(commit.author.avatarUrl);
+      const avatar = wrapper.findByRole('img', { name: 'avatar' });
+      expect(avatar.attributes('src')).toBe(commit.author.avatarUrl);
     });
 
     it('links the commit title to the commit', () => {
@@ -61,7 +59,8 @@ describe('~/environments/components/commit.vue', () => {
     });
 
     it('displays the user avatar', () => {
-      expect(findAvatar().props('src')).toBe(commit.authorGravatarUrl);
+      const avatar = wrapper.findByRole('img', { name: 'avatar' });
+      expect(avatar.attributes('src')).toBe(commit.authorGravatarUrl);
     });
 
     it('displays the commit title', () => {
@@ -83,7 +82,8 @@ describe('~/environments/components/commit.vue', () => {
     });
 
     it('displays the user avatar', () => {
-      expect(findAvatar().props('src')).toBe(commit.author.avatarUrl);
+      const avatar = wrapper.findByRole('img', { name: 'avatar' });
+      expect(avatar.attributes('src')).toBe(commit.author.avatarUrl);
     });
 
     it('links the commit title to the commit', () => {

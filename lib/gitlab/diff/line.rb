@@ -29,13 +29,13 @@ module Gitlab
 
       def self.init_from_hash(hash)
         new(hash[:text],
-          hash[:type],
-          hash[:index],
-          hash[:old_pos],
-          hash[:new_pos],
-          parent_file: hash[:parent_file],
-          line_code: hash[:line_code],
-          rich_text: hash[:rich_text])
+            hash[:type],
+            hash[:index],
+            hash[:old_pos],
+            hash[:new_pos],
+            parent_file: hash[:parent_file],
+            line_code: hash[:line_code],
+            rich_text: hash[:rich_text])
       end
 
       def self.safe_init_from_hash(hash)
@@ -126,18 +126,6 @@ module Gitlab
       # Conflict::File#as_json renders json diff lines in sections
       def as_json(opts = nil)
         DiffLineSerializer.new.represent(self)
-      end
-
-      def text_content
-        rich_text ? rich_text[1..] : text(prefix: false)
-      end
-
-      def id(file_hash, side)
-        return if meta?
-
-        prefix = side == :old ? "L" : "R"
-        position = side == :old ? old_pos : new_pos
-        "line_#{file_hash}_#{prefix}#{position}"
       end
 
       private

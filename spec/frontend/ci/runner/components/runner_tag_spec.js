@@ -15,13 +15,11 @@ describe('RunnerTag', () => {
   const getTooltipValue = () => getBinding(findBadge().element, 'gl-tooltip').value;
 
   const setDimensions = ({ scrollWidth, offsetWidth }) => {
-    const content = findBadge().element.querySelector('span');
-
-    jest.spyOn(content, 'scrollWidth', 'get').mockReturnValue(scrollWidth);
-    jest.spyOn(content, 'offsetWidth', 'get').mockReturnValue(offsetWidth);
+    jest.spyOn(findBadge().element, 'scrollWidth', 'get').mockReturnValue(scrollWidth);
+    jest.spyOn(findBadge().element, 'offsetWidth', 'get').mockReturnValue(offsetWidth);
 
     // Mock trigger resize
-    getBinding(content, 'gl-resize-observer').value({ target: content });
+    getBinding(findBadge().element, 'gl-resize-observer').value();
   };
 
   const createComponent = ({ props = {} } = {}) => {
@@ -47,8 +45,17 @@ describe('RunnerTag', () => {
 
   it('Displays tags with correct style', () => {
     expect(findBadge().props()).toMatchObject({
+      size: 'sm',
       variant: RUNNER_TAG_BADGE_VARIANT,
     });
+  });
+
+  it('Displays tags with md size', () => {
+    createComponent({
+      props: { size: 'md' },
+    });
+
+    expect(findBadge().props('size')).toBe('md');
   });
 
   it.each`

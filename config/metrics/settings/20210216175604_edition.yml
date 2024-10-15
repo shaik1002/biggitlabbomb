@@ -2,6 +2,8 @@
 data_category: standard
 key_path: edition
 description: Edition of GitLab such as EE or CE
+product_section: enablement
+product_stage: enablement
 product_group: distribution_deploy
 value_type: string
 status: active
@@ -17,4 +19,3 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/51974

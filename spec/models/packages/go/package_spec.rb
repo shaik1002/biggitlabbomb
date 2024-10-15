@@ -27,8 +27,4 @@ RSpec.describe Packages::Go::Package, type: :model, feature_category: :package_r
       end
     end
   end
-
-  describe '.installable' do
-    it_behaves_like 'installable packages', :golang_package
-  end
 end

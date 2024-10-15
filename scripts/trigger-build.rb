@@ -1,9 +1,6 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# We need to take some precautions when using the `gitlab` gem in this project.
-#
-# See https://docs.gitlab.com/ee/development/pipelines/internals.html#using-the-gitlab-ruby-gem-in-the-canonical-project.
 require 'gitlab'
 
 module Trigger
@@ -222,17 +219,11 @@ module Trigger
       }
     end
 
-    def simple_forwarded_variables
-      super.merge({
-        'TOP_UPSTREAM_SOURCE_REF_SLUG' => ENV['CI_COMMIT_REF_SLUG']
-      })
-    end
-
     def version_param_value(_version_file)
       raw_version = super
 
       # if the version matches semver format, treat it as a tag and prepend `v`
-      if Regexp.compile(/^\d+\.\d+\.\d+(-rc\d+)?(-ee)?$/).match?(raw_version)
+      if raw_version =~ Regexp.compile(/^\d+\.\d+\.\d+(-rc\d+)?(-ee)?$/)
         "v#{raw_version}"
       else
         raw_version

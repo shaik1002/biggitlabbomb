@@ -15,23 +15,12 @@ RSpec.describe 'admin deploy keys', :js, feature_category: :system_access do
     enable_admin_mode!(admin)
   end
 
-  describe 'index page' do
-    before do
-      visit admin_deploy_keys_path
-    end
+  it 'show all public deploy keys' do
+    visit admin_deploy_keys_path
 
-    it 'show all public deploy keys' do
-      within_testid('deploy-keys-list', match: :first) do
-        expect(page).to have_content(deploy_key.title)
-        expect(page).to have_content(another_deploy_key.title)
-      end
-    end
-
-    it 'shows breadcrumbs' do
-      expect(page_breadcrumbs).to eq([
-        { text: 'Admin area', href: admin_root_path },
-        { text: 'Deploy keys', href: admin_deploy_keys_path }
-      ])
+    within_testid('deploy-keys-list', match: :first) do
+      expect(page).to have_content(deploy_key.title)
+      expect(page).to have_content(another_deploy_key.title)
     end
   end
 
@@ -64,14 +53,6 @@ RSpec.describe 'admin deploy keys', :js, feature_category: :system_access do
         expect(page).to have_content('laptop')
       end
     end
-
-    it 'shows breadcrumbs' do
-      expect(page_breadcrumbs).to eq([
-        { text: 'Admin area', href: admin_root_path },
-        { text: 'Deploy keys', href: admin_deploy_keys_path },
-        { text: 'New deploy key', href: new_admin_deploy_key_path }
-      ])
-    end
   end
 
   describe 'update an existing deploy key' do
@@ -91,14 +72,6 @@ RSpec.describe 'admin deploy keys', :js, feature_category: :system_access do
       within_testid('deploy-keys-list', match: :first) do
         expect(page).to have_content('new-title')
       end
-    end
-
-    it 'shows breadcrumbs' do
-      expect(page_breadcrumbs).to eq([
-        { text: 'Admin area', href: admin_root_path },
-        { text: 'Deploy keys', href: admin_deploy_keys_path },
-        { text: 'Edit deploy key', href: edit_admin_deploy_key_path(deploy_key) }
-      ])
     end
   end
 

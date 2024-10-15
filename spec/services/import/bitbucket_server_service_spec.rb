@@ -70,7 +70,6 @@ RSpec.describe Import::BitbucketServerService, feature_category: :importers do
   context 'when import source is disabled' do
     before do
       stub_application_setting(import_sources: nil)
-      stub_feature_flags(override_bitbucket_server_disabled: false)
       allow(subject).to receive(:authorized?).and_return(true)
       allow(client).to receive(:repo).with(project_key, repo_slug).and_return(double(repo))
     end
@@ -82,18 +81,6 @@ RSpec.describe Import::BitbucketServerService, feature_category: :importers do
         status: :error,
         http_status: :forbidden
       )
-    end
-
-    context 'when override_bitbucket_server_disabled ops flag is enabled for the user' do
-      before do
-        stub_feature_flags(override_bitbucket_server_disabled: user)
-      end
-
-      it 'succeeds' do
-        result = subject.execute(credentials)
-
-        expect(result).to include(status: :success)
-      end
     end
   end
 
@@ -156,7 +143,7 @@ RSpec.describe Import::BitbucketServerService, feature_category: :importers do
 
     allow(client).to receive(:repo).and_raise(exception)
 
-    expect(::Import::Framework::Logger).not_to receive(:error)
+    expect(Gitlab::Import::Logger).not_to receive(:error)
 
     expect { subject.execute(credentials) }.to raise_error(exception)
   end

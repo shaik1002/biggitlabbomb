@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: Any user with at least the Maintainer role can merge updates to this content. For details, see https://docs.gitlab.com/ee/development/development_processes.html#development-guidelines-review.
 ---
@@ -278,7 +278,7 @@ There may be times where you need to return data through the GitLab API that is 
 another system. In these cases you may have to paginate a third-party's API.
 
 An example of this is with our [Error Tracking](../../operations/error_tracking.md) implementation,
-where we proxy [Sentry errors](../../operations/sentry_error_tracking.md) through
+where we proxy [Sentry errors](../../operations/error_tracking.md#sentry-error-tracking) through
 the GitLab API. We do this by calling the Sentry API which enforces its own pagination rules.
 This means we cannot access the collection within GitLab to perform our own custom pagination.
 

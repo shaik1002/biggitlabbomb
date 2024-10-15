@@ -1,5 +1,5 @@
 import * as types from './mutation_types';
-import { logLinesParser, checkJobHasLog } from './utils';
+import { logLinesParser } from './utils';
 
 export default {
   [types.SET_JOB_LOG_OPTIONS](state, options = {}) {
@@ -106,11 +106,7 @@ export default {
   },
   [types.RECEIVE_JOB_ERROR](state) {
     state.isLoading = false;
-
-    if (!checkJobHasLog(state)) {
-      state.job = {};
-    }
-
+    state.job = {};
     state.hasError = true;
   },
 

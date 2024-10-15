@@ -27,8 +27,6 @@ module Keeps
 
     def initialize(logger: nil)
       @migrations_to_be_marked_obsolete = {}
-      @search_team_map = group_data['backend_engineers'].index_with(0)
-
       load_migrations_to_process
 
       super(logger: logger)
@@ -39,10 +37,7 @@ module Keeps
 
       migrations_to_be_marked_obsolete.each do |version, migration_data|
         mark_obsolete_change = create_mark_obsolete_change(version, migration_data)
-        next unless mark_obsolete_change
-
-        search_team_map[mark_obsolete_change.assignees.first] += 1
-        yield(mark_obsolete_change)
+        yield(mark_obsolete_change) if mark_obsolete_change
       end
 
       nil
@@ -50,7 +45,7 @@ module Keeps
 
     private
 
-    attr_reader :migrations_to_be_marked_obsolete, :search_team_map
+    attr_reader :migrations_to_be_marked_obsolete
 
     def load_migrations_to_process
       each_advanced_search_migration do |migration_filename, spec_filename, yaml_filename, yaml_content|
@@ -101,31 +96,29 @@ module Keeps
       migration_name = migration_data[:yaml_content]['name']
       change = ::Gitlab::Housekeeper::Change.new
       change.title = "Mark #{version} as obsolete"
-      change.identifiers = ['mark_obsolete', version, migration_name]
+      change.identifiers = [self.class.name.demodulize, 'mark_obsolete', version, migration_name]
       change.labels = [
         'maintenance::refactor',
         GROUP_LABEL
       ]
-      assignee = search_team_map.min_by { |_k, v| v }.first
-      change.assignees = assignee
+      change.assignees = groups_helper.pick_reviewer(group_data, change.identifiers)
       change.changelog_ee = true
 
       # rubocop:disable Gitlab/DocUrl -- Not running inside rails application
       change.description = <<~MARKDOWN
         This migration marks the #{version} #{migration_name} Advanced search migration as obsolete.
 
-        [Search for references to `#{migration_name.underscore}` in code](https://gitlab.com/search?project_id=278964&scope=blobs&search=#{migration_name.underscore}&regex=false))
-
-        At the moment, the `gitlab-housekeeper` is not always capable of removing all references so
-        you must check the diff and pipeline failures to confirm if there are any issues.
+        This MR will still need changes to remove references to the migration in the code.
+        At the moment the `gitlab-housekeeper` is not always capable of removing all references so you must check the
+        diff and pipeline failures to confirm if there are any issues.
         It is the responsibility of the assignee (picked from ~"group::global search") to push those changes to this branch.
 
-        [Read more](https://docs.gitlab.com/ee/development/search/advanced_search_migration_styleguide.html#cleaning-up-advanced-search-migrations)
-        about the process for marking Advanced search migrations as obsolete.
+        You can read more about the process for marking Advanced search migrations as obsolete in
+        https://docs.gitlab.com/ee/development/search/advanced_search_migration_styleguide.html#deleting-advanced-search-migrations-in-a-major-version-upgrade.
 
-        All Advanced search migrations must have had at least one
-        [required stop](https : // docs.gitlab.com / ee / development / database / required_stops.html)
-        to process the migration. Therefore we mark any Advanced search migrations added before the
+        As part of our process we want to ensure all Advanced search migrations have had at least one
+        [required stop](https://docs.gitlab.com/ee/development/database/required_stops.html)
+        to process the migration. Therefore we can mark any Advanced search migrations added before the
         last required stop as obsolete.
       MARKDOWN
       # rubocop:enable Gitlab/DocUrl
@@ -133,16 +126,10 @@ module Keeps
       change.changed_files = []
       add_obsolete_to_yaml(migration_data[:yaml_filename], migration_data[:yaml_content])
       change.changed_files << migration_data[:yaml_filename]
-
       add_obsolete_to_migration(migration_data[:file])
       change.changed_files << migration_data[:file]
-
-      if File.exist?(migration_data[:spec_file])
-        add_obsolete_to_migration_spec(version, migration_data[:spec_file], migration_data[:yaml_content]['name'])
-        change.changed_files << migration_data[:spec_file]
-      end
-
-      change.push_options.ci_skip = true
+      add_obsolete_to_migration_spec(version, migration_data[:spec_file])
+      change.changed_files << migration_data[:spec_file]
 
       change
     end
@@ -161,16 +148,12 @@ module Keeps
       File.open(file, 'a') { |f| f.write("\n#{klass_name}.prepend ::Elastic::MigrationObsolete\n") }
     end
 
-    def add_obsolete_to_migration_spec(version, file, name)
+    def add_obsolete_to_migration_spec(version, file)
+      content = "it_behaves_like 'a deprecated Advanced Search migration', #{version}"
+
       source = RuboCop::ProcessedSource.new(File.read(file), RuboCop::ConfigStore.new.for_file('.').target_ruby_version)
       rewriter = Parser::Source::TreeRewriter.new(source.buffer)
-      describe_block = source.ast.each_node(:block).first
-      content = <<~RUBY.strip
-        RSpec.describe #{name}, feature_category: :global_search do
-          it_behaves_like 'a deprecated Advanced Search migration', #{version}
-        end
-      RUBY
-
+      describe_block = source.ast.each_node(:block).first.each_node(:begin).first
       rewriter.replace(describe_block.loc.expression, content)
       process = rewriter.process.lstrip.gsub(/\n{3,}/, "\n\n")
 

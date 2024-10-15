@@ -33,15 +33,16 @@ export default {
 
 <template>
   <gl-card>
-    <div class="gl-flex gl-items-center gl-justify-between">
-      <div class="gl-flex gl-items-center gl-text-gray-700">
+    <div class="gl-display-flex gl-align-items-center gl-justify-content-space-between">
+      <div class="gl-display-flex gl-align-items-center gl-text-gray-700">
         <gl-icon :name="iconName" />
         <span class="gl-ml-2">{{ title }}</span>
       </div>
       <gl-link :href="linkHref">{{ linkText }}</gl-link>
     </div>
-    <span class="gl-mt-2 gl-block gl-text-size-h-display gl-font-bold gl-leading-1">{{
-      count
-    }}</span>
+    <span
+      class="gl-font-size-h-display gl-font-weight-bold gl-line-height-ratio-1000 gl-mt-2 gl-display-block"
+      >{{ count }}</span
+    >
   </gl-card>
 </template>

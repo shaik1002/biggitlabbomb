@@ -3,8 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe NotificationRecipient, feature_category: :team_planning do
-  include ExternalAuthorizationServiceHelpers
-
   let(:user) { create(:user) }
   let(:project) { create(:project, namespace: user.namespace) }
   let(:target) { create(:issue, project: project) }
@@ -42,7 +40,7 @@ RSpec.describe NotificationRecipient, feature_category: :team_planning do
       end
     end
 
-    context 'when recipient email is blocked', :freeze_time, :clean_gitlab_redis_rate_limiting do
+    context 'when recipient email is blocked', :clean_gitlab_redis_rate_limiting do
       before do
         allow(Gitlab::ApplicationRateLimiter).to receive(:rate_limits)
           .and_return(
@@ -63,9 +61,11 @@ RSpec.describe NotificationRecipient, feature_category: :team_planning do
 
       context 'with temporary failures' do
         it 'returns false' do
-          2.times { Gitlab::ApplicationRateLimiter.throttled?(:temporary_email_failure, scope: user.email) }
+          freeze_time do
+            2.times { Gitlab::ApplicationRateLimiter.throttled?(:temporary_email_failure, scope: user.email) }
 
-          expect(recipient.notifiable?).to eq(false)
+            expect(recipient.notifiable?).to eq(false)
+          end
         end
       end
     end
@@ -76,25 +76,9 @@ RSpec.describe NotificationRecipient, feature_category: :team_planning do
       allow(user).to receive(:can?).and_call_original
     end
 
-    context 'when external authorization service denies access' do
-      let(:target) { project }
-
-      before do
-        enable_external_authorization_service_check
-        external_service_deny_access(user, project)
-      end
-
+    context 'user cannot read cross project' do
       it 'returns false' do
-        expect(recipient.has_access?).to eq false
-      end
-    end
-
-    context 'user cannot read project' do
-      let(:target) { project }
-
-      it 'returns false' do
-        expect(user).to receive(:can?).with(:read_project, project).and_return(false)
-        expect(user).not_to receive(:can?).with(:read_cross_project)
+        expect(user).to receive(:can?).with(:read_cross_project).and_return(false)
         expect(recipient.has_access?).to eq false
       end
     end

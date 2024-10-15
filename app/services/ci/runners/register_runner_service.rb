@@ -44,10 +44,10 @@ module Ci
           { runner_type: :instance_type }
         elsif runner_registrar_valid?('project') && project = ::Project.find_by_runners_token(registration_token)
           # Create a project runner
-          { runner_type: :project_type, projects: [project], sharding_key_id: project.id }
+          { runner_type: :project_type, projects: [project] }
         elsif runner_registrar_valid?('group') && group = ::Group.find_by_runners_token(registration_token)
           # Create a group runner
-          { runner_type: :group_type, groups: [group], sharding_key_id: group.id }
+          { runner_type: :group_type, groups: [group] }
         elsif registration_token.present? && !Gitlab::CurrentSettings.allow_runner_registration_token
           {} # Will result in a :runner_registration_disallowed response
         end

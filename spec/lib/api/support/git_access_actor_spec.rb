@@ -31,19 +31,6 @@ RSpec.describe API::Support::GitAccessActor do
         expect(described_class).to receive(:identify).and_call_original
         expect(described_class.from_params(identifier: "key-#{key.id}").user).to eq(key.user)
       end
-
-      context 'when identifier is for a deploy key' do
-        let_it_be(:key) { create(:deploy_key, user: user) }
-
-        it 'finds the deploy key based on an identifier' do
-          expect(described_class).to receive(:identify).and_call_original
-
-          actor = described_class.from_params(identifier: "key-#{key.id}")
-
-          expect(actor.key).to eq(key)
-          expect(actor.user).to eq(key.user)
-        end
-      end
     end
 
     context 'when passing a signing key' do
@@ -232,6 +219,10 @@ RSpec.describe API::Support::GitAccessActor do
   end
 
   describe '#update_last_used_at!' do
+    before do
+      stub_feature_flags(disable_ssh_key_used_tracking: false)
+    end
+
     context 'when initialized with a User' do
       let(:user) { build(:user) }
 
@@ -247,6 +238,14 @@ RSpec.describe API::Support::GitAccessActor do
 
       it 'updates update_last_used_at' do
         expect(key).to receive(:update_last_used_at)
+
+        subject.update_last_used_at!
+      end
+
+      it 'does not update `last_used_at` when the functionality is disabled' do
+        stub_feature_flags(disable_ssh_key_used_tracking: true)
+
+        expect(key).not_to receive(:update_last_used_at)
 
         subject.update_last_used_at!
       end

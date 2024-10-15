@@ -13,7 +13,6 @@ export const fetchExclusionsResponse = {
     integrationExclusions: {
       nodes: [
         {
-          group: null,
           project: {
             name: 'project foo',
             avatarUrl: 'foo.png',
@@ -21,19 +20,10 @@ export const fetchExclusionsResponse = {
           },
         },
         {
-          group: null,
           project: {
             name: 'project bar',
             avatarUrl: 'bar.png',
             id: 'gid://gitlab/Project/2',
-          },
-        },
-        {
-          project: null,
-          group: {
-            name: 'group foo',
-            avatarUrl: 'foo.png',
-            id: 'gid://gitlab/Group/2',
           },
         },
       ],

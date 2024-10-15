@@ -2,7 +2,7 @@
 @import 'framework/variables_overrides';
 
 @import '@gitlab/ui/src/scss/variables';
-@import '@gitlab/ui/src/scss/mixins';
+@import '@gitlab/ui/src/scss/utility-mixins/index';
 
 @media print {
   .md h1,
@@ -60,8 +60,10 @@
 
   header,
   nav,
+  .nav-sidebar,
   .super-sidebar,
   .super-sidebar-overlay,
+  .profiler-results,
   .tree-ref-holder,
   .tree-holder .breadcrumb,
   .nav,
@@ -74,7 +76,6 @@
   .note-action-button,
   .right-sidebar,
   .flash-container,
-  .top-bar-fixed,
   copy-code,
   #js-peek {
     display: none !important;
@@ -98,7 +99,7 @@
     content: none !important;
   }
 
-  .with-performance-bar .layout-page, .content-wrapper {
+  .with-performance-bar .layout-page {
     padding-top: 0;
   }
 }

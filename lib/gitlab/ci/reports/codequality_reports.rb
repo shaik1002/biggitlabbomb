@@ -15,7 +15,7 @@ module Gitlab
         end
 
         def add_degradation(degradation)
-          valid_degradation?(degradation) && @degradations[degradation['fingerprint']] = degradation
+          valid_degradation?(degradation) && @degradations[degradation.dig('fingerprint')] = degradation
         end
 
         def set_error_message(error)
@@ -32,7 +32,7 @@ module Gitlab
 
         def sort_degradations!
           @degradations = @degradations.sort_by do |_fingerprint, degradation|
-            severity = degradation[:severity]&.downcase
+            severity = degradation.dig(:severity)&.downcase
             SEVERITY_PRIORITIES[severity] || SEVERITY_PRIORITIES['unknown']
           end.to_h
         end

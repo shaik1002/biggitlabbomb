@@ -7,6 +7,7 @@ module API
       include ::Gitlab::Utils::StrongMemoize
 
       MAX_PACKAGE_FILE_SIZE = 50.megabytes.freeze
+      ALLOWED_REQUIRED_PERMISSIONS = %i[read_package read_group].freeze
 
       def require_packages_enabled!
         not_found! unless ::Gitlab.config.packages.enabled
@@ -14,10 +15,6 @@ module API
 
       def require_dependency_proxy_enabled!
         not_found! unless ::Gitlab.config.dependency_proxy.enabled
-      end
-
-      def authorize_admin_package!(subject = user_project)
-        authorize!(:admin_package, subject)
       end
 
       def authorize_read_package!(subject = user_project)
@@ -34,16 +31,12 @@ module API
 
       def authorize_packages_access!(subject = user_project, required_permission = :read_package)
         require_packages_enabled!
+        return forbidden! unless required_permission.in?(ALLOWED_REQUIRED_PERMISSIONS)
 
-        case required_permission
-        when :read_package
+        if required_permission == :read_package
           authorize_read_package!(subject)
-        when :read_package_within_public_registries
-          authorize!(required_permission, subject.packages_policy_subject)
-        when :read_group
-          authorize!(required_permission, subject)
         else
-          forbidden!
+          authorize!(required_permission, subject)
         end
       end
 
@@ -54,6 +47,8 @@ module API
         use_final_store_path: false)
 
         authorize_upload!(subject)
+
+        Gitlab::Workhorse.verify_api_request!(headers)
 
         status 200
         content_type Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE
@@ -97,13 +92,7 @@ module API
       strong_memoize_attr :user_project_with_read_package
 
       def track_package_event(action, scope, **args)
-        service = ::Packages::CreateEventService.new(
-          args[:project],
-          current_user,
-          namespace: args[:namespace],
-          event_name: action,
-          scope: scope
-        )
+        service = ::Packages::CreateEventService.new(nil, current_user, event_name: action, scope: scope)
         service.execute
 
         category = args.delete(:category) || self.options[:for].name
@@ -119,19 +108,9 @@ module API
         )
 
         if action.to_s == 'push_package' && service.originator_type == :deploy_token
-          track_snowplow_event(
-            'push_package_by_deploy_token',
-            'package_pushed_using_deploy_token',
-            category,
-            args
-          )
+          track_snowplow_event("push_package_by_deploy_token", category, args)
         elsif action.to_s == 'pull_package' && service.originator_type == :guest
-          track_snowplow_event(
-            'pull_package_by_guest',
-            'package_pulled_by_guest',
-            category,
-            args
-          )
+          track_snowplow_event("pull_package_by_guest", category, args)
         end
       end
 
@@ -146,17 +125,17 @@ module API
 
       private
 
-      def track_snowplow_event(action_name, snowplow_event_name, category, args)
+      def track_snowplow_event(action_name, category, args)
         event_name = "i_package_#{action_name}"
         key_path = "counts.package_events_i_package_#{action_name}"
-        context = Gitlab::Tracking::ServicePingContext.new(data_source: :redis, event: snowplow_event_name).to_context
+        service_ping_context = Gitlab::Usage::MetricDefinition.context_for(key_path).to_context
 
         Gitlab::Tracking.event(
           category,
           action_name,
           property: event_name,
           label: key_path,
-          context: [context],
+          context: [service_ping_context],
           **args
         )
       end

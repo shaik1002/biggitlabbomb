@@ -70,31 +70,9 @@ type LocalK8sNamespaces {
   metadata: k8sNamespaceMetadata
 }
 
-type LocalFluxResourceConditions {
-  message: String
-  reason: String
+type LocalFluxResourceStatus {
   status: String
   type: String
-}
-
-type LocalFluxResourceInventoryItem {
-  id: String
-}
-
-type LocalFluxKustomization {
-  kind: String
-  metadata: LocalWorkloadMetadata
-  status: JSON
-  spec: JSON
-  conditions: [LocalFluxResourceConditions]
-  inventory: [LocalFluxResourceInventoryItem]
-}
-type LocalFluxHelmRelease {
-  kind: String
-  metadata: LocalWorkloadMetadata
-  status: JSON
-  spec: JSON
-  conditions: [LocalFluxResourceConditions]
 }
 
 type K8sResources {
@@ -103,28 +81,6 @@ type K8sResources {
 }
 type K8sResource {
   connectionStatus: String
-}
-type LocalK8sDeploymentMetadata {
-  name: String
-}
-
-type LocalK8sDeployment {
-  metadata: LocalK8sDeploymentMetadata
-  status: JSON
-}
-
-type K8sLogsData {
-  logs: [String]
-  error: JSON
-}
-
-type K8sEvent {
-  lastTimestamp: String
-  eventTime: String
-  message: String
-  reason: String
-  source: JSON
-  type: String
 }
 
 extend type Query {
@@ -139,18 +95,14 @@ extend type Query {
   k8sPods(configuration: LocalConfiguration, namespace: String): [LocalWorkloadItem]
   k8sServices(configuration: LocalConfiguration, namespace: String): [LocalWorkloadItem]
   k8sConnection(configuration: LocalConfiguration): K8sResources
-  fluxKustomization(
+  fluxKustomizationStatus(
     configuration: LocalConfiguration
     fluxResourcePath: String
-  ): LocalFluxKustomization
-  fluxHelmRelease(configuration: LocalConfiguration, fluxResourcePath: String): LocalFluxHelmRelease
-  k8sDeployments(configuration: LocalConfiguration, namespace: String): [LocalK8sDeployment]
-  k8sLogs(configuration: LocalConfiguration, namespace: String, podName: String): [K8sLogsData]
-  k8sEvents(
+  ): LocalFluxResourceStatus
+  fluxHelmReleaseStatus(
     configuration: LocalConfiguration
-    namespace: String
-    involvedObjectName: String
-  ): [K8sEvent]
+    fluxResourcePath: String
+  ): LocalFluxResourceStatus
 }
 
 input ResourceTypeParam {
@@ -173,9 +125,4 @@ extend type Mutation {
   setEnvironmentToStop(environment: LocalEnvironmentInput): LocalErrors
   setEnvironmentToChangeCanary(environment: LocalEnvironmentInput, weight: Int): LocalErrors
   action(environment: LocalEnvironmentInput): LocalErrors
-  deleteKubernetesPod(
-    configuration: LocalConfiguration
-    namespace: String
-    podName: String
-  ): LocalErrors
 }

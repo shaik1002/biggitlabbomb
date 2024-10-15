@@ -65,11 +65,11 @@ export default {
 
 <template>
   <div>
-    <div class="gl-mt-3 gl-flex gl-w-full gl-items-center">
+    <div class="gl-w-full gl-display-flex gl-mt-3 gl-align-items-center">
       <gl-button
         v-if="showBack"
         size="small"
-        class="js-back-button gl-mr-3"
+        class="gl-mr-3 js-back-button"
         icon="chevron-lg-left"
         :aria-label="__('Go back')"
         @click="onBackClick"
@@ -78,13 +78,15 @@ export default {
       <h4>{{ heading }}</h4>
     </div>
 
-    <div class="gl-mt-3 gl-flex gl-w-full gl-flex-col md:gl-flex-row">
-      <div class="gl-flex gl-basis-1/2 gl-justify-between">
-        <span class="js-total-tests gl-grow">{{
+    <div
+      class="gl-display-flex gl-flex-direction-column gl-md-flex-direction-row gl-w-full gl-mt-3"
+    >
+      <div class="gl-display-flex gl-justify-content-space-between gl-flex-basis-half">
+        <span class="js-total-tests gl-flex-grow-1">{{
           sprintf(s__('TestReports|%{count} tests'), { count: report.total_count })
         }}</span>
 
-        <span class="js-failed-tests gl-grow">{{
+        <span class="js-failed-tests gl-flex-grow-1">{{
           sprintf(s__('TestReports|%{count} failures'), { count: report.failed_count })
         }}</span>
 
@@ -92,9 +94,9 @@ export default {
           sprintf(s__('TestReports|%{count} errors'), { count: report.error_count })
         }}</span>
       </div>
-      <div class="gl-flex gl-grow gl-justify-between">
-        <div class="gl-hidden gl-grow md:gl-block"></div>
-        <span class="js-success-rate gl-grow">{{
+      <div class="gl-display-flex gl-justify-content-space-between gl-flex-grow-1">
+        <div class="gl-display-none gl-md-display-block gl-flex-grow-1"></div>
+        <span class="js-success-rate gl-flex-grow-1">{{
           sprintf(s__('TestReports|%{rate}%{sign} success rate'), {
             rate: successPercentage,
             sign: '%',

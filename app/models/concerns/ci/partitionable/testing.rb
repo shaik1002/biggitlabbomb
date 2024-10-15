@@ -13,12 +13,9 @@ module Ci
         Ci::BuildNeed
         Ci::BuildReportResult
         Ci::BuildRunnerSession
-        Ci::BuildSource
-        Ci::BuildTag
         Ci::BuildTraceChunk
         Ci::BuildTraceMetadata
         Ci::BuildPendingState
-        Ci::DailyBuildGroupReportResult
         Ci::JobAnnotation
         Ci::JobArtifact
         Ci::JobVariable
@@ -29,11 +26,9 @@ module Ci
         Ci::PipelineArtifact
         Ci::PipelineChatData
         Ci::PipelineConfig
-        Ci::PipelineMessage
         Ci::PipelineMetadata
         Ci::PipelineVariable
         Ci::Sources::Pipeline
-        Ci::Sources::Project
         Ci::Stage
         Ci::UnitTestFailure
       ].freeze

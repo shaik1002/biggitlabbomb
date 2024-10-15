@@ -1,9 +1,5 @@
 import { cloneDeep } from 'lodash';
-import {
-  GROUPS_LOCAL_STORAGE_KEY,
-  PROJECTS_LOCAL_STORAGE_KEY,
-  LS_REGEX_HANDLE,
-} from '~/search/store/constants';
+import { GROUPS_LOCAL_STORAGE_KEY, PROJECTS_LOCAL_STORAGE_KEY } from '~/search/store/constants';
 import * as getters from '~/search/store/getters';
 import createState from '~/search/store/state';
 import { useMockLocationHelper } from 'helpers/mock_window_location_helper';
@@ -75,8 +71,6 @@ describe('Global Search Store Getters', () => {
 
   describe('navigationItems', () => {
     it('returns the re-mapped navigation data', () => {
-      localStorage.setItem(LS_REGEX_HANDLE, JSON.stringify(true));
-
       state.navigation = MOCK_NAVIGATION;
       expect(getters.navigationItems(state)).toStrictEqual(MOCK_NAVIGATION_ITEMS);
     });
@@ -143,7 +137,7 @@ describe('Global Search Store Getters', () => {
 
   describe('unselectedLabels', () => {
     it('returns all labels that are not selected', () => {
-      state.query.label_name = ['Brist'];
+      state.query.labels = ['60'];
       expect(getters.unselectedLabels(state)).toStrictEqual([MOCK_LABEL_SEARCH_RESULT]);
     });
   });
@@ -151,27 +145,23 @@ describe('Global Search Store Getters', () => {
   describe('unappliedNewLabels', () => {
     it('returns all labels that are selected but not applied', () => {
       // Applied labels
-      state.urlQuery.label_name = ['Aftersync', 'Brist'];
+      state.urlQuery.labels = ['37', '60'];
       // Applied and selected labels
-      state.query.label_name = ['Aftersync', 'Cosche', 'Accent', 'Brist'];
+      state.query.labels = ['37', '6', '73', '60'];
       // Selected but unapplied labels
       // expect(getters.unappliedNewLabels(state)).toStrictEqual(MOCK_FILTERED_UNSELECTED_LABELS);
       expect(getters.unappliedNewLabels(state).map(({ key }) => key)).toStrictEqual(['6', '73']);
     });
   });
-  describe('hasMissingProjectContext', () => {
-    it('returns true projectInitialJson.id is NOT in query', () => {
-      state.projectInitialJson = {
-        id: undefined,
-      };
-      expect(getters.hasMissingProjectContext(state)).toBe(true);
+  describe('showArchived', () => {
+    it('returns true project_id is NOT in query', () => {
+      state.query.project_id = undefined;
+      expect(getters.showArchived(state)).toBe(true);
     });
 
-    it('returns false projectInitialJson.id is in query', () => {
-      state.projectInitialJson = {
-        id: 'test',
-      };
-      expect(getters.hasMissingProjectContext(state)).toBe(false);
+    it('returns false project_id is in query', () => {
+      state.query.project_id = 'test';
+      expect(getters.showArchived(state)).toBe(false);
     });
   });
 });

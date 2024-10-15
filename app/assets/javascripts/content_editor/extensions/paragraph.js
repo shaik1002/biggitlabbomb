@@ -1,6 +1,4 @@
 import Paragraph from '@tiptap/extension-paragraph';
-import { VueNodeViewRenderer } from '@tiptap/vue-2';
-import ParagraphWrapper from '../components/wrappers/paragraph.vue';
 
 export default Paragraph.extend({
   addOptions() {
@@ -21,9 +19,5 @@ export default Paragraph.extend({
         this.editor.commands.enter();
       },
     };
-  },
-
-  addNodeView() {
-    return VueNodeViewRenderer(ParagraphWrapper);
   },
 });

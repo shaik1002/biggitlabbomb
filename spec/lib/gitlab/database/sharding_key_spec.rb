@@ -29,6 +29,7 @@ RSpec.describe 'new tables missing sharding_key', feature_category: :cell do
       *['boards.project_id', 'boards.group_id'],
       *['bulk_import_exports.project_id', 'bulk_import_exports.group_id'],
       'ci_pipeline_schedules.project_id',
+      'ci_runner_namespaces.namespace_id',
       'ci_sources_pipelines.project_id',
       'ci_triggers.project_id',
       'gpg_signatures.project_id',
@@ -36,7 +37,13 @@ RSpec.describe 'new tables missing sharding_key', feature_category: :cell do
       *['labels.project_id', 'labels.group_id'], # https://gitlab.com/gitlab-org/gitlab/-/issues/434356
       'member_roles.namespace_id', # https://gitlab.com/gitlab-org/gitlab/-/issues/444161
       *['milestones.project_id', 'milestones.group_id'],
+      'pages_domains.project_id', # https://gitlab.com/gitlab-org/gitlab/-/issues/442178,
+      'path_locks.project_id', # https://gitlab.com/gitlab-org/gitlab/-/issues/444643
+      'releases.project_id',
+      'remote_mirrors.project_id', # https://gitlab.com/gitlab-org/gitlab/-/issues/444643
       'sprints.group_id',
+      'subscription_add_on_purchases.namespace_id', # https://gitlab.com/gitlab-org/gitlab/-/issues/444338
+      'temp_notes_backup.project_id', # https://gitlab.com/gitlab-org/gitlab/-/issues/443667'
       *['todos.project_id', 'todos.group_id']
     ]
   end
@@ -64,26 +71,17 @@ RSpec.describe 'new tables missing sharding_key', feature_category: :cell do
       'ci_job_artifacts.project_id',
       'ci_namespace_monthly_usages.namespace_id', # https://gitlab.com/gitlab-org/gitlab/-/issues/321400
       'ci_builds_metadata.project_id',
-      'p_ci_job_annotations.project_id', # LFK already present on p_ci_builds and cascade delete all ci resources
       'ldap_group_links.group_id',
       'namespace_descendants.namespace_id',
       'p_batched_git_ref_updates_deletions.project_id',
       'p_catalog_resource_sync_events.project_id',
       'project_data_transfers.project_id', # https://gitlab.com/gitlab-org/gitlab/-/issues/439201
       'search_namespace_index_assignments.namespace_id_non_nullable',
+      'temp_notes_backup.project_id', # https://gitlab.com/gitlab-org/gitlab/-/issues/443667'
       'value_stream_dashboard_counts.namespace_id', # https://gitlab.com/gitlab-org/gitlab/-/issues/439555
       'zoekt_indices.namespace_id',
       'zoekt_repositories.project_identifier',
-      'zoekt_tasks.project_identifier',
-      'project_audit_events.project_id',
-      'group_audit_events.group_id',
-      # aggregated table, a worker ensures eventual consistency
-      'analytics_cycle_analytics_issue_stage_events.group_id',
-      # aggregated table, a worker ensures eventual consistency
-      'analytics_cycle_analytics_merge_request_stage_events.group_id',
-      # This is event log table for gitlab_subscriptions and should not be deleted.
-      # See more: https://gitlab.com/gitlab-org/gitlab/-/issues/462598#note_1949768698
-      'gitlab_subscription_histories.namespace_id'
+      'zoekt_tasks.project_identifier'
     ]
   end
 
@@ -112,8 +110,6 @@ RSpec.describe 'new tables missing sharding_key', feature_category: :cell do
             "If this is a foreign key referencing the specified table #{referenced_table_name} " \
             "then you must remove it from allowed_to_be_missing_foreign_key"
         else
-          next if Gitlab::Database::PostgresPartition.partition_exists?(table_name)
-
           expect(has_foreign_key?(table_name, column_name, to_table_name: referenced_table_name)).to eq(true),
             "Missing a foreign key constraint for `#{table_name}.#{column_name}` " \
             "referencing #{referenced_table_name}. " \
@@ -167,65 +163,6 @@ RSpec.describe 'new tables missing sharding_key', feature_category: :cell do
     end
   end
 
-  it 'ensures all organization_id columns are not nullable, have no default, and have a foreign key' do
-    sql = <<~SQL
-      SELECT c.table_name,
-        CASE WHEN c.column_default IS NOT NULL THEN 'has default' ELSE NULL END,
-        CASE WHEN c.is_nullable::boolean THEN 'nullable' ELSE NULL END,
-        CASE WHEN fk.name IS NULL THEN 'no foreign key' ELSE NULL END
-      FROM information_schema.columns c
-      LEFT JOIN postgres_foreign_keys fk
-      ON fk.constrained_table_name = c.table_name AND fk.constrained_columns = '{organization_id}' and fk.referenced_columns = '{id}'
-      WHERE c.column_name = 'organization_id'
-        AND (fk.referenced_table_name = 'organizations' OR fk.referenced_table_name IS NULL)
-        AND (c.column_default IS NOT NULL OR c.is_nullable::boolean OR fk.name IS NULL)
-      ORDER BY c.table_name;
-    SQL
-
-    # To add a table to this list, create an issue under https://gitlab.com/groups/gitlab-org/-/epics/11670.
-    # Use https://gitlab.com/gitlab-org/gitlab/-/issues/476206 as an example.
-    work_in_progress = {
-      "dependency_list_export_parts" => 'https://gitlab.com/gitlab-org/gitlab/-/issues/476207',
-      "dependency_list_exports" => 'https://gitlab.com/gitlab-org/gitlab/-/issues/476208',
-      "namespaces" => 'https://gitlab.com/gitlab-org/gitlab/-/issues/476209',
-      "organization_users" => 'https://gitlab.com/gitlab-org/gitlab/-/issues/476210',
-      "projects" => 'https://gitlab.com/gitlab-org/gitlab/-/issues/476211',
-      "push_rules" => 'https://gitlab.com/gitlab-org/gitlab/-/issues/476212',
-      "raw_usage_data" => 'https://gitlab.com/gitlab-org/gitlab/-/issues/476213',
-      "sbom_source_packages" => 'https://gitlab.com/gitlab-org/gitlab/-/issues/476214',
-      "sbom_sources" => 'https://gitlab.com/gitlab-org/gitlab/-/issues/476215',
-      "snippets" => 'https://gitlab.com/gitlab-org/gitlab/-/issues/476216',
-      "vulnerability_export_parts" => 'https://gitlab.com/gitlab-org/gitlab/-/issues/476218',
-      "vulnerability_exports" => 'https://gitlab.com/gitlab-org/gitlab/-/issues/476219',
-      "personal_access_tokens" => 'https://gitlab.com/gitlab-org/gitlab/-/issues/477750',
-      "sbom_components" => 'https://gitlab.com/gitlab-org/gitlab/-/issues/469436',
-      "sbom_component_versions" => 'https://gitlab.com/gitlab-org/gitlab/-/issues/483194',
-      "subscription_user_add_on_assignments" => "https://gitlab.com/gitlab-org/gitlab/-/issues/480697",
-      "topics" => 'https://gitlab.com/gitlab-org/gitlab/-/issues/463254'
-    }
-
-    organization_id_columns = ApplicationRecord.connection.select_rows(sql)
-    violations = organization_id_columns.reject { |column| work_in_progress[column[0]] }
-    messages = violations.filter_map do |violation|
-      if violation[2]
-        if has_null_check_constraint?(violation[0], 'organization_id')
-          violation.delete_at(2)
-        else
-          violation[2].concat(' / not null constraint missing')
-        end
-      end
-
-      "  #{violation[0]} - #{violation[1..].compact.join(', ')}" if violation[1..].any?
-    end
-
-    expect(messages).to be_empty, "Expected all organization_id columns to be not nullable, have no default, " \
-      "and have a foreign key, but the following tables do not meet this criteria:" \
-      "\n#{messages.join("\n")}\n\n" \
-      "If this is a work in progress, please create an issue under " \
-      "https://gitlab.com/groups/gitlab-org/-/epics/11670, " \
-      "and add the table to the work in progress list in this test."
-  end
-
   it 'only allows `allowed_to_be_missing_sharding_key` to include tables that are missing a sharding_key',
     :aggregate_failures do
     allowed_to_be_missing_sharding_key.each do |exempted_table|
@@ -266,59 +203,21 @@ RSpec.describe 'new tables missing sharding_key', feature_category: :cell do
     end
   end
 
-  it 'does not allow tables with FK references to be permanently exempted', :aggregate_failures do
-    tables_exempted_from_sharding_table_names = tables_exempted_from_sharding.map(&:table_name)
-
-    tables_exempted_from_sharding.each do |entry|
-      # See https://gitlab.com/gitlab-org/gitlab/-/issues/471182
-      tables_to_be_fixed = %w[geo_nodes zoekt_nodes]
-      pending 'These tables need to be fixed' if entry.table_name.in?(tables_to_be_fixed)
-
-      fks = referenced_foreign_keys(entry.table_name).to_a
-
-      fks.reject! { |fk| fk.constrained_table_name.in?(tables_exempted_from_sharding_table_names) }
-
-      # rubocop:disable Layout/LineLength -- sorry, long URL
-      expect(fks).to be_empty,
-        "#{entry.table_name} is exempted from sharding, but has foreign key references to it.\n" \
-        "For more information, see " \
-        "https://docs.gitlab.com/ee/development/database/multiple_databases.html#exempting-certain-tables-from-having-sharding-keys.\n" \
-        "The tables with foreign key references are:\n\n" \
-        "#{fks.map(&:constrained_table_name).join("\n")}"
-      # rubocop:enable Layout/LineLength
-
-      lfks = referenced_loose_foreign_keys(entry.table_name)
-      lfks.reject! { |lfk| lfk.from_table.in?(tables_exempted_from_sharding_table_names) }
-
-      # rubocop:disable Layout/LineLength -- sorry, long URL
-      expect(lfks).to be_empty,
-        "#{entry.table_name} is exempted from sharding, but has loose foreign key references to it.\n" \
-        "For more information, see " \
-        "https://docs.gitlab.com/ee/development/database/multiple_databases.html#exempting-certain-tables-from-having-sharding-keys.\n" \
-        "The tables with loose foreign key references are:\n\n" \
-        "#{lfks.map(&:from_table).join("\n")}"
-      # rubocop:enable Layout/LineLength
-    end
-  end
-
-  it 'allows tables that have a sharding key to only have a sharding-key-required schema' do
-    expect(tables_with_sharding_keys_not_in_sharding_key_required_schema).to be_empty, <<~ERROR.squish
-      Tables: #{tables_with_sharding_keys_not_in_sharding_key_required_schema.join(',')}
-      have a sharding key defined, but does not have a sharding-key-required schema assigned.
-      Tables with sharding keys should have a schema where `require_sharding_key` is enabled
-      like `gitlab_main_cell` or `gitlab_ci`.
-      Please change the `gitlab_schema` of these tables accordingly.
-    ERROR
+  it 'allows tables that have a sharding key to only have a cell-local schema' do
+    expect(tables_with_sharding_keys_not_in_cell_local_schema).to be_empty,
+      "Tables: #{tables_with_sharding_keys_not_in_cell_local_schema.join(',')} have a sharding key defined, " \
+      "but does not have a cell-local schema assigned. " \
+      "Tables having sharding keys should have a cell-local schema like `gitlab_main_cell` or `gitlab_ci`. " \
+      "Please change the `gitlab_schema` of these tables accordingly."
   end
 
   it 'does not allow invalid follow-up issue URLs', :aggregate_failures do
     issue_url_regex = %r{\Ahttps://gitlab\.com/gitlab-org/gitlab/-/issues/\d+\z}
 
     entries_with_issue_link.each do |entry|
-      if entry.sharding_key.present? || entry.desired_sharding_key.present?
+      if entry.sharding_key.present?
         expect(entry.sharding_key_issue_url).not_to be_present,
-          "You must remove `sharding_key_issue_url` from #{entry.table_name} now that it " \
-          "has a valid sharding key/desired sharding key."
+          "You must remove `sharding_key_issue_url` from #{entry.table_name} now that it has a valid sharding key." \
       else
         expect(entry.sharding_key_issue_url).to match(issue_url_regex),
           "Invalid `sharding_key_issue_url` url for #{entry.table_name}. Please use the following format: " \
@@ -335,7 +234,7 @@ RSpec.describe 'new tables missing sharding_key', feature_category: :cell do
       Starting from GitLab #{starting_from_milestone}, we expect all new tables to define a `sharding_key`.
 
       To choose an appropriate sharding_key for this table please refer
-      to our guidelines at https://docs.gitlab.com/ee/development/cells/index.html#defining-a-sharding-key-for-all-cell-local-tables, or consult with the Tenant Scale group.
+      to our guidelines at https://docs.gitlab.com/ee/development/database/multiple_databases.html#defining-a-sharding-key-for-all-cell-local-tables, or consult with the Tenant Scale group.
     HEREDOC
   end
 
@@ -344,7 +243,7 @@ RSpec.describe 'new tables missing sharding_key', feature_category: :cell do
       entry.table_name if entry.sharding_key.blank? &&
         !entry.exempt_from_sharding? &&
         entry.milestone_greater_than_or_equal_to?(starting_from_milestone) &&
-        ::Gitlab::Database::GitlabSchema.require_sharding_key?(entry.gitlab_schema)
+        ::Gitlab::Database::GitlabSchema.cell_local?(entry.gitlab_schema)
     end
   end
 
@@ -368,10 +267,10 @@ RSpec.describe 'new tables missing sharding_key', feature_category: :cell do
     ::Gitlab::Database::Dictionary.entries.select(&:exempt_from_sharding?)
   end
 
-  def tables_with_sharding_keys_not_in_sharding_key_required_schema
+  def tables_with_sharding_keys_not_in_cell_local_schema
     ::Gitlab::Database::Dictionary.entries.filter_map do |entry|
       entry.table_name if entry.sharding_key.present? &&
-        !::Gitlab::Database::GitlabSchema.require_sharding_key?(entry.gitlab_schema)
+        !::Gitlab::Database::GitlabSchema.cell_local?(entry.gitlab_schema)
     end
   end
 end

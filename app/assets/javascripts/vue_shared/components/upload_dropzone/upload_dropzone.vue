@@ -21,16 +21,6 @@ export default {
       required: false,
       default: false,
     },
-    uploadSingleMessage: {
-      type: String,
-      required: false,
-      default: __('Drop or %{linkStart}upload%{linkEnd} file to attach'),
-    },
-    uploadMultipleMessage: {
-      type: String,
-      required: false,
-      default: __('Drop or %{linkStart}upload%{linkEnd} files to attach'),
-    },
     dropToStartMessage: {
       type: String,
       required: false,
@@ -75,7 +65,7 @@ export default {
     iconStyles() {
       return {
         size: this.displayAsCard ? 24 : 16,
-        class: this.displayAsCard ? 'gl-mb-2' : 'gl-mr-3',
+        class: this.displayAsCard ? 'gl-mb-2' : 'gl-mr-3 gl-text-gray-500',
       };
     },
     validMimeTypeString() {
@@ -149,7 +139,7 @@ export default {
 
 <template>
   <div
-    class="gl-relative gl-w-full"
+    class="gl-w-full gl-relative"
     @dragstart.prevent.stop
     @dragend.prevent.stop
     @dragover.prevent.stop
@@ -159,23 +149,29 @@ export default {
   >
     <slot>
       <button
-        class="card upload-dropzone-card upload-dropzone-border gl-mb-0 gl-h-full gl-w-full gl-items-center gl-justify-center gl-px-5 gl-py-4"
+        class="card upload-dropzone-card upload-dropzone-border gl-w-full gl-h-full gl-align-items-center gl-justify-content-center gl-px-5 gl-py-4 gl-mb-0"
         type="button"
         @click="openFileUpload"
       >
         <div
-          :class="{ 'gl-flex-col': displayAsCard }"
-          class="gl-flex gl-items-center gl-justify-center gl-text-center"
+          :class="{ 'gl-flex-direction-column': displayAsCard }"
+          class="gl-display-flex gl-align-items-center gl-justify-content-center gl-text-center"
           data-testid="dropzone-area"
         >
           <gl-icon name="upload" :size="iconStyles.size" :class="iconStyles.class" />
           <p class="gl-mb-0" data-testid="upload-text">
             <slot name="upload-text" :open-file-upload="openFileUpload">
               <gl-sprintf
-                :message="singleFileSelection ? uploadSingleMessage : uploadMultipleMessage"
+                :message="
+                  singleFileSelection
+                    ? __('Drop or %{linkStart}upload%{linkEnd} file to attach')
+                    : __('Drop or %{linkStart}upload%{linkEnd} files to attach')
+                "
               >
                 <template #link="{ content }">
-                  <gl-link @click.stop="openFileUpload">{{ content }}</gl-link>
+                  <gl-link @click.stop="openFileUpload">
+                    {{ content }}
+                  </gl-link>
                 </template>
               </gl-sprintf>
             </slot>
@@ -196,11 +192,11 @@ export default {
     <transition name="upload-dropzone-fade">
       <div
         v-show="dragging && !enableDragBehavior"
-        class="card upload-dropzone-border upload-dropzone-overlay gl-absolute gl-flex gl-h-full gl-w-full gl-items-center gl-justify-center gl-p-4"
+        class="card upload-dropzone-border upload-dropzone-overlay gl-w-full gl-h-full gl-absolute gl-display-flex gl-align-items-center gl-justify-content-center gl-p-4"
       >
-        <div v-show="!isDragDataValid" class="gl-max-w-1/2 gl-text-center">
+        <div v-show="!isDragDataValid" class="mw-50 gl-text-center">
           <slot name="invalid-drag-data-slot">
-            <h3 :class="{ 'gl-inline gl-text-base': !displayAsCard }">
+            <h3 :class="{ 'gl-font-base gl-display-inline': !displayAsCard }">
               {{ __('Oh no!') }}
             </h3>
             <span>{{
@@ -210,9 +206,9 @@ export default {
             }}</span>
           </slot>
         </div>
-        <div v-show="isDragDataValid" class="gl-max-w-1/2 gl-text-center">
+        <div v-show="isDragDataValid" class="mw-50 gl-text-center">
           <slot name="valid-drag-data-slot">
-            <h3 :class="{ 'gl-inline gl-text-base': !displayAsCard }">
+            <h3 :class="{ 'gl-font-base gl-display-inline': !displayAsCard }">
               {{ __('Incoming!') }}
             </h3>
             <span>{{ dropToStartMessage }}</span>

@@ -1,14 +1,21 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Verify', :runner, product_group: :pipeline_authoring do
+  RSpec.describe 'Verify', :runner, product_group: :pipeline_security do
     describe 'Pass dotenv variables to downstream via bridge' do
       let(:executor) { "qa-runner-#{Faker::Alphanumeric.alphanumeric(number: 8)}" }
       let(:upstream_var) { Faker::Alphanumeric.alphanumeric(number: 8) }
       let(:group) { create(:group) }
       let(:upstream_project) { create(:project, group: group, name: 'upstream-project-with-bridge') }
       let(:downstream_project) { create(:project, group: group, name: 'downstream-project-with-bridge') }
-      let!(:runner) { create(:group_runner, group: group, name: executor, tags: [executor]) }
+
+      let!(:runner) do
+        Resource::GroupRunner.fabricate! do |runner|
+          runner.name = executor
+          runner.tags = [executor]
+          runner.group = group
+        end
+      end
 
       before do
         Flow::Login.sign_in

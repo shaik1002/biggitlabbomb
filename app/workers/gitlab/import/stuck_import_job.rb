@@ -55,7 +55,7 @@ module Gitlab
         completed_import_states = enqueued_import_states_with_jid.id_in(completed_import_state_ids)
         completed_import_state_jids = completed_import_states.map { |import_state| import_state.jid }.join(', ')
 
-        ::Import::Framework::Logger.info(
+        Gitlab::Import::Logger.info(
           message: 'Marked stuck import jobs as failed',
           job_ids: completed_import_state_jids
         )

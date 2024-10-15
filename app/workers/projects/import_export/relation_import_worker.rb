@@ -27,7 +27,6 @@ module Projects
 
         extract_import_file
         process_import
-        perform_post_import_tasks
 
         tracker.finish!
       rescue StandardError => error
@@ -99,10 +98,6 @@ module Projects
           user: current_user,
           importable: project
         )
-      end
-
-      def perform_post_import_tasks
-        project.reset_counters_and_iids
       end
     end
   end

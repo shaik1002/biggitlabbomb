@@ -3,16 +3,6 @@
 module Gitlab
   module Search
     module SortOptions
-      SCOPE_ONLY_SORT = {
-        popularity_asc: %w[issues],
-        popularity_desc: %w[issues]
-      }.freeze
-
-      DOC_TYPE_ONLY_SORT = {
-        popularity_asc: %w[issue work_item],
-        popularity_desc: %w[issue work_item]
-      }.freeze
-
       def sort_and_direction(order_by, sort)
         # Due to different uses of sort param in web vs. API requests we prefer
         # order_by when present

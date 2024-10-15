@@ -1,7 +1,8 @@
+import Vue from 'vue';
+import VueApollo from 'vue-apollo';
 import { GlLoadingIcon, GlPopover, GlSprintf } from '@gitlab/ui';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import KubernetesStatusBar from '~/environments/environment_details/components/kubernetes/kubernetes_status_bar.vue';
-import KubernetesConnectionStatus from '~/environments/environment_details/components/kubernetes/kubernetes_connection_status.vue';
 import {
   CLUSTER_HEALTH_SUCCESS,
   CLUSTER_HEALTH_ERROR,
@@ -9,13 +10,13 @@ import {
   CLUSTER_STATUS_UNHEALTHY_TEXT,
   SYNC_STATUS_BADGES,
 } from '~/environments/constants';
-import {
-  connectionStatus,
-  k8sResourceType,
-} from '~/environments/graphql/resolvers/kubernetes/constants';
-import { stubComponent } from 'helpers/stub_component';
+import waitForPromises from 'helpers/wait_for_promises';
+import createMockApollo from 'helpers/mock_apollo_helper';
+import { k8sResourceType } from '~/environments/graphql/resolvers/kubernetes/constants';
 import { mockKasTunnelUrl } from '../../../mock_data';
 import { kubernetesNamespace } from '../../../graphql/mock_data';
+
+Vue.use(VueApollo);
 
 const configuration = {
   basePath: mockKasTunnelUrl.replace(/\/$/, ''),
@@ -27,7 +28,6 @@ const configuration = {
 const environmentName = 'environment_name';
 const kustomizationResourcePath =
   'kustomize.toolkit.fluxcd.io/v1/namespaces/my-namespace/kustomizations/app';
-const fluxNamespace = 'flux-namespace';
 
 describe('~/environments/environment_details/components/kubernetes/kubernetes_status_bar.vue', () => {
   let wrapper;
@@ -40,16 +40,34 @@ describe('~/environments/environment_details/components/kubernetes/kubernetes_st
   const findFluxConnectionStatusBadge = () => wrapper.findByTestId('flux-status-badge');
   const findFluxConnectionStatus = () => wrapper.findByTestId('flux-connection-status');
 
+  const fluxKustomizationStatusQuery = jest.fn().mockReturnValue([]);
+  const fluxHelmReleaseStatusQuery = jest.fn().mockReturnValue([]);
+
+  const createApolloProvider = () => {
+    const mockResolvers = {
+      Query: {
+        fluxKustomizationStatus: fluxKustomizationStatusQuery,
+        fluxHelmReleaseStatus: fluxHelmReleaseStatusQuery,
+      },
+    };
+
+    return createMockApollo([], mockResolvers);
+  };
+
   const createWrapper = ({
+    apolloProvider = createApolloProvider(),
     clusterHealthStatus = '',
     fluxResourcePath = '',
-    fluxResourceStatus = [],
-    fluxApiError = '',
     namespace = kubernetesNamespace,
     resourceType = k8sResourceType.k8sPods,
-    connectionStatusValue = connectionStatus.connected,
+    k8sWatchApi = false,
   } = {}) => {
     wrapper = shallowMountExtended(KubernetesStatusBar, {
+      provide: {
+        glFeatures: {
+          k8sWatchApi,
+        },
+      },
       propsData: {
         clusterHealthStatus,
         configuration,
@@ -57,82 +75,65 @@ describe('~/environments/environment_details/components/kubernetes/kubernetes_st
         fluxResourcePath,
         namespace,
         resourceType,
-        fluxResourceStatus,
-        fluxNamespace,
-        fluxApiError,
       },
-      stubs: {
-        GlSprintf,
-        KubernetesConnectionStatus: stubComponent(KubernetesConnectionStatus, {
-          template: `<div><slot  :connection-props="{ connectionStatus: '${connectionStatusValue}', reconnect: '' }"></slot></div>`,
-        }),
-      },
+      apolloProvider,
+      stubs: { GlSprintf },
     });
   };
 
   describe('connection status', () => {
-    describe('when fluxResourcePath is not provided', () => {
-      beforeEach(() => {
-        createWrapper();
-      });
-
-      it("doesn't render flux status component", () => {
+    describe('when the k8sWatchApi feature flag is disabled', () => {
+      it("doesn't render connection status component", () => {
+        createWrapper({ k8sWatchApi: false });
+        expect(findDashboardConnectionStatus().exists()).toBe(false);
         expect(findFluxConnectionStatusBadge().exists()).toBe(false);
       });
     });
+    describe('when the k8sWatchApi feature flag is enabled', () => {
+      describe('and fluxResourcePath is not provided', () => {
+        beforeEach(() => {
+          createWrapper({ k8sWatchApi: true });
+        });
 
-    describe('when fluxResourcePath is provided', () => {
-      it('passes correct props to connection status component', () => {
-        createWrapper({ fluxResourcePath: kustomizationResourcePath });
-
-        const dashboardConnectionStatus = findDashboardConnectionStatus();
-        expect(dashboardConnectionStatus.props('configuration')).toBe(configuration);
-        expect(dashboardConnectionStatus.props('namespace')).toBe(kubernetesNamespace);
-        expect(dashboardConnectionStatus.props('resourceTypeParam')).toEqual({
-          resourceType: k8sResourceType.k8sPods,
-          connectionParams: null,
+        it("doesn't render flux status component", () => {
+          expect(findFluxConnectionStatusBadge().exists()).toBe(false);
         });
       });
 
-      it('passes correct props to flux connection status component', () => {
-        createWrapper({ fluxResourcePath: kustomizationResourcePath });
-
-        const fluxConnectionStatus = findFluxConnectionStatus();
-        expect(fluxConnectionStatus.props('configuration')).toBe(configuration);
-        expect(fluxConnectionStatus.props('namespace')).toBe(fluxNamespace);
-        expect(fluxConnectionStatus.props('resourceTypeParam')).toEqual({
-          resourceType: k8sResourceType.fluxKustomizations,
-          connectionParams: {
-            fluxResourcePath: kustomizationResourcePath,
-          },
+      describe('and fluxResourcePath is provided', () => {
+        beforeEach(() => {
+          createWrapper({ k8sWatchApi: true, fluxResourcePath: kustomizationResourcePath });
         });
-      });
-
-      it('handles errors from connection status component', () => {
-        createWrapper({ fluxResourcePath: kustomizationResourcePath });
-
-        const dashboardConnectionStatus = findDashboardConnectionStatus();
-        const connectionStatusError = new Error('connection status error');
-        dashboardConnectionStatus.vm.$emit('error', connectionStatusError);
-
-        expect(wrapper.emitted('error')).toEqual([[connectionStatusError]]);
-      });
-
-      it.each([
-        [connectionStatus.connected, 'not shown', false],
-        [connectionStatus.connecting, 'shown', true],
-        [connectionStatus.disconnected, 'shown', true],
-      ])(
-        'when connectionStatus is %s flux connection status badge is %s',
-        (status, condition, exists) => {
-          createWrapper({
-            fluxResourcePath: kustomizationResourcePath,
-            connectionStatusValue: status,
+        it('passes correct props to connection status component', () => {
+          const connectionStatus = findDashboardConnectionStatus();
+          expect(connectionStatus.props('configuration')).toBe(configuration);
+          expect(connectionStatus.props('namespace')).toBe(kubernetesNamespace);
+          expect(connectionStatus.props('resourceTypeParam')).toEqual({
+            resourceType: k8sResourceType.k8sPods,
+            connectionParams: null,
           });
+        });
 
-          expect(findFluxConnectionStatusBadge().exists()).toBe(exists);
-        },
-      );
+        it('passes correct props to flux connection status component', () => {
+          const connectionStatus = findFluxConnectionStatus();
+          expect(connectionStatus.props('configuration')).toBe(configuration);
+          expect(connectionStatus.props('namespace')).toBe(kubernetesNamespace);
+          expect(connectionStatus.props('resourceTypeParam')).toEqual({
+            resourceType: k8sResourceType.fluxKustomizations,
+            connectionParams: {
+              fluxResourcePath: kustomizationResourcePath,
+            },
+          });
+        });
+
+        it('handles errors from connection status component', () => {
+          const connectionStatus = findDashboardConnectionStatus();
+          const connectionStatusError = new Error('connection status error');
+          connectionStatus.vm.$emit('error', connectionStatusError);
+
+          expect(wrapper.emitted('error')).toEqual([[connectionStatusError]]);
+        });
+      });
     });
   });
 
@@ -148,7 +149,6 @@ describe('~/environments/environment_details/components/kubernetes/kubernetes_st
       [CLUSTER_HEALTH_ERROR, 'danger', 'status-alert', CLUSTER_STATUS_UNHEALTHY_TEXT],
     ])(
       'when clusterHealthStatus is %s shows health badge with variant %s, icon %s and text %s',
-      // eslint-disable-next-line max-params
       (status, variant, icon, text) => {
         createWrapper({ clusterHealthStatus: status });
 
@@ -165,83 +165,169 @@ describe('~/environments/environment_details/components/kubernetes/kubernetes_st
         createWrapper();
       });
 
+      it("doesn't request Kustomizations and HelmReleases", () => {
+        expect(fluxKustomizationStatusQuery).not.toHaveBeenCalled();
+        expect(fluxHelmReleaseStatusQuery).not.toHaveBeenCalled();
+      });
+
       it('renders sync status as Unavailable', () => {
         expect(findSyncBadge().text()).toBe('Unavailable');
       });
-
-      it('renders a non-clickable badge', () => {
-        expect(findSyncBadge().attributes('href')).toBeUndefined();
-      });
     });
 
-    describe('when flux status data is provided', () => {
-      const message = 'Message from Flux';
+    describe('when flux resource path is provided', () => {
+      let fluxResourcePath;
 
-      it.each`
-        status       | type             | reason           | statusText       | statusPopover
-        ${'True'}    | ${'Stalled'}     | ${''}            | ${'Stalled'}     | ${message}
-        ${'True'}    | ${'Reconciling'} | ${''}            | ${'Reconciling'} | ${'Flux sync reconciling'}
-        ${'Unknown'} | ${'Ready'}       | ${'Progressing'} | ${'Reconciling'} | ${message}
-        ${'True'}    | ${'Ready'}       | ${''}            | ${'Reconciled'}  | ${'Flux sync reconciled successfully'}
-        ${'False'}   | ${'Ready'}       | ${''}            | ${'Failed'}      | ${message}
-        ${'Unknown'} | ${'Ready'}       | ${''}            | ${'Unknown'}     | ${'Unable to detect state. How are states detected?'}
-      `(
-        'renders sync status as $statusText when status is $status, type is $type, and reason is $reason',
-        ({ status, type, reason, statusText, statusPopover }) => {
+      describe('if the provided resource is a Kustomization', () => {
+        beforeEach(() => {
+          fluxResourcePath = kustomizationResourcePath;
+
+          createWrapper({ fluxResourcePath });
+        });
+
+        it('requests the Kustomization resource status', () => {
+          expect(fluxKustomizationStatusQuery).toHaveBeenCalledWith(
+            {},
+            expect.objectContaining({
+              configuration,
+              fluxResourcePath,
+            }),
+            expect.any(Object),
+            expect.any(Object),
+          );
+        });
+
+        it("doesn't request HelmRelease resource status", () => {
+          expect(fluxHelmReleaseStatusQuery).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('if the provided resource is a helmRelease', () => {
+        beforeEach(() => {
+          fluxResourcePath =
+            'helm.toolkit.fluxcd.io/v2beta1/namespaces/my-namespace/helmreleases/app';
+
+          createWrapper({ fluxResourcePath });
+        });
+
+        it('requests the HelmRelease resource status', () => {
+          expect(fluxHelmReleaseStatusQuery).toHaveBeenCalledWith(
+            {},
+            expect.objectContaining({
+              configuration,
+              fluxResourcePath,
+            }),
+            expect.any(Object),
+            expect.any(Object),
+          );
+        });
+
+        it("doesn't request Kustomization resource status", () => {
+          expect(fluxKustomizationStatusQuery).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('with Flux Kustomizations available', () => {
+        const createApolloProviderWithKustomizations = ({
+          result = { status: 'True', type: 'Ready', message: '' },
+        } = {}) => {
+          const mockResolvers = {
+            Query: {
+              fluxKustomizationStatus: jest.fn().mockReturnValue([result]),
+              fluxHelmReleaseStatus: fluxHelmReleaseStatusQuery,
+            },
+          };
+
+          return createMockApollo([], mockResolvers);
+        };
+
+        it("doesn't request HelmReleases when the Kustomizations were found", async () => {
           createWrapper({
-            fluxResourceStatus: [
-              {
+            apolloProvider: createApolloProviderWithKustomizations(),
+          });
+          await waitForPromises();
+
+          expect(fluxHelmReleaseStatusQuery).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('when receives data from the Flux', () => {
+        const createApolloProviderWithKustomizations = (result) => {
+          const mockResolvers = {
+            Query: {
+              fluxKustomizationStatus: jest.fn().mockReturnValue([result]),
+              fluxHelmReleaseStatus: fluxHelmReleaseStatusQuery,
+            },
+          };
+
+          return createMockApollo([], mockResolvers);
+        };
+        const message = 'Message from Flux';
+
+        it.each`
+          status       | type             | reason           | statusText       | statusPopover
+          ${'True'}    | ${'Stalled'}     | ${''}            | ${'Stalled'}     | ${message}
+          ${'True'}    | ${'Reconciling'} | ${''}            | ${'Reconciling'} | ${'Flux sync reconciling'}
+          ${'Unknown'} | ${'Ready'}       | ${'Progressing'} | ${'Reconciling'} | ${message}
+          ${'True'}    | ${'Ready'}       | ${''}            | ${'Reconciled'}  | ${'Flux sync reconciled successfully'}
+          ${'False'}   | ${'Ready'}       | ${''}            | ${'Failed'}      | ${message}
+          ${'Unknown'} | ${'Ready'}       | ${''}            | ${'Unknown'}     | ${'Unable to detect state. How are states detected?'}
+        `(
+          'renders sync status as $statusText when status is $status, type is $type, and reason is $reason',
+          async ({ status, type, reason, statusText, statusPopover }) => {
+            createWrapper({
+              fluxResourcePath: kustomizationResourcePath,
+              apolloProvider: createApolloProviderWithKustomizations({
                 status,
                 type,
                 reason,
                 message,
-              },
-            ],
+              }),
+            });
+            await waitForPromises();
+
+            expect(findSyncBadge().text()).toBe(statusText);
+            expect(findPopover().text()).toBe(statusPopover);
+          },
+        );
+      });
+
+      describe('when Flux API errored', () => {
+        const error = new Error('Error from the cluster_client API');
+        const createApolloProviderWithErrors = () => {
+          const mockResolvers = {
+            Query: {
+              fluxKustomizationStatus: jest.fn().mockRejectedValueOnce(error),
+              fluxHelmReleaseStatus: jest.fn().mockRejectedValueOnce(error),
+            },
+          };
+
+          return createMockApollo([], mockResolvers);
+        };
+
+        beforeEach(async () => {
+          createWrapper({
+            apolloProvider: createApolloProviderWithErrors(),
+            fluxResourcePath:
+              'kustomize.toolkit.fluxcd.io/v1/namespaces/my-namespace/kustomizations/app',
           });
-
-          expect(findSyncBadge().text()).toBe(statusText);
-          expect(findPopover().text()).toBe(statusPopover);
-        },
-      );
-
-      it('renders a clickable badge', () => {
-        createWrapper({
-          fluxResourceStatus: [{ status: 'True', type: 'Ready' }],
+          await waitForPromises();
         });
 
-        expect(findSyncBadge().attributes('href')).toBe('#');
-      });
+        it('renders sync badge as unavailable', () => {
+          const badge = SYNC_STATUS_BADGES.unavailable;
 
-      it('emits `show-flux-resource-details` event when badge is clicked', () => {
-        createWrapper({
-          fluxResourceStatus: [{ status: 'True', type: 'Ready' }],
+          expect(findSyncBadge().text()).toBe(badge.text);
+          expect(findSyncBadge().props()).toMatchObject({
+            icon: badge.icon,
+            variant: badge.variant,
+          });
         });
 
-        findSyncBadge().trigger('click');
-        expect(wrapper.emitted('show-flux-resource-details')).toBeDefined();
-      });
-    });
-
-    describe('when Flux API errored', () => {
-      const fluxApiError = 'Error from the cluster_client API';
-
-      beforeEach(() => {
-        createWrapper({ fluxApiError });
-      });
-
-      it('renders sync badge as unavailable', () => {
-        const badge = SYNC_STATUS_BADGES.unavailable;
-
-        expect(findSyncBadge().text()).toBe(badge.text);
-        expect(findSyncBadge().props()).toMatchObject({
-          icon: badge.icon,
-          variant: badge.variant,
+        it('renders popover with an API error message', () => {
+          expect(findPopover().text()).toBe(error.message);
+          expect(findPopover().props('title')).toBe('Flux sync status is unavailable');
         });
-      });
-
-      it('renders popover with an API error message', () => {
-        expect(findPopover().text()).toBe(fluxApiError);
-        expect(findPopover().props('title')).toBe('Flux sync status is unavailable');
       });
     });
   });

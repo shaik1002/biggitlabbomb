@@ -78,11 +78,11 @@ class MergeRequestDiff < ApplicationRecord
     joins(:merge_request_diff_commits).where(merge_request_diff_commits: { sha: sha }).reorder(nil)
   end
 
-  scope :by_project_id, ->(project_id) do
+  scope :by_project_id, -> (project_id) do
     joins(:merge_request).where(merge_requests: { target_project_id: project_id })
   end
 
-  scope :recent, ->(limit = 100) { order(id: :desc).limit(limit) }
+  scope :recent, -> (limit = 100) { order(id: :desc).limit(limit) }
 
   scope :files_in_database, -> do
     where(stored_externally: [false, nil]).where(arel_table[:files_count].gt(0))
@@ -100,7 +100,7 @@ class MergeRequestDiff < ApplicationRecord
     joins(arel_join.join_sources)
   end
 
-  scope :old_merged_diffs, ->(before) do
+  scope :old_merged_diffs, -> (before) do
     merge_requests = MergeRequest.arel_table
     mr_metrics = MergeRequest::Metrics.arel_table
     mr_diffs = arel_table
@@ -122,7 +122,7 @@ class MergeRequestDiff < ApplicationRecord
     joins(metrics_join.join_sources, mr_join.join_sources).where(condition)
   end
 
-  scope :old_closed_diffs, ->(before) do
+  scope :old_closed_diffs, -> (before) do
     condition = MergeRequest.arel_table[:state_id].eq(MergeRequest.available_states[:closed])
       .and(MergeRequest::Metrics.arel_table[:latest_closed_at].lteq(before))
 
@@ -135,7 +135,7 @@ class MergeRequestDiff < ApplicationRecord
   # SELECT ...
   # FROM (VALUES (MR_ID_1),(MR_ID_2)) merge_requests (id)
   # INNER JOIN LATERAL (...)
-  scope :latest_diff_for_merge_requests, ->(merge_requests) do
+  scope :latest_diff_for_merge_requests, -> (merge_requests) do
     mrs = Array(merge_requests)
     return MergeRequestDiff.none if mrs.empty?
 
@@ -882,13 +882,8 @@ class MergeRequestDiff < ApplicationRecord
   end
 
   def keep_around_commits
-    # The merge head keeps track of what an actual merge might look like. The
-    # referenced merge is temporary and so is kept alive with
-    # MergeRequest#merge_ref_path which is updated as required.
-    return if merge_head?
-
     [repository, merge_request.source_project.repository].uniq.each do |repo|
-      repo.keep_around(start_commit_sha, head_commit_sha, source: self.class.name)
+      repo.keep_around(start_commit_sha, head_commit_sha, base_commit_sha, source: self.class.name)
     end
   end
 

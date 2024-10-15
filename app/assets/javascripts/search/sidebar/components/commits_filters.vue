@@ -11,13 +11,13 @@ export default {
     FiltersTemplate,
   },
   computed: {
-    ...mapGetters(['hasMissingProjectContext']),
+    ...mapGetters(['showArchived']),
   },
 };
 </script>
 
 <template>
   <filters-template>
-    <archived-filter v-if="hasMissingProjectContext" class="gl-mb-5" />
+    <archived-filter v-if="showArchived" class="gl-mb-5" />
   </filters-template>
 </template>

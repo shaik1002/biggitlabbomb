@@ -187,7 +187,8 @@ RSpec.describe 'Edit Project Settings', feature_category: :groups_and_projects d
       toggle_feature_off('repository')
 
       click_save_changes
-      expect(find_by_testid("visibility-features-permissions-content")).to have_selector(".gl-toggle.is-disabled", minimum: 3)
+
+      expect(find(".sharing-permissions")).to have_selector(".gl-toggle.is-disabled", minimum: 3)
     end
 
     it "shows empty features project homepage" do
@@ -284,7 +285,7 @@ RSpec.describe 'Edit Project Settings', feature_category: :groups_and_projects d
   end
 
   def click_save_changes
-    within_testid('visibility-features-permissions-content') do
+    page.within('.sharing-permissions') do
       click_button 'Save changes'
     end
   end

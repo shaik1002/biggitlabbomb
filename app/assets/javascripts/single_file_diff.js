@@ -42,11 +42,11 @@ export default class SingleFileDiff {
       this.loadingContent = $(WRAPPER).addClass('loading').html(LOADING_HTML).hide();
       this.content = null;
       this.collapsedContent.after(this.loadingContent);
-      this.$chevronRightIcon.removeClass('gl-hidden');
+      this.$chevronRightIcon.removeClass('gl-display-none');
     } else {
       this.collapsedContent = $(WRAPPER).html(COLLAPSED_HTML).hide();
       this.content.after(this.collapsedContent);
-      this.$chevronDownIcon.removeClass('gl-hidden');
+      this.$chevronDownIcon.removeClass('gl-display-none');
     }
 
     $('.js-file-title', this.file).on('click', (e) => {
@@ -67,17 +67,17 @@ export default class SingleFileDiff {
     this.isOpen = !this.isOpen;
     if (!this.isOpen && !this.hasError) {
       this.content.hide();
-      this.$chevronRightIcon.removeClass('gl-hidden');
-      this.$chevronDownIcon.addClass('gl-hidden');
+      this.$chevronRightIcon.removeClass('gl-display-none');
+      this.$chevronDownIcon.addClass('gl-display-none');
       this.collapsedContent.show();
     } else if (this.content) {
       this.collapsedContent.hide();
       this.content.show();
-      this.$chevronDownIcon.removeClass('gl-hidden');
-      this.$chevronRightIcon.addClass('gl-hidden');
+      this.$chevronDownIcon.removeClass('gl-display-none');
+      this.$chevronRightIcon.addClass('gl-display-none');
     } else {
-      this.$chevronDownIcon.removeClass('gl-hidden');
-      this.$chevronRightIcon.addClass('gl-hidden');
+      this.$chevronDownIcon.removeClass('gl-display-none');
+      this.$chevronRightIcon.addClass('gl-display-none');
       return this.getContentHTML(cb); // eslint-disable-line consistent-return
     }
   }

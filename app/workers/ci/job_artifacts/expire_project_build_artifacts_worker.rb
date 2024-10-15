@@ -7,7 +7,7 @@ module Ci
 
       data_consistency :always
 
-      feature_category :job_artifacts
+      feature_category :build_artifacts
       idempotent!
 
       def perform(project_id)

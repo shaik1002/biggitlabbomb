@@ -23,7 +23,6 @@ describe('Release block', () => {
         release: releaseProp,
       },
       provide: {
-        projectPath: 'project/path',
         glFeatures: {
           ...featureFlags,
         },
@@ -191,14 +190,6 @@ describe('Release block', () => {
       return factory(release).then(() => {
         expect(hasTargetBlueBackground()).toBe(false);
       });
-    });
-  });
-
-  describe('with no edit link provided', () => {
-    beforeEach(() => factory({ ...release, _links: { editUrl: null } }));
-
-    it('does not show an edit button', () => {
-      expect(editButton().exists()).toBe(false);
     });
   });
 });

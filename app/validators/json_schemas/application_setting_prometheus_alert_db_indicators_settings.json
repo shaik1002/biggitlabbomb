@@ -5,9 +5,6 @@
     "prometheus_api_url": {
       "type": "string"
     },
-    "mimir_api_url": {
-      "type": "string"
-    },
     "apdex_sli_query": {
       "type": "object",
       "properties": {

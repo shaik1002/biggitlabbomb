@@ -7,7 +7,6 @@ import RemoveMemberButton from './remove_member_button.vue';
 export default {
   name: 'AccessRequestActionButtons',
   components: { ActionButtonGroup, RemoveMemberButton, ApproveAccessRequestButton },
-  inject: ['canApproveAccessRequests'],
   inheritAttrs: false,
   props: {
     member: {
@@ -41,7 +40,7 @@ export default {
 
 <template>
   <action-button-group>
-    <div v-if="canApproveAccessRequests" class="gl-px-1">
+    <div class="gl-px-1">
       <approve-access-request-button :member-id="member.id" />
     </div>
     <div class="gl-px-1">

@@ -1,16 +1,11 @@
 <script>
-import Vue from 'vue';
 import { GlSkeletonLoader, GlAlert } from '@gitlab/ui';
+import SafeHtml from '~/vue_shared/directives/safe_html';
 import { createAlert } from '~/alert';
+import { __ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
 import { handleLocationHash } from '~/lib/utils/common_utils';
 import { renderGFM } from '~/behaviors/markdown/render_gfm';
-import SafeHtml from '~/vue_shared/directives/safe_html';
-import { __ } from '~/locale';
-import { getHeadingsFromDOM } from '~/content_editor/services/table_of_contents_utils';
-import TableOfContents from './table_of_contents.vue';
-
-const TableOfContentsComponent = Vue.extend(TableOfContents);
 
 export default {
   components: {
@@ -20,31 +15,23 @@ export default {
   directives: {
     SafeHtml,
   },
-
-  inject: ['contentApi'],
+  props: {
+    getWikiContentUrl: {
+      type: String,
+      required: true,
+    },
+  },
   data() {
     return {
-      content: '',
       isLoadingContent: false,
       loadingContentFailed: false,
-      headings: [],
+      content: null,
     };
   },
   mounted() {
     this.loadWikiContent();
   },
   methods: {
-    async renderHeadingsInSidebar() {
-      const headings = getHeadingsFromDOM(this.$refs.content);
-      if (!headings.length) return;
-
-      const tocComponent = new TableOfContentsComponent({ propsData: { headings } }).$mount();
-      const tocContainer = document.querySelector('.js-wiki-toc');
-
-      tocContainer.innerHTML = '';
-      tocContainer.appendChild(tocComponent.$el);
-    },
-
     async loadWikiContent() {
       this.loadingContentFailed = false;
       this.isLoadingContent = true;
@@ -52,21 +39,19 @@ export default {
       try {
         const {
           data: { content },
-        } = await axios.get(this.contentApi, { params: { render_html: true } });
+        } = await axios.get(this.getWikiContentUrl, { params: { render_html: true } });
         this.content = content;
 
         this.$nextTick()
           .then(() => {
             renderGFM(this.$refs.content);
             handleLocationHash();
-
-            this.renderHeadingsInSidebar();
           })
-          .catch(() => {
+          .catch(() =>
             createAlert({
               message: this.$options.i18n.renderingContentFailed,
-            });
-          });
+            }),
+          );
       } catch (e) {
         this.loadingContentFailed = true;
       } finally {

@@ -46,7 +46,6 @@ RSpec.describe Types::Ci::JobType, feature_category: :continuous_integration do
       scheduledAt
       schedulingType
       shortSha
-      source
       stage
       started_at
       status
@@ -61,6 +60,12 @@ RSpec.describe Types::Ci::JobType, feature_category: :continuous_integration do
       trace
       failure_message
     ]
+
+    if Gitlab.ee?
+      expected_fields += %i[
+        aiFailureAnalysis
+      ]
+    end
 
     expect(described_class).to have_graphql_fields(*expected_fields)
   end

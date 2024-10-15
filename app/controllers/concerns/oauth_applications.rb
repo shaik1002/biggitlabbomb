@@ -24,9 +24,7 @@ module OauthApplications
   end
 
   def load_scopes
-    @scopes ||= Doorkeeper::OAuth::Scopes.from_array(
-      Doorkeeper.configuration.scopes.to_a - [::Gitlab::Auth::AI_WORKFLOW.to_s]
-    )
+    @scopes ||= Doorkeeper.configuration.scopes
   end
 
   def permitted_params

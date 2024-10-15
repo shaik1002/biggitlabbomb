@@ -1,6 +1,6 @@
 ---
 stage: Verify
-group: Pipeline Execution
+group: Pipeline Security
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
@@ -18,7 +18,7 @@ You can download job artifacts by using the GitLab UI or the [API](../../api/job
 For an overview of job artifacts, watch the video [GitLab CI pipelines, artifacts, and environments](https://www.youtube.com/watch?v=PCKDICEe10s).
 Or, for an introduction, watch [GitLab CI pipeline tutorial for beginners](https://www.youtube.com/watch?v=Jav4vbUrqII).
 
-For administrator information about job artifact storage, see [administering job artifacts](../../administration/cicd/job_artifacts.md).
+For administrator information about job artifact storage, see [administering job artifacts](../../administration/job_artifacts.md).
 
 ## Create job artifacts
 
@@ -54,7 +54,7 @@ job:
 ### With an expiry
 
 The [`expire_in`](../yaml/index.md#artifactsexpire_in) keyword determines how long
-GitLab keeps the artifacts defined in `artifacts:paths`. For example:
+GitLab keeps the job artifacts. For example:
 
 ```yaml
 pdf:
@@ -248,8 +248,8 @@ For example:
 
   Files returned by this endpoint always have the `plain/text` content type.
 
-In both examples, replace `<project-id>` with a valid project ID. You can find the project ID on the
-[project overview page](../../user/project/working_with_projects.md#access-a-project-by-using-the-project-id).
+In both examples, replace `<project-id>` with a valid project ID. You can find the project ID on the,
+[project overview page](../../user/project/working_with_projects.md#access-the-project-overview-page-by-using-the-project-id).
 
 Artifacts for [parent and child pipelines](../pipelines/downstream_pipelines.md#parent-child-pipelines)
 are searched in hierarchical order from parent to child. For example, if both parent and
@@ -283,19 +283,18 @@ from:
 - A job's detail page. On the right of the page, select **Browse**.
 - The **Artifacts** page. On the right of the job, select **Browse** (**{folder-open}**).
 
-If [GitLab Pages](../../administration/pages/index.md) is enabled globally, even if it is disabled in the project settings,
-you can preview some artifacts file extensions directly in your browser. If the project is internal or private,
-you must enable [GitLab Pages access control](../../administration/pages/index.md#access-control) to enable the preview.
+If [GitLab Pages](../../administration/pages/index.md) is enabled in the project, you can preview
+some artifacts file extensions directly in your browser. If the project is internal or private, you must enable [GitLab Pages access control](../../administration/pages/index.md#access-control) to enable the preview.
 
 The following extensions are supported:
 
-| File extension | GitLab.com             | Linux package with built-in NGINX |
-|----------------|------------------------|-----------------------------------|
-| `.html`        | **{check-circle}** Yes | **{check-circle}** Yes            |
-| `.json`        | **{check-circle}** Yes | **{check-circle}** Yes            |
-| `.xml`         | **{check-circle}** Yes | **{check-circle}** Yes            |
-| `.txt`         | **{dotted-circle}** No | **{check-circle}** Yes            |
-| `.log`         | **{dotted-circle}** No | **{check-circle}** Yes            |
+| File extension | GitLab.com | Linux package with built-in NGINX |
+|----------|---------------------|--------------|
+|  `.html`   | **{check-circle}** Yes | **{check-circle}** Yes |
+|  `.json`   | **{check-circle}** Yes | **{check-circle}** Yes |
+|  `.xml`   | **{check-circle}** Yes | **{check-circle}** Yes |
+|  `.txt` | **{dotted-circle}** No | **{check-circle}** Yes |
+| `.log` | **{dotted-circle}** No | **{check-circle}** Yes |
 
 ### From a URL
 
@@ -362,7 +361,7 @@ With this configuration, GitLab adds **artifact 1** as a link to `file.txt` to t
 
 ## Keep artifacts from most recent successful jobs
 
-> - Artifacts for [blocked](https://gitlab.com/gitlab-org/gitlab/-/issues/387087) or [failed](https://gitlab.com/gitlab-org/gitlab/-/issues/266958) pipelines changed to no longer be kept indefinitely in GitLab 16.7.
+> - Artifacts for [blocked](https://gitlab.com/gitlab-org/gitlab/-/issues/387087) or [failed](https://gitlab.com/gitlab-org/gitlab/-/issues/266958) pipelines no longer kept indefinitely in GitLab 16.7.
 
 By default artifacts are always kept for successful pipelines for the most recent commit on each ref.
 Any [`expire_in`](#with-an-expiry) configuration does not apply to the most recent artifacts.

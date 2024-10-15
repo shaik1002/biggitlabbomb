@@ -138,7 +138,7 @@ When this situation occurs:
 - If someone feels strongly that you mention the API, at the end
   of the UI task, add this sentence:
 
-  `To create an issue, you can also [use the API](link.md).`
+  `To create an issue, you can also [use the API](link).`
 
 ## Task introductions
 

@@ -9,7 +9,6 @@ module Gitlab
           DEPTH_ANALYZER = GraphQL::Analysis::AST::QueryDepth
           FIELD_USAGE_ANALYZER = GraphQL::Analysis::AST::FieldUsage
           ALL_ANALYZERS = [COMPLEXITY_ANALYZER, DEPTH_ANALYZER, FIELD_USAGE_ANALYZER].freeze
-          FILTER_PARAMETERS = (::Rails.application.config.filter_parameters + [/password/i]).freeze
 
           def initialize(query)
             super
@@ -23,34 +22,11 @@ module Gitlab
           end
 
           def result
-            # In its most general form, .analyze_query returns one of the
-            # following:
-            #
-            # - An array with one result per analyzer, in the order they were
-            #   provided, but only the ones where #analyze? returned true prior
-            #   to analysis.
-            #
-            # - [GraphQL::AnalysisError] if the analysis times out
-            #
-            # - [] if an authorization error is raised
-            #
-            # For our analyzers, #analyze? is always true, so we can assume that
-            # there are always three valid results, one error, no results at all
-            # (we probably always have results, but we might as well be robust
-            # to that case).
-            complexity_or_error, depth, field_usages =
+            complexity, depth, field_usages =
               GraphQL::Analysis::AST.analyze_query(@subject, ALL_ANALYZERS, multiplex_analyzers: [])
 
-            case complexity_or_error
-            when Integer
-              results[:complexity] = complexity_or_error
-            when GraphQL::AnalysisError
-              results[:analysis_error] = complexity_or_error.message
-            end
-
-            field_usages ||= {} # in the zero or one result case, field_usages needs a sensible default
-
             results[:depth] = depth
+            results[:complexity] = complexity
             # This duration is not the execution time of the
             # query but the execution time of the analyzer.
             results[:duration_s] = duration(results[:time_started])
@@ -92,7 +68,7 @@ module Gitlab
 
           def filter_sensitive_variables(variables)
             ActiveSupport::ParameterFilter
-              .new(FILTER_PARAMETERS)
+              .new(::Rails.application.config.filter_parameters)
               .filter(variables)
           end
 

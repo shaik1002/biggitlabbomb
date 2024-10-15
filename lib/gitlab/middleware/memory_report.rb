@@ -32,8 +32,7 @@ module Gitlab
       private
 
       def rendering_memory_profiler?(request)
-        request.params['performance_bar'] == 'memory' &&
-          ::Gitlab::PerformanceBar.allowed_for_user?(request.env['warden']&.user)
+        Rails.env.development? && request.params['performance_bar'] == 'memory'
       end
 
       def report_to_string(report)

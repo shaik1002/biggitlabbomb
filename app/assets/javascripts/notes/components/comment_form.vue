@@ -5,7 +5,7 @@ import $ from 'jquery';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { createAlert } from '~/alert';
 import { STATUS_CLOSED, STATUS_MERGED, STATUS_OPEN, STATUS_REOPENED } from '~/issues/constants';
-import { detectAndConfirmSensitiveTokens } from '~/lib/utils/secret_detection';
+import { containsSensitiveToken, confirmSensitiveAction } from '~/lib/utils/secret_detection';
 import {
   capitalizeFirstCharacter,
   convertToCamelCase,
@@ -190,11 +190,6 @@ export default {
 
       return null;
     },
-    commentNowButtonTitle() {
-      return this.noteType === constants.COMMENT
-        ? this.$options.i18n.addCommentNow
-        : this.$options.i18n.addThreadNow;
-    },
   },
   watch: {
     noteIsInternal(val) {
@@ -245,9 +240,11 @@ export default {
           noteData.data.note.type = constants.DISCUSSION_NOTE;
         }
 
-        const confirmSubmit = await detectAndConfirmSensitiveTokens({ content: this.note });
-        if (!confirmSubmit) {
-          return;
+        if (containsSensitiveToken(this.note)) {
+          const confirmed = await confirmSensitiveAction();
+          if (!confirmed) {
+            return;
+          }
         }
 
         this.note = ''; // Empty textarea while being requested. Repopulate in catch
@@ -304,9 +301,7 @@ export default {
       toggleState()
         .then(() => {
           fetchUserCounts();
-          // badgeState is only initialized for MR type
-          // To avoid undefined error added an optional chaining to function
-          return badgeState?.updateStatus?.();
+          return badgeState?.updateStatus();
         })
         .catch(() =>
           createAlert({
@@ -339,9 +334,6 @@ export default {
     onInput(value) {
       this.note = value;
     },
-    append(value) {
-      this.$refs.markdownEditor.append(value);
-    },
   },
 };
 </script>
@@ -362,12 +354,7 @@ export default {
           {{ error }}
         </gl-alert>
         <div class="timeline-content timeline-content-form">
-          <form
-            ref="commentForm"
-            class="new-note common-note-form gfm-form js-main-target-form"
-            data-testid="comment-form"
-            @submit.stop.prevent
-          >
+          <form ref="commentForm" class="new-note common-note-form gfm-form js-main-target-form">
             <comment-field-layout
               :with-alert-container="true"
               :noteable-data="getNoteableData"
@@ -398,7 +385,7 @@ export default {
               <gl-form-checkbox
                 v-if="canSetInternalNote"
                 v-model="noteIsInternal"
-                class="gl-mb-2 gl-basis-full"
+                class="gl-mb-2 gl-flex-basis-full"
                 data-testid="internal-note-checkbox"
               >
                 {{ $options.i18n.internal }}
@@ -411,31 +398,29 @@ export default {
                 />
               </gl-form-checkbox>
               <template v-if="hasDrafts">
-                <comment-type-dropdown
-                  v-model="noteType"
-                  class="gl-mr-3"
-                  data-testid="add-to-review-dropdown"
+                <gl-button
                   :disabled="disableSubmitButton"
-                  :tracking-label="trackingLabel"
-                  is-review-dropdown
-                  :noteable-display-name="noteableDisplayName"
-                  :discussions-require-resolution="discussionsRequireResolution"
-                  @click="handleSaveDraft()"
-                />
+                  data-testid="add-to-review-button"
+                  type="submit"
+                  category="primary"
+                  variant="confirm"
+                  class="gl-mr-3"
+                  @click.prevent="handleSaveDraft()"
+                  >{{ __('Add to review') }}</gl-button
+                >
                 <gl-button
                   :disabled="disableSubmitButton"
                   data-testid="add-comment-now-button"
                   category="secondary"
                   class="gl-mr-3"
                   @click.prevent="handleSave()"
-                  >{{ commentNowButtonTitle }}</gl-button
+                  >{{ __('Add comment now') }}</gl-button
                 >
               </template>
               <template v-else>
                 <comment-type-dropdown
                   v-model="noteType"
                   class="gl-mr-3"
-                  data-testid="comment-button"
                   :disabled="disableSubmitButton"
                   :tracking-label="trackingLabel"
                   :is-internal-note="noteIsInternal"

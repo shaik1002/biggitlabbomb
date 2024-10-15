@@ -20,9 +20,7 @@ module Gitlab
               log_message = pipeline_authorized ? 'authorized' : 'not authorized'
               Gitlab::AppLogger.info(message: "Pipeline #{log_message}", project_id: project.id, user_id: current_user.id)
 
-              return if pipeline_authorized
-
-              error('External validation failed', failure_reason: :external_validation_failure)
+              error('External validation failed', drop_reason: :external_validation_failure) unless pipeline_authorized
             end
 
             def break?

@@ -1,8 +1,0 @@
-mutation userPreferencesUpdate($input: UserPreferencesUpdateInput!) {
-  userPreferencesUpdate(input: $input) {
-    userPreferences {
-      organizationGroupsProjectsSort
-      organizationGroupsProjectsDisplay
-    }
-  }
-}

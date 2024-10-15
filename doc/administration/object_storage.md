@@ -53,9 +53,6 @@ Most types of objects, such as CI artifacts, LFS files, and upload attachments
 can be saved in object storage by specifying a single credential for object
 storage with multiple buckets.
 
-NOTE:
-For GitLab Helm Charts, see how to [configure the consolidated form](https://docs.gitlab.com/charts/charts/globals.html#consolidated-object-storage).
-
 Configuring the object storage using the consolidated form has a number of advantages:
 
 - It can simplify your GitLab configuration since the connection details are shared
@@ -109,17 +106,16 @@ Each object type must at least define the bucket name where it will be stored.
 
 The following table lists the valid `objects` that can be used:
 
-| Type               | Description |
-|--------------------|-------------|
-| `artifacts`        | [CI/CD job artifacts](cicd/job_artifacts.md) |
-| `external_diffs`   | [Merge request diffs](merge_request_diffs.md) |
-| `uploads`          | [User uploads](uploads.md) |
-| `lfs`              | [Git Large File Storage objects](lfs/index.md) |
+|  Type              | Description                                                                |
+|--------------------|----------------------------------------------------------------------------|
+| `artifacts`        | [CI artifacts](job_artifacts.md)                                           |
+| `external_diffs`   | [Merge request diffs](merge_request_diffs.md)                              |
+| `uploads`          | [User uploads](uploads.md)                                                 |
+| `lfs`              | [Git Large File Storage objects](lfs/index.md)                             |
 | `packages`         | [Project packages (for example, PyPI, Maven, or NuGet)](packages/index.md) |
-| `dependency_proxy` | [Dependency Proxy](packages/dependency_proxy.md) |
-| `terraform_state`  | [Terraform state files](terraform_state.md) |
-| `pages`            | [Pages](pages/index.md) |
-| `ci_secure_files`  | [Secure files](cicd/secure_files.md) |
+| `dependency_proxy` | [Dependency Proxy](packages/dependency_proxy.md)                    |
+| `terraform_state`  | [Terraform state files](terraform_state.md)                                |
+| `pages`            | [Pages](pages/index.md)                                             |
 
 Within each object type, three parameters can be defined:
 
@@ -152,7 +148,7 @@ gitlab_rails['artifacts_enabled'] = false
 
 With the storage-specific form, every object defines its own object
 storage connection and configuration. You should [use the consolidated form](#transition-to-consolidated-form) instead,
-except for the storage types not supported by the consolidated form. When working with the GitLab Helm charts, refer to how the charts handle [consolidated form for object storage](https://docs.gitlab.com/charts/charts/globals.html#consolidated-object-storage).
+except for the storage types not supported by the consolidated form.
 
 The use of [encrypted S3 buckets](#encrypted-s3-buckets) with non-consolidated form is not supported.
 You may get [ETag mismatch errors](#etag-mismatch) if you use it.
@@ -167,12 +163,12 @@ supported by the consolidated form, refer to the following guides:
 
 | Object storage type | Supported by consolidated form? |
 |---------------------|------------------------------------------|
+| [Secure Files](secure_files.md#using-object-storage) | **{dotted-circle}** No |
 | [Backups](../administration/backup_restore/backup_gitlab.md#upload-backups-to-a-remote-cloud-storage) | **{dotted-circle}** No |
 | [Container registry](packages/container_registry.md#use-object-storage) (optional feature) | **{dotted-circle}** No |
 | [Mattermost](https://docs.mattermost.com/configure/file-storage-configuration-settings.html)| **{dotted-circle}** No |
 | [Autoscale runner caching](https://docs.gitlab.com/runner/configuration/autoscale.html#distributed-runners-caching) (optional for improved performance) | **{dotted-circle}** No |
-| [Secure Files](cicd/secure_files.md#using-object-storage) | **{check-circle}** Yes |
-| [Job artifacts](cicd/job_artifacts.md#using-object-storage) including archived job logs | **{check-circle}** Yes |
+| [Job artifacts](job_artifacts.md#using-object-storage) including archived job logs | **{check-circle}** Yes |
 | [LFS objects](lfs/index.md#storing-lfs-objects-in-remote-object-storage) | **{check-circle}** Yes |
 | [Uploads](uploads.md#using-object-storage) | **{check-circle}** Yes |
 | [Merge request diffs](merge_request_diffs.md#using-object-storage) | **{check-circle}** Yes |
@@ -196,7 +192,7 @@ The connection settings match those provided by [fog-aws](https://github.com/fog
 | `aws_access_key_id`                         | AWS credentials, or compatible.    | |
 | `aws_secret_access_key`                     | AWS credentials, or compatible.    | |
 | `aws_signature_version`                     | AWS signature version to use. `2` or `4` are valid options. Digital Ocean Spaces and other providers may need `2`. | `4` |
-| `enable_signature_v4_streaming`             | Set to `true` to enable HTTP chunked transfers with [AWS v4 signatures](https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-streaming.html). Oracle Cloud S3 needs this to be `false`. GitLab 17.4 changed the default from `true` to `false`.  | `false` |
+| `enable_signature_v4_streaming`             | Set to `true` to enable HTTP chunked transfers with [AWS v4 signatures](https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-streaming.html). Oracle Cloud S3 needs this to be `false`.       | `true` |
 | `region`                                    | AWS region.                        | |
 | `host`                                      | DEPRECATED: Use `endpoint` instead. S3 compatible host for when not using AWS. For example, `localhost` or `storage.example.com`. HTTPS and port 443 is assumed. | `s3.amazonaws.com` |
 | `endpoint`                                  | Can be used when configuring an S3 compatible service such as [MinIO](https://min.io), by entering a URL such as `http://127.0.0.1:9000`. This takes precedence over `host`. Always use `endpoint` for consolidated form. | (optional) |
@@ -431,7 +427,7 @@ For more information, see [issue #4419](https://gitlab.com/gitlab-org/gitlab/-/i
 ### Hitachi Vantara HCP
 
 NOTE:
-Connections to HCP may return an error stating `SignatureDoesNotMatch - The request signature we calculated does not match the signature you provided. Check your HCP Secret Access key and signing method.` In these cases, set the `endpoint` to the URL of the tenant instead of the namespace, and ensure bucket paths are configured as `<namespace_name>/<bucket_name>`.
+Connections to HCP may return an error stating `SigntureDoesNotMatch - The request signature we calculated does not match the signature you provided. Check your HCP Secret Access key and signing method.` In these cases, set the `endpoint` to the URL of the tenant instead of the namespace, and ensure bucket paths are configured as `<namespace_name>/<bucket_name>`.
 
 [HCP](https://docs.hitachivantara.com/r/en-us/content-platform-for-cloud-scale/2.6.x/mk-hcpcs008/getting-started/introducing-hcp-for-cloud-scale/support-for-the-amazon-s3-api) provides an S3-compatible API. Use the following configuration example:
 
@@ -484,7 +480,6 @@ The following example uses AWS S3 to enable object storage for all supported ser
    gitlab_rails['object_store']['objects']['packages']['bucket'] = 'gitlab-packages'
    gitlab_rails['object_store']['objects']['dependency_proxy']['bucket'] = 'gitlab-dependency-proxy'
    gitlab_rails['object_store']['objects']['terraform_state']['bucket'] = 'gitlab-terraform-state'
-   gitlab_rails['object_store']['objects']['ci_secure_files']['bucket'] = 'gitlab-ci-secure-files'
    gitlab_rails['object_store']['objects']['pages']['bucket'] = 'gitlab-pages'
    ```
 
@@ -739,7 +734,7 @@ The following example uses AWS S3 to enable object storage for all supported ser
 
 To migrate existing local data to object storage see the following guides:
 
-- [Job artifacts](cicd/job_artifacts.md#migrating-to-object-storage) including archived job logs
+- [Job artifacts](job_artifacts.md#migrating-to-object-storage) including archived job logs
 - [LFS objects](lfs/index.md#migrating-to-object-storage)
 - [Uploads](raketasks/uploads/migrate.md#migrate-to-object-storage)
 - [Merge request diffs](merge_request_diffs.md#using-object-storage)
@@ -747,7 +742,7 @@ To migrate existing local data to object storage see the following guides:
 - [Dependency Proxy](packages/dependency_proxy.md#migrate-local-dependency-proxy-blobs-and-manifests-to-object-storage)
 - [Terraform state files](terraform_state.md#migrate-to-object-storage)
 - [Pages content](pages/index.md#migrate-pages-deployments-to-object-storage)
-- [Project-level Secure Files](cicd/secure_files.md#migrate-to-object-storage)
+- [Project-level Secure Files](secure_files.md#migrate-to-object-storage)
 
 ## Transition to consolidated form
 
@@ -837,14 +832,14 @@ See the following additional guides:
 1. Make sure the [`git` user home directory](https://docs.gitlab.com/omnibus/settings/configuration.html#move-the-home-directory-for-a-user) is on local disk.
 1. Configure [database lookup of SSH keys](operations/fast_ssh_key_lookup.md)
    to eliminate the need for a shared `authorized_keys` file.
-1. [Prevent local disk usage for job logs](cicd/job_logs.md#prevent-local-disk-usage).
+1. [Prevent local disk usage for job logs](job_logs.md#prevent-local-disk-usage).
 1. [Disable Pages local storage](pages/index.md#disable-pages-local-storage).
 
 ## Troubleshooting
 
 ### Objects are not included in GitLab backups
 
-As noted in [the backup documentation](../administration/backup_restore/backup_gitlab.md#object-storage),
+As noted in [the backup documentation](../administration/backup_restore/index.md),
 objects are not included in GitLab backups. You can enable backups with
 your object storage provider instead.
 
@@ -873,12 +868,6 @@ with the Fog library that GitLab uses. Symptoms include an error in `production.
 ```plaintext
 411 Length Required
 ```
-
-### Artifacts always downloaded with filename `download`
-
-Downloaded artifact filenames are set with the `response-content-disposition` header in the
-[GetObject request](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html).
-If the S3 provider does not support this header, the downloaded file is always saved as `download`.
 
 ### Proxy Download
 
@@ -1004,36 +993,36 @@ In some situations, it may be helpful to test object storage settings using the 
 1. Start a [Rails console](operations/rails_console.md).
 1. Set up the object storage connection, using the same parameters you set up in `/etc/gitlab/gitlab.rb`, in the following example format:
 
-   Example connection using access keys:
+Example connection using access keys:
 
-   ```ruby
-   connection = Fog::Storage.new(
-     {
-       provider: 'AWS',
-       region: `eu-central-1`,
-       aws_access_key_id: '<AWS_ACCESS_KEY_ID>',
-       aws_secret_access_key: '<AWS_SECRET_ACCESS_KEY>'
-     }
-   )
-   ```
+  ```ruby
+  connection = Fog::Storage.new(
+    {
+      provider: 'AWS',
+      region: `eu-central-1`,
+      aws_access_key_id: '<AWS_ACCESS_KEY_ID>',
+      aws_secret_access_key: '<AWS_SECRET_ACCESS_KEY>'
+    }
+  )
+  ```
 
-   Example connection using AWS IAM Profiles:
+Example connection using AWS IAM Profiles:
 
-   ```ruby
-   connection = Fog::Storage.new(
-     {
-       provider: 'AWS',
-       use_iam_profile: true,
-       region: 'us-east-1'
-     }
-   )
-   ```
+  ```ruby
+  connection = Fog::Storage.new(
+    {
+      provider: 'AWS',
+      use_iam_profile: true,
+      region: 'us-east-1'
+    }
+  )
+  ```
 
 1. Specify the bucket name to test against, write, and finally read a test file.
 
-   ```ruby
-   dir = connection.directories.new(key: '<bucket-name-here>')
-   f = dir.files.create(key: 'test.txt', body: 'test')
-   pp f
-   pp dir.files.head('test.txt')
-   ```
+  ```ruby
+  dir = connection.directories.new(key: '<bucket-name-here>')
+  f = dir.files.create(key: 'test.txt', body: 'test')
+  pp f
+  pp dir.files.head('test.txt')
+  ```

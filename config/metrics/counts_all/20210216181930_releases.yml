@@ -2,6 +2,8 @@
 data_category: optional
 key_path: usage_activity_by_stage.release.releases
 description: Unique users creating release tags
+product_section: ops
+product_stage: deploy
 product_group: environments
 value_type: number
 status: active
@@ -15,4 +17,3 @@ tier:
 - premium
 - ultimate
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

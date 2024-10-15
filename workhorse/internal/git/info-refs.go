@@ -22,7 +22,7 @@ func GetInfoRefsHandler(a *api.API) http.Handler {
 }
 
 func handleGetInfoRefs(rw http.ResponseWriter, r *http.Request, a *api.Response) {
-	responseWriter := NewHTTPResponseWriter(rw)
+	responseWriter := NewHttpResponseWriter(rw)
 	// Log 0 bytes in because we ignore the request body (and there usually is none anyway).
 	defer responseWriter.Log(r, 0)
 
@@ -46,24 +46,16 @@ func handleGetInfoRefs(rw http.ResponseWriter, r *http.Request, a *api.Response)
 		status := grpcstatus.Convert(err)
 		err = fmt.Errorf("handleGetInfoRefs: %v", err)
 
-		if status == nil {
-			fail.Request(responseWriter, r, err)
-			return
-		}
-		switch status.Code() {
-		case grpccodes.Unavailable:
+		if status != nil && status.Code() == grpccodes.Unavailable {
 			fail.Request(responseWriter, r, err, fail.WithStatus(http.StatusServiceUnavailable),
 				fail.WithBody("The git server, Gitaly, is not available at this time. Please contact your administrator."))
-		case grpccodes.NotFound:
-			fail.Request(responseWriter, r, err, fail.WithStatus(http.StatusNotFound),
-				fail.WithBody("Not Found."))
-		default:
+		} else {
 			fail.Request(responseWriter, r, err)
 		}
 	}
 }
 
-func handleGetInfoRefsWithGitaly(ctx context.Context, responseWriter *HTTPResponseWriter, a *api.Response, rpc, gitProtocol, encoding string) error {
+func handleGetInfoRefsWithGitaly(ctx context.Context, responseWriter *HttpResponseWriter, a *api.Response, rpc, gitProtocol, encoding string) error {
 	ctx, smarthttp, err := gitaly.NewSmartHTTPClient(ctx, a.GitalyServer)
 	if err != nil {
 		return err

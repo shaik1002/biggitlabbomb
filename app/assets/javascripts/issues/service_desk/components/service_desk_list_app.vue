@@ -21,7 +21,10 @@ import {
   getFilterTokens,
   getSortOptions,
 } from '~/issues/list/utils';
-import { OPERATORS_IS_NOT_OR } from '~/vue_shared/components/filtered_search_bar/constants';
+import {
+  OPERATORS_IS_NOT,
+  OPERATORS_IS_NOT_OR,
+} from '~/vue_shared/components/filtered_search_bar/constants';
 import {
   CLOSED_MOVED,
   CLOSED,
@@ -206,11 +209,17 @@ export default {
         [STATUS_ALL]: allIssues?.count,
       };
     },
-    showPaginationControls() {
-      return !this.isLoading && (this.pageInfo.hasNextPage || this.pageInfo.hasPreviousPage);
+    currentTabCount() {
+      return this.tabCounts[this.state] ?? 0;
     },
-    showPageSizeSelector() {
-      return this.serviceDeskIssues.length > 0;
+    showPaginationControls() {
+      return (
+        this.serviceDeskIssues.length > 0 &&
+        (this.pageInfo.hasNextPage || this.pageInfo.hasPreviousPage)
+      );
+    },
+    showPageSizeControls() {
+      return this.currentTabCount > DEFAULT_PAGE_SIZE;
     },
     isLoading() {
       return this.$apollo.loading;
@@ -237,6 +246,9 @@ export default {
     },
     canShowIssuesList() {
       return this.isLoading || this.issuesError.length || this.hasAnyServiceDeskIssue;
+    },
+    hasOrFeature() {
+      return this.glFeatures.orIssuableQueries;
     },
     hasSearch() {
       return Boolean(
@@ -273,7 +285,7 @@ export default {
         },
         {
           ...assigneeTokenBase,
-          operators: OPERATORS_IS_NOT_OR,
+          operators: this.hasOrFeature ? OPERATORS_IS_NOT_OR : OPERATORS_IS_NOT,
           fetchUsers: this.fetchUsers,
           recentSuggestionsStorageKey: `${this.fullPath}-issues-recent-tokens-assignee`,
           preloadedUsers,
@@ -285,7 +297,7 @@ export default {
         },
         {
           ...labelTokenBase,
-          operators: OPERATORS_IS_NOT_OR,
+          operators: this.hasOrFeature ? OPERATORS_IS_NOT_OR : OPERATORS_IS_NOT,
           fetchLabels: this.fetchLabels,
           fetchLatestLabels: this.glFeatures.frontendCaching ? this.fetchLatestLabels : null,
           recentSuggestionsStorageKey: `${this.fullPath}-issues-recent-tokens-label`,
@@ -336,7 +348,6 @@ export default {
     this.cache = {};
   },
   methods: {
-    // eslint-disable-next-line max-params
     fetchWithCache(path, cacheName, searchKey, search) {
       if (this.cache[cacheName]) {
         const data = search
@@ -432,9 +443,10 @@ export default {
 
       this.$router.push({ query: this.urlParams });
     },
-    handlePageSizeChange(pageSize) {
-      this.pageSize = pageSize;
-      this.pageParams = getInitialPageParams(pageSize);
+    handlePageSizeChange(newPageSize) {
+      const pageParam = getParameterByName(PARAM_LAST_PAGE_SIZE) ? 'lastPageSize' : 'firstPageSize';
+      this.pageParams[pageParam] = newPageSize;
+      this.pageSize = newPageSize;
       scrollUp();
 
       this.$router.push({ query: this.urlParams });
@@ -563,8 +575,9 @@ export default {
       :search-tokens="searchTokens"
       :issuables-loading="isLoading"
       :initial-filter-value="filterTokens"
+      :show-filtered-search-friendly-text="hasOrFeature"
       :show-pagination-controls="showPaginationControls"
-      :show-page-size-selector="showPageSizeSelector"
+      :show-page-size-change-controls="showPageSizeControls"
       :sort-options="sortOptions"
       :initial-sort-by="sortKey"
       :is-manual-ordering="isManualOrdering"
@@ -575,7 +588,6 @@ export default {
       :default-page-size="pageSize"
       :has-next-page="pageInfo.hasNextPage"
       :has-previous-page="pageInfo.hasPreviousPage"
-      show-filtered-search-friendly-text
       sync-filter-and-sort
       use-keyset-pagination
       @click-tab="handleClickTab"

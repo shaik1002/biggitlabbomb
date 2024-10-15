@@ -7,7 +7,7 @@ module ClickHouseHelpers
     clickhouse_fixture(:events, events.map do |event|
       {
         id: event.id,
-        path: event.project.reload.project_namespace.traversal_path,
+        path: "#{event.project.reload.project_namespace.traversal_ids.join('/')}/",
         author_id: event.author_id,
         target_id: event.target_id,
         target_type: event.target_type,
@@ -22,40 +22,31 @@ module ClickHouseHelpers
   # rubocop:disable Metrics/PerceivedComplexity -- same
   def insert_ci_builds_to_click_house(builds)
     result = clickhouse_fixture(:ci_finished_builds, builds.map do |build|
-      build.slice(
-        %i[id project_id pipeline_id status finished_at created_at started_at queued_at runner_id]).symbolize_keys
-          .merge(
-            runner_run_untagged: build.runner&.run_untagged,
-            runner_type: Ci::Runner.runner_types[build.runner&.runner_type],
-            runner_owner_namespace_id: build.runner&.owner_runner_namespace&.namespace_id,
-            runner_manager_system_xid: build.runner_manager&.system_xid,
-            runner_manager_version: build.runner_manager&.version || '',
-            runner_manager_revision: build.runner_manager&.revision || '',
-            runner_manager_platform: build.runner_manager&.platform || '',
-            runner_manager_architecture: build.runner_manager&.architecture || ''
-          )
+      {
+        id: build.id,
+        project_id: build.project_id,
+        pipeline_id: build.pipeline_id,
+        status: build.status,
+        finished_at: build.finished_at,
+        created_at: build.created_at,
+        started_at: build.started_at,
+        queued_at: build.queued_at,
+        runner_id: build.runner_id,
+        runner_manager_system_xid: build.runner_manager&.system_xid,
+        runner_run_untagged: build.runner&.run_untagged,
+        runner_type: Ci::Runner.runner_types[build.runner&.runner_type],
+        runner_owner_namespace_id: build.runner&.owner_runner_namespace&.namespace_id,
+        runner_manager_version: build.runner_manager&.version || '',
+        runner_manager_revision: build.runner_manager&.revision || '',
+        runner_manager_platform: build.runner_manager&.platform || '',
+        runner_manager_architecture: build.runner_manager&.architecture || ''
+      }
     end)
 
     expect(result).to eq(true)
   end
   # rubocop:enable Metrics/CyclomaticComplexity
   # rubocop:enable Metrics/PerceivedComplexity
-
-  def insert_ci_pipelines_to_click_house(pipelines)
-    result = clickhouse_fixture(:ci_finished_pipelines, pipelines.map do |pipeline|
-      pipeline.slice(
-        %i[id duration status source ref committed_at created_at started_at finished_at]).symbolize_keys
-           .merge(
-             path: pipeline.project&.project_namespace&.traversal_path || '0/'
-           )
-    end)
-
-    expect(result).to eq(true)
-  end
-
-  def self.default_timezone
-    ActiveRecord.default_timezone
-  end
 
   def clickhouse_fixture(table, data, db = :main)
     return if data.empty?

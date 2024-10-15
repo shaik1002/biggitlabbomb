@@ -20,7 +20,6 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep, feature_category: 
   it_behaves_like 'having unique enum values'
 
   it { is_expected.to belong_to(:project) }
-  it { is_expected.to belong_to(:project_mirror).with_foreign_key('project_id') }
   it { is_expected.to belong_to(:user) }
   it { is_expected.to belong_to(:auto_canceled_by).class_name('Ci::Pipeline').inverse_of(:auto_canceled_pipelines) }
   it { is_expected.to belong_to(:pipeline_schedule) }
@@ -95,7 +94,6 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep, feature_category: 
   describe 'validations' do
     it { is_expected.to validate_presence_of(:sha) }
     it { is_expected.to validate_presence_of(:status) }
-    it { is_expected.to validate_presence_of(:project) }
   end
 
   describe 'associations' do
@@ -105,11 +103,6 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep, feature_category: 
       expect(described_class.reflect_on_association(:project).has_inverse?).to eq(:all_pipelines)
       expect(Project.reflect_on_association(:all_pipelines).has_inverse?).to eq(:project)
       expect(Project.reflect_on_association(:ci_pipelines).has_inverse?).to eq(:project)
-    end
-
-    it 'has a bidirectional relationship with project mirror' do
-      expect(described_class.reflect_on_association(:project_mirror).has_inverse?).to eq(:pipelines)
-      expect(Ci::ProjectMirror.reflect_on_association(:pipelines).has_inverse?).to eq(:project_mirror)
     end
 
     describe '#latest_builds' do
@@ -185,23 +178,19 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep, feature_category: 
     describe '.track_ci_pipeline_created_event' do
       let(:pipeline) { build(:ci_pipeline, user: user) }
 
-      it_behaves_like 'internal event tracking' do
-        let(:event) { 'create_ci_internal_pipeline' }
-        let(:additional_properties) do
-          {
-            label: 'push',
-            property: 'unknown_source'
-          }
-        end
+      it 'tracks the creation event with user information' do
+        expect(Gitlab::InternalEvents).to receive(:track_event).with('create_ci_internal_pipeline', project: project, user: user)
 
-        subject { pipeline.save! }
+        pipeline.save!
       end
 
       context 'when pipeline is external' do
         let(:pipeline) { build(:ci_pipeline, source: :external) }
 
-        it_behaves_like 'internal event not tracked' do
-          subject { pipeline.save! }
+        it 'does not track creation event' do
+          expect(Gitlab::InternalEvents).not_to receive(:track_event)
+
+          pipeline.save!
         end
       end
     end
@@ -2997,7 +2986,6 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep, feature_category: 
       before do
         allow(build).to receive(:with_resource_group?) { true }
         allow(Ci::ResourceGroups::AssignResourceFromResourceGroupWorker).to receive(:perform_async)
-        allow(Ci::ResourceGroups::AssignResourceFromResourceGroupWorkerV2).to receive(:perform_async)
 
         build.enqueue
       end
@@ -3839,7 +3827,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep, feature_category: 
     end
   end
 
-  describe '#stuck?', :freeze_time do
+  describe '#stuck?' do
     let(:pipeline) { create(:ci_empty_pipeline, :created) }
 
     before do
@@ -3895,7 +3883,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep, feature_category: 
     context 'when the pipeline is failed' do
       using RSpec::Parameterized::TableSyntax
 
-      where(:failure_reason, :expected) do
+      where(:drop_reason, :expected) do
         :unknown_failure            | false
         :filtered_by_rules          | true
         :filtered_by_workflow_rules | true
@@ -3903,7 +3891,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep, feature_category: 
 
       with_them do
         before do
-          pipeline.set_failed(failure_reason)
+          pipeline.set_failed(drop_reason)
         end
 
         it { is_expected.to eq expected }
@@ -4874,7 +4862,7 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep, feature_category: 
     end
 
     before do
-      create_list(:ci_build, 2, pipeline: pipeline, ci_stage: stage)
+      create_list(:ci_build, 2, pipeline: pipeline, stage: stage.name)
     end
 
     describe '#stage' do
@@ -5816,53 +5804,29 @@ RSpec.describe Ci::Pipeline, :mailer, factory_default: :keep, feature_category: 
   describe '.current_partition_value' do
     subject { described_class.current_partition_value }
 
-    context 'when not using ci partitioning automation' do
-      before do
-        stub_feature_flags(ci_partitioning_automation: false)
-      end
+    it { is_expected.to eq(102) }
 
-      it { is_expected.to eq(102) }
-
-      it 'accepts an optional argument' do
-        expect(described_class.current_partition_value(build_stubbed(:project))).to eq(102)
-      end
-
-      it 'returns 100 when the flags are disabled' do
-        stub_feature_flags(ci_current_partition_value_101: false)
-        stub_feature_flags(ci_current_partition_value_102: false)
-
-        is_expected.to eq(100)
-      end
-
-      it 'returns 101 when the 102 flag is disabled' do
-        stub_feature_flags(ci_current_partition_value_102: false)
-
-        is_expected.to eq(101)
-      end
-
-      it 'returns 102 when the 101 flag is disabled' do
-        stub_feature_flags(ci_current_partition_value_101: false)
-
-        is_expected.to eq(102)
-      end
+    it 'accepts an optional argument' do
+      expect(described_class.current_partition_value(build_stubbed(:project))).to eq(102)
     end
 
-    context 'when using ci partitioning automation' do
-      context 'when current ci_partition exists' do
-        before do
-          create(:ci_partition, :current)
-        end
+    it 'returns 100 when the flags are disabled' do
+      stub_feature_flags(ci_current_partition_value_101: false)
+      stub_feature_flags(ci_current_partition_value_102: false)
 
-        it 'return the current partition value' do
-          expect(subject).to eq(Ci::Partition.current.id)
-        end
-      end
+      is_expected.to eq(100)
+    end
 
-      context 'when current ci_partition does not exist' do
-        it 'return the default initial value' do
-          expect(subject).to eq(102)
-        end
-      end
+    it 'returns 101 when the 102 flag is disabled' do
+      stub_feature_flags(ci_current_partition_value_102: false)
+
+      is_expected.to eq(101)
+    end
+
+    it 'returns 102 when the 101 flag is disabled' do
+      stub_feature_flags(ci_current_partition_value_101: false)
+
+      is_expected.to eq(102)
     end
   end
 

@@ -118,9 +118,6 @@ export default {
           this.hasCurrentAttribute = data?.workspace?.issuable.hasEpic;
         }
       },
-      skip() {
-        return !this.iid;
-      },
       error(error) {
         createAlert({
           message: this.i18n.currentFetchError,
@@ -171,7 +168,7 @@ export default {
       return this.issuableAttributesQueries[this.issuableAttribute];
     },
     attributeTitle() {
-      return this.currentAttribute?.title || __('None');
+      return this.currentAttribute?.title || this.i18n.noAttribute;
     },
     attributeUrl() {
       return this.currentAttribute?.webUrl;
@@ -302,7 +299,7 @@ export default {
           class="sidebar-collapsed-icon"
         >
           <gl-icon :aria-label="attributeTypeTitle" :name="attributeTypeIcon" />
-          <span class="collapse-truncated-title gl-px-3 gl-pt-2 gl-text-sm">
+          <span class="collapse-truncated-title gl-pt-2 gl-px-3 gl-font-sm">
             {{ attributeTitle }}
           </span>
         </div>
@@ -328,7 +325,7 @@ export default {
         >
           <gl-link
             v-gl-tooltip="tooltipText"
-            class="gl-text-inherit hover:gl-text-blue-800"
+            class="gl-reset-color gl-hover-text-blue-800"
             :href="attributeUrl"
             :data-testid="`${formatIssuableAttribute.kebab}-link`"
           >
@@ -346,10 +343,10 @@ export default {
         boundary="viewport"
         triggers="click"
       >
-        <div class="gl-mb-4 gl-text-base">
+        <div class="gl-mb-4 gl-font-base">
           {{ i18n.editConfirmation }}
         </div>
-        <div class="gl-flex gl-items-center">
+        <div class="gl-display-flex gl-align-items-center">
           <gl-button
             size="small"
             variant="confirm"

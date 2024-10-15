@@ -10,7 +10,7 @@ DETAILS:
 **Tier:** Premium, Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
-Every API call for [merge train](../ci/pipelines/merge_trains.md) must be authenticated with at least the Developer [role](../user/permissions.md).
+Every API call for [merge train](../ci/pipelines/merge_trains.md) must be authenticated with at lease the Developer [role](../user/permissions.md).
 
 If a user is not a member of a project and the project is private, a `GET` request on that project returns a `404` status code.
 
@@ -21,7 +21,7 @@ If Merge Trains is not available for the project, a `403` status code is returne
 By default, `GET` requests return 20 results at a time because the API results
 are paginated.
 
-For more information, see [pagination](rest/index.md#pagination).
+Read more on [pagination](rest/index.md#pagination).
 
 ## List Merge Trains for a project
 
@@ -34,7 +34,7 @@ GET /projects/:id/merge_trains?scope=complete
 
 | Attribute | Type           | Required | Description |
 |-----------|----------------|----------|-------------|
-| `id`      | integer/string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`      | integer/string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `scope`   | string         | No       | Return Merge Trains filtered by the given scope. Available scopes are `active` (to be merged) and `complete` (have been merged). |
 | `sort`    | string         | No       | Return Merge Trains sorted in `asc` or `desc` order. Default: `desc`. |
 
@@ -98,7 +98,7 @@ Supported attributes:
 
 | Attribute       | Type           | Required | Description |
 |-----------------|----------------|----------|-------------|
-| `id`            | integer/string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`            | integer/string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `target_branch` | string         | Yes      | The target branch of the merge train. |
 | `scope`         | string         | No       | Return Merge Trains filtered by the given scope. Available scopes are `active` (to be merged) and `complete` (have been merged). |
 | `sort`          | string         | No       | Return Merge Trains sorted in `asc` or `desc` order. Default: `desc`. |
@@ -168,7 +168,7 @@ Supported attributes:
 
 | Attribute           | Type           | Required | Description |
 |---------------------|----------------|----------|-------------|
-| `id`                | integer/string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer/string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer        | Yes      | The internal ID of the merge request. |
 
 Example request:
@@ -234,7 +234,7 @@ Supported attributes:
 
 | Attribute                | Type           | Required | Description |
 |--------------------------|----------------|----------|-------------|
-| `id`                     | integer/string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                     | integer/string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid`      | integer        | Yes      | The internal ID of the merge request. |
 | `sha`                    | string         | No       | If present, the SHA must match the `HEAD` of the source branch, otherwise the merge fails. |
 | `squash`                 | boolean        | No       | If true, the commits are squashed into a single commit on merge. |

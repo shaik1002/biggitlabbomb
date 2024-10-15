@@ -20,11 +20,6 @@ export default {
       required: false,
       default: true,
     },
-    showBlobSize: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
   },
   computed: {
     blobSize() {
@@ -47,13 +42,13 @@ export default {
 };
 </script>
 <template>
-  <div class="file-header-content gl-flex gl-items-center gl-leading-1">
+  <div class="file-header-content d-flex gl-align-items-center gl-line-height-1">
     <slot name="filepath-prepend"></slot>
 
     <template v-if="fileName">
       <file-icon :file-name="fileName" :size="16" aria-hidden="true" css-classes="gl-mr-3" />
       <strong
-        class="file-title-name mr-1 js-blob-header-filepath gl-break-all !gl-no-underline"
+        class="file-title-name mr-1 js-blob-header-filepath"
         data-testid="file-title-content"
         >{{ fileName }}</strong
       >
@@ -67,7 +62,7 @@ export default {
       css-class="gl-mr-2"
     />
 
-    <small v-if="showBlobSize" class="gl-mr-3">{{ blobSize }}</small>
+    <small class="gl-mr-3">{{ blobSize }}</small>
 
     <gl-badge v-if="showLfsBadge">{{ __('LFS') }}</gl-badge>
   </div>

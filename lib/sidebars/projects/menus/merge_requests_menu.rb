@@ -23,7 +23,7 @@ module Sidebars
 
         override :sprite_icon
         def sprite_icon
-          'merge-request'
+          'git-merge'
         end
 
         override :render?

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::BackgroundMigration::RemoveNamespaceFromOsTypeSbomComponents, schema: 20240909204952, feature_category: :software_composition_analysis do
+RSpec.describe Gitlab::BackgroundMigration::RemoveNamespaceFromOsTypeSbomComponents, feature_category: :software_composition_analysis do
   let(:components) { table(:sbom_components) }
   let(:expected) do
     (0...os_prefix_to_purl_type_mapping.size).map { |n| "package-#{n}" }
@@ -51,7 +51,7 @@ RSpec.describe Gitlab::BackgroundMigration::RemoveNamespaceFromOsTypeSbomCompone
       ).perform
     end
 
-    it 'successfully removes the os namespace prefix' do
+    it 'succesfully removes the os namespace prefix' do
       expect(Gitlab::BackgroundMigration::Logger).not_to receive(:warn)
 
       expect { perform_migration }.not_to raise_error

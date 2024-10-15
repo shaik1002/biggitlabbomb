@@ -8,12 +8,12 @@ RSpec.describe Projects::Security::ConfigurationHelper do
   describe 'security_upgrade_path' do
     subject { security_upgrade_path }
 
-    it { is_expected.to eq("#{ApplicationHelper.promo_url}/pricing/") }
+    it { is_expected.to eq("https://#{ApplicationHelper.promo_host}/pricing/") }
   end
 
   describe 'vulnerability_training_docs_path' do
     subject { helper.vulnerability_training_docs_path }
 
-    it { is_expected.to eq(help_page_path('user/application_security/vulnerabilities/index.md', anchor: 'enable-security-training-for-vulnerabilities')) }
+    it { is_expected.to eq(help_page_path('user/application_security/vulnerabilities/index', anchor: 'enable-security-training-for-vulnerabilities')) }
   end
 end

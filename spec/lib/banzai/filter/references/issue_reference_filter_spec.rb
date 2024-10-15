@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Banzai::Filter::References::IssueReferenceFilter, feature_category: :markdown do
+RSpec.describe Banzai::Filter::References::IssueReferenceFilter, feature_category: :team_planning do
   include FilterSpecHelper
   include DesignManagementTestHelpers
 
@@ -10,8 +10,8 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter, feature_categor
     IssuesHelper
   end
 
-  let_it_be(:project) { create(:project, :public) }
-  let_it_be_with_reload(:issue) { create(:issue, project: project) }
+  let(:project) { create(:project, :public) }
+  let(:issue) { create(:issue, project: project) }
   let(:issue_path) { "/#{issue.project.namespace.path}/#{issue.project.path}/-/issues/#{issue.iid}" }
   let(:issue_url) { "http://#{Gitlab.config.gitlab.host}#{issue_path}" }
 
@@ -29,8 +29,8 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter, feature_categor
 
   %w[pre code a style].each do |elem|
     it "ignores valid references contained inside '#{elem}' element" do
-      act = "<#{elem}>Issue #{issue.to_reference}</#{elem}>"
-      expect(reference_filter(act).to_html).to include act
+      exp = act = "<#{elem}>Issue #{issue.to_reference}</#{elem}>"
+      expect(reference_filter(act).to_html).to eq exp
     end
   end
 
@@ -66,9 +66,9 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter, feature_categor
 
     it 'ignores invalid issue IDs' do
       invalid = invalidate_reference(written_reference)
-      act = "Fixed #{invalid}"
+      exp = act = "Fixed #{invalid}"
 
-      expect(reference_filter(act).to_html).to include act
+      expect(reference_filter(act).to_html).to eq exp
     end
 
     it 'includes a title attribute' do
@@ -102,14 +102,6 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter, feature_categor
       expect(link.attr('data-project')).to eq project.id.to_s
     end
 
-    it 'includes a data-namespace-path attribute' do
-      doc = reference_filter("Issue #{written_reference}")
-      link = doc.css('a').first
-
-      expect(link).to have_attribute('data-namespace-path')
-      expect(link.attr('data-namespace-path')).to eq(project.full_path)
-    end
-
     it 'includes a data-issue attribute' do
       doc = reference_filter("See #{written_reference}")
       link = doc.css('a').first
@@ -137,7 +129,7 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter, feature_categor
     it 'does not escape the data-original attribute' do
       inner_html = 'element <code>node</code> inside'
       doc = reference_filter(%(<a href="#{written_reference}">#{inner_html}</a>))
-      expect(doc.children.first.children.first.attr('data-original')).to eq inner_html
+      expect(doc.children.first.attr('data-original')).to eq inner_html
     end
 
     it 'includes a data-reference-format attribute' do
@@ -212,8 +204,8 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter, feature_categor
         .with(project2, issue.iid)
         .and_return(nil)
 
-      act = "Issue #{reference}"
-      expect(reference_filter(act).to_html).to include act
+      exp = act = "Issue #{reference}"
+      expect(reference_filter(act).to_html).to eq exp
     end
 
     it 'links to a valid reference' do
@@ -242,9 +234,9 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter, feature_categor
     end
 
     it 'ignores invalid issue IDs on the referenced project' do
-      act = "Fixed #{invalidate_reference(reference)}"
+      exp = act = "Fixed #{invalidate_reference(reference)}"
 
-      expect(reference_filter(act).to_html).to include act
+      expect(reference_filter(act).to_html).to eq exp
     end
   end
 
@@ -264,8 +256,8 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter, feature_categor
         .with(project2, issue.iid)
         .and_return(nil)
 
-      act = "Issue #{reference}"
-      expect(reference_filter(act).to_html).to include act
+      exp = act = "Issue #{reference}"
+      expect(reference_filter(act).to_html).to eq exp
     end
 
     it 'links to a valid reference' do
@@ -294,9 +286,9 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter, feature_categor
     end
 
     it 'ignores invalid issue IDs on the referenced project' do
-      act = "Fixed #{invalidate_reference(reference)}"
+      exp = act = "Fixed #{invalidate_reference(reference)}"
 
-      expect(reference_filter(act).to_html).to include act
+      expect(reference_filter(act).to_html).to eq exp
     end
   end
 
@@ -316,8 +308,8 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter, feature_categor
         .with(project2, issue.iid)
         .and_return(nil)
 
-      act = "Issue #{reference}"
-      expect(reference_filter(act).to_html).to include act
+      exp = act = "Issue #{reference}"
+      expect(reference_filter(act).to_html).to eq exp
     end
 
     it 'links to a valid reference' do
@@ -346,9 +338,9 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter, feature_categor
     end
 
     it 'ignores invalid issue IDs on the referenced project' do
-      act = "Fixed #{invalidate_reference(reference)}"
+      exp = act = "Fixed #{invalidate_reference(reference)}"
 
-      expect(reference_filter(act).to_html).to include act
+      expect(reference_filter(act).to_html).to eq exp
     end
   end
 
@@ -485,7 +477,7 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter, feature_categor
       reference = "##{issue.iid}"
       text = "Fixed #{reference}"
 
-      expect(reference_filter(text, context).to_html).to include(text)
+      expect(reference_filter(text, context).to_html).to eq(text)
     end
 
     it 'ignores valid references when cross-reference project uses external tracker' do
@@ -496,7 +488,7 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter, feature_categor
       reference = "#{project.full_path}##{issue.iid}"
       text = "Issue #{reference}"
 
-      expect(reference_filter(text, context).to_html).to include(text)
+      expect(reference_filter(text, context).to_html).to eq(text)
     end
 
     it 'links to a valid reference for complete cross-reference' do
@@ -512,7 +504,7 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter, feature_categor
       reference = "#{project.path}##{issue.iid}"
       text = "See #{reference}"
 
-      expect(reference_filter(text, context).to_html).to include(text)
+      expect(reference_filter(text, context).to_html).to eq(text)
     end
 
     it 'links to a valid reference for url cross-reference' do
@@ -603,20 +595,6 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter, feature_categor
           expect(extras).not_to include('designs')
         end
       end
-    end
-  end
-
-  context 'checking N+1' do
-    let_it_be(:issue1) { create(:issue, project: project) }
-    let_it_be(:issue2) { create(:issue, project: project) }
-
-    it 'does not have N+1 per multiple references per project' do
-      single_reference = "Issue #{issue1.to_reference}"
-      multiple_references = "Issues #{issue1.to_reference} and #{issue2.to_reference}"
-
-      control = ActiveRecord::QueryRecorder.new { reference_filter(single_reference).to_html }
-
-      expect { reference_filter(multiple_references).to_html }.not_to exceed_query_limit(control)
     end
   end
 end

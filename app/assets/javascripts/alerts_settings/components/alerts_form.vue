@@ -82,10 +82,10 @@ export default {
         label-for="alert-integration-settings-issue-template"
         class="col-8 col-md-9 gl-px-6"
       >
-        <label class="gl-inline-flex" for="alert-integration-settings-issue-template">
+        <label class="gl-display-inline-flex" for="alert-integration-settings-issue-template">
           {{ $options.i18n.incidentTemplate.label }}
           <gl-link :href="$options.ISSUE_TEMPLATES_DOCS_LINK" target="_blank">
-            <span class="gl-pl-2 gl-font-normal">{{ $options.i18n.introLinkText }}</span>
+            <span class="gl-font-weight-normal gl-pl-2">{{ $options.i18n.introLinkText }}</span>
           </gl-link>
         </label>
         <gl-collapsible-listbox
@@ -97,7 +97,7 @@ export default {
         />
       </gl-form-group>
 
-      <gl-form-group class="gl-mb-5 gl-pl-0">
+      <gl-form-group class="gl-pl-0 gl-mb-5">
         <gl-form-checkbox
           v-model="sendEmailEnabled"
           data-testid="enable-email-notification-checkbox"
@@ -105,7 +105,7 @@ export default {
           <span>{{ $options.i18n.sendEmail.label }}</span>
         </gl-form-checkbox>
       </gl-form-group>
-      <gl-form-group class="gl-mb-5 gl-pl-0">
+      <gl-form-group class="gl-pl-0 gl-mb-5">
         <gl-form-checkbox v-model="autoCloseIncident">
           <span>{{ $options.i18n.autoCloseIncidents.label }}</span>
         </gl-form-checkbox>

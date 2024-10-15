@@ -1,7 +1,7 @@
 - subscribed = params[:subscribed]
 
 .top-area.adjust
-  = gl_tabs_nav({ class: 'gl-grow gl-border-0' }) do
+  = gl_tabs_nav({ class: 'gl-flex-grow-1 gl-border-0' }) do
     = gl_tab_link_to _('All'), labels_filter_path, { item_active: subscribed != 'true' }
     - if current_user
       = gl_tab_link_to _('Subscribed'), labels_filter_path(subscribed: 'true'), { item_active: subscribed == 'true' }
@@ -10,7 +10,7 @@
       = hidden_field_tag :subscribed, params[:subscribed]
       = hidden_field_tag :sort, 'relevance'
       .input-group.gl-flex-nowrap
-        = search_field_tag :search, params[:search], { placeholder: _('Search'), id: 'label-search', "aria-label": _('Search labels'), class: 'form-control search-text-input input-short', spellcheck: false, autofocus: true }
+        = search_field_tag :search, params[:search], { placeholder: _('Filter'), id: 'label-search', class: 'form-control search-text-input input-short', spellcheck: false, autofocus: true }
         %span.input-group-append
           = render Pajamas::ButtonComponent.new(icon: 'search', button_options: { type: "submit", "aria-label" => _('Submit search') })
     = render 'shared/labels/sort_dropdown'

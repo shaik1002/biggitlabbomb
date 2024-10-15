@@ -10,7 +10,10 @@ module Environments
 
     def perform(environment_id, params = {})
       Environment.find_by_id(environment_id).try do |environment|
-        Environments::StopService.new(environment.project).unsafe_execute!(environment)
+        stop_actions = environment.stop_actions
+
+        user = stop_actions.last&.user
+        environment.stop_with_actions!(user)
       end
     end
   end

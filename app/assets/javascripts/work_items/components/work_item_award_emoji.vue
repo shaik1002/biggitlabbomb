@@ -7,6 +7,7 @@ import AwardsList from '~/vue_shared/components/awards_list.vue';
 import { isLoggedIn } from '~/lib/utils/common_utils';
 import { TYPENAME_USER } from '~/graphql_shared/constants';
 
+import groupWorkItemAwardEmojiQuery from '../graphql/group_award_emoji.query.graphql';
 import projectWorkItemAwardEmojiQuery from '../graphql/award_emoji.query.graphql';
 import updateAwardEmojiMutation from '../graphql/update_award_emoji.mutation.graphql';
 import {
@@ -23,6 +24,7 @@ export default {
   components: {
     AwardsList,
   },
+  inject: ['isGroup'],
   props: {
     workItemId: {
       type: String,
@@ -74,9 +76,10 @@ export default {
     },
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     awardEmoji: {
-      query: projectWorkItemAwardEmojiQuery,
+      query() {
+        return this.isGroup ? groupWorkItemAwardEmojiQuery : projectWorkItemAwardEmojiQuery;
+      },
       variables() {
         return {
           iid: this.workItemIid,
@@ -163,7 +166,7 @@ export default {
     },
     updateWorkItemAwardEmojiWidgetCache({ cache, name, toggledOn }) {
       const query = {
-        query: projectWorkItemAwardEmojiQuery,
+        query: this.isGroup ? groupWorkItemAwardEmojiQuery : projectWorkItemAwardEmojiQuery,
         variables: {
           fullPath: this.workItemFullpath,
           iid: this.workItemIid,

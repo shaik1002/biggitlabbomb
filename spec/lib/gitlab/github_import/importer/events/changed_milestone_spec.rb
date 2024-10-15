@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::GithubImport::Importer::Events::ChangedMilestone, feature_category: :importers do
+RSpec.describe Gitlab::GithubImport::Importer::Events::ChangedMilestone do
   subject(:importer) { described_class.new(project, client) }
 
   let_it_be(:project) { create(:project, :repository) }
@@ -30,9 +30,7 @@ RSpec.describe Gitlab::GithubImport::Importer::Events::ChangedMilestone, feature
       user_id: user.id,
       milestone_id: milestone.id,
       state: 'opened',
-      created_at: issue_event.created_at,
-      imported_from: 'github'
-
+      created_at: issue_event.created_at
     }.stringify_keys
   end
 

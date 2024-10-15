@@ -2,9 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Mutations::AlertManagement::HttpIntegration::Destroy, feature_category: :api do
-  include GraphqlHelpers
-
+RSpec.describe Mutations::AlertManagement::HttpIntegration::Destroy do
   let_it_be(:current_user) { create(:user) }
   let_it_be(:project) { create(:project) }
 
@@ -55,7 +53,7 @@ RSpec.describe Mutations::AlertManagement::HttpIntegration::Destroy, feature_cat
 
   private
 
-  def mutation_for(project, _user)
-    described_class.new(object: project, context: query_context, field: nil)
+  def mutation_for(project, user)
+    described_class.new(object: project, context: { current_user: user }, field: nil)
   end
 end

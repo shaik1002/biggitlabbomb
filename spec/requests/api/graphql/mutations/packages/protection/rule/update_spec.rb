@@ -7,7 +7,7 @@ RSpec.describe 'Updating the packages protection rule', :aggregate_failures, fea
 
   let_it_be(:project) { create(:project) }
   let_it_be_with_reload(:package_protection_rule) do
-    create(:package_protection_rule, project: project, minimum_access_level_for_push: :maintainer)
+    create(:package_protection_rule, project: project, push_protected_up_to_access_level: :developer)
   end
 
   let_it_be(:current_user) { create(:user, maintainer_of: project) }
@@ -19,7 +19,7 @@ RSpec.describe 'Updating the packages protection rule', :aggregate_failures, fea
       <<~QUERY
       packageProtectionRule {
         packageNamePattern
-        minimumAccessLevelForPush
+        pushProtectedUpToAccessLevel
       }
       clientMutationId
       errors
@@ -31,7 +31,7 @@ RSpec.describe 'Updating the packages protection rule', :aggregate_failures, fea
     {
       id: package_protection_rule.to_global_id,
       package_name_pattern: "#{package_protection_rule.package_name_pattern}-updated",
-      minimum_access_level_for_push: 'MAINTAINER'
+      push_protected_up_to_access_level: 'MAINTAINER'
     }
   end
 
@@ -48,7 +48,7 @@ RSpec.describe 'Updating the packages protection rule', :aggregate_failures, fea
       expect(mutation_response).to include(
         'packageProtectionRule' => {
           'packageNamePattern' => input[:package_name_pattern],
-          'minimumAccessLevelForPush' => input[:minimum_access_level_for_push]
+          'pushProtectedUpToAccessLevel' => input[:push_protected_up_to_access_level]
         }
       )
     end
@@ -57,7 +57,7 @@ RSpec.describe 'Updating the packages protection rule', :aggregate_failures, fea
       subject.tap do
         expect(package_protection_rule.reload).to have_attributes(
           package_name_pattern: input[:package_name_pattern],
-          minimum_access_level_for_push: input[:minimum_access_level_for_push].downcase
+          push_protected_up_to_access_level: input[:push_protected_up_to_access_level].downcase
         )
       end
     end
@@ -89,12 +89,12 @@ RSpec.describe 'Updating the packages protection rule', :aggregate_failures, fea
     end
   end
 
-  context 'with invalid input param `minimumAccessLevelForPush`' do
-    let(:input) { super().merge(minimum_access_level_for_push: nil) }
+  context 'with invalid input param `pushProtectedUpToAccessLevel`' do
+    let(:input) { super().merge(push_protected_up_to_access_level: nil) }
 
     it_behaves_like 'an erroneous response'
 
-    it { is_expected.tap { expect_graphql_errors_to_include(/minimumAccessLevelForPush can't be blank/) } }
+    it { is_expected.tap { expect_graphql_errors_to_include(/pushProtectedUpToAccessLevel can't be blank/) } }
   end
 
   context 'with invalid input param `packageNamePattern`' do

@@ -43,11 +43,6 @@ export default {
       type: Object,
       required: true,
     },
-    position: {
-      type: Number,
-      required: false,
-      default: null,
-    },
   },
   data() {
     return {
@@ -96,14 +91,13 @@ export default {
     },
   },
   methods: {
-    async createList({ labelId, position }) {
+    async createList({ labelId }) {
       try {
         await this.$apollo.mutate({
           mutation: createListMutations[this.issuableType].mutation,
           variables: {
             labelId,
             boardId: this.boardId,
-            position,
           },
           update: (
             store,
@@ -117,20 +111,8 @@ export default {
               query: listsQuery[this.issuableType].query,
               variables: this.listQueryVariables,
             });
-            const data = produce(sourceData, (draft) => {
-              const lists = draft[this.boardType].board.lists.nodes;
-              if (position === null) {
-                lists.push({ ...list, position: lists.length });
-              } else {
-                const updatedLists = lists.map((l) => {
-                  if (l.position >= position) {
-                    return { ...l, position: l.position + 1 };
-                  }
-                  return l;
-                });
-                updatedLists.splice(position, 0, list);
-                draft[this.boardType].board.lists.nodes = updatedLists;
-              }
+            const data = produce(sourceData, (draftData) => {
+              draftData[this.boardType].board.lists.nodes.push(list);
             });
             store.writeQuery({
               query: listsQuery[this.issuableType].query,
@@ -147,7 +129,7 @@ export default {
         });
       }
     },
-    async addList() {
+    addList() {
       if (!this.selectedLabel) {
         this.selectedIdValid = false;
         return;
@@ -159,7 +141,8 @@ export default {
         return;
       }
 
-      await this.createList({ labelId: this.selectedId, position: this.position });
+      this.createList({ labelId: this.selectedId });
+
       this.$emit('setAddColumnFormVisibility', false);
     },
 
@@ -207,18 +190,18 @@ export default {
       >
         <template #toggle>
           <gl-button
-            class="gl-flex gl-max-w-full gl-items-center gl-truncate"
+            class="gl-max-w-full gl-display-flex gl-align-items-center gl-text-truncate"
             :class="{ '!gl-shadow-inner-1-red-400': !selectedIdValid }"
-            button-text-classes="gl-flex"
+            button-text-classes="gl-display-flex"
           >
             <template v-if="selectedLabel">
               <span
-                class="dropdown-label-box gl-top-0 gl-shrink-0"
+                class="dropdown-label-box gl-top-0 gl-flex-shrink-0"
                 :style="{
                   backgroundColor: selectedLabel.color,
                 }"
               ></span>
-              <div class="gl-truncate">{{ selectedLabel.title }}</div>
+              <div class="gl-text-truncate">{{ selectedLabel.title }}</div>
             </template>
 
             <template v-else>{{ __('Select a label') }}</template>
@@ -227,9 +210,9 @@ export default {
         </template>
 
         <template #list-item="{ item }">
-          <label class="gl-mb-0 gl-flex gl-hyphens-auto gl-break-words gl-font-normal">
+          <label class="gl-display-flex gl-font-weight-normal gl-overflow-break-word gl-mb-0">
             <span
-              class="dropdown-label-box gl-top-0 gl-shrink-0"
+              class="dropdown-label-box gl-top-0 gl-flex-shrink-0"
               :style="{
                 backgroundColor: item.color,
               }"

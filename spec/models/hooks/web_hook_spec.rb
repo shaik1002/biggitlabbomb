@@ -377,67 +377,22 @@ RSpec.describe WebHook, feature_category: :webhooks do
 
     it 'passes force: false to the web hook service by default' do
       expect(WebHookService)
-        .to receive(:new).with(hook, data, hook_name, idempotency_key: anything,
-          force: false).and_return(double(execute: :done))
+        .to receive(:new).with(hook, data, hook_name, force: false).and_return(double(execute: :done))
 
       expect(hook.execute(data, hook_name)).to eq :done
     end
 
     it 'passes force: true to the web hook service if required' do
       expect(WebHookService)
-        .to receive(:new).with(hook, data, hook_name, idempotency_key: anything,
-          force: true).and_return(double(execute: :forced))
+        .to receive(:new).with(hook, data, hook_name, force: true).and_return(double(execute: :forced))
 
       expect(hook.execute(data, hook_name, force: true)).to eq :forced
     end
-
-    it 'forwards the idempotency key to the WebHook service when present' do
-      idempotency_key = SecureRandom.uuid
-
-      expect(WebHookService)
-        .to receive(:new)
-        .with(anything, anything, anything, idempotency_key: idempotency_key, force: anything)
-        .and_return(double(execute: :done))
-
-      expect(hook.execute(data, hook_name, idempotency_key: idempotency_key)).to eq :done
-    end
-
-    it 'forwards a nil idempotency key to the WebHook service when not supplied' do
-      expect(WebHookService)
-        .to receive(:new).with(anything, anything, anything, idempotency_key: nil,
-          force: anything).and_return(double(execute: :done))
-
-      expect(hook.execute(data, hook_name)).to eq :done
-    end
-  end
-
-  describe 'async_execute' do
-    let(:data) { { key: 'value' } }
-    let(:hook_name) { 'project hook' }
 
     it '#async_execute' do
       expect_next(WebHookService).to receive(:async_execute)
 
       hook.async_execute(data, hook_name)
-    end
-
-    it 'forwards the idempotency key to the WebHook service when present' do
-      idempotency_key = SecureRandom.uuid
-
-      expect(WebHookService)
-        .to receive(:new)
-        .with(anything, anything, anything, idempotency_key: idempotency_key)
-        .and_return(double(async_execute: :done))
-
-      expect(hook.async_execute(data, hook_name, idempotency_key: idempotency_key)).to eq :done
-    end
-
-    it 'forwards a nil idempotency key to the WebHook service when not supplied' do
-      expect(WebHookService)
-        .to receive(:new).with(anything, anything, anything,
-          idempotency_key: nil).and_return(double(async_execute: :done))
-
-      expect(hook.async_execute(data, hook_name)).to eq :done
     end
 
     it 'does not async execute non-executable hooks' do
@@ -459,40 +414,40 @@ RSpec.describe WebHook, feature_category: :webhooks do
   end
 
   describe '#next_backoff' do
-    before do
-      hook.backoff_count = backoff_count
-    end
-
     context 'when there was no last backoff' do
-      let(:backoff_count) { 0 }
+      before do
+        hook.backoff_count = 0
+      end
 
-      it 'is the initial value' do
+      it 'is 10 minutes' do
         expect(hook.next_backoff).to eq(WebHooks::AutoDisabling::INITIAL_BACKOFF)
       end
     end
 
     context 'when we have backed off once' do
-      let(:backoff_count) { 1 }
+      before do
+        hook.backoff_count = 1
+      end
 
       it 'is twice the initial value' do
         expect(hook.next_backoff).to eq(2 * WebHooks::AutoDisabling::INITIAL_BACKOFF)
       end
     end
 
-    context 'when the next backoff is just before the max backoff limit' do
-      let(:backoff_count) { WebHooks::AutoDisabling::MAX_BACKOFF_COUNT - 1 }
-
-      it 'is an exponential of the initial backoff' do
-        expect(hook.next_backoff).to eq((2**backoff_count) * WebHooks::AutoDisabling::INITIAL_BACKOFF)
+    context 'when we have backed off 3 times' do
+      before do
+        hook.backoff_count = 3
       end
 
-      it 'is not yet capped at the max limit' do
-        expect(hook.next_backoff).to be < WebHooks::AutoDisabling::MAX_BACKOFF
+      it 'grows exponentially' do
+        expect(hook.next_backoff).to eq(2 * 2 * 2 * WebHooks::AutoDisabling::INITIAL_BACKOFF)
       end
     end
 
-    describe 'when next_backoff has reached the MAX_BACKOFF limit' do
-      let(:backoff_count) { WebHooks::AutoDisabling::MAX_BACKOFF_COUNT }
+    context 'when the previous backoff was large' do
+      before do
+        hook.backoff_count = 8 # last value before MAX_BACKOFF
+      end
 
       it 'does not exceed the max backoff value' do
         expect(hook.next_backoff).to eq(WebHooks::AutoDisabling::MAX_BACKOFF)

@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe WorkItems::ParentLinks::DestroyService, feature_category: :team_planning do
   describe '#execute' do
+    let_it_be(:reporter) { create(:user) }
     let_it_be(:guest) { create(:user) }
     let_it_be(:project) { create(:project) }
     let_it_be(:work_item) { create(:work_item, project: project) }
@@ -15,15 +16,12 @@ RSpec.describe WorkItems::ParentLinks::DestroyService, feature_category: :team_p
     subject { described_class.new(parent_link, user).execute }
 
     before do
+      project.add_reporter(reporter)
       project.add_guest(guest)
     end
 
     context 'when user has permissions to update work items' do
-      let(:user) { guest }
-
-      it_behaves_like 'update service that triggers GraphQL work_item_updated subscription' do
-        subject(:execute_service) { described_class.new(parent_link, user).execute }
-      end
+      let(:user) { reporter }
 
       it 'removes relation and creates notes', :aggregate_failures do
         expect { subject }
@@ -67,17 +65,17 @@ RSpec.describe WorkItems::ParentLinks::DestroyService, feature_category: :team_p
     end
 
     context 'when user has insufficient permissions' do
-      let(:user) { create(:user) }
-
-      it 'returns error message' do
-        is_expected.to eq(message: 'No Work Item Link found', status: :error, http_status: 404)
-      end
+      let(:user) { guest }
 
       it 'does not remove relation', :aggregate_failures do
         expect { subject }
           .to not_change(parent_link_class, :count).from(1)
           .and not_change(WorkItems::ResourceLinkEvent, :count)
         expect(SystemNoteService).not_to receive(:unrelate_work_item)
+      end
+
+      it 'returns error message' do
+        is_expected.to eq(message: 'No Work Item Link found', status: :error, http_status: 404)
       end
     end
   end

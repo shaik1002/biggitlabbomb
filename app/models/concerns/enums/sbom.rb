@@ -7,10 +7,10 @@ module Enums
     }.with_indifferent_access.freeze
 
     PURL_TYPES = {
-      composer: 1, # refered to as `packagist` in gemnasium-db and semver_dialects
+      composer: 1, # refered to as `packagist` in gemnasium-db
       conan: 2,
       gem: 3,
-      golang: 4, # refered to as `go` in gemnasium-db and semver_dialects
+      golang: 4, # refered to as `go` in gemnasium-db
       maven: 5,
       npm: 6,
       nuget: 7,
@@ -19,13 +19,7 @@ module Enums
       rpm: 10,
       deb: 11,
       'cbl-mariner': 12,
-      wolfi: 13,
-      cargo: 14
-    }.with_indifferent_access.freeze
-
-    REACHABILITY_TYPES = {
-      unknown: 0,
-      in_use: 1 # In case package imported and being used in code.
+      wolfi: 13
     }.with_indifferent_access.freeze
 
     DEPENDENCY_SCANNING_PURL_TYPES = %w[
@@ -37,7 +31,6 @@ module Enums
       npm
       nuget
       pypi
-      cargo
     ].freeze
 
     CONTAINER_SCANNING_PURL_TYPES = %w[
@@ -123,10 +116,6 @@ module Enums
 
     def self.purl_types_numerical
       purl_types.invert
-    end
-
-    def self.reachability_types
-      REACHABILITY_TYPES
     end
 
     def self.package_manager_from_trivy_pkg_type(pkg_type)

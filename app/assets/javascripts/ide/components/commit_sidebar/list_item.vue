@@ -82,19 +82,19 @@ export default {
       :class="{
         'is-active': isActive,
       }"
-      class="multi-file-commit-list-path border-0 ml-0 mr-0 gl-w-full"
+      class="multi-file-commit-list-path gl-w-full border-0 ml-0 mr-0"
       role="button"
       @click="openFileInEditor"
     >
-      <span class="multi-file-commit-list-file-path !gl-flex gl-items-center">
+      <span class="multi-file-commit-list-file-path d-flex gl-align-items-center">
         <file-icon :file-name="file.name" class="gl-mr-3" />
         <template v-if="file.prevName && file.prevName !== file.name">
           {{ file.prevName }} &#x2192;
         </template>
         {{ file.name }}
       </span>
-      <div class="ml-auto gl-flex gl-items-center">
-        <div class="ide-commit-list-changed-icon gl-flex gl-items-center">
+      <div class="ml-auto d-flex gl-align-items-center">
+        <div class="d-flex gl-align-items-center ide-commit-list-changed-icon">
           <gl-icon :name="iconName" :size="16" :class="iconClass" />
         </div>
       </div>

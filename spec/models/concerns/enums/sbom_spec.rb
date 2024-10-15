@@ -19,7 +19,6 @@ RSpec.describe Enums::Sbom, feature_category: :dependency_management do
       :npm                  | 6
       :nuget                | 7
       :pypi                 | 8
-      :cargo                | 14
       :apk                  | 9
       :rpm                  | 10
       :deb                  | 11
@@ -38,8 +37,8 @@ RSpec.describe Enums::Sbom, feature_category: :dependency_management do
     end
 
     it 'contains all of the dependency scanning and container scanning purl types' do
-      expect((described_class::DEPENDENCY_SCANNING_PURL_TYPES + described_class::CONTAINER_SCANNING_PURL_TYPES).sort)
-        .to eql(described_class::PURL_TYPES.keys.sort)
+      expect(described_class::DEPENDENCY_SCANNING_PURL_TYPES + described_class::CONTAINER_SCANNING_PURL_TYPES)
+        .to eql(described_class::PURL_TYPES.keys)
     end
   end
 
@@ -54,7 +53,6 @@ RSpec.describe Enums::Sbom, feature_category: :dependency_management do
       'npm'      | true
       'nuget'    | true
       'pypi'     | true
-      'cargo'    | true
       'unknown'  | false
       'apk'      | false
       'rpm'      | false
@@ -80,7 +78,6 @@ RSpec.describe Enums::Sbom, feature_category: :dependency_management do
       'npm'         | false
       'nuget'       | false
       'pypi'        | false
-      'cargo'       | false
       'unknown'     | false
       :apk          | false
       'apk'         | true

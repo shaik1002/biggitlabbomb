@@ -139,10 +139,10 @@ export default {
 };
 </script>
 <template>
-  <div class="gl-relative gl-flex">
+  <div class="gl-display-flex gl-relative">
     <svg
       id="link-svg"
-      class="gl-pointer-events-none gl-absolute"
+      class="gl-absolute gl-pointer-events-none"
       :viewBox="viewBox"
       :width="`${containerMeasurements.width}px`"
       :height="`${containerMeasurements.height}px`"
@@ -152,7 +152,7 @@ export default {
         :key="link.path"
         :ref="link.ref"
         :d="link.path"
-        class="gl-fill-transparent gl-duration-slow gl-ease-ease"
+        class="gl-fill-transparent gl-transition-duration-slow gl-transition-timing-function-ease"
         :class="getLinkClasses(link)"
         :stroke-width="$options.STROKE_WIDTH"
       />

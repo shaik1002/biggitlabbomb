@@ -3,14 +3,12 @@
 module Types
   class BaseField < GraphQL::Schema::Field
     include Gitlab::Graphql::Deprecations
-    include Gitlab::Graphql::Authorize::AuthorizeResource
 
     argument_class ::Types::BaseArgument
 
     DEFAULT_COMPLEXITY = 1
 
     attr_reader :doc_reference
-    attr_accessor :skip_type_authorization
 
     def initialize(**kwargs, &block)
       @requires_argument = kwargs.delete(:requires_argument)
@@ -22,8 +20,6 @@ module Types
       kwargs[:complexity] = field_complexity(kwargs[:resolver_class], given_complexity)
 
       @authorize = Array.wrap(kwargs.delete(:authorize))
-      @skip_type_authorization = Array.wrap(kwargs.delete(:skip_type_authorization))
-      @scopes = Array.wrap(kwargs.delete(:scopes) || %i[api read_api])
       after_connection_extensions = kwargs.delete(:late_extensions) || []
 
       super(**kwargs, &block)
@@ -31,7 +27,7 @@ module Types
       # We want to avoid the overhead of this in prod
       extension ::Gitlab::Graphql::CallsGitaly::FieldExtension if Gitlab.dev_or_test_env?
       extension ::Gitlab::Graphql::Present::FieldExtension
-      extension ::Gitlab::Graphql::Authorize::FieldExtension
+      extension ::Gitlab::Graphql::Authorize::ConnectionFilterExtension
 
       after_connection_extensions.each { extension _1 } if after_connection_extensions.any?
     end
@@ -101,14 +97,7 @@ module Types
     def field_authorized?(object, ctx)
       object = object.node if object.is_a?(GraphQL::Pagination::Connection::Edge)
 
-      return true if authorization.ok?(object, ctx[:current_user], scope_validator: ctx[:scope_validator])
-
-      # Fields on MutationType should populate the 'errors' response when authorization fails
-      # for consistency with mutation authorization responses.
-      # See https://gitlab.com/gitlab-org/gitlab/-/blob/1abb46e235d96f2fa9098d2fb4190143c7c3adb9/app/graphql/mutations/base_mutation.rb#L61-62
-      return false unless owner == Types::MutationType
-
-      raise_resource_not_available_error!
+      authorization.ok?(object, ctx[:current_user], scope_validator: ctx[:scope_validator])
     end
 
     # Historically our resolvers have used declarative permission checks only
@@ -124,7 +113,7 @@ module Types
     end
 
     def authorization
-      @authorization ||= ::Gitlab::Graphql::Authorize::ObjectAuthorization.new(@authorize, @scopes)
+      @authorization ||= ::Gitlab::Graphql::Authorize::ObjectAuthorization.new(@authorize)
     end
 
     def field_complexity(resolver_class, current)

@@ -4,21 +4,19 @@
 
 .gfm-commit,
 .gfm-commit_range {
-  @apply gl-font-monospace;
+  @include gl-font-monospace;
   font-size: 95%;
 }
 
-// Increase specificity to ensure that it is applied
-.gfm-project_member.gfm-project_member,
+.gfm-project_member,
 .md a.gfm-project_member {
   padding: 0 2px;
-  color: var(--gl-link-mention-text-color-default);
-  background-color: var(--gl-link-mention-background-color-default);
-  border-radius: $gl-border-radius-base;
+  background-color: $blue-100;
+  border-radius: $border-radius-default;
+  color: $blue-700;
 
   &.current-user {
-    color: var(--gl-link-mention-text-color-current);
-    background-color: var(--gl-link-mention-background-color-current);
+    background-color: $orange-100;
   }
 }
 
@@ -36,8 +34,8 @@
   width: $chip-size;
   height: $chip-size;
   background: $white;
-  background-image: linear-gradient(135deg, $gray-100 25%, transparent 0%, transparent 75%, $gray-100 0%),
-    linear-gradient(135deg, $gray-100 25%, transparent 0%, transparent 75%, $gray-100 0%);
+  background-image: linear-gradient(135deg, $gray-dark 25%, transparent 0%, transparent 75%, $gray-dark 0%),
+    linear-gradient(135deg, $gray-dark 25%, transparent 0%, transparent 75%, $gray-dark 0%);
   background-size: $bg-size $bg-size;
   background-position: 0 0, $bg-pos $bg-pos;
 

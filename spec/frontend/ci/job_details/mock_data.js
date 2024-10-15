@@ -55,7 +55,6 @@ export const mockJobPlayMutationData = {
     jobPlay: {
       job: {
         id: 'gid://gitlab/Ci::Build/401',
-        name: 'playable_job',
         manualVariables: {
           nodes: [
             {

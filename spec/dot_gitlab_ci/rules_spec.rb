@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
-# NOTE: Do not remove the parentheses from this require statement!
-#       They are necessary so it doesn't match the regex in `scripts/run-fast-specs.sh`,
-#       and make the "fast" portion of that suite run slow.
-require('fast_spec_helper') # NOTE: Do not remove the parentheses from this require statement!
+require 'fast_spec_helper'
 
 PatternsList = Struct.new(:name, :patterns)
 
@@ -65,8 +62,7 @@ RSpec.describe '.gitlab/ci/rules.gitlab-ci.yml', feature_category: :tooling do
           # .review:rules:review-stop don't set variables
           base.delete('variables')
           base_with_manual_and_allowed_to_fail =
-            # base can be an array when we're using !reference
-            if base.is_a?(Array) || base['when'] == 'never'
+            if base['when'] == 'never'
               base
             else
               base.merge('when' => 'manual', 'allow_failure' => true)
@@ -218,19 +214,18 @@ RSpec.describe '.gitlab/ci/rules.gitlab-ci.yml', feature_category: :tooling do
         '.prettierignore',
         '.projections.json.example',
         '.rubocop_revert_ignores.txt',
+        '.ruby-version',
         '.solargraph.yml.example',
         '.solargraph.yml',
         '.test_license_encryption_key.pub',
+        '.tool-versions',
         '.vale.ini',
         '.vscode/extensions.json',
         'ee/lib/ee/gitlab/background_migration/.rubocop.yml',
         'ee/LICENSE',
         'Gemfile.checksum',
-        'Gemfile.next.checksum',
         'gems/error_tracking_open_api/.openapi-generator/FILES',
         'gems/error_tracking_open_api/.openapi-generator/VERSION',
-        'gems/openbao_client/.openapi-generator/FILES',
-        'gems/openbao_client/.openapi-generator/VERSION',
         'Guardfile',
         'INSTALLATION_TYPE',
         'lib/gitlab/background_migration/.rubocop.yml',
@@ -256,7 +251,6 @@ RSpec.describe '.gitlab/ci/rules.gitlab-ci.yml', feature_category: :tooling do
       Dir.glob('node_modules/**/*', File::FNM_DOTMATCH) +
       Dir.glob('patches/*') +
       Dir.glob('public/assets/**/.*') +
-      Dir.glob('qa/{,**/}.*') +
       Dir.glob('qa/.{,**/}*') +
       Dir.glob('qa/**/.gitlab-ci.yml') +
       Dir.glob('shared/**/*') +
@@ -282,14 +276,7 @@ RSpec.describe '.gitlab/ci/rules.gitlab-ci.yml', feature_category: :tooling do
       next unless name.end_with?('patterns')
 
       # Ignore EE-only patterns list when in FOSS context
-      relevant_patterns = if foss_context
-                            patterns.reject do |pattern|
-                              pattern =~ %r|^{?ee/| || pattern == '.tool-versions'
-                            end
-                          else
-                            patterns
-                          end
-
+      relevant_patterns = foss_context ? patterns.reject { |pattern| pattern =~ %r|^{?ee/| } : patterns
       next if relevant_patterns.empty?
       next if foss_context && name == '.custom-roles-patterns'
 

@@ -176,11 +176,11 @@ RSpec.describe Gitlab::PathRegex do
 
   describe 'TOP_LEVEL_ROUTES' do
     it 'includes all the top level namespaces' do
-      failure_block = -> do
+      failure_block = lambda do
         missing_words = top_level_words - described_class::TOP_LEVEL_ROUTES
         additional_words = described_class::TOP_LEVEL_ROUTES - top_level_words
         failure_message('TOP_LEVEL_ROUTES', 'rename_root_paths',
-          missing_words: missing_words, additional_words: additional_words)
+                        missing_words: missing_words, additional_words: additional_words)
       end
 
       # We have to account for routes that are added by gems into the RAILS_ENV=test only.
@@ -200,11 +200,11 @@ RSpec.describe Gitlab::PathRegex do
 
   describe 'GROUP_ROUTES' do
     it "don't contain a second wildcard" do
-      failure_block = -> do
+      failure_block = lambda do
         missing_words = paths_after_group_id - described_class::GROUP_ROUTES
         additional_words = described_class::GROUP_ROUTES - paths_after_group_id
         failure_message('GROUP_ROUTES', 'rename_child_paths',
-          missing_words: missing_words, additional_words: additional_words)
+                        missing_words: missing_words, additional_words: additional_words)
       end
 
       expect(described_class::GROUP_ROUTES)

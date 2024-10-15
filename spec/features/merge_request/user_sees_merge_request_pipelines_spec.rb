@@ -39,6 +39,16 @@ RSpec.describe 'Merge request > User sees pipelines triggered by merge request',
     sign_in(user)
   end
 
+  # rubocop:disable RSpec/AvoidConditionalStatements
+  def mr_widget_title
+    if Gitlab.ee?
+      'to be merged automatically when all merge checks pass'
+    else
+      'to be merged automatically when the pipeline succeeds'
+    end
+  end
+  # rubocop:enable RSpec/AvoidConditionalStatements
+
   context 'with feature flag `mr_pipelines_graphql turned off`' do
     before do
       stub_feature_flags(mr_pipelines_graphql: false)
@@ -173,7 +183,7 @@ RSpec.describe 'Merge request > User sees pipelines triggered by merge request',
 
           context 'when detached merge request pipeline is pending' do
             it 'waits the head pipeline' do
-              expect(page).to have_content 'to be merged automatically when all merge checks pass'
+              expect(page).to have_content mr_widget_title
               expect(page).to have_button('Cancel auto-merge')
             end
           end
@@ -187,7 +197,7 @@ RSpec.describe 'Merge request > User sees pipelines triggered by merge request',
             end
 
             it 'waits the head pipeline' do
-              expect(page).to have_content 'to be merged automatically when all merge checks pass'
+              expect(page).to have_content mr_widget_title
               expect(page).to have_button('Cancel auto-merge')
             end
           end
@@ -392,7 +402,7 @@ RSpec.describe 'Merge request > User sees pipelines triggered by merge request',
 
         context 'when detached merge request pipeline is pending' do
           it 'waits the head pipeline' do
-            expect(page).to have_content 'to be merged automatically when all merge checks pass'
+            expect(page).to have_content mr_widget_title
             expect(page).to have_button('Cancel auto-merge')
           end
         end
@@ -418,7 +428,7 @@ RSpec.describe 'Merge request > User sees pipelines triggered by merge request',
           end
 
           it 'waits the head pipeline' do
-            expect(page).to have_content 'to be merged automatically when all merge checks pass'
+            expect(page).to have_content mr_widget_title
             expect(page).to have_button('Cancel auto-merge')
           end
         end

@@ -19,9 +19,7 @@ module HasUserType
     suggested_reviewers_bot: 12,
     service_account: 13,
     llm_bot: 14,
-    placeholder: 15,
-    duo_code_review_bot: 16,
-    import_user: 17
+    placeholder: 15
   }.with_indifferent_access.freeze
 
   BOT_USER_TYPES = %w[
@@ -37,7 +35,6 @@ module HasUserType
     suggested_reviewers_bot
     service_account
     llm_bot
-    duo_code_review_bot
   ].freeze
 
   # `service_account` allows instance/namespaces to configure a user for external integrations/automations
@@ -53,9 +50,7 @@ module HasUserType
     scope :non_internal, -> { where(user_type: NON_INTERNAL_USER_TYPES) }
     scope :without_ghosts, -> { where(user_type: USER_TYPES.keys - ['ghost']) }
     scope :without_project_bot, -> { where(user_type: USER_TYPES.keys - ['project_bot']) }
-    scope :without_humans, -> { where(user_type: USER_TYPES.keys - ['human']) }
     scope :human_or_service_user, -> { where(user_type: %i[human service_user]) }
-    scope :resource_access_token_bot, -> { where(user_type: 'project_bot') }
 
     validates :user_type, presence: true
   end
@@ -87,13 +82,13 @@ module HasUserType
     projects&.first || groups&.first
   end
 
-  def resource_bot_owners_and_maintainers
+  def resource_bot_owners
     return [] unless project_bot?
 
     resource = resource_bot_resource
     return [] unless resource
 
-    return resource.owners_and_maintainers if resource.is_a?(Project)
+    return resource.maintainers if resource.is_a?(Project)
 
     resource
       .owners

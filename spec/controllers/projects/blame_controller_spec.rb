@@ -41,14 +41,6 @@ RSpec.describe Projects::BlameController, feature_category: :source_code_managem
 
       it { is_expected.to respond_with(:not_found) }
     end
-
-    context 'when ref includes a newline' do
-      let(:id) { "\n" }
-
-      it 'returns 404' do
-        is_expected.to respond_with(:not_found)
-      end
-    end
   end
 
   describe 'GET show' do

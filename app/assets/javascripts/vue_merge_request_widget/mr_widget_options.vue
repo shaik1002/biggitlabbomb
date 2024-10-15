@@ -17,7 +17,6 @@ import Loading from './components/loading.vue';
 import MrWidgetAlertMessage from './components/mr_widget_alert_message.vue';
 import MrWidgetPipelineContainer from './components/mr_widget_pipeline_container.vue';
 import WidgetSuggestPipeline from './components/mr_widget_suggest_pipeline.vue';
-import MrWidgetMigrateJenkins from './components/mr_widget_migrate_jenkins.vue';
 import SourceBranchRemovalStatus from './components/source_branch_removal_status.vue';
 import ArchivedState from './components/states/mr_widget_archived.vue';
 import MrWidgetAutoMergeEnabled from './components/states/mr_widget_auto_merge_enabled.vue';
@@ -25,13 +24,20 @@ import AutoMergeFailed from './components/states/mr_widget_auto_merge_failed.vue
 import CheckingState from './components/states/mr_widget_checking.vue';
 import PreparingState from './components/states/mr_widget_preparing.vue';
 import ClosedState from './components/states/mr_widget_closed.vue';
+import ConflictsState from './components/states/mr_widget_conflicts.vue';
 import FailedToMerge from './components/states/mr_widget_failed_to_merge.vue';
 import MergedState from './components/states/mr_widget_merged.vue';
 import MergingState from './components/states/mr_widget_merging.vue';
 import MissingBranchState from './components/states/mr_widget_missing_branch.vue';
+import NotAllowedState from './components/states/mr_widget_not_allowed.vue';
+import PipelineBlockedState from './components/states/mr_widget_pipeline_blocked.vue';
+import RebaseState from './components/states/mr_widget_rebase.vue';
 import NothingToMergeState from './components/states/nothing_to_merge.vue';
+import PipelineFailedState from './components/states/pipeline_failed.vue';
 import ReadyToMergeState from './components/states/ready_to_merge.vue';
 import ShaMismatch from './components/states/sha_mismatch.vue';
+import UnresolvedDiscussionsState from './components/states/unresolved_discussions.vue';
+import WorkInProgressState from './components/states/work_in_progress.vue';
 import WidgetContainer from './components/widget/app.vue';
 import {
   STATE_MACHINE,
@@ -44,6 +50,7 @@ import eventHub from './event_hub';
 import mergeRequestQueryVariablesMixin from './mixins/merge_request_query_variables';
 import getStateQuery from './queries/get_state.query.graphql';
 import getStateSubscription from './queries/get_state.subscription.graphql';
+import ReportWidgetContainer from './components/report_widget_container.vue';
 import MrWidgetReadyToMerge from './components/states/new_ready_to_merge.vue';
 import MergeChecks from './components/merge_checks.vue';
 
@@ -58,25 +65,33 @@ export default {
     Loading,
     WidgetContainer,
     MrWidgetSuggestPipeline: WidgetSuggestPipeline,
-    MrWidgetMigrateJenkins,
     MrWidgetPipelineContainer,
     MrWidgetAlertMessage,
     MrWidgetMerged: MergedState,
     MrWidgetClosed: ClosedState,
     MrWidgetMerging: MergingState,
     MrWidgetFailedToMerge: FailedToMerge,
+    MrWidgetWip: WorkInProgressState,
     MrWidgetArchived: ArchivedState,
+    MrWidgetConflicts: ConflictsState,
     MrWidgetNothingToMerge: NothingToMergeState,
+    MrWidgetNotAllowed: NotAllowedState,
     MrWidgetMissingBranch: MissingBranchState,
     MrWidgetReadyToMerge,
     ShaMismatch,
     MrWidgetChecking: CheckingState,
     MrWidgetPreparing: PreparingState,
+    MrWidgetUnresolvedDiscussions: UnresolvedDiscussionsState,
+    MrWidgetPipelineBlocked: PipelineBlockedState,
+    MrWidgetPipelineFailed: PipelineFailedState,
     MrWidgetAutoMergeEnabled,
     MrWidgetAutoMergeFailed: AutoMergeFailed,
+    MrWidgetRebase: RebaseState,
     SourceBranchRemovalStatus,
     MrWidgetApprovals,
+    MergeChecksFailed: () => import('./components/states/merge_checks_failed.vue'),
     ReadyToMerge: ReadyToMergeState,
+    ReportWidgetContainer,
     MergeChecks,
   },
   apollo: {
@@ -193,11 +208,6 @@ export default {
 
       return !hasCI && mergeRequestAddCiConfigPath && !isDismissedSuggestPipeline;
     },
-    showRenderMigrateFromJenkins() {
-      const { hasCI, isIntegrationJenkinsDismissed, ciIntegrationJenkins } = this.mr;
-
-      return hasCI && !isIntegrationJenkinsDismissed && ciIntegrationJenkins;
-    },
     shouldRenderCollaborationStatus() {
       return this.mr.allowCollaboration && this.mr.isOpen;
     },
@@ -233,23 +243,28 @@ export default {
     hasAlerts() {
       return this.hasMergeError || this.showMergePipelineForkWarning;
     },
-    mergeBlockedComponentVisible() {
-      return !(
-        [
-          'checking',
-          'preparing',
-          'nothingToMerge',
-          'archived',
-          'missingBranch',
-          'merged',
-          'closed',
-          'merging',
-          'shaMismatch',
-        ].includes(this.mr.state) || this.mr.machineValue === 'MERGING'
-      );
+    shouldShowMergeDetails() {
+      if (this.mr.state === 'readyToMerge') return true;
+
+      return !this.mr.mergeDetailsCollapsed;
     },
-    autoMergeEnabled() {
-      return this.mr.autoMergeEnabled;
+    mergeBlockedComponentEnabled() {
+      return (
+        window.gon?.features?.mergeBlockedComponent &&
+        !(
+          [
+            'checking',
+            'preparing',
+            'nothingToMerge',
+            'archived',
+            'missingBranch',
+            'merged',
+            'closed',
+            'merging',
+            'shaMismatch',
+          ].includes(this.mr.state) || this.mr.machineValue === 'MERGING'
+        )
+      );
     },
   },
   watch: {
@@ -323,6 +338,12 @@ export default {
 
       this.bindEventHubListeners();
       eventHub.$on('mr.discussion.updated', this.checkStatus);
+
+      window.addEventListener('resize', () => {
+        if (window.innerWidth >= 768) {
+          this.mr.toggleMergeDetails(false);
+        }
+      });
     },
     getServiceEndpoints(store) {
       return {
@@ -500,21 +521,22 @@ export default {
     dismissSuggestPipelines() {
       this.mr.isDismissedSuggestPipeline = true;
     },
-    dismissMigrateFromJenkins() {
-      this.mr.isIntegrationJenkinsDismissed = true;
-    },
   },
 };
 </script>
 <template>
   <div v-if="!loading" id="widget-state" class="mr-state-widget gl-mt-5">
-    <header v-if="shouldRenderCollaborationStatus" class="mr-section-container gl-overflow-hidden">
-      <mr-widget-alert-message type="info">
+    <header
+      v-if="shouldRenderCollaborationStatus"
+      class="gl-rounded-base gl-border-solid gl-border-1 gl-border-gray-100 gl-overflow-hidden mr-widget-workflow gl-mt-0!"
+    >
+      <mr-widget-alert-message v-if="shouldRenderCollaborationStatus" type="info">
         {{ s__('mrWidget|Members who can merge are allowed to add commits.') }}
       </mr-widget-alert-message>
     </header>
     <mr-widget-suggest-pipeline
       v-if="shouldSuggestPipelines"
+      class="mr-widget-workflow"
       :pipeline-path="mr.mergeRequestAddCiConfigPath"
       :pipeline-svg-path="mr.pipelinesEmptySvgPath"
       :human-access="formattedHumanAccess"
@@ -522,27 +544,22 @@ export default {
       :user-callout-feature-id="mr.suggestPipelineFeatureId"
       @dismiss="dismissSuggestPipelines"
     />
-    <mr-widget-migrate-jenkins
-      v-if="showRenderMigrateFromJenkins"
-      class="mr-widget-workflow"
-      :human-access="formattedHumanAccess"
-      @dismiss="dismissMigrateFromJenkins"
-    />
     <mr-widget-pipeline-container
       v-if="shouldRenderPipelines"
       :mr="mr"
       data-testid="pipeline-container"
     />
     <mr-widget-approvals v-if="shouldRenderApprovals" :mr="mr" :service="service" />
-    <widget-container :mr="mr" />
-    <div class="mr-section-container">
-      <template v-if="hasAlerts">
+    <report-widget-container>
+      <widget-container :mr="mr" />
+    </report-widget-container>
+    <div class="mr-section-container mr-widget-workflow">
+      <div v-if="hasAlerts" class="gl-overflow-hidden mr-widget-alert-container">
         <mr-widget-alert-message
           v-if="hasMergeError"
           type="danger"
           dismissible
           data-testid="merge-error"
-          class="mr-widget-section"
         >
           <span v-safe-html="mergeError"></span>
         </mr-widget-alert-message>
@@ -550,7 +567,6 @@ export default {
           v-if="showMergePipelineForkWarning"
           type="warning"
           :help-path="mr.mergeRequestPipelinesHelpPath"
-          class="mr-widget-section"
           data-testid="merge-pipeline-fork-warning"
         >
           {{
@@ -562,27 +578,32 @@ export default {
             {{ __('Learn more') }}
           </template>
         </mr-widget-alert-message>
-      </template>
+      </div>
 
       <div class="mr-widget-section" data-testid="mr-widget-content">
-        <template v-if="mergeBlockedComponentVisible">
+        <template v-if="mergeBlockedComponentEnabled">
           <mr-widget-auto-merge-enabled
-            v-if="autoMergeEnabled"
+            v-if="mr.autoMergeEnabled"
             :mr="mr"
             :service="service"
-            class="gl-border-b-1 gl-border-gray-100 gl-border-b-solid"
+            class="gl-border-b-1 gl-border-b-solid gl-border-gray-100"
           />
           <merge-checks :mr="mr" :service="service" />
         </template>
         <component :is="componentName" v-else :mr="mr" :service="service" />
-        <ready-to-merge v-if="mr.commitsCount" :mr="mr" :service="service" />
+        <ready-to-merge
+          v-if="mr.commitsCount"
+          v-show="shouldShowMergeDetails"
+          :mr="mr"
+          :service="service"
+        />
       </div>
     </div>
     <mr-widget-pipeline-container
       v-if="shouldRenderMergedPipeline"
-      class="js-post-merge-pipeline"
+      class="js-post-merge-pipeline mr-widget-workflow"
       :mr="mr"
-      is-post-merge
+      :is-post-merge="true"
       data-testid="merged-pipeline-container"
     />
   </div>

@@ -21,7 +21,7 @@ export default {
 };
 </script>
 <template>
-  <node-view-wrapper class="gl-flex">
+  <node-view-wrapper class="gl-display-flex">
     <div
       class="details-toggle-icon"
       data-testid="details-toggle-icon"

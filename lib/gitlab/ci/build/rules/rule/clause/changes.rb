@@ -11,37 +11,19 @@ module Gitlab
         end
 
         def satisfied_by?(pipeline, context)
-          compare_to_sha = find_compare_to_sha(pipeline, context)
-          modified_paths = find_modified_paths(pipeline, compare_to_sha)
+          modified_paths = find_modified_paths(pipeline)
 
           return true unless modified_paths
-          return false if modified_paths.empty?
 
-          expanded_globs = expand_globs(context).uniq
-          return false if expanded_globs.empty?
-
-          cache_key = [
-            self.class.to_s,
-            '#satisfied_by?',
-            pipeline.project_id,
-            pipeline.sha,
-            compare_to_sha,
-            expanded_globs.sort
-          ]
-          Gitlab::SafeRequestStore.fetch(cache_key) do
-            match?(expanded_globs, modified_paths)
-          end
-        end
-
-        private
-
-        def match?(globs, paths)
-          paths.any? do |path|
-            globs.any? do |glob|
+          expanded_globs = expand_globs(context)
+          modified_paths.any? do |path|
+            expanded_globs.any? do |glob|
               File.fnmatch?(glob, path, File::FNM_PATHNAME | File::FNM_DOTMATCH | File::FNM_EXTGLOB)
             end
           end
         end
+
+        private
 
         def expand_globs(context)
           return paths unless context
@@ -53,12 +35,14 @@ module Gitlab
 
         def paths
           strong_memoize(:paths) do
-            Array(@globs[:paths]).uniq
+            Array(@globs[:paths])
           end
         end
 
-        def find_modified_paths(pipeline, compare_to_sha)
+        def find_modified_paths(pipeline)
           return unless pipeline
+
+          compare_to_sha = find_compare_to_sha(pipeline)
 
           if compare_to_sha
             pipeline.modified_paths_since(compare_to_sha)
@@ -67,11 +51,10 @@ module Gitlab
           end
         end
 
-        def find_compare_to_sha(pipeline, context)
+        def find_compare_to_sha(pipeline)
           return unless @globs.include?(:compare_to)
 
-          compare_to = ExpandVariables.expand(@globs[:compare_to], -> { context.variables_hash })
-          commit = pipeline.project.commit(compare_to)
+          commit = pipeline.project.commit(@globs[:compare_to])
           raise Rules::Rule::Clause::ParseError, 'rules:changes:compare_to is not a valid ref' unless commit
 
           commit.sha

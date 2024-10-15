@@ -1,11 +1,18 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Verify', :runner, :blocking, product_group: :pipeline_execution do
+  RSpec.describe 'Verify', :runner, :blocking, product_group: :pipeline_security do
     describe "Unlocking job artifacts across pipelines" do
       let(:executor) { "qa-runner-#{Faker::Alphanumeric.alphanumeric(number: 8)}" }
       let(:project) { create(:project, name: 'unlock-job-artifacts-project') }
-      let!(:runner) { create(:project_runner, project: project, name: executor, tags: [executor]) }
+
+      let!(:runner) do
+        Resource::ProjectRunner.fabricate! do |runner|
+          runner.project = project
+          runner.name = executor
+          runner.tags = [executor]
+        end
+      end
 
       before do
         Flow::Login.sign_in

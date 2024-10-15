@@ -69,10 +69,9 @@ In this file, you define:
 - The structure and order of jobs that the runner should execute.
 - The decisions the runner should make when specific conditions are encountered.
 
-To create a `.gitlab-ci.yml` file in your project:
+To create a `.gitlab-ci.yml` file:
 
-1. On the left sidebar, select **Search or go to** and find your project.
-1. Select **Code > Repository**.
+1. On the left sidebar, select **Code > Repository**.
 1. Above the file list, select the branch you want to commit to.
    If you're not sure, leave `master` or `main`.
    Then select the plus icon (**{plus}**) and **New file**:
@@ -147,8 +146,8 @@ For the complete `.gitlab-ci.yml` syntax, see the full [CI/CD YAML syntax refere
 - Each job contains a script section and belongs to a stage:
   - [`stage`](../yaml/index.md#stage) describes the sequential execution of jobs.
     If there are runners available, jobs in a single stage run in parallel.
-  - Use the [`needs` keyword](../yaml/index.md#needs) to [run jobs out of stage order](../yaml/needs.md),
-    to increase pipeline speed and efficiency.
+  - Use the [`needs` keyword](../yaml/index.md#needs) to run jobs out of stage order.
+    This creates a [Directed Acyclic Graph (DAG)](../directed_acyclic_graph/index.md).
 - You can set additional configuration to customize how your jobs and stages perform:
   - Use the [`rules`](../yaml/index.md#rules) keyword to specify when to run or skip jobs.
     The `only` and `except` legacy keywords are still supported, but can't be used

@@ -33,12 +33,6 @@ describe('sidebar reviewers', () => {
         changing: false,
         ...props,
       },
-      provide: {
-        projectPath: 'projectPath',
-        issuableId: 1,
-        issuableIid: 1,
-        multipleApprovalRulesAvailable: false,
-      },
       // Attaching to document is required because this component emits something from the parent element :/
       attachTo: document.body,
     });

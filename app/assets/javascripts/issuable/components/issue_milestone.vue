@@ -1,6 +1,6 @@
 <script>
 import { GlTooltip, GlIcon } from '@gitlab/ui';
-import { localeDateFormat, newDate, timeFor } from '~/lib/utils/datetime_utility';
+import { timeFor, parsePikadayDate, dateInWords } from '~/lib/utils/datetime_utility';
 import { __, sprintf } from '~/locale';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 
@@ -20,12 +20,12 @@ export default {
     milestoneDue() {
       const dueDate = this.milestone.due_date || this.milestone.dueDate;
 
-      return dueDate ? newDate(dueDate) : null;
+      return dueDate ? parsePikadayDate(dueDate) : null;
     },
     milestoneStart() {
       const startDate = this.milestone.start_date || this.milestone.startDate;
 
-      return startDate ? newDate(startDate) : null;
+      return startDate ? parsePikadayDate(startDate) : null;
     },
     isMilestoneStarted() {
       if (!this.milestoneStart) {
@@ -41,10 +41,10 @@ export default {
     },
     milestoneDatesAbsolute() {
       if (this.milestoneDue) {
-        return `(${localeDateFormat.asDate.format(this.milestoneDue)})`;
+        return `(${dateInWords(this.milestoneDue)})`;
       }
       if (this.milestoneStart) {
-        return `(${localeDateFormat.asDate.format(this.milestoneStart)})`;
+        return `(${dateInWords(this.milestoneStart)})`;
       }
       return '';
     },
@@ -72,17 +72,19 @@ export default {
 };
 </script>
 <template>
-  <div ref="milestoneDetails" class="issue-milestone-details gl-flex gl-max-w-15 gl-gap-2">
-    <gl-icon :size="16" class="flex-shrink-0" name="milestone" />
-    <span class="milestone-title gl-inline-block gl-truncate">{{ milestone.title }}</span>
+  <div ref="milestoneDetails" class="issue-milestone-details">
+    <gl-icon :size="16" class="gl-mr-2 flex-shrink-0" name="milestone" />
+    <span class="milestone-title gl-display-inline-block gl-text-truncate">{{
+      milestone.title
+    }}</span>
     <gl-tooltip :target="() => $refs.milestoneDetails" placement="bottom" class="js-item-milestone">
-      <span class="gl-font-bold">{{ __('Milestone') }}</span> <br />
+      <span class="bold">{{ __('Milestone') }}</span> <br />
       <span>{{ milestone.title }}</span> <br />
       <span
         v-if="milestoneStart || milestoneDue"
         :class="{
           'gl-text-red-300': isMilestonePastDue,
-          'gl-text-tertiary': !isMilestonePastDue,
+          'text-tertiary': !isMilestonePastDue,
         }"
         ><span>{{ milestoneDatesHuman }}</span
         ><br /><span>{{ milestoneDatesAbsolute }}</span>

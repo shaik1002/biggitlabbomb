@@ -43,7 +43,8 @@ module Ci
       end
 
       log_pipeline_being_canceled
-      update_auto_canceled_pipeline_attributes
+
+      pipeline.update_column(:auto_canceled_by_id, @auto_canceled_by_pipeline.id) if @auto_canceled_by_pipeline
 
       if @safe_cancellation
         # Only build and bridge (trigger) jobs can be interruptible.
@@ -60,7 +61,7 @@ module Ci
 
     private
 
-    attr_reader :pipeline, :current_user, :auto_canceled_by_pipeline
+    attr_reader :pipeline, :current_user
 
     def log_pipeline_being_canceled
       Gitlab::AppJsonLogger.info(
@@ -70,15 +71,6 @@ module Ci
         cascade_to_children: cascade_to_children?,
         execute_async: execute_async?,
         **Gitlab::ApplicationContext.current
-      )
-    end
-
-    def update_auto_canceled_pipeline_attributes
-      return unless auto_canceled_by_pipeline
-
-      pipeline.update_columns(
-        auto_canceled_by_id: auto_canceled_by_pipeline.id,
-        auto_canceled_by_partition_id: auto_canceled_by_pipeline.partition_id
       )
     end
 

@@ -12,19 +12,19 @@
 
 .issue-token-reference {
   margin-right: 1px;
-  background-color: $gray-10;
+  background-color: $gray-lighter;
   transition: background $general-hover-transition-duration $general-hover-transition-curve, color $general-hover-transition-duration $general-hover-transition-curve;
 
   .issue-token:hover &,
   .issue-token-link:focus > & {
-    background-color: $gray-50;
+    background-color: $gray-normal;
     color: $blue-800;
     text-decoration: none;
   }
 }
 
 .issue-token-title {
-  background-color: $gray-50;
+  background-color: $gray-normal;
   transition: background $general-hover-transition-duration $general-hover-transition-curve;
 
   .issue-token:hover &,
@@ -34,7 +34,7 @@
 }
 
 .issue-token-remove-button {
-  background-color: $gray-50;
+  background-color: $gray-normal;
   transition: background $general-hover-transition-duration $general-hover-transition-curve;
 
   &:hover,
@@ -153,14 +153,14 @@ ul.related-merge-requests > li gl-emoji {
     // override dropdown item styles
     .btn.btn-confirm {
       @include btn-default;
-      @include btn-color($blue-500, $blue-600, $blue-600, $blue-700, $blue-700, $blue-800, $white-contrast);
+      @include btn-blue;
 
       border-width: 1px;
       line-height: $line-height-base;
       width: auto;
 
       &.disabled {
-        background-color: $gray-10;
+        background-color: $gray-light;
         border-color: $gray-100;
         color: $gl-text-color-disabled;
       }
@@ -255,7 +255,7 @@ ul.related-merge-requests > li gl-emoji {
 
 .issuable-header-slide-enter-active,
 .issuable-header-slide-leave-active {
-  @apply gl-transition-all;
+  @include gl-transition-medium;
 }
 
 .issuable-header-slide-enter,
@@ -277,12 +277,10 @@ ul.related-merge-requests > li gl-emoji {
   top: $calc-application-header-height;
 }
 
-// stylelint-disable-next-line gitlab/no-gl-class
 .gl-drawer .md-header {
   top: 0;
 }
 
-// stylelint-disable-next-line gitlab/no-gl-class
 .gl-modal .md-header {
   top: -$gl-padding-8;
 }

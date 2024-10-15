@@ -14,12 +14,11 @@ module Gitlab
           ALLOWED_KEYS = %i[tags script image services start_in artifacts
                             cache dependencies before_script after_script hooks
                             coverage retry parallel timeout
-                            release id_tokens publish pages manual_confirmation run].freeze
+                            release id_tokens publish pages manual_confirmation].freeze
 
           validations do
             validates :config, allowed_keys: Gitlab::Ci::Config::Entry::Job.allowed_keys + PROCESSABLE_ALLOWED_KEYS
-            validates :config, mutually_exclusive_keys: %i[script run]
-            validates :script, presence: true, if: -> { config.is_a?(Hash) && !config.key?(:run) }
+            validates :script, presence: true
 
             with_options allow_nil: true do
               validates :when, type: String, inclusion: {
@@ -30,12 +29,6 @@ module Gitlab
               validates :dependencies, array_of_strings: true
               validates :allow_failure, hash_or_boolean: true
               validates :manual_confirmation, type: String
-              validates :run, json_schema: {
-                base_directory: 'app/validators/json_schemas',
-                detail_errors: true,
-                filename: 'run_steps',
-                hash_conversion: true
-              }
             end
 
             validates :start_in, duration: { limit: '1 week' }, if: :delayed?
@@ -56,12 +49,11 @@ module Gitlab
 
             validates :publish,
               absence: { message: "can only be used within a `pages` job" },
-              unless: -> { config.is_a?(Hash) && pages_job? }
+              unless: -> { pages_job? }
 
-            # The below validation should be removed entirely with the FF cleanup
             validates :pages,
               absence: { message: "can only be used within a `pages` job" },
-              unless: -> { (config.is_a?(Hash) && pages_job?) || ::Gitlab::Ci::Config::FeatureFlags.enabled?(:customizable_pages_job_name) }
+              unless: -> { pages_job? }
           end
 
           entry :before_script, Entry::Commands,
@@ -143,12 +135,13 @@ module Gitlab
             description: 'Pages configuration.'
 
           attributes :script, :tags, :when, :dependencies,
-            :needs, :retry, :parallel, :start_in,
-            :timeout, :release,
-            :allow_failure, :publish, :pages, :manual_confirmation, :run
+                     :needs, :retry, :parallel, :start_in,
+                     :timeout, :release,
+                     :allow_failure, :publish, :pages, :manual_confirmation
 
           def self.matching?(name, config)
-            !name.to_s.start_with?('.') && config.is_a?(Hash) && (config.key?(:script) || config.key?(:run))
+            !name.to_s.start_with?('.') &&
+              config.is_a?(Hash) && config.key?(:script)
           end
 
           def self.visible?
@@ -185,8 +178,7 @@ module Gitlab
               id_tokens: id_tokens_value,
               publish: publish,
               pages: pages,
-              manual_confirmation: self.manual_confirmation,
-              run: run
+              manual_confirmation: self.manual_confirmation
             ).compact
           end
 
@@ -201,11 +193,7 @@ module Gitlab
           end
 
           def pages_job?
-            return name == :pages unless ::Gitlab::Ci::Config::FeatureFlags.enabled?(:customizable_pages_job_name)
-
-            return true if config[:pages].present?
-
-            name == :pages && config[:pages] != false # legacy behavior, overridable with `pages: false`
+            name == :pages
           end
 
           def self.allowed_keys

@@ -82,8 +82,6 @@ RSpec.shared_examples Gitlab::BitbucketImport::StageMethods do
       end
 
       it 'logs stage start and finish' do
-        allow(worker).to receive(:import)
-
         expect(import_logger_double)
           .to receive(:info)
           .with(

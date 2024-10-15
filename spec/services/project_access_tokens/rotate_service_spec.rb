@@ -10,14 +10,14 @@ RSpec.describe ProjectAccessTokens::RotateService, feature_category: :system_acc
 
     subject(:response) { described_class.new(current_user, token, project).execute }
 
-    shared_examples_for 'rotates token successfully' do
+    shared_examples_for 'rotates token succesfully' do
       it "rotates user's own token", :freeze_time do
         expect(response).to be_success
 
         new_token = response.payload[:personal_access_token]
 
         expect(new_token.token).not_to eq(token.token)
-        expect(new_token.expires_at).to eq(1.week.from_now.to_date)
+        expect(new_token.expires_at).to eq(Date.today + 1.week)
         expect(new_token.user).to eq(token.user)
       end
     end
@@ -32,7 +32,7 @@ RSpec.describe ProjectAccessTokens::RotateService, feature_category: :system_acc
           project.add_owner(current_user)
         end
 
-        it_behaves_like "rotates token successfully"
+        it_behaves_like "rotates token succesfully"
 
         context 'when creating the new token fails' do
           let(:error_message) { 'boom!' }
@@ -63,7 +63,7 @@ RSpec.describe ProjectAccessTokens::RotateService, feature_category: :system_acc
           end
 
           context 'when access level is not owner' do
-            it_behaves_like "rotates token successfully"
+            it_behaves_like "rotates token succesfully"
           end
 
           context 'when access level is owner' do
@@ -98,7 +98,7 @@ RSpec.describe ProjectAccessTokens::RotateService, feature_category: :system_acc
         let(:current_user) { create(:admin) }
 
         context 'when admin mode enabled', :enable_admin_mode do
-          it_behaves_like "rotates token successfully"
+          it_behaves_like "rotates token succesfully"
         end
 
         context 'when admin mode not enabled' do
@@ -127,7 +127,7 @@ RSpec.describe ProjectAccessTokens::RotateService, feature_category: :system_acc
             project.add_owner(current_user)
           end
 
-          it_behaves_like "rotates token successfully"
+          it_behaves_like "rotates token succesfully"
 
           context 'when its a bot user' do
             let_it_be(:bot_user) { create(:user, :project_bot) }
@@ -137,22 +137,11 @@ RSpec.describe ProjectAccessTokens::RotateService, feature_category: :system_acc
 
             let_it_be(:token, reload: true) { create(:personal_access_token, user: bot_user) }
 
-            it 'does not update membership expires at' do
+            it 'updates membership expires at' do
               response
-              expect(bot_user_membership.reload.expires_at).to be_nil
-            end
 
-            context 'when retain_resource_access_token_user_after_revoke FF is disabled' do
-              before do
-                stub_feature_flags(retain_resource_access_token_user_after_revoke: false)
-              end
-
-              it 'updates membership expires at' do
-                response
-
-                new_token = response.payload[:personal_access_token]
-                expect(bot_user_membership.reload.expires_at).to eq(new_token.expires_at)
-              end
+              new_token = response.payload[:personal_access_token]
+              expect(bot_user_membership.reload.expires_at).to eq(new_token.expires_at)
             end
           end
         end
@@ -164,7 +153,7 @@ RSpec.describe ProjectAccessTokens::RotateService, feature_category: :system_acc
             end
 
             context 'when access level is not owner' do
-              it_behaves_like "rotates token successfully"
+              it_behaves_like "rotates token succesfully"
             end
 
             context 'when access level is owner' do

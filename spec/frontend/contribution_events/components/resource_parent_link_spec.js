@@ -46,7 +46,7 @@ describe('ResourceParentLink', () => {
     });
 
     it('renders nothing', () => {
-      expect(wrapper.find('*').exists()).toBe(false);
+      expect(wrapper.html()).toBe('');
     });
   });
 });

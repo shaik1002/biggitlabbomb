@@ -8,7 +8,7 @@ module IssuablesHelper
   def sidebar_gutter_toggle_icon
     content_tag(:span, class: 'js-sidebar-toggle-container gl-button-text', data: { is_expanded: !sidebar_gutter_collapsed? }) do
       sprite_icon('chevron-double-lg-left', css_class: "js-sidebar-expand #{'hidden' unless sidebar_gutter_collapsed?}") +
-        sprite_icon('chevron-double-lg-right', css_class: "js-sidebar-collapse #{'hidden' if sidebar_gutter_collapsed?}")
+      sprite_icon('chevron-double-lg-right', css_class: "js-sidebar-collapse #{'hidden' if sidebar_gutter_collapsed?}")
     end
   end
 
@@ -129,7 +129,7 @@ module IssuablesHelper
 
     count = issuables_count_for_state(issuable_type, state)
     if count != -1
-      html << " " << gl_badge_tag(format_count(issuable_type, count, Gitlab::IssuablesCountForState::THRESHOLD), { variant: :muted }, { class: "gl-tab-counter-badge gl-hidden sm:gl-inline-flex" })
+      html << " " << gl_badge_tag(format_count(issuable_type, count, Gitlab::IssuablesCountForState::THRESHOLD), { variant: :muted, size: :sm }, { class: "gl-tab-counter-badge gl-display-none gl-sm-display-inline-flex" })
     end
 
     html.html_safe
@@ -166,7 +166,7 @@ module IssuablesHelper
       issuableRef: issuable.to_reference,
       imported: issuable.imported?,
       markdownPreviewPath: preview_markdown_path(parent, target_type: issuable.model_name, target_id: issuable.iid),
-      markdownDocsPath: help_page_path('user/markdown.md'),
+      markdownDocsPath: help_page_path('user/markdown'),
       lockVersion: issuable.lock_version,
       issuableTemplateNamesPath: template_names_path(parent, issuable),
       initialTitleHtml: markdown_field(issuable, :title),
@@ -204,6 +204,13 @@ module IssuablesHelper
 
   def has_filter_bar_param?
     finder.class.scalar_params.any? { |p| params[p].present? }
+  end
+
+  def assignee_sidebar_data(assignee, merge_request: nil)
+    { avatar_url: assignee.avatar_url, name: assignee.name, username: assignee.username }.tap do |data|
+      data[:can_merge] = merge_request.can_be_merged_by?(assignee) if merge_request
+      data[:availability] = assignee.status.availability if assignee.association(:status).loaded? && assignee.status&.availability
+    end
   end
 
   def issuable_squash_option?(issuable, project)
@@ -277,7 +284,7 @@ module IssuablesHelper
     end
   end
 
-  def issuable_sidebar_options(issuable, project)
+  def issuable_sidebar_options(issuable)
     {
       endpoint: "#{issuable[:issuable_json_path]}?serializer=sidebar_extras",
       toggleSubscriptionEndpoint: issuable[:toggle_subscription_path],
@@ -293,8 +300,7 @@ module IssuablesHelper
       timeTrackingLimitToHours: Gitlab::CurrentSettings.time_tracking_limit_to_hours,
       canCreateTimelogs: issuable.dig(:current_user, :can_create_timelogs),
       createNoteEmail: issuable[:create_note_email],
-      issuableType: issuable[:type],
-      directlyInviteMembers: can_admin_project_member?(project).to_s
+      issuableType: issuable[:type]
     }
   end
 
@@ -415,8 +421,8 @@ module IssuablesHelper
 
   def new_comment_template_paths(group, project = nil)
     [{
-      text: _('Your comment templates'),
-      href: profile_comment_templates_path
+      text: _('Manage your comment templates'),
+      path: profile_comment_templates_path
     }]
   end
 end

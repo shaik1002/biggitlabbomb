@@ -22,7 +22,6 @@ RSpec.describe Namespaces::Traversal::Cached, feature_category: :database do
 
       context 'when the group is deleted' do
         it 'invalidates the cache' do
-          subgroup.destroy!
           expect { group.destroy! }.not_to change { cache.reload.outdated_at }
         end
       end
@@ -86,7 +85,6 @@ RSpec.describe Namespaces::Traversal::Cached, feature_category: :database do
 
     context 'when group is destroyed' do
       it 'invalidates the cache' do
-        subgroup.destroy!
         cache = create(:namespace_descendants, namespace: group)
 
         expect { group.destroy! }.to change { cache.reload.outdated_at }.from(nil)
@@ -97,7 +95,6 @@ RSpec.describe Namespaces::Traversal::Cached, feature_category: :database do
           old_parent_cache = create(:namespace_descendants, namespace: old_parent)
           new_parent_cache = create(:namespace_descendants, namespace: new_parent)
 
-          subgroup.destroy!
           group.destroy!
 
           expect(old_parent_cache.reload.outdated_at).not_to be_nil

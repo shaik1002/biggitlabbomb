@@ -16,13 +16,13 @@ RSpec.describe Packages::Protection::Rule, type: :model, feature_category: :pack
 
     it {
       is_expected.to(
-        define_enum_for(:minimum_access_level_for_push)
+        define_enum_for(:push_protected_up_to_access_level)
           .with_values(
+            developer: Gitlab::Access::DEVELOPER,
             maintainer: Gitlab::Access::MAINTAINER,
-            owner: Gitlab::Access::OWNER,
-            admin: Gitlab::Access::ADMIN
+            owner: Gitlab::Access::OWNER
           )
-          .with_prefix(:minimum_access_level_for_push)
+          .with_prefix(:push_protected_up_to)
       )
     }
   end
@@ -68,8 +68,8 @@ RSpec.describe Packages::Protection::Rule, type: :model, feature_category: :pack
       it { is_expected.to validate_presence_of(:package_type) }
     end
 
-    describe '#minimum_access_level_for_push' do
-      it { is_expected.to validate_presence_of(:minimum_access_level_for_push) }
+    describe '#push_protected_up_to_access_level' do
+      it { is_expected.to validate_presence_of(:push_protected_up_to_access_level) }
     end
   end
 
@@ -165,25 +165,6 @@ RSpec.describe Packages::Protection::Rule, type: :model, feature_category: :pack
     end
   end
 
-  describe '.for_package_type' do
-    let_it_be(:npm_package_rule) { create(:package_protection_rule, package_type: :npm) }
-
-    subject { described_class.for_package_type(package_type) }
-
-    where(:package_type, :expected_package_protection_rules) do
-      :npm                   | lazy { [npm_package_rule] }
-      'npm'                  | lazy { [npm_package_rule] }
-
-      :maven                 | []
-      :invalid_package_type  | []
-      nil                    | []
-    end
-
-    with_them do
-      it { is_expected.to match_array expected_package_protection_rules }
-    end
-  end
-
   describe '.for_push_exists?' do
     let_it_be(:project_with_ppr) { create(:project) }
     let_it_be(:project_without_ppr) { create(:project) }
@@ -193,7 +174,7 @@ RSpec.describe Packages::Protection::Rule, type: :model, feature_category: :pack
         package_name_pattern: '@my-scope/my-package-stage*',
         project: project_with_ppr,
         package_type: :npm,
-        minimum_access_level_for_push: :maintainer
+        push_protected_up_to_access_level: :developer
       )
     end
 
@@ -202,7 +183,7 @@ RSpec.describe Packages::Protection::Rule, type: :model, feature_category: :pack
         package_name_pattern: '@my-scope/my-package-prod*',
         project: project_with_ppr,
         package_type: :npm,
-        minimum_access_level_for_push: :owner
+        push_protected_up_to_access_level: :maintainer
       )
     end
 
@@ -211,7 +192,7 @@ RSpec.describe Packages::Protection::Rule, type: :model, feature_category: :pack
         package_name_pattern: '@my-scope/my-package-release*',
         project: project_with_ppr,
         package_type: :npm,
-        minimum_access_level_for_push: :admin
+        push_protected_up_to_access_level: :owner
       )
     end
 
@@ -220,7 +201,7 @@ RSpec.describe Packages::Protection::Rule, type: :model, feature_category: :pack
         package_name_pattern: '@my-scope/my-package-*',
         project: project_with_ppr,
         package_type: :npm,
-        minimum_access_level_for_push: :maintainer
+        push_protected_up_to_access_level: :developer
       )
     end
 
@@ -235,121 +216,53 @@ RSpec.describe Packages::Protection::Rule, type: :model, feature_category: :pack
     end
 
     describe 'with different users and protection levels' do
+      # rubocop:disable Layout/LineLength
       where(:project, :access_level, :package_name, :package_type, :push_protected) do
-        ref(:project_with_ppr)    | Gitlab::Access::REPORTER   | '@my-scope/my-package-stage-sha-1234' | :npm   | true
-        ref(:project_with_ppr)    | Gitlab::Access::DEVELOPER  | '@my-scope/my-package-stage-sha-1234' | :npm   | true
-        ref(:project_with_ppr)    | Gitlab::Access::MAINTAINER | '@my-scope/my-package-stage-sha-1234' | :npm   | false
-        ref(:project_with_ppr)    | Gitlab::Access::MAINTAINER | '@my-scope/my-package-stage-sha-1234' | :npm   | false
-        ref(:project_with_ppr)    | Gitlab::Access::OWNER      | '@my-scope/my-package-stage-sha-1234' | :npm   | false
-        ref(:project_with_ppr)    | Gitlab::Access::ADMIN      | '@my-scope/my-package-stage-sha-1234' | :npm   | false
+        ref(:project_with_ppr)    | Gitlab::Access::REPORTER  | '@my-scope/my-package-stage-sha-1234' | :npm   | true
+        ref(:project_with_ppr)    | :developer                | '@my-scope/my-package-stage-sha-1234' | :npm   | true
+        ref(:project_with_ppr)    | :maintainer               | '@my-scope/my-package-stage-sha-1234' | :npm   | false
+        ref(:project_with_ppr)    | :maintainer               | '@my-scope/my-package-stage-sha-1234' | :npm   | false
+        ref(:project_with_ppr)    | :owner                    | '@my-scope/my-package-stage-sha-1234' | :npm   | false
+        ref(:project_with_ppr)    | Gitlab::Access::ADMIN     | '@my-scope/my-package-stage-sha-1234' | :npm   | false
 
-        ref(:project_with_ppr)    | Gitlab::Access::DEVELOPER  | '@my-scope/my-package-prod-sha-1234'  | :npm   | true
-        ref(:project_with_ppr)    | Gitlab::Access::MAINTAINER | '@my-scope/my-package-prod-sha-1234'  | :npm   | true
-        ref(:project_with_ppr)    | Gitlab::Access::OWNER      | '@my-scope/my-package-prod-sha-1234'  | :npm   | false
-        ref(:project_with_ppr)    | Gitlab::Access::ADMIN      | '@my-scope/my-package-prod-sha-1234'  | :npm   | false
+        ref(:project_with_ppr)    | :developer                | '@my-scope/my-package-prod-sha-1234'  | :npm   | true
+        ref(:project_with_ppr)    | :maintainer               | '@my-scope/my-package-prod-sha-1234'  | :npm   | true
+        ref(:project_with_ppr)    | :owner                    | '@my-scope/my-package-prod-sha-1234'  | :npm   | false
+        ref(:project_with_ppr)    | Gitlab::Access::ADMIN     | '@my-scope/my-package-prod-sha-1234'  | :npm   | false
 
-        ref(:project_with_ppr)    | Gitlab::Access::DEVELOPER  | '@my-scope/my-package-release-v1'     | :npm   | true
-        ref(:project_with_ppr)    | Gitlab::Access::OWNER      | '@my-scope/my-package-release-v1'     | :npm   | true
-        ref(:project_with_ppr)    | Gitlab::Access::ADMIN      | '@my-scope/my-package-release-v1'     | :npm   | false
+        ref(:project_with_ppr)    | :developer                | '@my-scope/my-package-release-v1'     | :npm   | true
+        ref(:project_with_ppr)    | :owner                    | '@my-scope/my-package-release-v1'     | :npm   | true
+        ref(:project_with_ppr)    | Gitlab::Access::ADMIN     | '@my-scope/my-package-release-v1'     | :npm   | false
 
-        ref(:project_with_ppr)    | Gitlab::Access::DEVELOPER  | '@my-scope/my-package-any-suffix'     | :npm   | true
-        ref(:project_with_ppr)    | Gitlab::Access::MAINTAINER | '@my-scope/my-package-any-suffix'     | :npm   | false
-        ref(:project_with_ppr)    | Gitlab::Access::OWNER      | '@my-scope/my-package-any-suffix'     | :npm   | false
+        ref(:project_with_ppr)    | :developer                | '@my-scope/my-package-any-suffix'     | :npm   | true
+        ref(:project_with_ppr)    | :maintainer               | '@my-scope/my-package-any-suffix'     | :npm   | false
+        ref(:project_with_ppr)    | :owner                    | '@my-scope/my-package-any-suffix'     | :npm   | false
 
         # For non-matching package_name
-        ref(:project_with_ppr)    | Gitlab::Access::DEVELOPER  | '@my-scope/non-matching-package'      | :npm   | false
+        ref(:project_with_ppr)    | :developer                | '@my-scope/non-matching-package'      | :npm   | false
 
         # For non-matching package_type
-        ref(:project_with_ppr)    | Gitlab::Access::DEVELOPER  | '@my-scope/my-package-any-suffix'     | :conan | false
+        ref(:project_with_ppr)    | :developer                | '@my-scope/my-package-any-suffix'     | :conan | false
 
         # For no access level
-        ref(:project_with_ppr)    | Gitlab::Access::NO_ACCESS  | '@my-scope/my-package-prod'           | :npm   | true
+        ref(:project_with_ppr)    | Gitlab::Access::NO_ACCESS | '@my-scope/my-package-prod'           | :npm   | true
 
         # Edge cases
-        ref(:project_with_ppr)    | nil                        | '@my-scope/my-package-stage-sha-1234' | :npm   | false
-        ref(:project_with_ppr)    | Gitlab::Access::DEVELOPER  | nil                                   | :npm   | false
-        ref(:project_with_ppr)    | Gitlab::Access::DEVELOPER  | ''                                    | :npm   | false
-        ref(:project_with_ppr)    | Gitlab::Access::DEVELOPER  | '@my-scope/my-package-stage-sha-1234' | nil    | false
-        ref(:project_with_ppr)    | nil                        | nil                                   | nil    | false
+        ref(:project_with_ppr)    | nil                       | '@my-scope/my-package-stage-sha-1234' | :npm   | false
+        ref(:project_with_ppr)    | :developer                | nil                                   | :npm   | false
+        ref(:project_with_ppr)    | :developer                | ''                                    | :npm   | false
+        ref(:project_with_ppr)    | :developer                | '@my-scope/my-package-stage-sha-1234' | nil    | false
+        ref(:project_with_ppr)    | nil                       | nil                                   | nil    | false
 
         # For projects that have no package protection rules
-        ref(:project_without_ppr) | Gitlab::Access::DEVELOPER  | '@my-scope/my-package-prod'           | :npm   | false
-        ref(:project_without_ppr) | Gitlab::Access::MAINTAINER | '@my-scope/my-package-prod'           | :npm   | false
-        ref(:project_without_ppr) | Gitlab::Access::OWNER      | '@my-scope/my-package-prod'           | :npm   | false
+        ref(:project_without_ppr) | :developer                | '@my-scope/my-package-prod'           | :npm   | false
+        ref(:project_without_ppr) | :maintainer               | '@my-scope/my-package-prod'           | :npm   | false
+        ref(:project_without_ppr) | :owner                    | '@my-scope/my-package-prod'           | :npm   | false
       end
+      # rubocop:enable Layout/LineLength
 
       with_them do
         it { is_expected.to eq push_protected }
-      end
-    end
-  end
-
-  describe '.for_push_exists_for_multiple_packages' do
-    let_it_be(:project_with_ppr) { create(:project) }
-
-    let_it_be(:ppr_for_maintainer) do
-      create(:package_protection_rule,
-        package_name_pattern: '@my-scope/my-package-prod*',
-        project: project_with_ppr,
-        package_type: :npm
-      )
-    end
-
-    let(:package_names) {
-      %w[
-        @my-scope/my-package-prod-1
-        @my-scope/my-package-prod-unmatched-package-type
-        @my-scope/unmatched-package-name
-        @my-scope/unmatched-package-name-and-package-type
-      ]
-    }
-
-    let(:package_types) do
-      [
-        Packages::Package.package_types[:npm],
-        Packages::Package.package_types[:maven],
-        Packages::Package.package_types[:npm],
-        Packages::Package.package_types[:maven]
-      ]
-    end
-
-    subject do
-      described_class
-        .for_push_exists_for_multiple_packages(
-          project_id: project_with_ppr.id,
-          package_names: package_names,
-          package_types: package_types
-        )
-        .to_a
-    end
-
-    it do
-      is_expected.to eq([
-        { "package_name" => '@my-scope/my-package-prod-1',
-          "package_type" => Packages::Package.package_types[:npm],
-          "protected" => true },
-        { "package_name" => '@my-scope/my-package-prod-unmatched-package-type',
-          "package_type" => Packages::Package.package_types[:maven],
-          "protected" => false },
-        { "package_name" => '@my-scope/unmatched-package-name',
-          "package_type" => Packages::Package.package_types[:npm],
-          "protected" => false },
-        { "package_name" => '@my-scope/unmatched-package-name-and-package-type',
-          "package_type" => Packages::Package.package_types[:maven],
-          "protected" => false }
-      ])
-    end
-
-    context 'when edge cases' do
-      where(:package_names, :package_types, :expected_result) do
-        nil                             | nil | []
-        []                              | []  | []
-        nil                             | []  | []
-        %w[@my-scope/my-package-prod-1] | []  | []
-      end
-
-      with_them do
-        it { is_expected.to eq([]) }
       end
     end
   end

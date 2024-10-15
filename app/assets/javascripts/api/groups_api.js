@@ -9,7 +9,6 @@ const GROUP_ALL_MEMBERS_PATH = '/api/:version/groups/:id/members/all';
 const DESCENDANT_GROUPS_PATH = '/api/:version/groups/:id/descendant_groups';
 const GROUP_TRANSFER_LOCATIONS_PATH = 'api/:version/groups/:id/transfer_locations';
 
-// eslint-disable-next-line max-params
 const axiosGet = (url, query, options, callback, axiosOptions = {}) => {
   return axios
     .get(url, {
@@ -27,13 +26,11 @@ const axiosGet = (url, query, options, callback, axiosOptions = {}) => {
     });
 };
 
-// eslint-disable-next-line max-params
 export function getGroups(query, options, callback = () => {}, axiosOptions = {}) {
   const url = buildApiUrl(GROUPS_PATH);
   return axiosGet(url, query, options, callback, axiosOptions);
 }
 
-// eslint-disable-next-line max-params
 export function getDescendentGroups(
   parentGroupId,
   query,
@@ -64,11 +61,11 @@ export const getGroupTransferLocations = (groupId, params = {}) => {
   return axios.get(url, { params: { ...defaultParams, ...params } });
 };
 
-export const getGroupMembers = (groupId, inherited = false, params = {}) => {
+export const getGroupMembers = (groupId, inherited = false) => {
   const path = inherited ? GROUP_ALL_MEMBERS_PATH : GROUP_MEMBERS_PATH;
   const url = buildApiUrl(path).replace(':id', groupId);
 
-  return axios.get(url, { params });
+  return axios.get(url);
 };
 
 export const createGroup = (params) => {

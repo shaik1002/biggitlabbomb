@@ -88,6 +88,7 @@ function createComponent({
   slots = defaultSlots,
   scopedSlots = defaultScopedSlots,
   mountFn = mount,
+  groupMultiSelectTokens = false,
 } = {}) {
   return mountFn(BaseToken, {
     propsData: {
@@ -95,6 +96,9 @@ function createComponent({
       ...props,
     },
     provide: {
+      glFeatures: {
+        groupMultiSelectTokens,
+      },
       portalName: 'fake target',
       alignSuggestions: jest.fn(),
       suggestionsListClass: () => 'custom-class',
@@ -126,11 +130,7 @@ describe('BaseToken', () => {
     it('calls `getRecentlyUsedSuggestions` to populate `recentSuggestions` when `recentSuggestionsStorageKey` is defined', () => {
       wrapper = createComponent();
 
-      expect(getRecentlyUsedSuggestions).toHaveBeenCalledWith(
-        mockStorageKey,
-        expect.anything(),
-        expect.anything(),
-      );
+      expect(getRecentlyUsedSuggestions).toHaveBeenCalledWith(mockStorageKey);
     });
   });
 
@@ -166,6 +166,7 @@ describe('BaseToken', () => {
             suggestions: mockLabels,
             getActiveTokenValue: mockGetActiveTokenValue,
           },
+          groupMultiSelectTokens: true,
         });
 
         const lastTitle = mockLabels[mockLabels.length - 1].title;
@@ -354,9 +355,8 @@ describe('BaseToken', () => {
         it(`${
           shouldRenderFilteredSearchSuggestion ? 'should' : 'should not'
         } render GlFilteredSearchSuggestion`, () => {
-          const filteredSearchSuggestions = wrapper.findAllComponents(
-            GlFilteredSearchSuggestion,
-          ).wrappers;
+          const filteredSearchSuggestions = wrapper.findAllComponents(GlFilteredSearchSuggestion)
+            .wrappers;
 
           if (shouldRenderFilteredSearchSuggestion) {
             expect(filteredSearchSuggestions.map((c) => c.props())).toMatchObject(

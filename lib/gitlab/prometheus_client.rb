@@ -4,7 +4,6 @@ module Gitlab
   # Helper methods to interact with Prometheus network services & resources
   class PrometheusClient
     include Gitlab::Utils::StrongMemoize
-
     Error = Class.new(StandardError)
     ConnectionError = Class.new(Gitlab::PrometheusClient::Error)
     UnexpectedResponseError = Class.new(Gitlab::PrometheusClient::Error)
@@ -49,7 +48,7 @@ module Gitlab
       # From Prometheus docs: This endpoint returns 200 when Prometheus is ready to serve traffic (i.e. respond to queries).
       response.code == 200
     rescue StandardError => e
-      raise PrometheusClient::UnexpectedResponseError, e.message.to_s
+      raise PrometheusClient::UnexpectedResponseError, "#{e.message}"
     end
 
     def proxy(type, args)
@@ -101,7 +100,7 @@ module Gitlab
     end
 
     def series(*matches, start_time: 8.hours.ago, end_time: Time.now)
-      json_api_get('series', match: matches, start: start_time.to_f, end: end_time.to_f)
+      json_api_get('series', 'match': matches, start: start_time.to_f, end: end_time.to_f)
     end
 
     def self.compute_step(start_time, end_time)

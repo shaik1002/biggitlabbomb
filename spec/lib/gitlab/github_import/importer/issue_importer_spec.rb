@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::GithubImport::Importer::IssueImporter, :clean_gitlab_redis_shared_state, feature_category: :importers do
+RSpec.describe Gitlab::GithubImport::Importer::IssueImporter, :clean_gitlab_redis_cache, feature_category: :importers do
   let_it_be(:work_item_type_id) { ::WorkItems::Type.default_issue_type.id }
   let_it_be(:project) { create(:project) }
   let_it_be(:user) { create(:user) }
@@ -12,13 +12,12 @@ RSpec.describe Gitlab::GithubImport::Importer::IssueImporter, :clean_gitlab_redi
   let(:client) { instance_double(Gitlab::GithubImport::Client) }
   let(:created_at) { Time.new(2017, 1, 1, 12, 00) }
   let(:updated_at) { Time.new(2017, 1, 1, 12, 15) }
-  let(:description) { 'This is my issue' }
 
   let(:issue) do
     Gitlab::GithubImport::Representation::Issue.new(
       iid: 42,
       title: 'My Issue',
-      description: description,
+      description: 'This is my issue',
       milestone_number: 1,
       state: :opened,
       assignees: [
@@ -80,8 +79,7 @@ RSpec.describe Gitlab::GithubImport::Importer::IssueImporter, :clean_gitlab_redi
         state_id: 1,
         created_at: created_at,
         updated_at: updated_at,
-        work_item_type_id: work_item_type_id,
-        imported_from: 'github'
+        work_item_type_id: work_item_type_id
       )
     end
 
@@ -120,16 +118,6 @@ RSpec.describe Gitlab::GithubImport::Importer::IssueImporter, :clean_gitlab_redi
         importer.execute
 
         expect(Issue.last.assignee_ids).to match_array([user.id, user_2.id])
-      end
-    end
-
-    context 'when the description has user mentions' do
-      let(:description) { 'You can ask @knejad by emailing xyz@gitlab.com' }
-
-      it 'adds backticks to the username' do
-        importer.execute
-
-        expect(Issue.last.description).to eq("*Created by: alice*\n\nYou can ask `@knejad` by emailing xyz@gitlab.com")
       end
     end
   end

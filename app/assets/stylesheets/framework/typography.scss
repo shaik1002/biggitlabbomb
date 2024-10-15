@@ -3,8 +3,6 @@
  *
  */
 .md {
-  position: relative;
-  z-index: 1;
   color: $gl-text-color;
   word-wrap: break-word;
 
@@ -27,33 +25,32 @@
     > code {
       font-weight: inherit;
     }
+
+    a:not(.no-attachment-icon) img {
+      // Remove bottom padding because
+      // <p> already has $gl-padding bottom
+      margin-bottom: 0;
+    }
   }
 
   .media-container {
     display: inline-flex;
     flex-direction: column;
     margin-bottom: $gl-spacing-scale-2;
-
-    video {
-      max-width: 100%;
-    }
   }
 
   img {
     max-width: 100%;
-    vertical-align: baseline;
   }
 
-  img[width][height] {
-    object-fit: contain;
-    object-position: top;
-    height: auto;
+  img:not(.emoji) {
+    margin: 0 0 8px;
   }
 
   img.lazy {
     min-width: 200px;
     min-height: 100px;
-    background-color: $gray-10;
+    background-color: $gray-lightest;
   }
 
   img.js-lazy-loaded,
@@ -75,16 +72,6 @@
     margin-bottom: $gl-padding;
   }
 
-  // Shift the anchor link for a heading inside a details summary to the left
-  // to make room for the summary toggle
-  details summary {
-    h1, h2, h3, h4, h5, h6 {
-      a.anchor {
-        margin-left: -2rem;
-      }
-    }
-  }
-
   summary > * {
     display: inline-block;
     margin-bottom: 0;
@@ -93,15 +80,12 @@
   // Single code lines should wrap
   code {
     font-family: $monospace-font;
+    vertical-align: bottom;
     white-space: pre-wrap;
     // Safari
     word-wrap: break-word;
     overflow-wrap: break-word;
     word-break: keep-all;
-  }
-
-  mark {
-    @include str-highlighted;
   }
 
   h1 {
@@ -152,16 +136,12 @@
     color: $gray-700;
     padding-top: $gl-spacing-scale-3;
     padding-bottom: $gl-spacing-scale-3;
-    padding-left: $gl-spacing-scale-5;
+    padding-left: $gl-spacing-scale-6;
     margin-top: $gl-spacing-scale-3;
     margin-bottom: $gl-spacing-scale-3;
     margin-left: 0;
     margin-right: 0;
-    border-left: 4px solid var(--gl-color-neutral-100);
-
-    .gl-dark & {
-      border-left-color: var(--gl-color-neutral-600);
-    }
+    @apply gl-shadow-inner-l-4-gray-100;
 
     &:dir(rtl) {
       border-left: 0;
@@ -256,6 +236,7 @@
         }
       }
     }
+
 
     &.grid-rows {
       > thead > tr > th,
@@ -352,7 +333,7 @@
     &.stripes-odd tr:nth-of-type(odd),
     &.stripes-even tr:nth-of-type(even),
     &.stripes-hover tr:hover {
-      background: $gray-10;
+      background: $gray-light;
     }
   }
 
@@ -364,7 +345,7 @@
     margin-bottom: 16px;
     line-height: 1.6em;
     overflow-x: auto;
-    border-radius: $gl-border-radius-base;
+    border-radius: $border-radius-default;
 
     // Multi-line code blocks should scroll horizontally
     code {
@@ -444,8 +425,7 @@
     padding-left: 3px;
 
     /* Normalize the bullet position on webkit. */
-    /* stylelint-disable-next-line media-feature-name-no-vendor-prefix */
-    @media screen and (-webkit-min-device-pixel-ratio: 0) {
+    @include on-webkit-only {
       margin-left: 28px;
       padding-left: 0;
     }
@@ -627,7 +607,7 @@
   }
 
   .sidebarblock {
-    background: $gray-50;
+    background: $gray-darker;
     padding: $gl-padding-12 $gl-padding-24;
     border-radius: $gl-border-radius-large;
 
@@ -747,7 +727,7 @@ pre {
   word-break: break-all;
   word-wrap: break-word;
   color: $gl-text-color;
-  background-color: $gray-10;
+  background-color: $gray-light;
   border: 1px solid $gray-100;
   border-radius: $border-radius-small;
 
@@ -757,8 +737,15 @@ pre {
   }
 }
 
+code {
+  &.key-fingerprint {
+    background: $body-bg;
+    color: $text-color;
+  }
+}
+
 .monospace {
-  @apply gl-font-monospace;
+  @include gl-font-monospace;
 }
 
 .weight-normal {
@@ -815,15 +802,34 @@ h4 {
   background: $line-added-dark;
 }
 
+
 /**
  * form text input i.e. search bar, comments, forms, etc.
  */
+/* stylelint-disable selector-no-vendor-prefix  */
 input,
 textarea {
-  &::placeholder {
-    color: var(--gl-control-placeholder-color);
+  &::-webkit-input-placeholder {
+    color: $gl-text-color-tertiary;
+  }
+
+  // support firefox 19+ vendor prefix
+  &::-moz-placeholder {
+    color: $gl-text-color-tertiary;
+    opacity: 1; // FF defaults to 0.54
+  }
+
+  // support Edge vendor prefix
+  &::-ms-input-placeholder {
+    color: $gl-text-color-tertiary;
+  }
+
+  // support IE vendor prefix
+  &:-ms-input-placeholder {
+    color: $gl-text-color-tertiary;
   }
 }
+/* stylelint-enable */
 
 wbr {
   display: inline-block;
@@ -832,39 +838,4 @@ wbr {
 // The font used in Monaco editor - Web IDE, Snippets, single file editor
 :root {
   --code-editor-font: #{$monospace-font};
-}
-
-/**
- * FOOTNOTES
- */
- section.footnotes {
-  position: relative;
-  padding-top: $gl-spacing-scale-5;
-  margin-top: $gl-spacing-scale-7;
-  font-size: $gl-font-size-12;
-
-  &::before {
-    content: '';
-    width: 16rem;
-    max-width: 100%;
-    border-top: 1px solid $border-color;
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
-
-  ol > li {
-    margin-inline-start: $gl-spacing-scale-6;
-
-     p {
-      margin-block-end: 0;
-     }
-  }
-
-  // prevent backref character from rendering as emoji
-  .footnote-backref gl-emoji {
-    font-family: inherit;
-    font-size: 0.875em;
-    pointer-events: none;
-  }
 }

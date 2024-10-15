@@ -8,6 +8,10 @@
   &.line_content span.idiff {
     background: $idiff;
   }
+
+  &.diff-line-num {
+    border-color: $border;
+  }
 }
 
 @mixin dark-diff-match-line {

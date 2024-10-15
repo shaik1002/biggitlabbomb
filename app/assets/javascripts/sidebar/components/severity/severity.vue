@@ -33,14 +33,14 @@ export default {
 
 <template>
   <div
-    class="incident-severity gl-justify-content-between gl-inline-flex gl-max-w-full gl-items-center"
+    class="incident-severity gl-display-inline-flex gl-align-items-center gl-justify-content-between gl-max-w-full"
   >
     <gl-icon
       :size="iconSize"
       :name="`severity-${severity.icon}`"
-      :class="[`icon-${severity.icon}`, { 'gl-mr-3 gl-shrink-0': !iconOnly }]"
+      :class="[`icon-${severity.icon}`, { 'gl-mr-3 gl-flex-shrink-0': !iconOnly }]"
     />
-    <tooltip-on-truncate v-if="!iconOnly" :title="severity.label" class="gl-truncate">
+    <tooltip-on-truncate v-if="!iconOnly" :title="severity.label" class="gl-text-truncate">
       {{ severity.label }}
     </tooltip-on-truncate>
   </div>

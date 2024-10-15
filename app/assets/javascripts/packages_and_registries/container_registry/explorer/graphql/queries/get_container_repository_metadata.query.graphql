@@ -1,12 +1,7 @@
-query getContainerRepositoryMetadata(
-  $id: ContainerRepositoryID!
-  $metadataDatabaseEnabled: Boolean!
-) {
+query getContainerRepositoryMetadata($id: ContainerRepositoryID!) {
   containerRepository(id: $id) {
     id
     tagsCount
-    size @include(if: $metadataDatabaseEnabled)
-    lastPublishedAt @include(if: $metadataDatabaseEnabled)
-    protectionRuleExists
+    size
   }
 }

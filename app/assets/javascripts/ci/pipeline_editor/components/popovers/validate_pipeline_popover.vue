@@ -42,7 +42,7 @@ export default {
     triggers="hover focus"
     placement="top"
   >
-    <p class="gl-my-3 gl-font-bold">{{ $options.i18n.title }}</p>
+    <p class="gl-my-3 gl-font-weight-bold">{{ $options.i18n.title }}</p>
     <p>
       <gl-sprintf :message="$options.i18n.popoverContent">
         <template #code="{ content }">
@@ -50,7 +50,7 @@ export default {
         </template>
         <template #link="{ content }">
           <gl-link
-            class="gl-text-sm"
+            class="gl-font-sm"
             target="_blank"
             :href="simulatePipelineHelpPagePath"
             data-testid="help-link"
@@ -59,9 +59,9 @@ export default {
         </template>
       </gl-sprintf>
     </p>
-    <p class="gl-mb-3 gl-text-right">
+    <p class="gl-text-right gl-mb-3">
       <gl-link
-        class="gl-text-sm"
+        class="gl-font-sm"
         target="_blank"
         :href="$options.VALIDATE_TAB_FEEDBACK_URL"
         data-testid="feedback-link"

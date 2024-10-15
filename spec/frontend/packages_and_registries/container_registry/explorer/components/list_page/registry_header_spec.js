@@ -28,18 +28,9 @@ describe('registry_header', () => {
       stubs: {
         GlSprintf,
         TitleArea,
-        MetadataContainerScanning: true,
-        ContainerScanningCounts: true,
       },
       propsData,
       slots,
-      provide() {
-        return {
-          config: {
-            isGroupPage: false,
-          },
-        };
-      },
     });
     await nextTick();
   };
@@ -80,7 +71,6 @@ describe('registry_header', () => {
           expect(findImagesCountSubHeader().props()).toMatchObject({
             text: '1 Image repository',
             icon: 'container-image',
-            size: 'xl',
           });
         });
 

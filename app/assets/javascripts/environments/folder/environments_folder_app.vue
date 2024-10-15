@@ -56,7 +56,6 @@ export default {
     };
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     folder: {
       query: folderQuery,
       variables() {
@@ -192,7 +191,7 @@ export default {
     <stop-environment-modal :environment="environmentToStop" graphql />
     <confirm-rollback-modal :environment="environmentToRollback" graphql />
     <canary-update-modal :environment="environmentToChangeCanary" :weight="weight" />
-    <h4 class="gl-font-normal" data-testid="folder-name">
+    <h4 class="gl-font-weight-normal" data-testid="folder-name">
       {{ $options.i18n.pageTitle }} /
       <b>{{ folderName }}</b>
     </h4>
@@ -203,7 +202,7 @@ export default {
       >
         <template #title>
           <span>{{ $options.i18n.active }}</span>
-          <gl-badge class="gl-tab-counter-badge">
+          <gl-badge size="sm" class="gl-tab-counter-badge">
             {{ activeCount }}
           </gl-badge>
         </template>
@@ -214,7 +213,7 @@ export default {
       >
         <template #title>
           <span>{{ $options.i18n.stopped }}</span>
-          <gl-badge class="gl-tab-counter-badge">
+          <gl-badge size="sm" class="gl-tab-counter-badge">
             {{ stoppedCount }}
           </gl-badge>
         </template>
@@ -224,7 +223,7 @@ export default {
       <div
         v-for="n in lastRowCount"
         :key="`skeleton-box-${n}`"
-        class="gl-border-1 gl-border-gray-100 gl-py-5 gl-border-t-solid md:gl-pl-7"
+        class="gl-border-gray-100 gl-border-t-solid gl-border-1 gl-py-5 gl-md-pl-7"
       >
         <gl-skeleton-loader :lines="2" />
       </div>
@@ -243,7 +242,7 @@ export default {
         :id="environment.name"
         :key="index"
         :environment="environment"
-        class="gl-border-1 gl-border-gray-100 gl-pt-3 gl-border-t-solid"
+        class="gl-border-gray-100 gl-border-t-solid gl-border-1 gl-pt-3"
         in-folder
       />
     </div>

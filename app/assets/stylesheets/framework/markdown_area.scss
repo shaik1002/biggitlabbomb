@@ -14,10 +14,28 @@
       pointer-events: none;
     }
 
+    .div-dropzone-spinner {
+      position: absolute;
+      bottom: 10px;
+      right: 5px;
+      opacity: 0;
+      font-size: 20px;
+      transition: opacity 200ms ease-in-out;
+    }
+
     .div-dropzone-icon {
       display: block;
       text-align: center;
       font-size: inherit;
+    }
+
+    .div-dropzone-progress {
+      position: absolute;
+      top: 7px;
+      left: -40px;
+      width: 35px;
+      font-size: 13px;
+      text-align: right;
     }
 
     .dz-preview {
@@ -64,7 +82,7 @@
 .referenced-commands {
   background: $blue-50;
   padding: $gl-padding-8 $gl-padding;
-  border-radius: 0 0 $gl-border-radius-base-inner $gl-border-radius-base-inner;
+  border-radius: 0 0 $border-radius-default-inner $border-radius-default-inner;
 
   p {
     margin: 0;
@@ -87,7 +105,7 @@
   box-shadow: none;
   width: 100%;
   resize: none !important;
-  @apply gl-transition-box-shadow;
+  transition: box-shadow $gl-transition-duration-medium ease;
 }
 
 .md-suggestion-diff {
@@ -113,9 +131,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: $gray-10;
+  background-color: $gray-light;
   border: 1px solid $border-color;
-  border-radius: $gl-border-radius-base $gl-border-radius-base 0 0;
+  border-radius: $border-radius-default $border-radius-default 0 0;
 }
 
 /* these two styles are important to prevent certain LaTeX from

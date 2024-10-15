@@ -18,14 +18,6 @@ RSpec.describe Users::BuildService, feature_category: :user_management do
     let(:params) { base_params }
     let(:service) { described_class.new(current_user, params) }
 
-    context 'with user_detail built' do
-      it 'creates the user_detail record' do
-        user = service.execute
-
-        expect { user.save! }.to change { UserDetail.count }.by(1)
-      end
-    end
-
     context 'with nil current_user' do
       subject(:user) { service.execute }
 

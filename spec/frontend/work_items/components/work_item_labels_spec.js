@@ -1,5 +1,5 @@
-import { GlDisclosureDropdown, GlLabel } from '@gitlab/ui';
-import Vue, { nextTick } from 'vue';
+import { GlLabel } from '@gitlab/ui';
+import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
@@ -9,14 +9,15 @@ import {
   TRACKING_CATEGORY_SHOW,
   I18N_WORK_ITEM_ERROR_FETCHING_LABELS,
 } from '~/work_items/constants';
-import DropdownContentsCreateView from '~/sidebar/components/labels/labels_select_widget/dropdown_contents_create_view.vue';
 import groupLabelsQuery from '~/sidebar/components/labels/labels_select_widget/graphql/group_labels.query.graphql';
 import projectLabelsQuery from '~/sidebar/components/labels/labels_select_widget/graphql/project_labels.query.graphql';
 import updateWorkItemMutation from '~/work_items/graphql/update_work_item.mutation.graphql';
+import groupWorkItemByIidQuery from '~/work_items/graphql/group_work_item_by_iid.query.graphql';
 import workItemByIidQuery from '~/work_items/graphql/work_item_by_iid.query.graphql';
 import WorkItemLabels from '~/work_items/components/work_item_labels.vue';
 import WorkItemSidebarDropdownWidget from '~/work_items/components/shared/work_item_sidebar_dropdown_widget.vue';
 import {
+  groupWorkItemByIidResponseFactory,
   projectLabelsResponse,
   groupLabelsResponse,
   getProjectLabelsResponse,
@@ -31,7 +32,6 @@ Vue.use(VueApollo);
 const workItemId = 'gid://gitlab/WorkItem/1';
 
 describe('WorkItemLabels component', () => {
-  /** @type {import('helpers/vue_test_utils_helper').ExtendedWrapper} */
   let wrapper;
 
   const label1Id = mockLabels[0].id;
@@ -47,6 +47,9 @@ describe('WorkItemLabels component', () => {
   const workItemQueryWithFewLabelsHandler = jest
     .fn()
     .mockResolvedValue(workItemByIidResponseFactory({ labels: [mockLabels[0], mockLabels[1]] }));
+  const groupWorkItemQuerySuccess = jest
+    .fn()
+    .mockResolvedValue(groupWorkItemByIidResponseFactory({ labels: null }));
   const projectLabelsQueryHandler = jest.fn().mockResolvedValue(projectLabelsResponse);
   const groupLabelsQueryHandler = jest.fn().mockResolvedValue(groupLabelsResponse);
   const errorHandler = jest.fn().mockRejectedValue('Error');
@@ -76,20 +79,19 @@ describe('WorkItemLabels component', () => {
     wrapper = shallowMountExtended(WorkItemLabels, {
       apolloProvider: createMockApollo([
         [workItemByIidQuery, workItemQueryHandler],
+        [groupWorkItemByIidQuery, groupWorkItemQuerySuccess],
         [projectLabelsQuery, searchQueryHandler],
         [groupLabelsQuery, groupLabelsQueryHandler],
         [updateWorkItemMutation, updateWorkItemMutationHandler],
       ]),
       provide: {
-        canAdminLabel: true,
+        isGroup,
         issuesListPath: 'test-project-path/issues',
-        labelsManagePath: 'test-project-path/labels',
       },
       propsData: {
         workItemId,
         workItemIid,
         canUpdate,
-        isGroup,
         fullPath: 'test-project-path',
         workItemType: 'Task',
       },
@@ -99,12 +101,8 @@ describe('WorkItemLabels component', () => {
   const findWorkItemSidebarDropdownWidget = () =>
     wrapper.findComponent(WorkItemSidebarDropdownWidget);
   const findAllLabels = () => wrapper.findAllComponents(GlLabel);
-  const findDisclosureDropdown = () => wrapper.findComponent(GlDisclosureDropdown);
   const findRegularLabel = () => findAllLabels().at(0);
   const findLabelWithDescription = () => findAllLabels().at(2);
-  const findDropdownContentsCreateView = () => wrapper.findComponent(DropdownContentsCreateView);
-  const findCreateLabelButton = () => wrapper.findByTestId('create-label');
-  const findManageLabelsButton = () => wrapper.findByTestId('manage-labels');
 
   const showDropdown = () => {
     findWorkItemSidebarDropdownWidget().vm.$emit('dropdownShown');
@@ -146,7 +144,6 @@ describe('WorkItemLabels component', () => {
       headerText: 'Select labels',
       resetButtonLabel: 'Clear',
       multiSelect: true,
-      showFooter: true,
       itemValue: [],
     });
     expect(findAllLabels()).toHaveLength(0);
@@ -160,6 +157,7 @@ describe('WorkItemLabels component', () => {
     await waitForPromises();
 
     expect(workItemQueryWithLabelsHandler).toHaveBeenCalled();
+    expect(groupWorkItemQuerySuccess).not.toHaveBeenCalled();
 
     expect(findWorkItemSidebarDropdownWidget().props('itemValue')).toStrictEqual([
       label1Id,
@@ -333,48 +331,6 @@ describe('WorkItemLabels component', () => {
     );
   });
 
-  it('shows selected labels at top of list', async () => {
-    const [label1, label2, label3] = mockLabels;
-    const label999 = {
-      __typename: 'Label',
-      id: 'gid://gitlab/Label/999',
-      title: 'Label 999',
-      description: 'Label not in the label query result',
-      color: '#fff',
-      textColor: '#000',
-    };
-
-    createComponent({
-      workItemQueryHandler: workItemQuerySuccess,
-      updateWorkItemMutationHandler: jest.fn().mockResolvedValue(
-        updateWorkItemMutationResponseFactory({
-          labels: [label1, label999],
-        }),
-      ),
-    });
-
-    updateLabels([label1Id, label999.id]);
-
-    showDropdown();
-
-    await waitForPromises();
-
-    const selected = [
-      { color: label1.color, text: label1.title, value: label1.id },
-      { color: label999.color, text: label999.title, value: label999.id },
-    ];
-
-    const unselected = [
-      { color: label2.color, text: label2.title, value: label2.id },
-      { color: label3.color, text: label3.title, value: label3.id },
-    ];
-
-    expect(findWorkItemSidebarDropdownWidget().props('listItems')).toEqual([
-      { options: selected, text: 'Selected' },
-      { options: unselected, text: 'All', textSrOnly: true },
-    ]);
-  });
-
   describe('tracking', () => {
     let trackingSpy;
 
@@ -428,6 +384,14 @@ describe('WorkItemLabels component', () => {
     expect(workItemQuerySuccess).not.toHaveBeenCalled();
   });
 
+  it('skips calling the group work item query when missing workItemIid', async () => {
+    createComponent({ isGroup: true, workItemIid: '' });
+
+    await waitForPromises();
+
+    expect(groupWorkItemQuerySuccess).not.toHaveBeenCalled();
+  });
+
   describe('when group context', () => {
     beforeEach(async () => {
       createComponent({ isGroup: true });
@@ -435,102 +399,19 @@ describe('WorkItemLabels component', () => {
       await waitForPromises();
     });
 
+    it('skips calling the project work item query', () => {
+      expect(workItemQuerySuccess).not.toHaveBeenCalled();
+    });
+
+    it('calls the group work item query', () => {
+      expect(groupWorkItemQuerySuccess).toHaveBeenCalled();
+    });
+
     it('calls the group labels query on search', async () => {
       showDropdown();
       await waitForPromises();
 
       expect(groupLabelsQueryHandler).toHaveBeenCalled();
-    });
-  });
-
-  describe('create/manage label buttons', () => {
-    describe('when project context', () => {
-      beforeEach(() => {
-        createComponent({ isGroup: false });
-      });
-
-      it('renders "Create project label" button', () => {
-        expect(findCreateLabelButton().text()).toBe('Create project label');
-      });
-
-      it('renders "Manage project labels" link', () => {
-        expect(findManageLabelsButton().text()).toBe('Manage project labels');
-        expect(findManageLabelsButton().attributes('href')).toBe('test-project-path/labels');
-      });
-    });
-
-    describe('when group context', () => {
-      beforeEach(() => {
-        createComponent({ isGroup: true });
-      });
-
-      it('renders "Create group label" button', () => {
-        expect(findCreateLabelButton().text()).toBe('Create group label');
-      });
-
-      it('renders "Manage group labels" link', () => {
-        expect(findManageLabelsButton().text()).toBe('Manage group labels');
-        expect(findManageLabelsButton().attributes('href')).toBe('test-project-path/labels');
-      });
-    });
-
-    describe('creating project label', () => {
-      beforeEach(async () => {
-        createComponent();
-
-        findCreateLabelButton().vm.$emit('click');
-        await nextTick();
-      });
-
-      describe('when "Create project label" button is clicked', () => {
-        it('renders "Create label" dropdown', () => {
-          expect(findDisclosureDropdown().props()).toMatchObject({
-            block: true,
-            startOpened: true,
-            toggleText: 'No labels',
-          });
-          expect(findDropdownContentsCreateView().props()).toEqual({
-            attrWorkspacePath: 'test-project-path',
-            fullPath: 'test-project-path',
-            labelCreateType: 'project',
-            searchKey: '',
-            workspaceType: 'project',
-          });
-        });
-      });
-
-      describe('when "hideCreateView" event is emitted', () => {
-        it('hides dropdown', async () => {
-          expect(findDisclosureDropdown().exists()).toBe(true);
-          expect(findDropdownContentsCreateView().exists()).toBe(true);
-
-          findDropdownContentsCreateView().vm.$emit('hideCreateView');
-          await nextTick();
-
-          expect(findDisclosureDropdown().exists()).toBe(false);
-          expect(findDropdownContentsCreateView().exists()).toBe(false);
-        });
-      });
-
-      describe('when "labelCreated" event is emitted', () => {
-        it('updates "createdLabelId" value and hides dropdown', async () => {
-          expect(findWorkItemSidebarDropdownWidget().props('createdLabelId')).toBe(undefined);
-          expect(findDisclosureDropdown().exists()).toBe(true);
-          expect(findDropdownContentsCreateView().exists()).toBe(true);
-
-          findDropdownContentsCreateView().vm.$emit('labelCreated', {
-            id: 'gid://gitlab/Label/55',
-            name: 'New label',
-          });
-          await nextTick();
-
-          expect(findWorkItemSidebarDropdownWidget().props('createdLabelId')).toBe(
-            'gid://gitlab/Label/55',
-          );
-          expect(findDisclosureDropdown().exists()).toBe(false);
-          expect(findDropdownContentsCreateView().exists()).toBe(false);
-        });
-      });
     });
   });
 });

@@ -125,9 +125,9 @@ module API
         requires :title, type: String, allow_blank: false, desc: 'The title of a snippet'
         optional :description, type: String, desc: 'The description of a snippet'
         optional :visibility, type: String,
-          values: Gitlab::VisibilityLevel.string_values,
-          default: 'internal',
-          desc: 'The visibility of the snippet'
+                              values: Gitlab::VisibilityLevel.string_values,
+                              default: 'internal',
+                              desc: 'The visibility of the snippet'
 
         use :create_file_params
       end
@@ -136,7 +136,7 @@ module API
 
         authorize! :create_snippet
 
-        attrs = process_create_params(declared_params(include_missing: false)).merge(organization_id: Current.organization_id)
+        attrs = process_create_params(declared_params(include_missing: false))
         service_response = ::Snippets::CreateService.new(project: nil, current_user: current_user, params: attrs).execute
         snippet = service_response.payload[:snippet]
 
@@ -166,8 +166,8 @@ module API
         optional :file_name, type: String, desc: 'The name of a snippet file'
         optional :title, type: String, allow_blank: false, desc: 'The title of a snippet'
         optional :visibility, type: String,
-          values: Gitlab::VisibilityLevel.string_values,
-          desc: 'The visibility of the snippet'
+                              values: Gitlab::VisibilityLevel.string_values,
+                              desc: 'The visibility of the snippet'
 
         use :update_file_params
         use :minimum_update_params

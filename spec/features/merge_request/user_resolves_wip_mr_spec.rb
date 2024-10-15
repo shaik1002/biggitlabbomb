@@ -33,7 +33,7 @@ RSpec.describe 'Merge request > User resolves Draft', :js, feature_category: :co
     let(:feature_flags_state) { true }
 
     before do
-      stub_feature_flags(merge_when_checks_pass: feature_flags_state)
+      stub_feature_flags(merge_when_checks_pass: feature_flags_state, merge_blocked_component: feature_flags_state)
 
       create(:ci_build, pipeline: pipeline)
 
@@ -43,8 +43,17 @@ RSpec.describe 'Merge request > User resolves Draft', :js, feature_category: :co
     end
 
     it 'retains merge request data after clicking Resolve WIP status' do
+      # rubocop:disable RSpec/AvoidConditionalStatements -- remove when Auto merge goes to Foss
+      # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/146730
+      expected_message = if Gitlab.ee?
+                           "Set to auto-merge"
+                         else
+                           "Merge blocked:"
+                         end
+      # rubocop:enable RSpec/AvoidConditionalStatements
+
       expect(page.find('.ci-widget-content')).to have_content("Pipeline ##{pipeline.id}")
-      expect(page).to have_content "Set to auto-merge"
+      expect(page).to have_content expected_message
 
       page.within('.mr-state-widget') do
         click_button('Mark as ready')
@@ -64,8 +73,7 @@ RSpec.describe 'Merge request > User resolves Draft', :js, feature_category: :co
 
       it 'retains merge request data after clicking Resolve WIP status' do
         expect(page.find('.ci-widget-content')).to have_content("Pipeline ##{pipeline.id}")
-        expect(page).to have_content "Merge blocked: 1 check failed"
-        expect(page).to have_content "Merge request must not be draft"
+        expect(page).to have_content "Merge blocked: Select Mark as ready to remove it from Draft status."
 
         page.within('.mr-state-widget') do
           click_button('Mark as ready')

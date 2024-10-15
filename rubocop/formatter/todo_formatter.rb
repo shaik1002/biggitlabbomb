@@ -23,7 +23,8 @@ module RuboCop
       # with offenses.
       #
       # See https://gitlab.com/gitlab-org/gitlab/-/issues/415330#caveats
-      RETAIN_EXCLUSIONS = %r{\.haml$}
+      # on why the entry must end with `.haml.rb`.
+      RETAIN_EXCLUSIONS = %r{\.haml\.rb$}
 
       class << self
         attr_accessor :base_directory
@@ -91,8 +92,7 @@ module RuboCop
       def create_todos_retaining_exclusions(inspected_cop_config)
         inspected_cop_config.each do |cop_name, config|
           todo = @todos[cop_name]
-          excluded_files = config['Exclude'] || []
-          todo.add_files(excluded_files.grep(RETAIN_EXCLUSIONS))
+          todo.add_files(config.fetch('Exclude', []).grep(RETAIN_EXCLUSIONS))
         end
       end
 

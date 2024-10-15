@@ -56,7 +56,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable, feature_category: :pipeli
       end
 
       context 'when job name is empty' do
-        let(:entry) { node_class.new(config, name: :"") }
+        let(:entry) { node_class.new(config, name: ''.to_sym) }
 
         it 'reports error' do
           expect(entry.errors).to include "job name can't be blank"
@@ -130,20 +130,6 @@ RSpec.describe Gitlab::Ci::Config::Entry::Processable, feature_category: :pipeli
       it 'returns is invalid' do
         expect(entry).not_to be_valid
         expect(entry.errors).to include(/these keys cannot be used together: script, trigger/)
-      end
-    end
-
-    context 'when run: and trigger: are used together' do
-      let(:config) do
-        {
-          run: [{ name: 'step1', step: 'some reference' }],
-          trigger: 'test-group/test-project'
-        }
-      end
-
-      it 'is invalid' do
-        expect(entry).not_to be_valid
-        expect(entry.errors).to include(/these keys cannot be used together: run, trigger/)
       end
     end
 

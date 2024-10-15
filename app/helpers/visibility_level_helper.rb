@@ -53,24 +53,6 @@ module VisibilityLevelHelper
     !form_model.visibility_level_allowed?(level)
   end
 
-  def disallowed_visibility_level_by_parent?(form_model, level)
-    return false unless form_model.respond_to?(:visibility_level_allowed_by_parent?)
-
-    !form_model.visibility_level_allowed_by_parent?(level)
-  end
-
-  def disallowed_visibility_level_by_projects?(form_model, level)
-    return false unless form_model.respond_to?(:visibility_level_allowed_by_projects?)
-
-    !form_model.visibility_level_allowed_by_projects?(level)
-  end
-
-  def disallowed_visibility_level_by_sub_groups?(form_model, level)
-    return false unless form_model.respond_to?(:visibility_level_allowed_by_sub_groups?)
-
-    !form_model.visibility_level_allowed_by_sub_groups?(level)
-  end
-
   # Visibility level can be restricted in two ways:
   #
   # 1. The group permissions (e.g. a subgroup is private, which requires
@@ -87,24 +69,11 @@ module VisibilityLevelHelper
     [requested_level, max_allowed_visibility_level(form_model)].min
   end
 
-  def all_visibility_levels
-    Gitlab::VisibilityLevel.values
-  end
-
   def available_visibility_levels(form_model)
     Gitlab::VisibilityLevel.values.reject do |level|
       disallowed_visibility_level?(form_model, level) ||
-        restricted_visibility_levels.include?(level)
+      restricted_visibility_levels.include?(level)
     end
-  end
-
-  def disabled_visibility_level?(form_model, level)
-    disallowed_visibility_level?(form_model, level) ||
-      restricted_visibility_level?(level)
-  end
-
-  def restricted_visibility_level?(level)
-    restricted_visibility_levels.include?(level)
   end
 
   def snippets_selected_visibility_level(visibility_levels, selected)
@@ -175,7 +144,7 @@ module VisibilityLevelHelper
           'Public groups and projects will be indexed by search engines. ' \
           'Read more about %{free_user_limit_doc_link_start}free user limits%{link_end}, ' \
           'or %{group_billings_link_start}upgrade to a paid tier%{link_end}.'),
-        free_user_limit_doc_link_start: "<a href='#{help_page_path('user/free_user_limit.md')}' target='_blank' rel='noopener noreferrer'>".html_safe,
+        free_user_limit_doc_link_start: "<a href='#{help_page_path('user/free_user_limit')}' target='_blank' rel='noopener noreferrer'>".html_safe,
         group_billings_link_start: "<a href='#{group_billings_path(group)}' target='_blank' rel='noopener noreferrer'>".html_safe,
         link_end: "</a>".html_safe
       ).html_safe

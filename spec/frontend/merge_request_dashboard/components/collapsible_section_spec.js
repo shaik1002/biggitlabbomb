@@ -23,20 +23,14 @@ describe('Merge request dashboard collapsible section', () => {
     expect(wrapper.element).toMatchSnapshot();
   });
 
-  it('collapses content when count is 0', () => {
+  it('collapses by default', () => {
     createComponent(0);
 
     expect(wrapper.findByTestId('section-content').exists()).toBe(false);
   });
 
   it('expands collapsed content', async () => {
-    createComponent(1);
-
-    wrapper.findByTestId('section-toggle-button').vm.$emit('click');
-
-    await nextTick();
-
-    expect(wrapper.findByTestId('section-content').exists()).toBe(false);
+    createComponent(0);
 
     wrapper.findByTestId('section-toggle-button').vm.$emit('click');
 

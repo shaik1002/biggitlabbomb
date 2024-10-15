@@ -33,7 +33,6 @@ module Gitlab
           'title' => title,
           'commit' => {
             'reference' => commit.to_reference(full: true),
-            'web_url' => Gitlab::UrlBuilder.build(commit),
             'trailers' => commit.trailers
           }
         }
@@ -48,8 +47,7 @@ module Gitlab
 
         if merge_request
           entry['merge_request'] = {
-            'reference' => merge_request.to_reference(full: true),
-            'web_url' => Gitlab::UrlBuilder.build(merge_request)
+            'reference' => merge_request.to_reference(full: true)
           }
         end
 

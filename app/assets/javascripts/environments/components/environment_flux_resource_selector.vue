@@ -36,9 +36,6 @@ export default {
     kustomizationsGroupLabel: s__('Environments|Kustomizations'),
     helmReleasesGroupLabel: s__('Environments|HelmReleases'),
     fluxResourcesHelpText: s__('Environments|Select Flux resource'),
-    fluxResourceSelectorDescription: s__(
-      'Environments|If a Flux resource is specified, its reconciliation status is reflected in GitLab.',
-    ),
     errorTitle: s__(
       'Environments|Unable to access the following resources from this environment. Check your authorization on the following and try again:',
     ),
@@ -52,7 +49,6 @@ export default {
     };
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     fluxKustomizations: {
       query: fluxKustomizationsQuery,
       variables() {
@@ -76,7 +72,6 @@ export default {
         }
       },
     },
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     fluxHelmReleases: {
       query: fluxHelmReleasesQuery,
       variables() {
@@ -188,11 +183,7 @@ export default {
 };
 </script>
 <template>
-  <gl-form-group
-    :description="$options.i18n.fluxResourceSelectorDescription"
-    :label="$options.i18n.fluxResourceLabel"
-    label-for="environment_flux_resource"
-  >
+  <gl-form-group :label="$options.i18n.fluxResourceLabel" label-for="environment_flux_resource">
     <gl-alert v-if="kubernetesErrors.length" variant="warning" :dismissible="false" class="gl-mb-5">
       {{ $options.i18n.errorTitle }}
       <ul class="gl-mb-0 gl-pl-6">

@@ -205,9 +205,9 @@ export default {
     data-testid="user-popover"
   >
     <template v-if="userCannotMerge" #title>
-      <div class="gl-flex gl-items-center gl-pb-3" data-testid="cannot-merge">
+      <div class="gl-pb-3 gl-display-flex gl-align-items-center" data-testid="cannot-merge">
         <gl-icon name="warning-solid" class="gl-mr-2 gl-text-orange-400" />
-        <span class="gl-font-normal">{{ __('Cannot merge') }}</span>
+        <span class="gl-font-weight-normal">{{ __('Cannot merge') }}</span>
       </div>
     </template>
     <div class="gl-mb-3">
@@ -232,7 +232,7 @@ export default {
         <template v-else>
           <gl-button
             v-if="shouldRenderToggleFollowButton"
-            class="gl-mt-3 gl-self-start"
+            class="gl-mt-3 gl-align-self-start"
             :variant="toggleFollowButtonVariant"
             :loading="toggleFollowLoading"
             size="small"
@@ -245,17 +245,17 @@ export default {
         <template #meta>
           <span
             v-if="hasPronouns"
-            class="gl-p-1 gl-text-sm gl-font-normal gl-text-gray-500"
+            class="gl-text-gray-500 gl-font-sm gl-font-weight-normal gl-p-1"
             data-testid="user-popover-pronouns"
             >({{ user.pronouns }})</span
           >
-          <gl-badge v-if="isBusy" variant="warning" class="gl-ml-1">
+          <gl-badge v-if="isBusy" size="sm" variant="warning" class="gl-ml-1">
             {{ $options.I18N_USER_BUSY }}
           </gl-badge>
         </template>
       </gl-avatar-labeled>
     </div>
-    <div class="gl-mt-2 gl-w-full gl-break-anywhere">
+    <div class="gl-mt-2 gl-w-full gl-word-break-word">
       <template v-if="userIsLoading">
         <gl-skeleton-loader
           :lines="$options.maxSkeletonLines"
@@ -267,28 +267,28 @@ export default {
       <template v-else>
         <template v-if="!isBlocked">
           <div class="gl-text-gray-500">
-            <div v-if="user.email" class="gl-mb-2 gl-flex">
-              <gl-icon name="mail" class="gl-shrink-0" />
+            <div v-if="user.email" class="gl-display-flex gl-mb-2">
+              <gl-icon name="mail" class="gl-flex-shrink-0" />
               <span ref="email" class="gl-ml-2">{{ user.email }}</span>
             </div>
-            <div v-if="user.bio" class="gl-mb-2 gl-flex">
-              <gl-icon name="profile" class="gl-shrink-0" />
+            <div v-if="user.bio" class="gl-display-flex gl-mb-2">
+              <gl-icon name="profile" class="gl-flex-shrink-0" />
               <span ref="bio" class="gl-ml-2">{{ user.bio }}</span>
             </div>
-            <div v-if="user.workInformation" class="gl-mb-2 gl-flex">
-              <gl-icon name="work" class="gl-shrink-0" />
+            <div v-if="user.workInformation" class="gl-display-flex gl-mb-2">
+              <gl-icon name="work" class="gl-flex-shrink-0" />
               <span ref="workInformation" class="gl-ml-2">{{ user.workInformation }}</span>
             </div>
-            <div v-if="user.location" class="gl-mb-2 gl-flex">
-              <gl-icon name="location" class="gl-shrink-0" />
+            <div v-if="user.location" class="gl-display-flex gl-mb-2">
+              <gl-icon name="location" class="gl-flex-shrink-0" />
               <span class="gl-ml-2">{{ user.location }}</span>
             </div>
             <div
               v-if="user.localTime && !user.bot"
-              class="gl-mb-2 gl-flex"
+              class="gl-display-flex gl-mb-2"
               data-testid="user-popover-local-time"
             >
-              <gl-icon name="clock" class="gl-shrink-0" />
+              <gl-icon name="clock" class="gl-flex-shrink-0" />
               <span class="gl-ml-2">{{ user.localTime }}</span>
             </div>
           </div>

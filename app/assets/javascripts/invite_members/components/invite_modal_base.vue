@@ -1,16 +1,22 @@
 <script>
-import { GlFormGroup, GlModal, GlDatepicker, GlLink, GlSprintf, GlButton } from '@gitlab/ui';
+import {
+  GlCollapsibleListbox,
+  GlFormGroup,
+  GlModal,
+  GlDatepicker,
+  GlLink,
+  GlSprintf,
+  GlButton,
+} from '@gitlab/ui';
 
 import Tracking from '~/tracking';
 import { sprintf } from '~/locale';
 import ContentTransition from '~/vue_shared/components/content_transition.vue';
 import { initialSelectedRole, roleDropdownItems } from 'ee_else_ce/members/utils';
-import RoleSelector from '~/members/components/role_selector.vue';
 import {
   ACCESS_LEVEL,
   ACCESS_EXPIRE_DATE,
   READ_MORE_TEXT,
-  READ_MORE_ACCESS_EXPIRATION_TEXT,
   INVITE_BUTTON_TEXT,
   INVITE_BUTTON_TEXT_DISABLED,
   CANCEL_BUTTON_TEXT,
@@ -31,7 +37,7 @@ const DEFAULT_SLOTS = [
 
 export default {
   components: {
-    RoleSelector,
+    GlCollapsibleListbox,
     GlFormGroup,
     GlDatepicker,
     GlLink,
@@ -39,6 +45,8 @@ export default {
     GlSprintf,
     GlButton,
     ContentTransition,
+    ManageRolesDropdownFooter: () =>
+      import('ee_component/members/components/action_dropdowns/manage_roles_dropdown_footer.vue'),
   },
   mixins: [Tracking.mixin()],
   inheritAttrs: false,
@@ -69,10 +77,6 @@ export default {
       default: null,
     },
     helpLink: {
-      type: String,
-      required: true,
-    },
-    accessExpirationHelpLink: {
       type: String,
       required: true,
     },
@@ -143,13 +147,13 @@ export default {
   data() {
     // Be sure to check out reset!
     return {
-      selectedRole: null,
+      selectedAccessLevel: null,
       selectedDate: undefined,
       minDate: new Date(),
     };
   },
   computed: {
-    roleDropdownItems() {
+    accessLevelOptions() {
       return roleDropdownItems(this.accessLevels);
     },
     introText() {
@@ -198,16 +202,15 @@ export default {
     },
   },
   watch: {
-    roleDropdownItems: {
+    accessLevelOptions: {
       immediate: true,
-      handler() {
-        this.resetSelectedAccessLevel();
-      },
+      handler: 'resetSelectedAccessLevel',
     },
   },
   methods: {
     onReset() {
-      // This component isn't necessarily disposed, so we might need to reset its state.
+      // This component isn't necessarily disposed,
+      // so we might need to reset it's state.
       this.resetSelectedAccessLevel();
       this.selectedDate = undefined;
 
@@ -229,10 +232,16 @@ export default {
 
       this.$emit('cancel');
     },
-    onSubmit() {
+    onSubmit(e) {
+      // We never want to hide when submitting
+      e.preventDefault();
+
+      const { accessLevel, memberRoleId } = this.accessLevelOptions.flatten.find(
+        (item) => item.value === this.selectedAccessLevel,
+      );
       this.$emit('submit', {
-        accessLevel: this.selectedRole.accessLevel,
-        memberRoleId: this.selectedRole.memberRoleId,
+        accessLevel,
+        memberRoleId,
         expiresAt: this.selectedDate,
       });
     },
@@ -244,14 +253,15 @@ export default {
         integerValue: this.defaultAccessLevel,
         memberRoleId: this.defaultMemberRoleId,
       };
-      this.selectedRole = initialSelectedRole(this.roleDropdownItems.flatten, { accessLevel });
+      this.selectedAccessLevel = initialSelectedRole(this.accessLevelOptions.flatten, {
+        accessLevel,
+      });
     },
   },
   HEADER_CLOSE_LABEL,
   ACCESS_EXPIRE_DATE,
   ACCESS_LEVEL,
   READ_MORE_TEXT,
-  READ_MORE_ACCESS_EXPIRATION_TEXT,
   INVITE_BUTTON_TEXT,
   CANCEL_BUTTON_TEXT,
   DEFAULT_SLOT,
@@ -273,13 +283,13 @@ export default {
     @hidden="onReset"
   >
     <content-transition
-      class="gl-grid"
+      class="gl-display-grid"
       transition-name="invite-modal-transition"
       :slots="contentSlots"
       :current-slot="currentSlot"
     >
       <template #[$options.DEFAULT_SLOT]>
-        <div class="gl-flex" data-testid="modal-base-intro-text">
+        <div class="gl-display-flex" data-testid="modal-base-intro-text">
           <slot name="intro-text-before"></slot>
           <p>
             <gl-sprintf :message="introText">
@@ -308,53 +318,52 @@ export default {
         <slot name="after-members-input"></slot>
 
         <gl-form-group
-          class="gl-w-full sm:gl-w-1/2"
+          class="gl-sm-w-half gl-w-full"
           :label="$options.ACCESS_LEVEL"
           :label-for="dropdownId"
         >
           <template #description>
             <gl-sprintf :message="$options.READ_MORE_TEXT">
               <template #link="{ content }">
-                <gl-link :href="helpLink" target="_blank" data-testid="invite-modal-help-link">{{
-                  content
-                }}</gl-link>
+                <gl-link :href="helpLink" target="_blank">{{ content }}</gl-link>
               </template>
             </gl-sprintf>
           </template>
-
-          <role-selector
-            v-model="selectedRole"
+          <gl-collapsible-listbox
+            :id="dropdownId"
+            v-model="selectedAccessLevel"
             data-testid="access-level-dropdown"
-            :roles="roleDropdownItems"
+            :items="accessLevelOptions.formatted"
             :loading="isLoadingRoles"
-            header-text=""
-          />
+            block
+          >
+            <template #list-item="{ item }">
+              <div :class="{ 'gl-font-weight-bold': item.memberRoleId }">{{ item.text }}</div>
+              <div
+                v-if="item.description"
+                class="gl-text-gray-700 gl-font-sm gl-pt-1 gl-line-clamp-2"
+              >
+                {{ item.description }}
+              </div>
+            </template>
+            <template #footer>
+              <manage-roles-dropdown-footer />
+            </template>
+          </gl-collapsible-listbox>
         </gl-form-group>
 
         <gl-form-group
-          class="gl-w-full sm:gl-w-1/2"
+          class="gl-sm-w-half gl-w-full"
           :label="$options.ACCESS_EXPIRE_DATE"
           :label-for="datepickerId"
         >
           <gl-datepicker
             v-model="selectedDate"
             :input-id="datepickerId"
-            class="!gl-block"
+            class="gl-display-block!"
             :min-date="minDate"
             :target="null"
           />
-          <template #description>
-            <gl-sprintf :message="$options.READ_MORE_ACCESS_EXPIRATION_TEXT">
-              <template #link="{ content }">
-                <gl-link
-                  :href="accessExpirationHelpLink"
-                  target="_blank"
-                  data-testid="invite-modal-access-expiration-link"
-                  >{{ content }}</gl-link
-                >
-              </template>
-            </gl-sprintf>
-          </template>
         </gl-form-group>
       </template>
 
@@ -364,18 +373,20 @@ export default {
     </content-transition>
 
     <template #modal-footer>
-      <div class="gl-m-0 gl-flex gl-w-full gl-flex-col sm:gl-flex-row-reverse">
+      <div
+        class="gl-m-0 gl-w-full gl-display-flex gl-flex-direction-column gl-sm-flex-direction-row-reverse"
+      >
         <gl-button
-          class="gl-w-full sm:!gl-ml-3 sm:gl-w-auto"
+          class="gl-w-full gl-sm-w-auto gl-sm-ml-3!"
           data-testid="invite-modal-submit"
           v-bind="actionPrimary.attributes"
-          @click.prevent="onSubmit"
+          @click="onSubmit"
         >
           {{ actionPrimary.text }}
         </gl-button>
 
         <gl-button
-          class="gl-w-full sm:gl-w-auto"
+          class="gl-w-full gl-sm-w-auto"
           data-testid="invite-modal-cancel"
           v-bind="actionCancel.attributes"
           @click="onCancel"

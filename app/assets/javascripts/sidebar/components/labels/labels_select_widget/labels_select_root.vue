@@ -182,7 +182,7 @@ export default {
         return issuableLabelsQueries[this.issuableType].issuableQuery;
       },
       skip() {
-        return !isDropdownVariantSidebar(this.variant) || !this.iid;
+        return !isDropdownVariantSidebar(this.variant);
       },
       variables() {
         const queryVariables = {

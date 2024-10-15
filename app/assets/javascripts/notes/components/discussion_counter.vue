@@ -119,10 +119,10 @@ export default {
     v-if="resolvableDiscussionsCount > 0"
     id="discussionCounter"
     ref="discussionCounter"
-    class="discussions-counter gl-flex"
+    class="gl-display-flex discussions-counter"
   >
     <div
-      class="gl-flex gl-min-h-7 gl-items-center gl-rounded-base gl-pl-4"
+      class="gl-display-flex gl-align-items-center gl-pl-4 gl-rounded-base gl-min-h-7"
       :class="{
         'gl-bg-orange-50': blocksMerge && !allResolved,
         'gl-bg-gray-50': !blocksMerge || allResolved,
@@ -138,12 +138,12 @@ export default {
           icon="ellipsis_v"
           size="small"
           category="tertiary"
-          placement="bottom-end"
+          placement="right"
           no-caret
           :title="__('Thread options')"
           :aria-label="__('Thread options')"
           toggle-class="btn-icon"
-          class="gl-ml-3 gl-h-full !gl-rounded-base !gl-pt-0"
+          class="gl-rounded-base! gl-pt-0! gl-h-full gl-ml-3"
           :items="threadOptions"
         />
       </template>
@@ -154,7 +154,7 @@ export default {
             v-gl-tooltip.html="previousUnresolvedDiscussionTooltip"
             :aria-label="previousUnresolvedDiscussionTitle"
             :aria-keyshortcuts="previousUnresolvedDiscussionShortcutKey"
-            class="discussion-previous-btn !gl-rounded-base !gl-px-2"
+            class="discussion-previous-btn gl-rounded-base! gl-px-2!"
             data-track-action="click_button"
             data-track-label="mr_previous_unresolved_thread"
             data-track-property="click_previous_unresolved_thread_top"
@@ -166,7 +166,7 @@ export default {
             v-gl-tooltip.html="nextUnresolvedDiscussionTooltip"
             :aria-label="nextUnresolvedDiscussionTitle"
             :aria-keyshortcuts="nextUnresolvedDiscussionShortcutKey"
-            class="discussion-next-btn !gl-rounded-base !gl-px-2"
+            class="discussion-next-btn gl-rounded-base! gl-px-2!"
             data-track-action="click_button"
             data-track-label="mr_next_unresolved_thread"
             data-track-property="click_next_unresolved_thread_top"
@@ -179,12 +179,12 @@ export default {
             icon="ellipsis_v"
             size="small"
             category="tertiary"
-            placement="bottom-end"
+            placement="right"
             no-caret
             :title="__('Thread options')"
             :aria-label="__('Thread options')"
             toggle-class="btn-icon"
-            class="!gl-rounded-base !gl-pt-0"
+            class="gl-rounded-base! gl-pt-0!"
             :items="threadOptions"
           />
         </gl-button-group>

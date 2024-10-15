@@ -165,9 +165,9 @@ When using default setup, minimum configuration requires:
 - `CONSUL_DATABASE_PASSWORD`. Password for the database user.
 - `CONSUL_PASSWORD_HASH`. This is a hash generated out of Consul username/password pair. It can be generated with:
 
-  ```shell
-  sudo gitlab-ctl pg-password-md5 CONSUL_USERNAME
-  ```
+   ```shell
+   sudo gitlab-ctl pg-password-md5 CONSUL_USERNAME
+   ```
 
 - `CONSUL_SERVER_NODES`. The IP addresses or DNS records of the Consul server nodes.
 
@@ -895,7 +895,7 @@ Stopping or restarting the Patroni service on the leader node triggers an automa
 WARNING:
 In GitLab 16.5 and earlier, PgBouncer nodes do not automatically fail over alongside
 Patroni nodes. PgBouncer services
-[must be restarted manually](../../administration/postgresql/replication_and_failover_troubleshooting.md#pgbouncer-error-error-pgbouncer-cannot-connect-to-server)
+[must be restarted manually](../../administration/postgresql/replication_and_failover_troubleshooting.md#pgbouncer-errors-error-running-command-gitlabctlerrorsexecutionerror-and-error-database-gitlabhq_production-is-not-paused)
 for a successful switchover.
 
 While Patroni supports automatic failover, you also have the ability to perform

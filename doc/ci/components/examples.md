@@ -1,14 +1,10 @@
 ---
 stage: Verify
 group: Pipeline Authoring
-info: This page is maintained by Developer Relations, author @dnsmichi, see https://handbook.gitlab.com/handbook/marketing/developer-relations/developer-advocacy/content/#maintained-documentation
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
 # CI/CD component examples
-
-DETAILS:
-**Tier:** Free, Premium, Ultimate
-**Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
 ## Test a component
 
@@ -78,7 +74,7 @@ The following "hello world" example for the Rust programming language uses the `
    ```yaml
    include:
      # include the component located in the current project from the current SHA
-     - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/build@$CI_COMMIT_SHA
+     - component: gitlab.com/$CI_PROJECT_PATH/build@$CI_COMMIT_SHA
        inputs:
          stage: build
 
@@ -111,10 +107,10 @@ The following "hello world" example for the Rust programming language uses the `
    ```yaml
    include:
      # include the component located in the current project from the current SHA
-     - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/build@$CI_COMMIT_SHA
+     - component: gitlab.com/$CI_PROJECT_PATH/build@$CI_COMMIT_SHA
        inputs:
          stage: build
-     - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/test@$CI_COMMIT_SHA
+     - component: gitlab.com/$CI_PROJECT_PATH/test@$CI_COMMIT_SHA
        inputs:
          stage: test
 
@@ -181,7 +177,7 @@ The CI/CD template migration involves the following steps:
    - The name of the template should follow the `go` command, for example `format.yml`, `build.yml`, and `test.yml`.
    - Create a new project, initialize a Git repository, add/commit all changes, set a remote origin and push.
      Modify the URL for your CI/CD component project path.
-   - Create additional files as outlined in the guidance to [write a component](index.md#write-a-component):
+   - Create additional files to follow [best practice](index.md#best-practices):
      `README.md`, `LICENSE.md`, `.gitlab-ci.yml`, `.gitignore`. The following shell commands
      initialize the Go component structure:
 
@@ -285,12 +281,12 @@ The CI/CD template migration involves the following steps:
      stages: [format, build, test]
 
      include:
-       - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/format@$CI_COMMIT_SHA
-       - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/build@$CI_COMMIT_SHA
-       - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/build@$CI_COMMIT_SHA
+       - component: example.gitlab.com/$CI_PROJECT_PATH/format@$CI_COMMIT_SHA
+       - component: example.gitlab.com/$CI_PROJECT_PATH/build@$CI_COMMIT_SHA
+       - component: example.gitlab.com/$CI_PROJECT_PATH/build@$CI_COMMIT_SHA
          inputs:
            golang_version: "1.21"
-       - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/test@$CI_COMMIT_SHA
+       - component: example.gitlab.com/$CI_PROJECT_PATH/test@$CI_COMMIT_SHA
          inputs:
            golang_version: latest
      ```
@@ -340,7 +336,7 @@ Follow the remaining steps in the [converting a CI/CD template into a component]
 section to complete the migration:
 
 1. Commit and push the changes, and verify the CI/CD pipeline results.
-1. Follow the guidance on [writing a component](index.md#write-a-component) to update the `README.md` and `LICENSE.md` files.
+1. Follow [documentation best practices](index.md#best-practices) to update the `README.md` and `LICENSE.md` files.
 1. [Release the component](index.md#publish-a-new-release) and verify it in the CI/CD catalog.
 1. Add the CI/CD component into your staging/production environment.
 

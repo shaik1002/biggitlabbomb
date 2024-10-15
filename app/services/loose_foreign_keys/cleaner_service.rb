@@ -6,12 +6,11 @@ module LooseForeignKeys
     DELETE_LIMIT = 1000
     UPDATE_LIMIT = 500
 
-    def initialize(loose_foreign_key_definition:, connection:, deleted_parent_records:, logger: Sidekiq.logger, with_skip_locked: false)
+    def initialize(loose_foreign_key_definition:, connection:, deleted_parent_records:, with_skip_locked: false)
       @loose_foreign_key_definition = loose_foreign_key_definition
       @connection = connection
       @deleted_parent_records = deleted_parent_records
       @with_skip_locked = with_skip_locked
-      @logger = logger
     end
 
     def execute
@@ -28,29 +27,21 @@ module LooseForeignKeys
       loose_foreign_key_definition.on_delete == :async_nullify
     end
 
-    def update_column_to?
-      loose_foreign_key_definition.on_delete == :update_column_to
-    end
-
     private
 
-    attr_reader :loose_foreign_key_definition, :connection, :deleted_parent_records, :with_skip_locked, :logger
+    attr_reader :loose_foreign_key_definition, :connection, :deleted_parent_records, :with_skip_locked
 
     def build_query
       query = if async_delete?
                 delete_query
               elsif async_nullify?
                 update_query
-              elsif update_column_to?
-                update_target_column_query
               else
-                logger.error("Invalid on_delete argument: #{loose_foreign_key_definition.on_delete}")
-                return ""
+                raise "Invalid on_delete argument: #{loose_foreign_key_definition.on_delete}"
               end
 
       unless query.include?(%{"#{loose_foreign_key_definition.column}" IN (})
-        logger.error("FATAL: foreign key condition is missing from the generated query: #{query}")
-        return ""
+        raise("FATAL: foreign key condition is missing from the generated query: #{query}")
       end
 
       query
@@ -81,19 +72,6 @@ module LooseForeignKeys
       query.set([[arel_table[loose_foreign_key_definition.column], nil]])
 
       add_in_query_with_limit(query, UPDATE_LIMIT)
-    end
-
-    def update_target_column_query
-      column, value = loose_foreign_key_definition.options.values_at(:target_column, :target_value)
-
-      query = Arel::UpdateManager.new
-      query.table(quoted_table_name)
-      query.set([[arel_table[column], value]])
-
-      columns = Arel::Nodes::Grouping.new(primary_keys)
-      in_query = in_query_with_limit(UPDATE_LIMIT)
-      in_query.where(arel_table[column].not_eq(value))
-      query.where(columns.in(in_query)).to_sql
     end
 
     # IN query with one or composite primary key

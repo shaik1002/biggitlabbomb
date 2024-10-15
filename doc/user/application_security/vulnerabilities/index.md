@@ -19,7 +19,6 @@ including:
 - Available actions
 - Linked issues
 - Actions log
-- Filename and line number of the vulnerability (if available)
 
 If the scanner determined the vulnerability to be a false positive, an alert message is included at
 the top of the vulnerability's page.
@@ -32,12 +31,12 @@ the Vulnerability Report's [Activity filter](../vulnerability_report/index.md#ac
 ## Explaining a vulnerability
 
 DETAILS:
-**Tier: GitLab.com and Self-managed:** For a limited time, Ultimate. On October 17, 2024, Ultimate with [GitLab Duo Enterprise](https://about.gitlab.com/gitlab-duo/#pricing). **GitLab Dedicated:** GitLab Duo Enterprise.
-**Offering:** GitLab.com, Self-managed, GitLab Dedicated
+**Tier:** Ultimate
+**Offering:** GitLab.com
+**Status:** Beta
 
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/10368) in GitLab 16.0 as an [experiment](../../../policy/experiment-beta-support.md#experiment) on GitLab.com.
-> - Promoted to [beta](../../../policy/experiment-beta-support.md#beta) status in GitLab 16.2.
-> - [Generally available](https://gitlab.com/groups/gitlab-org/-/epics/10642) in GitLab 17.2.
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/10368) in GitLab 16.0 as an [Experiment](../../../policy/experiment-beta-support.md#experiment) on GitLab.com.
+> - Promoted to [Beta](../../../policy/experiment-beta-support.md#beta) status in GitLab 16.2.
 
 GitLab can help you with a vulnerability by using a large language model to:
 
@@ -45,200 +44,93 @@ GitLab can help you with a vulnerability by using a large language model to:
 - Help developers and security analysts to understand the vulnerability, how it could be exploited, and how to fix it.
 - Provide a suggested mitigation.
 
-### Vulnerability Explanation
+### Vulnerability explanation
 
-Explain a vulnerability with GitLab Duo Vulnerability Explanation. Use the explanation to better
+Explain a vulnerability with GitLab Duo Vulnerability explanation. Use the explanation to better
 understand a vulnerability and its possible mitigation.
 
 Prerequisites:
 
 - You must have the GitLab Ultimate subscription tier.
-- Have a paid GitLab Duo Enterprise seat.
-- [GitLab Duo](../../ai_features_enable.md) must be enabled for the group or instance.
 - You must be a member of the project.
-- The vulnerability must be from a SAST scanner.
+- The vulnerability must be a SAST finding.
+
+Learn more about [how to enable all GitLab Duo features](../../ai_features_enable.md).
 
 To explain the vulnerability:
 
 1. On the left sidebar, select **Search or go to** and find your project.
-1. Select **Secure > Vulnerability report**.
-1. Optional. To remove the default filters, select **Clear** (**{clear}**).
-1. Above the list of vulnerabilities, select the filter bar.
-1. In the dropdown list that appears, select **Tool**, then select all the values in the **SAST** category.
-1. Select outside the filter field. The vulnerability severity totals and list of matching vulnerabilities are updated.
+1. Select **Security and Compliance > Vulnerability report**.
+1. In the **Tool** dropdown list, select **SAST**.
 1. Select the SAST vulnerability you want explained.
-1. Do one of the following:
-
-   - Select the text below the vulnerability description that reads _You can also use AI by asking GitLab Duo Chat to explain this vulnerability and a suggested fix._
-   - In the upper right, from the **Resolve with merge request** dropdown list, select **Explain vulnerability**, then select **Explain vulnerability**.
-   - Open GitLab Duo Chat and use the [explain a vulnerability](../../../user/gitlab_duo_chat/examples.md#explain-a-vulnerability) command by typing `/vulnerability_explain`.
+1. At the bottom of the vulnerability's page, select **Try it out**.
 
 The response is shown on the right side of the page.
 
-On GitLab.com this feature is available. By default, it is powered by Anthropic's [`claude-3-haiku`](https://docs.anthropic.com/en/docs/about-claude/models#claude-3-a-new-generation-of-ai)
-model. We cannot guarantee that the large language model produces results that are correct. Use the
+![Explain this vulnerability](img/explain_this_vulnerability_beta_v16_3.png)
+
+On GitLab.com this feature is available. By default, it is powered by Google's `text-bison-001`
+model. In the event of degraded performance with that model, the feature instead uses Anthropic's
+`claude` model.
+
+We cannot guarantee that the large language model produces results that are correct. Use the
 explanation with caution.
 
-### Data shared with third-party AI APIs for Vulnerability Explanation
+### Data shared with third-party AI APIs
 
 The following data is shared with third-party AI APIs:
 
 - Vulnerability title (which might contain the filename, depending on which scanner is used).
 - Vulnerability identifiers.
+- Code block, but only if the "Send code with prompt" checkbox is selected (single and multi-line as instructed by the vulnerability
+  record).
 - Filename.
 
-## Vulnerability Resolution
+## Vulnerability resolution
 
 DETAILS:
-**Tier: GitLab.com and Self-managed:** For a limited time, Ultimate. On October 17, 2024, Ultimate with [GitLab Duo Enterprise](https://about.gitlab.com/gitlab-duo/#pricing). **GitLab Dedicated:** GitLab Duo Enterprise.
-**Offering:** GitLab.com, Self-managed, GitLab Dedicated
-**Status:** Beta
+**Tier:** Ultimate
+**Offering:** GitLab.com
+**Status:** Experiment
 
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/10779) in GitLab 16.7 as an [experiment](../../../policy/experiment-beta-support.md#experiment) on GitLab.com.
-> - Changed to beta in GitLab 17.3.
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/10779) in GitLab 16.7 as an [Experiment](../../../policy/experiment-beta-support.md#experiment) on GitLab.com.
 
 Use GitLab Duo Vulnerability resolution to automatically create a merge request that
-resolves the vulnerability. By default, it is powered by Anthropic's [`claude-3.5-sonnet`](https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-3-5-sonnet) model.
+resolves the vulnerability.
 
-We can't guarantee that the large language model produces correct results.
-You should always review the proposed change before merging it. When reviewing, check that:
+On GitLab.com this feature is available. By default, it is powered by Google's `code-bison-001`
+model.
 
-- Your application's existing functionality is preserved.
-- The vulnerability is resolved in accordance with your organization's standards.
+We cannot guarantee that the large language model produces results that are correct. Use the
+explanation with caution.
 
 Prerequisites:
 
-- You must have the GitLab Ultimate subscription tier and GitLab Duo Enterprise.
+- You must have the GitLab Ultimate subscription tier.
 - You must be a member of the project.
-- The vulnerability must be a SAST finding from a supported analyzer:
-  - Any [GitLab-supported analyzer](../sast/analyzers.md).
-  - A properly integrated [third-party SAST scanner](../../../development/integrations/secure.md) that reports the [vulnerability location](../../../development/integrations/secure.md#sast) and a [CWE Identifier](../../../development/integrations/secure.md#identifiers) for each vulnerability.
-- The vulnerability must be of a [supported type](#supported-vulnerabilities-for-vulnerability-resolution).
+- The vulnerability must be a SAST finding.
 
 Learn more about [how to enable all GitLab Duo features](../../ai_features_enable.md).
 
 To resolve the vulnerability:
 
 1. On the left sidebar, select **Search or go to** and find your project.
-1. Select **Secure > Vulnerability report**.
-1. Optional. To remove the default filters, select **Clear** (**{clear}**).
-1. Above the list of vulnerabilities, select the filter bar.
-1. In the dropdown list that appears, select **Tool**, then select all the values in the **SAST** category.
-1. Select outside the filter field. The vulnerability severity totals and list of matching vulnerabilities are updated.
+1. Select **Security and Compliance > Vulnerability report**.
+1. In the **Tool** dropdown list, select **SAST**.
 1. Select the SAST vulnerability you want resolved.
-   - A blue icon is shown next to vulnerabilities that support Vulnerability Resolution.
-1. In the upper-right corner, select **Resolve with AI**.
-1. Add an additional commit to the MR. This forces a new pipeline to run.
-1. After the pipeline is complete, on the [pipeline security tab](../vulnerability_report/pipeline.md#view-vulnerabilities-in-a-pipeline), confirm that the vulnerability no longer appears.
-1. On the vulnerability report, [manually update the vulnerability](../vulnerability_report/index.md#change-status-of-vulnerabilities).
+1. At the top of the vulnerability's page, from the **Resolve with merge request** dropdown list, select **Resolve with AI**.
 
 A merge request containing the AI remediation suggestions is opened. Review the suggested changes,
 then process the merge request according to your standard workflow.
 
-Provide feedback on this feature in [issue 476553](https://gitlab.com/gitlab-org/gitlab/-/issues/476553).
-
-### Supported vulnerabilities for Vulnerability Resolution
-
-To ensure that suggested resolutions are high-quality, Vulnerability Resolution is available for a specific set of vulnerabilities.
-The system decides whether to offer Vulnerability Resolution based on the vulnerability's Common Weakness Enumeration (CWE) identifier.
-
-We selected the current set of vulnerabilities based on testing by automated systems and security experts.
-We are actively working to expand coverage to more types of vulnerabilities.
-
-<details><summary style="color:#5943b6; margin-top: 1em;"><a>View the complete list of supported CWEs for Vulnerability Resolution</a></summary>
-
-<ul>
-  <li>CWE-23: Relative Path Traversal</li>
-  <li>CWE-73: External Control of File Name or Path</li>
-  <li>CWE-80: Improper Neutralization of Script-Related HTML Tags in a Web Page (Basic XSS)</li>
-  <li>CWE-116: Improper Encoding or Escaping of Output</li>
-  <li>CWE-118: Incorrect Access of Indexable Resource ('Range Error')</li>
-  <li>CWE-119: Improper Restriction of Operations within the Bounds of a Memory Buffer</li>
-  <li>CWE-120: Buffer Copy without Checking Size of Input ('Classic Buffer Overflow')</li>
-  <li>CWE-126: Buffer Over-read</li>
-  <li>CWE-190: Integer Overflow or Wraparound</li>
-  <li>CWE-200: Exposure of Sensitive Information to an Unauthorized Actor</li>
-  <li>CWE-208: Observable Timing Discrepancy</li>
-  <li>CWE-209: Generation of Error Message Containing Sensitive Information</li>
-  <li>CWE-272: Least Privilege Violation</li>
-  <li>CWE-287: Improper Authentication</li>
-  <li>CWE-295: Improper Certificate Validation</li>
-  <li>CWE-297: Improper Validation of Certificate with Host Mismatch</li>
-  <li>CWE-305: Authentication Bypass by Primary Weakness</li>
-  <li>CWE-310: Cryptographic Issues</li>
-  <li>CWE-311: Missing Encryption of Sensitive Data</li>
-  <li>CWE-323: Reusing a Nonce, Key Pair in Encryption</li>
-  <li>CWE-327: Use of a Broken or Risky Cryptographic Algorithm</li>
-  <li>CWE-328: Use of Weak Hash</li>
-  <li>CWE-330: Use of Insufficiently Random Values</li>
-  <li>CWE-338: Use of Cryptographically Weak Pseudo-Random Number Generator (PRNG)</li>
-  <li>CWE-345: Insufficient Verification of Data Authenticity</li>
-  <li>CWE-346: Origin Validation Error</li>
-  <li>CWE-352: Cross-Site Request Forgery</li>
-  <li>CWE-362: Concurrent Execution using Shared Resource with Improper Synchronization ('Race Condition')</li>
-  <li>CWE-369: Divide By Zero</li>
-  <li>CWE-377: Insecure Temporary File</li>
-  <li>CWE-378: Creation of Temporary File With Insecure Permissions</li>
-  <li>CWE-400: Uncontrolled Resource Consumption</li>
-  <li>CWE-489: Active Debug Code</li>
-  <li>CWE-521: Weak Password Requirements</li>
-  <li>CWE-539: Use of Persistent Cookies Containing Sensitive Information</li>
-  <li>CWE-599: Missing Validation of OpenSSL Certificate</li>
-  <li>CWE-611: Improper Restriction of XML External Entity Reference</li>
-  <li>CWE-676: Use of potentially dangerous function</li>
-  <li>CWE-704: Incorrect Type Conversion or Cast</li>
-  <li>CWE-754: Improper Check for Unusual or Exceptional Conditions</li>
-  <li>CWE-770: Allocation of Resources Without Limits or Throttling</li>
-  <li>CWE-1004: Sensitive Cookie Without 'HttpOnly' Flag</li>
-  <li>CWE-1275: Sensitive Cookie with Improper SameSite Attribute</li>
-</ul>
-</details>
-
-### Troubleshooting
-
-Vulnerability Resolution sometimes cannot generate a suggested fix. Common causes include:
-
-- **False positive detected:** Before proposing a fix, the AI model assesses whether the vulnerability is valid. It may judge that the vulnerability is not a true vulnerability, or isn't worth fixing.
-  - This can happen if the vulnerability occurs in test code. Your organization might still choose to fix vulnerabilities even if they happen in test code, but models sometimes assess these to be false positives.
-  - If you agree that the vulnerability is a false-positive or is not worth fixing, you should [dismiss the vulnerability](#vulnerability-status-values) and [select a matching reason](#vulnerability-dismissal-reasons).
-    - To customize your SAST configuration or report a problem with a GitLab SAST rule, see [SAST rules](../sast/rules.md).
-- **Temporary or unexpected error:** The error message may state that "an unexpected error has occurred", "the upstream AI provider request timed out", "something went wrong", or a similar cause.
-  - These errors may be caused by temporary problems with the AI provider or with GitLab Duo.
-  - A new request may succeed, so you can try to resolve the vulnerability again.
-  - If you continue to see these errors, contact GitLab for assistance.
-
-### Data shared with third-party AI APIs for Vulnerability Resolution
+### Data shared with third-party AI APIs
 
 The following data is shared with third-party AI APIs:
 
-- Vulnerability name
-- Vulnerability description
-- Identifiers (CWE, OWASP)
-- Entire file that contains the vulnerable lines of code
-- Vulnerable lines of code (line numbers)
-
-## Vulnerability code flow
-
-DETAILS:
-**Tier:** Ultimate
-**Offering:** GitLab.com, Self-managed, GitLab Dedicated
-
-> - Introduced in GitLab 17.3 with a flag. Disabled by default.
-> - Enabled on GitLab.com in GitLab 17.3.
-> - Enabled on self-managed and GitLab Dedicated in GitLab 17.4.
-> - Generally available in GitLab 17.4. Feature flag removed.
-
-For some vulnerabilities detected by Advanced SAST, a **Code flow** tab is available. A
-vulnerability's code flow is the path the data takes from the user input (source) to the vulnerable
-line of code (sink), through all assignments, manipulation, and sanitization. This information helps
-you understand and evaluate the vulnerability's context, impact, and risk.
-
-The **Code flow** tab shows:
-
-- The steps from source to sink.
-- The relevant files, including code snippets.
-
-![A code flow of a Python application across two files](img/example_code_flow_of_python_applications_v17_3.png)
+- Vulnerability title (which might contain the filename, depending on which scanner is used).
+- Vulnerability identifiers.
+- Code block.
+- File name.
 
 ## Vulnerability status values
 
@@ -419,7 +311,7 @@ To manually apply the patch that GitLab generated for a vulnerability:
 
 NOTE:
 Security training is not accessible in an environment that is offline, meaning computers that are isolated from the public internet as a security measure. Specifically, the GitLab server needs the ability to query the API endpoints for any training provider you choose to enable. Some third-party training vendors may require you to sign up for a _free_ account. Sign up for an account by going to
-any of [Secure Code Warrior](https://www.securecodewarrior.com/), [Kontra](https://application.security/), or [SecureFlag](https://www.secureflag.com/index.html).
+any of [Secure Code Warrior](https://www.securecodewarrior.com/), [Kontra](https://application.security/), or [SecureFlag](https://www.secureflag.com/).
 GitLab does not send any user information to these third-party vendors; we do send the CWE or OWASP identifier and the language name of the file extension.
 
 Security training helps your developers learn how to fix vulnerabilities. Developers can view security training from selected educational providers, relevant to the detected vulnerability.

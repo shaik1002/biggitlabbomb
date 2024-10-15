@@ -11,29 +11,20 @@ module Gitlab
           :trigger_request, :schedule, :merge_request, :external_pull_request,
           :ignore_skip_ci, :save_incompleted,
           :seeds_block, :variables_attributes, :push_options,
-          :chat_data, :allow_mirror_update, :bridge, :content, :dry_run, :logger, :execution_policy_dry_run,
+          :chat_data, :allow_mirror_update, :bridge, :content, :dry_run, :logger,
           # These attributes are set by Chains during processing:
           :config_content, :yaml_processor_result, :workflow_rules_result, :pipeline_seed,
-          :pipeline_config, :execution_policy_pipelines, :partition_id,
-          keyword_init: true
+          :pipeline_config
         ) do
           include Gitlab::Utils::StrongMemoize
 
-          def dry_run?
-            dry_run || execution_policy_dry_run
+          def initialize(params = {})
+            params.each do |key, value|
+              self[key] = value
+            end
           end
 
-          # rubocop:disable Gitlab/NoCodeCoverageComment -- method is tested in EE
-          # :nocov:
-          def execution_policy_mode?
-            false # to be overridden in EE
-          end
-
-          def pipeline_policy_context
-            # to be overridden in EE
-          end
-          # :nocov:
-          # rubocop:enable Gitlab/NoCodeCoverageComment
+          alias_method :dry_run?, :dry_run
 
           def branch_exists?
             strong_memoize(:is_branch) do
@@ -178,4 +169,3 @@ module Gitlab
 end
 
 # rubocop:enable Naming/FileName
-Gitlab::Ci::Pipeline::Chain::Command.prepend_mod

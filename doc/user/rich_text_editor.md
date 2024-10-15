@@ -70,7 +70,7 @@ Supported input rules:
 | `**bold**` or `__bold__`                                  | Bold text            |
 | `_italics_` or `*italics*`                                | Italicized text      |
 | `~~strike~~`                                              | Strikethrough        |
-| `[link](https://example.com)`                             | Hyperlink            |
+| `[link](url)`                                             | Hyperlink            |
 | `code`                                                    | Inline code          |
 | <code>&#96;&#96;&#96;rb</code> + <kbd>Enter</kbd> <br> <code>&#96;&#96;&#96;js</code> + <kbd>Enter</kbd> | Code block           |
 | `* List item`, or<br> `- List item`, or<br> `+ List item` | Unordered list       |
@@ -89,7 +89,7 @@ To insert a table:
 1. Select **Insert table** **{table}**.
 1. From the dropdown list, select the dimensions of the new table.
 
-![A table size selector with 3 rows and 3 columns.](img/rich_text_editor_02_v16_2.png)
+![Alt text](img/rich_text_editor_02_v16_2.png)
 
 ### Edit a table
 
@@ -97,7 +97,7 @@ Inside a table cell, you can use a menu to insert or delete rows or columns.
 
 To open the menu: In the upper-right corner of a cell, select the chevron **{chevron-down}**.
 
-![An active chevron menu showing table actions.](img/rich_text_editor_03_v16_2.png)
+![Alt text](img/rich_text_editor_03_v16_2.png)
 
 ### Operations on multiple cells
 

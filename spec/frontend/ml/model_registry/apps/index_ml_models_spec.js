@@ -4,40 +4,31 @@ import VueApollo from 'vue-apollo';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
 import { IndexMlModels } from '~/ml/model_registry/apps';
 import ModelRow from '~/ml/model_registry/components/model_row.vue';
-import ModelCreate from '~/ml/model_registry/components/model_create.vue';
+import { MODEL_ENTITIES } from '~/ml/model_registry/constants';
 import TitleArea from '~/vue_shared/components/registry/title_area.vue';
 import MetadataItem from '~/vue_shared/components/registry/metadata_item.vue';
-import EmptyState from '~/ml/model_registry/components/model_list_empty_state.vue';
+import EmptyState from '~/ml/model_registry/components/empty_state.vue';
 import ActionsDropdown from '~/ml/model_registry/components/actions_dropdown.vue';
 import SearchableList from '~/ml/model_registry/components/searchable_list.vue';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import getModelsQuery from '~/ml/model_registry/graphql/queries/get_models.query.graphql';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import waitForPromises from 'helpers/wait_for_promises';
-import { MODEL_CREATION_MODAL_ID } from '~/ml/model_registry/constants';
-import { describeSkipVue3, SkipReason } from 'helpers/vue3_conditional';
 import { modelsQuery, modelWithOneVersion, modelWithoutVersion } from '../graphql_mock_data';
 
 Vue.use(VueApollo);
 
 const defaultProps = {
   projectPath: 'path/to/project',
+  createModelPath: 'path/to/create',
   canWriteModelRegistry: false,
-  maxAllowedFileSize: 99999,
-  markdownPreviewPath: '/markdown-preview',
 };
 
-const skipReason = new SkipReason({
-  name: 'ml/model_registry/apps/index_ml_models',
-  reason: 'OOM on the worker',
-  issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/458412',
-});
-
-describeSkipVue3(skipReason, () => {
+describe('ml/model_registry/apps/index_ml_models', () => {
   let wrapper;
   let apolloProvider;
 
-  const createWrapper = async ({
+  const createWrapper = ({
     props = {},
     resolver = jest.fn().mockResolvedValue(modelsQuery()),
   } = {}) => {
@@ -53,8 +44,6 @@ describeSkipVue3(skipReason, () => {
       apolloProvider,
       propsData,
     });
-
-    await waitForPromises();
   };
 
   beforeEach(() => {
@@ -69,7 +58,7 @@ describeSkipVue3(skipReason, () => {
   const findTitleArea = () => wrapper.findComponent(TitleArea);
   const findModelCountMetadataItem = () => findTitleArea().findComponent(MetadataItem);
   const findBadge = () => wrapper.findComponent(GlExperimentBadge);
-  const findModelCreate = () => wrapper.findComponent(ModelCreate);
+  const findCreateButton = () => wrapper.findByTestId('create-model-button');
   const findActionsDropdown = () => wrapper.findComponent(ActionsDropdown);
   const findSearchableList = () => wrapper.findComponent(SearchableList);
 
@@ -83,10 +72,9 @@ describeSkipVue3(skipReason, () => {
     });
 
     it('displays the experiment badge', () => {
-      expect(findBadge().props()).toMatchObject({
-        helpPageUrl: '/help/user/project/ml/model_registry/index.md',
-        type: 'beta',
-      });
+      expect(findBadge().props('helpPageUrl')).toBe(
+        '/help/user/project/ml/model_registry/index.md',
+      );
     });
 
     it('renders the extra actions button', () => {
@@ -96,35 +84,35 @@ describeSkipVue3(skipReason, () => {
 
   describe('empty state', () => {
     it('shows empty state', async () => {
-      await createWrapper({ resolver: emptyQueryResolver() });
+      createWrapper({ resolver: emptyQueryResolver() });
 
-      expect(findEmptyState().props()).toMatchObject({
-        title: 'Import your machine learning models',
-        description:
-          'Create your machine learning using GitLab directly or using the MLflow client',
-        primaryText: 'Create model',
-        modalId: MODEL_CREATION_MODAL_ID,
-      });
+      await waitForPromises();
+
+      expect(findEmptyState().props('entityType')).toBe(MODEL_ENTITIES.model);
     });
   });
 
   describe('create button', () => {
     describe('when user has no permission to write model registry', () => {
       it('does not display create button', async () => {
-        await createWrapper({ resolver: emptyQueryResolver() });
+        createWrapper({ resolver: emptyQueryResolver() });
 
-        expect(findModelCreate().exists()).toBe(false);
+        await waitForPromises();
+
+        expect(findCreateButton().exists()).toBe(false);
       });
     });
 
     describe('when user has permission to write model registry', () => {
       it('displays create button', async () => {
-        await createWrapper({
+        createWrapper({
           props: { canWriteModelRegistry: true },
           resolver: emptyQueryResolver(),
         });
 
-        expect(findModelCreate().exists()).toBe(true);
+        await waitForPromises();
+
+        expect(findCreateButton().attributes().href).toBe('path/to/create');
       });
     });
   });
@@ -133,7 +121,9 @@ describeSkipVue3(skipReason, () => {
     beforeEach(async () => {
       const error = new Error('Failure!');
 
-      await createWrapper({ resolver: jest.fn().mockRejectedValue(error) });
+      createWrapper({ resolver: jest.fn().mockRejectedValue(error) });
+
+      await waitForPromises();
     });
 
     it('error message is displayed', () => {
@@ -149,14 +139,16 @@ describeSkipVue3(skipReason, () => {
 
   describe('with data', () => {
     it('does not show empty state', async () => {
-      await createWrapper();
+      createWrapper();
+      await waitForPromises();
 
       expect(findEmptyState().exists()).toBe(false);
     });
 
     describe('header', () => {
       it('sets model metadata item to model count', async () => {
-        await createWrapper();
+        createWrapper();
+        await waitForPromises();
 
         expect(findModelCountMetadataItem().props('text')).toBe('2 models');
       });
@@ -167,7 +159,9 @@ describeSkipVue3(skipReason, () => {
 
       beforeEach(async () => {
         resolver = jest.fn().mockResolvedValue(modelsQuery());
-        await createWrapper({ resolver });
+        createWrapper({ resolver });
+
+        await waitForPromises();
       });
 
       it('calls query only once on setup', () => {
@@ -199,9 +193,9 @@ describeSkipVue3(skipReason, () => {
     describe('when query is updated', () => {
       let resolver;
 
-      beforeEach(async () => {
+      beforeEach(() => {
         resolver = jest.fn().mockResolvedValue(modelsQuery());
-        await createWrapper({ resolver });
+        createWrapper({ resolver });
       });
 
       it('when orderBy or sort are not present, use default value', async () => {

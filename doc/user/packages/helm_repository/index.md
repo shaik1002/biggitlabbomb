@@ -48,7 +48,7 @@ Once built, a chart can be uploaded to the desired channel with `curl` or `helm 
 - With `curl`:
 
   ```shell
-  curl --fail-with-body --request POST \
+  curl --request POST \
        --form 'chart=@mychart-0.1.0.tgz' \
        --user <username>:<access_token> \
        https://gitlab.example.com/api/v4/projects/<project_id>/packages/helm/api/<channel>/charts
@@ -57,7 +57,7 @@ Once built, a chart can be uploaded to the desired channel with `curl` or `helm 
   - `<username>`: the GitLab username or the deploy token username.
   - `<access_token>`: the personal access token or the deploy token.
   - `<project_id>`: the project ID (like `42`) or the
-    [URL-encoded](../../../api/rest/index.md#namespaced-paths) path of the project (like `group%2Fproject`).
+    [URL-encoded](../../../api/rest/index.md#namespaced-path-encoding) path of the project (like `group%2Fproject`).
   - `<channel>`: the name of the channel (like `stable`).
 
 - With the [`helm cm-push`](https://github.com/chartmuseum/helm-push/#readme) plugin:
@@ -93,7 +93,7 @@ stages:
 upload:
   stage: upload
   script:
-    - 'curl --fail-with-body --request POST --user gitlab-ci-token:$CI_JOB_TOKEN --form "chart=@mychart-0.1.0.tgz" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/helm/api/<channel>/charts"'
+    - 'curl --request POST --user gitlab-ci-token:$CI_JOB_TOKEN --form "chart=@mychart-0.1.0.tgz" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/helm/api/<channel>/charts"'
 ```
 
 - `<username>`: the GitLab username or the deploy token username.

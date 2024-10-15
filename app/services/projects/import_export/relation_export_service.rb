@@ -24,9 +24,10 @@ module Projects
           upload_compressed_file
           relation_export.finish!
         else
-          raise_error(shared.errors.join(', '))
+          fail_export(shared.errors.join(', '))
         end
-
+      rescue StandardError => e
+        fail_export(e.message)
       ensure
         FileUtils.remove_entry(shared.export_path) if File.exist?(shared.export_path)
         FileUtils.remove_entry(shared.archive_path) if File.exist?(shared.archive_path)
@@ -82,8 +83,10 @@ module Projects
         @archive_file ||= File.join(shared.archive_path, "#{relation}.tar.gz")
       end
 
-      def raise_error(error_message)
-        logger.warn(
+      def fail_export(error_message)
+        relation_export.update!(status_event: :fail_op, export_error: error_message.truncate(300))
+
+        logger.error(
           message: 'Project relation export failed',
           export_error: error_message,
           relation: relation_export.relation,
@@ -91,8 +94,6 @@ module Projects
           project_name: project.name,
           project_id: project.id
         )
-
-        raise ::Gitlab::ImportExport::Error.new, error_message
       end
     end
   end

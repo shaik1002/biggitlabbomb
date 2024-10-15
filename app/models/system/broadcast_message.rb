@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module System
-  class BroadcastMessage < ApplicationRecord
+  class BroadcastMessage < MainClusterwide::ApplicationRecord
     include CacheMarkdownField
     include Sortable
 
@@ -27,8 +27,6 @@ module System
 
     attribute :color, default: '#E75E40'
     attribute :font, default: '#FFFFFF'
-
-    has_many :broadcast_message_dismissals, class_name: 'Users::BroadcastMessageDismissal'
 
     scope :current_and_future_messages, -> { where('ends_at > :now', now: Time.current).order_id_asc }
 

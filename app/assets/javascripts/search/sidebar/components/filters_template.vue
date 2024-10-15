@@ -40,12 +40,12 @@ export default {
 
 <template>
   <gl-form
-    class="issue-filters gl-px-4 gl-pt-0"
+    class="issue-filters gl-px-5 gl-pt-0"
     :aria-label="__('Search filters')"
     @submit.prevent="applyQueryWithTracking"
   >
     <slot></slot>
-    <div class="gl-mt-4 gl-flex gl-items-center">
+    <div class="gl-display-flex gl-align-items-center gl-mt-4">
       <gl-button
         category="primary"
         variant="confirm"

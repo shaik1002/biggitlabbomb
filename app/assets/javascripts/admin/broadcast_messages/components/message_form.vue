@@ -8,12 +8,13 @@ import {
   GlFormCheckboxGroup,
   GlFormInput,
   GlFormSelect,
+  GlFormText,
   GlFormTextarea,
 } from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
 import { s__, __ } from '~/locale';
 import { createAlert, VARIANT_DANGER } from '~/alert';
-import { visitUrl } from '~/lib/utils/url_utility';
+import { redirectTo } from '~/lib/utils/url_utility'; // eslint-disable-line import/no-deprecated
 import { DEFAULT_DEBOUNCE_AND_THROTTLE_MS } from '~/lib/utils/constants';
 import SafeHtml from '~/vue_shared/directives/safe_html';
 import {
@@ -42,6 +43,7 @@ export default {
     GlFormCheckboxGroup,
     GlFormInput,
     GlFormSelect,
+    GlFormText,
     GlFormTextarea,
   },
   directives: {
@@ -202,7 +204,7 @@ export default {
 
       const success = await this.submitForm();
       if (success) {
-        visitUrl(this.messagesPath);
+        redirectTo(this.messagesPath); // eslint-disable-line import/no-deprecated
       } else {
         this.loading = false;
       }
@@ -264,7 +266,6 @@ export default {
         autofocus
         :debounce="$options.DEFAULT_DEBOUNCE_AND_THROTTLE_MS"
         :placeholder="$options.i18n.messagePlaceholder"
-        no-resize
         data-testid="message-input"
       />
     </gl-form-group>
@@ -325,7 +326,6 @@ export default {
     >
       <gl-form-checkbox-group
         v-model="targetAccessLevels"
-        data-testid="target-access-levels-checkbox-group"
         :options="targetAccessLevelCheckBoxGroupOptions"
       />
     </gl-form-group>
@@ -333,11 +333,13 @@ export default {
     <gl-form-group
       v-show="showTargetPath"
       :label="$options.i18n.targetPath"
-      :description="targetPathDescription"
       label-for="target-path-input"
       data-testid="target-path-input"
     >
       <gl-form-input id="target-path-input" v-model="targetPath" />
+      <gl-form-text>
+        {{ targetPathDescription }}
+      </gl-form-text>
     </gl-form-group>
 
     <gl-form-group :label="$options.i18n.startsAt">

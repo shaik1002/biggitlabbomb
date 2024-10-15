@@ -8,7 +8,6 @@ RSpec.describe 'User activates Jira', :js, feature_category: :integrations do
 
   before do
     stub_request(:get, test_url).to_return(body: { key: 'value' }.to_json)
-    stub_request(:get, client_url).to_return(body: { key: 'value' }.to_json)
   end
 
   describe 'user tests Jira integration' do
@@ -50,8 +49,6 @@ RSpec.describe 'User activates Jira', :js, feature_category: :integrations do
 
       it 'activates the Jira integration' do
         stub_request(:get, test_url).with(basic_auth: %w[username password])
-          .to_raise(JIRA::HTTPError.new(double(message: 'message', code: '200')))
-        stub_request(:get, client_url).with(basic_auth: %w[username password])
           .to_raise(JIRA::HTTPError.new(double(message: 'message', code: '200')))
 
         visit_project_integration('Jira')

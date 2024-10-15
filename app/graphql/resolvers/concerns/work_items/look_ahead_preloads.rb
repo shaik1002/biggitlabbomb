@@ -42,9 +42,7 @@ module WorkItems
         milestone: { milestone: [:project, :group] },
         subscribed: [:assignees, :award_emoji, { notes: [:author, :award_emoji] }],
         award_emoji: { award_emoji: :awardable },
-        due_date: :dates_source,
-        start_date: :dates_source,
-        closing_merge_requests: { merge_requests_closing_issues: { merge_request: [:target_project, :author] } }
+        related_merge_requests: { merge_requests_closing_issues: { merge_request: [:target_project, :author] } }
       }
     end
 

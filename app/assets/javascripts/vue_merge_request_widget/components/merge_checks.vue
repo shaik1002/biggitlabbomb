@@ -70,6 +70,7 @@ export default {
   data() {
     return {
       collapsed: true,
+      collapsedCount: 0,
       state: {},
     };
   },
@@ -82,10 +83,6 @@ export default {
         return 'warning';
       }
 
-      if (this.checkingMergeChecks.length) {
-        return 'loading';
-      }
-
       return this.failedChecks.length ? 'failed' : 'success';
     },
     summaryText() {
@@ -93,10 +90,6 @@ export default {
         return this.state?.userPermissions?.canMerge
           ? __('%{boldStart}Merge with caution%{boldEnd}: Override added')
           : __('%{boldStart}Ready to be merged with caution%{boldEnd}: Override added');
-      }
-
-      if (this.checkingMergeChecks.length) {
-        return __('Checking if merge request can be merged...');
       }
 
       if (!this.failedChecks.length) {
@@ -120,18 +113,16 @@ export default {
       return this.state?.mergeabilityChecks || [];
     },
     sortedChecks() {
-      const order = ['CHECKING', 'FAILED', 'WARNING', 'SUCCESS'];
+      const order = ['FAILED', 'WARNING', 'SUCCESS'];
 
       return [...this.checks]
         .filter((s) => {
           if (this.isStatusInactive(s) || !this.hasMessage(s)) return false;
+          if (this.collapsedCount > 0 && this.collapsed) return false;
 
-          return this.collapsed ? this.isStatusFailed(s) || this.isStatusChecking(s) : true;
+          return this.collapsed ? this.isStatusFailed(s) : true;
         })
         .sort((a, b) => order.indexOf(a.status) - order.indexOf(b.status));
-    },
-    checkingMergeChecks() {
-      return this.checks.filter((c) => this.isStatusChecking(c));
     },
     failedChecks() {
       return this.checks.filter((c) => this.isStatusFailed(c));
@@ -140,12 +131,15 @@ export default {
       return this.checks.filter((c) => this.isStatusWarning(c));
     },
     showChecks() {
-      return this.failedChecks.length > 0 || this.checkingMergeChecks.length || !this.collapsed;
+      if (this.collapsed && this.collapsedCount > 0) return false;
+
+      return this.failedChecks.length > 0 || !this.collapsed;
     },
   },
   methods: {
     toggleCollapsed() {
       this.collapsed = !this.collapsed;
+      this.collapsedCount += 1;
     },
     checkComponent(check) {
       return COMPONENTS[check.identifier.toLowerCase()] || COMPONENTS.default;
@@ -162,15 +156,12 @@ export default {
     isStatusWarning(check) {
       return check.status === 'WARNING';
     },
-    isStatusChecking(check) {
-      return check.status === 'CHECKING';
-    },
   },
 };
 </script>
 
 <template>
-  <div>
+  <div class="gl-rounded-0!">
     <state-container
       :is-loading="isLoading"
       :status="statusIcon"
@@ -193,7 +184,7 @@ export default {
     </state-container>
     <div
       v-if="showChecks"
-      class="gl-relative gl-border-t-1 gl-border-gray-100 gl-bg-gray-10 gl-border-t-solid"
+      class="gl-border-t-1 gl-border-t-solid gl-border-gray-100 gl-relative gl-bg-gray-10"
       data-testid="merge-checks-full"
     >
       <div>
@@ -203,7 +194,7 @@ export default {
           :key="index"
           class="gl-pl-9 gl-pr-4"
           :class="{
-            'gl-border-b-1 gl-border-gray-100 gl-border-b-solid': index !== sortedChecks.length - 1,
+            'gl-border-b-solid gl-border-b-1 gl-border-gray-100': index !== sortedChecks.length - 1,
           }"
           :check="check"
           :mr="mr"

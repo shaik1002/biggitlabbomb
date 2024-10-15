@@ -6,7 +6,9 @@ require_relative '../../../../rubocop/cop/gitlab/avoid_current_organization'
 
 RSpec.describe RuboCop::Cop::Gitlab::AvoidCurrentOrganization, feature_category: :cell do
   describe 'bad examples' do
-    shared_examples 'reference offense' do
+    let(:node_value) { 'Current.organization' }
+
+    context 'when referencing' do
       it 'registers an offense' do
         expect_offense(<<~CODE, node: node_value)
           return if %{node}
@@ -15,21 +17,7 @@ RSpec.describe RuboCop::Cop::Gitlab::AvoidCurrentOrganization, feature_category:
       end
     end
 
-    context 'when referencing Current.organization' do
-      let(:node_value) { 'Current.organization' }
-
-      include_examples 'reference offense'
-    end
-
-    context 'when referencing Current.organization_id' do
-      let(:node_value) { 'Current.organization_id' }
-
-      include_examples 'reference offense'
-    end
-
-    context 'when assigning Current.organization=' do
-      let(:node_value) { 'Current.organization' }
-
+    context 'when assigning' do
       it 'registers an offense' do
         expect_offense(<<~CODE, keyword: node_value)
           %{keyword} = some_value

@@ -1,9 +1,8 @@
 <script>
 import { isEmpty } from 'lodash';
-import { GlButton } from '@gitlab/ui';
+import { GlCard, GlIcon, GlButton } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
 import { scrollToElement } from '~/lib/utils/common_utils';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
 import { CUSTOM_HEADER_KEY_PATTERN } from '../constants';
 import FormCustomHeaderItem from './form_custom_header_item.vue';
 
@@ -11,8 +10,9 @@ const MAXIMUM_CUSTOM_HEADERS = 20;
 
 export default {
   components: {
-    CrudComponent,
     FormCustomHeaderItem,
+    GlCard,
+    GlIcon,
     GlButton,
   },
   props: {
@@ -49,9 +49,7 @@ export default {
       this.customHeaders.splice(index, 1);
     },
     onUpdate(index, newValues) {
-      const copy = [...this.customHeaders];
-      copy[index] = newValues;
-      this.customHeaders = copy;
+      this.$set(this.customHeaders, index, newValues);
     },
     handleSubmit(e) {
       this.isValidated = true;
@@ -100,15 +98,21 @@ export default {
 </script>
 
 <template>
-  <crud-component
+  <gl-card
     ref="customHeaderCard"
-    :title="s__('Webhooks|Custom headers')"
-    icon="code"
-    :count="customHeaders.length"
-    class="gl-mb-5 gl-mt-3"
     data-testid="custom-headers-card"
+    class="gl-new-card gl-my-4"
+    header-class="gl-new-card-header"
+    body-class="gl-new-card-body gl-px-5 gl-py-4"
   >
-    <template #actions>
+    <template #header>
+      <div class="gl-new-card-title-wrapper">
+        <h3 class="gl-new-card-title">{{ s__('Webhooks|Custom headers') }}</h3>
+        <div class="gl-new-card-count">
+          <gl-icon name="code" class="gl-mr-2" />
+          {{ customHeaders.length }}
+        </div>
+      </div>
       <gl-button
         v-if="!maximumCustomHeadersReached"
         size="small"
@@ -132,7 +136,7 @@ export default {
       :value-state="!isEmpty(value) || !isValidated"
       :invalid-key-feedback="keyErrorFeedback(key)"
       :invalid-value-feedback="valueErrorFeedback(value)"
-      :class="{ 'gl-border-b gl-mb-4 gl-pb-4': index < customHeaders.length - 1 }"
+      :class="{ 'gl-pb-4 gl-mb-4 gl-border-b': index < customHeaders.length - 1 }"
       @update:header-key="onUpdate(index, { key: $event, value })"
       @update:header-value="onUpdate(index, { key, value: $event })"
       @remove="removeItem(index)"
@@ -141,5 +145,5 @@ export default {
     <span v-if="customHeaders.length === 0" class="gl-text-secondary">
       {{ s__('Webhooks|No custom headers configured.') }}
     </span>
-  </crud-component>
+  </gl-card>
 </template>

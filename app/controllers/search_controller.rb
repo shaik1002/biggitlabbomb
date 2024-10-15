@@ -56,7 +56,7 @@ class SearchController < ApplicationController
     @group = search_service.group
     @search_service_presenter = Gitlab::View::Presenter::Factory.new(search_service, current_user: current_user).fabricate!
 
-    return unless search_term_valid? && search_type_valid?
+    return unless search_term_valid?
 
     return if check_single_commit_result?
 
@@ -73,7 +73,7 @@ class SearchController < ApplicationController
       @search_highlight = @search_service_presenter.search_highlight
     end
 
-    return if @search_results.respond_to?(:failed?) && @search_results.failed?(@scope)
+    return if @search_results.respond_to?(:failed?) && @search_results.failed?
 
     Gitlab::Metrics::GlobalSearchSlis.record_apdex(
       elapsed: @global_search_duration_s,
@@ -106,13 +106,9 @@ class SearchController < ApplicationController
 
     count = 0
     @global_search_duration_s = Benchmark.realtime do
-      count = if @search_type == 'basic'
-                ApplicationRecord.with_fast_read_statement_timeout do
-                  search_service.search_results.formatted_count(scope)
-                end
-              else
-                search_service.search_results.formatted_count(scope)
-              end
+      ApplicationRecord.with_fast_read_statement_timeout do
+        count = search_service.search_results.formatted_count(scope)
+      end
 
       # Users switching tabs will keep fetching the same tab counts so it's a
       # good idea to cache in their browser just for a short time. They can still
@@ -121,20 +117,6 @@ class SearchController < ApplicationController
       expires_in 1.minute
 
       render json: { count: count }
-    end
-  end
-
-  def settings
-    return render(json: []) unless current_user
-
-    project_id, group_id = params.permit(:project_id, :group_id).values_at(:project_id, :group_id)
-
-    if project_id
-      render json: settings_for_project(project_id)
-    elsif group_id
-      render json: settings_for_group(group_id)
-    else
-      head :bad_request
     end
   end
 
@@ -152,7 +134,8 @@ class SearchController < ApplicationController
     render json: Gitlab::Json.dump(search_autocomplete_opts(term, filter: @filter, scope: @scope))
   end
 
-  def opensearch; end
+  def opensearch
+  end
 
   private
 
@@ -180,17 +163,6 @@ class SearchController < ApplicationController
 
     unless search_service.valid_terms_count?
       flash[:alert] = t('errors.messages.search_terms_too_long', count: Gitlab::Search::Params::SEARCH_TERM_LIMIT)
-      return false
-    end
-
-    true
-  end
-
-  def search_type_valid?
-    search_type_errors = search_service.search_type_errors
-
-    if search_type_errors
-      flash[:alert] = search_type_errors
       return false
     end
 
@@ -242,11 +214,11 @@ class SearchController < ApplicationController
       metadata['meta.search.project_id'] = params[:project_id]
       metadata['meta.search.scope'] = params[:scope] || @scope
       metadata['meta.search.page'] = params[:page] || '1'
-      metadata['meta.search.filters.confidential'] = filter_params[:confidential]
-      metadata['meta.search.filters.state'] = filter_params[:state]
+      metadata['meta.search.filters.confidential'] = params[:confidential]
+      metadata['meta.search.filters.state'] = params[:state]
       metadata['meta.search.force_search_results'] = params[:force_search_results]
       metadata['meta.search.project_ids'] = params[:project_ids]
-      metadata['meta.search.filters.language'] = filter_params[:language]
+      metadata['meta.search.filters.language'] = params[:language]
       metadata['meta.search.type'] = @search_type if @search_type.present?
       metadata['meta.search.level'] = @search_level if @search_level.present?
       metadata[:global_search_duration_s] = @global_search_duration_s if @global_search_duration_s.present?
@@ -306,24 +278,6 @@ class SearchController < ApplicationController
 
   def search_type
     search_service.search_type
-  end
-
-  def filter_params
-    params.permit(:confidential, :state, language: [])
-  end
-
-  def settings_for_project(project_id)
-    project = Project.find_by(id: project_id) # rubocop: disable CodeReuse/ActiveRecord -- Using `find` would raise 404s
-    return [] unless project && current_user.can?(:admin_project, project)
-
-    Search::ProjectSettings.new(project).all
-  end
-
-  def settings_for_group(group_id)
-    group = Group.find_by(id: group_id) # rubocop: disable CodeReuse/ActiveRecord -- Using `find` would raise 404s
-    return [] unless group && current_user.can?(:admin_group, group)
-
-    Search::GroupSettings.new(group).all
   end
 end
 

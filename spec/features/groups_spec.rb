@@ -35,6 +35,33 @@ RSpec.describe 'Group', feature_category: :groups_and_projects do
         expect(page).to have_current_path(group_path(group), ignore_query: true)
         expect(page).to have_selector '.visibility-icon [data-testid="earth-icon"]'
       end
+
+      context 'with current organization setting in middleware' do
+        let_it_be(:another_organization) { create(:organization, users: [user]) }
+
+        before_all do
+          create(:organization, :default)
+        end
+
+        context 'for setting from the header' do
+          it 'sets the organization to another organization', :feature do
+            fill_in 'Group name', with: 'test-group'
+
+            inspect_requests(
+              inject_headers: {
+                ::Organizations::ORGANIZATION_HTTP_HEADER.sub(/^HTTP_/, '') => another_organization.id.to_s
+              }
+            ) do
+              click_button 'Create group'
+            end
+
+            group = Group.find_by(name: 'test-group')
+
+            expect(group.organization).to eq(another_organization)
+            expect(page).to have_current_path(group_path(group), ignore_query: true)
+          end
+        end
+      end
     end
 
     describe 'with expected fields' do
@@ -221,7 +248,7 @@ RSpec.describe 'Group', feature_category: :groups_and_projects do
     let_it_be(:group) { create(:group, path: 'foo') }
 
     context 'as admin' do
-      let(:user) { create(:admin) }
+      let(:user) { create(:admin, :without_default_org) }
 
       before do
         visit new_group_path(parent_id: group.id, anchor: 'create-group-pane')
@@ -280,8 +307,8 @@ RSpec.describe 'Group', feature_category: :groups_and_projects do
     end
 
     context 'when many parent groups are available' do
-      let_it_be(:group2) { create(:group, path: 'foo2', organization: group.organization) }
-      let_it_be(:group3) { create(:group, path: 'foo3', organization: group.organization) }
+      let_it_be(:group2) { create(:group, path: 'foo2') }
+      let_it_be(:group3) { create(:group, path: 'foo3') }
 
       before do
         group.add_owner(user)
@@ -338,7 +365,7 @@ RSpec.describe 'Group', feature_category: :groups_and_projects do
     visit new_group_path(parent_id: group.id, anchor: 'create-group-pane')
 
     expect(page).to have_title('Not Found')
-    expect(page).to have_content('Page not found')
+    expect(page).to have_content('Page Not Found')
   end
 
   describe 'group edit', :js do
@@ -365,7 +392,7 @@ RSpec.describe 'Group', feature_category: :groups_and_projects do
     ]
 
     it 'saves new settings' do
-      within_testid('general-settings') do
+      page.within('.gs-general') do
         # Have to reset it to '' so it overwrites rather than appends
         fill_in('group_name', with: '')
         fill_in 'group_name', with: new_name
@@ -389,7 +416,7 @@ RSpec.describe 'Group', feature_category: :groups_and_projects do
     it 'removes group', :sidekiq_might_not_need_inline do
       expect { remove_with_confirm('Delete group', group.path) }.to change { Group.count }.by(-1)
       expect(group.members.all.count).to be_zero
-      expect(page).to have_content "is being deleted"
+      expect(page).to have_content "scheduled for deletion"
     end
   end
 

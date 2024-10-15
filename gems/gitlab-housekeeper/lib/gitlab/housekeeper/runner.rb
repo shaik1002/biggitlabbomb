@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'active_support'
-require 'active_support/core_ext'
 require 'active_support/core_ext/string'
 require 'gitlab/housekeeper/logger'
 require 'gitlab/housekeeper/keep'
@@ -124,8 +122,7 @@ module Gitlab
       end
 
       def print_change_details(change, branch_name)
-        base_message = "Merge request URL: #{change.mr_web_url || '(known after create)'}, on branch #{branch_name}. " \
-                       "Squash commits enabled."
+        base_message = "Merge request URL: #{change.mr_web_url || '(known after create)'}, on branch #{branch_name}."
         base_message << " CI skipped." if change.push_options.ci_skip
 
         @logger.puts base_message.yellowish

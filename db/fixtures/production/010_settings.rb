@@ -1,11 +1,11 @@
 def save(settings, topic)
   if settings.save
-    puts Rainbow("Saved #{topic}").green
+    puts "Saved #{topic}".color(:green)
   else
-    puts Rainbow("Could not save #{topic}").red
+    puts "Could not save #{topic}".color(:red)
     puts
     settings.errors.full_messages.map do |message|
-      puts Rainbow("--> #{message}").red
+      puts "--> #{message}".color(:red)
     end
     puts
     exit(1)

@@ -13,7 +13,6 @@ module Namespaces
       enable :create_projects
       enable :import_projects
       enable :admin_namespace
-      enable :admin_runner
       enable :read_namespace
       enable :read_namespace_via_membership
       enable :read_statistics

@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -125,7 +125,7 @@ In GitLab 18.0, the [Runners API](../runners.md) will return `""` in place of `v
 and `architecture` for runners.
 In v5 of the REST API, the fields will be removed.
 
-## `default_branch_protection` API field
+## `default_branch_protection` API field 
 
 Breaking change. [Related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/408315).
 
@@ -139,10 +139,3 @@ You should use the `default_branch_protection_defaults` field instead, which pro
 over the default branch protections.
 
 The `default_branch_protection` field will be removed in v5 of the GitLab REST API.
-
-## `require_password_to_approve` API field
-
-The `require_password_to_approve` was deprecated in GitLab 16.9. Use the `require_reauthentication_to_approve` field
-instead. If you supply values to both fields, the `require_reauthentication_to_approve` field takes precedence.
-
-The `require_password_to_approve` field will be removed in v5 of the GitLab REST API.

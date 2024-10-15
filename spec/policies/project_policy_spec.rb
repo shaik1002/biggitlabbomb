@@ -129,45 +129,6 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
     end
   end
 
-  describe 'condition project_allowed_for_job_token' do
-    using RSpec::Parameterized::TableSyntax
-
-    subject { described_class.new(current_user, project).project_allowed_for_job_token? }
-
-    where(:project_visibility, :role, :project_in_allowlist, :allowed) do
-      :public   | :developer | true  | true
-      :public   | :developer | false | true
-      :public   | :owner     | true  | true
-      :public   | :owner     | false | true
-      :internal | :developer | true  | true
-      :internal | :developer | false | true
-      :internal | :owner     | true  | true
-      :internal | :owner     | false | true
-      :private  | :developer | true  | true
-      :private  | :developer | false | false
-      :private  | :owner     | true  | true
-      :private  | :owner     | false | false
-    end
-
-    with_them do
-      let(:current_user) { public_send(role) }
-      let(:scope_project) { public_project }
-      let(:project) { public_send("#{project_visibility}_project") }
-      let(:job) { build_stubbed(:ci_build, project: scope_project, user: current_user) }
-
-      before do
-        allow(current_user).to receive(:ci_job_token_scope).and_return(current_user.set_ci_job_token_scope!(job))
-        allow(current_user.ci_job_token_scope).to receive(:accessible?).with(project).and_return(project_in_allowlist)
-      end
-
-      if params[:allowed]
-        it { is_expected.to be_truthy }
-      else
-        it { is_expected.to be_falsey }
-      end
-    end
-  end
-
   context 'creating_merge_request_in' do
     context 'when the current_user can download_code' do
       before do
@@ -764,7 +725,7 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
     end
   end
 
-  describe 'read_grafana', feature_category: :observability do
+  describe 'read_grafana', feature_category: :metrics do
     using RSpec::Parameterized::TableSyntax
 
     let(:policy) { :read_grafana }
@@ -793,7 +754,7 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
     end
   end
 
-  describe 'read_prometheus', feature_category: :observability do
+  describe 'read_prometheus', feature_category: :metrics do
     using RSpec::Parameterized::TableSyntax
 
     before do
@@ -894,157 +855,46 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
     end
   end
 
-  describe 'change_restrict_user_defined_variables' do
-    using RSpec::Parameterized::TableSyntax
-
-    where(:user_role, :minimum_role, :allowed) do
-      :guest      | :developer      | false
-      :reporter   | :developer      | false
-      :developer  | :developer      | false
-      :maintainer | :developer      | true
-      :maintainer | :maintainer     | true
-      :maintainer | :no_one_allowed | true
-      :owner      | :owner          | true
-      :developer  | :owner          | false
-      :maintainer | :owner          | false
-    end
-
-    with_them do
-      let(:current_user) { public_send(user_role) }
-
-      before do
-        ci_cd_settings = project.ci_cd_settings
-        ci_cd_settings.pipeline_variables_minimum_override_role = minimum_role
-        ci_cd_settings.save!
-      end
-
-      it 'allows/disallows change_restrict_user_defined_variables variables based on project defined minimum role' do
-        if allowed
-          is_expected.to be_allowed(:change_restrict_user_defined_variables)
-        else
-          is_expected.to be_disallowed(:change_restrict_user_defined_variables)
-        end
-      end
-    end
-  end
-
   describe 'set_pipeline_variables' do
-    context 'when `pipeline_variables_minimum_override_role` is defined' do
-      using RSpec::Parameterized::TableSyntax
+    context 'when user is developer' do
+      let(:current_user) { developer }
 
-      where(:user_role, :minimum_role, :restrict_variables, :allowed) do
-        :developer   | :no_one_allowed | true | false
-        :maintainer  | :no_one_allowed | true | false
-        :owner       | :no_one_allowed | true | false
-        :guest       | :no_one_allowed | true | false
-        :reporter    | :no_one_allowed | true | false
-        :anonymous   | :no_one_allowed | true | false
-        :developer   | :developer      | true | true
-        :maintainer  | :developer      | true | true
-        :owner       | :developer      | true | true
-        :guest       | :developer      | true | false
-        :reporter    | :developer      | true | false
-        :anonymous   | :developer      | true | false
-        :developer   | :maintainer     | true | false
-        :maintainer  | :maintainer     | true | true
-        :owner       | :maintainer     | true | true
-        :guest       | :maintainer     | true | false
-        :reporter    | :maintainer     | true | false
-        :anonymous   | :maintainer     | true | false
-        :developer   | :owner          | true | false
-        :maintainer  | :owner          | true | false
-        :owner       | :owner          | true | true
-        :guest       | :owner          | true | false
-        :reporter    | :owner          | true | false
-        :anonymous   | :owner          | true | false
-        :developer   | :no_one_allowed | false | true
-        :maintainer  | :no_one_allowed | false | true
-        :owner       | :no_one_allowed | false | true
-        :guest       | :no_one_allowed | false | true
-        :reporter    | :no_one_allowed | false | true
-        :anonymous   | :no_one_allowed | false | true
-        :developer   | :developer      | false | true
-        :maintainer  | :developer      | false | true
-        :owner       | :developer      | false | true
-        :guest       | :developer      | false | true
-        :reporter    | :developer      | false | true
-        :anonymous   | :developer      | false | true
-        :developer   | :maintainer     | false | true
-        :maintainer  | :maintainer     | false | true
-        :owner       | :maintainer     | false | true
-        :guest       | :maintainer     | false | true
-        :reporter    | :maintainer     | false | true
-        :anonymous   | :maintainer     | false | true
-        :developer   | :owner          | false | true
-        :maintainer  | :owner          | false | true
-        :owner       | :owner          | false | true
-        :guest       | :owner          | false | true
-        :reporter    | :owner          | false | true
-        :anonymous   | :owner          | false | true
-      end
-      with_them do
-        let(:current_user) { public_send(user_role) }
-
+      context 'when project allows user defined variables' do
         before do
-          ci_cd_settings = project.ci_cd_settings
-          ci_cd_settings.restrict_user_defined_variables = restrict_variables
-          ci_cd_settings.pipeline_variables_minimum_override_role = minimum_role
-          ci_cd_settings.save!
+          project.update!(restrict_user_defined_variables: false)
         end
 
-        it 'allows/disallows set pipeline variables based on project defined minimum role' do
-          if allowed
-            is_expected.to be_allowed(:set_pipeline_variables)
-          else
-            is_expected.to be_disallowed(:set_pipeline_variables)
-          end
+        it { is_expected.to be_allowed(:set_pipeline_variables) }
+      end
+
+      context 'when project restricts use of user defined variables' do
+        before do
+          project.update!(restrict_user_defined_variables: true)
         end
+
+        it { is_expected.not_to be_allowed(:set_pipeline_variables) }
       end
     end
 
-    shared_examples 'set_pipeline_variables only on restrict_user_defined_variables' do
-      context 'when user is developer' do
-        let(:current_user) { developer }
+    context 'when user is maintainer' do
+      let(:current_user) { maintainer }
 
-        context 'when project allows user defined variables' do
-          before do
-            project.update!(restrict_user_defined_variables: false)
-          end
-
-          it { is_expected.to be_allowed(:set_pipeline_variables) }
+      context 'when project allows user defined variables' do
+        before do
+          project.update!(restrict_user_defined_variables: false)
         end
 
-        context 'when project restricts use of user defined variables' do
-          before do
-            project.update!(restrict_user_defined_variables: true)
-          end
-
-          it { is_expected.not_to be_allowed(:set_pipeline_variables) }
-        end
+        it { is_expected.to be_allowed(:set_pipeline_variables) }
       end
 
-      context 'when user is maintainer' do
-        let(:current_user) { maintainer }
-
-        context 'when project allows user defined variables' do
-          before do
-            project.update!(restrict_user_defined_variables: false)
-          end
-
-          it { is_expected.to be_allowed(:set_pipeline_variables) }
+      context 'when project restricts use of user defined variables' do
+        before do
+          project.update!(restrict_user_defined_variables: true)
         end
 
-        context 'when project restricts use of user defined variables' do
-          before do
-            project.update!(restrict_user_defined_variables: true)
-          end
-
-          it { is_expected.to be_allowed(:set_pipeline_variables) }
-        end
+        it { is_expected.to be_allowed(:set_pipeline_variables) }
       end
     end
-
-    it_behaves_like 'set_pipeline_variables only on restrict_user_defined_variables'
   end
 
   context 'support bot' do
@@ -1115,6 +965,56 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
     end
   end
 
+  describe 'read_prometheus_alerts' do
+    context 'with admin' do
+      let(:current_user) { admin }
+
+      context 'when admin mode is enabled', :enable_admin_mode do
+        it { is_expected.to be_allowed(:read_prometheus_alerts) }
+      end
+
+      context 'when admin mode is disabled' do
+        it { is_expected.to be_disallowed(:read_prometheus_alerts) }
+      end
+    end
+
+    context 'with owner' do
+      let(:current_user) { owner }
+
+      it { is_expected.to be_allowed(:read_prometheus_alerts) }
+    end
+
+    context 'with maintainer' do
+      let(:current_user) { maintainer }
+
+      it { is_expected.to be_allowed(:read_prometheus_alerts) }
+    end
+
+    context 'with developer' do
+      let(:current_user) { developer }
+
+      it { is_expected.to be_disallowed(:read_prometheus_alerts) }
+    end
+
+    context 'with reporter' do
+      let(:current_user) { reporter }
+
+      it { is_expected.to be_disallowed(:read_prometheus_alerts) }
+    end
+
+    context 'with guest' do
+      let(:current_user) { guest }
+
+      it { is_expected.to be_disallowed(:read_prometheus_alerts) }
+    end
+
+    context 'with anonymous' do
+      let(:current_user) { anonymous }
+
+      it { is_expected.to be_disallowed(:read_prometheus_alerts) }
+    end
+  end
+
   describe 'metrics_dashboard feature' do
     context 'public project' do
       let(:project) { public_project }
@@ -1126,6 +1026,8 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
           it { is_expected.to be_allowed(:metrics_dashboard) }
           it { is_expected.to be_allowed(:read_prometheus) }
           it { is_expected.to be_allowed(:read_deployment) }
+          it { is_expected.to be_allowed(:read_metrics_user_starred_dashboard) }
+          it { is_expected.to be_allowed(:create_metrics_user_starred_dashboard) }
         end
 
         context 'with guest' do
@@ -1152,6 +1054,8 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
           it { is_expected.to be_allowed(:metrics_dashboard) }
           it { is_expected.to be_allowed(:read_prometheus) }
           it { is_expected.to be_allowed(:read_deployment) }
+          it { is_expected.to be_allowed(:read_metrics_user_starred_dashboard) }
+          it { is_expected.to be_allowed(:create_metrics_user_starred_dashboard) }
         end
 
         context 'with guest' do
@@ -1160,6 +1064,8 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
           it { is_expected.to be_allowed(:metrics_dashboard) }
           it { is_expected.to be_disallowed(:read_prometheus) }
           it { is_expected.to be_allowed(:read_deployment) }
+          it { is_expected.to be_allowed(:read_metrics_user_starred_dashboard) }
+          it { is_expected.to be_allowed(:create_metrics_user_starred_dashboard) }
         end
 
         context 'with anonymous' do
@@ -1168,6 +1074,8 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
           it { is_expected.to be_allowed(:metrics_dashboard) }
           it { is_expected.to be_disallowed(:read_prometheus) }
           it { is_expected.to be_allowed(:read_deployment) }
+          it { is_expected.to be_disallowed(:read_metrics_user_starred_dashboard) }
+          it { is_expected.to be_disallowed(:create_metrics_user_starred_dashboard) }
         end
       end
     end
@@ -1182,6 +1090,8 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
           it { is_expected.to be_allowed(:metrics_dashboard) }
           it { is_expected.to be_allowed(:read_prometheus) }
           it { is_expected.to be_allowed(:read_deployment) }
+          it { is_expected.to be_allowed(:read_metrics_user_starred_dashboard) }
+          it { is_expected.to be_allowed(:create_metrics_user_starred_dashboard) }
         end
 
         context 'with guest' do
@@ -1210,6 +1120,8 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
           it { is_expected.to be_allowed(:metrics_dashboard) }
           it { is_expected.to be_allowed(:read_prometheus) }
           it { is_expected.to be_allowed(:read_deployment) }
+          it { is_expected.to be_allowed(:read_metrics_user_starred_dashboard) }
+          it { is_expected.to be_allowed(:create_metrics_user_starred_dashboard) }
         end
 
         context 'with guest' do
@@ -1218,6 +1130,8 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
           it { is_expected.to be_allowed(:metrics_dashboard) }
           it { is_expected.to be_disallowed(:read_prometheus) }
           it { is_expected.to be_allowed(:read_deployment) }
+          it { is_expected.to be_allowed(:read_metrics_user_starred_dashboard) }
+          it { is_expected.to be_allowed(:create_metrics_user_starred_dashboard) }
         end
 
         context 'with anonymous' do
@@ -1239,6 +1153,8 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
           it { is_expected.to be_allowed(:metrics_dashboard) }
           it { is_expected.to be_allowed(:read_prometheus) }
           it { is_expected.to be_allowed(:read_deployment) }
+          it { is_expected.to be_allowed(:read_metrics_user_starred_dashboard) }
+          it { is_expected.to be_allowed(:create_metrics_user_starred_dashboard) }
         end
 
         context 'with guest' do
@@ -1263,6 +1179,8 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
           it { is_expected.to be_allowed(:metrics_dashboard) }
           it { is_expected.to be_allowed(:read_prometheus) }
           it { is_expected.to be_allowed(:read_deployment) }
+          it { is_expected.to be_allowed(:read_metrics_user_starred_dashboard) }
+          it { is_expected.to be_allowed(:create_metrics_user_starred_dashboard) }
         end
 
         context 'with guest' do
@@ -2480,26 +2398,6 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
     end
   end
 
-  describe 'publish_catalog_version' do
-    using RSpec::Parameterized::TableSyntax
-
-    where(:role, :allowed) do
-      :owner      | true
-      :maintainer | true
-      :developer  | true
-      :reporter   | false
-      :guest      | false
-    end
-
-    with_them do
-      let(:current_user) { public_send(role) }
-
-      it do
-        expect(subject.can?(:publish_catalog_version)).to be(allowed)
-      end
-    end
-  end
-
   describe 'infrastructure feature' do
     using RSpec::Parameterized::TableSyntax
 
@@ -2606,7 +2504,7 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
   end
 
   describe 'access_security_and_compliance' do
-    context 'when the "Security and compliance" is enabled' do
+    context 'when the "Security and Compliance" is enabled' do
       before do
         project.project_feature.update!(security_and_compliance_access_level: Featurable::PRIVATE)
       end
@@ -2652,7 +2550,7 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
       end
     end
 
-    context 'when the "Security and compliance" is not enabled' do
+    context 'when the "Security and Compliance" is not enabled' do
       before do
         project.project_feature.update!(security_and_compliance_access_level: Featurable::DISABLED)
       end
@@ -2761,7 +2659,7 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
         let(:current_user) { developer }
         let(:project) { public_project }
         let(:job) { build_stubbed(:ci_build, project: scope_project, user: current_user) }
-        let(:scope_project) { create(:project, :private) }
+        let_it_be(:scope_project) { create(:project, :private) }
 
         before do
           current_user.set_ci_job_token_scope!(job)
@@ -3040,7 +2938,7 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
 
         before do
           project.project_feature.update!(container_registry_access_level: access_level)
-          allow(current_user).to receive(:external).and_return(true)
+          current_user.update_column(:external, true)
         end
 
         it 'allows/disallows the abilities based on the container_registry feature access level' do
@@ -3548,80 +3446,17 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
     end
   end
 
-  describe 'pages' do
-    using RSpec::Parameterized::TableSyntax
-
-    where(:ability, :current_user, :access_level, :allowed) do
-      :admin_pages | ref(:maintainer) | Featurable::ENABLED  | true
-      :admin_pages | ref(:reporter)   | Featurable::ENABLED  | false
-      :admin_pages | ref(:guest)      | Featurable::ENABLED  | false
-      :admin_pages | ref(:non_member) | Featurable::ENABLED  | false
-
-      :update_pages | ref(:maintainer) | Featurable::ENABLED  | true
-      :update_pages | ref(:reporter)   | Featurable::ENABLED  | false
-      :update_pages | ref(:guest)      | Featurable::ENABLED  | false
-      :update_pages | ref(:non_member) | Featurable::ENABLED  | false
-
-      :remove_pages | ref(:maintainer) | Featurable::ENABLED  | true
-      :remove_pages | ref(:reporter)   | Featurable::ENABLED  | false
-      :remove_pages | ref(:guest)      | Featurable::ENABLED  | false
-      :remove_pages | ref(:non_member) | Featurable::ENABLED  | false
-
-      :read_pages | ref(:maintainer) | Featurable::ENABLED  | true
-      :read_pages | ref(:reporter)   | Featurable::ENABLED  | false
-      :read_pages | ref(:guest)      | Featurable::ENABLED  | false
-      :read_pages | ref(:non_member) | Featurable::ENABLED  | false
-
-      :read_pages_content | ref(:maintainer) | Featurable::ENABLED  | true
-      :read_pages_content | ref(:reporter)   | Featurable::ENABLED  | true
-      :read_pages_content | ref(:reporter)   | Featurable::PRIVATE  | true
-      :read_pages_content | ref(:reporter)   | Featurable::DISABLED | false
-      :read_pages_content | ref(:guest)      | Featurable::ENABLED  | true
-      :read_pages_content | ref(:guest)      | Featurable::PRIVATE  | true
-      :read_pages_content | ref(:guest)      | Featurable::DISABLED | false
-      :read_pages_content | ref(:non_member) | Featurable::ENABLED  | true
-      :read_pages_content | ref(:non_member) | Featurable::PRIVATE  | false
-      :read_pages_content | ref(:non_member) | Featurable::DISABLED | false
-    end
-    with_them do
-      before do
-        project.project_feature.update!(pages_access_level: access_level)
-      end
-
-      if params[:allowed]
-        it { expect_allowed(ability) }
-      else
-        it { expect_disallowed(ability) }
-      end
-    end
-  end
-
   describe 'read_model_registry' do
     using RSpec::Parameterized::TableSyntax
 
     where(:feature_flag_enabled, :current_user, :access_level, :allowed) do
       false | ref(:owner)      | Featurable::ENABLED  | false
-      true  | ref(:anonymous)  | Featurable::ENABLED  | true
-      true  | ref(:anonymous)  | Featurable::PRIVATE  | false
-      true  | ref(:anonymous)  | Featurable::DISABLED | false
+      true  | ref(:guest)      | Featurable::ENABLED  | true
+      true  | ref(:guest)      | Featurable::PRIVATE  | true
+      true  | ref(:guest)      | Featurable::DISABLED | false
       true  | ref(:non_member) | Featurable::ENABLED  | true
       true  | ref(:non_member) | Featurable::PRIVATE  | false
       true  | ref(:non_member) | Featurable::DISABLED | false
-      true  | ref(:guest)      | Featurable::ENABLED  | true
-      true  | ref(:guest)      | Featurable::PRIVATE  | false
-      true  | ref(:guest)      | Featurable::DISABLED | false
-      true  | ref(:reporter)   | Featurable::ENABLED  | true
-      true  | ref(:reporter)   | Featurable::PRIVATE  | true
-      true  | ref(:reporter)   | Featurable::DISABLED | false
-      true  | ref(:developer)  | Featurable::ENABLED  | true
-      true  | ref(:developer)  | Featurable::PRIVATE  | true
-      true  | ref(:developer)  | Featurable::DISABLED | false
-      true  | ref(:maintainer) | Featurable::ENABLED  | true
-      true  | ref(:maintainer) | Featurable::PRIVATE  | true
-      true  | ref(:maintainer) | Featurable::DISABLED | false
-      true  | ref(:owner)      | Featurable::ENABLED  | true
-      true  | ref(:owner)      | Featurable::PRIVATE  | true
-      true  | ref(:owner)      | Featurable::DISABLED | false
     end
     with_them do
       before do
@@ -3642,27 +3477,11 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
 
     where(:feature_flag_enabled, :current_user, :access_level, :allowed) do
       false | ref(:owner)      | Featurable::ENABLED  | false
-      true  | ref(:anonymous)  | Featurable::ENABLED  | false
-      true  | ref(:anonymous)  | Featurable::PRIVATE  | false
-      true  | ref(:anonymous)  | Featurable::DISABLED | false
-      true  | ref(:non_member) | Featurable::ENABLED  | false
-      true  | ref(:non_member) | Featurable::PRIVATE  | false
-      true  | ref(:non_member) | Featurable::DISABLED | false
-      true  | ref(:guest)      | Featurable::ENABLED  | false
-      true  | ref(:guest)      | Featurable::PRIVATE  | false
-      true  | ref(:guest)      | Featurable::DISABLED | false
-      true  | ref(:reporter)   | Featurable::ENABLED  | false
-      true  | ref(:reporter)   | Featurable::PRIVATE  | false
+      true  | ref(:reporter)   | Featurable::ENABLED  | true
+      true  | ref(:reporter)   | Featurable::PRIVATE  | true
       true  | ref(:reporter)   | Featurable::DISABLED | false
-      true  | ref(:developer)  | Featurable::ENABLED  | true
-      true  | ref(:developer)  | Featurable::PRIVATE  | true
-      true  | ref(:developer)  | Featurable::DISABLED | false
-      true  | ref(:maintainer) | Featurable::ENABLED  | true
-      true  | ref(:maintainer) | Featurable::PRIVATE  | true
-      true  | ref(:maintainer) | Featurable::DISABLED | false
-      true  | ref(:owner)      | Featurable::ENABLED  | true
-      true  | ref(:owner)      | Featurable::PRIVATE  | true
-      true  | ref(:owner)      | Featurable::DISABLED | false
+      true  | ref(:guest)      | Featurable::ENABLED  | false
+      true  | ref(:non_member) | Featurable::ENABLED  | false
     end
     with_them do
       before do
@@ -3683,27 +3502,12 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
 
     where(:ff_ml_experiment_tracking, :current_user, :access_level, :allowed) do
       false | ref(:owner)      | Featurable::ENABLED  | false
-      true  | ref(:anonymous)  | Featurable::ENABLED  | true
-      true  | ref(:anonymous)  | Featurable::PRIVATE  | false
-      true  | ref(:anonymous)  | Featurable::DISABLED | false
+      true  | ref(:guest)      | Featurable::ENABLED  | true
+      true  | ref(:guest)      | Featurable::PRIVATE  | true
+      true  | ref(:guest)      | Featurable::DISABLED | false
       true  | ref(:non_member) | Featurable::ENABLED  | true
       true  | ref(:non_member) | Featurable::PRIVATE  | false
       true  | ref(:non_member) | Featurable::DISABLED | false
-      true  | ref(:guest)      | Featurable::ENABLED  | true
-      true  | ref(:guest)      | Featurable::PRIVATE  | false
-      true  | ref(:guest)      | Featurable::DISABLED | false
-      true  | ref(:reporter)   | Featurable::ENABLED  | true
-      true  | ref(:reporter)   | Featurable::PRIVATE  | true
-      true  | ref(:reporter)   | Featurable::DISABLED | false
-      true  | ref(:developer)  | Featurable::ENABLED  | true
-      true  | ref(:developer)  | Featurable::PRIVATE  | true
-      true  | ref(:developer)  | Featurable::DISABLED | false
-      true  | ref(:maintainer) | Featurable::ENABLED  | true
-      true  | ref(:maintainer) | Featurable::PRIVATE  | true
-      true  | ref(:maintainer) | Featurable::DISABLED | false
-      true  | ref(:owner)      | Featurable::ENABLED  | true
-      true  | ref(:owner)      | Featurable::PRIVATE  | true
-      true  | ref(:owner)      | Featurable::DISABLED | false
     end
     with_them do
       before do
@@ -3724,27 +3528,11 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
 
     where(:ff_ml_experiment_tracking, :current_user, :access_level, :allowed) do
       false | ref(:owner)      | Featurable::ENABLED  | false
-      true  | ref(:anonymous)  | Featurable::ENABLED  | false
-      true  | ref(:anonymous)  | Featurable::PRIVATE  | false
-      true  | ref(:anonymous)  | Featurable::DISABLED | false
-      true  | ref(:non_member) | Featurable::ENABLED  | false
-      true  | ref(:non_member) | Featurable::PRIVATE  | false
-      true  | ref(:non_member) | Featurable::DISABLED | false
-      true  | ref(:guest)      | Featurable::ENABLED  | false
-      true  | ref(:guest)      | Featurable::PRIVATE  | false
-      true  | ref(:guest)      | Featurable::DISABLED | false
-      true  | ref(:reporter)   | Featurable::ENABLED  | false
-      true  | ref(:reporter)   | Featurable::PRIVATE  | false
+      true  | ref(:reporter)   | Featurable::ENABLED  | true
+      true  | ref(:reporter)   | Featurable::PRIVATE  | true
       true  | ref(:reporter)   | Featurable::DISABLED | false
-      true  | ref(:developer)  | Featurable::ENABLED  | true
-      true  | ref(:developer)  | Featurable::PRIVATE  | true
-      true  | ref(:developer)  | Featurable::DISABLED | false
-      true  | ref(:maintainer) | Featurable::ENABLED  | true
-      true  | ref(:maintainer) | Featurable::PRIVATE  | true
-      true  | ref(:maintainer) | Featurable::DISABLED | false
-      true  | ref(:owner)      | Featurable::ENABLED  | true
-      true  | ref(:owner)      | Featurable::PRIVATE  | true
-      true  | ref(:owner)      | Featurable::DISABLED | false
+      true  | ref(:guest)      | Featurable::ENABLED  | false
+      true  | ref(:non_member) | Featurable::ENABLED  | false
     end
     with_them do
       before do
@@ -3797,76 +3585,6 @@ RSpec.describe ProjectPolicy, feature_category: :system_access do
       let(:current_user) { developer }
 
       it { expect_disallowed(:read_web_hook, :admin_web_hook) }
-    end
-  end
-
-  describe 'build_push_code' do
-    using RSpec::Parameterized::TableSyntax
-
-    let(:policy) { :build_push_code }
-
-    where(:user_role, :project_visibility, :push_repository_for_job_token_allowed, :self_referential_project, :allowed, :ff_disabled) do
-      :maintainer | :public   | true  | true  | true  | false
-      :owner      | :public   | true  | true  | true  | false
-      :maintainer | :private  | true  | true  | true  | false
-      :developer  | :public   | true  | true  | true  | false
-      :reporter   | :public   | true  | true  | false | false
-      :guest      | :public   | true  | true  | false | false
-      :guest      | :private  | true  | true  | false | false
-      :guest      | :internal | true  | true  | false | false
-      :anonymous  | :public   | true  | true  | false | false
-      :maintainer | :public   | false | true  | false | false
-      :maintainer | :public   | true  | false | false | false
-      :maintainer | :public   | false | false | false | false
-      :maintainer | :public   | true  | true  | false | true
-      :owner      | :public   | true  | true  | false | true
-      :maintainer | :private  | true  | true  | false | true
-      :developer  | :public   | true  | true  | false | true
-      :reporter   | :public   | true  | true  | false | true
-    end
-
-    with_them do
-      let(:current_user) do
-        public_send(user_role)
-      end
-
-      let(:job) { build_stubbed(:ci_build, project: scope_project, user: current_user) }
-      let(:project) { public_send("#{project_visibility}_project") }
-      let(:self_referential_job) { build_stubbed(:ci_build, project: project, user: current_user) }
-      let(:scope_project) { public_send(:private_project) }
-
-      before do
-        stub_feature_flags(allow_push_repository_for_job_token: false) if ff_disabled
-
-        project.add_guest(guest)
-        project.add_reporter(reporter)
-        project.add_developer(developer)
-        project.add_maintainer(maintainer)
-        project.add_maintainer(owner)
-
-        project.ci_inbound_job_token_scope_enabled = true
-        project.save!
-
-        ci_cd_settings = project.ci_cd_settings
-        ci_cd_settings.push_repository_for_job_token_allowed = push_repository_for_job_token_allowed
-        ci_cd_settings.save!
-
-        if user_role != :anonymous
-          if self_referential_project
-            allow(current_user).to receive(:ci_job_token_scope).and_return(current_user.set_ci_job_token_scope!(self_referential_job))
-          else
-            allow(current_user).to receive(:ci_job_token_scope).and_return(current_user.set_ci_job_token_scope!(job))
-          end
-        end
-      end
-
-      it 'allows/disallows build_push_code' do
-        if allowed
-          is_expected.to be_allowed(:build_push_code)
-        else
-          is_expected.to be_disallowed(:build_push_code)
-        end
-      end
     end
   end
 

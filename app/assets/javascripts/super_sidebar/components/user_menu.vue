@@ -26,7 +26,7 @@ export default {
     editStatus: s__('SetStatusModal|Edit status'),
     editProfile: s__('CurrentUser|Edit profile'),
     preferences: s__('CurrentUser|Preferences'),
-    buyPipelineMinutes: s__('CurrentUser|Buy compute minutes'),
+    buyPipelineMinutes: s__('CurrentUser|Buy Pipeline minutes'),
     oneOfGroupsRunningOutOfPipelineMinutes: s__('CurrentUser|One of your groups is running out'),
     gitlabNext: s__('CurrentUser|Switch to GitLab Next'),
     startTrial: s__('CurrentUser|Start an Ultimate trial'),
@@ -345,11 +345,11 @@ export default {
           @action="trackBuyCIMins"
         >
           <template #list-item>
-            <span class="gl-flex gl-flex-col">
+            <span class="gl-display-flex gl-flex-direction-column">
               <span>{{ buyPipelineMinutesItem.text }} <gl-emoji data-name="clock9" /></span>
               <span
                 v-if="data.pipeline_minutes.show_with_subtext"
-                class="small gl-pt-2 gl-text-sm gl-text-orange-800"
+                class="gl-font-sm small gl-pt-2 gl-text-orange-800"
                 >{{ buyPipelineMinutesItem.warningText }}</span
               >
             </span>

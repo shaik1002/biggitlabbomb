@@ -1,3 +1,5 @@
+import { s__ } from '~/locale';
+
 import { mockTracking } from 'helpers/tracking_helper';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import { createAlert, VARIANT_SUCCESS } from '~/alert';
@@ -55,7 +57,7 @@ describe('GroupRunnerRunnerApp', () => {
 
       it('pushes an alert to be shown after redirection', () => {
         expect(saveAlertToLocalStorage).toHaveBeenCalledWith({
-          message: 'Runner created.',
+          message: s__('Runners|Runner created.'),
           variant: VARIANT_SUCCESS,
         });
       });

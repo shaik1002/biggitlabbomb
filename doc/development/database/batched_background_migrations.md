@@ -6,7 +6,7 @@ info: "See the Technical Writers assigned to Development Guidelines: https://han
 
 # Batched background migrations
 
-Batched background migrations should be used to perform data migrations whenever a
+Batched Background Migrations should be used to perform data migrations whenever a
 migration exceeds [the time limits](../migration_style_guide.md#how-long-a-migration-should-take)
 in our guidelines. For example, you can use batched background
 migrations to migrate data that's stored in a single JSON column
@@ -73,7 +73,7 @@ batch size may be increased or decreased, based on the performance of the last 2
 hide empty description
 skinparam ConditionEndStyle hline
 left to right direction
-rectangle "Batched background migration queue" as migrations {
+rectangle "Batched Background Migration Queue" as migrations {
   rectangle "Migration N (active)" as migrationn
   rectangle "Migration 1 (completed)" as migration1
   rectangle "Migration 2 (active)" as migration2
@@ -129,7 +129,7 @@ rectangle Runner {
 
 Batched background migrations are executed in a context of a Sidekiq process.
 The usual Sidekiq rules apply, especially the rule that jobs should be small
-and idempotent. Ensure that in the case where your migration job is retried, data
+and idempotent. Make sure that in case that your migration job is retried, data
 integrity is guaranteed.
 
 See [Sidekiq best practices guidelines](https://github.com/mperham/sidekiq/wiki/Best-Practices)
@@ -141,47 +141,6 @@ After each job execution, a verification takes place to check if the migration c
 The optimization underlying mechanic is based on the concept of time efficiency. It calculates
 the exponential moving average of time efficiencies for the last N jobs and updates the batch
 size of the batched background migration to its optimal value.
-
-#### For GitLab SAAS
-
-When updating a large dataset specify different batch sizes for GitLab SAAS.
-
-```ruby
-# frozen_string_literal: true
-
-class BatchedMigration < Gitlab::Database::Migration[2.2]
-  BATCH_SIZE = 1000
-  SUB_BATCH_SIZE = 100
-  GITLAB_OPTIMIZED_BATCH_SIZE = 75_000
-  GITLAB_OPTIMIZED_SUB_BATCH_SIZE = 250
-
-  def up
-    queue_batched_background_migration(
-      MIGRATION,
-      TABLE_NAME,
-      COLUMN_NAME,
-      job_interval: DELAY_INTERVAL,
-      **batch_sizes
-    )
-  end
-
-  private
-
-  def batch_sizes
-    if Gitlab.com_except_jh?
-      {
-        batch_size: GITLAB_OPTIMIZED_BATCH_SIZE,
-        sub_batch_size: GITLAB_OPTIMIZED_SUB_BATCH_SIZE
-      }
-    else
-      {
-        batch_size: BATCH_SIZE,
-        sub_batch_size: SUB_BATCH_SIZE
-      }
-    end
-  end
-end
-```
 
 ### Job retry mechanism
 
@@ -228,9 +187,9 @@ the migration as `failed`) if any of the following is true:
 
 ### Throttling batched migrations
 
-Because batched migrations are update heavy and there have been incidents due to the heavy load from these migrations while the database was underperforming, a throttling mechanism exists to mitigate future incidents.
+Because batched migrations are update heavy and there were few incidents in the past because of the heavy load from migrations while the database was underperforming, a throttling mechanism exists to mitigate them.
 
-These database indicators are checked to throttle a migration. Upon receiving a
+These database indicators are checked to throttle a migration. On getting a
 stop signal, the migration is paused for a set time (10 minutes):
 
 - WAL queue pending archival crossing the threshold.
@@ -238,7 +197,7 @@ stop signal, the migration is paused for a set time (10 minutes):
 - Patroni apdex SLI dropping below the SLO.
 - WAL rate crossing the threshold.
 
-There is an ongoing effort to add more indicators to further enhance the
+It's an ongoing effort to add more indicators to further enhance the
 database health check framework. For more details, see
 [epic 7594](https://gitlab.com/groups/gitlab-org/-/epics/7594).
 
@@ -261,12 +220,7 @@ data fully migrated. ([See an example](https://gitlab.com/gitlab-org/gitlab/-/bl
 ### Generate a batched background migration
 
 The custom generator `batched_background_migration` scaffolds necessary files and
-accepts `table_name`, `column_name`, and `feature_category` as arguments. When
-choosing the `column_name`, ensure that you are using a column type that can be iterated over distinctly,
-preferably the table's primary key. The table will be iterated over based on the column defined here.
-For more information, see [Batch over non-distinct columns](#batch-over-non-distinct-columns).
-
-Usage:
+accepts `table_name`, `column_name`, and `feature_category` as arguments. Usage:
 
 ```shell
 bundle exec rails g batched_background_migration my_batched_migration --table_name=<table-name> --column_name=<column-name> --feature_category=<feature-category>
@@ -456,7 +410,7 @@ In the example above we need an index on `(type, id)` to support the filters. Se
 
 ### Access data for multiple databases
 
-Background migration contrary to regular migrations does have access to multiple databases
+Background Migration contrary to regular migrations does have access to multiple databases
 and can be used to efficiently access and update data across them. To properly indicate
 a database to be used it is desired to create ActiveRecord model inline the migration code.
 Such model should use a correct [`ApplicationRecord`](multiple_databases.md#gitlab-schema)
@@ -524,80 +478,6 @@ To requeue a batched background migration, you must:
   of the `#up` method to ensure that any existing runs are cleaned up.
 - Update the `db/docs/batched_background_migration/*.yml` file from the original
   migration to include information about the requeue.
-
-#### Example
-
-**Original Migration:**
-
-```ruby
-# frozen_string_literal: true
-
-class QueueResolveVulnerabilitiesForRemovedAnalyzers < Gitlab::Database::Migration[2.2]
-  milestone '17.3'
-
-  MIGRATION = "ResolveVulnerabilitiesForRemovedAnalyzers"
-
-  def up
-    # no-op because there was a bug in the original migration, which has been
-    # fixed by
-  end
-
-  def down
-    # no-op because there was a bug in the original migration, which has been
-    # fixed in https://gitlab.com/gitlab-org/gitlab/-/merge_requests/162527
-  end
-end
-```
-
-**Requeued migration:**
-
-```ruby
-# frozen_string_literal: true
-
-class RequeueResolveVulnerabilitiesForRemovedAnalyzers < Gitlab::Database::Migration[2.2]
-  milestone '17.4'
-
-  restrict_gitlab_migration gitlab_schema: :gitlab_main
-
-  MIGRATION = "ResolveVulnerabilitiesForRemovedAnalyzers"
-  DELAY_INTERVAL = 2.minutes
-  BATCH_SIZE = 10_000
-  SUB_BATCH_SIZE = 100
-
-  def up
-    # Clear previous background migration execution from QueueResolveVulnerabilitiesForRemovedAnalyzers
-    delete_batched_background_migration(MIGRATION, :vulnerability_reads, :id, [])
-
-    queue_batched_background_migration(
-      MIGRATION,
-      :vulnerability_reads,
-      :id,
-      job_interval: DELAY_INTERVAL,
-      batch_size: BATCH_SIZE,
-      sub_batch_size: SUB_BATCH_SIZE
-    )
-  end
-
-  def down
-    delete_batched_background_migration(MIGRATION, :vulnerability_reads, :id, [])
-  end
-end
-```
-
-**Batched migration dictionary:**
-
-The `milestone` and `queued_migration_version` should be the ones of requeued migration (in this eg: RequeueResolveVulnerabilitiesForRemovedAnalyzers).
-
-```markdown
----
-migration_job_name: ResolveVulnerabilitiesForRemovedAnalyzers
-description: Resolves all detected vulnerabilities for removed analyzers.
-feature_category: static_application_security_testing
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/162691
-milestone: '17.4'
-queued_migration_version: 20240814085540
-finalized_by: # version of the migration that finalized this BBM
-```
 
 ### Batch over non-distinct columns
 
@@ -859,6 +739,14 @@ class AddNotNullToRoutesNamespaceId < Gitlab::Database::Migration[2.1]
 end
 ```
 
+#### Notes
+
+- `BackgroundMigration::DictionaryFile` cop ensures the presence of `finalize_after` and `introduced_by_url` keys in the
+  BBM dictionary.
+  - `finalize_after`: Captures the (approximate) date after which the BBM is expected to be finalized.
+  - `introduced_by_url`: After the `finalize_after` date, an issue is created using the labels and author from `introduced_by_url`.
+    - As of writing (2023-08-11), issue [#424886](https://gitlab.com/gitlab-org/gitlab/-/issues/424886) is still open.
+
 ## Managing
 
 NOTE:
@@ -884,7 +772,7 @@ This command supports the following options:
 
 Output example:
 
-![Output of the ChatOps command listing all the active batched background migrations.](img/list_v15_4.png)
+![List command](img/list_v15_4.png)
 
 NOTE:
 ChatOps returns 20 batched background migrations order by `created_at` (DESC).
@@ -909,7 +797,7 @@ This command supports the following options:
 
 Output example:
 
-![Output of the ChatOps command to know the progress and status of a specific batched background migration using MIGRATION_ID.](img/status_v15_4.png)
+![Status command](img/status_v15_4.png)
 
 `Progress` represents the percentage of the background migration that has been completed.
 
@@ -943,7 +831,7 @@ This command supports the following options:
 
 Output example:
 
-![Output of the ChatOps command to pause a specific batched background migration using MIGRATION_ID.](img/pause_v15_4.png)
+![Pause command](img/pause_v15_4.png)
 
 NOTE:
 You can pause only `active` batched background migrations.
@@ -968,7 +856,7 @@ This command supports the following options:
 
 Output example:
 
-![Output of the ChatOps command to resume a specific batched background migration using MIGRATION_ID.](img/resume_v15_4.png)
+![Resume command](img/resume_v15_4.png)
 
 NOTE:
 You can resume only `active` batched background migrations
@@ -1217,6 +1105,7 @@ background migration.
     introduced_by_url: "https://mr_url"
     milestone: 16.6
     queued_migration_version: 20231113120650
+    finalize_after: "2023-11-15"
     finalized_by: # version of the migration that ensured this bbm
    ```
 
@@ -1267,6 +1156,7 @@ background migration.
     introduced_by_url: "https://mr_url"
     milestone: 16.6
     queued_migration_version: 20231113120650
+    finalize_after: "2023-11-15"
     finalized_by: 20231115120912
    ```
 

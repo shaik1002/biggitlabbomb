@@ -21,12 +21,6 @@ The `check` Praefect sub-command runs a series of checks to determine the health
 gitlab-ctl praefect check
 ```
 
-If Praefect is deployed by using the Praefect chart, run the binary directly.
-
-```shell
-/usr/local/bin/praefect check
-```
-
 The following sections describe the checks that are run.
 
 ### Praefect migrations
@@ -83,7 +77,7 @@ If this check fails:
 ### Check clock synchronization
 
 Authentication between Praefect and the Gitaly servers requires the server times to be
-within 60 seconds of each other, so that the token check succeeds.
+in sync so the token check succeeds.
 
 This check helps identify the root cause of `permission denied`
 [errors being logged by Praefect](troubleshooting.md#permission-denied-errors-appearing-in-gitaly-or-praefect-logs-when-accessing-repositories).
@@ -96,7 +90,7 @@ checking with NTP service at  and allowed clock drift 60000ms [correlation_id: <
 Failed (fatal) error: gitaly node at tcp://[gitlab.example-instance.com]:8075: rpc error: code = DeadlineExceeded desc = context deadline exceeded
 ```
 
-To resolve this issue, set an environment variable on all Praefect servers to point to an accessible internal [Network Time Protocol](https://en.wikipedia.org/wiki/Network_Time_Protocol) (NTP) server. For example:
+To resolve this issue, set an environment variable on all Praefect servers to point to an accessible internal NTP server. For example:
 
 ```shell
 export NTP_HOST=ntp.example.com
@@ -143,7 +137,7 @@ to inspect the metadata for troubleshooting.
 You can retrieve a repository's metadata by its Praefect-assigned repository ID:
 
 ```shell
-sudo -u git -- /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml metadata -repository-id <repository-id>
+sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml metadata -repository-id <repository-id>
 ```
 
 When the physical path on the physical storage starts with `@cluster`, you can
@@ -152,7 +146,7 @@ When the physical path on the physical storage starts with `@cluster`, you can
 You can also retrieve a repository's metadata by its virtual storage and relative path:
 
 ```shell
-sudo -u git -- /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml metadata -virtual-storage <virtual-storage> -relative-path <relative-path>
+sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml metadata -virtual-storage <virtual-storage> -relative-path <relative-path>
 ```
 
 ### Examples
@@ -160,13 +154,13 @@ sudo -u git -- /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefec
 To retrieve the metadata for a repository with a Praefect-assigned repository ID of 1:
 
 ```shell
-sudo -u git -- /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml metadata -repository-id 1
+sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml metadata -repository-id 1
 ```
 
 To retrieve the metadata for a repository with virtual storage `default` and relative path `@hashed/b1/7e/b17ef6d19c7a5b1ee83b907c595526dcb1eb06db8227d650d5dda0a9f4ce8cd9.git`:
 
 ```shell
-sudo -u git -- /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml metadata -virtual-storage default -relative-path @hashed/b1/7e/b17ef6d19c7a5b1ee83b907c595526dcb1eb06db8227d650d5dda0a9f4ce8cd9.git
+sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml metadata -virtual-storage default -relative-path @hashed/b1/7e/b17ef6d19c7a5b1ee83b907c595526dcb1eb06db8227d650d5dda0a9f4ce8cd9.git
 ```
 
 Either of these examples retrieve the following metadata for an example repository:
@@ -243,13 +237,6 @@ This Rake task checksums the repository on all Gitaly nodes.
 The [Praefect `dataloss`](recovery.md#check-for-data-loss) command only checks the state of the repository in the Praefect database, and cannot
 be relied to detect sync problems in this scenario.
 
-### `dataloss` command shows `@failed-geo-sync` repositories as out of sync
-
-`@failed-geo-sync` is a legacy path that was used on GitLab 16.1 and earlier by Geo when project synchronization failed and has been
-[deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/375640).
-
-On GitLab 16.2 and later, you can safely delete this path. The `@failed-geo-sync` directories are located under [the repository path](../repository_storage_paths.md) on the Gitaly nodes.
-
 ## Relation does not exist errors
 
 By default Praefect database tables are created automatically by `gitlab-ctl reconfigure` task.
@@ -274,7 +261,7 @@ To solve this, the database schema migration can be done using `sql-migrate` sub
 the `praefect` command:
 
 ```shell
-$ sudo -u git -- /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml sql-migrate
+$ sudo /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml sql-migrate
 praefect sql-migrate: OK (applied 21 migrations)
 ```
 
@@ -304,107 +291,6 @@ Possible solutions:
 - Provision larger VMs to gain access to larger network traffic allowances.
 - Use your cloud service's monitoring and logging to check that the Praefect nodes are not exhausting their traffic allowances.
 
-## `gitlab-ctl reconfigure` fails with a Praefect configuration error
-
-If `gitlab-ctl reconfigure` fails, you might see this error:
-
-```plaintext
-STDOUT: praefect: configuration error: error reading config file: toml: cannot store TOML string into a Go int
-```
+## `gitlab-ctl reconfigure` fails with error: `STDOUT: praefect: configuration error: error reading config file: toml: cannot store TOML string into a Go int`
 
 This error occurs when `praefect['database_port']` or `praefect['database_direct_port']` are configured as a string instead of an integer.
-
-## Common replication errors
-
-The following are some common replication errors with possible solutions.
-
-### Lock file exists
-
-Lock files are used to prevent multiple updates to the same ref. Sometimes lock files become stale, and replication fails with the error `error: cannot lock ref`.
-
-To clear stale `*.lock` files, you can trigger `OptimizeRepositoryRequest` on the [Rails console](../operations/rails_console.md):
-
-```ruby
-p = Project.find <Project ID>
-client = Gitlab::GitalyClient::RepositoryService.new(p.repository)
-client.optimize_repository
-```
-
-If triggering `OptimizeRepositoryRequest` does not work, inspect the files manually to confirm the creation date and decide if the `*.lock` file can be manually removed.
-Any lock files created over 24 hours ago are safe to remove.
-
-### Git `fsck` errors
-
-Gitaly repositories with invalid objects can lead to replication failures with errors in Gitaly logs such as:
-
-- `exit status 128, stderr: "fatal: git upload-pack: not our ref"`.
-- `"fatal: bad object 58....e0f... ssh://gitaly/internal.git did not send all necessary objects`.
-
-As long one of the Gitaly nodes still has a healthy copy of the repository, these issues can be fixed by:
-
-1. [Removing the repository from the Praefect database](recovery.md#manually-remove-repositories).
-1. Using the [Praefect `track-repository` subcommand](recovery.md#manually-add-a-single-repository-to-the-tracking-database) to re-track it.
-
-This will use the copy of the repository from the authoritative Gitaly node to overwrite the copies on all other Gitaly nodes.
-Be sure a recent backup of the repository has been made before running these commands.
-
-1. Move the bad repository out of place:
-
-   ```shell
-   run `mv <REPOSITORY_PATH> <REPOSITORY_PATH>.backup`
-   ```
-
-   For example:
-
-   ```shell
-   mv /var/opt/gitlab/git-data/repositories/@cluster/repositories/de/74/2335 /var/opt/gitlab/git-data/repositories/@cluster/repositories/de/74/2335.backup
-   ```
-
-1. Run the Praefect commands to trigger replication:
-
-   ```shell
-   # Validate you have the correct repository.
-   sudo -u git -- /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml remove-repository -virtual-storage gitaly -relative-path '<relative_path>' -db-only
-
-   # Run again with '--apply' flag to remove repository from the Praefect tracking database
-   sudo -u git -- /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml remove-repository -virtual-storage gitaly -relative-path '<relative_path>' -db-only --apply
-
-   # Re-track the repository, overwriting the secondary nodes
-   sudo -u git -- /opt/gitlab/embedded/bin/praefect -config /var/opt/gitlab/praefect/config.toml track-repository -virtual-storage gitaly -authoritative-storage '<healthy_gitaly>' -relative-path '<relative_path>' -replica-path '<replica_path>'-replicate-immediately
-   ```
-
-### Replication fails silently
-
-If the [Praefect `dataloss`](recovery.md#check-for-data-loss) shows [repositories partially unavailable](recovery.md#unavailable-replicas-of-available-repositories), and [`accept-dataloss` command](recovery.md#accept-data-loss) fails to synchronize the repository with no error present on the logs, this could be due to a mismatch in Praefect database in the `repository_id` field of the `storage_repositories` table. To check for a mismatch:
-
-1. Connect to the Praefect database.
-1. Run the following query:
-
-   ```sql
-   select * from storage_repositories where relative_path = '<relative-path>';
-   ```
-
-   Replace `<relative-path>` with the repository path [beginning with `@hashed`](../repository_storage_paths.md#hashed-storage).
-
-### Alternate directory does not exists
-
-GitLab uses the [Git alternates mechanism for deduplication](../../development/git_object_deduplication.md). `alternates` is a text file that points to the `objects` directory on
-a `@pool` repository to fetch objects. If this file points to an invalid path, replication can fail with one of the following the errors:
-
-- `"error":"no alternates directory exists", "warning","msg":"alternates file does not point to valid git repository"`
-- `"error":"unexpected alternates content:`
-- `remote: error: unable to normalize alternate object path`
-
-To investigate the cause of this error:
-
-1. Check if the project is part of a pool by using the [Rails console](../operations/rails_console.md):
-
-   ```ruby
-   project = Project.find_by_id(<project id>)
-   project.pool_repository
-   ```
-
-1. Check if the pool repository path exists on disk and that it matches [the `alternates` file](../../development/git_object_deduplication.md) content.
-1. Check if the path in the [`alternates` file](../../development/git_object_deduplication.md) is reachable from the `objects` directory in the project.
-
-After performing these checks, reach out to GitLab Support with the information collected.

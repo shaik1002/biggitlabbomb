@@ -33,6 +33,7 @@ export default {
   methods: {},
   i18n: {
     agentId: s__('ClusterAgents|Agent ID #%{agentId}'),
+    neverConnectedText: s__('ClusterAgents|Never'),
   },
   AGENT_STATUSES,
 };
@@ -55,6 +56,7 @@ export default {
 
     <span data-testid="agent-last-used-date">
       <time-ago-tooltip v-if="agentLastContact" :time="agentLastContact" />
+      <span v-else>{{ $options.i18n.neverConnectedText }}</span>
     </span>
   </div>
 </template>

@@ -100,7 +100,7 @@ module Import
     end
 
     def log_error(message)
-      ::Import::Framework::Logger.error(
+      Gitlab::Import::Logger.error(
         message: 'Import failed due to a Fogbugz error',
         error: message
       )

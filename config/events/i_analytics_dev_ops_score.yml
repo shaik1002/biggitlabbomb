@@ -2,11 +2,16 @@
 description: User visited /admin/dev_ops_reports
 internal_events: true
 action: i_analytics_dev_ops_score
+label_description:
+property_description:
+value_description:
 extra_properties:
 identifiers:
 - project
 - user
 - namespace
+product_section: dev
+product_stage: manage
 product_group: optimize
 milestone: "16.4"
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/131045

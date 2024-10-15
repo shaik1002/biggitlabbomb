@@ -58,7 +58,7 @@ export default {
           -
           <gl-button
             variant="link"
-            class="!gl-text-inherit"
+            class="gl-reset-color!"
             data-testid="assign-yourself"
             @click="assignSelf"
           >

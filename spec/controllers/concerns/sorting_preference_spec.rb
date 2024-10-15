@@ -7,7 +7,7 @@ RSpec.describe SortingPreference do
   let(:params) { {} }
 
   let(:controller_class) do
-    Class.new(ApplicationController) do
+    Class.new do
       def self.helper_method(name); end
 
       include SortingPreference

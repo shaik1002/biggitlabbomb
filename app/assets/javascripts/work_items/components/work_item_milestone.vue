@@ -163,7 +163,6 @@ export default {
           if (data.workItemUpdate.errors.length) {
             throw new Error(data.workItemUpdate.errors.join('\n'));
           }
-          this.$emit('milestoneUpdated', selectedMilestoneId);
         })
         .catch((error) => {
           this.localMilestone = this.workItemMilestone;
@@ -203,7 +202,7 @@ export default {
       <div v-if="item.title">{{ item.title }}</div>
     </template>
     <template #readonly>
-      <gl-link class="!gl-text-gray-900" :href="localMilestone.webPath">
+      <gl-link class="gl-text-gray-900!" :href="localMilestone.webPath">
         {{ localMilestone.title }}{{ expired }}
       </gl-link>
     </template>

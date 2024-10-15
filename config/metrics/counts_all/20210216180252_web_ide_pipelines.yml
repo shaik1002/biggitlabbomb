@@ -2,7 +2,9 @@
 data_category: optional
 key_path: counts.web_ide_pipelines
 description: Count of Pipeline tab views in the Web IDE
-product_group: remote_development
+product_section: dev
+product_stage: create
+product_group: ide
 value_type: number
 status: active
 time_frame: all
@@ -21,4 +23,3 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

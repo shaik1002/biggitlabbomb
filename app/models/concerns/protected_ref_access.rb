@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module ProtectedRefAccess
-  include Importable
   extend ActiveSupport::Concern
 
   class_methods do
@@ -71,6 +70,9 @@ module ProtectedRefAccess
   def check_access(current_user, current_project = project)
     return false if current_user.nil? || no_access?
     return current_user.admin? if admin_access?
+
+    return false if Feature.enabled?(:check_membership_in_protected_ref_access) &&
+      (current_project && !current_project.member?(current_user))
 
     yield if block_given?
 

@@ -1,13 +1,13 @@
 <script>
-import { GlBadge, GlTab, GlTabs } from '@gitlab/ui';
+import { GlTab, GlTabs, GlBadge } from '@gitlab/ui';
 import VueRouter from 'vue-router';
 import { n__, s__, sprintf } from '~/locale';
 import MetadataItem from '~/vue_shared/components/registry/metadata_item.vue';
 import TitleArea from '~/vue_shared/components/registry/title_area.vue';
 import { MODEL_ENTITIES } from '~/ml/model_registry/constants';
 import ModelVersionList from '~/ml/model_registry/components/model_version_list.vue';
+import CandidateList from '~/ml/model_registry/components/candidate_list.vue';
 import ModelDetail from '~/ml/model_registry/components/model_detail.vue';
-import ModelVersionCreate from '~/ml/model_registry/components/model_version_create.vue';
 import ActionsDropdown from '~/ml/model_registry/components/actions_dropdown.vue';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { visitUrlWithAlerts } from '~/lib/utils/url_utility';
@@ -16,10 +16,10 @@ import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import DeleteDisclosureDropdownItem from '../components/delete_disclosure_dropdown_item.vue';
 import LoadOrErrorOrShow from '../components/load_or_error_or_show.vue';
 import DeleteModel from '../components/functional/delete_model.vue';
-import ModelEdit from '../components/model_edit.vue';
 
 const ROUTE_DETAILS = 'details';
 const ROUTE_VERSIONS = 'versions';
+const ROUTE_CANDIDATES = 'candidates';
 
 const deletionSuccessfulAlert = {
   id: 'ml-model-deleted-successfully',
@@ -38,6 +38,11 @@ const routes = [
     name: ROUTE_VERSIONS,
     component: ModelVersionList,
   },
+  {
+    path: '/candidates',
+    name: ROUTE_CANDIDATES,
+    component: CandidateList,
+  },
   { path: '*', redirect: { name: ROUTE_DETAILS } },
 ];
 
@@ -53,8 +58,6 @@ export default {
     MetadataItem,
     LoadOrErrorOrShow,
     DeleteModel,
-    ModelVersionCreate,
-    ModelEdit,
   },
   router: new VueRouter({
     routes,
@@ -63,10 +66,6 @@ export default {
     return {
       mlflowTrackingUrl: this.mlflowTrackingUrl,
       projectPath: this.projectPath,
-      canWriteModelRegistry: this.canWriteModelRegistry,
-      maxAllowedFileSize: this.maxAllowedFileSize,
-      latestVersion: this.latestVersion,
-      markdownPreviewPath: this.markdownPreviewPath,
     };
   },
   props: {
@@ -91,19 +90,6 @@ export default {
       required: true,
     },
     mlflowTrackingUrl: {
-      type: String,
-      required: true,
-    },
-    maxAllowedFileSize: {
-      type: Number,
-      required: true,
-    },
-    latestVersion: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    markdownPreviewPath: {
       type: String,
       required: true,
     },
@@ -134,6 +120,9 @@ export default {
   computed: {
     versionCount() {
       return this.model?.versionCount || 0;
+    },
+    candidateCount() {
+      return this.model?.candidateCount || 0;
     },
     tabIndex() {
       return routes.findIndex(({ name }) => name === this.$route.name);
@@ -175,6 +164,7 @@ export default {
   modelVersionEntity: MODEL_ENTITIES.modelVersion,
   ROUTE_DETAILS,
   ROUTE_VERSIONS,
+  ROUTE_CANDIDATES,
 };
 </script>
 
@@ -187,9 +177,10 @@ export default {
             <metadata-item icon="machine-learning" :text="versionsCountLabel" />
           </template>
 
+          <template #sub-header>
+            {{ description }}
+          </template>
           <template #right-actions>
-            <model-edit v-if="canWriteModelRegistry" :model="model" />
-            <model-version-create v-if="canWriteModelRegistry" :model-gid="modelGid" />
             <actions-dropdown>
               <delete-disclosure-dropdown-item
                 v-if="canWriteModelRegistry"
@@ -208,14 +199,17 @@ export default {
 
         <load-or-error-or-show :is-loading="isLoading" :error-message="errorMessage">
           <gl-tabs class="gl-mt-4" :value="tabIndex">
-            <gl-tab
-              :title="s__('MlModelRegistry|Model card')"
-              @click="goTo($options.ROUTE_DETAILS)"
-            />
+            <gl-tab :title="s__('MlModelRegistry|Details')" @click="goTo($options.ROUTE_DETAILS)" />
             <gl-tab @click="goTo($options.ROUTE_VERSIONS)">
               <template #title>
                 {{ s__('MlModelRegistry|Versions') }}
-                <gl-badge class="gl-tab-counter-badge">{{ versionCount }}</gl-badge>
+                <gl-badge size="sm" class="gl-tab-counter-badge">{{ versionCount }}</gl-badge>
+              </template>
+            </gl-tab>
+            <gl-tab @click="goTo($options.ROUTE_CANDIDATES)">
+              <template #title>
+                {{ s__('MlModelRegistry|Version candidates') }}
+                <gl-badge size="sm" class="gl-tab-counter-badge">{{ candidateCount }}</gl-badge>
               </template>
             </gl-tab>
 

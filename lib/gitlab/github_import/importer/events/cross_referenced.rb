@@ -42,8 +42,7 @@ module Gitlab
               author_id: user_id,
               note: note_body,
               system_note_metadata: SystemNoteMetadata.new(action: 'cross_reference'),
-              created_at: issue_event.created_at,
-              imported_from: imported_from
+              created_at: issue_event.created_at
             )
           end
 

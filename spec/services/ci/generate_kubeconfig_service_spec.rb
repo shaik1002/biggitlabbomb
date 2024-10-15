@@ -61,9 +61,7 @@ RSpec.describe Ci::GenerateKubeconfigService, feature_category: :deployment_mana
     it "filters the pipeline's agents by `nil` environment" do
       expect(::Clusters::Agents::Authorizations::CiAccess::FilterService).to receive(:new).with(
         pipeline.cluster_agent_authorizations,
-        { environment: nil,
-          protected_ref: false },
-        project
+        environment: nil
       )
 
       execute
@@ -93,9 +91,7 @@ RSpec.describe Ci::GenerateKubeconfigService, feature_category: :deployment_mana
       it "filters the pipeline's agents by the specified environment" do
         expect(::Clusters::Agents::Authorizations::CiAccess::FilterService).to receive(:new).with(
           pipeline.cluster_agent_authorizations,
-          { environment: 'production',
-            protected_ref: false },
-          project
+          environment: 'production'
         )
 
         execute

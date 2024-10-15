@@ -10,7 +10,6 @@ RSpec.describe 'User adds pages domain', :js, feature_category: :pages do
   let(:user) { create(:user) }
 
   before do
-    stub_feature_flags(new_pages_ui: false)
     allow(Gitlab.config.pages).to receive(:enabled).and_return(true)
 
     project.add_maintainer(user)
@@ -24,7 +23,7 @@ RSpec.describe 'User adds pages domain', :js, feature_category: :pages do
         visit new_project_pages_domain_path(project)
 
         fill_in 'Domain', with: 'my.test.domain.com'
-        click_button 'Create new domain'
+        click_button 'Create New Domain'
 
         expect(page).to have_content('my.test.domain.com')
       end
@@ -33,7 +32,7 @@ RSpec.describe 'User adds pages domain', :js, feature_category: :pages do
     it 'allows to add new domain' do
       visit project_pages_path(project)
 
-      expect(page).to have_content('New domain')
+      expect(page).to have_content('New Domain')
     end
 
     it_behaves_like 'adds new domain'
@@ -58,7 +57,7 @@ RSpec.describe 'User adds pages domain', :js, feature_category: :pages do
 
       it 'does not adds new domain and renders error message' do
         fill_in 'Domain', with: 'my.test.domain.com'
-        click_button 'Create new domain'
+        click_button 'Create New Domain'
 
         expect(page).to have_content('Domain has already been taken')
       end
@@ -81,7 +80,7 @@ RSpec.describe 'User adds pages domain', :js, feature_category: :pages do
 
       fill_in 'Certificate (PEM)', with: certificate_pem
       fill_in 'Key (PEM)', with: certificate_key
-      click_button 'Create new domain'
+      click_button 'Create New Domain'
 
       expect(page).to have_content('my.test.domain.com')
     end
@@ -97,7 +96,7 @@ RSpec.describe 'User adds pages domain', :js, feature_category: :pages do
 
       fill_in 'Certificate (PEM)', with: certificate_pem
       fill_in 'Key (PEM)', with: certificate_key
-      click_button 'Create new domain'
+      click_button 'Create New Domain'
 
       expect(page).to have_content('my.test.domain.com')
     end
@@ -108,7 +107,7 @@ RSpec.describe 'User adds pages domain', :js, feature_category: :pages do
       visit new_project_pages_domain_path(project)
 
       fill_in 'Domain', with: 'my.test.domain.com'
-      click_button 'Create new domain'
+      click_button 'Create New Domain'
 
       expect(page).to have_content('Domain has already been taken')
     end
@@ -154,7 +153,7 @@ RSpec.describe 'User adds pages domain', :js, feature_category: :pages do
         visit project_pages_path(project)
 
         within('#content-body') { click_link 'Edit' }
-        click_button 'Save changes'
+        click_button 'Save Changes'
 
         expect(page).to have_content('Domain was updated')
       end
@@ -170,7 +169,7 @@ RSpec.describe 'User adds pages domain', :js, feature_category: :pages do
           within('#content-body') { click_link 'Edit' }
 
           fill_in 'Certificate (PEM)', with: 'invalid data'
-          click_button 'Save changes'
+          click_button 'Save Changes'
 
           expect(page).to have_content('Certificate must be a valid PEM certificate')
           expect(page).to have_content("Key doesn't match the certificate")
@@ -182,7 +181,7 @@ RSpec.describe 'User adds pages domain', :js, feature_category: :pages do
 
         within('#content-body') { click_link 'Edit' }
 
-        accept_gl_confirm(button_text: 'Remove certificate') { find_by_testid('remove-certificate').click }
+        accept_gl_confirm(button_text: 'Remove certificate') { click_link 'Remove' }
 
         expect(page).to have_field('Certificate (PEM)', with: '')
         expect(page).to have_field('Key (PEM)', with: '')

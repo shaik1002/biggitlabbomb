@@ -10,8 +10,6 @@ module Types
 
     expose_permissions Types::PermissionTypes::Project
 
-    implements Types::TodoableInterface
-
     field :id, GraphQL::Types::ID,
       null: false,
       description: 'ID of the project.'
@@ -29,14 +27,6 @@ module Types
       argument :ref, GraphQL::Types::String,
         required: true,
         description: 'Ref.'
-    end
-
-    field :ci_pipeline_creation, ::Types::Ci::PipelineCreation,
-      null: true, authorize: :read_pipeline,
-      alpha: { milestone: '17.4' },
-      description: 'Information about a pipeline creation.' do
-      argument :id, type: ::GraphQL::Types::String,
-        required: true, description: 'Unique ID associated with the pipeline creation.'
     end
 
     field :full_path, GraphQL::Types::ID,
@@ -349,7 +339,6 @@ module Types
       Types::Packages::Protection::RuleType.connection_type,
       null: true,
       description: 'Packages protection rules for the project.',
-      alpha: { milestone: '16.6' },
       resolver: Resolvers::ProjectPackagesProtectionRulesResolver
 
     field :jobs,
@@ -357,8 +346,7 @@ module Types
       null: true,
       authorize: :read_build,
       description: 'Jobs of a project. This field can only be resolved for one project in any single request.',
-      resolver: Resolvers::ProjectJobsResolver,
-      connection_extension: ::Gitlab::Graphql::Extensions::ExternallyPaginatedArrayExtension
+      resolver: Resolvers::ProjectJobsResolver
 
     field :job,
       type: Types::Ci::JobType,
@@ -374,13 +362,13 @@ module Types
       null: true,
       description: 'Build pipelines of the project.',
       extras: [:lookahead],
-      resolver: Resolvers::Ci::ProjectPipelinesResolver
+      resolver: Resolvers::ProjectPipelinesResolver
 
     field :pipeline_schedules,
       type: Types::Ci::PipelineScheduleType.connection_type,
       null: true,
       description: 'Pipeline schedules of the project. This field can only be resolved for one project per request.',
-      resolver: Resolvers::Ci::ProjectPipelineSchedulesResolver
+      resolver: Resolvers::ProjectPipelineSchedulesResolver
 
     field :pipeline_triggers,
       Types::Ci::PipelineTriggerType.connection_type,
@@ -393,7 +381,7 @@ module Types
       null: true,
       description: 'Build pipeline of the project.',
       extras: [:lookahead],
-      resolver: Resolvers::Ci::ProjectPipelineResolver
+      resolver: Resolvers::ProjectPipelineResolver
 
     field :pipeline_counts, Types::Ci::PipelineCountsType,
       null: true,
@@ -513,15 +501,8 @@ module Types
       resolver: Resolvers::ReleasesResolver.single,
       authorize: :read_release
 
-    field :container_tags_expiration_policy, Types::ContainerRegistry::ContainerTagsExpirationPolicyType,
-      null: true,
-      description: 'Container tags expiration policy of the project.',
-      method: :container_expiration_policy,
-      authorize: :read_container_image
-
     field :container_expiration_policy, Types::ContainerExpirationPolicyType,
       null: true,
-      deprecated: { reason: 'Use `container_tags_expiration_policy`', milestone: '17.5' },
       description: 'Container expiration policy of the project.'
 
     field :container_registry_protection_rules,
@@ -561,7 +542,7 @@ module Types
     field :pipeline_analytics, Types::Ci::AnalyticsType,
       null: true,
       description: 'Pipeline analytics.',
-      resolver: Resolvers::Ci::ProjectPipelineAnalyticsResolver
+      resolver: Resolvers::ProjectPipelineStatisticsResolver
 
     field :ci_template, Types::Ci::TemplateType,
       null: true,
@@ -749,11 +730,6 @@ module Types
           description: 'Term by which to search deploy key titles'
       end
 
-    field :pages_deployments, Types::PagesDeploymentType.connection_type, null: true,
-      resolver: Resolvers::PagesDeploymentsResolver,
-      connection: true,
-      description: "List of the project's Pages Deployments."
-
     def protectable_branches
       ProtectableDropdown.new(project, :branches).protectable_ref_names
     end
@@ -773,7 +749,7 @@ module Types
 
     {
       issues: "Issues are",
-      merge_requests: "Merge requests are",
+      merge_requests: "Merge Requests are",
       wiki: 'Wikis are',
       snippets: 'Snippets are',
       container_registry: 'Container Registry is'
@@ -849,10 +825,6 @@ module Types
       result.map do |var_key, var_config|
         { key: var_key, **var_config }
       end
-    end
-
-    def ci_pipeline_creation(id:)
-      ::Ci::PipelineCreationMetadata.find(project: project, id: id)
     end
 
     def job(id:)

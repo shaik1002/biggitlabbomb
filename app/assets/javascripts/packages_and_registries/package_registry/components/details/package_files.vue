@@ -75,11 +75,6 @@ export default {
       required: false,
       default: false,
     },
-    deleteAllFiles: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     packageId: {
       type: String,
       required: true,
@@ -270,7 +265,7 @@ export default {
     },
     handleFileDelete(files) {
       this.track(REQUEST_DELETE_PACKAGE_FILE_TRACKING_ACTION);
-      if (!this.deleteAllFiles && files.length === this.packageFiles.length && this.isLastPage) {
+      if (files.length === this.packageFiles.length && this.isLastPage) {
         this.$emit(
           'delete-all-files',
           this.hasOneItem(files)
@@ -328,9 +323,6 @@ export default {
         focusable.focus();
       }
     },
-    refetchPackageFiles() {
-      this.$apollo.getClient().refetchQueries({ include: [getPackageFilesQuery] });
-    },
   },
   i18n: {
     deleteFile: s__('PackageRegistry|Delete asset'),
@@ -364,8 +356,8 @@ export default {
 
 <template>
   <div class="gl-pt-6">
-    <div class="gl-flex gl-items-center gl-justify-between">
-      <h3 class="gl-mt-5 gl-text-lg">{{ __('Assets') }}</h3>
+    <div class="gl-display-flex gl-align-items-center gl-justify-content-space-between">
+      <h3 class="gl-font-lg gl-mt-5">{{ __('Assets') }}</h3>
       <gl-button
         v-if="!fetchPackageFilesError && canDelete"
         :disabled="isLoading || !areFilesSelected"
@@ -428,7 +420,7 @@ export default {
             :aria-label="detailsShowing ? __('Collapse') : __('Expand')"
             data-testid="toggle-details-button"
             category="tertiary"
-            class="!-gl-mt-2"
+            class="gl-mt-n2!"
             size="small"
             @click="
               toggleDetails();
@@ -444,7 +436,7 @@ export default {
             <file-icon
               :file-name="item.fileName"
               css-classes="gl-relative file-icon"
-              class="gl-relative gl-mr-1"
+              class="gl-mr-1 gl-relative"
             />
             <span>{{ item.fileName }}</span>
           </gl-link>
@@ -459,7 +451,7 @@ export default {
             category="tertiary"
             icon="ellipsis_v"
             placement="bottom-end"
-            class="!-gl-my-3"
+            class="gl-my-n3!"
             :toggle-text="$options.i18n.moreActionsText"
             text-sr-only
             no-caret
@@ -477,7 +469,7 @@ export default {
 
         <template #row-details="{ item }">
           <div
-            class="gl-flex gl-grow gl-flex-col gl-rounded-base gl-bg-gray-10 gl-shadow-inner-1-gray-100"
+            class="gl-display-flex gl-flex-direction-column gl-flex-grow-1 gl-bg-gray-10 gl-rounded-base gl-shadow-inner-1-gray-100"
           >
             <file-sha
               v-if="item.fileSha256"
@@ -490,7 +482,7 @@ export default {
           </div>
         </template>
       </gl-table>
-      <div class="gl-flex gl-justify-center">
+      <div class="gl-display-flex gl-justify-content-center">
         <gl-keyset-pagination
           :disabled="isLoading"
           v-bind="pageInfo"
@@ -499,7 +491,6 @@ export default {
           @next="fetchNextFilesPage"
         />
       </div>
-      <slot name="upload" :refetch="refetchPackageFiles"></slot>
     </template>
 
     <gl-modal

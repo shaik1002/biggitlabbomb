@@ -67,29 +67,17 @@ GitLab redirects to the latest release page URL when it is visited.
 The format of the URL is:
 
 ```plaintext
-https://gitlab.example.com/namespace/project/-/releases/permalink/latest
+https://host/namespace/project/-/releases/permalink/latest
 ```
 
 We also support, suffix path carry forward on the redirect to the latest release.
-Example if release `v14.8.0-ee` is the latest release and has a readable link `https://gitlab.example.com/namespace/project/-/releases/v14.8.0-ee#release` then it can be addressed as `https://gitlab.example.com/namespace/project/-/releases/permalink/latest#release`.
+Example if release `v14.8.0-ee` is the latest release and has a readable link `https://host/namespace/project/-/releases/v14.8.0-ee#release` then it can be addressed as `https://host/namespace/project/-/releases/permalink/latest#release`.
 
 Refer [permanent links to latest release assets](release_fields.md#permanent-links-to-latest-release-assets) section to understand more about the suffix path carry forward usage.
 
 #### Sorting preferences
 
 By default, GitLab fetches the release using `released_at` time. The use of the query parameter `?order_by=released_at` is optional, and support for `?order_by=semver` is tracked [in this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/352945).
-
-### Track releases with an RSS feed
-
-GitLab provides an RSS feed of a project's releases, in Atom format. To view the feed:
-
-1. For projects you are a member of:
-   1. On the left sidebar, select **Search or go to** and find your project.
-   1. Select **Deploy > Releases**.
-1. For all projects:
-   1. Go to the **Project overview** page.
-   1. On the right sidebar, select **Releases** (**{rocket-launch}**).
-1. In the upper-right corner, select the feed symbol (**{rss}**).
 
 ## Create a release
 
@@ -98,6 +86,8 @@ You can create a release:
 - [Using a job in your CI/CD pipeline](#creating-a-release-by-using-a-cicd-job).
 - [In the Releases page](#create-a-release-in-the-releases-page).
 - Using the [Releases API](../../../api/releases/index.md#create-a-release).
+
+You should create a release as one of the last steps in your CI/CD pipeline.
 
 ### Create a release in the Releases page
 
@@ -131,12 +121,11 @@ To create a release in the Releases page:
 
 You can create a release directly as part of the GitLab CI/CD pipeline by using the
 [`release` keyword](../../../ci/yaml/index.md#release) in the job definition.
-You should likely create a release as one of the last steps in your CI/CD pipeline.
 
 The release is created only if the job processes without error. If the API returns an error during
 release creation, the release job fails.
 
-The following links show typical example configurations for creating a release using a CI/CD job:
+Methods for creating a release using a CI/CD job include:
 
 - [Create a release when a Git tag is created](release_cicd_examples.md#create-a-release-when-a-git-tag-is-created).
 - [Create a release when a commit is merged to the default branch](release_cicd_examples.md#create-a-release-when-a-commit-is-merged-to-the-default-branch).
@@ -238,7 +227,6 @@ In the UI:
 
 When you delete a release, its assets are also deleted. However, the associated
 Git tag is not deleted.
-Deleting a Git tag associated with a release also deletes the release.
 
 Prerequisites:
 

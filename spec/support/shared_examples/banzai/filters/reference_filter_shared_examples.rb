@@ -10,8 +10,7 @@ RSpec.shared_examples 'a reference containing an element node' do
 
   it 'does not escape inner html' do
     doc = reference_filter(reference_with_element)
-
-    expect(doc.children.first.children.first.inner_html).to eq(inner_html)
+    expect(doc.children.first.inner_html).to eq(inner_html)
   end
 end
 

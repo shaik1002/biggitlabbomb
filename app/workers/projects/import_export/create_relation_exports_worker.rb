@@ -22,11 +22,8 @@ module Projects
         project = Project.find_by_id(project_id)
         return unless project
 
-        params.symbolize_keys!
-
         project_export_job = project.export_jobs.find_or_create_by!(jid: jid) do |export_job|
           export_job.user_id = user_id
-          export_job.exported_by_admin = !!params[:exported_by_admin]
         end
         return if project_export_job.started?
 

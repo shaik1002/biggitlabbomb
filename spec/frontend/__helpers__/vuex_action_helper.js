@@ -44,7 +44,6 @@ export default (
   stateArg,
   expectedMutationsArg = [],
   expectedActionsArg = [],
-  // eslint-disable-next-line max-params
 ) => {
   let action = actionArg;
   let payload = payloadArg;
@@ -82,6 +81,7 @@ export default (
 
     return Promise.resolve();
   };
+
   const validateResults = () => {
     expect({
       mutations,

@@ -5,7 +5,7 @@ module Resolvers
     type Types::Packages::PackageType.connection_type, null: true
 
     argument :sort, Types::Packages::PackageSortEnum,
-      description: 'Sort packages by the criteria.',
+      description: 'Sort packages by this criteria.',
       required: false,
       default_value: :created_desc
 
@@ -46,7 +46,7 @@ module Resolvers
       type_asc: { order_by: 'type', sort: 'asc' }
     }.freeze
 
-    def resolve(**_args)
+    def resolve
       raise NotImplementedError
     end
 

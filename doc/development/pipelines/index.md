@@ -20,23 +20,6 @@ unless they are mirrored on the `dev.gitlab.com` instance. CI/CD components do n
 and [cause failing pipelines](https://gitlab.com/gitlab-com/gl-infra/production/-/issues/17683#note_1795756077)
 on the `dev.gitlab.com` mirror if they do not exist on that instance.
 
-## Pipeline tiers
-
-**under active development:** For more information, see [epic 58](https://gitlab.com/groups/gitlab-org/quality/engineering-productivity/-/epics/58).
-
-A merge request will typically run several CI/CD pipelines. Depending on where the merge request is at in the approval process, we will trigger different kinds of pipelines. We call those kinds of pipelines **pipeline tiers**.
-
-We currently have three tiers:
-
-1. `pipeline::tier-1`: The merge request has no approvals
-1. `pipeline::tier-2`: The merge request has at least one approval, but still requires more approvals
-1. `pipeline::tier-3`: The merge request has all the approvals it needs
-
-Typically, the lower the pipeline tier, the fastest the pipeline should be.
-The higher the pipeline tier, the more confidence the pipeline should give us by running more tests
-
-See the [Introduce "tiers" in MR pipelines](https://gitlab.com/groups/gitlab-org/quality/engineering-productivity/-/epics/58) epic for more information on the implementation.
-
 ## Predictive test jobs before a merge request is approved
 
 **To reduce the pipeline cost and shorten the job duration, before a merge request is approved, the pipeline will run a predictive set of RSpec & Jest tests that are likely to fail for the merge request changes.**
@@ -232,57 +215,37 @@ graph LR
     A --"artifact: list of test files"--> B & C
 ```
 
-## Merge trains
+## Merge Trains
 
-### Current usage
+### Why do we need to have a "stable" master branch to enable merge trains?
 
-[We started using merge trains in June 2024](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/154540).
+If the master branch is unstable (i.e. CI/CD pipelines for the master branch are failing frequently), all of the merge requests pipelines that were added AFTER a faulty merge request pipeline would have to be **cancelled** and **added back to the train**, which would create a lot of delays if the merge train is long.
 
-At the moment, **Merge train pipelines don't run any tests**: they only enforce the
-["Merging a merge request" guidelines](../code_review.md#merging-a-merge-request)
-that already existed before the enablement of merge trains, but that we couldn't easily enforce.
+### How stable does the master branch have to be for us to enable merge trains?
 
-Merge train pipelines run a single `pre-merge-checks` job which ensures the latest pipeline before merge is:
+We don't have a specific number, but we need to have better numbers for flaky tests failures and infrastructure failures (see the [Master Broken Incidents RCA Dashboard](https://app.periscopedata.com/app/gitlab/1082465/Master-Broken-Incidents-Root-Cause-Analysis)).
 
-1. A [Merged Results pipeline](../../ci/pipelines/merged_results_pipelines.md)
-1. A [`tier-3` pipeline](#pipeline-tiers) (i.e. full pipeline, not predictive one)
-1. Created at most 8 hours ago (72 hours for stable branches)
+### Could we gradually move to merge trains in our CI/CD configuration?
 
-We opened [a feedback issue](https://gitlab.com/gitlab-org/quality/engineering-productivity/team/-/issues/513)
-to iterate on this solution.
-
-### Next iterations
-
-We opened [a dedicated issue to discuss the next iteration for merge trains](https://gitlab.com/gitlab-org/quality/engineering-productivity/team/-/issues/516)
-to actually start running tests in merge train pipelines.
-
-### Challenges for enabling merge trains running "full" test pipelines
-
-#### Why do we need to have a "stable" default branch?
-
-If the default branch is unstable (i.e. CI/CD pipelines for the default branch are failing frequently), all of the merge requests pipelines that were added AFTER a faulty merge request pipeline would have to be **canceled** and **added back to the train**, which would create a lot of delays if the merge train is long.
-
-#### How stable does the default branch have to be?
-
-We don't have a specific number, but we need to have better numbers for flaky tests failures and infrastructure failures (see the [Master Broken Incidents RCA Dashboard](https://10az.online.tableau.com/#/site/gitlab/workbooks/2296993/views)).
+There was a proposal from a contributor, but the approach is not without some downsides: [see the original proposal and discussion](https://gitlab.com/gitlab-org/quality/quality-engineering/team-tasks/-/issues/195#note_1117151994).
 
 ## Faster feedback for some merge requests
 
-### Broken `master` Fixes
+### Broken Master Fixes
 
-When you need to [fix a broken `master`](https://handbook.gitlab.com/handbook/engineering/workflow/#resolution-of-broken-master), you can add the `pipeline::expedited` label to expedite the pipelines that run on the merge request.
+When you need to [fix a broken `master`](https://handbook.gitlab.com/handbook/engineering/workflow/#resolution-of-broken-master), you can add the `pipeline:expedite` label to expedite the pipelines that run on the merge request.
 
 Note that the merge request also needs to have the `master:broken` or `master:foss-broken` label set.
 
 ### Revert MRs
 
-To make your Revert MRs faster, use the [revert MR template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/merge_request_templates/Revert%20To%20Resolve%20Incident.md) **before** you create your merge request. It will apply the `pipeline::expedited` label and others that will expedite the pipelines that run on the merge request.
+To make your Revert MRs faster, use the [revert MR template](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/merge_request_templates/Revert%20To%20Resolve%20Incident.md) **before** you create your merge request. It will apply the `pipeline:expedite` label and others that will expedite the pipelines that run on the merge request.
 
-### The `pipeline::expedited` label
+### The `pipeline:expedite` label
 
 When this label is assigned, the following steps of the CI/CD pipeline are skipped:
 
-- The `e2e:test-on-omnibus` job.
+- The `e2e:package-and-test` job.
 - The `rspec:undercoverage` job.
 - The entire [review apps process](../testing_guide/review_apps.md).
 
@@ -299,47 +262,19 @@ Forcing all jobs on docs only related MRs would not have the prerequisite jobs a
 
 ### End-to-end jobs
 
-The [`e2e:test-on-omnibus`](../testing_guide/end_to_end/index.md#using-the-test-on-omnibus-job) child pipeline
+The [`e2e:package-and-test`](../testing_guide/end_to_end/index.md#using-the-package-and-test-job) child pipeline
 runs end-to-end jobs automatically depending on changes, and is manual in other cases.
-See `.qa:rules:test-on-omnibus` in
+See `.qa:rules:package-and-test` in
 [`rules.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/rules.gitlab-ci.yml) for
 the specific list of rules.
 
-If you want to force `e2e:test-on-omnibus` to run regardless of your changes, you can add the
+If you want to force `e2e:package-and-test` to run regardless of your changes, you can add the
 `pipeline:run-all-e2e` label to the merge request.
 
-The [`e2e:test-on-gdk`](../testing_guide/end_to_end/index.md#using-the-test-on-gdk-job) child pipeline runs `:blocking`
-E2E specs automatically for all `code patterns changes`. See `.qa:rules:e2e-blocking-gdk` [`rules.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/rules.gitlab-ci.yml) for specific set of rules.
+The [`e2e:test-on-gdk`](../testing_guide/end_to_end/index.md#using-the-test-on-gdk-job) child pipeline runs `:reliable`
+E2E specs automatically for all `code patterns changes`. See `.qa:rules:e2e-blocking` [`rules.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/rules.gitlab-ci.yml) for specific set of rules.
 
 Consult the [End-to-end Testing](../testing_guide/end_to_end/index.md) dedicated page for more information.
-
-### Observability end-to-end jobs
-
-The [GitLab Observability Backend](https://gitlab.com/gitlab-org/opstrace/opstrace) has dedicated [end-to-end tests](https://gitlab.com/gitlab-org/opstrace/opstrace/-/tree/main/test/e2e/frontend) that run against a GitLab instance. These tests are designed to ensure the integration between GitLab and the Observability Backend is functioning correctly.
-
-The GitLab pipeline has dedicated jobs (see [`observability-backend.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/.gitlab/ci/observability-backend.gitlab-ci.yml)) that can be executed from GitLab MRs. These jobs will trigger the E2E tests on the GitLab Observability Backend pipeline against a GitLab instance built from the GitLab MR branch. These jobs are useful to make sure that the GitLab changes under review will not break E2E tests on the GitLab Observability Backend pipeline.
-
-There are two Observability end-to-end jobs:
-
-- `e2e:observability-backend-main-branch`: executes the tests against the main branch of the GitLab Observability Backend.
-- `e2e:observability-backend`: executes the tests against a branch of the GitLab Observability Backend with the same name as the MR branch.
-
-The Observability E2E jobs are triggered automatically for merge requests that touch relevant files, such as those in the `lib/gitlab/observability/` directory or specific configuration files related to observability features.
-
-To run these jobs manually, you can add the `pipeline:run-observability-e2e-tests-main-branch` or `pipeline:run-observability-e2e-tests-current-branch` label to your merge request.
-
-In the following example workflow, a developer creates an MR that touches Observability code and uses Observability end-to-end jobs:
-
-1. A developer creates a GitLab MR that touches observability code. The MR automatically executes the `e2e:observability-backend-main-branch` job.
-1. If `e2e:observability-backend-main-branch` fails, it means that either the MR broke something (and needs fixing), or the MR made changes that requires the e2e tests to be updated.
-1. To update the e2e tests, the developer should:
-   1. Create a branch in the GitLab Observability Backend [repository](https://gitlab.com/gitlab-org/opstrace/opstrace), with the same name as the GitLab branch containing the breaking changes.
-   1. Fix the [e2e tests](https://gitlab.com/gitlab-org/opstrace/opstrace/-/tree/main/test/e2e/frontend).
-   1. Create a merge request with the changes.
-1. The developer should add the `pipeline:run-observability-e2e-tests-current-branch` label on the GitLab MR and wait for the `e2e:observability-backend` job to succeed.
-1. If `e2e:observability-backend` succeeds, the developer can merge both MRs.
-
-+In addition, the developer can manually add `pipeline:run-observability-e2e-tests-main-branch` to force the MR to run the `e2e:observability-backend-main-branch` job. This could be useful in case of changes to files that are not being tracked as related to observability.
 
 ### Review app jobs
 
@@ -642,11 +577,11 @@ fail.
 #### Troubleshooting `rspec:undercoverage` failures
 
 The `rspec:undercoverage` job has [known bugs](https://gitlab.com/groups/gitlab-org/-/epics/8254)
-that can cause false positive failures. Such false positive failures may also happen if you are updating database migration that is too old.
-You can test coverage locally to determine if it's safe to apply `pipeline:skip-undercoverage`. For example, using `<spec>` as the name of the
+that can cause false positive failures. You can test coverage locally to determine if it's
+safe to apply `pipeline:skip-undercoverage`. For example, using `<spec>` as the name of the
 test causing the failure:
 
-1. Run `RUN_ALL_MIGRATION_TESTS=1 SIMPLECOV=1 bundle exec rspec <spec>`.
+1. Run `SIMPLECOV=1 bundle exec rspec <spec>`.
 1. Run `scripts/undercoverage`.
 
 If these commands return `undercover: ✅ No coverage is missing in latest changes` then you can apply `pipeline:skip-undercoverage` to bypass pipeline failures.
@@ -688,10 +623,10 @@ After that, the next pipeline uses the up-to-date `knapsack/report-master.json` 
 
 ### Automatic skipping of flaky tests
 
-We used to skip tests that are [known to be flaky](../testing_guide/unhealthy_tests.md#automatic-retries-and-flaky-tests-detection),
+We used to skip tests that are [known to be flaky](../testing_guide/flaky_tests.md#automatic-retries-and-flaky-tests-detection),
 but we stopped doing so since that could actually lead to actual broken `master`.
 Instead, we introduced
-[a fast-quarantining process](../testing_guide/unhealthy_tests.md#fast-quarantine)
+[a fast-quarantining process](../testing_guide/flaky_tests.md#fast-quarantine)
 to proactively quarantine any flaky test reported in `#master-broken` incidents.
 
 This fast-quarantining process can be disabled by setting the `$FAST_QUARANTINE`
@@ -735,17 +670,20 @@ Ruby version only:
 Our test suite runs against PostgreSQL 14 as GitLab.com runs on PostgreSQL 14 and
 [Omnibus defaults to PG14 for new installs and upgrades](../../administration/package_information/postgresql_versions.md).
 
-We run our test suite against PostgreSQL 14, 15 and 16 on nightly scheduled pipelines.
+We run our test suite against PostgreSQL 13, 14, 15 and 16 on nightly scheduled pipelines.
+
+We also run our test suite against PostgreSQL 13 upon specific database library changes in merge requests and `main` pipelines (with the `rspec db-library-code pg13` job).
 
 #### Current versions testing
 
-| Where?                                                                                        | PostgreSQL version           | Ruby version          |
-|-----------------------------------------------------------------------------------------------|------------------------------|-----------------------|
-| Merge requests                                                                                | 14 (default version)         | 3.1 (default version) |
-| `master` branch commits                                                                       | 14 (default version)         | 3.1 (default version) |
-| `maintenance` scheduled pipelines for the `master` branch (every even-numbered hour at XX:05) | 14 (default version)         | 3.1 (default version) |
-| `maintenance` scheduled pipelines for the `ruby3_2` branch (every odd-numbered hour at XX:10) | 14 (default version)         | 3.2                   |
-| `nightly` scheduled pipelines for the `master` branch                                         | 14 (default version), 15, 16 | 3.1 (default version) |
+| Where?                                                                                           | PostgreSQL version                              | Ruby version          |
+|--------------------------------------------------------------------------------------------------|-------------------------------------------------|-----------------------|
+| Merge requests                                                                                   | 14 (default version), 13 for DB library changes | 3.1 (default version) |
+| `master` branch commits                                                                          | 14 (default version), 13 for DB library changes | 3.1 (default version) |
+| `maintenance` scheduled pipelines for the `master` branch (every even-numbered hour at XX:05)    | 14 (default version), 13 for DB library changes | 3.1 (default version) |
+| `maintenance` scheduled pipelines for the `ruby3_0` branch (every odd-numbered hour at XX:40)    | 14 (default version), 13 for DB library changes | 3.0                   |
+| `maintenance` scheduled pipelines for the `ruby3_2` branch (every odd-numbered hour at XX:10)    | 14 (default version), 13 for DB library changes | 3.2                   |
+| `nightly` scheduled pipelines for the `master` branch                                            | 14 (default version), 13, 15, 16                    | 3.1 (default version) |
 
 For each current Ruby versions we're testing against with, we run
 maintenance scheduled pipelines every 2 hours on their respective `ruby\d_\d`
@@ -815,8 +753,7 @@ In general, pipelines for an MR fall into one of the following types (from short
 
 A "pipeline type" is an abstract term that mostly describes the "critical path" (for example, the chain of jobs for which the sum
 of individual duration equals the pipeline's duration).
-We use these "pipeline types" in [metrics dashboards](https://10az.online.tableau.com/#/site/gitlab/views/GitlabPipelineDurations/SuccessfulMergeRequestPipelineDurationHistogramsbyTypes?:iid=1)
-to detect what types and jobs need to be optimized first.
+We use these "pipeline types" in [metrics dashboards](https://app.periscopedata.com/app/gitlab/858266/GitLab-Pipeline-Durations) to detect what types and jobs need to be optimized first.
 
 An MR that touches multiple areas would be associated with the longest type applicable. For instance, an MR that touches backend
 and frontend would fall into the "Frontend" pipeline type since this type takes longer to finish than the "Backend" pipeline type.
@@ -923,7 +860,7 @@ graph RL;
   class 2_3-1 criticalPath;
   2_3-1 --> 1-5
 
-  2_4-1["e2e:test-on-omnibus-ee (103 minutes)"];
+  2_4-1["e2e:package-and-test-ee (103 minutes)"];
   class 2_4-1 criticalPath;
   click 2_4-1 "https://app.periscopedata.com/app/gitlab/652085/Engineering-Productivity---Pipeline-Build-Durations?widget=6914305&udv=0"
   2_4-1 --> 1-2 & 2_3-1 & 1-15;

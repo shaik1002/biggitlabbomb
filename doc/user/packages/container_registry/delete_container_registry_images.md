@@ -12,13 +12,6 @@ DETAILS:
 
 You can delete container images from your container registry.
 
-To automatically delete container images based on specific criteria, use [garbage collection](#garbage-collection).
-Alternatively, you can use a 3rd-party tool to [create a CI/CD job](#use-gitlab-cicd)
-for deleting container images from specific projects.
-
-To delete specific container images from a project or group, you can use [the GitLab UI](#use-the-gitlab-ui)
-or [GitLab API](#use-the-gitlab-api).
-
 WARNING:
 Deleting container images is a destructive action and can't be undone. To restore
 a deleted container image, you must rebuild and re-upload it.
@@ -26,12 +19,12 @@ a deleted container image, you must rebuild and re-upload it.
 ## Garbage collection
 
 Deleting a container image on self-managed instances doesn't free up storage space, it only marks the image
-as eligible for deletion. To actually delete unreferenced container images and recover storage space, self-managed instance administrators
+as eligible for deletion. To actually delete unreferenced container images and recover storage space, administrators
 must run [garbage collection](../../../administration/packages/container_registry.md#container-registry-garbage-collection).
 
-The container registry on GitLab.com includes an automatic online garbage
-collector.
-With the automatic garbage collector, the following are automatically scheduled
+On GitLab.com, the latest version of the container registry includes an automatic online garbage
+collector. For more information, see [this blog post](https://about.gitlab.com/blog/2021/10/25/gitlab-com-container-registry-update/).
+In this new version of the container registry, the following are automatically scheduled
 for deletion in 24 hours if left unreferenced:
 
 - Layers that aren't referenced by any image manifest.
@@ -71,8 +64,8 @@ information, see the following endpoints:
 
 NOTE:
 GitLab CI/CD doesn't provide a built-in way to remove your container images. This example uses a
-third-party tool called [`regctl`](https://github.com/regclient/regclient) that talks to the GitLab Registry API.
-For assistance with this third-party tool, see [the issue queue for regclient](https://github.com/regclient/regclient/issues).
+third-party tool called [reg](https://github.com/genuinetools/reg) that talks to the GitLab Registry API.
+For assistance with this third-party tool, see [the issue queue for reg](https://github.com/genuinetools/reg/issues).
 
 The following example defines two stages: `build`, and `clean`. The `build_image` job builds a container
 image for the branch, and the `delete_image` job deletes it. The `reg` executable is downloaded and used to
@@ -97,31 +90,33 @@ build_image:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker build -t $IMAGE_TAG .
     - docker push $IMAGE_TAG
-  rules:
-      - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-        when: never
-      - if: $CI_COMMIT_BRANCH
+  only:
+    - branches
+  except:
+    - main
 
 delete_image:
+  before_script:
+    - curl --fail --show-error --location "https://github.com/genuinetools/reg/releases/download/v$REG_VERSION/reg-linux-amd64" --output ./reg
+    - echo "$REG_SHA256  ./reg" | sha256sum -c -
+    - chmod a+x ./reg
+  image: curlimages/curl:7.86.0
+  script:
+    - ./reg rm -d --auth-url $CI_REGISTRY -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $IMAGE_TAG
   stage: clean
   variables:
     IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
-    REGCTL_VERSION: v0.6.1
-  rules:
-      - if: $CI_COMMIT_REF_NAME != $CI_DEFAULT_BRANCH
-  image: alpine:latest
-  script:
-    - apk update
-    - apk add curl
-    - curl --fail-with-body --location "https://github.com/regclient/regclient/releases/download/${REGCTL_VERSION}/regctl-linux-amd64" > /usr/bin/regctl
-    - chmod 755 /usr/bin/regctl
-    - regctl registry login ${CI_REGISTRY} -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD}
-    - regctl tag rm $IMAGE
+    REG_SHA256: ade837fc5224acd8c34732bf54a94f579b47851cc6a7fd5899a98386b782e228
+    REG_VERSION: 0.16.1
+  only:
+    - branches
+  except:
+    - main
 ```
 
 NOTE:
-You can download the latest `regctl` release from [the releases page](https://github.com/regclient/regclient/releasess), then update
-the code example by changing the `REGCTL_VERSION` variable defined in the `delete_image` job.
+You can download the latest `reg` release from [the releases page](https://github.com/genuinetools/reg/releases), then update
+the code example by changing the `REG_SHA256` and `REG_VERSION` variables defined in the `delete_image` job.
 
 ## Use a cleanup policy
 

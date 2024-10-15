@@ -654,7 +654,7 @@ persistence classes.
 | `queues`           | Store Sidekiq background jobs. |
 | `shared_state`     | Store session-related and other persistent data. |
 | `actioncable`      | Pub/Sub queue backend for ActionCable. |
-| `trace_chunks`     | Store [CI trace chunks](../cicd/job_logs.md#enable-or-disable-incremental-logging) data. |
+| `trace_chunks`     | Store [CI trace chunks](../job_logs.md#enable-or-disable-incremental-logging) data. |
 | `rate_limiting`    | Store [rate limiting](../settings/user_and_ip_rate_limits.md) state. |
 | `sessions`         | Store [sessions](../../development/session.md#gitlabsession). |
 | `repository_cache` | Store cache data specific to repositories. |
@@ -721,7 +721,7 @@ To make this work with Sentinel:
    - Redis URLs should be in the format: `redis://:PASSWORD@SENTINEL_PRIMARY_NAME`, where:
      - `PASSWORD` is the plaintext password for the Redis instance.
      - `SENTINEL_PRIMARY_NAME` is the Sentinel primary name set with `redis['master_name']`,
-       for example `gitlab-redis-cache`.
+        for example `gitlab-redis-cache`.
 
 1. Save the file and reconfigure GitLab for the change to take effect:
 

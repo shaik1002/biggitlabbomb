@@ -10,9 +10,9 @@ export default {
 </script>
 
 <template>
-  <div class="gl-flex gl-break-anywhere">
+  <div class="gl-display-flex gl-word-break-word">
     <span
-      class="dropdown-label-box gl-top-0 gl-mr-3 gl-shrink-0"
+      class="dropdown-label-box gl-flex-shrink-0 gl-top-0 gl-mr-3"
       :style="{ 'background-color': label.color }"
       data-testid="label-color-box"
     ></span>

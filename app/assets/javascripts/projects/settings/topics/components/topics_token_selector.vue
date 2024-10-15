@@ -14,7 +14,7 @@ export default {
     GlSprintf,
   },
   i18n: {
-    topicsTitle: s__('ProjectSettings|Project topics'),
+    topicsTitle: s__('ProjectSettings|Topics'),
     topicsHelpText: s__(
       'ProjectSettings|Topics are publicly visible even on private projects. Do not include sensitive information in topic names. %{linkStart}Learn more%{linkEnd}.',
     ),
@@ -60,7 +60,9 @@ export default {
       return this.selectedTokens.length ? '' : this.$options.i18n.placeholder;
     },
     topicsHelpUrl() {
-      return helpPagePath('user/project/project_topics');
+      return helpPagePath('administration/index', {
+        anchor: 'administering-topics',
+      });
     },
   },
   methods: {
@@ -74,11 +76,7 @@ export default {
       this.search = searchTerm;
     },
     onTokensUpdate(tokens) {
-      const uniqueTokens = Array.from(new Map(tokens.map((item) => [item.name, item])).values());
-
-      this.selectedTokens = uniqueTokens;
-
-      this.$emit('update', this.selectedTokens);
+      this.$emit('update', tokens);
     },
   },
   AVATAR_SHAPE_OPTION_RECT,
@@ -92,7 +90,6 @@ export default {
       :dropdown-items="topics"
       :loading="loading"
       allow-user-defined-tokens
-      show-add-new-always
       :placeholder="placeholderText"
       @keydown.enter="handleEnter"
       @text-input="filterTopics"

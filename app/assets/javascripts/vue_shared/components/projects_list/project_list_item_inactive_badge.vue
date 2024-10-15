@@ -32,7 +32,7 @@ export default {
 </script>
 
 <template>
-  <gl-badge v-if="inactiveBadge" :variant="inactiveBadge.variant">{{
+  <gl-badge v-if="inactiveBadge" :variant="inactiveBadge.variant" size="sm">{{
     inactiveBadge.text
   }}</gl-badge>
 </template>

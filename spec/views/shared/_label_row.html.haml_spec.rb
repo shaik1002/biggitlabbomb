@@ -96,6 +96,10 @@ RSpec.describe 'shared/_label_row.html.haml' do
     it 'has Merge request link' do
       expect(rendered).to have_link('Merge requests')
     end
+
+    it 'does not show a path from where the label was created' do
+      expect(rendered).not_to have_css('.label-badge')
+    end
   end
 
   context 'with an admin context' do
@@ -117,6 +121,10 @@ RSpec.describe 'shared/_label_row.html.haml' do
 
     it 'does not show Merge request link' do
       expect(rendered).not_to have_link('Merge requests')
+    end
+
+    it 'does not show a path from where the label was created' do
+      expect(rendered).not_to have_css('.label-badge')
     end
   end
 end

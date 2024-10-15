@@ -25,7 +25,6 @@ class SwapEventsTargetIdToBigintForSelfHosts < Gitlab::Database::Migration[2.1]
 
   private
 
-  # rubocop:disable Migration/PreventIndexCreation -- Legacy migration
   def swap
     # This will replace the existing index_events_on_target_type_and_target_id_and_fingerprint
     add_concurrent_index TABLE_NAME, [:target_type, :target_id_convert_to_bigint, :fingerprint],
@@ -49,5 +48,4 @@ class SwapEventsTargetIdToBigintForSelfHosts < Gitlab::Database::Migration[2.1]
         'index_events_on_target_type_and_target_id_and_fingerprint'
     end
   end
-  # rubocop:enable Migration/PreventIndexCreation
 end

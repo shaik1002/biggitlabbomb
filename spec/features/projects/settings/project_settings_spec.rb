@@ -6,9 +6,9 @@ RSpec.describe 'Projects settings', feature_category: :groups_and_projects do
   let_it_be(:project) { create(:project) }
 
   let(:user) { project.first_owner }
-  let(:panel) { find_by_testid('advanced-settings-content', match: :first) }
+  let(:panel) { find('.general-settings', match: :first) }
   let(:button) { panel.find('.btn.gl-button.js-settings-toggle') }
-  let(:title) { panel.find('.js-settings-toggle', match: :first) }
+  let(:title) { panel.find('.settings-title') }
 
   before do
     sign_in(user)
@@ -46,7 +46,7 @@ RSpec.describe 'Projects settings', feature_category: :groups_and_projects do
 
       # disable by clicking toggle
       forking_enabled_button.click
-      within_testid('visibility-features-permissions-content') do
+      page.within('.sharing-permissions') do
         find_by_testid('project-features-save-button').click
       end
       wait_for_requests
@@ -76,7 +76,7 @@ RSpec.describe 'Projects settings', feature_category: :groups_and_projects do
 
       expect(default_award_emojis_input.value).to eq('false')
 
-      within_testid('visibility-features-permissions-content') do
+      page.within('.sharing-permissions') do
         find_by_testid('project-features-save-button').click
       end
       wait_for_requests
@@ -88,8 +88,7 @@ RSpec.describe 'Projects settings', feature_category: :groups_and_projects do
   def expect_toggle_state(state)
     is_collapsed = state == :collapsed
 
-    expect(panel).to have_css(is_collapsed ? '.settings-toggle[aria-label^="Expand"]' : '.settings-toggle[aria-label^="Collapse"]')
-
+    expect(button).to have_content(is_collapsed ? 'Expand' : 'Collapse')
     expect(panel[:class]).send(is_collapsed ? 'not_to' : 'to', include('expanded'))
   end
 end

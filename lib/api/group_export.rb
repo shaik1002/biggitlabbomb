@@ -55,11 +55,7 @@ module API
       post ':id/export' do
         check_rate_limit! :group_export, scope: current_user
 
-        export_service = ::Groups::ImportExport::ExportService.new(
-          group: user_group,
-          user: current_user,
-          exported_by_admin: current_user.can_admin_all_resources?
-        )
+        export_service = ::Groups::ImportExport::ExportService.new(group: user_group, user: current_user)
 
         if export_service.async_execute
           accepted!

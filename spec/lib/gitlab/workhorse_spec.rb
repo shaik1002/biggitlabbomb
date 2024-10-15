@@ -301,7 +301,7 @@ RSpec.describe Gitlab::Workhorse, feature_category: :shared do
           response = described_class.git_http_ok(repository, Gitlab::GlRepository::PROJECT, user, action)
 
           expect(response.dig(:GitalyServer, :call_metadata)).to include('gitaly-feature-enforce-requests-limits' => 'true',
-            'gitaly-feature-mep-mep' => 'true')
+                                                                         'gitaly-feature-mep-mep' => 'true')
         end
 
         it 'sets the flag to false for other projects' do
@@ -309,7 +309,7 @@ RSpec.describe Gitlab::Workhorse, feature_category: :shared do
           response = described_class.git_http_ok(other_project.repository, Gitlab::GlRepository::PROJECT, user, action)
 
           expect(response.dig(:GitalyServer, :call_metadata)).to include('gitaly-feature-enforce-requests-limits' => 'true',
-            'gitaly-feature-mep-mep' => 'false')
+                                                                         'gitaly-feature-mep-mep' => 'false')
         end
 
         it 'sets the flag to false when there is no project' do
@@ -317,7 +317,7 @@ RSpec.describe Gitlab::Workhorse, feature_category: :shared do
           response = described_class.git_http_ok(snippet.repository, Gitlab::GlRepository::SNIPPET, user, action)
 
           expect(response.dig(:GitalyServer, :call_metadata)).to include('gitaly-feature-enforce-requests-limits' => 'true',
-            'gitaly-feature-mep-mep' => 'false')
+                                                                         'gitaly-feature-mep-mep' => 'false')
         end
       end
     end
@@ -488,16 +488,10 @@ RSpec.describe Gitlab::Workhorse, feature_category: :shared do
 
   describe '.send_url' do
     let(:url) { 'http://example.com' }
-    let(:allow_localhost) { true }
-    let(:ssrf_filter) { false }
-    let(:allowed_uris) { [] }
     let(:expected_params) do
       {
         'URL' => url,
         'AllowRedirects' => false,
-        'AllowLocalhost' => allow_localhost,
-        'AllowedURIs' => allowed_uris.map(&:to_s),
-        'SSRFFilter' => ssrf_filter,
         'Header' => {},
         'ResponseHeaders' => {},
         'Body' => '',
@@ -566,42 +560,6 @@ RSpec.describe Gitlab::Workhorse, feature_category: :shared do
         expect(params).to eq(expected_params)
       end
     end
-
-    context 'when `ssrf_filter` parameter is set' do
-      let(:ssrf_filter) { true }
-
-      it 'sets the header correctly' do
-        key, command, params = decode_workhorse_header(described_class.send_url(url, ssrf_filter: ssrf_filter))
-
-        expect(key).to eq('Gitlab-Workhorse-Send-Data')
-        expect(command).to eq('send-url')
-        expect(params).to eq(expected_params)
-      end
-    end
-
-    context 'when `allowed_uris` paramter is set' do
-      let(:allowed_uris) { [URI('http://172.16.123.1:9000')] }
-
-      it 'sets the header correctly' do
-        key, command, params = decode_workhorse_header(described_class.send_url(url, allowed_uris: allowed_uris))
-
-        expect(key).to eq('Gitlab-Workhorse-Send-Data')
-        expect(command).to eq('send-url')
-        expect(params).to eq(expected_params)
-      end
-    end
-
-    context 'when local requests are not allowed' do
-      let(:allow_localhost) { false }
-
-      it 'sets the header correctly' do
-        key, command, params = decode_workhorse_header(described_class.send_url(url, allow_localhost: allow_localhost))
-
-        expect(key).to eq('Gitlab-Workhorse-Send-Data')
-        expect(command).to eq('send-url')
-        expect(params).to eq(expected_params)
-      end
-    end
   end
 
   describe '.send_scaled_image' do
@@ -630,32 +588,20 @@ RSpec.describe Gitlab::Workhorse, feature_category: :shared do
     let(:upload_method) { nil }
     let(:upload_url) { nil }
     let(:upload_headers) { {} }
-    let(:authorized_upload_response) { {} }
-    let(:upload_config) { { method: upload_method, headers: upload_headers, url: upload_url, authorized_upload_response: authorized_upload_response }.compact_blank! }
-    let(:ssrf_filter) { false }
-    let(:allow_localhost) { true }
-    let(:allowed_uris) { [] }
+    let(:upload_config) { { method: upload_method, headers: upload_headers, url: upload_url }.compact_blank! }
 
-    subject do
-      described_class.send_dependency(
-        headers, url, upload_config: upload_config, ssrf_filter: ssrf_filter, allow_localhost: allow_localhost, allowed_uris: allowed_uris
-      )
-    end
+    subject { described_class.send_dependency(headers, url, upload_config: upload_config) }
 
     shared_examples 'setting the header correctly' do |ensure_upload_config_field: nil|
       it 'sets the header correctly' do
         key, command, params = decode_workhorse_header(subject)
         expected_params = {
-          'AllowLocalhost' => allow_localhost,
           'Headers' => headers.transform_values { |v| Array.wrap(v) },
-          'SSRFFilter' => ssrf_filter,
-          'AllowedURIs' => allowed_uris.map(&:to_s),
           'Url' => url,
           'UploadConfig' => {
             'Method' => upload_method,
             'Url' => upload_url,
-            'Headers' => upload_headers.transform_values { |v| Array.wrap(v) },
-            'AuthorizedUploadResponse' => authorized_upload_response
+            'Headers' => upload_headers.transform_values { |v| Array.wrap(v) }
           }.compact_blank!
         }
         expected_params.compact_blank!
@@ -686,30 +632,6 @@ RSpec.describe Gitlab::Workhorse, feature_category: :shared do
       let(:upload_headers) { { 'Private-Token' => '1234567890' } }
 
       it_behaves_like 'setting the header correctly', ensure_upload_config_field: 'Headers'
-    end
-
-    context 'with authorized upload response set' do
-      let(:authorized_upload_response) { { 'TempPath' => '/dev/null' } }
-
-      it_behaves_like 'setting the header correctly', ensure_upload_config_field: 'AuthorizedUploadResponse'
-    end
-
-    context 'when `ssrf_filter` parameter is set' do
-      let(:ssrf_filter) { true }
-
-      it_behaves_like 'setting the header correctly'
-    end
-
-    context 'when `allowed_uris` parameter is set' do
-      let(:allowed_uris) { [URI('http://172.16.123.1:9000')] }
-
-      it_behaves_like 'setting the header correctly'
-    end
-
-    context 'when local requests are not allowed' do
-      let(:allow_localhost) { false }
-
-      it_behaves_like 'setting the header correctly'
     end
   end
 

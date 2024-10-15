@@ -35,8 +35,8 @@ When SAML is enabled, users with the Owner role see a new menu
 item in group **Settings > SAML Group Links**.
 
 - You can configure one or more **SAML Group Links** to map a SAML identity
-  provider (IdP) group name to a GitLab role.
-- Members of the SAML IdP group are added as members of the GitLab
+  provider group name to a GitLab role.
+- Members of the SAML identity provider group are added as members of the GitLab
   group on their next SAML sign-in.
 - Group membership is evaluated each time a user signs in using SAML.
 - SAML Group Links can be configured for a top-level group or any subgroup.
@@ -55,58 +55,23 @@ To link the SAML groups:
 
 ![SAML Group Links](img/saml_group_links_v13_9.png)
 
-### Self-managed GitLab with multiple SAML IdPs
-
-When a user signs in, GitLab:
-
-- Checks all the configured SAML group links.
-- Adds that user to the corresponding GitLab groups based on the SAML groups the user belongs to across the different IdPs.
-
-The group link mapping in GitLab is not tied to a specific IdP so you must configure all SAML IdPs to contain group attributes in the SAML response. This means that GitLab is able to match groups in the SAML response, regardless of the IdP that was used to sign in.
-
-As an example, you have 2 IdPs: `SAML1` and `SAML2`.
-
-In GitLab, on a specific group, you have configured two group links:
-
-- `gtlb-owner => Owner role`.
-- `gtlb-dev => Developer role`.
-
-In `SAML1`, the user is a member of `gtlb-owner` but not `gtlb-dev`.
-
-In `SAML2`, the user is a member of `gtlb-dev` but not `gtlb-owner`.
-
-When a user signs in to a group with `SAML1`, the SAML response shows that the user is a member of `gtlb-owner`, so GitLab sets the user's role in that group to be `Owner`.
-
-The user then signs out and signs back in to the group with `SAML2`. The SAML response shows that the user is a member of `gtlb-dev`, so GitLab sets the user's role in that group to be `Developer`.
-
-Now let's change the previous example so that the user is not a member of either `gtlb-owner` or `gtlb-dev` in `SAML2`.
-
-- When the user signs in to a group with `SAML1`, the user is given the `Owner` role in that group.
-- When the user signs in with `SAML2`, the user is removed from the group because they are not a member of either configured group link.
-
-### How role conflicts are resolved
-
-#### Members of multiple mapped SAML groups
-
 If a user is a member of multiple SAML groups mapped to the same GitLab group,
 the user gets the highest role from the groups. For example, if one group
 is linked as Guest and another Maintainer, a user in both groups gets the Maintainer
 role.
-
-#### Parent group role is higher than child group
 
 Users granted:
 
 - A higher role with Group Sync are displayed as having
   [direct membership](../../project/members/index.md#display-direct-members) of the group.
 - A lower or the same role with Group Sync are displayed as having
-  [inherited membership](../../project/members/index.md#membership-types) of the group.
+  [inherited membership](../../project/members/index.md#display-inherited-members) of the group.
 
 ### Use the API
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/290367) in GitLab 15.3.
 
-You can use the GitLab API to [list, add, and delete](../../../api/saml.md#saml-group-links) SAML group links.
+You can use the GitLab API to [list, add, and delete](../../../api/groups.md#saml-group-links) SAML group links.
 
 ## Configure SAML Group Sync
 
@@ -177,7 +142,7 @@ group overage claim attribute in the SAML response. Then group memberships must 
 The [Graph API endpoint](https://learn.microsoft.com/en-us/graph/api/user-list-transitivememberof?view=graph-rest-1.0&tabs=http#http-request) supports only a
 [user object ID](https://learn.microsoft.com/en-us/partner-center/find-ids-and-domain-names#find-the-user-object-id) or
 [userPrincipalName](https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/plan-connect-userprincipalname#what-is-userprincipalname)
-as the [configured](../../../user/group/saml_sso/index.md#azure) Unique User Identifier (Name identifier) attribute.
+as the [configured](../../../user/group/saml_sso/index.md#azure) Unique User Identifier (Name identifier) attribute. 
 
 When the integration processes Group Sync, only Group Links configured with
 group unique identifiers (like `12345678-9abc-def0-1234-56789abcde`) are supported.
@@ -197,7 +162,7 @@ To integrate Microsoft Azure AD, you:
 
 ### Configure Azure AD
 
-<!-- vale gitlab_base.SentenceSpacing = NO -->
+<!-- vale gitlab.SentenceSpacing = NO -->
 
 1. In the [Azure Portal](https://portal.azure.com), go to **Microsoft Entra ID > App registrations > All applications**, and select your GitLab SAML application.
 1. Under **Essentials**, the **Application (client) ID** and **Directory (tenant) ID** values are displayed. Copy these values, because you need them for the GitLab configuration.
@@ -213,7 +178,7 @@ To integrate Microsoft Azure AD, you:
 1. Select **Add permissions** to save.
 1. Select **Grant admin consent for `<application_name>`**, then on the confirmation dialog select **Yes**. The **Status** column for both permissions should change to a green check with **Granted for `<application_name>`**.
 
-<!-- vale gitlab_base.SentenceSpacing = YES -->
+<!-- vale gitlab.SentenceSpacing = YES -->
 
 ### Configure GitLab
 
@@ -223,7 +188,7 @@ To configure for a GitLab.com group:
 1. Select **Settings > SAML SSO**.
 1. Configure [SAML SSO for the group](../../../user/group/saml_sso/index.md).
 1. In the **Microsoft Azure integration** section, select the **Enable Microsoft Azure integration for this group** checkbox.
-   This section is only visible if SAML SSO is configured and enabled for the group.
+   This section will only be visible if SAML SSO is configured and enabled for the group.
 1. Enter the **Tenant ID**, **Client ID**, and **Client secret** obtained earlier when configuring Azure Active Directory in the Azure Portal.
 1. Optional. If using Azure AD for US Government or Azure AD China, enter the appropriate **Login API endpoint** and **Graph API endpoint**. The default values work for most organizations.
 1. Select **Save changes**.
@@ -231,7 +196,7 @@ To configure for a GitLab.com group:
 To configure for self-managed:
 
 1. Configure [SAML SSO for the instance](../../../integration/saml.md).
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Settings > General**.
 1. In the **Microsoft Azure integration** section, select the **Enable Microsoft Azure integration for this group** checkbox.
 1. Enter the **Tenant ID**, **Client ID**, and **Client secret** obtained earlier when configuring Azure Active Directory in the Azure Portal.
@@ -265,7 +230,7 @@ When global group memberships lock is enabled:
 To enable global group memberships lock:
 
 1. [Configure SAML](../../../integration/saml.md) for your self-managed GitLab instance.
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Settings > General**.
 1. Expand the **Visibility and access controls** section.
 1. Ensure that **Lock memberships to SAML Group Links synchronization** is selected.
@@ -284,11 +249,7 @@ For example, in the following diagram:
   not yet signed in.
 
 ```mermaid
-%%{init: { "fontFamily": "GitLab Sans" }}%%
 graph TB
-accTitle: Automatic member removal
-accDescr: How group membership of users is determined before sign in if group sync is set up.
-
    subgraph SAML users
       SAMLUserA[Sidney Jones]
       SAMLUserB[Zhang Wei]
@@ -313,11 +274,7 @@ accDescr: How group membership of users is determined before sign in if group sy
 ```
 
 ```mermaid
-%%{init: { "fontFamily": "GitLab Sans" }}%%
 graph TB
-accTitle: Automatic member removal
-accDescr: User membership for Sidney when she has not signed into group C, and group B has not configured group links.
-
     subgraph GitLab users
       GitLabUserA[Sidney Jones]
       GitLabUserB[Zhang Wei]
@@ -326,9 +283,9 @@ accDescr: User membership for Sidney when she has not signed into group C, and g
     end
 
    subgraph GitLab groups
-      GitLabGroupA["Group A<br> (SAML configured)"] --> GitLabGroupB["Group B<br> (SAML Group Link not configured)"]
-      GitLabGroupA --> GitLabGroupC["Group C<br> (SAML Group Link configured)"]
-      GitLabGroupA --> GitLabGroupD["Group D<br> (SAML Group Link configured)"]
+      GitLabGroupA["Group A (SAML configured)"] --> GitLabGroupB["Group B (SAML Group Link not configured)"]
+      GitLabGroupA --> GitLabGroupC["Group C (SAML Group Link configured)"]
+      GitLabGroupA --> GitLabGroupD["Group D (SAML Group Link configured)"]
    end
 
    GitLabGroupB --> |Member|GitLabUserA
@@ -341,11 +298,7 @@ accDescr: User membership for Sidney when she has not signed into group C, and g
 ```
 
 ```mermaid
-%%{init: { "fontFamily": "GitLab Sans" }}%%
 graph TB
-accTitle: Automatic member removal
-accDescr: How membership of Alex Garcia works once she has signed into a group that has group links enabled.
-
    subgraph GitLab users
       GitLabUserA[Sidney Jones]
       GitLabUserB[Zhang Wei]
@@ -355,9 +308,9 @@ accDescr: How membership of Alex Garcia works once she has signed into a group t
 
    subgraph GitLab groups after Alex Garcia signs in
       GitLabGroupA[Group A]
-      GitLabGroupA["Group A<br> (SAML configured)"] --> GitLabGroupB["Group B<br> (SAML Group Link not configured)"]
-      GitLabGroupA --> GitLabGroupC["Group C<br> (SAML Group Link configured)"]
-      GitLabGroupA --> GitLabGroupD["Group D<br> (SAML Group Link configured)"]
+      GitLabGroupA["Group A (SAML configured)"] --> GitLabGroupB["Group B (SAML Group Link not configured)"]
+      GitLabGroupA --> GitLabGroupC["Group C (SAML Group Link configured)"]
+      GitLabGroupA --> GitLabGroupD["Group D (SAML Group Link configured)"]
    end
 
    GitLabGroupB --> |Member|GitLabUserA
@@ -379,4 +332,4 @@ not limited to 150 groups.
 
 Otherwise, you can work around this issue by changing the [group claims](https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/how-to-connect-fed-group-claims#configure-the-microsoft-entra-application-registration-for-group-attributes) to use the `Groups assigned to the application` option instead.
 
-![Manage Group Claims](img/Azure-manage-group-claims_v15_9.png)
+![Manage Group Claims](img/Azure-manage-group-claims.png).

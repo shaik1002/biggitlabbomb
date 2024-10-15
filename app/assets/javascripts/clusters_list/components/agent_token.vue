@@ -86,7 +86,7 @@ export default {
       ></gl-sprintf>
     </p>
 
-    <p class="gl-flex gl-items-start">
+    <p class="gl-display-flex gl-align-items-flex-start">
       <code-block class="gl-w-full" :code="agentRegistrationCommand" />
       <modal-copy-button
         data-testid="agent-registration-command"

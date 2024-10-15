@@ -5,26 +5,15 @@ module Gitlab
     InvalidEventError = Class.new(RuntimeError)
 
     class EventDefinition
+      EVENT_SCHEMA_PATH = Rails.root.join('config', 'events', 'schema.json')
+      SCHEMA = ::JSONSchemer.schema(EVENT_SCHEMA_PATH)
+
       attr_reader :path
       attr_reader :attributes
 
       class << self
-        include Gitlab::Utils::StrongMemoize
-
         def definitions
           @definitions ||= paths.flat_map { |glob_path| load_all_from_path(glob_path) }
-        end
-
-        def internal_event_exists?(event_name)
-          definitions
-            .any? { |event| event.attributes[:internal_events] && event.action == event_name } ||
-            Gitlab::UsageDataCounters::HLLRedisCounter.legacy_event?(event_name)
-        end
-
-        def find(event_name)
-          strong_memoize_with(:find, event_name) do
-            definitions.find { |definition| definition.action == event_name }
-          end
         end
 
         private
@@ -62,24 +51,16 @@ module Gitlab
         path.delete_prefix(Rails.root.to_s)
       end
 
-      def event_selection_rules
-        @event_selection_rules ||= find_event_selection_rules
-      end
-
-      def action
-        attributes[:action]
-      end
-
-      private
-
-      def find_event_selection_rules
-        [
-          Gitlab::Usage::EventSelectionRule.new(name: action, time_framed: false),
-          Gitlab::Usage::EventSelectionRule.new(name: action, time_framed: true),
-          *Gitlab::Usage::MetricDefinition.all.flat_map do |metric_definition|
-            metric_definition.event_selection_rules.select { |rule| rule.name == action }
-          end
-        ].uniq
+      def validation_errors
+        SCHEMA.validate(attributes.deep_stringify_keys).map do |error|
+          <<~ERROR_MSG
+            --------------- VALIDATION ERROR ---------------
+            Definition file: #{path}
+            Error type: #{error['type']}
+            Data: #{error['data']}
+            Path: #{error['data_pointer']}
+          ERROR_MSG
+        end
       end
     end
   end

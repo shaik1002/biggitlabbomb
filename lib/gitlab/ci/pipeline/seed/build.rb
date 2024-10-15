@@ -17,7 +17,6 @@ module Gitlab
             @needs_attributes = dig(:needs_attributes)
             @resource_group_key = attributes.delete(:resource_group_key)
             @job_variables = @seed_attributes.delete(:job_variables)
-            @execution_config_attribute = @seed_attributes.delete(:execution_config)
             @root_variables_inheritance = @seed_attributes.delete(:root_variables_inheritance) { true }
 
             @using_rules  = attributes.key?(:rules)
@@ -71,7 +70,6 @@ module Gitlab
               .deep_merge(allow_failure_criteria_attributes)
               .deep_merge(@cache.cache_attributes)
               .deep_merge(runner_tags)
-              .deep_merge(build_execution_config_attribute)
           end
 
           def bridge?
@@ -96,11 +94,14 @@ module Gitlab
 
           delegate :logger, to: :@context
 
-          def build_execution_config_attribute
-            return {} unless @execution_config_attribute
+          def initialize_processable
+            return unless reuse_build_in_seed_context?
 
-            execution_config = @context.find_or_build_execution_config(@execution_config_attribute)
-            { execution_config: execution_config }
+            if bridge?
+              ::Ci::Bridge.new(initial_attributes)
+            else
+              ::Ci::Build.new(initial_attributes)
+            end
           end
 
           def all_of_only?

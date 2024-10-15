@@ -6,7 +6,7 @@ info: Any user with at least the Maintainer role can merge updates to this conte
 
 # AI Architecture
 
-This document describes architecture shared by the GitLab Duo AI features. For historical motivation and goals of this architecture, see the [AI Gateway Architecture design document](https://handbook.gitlab.com/handbook/engineering/architecture/design-documents/ai_gateway/).
+This document describes architecture shared by the GitLab Duo AI features. For historical motivation and goals of this architecture, see the [AI Gateway Architecture blueprint](../architecture/blueprints/ai_gateway/index.md).
 
 ## Introduction
 
@@ -34,7 +34,6 @@ package Models {
 
 Clients -down-> GLCOM : REST/Websockets
 Clients -down-> SMI : REST/Websockets
-Clients -down-> AIGW : code completion direct connection
 SMI -right-> CD : License + JWT Sync
 GLCOM -down-> AIGW : Prompts + Telemetry + JWT (REST)
 
@@ -53,10 +52,10 @@ AIGW -down-> Models : prompts
 - [CustomersDot](https://gitlab.com/gitlab-org/customers-gitlab-com) - Allows customers to buy and upgrade subscriptions by adding more seats and add/edit payment records. It also manages self-managed licenses.
 - [AI Gateway](https://gitlab.com/gitlab-org/modelops/applied-ml/code-suggestions/ai-assist) - System that provides unified interface for invoking models. Deployed in Google Cloud Run (using [Runway](https://gitlab.com/gitlab-com/gl-infra/platform/runway)).
 - Extensions
-  - [Language Server](https://gitlab.com/gitlab-org/editor-extensions/gitlab-lsp) (powers Code Suggestions in VS Code, Visual Studio 2022 for Windows, and Neovim)
+  - [Language Server](https://gitlab.com/gitlab-org/editor-extensions/gitlab-lsp) (powers code suggestions in VS Code, VisualStudio and Neovim)
   - [VS Code](https://gitlab.com/gitlab-org/gitlab-vscode-extension)
   - [JetBrains](https://gitlab.com/gitlab-org/editor-extensions/gitlab-jetbrains-plugin)
-  - [Visual Studio 2022 for Windows](https://gitlab.com/gitlab-org/editor-extensions/gitlab-visual-studio-extension)
+  - [Visual Studio](https://gitlab.com/gitlab-org/editor-extensions/gitlab-visual-studio-extension)
   - [Neovim](https://gitlab.com/gitlab-org/editor-extensions/gitlab.vim)
 
 ### Difference between how GitLab.com and Self-Managed/Dedicated access AI Gateway
@@ -69,7 +68,7 @@ AIGW -down-> Models : prompts
 
 ## SaaS-based AI abstraction layer
 
-GitLab operates a cloud-hosted AI architecture. We will allow access to it for licensed self managed instances using the AI-gateway. See [the design document](https://handbook.gitlab.com/handbook/engineering/architecture/design-documents/ai_gateway/) for details.
+GitLab currently operates a cloud-hosted AI architecture. We will allow access to it for licensed self managed instances using the AI-gateway. See [the blueprint](../architecture/blueprints/ai_gateway) for details.
 
 There are two primary reasons for this: the best AI models are cloud-based as they often depend on specialized hardware designed for this purpose, and operating self-managed infrastructure capable of AI at-scale and with appropriate performance is a significant undertaking. We are actively [tracking self-managed customers interested in AI](https://gitlab.com/gitlab-org/gitlab/-/issues/409183).
 
@@ -109,9 +108,32 @@ The following models have been approved for use:
 - [Anthropic models](https://docs.anthropic.com/claude/docs/models-overview)
 - [Suggested reviewer](https://gitlab.com/gitlab-org/modelops/applied-ml/applied-ml-updates/-/issues/10)
 
-### Embeddings
+### Vector stores
 
-For more information regarding GitLab embeddings, see our [AI embeddings architecture](ai_features/embeddings.md).
+The following vector stores have been approved for use:
+
+- [`pgvector`](https://github.com/pgvector/pgvector) is a Postgres extension adding support for storing vector embeddings and calculating ANN (approximate nearest neighbor).
+
+### Indexing Update
+
+We are currently using sequential scan, which provides perfect recall. We are considering adding an index if we can ensure that it still produces accurate results, as noted in the `pgvector` indexing [documentation](https://github.com/pgvector/pgvector#indexing).
+
+Given that the table contains thousands of entries, indexing with these updated settings would likely improve search speed while maintaining high accuracy. However, more testing may be needed to verify the optimal configuration for this dataset size before deploying to production.
+
+A [draft MR](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/122035) has been created to update the index.
+
+The index function has been updated to improve search quality. This was tested locally by setting the `ivfflat.probes` value to `10` with the following SQL command:
+
+```ruby
+::Embedding::Vertex::GitlabDocumentation.connection.execute("SET ivfflat.probes = 10")
+```
+
+Setting the `probes` value for indexing improves results, as per the neighbor [documentation](https://github.com/ankane/neighbor#indexing).
+
+For optimal `probes` and `lists` values:
+
+- Use `lists` equal to `rows / 1000` for tables with up to 1 million rows and `sqrt(rows)` for larger datasets.
+- For `probes` start with `lists / 10` for tables up to 1 million rows and `sqrt(lists)` for larger datasets.
 
 ## Code Suggestions
 
@@ -119,26 +141,26 @@ Code Suggestions is being integrated as part of the GitLab-Rails repository whic
 
 The following table documents functionality that Code Suggestions offers today, and what those changes will look like as part of the unification:
 
-| Topic              | Details                                                                                                                                                                       | Where this happens today                                                                                                                                              | Where this will happen going forward                         |
-|--------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------|
-| Request processing |                                                                                                                                                                               |                                                                                                                                                                       |                                                              |
-|                    | Receives requests from IDEs (VS Code, GitLab WebIDE, MS Visual Studio 2022 for Windows, IntelliJ, JetBrains, VIM, Emacs, Sublime), including code before and after the cursor | GitLab Rails                                                                                                                                                          | GitLab Rails                                                 |
-|                    | Authenticates the current user, verifies they are authorized to use Code Suggestions for this project                                                                         | GitLab Rails + AI Gateway                                                                                                                                             | GitLab Rails + AI Gateway                                    |
-|                    | Preprocesses the request to add context, such as including imports via TreeSitter                                                                                             | AI Gateway                                                                                                                                                            | Undecided                                                    |
-|                    | Routes the request to the AI Provider                                                                                                                                         | AI Gateway                                                                                                                                                            | AI Gateway                                                   |
-|                    | Returns the response to the IDE                                                                                                                                               | GitLab Rails                                                                                                                                                          | GitLab Rails                                                 |
-|                    | Logs the request, including timestamp, response time, model, etc                                                                                                              | Both                                                                                                                                                                  | Both                                                         |
-| Telemetry          |                                                                                                                                                                               |                                                                                                                                                                       |                                                              |
-|                    | User acceptance or rejection in the IDE                                                                                                                                       | AI Gateway                                                                                                                                                            | [Both](https://gitlab.com/gitlab-org/gitlab/-/issues/418282) |
-|                    | Number of unique users per day                                                                                                                                                | [GitLab Rails](https://app.periscopedata.com/app/gitlab/1143612/Code-Suggestions-Usage), AI gateway                                                                   | Undecided                                                    |
-|                    | Error rate, model usage, response time, IDE usage                                                                                                                             | [AI Gateway](https://log.gprd.gitlab.net/app/dashboards#/view/6c947f80-7c07-11ed-9f43-e3784d7fe3ca?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-6h,to:now))) | Both                                                         |
-|                    | Suggestions per language                                                                                                                                                      | AI Gateway                                                                                                                                                            | [Both](https://gitlab.com/groups/gitlab-org/-/epics/11017)   |
-| Monitoring         |                                                                                                                                                                               | Both                                                                                                                                                                  | Both                                                         |
-|                    |                                                                                                                                                                               |                                                                                                                                                                       |                                                              |
-| Model Routing      |                                                                                                                                                                               |                                                                                                                                                                       |                                                              |
-|                    | Currently we are not using this functionality, but Code Suggestions is able to support routing to multiple models based on a percentage of traffic                            | AI Gateway                                                                                                                                                            | Both                                                         |
-| Internal Models    |                                                                                                                                                                               |                                                                                                                                                                       |                                                              |
-|                    | Currently unmaintained, the ability to run models in our own instance, running them inside Triton, and routing requests to our own models                                     | AI Gateway                                                                                                                                                            | AI Gateway                                                   |
+| Topic | Details | Where this happens today | Where this will happen going forward |
+| ----- | ------  | --------------           | ------------------                   |
+| Request processing | |                     |                                      |
+|                    | Receives requests from IDEs (VS Code, GitLab WebIDE, MS Visual Studio, IntelliJ, JetBrains, VIM, Emacs, Sublime), including code before and after the cursor | GitLab Rails | GitLab Rails |
+|                    | Authenticates the current user, verifies they are authorized to use Code Suggestions for this project | GitLab Rails + AI Gateway | GitLab Rails + AI Gateway |
+|                    | Preprocesses the request to add context, such as including imports via TreeSitter | AI Gateway | Undecided |
+|                    | Routes the request to the AI Provider | AI Gateway | AI Gateway |
+|                    | Returns the response to the IDE | GitLab Rails | GitLab Rails |
+|                    | Logs the request, including timestamp, response time, model, etc | Both | Both |
+| Telemetry | |                     |                                      |
+|           | User acceptance or rejection in the IDE | AI Gateway | [Both](https://gitlab.com/gitlab-org/gitlab/-/issues/418282) |
+|           | Number of unique users per day | [GitLab Rails](https://app.periscopedata.com/app/gitlab/1143612/Code-Suggestions-Usage), AI gateway | Undecided |
+|           | Error rate, model usage, response time, IDE usage | [AI Gateway](https://log.gprd.gitlab.net/app/dashboards#/view/6c947f80-7c07-11ed-9f43-e3784d7fe3ca?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-6h,to:now))) | Both |
+|           | Suggestions per language | AI Gateway |[Both](https://gitlab.com/groups/gitlab-org/-/epics/11017) |
+| Monitoring | |  Both                   |   Both                                  |
+|            | |                     |                                      |
+| Model Routing | |                     |                                      |
+|            | Currently we are not using this functionality, but Code Suggestions is able to support routing to multiple models based on a percentage of traffic | AI Gateway | Both |
+| Internal Models | |                     |                                      |
+|            | Currently unmaintained, the ability to run models in our own instance, running them inside Triton, and routing requests to our own models | AI Gateway | AI Gateway |
 
 ### Self-managed support
 

@@ -72,7 +72,7 @@ export default {
       :show-label="showLabel"
       :icon-classes="showLabel ? 'mr-2' : ''"
       :label="__('Upload file')"
-      class="gl-flex"
+      class="d-flex"
       icon="upload"
       @click="startFileUpload"
     />

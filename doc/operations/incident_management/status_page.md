@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: Platform Insights
+group: Respond
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
@@ -87,7 +87,7 @@ the necessary CI/CD variables to deploy the Status Page to AWS S3:
    - `AWS_ACCESS_KEY_ID` - The AWS access key ID.
    - `AWS_SECRET_ACCESS_KEY` - The AWS secret.
 1. On the left sidebar, select **Build > Pipelines**.
-1. To deploy the Status Page to S3, select **New pipeline**.
+1. To deploy the Status Page to S3, select **Run pipeline**.
 
 WARNING:
 Consider limiting who can access issues in this project, as any user who can view
@@ -113,11 +113,7 @@ and displays it to users, providing information about ongoing incidents without
 extra effort from your team:
 
 ```mermaid
-%%{init: { "fontFamily": "GitLab Sans" }}%%
 graph TB
-    accTitle: Understand your status page
-    accDescr: How GitLab fetches, formats, and displays incident data
-
     subgraph GitLab Instance
     issues(issue updates) -- trigger --> middleware(Background job: JSON generation)
     end

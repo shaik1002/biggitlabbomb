@@ -7,7 +7,6 @@ import JobsTableTabs from '~/ci/jobs_page/components/jobs_table_tabs.vue';
 import JobsFilteredSearch from '~/ci/common/private/jobs_filtered_search/app.vue';
 import JobsTableEmptyState from '~/ci/jobs_page/components/jobs_table_empty_state.vue';
 import { createAlert } from '~/alert';
-import { InternalEvents } from '~/tracking';
 import {
   TOKEN_TYPE_STATUS,
   TOKEN_TYPE_JOBS_RUNNER_TYPE,
@@ -20,7 +19,6 @@ import {
   JOBS_FETCH_ERROR_MSG,
   LOADING_ARIA_LABEL,
   CANCELABLE_JOBS_ERROR_MSG,
-  VIEW_ADMIN_JOBS_PAGELOAD,
 } from './constants';
 import JobsSkeletonLoader from './components/jobs_skeleton_loader.vue';
 import GetAllJobs from './graphql/queries/get_all_jobs.query.graphql';
@@ -46,7 +44,7 @@ export default {
     GlIntersectionObserver,
     GlLoadingIcon,
   },
-  mixins: [glFeatureFlagsMixin(), InternalEvents.mixin()],
+  mixins: [glFeatureFlagsMixin()],
   inject: {
     jobStatuses: {
       default: null,
@@ -90,7 +88,6 @@ export default {
         this.error = this.$options.i18n.jobsCountErrorMsg;
       },
     },
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     cancelable: {
       query: getCancelableJobs,
       update(data) {
@@ -157,9 +154,6 @@ export default {
 
       this.count = newCount;
     },
-  },
-  mounted() {
-    this.trackEvent(VIEW_ADMIN_JOBS_PAGELOAD);
   },
   methods: {
     updateHistoryAndFetchCount(filterParams = {}) {

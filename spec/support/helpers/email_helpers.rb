@@ -36,7 +36,7 @@ module EmailHelpers
 
   def should_email(user, times: 1, recipients: email_recipients)
     amount = sent_to_user(user, recipients: recipients)
-    failed_message = -> { "User #{user.username} (#{user.id}): email test failed (expected #{times}, got #{amount})" }
+    failed_message = lambda { "User #{user.username} (#{user.id}): email test failed (expected #{times}, got #{amount})" }
     expect(amount).to eq(times), failed_message
   end
 
@@ -56,20 +56,12 @@ module EmailHelpers
     ActionMailer::Base.deliveries.flat_map(&kind)
   end
 
-  def find_email_for(user_or_email)
-    to = user_or_email.is_a?(User) ? user_or_email.notification_email_or_default : user_or_email
-    ActionMailer::Base.deliveries.find { |d| d.to.include?(to) }
+  def find_email_for(user)
+    ActionMailer::Base.deliveries.find { |d| d.to.include?(user.notification_email_or_default) }
   end
 
   def have_referable_subject(referable, include_project: true, reply: false)
-    prefix = if include_project && referable.project
-               "#{referable.project.name} | "
-             elsif referable.is_a?(Issue) && referable.group_level?
-               "#{referable.namespace.name} | "
-             else
-               ""
-             end.freeze
-
+    prefix = (include_project && referable.project ? "#{referable.project.name} | " : '').freeze
     prefix = "Re: #{prefix}" if reply
 
     suffix = "#{referable.title} (#{referable.to_reference})"

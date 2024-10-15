@@ -2,7 +2,6 @@
 
 import $ from 'jquery';
 import axios from '~/lib/utils/axios_utils';
-import { visitUrl } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 import Raphael from './raphael';
 
@@ -239,7 +238,7 @@ export default class BranchGraph {
         opacity: 0,
         cursor: 'pointer',
       })
-      .click(() => visitUrl(options.commit_url.replace('%s', commit.id), true))
+      .click(() => window.open(options.commit_url.replace('%s', commit.id), '_blank'))
       .hover(
         function () {
           this.tooltip = r.commitTooltip(x + 5, y, commit);
@@ -272,7 +271,7 @@ export default class BranchGraph {
       .text(this.offsetX + this.unitSpace * this.mspace + 35, y, commit.message.split('\n')[0])
       .attr({
         fill: 'currentColor',
-        class: 'gl-text-primary',
+        class: 'gl-text-body',
         'text-anchor': 'start',
         font: '14px Monaco, monospace',
       });

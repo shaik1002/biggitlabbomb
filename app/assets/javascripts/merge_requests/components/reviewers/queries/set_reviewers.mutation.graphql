@@ -1,7 +1,0 @@
-mutation setReviewers($projectPath: ID!, $iid: String!, $reviewerUsernames: [String!]!) {
-  mergeRequestSetReviewers(
-    input: { projectPath: $projectPath, iid: $iid, reviewerUsernames: $reviewerUsernames }
-  ) {
-    errors
-  }
-}

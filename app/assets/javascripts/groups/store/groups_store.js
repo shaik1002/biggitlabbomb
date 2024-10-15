@@ -106,15 +106,15 @@ export default class GroupsStore {
       archived: rawGroupItem.archived,
     };
 
-    if (!isEmpty(rawGroupItem.compliance_management_frameworks)) {
+    if (!isEmpty(rawGroupItem.compliance_management_framework)) {
       groupItem.complianceFramework = {
         id: convertToGraphQLId(
           'ComplianceManagement::Framework',
-          rawGroupItem.compliance_management_frameworks[0].id,
+          rawGroupItem.compliance_management_framework.id,
         ),
-        name: rawGroupItem.compliance_management_frameworks[0].name,
-        color: rawGroupItem.compliance_management_frameworks[0].color,
-        description: rawGroupItem.compliance_management_frameworks[0].description,
+        name: rawGroupItem.compliance_management_framework.name,
+        color: rawGroupItem.compliance_management_framework.color,
+        description: rawGroupItem.compliance_management_framework.description,
       };
     }
 

@@ -9,9 +9,9 @@ RSpec.describe ::Gitlab::Seeders::Ci::Runner::RunnerFleetSeeder, feature_categor
 
   subject(:seeder) do
     described_class.new(NULL_LOGGER,
-      username: user.username,
-      registration_prefix: registration_prefix,
-      runner_count: runner_count)
+                        username: user.username,
+                        registration_prefix: registration_prefix,
+                        runner_count: runner_count)
   end
 
   describe '#seed', :enable_admin_mode do
@@ -89,18 +89,6 @@ RSpec.describe ::Gitlab::Seeders::Ci::Runner::RunnerFleetSeeder, feature_categor
 
       it 'does not change runner count' do
         expect { seed }.not_to change { Ci::Runner.count }
-      end
-    end
-
-    context 'when organization cannot be created' do
-      before do
-        allow_next_instance_of(::Organizations::CreateService, current_user: user, params: anything) do |service|
-          allow(service).to receive(:execute).and_return(ServiceResponse.error(message: 'test error'))
-        end
-      end
-
-      it 'raises RuntimeError' do
-        expect { seed }.to raise_error(RuntimeError)
       end
     end
   end

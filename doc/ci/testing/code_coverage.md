@@ -12,40 +12,35 @@ DETAILS:
 
 Use code coverage to provide insights on what source code is being validated by a test suite. Code coverage is one of many test metrics that can determine software performance and quality.
 
-## Code coverage results
+## View Code Coverage results
 
-Code coverage results are shown in:
+Code Coverage results are shown in:
 
 - Merge request widget
 - Project repository analytics
 - Group repository analytics
 - Repository badge
 
-For more information on test coverage visualization in the file diff of the merge request, see [Test coverage visualization](test_coverage_visualization/index.md).
+For more information on test coverage visualization in the file diff of the MR, see [Test Coverage Visualization](test_coverage_visualization.md).
 
-### Code coverage results in merge requests
+### View code coverage results in the MR
 
 If you use test coverage in your code, you can use a regular expression to
 find coverage results in the job log. You can then include these results
-in the merge request.
+in the merge request in GitLab.
 
 If the pipeline succeeds, the coverage is shown in the merge request widget and
 in the jobs table. If multiple jobs in the pipeline have coverage reports, they are
 averaged.
 
-![MR widget coverage](img/pipelines_test_coverage_mr_widget_v17_3.png)
+![MR widget coverage](img/pipelines_test_coverage_mr_widget.png)
 
-![Build status coverage](img/pipelines_test_coverage_jobs_v17_3.png)
+![Build status coverage](img/pipelines_test_coverage_build.png)
 
-#### Add code coverage results to merge requests
+#### Add test coverage results using `coverage` keyword
 
-You can display test coverage results in merge requests by adding the
-[`coverage`](../yaml/index.md#coverage) keyword to your project's `.gitlab-ci.yml` file.
-
-To aggregate multiple test coverage values:
-
-- For each job you want to include in the aggregate value,
-  add the `coverage` keyword followed by a regular expression.
+To add test coverage results to a merge request using the project's `.gitlab-ci.yml` file, provide a regular expression
+using the [`coverage`](../yaml/index.md#coverage) keyword.
 
 #### Test coverage examples
 
@@ -54,89 +49,80 @@ If the tooling has changed after these samples were created, or if the tooling w
 the regex might not work. Test the regex carefully to make sure it correctly finds the
 coverage in the tool's output:
 
-<!-- vale gitlab_base.Spelling = NO -->
+<!-- vale gitlab.Spelling = NO -->
 <!-- markdownlint-disable MD056 -->
 
 | Name         | Language     | Command      | Example      |
 |--------------|--------------|--------------|--------------|
 | Simplecov | Ruby | None | `/\(\d+.\d+\%\) covered/` |
-| pytest-cov | Python | None | `/TOTAL.*? (100(?:\.0+)?\%\|[1-9]?\d(?:\.\d+)?\%)$/` |
-| Scoverage | Scala | None | `/(?i)total.*? (100(?:\.0+)?\%\|[1-9]?\d(?:\.\d+)?\%)$/` |
+| pytest-cov | Python | None | `/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/` |
+| Scoverage | Scala | None | `/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/` |
 | pest | PHP | `pest --coverage --colors=never` | `/Statement coverage[A-Za-z\.*]\s*:\s*([^%]+)/` |
 | phpunit | PHP | `phpunit --coverage-text --colors=never` | `/^\s*Lines:\s*\d+.\d+\%/` |
 | gcovr | C/C++ | None | `/^TOTAL.*\s+(\d+\%)$/` |
 | tap | NodeJs | `tap --coverage-report=text-summary` | `/^Statements\s*:\s*([^%]+)/` |
-| nyc | NodeJs | `nyc npm test` | `/All files[^\|]*\|[^\|]*\s+([\d\.]+)/` |
-| jest | NodeJs | `jest --ci --coverage` | `/All files[^\|]*\|[^\|]*\s+([\d\.]+)/` |
+| nyc | NodeJs | `nyc npm test` | `/All files[^|]*\|[^|]*\s+([\d\.]+)/` |
+| jest | NodeJs | `jest --ci --coverage` | `/All files[^|]*\|[^|]*\s+([\d\.]+)/` |
 | excoveralls | Elixir | None | `/\[TOTAL\]\s+(\d+\.\d+)%/` |
 | mix | Elixir | `mix test --cover` | `/\d+.\d+\%\s+\|\s+Total/` |
 | JaCoCo | Java/Kotlin | None | `/Total.*?([0-9]{1,3})%/` |
-| go test (single package) | Go | `go test -cover` | `/coverage: \d+.\d+% of statements/` |
-| go test (whole project) | Go | `go test -coverprofile=cover.profile && go tool cover -func cover.profile` | `/total:\s+\(statements\)\s+\d+.\d+%/` |
+| go test | Go | `go test -cover` | `/coverage: \d+.\d+% of statements/` |
 | OpenCover | .NET | None | `/(Visited Points).*\((.*)\)/` |
-| dotnet test ([MSBuild](https://github.com/coverlet-coverage/coverlet/blob/master/Documentation/MSBuildIntegration.md)) | .NET | `dotnet test` | `/Total\s*\|\s*(\d+(?:\.\d+)?)/` |
+| dotnet test | .NET | `dotnet test` | `/Total\s*\|\s*(\d+(?:\.\d+)?)/` |
 | tarpaulin | Rust | None | `/^\d+.\d+% coverage/` |
 | Pester | PowerShell | None | `/Covered (\d+\.\d+%)/` |
 
-<!-- vale gitlab_base.Spelling = YES -->
+<!-- vale gitlab.Spelling = YES -->
 <!-- markdownlint-enable MD056 -->
 
-### View code coverage history
+### View history of project code coverage
 
-You can track the evolution of code coverage for your project or group over time.
-
-#### For a project
-
-To view the code coverage history for a project:
+To see the evolution of your project code coverage over time,
+you can view a graph or download a CSV file with this data.
 
 1. On the left sidebar, select **Search or go to** and find your project.
 1. Select **Analyze > Repository analytics**.
-1. From the dropdown list, select the job you want to view historical data for.
-1. Optional. To view a CSV file of the data, select **Download raw data (.csv)**.
+
+The historic data for each job is listed in the dropdown list above the graph.
+
+To view a CSV file of the data, select **Download raw data (`.csv`)**.
 
 ![Code coverage graph of a project over time](img/code_coverage_graph_v13_1.png)
 
-#### For a group
+### View history of group code coverage
 
 DETAILS:
 **Tier:** Premium, Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
-To view the code coverage history for all projects in a group:
+To see the all the project's code coverage under a group over time, you can find view [group repository analytics](../../user/group/repositories_analytics/index.md).
 
-1. On the left sidebar, select **Search or go to** and find your group.
-1. Select **Analyze > Repository analytics**.
-1. Optional. To view a CSV file of the data, select **Download historic test coverage data (.csv)**.
-
-![Code coverage graph of a group over time](img/code_coverage_group_report_v15_11.png)
+![Code coverage graph of a group over time](img/code_coverage_group_report.png)
 
 ### Pipeline badges
 
 You can use [pipeline badges](../../user/project/badges.md#test-coverage-report-badges) to indicate the pipeline status and
 test coverage of your projects. These badges are determined by the latest successful pipeline.
 
-## Add a coverage check approval rule
+## Coverage check approval rule
 
 DETAILS:
 **Tier:** Premium, Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
-You can require specific users or a group to approve merge requests that reduce the project's test coverage.
+When merging a request that would cause the project's test coverage to decline, you can stipulate that such merge requests require approval by selected users or a group.
 
-Prerequisites:
+Follow these steps to enable the `Coverage-Check` MR approval rule:
 
-- Ensure you've [added code coverage results to your merge requests](#add-code-coverage-results-to-merge-requests).
-
-To add a `Coverage-Check` approval rule:
-
+1. Set up a [`coverage`](../yaml/index.md#coverage) regular expression for all jobs you want to include in the overall coverage value.
 1. Go to your project and select **Settings > Merge requests**.
-1. Under **Merge request approvals**, do one of the following:
-   - Next to the `Coverage-Check` approval rule, select **Enable**.
-   - For manual setup, select **Add approval rule**, then enter the **Rule name**. For example: `Coverage Check`.
-1. Select a **Target branch**.
-1. Set the number of **Required number of approvals**.
-1. Select the **Users** or **Groups** to provide approval.
-1. Select **Save changes**.
+1. Under **Merge request approvals**, select **Enable** next to the `Coverage-Check` approval rule.
+1. Select the **Target branch**.
+1. Set the number of **Approvals required** to greater than zero.
+1. Select the users or groups to provide approval.
+1. Select **Add approval rule**.
+
+![Coverage-Check approval rule](img/coverage_check_approval_rule_14_1.png)
 
 ## Troubleshooting
 

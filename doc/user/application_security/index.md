@@ -55,7 +55,7 @@ Each of the GitLab application security tools is relevant to specific stages of 
 - Deploy
   - Operational Container Scanning
 
-![CI/CD stages and matching GitLab application security tools](img/secure_tools_and_cicd_stages_v15_5.png)
+![CI/CD stages and matching GitLab application security tools](img/secure_tools_and_cicd_stages.png)
 
 ### Source code analysis
 
@@ -73,7 +73,7 @@ Analysis of the web application occurs on every code commit. As part of the CI/C
 application is built, deployed to a test environment, and subjected to the following tests:
 
 - Test application for known attack vectors - [Dynamic Application Security Testing (DAST)](dast/index.md).
-- Analysis of APIs for known attack vectors - [API Security](api_security_testing/index.md).
+- Analysis of APIs for known attack vectors - [API Security](dast_api/index.md).
 - Analysis of web APIs for unknown bugs and vulnerabilities - [API fuzzing](api_fuzzing/index.md).
 
 ### Dependency analysis
@@ -114,9 +114,9 @@ The following vulnerability scanners and their databases are regularly updated:
 | Secure scanning tool                                            | Vulnerabilities database updates |
 |:----------------------------------------------------------------|:---------------------------------|
 | [Container Scanning](container_scanning/index.md)            | A job runs on a daily basis to build new images with the latest vulnerability database updates from the upstream scanner. GitLab monitors this job through an internal alert that tells the engineering team when the database becomes more than 48 hours old. For more information, see the [Vulnerabilities database update](container_scanning/index.md#vulnerabilities-database). |
-| [Dependency Scanning](dependency_scanning/index.md)          | Relies on the [GitLab Advisory Database](https://gitlab.com/gitlab-org/security-products/gemnasium-db). It is updated on a daily basis using [data from NVD, the `ruby-advisory-db` and the GitHub Advisory Database as data sources](https://gitlab.com/gitlab-org/security-products/gemnasium-db/-/blob/master/SOURCES.md). |
-| [Dynamic Application Security Testing (DAST)](dast/index.md) | [DAST proxy-based](dast/browser/index.md) and [browser-based](dast/browser/index.md) engines are updated on a periodic basis. [DAST proxy-based](dast/browser/index.md) analyzer downloads the scanning rules at scan runtime. See the [version of the underlying tool `zaproxy`](https://gitlab.com/gitlab-org/security-products/dast/blob/main/Dockerfile#L27). [DAST browser-based](dast/browser/index.md) rules run [different vulnerability checks](dast/browser/checks/index.md). |
-| [Secret Detection](secret_detection/pipeline/index.md#detected-secrets) | GitLab maintains the [detection rules](secret_detection/pipeline/index.md#detected-secrets) and [accepts community contributions](secret_detection/pipeline/index.md#add-new-patterns). The scanning engine is updated at least once per month if a relevant update is available. |
+| [Dependency Scanning](dependency_scanning/index.md)          | Relies on the [GitLab Advisory Database](https://gitlab.com/gitlab-org/security-products/gemnasium-db). It is updated on a daily basis using [data from NVD, the `ruby-advisory-db` and the GitHub Advisory Database as data sources](https://gitlab.com/gitlab-org/security-products/gemnasium-db/-/blob/master/SOURCES.md). See our [current measurement of time from CVE being issued to our product being updated](https://handbook.gitlab.com/handbook/engineering/development/performance-indicators/#cve-issue-to-update). |
+| [Dynamic Application Security Testing (DAST)](dast/index.md) | [DAST proxy-based](dast/proxy-based.md) and [browser-based](dast/browser_based.md) engines are updated on a periodic basis. [DAST proxy-based](dast/proxy-based.md) analyzer downloads the scanning rules at scan runtime. See the [version of the underlying tool `zaproxy`](https://gitlab.com/gitlab-org/security-products/dast/blob/main/Dockerfile#L27). [DAST browser-based](dast/browser_based.md) rules run [different vulnerability checks](dast/checks/index.md). |
+| [Secret Detection](secret_detection/pipeline/index.md#detected-secrets) | GitLab maintains the [detection rules](secret_detection/pipeline/index.md#detected-secrets) and [accepts community contributions](secret_detection/pipeline/index.md#adding-new-patterns). The scanning engine is updated at least once per month if a relevant update is available. |
 | [Static Application Security Testing (SAST)](sast/index.md)  | The source of scan rules depends on which [analyzer](sast/analyzers.md) is used for each [supported programming language](sast/index.md#supported-languages-and-frameworks). GitLab maintains a ruleset for the Semgrep-based analyzer and updates it regularly based on internal research and user feedback. For other analyzers, the ruleset is sourced from the upstream open-source scanner. Each analyzer is updated at least once per month if a relevant update is available. |
 
 In versions of GitLab that use the same major version of the analyzer, you do not have to update
@@ -185,27 +185,16 @@ does not use the `SECURE_ANALYZERS_PREFIX` variable. To override its Docker imag
 the instructions for
 [Running container scanning in an offline environment](container_scanning/index.md#running-container-scanning-in-an-offline-environment).
 
-### Template editions
-
-Most of the GitLab application security tools have two template editions:
-
-- **Stable:** The stable template is the default. It offers a reliable and consistent application
-  security experience. You should use the stable template for most users and projects that require
-  stability and predictable behavior in their CI/CD pipelines.
-- **Latest:** The latest template is for those who want to access and test cutting-edge features. It
-  is identified by the word `latest` in the template's name. It is not considered stable and may
-  include breaking changes that are planned for the next major release. This template allows you to
-  try new features and updates before they become part of the stable release.
-
-NOTE:
-Mixing different security template editions can cause both merge request and branch pipelines to
-run. You should use **either** the stable or latest edition templates in a project.
-
 ### Use security scanning tools with merge request pipelines
 
 By default, the application security jobs are configured to run for branch pipelines only.
 To use them with [merge request pipelines](../../ci/pipelines/merge_request_pipelines.md),
-you must reference their [`latest` edition template](#template-editions).
+you must reference the [`latest` templates](../../development/cicd/templates.md).
+
+The latest version of the template may include breaking changes. Use the stable template unless you
+need a feature provided only in the latest template.
+
+All `latest` security templates support merge request pipelines.
 
 For example, to run both SAST and Dependency Scanning, the following template is used:
 
@@ -214,6 +203,15 @@ include:
   - template: Jobs/Dependency-Scanning.latest.gitlab-ci.yml
   - template: Jobs/SAST.latest.gitlab-ci.yml
 ```
+
+NOTE:
+Mixing `latest` and `stable` security templates can cause both MR and branch pipelines to run. We recommend choosing `latest` or `stable` for all security scanners.
+
+NOTE:
+Latest templates can receive breaking changes in any release.
+
+For more information about template versioning, see the
+[CI/CD documentation](../../development/cicd/templates.md#latest-version).
 
 ## Security scanning
 
@@ -260,7 +258,7 @@ After completing successfully, each job outputs artifacts. These artifacts are p
 results are available in GitLab. Results are shown only if all jobs are finished, including manual
 ones. Additionally for some features, results are shown only if the pipeline runs on the default branch.
 
-#### Job status
+### Secure job status
 
 Jobs pass if they are able to complete a scan. A _pass_ result does not indicate if they did, or did not, identify findings. The only exception is coverage fuzzing, which fails if it identifies findings.
 
@@ -272,12 +270,9 @@ If you want to prevent vulnerabilities from being merged, you should do this by 
 
 We do not recommend changing the job [`allow_failure` setting](../../ci/yaml/index.md#allow_failure) as that fails the entire pipeline.
 
-#### Job artifacts
+### JSON Artifact
 
-A security scan job may generate one or more artifacts. From GitLab 17.0, these artifacts are
-restricted to the [`developer` role](../permissions.md#roles).
-
-The [security report](../../development/integrations/secure.md#report) artifact generated by the secure analyzer contains all findings it discovers on the target branch, regardless of whether they were previously found, dismissed, or completely new (it puts in everything that it finds).
+The artifact generated by the secure analyzer contains all findings it discovers on the target branch, regardless of whether they were previously found, dismissed, or completely new (it puts in everything that it finds).
 
 ## View security scan information
 
@@ -367,7 +362,7 @@ By default, the vulnerability report does not show vulnerabilities of `dismissed
 
 ### GitLab Workflow extension for VS Code
 
-You can now see security findings directly in Visual Studio Code (VS Code) using [GitLab Workflow extension for VS Code](../../editor_extensions/visual_studio_code/index.md), just as you would in a merge request.
+You can now see security findings directly in Visual Studio Code (VS Code) using [GitLab Workflow VS Code extension](../../editor_extensions/visual_studio_code/index.md), just as you would in a merge request.
 
 For more details, see [extension page](https://marketplace.visualstudio.com/items?itemName=gitlab.gitlab-workflow#security-findings).
 
@@ -379,7 +374,7 @@ For more details, see [extension page](https://marketplace.visualstudio.com/item
 You can enforce an additional approval for merge requests that would introduce one of the following
 security issues:
 
-- A security vulnerability. For more details, read [Merge request approval policies](policies/merge_request_approval_policies.md).
+- A security vulnerability. For more details, read [Merge request approval policies](policies/scan-result-policies.md).
 
 ## Using private Maven repositories
 
@@ -438,7 +433,7 @@ The above `.gitlab-ci.yml` causes a linting error:
 
 ```plaintext
 Unable to create pipeline
-- dependency_scanning job: chosen stage test does not exist; available stages are .pre
+- dependency_scanning job: chosen stage does not exist; available stages are .pre
 - unit-tests
 - .post
 ```
@@ -496,7 +491,7 @@ For more information about overriding security jobs, see:
 - [Overriding Dependency Scanning jobs](dependency_scanning/index.md#overriding-dependency-scanning-jobs).
 - [Overriding Container Scanning jobs](container_scanning/index.md#overriding-the-container-scanning-template).
 - [Overriding Secret Detection jobs](secret_detection/pipeline/index.md#configuration).
-- [Overriding DAST jobs](dast/browser/index.md).
+- [Overriding DAST jobs](dast/proxy-based.md#customize-dast-settings).
 
 All the security scanning tools define their stage, so this error can occur with all of them.
 
@@ -533,7 +528,7 @@ You can interact with the results of the security scanning tools in several loca
 
 - [Scan information in merge requests](#merge-request)
 - [Project Security Dashboard](security_dashboard/index.md#project-security-dashboard)
-- [Security pipeline tab](vulnerability_report/pipeline.md)
+- [Security pipeline tab](security_dashboard/index.md)
 - [Group Security Dashboard](security_dashboard/index.md#group-security-dashboard)
 - [Security Center](security_dashboard/index.md#security-center)
 - [Vulnerability Report](vulnerability_report/index.md)
@@ -584,7 +579,7 @@ GitLab provides two methods of accomplishing this, each with advantages and disa
   - Scan execution enforcement is required for scanners external to GitLab.
   - Scan execution enforcement is required for custom jobs other than security scans.
 
-- [Scan execution policies](policies/scan_execution_policies.md)
+- [Scan execution policies](policies/scan-execution-policies.md)
   are recommended when:
 
   - Scan execution enforcement is required for DAST which uses a DAST site or scan profile.
@@ -609,14 +604,3 @@ Additional details about the differences between the two solutions are outlined 
 | **Ability to apply one standard to multiple projects** | The same compliance framework label can be applied to multiple projects inside a group. | The same security policy project can be used for multiple projects across GitLab with no requirement of being located in the same group. |
 
 Feedback is welcome on our vision for [unifying the user experience for these two features](https://gitlab.com/groups/gitlab-org/-/epics/7312)
-
-## Custom security role
-
-You can create a [custom role](../../user/custom_roles.md) for security team members who need access to application security features, such as vulnerability management, security policies, or dependencies. This approach allows organizations to follow the Principle of Least Privilege by providing security team members with the privileges they need without promoting them to Developer or Maintainer on a group or project.
-
-For example, the custom security role may have the following [permissions](../../user/custom_roles/abilities.md):
-
-- Name: Custom Security Role
-- Description: Manage vulnerabilities and link security policy projects.
-- Base Role: Reporter (or any default role)
-- Permissions: `admin_vulnerability`, `read_dependency`, `manage_security_policy_link`

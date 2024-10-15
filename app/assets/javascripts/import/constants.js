@@ -8,7 +8,7 @@ export const TYPE_SNIPPET = 'snippet';
 
 export const BULK_IMPORT_STATIC_ITEMS = {
   badges: __('Badge'),
-  boards: s__('Boards|Board'),
+  boards: s__('IssueBoards|Board'),
   epics: __('Epic'),
   issues: __('Issue'),
   labels: __('Label'),
@@ -26,7 +26,7 @@ export const BULK_IMPORT_STATIC_ITEMS = {
   design: __('Design'),
   project_feature: __('Project feature'),
   protected_branches: __('Protected Branch'),
-  push_rule: __('Push rule'),
+  push_rule: __('Push Rule'),
   repository: __('Repository'),
   service_desk_setting: __('Service Desk'),
 };

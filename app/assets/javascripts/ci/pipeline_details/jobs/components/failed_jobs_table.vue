@@ -3,16 +3,14 @@ import { GlButton, GlLink, GlTableLite } from '@gitlab/ui';
 import SafeHtml from '~/vue_shared/directives/safe_html';
 import { __, s__ } from '~/locale';
 import { createAlert } from '~/alert';
-import { reportToSentry } from '~/ci/utils';
 import Tracking from '~/tracking';
-import { visitUrl } from '~/lib/utils/url_utility';
+import { redirectTo } from '~/lib/utils/url_utility'; // eslint-disable-line import/no-deprecated
 import CiIcon from '~/vue_shared/components/ci_icon/ci_icon.vue';
 import { TRACKING_CATEGORIES } from '~/ci/constants';
 import RetryFailedJobMutation from '../graphql/mutations/retry_failed_job.mutation.graphql';
 import { DEFAULT_FIELDS } from '../../constants';
 
 export default {
-  name: 'PipelineFailedJobsTable',
   fields: DEFAULT_FIELDS,
   retry: __('Retry'),
   components: {
@@ -47,11 +45,10 @@ export default {
         if (errors.length > 0) {
           this.showErrorMessage();
         } else {
-          visitUrl(job.detailedStatus.detailsPath);
+          redirectTo(job.detailedStatus.detailsPath); // eslint-disable-line import/no-deprecated
         }
-      } catch (error) {
+      } catch {
         this.showErrorMessage();
-        reportToSentry(this.$options.name, error);
       }
     },
     canRetryJob(job) {
@@ -80,10 +77,15 @@ export default {
     </template>
 
     <template #cell(name)="{ item }">
-      <div class="gl-flex gl-items-center gl-justify-end lg:gl-justify-start">
+      <div
+        class="gl-display-flex gl-align-items-center gl-lg-justify-content-start gl-justify-content-end"
+      >
         <ci-icon :status="item.detailedStatus" class="gl-mr-3" />
-        <div class="gl-truncate">
-          <gl-link :href="item.detailedStatus.detailsPath" class="gl-font-bold !gl-text-gray-900">
+        <div class="gl-text-truncate">
+          <gl-link
+            :href="item.detailedStatus.detailsPath"
+            class="gl-font-weight-bold gl-text-gray-900!"
+          >
             {{ item.name }}
           </gl-link>
         </div>
@@ -91,7 +93,7 @@ export default {
     </template>
 
     <template #cell(stage)="{ item }">
-      <div class="gl-truncate">
+      <div class="gl-text-truncate">
         <span>{{ item.stage.name }}</span>
       </div>
     </template>
@@ -113,10 +115,10 @@ export default {
     <template #row-details="{ item }">
       <pre
         v-if="item.userPermissions.readBuild"
-        class="gl-w-full gl-border-none gl-text-left"
+        class="gl-w-full gl-text-left gl-border-none"
         data-testid="job-log"
       >
-        <code v-safe-html="failureSummary(item.trace)" class="gl-bg-inherit gl-p-0" data-testid="job-trace-summary">
+        <code v-safe-html="failureSummary(item.trace)" class="gl-reset-bg gl-p-0" data-testid="job-trace-summary">
         </code>
       </pre>
     </template>

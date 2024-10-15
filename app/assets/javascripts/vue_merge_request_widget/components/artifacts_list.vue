@@ -17,7 +17,7 @@ export default {
   <div class="gl-pl-7">
     <table class="table m-0">
       <thead class="thead-white text-nowrap">
-        <tr class="gl-hidden sm:gl-table-row">
+        <tr class="d-none d-sm-table-row">
           <th>{{ __('Artifact') }}</th>
           <th>{{ __('Job') }}</th>
         </tr>

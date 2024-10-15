@@ -1,5 +1,5 @@
 <template>
-  <footer class="footer-block gl-mt-5">
+  <footer class="gl-mt-5 footer-block">
     <slot name="prepend"></slot>
     <slot></slot>
     <slot name="append"></slot>

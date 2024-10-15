@@ -25,8 +25,13 @@ export default (containerId = 'js-jobs-table') => {
     return false;
   }
 
-  const { fullPath, jobStatuses, pipelineEditorPath, emptyStateSvgPath, admin } =
-    containerEl.dataset;
+  const {
+    fullPath,
+    jobStatuses,
+    pipelineEditorPath,
+    emptyStateSvgPath,
+    admin,
+  } = containerEl.dataset;
 
   return new Vue({
     el: containerEl,

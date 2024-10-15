@@ -13,6 +13,7 @@ export default () => {
   const el = document.getElementById('js-vue-packages-list');
   const {
     endpoint,
+    resourceId,
     fullPath,
     pageType,
     emptyListIllustration,
@@ -42,6 +43,7 @@ export default () => {
       router,
       apolloProvider,
       provide: {
+        resourceId,
         fullPath,
         emptyListIllustration,
         isGroupPage,

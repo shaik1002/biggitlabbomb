@@ -10,7 +10,6 @@ import { setUrlParams, updateHistory } from '~/lib/utils/url_utility';
 import { sprintf } from '~/locale';
 import CiIcon from '~/vue_shared/components/ci_icon/ci_icon.vue';
 import WorkItemDetailModal from '~/work_items/components/work_item_detail_modal.vue';
-import { DETAIL_VIEW_QUERY_PARAM_NAME } from '~/work_items/constants';
 import AbuseCategorySelector from '~/abuse_reports/components/abuse_category_selector.vue';
 import relatedIssuableMixin from '../mixins/related_issuable_mixin';
 import IssueAssignees from './issue_assignees.vue';
@@ -24,7 +23,7 @@ export default {
     GlIcon,
     GlLink,
     GlTooltip,
-    IssueWeight: () => import('ee_component/issues/components/issue_weight.vue'),
+    IssueWeight: () => import('ee_component/boards/components/issue_card_weight.vue'),
     IssueDueDate,
     GlButton,
     WorkItemDetailModal,
@@ -72,7 +71,7 @@ export default {
   computed: {
     stateTitle() {
       return sprintf(
-        '<span class="gl-font-bold">%{state}</span> %{timeInWords}<br/><span class="gl-text-tertiary">%{timestamp}</span>',
+        '<span class="bold">%{state}</span> %{timeInWords}<br/><span class="text-tertiary">%{timestamp}</span>',
         {
           state: this.stateText,
           timeInWords: this.stateTimeInWords,
@@ -98,15 +97,15 @@ export default {
         }
         event.preventDefault();
         this.$refs.modal.show();
-        this.updateQueryParam(this.idKey);
+        this.updateWorkItemIidUrlQuery(this.iid);
       }
     },
     handleWorkItemDeleted(workItemId) {
       this.$emit('relatedIssueRemoveRequest', workItemId);
     },
-    updateQueryParam(id) {
+    updateWorkItemIidUrlQuery(iid) {
       updateHistory({
-        url: setUrlParams({ [DETAIL_VIEW_QUERY_PARAM_NAME]: id }),
+        url: setUrlParams({ work_item_iid: iid }),
         replace: true,
       });
     },
@@ -128,13 +127,13 @@ export default {
       'issuable-info-container': !canReorder,
       'card-body': canReorder,
     }"
-    class="item-body gl-flex gl-items-center gl-gap-3"
+    class="item-body gl-display-flex gl-align-items-center gl-gap-3"
   >
     <div
-      class="item-contents py-xl-0 flex-xl-nowrap gl-flex gl-min-h-7 gl-grow gl-flex-wrap gl-items-center gl-gap-2 gl-px-3 gl-py-2"
+      class="item-contents gl-display-flex gl-align-items-center gl-flex-wrap gl-flex-grow-1 gl-gap-2 gl-px-3 gl-py-2 py-xl-0 flex-xl-nowrap gl-min-h-7"
     >
       <!-- Title area: Status icon (XL) and title -->
-      <div class="item-title gl-flex gl-min-w-0 gl-gap-3">
+      <div class="item-title gl-display-flex gl-gap-3 gl-min-w-0">
         <gl-icon
           v-if="hasState"
           :id="`iconElementXL-${itemId}`"
@@ -161,13 +160,19 @@ export default {
       </div>
 
       <!-- Info area: meta, path, and assignees -->
-      <div class="item-info-area ml-xl-0 gl-ml-6 gl-flex gl-shrink-0 gl-grow gl-gap-3">
+      <div
+        class="item-info-area gl-display-flex gl-flex-grow-1 gl-flex-shrink-0 gl-gap-3 gl-ml-6 ml-xl-0"
+      >
         <!-- Meta area: path and attributes -->
         <!-- If there is no room beside the path, meta attributes are put ABOVE it (gl-flex-wrap-reverse). -->
         <!-- See design: https://gitlab-org.gitlab.io/gitlab-design/hosted/pedro/%2383-issue-mr-rows-cards-spec-previews/#artboard16 -->
-        <div class="item-meta gl-flex gl-flex-wrap-reverse gl-gap-3 md:gl-justify-between">
+        <div
+          class="item-meta gl-display-flex gl-md-justify-content-space-between gl-gap-3 gl-flex-wrap-reverse"
+        >
           <!-- Path area: status icon (<XL), path, issue # -->
-          <div class="item-path-area item-path-id gl-flex gl-flex-wrap gl-items-center gl-gap-3">
+          <div
+            class="item-path-area item-path-id gl-display-flex gl-align-items-center gl-flex-wrap gl-gap-3"
+          >
             <gl-tooltip :target="() => $refs.iconElement">
               <span v-safe-html="stateTitle"></span>
             </gl-tooltip>
@@ -175,7 +180,7 @@ export default {
               v-if="itemPath"
               v-gl-tooltip
               :title="itemPath"
-              class="path-id-text gl-inline-block"
+              class="path-id-text d-inline-block"
               >{{ itemPath }}</span
             >
             <span>{{ pathIdSeparator }}{{ itemId }}</span>
@@ -183,20 +188,26 @@ export default {
 
           <!-- Attributes area: CI, epic count, weight, milestone -->
           <!-- They have a different order on large screen sizes -->
-          <div class="item-attributes-area gl-flex gl-items-center gl-gap-3">
-            <span v-if="hasPipeline" class="mr-ci-status order-md-last -gl-mr-2 md:gl-ml-3">
+          <div
+            class="item-attributes-area gl-display-flex gl-align-items-center gl-flex-wrap gl-gap-3"
+          >
+            <span v-if="hasPipeline" class="mr-ci-status order-md-last gl-md-ml-3 gl-mr-n2">
               <ci-icon :status="pipelineStatus" />
             </span>
 
             <issue-milestone
               v-if="hasMilestone"
               :milestone="milestone"
-              class="item-milestone order-md-first gl-ml-2 gl-flex gl-items-center gl-text-sm"
+              class="item-milestone gl-font-sm gl-display-flex gl-align-items-center order-md-first gl-ml-2"
             />
 
             <!-- Flex order for slots is defined in the parent component: e.g. related_issues_block.vue -->
             <span v-if="weight > 0" class="order-md-1">
-              <issue-weight :weight="weight" class="item-weight gl-flex gl-items-center" />
+              <issue-weight
+                :weight="weight"
+                class="item-weight gl-display-flex gl-align-items-center"
+                tag-name="span"
+              />
             </span>
 
             <span v-if="dueDate" class="order-md-1">
@@ -204,14 +215,14 @@ export default {
                 :date="dueDate"
                 :closed="Boolean(closedAt)"
                 tooltip-placement="top"
-                css-class="item-due-date gl-flex gl-items-center"
+                css-class="item-due-date gl-display-flex gl-align-items-center"
               />
             </span>
 
             <issue-assignees
               v-if="hasAssignees"
               :assignees="assignees"
-              class="item-assignees order-md-2 gl-flex gl-shrink-0 gl-items-center gl-self-end"
+              class="item-assignees gl-display-flex gl-align-items-center gl-align-self-end gl-flex-shrink-0 order-md-2"
             />
           </div>
         </div>
@@ -221,7 +232,7 @@ export default {
     <span
       v-if="isLocked"
       v-gl-tooltip
-      class="gl-inline-block gl-cursor-not-allowed"
+      class="gl-display-inline-block gl-cursor-not-allowed"
       :title="lockedMessage"
       data-testid="lockIcon"
     >
@@ -244,7 +255,7 @@ export default {
       ref="modal"
       :work-item-id="workItemId"
       :work-item-iid="workItemIid"
-      @close="updateQueryParam"
+      @close="updateWorkItemIidUrlQuery"
       @workItemDeleted="handleWorkItemDeleted"
       @openReportAbuse="openReportAbuseDrawer"
     />

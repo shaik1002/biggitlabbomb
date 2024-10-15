@@ -1,7 +1,7 @@
 <script>
 import { GlLoadingIcon, GlModal } from '@gitlab/ui';
 import { fetchPolicies } from '~/lib/graphql';
-import { mergeUrlParams, queryToObject, visitUrl } from '~/lib/utils/url_utility';
+import { mergeUrlParams, queryToObject, redirectTo } from '~/lib/utils/url_utility'; // eslint-disable-line import/no-deprecated
 import { __, s__ } from '~/locale';
 
 import { unwrapStagesWithNeeds } from '~/ci/pipeline_details/utils/unwrapping_utils';
@@ -169,14 +169,12 @@ export default {
         }
       },
     },
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     appStatus: {
       query: getAppStatus,
       update(data) {
         return data.app.status;
       },
     },
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     commitSha: {
       query: getLatestCommitShaQuery,
       skip({ currentBranch }) {
@@ -204,7 +202,6 @@ export default {
         this.reportFailure(LOAD_FAILURE_UNKNOWN);
       },
     },
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     currentBranch: {
       query: getCurrentBranch,
       update(data) {
@@ -328,7 +325,7 @@ export default {
         },
         this.newMergeRequestPath,
       );
-      visitUrl(url);
+      redirectTo(url); // eslint-disable-line import/no-deprecated
     },
     async refetchContent() {
       this.$apollo.queries.initialCiFileContent.skip = false;
@@ -397,7 +394,7 @@ export default {
 </script>
 
 <template>
-  <div class="gl-relative gl-mt-4">
+  <div class="gl-mt-4 gl-relative">
     <gl-loading-icon v-if="isBlobContentLoading" size="lg" class="gl-m-3" />
     <pipeline-editor-empty-state
       v-else-if="showStartScreen || usesExternalConfig"

@@ -1,19 +1,15 @@
 import { GlBadge } from '@gitlab/ui';
-import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
+import { shallowMount } from '@vue/test-utils';
 import ModelExperimentsHeader from '~/ml/experiment_tracking/components/model_experiments_header.vue';
-import PageHeading from '~/vue_shared/components/page_heading.vue';
 
 describe('ml/experiment_tracking/components/model_experiments_header.vue', () => {
   let wrapper;
 
   const createWrapper = () => {
-    wrapper = shallowMountExtended(ModelExperimentsHeader, {
+    wrapper = shallowMount(ModelExperimentsHeader, {
       propsData: { pageTitle: 'Some Title' },
       slots: {
         default: 'Slot content',
-      },
-      stubs: {
-        PageHeading,
       },
     });
   };
@@ -21,10 +17,10 @@ describe('ml/experiment_tracking/components/model_experiments_header.vue', () =>
   beforeEach(createWrapper);
 
   const findBadge = () => wrapper.findComponent(GlBadge);
-  const findTitle = () => wrapper.findByTestId('page-heading');
+  const findTitle = () => wrapper.find('h3');
 
   it('renders title', () => {
-    expect(findTitle().text()).toContain('Some Title');
+    expect(findTitle().text()).toBe('Some Title');
   });
 
   it('link points to documentation', () => {

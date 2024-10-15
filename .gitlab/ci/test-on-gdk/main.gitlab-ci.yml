@@ -5,23 +5,13 @@ include:
   - local: .gitlab/ci/qa-common/variables.gitlab-ci.yml
 
 # code pattern changes
-.code-pattern-changes-with-selective-disabled: &code-pattern-changes-with-selective-disabled
-  if: $MR_CODE_PATTERNS == "true" && $SELECTIVE_EXECUTION_IMPROVED != "true"
-
-# code pattern changes with selective execution enabled
-.code-pattern-with-selective-enabled-knapsack-set: &code-pattern-with-selective-enabled-knapsack-set
-  if: $MR_CODE_PATTERNS == "true" && $KNAPSACK_TEST_FILE_PATTERN != "" && $SELECTIVE_EXECUTION_IMPROVED == "true"
-
-.code-pattern-with-selective-enabled-knapsack-unset: &code-pattern-with-selective-enabled-knapsack-unset
-  if: $MR_CODE_PATTERNS == "true" && $QA_TESTS != "" && $KNAPSACK_TEST_FILE_PATTERN == "" && $SELECTIVE_EXECUTION_IMPROVED == "true"
+.code-pattern-changes: &code-pattern-changes
+  if: $MR_CODE_PATTERNS == "true"
 
 .rules:gdk:qa-selective:
   rules:
-    - <<: *code-pattern-changes-with-selective-disabled
+    - <<: *code-pattern-changes
       when: never
-    - <<: *code-pattern-with-selective-enabled-knapsack-set
-      when: never
-    - <<: *code-pattern-with-selective-enabled-knapsack-unset
     - !reference [.rules:test:qa-selective, rules]
     - if: $QA_SUITES =~ /Test::Instance::Blocking/
 
@@ -29,13 +19,10 @@ include:
   rules:
     # To account for cases where a group label is set which may trigger selective execution
     # But we want to execute full blocking suite on gdk in case of code-pattern-changes
-    - <<: *code-pattern-changes-with-selective-disabled
+    - <<: *code-pattern-changes
       variables:
         QA_TESTS: ""
         KNAPSACK_TEST_FILE_PATTERN: ""
-    - <<: *code-pattern-with-selective-enabled-knapsack-unset
-      when: never
-    - <<: *code-pattern-with-selective-enabled-knapsack-set
     - !reference [.rules:test:qa-parallel, rules]
     - if: $QA_SUITES =~ /Test::Instance::Blocking/
     - !reference [.rules:test:manual, rules]
@@ -48,11 +35,6 @@ include:
         - ".gitlab/ci/test-on-gdk/**"
         - "lib/gitlab/database/load_balancing/**/*"
 
-.rules:test:gdk-gitaly-version-change:
-  rules:
-    changes:
-      - "GITALY_SERVER_VERSION"
-
 .with-parallel:
   parallel: 15
 
@@ -61,12 +43,11 @@ include:
     - mv $CI_BUILDS_DIR/*.log $CI_PROJECT_DIR/
 
 .gdk-qa-base:
-  image: "${REGISTRY_HOST}/${REGISTRY_GROUP}/gitlab-build-images/${BUILD_OS}-${OS_VERSION}-ruby-${RUBY_VERSION}:git-${GIT_VERSION}-lfs-${LFS_VERSION}-chrome-${CHROME_VERSION}-docker-${DOCKER_VERSION}-gcloud-${GCLOUD_VERSION}-kubectl-${KUBECTL_VERSION}-helm-${HELM_VERSION}"
+  image: ${REGISTRY_HOST}/${REGISTRY_GROUP}/gitlab-build-images/${BUILD_OS}-${OS_VERSION}-ruby-${RUBY_VERSION}:bundler-${BUNDLER_VERSION}-git-2.36-lfs-2.9-chrome-${CHROME_VERSION}-docker-${DOCKER_VERSION}-gcloud-383-kubectl-1.23
   extends:
     - .qa-cache
-    - .docker-in-docker
+    - .default-retry
     - .gitlab-qa-report
-    - .qa-run-e2e-with-bundler
   stage: test
   services:
     - name: docker:${DOCKER_VERSION}-dind
@@ -78,22 +59,33 @@ include:
   tags:
     - e2e
   variables:
+    DOCKER_HOST: tcp://docker:2375
     QA_GENERATE_ALLURE_REPORT: "true"
     QA_CAN_TEST_PRAEFECT: "false"
     QA_INTERCEPT_REQUESTS: "false"
     QA_SUITE_STATUS_ENV_FILE: "$CI_PROJECT_DIR/suite_status.env"
     QA_DOCKER_NETWORK: host
     QA_DISABLE_RSPEC_RETRY: "true"
-    QA_GITLAB_URL: http://gdk.test:3000
     GITLAB_QA_ADMIN_ACCESS_TOKEN: $QA_ADMIN_ACCESS_TOKEN
+    GDK_URL: http://gdk.test:3000
     FF_NETWORK_PER_BUILD: "true"
     RSPEC_LAST_RUN_RESULTS_FILE: "$CI_PROJECT_DIR/qa/tmp/examples.txt"
-    COVERBAND_ENABLED: "$COVERBAND_ENABLED"  # explicitly define variable so it is passed in to gdk service container
   before_script:
     - echo "SUITE_RAN=true" > "$QA_SUITE_STATUS_ENV_FILE"
     - echo -e "\e[0Ksection_start:`date +%s`:install_gems[collapsed=true]\r\e[0KInstall gems"
+    - source scripts/utils.sh
+    - source scripts/rspec_helpers.sh
     - cd qa && bundle install
     - echo -e "\e[0Ksection_end:`date +%s`:install_gems\r\e[0K"
+  script:
+    - export QA_COMMAND="bundle exec bin/qa ${QA_SCENARIO:=Test::Instance::All} $GDK_URL $GITLAB_QA_OPTS -- $QA_TESTS --order random --force-color --format documentation --format QA::Support::JsonFormatter --out tmp/rspec-${CI_JOB_ID}-\${QA_RSPEC_RETRIED:-false}.json"
+    - echo "Running - '$QA_COMMAND'"
+    - |
+      if eval "$QA_COMMAND --format RspecJunitFormatter --out tmp/rspec-${CI_JOB_ID}.xml"; then
+        echo "Test run finished successfully"
+      else
+        retry_failed_e2e_rspec_examples
+      fi
   after_script:
     - !reference [.with-gdk-log, after_script]
     - !reference [.gitlab-qa-report, after_script]
@@ -162,14 +154,6 @@ gdk-qa-blocking-selective:
     QA_SCENARIO: Test::Instance::Blocking
     QA_RUN_TYPE: gdk-qa-blocking
 
-gdk-qa-blocking-gitaly-transactions:
-  extends: gdk-qa-blocking
-  variables:
-    QA_GITALY_TRANSACTIONS_ENABLED: "true"
-  rules:
-    - !reference [.rules:test:never-schedule-pipeline, rules]
-    - !reference [.rules:test:gdk-gitaly-version-change, rules]
-
 # ------------------------------------------
 # Non Blocking tests
 # ------------------------------------------
@@ -198,14 +182,11 @@ gdk-qa-non-blocking:
   variables:
     QA_SCENARIO: Test::Instance::NonBlocking
     QA_RUN_TYPE: gdk-qa-non-blocking
+  parallel: 5
   allow_failure: true
   artifacts:
     paths:
-      - '*.log'
-      - qa/tmp/test-metrics-*.json
-      - qa/tmp/*.txt
-      - qa/tmp/*.log
-      - qa/tmp/qa-test-*/*
+      - log
     reports:
       dotenv: ""
   rules:
@@ -236,18 +217,17 @@ export-test-metrics:
   variables:
     QA_METRICS_REPORT_FILE_PATTERN: $CI_PROJECT_DIR/qa/tmp/test-metrics-*.json
 
-export-code-paths-mapping:
-  extends:
-    - .export-code-paths-mapping
-  variables:
-    QA_CODE_PATHS_MAPPING_FILE_PATTERN: $CI_PROJECT_DIR/qa/tmp/test-code-paths-mapping-*.json
-  rules:
-    - if: '$COVERBAND_ENABLED == "true"'
-
 .gitlab-qa-report:
   variables:
     QA_RSPEC_JSON_FILE_PATTERN: $CI_PROJECT_DIR/qa/tmp/rspec-*.json
     QA_SYSTEM_LOG_FILE_PATTERN: $CI_PROJECT_DIR/test_output/logs
+
+generate-test-session:
+  extends:
+    - .generate-test-session
+    - .rules:report:process-results
+  variables:
+    QA_RSPEC_JSON_FILE_PATTERN: $CI_PROJECT_DIR/qa/tmp/rspec-*.json
 
 notify-slack:
   extends:

@@ -1,3 +1,0 @@
-mutation updateNewWorkItem($input: LocalUpdateNewWorkItemInput) {
-  updateNewWorkItem(input: $input) @client
-}

@@ -13,7 +13,7 @@ import {
 } from '~/packages_and_registries/settings/project/constants';
 import packagesCleanupPolicyQuery from '~/packages_and_registries/settings/project/graphql/queries/get_packages_cleanup_policy.query.graphql';
 import updatePackagesCleanupPolicyMutation from '~/packages_and_registries/settings/project/graphql/mutations/update_packages_cleanup_policy.mutation.graphql';
-import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
+import Tracking from '~/tracking';
 import { packagesCleanupPolicyPayload, packagesCleanupPolicyMutationPayload } from '../mock_data';
 
 Vue.use(VueApollo);
@@ -109,6 +109,10 @@ describe('Packages Cleanup Policy Settings Form', () => {
       },
     });
   };
+
+  beforeEach(() => {
+    jest.spyOn(Tracking, 'event');
+  });
 
   afterEach(() => {
     fakeApollo = null;
@@ -270,30 +274,18 @@ describe('Packages Cleanup Policy Settings Form', () => {
         });
       });
 
-      describe('tracking', () => {
-        let trackingSpy;
-
-        beforeEach(() => {
-          trackingSpy = mockTracking(undefined, undefined, jest.spyOn);
+      it('tracks the submit event', () => {
+        mountComponentWithApollo({
+          mutationResolver: jest.fn().mockResolvedValue(packagesCleanupPolicyMutationPayload()),
         });
 
-        afterEach(() => {
-          unmockTracking();
-        });
+        findForm().trigger('submit');
 
-        it('tracks the submit event', () => {
-          mountComponentWithApollo({
-            mutationResolver: jest.fn().mockResolvedValue(packagesCleanupPolicyMutationPayload()),
-          });
-
-          findForm().trigger('submit');
-
-          expect(trackingSpy).toHaveBeenCalledWith(
-            undefined,
-            'submit_packages_cleanup_form',
-            trackingPayload,
-          );
-        });
+        expect(Tracking.event).toHaveBeenCalledWith(
+          undefined,
+          'submit_packages_cleanup_form',
+          trackingPayload,
+        );
       });
 
       it('show a success toast when submit succeed', async () => {

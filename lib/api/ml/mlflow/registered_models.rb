@@ -78,9 +78,7 @@ module API
               desc: 'Optional description for registered model.'
           end
           patch 'update', urgency: :low do
-            present ::Ml::UpdateModelService.new(
-              find_model(user_project, params[:name]), params[:description]
-            ).execute.payload,
+            present ::Ml::UpdateModelService.new(find_model(user_project, params[:name]), params[:description]).execute,
               with: Entities::Ml::Mlflow::RegisteredModel, root: :registered_model
           end
 

@@ -45,7 +45,7 @@ export default {
 </script>
 
 <template>
-  <div class="align-items-lg-center gl-flex">
+  <div class="gl-display-flex align-items-lg-center">
     <gl-tabs content-class="gl-py-0" class="gl-w-full">
       <gl-tab
         v-for="tab in tabs"
@@ -57,7 +57,7 @@ export default {
           <span>{{ tab.text }}</span>
           <gl-loading-icon v-if="showLoadingIcon" class="gl-ml-3" />
 
-          <gl-badge v-else class="gl-tab-counter-badge">
+          <gl-badge v-else size="sm" class="gl-tab-counter-badge">
             {{ tab.count }}
           </gl-badge>
         </template>

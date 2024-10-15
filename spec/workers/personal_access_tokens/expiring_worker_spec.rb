@@ -41,10 +41,6 @@ RSpec.describe PersonalAccessTokens::ExpiringWorker, type: :worker, feature_cate
         expect { worker.perform }.to change { expiring_token.reload.expire_notification_delivered }.from(false).to(true)
       end
 
-      it 'marks the notification as delivered with new column', :freeze_time do
-        expect { worker.perform }.to change { expiring_token.reload.seven_days_notification_sent_at }.from(nil).to(Time.current)
-      end
-
       it 'avoids N+1 queries', :use_sql_query_cache do
         control = ActiveRecord::QueryRecorder.new(skip_cached: false) { worker.perform }
 
@@ -114,13 +110,7 @@ RSpec.describe PersonalAccessTokens::ExpiringWorker, type: :worker, feature_cate
         expect(fake_wh_service).to receive(:async_execute).once
 
         expect(WebHookService)
-          .to receive(:new)
-          .with(
-            project_hook,
-            {},
-            'resource_access_token_hooks',
-            idempotency_key: anything
-          ) { fake_wh_service }
+        .to receive(:new).with(project_hook, {}, 'resource_access_token_hooks') { fake_wh_service }
 
         worker.perform
       end
@@ -140,87 +130,14 @@ RSpec.describe PersonalAccessTokens::ExpiringWorker, type: :worker, feature_cate
 
     context 'when a token is owned by a group bot' do
       let_it_be(:project_bot) { create(:user, :project_bot) }
+      let_it_be(:group) { create(:group) }
       let_it_be(:expiring_token) { create(:personal_access_token, user: project_bot, expires_at: 5.days.from_now) }
 
-      context 'when the group of the resource bot exists' do
-        let_it_be(:group) { create(:group) }
-
-        before_all do
-          group.add_maintainer(project_bot)
-        end
-
-        it_behaves_like 'sends notification about expiry of bot user tokens'
-
-        it 'updates expire notification delivered attribute of the token' do
-          expect { worker.perform }.to change { expiring_token.reload.expire_notification_delivered }.from(false).to(true)
-        end
-
-        context 'when exception is raised during processing' do
-          context 'with a single resource access token' do
-            before do
-              allow_next_instance_of(NotificationService) do |service|
-                allow(service).to(
-                  receive(:bot_resource_access_token_about_to_expire)
-                    .with(project_bot, expiring_token.name)
-                    .and_raise('boom!')
-                )
-              end
-            end
-
-            it 'logs error' do
-              expect(Gitlab::AppLogger).to(
-                receive(:error)
-                  .with({ message: 'Failed to send notification about expiring resource access tokens',
-                          class: described_class,
-                          "exception.class": "RuntimeError",
-                          "exception.message": "boom!",
-                          user_id: project_bot.id })
-              )
-
-              worker.perform
-            end
-
-            it 'does not update token with failed delivery' do
-              expect { worker.perform }.not_to change { expiring_token.reload.expire_notification_delivered }
-            end
-          end
-
-          context 'with multiple resource access tokens' do
-            let_it_be(:another_project_bot) { create(:user, :project_bot) }
-            let_it_be(:another_expiring_token) { create(:personal_access_token, user: another_project_bot, expires_at: 5.days.from_now) }
-
-            before_all do
-              group.add_maintainer(another_project_bot)
-            end
-
-            it 'continues sending email' do
-              expect_next_instance_of(NotificationService) do |service|
-                expect(service).to(
-                  receive(:bot_resource_access_token_about_to_expire)
-                    .with(project_bot, expiring_token.name)
-                    .and_raise('boom!')
-                )
-                expect(service).to(
-                  receive(:bot_resource_access_token_about_to_expire)
-                    .with(another_project_bot, another_expiring_token.name)
-                    .and_call_original
-                )
-              end
-
-              worker.perform
-            end
-          end
-        end
+      before_all do
+        group.add_developer(project_bot)
       end
 
-      context 'when the group of the resource bot has been deleted' do
-        it 'does not update token with no delivery' do
-          expect(Group).to be_none
-          expect(Project).to be_none
-
-          expect { worker.perform }.not_to change { expiring_token.reload.expire_notification_delivered }
-        end
-      end
+      it_behaves_like 'sends notification about expiry of bot user tokens'
     end
   end
 end

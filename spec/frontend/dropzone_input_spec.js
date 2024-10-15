@@ -1,4 +1,3 @@
-import fs from 'fs';
 import MockAdapter from 'axios-mock-adapter';
 import $ from 'jquery';
 import mock from 'xhr-mock';
@@ -20,8 +19,6 @@ const TEMPLATE = `<form class="gfm-form" data-uploads-path="${TEST_UPLOAD_PATH}"
   <textarea class="js-gfm-input"></textarea>
   <div class="uploading-error-message"></div>
 </form>`;
-
-const RETINA_IMAGE = fs.readFileSync('spec/fixtures/retina_image.png');
 
 describe('dropzone_input', () => {
   afterEach(() => {
@@ -125,55 +122,21 @@ describe('dropzone_input', () => {
     });
 
     it('display original file name in comment box', async () => {
-      await new Promise((resolve) => {
-        const axiosMock = new MockAdapter(axios);
-        triggerPasteEvent({
-          types: ['Files'],
-          files: [new File([new Blob()], 'test.png', { type: 'image/png' })],
-          items: [
-            {
-              kind: 'file',
-              type: 'image/png',
-              getAsFile: () => new Blob(),
-            },
-          ],
-        });
-
-        $('textarea').on('change', () => {
-          expect(axiosMock.history.post[0].data.get('file').name).toEqual('test.png');
-          expect($('textarea').val()).toEqual('![test.png]');
-
-          resolve();
-        });
-
-        axiosMock.onPost().reply(HTTP_STATUS_OK, { link: { markdown: '![test.png]' } });
+      const axiosMock = new MockAdapter(axios);
+      triggerPasteEvent({
+        types: ['Files'],
+        files: [new File([new Blob()], 'test.png', { type: 'image/png' })],
+        items: [
+          {
+            kind: 'file',
+            type: 'image/png',
+            getAsFile: () => new Blob(),
+          },
+        ],
       });
-    });
-
-    it('display width and height for retina images', async () => {
-      await new Promise((resolve) => {
-        const axiosMock = new MockAdapter(axios);
-        triggerPasteEvent({
-          types: ['Files'],
-          files: [new File([RETINA_IMAGE], 'test.png', { type: 'image/png' })],
-          items: [
-            {
-              kind: 'file',
-              type: 'image/png',
-              getAsFile: () => new Blob(),
-            },
-          ],
-        });
-
-        $('textarea').on('change', () => {
-          expect(axiosMock.history.post[0].data.get('file').name).toEqual('test.png');
-          expect($('textarea').val()).toEqual('![test.png]{width=663 height=325}');
-
-          resolve();
-        });
-
-        axiosMock.onPost().reply(HTTP_STATUS_OK, { link: { markdown: '![test.png]' } });
-      });
+      axiosMock.onPost().reply(HTTP_STATUS_OK, { link: { markdown: 'foo' } });
+      await waitForPromises();
+      expect(axiosMock.history.post[0].data.get('file').name).toEqual('test.png');
     });
   });
 
@@ -232,14 +195,14 @@ describe('dropzone_input', () => {
 
       it('passes attach file button as `clickable` to dropzone', () => {
         dropzoneInput(form);
-        expect($.fn.dropzone.mock.calls[0][0].clickable).toEqual(attachFileButton);
+        expect($.fn.dropzone.mock.calls[0][0]).toMatchObject({ clickable: attachFileButton });
       });
     });
 
     describe('if attach file button does not exist', () => {
       it('passes attach file button as `clickable`, if it exists', () => {
         dropzoneInput(form);
-        expect($.fn.dropzone.mock.calls[0][0].clickable).toEqual(true);
+        expect($.fn.dropzone.mock.calls[0][0]).toMatchObject({ clickable: true });
       });
     });
   });

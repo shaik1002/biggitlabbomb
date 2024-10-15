@@ -1,44 +1,20 @@
-import Vue, { nextTick } from 'vue';
-import VueApollo from 'vue-apollo';
 import { GlTable, GlBadge } from '@gitlab/ui';
+import { nextTick } from 'vue';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
-import waitForPromises from 'helpers/wait_for_promises';
-import { createAlert } from '~/alert';
-import { convertToGraphQLId } from '~/graphql_shared/utils';
-import createMockApollo from 'helpers/mock_apollo_helper';
 import { setHTMLFixture, resetHTMLFixture } from 'helpers/fixtures';
-import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
-import { TYPENAME_CI_TRIGGER } from '~/graphql_shared/constants';
 import TriggersList from '~/ci_settings_pipeline_triggers/components/triggers_list.vue';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
-import EditTriggerModal from '~/ci_settings_pipeline_triggers/components/edit_trigger_modal.vue';
-import updatePipelineTriggerMutation from '~/ci_settings_pipeline_triggers/graphql/update_pipeline_trigger.mutation.graphql';
-import { triggers, mockPipelineTriggerMutationResponse } from '../mock_data';
 
-jest.mock('~/alert');
-Vue.use(VueApollo);
+import { triggers } from '../mock_data';
 
 describe('TriggersList', () => {
   let wrapper;
-  let mockApollo;
-  let mockUpdatePipelineTriggerMutation;
 
-  const createComponent = (props = {}, apolloProvider = undefined) => {
+  const createComponent = (props = {}) => {
     wrapper = mountExtended(TriggersList, {
-      apolloProvider,
-      propsData: { initTriggers: triggers, ...props },
-      directives: {
-        GlModal: createMockDirective('gl-modal'),
-      },
+      propsData: { triggers, ...props },
     });
-  };
-
-  const createComponentWithApollo = (props = {}) => {
-    const handlers = [[updatePipelineTriggerMutation, mockUpdatePipelineTriggerMutation]];
-
-    mockApollo = createMockApollo(handlers);
-    createComponent(props, mockApollo);
   };
 
   const findTable = () => wrapper.findComponent(GlTable);
@@ -49,14 +25,9 @@ describe('TriggersList', () => {
   const findClipboardBtn = (i) => findCell(i, 0).findComponent(ClipboardButton);
   const findInvalidBadge = (i) => findCell(i, 0).findComponent(GlBadge);
   const findEditBtn = (i) => findRowAt(i).find('[data-testid="edit-btn"]');
-  const findModal = () => wrapper.findComponent(EditTriggerModal);
   const findRevokeBtn = (i) => findRowAt(i).find('[data-testid="trigger_revoke_button"]');
   const findRevealHideButton = () =>
     document.querySelector('[data-testid="reveal-hide-values-button"]');
-
-  beforeEach(() => {
-    mockUpdatePipelineTriggerMutation = jest.fn();
-  });
 
   describe('With triggers set', () => {
     beforeEach(async () => {
@@ -125,42 +96,19 @@ describe('TriggersList', () => {
     it('displays actions in a rows', () => {
       const [data] = triggers;
       const confirmWarning =
-        'By revoking a trigger token you will break any processes making use of it. Are you sure?';
+        'By revoking a trigger you will break any processes making use of it. Are you sure?';
+
+      expect(findEditBtn(0).attributes('href')).toBe(data.editProjectTriggerPath);
 
       expect(findRevokeBtn(0).attributes('href')).toBe(data.projectTriggerPath);
       expect(findRevokeBtn(0).attributes('data-method')).toBe('delete');
       expect(findRevokeBtn(0).attributes('data-confirm')).toBe(confirmWarning);
     });
-
-    it('does not display edit modal yet', () => {
-      expect(findModal().exists()).toBe(false);
-    });
-
-    describe('when edit button is clicked', () => {
-      beforeEach(async () => {
-        const editBtn = findEditBtn(0);
-        await editBtn.trigger('click');
-      });
-
-      it('has modal binding set', () => {
-        const { value } = getBinding(findEditBtn(0).element, 'gl-modal');
-
-        expect(value).toBe('edit-trigger-modal');
-      });
-
-      it('displays modal', () => {
-        expect(findModal().exists()).toBe(true);
-        expect(findModal().props()).toEqual({
-          modalId: 'edit-trigger-modal',
-          trigger: triggers[0],
-        });
-      });
-    });
   });
 
   describe('when there are no triggers set', () => {
     beforeEach(() => {
-      createComponent({ initTriggers: [] });
+      createComponent({ triggers: [] });
     });
 
     it('does not display a table', () => {
@@ -169,86 +117,8 @@ describe('TriggersList', () => {
 
     it('displays a message', () => {
       expect(wrapper.text()).toBe(
-        'No trigger tokens have been created yet. Add one using the form above.',
+        'No triggers have been created yet. Add one using the form above.',
       );
-    });
-  });
-
-  describe('when editing a trigger token', () => {
-    const [trigger] = triggers;
-    const triggerIndex = 0;
-    const updatedDescription = 'This is an updated description.';
-
-    beforeEach(() => {
-      createComponentWithApollo();
-    });
-
-    const updateTriggerToken = async () => {
-      const editBtn = findEditBtn(triggerIndex);
-      await editBtn.trigger('click');
-
-      await findModal().vm.$emit('submit', { ...trigger, description: updatedDescription });
-      await waitForPromises();
-    };
-
-    describe('when mutation is successful', () => {
-      beforeEach(() => {
-        mockUpdatePipelineTriggerMutation.mockResolvedValue(
-          mockPipelineTriggerMutationResponse({ description: updatedDescription }),
-        );
-      });
-
-      it('calls the mutation with the correct variables', async () => {
-        await updateTriggerToken();
-
-        expect(mockUpdatePipelineTriggerMutation).toHaveBeenCalledWith({
-          id: convertToGraphQLId(TYPENAME_CI_TRIGGER, trigger.id),
-          description: updatedDescription,
-        });
-      });
-
-      it('updates the description in the table and does not render an alert message', async () => {
-        expect(findCell(triggerIndex, 1).text()).toBe(trigger.description);
-
-        await updateTriggerToken();
-
-        expect(findCell(triggerIndex, 1).text()).toBe(updatedDescription);
-        expect(createAlert).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('when mutation returns an error', () => {
-      beforeEach(() => {
-        mockUpdatePipelineTriggerMutation.mockResolvedValue(
-          mockPipelineTriggerMutationResponse({ errors: ['Something went wrong.'] }),
-        );
-      });
-
-      it('renders an alert message and does not update the table', async () => {
-        expect(findCell(triggerIndex, 1).text()).toBe(trigger.description);
-
-        await updateTriggerToken();
-
-        expect(createAlert).toHaveBeenCalledWith({ message: 'Something went wrong.' });
-        expect(findCell(triggerIndex, 1).text()).toBe(trigger.description);
-      });
-    });
-
-    describe('when mutation fails', () => {
-      beforeEach(() => {
-        mockUpdatePipelineTriggerMutation.mockRejectedValue(new Error());
-      });
-
-      it('renders an alert message and does not update the table', async () => {
-        expect(findCell(triggerIndex, 1).text()).toBe(trigger.description);
-
-        await updateTriggerToken();
-
-        expect(createAlert).toHaveBeenCalledWith({
-          message: 'An error occurred while updating the trigger token. Please try again.',
-        });
-        expect(findCell(triggerIndex, 1).text()).toBe(trigger.description);
-      });
     });
   });
 });

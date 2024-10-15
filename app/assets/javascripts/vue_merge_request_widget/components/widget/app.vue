@@ -2,12 +2,15 @@
 export default {
   components: {
     MrSecurityWidget: () =>
-      import('~/vue_merge_request_widget/widgets/security_reports/mr_widget_security_reports.vue'),
-    MrTestReportWidget: () => import('~/vue_merge_request_widget/widgets/test_report/index.vue'),
-    MrTerraformWidget: () => import('~/vue_merge_request_widget/widgets/terraform/index.vue'),
-    MrCodeQualityWidget: () => import('~/vue_merge_request_widget/widgets/code_quality/index.vue'),
+      import(
+        '~/vue_merge_request_widget/extensions/security_reports/mr_widget_security_reports.vue'
+      ),
+    MrTestReportWidget: () => import('~/vue_merge_request_widget/extensions/test_report/index.vue'),
+    MrTerraformWidget: () => import('~/vue_merge_request_widget/extensions/terraform/index.vue'),
+    MrCodeQualityWidget: () =>
+      import('~/vue_merge_request_widget/extensions/code_quality/index.vue'),
     MrAccessibilityWidget: () =>
-      import('~/vue_merge_request_widget/widgets/accessibility/index.vue'),
+      import('~/vue_merge_request_widget/extensions/accessibility/index.vue'),
   },
 
   props: {
@@ -53,7 +56,7 @@ export default {
     role="region"
     :aria-label="__('Merge request reports')"
     data-testid="mr-widget-app"
-    class="mr-section-container"
+    class="mr-widget-section"
   >
     <component
       :is="widget"
@@ -61,7 +64,6 @@ export default {
       :key="widget.name || index"
       :mr="mr"
       class="mr-widget-section"
-      :class="{ 'gl-border-t': index > 0 }"
     />
   </section>
 </template>

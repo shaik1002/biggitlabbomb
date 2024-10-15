@@ -9,8 +9,6 @@ RSpec.describe GitlabSchema.types['WorkItem'], feature_category: :team_planning 
 
   specify { expect(described_class).to expose_permissions_using(Types::PermissionTypes::WorkItem) }
 
-  specify { expect(described_class.interfaces).to include(Types::TodoableInterface) }
-
   it 'has specific fields' do
     fields = %i[
       author
@@ -34,23 +32,8 @@ RSpec.describe GitlabSchema.types['WorkItem'], feature_category: :team_planning 
       create_note_email
       reference
       archived
-      name
     ]
 
     expect(described_class).to have_graphql_fields(*fields)
-  end
-
-  describe 'pagination and count' do
-    let_it_be(:user) { create(:user) }
-    let_it_be(:group) { create(:group, :public) }
-    let_it_be(:project) { create(:project, :public) }
-
-    let(:field_name) { 'workItems' }
-
-    it_behaves_like 'issuables pagination and count' do
-      let_it_be(:issuables) { create_list(:work_item, 10, project: project, created_at: now) }
-      let(:container_name) { 'project' }
-      let(:container) { project }
-    end
   end
 end

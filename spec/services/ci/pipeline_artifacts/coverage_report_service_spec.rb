@@ -2,9 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::PipelineArtifacts::CoverageReportService, feature_category: :pipeline_reports do
-  let!(:merge_request) { create(:merge_request, head_pipeline: pipeline, source_project: project) }
-
+RSpec.describe Ci::PipelineArtifacts::CoverageReportService, feature_category: :build_artifacts do
   describe '#execute' do
     let_it_be(:project) { create(:project, :repository) }
 
@@ -51,7 +49,7 @@ RSpec.describe Ci::PipelineArtifacts::CoverageReportService, feature_category: :
     end
 
     context 'when pipeline has coverage report' do
-      let(:pipeline) { create(:ci_pipeline, :with_coverage_reports, project: project) }
+      let!(:pipeline) { create(:ci_pipeline, :with_coverage_reports, project: project) }
 
       it_behaves_like 'creating or updating a pipeline coverage report'
 

@@ -6,7 +6,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # GitLab Advisory Database
 
-The [GitLab Advisory Database](https://gitlab.com/gitlab-org/security-products/gemnasium-db) serves as a repository for security advisories related to software dependencies. It is updated on an hourly basis with the latest security advisories.
+The [GitLab Advisory Database](https://gitlab.com/gitlab-org/security-products/gemnasium-db) serves as a repository for security advisories related to software dependencies.
 
 The database is an essential component of both [Dependency Scanning](../dependency_scanning/index.md) and [Container Scanning](../container_scanning/index.md).
 
@@ -40,6 +40,10 @@ Each advisory has a page with the following details:
 - **Solution**: How to remediate the vulnerability.
 - **Last Modified**: The date when the advisory was last modified.
 
+### Statistics
+
+The home page also offers a [statistic section](https://advisories.gitlab.com/stats/index.html) that provides valuable insights into advisory distribution, the origins of vulnerabilities, dependency scanning coverage, and timelines for vulnerability resolution.
+
 ## Open Source Edition
 
 GitLab provides a free and open-source version of the database, the [GitLab Advisory Database (Open Source Edition)](https://gitlab.com/gitlab-org/advisories-community).
@@ -60,11 +64,7 @@ GitLab Advisory Database Terms prohibit the use of data contained in the GitLab 
 As an example, we highlight the use of the database as a source for an Advisory Ingestion process as part of Continuous Vulnerability Scans.
 
 ```mermaid
-%%{init: { "fontFamily": "GitLab Sans" }}%%
 flowchart TB
-accTitle: Advisory ingestion process
-accDescr: Sequence of actions that make up the advisory ingestion process.
-
     subgraph Dependency Scanning
         A[GitLab Advisory Database]
     end

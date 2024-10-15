@@ -13,14 +13,12 @@ module Banzai
         @filters ||= FilterArray[
           Filter::CodeLanguageFilter,
           Filter::PlantumlFilter,
-          # Must always be before the SanitizationFilter/SanitizeLinkFilter to prevent XSS attacks
+          # Must always be before the SanitizationFilter to prevent XSS attacks
           Filter::SpacedLinkFilter,
           Filter::SanitizationFilter,
-          Filter::SanitizeLinkFilter,
           Filter::EscapedCharFilter,
           Filter::KrokiFilter,
           Filter::GollumTagsFilter,
-          Filter::WikiLinkGollumFilter,
           Filter::AssetProxyFilter,
           Filter::MathFilter,
           Filter::ColorFilter,
@@ -31,7 +29,6 @@ module Banzai
           Filter::ImageLazyLoadFilter,
           Filter::ImageLinkFilter,
           Filter::TableOfContentsLegacyFilter,
-          Filter::TableOfContentsTagLegacyFilter,
           Filter::TableOfContentsTagFilter,
           Filter::AutolinkFilter,
           Filter::ExternalLinkFilter,

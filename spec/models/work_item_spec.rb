@@ -48,9 +48,9 @@ RSpec.describe WorkItem, feature_category: :portfolio_management do
     subject { parent_item.reload.work_item_children_by_relative_position }
 
     let_it_be(:parent_item) { create(:work_item, :objective, project: reusable_project) }
-    let_it_be(:oldest_item) { create(:work_item, :objective, project: reusable_project) }
+    let_it_be(:oldest_item) { create(:work_item, :objective, created_at: 5.hours.ago, project: reusable_project) }
     let_it_be(:middle_item) { create(:work_item, :objective, project: reusable_project) }
-    let_it_be(:newest_item) { create(:work_item, :objective, project: reusable_project) }
+    let_it_be(:newest_item) { create(:work_item, :objective, created_at: 5.hours.from_now, project: reusable_project) }
 
     let_it_be_with_reload(:link_to_oldest_item) do
       create(:parent_link, work_item_parent: parent_item, work_item: oldest_item)
@@ -64,7 +64,7 @@ RSpec.describe WorkItem, feature_category: :portfolio_management do
       create(:parent_link, work_item_parent: parent_item, work_item: newest_item)
     end
 
-    context 'when ordered by relative position' do
+    context 'when ordered by relative position and created_at' do
       using RSpec::Parameterized::TableSyntax
 
       where(:oldest_item_position, :middle_item_position, :newest_item_position, :expected_order) do
@@ -73,11 +73,6 @@ RSpec.describe WorkItem, feature_category: :portfolio_management do
         nil | 1   | 2   | lazy { [middle_item, newest_item, oldest_item] }
         2   | 3   | 1   | lazy { [newest_item, oldest_item, middle_item] }
         1   | 2   | 3   | lazy { [oldest_item, middle_item, newest_item] }
-        1   | 3   | 2   | lazy { [oldest_item, newest_item, middle_item] }
-        2   | 1   | 3   | lazy { [middle_item, oldest_item, newest_item] }
-        3   | 1   | 2   | lazy { [middle_item, newest_item, oldest_item] }
-        3   | 2   | 1   | lazy { [newest_item, middle_item, oldest_item] }
-        1   | 2   | 1   | lazy { [oldest_item, newest_item, middle_item] }
       end
 
       with_them do
@@ -285,11 +280,13 @@ RSpec.describe WorkItem, feature_category: :portfolio_management do
       end
 
       it_behaves_like 'internal event tracking' do
+        let(:work_item) { create(:work_item) }
         let(:event) { Gitlab::UsageDataCounters::IssueActivityUniqueCounter::ISSUE_CREATED }
-        let(:project) { reusable_project }
-        let(:user) { create(:user) }
+        let(:project) { work_item.project }
+        let(:user) { work_item.author }
+        let(:namespace) { project.namespace }
 
-        subject(:service_action) { create(:work_item, project: reusable_project, author: user) }
+        subject(:service_action) { work_item }
       end
     end
 
@@ -370,7 +367,7 @@ RSpec.describe WorkItem, feature_category: :portfolio_management do
 
           expect(parent).not_to be_valid
           expect(parent.errors[:base]).to include(
-            _('All child items must be confidential in order to turn on confidentiality.')
+            _('A confidential work item cannot have a parent that already has non-confidential children.')
           )
         end
 
@@ -398,27 +395,13 @@ RSpec.describe WorkItem, feature_category: :portfolio_management do
   describe '#link_reference_pattern' do
     let(:match_data) { described_class.link_reference_pattern.match(link_reference_url) }
 
-    before_all do
-      # Required on the unlikely event that factory lint specs load the WorkItem class for the first time as
-      # those will define the instance's URL to be gitlab.com and link_reference_pattern is memoized in the class
-      described_class.instance_variable_set(:@link_reference_pattern, nil)
-    end
-
     context 'with work item url' do
       let(:link_reference_url) { 'http://localhost/namespace/project/-/work_items/1' }
 
       it 'matches with expected attributes' do
-        expect(match_data['group_or_project_namespace']).to eq('namespace/project')
+        expect(match_data['namespace']).to eq('namespace')
+        expect(match_data['project']).to eq('project')
         expect(match_data['work_item']).to eq('1')
-      end
-
-      context 'when work item exists in a group' do
-        let(:link_reference_url) { 'http://localhost/groups/group/sub_group/-/work_items/1' }
-
-        it 'matches with expected attributes' do
-          expect(match_data['group_or_project_namespace']).to eq('group/sub_group')
-          expect(match_data['work_item']).to eq('1')
-        end
       end
     end
   end
@@ -426,14 +409,14 @@ RSpec.describe WorkItem, feature_category: :portfolio_management do
   describe '#linked_items_keyset_order' do
     subject { described_class.linked_items_keyset_order }
 
-    it { is_expected.to eq('"issue_links"."id" DESC') }
+    it { is_expected.to eq('"issue_links"."id" ASC') }
   end
 
   context 'with hierarchy' do
-    let_it_be(:type1) { create(:work_item_type, :non_default) }
-    let_it_be(:type2) { create(:work_item_type, :non_default) }
-    let_it_be(:type3) { create(:work_item_type, :non_default) }
-    let_it_be(:type4) { create(:work_item_type, :non_default) }
+    let_it_be(:type1) { create(:work_item_type, namespace: reusable_project.namespace) }
+    let_it_be(:type2) { create(:work_item_type, namespace: reusable_project.namespace) }
+    let_it_be(:type3) { create(:work_item_type, namespace: reusable_project.namespace) }
+    let_it_be(:type4) { create(:work_item_type, namespace: reusable_project.namespace) }
     let_it_be(:hierarchy_restriction1) { create(:hierarchy_restriction, parent_type: type1, child_type: type2) }
     let_it_be(:hierarchy_restriction2) { create(:hierarchy_restriction, parent_type: type2, child_type: type2) }
     let_it_be(:hierarchy_restriction3) { create(:hierarchy_restriction, parent_type: type2, child_type: type3) }
@@ -460,12 +443,6 @@ RSpec.describe WorkItem, feature_category: :portfolio_management do
 
       it 'returns an empty array if there are no ancestors' do
         expect(item1.ancestors).to be_empty
-      end
-    end
-
-    describe '#descendants' do
-      it 'returns all descendants' do
-        expect(item1.descendants).to match_array([item2_1, item2_2, item3_1, item3_2, item4])
       end
     end
 
@@ -506,11 +483,11 @@ RSpec.describe WorkItem, feature_category: :portfolio_management do
     end
 
     context 'with ParentLink relation' do
-      let_it_be(:old_type) { create(:work_item_type, :non_default) }
-      let_it_be(:new_type) { create(:work_item_type, :non_default) }
+      let_it_be(:old_type) { create(:work_item_type) }
+      let_it_be(:new_type) { create(:work_item_type) }
 
       context 'with hierarchy restrictions' do
-        let_it_be(:child_type) { create(:work_item_type, :non_default) }
+        let_it_be(:child_type) { create(:work_item_type) }
 
         let_it_be_with_reload(:parent) { create(:work_item, work_item_type: old_type, project: reusable_project) }
         let_it_be_with_reload(:child) { create(:work_item, work_item_type: child_type, project: reusable_project) }
@@ -785,109 +762,6 @@ RSpec.describe WorkItem, feature_category: :portfolio_management do
 
       it 'has participants' do
         expect(work_item.participants).to match_array([work_item.author])
-      end
-    end
-  end
-
-  describe '#due_date' do
-    let_it_be(:work_item) { create(:work_item, :issue) }
-
-    context 'when work_item have no dates_source fallbacks to work_item due_date' do
-      before do
-        work_item.update!(due_date: 1.day.from_now)
-      end
-
-      specify { expect(work_item.due_date).to eq(work_item.due_date) }
-    end
-
-    context 'when work_item have dates_source use it instead of work_item due_date value' do
-      before do
-        work_item.create_dates_source!(due_date: 1.day.ago)
-        work_item.reload.update!(due_date: nil)
-      end
-
-      specify { expect(work_item.due_date).to eq(work_item.dates_source.due_date) }
-    end
-  end
-
-  describe '#start_date' do
-    let_it_be(:work_item) { create(:work_item, :issue) }
-
-    context 'when work_item have no dates_source fallbacks to work_item start_date' do
-      before do
-        work_item.update!(start_date: 1.day.ago)
-      end
-
-      specify { expect(work_item.start_date).to eq(work_item.start_date) }
-    end
-
-    context 'when work_item have dates_source use it instead of work_item start_date value' do
-      before do
-        work_item.create_dates_source!(start_date: 1.day.from_now)
-        work_item.reload.update!(start_date: nil)
-      end
-
-      specify { expect(work_item.start_date).to eq(work_item.dates_source.start_date) }
-    end
-  end
-
-  describe '#max_depth_reached?' do
-    let_it_be(:work_item) { create(:work_item) }
-    let_it_be(:child_type) { create(:work_item_type) }
-
-    context 'when there is no hierarchy restriction' do
-      it 'returns false' do
-        expect(work_item.max_depth_reached?(child_type)).to be false
-      end
-    end
-
-    context 'when there is a hierarchy restriction without maximum depth' do
-      before do
-        create(:hierarchy_restriction,
-          parent_type_id: work_item.work_item_type_id,
-          child_type_id: child_type.id,
-          maximum_depth: nil)
-      end
-
-      it 'returns false' do
-        expect(work_item.max_depth_reached?(child_type)).to be false
-      end
-    end
-
-    context 'when there is a hierarchy restriction with maximum depth' do
-      let(:max_depth) { 3 }
-
-      before do
-        create(:hierarchy_restriction,
-          parent_type_id: work_item.work_item_type_id,
-          child_type_id: child_type.id,
-          maximum_depth: max_depth)
-      end
-
-      context 'when work item type is the same as child type' do
-        let(:child_type) { work_item.work_item_type }
-
-        it 'returns true when depth is reached' do
-          allow(work_item).to receive_message_chain(:same_type_base_and_ancestors, :count).and_return(max_depth)
-          expect(work_item.max_depth_reached?(child_type)).to be true
-        end
-
-        it 'returns false when depth is not reached' do
-          allow(work_item).to receive_message_chain(:same_type_base_and_ancestors, :count).and_return(max_depth - 1)
-          expect(work_item.max_depth_reached?(child_type)).to be false
-        end
-      end
-
-      context 'when work item type is different from child type' do
-        it 'returns true when depth is reached' do
-          allow(work_item).to receive_message_chain(:hierarchy, :base_and_ancestors, :count).and_return(max_depth)
-          expect(work_item.max_depth_reached?(child_type)).to be true
-        end
-
-        it 'returns false when depth is not reached' do
-          allow(work_item).to receive_message_chain(:hierarchy, :base_and_ancestors, :count).and_return(max_depth - 1)
-          expect(work_item.max_depth_reached?(child_type)).to be false
-        end
       end
     end
   end

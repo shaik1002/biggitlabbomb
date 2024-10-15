@@ -101,8 +101,7 @@ module API
         end
 
         def authenticate_job_via_dependent_job!
-          ::Gitlab::Database::LoadBalancing::Session.current.use_primary { authenticate! }
-
+          authenticate!
           forbidden! unless current_job
           forbidden! unless can?(current_user, :read_build, current_job)
         end
@@ -137,7 +136,7 @@ module API
           Gitlab::ApplicationContext.push(job: current_job, runner: current_runner)
         end
 
-        def track_ci_minutes_usage!(_build)
+        def track_ci_minutes_usage!(_build, _runner)
           # noop: overridden in EE
         end
 

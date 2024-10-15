@@ -234,12 +234,6 @@ module Types
       extras: [:lookahead],
       resolver: Resolvers::WorkItemReferencesResolver
 
-    field :feature_flag_enabled, GraphQL::Types::Boolean,
-      null: false,
-      deprecated: { reason: 'Replaced with metadata.featureFlags', milestone: '17.4' },
-      description: 'Check if a feature flag is enabled',
-      resolver: Resolvers::FeatureFlagResolver
-
     def design_management
       DesignManagementObject.new(nil)
     end

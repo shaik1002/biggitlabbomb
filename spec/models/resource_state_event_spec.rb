@@ -64,13 +64,8 @@ RSpec.describe ResourceStateEvent, feature_category: :team_planning, type: :mode
 
           let(:event) { Gitlab::UsageDataCounters::IssueActivityUniqueCounter::ISSUE_CLOSED }
           let(:project) { issue.project }
+          let(:namespace) { issue.project.namespace }
           let(:user) { issue.author }
-
-          let(:issue) do
-            # The g_project_management_issue_created event is triggered by creating the issue.
-            # So we'll trigger the irrelevant event outside of the metric time ranges
-            travel_to(2.months.ago) { create(:issue) }
-          end
         end
       end
 
@@ -95,12 +90,7 @@ RSpec.describe ResourceStateEvent, feature_category: :team_planning, type: :mode
           let(:event) { Gitlab::UsageDataCounters::IssueActivityUniqueCounter::ISSUE_REOPENED }
           let(:project) { issue.project }
           let(:user) { issue.author }
-
-          let(:issue) do
-            # The g_project_management_issue_created event is triggered by creating the issue.
-            # So we'll trigger the irrelevant event outside of the metric time ranges
-            travel_to(2.months.ago) { create(:issue) }
-          end
+          let(:namespace) { issue.project.namespace }
         end
       end
 

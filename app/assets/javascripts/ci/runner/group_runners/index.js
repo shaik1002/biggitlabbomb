@@ -19,8 +19,13 @@ export const initGroupRunners = (selector = '#js-group-runners') => {
     return null;
   }
 
-  const { allowRegistrationToken, registrationToken, newRunnerPath, groupId, groupFullPath } =
-    el.dataset;
+  const {
+    allowRegistrationToken,
+    registrationToken,
+    newRunnerPath,
+    groupId,
+    groupFullPath,
+  } = el.dataset;
 
   const { cacheConfig, typeDefs, localMutations } = createLocalState();
 

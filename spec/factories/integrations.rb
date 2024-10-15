@@ -139,13 +139,6 @@ FactoryBot.define do
       deployment_type { 'cloud' }
     end
 
-    trait :jira_cloud do
-      url { 'https://mysite.atlassian.net' }
-      username { 'jira_user' }
-      password { 'my-secret-password' }
-      jira_auth_type { 0 }
-    end
-
     after(:build) do |integration, evaluator|
       integration.instance_variable_set(:@old_data_fields, nil)
 
@@ -255,6 +248,13 @@ FactoryBot.define do
     type { 'Integrations::ExternalWiki' }
     active { true }
     external_wiki_url { 'http://external-wiki-url.com' }
+  end
+
+  trait :jira_cloud_service do
+    url { 'https://mysite.atlassian.net' }
+    username { 'jira_user' }
+    password { 'my-secret-password' }
+    jira_auth_type { 0 }
   end
 
   trait :chat_notification do
@@ -467,15 +467,6 @@ FactoryBot.define do
     google_play_protected_refs { true }
   end
 
-  factory :matrix_integration, class: 'Integrations::Matrix' do
-    project
-    type { 'Integrations::Matrix' }
-    active { true }
-
-    token { 'syt-zyx57W2v1u123ew11' }
-    room { '!qPKKM111FFKKsfoCVy:matrix.org' }
-  end
-
   factory :squash_tm_integration, class: 'Integrations::SquashTm' do
     project
     active { true }
@@ -493,13 +484,6 @@ FactoryBot.define do
     token { '123456:ABC-DEF1234' }
     room { '@channel' }
     thread { nil }
-  end
-
-  factory :jira_cloud_app_integration, class: 'Integrations::JiraCloudApp' do
-    project
-    active { true }
-    type { 'Integrations::JiraCloudApp' }
-    jira_cloud_app_service_ids { 'b:YXJpOmNsb3VkOmdyYXBoOjpzZXJ2aWNlLzI=' }
   end
 
   # this is for testing storing values inside properties, which is deprecated and will be removed in

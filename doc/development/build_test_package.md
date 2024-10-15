@@ -18,9 +18,10 @@ that will create:
 - The image tag is the commit that triggered the pipeline.
 
 When you push a commit to either the GitLab CE or GitLab EE project, the
-pipeline for that commit will have a `trigger-omnibus` job inside `e2e:test-on-omnibus` child pipeline in the `.pre` stage.
+pipeline for that commit will have a `trigger-omnibus` job in the `qa` stage you
+can trigger manually (if it didn't trigger already).
 
-![Trigger omnibus job](img/trigger_omnibus_v16_3.png)
+![Trigger omnibus QA job](img/trigger_omnibus_v16_3.png)
 
 After the child pipeline started, you can select `trigger-omnibus` to go to
 the child pipeline named `TRIGGERED_EE_PIPELINE`.

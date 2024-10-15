@@ -19,10 +19,8 @@ import {
   REMOVE_TAGS_BUTTON_TITLE,
   TAGS_LIST_TITLE,
   GRAPHQL_PAGE_SIZE,
-  GRAPHQL_PAGE_SIZE_METADATA_ENABLED,
   FETCH_IMAGES_LIST_ERROR_MESSAGE,
   NAME_SORT_FIELD,
-  PUBLISHED_SORT_FIELD,
   NO_TAGS_TITLE,
   NO_TAGS_MESSAGE,
   NO_TAGS_MATCHING_FILTERS_TITLE,
@@ -68,6 +66,7 @@ export default {
       required: false,
     },
   },
+  sortableFields: [NAME_SORT_FIELD],
   i18n: {
     REMOVE_TAGS_BUTTON_TITLE,
     TAGS_LIST_TITLE,
@@ -98,13 +97,6 @@ export default {
     };
   },
   computed: {
-    defaultSort() {
-      return this.config.isMetadataDatabaseEnabled ? 'desc' : 'asc';
-    },
-    sortableFields() {
-      const fields = this.config.isMetadataDatabaseEnabled ? [PUBLISHED_SORT_FIELD] : [];
-      return fields.concat(NAME_SORT_FIELD);
-    },
     listTitle() {
       return n__('%d tag', '%d tags', this.tags.length);
     },
@@ -117,15 +109,10 @@ export default {
     tagsPageInfo() {
       return this.containerRepository?.tags?.pageInfo;
     },
-    pageSize() {
-      return this.config.isMetadataDatabaseEnabled
-        ? GRAPHQL_PAGE_SIZE_METADATA_ENABLED
-        : GRAPHQL_PAGE_SIZE;
-    },
     queryVariables() {
       return {
         id: joinPaths(this.config.gidPrefix, `${this.id}`),
-        first: this.pageSize,
+        first: GRAPHQL_PAGE_SIZE,
         name: this.filters?.name,
         sort: this.sort,
         referrers: this.glFeatures.showContainerRegistryTagSignatures,
@@ -202,28 +189,30 @@ export default {
       }
     },
     fetchNextPage() {
-      this.pageParams = getNextPageParams(this.tagsPageInfo?.endCursor, this.pageSize);
+      this.pageParams = getNextPageParams(this.tagsPageInfo?.endCursor);
     },
     fetchPreviousPage() {
-      this.pageParams = getPreviousPageParams(this.tagsPageInfo?.startCursor, this.pageSize);
+      this.pageParams = getPreviousPageParams(this.tagsPageInfo?.startCursor);
     },
     handleSearchUpdate({ sort, filters, pageInfo }) {
-      this.pageParams = getPageParams(pageInfo, this.pageSize);
+      this.pageParams = getPageParams(pageInfo);
       this.sort = sort;
+
+      const parsed = {
+        name: '',
+      };
 
       // This takes in account the fact that we will be adding more filters types
       // this is why is an object and not an array or a simple string
-      this.filters = filters
-        .filter((filter) => filter.value?.data)
-        .reduce((acc, filter) => {
-          if (filter.type === FILTERED_SEARCH_TERM) {
-            return {
-              ...acc,
-              name: filter.value.data.trim(),
-            };
-          }
-          return acc;
-        }, {});
+      this.filters = filters.reduce((acc, filter) => {
+        if (filter.type === FILTERED_SEARCH_TERM) {
+          return {
+            ...acc,
+            name: `${acc.name} ${filter.value.data}`.trim(),
+          };
+        }
+        return acc;
+      }, parsed);
     },
   },
 };
@@ -232,9 +221,9 @@ export default {
 <template>
   <div>
     <persisted-search
-      :sortable-fields="sortableFields"
-      :default-order="sortableFields[0].orderBy"
-      :default-sort="defaultSort"
+      :sortable-fields="$options.sortableFields"
+      :default-order="$options.sortableFields[0].orderBy"
+      default-sort="asc"
       @update="handleSearchUpdate"
     />
     <tags-loader v-if="isLoading" />
@@ -277,7 +266,7 @@ export default {
       </template>
     </template>
 
-    <div v-if="!isDeleteInProgress" class="gl-flex gl-justify-center">
+    <div v-if="!isDeleteInProgress" class="gl-display-flex gl-justify-content-center">
       <persisted-pagination
         class="gl-mt-3"
         :pagination="tagsPageInfo"

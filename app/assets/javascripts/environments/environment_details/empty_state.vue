@@ -1,6 +1,5 @@
 <script>
 import { GlEmptyState, GlLink, GlSprintf } from '@gitlab/ui';
-import EMPTY_SVG from '@gitlab/svgs/dist/illustrations/status/status-nothing-md.svg';
 import { translations, environmentsLearnMorePath, environmentsHelpPagePath } from './constants';
 
 export default {
@@ -12,16 +11,14 @@ export default {
   translations,
   actionButtonUrl: environmentsHelpPagePath,
   learnMoreHelpPath: environmentsLearnMorePath,
-  EMPTY_SVG,
 };
 </script>
 <template>
   <gl-empty-state
-    :svg-path="$options.EMPTY_SVG"
     :title="$options.translations.emptyStateTitle"
     :primary-button-text="$options.translations.emptyStatePrimaryButton"
     :primary-button-link="$options.actionButtonUrl"
-    class="gl-leading-20"
+    class="gl-line-height-20"
   >
     <template #description>
       <gl-sprintf :message="$options.translations.emptyStateDescription">

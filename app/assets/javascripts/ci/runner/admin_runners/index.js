@@ -33,8 +33,12 @@ export const initAdminRunners = (selector = '#js-admin-runners') => {
     return null;
   }
 
-  const { newRunnerPath, allowRegistrationToken, registrationToken, tagSuggestionsPath } =
-    el.dataset;
+  const {
+    newRunnerPath,
+    allowRegistrationToken,
+    registrationToken,
+    tagSuggestionsPath,
+  } = el.dataset;
   const { cacheConfig, typeDefs, localMutations } = createLocalState();
 
   const apolloProvider = new VueApollo({

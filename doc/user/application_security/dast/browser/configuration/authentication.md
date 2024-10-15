@@ -5,38 +5,29 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference, howto
 ---
 
-# Authentication
+# Authentication configuration
 
-For complete coverage, the DAST analyzer must authenticate with the application being tested. This
-requires configuring the authentication credentials and authentication method in the DAST CI/CD job.
+WARNING:
+**DO NOT** use credentials that are valid for production systems, production servers, or any that
+contain production data.
 
-DAST requires authentication to:
+WARNING:
+**DO NOT** run an authenticated scan against a production server.
+Authenticated scans may perform **any** function that the authenticated user can,
+including modifying or deleting data, submitting forms, and following links.
+Only run an authenticated scan against non-production systems or servers.
 
-- Simulate real-world attacks and identify vulnerabilities that might be exploited by
-  attackers.
-- Test user-specific features and custom behavior that may only be visible after authentication.
+Authentication logs a user in before a DAST scan so that the analyzer can test
+as much of the application as possible when searching for vulnerabilities.
 
-The DAST job authenticates itself to the application, most commonly by filling in and submitting a
-login form on a browser. After the form is submitted, the DAST job confirms that authentication was
-successful. If authentication was successful, the DAST job continues and also saves the credentials
-for reuse when crawling the target application. If not, the DAST job stops.
+DAST uses a browser to authenticate the user so that the login form has the necessary JavaScript
+and styling required to submit the form. DAST finds the username and password fields and fills them with their respective values.
+The login form is submitted, and when the response returns, a series of checks verify if authentication was successful.
+DAST saves the credentials for reuse when crawling the target application.
 
-Authentication methods supported by DAST include:
+If DAST fails to authenticate, the scan halts and the CI job fails.
 
-- Single-step login form
-- Multi-step login form
-- Authenticating to URLs outside the configured target URL
-
-When choosing authentication credentials:
-
-- **DO NOT** use credentials that are valid for production systems, production servers, or used to access production data.
-- **DO NOT** run an authenticated scan against a production server. Authenticated scans may perform
-  **any** function that the authenticated user can, including modifying or deleting data, submitting
-  forms, and following links. Only run an authenticated scan against non-production systems or
-  servers.
-- Provide credentials that allow DAST to test the entire application.
-- Note the credentials' expiry date, if any, for future reference. For example, with a password
-  manager such as 1Password.
+Authentication supports single-step login forms, multi-step login forms, single sign-on, and authenticating to URLs outside of the configured target URL.
 
 ## Getting started
 
@@ -186,11 +177,11 @@ See [Custom CI/CD variables](../../../../../ci/variables/index.md#for-a-project)
 
 ### Configuration for Single Sign-On (SSO)
 
-If a user can sign in to an application, then in most cases, DAST is also able to sign in.
+If a user can sign in to an application, then in most cases, DAST is also able to log in.
 Even when an application uses Single Sign-on. Applications using SSO solutions should configure DAST
 authentication using the [single-step](#configuration-for-a-single-step-login-form) or [multi-step](#configuration-for-a-multi-step-login-form) login form configuration guides.
 
-DAST supports authentication processes where a user is redirected to an external Identity Provider's site to sign in.
+DAST supports authentication processes where a user is redirected to an external Identity Provider's site to log in.
 Check the [known limitations](#known-limitations) of DAST authentication to determine if your SSO authentication process is supported.
 
 ### Clicking to go to the login form
@@ -249,10 +240,10 @@ Chrome DevTools element selector tool is an effective way to find a selector.
 1. Open Chrome and go to the page where you would like to find a selector, for example, the login page for your site.
 1. Open the `Elements` tab in Chrome DevTools with the keyboard shortcut `Command + Shift + c` in macOS or `Ctrl + Shift + c` in Windows or Linux.
 1. Select the `Select an element in the page to select it` tool.
-   ![search-elements](../img/dast_auth_browser_scan_search_elements_v16_9.png)
+   ![search-elements](../img/dast_auth_browser_scan_search_elements.png)
 1. Select the field on your page that you would like to know the selector for.
 1. After the tool is active, highlight a field you wish to view the details of.
-   ![highlight](../img/dast_auth_browser_scan_highlight_v16_9.png)
+   ![highlight](../img/dast_auth_browser_scan_highlight.png)
 1. Once highlighted, you can see the element's details, including attributes that would make a good candidate for a selector.
 
 In this example, the `id="user_login"` appears to be a good candidate. You can use this as a selector as the DAST username field by setting
@@ -420,7 +411,7 @@ An authentication report can be saved as a CI/CD job artifact to assist with und
 
 The report contains steps performed during the login process, HTTP requests and responses, the Document Object Model (DOM) and screenshots.
 
-![dast-auth-report](../img/dast_auth_report_v16_9.jpg)
+![dast-auth-report](../img/dast_auth_report.jpg)
 
 An example configuration where the authentication debug report is exported may look like the following:
 

@@ -2,23 +2,17 @@
 
 # Helpers for calculating the latest metric values from specs and the dev rails console.
 # The time frame for the metrics is modified to includes all records and events
-# created on the current date (rather than only completed days from the last week.)
+# created on the current date (rather than only completed days.)
 module ServicePingHelpers
   # Override metric timeframe from within specs
-  # rubocop:disable RSpec/AnyInstanceOf -- Gitlab::Usage::TimeFrame is initialized multiple times from many classes
   def stub_metric_timeframes
-    [
-      :weekly_time_range,
-      :monthly_time_range,
-      :weekly_time_range_db_params,
-      :monthly_time_range_db_params
-    ].each do |method|
-      allow_any_instance_of(Gitlab::Usage::TimeFrame)
-        .to receive(method)
-        .and_wrap_original { |_, **args| ClassWithStubbedTimeframe.new.send(method, **args) }
-    end
+    stub_const('Gitlab::Usage::TimeFrame',
+      Module.new do
+        include Gitlab::Usage::TimeFrame
+        include CurrentTimeFrame
+      end
+    )
   end
-  # rubocop:enable RSpec/AnyInstanceOf
 
   class << self
     # Generates a full service ping report from rails console
@@ -53,7 +47,7 @@ module ServicePingHelpers
 
     def override_timeframe_from_dev_console!
       if Rails.env.test?
-        raise 'Prefer ServicePingHelpers#stub_metric_timeframe from specs!'
+        raise 'Prefer ServicePingHelpers#stub_metric_timeframes from specs!'
       elsif !defined?(Rails::Console) || !Rails.env.development?
         raise 'ServicePingHelpers override the timeframe used to calculate metrics. ' \
               'Use only in the development rails console.'
@@ -79,10 +73,5 @@ module ServicePingHelpers
     def weekly_time_range_db_params(column: nil)
       super.transform_values { 9.days.ago..1.week.from_now }
     end
-  end
-
-  class ClassWithStubbedTimeframe
-    include Gitlab::Usage::TimeFrame.dup
-    include ::ServicePingHelpers::CurrentTimeFrame
   end
 end

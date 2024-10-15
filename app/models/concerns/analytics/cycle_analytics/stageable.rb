@@ -135,9 +135,7 @@ module Analytics
 
         return unless previous_stage_event_hash.blank? || events_hash_code != previous_stage_event_hash
 
-        organization_id = namespace.organization_id
-        self.stage_event_hash_id = Analytics::CycleAnalytics::StageEventHash.record_id_by_hash_sha256(organization_id,
-          events_hash_code)
+        self.stage_event_hash_id = Analytics::CycleAnalytics::StageEventHash.record_id_by_hash_sha256(events_hash_code)
       end
 
       def cleanup_old_stage_event_hash

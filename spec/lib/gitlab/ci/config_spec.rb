@@ -121,10 +121,24 @@ RSpec.describe Gitlab::Ci::Config, feature_category: :pipeline_composition do
         EOS
       end
 
-      it 'sets the ref in the pipeline' do
-        expect(Ci::Pipeline).to receive(:new).with(hash_including(ref: ref)).and_call_original
+      context 'when feature :project_ref_name_in_pipeline is enabled' do
+        it 'sets the ref in the pipeline' do
+          expect(Ci::Pipeline).to receive(:new).with(hash_including(ref: ref)).and_call_original
 
-        described_class.new(yml, project: project, ref: ref, user: user)
+          described_class.new(yml, project: project, ref: ref, user: user)
+        end
+      end
+
+      context 'when feature is disabled' do
+        before do
+          stub_feature_flags(project_ref_name_in_pipeline: false)
+        end
+
+        it 'does not set the ref in the pipeline' do
+          expect(Ci::Pipeline).to receive(:new).with(hash_not_including(ref: ref)).and_call_original
+
+          described_class.new(yml, project: project, ref: ref, user: user)
+        end
       end
     end
   end
@@ -752,7 +766,7 @@ RSpec.describe Gitlab::Ci::Config, feature_category: :pipeline_composition do
             job1: {
               script: ["echo 'hello from main file'"],
               variables: {
-                VARIABLE_DEFINED_IN_MAIN_FILE: 'some value'
+               VARIABLE_DEFINED_IN_MAIN_FILE: 'some value'
               }
             }
           })

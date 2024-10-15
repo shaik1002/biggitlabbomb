@@ -79,7 +79,7 @@ export default {
     issuableColor: {
       query: epicColorQuery,
       skip() {
-        return !isDropdownVariantSidebar(this.variant) || !this.iid;
+        return !isDropdownVariantSidebar(this.variant);
       },
       variables() {
         return {

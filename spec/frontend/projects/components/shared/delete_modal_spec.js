@@ -2,7 +2,7 @@ import { GlFormInput, GlModal, GlAlert } from '@gitlab/ui';
 import { nextTick } from 'vue';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
 import DeleteModal from '~/projects/components/shared/delete_modal.vue';
-import { sprintf } from '~/locale';
+import { __, sprintf } from '~/locale';
 import { stubComponent } from 'helpers/stub_component';
 
 jest.mock('lodash/uniqueId', () => () => 'fake-id');
@@ -47,7 +47,7 @@ describe('DeleteModal', () => {
       visible: defaultPropsData.visible,
       modalId: 'fake-id',
       actionPrimary: {
-        text: 'Yes, delete project',
+        text: __('Yes, delete project'),
         attributes: {
           variant: 'danger',
           disabled: true,
@@ -55,7 +55,7 @@ describe('DeleteModal', () => {
         },
       },
       actionCancel: {
-        text: 'Cancel, keep project',
+        text: __('Cancel, keep project'),
       },
     });
   });

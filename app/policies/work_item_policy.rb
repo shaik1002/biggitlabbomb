@@ -18,16 +18,11 @@ class WorkItemPolicy < IssuePolicy
   # is prevented
   rule { ~can?(:read_issue) }.prevent :read_work_item
 
-  rule { (is_member & can?(:read_work_item)) | admin }.policy do
-    enable :admin_work_item_link
+  rule { can?(:reporter_access) }.policy do
     enable :admin_parent_link
   end
 
-  # IMPORTANT: keep the prevent rules as last rules defined in the policy, as these are based on
-  # all abilities defined up to this point.
-  rule { group_issue & ~group_level_issues_license_available }.policy do
-    prevent(*::WorkItemPolicy.ability_map.map.keys)
-  end
+  rule { is_member & can?(:read_work_item) }.enable :admin_work_item_link
 end
 
 WorkItemPolicy.prepend_mod
