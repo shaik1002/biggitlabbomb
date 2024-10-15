@@ -32,7 +32,7 @@ Prerequisites:
 
 To view the runner fleet dashboard:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Runners**.
 1. Select **Fleet dashboard**.
 
@@ -52,7 +52,7 @@ CSV file shows the runner type and job status for each project. The CSV is sent 
 
 To export compute minutes used by instance runners:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Runners**.
 1. Select **Fleet dashboard**.
 1. Select **Export CSV**.
@@ -61,11 +61,11 @@ To export compute minutes used by instance runners:
 
 DETAILS:
 **Tier:** Ultimate
-**Offering:** GitLab.com, Self-managed
+**Offering:** GitLab.com, Self-managed, GitLab Dedicated
 **Status:** Beta
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/11180) as an [experiment](../../policy/experiment-beta-support.md#experiment) in GitLab 16.7 with [flags](../../administration/feature_flags.md) named `ci_data_ingestion_to_click_house` and `clickhouse_ci_analytics`. Disabled by default.
-> - [Enabled on GitLab.com and self-managed](https://gitlab.com/gitlab-org/gitlab/-/issues/424866) in GitLab 16.10. Feature flags `ci_data_ingestion_to_click_house` and `clickhouse_ci_analytics` removed.
+> - [Enabled on GitLab.com, self-managed, and GitLab Dedicated](https://gitlab.com/gitlab-org/gitlab/-/issues/424866) in GitLab 16.10. Feature flags `ci_data_ingestion_to_click_house` and `clickhouse_ci_analytics` removed.
 > - [Changed](https://gitlab.com/gitlab-org/gitlab/-/issues/424789) to [beta](../../policy/experiment-beta-support.md#beta) in GitLab 17.1.
 
 WARNING:

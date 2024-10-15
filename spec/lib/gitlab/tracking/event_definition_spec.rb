@@ -41,7 +41,7 @@ RSpec.describe Gitlab::Tracking::EventDefinition, feature_category: :service_pin
     definitions_by_action = described_class
                               .definitions
                               .select { |d| d.attributes[:internal_events] }
-                              .group_by(&:action)
+                              .group_by { |d| d.attributes[:action] }
 
     definitions_by_action.each do |action, definitions|
       expect(definitions.size).to eq(1),
@@ -73,6 +73,33 @@ RSpec.describe Gitlab::Tracking::EventDefinition, feature_category: :service_pin
     from_metric_definitions.each do |event|
       expect(event_names).to include(event),
         "Event '#{event}' is used in Internal Events but does not have an event definition yet. Please define it."
+    end
+  end
+
+  describe '#validate' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:attribute, :value) do
+      :description          | 1
+      :category             | nil
+      :action               | nil
+      :label_description    | 1
+      :property_description | 1
+      :value_description    | 1
+      :extra_properties     | 'smth'
+      :product_group        | nil
+      :distributions        | %(be eb)
+      :tiers                | %(pro)
+    end
+
+    with_them do
+      before do
+        attributes[attribute] = value
+      end
+
+      it 'has validation errors' do
+        expect(described_class.new(path, attributes).validation_errors).not_to be_empty
+      end
     end
   end
 

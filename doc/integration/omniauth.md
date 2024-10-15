@@ -45,7 +45,6 @@ configure the settings that are common for all providers.
 
 | Linux package, Docker, and self-compiled | Helm chart | Description | Default value |
 | ----------------------------|------------|-------------|-----------|
-| `enabled`                   | `enabled`          | Allows the use of OmniAuth providers. | `false`, which means that signing in using your OmniAuth providers is not allowed, and the OmniAuth provider buttons are not visible in the user interface. |
 | `allow_single_sign_on`     | `allowSingleSignOn` | List of providers that automatically create a GitLab account. The provider names are available in the **OmniAuth provider name** column in the [supported providers table](#supported-providers). | `false`, which means that signing in using your OmniAuth provider account without a pre-existing GitLab account is not allowed. You must create a GitLab account first, and then connect it to your OmniAuth provider account through your profile settings. |
 | `auto_link_ldap_user`      | `autoLinkLdapUser` | Creates an LDAP identity in GitLab for users that are created through an OmniAuth provider. You can enable this setting if you have [LDAP integration](../administration/auth/ldap/index.md) enabled. Requires the `uid` of the user to be the same in both LDAP and the OmniAuth provider. | `false` |
 | `block_auto_created_users` | `blockAutoCreatedUsers` | Places automatically-created users in a [Pending approval](../administration/moderate_users.md#users-pending-approval) state (unable to sign in) until they are approved by an administrator. | `true`. If you set the value to `false`, make sure you define providers that you can control, like SAML or Google. Otherwise, any user on the internet can sign in to GitLab without an administrator's approval. |
@@ -258,7 +257,7 @@ By default, sign-in is enabled for all the OAuth providers configured in `config
 
 To enable or disable an OmniAuth provider:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Settings > General**.
 1. Expand **Sign-in restrictions**.
 1. In the **Enabled OAuth authentication sources** section, select or clear the checkbox for each provider you want to enable or disable.
@@ -546,7 +545,7 @@ your current provider for the same user.
 
 There are two methods to update the `extern_uid`:
 
-- Using the [Users API](../api/users.md#modify-a-user). Pass the provider name and the new `extern_uid`.
+- Using the [Users API](../api/users.md#user-modification). Pass the provider name and the new `extern_uid`.
 - Using the [Rails console](../administration/operations/rails_console.md):
 
   ```ruby

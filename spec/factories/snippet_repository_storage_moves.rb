@@ -2,7 +2,7 @@
 
 FactoryBot.define do
   factory :snippet_repository_storage_move, class: 'Snippets::RepositoryStorageMove' do
-    container { association(:project_snippet) }
+    container { association(:snippet) }
 
     source_storage_name { 'default' }
 

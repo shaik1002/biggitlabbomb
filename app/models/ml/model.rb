@@ -4,7 +4,6 @@ module Ml
   class Model < ApplicationRecord
     include Presentable
     include Sortable
-    include CacheMarkdownField
 
     EXPERIMENT_NAME_PREFIX = '[model]'
 
@@ -16,8 +15,6 @@ module Ml
       length: { maximum: 255 }
 
     validate :valid_default_experiment?
-    validates :description,
-      length: { maximum: 10_000 }
 
     has_one :default_experiment, class_name: 'Ml::Experiment'
     belongs_to :project
@@ -36,8 +33,6 @@ module Ml
     }
     scope :by_name, ->(name) { where("ml_models.name LIKE ?", "%#{sanitize_sql_like(name)}%") } # rubocop:disable GitlabSecurity/SqlInjection
     scope :by_project, ->(project) { where(project_id: project.id) }
-
-    cache_markdown_field :description
 
     def all_packages
       Packages::MlModel::Package.where(project: project, id: versions.select(:package_id))

@@ -2,7 +2,6 @@
 import { GlButton, GlDisclosureDropdown, GlLoadingIcon, GlTooltipDirective } from '@gitlab/ui';
 import { createAlert } from '~/alert';
 import { s__, __, sprintf } from '~/locale';
-import { reportToSentry } from '~/ci/utils';
 import { PIPELINE_MINI_GRAPH_POLL_INTERVAL } from '~/ci/pipeline_details/constants';
 import CiIcon from '~/vue_shared/components/ci_icon/ci_icon.vue';
 import { getQueryHeaders, toggleQueryPollingByVisibility } from '~/ci/pipeline_details/graph/utils';
@@ -75,9 +74,8 @@ export default {
       update(data) {
         return data?.ciPipelineStage?.jobs?.nodes || [];
       },
-      error(error) {
+      error() {
         createAlert({ message: this.$options.i18n.stageJobsFetchError });
-        reportToSentry(this.$options.name, error);
       },
     },
   },
@@ -113,7 +111,7 @@ export default {
 
 <template>
   <gl-disclosure-dropdown
-    data-testid="pipeline-mini-graph-dropdown"
+    data-testid="pipeline-stage"
     :aria-label="stageAriaLabel(stage.name)"
     @hidden="onHideDropdown"
     @shown="onShowDropdown"
@@ -121,9 +119,8 @@ export default {
     <template #toggle>
       <gl-button
         v-gl-tooltip.hover="dropdownTooltipTitle"
-        data-testid="pipeline-mini-graph-dropdown-toggle"
         :title="dropdownTooltipTitle"
-        class="!gl-rounded-full"
+        class="gl-rounded-full!"
         variant="link"
       >
         <ci-icon :status="stage.detailedStatus" :show-tooltip="false" :use-link="false" />
@@ -133,20 +130,20 @@ export default {
     <template #header>
       <div
         data-testid="pipeline-stage-dropdown-menu-title"
-        class="gl-flex gl-min-h-8 gl-items-center gl-border-b-1 gl-border-b-dropdown !gl-p-4 gl-text-sm gl-font-bold gl-leading-1 gl-border-b-solid"
+        class="gl-flex gl-items-center !gl-p-4 gl-min-h-8 gl-border-b-1 gl-border-b-solid gl-border-b-gray-200 gl-text-sm gl-font-bold gl-leading-1"
       >
         <span>{{ dropdownHeaderText }}</span>
       </div>
     </template>
 
-    <div v-if="isLoading" class="gl-flex gl-gap-3 gl-px-4 gl-py-3">
+    <div v-if="isLoading" class="gl-flex gl-gap-3 gl-py-3 gl-px-4">
       <gl-loading-icon size="sm" />
-      <span class="gl-leading-normal">{{ $options.i18n.loadingText }}</span>
+      <p class="gl-leading-normal">{{ $options.i18n.loadingText }}</p>
     </div>
     <ul
       v-else
-      class="gl-m-0 gl-overflow-y-auto gl-p-0"
-      data-testid="pipeline-mini-graph-dropdown-menu-list"
+      class="gl-overflow-y-auto gl-p-0"
+      data-testid="pipeline-stage-dropdown-menu-list"
       @click.stop
     >
       <job-item
@@ -160,7 +157,7 @@ export default {
     <template #footer>
       <div
         v-if="!isLoading && isMergeTrain"
-        class="gl-border-t gl-px-4 gl-py-3 gl-text-sm gl-text-secondary"
+        class="gl-text-sm gl-text-secondary gl-py-3 gl-px-4 gl-border-t"
         data-testid="merge-train-message"
       >
         {{ $options.i18n.mergeTrainMessage }}

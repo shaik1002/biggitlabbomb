@@ -1,4 +1,5 @@
 import { handleClusterError } from '~/kubernetes_dashboard/graphql/helpers/resolver_helpers';
+import { s__ } from '~/locale';
 
 describe('handleClusterError', () => {
   describe('helper argument includes a response data', () => {
@@ -30,8 +31,9 @@ describe('handleClusterError', () => {
             },
           },
         };
-        const expectedMessage =
-          'There was a problem fetching cluster information. Refresh the page and try again.';
+        const expectedMessage = s__(
+          'KubernetesDashboard|There was a problem fetching cluster information. Refresh the page and try again.',
+        );
 
         await expect(handleClusterError(error)).rejects.toThrow(expectedMessage);
       });

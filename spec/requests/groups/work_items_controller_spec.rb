@@ -48,9 +48,8 @@ RSpec.describe 'Group Level Work Items', feature_category: :team_planning do
 
   describe 'GET /groups/:group/-/work_items/:iid' do
     let_it_be(:work_item) { create(:work_item, :group_level, namespace: group) }
-    let(:iid) { work_item.iid }
     let(:work_items_path) do
-      url_for(controller: 'groups/work_items', action: :show, group_id: group.full_path, iid: iid)
+      url_for(controller: 'groups/work_items', action: :show, group_id: group.full_path, iid: work_item.iid)
     end
 
     before do
@@ -60,23 +59,10 @@ RSpec.describe 'Group Level Work Items', feature_category: :team_planning do
     context 'when the user can read the group' do
       let(:current_user) { developer }
 
-      it 'renders show' do
+      it 'renders index' do
         get work_items_path
 
         expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to render_template(:show)
-      end
-
-      context 'when the new page gets requested' do
-        let(:iid) { 'new' }
-
-        it 'renders show' do
-          get work_items_path
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(response).to render_template(:show)
-          expect(response.body).to have_pushed_frontend_feature_flags(namespaceLevelWorkItems: true)
-        end
       end
 
       it 'has correct metadata' do
@@ -95,16 +81,6 @@ RSpec.describe 'Group Level Work Items', feature_category: :team_planning do
           get work_items_path
 
           expect(response).to have_gitlab_http_status(:not_found)
-        end
-
-        context 'on new page' do
-          let(:iid) { 'new' }
-
-          it 'returns not found' do
-            get work_items_path
-
-            expect(response).to have_gitlab_http_status(:not_found)
-          end
         end
       end
     end

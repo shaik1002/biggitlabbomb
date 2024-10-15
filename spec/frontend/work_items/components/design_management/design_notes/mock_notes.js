@@ -22,7 +22,7 @@ export const mockAwardEmoji = {
   ],
 };
 
-export const DISCUSSION_1 = {
+const DISCUSSION_1 = {
   id: 'discussion-id-1',
   resolved: false,
   resolvable: true,

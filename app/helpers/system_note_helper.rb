@@ -15,7 +15,7 @@ module SystemNoteHelper
     'assignee' => 'user',
     'reviewer' => 'user',
     'title' => 'pencil',
-    'task' => 'todo-done',
+    'task' => 'task-done',
     'label' => 'label',
     'cross_reference' => 'comment-dots',
     'branch' => 'fork',

@@ -6,6 +6,7 @@ import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
+import { s__ } from '~/locale';
 import { WORKSPACE_GROUP, WORKSPACE_PROJECT } from '~/issues/constants';
 import ListPage from '~/packages_and_registries/package_registry/pages/list.vue';
 import PackageTitle from '~/packages_and_registries/package_registry/components/list/package_title.vue';
@@ -153,7 +154,7 @@ describe('PackagesListApp', () => {
     });
 
     describe('when settings path is provided', () => {
-      const label = 'Configure in settings';
+      const label = s__('PackageRegistry|Configure in settings');
 
       beforeEach(() => {
         mountComponent();

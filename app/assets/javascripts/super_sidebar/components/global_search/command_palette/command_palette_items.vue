@@ -5,11 +5,10 @@ import { GlDisclosureDropdownGroup, GlLoadingIcon } from '@gitlab/ui';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import axios from '~/lib/utils/axios_utils';
 import { DEFAULT_DEBOUNCE_AND_THROTTLE_MS } from '~/lib/utils/constants';
-import Tracking, { InternalEvents } from '~/tracking';
+import Tracking from '~/tracking';
 import { logError } from '~/lib/logger';
 import { getFormattedItem } from '../utils';
 
-import { EVENT_CLICK_PROJECT_SETTING_IN_COMMAND_PALETTE } from '../tracking_constants';
 import {
   COMMON_HANDLES,
   COMMAND_HANDLE,
@@ -28,8 +27,6 @@ import {
 import SearchItem from './search_item.vue';
 import { commandMapper, linksReducer, autocompleteQuery, fileMapper } from './utils';
 
-const trackingMixin = InternalEvents.mixin();
-
 export default {
   name: 'CommandPaletteItems',
   components: {
@@ -37,7 +34,7 @@ export default {
     GlLoadingIcon,
     SearchItem,
   },
-  mixins: [Tracking.mixin(), trackingMixin],
+  mixins: [Tracking.mixin()],
   inject: [
     'commandPaletteCommands',
     'commandPaletteLinks',
@@ -163,29 +160,19 @@ export default {
     this.$emit('updated');
   },
   methods: {
-    fetchSettings() {
-      let settingsUrl = null;
-      const projectId = this.searchContext.project?.id;
-      const groupId = this.searchContext.group?.id;
-
+    async fetchSettings() {
+      const projectId = this.searchContext.project.id;
       if (projectId) {
-        settingsUrl = `${this.settingsPath}?project_id=${projectId}`;
-      } else if (groupId) {
-        settingsUrl = `${this.settingsPath}?group_id=${groupId}`;
-      } else {
-        this.settings = [];
-        return;
+        await axios
+          .get(`${this.settingsPath}?project_id=${projectId}`)
+          .then((response) => {
+            this.settings = response.data;
+          })
+          .catch((e) => {
+            logError(e);
+            this.settings = [];
+          });
       }
-
-      axios
-        .get(settingsUrl)
-        .then((response) => {
-          this.settings = response.data;
-        })
-        .catch((e) => {
-          logError(e);
-          this.settings = [];
-        });
     },
     filterBySearchQuery(items, key = 'keywords') {
       return fuzzaldrinPlus.filter(items, this.searchQuery, { key });
@@ -264,19 +251,6 @@ export default {
         this.loading = false;
       }
     },
-    trackingCommands({ text: command }) {
-      if (!this.isCommandMode || !this.searchContext.project?.id) {
-        return;
-      }
-      const isSettings = this.settings.some((setting) => setting.text === command);
-      if (!isSettings) {
-        return;
-      }
-
-      this.trackEvent(EVENT_CLICK_PROJECT_SETTING_IN_COMMAND_PALETTE, {
-        label: command,
-      });
-    },
   },
 };
 </script>
@@ -292,7 +266,6 @@ export default {
         :group="group"
         bordered
         :class="{ '!gl-mt-0': index === 0 }"
-        @action="trackingCommands"
       >
         <template #list-item="{ item }">
           <search-item :item="item" :search-query="searchQuery" />

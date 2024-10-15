@@ -28,7 +28,7 @@ Expected batched background migration for the given configuration to be marked a
   }
 ```
 
-First, check if you have followed the [version-specific upgrade instructions for 14.2](https://docs.gitlab.com/17.3/ee/update/versions/gitlab_14_changes.html#1420).
+First, check if you have followed the [version-specific upgrade instructions for 14.2](../update/versions/gitlab_14_changes.md#1420).
 If you have, you can [manually finish the batched background migration](background_migrations.md#finish-a-failed-migration-manually)).
 If you haven't, choose one of the following methods:
 
@@ -174,23 +174,3 @@ end
 ```
 
 ::EndTabs
-
-## What do you do if your advanced search migrations are stuck?
-
-In GitLab 15.0, an advanced search migration named `DeleteOrphanedCommit` can be permanently stuck
-in a pending state across upgrades. This issue
-[is corrected in GitLab 15.1](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/89539).
-
-If you are a self-managed customer who uses GitLab 15.0 with advanced search, you will experience performance degradation.
-To clean up the migration, upgrade to 15.1 or later.
-
-For other advanced search migrations stuck in pending, see [how to retry a halted migration](../integration/advanced_search/elasticsearch.md#retry-a-halted-migration).
-
-If you upgrade GitLab before all pending advanced search migrations are completed, any pending migrations
-that have been removed in the new version cannot be executed or retried.
-In this case, you must
-[re-create your index from scratch](../integration/advanced_search/elasticsearch_troubleshooting.md#last-resort-to-recreate-an-index).
-
-## What do you do for the error `Elasticsearch version not compatible`
-
-Confirm that your version of Elasticsearch or OpenSearch is [compatible with your version of GitLab](../integration/advanced_search/elasticsearch.md#version-requirements).

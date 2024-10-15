@@ -11,8 +11,7 @@ class SemgrepResultProcessor
   ALLOWED_API_URLS = %w[https://gitlab.com/api/v4].freeze
 
   # Remove this when the feature is fully working
-  MESSAGE_FOOTER = <<~FOOTER
-
+  MESSAGE_FOOTER = <<-FOOTER
 
   <small>
   This AppSec automation is currently under testing.
@@ -20,6 +19,7 @@ class SemgrepResultProcessor
   For any detailed feedback, [add a comment here](https://gitlab.com/gitlab-com/gl-security/product-security/appsec/sast-custom-rules/-/issues/38).
   </small>
 
+  /label ~"appsec-sast::commented"
   FOOTER
 
   def initialize(report_path = "#{ENV['CI_PROJECT_DIR']}/gl-sast-report.json")

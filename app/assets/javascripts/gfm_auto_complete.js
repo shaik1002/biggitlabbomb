@@ -17,7 +17,7 @@ import {
 } from '~/work_items/constants';
 import AjaxCache from './lib/utils/ajax_cache';
 import { spriteIcon } from './lib/utils/common_utils';
-import { newDate } from './lib/utils/datetime_utility';
+import { parsePikadayDate } from './lib/utils/datetime_utility';
 import { unicodeLetters } from './lib/utils/regexp';
 import { renderVueComponentForLegacyJS } from './render_vue_component_for_legacy_js';
 
@@ -37,8 +37,6 @@ export const AT_WHO_ACTIVE_CLASS = 'at-who-active';
 export const CONTACT_STATE_ACTIVE = 'active';
 export const CONTACTS_ADD_COMMAND = '/add_contacts';
 export const CONTACTS_REMOVE_COMMAND = '/remove_contacts';
-
-const useIssueBackendFiltering = window.gon.features?.issueAutocompleteBackendFiltering;
 
 const busyBadge = memoize(
   () =>
@@ -138,7 +136,6 @@ export const highlighter = (li, query) => {
   }
   const escapedQuery = escapeRegExp(query);
   const regexp = new RegExp(`>\\s*([^<]*?)(${escapedQuery})([^<]*)\\s*<`, 'ig');
-  // eslint-disable-next-line max-params
   return li.replace(regexp, (str, $1, $2, $3) => `> ${$1}<strong>${$2}</strong>${$3} <`);
 };
 
@@ -222,7 +219,7 @@ class GfmAutoComplete {
           tpl += ' <small class="params"><%- params.join(" ") %></small>';
         }
         if (value.warning && value.icon && value.icon === 'confidential') {
-          tpl += `<small class="description gl-flex gl-items-center">${spriteIcon(
+          tpl += `<small class="description gl-display-flex gl-align-items-center">${spriteIcon(
             'eye-slash',
             's16 gl-mr-2',
           )}<em><%- warning %></em></small>`;
@@ -500,7 +497,6 @@ class GfmAutoComplete {
       alias: ISSUES_ALIAS,
       searchKey: 'search',
       maxLen: 100,
-      delay: useIssueBackendFiltering ? DEFAULT_DEBOUNCE_AND_THROTTLE_MS : null,
       displayTpl(value) {
         let tmpl = GfmAutoComplete.Loading.template;
         if (value.title != null) {
@@ -556,7 +552,7 @@ class GfmAutoComplete {
               return m;
             }
 
-            const dueDate = m.due_date ? newDate(m.due_date) : null;
+            const dueDate = m.due_date ? parsePikadayDate(m.due_date) : null;
             const expired = dueDate ? Date.now() > dueDate.getTime() : false;
 
             return {
@@ -991,7 +987,6 @@ class GfmAutoComplete {
     }
   }
 
-  // eslint-disable-next-line max-params
   loadData($input, at, data, { search } = {}) {
     this.isLoadingData[at] = false;
 
@@ -1017,11 +1012,6 @@ class GfmAutoComplete {
     this.loadData($input, at, ['loaded']);
 
     GfmAutoComplete.glEmojiTag = Emoji.glEmojiTag;
-  }
-
-  updateDataSources(newDataSources) {
-    this.dataSources = { ...this.dataSources, ...newDataSources };
-    this.clearCache();
   }
 
   clearCache() {
@@ -1093,10 +1083,6 @@ GfmAutoComplete.atTypeMap = {
 };
 
 GfmAutoComplete.typesWithBackendFiltering = ['vulnerabilities', 'members'];
-
-if (useIssueBackendFiltering) {
-  GfmAutoComplete.typesWithBackendFiltering.push('issues');
-}
 
 GfmAutoComplete.isTypeWithBackendFiltering = (type) =>
   GfmAutoComplete.typesWithBackendFiltering.includes(GfmAutoComplete.atTypeMap[type]);

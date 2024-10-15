@@ -7,7 +7,6 @@ query getModelVersion($modelId: MlModelID!, $modelVersionId: MlModelVersionID!) 
       version
       packageId
       description
-      descriptionHtml
       candidate {
         id
         name

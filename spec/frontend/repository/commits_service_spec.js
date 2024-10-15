@@ -30,7 +30,6 @@ describe('commits service', () => {
     path = '',
     ref = 'main',
     refType = 'heads',
-    // eslint-disable-next-line max-params
   ) => loadCommits(project, path, ref, offset, refType);
 
   it('calls axios get', async () => {

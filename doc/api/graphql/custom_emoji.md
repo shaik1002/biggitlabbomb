@@ -21,7 +21,7 @@ Parameters:
 
 | Attribute    | Type           | Required               | Description                                                               |
 | :----------- | :------------- | :--------------------- | :------------------------------------------------------------------------ |
-| `group_path` | integer/string | Yes | ID or [URL-encoded path of the top-level group](../rest/index.md#namespaced-paths) |
+| `group_path` | integer/string | Yes | ID or [URL-encoded path of the top-level group](../rest/index.md#namespaced-path-encoding) |
 | `name`       | string         | Yes | Name of the custom emoji.                                                 |
 | `file`       | string         | Yes | URL of the custom emoji image.                                            |
 
@@ -66,19 +66,19 @@ explorer. GraphiQL explorer is available for:
 
 1. Copy the following code excerpt:
 
-   ```graphql
-       query GetCustomEmoji {
-         group(fullPath: "gitlab-org") {
-           id
-           customEmoji {
-             nodes {
-               name,
-               url
-             }
-           }
-         }
-       }
-   ```
+  ```graphql
+      query GetCustomEmoji {
+        group(fullPath: "gitlab-org") {
+          id
+          customEmoji {
+            nodes {
+              name,
+              url
+            }
+          }
+        }
+      }
+  ```
 
 1. Open the [GraphiQL explorer tool](https://gitlab.com/-/graphql-explorer).
 1. Paste the `query` listed above into the left window of your GraphiQL explorer tool.

@@ -4,7 +4,7 @@ group: unassigned
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
-# Instance Kubernetes clusters (certificate-based) (deprecated)
+# Instance-level Kubernetes clusters (certificate-based) (deprecated)
 
 DETAILS:
 **Tier:** Free, Premium, Ultimate
@@ -14,23 +14,24 @@ WARNING:
 This feature was [deprecated](https://gitlab.com/groups/gitlab-org/configure/-/epics/8) in GitLab 14.5. To connect clusters to GitLab,
 use the [GitLab agent](../../clusters/agent/index.md).
 
-Similar to Kubernetes clusters for [projects](../../project/clusters/index.md)
-and [groups](../../group/clusters/index.md), instance Kubernetes clusters enable
-you to connect a Kubernetes cluster to the GitLab instance, and use the same cluster
-across multiple projects.
+Similar to [project-level](../../project/clusters/index.md)
+and [group-level](../../group/clusters/index.md) Kubernetes clusters,
+instance-level Kubernetes clusters allow you to connect a Kubernetes cluster to
+the GitLab instance, which enables you to use the same cluster across multiple
+projects.
 
-To view Kubernetes clusters for your instance:
+To view the instance level Kubernetes clusters:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Kubernetes**.
 
 ## Cluster precedence
 
 GitLab tries to match clusters in the following order:
 
-- Project clusters.
-- Group clusters.
-- Instance clusters.
+- Project-level clusters.
+- Group-level clusters.
+- Instance-level clusters.
 
 To be selected, the cluster must be enabled and
 match the [environment selector](../../../ci/environments/index.md#limit-the-environment-scope-of-a-cicd-variable).

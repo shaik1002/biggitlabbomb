@@ -31,7 +31,17 @@ module Gitlab
             pipeline.sha
           end
 
-          delegate :top_level_worktree_paths, :all_worktree_paths, to: :pipeline
+          def top_level_worktree_paths
+            strong_memoize(:top_level_worktree_paths) do
+              project.repository.tree(sha).blobs.map(&:path)
+            end
+          end
+
+          def all_worktree_paths
+            strong_memoize(:all_worktree_paths) do
+              project.repository.ls_files(sha)
+            end
+          end
 
           protected
 

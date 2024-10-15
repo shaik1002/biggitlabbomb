@@ -10,7 +10,6 @@ module BulkImports
     data_consistency :always # rubocop:disable SidekiqLoadBalancing/WorkerDataConsistency
     feature_category :importers
     sidekiq_options dead: false, retry: 6
-    sidekiq_options max_retries_after_interruption: 20
     worker_has_external_dependencies!
     worker_resource_boundary :memory
     idempotent!
@@ -109,10 +108,6 @@ module BulkImports
 
     def retry_batch(exception)
       batch.retry!
-
-      logger.error(log_attributes(
-        message: "Retrying pipeline", exception: { message: exception.message, class: exception.class.name }
-      ))
 
       re_enqueue(exception.retry_delay)
     end

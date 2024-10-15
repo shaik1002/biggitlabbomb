@@ -26,7 +26,6 @@ describe('Design item component', () => {
   const findEventIcon = () => findDesignEvent().findComponent(GlIcon);
   const findLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
   const findImage = () => wrapper.find('img');
-  const findImageSrc = () => findImage().element.src;
 
   function createComponent({
     notesCount = 0,
@@ -62,15 +61,7 @@ describe('Design item component', () => {
     it('image is not rendered', () => {
       createComponent();
 
-      const imageSrc = findImageSrc();
-
-      /**
-       * Test for <img> tag source handling.
-       * When running this spec in Vue 3 mode, the src attribute
-       * of the image element is null. While in browser `img.src` would
-       * be an empty string, in `jsdom` it can be `null`.
-       */
-      expect(imageSrc === '' || imageSrc === null).toBe(true);
+      expect(findImage().attributes('src')).toBe('');
     });
   });
 
@@ -104,7 +95,7 @@ describe('Design item component', () => {
       });
 
       it('renders an image', () => {
-        expect(findImageSrc()).toBe('http://via.placeholder.com/300');
+        expect(image.attributes('src')).toBe('http://via.placeholder.com/300');
         expect(image.isVisible()).toBe(true);
       });
 
@@ -138,7 +129,7 @@ describe('Design item component', () => {
         });
 
         it('renders imageV432x230 image', () => {
-          expect(findImageSrc()).toBe(mockSrc);
+          expect(findImage().attributes('src')).toBe(mockSrc);
         });
       });
     });

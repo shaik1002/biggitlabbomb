@@ -333,7 +333,6 @@ RSpec.describe MergeRequestsHelper, feature_category: :code_review_workflow do
 
     it 'returns the correct data' do
       expected_data = {
-        autocomplete_award_emojis_path: autocomplete_award_emojis_path,
         full_path: project.full_path,
         is_public_visibility_restricted: 'false',
         is_signed_in: 'true',
@@ -345,14 +344,10 @@ RSpec.describe MergeRequestsHelper, feature_category: :code_review_workflow do
         issuable_count: 5,
         email: current_user.notification_email_or_default,
         export_csv_path: '/csv-url',
-        rss_url: '/rss-url',
-        releases_endpoint: project_releases_path(project, format: :json),
-        can_bulk_update: 'true',
-        environment_names_path: unfoldered_environment_names_project_path(project, format: :json),
-        default_branch: project.default_branch
+        rss_url: '/rss-url'
       }
 
-      expect(subject).to include(expected_data)
+      expect(subject).to eq(expected_data)
     end
   end
 
@@ -397,39 +392,6 @@ RSpec.describe MergeRequestsHelper, feature_category: :code_review_workflow do
       expected_data = { identity_verification_required: 'false' }
 
       expect(subject).to include(expected_data)
-    end
-  end
-
-  describe '#diffs_stream_url' do
-    let_it_be(:offset) { 5 }
-    let(:merge_request) { create(:merge_request_with_diffs) }
-    let(:id) { merge_request.iid }
-    let(:project_id) { merge_request.project.to_param }
-    let(:namespace_id) { merge_request.project.namespace.to_param }
-    let(:diff_view) { :inline }
-
-    subject { diffs_stream_url(merge_request, offset, diff_view) }
-
-    it 'returns diffs stream url with offset' do
-      url = "/#{namespace_id}/#{project_id}/-/merge_requests/#{id}/diffs_stream?offset=#{offset}&view=inline"
-      expect(subject).to eq(url)
-    end
-
-    context 'when view is set to parallel' do
-      let_it_be(:diff_view) { :parallel }
-
-      it 'returns diffs stream url with parallel view' do
-        url = "/#{namespace_id}/#{project_id}/-/merge_requests/#{id}/diffs_stream?offset=#{offset}&view=parallel"
-        expect(subject).to eq(url)
-      end
-    end
-
-    context 'when offset is greater than the number of diffs' do
-      let_it_be(:offset) { 9999 }
-
-      it 'returns nil' do
-        expect(subject).to eq(nil)
-      end
     end
   end
 end

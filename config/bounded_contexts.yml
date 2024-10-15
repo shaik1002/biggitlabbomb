@@ -39,18 +39,13 @@ domains:
       - value_stream_management
       - devops_reports
       - dora_metrics
-      - product_analytics
+      - product_analytics_data_management
 
   AntiAbuse:
     description:
     feature_categories:
       - insider_threat
       - instance_resiliency
-
-  AppConfig:
-    description: Top-level configuration at the GitLab instance level
-    feature_categories:
-      - settings
 
   AuditEvents:
     description:
@@ -84,6 +79,7 @@ domains:
     feature_categories:
       - continuous_integration
       - pipeline_composition
+      - secrets_management
       - fleet_visibility
       - job_artifacts
       - pipeline_reports
@@ -116,6 +112,11 @@ domains:
     feature_categories:
       - container_registry
 
+  DependencyManagement:
+    description:
+    feature_categories:
+      - dependency_management
+
   DependencyProxy:
     description: Dependency Proxy for container images.
     feature_categories:
@@ -141,12 +142,11 @@ domains:
       - geo_replication
 
   GitlabSubscriptions:
-    description: Managing subscription related code for GitLab.com and Self-Managed
+    description:
     feature_categories:
       - seat_cost_management
       - plan_provisioning
       - subscription_management
-      - add-on_provisioning
 
   Import:
     description:
@@ -211,7 +211,8 @@ domains:
   Observability:
     description:
     feature_categories:
-      - observability
+      - metrics
+      - error_tracking
       - incident_management
 
   Onboarding:
@@ -241,11 +242,6 @@ domains:
     feature_categories:
       - groups_and_projects
 
-  ResourceAccessTokens:
-    description: Managing groups and projects access tokens
-    feature_categories:
-      - system_access
-
   Releases:
     description:
     feature_categories:
@@ -255,7 +251,7 @@ domains:
   RemoteDevelopment:
     description:
     feature_categories:
-      - workspaces
+      - remote_development
 
   Repositories:
     description: Git repositories and workflow including Gitaly client
@@ -274,11 +270,6 @@ domains:
     feature_categories:
       - global_search
 
-  SecretsManagement:
-    description: Management of native and external secrets
-    feature_categories:
-      - secrets_management
-
   Security:
     description: Manage and execute security scanners and policies
     feature_categories:
@@ -287,7 +278,6 @@ domains:
       - security_policy_management
       - software_composition_analysis
       - static_application_security_testing
-      - secret_detection
 
   ServiceDesk:
     description:
@@ -299,11 +289,6 @@ domains:
     feature_categories:
       - service_ping
 
-  Snippets:
-    description: Snippets to store and share bits of code and text with other users.
-    feature_categories:
-      - source_code_management
-
   StatusPage:
     description:
     feature_categories:
@@ -313,11 +298,6 @@ domains:
     description:
     feature_categories:
       - infrastructure_as_code
-
-  Todos:
-    description: User todos management
-    feature_categories:
-      - notifications
 
   Users:
     description: Behavior related to user lifecycle and profile settings. Feature specific behavior must not go here.

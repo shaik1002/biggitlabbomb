@@ -32,18 +32,7 @@ module ViteHelper
   def universal_stylesheet_link_tag(path, **options)
     return stylesheet_link_tag(path, **options) unless vite_enabled?
 
-    if Rails.env.test? && config.asset_host
-      # Link directly to Vite server when running tests because for unit and integration tests, there
-      # won't be a Rails server to proxy these requests to the Vite server.
-      options[:host] = URI::HTTP.build(host: ViteRuby.config.host, port: ViteRuby.config.port).to_s
-    end
-
-    options[:extname] = false
-
-    stylesheet_link_tag(
-      ViteRuby.instance.manifest.path_for("stylesheets/styles.#{path}.scss", type: :stylesheet),
-      **options
-    )
+    vite_stylesheet_tag("stylesheets/styles.#{path}.scss", **options)
   end
 
   def universal_path_to_stylesheet(path, **options)

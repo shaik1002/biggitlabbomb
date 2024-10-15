@@ -96,7 +96,7 @@ module Gitlab
         end
       end
 
-      puts Rainbow("\nOK").green
+      puts "\nOK".color(:green)
     ensure
       SeedFu.quiet = false
       ActionMailer::Base.perform_deliveries = old_perform_deliveries

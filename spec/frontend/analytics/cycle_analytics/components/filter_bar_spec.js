@@ -210,7 +210,6 @@ describe('Filter bar', () => {
       ],
       ['rootUser', 'secondaryUser'],
     ],
-    // eslint-disable-next-line max-params
   ])('with a %s updates the %s url parameter', (stateKey, paramKey, payload, result) => {
     beforeEach(() => {
       commonUtils.historyPushState = jest.fn();

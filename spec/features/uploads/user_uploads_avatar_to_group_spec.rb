@@ -16,7 +16,7 @@ RSpec.describe 'User uploads avatar to group', feature_category: :user_profile d
       visible: false
     )
 
-    within_testid('general-settings') do
+    page.within('.gs-general') do
       click_button 'Save changes'
     end
 

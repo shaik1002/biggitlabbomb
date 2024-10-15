@@ -167,9 +167,7 @@ RSpec.describe Ci::Partitionable, feature_category: :continuous_integration do
       ci_model.include(described_class)
     end
 
-    subject(:scope_values) { ci_model.in_partition(value, **options).where_values_hash }
-
-    let(:options) { {} }
+    subject(:scope_values) { ci_model.in_partition(value).where_values_hash }
 
     context 'with integer parameters' do
       let(:value) { 101 }
@@ -186,15 +184,6 @@ RSpec.describe Ci::Partitionable, feature_category: :continuous_integration do
         expect(scope_values).to include('partition_id' => 101)
       end
     end
-
-    context 'with given partition_foreign_key' do
-      let(:options) { { partition_foreign_key: :auto_canceled_by_partition_id } }
-      let(:value) { build_stubbed(:ci_build, auto_canceled_by_partition_id: 102) }
-
-      it 'adds a partition_id filter' do
-        expect(scope_values).to include('partition_id' => 102)
-      end
-    end
   end
 
   describe '.registered_models' do
@@ -209,7 +198,6 @@ RSpec.describe Ci::Partitionable, feature_category: :continuous_integration do
         Ci::BuildSource
         Ci::JobAnnotation
         Ci::JobArtifact
-        Ci::PipelineConfig
         Ci::PipelineVariable
         Ci::RunnerManagerBuild
         Ci::Stage

@@ -20,11 +20,6 @@ module Mutations
         required: true,
         description: 'Name of the environment.'
 
-      argument :description,
-        GraphQL::Types::String,
-        required: false,
-        description: 'Description of the environment.'
-
       argument :external_url,
         GraphQL::Types::String,
         required: false,

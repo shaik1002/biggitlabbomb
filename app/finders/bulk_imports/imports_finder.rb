@@ -9,8 +9,7 @@ module BulkImports
 
     def execute
       imports = filter_by_status(user.bulk_imports)
-      imports = sort(imports)
-      include_configuration(imports)
+      sort(imports)
     end
 
     private
@@ -27,12 +26,6 @@ module BulkImports
       return imports unless @params[:sort]
 
       imports.order_by_created_at(@params[:sort])
-    end
-
-    def include_configuration(imports)
-      return imports unless @params[:include_configuration]
-
-      imports.with_configuration
     end
   end
 end

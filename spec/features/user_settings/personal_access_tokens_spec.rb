@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'User Settings > Personal access tokens', :js, feature_category: :system_access do
+RSpec.describe 'User Settings > Personal Access Tokens', :js, feature_category: :system_access do
   include Spec::Support::Helpers::ModalHelpers
   include Features::AccessTokenHelpers
 
@@ -19,7 +19,6 @@ RSpec.describe 'User Settings > Personal access tokens', :js, feature_category: 
   describe "token creation" do
     it "allows creation of a personal access token" do
       name = 'My PAT'
-      create(:organization, :default)
 
       visit user_settings_personal_access_tokens_path
 
@@ -154,6 +153,7 @@ RSpec.describe 'User Settings > Personal access tokens', :js, feature_category: 
 
     visit user_settings_personal_access_tokens_path({ name: name, scopes: scopes })
 
+    click_button 'Add new token'
     expect(page).to have_field("Token name", with: name)
     expect(find("#personal_access_token_scopes_api")).to be_checked
     expect(find("#personal_access_token_scopes_read_user")).to be_checked

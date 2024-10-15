@@ -21,14 +21,13 @@ class UsersController < ApplicationController
   skip_before_action :authenticate_user!
   prepend_before_action(only: [:show]) { authenticate_sessionless_user!(:rss) }
   before_action :user, except: [:exists]
-  before_action :set_legacy_data
   before_action :authorize_read_user_profile!, only: [
     :calendar, :calendar_activities, :groups, :projects, :contributed, :starred, :snippets, :followers, :following
   ]
   before_action only: [:exists] do
     check_rate_limit!(:username_exists, scope: request.ip)
   end
-  before_action only: [:show, :activity, :groups, :projects, :contributed, :starred, :snippets, :followers, :following] do
+  before_action only: [:show] do
     push_frontend_feature_flag(:profile_tabs_vue, current_user)
   end
 
@@ -186,7 +185,7 @@ class UsersController < ApplicationController
 
   def exists
     if Gitlab::CurrentSettings.signup_enabled? || current_user
-      render json: { exists: Namespace.username_reserved?(params[:username]) }
+      render json: { exists: !!Namespace.without_project_namespaces.find_by_path_or_name(params[:username]) }
     else
       render json: { error: _('You must be authenticated to access this path.') }, status: :unauthorized
     end
@@ -229,9 +228,7 @@ class UsersController < ApplicationController
   end
 
   def contributed_projects
-    ContributedProjectsFinder.new(
-      user: user, current_user: current_user, params: { sort: 'latest_activity_desc' }
-    ).execute
+    ContributedProjectsFinder.new(user).execute(current_user, order_by: 'latest_activity_desc')
   end
 
   def starred_projects
@@ -309,12 +306,6 @@ class UsersController < ApplicationController
       # don't display projects marked for deletion
       not_aimed_for_deletion: true
     }
-  end
-
-  def set_legacy_data
-    controller_action = params[:action]
-    @action = controller_action.gsub('show', 'overview')
-    @endpoint = request.path
   end
 end
 

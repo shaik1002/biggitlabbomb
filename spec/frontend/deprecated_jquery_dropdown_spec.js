@@ -29,7 +29,6 @@ describe('deprecatedJQueryDropdown', () => {
 
   const test = {};
 
-  // eslint-disable-next-line max-params
   const navigateWithKeys = (direction, steps, cb, i) => {
     i = i || 0;
     if (!i) direction = direction.toUpperCase();
@@ -68,7 +67,7 @@ describe('deprecatedJQueryDropdown', () => {
 
   beforeEach(() => {
     setHTMLFixture(htmlDeprecatedJqueryDropdown);
-    test.dropdownContainerElement = $('.dropdown');
+    test.dropdownContainerElement = $('.dropdown.inline');
     test.$dropdownMenuElement = $('.dropdown-menu', test.dropdownContainerElement);
     test.projectsData = JSON.parse(JSON.stringify(mockProjects));
   });

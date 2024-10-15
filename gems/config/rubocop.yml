@@ -59,10 +59,6 @@ Gitlab/DocUrl:
   Enabled: false
 
 # This cop doesn't make sense in the context of gems
-Gitlab/EeOnlyClass:
-  Enabled: false
-
-# This cop doesn't make sense in the context of gems
 Gitlab/NamespacedClass:
   Enabled: false
 
@@ -143,7 +139,3 @@ Rails/StrongParams:
   Enabled: true
   Include:
     - '**/controllers/**/*'
-
-# This cop doesn't make sense in the context of gems
-Gitlab/NoFindInWorkers:
-  Enabled: false

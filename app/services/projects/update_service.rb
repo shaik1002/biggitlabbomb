@@ -39,10 +39,10 @@ module Projects
       else
         update_failed!
       end
+    rescue ValidationError => e
+      error(e.message)
     rescue ApiError => e
       error(e.message, status: :api_error)
-    rescue ValidationError, Gitlab::Pages::UniqueDomainGenerationFailure => e
-      error(e.message)
     end
 
     def run_auto_devops_pipeline?
@@ -129,7 +129,7 @@ module Projects
     end
 
     def ambiguous_head_documentation_link
-      url = Rails.application.routes.url_helpers.help_page_path('user/project/repository/branches/index.md', anchor: 'error-ambiguous-head-branch-exists')
+      url = Rails.application.routes.url_helpers.help_page_path('user/project/repository/branches/index', anchor: 'error-ambiguous-head-branch-exists')
 
       format('<a href="%{url}" target="_blank" rel="noopener noreferrer">', url: url)
     end
@@ -142,9 +142,6 @@ module Projects
     def after_default_branch_change(previous_default_branch)
       # overridden by EE module
     end
-
-    # overridden by EE module
-    def audit_topic_change(from:); end
 
     # overridden by EE module
     def remove_unallowed_params
@@ -176,8 +173,6 @@ module Projects
       end
 
       update_pending_builds if runners_settings_toggled?
-
-      audit_topic_change(from: @previous_topics)
 
       publish_events
     end
@@ -251,9 +246,6 @@ module Projects
     end
 
     def build_topics
-      # Used in EE. Can't be cached in override due to Gitlab/ModuleWithInstanceVariables cop
-      @previous_topics = project.topic_list
-
       topics = params.delete(:topics)
       tag_list = params.delete(:tag_list)
       topic_list = topics || tag_list

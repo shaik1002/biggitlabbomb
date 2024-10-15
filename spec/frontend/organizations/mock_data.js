@@ -21,10 +21,3 @@ export const pageInfoEmpty = {
   startCursor: null,
   __typename: 'PageInfo',
 };
-
-export const defaultOrganization = {
-  id: 1,
-  name: 'Default',
-  web_url: '/-/organizations/default',
-  avatar_url: null,
-};

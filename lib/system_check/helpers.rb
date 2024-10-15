@@ -7,14 +7,14 @@ module SystemCheck
 
     # Display a message telling to fix and rerun the checks
     def fix_and_rerun
-      $stdout.puts Rainbow('  Please fix the error above and rerun the checks.').red
+      $stdout.puts '  Please fix the error above and rerun the checks.'.color(:red)
     end
 
     # Display a formatted list of references (documentation or links) where to find more information
     #
     # @param [Array<String>] sources one or more references (documentation or links)
     def for_more_information(*sources)
-      $stdout.puts Rainbow('  For more information see:').blue
+      $stdout.puts '  For more information see:'.color(:blue)
       sources.each do |source|
         $stdout.puts "  #{source}"
       end
@@ -37,13 +37,13 @@ module SystemCheck
     # @deprecated This will no longer be used when all checks were executed using SystemCheck
     def finished_checking(component)
       $stdout.puts ''
-      $stdout.puts "Checking #{Rainbow(component).yellow} ... #{Rainbow('Finished').green}"
+      $stdout.puts "Checking #{component.color(:yellow)} ... #{'Finished'.color(:green)}"
       $stdout.puts ''
     end
 
     # @deprecated This will no longer be used when all checks were executed using SystemCheck
     def start_checking(component)
-      $stdout.puts "Checking #{Rainbow(component).yellow} ..."
+      $stdout.puts "Checking #{component.color(:yellow)} ..."
       $stdout.puts ''
     end
 
@@ -53,7 +53,7 @@ module SystemCheck
     def try_fixing_it(*steps)
       steps = steps.shift if steps.first.is_a?(Array)
 
-      $stdout.puts Rainbow('  Try fixing it:').blue
+      $stdout.puts '  Try fixing it:'.color(:blue)
       steps.each do |step|
         $stdout.puts "  #{step}"
       end
@@ -61,9 +61,9 @@ module SystemCheck
 
     def sanitized_message(project)
       if should_sanitize?
-        "#{Rainbow(project.namespace_id.to_s).yellow}/#{Rainbow(project.id.to_s).yellow} ... "
+        "#{project.namespace_id.to_s.color(:yellow)}/#{project.id.to_s.color(:yellow)} ... "
       else
-        "#{Rainbow(project.full_name).yellow} ... "
+        "#{project.full_name.color(:yellow)} ... "
       end
     end
 

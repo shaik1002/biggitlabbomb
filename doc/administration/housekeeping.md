@@ -80,7 +80,7 @@ frequently.
 
 You can change how often Gitaly is asked to optimize a repository.
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Settings > Repository**.
 1. Expand **Repository maintenance**.
 1. In the **Housekeeping** section, configure the housekeeping options.
@@ -177,7 +177,7 @@ staggered across Gitaly nodes so the scheduled housekeeping is not running
 simultaneously on multiple nodes.
 
 If a scheduled housekeeping run reaches the `duration` specified, the running tasks are
-gracefully canceled. On subsequent scheduled housekeeping runs, Gitaly randomly shuffles
+gracefully cancelled. On subsequent scheduled housekeeping runs, Gitaly randomly shuffles
 the repository list to process.
 
 The following snippet enables daily background repository maintenance starting at

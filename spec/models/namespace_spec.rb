@@ -29,6 +29,7 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
     it { is_expected.to have_one(:catalog_verified_namespace) }
     it { is_expected.to have_many :custom_emoji }
     it { is_expected.to have_one :package_setting_relation }
+    it { is_expected.to have_one :onboarding_progress }
     it { is_expected.to have_one :admin_note }
     it { is_expected.to have_many :pending_builds }
     it { is_expected.to have_one :namespace_route }
@@ -89,7 +90,6 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
     it { is_expected.to validate_presence_of(:path) }
     it { is_expected.to validate_length_of(:path).is_at_most(255) }
     it { is_expected.to validate_presence_of(:owner) }
-    it { is_expected.to validate_presence_of(:organization) }
     it { is_expected.to validate_numericality_of(:max_artifacts_size).only_integer.is_greater_than(0) }
 
     context 'validating the parent of a namespace' do
@@ -252,93 +252,6 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
         end
       end
     end
-
-    describe '#parent_organization_match' do
-      let_it_be(:group) { create(:group, :with_organization) }
-
-      subject(:namespace) { build(:group, parent: group, organization: organization) }
-
-      context "when namespace belongs to parent's organization" do
-        let(:organization) { group.organization }
-
-        it { is_expected.to be_valid }
-      end
-
-      context "when namespace does not belong to parent's organization" do
-        let(:organization) { build(:organization) }
-
-        it 'is not valid and adds an error message' do
-          expect(namespace).not_to be_valid
-          expect(namespace.errors[:organization_id]).to include("must match the parent organization's ID")
-        end
-      end
-    end
-  end
-
-  describe 'default values' do
-    context 'organzation_id' do
-      context 'when feature flag namespace_model_default_org is enabled' do
-        context 'and database has a default value' do
-          before do
-            described_class.connection.execute("ALTER TABLE namespaces ALTER COLUMN organization_id SET DEFAULT 100")
-            described_class.reset_column_information
-          end
-
-          after do
-            described_class.connection.execute("ALTER TABLE namespaces ALTER COLUMN organization_id SET DEFAULT 1")
-            described_class.reset_column_information
-          end
-
-          it 'uses value from model' do
-            expect(described_class.new.organization_id).to eq(1)
-          end
-        end
-
-        context 'and database has no default value' do
-          before do
-            described_class.connection.execute("ALTER TABLE namespaces ALTER COLUMN organization_id DROP DEFAULT")
-            described_class.reset_column_information
-          end
-
-          after do
-            described_class.connection.execute("ALTER TABLE namespaces ALTER COLUMN organization_id SET DEFAULT 1")
-            described_class.reset_column_information
-          end
-
-          it 'uses value from model' do
-            expect(described_class.new.organization_id).to eq(1)
-          end
-        end
-      end
-
-      context 'when feature flag namespace_model_default_org is disabled' do
-        before do
-          stub_feature_flags(namespace_model_default_org: false)
-        end
-
-        context 'and database has a default value' do
-          before do
-            described_class.connection.execute("ALTER TABLE namespaces ALTER COLUMN organization_id SET DEFAULT 100")
-            described_class.reset_column_information
-          end
-
-          it 'uses database value' do
-            expect(described_class.new.organization_id).to eq(100)
-          end
-        end
-
-        context 'and database has no default value' do
-          before do
-            described_class.connection.execute("ALTER TABLE namespaces ALTER COLUMN organization_id DROP DEFAULT")
-            described_class.reset_column_information
-          end
-
-          it 'is nil' do
-            expect(described_class.new.organization_id).to be_nil
-          end
-        end
-      end
-    end
   end
 
   describe "ReferencePatternValidation" do
@@ -399,7 +312,7 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
       ref(:group)             | true  | nil                                       | lazy { group.full_path }
       ref(:group)             | false | ref(:group)                               | nil
       ref(:group)             | true  | ref(:group)                               | lazy { group.full_path }
-      ref(:group)             | false | ref(:parent)                              | lazy { group.full_path }
+      ref(:group)             | false | ref(:parent)                              | lazy { group.path }
       ref(:group)             | true  | ref(:parent)                              | lazy { group.full_path }
       ref(:group)             | false | ref(:project)                             | lazy { group.path }
       ref(:group)             | true  | ref(:project)                             | lazy { group.full_path }
@@ -546,14 +459,6 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
         expect(described_class.by_root_id(namespace2.id)).to match_array([namespace2, namespace2sub])
         expect(described_class.by_root_id(namespace1sub.id)).to be_empty
         expect(described_class.by_root_id(nil)).to be_empty
-      end
-    end
-
-    describe '.by_not_in_root_id' do
-      it 'returns correct namespaces' do
-        expect(described_class.by_not_in_root_id(namespace1.id)).to contain_exactly(namespace, namespace2, namespace2sub)
-        expect(described_class.by_not_in_root_id(namespace2.id)).to contain_exactly(namespace, namespace1, namespace1sub)
-        expect(described_class.by_not_in_root_id(namespace1sub.id)).to match_array(described_class.all)
       end
     end
 
@@ -787,26 +692,6 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
     it { is_expected.to include_module(Namespaces::Traversal::Linear) }
     it { is_expected.to include_module(Namespaces::Traversal::RecursiveScopes) }
     it { is_expected.to include_module(Namespaces::Traversal::LinearScopes) }
-  end
-
-  context 'when feature flag require_organization is disabled', :request_store do
-    before do
-      stub_feature_flags(require_organization: false)
-    end
-
-    it 'does not require organization' do
-      namespace.organization = nil
-
-      expect(namespace.valid?).to eq(true)
-    end
-  end
-
-  context 'when feature flag require_organization is enabled', :request_store do
-    it 'does require organization' do
-      namespace.organization = nil
-
-      expect(namespace.valid?).to eq(false)
-    end
   end
 
   describe '#traversal_ids' do
@@ -1514,47 +1399,6 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
     end
   end
 
-  describe ".username_reserved?" do
-    subject(:username_reserved) { described_class.username_reserved?(username) }
-
-    let(:username) { 'capyabra' }
-
-    let_it_be(:user) { create(:user, name: 'capybara') }
-    let_it_be(:group) { create(:group, name: 'capybara-group') }
-    let_it_be(:subgroup) { create(:group, parent: group, name: 'capybara-subgroup') }
-    let_it_be(:project) { create(:project, group: group, name: 'capybara-project') }
-
-    context 'when given a project name' do
-      let(:username) { 'capyabra-project' }
-
-      it { is_expected.to eq(false) }
-    end
-
-    context 'when given a sub-group name' do
-      let(:username) { 'capybara-subgroup' }
-
-      it { is_expected.to eq(false) }
-    end
-
-    context 'when given a top-level group' do
-      let(:username) { 'capybara-group' }
-
-      it { is_expected.to eq(true) }
-    end
-
-    context 'when given an existing username' do
-      let(:username) { 'capybara' }
-
-      it { is_expected.to eq(true) }
-    end
-
-    context 'when given a username with varying capitalization' do
-      let(:username) { 'CaPyBaRa' }
-
-      it { is_expected.to eq(true) }
-    end
-  end
-
   describe "#default_branch_protection" do
     let(:namespace) { create(:namespace) }
     let(:default_branch_protection) { nil }
@@ -1929,7 +1773,7 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
 
   describe '#root_ancestor' do
     context 'with persisted root group' do
-      let_it_be(:root_group) { create(:group) }
+      let!(:root_group) { create(:group) }
 
       it 'returns root_ancestor for root group without a query' do
         expect { root_group.root_ancestor }.not_to exceed_query_limit(0)
@@ -1951,19 +1795,6 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
         expect(nested_group.root_ancestor).to eq(root_group)
         expect(deep_nested_group.root_ancestor).to eq(root_group)
         expect(very_deep_nested_group.root_ancestor).to eq(root_group)
-      end
-
-      context 'when nested group references parent by id' do
-        let_it_be(:nested_group) { create(:group, parent: root_group) }
-        let_it_be(:deep_nested_group) { Group.new(attributes_for(:group, parent_id: nested_group.id)) }
-
-        it 'performs a single query' do
-          expect { deep_nested_group.root_ancestor }.not_to exceed_query_limit(1)
-        end
-
-        it 'returns the root ancestor' do
-          expect(deep_nested_group.root_ancestor).to eq root_group
-        end
       end
     end
 
@@ -2642,20 +2473,6 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
     it_behaves_like 'cleanup by a loose foreign key' do
       let_it_be(:parent) { create(:organization) }
       let_it_be(:model) { create(:namespace, organization: parent) }
-    end
-  end
-
-  describe '#web_url' do
-    let_it_be(:group) { create(:group) }
-
-    it 'returns the canonical URL' do
-      expect(group.web_url).to include("groups/#{group.name}")
-    end
-
-    context 'nested group' do
-      let(:nested_group) { create(:group, :nested) }
-
-      it { expect(nested_group.web_url).to include("groups/#{nested_group.full_path}") }
     end
   end
 end

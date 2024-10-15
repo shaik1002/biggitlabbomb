@@ -29,11 +29,14 @@ fragment WorkItemMetadataWidgets on WorkItemWidget {
       }
     }
   }
-  ... on WorkItemWidgetLinkedItems {
-    linkedItems {
+  ... on WorkItemWidgetNotifications {
+    subscribed
+  }
+
+  ... on WorkItemWidgetCurrentUserTodos {
+    currentUserTodos(state: pending) {
       nodes {
-        linkId
-        linkType
+        id
       }
     }
   }

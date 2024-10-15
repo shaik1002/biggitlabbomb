@@ -3,24 +3,16 @@ import { convertToSnakeCase } from '~/lib/utils/text_utility';
 
 export default class FormErrorTracker {
   constructor() {
-    this.elements = [
-      ...document.querySelectorAll('.js-track-error'),
-      // https://gitlab.com/gitlab-org/gitlab/-/issues/494329 to revert this additional
-      // class when blocker is implemented
-      ...Array.from(document.querySelectorAll('.js-track-error-gl-select')).map(
-        (select) => select.firstElementChild,
-      ),
-    ];
-
+    this.elements = document.querySelectorAll('.js-track-error');
     this.trackErrorOnChange = FormErrorTracker.trackErrorOnChange.bind(this);
     this.trackErrorOnEmptyField = FormErrorTracker.trackErrorOnEmptyField.bind(this);
 
     this.elements.forEach((element) => {
-      // on item change
+      // on input change
       element.addEventListener('input', this.trackErrorOnChange);
 
-      // on invalid item - adding separately to track submit click without
-      // changing any field
+      // on invalid input - adding separately to track submit click without
+      // changing any input field
       element.addEventListener('invalid', this.trackErrorOnEmptyField);
     });
   }
@@ -47,7 +39,7 @@ export default class FormErrorTracker {
   static trackErrorOnEmptyField(event) {
     const inputDomElement = event.target;
 
-    if (inputDomElement.value === '' || !inputDomElement.checked) {
+    if (inputDomElement.value === '') {
       const message = FormErrorTracker.inputErrorMessage(inputDomElement);
 
       Tracking.event(undefined, FormErrorTracker.action(inputDomElement), {
@@ -77,11 +69,6 @@ export default class FormErrorTracker {
   }
 
   static label(element, message) {
-    if (element.type === 'radio') {
-      const labelText = element.closest('.form-group').querySelector('label').textContent;
-      return `missing_${convertToSnakeCase(labelText)}`;
-    }
-
     return `${element.id}_${message}`;
   }
 }

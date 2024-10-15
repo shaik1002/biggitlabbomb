@@ -17,7 +17,6 @@ export default {
     WebIdeLink: () => import('ee_else_ce/vue_shared/components/web_ide_link.vue'),
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     currentUser: {
       query: userInfoQuery,
       error() {
@@ -76,11 +75,6 @@ export default {
       required: false,
       default: false,
     },
-    showWebIdeForkSuggestion: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     projectPath: {
       type: String,
       required: false,
@@ -95,11 +89,6 @@ export default {
       type: Boolean,
       required: false,
       default: false,
-    },
-    showBlobSize: {
-      type: Boolean,
-      required: false,
-      default: true,
     },
   },
   data() {
@@ -141,16 +130,16 @@ export default {
 </script>
 <template>
   <div class="js-file-title file-title-flex-parent">
-    <div class="gl-flex">
+    <div class="gl-display-flex">
       <table-of-contents class="gl-pr-2" />
-      <blob-filepath :blob="blob" :show-path="showPath" :show-blob-size="showBlobSize">
+      <blob-filepath :blob="blob" :show-path="showPath">
         <template #filepath-prepend>
           <slot name="prepend"></slot>
         </template>
       </blob-filepath>
     </div>
 
-    <div class="file-actions gl-flex gl-flex-wrap">
+    <div class="gl-display-flex gl-flex-wrap file-actions">
       <viewer-switcher
         v-if="!hideViewerSwitcher"
         v-model="viewer"
@@ -167,7 +156,6 @@ export default {
         :edit-url="blob.editBlobPath"
         :web-ide-url="blob.ideEditPath"
         :needs-to-fork="showForkSuggestion"
-        :needs-to-fork-with-web-ide="showWebIdeForkSuggestion"
         :show-pipeline-editor-button="Boolean(blob.pipelineEditorPath)"
         :pipeline-editor-url="blob.pipelineEditorPath"
         :gitpod-url="blob.gitpodBlobUrl"

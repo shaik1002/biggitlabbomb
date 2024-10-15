@@ -29,11 +29,7 @@ module QA
 
         it(
           'successfully imports project',
-          testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/383351',
-          quarantine: {
-            issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/478101',
-            type: :flaky
-          }
+          testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/383351'
         ) do
           expect_project_import_finished_successfully
 
@@ -44,11 +40,7 @@ module QA
       context 'with uninitialized project' do
         it(
           'successfully imports project',
-          testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347610',
-          quarantine: {
-            issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/478099',
-            type: :flaky
-          }
+          testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/347610'
         ) do
           expect_project_import_finished_successfully
 

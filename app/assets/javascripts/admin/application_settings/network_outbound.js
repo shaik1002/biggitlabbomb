@@ -11,9 +11,9 @@ export default () => {
     const denyAllRequestsWarning = document.querySelector('.js-deny-all-requests-warning');
 
     if (denyAll) {
-      denyAllRequestsWarning.classList.remove('gl-hidden');
+      denyAllRequestsWarning.classList.remove('gl-display-none');
     } else {
-      denyAllRequestsWarning.classList.add('gl-hidden');
+      denyAllRequestsWarning.classList.add('gl-display-none');
     }
 
     allowLocalRequests.forEach((allowLocalRequest) => {

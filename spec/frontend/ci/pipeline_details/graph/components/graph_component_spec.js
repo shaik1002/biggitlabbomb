@@ -206,7 +206,7 @@ describe('graph component', () => {
       const titleClasses = [
         'gl-font-bold',
         'gl-pipeline-job-width',
-        'gl-truncate',
+        'gl-text-truncate',
         'gl-leading-36',
         'gl-pl-4',
         '-gl-mb-2',
@@ -219,11 +219,11 @@ describe('graph component', () => {
       const jobClasses = [
         'gl-p-3',
         'gl-border-0',
-        '!gl-rounded-base',
+        'gl-rounded',
         'hover:gl-bg-strong',
         'focus:gl-bg-strong',
-        'hover:gl-text-gray-900',
-        'focus:gl-text-gray-900',
+        'gl-hover-text-gray-900',
+        'gl-focus-text-gray-900',
       ];
 
       expect(findJobItem().props('cssClassJobName')).toEqual(expect.arrayContaining(jobClasses));

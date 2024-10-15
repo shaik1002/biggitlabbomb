@@ -8,25 +8,11 @@
     "created_by_user_id"
   ],
   "properties": {
-    "id": {
-      "type": "integer"
-    },
-    "name": {
-      "type": "string"
-    },
-    "config_project": {
-      "$ref": "project_identity.json"
-    },
-    "created_at": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "created_by_user_id": {
-      "type": "integer"
-    },
-    "is_receptive": {
-      "type": "boolean"
-    }
+    "id": { "type": "integer" },
+    "name": { "type": "string" },
+    "config_project": { "$ref": "project_identity.json" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "created_by_user_id": { "type": "integer" }
   },
   "additionalProperties": false
 }

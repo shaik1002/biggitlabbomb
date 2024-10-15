@@ -1,4 +1,3 @@
-import { domToBlob } from 'modern-screenshot';
 import vector from './vector';
 import { readFileAsDataURL } from './file_utility';
 
@@ -8,7 +7,7 @@ const UNIT_METERS = 1;
 const PNG_DEFAULT_PPI = 72;
 
 const stringToUInt32 = (str) => {
-  const buffer = str.split('').map((char) => char.charCodeAt(0));
+  const buffer = Buffer.from(str, 'binary');
   // eslint-disable-next-line no-bitwise
   return (buffer[0] << 24) + (buffer[1] << 16) + (buffer[2] << 8) + buffer[3];
 };
@@ -65,7 +64,3 @@ export const getRetinaDimensions = async (pngFile) => {
     return null;
   }
 };
-
-export function domElementToBlob(domElement) {
-  return domToBlob(domElement);
-}

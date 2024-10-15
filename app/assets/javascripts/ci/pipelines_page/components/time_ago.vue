@@ -17,8 +17,8 @@ export default {
     fontSize: {
       type: String,
       required: false,
-      default: 'gl-text-sm',
-      validator: (fontSize) => ['gl-text-sm', 'gl-font-md'].includes(fontSize),
+      default: 'gl-font-sm',
+      validator: (fontSize) => ['gl-font-sm', 'gl-font-md'].includes(fontSize),
     },
   },
   computed: {
@@ -35,10 +35,13 @@ export default {
 };
 </script>
 <template>
-  <div class="gl-flex gl-flex-col gl-items-end lg:gl-items-start" :class="fontSize">
+  <div
+    class="gl-display-flex gl-flex-direction-column gl-align-items-flex-end gl-lg-align-items-flex-start"
+    :class="fontSize"
+  >
     <p
       v-if="duration"
-      class="gl-m-0 gl-inline-flex gl-items-center gl-whitespace-nowrap gl-text-secondary"
+      class="gl-inline-flex gl-align-items-center gl-text-secondary gl-m-0 gl-whitespace-nowrap"
       data-testid="duration"
     >
       <gl-icon name="timer" class="gl-mr-2" :size="12" />
@@ -47,7 +50,7 @@ export default {
 
     <p
       v-if="finishedTime"
-      class="gl-m-0 gl-inline-flex gl-items-center gl-whitespace-nowrap gl-text-secondary"
+      class="gl-inline-flex gl-align-items-center gl-text-secondary gl-m-0 gl-whitespace-nowrap"
       data-testid="finished-at"
     >
       <gl-icon name="calendar" class="gl-mr-2" :size="12" data-testid="calendar-icon" />

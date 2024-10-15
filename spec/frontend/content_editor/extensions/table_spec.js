@@ -1,5 +1,4 @@
 import { builders } from 'prosemirror-test-builder';
-import createEventHub from '~/helpers/event_hub_factory';
 import Bold from '~/content_editor/extensions/bold';
 import BulletList from '~/content_editor/extensions/bullet_list';
 import ListItem from '~/content_editor/extensions/list_item';
@@ -8,8 +7,6 @@ import TableCell from '~/content_editor/extensions/table_cell';
 import TableRow from '~/content_editor/extensions/table_row';
 import TableHeader from '~/content_editor/extensions/table_header';
 import { createTestEditor } from '../test_utils';
-
-const eventHub = createEventHub();
 
 describe('content_editor/extensions/table', () => {
   let tiptapEditor;
@@ -24,15 +21,7 @@ describe('content_editor/extensions/table', () => {
 
   beforeEach(() => {
     tiptapEditor = createTestEditor({
-      extensions: [
-        Table.configure({ eventHub }),
-        TableCell,
-        TableRow,
-        TableHeader,
-        BulletList,
-        Bold,
-        ListItem,
-      ],
+      extensions: [Table, TableCell, TableRow, TableHeader, BulletList, Bold, ListItem],
     });
 
     ({
@@ -58,16 +47,13 @@ describe('content_editor/extensions/table', () => {
   it('triggers a warning (just once) if the table is markdown, but the changes in the document will render an HTML table instead', () => {
     tiptapEditor.commands.setContent(initialDoc.toJSON());
 
-    eventHub.$on('alert', mockAlert);
+    tiptapEditor.on('alert', mockAlert);
 
     tiptapEditor.commands.setTextSelection({ from: 20, to: 22 });
     tiptapEditor.commands.toggleBulletList();
 
     jest.advanceTimersByTime(1001);
-    expect(mockAlert).toHaveBeenCalledWith({
-      message: expect.any(String),
-      variant: 'warning',
-    });
+    expect(mockAlert).toHaveBeenCalled();
 
     mockAlert.mockReset();
 

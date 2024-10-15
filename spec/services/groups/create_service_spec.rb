@@ -4,13 +4,8 @@ require 'spec_helper'
 
 RSpec.describe Groups::CreateService, '#execute', feature_category: :groups_and_projects do
   let_it_be(:user, reload: true) { create(:user) }
-  let_it_be(:organization) { create(:organization, users: [user]) }
   let(:current_user) { user }
-  let(:group_params) do
-    { path: 'group_path', visibility_level: Gitlab::VisibilityLevel::PUBLIC,
-      organization_id: organization.id }.merge(extra_params)
-  end
-
+  let(:group_params) { { path: 'group_path', visibility_level: Gitlab::VisibilityLevel::PUBLIC }.merge(extra_params) }
   let(:extra_params) { {} }
   let(:created_group) { response[:group] }
 
@@ -225,11 +220,11 @@ RSpec.describe Groups::CreateService, '#execute', feature_category: :groups_and_
       end
     end
 
-    context 'when organization is not set by params' do
+    context 'when organization is not set by params', :with_current_organization do
       context 'and the parent of the group has an organization' do
         let_it_be(:parent_group) { create(:group, organization: other_organization) }
 
-        let(:group_params) { { path: 'with-parent', parent_id: parent_group.id } }
+        let(:extra_params) { { parent_id: parent_group.id } }
 
         it 'creates group with the parent group organization' do
           expect(created_group.organization).to eq(other_organization)
@@ -237,18 +232,26 @@ RSpec.describe Groups::CreateService, '#execute', feature_category: :groups_and_
       end
     end
 
-    context 'when organization_id is not specified' do
+    context 'when organization_id is set to nil' do
       let_it_be(:default_organization) { create(:organization, :default) }
-      let(:group_params) { { path: 'group_path' } }
+      let(:extra_params) { { organization_id: nil } }
 
       it 'creates group in default organization' do
         expect(created_group.organization).to eq(default_organization)
       end
     end
+
+    context 'when organization is not set at all' do
+      it 'creates group without an organization' do
+        expect(created_group.organization).to eq(nil)
+        # let db default happen even if the organization record itself doesn't exist
+        expect(created_group.organization_id).not_to be_nil
+      end
+    end
   end
 
   context 'for a subgroup' do
-    let_it_be(:group) { create(:group, organization: organization) }
+    let_it_be(:group) { create(:group) }
     let(:extra_params) { { parent_id: group.id } }
 
     context 'as group owner' do
@@ -334,7 +337,7 @@ RSpec.describe Groups::CreateService, '#execute', feature_category: :groups_and_
 
     context 'when there is a group-level exclusion' do
       let(:extra_params) { { parent_id: group.id } }
-      let_it_be(:group) { create(:group, organization: organization) { |g| g.add_owner(user) } }
+      let_it_be(:group) { create(:group) { |g| g.add_owner(user) } }
       let_it_be(:group_integration) do
         create(:beyond_identity_integration, group: group, instance: false, active: false)
       end
@@ -360,7 +363,7 @@ RSpec.describe Groups::CreateService, '#execute', feature_category: :groups_and_
 
     context 'with an active group-level integration' do
       let(:extra_params) { { parent_id: group.id } }
-      let_it_be(:group) { create(:group, organization: organization) { |g| g.add_owner(user) } }
+      let_it_be(:group) { create(:group) { |g| g.add_owner(user) } }
       let_it_be(:group_integration) do
         create(:prometheus_integration, :group, group: group, api_url: 'https://prometheus.group.com/')
       end

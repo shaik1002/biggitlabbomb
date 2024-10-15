@@ -1,6 +1,5 @@
 <script>
 import { GlFormGroup, GlFormInput } from '@gitlab/ui';
-import { localeDateFormat, isValidDate } from '~/lib/utils/datetime_utility';
 import {
   NEXT_CLEANUP_LABEL,
   NOT_SCHEDULED_POLICY_TEXT,
@@ -25,11 +24,7 @@ export default {
   },
   computed: {
     parsedValue() {
-      const date = new Date(this.value);
-      const isValid = isValidDate(date);
-      return this.enabled && isValid
-        ? localeDateFormat.asDateTimeFull.format(date)
-        : NOT_SCHEDULED_POLICY_TEXT;
+      return this.enabled ? this.value : NOT_SCHEDULED_POLICY_TEXT;
     },
   },
   i18n: {
@@ -46,7 +41,7 @@ export default {
   >
     <gl-form-input
       id="expiration-policy-info-text"
-      class="!gl-pl-0"
+      class="gl-pl-0!"
       plaintext
       :value="parsedValue"
     />

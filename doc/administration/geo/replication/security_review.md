@@ -235,7 +235,7 @@ from [owasp.org](https://owasp.org/).
 
 - Git repositories and files, tracking information related to them, and the GitLab database contents.
 
-### What data should be encrypted? What key management requirements are defined?
+### What data is or may need to be encrypted and what key management requirements have been defined?
 
 - Neither **primary** sites or **secondary** sites encrypt Git repository or file system data at
   rest. A subset of database columns are encrypted at rest using the `db_otp_key`.
@@ -272,7 +272,7 @@ from [owasp.org](https://owasp.org/).
 
 ### What user authorization requirements have been defined?
 
-- **Secondary** sites must only be able to *read* data. They cannot mutate data on the **primary** site.
+- **Secondary** sites must only be able to *read* data. They are not currently able to mutate data on the **primary** site.
 
 ### What session management requirements have been defined?
 

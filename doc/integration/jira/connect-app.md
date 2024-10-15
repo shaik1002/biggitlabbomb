@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -65,7 +65,6 @@ You can now [configure the GitLab for Jira Cloud app](#configure-the-gitlab-for-
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For an overview, see
 [Configure the GitLab for Jira Cloud app from the Atlassian Marketplace](https://youtu.be/SwR-g1s1zTo).
-<!-- Video published on 2020-02-01 -->
 
 ## Configure the GitLab for Jira Cloud app
 
@@ -93,58 +92,40 @@ To configure the GitLab for Jira Cloud app:
 1. Optional. To link a self-managed GitLab instance with Jira, select **Change GitLab version**.
    1. Select all checkboxes, then select **Next**.
    1. Enter your **GitLab instance URL**, then select **Save**.
-1. Select **Sign in to GitLab**.
-
-   NOTE:
-   [Enterprise users](../../user/enterprise_user/index.md) with [disabled password authentication for their group](../../user/group/saml_sso/index.md#disable-password-authentication-for-enterprise-users)
-   must first sign in to GitLab with their group's single sign-on URL.
-
+1. Select **Sign in to GitLab**, then enter your username and password. The integration doesn't support single-sign on such as SAML during configuration.
 1. Select **Authorize**. A list of groups is now visible.
 1. Select **Link groups**.
 1. To link to a group, select **Link**.
 
 <!-- markdownlint-enable MD044 -->
 
-After you link to a GitLab group:
-
-- Data is synced to Jira for all projects in that group. The initial data sync happens in batches of 20 projects per minute.
-  For groups with many projects, the data sync for some projects is delayed.
-- A GitLab for Jira Cloud app integration is automatically enabled for the group, and all subgroups or projects in that group.
-  The integration allows you to [configure Jira Service Management](#configure-jira-service-management).
+After you link to a GitLab group, data is synced to Jira for all projects in that group.
+The initial data sync happens in batches of 20 projects per minute.
+For groups with many projects, the data sync for some projects is delayed.
 
 ## Configure Jira Service Management
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/460663) in GitLab 17.2 [with a flag](../../administration/feature_flags.md) named `enable_jira_connect_configuration`. Disabled by default.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/467117) in GitLab 17.4. Feature flag `enable_jira_connect_configuration` removed.
+
+FLAG:
+The availability of this feature is controlled by a feature flag.
+For more information, see the history.
+This feature is available for testing, but not ready for production use.
 
 Prerequisites:
 
-- The GitLab for Jira Cloud app must be [installed](#install-the-gitlab-for-jira-cloud-app).
-- A [GitLab group to be linked](#configure-the-gitlab-for-jira-cloud-app) in the GitLab for Jira Cloud app configuration.
+- The GitLab for Jira app must be installed.
 
 You can connect GitLab to your IT service project to track your deployments.
 
-Configuration happens in GitLab, in the GitLab for
-Jira Cloud app integration. The integration is enabled for a group, its subgroups, and projects in GitLab after a [GitLab group has been linked](#configure-the-gitlab-for-jira-cloud-app).
-
-Enabling and disabling the GitLab for Jira Cloud app integration happens entirely automatically through group linking,
-and not through the GitLab integrations form or API.
-
-In Jira Service Management:
-
-1. In your service project, go to **Project settings > Change management**.
+1. In Jira Service Management, in your service project, go to **Project settings > Change management**.
 1. Select **Connect Pipeline > GitLab**, then copy the **Service ID** at the end of the setup flow.
-
-In GitLab:
-
-1. On the left sidebar, select **Search or go to** and find your project.
+1. In GitLab, on the left sidebar, select **Search or go to** and find your project.
 1. Select **Settings > Integrations**.
-1. Select **GitLab for Jira Cloud app**. If the integration is disabled, first [link a GitLab group](#configure-the-gitlab-for-jira-cloud-app)
-   which enables the GitLab for Jira Cloud app integration for the group, its subgroups, and projects.
-1. In the **Service ID** field, enter the service ID that you want to map into this project. To use multiple service IDs,
-   add a comma between each service ID.
+1. Select **GitLab for Jira Cloud app**.
+1. In the **Service ID** field, enter the service ID that you want to map into this project. To use multiple service IDs, add a comma between each service ID.
 
-You can map up to 100 services.
+You can map up to 100 services to each GitLab project.
 
 For more information about deployment tracking in Jira, see [Set up deployment tracking](https://support.atlassian.com/jira-service-management-cloud/docs/set-up-deployment-tracking/).
 
@@ -197,7 +178,7 @@ When working with the GitLab for Jira Cloud app, you might encounter the followi
 
 For administrator documentation, see [GitLab for Jira Cloud app administration](../../administration/settings/jira_cloud_app_troubleshooting.md).
 
-### Error: `Failed to link group`
+### Error when connecting the app
 
 When you connect the GitLab for Jira Cloud app, you might get this error:
 

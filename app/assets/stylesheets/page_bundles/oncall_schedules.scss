@@ -9,7 +9,6 @@
 }
 
 .invalid-dropdown {
-  // stylelint-disable-next-line gitlab/no-gl-class
   .gl-button.gl-dropdown-toggle {
     @include inset-border-1-red-500;
 
@@ -20,9 +19,12 @@
 }
 
 .rotations-modal {
-  // stylelint-disable-next-line gitlab/no-gl-class
   .gl-card {
     min-width: 75%;
+  }
+
+  &.gl-modal .modal-md {
+    max-width: 640px;
   }
 }
 
@@ -55,7 +57,7 @@ $column-right-gradient: linear-gradient(to right, $gradient-dark-gray 0%, $gradi
 
     &:first-of-type {
       .week-item-sublabel .sublabel-value:nth-of-type(7) {
-        @apply gl-border-r;
+        @include gl-border-r;
       }
     }
   }

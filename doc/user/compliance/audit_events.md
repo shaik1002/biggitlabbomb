@@ -45,15 +45,6 @@ Users with the [Auditor access level](../../administration/auditor_users.md) can
 
 Audit events can be viewed at the group, project, instance, and sign-in level. Each level has different audit events which it logs.
 
-### Sign-in audit events
-
-Successful sign-in events are the only audit events available at all tiers. To see successful sign-in events:
-
-1. On the left sidebar, select your avatar.
-1. Select **Edit profile > Authentication log**.
-
-After upgrading to a paid tier, you can also see successful sign-in events on audit event pages.
-
 ### Group audit events
 
 DETAILS:
@@ -80,6 +71,19 @@ DETAILS:
 
 Project audit events can also be accessed using the [project audit events API](../../api/audit_events.md#project-audit-events). Project audit event queries `created_after` and `created_before` parameters are limited to a maximum 30 day difference between the dates.
 
+### Sign-in audit events
+
+DETAILS:
+**Tier:** Free, Premium, Ultimate
+**Offering:** GitLab.com, Self-managed, GitLab Dedicated
+
+Successful sign-in events are the only audit events available at all tiers. To see successful sign-in events:
+
+1. On the left sidebar, select your avatar.
+1. Select **Edit profile > Authentication log**.
+
+After upgrading to a paid tier, you can also see successful sign-in events on audit event pages.
+
 ## Time zones
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/242014) in GitLab 15.7, GitLab UI shows dates and times in the user's local time zone instead of UTC.
@@ -95,10 +99,10 @@ The time zone used for audit events depends on where you view them:
 
 If you don't see the event you want in any of the epics, you can either:
 
-- Use the **Audit event proposal** issue template to
+- Use the **Audit Event Proposal** issue template to
   [create an issue](https://gitlab.com/gitlab-org/gitlab/-/issues/new?issuable_template=Audit%20Event%20Proposal) to request it.
 - [Add it yourself](../../development/audit_event_guide/index.md).
 
 ## Administer topics
 
-Instance administrators can [administer audit events](../../administration/audit_event_reports.md) from the **Admin** area.
+Instance administrators can [administer audit events](../../administration/audit_event_reports.md) from the Admin area.

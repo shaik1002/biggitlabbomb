@@ -1,7 +1,6 @@
 <script>
-import { GlSprintf, GlBadge, GlResizeObserverDirective } from '@gitlab/ui';
+import { GlSprintf, GlBadge, GlResizeObserverDirective, GlTooltipDirective } from '@gitlab/ui';
 import { GlBreakpointInstance } from '@gitlab/ui/dist/utils';
-import ProtectedBadge from '~/vue_shared/components/badges/protected_badge.vue';
 import { __, s__, sprintf } from '~/locale';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import PackageTags from '~/packages_and_registries/shared/components/package_tags.vue';
@@ -21,10 +20,10 @@ export default {
     MetadataItem,
     GlBadge,
     TimeAgoTooltip,
-    ProtectedBadge,
   },
   directives: {
     GlResizeObserver: GlResizeObserverDirective,
+    GlTooltip: GlTooltipDirective,
   },
   mixins: [glFeatureFlagsMixin()],
   inject: ['isGroupPage'],
@@ -90,7 +89,10 @@ export default {
     :avatar="packageIcon"
   >
     <template #sub-header>
-      <div data-testid="sub-header" class="gl-flex gl-flex-wrap gl-items-baseline gl-gap-2">
+      <div
+        data-testid="sub-header"
+        class="gl-display-flex gl-flex-wrap gl-gap-2 gl-align-items-baseline"
+      >
         <gl-sprintf :message="$options.i18n.packageInfo">
           <template #version>{{ packageEntity.version }}</template>
 
@@ -119,10 +121,14 @@ export default {
           </gl-badge>
         </template>
 
-        <protected-badge
+        <gl-badge
           v-if="showBadgeProtected"
-          :tooltip-text="$options.i18n.badgeProtectedTooltipText"
-        />
+          v-gl-tooltip="{ title: $options.i18n.badgeProtectedTooltipText }"
+          icon-size="sm"
+          variant="neutral"
+        >
+          {{ __('protected') }}
+        </gl-badge>
       </div>
     </template>
 

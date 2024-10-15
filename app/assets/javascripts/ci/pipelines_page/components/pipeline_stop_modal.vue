@@ -73,7 +73,6 @@ export default {
     :title="modalTitle"
     :action-primary="primaryProps"
     :action-cancel="$options.cancelProps"
-    data-testid="pipeline-stop-modal"
     @primary="emitSubmit($event)"
   >
     <p>

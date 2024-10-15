@@ -20,9 +20,9 @@ class Snippet < ApplicationRecord
   include CreatedAtFilterable
   include EachBatch
   include Import::HasImportSource
-  include SafelyChangeColumnDefault
+  include IgnorableColumns
 
-  columns_changing_default :organization_id
+  ignore_column :imported, remove_with: '17.2', remove_after: '2024-07-22'
 
   MAX_FILE_COUNT = 10
 

@@ -24,7 +24,6 @@ import axios from '~/lib/utils/axios_utils';
 import { HTTP_STATUS_OK } from '~/lib/utils/http_status';
 import { mockTracking } from 'helpers/tracking_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import SearchItem from '~/super_sidebar/components/global_search/command_palette/search_item.vue';
 import { COMMANDS, LINKS, USERS, FILES, SETTINGS } from './mock_data';
 
 const links = LINKS.reduce(linksReducer, []);
@@ -48,7 +47,6 @@ describe('CommandPaletteItems', () => {
       stubs: {
         GlDisclosureDropdownGroup,
         GlDisclosureDropdownItem,
-        SearchItem,
       },
       provide: {
         commandPaletteCommands: COMMANDS,
@@ -71,7 +69,6 @@ describe('CommandPaletteItems', () => {
   beforeEach(() => {
     mockAxios = new MockAdapter(axios);
     mockAxios.onGet('/settings?project_id=1').reply(HTTP_STATUS_OK, SETTINGS);
-    mockAxios.onGet('/settings?group_id=2').reply(HTTP_STATUS_OK, SETTINGS);
   });
 
   describe('Commands and links', () => {
@@ -234,7 +231,7 @@ describe('CommandPaletteItems', () => {
 
   describe('Settings search', () => {
     describe('when in a project', () => {
-      it('fetches project settings when entering command mode', async () => {
+      it('fetches settings when entering command mode', async () => {
         jest.spyOn(axios, 'get');
 
         createComponent({ handle: COMMAND_HANDLE });
@@ -268,30 +265,14 @@ describe('CommandPaletteItems', () => {
       });
     });
 
-    describe('when in a group', () => {
-      it('fetches group settings when entering command mode', async () => {
-        jest.spyOn(axios, 'get');
-
-        createComponent(
-          { handle: COMMAND_HANDLE },
-          {},
-          { searchContext: { project: { id: null }, group: { id: 2 } } },
-        );
-        await waitForPromises();
-
-        expect(axios.get).toHaveBeenCalledTimes(1);
-        expect(axios.get).toHaveBeenCalledWith('/settings?group_id=2');
-      });
-    });
-
-    describe('when not in a project or group', () => {
+    describe('when not in a project', () => {
       it('does not fetch settings when entering command mode', () => {
         jest.spyOn(axios, 'get');
 
         createComponent(
           { handle: COMMAND_HANDLE },
           {},
-          { searchContext: { project: { id: null }, group: { id: null } } },
+          { searchContext: { project: { id: null }, group: { id: 2 } } },
         );
         expect(axios.get).not.toHaveBeenCalled();
       });
@@ -326,25 +307,6 @@ describe('CommandPaletteItems', () => {
       expect(trackingSpy).toHaveBeenCalledWith(undefined, 'activate_command_palette', {
         label,
       });
-    });
-
-    it('tracks command settings', async () => {
-      createComponent({ handle: COMMAND_HANDLE });
-      await waitForPromises();
-
-      wrapper.setProps({ searchQuery: 'ava' });
-      await waitForPromises();
-
-      trackingSpy.mockClear();
-      findGroups().at(0).vm.$emit('action', { text: 'Avatar' });
-
-      expect(trackingSpy).toHaveBeenCalledWith(
-        undefined,
-        'click_project_setting_in_command_palette',
-        expect.objectContaining({
-          label: 'Avatar',
-        }),
-      );
     });
   });
 });

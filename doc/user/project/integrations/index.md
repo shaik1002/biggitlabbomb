@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -15,23 +15,23 @@ This page contains user documentation for project integrations. For administrato
 
 You can integrate with external applications to add functionality to GitLab.
 
-You can view and manage integrations for the:
+You can view and manage integrations at the:
 
-- [Instance](../../../administration/settings/project_integration_management.md#manage-instance-level-default-settings-for-a-project-integration) (self-managed GitLab)
-- [Group](#manage-group-default-settings-for-a-project-integration)
+- [Instance level](../../../administration/settings/project_integration_management.md#manage-instance-level-default-settings-for-a-project-integration) (self-managed GitLab)
+- [Group level](#manage-group-level-default-settings-for-a-project-integration)
 
 You can use:
 
-- [Instance or group default settings for a project integration](#use-instance-or-group-default-settings-for-a-project-integration)
+- [Instance-level or group-level default settings for a project integration](#use-instance-level-or-group-level-default-settings-for-a-project-integration)
 - [Custom settings for a project or group integration](#use-custom-settings-for-a-project-or-group-integration)
 
-## Manage group default settings for a project integration
+## Manage group-level default settings for a project integration
 
 Prerequisites:
 
 - You must have at least the Maintainer role for the group.
 
-To manage the group default settings for a project integration:
+To manage group-level default settings for a project integration:
 
 1. On the left sidebar, select **Search or go to** and find your group.
 1. Select **Settings > Integrations**.
@@ -42,10 +42,11 @@ To manage the group default settings for a project integration:
 WARNING:
 This may affect all or most of the subgroups and projects belonging to the group. Review the details below.
 
-If this is the first time you are setting up group settings for an integration:
+If this is the first time you are setting up group-level settings for an integration:
 
 - The integration is enabled for all subgroups and projects belonging to the group that don't already have
-  this integration configured, if you have the **Enable integration** toggle turned on in the group settings.
+  this integration configured, if you have the **Enable integration** toggle turned on in the group-level
+  settings.
 - Subgroups and projects that already have the integration configured are not affected, but can choose to use
   the inherited settings at any time.
 
@@ -54,39 +55,39 @@ When you make further changes to the group defaults:
 - They are immediately applied to all subgroups and projects belonging to the group that have the integration
   set to use default settings.
 - They are immediately applied to newer subgroups and projects, even those created after you last saved defaults for the
-  integration. If your group default setting has the **Enable integration** toggle turned on,
+  integration. If your group-level default setting has the **Enable integration** toggle turned on,
   the integration is automatically enabled for all such subgroups and projects.
 - Subgroups and projects with custom settings selected for the integration are not immediately affected and
   may choose to use the latest defaults at any time.
 
-If [instance settings](../../../administration/settings/project_integration_management.md#manage-instance-level-default-settings-for-a-project-integration)
+If [instance-level settings](../../../administration/settings/project_integration_management.md#manage-instance-level-default-settings-for-a-project-integration)
 have also been configured for the same integration, projects in the group inherit settings from the group.
 
 Only the entire settings for an integration can be inherited. Per-field inheritance
 is proposed in [epic 2137](https://gitlab.com/groups/gitlab-org/-/epics/2137).
 
-### Remove a group default setting
+### Remove a group-level default setting
 
 Prerequisites:
 
 - You must have at least the Maintainer role for the group.
 
-To remove a group default setting:
+To remove a group-level default setting:
 
 1. On the left sidebar, select **Search or go to** and find your group.
 1. Select **Settings > Integrations**.
 1. Select an integration.
 1. Select **Reset** and confirm.
 
-Resetting a group default setting removes integrations that use default settings and belong to a project or subgroup of the group.
+Resetting a group-level default setting removes integrations that use default settings and belong to a project or subgroup of the group.
 
-## Use instance or group default settings for a project integration
+## Use instance-level or group-level default settings for a project integration
 
 Prerequisites:
 
 - You must have at least the Maintainer role for the project.
 
-To use instance or group default settings for a project integration:
+To use instance-level or group-level default settings for a project integration:
 
 1. On the left sidebar, select **Search or go to** and find your project.
 1. Select **Settings > Integrations**.
@@ -116,19 +117,16 @@ To use custom settings for a project or group integration:
 
 | Integration                                                                 | Description                                                           | Integration hooks      |
 |-----------------------------------------------------------------------------|-----------------------------------------------------------------------|------------------------|
-| [Apple App Store Connect](apple_app_store.md)                               | Use GitLab to build and release an app in the Apple App Store.        | **{dotted-circle}** No |
 | [Asana](asana.md)                                                           | Add commit messages as comments to Asana tasks.                       | **{dotted-circle}** No |
 | Assembla                                                                    | Manage projects with Assembla.                                        | **{dotted-circle}** No |
 | [Atlassian Bamboo](bamboo.md)                                               | Run CI/CD pipelines with Atlassian Bamboo.                            | **{check-circle}** Yes |
 | [Bugzilla](bugzilla.md)                                                     | Use Bugzilla as an issue tracker.                                     | **{dotted-circle}** No |
-| [Beyond Identity](beyond_identity.md)                                       | Verify that GPG keys are authorized by Beyond Identity Authenticator. | **{dotted-circle}** No |
 | Buildkite                                                                   | Run CI/CD pipelines with Buildkite.                                   | **{check-circle}** Yes |
 | Campfire                                                                    | Connect Campfire to chat.                                             | **{dotted-circle}** No |
 | [ClickUp](clickup.md)                                                       | Use ClickUp as an issue tracker.                                      | **{dotted-circle}** No |
 | [Confluence Workspace](../../../api/integrations.md#confluence-workspace)   | Use Confluence Workspace as an internal wiki.                         | **{dotted-circle}** No |
 | [Custom issue tracker](custom_issue_tracker.md)                             | Use a custom issue tracker.                                           | **{dotted-circle}** No |
 | [Datadog](../../../integration/datadog.md)                                  | Trace your GitLab pipelines with Datadog.                             | **{check-circle}** Yes |
-| [Diffblue Cover](../../../integration/diffblue_cover.md)                    | Automatically write comprehensive, human-like Java unit tests.        | **{check-circle}** No |
 | [Discord Notifications](discord_notifications.md)                           | Send notifications about project events to a Discord channel.         | **{dotted-circle}** No |
 | Drone                                                                       | Run CI/CD pipelines with Drone.                                       | **{check-circle}** Yes |
 | [Emails on push](emails_on_push.md)                                         | Send commits and diffs on push by email.                              | **{dotted-circle}** No |
@@ -137,17 +135,12 @@ To use custom settings for a project or group integration:
 | [GitGuardian](git_guardian.md)                                              | Reject commits based on GitGuardian policies.                         | **{dotted-circle}** No |
 | [GitHub](github.md)                                                         | Receive statuses for commits and pull requests.                       | **{dotted-circle}** No |
 | [GitLab for Slack app](gitlab_slack_application.md)                         | Use the native Slack app to receive notifications and run commands.   | **{dotted-circle}** No |
-| [Google Artifact Management](google_artifact_management.md)                 | Manage your artifacts in Google Artifact Registry.                    | **{dotted-circle}** No |
 | [Google Chat](hangouts_chat.md)                                             | Send notifications from your GitLab project to a space in Google Chat. | **{dotted-circle}** No |
-| [Google Cloud IAM](../../../integration/google_cloud_iam.md)                | Manage permissions for Google Cloud resources with Identity and Access Management (IAM). | **{dotted-circle}** No |
-| [Google Play](google_play.md)                                               | Use GitLab to build and release an app in Google Play.                | **{dotted-circle}** No |
 | [Harbor](harbor.md)                                                         | Use Harbor as the container registry for GitLab.                      | **{dotted-circle}** No |
 | [irker (IRC gateway)](irker.md)                                             | Send IRC messages.                                                    | **{dotted-circle}** No |
 | [Jenkins](../../../integration/jenkins.md)                                  | Run CI/CD pipelines with Jenkins.                                     | **{check-circle}** Yes |
 | JetBrains TeamCity                                                          | Run CI/CD pipelines with TeamCity.                                    | **{check-circle}** Yes |
-| [JetBrains YouTrack](youtrack.md)                                           | Use JetBrains YouTrack as your project's issue tracker.               | **{dotted-circle}** No |
 | [Jira](../../../integration/jira/index.md)                                  | Use Jira as an issue tracker.                                         | **{dotted-circle}** No |
-| [Matrix notifications](matrix.md)                                           | Send notifications about project events to Matrix.                    | **{dotted-circle}** No |
 | [Mattermost notifications](mattermost.md)                                   | Send notifications about project events to Mattermost channels.       | **{dotted-circle}** No |
 | [Mattermost slash commands](mattermost_slash_commands.md)                   | Run slash commands from a Mattermost chat environment.                | **{dotted-circle}** No |
 | [Microsoft Teams notifications](microsoft_teams.md)                         | Receive event notifications in Microsoft Teams.                       | **{dotted-circle}** No |
@@ -163,6 +156,7 @@ To use custom settings for a project or group integration:
 | [Telegram](telegram.md)                                                     | Send notifications about project events to Telegram.                  | **{dotted-circle}** No |
 | [Unify Circuit](unify_circuit.md)                                           | Send notifications about project events to Unify Circuit.             | **{dotted-circle}** No |
 | [Webex Teams](webex_teams.md)                                               | Receive event notifications in Webex Teams.                           | **{dotted-circle}** No |
+| [YouTrack](youtrack.md)                                                     | Use YouTrack as an issue tracker.                                     | **{dotted-circle}** No |
 
 ## Project webhooks
 

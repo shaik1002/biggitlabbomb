@@ -2,7 +2,7 @@
 import { GlLoadingIcon, GlIcon, GlIntersectionObserver, GlTooltipDirective } from '@gitlab/ui';
 import { n__, __ } from '~/locale';
 import Timeago from '~/vue_shared/components/time_ago_tooltip.vue';
-import { ROUTES } from '../../constants';
+import { DESIGN_ROUTE_NAME } from '../../constants';
 
 export default {
   components: {
@@ -122,26 +122,26 @@ export default {
       this.imageLoading = true;
     },
   },
-  ROUTES,
+  DESIGN_ROUTE_NAME,
 };
 </script>
 
 <template>
   <router-link
     :to="{
-      name: $options.ROUTES.design,
+      name: $options.DESIGN_ROUTE_NAME,
       params: { iid: workItemIid, id: filename },
       query: $route.query,
     }"
-    class="card js-design-list-item design-list-item gl-mb-0 gl-cursor-pointer gl-text-default hover:gl-text-default"
+    class="card gl-cursor-pointer text-plain js-design-list-item design-list-item gl-mb-0"
   >
     <div
-      class="card-body gl-relative gl-flex gl-items-center gl-justify-center gl-overflow-hidden gl-rounded-t-base gl-p-0"
+      class="card-body gl-p-0 gl-flex gl-items-center gl-justify-content-center gl-overflow-hidden gl-relative gl-rounded-top-base"
     >
       <div
         v-if="icon.name"
         data-testid="design-event"
-        class="gl-absolute gl-right-3 gl-top-3 gl-mr-1"
+        class="gl-absolute gl-top-3 gl-right-3 gl-mr-1"
       >
         <span :title="icon.tooltip" :aria-label="icon.tooltip">
           <gl-icon
@@ -170,18 +170,18 @@ export default {
           v-show="showImage"
           :src="imageLink"
           :alt="filename"
-          class="design-img gl-mx-auto gl-block gl-max-h-full gl-w-auto gl-max-w-full"
+          class="gl-block gl-mx-auto gl-max-w-full gl-max-h-full gl-w-auto design-img"
           :data-testid="`design-img-${id}`"
           @load="onImageLoad"
           @error="onImageError"
         />
       </gl-intersection-observer>
     </div>
-    <div class="card-footer gl-flex gl-w-full gl-bg-white gl-px-4 gl-py-3">
-      <div class="str-truncated-100 gl-flex gl-flex-col">
+    <div class="card-footer gl-flex gl-w-full gl-bg-white gl-py-3 gl-px-4">
+      <div class="gl-flex gl-flex-col str-truncated-100">
         <span
           v-gl-tooltip
-          class="str-truncated-100 gl-text-sm"
+          class="gl-font-sm str-truncated-100"
           :data-testid="`design-img-filename-${id}`"
           :title="filename"
           >{{ filename }}</span
@@ -192,7 +192,7 @@ export default {
       </div>
       <div v-if="notesCount" class="gl-ml-auto gl-flex gl-items-center gl-text-gray-500">
         <gl-icon name="comments" class="gl-ml-2" />
-        <span :aria-label="notesLabel" class="gl-ml-2 gl-text-sm">
+        <span :aria-label="notesLabel" class="gl-font-sm gl-ml-2">
           {{ notesCount }}
         </span>
       </div>

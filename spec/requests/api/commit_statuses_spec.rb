@@ -544,13 +544,13 @@ RSpec.describe API::CommitStatuses, :clean_gitlab_redis_cache, feature_category:
         end
       end
 
-      context 'with partitions' do
+      context 'with partitions', :ci_partitionable do
         include Ci::PartitioningHelpers
 
-        let(:current_partition_id) { ci_testing_partition_id }
+        let(:current_partition_id) { ci_testing_partition_id_for_check_constraints }
 
         before do
-          stub_current_partition_id(ci_testing_partition_id)
+          stub_current_partition_id(ci_testing_partition_id_for_check_constraints)
         end
 
         it 'creates records in the current partition' do

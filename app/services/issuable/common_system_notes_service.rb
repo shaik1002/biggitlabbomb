@@ -32,15 +32,8 @@ module Issuable
 
     def handle_start_date_or_due_date_change_note
       # Type check needed as some issuables do their own date change handling for date fields other than due_date
-      changed_dates =
-        if issuable.is_a?(WorkItem) && issuable.dates_source.present?
-          issuable.dates_source.previous_changes&.slice(*%w[due_date start_date])
-        elsif issuable.is_a?(Issue)
-          issuable.previous_changes&.slice(*%w[due_date start_date])
-        else
-          issuable.previous_changes.slice(:due_date)
-        end
-
+      change_date_fields = issuable.is_a?(Issue) ? %w[due_date start_date] : %w[due_date]
+      changed_dates = issuable.previous_changes.slice(*change_date_fields)
       create_start_date_or_due_date_note(changed_dates)
     end
 

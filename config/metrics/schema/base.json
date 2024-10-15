@@ -11,8 +11,7 @@
     "distribution",
     "tier",
     "data_category",
-    "milestone",
-    "introduced_by_url"
+    "milestone"
   ],
   "additionalProperties": false,
   "properties": {
@@ -58,7 +57,8 @@
     },
     "introduced_by_url": {
       "type": [
-        "string"
+        "string",
+        "null"
       ],
       "format": "uri"
     },

@@ -22,5 +22,4 @@ fragment BaseGroup on Group {
   maxAccessLevel {
     integerValue
   }
-  isLinkedToSubscription
 }

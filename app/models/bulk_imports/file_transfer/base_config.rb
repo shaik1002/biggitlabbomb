@@ -25,10 +25,6 @@ module BulkImports
         attributes_finder.find_excluded_keys(relation)
       end
 
-      def relation_included_keys(relation)
-        attributes_finder.find_included_keys(relation)
-      end
-
       def export_path
         @export_path ||= Dir.mktmpdir('bulk_imports')
       end
@@ -56,10 +52,6 @@ module BulkImports
 
       def file_relation?(relation)
         file_relations.include?(relation)
-      end
-
-      def relation_has_user_contributions?(relation)
-        (relation_included_keys(relation) & ::Gitlab::ImportExport::Base::RelationFactory::USER_REFERENCES).any?
       end
 
       def user_contributions_relation?(relation)

@@ -1,7 +1,6 @@
 fragment BaseCiGroupVariable on CiGroupVariable {
   description
   environmentScope
-  hidden
   masked
   protected
   raw

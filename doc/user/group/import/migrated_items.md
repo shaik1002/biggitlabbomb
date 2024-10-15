@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -33,8 +33,6 @@ Any other group items are **not** migrated.
 
 Group items that are migrated to the destination GitLab instance include:
 
-<!-- vale gitlab_base.OutdatedVersions = NO -->
-
 | Group item           | Introduced in                                                               |
 |:---------------------|:----------------------------------------------------------------------------|
 | Badges               | [GitLab 13.11](https://gitlab.com/gitlab-org/gitlab/-/issues/292431)        |
@@ -59,9 +57,7 @@ Group items that are migrated to the destination GitLab instance include:
    metadata [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/63551) in GitLab 14.0.
 1. Group Labels cannot retain any associated Label Priorities during import. These labels will need to be re-prioritized manually
    once the relevant Project is migrated to the destination instance.
-1. See [User contributions and membership mapping](direct_transfer_migrations.md#user-contributions-and-membership-mapping).
-
-<!-- vale gitlab_base.OutdatedVersions = YES -->
+1. See [Memberships](index.md#memberships).
 
 ### Excluded items
 
@@ -104,8 +100,6 @@ initiate project-only migrations using the [API](../../../api/bulk_imports.md).
 
 Project items that are migrated to the destination GitLab instance include:
 
-<!-- vale gitlab_base.OutdatedVersions = NO -->
-
 | Project item                            | Introduced in                                                              |
 |:----------------------------------------|:---------------------------------------------------------------------------|
 | Projects                                | [GitLab 14.4](https://gitlab.com/gitlab-org/gitlab/-/issues/267945)        |
@@ -135,19 +129,15 @@ Project items that are migrated to the destination GitLab instance include:
 | Uploads                                 | [GitLab 14.5](https://gitlab.com/gitlab-org/gitlab/-/issues/339401)        |
 | Wikis                                   | [GitLab 14.6](https://gitlab.com/gitlab-org/gitlab/-/issues/345923)        |
 
-<!-- vale gitlab_base.OutdatedVersions = YES -->
-
 **Footnotes:**
 
-1. Imported branches respect the [default branch protection settings](../../project/repository/branches/protected.md)
+1. Imported branches respect the [default branch protection settings](../../project/protected_branches.md)
    of the destination group, which could cause an unprotected branch to be imported as protected.
-1. See [User contributions and membership mapping](direct_transfer_migrations.md#user-contributions-and-membership-mapping).
+1. See [Memberships](index.md#memberships).
 
 ### Issue-related items
 
 Issue-related project items that are migrated to the destination GitLab instance include:
-
-<!-- vale gitlab_base.OutdatedVersions = NO -->
 
 | Issue-related project item      | Introduced in                                                              |
 |:--------------------------------|:---------------------------------------------------------------------------|
@@ -158,13 +148,9 @@ Issue-related project items that are migrated to the destination GitLab instance
 | Merge request URL references    | [GitLab 15.6](https://gitlab.com/gitlab-org/gitlab/-/issues/267947)        |
 | Time tracking                   | [GitLab 14.4](https://gitlab.com/gitlab-org/gitlab/-/issues/267946)        |
 
-<!-- vale gitlab_base.OutdatedVersions = YES -->
-
 ### Merge request-related items
 
 Merge request-related project items that are migrated to the destination GitLab instance include:
-
-<!-- vale gitlab_base.OutdatedVersions = NO -->
 
 | Merge request-related project item      | Introduced in                                                       |
 |:----------------------------------------|:--------------------------------------------------------------------|
@@ -175,8 +161,6 @@ Merge request-related project items that are migrated to the destination GitLab 
 | Merge request resource milestone events | [GitLab 15.4](https://gitlab.com/gitlab-org/gitlab/-/issues/291983) |
 | Issue URL references                    | [GitLab 15.6](https://gitlab.com/gitlab-org/gitlab/-/issues/267947) |
 | Time tracking                           | [GitLab 14.5](https://gitlab.com/gitlab-org/gitlab/-/issues/339403) |
-
-<!-- vale gitlab_base.OutdatedVersions = YES -->
 
 **Footnotes:**
 
@@ -191,16 +175,12 @@ Merge request-related project items that are migrated to the destination GitLab 
 
 Setting-related project items that are migrated to the destination GitLab instance include:
 
-<!-- vale gitlab_base.OutdatedVersions = NO -->
-
 | Setting-related project item | Introduced in                                                              |
 |:-----------------------------|:---------------------------------------------------------------------------|
 | Avatar                       | [GitLab 14.6](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/75249) |
 | Container expiration policy  | [GitLab 14.6](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/75653) |
 | Project properties           | [GitLab 14.6](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/75898) |
 | Service Desk                 | [GitLab 14.6](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/75653) |
-
-<!-- vale gitlab_base.OutdatedVersions = YES -->
 
 ### Excluded items
 

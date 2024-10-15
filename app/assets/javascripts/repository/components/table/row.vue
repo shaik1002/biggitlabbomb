@@ -19,7 +19,6 @@ import FileIcon from '~/vue_shared/components/file_icon.vue';
 import TimeagoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import blobInfoQuery from 'shared_queries/repository/blob_info.query.graphql';
 import getRefMixin from '../../mixins/get_ref';
-import { getRefType } from '../../utils/ref_type';
 
 export default {
   components: {
@@ -166,7 +165,7 @@ export default {
       this.apolloQuery(paginatedTreeQuery, {
         projectPath: this.projectPath,
         ref: this.ref,
-        refType: getRefType(this.refType),
+        refType: this.refType?.toUpperCase() || null,
         path: this.path,
         nextPageCursor: '',
         pageSize: TREE_PAGE_SIZE,
@@ -177,7 +176,7 @@ export default {
         projectPath: this.projectPath,
         filePath: [this.path],
         ref: this.ref,
-        refType: getRefType(this.refType),
+        refType: this.refType?.toUpperCase() || null,
         shouldFetchRawText: true,
       });
     },
@@ -247,7 +246,7 @@ export default {
         class="ml-1"
       />
     </td>
-    <td class="tree-commit cursor-default gl-hidden sm:gl-table-cell">
+    <td class="gl-hidden sm:gl-table-cell tree-commit cursor-default">
       <gl-link
         v-if="commitData"
         v-safe-html:[$options.safeHtmlConfig]="commitData.titleHtml"

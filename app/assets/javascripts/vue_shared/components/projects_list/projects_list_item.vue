@@ -11,15 +11,11 @@ import {
 } from '@gitlab/ui';
 import uniqueId from 'lodash/uniqueId';
 
-import {
-  renderDeleteSuccessToast,
-  deleteParams,
-} from 'ee_else_ce/vue_shared/components/resource_lists/utils';
 import ProjectListItemInactiveBadge from 'ee_else_ce/vue_shared/components/projects_list/project_list_item_inactive_badge.vue';
 import { VISIBILITY_TYPE_ICON, PROJECT_VISIBILITY_TYPE } from '~/visibility_level/constants';
 import { ACCESS_LEVEL_LABELS, ACCESS_LEVEL_NO_ACCESS_INTEGER } from '~/access_level/constants';
 import { FEATURABLE_ENABLED } from '~/featurable/constants';
-import { __, s__ } from '~/locale';
+import { __ } from '~/locale';
 import { numberToMetricPrefix } from '~/lib/utils/number_utils';
 import { truncate } from '~/lib/utils/text_utility';
 import SafeHtml from '~/vue_shared/directives/safe_html';
@@ -31,8 +27,6 @@ import {
   TIMESTAMP_TYPE_CREATED_AT,
   TIMESTAMP_TYPE_UPDATED_AT,
 } from '~/vue_shared/components/resource_lists/constants';
-import { deleteProject } from '~/rest_api';
-import { createAlert } from '~/alert';
 
 const MAX_TOPICS_TO_SHOW = 3;
 const MAX_TOPIC_TITLE_LENGTH = 15;
@@ -51,12 +45,8 @@ export default {
     actions: __('Actions'),
     showMore: __('Show more'),
     showLess: __('Show less'),
-    project: __('Project'),
-    deleteErrorMessage: s__(
-      'Projects|An error occurred deleting the project. Please refresh the page to try again.',
-    ),
   },
-  truncateTextToggleButtonProps: { class: '!gl-text-sm' },
+  truncateTextToggleButtonProps: { class: 'gl-font-sm!' },
   components: {
     GlAvatarLabeled,
     GlIcon,
@@ -126,7 +116,6 @@ export default {
     return {
       topicsPopoverTarget: uniqueId('project-topics-popover-'),
       isDeleteModalVisible: false,
-      isDeleteLoading: false,
     };
   },
   computed: {
@@ -227,6 +216,9 @@ export default {
     hasActionDelete() {
       return this.project.availableActions?.includes(ACTION_DELETE);
     },
+    isActionDeleteLoading() {
+      return this.project.actionLoadingStates[ACTION_DELETE];
+    },
     timestampText() {
       return this.$options.i18n[this.timestampType];
     },
@@ -252,28 +244,18 @@ export default {
     onActionDelete() {
       this.isDeleteModalVisible = true;
     },
-    async onDeleteModalPrimary() {
-      this.isDeleteLoading = true;
-
-      try {
-        await deleteProject(this.project.id, deleteParams(this.project));
-        this.$emit('delete-complete');
-        renderDeleteSuccessToast(this.project, this.$options.i18n.project);
-      } catch (error) {
-        createAlert({ message: this.$options.i18n.deleteErrorMessage, error, captureError: true });
-      } finally {
-        this.isDeleteLoading = false;
-      }
-    },
   },
 };
 </script>
 
 <template>
-  <li class="projects-list-item gl-border-b gl-flex gl-py-5">
-    <div class="gl-grow md:gl-flex">
+  <li class="projects-list-item gl-py-5 gl-border-b gl-display-flex">
+    <div class="md:gl-flex gl-flex-grow-1">
       <div class="gl-flex gl-grow gl-items-start">
-        <div v-if="showProjectIcon" class="gl-mr-3 gl-flex gl-h-9 gl-shrink-0 gl-items-center">
+        <div
+          v-if="showProjectIcon"
+          class="gl-display-flex gl-align-items-center gl-flex-shrink-0 gl-h-9 gl-mr-3"
+        >
           <gl-icon class="gl-text-secondary" name="project" />
         </div>
         <gl-avatar-labeled
@@ -281,13 +263,12 @@ export default {
           :entity-name="project.name"
           :label="project.name"
           :label-link="project.webUrl"
-          :src="project.avatarUrl"
           shape="rect"
           :size="48"
         >
           <template #meta>
             <div class="gl-px-2">
-              <div class="-gl-mx-2 gl-flex gl-flex-wrap gl-items-center">
+              <div class="-gl-mx-2 gl-display-flex gl-align-items-center gl-flex-wrap">
                 <div class="gl-px-2">
                   <gl-icon
                     v-if="visibility"
@@ -318,15 +299,15 @@ export default {
           >
             <div
               v-safe-html="project.descriptionHtml"
-              class="md gl-text-sm gl-text-secondary"
+              class="gl-font-sm gl-text-secondary md"
               data-testid="project-description"
             ></div>
           </gl-truncate-text>
           <div v-if="hasTopics" class="gl-mt-3" data-testid="project-topics">
             <div
-              class="-gl-mx-2 -gl-my-2 gl-inline-flex gl-w-full gl-flex-wrap gl-items-center gl-text-base gl-font-normal"
+              class="gl-w-full gl-inline-flex gl-flex-wrap gl-font-base gl-font-normal gl-align-items-center -gl-mx-2 -gl-my-2"
             >
-              <span class="gl-p-2 gl-text-sm gl-text-secondary">{{ $options.i18n.topics }}:</span>
+              <span class="gl-p-2 gl-font-sm gl-text-secondary">{{ $options.i18n.topics }}:</span>
               <div v-for="topic in visibleTopics" :key="topic" class="gl-p-2">
                 <gl-badge v-gl-tooltip="topicTooltipTitle(topic)" :href="topicPath(topic)">
                   {{ topicTitle(topic) }}
@@ -335,7 +316,7 @@ export default {
               <template v-if="popoverTopics.length">
                 <div
                   :id="topicsPopoverTarget"
-                  class="gl-p-2 gl-text-sm gl-text-secondary"
+                  class="gl-p-2 gl-font-sm gl-text-secondary"
                   role="button"
                   tabindex="0"
                 >
@@ -344,8 +325,12 @@ export default {
                   </gl-sprintf>
                 </div>
                 <gl-popover :target="topicsPopoverTarget" :title="$options.i18n.moreTopics">
-                  <div class="-gl-mx-2 -gl-my-2 gl-text-base gl-font-normal">
-                    <div v-for="topic in popoverTopics" :key="topic" class="gl-inline-block gl-p-2">
+                  <div class="gl-font-base gl-font-normal -gl-mx-2 -gl-my-2">
+                    <div
+                      v-for="topic in popoverTopics"
+                      :key="topic"
+                      class="gl-p-2 gl-display-inline-block"
+                    >
                       <gl-badge v-gl-tooltip="topicTooltipTitle(topic)" :href="topicPath(topic)">
                         {{ topicTitle(topic) }}
                       </gl-badge>
@@ -358,7 +343,7 @@ export default {
         </gl-avatar-labeled>
       </div>
       <div
-        class="gl-mt-3 gl-shrink-0 gl-flex-col gl-items-end md:gl-mt-0 md:gl-flex md:gl-pl-0"
+        class="md:gl-flex gl-flex-col gl-items-end gl-shrink-0 gl-mt-3 md:gl-pl-0 md:gl-mt-0"
         :class="showProjectIcon ? 'gl-pl-12' : 'gl-pl-10'"
       >
         <div class="gl-flex gl-items-center gl-gap-x-3 md:gl-h-9">
@@ -389,7 +374,7 @@ export default {
             :aria-label="$options.i18n.mergeRequests"
             class="gl-text-secondary"
           >
-            <gl-icon name="merge-request" />
+            <gl-icon name="git-merge" />
             <span>{{ openMergeRequestsCount }}</span>
           </gl-link>
           <gl-link
@@ -405,14 +390,14 @@ export default {
         </div>
         <div
           v-if="timestamp"
-          class="gl-mt-3 gl-whitespace-nowrap gl-text-sm gl-text-secondary md:-gl-mt-2"
+          class="gl-text-sm gl-whitespace-nowrap gl-text-secondary gl-mt-3 md:-gl-mt-2"
         >
           <span>{{ timestampText }}</span>
           <time-ago-tooltip :time="timestamp" />
         </div>
       </div>
     </div>
-    <div class="gl-ml-3 gl-flex gl-h-9 gl-items-center">
+    <div class="gl-display-flex gl-align-items-center gl-h-9 gl-ml-3">
       <list-actions
         v-if="hasActions"
         :actions="actions"
@@ -425,12 +410,12 @@ export default {
       v-model="isDeleteModalVisible"
       :confirm-phrase="project.name"
       :is-fork="project.isForked"
-      :confirm-loading="isDeleteLoading"
+      :confirm-loading="isActionDeleteLoading"
       :merge-requests-count="openMergeRequestsCount"
       :issues-count="openIssuesCount"
       :forks-count="forksCount"
       :stars-count="starCount"
-      @primary="onDeleteModalPrimary"
+      @primary="$emit('delete', project)"
     >
       <template #modal-footer
         ><project-list-item-delayed-deletion-modal-footer :project="project"

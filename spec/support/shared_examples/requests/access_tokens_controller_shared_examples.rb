@@ -58,7 +58,7 @@ RSpec.shared_examples 'GET access tokens are paginated and ordered' do
     end
   end
 
-  context "when active tokens returned are ordered" do
+  context "when tokens returned are ordered" do
     let(:expires_1_day_from_now) { 1.day.from_now.to_date }
     let(:expires_2_day_from_now) { 2.days.from_now.to_date }
 
@@ -95,33 +95,6 @@ RSpec.shared_examples 'GET access tokens are paginated and ordered' do
   end
 end
 
-RSpec.shared_examples 'GET access tokens includes inactive tokens' do
-  context "when inactive tokens returned are ordered" do
-    let(:one_day_ago) { 1.day.ago.to_date }
-    let(:two_days_ago) { 2.days.ago.to_date }
-
-    before do
-      create(:personal_access_token, :revoked, user: access_token_user, name: "Token1").update!(updated_at: one_day_ago)
-      create(:personal_access_token, :expired, user: access_token_user,
-        name: "Token2").update!(updated_at: two_days_ago)
-    end
-
-    it "orders token list descending on updated_at" do
-      get_access_tokens
-
-      first_token = assigns(:inactive_access_tokens).first.as_json
-      expect(first_token['name']).to eq("Token1")
-    end
-  end
-
-  context "when there are no inactive tokens" do
-    it "returns an empty array" do
-      get_access_tokens
-      expect(assigns(:inactive_access_tokens)).to eq([])
-    end
-  end
-end
-
 RSpec.shared_examples 'POST resource access tokens available' do
   def created_token
     PersonalAccessToken.order(:created_at).last
@@ -132,8 +105,6 @@ RSpec.shared_examples 'POST resource access tokens available' do
 
     parsed_body = Gitlab::Json.parse(response.body)
     expect(parsed_body['new_token']).not_to be_blank
-    expect(parsed_body['active_access_tokens'].length).to be > 0
-    expect(parsed_body['total']).to be > 0
     expect(parsed_body['errors']).to be_blank
     expect(response).to have_gitlab_http_status(:success)
   end
@@ -199,11 +170,7 @@ RSpec.shared_examples 'PUT resource access tokens available' do
     end
 
     it 'calls delete user worker' do
-      expect(DeleteUserWorker).to receive(:perform_async).with(
-        user.id,
-        access_token_user.id,
-        skip_authorization: true, reason_for_deletion: "Access token revoked"
-      )
+      expect(DeleteUserWorker).to receive(:perform_async).with(user.id, access_token_user.id, skip_authorization: true)
 
       subject
     end

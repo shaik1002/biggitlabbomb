@@ -2,7 +2,6 @@ import produce from 'immer';
 
 export const hasErrors = ({ errors = [] }) => errors?.length;
 
-// eslint-disable-next-line max-params
 export function addAgentTokenToStore(store, clusterAgentTokenCreate, query, variables) {
   if (!hasErrors(clusterAgentTokenCreate)) {
     const { token } = clusterAgentTokenCreate;
@@ -24,7 +23,6 @@ export function addAgentTokenToStore(store, clusterAgentTokenCreate, query, vari
   }
 }
 
-// eslint-disable-next-line max-params
 export function removeTokenFromStore(store, revokeToken, query, variables) {
   if (!hasErrors(revokeToken)) {
     const sourceData = store.readQuery({

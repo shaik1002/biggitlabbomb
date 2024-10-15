@@ -18,8 +18,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware, :clean_
     replication_lag!(false)
     Gitlab::Database::LoadBalancing::Session.clear_session
 
-    stub_const("#{described_class.name}::REPLICA_WAIT_SLEEP_SECONDS", 0.02)
-    stub_const("#{described_class.name}::URGENT_REPLICA_WAIT_SLEEP_SECONDS", 0.01)
+    stub_const("#{described_class.name}::REPLICA_WAIT_SLEEP_SECONDS", 0.0)
   end
 
   after do
@@ -27,7 +26,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware, :clean_
   end
 
   describe '#call' do
-    shared_context 'data consistency worker class' do |data_consistency, feature_flag, urgency = :low|
+    shared_context 'data consistency worker class' do |data_consistency, feature_flag|
       let(:worker_class) do
         Class.new do
           def self.name
@@ -37,7 +36,6 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware, :clean_
           include ApplicationWorker
 
           data_consistency data_consistency, feature_flag: feature_flag
-          urgency urgency
 
           def perform(*args); end
         end
@@ -117,16 +115,9 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware, :clean_
       end
     end
 
-    shared_examples_for 'essential sleep' do |sleep_duration = 0.02, sleep_attempts = described_class::SLEEP_ATTEMPTS|
+    shared_examples_for 'essential sleep' do
       context 'when WAL locations are blank', :freeze_time do
-        let(:job) do
-          {
-            "retry" => 3,
-            "job_id" => "a180b47c-3fd6-41b8-81e9-34da61c3400e",
-            "wal_locations" => {},
-            "created_at" => Time.current.to_f - (sleep_duration + 0.2)
-          }
-        end
+        let(:job) { { "retry" => 3, "job_id" => "a180b47c-3fd6-41b8-81e9-34da61c3400e", "wal_locations" => {}, "created_at" => Time.current.to_f - (described_class::REPLICA_WAIT_SLEEP_SECONDS + 0.2) } }
 
         it 'does not sleep' do
           expect(middleware).not_to receive(:sleep)
@@ -139,7 +130,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware, :clean_
         let(:job) { { "retry" => 3, "job_id" => "a180b47c-3fd6-41b8-81e9-34da61c3400e", 'wal_locations' => wal_locations, "created_at" => Time.current.to_f - elapsed_time } }
 
         context 'when delay interval has not elapsed' do
-          let(:elapsed_time) { sleep_duration + 0.2 }
+          let(:elapsed_time) { described_class::REPLICA_WAIT_SLEEP_SECONDS + 0.2 }
 
           context 'when replica is up to date' do
             before do
@@ -163,7 +154,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware, :clean_
             end
 
             it 'sleeps until the minimum delay is reached' do
-              expect(middleware).to receive(:sleep).with(sleep_duration)
+              expect(middleware).to receive(:sleep).with(described_class::REPLICA_WAIT_SLEEP_SECONDS)
 
               run_middleware
             end
@@ -177,7 +168,7 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware, :clean_
             end
 
             it 'sleeps until the maximum delay is reached' do
-              expect(middleware).to receive(:sleep).exactly(sleep_attempts).times.with(sleep_duration)
+              expect(middleware).to receive(:sleep).exactly(3).times.with(described_class::REPLICA_WAIT_SLEEP_SECONDS)
 
               run_middleware
             end
@@ -274,40 +265,6 @@ RSpec.describe Gitlab::Database::LoadBalancing::SidekiqServerMiddleware, :clean_
 
       include_examples 'sticks based on data consistency'
       include_examples 'essential sleep'
-
-      context 'when replica is not up to date' do
-        before do
-          Gitlab::Database::LoadBalancing.each_load_balancer do |lb|
-            allow(lb).to receive(:select_up_to_date_host).and_return(none_caught_up)
-          end
-        end
-
-        include_examples 'stick to the primary', 'primary'
-      end
-    end
-
-    context 'when worker data consistency is :sticky and urgent' do
-      include_context 'data consistency worker class', :sticky, :load_balancing_for_test_data_consistency_worker, :high
-
-      include_examples 'sticks based on data consistency'
-      include_examples 'essential sleep', 0.01, described_class::URGENT_SLEEP_ATTEMPTS
-
-      context 'when replica is not up to date' do
-        before do
-          Gitlab::Database::LoadBalancing.each_load_balancer do |lb|
-            allow(lb).to receive(:select_up_to_date_host).and_return(none_caught_up)
-          end
-        end
-
-        include_examples 'stick to the primary', 'primary'
-      end
-    end
-
-    context 'when worker data consistency is :delayed and urgent' do
-      include_context 'data consistency worker class', :delayed, :load_balancing_for_test_data_consistency_worker, :high
-
-      include_examples 'sticks based on data consistency'
-      include_examples 'essential sleep', 0.01, described_class::URGENT_SLEEP_ATTEMPTS
 
       context 'when replica is not up to date' do
         before do

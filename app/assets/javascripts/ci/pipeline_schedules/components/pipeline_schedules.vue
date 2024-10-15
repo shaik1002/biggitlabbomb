@@ -14,18 +14,11 @@ import { helpPagePath } from '~/helpers/help_page_helper';
 import { s__, sprintf } from '~/locale';
 import { limitedCounterWithDelimiter } from '~/lib/utils/text_utility';
 import { queryToObject } from '~/lib/utils/url_utility';
-import { reportToSentry } from '~/ci/utils';
-import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import deletePipelineScheduleMutation from '../graphql/mutations/delete_pipeline_schedule.mutation.graphql';
 import playPipelineScheduleMutation from '../graphql/mutations/play_pipeline_schedule.mutation.graphql';
 import takeOwnershipMutation from '../graphql/mutations/take_ownership.mutation.graphql';
 import getPipelineSchedulesQuery from '../graphql/queries/get_pipeline_schedules.query.graphql';
-import {
-  ALL_SCOPE,
-  SCHEDULES_PER_PAGE,
-  DEFAULT_SORT_VALUE,
-  TABLE_SORT_STORAGE_KEY,
-} from '../constants';
+import { ALL_SCOPE, SCHEDULES_PER_PAGE, DEFAULT_SORT_VALUE } from '../constants';
 import PipelineSchedulesTable from './table/pipeline_schedules_table.vue';
 import TakeOwnershipModal from './take_ownership_modal.vue';
 import DeletePipelineScheduleModal from './delete_pipeline_schedule_modal.vue';
@@ -40,7 +33,6 @@ const defaultPagination = {
 };
 
 export default {
-  name: 'PipelineSchedules',
   i18n: {
     schedulesFetchError: s__('PipelineSchedules|There was a problem fetching pipeline schedules.'),
     scheduleDeleteError: s__(
@@ -60,7 +52,6 @@ export default {
     ),
     planLimitReachedBtnText: s__('PipelineSchedules|Explore plan limits'),
   },
-  sortStorageKey: TABLE_SORT_STORAGE_KEY,
   docsLink: helpPagePath('administration/instance_limits', {
     anchor: 'number-of-pipeline-schedules',
   }),
@@ -75,7 +66,6 @@ export default {
     GlTab,
     GlSprintf,
     GlLink,
-    LocalStorageSync,
     PipelineSchedulesTable,
     TakeOwnershipModal,
     PipelineScheduleEmptyState,
@@ -122,8 +112,8 @@ export default {
           planLimit: ciPipelineSchedules,
         };
       },
-      error(error) {
-        this.reportError(this.$options.i18n.schedulesFetchError, error);
+      error() {
+        this.reportError(this.$options.i18n.schedulesFetchError);
       },
     },
   },
@@ -215,16 +205,6 @@ export default {
     shouldDisableNewScheduleBtn() {
       return (this.hasReachedPlanLimit || this.hasNoAccess) && !this.hasUnlimitedSchedules;
     },
-    sortingState: {
-      get() {
-        return { sortValue: this.sortValue, sortBy: this.sortBy, sortDesc: this.sortDesc };
-      },
-      set(values) {
-        this.sortValue = values.sortValue;
-        this.sortBy = values.sortBy;
-        this.sortDesc = values.sortDesc;
-      },
-    },
   },
   watch: {
     // this watcher ensures that the count on the all tab
@@ -236,11 +216,9 @@ export default {
     },
   },
   methods: {
-    reportError(errorMessage, error) {
+    reportError(error) {
       this.hasError = true;
-      this.errorMessage = errorMessage;
-
-      reportToSentry(this.$options.name, error);
+      this.errorMessage = error;
     },
     setDeleteModal(id) {
       this.showDeleteModal = true;
@@ -272,8 +250,8 @@ export default {
           this.$apollo.queries.schedules.refetch();
           this.$toast.show(this.$options.i18n.deleteSuccess);
         }
-      } catch (error) {
-        this.reportError(this.$options.i18n.scheduleDeleteError, error);
+      } catch {
+        this.reportError(this.$options.i18n.scheduleDeleteError);
       }
     },
     async takeOwnership() {
@@ -303,8 +281,8 @@ export default {
             this.$toast.show(toastMsg);
           }
         }
-      } catch (error) {
-        this.reportError(this.$options.i18n.takeOwnershipError, error);
+      } catch {
+        this.reportError(this.$options.i18n.takeOwnershipError);
       }
     },
     async playPipelineSchedule(id) {
@@ -323,10 +301,9 @@ export default {
         } else {
           this.playSuccess = true;
         }
-      } catch (error) {
+      } catch {
         this.playSuccess = false;
-
-        this.reportError(this.$options.i18n.schedulePlayError, error);
+        this.reportError(this.$options.i18n.schedulePlayError);
       }
     },
     resetPagination() {
@@ -379,7 +356,7 @@ export default {
     <gl-alert v-if="playSuccess" class="gl-my-3" variant="info" @dismiss="playSuccess = false">
       <gl-sprintf :message="$options.i18n.playSuccess">
         <template #link="{ content }">
-          <gl-link :href="pipelinesPath" class="!gl-no-underline">{{ content }}</gl-link>
+          <gl-link :href="pipelinesPath" class="gl-text-decoration-none!">{{ content }}</gl-link>
         </template>
       </gl-sprintf>
     </gl-alert>
@@ -398,15 +375,13 @@ export default {
       </gl-button>
     </gl-alert>
 
-    <local-storage-sync v-model="sortingState" :storage-key="$options.sortStorageKey" />
-
     <pipeline-schedule-empty-state v-if="showEmptyState" />
 
     <gl-tabs
       v-else
       sync-active-tab-with-query-params
       query-param-name="scope"
-      nav-class="gl-grow gl-items-center gl-mt-2"
+      nav-class="gl-flex-grow-1 gl-align-items-center gl-mt-2"
     >
       <gl-tab
         v-for="tab in tabs"

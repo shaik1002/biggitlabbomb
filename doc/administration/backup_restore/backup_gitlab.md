@@ -104,7 +104,7 @@ The [backup command](#backup-command) doesn't back up blobs that aren't stored o
   - Hosted by you (like MinIO).
   - A Storage Appliance that exposes an Object Storage-compatible API.
 
-The backup command does not back up registry data when they are stored in Object Storage.
+The backup command backs up registry data when they are stored in the default location on the file system.
 
 ### Storing configuration files
 
@@ -182,8 +182,6 @@ Backups do not include:
 - [Mattermost data](../../integration/mattermost/index.md#back-up-gitlab-mattermost)
 - Redis (and thus Sidekiq jobs)
 - [Object storage](#object-storage) on Linux package (Omnibus) / Docker / Self-compiled installations
-- [Global server hooks](../server_hooks.md#create-global-server-hooks-for-all-repositories)
-- [File hooks](../file_hooks.md)
 
 WARNING:
 GitLab does not back up any configuration files (`/etc/gitlab`), TLS keys and certificates, or system
@@ -286,8 +284,6 @@ Deleting tmp directories...[DONE]
 Deleting old backups... [SKIPPING]
 ```
 
-For detailed information about the backup process, see [Backup archive process](backup_archive_process.md).
-
 ### Backup options
 
 The command-line tool GitLab provides to back up your instance can accept more
@@ -322,7 +318,7 @@ WARNING:
 If you use a custom backup filename, you can't
 [limit the lifetime of the backups](#limit-backup-lifetime-for-local-files-prune-old-backups).
 
-Backup files are created with filenames according to [specific defaults](backup_archive_process.md#backup-id). However, you can
+Backup files are created with filenames according to [specific defaults](index.md#backup-id). However, you can
 override the `<backup-id>` portion of the filename by setting the `BACKUP`
 environment variable. For example:
 
@@ -388,7 +384,7 @@ DECOMPRESS_CMD=tee gitlab-backup restore
 ##### Parallel compression with `pigz`
 
 WARNING:
-While we support using `COMPRESS_CMD` and `DECOMPRESS_CMD` to override the default Gzip compression library, we only test the default Gzip library with default options on a routine basis. You are responsible for testing and validating the viability of your backups. We strongly recommend this as best practice in general for backups, whether overriding the compression command or not. If you encounter issues with another compression library, you should revert back to the default. Troubleshooting and fixing errors with alternative libraries are a lower priority for GitLab.
+While we support using `COMPRESS_CMD` and `DECOMPRESS_CMD` to override the default Gzip compression library, we currently only test the default Gzip library with default options on a routine basis. You are responsible for testing and validating the viability of your backups. We strongly recommend this as best practice in general for backups, whether overriding the compression command or not. If you encounter issues with another compression library, you should revert back to the default. Troubleshooting and fixing errors with alternative libraries are a lower priority for GitLab.
 
 NOTE:
 `pigz` is not included in the GitLab Linux package. You must install it yourself.
@@ -408,7 +404,7 @@ DECOMPRESS_CMD="pigz --decompress --stdout" sudo gitlab-backup restore
 ##### Parallel compression with `zstd`
 
 WARNING:
-While we support using `COMPRESS_CMD` and `DECOMPRESS_CMD` to override the default Gzip compression library, we only test the default Gzip library with default options on a routine basis. You are responsible for testing and validating the viability of your backups. We strongly recommend this as best practice in general for backups, whether overriding the compression command or not. If you encounter issues with another compression library, you should revert back to the default. Troubleshooting and fixing errors with alternative libraries are a lower priority for GitLab.
+While we support using `COMPRESS_CMD` and `DECOMPRESS_CMD` to override the default Gzip compression library, we currently only test the default Gzip library with default options on a routine basis. You are responsible for testing and validating the viability of your backups. We strongly recommend this as best practice in general for backups, whether overriding the compression command or not. If you encounter issues with another compression library, you should revert back to the default. Troubleshooting and fixing errors with alternative libraries are a lower priority for GitLab.
 
 NOTE:
 `zstd` is not included in the GitLab Linux package. You must install it yourself.
@@ -459,8 +455,8 @@ Depending on your installation type, slightly different components can be skippe
 - `terraform_state` (Terraform states)
 - `registry` (Container registry images)
 - `packages` (Packages)
-- `ci_secure_files` (Project-level secure files)
-- `external_diffs` (External merge request diffs)
+- `ci_secure_files` (Project-level Secure Files)
+- `external_diffs` (External Merge Request diffs)
 
 :::TabTitle Helm chart (Kubernetes)
 
@@ -628,7 +624,7 @@ The incremental backup archives are not linked to each other: each archive is a 
 to create an incremental backup from.
 
 Use the `PREVIOUS_BACKUP=<backup-id>` option to choose the backup to use. By default, a backup file is created
-as documented in the [Backup ID](backup_archive_process.md#backup-id) section. You can override the `<backup-id>` portion of the filename by setting the
+as documented in the [Backup ID](index.md#backup-id) section. You can override the `<backup-id>` portion of the filename by setting the
 [`BACKUP` environment variable](#backup-filename).
 
 To create an incremental backup, run:

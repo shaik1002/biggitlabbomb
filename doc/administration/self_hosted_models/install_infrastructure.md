@@ -1,16 +1,16 @@
 ---
 stage: AI-Powered
 group: Custom Models
-description: Set up your self-hosted model infrastructure
+description: Setup your self-hosted model deployment infrastructure
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
-# Set up your self-hosted model infrastructure
+# Set up your self-hosted model deployment infrastructure
 
 DETAILS:
-**Tier:** For a limited time, Ultimate. On October 17, 2024, Ultimate with [GitLab Duo Enterprise](https://about.gitlab.com/gitlab-duo/#pricing).
+**Tier:** For a limited time, Premium and Ultimate. In the future, [GitLab Duo Enterprise](../../subscriptions/subscription-add-ons.md).
 **Offering:** Self-managed
-**Status:** Beta
+**Status:** Experiment
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/12972) in GitLab 17.1 [with a flag](../../administration/feature_flags.md) named `ai_custom_model`. Disabled by default.
 
@@ -18,162 +18,212 @@ FLAG:
 The availability of this feature is controlled by a feature flag.
 For more information, see the history.
 
-By self-hosting the model, AI Gateway, and GitLab instance, there are no calls to
-external architecture, ensuring maximum levels of security.
+WARNING:
+This feature is considered [experimental](../../policy/experiment-beta-support.md) and is not intended for customer usage outside of initial design partners. We expect major changes to this feature.
 
-To set up your self-hosted model infrastructure:
+DISCLAIMER:
+This page contains information related to upcoming products, features, and functionality.
+It is important to note that the information presented is for informational purposes only.
+Please do not rely on this information for purchasing or planning purposes.
+The development, release, and timing of any products, features, or functionality may be subject to change or delay and remain at the
+sole discretion of GitLab Inc.
+
+By self-hosting the model, AI Gateway, and GitLab instance, there are no calls to external architecture, ensuring maximum levels of security.
+
+To set up your self-hosted model deployment infrastructure:
 
 1. Install the large language model (LLM) serving infrastructure.
-1. Configure your GitLab instance.
 1. Install the GitLab AI Gateway.
 
-## Install large language model serving infrastructure
+- [Installation video guide](https://youtu.be/UNmD9-sgUvw)
+- [Installation video guide (French version)](https://www.youtube.com/watch?v=aU5vnzO-MSM)
+
+## Step 1: Install LLM serving infrastructure
 
 Install one of the following GitLab-approved LLM models:
 
-<!-- vale gitlab_base.Spelling = NO -->
+| Model                                                                                                                       | Code Completion | Code Generation | Duo Chat |
+|-----------------------------------------------------------------------------------------------------------------------------|-----------------|-----------------|----------|
+| [CodeGemma 2b](https://huggingface.co/google/codegemma-2b)                                                                  | ✅               | -               | -        |
+| [CodeGemma 7b-it](https://huggingface.co/google/codegemma-7b-it)                                                            | -               | ✅               | -        |
+| [CodeGemma 7b](https://huggingface.co/google/codegemma-7b)                                                                  | ✅               | -               | -        |
+| [Code-Llama 13b-code](https://huggingface.co/meta-llama/CodeLlama-13b-hf)                                                   | ✅               | -               | -        |
+| [Code-Llama 13b](https://huggingface.co/meta-llama/CodeLlama-13b-Instruct-hf)                                               | -               | ✅               | -        |
+| [Codestral 22B](https://huggingface.co/mistralai/Codestral-22B-v0.1) (see [setup instructions](litellm_proxy_setup.md#example-setup-for-codestral-with-ollama)) | ✅               | ✅               | -        |
+| [Mistral 7B](https://huggingface.co/mistralai/Mistral-7B-v0.1)                                                              | -               | ✅               | ✅       |
+| [Mixtral 8x22B](https://huggingface.co/mistral-community/Mixtral-8x22B-v0.1)                                                | -               | ✅               | ✅       |
+| [Mixtral 8x7B](https://huggingface.co/mistralai/Mixtral-8x7B-Instruct-v0.1)                                                 | -               | ✅               | ✅       |
 
-| Model family | Model                                                                              | Code completion | Code generation | GitLab Duo Chat |
-|--------------|------------------------------------------------------------------------------------|-----------------|-----------------|---------|
-| Mistral      | [Codestral 22B](https://huggingface.co/mistralai/Codestral-22B-v0.1) (see [setup instructions](litellm_proxy_setup.md#example-setup-for-codestral-with-ollama))                                         | **{check-circle}** Yes               | **{check-circle}** Yes               | **{dotted-circle}** No        |
-| Mistral      | [Mistral 7B](https://huggingface.co/mistralai/Mistral-7B-v0.1)                     | **{dotted-circle}** No                | **{check-circle}** Yes               | **{check-circle}** Yes        |
-| Mistral      | [Mixtral 8x22B](https://huggingface.co/mistral-community/Mixtral-8x22B-v0.1)       | **{dotted-circle}** No                | **{check-circle}** Yes               | **{check-circle}** Yes        |
-| Mistral      | [Mixtral 8x7B](https://huggingface.co/mistralai/Mixtral-8x7B-Instruct-v0.1)        | **{dotted-circle}** No                | **{check-circle}** Yes               | **{check-circle}** Yes        |
-| Mistral      | [Mistral 7B Text](https://huggingface.co/mistralai/Mistral-7B-v0.3)                     | **{check-circle}** Yes                | **{dotted-circle}** No               |**{dotted-circle}** No        |
-| Mistral      | [Mixtral 8x22B Text](https://huggingface.co/mistralai/Mixtral-8x22B-v0.1)       | **{check-circle}** Yes                | **{dotted-circle}** No               | **{dotted-circle}** No        |
-| Mistral      | [Mixtral 8x7B Text](https://huggingface.co/mistralai/Mixtral-8x7B-v0.1)        | **{check-circle}** Yes                | **{dotted-circle}** No               | **{dotted-circle}** No        |
-| Claude 3     | [Claude 3.5 Sonnet](https://www.anthropic.com/news/claude-3-5-sonnet)        | **{check-circle}** No                | **{check-circle}** Yes               | **{check-circle}** Yes        |
+### Recommended serving architectures
 
-The following models are under evaluation, and support is limited:
+For Mistral, you should use one of the following architectures:
 
-| Model family  | Model                                                                              | Code completion | Code generation | GitLab Duo Chat |
-|---------------|---------------------------------------------------------------------|-----------------|-----------------|---------|
-| CodeGemma     | [CodeGemma 2b](https://huggingface.co/google/codegemma-2b)                         | **{check-circle}** Yes               | **{dotted-circle}** No               | **{dotted-circle}** No        |
-| CodeGemma     | [CodeGemma 7b-it](https://huggingface.co/google/codegemma-7b-it) (Instruction)     | **{dotted-circle}** No                | **{check-circle}** Yes               | **{dotted-circle}** No        |
-| CodeGemma     | [CodeGemma 7b-code](https://huggingface.co/google/codegemma-7b) (Code)             | **{check-circle}** Yes               | **{dotted-circle}** No               | **{dotted-circle}** No        |
-| CodeLlama     | [Code-Llama 13b-code](https://huggingface.co/meta-llama/CodeLlama-13b-hf)          | **{check-circle}** Yes               | **{dotted-circle}** No               | **{dotted-circle}** No        |
-| CodeLlama     | [Code-Llama 13b](https://huggingface.co/meta-llama/CodeLlama-13b-Instruct-hf)      | **{dotted-circle}** No                | **{check-circle}** Yes               | **{dotted-circle}** No        |
-| DeepSeekCoder | [DeepSeek Coder 33b Instruct](https://huggingface.co/deepseek-ai/deepseek-coder-33b-instruct)        | **{check-circle}** Yes                | **{check-circle}** Yes               | **{dotted-circle}** No        |
-| DeepSeekCoder | [DeepSeek Coder 33b Base](https://huggingface.co/deepseek-ai/deepseek-coder-33b-base)        | **{check-circle}** Yes                | **{dotted-circle}** No               | **{dotted-circle}** No        |
-| GPT  | [GPT-3.5-Turbo](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models?tabs=python-secure#gpt-35)        | **{check-circle}** No                | **{dotted-circle}** Yes               | **{dotted-circle}** No        |
-| GPT  | [GPT-4](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models?tabs=python-secure#gpt-4)        | **{check-circle}** No                | **{dotted-circle}** Yes               | **{dotted-circle}** No        |
-| GPT  | [GPT-4 Turbo](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models?tabs=python-secure#gpt-4)        | **{check-circle}** No                | **{dotted-circle}** Yes               | **{dotted-circle}** No        |
-| GPT  | [GPT-4o](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models?tabs=python-secure#gpt-4o-and-gpt-4-turbo)        | **{check-circle}** No                | **{dotted-circle}** Yes               | **{dotted-circle}** No        |
-| GPT  | [GPT-4o-mini](https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models?tabs=python-secure#gpt-4o-and-gpt-4-turbo)        | **{check-circle}** No                | **{dotted-circle}** Yes               | **{dotted-circle}** No        |
+- [vLLM](https://docs.vllm.ai/en/stable/)
+- [TensorRT-LLM](https://docs.mistral.ai/deployment/self-deployment/overview/)
+- [Ollama and litellm](litellm_proxy_setup.md)
 
-<!-- vale gitlab_base.Spelling = YES -->
+## Step 2: Install the GitLab AI Gateway
 
-### Use a serving architecture
-
-To host your models, you should use:
-
-- For non-cloud on-premise deployments, [vLLM](https://docs.vllm.ai/en/stable/).
-- For cloud deployments, AWS Bedrock or Azure as a cloud providers.
-
-## Configure your GitLab instance
+### Install by using Docker
 
 Prerequisites:
 
-- Upgrade to the latest version of GitLab.
+- You must [install Docker](https://docs.docker.com/engine/install/#server).
+- Use a valid hostname accessible within your network. Do not use `localhost`.
 
-1. The GitLab instance must be able to access the AI Gateway.
+The GitLab AI Gateway Docker image contains all necessary code and dependencies in a single container.
 
-   1. Where your GitLab instance is installed, update the `/etc/gitlab/gitlab.rb` file.
+Find the GitLab official Docker image at:
 
-      ```shell
-      sudo vim /etc/gitlab/gitlab.rb
-      ```
+- [AI Gateway Docker image on Container Registry](https://gitlab.com/gitlab-org/modelops/applied-ml/code-suggestions/ai-assist/container_registry/).
+- [Release process for self-hosted AI Gateway](https://gitlab.com/gitlab-org/modelops/applied-ml/code-suggestions/ai-assist/-/blob/main/docs/release.md).
 
-   1. Add and save the following environment variables.
+WARNING:
+Docker for Windows is not officially supported. There are known issues with volume
+permissions, and potentially other unknown issues. If you are trying to run on Docker
+for Windows, see the [getting help page](https://about.gitlab.com/get-help/) for links
+to community resources (such as IRC or forums) to seek help from other users.
 
-      ```.rb
-      gitlab_rails['env'] = {
-      'GITLAB_LICENSE_MODE' => 'production',
-      'CUSTOMER_PORTAL_URL' => 'https://customers.gitlab.com',
-      'AI_GATEWAY_URL' => '<path_to_your_ai_gateway>:<port>'
-      }
-      ```
+#### Set up the volumes location
 
-   1. Run reconfigure:
-
-      ```shell
-      sudo gitlab-ctl reconfigure
-      ```
-
-## GitLab AI Gateway
-
-[Install the GitLab AI Gateway](../../install/install_ai_gateway.md).
-
-## Enable logging
-
-Prerequisites:
-
-- You must be an administrator for your self-managed instance.
-
-To enable logging and access the logs, enable the feature flag:
-
-```ruby
-Feature.enable(:expanded_ai_logging)
-```
-
-Disabling the feature flag stops logs from being written.
-
-### Logs in your GitLab installation
-
-In your instance log directory, a file called `llm.log` is populated.
-
-For more information on:
-
-- Logged events and their properties, see the [logged event documentation](../../development/ai_features/logged_events.md).
-- How to rotate, manage, export and visualize the logs in `llm.log`, see the [log system documentation](../logs/index.md).
-
-### Logs in your AI Gateway container
-
-To specify the location of logs generated by AI Gateway, run:
+Create a directory where the logs will reside on the Docker host. It can be under your user's home directory (for example
+`~/gitlab-agw`), or in a directory like `/srv/gitlab-agw`. To create that directory, run:
 
 ```shell
-docker run -e AIGW_GITLAB_URL=<your_gitlab_instance> \
- -e AIGW_GITLAB_API_URL=https://<your_gitlab_domain>/api/v4/ \
- -e AIGW_GITLAB_API_URL=https://<your_gitlab_domain>/api/v4/ \
- -e AIGW_LOGGING__TO_FILE="aigateway.log" \
- -v <your_file_path>:"aigateway.log"
- <image>
+sudo mkdir -p /srv/gitlab-agw
 ```
 
-If you do not specify a file name, logs are streamed to the output.
+If you're running Docker with a user other than `root`, ensure appropriate
+permissions have been granted to that directory.
 
-Additionally, the outputs of the AI Gateway execution can also be useful for debugging issues. To access them:
+#### Optional: Download documentation index
 
-- When using Docker:
+To improve results when asking GitLab Duo Chat questions about GitLab, you can
+index GitLab documentation and provide it as a file to the AI Gateway.
 
-  ```shell
-  docker logs <container-id>
-  ```
+To index the documentation in your local installation,run:
 
-- When using Kubernetes:
+```shell
+pip install requests langchain langchain_text_splitters
+python3 scripts/custom_models/create_index.py -o <path_to_created_index/docs.db>
+```
 
-  ```shell
-  kubectl logs <container-name>
-  ```
+This creates a file `docs.db` at the specified path.
 
-To ingest these logs into the logging solution, see your logging provider documentation.
+You can also create an index for a specific GitLab version:
 
-### Logs in your inference service provider
+```shell
+python3 scripts/custom_models/create_index.py --version_tag="{gitlab-version}"
+```
 
-GitLab does not manage logs generated by your inference service provider. Please refer to the documentation of your inference service
-provider on how to use their logs.
+#### Find the AI Gateway release
 
-### Cross-referencing logs between AI Gateway and GitLab
+In a production environment, you should set your deployment to a specific
+GitLab AI Gateway release. Find the release to use in [GitLab AI Gateway releases](https://gitlab.com/gitlab-org/modelops/applied-ml/code-suggestions/ai-assist/-/releases), for example:
 
-The property `correlation_id` is assigned to every request and is carried across different components that respond to a
-request. For more information, see the [documentation on finding logs with a correlation ID](../logs/tracing_correlation_id.md).
+```shell
+docker run -e AIGW_CUSTOM_MODELS__ENABLED=true \
+   -v path/to/created/index/docs.db:/app/tmp/docs.db \
+   -e AIGW_FASTAPI__OPENAPI_URL="/openapi.json" \
+   -e AIGW_AUTH__BYPASS_EXTERNAL=true \
+   -e AIGW_FASTAPI__DOCS_URL="/docs"\
+   -e AIGW_FASTAPI__API_PORT=5052 \
+   registry.gitlab.com/gitlab-org/modelops/applied-ml/code-suggestions/ai-assist/model-gateway:v1.11.0`
+```
 
-Correlation ID is not available in your model provider logs.
+To set your deployment to the latest stable release, use the `latest` tag to run the latest stable release.
+
+The arguments `AIGW_FASTAPI__OPENAPI_URL` and `AIGW_FASTAPI__DOCS_URL` are not
+mandatory, but are useful for debugging. From the host, accessing `http://localhost:5052/docs`
+should open the AI Gateway API documentation.
+
+### Install by using Docker Engine
+
+1. For the AI Gateway to access the API, it must know where the GitLab instance
+   is located. To do this, set the environment variables `AIGW_GITLAB_URL` and
+   `AIGW_GITLAB_API_URL`:
+
+   ```shell
+   AIGW_GITLAB_URL=https://<your_gitlab_domain>
+   AIGW_GITLAB_API_URL=https://<your_gitlab_domain>/api/v4/
+   ```
+
+1. For the GitLab instance to know where AI Gateway is located so it can access
+   the gateway, set the environment variable `AI_GATEWAY_URL` inside your GitLab
+   instance environment variables:
+
+   ```shell
+   AI_GATEWAY_URL=https://<your_ai_gitlab_domain>
+   CLOUD_CONNECTOR_SELF_SIGN_TOKENS=1
+   ```
+
+1. After you've set up the environment variables, run the image. For example:
+
+   ```shell
+   docker run -p 5000:500 -e AIGW_CUSTOM_MODELS__ENABLED=true registry.gitlab.com/gitlab-org/modelops/applied-ml/code-suggestions/ai-assist/model-gateway:latest
+   ```
+
+   This command downloads and starts a AI Gateway container, and
+   [publishes ports](https://docs.docker.com/network/#published-ports) needed to
+   access SSH, HTTP and HTTPS.
+
+1. Track the initialization process:
+
+   ```shell
+   sudo docker logs -f gitlab-aigw
+   ```
+
+After starting the container, visit `gitlab-aigw.example.com`. It might take
+a while before the Docker container starts to respond to queries.
+
+## Upgrade the AI Gateway
+
+To upgrade the AI Gateway, download the newest Docker image tag.
+
+1. Stop the running container:
+
+   ```shell
+   sudo docker stop gitlab-aigw
+   ```
+
+1. Remove the existing container:
+
+   ```shell
+   sudo docker rm gitlab-aigw
+   ```
+
+1. Pull the new image:
+
+   ```shell
+   docker run -e AIGW_CUSTOM_MODELS__ENABLED=true \
+      -v path/to/created/index/docs.db:/app/tmp/docs.db \
+      -e AIGW_FASTAPI__OPENAPI_URL="/openapi.json" \
+      -e AIGW_AUTH__BYPASS_EXTERNAL=true \
+      -e AIGW_FASTAPI__DOCS_URL="/docs"\
+      -e AIGW_FASTAPI__API_PORT=5052 \
+      registry.gitlab.com/gitlab-org/modelops/applied-ml/code-suggestions/ai-assist/model-gateway:v1.11.0`
+   ```
+
+1. Ensure that the environment variables are all set correctly
+
+## Alternative installation methods
+
+For information on alternative ways to install the AI Gateway, see [issue 463773](https://gitlab.com/gitlab-org/gitlab/-/issues/463773).
 
 ## Troubleshooting
 
-First, run the [debugging scripts](troubleshooting.md#use-debugging-scripts) to
-verify your self-hosted model setup.
+### The image's platform does not match the host
 
-For more information on other actions to take, see the
-[troubleshooting documentation](troubleshooting.md).
+When [finding the AI Gateway release](#find-the-ai-gateway-release), you might get an error that states `The requested image’s platform (linux/amd64) does not match the detected host`.
+
+To work around this error, add `--platform linux/amd64` to the `docker run` command:
+
+```shell
+docker run -e AIGW_CUSTOM_MODELS__ENABLED=true --platform linux/amd64 \
+   -v path/to/created/index/docs.db:/app/tmp/docs.db \
+   -e AIGW_FASTAPI__OPENAPI_URL="/openapi.json" \
+   -e AIGW_AUTH__BYPASS_EXTERNAL=true \
+   -e AIGW_FASTAPI__DOCS_URL="/docs"\
+   -e AIGW_FASTAPI__API_PORT=5052 \
+   registry.gitlab.com/gitlab-org/modelops/applied-ml/code-suggestions/ai-assist/model-gateway:v1.11.0`
+```

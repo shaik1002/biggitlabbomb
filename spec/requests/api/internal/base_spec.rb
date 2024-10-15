@@ -893,6 +893,8 @@ RSpec.describe API::Internal::Base, feature_category: :system_access do
     end
 
     context 'with a pending membership' do
+      let_it_be(:project) { create(:project, :repository) }
+
       before_all do
         create(:project_member, :awaiting, :developer, source: project, user: user)
       end
@@ -1130,13 +1132,11 @@ RSpec.describe API::Internal::Base, feature_category: :system_access do
     end
 
     context 'project does not exist' do
-      let_it_be(:destroy_project) { create(:project, :repository, :wiki_repo) }
-
       context 'git pull' do
         it 'returns a 200 response with status: false' do
-          destroy_project.destroy!
+          project.destroy!
 
-          pull(key, destroy_project)
+          pull(key, project)
 
           expect(response).to have_gitlab_http_status(:not_found)
           expect(json_response["status"]).to be_falsey

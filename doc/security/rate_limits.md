@@ -35,7 +35,7 @@ The rate limits for API requests do not affect requests made by the frontend, be
 
 ## Configurable limits
 
-You can set these rate limits in the **Admin** area of your instance:
+You can set these rate limits in the Admin area of your instance:
 
 - [Import/Export rate limits](../administration/settings/import_export_rate_limits.md)
 - [Issue rate limits](../administration/settings/rate_limit_on_issues_creation.md)
@@ -53,7 +53,6 @@ You can set these rate limits in the **Admin** area of your instance:
 - [Incident management rate limits](../administration/settings/incident_management_rate_limits.md)
 - [Projects API rate limits](../administration/settings/rate_limit_on_projects_api.md)
 - [Groups API rate limits](../administration/settings/rate_limit_on_groups_api.md)
-- [Organizations API rate limits](../administration/settings/rate_limit_on_organizations_api.md)
 
 You can set these rate limits using the Rails console:
 

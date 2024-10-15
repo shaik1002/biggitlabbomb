@@ -1,9 +1,7 @@
-import { set, isEmpty } from 'lodash';
 import { produce } from 'immer';
 import { findWidget } from '~/issues/list/utils';
-import { newDate, toISODateFormat } from '~/lib/utils/datetime_utility';
-import { updateDraft } from '~/lib/utils/autosave';
-import { getNewWorkItemAutoSaveKey, newWorkItemFullPath } from '../utils';
+import { pikadayToString } from '~/lib/utils/datetime_utility';
+import { newWorkItemFullPath } from '../utils';
 import {
   WIDGET_TYPE_ASSIGNEES,
   WIDGET_TYPE_COLOR,
@@ -11,53 +9,15 @@ import {
   WIDGET_TYPE_LABELS,
   WIDGET_TYPE_HEALTH_STATUS,
   WIDGET_TYPE_DESCRIPTION,
-  WIDGET_TYPE_CRM_CONTACTS,
   NEW_WORK_ITEM_IID,
-  CLEAR_VALUE,
 } from '../constants';
+import groupWorkItemByIidQuery from './group_work_item_by_iid.query.graphql';
 import workItemByIidQuery from './work_item_by_iid.query.graphql';
-
-// eslint-disable-next-line max-params
-const updateWidget = (draftData, widgetType, newData, nodePath) => {
-  if (!newData) return;
-
-  const widget = findWidget(widgetType, draftData.workspace.workItem);
-  set(widget, nodePath, newData);
-};
-
-const updateHealthStatusWidget = (draftData, healthStatus) => {
-  if (!healthStatus) return;
-
-  const newValue = healthStatus === CLEAR_VALUE ? null : healthStatus;
-  const widget = findWidget(WIDGET_TYPE_HEALTH_STATUS, draftData.workspace.workItem);
-  set(widget, 'healthStatus', newValue);
-};
-
-const updateRolledUpDatesWidget = (draftData, rolledUpDates) => {
-  if (!rolledUpDates) return;
-
-  const dueDateFixed = rolledUpDates.dueDateFixed
-    ? toISODateFormat(newDate(rolledUpDates.dueDateFixed))
-    : null;
-  const startDateFixed = rolledUpDates.startDateFixed
-    ? toISODateFormat(newDate(rolledUpDates.startDateFixed))
-    : null;
-
-  const widget = findWidget(WIDGET_TYPE_ROLLEDUP_DATES, draftData.workspace.workItem);
-  Object.assign(widget, {
-    dueDate: dueDateFixed,
-    dueDateFixed,
-    dueDateIsFixed: rolledUpDates.dueDateIsFixed,
-    startDate: startDateFixed,
-    startDateFixed,
-    startDateIsFixed: rolledUpDates.startDateIsFixed,
-    __typename: 'WorkItemWidgetRolledupDates',
-  });
-};
 
 export const updateNewWorkItemCache = (input, cache) => {
   const {
     healthStatus,
+    isGroup,
     fullPath,
     workItemType,
     assignees,
@@ -67,10 +27,10 @@ export const updateNewWorkItemCache = (input, cache) => {
     confidential,
     labels,
     rolledUpDates,
-    crmContacts,
   } = input;
 
-  const query = workItemByIidQuery;
+  const query = isGroup ? groupWorkItemByIidQuery : workItemByIidQuery;
+
   const variables = {
     fullPath: newWorkItemFullPath(fullPath, workItemType),
     iid: NEW_WORK_ITEM_IID,
@@ -78,59 +38,101 @@ export const updateNewWorkItemCache = (input, cache) => {
 
   cache.updateQuery({ query, variables }, (sourceData) =>
     produce(sourceData, (draftData) => {
-      const widgetUpdates = [
-        {
-          widgetType: WIDGET_TYPE_ASSIGNEES,
-          newData: assignees,
-          nodePath: 'assignees.nodes',
-        },
-        {
-          widgetType: WIDGET_TYPE_LABELS,
-          newData: labels,
-          nodePath: 'labels.nodes',
-        },
-        {
-          widgetType: WIDGET_TYPE_COLOR,
-          newData: color,
-          nodePath: 'color',
-        },
-        {
-          widgetType: WIDGET_TYPE_CRM_CONTACTS,
-          newData: crmContacts,
-          nodePath: 'contacts.nodes',
-        },
-        {
-          widgetType: WIDGET_TYPE_DESCRIPTION,
-          newData: description,
-          nodePath: 'description',
-        },
-      ];
+      if (healthStatus) {
+        const healthStatusWidget = findWidget(
+          WIDGET_TYPE_HEALTH_STATUS,
+          draftData?.workspace?.workItem,
+        );
 
-      widgetUpdates.forEach(({ widgetType, newData, nodePath }) => {
-        updateWidget(draftData, widgetType, newData, nodePath);
-      });
+        healthStatusWidget.healthStatus = healthStatus;
 
-      updateRolledUpDatesWidget(draftData, rolledUpDates);
-      updateHealthStatusWidget(draftData, healthStatus);
+        const healthStatusWidgetIndex = draftData.workspace.workItem.widgets.findIndex(
+          (widget) => widget.type === WIDGET_TYPE_HEALTH_STATUS,
+        );
+        draftData.workspace.workItem.widgets[healthStatusWidgetIndex] = healthStatusWidget;
+      }
 
-      if (title) draftData.workspace.workItem.title = title;
-      if (confidential !== undefined) draftData.workspace.workItem.confidential = confidential;
+      if (assignees) {
+        const assigneesWidget = findWidget(WIDGET_TYPE_ASSIGNEES, draftData?.workspace?.workItem);
+        assigneesWidget.assignees.nodes = assignees;
+
+        const assigneesWidgetIndex = draftData.workspace.workItem.widgets.findIndex(
+          (widget) => widget.type === WIDGET_TYPE_ASSIGNEES,
+        );
+        draftData.workspace.workItem.widgets[assigneesWidgetIndex] = assigneesWidget;
+      }
+
+      if (labels) {
+        const labelsWidget = findWidget(WIDGET_TYPE_LABELS, draftData?.workspace?.workItem);
+
+        labelsWidget.labels.nodes = labels;
+
+        const labelsWidgetIndex = draftData.workspace.workItem.widgets.findIndex(
+          (widget) => widget.type === WIDGET_TYPE_LABELS,
+        );
+
+        draftData.workspace.workItem.widgets[labelsWidgetIndex] = labelsWidget;
+      }
+
+      if (rolledUpDates) {
+        let rolledUpDatesWidget = findWidget(
+          WIDGET_TYPE_ROLLEDUP_DATES,
+          draftData?.workspace?.workItem,
+        );
+
+        const dueDate = rolledUpDates.dueDateFixed || null;
+        const dueDateFixed = dueDate ? pikadayToString(rolledUpDates.dueDateFixed) : null;
+        const startDate = rolledUpDates.startDateFixed || null;
+        const startDateFixed = startDate ? pikadayToString(rolledUpDates.startDateFixed) : null;
+
+        rolledUpDatesWidget = {
+          type: 'ROLLEDUP_DATES',
+          dueDate: dueDateFixed,
+          dueDateFixed,
+          dueDateIsFixed: rolledUpDates.dueDateIsFixed,
+          startDate: startDateFixed,
+          startDateFixed,
+          startDateIsFixed: rolledUpDates.startDateIsFixed,
+          __typename: 'WorkItemWidgetRolledupDates',
+        };
+
+        const rolledUpDatesWidgetIndex = draftData.workspace.workItem.widgets.findIndex(
+          (widget) => widget.type === WIDGET_TYPE_ROLLEDUP_DATES,
+        );
+
+        draftData.workspace.workItem.widgets[rolledUpDatesWidgetIndex] = rolledUpDatesWidget;
+      }
+
+      if (color) {
+        const colorWidget = findWidget(WIDGET_TYPE_COLOR, draftData?.workspace?.workItem);
+        colorWidget.color = color;
+
+        const colorWidgetIndex = draftData.workspace.workItem.widgets.findIndex(
+          (widget) => widget.type === WIDGET_TYPE_COLOR,
+        );
+        draftData.workspace.workItem.widgets[colorWidgetIndex] = colorWidget;
+      }
+
+      if (title) {
+        draftData.workspace.workItem.title = title;
+      }
+
+      if (description) {
+        const descriptionWidget = findWidget(
+          WIDGET_TYPE_DESCRIPTION,
+          draftData?.workspace?.workItem,
+        );
+        descriptionWidget.description = description;
+
+        const descriptionWidgetIndex = draftData.workspace.workItem.widgets.findIndex(
+          (widget) => widget.type === WIDGET_TYPE_DESCRIPTION,
+        );
+        draftData.workspace.workItem.widgets[descriptionWidgetIndex] = descriptionWidget;
+      }
+
+      if (confidential !== undefined) {
+        draftData.workspace.workItem.confidential = confidential;
+      }
     }),
   );
-
-  const newData = cache.readQuery({ query, variables });
-
-  const autosaveKey = getNewWorkItemAutoSaveKey(fullPath, workItemType);
-
-  const isQueryDataValid = !isEmpty(newData) && newData?.workspace?.workItem;
-
-  if (isQueryDataValid && autosaveKey) {
-    updateDraft(autosaveKey, JSON.stringify(newData));
-  }
-};
-
-export const workItemBulkEdit = (input) => {
-  return {
-    updatedIssueCount: input.ids.length,
-  };
 };

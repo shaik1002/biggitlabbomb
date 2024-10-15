@@ -38,13 +38,17 @@ module Gitlab
 
       def self.from_git(project, user = nil, path = nil)
         config_path = path.presence || DEFAULT_FILE_PATH
-        config_yaml = project.repository.changelog_config('HEAD', config_path)
-        config_hash = YAML.safe_load(config_yaml) if config_yaml.present?
-        return new(project) if config_hash.nil?
+        yaml = project.repository.changelog_config('HEAD', config_path)
 
-        from_hash(project, config_hash, user)
-      rescue Psych::Exception
-        raise Error, "#{config_path} does not contain valid YAML"
+        if yaml.present?
+          begin
+            from_hash(project, YAML.safe_load(yaml), user)
+          rescue Psych::Exception
+            raise Error, "#{config_path} does not contain valid YAML"
+          end
+        else
+          new(project)
+        end
       end
 
       def self.from_hash(project, hash, user = nil)

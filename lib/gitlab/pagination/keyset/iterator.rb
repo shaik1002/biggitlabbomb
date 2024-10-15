@@ -15,24 +15,17 @@ module Gitlab
         end
 
         # rubocop: disable CodeReuse/ActiveRecord
-        def each_batch(of: 1000, load_batch: true)
+        def each_batch(of: 1000)
           loop do
             current_scope = scope.dup
             relation = order.apply_cursor_conditions(current_scope, cursor, keyset_options)
             relation = relation.reorder(order) unless @in_operator_optimization_options
             relation = relation.limit(of)
 
-            if load_batch
-              last_record = relation.last
-              break unless last_record
+            yield relation
 
-              yield relation
-            else
-              last_record, next_record = relation.offset(of - 1).limit(2)
-              yield relation
-
-              break unless next_record
-            end
+            last_record = relation.last
+            break unless last_record
 
             @cursor = order.cursor_attributes_for_node(last_record)
           end

@@ -23,7 +23,6 @@ export default function initSignupRestrictions(elementSelector = '#js-signup-for
       'passwordSymbolRequired',
       'promotionManagementAvailable',
       'enableMemberPromotionManagement',
-      'canDisableMemberPromotionManagement',
     ],
   });
 

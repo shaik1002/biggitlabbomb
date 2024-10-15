@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -253,8 +253,8 @@ curl --request POST \
   --data '{
     "bitbucket_username": "bitbucket_username",
     "bitbucket_app_password": "bitbucket_app_password",
-    "repo_path": "username/my_project",
-    "target_namespace": "my_group/my_subgroup",
+    "repo_path": "username/my_project"
+    "target_namespace": "my_group/my_subgroup"
     "new_name": "new_project_name"
 }'
 ```

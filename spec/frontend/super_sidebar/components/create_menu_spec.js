@@ -7,6 +7,7 @@ import {
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import InviteMembersTrigger from '~/invite_members/components/invite_members_trigger.vue';
 import CreateWorkItemModal from '~/work_items/components/create_work_item_modal.vue';
+import { __ } from '~/locale';
 import CreateMenu from '~/super_sidebar/components/create_menu.vue';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import { createNewMenuGroups } from '../mock_data';
@@ -58,7 +59,7 @@ describe('CreateMenu component', () => {
     });
 
     it("sets the toggle's label", () => {
-      expect(findGlDisclosureDropdown().props('toggleText')).toBe('Create new...');
+      expect(findGlDisclosureDropdown().props('toggleText')).toBe(__('Create new...'));
     });
     it('has correct amount of dropdown groups', () => {
       const items = findGlDisclosureDropdownGroups();
@@ -81,14 +82,8 @@ describe('CreateMenu component', () => {
       expect(findInviteMembersTrigger().exists()).toBe(true);
     });
 
-    describe('create new work item modal', () => {
-      it('renders the modal', () => {
-        expect(findCreateWorkItemModal().exists()).toBe(true);
-      });
-
-      it('sets `isGroup` to `true`', () => {
-        expect(findCreateWorkItemModal().props('isGroup')).toBe(true);
-      });
+    it('renders the create new work item modal', () => {
+      expect(findCreateWorkItemModal().exists()).toBe(true);
     });
 
     it('hides the tooltip when the dropdown is opened', async () => {

@@ -345,11 +345,11 @@ export default {
           @action="trackBuyCIMins"
         >
           <template #list-item>
-            <span class="gl-flex gl-flex-col">
+            <span class="gl-display-flex gl-flex-direction-column">
               <span>{{ buyPipelineMinutesItem.text }} <gl-emoji data-name="clock9" /></span>
               <span
                 v-if="data.pipeline_minutes.show_with_subtext"
-                class="small gl-pt-2 gl-text-sm gl-text-orange-800"
+                class="gl-font-sm small gl-pt-2 gl-text-orange-800"
                 >{{ buyPipelineMinutesItem.warningText }}</span
               >
             </span>

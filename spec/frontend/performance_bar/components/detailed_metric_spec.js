@@ -44,7 +44,7 @@ describe('detailedMetric', () => {
     });
 
     it('does not render the element', () => {
-      expect(wrapper.find('*').exists()).toBe(false);
+      expect(wrapper.html()).toBe('');
     });
   });
 

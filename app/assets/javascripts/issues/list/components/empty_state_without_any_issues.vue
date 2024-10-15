@@ -1,5 +1,5 @@
 <script>
-import emptyStateSvg from '@gitlab/svgs/dist/illustrations/empty-state/empty-issues-add-md.svg';
+import emptyStateSvg from '@gitlab/svgs/dist/illustrations/empty-state/empty-issues-md.svg';
 import { GlButton, GlDisclosureDropdown, GlEmptyState, GlLink, GlSprintf } from '@gitlab/ui';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import CsvImportExportButtons from '~/issuable/components/csv_import_export_buttons.vue';
@@ -15,7 +15,7 @@ export default {
   },
   emptyStateSvg,
   issuesHelpPagePath: helpPagePath('user/project/issues/index'),
-  jiraIntegrationPath: helpPagePath('integration/jira/configure', { anchor: 'view-jira-issues' }),
+  jiraIntegrationPath: helpPagePath('integration/jira/issues', { anchor: 'view-jira-issues' }),
   components: {
     CsvImportExportButtons,
     GlButton,
@@ -77,6 +77,7 @@ export default {
       <gl-empty-state
         :title="__('Use issues to collaborate on ideas, solve problems, and plan work')"
         :svg-path="$options.emptyStateSvg"
+        :svg-height="150"
         data-testid="issuable-empty-state"
       >
         <template #description>
@@ -128,7 +129,7 @@ export default {
 
           <new-resource-dropdown
             v-if="showNewIssueDropdown"
-            class="gl-mx-2 gl-mb-3 gl-self-center"
+            class="gl-self-center gl-mx-2 gl-mb-3"
             :query="$options.searchProjectsQuery"
             :query-variables="newIssueDropdownQueryVariables"
             :extract-projects="extractProjects"
@@ -137,10 +138,10 @@ export default {
         </template>
       </gl-empty-state>
       <hr />
-      <p class="gl-mb-0 gl-text-center gl-font-bold">
+      <p class="gl-text-center gl-font-bold gl-mb-0">
         {{ s__('JiraService|Using Jira for issue tracking?') }}
       </p>
-      <p class="gl-mb-0 gl-text-center">
+      <p class="gl-text-center gl-mb-0">
         <gl-sprintf :message="$options.i18n.jiraIntegrationMessage">
           <template #jiraDocsLink="{ content }">
             <gl-link

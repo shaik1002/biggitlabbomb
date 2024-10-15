@@ -22,10 +22,6 @@ export default {
       import(
         'ee_component/packages_and_registries/container_registry/explorer/components/list_page/metadata_container_scanning.vue'
       ),
-    ContainerScanningCounts: () =>
-      import(
-        'ee_component/packages_and_registries/container_registry/explorer/components/list_page/container_scanning_counts.vue'
-      ),
   },
   inject: ['config'],
   props: {
@@ -126,10 +122,6 @@ export default {
     </template>
     <template v-if="!config.isGroupPage" #metadata-container-scanning>
       <metadata-container-scanning />
-    </template>
-
-    <template v-if="!config.isGroupPage">
-      <container-scanning-counts />
     </template>
   </title-area>
 </template>

@@ -119,11 +119,6 @@ export default {
       required: false,
       default: () => ({}),
     },
-    restrictedToolBarItems: {
-      type: Array,
-      required: false,
-      default: () => [],
-    },
   },
   data() {
     const editingMode =
@@ -144,13 +139,16 @@ export default {
       return this.autofocus && !this.autofocused ? 'end' : false;
     },
     markdownFieldRestrictedToolBarItems() {
-      const restrictAttachments = this.disableAttachments ? ['attach-file'] : [];
-
-      return [...this.restrictedToolBarItems, ...restrictAttachments];
+      return this.disableAttachments ? ['attach-file'] : [];
     },
   },
   watch: {
-    value: 'updateValue',
+    value(val) {
+      this.markdown = val;
+
+      this.saveDraft();
+      this.autosizeTextarea();
+    },
   },
   mounted() {
     this.autofocusTextarea();
@@ -173,24 +171,11 @@ export default {
       return this.markdown;
     },
     setValue(value) {
-      this.$emit('input', value);
-      this.updateValue(value);
-    },
-    updateValue(value) {
       this.markdown = value;
+      this.$emit('input', value);
+
       this.saveDraft();
       this.autosizeTextarea();
-    },
-    append(value) {
-      if (!value) {
-        this.focus();
-        return;
-      }
-      const newValue = [this.markdown.trim(), value].filter(Boolean).join('\n\n');
-      this.updateValue(`${newValue}\n\n`);
-      this.$nextTick(() => {
-        this.focus();
-      });
     },
     setTemplate(template, force = false) {
       if (!this.markdown || force) {
@@ -268,13 +253,6 @@ export default {
         this.setEditorAsAutofocused();
       }
     },
-    focus() {
-      if (this.editingMode === EDITING_MODE_MARKDOWN_FIELD) {
-        this.$refs.textarea.focus();
-      } else {
-        this.$refs.contentEditor.focus();
-      }
-    },
     setEditorAsAutofocused() {
       this.autofocused = true;
     },
@@ -320,7 +298,7 @@ export default {
 };
 </script>
 <template>
-  <div class="!gl-px-0">
+  <div class="gl-px-0!">
     <local-storage-sync
       :value="editingMode"
       as-string

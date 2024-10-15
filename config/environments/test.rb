@@ -14,6 +14,7 @@ Rails.application.configure do
   config.middleware.insert_before(ActionDispatch::Static, Gitlab::Testing::RobotsBlockerMiddleware)
   config.middleware.insert_before(ActionDispatch::Static, Gitlab::Testing::RequestInspectorMiddleware)
   config.middleware.insert_before(ActionDispatch::Static, Gitlab::Testing::ClearProcessMemoryCacheMiddleware)
+
   config.middleware.insert_before(
     ActionDispatch::Cookies, Gitlab::Middleware::StripCookies, paths: [%r{^/assets/}, %r{^/v2$}, %r{^/v2/}]
   )
@@ -55,11 +56,7 @@ Rails.application.configure do
   # ActionMailer::Base.deliveries array.
   config.action_mailer.delivery_method = :test
 
-  if ::Gitlab.next_rails?
-    config.action_mailer.preview_paths = [GitlabEdition.path_glob('app/mailers/previews')]
-  else
-    config.action_mailer.preview_path = GitlabEdition.path_glob('app/mailers/previews')
-  end
+  config.action_mailer.preview_path = GitlabEdition.path_glob('app/mailers/previews')
 
   config.eager_load = Gitlab::Utils.to_boolean(ENV['GITLAB_TEST_EAGER_LOAD'], default: ENV['CI'].present?)
 

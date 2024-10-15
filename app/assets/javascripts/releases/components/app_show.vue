@@ -14,7 +14,7 @@ export default {
     ReleaseSkeletonLoader,
   },
   inject: {
-    projectPath: {
+    fullPath: {
       default: '',
     },
     tagName: {
@@ -22,12 +22,11 @@ export default {
     },
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     release: {
       query: oneReleaseQuery,
       variables() {
         return {
-          fullPath: this.projectPath,
+          fullPath: this.fullPath,
           tagName: this.tagName,
         };
       },
@@ -42,9 +41,7 @@ export default {
         // Handle the case where the query succeeded but didn't return any data
         if (!result.error && !this.release) {
           this.showFlash(
-            new Error(
-              `No release found in project "${this.projectPath}" with tag "${this.tagName}"`,
-            ),
+            new Error(`No release found in project "${this.fullPath}" with tag "${this.tagName}"`),
           );
         }
       },
@@ -54,7 +51,7 @@ export default {
     },
   },
   mounted() {
-    popCreateReleaseNotification(this.projectPath);
+    popCreateReleaseNotification(this.fullPath);
   },
   methods: {
     showFlash(error) {

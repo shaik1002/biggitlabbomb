@@ -1,10 +1,14 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Create', product_group: :remote_development do
+  RSpec.describe 'Create', product_group: :ide do
     describe 'Add a directory in Web IDE' do
-      include_context 'Web IDE test prep'
       let(:project) { create(:project, :with_readme, name: 'webide-add-directory-project') }
+
+      before do
+        Flow::Login.sign_in
+        project.visit!
+      end
 
       context 'when a directory with the same name already exists' do
         let(:directory_name) { 'first_directory' }
@@ -16,9 +20,7 @@ module QA
 
           project.visit!
           Page::Project::Show.perform(&:open_web_ide!)
-          Page::Project::WebIDE::VSCode.perform do |ide|
-            ide.wait_for_ide_to_load('README.md')
-          end
+          Page::Project::WebIDE::VSCode.perform(&:wait_for_ide_to_load)
         end
 
         it 'throws an error', :blocking, testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/386760' do

@@ -113,6 +113,7 @@ tree:
       - :create_access_levels
     - :project_feature
     - :custom_attributes
+    - :prometheus_metrics
     - :project_badges
     - :ci_cd_settings
     - :error_tracking_setting
@@ -324,6 +325,17 @@ included_attributes:
     - :infrastructure_access_level
     - :model_experiments_access_level
     - :model_registry_access_level
+  prometheus_metrics:
+    - :created_at
+    - :updated_at
+    - :project_id
+    - :y_label
+    - :unit
+    - :legend
+    - :title
+    - :query
+    - :group
+    - :dashboard_path
   service_desk_setting:
     - :project_id
     - :issue_template_key
@@ -751,8 +763,6 @@ included_attributes:
     - :security_and_compliance_enabled
     - :allow_merge_on_skipped_pipeline
     - :squash_option
-    - :merge_commit_template
-    - :squash_commit_template
   resource_milestone_events:
     - :user_id
     - :action
@@ -860,6 +870,9 @@ excluded_attributes:
     - :jid
     - :last_update_at
     - :last_successful_update_at
+  prometheus_metrics:
+    - :common
+    - :identifier
   snippets:
     - :expired_at
     - :secret
@@ -1060,7 +1073,6 @@ excluded_attributes:
   epic_issue:
     - :epic_id
     - :issue_id
-    - :namespace_id
   system_note_metadata:
     - :description_version_id
     - :note_id
@@ -1124,8 +1136,6 @@ methods:
   project:
     - :allow_merge_on_skipped_pipeline
     - :squash_option
-    - :merge_commit_template
-    - :squash_commit_template
   notes:
     - :type
   commit_notes:

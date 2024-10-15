@@ -36,6 +36,9 @@ describe('GroupsListWithFilteredSearch', () => {
       router,
       mocks: { $route: { path: '/', query: routeQuery }, $router: routerMock },
       propsData: defaultPropsData,
+      scopedSlots: {
+        'empty-state': '<div data-testid="empty-state"></div>',
+      },
     });
   };
 
@@ -62,7 +65,7 @@ describe('GroupsListWithFilteredSearch', () => {
     });
   });
 
-  it('renders `GroupsApp`', () => {
+  it('renders `GroupsApp` and empty state', () => {
     createComponent();
 
     const service = new GroupsService(defaultPropsData.endpoint);
@@ -72,6 +75,7 @@ describe('GroupsListWithFilteredSearch', () => {
       service,
       store,
     });
+    expect(wrapper.findByTestId('empty-state').exists()).toBe(true);
   });
 
   describe('when filtered search bar is submitted', () => {

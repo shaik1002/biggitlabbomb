@@ -4,9 +4,7 @@ import EMPTY_DISCUSSION_URL from '@gitlab/svgs/dist/illustrations/empty-state/em
 import { isLoggedIn } from '~/lib/utils/common_utils';
 import { s__, n__ } from '~/locale';
 import DesignDisclosure from '~/vue_shared/components/design_management/design_disclosure.vue';
-import { ACTIVE_DISCUSSION_SOURCE_TYPES } from '../constants';
 import { extractDiscussions } from '../utils';
-import updateActiveDiscussionMutation from '../graphql/client/update_active_design_discussion.mutation.graphql';
 import DesignDiscussion from '../design_notes/design_discussion.vue';
 import DesignDescription from './design_description.vue';
 
@@ -33,14 +31,11 @@ export default {
       type: Boolean,
       required: true,
     },
-    resolvedDiscussionsExpanded: {
-      type: Boolean,
-      required: true,
-    },
   },
   data() {
     return {
       isLoggedIn: isLoggedIn(),
+      resolvedDiscussionsExpanded: false,
     };
   },
   computed: {
@@ -65,28 +60,6 @@ export default {
     resolvedDiscussionsTitle() {
       return `${this.$options.i18n.resolveCommentsToggleText} (${this.resolvedDiscussions.length})`;
     },
-    isResolvedDiscussionsExpanded: {
-      get() {
-        return this.resolvedDiscussionsExpanded;
-      },
-      set(isExpanded) {
-        this.$emit('toggleResolvedComments', isExpanded);
-      },
-    },
-  },
-  methods: {
-    handleSidebarClick() {
-      this.updateActiveDesignDiscussion();
-    },
-    updateActiveDesignDiscussion(id) {
-      this.$apollo.mutate({
-        mutation: updateActiveDiscussionMutation,
-        variables: {
-          id,
-          source: ACTIVE_DISCUSSION_SOURCE_TYPES.discussion,
-        },
-      });
-    },
   },
   i18n: {
     resolveCommentsToggleText: s__('DesignManagement|Resolved Comments'),
@@ -98,13 +71,13 @@ export default {
 <template>
   <design-disclosure :open="isOpen">
     <template #default>
-      <div class="image-notes gl-h-full gl-pt-0" @click.self="handleSidebarClick">
-        <design-description v-if="showDescription" :design="design" class="gl-border-b gl-my-5" />
+      <div class="image-notes gl-h-full gl-pt-0">
+        <design-description v-if="showDescription" :design="design" class="gl-my-5 gl-border-b" />
         <div v-if="isLoading" class="gl-my-5">
           <gl-skeleton-loader />
         </div>
         <template v-else>
-          <h3 data-testid="unresolved-discussion-count" class="gl-my-5 gl-text-lg !gl-leading-20">
+          <h3 data-testid="unresolved-discussion-count" class="!gl-leading-20 gl-text-lg gl-my-5">
             {{ unresolvedDiscussionsCount }}
           </h3>
           <gl-empty-state
@@ -119,11 +92,10 @@ export default {
             :design-id="$route.params.id"
             :noteable-id="design.id"
             data-testid="unresolved-discussion"
-            @update-active-discussion="updateActiveDesignDiscussion(discussion.notes[0].id)"
           />
           <gl-accordion v-if="hasResolvedDiscussions" :header-level="3" class="gl-mb-5">
             <gl-accordion-item
-              v-model="isResolvedDiscussionsExpanded"
+              v-model="resolvedDiscussionsExpanded"
               :title="resolvedDiscussionsTitle"
               header-class="!gl-mb-5"
             >
@@ -135,7 +107,6 @@ export default {
                 :noteable-id="design.id"
                 :resolved-discussions-expanded="resolvedDiscussionsExpanded"
                 data-testid="resolved-discussion"
-                @update-active-discussion="updateActiveDesignDiscussion(discussion.notes[0].id)"
               />
             </gl-accordion-item>
           </gl-accordion>

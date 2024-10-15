@@ -37,6 +37,6 @@ class Groups::GroupLinksController < Groups::ApplicationController
   end
 
   def group_link_params
-    params.require(:group_link).permit(:group_access, :expires_at, :member_role_id)
+    params.require(:group_link).permit(:group_access, :expires_at)
   end
 end

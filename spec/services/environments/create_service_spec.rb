@@ -14,7 +14,7 @@ RSpec.describe Environments::CreateService, feature_category: :environment_manag
   describe '#execute' do
     subject { service.execute }
 
-    let(:params) { { name: 'production', description: 'description', external_url: 'https://gitlab.com', tier: :production } }
+    let(:params) { { name: 'production', external_url: 'https://gitlab.com', tier: :production, kubernetes_namespace: 'default', flux_resource_path: 'path/to/flux/resource' } }
 
     it 'creates an environment' do
       expect { subject }.to change { ::Environment.count }.by(1)
@@ -25,9 +25,10 @@ RSpec.describe Environments::CreateService, feature_category: :environment_manag
 
       expect(response).to be_success
       expect(response.payload[:environment].name).to eq('production')
-      expect(response.payload[:environment].description).to eq('description')
       expect(response.payload[:environment].external_url).to eq('https://gitlab.com')
       expect(response.payload[:environment].tier).to eq('production')
+      expect(response.payload[:environment].kubernetes_namespace).to eq('default')
+      expect(response.payload[:environment].flux_resource_path).to eq('path/to/flux/resource')
     end
 
     context 'with a cluster agent' do
@@ -35,22 +36,13 @@ RSpec.describe Environments::CreateService, feature_category: :environment_manag
       let_it_be(:cluster_agent) { create(:cluster_agent, project: agent_management_project) }
 
       let!(:authorization) { create(:agent_user_access_project_authorization, project: project, agent: cluster_agent) }
-      let(:params) do
-        {
-          name: 'production',
-          cluster_agent: cluster_agent,
-          kubernetes_namespace: 'default',
-          flux_resource_path: 'path/to/flux/resource'
-        }
-      end
+      let(:params) { { name: 'production', cluster_agent: cluster_agent } }
 
       it 'returns successful response' do
         response = subject
 
         expect(response).to be_success
         expect(response.payload[:environment].cluster_agent).to eq(cluster_agent)
-        expect(response.payload[:environment].kubernetes_namespace).to eq('default')
-        expect(response.payload[:environment].flux_resource_path).to eq('path/to/flux/resource')
       end
 
       context 'when user does not have permission to read the agent' do

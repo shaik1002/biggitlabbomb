@@ -70,6 +70,10 @@ type LocalK8sNamespaces {
   metadata: k8sNamespaceMetadata
 }
 
+type LocalFluxResourceMetadata {
+  name: String
+}
+
 type LocalFluxResourceConditions {
   message: String
   reason: String
@@ -83,17 +87,11 @@ type LocalFluxResourceInventoryItem {
 
 type LocalFluxKustomization {
   kind: String
-  metadata: LocalWorkloadMetadata
-  status: JSON
-  spec: JSON
+  metadata: LocalFluxResourceMetadata
   conditions: [LocalFluxResourceConditions]
   inventory: [LocalFluxResourceInventoryItem]
 }
-type LocalFluxHelmRelease {
-  kind: String
-  metadata: LocalWorkloadMetadata
-  status: JSON
-  spec: JSON
+type LocalFluxHelmReleaseStatus {
   conditions: [LocalFluxResourceConditions]
 }
 
@@ -118,15 +116,6 @@ type K8sLogsData {
   error: JSON
 }
 
-type K8sEvent {
-  lastTimestamp: String
-  eventTime: String
-  message: String
-  reason: String
-  source: JSON
-  type: String
-}
-
 extend type Query {
   environmentApp(page: Int, scope: String): LocalEnvironmentApp
   folder(environment: NestedLocalEnvironmentInput): LocalEnvironmentFolder
@@ -143,14 +132,12 @@ extend type Query {
     configuration: LocalConfiguration
     fluxResourcePath: String
   ): LocalFluxKustomization
-  fluxHelmRelease(configuration: LocalConfiguration, fluxResourcePath: String): LocalFluxHelmRelease
+  fluxHelmReleaseStatus(
+    configuration: LocalConfiguration
+    fluxResourcePath: String
+  ): LocalFluxHelmReleaseStatus
   k8sDeployments(configuration: LocalConfiguration, namespace: String): [LocalK8sDeployment]
   k8sLogs(configuration: LocalConfiguration, namespace: String, podName: String): [K8sLogsData]
-  k8sEvents(
-    configuration: LocalConfiguration
-    namespace: String
-    involvedObjectName: String
-  ): [K8sEvent]
 }
 
 input ResourceTypeParam {
@@ -173,9 +160,4 @@ extend type Mutation {
   setEnvironmentToStop(environment: LocalEnvironmentInput): LocalErrors
   setEnvironmentToChangeCanary(environment: LocalEnvironmentInput, weight: Int): LocalErrors
   action(environment: LocalEnvironmentInput): LocalErrors
-  deleteKubernetesPod(
-    configuration: LocalConfiguration
-    namespace: String
-    podName: String
-  ): LocalErrors
 }

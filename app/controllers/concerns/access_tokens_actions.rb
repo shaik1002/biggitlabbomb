@@ -7,9 +7,6 @@ module AccessTokensActions
     before_action -> { check_permission(:read_resource_access_tokens) }, only: [:index]
     before_action -> { check_permission(:destroy_resource_access_tokens) }, only: [:revoke]
     before_action -> { check_permission(:create_resource_access_tokens) }, only: [:create]
-    before_action do
-      push_frontend_feature_flag(:retain_resource_access_token_user_after_revoke, resource.root_ancestor)
-    end
   end
 
   # rubocop:disable Gitlab/ModuleWithInstanceVariables
@@ -32,9 +29,8 @@ module AccessTokensActions
 
     if token_response.success?
       @resource_access_token = token_response.payload[:access_token]
-      tokens, size = active_access_tokens(resource.root_ancestor)
       render json: { new_token: @resource_access_token.token,
-                     active_access_tokens: tokens, total: size }, status: :ok
+                     active_access_tokens: active_access_tokens }, status: :ok
     else
       render json: { errors: token_response.errors }, status: :unprocessable_entity
     end
@@ -73,10 +69,7 @@ module AccessTokensActions
     resource.members.load
 
     @scopes = Gitlab::Auth.available_scopes_for(resource)
-    @active_access_tokens, @active_access_tokens_size = active_access_tokens(resource.root_ancestor)
-    if Feature.enabled?(:retain_resource_access_token_user_after_revoke, resource.root_ancestor) # rubocop:disable Style/GuardClause
-      @inactive_access_tokens = inactive_access_tokens
-    end
+    @active_access_tokens = active_access_tokens
   end
   # rubocop:enable Gitlab/ModuleWithInstanceVariables
 

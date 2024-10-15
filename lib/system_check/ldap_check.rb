@@ -43,7 +43,7 @@ module SystemCheck
             end
           end
         rescue Errno::ECONNREFUSED => e
-          $stdout.puts Rainbow("Could not connect to the LDAP server: #{e.message}").red
+          $stdout.puts "Could not connect to the LDAP server: #{e.message}".color(:red)
         end
       end
     end
@@ -52,11 +52,11 @@ module SystemCheck
       auth = adapter.config.has_auth?
 
       message = if auth && adapter.ldap.bind
-                  Rainbow('Success').green
+                  'Success'.color(:green)
                 elsif auth
-                  Rainbow('Failed. Check `bind_dn` and `password` configuration values').red
+                  'Failed. Check `bind_dn` and `password` configuration values'.color(:red)
                 else
-                  Rainbow('Anonymous. No `bind_dn` or `password` configured').yellow
+                  'Anonymous. No `bind_dn` or `password` configured'.color(:yellow)
                 end
 
       $stdout.puts "LDAP authentication... #{message}"

@@ -283,7 +283,7 @@ Fast lookup is [required for Geo](../../operations/fast_ssh_key_lookup.md#fast-l
 
 NOTE:
 Authentication is handled by the primary site. Don't set up custom authentication for the secondary site.
-Any change that requires access to the **Admin** area should be made in the primary site, because the
+Any change that requires access to the Admin area should be made in the primary site, because the
 secondary site is a read-only copy.
 
 #### Add the secondary site
@@ -313,7 +313,7 @@ secondary site is a read-only copy.
    ```
 
 1. Go to the primary node GitLab instance:
-   1. On the left sidebar, at the bottom, select **Admin**..
+   1. On the left sidebar, at the bottom, select **Admin area**..
    1. Select **Geo > Sites**.
    1. Select **Add site**.
 
@@ -368,7 +368,7 @@ If you convert an existing site to Geo, you should check that the clone method i
 
 On the primary site:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Settings > General**.
 1. Expand **Visibility and access controls**.
 1. If you use Git over SSH:
@@ -383,7 +383,7 @@ the primary site.
 
 After you sign in:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Geo > Sites**.
 1. Verify that the site is correctly identified as a secondary Geo site, and that
    Geo is enabled.
@@ -392,7 +392,7 @@ The initial replication might take some time.
 You can monitor the synchronization process on each Geo site from the primary
 site **Geo Sites** dashboard in your browser.
 
-![Geo admin dashboard showing the synchronization status of a secondary site.](../replication/img/geo_dashboard_v14_0.png)
+![Geo dashboard](../replication/img/geo_dashboard_v14_0.png)
 
 ## Configure the tracking database
 
@@ -430,7 +430,7 @@ the tracking database on port 5432.
 Create and configure the tracking database in your PostgreSQL instance:
 
 1. Set up PostgreSQL according to the
-   [database requirements document](../../../install/requirements.md#postgresql).
+   [database requirements document](../../../install/requirements.md#database).
 1. Set up a `gitlab_geo` user with a password of your choice, create the `gitlabhq_geo_production` database, and make the user an owner of the database.
    You can see an example of this setup in the [self-compiled installation documentation](../../../install/installation.md#7-database).
 1. If you are **not** using a cloud-managed PostgreSQL database, ensure that your secondary

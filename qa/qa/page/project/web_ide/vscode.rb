@@ -84,7 +84,7 @@ module QA
           end
 
           def click_commit_button
-            click_element('div[aria-label="Commit and push to \'main\'"]')
+            click_element('div[aria-label="Commit to \'main\'"]')
           end
 
           def has_notification_box?
@@ -151,9 +151,8 @@ module QA
             end
           end
 
-          # Used for stability, due to feature_caching of vscode_web_ide
-          # @param file_name [string] wait for file to be loaded (optional)
-          def wait_for_ide_to_load(file_name = nil)
+          # Used for stablility, due to feature_caching of vscode_web_ide
+          def wait_for_ide_to_load
             page.driver.browser.switch_to.window(page.driver.browser.window_handles.last)
             # On test environments we have a broadcast message that can cover the buttons
             if has_element?('broadcast-notification-container', wait: 5)
@@ -167,8 +166,12 @@ module QA
               message: 'Waiting for VSCode file explorer') do
               has_file_explorer?
             end
+          end
 
-            wait_for_file_to_load(file_name) if file_name
+          def wait_for_file_to_load(filename)
+            Support::Waiter.wait_until(message: "Waiting for #{filename} to load in VSCode file explorer") do
+              has_file?(filename)
+            end
           end
 
           def create_new_folder(folder_name)
@@ -227,6 +230,7 @@ module QA
           def create_merge_request
             within_vscode_editor do
               within_element('.notification-toast-container') do
+                has_element?('div[title="GitLab Web IDE Extension (Extension)"]')
                 click_monaco_button('Create MR')
               end
             end
@@ -266,10 +270,11 @@ module QA
             within_vscode_editor do
               within_file_editor do
                 wait_until(reload: false, max_duration: 30, message: 'Waiting for Code Suggestion to start loading') do
-                  code_suggestion_loading?
+                  has_code_suggestions_status?('loading')
                 end
 
-                wait_until_code_suggestion_loaded
+                # Wait for code suggestion to finish loading
+                wait_until_code_suggestions_enabled
               end
             end
           end
@@ -305,12 +310,6 @@ module QA
           end
 
           private
-
-          def wait_for_file_to_load(filename)
-            Support::Waiter.wait_until(message: "Waiting for #{filename} to load in VSCode file explorer") do
-              has_file?(filename)
-            end
-          end
 
           def click_monaco_button(label)
             click_element('.monaco-button', text: label)
@@ -352,10 +351,6 @@ module QA
             page.document.has_css?(code_suggestions_icon_selector(status))
           end
 
-          def code_suggestion_loading?
-            page.document.has_css?('.glyph-margin-widgets .codicon', wait: 0)
-          end
-
           def has_code_suggestions_error?
             !page.document.has_no_css?(code_suggestions_icon_selector('error'))
           end
@@ -374,15 +369,6 @@ module QA
             wait_until(reload: false, max_duration: 30, skip_finished_loading_check_on_refresh: true,
               message: 'Wait for Code Suggestions extension to be enabled') do
               has_code_suggestions_status_without_error?('enabled')
-            end
-          end
-
-          def wait_until_code_suggestion_loaded
-            wait_until(reload: false, max_duration: 30, skip_finished_loading_check_on_refresh: true,
-              message: 'Wait for Code Suggestion to finish loading') do
-              raise code_suggestions_error if has_code_suggestions_error?
-
-              !code_suggestion_loading?
             end
           end
         end

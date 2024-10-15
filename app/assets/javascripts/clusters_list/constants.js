@@ -56,7 +56,7 @@ export const CLUSTER_TYPES = {
 export const MAX_REQUESTS = 3;
 
 export const STATUSES = {
-  default: { className: 'gl-bg-white', title: __('Unknown') },
+  default: { className: 'bg-white', title: __('Unknown') },
   disabled: { className: 'disabled', title: __('Disabled') },
   created: { className: 'bg-success', title: __('Connected') },
   unreachable: { className: 'bg-danger', title: __('Unreachable') },
@@ -86,8 +86,7 @@ export const I18N_AGENT_TABLE = {
   viewDocsText: s__('ClusterAgents|How do I update an agent?'),
   defaultConfigText: s__('ClusterAgents|Default configuration'),
   defaultConfigTooltip: s__('ClusterAgents|What is default configuration?'),
-  sharedBadgeText: s__('ClusterAgents|Shared'),
-  receptiveBadgeText: s__('ClusterAgents|Receptive'),
+  sharedBadgeText: s__('ClusterAgents|shared'),
   externalConfigText: s__('ClusterAgents|External project'),
 };
 
@@ -284,5 +283,3 @@ export const DELETE_AGENT_MODAL_ID = 'delete-agent-modal-%{agentName}';
 
 export const AGENT_FEEDBACK_ISSUE = 'https://gitlab.com/gitlab-org/gitlab/-/issues/342696';
 export const AGENT_FEEDBACK_KEY = 'agent_feedback_banner';
-
-export const CONNECT_MODAL_ID = 'connect-to-cluster-modal';

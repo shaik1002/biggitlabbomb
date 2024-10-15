@@ -129,11 +129,6 @@ InitializerConnections.raise_if_new_database_connection do
         end
       end
 
-      # HTTP Router
-      # Creating a black hole for /-/http_router/version since it is taken by the
-      # cloudflare worker, see: https://gitlab.com/gitlab-org/cells/http-router/-/issues/47
-      match '/http_router/version', to: proc { [204, {}, ['']] }, via: :all
-
       # '/-/health' implemented by BasicHealthCheck middleware
       get 'liveness' => 'health#liveness'
       get 'readiness' => 'health#readiness'
@@ -150,7 +145,6 @@ InitializerConnections.raise_if_new_database_connection do
       scope :ide, as: :ide, format: false do
         get '/', to: 'ide#index'
         get '/project', to: 'ide#index'
-        # note: This path has a hardcoded reference in the FE `app/assets/javascripts/ide/constants.js`
         get '/oauth_redirect', to: 'ide#oauth_redirect'
 
         scope path: 'project/:project_id', as: :project, constraints: { project_id: Gitlab::PathRegex.full_namespace_route_regex } do
@@ -165,7 +159,11 @@ InitializerConnections.raise_if_new_database_connection do
           get '/', to: 'ide#index'
         end
 
-        post '/reset_oauth_application_settings' => 'admin/applications#reset_web_ide_oauth_application_settings'
+        # Remote host can contain "." characters so it needs a constraint
+        post 'remote/:remote_host(/*remote_path)',
+          as: :remote,
+          to: 'web_ide/remote_ide#index',
+          constraints: { remote_host: %r{[^/?]+} }
       end
 
       draw :operations
@@ -213,7 +211,7 @@ InitializerConnections.raise_if_new_database_connection do
 
       resources :sent_notifications, only: [], constraints: { id: /\h{32}/ } do
         member do
-          match :unsubscribe, via: [:get, :post]
+          get :unsubscribe
         end
       end
 
@@ -273,16 +271,21 @@ InitializerConnections.raise_if_new_database_connection do
       end
     end
 
-    resources :groups, only: [:index, :new, :create]
-
-    get '/-/g/:id' => 'groups/redirect#redirect_from_id'
+    resources(:groups, only: [:index, :new, :create]) do
+      # The constraints ensure that the `group_id` parameter in the URL allows for multiple levels
+      # of subgroups, permitting both regular and encoded slashes (%2F).
+      # Deprecated in favor of /groups/*group_id/-/preview_markdown
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/442218
+      post :preview_markdown,
+        as: :preview_markdown_deprecated,
+        constraints: { group_id: %r{#{Gitlab::PathRegex.full_namespace_route_regex.source}(%2F#{Gitlab::PathRegex.full_namespace_route_regex.source})*} }
+    end
 
     draw :group
 
     resources :projects, only: [:index, :new, :create]
 
     get '/projects/:id' => 'projects/redirect#redirect_from_id'
-    get '/-/p/:id' => 'projects/redirect#redirect_from_id'
 
     draw :git_http
     draw :api

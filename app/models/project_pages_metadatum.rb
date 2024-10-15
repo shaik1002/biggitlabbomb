@@ -4,6 +4,7 @@ class ProjectPagesMetadatum < ApplicationRecord
   extend SuppressCompositePrimaryKeyWarning
 
   include EachBatch
+  include IgnorableColumns
 
   self.primary_key = :project_id
 

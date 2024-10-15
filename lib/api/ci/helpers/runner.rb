@@ -137,7 +137,7 @@ module API
           Gitlab::ApplicationContext.push(job: current_job, runner: current_runner)
         end
 
-        def track_ci_minutes_usage!(_build)
+        def track_ci_minutes_usage!(_build, _runner)
           # noop: overridden in EE
         end
 

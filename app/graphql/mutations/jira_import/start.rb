@@ -19,8 +19,7 @@ module Mutations
         description: 'Project key of the importer Jira project.'
       argument :jira_project_name, GraphQL::Types::String,
         required: false,
-        description: 'Project name of the importer Jira project.',
-        deprecated: { milestone: '17.4', reason: 'Argument is not used' }
+        description: 'Project name of the importer Jira project.'
       argument :project_path, GraphQL::Types::ID,
         required: true,
         description: 'Project to import the Jira project into.'
@@ -29,7 +28,7 @@ module Mutations
         required: false,
         description: 'Mapping of Jira to GitLab users.'
 
-      def resolve(project_path:, jira_project_key:, users_mapping:) # rubocop: disable GraphQL/UnusedArgument -- `jira_project_name` must be deprecated before we can remove it
+      def resolve(project_path:, jira_project_key:, users_mapping:)
         project = authorized_find!(project_path)
         mapping = users_mapping.to_ary.map(&:to_hash)
 

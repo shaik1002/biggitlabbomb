@@ -19,8 +19,6 @@ You can follow this tutorial to familiarize yourself with the contribution proce
    Confirm you can successfully [sign in](https://gitlab.com/users/sign_in).
 1. [Request access to the community forks](https://gitlab.com/groups/gitlab-community/community-members/-/group_members/request_access),
    a set of forks mirrored from GitLab repositories in order to improve the contributor experience.
-   - When you request access to the community forks you will receive an onboarding issue in the
-[community onboarding project](https://gitlab.com/gitlab-community/community-members/onboarding/-/issues).
    - For more information, read the [community forks blog post](https://about.gitlab.com/blog/2023/04/04/gitlab-community-forks/).
    - The access request will be manually verified and should take no more than a few hours.
    - If you use a local development environment, you can start making changes locally while you wait
@@ -29,8 +27,6 @@ You can follow this tutorial to familiarize yourself with the contribution proce
 1. We recommend you join the [GitLab Discord server](https://discord.com/invite/gitlab), where GitLab team
    members and the wider community are ready and waiting to answer your questions and offer support
    for making contributions.
-1. Visit the [Duo access project](https://gitlab.com/gitlab-community/community-members/duo-access)
-   to request a GitLab Duo Pro license and learn more about the benefits of Code Suggestions, Chat and more AI-powered features with [GitLab Duo](https://about.gitlab.com/gitlab-duo/).
 
 ## Choose how you want to contribute
 

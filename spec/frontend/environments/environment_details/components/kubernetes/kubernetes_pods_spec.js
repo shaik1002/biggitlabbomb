@@ -99,26 +99,6 @@ describe('~/environments/environment_details/components/kubernetes/kubernetes_po
       expect(findWorkloadTable().props('items')).toMatchObject(mockPodsTableItems);
     });
 
-    it('provides correct actions data to the workload table', async () => {
-      createWrapper();
-      await waitForPromises();
-
-      const actions = [
-        {
-          name: 'delete-pod',
-          text: 'Delete pod',
-          icon: 'remove',
-          variant: 'danger',
-          class: '!gl-text-red-500',
-        },
-      ];
-      const items = findWorkloadTable().props('items');
-
-      items.forEach((item) => {
-        expect(item.actions).toEqual(actions);
-      });
-    });
-
     it('emits a update-failed-state event for each pod', async () => {
       createWrapper();
       await waitForPromises();
@@ -132,23 +112,24 @@ describe('~/environments/environment_details/components/kubernetes/kubernetes_po
       ]);
     });
 
-    it('emits select-item event on item select', async () => {
+    it('emits show-resource-details event on item select', async () => {
       createWrapper();
       await waitForPromises();
 
-      expect(wrapper.emitted('select-item')).toBeUndefined();
+      expect(wrapper.emitted('show-resource-details')).toBeUndefined();
 
       findWorkloadTable().vm.$emit('select-item', mockPodsTableItems[0]);
-      expect(wrapper.emitted('select-item')).toEqual([[mockPodsTableItems[0]]]);
+      expect(wrapper.emitted('show-resource-details')).toEqual([[mockPodsTableItems[0]]]);
     });
 
-    it('emits delete-pod event when receives it from the WorkloadTable component', async () => {
+    it('emits remove-selection event when receives it from the WorkloadTable component', async () => {
       createWrapper();
       await waitForPromises();
-      expect(wrapper.emitted('delete-pod')).toBeUndefined();
 
-      findWorkloadTable().vm.$emit('delete-pod', mockPodsTableItems[0]);
-      expect(wrapper.emitted('delete-pod')).toHaveLength(1);
+      expect(wrapper.emitted('remove-selection')).toBeUndefined();
+
+      findWorkloadTable().vm.$emit('remove-selection');
+      expect(wrapper.emitted('remove-selection')).toHaveLength(1);
     });
 
     it('filters pods when receives a stat select event', async () => {

@@ -47,11 +47,7 @@ export default {
       );
     },
     showResetButton() {
-      return (
-        this.isInstanceOrGroupLevel &&
-        this.propsSource.resetPath &&
-        this.propsSource.manualActivation
-      );
+      return this.isInstanceOrGroupLevel && this.propsSource.resetPath;
     },
     showTestButton() {
       return this.propsSource.canTest;
@@ -74,7 +70,7 @@ export default {
 };
 </script>
 <template>
-  <section class="gl-justify-between lg:gl-flex">
+  <section class="lg:gl-flex gl-justify-content-space-between">
     <div>
       <template v-if="isInstanceOrGroupLevel">
         <gl-button

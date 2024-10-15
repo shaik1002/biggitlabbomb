@@ -115,7 +115,6 @@ export default {
     :data-user-id="userId"
     :data-username="popoverUsername"
     class="user-avatar-link js-user-link"
-    @click.stop
   >
     <user-avatar-image
       :class="imgCssWrapperClasses"

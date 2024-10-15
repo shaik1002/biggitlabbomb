@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -74,7 +74,6 @@ curl --request POST --header "PRIVATE-TOKEN: <your_access_token_for_destination_
   "id": 1,
   "status": "created",
   "source_type": "gitlab",
-  "source_url": "https://gitlab.example.com",
   "created_at": "2021-06-18T09:45:55.358Z",
   "updated_at": "2021-06-18T09:46:27.003Z",
   "has_failures": false
@@ -111,7 +110,6 @@ curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab
         "id": 1,
         "status": "finished",
         "source_type": "gitlab",
-        "source_url": "https://gitlab.example.com",
         "created_at": "2021-06-18T09:45:55.358Z",
         "updated_at": "2021-06-18T09:46:27.003Z",
         "has_failures": false
@@ -120,7 +118,6 @@ curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab
         "id": 2,
         "status": "started",
         "source_type": "gitlab",
-        "source_url": "https://gitlab.example.com",
         "created_at": "2021-06-18T09:47:36.581Z",
         "updated_at": "2021-06-18T09:47:58.286Z",
         "has_failures": false
@@ -234,7 +231,6 @@ curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab
   "id": 1,
   "status": "finished",
   "source_type": "gitlab",
-  "source_url": "https://gitlab.example.com",
   "created_at": "2021-06-18T09:45:55.358Z",
   "updated_at": "2021-06-18T09:46:27.003Z"
 }
@@ -393,7 +389,7 @@ curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/438281) in GitLab 17.1.
 
-Cancel a direct transfer migration.
+Cancel a direct transfer migration. Requires administrator access.
 
 ```plaintext
 POST /bulk_imports/:id/cancel

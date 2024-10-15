@@ -42,7 +42,7 @@ RSpec.describe 'container repository details', feature_category: :container_regi
   let(:user) { project.first_owner }
   let(:tags) { %w[latest tag1 tag2 tag3 tag4 tag5] }
   let(:container_repository_global_id) { container_repository.to_global_id.to_s }
-  let(:container_repository_details_response) { graphql_data['containerRepository'] }
+  let(:container_repository_details_response) { graphql_data.dig('containerRepository') }
 
   before do
     stub_container_registry_config(enabled: true)
@@ -55,7 +55,7 @@ RSpec.describe 'container repository details', feature_category: :container_regi
     it 'returns an error' do
       subject
 
-      expect(graphql_errors.first['message']).to match(/invalid value/)
+      expect(graphql_errors.first.dig('message')).to match(/invalid value/)
     end
   end
 
@@ -269,7 +269,7 @@ RSpec.describe 'container repository details', feature_category: :container_regi
   end
 
   context 'size field' do
-    let(:size_response) { container_repository_details_response['size'] }
+    let(:size_response) { container_repository_details_response.dig('size') }
     let(:variables) do
       { id: container_repository_global_id }
     end
@@ -316,7 +316,7 @@ RSpec.describe 'container repository details', feature_category: :container_regi
   end
 
   context 'lastPublishedAt field' do
-    let(:last_published_at_response) { container_repository_details_response['lastPublishedAt'] }
+    let(:last_published_at_response) { container_repository_details_response.dig('lastPublishedAt') }
     let(:variables) do
       { id: container_repository_global_id }
     end
@@ -369,7 +369,7 @@ RSpec.describe 'container repository details', feature_category: :container_regi
 
   context 'with tags with a manifest containing nil fields' do
     let(:tags_response) { container_repository_details_response.dig('tags', 'nodes') }
-    let(:errors) { container_repository_details_response['errors'] }
+    let(:errors) { container_repository_details_response.dig('errors') }
 
     %i[digest revision short_revision total_size created_at].each do |nilable_field|
       it "returns a list of tags with a nil #{nilable_field}" do
@@ -385,11 +385,12 @@ RSpec.describe 'container repository details', feature_category: :container_regi
 
   it_behaves_like 'handling graphql network errors with the container registry'
 
-  context 'when list tags API is enabled' do
+  context 'when list tags API is enabled', :saas do
     before do
       stub_container_registry_config(enabled: true)
+      allow(ContainerRegistry::GitlabApiClient).to receive(:supports_gitlab_api?).and_return(true)
+
       allow_next_instances_of(ContainerRegistry::GitlabApiClient, nil) do |client|
-        allow(client).to receive(:supports_gitlab_api?).and_return(true)
         allow(client).to receive(:tags).and_return(response_body)
       end
     end
@@ -562,7 +563,7 @@ RSpec.describe 'container repository details', feature_category: :container_regi
     end
 
     let(:reference) { 'latest' }
-    let(:manifest_response) { container_repository_details_response['manifest'] }
+    let(:manifest_response) { container_repository_details_response.dig('manifest') }
     let(:variables) do
       { id: container_repository_global_id, n: reference }
     end
@@ -628,7 +629,7 @@ RSpec.describe 'container repository details', feature_category: :container_regi
   end
 
   context 'migration_state field' do
-    let(:migration_state_response) { container_repository_details_response['migrationState'] }
+    let(:migration_state_response) { container_repository_details_response.dig('migrationState') }
     let(:variables) do
       { id: container_repository_global_id }
     end

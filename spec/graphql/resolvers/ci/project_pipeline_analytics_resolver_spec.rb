@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Resolvers::Ci::ProjectPipelineAnalyticsResolver, :click_house, feature_category: :fleet_visibility do
+RSpec.describe Resolvers::Ci::ProjectPipelineAnalyticsResolver, feature_category: :fleet_visibility do
   include GraphqlHelpers
 
   let_it_be(:public_project) { create(:project, :public) }
@@ -25,7 +25,9 @@ RSpec.describe Resolvers::Ci::ProjectPipelineAnalyticsResolver, :click_house, fe
     it 'loads all fields' do
       result = resolve_statistics(project, {})
       expect(result.keys).to contain_exactly(
-        :aggregate,
+        :week_pipelines,
+        :month_pipelines,
+        :year_pipelines,
         :week_pipelines_labels,
         :week_pipelines_totals,
         :week_pipelines_successful,
@@ -45,7 +47,11 @@ RSpec.describe Resolvers::Ci::ProjectPipelineAnalyticsResolver, :click_house, fe
 
       it 'does not load fields that execute queries' do
         result = resolve_statistics(project, {})
-        expect(result.keys).to be_empty
+        expect(result.keys).to contain_exactly(
+          :week_pipelines,
+          :month_pipelines,
+          :year_pipelines
+        )
       end
     end
   end

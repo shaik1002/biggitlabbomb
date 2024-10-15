@@ -1,6 +1,6 @@
 import { baseQueries, baseMutations } from './resolvers/base';
 import { kubernetesQueries, kubernetesMutations } from './resolvers/kubernetes';
-import { fluxQueries, fluxMutations } from './resolvers/flux';
+import fluxQueries from './resolvers/flux';
 
 export const resolvers = (endpoint) => ({
   Query: {
@@ -11,6 +11,5 @@ export const resolvers = (endpoint) => ({
   Mutation: {
     ...baseMutations,
     ...kubernetesMutations,
-    ...fluxMutations,
   },
 });

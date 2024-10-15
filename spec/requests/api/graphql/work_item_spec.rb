@@ -91,6 +91,19 @@ RSpec.describe 'Query.work_item(id)', feature_category: :team_planning do
       )
     end
 
+    context 'when work item is created at the group level' do
+      let_it_be(:group_work_item) { create(:work_item, :group_level, namespace: group) }
+      let(:global_id) { group_work_item.to_gid.to_s }
+
+      it 'always returns false in the archived field' do
+        expect(work_item_data).to include(
+          'id' => group_work_item.to_gid.to_s,
+          'iid' => group_work_item.iid.to_s,
+          'archived' => false
+        )
+      end
+    end
+
     context 'when querying work item type information' do
       include_context 'with work item types request context'
 
@@ -169,22 +182,6 @@ RSpec.describe 'Query.work_item(id)', feature_category: :team_planning do
                 }
                 hasChildren
                 hasParent
-                rolledUpCountsByType {
-                  workItemType {
-                    name
-                  }
-                  countsByState {
-                    all
-                    opened
-                    closed
-                  }
-                }
-                depthLimitReachedByType {
-                  workItemType {
-                    name
-                  }
-                  depthLimitReached
-                }
               }
             }
           GRAPHQL
@@ -203,23 +200,7 @@ RSpec.describe 'Query.work_item(id)', feature_category: :team_planning do
                     hash_including('id' => child_link2.work_item.to_gid.to_s)
                   ]) },
                 'hasChildren' => true,
-                'hasParent' => false,
-                'rolledUpCountsByType' => match_array([
-                  hash_including(
-                    'workItemType' => hash_including('name' => 'Task'),
-                    'countsByState' => {
-                      'all' => 2,
-                      'opened' => 2,
-                      'closed' => 0
-                    }
-                  )
-                ]),
-                'depthLimitReachedByType' => match_array([
-                  hash_including(
-                    'workItemType' => hash_including('name' => 'Task'),
-                    'depthLimitReached' => false
-                  )
-                ])
+                'hasParent' => false
               )
             )
           )
@@ -614,16 +595,8 @@ RSpec.describe 'Query.work_item(id)', feature_category: :team_planning do
       describe 'linked items widget' do
         let_it_be(:related_item) { create(:work_item, project: project) }
         let_it_be(:blocked_item) { create(:work_item, project: project) }
-        let_it_be(:link1) do
-          create(:work_item_link, source: work_item, target: related_item, link_type: 'relates_to',
-            created_at: Time.current + 1.day)
-        end
-
-        let_it_be(:link2) do
-          create(:work_item_link, source: work_item, target: blocked_item, link_type: 'blocks',
-            created_at: Time.current + 2.days)
-        end
-
+        let_it_be(:link1) { create(:work_item_link, source: work_item, target: related_item, link_type: 'relates_to') }
+        let_it_be(:link2) { create(:work_item_link, source: work_item, target: blocked_item, link_type: 'blocks') }
         let(:work_item_fields) do
           <<~GRAPHQL
             id
@@ -688,7 +661,7 @@ RSpec.describe 'Query.work_item(id)', feature_category: :team_planning do
             include_context 'no sort argument'
 
             let(:first_param) { 1 }
-            let(:all_records) { [link2, link1] }
+            let(:all_records) { [link1, link2] }
             let(:data_path) { %w[workItem widgets linkedItems] }
 
             def widget_fields(args)
@@ -827,6 +800,26 @@ RSpec.describe 'Query.work_item(id)', feature_category: :team_planning do
           # TODO: Fix existing N+1 queries in https://gitlab.com/gitlab-org/gitlab/-/issues/414747
           expect { post_graphql(query, current_user: developer) }.not_to exceed_query_limit(control).with_threshold(4)
           expect_graphql_errors_to_be_empty
+        end
+
+        context 'when work item is associated with a group' do
+          let_it_be(:group_work_item) { create(:work_item, :group_level, namespace: group) }
+          let_it_be(:group_work_item_note) { create(:note, noteable: group_work_item, author: developer, project: nil) }
+          let(:global_id) { group_work_item.to_gid.to_s }
+
+          before_all do
+            create(:award_emoji, awardable: group_work_item_note, name: 'rocket', user: developer)
+          end
+
+          it 'returns notes for the group work item' do
+            all_widgets = graphql_dig_at(work_item_data, :widgets)
+            notes_widget = all_widgets.find { |x| x['type'] == 'NOTES' }
+            notes = graphql_dig_at(notes_widget['discussions'], :nodes).flat_map { |d| d['notes']['nodes'] }
+
+            expect(notes).to contain_exactly(
+              hash_including('body' => group_work_item_note.note)
+            )
+          end
         end
       end
     end
@@ -1076,7 +1069,7 @@ RSpec.describe 'Query.work_item(id)', feature_category: :team_planning do
       end
 
       context 'when work item base type is non issue' do
-        let_it_be(:epic) { create(:work_item, :task, project: project) }
+        let_it_be(:epic) { create(:work_item, :task, namespace: group) }
         let_it_be(:global_id) { epic.to_gid.to_s }
 
         it 'returns without design' do

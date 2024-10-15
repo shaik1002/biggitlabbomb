@@ -20,8 +20,6 @@ import EmptyViewer from '~/repository/components/blob_viewers/empty_viewer.vue';
 import SourceViewer from '~/vue_shared/components/source_viewer/source_viewer.vue';
 import blobInfoQuery from 'shared_queries/repository/blob_info.query.graphql';
 import projectInfoQuery from '~/repository/queries/project_info.query.graphql';
-import highlightMixin from '~/repository/mixins/highlight_mixin';
-import getRefMixin from '~/repository/mixins/get_ref';
 import CodeIntelligence from '~/code_navigation/components/app.vue';
 import * as urlUtility from '~/lib/utils/url_utility';
 import { isLoggedIn, handleLocationHash } from '~/lib/utils/common_utils';
@@ -36,6 +34,7 @@ import {
   projectMock,
   userPermissionsMock,
   propsMock,
+  refMock,
   axiosMockResponse,
 } from '../mock_data';
 
@@ -128,7 +127,7 @@ const createComponent = async (mockData = {}, mountFn = shallowMount, mockRoute 
       store: createMockStore(),
       apolloProvider: fakeApollo,
       propsData: propsMock,
-      mixins: [getRefMixin, highlightMixin],
+      mixins: [{ data: () => ({ ref: refMock }) }],
       mocks: {
         $route: mockRoute,
         $router: mockRouter,
@@ -545,27 +544,24 @@ describe('Blob content viewer component', () => {
     });
 
     it.each`
-      loggedIn | canModifyBlob | isUsingLfs | createMergeRequestIn | forkProject | showSingleFileEditorForkSuggestion
-      ${true}  | ${true}       | ${false}   | ${true}              | ${true}     | ${false}
-      ${true}  | ${false}      | ${false}   | ${true}              | ${true}     | ${true}
-      ${false} | ${false}      | ${false}   | ${true}              | ${true}     | ${false}
-      ${true}  | ${false}      | ${false}   | ${false}             | ${true}     | ${false}
-      ${true}  | ${false}      | ${false}   | ${true}              | ${false}    | ${false}
-      ${true}  | ${false}      | ${true}    | ${true}              | ${true}     | ${false}
+      loggedIn | canModifyBlob | createMergeRequestIn | forkProject | showForkSuggestion
+      ${true}  | ${false}      | ${true}              | ${true}     | ${true}
+      ${false} | ${false}      | ${true}              | ${true}     | ${false}
+      ${true}  | ${true}       | ${false}             | ${true}     | ${false}
+      ${true}  | ${true}       | ${true}              | ${false}    | ${false}
     `(
       'shows/hides a fork suggestion according to a set of conditions',
       async ({
         loggedIn,
         canModifyBlob,
-        isUsingLfs,
         createMergeRequestIn,
         forkProject,
-        showSingleFileEditorForkSuggestion,
+        showForkSuggestion,
       }) => {
         isLoggedIn.mockReturnValueOnce(loggedIn);
         await createComponent(
           {
-            blob: { ...simpleViewerMock, canModifyBlob, storedExternally: isUsingLfs },
+            blob: { ...simpleViewerMock, canModifyBlob },
             createMergeRequestIn,
             forkProject,
           },
@@ -575,42 +571,7 @@ describe('Blob content viewer component', () => {
         findBlobHeader().vm.$emit('edit', 'simple');
         await nextTick();
 
-        expect(findForkSuggestion().exists()).toBe(showSingleFileEditorForkSuggestion);
-      },
-    );
-
-    it.each`
-      loggedIn | canModifyBlobWithWebIde | isUsingLfs | createMergeRequestIn | forkProject | showWebIdeForkSuggestion
-      ${true}  | ${true}                 | ${false}   | ${true}              | ${true}     | ${false}
-      ${true}  | ${false}                | ${false}   | ${true}              | ${true}     | ${true}
-      ${false} | ${false}                | ${false}   | ${true}              | ${true}     | ${false}
-      ${true}  | ${false}                | ${false}   | ${false}             | ${true}     | ${false}
-      ${true}  | ${false}                | ${false}   | ${true}              | ${false}    | ${false}
-      ${true}  | ${false}                | ${true}    | ${true}              | ${true}     | ${false}
-    `(
-      'shows/hides a fork suggestion for WebIDE according to a set of conditions',
-      async ({
-        loggedIn,
-        canModifyBlobWithWebIde,
-        isUsingLfs,
-        createMergeRequestIn,
-        forkProject,
-        showWebIdeForkSuggestion,
-      }) => {
-        isLoggedIn.mockReturnValueOnce(loggedIn);
-        await createComponent(
-          {
-            blob: { ...simpleViewerMock, canModifyBlobWithWebIde, storedExternally: isUsingLfs },
-            createMergeRequestIn,
-            forkProject,
-          },
-          mount,
-        );
-
-        findBlobHeader().vm.$emit('edit', 'ide');
-        await nextTick();
-
-        expect(findForkSuggestion().exists()).toBe(showWebIdeForkSuggestion);
+        expect(findForkSuggestion().exists()).toBe(showForkSuggestion);
       },
     );
   });

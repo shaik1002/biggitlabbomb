@@ -1,4 +1,5 @@
 import { GlSprintf } from '@gitlab/ui';
+import { __ } from '~/locale';
 import { mountExtended, shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import RunnerSummaryCell from '~/ci/runner/components/cells/runner_summary_cell.vue';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
@@ -22,7 +23,8 @@ describe('RunnerTypeCell', () => {
   const findLockIcon = () => wrapper.findByTestId('lock-icon');
   const findRunnerTags = () => wrapper.findComponent(RunnerTags);
   const findRunnerSummaryField = (icon) =>
-    wrapper.findAllComponents(RunnerSummaryField).wrappers.find((w) => w.props('icon') === icon);
+    wrapper.findAllComponents(RunnerSummaryField).filter((w) => w.props('icon') === icon)
+      .wrappers[0];
 
   const createComponent = ({ runner, mountFn = shallowMountExtended, ...options } = {}) => {
     wrapper = mountFn(RunnerSummaryCell, {
@@ -57,7 +59,7 @@ describe('RunnerTypeCell', () => {
       mountFn: mountExtended,
     });
 
-    expect(findRunnerManagersBadge().find('*').exists()).toBe(false);
+    expect(findRunnerManagersBadge().html()).toBe('');
   });
 
   it('Displays runner manager count', () => {
@@ -110,7 +112,7 @@ describe('RunnerTypeCell', () => {
     });
 
     expect(findRunnerSummaryField('clock').findComponent(TimeAgo).exists()).toBe(false);
-    expect(findRunnerSummaryField('clock').text()).toContain('Never');
+    expect(findRunnerSummaryField('clock').text()).toContain(__('Never'));
   });
 
   describe('IP address', () => {

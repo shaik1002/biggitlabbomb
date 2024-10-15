@@ -7,15 +7,15 @@ module Banzai
     #
     # Based on HTML::Pipeline::EmojiFilter
     class EmojiFilter < HTML::Pipeline::Filter
-      prepend Concerns::TimeoutFilterHandler
+      include Concerns::TimeoutFilterHandler
       prepend Concerns::PipelineTimingCheck
 
       IGNORED_ANCESTOR_TAGS = %w[pre code tt].to_set
 
-      def call
+      def call_with_timeout
         @emoji_count = 0
 
-        doc.xpath('descendant-or-self::text()[not(ancestor::a[@data-footnote-backref])]').each do |node|
+        doc.xpath('descendant-or-self::text()').each do |node|
           break if Banzai::Filter.filter_item_limit_exceeded?(@emoji_count)
           next if has_ancestor?(node, IGNORED_ANCESTOR_TAGS)
 

@@ -134,7 +134,7 @@ module Gitlab
         end
 
         def with_lock_retries(&block)
-          Gitlab::Database::Partitioning::WithPartitioningLockRetries.new(
+          Gitlab::Database::WithLockRetries.new(
             klass: self.class,
             logger: Gitlab::AppLogger,
             connection: connection

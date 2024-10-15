@@ -60,7 +60,7 @@ RSpec.describe ::Ci::Runners::SetRunnerAssociatedProjectsService, '#execute', fe
           runner.reload
 
           expect(runner.owner_project).to eq(owner_project)
-          expect(runner.runner_projects.order(:id).map(&:project_id)).to eq([owner_project, *new_projects].map(&:id))
+          expect(runner.projects.ids).to match_array([owner_project, *new_projects].map(&:id))
         end
       end
 
@@ -73,7 +73,7 @@ RSpec.describe ::Ci::Runners::SetRunnerAssociatedProjectsService, '#execute', fe
           runner.reload
 
           expect(runner.owner_project).to eq(owner_project)
-          expect(runner.runner_projects.order(:id).map(&:project_id)).to eq([owner_project, *new_projects].map(&:id))
+          expect(runner.projects.ids).to eq([owner_project, *new_projects].map(&:id))
         end
       end
 
@@ -101,7 +101,7 @@ RSpec.describe ::Ci::Runners::SetRunnerAssociatedProjectsService, '#execute', fe
 
         expect(execute).to be_error
         expect(execute.reason).to eq(:failed_runner_project_destroy)
-        expect(runner.reload.runner_projects.order(:id).map(&:project_id)).to eq(original_projects.map(&:id))
+        expect(runner.reload.projects.order(:id)).to eq(original_projects)
       end
     end
 
@@ -122,7 +122,7 @@ RSpec.describe ::Ci::Runners::SetRunnerAssociatedProjectsService, '#execute', fe
             expect(execute).to be_error
             expect(execute.reason).to eq(:not_authorized_to_add_runner_in_project)
             expect(execute.errors).to contain_exactly(_('user is not authorized to add runners to project'))
-            expect(runner.reload.runner_projects.order(:id).map(&:project_id)).to eq(original_projects.map(&:id))
+            expect(runner.reload.projects.order(:id)).to eq(original_projects)
           end
         end
 
@@ -136,7 +136,7 @@ RSpec.describe ::Ci::Runners::SetRunnerAssociatedProjectsService, '#execute', fe
             expect(execute.errors).to contain_exactly(
               _('runner can only be assigned to projects in the same organization')
             )
-            expect(runner.reload.runner_projects.order(:id).map(&:project_id)).to eq(original_projects.map(&:id))
+            expect(runner.reload.projects.order(:id)).to eq(original_projects)
           end
 
           context 'with multiple failures' do
@@ -149,35 +149,7 @@ RSpec.describe ::Ci::Runners::SetRunnerAssociatedProjectsService, '#execute', fe
                 _('runner can only be assigned to projects in the same organization'),
                 _('user is not authorized to add runners to project')
               )
-              expect(runner.reload.runner_projects.order(:id).map(&:project_id)).to eq(original_projects.map(&:id))
-            end
-          end
-        end
-
-        context 'when runner has no associated projects' do
-          let(:runner) { create(:ci_runner, :project, :without_projects) }
-          let(:original_projects) { [] }
-          let(:owner_project) { new_projects.first }
-
-          it 'assigns associated projects and returns error response' do
-            expect(execute).to be_error
-
-            runner.reload
-
-            expect(runner.owner_project).to be_nil
-            expect(runner.projects.ids).to be_empty
-          end
-
-          context 'and no new projects are being associated' do
-            let(:new_projects) { [] }
-
-            it 'does nothing and returns error response' do
-              expect(execute).to be_error
-
-              runner.reload
-
-              expect(runner.owner_project).to be_nil
-              expect(runner.projects.ids).to be_empty
+              expect(runner.reload.projects.order(:id)).to eq(original_projects)
             end
           end
         end
@@ -190,38 +162,6 @@ RSpec.describe ::Ci::Runners::SetRunnerAssociatedProjectsService, '#execute', fe
 
       it_behaves_like 'with successful requests'
       it_behaves_like 'with failing destroy calls'
-
-      context 'when runner has no associated projects' do
-        let(:runner) { create(:ci_runner, :project, :without_projects) }
-        let(:original_projects) { [] }
-
-        context 'when associating projects' do
-          let(:new_projects) { [project3, project4] }
-          let(:owner_project) { new_projects.first }
-
-          it 'assigns associated projects and returns success response' do
-            expect(execute).to be_success
-
-            runner.reload
-
-            expect(runner.owner_project).to eq(owner_project)
-            expect(runner.runner_projects.order(:id).map(&:project_id)).to eq(new_projects.map(&:id))
-          end
-        end
-
-        context 'when associating no projects' do
-          let(:new_projects) { [] }
-
-          it 'does nothing and returns success response' do
-            expect(execute).to be_success
-
-            runner.reload
-
-            expect(runner.owner_project).to be_nil
-            expect(runner.projects.ids).to be_empty
-          end
-        end
-      end
     end
   end
 end

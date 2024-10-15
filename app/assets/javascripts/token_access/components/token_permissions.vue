@@ -1,9 +1,8 @@
 <script>
-import { GlButton, GlFormCheckbox, GlIcon, GlLink, GlLoadingIcon } from '@gitlab/ui';
+import { GlButton, GlCard, GlFormCheckbox, GlIcon, GlLink, GlLoadingIcon } from '@gitlab/ui';
 import { createAlert } from '~/alert';
 import { __, sprintf } from '~/locale';
 import { helpPagePath } from '~/helpers/help_page_helper';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
 import updateCiJobTokenPermissionsMutation from '../graphql/mutations/update_ci_job_token_permissions.mutation.graphql';
 import getCiJobTokenPermissionsQuery from '../graphql/queries/get_ci_job_token_permissions.query.graphql';
 
@@ -11,15 +10,14 @@ export default {
   name: 'TokenPermissions',
   components: {
     GlButton,
+    GlCard,
     GlFormCheckbox,
     GlIcon,
     GlLink,
     GlLoadingIcon,
-    CrudComponent,
   },
   inject: ['fullPath'],
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     ciCdSettings: {
       query: getCiJobTokenPermissionsQuery,
       variables() {
@@ -92,21 +90,29 @@ export default {
     },
   },
   docsLink: helpPagePath('ci/jobs/ci_job_token', {
-    anchor: 'git-push-to-your-project-repository',
+    anchor: 'push-to-a-project-repository-using-a-job-token',
   }),
 };
 </script>
 <template>
   <div>
-    <gl-loading-icon v-if="isPermissionsQueryLoading" size="md" class="gl-mt-5" />
-    <crud-component v-else :title="s__('CICD|Additional permissions')">
-      <template #description>
-        {{ s__("CICD|Grant additional access permissions to this project's CI/CD job tokens.") }}
+    <gl-loading-icon v-if="isPermissionsQueryLoading" size="lg" class="gl-mt-5" />
+    <gl-card v-else class="gl-new-card" header-class="gl-new-card-header">
+      <template #header>
+        <div class="gl-new-card-title-wrapper gl-flex-col gl-flex-wrap">
+          <div class="gl-new-card-title">
+            <h5 class="gl-mt-0 gl-mb-2">{{ s__('CICD|Additional permissions') }}</h5>
+          </div>
+          <p class="gl-text-secondary gl-my-0">
+            {{
+              s__("CICD|Grant additional access permissions to this project's CI/CD job tokens.")
+            }}
+          </p>
+        </div>
       </template>
-
       <gl-form-checkbox :checked="allowPushToRepo" @input="updateAllowPushToRepo">
         {{ s__('CICD|Allow Git push requests to the repository') }}
-        <p class="gl-mb-3 gl-text-subtle">
+        <p class="gl-text-secondary gl-mb-3">
           {{
             s__(
               'CICD|CI/CD job token can be used to authenticate a Git push to this repository, using the permissions of the user that started the job.',
@@ -120,6 +126,6 @@ export default {
       <gl-button variant="confirm" :loading="isUpdating" @click="updateCiJobTokenPermissions"
         >{{ __('Save Changes') }}
       </gl-button>
-    </crud-component>
+    </gl-card>
   </div>
 </template>

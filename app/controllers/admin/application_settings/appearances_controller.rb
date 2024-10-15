@@ -6,7 +6,8 @@ class Admin::ApplicationSettings::AppearancesController < Admin::ApplicationCont
   feature_category :navigation
   urgency :low
 
-  def show; end
+  def show
+  end
 
   def preview_sign_in
     render 'preview_sign_in', layout: 'devise'

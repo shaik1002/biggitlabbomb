@@ -246,31 +246,55 @@ RSpec.describe SessionsController, feature_category: :system_access do
           create(:broadcast_message_dismissal, broadcast_message: other_message, user: build(:user))
         end
 
-        it 'creates dismissed cookies based on db records' do
-          expect(cookies["hide_broadcast_message_#{message_banner.id}"]).to be_nil
-          expect(cookies["hide_broadcast_message_#{message_notification.id}"]).to be_nil
-          expect(cookies["hide_broadcast_message_#{other_message.id}"]).to be_nil
-
-          post_action
-
-          expect(cookies["hide_broadcast_message_#{message_banner.id}"]).to be(true)
-          expect(cookies["hide_broadcast_message_#{message_notification.id}"]).to be(true)
-          expect(cookies["hide_broadcast_message_#{other_message.id}"]).to be_nil
-        end
-
-        context 'when dismissal is expired' do
-          let_it_be(:message) { create(:broadcast_message, broadcast_type: :banner, message: 'banner') }
-
+        context 'when new_broadcast_message_dismissal feature flag is not enabled' do
           before do
-            create(:broadcast_message_dismissal, :expired, broadcast_message: message, user: user)
+            stub_feature_flags(new_broadcast_message_dismissal: false)
           end
 
-          it 'does not create cookie' do
-            expect(cookies["hide_broadcast_message_#{message.id}"]).to be_nil
+          it 'does not create dismissed cookies based on db records' do
+            expect(cookies["hide_broadcast_message_#{message_banner.id}"]).to be_nil
+            expect(cookies["hide_broadcast_message_#{message_notification.id}"]).to be_nil
+            expect(cookies["hide_broadcast_message_#{other_message.id}"]).to be_nil
 
             post_action
 
-            expect(cookies["hide_broadcast_message_#{message.id}"]).to be_nil
+            expect(cookies["hide_broadcast_message_#{message_banner.id}"]).to be_nil
+            expect(cookies["hide_broadcast_message_#{message_notification.id}"]).to be_nil
+            expect(cookies["hide_broadcast_message_#{other_message.id}"]).to be_nil
+          end
+        end
+
+        context 'when new_broadcast_message_dismissal feature flag is enabled' do
+          before do
+            stub_feature_flags(new_broadcast_message_dismissal: true)
+          end
+
+          it 'creates dismissed cookies based on db records' do
+            expect(cookies["hide_broadcast_message_#{message_banner.id}"]).to be_nil
+            expect(cookies["hide_broadcast_message_#{message_notification.id}"]).to be_nil
+            expect(cookies["hide_broadcast_message_#{other_message.id}"]).to be_nil
+
+            post_action
+
+            expect(cookies["hide_broadcast_message_#{message_banner.id}"]).to be(true)
+            expect(cookies["hide_broadcast_message_#{message_notification.id}"]).to be(true)
+            expect(cookies["hide_broadcast_message_#{other_message.id}"]).to be_nil
+          end
+
+          context 'when dismissal is expired' do
+            let_it_be(:message) { create(:broadcast_message, broadcast_type: :banner, message: 'banner') }
+
+            before do
+              create(:broadcast_message_dismissal, :expired, broadcast_message: message, user: user)
+            end
+
+            it 'does not create cookie' do
+              expect(cookies["hide_broadcast_message_#{message.id}"]).to be_nil
+
+              post_action
+
+              expect(cookies["hide_broadcast_message_#{message.id}"]).to be_nil
+            end
           end
         end
       end
@@ -679,6 +703,61 @@ RSpec.describe SessionsController, feature_category: :system_access do
     end
   end
 
+  describe '#set_current_context' do
+    let_it_be(:user) { create(:user) }
+
+    context 'when signed in' do
+      before do
+        sign_in(user)
+      end
+
+      it 'sets the username and caller_id in the context' do
+        expect(controller).to receive(:destroy).and_wrap_original do |m, *args|
+          expect(Gitlab::ApplicationContext.current)
+            .to include('meta.user' => user.username, 'meta.caller_id' => 'SessionsController#destroy')
+
+          m.call(*args)
+        end
+
+        delete :destroy
+      end
+    end
+
+    context 'when not signed in' do
+      it 'sets the caller_id in the context' do
+        expect(controller).to receive(:new).and_wrap_original do |m, *args|
+          expect(Gitlab::ApplicationContext.current)
+            .to include('meta.caller_id' => 'SessionsController#new')
+          expect(Gitlab::ApplicationContext.current)
+            .not_to include('meta.user')
+
+          m.call(*args)
+        end
+
+        get :new
+      end
+    end
+
+    context 'when the user becomes locked' do
+      before do
+        user.update!(failed_attempts: User.maximum_attempts.pred)
+      end
+
+      it 'sets the caller_id in the context' do
+        allow_any_instance_of(User).to receive(:lock_access!).and_wrap_original do |m, *args|
+          expect(Gitlab::ApplicationContext.current)
+            .to include('meta.caller_id' => 'SessionsController#create')
+          expect(Gitlab::ApplicationContext.current)
+            .not_to include('meta.user')
+
+          m.call(*args)
+        end
+
+        post :create, params: { user: { login: user.username, password: user.password.succ } }
+      end
+    end
+  end
+
   describe '#destroy' do
     before do
       sign_in(user)
@@ -692,31 +771,6 @@ RSpec.describe SessionsController, feature_category: :system_access do
 
         expect(response).to redirect_to(new_user_session_path)
         expect(controller.current_user).to be_nil
-      end
-    end
-
-    context 'clearing browser data' do
-      let(:user) { create(:user) }
-
-      before do
-        cookies[:test_cookie] = 'test-value'
-        cookies.encrypted[:test_encrypted_cookie] = 'test-value'
-        cookies.signed[:test_signed_cookie] = 'test-value'
-      end
-
-      it 'clears all cookies known by Rails' do
-        delete :destroy
-
-        %w[test_cookie test_encrypted_cookie test_signed_cookie].each do |key|
-          expect(response.cookies).to have_key(key)
-          expect(response.cookies[key]).to be_nil
-        end
-      end
-
-      it 'sends Clear-Site-Data header for all non-cookie data' do
-        delete :destroy
-
-        expect(response.headers['Clear-Site-Data']).to eq('"cache", "storage", "executionContexts", "clientHints"')
       end
     end
   end

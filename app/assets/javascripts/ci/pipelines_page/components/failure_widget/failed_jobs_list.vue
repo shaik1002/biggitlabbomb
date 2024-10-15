@@ -1,5 +1,5 @@
 <script>
-import { GlAlert, GlLink, GlLoadingIcon, GlSprintf } from '@gitlab/ui';
+import { GlLoadingIcon } from '@gitlab/ui';
 import { createAlert } from '~/alert';
 import { __, s__, sprintf } from '~/locale';
 import { getQueryHeaders } from '~/ci/pipeline_details/graph/utils';
@@ -16,10 +16,7 @@ const STAGE_HEADER = __('Stage');
 
 export default {
   components: {
-    GlAlert,
-    GlLink,
     GlLoadingIcon,
-    GlSprintf,
     FailedJobDetails,
   },
   inject: ['graphqlPath'],
@@ -28,10 +25,6 @@ export default {
       required: true,
       type: Number,
     },
-    isMaximumJobLimitReached: {
-      required: true,
-      type: Boolean,
-    },
     isPipelineActive: {
       required: true,
       type: Boolean,
@@ -39,10 +32,6 @@ export default {
     pipelineIid: {
       type: Number,
       required: true,
-    },
-    pipelinePath: {
-      required: true,
-      type: String,
     },
     projectPath: {
       type: String,
@@ -89,6 +78,9 @@ export default {
   computed: {
     graphqlResourceEtag() {
       return graphqlEtagPipelinePath(this.graphqlPath, this.pipelineIid);
+    },
+    hasFailedJobs() {
+      return this.failedJobs.length > 0;
     },
     isInitialLoading() {
       return this.isLoading && !this.isLoadingMore;
@@ -149,46 +141,28 @@ export default {
     },
   },
   columns: [
-    { text: JOB_NAME_HEADER, class: 'col-4' },
-    { text: STAGE_HEADER, class: 'col-3' },
-    { text: JOB_ID_HEADER, class: 'col-3' },
+    { text: JOB_NAME_HEADER, class: 'col-6' },
+    { text: STAGE_HEADER, class: 'col-2' },
+    { text: JOB_ID_HEADER, class: 'col-2' },
   ],
   i18n: {
-    maximumJobLimitAlert: {
-      title: s__('Pipelines|Maximum list size reached'),
-      message: s__(
-        `Pipelines| The list can only display 100 jobs. To view all jobs, %{linkStart}go to this pipeline's details page.%{linkEnd}`,
-      ),
-    },
     fetchError: __('There was a problem fetching failed jobs'),
+    noFailedJobs: s__('Pipeline|No failed jobs in this pipeline 🎉'),
     retriedJobsSuccess: __('%{jobName} job is being retried'),
   },
 };
 </script>
 
 <template>
-  <div class="gl-mb-4">
+  <div>
     <gl-loading-icon v-if="isInitialLoading" class="gl-p-4" />
+    <div v-else-if="!hasFailedJobs" class="gl-p-4">{{ $options.i18n.noFailedJobs }}</div>
     <div v-else class="container-fluid gl-grid-rows-auto">
-      <gl-alert
-        v-if="isMaximumJobLimitReached"
-        :title="$options.i18n.maximumJobLimitAlert.title"
-        variant="warning"
-        class="gl-mt-4"
-      >
-        <gl-sprintf :message="$options.i18n.maximumJobLimitAlert.message">
-          <template #link="{ content }">
-            <gl-link class="!gl-no-underline" :href="pipelinePath" target="_blank">
-              {{ content }}
-            </gl-link>
-          </template>
-        </gl-sprintf>
-      </gl-alert>
       <div class="row gl-my-4 gl-text-gray-900">
         <div
           v-for="col in $options.columns"
           :key="col.text"
-          class="gl-flex gl-font-bold"
+          class="gl-font-bold gl-text-left"
           :class="col.class"
           data-testid="header"
         >

@@ -19,7 +19,7 @@ RSpec.describe QueueBackfillDastSiteValidationsProjectId, feature_category: :dyn
           interval: described_class::DELAY_INTERVAL,
           batch_size: described_class::BATCH_SIZE,
           sub_batch_size: described_class::SUB_BATCH_SIZE,
-          gitlab_schema: :gitlab_sec,
+          gitlab_schema: :gitlab_main_cell,
           job_arguments: [
             :project_id,
             :dast_site_tokens,

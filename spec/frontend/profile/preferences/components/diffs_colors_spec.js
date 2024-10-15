@@ -1,4 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
+import { s__ } from '~/locale';
 import ColorPicker from '~/vue_shared/components/color_picker/color_picker.vue';
 import DiffsColors from '~/profile/preferences/components/diffs_colors.vue';
 import DiffsColorsPreview from '~/profile/preferences/components/diffs_colors_preview.vue';
@@ -13,8 +14,8 @@ describe('DiffsColors component', () => {
   };
 
   const initialSuggestedColors = {
-    '#d99530': 'Orange',
-    '#1f75cb': 'Blue',
+    '#d99530': s__('SuggestedColors|Orange'),
+    '#1f75cb': s__('SuggestedColors|Blue'),
   };
 
   const findColorPickers = () => wrapper.findAllComponents(ColorPicker);
@@ -80,12 +81,12 @@ describe('DiffsColors component', () => {
 
       expect(colorPickers.length).toBe(2);
       expect(colorPickers.at(0).props()).toMatchObject({
-        label: 'Color for removed lines',
+        label: s__('Preferences|Color for removed lines'),
         value: '#ff0000',
         state: true,
       });
       expect(colorPickers.at(1).props()).toMatchObject({
-        label: 'Color for added lines',
+        label: s__('Preferences|Color for added lines'),
         value: '#00ff00',
         state: true,
       });
@@ -110,8 +111,8 @@ describe('DiffsColors component', () => {
         createComponent();
 
         expect(suggestedColors()).toMatchObject({
-          '#111111': 'Default addition color',
-          '#222222': 'Default removal color',
+          '#111111': s__('SuggestedColors|Default addition color'),
+          '#222222': s__('SuggestedColors|Default removal color'),
         });
       });
 
@@ -119,14 +120,22 @@ describe('DiffsColors component', () => {
         createComponent();
 
         expect(suggestedColors()).toMatchObject({
-          [defaultInjectedProps.addition]: 'Current addition color',
-          [defaultInjectedProps.deletion]: 'Current removal color',
+          [defaultInjectedProps.addition]: s__('SuggestedColors|Current addition color'),
+          [defaultInjectedProps.deletion]: s__('SuggestedColors|Current removal color'),
         });
       });
 
       it.each([
-        [{ addition: null }, 'Current removal color', 'Current addition color'],
-        [{ deletion: null }, 'Current addition color', 'Current removal color'],
+        [
+          { addition: null },
+          s__('SuggestedColors|Current removal color'),
+          s__('SuggestedColors|Current addition color'),
+        ],
+        [
+          { deletion: null },
+          s__('SuggestedColors|Current addition color'),
+          s__('SuggestedColors|Current removal color'),
+        ],
       ])(
         'does not contain current diff color if not set %p',
         (provide, expectedToContain, expectNotToContain) => {

@@ -60,7 +60,7 @@ export default {
 <template>
   <div>
     <active-checkbox
-      v-if="propsSource.manualActivation"
+      v-if="propsSource.showActive"
       :key="`${currentKey}-active-checkbox`"
       @toggle-integration-active="$emit('toggle-integration-active', $event)"
     />

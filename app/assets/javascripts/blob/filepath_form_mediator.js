@@ -30,7 +30,6 @@ export default class FilepathFormMediator {
     this.$filenameInput = $fileEditor.find('.js-file-path-name-input');
   }
 
-  // eslint-disable-next-line max-params
   selectTemplateFile(template, type, clearSelectedTemplate, stopLoading) {
     const self = this;
 

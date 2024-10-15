@@ -1,4 +1,4 @@
-import 'vendor/bootstrap/js/src/collapse';
+import 'bootstrap/js/dist/collapse';
 import MirrorRepos from '~/mirrors/mirror_repos';
 import mountBranchRules from '~/projects/settings/repository/branch_rules/mount_branch_rules';
 import mountDefaultBranchSelector from '~/projects/settings/mount_default_branch_selector';

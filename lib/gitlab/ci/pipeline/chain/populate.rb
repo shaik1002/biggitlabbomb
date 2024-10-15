@@ -19,7 +19,8 @@ module Gitlab
 
             if no_pipeline_to_create?
               return error(
-                ::Ci::Pipeline.rules_failure_message,
+                'Pipeline will not run for the selected trigger. ' \
+                  'The rules configuration prevented any jobs from being added to the pipeline.',
                 failure_reason: :filtered_by_rules
               )
             end
@@ -38,7 +39,7 @@ module Gitlab
           def no_pipeline_to_create?
             # If there are security policy pipelines,
             # they will be merged onto the pipeline in PipelineExecutionPolicies::MergeJobs
-            stage_names.empty? && @command.execution_policy_pipelines.blank?
+            stage_names.empty? && @command.pipeline_execution_policies.blank?
           end
 
           def stage_names

@@ -76,13 +76,10 @@ you must authenticate against the Dependency Proxy.
 Follow the [instructions for using images from a private registry](../../../ci/docker/using_docker_images.md#access-an-image-from-a-private-container-registry),
 but instead of using `registry.example.com:5000`, use your GitLab domain with no port `gitlab.example.com`.
 
-NOTE:
-[Admin Mode](../../../administration/settings/sign_in_restrictions.md#admin-mode) does not apply during authentication with the dependency proxy. If you are an administrator with Admin Mode enabled, and you create a personal access token without the `admin_mode` scope, that token works even though Admin Mode is enabled.
-
 For example, to manually sign in:
 
 ```shell
-echo "$CONTAINER_REGISTRY_PASSWORD" | docker login gitlab.example.com --username my_username --password-stdin
+docker login gitlab.example.com --username my_username --password my_password
 ```
 
 You can authenticate using:
@@ -108,10 +105,6 @@ On GitLab.com, the expiration time is 15 minutes.
 When [SSO enforcement](../../group/saml_sso/index.md#sso-enforcement)
 is enabled, users must be signed-in through SSO before they can pull images through the Dependency
 Proxy.
-
-SSO enforcement also affects [auto-merge](../../project/merge_requests/auto_merge.md).
-If an SSO session expires before the auto-merge triggers, the merge pipeline fails
-to pull images through the Dependency Proxy.
 
 #### Authenticate within CI/CD
 
@@ -170,7 +163,7 @@ services:
 build:
   image: docker:20.10.16
   before_script:
-    - echo "$CI_DEPENDENCY_PROXY_PASSWORD" | docker login $CI_DEPENDENCY_PROXY_SERVER -u $CI_DEPENDENCY_PROXY_USER --password-stdin
+    - docker login -u $CI_DEPENDENCY_PROXY_USER -p $CI_DEPENDENCY_PROXY_PASSWORD $CI_DEPENDENCY_PROXY_SERVER
   script:
     - docker build -t test .
 ```
@@ -305,7 +298,7 @@ hub_docker_quota_check:
 
 ### Authentication error: "HTTP Basic: Access Denied"
 
-If you receive an `HTTP Basic: Access denied` error when authenticating against the Dependency Proxy, refer to the [two-factor authentication troubleshooting guide](../../profile/account/two_factor_authentication_troubleshooting.md).
+If you receive an `HTTP Basic: Access denied` error when authenticating against the Dependency Proxy, refer to the [two-factor authentication troubleshooting guide](../../profile/account/two_factor_authentication.md#troubleshooting).
 
 ### Dependency Proxy Connection Failure
 
@@ -349,7 +342,7 @@ Make sure you are using the expected authentication mechanism.
 ### `Not Found` or `404` error when pulling image
 
 Errors like these might indicate that the user running the job doesn't have
-a minimum of the Guest role for the Dependency Proxy group:
+a minimum of the Guest role in the Dependency Proxy group:
 
 - ```plaintext
   ERROR: gitlab.example.com:443/group1/dependency_proxy/containers/alpine:latest: not found

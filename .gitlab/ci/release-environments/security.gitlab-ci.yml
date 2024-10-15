@@ -6,7 +6,7 @@ include:
     inputs:
       cng_path: 'charts/components/images'
   - project: 'gitlab-org/quality/pipeline-common'
-    ref: '9.4.0'
+    ref: '8.18.4'
     file: ci/base.gitlab-ci.yml
 
 stages:
@@ -90,7 +90,7 @@ release-environments-qa:
   extends:
     - .qa-base
   timeout: 30m
-  parallel: 3
+  parallel: 5
   variables:
     QA_SCENARIO: "Test::Instance::Smoke"
     RELEASE: "${CI_REGISTRY}/${CI_PROJECT_PATH}/gitlab-ee-qa:${CI_COMMIT_SHA}"
@@ -101,9 +101,6 @@ release-environments-qa:
   before_script:
     - !reference [.qa-base, before_script]
     - echo "$CI_REGISTRY_PASSWORD" | docker login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
-  retry:
-    max: 2
-    when: always
 
 release-environments-notification-failure:
   stage: finish

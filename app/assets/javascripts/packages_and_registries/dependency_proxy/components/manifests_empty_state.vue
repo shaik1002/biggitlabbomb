@@ -35,7 +35,11 @@ export default {
 </script>
 
 <template>
-  <gl-empty-state :svg-path="noManifestsIllustration" :title="$options.i18n.noManifestTitle">
+  <gl-empty-state
+    :svg-path="noManifestsIllustration"
+    :svg-height="null"
+    :title="$options.i18n.noManifestTitle"
+  >
     <template #description>
       <p class="gl-mb-5">
         <gl-sprintf :message="$options.i18n.emptyText">
@@ -55,14 +59,14 @@ export default {
           id="code-example"
           readonly
           :value="$options.codeExample"
-          class="gl-mx-auto gl-w-7/10"
+          class="gl-w-7/10 gl-mx-auto"
           select-on-click
         >
           <template #append>
             <clipboard-button
               :text="$options.codeExample"
               :title="$options.i18n.copyExample"
-              class="!gl-m-0"
+              class="gl-m-0!"
             />
           </template>
         </gl-form-input-group>

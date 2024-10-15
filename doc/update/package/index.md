@@ -15,10 +15,7 @@ GitLab package.
 
 ## Prerequisites
 
-- Create an [upgrade plan](../plan_your_upgrade.md).
-  We recommend upgrading in a test environment first and having a [rollback plan](../plan_your_upgrade.md#rollback-plan)
-  to reduce the risk of unplanned outages and extended downtime.
-- Decide when to upgrade by viewing the [supported upgrade paths](../upgrade_paths.md).
+- Decide when to upgrade by viewing the [supported upgrade paths](../index.md#upgrade-paths).
   You can't directly skip major versions (for example, go from 10.3 to 12.7 in one step).
 - If you are upgrading from a non-package installation to a GitLab package installation, see
   [Upgrading from a non-package installation to a GitLab package installation](https://docs.gitlab.com/omnibus/update/convert_to_omnibus.html).
@@ -120,7 +117,7 @@ For the GitLab Community Edition, replace `gitlab-ee` with
 Linux package managers default to installing the latest available version of a
 package for installation and upgrades. Upgrading directly to the latest major
 version can be problematic for older GitLab versions that require a multi-stage
-[upgrade path](../upgrade_paths.md). An upgrade path can span multiple
+[upgrade path](../index.md#upgrade-paths). An upgrade path can span multiple
 versions, so you must specify the specific GitLab package with each upgrade.
 
 To specify the intended GitLab version number in your package manager's install
@@ -144,7 +141,7 @@ or upgrade command:
 
 1. Install the specific `gitlab-ee` package by using one of the following commands
    and replacing `<version>` with the next supported version you would like to install
-   (make sure to review the [upgrade path](../upgrade_paths.md) to confirm the
+   (make sure to review the [upgrade path](../index.md#upgrade-paths) to confirm the
    version you're installing is part of a supported path):
 
    ```shell
@@ -171,7 +168,7 @@ NOTE:
 For the GitLab Community Edition, replace `ee` with
 `ce`.
 
-## Download a package manually
+## Upgrade using a manually-downloaded package
 
 NOTE:
 The [package repository](#upgrade-using-the-official-repositories) is recommended over
@@ -181,7 +178,7 @@ If for some reason you don't use the official repositories, you can
 download the package and install it manually. This method can be used to either
 install GitLab for the first time or upgrade it.
 
-To download and install or upgrade GitLab:
+To download and install GitLab:
 
 1. Visit the [official repository](#upgrade-using-the-official-repositories) of your package.
 1. Filter the list by searching for the version you want to install (for example 14.1.8).

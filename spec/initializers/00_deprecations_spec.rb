@@ -149,19 +149,23 @@ RSpec.describe '00_deprecations', feature_category: :shared do
     end
 
     describe 'configuring ActiveSupport::Deprecation.disallowed_warnings' do
-      subject(:disallowed_warnings) { ActiveSupport::Deprecation.disallowed_warnings }
-
-      it { is_expected.to be_empty }
+      it 'sets disallowed warnings' do
+        expect(ActiveSupport::Deprecation.disallowed_warnings).not_to be_empty
+      end
 
       context 'when in production environment' do
         let(:rails_env) { 'production' }
 
-        it { is_expected.to be_empty }
+        it 'does not set disallowed warnings' do
+          expect(ActiveSupport::Deprecation.disallowed_warnings).to be_empty
+        end
 
         context 'when GITLAB_LOG_DEPRECATIONS is set' do
           let(:gitlab_log_deprecations) { '1' }
 
-          it { is_expected.to be_empty }
+          it 'does not set disallowed warnings' do
+            expect(ActiveSupport::Deprecation.disallowed_warnings).to be_empty
+          end
         end
       end
     end

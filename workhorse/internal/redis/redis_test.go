@@ -2,33 +2,25 @@ package redis
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"sync/atomic"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"gitlab.com/gitlab-org/gitlab/workhorse/internal/config"
 	"gitlab.com/gitlab-org/gitlab/workhorse/internal/helper"
 )
 
-const (
-	caCert   = "../../testdata/localhost.crt"
-	certFile = "../../testdata/localhost.crt"
-	keyFile  = "../../testdata/localhost.key"
-)
-
 func mockRedisServer(t *testing.T, connectReceived *atomic.Value) string {
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 
-	require.NoError(t, err)
+	require.Nil(t, err)
 
 	go func() {
 		defer ln.Close()
 		conn, err := ln.Accept()
-		assert.NoError(t, err)
+		require.Nil(t, err)
 		connectReceived.Store(true)
 		conn.Write([]byte("OK\n"))
 	}()
@@ -42,19 +34,9 @@ func TestConfigureNoConfig(t *testing.T) {
 	require.Nil(t, rdb, "rdb client should be nil")
 }
 
-func TestConfigureConfigWithoutRedis(t *testing.T) {
-	rdb, err := Configure(&config.Config{})
-	require.NoError(t, err)
-	require.Nil(t, rdb, "rdb client should be nil")
-}
-
 func TestConfigureValidConfigX(t *testing.T) {
 	testCases := []struct {
-		scheme           string
-		username         string
-		urlPassword      string
-		redisPassword    string
-		expectedPassword string
+		scheme string
 	}{
 		{
 			scheme: "redis",
@@ -65,24 +47,6 @@ func TestConfigureValidConfigX(t *testing.T) {
 		{
 			scheme: "tcp",
 		},
-		{
-			scheme:           "redis",
-			username:         "redis-user",
-			urlPassword:      "redis-password",
-			expectedPassword: "redis-password",
-		},
-		{
-			scheme:           "redis",
-			redisPassword:    "override-password",
-			expectedPassword: "override-password",
-		},
-		{
-			scheme:           "redis",
-			username:         "redis-user",
-			urlPassword:      "redis-password",
-			redisPassword:    "override-password",
-			expectedPassword: "override-password",
-		},
 	}
 
 	for _, tc := range testCases {
@@ -90,30 +54,16 @@ func TestConfigureValidConfigX(t *testing.T) {
 			connectReceived := atomic.Value{}
 			a := mockRedisServer(t, &connectReceived)
 
-			var u string
-			if tc.username != "" || tc.urlPassword != "" {
-				u = fmt.Sprintf("%s://%s:%s@%s", tc.scheme, tc.username, tc.urlPassword, a)
-			} else {
-				u = fmt.Sprintf("%s://%s", tc.scheme, a)
-			}
-
-			parsedURL := helper.URLMustParse(u)
-			redisCfg := &config.RedisConfig{
-				URL:      config.TomlURL{URL: *parsedURL},
-				Password: tc.redisPassword,
-			}
-			cfg := &config.Config{Redis: redisCfg}
+			parsedURL := helper.URLMustParse(tc.scheme + "://" + a)
+			cfg := &config.RedisConfig{URL: config.TomlURL{URL: *parsedURL}}
 
 			rdb, err := Configure(cfg)
 			require.NoError(t, err)
 			defer rdb.Close()
 
 			require.NotNil(t, rdb.Conn(), "Pool should not be nil")
-			opt := rdb.Options()
-			require.Equal(t, tc.username, opt.Username)
-			require.Equal(t, tc.expectedPassword, opt.Password)
 
-			// goredis initialize connections lazily
+			// goredis initialise connections lazily
 			rdb.Ping(context.Background())
 			require.True(t, connectReceived.Load().(bool))
 		})
@@ -145,15 +95,14 @@ func TestConnectToSentinel(t *testing.T) {
 				sentinelUrls = append(sentinelUrls, config.TomlURL{URL: *parsedURL})
 			}
 
-			redisCfg := &config.RedisConfig{Sentinel: sentinelUrls}
-			cfg := &config.Config{Redis: redisCfg}
+			cfg := &config.RedisConfig{Sentinel: sentinelUrls}
 			rdb, err := Configure(cfg)
 			require.NoError(t, err)
 			defer rdb.Close()
 
 			require.NotNil(t, rdb.Conn(), "Pool should not be nil")
 
-			// goredis initialize connections lazily
+			// goredis initialise connections lazily
 			rdb.Ping(context.Background())
 			require.True(t, connectReceived.Load().(bool))
 		})
@@ -169,7 +118,6 @@ func TestSentinelOptions(t *testing.T) {
 		username              string
 		password              string
 		sentinels             []string
-		sentinelTLSConfig     *config.TLSConfig
 	}{
 		{
 			description:   "no sentinel passwords",
@@ -228,12 +176,6 @@ func TestSentinelOptions(t *testing.T) {
 			username:      "someuser3",
 			password:      "password3",
 		},
-		{
-			description:       "tls defined",
-			inputSentinel:     []string{"tcp://localhost:26480", "tcp://localhost:26481"},
-			sentinels:         []string{"localhost:26480", "localhost:26481"},
-			sentinelTLSConfig: &config.TLSConfig{Certificate: certFile, Key: keyFile},
-		},
 	}
 
 	for _, tc := range testCases {
@@ -245,69 +187,15 @@ func TestSentinelOptions(t *testing.T) {
 				sentinelUrls[i] = config.TomlURL{URL: *parsedURL}
 			}
 
-			redisCfg := &config.RedisConfig{
+			options := sentinelOptions(&config.RedisConfig{
 				Sentinel:         sentinelUrls,
 				SentinelUsername: tc.inputSentinelUsername,
 				SentinelPassword: tc.inputSentinelPassword,
-			}
-
-			sentinelCfg := &config.SentinelConfig{
-				TLS: tc.sentinelTLSConfig,
-			}
-
-			options, err := sentinelOptions(&config.Config{
-				Redis:    redisCfg,
-				Sentinel: sentinelCfg,
 			})
 
-			require.NoError(t, err)
 			require.Equal(t, tc.username, options.SentinelUsername)
 			require.Equal(t, tc.password, options.SentinelPassword)
 			require.Equal(t, tc.sentinels, options.Sentinels)
-
-			if tc.sentinelTLSConfig != nil {
-				require.Len(t, options.SentinelTLSConfig.Certificates, 1)
-			}
-		})
-	}
-}
-
-func TestSentinelTLSOptions(t *testing.T) {
-	testCases := []struct {
-		description    string
-		sentinelConfig *config.SentinelConfig
-		expectedError  *error
-	}{
-		{
-			description:    "no tls defined",
-			sentinelConfig: &config.SentinelConfig{},
-			expectedError:  &errSentinelTLSNotDefined,
-		},
-		{
-			description:    "certificate missing",
-			sentinelConfig: &config.SentinelConfig{TLS: &config.TLSConfig{Key: keyFile}},
-			expectedError:  &errSentinelTLSCertificateNotDefined,
-		},
-		{
-			description:    "key missing",
-			sentinelConfig: &config.SentinelConfig{TLS: &config.TLSConfig{Certificate: certFile}},
-			expectedError:  &errSentinelTLSKeyNotDefined,
-		},
-		{
-			description:    "tls defined",
-			sentinelConfig: &config.SentinelConfig{TLS: &config.TLSConfig{Certificate: certFile, Key: keyFile, CACertificate: caCert}},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.description, func(t *testing.T) {
-			tlsConfig, err := sentinelTLSOptions(tc.sentinelConfig)
-
-			if tc.expectedError != nil {
-				require.ErrorIs(t, *tc.expectedError, err)
-			} else {
-				require.Len(t, tlsConfig.Certificates, 1)
-			}
 		})
 	}
 }

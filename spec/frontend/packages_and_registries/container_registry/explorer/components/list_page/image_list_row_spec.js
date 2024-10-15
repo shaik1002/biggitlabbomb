@@ -1,5 +1,4 @@
-import { GlSprintf, GlSkeletonLoader, GlButton, GlBadge } from '@gitlab/ui';
-import ProtectedBadge from '~/vue_shared/components/badges/protected_badge.vue';
+import { GlSprintf, GlSkeletonLoader, GlButton } from '@gitlab/ui';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import { createMockDirective } from 'helpers/vue_mock_directive';
 import { mockTracking } from 'helpers/tracking_helper';
@@ -35,23 +34,20 @@ describe('Image List Row', () => {
   const findListItemComponent = () => wrapper.findComponent(ListItem);
   const findShowFullPathButton = () => wrapper.findComponent(GlButton);
   const findPublishMessage = () => wrapper.findComponent(PublishMessage);
-  const findProtectedBadge = () => wrapper.findComponent(ProtectedBadge);
 
-  const mountComponent = ({ props = {}, config = {}, provide = {} } = {}) => {
+  const mountComponent = ({ props = {}, config = {} } = {}) => {
     wrapper = shallowMountExtended(Component, {
       stubs: {
         RouterLink,
         ListItem,
         GlButton,
         GlSprintf,
-        GlBadge,
       },
       propsData: {
         item,
         ...props,
       },
       provide: {
-        ...provide,
         config: {
           ...config,
         },
@@ -271,51 +267,6 @@ describe('Image List Row', () => {
         projectName: 'gitlab-test',
         projectUrl: 'http://localhost:3000/gitlab-org/gitlab-test',
         publishDate: item.createdAt,
-      });
-    });
-  });
-
-  describe('badge "protected"', () => {
-    const mountComponentForProtectedBadge = ({
-      itemProtectionRuleExists = true,
-      glFeaturesContainerRegistryProtectedContainers = true,
-    } = {}) => {
-      return mountComponent({
-        props: { item: { ...item, protectionRuleExists: itemProtectionRuleExists } },
-        provide: {
-          glFeatures: {
-            containerRegistryProtectedContainers: glFeaturesContainerRegistryProtectedContainers,
-          },
-        },
-      });
-    };
-
-    describe('when image is protected', () => {
-      beforeEach(() => {
-        mountComponentForProtectedBadge();
-      });
-
-      it('shows badge', () => {
-        expect(findProtectedBadge().exists()).toBe(true);
-        expect(findProtectedBadge().props('tooltipText')).toBe(
-          'A protection rule exists for this container repository.',
-        );
-      });
-    });
-
-    describe('when image is not protected', () => {
-      it('does not show badge', () => {
-        mountComponentForProtectedBadge({ itemProtectionRuleExists: false });
-
-        expect(findProtectedBadge().exists()).toBe(false);
-      });
-    });
-
-    describe('when feature flag "containerRegistryProtectedContainers" disabled', () => {
-      it('does not show badge', () => {
-        mountComponentForProtectedBadge({ glFeaturesContainerRegistryProtectedContainers: false });
-
-        expect(findProtectedBadge().exists()).toBe(false);
       });
     });
   });

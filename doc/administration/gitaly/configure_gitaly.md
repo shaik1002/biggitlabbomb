@@ -96,10 +96,10 @@ The following list depicts the network architecture of Gitaly:
 - Authentication is done through a static token which is shared among the Gitaly and GitLab Rails
   nodes.
 
-The following diagram illustrates communication between Gitaly servers and GitLab Rails showing
+The following digraph illustrates communication between Gitaly servers and GitLab Rails showing
 the default ports for HTTP and HTTPs communication.
 
-![Two Gitaly servers and a GitLab Rails exchanging information.](img/gitaly_network_v13_9.png)
+![Gitaly network architecture diagram](img/gitaly_network_13_9.png)
 
 WARNING:
 Gitaly servers must not be exposed to the public internet as Gitaly network traffic is unencrypted
@@ -309,8 +309,8 @@ Configure Gitaly server.
 
 1. Save the file and [reconfigure GitLab](../restart_gitlab.md#reconfigure-a-linux-package-installation).
 1. Confirm that Gitaly can perform callbacks to the GitLab internal API:
-   - For GitLab 15.3 and later, run `sudo -u git -- /opt/gitlab/embedded/bin/gitaly check /var/opt/gitlab/gitaly/config.toml`.
-   - For GitLab 15.2 and earlier, run `sudo -u git -- /opt/gitlab/embedded/bin/gitaly-hooks check /var/opt/gitlab/gitaly/config.toml`.
+   - For GitLab 15.3 and later, run `sudo /opt/gitlab/embedded/bin/gitaly check /var/opt/gitlab/gitaly/config.toml`.
+   - For GitLab 15.2 and earlier, run `sudo /opt/gitlab/embedded/bin/gitaly-hooks check /var/opt/gitlab/gitaly/config.toml`.
 
 :::TabTitle Self-compiled (source)
 
@@ -357,8 +357,8 @@ Configure Gitaly server.
 
 1. Save the files and [restart GitLab](../restart_gitlab.md#self-compiled-installations).
 1. Confirm that Gitaly can perform callbacks to the GitLab internal API:
-   - For GitLab 15.3 and later, run `sudo -u git -- /opt/gitlab/embedded/bin/gitaly check /var/opt/gitlab/gitaly/config.toml`.
-   - For GitLab 15.2 and earlier, run `sudo -u git -- /opt/gitlab/embedded/bin/gitaly-hooks check /var/opt/gitlab/gitaly/config.toml`.
+   - For GitLab 15.3 and later, run `sudo /opt/gitlab/embedded/bin/gitaly check /var/opt/gitlab/gitaly/config.toml`.
+   - For GitLab 15.2 and earlier, run `sudo /opt/gitlab/embedded/bin/gitaly-hooks check /var/opt/gitlab/gitaly/config.toml`.
 
 ::EndTabs
 
@@ -531,7 +531,7 @@ reconfigure the GitLab application servers to remove the `default` entry from `g
 To work around the limitation:
 
 1. Define an additional storage location on the new Gitaly service and configure the additional storage to be `default`.
-1. In the [**Admin** area](../repository_storage_paths.md#configure-where-new-repositories-are-stored), set `default` to a weight of zero
+1. In the [Admin area](../repository_storage_paths.md#configure-where-new-repositories-are-stored), set `default` to a weight of zero
    to prevent repositories being stored there.
 
 ### Disable Gitaly where not required (optional)
@@ -614,7 +614,6 @@ When these limits are reached, performance may be reduced and users may be disco
 
 > - This method of configuring repository cgroups was introduced in GitLab 15.1.
 > - `cpu_quota_us`[introduced](https://gitlab.com/gitlab-org/gitaly/-/merge_requests/5422) in GitLab 15.10.
-> - `max_cgroups_per_repo` [introduced](https://gitlab.com/gitlab-org/gitaly/-/issues/5689) in GitLab 16.7.
 
 To configure repository cgroups in Gitaly using the new method, use the following settings for the new configuration method
 to `gitaly['configuration'][:cgroups]` in `/etc/gitlab/gitlab.rb`:
@@ -646,14 +645,8 @@ to `gitaly['configuration'][:cgroups]` in `/etc/gitlab/gitlab.rb`:
   that is imposed on all Git processes contained in a repository cgroup. A Git
   process can't use more then the given quota. We set
   `cfs_period_us` to `100ms` so 1 core is `100000`. 0 implies no limit.
-- `repositories.max_cgroups_per_repo` is the number of repository cgroups that Git processes
-  targeting a specific repository can be distributed across. This enables more conservative
-  CPU and memory limits to be configured for repository cgroups while still allowing for
-  bursty workloads. For instance, with a `max_cgroups_per_repo` of `2` and a `memory_bytes`
-  limit of 10GB, independent Git operations against a specific repository can consume up
-  to 20GB of memory.
 
-For example (not necessarily recommended settings):
+For example:
 
 ```ruby
 # in /etc/gitlab/gitlab.rb
@@ -669,8 +662,7 @@ gitaly['configuration'] = {
       count: 1000,
       memory_bytes: 32212254720, # 20gb
       cpu_shares: 512,
-      cpu_quota_us: 200000, # 2 cores
-      max_cgroups_per_repo: 2
+      cpu_quota_us: 200000 # 2 cores
     },
   },
 }
@@ -903,10 +895,10 @@ fetch responses. This can reduce server load when your server receives
 lots of CI fetch traffic.
 
 The pack-objects cache wraps `git pack-objects`, an internal part of
-Git that gets invoked indirectly by using the PostUploadPack and
+Git that gets invoked indirectly via the PostUploadPack and
 SSHUploadPack Gitaly RPCs. Gitaly runs PostUploadPack when a
-user does a Git fetch by using HTTP, or SSHUploadPack when a
-user does a Git fetch by using SSH.
+user does a Git fetch via HTTP, or SSHUploadPack when a
+user does a Git fetch via SSH.
 When the cache is enabled, anything that uses PostUploadPack or SSHUploadPack can
 benefit from it. It is orthogonal to:
 

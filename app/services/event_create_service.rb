@@ -218,7 +218,7 @@ class EventCreateService
       action = Event.actions[status]
       raise IllegalActionError, "#{status} is not a valid status" if action.nil?
 
-      parent_attrs(record.resource_parent, current_user)
+      parent_attrs(record.resource_parent)
         .merge(base_attrs)
         .merge(action: action, fingerprint: fingerprint, target_id: record.id, target_type: record.class.name)
     end
@@ -257,13 +257,6 @@ class EventCreateService
       .cache_last_push_event(event)
 
     Users::ActivityService.new(author: current_user, namespace: namespace, project: project).execute
-
-    Gitlab::EventStore.publish(
-      Users::ActivityEvent.new(data: {
-        user_id: current_user.id,
-        namespace_id: project.root_ancestor.id
-      })
-    )
   end
 
   def create_event(resource_parent, current_user, status, attributes = {})
@@ -271,7 +264,7 @@ class EventCreateService
       action: status,
       author_id: current_user.id
     )
-    attributes.merge!(parent_attrs(resource_parent, current_user))
+    attributes.merge!(parent_attrs(resource_parent))
 
     if attributes[:fingerprint].present?
       Event.safe_find_or_create_by!(attributes)
@@ -280,7 +273,7 @@ class EventCreateService
     end
   end
 
-  def parent_attrs(resource_parent, current_user)
+  def parent_attrs(resource_parent)
     resource_parent_attr = case resource_parent
                            when Project
                              :project_id
@@ -288,7 +281,7 @@ class EventCreateService
                              :group_id
                            end
 
-    return { personal_namespace_id: current_user.namespace_id }.compact unless resource_parent_attr
+    return {} unless resource_parent_attr
 
     { resource_parent_attr => resource_parent.id }
   end

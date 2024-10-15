@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Banzai::Filter::SpacedLinkFilter, feature_category: :markdown do
+RSpec.describe Banzai::Filter::SpacedLinkFilter, feature_category: :team_planning do
   include FilterSpecHelper
 
   let(:link)  { '[example](page slug)' }
@@ -64,7 +64,7 @@ RSpec.describe Banzai::Filter::SpacedLinkFilter, feature_category: :markdown do
   end
 
   it 'does not process malicious input' do
-    Timeout.timeout(BANZAI_FILTER_TIMEOUT_MAX) do
+    Timeout.timeout(10) do
       doc = filter('[ (](' * 60_000)
 
       found_links = doc.css('a')

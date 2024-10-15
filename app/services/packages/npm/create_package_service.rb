@@ -6,7 +6,6 @@ module Packages
       include Gitlab::Utils::StrongMemoize
       include ExclusiveLeaseGuard
 
-      INSTALL_SCRIPT_KEYS = %w[preinstall install postinstall].freeze
       PACKAGE_JSON_NOT_ALLOWED_FIELDS = %w[readme readmeFilename licenseText contributors exports].freeze
       DEFAULT_LEASE_TIMEOUT = 1.hour.to_i
 
@@ -75,19 +74,12 @@ module Packages
 
       def current_package_protected?
         return false if Feature.disabled?(:packages_protected_packages, project)
-
-        unless current_user.is_a?(User)
-          return project.package_protection_rules.for_package_type(:npm).for_package_name(name).exists?
-        end
-
-        return false if current_user.can_admin_all_resources?
+        return false if current_user.is_a?(DeployToken)
+        return false if current_user&.can_admin_all_resources?
 
         user_project_authorization_access_level = current_user.max_member_access_for_project(project.id)
-
-        project.package_protection_rules.for_push_exists?(
-          access_level: user_project_authorization_access_level,
-          package_name: name, package_type: :npm
-        )
+        project.package_protection_rules.for_push_exists?(access_level: user_project_authorization_access_level,
+          package_name: name, package_type: :npm)
       end
 
       def name
@@ -104,10 +96,6 @@ module Packages
       end
 
       def package_json
-        if version_data['scripts'] && (version_data['scripts'].keys & INSTALL_SCRIPT_KEYS).any?
-          version_data['hasInstallScript'] = true
-        end
-
         version_data.except(*PACKAGE_JSON_NOT_ALLOWED_FIELDS)
       end
 

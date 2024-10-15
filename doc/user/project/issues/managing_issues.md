@@ -28,36 +28,6 @@ To edit an issue:
 1. Edit the available fields.
 1. Select **Save changes**.
 
-### Populate an issue with Issue Description Generation
-
-DETAILS:
-**Tier:** For a limited time, Ultimate. On October 17, 2024, Ultimate with [GitLab Duo Enterprise](https://about.gitlab.com/gitlab-duo/#pricing).
-**Offering:** GitLab.com
-**Status:** Experiment
-
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/10762) in GitLab 16.3 as an [experiment](../../../policy/experiment-beta-support.md#experiment).
-
-Generate a detailed description for an issue based on a short summary you provide.
-
-Prerequisites:
-
-- You must belong to at least one group with the [experiment and beta features setting](../../gitlab_duo/turn_on_off.md#turn-on-beta-and-experimental-features) enabled.
-- You must have permission to view the issue.
-- Only available for the plain text editor.
-
-To generate an issue description:
-
-1. Create a new issue.
-1. Above the **Description** field, select **GitLab Duo** (**{tanuki-ai}**) **> Generate issue description**.
-1. Write a short description and select **Submit**.
-
-The issue description is replaced with AI-generated text.
-
-Provide feedback on this experimental feature in [issue 409844](https://gitlab.com/gitlab-org/gitlab/-/issues/409844).
-
-**Data usage**: When you use this feature, the text you enter is sent to
-the [large language model listed on the GitLab Duo page](../../gitlab_duo/index.md#issue-description-generation).
-
 ### Remove a task list item
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/377307) in GitLab 15.9.
@@ -94,7 +64,7 @@ To edit multiple issues at the same time:
 When bulk editing issues in a project, you can edit the following attributes:
 
 - Status (open or closed)
-- [Assignees](managing_issues.md#assignees)
+- [Assignees](managing_issues.md#assignee)
 - [Epic](../../group/epics/index.md)
 - [Milestone](../milestones/index.md)
 - [Labels](../labels.md)
@@ -156,9 +126,13 @@ To move an issue:
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/371252) in GitLab 16.9 [with a flag](../../../administration/feature_flags.md) named `move_issue_children`. Disabled by default.
 > - [Enabled on GitLab.com and self-managed](https://gitlab.com/gitlab-org/gitlab/-/issues/371252) in GitLab 16.11.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/371252) in GitLab 17.3. Feature flag `move_issue_children` removed.
 
-When you move an issue to another project, all its child tasks are also
+FLAG:
+On self-managed GitLab, by default this feature is available. To hide the feature, an administrator can
+[disable the feature flag](../../../administration/feature_flags.md) named `move_issue_children`.
+On GitLab.com, this feature is available.
+
+When this feature is enabled, when you move an issue to another project, all its child tasks are also
 moved to the target project and remain associated as child tasks on the moved issue.
 Each task is moved the same way as the parent, that is, it's closed in the original project and
 copied to the target project.
@@ -169,7 +143,7 @@ DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** Self-managed, GitLab Dedicated
 
-#### From the Issues page
+#### From the issues list
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15991) in GitLab 15.6.
 
@@ -293,23 +267,7 @@ it inherits the issue's milestone and labels.
 For performance reasons, automatic issue closing is disabled for the very first
 push from an existing repository.
 
-#### User responsibility when merging
-
-When you merge a merge request, it's your responsibility to check that it's appropriate for any targeted issues
-to close. Users can include issue closing patterns in the merge request description, and also in the body
-of a commit message. Closing messages in commit messages are easy to miss. In both cases, the merge request widget
-shows information about the issue to close on merge:
-
-![This merge request closes issue #2754.](../merge_requests/img/closing_pattern_v17_4.png)
-
-When you merge a merge request, GitLab checks that you have permission to close the targeted issues.
-In public repositories, this check is important, because external users can create both merge requests
-and commits that contain closing patterns. When you are the user who merges, it's important
-that you are aware of the effects the merge has on both the code and issues in your project.
-
 #### Default closing pattern
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/465391) work item (task, objective, or key result) references in GitLab 17.3.
 
 To automatically close an issue, use the following keywords followed by the issue reference.
 
@@ -324,10 +282,7 @@ Available issue reference formats:
 
 - A local issue (`#123`).
 - A cross-project issue (`group/project#123`).
-- The full URL of an issue (`https://gitlab.example.com/<project_full_path>/-/issues/123`).
-- The full URL of a work item (for example, task, objective, or key result):
-  - In a project (`https://gitlab.example.com/<project_full_path>/-/work_items/123`).
-  - In a group (`https://gitlab.example.com/groups/<group_full_path>/-/work_items/123`).
+- The full URL of an issue (`https://gitlab.example.com/group/project/issues/123`).
 
 For example:
 
@@ -336,7 +291,7 @@ Awesome commit message
 
 Fix #20, Fixes #21 and Closes group/otherproject#22.
 This commit is also related to #17 and fixes #18, #19
-and https://gitlab.example.com/group/otherproject/-/issues/23.
+and https://gitlab.example.com/group/otherproject/issues/23.
 ```
 
 The previous commit message closes `#18`, `#19`, `#20`, and `#21` in the project this commit is pushed to,
@@ -507,27 +462,7 @@ Or:
 - To use a [keyboard shortcut](../../shortcuts.md), press <kbd>Shift</kbd> + <kbd>i</kbd>.
 - On the left sidebar, at the top, select **Assigned issues** (**{issues}**).
 
-## Issue list
-
-The issue list shows all issues in your project or group.
-You can use it to view, sort, and manage issues.
-
-To view the issue list:
-
-1. On the left sidebar, select **Search or go to** and find your project.
-1. Select **Plan > Issues**.
-
-From the issue list, you can:
-
-- View issue details like title, assignees, labels, and milestone.
-- [Sort issues](sorting_issue_lists.md) by various criteria.
-- Filter issues to find specific ones.
-- Edit issues individually or in bulk.
-- Create new issues.
-
-The following sections describe how to work with the issue list.
-
-### Filter the list of issues
+## Filter the list of issues
 
 > - Filtering by type was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/322755) in GitLab 13.10 [with a flag](../../../administration/feature_flags.md) named `vue_issues_list`. Disabled by default.
 > - Filtering by type was [enabled on self-managed](https://gitlab.com/gitlab-org/gitlab/-/issues/322755) in GitLab 14.10.
@@ -549,7 +484,7 @@ To filter the list of issues:
 1. Repeat this process to filter by multiple attributes. Multiple attributes are joined by a logical
    `AND`.
 
-#### Filter by title or description
+### Filter by title or description
 
 To filter the list issues for text in a title or description:
 
@@ -570,7 +505,7 @@ However, GitLab won't match the sentence or the words `I`, `am` or `M&A` exactly
 as they aren't deemed lexically meaningful or significant.
 It's a limitation of PostgreSQL full text search.
 
-#### Filter with the OR operator
+### Filter with the OR operator
 
 > - OR filtering for author and assignee was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/23532) in GitLab 15.6 [with a flag](../../../administration/feature_flags.md) named `or_issuable_queries`. Disabled by default.
 > - OR filtering for label was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/23532) in GitLab 15.8 [with a flag](../../../administration/feature_flags.md) named `or_issuable_queries`. Disabled by default.
@@ -586,37 +521,13 @@ You can use the OR operator (**is one of: `||`**) when you [filter the list of i
 `is one of` represents an inclusive OR. For example, if you filter by `Assignee is one of Sidney Jones` and
 `Assignee is one of Zhang Wei`, GitLab shows issues where either `Sidney`, `Zhang`, or both of them are assignees.
 
-#### Filter issues by ID
+### Filter issues by ID
 
 1. On the left sidebar, select **Search or go to** and find your project.
 1. Select **Plan > Issues**.
 1. In the **Search** box, type the issue ID. For example, enter filter `#10` to return only issue 10.
 
 ![filter issues by specific ID](img/issue_search_by_id_v15_0.png)
-
-### Open issues in a drawer
-
-DETAILS:
-**Offering:** Self-managed
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/464063) in GitLab 17.4 [with a flag](../../../administration/feature_flags.md) named `issues_list_drawer`. Disabled by default.
-
-FLAG:
-The availability of this feature is controlled by a feature flag.
-For more information, see the history.
-This feature is available for testing, but not ready for production use.
-
-When this feature is enabled, when you select an issue from the list or issue board, it opens in a drawer.
-You can then edit the issue or create comments.
-
-To open the issue in full view:
-
-- Open the issue in a new tab. From the list of issues, either:
-  - Right-click the issue and open it in a new browser tab.
-  - Hold <kbd>Cmd</kbd> or <kbd>Ctrl</kbd> and click the issue.
-- From the drawer, in the top-left corner, select **Open in full view**.
-
-![Issue opened in a drawer.](img/issue_drawer_v17_4.png)
 
 ## Copy issue reference
 
@@ -647,22 +558,16 @@ To copy the issue's email address:
 1. Select **Plan > Issues**, then select your issue to view it.
 1. On the right sidebar, next to **Issue email**, select **Copy Reference** (**{copy-to-clipboard}**).
 
-## Assignees
+## Assignee
 
 An issue can be assigned to one or [more users](multiple_assignees_for_issues.md).
 
 The assignees can be changed as often as needed. The idea is that the assignees are
-people responsible for the issue.
-When an issue is assigned to someone, it appears in their **Assigned issues** page.
+people responsible for an issue.
+When an issue is assigned to someone, it appears in their assigned issues list.
 
 If a user is not a member of a project, an issue can only be assigned to them if they create it
 themselves or another project member assigns them.
-
-### Change assignee on an issue
-
-Prerequisites:
-
-- You must have at least the Reporter role for the project.
 
 To change the assignee on an issue:
 
@@ -701,8 +606,6 @@ as planned or need attention to stay on schedule.
 
 Incorporate a review of issue health status into your daily stand-up, project status reports, or weekly meetings to address risks to timely delivery of your planned work.
 
-### Change health status of an issue
-
 Prerequisites:
 
 - You must have at least the Reporter role for the project.
@@ -720,7 +623,7 @@ To edit health status of an issue:
 
 You can see the issue's health status in:
 
-- The **Issues** page
+- Issues list
 - Epic tree
 - Issue cards in issue boards
 

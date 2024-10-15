@@ -2,17 +2,19 @@
 
 module API
   class NpmGroupPackages < ::API::Base
+    helpers ::API::Helpers::Packages::Npm
+
     feature_category :package_registry
     urgency :low
 
     helpers do
-      include Gitlab::Utils::StrongMemoize
+      def endpoint_scope
+        :group
+      end
 
       def group_or_namespace
-        group = find_group(params[:id])
-        check_group_access(group)
+        group
       end
-      strong_memoize_attr :group_or_namespace
     end
 
     params do

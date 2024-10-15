@@ -4,11 +4,6 @@ const agent = {
   name: 'agent-name',
   webPath: 'agent-webPath',
   createdAt: new Date(),
-  userAccessAuthorizations: null,
-  project: {
-    id: '1',
-    fullPath: 'path/to/project',
-  },
 };
 const token = {
   id: 'token-id',

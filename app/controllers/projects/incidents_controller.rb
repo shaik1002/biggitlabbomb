@@ -16,7 +16,8 @@ class Projects::IncidentsController < Projects::ApplicationController
   feature_category :incident_management
   urgency :low
 
-  def index; end
+  def index
+  end
 
   private
 

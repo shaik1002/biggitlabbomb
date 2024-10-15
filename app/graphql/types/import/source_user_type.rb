@@ -58,10 +58,6 @@ module Types
         Types::Import::SourceUserStatusEnum,
         null: false,
         description: 'Status of the mapping.'
-
-      field :reassignment_error,
-        GraphQL::Types::String,
-        description: 'Error message if reassignment failed.'
     end
   end
 end

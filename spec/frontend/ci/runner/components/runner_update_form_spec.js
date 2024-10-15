@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import { GlForm } from '@gitlab/ui';
+import { __ } from '~/locale';
 import { createAlert, VARIANT_SUCCESS } from '~/alert';
 import { visitUrl } from '~/lib/utils/url_utility';
 
@@ -39,7 +40,7 @@ describe('RunnerUpdateForm', () => {
 
   const findSubmit = () => wrapper.find('[type="submit"]');
   const findSubmitDisabledAttr = () => findSubmit().attributes('disabled');
-  const findCancelBtn = () => wrapper.findByRole('link', { name: 'Cancel' });
+  const findCancelBtn = () => wrapper.findByRole('link', { name: __('Cancel') });
   const submitForm = () => findForm().trigger('submit');
   const submitFormAndWait = () => submitForm().then(waitForPromises);
 

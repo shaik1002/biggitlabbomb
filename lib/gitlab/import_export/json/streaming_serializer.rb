@@ -100,16 +100,6 @@ module Gitlab
             json_writer.write_relation_array(@exportable_path, key, batch_enumerator)
 
             Gitlab::SafeRequestStore.clear!
-          rescue StandardError => e
-            # if any error occurs during the export of a batch, skip the batch instead of failing the whole export
-            logger.error(
-              message: 'Error exporting relation batch',
-              exception_message: e.message,
-              exception_class: e.class.to_s,
-              relation: key,
-              sql: e.respond_to?(:sql) ? e.sql : nil,
-              **log_base_data
-            )
           end
         end
 
@@ -267,7 +257,7 @@ module Gitlab
         end
 
         def after_read_callback(record)
-          if Feature.enabled?(:importer_user_mapping, current_user)
+          if Feature.enabled?(:bulk_import_user_mapping, current_user)
             user_contributions_export_mapper.cache_user_contributions_on_record(record)
           end
 

@@ -1,14 +1,20 @@
 import axios from 'axios';
-import { roleDropdownItems, initialSelectedRole } from '~/members/utils';
+import { roleDropdownItems } from '~/members/utils';
 import {
   GROUP_LINK_ACCESS_LEVEL_PROPERTY_NAME,
   MEMBER_ACCESS_LEVEL_PROPERTY_NAME,
   MEMBERS_TAB_TYPES,
 } from '~/members/constants';
 
-// EE overrides these.
+export const getMemberRole = (roles, member) => {
+  const { stringValue, integerValue, memberRoleId = null } = member.accessLevel;
+  const role = roles.find(({ accessLevel }) => accessLevel === member.accessLevel.integerValue);
+
+  return role || { text: stringValue, value: integerValue, memberRoleId };
+};
+
+// EE version has a special implementation, CE version just returns the basic version.
 export const getRoleDropdownItems = roleDropdownItems;
-export const getMemberRole = initialSelectedRole;
 
 // The API to update members uses different property names for the access level, depending on if it's a user or a group.
 // Users use 'access_level', groups use 'group_access'.
@@ -22,7 +28,7 @@ export const callRoleUpdateApi = async (member, role) => {
 
   return axios.put(member.memberPath, {
     [accessLevelProp]: role.accessLevel,
-    member_role_id: role.memberRoleId || null,
+    member_role_id: role.memberRoleId,
   });
 };
 

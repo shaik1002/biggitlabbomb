@@ -263,28 +263,28 @@ export default {
 
 <template>
   <div
-    class="md-header gl-border-b gl-z-2 gl-rounded-lg gl-rounded-bl-none gl-rounded-br-none gl-border-gray-100 gl-bg-white gl-px-3"
+    class="md-header gl-bg-white gl-border-b gl-border-gray-100 gl-rounded-lg gl-rounded-bottom-left-none gl-rounded-bottom-right-none gl-px-3"
     :class="{ 'md-header-preview': previewMarkdown }"
   >
-    <div class="gl-flex gl-flex-wrap gl-items-center">
+    <div class="gl-display-flex gl-align-items-center gl-flex-wrap">
       <div
         data-testid="md-header-toolbar"
-        class="md-header-toolbar gl-flex gl-grow gl-items-start gl-gap-y-2 gl-py-3"
+        class="md-header-toolbar gl-display-flex gl-py-3 gl-gap-y-2 gl-flex-grow-1 gl-align-items-flex-start"
       >
-        <div class="gl-flex gl-flex-wrap gl-gap-y-2">
+        <div class="gl-display-flex gl-flex-wrap gl-gap-y-2">
           <gl-button
             v-if="enablePreview"
             data-testid="preview-toggle"
             :value="previewMarkdown ? 'preview' : 'edit'"
             :label="$options.i18n.previewTabTitle"
-            class="js-md-preview-button gl-flex-row-reverse gl-items-center !gl-font-normal"
+            class="js-md-preview-button gl-flex-direction-row-reverse gl-align-items-center !gl-font-normal"
             size="small"
             category="tertiary"
             @click="switchPreview"
             >{{ previewMarkdown ? $options.i18n.hidePreview : $options.i18n.preview }}</gl-button
           >
           <template v-if="!previewMarkdown && canSuggest">
-            <div class="gl-flex gl-gap-y-2">
+            <div class="gl-display-flex gl-gap-y-2">
               <header-divider v-if="!previewMarkdown" />
               <toolbar-button
                 ref="suggestButton"
@@ -327,8 +327,11 @@ export default {
               </gl-popover>
             </div>
           </template>
-          <div class="gl-flex gl-gap-y-2">
-            <div v-if="!previewMarkdown && editorAiActions.length" class="gl-flex gl-gap-y-2">
+          <div class="gl-display-flex gl-gap-y-2">
+            <div
+              v-if="!previewMarkdown && editorAiActions.length"
+              class="gl-display-flex gl-gap-y-2"
+            >
               <header-divider v-if="!previewMarkdown" />
               <ai-actions-dropdown
                 :actions="editorAiActions"
@@ -364,7 +367,7 @@ export default {
             icon="italic"
             tracking-property="italic"
           />
-          <div class="gl-flex gl-gap-y-2">
+          <div class="gl-display-flex gl-gap-y-2">
             <toolbar-button
               v-if="!restrictedToolBarItems.includes('strikethrough')"
               v-show="!previewMarkdown"
@@ -445,7 +448,7 @@ export default {
           <toolbar-button
             v-if="!restrictedToolBarItems.includes('indent')"
             v-show="!previewMarkdown"
-            class="gl-hidden"
+            class="gl-display-none"
             :button-title="
               /* eslint-disable @gitlab/vue-no-new-non-primitive-in-template */
               sprintf(s__('MarkdownEditor|Indent line (%{modifierKey}])'), {
@@ -460,7 +463,7 @@ export default {
           <toolbar-button
             v-if="!restrictedToolBarItems.includes('outdent')"
             v-show="!previewMarkdown"
-            class="gl-hidden"
+            class="gl-display-none"
             :button-title="
               /* eslint-disable @gitlab/vue-no-new-non-primitive-in-template */
               sprintf(s__('MarkdownEditor|Outdent line (%{modifierKey}[)'), {
@@ -472,7 +475,7 @@ export default {
             icon="list-outdent"
             tracking-property="outdent"
           />
-          <div class="gl-flex gl-gap-y-2">
+          <div class="gl-display-flex gl-gap-y-2">
             <toolbar-button
               v-if="!restrictedToolBarItems.includes('collapsible-section')"
               v-show="!previewMarkdown"
@@ -499,7 +502,7 @@ export default {
             dropzone_input.js.
           -->
           <toolbar-button
-            v-show="!previewMarkdown && !restrictedToolBarItems.includes('attach-file')"
+            v-if="!previewMarkdown && !restrictedToolBarItems.includes('attach-file')"
             data-testid="button-attach-file"
             data-button-type="attach-file"
             :button-title="__('Attach a file or image')"
@@ -528,10 +531,13 @@ export default {
             @select="insertSavedReply"
           />
         </div>
-        <div v-if="!previewMarkdown" class="full-screen gl-flex gl-grow gl-justify-end">
+        <div
+          v-if="!previewMarkdown"
+          class="full-screen gl-flex-grow-1 gl-justify-content-end gl-display-flex"
+        >
           <toolbar-button
             v-if="!restrictedToolBarItems.includes('full-screen')"
-            class="js-zen-enter !gl-mr-0"
+            class="js-zen-enter gl-mr-0!"
             icon="maximize"
             :button-title="__('Go full screen')"
             :prepend="true"

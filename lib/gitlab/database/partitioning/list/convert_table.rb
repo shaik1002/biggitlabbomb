@@ -214,8 +214,6 @@ module Gitlab
                   .not_inherited
                   .any? { |p_fk| p_fk.name == fk.name }
 
-              next if fk.referenced_table_name == table_name.to_s
-
               migration_context.add_concurrent_foreign_key(
                 parent_table_name,
                 fk.referenced_table_name,
@@ -285,9 +283,7 @@ module Gitlab
                    INNER JOIN pg_class dep_pg_class ON pg_depend.refobjid = dep_pg_class.oid
                    INNER JOIN pg_attribute ON dep_pg_class.oid = pg_attribute.attrelid
                                            AND pg_depend.refobjsubid = pg_attribute.attnum
-              WHERE pg_depend.classid = 'pg_class'::regclass
-                AND pg_depend.refclassid = 'pg_class'::regclass
-                AND seq_pg_class.relkind = 'S'
+              WHERE seq_pg_class.relkind = 'S'
                 AND dep_pg_class.relname = $1
             SQL
 

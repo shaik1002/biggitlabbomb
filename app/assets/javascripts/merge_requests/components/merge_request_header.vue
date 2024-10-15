@@ -94,31 +94,31 @@ export default {
 </script>
 
 <template>
-  <span class="gl-contents">
+  <span class="gl-display-contents">
     <status-badge
-      class="gl-mr-2 gl-self-center"
+      class="gl-align-self-center gl-mr-2"
       :issuable-type="$options.TYPE_MERGE_REQUEST"
       :state="state"
     />
     <confidentiality-badge
       v-if="isConfidential"
-      class="gl-mr-2 gl-self-center"
+      class="gl-align-self-center gl-mr-2"
       :issuable-type="$options.TYPE_ISSUE"
       :workspace-type="$options.WORKSPACE_PROJECT"
     />
     <locked-badge
       v-if="isLocked"
-      class="gl-mr-2 gl-self-center"
+      class="gl-align-self-center gl-mr-2"
       :issuable-type="$options.TYPE_MERGE_REQUEST"
     />
     <hidden-badge
       v-if="hidden"
-      class="gl-mr-2 gl-self-center"
+      class="gl-align-self-center gl-mr-2"
       :issuable-type="$options.TYPE_MERGE_REQUEST"
     />
     <imported-badge
       v-if="isImported"
-      class="gl-mr-2 gl-self-center"
+      class="gl-align-self-center gl-mr-2"
       :importable-type="$options.TYPE_MERGE_REQUEST"
     />
   </span>

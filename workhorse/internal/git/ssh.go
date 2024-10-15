@@ -49,15 +49,9 @@ func handleSSHUploadPack(w http.ResponseWriter, r *http.Request, a *api.Response
 		return
 	}
 
-	conn, err := gitaly.NewConnection(a.GitalyServer)
+	conn, registry, err := gitaly.NewConnectionWithSidechannel(a.GitalyServer)
 	if err != nil {
 		fail.Request(w, r, fmt.Errorf("look up for gitaly connection: %v", err))
-		return
-	}
-
-	registry, err := gitaly.Sidechannel()
-	if err != nil {
-		fail.Request(w, r, fmt.Errorf("sidechannel error: %v", err))
 		return
 	}
 
@@ -83,7 +77,7 @@ func handleSSHReceivePack(w http.ResponseWriter, r *http.Request, a *api.Respons
 		return
 	}
 
-	conn, err := gitaly.NewConnection(a.GitalyServer)
+	conn, _, err := gitaly.NewConnectionWithSidechannel(a.GitalyServer)
 	if err != nil {
 		fail.Request(w, r, fmt.Errorf("look up for gitaly connection: %v", err))
 		return

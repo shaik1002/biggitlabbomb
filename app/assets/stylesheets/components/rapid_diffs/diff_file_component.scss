@@ -4,8 +4,9 @@
 
 .rd-diff-file-header {
   display: flex;
-  background-color: var(--gl-background-color-subtle);
-  border: 1px solid var(--gl-border-color-default);
+  background-color: $gray-10;
+  border: 1px solid $gray-100;
+  border-bottom: 1px solid $border-color;
   padding: $gl-padding-8 $gl-padding;
   min-height: px-to-rem($file-header-height);
   border-radius: calc($gl-border-radius-base - 1px) calc($gl-border-radius-base - 1px) 0 0;
@@ -24,7 +25,7 @@
 }
 
 .rd-diff-file-body {
-  border: 1px solid var(--gl-border-color-default);
+  border: 1px solid $gray-100;
   border-top: 0;
   border-radius: 0 0 calc($gl-border-radius-base - 1px) calc($gl-border-radius-base - 1px);
 }

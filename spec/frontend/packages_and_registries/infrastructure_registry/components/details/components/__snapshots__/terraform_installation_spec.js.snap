@@ -3,7 +3,7 @@
 exports[`TerraformInstallation renders all the messages 1`] = `
 <div>
   <h3
-    class="gl-text-lg"
+    class="gl-font-lg"
   >
     Provision instructions
   </h3>
@@ -19,7 +19,7 @@ exports[`TerraformInstallation renders all the messages 1`] = `
     trackinglabel=""
   />
   <h3
-    class="gl-text-lg"
+    class="gl-font-lg"
   >
     Registry setup
   </h3>

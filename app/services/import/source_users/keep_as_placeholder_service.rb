@@ -21,8 +21,9 @@ module Import
 
       private
 
+      attr_reader :import_source_user, :current_user, :params
+
       def keep_as_placeholder
-        import_source_user.reassign_to_user = nil
         import_source_user.reassigned_by_user = current_user
         import_source_user.keep_as_placeholder
       end

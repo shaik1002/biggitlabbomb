@@ -23,7 +23,11 @@ describe('PackagesListLoader', () => {
     });
 
     it('has the correct classes', () => {
-      expect(findDesktopShapes().classes()).toEqual(['gl-hidden', 'gl-flex-col', 'sm:gl-flex']);
+      expect(findDesktopShapes().classes()).toEqual([
+        'gl-hidden',
+        'sm:gl-flex',
+        'gl-flex-direction-column',
+      ]);
     });
   });
 
@@ -33,7 +37,7 @@ describe('PackagesListLoader', () => {
     });
 
     it('has the correct classes', () => {
-      expect(findMobileShapes().classes()).toEqual(['gl-flex-col', 'sm:gl-hidden']);
+      expect(findMobileShapes().classes()).toEqual(['gl-flex-direction-column', 'sm:gl-hidden']);
     });
   });
 });

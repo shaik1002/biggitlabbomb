@@ -6,7 +6,7 @@ RSpec.shared_examples 'Deploy keys with protected branches' do
     sign_in(user)
   end
 
-  let(:dropdown_sections_minus_deploy_keys) { all_dropdown_sections - ['Deploy keys'] }
+  let(:dropdown_sections_minus_deploy_keys) { all_dropdown_sections - ['Deploy Keys'] }
 
   context 'when deploy keys are enabled to this project' do
     let!(:deploy_key_1) { create(:deploy_key, title: 'title 1', projects: [project]) }
@@ -78,7 +78,7 @@ RSpec.shared_examples 'Deploy keys with protected branches' do
 
             within('[data-testid="deploy_key-dropdown-item"]') do
               deploy_key_checkbox = find('[data-testid="dropdown-item-checkbox"]')
-              expect(deploy_key_checkbox).to have_no_css("gl-invisible")
+              expect(deploy_key_checkbox).to have_no_css("gl-visibility-hidden")
             end
           end
         end

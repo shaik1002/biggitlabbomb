@@ -7,7 +7,7 @@ module Projects
 
       before_action :authorize_admin_sentry!
 
-      feature_category :observability
+      feature_category :error_tracking
       urgency :low
 
       def index

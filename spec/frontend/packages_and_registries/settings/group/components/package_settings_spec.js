@@ -14,7 +14,7 @@ import {
 
 import updateNamespacePackageSettings from '~/packages_and_registries/settings/group/graphql/mutations/update_group_packages_settings.mutation.graphql';
 import getGroupPackagesSettingsQuery from '~/packages_and_registries/settings/group/graphql/queries/get_group_packages_settings.query.graphql';
-import SettingsSection from '~/vue_shared/components/settings/settings_section.vue';
+import SettingsBlock from '~/packages_and_registries/shared/components/settings_block.vue';
 import { updateGroupPackagesSettingsOptimisticResponse } from '~/packages_and_registries/settings/group/graphql/utils/optimistic_responses';
 import {
   packageSettings,
@@ -50,10 +50,14 @@ describe('Packages Settings', () => {
       propsData: {
         packageSettings,
       },
+      stubs: {
+        SettingsBlock,
+      },
     });
   };
 
-  const findSettingsSection = () => wrapper.findComponent(SettingsSection);
+  const findSettingsBlock = () => wrapper.findComponent(SettingsBlock);
+  const findDescription = () => wrapper.findByTestId('description');
   const findMavenSettings = () => wrapper.findByTestId('maven-settings');
   const findGenericSettings = () => wrapper.findByTestId('generic-settings');
   const findNugetSettings = () => wrapper.findByTestId('nuget-settings');
@@ -93,21 +97,19 @@ describe('Packages Settings', () => {
   it('renders a settings block', () => {
     mountComponent();
 
-    expect(findSettingsSection().exists()).toBe(true);
+    expect(findSettingsBlock().exists()).toBe(true);
   });
 
   it('has the correct header text', () => {
     mountComponent();
 
-    expect(findSettingsSection().props('heading')).toContain(PACKAGE_SETTINGS_HEADER);
+    expect(wrapper.text()).toContain(PACKAGE_SETTINGS_HEADER);
   });
 
   it('has the correct description text', () => {
     mountComponent();
 
-    expect(findSettingsSection().props('description')).toMatchInterpolatedText(
-      PACKAGE_SETTINGS_DESCRIPTION,
-    );
+    expect(findDescription().text()).toMatchInterpolatedText(PACKAGE_SETTINGS_DESCRIPTION);
   });
 
   describe('maven settings', () => {

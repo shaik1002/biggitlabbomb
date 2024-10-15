@@ -10,6 +10,7 @@ fragment WorkItem on WorkItem {
   description
   confidential
   createdAt
+  updatedAt
   closedAt
   webUrl
   reference(full: true)

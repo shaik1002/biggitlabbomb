@@ -139,10 +139,10 @@ export default {
 };
 </script>
 <template>
-  <div class="gl-relative gl-flex">
+  <div class="gl-display-flex gl-relative">
     <svg
       id="link-svg"
-      class="gl-pointer-events-none gl-absolute"
+      class="gl-absolute gl-pointer-events-none"
       :viewBox="viewBox"
       :width="`${containerMeasurements.width}px`"
       :height="`${containerMeasurements.height}px`"

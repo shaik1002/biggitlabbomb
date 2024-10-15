@@ -53,7 +53,7 @@ To generate an API Fuzzing configuration snippet:
 1. Do one of the following:
    1. To copy the snippet to your clipboard, select **Copy code only**.
    1. To add the snippet to your project's `.gitlab-ci.yml` file, select
-      **Copy code and open `.gitlab-ci.yml` file**. The pipeline editor opens.
+      **Copy code and open `.gitlab-ci.yml` file**. The Pipeline Editor opens.
       1. Paste the snippet into the `.gitlab-ci.yml` file.
       1. Select the **Lint** tab to confirm the edited `.gitlab-ci.yml` file is valid.
       1. Select the **Edit** tab, then select **Commit changes**.
@@ -409,15 +409,15 @@ requests. These placeholders are called variables, as explained in [using variab
 You can use variables to store and reuse values in your requests and scripts. For example, you can
 edit the collection to add variables to the document:
 
-![Edit collection variable tab View](../img/api_fuzzing_postman_collection_edit_variable_v13_9.png)
+![Edit collection variable tab View](../img/api_fuzzing_postman_collection_edit_variable.png)
 
 Or alternatively, you can add variables in an environment:
 
-![Edit environment variables View](../img/api_fuzzing_postman_environment_edit_variable_v13_9.png)
+![Edit environment variables View](../img/api_fuzzing_postman_environment_edit_variable.png)
 
 You can then use the variables in sections such as URL, headers, and others:
 
-![Edit request using variables View](../img/api_fuzzing_postman_request_edit_v13_9.png)
+![Edit request using variables View](../img/api_fuzzing_postman_request_edit.png)
 
 Postman has grown from a basic client tool with a nice UX experience to a more complex ecosystem that allows testing APIs with scripts, creating complex collections that trigger secondary requests, and setting variables along the way. Not every feature in the Postman ecosystem is supported. For example, scripts are not supported. The main focus of the Postman support is to ingest Postman Collection definitions that are used by the Postman Client and their related variables defined in the workspace, environments, and the collections themselves.
 

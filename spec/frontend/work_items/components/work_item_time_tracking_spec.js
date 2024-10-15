@@ -31,6 +31,7 @@ describe('WorkItemTimeTracking component', () => {
       },
       provide: {
         fullPath: 'gitlab-org/gitlab',
+        isGroup: false,
       },
       stubs: {
         GlProgressBar: true,

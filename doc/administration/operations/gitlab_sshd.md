@@ -33,9 +33,6 @@ If you are considering switching from OpenSSH to `gitlab-sshd`, consider these c
   on it, such as HAProxy. The PROXY protocol is not enabled by default, but [it can be enabled](#proxy-protocol-support).
 - `gitlab-sshd` does not support SSH certificates. For discussion about adding them,
   see [issue 655](https://gitlab.com/gitlab-org/gitlab-shell/-/issues/655).
-- `gitlab-sshd` does not support 2FA recovery code regeneration. Attempting to run `2fa_recovery_codes`
-  results in the following error: `remote: ERROR: Unknown command: 2fa_recovery_codes`.
-  See [the discussion](https://gitlab.com/gitlab-org/gitlab-shell/-/issues/766#note_1906707753) for more information.
 
 ## Enable `gitlab-sshd`
 
@@ -122,9 +119,6 @@ To enable the PROXY protocol:
    # Proxy protocol policy ("use", "require", "reject", "ignore"), "use" is the default value
    gitlab_sshd['proxy_policy'] = "use"
    ```
-
-   For more information about the `gitlab_sshd['proxy_policy']` options, see the
-   [`go-proxyproto` library](https://github.com/pires/go-proxyproto/blob/4ba2eb817d7a57a4aafdbd3b82ef0410806b533d/policy.go#L20-L35).
 
 1. Save the file and reconfigure GitLab:
 

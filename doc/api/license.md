@@ -22,7 +22,7 @@ GET /license
 ```json
 {
   "id": 2,
-  "plan": "ultimate",
+  "plan": "gold",
   "created_at": "2018-02-27T23:21:58.674Z",
   "starts_at": "2018-01-27",
   "expires_at": "2022-01-27",
@@ -33,9 +33,7 @@ GET /license
   "user_limit": 100,
   "active_users": 300,
   "licensee": {
-    "Name": "John Doe1",
-    "Email": "johndoe1@gitlab.com",
-    "Company": "GitLab"
+    "Name": "John Doe1"
   },
   "add_ons": {
     "GitLab_FileLocks": 1,
@@ -54,7 +52,7 @@ GET /licenses
 [
   {
     "id": 1,
-    "plan": "premium",
+    "plan": "silver",
     "created_at": "2018-02-27T23:21:58.674Z",
     "starts_at": "2018-01-27",
     "expires_at": "2022-01-27",
@@ -64,9 +62,7 @@ GET /licenses
     "overage": 200,
     "user_limit": 100,
     "licensee": {
-      "Name": "John Doe1",
-      "Email": "johndoe1@gitlab.com",
-      "Company": "GitLab"
+      "Name": "John Doe1"
     },
     "add_ons": {
       "GitLab_FileLocks": 1,
@@ -75,7 +71,7 @@ GET /licenses
   },
   {
     "id": 2,
-    "plan": "ultimate",
+    "plan": "gold",
     "created_at": "2018-02-27T23:21:58.674Z",
     "starts_at": "2018-01-27",
     "expires_at": "2022-01-27",
@@ -85,9 +81,7 @@ GET /licenses
     "overage": 200,
     "user_limit": 100,
     "licensee": {
-      "Name": "Doe John",
-      "Email": "doejohn@gitlab.com",
-      "Company": "GitLab"
+      "Name": "Doe John"
     },
     "add_ons": {
       "GitLab_FileLocks": 1
@@ -147,9 +141,7 @@ Example response:
   "user_limit": 100,
   "active_users": 50,
   "licensee": {
-    "Name": "John Doe1",
-    "Email": "johndoe1@gitlab.com",
-    "Company": "GitLab"
+    "Name": "John Doe1"
   },
   "add_ons": {
     "GitLab_FileLocks": 1,
@@ -177,7 +169,7 @@ Example response:
 ```json
 {
   "id": 1,
-  "plan": "ultimate",
+  "plan": "gold",
   "created_at": "2018-02-27T23:21:58.674Z",
   "starts_at": "2018-01-27",
   "expires_at": "2022-01-27",
@@ -188,9 +180,7 @@ Example response:
   "user_limit": 100,
   "active_users": 300,
   "licensee": {
-    "Name": "John Doe1",
-    "Email": "johndoe1@gitlab.com",
-    "Company": "GitLab"
+    "Name": "John Doe1"
   },
   "add_ons": {
     "GitLab_FileLocks": 1,
@@ -216,6 +206,30 @@ DELETE /license/:id
 
 ```shell
 curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/license/:id"
+```
+
+Example response:
+
+```json
+{
+  "id": 2,
+  "plan": "gold",
+  "created_at": "2018-02-27T23:21:58.674Z",
+  "starts_at": "2018-01-27",
+  "expires_at": "2022-01-27",
+  "historical_max": 300,
+  "maximum_user_count": 300,
+  "expired": false,
+  "overage": 200,
+  "user_limit": 100,
+  "licensee": {
+    "Name": "John Doe"
+  },
+  "add_ons": {
+    "GitLab_FileLocks": 1,
+    "GitLab_Auditor_User": 1
+  }
+}
 ```
 
 Returns:
@@ -265,7 +279,7 @@ GET /license/usage_export.csv
 ```
 
 ```shell
-curl --request GET --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/license/usage_export.csv"
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/license/usage_export.csv"
 ```
 
 Example response:
@@ -284,9 +298,11 @@ Date,Billable User Count
 2023-07-13 12:00:06,21
 2023-08-16 12:00:02,21
 2023-09-04 12:00:12,21
+
 ```
 
 Returns:
 
-- `200 OK`: Response contains the license usage in CSV format.
-- `403 Forbidden` if the current user in not permitted to view license usage.
+- `202 Accepted` if the request to refresh billable users is successfully initiated.
+- `403 Forbidden` if the current user in not permitted to refresh billable users for the license.
+- `404 Not Found` if the license could not be found.

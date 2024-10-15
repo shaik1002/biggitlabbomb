@@ -26,15 +26,9 @@ RSpec.describe WorkItems::Widgets::Assignees do
       let(:resource_parent) { build_stubbed(:project) }
 
       it 'checks the ability with the correct permission' do
-        expect(Ability).to receive(:allowed?).with(user, :admin_project_member, resource_parent)
+        expect(user).to receive(:can?).with(:admin_project_member, resource_parent)
 
         execute
-      end
-
-      context 'when user is nil' do
-        let(:user) { nil }
-
-        it { is_expected.to eq(false) }
       end
     end
 
@@ -42,15 +36,9 @@ RSpec.describe WorkItems::Widgets::Assignees do
       let(:resource_parent) { build_stubbed(:group) }
 
       it 'checks the ability with the correct permission' do
-        expect(Ability).to receive(:allowed?).with(user, :admin_group_member, resource_parent)
+        expect(user).to receive(:can?).with(:admin_group_member, resource_parent)
 
         execute
-      end
-
-      context 'when user is nil' do
-        let(:user) { nil }
-
-        it { is_expected.to eq(false) }
       end
     end
   end

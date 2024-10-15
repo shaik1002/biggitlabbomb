@@ -24,15 +24,3 @@ warning: One-line pattern matching is experimental, and the behavior may change 
 # it's really unlikelly that we will not be able to find a compatible version of the `io-event` gem if the
 # experimental `IO::Buffer` feature changes in Ruby.
 warning: IO::Buffer is experimental and both the Ruby and C interface may change in the future!
-
-# We need to build the Tailwind CSS bundle before running Stylelint so that we can lint against
-# forbidden syntax within the compiled tailwind.css. The Tailwind CSS builder logs some messages
-# with `console.error()` which need to be ignored here.
-Rebuilding...
-Done in [0-9]+ms.
-
-# We are in the midst of legacy util to Tailwind migration and for linting purposes we are checking
-# whether someone uses legacy utils. If no legacy utils are found, tailwind sends a warning
-# This can be removed once we do not compile legacy utils any longer
-.+ - No utility classes were detected in your source files. If this is unexpected, double-check the `content` option in your Tailwind CSS configuration.
-.+ - https://tailwindcss.com/docs/content-configuration

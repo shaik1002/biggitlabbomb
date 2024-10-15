@@ -7,7 +7,7 @@ import {
   URLS_CACHE_STORAGE_KEY,
   REFERRER_TTL,
   INTERNAL_EVENTS_SELECTOR,
-  BASE_ADDITIONAL_PROPERTIES,
+  ALLOWED_ADDITIONAL_PROPERTIES,
 } from './constants';
 
 export const addExperimentContext = (opts) => {
@@ -72,32 +72,12 @@ export const createEventPayload = (el, { suffix = '' } = {}) => {
 };
 
 export const createInternalEventPayload = (el) => {
-  const {
-    eventTracking,
-    eventLabel,
-    eventProperty,
-    eventValue,
-    eventAdditional = '{}',
-  } = el?.dataset || {};
-
-  let parsedEventAdditional = {};
-
-  try {
-    parsedEventAdditional = JSON.parse(eventAdditional);
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Failed to parse eventAdditional attribute:', eventAdditional);
-  }
+  const { eventTracking, eventLabel, eventProperty, eventValue } = el?.dataset || {};
 
   return {
     event: eventTracking,
     additionalProperties: omitBy(
-      {
-        label: eventLabel,
-        property: eventProperty,
-        value: parseInt(eventValue, 10) || undefined,
-        ...parsedEventAdditional,
-      },
+      { label: eventLabel, property: eventProperty, value: parseInt(eventValue, 10) || undefined },
       isUndefined,
     ),
   };
@@ -166,47 +146,18 @@ export const addReferrersCacheEntry = (cache, entry) => {
   window.localStorage.setItem(URLS_CACHE_STORAGE_KEY, referrers);
 };
 
-function validateProperty(obj, key, allowedTypes) {
-  if (!obj[key]) return;
-  if (obj[key] === null) return;
+export const validateAdditionalProperties = (additionalProperties) => {
+  const disallowedProperties = Object.keys(additionalProperties).filter(
+    (key) => !ALLOWED_ADDITIONAL_PROPERTIES.includes(key),
+  );
 
-  const isValidType = allowedTypes.includes(typeof obj[key]);
-
-  if (!isValidType) {
+  if (disallowedProperties.length > 0) {
     throw new Error(
-      `${key} should be of type: ${allowedTypes.join(', ')}. Provided type is: ${typeof obj[key]}.`,
+      `Allowed additional properties are ${ALLOWED_ADDITIONAL_PROPERTIES.join(
+        ', ',
+      )} for InternalEvents tracking.\nDisallowed additional properties were provided: ${disallowedProperties.join(
+        ', ',
+      )}.`,
     );
   }
-}
-
-export const validateAdditionalProperties = (additionalProperties) => {
-  const baseKeys = Object.keys(BASE_ADDITIONAL_PROPERTIES);
-
-  baseKeys.forEach((key) => {
-    if (additionalProperties[key]) {
-      validateProperty(additionalProperties, key, BASE_ADDITIONAL_PROPERTIES[key]);
-    }
-  });
 };
-
-function filterProperties(additionalProperties, predicate) {
-  return Object.keys(additionalProperties).reduce((acc, key) => {
-    if (predicate(key)) {
-      return { ...acc, [key]: additionalProperties[key] };
-    }
-    return acc;
-  }, {});
-}
-
-export function getCustomAdditionalProperties(additionalProperties) {
-  return filterProperties(
-    additionalProperties,
-    (key) => !Object.keys(BASE_ADDITIONAL_PROPERTIES).includes(key),
-  );
-}
-
-export function getBaseAdditionalProperties(additionalProperties) {
-  return filterProperties(additionalProperties, (key) =>
-    Object.keys(BASE_ADDITIONAL_PROPERTIES).includes(key),
-  );
-}

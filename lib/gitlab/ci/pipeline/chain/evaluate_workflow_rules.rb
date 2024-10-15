@@ -28,7 +28,7 @@ module Gitlab
             end
 
             error(
-              ::Ci::Pipeline.workflow_rules_failure_message,
+              'Pipeline filtered out by workflow rules.',
               failure_reason: :filtered_by_workflow_rules
             )
           end

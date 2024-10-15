@@ -295,7 +295,7 @@ module QA
         text = kwargs.delete(:text)
         klass = kwargs.delete(:class)
         visible = kwargs.delete(:visible)
-        visible = true if visible.nil?
+        visible = visible.nil? && true
 
         try_find_element = ->(wait) do
           if disabled.nil?

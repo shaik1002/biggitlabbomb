@@ -5,72 +5,53 @@ module Notes
     include IncidentManagement::UsageData
 
     def execute(skip_capture_diff_note_position: false, skip_merge_status_trigger: false, executing_user: nil)
-      Gitlab::Database::QueryAnalyzers::PreventCrossDatabaseModification.temporary_ignore_tables_in_transaction(
-        %w[
-          notes
-          vulnerability_user_mentions
-        ], url: 'https://gitlab.com/gitlab-org/gitlab/-/issues/482744'
-      ) do
-        note = build_note(executing_user)
+      note =
+        Notes::BuildService
+          .new(project, current_user, params.except(:merge_request_diff_head_sha))
+          .execute(executing_user: executing_user)
 
-        # n+1: https://gitlab.com/gitlab-org/gitlab-foss/issues/37440
-        note_valid = Gitlab::GitalyClient.allow_n_plus_1_calls do
-          # We may set errors manually in Notes::BuildService for this reason
-          # we also need to check for already existing errors.
-          note.errors.empty? && note.valid?
-        end
-
-        return note unless note_valid # rubocop:disable Cop/AvoidReturnFromBlocks -- Temp for decomp exemption
-
-        # We execute commands (extracted from `params[:note]`) on the noteable
-        # **before** we save the note because if the note consists of commands
-        # only, there is no need be create a note!
-
-        execute_quick_actions(note) do |only_commands|
-          note.check_for_spam(action: :create, user: current_user) if check_for_spam?(only_commands)
-
-          after_commit(note)
-
-          note_saved = note.with_transaction_returning_status do
-            break false if only_commands
-
-            note.save.tap do
-              update_discussions(note)
-            end
-          end
-
-          if note_saved
-            when_saved(
-              note,
-              skip_capture_diff_note_position: skip_capture_diff_note_position,
-              skip_merge_status_trigger: skip_merge_status_trigger
-            )
-          end
-        end
-
-        note
+      # n+1: https://gitlab.com/gitlab-org/gitlab-foss/issues/37440
+      note_valid = Gitlab::GitalyClient.allow_n_plus_1_calls do
+        # We may set errors manually in Notes::BuildService for this reason
+        # we also need to check for already existing errors.
+        note.errors.empty? && note.valid?
       end
+
+      return note unless note_valid
+
+      # We execute commands (extracted from `params[:note]`) on the noteable
+      # **before** we save the note because if the note consists of commands
+      # only, there is no need be create a note!
+
+      execute_quick_actions(note) do |only_commands|
+        note.check_for_spam(action: :create, user: current_user) unless only_commands
+
+        note.run_after_commit do
+          # Finish the harder work in the background
+          NewNoteWorker.perform_async(note.id)
+        end
+
+        note_saved = note.with_transaction_returning_status do
+          break false if only_commands
+
+          note.save.tap do
+            update_discussions(note)
+          end
+        end
+
+        if note_saved
+          when_saved(
+            note,
+            skip_capture_diff_note_position: skip_capture_diff_note_position,
+            skip_merge_status_trigger: skip_merge_status_trigger
+          )
+        end
+      end
+
+      note
     end
 
     private
-
-    def build_note(executing_user)
-      Notes::BuildService
-        .new(project, current_user, params.except(:merge_request_diff_head_sha))
-        .execute(executing_user: executing_user)
-    end
-
-    def check_for_spam?(only_commands)
-      !only_commands
-    end
-
-    def after_commit(note)
-      note.run_after_commit do
-        # Complete more expensive operations like sending
-        # notifications and post processing in a background worker.
-        NewNoteWorker.perform_async(note.id)
-      end
-    end
 
     def execute_quick_actions(note)
       return yield(false) unless quick_actions_supported?(note)

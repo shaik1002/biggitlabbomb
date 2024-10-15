@@ -4,10 +4,9 @@ require 'spec_helper'
 
 RSpec.describe Users::RegistrationsBuildService, feature_category: :system_access do
   describe '#execute' do
-    let_it_be(:organization) { create(:organization) }
     let(:base_params) { build_stubbed(:user).slice(:first_name, :last_name, :username, :email, :password) }
     let(:skip_param) { {} }
-    let(:params) { base_params.merge(skip_param).merge(organization_id: organization.id) }
+    let(:params) { base_params.merge(skip_param) }
 
     subject(:service) { described_class.new(nil, params) }
 

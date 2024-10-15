@@ -2,11 +2,11 @@
 
 exports[`publish_method renders 1`] = `
 <div
-  class="gl-flex gl-items-center"
+  class="gl-align-items-center gl-display-flex"
 >
   <gl-icon-stub
     class="gl-mr-2"
-    name="merge-request"
+    name="git-merge"
     size="16"
     variant="current"
   />

@@ -1,12 +1,18 @@
 <script>
 import { GlLoadingIcon, GlKeysetPagination } from '@gitlab/ui';
 import projectsEmptyStateSvgPath from '@gitlab/svgs/dist/illustrations/empty-state/empty-projects-md.svg?url';
-import { s__ } from '~/locale';
+import { s__, __ } from '~/locale';
 import ProjectsList from '~/vue_shared/components/projects_list/projects_list.vue';
-import { formatGraphQLProjects } from '~/vue_shared/components/projects_list/utils';
+import { ACTION_DELETE } from '~/vue_shared/components/list_actions/constants';
 import { DEFAULT_PER_PAGE } from '~/api';
+import { deleteProject } from '~/rest_api';
 import { createAlert } from '~/alert';
-import { timestampType } from '~/organizations/shared/utils';
+import {
+  renderDeleteSuccessToast,
+  deleteParams,
+  formatProjects,
+  timestampType,
+} from 'ee_else_ce/organizations/shared/utils';
 import { SORT_ITEM_NAME, SORT_DIRECTION_ASC } from '../constants';
 import projectsQuery from '../graphql/queries/projects.query.graphql';
 import NewProjectButton from './new_project_button.vue';
@@ -27,6 +33,7 @@ export default {
         'GroupsEmptyState|Projects are where you can store your code, access issues, wiki, and other features of GitLab.',
       ),
     },
+    project: __('Project'),
   },
   components: {
     ProjectsList,
@@ -102,7 +109,7 @@ export default {
         },
       }) {
         return {
-          nodes: formatGraphQLProjects(nodes),
+          nodes: formatProjects(nodes),
           pageInfo,
         };
       },
@@ -158,8 +165,22 @@ export default {
         startCursor,
       });
     },
-    onDeleteComplete() {
-      this.$apollo.queries.projects.refetch();
+    setProjectIsDeleting(nodeIndex, value) {
+      this.projects.nodes[nodeIndex].actionLoadingStates[ACTION_DELETE] = value;
+    },
+    async deleteProject(project) {
+      const nodeIndex = this.projects.nodes.findIndex((node) => node.id === project.id);
+
+      try {
+        this.setProjectIsDeleting(nodeIndex, true);
+        await deleteProject(project.id, deleteParams(project));
+        this.$apollo.queries.projects.refetch();
+        renderDeleteSuccessToast(project, this.$options.i18n.project);
+      } catch (error) {
+        createAlert({ message: this.$options.i18n.deleteErrorMessage, error, captureError: true });
+      } finally {
+        this.setProjectIsDeleting(nodeIndex, false);
+      }
     },
   },
 };
@@ -173,9 +194,9 @@ export default {
       show-project-icon
       :list-item-class="listItemClass"
       :timestamp-type="timestampType"
-      @delete-complete="onDeleteComplete"
+      @delete="deleteProject"
     />
-    <div v-if="pageInfo.hasNextPage || pageInfo.hasPreviousPage" class="gl-mt-5 gl-text-center">
+    <div v-if="pageInfo.hasNextPage || pageInfo.hasPreviousPage" class="gl-text-center gl-mt-5">
       <gl-keyset-pagination v-bind="pageInfo" @prev="onPrev" @next="onNext" />
     </div>
   </div>

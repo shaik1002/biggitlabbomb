@@ -8,7 +8,7 @@ FactoryBot.define do
     author { project.creator }
     updated_by { author }
     relative_position { RelativePositioning::START_POSITION }
-    association :work_item_type
+    association :work_item_type, :default
 
     trait :confidential do
       confidential { true }
@@ -78,43 +78,43 @@ FactoryBot.define do
     end
 
     trait :issue do
-      association :work_item_type, :issue
+      association :work_item_type, :default, :issue
     end
 
     trait :requirement do
-      association :work_item_type, :requirement
+      association :work_item_type, :default, :requirement
     end
 
     trait :task do
-      association :work_item_type, :task
+      association :work_item_type, :default, :task
     end
 
     trait :objective do
-      association :work_item_type, :objective
+      association :work_item_type, :default, :objective
     end
 
     trait :key_result do
-      association :work_item_type, :key_result
+      association :work_item_type, :default, :key_result
     end
 
     trait :incident do
-      association :work_item_type, :incident
+      association :work_item_type, :default, :incident
     end
 
     trait :test_case do
-      association :work_item_type, :test_case
+      association :work_item_type, :default, :test_case
     end
 
     trait :epic do
-      association :work_item_type, :epic
+      association :work_item_type, :default, :epic
     end
 
     trait :ticket do
-      association :work_item_type, :ticket
+      association :work_item_type, :default, :ticket
     end
 
     factory :incident do
-      association :work_item_type, :incident
+      association :work_item_type, :default, :incident
 
       # An escalation status record is created for all incidents
       # in app code. This is a trait to avoid creating escalation

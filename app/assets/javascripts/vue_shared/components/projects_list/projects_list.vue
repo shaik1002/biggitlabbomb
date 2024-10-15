@@ -58,7 +58,7 @@ export default {
 </script>
 
 <template>
-  <ul class="gl-list-none gl-p-0">
+  <ul class="gl-p-0 gl-list-none">
     <projects-list-item
       v-for="project in projects"
       :key="project.id"
@@ -66,7 +66,7 @@ export default {
       :show-project-icon="showProjectIcon"
       :class="listItemClass"
       :timestamp-type="timestampType"
-      @delete-complete="$emit('delete-complete')"
+      @delete="$emit('delete', $event)"
     />
   </ul>
 </template>

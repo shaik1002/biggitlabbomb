@@ -1,4 +1,5 @@
 import { GlDisclosureDropdown, GlDisclosureDropdownItem, GlLoadingIcon } from '@gitlab/ui';
+import MockAdapter from 'axios-mock-adapter';
 import Vue, { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
 import mockPipelineActionsQueryResponse from 'test_fixtures/graphql/pipelines/get_pipeline_actions.query.graphql.json';
@@ -7,10 +8,11 @@ import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import { createAlert } from '~/alert';
+import axios from '~/lib/utils/axios_utils';
+import { HTTP_STATUS_INTERNAL_SERVER_ERROR, HTTP_STATUS_OK } from '~/lib/utils/http_status';
 import { confirmAction } from '~/lib/utils/confirm_via_gl_modal/confirm_via_gl_modal';
 import PipelinesManualActions from '~/ci/pipelines_page/components/pipelines_manual_actions.vue';
 import getPipelineActionsQuery from '~/ci/pipelines_page/graphql/queries/get_pipeline_actions.query.graphql';
-import jobPlayMutation from '~/ci/jobs_page/graphql/mutations/job_play.mutation.graphql';
 import { TRACKING_CATEGORIES } from '~/ci/constants';
 import GlCountdown from '~/vue_shared/components/gl_countdown.vue';
 
@@ -21,10 +23,9 @@ jest.mock('~/lib/utils/confirm_via_gl_modal/confirm_via_gl_modal');
 
 describe('Pipeline manual actions', () => {
   let wrapper;
+  let mock;
 
   const queryHandler = jest.fn().mockResolvedValue(mockPipelineActionsQueryResponse);
-  const jobPlayMutationHandler = jest.fn();
-
   const {
     data: {
       project: {
@@ -35,12 +36,9 @@ describe('Pipeline manual actions', () => {
     },
   } = mockPipelineActionsQueryResponse;
 
-  const createComponent = (limit = 50) => {
-    const apolloProvider = createMockApollo([
-      [getPipelineActionsQuery, queryHandler],
-      [jobPlayMutation, jobPlayMutationHandler],
-    ]);
+  const mockPath = nodes[2].playPath;
 
+  const createComponent = (limit = 50) => {
     wrapper = shallowMountExtended(PipelinesManualActions, {
       provide: {
         fullPath: 'root/ci-project',
@@ -52,7 +50,7 @@ describe('Pipeline manual actions', () => {
       stubs: {
         GlDisclosureDropdown,
       },
-      apolloProvider,
+      apolloProvider: createMockApollo([[getPipelineActionsQuery, queryHandler]]),
     });
   };
 
@@ -84,6 +82,8 @@ describe('Pipeline manual actions', () => {
 
   describe('loaded', () => {
     beforeEach(async () => {
+      mock = new MockAdapter(axios);
+
       createComponent();
 
       findDropdown().vm.$emit('shown');
@@ -92,6 +92,7 @@ describe('Pipeline manual actions', () => {
     });
 
     afterEach(() => {
+      mock.restore();
       confirmAction.mockReset();
     });
 
@@ -107,6 +108,8 @@ describe('Pipeline manual actions', () => {
 
     describe('on action click', () => {
       it('makes a request and toggles the loading state', async () => {
+        mock.onPost(mockPath).reply(HTTP_STATUS_OK);
+
         findAllDropdownItems().at(1).vm.$emit('action');
 
         await nextTick();
@@ -116,11 +119,10 @@ describe('Pipeline manual actions', () => {
         await waitForPromises();
 
         expect(findDropdown().props('loading')).toBe(false);
-        expect(jobPlayMutationHandler).toHaveBeenCalledTimes(1);
       });
 
       it('makes a failed request and toggles the loading state', async () => {
-        jobPlayMutationHandler.mockRejectedValueOnce(new Error('GraphQL error'));
+        mock.onPost(mockPath).reply(HTTP_STATUS_INTERNAL_SERVER_ERROR);
 
         findAllDropdownItems().at(1).vm.$emit('action');
 
@@ -158,7 +160,9 @@ describe('Pipeline manual actions', () => {
           .mockImplementation(() => new Date('2063-04-04T00:42:00Z').getTime());
       });
 
-      it('makes calls GraphQl mutation after confirming', async () => {
+      it('makes post request after confirming', async () => {
+        mock.onPost(mockPath).reply(HTTP_STATUS_OK);
+
         confirmAction.mockResolvedValueOnce(true);
 
         findAllDropdownItems().at(2).vm.$emit('action');
@@ -167,10 +171,12 @@ describe('Pipeline manual actions', () => {
 
         await waitForPromises();
 
-        expect(jobPlayMutationHandler).toHaveBeenCalledTimes(1);
+        expect(mock.history.post).toHaveLength(1);
       });
 
-      it('does not call GraphQl mutation if confirmation is cancelled', async () => {
+      it('does not make post request if confirmation is cancelled', async () => {
+        mock.onPost(mockPath).reply(HTTP_STATUS_OK);
+
         confirmAction.mockResolvedValueOnce(false);
 
         findAllDropdownItems().at(2).vm.$emit('action');
@@ -179,7 +185,7 @@ describe('Pipeline manual actions', () => {
 
         await waitForPromises();
 
-        expect(jobPlayMutationHandler).not.toHaveBeenCalled();
+        expect(mock.history.post).toHaveLength(0);
       });
 
       it('displays the remaining time in the dropdown', () => {

@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 # frozen_string_literal: true
 
 # Internal Events Tracking Monitor
@@ -19,24 +18,8 @@
 #   - To exit the script, press Ctrl+C.
 #
 
-unless defined?(Rails)
-  puts <<~TEXT
-
-    Error! The Internal Events Tracking Monitor could not access the Rails context!
-
-      Ensure GDK is running, then run:
-
-      bin/rails runner scripts/internal_events/monitor.rb #{ARGV.join(' ')}
-
-  TEXT
-
-  exit! 1
-end
-
 require 'terminal-table'
 require 'net/http'
-
-require_relative './server'
 require_relative '../../spec/support/helpers/service_ping_helpers'
 
 Gitlab::Usage::TimeFrame.prepend(ServicePingHelpers::CurrentTimeFrame)
@@ -52,10 +35,6 @@ def red(text)
   @pastel ||= Pastel.new
 
   @pastel.red(text)
-end
-
-def current_timestamp
-  (Time.now.to_f * 1000).to_i
 end
 
 def snowplow_data
@@ -75,8 +54,7 @@ def extract_standard_context(event)
       user_id: context["data"]["user_id"],
       namespace_id: context["data"]["namespace_id"],
       project_id: context["data"]["project_id"],
-      plan: context["data"]["plan"],
-      extra: context["data"]["extra"]
+      plan: context["data"]["plan"]
     }
   end
   {}
@@ -84,8 +62,6 @@ end
 
 def generate_snowplow_table
   events = snowplow_data.select { |d| ARGV.include?(d["event"]["se_action"]) }
-            .filter { |e| e['rawEvent']['parameters']['dtm'].to_i > @min_timestamp }
-
   @initial_max_timestamp ||= events.map { |e| e['rawEvent']['parameters']['dtm'].to_i }.max || 0
 
   rows = []
@@ -99,8 +75,7 @@ def generate_snowplow_table
     'plan',
     'Label',
     'Property',
-    'Value',
-    'Extra'
+    'Value'
   ]
 
   rows << :separator
@@ -118,8 +93,7 @@ def generate_snowplow_table
       standard_context[:plan],
       event['event']['se_label'],
       event['event']['se_property'],
-      event['event']['se_value'],
-      standard_context[:extra]
+      event['event']['se_value']
     ]
 
     row.map! { |value| red(value) } if event['rawEvent']['parameters']['dtm'].to_i > @initial_max_timestamp
@@ -130,6 +104,17 @@ def generate_snowplow_table
   Terminal::Table.new(
     title: 'SNOWPLOW EVENTS',
     rows: rows
+  )
+end
+
+def generate_snowplow_placeholder
+  Terminal::Table.new(
+    title: 'SNOWPLOW EVENTS',
+    rows: [
+      ["Could not connect to Snowplow Micro."],
+      ["Please follow these instruction to set up Snowplow Micro:"],
+      ["https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/main/doc/howto/snowplow_micro.md"]
+    ]
   )
 end
 
@@ -169,9 +154,9 @@ def generate_metrics_table
   )
 end
 
-def render_screen(paused)
+def render_screen(paused, snowplow_available)
   metrics_table = generate_metrics_table
-  events_table = generate_snowplow_table
+  events_table = snowplow_available ? generate_snowplow_table : generate_snowplow_placeholder
 
   print TTY::Cursor.clear_screen
   print TTY::Cursor.move_to(0, 0)
@@ -185,18 +170,15 @@ def render_screen(paused)
 
   puts
   puts "Press \"p\" to toggle refresh. (It makes it easier to select and copy the tables)"
-  puts "Press \"r\" to reset without exiting the monitor"
   puts "Press \"q\" to quit"
 end
 
-server = nil
-@min_timestamp = current_timestamp
+snowplow_available = true
 
 begin
   snowplow_data
 rescue Errno::ECONNREFUSED
-  # Start the mock server if Snowplow Micro is not running
-  server = Thread.start { Server.new.start }
+  snowplow_available = false
 end
 
 reader = TTY::Reader.new
@@ -207,21 +189,15 @@ begin
     case reader.read_keypress(nonblock: true)
     when 'p'
       paused = !paused
-      render_screen(paused)
-    when 'r'
-      @min_timestamp = current_timestamp
-      @initial_values = {}
+      render_screen(paused, snowplow_available)
     when 'q'
-      server&.exit
       break
     end
 
-    render_screen(paused) unless paused
+    render_screen(paused, snowplow_available) unless paused
 
     sleep 1
   end
 rescue Interrupt
-  server&.exit
-rescue Errno::ECONNREFUSED
-  # Ignore this error, caused by the server being killed before the loop due to working on a child thread
+  # Quietly shut down
 end

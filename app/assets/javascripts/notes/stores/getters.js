@@ -348,7 +348,6 @@ export const commentsDisabled = (state) => state.commentsDisabled;
 export const suggestionsCount = (state, getters) =>
   Object.values(getters.notesById).filter((n) => n.suggestions?.length).length;
 
-// eslint-disable-next-line max-params
 export const hasDrafts = (state, getters, rootState, rootGetters) =>
   Boolean(rootGetters['batchComments/hasDrafts']);
 

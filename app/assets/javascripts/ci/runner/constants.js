@@ -103,6 +103,10 @@ export const I18N_CONTACT_ADMIN_TO_REGISTER = s__(
   'Runners|To register new runners, contact your administrator.',
 );
 
+// No runners found
+export const I18N_NO_RESULTS = s__('Runners|No results found');
+export const I18N_EDIT_YOUR_SEARCH = s__('Runners|Edit your search and try again');
+
 // Runner details
 
 export const JOBS_ROUTE_PATH = '/jobs'; // vue-router route path
@@ -215,4 +219,3 @@ export const CHANGELOG_URL = `https://gitlab.com/gitlab-org/gitlab-runner/blob/m
 export const DOCKER_HELP_URL = `${DOCS_URL}/runner/install/docker.html`;
 export const KUBERNETES_HELP_URL = `${DOCS_URL}/runner/install/kubernetes.html`;
 export const RUNNER_MANAGERS_HELP_URL = `${DOCS_URL}/runner/fleet_scaling/#workers-executors-and-autoscaling-capabilities`;
-export const SINGLE_RUNNER_ENTRY_HELP_URL = `${DOCS_URL}/runner/configuration/advanced-configuration#the-runners-section`;

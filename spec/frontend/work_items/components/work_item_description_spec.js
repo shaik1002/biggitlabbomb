@@ -1,4 +1,4 @@
-import { GlAlert, GlForm } from '@gitlab/ui';
+import { GlForm } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import Vue, { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
@@ -7,14 +7,15 @@ import waitForPromises from 'helpers/wait_for_promises';
 import EditedAt from '~/issues/show/components/edited.vue';
 import { updateDraft } from '~/lib/utils/autosave';
 import { confirmAction } from '~/lib/utils/confirm_via_gl_modal/confirm_via_gl_modal';
-import { ENTER_KEY } from '~/lib/utils/keys';
 import MarkdownEditor from '~/vue_shared/components/markdown/markdown_editor.vue';
 import WorkItemDescription from '~/work_items/components/work_item_description.vue';
 import WorkItemDescriptionRendered from '~/work_items/components/work_item_description_rendered.vue';
 import updateWorkItemMutation from '~/work_items/graphql/update_work_item.mutation.graphql';
+import groupWorkItemByIidQuery from '~/work_items/graphql/group_work_item_by_iid.query.graphql';
 import workItemByIidQuery from '~/work_items/graphql/work_item_by_iid.query.graphql';
-import { autocompleteDataSources, markdownPreviewPath, newWorkItemId } from '~/work_items/utils';
+import { autocompleteDataSources, markdownPreviewPath } from '~/work_items/utils';
 import {
+  groupWorkItemByIidResponseFactory,
   updateWorkItemMutationResponse,
   workItemByIidResponseFactory,
   workItemQueryResponse,
@@ -29,12 +30,13 @@ describe('WorkItemDescription', () => {
   Vue.use(VueApollo);
 
   const mutationSuccessHandler = jest.fn().mockResolvedValue(updateWorkItemMutationResponse);
+  let workItemResponseHandler;
+  let groupWorkItemResponseHandler;
+
   const findForm = () => wrapper.findComponent(GlForm);
   const findMarkdownEditor = () => wrapper.findComponent(MarkdownEditor);
   const findRenderedDescription = () => wrapper.findComponent(WorkItemDescriptionRendered);
   const findEditedAt = () => wrapper.findComponent(EditedAt);
-  const findConflictsAlert = () => wrapper.findComponent(GlAlert);
-  const findConflictedDescription = () => wrapper.find('[data-testid="conflicted-description"]');
 
   const editDescription = (newText) => findMarkdownEditor().vm.$emit('input', newText);
 
@@ -46,35 +48,35 @@ describe('WorkItemDescription', () => {
     mutationHandler = mutationSuccessHandler,
     canUpdate = true,
     workItemResponse = workItemByIidResponseFactory({ canUpdate }),
-    workItemResponseHandler = jest.fn().mockResolvedValue(workItemResponse),
     isEditing = false,
     isGroup = false,
-    workItemId = workItemQueryResponse.data.workItem.id,
     workItemIid = '1',
     workItemTypeId = workItemQueryResponse.data.workItem.workItemType.id,
-    workItemTypeName = workItemQueryResponse.data.workItem.workItemType.name,
     editMode = false,
     showButtonsBelowField,
   } = {}) => {
+    workItemResponseHandler = jest.fn().mockResolvedValue(workItemResponse);
+    groupWorkItemResponseHandler = jest
+      .fn()
+      .mockResolvedValue(groupWorkItemByIidResponseFactory({ canUpdate }));
+
+    const { id } = workItemQueryResponse.data.workItem;
     wrapper = shallowMount(WorkItemDescription, {
       apolloProvider: createMockApollo([
         [workItemByIidQuery, workItemResponseHandler],
+        [groupWorkItemByIidQuery, groupWorkItemResponseHandler],
         [updateWorkItemMutation, mutationHandler],
       ]),
       propsData: {
         fullPath: 'test-project-path',
-        workItemId,
+        workItemId: id,
         workItemIid,
         workItemTypeId,
-        workItemTypeName,
         editMode,
         showButtonsBelowField,
       },
       provide: {
         isGroup,
-      },
-      stubs: {
-        GlAlert,
       },
     });
 
@@ -100,47 +102,6 @@ describe('WorkItemDescription', () => {
         supportsQuickActions: true,
         renderMarkdownPath: markdownPreviewPath({ fullPath, iid }),
         autocompleteDataSources: autocompleteDataSources({ fullPath, iid }),
-      });
-    });
-
-    it('passes correct autocompletion data sources when it is a group work item', async () => {
-      const {
-        iid,
-        namespace: { fullPath },
-      } = workItemQueryResponse.data.workItem;
-
-      const workItemResponse = workItemByIidResponseFactory();
-
-      const groupWorkItem = {
-        data: {
-          workspace: {
-            __typename: 'Group',
-            id: 'gid://gitlab/Group/24',
-            workItem: {
-              ...workItemResponse.data.workspace.workItem,
-              namespace: {
-                id: 'gid://gitlab/Group/24',
-                fullPath: 'gitlab-org',
-                name: 'Gitlab Org',
-                __typename: 'Namespace',
-              },
-            },
-          },
-        },
-      };
-
-      createComponent({ isEditing: true, workItemResponse: groupWorkItem, isGroup: true });
-
-      await waitForPromises();
-
-      expect(findMarkdownEditor().props()).toMatchObject({
-        supportsQuickActions: true,
-        renderMarkdownPath: markdownPreviewPath({ fullPath, iid, isGroup: true }),
-        autocompleteDataSources: autocompleteDataSources({
-          fullPath,
-          iid,
-          isGroup: true,
-        }),
       });
     });
 
@@ -225,11 +186,32 @@ describe('WorkItemDescription', () => {
     });
   });
 
-  it('calls the project work item query', () => {
-    const workItemResponseHandler = jest.fn().mockResolvedValue(workItemByIidResponseFactory());
-    createComponent({ workItemResponseHandler });
+  describe('when project context', () => {
+    it('calls the project work item query', () => {
+      createComponent();
 
-    expect(workItemResponseHandler).toHaveBeenCalled();
+      expect(workItemResponseHandler).toHaveBeenCalled();
+    });
+
+    it('skips calling the group work item query', () => {
+      createComponent();
+
+      expect(groupWorkItemResponseHandler).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when group context', () => {
+    it('skips calling the project work item query', () => {
+      createComponent({ isGroup: true });
+
+      expect(workItemResponseHandler).not.toHaveBeenCalled();
+    });
+
+    it('calls the group work item query', () => {
+      createComponent({ isGroup: true });
+
+      expect(groupWorkItemResponseHandler).toHaveBeenCalled();
+    });
   });
 
   describe('when edit mode is inactive', () => {
@@ -243,93 +225,18 @@ describe('WorkItemDescription', () => {
   });
 
   describe('when edit mode is active', () => {
-    it('shows markdown editor in edit mode only when the correct props are passed', () => {
+    beforeEach(() => {
       createComponent({ editMode: true });
+    });
 
+    it('shows markdown editor in edit mode only when the correct props are passed', () => {
       expect(findMarkdownEditor().exists()).toBe(true);
     });
 
-    it('emits the `updateDraft` event when the description is updated', () => {
-      createComponent({ editMode: true });
+    it('emits the `updateDraft` event when clicked on submit button in edit mode', () => {
       const updatedDesc = 'updated desc with inline editing disabled';
-
       findMarkdownEditor().vm.$emit('input', updatedDesc);
-
       expect(wrapper.emitted('updateDraft')).toEqual([[updatedDesc]]);
-    });
-
-    it('emits the `updateWorkItem` event when submitting the description', async () => {
-      await createComponent({ isEditing: true });
-      editDescription('updated description');
-      findMarkdownEditor().vm.$emit(
-        'keydown',
-        new KeyboardEvent('keydown', { key: ENTER_KEY, ctrlKey: true }),
-      );
-
-      expect(wrapper.emitted('updateWorkItem')).toEqual([[{ clearDraft: expect.any(Function) }]]);
-    });
-
-    describe('when description has conflicts', () => {
-      beforeEach(async () => {
-        const workItemResponseHandler = jest
-          .fn()
-          .mockResolvedValueOnce(workItemByIidResponseFactory())
-          .mockResolvedValueOnce(
-            workItemByIidResponseFactory({
-              descriptionText: 'description updated by someone else',
-            }),
-          );
-        await createComponent({ isEditing: true, workItemResponseHandler });
-
-        editDescription('updated description');
-
-        // Trigger a refetch of the work item data
-        await wrapper.vm.$apollo.queries.workItem.refetch();
-      });
-
-      it('shows conflict warning when description is updated while editing', () => {
-        expect(findConflictsAlert().exists()).toBe(true);
-        expect(findConflictsAlert().text()).toContain(
-          'Someone edited the description at the same time you did',
-        );
-        expect(findConflictedDescription().attributes('value')).toBe(
-          'description updated by someone else',
-        );
-
-        expect(findSubmitButton().text()).toBe('Save and overwrite');
-        expect(findCancelButton().text()).toBe('Discard changes');
-      });
-
-      it('clears conflict warning on save', async () => {
-        findSubmitButton().vm.$emit('click');
-
-        await nextTick();
-
-        expect(findConflictsAlert().exists()).toBe(false);
-      });
-    });
-
-    it('does not show conflict warning when in create flow', async () => {
-      const workItemResponseHandler = jest
-        .fn()
-        .mockResolvedValueOnce(workItemByIidResponseFactory())
-        .mockResolvedValueOnce(
-          workItemByIidResponseFactory({
-            descriptionText: 'description updated by someone else',
-          }),
-        );
-      await createComponent({
-        workItemId: newWorkItemId(workItemQueryResponse.data.workItem.workItemType.name),
-        isEditing: true,
-        workItemResponseHandler,
-      });
-
-      editDescription('updated description');
-
-      // Trigger a refetch of the work item data
-      await wrapper.vm.$apollo.queries.workItem.refetch();
-
-      expect(findConflictsAlert().exists()).toBe(false);
     });
   });
 

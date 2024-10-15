@@ -11,7 +11,7 @@ module Users
     def execute
       credit_card = Users::CreditCardValidation.find_or_initialize_by_user(user_id)
 
-      credit_card_attributes = {
+      credit_card_params = {
         credit_card_validated_at: credit_card_validated_at,
         last_digits: last_digits,
         holder_name: holder_name,
@@ -23,11 +23,7 @@ module Users
         stripe_card_fingerprint: stripe_card_fingerprint
       }
 
-      credit_card.assign_attributes(credit_card_attributes)
-
-      return blocked if credit_card.exceeded_daily_verification_limit?
-
-      credit_card.save!
+      credit_card.update!(credit_card_params)
 
       success
     rescue ActiveRecord::InvalidForeignKey, ActiveRecord::NotNullViolation, ActiveRecord::RecordInvalid
@@ -88,10 +84,6 @@ module Users
 
     def error
       ServiceResponse.error(message: _('Error saving credit card validation record'))
-    end
-
-    def blocked
-      ServiceResponse.error(message: 'Credit card verification limit exceeded', reason: :rate_limited)
     end
   end
 end

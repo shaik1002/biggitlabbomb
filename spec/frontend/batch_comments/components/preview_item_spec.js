@@ -58,7 +58,8 @@ describe('Batch comments draft preview item component', () => {
           },
         },
       });
-      expect(wrapper.text()).toContain(':+1');
+
+      expect(wrapper.find('.bold').text()).toContain(':+1');
     });
 
     it('renders old line position', () => {
@@ -74,7 +75,7 @@ describe('Batch comments draft preview item component', () => {
         },
       });
 
-      expect(wrapper.text()).toContain(':2');
+      expect(wrapper.find('.bold').text()).toContain(':2');
     });
 
     it('renders image position', () => {
@@ -84,7 +85,7 @@ describe('Batch comments draft preview item component', () => {
         position: { position_type: 'image', x: 10, y: 20 },
       });
 
-      expect(wrapper.text()).toContain('10x 20y');
+      expect(wrapper.find('.bold').text()).toContain('10x 20y');
     });
   });
 

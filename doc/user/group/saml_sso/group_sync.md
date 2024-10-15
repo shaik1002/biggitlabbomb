@@ -62,27 +62,11 @@ When a user signs in, GitLab:
 - Checks all the configured SAML group links.
 - Adds that user to the corresponding GitLab groups based on the SAML groups the user belongs to across the different IdPs.
 
-The group link mapping in GitLab is not tied to a specific IdP so you must configure all SAML IdPs to contain group attributes in the SAML response. This means that GitLab is able to match groups in the SAML response, regardless of the IdP that was used to sign in.
+For this to work correctly, you must configure all SAML IdPs to contain group attributes in the SAML response.
 
-As an example, you have 2 IdPs: `SAML1` and `SAML2`.
-
-In GitLab, on a specific group, you have configured two group links:
-
-- `gtlb-owner => Owner role`.
-- `gtlb-dev => Developer role`.
-
-In `SAML1`, the user is a member of `gtlb-owner` but not `gtlb-dev`.
-
-In `SAML2`, the user is a member of `gtlb-dev` but not `gtlb-owner`.
-
-When a user signs in to a group with `SAML1`, the SAML response shows that the user is a member of `gtlb-owner`, so GitLab sets the user's role in that group to be `Owner`.
-
-The user then signs out and signs back in to the group with `SAML2`. The SAML response shows that the user is a member of `gtlb-dev`, so GitLab sets the user's role in that group to be `Developer`.
-
-Now let's change the previous example so that the user is not a member of either `gtlb-owner` or `gtlb-dev` in `SAML2`.
-
-- When the user signs in to a group with `SAML1`, the user is given the `Owner` role in that group.
-- When the user signs in with `SAML2`, the user is removed from the group because they are not a member of either configured group link.
+For example, if you have two SAML IdPs and you configure a group link named `GTLB-Owners` mapped to the Owner role,
+the SAML response from either SAML IdP must contain a group attribute `GTLB-Owners`. If one of the SAML IdPs does not return the group attribute,
+when the user signs in with that SAML IdP, that user is removed from the group.
 
 ### How role conflicts are resolved
 
@@ -100,13 +84,13 @@ Users granted:
 - A higher role with Group Sync are displayed as having
   [direct membership](../../project/members/index.md#display-direct-members) of the group.
 - A lower or the same role with Group Sync are displayed as having
-  [inherited membership](../../project/members/index.md#membership-types) of the group.
+  [inherited membership](../../project/members/index.md#display-inherited-members) of the group.
 
 ### Use the API
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/290367) in GitLab 15.3.
 
-You can use the GitLab API to [list, add, and delete](../../../api/saml.md#saml-group-links) SAML group links.
+You can use the GitLab API to [list, add, and delete](../../../api/groups.md#saml-group-links) SAML group links.
 
 ## Configure SAML Group Sync
 
@@ -197,7 +181,7 @@ To integrate Microsoft Azure AD, you:
 
 ### Configure Azure AD
 
-<!-- vale gitlab_base.SentenceSpacing = NO -->
+<!-- vale gitlab.SentenceSpacing = NO -->
 
 1. In the [Azure Portal](https://portal.azure.com), go to **Microsoft Entra ID > App registrations > All applications**, and select your GitLab SAML application.
 1. Under **Essentials**, the **Application (client) ID** and **Directory (tenant) ID** values are displayed. Copy these values, because you need them for the GitLab configuration.
@@ -213,7 +197,7 @@ To integrate Microsoft Azure AD, you:
 1. Select **Add permissions** to save.
 1. Select **Grant admin consent for `<application_name>`**, then on the confirmation dialog select **Yes**. The **Status** column for both permissions should change to a green check with **Granted for `<application_name>`**.
 
-<!-- vale gitlab_base.SentenceSpacing = YES -->
+<!-- vale gitlab.SentenceSpacing = YES -->
 
 ### Configure GitLab
 
@@ -223,7 +207,7 @@ To configure for a GitLab.com group:
 1. Select **Settings > SAML SSO**.
 1. Configure [SAML SSO for the group](../../../user/group/saml_sso/index.md).
 1. In the **Microsoft Azure integration** section, select the **Enable Microsoft Azure integration for this group** checkbox.
-   This section is only visible if SAML SSO is configured and enabled for the group.
+   This section will only be visible if SAML SSO is configured and enabled for the group.
 1. Enter the **Tenant ID**, **Client ID**, and **Client secret** obtained earlier when configuring Azure Active Directory in the Azure Portal.
 1. Optional. If using Azure AD for US Government or Azure AD China, enter the appropriate **Login API endpoint** and **Graph API endpoint**. The default values work for most organizations.
 1. Select **Save changes**.
@@ -231,7 +215,7 @@ To configure for a GitLab.com group:
 To configure for self-managed:
 
 1. Configure [SAML SSO for the instance](../../../integration/saml.md).
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Settings > General**.
 1. In the **Microsoft Azure integration** section, select the **Enable Microsoft Azure integration for this group** checkbox.
 1. Enter the **Tenant ID**, **Client ID**, and **Client secret** obtained earlier when configuring Azure Active Directory in the Azure Portal.
@@ -265,7 +249,7 @@ When global group memberships lock is enabled:
 To enable global group memberships lock:
 
 1. [Configure SAML](../../../integration/saml.md) for your self-managed GitLab instance.
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Settings > General**.
 1. Expand the **Visibility and access controls** section.
 1. Ensure that **Lock memberships to SAML Group Links synchronization** is selected.
@@ -379,4 +363,4 @@ not limited to 150 groups.
 
 Otherwise, you can work around this issue by changing the [group claims](https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/how-to-connect-fed-group-claims#configure-the-microsoft-entra-application-registration-for-group-attributes) to use the `Groups assigned to the application` option instead.
 
-![Manage Group Claims](img/Azure-manage-group-claims_v15_9.png)
+![Manage Group Claims](img/Azure-manage-group-claims.png).

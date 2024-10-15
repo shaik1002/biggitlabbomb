@@ -5,18 +5,15 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 ignore_in_report: true
 ---
 
+WARNING:
+This runbook is an [experiment](../../../../policy/experiment-beta-support.md#experiment). For complete, production-ready documentation, see the
+[disaster recovery documentation](../index.md).
+
 # Disaster Recovery (Geo) promotion runbooks
 
 DETAILS:
 **Tier:** Premium, Ultimate
 **Offering:** Self-managed
-**Status:** Experiment
-
-Disaster Recovery (Geo) promotion runbooks.
-
-WARNING:
-This runbook is an [experiment](../../../../policy/experiment-beta-support.md#experiment). For complete, production-ready documentation, see the
-[disaster recovery documentation](../index.md).
 
 ## Geo planned failover for a single-node configuration
 
@@ -64,12 +61,15 @@ and there should be no failures (shown in red). If a large proportion of
 objects aren't yet replicated (shown in gray), consider giving the site more
 time to complete.
 
-![Geo admin dashboard showing the synchronization status of a secondary site.](../../replication/img/geo_dashboard_v14_0.png)
+![Replication status](../../replication/img/geo_dashboard_v14_0.png)
 
 If any objects are failing to replicate, this should be investigated before
 scheduling the maintenance window. After a planned failover, anything that
 failed to replicate is **lost**.
 
+You can use the
+[Geo status API](../../../../api/geo_nodes.md#retrieve-project-sync-or-verification-failures-that-occurred-on-the-current-node)
+to review failed objects and the reasons for failure.
 A common cause of replication failures is the data being missing on the
 **primary** site - you can resolve these failures by restoring the data from backup,
 or removing references to the missing data.
@@ -119,7 +119,7 @@ follow these steps to avoid unnecessary data loss:
       connection.
 
    1. On the **primary** site:
-      1. On the left sidebar, at the bottom, select **Admin**..
+      1. On the left sidebar, at the bottom, select **Admin area**..
       1. On the left sidebar, select **Monitoring > Background jobs**.
       1. On the Sidekiq dashboard, select **Cron**.
       1. Select `Disable All` to disable any non-Geo periodic background jobs.
@@ -134,10 +134,10 @@ follow these steps to avoid unnecessary data loss:
    [what is excluded](../planned_failover.md#not-all-data-is-automatically-replicated).
 
    1. If you are manually replicating any
-      [data not managed by Geo](../../replication/datatypes.md#replicated-data-types),
+      [data not managed by Geo](../../replication/datatypes.md#limitations-on-replicationverification),
       trigger the final replication process now.
    1. On the **primary** site:
-      1. On the left sidebar, at the bottom, select **Admin**.
+      1. On the left sidebar, at the bottom, select **Admin area**.
       1. On the left sidebar, select **Monitoring > Background jobs**.
       1. On the Sidekiq dashboard, select **Queues**, and wait for all queues except
          those with `geo` in the name to drop to 0.
@@ -152,7 +152,7 @@ follow these steps to avoid unnecessary data loss:
          - The Geo log cursor is up to date (0 events behind).
 
    1. On the **secondary** site:
-      1. On the left sidebar, at the bottom, select **Admin**.
+      1. On the left sidebar, at the bottom, select **Admin area**.
       1. On the left sidebar, select **Monitoring > Background jobs**.
       1. On the Sidekiq dashboard, select **Queues**, and wait for all the `geo`
          queues to drop to 0 queued and 0 running jobs.
@@ -221,7 +221,7 @@ Note the following when promoting a secondary:
   the **secondary** to the **primary**.
 - If you encounter an `ActiveRecord::RecordInvalid: Validation failed: Name has already been taken`
   error during this process, read
-  [the troubleshooting advice](../failover_troubleshooting.md#fixing-errors-during-a-failover-or-when-promoting-a-secondary-to-a-primary-site).
+  [the troubleshooting advice](../../replication/troubleshooting/failover.md#fixing-errors-during-a-failover-or-when-promoting-a-secondary-to-a-primary-site).
 
 To promote the secondary site:
 

@@ -77,7 +77,6 @@ function createComponent(
       projectPath: 'gitlab-org/gitlab',
       issuableId: '1',
       issuableIid: '1',
-      directlyInviteMembers: true,
     },
     stubs: {
       UpdateReviewers,

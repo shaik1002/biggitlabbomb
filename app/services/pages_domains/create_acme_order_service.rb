@@ -25,10 +25,7 @@ module PagesDomains
       )
 
       challenge.request_validation
-
-      ServiceResponse.success(payload: { acme_order: saved_order })
-    rescue Acme::Client::Error => e
-      ServiceResponse.error(message: e.message, payload: { acme_order: saved_order })
+      saved_order
     end
   end
 end

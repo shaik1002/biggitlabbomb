@@ -7,7 +7,8 @@
 #
 #   it_behaves_like 'an idempotent worker' do
 #     it 'checks the side-effects for multiple calls' do
-#       # it'll call the job's perform method 2 times
+#       # it'll call the job's perform method 3 times
+#       # by default.
 #       subject
 #
 #       expect(model.state).to eq('state')

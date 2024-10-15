@@ -13,7 +13,8 @@ module Types
 
     field :path,
       GraphQL::Types::String,
-      description: 'Path for this tag.'
+      description: 'Path for this tag.',
+      hash_key: :path
 
     field :web_path,
       GraphQL::Types::String,

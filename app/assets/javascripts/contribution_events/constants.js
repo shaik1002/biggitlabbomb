@@ -153,7 +153,7 @@ export const EVENT_CLOSED_ICONS = Object.freeze({
 });
 
 export const EVENT_REOPENED_ICONS = Object.freeze({
-  [TARGET_TYPE_MERGE_REQUEST]: 'merge-request',
+  [TARGET_TYPE_MERGE_REQUEST]: 'merge-request-open',
   [TYPE_FALLBACK]: 'status_open',
 });
 

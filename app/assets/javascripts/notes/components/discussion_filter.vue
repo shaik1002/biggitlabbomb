@@ -163,7 +163,7 @@ export default {
     v-if="displayFilters"
     id="discussion-preferences"
     data-testid="discussion-preferences"
-    class="full-width-mobile gl-inline-block gl-align-bottom"
+    class="gl-display-inline-block gl-align-bottom full-width-mobile"
   >
     <local-storage-sync
       :value="sortDirection"

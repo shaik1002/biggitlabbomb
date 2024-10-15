@@ -33,11 +33,7 @@ export const GOOGLE_ANALYTICS_ID_COOKIE_NAME = '_ga';
 
 export const SERVICE_PING_SCHEMA = 'iglu:com.gitlab/gitlab_service_ping/jsonschema/1-0-1';
 
-export const BASE_ADDITIONAL_PROPERTIES = {
-  label: ['string'],
-  property: ['string'],
-  value: ['number'],
-};
+export const ALLOWED_ADDITIONAL_PROPERTIES = ['label', 'property', 'value'];
 
 // events constants
 export const SERVICE_PING_SECURITY_CONFIGURATION_THREAT_MANAGEMENT_VISIT =

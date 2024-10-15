@@ -1,3 +1,27 @@
+.commit-box {
+  border-top: 1px solid $border-color;
+  padding: $gl-padding 0;
+
+  .commit-title {
+    margin: 0;
+    color: $gl-text-color;
+  }
+}
+
+.pipeline-info {
+  .status-icon-container {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 3px;
+
+    svg {
+      display: block;
+      width: 22px;
+      height: 22px;
+    }
+  }
+}
+
 .branch-info .commit-icon {
   svg {
     top: 3px;
@@ -9,7 +33,7 @@
  * custom merge request message
  */
 .commit-message-container {
-  @apply gl-bg-default;
+  background-color: $body-bg;
   position: relative;
   font-family: $monospace-font;
   $left: 12px;
@@ -64,6 +88,16 @@
   }
 }
 
+.commit.flex-list {
+  display: flex;
+}
+
+.avatar-cell {
+  img {
+    margin-right: 0;
+  }
+}
+
 .commit-content {
   padding-right: 10px;
   white-space: normal;
@@ -80,12 +114,11 @@
       color: $gl-text-color;
     }
 
-    // stylelint-disable-next-line gitlab/no-gl-class
     &.gl-inline-flex {
       gap: 0.5ch;
     }
 
-    .commit-author-link {
+    .commit-author-link.gl-text-truncate {
       max-width: 19ch;
     }
   }
@@ -120,7 +153,6 @@
 .commit-sha-group {
   display: inline-flex;
 
-  // stylelint-disable-next-line gitlab/no-gl-class
   .label,
   .btn:not(.gl-button) {
     padding: $gl-vert-padding $gl-btn-padding;
@@ -162,6 +194,10 @@
 .generic-commit-status {
   a {
     color: $gl-text-color;
+
+    &.autodevops-badge {
+      color: $white;
+    }
   }
 
   .commit-row-description {
@@ -227,4 +263,30 @@
   align-items: center;
   font-weight: $gl-font-weight-normal;
   line-height: 1.5;
+}
+
+.gpg-popover-icon {
+  // same margin as .s32.avatar
+  margin-right: $btn-side-margin;
+
+  &.valid {
+    svg {
+      border: 1px solid $brand-success;
+      fill: $brand-success;
+    }
+  }
+
+  &.invalid {
+    svg {
+      border: 1px solid $gray-200;
+      fill: $gray-200;
+    }
+  }
+
+  svg {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    vertical-align: middle;
+  }
 }

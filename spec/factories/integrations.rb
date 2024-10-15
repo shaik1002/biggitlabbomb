@@ -139,13 +139,6 @@ FactoryBot.define do
       deployment_type { 'cloud' }
     end
 
-    trait :jira_cloud do
-      url { 'https://mysite.atlassian.net' }
-      username { 'jira_user' }
-      password { 'my-secret-password' }
-      jira_auth_type { 0 }
-    end
-
     after(:build) do |integration, evaluator|
       integration.instance_variable_set(:@old_data_fields, nil)
 
@@ -255,6 +248,13 @@ FactoryBot.define do
     type { 'Integrations::ExternalWiki' }
     active { true }
     external_wiki_url { 'http://external-wiki-url.com' }
+  end
+
+  trait :jira_cloud_service do
+    url { 'https://mysite.atlassian.net' }
+    username { 'jira_user' }
+    password { 'my-secret-password' }
+    jira_auth_type { 0 }
   end
 
   trait :chat_notification do
@@ -465,15 +465,6 @@ FactoryBot.define do
     service_account_key_file_name { 'service_account.json' }
     service_account_key { File.read('spec/fixtures/service_account.json') }
     google_play_protected_refs { true }
-  end
-
-  factory :matrix_integration, class: 'Integrations::Matrix' do
-    project
-    type { 'Integrations::Matrix' }
-    active { true }
-
-    token { 'syt-zyx57W2v1u123ew11' }
-    room { '!qPKKM111FFKKsfoCVy:matrix.org' }
   end
 
   factory :squash_tm_integration, class: 'Integrations::SquashTm' do

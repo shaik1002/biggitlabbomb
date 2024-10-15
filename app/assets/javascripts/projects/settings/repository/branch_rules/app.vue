@@ -1,17 +1,18 @@
 <script>
-import { GlButton, GlModal, GlModalDirective, GlDisclosureDropdown } from '@gitlab/ui';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
+import {
+  GlButton,
+  GlModal,
+  GlModalDirective,
+  GlCard,
+  GlIcon,
+  GlDisclosureDropdown,
+} from '@gitlab/ui';
 import { createAlert } from '~/alert';
-import { InternalEvents } from '~/tracking';
 import branchRulesQuery from 'ee_else_ce/projects/settings/repository/branch_rules/graphql/queries/branch_rules.query.graphql';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { expandSection } from '~/settings_panels';
 import { scrollToElement } from '~/lib/utils/common_utils';
 import { visitUrl } from '~/lib/utils/url_utility';
-import {
-  BRANCH_RULE_DETAILS_LABEL,
-  PROTECTED_BRANCH,
-} from '~/projects/settings/branch_rules/tracking/constants';
 import BranchRuleModal from '../../components/branch_rule_modal.vue';
 import createBranchRuleMutation from './graphql/mutations/create_branch_rule.mutation.graphql';
 import BranchRule from './components/branch_rule.vue';
@@ -25,8 +26,9 @@ export default {
     BranchRuleModal,
     GlButton,
     GlModal,
+    GlCard,
+    GlIcon,
     GlDisclosureDropdown,
-    CrudComponent,
   },
   directives: {
     GlModal: GlModalDirective,
@@ -51,8 +53,6 @@ export default {
   inject: {
     projectPath: { default: '' },
     branchRulesPath: { default: '' },
-    showStatusChecks: { default: false },
-    showApprovers: { default: false },
   },
   data() {
     return {
@@ -65,15 +65,13 @@ export default {
         { text: this.$options.i18n.branchName, action: () => this.openCreateRuleModal() },
       ];
 
-      if (this.showApprovers || this.showStatusChecks) {
-        [this.$options.i18n.allBranches, this.$options.i18n.allProtectedBranches].forEach(
-          (branch) => {
-            if (!this.hasPredefinedBranchRule(branch)) {
-              items.push(this.createPredefinedBrachRulesItem(branch));
-            }
-          },
-        );
-      }
+      [this.$options.i18n.allBranches, this.$options.i18n.allProtectedBranches].forEach(
+        (branch) => {
+          if (!this.hasPredefinedBranchRule(branch)) {
+            items.push(this.createPredefinedBrachRulesItem(branch));
+          }
+        },
+      );
 
       return items;
     },
@@ -142,9 +140,6 @@ export default {
           },
         })
         .then(() => {
-          InternalEvents.trackEvent(PROTECTED_BRANCH, {
-            label: BRANCH_RULE_DETAILS_LABEL,
-          });
           visitUrl(this.getBranchRuleEditPath(name));
         })
         .catch(() => {
@@ -161,13 +156,21 @@ export default {
 </script>
 
 <template>
-  <crud-component
-    :title="__('Branch rules')"
-    icon="branch"
-    :count="branchRules.length"
-    class="gl-mb-5"
+  <gl-card
+    class="gl-new-card"
+    header-class="gl-new-card-header"
+    body-class="gl-new-card-body gl-px-0"
   >
-    <template #actions>
+    <template #header>
+      <div class="gl-new-card-title-wrapper" data-testid="title">
+        <h3 class="gl-new-card-title">
+          {{ __('Branch Rules') }}
+        </h3>
+        <div class="gl-new-card-count">
+          <gl-icon name="branch" class="gl-mr-2" />
+          {{ branchRules.length }}
+        </div>
+      </div>
       <gl-disclosure-dropdown
         v-if="glFeatures.editBranchRules"
         :toggle-text="$options.i18n.addBranchRule"
@@ -178,7 +181,6 @@ export default {
         >{{ $options.i18n.addBranchRule }}
       </gl-button>
     </template>
-
     <ul class="content-list">
       <branch-rule
         v-for="(rule, index) in branchRules"
@@ -191,12 +193,12 @@ export default {
         "
         :approval-rules-total="rule.approvalRules ? rule.approvalRules.nodes.length : 0"
         :matching-branches-count="rule.matchingBranchesCount"
+        class="gl-px-5! gl-py-4!"
       />
-      <span v-if="!branchRules.length" class="gl-text-subtle" data-testid="empty">
+      <div v-if="!branchRules.length" class="gl-new-card-empty gl-px-5 gl-py-4" data-testid="empty">
         {{ $options.i18n.emptyState }}
-      </span>
+      </div>
     </ul>
-
     <branch-rule-modal
       v-if="glFeatures.editBranchRules"
       :id="$options.modalId"
@@ -216,5 +218,5 @@ export default {
       <p>{{ $options.i18n.branchRuleModalDescription }}</p>
       <p>{{ $options.i18n.branchRuleModalContent }}</p>
     </gl-modal>
-  </crud-component>
+  </gl-card>
 </template>

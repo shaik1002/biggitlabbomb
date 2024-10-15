@@ -35,8 +35,8 @@ RSpec.describe Projects::Security::ConfigurationPresenter, feature_category: :so
       let!(:build_license_scanning) { create(:ci_build, :license_scanning, pipeline: pipeline) }
 
       it 'includes links to auto devops and secure product docs' do
-        expect(html_data[:auto_devops_help_page_path]).to eq(help_page_path('topics/autodevops/index.md'))
-        expect(html_data[:help_page_path]).to eq(help_page_path('user/application_security/index.md'))
+        expect(html_data[:auto_devops_help_page_path]).to eq(help_page_path('topics/autodevops/index'))
+        expect(html_data[:help_page_path]).to eq(help_page_path('user/application_security/index'))
       end
 
       it 'returns info that Auto DevOps is not enabled' do
@@ -274,7 +274,7 @@ RSpec.describe Projects::Security::ConfigurationPresenter, feature_category: :so
       end
 
       it 'includes a link to CI pipeline docs' do
-        expect(html_data[:latest_pipeline_path]).to eq(help_page_path('ci/pipelines/index.md'))
+        expect(html_data[:latest_pipeline_path]).to eq(help_page_path('ci/pipelines/index'))
       end
 
       context 'when gathering feature data' do
@@ -309,8 +309,20 @@ RSpec.describe Projects::Security::ConfigurationPresenter, feature_category: :so
       let_it_be(:project) { create(:project, :repository) }
       let(:features) { Gitlab::Json.parse(html_data[:features]) }
 
-      context 'when the feature flag is enabled' do
+      context 'when the feature flag is disabled' do
         before do
+          stub_feature_flags(pre_receive_secret_detection_beta_release: false)
+        end
+
+        it 'feature does not include pre_receive_secret_detection' do
+          feature = features.find { |scan| scan["type"] == 'pre_receive_secret_detection' }
+          expect(feature).to be_nil
+        end
+      end
+
+      context 'when the feature flags are enabled' do
+        before do
+          stub_feature_flags(pre_receive_secret_detection_beta_release: true)
           stub_feature_flags(pre_receive_secret_detection_push_check: true)
         end
 

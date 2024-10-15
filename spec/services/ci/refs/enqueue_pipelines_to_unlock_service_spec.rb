@@ -94,16 +94,13 @@ RSpec.describe Ci::Refs::EnqueuePipelinesToUnlockService, :unlock_pipelines, :cl
       end
     end
 
-    context 'when ref is a tag', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/451377' do
+    context 'when ref is a tag' do
       let(:target_ref) { ci_ref_tag }
 
       it_behaves_like 'unlocking pipelines'
     end
 
-    # Quarantining this spec as well, as when we quarantined the one above,
-    # this one started failing in the merge request:
-    #   https://gitlab.com/gitlab-org/gitlab/-/jobs/7424531351#L505
-    context 'when ref is a branch', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/451377' do
+    context 'when ref is a branch' do
       let(:target_ref) { ci_ref_branch }
 
       it_behaves_like 'unlocking pipelines'

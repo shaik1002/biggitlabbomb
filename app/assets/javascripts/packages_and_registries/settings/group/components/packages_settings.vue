@@ -14,7 +14,7 @@ import {
 import updateNamespacePackageSettings from '~/packages_and_registries/settings/group/graphql/mutations/update_group_packages_settings.mutation.graphql';
 import { updateGroupPackageSettings } from '~/packages_and_registries/settings/group/graphql/utils/cache_update';
 import { updateGroupPackagesSettingsOptimisticResponse } from '~/packages_and_registries/settings/group/graphql/utils/optimistic_responses';
-import SettingsSection from '~/vue_shared/components/settings/settings_section.vue';
+import SettingsBlock from '~/packages_and_registries/shared/components/settings_block.vue';
 import ExceptionsInput from '~/packages_and_registries/settings/group/components/exceptions_input.vue';
 
 export default {
@@ -29,21 +29,21 @@ export default {
     {
       key: 'packageFormat',
       label: PACKAGE_FORMATS_TABLE_HEADER,
-      thClass: '!gl-bg-gray-10',
+      thClass: 'gl-bg-gray-10!',
     },
     {
       key: 'allowDuplicates',
       label: DUPLICATES_TOGGLE_LABEL,
-      thClass: '!gl-bg-gray-10',
+      thClass: 'gl-bg-gray-10!',
     },
     {
       key: 'exceptions',
       label: DUPLICATES_SETTING_EXCEPTION_TITLE,
-      thClass: '!gl-bg-gray-10',
+      thClass: 'gl-bg-gray-10!',
     },
   ],
   components: {
-    SettingsSection,
+    SettingsBlock,
     GlTableLite,
     GlToggle,
     ExceptionsInput,
@@ -166,44 +166,48 @@ export default {
 </script>
 
 <template>
-  <settings-section
-    :heading="$options.i18n.PACKAGE_SETTINGS_HEADER"
-    :description="$options.i18n.PACKAGE_SETTINGS_DESCRIPTION"
-    data-testid="package-registry-settings-content"
-  >
-    <form>
-      <gl-table-lite
-        :fields="$options.tableHeaderFields"
-        :items="tableRows"
-        stacked="sm"
-        :tbody-tr-attr="(item) => ({ 'data-testid': item.testid })"
-      >
-        <template #cell(packageFormat)="{ item }">
-          <span class="md:gl-pt-3">{{ item.format }}</span>
-        </template>
-        <template #cell(allowDuplicates)="{ item }">
-          <gl-toggle
-            :data-testid="item.dataTestid"
-            :label="$options.i18n.DUPLICATES_TOGGLE_LABEL"
-            :value="item.duplicatesAllowed"
-            :disabled="isLoading"
-            label-position="hidden"
-            class="gl-items-end sm:gl-items-start"
-            @change="update(item.modelNames.allowed, $event)"
-          />
-        </template>
-        <template #cell(exceptions)="{ item }">
-          <exceptions-input
-            :id="item.id"
-            :duplicates-allowed="item.duplicatesAllowed"
-            :duplicate-exception-regex="item.duplicateExceptionRegex"
-            :duplicate-exception-regex-error="item.duplicateExceptionRegexError"
-            :name="item.modelNames.exception"
-            :loading="isLoading"
-            @update="updateSettings"
-          />
-        </template>
-      </gl-table-lite>
-    </form>
-  </settings-section>
+  <settings-block data-testid="package-registry-settings-content">
+    <template #title> {{ $options.i18n.PACKAGE_SETTINGS_HEADER }}</template>
+    <template #description>
+      <span data-testid="description">
+        {{ $options.i18n.PACKAGE_SETTINGS_DESCRIPTION }}
+      </span>
+    </template>
+    <template #default>
+      <form>
+        <gl-table-lite
+          :fields="$options.tableHeaderFields"
+          :items="tableRows"
+          stacked="sm"
+          :tbody-tr-attr="(item) => ({ 'data-testid': item.testid })"
+        >
+          <template #cell(packageFormat)="{ item }">
+            <span class="gl-md-pt-3">{{ item.format }}</span>
+          </template>
+          <template #cell(allowDuplicates)="{ item }">
+            <gl-toggle
+              :data-testid="item.dataTestid"
+              :label="$options.i18n.DUPLICATES_TOGGLE_LABEL"
+              :value="item.duplicatesAllowed"
+              :disabled="isLoading"
+              label-position="hidden"
+              class="gl-align-items-flex-end gl-sm-align-items-flex-start"
+              @change="update(item.modelNames.allowed, $event)"
+            />
+          </template>
+          <template #cell(exceptions)="{ item }">
+            <exceptions-input
+              :id="item.id"
+              :duplicates-allowed="item.duplicatesAllowed"
+              :duplicate-exception-regex="item.duplicateExceptionRegex"
+              :duplicate-exception-regex-error="item.duplicateExceptionRegexError"
+              :name="item.modelNames.exception"
+              :loading="isLoading"
+              @update="updateSettings"
+            />
+          </template>
+        </gl-table-lite>
+      </form>
+    </template>
+  </settings-block>
 </template>

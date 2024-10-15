@@ -103,7 +103,6 @@ export default {
     };
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     issuableReference: {
       query: issueReferenceQuery,
       variables() {
@@ -334,9 +333,9 @@ export default {
 
 <template>
   <div
-    class="detail-page-header-actions gl-mt-1 gl-flex gl-w-full gl-self-start sm:gl-gap-3 md:gl-w-auto"
+    class="detail-page-header-actions gl-flex gl-self-start sm:gl-gap-3 gl-w-full md:gl-w-auto gl-mt-1"
   >
-    <div class="gl-w-full md:!gl-hidden">
+    <div class="md:!gl-hidden gl-w-full">
       <gl-disclosure-dropdown
         v-if="hasMobileDropdown"
         ref="issuableActionsDropdownMobile"
@@ -515,7 +514,7 @@ export default {
           @action="track('click_dropdown')"
         >
           <template #list-item>
-            <span class="gl-text-danger">
+            <span class="text-danger">
               {{ deleteButtonText }}
             </span>
           </template>

@@ -253,7 +253,7 @@ export default {
       :class="{ 'pr-sm-8': sidebarStatus }"
     >
       <div
-        class="py-3 py-md-4 gl-flex gl-flex-col gl-items-center gl-justify-between gl-border-b-1 gl-border-b-gray-100 gl-px-1 gl-border-b-solid sm:gl-flex-row"
+        class="gl-display-flex gl-justify-content-space-between gl-align-items-center gl-px-1 py-3 py-md-4 gl-border-b-1 gl-border-b-gray-100 gl-border-b-solid gl-flex-direction-column gl-sm-flex-direction-row"
       >
         <div data-testid="alert-header">
           <gl-badge class="gl-mr-3">
@@ -270,7 +270,7 @@ export default {
         </div>
         <gl-button
           v-if="alert.issue"
-          class="mt-sm-0 align-self-center align-self-sm-baseline alert-details-incident-button gl-mt-3"
+          class="gl-mt-3 mt-sm-0 align-self-center align-self-sm-baseline alert-details-incident-button"
           data-testid="viewIncidentBtn"
           :href="incidentPath(alert.issue.iid)"
           category="primary"
@@ -280,7 +280,7 @@ export default {
         </gl-button>
         <gl-button
           v-else
-          class="mt-sm-0 align-self-center align-self-sm-baseline alert-details-incident-button gl-mt-3"
+          class="gl-mt-3 mt-sm-0 align-self-center align-self-sm-baseline alert-details-incident-button"
           data-testid="createIncidentBtn"
           :loading="incidentCreationInProgress"
           category="primary"
@@ -293,13 +293,16 @@ export default {
           :aria-label="__('Toggle sidebar')"
           category="primary"
           variant="default"
-          class="d-sm-none toggle-sidebar-mobile-button gl-absolute"
+          class="d-sm-none gl-absolute toggle-sidebar-mobile-button"
           type="button"
           icon="chevron-double-lg-left"
           @click="toggleSidebar"
         />
       </div>
-      <div v-if="alert" class="gl-flex gl-items-center gl-justify-between">
+      <div
+        v-if="alert"
+        class="gl-display-flex gl-justify-content-space-between gl-align-items-center"
+      >
         <h2 data-testid="title">{{ alert.title }}</h2>
       </div>
       <gl-tabs v-if="alert" v-model="currentTabIndex" data-testid="alertDetailsTabs">
@@ -321,7 +324,7 @@ export default {
           >
             <gl-link
               v-if="environmentPath"
-              class="gl-inline-block"
+              class="gl-display-inline-block"
               data-testid="environmentPath"
               :href="environmentPath"
             >

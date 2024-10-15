@@ -105,16 +105,12 @@ module API
         member = instance.single_member
         render_validation_error!(member) if member&.invalid?
 
-        present_add_single_member_response(result, member)
-      end
-
-      def present_put_membership_response(result)
-        updated_member = result[:members].first
-
-        if result[:status] == :success
-          present_members updated_member
+        # if errors occurred besides model validations or authorization failures,
+        # render those appropriately
+        if result[:status] == :error
+          render_structured_api_error!(result, :bad_request)
         else
-          render_validation_error!(updated_member)
+          present_members(member)
         end
       end
 
@@ -137,16 +133,6 @@ module API
 
       def member_already_exists?(source, user_id)
         source.members.exists?(user_id: user_id) # rubocop: disable CodeReuse/ActiveRecord
-      end
-
-      def present_add_single_member_response(result, member)
-        # if errors occurred besides model validations or authorization failures,
-        # render those appropriately
-        if result[:status] == :error
-          render_structured_api_error!(result, :bad_request)
-        else
-          present_members(member)
-        end
       end
     end
   end

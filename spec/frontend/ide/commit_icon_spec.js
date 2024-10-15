@@ -2,7 +2,6 @@ import getCommitIconMap from '~/ide/commit_icon';
 import { commitItemIconMap } from '~/ide/constants';
 import { decorateData } from '~/ide/stores/utils';
 
-// eslint-disable-next-line max-params
 const createFile = (name = 'name', id = name, type = '', parent = null) =>
   decorateData({
     id,

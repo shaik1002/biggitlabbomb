@@ -21,32 +21,23 @@ module PagesDomains
       acme_order = pages_domain.acme_orders.first
 
       unless acme_order
-        service_response = ::PagesDomains::CreateAcmeOrderService.new(pages_domain).execute
-        if service_response.error?
-          save_order_error(service_response[:acme_order], service_response.message)
-          return
-        end
-
+        ::PagesDomains::CreateAcmeOrderService.new(pages_domain).execute
         PagesDomainSslRenewalWorker.perform_in(CHALLENGE_PROCESSING_DELAY, pages_domain.id)
         return
       end
 
       api_order = ::Gitlab::LetsEncrypt::Client.new.load_order(acme_order.url)
 
-      begin
-        # https://www.rfc-editor.org/rfc/rfc8555#section-7.1.6 - statuses diagram
-        case api_order.status
-        when 'ready'
-          api_order.request_certificate(private_key: acme_order.private_key, domain: pages_domain.domain)
-          PagesDomainSslRenewalWorker.perform_in(CERTIFICATE_PROCESSING_DELAY, pages_domain.id)
-        when 'valid'
-          save_certificate(acme_order.private_key, api_order)
-          acme_order.destroy!
-        when 'invalid'
-          save_order_error(acme_order, get_challenge_error(api_order))
-        end
-      rescue Acme::Client::Error => e
-        save_order_error(acme_order, e.message)
+      # https://www.rfc-editor.org/rfc/rfc8555#section-7.1.6 - statuses diagram
+      case api_order.status
+      when 'ready'
+        api_order.request_certificate(private_key: acme_order.private_key, domain: pages_domain.domain)
+        PagesDomainSslRenewalWorker.perform_in(CERTIFICATE_PROCESSING_DELAY, pages_domain.id)
+      when 'valid'
+        save_certificate(acme_order.private_key, api_order)
+        acme_order.destroy!
+      when 'invalid'
+        save_order_error(acme_order, api_order)
       end
     end
 
@@ -57,32 +48,27 @@ module PagesDomains
       pages_domain.update!(gitlab_provided_key: private_key, gitlab_provided_certificate: certificate)
     end
 
-    def save_order_error(acme_order, acme_error_message)
-      log_error(acme_error_message)
+    def save_order_error(acme_order, api_order)
+      log_error(api_order)
 
       pages_domain.assign_attributes(auto_ssl_failed: true)
       pages_domain.save!(validate: false)
 
-      acme_order&.destroy!
+      acme_order.destroy!
 
       NotificationService.new.pages_domain_auto_ssl_failed(pages_domain)
     end
 
-    def log_error(acme_error_message)
+    def log_error(api_order)
       Gitlab::AppLogger.error(
         message: "Failed to obtain Let's Encrypt certificate",
-        acme_error: acme_error_message,
+        acme_error: api_order.challenge_error,
         project_id: pages_domain.project_id,
         pages_domain: pages_domain.domain
       )
-    end
-
-    def get_challenge_error(api_order)
-      api_order.challenge_error
     rescue StandardError => e
       # getting authorizations is an additional network request which can raise errors
       Gitlab::ErrorTracking.track_exception(e)
-      e.message
     end
   end
 end

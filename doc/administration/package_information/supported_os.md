@@ -17,7 +17,7 @@ avoid confusion, the official policy is that at any point of time, all the
 operating systems supported by GitLab are listed in the
 [installation page](https://about.gitlab.com/install/).
 
-The following lists the supported OSs and their possible EOL dates.
+The following lists the currently supported OSs and their possible EOL dates.
 
 NOTE:
 `amd64` and `x86_64` refer to the same 64-bit architecture.
@@ -71,12 +71,6 @@ To upgrade both the operating system (OS) and GitLab:
 1. Upgrade the OS.
 1. Check if it's necessary to [update the GitLab package sources](#update-gitlab-package-sources-after-upgrading-the-os).
 1. [Upgrade GitLab](../../update/index.md).
-
-## Corrupted Postgres indexes after upgrading the OS
-
-As part of upgrading the operating system, if your `glibc` version changes, then you must follow
-[Upgrading operating systems for PostgreSQL](../postgresql/upgrading_os.md) to avoid corrupted
-indexes.
 
 ## Packages for ARM64
 

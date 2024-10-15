@@ -1,15 +1,7 @@
 <script>
 import { GlDisclosureDropdown, GlDisclosureDropdownItem } from '@gitlab/ui';
 import { TYPE_INCIDENT, TYPE_ISSUE } from '~/issues/constants';
-import { WORK_ITEM_TYPE_VALUE_EPIC, WORK_ITEM_TYPE_VALUE_ISSUE } from '~/work_items/constants';
 import eventHub from '../event_hub';
-
-const allowedTypes = [
-  TYPE_INCIDENT,
-  TYPE_ISSUE,
-  WORK_ITEM_TYPE_VALUE_EPIC,
-  WORK_ITEM_TYPE_VALUE_ISSUE,
-];
 
 export default {
   components: {
@@ -19,7 +11,7 @@ export default {
   inject: ['id', 'issuableType'],
   computed: {
     showConvertToTaskItem() {
-      return allowedTypes.includes(this.issuableType);
+      return [TYPE_INCIDENT, TYPE_ISSUE].includes(this.issuableType);
     },
   },
   methods: {
@@ -57,7 +49,7 @@ export default {
       @action="convertToTask"
     >
       <template #list-item>
-        {{ s__('WorkItem|Convert to child item') }}
+        {{ s__('WorkItem|Convert to task') }}
       </template>
     </gl-disclosure-dropdown-item>
     <gl-disclosure-dropdown-item class="!gl-ml-2" data-testid="delete" @action="deleteTaskListItem">

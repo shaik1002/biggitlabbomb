@@ -89,10 +89,14 @@ export default {
           data-testid="selected-color"
         />
       </gl-form-group>
-      <gl-form-group :invalid-feedback="errorMessage" :state="validColor" class="gl-mb-0 gl-grow">
+      <gl-form-group
+        :invalid-feedback="errorMessage"
+        :state="validColor"
+        class="gl-mb-0 gl-flex-grow-1"
+      >
         <gl-form-input
           v-model.trim="selectedColor"
-          class="gl-mb-2 gl-rounded-s-none"
+          class="gl-rounded-s-none gl-mb-2"
           :placeholder="__('Use custom color #FF0000')"
           :autofocus="autofocus"
           :state="validColor"

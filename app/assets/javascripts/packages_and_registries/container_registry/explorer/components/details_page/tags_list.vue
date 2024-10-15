@@ -19,7 +19,6 @@ import {
   REMOVE_TAGS_BUTTON_TITLE,
   TAGS_LIST_TITLE,
   GRAPHQL_PAGE_SIZE,
-  GRAPHQL_PAGE_SIZE_METADATA_ENABLED,
   FETCH_IMAGES_LIST_ERROR_MESSAGE,
   NAME_SORT_FIELD,
   PUBLISHED_SORT_FIELD,
@@ -117,15 +116,10 @@ export default {
     tagsPageInfo() {
       return this.containerRepository?.tags?.pageInfo;
     },
-    pageSize() {
-      return this.config.isMetadataDatabaseEnabled
-        ? GRAPHQL_PAGE_SIZE_METADATA_ENABLED
-        : GRAPHQL_PAGE_SIZE;
-    },
     queryVariables() {
       return {
         id: joinPaths(this.config.gidPrefix, `${this.id}`),
-        first: this.pageSize,
+        first: GRAPHQL_PAGE_SIZE,
         name: this.filters?.name,
         sort: this.sort,
         referrers: this.glFeatures.showContainerRegistryTagSignatures,
@@ -202,13 +196,13 @@ export default {
       }
     },
     fetchNextPage() {
-      this.pageParams = getNextPageParams(this.tagsPageInfo?.endCursor, this.pageSize);
+      this.pageParams = getNextPageParams(this.tagsPageInfo?.endCursor);
     },
     fetchPreviousPage() {
-      this.pageParams = getPreviousPageParams(this.tagsPageInfo?.startCursor, this.pageSize);
+      this.pageParams = getPreviousPageParams(this.tagsPageInfo?.startCursor);
     },
     handleSearchUpdate({ sort, filters, pageInfo }) {
-      this.pageParams = getPageParams(pageInfo, this.pageSize);
+      this.pageParams = getPageParams(pageInfo);
       this.sort = sort;
 
       // This takes in account the fact that we will be adding more filters types
@@ -277,7 +271,7 @@ export default {
       </template>
     </template>
 
-    <div v-if="!isDeleteInProgress" class="gl-flex gl-justify-center">
+    <div v-if="!isDeleteInProgress" class="gl-display-flex gl-justify-content-center">
       <persisted-pagination
         class="gl-mt-3"
         :pagination="tagsPageInfo"

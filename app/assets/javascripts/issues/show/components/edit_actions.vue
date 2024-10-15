@@ -58,7 +58,7 @@ export default {
 </script>
 
 <template>
-  <div class="gl-mb-3 gl-mt-3 gl-flex">
+  <div class="gl-mt-3 gl-mb-3 gl-display-flex">
     <gl-button
       :loading="formState.updateLoading"
       :disabled="formState.updateLoading || !isSubmitEnabled"

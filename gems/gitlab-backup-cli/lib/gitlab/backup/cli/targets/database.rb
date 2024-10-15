@@ -5,6 +5,10 @@ module Gitlab
     module Cli
       module Targets
         class Database < Target
+          # TODO: Refactor to remove coupling with compress and decompress commands
+          # https://gitlab.com/gitlab-org/gitlab/-/issues/454830
+          include ::Backup::Helper
+
           attr_reader :force, :errors
 
           IGNORED_ERRORS = [
@@ -24,15 +28,15 @@ module Gitlab
             @force = options.force?
           end
 
-          def dump(destination)
-            FileUtils.mkdir_p(destination)
+          def dump(destination_dir, _)
+            FileUtils.mkdir_p(destination_dir)
 
-            each_database(destination) do |backup_connection|
+            each_database(destination_dir) do |backup_connection|
               pg_env = backup_connection.database_configuration.pg_env_variables
               active_record_config = backup_connection.database_configuration.activerecord_variables
               pg_database_name = active_record_config[:database]
 
-              dump_file_name = file_name(destination, backup_connection.connection_name)
+              dump_file_name = file_name(destination_dir, backup_connection.connection_name)
               FileUtils.rm_f(dump_file_name)
 
               Gitlab::Backup::Cli::Output.print_info("Dumping PostgreSQL database #{pg_database_name} ... ")
@@ -66,15 +70,15 @@ module Gitlab
                 backup_connection = ::Backup::DatabaseConnection.new(database_connection_name)
                 backup_connection.restore_timeouts!
               rescue ActiveRecord::ConnectionNotEstablished
-                raise DatabaseBackupError.new(
+                raise ::Backup::DatabaseBackupError.new(
                   backup_connection.database_configuration.activerecord_variables,
-                  file_name(destination, database_connection_name)
+                  file_name(destination_dir, database_connection_name)
                 )
               end
             end
           end
 
-          def restore(source)
+          def restore(destination_dir, _)
             @errors = []
 
             base_models_for_backup.each do |database_name, _|
@@ -82,7 +86,7 @@ module Gitlab
 
               config = backup_connection.database_configuration.activerecord_variables
 
-              db_file_name = file_name(source, database_name)
+              db_file_name = file_name(destination_dir, database_name)
               database = config[:database]
 
               unless File.exist?(db_file_name)
@@ -113,8 +117,7 @@ module Gitlab
               pg_env = backup_connection.database_configuration.pg_env_variables
               success = with_transient_pg_env(pg_env) do
                 decompress_rd, decompress_wr = IO.pipe
-
-                decompress_pid = spawn(decompression_cmd, out: decompress_wr, in: db_file_name)
+                decompress_pid = spawn(decompress_cmd, out: decompress_wr, in: db_file_name)
                 decompress_wr.close
 
                 status, tracked_errors =
@@ -193,10 +196,6 @@ module Gitlab
 
           private
 
-          def decompression_cmd
-            Utils::Compression.decompression_command.cmd_args.flatten.first
-          end
-
           def report_success(success)
             Gitlab::Backup::Cli::Output.print_tag(success ? :success : :failure)
           end
@@ -246,7 +245,7 @@ module Gitlab
                 # Trigger a transaction snapshot export that will be used by pg_dump later on
                 backup_connection.export_snapshot!
               rescue ActiveRecord::ConnectionNotEstablished
-                raise DatabaseBackupError.new(
+                raise ::Backup::DatabaseBackupError.new(
                   backup_connection.database_configuration.activerecord_variables,
                   file_name(destination_dir, database_connection_name)
                 )

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class UserPreference < ApplicationRecord
+class UserPreference < MainClusterwide::ApplicationRecord
   # We could use enums, but Rails 4 doesn't support multiple
   # enum options with same name for multiple fields, also it creates
   # extra methods that aren't really needed here.
@@ -39,10 +39,9 @@ class UserPreference < ApplicationRecord
   attribute :render_whitespace_in_code, default: false
   attribute :project_shortcut_buttons, default: true
   attribute :keyboard_shortcuts_enabled, default: true
-  attribute :dpop_enabled, default: false
+  attribute :use_web_ide_extension_marketplace, default: false
 
-  enum :visibility_pipeline_id_type, { id: 0, iid: 1 }, scopes: false
-
+  enum visibility_pipeline_id_type: { id: 0, iid: 1 }
   enum extensions_marketplace_opt_in_status: Enums::WebIde::ExtensionsMarketplaceOptInStatus.statuses
   enum organization_groups_projects_display: { projects: 0, groups: 1 }
 
@@ -74,6 +73,19 @@ class UserPreference < ApplicationRecord
     self[notes_filter_field_for(resource)]
   end
 
+  def tab_width
+    read_attribute(:tab_width) || self.class.column_defaults['tab_width']
+  end
+
+  def tab_width=(value)
+    if value.nil?
+      default = self.class.column_defaults['tab_width']
+      super(default)
+    else
+      super(value)
+    end
+  end
+
   class << self
     def time_display_formats
       {
@@ -81,6 +93,38 @@ class UserPreference < ApplicationRecord
         s_('Time Display|12-hour: 2:34 PM') => TIME_DISPLAY_FORMATS[:non_iso_format],
         s_('Time Display|24-hour: 14:34') => TIME_DISPLAY_FORMATS[:iso_format]
       }
+    end
+  end
+
+  def time_display_relative
+    value = read_attribute(:time_display_relative)
+    return value unless value.nil?
+
+    self.class.column_defaults['time_display_relative']
+  end
+
+  def time_display_relative=(value)
+    if value.nil?
+      default = self.class.column_defaults['time_display_relative']
+      super(default)
+    else
+      super(value)
+    end
+  end
+
+  def render_whitespace_in_code
+    value = read_attribute(:render_whitespace_in_code)
+    return value unless value.nil?
+
+    self.class.column_defaults['render_whitespace_in_code']
+  end
+
+  def render_whitespace_in_code=(value)
+    if value.nil?
+      default = self.class.column_defaults['render_whitespace_in_code']
+      super(default)
+    else
+      super(value)
     end
   end
 
@@ -98,15 +142,6 @@ class UserPreference < ApplicationRecord
     status = ActiveRecord::Type::Boolean.new.cast(value) ? 'enabled' : 'disabled'
 
     self.extensions_marketplace_opt_in_status = status
-  end
-
-  def dpop_enabled=(value)
-    if value.nil?
-      default = self.class.column_defaults['dpop_enabled']
-      super(default)
-    else
-      super(value)
-    end
   end
 
   private

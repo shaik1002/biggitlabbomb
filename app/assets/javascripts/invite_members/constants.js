@@ -4,7 +4,6 @@ import { helpPagePath } from '~/helpers/help_page_helper';
 export const PROJECT_SELECT_LABEL_ID = 'project-select';
 export const SEARCH_DELAY = 200;
 export const VALID_TOKEN_BACKGROUND = 'gl-bg-green-100';
-export const WARNING_TOKEN_BACKGROUND = 'gl-bg-orange-100';
 export const INVALID_TOKEN_BACKGROUND = 'gl-bg-red-100';
 export const TOAST_MESSAGE_LOCALSTORAGE_KEY = 'members_invited_successfully';
 
@@ -54,21 +53,15 @@ export const GROUP_MODAL_TO_PROJECT_DEFAULT_INTRO_TEXT = s__(
 export const GROUP_MODAL_TO_GROUP_ALERT_BODY = s__(
   'InviteMembersModal|Inviting a group %{linkStart}adds its members to your group%{linkEnd}, including members who join after the invite. This might put your group over the free %{count} user limit.',
 );
-export const GROUP_MODAL_TO_GROUP_ALERT_LINK = helpPagePath(
-  'user/project/members/sharing_projects_groups',
-  {
-    anchor: 'invite-a-group-to-a-group',
-  },
-);
+export const GROUP_MODAL_TO_GROUP_ALERT_LINK = helpPagePath('user/group/manage', {
+  anchor: 'share-a-group-with-another-group',
+});
 export const GROUP_MODAL_TO_PROJECT_ALERT_BODY = s__(
   'InviteMembersModal|Inviting a group %{linkStart}adds its members to your project%{linkEnd}, including members who join after the invite. This might put your group over the free %{count} user limit.',
 );
-export const GROUP_MODAL_TO_PROJECT_ALERT_LINK = helpPagePath(
-  'user/project/members/sharing_projects_groups',
-  {
-    anchor: 'invite-a-group-to-a-project',
-  },
-);
+export const GROUP_MODAL_TO_PROJECT_ALERT_LINK = helpPagePath('user/project/members/index', {
+  anchor: 'add-groups-to-a-project',
+});
 
 export const GROUP_SEARCH_FIELD = s__('InviteMembersModal|Select a group to invite');
 export const GROUP_PLACEHOLDER = s__('InviteMembersModal|Search for a group to invite');
@@ -79,9 +72,6 @@ export const TOAST_MESSAGE_SUCCESSFUL = s__('InviteMembersModal|Members were suc
 export const INVALID_FEEDBACK_MESSAGE_DEFAULT = s__('InviteMembersModal|Something went wrong');
 export const READ_MORE_TEXT = s__(
   `InviteMembersModal|%{linkStart}Read more%{linkEnd} about role permissions`,
-);
-export const READ_MORE_ACCESS_EXPIRATION_TEXT = s__(
-  `InviteMembersModal|%{linkStart}Read more%{linkEnd} about access expiration`,
 );
 export const INVITE_BUTTON_TEXT = s__('InviteMembersModal|Invite');
 export const INVITE_BUTTON_TEXT_DISABLED = s__('InviteMembersModal|Manage members');

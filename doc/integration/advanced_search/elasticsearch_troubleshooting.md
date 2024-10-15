@@ -108,7 +108,7 @@ There are a couple of ways to achieve that:
   This is always correctly identifying whether the current project/namespace
   being searched is using Elasticsearch.
 
-- From the **Admin** area under **Settings > Search** check that the
+- From the Admin area under **Settings > Search** check that the
   advanced search settings are checked.
 
   Those same settings there can be obtained from the Rails console if necessary:
@@ -236,7 +236,7 @@ We continuously make updates to our indexing strategies and aim to support
 newer versions of Elasticsearch. When indexing changes are made, it may
 be necessary for you to [reindex](elasticsearch.md#zero-downtime-reindexing) after updating GitLab.
 
-### No search results in the UI after indexing all repositories
+### You indexed all the repositories but you can't get any hits for your search term in the UI
 
 Make sure you [indexed all the database data](elasticsearch.md#enable-advanced-search).
 
@@ -266,7 +266,7 @@ The above instructions are not to be used for scenarios that only index a [subse
 
 See [Elasticsearch Index Scopes](elasticsearch.md#advanced-search-index-scopes) for more information on searching for specific types of data.
 
-### All repositories indexed, but no results after switching Elasticsearch servers
+### You indexed all the repositories but then switched Elasticsearch servers and now you can't find anything
 
 You must re-run all the Rake tasks to reindex the database, repositories, and wikis.
 
@@ -448,7 +448,7 @@ These settings limit indexing to 2000 documents per minute.
 
 To adjust worker settings:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Settings > Search**.
 1. Expand **Advanced Search**.
 1. Select the **Requeue indexing workers** checkbox.
@@ -461,7 +461,7 @@ Ensure you've read about [Elasticsearch Migrations](../advanced_search/elasticse
 
 If there is a halted migration and your [`elasticsearch.log`](../../administration/logs/index.md#elasticsearchlog) file contain errors, this could potentially be a bug/issue. Escalate to GitLab support if retrying migrations does not succeed.
 
-## Error: `Can't specify parent if no parent field has been configured`
+## `Can't specify parent if no parent field has been configured` error
 
 If you enabled Elasticsearch before GitLab 8.12 and have not rebuilt indices, you get
 exceptions in lots of different cases:
@@ -483,12 +483,12 @@ Elasticsearch::Transport::Transport::Errors::BadRequest([400] {
 This is because we changed the index mapping in GitLab 8.12 and the old indices should be removed and built from scratch again,
 see details in the [update guide](../../update/upgrading_from_source.md).
 
-## Error: `Elasticsearch::Transport::Transport::Errors::BadRequest`
+## `Elasticsearch::Transport::Transport::Errors::BadRequest`
 
 If you have this exception (just like in the case above but the actual message is different), check that you have the correct Elasticsearch version and you met the other [requirements](elasticsearch.md#system-requirements).
 There is also an easy way to check it automatically with `sudo gitlab-rake gitlab:check` command.
 
-## Error: `Elasticsearch::Transport::Transport::Errors::RequestEntityTooLarge`
+## `Elasticsearch::Transport::Transport::Errors::RequestEntityTooLarge`
 
 ```plaintext
 [413] {"Message":"Request size exceeded 10485760 bytes"}
@@ -498,11 +498,9 @@ This exception is seen when your Elasticsearch cluster is configured to reject r
 
 AWS has [network limits](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/limits.html#network-limits) on the maximum size of HTTP request payloads based on the size of the underlying instance. Set the maximum bulk request size to a value lower than 10 MiB.
 
-## Error: `Faraday::TimeoutError (execution expired)`
+## `Faraday::TimeoutError (execution expired)` error when using a proxy
 
-When you use a proxy, set a custom `gitlab_rails['env']` environment variable
-named [`no_proxy`](https://docs.gitlab.com/omnibus/settings/environment-variables.html)
-with the IP address of your Elasticsearch host.
+Set a custom `gitlab_rails['env']` environment variable, called [`no_proxy`](https://docs.gitlab.com/omnibus/settings/environment-variables.html) with the IP address of your Elasticsearch host.
 
 ## My single node Elasticsearch cluster status never goes from `yellow` to `green`
 
@@ -522,7 +520,7 @@ curl --request PUT localhost:9200/gitlab-production/_settings --header 'Content-
      }'
 ```
 
-## Error: `health check timeout: no Elasticsearch node available`
+## `health check timeout: no Elasticsearch node available` error in Sidekiq
 
 If you're getting a `health check timeout: no Elasticsearch node available` error in Sidekiq during the indexing process:
 
@@ -595,7 +593,7 @@ $ jq '.class' sidekiq/current | sort | uniq -c | sort -nr
 In this case, `free -m` on the overloaded GitLab node would also show
 unexpectedly high `buff/cache` usage.
 
-## Error: `Couldn't load task status`
+## `Couldn't load task status` error when reindexing
 
 When you reindex, you might get a `Couldn't load task status` error. A `sliceId must be greater than 0 but was [-1]` error might also appear on the Elasticsearch host. As a workaround, consider [reindexing from scratch](../../integration/advanced_search/elasticsearch_troubleshooting.md#last-resort-to-recreate-an-index) or upgrading to GitLab 16.3.
 

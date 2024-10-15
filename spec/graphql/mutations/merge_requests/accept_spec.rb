@@ -2,16 +2,21 @@
 
 require 'spec_helper'
 
-RSpec.describe Mutations::MergeRequests::Accept, feature_category: :api do
+RSpec.describe Mutations::MergeRequests::Accept do
   include GraphqlHelpers
   include AfterNextHelpers
 
-  let_it_be(:user) { create(:user) }
-  let(:project) { create(:project, :public, :repository) }
-  let(:query) { GraphQL::Query.new(empty_schema, document: nil, context: {}, variables: {}) }
-  let(:context) { GraphQL::Query::Context.new(query: query, values: { current_user: user }) }
-
   subject(:mutation) { described_class.new(context: context, object: nil, field: nil) }
+
+  let_it_be(:user) { create(:user) }
+
+  let(:project) { create(:project, :public, :repository) }
+  let(:context) do
+    GraphQL::Query::Context.new(
+      query: query_double(schema: GitlabSchema),
+      values: { current_user: user }
+    )
+  end
 
   before do
     project.repository.expire_all_method_caches

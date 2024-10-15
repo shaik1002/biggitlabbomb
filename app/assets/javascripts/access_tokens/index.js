@@ -1,11 +1,10 @@
 import Vue from 'vue';
 
-import { convertObjectPropsToCamelCase, parseBoolean } from '~/lib/utils/common_utils';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { parseRailsFormFields } from '~/lib/utils/forms';
 import { __, sprintf } from '~/locale';
 import Translate from '~/vue_shared/translate';
 import AccessTokenTableApp from './components/access_token_table_app.vue';
-import InactiveAccessTokenTableApp from './components/inactive_access_token_table_app.vue';
 import ExpiresAtField from './components/expires_at_field.vue';
 import NewAccessTokenApp from './components/new_access_token_app.vue';
 import TokensApp from './components/tokens_app.vue';
@@ -23,7 +22,6 @@ export const initAccessTokenTableApp = () => {
   const {
     accessTokenType,
     accessTokenTypePlural,
-    backendPagination,
     initialActiveAccessTokens: initialActiveAccessTokensJson,
     noActiveTokensMessage: noTokensMessage,
   } = el.dataset;
@@ -42,51 +40,12 @@ export const initAccessTokenTableApp = () => {
     provide: {
       accessTokenType,
       accessTokenTypePlural,
-      backendPagination: parseBoolean(backendPagination),
       initialActiveAccessTokens,
       noActiveTokensMessage,
       showRole,
     },
     render(h) {
       return h(AccessTokenTableApp);
-    },
-  });
-};
-
-export const initInactiveAccessTokenTableApp = () => {
-  const el = document.querySelector('#js-inactive-access-token-table-app');
-
-  if (!el) {
-    return null;
-  }
-
-  const {
-    accessTokenType,
-    accessTokenTypePlural,
-    initialInactiveAccessTokens: initialInactiveAccessTokensJson,
-    noInactiveTokensMessage: noTokensMessage,
-  } = el.dataset;
-
-  // Default values
-  const noInactiveTokensMessage =
-    noTokensMessage ||
-    sprintf(__('This resource has no inactive %{accessTokenTypePlural}.'), {
-      accessTokenTypePlural,
-    });
-
-  const initialInactiveAccessTokens = JSON.parse(initialInactiveAccessTokensJson);
-
-  return new Vue({
-    el,
-    name: 'InactiveAccessTokenTableRoot',
-    provide: {
-      accessTokenType,
-      accessTokenTypePlural,
-      initialInactiveAccessTokens,
-      noInactiveTokensMessage,
-    },
-    render(h) {
-      return h(InactiveAccessTokenTableApp);
     },
   });
 };

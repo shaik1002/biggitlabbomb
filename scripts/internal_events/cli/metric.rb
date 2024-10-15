@@ -48,22 +48,12 @@ module InternalEventsCli
       events&.map { |event| event['name'] } # rubocop:disable Rails/Pluck -- not rails
     end
 
-    def filters
-      events&.map do |event|
-        [event['name'], event['filter'] || {}]
-      end
-    end
-
-    def filtered?
-      !!filters&.any? { |(_action, filter)| filter&.any? }
-    end
-
     def time_frame
       self[:time_frame] || 'all'
     end
   end
 
-  NewMetric = Struct.new(*NEW_METRIC_FIELDS, :identifier, :actions, :key, :filters, keyword_init: true) do
+  NewMetric = Struct.new(*NEW_METRIC_FIELDS, :identifier, :actions, :key, keyword_init: true) do
     def formatted_output
       METRIC_DEFAULTS
         .merge(to_h.compact)
@@ -111,26 +101,13 @@ module InternalEventsCli
       Metric::Key.new(self[:key] || actions, time_frame, identifier)
     end
 
-    def filters
-      Metric::Filters.new(self[:filters])
-    end
-
-    # Returns value for the `events` key in the metric definition.
-    # Requires #actions or #filters to be set by the caller first.
-    #
-    # @return [Hash]
     def events
-      if filters.assigned?
-        self[:filters].map { |(action, filter)| event_params(action, filter) }
-      else
-        actions.map { |action| event_params(action) }
-      end
+      self[:events] || actions.map { |action| event_params(action) }
     end
 
-    def event_params(action, filter = nil)
+    def event_params(action)
       params = { 'name' => action }
-      params['unique'] = identifier.reference if identifier.value
-      params['filter'] = filter if filter&.any?
+      params['unique'] = "#{identifier.value}.id" if identifier.value
 
       params
     end
@@ -139,41 +116,21 @@ module InternalEventsCli
       self[:actions] || []
     end
 
-    # How to interpretting different values for filters:
-    # nil --> not expected, assigned or filtered
-    #        (metric not initialized with filters)
-    # [] --> both expected and filtered
-    #        (metric initialized with filters, but not yet assigned by user)
-    # [['event', {}]] --> not expected, assigned or filtered
-    #        (filters were expected, but then skipped by user)
-    # [['event', { 'label' => 'a' }]] --> both assigned and filtered
-    #        (filters exist for any event; user is done assigning)
-    def filtered?
-      filters.assigned? || filters.expected?
-    end
-
-    def filters_expected?
-      filters.expected?
-    end
-
-    # Automatically prepended to all new descriptions
-    # ex) Total count of
-    # ex) Weekly/Monthly count of unique
     def description_prefix
-      [
-        time_frame.description,
-        identifier.prefix,
-        *(identifier.plural if identifier.default?)
-      ].join(' ')
+      [time_frame.description, identifier.description].join(' ')
     end
 
-    # Provides simplified but technically accurate description
-    # to be used before the user has provided a description
     def technical_description
-      event_name = actions.first if events.length == 1 && !filtered?
-      event_name ||= 'the selected events'
+      simple_event_list = actions.join(' or ')
 
-      "#{time_frame.description} #{identifier.description % event_name}"
+      case identifier
+      when 'user'
+        "#{description_prefix} who triggered #{simple_event_list}"
+      when 'project', 'namespace'
+        "#{description_prefix} where #{simple_event_list} occurred"
+      else
+        "#{description_prefix} #{simple_event_list} occurrences"
+      end
     end
 
     def bulk_assign(key_value_pairs)
@@ -204,48 +161,16 @@ module InternalEventsCli
     end
 
     Identifier = Struct.new(:value) do
-      # returns a description of the identifier with appropriate
-      # grammer to interpolate a description of events
       def description
-        if value.nil?
-          "#{prefix} %s occurrences"
-        elsif value == 'user'
-          "#{prefix} users who triggered %s"
-        elsif %w[project namespace].include?(value)
-          "#{prefix} #{plural} where %s occurred"
-        else
-          "#{prefix} #{plural} from %s occurrences"
-        end
-      end
-
-      # handles generic pluralization for unknown indentifers
-      def plural
-        default? ? "#{value}s" : "values for '#{value}'"
-      end
-
-      def prefix
         if value
-          "count of unique"
+          "count of unique #{value}s"
         else
           "count of"
         end
       end
 
-      # returns a slug which can be used in the
-      # metric's key_path and filepath
       def key_path
-        value ? "distinct_#{reference.tr('.', '_')}_from" : 'total'
-      end
-
-      # Returns the identifier string that will be included in the yml
-      def reference
-        default? ? "#{value}.id" : value
-      end
-
-      # Refers to the top-level identifiers not included in
-      # additional_properties
-      def default?
-        %w[user project namespace].include?(value)
+        value ? "distinct_#{value}_id_from" : 'total'
       end
     end
 
@@ -256,13 +181,11 @@ module InternalEventsCli
     end
 
     Key = Struct.new(:events, :time_frame, :identifier) do
-      # @param name_to_display [String] return the key with the
-      #          provided name instead of a list of event names
-      def value(name_to_display = nil)
+      def value
         [
           'count',
           identifier&.key_path,
-          name_to_display || name_for_events,
+          name_for_events,
           time_frame&.key_path
         ].compact.join('_')
       end
@@ -271,13 +194,7 @@ module InternalEventsCli
         "#{prefix}.#{value}"
       end
 
-      # Refers to the middle portion of a metric's `key_path`
-      # pertaining to the relevent events; This does not include
-      # identifier/time_frame/etc
       def name_for_events
-        # user may have defined a different name for events
-        return events unless events.respond_to?(:join)
-
         events.join('_and_')
       end
 
@@ -287,28 +204,6 @@ module InternalEventsCli
         else
           'counts'
         end
-      end
-    end
-
-    Filters = Struct.new(:filters) do
-      def expected?
-        filters == []
-      end
-
-      def assigned?
-        !!filters&.any? { |(_action, filter)| filter.any? }
-      end
-
-      def descriptions
-        Array(filters).filter_map do |(action, filter)|
-          next action if filter.none?
-
-          "#{action}(#{describe_filter(filter)})"
-        end.sort_by(&:length)
-      end
-
-      def describe_filter(filter)
-        filter.map { |k, v| "#{k}=#{v}" }.join(',')
       end
     end
 

@@ -3,15 +3,14 @@
 require 'spec_helper'
 
 RSpec.describe Mutations::Environments::CanaryIngress::Update do
-  include GraphqlHelpers
   let_it_be(:project) { create(:project) }
   let_it_be(:environment) { create(:environment, project: project) }
   let_it_be(:maintainer) { create(:user, maintainer_of: project) }
   let_it_be(:reporter) { create(:user, reporter_of: project) }
 
-  let(:current_user) { maintainer }
+  let(:user) { maintainer }
 
-  subject(:mutation) { described_class.new(object: nil, context: query_context, field: nil) }
+  subject(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
 
   describe '#resolve' do
     subject { mutation.resolve(id: environment_id, weight: weight) }
@@ -60,7 +59,7 @@ RSpec.describe Mutations::Environments::CanaryIngress::Update do
     end
 
     context 'when user is reporter who does not have permission to access the environment' do
-      let(:current_user) { reporter }
+      let(:user) { reporter }
 
       it 'raises an error' do
         expect { subject }.to raise_error(Gitlab::Graphql::Authorize::AuthorizeResource::RESOURCE_ACCESS_ERROR)

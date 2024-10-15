@@ -10,21 +10,9 @@ module Import
 
       def execute
         return error_invalid_permissions unless current_user.can?(:admin_import_source_user, import_source_user)
+        return error_invalid_status unless import_source_user.cancelable_status?
 
-        invalid_status = false
-        cancel_successful = false
-
-        import_source_user.with_lock do
-          if import_source_user.cancelable_status?
-            cancel_successful = cancel_reassignment
-          else
-            invalid_status = true
-          end
-        end
-
-        return error_invalid_status if invalid_status
-
-        if cancel_successful
+        if cancel_reassignment
           ServiceResponse.success(payload: import_source_user)
         else
           ServiceResponse.error(payload: import_source_user, message: import_source_user.errors.full_messages)
@@ -32,6 +20,8 @@ module Import
       end
 
       private
+
+      attr_reader :import_source_user, :current_user, :params
 
       def cancel_reassignment
         import_source_user.reassign_to_user = nil

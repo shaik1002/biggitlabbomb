@@ -1,17 +1,9 @@
 <script>
-import {
-  GlButton,
-  GlTruncateText,
-  GlModalDirective,
-  GlTooltipDirective as GlTooltip,
-  GlSprintf,
-} from '@gitlab/ui';
+import { GlButton, GlModalDirective, GlTooltipDirective as GlTooltip, GlSprintf } from '@gitlab/ui';
 import csrf from '~/lib/utils/csrf';
 import { __, s__ } from '~/locale';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
-import { renderGFM } from '~/behaviors/markdown/render_gfm';
-import SafeHtml from '~/vue_shared/directives/safe_html';
 import DeleteEnvironmentModal from './delete_environment_modal.vue';
 import StopEnvironmentModal from './stop_environment_modal.vue';
 import DeployFreezeAlert from './deploy_freeze_alert.vue';
@@ -22,7 +14,6 @@ export default {
   components: {
     GlButton,
     GlSprintf,
-    GlTruncateText,
     TimeAgo,
     DeployFreezeAlert,
     DeleteEnvironmentModal,
@@ -31,7 +22,6 @@ export default {
   directives: {
     GlModalDirective,
     GlTooltip,
-    SafeHtml,
   },
   mixins: [timeagoMixin],
   props: {
@@ -79,7 +69,6 @@ export default {
     externalButtonTitle: s__('Environments|Open live environment'),
     externalButtonText: __('View deployment'),
     cancelAutoStopButtonTitle: __('Prevent environment from auto-stopping'),
-    showMoreText: __('Read more'),
   },
   computed: {
     shouldShowCancelAutoStopButton() {
@@ -95,18 +84,14 @@ export default {
       return this.canAdminEnvironment && this.environment.hasTerminals;
     },
   },
-  mounted() {
-    renderGFM(this.$refs['gfm-content']);
-  },
-  safeHtmlConfig: { ADD_TAGS: ['gl-emoji'] },
 };
 </script>
 <template>
   <div>
     <deploy-freeze-alert :name="environment.name" />
     <header class="top-area gl-justify-content-between gl-border-none">
-      <div class="gl-flex gl-grow gl-items-center">
-        <h1 class="page-title gl-text-size-h-display">
+      <div class="gl-display-flex gl-flex-grow-1 gl-align-items-center">
+        <h1 class="page-title gl-font-size-h-display">
           {{ environment.name }}
         </h1>
         <p
@@ -174,18 +159,5 @@ export default {
       <delete-environment-modal v-if="canDestroyEnvironment" :environment="environment" />
       <stop-environment-modal v-if="shouldShowStopButton" :environment="environment" />
     </header>
-
-    <gl-truncate-text
-      v-if="environment.descriptionHtml"
-      :show-more-text="$options.i18n.showMoreText"
-      class="gl-relative gl-mb-4"
-    >
-      <div
-        ref="gfm-content"
-        v-safe-html:[$options.safeHtmlConfig]="environment.descriptionHtml"
-        class="md"
-        data-testid="environment-description-content"
-      ></div>
-    </gl-truncate-text>
   </div>
 </template>

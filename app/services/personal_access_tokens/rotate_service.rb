@@ -65,8 +65,8 @@ module PersonalAccessTokens
         # - retain the membership when this token does eventually expire
         #   or get revoked.
         #
-        # Applies only to resource (group and project) access tokens
-        # not personal access tokens.
+        # Applies only to Resource (Group and Project) Access Tokens
+        # not Personal Access Tokens.
         expires_at = nil
       end
 
@@ -94,8 +94,7 @@ module PersonalAccessTokens
         previous_personal_access_token_id: token.id,
         impersonation: token.impersonation,
         scopes: token.scopes,
-        expires_at: expires_at,
-        organization: token.organization }
+        expires_at: expires_at }
     end
 
     def default_expiration_date

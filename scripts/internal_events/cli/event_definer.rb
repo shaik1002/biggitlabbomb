@@ -27,12 +27,10 @@ module InternalEventsCli
                                '(ex - service_desk_request_received)',
       %w[namespace] => 'Use case: For namespace-level events without user interaction ' \
                        '(ex - stale_runners_cleaned_up)',
-      %w[feature_enabled_by_namespace_ids user] => 'Use case: For user actions attributable to multiple namespaces ' \
-                                                   '(ex - Code-Suggestions / Duo Pro)',
       %w[] => "Use case: For instance-level events without user interaction [LEAST COMMON]"
     }.freeze
 
-    IDENTIFIER_FORMATTING_BUFFER = "[#{IDENTIFIER_OPTIONS.keys.map { |k| k.join(', ') }.max_by(&:length)}]".length
+    IDENTIFIER_FORMATTING_BUFFER = "[#{IDENTIFIER_OPTIONS.keys.max_by(&:length).join(', ')}]".length
 
     attr_reader :cli, :event
 
@@ -74,7 +72,7 @@ module InternalEventsCli
 
       event.action = cli.ask("Define the event name: #{input_required_text}", **input_opts) do |q|
         q.required true
-        q.validate ->(input) { input =~ NAME_REGEX && cli.global.events.map(&:action).none?(input) }
+        q.validate ->(input) { input =~ /\A[a-z1-9_]+\z/ && cli.global.events.map(&:action).none?(input) }
         q.modify :trim
         q.messages[:valid?] = format_warning("Invalid event name. Only lowercase/numbers/underscores allowed. " \
                                              "Ensure %{value} is not an existing event.")
@@ -97,8 +95,7 @@ module InternalEventsCli
 
       identifiers = prompt_for_array_selection(
         'Which identifiers are available when the event occurs?',
-        IDENTIFIER_OPTIONS.keys,
-        per_page: IDENTIFIER_OPTIONS.length
+        IDENTIFIER_OPTIONS.keys
       ) { |choice| format_identifier_choice(choice) }
 
       event.identifiers = identifiers if identifiers.any?
@@ -114,10 +111,10 @@ module InternalEventsCli
     def prompt_for_additional_properties
       cli.say Text::ADDITIONAL_PROPERTIES_INTRO
 
-      available_props = [:label, :property, :value, :add_extra_prop]
+      available_props = [:label, :property, :value]
 
       while available_props.any?
-        disabled = format_help('(already defined)')
+        disabled = format_warning('(already defined)')
 
         # rubocop:disable Rails/NegateInclude -- this isn't Rails
         options = [
@@ -136,16 +133,7 @@ module InternalEventsCli
             value: :value,
             name: 'Number (attribute will be named `value`)',
             disabled: disabled
-          ) { !available_props.include?(:value) },
-          disableable_option(
-            value: :add_extra_prop,
-            name: 'Add extra property (attribute will be named the input custom name)',
-            disabled: format_warning('(option disabled - use label/property/value first)')
-          ) do
-            !((!available_props.include?(:label) &&
-                !available_props.include?(:property)) ||
-                !available_props.include?(:value))
-          end
+          ) { !available_props.include?(:value) }
         ]
         # rubocop:enable Rails/NegateInclude
 
@@ -153,41 +141,20 @@ module InternalEventsCli
           "Which additional property do you want to add to the event?",
           options,
           help: format_help("(will reprompt for multiple)"),
-          **select_opts,
-          &disabled_format_callback
+          **select_opts
         )
 
         if selected_property == :none
           available_props.clear
-        elsif selected_property == :add_extra_prop
-          property_name = prompt_for_add_extra_properties
-          property_description = prompt_for_text('Describe what the field will include:')
-          assign_extra_properties(property_name, property_description)
         else
           available_props.delete(selected_property)
           property_description = prompt_for_text('Describe what the field will include:')
-          assign_extra_properties(selected_property, property_description)
+
+          event.additional_properties ||= {}
+          event.additional_properties[selected_property.to_s] = {
+            'description' => property_description || 'TODO'
+          }
         end
-      end
-    end
-
-    def assign_extra_properties(property, description = nil)
-      event.additional_properties ||= {}
-      event.additional_properties[property.to_s] = {
-        'description' => description || 'TODO'
-      }
-    end
-
-    def prompt_for_add_extra_properties
-      primary_props = %w[label property value]
-
-      prompt_for_text('Define a name for the attribute:', **input_opts) do |q|
-        q.required true
-        q.validate ->(input) { input =~ NAME_REGEX && primary_props.none?(input) }
-        q.modify :trim
-        q.messages[:required?] = Text::ADDITIONAL_PROPERTIES_ADD_MORE_HELP
-        q.messages[:valid?] = format_warning("Invalid property name. Only lowercase/numbers/underscores allowed. " \
-                                             "Ensure %{value} is not one of `property, label, value`.")
       end
     end
 
@@ -233,11 +200,7 @@ module InternalEventsCli
 
         #{divider}
 
-          Do you need to create a metric? Probably!
-
-          Metrics are required to pull any usage data from self-managed instances or GitLab-Dedicated through Service Ping. Collected metric data can viewed in Tableau. Individual event details from GitLab.com can also be accessed through Snowflake.
-
-          Typical flow: Define event > Define metric > Instrument app code > Merge/Deploy MR > Verify data in Tableau/Snowflake
+          Want to have data reported in Snowflake/Tableau/ServicePing? Add a new metric for your event!
 
       TEXT
     end

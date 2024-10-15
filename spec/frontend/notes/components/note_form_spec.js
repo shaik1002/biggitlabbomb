@@ -10,7 +10,6 @@ import eventHub from '~/environments/event_hub';
 import notesEventHub from '~/notes/event_hub';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
 import { mockTracking } from 'helpers/tracking_helper';
-import MarkdownEditor from '~/vue_shared/components/markdown/markdown_editor.vue';
 import { noteableDataMock, notesDataMock, discussionMock, note } from '../mock_data';
 
 jest.mock('~/lib/utils/autosave');
@@ -22,7 +21,7 @@ describe('issue_note_form component', () => {
   let props;
   let trackingSpy;
 
-  const createComponentWrapper = (propsData = {}, provide = {}, stubs = {}) => {
+  const createComponentWrapper = (propsData = {}, provide = {}) => {
     wrapper = mountExtended(NoteForm, {
       store,
       propsData: {
@@ -41,7 +40,6 @@ describe('issue_note_form component', () => {
           },
         },
       },
-      stubs,
     });
 
     textarea = wrapper.find('textarea');
@@ -367,12 +365,5 @@ describe('issue_note_form component', () => {
         });
       });
     });
-  });
-
-  it('calls append on a markdown editor', () => {
-    createComponentWrapper(undefined, undefined, { MarkdownEditor });
-    const spy = jest.spyOn(wrapper.findComponent(MarkdownEditor).vm, 'append');
-    wrapper.vm.append('foo');
-    expect(spy).toHaveBeenCalledWith('foo');
   });
 });

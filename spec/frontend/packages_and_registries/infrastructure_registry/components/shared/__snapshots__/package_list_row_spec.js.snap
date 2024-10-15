@@ -2,26 +2,26 @@
 
 exports[`packages_list_row renders 1`] = `
 <div
-  class="gl-border-b-1 gl-border-b-gray-100 gl-border-b-solid gl-border-t-1 gl-border-t-solid gl-border-t-transparent gl-flex gl-flex-col"
+  class="gl-border-b-1 gl-border-b-gray-100 gl-border-b-solid gl-border-t-1 gl-border-t-solid gl-border-t-transparent gl-display-flex gl-flex-direction-column"
   data-testid="package-row"
 >
   <div
-    class="gl-flex gl-items-center gl-py-3"
+    class="gl-align-items-center gl-display-flex gl-py-3"
   >
     <div
-      class="gl-flex gl-flex-col gl-grow gl-items-stretch gl-justify-between sm:gl-flex-row"
+      class="gl-align-items-stretch gl-display-flex gl-flex-direction-column gl-flex-grow-1 gl-justify-content-space-between gl-sm-flex-direction-row"
     >
       <div
-        class="gl-flex gl-flex-col gl-grow gl-mb-3 gl-min-w-0 sm:gl-mb-0"
+        class="gl-display-flex gl-flex-direction-column gl-flex-grow-1 gl-mb-3 gl-min-w-0 gl-sm-mb-0"
       >
         <div
-          class="gl-flex gl-font-semibold gl-items-center gl-min-h-6 gl-min-w-0 gl-text-primary"
+          class="gl-align-items-center gl-display-flex gl-font-semibold gl-min-h-6 gl-min-w-0 gl-text-body"
         >
           <div
-            class="gl-flex gl-items-center gl-min-w-0 gl-mr-3"
+            class="gl-align-items-center gl-display-flex gl-min-w-0 gl-mr-3"
           >
             <gl-link-stub
-              class="gl-min-w-0 gl-text-primary"
+              class="gl-min-w-0 gl-text-body"
               data-testid="details-link"
               href="foo"
             >
@@ -33,10 +33,10 @@ exports[`packages_list_row renders 1`] = `
           </div>
         </div>
         <div
-          class="gl-flex gl-gap-3 gl-grow gl-items-center gl-min-h-6 gl-min-w-0 gl-text-sm gl-text-subtle"
+          class="gl-align-items-center gl-display-flex gl-flex-grow-1 gl-font-sm gl-min-h-6 gl-min-w-0 gl-text-secondary"
         >
           <div
-            class="gl-flex"
+            class="gl-display-flex"
           >
             <span>
               1.0.0
@@ -49,17 +49,17 @@ exports[`packages_list_row renders 1`] = `
         </div>
       </div>
       <div
-        class="gl-flex gl-flex-col gl-justify-between gl-shrink-0 gl-text-secondary sm:gl-items-end"
+        class="gl-display-flex gl-flex-direction-column gl-flex-shrink-0 gl-justify-content-space-between gl-sm-align-items-flex-end gl-text-secondary"
       >
         <div
-          class="gl-flex gl-items-center gl-min-h-6 sm:gl-text-primary"
+          class="gl-align-items-center gl-display-flex gl-min-h-6 gl-sm-text-body"
         >
           <publish-method-stub
             packageentity="[object Object]"
           />
         </div>
         <div
-          class="gl-flex gl-items-center gl-min-h-6 gl-text-sm"
+          class="gl-align-items-center gl-display-flex gl-font-sm gl-min-h-6"
         >
           <span>
             Created
@@ -73,7 +73,7 @@ exports[`packages_list_row renders 1`] = `
       </div>
     </div>
     <div
-      class="gl-flex gl-justify-end gl-pr-1 gl-w-9"
+      class="gl-display-flex gl-justify-content-end gl-pr-1 gl-w-9"
     >
       <gl-button-stub
         aria-label="Remove package"

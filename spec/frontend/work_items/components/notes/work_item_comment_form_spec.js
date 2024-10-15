@@ -1,7 +1,7 @@
 import { GlFormCheckbox, GlIcon } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import Vue, { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
-import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import { createMockDirective } from 'helpers/vue_mock_directive';
 import waitForPromises from 'helpers/wait_for_promises';
 import * as autosave from '~/lib/utils/autosave';
@@ -35,12 +35,11 @@ describe('Work item comment form component', () => {
 
   const findCommentFieldLayout = () => wrapper.findComponent(CommentFieldLayout);
   const findMarkdownEditor = () => wrapper.findComponent(MarkdownEditor);
-  const findCancelButton = () => wrapper.findByTestId('cancel-button');
-  const findConfirmButton = () => wrapper.findByTestId('confirm-button');
+  const findCancelButton = () => wrapper.find('[data-testid="cancel-button"]');
+  const findConfirmButton = () => wrapper.find('[data-testid="confirm-button"]');
   const findInternalNoteCheckbox = () => wrapper.findComponent(GlFormCheckbox);
   const findInternalNoteTooltipIcon = () => wrapper.findComponent(GlIcon);
   const findWorkItemToggleStateButton = () => wrapper.findComponent(WorkItemStateToggle);
-  const findToggleResolveCheckbox = () => wrapper.findByTestId('toggle-resolve-checkbox');
 
   const createComponent = ({
     isSubmitting = false,
@@ -48,11 +47,12 @@ describe('Work item comment form component', () => {
     isNewDiscussion = false,
     workItemState = STATE_OPEN,
     workItemType = 'Task',
-    hasReplies = false,
-    isDiscussionResolved = false,
-    isDiscussionResolvable = false,
+    isGroup = false,
   } = {}) => {
-    wrapper = shallowMountExtended(WorkItemCommentForm, {
+    wrapper = shallowMount(WorkItemCommentForm, {
+      provide: {
+        isGroup,
+      },
       propsData: {
         fullPath: 'test-project-path',
         workItemIid: '1',
@@ -66,9 +66,6 @@ describe('Work item comment form component', () => {
         markdownPreviewPath: '/group/project/preview_markdown?target_type=WorkItem',
         autocompleteDataSources: {},
         isNewDiscussion,
-        isDiscussionResolvable,
-        isDiscussionResolved,
-        hasReplies,
       },
       directives: {
         GlTooltip: createMockDirective('gl-tooltip'),
@@ -104,7 +101,7 @@ describe('Work item comment form component', () => {
         confidential: false,
         confidential_issues_docs_path: '/help/user/tasks.html#confidential-tasks',
         discussion_locked: false,
-        locked_discussion_docs_path: '/help/user/tasks.html#lock-discussion',
+        locked_discussion_docs_path: '/help/user/tasks.html#locked-tasks',
       },
       noteableType: 'Task',
     });
@@ -289,44 +286,6 @@ describe('Work item comment form component', () => {
           [{ commentText: draftComment, isNoteInternal: true }],
         ]);
       });
-    });
-  });
-
-  describe('Toggle Resolve checkbox', () => {
-    it('does not render when used as a top level comment/discussion', () => {
-      createComponent({ isNewDiscussion: true });
-
-      expect(findToggleResolveCheckbox().exists()).toBe(false);
-    });
-
-    it('renders when used as a reply and the discussion is resolvable', () => {
-      createComponent({
-        hasReplies: true,
-        isDiscussionResolvable: true,
-      });
-
-      expect(findToggleResolveCheckbox().exists()).toBe(true);
-    });
-
-    it('emits the `toggleResolve` event on submitForm when resolved', async () => {
-      createComponent({
-        hasReplies: true,
-        isDiscussionResolvable: true,
-        isDiscussionResolved: false,
-      });
-
-      findToggleResolveCheckbox().vm.$emit('input', true);
-      findMarkdownEditor().vm.$emit('input', 'new comment');
-
-      findConfirmButton().vm.$emit('click');
-
-      await waitForPromises();
-
-      expect(wrapper.emitted('submitForm')).toEqual([
-        [{ commentText: 'new comment', isNoteInternal: false }],
-      ]);
-
-      expect(wrapper.emitted('toggleResolveDiscussion')).toEqual([[]]);
     });
   });
 });

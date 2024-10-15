@@ -107,7 +107,7 @@ The SSH host key path depends on the used software:
 
 In the following steps, replace `<ssh_host_key_path>` with the one you're using:
 
-1. SSH into **each Rails node on your secondary** site and sign in as the `root` user:
+1. SSH into **each Rails node on your secondary** site and log in as the `root` user:
 
    ```shell
    sudo -i
@@ -222,10 +222,10 @@ In the following steps, replace `<ssh_host_key_path>` with the one you're using:
    ```
 
 1. Go to the primary node GitLab instance:
-   1. On the left sidebar, at the bottom, select **Admin**.
+   1. On the left sidebar, at the bottom, select **Admin area**.
    1. On the left sidebar, select **Geo > Sites**.
    1. Select **Add site**.
-      ![Adding a secondary site in Geo configuration interface](img/adding_a_secondary_v15_8.png)
+      ![Add secondary site](img/adding_a_secondary_v15_8.png)
    1. In **Name**, enter the value for `gitlab_rails['geo_node_name']` in
       `/etc/gitlab/gitlab.rb`. These values must always match **exactly**, character
       for character.
@@ -331,7 +331,7 @@ method to be enabled. This is enabled by default, but if converting an existing 
 
 On the **primary** site:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Settings > General**.
 1. Expand **Visibility and access controls**.
 1. If using Git over SSH, then:
@@ -346,7 +346,7 @@ On the **primary** site:
 You can sign in to the **secondary** site with the same credentials you used with
 the **primary** site. After you sign in:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Geo > Sites**.
 1. Verify that it's correctly identified as a **secondary** Geo site, and that
    Geo is enabled.
@@ -355,7 +355,7 @@ The initial replication may take some time. The status of the site or the 'backf
 can monitor the synchronization process on each Geo site from the **primary**
 site's **Geo Sites** dashboard in your browser.
 
-![Geo dashboard of secondary site](img/geo_dashboard_v14_0.png)
+![Geo dashboard](img/geo_dashboard_v14_0.png)
 
 If your installation isn't working properly, check the
 [troubleshooting document](troubleshooting/index.md).

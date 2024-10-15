@@ -5,7 +5,6 @@
     overflow: hidden;
     width: 20rem;
 
-    // stylelint-disable-next-line gitlab/no-gl-class
     &,
     .gl-dropdown-inner {
       max-height: $dropdown-max-height-lg;

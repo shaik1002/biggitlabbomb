@@ -15,8 +15,7 @@ module QA
         :github_repository_path,
         :gitlab_repository_path,
         :personal_namespace,
-        :import_wait_duration,
-        :repository_object_format
+        :import_wait_duration
 
       attr_reader :repository_storage
 
@@ -30,8 +29,7 @@ module QA
         :import,
         :import_status,
         :import_error,
-        :description,
-        :created_at
+        :description
 
       attribute :group do
         Group.fabricate! do |group|
@@ -265,9 +263,6 @@ module QA
         post_body[:repository_storage] = repository_storage if repository_storage
         post_body[:template_name] = @template_name if @template_name
 
-        # Use experimental SHA256 support https://gitlab.com/groups/gitlab-org/-/epics/794
-        post_body[:repository_object_format] = 'sha256' if Runtime::Env.use_sha256_repository_object_storage
-
         post_body
       end
 
@@ -412,28 +407,7 @@ module QA
       end
 
       def latest_pipeline
-        # Observing in https://gitlab.com/gitlab-org/gitlab/-/issues/481642#note_2081214771
-        # Sometimes in either canary or staging-canary,
-        # GET latest pipeline immediately after 1st pipeline was created seems to cause 500 or 502
-        # Adding a retry block with `retry_on_exception: true` to reduce flakiness
-        #
-        retry_until do
-          response = get(request_url(api_latest_pipeline_path))
-          response.code == HTTP_STATUS_OK
-        rescue ResourceQueryError
-          raise(
-            "Could not GET project's latest pipeline. Request returned (#{response.code}): `#{response}`."
-          )
-        end
-
-        parse_body(get(request_url(api_latest_pipeline_path)))
-      end
-
-      def visit_latest_pipeline
-        url = latest_pipeline[:web_url]
-        Runtime::Logger.info("Visiting #{Rainbow(self.class.name).black.bg(:white)}'s latest pipeline at #{url}")
-        visit(url)
-        Support::WaitForRequests.wait_for_requests
+        parse_body(api_get_from(api_latest_pipeline_path))
       end
 
       # Waits for a pipeline to be available with the attributes as specified.
@@ -456,13 +430,6 @@ module QA
 
       def job_by_name(job_name)
         jobs.find { |job| job[:name] == job_name }
-      end
-
-      def visit_job(job_name)
-        url = job_by_name(job_name)[:web_url]
-        Runtime::Logger.info("Visiting #{Rainbow(self.class.name).black.bg(:white)}'s job #{job_name} at #{url}")
-        visit(url)
-        Support::WaitForRequests.wait_for_requests
       end
 
       def issues(auto_paginate: false, attempts: 0)
@@ -606,8 +573,7 @@ module QA
           :snippets_enabled,
           :shared_runners_enabled,
           :request_access_enabled,
-          :avatar_url,
-          :created_at
+          :avatar_url
         )
       end
 

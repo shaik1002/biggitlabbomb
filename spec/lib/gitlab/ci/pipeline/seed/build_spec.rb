@@ -59,8 +59,8 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build, feature_category: :pipeline_co
         {
           name: 'rspec',
           ref: 'master',
-          execution_config: {
-            run_steps: run_value
+          options: {
+            run: run_value
           }
         }
       end
@@ -71,6 +71,16 @@ RSpec.describe Gitlab::Ci::Pipeline::Seed::Build, feature_category: :pipeline_co
           pipeline: pipeline,
           run_steps: run_value
         )
+      end
+
+      context 'when feature flag is disabled' do
+        before do
+          stub_feature_flags(pipeline_run_keyword: false)
+        end
+
+        it 'does not include execution_config attribute' do
+          expect(subject).not_to include(:execution_config)
+        end
       end
 
       context 'when job:run attribute is not specified' do

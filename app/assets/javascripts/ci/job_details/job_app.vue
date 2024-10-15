@@ -5,16 +5,12 @@ import { throttle, isEmpty } from 'lodash';
 // eslint-disable-next-line no-restricted-imports
 import { mapGetters, mapState, mapActions } from 'vuex';
 import JobLogTopBar from 'ee_else_ce/ci/job_details/components/job_log_top_bar.vue';
-import RootCauseAnalysisButton from 'ee_else_ce/ci/job_details/components/root_cause_analysis_button.vue';
 import SafeHtml from '~/vue_shared/directives/safe_html';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import glAbilitiesMixin from '~/vue_shared/mixins/gl_abilities_mixin';
 import { isScrolledToBottom } from '~/lib/utils/scroll_utils';
 import { __, sprintf } from '~/locale';
 import delayedJobMixin from '~/ci/mixins/delayed_job_mixin';
 import Log from '~/ci/job_details/components/log/log.vue';
 import { MANUAL_STATUS } from '~/ci/constants';
-import { reportToSentry } from '~/ci/utils';
 import EmptyState from './components/empty_state.vue';
 import EnvironmentsBlock from './components/environments_block.vue';
 import ErasedBlock from './components/erased_block.vue';
@@ -33,7 +29,6 @@ export default {
     GlIcon,
     Log,
     JobLogTopBar,
-    RootCauseAnalysisButton,
     StuckBlock,
     UnmetPrerequisitesBlock,
     Sidebar,
@@ -44,7 +39,7 @@ export default {
   directives: {
     SafeHtml,
   },
-  mixins: [delayedJobMixin, glAbilitiesMixin(), glFeatureFlagMixin()],
+  mixins: [delayedJobMixin],
   props: {
     artifactHelpUrl: {
       type: String,
@@ -137,13 +132,6 @@ export default {
     jobConfirmationMessage() {
       return this.job.status?.action?.confirmation_message;
     },
-    jobFailed() {
-      const { status } = this.job;
-
-      const failedGroups = ['failed', 'failed-with-warnings'];
-
-      return failedGroups.includes(status.group);
-    },
   },
   watch: {
     // Once the job log is loaded,
@@ -180,9 +168,6 @@ export default {
     this.stopPolling();
     window.removeEventListener('resize', this.onResize);
     window.removeEventListener('scroll', this.updateScroll);
-  },
-  errorCaptured(err, _vm, info) {
-    reportToSentry(this.$options.name, `error: ${err}, info: ${info}`);
   },
   methods: {
     ...mapActions([
@@ -241,7 +226,7 @@ export default {
       <div class="build-page" data-testid="job-content">
         <!-- Header Section -->
         <header>
-          <div class="build-header gl-flex">
+          <div class="build-header gl-display-flex">
             <job-header
               :status="job.status"
               :time="headerTime"
@@ -298,8 +283,8 @@ export default {
 
         <div
           v-if="job.archived"
-          class="archived-job gl-z-1 gl-m-auto gl-mt-3 gl-items-center gl-px-3 gl-py-2"
-          :class="{ 'sticky-top gl-border-b-0': hasJobLog }"
+          class="gl-mt-3 gl-py-2 gl-px-3 gl-align-items-center gl-z-1 gl-m-auto archived-job"
+          :class="{ 'sticky-top gl-border-bottom-0': hasJobLog }"
           data-testid="archived-job"
         >
           <gl-icon name="lock" class="gl-align-bottom" />
@@ -329,7 +314,6 @@ export default {
             @exitFullscreen="exitFullscreen"
           />
           <log :search-results="searchResults" />
-          <root-cause-analysis-button :job-failed="jobFailed" />
         </div>
         <!-- EO job log -->
 

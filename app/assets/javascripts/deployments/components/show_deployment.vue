@@ -92,9 +92,9 @@ export default {
 </script>
 <template>
   <div>
-    <div class="gl-flex gl-justify-between">
-      <div class="gl-grow lg:gl-pr-5">
-        <h1 class="page-title gl-text-size-h-display">
+    <div class="gl-display-flex gl-justify-content-space-between">
+      <div class="gl-flex-grow-1">
+        <h1 class="page-title gl-font-size-h-display">
           <gl-sprintf :message="$options.i18n.header">
             <template #iid>{{ deploymentIid }}</template>
           </gl-sprintf>
@@ -106,20 +106,29 @@ export default {
           :environment="environment"
           :loading="isLoading"
         />
-        <details-feedback class="gl-mt-6" />
+        <details-feedback class="gl-mt-6 gl-w-9/10" />
         <deployment-approvals
           v-if="hasApprovalSummary"
           :approval-summary="deployment.approvalSummary"
           :deployment="deployment"
-          class="gl-mt-6"
+          class="gl-mt-6 gl-w-9/10"
           @change="$apollo.queries.deployment.refetch()"
         />
-        <deployment-deploy-block v-if="isManual" :deployment="deployment" class="gl-mt-4" />
+        <deployment-deploy-block
+          v-if="isManual"
+          :deployment="deployment"
+          class="gl-w-9/10 gl-mt-4"
+        />
         <deployment-timeline
           v-if="hasApprovalSummary"
           :approval-summary="deployment.approvalSummary"
+          class="gl-w-9/10"
         />
-        <approvals-empty-state v-if="!isLoading" :approval-summary="deployment.approvalSummary" />
+        <approvals-empty-state
+          v-if="!isLoading"
+          :approval-summary="deployment.approvalSummary"
+          class="gl-w-9/10"
+        />
       </div>
       <deployment-aside
         v-if="!hasError"

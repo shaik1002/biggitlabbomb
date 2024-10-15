@@ -5,7 +5,8 @@ class Projects::ConfluencesController < Projects::ApplicationController
 
   feature_category :integrations
 
-  def show; end
+  def show
+  end
 
   private
 

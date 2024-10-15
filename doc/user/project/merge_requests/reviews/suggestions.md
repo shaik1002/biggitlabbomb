@@ -74,12 +74,12 @@ When applied, the suggestion replaces from 2 lines above to 2 lines below the co
 ![Multi-line suggestion preview](img/multi-line-suggestion-preview_v16_6.png)
 
 Suggestions for multiple lines are limited to 100 lines _above_ and 100
-lines _below_ the commented diff line. This allows for up to 201 changed lines per
+lines _below_ the commented diff line. This allows for up to 200 changed lines per
 suggestion.
 
 Multiline comments display the comment's line numbers above the body of the comment:
 
-![Multiline comment selection displayed above comment](img/multiline-comment-saved_v13_3.png)
+![Multiline comment selection displayed above comment](img/multiline-comment-saved.png)
 
 #### Using the rich text editor
 
@@ -99,7 +99,7 @@ To add or subtract changed lines, next to **From line**, select **+** or **-**.
 
 Prerequisites:
 
-- You must be the author of the merge request, or have at least the Developer role for the project.
+- You must be the author of the merge request, or have at least the Developer role in the project.
 
 To apply suggested changes directly from the merge request:
 
@@ -187,7 +187,7 @@ For example, to customize the commit message to output
 
 Prerequisites:
 
-- You must have a role for the project that allows you to commit to the source branch.
+- You must have a role in the project that allows you to commit to the source branch.
 
 To reduce the number of commits added to your branch, apply multiple
 suggestions in a single commit.

@@ -90,18 +90,15 @@ export default {
     },
     canEdit: {
       type: Boolean,
-      required: false,
-      default: false,
+      required: true,
     },
     canAwardEmoji: {
       type: Boolean,
-      required: false,
-      default: false,
+      required: true,
     },
     canDelete: {
       type: Boolean,
-      required: false,
-      default: false,
+      required: true,
     },
     canResolve: {
       type: Boolean,
@@ -201,6 +198,9 @@ export default {
       }
       return null;
     },
+    resolveVariant() {
+      return this.isResolved ? 'success' : 'default';
+    },
   },
   methods: {
     ...mapActions(['toggleAwardRequest', 'promoteCommentToTimelineEvent']),
@@ -289,14 +289,14 @@ export default {
       v-if="canResolve"
       ref="resolveButton"
       v-gl-tooltip
-      data-testid="resolve-line-button"
       category="tertiary"
-      class="note-action-button"
-      :class="{ '!gl-text-success': isResolved }"
+      :variant="resolveVariant"
+      :class="{ 'is-disabled': !resolvable, 'is-active': isResolved }"
       :title="resolveButtonTitle"
       :aria-label="resolveButtonTitle"
       :icon="resolveIcon"
       :loading="isResolving"
+      class="line-resolve-btn note-action-button"
       @click="onResolve"
     />
     <timeline-event-button
@@ -380,7 +380,7 @@ export default {
         </gl-disclosure-dropdown-item>
         <gl-disclosure-dropdown-item v-if="canEdit" class="js-note-delete" @action="onDelete">
           <template #list-item>
-            <span class="gl-text-danger">{{ __('Delete comment') }}</span>
+            <span class="text-danger">{{ __('Delete comment') }}</span>
           </template>
         </gl-disclosure-dropdown-item>
       </gl-disclosure-dropdown>

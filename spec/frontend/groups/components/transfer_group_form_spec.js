@@ -86,7 +86,7 @@ describe('Transfer group form', () => {
     });
   });
 
-  describe('with a selected group', () => {
+  describe('with a selected project', () => {
     const [selectedItem] = groupNamespaces;
 
     beforeEach(() => {

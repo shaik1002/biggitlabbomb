@@ -4,8 +4,6 @@ module Gitlab
   module Graphql
     module Authorize
       class ObjectAuthorization
-        include ::Gitlab::Allowable
-
         attr_reader :abilities, :permitted_scopes
 
         def initialize(abilities, scopes = %i[api read_api])
@@ -21,17 +19,19 @@ module Gitlab
           abilities.present?
         end
 
-        def ok?(object, current_user, scope_validator:, skip_abilities: nil)
-          scopes_ok?(scope_validator) && abilities_ok?(object, current_user, skip_abilities: skip_abilities)
+        def ok?(object, current_user, scope_validator:)
+          scopes_ok?(scope_validator) && abilities_ok?(object, current_user)
         end
 
         private
 
-        def abilities_ok?(object, current_user, skip_abilities: nil)
+        def abilities_ok?(object, current_user)
           return true if none?
 
           subject = object.try(:declarative_policy_subject) || object
-          can_all?(current_user, abilities - Array.wrap(skip_abilities).flatten, subject)
+          abilities.all? do |ability|
+            Ability.allowed?(current_user, ability, subject)
+          end
         end
 
         def scopes_ok?(validator)

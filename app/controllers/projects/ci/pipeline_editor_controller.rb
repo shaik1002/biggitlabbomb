@@ -11,7 +11,8 @@ class Projects::Ci::PipelineEditorController < Projects::ApplicationController
 
   urgency :low, [:show]
 
-  def show; end
+  def show
+  end
 
   private
 

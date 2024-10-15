@@ -14,7 +14,6 @@ class GraphqlController < ApplicationController
 
   # The query string of a standard IntrospectionQuery, used to compare incoming requests for caching
   CACHED_INTROSPECTION_QUERY_STRING = CachedIntrospectionQuery.query_string
-  CACHED_LEGACY_INTROSPECTION_QUERY_STRING = CachedIntrospectionQuery.legacy_query_string
   INTROSPECTION_QUERY_OPERATION_NAME = 'IntrospectionQuery'
 
   # If a user is using their session to access GraphQL, we need to have session
@@ -165,16 +164,10 @@ class GraphqlController < ApplicationController
   def disable_query_limiting
     return unless Gitlab::QueryLimiting.enabled_for_env?
 
-    disable_reference = request.headers[DISABLE_SQL_QUERY_LIMIT_HEADER]
-    return unless disable_reference
+    disable_issue = request.headers[DISABLE_SQL_QUERY_LIMIT_HEADER]
+    return unless disable_issue
 
-    first, second = disable_reference.split(',')
-
-    if first.match?(/^\d+$/)
-      Gitlab::QueryLimiting.disable!(second, new_threshold: first&.to_i)
-    else
-      Gitlab::QueryLimiting.disable!(first)
-    end
+    Gitlab::QueryLimiting.disable!(disable_issue)
   end
 
   def set_user_last_activity
@@ -322,20 +315,14 @@ class GraphqlController < ApplicationController
   def introspection_query_can_use_cache?
     return false if Gitlab.dev_or_test_env?
 
-    [
-      CACHED_INTROSPECTION_QUERY_STRING,
-      CACHED_LEGACY_INTROSPECTION_QUERY_STRING
-    ].include?(graphql_query_object.query_string.squish)
+    CACHED_INTROSPECTION_QUERY_STRING == graphql_query_object.query_string.squish
   end
 
   def introspection_query_cache_key
     # We use context[:remove_deprecated] here as an introspection query result can differ based on the
     # visibility of schema items. Visibility can be affected by the remove_deprecated param. For more context, see:
     # https://gitlab.com/gitlab-org/gitlab/-/issues/409448#note_1377558096
-    [
-      'introspection-query-cache', Gitlab.revision, context[:remove_deprecated],
-      hexdigest(graphql_query_object.query_string.squish)
-    ]
+    ['introspection-query-cache', Gitlab.revision, context[:remove_deprecated]]
   end
 
   def introspection_query?

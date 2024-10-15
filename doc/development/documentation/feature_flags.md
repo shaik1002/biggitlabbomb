@@ -41,15 +41,10 @@ To document feature flags:
 - [Add history text](#add-history-text).
 - [Add a flag note](#add-a-flag-note).
 
-## Offerings
-
-When documenting the [offerings](styleguide/availability_details.md#offering), for features 
-**disabled on self-managed**, don't list `GitLab Dedicated` as the feature's offering.
-
 ## Add history text
 
 When the state of a flag changes (for example, from disabled by default to enabled by default), add the change to the
-[history](../documentation/styleguide/availability_details.md#history).
+[history](versions.md#add-a-history-item).
 
 Possible history entries are:
 

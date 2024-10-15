@@ -17,10 +17,6 @@ module Mutations
       MUTUALLY_EXCLUSIVE_ARGUMENTS_ERROR = 'Please provide either projectPath or namespacePath argument, but not both.'
       DISABLED_FF_ERROR = 'create_group_level_work_items feature flag is disabled. Only project paths allowed.'
 
-      argument :crm_contacts_widget,
-        ::Types::WorkItems::Widgets::CrmContactsCreateInputType,
-        required: false,
-        description: 'Input for CRM contacts widget.'
       argument :description,
         GraphQL::Types::String,
         required: false,
@@ -34,10 +30,6 @@ module Mutations
         ::Types::WorkItems::Widgets::LabelsCreateInputType,
         required: false,
         description: 'Input for labels widget.'
-      argument :linked_items_widget,
-        ::Types::WorkItems::Widgets::LinkedItemsCreateInputType,
-        required: false,
-        description: 'Input for linked items widget.'
       argument :namespace_path,
         GraphQL::Types::ID,
         required: false,
@@ -47,7 +39,7 @@ module Mutations
         required: false,
         description: 'Full path of the project the work item is associated with.',
         deprecated: {
-          reason: 'Please use namespacePath instead. That will cover for both projects and groups',
+          reason: 'Please use namespace_path instead. That will cover for both projects and groups',
           milestone: '15.10'
         }
       argument :title,

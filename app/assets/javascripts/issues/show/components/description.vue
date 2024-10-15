@@ -15,7 +15,7 @@ import TaskList from '~/task_list';
 import { addHierarchyChild, removeHierarchyChild } from '~/work_items/graphql/cache_utils';
 import createWorkItemMutation from '~/work_items/graphql/create_work_item.mutation.graphql';
 import deleteWorkItemMutation from '~/work_items/graphql/delete_work_item.mutation.graphql';
-import namespaceWorkItemTypesQuery from '~/work_items/graphql/namespace_work_item_types.query.graphql';
+import projectWorkItemTypesQuery from '~/work_items/graphql/project_work_item_types.query.graphql';
 import {
   sprintfWorkItem,
   I18N_WORK_ITEM_ERROR_CREATING,
@@ -110,7 +110,7 @@ export default {
       },
     },
     workItemTypes: {
-      query: namespaceWorkItemTypesQuery,
+      query: projectWorkItemTypesQuery,
       variables() {
         return {
           fullPath: this.fullPath,
@@ -183,9 +183,8 @@ export default {
     },
     renderSortableLists() {
       // We exclude GLFM table of contents which have a `section-nav` class on the root `ul`.
-      // We also exclude footnotes, which are in an `ol` inside a `section.footnotes`.
       const lists = this.$el.querySelectorAll?.(
-        '.description .md > ul:not(.section-nav), .description .md > ul:not(.section-nav) ul, .description :not(section.footnotes) > ol',
+        '.description .md > ul:not(.section-nav), .description .md > ul:not(.section-nav) ul, .description ol',
       );
       lists?.forEach((list) => {
         if (list.children.length <= 1) {
@@ -337,7 +336,8 @@ export default {
           update: (cache, { data: { workItemCreate } }) =>
             addHierarchyChild({
               cache,
-              id: convertToGraphQLId(TYPENAME_WORK_ITEM, this.issueId),
+              fullPath: this.fullPath,
+              iid: this.issueIid,
               workItem: workItemCreate.workItem,
             }),
         });
@@ -371,7 +371,8 @@ export default {
           update: (cache) =>
             removeHierarchyChild({
               cache,
-              id: convertToGraphQLId(TYPENAME_WORK_ITEM, this.issueId),
+              fullPath: this.fullPath,
+              iid: this.issueIid,
               workItem: { id },
             }),
         });

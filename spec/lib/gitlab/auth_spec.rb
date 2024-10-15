@@ -88,32 +88,18 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching, feature_cate
 
     it 'optional_scopes contains all non-default scopes' do
       expect(subject.optional_scopes).to match_array %i[
-        admin_mode
-        ai_features
-        ai_workflows
-        create_runner
-        email
-        k8s_proxy
-        manage_runner
-        openid
-        profile
-        read_api
-        read_observability
-        read_registry
-        read_repository
-        read_service_ping
-        read_user
-        sudo
-        write_observability
-        write_registry
-        write_repository
+        read_user read_api read_repository write_repository read_registry read_service_ping
+        write_registry sudo admin_mode openid profile email read_observability write_observability
+        create_runner manage_runner k8s_proxy ai_features
       ]
     end
 
     context 'with observability feature flags' do
+      feature_flags = [:observability_tracing, :observability_metrics, :observability_logs]
+
       context 'when all disabled' do
         before do
-          stub_feature_flags(observability_features: false)
+          stub_feature_flags(feature_flags.index_with { false })
         end
 
         it 'contains for group all resource bot scopes without observability scopes' do
@@ -140,64 +126,70 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching, feature_cate
         end
       end
 
-      context "with feature flag enabled for specific root group" do
-        let(:parent) { build_stubbed(:group) }
-        let(:group) do
-          build_stubbed(:group, parent: parent).tap { |g| g.namespace_settings = build_stubbed(:namespace_settings, namespace: g) }
-        end
+      flag_states = [true, false].repeated_permutation(feature_flags.length)
+      flag_tests = flag_states.filter(&:any?).map { |flags| Hash[feature_flags.zip(flags)] }
 
-        let(:project) { build_stubbed(:project, namespace: group) }
-
-        before do
-          stub_feature_flags(observability_features: parent)
-        end
-
-        it 'contains for group all resource bot scopes including observability scopes' do
-          expect(subject.available_scopes_for(group)).to match_array %i[
-            api read_api read_repository write_repository read_registry write_registry
-            read_observability write_observability create_runner manage_runner k8s_proxy ai_features
-          ]
-        end
-
-        it 'contains for admin user all non-default scopes with ADMIN access and without observability scopes' do
-          user = build_stubbed(:user, admin: true)
-
-          expect(subject.available_scopes_for(user)).to match_array %i[
-            api read_user read_api read_repository write_repository read_registry write_registry read_service_ping
-            sudo admin_mode create_runner manage_runner k8s_proxy ai_features
-          ]
-        end
-
-        it 'contains for project all resource bot scopes including observability scopes' do
-          expect(subject.available_scopes_for(project)).to match_array %i[
-            api read_api read_repository write_repository read_registry write_registry
-            read_observability write_observability create_runner manage_runner k8s_proxy ai_features
-          ]
-        end
-
-        it 'contains for other group all resource bot scopes without observability scopes' do
-          other_parent = build_stubbed(:group)
-          other_group = build_stubbed(:group, parent: other_parent).tap do |g|
-            g.namespace_settings = build_stubbed(:namespace_settings, namespace: g)
+      flag_tests.each do |flags|
+        context "with flags #{flags} enabled for specific root group" do
+          let(:parent) { build_stubbed(:group) }
+          let(:group) do
+            build_stubbed(:group, parent: parent).tap { |g| g.namespace_settings = build_stubbed(:namespace_settings, namespace: g) }
           end
 
-          expect(subject.available_scopes_for(other_group)).to match_array %i[
-            api read_api read_repository write_repository read_registry write_registry
-            create_runner manage_runner k8s_proxy ai_features
-          ]
-        end
+          let(:project) { build_stubbed(:project, namespace: group) }
 
-        it 'contains for other project all resource bot scopes without observability scopes' do
-          other_parent = build_stubbed(:group)
-          other_group = build_stubbed(:group, parent: other_parent).tap do |g|
-            g.namespace_settings = build_stubbed(:namespace_settings, namespace: g)
+          before do
+            flags.transform_values! { |v| v ? parent : false }
+            stub_feature_flags(flags)
           end
-          other_project = build_stubbed(:project, namespace: other_group)
 
-          expect(subject.available_scopes_for(other_project)).to match_array %i[
-            api read_api read_repository write_repository read_registry write_registry
-            create_runner manage_runner k8s_proxy ai_features
-          ]
+          it 'contains for group all resource bot scopes including observability scopes' do
+            expect(subject.available_scopes_for(group)).to match_array %i[
+              api read_api read_repository write_repository read_registry write_registry
+              read_observability write_observability create_runner manage_runner k8s_proxy ai_features
+            ]
+          end
+
+          it 'contains for admin user all non-default scopes with ADMIN access and without observability scopes' do
+            user = build_stubbed(:user, admin: true)
+
+            expect(subject.available_scopes_for(user)).to match_array %i[
+              api read_user read_api read_repository write_repository read_registry write_registry read_service_ping
+              sudo admin_mode create_runner manage_runner k8s_proxy ai_features
+            ]
+          end
+
+          it 'contains for project all resource bot scopes including observability scopes' do
+            expect(subject.available_scopes_for(project)).to match_array %i[
+              api read_api read_repository write_repository read_registry write_registry
+              read_observability write_observability create_runner manage_runner k8s_proxy ai_features
+            ]
+          end
+
+          it 'contains for other group all resource bot scopes without observability scopes' do
+            other_parent = build_stubbed(:group)
+            other_group = build_stubbed(:group, parent: other_parent).tap do |g|
+              g.namespace_settings = build_stubbed(:namespace_settings, namespace: g)
+            end
+
+            expect(subject.available_scopes_for(other_group)).to match_array %i[
+              api read_api read_repository write_repository read_registry write_registry
+              create_runner manage_runner k8s_proxy ai_features
+            ]
+          end
+
+          it 'contains for other project all resource bot scopes without observability scopes' do
+            other_parent = build_stubbed(:group)
+            other_group = build_stubbed(:group, parent: other_parent).tap do |g|
+              g.namespace_settings = build_stubbed(:namespace_settings, namespace: g)
+            end
+            other_project = build_stubbed(:project, namespace: other_group)
+
+            expect(subject.available_scopes_for(other_project)).to match_array %i[
+              api read_api read_repository write_repository read_registry write_registry
+              create_runner manage_runner k8s_proxy ai_features
+            ]
+          end
         end
       end
     end
@@ -1221,8 +1213,7 @@ RSpec.describe Gitlab::Auth, :use_clean_rails_memory_store_caching, feature_cate
 
     it { is_expected.to include(*described_class::API_SCOPES - [:read_user]) }
     it { is_expected.to include(*described_class::REPOSITORY_SCOPES) }
-
-    it { is_expected.to include(*described_class.registry_scopes) } unless described_class.registry_scopes.empty?
+    it { is_expected.to include(*described_class.registry_scopes) }
     it { is_expected.to include(*described_class::OBSERVABILITY_SCOPES) }
   end
 

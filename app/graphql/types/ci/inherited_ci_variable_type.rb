@@ -39,10 +39,6 @@ module Types
         null: true,
         description: 'Indicates whether the variable is masked.'
 
-      field :hidden, GraphQL::Types::Boolean,
-        null: true,
-        description: 'Indicates whether the variable is hidden.'
-
       field :group_name, GraphQL::Types::String,
         null: true,
         description: 'Indicates group the variable belongs to.'

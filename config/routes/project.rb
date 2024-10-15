@@ -459,6 +459,8 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           end
         end
 
+        get :planning_hierarchy
+
         resources :badges, only: [] do
           collection do
             constraints format: /svg/ do
@@ -669,6 +671,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         post :unarchive
         post :housekeeping
         post :toggle_star
+        post :preview_markdown, as: :preview_markdown_deprecated
         post :export
         post :remove_export
         post :generate_new_export

@@ -127,14 +127,13 @@ class SearchController < ApplicationController
   def settings
     return render(json: []) unless current_user
 
-    project_id, group_id = params.permit(:project_id, :group_id).values_at(:project_id, :group_id)
+    project_id = params.require(:project_id)
+    project = Project.find_by(id: project_id) # rubocop: disable CodeReuse/ActiveRecord -- Using `find_by` as `find` would raise 404s
 
-    if project_id
-      render json: settings_for_project(project_id)
-    elsif group_id
-      render json: settings_for_group(group_id)
+    if project && current_user.can?(:admin_project, project)
+      render json: Search::Settings.new.for_project(project)
     else
-      head :bad_request
+      render json: []
     end
   end
 
@@ -152,7 +151,8 @@ class SearchController < ApplicationController
     render json: Gitlab::Json.dump(search_autocomplete_opts(term, filter: @filter, scope: @scope))
   end
 
-  def opensearch; end
+  def opensearch
+  end
 
   private
 
@@ -242,11 +242,11 @@ class SearchController < ApplicationController
       metadata['meta.search.project_id'] = params[:project_id]
       metadata['meta.search.scope'] = params[:scope] || @scope
       metadata['meta.search.page'] = params[:page] || '1'
-      metadata['meta.search.filters.confidential'] = filter_params[:confidential]
-      metadata['meta.search.filters.state'] = filter_params[:state]
+      metadata['meta.search.filters.confidential'] = params[:confidential]
+      metadata['meta.search.filters.state'] = params[:state]
       metadata['meta.search.force_search_results'] = params[:force_search_results]
       metadata['meta.search.project_ids'] = params[:project_ids]
-      metadata['meta.search.filters.language'] = filter_params[:language]
+      metadata['meta.search.filters.language'] = params[:language]
       metadata['meta.search.type'] = @search_type if @search_type.present?
       metadata['meta.search.level'] = @search_level if @search_level.present?
       metadata[:global_search_duration_s] = @global_search_duration_s if @global_search_duration_s.present?
@@ -306,24 +306,6 @@ class SearchController < ApplicationController
 
   def search_type
     search_service.search_type
-  end
-
-  def filter_params
-    params.permit(:confidential, :state, language: [])
-  end
-
-  def settings_for_project(project_id)
-    project = Project.find_by(id: project_id) # rubocop: disable CodeReuse/ActiveRecord -- Using `find` would raise 404s
-    return [] unless project && current_user.can?(:admin_project, project)
-
-    Search::ProjectSettings.new(project).all
-  end
-
-  def settings_for_group(group_id)
-    group = Group.find_by(id: group_id) # rubocop: disable CodeReuse/ActiveRecord -- Using `find` would raise 404s
-    return [] unless group && current_user.can?(:admin_group, group)
-
-    Search::GroupSettings.new(group).all
   end
 end
 

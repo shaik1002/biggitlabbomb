@@ -46,7 +46,7 @@ whether they are stored on the local file system or in object storage.
 
 To enable GitLab replication:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Geo > Nodes**.
 1. Select **Edit** on the **secondary** site.
 1. In the **Synchronization Settings** section, find the **Allow this secondary node to replicate content on Object Storage**
@@ -56,7 +56,7 @@ For LFS, follow the documentation to
 [set up LFS object storage](../../lfs/index.md#storing-lfs-objects-in-remote-object-storage).
 
 For CI job artifacts, there is similar documentation to configure
-[jobs artifact object storage](../../cicd/job_artifacts.md#using-object-storage)
+[jobs artifact object storage](../../job_artifacts.md#using-object-storage)
 
 For user uploads, there is similar documentation to configure [upload object storage](../../uploads.md#using-object-storage)
 
@@ -69,7 +69,7 @@ configure the **secondary** in a few ways:
 - Use a separate object store and enable the **Allow this secondary node to replicate
   content on Object Storage** setting.
 
-GitLab does not support the case where both:
+GitLab does not currently support the case where both:
 
 - The **primary** site uses local storage.
 - A **secondary** site uses object storage.

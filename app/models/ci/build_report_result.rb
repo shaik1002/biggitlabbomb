@@ -21,31 +21,31 @@ module Ci
     store_accessor :data, :tests
 
     def tests_name
-      tests["name"]
+      tests.dig("name")
     end
 
     def tests_duration
-      tests["duration"]
+      tests.dig("duration")
     end
 
     def tests_success
-      tests["success"].to_i
+      tests.dig("success").to_i
     end
 
     def tests_failed
-      tests["failed"].to_i
+      tests.dig("failed").to_i
     end
 
     def tests_errored
-      tests["errored"].to_i
+      tests.dig("errored").to_i
     end
 
     def tests_skipped
-      tests["skipped"].to_i
+      tests.dig("skipped").to_i
     end
 
     def suite_error
-      tests["suite_error"]
+      tests.dig("suite_error")
     end
   end
 end

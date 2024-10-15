@@ -99,10 +99,22 @@ IPv6 address. If you don't have IPv6, you can omit the `AAAA` record.
 
 #### For namespace in URL path, without wildcard DNS
 
+DETAILS:
+**Status:** Beta
+
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17584) as an [experiment](../../policy/experiment-beta-support.md) in GitLab 16.7.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/148621) to [beta](../../policy/experiment-beta-support.md) in GitLab 16.11.
 > - [Changed](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/1111) implementation from NGINX to the GitLab Pages codebase in GitLab 17.2.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/483365) in GitLab 17.4.
+
+FLAG:
+On self-managed GitLab, by default this feature is available.
+On GitLab.com and GitLab Dedicated, this feature is not available.
+This feature is not ready for production use.
+
+Prerequisites:
+
+- Your instance must use the Linux package installation method.
+- Your installation must use the default `auth_redirect_uri`.
 
 If you need support for namespace in the URL path to remove the requirement for wildcard DNS:
 
@@ -186,10 +198,17 @@ Watch the [video tutorial](https://youtu.be/dD8c7WNcc6s) for this configuration.
 
 ### Pages domain without wildcard DNS
 
+DETAILS:
+**Status:** Beta
+
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17584) as an [experiment](../../policy/experiment-beta-support.md) in GitLab 16.7.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/148621) to [beta](../../policy/experiment-beta-support.md) in GitLab 16.11.
 > - [Changed](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/1111) implementation from NGINX to the GitLab Pages codebase in GitLab 17.2.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/483365) in GitLab 17.4.
+
+FLAG:
+On self-managed GitLab, by default this feature is available.
+On GitLab.com and GitLab Dedicated, this feature is not available.
+This feature is not ready for production use.
 
 This configuration is the minimum setup for GitLab Pages. It is the base for all
 other configurations. In this configuration, NGINX proxies all requests to the daemon,
@@ -197,6 +216,7 @@ because the GitLab Pages daemon doesn't listen to the outside world.
 
 Prerequisites:
 
+- Your instance must use the Linux package installation method.
 - You have configured DNS setup
   [without a wildcard](#for-namespace-in-url-path-without-wildcard-dns).
 
@@ -269,13 +289,21 @@ then run `gitlab-ctl reconfigure`. For more information, read
 
 ### Pages domain with TLS support, without wildcard DNS
 
+DETAILS:
+**Status:** Beta
+
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/17584) as an [experiment](../../policy/experiment-beta-support.md) in GitLab 16.7.
 > - [Moved](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/148621) to [beta](../../policy/experiment-beta-support.md) in GitLab 16.11.
 > - [Changed](https://gitlab.com/gitlab-org/gitlab-pages/-/issues/1111) implementation from NGINX to the GitLab Pages codebase in GitLab 17.2.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/483365) in GitLab 17.4.
+
+FLAG:
+On self-managed GitLab, by default this feature is available.
+On GitLab.com and GitLab Dedicated, this feature is not available.
+This feature is not ready for production use.
 
 Prerequisites:
 
+- Your instance must use the Linux package installation method.
 - You have configured DNS setup
   [without a wildcard](#for-namespace-in-url-path-without-wildcard-dns).
 - You have a TLS certificate that covers your domain (like `example.io`).
@@ -368,17 +396,17 @@ control over how the Pages daemon runs and serves content in your environment.
 | **`gitlab_pages[]`**                    |                                                                                                                                                                                                                                                                                                            |
 | `access_control`                        | Whether to enable [access control](index.md#access-control).                                                                                                                                                                                                                                               |
 | `api_secret_key`                        | Full path to file with secret key used to authenticate with the GitLab API. Auto-generated when left unset.                                                                                                                                                                                                |
-| `artifacts_server`                      | Enable viewing [artifacts](../cicd/job_artifacts.md) in GitLab Pages.                                                                                                                                                                                                                                           |
+| `artifacts_server`                      | Enable viewing [artifacts](../job_artifacts.md) in GitLab Pages.                                                                                                                                                                                                                                           |
 | `artifacts_server_timeout`              | Timeout (in seconds) for a proxied request to the artifacts server.                                                                                                                                                                                                                                        |
 | `artifacts_server_url`                  | API URL to proxy artifact requests to. Defaults to GitLab `external URL` + `/api/v4`, for example `https://gitlab.com/api/v4`. When running a [separate Pages server](#running-gitlab-pages-on-a-separate-server), this URL must point to the main GitLab server's API.                                    |
-| `auth_redirect_uri`                     | Callback URL for authenticating with GitLab. URL should be subdomain of `pages_external_url` + `/auth`. Defaults to project's subdomain of `pages_external_url` + `/auth`, for example `https://projects.example.io/auth`. When `namespace_in_path` is enabled, defaults to `pages_external_url` + `/projects/auth`, for example `https://example.io/projects/auth`.  |
+| `auth_redirect_uri`                     | Callback URL for authenticating with GitLab. Defaults to project's subdomain of `pages_external_url` + `/auth`, for example `https://projects.example.io/auth`. When `namespace_in_path` is enabled, defaults to `pages_external_url` + `/projects/auth`, for example `https://example.io/projects/auth`.  |
 | `auth_secret`                           | Secret key for signing authentication requests. Leave blank to pull automatically from GitLab during OAuth registration.                                                                                                                                                                                   |
 | `client_cert`                           | Client certificate used for mutual TLS with the GitLab API. See [Support mutual TLS when calling the GitLab API](#support-mutual-tls-when-calling-the-gitlab-api) for details.                                                                                                                             |
 | `client_key`                            | Client key used for mutual TLS with the GitLab API. See [Support mutual TLS when calling the GitLab API](#support-mutual-tls-when-calling-the-gitlab-api) for details.                                                                                                                                     |
 | `client_ca_certs`                       | Root CA certificates used to sign client certificate used for mutual TLS with the GitLab API. See [Support mutual TLS when calling the GitLab API](#support-mutual-tls-when-calling-the-gitlab-api) for details.                                                                                           |
 | `dir`                                   | Working directory for configuration and secrets files.                                                                                                                                                                                                                                                     |
 | `enable`                                | Enable or disable GitLab Pages on the current system.                                                                                                                                                                                                                                                      |
-| `external_http`                         | Configure Pages to bind to one or more secondary IP addresses, serving HTTP requests. Multiple addresses can be given as an array, along with exact ports, for example `['1.2.3.4', '1.2.3.5:8063']`. Sets value for `listen_http`. If running GitLab Pages behind a reverse proxy with TLS termination, specify `listen_proxy` instead of `external_http`. |
+| `external_http`                         | Configure Pages to bind to one or more secondary IP addresses, serving HTTP requests. Multiple addresses can be given as an array, along with exact ports, for example `['1.2.3.4', '1.2.3.5:8063']`. Sets value for `listen_http`.                                                                        |
 | `external_https`                        | Configure Pages to bind to one or more secondary IP addresses, serving HTTPS requests. Multiple addresses can be given as an array, along with exact ports, for example `['1.2.3.4', '1.2.3.5:8063']`. Sets value for `listen_https`.                                                                      |
 | `server_shutdown_timeout`               | GitLab Pages server shutdown timeout in seconds (default: `30s`).                                                                                                                                                                                                                                          |
 | `gitlab_client_http_timeout`            | GitLab API HTTP client connection timeout in seconds (default: `10s`).                                                                                                                                                                                                                                     |
@@ -439,7 +467,6 @@ control over how the Pages daemon runs and serves content in your environment.
 | `rate_limit_tls_source_ip_burst`        | Rate limit per source IP maximum TLS connections burst allowed per second.                                                                                                                                                                                                                                 |
 | `rate_limit_tls_domain`                 | Rate limit per domain in number of TLS connections per second. Set to `0` to disable this feature.                                                                                                                                                                                                         |
 | `rate_limit_tls_domain_burst`           | Rate limit per domain maximum TLS connections burst allowed per second.                                                                                                                                                                                                                                    |
-| `rate_limit_subnets_allow_list`         | Allow list with the IP ranges (subnets) that should bypass all rate limits. For example, `['1.2.3.4/24', '2001:db8::1/32']`. [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/14653) in GitLab 17.3. |
 | `server_read_timeout`                   | Maximum duration to read the request headers and body. For no timeout, set to `0` or a negative value. Default: `5s`                                                                                                                                                                                       |
 | `server_read_header_timeout`            | Maximum duration to read the request headers. For no timeout, set to `0` or a negative value. Default: `1s`                                                                                                                                                                                                |
 | `server_write_timeout`                  | Maximum duration to write all files in the response. Larger files require more time. For no timeout, set to `0` or a negative value. Default: `0`                                                                                                                                                          |
@@ -543,7 +570,7 @@ domain as a custom domain to their project.
 If your user base is private or otherwise trusted, you can disable the
 verification requirement:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Settings > Preferences**.
 1. Expand **Pages**.
 1. Clear the **Require users to prove ownership of custom domains** checkbox.
@@ -558,10 +585,10 @@ sites served under a custom domain.
 To enable it:
 
 1. Choose an email address on which you want to receive notifications about expiring domains.
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Settings > Preferences**.
 1. Expand **Pages**.
-1. Enter the email address for receiving notifications and accept the Terms of Service for Let's Encrypt.
+1. Enter the email address for receiving notifications and accept Let's Encrypt's Terms of Service.
 1. Select **Save changes**.
 
 ### Access control
@@ -609,7 +636,7 @@ pre-existing applications must modify the GitLab Pages OAuth application. Follow
 this:
 
 1. Enable [access control](#access-control).
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Applications**.
 1. Expand **GitLab Pages**.
 1. Clear the `api` scope's checkbox and select the desired scope's checkbox (for example,
@@ -626,14 +653,14 @@ This can be helpful to restrict information published with Pages websites to the
 of your instance only.
 To do that:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Settings > Preferences**.
 1. Expand **Pages**.
 1. Select the **Disable public access to Pages sites** checkbox.
 1. Select **Save changes**.
 
 NOTE:
-You must enable [Access Control](#access-control) first for the setting to show in the **Admin** area.
+You must enable [Access Control](#access-control) first for the setting to show in the Admin area.
 
 ### Running behind a proxy
 
@@ -744,7 +771,7 @@ opened) it's refreshed. This extends the time the archive remains in memory from
 After an archive reaches `zip_cache_expiration`, it's marked as expired and removed on the next
 `zip_cache_cleanup` interval.
 
-![A timeline shows the ZIP cache refresh extends the ZIP cache expiration time.](img/zip_cache_configuration.png)
+![ZIP cache configuration](img/zip_cache_configuration.png)
 
 ### HTTP Strict Transport Security (HSTS) support
 
@@ -868,7 +895,7 @@ Prerequisites:
 
 To set the global maximum pages size for a project:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Settings > Preferences**.
 1. Expand **Pages**.
 1. In **Maximum size of pages**, enter a value. The default is `100`.
@@ -917,29 +944,10 @@ Prerequisites:
 
 To set the maximum number of GitLab Pages custom domains for a project:
 
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin area**.
 1. Select **Settings > Preferences**.
 1. Expand **Pages**.
 1. Enter a value for **Maximum number of custom domains per project**. Use `0` for unlimited domains.
-1. Select **Save changes**.
-
-## Configure the default expiry for parallel deployments
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/456477) in GitLab 17.4.
-
-Prerequisites:
-
-- You must have administrator access to the instance.
-
-To configure the default duration for the instance after which
-[parallel deployments](../../user/project/pages/index.md#parallel-deployments)
-are deleted:
-
-1. On the left sidebar, at the bottom, select **Admin**.
-1. Select **Settings > Preferences**.
-1. Expand **Pages**.
-1. Enter a value for **Default expiration for parallel deployments in seconds**.
-   Use `0` if parallel deployments should not expire by default.
 1. Select **Save changes**.
 
 ## Set maximum number of files per GitLab Pages website
@@ -963,17 +971,6 @@ The following procedure includes steps to back up and edit the
 `gitlab-secrets.json` file. This file contains secrets that control
 database encryption. Proceed with caution.
 
-1. Optionally, to enable [access control](#access-control), add the following to `/etc/gitlab/gitlab.rb` and [reconfigure the **GitLab server**](../restart_gitlab.md#reconfigure-a-linux-package-installation):
-
-   ```ruby
-   gitlab_pages['access_control'] = true
-   ```
-
-   WARNING:
-   If you plan to use GitLab Pages with access control, you must enable it on the first GitLab server before copying `gitlab-secrets.json`.
-   Enabling access control generates a new OAuth application, and information about it propagates to `gitlab-secrets.json`. If it's not done
-   in the correct order, you may face issues with access control.
-
 1. Create a backup of the secrets file on the **GitLab server**:
 
    ```shell
@@ -984,6 +981,12 @@ database encryption. Proceed with caution.
 
    ```ruby
    pages_external_url "http://<pages_server_URL>"
+   ```
+
+1. Optionally, to enable [access control](#access-control), add the following to `/etc/gitlab/gitlab.rb`:
+
+   ```ruby
+   gitlab_pages['access_control'] = true
    ```
 
 1. Set up object storage by either:
@@ -1208,11 +1211,9 @@ than GitLab to prevent XSS attacks.
 
 ### Rate limits
 
-> - [Changed](https://gitlab.com/groups/gitlab-org/-/epics/14653) in GitLab 17.3: You can exclude subnets from Pages rate limits.
-
 You can enforce rate limits to help minimize the risk of a Denial of Service (DoS) attack. GitLab Pages
 uses a [token bucket algorithm](https://en.wikipedia.org/wiki/Token_bucket) to enforce rate limiting. By default,
-requests or TLS connections that exceed the specified limits are reported and rejected.
+requests or TLS connections that exceed the specified limits are reported but not rejected.
 
 GitLab Pages supports the following types of rate limiting:
 
@@ -1221,25 +1222,19 @@ GitLab Pages supports the following types of rate limiting:
 
 HTTP request-based rate limits are enforced using the following:
 
-- `rate_limit_source_ip`: Sets the maximum threshold in number of requests per client IP per second. Set to 0 to disable this feature.
+- `rate_limit_source_ip`: Set the maximum threshold in number of requests per client IP per second. Set to 0 to disable this feature.
 - `rate_limit_source_ip_burst`: Sets the maximum threshold of number of requests allowed in an initial outburst of requests per client IP.
   For example, when you load a web page that loads a number of resources at the same time.
-- `rate_limit_domain`: Sets the maximum threshold in number of requests per hosted pages domain per second. Set to 0 to disable this feature.
+- `rate_limit_domain`: Set the maximum threshold in number of requests per hosted pages domain per second. Set to 0 to disable this feature.
 - `rate_limit_domain_burst`: Sets the maximum threshold of number of requests allowed in an initial outburst of requests per hosted pages domain.
 
 TLS connection-based rate limits are enforced using the following:
 
-- `rate_limit_tls_source_ip`: Sets the maximum threshold in number of TLS connections per client IP per second. Set to 0 to disable this feature.
+- `rate_limit_tls_source_ip`: Set the maximum threshold in number of TLS connections per client IP per second. Set to 0 to disable this feature.
 - `rate_limit_tls_source_ip_burst`: Sets the maximum threshold of number of TLS connections allowed in an initial outburst of TLS connections per client IP.
   For example, when you load a web page from different web browsers at the same time.
-- `rate_limit_tls_domain`: Sets the maximum threshold in number of TLS connections per hosted pages domain per second. Set to 0 to disable this feature.
+- `rate_limit_tls_domain`: Set the maximum threshold in number of TLS connections per hosted pages domain per second. Set to 0 to disable this feature.
 - `rate_limit_tls_domain_burst`: Sets the maximum threshold of number of TLS connections allowed in an initial outburst of TLS connections per hosted pages domain.
-
-To allow certain IP ranges (subnets) to bypass all rate limits:
-
-- `rate_limit_subnets_allow_list`: Sets the allow list with the IP ranges (subnets) that should bypass all rate limits.
-  For example, `['1.2.3.4/24', '2001:db8::1/32']`.
-  [Charts example](https://docs.gitlab.com/charts/charts/gitlab/gitlab-pages/index.html#configure-rate-limits-subnets-allow-list) is available.
 
 An IPv6 address receives a large prefix in the 128-bit address space. The prefix is typically at least size /64. Because of the large number of possible addresses, if the client's IP address is IPv6, the limit is applied to the IPv6 prefix with a length of 64, rather than the entire IPv6 address.
 

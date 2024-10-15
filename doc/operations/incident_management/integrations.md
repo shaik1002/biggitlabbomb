@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: Platform Insights
+group: Respond
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
@@ -446,5 +446,5 @@ To enable Opsgenie integration:
    such as `https://app.opsgenie.com/alert/list`.
 1. Select **Save changes**.
 
-After you enable the integration, go to the **Alerts** page at
+After you enable the integration, go to the Alerts list page at
 **Monitor > Alerts**, and then select **View alerts in Opsgenie**.

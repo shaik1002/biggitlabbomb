@@ -21,8 +21,6 @@ RSpec.describe Gitlab::Pagination::Keyset::InOperatorOptimization::Strategies::O
     Gitlab::Pagination::Keyset::InOperatorOptimization::OrderByColumns.new(keyset_order.column_definitions, model.arel_table)
   end
 
-  let(:id_type) { model.columns_hash['id'].sql_type }
-
   subject(:strategy) { described_class.new(model, order_by_columns) }
 
   describe '#initializer_columns' do
@@ -30,7 +28,7 @@ RSpec.describe Gitlab::Pagination::Keyset::InOperatorOptimization::Strategies::O
       expect(strategy.initializer_columns).to eq(
         [
           'NULL::timestamp without time zone AS created_at',
-          "NULL::#{id_type} AS id"
+          'NULL::integer AS id'
         ])
     end
   end
@@ -61,7 +59,7 @@ RSpec.describe Gitlab::Pagination::Keyset::InOperatorOptimization::Strategies::O
             Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
               attribute_name: 'id_times_ten',
               order_expression: Arel.sql('id * 10').asc,
-              sql_type: id_type
+              sql_type: 'integer'
             )
           ])
       end
@@ -69,7 +67,7 @@ RSpec.describe Gitlab::Pagination::Keyset::InOperatorOptimization::Strategies::O
       let(:keyset_scope) { Project.order(order) }
 
       it 'returns the initializer columns' do
-        expect(strategy.initializer_columns).to eq(["NULL::#{id_type} AS id_times_ten"])
+        expect(strategy.initializer_columns).to eq(['NULL::integer AS id_times_ten'])
       end
     end
   end

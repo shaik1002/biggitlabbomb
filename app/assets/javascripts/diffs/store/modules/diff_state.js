@@ -37,5 +37,5 @@ export default () => ({
   mrReviews: {},
   latestDiff: true,
   disableVirtualScroller: false,
-  linkedFileHash: null,
+  pinnedFileHash: null,
 });

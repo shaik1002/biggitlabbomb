@@ -33,13 +33,19 @@ module Integrations
     end
 
     def self.help
-      build_help_page_url(
-        'user/project/integrations/pumble.md',
-        s_("PumbleIntegration|Send notifications about project events to Pumble.")
+      docs_link = ActionController::Base.helpers.link_to(
+        _('Learn more.'),
+        Rails.application.routes.url_helpers.help_page_url('user/project/integrations/pumble'),
+        target: '_blank',
+        rel: 'noopener noreferrer'
       )
+      # rubocop:disable Layout/LineLength
+      s_("PumbleIntegration|Send notifications about project events to Pumble. %{docs_link}") % { docs_link: docs_link.html_safe }
+      # rubocop:enable Layout/LineLength
     end
 
-    def default_channel_placeholder; end
+    def default_channel_placeholder
+    end
 
     def self.supported_events
       %w[push issue confidential_issue merge_request note confidential_note tag_push

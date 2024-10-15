@@ -1,6 +1,5 @@
 <script>
 import { GlButton, GlDrawer, GlFormTextarea, GlModal, GlFormInput, GlSprintf } from '@gitlab/ui';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { InternalEvents } from '~/tracking';
 import { visitUrl } from '~/lib/utils/url_utility';
 import { DRAWER_Z_INDEX } from '~/lib/utils/constants';
@@ -30,14 +29,8 @@ const i18n = {
   modalConfirm: s__('ProjectMaintenance|To confirm, enter the following:'),
   redactTextError: s__('ProjectMaintenance|Something went wrong while redacting text.'),
   successAlertTitle: s__('ProjectMaintenance|Text redacted'),
-  scheduledRedactionSuccessAlertTitle: s__(
-    'ProjectMaintenance|Text redaction removal is scheduled.',
-  ),
   successAlertContent: s__(
     'ProjectMaintenance|To remove old versions from the repository, run housekeeping.',
-  ),
-  scheduledSuccessAlertContent: s__(
-    'ProjectMaintenance|You will receive an email notification when the process is complete. To remove old versions from the repository, run housekeeping.',
   ),
   successAlertButtonText: s__('ProjectMaintenance|Go to housekeeping'),
 };
@@ -47,7 +40,7 @@ export default {
   DRAWER_Z_INDEX,
   modalCancel: { text: i18n.modalCancelText },
   components: { GlButton, GlDrawer, GlFormTextarea, GlModal, GlFormInput, GlSprintf },
-  mixins: [trackingMixin, glFeatureFlagsMixin()],
+  mixins: [trackingMixin],
   inject: { projectPath: { default: '' }, housekeepingPath: { default: '' } },
   data() {
     return {
@@ -76,16 +69,6 @@ export default {
     },
     isConfirmEnabled() {
       return this.confirmInput === this.projectPath;
-    },
-    alertTitle() {
-      return this.glFeatures.asyncRewriteHistory
-        ? this.$options.i18n.scheduledRedactionSuccessAlertTitle
-        : this.$options.i18n.successAlertTitle;
-    },
-    alertBody() {
-      return this.glFeatures.asyncRewriteHistory
-        ? this.$options.i18n.scheduledSuccessAlertContent
-        : this.$options.i18n.successAlertContent;
     },
   },
   methods: {
@@ -131,8 +114,8 @@ export default {
     },
     generateSuccessAlert() {
       createAlert({
-        title: this.alertTitle,
-        message: this.alertBody,
+        title: i18n.successAlertTitle,
+        message: i18n.successAlertContent,
         variant: VARIANT_WARNING,
         primaryButton: {
           text: i18n.successAlertButtonText,
@@ -183,7 +166,7 @@ export default {
         <gl-form-textarea
           id="text"
           v-model.trim="text"
-          class="gl-mb-3 !gl-font-monospace"
+          class="!gl-font-monospace gl-mb-3"
           :disabled="isLoading"
           autofocus
         />

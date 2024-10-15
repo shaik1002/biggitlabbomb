@@ -1,7 +1,6 @@
 ---
 table_name: abuse_report_notes
 classes:
-- AntiAbuse::Reports::DiscussionNote
 - AntiAbuse::Reports::Note
 feature_categories:
 - insider_threat

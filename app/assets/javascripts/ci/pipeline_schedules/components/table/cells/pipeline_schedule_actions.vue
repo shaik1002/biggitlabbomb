@@ -55,7 +55,7 @@ export default {
 </script>
 
 <template>
-  <div class="gl-flex gl-justify-end">
+  <div class="gl-display-flex gl-justify-content-end">
     <gl-button-group>
       <gl-button
         v-if="canPlay"

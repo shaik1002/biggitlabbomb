@@ -142,7 +142,6 @@ export const inboundJobTokenScopeEnabledResponse = {
   data: {
     project: {
       id: 1,
-      name: 'Test project',
       ciCdSettings: {
         inboundJobTokenScopeEnabled: true,
         __typename: 'ProjectCiCdSetting',
@@ -156,7 +155,6 @@ export const inboundJobTokenScopeDisabledResponse = {
   data: {
     project: {
       id: 1,
-      name: 'Test project',
       ciCdSettings: {
         inboundJobTokenScopeEnabled: false,
         __typename: 'ProjectCiCdSetting',

@@ -39,7 +39,7 @@ One of these issues might be occurring:
 
 ## Deadline Exceeded
 
-When you upgrade GitLab, a change in how usernames are represented means that you
+When upgrading GitLab, a change in how usernames are represented means that you
 must update your mirroring username and password to ensure that `%40` characters are replaced with `@`.
 
 ## Connection blocked: server only allows public key authentication
@@ -118,7 +118,7 @@ Pipelines might not run for multiple reasons:
   being added to the pipeline.
 - Pipelines are triggered using [the account that set up the pull mirror](https://gitlab.com/gitlab-org/gitlab/-/issues/13697).
   If the account is no longer valid, pipelines do not run.
-- [Branch protection](../../repository/branches/protected.md#run-pipelines-on-protected-branches)
+- [Branch protection](../../protected_branches.md#run-pipelines-on-protected-branches)
   might prevent the account that set up mirroring from running pipelines.
 
 ## `The repository is being updated`, but neither fails nor succeeds visibly
@@ -261,8 +261,7 @@ When mirroring fails due to Silent Mode the following are the debug steps:
 - [Triggering the mirror using the API](pull.md#trigger-pipelines-for-mirror-updates) shows: `The project is not mirrored`.
 
 - If pull or push mirror was already set up but there are no further updates on the mirrored repository,
-  confirm the [project's pull and push mirror details ans status](../../../../api/project_pull_mirroring.md#get-a-projects-pull-mirror-details)
-  are not recent as shown below. This indicates mirroring was paused and disabling GitLab Silent Mode restarts it automatically.
+  confirm the [project's pull and push mirror details ans status](../../../../api/projects.md#get-a-projects-pull-mirror-details) are not recent as shown below. This indicates mirroring was paused and disabling GitLab Silent Mode restarts it automatically.
 
 For example, if Silent Mode is what is impeding your imports, the output is similar to the following:
 
@@ -275,36 +274,3 @@ For example, if Silent Mode is what is impeding your imports, the output is simi
 "last_update_started_at": "2023-12-12T00:01:02.222Z",
 "last_successful_update_at": null
 ```
-
-## Initial mirroring fails: `Unable to pull mirror repo: Unable to get pack index`
-
-You might get an error that states something similar to the following:
-
-```plaintext
-13:fetch remote: "error: Unable to open local file /var/opt/gitlab/git-data/repositories/+gitaly/tmp/quarantine-[OMITTED].idx.temp.temp\nerror: Unable to get pack index https://git.example.org/ebtables/objects/pack/pack-[OMITTED].idx\nerror: Unable to find fcde2b2edba56bf408601fb721fe9b5c338d10ee under https://git.example.org/ebtables
-Cannot obtain needed object fcde2b2edba56bf408601fb721fe9b5c338d10ee
-while processing commit 2c26b46b68ffc68ff99b453c1d30413413422d70.
-error: fetch failed.\n": exit status 128.
-```
-
-This issue occurs because Gitaly does not support mirroring or importing repositories over the "dumb" HTTP protocol.
-
-To determine if a server is "smart" or "dumb", use cURL to start a reference discovery for the
-`git-upload-pack` service and emulate a Git "smart" client:
-
-```shell
-$GIT_URL="https://git.example.org/project"
-curl --silent --dump-header - "$GIT_URL/info/refs?service=git-upload-pack"\
-  -o /dev/null | grep -Ei "$content-type:"
-```
-
-- A ["smart" server](https://www.git-scm.com/docs/http-protocol#_smart_server_response)
-  reports `application/x-git-upload-pack-advertisement` in the `Content-Type` response header.
-- A "dumb" server reports `text/plain` in the `Content-Type` response header.
-
-For more information, see the [Git documentation on discovering references](https://www.git-scm.com/docs/http-protocol#_discovering_references).
-
-To resolve this, you can do either of the following:
-
-- Migrate the source repository to a "smart" server.
-- Mirror the repository using the [SSH protocol](index.md#ssh-authentication) (requires authentication).

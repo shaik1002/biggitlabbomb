@@ -8,7 +8,7 @@ module Preloaders
     end
 
     def execute
-      return if runner_managers.is_a?(ActiveRecord::Relation) && runner_managers.null_relation?
+      return if runner_managers.is_a?(ActiveRecord::NullRelation)
 
       ActiveRecord::Associations::Preloader.new(
         records: runner_managers,

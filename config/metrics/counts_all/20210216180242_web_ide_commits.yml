@@ -2,7 +2,7 @@
 data_category: operational
 key_path: counts.web_ide_commits
 description: Count of commits made from the Web IDE
-product_group: remote_development
+product_group: ide
 value_type: number
 status: active
 time_frame: all
@@ -18,4 +18,3 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

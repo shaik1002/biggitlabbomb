@@ -9,6 +9,7 @@ class ProjectsController < Projects::ApplicationController
   include ImportUrlParams
   include FiltersEvents
   include SourcegraphDecorator
+  include PlanningHierarchy
 
   REFS_LIMIT = 100
 
@@ -65,6 +66,7 @@ class ProjectsController < Projects::ApplicationController
   feature_category :team_planning, [:preview_markdown, :new_issuable_address]
   feature_category :importers, [:export, :remove_export, :generate_new_export, :download_export]
   feature_category :code_review_workflow, [:unfoldered_environment_names]
+  feature_category :portfolio_management, [:planning_hierarchy]
 
   urgency :low, [:export, :remove_export, :generate_new_export, :download_export]
   urgency :low, [:preview_markdown, :new_issuable_address]
@@ -569,11 +571,7 @@ class ProjectsController < Projects::ApplicationController
     # behaviour when the user isn't authorized to see the project
     return if project.nil? || performed?
 
-    uri = URI(request.original_url)
-    # Strip the '.git' part from the path
-    uri.path = uri.path.sub(%r{\.git/?\Z}, '')
-
-    redirect_to(uri.to_s)
+    redirect_to(request.original_url.sub(%r{\.git/?\Z}, ''))
   end
 
   def disable_query_limiting

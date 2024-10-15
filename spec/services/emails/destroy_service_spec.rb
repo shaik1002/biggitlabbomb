@@ -3,9 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Emails::DestroyService, feature_category: :user_management do
-  let_it_be(:user) { create(:user) }
-  let!(:email) { create(:email, :confirmed, user: user) }
-  let!(:notification_setting) { create(:notification_setting, user: user, notification_email: email.email) }
+  let!(:user) { create(:user) }
+  let!(:email) { create(:email, user: user) }
 
   subject(:service) { described_class.new(user, user: user) }
 
@@ -15,12 +14,6 @@ RSpec.describe Emails::DestroyService, feature_category: :user_management do
 
       expect(user.emails).not_to include(email)
       expect(response).to be true
-    end
-
-    it 'resets email in notification settings' do
-      service.execute(email)
-
-      expect(notification_setting.reload.notification_email).to eq nil
     end
 
     context 'when it corresponds to the user primary email' do

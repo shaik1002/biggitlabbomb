@@ -4,8 +4,8 @@ textarea {
 
 input {
   border-radius: $border-radius-base;
-  @apply gl-text-default;
-  background-color: var(--gl-control-background-color-default);
+  color: $gl-text-color;
+  background-color: $input-bg;
 }
 
 input[type='text'].danger {
@@ -13,6 +13,28 @@ input[type='text'].danger {
   border-color: $red-400;
   text-shadow: 0 1px 1px $white;
 }
+
+/**
+ * When form input type is number, Firefox & Safari show the up/down arrows
+ * on the right side of the input persistently, while Chrome shows it only
+ * on hover or focus, this fix allows us to hide the arrows in all browsers.
+ * You can conditionally add/remove `hide-spinners` class to have consistent
+ * behaviour across browsers.
+ */
+
+/* stylelint-disable property-no-vendor-prefix */
+input[type='number'].hide-spinners {
+  -moz-appearance: textfield;
+  appearance: textfield;
+
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+  }
+}
+/* stylelint-enable property-no-vendor-prefix */
 
 /**
  * When form input type is search, browsers add a clear input button inside
@@ -31,6 +53,12 @@ input[type='search'] {
   }
 }
 /* stylelint-enable property-no-vendor-prefix */
+
+.datetime-controls {
+  select {
+    width: 100px;
+  }
+}
 
 .form-actions {
   margin-top: 0;
@@ -55,6 +83,15 @@ label {
   &.label-bold {
     font-weight: $gl-font-weight-bold;
   }
+}
+
+.label-wrapper {
+  display: block;
+  margin: 0;
+}
+
+.inline-input-group {
+  width: 250px;
 }
 
 .custom-form-control {
@@ -86,6 +123,7 @@ label {
   margin-right: 0;
 
   .form-control {
+    background: $white;
     font-family: $monospace-font;
   }
 
@@ -100,8 +138,6 @@ label {
 
 .form-control {
   @include box-shadow(none);
-  background: var(--gl-control-background-color-default);
-  @apply gl-text-default;
   border-radius: $gl-border-radius-base;
   padding: $gl-vert-padding $gl-input-padding;
 
@@ -117,9 +153,7 @@ label {
 .form-control,
 [contenteditable=true] {
   &:focus {
-    background: var(--gl-control-background-color-default);
-    border-color: var(--gl-control-border-color-default);
-    @apply gl-text-default;
+    border-color: $gray-400;
     @include gl-focus;
   }
 }
@@ -139,8 +173,12 @@ label {
   }
 }
 
+.form-control-inline {
+  display: inline;
+}
+
 .form-control::placeholder {
-  color: var(--gl-control-placeholder-color);
+  color: $gl-text-color-tertiary;
 }
 
 .input-group {

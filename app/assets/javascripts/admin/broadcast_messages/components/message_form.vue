@@ -8,6 +8,7 @@ import {
   GlFormCheckboxGroup,
   GlFormInput,
   GlFormSelect,
+  GlFormText,
   GlFormTextarea,
 } from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
@@ -42,6 +43,7 @@ export default {
     GlFormCheckboxGroup,
     GlFormInput,
     GlFormSelect,
+    GlFormText,
     GlFormTextarea,
   },
   directives: {
@@ -333,11 +335,13 @@ export default {
     <gl-form-group
       v-show="showTargetPath"
       :label="$options.i18n.targetPath"
-      :description="targetPathDescription"
       label-for="target-path-input"
       data-testid="target-path-input"
     >
       <gl-form-input id="target-path-input" v-model="targetPath" />
+      <gl-form-text>
+        {{ targetPathDescription }}
+      </gl-form-text>
     </gl-form-group>
 
     <gl-form-group :label="$options.i18n.startsAt">

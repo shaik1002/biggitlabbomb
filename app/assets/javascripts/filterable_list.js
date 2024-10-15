@@ -8,7 +8,6 @@ import axios from './lib/utils/axios_utils';
  */
 
 export default class FilterableList {
-  // eslint-disable-next-line max-params
   constructor(form, filter, holder, filterInputField = 'filter_groups') {
     this.filterForm = form;
     this.listFilterElement = filter;

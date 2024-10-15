@@ -236,10 +236,10 @@ Using `update`, `upsert`, `delete`, `update_all`, `upsert_all`, `delete_all` or 
 ActiveRecord methods requires extra care because they modify data and can perform poorly, or they
 can destroy data if improperly scoped. These methods are also
 [incompatible with Common Table Expression (CTE) statements](sql.md#when-to-use-common-table-expressions).
-Danger will comment on a merge request diff when these methods are used.
+Danger will comment on a Merge Request Diff when these methods are used.
 
 Follow documentation for [preparation when adding or modifying queries](#preparation-when-adding-or-modifying-queries)
-to add the raw SQL query and query plan to the merge request description, and request a database review.
+to add the raw SQL query and query plan to the Merge Request description, and request a database review.
 
 ### How to review for database
 
@@ -297,9 +297,3 @@ to add the raw SQL query and query plan to the merge request description, and re
     to queries (changing the query, schema or adding indexes and similar)
   - General guideline is for queries to come in below [100ms execution time](database/query_performance.md#timing-guidelines-for-queries)
   - Avoid N+1 problems and minimize the [query count](merge_request_concepts/performance.md#query-counts).
-
-### Useful tips
-
-- If you often find yourself applying and reverting migrations from a specific branch, you might want to try out
-[`scripts/database/migrate.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/scripts/database/migrate.rb)
-to make this process more efficient.

@@ -60,7 +60,21 @@ class GroupPolicy < Namespaces::GroupProjectNamespaceSharedPolicy
   end
 
   condition(:create_subgroup_disabled, scope: :subject) do
-    Gitlab::VisibilityLevel.allowed_levels_for_user(@user, @subject).empty?
+    next true if @user.nil?
+
+    visibility_levels = if @user.can_admin_all_resources?
+                          # admin can create groups even with restricted visibility levels
+                          Gitlab::VisibilityLevel.values
+                        else
+                          Gitlab::VisibilityLevel.allowed_levels
+                        end
+
+    # visibility_level_allowed? is not supporting root-groups, so we have to create a dummy sub-group.
+    subgroup = Group.new(parent_id: @subject.id)
+
+    # if a subgroup with none of the remaining visibility levels can be allowed by the group,
+    # then it means that the `Create subgroup` button must be disabled.
+    visibility_levels.none? { |level| subgroup.visibility_level_allowed?(level) }
   end
 
   condition(:developer_maintainer_access, scope: :subject) do
@@ -80,7 +94,7 @@ class GroupPolicy < Namespaces::GroupProjectNamespaceSharedPolicy
   end
 
   condition(:dependency_proxy_access_allowed) do
-    access_level(for_any_session: true) >= GroupMember::GUEST
+    access_level(for_any_session: true) >= GroupMember::GUEST || valid_dependency_proxy_deploy_token
   end
 
   desc "Deploy token with read_package_registry scope"
@@ -162,7 +176,6 @@ class GroupPolicy < Namespaces::GroupProjectNamespaceSharedPolicy
     enable :read_issue
     enable :read_work_item
     enable :read_namespace
-    enable :read_upload
   end
 
   rule { ~achievements_enabled }.policy do
@@ -198,6 +211,7 @@ class GroupPolicy < Namespaces::GroupProjectNamespaceSharedPolicy
   rule { has_access }.enable :read_namespace_via_membership
 
   rule { developer }.policy do
+    enable :admin_metrics_dashboard_annotation
     enable :create_custom_emoji
     enable :create_package
     enable :developer_access
@@ -219,6 +233,7 @@ class GroupPolicy < Namespaces::GroupProjectNamespaceSharedPolicy
     enable :admin_issue_board_list
     enable :admin_issue
     enable :update_issue
+    enable :read_metrics_dashboard_annotation
     enable :read_prometheus
     enable :read_package
     enable :read_crm_organization
@@ -240,6 +255,7 @@ class GroupPolicy < Namespaces::GroupProjectNamespaceSharedPolicy
     enable :read_group_runners
     enable :create_jira_connect_subscription
     enable :maintainer_access
+    enable :read_upload
     enable :admin_upload
     enable :destroy_upload
     enable :admin_push_rules
@@ -264,7 +280,6 @@ class GroupPolicy < Namespaces::GroupProjectNamespaceSharedPolicy
     enable :set_emails_disabled
     enable :change_prevent_sharing_groups_outside_hierarchy
     enable :set_show_diff_preview_in_email
-    enable :change_seat_control
     enable :change_new_user_signups_cap
     enable :update_default_branch_protection
     enable :create_deploy_token
@@ -400,8 +415,6 @@ class GroupPolicy < Namespaces::GroupProjectNamespaceSharedPolicy
     enable :destroy_resource_access_tokens
   end
 
-  rule { can?(:admin_group) | can?(:admin_runner) }.enable :admin_group_or_admin_runner
-
   # Should be matched with ProjectPolicy#read_internal_note
   rule { admin | reporter }.enable :read_internal_note
 
@@ -438,6 +451,12 @@ class GroupPolicy < Namespaces::GroupProjectNamespaceSharedPolicy
 
   def resource_access_token_creation_allowed?
     resource_access_token_create_feature_available? && group.root_ancestor.namespace_settings.resource_access_token_creation_allowed?
+  end
+
+  # TODO: Remove this when we rollout the feature flag packages_dependency_proxy_pass_token_to_policy
+  # https://gitlab.com/gitlab-org/gitlab/-/issues/441588
+  def valid_dependency_proxy_deploy_token
+    @user.is_a?(DeployToken) && @user&.valid_for_dependency_proxy? && @user&.has_access_to_group?(@subject)
   end
 
   # rubocop:disable Cop/UserAdmin -- specifically check the admin attribute

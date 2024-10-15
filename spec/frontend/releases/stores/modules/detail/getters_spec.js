@@ -1,3 +1,4 @@
+import { s__ } from '~/locale';
 import * as getters from '~/releases/stores/modules/edit_new/getters';
 import { i18n } from '~/releases/constants';
 import { validateTag, ValidationResult } from '~/lib/utils/ref_validator';
@@ -444,7 +445,7 @@ describe('Release edit/new getters', () => {
           state = { release: { description }, includeTagNotes, tagNotes };
         }
 
-        const text = `### ${'Tag message'}\n\n${tagNotes}\n`;
+        const text = `### ${s__('Releases|Tag message')}\n\n${tagNotes}\n`;
         if (included) {
           expect(getters.formattedReleaseNotes(state, { isNewTag })).toContain(text);
         } else {

@@ -98,6 +98,9 @@ module Repositories
       return unless project
       return if Gitlab::Database.read_only?
       return unless repo_type.project?
+
+      Onboarding::ProgressService.async(project.namespace_id).execute(action: :git_pull)
+
       return if Feature.enabled?(:disable_git_http_fetch_writes)
 
       Projects::FetchStatisticsIncrementService.new(project).execute
@@ -129,15 +132,6 @@ module Repositories
 
     def log_user_activity
       Users::ActivityService.new(author: user, project: project, namespace: project&.namespace).execute
-
-      return unless project && user
-
-      Gitlab::EventStore.publish(
-        Users::ActivityEvent.new(data: {
-          user_id: user.id,
-          namespace_id: project.root_ancestor.id
-        })
-      )
     end
 
     def append_info_to_payload(payload)

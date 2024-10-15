@@ -1,6 +1,6 @@
 <script>
 import { GlEmptyState } from '@gitlab/ui';
-import emptySvgUrl from '@gitlab/svgs/dist/illustrations/status/status-new-md.svg';
+import emptySvgUrl from '@gitlab/svgs/dist/illustrations/empty-state/empty-dag-md.svg?url';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import { s__ } from '~/locale';
 import { MODEL_ENTITIES } from '../constants';
@@ -16,15 +16,6 @@ const emptyStateTranslations = {
     description: s__('MlModelRegistry|Use versions to track performance, parameters, and metadata'),
     createNew: s__('MlModelRegistry|Create a model version'),
   },
-};
-
-const helpLinks = {
-  [MODEL_ENTITIES.model]: helpPagePath('user/project/ml/model_registry/index', {
-    anchor: 'create-machine-learning-models-by-using-the-ui',
-  }),
-  [MODEL_ENTITIES.modelVersion]: helpPagePath('user/project/ml/model_registry/index', {
-    anchor: 'create-a-model-version-by-using-the-ui',
-  }),
 };
 
 export default {
@@ -44,7 +35,9 @@ export default {
     emptyStateValues() {
       return {
         ...emptyStateTranslations[this.entityType],
-        helpPath: helpLinks[this.entityType],
+        helpPath: helpPagePath('user/project/ml/model_registry/index', {
+          anchor: 'creating-machine-learning-models-and-model-versions',
+        }),
         emptySvgPath: emptySvgUrl,
       };
     },
@@ -58,6 +51,7 @@ export default {
     :primary-button-text="emptyStateValues.createNew"
     :primary-button-link="emptyStateValues.helpPath"
     :svg-path="emptyStateValues.emptySvgPath"
+    :svg-height="null"
     :description="emptyStateValues.description"
     class="gl-py-8"
   />

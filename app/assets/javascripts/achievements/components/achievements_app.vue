@@ -1,17 +1,14 @@
 <script>
-import FILTERED_SVG_URL from '@gitlab/svgs/dist/illustrations/empty-state/empty-search-md.svg?url';
-
 import {
   GlAvatarLabeled,
   GlButton,
+  GlCard,
   GlEmptyState,
   GlKeysetPagination,
   GlLoadingIcon,
 } from '@gitlab/ui';
 import { uniqBy } from 'lodash';
 import { s__ } from '~/locale';
-import PageHeading from '~/vue_shared/components/page_heading.vue';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
 import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
 import { NEW_ROUTE_NAME } from '../constants';
 import getGroupAchievements from './graphql/get_group_achievements.query.graphql';
@@ -20,10 +17,9 @@ const ENTRIES_PER_PAGE = 20;
 
 export default {
   components: {
-    PageHeading,
-    CrudComponent,
     GlAvatarLabeled,
     GlButton,
+    GlCard,
     GlEmptyState,
     GlKeysetPagination,
     GlLoadingIcon,
@@ -111,70 +107,51 @@ export default {
     },
   },
   i18n: {
-    title: s__('Achievements|Achievements'),
     emptyStateTitle: s__('Achievements|There are currently no achievements.'),
     newAchievement: s__('Achievements|New achievement'),
     notYetAwarded: s__('Achievements|Not yet awarded.'),
   },
   NEW_ROUTE_NAME,
-  FILTERED_SVG_URL,
-  svgHeight: 145,
 };
 </script>
 
 <template>
-  <div class="gl-flex gl-flex-col">
-    <gl-empty-state
-      v-if="!isLoading && !achievements.length"
-      :title="$options.i18n.emptyStateTitle"
-      :svg-path="$options.FILTERED_SVG_URL"
-      :svg-height="$options.svgHeight"
-    >
-      <template #description>
-        <router-link v-if="canAdminAchievement" :to="{ name: $options.NEW_ROUTE_NAME }">
-          <gl-button variant="confirm" data-testid="new-achievement-button" class="gl-my-3">
-            {{ $options.i18n.newAchievement }}
-          </gl-button>
-        </router-link>
-      </template>
-    </gl-empty-state>
-    <page-heading v-else :heading="$options.i18n.title">
-      <template #actions>
-        <router-link v-if="canAdminAchievement" :to="{ name: $options.NEW_ROUTE_NAME }">
-          <gl-button variant="confirm" data-testid="new-achievement-button" class="gl-my-3">
-            {{ $options.i18n.newAchievement }}
-          </gl-button>
-        </router-link>
-      </template>
-    </page-heading>
+  <div class="gl-display-flex gl-flex-direction-column">
+    <router-link v-if="canAdminAchievement" :to="{ name: $options.NEW_ROUTE_NAME }">
+      <gl-button variant="confirm" data-testid="new-achievement-button" class="gl-my-3">
+        {{ $options.i18n.newAchievement }}
+      </gl-button>
+    </router-link>
     <gl-loading-icon v-if="isLoading" size="lg" class="gl-mt-5" />
-    <template v-else-if="achievements.length">
-      <crud-component
-        v-for="(achievement, index) in achievements"
+    <gl-empty-state v-else-if="!achievements.length" :title="$options.i18n.emptyStateTitle" />
+    <template v-else>
+      <gl-card
+        v-for="achievement in achievements"
         :key="achievement.id"
-        :class="{ 'gl-mt-5': index !== 0 }"
+        body-class="gl-p-3"
+        footer-class="gl-p-3 gl-new-card-empty"
+        class="gl-mb-5"
       >
-        <template #description>
-          <gl-avatar-labeled
-            shape="rect"
-            :size="48"
-            :src="achievement.avatarUrl || gitlabLogoPath"
-            :label="achievement.name"
-            :sub-label="achievement.description"
-          />
-        </template>
-
-        <user-avatar-list
-          v-if="achievement.userAchievements.nodes.length"
-          :items="uniqueRecipients(achievement.userAchievements.nodes)"
-          :img-size="24"
+        <gl-avatar-labeled
+          shape="rect"
+          :size="64"
+          :src="achievement.avatarUrl || gitlabLogoPath"
+          :label="achievement.name"
+          :sub-label="achievement.description"
         />
-        <span v-else class="gl-text-subtle">{{ $options.i18n.notYetAwarded }}</span>
-      </crud-component>
+        <template #footer>
+          <user-avatar-list
+            v-if="achievement.userAchievements.nodes.length"
+            :items="uniqueRecipients(achievement.userAchievements.nodes)"
+            :img-size="24"
+          />
+          <span v-else>{{ $options.i18n.notYetAwarded }}</span>
+        </template>
+      </gl-card>
       <gl-keyset-pagination
         v-if="showPagination"
         v-bind="pageInfo"
-        class="gl-mt-3 gl-self-center"
+        class="gl-mt-3 gl-align-self-center"
         @prev="prevPage"
         @next="nextPage"
       />

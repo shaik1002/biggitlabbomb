@@ -6,9 +6,7 @@ module SidekiqLogArguments
 end
 
 def load_cron_jobs!
-  # Set source to schedule to clear any missing jobs
-  # See https://github.com/sidekiq-cron/sidekiq-cron/pull/431
-  Sidekiq::Cron::Job.load_from_hash! Gitlab::SidekiqConfig.cron_jobs, source: 'schedule'
+  Sidekiq::Cron::Job.load_from_hash! Gitlab::SidekiqConfig.cron_jobs
 
   Gitlab.ee do
     Gitlab::Mirror.configure_cron_job!
@@ -35,12 +33,10 @@ enable_json_logs = Gitlab.config.sidekiq.log_format != 'text'
 
 # Sidekiq's `strict_args!` raises an exception by default in 7.0
 # https://github.com/sidekiq/sidekiq/blob/31bceff64e10d501323bc06ac0552652a47c082e/docs/7.0-Upgrade.md?plain=1#L59
-# We set :warn in development/test to pick out workers that try to serialise complex args
-strict_args_mode = Gitlab.dev_or_test_env? ? :warn : false
-Sidekiq.strict_args!(strict_args_mode)
+Sidekiq.strict_args!(false)
 
 # Perform version check before configuring server with the custome scheduled job enqueue class
-unless Gem::Version.new(Sidekiq::VERSION) == Gem::Version.new('7.2.4')
+unless Gem::Version.new(Sidekiq::VERSION) == Gem::Version.new('7.1.6')
   raise 'New version of Sidekiq detected, please either update the version for this check ' \
         'and update Gitlab::SidekiqSharding::ScheduledEnq is compatible.'
 end

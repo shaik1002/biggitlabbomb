@@ -14,13 +14,13 @@ export default {
 </script>
 
 <template>
-  <div class="gl-rounded-base gl-bg-gray-50 gl-shadow-inner-1-gray-100">
+  <div class="gl-bg-gray-50 gl-shadow-inner-1-gray-100 gl-rounded-base">
     <div
       v-for="index in $options.loader.repeat"
       :key="index"
-      class="gl-flex gl-items-center gl-border-b-1 gl-border-gray-100 gl-p-4"
+      class="gl-display-flex gl-align-items-center gl-p-4 gl-border-gray-100 gl-border-b-1"
     >
-      <div class="md:gl-max-w-3/10">
+      <div class="gl-md-max-w-30p">
         <gl-skeleton-loader :width="$options.loader.width" :height="$options.loader.height">
           <rect :width="$options.loader.width" :height="$options.loader.height" rx="4" />
         </gl-skeleton-loader>

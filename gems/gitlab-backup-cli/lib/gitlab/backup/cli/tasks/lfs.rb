@@ -13,7 +13,7 @@ module Gitlab
 
           private
 
-          def local
+          def target
             ::Backup::Targets::Files.new(nil, storage_path, options: options)
           end
 

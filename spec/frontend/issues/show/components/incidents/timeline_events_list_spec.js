@@ -5,7 +5,6 @@ import { confirmAction } from '~/lib/utils/confirm_via_gl_modal/confirm_via_gl_m
 import IncidentTimelineEventList from '~/issues/show/components/incidents/timeline_events_list.vue';
 import IncidentTimelineEventItem from '~/issues/show/components/incidents/timeline_events_item.vue';
 import EditTimelineEvent from '~/issues/show/components/incidents/edit_timeline_event.vue';
-import { describeSkipVue3, SkipReason } from 'helpers/vue3_conditional';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import deleteTimelineEventMutation from '~/issues/show/components/incidents/graphql/queries/delete_timeline_event.mutation.graphql';
@@ -34,13 +33,7 @@ const mockConfirmAction = ({ confirmed }) => {
   confirmAction.mockResolvedValueOnce(confirmed);
 };
 
-const skipReason = new SkipReason({
-  name: 'IncidentTimelineEventList',
-  reason: 'Caught error after test environment was torn down',
-  issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/478771',
-});
-
-describeSkipVue3(skipReason, () => {
+describe('IncidentTimelineEventList', () => {
   useFakeDate(fakeDate);
   let wrapper;
   const deleteResponseSpy = jest.fn().mockResolvedValue(timelineEventsDeleteEventResponse);

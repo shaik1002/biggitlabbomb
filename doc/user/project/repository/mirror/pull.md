@@ -114,11 +114,11 @@ assigned when you set up pull mirroring.
 
 Pull mirroring uses polling to detect new branches and commits added upstream,
 often minutes afterwards. You can notify GitLab using an
-[API call](../../../../api/project_pull_mirroring.md#start-the-pull-mirroring-process-for-a-project),
+[API call](../../../../api/projects.md#start-the-pull-mirroring-process-for-a-project),
 but the [minimum interval for pull mirroring limits](index.md#force-an-update) is still enforced.
 
 For more information, read
-[Start the pull mirroring process for a project](../../../../api/project_pull_mirroring.md#start-the-pull-mirroring-process-for-a-project).
+[Start the pull mirroring process for a project](../../../../api/projects.md#start-the-pull-mirroring-process-for-a-project).
 
 ## Fix hard failures when mirroring
 
@@ -132,7 +132,7 @@ and mirroring attempts stop. This failure is visible in either the:
 
 To resume project mirroring, [force an update](index.md#force-an-update).
 
-If multiple projects are affected by this problem, such as after a long network or
+If many projects are affected by this problem, such as after a long network or
 server outage, you can use the [Rails console](../../../../administration/operations/rails_console.md)
 to identify and update all affected projects with this command:
 
@@ -151,4 +151,4 @@ end
 
 - [Troubleshooting](troubleshooting.md) for repository mirroring.
 - [Pull mirroring intervals](../../../../administration/instance_limits.md#pull-mirroring-interval)
-- [Project pull mirroring API](../../../../api/project_pull_mirroring.md#configure-pull-mirroring-for-a-project)
+- [Pull mirroring API](../../../../api/projects.md#configure-pull-mirroring-for-a-project)

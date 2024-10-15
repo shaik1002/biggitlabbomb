@@ -29,7 +29,7 @@ export default {
     },
   },
   i18n: {
-    LIST_TITLE_TEXT: s__('PackageRegistry|Package registry'),
+    LIST_TITLE_TEXT: s__('PackageRegistry|Package Registry'),
   },
 };
 </script>

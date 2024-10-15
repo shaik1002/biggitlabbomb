@@ -333,26 +333,6 @@ RSpec.describe Issuable, feature_category: :team_planning do
     end
   end
 
-  describe '.gfm_autocomplete_search' do
-    let_it_be(:project) { create(:project) }
-
-    let_it_be(:issue_1) { create(:issue, project: project, iid: 1, title: 'gitlab 2') }
-    let_it_be(:issue_10) { create(:issue, project: project, iid: 10, title: 'some gitlab issue') }
-    let_it_be(:issue_20) { create(:issue, project: project, iid: 20, title: 'other title') }
-
-    it 'returns issuables with matching iid or title ordered by id desc' do
-      expect(issuable_class.gfm_autocomplete_search('2')).to eq([issue_20, issue_1])
-    end
-
-    it 'returns issuables with matching title ordered by id desc' do
-      expect(issuable_class.gfm_autocomplete_search('gitlab')).to eq([issue_10, issue_1])
-    end
-
-    it 'allows partial string matches' do
-      expect(issuable_class.gfm_autocomplete_search('the')).to eq([issue_20])
-    end
-  end
-
   describe '.to_ability_name' do
     it { expect(Issue.to_ability_name).to eq("issue") }
     it { expect(MergeRequest.to_ability_name).to eq("merge_request") }
@@ -472,7 +452,7 @@ RSpec.describe Issuable, feature_category: :team_planning do
     end
 
     it 'skips coercion for not Integer values' do
-      expect { issue.time_estimate = nil }.to change { issue.read_attribute(:time_estimate) }.to(nil)
+      expect { issue.time_estimate = nil }.to change { issue.time_estimate }.to(nil)
       expect { issue.time_estimate = 'invalid time' }.not_to raise_error
       expect { issue.time_estimate = 22.33 }.not_to raise_error
     end

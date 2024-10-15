@@ -33,24 +33,6 @@ module Resolvers
         description: 'Filter by reviewer presence. Incompatible with reviewerUsername.'
     end
 
-    argument :approved_by, [GraphQL::Types::String],
-      required: false,
-      as: :approved_by_usernames,
-      description: 'Usernames of the approvers.'
-
-    argument :release_tag, GraphQL::Types::String,
-      required: false,
-      description: 'Filter by release tag.'
-
-    argument :merged_by, GraphQL::Types::String,
-      required: false,
-      as: :merge_user_username,
-      description: 'Username of the merger.'
-
-    argument :my_reaction_emoji, GraphQL::Types::String,
-      required: false,
-      description: 'Filter by your reaction emoji.'
-
     argument :iids, [GraphQL::Types::String],
       required: false,
       description: 'Array of IIDs of merge requests, for example `[1, 2]`.'
@@ -86,12 +68,6 @@ module Resolvers
                Available only when the feature flag `mr_approved_filter` is enabled.
       DESC
 
-    argument :subscribed, Types::Issuables::SubscriptionStatusEnum,
-      description: 'Merge requests the current user is subscribed to. Is ignored if ' \
-        '`filter_subscriptions` feature flag is disabled.',
-      alpha: { milestone: '17.5' },
-      required: false
-
     argument :created_after, Types::TimeType,
       required: false,
       description: 'Merge requests created after the timestamp.'
@@ -107,10 +83,6 @@ module Resolvers
     argument :deployment_id, GraphQL::Types::String,
       required: false,
       description: 'ID of the deployment.'
-    argument :environment_name, GraphQL::Types::String,
-      as: :environment,
-      required: false,
-      description: 'Environment merge requests have been deployed to.'
     argument :updated_after, Types::TimeType,
       required: false,
       description: 'Merge requests updated after the timestamp.'
@@ -152,30 +124,13 @@ module Resolvers
       default_value: :created_desc
 
     negated do
-      argument :approved_by, [GraphQL::Types::String],
-        required: false,
-        as: :approved_by_usernames,
-        description: 'Usernames of approvers to exclude.'
-      argument :assignee_usernames, [GraphQL::Types::String],
-        as: :assignee_username,
-        required: false,
-        description: 'Usernames of the assignee to exclude.'
       argument :labels, [GraphQL::Types::String],
         required: false,
         as: :label_name,
         description: 'Array of label names. All resolved merge requests will not have these labels.'
       argument :milestone_title, GraphQL::Types::String,
         required: false,
-        description: 'Title of the milestone to exclude.'
-      argument :my_reaction_emoji, GraphQL::Types::String,
-        required: false,
-        description: 'Filter by reaction emoji to exclude.'
-      argument :release_tag, GraphQL::Types::String,
-        required: false,
-        description: 'Filter by release tag to exclude.'
-      argument :reviewer_username, GraphQL::Types::String,
-        required: false,
-        description: 'Username of the reviewer to exclude.'
+        description: 'Title of the milestone.'
     end
 
     validates mutually_exclusive: [:assignee_username, :assignee_wildcard_id]
@@ -195,5 +150,3 @@ module Resolvers
     end
   end
 end
-
-Resolvers::MergeRequestsResolver.prepend_mod

@@ -10,12 +10,8 @@ RSpec.shared_examples 'update work item description widget' do
     expect(response).to have_gitlab_http_status(:success)
     expect(mutation_response['workItem']['widgets']).to include(
       {
-        'type' => 'DESCRIPTION',
         'description' => new_description,
-        'lastEditedAt' => Time.current,
-        'lastEditedBy' => {
-          'id' => current_user.to_global_id.to_s
-        }
+        'type' => 'DESCRIPTION'
       }
     )
   end
@@ -58,10 +54,10 @@ RSpec.shared_examples 'update work item description widget' do
         let(:expected_response) do
           {
             'title' => 'updated title',
-            'widgets' => include(a_hash_including({
+            'widgets' => include({
               'description' => filtered_description,
               'type' => 'DESCRIPTION'
-            }))
+            })
           }
         end
       end
@@ -74,10 +70,10 @@ RSpec.shared_examples 'update work item description widget' do
         let(:filtered_description) { "(╯°□°)╯︵ ┻━┻\n¯\\＿(ツ)＿/¯\n/cc @#{developer.username}" }
         let(:expected_response) do
           {
-            'widgets' => include(a_hash_including({
+            'widgets' => include({
               'description' => filtered_description,
               'type' => 'DESCRIPTION'
-            }))
+            })
           }
         end
       end
@@ -90,10 +86,10 @@ RSpec.shared_examples 'update work item description widget' do
         let(:expected_response) do
           {
             'state' => 'CLOSED',
-            'widgets' => include(a_hash_including({
+            'widgets' => include({
               'description' => filtered_description,
               'type' => 'DESCRIPTION'
-            }))
+            })
           }
         end
       end
@@ -110,10 +106,10 @@ RSpec.shared_examples 'update work item description widget' do
         let(:expected_response) do
           {
             'state' => 'OPEN',
-            'widgets' => include(a_hash_including({
+            'widgets' => include({
               'description' => filtered_description,
               'type' => 'DESCRIPTION'
-            }))
+            })
           }
         end
       end

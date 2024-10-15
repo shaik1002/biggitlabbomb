@@ -85,6 +85,10 @@ export default {
     cleanUpEnvsButtonLabel: s__('Environments|Clean up environments'),
     active: __('Active'),
     stopped: __('Stopped'),
+    prevPage: __('Go to previous page'),
+    nextPage: __('Go to next page'),
+    next: __('Next'),
+    prev: __('Prev'),
     searchPlaceholder: s__('Environments|Search by environment name'),
   },
   modalId: 'enable-review-app-info',
@@ -92,7 +96,6 @@ export default {
   data() {
     const { page = '1', search = '', scope } = queryToObject(window.location.search);
     return {
-      environmentApp: null,
       interval: undefined,
       isReviewAppModalVisible: false,
       isStopStaleEnvModalVisible: false,
@@ -207,7 +210,7 @@ export default {
     window.addEventListener('popstate', this.syncPageFromQueryParams);
     window.addEventListener('popstate', this.syncSearchFromQueryParams);
   },
-  beforeDestroy() {
+  destroyed() {
     window.removeEventListener('popstate', this.syncPageFromQueryParams);
     window.removeEventListener('popstate', this.syncSearchFromQueryParams);
     this.$apollo.queries.environmentApp.stopPolling();
@@ -320,7 +323,7 @@ export default {
       <environment-item
         v-for="environment in environments"
         :key="environment.name"
-        class="gl-mb-3 gl-border-1 gl-border-gray-100 gl-border-b-solid"
+        class="gl-mb-3 gl-border-gray-100 gl-border-1 gl-border-b-solid"
         :environment="environment.latest"
         @change="refetchEnvironments"
       />
@@ -336,6 +339,10 @@ export default {
       :total-items="totalItems"
       :per-page="itemsPerPage"
       :value="page"
+      :next="$options.i18n.next"
+      :prev="$options.i18n.prev"
+      :label-previous-page="$options.prevPage"
+      :label-next-page="$options.nextPage"
       @next="movePage('next')"
       @previous="movePage('previous')"
       @input="moveToPage"

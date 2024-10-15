@@ -62,7 +62,6 @@ module Ci
     # rubocop: disable Metrics/ParameterLists, Metrics/AbcSize
     def execute(source, ignore_skip_ci: false, save_on_errors: true, trigger_request: nil, schedule: nil, merge_request: nil, external_pull_request: nil, bridge: nil, **options, &block)
       @logger = build_logger
-      @command_logger = Gitlab::Ci::Pipeline::CommandLogger.new
       @pipeline = Ci::Pipeline.new
 
       validate_options!(options)
@@ -104,7 +103,7 @@ module Ci
           Ci::PipelineCreatedEvent.new(data: { pipeline_id: pipeline.id })
         )
 
-        after_successful_creation_hook
+        create_namespace_onboarding_action
       else
         # If pipeline is not persisted, try to recover IID
         pipeline.reset_project_iid
@@ -118,15 +117,10 @@ module Ci
 
     ensure
       @logger.commit(pipeline: pipeline, caller: self.class.name)
-      @command_logger.commit(pipeline: pipeline, command: command) if command
     end
     # rubocop: enable Metrics/ParameterLists, Metrics/AbcSize
 
     private
-
-    def after_successful_creation_hook
-      # overridden in EE
-    end
 
     # rubocop:disable Gitlab/NoCodeCoverageComment
     # :nocov: Tested in FOSS and fully overridden and tested in EE
@@ -135,6 +129,10 @@ module Ci
     end
     # :nocov:
     # rubocop:enable Gitlab/NoCodeCoverageComment
+
+    def create_namespace_onboarding_action
+      Onboarding::PipelineCreatedWorker.perform_async(project.namespace_id)
+    end
 
     def extra_options(content: nil, dry_run: false)
       { content: content, dry_run: dry_run }

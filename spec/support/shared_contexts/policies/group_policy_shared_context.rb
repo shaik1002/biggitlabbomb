@@ -40,6 +40,7 @@ RSpec.shared_context 'GroupPolicy context' do
       admin_issue_board
       read_container_image
       read_harbor_registry
+      read_metrics_dashboard_annotation
       read_prometheus
       read_crm_contact
       read_crm_organization
@@ -50,6 +51,7 @@ RSpec.shared_context 'GroupPolicy context' do
 
   let(:developer_permissions) do
     %i[
+      admin_metrics_dashboard_annotation
       create_custom_emoji
       create_package
       read_cluster

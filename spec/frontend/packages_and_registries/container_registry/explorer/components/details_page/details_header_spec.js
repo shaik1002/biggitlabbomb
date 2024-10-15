@@ -1,7 +1,6 @@
 import { GlDisclosureDropdown, GlDisclosureDropdownItem, GlIcon } from '@gitlab/ui';
 import VueApollo from 'vue-apollo';
 import Vue from 'vue';
-import ProtectedBadge from '~/vue_shared/components/badges/protected_badge.vue';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
 import { useFakeDate } from 'helpers/fake_date';
 import createMockApollo from 'helpers/mock_apollo_helper';
@@ -342,57 +341,6 @@ describe('Details Header', () => {
 
         await waitForPromises();
         expect(findLastPublishedAt().exists()).toBe(false);
-      });
-    });
-  });
-
-  describe('badge "protected"', () => {
-    const createComponentForBadgeProtected = async ({
-      imageProtectionRuleExists = true,
-      glFeaturesContainerRegistryProtectedContainers = true,
-    } = {}) => {
-      await mountComponent({
-        propsData: {
-          image: {
-            ...defaultImage,
-            protectionRuleExists: imageProtectionRuleExists,
-          },
-        },
-        provide: {
-          ...defaultProvide,
-          glFeatures: {
-            containerRegistryProtectedContainers: glFeaturesContainerRegistryProtectedContainers,
-          },
-        },
-      });
-    };
-
-    const findProtectedBadge = () => wrapper.findComponent(ProtectedBadge);
-
-    describe('when a protection rule exists for the given package', () => {
-      it('shows badge', () => {
-        createComponentForBadgeProtected();
-
-        expect(findProtectedBadge().exists()).toBe(true);
-        expect(findProtectedBadge().props('tooltipText')).toBe(
-          'A protection rule exists for this container repository.',
-        );
-      });
-    });
-
-    describe('when no protection rule exists for the given package', () => {
-      it('does not show badge', () => {
-        createComponentForBadgeProtected({ imageProtectionRuleExists: false });
-
-        expect(findProtectedBadge().exists()).toBe(false);
-      });
-    });
-
-    describe('when feature flag ":container_registry_protected_container" is disabled', () => {
-      it('does not show badge', () => {
-        createComponentForBadgeProtected({ glFeaturesContainerRegistryProtectedContainers: false });
-
-        expect(findProtectedBadge().exists()).toBe(false);
       });
     });
   });

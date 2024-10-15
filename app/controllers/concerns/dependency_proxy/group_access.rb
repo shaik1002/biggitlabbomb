@@ -31,10 +31,14 @@ module DependencyProxy
     # TODO: Split the authorization logic into dedicated methods
     # https://gitlab.com/gitlab-org/gitlab/-/issues/452145
     def authorize_read_dependency_proxy!
-      if auth_user_or_token.is_a?(User)
-        authorize_read_dependency_proxy_for_users!
+      if Feature.enabled?(:packages_dependency_proxy_pass_token_to_policy, group)
+        if auth_user_or_token.is_a?(User)
+          authorize_read_dependency_proxy_for_users!
+        else
+          authorize_read_dependency_proxy_for_tokens!
+        end
       else
-        authorize_read_dependency_proxy_for_tokens!
+        authorize_read_dependency_proxy_for_users!
       end
     end
 

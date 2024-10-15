@@ -24,7 +24,7 @@ With custom roles, the customers can decide which abilities they want to assign 
 - In the default role system, reading of vulnerabilities is limited to a Developer role.
 - In the custom role system, a customer can assign this ability to a new custom role based on any default role.
 
-Like default roles, custom roles are [inherited](../../user/project/members/index.md#membership-types) within a group hierarchy. If a user has custom role for a group, that user will also have a custom role for any projects or subgroups within the group.
+Like default roles, custom roles are [inherited](../../user/project/members/index.md#inherited-membership) within a group hierarchy. If a user has custom role for a group, that user will also have a custom role for any projects or subgroups within the group.
 
 ## Technical overview
 
@@ -178,7 +178,6 @@ before in a separate merge request, before completing the below.
 | Field | Required | Description |
 | ----- | -------- |--------------|
 | `name` | yes     | Unique, lowercase and underscored name describing the custom ability. Must match the filename. |
-| `title` | yes | Human-readable title of the custom ability. |
 | `description` | yes | Human-readable description of the custom ability. |
 | `feature_category` | yes | Name of the feature category. For example, `vulnerability_management`. |
 | `introduced_by_issue` | yes | Issue URL that proposed the addition of this custom ability. |
@@ -214,10 +213,10 @@ rule { custom_role_enables_read_dependency }.enable(:read_dependency)
 ### Step 4: Verify
 
 - Ensure SaaS mode is enabled with `GITLAB_SIMULATE_SAAS=1`.
-- Go to any Group that you are an owner of, then go to `Settings -> Roles and permissions`.
+- Go to any Group that you are an owner of, then go to `Settings -> Roles and Permissions`.
 - Select `New role` and create a custom role with the permission you have just created.
 - Go to the Group's `Manage -> Members` page and assign a member to this newly created custom role.
-- Next, sign in as that member and ensure that you are able to access the page that the custom ability is intended for.
+- Next, log-in as that member and ensure that you are able to access the page that the custom ability is intended for.
 
 ### Step 5: Add specs
 
@@ -286,8 +285,6 @@ rule { custom_role_enables_read_dependency }.enable(:read_dependency)
 ```
 
 ### Step 6: Update documentation
-
-Follow the [Contribute to the GitLab documentation](../../development/documentation/index.md) page to make the following changes to the documentation:
 
 - Update the list of custom abilities by running `bundle exec rake gitlab:custom_roles:compile_docs`
 - Update the GraphQL documentation by running `bundle exec rake gitlab:graphql:compile_docs`

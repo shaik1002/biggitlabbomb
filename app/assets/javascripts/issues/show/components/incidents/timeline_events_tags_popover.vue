@@ -11,7 +11,7 @@ export default {
     GlLink,
   },
   i18n: timelineEventTagsPopover,
-  learnMoreLink: helpPagePath('operations/incident_management/incident_timeline_events', {
+  learnMoreLink: helpPagePath('ee/operations/incident_management/incident_timeline_events', {
     anchor: 'incident-tags',
   }),
 };
@@ -32,7 +32,7 @@ export default {
         <p class="gl-mb-0">
           {{ $options.i18n.message }}
         </p>
-        <gl-link target="_blank" class="gl-text-sm" :href="$options.learnMoreLink">{{
+        <gl-link target="_blank" class="gl-font-sm" :href="$options.learnMoreLink">{{
           $options.i18n.link
         }}</gl-link
         >.

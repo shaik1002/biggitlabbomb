@@ -27,14 +27,14 @@ export default {
 
 <template>
   <div>
-    <ul class="gl-list-none gl-p-0">
+    <ul class="gl-p-0 gl-list-none">
       <organizations-list-item
         v-for="organization in nodes"
         :key="organization.id"
         :organization="organization"
       />
     </ul>
-    <div v-if="pageInfo.hasNextPage || pageInfo.hasPreviousPage" class="gl-mt-5 gl-text-center">
+    <div v-if="pageInfo.hasNextPage || pageInfo.hasPreviousPage" class="gl-text-center gl-mt-5">
       <gl-keyset-pagination
         v-bind="pageInfo"
         @prev="$emit('prev', $event)"

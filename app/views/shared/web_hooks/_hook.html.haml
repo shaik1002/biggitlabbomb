@@ -11,19 +11,19 @@
         = hook.url
 
         - if hook.rate_limited?
-          = gl_badge_tag(_('Disabled'), variant: :danger)
+          = gl_badge_tag(_('Disabled'), variant: :danger, size: :sm)
         - elsif hook.permanently_disabled?
-          = gl_badge_tag(s_('Webhooks|Failed to connect'), variant: :danger)
+          = gl_badge_tag(s_('Webhooks|Failed to connect'), variant: :danger, size: :sm)
         - elsif hook.temporarily_disabled?
-          = gl_badge_tag(s_('Webhooks|Fails to connect'), variant: :warning)
+          = gl_badge_tag(s_('Webhooks|Fails to connect'), variant: :warning, size: :sm)
 
       %div
         - hook.class.triggers.each_value do |trigger|
           - if hook.public_send(trigger)
-            = gl_badge_tag(integration_webhook_event_human_name(trigger), variant: :neutral)
-        = gl_badge_tag(sslBadgeText, variant: :neutral)
+            = gl_badge_tag(integration_webhook_event_human_name(trigger), variant: :neutral, size: :sm)
+        = gl_badge_tag(sslBadgeText, variant: :neutral, size: :sm)
 
-    .gl-text-sm
+    .gl-font-sm
       = truncate(hook.description, length: 200)
 
     .gl-flex.gl-items-baseline.gl-gap-3

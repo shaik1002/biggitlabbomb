@@ -30,6 +30,10 @@ export default {
     ),
     delete: __('Delete deploy key'),
     edit: __('Edit deploy key'),
+    pagination: {
+      next: __('Next'),
+      prev: __('Prev'),
+    },
     modal: {
       title: __('Are you sure?'),
       body: __('Are you sure you want to delete this deploy key?'),
@@ -44,12 +48,12 @@ export default {
     {
       key: 'fingerprint_sha256',
       label: __('Fingerprint (SHA256)'),
-      tdClass: 'md:gl-max-w-26',
+      tdClass: 'gl-md-max-w-26',
     },
     {
       key: 'fingerprint',
       label: __('Fingerprint (MD5)'),
-      tdClass: 'md:gl-max-w-26',
+      tdClass: 'gl-md-max-w-26',
     },
     {
       key: 'projects',
@@ -62,8 +66,8 @@ export default {
     {
       key: 'actions',
       label: __('Actions'),
-      tdClass: 'lg:gl-w-px gl-whitespace-nowrap',
-      thClass: 'lg:gl-w-px gl-whitespace-nowrap',
+      tdClass: 'gl-lg-w-1px gl-whitespace-nowrap',
+      thClass: 'gl-lg-w-1px gl-whitespace-nowrap',
     },
   ],
   modal: {
@@ -199,9 +203,11 @@ export default {
     class="gl-mt-5"
   >
     <template #actions>
-      <gl-button size="small" :href="createPath" data-testid="new-deploy-key-button">{{
-        $options.i18n.newDeployKeyButtonText
-      }}</gl-button>
+      <div class="gl-new-card-actions">
+        <gl-button size="small" :href="createPath" data-testid="new-deploy-key-button">{{
+          $options.i18n.newDeployKeyButtonText
+        }}</gl-button>
+      </div>
     </template>
 
     <gl-table
@@ -211,7 +217,7 @@ export default {
       :fields="$options.fields"
       stacked="md"
       data-testid="deploy-keys-list"
-      class="-gl-mb-2 -gl-mt-1"
+      class="-gl-mt-1 -gl-mb-2"
     >
       <template #table-busy>
         <gl-loading-icon size="sm" class="gl-my-5" />
@@ -229,7 +235,7 @@ export default {
       <template #cell(fingerprint_sha256)="{ item: { fingerprint_sha256 } }">
         <div
           v-if="fingerprint_sha256"
-          class="gl-truncate gl-font-monospace"
+          class="gl-font-monospace gl-text-truncate"
           :title="fingerprint_sha256"
         >
           {{ fingerprint_sha256 }}
@@ -237,7 +243,7 @@ export default {
       </template>
 
       <template #cell(fingerprint)="{ item: { fingerprint } }">
-        <div v-if="fingerprint" class="gl-truncate gl-font-monospace" :title="fingerprint">
+        <div v-if="fingerprint" class="gl-font-monospace gl-text-truncate" :title="fingerprint">
           {{ fingerprint }}
         </div>
       </template>
@@ -251,7 +257,7 @@ export default {
       </template>
 
       <template #cell(actions)="{ item: { id } }">
-        <div class="-gl-my-3 gl-flex gl-gap-2">
+        <div class="gl-flex gl-gap-2 -gl-my-3">
           <gl-button
             v-gl-tooltip
             :title="$options.i18n.edit"
@@ -283,6 +289,8 @@ export default {
       v-model="page"
       :per-page="$options.DEFAULT_PER_PAGE"
       :total-items="totalItems"
+      :next-text="$options.i18n.pagination.next"
+      :prev-text="$options.i18n.pagination.prev"
       align="center"
       class="gl-mt-5"
     />

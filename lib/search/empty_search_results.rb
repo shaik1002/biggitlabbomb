@@ -4,11 +4,7 @@ module Search
   # This class has the same interface as SearchResults except
   # it is empty and does not do any work.
   class EmptySearchResults
-    attr_reader :error
-
-    def initialize(error: nil)
-      @error = error
-    end
+    def initialize(*); end
 
     def objects(*)
       Kaminari.paginate_array([])
@@ -27,7 +23,7 @@ module Search
     end
 
     def failed?(*)
-      error.present?
+      false
     end
   end
 end

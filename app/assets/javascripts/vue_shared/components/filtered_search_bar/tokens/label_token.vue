@@ -171,17 +171,17 @@ export default {
         :value="getLabelName(label)"
       >
         <div
-          class="gl-flex gl-items-center"
+          class="gl-display-flex gl-align-items-center"
           :class="{ 'gl-pl-6': !selections.includes(label.title) }"
         >
           <gl-icon
             v-if="selections.includes(label.title)"
             name="check"
-            class="gl-mr-3 gl-shrink-0 gl-text-secondary"
+            class="gl-mr-3 gl-text-secondary gl-flex-shrink-0"
           />
           <span
             :style="{ backgroundColor: label.color }"
-            class="gl-mr-3 gl-inline-block gl-p-3"
+            class="gl-display-inline-block gl-mr-3 gl-p-3"
           ></span>
           <div>{{ getLabelName(label) }}</div>
         </div>

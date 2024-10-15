@@ -1,21 +1,17 @@
 <script>
-import { GlBadge } from '@gitlab/ui';
+import { GlBadge, GlIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
 import { STATE_OPEN } from '../constants';
 
 export default {
   components: {
     GlBadge,
+    GlIcon,
   },
   props: {
     workItemState: {
       type: String,
       required: true,
-    },
-    showIcon: {
-      type: Boolean,
-      required: false,
-      default: true,
     },
   },
   computed: {
@@ -26,10 +22,6 @@ export default {
       return this.isWorkItemOpen ? __('Open') : __('Closed');
     },
     workItemStateIcon() {
-      if (!this.showIcon) {
-        return null;
-      }
-
       return this.isWorkItemOpen ? 'issue-open-m' : 'issue-close';
     },
     workItemStateVariant() {
@@ -40,7 +32,8 @@ export default {
 </script>
 
 <template>
-  <gl-badge :variant="workItemStateVariant" :icon="workItemStateIcon" class="gl-align-middle">
-    {{ stateText }}
+  <gl-badge :variant="workItemStateVariant" class="gl-align-middle">
+    <gl-icon :name="workItemStateIcon" :size="16" />
+    <span class="gl-sr-only sm:gl-not-sr-only gl-ml-2">{{ stateText }}</span>
   </gl-badge>
 </template>

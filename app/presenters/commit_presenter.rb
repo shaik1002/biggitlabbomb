@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class CommitPresenter < Gitlab::View::Presenter::Delegated
+  include GlobalID::Identification
+
   presents ::Commit, as: :commit
 
   def detailed_status_for(ref)

@@ -127,8 +127,6 @@ namespace :gitlab do
       database_name = ":#{database_name}" if database_name
       load_database = connection.tables.count <= 1
 
-      ActiveRecord::Base.connection_handler.clear_all_connections!(:all)
-
       if load_database
         puts "Running db:schema:load#{database_name} rake task"
         Gitlab::Database.add_post_migrate_path_to_rails(force: true)
@@ -139,15 +137,6 @@ namespace :gitlab do
       end
 
       load_database
-    end
-
-    desc "Clear all connections"
-    task :clear_all_connections do
-      ActiveRecord::Base.connection_handler.clear_all_connections!(:all)
-    end
-
-    ActiveRecord::Tasks::DatabaseTasks.for_each(databases) do |name|
-      Rake::Task["db:test:purge:#{name}"].enhance(['gitlab:db:clear_all_connections'])
     end
 
     desc 'GitLab | DB | Run database migrations and print `unattended_migrations_completed` if action taken'
@@ -503,8 +492,6 @@ namespace :gitlab do
 
       desc 'Checks schema inconsistencies'
       task run: :environment do
-        logger = Logger.new($stdout)
-
         database_model = Gitlab::Database.database_base_models[Gitlab::Database::MAIN_DATABASE_NAME]
         database = Gitlab::Schema::Validation::Sources::Database.new(database_model.connection)
 
@@ -521,7 +508,6 @@ namespace :gitlab do
         inconsistencies.each do |inconsistency|
           puts inconsistency.display
         end
-        logger.info "This task is a diagnostic tool to be used under the guidance of GitLab Support. You should not use the task for routine checks as database inconsistencies might be expected."
       end
     end
 

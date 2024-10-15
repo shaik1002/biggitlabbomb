@@ -46,11 +46,7 @@ RSpec.describe Gitlab::Database::PostgresPartition, type: :model, feature_catego
     end
 
     describe '.with_list_constraint' do
-      subject(:with_list_constraint) do
-        described_class
-          .with_parent_tables(Ci::Partitionable.registered_models.map(&:table_name))
-          .with_list_constraint(partition_id)
-      end
+      subject(:with_list_constraint) { described_class.with_list_constraint(partition_id) }
 
       context 'when condition matches' do
         let(:partition_id) { '102' }

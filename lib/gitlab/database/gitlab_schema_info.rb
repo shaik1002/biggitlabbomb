@@ -9,7 +9,7 @@ module Gitlab
       :allow_cross_transactions,
       :allow_cross_foreign_keys,
       :file_path,
-      :require_sharding_key,
+      :cell_local,
       keyword_init: true
     ) do
       def initialize(*)

@@ -3,8 +3,7 @@
 require 'spec_helper'
 require_migration!
 
-RSpec.describe QueueBackfillRootNamespaceClusterAgentMappingsAgain, migration: :gitlab_main_cell,
-  feature_category: :workspaces do
+RSpec.describe QueueBackfillRootNamespaceClusterAgentMappingsAgain, feature_category: :remote_development do
   let!(:batched_migration) { described_class::MIGRATION }
 
   it 'schedules a new batched migration' do

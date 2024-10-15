@@ -1,12 +1,11 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
+import { shallowMount } from '@vue/test-utils';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import RelatedMergeRequests from '~/issues/related_merge_requests/components/related_merge_requests.vue';
 import relatedMergeRequestsQuery from '~/issues/related_merge_requests/queries/related_merge_requests.query.graphql';
 import RelatedIssuableItem from '~/issuable/components/related_issuable_item.vue';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
 
 Vue.use(VueApollo);
 
@@ -41,10 +40,6 @@ const mockData = {
                 title: 'v4.0',
                 __typename: 'Milestone',
               },
-              project: {
-                id: 1,
-                fullPath: 'gitlab-ce',
-              },
               assignees: {
                 nodes: [],
                 __typename: 'MergeRequestAssigneeConnection',
@@ -66,10 +61,6 @@ const mockData = {
                 state: 'active',
                 title: 'v4.0',
                 __typename: 'Milestone',
-              },
-              project: {
-                id: 1,
-                fullPath: 'gitlab-org',
               },
               assignees: {
                 nodes: [
@@ -116,14 +107,11 @@ describe('RelatedMergeRequests', () => {
     const apolloProvider = createMockApollo([
       [relatedMergeRequestsQuery, jest.fn().mockResolvedValue(mockData)],
     ]);
-    wrapper = shallowMountExtended(RelatedMergeRequests, {
+    wrapper = shallowMount(RelatedMergeRequests, {
       apolloProvider,
       propsData: {
         projectPath: 'gitlab-ce',
         iid: '1',
-      },
-      stubs: {
-        CrudComponent,
       },
     });
 
@@ -132,7 +120,7 @@ describe('RelatedMergeRequests', () => {
 
   describe('template', () => {
     it('should render related merge request items', () => {
-      expect(wrapper.findByTestId('crud-count').text()).toBe('2');
+      expect(wrapper.find('[data-testid="count"]').text()).toBe('2');
       expect(wrapper.findAllComponents(RelatedIssuableItem)).toHaveLength(2);
 
       const props = wrapper.findAllComponents(RelatedIssuableItem).at(1).props();
@@ -146,7 +134,6 @@ describe('RelatedMergeRequests', () => {
       expect(props.title).toEqual(data.title);
       expect(props.state).toEqual(data.state);
       expect(props.createdAt).toEqual(data.createdAt);
-      expect(props.displayReference).toEqual('gitlab-org!10');
     });
   });
 });

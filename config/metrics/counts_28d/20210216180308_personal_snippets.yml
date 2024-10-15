@@ -2,7 +2,7 @@
 data_category: optional
 key_path: counts_monthly.personal_snippets
 description: Monthly count of personal Snippets
-product_group: remote_development
+product_group: ide
 value_type: number
 status: active
 time_frame: 28d
@@ -17,4 +17,3 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

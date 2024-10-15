@@ -8,5 +8,4 @@ description: Holds references to finished CI pipelines ready to be synced to Cli
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/158060
 milestone: '17.2'
 gitlab_schema: gitlab_ci
-sharding_key:
-  project_namespace_id: namespaces
+sharding_key_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/470152

@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: Platform Insights
+group: Respond
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
@@ -45,7 +45,7 @@ Each level of alert contains a uniquely shaped and color-coded icon to help you 
 
 Alerts contain one of the following icons:
 
-<!-- vale gitlab_base.SubstitutionWarning = NO -->
+<!-- vale gitlab.SubstitutionWarning = NO -->
 
 | Severity | Icon                    | Color (hexadecimal) |
 |----------|-------------------------|---------------------|
@@ -56,7 +56,7 @@ Alerts contain one of the following icons:
 | Info     | **{severity-info}**     | `#418cd8`           |
 | Unknown  | **{severity-unknown}**  | `#bababa`           |
 
-<!-- vale gitlab_base.SubstitutionWarning = YES -->
+<!-- vale gitlab.SubstitutionWarning = YES -->
 
 ## Alert details page
 

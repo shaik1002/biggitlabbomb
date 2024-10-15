@@ -1,7 +1,6 @@
 import { mount, shallowMount } from '@vue/test-utils';
-import { GlTable, GlBadge, GlPagination, GlDisclosureDropdown, GlButton } from '@gitlab/ui';
+import { GlTable, GlBadge, GlPagination } from '@gitlab/ui';
 import { nextTick } from 'vue';
-import { cloneDeep } from 'lodash';
 import { stubComponent } from 'helpers/stub_component';
 import WorkloadTable from '~/kubernetes_dashboard/components/workload_table.vue';
 import {
@@ -35,8 +34,6 @@ const findAllBadges = () => wrapper.findAllComponents(GlBadge);
 const findBadge = (at) => findAllBadges().at(at);
 const findPagination = () => wrapper.findComponent(GlPagination);
 const findAllPodLogsButtons = () => wrapper.findAllComponents(PodLogsButton);
-const findAllActionsDropdowns = () => wrapper.findAllComponents(GlDisclosureDropdown);
-const findAllPodNameButtons = () => wrapper.findAllComponents(GlButton);
 
 describe('Workload table component', () => {
   it('renders GlTable component with the default fields if no fields specified in props', () => {
@@ -105,7 +102,7 @@ describe('Workload table component', () => {
 
     describe('with containers field specified', () => {
       const containers = [{ name: 'my-container-1' }, { name: 'my-container-2' }];
-      const itemsWithContainers = cloneDeep(mockPodsTableItems);
+      const itemsWithContainers = mockPodsTableItems;
       itemsWithContainers[0].containers = containers;
 
       beforeEach(() => {
@@ -123,47 +120,6 @@ describe('Workload table component', () => {
           namespace: pod.namespace,
           containers,
         });
-      });
-    });
-
-    describe('with actions field specified', () => {
-      const actions = [
-        {
-          name: 'delete-pod',
-          text: 'Delete Pod',
-        },
-      ];
-      const podItemsWithActions = mockPodsTableItems.map((item) => {
-        return {
-          ...item,
-          actions,
-        };
-      });
-      const lastField = PODS_TABLE_FIELDS.length - 1;
-
-      beforeEach(() => {
-        createWrapper({ items: podItemsWithActions, fields: PODS_TABLE_FIELDS });
-      });
-
-      it('renders actions column', () => {
-        expect(findTable().props('fields')[lastField]).toEqual({
-          key: 'actions',
-          label: '',
-          sortable: false,
-        });
-      });
-
-      it('renders actions dropdown for each row', () => {
-        expect(findAllActionsDropdowns()).toHaveLength(podItemsWithActions.length);
-      });
-
-      it('renders correct props for each dropdown', () => {
-        expect(findAllActionsDropdowns().at(0).attributes('title')).toBe('Actions');
-        expect(findAllActionsDropdowns().at(0).props('items')).toMatchObject([
-          {
-            text: 'Delete Pod',
-          },
-        ]);
       });
     });
   });
@@ -209,19 +165,25 @@ describe('Workload table component', () => {
     });
   });
 
-  describe('item selection', () => {
+  describe('row selection', () => {
     beforeEach(() => {
       createWrapper({ items: mockPodsTableItems });
     });
 
-    it('emits "select-item" event on the pod name click', () => {
-      const podNameButtons = findAllPodNameButtons();
-
+    it('emits row-selected event on row click', () => {
       mockPodsTableItems.forEach((data, index) => {
-        podNameButtons.at(index).vm.$emit('click', data);
+        findTable().vm.$emit('row-selected', [data]);
 
         expect(wrapper.emitted('select-item')[index]).toEqual([data]);
       });
+    });
+
+    it('emits remove-selection event on the second click on the same item', () => {
+      findTable().vm.$emit('row-selected', [mockPodsTableItems[0]]);
+      expect(wrapper.emitted('select-item')).toEqual([[mockPodsTableItems[0]]]);
+
+      findTable().vm.$emit('row-selected', mockPodsTableItems[0]);
+      expect(wrapper.emitted('remove-selection')).toHaveLength(1);
     });
   });
 });

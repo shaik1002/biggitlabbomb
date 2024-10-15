@@ -1,6 +1,6 @@
 ---
 stage: Create
-group: Remote Development
+group: IDE
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 description: "Search for files in your GitLab repository directly from the GitLab user interface."
 ---
@@ -120,7 +120,7 @@ This feature uses the [`fuzzaldrin-plus`](https://github.com/jeancroy/fuzz-aldri
 ## Change how Git handles a file
 
 To change the default handling of a file or file type, create a
-[`.gitattributes` file](git_attributes.md). Use `.gitattributes` files to:
+[`.gitattributes` file](../../git_attributes.md). Use `.gitattributes` files to:
 
 - Configure file display in diffs, such as [syntax highlighting](highlighting.md)
   or [collapsing generated files](../../merge_requests/changes.md#collapse-generated-files).

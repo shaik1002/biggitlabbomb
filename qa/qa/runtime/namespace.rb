@@ -25,12 +25,7 @@ module QA
       end
 
       def sandbox_name
-        @sandbox_name ||= Runtime::Env.sandbox_name ||
-          if !QA::Runtime::Env.running_on_dot_com? && QA::Runtime::Env.run_in_parallel?
-            "gitlab-qa-sandbox-group-#{SecureRandom.hex(4)}-#{Time.now.wday + 1}"
-          else
-            "gitlab-qa-sandbox-group-#{Time.now.wday + 1}"
-          end
+        @sandbox_name ||= Runtime::Env.sandbox_name || "gitlab-qa-sandbox-group-#{Time.now.wday + 1}"
       end
     end
   end

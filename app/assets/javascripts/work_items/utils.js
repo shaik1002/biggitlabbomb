@@ -1,9 +1,4 @@
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import { queryToObject } from '~/lib/utils/url_utility';
-import AccessorUtilities from '~/lib/utils/accessor';
-import { parseBoolean } from '~/lib/utils/common_utils';
-import { TYPE_EPIC, TYPE_ISSUE } from '~/issues/constants';
-
 import {
   NEW_WORK_ITEM_IID,
   WIDGET_TYPE_ASSIGNEES,
@@ -15,8 +10,6 @@ import {
   WIDGET_TYPE_NOTES,
   WIDGET_TYPE_START_AND_DUE_DATE,
   WIDGET_TYPE_WEIGHT,
-  WIDGET_TYPE_AWARD_EMOJI,
-  WIDGET_TYPE_LINKED_ITEMS,
   ISSUABLE_EPIC,
   WORK_ITEMS_TYPE_MAP,
   WORK_ITEM_TYPE_ENUM_EPIC,
@@ -28,7 +21,6 @@ import {
   WORK_ITEM_TYPE_ENUM_KEY_RESULT,
   WORK_ITEM_TYPE_ENUM_REQUIREMENTS,
   NEW_WORK_ITEM_GID,
-  DEFAULT_PAGE_SIZE_CHILD_ITEMS,
 } from './constants';
 
 export const isAssigneesWidget = (widget) => widget.type === WIDGET_TYPE_ASSIGNEES;
@@ -48,12 +40,6 @@ export const isWeightWidget = (widget) => widget.type === WIDGET_TYPE_WEIGHT;
 export const findHierarchyWidgets = (widgets) =>
   widgets?.find((widget) => widget.type === WIDGET_TYPE_HIERARCHY);
 
-export const findLinkedItemsWidget = (workItem) =>
-  workItem.widgets?.find((widget) => widget.type === WIDGET_TYPE_LINKED_ITEMS);
-
-export const findAwardEmojiWidget = (workItem) =>
-  workItem.widgets?.find((widget) => widget.type === WIDGET_TYPE_AWARD_EMOJI);
-
 export const findHierarchyWidgetChildren = (workItem) =>
   findHierarchyWidgets(workItem?.widgets)?.children?.nodes || [];
 
@@ -68,18 +54,6 @@ export const getWorkItemIcon = (icon) => {
   return icon;
 };
 
-/**
- * TODO: Remove this method with https://gitlab.com/gitlab-org/gitlab/-/issues/479637
- * We're currently setting children count per page based on `DEFAULT_PAGE_SIZE_CHILD_ITEMS`
- * but we need to find an ideal page size that's usable and fast enough. In order to test
- * correct page size in production with actual data, this method allows us to set page
- * size using query param (while falling back to `DEFAULT_PAGE_SIZE_CHILD_ITEMS`).
- */
-export const getDefaultHierarchyChildrenCount = () => {
-  const { children_count } = queryToObject(window.location.search);
-  return Number(children_count) || DEFAULT_PAGE_SIZE_CHILD_ITEMS;
-};
-
 export const formatAncestors = (workItem) =>
   findHierarchyWidgetAncestors(workItem).map((ancestor) => ({
     ...ancestor,
@@ -87,10 +61,8 @@ export const formatAncestors = (workItem) =>
     href: ancestor.webUrl,
   }));
 
-export const findHierarchyWidgetDefinition = (workItem) =>
-  workItem.workItemType.widgetDefinitions?.find(
-    (widgetDefinition) => widgetDefinition.type === WIDGET_TYPE_HIERARCHY,
-  );
+export const findHierarchyWidgetDefinition = (widgetDefinitions) =>
+  widgetDefinitions?.find((widgetDefinition) => widgetDefinition.type === WIDGET_TYPE_HIERARCHY);
 
 const autocompleteSourcesPath = ({ autocompleteType, fullPath, iid, workItemTypeId, isGroup }) => {
   const domain = gon.relative_url_root || '';
@@ -154,15 +126,6 @@ export const markdownPreviewPath = ({ fullPath, iid, isGroup = false }) => {
   return `${domain}/${basePath}/-/preview_markdown?target_type=WorkItem&target_id=${iid}`;
 };
 
-export const getDisplayReference = (workItemFullPath, workitemReference) => {
-  // The reference is replaced by work item fullpath in case the project and group are same.
-  // e.g., gitlab-org/gitlab-test#45 will be shown as #45
-  if (new RegExp(`${workItemFullPath}#`, 'g').test(workitemReference)) {
-    return workitemReference.replace(new RegExp(`${workItemFullPath}`, 'g'), '');
-  }
-  return workitemReference;
-};
-
 export const isReference = (input) => {
   /**
    * The regular expression checks if the `value` is
@@ -187,10 +150,7 @@ export const sortNameAlphabetically = (a, b) => {
  */
 export const workItemRoadmapPath = (fullPath, iid) => {
   const domain = gon.relative_url_root || '';
-  // We're hard-coding the values of `layout` & `timeframe_range_type` as those exist in `ee/app/assets/javascripts/roadmap/constants.js`
-  // and importing those here also requires a corresponding file in non-EE scope and that's overengineering a query param.
-  // This won't be needed once https://gitlab.com/gitlab-org/gitlab/-/issues/353191 is resolved.
-  return `${domain}/groups/${fullPath}/-/roadmap?epic_iid=${iid}&layout=MONTHS&timeframe_range_type=CURRENT_YEAR`;
+  return `${domain}/groups/${fullPath}/-/roadmap?epic_iid=${iid}`;
 };
 
 /**
@@ -234,56 +194,4 @@ export const newWorkItemId = (workItemType) => {
 
   const workItemTypeLowercase = workItemType.split(' ').join('-').toLowerCase();
   return `${NEW_WORK_ITEM_GID}-${workItemTypeLowercase}`;
-};
-
-export const saveShowLabelsToLocalStorage = (showLabelsLocalStorageKey, value) => {
-  if (AccessorUtilities.canUseLocalStorage()) {
-    localStorage.setItem(showLabelsLocalStorageKey, value);
-  }
-};
-
-export const getShowLabelsFromLocalStorage = (showLabelsLocalStorageKey, defaultValue = true) => {
-  if (AccessorUtilities.canUseLocalStorage()) {
-    return parseBoolean(localStorage.getItem(showLabelsLocalStorageKey) ?? defaultValue);
-  }
-  return null;
-};
-
-/**
- * @param {{fullPath?: string, referencePath?: string}} activeItem
- * @param {string} fullPath
- * @param {string} issuableType
- * @returns {string}
- */
-export const makeDrawerItemFullPath = (activeItem, fullPath, issuableType = TYPE_ISSUE) => {
-  if (activeItem?.fullPath) {
-    return activeItem.fullPath;
-  }
-  const delimiter = issuableType === TYPE_EPIC ? '&' : '#';
-  if (!activeItem?.referencePath) {
-    return fullPath;
-  }
-  return activeItem.referencePath.split(delimiter)[0];
-};
-
-/**
- * since legacy epics don't have GID matching the work item ID, we need additional parameters
- * @param {{iid: string, id: string}} activeItem
- * @param {string} fullPath
- * @param {string} issuableType
- * @returns {{iid: string, full_path: string, id: number}}
- */
-export const makeDrawerUrlParam = (activeItem, fullPath, issuableType = TYPE_ISSUE) => {
-  return btoa(
-    JSON.stringify({
-      iid: activeItem.iid,
-      full_path: makeDrawerItemFullPath(activeItem, fullPath, issuableType),
-      id: getIdFromGraphQLId(activeItem.id),
-    }),
-  );
-};
-
-export const getNewWorkItemAutoSaveKey = (fullPath, workItemType) => {
-  if (!workItemType || !fullPath) return '';
-  return `new-${fullPath}-${workItemType.toLowerCase()}-draft`;
 };

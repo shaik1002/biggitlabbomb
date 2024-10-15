@@ -5,7 +5,6 @@ class Groups::DependencyProxyForContainersController < ::Groups::DependencyProxy
   include SendFileUpload
   include ::PackagesHelper # for event tracking
   include WorkhorseRequest
-  include Gitlab::Utils::StrongMemoize
 
   before_action :ensure_group
   before_action :ensure_token_granted!, only: [:blob, :manifest]
@@ -18,8 +17,6 @@ class Groups::DependencyProxyForContainersController < ::Groups::DependencyProxy
 
   feature_category :virtual_registry
   urgency :low
-
-  PERMITTED_PARAMS = [:image, :tag, :file, :sha, :group_id].freeze
 
   def manifest
     result = DependencyProxy::FindCachedManifestService.new(group, image, tag, token).execute
@@ -44,7 +41,7 @@ class Groups::DependencyProxyForContainersController < ::Groups::DependencyProxy
 
       send_upload(blob.file)
     else
-      send_dependency(token_header, DependencyProxy::Registry.blob_url(image, permitted_params[:sha]), blob_file_name)
+      send_dependency(token_header, DependencyProxy::Registry.blob_url(image, params[:sha]), blob_file_name)
     end
   end
 
@@ -57,8 +54,8 @@ class Groups::DependencyProxyForContainersController < ::Groups::DependencyProxy
   def upload_blob
     @group.dependency_proxy_blobs.create!(
       file_name: blob_file_name,
-      file: permitted_params[:file],
-      size: permitted_params[:file].size
+      file: params[:file],
+      size: params[:file].size
     )
 
     event_name = tracking_event_name(object_type: :blob, from_cache: false)
@@ -78,8 +75,8 @@ class Groups::DependencyProxyForContainersController < ::Groups::DependencyProxy
       file_name: manifest_file_name,
       content_type: request.headers[Gitlab::Workhorse::SEND_DEPENDENCY_CONTENT_TYPE_HEADER],
       digest: request.headers[DependencyProxy::Manifest::DIGEST_HEADER],
-      file: permitted_params[:file],
-      size: permitted_params[:file].size
+      file: params[:file],
+      size: params[:file].size
     }
 
     manifest = @group.dependency_proxy_manifests
@@ -100,11 +97,6 @@ class Groups::DependencyProxyForContainersController < ::Groups::DependencyProxy
 
   private
 
-  def group
-    Group.find_by_full_path(permitted_params[:group_id], follow_redirects: true)
-  end
-  strong_memoize_attr :group
-
   def send_manifest(manifest, from_cache:)
     response.headers[DependencyProxy::Manifest::DIGEST_HEADER] = manifest.digest
     response.headers['Content-Length'] = manifest.size
@@ -124,7 +116,7 @@ class Groups::DependencyProxyForContainersController < ::Groups::DependencyProxy
   end
 
   def blob_file_name
-    @blob_file_name ||= "#{permitted_params[:sha].sub('sha256:', '')}.gz"
+    @blob_file_name ||= "#{params[:sha].sub('sha256:', '')}.gz"
   end
 
   def manifest_file_name
@@ -132,15 +124,11 @@ class Groups::DependencyProxyForContainersController < ::Groups::DependencyProxy
   end
 
   def image
-    permitted_params[:image]
+    params[:image]
   end
 
   def tag
-    permitted_params[:tag]
-  end
-
-  def permitted_params
-    params.permit(PERMITTED_PARAMS)
+    params[:tag]
   end
 
   def tracking_event_name(object_type:, from_cache:)

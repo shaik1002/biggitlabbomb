@@ -8,22 +8,6 @@ info: Any user with at least the Maintainer role can merge updates to this conte
 
 This style guide recommends best practices for API development.
 
-## GraphQL and REST APIs
-
-We offer two types of API to our customers:
-
-- [REST API](../api/rest/index.md)
-- [GraphQL API](../api/graphql/index.md)
-
-To reduce the technical burden of supporting two APIs in parallel,
-they should share implementations as much as possible.
-For example, they could share the same [services](reusing_abstractions.md#service-classes).
-
-## Frontend
-
-See the [frontend guide](fe_guide/index.md#overview)
-on details on which API to use when developing in the frontend.
-
 ## Instance variables
 
 Don't use instance variables, there is no need for them (we don't need
@@ -78,7 +62,7 @@ end
 We must not make breaking changes to our REST API v4, even in major GitLab releases.
 
 Our REST API maintains its own versioning independent of GitLab versioning.
-The current REST API version is `4`. [We commit to follow semantic versioning for our REST API](../api/rest/index.md),
+The current REST API version is `4`. [We commit to follow semantic versioning for our REST API](../api/rest/index.md#compatibility-guidelines),
 which means we cannot make breaking changes until a major version change (most likely, `5`).
 
 Because version `5` is not scheduled, we allow rare [exceptions](#exceptions).
@@ -117,7 +101,7 @@ Some examples of breaking changes are:
 - Changing the type of fields in the response. In a JSON response, this would be a change of any `Number`, `String`, `Boolean`, `Array`, or `Object` type to another type.
 - Adding a new **required** argument.
 - Changing authentication, authorization, or other header requirements.
-- Changing [any status code](../api/rest/troubleshooting.md#status-codes) other than `500`.
+- Changing [any status code](../api/rest/index.md#status-codes) other than `500`.
 
 ## What is not a breaking change
 
@@ -125,7 +109,7 @@ Some examples of non-breaking changes:
 
 - Any additive change, such as adding endpoints, non-required arguments, fields, or enum values.
 - Changes to error messages.
-- Changes from a `500` status code to [any supported status code](../api/rest/troubleshooting.md#status-codes) (this is a bugfix).
+- Changes from a `500` status code to [any supported status code](../api/rest/index.md#status-codes) (this is a bugfix).
 - Changes to the order of fields returned in a response.
 
 ## Experimental, beta, and generally available features
@@ -144,13 +128,13 @@ While in the [experiment status](../policy/experiment-beta-support.md#experiment
   - Any added arguments must be ignored.
   - Any added fields must not be exposed.
 - The [API documentation](../api/api_resources.md) must [document the experimental status](documentation/experiment_beta.md) and the feature flag [must be documented](documentation/feature_flags.md).
-- The [OpenAPI documentation](../api/openapi/openapi_interactive.md) must not describe the changes (for example, using [the `hidden` option](https://github.com/ruby-grape/grape-swagger#hiding-an-endpoint-)).
+- The [OpenAPI documentation](../api/openapi/openapi_interactive.md) should not describe the changes.
 
 While in the [beta status](../policy/experiment-beta-support.md#beta):
 
 - Use a feature flag that is [on by default](feature_flags/index.md#beta-type).
 - The [API documentation](../api/api_resources.md) must [document the beta status](documentation/experiment_beta.md) and the feature flag [must be documented](documentation/feature_flags.md).
-- The [OpenAPI documentation](../api/openapi/openapi_interactive.md) must not describe the changes.
+- The [OpenAPI documentation](../api/openapi/openapi_interactive.md) should not describe the changes.
 
 When the feature becomes [generally available](../policy/experiment-beta-support.md#generally-available-ga):
 

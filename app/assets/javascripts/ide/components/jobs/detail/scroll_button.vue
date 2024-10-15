@@ -53,7 +53,7 @@ export default {
   >
     <button
       :disabled="disabled"
-      class="btn-scroll btn-transparent gl-rounded-none gl-border-none !gl-bg-transparent gl-p-0 !gl-shadow-none !gl-outline-none"
+      class="btn-scroll btn-transparent btn-blank"
       type="button"
       :aria-label="tooltipTitle"
       @click="clickedScroll"

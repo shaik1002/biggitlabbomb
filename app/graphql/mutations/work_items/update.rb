@@ -16,10 +16,6 @@ module Mutations
         ::Types::WorkItems::Widgets::AwardEmojiUpdateInputType,
         required: false,
         description: 'Input for emoji reactions widget.'
-      argument :crm_contacts_widget,
-        ::Types::WorkItems::Widgets::CrmContactsUpdateInputType,
-        required: false,
-        description: 'Input for CRM contacts widget.'
       argument :current_user_todos_widget,
         ::Types::WorkItems::Widgets::CurrentUserTodosInputType,
         required: false,

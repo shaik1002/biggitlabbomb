@@ -77,7 +77,11 @@ export default {
     <template #modal-title>
       <gl-sprintf :message="s__('Environments|Stopping %{environmentName}')">
         <template #environmentName>
-          <span v-gl-tooltip :title="environment.name" class="gl-ml-2 gl-mr-2 gl-grow gl-truncate">
+          <span
+            v-gl-tooltip
+            :title="environment.name"
+            class="gl-text-truncate gl-ml-2 gl-mr-2 gl-flex-grow-1"
+          >
             {{ environment.name }}?
           </span>
         </template>

@@ -141,7 +141,7 @@ export default {
     widgetName: {
       type: String,
       required: true,
-      // see https://docs.gitlab.com/ee/development/fe_guide/merge_request_widgets.html#add-new-widgets
+      // see https://docs.gitlab.com/ee/development/fe_guide/merge_request_widget_extensions.html#add-new-widgets
       validator: (val) => val.startsWith(WIDGET_PREFIX),
     },
     telemetry: {
@@ -321,7 +321,7 @@ export default {
 
 <template>
   <section class="media-section" data-testid="widget-extension">
-    <div class="gl-flex gl-px-5 gl-py-4 gl-pr-4">
+    <div class="gl-px-5 gl-pr-4 gl-py-4 gl-display-flex">
       <status-icon
         :level="1"
         :name="widgetName"
@@ -329,21 +329,21 @@ export default {
         :icon-name="summaryStatusIcon"
       />
       <div
-        class="media-body gl-flex !gl-flex-row gl-self-center"
+        class="media-body gl-display-flex gl-flex-direction-row! gl-align-self-center"
         data-testid="widget-extension-top-level"
       >
-        <div class="gl-grow" data-testid="widget-extension-top-level-summary">
+        <div class="gl-flex-grow-1" data-testid="widget-extension-top-level-summary">
           <span v-if="summaryError">{{ summaryError }}</span>
           <slot v-else name="summary"
             ><div v-safe-html="isSummaryLoading ? loadingText : generatedSummary"></div>
             <div
               v-if="!isSummaryLoading && generatedSubSummary"
               v-safe-html="generatedSubSummary"
-              class="gl-text-sm gl-text-gray-700"
+              class="gl-font-sm gl-text-gray-700"
             ></div
           ></slot>
         </div>
-        <div class="gl-flex">
+        <div class="gl-display-flex">
           <help-popover
             v-if="helpPopover"
             icon="information-o"
@@ -360,7 +360,7 @@ export default {
                 v-if="helpPopover.content.learnMorePath"
                 :href="helpPopover.content.learnMorePath"
                 target="_blank"
-                class="gl-text-sm"
+                class="gl-font-sm"
                 >{{ $options.i18n.learnMore }}</gl-link
               >
             </template>
@@ -375,14 +375,14 @@ export default {
         </div>
         <div
           v-if="isCollapsible && !isSummaryLoading"
-          class="gl-ml-3 gl-h-6 gl-border-l-1 gl-border-gray-100 gl-pl-3 gl-border-l-solid"
+          class="gl-border-l-1 gl-border-l-solid gl-border-gray-100 gl-ml-3 gl-pl-3 gl-h-6"
         >
           <gl-button
             v-gl-tooltip
             :title="collapseButtonLabel"
             :aria-expanded="`${!isCollapsed}`"
             :aria-label="collapseButtonLabel"
-            :icon="isCollapsed ? 'chevron-down' : 'chevron-up'"
+            :icon="isCollapsed ? 'chevron-lg-down' : 'chevron-lg-up'"
             category="tertiary"
             data-testid="toggle-button"
             size="small"
@@ -393,13 +393,13 @@ export default {
     </div>
     <div
       v-if="!isCollapsed || contentError"
-      class="gl-border-t gl-relative gl-bg-gray-10"
+      class="gl-relative gl-bg-gray-10 gl-border-t"
       data-testid="widget-extension-collapsed-section"
     >
       <div v-if="isLoadingExpandedContent" class="report-block-container gl-text-center">
         <gl-loading-icon size="sm" inline /> {{ loadingText }}
       </div>
-      <div v-else class="gl-flex gl-pl-5" :class="{ 'gl-pr-5': $scopedSlots.content }">
+      <div v-else class="gl-pl-5 gl-display-flex" :class="{ 'gl-pr-5': $scopedSlots.content }">
         <content-row
           v-if="contentError"
           :level="2"

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe RegistrationsController, :with_current_organization, feature_category: :user_profile do
+RSpec.describe RegistrationsController, feature_category: :user_profile do
   include TermsHelper
   include FullNameHelper
 
@@ -209,6 +209,7 @@ RSpec.describe RegistrationsController, :with_current_organization, feature_cate
                   category: 'RegistrationsController',
                   action: 'accepted',
                   label: 'invite_email',
+                  property: member.id.to_s,
                   user: member.reload.user
                 )
               end
@@ -472,16 +473,6 @@ RSpec.describe RegistrationsController, :with_current_organization, feature_cate
       end
     end
 
-    context 'for system hooks' do
-      it 'executes user_create system hook' do
-        expect_next_instance_of(SystemHooksService) do |system_hook_service|
-          expect(system_hook_service).to receive(:execute_hooks_for).with(User.find_by(email: 'new@user.com'), :create)
-        end
-
-        expect { post_create }.to change { User.where(email: 'new@user.com').count }.from(0).to(1)
-      end
-    end
-
     context 'when the rate limit has been reached' do
       it 'returns status 429 Too Many Requests', :aggregate_failures do
         ip = '1.2.3.4'
@@ -512,6 +503,17 @@ RSpec.describe RegistrationsController, :with_current_organization, feature_cate
       expect(User.last.first_name).to eq(base_user_params[:first_name])
       expect(User.last.last_name).to eq(base_user_params[:last_name])
       expect(User.last.name).to eq full_name(base_user_params[:first_name], base_user_params[:last_name])
+    end
+
+    it 'sets the caller_id in the context' do
+      expect(controller).to receive(:create).and_wrap_original do |m, *args|
+        m.call(*args)
+
+        expect(Gitlab::ApplicationContext.current)
+          .to include('meta.caller_id' => 'RegistrationsController#create')
+      end
+
+      subject
     end
 
     context 'when the password is weak' do
@@ -715,6 +717,17 @@ RSpec.describe RegistrationsController, :with_current_organization, feature_cate
 
         expect_failure(s_('Profiles|You must accept the Terms of Service in order to perform this action.'))
       end
+    end
+
+    it 'sets the username and caller_id in the context' do
+      expect(controller).to receive(:destroy).and_wrap_original do |m, *args|
+        m.call(*args)
+
+        expect(Gitlab::ApplicationContext.current)
+          .to include('meta.user' => user.username, 'meta.caller_id' => 'RegistrationsController#destroy')
+      end
+
+      post :destroy
     end
   end
 end

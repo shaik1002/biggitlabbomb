@@ -909,6 +909,26 @@ describe('Api', () => {
     });
   });
 
+  describe('pipelineJobs', () => {
+    it.each([undefined, {}, { foo: true }])(
+      'fetches the jobs for a given pipeline given %p params',
+      async (params) => {
+        const projectId = 123;
+        const pipelineId = 456;
+        const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${projectId}/pipelines/${pipelineId}/jobs`;
+        const payload = [
+          {
+            name: 'test',
+          },
+        ];
+        mock.onGet(expectedUrl, { params }).reply(HTTP_STATUS_OK, payload);
+
+        const { data } = await Api.pipelineJobs(projectId, pipelineId, params);
+        expect(data).toEqual(payload);
+      },
+    );
+  });
+
   describe('createBranch', () => {
     it('creates new branch', () => {
       const ref = 'main';
@@ -927,31 +947,6 @@ describe('Api', () => {
       return Api.createBranch(dummyProjectPath, { ref, branch }).then(({ data }) => {
         expect(data.name).toBe(branch);
         expect(axios.post).toHaveBeenCalledWith(expectedUrl, { ref, branch });
-      });
-    });
-  });
-
-  describe('postMergeRequestPipeline', () => {
-    const dummyProjectId = 5;
-    const dummyMergeRequestIid = 123;
-    const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/5/merge_requests/123/pipelines`;
-
-    beforeEach(() => {
-      mock = new MockAdapter(axios);
-    });
-
-    it('creates a merge request pipeline async', () => {
-      jest.spyOn(axios, 'post');
-
-      mock.onPost(expectedUrl).replyOnce(HTTP_STATUS_OK, {
-        id: 456,
-      });
-
-      return Api.postMergeRequestPipeline(dummyProjectId, {
-        mergeRequestId: dummyMergeRequestIid,
-      }).then(({ data }) => {
-        expect(data.id).toBe(456);
-        expect(axios.post).toHaveBeenCalledWith(expectedUrl, { async: true });
       });
     });
   });
@@ -1567,6 +1562,15 @@ describe('Api', () => {
               headers,
             });
           });
+        });
+      });
+
+      describe('when internal event is called with unallowed additionalProperties', () => {
+        it('throws an error', () => {
+          expect(() => {
+            const unallowedProperties = { new_key: 'unallowed' };
+            Api.trackInternalEvent(event, unallowedProperties);
+          }).toThrow(/Disallowed additional properties were provided:/);
         });
       });
     });

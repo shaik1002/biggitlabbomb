@@ -2,11 +2,7 @@
 
 module QA
   RSpec.describe 'Package', :object_storage, :external_api_calls do
-    describe 'Maven project level endpoint', product_group: :package_registry, quarantine: {
-      type: :investigating,
-      issue: "https://gitlab.com/gitlab-org/gitlab/-/issues/471172",
-      only: { job: /gdk-qa-.*/ }
-    } do
+    describe 'Maven project level endpoint', product_group: :package_registry do
       include Runtime::Fixtures
       include Support::Helpers::MaskToken
 
@@ -19,9 +15,9 @@ module QA
       let(:package_project) { create(:project, :with_readme, :private, name: "#{package_type}_package_project") }
       let(:package) { build(:package, name: package_name, project: package_project) }
 
-      let!(:runner) do
+      let(:runner) do
         create(:project_runner,
-          name: "qa-runner-#{SecureRandom.hex(6)}",
+          name: "qa-runner-#{Time.now.to_i}",
           tags: ["runner-for-#{package_project.name}"],
           executor: :docker,
           project: package_project)
@@ -44,10 +40,13 @@ module QA
 
       before do
         Flow::Login.sign_in_unless_signed_in
+        runner
       end
 
       after do
         runner.remove_via_api!
+        package.remove_via_api!
+        package_project.remove_via_api!
       end
 
       where do
@@ -90,21 +89,28 @@ module QA
           settings_xml = ERB.new(read_fixture('package_managers/maven/project', 'settings.xml.erb'))
                                     .result(binding)
 
-          create(:commit, project: package_project, actions: [
-            { action: 'create', file_path: '.gitlab-ci.yml', content: gitlab_ci_yaml },
-            { action: 'create', file_path: 'pom.xml', content: pom_xml },
-            { action: 'create', file_path: 'settings.xml', content: settings_xml }
-          ])
+          Support::Retrier.retry_on_exception(max_attempts: 3, sleep_interval: 2) do
+            create(:commit, project: package_project, actions: [
+              { action: 'create', file_path: '.gitlab-ci.yml', content: gitlab_ci_yaml },
+              { action: 'create', file_path: 'pom.xml', content: pom_xml },
+              { action: 'create', file_path: 'settings.xml', content: settings_xml }
+            ])
+          end
 
           package_project.visit!
-          Flow::Pipeline.wait_for_pipeline_creation_via_api(project: package_project)
 
-          package_project.visit_job('deploy-and-install')
+          Flow::Pipeline.visit_latest_pipeline
+
+          Page::Project::Pipeline::Show.perform do |pipeline|
+            pipeline.click_job('deploy-and-install')
+          end
+
           Page::Project::Job::Show.perform do |job|
             expect(job).to be_successful(timeout: 800)
           end
 
           Page::Project::Menu.perform(&:go_to_package_registry)
+
           Page::Project::Packages::Index.perform do |index|
             expect(index).to have_package(package_name)
 

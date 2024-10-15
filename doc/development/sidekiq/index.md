@@ -132,16 +132,12 @@ If you need to perform an action when a job fails after all of its retry attempt
 
 ```ruby
 sidekiq_retries_exhausted do |msg, ex|
-  project = Project.find_by_id(msg['args'].first)
-  return unless project
-
+  project = Project.find(msg['args'].first)
   project.perform_a_rollback # handle the permanent failure
 end
 
 def perform(project_id)
-  project = Project.find_by_id(project_id)
-  return unless project
-
+  project = Project.find(project_id)
   project.some_action # throws an exception
 end
 ```

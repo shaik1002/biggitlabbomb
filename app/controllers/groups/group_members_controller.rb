@@ -13,14 +13,13 @@ class Groups::GroupMembersController < Groups::ApplicationController
   end
 
   # Authorize
-  before_action :authorize_owner_access!, only: :bulk_reassignment_file
   before_action :authorize_admin_group_member!, except: admin_not_required_endpoints
   before_action :authorize_read_group_member!, only: :index
 
   before_action only: [:index] do
-    push_frontend_feature_flag(:importer_user_mapping, current_user)
-    push_frontend_feature_flag(:importer_user_mapping_reassignment_csv, current_user)
+    push_frontend_feature_flag(:bulk_import_user_mapping, current_user)
     push_frontend_feature_flag(:service_accounts_crud, @group)
+    push_frontend_feature_flag(:webui_members_inherited_users, current_user)
   end
 
   skip_before_action :check_two_factor_requirement, only: :leave
@@ -45,27 +44,10 @@ class Groups::GroupMembersController < Groups::ApplicationController
     end
 
     @members = present_group_members(non_invited_members)
-    @placeholder_users_count = placeholder_users_count
 
     @requesters = present_members(
       AccessRequestsFinder.new(@group).execute(current_user)
     )
-  end
-
-  def bulk_reassignment_file
-    return render_404 unless Feature.enabled?(:importer_user_mapping_reassignment_csv, current_user)
-
-    csv_response = Import::SourceUsers::GenerateCsvService.new(membershipable, current_user: current_user).execute
-
-    if csv_response.success?
-      send_data(
-        csv_response.payload,
-        filename: "bulk_reassignments_for_namespace_#{membershipable.id}_#{Time.current.to_i}.csv",
-        type: 'text/csv; charset=utf-8'
-      )
-    else
-      redirect_back_or_default(options: { alert: csv_response.message })
-    end
   end
 
   # MembershipActions concern
@@ -73,18 +55,18 @@ class Groups::GroupMembersController < Groups::ApplicationController
 
   private
 
-  def members
-    @members ||= GroupMembersFinder
+  def group_members
+    @group_members ||= GroupMembersFinder
       .new(@group, current_user, params: filter_params)
       .execute(include_relations: requested_relations)
   end
 
   def invited_members
-    members.invite.with_invited_user_state
+    group_members.invite.with_invited_user_state
   end
 
   def non_invited_members
-    members.non_invite
+    group_members.non_invite
   end
 
   def present_invited_members(invited_members)
@@ -100,7 +82,7 @@ class Groups::GroupMembersController < Groups::ApplicationController
   end
 
   def filter_params
-    params.permit(:two_factor, :search, :user_type, :max_role).merge(sort: @sort)
+    params.permit(:two_factor, :search, :user_type).merge(sort: @sort)
   end
 
   def membershipable_members
@@ -115,10 +97,6 @@ class Groups::GroupMembersController < Groups::ApplicationController
     _("group")
   end
 
-  def source
-    group
-  end
-
   def members_page_url
     polymorphic_url([group, :members])
   end
@@ -126,25 +104,6 @@ class Groups::GroupMembersController < Groups::ApplicationController
   def root_params_key
     :group_member
   end
-
-  def placeholder_users_count
-    {
-      pagination: {
-        total_items: placeholder_users.count,
-        awaiting_reassignment_items: placeholder_users.awaiting_reassignment.count,
-        reassigned_items: placeholder_users.reassigned.count
-      }
-    }
-  end
-
-  def placeholder_users
-    if Feature.enabled?(:importer_user_mapping, current_user)
-      Import::SourceUsersFinder.new(@group, current_user).execute
-    else
-      Import::SourceUser.none
-    end
-  end
-  strong_memoize_attr :placeholder_users
 end
 
 Groups::GroupMembersController.prepend_mod_with('Groups::GroupMembersController')

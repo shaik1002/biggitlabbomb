@@ -1200,26 +1200,6 @@ RSpec.describe QuickActions::InterpretService, feature_category: :team_planning 
         it_behaves_like 'failed command', 'Could not apply unassign_reviewer command.'
       end
 
-      context 'with a not-yet-persisted merge request and a preceding assign_reviewer command' do
-        let(:content) do
-          <<-QUICKACTION
-/assign_reviewer #{developer.to_reference}
-/unassign_reviewer #{developer.to_reference}
-          QUICKACTION
-        end
-
-        let(:issuable) { build(:merge_request) }
-
-        it 'adds and then removes a single reviewer in a single step' do
-          _, updates, message = service.execute(content, issuable)
-          translated_string = _("Assigned %{developer_to_reference} as reviewer. Removed reviewer %{developer_to_reference}.")
-          formatted_message = format(translated_string, developer_to_reference: developer.to_reference.to_s)
-
-          expect(updates).to eq(reviewer_ids: [])
-          expect(message).to eq(formatted_message)
-        end
-      end
-
       context 'with anything after the command' do
         let(:content) { '/unassign_reviewer supercalifragilisticexpialidocious' }
 
@@ -1777,6 +1757,33 @@ RSpec.describe QuickActions::InterpretService, feature_category: :team_planning 
         let(:content) { '/due in 2 days' }
         let(:issuable) { issue }
         let(:expected_date) { 2.days.from_now.to_date }
+      end
+    end
+
+    context '/label command' do
+      context 'when target is a group level work item' do
+        let_it_be(:new_group) { create(:group, developers: developer) }
+        let_it_be(:group_level_work_item) { create(:work_item, :group_level, namespace: new_group) }
+        # this label should not be show on the list as belongs to another group
+        let_it_be(:invalid_label) { create(:group_label, title: 'not_from_group', group: group) }
+        let(:container) { new_group }
+
+        # This spec was introduced just to validate that the label finder scopes que query to a single group.
+        # The command checks that labels are available as part of the condition.
+        # Query was timing out in .com https://gitlab.com/gitlab-org/gitlab/-/issues/441123
+        it 'is not available when there are no labels associated with the group' do
+          expect(service.available_commands(group_level_work_item)).not_to include(a_hash_including(name: :label))
+        end
+
+        context 'when a label exists at the group level' do
+          before do
+            create(:group_label, group: new_group)
+          end
+
+          it 'is available' do
+            expect(service.available_commands(group_level_work_item)).to include(a_hash_including(name: :label))
+          end
+        end
       end
     end
 
@@ -2427,48 +2434,6 @@ RSpec.describe QuickActions::InterpretService, feature_category: :team_planning 
       end
     end
 
-    shared_examples 'only available when issue_or_work_item_feature_flag_enabled' do |command|
-      context 'when issue' do
-        it 'is available' do
-          _, explanations = service.explain(command, issue)
-
-          expect(explanations).not_to be_empty
-        end
-      end
-
-      context 'when project work item' do
-        let_it_be(:work_item) { create(:work_item, project: project) }
-
-        it 'is available' do
-          _, explanations = service.explain(command, work_item)
-
-          expect(explanations).not_to be_empty
-        end
-
-        context 'when feature flag disabled' do
-          before do
-            stub_feature_flags(work_items_alpha: false)
-          end
-
-          it 'is not available' do
-            _, explanations = service.explain(command, work_item)
-
-            expect(explanations).to be_empty
-          end
-        end
-      end
-
-      context 'when group work item' do
-        let_it_be(:work_item) { create(:work_item, :group_level) }
-
-        it 'is not available' do
-          _, explanations = service.explain(command, work_item)
-
-          expect(explanations).to be_empty
-        end
-      end
-    end
-
     describe 'add_email command' do
       let_it_be(:issuable) { issue }
 
@@ -2597,8 +2562,6 @@ RSpec.describe QuickActions::InterpretService, feature_category: :team_planning 
           expect(service.available_commands(issuable)).not_to include(a_hash_including(name: :add_email))
         end
       end
-
-      it_behaves_like 'only available when issue_or_work_item_feature_flag_enabled', '/add_email'
     end
 
     describe 'remove_email command' do

@@ -41,7 +41,7 @@ module API
                 tags %w[nuget_packages]
               end
               get 'index', format: :json, urgency: :low do
-                present ::Packages::Nuget::PackagesMetadataPresenter.new(find_packages),
+                present ::Packages::Nuget::PackagesMetadataPresenter.new(find_packages(params[:package_name])),
                   with: ::API::Entities::Nuget::PackagesMetadata
               end
 
@@ -60,7 +60,10 @@ module API
                   regexp: API::NO_SLASH_URL_PART_REGEX, documentation: { example: '1.0.0' }
               end
               get '*package_version', format: :json, urgency: :low do
-                present ::Packages::Nuget::PackageMetadataPresenter.new(find_package),
+                present ::Packages::Nuget::PackageMetadataPresenter.new(
+                  find_package(params[:package_name],
+                    params[:package_version])
+                ),
                   with: ::API::Entities::Nuget::PackageMetadata
               end
             end
@@ -90,13 +93,21 @@ module API
                 tags %w[nuget_packages]
               end
               get format: :json, urgency: :low do
+                search_options = {
+                  include_prerelease_versions: params[:prerelease],
+                  per_page: params[:take],
+                  padding: params[:skip]
+                }
+
+                results = search_packages(params[:q], search_options)
+
                 track_package_event(
                   'search_package',
                   :nuget,
                   **snowplow_gitlab_standard_context.merge(category: 'API::NugetPackages')
                 )
 
-                present ::Packages::Nuget::SearchResultsPresenter.new(search_packages),
+                present ::Packages::Nuget::SearchResultsPresenter.new(results),
                   with: ::API::Entities::Nuget::SearchResults
               end
             end

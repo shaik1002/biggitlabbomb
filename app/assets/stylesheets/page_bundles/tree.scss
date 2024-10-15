@@ -38,6 +38,10 @@
         float: left;
       }
 
+      .tree-ref-target-holder {
+        display: inline-block;
+      }
+
       .repo-breadcrumb {
         li:last-of-type {
           position: relative;
@@ -58,6 +62,12 @@
         left: inherit;
         right: 0;
       }
+    }
+
+    .add-to-tree-dropdown {
+      position: absolute;
+      left: 0;
+      right: 0;
     }
 
     .tree-controls {
@@ -106,7 +116,7 @@
       }
 
       td {
-        border-color: var(--gl-border-color-default);
+        border-color: var(--border-color, $border-color);
       }
 
       &:hover:not(.tree-truncated-warning) {
@@ -122,8 +132,8 @@
       &.selected {
         td {
           background: var(--gray-50, $gray-50);
-          border-top: 1px solid var(--gl-border-color-default);
-          border-bottom: 1px solid var(--gl-border-color-default);
+          border-top: 1px solid var(--border-color, $border-color);
+          border-bottom: 1px solid var(--border-color, $border-color);
         }
       }
 
@@ -151,7 +161,7 @@
 
       i,
       a {
-        color: var(--gl-text-color-default);
+        color: var(--gl-text-color, $gl-text-color);
       }
 
       img {

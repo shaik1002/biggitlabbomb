@@ -153,10 +153,6 @@ RSpec.describe Packages::Debian::Package, type: :model, feature_category: :packa
     it { is_expected.to contain_exactly(package1) }
   end
 
-  describe '.installable' do
-    it_behaves_like 'installable packages', :debian_package
-  end
-
   describe '#incoming?' do
     let(:package) { build(:debian_package) }
 

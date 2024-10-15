@@ -40,13 +40,12 @@ export const rateLimitStreamRequests = ({
     unsettled.push(consume);
     return promise.then((stream) => {
       const [first, second] = stream.tee();
+      // eslint-disable-next-line promise/no-nesting
       consumeReadableStream(first)
-        // eslint-disable-next-line promise/no-nesting
         .then(() => {
           unsettled.splice(unsettled.indexOf(consume), 1);
           res();
         })
-        // eslint-disable-next-line promise/no-nesting
         .catch(rej);
       return second;
     }, rej);

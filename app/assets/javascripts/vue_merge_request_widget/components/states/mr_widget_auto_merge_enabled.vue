@@ -19,7 +19,7 @@ export default {
       variables() {
         return this.mergeRequestQueryVariables;
       },
-      update: (data) => data.project,
+      update: (data) => data.project?.mergeRequest,
     },
   },
   components: {
@@ -51,17 +51,14 @@ export default {
       return this.$apollo.queries.state.loading && Object.keys(this.state).length === 0;
     },
     stateRemoveSourceBranch() {
-      if (!this.state.mergeRequest.shouldRemoveSourceBranch) return false;
+      if (!this.state.shouldRemoveSourceBranch) return false;
 
-      return (
-        this.state.mergeRequest.shouldRemoveSourceBranch ||
-        this.state.mergeRequest.forceRemoveSourceBranch
-      );
+      return this.state.shouldRemoveSourceBranch || this.state.forceRemoveSourceBranch;
     },
     canRemoveSourceBranch() {
       const { currentUserId } = this.mr;
-      const mergeUserId = getIdFromGraphQLId(this.state.mergeRequest.mergeUser?.id);
-      const canRemoveSourceBranch = this.state.mergeRequest.userPermissions.removeSourceBranch;
+      const mergeUserId = getIdFromGraphQLId(this.state.mergeUser?.id);
+      const canRemoveSourceBranch = this.state.userPermissions.removeSourceBranch;
 
       return (
         !this.stateRemoveSourceBranch && canRemoveSourceBranch && mergeUserId === currentUserId
@@ -106,7 +103,7 @@ export default {
     removeSourceBranch() {
       const options = {
         sha: this.mr.sha,
-        auto_merge_strategy: this.state.mergeRequest.autoMergeStrategy,
+        auto_merge_strategy: this.state.autoMergeStrategy,
         should_remove_source_branch: true,
       };
 
@@ -142,13 +139,10 @@ export default {
       </gl-skeleton-loader>
     </template>
     <template v-if="!loading">
-      <h4 class="gl-mr-3 gl-grow" data-testid="statusText">
+      <h4 class="gl-mr-3 gl-flex-grow-1" data-testid="statusText">
         <gl-sprintf :message="statusText" data-testid="statusText">
           <template #merge_author>
-            <mr-widget-author
-              v-if="state.mergeRequest.mergeUser"
-              :author="state.mergeRequest.mergeUser"
-            />
+            <mr-widget-author v-if="state.mergeUser" :author="state.mergeUser" />
           </template>
         </gl-sprintf>
       </h4>

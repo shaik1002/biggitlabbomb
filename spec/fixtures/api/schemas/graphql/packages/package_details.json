@@ -53,8 +53,7 @@
         "GOLANG",
         "RUBYGEMS",
         "DEBIAN",
-        "HELM",
-        "TERRAFORM_MODULE"
+        "HELM"
       ]
     },
     "tags": {
@@ -133,9 +132,6 @@
         },
         {
           "$ref": "./package_pypi_metadata.json"
-        },
-        {
-          "$ref": "./package_terraform_module_metadata.json"
         },
         {
           "type": "null"

@@ -420,7 +420,7 @@ describe('ErrorTrackingList', () => {
       expect(emptyStateComponent.isVisible()).toBe(true);
       expect(emptyStatePrimaryDescription.exists()).toBe(true);
       expect(emptyStateLinks.at(0).attributes('href')).toBe(
-        '/help/operations/integrated_error_tracking',
+        '/help/operations/error_tracking.html#integrated-error-tracking',
       );
     });
   });
@@ -532,9 +532,7 @@ describe('ErrorTrackingList', () => {
         });
 
         it('fetches the previous page of results', () => {
-          expect(
-            wrapper.find('[data-testid="gl-pagination-prev"]').attributes('aria-disabled'),
-          ).toBe(undefined);
+          expect(wrapper.find('.prev-page-item').attributes('aria-disabled')).toBe(undefined);
           findPagination().vm.$emit('input', currentPage - 1);
           expect(actions.fetchPaginatedResults).toHaveBeenCalled();
           expect(actions.fetchPaginatedResults).toHaveBeenLastCalledWith(

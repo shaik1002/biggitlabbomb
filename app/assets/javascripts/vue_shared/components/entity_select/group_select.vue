@@ -4,7 +4,7 @@ import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import axios from '~/lib/utils/axios_utils';
 import { normalizeHeaders, parseIntPagination } from '~/lib/utils/common_utils';
 import Api, { DEFAULT_PER_PAGE } from '~/api';
-import { groupsPath, initialSelectionPropValidator } from './utils';
+import { groupsPath } from './utils';
 import {
   GROUP_TOGGLE_TEXT,
   GROUP_HEADER_TEXT,
@@ -24,11 +24,6 @@ export default {
       required: false,
       default: () => ({}),
     },
-    block: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     label: {
       type: String,
       required: false,
@@ -43,10 +38,9 @@ export default {
       required: true,
     },
     initialSelection: {
-      type: [String, Number, Object],
+      type: String,
       required: false,
       default: null,
-      validator: initialSelectionPropValidator,
     },
     clearable: {
       type: Boolean,
@@ -62,11 +56,6 @@ export default {
       type: String, // Two supported values: `descendant_groups` and `subgroups` See app/assets/javascripts/vue_shared/components/entity_select/utils.js.
       required: false,
       default: null,
-    },
-    emptyText: {
-      type: String,
-      required: false,
-      default: GROUP_TOGGLE_TEXT,
     },
   },
   data() {
@@ -118,6 +107,7 @@ export default {
     },
   },
   i18n: {
+    toggleText: GROUP_TOGGLE_TEXT,
     selectGroup: GROUP_HEADER_TEXT,
   },
 };
@@ -131,10 +121,9 @@ export default {
     :initial-selection="initialSelection"
     :clearable="clearable"
     :header-text="$options.i18n.selectGroup"
-    :default-toggle-text="emptyText"
+    :default-toggle-text="$options.i18n.toggleText"
     :fetch-items="fetchGroups"
     :fetch-initial-selection="fetchInitialGroup"
-    :block="block"
     v-on="$listeners"
   >
     <template #error>

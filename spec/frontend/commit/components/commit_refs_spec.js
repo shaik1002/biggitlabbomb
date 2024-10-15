@@ -15,6 +15,7 @@ import CommitRefs from '~/projects/commit_box/info/components/commit_refs.vue';
 
 import {
   mockCommitReferencesResponse,
+  mockOnlyBranchesResponse,
   mockContainingBranchesResponse,
   refsListPropsMock,
 } from '../mock_data';
@@ -53,7 +54,7 @@ describe('Commit references component', () => {
     await createComponent();
   });
 
-  it('renders component correctly', () => {
+  it('renders component correcrly', () => {
     expect(findRefsLists()).toHaveLength(2);
   });
 
@@ -74,6 +75,11 @@ describe('Commit references component', () => {
     branchesList().vm.$emit(FETCH_CONTAINING_REFS_EVENT);
     await waitForPromises();
     expect(containingBranchesQueryHandler).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not render list when there is no branches or tags', async () => {
+    await createComponent(successQueryHandler(mockOnlyBranchesResponse));
+    expect(findRefsLists()).toHaveLength(1);
   });
 
   describe('with relative url', () => {

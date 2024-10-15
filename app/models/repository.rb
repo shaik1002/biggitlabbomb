@@ -275,10 +275,10 @@ class Repository
     false
   end
 
-  def rm_branch(user, branch_name, target_sha: nil)
+  def rm_branch(user, branch_name)
     before_remove_branch
 
-    raw_repository.rm_branch(branch_name, user: user, target_sha: target_sha)
+    raw_repository.rm_branch(branch_name, user: user)
 
     after_remove_branch
     true
@@ -313,14 +313,6 @@ class Repository
     !!raw_repository&.ref_exists?(ref)
   rescue ArgumentError
     false
-  end
-
-  def branch_or_tag?(ref)
-    return false unless exists?
-
-    ref = Gitlab::Git.ref_name(ref, types: 'heads|tags')
-
-    branch_exists?(ref) || tag_exists?(ref)
   end
 
   def search_branch_names(pattern)
@@ -457,6 +449,10 @@ class Repository
     expire_status_cache
 
     repository_event(:create_repository)
+
+    return unless project.present?
+
+    project.run_after_commit_or_now { Onboarding::ProgressWorker.perform_async(namespace_id, 'git_write') }
   end
 
   # Runs code just before a repository is deleted.
@@ -771,8 +767,8 @@ class Repository
   #
   # order_by: name|email|commits
   # sort: asc|desc default: 'asc'
-  def contributors(ref: nil, order_by: nil, sort: 'asc')
-    commits = self.commits(ref, limit: 2000, offset: 0, skip_merges: true)
+  def contributors(order_by: nil, sort: 'asc')
+    commits = self.commits(nil, limit: 2000, offset: 0, skip_merges: true)
 
     commits = commits.group_by(&:author_email).map do |email, commits|
       contributor = Gitlab::Contributor.new
@@ -889,11 +885,6 @@ class Repository
       options[:start_repository] = start_project.repository.raw_repository
     end
 
-    skip_target_sha = options.delete(:skip_target_sha)
-    unless skip_target_sha
-      options[:target_sha] = self.commit(options[:branch_name])&.sha
-    end
-
     with_cache_hooks { raw.commit_files(user, **options) }
   end
 
@@ -963,8 +954,6 @@ class Repository
     start_branch_name: nil, start_project: project,
     author_name: nil, author_email: nil, dry_run: false)
 
-    target_sha = find_branch(branch_name)&.dereferenced_target&.id if branch_name.present?
-
     with_cache_hooks do
       raw_repository.cherry_pick(
         user: user,
@@ -975,8 +964,7 @@ class Repository
         start_repository: start_project.repository.raw_repository,
         author_name: author_name,
         author_email: author_email,
-        dry_run: dry_run,
-        target_sha: target_sha
+        dry_run: dry_run
       )
     end
   end
@@ -1117,10 +1105,6 @@ class Repository
 
   def lfsconfig_for(sha)
     blob_data_at(sha, '.lfsconfig')
-  end
-
-  def has_gitattributes?
-    blob_data_at('HEAD', '.gitattributes').present?
   end
 
   def changelog_config(ref, path)

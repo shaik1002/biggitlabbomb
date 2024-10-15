@@ -72,9 +72,6 @@ module QA
           wait_until(reload: false) do
             has_element?('content-editor')
           end
-
-          # Remove once tabindex error is fixed: https://gitlab.com/gitlab-org/gitlab/-/issues/493891
-          sleep 2
         end
       end
     end

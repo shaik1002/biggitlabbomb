@@ -3,8 +3,7 @@
 require 'spec_helper'
 require_migration!
 
-RSpec.describe QueueMigrateOsSbomOccurrencesToComponentsWithoutPrefix, migration: :gitlab_sec,
-  feature_category: :software_composition_analysis do
+RSpec.describe QueueMigrateOsSbomOccurrencesToComponentsWithoutPrefix, feature_category: :software_composition_analysis do
   let!(:batched_migration) { described_class::MIGRATION }
 
   it 'schedules a new batched migration' do
@@ -19,8 +18,7 @@ RSpec.describe QueueMigrateOsSbomOccurrencesToComponentsWithoutPrefix, migration
           column_name: :id,
           interval: described_class::DELAY_INTERVAL,
           batch_size: described_class::BATCH_SIZE,
-          sub_batch_size: described_class::SUB_BATCH_SIZE,
-          gitlab_schema: :gitlab_sec
+          sub_batch_size: described_class::SUB_BATCH_SIZE
         )
       }
     end

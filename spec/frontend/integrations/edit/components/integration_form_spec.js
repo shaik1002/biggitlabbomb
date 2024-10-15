@@ -230,7 +230,7 @@ describe('IntegrationForm', () => {
           createComponent({
             customStateProps: {
               sections: [mockSectionConnection],
-              manualActivation: true,
+              showActive: true,
               initialActivated: false,
             },
           });
@@ -269,18 +269,18 @@ describe('IntegrationForm', () => {
 
   describe('ActiveCheckbox', () => {
     describe.each`
-      manualActivation
+      showActive
       ${true}
       ${false}
-    `('when `manualActivation` is $manualActivation', ({ manualActivation }) => {
-      it(`${manualActivation ? 'renders' : 'does not render'} ActiveCheckbox`, () => {
+    `('when `showActive` is $showActive', ({ showActive }) => {
+      it(`${showActive ? 'renders' : 'does not render'} ActiveCheckbox`, () => {
         createComponent({
           customStateProps: {
-            manualActivation,
+            showActive,
           },
         });
 
-        expect(findActiveCheckbox().exists()).toBe(manualActivation);
+        expect(findActiveCheckbox().exists()).toBe(showActive);
       });
     });
 
@@ -294,7 +294,7 @@ describe('IntegrationForm', () => {
         beforeEach(() => {
           createComponent({
             customStateProps: {
-              manualActivation: true,
+              showActive: true,
               initialActivated: false,
             },
           });
@@ -313,7 +313,7 @@ describe('IntegrationForm', () => {
     const prepareComponentAndSave = async (initialActivated = true, checkValidityReturn) => {
       createComponent({
         customStateProps: {
-          manualActivation: true,
+          showActive: true,
           initialActivated,
           fields: [mockField],
         },
@@ -370,7 +370,7 @@ describe('IntegrationForm', () => {
       beforeEach(async () => {
         createComponent({
           customStateProps: {
-            manualActivation: true,
+            showActive: true,
             fields: [mockField],
           },
           mountFn: mountExtended,
@@ -396,7 +396,7 @@ describe('IntegrationForm', () => {
       beforeEach(() => {
         createComponent({
           customStateProps: {
-            manualActivation: true,
+            showActive: true,
             testPath: mockTestPath,
           },
           mountFn: mountExtended,

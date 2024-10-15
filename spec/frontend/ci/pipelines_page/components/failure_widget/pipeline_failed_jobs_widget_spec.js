@@ -1,5 +1,4 @@
-import { GlButton } from '@gitlab/ui';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
+import { GlButton, GlCard, GlIcon, GlPopover } from '@gitlab/ui';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import PipelineFailedJobsWidget from '~/ci/pipelines_page/components/failure_widget/pipeline_failed_jobs_widget.vue';
 import FailedJobsList from '~/ci/pipelines_page/components/failure_widget/failed_jobs_list.vue';
@@ -31,13 +30,26 @@ describe('PipelineFailedJobsWidget component', () => {
         ...defaultProvide,
         ...provide,
       },
-      stubs: { CrudComponent },
+      stubs: { GlCard },
     });
   };
 
+  const findFailedJobsCard = () => wrapper.findByTestId('failed-jobs-card');
   const findFailedJobsButton = () => wrapper.findComponent(GlButton);
   const findFailedJobsList = () => wrapper.findAllComponents(FailedJobsList);
-  const findCrudComponent = () => wrapper.findComponent(CrudComponent);
+  const findInfoIcon = () => wrapper.findComponent(GlIcon);
+  const findInfoPopover = () => wrapper.findComponent(GlPopover);
+
+  describe('when there are no failed jobs', () => {
+    beforeEach(() => {
+      createComponent({ props: { failedJobsCount: 0 } });
+    });
+
+    it('renders the show failed jobs button with a count of 0', () => {
+      expect(findFailedJobsButton().exists()).toBe(true);
+      expect(findFailedJobsButton().text()).toBe('Failed jobs (0)');
+    });
+  });
 
   describe('when there are failed jobs', () => {
     beforeEach(() => {
@@ -46,7 +58,15 @@ describe('PipelineFailedJobsWidget component', () => {
 
     it('renders the show failed jobs button with correct count', () => {
       expect(findFailedJobsButton().exists()).toBe(true);
-      expect(findFailedJobsButton().text()).toContain(`${defaultProps.failedJobsCount}`);
+      expect(findFailedJobsButton().text()).toBe(`Failed jobs (${defaultProps.failedJobsCount})`);
+    });
+
+    it('renders the info icon', () => {
+      expect(findInfoIcon().exists()).toBe(true);
+    });
+
+    it('renders the info popover', () => {
+      expect(findInfoPopover().exists()).toBe(true);
     });
 
     it('does not render the failed jobs widget', () => {
@@ -54,7 +74,7 @@ describe('PipelineFailedJobsWidget component', () => {
     });
   });
 
-  const CSS_BORDER_CLASSES = 'is-collapsed gl-border-white hover:gl-border-gray-100';
+  const CSS_BORDER_CLASSES = 'gl-border-white gl-hover-border-gray-100';
 
   describe('when the job button is clicked', () => {
     beforeEach(async () => {
@@ -67,11 +87,7 @@ describe('PipelineFailedJobsWidget component', () => {
     });
 
     it('removes the CSS border classes', () => {
-      expect(findCrudComponent().attributes('class')).not.toContain(CSS_BORDER_CLASSES);
-    });
-
-    it('the failed jobs button has the correct "aria-expanded" attribute value', () => {
-      expect(findFailedJobsButton().attributes('aria-expanded')).toBe('true');
+      expect(findFailedJobsCard().attributes('class')).not.toContain(CSS_BORDER_CLASSES);
     });
   });
 
@@ -81,11 +97,7 @@ describe('PipelineFailedJobsWidget component', () => {
     });
 
     it('has the CSS border classes', () => {
-      expect(findCrudComponent().attributes('class')).toContain(CSS_BORDER_CLASSES);
-    });
-
-    it('the failed jobs button has the correct "aria-expanded" attribute value', () => {
-      expect(findFailedJobsButton().attributes('aria-expanded')).toBe('false');
+      expect(findFailedJobsCard().attributes('class')).toContain(CSS_BORDER_CLASSES);
     });
   });
 
@@ -120,17 +132,6 @@ describe('PipelineFailedJobsWidget component', () => {
 
         expect(findFailedJobsButton().text()).toContain(String(newJobCount));
       });
-    });
-  });
-
-  describe('"aria-controls" attribute', () => {
-    it('is set and identifies the correct element', () => {
-      createComponent();
-
-      expect(findFailedJobsButton().attributes('aria-controls')).toBe(
-        'pipeline-failed-jobs-widget',
-      );
-      expect(findCrudComponent().attributes('id')).toBe('pipeline-failed-jobs-widget');
     });
   });
 });

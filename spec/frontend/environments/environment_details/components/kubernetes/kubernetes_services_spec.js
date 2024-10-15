@@ -85,14 +85,24 @@ describe('~/environments/environment_details/components/kubernetes/kubernetes_se
       expect(findWorkloadTable().props('items')).toMatchObject(mockServicesTableItems);
     });
 
-    it('emits select-item event on item select', async () => {
+    it('emits show-resource-details event on item select', async () => {
       createWrapper();
       await waitForPromises();
 
-      expect(wrapper.emitted('select-item')).toBeUndefined();
+      expect(wrapper.emitted('show-resource-details')).toBeUndefined();
 
       findWorkloadTable().vm.$emit('select-item', mockServicesTableItems[0]);
-      expect(wrapper.emitted('select-item')).toEqual([[mockServicesTableItems[0]]]);
+      expect(wrapper.emitted('show-resource-details')).toEqual([[mockServicesTableItems[0]]]);
+    });
+
+    it('emits remove-selection event when receives it from the WorkloadTable component', async () => {
+      createWrapper();
+      await waitForPromises();
+
+      expect(wrapper.emitted('remove-selection')).toBeUndefined();
+
+      findWorkloadTable().vm.$emit('remove-selection');
+      expect(wrapper.emitted('remove-selection')).toHaveLength(1);
     });
 
     it('emits an error message when gets an error from the cluster_client API', async () => {

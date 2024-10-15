@@ -33,6 +33,14 @@ RSpec.describe WikiPage, feature_category: :wiki do
     build(:wiki_page, wiki_page_attrs)
   end
 
+  def disable_front_matter
+    stub_feature_flags(Gitlab::WikiPages::FrontMatterParser::FEATURE_FLAG => false)
+  end
+
+  def enable_front_matter_for(thing)
+    stub_feature_flags(Gitlab::WikiPages::FrontMatterParser::FEATURE_FLAG => thing)
+  end
+
   def force_wiki_change_branch
     old_default_branch = wiki.default_branch
     wiki.repository.add_branch(user, 'another_branch', old_default_branch)
@@ -83,6 +91,22 @@ RSpec.describe WikiPage, feature_category: :wiki do
 
       it 'strips the front matter from the content' do
         expect(wiki_page.content.strip).to eq('My actual content')
+      end
+
+      context 'the feature flag is off' do
+        before do
+          disable_front_matter
+        end
+
+        it_behaves_like 'a page without front-matter'
+
+        context 'but enabled for the container' do
+          before do
+            enable_front_matter_for(container)
+          end
+
+          it_behaves_like 'a page with front-matter'
+        end
       end
     end
 
@@ -419,25 +443,6 @@ RSpec.describe WikiPage, feature_category: :wiki do
         expect(wiki.find_page(title).content).to eq(page.content)
       end
     end
-
-    context 'when the repository fails' do
-      it 'do not create the page if the repository raise an error' do
-        page = build_wiki_page(container)
-
-        allow(Gitlab::GitalyClient).to receive(:call) do
-          raise GRPC::Unavailable, 'Gitaly broken in this spec'
-        end
-
-        saved = page.create(attributes)
-
-        # unstub
-        allow(Gitlab::GitalyClient).to receive(:call).and_call_original
-
-        expect(saved).to be(false)
-        expect(page.errors.messages[:base]).to include(/Gitaly broken in this spec/)
-        expect(wiki.find_page(title)).to be_nil
-      end
-    end
   end
 
   describe "dot in the title" do
@@ -518,6 +523,29 @@ RSpec.describe WikiPage, feature_category: :wiki do
 
           it 'raises an error' do
             expect { subject.update(front_matter: new_front_matter) }.to raise_error(described_class::FrontMatterTooLong)
+          end
+        end
+
+        context 'the front-matter feature flag is not enabled' do
+          before do
+            disable_front_matter
+          end
+
+          it 'does not update the front-matter' do
+            content = subject.content
+            subject.update(front_matter: { slugs: ['x'] })
+
+            page = wiki.find_page(subject.title)
+
+            expect([subject, page]).to all(have_attributes(front_matter: be_empty, content: content))
+          end
+
+          context 'but it is enabled for the container' do
+            before do
+              enable_front_matter_for(container)
+            end
+
+            it_behaves_like 'able to update front-matter'
           end
         end
 
@@ -680,28 +708,6 @@ RSpec.describe WikiPage, feature_category: :wiki do
         expect(page.content).to eq 'test content'
       end
     end
-
-    context 'when the repository fails' do
-      it 'do not update the page if the repository raise an error' do
-        page = create_wiki_page(container)
-
-        allow(Gitlab::GitalyClient).to receive(:call) do
-          raise GRPC::Unavailable, 'Gitaly broken in this spec'
-        end
-
-        saved = page.update(content: "new content")
-
-        # unstub
-        allow(Gitlab::GitalyClient).to receive(:call).and_call_original
-
-        expect(saved).to be(false)
-        expect(page.errors.messages[:base]).to include(/Gitaly broken in this spec/)
-
-        page_found = wiki.find_page(original_title)
-
-        expect(page_found.content).to eq 'test content'
-      end
-    end
   end
 
   describe "#delete" do
@@ -711,25 +717,6 @@ RSpec.describe WikiPage, feature_category: :wiki do
       expect do
         expect(page.delete).to eq(true)
       end.to change { wiki.list_pages.length }.by(-1)
-    end
-
-    context 'when the repository fails' do
-      it 'do not delete the page if the repository raise an error' do
-        page = create_wiki_page(container)
-
-        allow(Gitlab::GitalyClient).to receive(:call) do
-          raise GRPC::Unavailable, 'Gitaly broken in this spec'
-        end
-
-        deleted = page.delete
-
-        # unstub
-        allow(Gitlab::GitalyClient).to receive(:call).and_call_original
-
-        expect(deleted).to be(false)
-        expect(wiki.error_message).to match(/Gitaly broken in this spec/)
-        expect(wiki.list_pages.length).to be(1)
-      end
     end
   end
 
@@ -1125,8 +1112,20 @@ RSpec.describe WikiPage, feature_category: :wiki do
       let(:content_with_front_matter_title) { "---\ntitle: #{front_matter_title}\n---\nHome Page" }
       let(:wiki_page) { create(:wiki_page, container: container, content: content_with_front_matter_title) }
 
-      it 'returns the front matter title' do
-        expect(wiki_page.human_title).to eq front_matter_title
+      context "when wiki_front_matter_title enabled" do
+        it 'returns the front matter title' do
+          expect(wiki_page.human_title).to eq front_matter_title
+        end
+      end
+
+      context "when wiki_front_matter_title disabled" do
+        before do
+          stub_feature_flags(wiki_front_matter_title: false)
+        end
+
+        it 'returns the page title' do
+          expect(wiki_page.human_title).to eq wiki_page.title
+        end
       end
     end
   end

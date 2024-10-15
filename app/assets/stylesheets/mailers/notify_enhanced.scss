@@ -13,7 +13,7 @@
 
 // @gitlab/ui variables, mixins, functions
 @import '@gitlab/ui/src/scss/variables';
-@import '@gitlab/ui/src/scss/mixins';
+@import '@gitlab/ui/src/scss/utility-mixins/index';
 
 // @gitlab/ui styles
 @import '@gitlab/ui/src/components/base/icon/icon';
@@ -36,12 +36,10 @@ pre {
   font-size: 14px;
 }
 
-// stylelint-disable-next-line gitlab/no-gl-class
 .gl-mb-5 {
   margin-bottom: $gl-spacing-scale-5;
 }
 
-// stylelint-disable-next-line gitlab/no-gl-class
 .gl-mt-5 {
   margin-top: $gl-spacing-scale-5;
 }

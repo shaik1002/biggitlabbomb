@@ -32,10 +32,10 @@ export default {
 
 <template>
   <div
-    class="gl-align-items-top gl-flex gl-break-all gl-text-sm gl-font-monospace"
+    class="gl-display-flex gl-align-items-top gl-font-monospace gl-font-sm gl-break-all"
     :class="[padding, borderClass]"
   >
-    <div v-if="icon" class="gl-mr-4 gl-w-5">
+    <div v-if="icon" class="gl-w-5 gl-mr-4">
       <gl-icon :name="icon" />
     </div>
     <div>

@@ -39,7 +39,6 @@ RSpec.describe GitlabSchema.types['AlertManagementAlert'], feature_category: :in
       environment
       web_url
       commenters
-      name
     ]
 
     expect(described_class).to have_graphql_fields(*expected_fields)

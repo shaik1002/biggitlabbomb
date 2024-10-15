@@ -141,20 +141,19 @@ module CounterAttribute
     end
   end
 
-  def update_counters(increments)
-    self.class.update_counters(id, increments)
-  end
-
   def update_counters_with_lease(increments)
     detect_race_on_record(log_fields: { caller: __method__, attributes: increments.keys }) do
-      update_counters(increments)
+      self.class.update_counters(id, increments)
     end
   end
 
   def initiate_refresh!(attribute)
     raise ArgumentError, %(attribute "#{attribute}" cannot be refreshed) unless counter_attribute_enabled?(attribute)
 
-    counter(attribute).initiate_refresh!
+    detect_race_on_record(log_fields: { caller: __method__, attributes: attribute }) do
+      counter(attribute).initiate_refresh!
+    end
+
     log_clear_counter(attribute)
   end
 
@@ -192,9 +191,10 @@ module CounterAttribute
     "project:{#{project_id}}:#{self.class}:#{id}"
   end
 
-  # This method uses a lease to monitor access to the model row.
-  # This is needed to detect concurrent attempts to increment columns,
-  # which could result in a race condition.
+  # detect_race_on_record uses a lease to monitor access
+  # to the project statistics row. This is needed to detect
+  # concurrent attempts to increment columns, which could result in a
+  # race condition.
   #
   # As the purpose is to detect and warn concurrent attempts,
   # it falls back to direct update on the row if it fails to obtain the lease.
