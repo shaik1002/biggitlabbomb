@@ -119,6 +119,7 @@ RSpec.describe ProjectsHelper, feature_category: :source_code_management do
   end
 
   describe '#can_set_diff_preview_in_email?' do
+    stub_feature_flags(diff_preview_in_email: true)
     let_it_be(:user) { create(:project_member, :maintainer, user: create(:user), project: project).user }
 
     it 'returns true for the project owner' do
@@ -247,7 +248,7 @@ RSpec.describe ProjectsHelper, feature_category: :source_code_management do
   describe '#show_no_ssh_key_message?' do
     context 'user has no keys' do
       it 'returns true' do
-        expect(helper.show_no_ssh_key_message?(project)).to be_truthy
+        expect(helper.show_no_ssh_key_message?).to be_truthy
       end
     end
 
@@ -255,7 +256,7 @@ RSpec.describe ProjectsHelper, feature_category: :source_code_management do
       it 'returns false' do
         create(:personal_key, user: user)
 
-        expect(helper.show_no_ssh_key_message?(project)).to be_falsey
+        expect(helper.show_no_ssh_key_message?).to be_falsey
       end
     end
   end
@@ -300,7 +301,7 @@ RSpec.describe ProjectsHelper, feature_category: :source_code_management do
       it 'returns message prompting user to set password or set up a PAT' do
         stub_application_setting(password_authentication_enabled_for_git?: true)
 
-        expect(helper.no_password_message).to eq('Your account is authenticated with SSO or SAML. To push and pull over HTTP with Git using this account, you must <a href="/-/user_settings/password/edit">set a password</a> or <a href="/-/user_settings/personal_access_tokens">set up a personal access token</a> to use instead of a password.')
+        expect(helper.no_password_message).to eq('Your account is authenticated with SSO or SAML. To <a href="/help/topics/git/terminology#pull-and-push" target="_blank" rel="noopener noreferrer">push and pull</a> over HTTP with Git using this account, you must <a href="/-/user_settings/password/edit">set a password</a> or <a href="/-/user_settings/personal_access_tokens">set up a Personal Access Token</a> to use instead of a password. For more information, see <a href="/help/gitlab-basics/start-using-git#clone-with-https" target="_blank" rel="noopener noreferrer">Clone with HTTPS</a>.')
       end
     end
 
@@ -308,7 +309,7 @@ RSpec.describe ProjectsHelper, feature_category: :source_code_management do
       it 'returns message prompting user to set up a PAT' do
         stub_application_setting(password_authentication_enabled_for_git?: false)
 
-        expect(helper.no_password_message).to eq('Your account is authenticated with SSO or SAML. To push and pull over HTTP with Git using this account, you must <a href="/-/user_settings/personal_access_tokens">set up a personal access token</a> to use instead of a password.')
+        expect(helper.no_password_message).to eq('Your account is authenticated with SSO or SAML. To <a href="/help/topics/git/terminology#pull-and-push" target="_blank" rel="noopener noreferrer">push and pull</a> over HTTP with Git using this account, you must <a href="/-/user_settings/personal_access_tokens">set up a Personal Access Token</a> to use instead of a password. For more information, see <a href="/help/gitlab-basics/start-using-git#clone-with-https" target="_blank" rel="noopener noreferrer">Clone with HTTPS</a>.')
       end
     end
   end
@@ -354,13 +355,13 @@ RSpec.describe ProjectsHelper, feature_category: :source_code_management do
 
     describe 'using the default options' do
       it 'returns an HTML link to the user' do
-        link = helper.link_to_member(user)
+        link = helper.link_to_member(project, user)
 
         expect(link).to match(%r{/#{user.username}})
       end
 
       it 'HTML escapes the name of the user' do
-        link = helper.link_to_member(user)
+        link = helper.link_to_member(project, user)
 
         expect(link).to include(ERB::Util.html_escape(user.name))
         expect(link).not_to include(user.name)
@@ -369,7 +370,7 @@ RSpec.describe ProjectsHelper, feature_category: :source_code_management do
 
     context 'when user is nil' do
       it 'returns "(deleted)"' do
-        link = helper.link_to_member(nil)
+        link = helper.link_to_member(project, nil)
 
         expect(link).to eq("(deleted)")
       end
@@ -433,10 +434,6 @@ RSpec.describe ProjectsHelper, feature_category: :source_code_management do
 
     it 'returns false when there are no projects and there is no name' do
       expect(helper.show_projects?(Project.none, {})).to eq(false)
-    end
-
-    it 'returns true when there are no projects but archived param is "only"' do
-      expect(helper.show_projects?(Project.none, archived: 'only')).to eq(true)
     end
   end
 
@@ -875,54 +872,6 @@ RSpec.describe ProjectsHelper, feature_category: :source_code_management do
     end
   end
 
-  describe '#show_lfs_misconfiguration_banner?' do
-    before do
-      allow(project).to receive(:lfs_enabled?).and_return(true)
-    end
-
-    subject { helper.show_lfs_misconfiguration_banner?(project) }
-
-    it { is_expected.to be_falsey }
-
-    context 'when the project contains an lfs_object' do
-      before do
-        create(:lfs_objects_project, project: project)
-      end
-
-      context 'when it does not have a .gitattributes file' do
-        before do
-          allow(project.repository).to receive(:has_gitattributes?).and_return(false)
-        end
-
-        it { is_expected.to be_truthy }
-
-        context 'when lfs is not enabled' do
-          before do
-            allow(project).to receive(:lfs_enabled?).and_return(false)
-          end
-
-          it { is_expected.to be_falsey }
-        end
-
-        context 'when lfs_misconfiguration_banner feature flag is disabled' do
-          before do
-            stub_feature_flags(lfs_misconfiguration_banner: false)
-          end
-
-          it { is_expected.to be_falsey }
-        end
-      end
-
-      context 'when it does have a .gitattributes file' do
-        before do
-          allow(project.repository).to receive(:has_gitattributes?).and_return(true)
-        end
-
-        it { is_expected.to be_falsey }
-      end
-    end
-  end
-
   describe '#project_title' do
     subject { helper.project_title(project) }
 
@@ -952,7 +901,7 @@ RSpec.describe ProjectsHelper, feature_category: :source_code_management do
     end
 
     it 'includes project_permissions_settings' do
-      settings = subject[:currentSettings]
+      settings = subject.dig(:currentSettings)
 
       expect(settings).to include(
         packagesEnabled: !!project.packages_enabled,
@@ -1238,6 +1187,13 @@ RSpec.describe ProjectsHelper, feature_category: :source_code_management do
   describe '#home_panel_data_attributes' do
     using RSpec::Parameterized::TableSyntax
 
+    before do
+      allow(helper).to receive(:groups_projects_more_actions_dropdown_data).and_return(nil)
+      allow(helper).to receive(:fork_button_data_attributes).and_return(nil)
+      allow(helper).to receive(:notification_data_attributes).and_return(nil)
+      allow(helper).to receive(:star_count_data_attributes).and_return({})
+    end
+
     where(:can_read_project, :is_empty_repo, :is_admin, :has_admin_path) do
       true  | true  | true  | true
       false | false | true  | true
@@ -1246,55 +1202,26 @@ RSpec.describe ProjectsHelper, feature_category: :source_code_management do
     end
 
     with_them do
-      before do
-        allow(helper).to receive(:groups_projects_more_actions_dropdown_data).and_return(nil)
-        allow(helper).to receive(:fork_button_data_attributes).and_return(nil)
-        allow(helper).to receive(:notification_data_attributes).and_return(nil)
-        allow(helper).to receive(:star_count_data_attributes).and_return({})
-        allow(helper).to receive(:can?).with(user, :read_project, project).and_return(can_read_project)
-        allow(project).to receive(:empty_repo?).and_return(is_empty_repo)
-        allow(user).to receive(:can_admin_all_resources?).and_return(is_admin)
+      context "returns default user project details" do
+        before do
+          allow(helper).to receive(:can?).with(user, :read_project, project).and_return(can_read_project)
+          allow(project).to receive(:empty_repo?).and_return(is_empty_repo)
+          allow(user).to receive(:can_admin_all_resources?).and_return(is_admin)
+        end
+
+        let(:expected) do
+          {
+            admin_path: (admin_project_path(project) if has_admin_path),
+            can_read_project: can_read_project.to_s,
+            is_project_empty: is_empty_repo.to_s,
+            project_id: project.id
+          }
+        end
+
+        subject { helper.home_panel_data_attributes }
+
+        it { is_expected.to eq(expected) }
       end
-
-      let(:expected) do
-        {
-          admin_path: (admin_project_path(project) if has_admin_path),
-          can_read_project: can_read_project.to_s,
-          cicd_catalog_path: nil,
-          is_project_archived: "false",
-          project_avatar: nil,
-          is_project_empty: is_empty_repo.to_s,
-          project_id: project.id,
-          project_name: project.name,
-          project_visibility_level: "private"
-        }
-      end
-
-      subject { helper.home_panel_data_attributes }
-
-      it { is_expected.to include(expected) }
-    end
-  end
-
-  describe '#visibility_level_name' do
-    using RSpec::Parameterized::TableSyntax
-
-    where(:banned_user, :feature_flag_enabled, :expected) do
-      true  | true  | 'banned'
-      false | false | 'private'
-      true  | false | 'private'
-      false | true  | 'private'
-    end
-
-    with_them do
-      before do
-        stub_feature_flags(hide_projects_of_banned_users: feature_flag_enabled)
-        allow(project).to receive(:created_and_owned_by_banned_user?).and_return(banned_user)
-      end
-
-      subject { visibility_level_name(project) }
-
-      it { is_expected.to eq(expected) }
     end
   end
 
@@ -1945,24 +1872,14 @@ RSpec.describe ProjectsHelper, feature_category: :source_code_management do
     end
   end
 
-  describe '#projects_filtered_search_and_sort_app_data' do
+  describe '#projects_explore_filtered_search_and_sort_app_data' do
     it 'returns expected json' do
-      expect(Gitlab::Json.parse(helper.projects_filtered_search_and_sort_app_data)).to eq(
+      expect(Gitlab::Json.parse(helper.projects_explore_filtered_search_and_sort_app_data)).to eq(
         {
           'initial_sort' => 'created_desc',
           'programming_languages' => ProgrammingLanguage.most_popular,
-          'paths_to_exclude_sort_on' => [starred_explore_projects_path, explore_root_path]
-        }
-      )
-    end
-  end
-
-  describe '#dashboard_projects_app_data' do
-    it 'returns expected json' do
-      expect(Gitlab::Json.parse(helper.dashboard_projects_app_data)).to eq(
-        {
-          'initial_sort' => 'created_desc',
-          'programming_languages' => ProgrammingLanguage.most_popular
+          'starred_explore_projects_path' => starred_explore_projects_path,
+          'explore_root_path' => explore_root_path
         }
       )
     end

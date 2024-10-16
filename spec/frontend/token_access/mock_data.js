@@ -142,7 +142,6 @@ export const inboundJobTokenScopeEnabledResponse = {
   data: {
     project: {
       id: 1,
-      name: 'Test project',
       ciCdSettings: {
         inboundJobTokenScopeEnabled: true,
         __typename: 'ProjectCiCdSetting',
@@ -156,7 +155,6 @@ export const inboundJobTokenScopeDisabledResponse = {
   data: {
     project: {
       id: 1,
-      name: 'Test project',
       ciCdSettings: {
         inboundJobTokenScopeEnabled: false,
         __typename: 'ProjectCiCdSetting',
@@ -238,23 +236,6 @@ export const inboundGroupsAndProjectsWithScopeResponseWithAddedItem = {
   },
 };
 
-export const getGroupsAndProjectsResponse = {
-  data: {
-    groups: {
-      nodes: [
-        { id: 1, name: 'gitlab-org', avatarUrl: '', fullPath: 'gitlab-org' },
-        { id: 2, name: 'ci-group', avatarUrl: '', fullPath: 'root/ci-group' },
-      ],
-    },
-    projects: {
-      nodes: [
-        { id: 1, name: 'gitlab', avatarUrl: '', fullPath: 'gitlab-org/gitlab' },
-        { id: 2, name: 'ci-project', avatarUrl: '', fullPath: 'root/ci-project' },
-      ],
-    },
-  },
-};
-
 export const inboundAddGroupOrProjectSuccessResponse = {
   data: {
     ciJobTokenScopeAddProject: {
@@ -294,33 +275,3 @@ export const inboundUpdateScopeSuccessResponse = {
     },
   },
 };
-
-export const mockPermissionsQueryResponse = (pushRepositoryForJobTokenAllowed = false) => ({
-  data: {
-    project: {
-      id: 'gid://gitlab/Project/20',
-      name: 'ops',
-      ciCdSettings: {
-        pushRepositoryForJobTokenAllowed,
-        __typename: 'ProjectCiCdSetting',
-      },
-      __typename: 'Project',
-    },
-  },
-});
-
-export const mockPermissionsMutationResponse = ({
-  pushRepositoryForJobTokenAllowed = true,
-  errors = [],
-} = {}) => ({
-  data: {
-    projectCiCdSettingsUpdate: {
-      ciCdSettings: {
-        pushRepositoryForJobTokenAllowed,
-        __typename: 'ProjectCiCdSetting',
-      },
-      errors,
-      __typename: 'Project',
-    },
-  },
-});

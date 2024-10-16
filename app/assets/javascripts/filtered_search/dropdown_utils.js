@@ -163,8 +163,9 @@ export default class DropdownUtils {
           values.push(name.innerText);
         }
       } else if (token.classList.contains('input-token')) {
-        const { isLastVisualTokenValid } =
-          FilteredSearchVisualTokens.getLastVisualTokenBeforeInput();
+        const {
+          isLastVisualTokenValid,
+        } = FilteredSearchVisualTokens.getLastVisualTokenBeforeInput();
 
         const input = FilteredSearchContainer.container.querySelector('.filtered-search');
         const inputValue = input && input.value;

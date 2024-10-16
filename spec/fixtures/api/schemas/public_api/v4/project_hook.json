@@ -19,14 +19,12 @@
     "wiki_page_events",
     "job_events",
     "deployment_events",
-    "feature_flag_events",
     "releases_events",
     "alert_status",
     "disabled_until",
     "emoji_events",
     "custom_webhook_template",
-    "resource_access_token_events",
-    "branch_filter_strategy"
+    "resource_access_token_events"
   ],
   "optional": [
     "url_variables",
@@ -111,9 +109,6 @@
     "deployment_events": {
       "type": "boolean"
     },
-    "feature_flag_events": {
-      "type": "boolean"
-    },
     "releases_events": {
       "type": "boolean"
     },
@@ -172,9 +167,6 @@
           }
         }
       }
-    },
-    "branch_filter_strategy": {
-      "type": "string"
     }
   },
   "additionalProperties": false

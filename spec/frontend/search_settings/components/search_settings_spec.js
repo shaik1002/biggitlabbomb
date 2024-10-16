@@ -1,7 +1,6 @@
-import { GlSearchBoxByType } from '@gitlab/ui';
+import { GlEmptyState, GlSearchBoxByType } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import { setHTMLFixture } from 'helpers/fixtures';
-import EmptyResult from '~/vue_shared/components/empty_result.vue';
 import SearchSettings from '~/search_settings/components/search_settings.vue';
 import { HIGHLIGHT_CLASS, HIDE_CLASS } from '~/search_settings/constants';
 import { isExpanded, expandSection, closeSection } from '~/settings_panels';
@@ -48,7 +47,7 @@ describe('search_settings/components/search_settings.vue', () => {
 
   const findMatchSiblingElement = () => document.querySelector(`[data-testid="sibling"]`);
   const findSearchBox = () => wrapper.findComponent(GlSearchBoxByType);
-  const findEmptyState = () => wrapper.findComponent(EmptyResult);
+  const findEmptyState = () => wrapper.findComponent(GlEmptyState);
   const findHideWhenEmpty = () => document.querySelector(`.${HIDE_WHEN_EMPTY_CLASS}`);
   const search = (term) => {
     findSearchBox().vm.$emit('input', term);

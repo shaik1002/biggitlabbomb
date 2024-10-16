@@ -1,4 +1,5 @@
 import { GlDrawer, GlLink, GlIcon, GlSprintf } from '@gitlab/ui';
+import { s__ } from '~/locale';
 import { shallowMountExtended, mountExtended } from 'helpers/vue_test_utils_helper';
 
 import PlatformsDrawer from '~/ci/runner/components/registration/platforms_drawer.vue';
@@ -18,7 +19,8 @@ describe('RegistrationInstructions', () => {
   let wrapper;
 
   const findDrawer = () => wrapper.findComponent(GlDrawer);
-  const findArchitectureOptions = () => wrapper.findByLabelText('Architecture').findAll('option');
+  const findArchitectureOptions = () =>
+    wrapper.findByLabelText(s__('Runners|Architecture')).findAll('option');
   const findCliCommand = () => wrapper.findComponent(CliCommand);
   const findLink = () => wrapper.findComponent(GlLink);
 

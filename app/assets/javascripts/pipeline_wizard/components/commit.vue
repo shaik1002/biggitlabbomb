@@ -116,7 +116,6 @@ export default {
     },
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     project: {
       query: getFileMetaDataQuery,
       variables() {

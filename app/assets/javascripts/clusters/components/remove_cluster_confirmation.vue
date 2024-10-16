@@ -82,7 +82,7 @@ export default {
 </script>
 
 <template>
-  <div class="gl-flex">
+  <div class="gl-display-flex">
     <gl-button
       v-if="canCleanupResources"
       data-testid="remove-integration-and-resources-button"

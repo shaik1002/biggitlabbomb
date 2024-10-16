@@ -18,17 +18,6 @@ RSpec.describe API::Groups, feature_category: :groups_and_projects do
   let_it_be(:project3) { create(:project, namespace: group1, path: 'test', visibility_level: Gitlab::VisibilityLevel::PRIVATE) }
   let_it_be(:archived_project) { create(:project, namespace: group1, archived: true) }
 
-  def expect_log_keys(caller_id:, route:, root_namespace:)
-    expect(API::API::LOG_FORMATTER).to receive(:call) do |_severity, _datetime, _, data|
-      expect(data.stringify_keys).to include(
-        'correlation_id' => an_instance_of(String),
-        'meta.caller_id' => caller_id,
-        'route' => route,
-        'meta.root_namespace' => root_namespace
-      )
-    end
-  end
-
   shared_examples 'group avatar upload' do
     context 'when valid' do
       let(:file_path) { 'spec/fixtures/banana_sample.gif' }
@@ -638,10 +627,6 @@ RSpec.describe API::Groups, feature_category: :groups_and_projects do
       end
 
       it 'returns 200 for a public group', :aggregate_failures do
-        expect_log_keys(caller_id: "GET /api/:version/groups/:id",
-          route: "/api/:version/groups/:id",
-          root_namespace: group1.path)
-
         get api("/groups/#{group1.id}")
 
         expect(response).to have_gitlab_http_status(:ok)
@@ -1099,24 +1084,6 @@ RSpec.describe API::Groups, feature_category: :groups_and_projects do
         end
       end
 
-      context 'when default_branch_protection_defaults set to No one' do
-        it 'updates default branch protection settings for the group' do
-          put api("/groups/#{group1.id}", user1),
-            params: {
-              default_branch_protection_defaults: {
-                allowed_to_push: [{ access_level: 0 }],
-                allowed_to_merge: [{ access_level: 0 }]
-              }
-            }
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response['default_branch_protection_defaults']).to eq(
-            "allowed_to_merge" => [{ "access_level" => 0 }],
-            "allowed_to_push" => [{ "access_level" => 0 }]
-          )
-        end
-      end
-
       it 'removes the group avatar', :aggregate_failures do
         put api("/groups/#{group1.id}", user1), params: { avatar: '' }
 
@@ -1320,10 +1287,6 @@ RSpec.describe API::Groups, feature_category: :groups_and_projects do
     context "when authenticated as user" do
       context 'with min access level' do
         it 'returns projects with min access level or higher' do
-          expect_log_keys(caller_id: "GET /api/:version/groups/:id/projects",
-            route: "/api/:version/groups/:id/projects",
-            root_namespace: group1.path)
-
           group_guest = create(:user)
           group1.add_guest(group_guest)
           project4 = create(:project, group: group1)
@@ -1903,462 +1866,6 @@ RSpec.describe API::Groups, feature_category: :groups_and_projects do
     end
   end
 
-  describe "GET /groups/:id/groups/shared" do
-    let_it_be(:main_group) do
-      create(:group, :private, name: "b-group", path: "w#{group1.path}", owners: user1)
-    end
-
-    let_it_be(:shared_group1) do
-      create(:group, :private, name: "a-group", path: "x#{group1.path}", owners: user1)
-    end
-
-    let_it_be(:shared_group2) do
-      create(:group, :private, name: "d-group", path: "y#{group1.path}", owners: user1)
-    end
-
-    let_it_be(:other_group) { create(:group, :private, name: "c-group", path: "z#{group1.path}", owners: [user1, user2]) }
-
-    let(:path) { "/groups/#{main_group.id}/groups/shared" }
-
-    before do
-      create(:group_group_link, shared_group: shared_group1, shared_with_group: main_group)
-      create(:group_group_link, shared_group: shared_group2, shared_with_group: main_group)
-      create(:group_group_link, shared_group: other_group, shared_with_group: main_group)
-    end
-
-    it_behaves_like 'rate limited endpoint', rate_limit_key: :group_shared_groups_api do
-      def request
-        get api(path)
-      end
-    end
-
-    context 'when rate_limit_groups_and_projects_api feature flag is disabled' do
-      before do
-        stub_feature_flags(rate_limit_groups_and_projects_api: false)
-      end
-
-      it_behaves_like 'unthrottled endpoint'
-
-      def request
-        get api(path)
-      end
-    end
-
-    context 'when authenticated as user' do
-      it 'returns the shared groups in the group', :aggregate_failures do
-        expect_log_keys(caller_id: "GET /api/:version/groups/:id/groups/shared",
-          route: "/api/:version/groups/:id/groups/shared",
-          root_namespace: main_group.path)
-
-        get api(path, user1)
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to include_pagination_headers
-        expect(json_response.length).to eq(3)
-        group_ids = json_response.map { |group| group['id'] }
-        expect(group_ids).to contain_exactly(shared_group1.id, shared_group2.id, other_group.id)
-      end
-    end
-
-    context 'when authenticated and user does not have the access' do
-      it 'does not return the shared groups in the group', :aggregate_failures do
-        get api(path, user2)
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
-    end
-
-    context 'when unauthenticated as user' do
-      let_it_be(:main_group) { create(:group, :public, owners: user1) }
-      let_it_be(:shared_group_1) { create(:group, :public, owners: user1) }
-      let_it_be(:shared_group_2) { create(:group, :private, owners: user1) }
-
-      before do
-        create(:group_group_link, shared_group: shared_group_1, shared_with_group: main_group)
-        create(:group_group_link, shared_group: shared_group_2, shared_with_group: main_group)
-      end
-
-      it 'only returns the shared public groups in the group', :aggregate_failures do
-        get api(path)
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to include_pagination_headers
-        expect(json_response.length).to eq(1)
-        group_ids = json_response.map { |group| group['id'] }
-        expect(group_ids).to contain_exactly(shared_group_1.id)
-      end
-    end
-
-    context "when using skip_groups in request" do
-      it "returns all shared groups excluding skipped groups", :aggregate_failures do
-        get api(path, user1), params: { skip_groups: [shared_group1.id] }
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to include_pagination_headers
-        expect(json_response).to be_an Array
-        expect(json_response.length).to eq(2)
-        expect(json_response.map { |group| group['id'] }).to contain_exactly(shared_group2.id, other_group.id)
-      end
-    end
-
-    context "when search is present in request" do
-      let_it_be(:new_shared_group) { create(:group, :public, name: "new search group", owners: user1) }
-      let_it_be(:other_shared_group) { create(:group, :private, name: "other group", owners: user1) }
-
-      before do
-        create(:group_group_link, shared_group: new_shared_group, shared_with_group: main_group)
-        create(:group_group_link, shared_group: other_shared_group, shared_with_group: main_group)
-      end
-
-      it 'filters the shared groups in the group based on search params', :aggregate_failures do
-        get api(path, user1), params: { search: 'new' }
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to include_pagination_headers
-        expect(json_response).to be_an(Array)
-        expect(json_response.length).to eq(1)
-        expect(json_response.first['id']).to eq(new_shared_group.id)
-      end
-    end
-
-    context 'when using min_access_level in the request' do
-      let_it_be(:new_main_group) do
-        create(:group, :private, owners: user1)
-      end
-
-      let_it_be(:shared_group1) do
-        create(:group, :private)
-      end
-
-      let_it_be(:shared_group2) do
-        create(:group, :private)
-      end
-
-      before do
-        shared_group1.add_developer(user1)
-        shared_group2.add_reporter(user1)
-        create(:group_group_link, shared_group: shared_group1, shared_with_group: new_main_group)
-        create(:group_group_link, shared_group: shared_group2, shared_with_group: new_main_group)
-      end
-
-      context 'with min_access_level parameter' do
-        it 'returns an array of groups the user has at least reporter access', :aggregate_failures do
-          get api("/groups/#{new_main_group.id}/groups/shared", user1), params: { min_access_level: Gitlab::Access::REPORTER }
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(response).to include_pagination_headers
-          expect(json_response).to be_an Array
-          expect(json_response.map { |group| group['id'] }).to contain_exactly(shared_group1.id, shared_group2.id)
-        end
-      end
-    end
-
-    context "when using sorting" do
-      let(:response_groups) { json_response.map { |group| group['name'] } }
-      let(:response_group_paths) { json_response.map { |group| group['path'] } }
-      let(:response_group_ids) { json_response.map { |group| group['id'] } }
-      let(:shared_group_names) { [shared_group1.name, shared_group2.name, other_group.name] }
-      let(:shared_group_paths) { [shared_group1.path, shared_group2.path, other_group.path] }
-      let(:shared_group_ids) { [shared_group1.id, shared_group2.id, other_group.id] }
-
-      it "sorts by name ascending by default", :aggregate_failures do
-        get api(path, user1)
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to include_pagination_headers
-        expect(json_response.length).to eq(3)
-        expect(json_response).to be_an Array
-        expect(response_groups).to eq(shared_group_names.sort)
-      end
-
-      it "sorts in descending order when passed", :aggregate_failures do
-        get api(path, user1), params: { sort: "desc" }
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to include_pagination_headers
-        expect(json_response.length).to eq(3)
-        expect(json_response).to be_an Array
-        expect(response_groups).to eq(shared_group_names.sort.reverse)
-      end
-
-      it "sorts by path in order_by param", :aggregate_failures do
-        get api(path, user1), params: { order_by: "path" }
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to include_pagination_headers
-        expect(json_response).to be_an Array
-        expect(response_group_paths).to eq(shared_group_paths.sort)
-      end
-
-      it "sorts by id in the order_by param", :aggregate_failures do
-        get api(path, user1), params: { order_by: "id" }
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to include_pagination_headers
-        expect(json_response).to be_an Array
-        expect(response_group_ids).to eq(shared_group_ids.sort)
-      end
-    end
-
-    context 'when searching with similarity ordering', :aggregate_failures do
-      let_it_be(:user2) { create(:user) }
-      let_it_be(:main_group_2) { create(:group, name: 'same-name main', owners: user2) }
-      let_it_be(:shared_group1) { create(:group, name: 'same-name shared', owners: user2) }
-      let_it_be(:shared_group2) { create(:group, name: 'same-name shared_other', owners: user2) }
-      let_it_be(:shared_group3) { create(:group, name: 'other-name', owners: user2) }
-
-      let(:response_groups) { json_response.map { |group| group['name'] } }
-      let(:shared_group_names) { [shared_group1.name, shared_group2.name, shared_group3.name] }
-      let(:params) { { order_by: 'similarity', search: 'same-name' } }
-
-      before do
-        create(:group_group_link, shared_group: shared_group1, shared_with_group: main_group_2)
-        create(:group_group_link, shared_group: shared_group2, shared_with_group: main_group_2)
-        create(:group_group_link, shared_group: shared_group3, shared_with_group: main_group_2)
-      end
-
-      subject { get api("/groups/#{main_group_2.id}/groups/shared", user2), params: params }
-
-      it 'sorts shared groups with exact matches first', :aggregate_failures do
-        subject
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to include_pagination_headers
-        expect(json_response.length).to eq(2)
-        expect(response_groups).to eq(['same-name shared', 'same-name shared_other'])
-      end
-
-      context 'when `search` parameter is not given' do
-        let(:params) { { order_by: 'similarity' } }
-
-        it 'sorts items ordered by name', :aggregate_failures do
-          subject
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(response).to include_pagination_headers
-          expect(json_response.length).to eq(3)
-          expect(response_groups).to eq(shared_group_names.sort)
-        end
-      end
-    end
-
-    context 'when using visibility filter', :aggregate_failures do
-      let_it_be(:user3) { create(:user) }
-      let_it_be(:main_group_3) { create(:group, :private, owners: user3) }
-      let_it_be(:shared_group1) { create(:group, :public, owners: user3) }
-      let_it_be(:shared_group2) { create(:group, :internal, owners: user3) }
-      let_it_be(:shared_group3) { create(:group, :private, owners: user3) }
-
-      let(:response_groups) { json_response.map { |group| group['id'] } }
-
-      before do
-        create(:group_group_link, shared_group: shared_group1, shared_with_group: main_group_3)
-        create(:group_group_link, shared_group: shared_group2, shared_with_group: main_group_3)
-        create(:group_group_link, shared_group: shared_group3, shared_with_group: main_group_3)
-      end
-
-      it 'filters based on private visibility param' do
-        get api("/groups/#{main_group_3.id}/groups/shared", user3), params: { visibility: 'private' }
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to include_pagination_headers
-        expect(json_response).to be_an Array
-        expect(response_groups).to contain_exactly(shared_group3.id)
-      end
-
-      it 'filters based on internal visibility param' do
-        get api("/groups/#{main_group_3.id}/groups/shared", user3), params: { visibility: 'internal' }
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to include_pagination_headers
-        expect(json_response).to be_an Array
-        expect(response_groups).to contain_exactly(shared_group2.id)
-      end
-
-      it 'filters based on public visibility param' do
-        get api("/groups/#{main_group_3.id}/groups/shared", user3), params: { visibility: 'public' }
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to include_pagination_headers
-        expect(json_response).to be_an Array
-        expect(response_groups).to contain_exactly(shared_group1.id)
-      end
-
-      it 'filters based on no visibility param passed' do
-        get api("/groups/#{main_group_3.id}/groups/shared", user3)
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to include_pagination_headers
-        expect(json_response).to be_an Array
-        expect(response_groups).to contain_exactly(shared_group1.id, shared_group2.id, shared_group3.id)
-      end
-
-      it 'filters based on unknown visibility param' do
-        get api("/groups/#{main_group_3.id}/groups/shared", user3), params: { visibility: 'something' }
-
-        expect(response).to have_gitlab_http_status(:bad_request)
-        expect(json_response['error']).to eq('visibility does not have a valid value')
-      end
-    end
-  end
-
-  describe "GET /groups/:id/invited_groups" do
-    let_it_be(:main_group) do
-      create(:group, :private, name: "b-group", path: "w#{group1.path}", owners: user1)
-    end
-
-    let_it_be(:shared_group1) do
-      create(:group, :private, name: "a-group", path: "x#{group1.path}", owners: user1)
-    end
-
-    let_it_be(:shared_group2) do
-      create(:group, :private, name: "d-group", path: "y#{group1.path}", owners: user1)
-    end
-
-    let_it_be(:other_group) { create(:group, :private, name: "c-group", path: "z#{group1.path}", owners: user1) }
-
-    let(:path) { "/groups/#{main_group.id}/invited_groups" }
-
-    before do
-      create(:group_group_link, shared_group: main_group, shared_with_group: shared_group1)
-      create(:group_group_link, shared_group: main_group, shared_with_group: shared_group2)
-      create(:group_group_link, shared_group: main_group, shared_with_group: other_group)
-    end
-
-    it_behaves_like 'rate limited endpoint', rate_limit_key: :group_invited_groups_api do
-      def request
-        get api(path)
-      end
-    end
-
-    context 'when authenticated as user' do
-      it 'returns the invited groups in the group', :aggregate_failures do
-        expect_log_keys(caller_id: "GET /api/:version/groups/:id/invited_groups",
-          route: "/api/:version/groups/:id/invited_groups",
-          root_namespace: main_group.path)
-
-        get api(path, user1)
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to include_pagination_headers
-        expect(json_response.length).to eq(3)
-        group_ids = json_response.map { |group| group['id'] }
-        expect(group_ids).to contain_exactly(shared_group1.id, shared_group2.id, other_group.id)
-      end
-    end
-
-    context 'when authenticated and user does not have the access' do
-      it 'does not return the invited groups in the group', :aggregate_failures do
-        get api(path, user2)
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
-    end
-
-    context 'when unauthenticated as user' do
-      let_it_be(:main_group) { create(:group, :public, owners: user1) }
-      let_it_be(:shared_group_1) { create(:group, :public, owners: user1) }
-      let_it_be(:shared_group_2) { create(:group, :private, owners: user1) }
-
-      before do
-        create(:group_group_link, shared_group: main_group, shared_with_group: shared_group_1)
-        create(:group_group_link, shared_group: main_group, shared_with_group: shared_group_2)
-      end
-
-      it 'only returns the invited public groups in the group', :aggregate_failures do
-        get api(path)
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to include_pagination_headers
-        expect(json_response.length).to eq(1)
-        group_ids = json_response.map { |group| group['id'] }
-        expect(group_ids).to contain_exactly(shared_group_1.id)
-      end
-    end
-
-    context "when search is present in request" do
-      let_it_be(:new_shared_group) { create(:group, :public, name: "new search group", owners: user1) }
-      let_it_be(:other_shared_group) { create(:group, :private, name: "other group", owners: user1) }
-
-      before do
-        create(:group_group_link, shared_group: main_group, shared_with_group: new_shared_group)
-        create(:group_group_link, shared_group: main_group, shared_with_group: other_shared_group)
-      end
-
-      it 'filters the invited groups in the group based on search params', :aggregate_failures do
-        get api(path, user1), params: { search: 'new' }
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to include_pagination_headers
-        expect(json_response).to be_an(Array)
-        expect(json_response.length).to eq(1)
-        expect(json_response.first['id']).to eq(new_shared_group.id)
-      end
-    end
-
-    context 'when using min_access_level in the request' do
-      let_it_be(:new_main_group) do
-        create(:group, :private, owners: user1)
-      end
-
-      let_it_be(:shared_group1) do
-        create(:group, :private)
-      end
-
-      let_it_be(:shared_group2) do
-        create(:group, :private)
-      end
-
-      before do
-        shared_group1.add_developer(user1)
-        shared_group2.add_reporter(user1)
-        create(:group_group_link, shared_group: new_main_group, shared_with_group: shared_group1)
-        create(:group_group_link, shared_group: new_main_group, shared_with_group: shared_group2)
-      end
-
-      context 'with min_access_level parameter' do
-        it 'returns an array of groups the user has at least reporter access', :aggregate_failures do
-          get api("/groups/#{new_main_group.id}/invited_groups", user1), params: { min_access_level: Gitlab::Access::REPORTER }
-
-          expect(response).to have_gitlab_http_status(:ok)
-          expect(response).to include_pagination_headers
-          expect(json_response).to be_an Array
-          expect(json_response.map { |group| group['id'] }).to contain_exactly(shared_group1.id, shared_group2.id)
-        end
-      end
-    end
-
-    context "when include_relation is present in request" do
-      let_it_be(:relation_main_group) do
-        create(:group, :private, owners: user1)
-      end
-
-      let_it_be(:new_shared_group) { create(:group, :public, name: "new search group", owners: user1) }
-      let_it_be(:other_shared_group) { create(:group, :private, name: "other group", owners: user1) }
-
-      before do
-        create(:group_group_link, shared_group: relation_main_group, shared_with_group: new_shared_group)
-        create(:group_group_link, shared_group: relation_main_group, shared_with_group: other_shared_group)
-      end
-
-      it 'filters the invited groups in the group based on relation params', :aggregate_failures do
-        get api("/groups/#{relation_main_group.id}/invited_groups", user1), params: { relation: ['direct'] }
-
-        expect(response).to have_gitlab_http_status(:ok)
-        expect(response).to include_pagination_headers
-        expect(json_response).to be_an(Array)
-        expect(json_response.map { |group| group['id'] }).to contain_exactly(new_shared_group.id, other_shared_group.id)
-      end
-
-      it 'returns error message when include relation is invalid' do
-        get api("/groups/#{relation_main_group.id}/invited_groups", user1), params: { relation: ['some random'] }
-
-        expect(response).to have_gitlab_http_status(:bad_request)
-        expect(json_response['error']).to eq("relation does not have a valid value")
-      end
-    end
-  end
-
   describe 'GET /groups/:id/subgroups' do
     let!(:subgroup1) { create(:group, parent: group1) }
     let!(:subgroup2) { create(:group, :private, parent: group1) }
@@ -2397,10 +1904,6 @@ RSpec.describe API::Groups, feature_category: :groups_and_projects do
     context 'when authenticated as user' do
       context 'when user is not member of a public group' do
         it 'returns no subgroups for the public group', :aggregate_failures do
-          expect_log_keys(caller_id: "GET /api/:version/groups/:id/subgroups",
-            route: "/api/:version/groups/:id/subgroups",
-            root_namespace: group1.path)
-
           get api("/groups/#{group1.id}/subgroups", user2)
 
           expect(response).to have_gitlab_http_status(:ok)
@@ -2705,34 +2208,25 @@ RSpec.describe API::Groups, feature_category: :groups_and_projects do
     end
 
     context 'when group is within a provided organization' do
+      let_it_be(:current_organization) { create(:organization, name: "Current Organization") }
       let_it_be(:organization) { create(:organization) }
+
+      before do
+        allow(Current).to receive(:organization).and_return(current_organization)
+      end
 
       context 'when user is an organization user' do
         before_all do
+          create(:organization_user, user: user3, organization: current_organization)
           create(:organization_user, user: user3, organization: organization)
         end
 
         context 'and organization_id is not passed' do
-          context 'and current_organization is set', :with_current_organization do
-            before_all do
-              create(:organization_user, user: user3, organization: current_organization)
-            end
+          it 'uses database default value' do
+            post api('/groups', user3), params: attributes_for_group_api
 
-            it 'uses current_organization' do
-              post api('/groups', user3), params: attributes_for_group_api
-
-              expect(response).to have_gitlab_http_status(:created)
-              expect(json_response['organization_id']).to eq(current_organization.id)
-            end
-          end
-
-          context 'and current organization is not set' do
-            it 'uses database default value' do
-              post api('/groups', user3), params: attributes_for_group_api
-
-              expect(response).to have_gitlab_http_status(:created)
-              expect(json_response['organization_id']).to eq(Organizations::Organization::DEFAULT_ORGANIZATION_ID)
-            end
+            expect(response).to have_gitlab_http_status(:created)
+            expect(json_response['organization_id']).to eq(Organizations::Organization::DEFAULT_ORGANIZATION_ID)
           end
         end
 
@@ -2876,30 +2370,6 @@ RSpec.describe API::Groups, feature_category: :groups_and_projects do
         end
       end
 
-      context 'when creating a nested group with `default_branch_protection_defaults` attribute' do
-        let_it_be(:parent) { create(:group) }
-        let_it_be(:params) do
-          attributes_for_group_api(
-            default_branch_protection_defaults: {
-              "allowed_to_push" => [{ "access_level" => Gitlab::Access::DEVELOPER }]
-            },
-            parent_id: parent.id
-          )
-        end
-
-        subject { post api("/groups", user3), params: params }
-
-        before do
-          parent.add_owner(user3)
-        end
-
-        it 'creates group' do
-          subject
-
-          expect(response).to have_gitlab_http_status(:created)
-        end
-      end
-
       context 'when creating a group with `enabled_git_access_protocol' do
         let(:params) { attributes_for_group_api enabled_git_access_protocol: 'all' }
 
@@ -2973,10 +2443,6 @@ RSpec.describe API::Groups, feature_category: :groups_and_projects do
 
     context "when authenticated as admin" do
       it "removes any existing group" do
-        expect_log_keys(caller_id: "DELETE /api/:version/groups/:id",
-          route: "/api/:version/groups/:id",
-          root_namespace: group2.path)
-
         delete api("/groups/#{group2.id}", admin, admin_mode: true)
 
         expect(response).to have_gitlab_http_status(:accepted)
@@ -3092,10 +2558,6 @@ RSpec.describe API::Groups, feature_category: :groups_and_projects do
       end
 
       it 'only includes groups where the user has permissions to transfer a group to' do
-        expect_log_keys(caller_id: "GET /api/:version/groups/:id/transfer_locations",
-          route: "/api/:version/groups/:id/transfer_locations",
-          root_namespace: source_group.path)
-
         request
 
         expect(group_ids_from_response).to contain_exactly(
@@ -3160,10 +2622,6 @@ RSpec.describe API::Groups, feature_category: :groups_and_projects do
     context 'when promoting a subgroup to a root group' do
       shared_examples_for 'promotes the subgroup to a root group' do
         it 'returns success', :aggregate_failures do
-          expect_log_keys(caller_id: "POST /api/:version/groups/:id/transfer",
-            route: "/api/:version/groups/:id/transfer",
-            root_namespace: group.path)
-
           make_request(user)
 
           expect(response).to have_gitlab_http_status(:created)
@@ -3438,120 +2896,6 @@ RSpec.describe API::Groups, feature_category: :groups_and_projects do
         let(:shared_group) { group2 }
         let(:shared_with_group) { group_b }
         let(:admin_mode) { true }
-      end
-    end
-  end
-
-  describe 'POST groups/:id/tokens/revoke' do
-    let(:token) { 'glprefix-AABBCCDDEE1122334455' }
-    let(:service_response) { ServiceResponse.error(message: '') }
-    let(:service) { instance_double(service_class, execute: service_response) }
-    let(:service_class) { Groups::AgnosticTokenRevocationService }
-    let_it_be(:group) { create(:group, :with_hierarchy, children: 1) }
-
-    let(:path) { "/groups/#{group.id}/tokens/revoke" }
-
-    before do
-      allow(service_class).to receive(:new).and_return(service)
-    end
-
-    shared_examples 'revoking token fails' do |status, message|
-      it 'cannot revoke token' do
-        revoke_token
-
-        expect(response).to have_gitlab_http_status(status)
-        expect(json_response['message'] || json_response['error']).to include(message)
-      end
-    end
-
-    context 'when not a group owner' do
-      subject(:revoke_token) { post api(path, user1), params: { token: token } }
-
-      before do
-        group.add_maintainer(user1)
-      end
-
-      it_behaves_like 'revoking token fails', :forbidden, 'Forbidden'
-    end
-
-    context 'when authenticated as a group owner' do
-      subject(:revoke_token) { post api(path, user1), params: { token: token } }
-
-      before do
-        group.add_owner(user1)
-      end
-
-      context 'when group is a top level group' do
-        it 'calls revocation service' do
-          revoke_token
-          expect(service_class).to have_received(:new).with(group, user1, token)
-        end
-
-        context 'when the service returns successfully' do
-          let(:token) { create(:personal_access_token, :revoked) }
-          let(:service_response) do
-            ServiceResponse.success(
-              message: 'PersonalAccessToken is revoked',
-              payload: {
-                revocable: token,
-                type: 'PersonalAccessToken',
-                api_entity: 'PersonalAccessToken'
-              }
-            )
-          end
-
-          it 'renders the token with a presenter', :aggregate_failures do
-            revoke_token
-            expect(response).to have_gitlab_http_status(:ok)
-            expect(json_response.with_indifferent_access).to include(revoked: true, id: token.id)
-            expect(json_response.keys).not_to include(%w[token token_digest])
-          end
-        end
-
-        context 'when the service returns unsuccessfully' do
-          let(:service_response) do
-            ServiceResponse.error(
-              message: 'Some error'
-            )
-          end
-
-          it_behaves_like 'revoking token fails', :unprocessable_entity, 'Unprocessable Entity'
-        end
-
-        context 'when ff disabled' do
-          before do
-            Feature.disable(:group_agnostic_token_revocation, group)
-          end
-
-          it_behaves_like 'revoking token fails', :not_found, 'Not Found'
-
-          it 'does not call revocation service' do
-            revoke_token
-            expect(service_class).not_to have_received(:new)
-          end
-        end
-      end
-
-      context 'when group does not exist' do
-        let(:path) { "/groups/0/tokens/revoke" }
-
-        it_behaves_like 'revoking token fails', :not_found, 'Group Not Found'
-
-        it 'does not call revocation service' do
-          revoke_token
-          expect(service_class).not_to have_received(:new)
-        end
-      end
-
-      context 'when group is a subgroup' do
-        let(:path) { "/groups/#{group.children.first.id}/tokens/revoke" }
-
-        it_behaves_like 'revoking token fails', :bad_request, 'Must be a top-level'
-
-        it 'does not call revocation service' do
-          revoke_token
-          expect(service_class).not_to have_received(:new)
-        end
       end
     end
   end

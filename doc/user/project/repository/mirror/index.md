@@ -14,6 +14,11 @@ DETAILS:
 You can _mirror_ a repository to and from external sources. You can select which repository
 serves as the source. Branches, tags, and commits are synced automatically.
 
+NOTE:
+SCP-style URLs are **not** supported. However, the work for implementing SCP-style URLs is tracked
+in [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/18993).
+Subscribe to the issue to follow its progress.
+
 Several mirroring methods exist:
 
 - [Push](push.md): Mirror a repository from GitLab to another location.
@@ -31,13 +36,6 @@ Mirror a repository when:
   Configure your GitLab repository as a [pull mirror](pull.md) of the other project.
   Your GitLab repository pulls copies of the commits, tags, and branches of project.
   They become available to use on GitLab.
-
-The following is not supported:
-
-- SCP-style URLs. The work to implement SCP-style URLs is ongoing.
-  For more information and to track its progress, see
-  [issue 18993](https://gitlab.com/gitlab-org/gitlab/-/issues/18993).
-- Mirroring repositories over [dumb HTTP protocol](https://git-scm.com/book/en/v2/Git-on-the-Server-The-Protocols#_dumb_http).
 
 ## Create a repository mirror
 
@@ -78,7 +76,7 @@ For more information, see [Get your SSH public key](#get-your-ssh-public-key).
 ### Mirror only protected branches
 
 You can choose to mirror only the
-[protected branches](../branches/protected.md) in the mirroring project,
+[protected branches](../../protected_branches.md) in the mirroring project,
 either from or to your remote repository. For [pull mirroring](pull.md),
 non-protected branches in the mirroring project are not mirrored and can diverge.
 
@@ -129,7 +127,7 @@ Prerequisites:
 1. Expand **Mirroring repositories**.
 1. Scroll to **Mirrored repositories** and identify the mirror to update.
 1. Select **Update now** (**{retry}**):
-   ![Repository mirroring force update user interface](img/repository_mirroring_force_update_v11_5.png)
+   ![Repository mirroring force update user interface](img/repository_mirroring_force_update.png)
 
 ## Authentication methods for mirrors
 

@@ -1,5 +1,5 @@
 import { GlSprintf, GlToggle, GlFormCheckbox } from '@gitlab/ui';
-import { shallowMountExtended, mountExtended } from 'helpers/vue_test_utils_helper';
+import { shallowMount, mount } from '@vue/test-utils';
 import ProjectFeatureSetting from '~/pages/projects/shared/permissions/components/project_feature_setting.vue';
 import CiCatalogSettings from '~/pages/projects/shared/permissions/components/ci_catalog_settings.vue';
 import settingsPanel from '~/pages/projects/shared/permissions/components/settings_panel.vue';
@@ -56,9 +56,6 @@ const defaultProps = {
   confirmationPhrase: 'my-fake-project',
   showVisibilityConfirmModal: false,
   membersPagePath: '/my-fake-project/-/project_members',
-  licensedAiFeaturesAvailable: true,
-  policySettingsAvailable: false,
-  duoFeaturesLocked: false,
 };
 
 const FEATURE_ACCESS_LEVEL_ANONYMOUS = 30;
@@ -67,14 +64,8 @@ describe('Settings Panel', () => {
   let wrapper;
 
   const mountComponent = (
-    {
-      currentSettings = {},
-      glFeatures = {},
-      cascadingSettingsData = {},
-      stubs = {},
-      ...customProps
-    } = {},
-    mountFn = shallowMountExtended,
+    { currentSettings = {}, glFeatures = {}, stubs = {}, ...customProps } = {},
+    mountFn = shallowMount,
   ) => {
     const propsData = {
       ...defaultProps,
@@ -86,7 +77,6 @@ describe('Settings Panel', () => {
       propsData,
       provide: {
         glFeatures,
-        cascadingSettingsData,
       },
       stubs,
     });
@@ -150,10 +140,6 @@ describe('Settings Panel', () => {
   const findModelExperimentsSettings = () =>
     wrapper.findComponent({ ref: 'model-experiments-settings' });
   const findModelRegistrySettings = () => wrapper.findComponent({ ref: 'model-registry-settings' });
-  const findDuoSettings = () => wrapper.findByTestId('duo-settings');
-  const findDuoCascadingLockIcon = () => wrapper.findByTestId('duo-cascading-lock-icon');
-  const findPipelineExecutionPolicySettings = () =>
-    wrapper.findByTestId('pipeline-execution-policy-settings');
 
   describe('Project Visibility', () => {
     it('should set the project visibility help path', () => {
@@ -464,7 +450,7 @@ describe('Settings Panel', () => {
 
     it('should not change lfsEnabled when disabling the repository', async () => {
       // mount over shallowMount, because we are aiming to test rendered state of toggle
-      wrapper = mountComponent({ currentSettings: { lfsEnabled: true } }, mountExtended);
+      wrapper = mountComponent({ currentSettings: { lfsEnabled: true } }, mount);
 
       const repositoryFeatureToggleButton = findRepositoryFeatureSetting().find('button');
       const lfsFeatureToggleButton = findLFSFeatureToggle().find('button');
@@ -491,10 +477,7 @@ describe('Settings Panel', () => {
       'with (lfsObjectsExist = $lfsObjectsExist, lfsEnabled = $lfsEnabled)',
       ({ lfsObjectsExist, lfsEnabled, isShown }) => {
         beforeEach(() => {
-          wrapper = mountComponent(
-            { lfsObjectsExist, currentSettings: { lfsEnabled } },
-            mountExtended,
-          );
+          wrapper = mountComponent({ lfsObjectsExist, currentSettings: { lfsEnabled } }, mount);
         });
 
         if (isShown) {
@@ -573,8 +556,7 @@ describe('Settings Panel', () => {
 
         await findPackageRegistryEnabledInput().vm.$emit('change', packageRegistryEnabled);
 
-        const packageRegistryApiForEveryoneEnabledInput =
-          findPackageRegistryApiForEveryoneEnabledInput();
+        const packageRegistryApiForEveryoneEnabledInput = findPackageRegistryApiForEveryoneEnabledInput();
 
         if (packageRegistryApiForEveryoneEnabled === 'hidden') {
           expect(packageRegistryApiForEveryoneEnabledInput.exists()).toBe(false);
@@ -730,7 +712,7 @@ describe('Settings Panel', () => {
           canDisableEmails: true,
           canSetDiffPreviewInEmail: true,
         },
-        mountExtended,
+        mount,
       );
 
       // It seems like we need the "interactivity" to ensure that the disabled
@@ -751,7 +733,7 @@ describe('Settings Panel', () => {
           canSetDiffPreviewInEmail: true,
           emailsEnabled: true,
         },
-        mountExtended,
+        mount,
       );
       const originalHiddenInputValue = findShowDiffPreviewSetting()
         .find('input[type="hidden"]')
@@ -844,124 +826,6 @@ describe('Settings Panel', () => {
       wrapper = mountComponent({});
 
       expect(findModelRegistrySettings().exists()).toBe(true);
-    });
-  });
-  describe('Duo', () => {
-    it('shows duo toggle', () => {
-      wrapper = mountComponent({});
-      expect(findDuoSettings().exists()).toBe(true);
-    });
-
-    describe('when areDuoSettingsLocked is false', () => {
-      it('does not show CascadingLockIcon', () => {
-        wrapper = mountComponent({ duoFeaturesLocked: false });
-        expect(findDuoCascadingLockIcon().exists()).toBe(false);
-      });
-    });
-
-    describe('when areDuoSettingsLocked is true', () => {
-      beforeEach(() => {
-        wrapper = mountComponent(
-          {
-            cascadingSettingsData: {
-              lockedByAncestor: false,
-              lockedByApplicationSetting: false,
-              ancestorNamespace: null,
-            },
-            duoFeaturesLocked: true,
-          },
-          mountExtended,
-        );
-      });
-
-      it('shows CascadingLockIcon when cascadingSettingsData is provided', () => {
-        expect(findDuoCascadingLockIcon().exists()).toBe(true);
-      });
-
-      it('passes correct props to CascadingLockIcon', () => {
-        expect(findDuoCascadingLockIcon().props()).toMatchObject({
-          isLockedByGroupAncestor: false,
-          isLockedByApplicationSettings: false,
-          ancestorNamespace: null,
-        });
-      });
-
-      it('does not show CascadingLockIcon when cascadingSettingsData is empty', () => {
-        wrapper = mountComponent(
-          {
-            cascadingSettingsData: {},
-            duoFeaturesLocked: true,
-          },
-          mountExtended,
-        );
-        expect(findDuoCascadingLockIcon().exists()).toBe(false);
-      });
-
-      it('does not show CascadingLockIcon when cascadingSettingsData is null', () => {
-        wrapper = mountComponent(
-          {
-            glFeatures: { aiSettingsVueProject: true },
-            cascadingSettingsData: null,
-            duoFeaturesLocked: true,
-          },
-          mountExtended,
-        );
-        expect(findDuoCascadingLockIcon().exists()).toBe(false);
-      });
-    });
-  });
-  describe('Pipeline execution policies', () => {
-    it('does not show the pipeline execution policy settings by default', () => {
-      wrapper = mountComponent();
-
-      expect(findPipelineExecutionPolicySettings().exists()).toBe(false);
-    });
-
-    it('shows pipeline execution policies toggle when policies are available', () => {
-      wrapper = mountComponent({
-        policySettingsAvailable: true,
-      });
-
-      expect(findPipelineExecutionPolicySettings().exists()).toBe(true);
-    });
-
-    it('disables the checkbox when the setting is locked', () => {
-      wrapper = mountComponent(
-        {
-          policySettingsAvailable: true,
-          sppRepositoryPipelineAccessLocked: true,
-        },
-        mountExtended,
-      );
-
-      expect(
-        findPipelineExecutionPolicySettings()
-          .findComponent(GlFormCheckbox)
-          .find('input')
-          .attributes('disabled'),
-      ).toBe('disabled');
-    });
-
-    it('updates the hidden value when toggled', async () => {
-      wrapper = mountComponent(
-        {
-          policySettingsAvailable: true,
-          currentSettings: { sppRepositoryPipelineAccess: true },
-        },
-        mountExtended,
-      );
-      const originalHiddenInputValue = findPipelineExecutionPolicySettings()
-        .find('input[type="hidden"]')
-        .attributes('value');
-
-      await findPipelineExecutionPolicySettings()
-        .findComponent(GlFormCheckbox)
-        .find('input')
-        .setChecked(false);
-
-      expect(
-        findPipelineExecutionPolicySettings().find('input[type="hidden"]').attributes('value'),
-      ).not.toEqual(originalHiddenInputValue);
     });
   });
 });

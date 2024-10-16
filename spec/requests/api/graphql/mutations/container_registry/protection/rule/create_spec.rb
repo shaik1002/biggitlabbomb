@@ -12,7 +12,7 @@ RSpec.describe 'Creating the container registry protection rule', :aggregate_fai
     build_stubbed(:container_registry_protection_rule, project: project)
   end
 
-  let(:input) do
+  let(:kwargs) do
     {
       project_path: project.full_path,
       repository_path_pattern: container_registry_protection_rule_attributes.repository_path_pattern,
@@ -22,7 +22,7 @@ RSpec.describe 'Creating the container registry protection rule', :aggregate_fai
   end
 
   let(:mutation) do
-    graphql_mutation(:create_container_registry_protection_rule, input,
+    graphql_mutation(:create_container_registry_protection_rule, kwargs,
       <<~QUERY
       containerRegistryProtectionRule {
         id
@@ -36,9 +36,7 @@ RSpec.describe 'Creating the container registry protection rule', :aggregate_fai
 
   let(:mutation_response) { graphql_mutation_response(:create_container_registry_protection_rule) }
 
-  subject(:post_graphql_mutation_create_container_registry_protection_rule) {
-    post_graphql_mutation(mutation, current_user: user)
-  }
+  subject { post_graphql_mutation(mutation, current_user: user) }
 
   shared_examples 'a successful response' do
     it { subject.tap { expect_graphql_errors_to_be_empty } }
@@ -50,7 +48,7 @@ RSpec.describe 'Creating the container registry protection rule', :aggregate_fai
         'errors' => be_blank,
         'containerRegistryProtectionRule' => {
           'id' => be_present,
-          'repositoryPathPattern' => input[:repository_path_pattern]
+          'repositoryPathPattern' => kwargs[:repository_path_pattern]
         }
       )
     end
@@ -59,7 +57,7 @@ RSpec.describe 'Creating the container registry protection rule', :aggregate_fai
       expect { subject }.to change { ::ContainerRegistry::Protection::Rule.count }.by(1)
 
       expect(::ContainerRegistry::Protection::Rule.where(project: project,
-        repository_path_pattern: input[:repository_path_pattern])).to exist
+        repository_path_pattern: kwargs[:repository_path_pattern])).to exist
     end
   end
 
@@ -70,10 +68,10 @@ RSpec.describe 'Creating the container registry protection rule', :aggregate_fai
   it_behaves_like 'a successful response'
 
   context 'with invalid input fields `minimumAccessLevelForPush` and `minimumAccessLevelForDelete`' do
-    let(:input) do
+    let(:kwargs) do
       super().merge(
-        minimum_access_level_for_push: 'INVALID_ACCESS_LEVEL',
-        minimum_access_level_for_delete: 'INVALID_ACCESS_LEVEL'
+        minimum_access_level_for_push: 'UNKNOWN_ACCESS_LEVEL',
+        minimum_access_level_for_delete: 'UNKNOWN_ACCESS_LEVEL'
       )
     end
 
@@ -86,45 +84,24 @@ RSpec.describe 'Creating the container registry protection rule', :aggregate_fai
     }
   end
 
-  context 'with blank input fields `minimumAccessLevelForPush` and `minimumAccessLevelForDelete`' do
-    let(:input) { super().merge(minimum_access_level_for_push: nil, minimum_access_level_for_delete: nil) }
-
-    it_behaves_like 'an erroneous response'
-
-    it 'returns error with correct error message' do
-      subject
-
-      expect(mutation_response['errors']).to eq ['A rule must have at least a minimum access role for push or delete.']
-    end
-  end
-
-  context 'with blank input field `repositoryPathPattern`' do
-    let(:input) { super().merge(repository_path_pattern: '') }
-
-    it_behaves_like 'an erroneous response'
-
-    it 'returns error from endpoint implementation (not from grapqhl framework)' do
-      post_graphql_mutation_create_container_registry_protection_rule
-
-      expect_graphql_errors_to_include([/repositoryPathPattern can't be blank/])
-    end
-  end
-
   context 'with invalid input field `repositoryPathPattern`' do
-    let(:input) { super().merge(repository_path_pattern: "prefix-#{project.full_path}-invalid-character-!") }
+    let(:kwargs) do
+      super().merge(repository_path_pattern: '')
+    end
 
     it_behaves_like 'an erroneous response'
 
-    it 'returns error from endpoint implementation (not from grapqhl framework)' do
-      post_graphql_mutation_create_container_registry_protection_rule
+    it { subject.tap { expect_graphql_errors_to_be_empty } }
 
-      expect_graphql_errors_to_be_empty
-
-      expect(mutation_response['errors']).to eq [
-        "Repository path pattern should be a valid container repository path with optional wildcard characters.",
-        "Repository path pattern should start with the project's full path"
-      ]
-    end
+    it {
+      subject.tap do
+        expect(mutation_response['errors']).to eq [
+          "Repository path pattern can't be blank, " \
+          "Repository path pattern should be a valid container repository path with optional wildcard characters., " \
+          "and Repository path pattern should start with the project's full path"
+        ]
+      end
+    }
   end
 
   context 'with existing containers protection rule' do
@@ -134,7 +111,7 @@ RSpec.describe 'Creating the container registry protection rule', :aggregate_fai
     end
 
     context 'when container name pattern is slightly different' do
-      let(:input) do
+      let(:kwargs) do
         # The field `repository_path_pattern` is unique; this is why we change the value in a minimum way
         super().merge(
           repository_path_pattern: "#{existing_container_registry_protection_rule.repository_path_pattern}-unique"
@@ -149,7 +126,7 @@ RSpec.describe 'Creating the container registry protection rule', :aggregate_fai
     end
 
     context 'when field `repository_path_pattern` is taken' do
-      let(:input) do
+      let(:kwargs) do
         super().merge(repository_path_pattern: existing_container_registry_protection_rule.repository_path_pattern,
           minimum_access_level_for_push: 'OWNER')
       end
@@ -166,7 +143,7 @@ RSpec.describe 'Creating the container registry protection rule', :aggregate_fai
 
       it 'does not create new container protection rules' do
         expect(::ContainerRegistry::Protection::Rule.where(project: project,
-          repository_path_pattern: input[:repository_path_pattern],
+          repository_path_pattern: kwargs[:repository_path_pattern],
           minimum_access_level_for_push: Gitlab::Access::OWNER)).not_to exist
       end
     end

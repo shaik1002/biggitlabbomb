@@ -2,9 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe BulkImports::CreateService, :clean_gitlab_redis_shared_state, feature_category: :importers do
-  include GraphqlHelpers
-
+RSpec.describe BulkImports::CreateService, feature_category: :importers do
   let(:user) { create(:user) }
   let(:credentials) { { url: 'http://gitlab.example', access_token: 'token' } }
   let(:destination_group) { create(:group, path: 'destination1') }
@@ -64,86 +62,39 @@ RSpec.describe BulkImports::CreateService, :clean_gitlab_redis_shared_state, fea
         end
       end
 
-      context 'when the resource is not found  while validating the source_full_path' do
-        before do
-          allow_next_instance_of(BulkImports::Clients::HTTP) do |client|
-            allow(client)
-              .to receive(:validate_instance_version!)
-              .and_return(true)
-
-            allow(client)
-              .to receive(:validate_import_scopes!)
-              .and_return(true)
-          end
-        end
-
-        it 'rescues the error and raises a BulkImports::Error' do
-          expect_next_instance_of(BulkImports::Clients::Graphql) do |client|
-            expect(client)
-             .to receive(:execute)
-             .and_return(instance_double(GraphQL::Client::Response, original_hash: { 'data' => { 'group' => nil } }))
-
-            expect(client).to receive(:parse)
-          end
-
-          result = subject.execute
-
-          expect(result).to be_a(ServiceResponse)
-          expect(result).to be_error
-          expect(result.message).to eq("Import failed. 'full/path/to/group1' not found.")
-        end
-      end
-
       # response when authorize_admin_project in API endpoint fails
       context 'when direct transfer status query returns a 403' do
-        before do
-          allow_next_instance_of(BulkImports::Clients::HTTP) do |client|
-            allow(client).to receive(:validate_instance_version!).and_return(true)
-            allow(client).to receive(:validate_import_scopes!).and_return(true)
-          end
-
-          allow_next_instance_of(BulkImports::Clients::Graphql) do |client|
-            allow(client)
-             .to receive(:execute)
-             .and_return(instance_double(GraphQL::Client::Response, original_hash: {
-               'data' => { 'group' => { 'id' => 'gid://gitlab/Group/165' } }
-             } ))
-
-            allow(client).to receive(:parse)
-          end
-        end
-
         it 'raises a ServiceResponse::Error' do
-          stub_request(:get, "http://gitlab.example/api/v4/#{source_entity_type}/165/export_relations/status?page=1&per_page=30&private_token=token")
-            .to_return(status: 403)
+          expect_next_instance_of(BulkImports::Clients::HTTP) do |client|
+            expect(client).to receive(:validate_instance_version!).and_return(true)
+            expect(client).to receive(:get)
+              .with("/groups/full%2Fpath%2Fto%2Fgroup1/export_relations/status")
+              .and_raise(BulkImports::NetworkError, '403 Forbidden')
+          end
 
           result = subject.execute
 
           expect(result).to be_a(ServiceResponse)
           expect(result).to be_error
-          expect(result.message).to eq("Import failed. You don't have permission to export 'full/path/to/group1'.")
+          expect(result.message).to eq("403 Forbidden")
         end
       end
 
       context 'when direct transfer setting query returns a 404' do
         it 'raises a ServiceResponse::Error' do
-          allow_next_instance_of(BulkImports::Clients::HTTP) do |client|
-            allow(client).to receive(:validate_instance_version!).and_return(true)
-            allow(client).to receive(:validate_import_scopes!).and_return(true)
-          end
-
-          allow_next_instance_of(BulkImports::Clients::Graphql) do |client|
-            allow(client)
-             .to receive(:execute)
-             .and_return(instance_double(GraphQL::Client::Response, original_hash: {
-               'data' => { 'group' => { 'id' => 'gid://gitlab/Group/165' } }
-             } ))
-
-            allow(client).to receive(:parse)
-          end
-
-          stub_request(:get, "http://gitlab.example/api/v4/#{source_entity_type}/165/export_relations/status?page=1&per_page=30&private_token=token")
+          stub_request(:get, 'http://gitlab.example/api/v4/version?private_token=token').to_return(status: 404)
+          stub_request(:get, 'http://gitlab.example/api/v4/metadata?private_token=token')
+            .to_return(
+              status: 200,
+              body: source_version.to_json,
+              headers: { 'Content-Type' => 'application/json' }
+            )
+          stub_request(:get, "http://gitlab.example/api/v4/#{source_entity_type}/#{source_entity_identifier}/export_relations/status?page=1&per_page=30&private_token=token")
             .to_return(status: 404)
+
+          expect_next_instance_of(BulkImports::Clients::HTTP) do |client|
+            expect(client).to receive(:get).and_raise(BulkImports::Error.setting_not_enabled)
+          end
 
           result = subject.execute
 
@@ -151,45 +102,27 @@ RSpec.describe BulkImports::CreateService, :clean_gitlab_redis_shared_state, fea
           expect(result).to be_error
           expect(result.message)
             .to eq(
-              "Migration by direct transfer disabled on source or destination instance. " \
+              "Group import disabled on source or destination instance. " \
               "Ask an administrator to enable it on both instances and try again."
             )
         end
       end
 
-      context 'when direct transfer setting query raises any other NetworkError' do
-        it 'raises a ServiceResponse::Error' do
-          allow_next_instance_of(BulkImports::Clients::HTTP) do |client|
-            allow(client).to receive(:validate_instance_version!).and_return(true)
-            allow(client).to receive(:validate_import_scopes!).and_return(true)
-          end
-
-          allow_next_instance_of(BulkImports::Clients::Graphql) do |client|
-            allow(client)
-             .to receive(:execute)
-             .and_return(instance_double(GraphQL::Client::Response, original_hash: {
-               'data' => { 'group' => { 'id' => 'gid://gitlab/Group/165' } }
-             } ))
-
-            allow(client).to receive(:parse)
-          end
-
-          stub_request(:get, "http://gitlab.example/api/v4/#{source_entity_type}/165/export_relations/status?page=1&per_page=30&private_token=token")
-            .to_return(status: 408)
-
-          result = subject.execute
-
-          expect(result).to be_a(ServiceResponse)
-          expect(result).to be_error
-          expect(result.message)
-            .to include("Unsuccessful response 408")
-        end
-      end
-
       context 'when required scopes are not present' do
         it 'returns ServiceResponse with error if token does not have api scope' do
+          stub_request(:get, 'http://gitlab.example/api/v4/version?private_token=token').to_return(status: 404)
+          stub_request(:get, 'http://gitlab.example/api/v4/metadata?private_token=token')
+            .to_return(
+              status: 200,
+              body: source_version.to_json,
+              headers: { 'Content-Type' => 'application/json' }
+            )
+          stub_request(:get, "http://gitlab.example/api/v4/#{source_entity_type}/#{source_entity_identifier}/export_relations/status?page=1&per_page=30&private_token=token")
+            .to_return(
+              status: 200
+            )
+
           allow_next_instance_of(BulkImports::Clients::HTTP) do |client|
-            allow(client).to receive(:validate_instance_version!).and_return(true)
             allow(client).to receive(:validate_import_scopes!)
               .and_raise(BulkImports::Error.scope_or_url_validation_failure)
           end
@@ -207,12 +140,19 @@ RSpec.describe BulkImports::CreateService, :clean_gitlab_redis_shared_state, fea
 
       context 'when token validation succeeds' do
         before do
-          allow(subject).to receive(:validate!).and_return(true)
-
-          allow_next_instance_of(BulkImports::Clients::HTTP) do |client|
-            allow(client).to receive(:instance_version).and_return(source_version[:version])
-            allow(client).to receive(:instance_enterprise).and_return(false)
-          end
+          stub_request(:get, 'http://gitlab.example/api/v4/version?private_token=token').to_return(status: 404)
+          stub_request(:get, 'http://gitlab.example/api/v4/metadata?private_token=token')
+            .to_return(status: 200, body: source_version.to_json, headers: { 'Content-Type' => 'application/json' })
+          stub_request(:get, "http://gitlab.example/api/v4/#{source_entity_type}/#{source_entity_identifier}/export_relations/status?page=1&per_page=30&private_token=token")
+            .to_return(
+              status: 200
+            )
+          stub_request(:get, 'http://gitlab.example/api/v4/personal_access_tokens/self?private_token=token')
+            .to_return(
+              status: 200,
+              body: { 'scopes' => ['api'] }.to_json,
+              headers: { 'Content-Type' => 'application/json' }
+            )
 
           parent_group.add_owner(user)
         end
@@ -221,7 +161,6 @@ RSpec.describe BulkImports::CreateService, :clean_gitlab_redis_shared_state, fea
           expect { subject.execute }.to change { BulkImport.count }.by(1)
 
           last_bulk_import = BulkImport.last
-
           expect(last_bulk_import.user).to eq(user)
           expect(last_bulk_import.source_version).to eq(source_version[:version])
           expect(last_bulk_import.user).to eq(user)
@@ -308,37 +247,11 @@ RSpec.describe BulkImports::CreateService, :clean_gitlab_redis_shared_state, fea
         allow_next_instance_of(BulkImports::Clients::HTTP) do |instance|
           allow(instance).to receive(:instance_version).and_return(source_version)
           allow(instance).to receive(:instance_enterprise).and_return(false)
-
-          allow_next_instance_of(BulkImports::Clients::Graphql) do |client|
-            allow(client)
-             .to receive(:execute)
-             .and_return(instance_double(GraphQL::Client::Response, original_hash: {
-               'data' => { 'group' => { 'id' => 'gid://gitlab/Group/165' } }
-             } ))
-
-            allow(client).to receive(:parse)
-          end
-
-          stub_request(:get, "http://gitlab.example/api/v4/#{source_entity_type}/165/export_relations/status?page=1&per_page=30&private_token=token")
+          stub_request(:get, "http://gitlab.example/api/v4/#{source_entity_type}/#{source_entity_identifier}/export_relations/status?page=1&per_page=30&private_token=token")
             .to_return(
               status: 200
             )
         end
-
-        allow_next_instance_of(BulkImports::Clients::Graphql) do |client|
-          allow(client)
-            .to receive(:execute)
-            .and_return(instance_double(GraphQL::Client::Response, original_hash: {
-              'data' => { 'group' => { 'id' => 'gid://gitlab/Group/165' } }
-            } ))
-
-          allow(client).to receive(:parse)
-        end
-
-        stub_request(:get, "http://gitlab.example/api/v4/#{source_entity_type}/#{source_entity_identifier}/export_relations/status?page=1&per_page=30&private_token=token")
-          .to_return(
-            status: 200
-          )
 
         parent_group.add_owner(user)
       end
@@ -367,48 +280,6 @@ RSpec.describe BulkImports::CreateService, :clean_gitlab_redis_shared_state, fea
           user: user,
           extra: { user_role: 'Owner', import_type: 'bulk_import_group' }
         )
-      end
-
-      it 'enables importer_user_mapping' do
-        subject.execute
-
-        expect(Import::BulkImports::EphemeralData.new(BulkImport.last.id).importer_user_mapping_enabled?).to eq(true)
-      end
-
-      it 'enqueues SourceUsersAttributesWorker' do
-        expect(Import::BulkImports::SourceUsersAttributesWorker).to receive(:perform_async)
-
-        subject.execute
-      end
-
-      context 'when importer_user_mapping feature flag is disable' do
-        before do
-          stub_feature_flags(importer_user_mapping: false)
-        end
-
-        it 'does not enable importer_user_mapping' do
-          subject.execute
-
-          expect(Import::BulkImports::EphemeralData.new(BulkImport.last.id).importer_user_mapping_enabled?).to eq(false)
-        end
-
-        it 'does not enqueue SourceUsersAttributesWorker' do
-          expect(Import::BulkImports::SourceUsersAttributesWorker).not_to receive(:perform_async)
-
-          subject.execute
-        end
-      end
-
-      context 'when bulk_import_importer_user_mapping feature flag is disable' do
-        before do
-          stub_feature_flags(bulk_import_importer_user_mapping: false)
-        end
-
-        it 'does not enable importer_user_mapping' do
-          subject.execute
-
-          expect(Import::BulkImports::EphemeralData.new(BulkImport.last.id).importer_user_mapping_enabled?).to eq(false)
-        end
       end
 
       context 'on the same instance' do
@@ -560,7 +431,7 @@ RSpec.describe BulkImports::CreateService, :clean_gitlab_redis_shared_state, fea
         let(:entity_source_id) { 'gid://gitlab/Model/12345' }
         let(:graphql_client) { instance_double(BulkImports::Clients::Graphql) }
         let(:http_client) { instance_double(BulkImports::Clients::HTTP) }
-        let(:http_response) { instance_double(HTTParty::Response, code: 200, success?: true) }
+        let(:http_response) { double(code: 200, success?: true) } # rubocop:disable RSpec/VerifiedDoubles
 
         before do
           allow(BulkImports::Clients::HTTP).to receive(:new).and_return(http_client)
@@ -576,8 +447,7 @@ RSpec.describe BulkImports::CreateService, :clean_gitlab_redis_shared_state, fea
           context 'when the source_full_path contains only integer characters' do
             let(:query_string) { BulkImports::Groups::Graphql::GetGroupQuery.new(context: nil).to_s }
             let(:graphql_response) do
-              instance_double(GraphQL::Client::Response,
-                original_hash: { 'data' => { 'group' => { 'id' => entity_source_id } } })
+              double(original_hash: { 'data' => { 'group' => { 'id' => entity_source_id } } }) # rubocop:disable RSpec/VerifiedDoubles
             end
 
             let(:params) do
@@ -618,8 +488,7 @@ RSpec.describe BulkImports::CreateService, :clean_gitlab_redis_shared_state, fea
           context 'when the source_full_path contains only integer characters' do
             let(:query_string) { BulkImports::Projects::Graphql::GetProjectQuery.new(context: nil).to_s }
             let(:graphql_response) do
-              instance_double(GraphQL::Client::Response,
-                original_hash: { 'data' => { 'project' => { 'id' => entity_source_id } } })
+              double(original_hash: { 'data' => { 'project' => { 'id' => entity_source_id } } }) # rubocop:disable RSpec/VerifiedDoubles
             end
 
             let(:params) do
@@ -658,10 +527,6 @@ RSpec.describe BulkImports::CreateService, :clean_gitlab_redis_shared_state, fea
       end
 
       describe '#validate_destination_namespace' do
-        before do
-          allow(subject).to receive(:validate!).and_return(true)
-        end
-
         context 'when the destination_namespace does not exist' do
           let(:params) do
             [
@@ -769,10 +634,6 @@ RSpec.describe BulkImports::CreateService, :clean_gitlab_redis_shared_state, fea
       end
 
       describe '#validate_destination_full_path' do
-        before do
-          allow(subject).to receive(:validate!).and_return(true)
-        end
-
         context 'when the source_type is a group' do
           context 'when the provided destination_slug already exists in the destination_namespace' do
             let_it_be(:existing_subgroup) { create(:group, path: 'existing-subgroup', parent_id: parent_group.id ) }

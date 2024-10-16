@@ -14,11 +14,6 @@ query integrationExclusion($before: String, $after: String, $first: Int, $last: 
         name
         id
       }
-      group {
-        avatarUrl
-        name
-        id
-      }
     }
     pageInfo {
       ...PageInfo

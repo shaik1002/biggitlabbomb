@@ -19,9 +19,6 @@
     "admin_merge_request": {
       "type": "boolean"
     },
-    "admin_protected_branch": {
-      "type": "boolean"
-    },
     "admin_push_rules": {
       "type": "boolean"
     },
@@ -71,9 +68,6 @@
       "type": "boolean"
     },
     "remove_project": {
-      "type": "boolean"
-    },
-    "read_runners": {
       "type": "boolean"
     }
   }

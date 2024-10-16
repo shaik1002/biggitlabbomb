@@ -162,7 +162,7 @@ export default {
           :toggle-text="__('More actions')"
           :text-sr-only="true"
           category="tertiary"
-          placement="bottom-end"
+          placement="right"
           no-caret
         >
           <gl-disclosure-dropdown-item v-gl-modal-directive="$options.confirmClearCacheModal">

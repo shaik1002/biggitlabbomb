@@ -79,7 +79,7 @@ module Spam
           target.spam!
           create_spam_log
           create_spam_abuse_event(result)
-          ban_user
+          ban_user!
         when DISALLOW
           target.spam!
           create_spam_log
@@ -132,17 +132,15 @@ module Spam
         verdict: result
       }
 
-      base_class = Feature.enabled?(:rename_abuse_workers, user, type: :ops) ? AntiAbuse : Abuse
-
       target.run_after_commit_or_now do
-        base_class::SpamAbuseEventsWorker.perform_async(params)
+        Abuse::SpamAbuseEventsWorker.perform_async(params)
       end
     end
 
-    def ban_user
+    def ban_user!
       UserCustomAttribute.set_banned_by_spam_log(target.spam_log)
 
-      Users::AutoBanService.new(user: user, reason: 'spam').execute
+      user.ban!
     end
 
     def spam_verdict_service

@@ -81,11 +81,11 @@ const validateGroupNamespaceDropdown = (e) => {
     e.preventDefault();
     dropdownButton().classList.add(invalidDropdownClass);
     namespaceButton().classList.add(invalidDropdownClass);
-    namespaceError().classList.remove('gl-hidden');
+    namespaceError().classList.remove('gl-display-none');
   } else {
     dropdownButton().classList.remove(invalidDropdownClass);
     namespaceButton().classList.remove(invalidDropdownClass);
-    namespaceError().classList.add('gl-hidden');
+    namespaceError().classList.add('gl-display-none');
   }
 };
 
@@ -96,11 +96,11 @@ const checkProjectName = (projectNameInput) => {
   if (!projectNameError) return;
   if (msg) {
     projectNameError.innerText = msg;
-    projectNameError.classList.remove('gl-hidden');
-    projectNameDescription.classList.add('gl-hidden');
+    projectNameError.classList.remove('gl-display-none');
+    projectNameDescription.classList.add('gl-display-none');
   } else {
-    projectNameError.classList.add('gl-hidden');
-    projectNameDescription.classList.remove('gl-hidden');
+    projectNameError.classList.add('gl-display-none');
+    projectNameDescription.classList.remove('gl-display-none');
   }
 };
 
@@ -123,7 +123,7 @@ const setProjectNamePathHandlers = ($projectNameInput, $projectPathInput) => {
     hasUserDefinedProjectPath = $projectPathInput.value.trim().length > 0;
 
     specialRepo.classList.toggle(
-      'gl-hidden',
+      'gl-display-none',
       $projectPathInput.value !== $projectPathInput.dataset.username,
     );
   };

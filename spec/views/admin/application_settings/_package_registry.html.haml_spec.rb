@@ -3,13 +3,11 @@
 require 'spec_helper'
 
 RSpec.describe 'admin/application_settings/_package_registry' do
-  include RenderedHtml
-
   let_it_be(:admin) { create(:admin) }
   let_it_be(:default_plan_limits) { create(:plan_limits, :default_plan, :with_package_file_sizes) }
   let_it_be(:application_setting) { build(:application_setting) }
 
-  let(:page) { rendered_html }
+  let(:page) { Capybara::Node::Simple.new(rendered) }
 
   before do
     assign(:application_setting, application_setting)

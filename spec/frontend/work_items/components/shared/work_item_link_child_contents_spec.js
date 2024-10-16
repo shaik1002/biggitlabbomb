@@ -1,4 +1,4 @@
-import { GlLabel, GlLink, GlButton, GlAvatarsInline } from '@gitlab/ui';
+import { GlLabel, GlIcon, GlLink, GlButton, GlAvatarsInline } from '@gitlab/ui';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
@@ -7,19 +7,16 @@ import WorkItemLinkChildMetadata from 'ee_else_ce/work_items/components/shared/w
 
 import { createAlert } from '~/alert';
 import RichTimestampTooltip from '~/vue_shared/components/rich_timestamp_tooltip.vue';
-import WorkItemStateBadge from '~/work_items/components/work_item_state_badge.vue';
+
 import WorkItemLinkChildContents from '~/work_items/components/shared/work_item_link_child_contents.vue';
 import { WORK_ITEM_TYPE_VALUE_OBJECTIVE } from '~/work_items/constants';
-import WorkItemRelationshipIcons from '~/work_items/components/shared/work_item_relationship_icons.vue';
 
 import {
   workItemTask,
   workItemObjectiveWithChild,
   confidentialWorkItemTask,
   closedWorkItemTask,
-  otherNamespaceChild,
   workItemObjectiveMetadataWidgets,
-  workItemObjectiveWithoutChild,
 } from '../../mock_data';
 
 jest.mock('~/alert');
@@ -32,8 +29,8 @@ describe('WorkItemLinkChildContents', () => {
   const mockAssignees = ASSIGNEES.assignees.nodes;
   const mockLabels = LABELS.labels.nodes;
 
-  const findStatusBadgeComponent = () =>
-    wrapper.findByTestId('item-status-icon').findComponent(WorkItemStateBadge);
+  const findStatusIconComponent = () =>
+    wrapper.findByTestId('item-status-icon').findComponent(GlIcon);
   const findConfidentialIconComponent = () => wrapper.findByTestId('confidential-icon');
   const findTitleEl = () => wrapper.findComponent(GlLink);
   const findStatusTooltipComponent = () => wrapper.findComponent(RichTimestampTooltip);
@@ -42,7 +39,6 @@ describe('WorkItemLinkChildContents', () => {
   const findRegularLabel = () => findAllLabels().at(0);
   const findScopedLabel = () => findAllLabels().at(1);
   const findRemoveButton = () => wrapper.findComponent(GlButton);
-  const findRelationshipIconsComponent = () => wrapper.findComponent(WorkItemRelationshipIcons);
 
   const createComponent = ({
     canUpdate = true,
@@ -64,15 +60,16 @@ describe('WorkItemLinkChildContents', () => {
   });
 
   it.each`
-    status      | childItem             | workItemState | rawTimestamp                   | tooltipContents
-    ${'open'}   | ${workItemTask}       | ${'OPEN'}     | ${workItemTask.createdAt}      | ${'Created'}
-    ${'closed'} | ${closedWorkItemTask} | ${'CLOSED'}   | ${closedWorkItemTask.closedAt} | ${'Closed'}
+    status      | childItem             | statusIconName    | statusIconColorClass   | rawTimestamp                   | tooltipContents
+    ${'open'}   | ${workItemTask}       | ${'issue-open-m'} | ${'gl-text-green-500'} | ${workItemTask.createdAt}      | ${'Created'}
+    ${'closed'} | ${closedWorkItemTask} | ${'issue-close'}  | ${'gl-text-blue-500'}  | ${closedWorkItemTask.closedAt} | ${'Closed'}
   `(
     'renders item status icon and tooltip when item status is `$status`',
-    ({ childItem, workItemState, rawTimestamp, tooltipContents }) => {
+    ({ childItem, statusIconName, statusIconColorClass, rawTimestamp, tooltipContents }) => {
       createComponent({ childItem });
 
-      expect(findStatusBadgeComponent().props('workItemState')).toBe(workItemState);
+      expect(findStatusIconComponent().props('name')).toBe(statusIconName);
+      expect(findStatusIconComponent().classes()).toContain(statusIconColorClass);
       expect(findStatusTooltipComponent().props('rawTimestamp')).toBe(rawTimestamp);
       expect(findStatusTooltipComponent().props('timestampTypeText')).toContain(tooltipContents);
     },
@@ -134,7 +131,7 @@ describe('WorkItemLinkChildContents', () => {
   describe('item metadata', () => {
     it('renders item metadata component when item has metadata present', () => {
       createComponent({
-        childItem: workItemObjectiveWithoutChild,
+        childItem: workItemObjectiveWithChild,
         workItemType: WORK_ITEM_TYPE_VALUE_OBJECTIVE,
       });
 
@@ -142,16 +139,6 @@ describe('WorkItemLinkChildContents', () => {
         iid: '12',
         reference: '#12',
         metadataWidgets: workItemObjectiveMetadataWidgets,
-      });
-    });
-    it('renders full path when not in the same namespace', () => {
-      createComponent({
-        childItem: otherNamespaceChild,
-      });
-
-      expect(findMetadataComponent().props()).toMatchObject({
-        iid: '24',
-        reference: 'test-project-path/other#24',
       });
     });
   });
@@ -163,16 +150,6 @@ describe('WorkItemLinkChildContents', () => {
 
     it('renders remove button', () => {
       expect(findRemoveButton().exists()).toBe(true);
-    });
-
-    it('renders relationship icons', () => {
-      expect(findRelationshipIconsComponent().exists()).toBe(true);
-    });
-
-    it('does not render relationship icons when item is closed', () => {
-      createComponent({ childItem: closedWorkItemTask });
-
-      expect(findRelationshipIconsComponent().exists()).toBe(false);
     });
 
     it('does not render work-item-links-menu when canUpdate is false', () => {

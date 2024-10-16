@@ -46,7 +46,7 @@ RSpec.describe JwtController, feature_category: :system_access do
         {
           "errors" => [{
             "code" => "UNAUTHORIZED",
-            "message" => "HTTP Basic: Access denied. If a password was provided for Git authentication, the password was incorrect or you're required to use a token instead of a password. If a token was provided, it was either incorrect, expired, or improperly scoped. See http://www.example.com/help/user/profile/account/two_factor_authentication.md#troubleshooting"
+            "message" => "HTTP Basic: Access denied. The provided password or token is incorrect or your account has 2FA enabled and you must use a personal access token instead of a password. See http://www.example.com/help/user/profile/account/two_factor_authentication#troubleshooting"
           }]
         }
       )
@@ -54,18 +54,6 @@ RSpec.describe JwtController, feature_category: :system_access do
   end
 
   context 'POST /jwt/auth' do
-    it 'returns 404' do
-      post '/jwt/auth'
-
-      expect(response).to have_gitlab_http_status(:not_found)
-    end
-  end
-
-  context 'POST /jwt/auth when in maintenance mode' do
-    before do
-      stub_maintenance_mode_setting(true)
-    end
-
     it 'returns 404' do
       post '/jwt/auth'
 
@@ -235,26 +223,6 @@ RSpec.describe JwtController, feature_category: :system_access do
           get '/jwt/auth', params: parameters, headers: headers
 
           expect(response).to have_gitlab_http_status(:ok)
-        end
-
-        context 'when the user is admin' do
-          let(:admin) { create(:admin) }
-          let(:access_token) { create(:personal_access_token, user: admin) }
-          let(:headers) { { authorization: credentials(admin.username, access_token.token) } }
-
-          # We are bypassing admin mode for registry operations
-          # since that should not matter for data based operations
-          context 'when admin mode is enabled', :enable_admin_mode do
-            it 'accepts the authorization attempt' do
-              expect(response).to have_gitlab_http_status(:ok)
-            end
-          end
-
-          context 'when admin mode is disabled' do
-            it 'accepts the authorization attempt' do
-              expect(response).to have_gitlab_http_status(:ok)
-            end
-          end
         end
       end
 

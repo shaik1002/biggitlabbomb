@@ -11,7 +11,7 @@ module API
       def bulk_imports
         @bulk_imports ||= ::BulkImports::ImportsFinder.new(
           user: current_user,
-          params: params.merge(include_configuration: true)
+          params: params
         ).execute
       end
 
@@ -247,10 +247,9 @@ module API
         requires :import_id, type: Integer, desc: "The ID of user's GitLab Migration"
       end
       post ':import_id/cancel' do
-        bulk_import = BulkImport.find_by_id(params[:import_id])
+        authenticated_as_admin!
 
-        not_found! unless bulk_import
-        authenticated_as_admin! unless bulk_import.user == current_user
+        bulk_import = BulkImport.find(params[:import_id])
 
         bulk_import.cancel!
 

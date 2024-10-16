@@ -9,7 +9,7 @@ module API
 
     before { authenticate! if Feature.enabled?(:authenticate_markdown_api, type: :ops) }
 
-    feature_category :markdown
+    feature_category :team_planning
 
     params do
       requires :text, type: String, desc: "The Markdown text to render"
@@ -40,10 +40,7 @@ module API
           context[:skip_project_check] = true
         end
 
-        # Disable comments in markdown for IE browsers because comments in IE
-        # could allow script execution.
-        browser = Browser.new(headers['User-Agent'])
-        context[:allow_comments] = !browser.ie?
+        context[:allow_comments] = false
 
         present({ html: Banzai.render_and_post_process(params[:text], context) }, with: Entities::Markdown)
       end

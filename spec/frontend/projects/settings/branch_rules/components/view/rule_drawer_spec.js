@@ -1,4 +1,3 @@
-import { nextTick } from 'vue';
 import { GlDrawer, GlFormCheckbox } from '@gitlab/ui';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import { getContentWrapperHeight } from '~/lib/utils/dom_utils';
@@ -7,7 +6,6 @@ import RuleDrawer from '~/projects/settings/branch_rules/components/view/rule_dr
 import {
   allowedToMergeDrawerProps,
   editRuleData,
-  editRuleDataNoAccessLevels,
   editRuleDataNoOne,
 } from 'ee_else_ce_jest/projects/settings/branch_rules/components/view/mock_data';
 
@@ -23,11 +21,6 @@ describe('Edit Rule Drawer', () => {
   const findHeader = () => wrapper.find('h2');
   const findSaveButton = () => wrapper.findByTestId('save-allowed-to-merge');
   const findCheckboxes = () => wrapper.findAllComponents(GlFormCheckbox);
-  const findAdministratorsCheckbox = () => wrapper.findByTestId('admins-role-checkbox');
-  const findMaintainersCheckbox = () => wrapper.findByTestId('maintainers-role-checkbox');
-  const findDevelopersAndMaintainersCheckbox = () =>
-    wrapper.findByTestId('developers-role-checkbox');
-  const findNoOneCheckbox = () => wrapper.findByTestId('no-one-role-checkbox');
 
   const createComponent = (props = allowedToMergeDrawerProps) => {
     wrapper = shallowMountExtended(RuleDrawer, {
@@ -38,7 +31,6 @@ describe('Edit Rule Drawer', () => {
   };
 
   beforeEach(() => {
-    window.gon.dot_com = false;
     getContentWrapperHeight.mockReturnValue(TEST_HEADER_HEIGHT);
     createComponent();
   });
@@ -72,74 +64,27 @@ describe('Edit Rule Drawer', () => {
   });
 
   it('renders checkboxes with expected text', () => {
-    expect(findCheckboxes().length).toBe(4);
-    expect(findAdministratorsCheckbox().text()).toBe('Administrators');
-    expect(findMaintainersCheckbox().text()).toBe('Maintainers');
-    expect(findDevelopersAndMaintainersCheckbox().text()).toBe('Developers and Maintainers');
-    expect(findNoOneCheckbox().text()).toBe('No one');
+    expect(findCheckboxes().length).toBe(3);
+    expect(findCheckboxes().at(0).text()).toBe('Administrators');
+    expect(findCheckboxes().at(1).text()).toBe('Maintainers');
+    expect(findCheckboxes().at(2).text()).toBe('Developers and Maintainers');
   });
 
   it('emits expected data', () => {
-    findAdministratorsCheckbox().vm.$emit('input', true);
-    findMaintainersCheckbox().vm.$emit('input', true);
-    findDevelopersAndMaintainersCheckbox().vm.$emit('input', true);
+    findCheckboxes().at(0).vm.$emit('input', true);
+    findCheckboxes().at(1).vm.$emit('input', true);
+    findCheckboxes().at(2).vm.$emit('input', true);
     findSaveButton().vm.$emit('click');
-
     expect(wrapper.emitted('editRule')).toHaveLength(1);
     expect(wrapper.emitted('editRule')[0][0]).toEqual(editRuleData);
   });
 
-  it('when `No one` is selected, it sets other access level checkboxes to false', async () => {
-    createComponent({ ...allowedToMergeDrawerProps, roles: [30, 40, 60], isOpen: true });
-    findNoOneCheckbox().vm.$emit('input', true);
-    await nextTick();
-
-    expect(findAdministratorsCheckbox().attributes('checked')).toBeUndefined();
-    expect(findMaintainersCheckbox().attributes('checked')).toBeUndefined();
-    expect(findDevelopersAndMaintainersCheckbox().attributes('checked')).toBeUndefined();
-    expect(findNoOneCheckbox().attributes('checked')).toBe('true');
-  });
-
-  it('when `No one` is initially selected, selecting another role unchecks `No one', async () => {
-    createComponent({ ...allowedToMergeDrawerProps, roles: [0], isOpen: true });
-    findAdministratorsCheckbox().vm.$emit('input', true);
-    await nextTick();
-
-    expect(findNoOneCheckbox().attributes('checked')).toBeUndefined();
-    expect(findAdministratorsCheckbox().attributes('checked')).toBe('true');
-  });
-
-  it('when all roles are checked it sends `No one` as a role', () => {
-    findAdministratorsCheckbox().vm.$emit('input', true);
-    findMaintainersCheckbox().vm.$emit('input', true);
-    findDevelopersAndMaintainersCheckbox().vm.$emit('input', true);
-    findNoOneCheckbox().vm.$emit('input', true);
-
+  it('when all roles unchecked it sends `No one` as a role', () => {
+    findCheckboxes().at(0).vm.$emit('input', false);
+    findCheckboxes().at(1).vm.$emit('input', false);
+    findCheckboxes().at(2).vm.$emit('input', false);
     findSaveButton().vm.$emit('click');
     expect(wrapper.emitted('editRule')).toHaveLength(1);
     expect(wrapper.emitted('editRule')[0][0]).toEqual(editRuleDataNoOne);
-  });
-
-  it('when all roles are unchecked it does not send any role', () => {
-    findAdministratorsCheckbox().vm.$emit('input', false);
-    findMaintainersCheckbox().vm.$emit('input', false);
-    findDevelopersAndMaintainersCheckbox().vm.$emit('input', false);
-    findNoOneCheckbox().vm.$emit('input', false);
-
-    findSaveButton().vm.$emit('click');
-    expect(wrapper.emitted('editRule')[0][0]).toEqual(editRuleDataNoAccessLevels);
-  });
-
-  describe('for dot_com', () => {
-    beforeEach(() => {
-      gon.dot_com = true;
-      getContentWrapperHeight.mockReturnValue(TEST_HEADER_HEIGHT);
-      createComponent();
-    });
-
-    it('does not render a checkbox for Administrators', () => {
-      expect(findCheckboxes().length).toBe(3);
-      expect(findAdministratorsCheckbox().exists()).toBe(false);
-    });
   });
 });

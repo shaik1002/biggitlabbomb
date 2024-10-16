@@ -88,5 +88,3 @@ class AwardEmoji < ApplicationRecord
     Gitlab::HookData::EmojiBuilder.new(self).build
   end
 end
-
-AwardEmoji.prepend_mod

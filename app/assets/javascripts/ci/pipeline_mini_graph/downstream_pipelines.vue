@@ -6,7 +6,6 @@ import CiIcon from '~/vue_shared/components/ci_icon/ci_icon.vue';
  * Renders the downstream portion of the pipeline mini graph.
  */
 export default {
-  name: 'DownstreamPipelines',
   directives: {
     GlTooltip: GlTooltipDirective,
   },
@@ -60,7 +59,7 @@ export default {
 </script>
 
 <template>
-  <span v-if="pipelines" class="gl-inline-flex gl-gap-2 gl-align-middle">
+  <span v-if="pipelines" class="gl-display-inline-flex gl-gap-2 gl-align-middle">
     <ci-icon
       v-for="pipeline in pipelinesTrimmed"
       :key="pipeline.id"
@@ -76,7 +75,7 @@ export default {
       v-gl-tooltip="{ title: counterTooltipText }"
       :title="counterTooltipText"
       :href="pipelinePath"
-      class="gl-inline-flex gl-h-6 gl-w-7 gl-items-center gl-justify-center gl-rounded-pill gl-bg-gray-50 gl-text-sm gl-text-gray-500 gl-no-underline"
+      class="gl-align-items-center gl-bg-gray-50 gl-display-inline-flex gl-font-sm gl-h-6 gl-justify-content-center gl-rounded-pill gl-text-decoration-none gl-text-gray-500 gl-w-7"
       data-testid="downstream-pipeline-counter"
     >
       {{ counterLabel }}

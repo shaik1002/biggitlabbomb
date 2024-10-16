@@ -1,6 +1,7 @@
 #import "~/graphql_shared/fragments/author.fragment.graphql"
+#import "./abuse_report_note_permissions.fragment.graphql"
 
-fragment AbuseReportNote on AbuseReportNote {
+fragment AbuseReportNote on Note {
   id
   body
   bodyHtml
@@ -14,6 +15,9 @@ fragment AbuseReportNote on AbuseReportNote {
   lastEditedBy {
     ...Author
     webPath
+  }
+  userPermissions {
+    ...AbuseReportNotePermissions
   }
   discussion {
     id

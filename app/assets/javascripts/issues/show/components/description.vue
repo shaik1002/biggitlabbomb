@@ -15,7 +15,7 @@ import TaskList from '~/task_list';
 import { addHierarchyChild, removeHierarchyChild } from '~/work_items/graphql/cache_utils';
 import createWorkItemMutation from '~/work_items/graphql/create_work_item.mutation.graphql';
 import deleteWorkItemMutation from '~/work_items/graphql/delete_work_item.mutation.graphql';
-import namespaceWorkItemTypesQuery from '~/work_items/graphql/namespace_work_item_types.query.graphql';
+import projectWorkItemTypesQuery from '~/work_items/graphql/project_work_item_types.query.graphql';
 import {
   sprintfWorkItem,
   I18N_WORK_ITEM_ERROR_CREATING,
@@ -26,14 +26,17 @@ import { renderGFM } from '~/behaviors/markdown/render_gfm';
 import eventHub from '../event_hub';
 import animateMixin from '../mixins/animate';
 import {
-  convertDescriptionWithNewSort,
   deleteTaskListItem,
+  convertDescriptionWithNewSort,
   extractTaskTitleAndDescription,
-  insertNextToTaskListItemText,
 } from '../utils';
 import TaskListItemActions from './task_list_item_actions.vue';
 
 Vue.use(GlToast);
+
+const workItemTypes = {
+  TASK: 'task',
+};
 
 export default {
   directives: {
@@ -110,7 +113,7 @@ export default {
       },
     },
     workItemTypes: {
-      query: namespaceWorkItemTypesQuery,
+      query: projectWorkItemTypesQuery,
       variables() {
         return {
           fullPath: this.fullPath,
@@ -143,14 +146,19 @@ export default {
         this.initialUpdate = false;
       }
 
-      this.renderGFM();
+      this.$nextTick(() => {
+        this.renderGFM();
+      });
     },
   },
   mounted() {
     eventHub.$on('convert-task-list-item', this.convertTaskListItem);
     eventHub.$on('delete-task-list-item', this.deleteTaskListItem);
 
-    this.renderGFM();
+    // this.renderGFM();
+    this.$nextTick(() => {
+      this.renderGFM();
+    });
   },
   beforeDestroy() {
     eventHub.$off('convert-task-list-item', this.convertTaskListItem);
@@ -159,9 +167,7 @@ export default {
     this.removeAllPointerEventListeners();
   },
   methods: {
-    async renderGFM() {
-      await this.$nextTick();
-
+    renderGFM() {
       renderGFM(this.$refs['gfm-content']);
 
       if (this.canUpdate) {
@@ -171,21 +177,22 @@ export default {
           fieldName: 'description',
           lockVersion: this.lockVersion,
           selector: '.detail-page-description',
-          onUpdate: () => this.$emit('taskListUpdateStarted'),
-          onSuccess: () => this.$emit('taskListUpdateSucceeded'),
+          onUpdate: this.taskListUpdateStarted.bind(this),
+          onSuccess: this.taskListUpdateSuccess.bind(this),
           onError: this.taskListUpdateError.bind(this),
         });
 
         this.removeAllPointerEventListeners();
+
         this.renderSortableLists();
+
         this.renderTaskListItemActions();
       }
     },
     renderSortableLists() {
       // We exclude GLFM table of contents which have a `section-nav` class on the root `ul`.
-      // We also exclude footnotes, which are in an `ol` inside a `section.footnotes`.
       const lists = this.$el.querySelectorAll?.(
-        '.description .md > ul:not(.section-nav), .description .md > ul:not(.section-nav) ul, .description :not(section.footnotes) > ol',
+        '.description .md > ul:not(.section-nav), .description .md > ul:not(.section-nav) ul, .description ol',
       );
       lists?.forEach((list) => {
         if (list.children.length <= 1) {
@@ -256,26 +263,35 @@ export default {
         this.pointerEventListeners.delete(listItem);
       });
     },
+    taskListUpdateStarted() {
+      this.$emit('taskListUpdateStarted');
+    },
+    taskListUpdateSuccess() {
+      this.$emit('taskListUpdateSucceeded');
+    },
     taskListUpdateError() {
-      const message = __(
-        'Someone edited this %{issueType} at the same time you did. The description has been updated and you will need to make your changes again.',
-      );
-      createAlert({ message: sprintf(message, { issueType: this.issuableType }) });
+      createAlert({
+        message: sprintf(
+          __(
+            'Someone edited this %{issueType} at the same time you did. The description has been updated and you will need to make your changes again.',
+          ),
+          {
+            issueType: this.issuableType,
+          },
+        ),
+      });
 
       this.$emit('taskListUpdateFailed');
     },
-    createTaskListItemActions() {
+    createTaskListItemActions(provide) {
       const app = new Vue({
         el: document.createElement('div'),
-        provide: { id: this.issueId, issuableType: this.issuableType },
+        provide,
         render: (createElement) => createElement(TaskListItemActions),
       });
       return app.$el;
     },
-    convertTaskListItem({ id, sourcepos }) {
-      if (this.issueId !== id) {
-        return;
-      }
+    convertTaskListItem(sourcepos) {
       const oldDescription = this.descriptionText;
       const { newDescription, taskDescription, taskTitle } = deleteTaskListItem(
         oldDescription,
@@ -284,10 +300,7 @@ export default {
       this.$emit('saveDescription', newDescription);
       this.createTask({ taskTitle, taskDescription, oldDescription });
     },
-    deleteTaskListItem({ id, sourcepos }) {
-      if (this.issueId !== id) {
-        return;
-      }
+    deleteTaskListItem(sourcepos) {
       const { newDescription } = deleteTaskListItem(this.descriptionText, sourcepos);
       this.$emit('saveDescription', newDescription);
     },
@@ -297,11 +310,28 @@ export default {
       );
 
       taskListItems?.forEach((item) => {
-        const dropdown = this.createTaskListItemActions();
-        insertNextToTaskListItemText(dropdown, item);
+        const provide = { canUpdate: this.canUpdate, issuableType: this.issuableType };
+        const dropdown = this.createTaskListItemActions(provide);
+        this.insertNextToTaskListItemText(dropdown, item);
         this.addPointerEventListeners(item, '.task-list-item-actions');
         this.hasTaskListItemActions = true;
       });
+    },
+    insertNextToTaskListItemText(element, listItem) {
+      const children = Array.from(listItem.children);
+      const paragraph = children.find((el) => el.tagName === 'P');
+      const list = children.find((el) => el.classList.contains('task-list'));
+      if (paragraph) {
+        // If there's a `p` element, then it's a multi-paragraph task item
+        // and the task text exists within the `p` element as the last child
+        paragraph.append(element);
+      } else if (list) {
+        // Otherwise, the task item can have a child list which exists directly after the task text
+        list.insertAdjacentElement('beforebegin', element);
+      } else {
+        // Otherwise, the task item is a simple one where the task text exists as the last child
+        listItem.append(element);
+      }
     },
     stripClientState(description) {
       return description.replaceAll('<details open="true">', '<details>');
@@ -337,7 +367,8 @@ export default {
           update: (cache, { data: { workItemCreate } }) =>
             addHierarchyChild({
               cache,
-              id: convertToGraphQLId(TYPENAME_WORK_ITEM, this.issueId),
+              fullPath: this.fullPath,
+              iid: this.issueIid,
               workItem: workItemCreate.workItem,
             }),
         });
@@ -371,7 +402,8 @@ export default {
           update: (cache) =>
             removeHierarchyChild({
               cache,
-              id: convertToGraphQLId(TYPENAME_WORK_ITEM, this.issueId),
+              fullPath: this.fullPath,
+              iid: this.issueIid,
               workItem: { id },
             }),
         });
@@ -387,7 +419,7 @@ export default {
     },
     showAlert(message, error) {
       createAlert({
-        message: sprintfWorkItem(message, WORK_ITEM_TYPE_VALUE_TASK),
+        message: sprintfWorkItem(message, workItemTypes.TASK),
         error,
         captureError: true,
       });

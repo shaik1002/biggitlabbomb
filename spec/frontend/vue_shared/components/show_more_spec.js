@@ -1,4 +1,5 @@
 import { mountExtended } from 'helpers/vue_test_utils_helper';
+import { __ } from '~/locale';
 import ShowMore from '~/vue_shared/components/show_more.vue';
 
 describe('~/vue_shared/components/show_more.vue', () => {
@@ -93,7 +94,7 @@ describe('~/vue_shared/components/show_more.vue', () => {
     });
 
     it('shows the "Show more" button', () => {
-      expect(button.text()).toBe('Show more');
+      expect(button.text()).toBe(__('Show more'));
     });
 
     describe('after clicking', () => {
@@ -102,7 +103,7 @@ describe('~/vue_shared/components/show_more.vue', () => {
       });
 
       it('shows the "Show less" button after clicking', () => {
-        expect(button.text()).toBe('Show less');
+        expect(button.text()).toBe(__('Show less'));
       });
 
       it('shows all items after clicking', () => {
@@ -126,7 +127,7 @@ describe('~/vue_shared/components/show_more.vue', () => {
         });
 
         it('shows the "Show more" button', () => {
-          expect(button.text()).toBe('Show more');
+          expect(button.text()).toBe(__('Show more'));
         });
       });
     });

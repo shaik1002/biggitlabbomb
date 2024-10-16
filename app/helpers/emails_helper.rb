@@ -24,7 +24,7 @@ module EmailsHelper
   def action_title(url)
     return unless url
 
-    %w[merge_requests issues work_items commit].each do |action|
+    %w[merge_requests issues commit].each do |action|
       if url.split("/").include?(action)
         return "View #{action.humanize.singularize}"
       end
@@ -100,7 +100,6 @@ module EmailsHelper
 
   def closure_reason_text(closed_via, format:, name:)
     name = sanitize_name(name)
-
     case closed_via
     when MergeRequest
       merge_request = MergeRequest.find(closed_via[:id]).present
@@ -123,10 +122,8 @@ module EmailsHelper
 
       _("Issue was closed by %{name} with %{closed_via}") % { name: name, closed_via: closed_via }
     else
-      type = work_item_type_for(@issue).capitalize
-
       if name
-        _("%{type} was closed by %{name}") % { name: name, type: type }
+        _("Issue was closed by %{name}") % { name: name }
       else
         ""
       end

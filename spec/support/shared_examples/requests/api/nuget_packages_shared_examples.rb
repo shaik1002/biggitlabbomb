@@ -472,7 +472,7 @@ end
 
 RSpec.shared_examples 'rejects nuget access with unknown target id' do |not_found_response: :unauthorized|
   context 'with an unknown target' do
-    let(:target) { double(id: non_existing_record_id) }
+    let(:target) { double(id: 1234567890) }
 
     context 'as anonymous' do
       it_behaves_like 'rejects nuget packages access', :anonymous, not_found_response
@@ -482,66 +482,6 @@ RSpec.shared_examples 'rejects nuget access with unknown target id' do |not_foun
       subject { get api(url), headers: basic_auth_header(user.username, personal_access_token.token) }
 
       it_behaves_like 'rejects nuget packages access', :anonymous, :not_found
-    end
-  end
-end
-
-RSpec.shared_examples 'allows anyone to pull public nuget packages on group level' do
-  let_it_be(:package_name) { 'dummy.package' }
-  let_it_be(:package) { create(:nuget_package, project: project, name: package_name) }
-
-  let(:not_found_response) { :not_found }
-
-  subject { get api(url), headers: basic_auth_header(user.username, personal_access_token.token) }
-
-  shared_examples 'successful response' do
-    it 'returns a successful response' do
-      subject
-
-      expect(response).to have_gitlab_http_status(:ok)
-      expect(json_response).to match_schema(json_schema)
-    end
-  end
-
-  before_all do
-    [subgroup, group, project].each do |entity|
-      entity.update_column(:visibility_level, Gitlab::VisibilityLevel.const_get(:PRIVATE, false))
-    end
-    project.project_feature.update!(package_registry_access_level: ::ProjectFeature::PUBLIC)
-  end
-
-  before do
-    stub_application_setting(package_registry_allow_anyone_to_pull_option: true)
-  end
-
-  it_behaves_like 'successful response'
-
-  context 'when target package is in a private registry and group has another public registry' do
-    let(:other_project) { create(:project, group: target, visibility_level: target.visibility_level) }
-
-    before do
-      project.project_feature.update!(package_registry_access_level: ::ProjectFeature::PRIVATE)
-      other_project.project_feature.update!(package_registry_access_level: ::ProjectFeature::PUBLIC)
-    end
-
-    it 'returns no packages' do
-      subject
-
-      expect(response).to have_gitlab_http_status(not_found_response)
-
-      if not_found_response == :ok
-        expect(json_response).to match_schema(json_schema)
-        expect(json_response['totalHits']).to eq(0)
-        expect(json_response['data']).to be_empty
-      end
-    end
-
-    context 'when package is in the project with public registry' do
-      before do
-        package.update!(project: other_project)
-      end
-
-      it_behaves_like 'successful response'
     end
   end
 end
@@ -786,7 +726,7 @@ RSpec.shared_examples 'nuget upload endpoint' do |symbol_package: false|
   end
 end
 
-RSpec.shared_examples 'process nuget delete request' do |user_type, status, auth|
+RSpec.shared_examples 'process nuget delete request' do |user_type, status|
   context "for user type #{user_type}" do
     before do
       target.send("add_#{user_type}", user) if user_type
@@ -794,22 +734,7 @@ RSpec.shared_examples 'process nuget delete request' do |user_type, status, auth
 
     it_behaves_like 'returning response status', status
 
-    it 'triggers an internal event' do
-      args = { project: project, label: 'nuget', category: 'InternalEventTracking' }
-
-      if auth.nil?
-        args[:property] = 'guest'
-      elsif auth == :deploy_token
-        args[:property] = 'deploy_token'
-      else
-        args[:user] = user
-        args[:property] = 'user'
-      end
-
-      expect { subject }
-        .to trigger_internal_events('delete_package_from_registry')
-          .with(**args)
-    end
+    it_behaves_like 'a package tracking event', 'API::NugetPackages', 'delete_package'
 
     it 'marks package for deletion' do
       expect { subject }.to change { package.reset.status }.from('default').to('pending_destruction')
@@ -851,7 +776,7 @@ RSpec.shared_examples 'nuget symbol file endpoint' do
     end
 
     context 'when target does not exist' do
-      let(:target) { double(id: non_existing_record_id) }
+      let(:target) { double(id: 1234567890) }
 
       it_behaves_like 'returning response status', :not_found
     end

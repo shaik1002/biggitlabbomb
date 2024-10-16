@@ -36,8 +36,7 @@ RSpec.describe Profiles::TwoFactorAuthsController, feature_category: :system_acc
     it 'requires the current password', :aggregate_failures do
       go
 
-      error = assigns[:error] || assigns[:otp_error]
-      expect(error).to eq(error_message)
+      expect(assigns[:error]).to eq(error_message)
       expect(response).to render_template(:show)
     end
 
@@ -430,122 +429,5 @@ RSpec.describe Profiles::TwoFactorAuthsController, feature_category: :system_acc
           .to eq _('Two-factor authentication is not enabled for this user')
       end
     end
-  end
-
-  describe 'DELETE destroy_otp' do
-    let(:destroy_otp) do
-      delete :destroy_otp, params: { current_password: current_password }
-    end
-
-    let(:current_password) { user.password }
-
-    def go
-      destroy_otp
-    end
-
-    context 'for a user that has OTP and WebAuthn enabled' do
-      let_it_be_with_reload(:user) do
-        create(:user, :two_factor_via_otp, :two_factor_via_webauthn)
-      end
-
-      it 'disables OTP authenticator and leaves WebAuthn devices unaffected' do
-        expect(user.two_factor_otp_enabled?).to eq(true)
-        expect(user.two_factor_webauthn_enabled?).to eq(true)
-
-        go
-
-        user.reload
-        expect(user.two_factor_otp_enabled?).to eq(false)
-        expect(user.two_factor_webauthn_enabled?).to eq(true)
-      end
-
-      it 'redirects to profile_two_factor_auth_path' do
-        go
-
-        expect(response).to redirect_to(profile_two_factor_auth_path)
-      end
-
-      it 'displays a notice on success' do
-        go
-
-        expect(flash[:notice])
-        .to eq _('One-time password authenticator has been deleted!')
-      end
-
-      it_behaves_like 'user must enter a valid current password'
-    end
-
-    context 'for a user that has only WebAuthn enabled' do
-      let_it_be_with_reload(:user) do
-        create(:user, :two_factor_via_webauthn)
-      end
-
-      it 'leaves WebAuthn devices unaffected' do
-        expect(user.two_factor_otp_enabled?).to eq(false)
-        expect(user.two_factor_webauthn_enabled?).to eq(true)
-
-        go
-
-        user.reload
-        expect(user.two_factor_otp_enabled?).to eq(false)
-        expect(user.two_factor_webauthn_enabled?).to eq(true)
-      end
-
-      it 'redirects to profile_two_factor_auth_path' do
-        go
-
-        expect(response).to redirect_to(profile_two_factor_auth_path)
-      end
-
-      it 'displays a alert on failure' do
-        go
-
-        expect(flash[:alert])
-        .to eq _('This user does not have a one-time password authenticator registered.')
-      end
-
-      it_behaves_like 'user must enter a valid current password'
-    end
-  end
-
-  describe 'DELETE destroy_webauthn' do
-    let_it_be_with_reload(:user) do
-      create(:user, :two_factor_via_webauthn)
-    end
-
-    let(:webauthn_id) { user.webauthn_registrations.first.id }
-    let(:current_password) { user.password }
-    let(:destroy_webauthn) do
-      delete :destroy_webauthn, params: { id: webauthn_id, current_password: current_password }
-    end
-
-    def go
-      destroy_webauthn
-    end
-
-    it 'destroys the webauthn device' do
-      count = user.webauthn_registrations.count
-      go
-
-      user.reload
-      expect(user.webauthn_registrations.count).to eq(count - 1)
-    end
-
-    it 'redirects to the profile two factor authentication page' do
-      go
-
-      expect(response).to redirect_to profile_two_factor_auth_path
-    end
-
-    it 'calls the Webauthn::DestroyService' do
-      service = double
-
-      expect(Webauthn::DestroyService).to receive(:new).with(user, user, webauthn_id.to_s).and_return(service)
-      expect(service).to receive(:execute)
-
-      go
-    end
-
-    it_behaves_like 'user must enter a valid current password'
   end
 end

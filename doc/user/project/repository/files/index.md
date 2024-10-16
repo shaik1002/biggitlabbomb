@@ -1,6 +1,6 @@
 ---
 stage: Create
-group: Remote Development
+group: IDE
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 description: "Search for files in your GitLab repository directly from the GitLab user interface."
 ---
@@ -85,8 +85,8 @@ evaluates to `true`. This behavior matches the default behavior of Swagger.
 
 Historical information about files in your repository is available in the GitLab UI:
 
-- [Git file history](git_history.md): shows the commit history of an entire file.
-- [Git blame](git_blame.md): shows each line of a text-based file, and the most
+- [Git file history](../git_history.md): shows the commit history of an entire file.
+- [Git blame](../git_blame.md): shows each line of a text-based file, and the most
   recent commit that changed the line.
 
 ## Search for a file
@@ -120,9 +120,9 @@ This feature uses the [`fuzzaldrin-plus`](https://github.com/jeancroy/fuzz-aldri
 ## Change how Git handles a file
 
 To change the default handling of a file or file type, create a
-[`.gitattributes` file](git_attributes.md). Use `.gitattributes` files to:
+[`.gitattributes` file](../../git_attributes.md). Use `.gitattributes` files to:
 
-- Configure file display in diffs, such as [syntax highlighting](highlighting.md)
+- Configure file display in diffs, such as [syntax highlighting](../../highlighting.md)
   or [collapsing generated files](../../merge_requests/changes.md#collapse-generated-files).
 - Control file storage and protection, such as [making files read-only](../../file_lock.md),
   or storing large files [with Git LFS](../../../../topics/git/lfs/index.md).

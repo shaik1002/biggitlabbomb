@@ -11,10 +11,63 @@ import { __ } from '~/locale';
 import ActivityCalendar from './activity_calendar';
 import UserOverviewBlock from './user_overview_block';
 
+/**
+ * UserTabs
+ *
+ * Handles persisting and restoring the current tab selection and lazily-loading
+ * content on the Users#show page.
+ *
+ * ### Example Markup
+ *
+ * <ul class="nav-links">
+ *   <li class="activity-tab active">
+ *     <a data-action="activity" data-target="#activity" data-toggle="tab" href="/username">
+ *       Activity
+ *     </a>
+ *   </li>
+ *   <li class="groups-tab">
+ *     <a data-action="groups" data-target="#groups" data-toggle="tab" href="/users/username/groups">
+ *       Groups
+ *     </a>
+ *   </li>
+ *   <li class="contributed-tab">
+ *     ...
+ *   </li>
+ *   <li class="projects-tab">
+ *     ...
+ *   </li>
+ *   <li class="snippets-tab">
+ *     ...
+ *   </li>
+ * </ul>
+ *
+ * <div class="tab-content">
+ *   <div class="tab-pane" id="activity">
+ *     Activity Content
+ *   </div>
+ *   <div class="tab-pane" id="groups">
+ *     Groups Content
+ *   </div>
+ *   <div class="tab-pane" id="contributed">
+ *     Contributed projects content
+ *   </div>
+ *   <div class="tab-pane" id="projects">
+ *    Projects content
+ *   </div>
+ *   <div class="tab-pane" id="snippets">
+ *     Snippets content
+ *   </div>
+ * </div>
+ *
+ * <div class="loading">
+ *   Loading Animation
+ * </div>
+ */
+
 const CALENDAR_TEMPLATE = `
   <div class="calendar">
     <div class="js-contrib-calendar gl-overflow-x-auto"></div>
-    <div class="calendar-help gl-flex gl-justify-between gl-ml-auto gl-mr-auto">
+    <div class="calendar-help gl-display-flex gl-justify-content-space-between gl-ml-auto gl-mr-auto">
       <div class="calendar-legend">
         <svg width="80px" height="20px">
           <g>
@@ -36,61 +89,87 @@ const CALENDAR_TEMPLATE = `
           </g>
         </svg>
       </div>
-      <div class="calendar-hint gl-text-sm gl-text-secondary"></div>
+      <div class="calendar-hint gl-font-sm gl-text-secondary"></div>
     </div>
   </div>
 `;
 
 const CALENDAR_PERIOD_12_MONTHS = 12;
 
-const DEFAULT_LOADER_ACTIONS = [
-  'groups',
-  'contributed',
-  'projects',
-  'starred',
-  'snippets',
-  'followers',
-  'following',
-];
-
 export default class UserTabs {
-  constructor({ parentEl }) {
-    this.$legacyTabsContainer = $('#js-legacy-tabs-container');
-    this.$parentEl = $(parentEl || document);
+  constructor({ defaultAction, action, parentEl }) {
+    this.loaded = {};
+    this.defaultAction = defaultAction || 'overview';
+    this.action = action || this.defaultAction;
+    this.$parentEl = $(parentEl) || $(document);
     this.windowLocation = window.location;
+    this.$parentEl.find('.nav-links a').each((i, navLink) => {
+      this.loaded[$(navLink).attr('data-action')] = false;
+    });
+    this.actions = Object.keys(this.loaded);
+    this.bindEvents();
 
-    const action = this.$legacyTabsContainer.data('action');
-    const endpoint = this.$legacyTabsContainer.data('endpoint');
+    // TODO: refactor to make this configurable via constructor params with a default value of 'show'
+    if (this.action === 'show') {
+      this.action = this.defaultAction;
+    }
 
-    this.bindPaginationEvent();
-    this.loadPage(action, endpoint);
+    this.activateTab(this.action);
   }
 
-  bindPaginationEvent() {
-    this.$parentEl.on('click', '.gl-pagination a', (event) => this.changePage(event));
+  bindEvents() {
+    this.$parentEl
+      .off('shown.bs.tab', '.nav-links a[data-toggle="tab"]')
+      .on('shown.bs.tab', '.nav-links a[data-toggle="tab"]', (event) => this.tabShown(event))
+      .on('click', '.gl-pagination a', (event) => this.changeProjectsPage(event));
   }
 
-  changePage(e) {
+  changeProjectsPage(e) {
     e.preventDefault();
 
-    $('#js-legacy-tabs-container').empty();
+    $('.tab-pane.active').empty();
     const endpoint = $(e.target).attr('href');
-    const action = this.$legacyTabsContainer.data('action');
-    this.loadPage(action, endpoint);
+    this.loadTab(this.getCurrentAction(), endpoint);
   }
 
-  loadPage(action, endpoint) {
+  tabShown(event) {
+    const $target = $(event.target);
+    const action = $target.data('action');
+    const source = $target.attr('href');
+    const endpoint = $target.data('endpoint');
+    this.setTab(action, endpoint);
+    return this.setCurrentAction(source);
+  }
+
+  activateTab(action) {
+    return this.$parentEl.find(`.nav-links .js-${action}-tab a`).tab('show');
+  }
+
+  setTab(action, endpoint) {
+    if (this.loaded[action]) {
+      return;
+    }
     if (action === 'activity') {
-      // eslint-disable-next-line no-new
-      new Activities('#js-legacy-tabs-container');
+      this.loadActivities();
     } else if (action === 'overview') {
-      this.loadOverviewPage();
-    } else if (DEFAULT_LOADER_ACTIONS.includes(action)) {
-      this.defaultPageLoader(action, endpoint);
+      this.loadOverviewTab();
+    }
+
+    const loadableActions = [
+      'groups',
+      'contributed',
+      'projects',
+      'starred',
+      'snippets',
+      'followers',
+      'following',
+    ];
+    if (loadableActions.indexOf(action) > -1) {
+      this.loadTab(action, endpoint);
     }
   }
 
-  defaultPageLoader(action, endpoint) {
+  loadTab(action, endpoint) {
     this.toggleLoading(true);
 
     const params = action === 'projects' ? { skip_namespace: true } : {};
@@ -98,9 +177,10 @@ export default class UserTabs {
     return axios
       .get(endpoint, { params })
       .then(({ data }) => {
-        const containerSelector = `div#js-legacy-tabs-container`;
-        this.$parentEl.find(containerSelector).html(data.html);
-        localTimeAgo(document.querySelectorAll(`${containerSelector} .js-timeago`));
+        const tabSelector = `div#${action}`;
+        this.$parentEl.find(tabSelector).html(data.html);
+        this.loaded[action] = true;
+        localTimeAgo(document.querySelectorAll(`${tabSelector} .js-timeago`));
 
         this.toggleLoading(false);
       })
@@ -109,18 +189,35 @@ export default class UserTabs {
       });
   }
 
-  loadOverviewPage() {
+  loadActivities() {
+    if (this.loaded.activity) {
+      return;
+    }
+
+    // eslint-disable-next-line no-new
+    new Activities('#activity');
+
+    this.loaded.activity = true;
+  }
+
+  loadOverviewTab() {
+    if (this.loaded.overview) {
+      return;
+    }
+
     initReadMore();
 
     this.loadActivityCalendar();
 
-    UserTabs.renderMostRecentBlocks('#js-legacy-tabs-container .activities-block', {
+    UserTabs.renderMostRecentBlocks('#js-overview .activities-block', {
       requestParams: { limit: 15 },
     });
 
-    UserTabs.renderMostRecentBlocks('#js-legacy-tabs-container .projects-block', {
+    UserTabs.renderMostRecentBlocks('#js-overview .projects-block', {
       requestParams: { limit: 3, skip_pagination: true, skip_namespace: true, card_mode: true },
     });
+
+    this.loaded.overview = true;
   }
 
   static renderMostRecentBlocks(container, options) {
@@ -137,7 +234,7 @@ export default class UserTabs {
   }
 
   loadActivityCalendar() {
-    const $calendarWrap = this.$parentEl.find('.user-calendar');
+    const $calendarWrap = this.$parentEl.find('.tab-pane.active .user-calendar');
     const calendarPath = $calendarWrap.data('calendarPath');
 
     AjaxCache.retrieve(calendarPath)
@@ -168,10 +265,8 @@ export default class UserTabs {
 
     // eslint-disable-next-line no-new
     new ActivityCalendar({
-      container: '#js-legacy-tabs-container .js-contrib-calendar',
-      activitiesContainer: '#js-legacy-tabs-container .user-calendar-activities',
-      recentActivitiesContainer:
-        '#js-legacy-tabs-container .activities-block .user-activity-content',
+      container: '.tab-pane.active .js-contrib-calendar',
+      activitiesContainer: '.tab-pane.active .user-calendar-activities',
       timestamps: data,
       calendarActivitiesPath,
       utcOffset,
@@ -186,5 +281,23 @@ export default class UserTabs {
 
   toggleLoading(status) {
     return this.$parentEl.find('.loading').toggleClass('hide', !status);
+  }
+
+  setCurrentAction(source) {
+    let newState = source;
+    newState = newState.replace(/\/+$/, '');
+    newState += this.windowLocation.search + this.windowLocation.hash;
+    window.history.replaceState(
+      {
+        url: newState,
+      },
+      document.title,
+      newState,
+    );
+    return newState;
+  }
+
+  getCurrentAction() {
+    return this.$parentEl.find('.nav-links a.active').data('action');
   }
 }

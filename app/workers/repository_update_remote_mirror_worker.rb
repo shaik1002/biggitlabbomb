@@ -57,12 +57,6 @@ class RepositoryUpdateRemoteMirrorWorker
   end
 
   def schedule_retry(mirror, scheduled_time, tries)
-    retry_time = if Feature.enabled?(:remote_mirror_retry_with_delay, mirror.project)
-                   Time.current + 1.second
-                 else
-                   scheduled_time
-                 end
-
-    self.class.perform_in(mirror.backoff_delay, mirror.id, retry_time, tries + 1)
+    self.class.perform_in(mirror.backoff_delay, mirror.id, scheduled_time, tries + 1)
   end
 end

@@ -1,8 +1,7 @@
 import Vue from 'vue';
+import { mount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
-import noSavedRepliesResponse from 'test_fixtures/graphql/comment_templates/saved_replies_empty.query.graphql.json';
 import savedRepliesResponse from 'test_fixtures/graphql/comment_templates/saved_replies.query.graphql.json';
-import { mountExtended } from 'helpers/vue_test_utils_helper';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import IndexPage from '~/comment_templates/pages/index.vue';
@@ -23,7 +22,7 @@ function createMockApolloProvider(response) {
 function createComponent(options = {}) {
   const { mockApollo } = options;
 
-  return mountExtended(IndexPage, {
+  return mount(IndexPage, {
     apolloProvider: mockApollo,
     provide: {
       fetchAllQuery: savedRepliesQuery,
@@ -33,15 +32,6 @@ function createComponent(options = {}) {
 }
 
 describe('Comment templates index page component', () => {
-  it('does not render any list items when response is empty', async () => {
-    const mockApollo = createMockApolloProvider(noSavedRepliesResponse);
-    wrapper = createComponent({ mockApollo });
-
-    await waitForPromises();
-
-    expect(wrapper.findAllComponents(ListItem).length).toBe(0);
-  });
-
   it('renders list of comment templates', async () => {
     const mockApollo = createMockApolloProvider(savedRepliesResponse);
     const savedReplies = savedRepliesResponse.data.object.savedReplies.nodes;
@@ -64,6 +54,6 @@ describe('Comment templates index page component', () => {
 
     await waitForPromises();
 
-    expect(wrapper.findByTestId('crud-count').text()).toContain('2');
+    expect(wrapper.find('[data-testid="title"]').text()).toContain('2');
   });
 });

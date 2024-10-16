@@ -35,12 +35,12 @@ export default () => {
           groupName: groupFullPath,
           codeStart: '<code>',
           codeEnd: '</code>',
-          groupLinkStart: `<a href="${helpPagePath(
+          projectLinkStart: `<a href="${helpPagePath(
             'user/group/manage.html#change-a-groups-path',
           )}">`,
-          groupLinkEnd: '</a>',
+          projectLinkEnd: '</a>',
           documentationLinkStart: `<a href="${helpPagePath(
-            'user/project/repository/index.html#repository-path-changes',
+            'user/project/repository/index.html#what-happens-when-a-repository-path-changes',
           )}">`,
           documentationLinkEnd: '</a>',
         },

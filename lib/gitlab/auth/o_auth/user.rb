@@ -29,9 +29,8 @@ module Gitlab
 
         attr_reader :auth_hash
 
-        def initialize(auth_hash, user_params = {})
+        def initialize(auth_hash)
           self.auth_hash = auth_hash
-          @user_params = user_params
           update_profile
           add_or_update_user_identities
         end
@@ -45,7 +44,7 @@ module Gitlab
         end
 
         def valid?
-          !any_auth_hash_errors? && gl_user.try(:valid?)
+          gl_user.try(:valid?)
         end
 
         def valid_sign_in?
@@ -53,8 +52,6 @@ module Gitlab
         end
 
         def save(provider = protocol_name)
-          return false if any_auth_hash_errors?
-
           raise SigninDisabledForProviderError if oauth_provider_disabled?
           raise SignupDisabledError unless gl_user
 
@@ -110,8 +107,6 @@ module Gitlab
         end
 
         protected
-
-        attr_reader :user_params
 
         def activate_user_if_user_cap_not_reached
           nil
@@ -226,8 +221,8 @@ module Gitlab
         end
 
         def build_new_user(skip_confirmation: true)
-          augmented_user_params = user_attributes.merge(skip_confirmation: skip_confirmation)
-          Users::AuthorizedBuildService.new(nil, augmented_user_params).execute
+          user_params = user_attributes.merge(skip_confirmation: skip_confirmation)
+          Users::AuthorizedBuildService.new(nil, user_params).execute
         end
 
         def user_attributes
@@ -250,8 +245,7 @@ module Gitlab
             email: email,
             password: auth_hash.password,
             password_confirmation: auth_hash.password,
-            password_automatically_set: true,
-            organization_id: user_params[:organization_id]
+            password_automatically_set: true
           }
         end
 
@@ -286,7 +280,7 @@ module Gitlab
 
           if creating_linked_ldap_user?
             metadata.set_attribute_synced(:name, true) if gl_user.name == ldap_person.name
-            metadata.set_attribute_synced(:email, true) if gl_user.email.downcase == ldap_person.email&.first&.downcase
+            metadata.set_attribute_synced(:email, true) if gl_user.email == ldap_person.email&.first
             metadata.provider = ldap_person.provider
           end
         end
@@ -311,19 +305,6 @@ module Gitlab
 
           auto_link = Array(auto_link)
           auto_link.include?(auth_hash.provider)
-        end
-
-        def any_auth_hash_errors?
-          return false if auth_hash.errors.empty?
-
-          assign_errors_from_auth_hash
-          true
-        end
-
-        def assign_errors_from_auth_hash
-          auth_hash.errors.each do |attr, error|
-            gl_user.errors.add(attr, error)
-          end
         end
       end
     end

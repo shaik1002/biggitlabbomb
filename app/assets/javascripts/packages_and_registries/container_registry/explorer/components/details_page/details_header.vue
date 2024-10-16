@@ -5,14 +5,12 @@ import {
   GlIcon,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import ProtectedBadge from '~/vue_shared/components/badges/protected_badge.vue';
 import { sprintf, n__, s__ } from '~/locale';
 import MetadataItem from '~/vue_shared/components/registry/metadata_item.vue';
 import TitleArea from '~/vue_shared/components/registry/title_area.vue';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import {
   CREATED_AT,
   LAST_PUBLISHED_AT,
@@ -33,23 +31,17 @@ import {
   ONGOING_STATUS,
   ROOT_IMAGE_TOOLTIP,
 } from '../../constants/index';
+
 import getContainerRepositoryMetadata from '../../graphql/queries/get_container_repository_metadata.query.graphql';
 import { getImageName } from '../../utils';
 
 export default {
   name: 'DetailsHeader',
-  components: {
-    GlDisclosureDropdown,
-    GlDisclosureDropdownItem,
-    GlIcon,
-    TitleArea,
-    MetadataItem,
-    ProtectedBadge,
-  },
+  components: { GlDisclosureDropdown, GlDisclosureDropdownItem, GlIcon, TitleArea, MetadataItem },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [timeagoMixin, glFeatureFlagsMixin()],
+  mixins: [timeagoMixin],
   inject: ['config'],
   props: {
     image: {
@@ -109,15 +101,13 @@ export default {
       return n__('%d tag', '%d tags', this.imageDetails.tagsCount);
     },
     cleanupTextAndTooltip() {
-      if (!this.imageDetails.project.containerTagsExpirationPolicy?.enabled) {
+      if (!this.imageDetails.project.containerExpirationPolicy?.enabled) {
         return { text: CLEANUP_DISABLED_TEXT, tooltip: CLEANUP_DISABLED_TOOLTIP };
       }
       return {
         [UNSCHEDULED_STATUS]: {
           text: sprintf(CLEANUP_UNSCHEDULED_TEXT, {
-            time: this.timeFormatted(
-              this.imageDetails.project.containerTagsExpirationPolicy.nextRunAt,
-            ),
+            time: this.timeFormatted(this.imageDetails.project.containerExpirationPolicy.nextRunAt),
           }),
         },
         [SCHEDULED_STATUS]: { text: CLEANUP_SCHEDULED_TEXT, tooltip: CLEANUP_SCHEDULED_TOOLTIP },
@@ -138,12 +128,6 @@ export default {
       const { size } = this.imageDetails;
       return size ? numberToHumanSize(Number(size)) : null;
     },
-    showBadgeProtected() {
-      return (
-        Boolean(this.glFeatures.containerRegistryProtectedContainers) &&
-        Boolean(this.image?.protectionRuleExists)
-      );
-    },
   },
   methods: {
     formatDate(date) {
@@ -153,9 +137,6 @@ export default {
   i18n: {
     DELETE_IMAGE_TEXT,
     MORE_ACTIONS_TEXT,
-    BADGE_PROTECTED_TOOLTIP_TEXT: s__(
-      'ContainerRegistry|A protection rule exists for this container repository.',
-    ),
   },
 };
 </script>
@@ -206,7 +187,6 @@ export default {
         data-testid="created-and-visibility"
       />
     </template>
-
     <template v-if="containsLastPublishedAtDate" #metadata-last-published-at>
       <metadata-item
         icon="calendar"
@@ -215,19 +195,11 @@ export default {
         data-testid="last-published-at"
       />
     </template>
-
-    <template #metadata-protection-rule-exists>
-      <protected-badge
-        v-if="showBadgeProtected"
-        :tooltip-text="$options.i18n.BADGE_PROTECTED_TOOLTIP_TEXT"
-      />
-    </template>
-
     <template v-if="!deleteButtonDisabled" #right-actions>
       <gl-disclosure-dropdown
         category="tertiary"
         icon="ellipsis_v"
-        placement="bottom-end"
+        placement="right"
         :toggle-text="$options.i18n.MORE_ACTIONS_TEXT"
         text-sr-only
         no-caret

@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 require 'faraday'
-require 'faraday/follow_redirects'
-require 'faraday/retry'
+require 'faraday_middleware'
 require 'digest'
 
 module ContainerRegistry
@@ -16,7 +15,7 @@ module ContainerRegistry
     ACCEPTED_TYPES = [DOCKER_DISTRIBUTION_MANIFEST_V2_TYPE, OCI_MANIFEST_V1_TYPE].freeze
     ACCEPTED_TYPES_RAW = [DOCKER_DISTRIBUTION_MANIFEST_V2_TYPE, OCI_MANIFEST_V1_TYPE, DOCKER_DISTRIBUTION_MANIFEST_LIST_V2_TYPE, OCI_DISTRIBUTION_INDEX_TYPE].freeze
 
-    RETRY_EXCEPTIONS = [Faraday::Retry::Middleware::DEFAULT_EXCEPTIONS, Faraday::ConnectionFailed].flatten.freeze
+    RETRY_EXCEPTIONS = [Faraday::Request::Retry::DEFAULT_EXCEPTIONS, Faraday::ConnectionFailed].flatten.freeze
     RETRY_OPTIONS = {
       max: 1,
       interval: 5,
@@ -57,10 +56,6 @@ module ContainerRegistry
           return unless config[:path]
 
           Auth::ContainerRegistryAuthenticationService.push_pull_nested_repositories_access_token(config[:path])
-        when :push_pull_move_repositories_access_token
-          return unless config[:path].present? && config[:new_path].present?
-
-          Auth::ContainerRegistryAuthenticationService.push_pull_move_repositories_access_token(config[:path], config[:new_path])
         end
       end
     end

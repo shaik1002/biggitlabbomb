@@ -11,12 +11,9 @@
 # - See https://gitlab.com/gitlab-org/gitlab/-/issues/325640
 # - See https://gitlab.com/groups/gitlab-org/-/epics/5670
 
-# We need to take some precautions when using the `gitlab` gem in this project.
-#
-# See https://docs.gitlab.com/ee/development/pipelines/internals.html#using-the-gitlab-ruby-gem-in-the-canonical-project.
+require 'rubygems'
 require 'gitlab'
 require 'optparse'
-require 'rubygems'
 
 class QueryLimitingReport
   GITLAB_PROJECT_ID = 278964 # gitlab-org/gitlab project
@@ -120,14 +117,14 @@ class QueryLimitingReport
       item_hash = item.to_hash
 
       filename = item_hash.fetch('filename')
-      next unless /\.rb\Z/.match?(filename)
+      next if filename !~ /\.rb\Z/
 
       file_contents = Gitlab.file_contents(GITLAB_PROJECT_ID, filename)
       file_lines = file_contents.split("\n")
 
       file_lines.each_index do |index|
         line = file_lines[index]
-        next unless /#{CODE_LINES_SEARCH_STRING}/o.match?(line)
+        next unless line =~ /#{CODE_LINES_SEARCH_STRING}/o
 
         issue_iid = line.slice(%r{issues/(\d+)\D}, 1)
         line_number = index + 1

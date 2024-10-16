@@ -129,7 +129,7 @@ describe('GlobalAlerts', () => {
     it('renders nothing', async () => {
       await createComponent();
 
-      expect(wrapper.find('*').exists()).toBe(false);
+      expect(wrapper.html()).toBe('');
     });
   });
 });

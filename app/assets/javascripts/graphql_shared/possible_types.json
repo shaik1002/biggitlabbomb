@@ -7,21 +7,9 @@
     "AmazonS3ConfigurationType",
     "InstanceAmazonS3ConfigurationType"
   ],
-  "AuditEventStreamingDestinationInterface": [
-    "GroupAuditEventStreamingDestination",
-    "InstanceAuditEventStreamingDestination"
-  ],
-  "BaseDiscussionInterface": [
-    "AbuseReportDiscussion",
-    "Discussion"
-  ],
   "BaseHeaderInterface": [
     "AuditEventStreamingHeader",
     "AuditEventsStreamingInstanceHeader"
-  ],
-  "BaseNoteInterface": [
-    "AbuseReportNote",
-    "Note"
   ],
   "CiRunnerCloudProvisioning": [
     "CiRunnerGoogleCloudProvisioning"
@@ -67,6 +55,10 @@
     "ExternalAuditEventDestination",
     "InstanceExternalAuditEventDestination"
   ],
+  "AuditEventStreamingDestinationInterface": [
+    "GroupAuditEventStreamingDestination",
+    "InstanceAuditEventStreamingDestination"
+  ],
   "GoogleCloudArtifactRegistryArtifact": [
     "GoogleCloudArtifactRegistryDockerImage"
   ],
@@ -87,17 +79,13 @@
     "CiBuildNeed",
     "CiJob"
   ],
-  "LabelInterface": [
-    "AbuseReportLabel",
-    "Label"
-  ],
   "MemberInterface": [
     "GroupMember",
     "PendingGroupMember",
-    "PendingProjectMember",
     "ProjectMember"
   ],
   "NoteableInterface": [
+    "AbuseReport",
     "AlertManagementAlert",
     "BoardEpic",
     "Design",
@@ -117,8 +105,7 @@
     "ApprovalPolicy",
     "PipelineExecutionPolicy",
     "ScanExecutionPolicy",
-    "ScanResultPolicy",
-    "VulnerabilityManagementPolicy"
+    "ScanResultPolicy"
   ],
   "PackageFileMetadata": [
     "ConanFileMetadata",
@@ -129,12 +116,7 @@
     "ConanMetadata",
     "MavenMetadata",
     "NugetMetadata",
-    "PypiMetadata",
-    "TerraformModuleMetadata"
-  ],
-  "PendingMemberInterface": [
-    "PendingGroupMember",
-    "PendingProjectMember"
+    "PypiMetadata"
   ],
   "Registrable": [
     "CiSecureFileRegistry",
@@ -155,8 +137,6 @@
     "UploadRegistry"
   ],
   "ResolvableInterface": [
-    "AbuseReportDiscussion",
-    "AbuseReportNote",
     "Discussion",
     "Note"
   ],
@@ -167,11 +147,6 @@
   "Service": [
     "BaseService",
     "JiraService"
-  ],
-  "TerraformModuleMetadataSharedFields": [
-    "TerraformModuleMetadataExample",
-    "TerraformModuleMetadataRoot",
-    "TerraformModuleMetadataSubmodule"
   ],
   "TimeboxReportInterface": [
     "Iteration",
@@ -184,13 +159,8 @@
     "Design",
     "Epic",
     "EpicIssue",
-    "Group",
     "Issue",
-    "Key",
     "MergeRequest",
-    "Namespace",
-    "Project",
-    "Vulnerability",
     "WorkItem"
   ],
   "User": [
@@ -207,7 +177,6 @@
     "VulnerabilityDetailBase",
     "VulnerabilityDetailBoolean",
     "VulnerabilityDetailCode",
-    "VulnerabilityDetailCodeFlows",
     "VulnerabilityDetailCommit",
     "VulnerabilityDetailDiff",
     "VulnerabilityDetailFileLocation",
@@ -234,12 +203,10 @@
     "WorkItemWidgetAssignees",
     "WorkItemWidgetAwardEmoji",
     "WorkItemWidgetColor",
-    "WorkItemWidgetCrmContacts",
     "WorkItemWidgetCurrentUserTodos",
     "WorkItemWidgetDescription",
     "WorkItemWidgetDesigns",
     "WorkItemWidgetDevelopment",
-    "WorkItemWidgetEmailParticipants",
     "WorkItemWidgetHealthStatus",
     "WorkItemWidgetHierarchy",
     "WorkItemWidgetIteration",
@@ -262,7 +229,6 @@
     "WorkItemWidgetDefinitionAssignees",
     "WorkItemWidgetDefinitionGeneric",
     "WorkItemWidgetDefinitionHierarchy",
-    "WorkItemWidgetDefinitionLabels",
-    "WorkItemWidgetDefinitionWeight"
+    "WorkItemWidgetDefinitionLabels"
   ]
 }

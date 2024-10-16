@@ -18,15 +18,15 @@ DETAILS:
 You can view audit events from user actions across an entire GitLab instance.
 To view instance audit events:
 
-1. On the left sidebar, at the bottom, select **Admin**.
-1. Select **Monitoring > Audit events**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
+1. Select **Monitoring > Audit Events**.
 1. Filter by the following:
    - Member of the project (user) who performed the action
    - Group
    - Project
    - Date Range
 
-Instance audit events can also be accessed using the [instance audit events API](../api/audit_events.md#instance-audit-events). Instance audit event queries are limited to a maximum of 30 days.
+Instance audit events can also be accessed using the [Instance Audit Events API](../api/audit_events.md#instance-audit-events). Instance audit event queries are limited to a maximum of 30 days.
 
 ## Exporting audit events
 
@@ -39,8 +39,8 @@ DETAILS:
 You can export the current view (including filters) of your instance audit events as a
 CSV(comma-separated values) file. To export the instance audit events to CSV:
 
-1. On the left sidebar, at the bottom, select **Admin**.
-1. Select **Monitoring > Audit events**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
+1. Select **Monitoring > Audit Events**.
 1. Select the available search filters.
 1. Select **Export as CSV**.
 
@@ -86,7 +86,7 @@ When a user is [impersonated](../administration/admin_area.md#user-impersonation
 - Audit events include information about the impersonating administrator.
 - Extra audit events are recorded for the start and end of the administrator's impersonation session.
 
-![An audit event with an impersonated user.](img/impersonated_audit_events_v15_7.png)
+![Audit event with impersonated user](img/impersonated_audit_events_v15_7.png)
 
 ## Time zones
 

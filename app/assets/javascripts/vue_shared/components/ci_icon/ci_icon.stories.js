@@ -16,7 +16,7 @@ Default.args = {
   status: {
     icon: 'status_success',
     text: 'Success',
-    detailsPath: 'https://gitlab.com/',
+    detailsPath: 'https://gitab.com/',
   },
 };
 
@@ -25,7 +25,7 @@ WithText.args = {
   status: {
     icon: 'status_success',
     text: 'Success',
-    detailsPath: 'https://gitlab.com/',
+    detailsPath: 'https://gitab.com/',
   },
   showStatusText: true,
 };

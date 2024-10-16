@@ -20,7 +20,7 @@ In order to instrument your code with Internal Events Tracking you need to do th
 To create event and/or metric definitions, use the `internal_events` generator from the `gitlab` directory:
 
 ```shell
-scripts/internal_events/cli.rb
+ruby scripts/internal_events/cli.rb
 ```
 
 This CLI will help you create the correct defintion files based on your specific use-case, then provide code examples for instrumentation and testing.
@@ -76,28 +76,7 @@ track_internal_event(
 
 #### Additional properties
 
-Additional properties can be passed when tracking events. They can be used to save additional data related to given event.
-
-Tracking classes already have three built-in properties:
-
-- `label` (string)
-- `property` (string)
-- `value`(numeric)
-
-The arbitrary naming and typing of the these three properties is due to constraints from the data extraction process.
-It's recommended to use these properties first, even if their name does not match with the data you want to track.
-This recommendation is particularly important if you want to leverage these attributes as
-[metric filters](metric_definition_guide.md#filters). You can further describe what is the actual data being tracked
-by using the `description` property in the YAML definition of the event. For an example, see
-[`create_ci_internal_pipeline.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/537ea367dab731e886e6040d8399c430fdb67ab7/config/events/create_ci_internal_pipeline.yml):
-
-```ruby
-additional_properties:
-  label:
-    description: The source of the pipeline, e.g. a push, a schedule or similar.
-  property:
-    description: The source of the config, e.g. the repository, auto_devops or similar.
-```
+Additional properties can be passed when tracking events. They can be used to save additional data related to given event. It is possible to send a maximum of three additional properties with keys `label` (string), `property` (string) and `value`(numeric).
 
 Additional properties are passed by including the `additional_properties` hash in the `#track_event` call:
 
@@ -106,30 +85,11 @@ track_internal_event(
   "create_ci_build",
   user: user,
   additional_properties: {
-    label: source, # The label is tracking the source of the pipeline
-    property: config_source # The property is tracking the source of the configuration
+    label: 'scheduled',
+    value: 20
   }
 )
 ```
-
-If you need to pass more than three additional properties, you can use the `additional_properties` hash with your custom keys:
-
-```ruby
-track_internal_event(
-  "code_suggestion_accepted",
-  user: user,
-    label: editor_name,
-    property: suggestion_type,
-    value: suggestion_shown_duration
-    lang: 'ruby',
-    custom_key: 'custom_value'
-  }
-)
-```
-
-Please add custom properties only in addition to the built-in properties.
-
-Custom rules can not be used as [metric filters](metric_definition_guide.md#filters).
 
 #### Controller and API helpers
 
@@ -176,110 +136,6 @@ track_event(
   namespace_id: namespace_id,
   project_id: project_id
 )
-```
-
-### Backend testing
-
-When testing code that simply triggers an internal event and make sure it increments all the related metrics,
-you can use the `internal_event_tracking` shared example.
-
-```ruby
-it_behaves_like 'internal event tracking' do
-  let(:event) { 'update_issue_severity' }
-  let(:project) { issue.project }
-  let(:user) { issue.author }
-  let(:additional_properties) { { label: issue.issueable_severity } }
-  subject(:service_action) { described_class.new(issue).execute }
-end
-```
-
-It requires a context containing:
-
-- `subject` - the action that triggers the event
-- `event` - the name of the event
-
-Optionally, the context can contain:
-
-- `user`
-- `project`
-- `namespace`. If not provided, `project.namespace` will be used (if `project` is available).
-- `category`
-- `additional_properties`
-- `event_attribute_overrides` - is used when its necessary to override the attributes available in parent context. For example:
-
-```ruby
-let(:event) { 'create_new_issue' }
-
-it_behaves_like 'internal event tracking' do
-  let(:event_attribute_overrides) { { event: 'create_new_milestone'} }
-
-  subject(:service_action) { described_class.new(issue).save }
-end
-```
-
-These legacy options are now deprecated:
-
-- `label`
-- `property`
-- `value`
-
-Prefer using `additional_properties` instead.
-
-#### Composable matchers
-
-When a singe action triggers an event multiple times, triggers multiple different events, or increments some metrics but not others for the event,
-you can use the `trigger_internal_events` and `increment_usage_metrics` matchers.
-
-```ruby
- expect { subject }
-  .to trigger_internal_events('web_ide_viewed')
-  .with(user: user, project: project, namespace: namespace)
-  .and increment_usage_metrics('counts.web_views')
-```
-
-The `trigger_internal_events` matcher accepts the same chain methods as the [`receive`](https://rubydoc.info/github/rspec/rspec-mocks/RSpec/Mocks/ExampleMethods#receive-instance_method) matcher (`#once`, `#at_most`, etc). By default, it expects the provided events to be triggered only once.
-
-The chain method `#with` accepts following parameters:
-
-- `user` - User object
-- `project` - Project object
-- `namespace` - Namespace object. If not provided, it will be set to `project.namespace`
-- `additional_properties` - Hash. Additional properties to be sent with the event. For example: `{ label: 'scheduled', value: 20 }`
-- `category` - String. If not provided, it will be set to the class name of the object that triggers the event
-
-The `increment_usage_metrics` matcher accepts the same chain methods as the [`change`](https://rubydoc.info/gems/rspec-expectations/RSpec%2FMatchers:change) matcher (`#by`, `#from`, `#to`, etc). By default, it expects the provided metrics to be incremented by one.
-
-```ruby
-expect { subject }
-  .to trigger_internal_events('web_ide_viewed')
-  .with(user: user, project: project, namespace: namespace)
-  .exactly(3).times
-```
-
-Both matchers are composable with other matchers that act on a block (like `change` matcher).
-
-```ruby
-expect { subject }
-  .to trigger_internal_events('mr_created')
-    .with(user: user, project: project, category: category, additional_properties: { label: label } )
-  .and increment_usage_metrics('counts.deployments')
-    .at_least(:once)
-  .and change { mr.notes.count }.by(1)
-```
-
-To test that an event was not triggered, you can use the `not_trigger_internal_events` matcher. It does not accept message chains.
-
-```ruby
-expect { subject }.to trigger_internal_events('mr_created')
-    .with(user: user, project: project, namespace: namespace)
-  .and increment_usage_metrics('counts.deployments')
-  .and not_trigger_internal_events('pipeline_started')
-```
-
-Or you can use the `not_to` syntax:
-
-```ruby
-expect { subject }.not_to trigger_internal_events('mr_created', 'member_role_created')
 ```
 
 ### Frontend tracking
@@ -407,7 +263,6 @@ For data-event attributes:
     data-event-tracking="click_view_runners_button"
     data-event-label="group_runner_form"
     :data-event-property=dynamicPropertyVar
-    data-event-additional='{"key1": "value1", "key2": "value2"}'
   >
    Click Me
   </gl-button>
@@ -416,7 +271,7 @@ For data-event attributes:
 For Haml:
 
 ```haml
-= render Pajamas::ButtonComponent.new(button_options: { class: 'js-settings-toggle',  data: { event_tracking: 'action', event_label: 'group_runner_form', event_property: dynamic_property_var, event_value: 2, event_additional: '{"key1": "value1", "key2": "value2"}' }}) do
+= render Pajamas::ButtonComponent.new(button_options: { class: 'js-settings-toggle',  data: { event_tracking: 'action', event_label: 'group_runner_form', event_property: dynamic_property_var, event_value: 2 }}) do
 ```
 
 #### Frontend testing
@@ -563,15 +418,3 @@ describe('DeleteApplication', () => {
   });
 });
 ```
-
-### Using Internal Events API
-
-You can also use our API to track events from other systems connected to a GitLab instance.
-See the [Usage Data API documentation](../../../api/usage_data.md#events-tracking-api) for more information.
-
-### Internal Events on other systems
-
-Apart from the GitLab codebase, we are using Internal Events for the systems listed below.
-
-1. [AI Gateway](https://gitlab.com/gitlab-org/modelops/applied-ml/code-suggestions/ai-assist/-/blob/main/docs/internal_events.md?ref_type=heads)
-1. [Switchboard](https://gitlab.com/gitlab-com/gl-infra/gitlab-dedicated/switchboard/-/blob/main/docs/internal_events.md)

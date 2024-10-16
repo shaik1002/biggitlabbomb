@@ -15,8 +15,10 @@ import NoteActions from '~/work_items/components/notes/work_item_note_actions.vu
 import WorkItemCommentForm from '~/work_items/components/notes/work_item_comment_form.vue';
 import updateWorkItemNoteMutation from '~/work_items/graphql/notes/update_work_item_note.mutation.graphql';
 import updateWorkItemMutation from '~/work_items/graphql/update_work_item.mutation.graphql';
+import groupWorkItemByIidQuery from '~/work_items/graphql/group_work_item_by_iid.query.graphql';
 import workItemByIidQuery from '~/work_items/graphql/work_item_by_iid.query.graphql';
 import {
+  groupWorkItemByIidResponseFactory,
   mockAssignees,
   mockWorkItemCommentNote,
   updateWorkItemMutationResponse,
@@ -68,6 +70,9 @@ describe('Work Item Note', () => {
   });
 
   const workItemResponseHandler = jest.fn().mockResolvedValue(workItemByIidResponseFactory());
+  const groupWorkItemResponseHandler = jest
+    .fn()
+    .mockResolvedValue(groupWorkItemByIidResponseFactory());
   const workItemByAuthoredByDifferentUser = jest
     .fn()
     .mockResolvedValue(mockWorkItemByDifferentUser);
@@ -90,6 +95,7 @@ describe('Work Item Note', () => {
   const createComponent = ({
     note = mockWorkItemCommentNote,
     isFirstNote = false,
+    isGroup = false,
     updateNoteMutationHandler = successHandler,
     workItemId = mockWorkItemId,
     updateWorkItemMutationHandler = updateWorkItemMutationSuccessHandler,
@@ -97,6 +103,9 @@ describe('Work Item Note', () => {
     workItemByIidResponseHandler = workItemResponseHandler,
   } = {}) => {
     wrapper = shallowMount(WorkItemNote, {
+      provide: {
+        isGroup,
+      },
       propsData: {
         fullPath: 'test-project-path',
         workItemId,
@@ -108,14 +117,9 @@ describe('Work Item Note', () => {
         autocompleteDataSources: {},
         assignees,
       },
-      stubs: {
-        TimelineEntryItem,
-      },
-      mocks: {
-        $route: {},
-      },
       apolloProvider: mockApollo([
         [workItemByIidQuery, workItemByIidResponseHandler],
+        [groupWorkItemByIidQuery, groupWorkItemResponseHandler],
         [updateWorkItemNoteMutation, updateNoteMutationHandler],
         [updateWorkItemMutation, updateWorkItemMutationHandler],
       ]),
@@ -125,7 +129,6 @@ describe('Work Item Note', () => {
   describe('when editing', () => {
     beforeEach(() => {
       createComponent();
-
       findNoteActions().vm.$emit('startEditing');
       return nextTick();
     });
@@ -158,7 +161,7 @@ describe('Work Item Note', () => {
     });
 
     it('should show the awards list when in edit mode', async () => {
-      createComponent({ note: mockWorkItemCommentNote });
+      createComponent({ note: mockWorkItemCommentNote, workItemsAlpha: true });
       findNoteActions().vm.$emit('startEditing');
       await nextTick();
       expect(findAwardsList().exists()).toBe(true);
@@ -271,10 +274,6 @@ describe('Work Item Note', () => {
 
       it('should have the project name', () => {
         expect(findNoteActions().props('projectName')).toBe('Project name');
-      });
-
-      it('should pass the noteUrl to the note header and should be a work items url', () => {
-        expect(findNoteHeader().props('noteUrl')).toContain('work_items');
       });
     });
 
@@ -445,17 +444,39 @@ describe('Work Item Note', () => {
     });
 
     it('passes note props to awards list', () => {
-      createComponent({ note: mockWorkItemCommentNote });
+      createComponent({ note: mockWorkItemCommentNote, workItemsAlpha: true });
 
       expect(findAwardsList().props('note')).toBe(mockWorkItemCommentNote);
       expect(findAwardsList().props('workItemIid')).toBe('1');
     });
   });
 
-  it('calls the work item query', () => {
-    createComponent();
+  describe('when project context', () => {
+    it('calls the project work item query', () => {
+      createComponent();
 
-    expect(workItemResponseHandler).toHaveBeenCalled();
+      expect(workItemResponseHandler).toHaveBeenCalled();
+    });
+
+    it('skips calling the group work item query', () => {
+      createComponent();
+
+      expect(groupWorkItemResponseHandler).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when group context', () => {
+    it('skips calling the project work item query', () => {
+      createComponent({ isGroup: true });
+
+      expect(workItemResponseHandler).not.toHaveBeenCalled();
+    });
+
+    it('calls the group work item query', () => {
+      createComponent({ isGroup: true });
+
+      expect(groupWorkItemResponseHandler).toHaveBeenCalled();
+    });
   });
 
   describe('when note has no author', () => {

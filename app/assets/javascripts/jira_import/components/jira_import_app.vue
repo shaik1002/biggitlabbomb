@@ -17,6 +17,10 @@ export default {
     JiraImportSetup,
   },
   props: {
+    inProgressIllustration: {
+      type: String,
+      required: true,
+    },
     isJiraConfigured: {
       type: Boolean,
       required: true,
@@ -94,7 +98,7 @@ export default {
     <gl-loading-icon v-else-if="$apollo.loading" size="lg" class="mt-3" />
     <jira-import-progress
       v-else-if="jiraImportDetails.isInProgress"
-      :illustration="setupIllustration"
+      :illustration="inProgressIllustration"
       :import-initiator="jiraImportDetails.mostRecentImport.scheduledBy.name"
       :import-project="jiraImportDetails.mostRecentImport.jiraProjectKey"
       :import-time="jiraImportDetails.mostRecentImport.scheduledAt"

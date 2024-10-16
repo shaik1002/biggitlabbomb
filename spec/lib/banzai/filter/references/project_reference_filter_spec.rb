@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Banzai::Filter::References::ProjectReferenceFilter, feature_category: :markdown do
+RSpec.describe Banzai::Filter::References::ProjectReferenceFilter, feature_category: :team_planning do
   include FilterSpecHelper
 
   def invalidate_reference(reference)
@@ -32,7 +32,7 @@ RSpec.describe Banzai::Filter::References::ProjectReferenceFilter, feature_categ
       it 'fails fast for long strings' do
         # took well under 1 second in CI https://dev.gitlab.org/gitlab/gitlabhq/merge_requests/3267#note_172824
         expect do
-          Timeout.timeout(BANZAI_FILTER_TIMEOUT_MAX) { reference_filter(ref_string).to_html }
+          Timeout.timeout(3.seconds) { reference_filter(ref_string).to_html }
         end.not_to raise_error
       end
     end

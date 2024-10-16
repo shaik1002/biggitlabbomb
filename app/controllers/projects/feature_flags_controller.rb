@@ -30,7 +30,8 @@ class Projects::FeatureFlagsController < Projects::ApplicationController
     end
   end
 
-  def new; end
+  def new
+  end
 
   def show
     respond_to do |format|
@@ -56,7 +57,8 @@ class Projects::FeatureFlagsController < Projects::ApplicationController
     end
   end
 
-  def edit; end
+  def edit
+  end
 
   def update
     result = FeatureFlags::UpdateService.new(project, current_user, update_params).execute(feature_flag)

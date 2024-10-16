@@ -22,11 +22,12 @@ module Commits
     end
 
     def create_commit!
-      prepare_branch! if @start_branch && new_branch?
-      target_sha = @start_branch ? project.repository.commit(@start_branch).sha : nil
+      if @start_branch && new_branch?
+        prepare_branch!
+      end
 
       Gitlab::Git::Patches::CommitPatches
-        .new(current_user, project.repository, @branch_name, @patches, target_sha)
+        .new(current_user, project.repository, @branch_name, @patches)
         .commit
     end
 

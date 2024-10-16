@@ -33,9 +33,7 @@ describe('Downstream Pipelines', () => {
     });
 
     it('should render the correct ci status icon', () => {
-      const findIcon = () => wrapper.findByTestId('status_success_borderless-icon');
-
-      expect(findIcon().exists()).toBe(true);
+      expect(wrapper.find('[data-testid="status_success_borderless-icon"]').exists()).toBe(true);
     });
 
     it('should have the correct title assigned for the tooltip', () => {

@@ -19,7 +19,8 @@ class Projects::PipelineSchedulesController < Projects::ApplicationController
     @schedules = Ci::PipelineSchedulesFinder.new(@project).execute(scope: params[:scope])
   end
 
-  def new; end
+  def new
+  end
 
   def create
     response = Ci::PipelineSchedules::CreateService.new(@project, current_user, schedule_params).execute
@@ -32,7 +33,8 @@ class Projects::PipelineSchedulesController < Projects::ApplicationController
     end
   end
 
-  def edit; end
+  def edit
+  end
 
   def update
     response = Ci::PipelineSchedules::UpdateService.new(schedule, current_user, schedule_params).execute

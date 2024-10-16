@@ -1,10 +1,10 @@
 import axios from '~/lib/utils/axios_utils';
 
 const USERS_PATH = '/-/autocomplete/users.json';
-export const GROUPS_PATH = '/-/autocomplete/project_groups.json';
+const GROUPS_PATH = '/-/autocomplete/project_groups.json';
 const DEPLOY_KEYS_PATH = '/-/autocomplete/deploy_keys_with_owners.json';
 
-export const buildUrl = (urlRoot, url) => {
+const buildUrl = (urlRoot, url) => {
   let newUrl;
   if (urlRoot != null) {
     newUrl = urlRoot.replace(/\/$/, '') + url;

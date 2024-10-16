@@ -1,13 +1,8 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
+require 'rails/generators/testing/behaviour'
 require 'rails/generators/testing/assertions'
-
-if ::Gitlab.next_rails?
-  require 'rails/generators/testing/behavior'
-else
-  require 'rails/generators/testing/behaviour'
-end
 
 RSpec.describe BatchedBackgroundMigration::BatchedBackgroundMigrationGenerator, feature_category: :database do
   include Rails::Generators::Testing::Behaviour

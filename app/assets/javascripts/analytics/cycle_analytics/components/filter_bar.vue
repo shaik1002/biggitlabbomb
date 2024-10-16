@@ -145,7 +145,7 @@ export default {
 <template>
   <div>
     <filtered-search-bar
-      class="gl-grow"
+      class="gl-flex-grow-1"
       :namespace="namespacePath"
       recent-searches-storage-key="value-stream-analytics"
       :search-input-placeholder="__('Filter results')"

@@ -20,7 +20,6 @@ function parseDatasetToProps(data) {
     id,
     type,
     projectId,
-    groupId,
     commentDetail,
     projectKey,
     projectKeys,
@@ -43,13 +42,12 @@ function parseDatasetToProps(data) {
     workloadIdentityFederationProjectNumber,
     workloadIdentityPoolId,
     wlifIssuer,
-    jwtClaims,
     redirectTo,
     upgradeSlackUrl,
     ...booleanAttributes
   } = data;
   const {
-    manualActivation,
+    showActive,
     activated,
     operating,
     activateDisabled,
@@ -63,13 +61,12 @@ function parseDatasetToProps(data) {
     enableJiraIssues,
     enableJiraVulnerabilities,
     shouldUpgradeSlack,
-    customizeJiraIssueEnabled,
   } = parseBooleanInData(booleanAttributes);
 
   return {
     initialActivated: activated,
     operating,
-    manualActivation,
+    showActive,
     activateDisabled,
     type,
     cancelPath,
@@ -94,7 +91,6 @@ function parseDatasetToProps(data) {
       initialVulnerabilitiesIssuetype: vulnerabilitiesIssuetype,
       initialProjectKey: projectKey,
       initialProjectKeys: projectKeys,
-      initialCustomizeJiraIssueEnabled: customizeJiraIssueEnabled,
     },
     googleArtifactManagementProps: {
       artifactRegistryPath,
@@ -110,10 +106,8 @@ function parseDatasetToProps(data) {
     inheritFromId: parseInt(inheritFromId, 10),
     integrationLevel,
     id: parseInt(id, 10),
-    groupId: parseInt(groupId, 10),
     projectId: parseInt(projectId, 10),
     wlifIssuer,
-    jwtClaims,
     redirectTo,
     shouldUpgradeSlack,
     upgradeSlackUrl,

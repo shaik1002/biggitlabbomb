@@ -22,10 +22,6 @@ export const rawMockData = {
   passwordLowercaseRequired: 'true',
   passwordUppercaseRequired: 'true',
   passwordSymbolRequired: 'true',
-  promotionManagementAvailable: 'true',
-  enableMemberPromotionManagement: 'true',
-  canDisableMemberPromotionManagement: false,
-  rolePromotionRequestsPath: '/admin/role_promotion',
 };
 
 export const mockData = {
@@ -52,8 +48,4 @@ export const mockData = {
   passwordLowercaseRequired: true,
   passwordUppercaseRequired: true,
   passwordSymbolRequired: true,
-  promotionManagementAvailable: true,
-  enableMemberPromotionManagement: true,
-  canDisableMemberPromotionManagement: false,
-  rolePromotionRequestsPath: '/admin/role_promotion',
 };

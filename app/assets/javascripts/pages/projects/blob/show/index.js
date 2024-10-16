@@ -157,19 +157,21 @@ const initForkInfo = () => {
 
 initForkInfo();
 
-const commitPipelineStatusEl = document.querySelector('.js-commit-pipeline-status');
+const CommitPipelineStatusEl = document.querySelector('.js-commit-pipeline-status');
+const legacyStatusBadge = document.querySelector('.js-ci-status-badge-legacy');
 
-if (commitPipelineStatusEl) {
+if (legacyStatusBadge) {
+  legacyStatusBadge.remove();
   // eslint-disable-next-line no-new
   new Vue({
-    el: commitPipelineStatusEl,
+    el: CommitPipelineStatusEl,
     components: {
       CommitPipelineStatus,
     },
     render(createElement) {
       return createElement('commit-pipeline-status', {
         props: {
-          endpoint: commitPipelineStatusEl.dataset.endpoint,
+          endpoint: CommitPipelineStatusEl.dataset.endpoint,
         },
       });
     },

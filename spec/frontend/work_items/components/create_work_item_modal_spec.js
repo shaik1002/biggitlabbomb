@@ -1,76 +1,67 @@
-import Vue, { nextTick } from 'vue';
-import VueApollo from 'vue-apollo';
+import { nextTick } from 'vue';
 import { GlDisclosureDropdownItem, GlModal } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
-import namespaceWorkItemTypesQueryResponse from 'test_fixtures/graphql/work_items/namespace_work_item_types.query.graphql.json';
-import { setNewWorkItemCache } from '~/work_items/graphql/cache_utils';
+import projectWorkItemTypesQueryResponse from 'test_fixtures/graphql/work_items/project_work_item_types.query.graphql.json';
+import groupWorkItemTypesQueryResponse from 'test_fixtures/graphql/work_items/group_work_item_types.query.graphql.json';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import CreateWorkItem from '~/work_items/components/create_work_item.vue';
 import CreateWorkItemModal from '~/work_items/components/create_work_item_modal.vue';
-import namespaceWorkItemTypesQuery from '~/work_items/graphql/namespace_work_item_types.query.graphql';
+import groupWorkItemTypesQuery from '~/work_items/graphql/group_work_item_types.query.graphql';
+import projectWorkItemTypesQuery from '~/work_items/graphql/project_work_item_types.query.graphql';
 
 const showToast = jest.fn();
-jest.mock('~/work_items/graphql/cache_utils', () => ({
-  setNewWorkItemCache: jest.fn(),
-}));
-
-Vue.use(VueApollo);
 
 describe('CreateWorkItemModal', () => {
   let wrapper;
-  let apolloProvider;
 
   const findTrigger = () => wrapper.find('[data-testid="new-epic-button"]');
   const findDropdownItem = () => wrapper.findComponent(GlDisclosureDropdownItem);
   const findModal = () => wrapper.findComponent(GlModal);
   const findForm = () => wrapper.findComponent(CreateWorkItem);
 
-  const namespaceSingleWorkItemTypeQueryResponse = {
+  const projectSingleWorkItemTypeQueryResponse = {
     data: {
       workspace: {
-        ...namespaceWorkItemTypesQueryResponse.data.workspace,
+        ...projectWorkItemTypesQueryResponse.data.workspace,
         workItemTypes: {
-          nodes: [namespaceWorkItemTypesQueryResponse.data.workspace.workItemTypes.nodes[0]],
+          nodes: [projectWorkItemTypesQueryResponse.data.workspace.workItemTypes.nodes[0]],
+        },
+      },
+    },
+  };
+
+  const groupSingleWorkItemQueryResponse = {
+    data: {
+      workspace: {
+        ...groupWorkItemTypesQueryResponse.data.workspace,
+        workItemTypes: {
+          nodes: [groupWorkItemTypesQueryResponse.data.workspace.workItemTypes.nodes[0]],
         },
       },
     },
   };
 
   const workItemTypesQueryHandler = jest.fn().mockResolvedValue({
-    data: namespaceSingleWorkItemTypeQueryResponse.data,
+    data: projectSingleWorkItemTypeQueryResponse.data,
   });
 
-  const workItemTypesEmptyQueryHandler = jest.fn().mockResolvedValue({
-    data: {
-      workspace: {
-        workItemTypes: {
-          nodes: [],
-          __typename: 'WorkItemType',
-        },
-      },
-    },
+  const groupWorkItemTypesQueryHandler = jest.fn().mockResolvedValue({
+    data: groupSingleWorkItemQueryResponse.data,
   });
 
-  const createComponent = ({
-    asDropdownItem = false,
-    hideButton = false,
-    workItemTypeName = 'EPIC',
-    namespaceWorkItemTypesQueryHandler = workItemTypesQueryHandler,
-  } = {}) => {
-    apolloProvider = createMockApollo([
-      [namespaceWorkItemTypesQuery, namespaceWorkItemTypesQueryHandler],
+  const createComponent = (propsData = { workItemTypeName: 'issue' }) => {
+    const apolloProvider = createMockApollo([
+      [projectWorkItemTypesQuery, workItemTypesQueryHandler],
+      [groupWorkItemTypesQuery, groupWorkItemTypesQueryHandler],
     ]);
 
     wrapper = shallowMount(CreateWorkItemModal, {
-      propsData: {
-        workItemTypeName,
-        asDropdownItem,
-        hideButton,
-      },
+      propsData,
       apolloProvider,
       provide: {
         fullPath: 'full-path',
+        isGroup: false,
       },
       mocks: {
         $toast: {
@@ -80,14 +71,10 @@ describe('CreateWorkItemModal', () => {
     });
   };
 
-  it('passes workItemTypeName to CreateWorkItem and sets the cache', async () => {
+  it('passes workItemTypeName to CreateWorkItem', () => {
     createComponent();
 
-    expect(findForm().props('workItemTypeName')).toBe('EPIC');
-
-    await waitForPromises();
-
-    expect(setNewWorkItemCache).toHaveBeenCalled();
+    expect(findForm().props('workItemTypeName')).toBe('issue');
   });
 
   it('shows toast on workItemCreated', async () => {
@@ -96,7 +83,7 @@ describe('CreateWorkItemModal', () => {
     await waitForPromises();
     findForm().vm.$emit('workItemCreated', { webUrl: '/' });
 
-    expect(showToast).toHaveBeenCalledWith('Epic created', expect.any(Object));
+    expect(showToast).toHaveBeenCalledWith('Issue created', expect.any(Object));
   });
 
   describe('default trigger', () => {
@@ -111,12 +98,6 @@ describe('CreateWorkItemModal', () => {
 
       expect(findModal().props('visible')).toBe(true);
     });
-
-    it('does not render when hideButton=true', () => {
-      createComponent({ hideButton: true });
-
-      expect(findTrigger().exists()).toBe(false);
-    });
   });
 
   describe('dropdown item trigger', () => {
@@ -125,16 +106,6 @@ describe('CreateWorkItemModal', () => {
 
       expect(findDropdownItem().exists()).toBe(true);
     });
-  });
-
-  it('opens modal when visible prop updates to true', async () => {
-    createComponent();
-
-    expect(findModal().props('visible')).toBe(false);
-
-    await wrapper.setProps({ visible: true });
-
-    expect(findModal().props('visible')).toBe(true);
   });
 
   it('closes modal on cancel event from form', async () => {
@@ -147,33 +118,5 @@ describe('CreateWorkItemModal', () => {
     findForm().vm.$emit('cancel');
 
     expect(findModal().props('visible')).toBe(false);
-  });
-
-  it('when there are no work item types it does not set the cache', async () => {
-    createComponent({ namespaceWorkItemTypesQueryHandler: workItemTypesEmptyQueryHandler });
-
-    await waitForPromises();
-
-    expect(setNewWorkItemCache).not.toHaveBeenCalled();
-  });
-
-  it('when the work item type is invalid it does not set the cache', async () => {
-    createComponent({ workItemTypeName: 'INVALID' });
-
-    await waitForPromises();
-
-    expect(setNewWorkItemCache).not.toHaveBeenCalled();
-  });
-
-  it('resets the cache on work item created event', async () => {
-    createComponent();
-
-    await waitForPromises();
-
-    await nextTick();
-
-    findForm().vm.$emit('workItemCreated', { webUrl: '/' });
-
-    expect(setNewWorkItemCache).toHaveBeenCalled();
   });
 });

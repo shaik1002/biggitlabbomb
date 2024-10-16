@@ -66,7 +66,8 @@ The [`stage`](../../ci/yaml/index.md#stage) keyword can be omitted because `test
 
 ### Fail-safe
 
-By default, scanning jobs do not block the pipeline when they fail,
+To be aligned with the [GitLab Security paradigm](https://about.gitlab.com/direction/secure/#security-paradigm),
+scanning jobs should not block the pipeline when they fail,
 so the [`allow_failure`](../../ci/yaml/index.md#allow_failure) parameter should be set to `true`.
 
 ### Artifacts
@@ -288,7 +289,7 @@ This documentation gives an overview of the report JSON format, recommendations,
 help integrators set its fields.
 The format is extensively described in the documentation of
 [SAST](../../user/application_security/sast/index.md#output),
-[DAST](../../user/application_security/dast/browser/index.md),
+[DAST](../../user/application_security/dast/proxy-based.md#reports),
 [Dependency Scanning](../../user/application_security/dependency_scanning/index.md#output),
 and [Container Scanning](../../user/application_security/container_scanning/index.md#reports-json-format)
 
@@ -320,43 +321,47 @@ If a report uses a `PATCH` version that doesn't match any vendored schema versio
 the latest vendored `PATCH` version. For example, if a report version is 15.0.23 and the latest vendored
 version is 15.0.6, the report is validated against version 15.0.6.
 
-GitLab uses the [`gitlab-security_report_schemas`](https://rubygems.org/gems/gitlab-security_report_schemas)
-gem to perform validation. You can see which schema versions are supported in your GitLab version
-by looking at the version of the gem in your GitLab installation. For example,
-[GitLab 15.4](https://gitlab.com/gitlab-org/gitlab/-/blob/93a2a651a48bd03d9d84847e1cade19962ab4292/Gemfile#L431)
-uses version `0.1.2.min15.0.0.max15.2.0`, which means it has versions in the range `15.0.0` and `15.2.0`.
+GitLab uses the
+[`json_schemer`](https://www.rubydoc.info/gems/json_schemer) gem to perform validation.
 
-To see the exact versions, read the [validate locally](#validate-locally) section.
+Ongoing improvements to report validation are tracked [in this epic](https://gitlab.com/groups/gitlab-org/-/epics/8900).
+In the meantime, you can see which versions are supported in the
+[source code](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/parsers/security/validators/schema_validator.rb#L9). Remember to pick the correct version for your instance, for example [`v15.7.3-ee`](https://gitlab.com/gitlab-org/gitlab/-/blob/v15.7.3-ee/lib/gitlab/ci/parsers/security/validators/schema_validator.rb#L9).
 
 #### Validate locally
 
 Before running your analyzer in GitLab, you should validate the report produced by your analyzer to
 ensure it complies with the declared schema version.
 
-1. Install [`gitlab-security_report_schemas`](https://rubygems.org/gems/gitlab-security_report_schemas).
-1. Run `security-report-schemas` to see what schema versions are supported.
-1. Run `security-report-schemas <report.json>` to validate a report.
+Use the script below to validate JSON files against a given schema.
 
-```shell
-$ gem install gitlab-security_report_schemas -v 0.1.2.min15.0.0.max15.2.1
-Successfully installed gitlab-security_report_schemas-0.1.2.min15.0.0.max15.2.1
-Parsing documentation for gitlab-security_report_schemas-0.1.2.min15.0.0.max15.2.1
-Done installing documentation for gitlab-security_report_schemas after 0 seconds
-1 gem installed
+```ruby
+require 'bundler/inline'
 
-$ security-report-schemas
-SecurityReportSchemas 0.1.2.min15.0.0.max15.2.1.
-Supported schema versions: ["15.0.0", "15.0.1", "15.0.2", "15.0.4", "15.0.5", "15.0.6", "15.0.7", "15.1.0", "15.1.1", "15.1.2", "15.1.3", "15.1.4", "15.2.0", "15.2.1"]
+gemfile do
+  source 'https://rubygems.org'
+  gem 'json_schemer'
+end
 
-Usage: security-report-schemas REPORT_FILE_PATH [options]
-    -r, --report_type=REPORT_TYPE    Override the report type
-    -w, --warnings                   Prints the warning messages
+require 'json'
+require 'pathname'
 
-$ security-report-schemas ~/Downloads/gl-dependency-scanning-report.json
-Validating dependency_scanning v15.0.0 against schema v15.0.0
-Content is invalid
-* root is missing required keys: dependency_files
+raise 'Usage: ruby script.rb <security schema filename> <report filename>' unless ARGV.size == 2
+
+schema = JSONSchemer.schema(Pathname.new(ARGV[0]))
+report = JSON.parse(File.open(ARGV[1]).read)
+schema_validation_errors = schema.validate(report).map { |error| JSONSchemer::Errors.pretty(error) }
+puts(schema_validation_errors)
 ```
+
+1. Download the appropriate schema that matches your report type and declared version. For
+   example, you can find version `15.0.6` of the `container_scanning` report schema at
+   `https://gitlab.com/gitlab-org/security-products/security-report-schemas/-/raw/v15.0.6/dist/container-scanning-report-format.json?inline=false`.
+1. Save the Ruby script above in a file, for example, `validate.rb`.
+1. Run the script, passing the schema and report filenames as arguments in order. For example:
+   1. Using your local Ruby interpreter: `ruby validate.rb container-scanning-format_15-0-6.json gl-container-scanning-report.json`.
+   1. Using Docker: `docker run -it --rm -v $(pwd):/ci ruby:3 ruby /ci/validate.rb /ci/container-scanning-format_15-0-6.json  /ci/gl-container-scanning-report.json`
+1. Validation errors are shown on the screen. You must resolve these errors before GitLab can ingest your report.
 
 ### Report Fields
 
@@ -465,19 +470,18 @@ The `identifiers` array describes the detected vulnerability. An identifier obje
 `value` fields are used to [tell if two identifiers are the same](../../user/application_security/vulnerability_report/pipeline.md#deduplication-process).
 The user interface uses the object's `name` and `url` fields to display the identifier.
 
-We recommend that you use the identifiers the GitLab scanners already [define](https://gitlab.com/gitlab-org/security-products/analyzers/report/-/blob/main/identifier.go):
+We recommend that you use the identifiers the GitLab scanners already define:
 
-| Identifier | Type | Example value | Example name |
-|------------|------|---------------|--------------|
-| [CVE](https://cve.mitre.org/cve/) | `cve` | CVE-2019-10086 | CVE-2019-10086 |
-| [CWE](https://cwe.mitre.org/data/index.html) | `cwe` | 1026 | CWE-1026 |
-| [ELSA](https://linux.oracle.com/security/) | `elsa` | ELSA-2020-0085 | ELSA-2020-0085 |
-| [OSVD](https://cve.mitre.org/data/refs/refmap/source-OSVDB.html) | `osvdb` | OSVDB-113928 | OSVDB-113928 |
-| [OWASP](https://owasp.org/Top10/) | `owasp` | A01:2021 | A01:2021 - Broken Access Control |
-| [RHSA](https://access.redhat.com/errata-search/#/) | `rhsa` | RHSA-2020:0111 | RHSA-2020:0111 |
-| [USN](https://ubuntu.com/security/notices) | `usn` | USN-4234-1 | USN-4234-1 |
-| [GHSA](https://github.com/advisories) | `ghsa` | GHSA-38jh-8h67-m7mj | GHSA-38jh-8h67-m7mj |
-| [HACKERONE](https://hackerone.com/hacktivity/overview) | `hackerone` | 698789 | HACKERONE-698789 |
+| Identifier | Type | Example value |
+|------------|------|---------------|
+| [CVE](https://cve.mitre.org/cve/) | `cve` | CVE-2019-10086 |
+| [CWE](https://cwe.mitre.org/data/index.html) | `cwe` | CWE-1026 |
+| [ELSA](https://linux.oracle.com/security/) | `elsa` | ELSA-2020-0085 |
+| [OSVD](https://cve.mitre.org/data/refs/refmap/source-OSVDB.html) | `osvdb` | OSVDB-113928 |
+| [OWASP](https://owasp.org/Top10/) | `owasp` | A01:2021–Broken Access Control Design |
+| [RHSA](https://access.redhat.com/errata-search/#/) | `rhsa` | RHSA-2020:0111 |
+| [USN](https://ubuntu.com/security/notices) | `usn` | USN-4234-1 |
+| [WASC](http://projects.webappsec.org/Threat-Classification-Reference-Grid)  | `wasc` | WASC-19 |
 
 The generic identifiers listed above are defined in the [common library](https://gitlab.com/gitlab-org/security-products/analyzers/common),
 which is shared by some of the analyzers that GitLab maintains. You can [contribute](https://gitlab.com/gitlab-org/security-products/analyzers/common/blob/master/issue/identifier.go)
@@ -631,7 +635,8 @@ The severity ranges from `Info` to `Critical`, but it can also be `Unknown`.
 Valid values are: `Unknown`, `Info`, `Low`, `Medium`, `High`, or `Critical`
 
 `Unknown` values means that data is unavailable to determine it's actual value. Therefore, it may be `high`, `medium`, or `low`,
-and needs to be investigated.
+and needs to be investigated. We have [provided a chart](../../user/application_security/sast/analyzers.md#data-provided-by-analyzers)
+of the available SAST Analyzers and what data is currently available.
 
 #### Remediations
 

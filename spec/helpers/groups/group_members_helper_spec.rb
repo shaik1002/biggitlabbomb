@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe Groups::GroupMembersHelper, feature_category: :groups_and_projects do
+RSpec.describe Groups::GroupMembersHelper do
   include MembersPresentation
 
   let_it_be(:group) { create(:group) }
@@ -15,9 +15,6 @@ RSpec.describe Groups::GroupMembersHelper, feature_category: :groups_and_project
     let(:members) { create_list(:group_member, 2, group: shared_group, created_by: current_user) }
     let(:invited) { create_list(:group_member, 2, :invited, group: shared_group, created_by: current_user) }
     let!(:access_requests) { create_list(:group_member, 2, :access_request, group: shared_group, created_by: current_user) }
-    let(:available_roles) do
-      Gitlab::Access.options_with_owner.map { |name, access_level| { title: name, value: "static-#{access_level}" } }
-    end
 
     let(:members_collection) { members }
 
@@ -36,14 +33,7 @@ RSpec.describe Groups::GroupMembersHelper, feature_category: :groups_and_project
         banned: [],
         include_relations: [:inherited, :direct],
         search: nil,
-        pending_members_count: [],
-        placeholder_users: {
-          pagination: {
-            total_items: 3,
-            awaiting_reassignment_items: 2,
-            reassigned_items: 1
-          }
-        }
+        pending_members: []
       )
     end
 
@@ -64,8 +54,7 @@ RSpec.describe Groups::GroupMembersHelper, feature_category: :groups_and_project
         can_manage_access_requests: be_in([true, false]),
         group_name: shared_group.name,
         group_path: shared_group.full_path,
-        can_approve_access_requests: true,
-        available_roles: available_roles
+        can_approve_access_requests: true
       }
 
       expect(subject).to include(expected)
@@ -121,8 +110,7 @@ RSpec.describe Groups::GroupMembersHelper, feature_category: :groups_and_project
             banned: [],
             include_relations: include_relations,
             search: nil,
-            pending_members_count: [],
-            placeholder_users: {}
+            pending_members: []
           )
         end
 
@@ -169,18 +157,6 @@ RSpec.describe Groups::GroupMembersHelper, feature_category: :groups_and_project
         }.as_json
 
         expect(subject[:user][:pagination].as_json).to include(expected)
-      end
-    end
-
-    context 'when placeholder users data is available' do
-      it 'returns placeholder information' do
-        expect(subject[:placeholder]).to eq(
-          pagination: {
-            total_items: 3,
-            awaiting_reassignment_items: 2,
-            reassigned_items: 1
-          }
-        )
       end
     end
   end

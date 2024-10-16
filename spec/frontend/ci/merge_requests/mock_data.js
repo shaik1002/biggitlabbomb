@@ -15,8 +15,6 @@ const createMergeRequestPipelines = ({ mergeRequestEventType = 'MERGE_TRAIN', co
       failureReason: null,
       yamlErrors: false,
       latest: true,
-      retryable: true,
-      cancelable: false,
       commit: {
         id: 'gid://gitlab/Ci::Commit/1',
         title:

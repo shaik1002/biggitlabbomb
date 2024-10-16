@@ -11,7 +11,6 @@ import { makeLoadVersionsErrorMessage } from '~/ml/model_registry/translations';
 import ModelVersionDetail from '../components/model_version_detail.vue';
 import LoadOrErrorOrShow from '../components/load_or_error_or_show.vue';
 import ModelVersionActionsDropdown from '../components/model_version_actions_dropdown.vue';
-import ModelVersionEdit from '../components/model_version_edit.vue';
 
 export default {
   name: 'ShowMlModelVersionApp',
@@ -20,7 +19,6 @@ export default {
     ModelVersionDetail,
     ModelVersionActionsDropdown,
     TitleArea,
-    ModelVersionEdit,
   },
   provide() {
     return {
@@ -29,7 +27,6 @@ export default {
       importPath: this.importPath,
       versionName: this.versionName,
       maxAllowedFileSize: this.maxAllowedFileSize,
-      markdownPreviewPath: this.markdownPreviewPath,
     };
   },
   props: {
@@ -67,10 +64,6 @@ export default {
     },
     maxAllowedFileSize: {
       type: Number,
-      required: true,
-    },
-    markdownPreviewPath: {
-      type: String,
       required: true,
     },
   },
@@ -170,15 +163,13 @@ export default {
 
 <template>
   <div>
-    <div class="gl-flex gl-flex-wrap gl-justify-between gl-py-3 sm:gl-flex-nowrap">
-      <div class="gl-min-w-0 gl-grow gl-flex-col">
+    <div
+      class="gl-display-flex gl-flex-wrap gl-sm-flex-nowrap gl-justify-content-space-between gl-py-3"
+    >
+      <div class="gl-flex-direction-column gl-flex-grow-1 gl-min-w-0">
         <title-area :title="title" />
       </div>
-      <div class="gl-mt-3 gl-flex gl-items-start gl-gap-3">
-        <model-version-edit
-          v-if="modelVersion && canWriteModelRegistry"
-          :model-with-version="modelWithModelVersion"
-        />
+      <div class="gl-display-flex gl-align-items-flex-start gl-gap-3 gl-mt-3">
         <model-version-actions-dropdown @delete-model-version="deleteModelVersion" />
       </div>
     </div>

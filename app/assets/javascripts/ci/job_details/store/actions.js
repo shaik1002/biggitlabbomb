@@ -163,10 +163,7 @@ export const receiveJobSuccess = ({ commit }, data = {}) => {
 export const receiveJobError = ({ commit }) => {
   commit(types.RECEIVE_JOB_ERROR);
   createAlert({
-    message: __(
-      'An error occurred while fetching the job. The information presented below may not be accurate. Refresh the page to retrieve the latest job log.',
-    ),
-    dismissible: false,
+    message: __('An error occurred while fetching the job.'),
   });
   resetFavicon();
 };
@@ -276,10 +273,7 @@ export const stopPollingJobLog = ({ state, commit }) => {
 export const receiveJobLogError = ({ dispatch }) => {
   dispatch('stopPollingJobLog');
   createAlert({
-    message: __(
-      'An error occurred while fetching the job log. The information presented below may not be accurate. Refresh the page to retrieve the latest job log.',
-    ),
-    dismissible: false,
+    message: __('An error occurred while fetching the job log.'),
   });
 };
 

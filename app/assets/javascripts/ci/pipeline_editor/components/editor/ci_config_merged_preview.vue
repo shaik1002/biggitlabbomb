@@ -36,11 +36,11 @@ export default {
 </script>
 <template>
   <div>
-    <div class="gl-flex gl-items-center">
-      <gl-icon :size="16" name="lock" class="gl-mr-3 gl-text-gray-500" />
+    <div class="gl-display-flex gl-align-items-center">
+      <gl-icon :size="16" name="lock" class="gl-text-gray-500 gl-mr-3" />
       {{ $options.i18n.viewOnlyMessage }}
     </div>
-    <div class="gl-mt-3 gl-border-1 gl-border-solid gl-border-gray-100">
+    <div class="gl-mt-3 gl-border-solid gl-border-gray-100 gl-border-1">
       <source-editor
         ref="editor"
         :value="mergedYaml"

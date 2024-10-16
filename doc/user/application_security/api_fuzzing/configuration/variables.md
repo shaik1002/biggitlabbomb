@@ -9,7 +9,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 | CI/CD variable                                              | Description |
 |-------------------------------------------------------------|-------------|
 | `SECURE_ANALYZERS_PREFIX`                                   | Specify the Docker registry base address from which to download the analyzer. |
-| `FUZZAPI_VERSION`                                           | Specify API Fuzzing container version. Defaults to `5`. |
+| `FUZZAPI_VERSION`                                           | Specify API Fuzzing container version. Defaults to `3`. |
 | `FUZZAPI_IMAGE_SUFFIX`                                      | Specify a container image suffix. Defaults to none. |
 | `FUZZAPI_API_PORT`                                          | Specify the communication port number used by API Fuzzing engine. Defaults to `5500`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/367734) in GitLab 15.5. |
 | `FUZZAPI_TARGET_URL`                                        | Base URL of API testing target. |
@@ -33,7 +33,6 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 |[`FUZZAPI_OVERRIDES_ENV`](customizing_analyzer_settings.md#overrides)                        | JSON string containing headers to override. |
 |[`FUZZAPI_OVERRIDES_CMD`](customizing_analyzer_settings.md#overrides)                        | Overrides command. |
 |[`FUZZAPI_OVERRIDES_CMD_VERBOSE`](customizing_analyzer_settings.md#overrides)                | When set to any value. It shows overrides command output as part of the job output. |
-|`FUZZAPI_PER_REQUEST_SCRIPT`                          | Full path and filename for a per-request script. [See demo project for examples.](https://gitlab.com/gitlab-org/security-products/demos/api-dast/auth-with-request-example) [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/13691) in GitLab 17.2. |
 |`FUZZAPI_PRE_SCRIPT`                                         | Run user command or script before scan session starts. `sudo` must be used for privileged operations like installing packages. |
 |`FUZZAPI_POST_SCRIPT`                                        | Run user command or script after scan session has finished. `sudo` must be used for privileged operations like installing packages. |
 |[`FUZZAPI_OVERRIDES_INTERVAL`](customizing_analyzer_settings.md#overrides)                   | How often to run overrides command in seconds. Defaults to `0` (once). |

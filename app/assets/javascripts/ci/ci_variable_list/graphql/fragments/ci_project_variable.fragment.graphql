@@ -1,7 +1,6 @@
 fragment BaseCiProjectVariable on CiProjectVariable {
   description
   environmentScope
-  hidden
   masked
   protected
   raw

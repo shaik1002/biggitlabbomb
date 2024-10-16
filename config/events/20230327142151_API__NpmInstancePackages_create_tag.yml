@@ -2,6 +2,9 @@
 description: Create NPM instance packages tag
 category: API::NpmInstancePackages
 action: create_tag
+label_description:
+property_description:
+value_description:
 extra_properties:
 identifiers:
 - project

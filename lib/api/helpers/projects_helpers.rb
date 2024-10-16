@@ -117,8 +117,6 @@ module API
         optional :ci_separated_caches, type: Boolean, desc: 'Enable or disable separated caches based on branch protection.'
         optional :restrict_user_defined_variables, type: Boolean, desc: 'Restrict use of user-defined variables when triggering a pipeline'
         optional :ci_pipeline_variables_minimum_override_role, values: %w[no_one_allowed developer maintainer owner], type: String, desc: 'Limit ability to override CI/CD variables when triggering a pipeline to only users with at least the set minimum role'
-        optional :ci_push_repository_for_job_token_allowed, type: Boolean, desc: "Allow pushing to this project's repository by authenticating with a CI/CD job token generated in this project."
-        optional :ci_id_token_sub_claim_components, type: Array[String], values: %w[project_path ref_type ref], desc: 'Claims that will be used to build the sub claim in id tokens'
       end
 
       params :optional_update_params_ee do
@@ -212,7 +210,6 @@ module API
           :model_registry_access_level,
           :warn_about_potentially_unwanted_characters,
           :ci_pipeline_variables_minimum_override_role,
-          :ci_push_repository_for_job_token_allowed,
 
           # TODO: remove in API v5, replaced by *_access_level
           :issues_enabled,
@@ -224,7 +221,8 @@ module API
         ]
       end
 
-      def filter_attributes_using_license!(attrs); end
+      def filter_attributes_using_license!(attrs)
+      end
 
       def validate_git_import_url!(import_url)
         return if import_url.blank?

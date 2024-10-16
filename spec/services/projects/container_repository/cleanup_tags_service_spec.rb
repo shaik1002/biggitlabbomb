@@ -75,17 +75,31 @@ RSpec.describe Projects::ContainerRepository::CleanupTagsService, feature_catego
         end
       end
 
-      context 'supporting the gitlab api' do
+      context 'with a migrated repository' do
         before do
-          allow(container_repository.gitlab_api_client).to receive(:supports_gitlab_api?).and_return(true)
+          allow(container_repository).to receive(:migrated?).and_return(true)
         end
 
-        it_behaves_like 'calling service', ::Projects::ContainerRepository::Gitlab::CleanupTagsService, extra_log_data: { gitlab_cleanup_tags_service: true }
+        context 'supporting the gitlab api' do
+          before do
+            allow(container_repository.gitlab_api_client).to receive(:supports_gitlab_api?).and_return(true)
+          end
+
+          it_behaves_like 'calling service', ::Projects::ContainerRepository::Gitlab::CleanupTagsService, extra_log_data: { gitlab_cleanup_tags_service: true }
+        end
+
+        context 'not supporting the gitlab api' do
+          before do
+            allow(container_repository.gitlab_api_client).to receive(:supports_gitlab_api?).and_return(false)
+          end
+
+          it_behaves_like 'calling service', ::Projects::ContainerRepository::ThirdParty::CleanupTagsService, extra_log_data: { third_party_cleanup_tags_service: true }
+        end
       end
 
-      context 'not supporting the gitlab api' do
+      context 'with a non migrated repository' do
         before do
-          allow(container_repository.gitlab_api_client).to receive(:supports_gitlab_api?).and_return(false)
+          allow(container_repository).to receive(:migrated?).and_return(false)
         end
 
         it_behaves_like 'calling service', ::Projects::ContainerRepository::ThirdParty::CleanupTagsService, extra_log_data: { third_party_cleanup_tags_service: true }

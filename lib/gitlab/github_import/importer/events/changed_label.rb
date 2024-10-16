@@ -17,8 +17,7 @@ module Gitlab
               user_id: author_id(issue_event),
               label_id: label_finder.id_for(issue_event.label_title),
               action: action(issue_event.event),
-              created_at: issue_event.created_at,
-              imported_from: imported_from
+              created_at: issue_event.created_at
             }.merge(resource_event_belongs_to(issue_event))
 
             ResourceLabelEvent.create!(attrs)

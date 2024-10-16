@@ -5,7 +5,6 @@ import Vue, { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
 // eslint-disable-next-line no-restricted-imports
 import Vuex from 'vuex';
-import api from '~/api';
 import getMRCodequalityAndSecurityReports from '~/diffs/components/graphql/get_mr_codequality_and_security_reports.query.graphql';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import setWindowLocation from 'helpers/set_window_location_helper';
@@ -19,7 +18,6 @@ import DiffFile from '~/diffs/components/diff_file.vue';
 import NoChanges from '~/diffs/components/no_changes.vue';
 import FindingsDrawer from '~/diffs/components/shared/findings_drawer.vue';
 import DiffsFileTree from '~/diffs/components/diffs_file_tree.vue';
-import DiffAppControls from '~/diffs/components/diff_app_controls.vue';
 
 import CollapsedFilesWarning from '~/diffs/components/collapsed_files_warning.vue';
 import HiddenFilesWarning from '~/diffs/components/hidden_files_warning.vue';
@@ -41,13 +39,12 @@ import { diffMetadata } from 'jest/diffs/mock_data/diff_metadata';
 import createDiffsStore from '../create_diffs_store';
 import diffsMockData from '../mock_data/merge_request_diffs';
 
+const mergeRequestDiff = { version_index: 1 };
 const TEST_ENDPOINT = `${TEST_HOST}/diff/endpoint`;
 const COMMIT_URL = `${TEST_HOST}/COMMIT/OLD`;
 const UPDATED_COMMIT_URL = `${TEST_HOST}/COMMIT/NEW`;
 const ENDPOINT_BATCH_URL = `${TEST_HOST}/diff/endpointBatch`;
 const ENDPOINT_METADATA_URL = `${TEST_HOST}/diff/endpointMetadata`;
-
-jest.mock('~/api.js');
 
 Vue.use(Vuex);
 Vue.use(VueApollo);
@@ -71,7 +68,7 @@ describe('diffs/components/app', () => {
     provisions = {},
     baseConfig = {},
     actions = {},
-  } = {}) => {
+  }) => {
     fakeApollo = createMockApollo([
       [getMRCodequalityAndSecurityReports, codeQualityAndSastQueryHandlerSuccess],
     ]);
@@ -280,7 +277,7 @@ describe('diffs/components/app', () => {
       });
 
       expect(wrapper.findComponent(NoChanges).exists()).toBe(false);
-      expect(wrapper.findComponent({ name: 'DynamicScroller' }).props('items')).toStrictEqual(
+      expect(wrapper.findComponent({ name: 'DynamicScroller' }).props('items')).toBe(
         store.state.diffs.diffFiles,
       );
     });
@@ -493,58 +490,20 @@ describe('diffs/components/app', () => {
 
   describe('diffs', () => {
     it('should render compare versions component', () => {
-      createComponent();
+      createComponent({
+        extendStore: ({ state }) => {
+          state.diffs.mergeRequestDiffs = diffsMockData;
+          state.diffs.targetBranchName = 'target-branch';
+          state.diffs.mergeRequestDiff = mergeRequestDiff;
+        },
+      });
+
       expect(wrapper.findComponent(CompareVersions).exists()).toBe(true);
-      expect(wrapper.findComponent(CompareVersions).props()).toMatchObject({
-        toggleFileTreeVisible: false,
-      });
-    });
-
-    it('should render file tree toggle in compare versions', () => {
-      createComponent({
-        extendStore: ({ state }) => {
-          state.diffs.diffFiles = [getDiffFileMock()];
-        },
-      });
-
-      expect(wrapper.findComponent(CompareVersions).props()).toMatchObject({
-        toggleFileTreeVisible: true,
-      });
-    });
-
-    it('should render app controls component', () => {
-      createComponent({
-        extendStore: ({ state }) => {
-          state.diffs.diffFiles = diffsMockData;
-          state.diffs.realSize = '10';
-          state.diffs.addedLines = 15;
-          state.diffs.removedLines = 20;
-        },
-      });
-
-      expect(wrapper.findComponent(DiffAppControls).exists()).toBe(true);
-      expect(wrapper.findComponent(DiffAppControls).props()).toEqual(
+      expect(wrapper.findComponent(CompareVersions).props()).toEqual(
         expect.objectContaining({
-          hasChanges: true,
-          diffsCount: '10',
-          addedLines: 15,
-          removedLines: 20,
+          diffFilesCountText: null,
         }),
       );
-    });
-
-    it('collapses all files', async () => {
-      createComponent();
-      const spy = jest.spyOn(store, 'dispatch');
-      await wrapper.findComponent(DiffAppControls).vm.$emit('collapseAllFiles');
-      expect(spy).toHaveBeenCalledWith('diffs/collapseAllFiles', undefined);
-    });
-
-    it('expands all files', async () => {
-      createComponent();
-      jest.spyOn(store, 'dispatch');
-      await wrapper.findComponent(DiffAppControls).vm.$emit('expandAllFiles');
-      expect(store.dispatch).toHaveBeenCalledWith('diffs/expandAllFiles', undefined);
     });
 
     describe('warnings', () => {
@@ -557,9 +516,6 @@ describe('diffs/components/app', () => {
               state.diffs.plainDiffPath = 'plain diff path';
               state.diffs.emailPatchPath = 'email patch path';
               state.diffs.size = 1;
-              state.diffs.treeEntries = {
-                111: { type: 'blob', fileHash: '111', path: '111.js' },
-              };
             },
           });
 
@@ -624,7 +580,7 @@ describe('diffs/components/app', () => {
       });
 
       expect(wrapper.findComponent({ name: 'DynamicScroller' }).exists()).toBe(true);
-      expect(wrapper.findComponent({ name: 'DynamicScroller' }).props('items')).toStrictEqual(
+      expect(wrapper.findComponent({ name: 'DynamicScroller' }).props('items')).toBe(
         store.state.diffs.diffFiles,
       );
     });
@@ -1032,26 +988,26 @@ describe('diffs/components/app', () => {
     });
   });
 
-  describe('linked file', () => {
-    const linkedFileUrl = 'http://localhost.test/linked-file';
-    let linkedFile;
+  describe('pinned file', () => {
+    const pinnedFileUrl = 'http://localhost.test/pinned-file';
+    let pinnedFile;
 
     beforeEach(() => {
-      linkedFile = getDiffFileMock();
-      mock.onGet(linkedFileUrl).reply(HTTP_STATUS_OK, { diff_files: [linkedFile] });
+      pinnedFile = getDiffFileMock();
+      mock.onGet(pinnedFileUrl).reply(HTTP_STATUS_OK, { diff_files: [pinnedFile] });
       mock
         .onGet(new RegExp(ENDPOINT_BATCH_URL))
         .reply(HTTP_STATUS_OK, { diff_files: [], pagination: {} });
       mock.onGet(new RegExp(ENDPOINT_METADATA_URL)).reply(HTTP_STATUS_OK, diffMetadata);
 
-      createComponent({ props: { shouldShow: true, linkedFileUrl } });
+      createComponent({ props: { shouldShow: true, pinnedFileUrl } });
     });
 
-    it('fetches and displays the file', async () => {
+    it('fetches and displays pinned file', async () => {
       await waitForPromises();
 
       expect(wrapper.findComponent({ name: 'DynamicScroller' }).props('items')[0].file_hash).toBe(
-        linkedFile.file_hash,
+        pinnedFile.file_hash,
       );
     });
 
@@ -1113,75 +1069,6 @@ describe('diffs/components/app', () => {
       const rootWrapper = createWrapper(wrapper.vm.$root);
       scroll();
       expect(rootWrapper.emitted(BV_HIDE_TOOLTIP)).toStrictEqual(undefined);
-    });
-  });
-
-  describe('track "trackRedisHllUserEvent" and "trackRedisCounterEvent" metrics', () => {
-    let mockGetTime;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      mockGetTime = jest.spyOn(Date.prototype, 'getTime');
-    });
-
-    afterEach(() => {
-      mockGetTime.mockRestore();
-    });
-
-    const simulateKeydown = async (key, time) => {
-      await nextTick();
-
-      mockGetTime.mockReturnValue(time);
-      Mousetrap.trigger(key);
-    };
-
-    it('should not track metrics if keydownTime is not set', async () => {
-      createComponent({ props: { shouldShow: true } });
-
-      await nextTick();
-      window.dispatchEvent(new Event('blur'));
-
-      expect(api.trackRedisHllUserEvent).not.toHaveBeenCalled();
-      expect(api.trackRedisCounterEvent).not.toHaveBeenCalled();
-    });
-
-    it('should track metrics if delta is between 0 and 1000ms', async () => {
-      createComponent({ props: { shouldShow: true } });
-
-      // delta 500 ms
-      await simulateKeydown('mod+f', 1000);
-      mockGetTime.mockReturnValue(1500);
-
-      window.dispatchEvent(new Event('blur'));
-
-      expect(api.trackRedisHllUserEvent).toHaveBeenCalledWith('i_code_review_user_searches_diff');
-      expect(api.trackRedisCounterEvent).toHaveBeenCalledWith('diff_searches');
-    });
-
-    it('should not track metrics if delta is greater than or equal to 1000ms', async () => {
-      createComponent({ props: { shouldShow: true } });
-
-      // delta 1050 ms
-      await simulateKeydown('mod+f', 1000);
-      mockGetTime.mockReturnValue(2050);
-
-      window.dispatchEvent(new Event('blur'));
-
-      expect(api.trackRedisHllUserEvent).not.toHaveBeenCalled();
-      expect(api.trackRedisCounterEvent).not.toHaveBeenCalled();
-    });
-
-    it('should not track metrics if delta is negative', async () => {
-      createComponent({ props: { shouldShow: true } });
-
-      // delta -500 ms
-      await simulateKeydown('mod+f', 1500);
-      mockGetTime.mockReturnValue(1000);
-
-      window.dispatchEvent(new Event('blur'));
-
-      expect(api.trackRedisHllUserEvent).not.toHaveBeenCalled();
-      expect(api.trackRedisCounterEvent).not.toHaveBeenCalled();
     });
   });
 });

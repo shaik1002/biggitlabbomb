@@ -3,7 +3,7 @@
 module QA
   RSpec.describe 'Verify', :runner, product_group: :runner do
     describe 'Runner fleet management' do
-      let(:executor) { "qa-runner-#{SecureRandom.hex(6)}" }
+      let(:executor) { "qa-runner-#{Time.now.to_i}" }
 
       let!(:runner) { create(:group_runner, name: executor) }
 
@@ -12,7 +12,7 @@ module QA
       end
 
       it(
-        'shows group runner online count', :blocking,
+        'shows group runner online count',
         testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/421255'
       ) do
         Flow::Login.sign_in

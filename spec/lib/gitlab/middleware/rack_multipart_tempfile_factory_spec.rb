@@ -6,7 +6,7 @@ require 'tempfile'
 
 RSpec.describe Gitlab::Middleware::RackMultipartTempfileFactory do
   let(:app) do
-    ->(env) do
+    lambda do |env|
       params = Rack::Request.new(env).params
 
       if params['file']

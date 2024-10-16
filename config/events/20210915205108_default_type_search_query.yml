@@ -1,9 +1,12 @@
 description: "Type search query"
 category: default
 action: type_search_query
+label_description: "`[dropdown_type]_dropdown_frequent_items_search_input`"
+property_description: ""
+value_description: ""
 extra_properties:
 identifiers:
-product_group: remote_development
+product_group: ide
 milestone: "13.7"
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/47589
 distributions:
@@ -13,6 +16,3 @@ tiers:
 - free
 - premium
 - ultimate
-additional_properties:
-  label:
-    description: "`[dropdown_type]_dropdown_frequent_items_search_input`"

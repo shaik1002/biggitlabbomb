@@ -9,19 +9,19 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 Use groups to manage one or more related projects at the same time.
 
 NOTE:
-On self-managed GitLab, if you want to see an overview of your entire organization, you should create one top-level group.
-For more information about efforts to create an organization view of all groups,
-[see epic 9266](https://gitlab.com/groups/gitlab-org/-/epics/9266).
-A top-level group offers insights in your entire organization through a complete
+For self-managed customers it could be beneficial to create one single top-level group, so you can see an overview of
+your entire organization. For more information about efforts to create an
+organization view of all groups, [see epic 9266](https://gitlab.com/groups/gitlab-org/-/epics/9266).
+A single top-level group provides insights in your entire organization via a complete
 [Security Dashboard and Center](../application_security/security_dashboard/index.md),
-[Vulnerability Report](../application_security/vulnerability_report/index.md#vulnerability-report),
-[compliance center](../compliance/compliance_center/index.md), and
-[value stream analytics](../group/value_stream_analytics/index.md).
+[Vulnerability](../application_security/vulnerability_report/index.md#vulnerability-report) and
+[Compliance center](../compliance/compliance_center/index.md), and
+[Value stream analytics](../group/value_stream_analytics/index.md).
 
 ## Add a group README
 
-You can add a README file to provide information about your team and invite users to contribute to your projects.
-The README displays on the group overview page. All group members can view and edit the README.
+As a group owner or member, you can use a README to provide more information about your team, and invite users to contribute to your projects.
+The README is displayed on the group overview page, and can be changed in the group settings. All group members can edit the README.
 
 Prerequisites:
 
@@ -54,8 +54,8 @@ member with the Owner role.
 ## Change a group's path
 
 Changing a group's path (group URL) can have unintended side effects. Read how redirects behave
-for [projects](../project/repository/index.md#repository-path-changes)
-and in the [API](../../api/rest/index.md#redirects)
+[on the project-level](../project/repository/index.md#what-happens-when-a-repository-path-changes)
+and [in the API](../../api/rest/index.md#redirects)
 before you proceed.
 
 If you are changing the path so it can be claimed by another group or user,
@@ -101,6 +101,39 @@ first push. The group Owner can
 [customize the initial branch](../project/repository/branches/default.md#group-level-custom-initial-branch-name)
 for the group's projects to meet your group's needs.
 
+## Share a group with another group
+
+Similar to how you [share a project with a group](../project/members/share_project_with_groups.md),
+you can share a group with another group by invitation.
+For more information about sharing conditions and behavior, see [Sharing projects and groups](../project/members/sharing_projects_groups.md).
+
+Prerequisites:
+
+- You must be a member of the invited and inviting groups.
+
+To invite a group to your group:
+
+1. On the left sidebar, select **Search or go to** and find your group.
+1. Select **Manage > Members**.
+1. Select **Invite a group**.
+1. In the **Select a group to invite** list, select the group you want to invite.
+1. Select a [role](../permissions.md) as maximum access level.
+1. Select **Invite**.
+
+## Remove an invited group
+
+To remove an invited group:
+
+1. On the left sidebar, select **Search or go to** and find your group.
+1. Select **Manage > Members**.
+1. Select the **Groups** tab.
+1. To the right of the account you want to remove, select **Remove group** (**{remove}**).
+
+When you remove the invited group from your group:
+
+- All direct members of the invited group no longer have access to the inviting group.
+- Members of the invited group no longer count towards the billable members of the inviting group.
+
 ## Transfer a group
 
 Transferring groups moves them from one place to another in the same GitLab instance. You can:
@@ -114,8 +147,8 @@ If you need to copy a group to a different GitLab instance,
 
 When transferring groups, note:
 
-- Changing a group's parent can have unintended side effects. See [what happens when a repository path changes](../project/repository/index.md#repository-path-changes).
-- You must have the Owner role for the source and target group.
+- Changing a group's parent can have unintended side effects. See [what happens when a repository path changes](../project/repository/index.md#what-happens-when-a-repository-path-changes).
+- You must have the Owner role in the source and target group.
 - You must update your local repositories to point to the new location.
 - If the immediate parent group's visibility is lower than the group's current visibility, visibility levels for subgroups and projects change to match the new parent group's visibility.
 - Only explicit group membership is transferred, not inherited membership. If the group's Owners have only inherited membership, this leaves the group without an Owner. In this case, the user transferring the group becomes the group's Owner.
@@ -151,10 +184,10 @@ To disable email notifications:
 > - [Enabled](https://gitlab.com/gitlab-org/gitlab/-/issues/382055) the flag `diff_preview_in_email` on GitLab.com, self-managed, and GitLab Dedicated in GitLab 17.1.
 
 FLAG:
-A feature flag controls the availability of this feature.
+The availability of this feature is controlled by a feature flag.
 For more information, see the history.
 
-When you comment on code in a merge request, GitLab
+When you review code in a merge request and comment on a line of code, GitLab
 includes a few lines of the diff in the email notification to participants.
 Some organizational policies treat email as a less secure system, or might not
 control their own infrastructure for email. This can present risks to IP or
@@ -180,7 +213,7 @@ in which those users are members.
 
 Groups with disabled mentions are visualized accordingly in the autocompletion dropdown list.
 
-These visual cues are particularly helpful for groups with many users.
+This is particularly helpful for groups with a large number of users.
 
 To disable group mentions:
 
@@ -199,7 +232,7 @@ DETAILS:
 You can export a list of members in a group or subgroup as a CSV.
 
 1. On the left sidebar, select **Search or go to** and find your group or subgroup.
-1. Select **Manage > Members**.
+1. Select  **Manage > Members**.
 1. Select **Export as CSV**.
 1. After the CSV file has been generated, it is emailed as an attachment to the user that requested it.
 
@@ -214,9 +247,10 @@ For members with `Minimal Access` in the selected group, their `Max Role` and `S
 
 For more information about user caps for GitLab self-managed, see [User cap](../../administration/settings/sign_up_restrictions.md#user-cap).
 
-When the number of billable members reaches the user cap, the group Owner must approve new members.
+When the number of billable members reaches the user cap, new users can't be added to the group
+without being approved by the group Owner.
 
-Groups with the user cap feature enabled have [group sharing](../project/members/sharing_projects_groups.md#invite-a-group-to-a-group)
+Groups with the user cap feature enabled have [group sharing](#share-a-group-with-another-group)
 disabled for the group and its subgroups.
 
 ### Specify a user cap for a group
@@ -231,7 +265,7 @@ To specify a user cap:
    You can set a cap on the top-level group only.
 1. Select **Settings > General**.
 1. Expand **Permissions and group features**.
-1. From **Seat controls**, select the **Set user cap** checkbox and enter the number of users in the field.
+1. In the **User cap** box, enter the desired number of users.
 1. Select **Save changes**.
 
 If you already have more users in the group than the user cap value, users
@@ -252,7 +286,7 @@ To remove the user cap:
 1. On the left sidebar, select **Search or go to** and find your group.
 1. Select **Settings > General**.
 1. Expand **Permissions and group features**.
-1. From **Seat controls**, select **Open access**.
+1. In the **User cap** box, delete the value.
 1. Select **Save changes**.
 
 Decreasing the user cap does not approve pending members.
@@ -281,9 +315,9 @@ The user cap cannot be enabled if a group, subgroup, or project is shared extern
 or project is shared externally, it is shared outside of the namespace hierarchy, regardless of its level
 in the hierarchy.
 
-To ensure that the user cap applies when groups, subgroups, or projects are shared externally, restrict group sharing only in the top-level namespace. A top-level namespace restriction allows invitations in the same namespace and prevents new user (seat) additions from external shares.
+To ensure that the user cap applies when groups, subgroups, or projects are shared externally, restrict group sharing only within the top-level namespace. This ensure that groups in the same top-leve namespace can be invited, and prevents the addition of new users (seats) when the group is shared.
 
-GitLab.com Ultimate has a [known issue](https://gitlab.com/gitlab-org/gitlab/-/issues/441504) where you cannot add guest users to a group when billable users exceed the user cap. For example, suppose you have a user cap of 5, with 3 developers, and 2 guests. After you add 2 more developers, you cannot add any more users, even if they are guest users that don't consume a billable seat.
+On GitLab.com, on the Ultimate tier, there is a [known issue](https://gitlab.com/gitlab-org/gitlab/-/issues/441504) where you cannot add new guest users to a group when the amount of billable users exceeds the user cap. For example, suppose you have a user cap of 5, with 3 developers and 2 guests. After you add 2 more developers, you cannot add any more users, even if they are guest users that don't consume a billable seat.
 
 ## Group file templates
 
@@ -381,7 +415,8 @@ To change this behavior:
 
 ### Prevent merge unless all threads are resolved
 
-You can prevent merge requests from being merged until all threads are resolved. When this setting is enabled, child projects in your group display unresolved thread counts in orange on merge requests with at least one unresolved thread.
+You can prevent merge requests from being merged until all threads are resolved. When this setting is enabled, for all child projects in your group, the
+**Unresolved threads** count in a merge request is shown in orange when at least one thread remains unresolved.
 
 Prerequisites:
 

@@ -13,8 +13,12 @@ export const initOrganizationsSettingsGeneral = () => {
   const {
     dataset: { appData },
   } = el;
-  const { organization, organizationsPath, rootUrl, previewMarkdownPath } =
-    convertObjectPropsToCamelCase(JSON.parse(appData), { deep: true });
+  const {
+    organization,
+    organizationsPath,
+    rootUrl,
+    previewMarkdownPath,
+  } = convertObjectPropsToCamelCase(JSON.parse(appData));
 
   const apolloProvider = new VueApollo({
     defaultClient: createDefaultClient(),

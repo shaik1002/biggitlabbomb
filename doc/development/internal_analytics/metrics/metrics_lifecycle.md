@@ -66,7 +66,7 @@ The `product_group_renamer` script can update all the definitions so you do not 
 For example, if the group 5-min-app was renamed to 2-min-app, you can update the relevant files like this:
 
 ```shell
-$ scripts/internal_events/product_group_renamer.rb 5-min-app 2-min-app
+$ ruby scripts/internal_events/product_group_renamer.rb 5-min-app 2-min-app
 Updated '5-min-app' to '2-min-app' in 3 files
 
 Updated files:
@@ -76,7 +76,5 @@ Updated files:
 ```
 
 After running the script, you must commit all the modified files to Git and create a merge request.
-
-The script is part of GDK and a frontend or backend developer can run the script and prepare the merge request.
 
 If a group is split into multiple groups, you need to manually update the product_group.

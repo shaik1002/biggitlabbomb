@@ -8,7 +8,6 @@ FactoryBot.define do
     mount_point { :avatar }
     secret { nil }
     store { ObjectStorage::Store::LOCAL }
-    version { RecordsUploads::Concern::VERSION }
 
     # we should build a mount agnostic upload by default
     transient do

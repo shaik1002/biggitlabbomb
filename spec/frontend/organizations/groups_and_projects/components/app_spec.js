@@ -1,6 +1,3 @@
-import VueApollo from 'vue-apollo';
-import VueRouter from 'vue-router';
-import Vue from 'vue';
 import { GlCollapsibleListbox } from '@gitlab/ui';
 import App from '~/organizations/groups_and_projects/components/app.vue';
 import GroupsView from '~/organizations/shared/components/groups_view.vue';
@@ -26,53 +23,22 @@ import {
 } from '~/filtered_search/recent_searches_storage_keys';
 import FilteredSearchAndSort from '~/groups_projects/components/filtered_search_and_sort.vue';
 import { createRouter } from '~/organizations/groups_and_projects';
-import userPreferencesUpdate from '~/organizations/groups_and_projects/graphql/mutations/user_preferences_update.mutation.graphql';
-import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
-import createMockApollo from 'helpers/mock_apollo_helper';
-import waitForPromises from 'helpers/wait_for_promises';
-
-jest.mock('~/sentry/sentry_browser_wrapper');
-
-Vue.use(VueApollo);
-Vue.use(VueRouter);
 
 describe('GroupsAndProjectsApp', () => {
+  const router = createRouter();
+  const routerMock = {
+    push: jest.fn(),
+  };
   const mockEndCursor = 'mockEndCursor';
   const mockStartCursor = 'mockStartCursor';
-  const defaultProvide = {
-    userPreferenceSortName: SORT_ITEM_NAME.value,
-    userPreferenceSortDirection: SORT_DIRECTION_ASC,
-    userPreferenceDisplay: null,
-  };
-  const userPreferencesUpdateSuccessHandler = jest.fn().mockResolvedValue({
-    data: {
-      userPreferencesUpdate: {
-        userPreferences: {
-          organizationGroupsProjectsSort: 'updated_asc',
-          organizationGroupsProjectsDisplay: 'PROJECTS',
-        },
-      },
-    },
-  });
 
   let wrapper;
-  let mockApollo;
-  let router;
 
-  const createComponent = ({
-    routeQuery = { [FILTERED_SEARCH_TERM_KEY]: 'foo' },
-    provide = {},
-    userPreferencesUpdateHandler = userPreferencesUpdateSuccessHandler,
-  } = {}) => {
-    mockApollo = createMockApollo([[userPreferencesUpdate, userPreferencesUpdateHandler]]);
-    router = createRouter();
-    router.push({ query: routeQuery });
-
+  const createComponent = ({ routeQuery = { [FILTERED_SEARCH_TERM_KEY]: 'foo' } } = {}) => {
     wrapper = shallowMountExtended(App, {
-      apolloProvider: mockApollo,
       router,
-      provide: { ...defaultProvide, ...provide },
+      mocks: { $route: { path: '/', query: routeQuery }, $router: routerMock },
     });
   };
 
@@ -82,11 +48,6 @@ describe('GroupsAndProjectsApp', () => {
   const findProjectsView = () => wrapper.findComponent(ProjectsView);
   const findNewGroupButton = () => wrapper.findComponent(NewGroupButton);
   const findNewProjectButton = () => wrapper.findComponent(NewProjectButton);
-
-  afterEach(() => {
-    mockApollo = null;
-    router = null;
-  });
 
   it('renders page title as Groups and projects', () => {
     createComponent();
@@ -170,51 +131,6 @@ describe('GroupsAndProjectsApp', () => {
     });
   });
 
-  describe('when `userPreferenceSortName` and `userPreferenceSortDirection` is set', () => {
-    beforeEach(() => {
-      createComponent({
-        provide: {
-          userPreferenceSortName: SORT_ITEM_CREATED_AT.value,
-          userPreferenceSortDirection: SORT_DIRECTION_DESC,
-        },
-      });
-    });
-
-    it('renders filtered search bar with correct sort props', () => {
-      expect(findFilteredSearchAndSort().props()).toMatchObject({
-        activeSortOption: SORT_ITEM_CREATED_AT,
-        isAscending: false,
-      });
-    });
-
-    it('renders view component with correct sort props', () => {
-      expect(wrapper.findComponent(GroupsView).props()).toMatchObject({
-        sortName: SORT_ITEM_CREATED_AT.value,
-        sortDirection: SORT_DIRECTION_DESC,
-      });
-    });
-  });
-
-  describe('when `userPreferenceDisplay` is set', () => {
-    beforeEach(() => {
-      createComponent({
-        provide: {
-          userPreferenceDisplay: RESOURCE_TYPE_PROJECTS,
-        },
-      });
-    });
-
-    it('renders display listbox with correct item selected', () => {
-      expect(findListbox().props()).toMatchObject({
-        selected: RESOURCE_TYPE_PROJECTS,
-      });
-    });
-
-    it('renders correct view component', () => {
-      expect(wrapper.findComponent(ProjectsView).exists()).toBe(true);
-    });
-  });
-
   describe('actions', () => {
     beforeEach(() => {
       createComponent();
@@ -230,68 +146,35 @@ describe('GroupsAndProjectsApp', () => {
   });
 
   describe('when filtered search bar is submitted', () => {
-    describe('when search term is 3 characters or more', () => {
-      const searchTerm = 'foo bar';
+    const searchTerm = 'foo bar';
 
-      beforeEach(() => {
-        createComponent();
+    beforeEach(() => {
+      createComponent();
 
-        findFilteredSearchAndSort().vm.$emit('filter', { [FILTERED_SEARCH_TERM_KEY]: searchTerm });
-      });
-
-      it(`updates \`${FILTERED_SEARCH_TERM_KEY}\` query string`, () => {
-        expect(router.currentRoute.query).toEqual({ [FILTERED_SEARCH_TERM_KEY]: searchTerm });
-      });
+      findFilteredSearchAndSort().vm.$emit('filter', { [FILTERED_SEARCH_TERM_KEY]: searchTerm });
     });
 
-    describe('when search term is less than 3 characters', () => {
-      const searchTerm = 'fo';
-
-      beforeEach(() => {
-        createComponent({ routeQuery: {} });
-
-        findFilteredSearchAndSort().vm.$emit('filter', { [FILTERED_SEARCH_TERM_KEY]: searchTerm });
-      });
-
-      it('does not update query string', () => {
-        expect(router.currentRoute.query).toEqual({});
-      });
-    });
-
-    describe('when search term is empty but there are other filters', () => {
-      beforeEach(() => {
-        createComponent();
-
-        findFilteredSearchAndSort().vm.$emit('filter', { foo: 'bar' });
-      });
-
-      it('updates query string', () => {
-        expect(router.currentRoute.query).toEqual({ foo: 'bar' });
+    it(`updates \`${FILTERED_SEARCH_TERM_KEY}\` query string`, () => {
+      expect(routerMock.push).toHaveBeenCalledWith({
+        query: { [FILTERED_SEARCH_TERM_KEY]: searchTerm },
       });
     });
   });
 
   describe('when display listbox is changed', () => {
-    beforeEach(async () => {
+    beforeEach(() => {
       createComponent();
 
       findListbox().vm.$emit('select', RESOURCE_TYPE_PROJECTS);
-      await waitForPromises();
     });
 
     it('updates `display` query string', () => {
-      expect(router.currentRoute.query.display).toBe(RESOURCE_TYPE_PROJECTS);
-    });
-
-    it('calls `userPreferencesUpdate` mutation with correct variables', () => {
-      expect(userPreferencesUpdateSuccessHandler).toHaveBeenCalledWith({
-        input: { organizationGroupsProjectsDisplay: 'PROJECTS' },
-      });
+      expect(routerMock.push).toHaveBeenCalledWith({ query: { display: RESOURCE_TYPE_PROJECTS } });
     });
   });
 
   describe('when sort item is changed', () => {
-    beforeEach(async () => {
+    beforeEach(() => {
       createComponent({
         routeQuery: {
           display: RESOURCE_TYPE_PROJECTS,
@@ -302,26 +185,21 @@ describe('GroupsAndProjectsApp', () => {
       });
 
       findFilteredSearchAndSort().vm.$emit('sort-by-change', SORT_ITEM_CREATED_AT.value);
-      await waitForPromises();
     });
 
     it('updates `sort_name` query string', () => {
-      expect(router.currentRoute.query).toMatchObject({
-        display: RESOURCE_TYPE_PROJECTS,
-        sort_name: SORT_ITEM_CREATED_AT.value,
-        [FILTERED_SEARCH_TERM_KEY]: 'foo',
-      });
-    });
-
-    it('calls `userPreferencesUpdate` mutation with correct variables', () => {
-      expect(userPreferencesUpdateSuccessHandler).toHaveBeenCalledWith({
-        input: { organizationGroupsProjectsSort: 'CREATED_ASC' },
+      expect(routerMock.push).toHaveBeenCalledWith({
+        query: {
+          display: RESOURCE_TYPE_PROJECTS,
+          sort_name: SORT_ITEM_CREATED_AT.value,
+          [FILTERED_SEARCH_TERM_KEY]: 'foo',
+        },
       });
     });
   });
 
   describe('when sort direction is changed', () => {
-    beforeEach(async () => {
+    beforeEach(() => {
       createComponent({
         routeQuery: {
           display: RESOURCE_TYPE_PROJECTS,
@@ -332,37 +210,16 @@ describe('GroupsAndProjectsApp', () => {
       });
 
       findFilteredSearchAndSort().vm.$emit('sort-direction-change', false);
-      await waitForPromises();
     });
 
     it('updates `sort_direction` query string', () => {
-      expect(router.currentRoute.query).toMatchObject({
-        display: RESOURCE_TYPE_PROJECTS,
-        sort_direction: SORT_DIRECTION_DESC,
-        [FILTERED_SEARCH_TERM_KEY]: 'foo',
+      expect(routerMock.push).toHaveBeenCalledWith({
+        query: {
+          display: RESOURCE_TYPE_PROJECTS,
+          sort_direction: SORT_DIRECTION_DESC,
+          [FILTERED_SEARCH_TERM_KEY]: 'foo',
+        },
       });
-    });
-
-    it('calls `userPreferencesUpdate` mutation with correct variables', () => {
-      expect(userPreferencesUpdateSuccessHandler).toHaveBeenCalledWith({
-        input: { organizationGroupsProjectsSort: 'NAME_DESC' },
-      });
-    });
-  });
-
-  describe('when `userPreferencesUpdate` mutation fails', () => {
-    const error = new Error();
-    const errorHandler = jest.fn().mockRejectedValue(error);
-
-    beforeEach(async () => {
-      createComponent({ userPreferencesUpdateHandler: errorHandler });
-
-      findListbox().vm.$emit('select', RESOURCE_TYPE_PROJECTS);
-      await waitForPromises();
-    });
-
-    it('captures error in Sentry', () => {
-      expect(Sentry.captureException).toHaveBeenCalledWith(error);
     });
   });
 
@@ -388,9 +245,8 @@ describe('GroupsAndProjectsApp', () => {
       });
 
       it('sets `end_cursor` query string', () => {
-        expect(router.currentRoute.query).toMatchObject({
-          display: RESOURCE_TYPE_PROJECTS,
-          end_cursor: mockEndCursor,
+        expect(routerMock.push).toHaveBeenCalledWith({
+          query: { display: RESOURCE_TYPE_PROJECTS, end_cursor: mockEndCursor },
         });
       });
     });
@@ -411,9 +267,8 @@ describe('GroupsAndProjectsApp', () => {
           hasPreviousPage: true,
         });
 
-        expect(router.currentRoute.query).toMatchObject({
-          display: RESOURCE_TYPE_PROJECTS,
-          start_cursor: mockStartCursor,
+        expect(routerMock.push).toHaveBeenCalledWith({
+          query: { display: RESOURCE_TYPE_PROJECTS, start_cursor: mockStartCursor },
         });
       });
     });

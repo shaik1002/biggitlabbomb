@@ -1,4 +1,3 @@
-// Package png provides utilities for handling PNG images.
 package png
 
 import (
@@ -24,7 +23,6 @@ type Reader struct {
 	bytesRemaining int64
 }
 
-// NewReader returns a new Reader that skips problematic PNG chunks.
 func NewReader(r io.Reader) (io.Reader, error) {
 	magicBytes, err := readMagic(r)
 	if err != nil {
@@ -39,7 +37,6 @@ func NewReader(r io.Reader) (io.Reader, error) {
 	return io.MultiReader(bytes.NewReader(magicBytes), &Reader{underlying: r}), nil
 }
 
-// Read reads from the PNG stream, skipping specific chunks as needed.
 func (r *Reader) Read(p []byte) (int, error) {
 	for r.bytesRemaining == 0 {
 		const (
@@ -78,7 +75,7 @@ func debug(args ...interface{}) {
 
 // Consume PNG magic and proceed to reading the IHDR chunk.
 func readMagic(r io.Reader) ([]byte, error) {
-	var magicBytes = make([]byte, pngMagicLen)
+	var magicBytes []byte = make([]byte, pngMagicLen)
 	_, err := io.ReadFull(r, magicBytes)
 	if err != nil {
 		return nil, err

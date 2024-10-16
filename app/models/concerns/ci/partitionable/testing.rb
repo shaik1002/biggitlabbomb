@@ -14,7 +14,6 @@ module Ci
         Ci::BuildReportResult
         Ci::BuildRunnerSession
         Ci::BuildSource
-        Ci::BuildTag
         Ci::BuildTraceChunk
         Ci::BuildTraceMetadata
         Ci::BuildPendingState

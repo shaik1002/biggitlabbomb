@@ -74,7 +74,9 @@ Install GitLab HAR Recorder:
 To verify the HAR contains all requests, use an online HAR viewer, for example:
 
 - [HAR Viewer](http://www.softwareishard.com/har/viewer/)
+<!-- vale gitlab.Admin = NO -->
 - [Google Admin Toolbox HAR Analyzer](https://toolbox.googleapps.com/apps/har_analyzer/)
+<!-- vale gitlab.Admin = YES -->
 
 ### Insomnia API Client
 
@@ -195,7 +197,9 @@ a text editor.
 Tools recommended for viewing HAR files include:
 
 - [HAR Viewer](http://www.softwareishard.com/har/viewer/) - (online)
+<!-- vale gitlab.Admin = NO -->
 - [Google Admin Toolbox HAR Analyzer](https://toolbox.googleapps.com/apps/har_analyzer/) - (online)
+<!-- vale gitlab.Admin = YES -->
 - [Fiddler](https://www.telerik.com/fiddler) - local
 - [Insomnia API Client](https://insomnia.rest/) - local
 
@@ -236,4 +240,4 @@ intact.
 The following example demonstrates use of [Visual Studio Code](https://code.visualstudio.com/) text
 editor to edit an Authorization token found in a header.
 
-![Authorization token edited in Visual Studio Code](img/vscode_har_edit_auth_header_v13_12.png)
+![Authorization token edited in Visual Studio Code](img/vscode_har_edit_auth_header.png)

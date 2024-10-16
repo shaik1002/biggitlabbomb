@@ -4,11 +4,10 @@ import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import $ from 'jquery';
 import { uniq, escape } from 'lodash';
 import { getEmojiScoreWithIntent } from '~/emoji/utils';
-import { scrollToElement } from '~/lib/utils/common_utils';
+import { getCookie, setCookie, scrollToElement } from '~/lib/utils/common_utils';
 import * as Emoji from '~/emoji';
 import { dispose, fixTitle } from '~/tooltips';
 import { createAlert } from '~/alert';
-import { FREQUENTLY_USED_EMOJIS_STORAGE_KEY } from '~/emoji/constants';
 import axios from './lib/utils/axios_utils';
 import { isInVueNoteablePage } from './lib/utils/dom_utils';
 import { __ } from './locale';
@@ -275,7 +274,6 @@ export class AwardsHandler {
     return $menu.css(css);
   }
 
-  // eslint-disable-next-line max-params
   addAward(votesBlock, awardUrl, emoji, checkMutuality, callback) {
     const isMainAwardsBlock = votesBlock.closest('.js-noteable-awards').length;
 
@@ -482,7 +480,6 @@ export class AwardsHandler {
     });
   }
 
-  // eslint-disable-next-line max-params
   postEmoji($emojiButton, awardUrl, emoji, callback) {
     axios
       .post(awardUrl, {
@@ -511,7 +508,7 @@ export class AwardsHandler {
   addEmojiToFrequentlyUsedList(emoji) {
     if (this.emoji.isEmojiNameValid(emoji)) {
       this.frequentlyUsedEmojis = uniq(this.getFrequentlyUsedEmojis().concat(emoji));
-      localStorage.setItem(FREQUENTLY_USED_EMOJIS_STORAGE_KEY, this.frequentlyUsedEmojis.join(','));
+      setCookie('frequently_used_emojis', this.frequentlyUsedEmojis.join(','));
     }
   }
 
@@ -519,9 +516,7 @@ export class AwardsHandler {
     return (
       this.frequentlyUsedEmojis ||
       (() => {
-        const frequentlyUsedEmojis = uniq(
-          (localStorage.getItem(FREQUENTLY_USED_EMOJIS_STORAGE_KEY) || '').split(','),
-        );
+        const frequentlyUsedEmojis = uniq((getCookie('frequently_used_emojis') || '').split(','));
         this.frequentlyUsedEmojis = frequentlyUsedEmojis.filter((inputName) =>
           this.emoji.isEmojiNameValid(inputName),
         );

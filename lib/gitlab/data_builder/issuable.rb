@@ -11,7 +11,7 @@ module Gitlab
         @issuable = issuable
       end
 
-      def build(user: nil, changes: {}, action: nil)
+      def build(user: nil, changes: {})
         hook_data = {
           object_kind: object_kind,
           event_type: event_type,
@@ -24,7 +24,6 @@ module Gitlab
           repository: issuable.project&.hook_attrs&.slice(:name, :url, :description, :homepage)
         }
 
-        hook_data[:object_attributes][:action] = action if action
         hook_data[:assignees] = issuable.assignees.map(&:hook_attrs) if issuable.assignees.any?
 
         if issuable.allows_reviewers? && issuable.reviewers.any?

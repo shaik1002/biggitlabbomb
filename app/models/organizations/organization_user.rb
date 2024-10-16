@@ -20,7 +20,6 @@ module Organizations
     scope :owners, -> { where(access_level: Gitlab::Access::OWNER) }
     scope :in_organization, ->(organization) { where(organization: organization) }
     scope :with_active_users, -> { joins(:user).merge(User.active) }
-    scope :by_user, ->(user) { where(user: user) }
 
     def self.create_default_organization_record_for(user_id, user_is_admin:)
       upsert(
@@ -31,6 +30,15 @@ module Organizations
         },
         unique_by: [:organization_id, :user_id]
       )
+    end
+
+    def self.update_default_organization_record_for(user_id, user_is_admin:)
+      find_or_initialize_by(
+        user_id: user_id, organization_id: Organizations::Organization::DEFAULT_ORGANIZATION_ID
+      ).tap do |record|
+        record.access_level = default_organization_access_level(user_is_admin: user_is_admin)
+        record.save
+      end
     end
 
     def self.default_organization_access_level(user_is_admin: false)

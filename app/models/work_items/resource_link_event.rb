@@ -10,10 +10,6 @@ module WorkItems
       add: 1,
       remove: 2
     }
-
-    def synthetic_note_class
-      nil
-    end
   end
 end
 

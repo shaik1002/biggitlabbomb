@@ -80,7 +80,9 @@ class SessionsController < Devise::SessionsController
 
       accept_pending_invitations
 
-      synchronize_broadcast_message_dismissals
+      if Feature.enabled?(:new_broadcast_message_dismissal, current_user, type: :gitlab_com_derisk)
+        synchronize_broadcast_message_dismissals
+      end
 
       log_audit_event(current_user, resource, with: authentication_method)
       log_user_activity(current_user)
@@ -88,19 +90,12 @@ class SessionsController < Devise::SessionsController
   end
 
   def destroy
-    headers['Clear-Site-Data'] = '"cache", "storage", "executionContexts", "clientHints"'
+    headers['Clear-Site-Data'] = '"*"'
+
     Gitlab::AppLogger.info("User Logout: username=#{current_user.username} ip=#{request.remote_ip}")
-
     super
-
     # hide the signed_out notice
     flash[:notice] = nil
-
-    # cookies must be deleted after super call
-    # Warden sets some cookies for deletion, this will not override those settings
-    cookies.each do |cookie|
-      cookies.delete(cookie[0])
-    end
   end
 
   private

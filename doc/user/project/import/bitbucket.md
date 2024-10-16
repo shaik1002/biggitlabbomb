@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -13,7 +13,6 @@ DETAILS:
 > - Parallel imports from Bitbucket Cloud [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/412614) in GitLab 16.6 [with a flag](../../../administration/feature_flags.md) named `bitbucket_parallel_importer`. Disabled by default.
 > - [Enabled on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/423530) in GitLab 16.6.
 > - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/423530) in GitLab 16.7. Feature flag `bitbucket_parallel_importer` removed.
-> - An **Imported** badge on some imported items [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/461210) in GitLab 17.2.
 
 Import your projects from Bitbucket Cloud to GitLab.
 
@@ -21,25 +20,21 @@ The Bitbucket importer can import:
 
 - Repository description
 - Git repository data
-- Issues, including comments
-- Pull requests, including comments
+- Issues
+- Issue comments
+- Pull requests
+- Pull request comments
 - Milestones
 - Wiki
 - Labels
 - Milestones
 - LFS objects
 
-The Bitbucket importer cannot import:
-
-- Pull request approvals
-- Approval rules
-
 When importing:
 
 - References to pull requests and issues are preserved.
 - Repository public access is retained. If a repository is private in Bitbucket, it's created as
   private in GitLab as well.
-- Imported issues, merge requests, and comments have an **Imported** badge in GitLab.
 
 NOTE:
 The Bitbucket Cloud importer works only with [Bitbucket.org](https://bitbucket.org/), not with Bitbucket
@@ -56,6 +51,7 @@ For pull requests:
 
 - If the source SHA does not exist in the repository, the importer attempts to set the source commit to the merge commit SHA.
 - The merge request assignee is set to the author. Reviewers are set with usernames matching Bitbucket identities in GitLab.
+- Approvals are not imported.
 - Merge requests in GitLab can be either can be either `opened`, `closed` or `merged`.
 
 For issues:
@@ -100,9 +96,9 @@ For user contributions to be mapped, each user must complete the following befor
 1. On the left sidebar, at the top, select **Create new** (**{plus}**) and **New project/repository**.
 1. Select **Import project**.
 1. Select **Bitbucket Cloud**.
-1. Sign in to Bitbucket and grant GitLab access to your Bitbucket account.
+1. Log in to Bitbucket and grant GitLab access to your Bitbucket account.
 
-   ![Grant access](img/bitbucket_import_grant_access_v8.png)
+   ![Grant access](img/bitbucket_import_grant_access.png)
 
 1. Select the projects that you'd like to import or import all projects.
    You can filter projects by name and select the namespace
@@ -159,7 +155,7 @@ Bitbucket username after connecting their Bitbucket account in the
 To fix this, the user must verify that their Bitbucket external UID in the GitLab database matches their
 current Bitbucket public name, and reconnect if there's a mismatch:
 
-1. [Use the API to get the currently authenticated user](../../../api/users.md#as-a-regular-user-2).
+1. [Use the API to get the currently authenticated user](../../../api/users.md#for-non-administrator-users-1).
 
 1. In the API response, the `identities` attribute contains the Bitbucket account that exists in
    the GitLab database. If the `extern_uid` doesn't match the current Bitbucket public name, the

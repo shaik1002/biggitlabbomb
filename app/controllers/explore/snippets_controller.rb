@@ -8,7 +8,7 @@ class Explore::SnippetsController < Explore::ApplicationController
   def index
     @snippets = SnippetsFinder.new(current_user, explore: true)
       .execute
-      .page(pagination_params[:page])
+      .page(params[:page])
       .without_count
       .inc_author
       .inc_statistics

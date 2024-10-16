@@ -193,9 +193,7 @@ class Wiki
   end
 
   def empty?
-    capture_git_error(:empty, response_on_error: true) do
-      !repository_exists? || list_page_paths(limit: 1).empty?
-    end
+    !repository_exists? || list_page_paths(limit: 1).empty?
   end
 
   def exists?
@@ -212,37 +210,29 @@ class Wiki
   #
   # Returns an Array of GitLab WikiPage instances or an
   # empty Array if this Wiki has no pages.
-  def list_pages(
-    direction: DIRECTION_ASC,
-    load_content: false,
-    size_limit: Gitlab::Git::Blob::MAX_DATA_DISPLAY_SIZE,
-    limit: 0,
-    offset: 0
-  )
-    capture_git_error(:list, response_on_error: []) do
-      create_wiki_repository unless repository_exists?
+  def list_pages(direction: DIRECTION_ASC, load_content: false, limit: 0, offset: 0)
+    create_wiki_repository unless repository_exists?
 
-      paths = list_page_paths(limit: limit, offset: offset)
-      next [] if paths.empty?
+    paths = list_page_paths(limit: limit, offset: offset)
+    return [] if paths.empty?
 
-      pages = paths.map do |path|
-        page = Gitlab::Git::WikiPage.new(
-          url_path: strip_extension(path),
-          title: canonicalize_filename(path),
-          format: find_page_format(path),
-          path: path,
-          raw_data: '',
-          name: canonicalize_filename(path),
-          historical: false
-        )
-        WikiPage.new(self, page)
-      end
-      sort_pages!(pages, direction)
-      pages = pages.take(limit) if limit > 0
-      fetch_pages_content!(pages, size_limit: size_limit) if load_content
-
-      pages
+    pages = paths.map do |path|
+      page = Gitlab::Git::WikiPage.new(
+        url_path: strip_extension(path),
+        title: canonicalize_filename(path),
+        format: find_page_format(path),
+        path: path,
+        raw_data: '',
+        name: canonicalize_filename(path),
+        historical: false
+      )
+      WikiPage.new(self, page)
     end
+    sort_pages!(pages, direction)
+    pages = pages.take(limit) if limit > 0
+    fetch_pages_content!(pages) if load_content
+
+    pages
   end
 
   # Finds a page within the repository based on a title
@@ -253,31 +243,29 @@ class Wiki
   #
   # Returns an initialized WikiPage instance or nil
   def find_page(title, version = nil, load_content: true)
-    capture_git_error(:find, response_on_error: nil) do
-      create_wiki_repository unless repository_exists?
+    create_wiki_repository unless repository_exists?
 
-      version = version.presence || default_branch
-      path = find_matched_file(title, version)
-      next if path.blank?
+    version = version.presence || default_branch
+    path = find_matched_file(title, version)
+    return if path.blank?
 
-      path = Gitlab::EncodingHelper.encode_utf8_no_detect(path)
-      blob_options = load_content ? {} : { limit: 0 }
-      blob = repository.blob_at(version, path, **blob_options)
-      commit = repository.commit(blob.commit_id)
-      format = find_page_format(path)
+    path = Gitlab::EncodingHelper.encode_utf8_no_detect(path)
+    blob_options = load_content ? {} : { limit: 0 }
+    blob = repository.blob_at(version, path, **blob_options)
+    commit = repository.commit(blob.commit_id)
+    format = find_page_format(path)
 
-      page = Gitlab::Git::WikiPage.new(
-        url_path: strip_extension(path),
-        title: canonicalize_filename(path),
-        format: format,
-        path: path,
-        raw_data: blob.data,
-        name: canonicalize_filename(path),
-        historical: version == default_branch ? false : check_page_historical(path, commit),
-        version: Gitlab::Git::WikiPageVersion.new(commit, format)
-      )
-      WikiPage.new(self, page)
-    end
+    page = Gitlab::Git::WikiPage.new(
+      url_path: strip_extension(path),
+      title: canonicalize_filename(path),
+      format: format,
+      path: path,
+      raw_data: blob.data,
+      name: canonicalize_filename(path),
+      historical: version == default_branch ? false : check_page_historical(path, commit),
+      version: Gitlab::Git::WikiPageVersion.new(commit, format)
+    )
+    WikiPage.new(self, page)
   end
 
   def find_sidebar(version = nil)
@@ -286,9 +274,7 @@ class Wiki
 
   def find_file(name, version = default_branch, load_content: true)
     data_limit = load_content ? -1 : 0
-    blobs = capture_git_error(:blob, response_on_error: []) do
-      repository.blobs_at([[version, name]], blob_size_limit: data_limit)
-    end
+    blobs = repository.blobs_at([[version, name]], blob_size_limit: data_limit)
 
     return if blobs.empty?
 
@@ -298,14 +284,13 @@ class Wiki
   def create_page(title, content, format = :markdown, message = nil)
     with_valid_format(format) do |default_extension|
       sanitized_path = sluggified_full_path(title, default_extension)
+      # cannot create two pages with:
+      # - the same title but different format
+      # - the same title but different capitalization
+      # - the same title, different capitalization, and different format
+      next duplicated_page_error(sanitized_path) if file_exists_by_regex?(title)
 
       capture_git_error(:created) do
-        # cannot create two pages with:
-        # - the same title but different format
-        # - the same title but different capitalization
-        # - the same title, different capitalization, and different format
-        next duplicated_page_error(sanitized_path) if file_exists_by_regex?(title)
-
         create_wiki_repository unless repository_exists?
         sanitized_path = sluggified_full_path(title, default_extension)
         options = multi_commit_options(:created, message, title)
@@ -410,9 +395,7 @@ class Wiki
 
   override :default_branch
   def default_branch
-    capture_git_error(:default_branch, response_on_error: 'main') do
-      super || Gitlab::DefaultBranch.value(object: container)
-    end
+    super || Gitlab::DefaultBranch.value(object: container)
   end
 
   def wiki_base_path
@@ -437,9 +420,7 @@ class Wiki
     @repository = nil
   end
 
-  private
-
-  def capture_git_error(action, response_on_error: false, &block)
+  def capture_git_error(action, &block)
     wrapped_gitaly_errors(&block)
   rescue Gitlab::Git::Index::IndexError,
     Gitlab::Git::CommitError,
@@ -451,11 +432,13 @@ class Wiki
 
     Gitlab::ErrorTracking.log_exception(e, action: action, wiki_id: id)
 
-    response_on_error
+    false
   end
 
+  private
+
   def update_redirection_actions(new_path, old_path = nil, **options)
-    return [] unless old_path != new_path
+    return [] unless Feature.enabled?(:wiki_redirection, container) && old_path != new_path
 
     old_contents = repository.blob_at(default_branch, REDIRECTS_YML)
     redirects = old_contents ? YAML.safe_load(old_contents.data).to_h : {}
@@ -537,7 +520,7 @@ class Wiki
     escaped_path = RE2::Regexp.escape(title)
     path_regexp = Gitlab::EncodingHelper.encode_utf8_no_detect("(?i)^#{escaped_path}\\.(#{file_extension_regexp})$")
 
-    matched_files = capture_git_error(:find, response_on_error: []) do
+    matched_files = capture_git_error(:find) do
       repository.search_files_by_regexp(path_regexp, version, limit: 1)
     end
     matched_files.first
@@ -583,10 +566,10 @@ class Wiki
     pages.reverse! if direction == DIRECTION_DESC
   end
 
-  def fetch_pages_content!(pages, size_limit: Gitlab::Git::Blob::MAX_DATA_DISPLAY_SIZE)
+  def fetch_pages_content!(pages)
     blobs =
       repository
-      .blobs_at(pages.map { |page| [default_branch, page.path] }, blob_size_limit: size_limit)
+      .blobs_at(pages.map { |page| [default_branch, page.path] })
       .to_h { |blob| [blob.path, blob.data] }
 
     pages.each do |page|

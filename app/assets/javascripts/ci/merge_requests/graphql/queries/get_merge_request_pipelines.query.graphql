@@ -21,8 +21,6 @@ query getMergeRequestPipelines($mergeRequestIid: String!, $fullPath: ID!) {
           mergeRequestEventType
           failureReason
           yamlErrors
-          retryable
-          cancelable
           commit {
             id
             title

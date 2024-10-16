@@ -3,6 +3,7 @@ import { GlDrawer } from '@gitlab/ui';
 import { DRAWER_Z_INDEX } from '~/lib/utils/constants';
 import { getContentWrapperHeight } from '~/lib/utils/dom_utils';
 import getMergeRequestReviewers from '~/sidebar/queries/get_merge_request_reviewers.query.graphql';
+import ReviewersContainer from './reviewers_container.vue';
 
 export default {
   apollo: {
@@ -22,6 +23,7 @@ export default {
   },
   components: {
     GlDrawer,
+    ReviewersContainer,
     ApprovalSummary: () =>
       import('ee_component/merge_requests/components/reviewers/approval_summary.vue'),
     ApprovalRulesWrapper: () =>
@@ -63,12 +65,13 @@ export default {
       <h4 class="gl-my-0">{{ __('Assign reviewers') }}</h4>
     </template>
     <template #header>
-      <approval-summary class="gl-mt-3" />
+      <approval-summary />
     </template>
-    <approval-rules-wrapper
+    <reviewers-container
       :reviewers="reviewers"
-      @request-review="(data) => $emit('request-review', data)"
-      @remove-reviewer="(data) => $emit('remove-reviewer', data)"
+      :loading-reviewers="loadingReviewers"
+      @request-review="(params) => $emit('request-review', params)"
     />
+    <approval-rules-wrapper :reviewers="reviewers" />
   </gl-drawer>
 </template>

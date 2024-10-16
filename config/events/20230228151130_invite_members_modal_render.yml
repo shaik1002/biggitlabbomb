@@ -2,6 +2,9 @@
 description: Invite members modal is opened from top nav
 category: invite_members_modal
 action: render
+label_description: area/source of invite members modal being triggered
+property_description:
+value_description:
 extra_properties:
 identifiers:
 - project
@@ -17,7 +20,4 @@ tiers:
 - free
 - premium
 - ultimate
-additional_properties:
-  label:
-    description: area/source of invite members modal being triggered
 

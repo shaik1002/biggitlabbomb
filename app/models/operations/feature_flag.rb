@@ -104,10 +104,6 @@ module Operations
       Ability.issues_readable_by_user(issues, current_user)
     end
 
-    def path
-      Gitlab::Routing.url_helpers.edit_project_feature_flag_path(project, self)
-    end
-
     def hook_attrs
       {
         id: id,

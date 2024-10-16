@@ -68,7 +68,7 @@ module Gitlab
           private
 
           def base_message
-            "#{s_('CiStatusLabel|Failed')} #{description}"
+            "#{s_('CiStatusLabel|failed')} #{description}"
           end
 
           def description

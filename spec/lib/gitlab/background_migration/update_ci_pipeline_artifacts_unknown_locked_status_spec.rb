@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::BackgroundMigration::UpdateCiPipelineArtifactsUnknownLockedStatus, feature_category: :job_artifacts do
+RSpec.describe Gitlab::BackgroundMigration::UpdateCiPipelineArtifactsUnknownLockedStatus, feature_category: :build_artifacts do
   describe '#perform' do
     let(:batch_table) { :ci_pipeline_artifacts }
     let(:batch_column) { :id }
@@ -13,7 +13,7 @@ RSpec.describe Gitlab::BackgroundMigration::UpdateCiPipelineArtifactsUnknownLock
 
     let(:namespaces) { table(:namespaces) }
     let(:projects) { table(:projects) }
-    let(:pipelines) { table(:ci_pipelines, primary_key: :id, database: :ci) }
+    let(:pipelines) { table(:ci_pipelines, database: :ci) }
     let(:pipeline_artifacts) { table(:ci_pipeline_artifacts, database: :ci) }
 
     let(:namespace) { namespaces.create!(name: 'name', path: 'path') }
@@ -26,8 +26,8 @@ RSpec.describe Gitlab::BackgroundMigration::UpdateCiPipelineArtifactsUnknownLock
     let(:locked) { 1 }
     let(:unknown) { 2 }
 
-    let(:unlocked_pipeline) { pipelines.create!(locked: unlocked, partition_id: 100, project_id: project.id) }
-    let(:locked_pipeline) { pipelines.create!(locked: locked, partition_id: 100, project_id: project.id) }
+    let(:unlocked_pipeline) { pipelines.create!(locked: unlocked, partition_id: 100) }
+    let(:locked_pipeline) { pipelines.create!(locked: locked, partition_id: 100) }
 
     # rubocop:disable Layout/LineLength
     let!(:locked_artifact) { pipeline_artifacts.create!(project_id: project.id, pipeline_id: locked_pipeline.id, size: 1024, file_type: 0, file_format: 'gzip', file: 'a.gz', locked: unknown, partition_id: 100) }

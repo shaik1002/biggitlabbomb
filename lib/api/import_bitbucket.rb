@@ -29,10 +29,7 @@ module API
     end
 
     post 'import/bitbucket' do
-      result = Import::BitbucketService.new(
-        current_user,
-        params.merge(organization_id: Current.organization_id)
-      ).execute
+      result = Import::BitbucketService.new(current_user, params).execute
 
       if result[:status] == :success
         present ProjectSerializer.new.represent(result[:project], serializer: :import)

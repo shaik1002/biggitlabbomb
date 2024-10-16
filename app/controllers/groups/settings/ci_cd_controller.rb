@@ -94,10 +94,12 @@ module Groups
       end
 
       # Overridden in EE
-      def push_licensed_features; end
+      def push_licensed_features
+      end
 
       # Overridden in EE
-      def assign_variables_to_gon; end
+      def assign_variables_to_gon
+      end
     end
   end
 end

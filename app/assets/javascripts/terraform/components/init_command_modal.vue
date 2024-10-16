@@ -74,15 +74,15 @@ terraform init \\
       </gl-sprintf>
     </p>
 
-    <div class="gl-flex">
-      <pre class="gl-bg-gray gl-whitespace-pre-wrap" data-testid="terraform-init-command">{{
+    <div class="gl-display-flex">
+      <pre class="gl-bg-gray gl-white-space-pre-wrap" data-testid="terraform-init-command">{{
         getModalInfoCopyStr()
       }}</pre>
       <modal-copy-button
         :title="$options.i18n.copyToClipboardText"
         :text="getModalInfoCopyStr()"
         :modal-id="$options.modalId"
-        css-classes="gl-self-start gl-ml-2"
+        css-classes="gl-align-self-start gl-ml-2"
       />
     </div>
   </gl-modal>

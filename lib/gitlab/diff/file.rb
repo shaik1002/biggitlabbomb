@@ -184,8 +184,8 @@ module Gitlab
           lines = { added: [], removed: [] }
 
           diff_lines.each do |line|
-            lines[:added] << line if line.added? && !line.meta?
-            lines[:removed] << line if line.removed? && !line.meta?
+            lines[:added] << line if line.added?
+            lines[:removed] << line if line.removed?
 
             next unless line.type == 'match'
 
@@ -202,40 +202,6 @@ module Gitlab
 
           a << lines
         end
-      end
-
-      def diff_hunks
-        [].tap do |hunks|
-          lines_text = []
-          hunk = {}
-
-          diff_lines.each do |line|
-            if line.type == 'match'
-              unless lines_text.empty?
-                # Ending previous hunk
-                hunk[:text] = lines_text.join("\n")
-                hunks << hunk
-
-                # Starting a new hunk
-                lines_text = []
-                hunk = {}
-              end
-            elsif !line.meta?
-              # Add new line
-              hunk[:last_removed_line_pos] = line.old_pos if line.removed?
-              hunk[:last_added_line_pos] = line.new_pos if line.added?
-              lines_text << line.text
-            end
-          end
-
-          # Handle the last diff_line
-          hunk[:text] = lines_text.join("\n")
-          hunks << hunk
-        end
-      end
-
-      def viewer_hunks
-        ViewerHunk.init_from_diff_lines(diff_lines_with_match_tail)
       end
 
       # Changes diff_lines according to the given position. That is,
@@ -293,7 +259,6 @@ module Gitlab
       def file_hash
         Digest::SHA1.hexdigest(file_path)
       end
-      strong_memoize_attr :file_hash
 
       def added_lines
         strong_memoize(:added_lines) do
@@ -403,28 +368,22 @@ module Gitlab
       # This adds the bottom match line to the array if needed. It contains
       # the data to load more context lines.
       def diff_lines_for_serializer
-        lines = diff_lines_with_match_tail
-        return if lines.empty?
+        strong_memoize(:diff_lines_for_serializer) do
+          lines = highlighted_diff_lines
 
-        lines
-      end
+          next if lines.empty?
+          next if blob.nil?
 
-      def diff_lines_with_match_tail
-        lines = highlighted_diff_lines
+          last_line = lines.last
 
-        return [] if lines.empty?
-        return [] if blob.nil?
+          if last_line.new_pos < total_blob_lines(blob) && !deleted_file?
+            match_line = Gitlab::Diff::Line.new("", 'match', nil, last_line.old_pos, last_line.new_pos)
+            lines.push(match_line)
+          end
 
-        last_line = lines.last
-
-        if last_line.new_pos < total_blob_lines(blob) && !deleted_file?
-          match_line = Gitlab::Diff::Line.new("", 'match', nil, last_line.old_pos, last_line.new_pos)
-          lines.push(match_line)
+          lines
         end
-
-        lines
       end
-      strong_memoize_attr(:diff_lines_with_match_tail)
 
       def fully_expanded?
         return true if binary?
@@ -453,10 +412,6 @@ module Gitlab
 
       def ai_reviewable?
         diffable? && !deleted_file?
-      end
-
-      def text_diff?
-        modified_file? && text?
       end
 
       private

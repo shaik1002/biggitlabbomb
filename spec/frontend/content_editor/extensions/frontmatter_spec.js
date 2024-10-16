@@ -1,7 +1,6 @@
-import { builders } from 'prosemirror-test-builder';
 import Frontmatter from '~/content_editor/extensions/frontmatter';
 import CodeBlockHighlight from '~/content_editor/extensions/code_block_highlight';
-import { createTestEditor, triggerNodeInputRule } from '../test_utils';
+import { createTestEditor, createDocBuilder, triggerNodeInputRule } from '../test_utils';
 
 describe('content_editor/extensions/frontmatter', () => {
   let tiptapEditor;
@@ -12,7 +11,15 @@ describe('content_editor/extensions/frontmatter', () => {
   beforeEach(() => {
     tiptapEditor = createTestEditor({ extensions: [Frontmatter, CodeBlockHighlight] });
 
-    ({ doc, codeBlock, frontmatter } = builders(tiptapEditor.schema));
+    ({
+      builders: { doc, codeBlock, frontmatter },
+    } = createDocBuilder({
+      tiptapEditor,
+      names: {
+        frontmatter: { nodeType: Frontmatter.name },
+        codeBlock: { nodeType: CodeBlockHighlight.name },
+      },
+    }));
   });
 
   it('inherits from code block highlight extension', () => {

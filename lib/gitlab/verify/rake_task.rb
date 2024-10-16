@@ -42,12 +42,12 @@ module Gitlab
 
       def run_batch(range, failures)
         status_color = failures.empty? ? :green : :red
-        say Rainbow("- #{range}: Failures: #{failures.count}").color(status_color)
+        say "- #{range}: Failures: #{failures.count}".color(status_color)
 
         return unless verbose?
 
         failures.each do |object, error|
-          say Rainbow("  - #{verifier.describe(object)}: #{error}").color(:red)
+          say "  - #{verifier.describe(object)}: #{error}".color(:red)
         end
       end
     end

@@ -6,8 +6,3 @@ Gemfile/MissingFeatureCategory:
 
 Rails/Exit:
   Enabled: false
-
-# Configuration parameters: AllowSubject.
-RSpec/MultipleMemoizedHelpers:
-  Max: 25
-  AllowSubject: true

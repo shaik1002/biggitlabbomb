@@ -110,7 +110,7 @@ module Gitlab
         access_token&.user || raise(UnauthorizedError)
       end
 
-      # We allow private access tokens with `api` scope to be used by web
+      # We allow Private Access Tokens with `api` scope to be used by web
       # requests on RSS feeds or ICS files for backwards compatibility.
       # It is also used by GraphQL/API requests.
       # And to allow accessing /archive programatically as it was a big pain point
@@ -158,20 +158,11 @@ module Gitlab
 
       def cluster_agent_token_from_authorization_token
         return unless route_authentication_setting[:cluster_agent_token_allowed]
+        return unless current_request.authorization.present?
 
-        # We are migrating from the `Authorization` header to one specific to cluster
-        # agents, `Gitlab-Agentk-Api-Request`. Both must be supported until KAS has
-        # been updated to use the new header, and then this first lookup can be removed.
-        # See https://gitlab.com/gitlab-org/gitlab/-/issues/406582.
-        token, _ = if current_request.authorization.present?
-                     token_and_options(current_request)
-                   else
-                     current_request.headers[Gitlab::Kas::INTERNAL_API_AGENTK_REQUEST_HEADER]
-                   end
+        authorization_token, _options = token_and_options(current_request)
 
-        return unless token.present?
-
-        ::Clusters::AgentToken.active.find_by_token(token.to_s)
+        ::Clusters::AgentToken.active.find_by_token(authorization_token.to_s)
       end
 
       def find_runner_from_token
@@ -471,47 +462,6 @@ module Gitlab
       def access_token_rotation_request?
         current_request.path.match(%r{access_tokens/\d+/rotate$}) ||
           current_request.path.match(%r{/personal_access_tokens/self/rotate$})
-      end
-
-      # To prevent Rack Attack from incorrectly rate limiting
-      # authenticated Git activity, we need to authenticate the user
-      # from other means (e.g. HTTP Basic Authentication) only if the
-      # request originated from a Git or Git LFS
-      # request. Repositories::GitHttpClientController or
-      # Repositories::LfsApiController normally does the authentication,
-      # but Rack Attack runs before those controllers.
-      def find_user_for_git_or_lfs_request
-        return unless git_or_lfs_request?
-
-        find_user_from_lfs_token || find_user_from_basic_auth_password
-      end
-
-      def find_user_from_personal_access_token_for_api_or_git
-        return unless api_request? || git_or_lfs_request?
-
-        find_user_from_personal_access_token
-      end
-
-      def find_user_from_dependency_proxy_token
-        return unless dependency_proxy_request?
-
-        token, _ = ActionController::HttpAuthentication::Token.token_and_options(current_request)
-
-        return unless token
-
-        user_or_deploy_token = ::DependencyProxy::AuthTokenService.user_or_deploy_token_from_jwt(token)
-
-        # Do not return deploy tokens
-        # See https://gitlab.com/gitlab-org/gitlab/-/issues/342481
-        return unless user_or_deploy_token.is_a?(::User)
-
-        user_or_deploy_token
-      rescue ActiveRecord::RecordNotFound
-        nil # invalid id used return no user
-      end
-
-      def dependency_proxy_request?
-        Gitlab::PathRegex.dependency_proxy_route_regex.match?(current_request.path)
       end
     end
   end

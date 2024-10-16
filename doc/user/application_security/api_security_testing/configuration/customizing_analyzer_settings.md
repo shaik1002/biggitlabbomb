@@ -372,7 +372,7 @@ variables:
 ```
 
 In this example `.gitlab-ci.yml`, the `SECRET_OVERRIDES` variable provides the JSON. This is a
-[group or instance CI/CD variable defined in the UI](../../../../ci/variables/index.md#define-a-cicd-variable-in-the-ui):
+[group or instance level CI/CD variable defined in the UI](../../../../ci/variables/index.md#define-a-cicd-variable-in-the-ui):
 
 ```yaml
 stages:
@@ -436,7 +436,7 @@ variables:
 
 ### Debugging overrides
 
-By default the output of the overrides command is hidden. Optionally, you can set the variable `APISEC_OVERRIDES_CMD_VERBOSE` to any value to log overrides command output to `gl-api-security-scanner.log` job artifact file. This is useful when testing your overrides script, but should be disabled afterwards as it slows down testing.
+By default the output of the overrides command is hidden. If the overrides command returns a non zero exit code, the command is displayed as part of your job output. Optionally, you can set the variable `APISEC_OVERRIDES_CMD_VERBOSE` to any value to display overrides command output as it is generated. This is useful when testing your overrides script, but should be disabled afterwards as it slows down testing.
 
 It is also possible to write messages from your script to a log file that is collected when the job completes or fails. The log file must be created in a specific location and following a naming convention.
 
@@ -626,7 +626,7 @@ variables:
 
 ### Example: Using a masked CI/CD variable
 
-The following `.gitlab-ci.yml` sample assumes the [masked variable](../../../../ci/variables/index.md#mask-a-cicd-variable) `SECRET_REQUEST_HEADERS_BASE64` is defined as a [group or instance CI/CD variable defined in the UI](../../../../ci/variables/index.md#define-a-cicd-variable-in-the-ui). The value of `SECRET_REQUEST_HEADERS_BASE64` is set to `WC1BQ01FLVNlY3JldDogc31jcnt0ISwgWC1BQ01FLVRva2VuOiA3MDVkMTZmNWUzZmI=`, which is the Base64-encoded text version of `X-ACME-Secret: s3cr3t!, X-ACME-Token: 705d16f5e3fb`. Then, it can be used as follows:
+The following `.gitlab-ci.yml` sample assumes the [masked variable](../../../../ci/variables/index.md#mask-a-cicd-variable) `SECRET_REQUEST_HEADERS_BASE64` is defined as a [group or instance level CI/CD variable defined in the UI](../../../../ci/variables/index.md#define-a-cicd-variable-in-the-ui). The value of `SECRET_REQUEST_HEADERS_BASE64` is set to `WC1BQ01FLVNlY3JldDogc31jcnt0ISwgWC1BQ01FLVRva2VuOiA3MDVkMTZmNWUzZmI=`, which is the Base64-encoded text version of `X-ACME-Secret: s3cr3t!, X-ACME-Token: 705d16f5e3fb`. Then, it can be used as follows:
 
 ```yaml
 stages:
@@ -799,7 +799,7 @@ The exclude parameters uses `body-json` when the request uses a content type `ap
 
 ##### Excluding multiple JSON nodes using JSON Path
 
-To exclude the property `password` on each entry of an array of `users` at the root level, set the `body-json` property's value to an array with the JSON Path expression `[ "$.users[*].password" ]`.
+To exclude the property `password` on each entry of an array of `users` at the root level, set the `body-json` property's value to an array with the JSON Path expression `[ "$.users[*].paswword" ]`.
 
 The JSON Path expression starts with `$` to refer to the root node and uses `.` to refer to the current node. Then, it uses `users` to refer to a property and the characters `[` and `]` to enclose the index in the array you want to use, instead of providing a number as an index you use `*` to specify any index. After the index reference, we find `.` which now refers to any given selected index in the array, preceded by a property name `password`.
 
@@ -807,7 +807,7 @@ For instance, the JSON document looks like this:
 
 ```json
 {
-  "body-json": [ "$.users[*].password" ]
+  "body-json": [ "$.users[*].paswword" ]
 }
 ```
 

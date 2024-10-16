@@ -3,7 +3,6 @@ import { GlLabel, GlTooltipDirective, GlIcon, GlLoadingIcon } from '@gitlab/ui';
 import { sortBy } from 'lodash';
 import boardCardInner from 'ee_else_ce/boards/mixins/board_card_inner';
 import { isScopedLabel, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { updateHistory, queryToObject } from '~/lib/utils/url_utility';
 import { sprintf, __, n__ } from '~/locale';
 import isShowingLabelsQuery from '~/graphql_shared/client/is_showing_labels.query.graphql';
@@ -37,7 +36,7 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [boardCardInner, glFeatureFlagsMixin()],
+  mixins: [boardCardInner],
   inject: [
     'allowSubEpics',
     'rootPath',
@@ -45,7 +44,6 @@ export default {
     'isEpicBoard',
     'issuableType',
     'isGroupBoard',
-    'disabled',
   ],
   props: {
     item: {
@@ -80,7 +78,6 @@ export default {
     };
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     isShowingLabels: {
       query: isShowingLabelsQuery,
       update: (data) => data.isShowingLabels,
@@ -139,7 +136,7 @@ export default {
       return this.isEpicBoard && this.hasChildren;
     },
     showLabelFooter() {
-      return this.isShowingLabels && this.item.labels.filter(this.isNonListLabel).length > 0;
+      return this.isShowingLabels && this.item.labels.find(this.showLabel);
     },
     itemReferencePath() {
       const { referencePath } = this.item;
@@ -178,9 +175,6 @@ export default {
     showBoardCardNumber() {
       return this.item.referencePath && !this.isLoading;
     },
-    hasActions() {
-      return !this.disabled && this.list.listType !== ListType.closed;
-    },
   },
   methods: {
     setError,
@@ -196,6 +190,10 @@ export default {
     },
     avatarUrl(assignee) {
       return assignee.avatarUrl || assignee.avatar || gon.default_avatar_url;
+    },
+    showLabel(label) {
+      if (!label.id) return false;
+      return true;
     },
     isNonListLabel(label) {
       return (
@@ -230,10 +228,9 @@ export default {
 </script>
 <template>
   <div>
-    <div class="gl-flex" dir="auto">
+    <div class="gl-display-flex" dir="auto">
       <h4
-        class="board-card-title gl-mb-0 gl-mt-0 gl-min-w-0 gl-hyphens-auto gl-break-words gl-text-base"
-        :class="{ 'gl-mr-6': hasActions }"
+        class="board-card-title gl-min-w-0 gl-mb-0 gl-mt-0 gl-mr-3 gl-font-base gl-break-words gl-hyphens-auto"
       >
         <issuable-blocked-icon
           v-if="item.blocked"
@@ -247,7 +244,7 @@ export default {
           v-gl-tooltip
           name="eye-slash"
           :title="__('Confidential')"
-          class="confidential-icon gl-mr-2 gl-cursor-help gl-text-orange-500"
+          class="confidential-icon gl-mr-2 gl-text-orange-500 gl-cursor-help"
           :aria-label="__('Confidential')"
         />
         <gl-icon
@@ -255,30 +252,25 @@ export default {
           v-gl-tooltip
           name="spam"
           :title="__('This issue is hidden because its author has been banned.')"
-          class="hidden-icon gl-mr-2 gl-cursor-help gl-text-orange-500"
+          class="gl-mr-2 hidden-icon gl-text-orange-500 gl-cursor-help"
           data-testid="hidden-icon"
         />
         <a
           :href="item.path || item.webUrl || ''"
           :title="item.title"
-          :class="{
-            '!gl-text-gray-400': isLoading,
-            'js-no-trigger': !glFeatures.issuesListDrawer,
-            'js-no-trigger-title': glFeatures.issuesListDrawer,
-          }"
-          class="gl-text-primary hover:gl-text-gray-900"
-          data-testid="board-card-title-link"
+          :class="{ 'gl-text-gray-400!': isLoading }"
+          class="js-no-trigger gl-text-body gl-hover-text-gray-900"
           @mousemove.stop
           >{{ item.title }}</a
         >
       </h4>
       <slot></slot>
     </div>
-    <div v-if="showLabelFooter" class="board-card-labels gl-mt-2 gl-flex gl-flex-wrap">
+    <div v-if="showLabelFooter" class="board-card-labels gl-mt-2 gl-display-flex gl-flex-wrap">
       <template v-for="label in orderedLabels">
         <gl-label
           :key="label.id"
-          class="js-no-trigger gl-mr-2 gl-mt-2"
+          class="js-no-trigger gl-mt-2 gl-mr-2"
           :background-color="label.color"
           :title="label.title"
           :description="label.description"
@@ -288,16 +280,18 @@ export default {
         />
       </template>
     </div>
-    <div class="board-card-footer gl-mt-3 gl-flex gl-items-end gl-justify-between">
+    <div
+      class="board-card-footer gl-display-flex gl-justify-content-space-between gl-align-items-flex-end"
+    >
       <div
-        class="align-items-start board-card-number-container gl-flex gl-flex-wrap-reverse gl-overflow-hidden"
+        class="gl-display-flex align-items-start gl-flex-wrap-reverse board-card-number-container gl-overflow-hidden"
       >
-        <span class="board-info-items gl-inline-block gl-leading-20">
+        <span class="board-info-items gl-mt-3 gl-leading-20 gl-display-inline-block">
           <gl-loading-icon v-if="isLoading" size="lg" class="gl-mt-5" />
           <span
             v-if="showBoardCardNumber"
-            class="board-card-number gl-mr-3 gl-mt-3 gl-gap-2 gl-overflow-hidden gl-text-sm gl-text-secondary"
-            :class="{ 'gl-text-base': isEpicBoard }"
+            class="board-card-number gl-overflow-hidden gl-gap-2 gl-mr-3 gl-mt-3 gl-font-sm gl-text-secondary"
+            :class="{ 'gl-font-base': isEpicBoard }"
           >
             <work-item-type-icon
               v-if="showWorkItemTypeIcon"
@@ -309,7 +303,7 @@ export default {
               v-gl-tooltip
               :title="itemReferencePath"
               data-placement="bottom"
-              class="board-item-path gl-cursor-help gl-truncate gl-font-bold"
+              class="board-item-path gl-text-truncate gl-font-bold gl-cursor-help"
             >
               {{ directNamespaceReference }}
             </span>
@@ -331,13 +325,13 @@ export default {
               v-if="item.milestone"
               data-testid="issue-milestone"
               :milestone="item.milestone"
-              class="gl-mr-3 gl-inline-flex gl-max-w-15 gl-cursor-help gl-items-center gl-align-bottom gl-text-sm gl-text-gray-500"
+              class="gl-display-inline-flex gl-align-items-center gl-max-w-15 gl-font-sm gl-text-gray-500! gl-cursor-help! gl-align-bottom gl-mr-3"
             />
             <issue-iteration
               v-if="item.iteration"
               data-testid="issue-iteration"
               :iteration="item.iteration"
-              class="gl-align-bottom"
+              class="gl-align-bottom gl-whitespace-nowrap"
             />
             <issue-due-date
               v-if="item.dueDate"
@@ -349,7 +343,7 @@ export default {
           </span>
         </span>
       </div>
-      <div class="board-card-assignee gl-flex">
+      <div class="board-card-assignee gl-display-flex -gl-mb-2">
         <user-avatar-link
           v-for="assignee in cappedAssignees"
           :key="assignee.id"
@@ -361,7 +355,7 @@ export default {
           tooltip-placement="bottom"
         >
           <span class="js-assignee-tooltip">
-            <span class="gl-block gl-font-bold">{{ __('Assignee') }}</span>
+            <span class="gl-font-bold gl-block">{{ __('Assignee') }}</span>
             {{ assignee.name }}
             <span class="text-white-50">@{{ assignee.username }}</span>
           </span>
@@ -370,7 +364,7 @@ export default {
           v-if="shouldRenderCounter"
           v-gl-tooltip
           :title="assigneeCounterTooltip"
-          class="avatar-counter -gl-ml-3 gl-cursor-help gl-border-0 gl-bg-gray-100 gl-font-bold gl-leading-24 gl-text-gray-900"
+          class="avatar-counter gl-bg-gray-100 gl-text-gray-900 gl-cursor-help gl-font-bold gl-border-0 gl-leading-24 -gl-ml-3"
           data-placement="bottom"
           >{{ assigneeCounterLabel }}</span
         >

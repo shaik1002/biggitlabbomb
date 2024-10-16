@@ -768,17 +768,27 @@ RSpec.describe Projects::PipelinesController, feature_category: :continuous_inte
     [
       {
         chart_param: 'time-to-restore-service',
-        event: 'visit_ci_cd_time_to_restore_service_tab'
+        event: 'p_analytics_ci_cd_time_to_restore_service'
       },
       {
         chart_param: 'change-failure-rate',
-        event: 'visit_ci_cd_failure_rate_tab'
+        event: 'p_analytics_ci_cd_change_failure_rate'
       }
     ].each do |tab|
-      it 'tracks internal events' do
-        request_params = { namespace_id: project.namespace, project_id: project, id: pipeline.id, chart: tab[:chart_param] }
+      it_behaves_like 'tracking unique visits', :charts do
+        let(:request_params) { { namespace_id: project.namespace, project_id: project, id: pipeline.id, chart: tab[:chart_param] } }
+        let(:target_id) { ['p_analytics_pipelines', tab[:event]] }
+      end
 
-        expect { get :charts, params: request_params, format: :html }.to trigger_internal_events(tab[:event])
+      it_behaves_like 'Snowplow event tracking with RedisHLL context' do
+        subject { get :charts, params: request_params, format: :html }
+
+        let(:request_params) { { namespace_id: project.namespace, project_id: project, id: pipeline.id, chart: tab[:chart_param] } }
+        let(:category) { described_class.name }
+        let(:action) { 'perform_analytics_usage_action' }
+        let(:namespace) { project.namespace }
+        let(:label) { 'redis_hll_counters.analytics.analytics_total_unique_counts_monthly' }
+        let(:property) { 'p_analytics_pipelines' }
       end
     end
 
@@ -792,7 +802,7 @@ RSpec.describe Projects::PipelinesController, feature_category: :continuous_inte
     end
 
     with_them do
-      let!(:params) { { namespace_id: project.namespace, project_id: project, id: pipeline.id, chart: chart } }
+      let(:params) { { namespace_id: project.namespace, project_id: project, id: pipeline.id, chart: chart } }
 
       it_behaves_like 'tracking unique visits', :charts do
         let(:request_params) { params }
@@ -935,7 +945,7 @@ RSpec.describe Projects::PipelinesController, feature_category: :continuous_inte
 
         expect(response).to have_gitlab_http_status(:bad_request)
         expect(json_response['errors']).to eq([
-          'test job: chosen stage invalid does not exist; available stages are .pre, build, test, deploy, .post'
+          'test job: chosen stage does not exist; available stages are .pre, build, test, deploy, .post'
         ])
         expect(json_response['warnings'][0]).to include(
           'jobs:build may allow multiple pipelines to run for a single action due to `rules:when`'
@@ -1188,28 +1198,6 @@ RSpec.describe Projects::PipelinesController, feature_category: :continuous_inte
     def clear_controller_memoization
       controller.clear_memoization(:pipeline_test_report)
       controller.remove_instance_variable(:@pipeline)
-    end
-  end
-
-  describe 'GET manual_variables' do
-    context 'when FF ci_show_manual_variables_in_pipeline is enabled' do
-      let(:pipeline) { create(:ci_pipeline, project: project) }
-
-      it_behaves_like 'the show page', 'manual_variables'
-    end
-
-    context 'when FF ci_show_manual_variables_in_pipeline is disabled' do
-      let(:pipeline) { create(:ci_pipeline, project: project) }
-
-      before do
-        stub_feature_flags(ci_show_manual_variables_in_pipeline: false)
-      end
-
-      it 'renders 404' do
-        get 'manual_variables', params: { namespace_id: project.namespace, project_id: project, id: pipeline }
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
     end
   end
 

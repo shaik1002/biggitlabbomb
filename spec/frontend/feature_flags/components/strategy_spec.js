@@ -1,5 +1,5 @@
-import { GlAlert, GlFormSelect, GlLink, GlToken, GlButton, GlFormGroup } from '@gitlab/ui';
-import { shallowMount } from '@vue/test-utils';
+import { GlAlert, GlFormSelect, GlLink, GlToken, GlButton } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import Vue, { nextTick } from 'vue';
 import { last } from 'lodash';
@@ -53,7 +53,7 @@ describe('Feature flags strategy', () => {
   ) => {
     axiosMock = new MockAdapter(axios);
     axiosMock.onGet(TEST_HOST).reply(HTTP_STATUS_OK, []);
-    wrapper = shallowMount(Strategy, { store: createStore({ projectId: '1' }), ...opts });
+    wrapper = mount(Strategy, { store: createStore({ projectId: '1' }), ...opts });
   };
 
   beforeEach(() => {
@@ -66,7 +66,7 @@ describe('Feature flags strategy', () => {
 
   describe('helper links', () => {
     const propsData = { strategy: {}, index: 0, userLists: [userList] };
-    factory({ propsData, provide, stubs: { GlFormGroup } });
+    factory({ propsData, provide });
 
     it('should display 2 helper links', () => {
       const links = findDocsLinks();
@@ -95,7 +95,7 @@ describe('Feature flags strategy', () => {
     });
 
     it('should set the select to match the strategy name', () => {
-      expect(wrapper.findComponent(GlFormSelect).attributes('value')).toBe(name);
+      expect(wrapper.findComponent(GlFormSelect).element.value).toBe(name);
     });
 
     it('should emit a change if the parameters component does', () => {
@@ -198,7 +198,8 @@ describe('Feature flags strategy', () => {
 
       it('should change the parameters if a different strategy is chosen', async () => {
         const select = wrapper.findComponent(GlFormSelect);
-        select.vm.$emit('change', ROLLOUT_STRATEGY_ALL_USERS);
+        select.element.value = ROLLOUT_STRATEGY_ALL_USERS;
+        select.trigger('change');
         await nextTick();
         expect(last(wrapper.emitted('change'))).toEqual([
           {

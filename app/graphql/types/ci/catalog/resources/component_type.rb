@@ -21,14 +21,13 @@ module Types
             description: 'Inputs for the component.'
 
           def inputs
-            object.spec.fetch('inputs', {}).map do |key, value|
+            spec_inputs = object.spec.fetch('inputs', {})
+
+            spec_inputs.map do |key, value|
               {
                 name: key,
                 required: !value&.key?('default'),
-                default: value&.dig('default'),
-                description: value&.dig('description'),
-                regex: value&.dig('regex'),
-                type: value&.dig('type') || 'string'
+                default: value&.dig('default')
               }
             end
           end

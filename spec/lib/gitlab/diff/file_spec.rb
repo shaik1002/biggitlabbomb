@@ -178,23 +178,22 @@ RSpec.describe Gitlab::Diff::File do
   describe '#diff_lines_by_hunk' do
     let(:diff_lines) do
       [
-        instance_double(Gitlab::Diff::Line, type: 'match', added?: false, removed?: false, meta?: true),
-        instance_double(Gitlab::Diff::Line, type: nil, added?: false, removed?: false, meta?: false),
-        instance_double(Gitlab::Diff::Line, type: nil, added?: false, removed?: false, meta?: false),
-        instance_double(Gitlab::Diff::Line, type: nil, added?: false, removed?: false, meta?: false),
-        instance_double(Gitlab::Diff::Line, type: 'new', added?: true, removed?: false, text: 'First Hunk Added 1', meta?: false),
-        instance_double(Gitlab::Diff::Line, type: 'new', added?: true, removed?: false, text: 'First Hunk Added 2', meta?: false),
-        instance_double(Gitlab::Diff::Line, type: 'old', added?: false, removed?: true, text: 'First Hunk Removed 1', meta?: false),
-        instance_double(Gitlab::Diff::Line, type: 'old', added?: false, removed?: true, text: 'First Hunk Removed 2', meta?: false),
-        instance_double(Gitlab::Diff::Line, type: nil, added?: false, removed?: false, meta?: false),
-        instance_double(Gitlab::Diff::Line, type: nil, added?: false, removed?: false, meta?: false),
-        instance_double(Gitlab::Diff::Line, type: nil, added?: false, removed?: false, meta?: false),
-        instance_double(Gitlab::Diff::Line, type: 'match', added?: false, removed?: false, meta?: true),
-        instance_double(Gitlab::Diff::Line, type: nil, added?: false, removed?: false, meta?: false),
-        instance_double(Gitlab::Diff::Line, type: nil, added?: false, removed?: false, meta?: false),
-        instance_double(Gitlab::Diff::Line, type: nil, added?: false, removed?: false, meta?: false),
-        instance_double(Gitlab::Diff::Line, type: 'old', added?: false, removed?: true, text: 'Second Hunk Removed', meta?: false),
-        instance_double(Gitlab::Diff::Line, type: 'new-nonewline', added?: true, removed?: false, meta?: true)
+        instance_double(Gitlab::Diff::Line, type: 'match', added?: false, removed?: false),
+        instance_double(Gitlab::Diff::Line, type: nil, added?: false, removed?: false),
+        instance_double(Gitlab::Diff::Line, type: nil, added?: false, removed?: false),
+        instance_double(Gitlab::Diff::Line, type: nil, added?: false, removed?: false),
+        instance_double(Gitlab::Diff::Line, type: 'new', added?: true, removed?: false, text: 'First Hunk Added 1'),
+        instance_double(Gitlab::Diff::Line, type: 'new', added?: true, removed?: false, text: 'First Hunk Added 2'),
+        instance_double(Gitlab::Diff::Line, type: 'old', added?: false, removed?: true, text: 'First Hunk Removed 1'),
+        instance_double(Gitlab::Diff::Line, type: 'old', added?: false, removed?: true, text: 'First Hunk Removed 2'),
+        instance_double(Gitlab::Diff::Line, type: nil, added?: false, removed?: false),
+        instance_double(Gitlab::Diff::Line, type: nil, added?: false, removed?: false),
+        instance_double(Gitlab::Diff::Line, type: nil, added?: false, removed?: false),
+        instance_double(Gitlab::Diff::Line, type: 'match', added?: false, removed?: false),
+        instance_double(Gitlab::Diff::Line, type: nil, added?: false, removed?: false),
+        instance_double(Gitlab::Diff::Line, type: nil, added?: false, removed?: false),
+        instance_double(Gitlab::Diff::Line, type: nil, added?: false, removed?: false),
+        instance_double(Gitlab::Diff::Line, type: 'old', added?: false, removed?: true, text: 'Second Hunk Removed')
       ]
     end
 
@@ -224,68 +223,6 @@ RSpec.describe Gitlab::Diff::File do
       expect(diff_lines_by_hunk.last[:removed].map(&:text)).to eq([
         'Second Hunk Removed'
       ])
-    end
-  end
-
-  describe '#diff_hunks' do
-    let(:diff_lines) do
-      [
-        instance_double(Gitlab::Diff::Line, type: 'match', added?: false, removed?: false, meta?: true),
-        instance_double(Gitlab::Diff::Line, type: nil, old_pos: 1, new_pos: 1, added?: false, removed?: false, meta?: false, text: 'First Hunk Unchanged'),
-        instance_double(Gitlab::Diff::Line, type: nil, old_pos: 2, new_pos: 2, added?: false, removed?: false, meta?: false, text: 'First Hunk Unchanged'),
-        instance_double(Gitlab::Diff::Line, type: nil, old_pos: 3, new_pos: 3, added?: false, removed?: false, meta?: false, text: 'First Hunk Unchanged'),
-        instance_double(Gitlab::Diff::Line, type: 'old', old_pos: 4, new_pos: 4, added?: false, removed?: true, text: 'First Hunk Removed 1', meta?: false),
-        instance_double(Gitlab::Diff::Line, type: 'old', old_pos: 5, new_pos: 4, added?: false, removed?: true, text: 'First Hunk Removed 2', meta?: false),
-        instance_double(Gitlab::Diff::Line, type: 'new', old_pos: 5, new_pos: 4, added?: true, removed?: false, text: 'First Hunk Added 1', meta?: false),
-        instance_double(Gitlab::Diff::Line, type: 'new', old_pos: 5, new_pos: 5, added?: true, removed?: false, text: 'First Hunk Added 2', meta?: false),
-        instance_double(Gitlab::Diff::Line, type: nil, old_pos: 5, new_pos: 6, added?: false, removed?: false, meta?: false, text: 'First Hunk Unchanged'),
-        instance_double(Gitlab::Diff::Line, type: nil, old_pos: 6, new_pos: 7, added?: false, removed?: false, meta?: false, text: 'First Hunk Unchanged'),
-        instance_double(Gitlab::Diff::Line, type: nil, old_pos: 7, new_pos: 8, added?: false, removed?: false, meta?: false, text: 'First Hunk Unchanged'),
-        instance_double(Gitlab::Diff::Line, type: 'match', old_pos: 8, new_pos: 9, added?: false, removed?: false, meta?: true),
-        instance_double(Gitlab::Diff::Line, type: nil, old_pos: 9, new_pos: 10, added?: false, removed?: false, meta?: false, text: 'Second Hunk Unchanged'),
-        instance_double(Gitlab::Diff::Line, type: nil, old_pos: 10, new_pos: 11, added?: false, removed?: false, meta?: false, text: 'Second Hunk Unchanged'),
-        instance_double(Gitlab::Diff::Line, type: nil, old_pos: 11, new_pos: 12, added?: false, removed?: false, meta?: false, text: 'Second Hunk Unchanged'),
-        instance_double(Gitlab::Diff::Line, type: 'old', old_pos: 12, new_pos: 13, added?: false, removed?: true, text: 'Second Hunk Removed', meta?: false),
-        instance_double(Gitlab::Diff::Line, type: 'new-nonewline', old_pos: 13, new_pos: 13, added?: true, removed?: false, meta?: true)
-      ]
-    end
-
-    before do
-      allow(diff_file).to receive(:diff_lines).and_return(diff_lines)
-    end
-
-    subject(:diff_hunks) { diff_file.diff_hunks }
-
-    it 'returns lines per hunk' do
-      expect(diff_hunks.size).to eq(2)
-
-      expect(diff_hunks.first[:last_removed_line_pos]).to eq(5)
-      expect(diff_hunks.first[:last_added_line_pos]).to eq(5)
-      expect(diff_hunks.first[:text]).to eq(
-        <<~HUNK.chomp
-          First Hunk Unchanged
-          First Hunk Unchanged
-          First Hunk Unchanged
-          First Hunk Removed 1
-          First Hunk Removed 2
-          First Hunk Added 1
-          First Hunk Added 2
-          First Hunk Unchanged
-          First Hunk Unchanged
-          First Hunk Unchanged
-        HUNK
-      )
-
-      expect(diff_hunks.last[:last_removed_line_pos]).to eq(12)
-      expect(diff_hunks.last[:last_added_line_pos]).to be_nil
-      expect(diff_hunks.last[:text]).to eq(
-        <<~HUNK.chomp
-          Second Hunk Unchanged
-          Second Hunk Unchanged
-          Second Hunk Unchanged
-          Second Hunk Removed
-        HUNK
-      )
     end
   end
 
@@ -401,16 +338,36 @@ RSpec.describe Gitlab::Diff::File do
   end
 
   describe '#old_blob and #new_blob' do
-    let(:diff_file) do
-      described_class.new(diff, diff_refs: commit.diff_refs, repository: project.repository, max_blob_size: max_blob_size)
-    end
+    context 'when increase_diff_file_performance is on' do
+      let(:diff_file) do
+        described_class.new(diff, diff_refs: commit.diff_refs, repository: project.repository, max_blob_size: max_blob_size)
+      end
 
-    let(:max_blob_size) { 1000 }
+      let(:max_blob_size) { 1000 }
 
-    context 'when the blobs are truncated' do
-      let(:max_blob_size) { 10 }
+      before do
+        stub_feature_flags(increase_diff_file_performance: true)
+      end
 
-      it 'returns the truncated blobs' do
+      context 'when the blobs are truncated' do
+        let(:max_blob_size) { 10 }
+
+        it 'returns the truncated blobs' do
+          items = [
+            [diff_file.new_content_sha, diff_file.new_path], [diff_file.old_content_sha, diff_file.old_path]
+          ]
+
+          expect(project.repository).to receive(:blobs_at).with(items, blob_size_limit: max_blob_size).and_call_original
+
+          old_data = diff_file.old_blob.data
+          data = diff_file.new_blob.data
+
+          expect(old_data.size).to eq(max_blob_size)
+          expect(data.size).to eq(max_blob_size)
+        end
+      end
+
+      it 'returns blob of base commit and the new commit' do
         items = [
           [diff_file.new_content_sha, diff_file.new_path], [diff_file.old_content_sha, diff_file.old_path]
         ]
@@ -420,23 +377,33 @@ RSpec.describe Gitlab::Diff::File do
         old_data = diff_file.old_blob.data
         data = diff_file.new_blob.data
 
-        expect(old_data.size).to eq(max_blob_size)
-        expect(data.size).to eq(max_blob_size)
+        expect(old_data).to include('raise "System commands must be given as an array of strings"')
+        expect(data).to include('raise RuntimeError, "System commands must be given as an array of strings"')
       end
     end
 
-    it 'returns blob of base commit and the new commit' do
-      items = [
-        [diff_file.new_content_sha, diff_file.new_path], [diff_file.old_content_sha, diff_file.old_path]
-      ]
+    context 'when increase_diff_file_performance is off' do
+      let(:diff_file) do
+        described_class.new(diff, diff_refs: commit.diff_refs, repository: project.repository)
+      end
 
-      expect(project.repository).to receive(:blobs_at).with(items, blob_size_limit: max_blob_size).and_call_original
+      before do
+        stub_feature_flags(increase_diff_file_performance: false)
+      end
 
-      old_data = diff_file.old_blob.data
-      data = diff_file.new_blob.data
+      it 'returns blob of base commit and the new commit' do
+        items = [
+          [diff_file.new_content_sha, diff_file.new_path], [diff_file.old_content_sha, diff_file.old_path]
+        ]
 
-      expect(old_data).to include('raise "System commands must be given as an array of strings"')
-      expect(data).to include('raise RuntimeError, "System commands must be given as an array of strings"')
+        expect(project.repository).to receive(:blobs_at).with(items, blob_size_limit: Gitlab::Git::Blob::MAX_DATA_DISPLAY_SIZE).and_call_original
+
+        old_data = diff_file.old_blob.data
+        data = diff_file.new_blob.data
+
+        expect(old_data).to include('raise "System commands must be given as an array of strings"')
+        expect(data).to include('raise RuntimeError, "System commands must be given as an array of strings"')
+      end
     end
   end
 
@@ -1271,33 +1238,5 @@ RSpec.describe Gitlab::Diff::File do
 
       it { is_expected.to eq(false) }
     end
-  end
-
-  describe '#text_diff' do
-    subject(:text_diff) { diff_file.text_diff? }
-
-    it 'returns true for text diffs' do
-      expect(text_diff).to eq(true)
-    end
-
-    it 'returns false for unchanged files' do
-      allow(diff_file).to receive(:modified_file?).and_return(false)
-      expect(text_diff).to eq(false)
-    end
-
-    it 'returns false for non text files' do
-      allow(diff_file).to receive(:text?).and_return(false)
-      expect(text_diff).to eq(false)
-    end
-  end
-
-  describe '#diff_lines_with_match_tail' do
-    subject(:lines) { diff_file.diff_lines_with_match_tail }
-
-    it { expect(lines.last.type).to eq('match') }
-  end
-
-  describe '#viewer_hunks' do
-    it { expect(diff_file.viewer_hunks).to all(be_instance_of(Gitlab::Diff::ViewerHunk)) }
   end
 end

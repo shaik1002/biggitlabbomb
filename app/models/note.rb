@@ -9,7 +9,6 @@ class Note < ApplicationRecord
 
   include Notes::ActiveRecord
   include Notes::Discussion
-
   include Gitlab::Utils::StrongMemoize
   include Participable
   include Mentionable
@@ -28,6 +27,9 @@ class Note < ApplicationRecord
   include Sortable
   include EachBatch
   include Spammable
+  include IgnorableColumns
+
+  ignore_column :imported, remove_with: '17.2', remove_after: '2024-07-22'
 
   cache_markdown_field :note, pipeline: :note, issuable_reference_expansion_enabled: true
 
@@ -84,10 +86,6 @@ class Note < ApplicationRecord
   has_one :note_diff_file, inverse_of: :diff_note, foreign_key: :diff_note_id
   has_many :diff_note_positions
 
-  # rubocop:disable Cop/ActiveRecordDependent -- polymorphic association
-  has_many :events, as: :target, dependent: :delete_all
-  # rubocop:enable Cop/ActiveRecordDependent
-
   delegate :gfm_reference, :local_reference, to: :noteable
   delegate :name, to: :project, prefix: true
   delegate :title, to: :noteable, allow_nil: true
@@ -95,7 +93,7 @@ class Note < ApplicationRecord
   accepts_nested_attributes_for :note_metadata
 
   validates :project, presence: true, if: :for_project_noteable?
-  validates :namespace, presence: true
+  validates :namespace, presence: true, unless: :for_abuse_report?
 
   # Attachments are deprecated and are handled by Markdown uploader
   validates :attachment, file_size: { maximum: :max_attachment_size }
@@ -107,7 +105,6 @@ class Note < ApplicationRecord
   validate :ensure_noteable_can_have_confidential_note
   validate :ensure_note_type_can_be_confidential
   validate :ensure_confidentiality_not_changed, on: :update
-  validate :ensure_confidentiality_discussion_compliance
 
   validate unless: [:for_commit?, :importing?, :skip_project_check?] do |note|
     unless note.noteable.try(:project) == note.project
@@ -136,11 +133,8 @@ class Note < ApplicationRecord
   scope :inc_note_diff_file, -> { includes(:note_diff_file) }
   scope :with_api_entity_associations, -> { preload(:note_diff_file, :author) }
   scope :inc_relations_for_view, ->(noteable = nil) do
-    relations = [
-      { project: :group }, { author: :status }, :updated_by, :resolved_by,
-      :award_emoji, :note_metadata, :suggestions,
-      { system_note_metadata: { description_version: [:issue, :merge_request] } }
-    ]
+    relations = [{ project: :group }, { author: :status }, :updated_by, :resolved_by,
+      :award_emoji, :note_metadata, { system_note_metadata: :description_version }, :suggestions]
 
     if noteable.nil? || DiffNote.noteable_types.include?(noteable.class.name)
       relations += [:note_diff_file, :diff_note_positions]
@@ -232,10 +226,6 @@ class Note < ApplicationRecord
 
     def model_name
       ActiveModel::Name.new(self, nil, 'note')
-    end
-
-    def parent_object_field
-      :noteable
     end
 
     # Group diff discussions by line code or file path.
@@ -359,10 +349,6 @@ class Note < ApplicationRecord
 
   def for_personal_snippet?
     noteable.is_a?(PersonalSnippet)
-  end
-
-  def for_wiki_page?
-    noteable_type == "WikiPage::Meta"
   end
 
   def for_project_noteable?
@@ -543,8 +529,7 @@ class Note < ApplicationRecord
   # touch the data so we can SELECT only the columns we need.
   def touch_noteable
     # Commits are not stored in the DB so we can't touch them.
-    # Vulnerabilities should not be touched as they are tracked in the same manner as other issuable types
-    return if for_vulnerability? || for_commit?
+    return if for_commit?
 
     assoc = association(:noteable)
 
@@ -774,11 +759,13 @@ class Note < ApplicationRecord
 
     if user_visible_reference_count.present? && total_reference_count.present?
       # if they are not equal, then there are private/confidential references as well
-      user_visible_reference_count > 0 && user_visible_reference_count == total_reference_count
+      total_reference_count == 0 ||
+        (user_visible_reference_count > 0 && user_visible_reference_count == total_reference_count)
     else
       refs = all_references(user)
+      refs.all
 
-      refs.all.present? && refs.all_visible?
+      refs.all_visible?
     end
   end
 

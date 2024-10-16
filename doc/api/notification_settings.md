@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Personal Productivity
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -125,7 +125,7 @@ curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/a
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer or string | yes | The ID, or [URL-encoded path, of the group or project](rest/index.md#namespaced-paths). |
+| `id` | integer or string | yes | The ID, or [URL-encoded path, of the group or project](rest/index.md#namespaced-path-encoding). |
 
 Example response:
 
@@ -151,7 +151,7 @@ curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer or string | yes | The ID, or [URL-encoded path, of the group or project](rest/index.md#namespaced-paths) |
+| `id` | integer or string | yes | The ID, or [URL-encoded path, of the group or project](rest/index.md#namespaced-path-encoding) |
 | `level` | string | no | The global notification level |
 | `new_note` | boolean | no | Enable/disable this notification |
 | `new_issue` | boolean | no | Enable/disable this notification |

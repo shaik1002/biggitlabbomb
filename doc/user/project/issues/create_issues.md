@@ -120,7 +120,7 @@ example, if the list is scoped to a label `Frontend`, the new issue also has thi
 ## By sending an email
 
 You can send an email to create an issue in a project on the project's
-**Issues** page.
+**Issues List** page.
 
 Prerequisites:
 
@@ -149,7 +149,7 @@ were you.
 
 To regenerate the email address:
 
-1. On the **Issues** page, select **Email a new issue to this project**.
+1. On the issues list, select **Email a new issue to this project**.
 1. Select **reset this token**.
 
 ## Using a URL with prefilled values
@@ -160,10 +160,10 @@ HTML page to create issues with certain fields prefilled.
 
 | Field                | URL parameter         | Notes                                                                                                                           |
 | -------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| Title                | `issue[title]`        | Must be [URL-encoded](../../../api/rest/index.md#namespaced-paths).                                                          |
+| Title                | `issue[title]`        | Must be [URL-encoded](../../../api/rest/index.md#namespaced-path-encoding).                                                          |
 | Issue type           | `issue[issue_type]`   | Either `incident` or `issue`.                                                                                                   |
-| Description template | `issuable_template`   | Must be [URL-encoded](../../../api/rest/index.md#namespaced-paths).                                                          |
-| Description          | `issue[description]`  | Must be [URL-encoded](../../../api/rest/index.md#namespaced-paths). If used in combination with `issuable_template` or a [default issue template](../description_templates.md#set-a-default-template-for-merge-requests-and-issues), the `issue[description]` value is appended to the template. |
+| Description template | `issuable_template`   | Must be [URL-encoded](../../../api/rest/index.md#namespaced-path-encoding).                                                          |
+| Description          | `issue[description]`  | Must be [URL-encoded](../../../api/rest/index.md#namespaced-path-encoding). If used in combination with `issuable_template` or a [default issue template](../description_templates.md#set-a-default-template-for-merge-requests-and-issues), the `issue[description]` value is appended to the template. |
 | Confidential         | `issue[confidential]` | If `true`, the issue is marked as confidential.                                                                                 |
 | Relate to…           | `add_related_issue`   | A numeric issue ID. If present, the issue form shows a [**Relate to** checkbox](#from-another-issue-or-incident) to optionally link the new issue to the specified existing issue. |
 
@@ -206,7 +206,7 @@ When you're creating a new issue, you can complete the following fields:
 - [Description template](../description_templates.md): overwrites anything in the Description text box
 - Description: you can use [Markdown](../../markdown.md) and [quick actions](../quick_actions.md)
 - Checkbox to make the issue [confidential](confidential_issues.md)
-- [Assignees](managing_issues.md#assignees)
+- [Assignees](managing_issues.md#assignee)
 - [Weight](issue_weight.md)
 - [Epic](../../group/epics/index.md)
 - [Due date](due_dates.md)

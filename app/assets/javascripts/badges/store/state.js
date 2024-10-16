@@ -1,14 +1,13 @@
-export default (initialState) => ({
+export default () => ({
   apiEndpointUrl: null,
-  badgeInAddForm: {},
-  badgeInEditForm: {},
+  badgeInAddForm: null,
+  badgeInEditForm: null,
   badgeInModal: null,
   badges: [],
-  pagination: {},
+  docsUrl: null,
   renderedBadge: null,
   isEditing: false,
   isLoading: false,
   isRendering: false,
   isSaving: false,
-  ...initialState,
 });

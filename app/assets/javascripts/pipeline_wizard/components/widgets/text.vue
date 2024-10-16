@@ -60,11 +60,6 @@ export default {
       required: false,
       default: null,
     },
-    monospace: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
   data() {
     return {
@@ -91,9 +86,6 @@ export default {
       return this.isRequiredButEmpty
         ? s__('PipelineWizardInputValidation|This field is required')
         : this.invalidFeedback;
-    },
-    inputClass() {
-      return this.monospace ? '!gl-font-monospace' : '';
     },
   },
   watch: {
@@ -124,7 +116,6 @@ export default {
       <gl-form-input
         :id="id"
         v-model="value"
-        :class="inputClass"
         :placeholder="placeholder"
         :state="validationState"
         type="text"

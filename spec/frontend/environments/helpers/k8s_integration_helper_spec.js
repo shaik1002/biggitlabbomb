@@ -2,7 +2,6 @@ import {
   humanizeClusterErrors,
   createK8sAccessConfiguration,
   fluxSyncStatus,
-  updateFluxRequested,
 } from '~/environments/helpers/k8s_integration_helper';
 import {
   CLUSTER_AGENT_ERROR_MESSAGES,
@@ -92,29 +91,5 @@ describe('k8s_integration_helper', () => {
         });
       },
     );
-  });
-
-  describe('updateFluxRequested', () => {
-    const defaultPath = '/metadata/annotations/reconcile.fluxcd.io~1requestedAt';
-    const defaultValue = new Date().toISOString();
-    const customPath = '/custom/path';
-    const customValue = true;
-
-    it.each([
-      ['with default values', undefined, undefined],
-      ['with custom path', customPath, undefined],
-      ['with custom value', undefined, customValue],
-      ['with custom path and value', customPath, customValue],
-    ])('%s', (description, path, value) => {
-      expect(updateFluxRequested({ path, value })).toEqual(
-        JSON.stringify([
-          {
-            op: 'replace',
-            path: path || defaultPath,
-            value: value || defaultValue,
-          },
-        ]),
-      );
-    });
   });
 });

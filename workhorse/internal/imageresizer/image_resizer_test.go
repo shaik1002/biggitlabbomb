@@ -74,7 +74,6 @@ func TestRequestScaledImageFromPath(t *testing.T) {
 			params := resizeParams{Location: tc.imagePath, ContentType: tc.contentType, Width: 64}
 
 			resp := requestScaledImage(t, nil, params, cfg)
-			defer resp.Body.Close()
 			require.Equal(t, http.StatusOK, resp.StatusCode)
 
 			bounds := imageFromResponse(t, resp).Bounds()
@@ -92,7 +91,6 @@ func TestRequestScaledImageWithConditionalGetAndImageNotChanged(t *testing.T) {
 	header.Set("If-Modified-Since", httpTimeStr(clientTime))
 
 	resp := requestScaledImage(t, header, params, cfg)
-	defer resp.Body.Close()
 	require.Equal(t, http.StatusNotModified, resp.StatusCode)
 	require.Equal(t, httpTimeStr(testImageLastModified(t)), resp.Header.Get("Last-Modified"))
 	require.Empty(t, resp.Header.Get("Content-Type"))
@@ -108,7 +106,6 @@ func TestRequestScaledImageWithConditionalGetAndImageChanged(t *testing.T) {
 	header.Set("If-Modified-Since", httpTimeStr(clientTime))
 
 	resp := requestScaledImage(t, header, params, cfg)
-	defer resp.Body.Close()
 	require.Equal(t, http.StatusOK, resp.StatusCode)
 	require.Equal(t, httpTimeStr(testImageLastModified(t)), resp.Header.Get("Last-Modified"))
 }
@@ -121,7 +118,6 @@ func TestRequestScaledImageWithConditionalGetAndInvalidClientTime(t *testing.T) 
 	header.Set("If-Modified-Since", "0")
 
 	resp := requestScaledImage(t, header, params, cfg)
-	defer resp.Body.Close()
 	require.Equal(t, http.StatusOK, resp.StatusCode)
 	require.Equal(t, httpTimeStr(testImageLastModified(t)), resp.Header.Get("Last-Modified"))
 }
@@ -132,7 +128,6 @@ func TestServeOriginalImageWhenSourceImageTooLarge(t *testing.T) {
 	params := resizeParams{Location: imagePath, ContentType: "image/png", Width: 64}
 
 	resp := requestScaledImage(t, nil, params, cfg)
-	defer resp.Body.Close()
 	require.Equal(t, http.StatusOK, resp.StatusCode)
 
 	img := imageFromResponse(t, resp)
@@ -143,7 +138,6 @@ func TestFailFastOnOpenStreamFailure(t *testing.T) {
 	cfg := config.DefaultImageResizerConfig
 	params := resizeParams{Location: "does_not_exist.png", ContentType: "image/png", Width: 64}
 	resp := requestScaledImage(t, nil, params, cfg)
-	defer resp.Body.Close()
 
 	require.Equal(t, http.StatusInternalServerError, resp.StatusCode)
 }
@@ -152,7 +146,6 @@ func TestIgnoreContentTypeMismatchIfImageFormatIsAllowed(t *testing.T) {
 	cfg := config.DefaultImageResizerConfig
 	params := resizeParams{Location: imagePath, ContentType: "image/jpeg", Width: 64}
 	resp := requestScaledImage(t, nil, params, cfg)
-	defer resp.Body.Close()
 	require.Equal(t, http.StatusOK, resp.StatusCode)
 
 	bounds := imageFromResponse(t, resp).Bounds()
@@ -198,7 +191,6 @@ func TestServeOriginalImageWhenSourceImageFormatIsNotAllowed(t *testing.T) {
 	params := resizeParams{Location: svgImagePath, ContentType: "image/png", Width: 64}
 
 	resp := requestScaledImage(t, nil, params, cfg)
-	defer resp.Body.Close()
 	require.Equal(t, http.StatusOK, resp.StatusCode)
 
 	responseData, err := io.ReadAll(resp.Body)
@@ -222,7 +214,6 @@ func TestServeOriginalImageWhenSourceImageIsTooSmall(t *testing.T) {
 	params := resizeParams{Location: img.Name(), ContentType: "image/png", Width: 64}
 
 	resp := requestScaledImage(t, nil, params, cfg)
-	defer resp.Body.Close()
 	require.Equal(t, http.StatusOK, resp.StatusCode)
 
 	responseData, err := io.ReadAll(resp.Body)

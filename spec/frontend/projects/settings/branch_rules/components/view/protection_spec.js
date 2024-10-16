@@ -1,14 +1,8 @@
-import { GlLink } from '@gitlab/ui';
+import { GlCard, GlLink } from '@gitlab/ui';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
 import Protection, { i18n } from '~/projects/settings/branch_rules/components/view/protection.vue';
 import ProtectionRow from '~/projects/settings/branch_rules/components/view/protection_row.vue';
-import {
-  protectionPropsMock,
-  protectionEmptyStatePropsMock,
-  statusChecksRulesMock,
-  deployKeysMock,
-} from './mock_data';
+import { protectionPropsMock, protectionEmptyStatePropsMock } from './mock_data';
 
 describe('Branch rule protection', () => {
   let wrapper;
@@ -22,22 +16,22 @@ describe('Branch rule protection', () => {
         emptyStateCopy: 'Nothing to show',
         ...props,
       },
-      stubs: { CrudComponent },
+      stubs: { GlCard },
       provide: { glFeatures },
     });
   };
 
   beforeEach(() => createComponent());
 
-  const findCrudComponent = () => wrapper.findComponent(CrudComponent);
+  const findCard = () => wrapper.findComponent(GlCard);
   const findHeader = () => wrapper.findByText(protectionPropsMock.header);
   const findLink = () => wrapper.findComponent(GlLink);
   const findProtectionRows = () => wrapper.findAllComponents(ProtectionRow);
   const findEmptyState = () => wrapper.findByTestId('protection-empty-state');
   const findEditButton = () => wrapper.findByTestId('edit-rule-button');
 
-  it('renders a crud component', () => {
-    expect(findCrudComponent().exists()).toBe(true);
+  it('renders a card component', () => {
+    expect(findCard().exists()).toBe(true);
   });
 
   it('renders a header', () => {
@@ -53,7 +47,7 @@ describe('Branch rule protection', () => {
   it('renders a help text when provided', () => {
     createComponent({ editBranchRules: true }, { helpText: 'Help text' });
 
-    expect(findCrudComponent().text()).toContain('Help text');
+    expect(findCard().text()).toContain('Help text');
   });
 
   it('renders a protection row for roles', () => {
@@ -73,16 +67,15 @@ describe('Branch rule protection', () => {
     });
   });
 
-  it('renders a protection row for deploy keys', () => {
-    createComponent(
-      { editBranchRules: false },
-      { ...protectionPropsMock, deployKeys: deployKeysMock },
-    );
+  it('renders a protection row for status checks', () => {
+    const statusCheck = protectionPropsMock.statusChecks[0];
     expect(findProtectionRows().at(2).props()).toMatchObject({
-      showDivider: true,
-      deployKeys: deployKeysMock,
-      title: i18n.deployKeysTitle,
+      title: statusCheck.name,
+      showDivider: false,
+      statusCheckUrl: statusCheck.externalUrl,
     });
+
+    expect(findProtectionRows().at(3).props('showDivider')).toBe(true);
   });
 
   describe('When `isEditAvailable` prop is set to true', () => {
@@ -103,18 +96,6 @@ describe('Branch rule protection', () => {
     it('renders link to manage branch protections', () => {
       expect(findLink().text()).toBe(protectionPropsMock.headerLinkTitle);
       expect(findLink().attributes('href')).toBe(protectionPropsMock.headerLinkHref);
-    });
-
-    it('renders a protection row for status checks', () => {
-      createComponent({ editBranchRules: false }, { statusChecks: statusChecksRulesMock });
-      const statusCheck = statusChecksRulesMock[0];
-      expect(findProtectionRows().at(0).props()).toMatchObject({
-        title: statusCheck.name,
-        showDivider: false,
-        statusCheckUrl: statusCheck.externalUrl,
-      });
-
-      expect(findProtectionRows().at(1).props('showDivider')).toBe(true);
     });
   });
 });

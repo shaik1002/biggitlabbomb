@@ -3,12 +3,11 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::LegacyGithubImport::IssueFormatter, feature_category: :importers do
-  let_it_be(:project) { create(:project, import_type: 'gitea', namespace: create(:namespace, path: 'octocat')) }
+  let_it_be(:project) { create(:project, namespace: create(:namespace, path: 'octocat')) }
   let(:client) { double }
   let(:octocat) { { id: 123456, login: 'octocat', email: 'octocat@example.com' } }
   let(:created_at) { DateTime.strptime('2011-01-26T19:01:12Z') }
   let(:updated_at) { DateTime.strptime('2011-01-27T19:01:12Z') }
-  let(:imported_from) { ::Import::SOURCE_GITEA }
 
   let(:base_data) do
     {
@@ -48,8 +47,7 @@ RSpec.describe Gitlab::LegacyGithubImport::IssueFormatter, feature_category: :im
           author_id: project.creator_id,
           assignee_ids: [],
           created_at: created_at,
-          updated_at: updated_at,
-          imported_from: imported_from
+          updated_at: updated_at
         }
 
         expect(issue.attributes).to eq(expected)
@@ -70,8 +68,7 @@ RSpec.describe Gitlab::LegacyGithubImport::IssueFormatter, feature_category: :im
           author_id: project.creator_id,
           assignee_ids: [],
           created_at: created_at,
-          updated_at: updated_at,
-          imported_from: imported_from
+          updated_at: updated_at
         }
 
         expect(issue.attributes).to eq(expected)
@@ -136,16 +133,14 @@ RSpec.describe Gitlab::LegacyGithubImport::IssueFormatter, feature_category: :im
     end
   end
 
-  context 'when importing a Gitea project' do
+  context 'when importing a GitHub project' do
     it_behaves_like 'Gitlab::LegacyGithubImport::IssueFormatter#attributes'
     it_behaves_like 'Gitlab::LegacyGithubImport::IssueFormatter#number'
   end
 
-  context 'when importing a GitHub project' do
-    let(:imported_from) { ::Import::SOURCE_GITHUB }
-
+  context 'when importing a Gitea project' do
     before do
-      project.import_type = 'github'
+      project.update!(import_type: 'gitea')
     end
 
     it_behaves_like 'Gitlab::LegacyGithubImport::IssueFormatter#attributes'

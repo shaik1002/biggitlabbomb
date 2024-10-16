@@ -77,7 +77,7 @@ export default class SSHMirror {
 
     // Disable button while we make request
     this.$btnDetectHostKeys.disable();
-    $btnLoadSpinner.removeClass('gl-hidden');
+    $btnLoadSpinner.removeClass('gl-display-none');
 
     // Make backOff polling to get data
     backOff((next, stop) => {
@@ -102,7 +102,7 @@ export default class SSHMirror {
         .catch(stop);
     })
       .then((res) => {
-        $btnLoadSpinner.addClass('gl-hidden');
+        $btnLoadSpinner.addClass('gl-display-none');
         // Once data is received, we show verification info along with Host keys and fingerprints
         this.$hostKeysInformation
           .find('.js-fingerprint-verification')

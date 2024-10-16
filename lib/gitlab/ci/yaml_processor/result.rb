@@ -8,7 +8,7 @@ module Gitlab
       class Result
         include Gitlab::Utils::StrongMemoize
 
-        attr_reader :ci_config, :errors, :warnings,
+        attr_reader :errors, :warnings,
           :root_variables, :root_variables_with_prefill_data,
           :stages, :jobs,
           :workflow_rules, :workflow_name, :workflow_auto_cancel
@@ -115,7 +115,6 @@ module Gitlab
             resource_group_key: job[:resource_group],
             scheduling_type: job[:scheduling_type],
             id_tokens: job[:id_tokens],
-            execution_config: build_execution_config(job),
             options: {
               image: job[:image],
               services: job[:services],
@@ -145,12 +144,6 @@ module Gitlab
 
         def transform_to_array(variables)
           ::Gitlab::Ci::Variables::Helpers.transform_to_array(variables)
-        end
-
-        def build_execution_config(job)
-          {
-            run_steps: job[:run]
-          }.compact.presence
         end
       end
     end

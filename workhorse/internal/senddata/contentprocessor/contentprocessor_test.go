@@ -9,7 +9,6 @@ import (
 	"gitlab.com/gitlab-org/gitlab/workhorse/internal/headers"
 	"gitlab.com/gitlab-org/gitlab/workhorse/internal/testhelper"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -20,7 +19,7 @@ func TestFailSetContentTypeAndDisposition(t *testing.T) {
 
 	h := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, err := io.WriteString(w, testCaseBody)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 
 	resp := makeRequest(t, h, testCaseBody, "")
@@ -220,7 +219,7 @@ func TestFailOverrideContentType(t *testing.T) {
 				w.Header().Set(headers.GitlabWorkhorseDetectContentTypeHeader, "true")
 				w.Header().Set(headers.ContentTypeHeader, tc.overrideFromUpstream)
 				_, err := io.WriteString(w, tc.body)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			})
 
 			resp := makeRequest(t, h, tc.body, "")
@@ -239,7 +238,7 @@ func TestSuccessOverrideContentDispositionFromInlineToAttachment(t *testing.T) {
 		w.Header().Set(headers.ContentDispositionHeader, "attachment")
 		w.Header().Set(headers.GitlabWorkhorseDetectContentTypeHeader, "true")
 		_, err := io.WriteString(w, testCaseBody)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 
 	resp := makeRequest(t, h, testCaseBody, "")
@@ -256,7 +255,7 @@ func TestInlineContentDispositionForPdfFiles(t *testing.T) {
 		w.Header().Set(headers.ContentDispositionHeader, "inline")
 		w.Header().Set(headers.GitlabWorkhorseDetectContentTypeHeader, "true")
 		_, err := io.WriteString(w, testCaseBody)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 
 	resp := makeRequest(t, h, testCaseBody, "")
@@ -273,7 +272,7 @@ func TestFailOverrideContentDispositionFromAttachmentToInline(t *testing.T) {
 		w.Header().Set(headers.ContentDispositionHeader, "inline")
 		w.Header().Set(headers.GitlabWorkhorseDetectContentTypeHeader, "true")
 		_, err := io.WriteString(w, testCaseBody)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 
 	resp := makeRequest(t, h, testCaseBody, "")
@@ -318,7 +317,7 @@ func makeRequest(t *testing.T, handler http.HandlerFunc, body string, dispositio
 			w.Header().Set(headers.GitlabWorkhorseDetectContentTypeHeader, "true")
 			w.Header().Set(headers.ContentDispositionHeader, disposition)
 			_, err := io.WriteString(w, body)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 		})
 	}
 	req, _ := http.NewRequest("GET", "/", nil)

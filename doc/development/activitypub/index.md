@@ -35,7 +35,7 @@ This feature requires two feature flags:
   projects. Requires the `activity_pub` flag to also be enabled.
 
 Most of the implementation is being discussed in
-[an architecture design document](https://handbook.gitlab.com/handbook/engineering/architecture/design-documents/activity_pub/),
+[an architecture blueprint](../../architecture/blueprints/activity_pub/index.md),
 see this document for more information.
 
 For now, see [how to implement an ActivityPub actor](actors/index.md).

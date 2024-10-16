@@ -17,7 +17,6 @@ DETAILS:
 > - `with_merge_status_recheck` [changed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/115948) in GitLab 15.11 [with a flag](../administration/feature_flags.md) named `restrict_merge_status_recheck` to be ignored for requests from users insufficient permissions. Disabled by default.
 > - `approvals_before_merge` [deprecated](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/119503) in GitLab 16.0.
 > - `prepared_at` [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/122001) in GitLab 16.1.
-> - `merge_after` [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/165092) in GitLab 17.5.
 
 All API calls to non-public information require authentication.
 
@@ -53,41 +52,41 @@ GET /merge_requests?search=foo&in=title
 
 Supported attributes:
 
-| Attribute                   | Type          | Required | Description |
-|-----------------------------|---------------|----------|-------------|
-| `approved_by_ids`               | integer array  | No       | Returns the merge requests approved by all the users with the given `id`, up to 5 users. `None` returns merge requests with no approvals. `Any` returns merge requests with an approval. Premium and Ultimate only.                                                                                                                                        |
-| `approver_ids`                  | integer array  | No       | Returns merge requests which have specified all the users with the given `id` as individual approvers. `None` returns merge requests without approvers. `Any` returns merge requests with an approver. Premium and Ultimate only.                                                                                                                          |
-| `approved`                      | string         | No       | Filters merge requests by their `approved` status. `yes` returns only approved merge requests. `no` returns only non-approved merge requests. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3159) in GitLab 15.11 with the flag `mr_approved_filter`. Disabled by default.                                                                    |
-| `assignee_id`                   | integer        | No       | Returns merge requests assigned to the given user `id`. `None` returns unassigned merge requests. `Any` returns merge requests with an assignee.                                                                                                                                                                                                           |
-| `author_id`                     | integer        | No       | Returns merge requests created by the given user `id`. Mutually exclusive with `author_username`. Combine with `scope=all` or `scope=assigned_to_me`.                                                                                                                                                                                                      |
-| `author_username`               | string         | No       | Returns merge requests created by the given `username`. Mutually exclusive with `author_id`.                                                                                                                                                                                                                                                               |
-| `created_after`                 | datetime       | No       | Returns merge requests created on or after the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`).                                                                                                                                                                                                                                           |
-| `created_before`                | datetime       | No       | Returns merge requests created on or before the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`).                                                                                                                                                                                                                                          |
-| `deployed_after`                | datetime       | No       | Returns merge requests deployed after the given date/time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`).                                                                                                                                                                                                                                           |
-| `deployed_before`               | datetime       | No       | Returns merge requests deployed before the given date/time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`).                                                                                                                                                                                                                                          |
-| `environment`                   | string         | No       | Returns merge requests deployed to the given environment.                                                                                                                                                                                                                                                                                                  |
-| `in`                            | string         | No       | Change the scope of the `search` attribute. `title`, `description`, or a string joining them with comma. Default is `title,description`.                                                                                                                                                                                                                   |
-| `labels`                        | string         | No       | Returns merge requests matching a comma-separated list of labels. `None` lists all merge requests with no labels. `Any` lists all merge requests with at least one label. Predefined names are case-insensitive.                                                                                                                                           |
-| `merge_user_id`                 | integer        | No       | Returns the merge requests merged by the user with the given user `id`. Mutually exclusive with `merge_user_username`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/140002) in GitLab 17.0.                                                                                                                                          |
-| `merge_user_username`           | string         | No       | Returns the merge requests merged by the user with the given `username`. Mutually exclusive with `merge_user_id`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/140002) in GitLab 17.0.                                                                                                                                               |
-| `milestone`                     | string         | No       | Returns merge requests for a specific milestone. `None` returns merge requests with no milestone. `Any` returns merge requests that have an assigned milestone.                                                                                                                                                                                            |
-| `my_reaction_emoji`             | string         | No       | Returns merge requests reacted by the authenticated user by the given `emoji`. `None` returns issues not given a reaction. `Any` returns issues given at least one reaction.                                                                                                                                                                               |
-| `not`                           | Hash           | No       | Returns merge requests that do not match the parameters supplied. Accepts: `labels`, `milestone`, `author_id`, `author_username`, `assignee_id`, `assignee_username`, `reviewer_id`, `reviewer_username`, `my_reaction_emoji`.                                                                                                                             |
-| `order_by`                  | string        | No       | Returns requests ordered by `created_at`, `title`, `merged_at` ([introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/147052) in GitLab 17.2), or `updated_at` fields. Default is `created_at`. |
-| `reviewer_id`                   | integer        | No       | Returns merge requests which have the user as a [reviewer](../user/project/merge_requests/reviews/index.md) with the given user `id`. `None` returns merge requests with no reviewers. `Any` returns merge requests with any reviewer. Mutually exclusive with `reviewer_username`.                                                                        |
-| `reviewer_username`             | string         | No       | Returns merge requests which have the user as a [reviewer](../user/project/merge_requests/reviews/index.md) with the given `username`. `None` returns merge requests with no reviewers. `Any` returns merge requests with any reviewer. Mutually exclusive with `reviewer_id`.                                                                             |
-| `scope`                         | string         | No       | Returns merge requests for the given scope: `created_by_me`, `assigned_to_me` or `all`. Defaults to `created_by_me`.                                                                                                                                                                                                                                       |
-| `search`                        | string         | No       | Search merge requests against their `title` and `description`.                                                                                                                                                                                                                                                                                             |
-| `sort`                          | string         | No       | Returns requests sorted in `asc` or `desc` order. Default is `desc`.                                                                                                                                                                                                                                                                                       |
-| `source_branch`                 | string         | No       | Returns merge requests with the given source branch.                                                                                                                                                                                                                                                                                                       |
-| `state`                         | string         | No       | Returns all merge requests or just those that are `opened`, `closed`, `locked`, or `merged`.                                                                                                                                                                                                                                                               |
-| `target_branch`                 | string         | No       | Returns merge requests with the given target branch.                                                                                                                                                                                                                                                                                                       |
-| `updated_after`                 | datetime       | No       | Returns merge requests updated on or after the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`).                                                                                                                                                                                                                                           |
-| `updated_before`                | datetime       | No       | Returns merge requests updated on or before the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`).                                                                                                                                                                                                                                          |
-| `view`                          | string         | No       | If `simple`, returns the `iid`, URL, title, description, and basic state of merge request.                                                                                                                                                                                                                                                                 |
-| `with_labels_details`           | boolean        | No       | If `true`, response returns more details for each label in labels field: `:name`, `:color`, `:description`, `:description_html`, `:text_color`. Default is `false`.                                                                                                                                                                                        |
+| Attribute                       | Type           | Required | Description |
+| ------------------------------- | -------------- | -------- | ----------- |
+| `approved_by_ids`               | integer array  | No       | Returns the merge requests approved by all the users with the given `id`, up to 5 users. `None` returns merge requests with no approvals. `Any` returns merge requests with an approval. Premium and Ultimate only. |
+| `approver_ids`                  | integer array  | No       | Returns merge requests which have specified all the users with the given `id` as individual approvers. `None` returns merge requests without approvers. `Any` returns merge requests with an approver. Premium and Ultimate only. |
+| `approved`                      | string         | No       | Filters merge requests by their `approved` status. `yes` returns only approved merge requests. `no` returns only non-approved merge requests. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3159) in GitLab 15.11 with the flag `mr_approved_filter`. Disabled by default. |
+| `assignee_id`                   | integer        | No       | Returns merge requests assigned to the given user `id`. `None` returns unassigned merge requests. `Any` returns merge requests with an assignee. |
+| `author_id`                     | integer        | No       | Returns merge requests created by the given user `id`. Mutually exclusive with `author_username`. Combine with `scope=all` or `scope=assigned_to_me`. |
+| `author_username`               | string         | No       | Returns merge requests created by the given `username`. Mutually exclusive with `author_id`. |
+| `created_after`                 | datetime       | No       | Returns merge requests created on or after the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`). |
+| `created_before`                | datetime       | No       | Returns merge requests created on or before the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`). |
+| `deployed_after`                | datetime       | No       | Returns merge requests deployed after the given date/time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`). |
+| `deployed_before`               | datetime       | No       | Returns merge requests deployed before the given date/time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`). |
+| `environment`                   | string         | No       | Returns merge requests deployed to the given environment. |
+| `in`                            | string         | No       | Change the scope of the `search` attribute. `title`, `description`, or a string joining them with comma. Default is `title,description`. |
+| `labels`                        | string         | No       | Returns merge requests matching a comma-separated list of labels. `None` lists all merge requests with no labels. `Any` lists all merge requests with at least one label. Predefined names are case-insensitive. |
+| `merge_user_id`                 | integer        | No       | Returns the merge requests merged by the user with the given user `id`. Mutually exclusive with `merge_user_username`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/140002) in GitLab 17.0. |
+| `merge_user_username`           | string         | No       | Returns the merge requests merged by the user with the given `username`. Mutually exclusive with `merge_user_id`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/140002) in GitLab 17.0. |
+| `milestone`                     | string         | No       | Returns merge requests for a specific milestone. `None` returns merge requests with no milestone. `Any` returns merge requests that have an assigned milestone. |
+| `my_reaction_emoji`             | string         | No       | Returns merge requests reacted by the authenticated user by the given `emoji`. `None` returns issues not given a reaction. `Any` returns issues given at least one reaction. |
+| `not`                           | Hash           | No       | Returns merge requests that do not match the parameters supplied. Accepts: `labels`, `milestone`, `author_id`, `author_username`, `assignee_id`, `assignee_username`, `reviewer_id`, `reviewer_username`, `my_reaction_emoji`. |
+| `order_by`                      | string         | No       | Returns requests ordered by `created_at`, `title`, or `updated_at` fields. Default is `created_at`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/331625) in GitLab 14.8.|
+| `reviewer_id`                   | integer        | No       | Returns merge requests which have the user as a [reviewer](../user/project/merge_requests/reviews/index.md) with the given user `id`. `None` returns merge requests with no reviewers. `Any` returns merge requests with any reviewer. Mutually exclusive with `reviewer_username`. |
+| `reviewer_username`             | string         | No       | Returns merge requests which have the user as a [reviewer](../user/project/merge_requests/reviews/index.md) with the given `username`. `None` returns merge requests with no reviewers. `Any` returns merge requests with any reviewer. Mutually exclusive with `reviewer_id`. |
+| `scope`                         | string         | No       | Returns merge requests for the given scope: `created_by_me`, `assigned_to_me` or `all`. Defaults to `created_by_me`. |
+| `search`                        | string         | No       | Search merge requests against their `title` and `description`. |
+| `sort`                          | string         | No       | Returns requests sorted in `asc` or `desc` order. Default is `desc`. |
+| `source_branch`                 | string         | No       | Returns merge requests with the given source branch. |
+| `state`                         | string         | No       | Returns all merge requests or just those that are `opened`, `closed`, `locked`, or `merged`. |
+| `target_branch`                 | string         | No       | Returns merge requests with the given target branch. |
+| `updated_after`                 | datetime       | No       | Returns merge requests updated on or after the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`). |
+| `updated_before`                | datetime       | No       | Returns merge requests updated on or before the given time. Expected in ISO 8601 format (`2019-03-15T08:00:00Z`). |
+| `view`                          | string         | No       | If `simple`, returns the `iid`, URL, title, description, and basic state of merge request. |
+| `with_labels_details`           | boolean        | No       | If `true`, response returns more details for each label in labels field: `:name`, `:color`, `:description`, `:description_html`, `:text_color`. Default is `false`. |
 | `with_merge_status_recheck`     | boolean        | No       | If `true`, this projection requests (but does not guarantee) an asynchronous recalculation of the `merge_status` field. Default is `false`. In GitLab 15.11 and later, enable the `restrict_merge_status_recheck` feature [flag](../administration/feature_flags.md) to ignore this attribute when requested by users without at least the Developer role. |
-| `wip`                           | string         | No       | Filter merge requests against their `wip` status. Use `yes` to return *only* draft merge requests, `no` to return *non-draft* merge requests.                                                                                                                                                                                                              |
+| `wip`                           | string         | No       | Filter merge requests against their `wip` status. Use `yes` to return *only* draft merge requests, `no` to return *non-draft* merge requests. |
 
 Example response:
 
@@ -119,7 +118,6 @@ Example response:
       "web_url": "https://gitlab.com/DouweM"
     },
     "merged_at": "2018-09-07T11:16:17.520Z",
-    "merge_after": "2018-09-07T11:16:00.000Z",
     "prepared_at": "2018-09-04T11:16:17.520Z",
     "closed_by": null,
     "closed_at": null,
@@ -241,7 +239,7 @@ Supported attributes:
 
 | Attribute                       | Type           | Required | Description |
 | ------------------------------- | -------------- | -------- | ----------- |
-| `id`                            | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                            | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `approved_by_ids`               | integer array  | No       | Returns merge requests approved by all the users with the given `id`, up to 5 users. `None` returns merge requests with no approvals. `Any` returns merge requests with an approval. Premium and Ultimate only. |
 | `approver_ids`                  | integer array  | No       | Returns merge requests which have specified all the users with the given `id` as individual approvers. `None` returns merge requests without approvers. `Any` returns merge requests with an approver. Premium and Ultimate only. |
 | `approved`                      | string         | No       | Filters merge requests by their `approved` status. `yes` returns only approved merge requests. `no` returns only non-approved merge requests. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3159) in GitLab 15.11. Available only when the feature flag `mr_approved_filter` is enabled. |
@@ -276,7 +274,7 @@ Supported attributes:
 | `with_labels_details`           | boolean        | No       | If `true`, response returns more details for each label in labels field: `:name`, `:color`, `:description`, `:description_html`, `:text_color`. Default is `false`. |
 | `with_merge_status_recheck`     | boolean        | No       | If `true`, this projection requests (but does not guarantee) the asynchronous recalculation of the `merge_status` field. Default is `false`. In GitLab 15.11 and later, enable the `restrict_merge_status_recheck` feature [flag](../administration/feature_flags.md) to ignore this attribute when requested by users without at least the Developer role. |
 
-If successful, returns [`200 OK`](rest/troubleshooting.md#status-codes) and the following
+If successful, returns [`200 OK`](rest/index.md#status-codes) and the following
 response attributes:
 
 | Attribute                          | Type     | Description |
@@ -369,7 +367,6 @@ Example response:
       "web_url": "https://gitlab.com/DouweM"
     },
     "merged_at": "2018-09-07T11:16:17.520Z",
-    "merge_after": "2018-09-07T11:16:00.000Z",
     "prepared_at": "2018-09-04T11:16:17.520Z",
     "closed_by": null,
     "closed_at": null,
@@ -490,7 +487,7 @@ Supported attributes:
 
 | Attribute                       | Type           | Required | Description |
 | ------------------------------- | -------------- | -------- | ----------- |
-| `id`                            | integer or string | Yes      | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths). |
+| `id`                            | integer or string | Yes      | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `approved_by_ids`               | integer array  | No       | Returns the merge requests approved by all the users with the given `id`, up to 5 users. `None` returns merge requests with no approvals. `Any` returns merge requests with an approval. Premium and Ultimate only. |
 | `approved_by_usernames`         | string array  | No       | Returns the merge requests approved by all the users with the given `username`, up to 5 users. `None` returns merge requests with no approvals. `Any` returns merge requests with an approval. Premium and Ultimate only. |
 | `approver_ids`                  | integer array  | No       | Returns merge requests which have specified all the users with the given `id` as individual approvers. `None` returns merge requests without approvers. `Any` returns merge requests with an approver. Premium and Ultimate only. |
@@ -556,7 +553,6 @@ Example response:
       "web_url": "https://gitlab.com/DouweM"
     },
     "merged_at": "2018-09-07T11:16:17.520Z",
-    "merge_after": "2018-09-07T11:16:00.000Z",
     "prepared_at": "2018-09-04T11:16:17.520Z",
     "closed_by": null,
     "closed_at": null,
@@ -666,7 +662,7 @@ Supported attributes:
 
 | Attribute                        | Type           | Required | Description |
 |----------------------------------|----------------|----------|-------------|
-| `id`                             | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                             | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `merge_request_iid`              | integer        | Yes      | The internal ID of the merge request. |
 | `include_diverged_commits_count` | boolean        | No       | If `true`, response includes the commits behind the target branch. |
 | `include_rebase_in_progress`     | boolean        | No       | If `true`, response includes whether a rebase operation is in progress. |
@@ -751,7 +747,6 @@ Example response:
   "merged_by": null, // Deprecated and will be removed in API v5. Use `merge_user` instead.
   "merge_user": null,
   "merged_at": null,
-  "merge_after": "2018-09-07T11:16:00.000Z",
   "prepared_at": "2018-09-04T11:16:17.520Z",
   "closed_by": null,
   "closed_at": null,
@@ -898,31 +893,22 @@ Use `detailed_merge_status` instead of `merge_status` to account for all potenti
 
 - The `detailed_merge_status` field can contain one of the following values related to the merge request:
   - `approvals_syncing`: The merge request's approvals are syncing.
+  - `blocked_status`: Blocked by another merge request.
   - `checking`: Git is testing if a valid merge is possible.
   - `ci_must_pass`: A CI/CD pipeline must succeed before merge.
   - `ci_still_running`: A CI/CD pipeline is still running.
-  - `commits_status`: Source branch should exist, and contain commits.
   - `conflict`: Conflicts exist between the source and target branches.
   - `discussions_not_resolved`: All discussions must be resolved before merge.
   - `draft_status`: Can't merge because the merge request is a draft.
+  - `external_status_checks`: All status checks must pass before merge.
   - `jira_association_missing`: The title or description must reference a Jira issue. To configure, see
     [Require associated Jira issue for merge requests to be merged](../integration/jira/issues.md#require-associated-jira-issue-for-merge-requests-to-be-merged).
   - `mergeable`: The branch can merge cleanly into the target branch.
-  - `merge_request_blocked`: Blocked by another merge request.
-  - `merge_time`: May not be merged until after the specified time.
   - `need_rebase`: The merge request must be rebased.
   - `not_approved`: Approval is required before merge.
   - `not_open`: The merge request must be open before merge.
-  - `preparing`: Merge request diff is being created.
   - `requested_changes`: The merge request has reviewers who have requested changes.
-  - `security_policy_evaluation`: All security policies must be evaluated.
-    Requires the `policy_mergability_check` feature flag to be enabled.
-  - `security_policy_violations`: All security policies must be satisfied.
-    Requires the `policy_mergability_check` feature flag to be enabled.
-  - `status_checks_must_pass`: All status checks must pass before merge.
   - `unchecked`: Git has not yet tested if a valid merge is possible.
-  - `locked_paths`: Paths locked by other users must be unlocked before merging to default branch.
-  - `locked_lfs_files`: LFS files locked by other users must be unlocked before merge.
 
 ### Preparation steps
 
@@ -948,7 +934,7 @@ Supported attributes:
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `merge_request_iid` | integer           | Yes      | The internal ID of the merge request. |
 
 Example response:
@@ -986,7 +972,7 @@ Supported attributes:
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `merge_request_iid` | integer           | Yes      | The internal ID of the merge request. |
 
 Example response:
@@ -1032,37 +1018,8 @@ Supported attributes:
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
-| `merge_request_iid` | integer           | Yes      | Internal ID of the merge request. |
-
-If successful, returns [`200 OK`](rest/troubleshooting.md#status-codes) and the following
-response attributes:
-
-| Attribute                     | Type         | Description |
-|-------------------------------|--------------|-------------|
-| `commits`                     | object array | Commits in the merge request. |
-| `commits[].id`                | string       | ID of the commit. |
-| `commits[].short_id`          | string       | Short ID of the commit. |
-| `commits[].created_at`        | datetime     | Identical to the `committed_date` field. |
-| `commits[].parent_ids`        | array        | IDs of the parent commits. |
-| `commits[].title`             | string       | Commit title. |
-| `commits[].message`           | string       | Commit message. |
-| `commits[].author_name`       | string       | Commit author's name. |
-| `commits[].author_email`      | string       | Commit author's email address. |
-| `commits[].authored_date`     | datetime     | Commit authored date. |
-| `commits[].committer_name`    | string       | Name of the committer. |
-| `commits[].committer_email`   | string       | Email address of the committer. |
-| `commits[].committed_date`    | datetime     | Commit date. |
-| `commits[].trailers`          | object       | Git trailers parsed for the commit. Duplicate keys include the last value only. |
-| `commits[].extended_trailers` | object       | Git trailers parsed for the commit. |
-| `commits[].web_url`           | string       | Web URL of the merge request. |
-
-Example request:
-
-```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" \
-  --url "https://gitlab.example.com/api/v4/projects/1/merge_requests/1/commits"
-```
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
+| `merge_request_iid` | integer           | Yes      | The internal ID of the merge request. |
 
 Example response:
 
@@ -1074,15 +1031,8 @@ Example response:
     "title": "Replace sanitize with escape once",
     "author_name": "Example User",
     "author_email": "user@example.com",
-    "authored_date": "2012-09-20T11:50:22+03:00",
-    "committer_name": "Example User",
-    "committer_email": "user@example.com",
-    "committed_date": "2012-09-20T11:50:22+03:00",
     "created_at": "2012-09-20T11:50:22+03:00",
-    "message": "Replace sanitize with escape once",
-    "trailers": {},
-    "extended_trailers": {},
-    "web_url": "https://gitlab.example.com/project/-/commit/ed899a2f4b50b4370feeea94676502b42383c746"
+    "message": "Replace sanitize with escape once"
   },
   {
     "id": "6104942438c14ec7bd21c6cd5bd995272b3faff6",
@@ -1090,452 +1040,8 @@ Example response:
     "title": "Sanitize for network graph",
     "author_name": "Example User",
     "author_email": "user@example.com",
-    "authored_date": "2012-09-20T09:06:12+03:00",
-    "committer_name": "Example User",
-    "committer_email": "user@example.com",
-    "committed_date": "2012-09-20T09:06:12+03:00",
     "created_at": "2012-09-20T09:06:12+03:00",
-    "message": "Sanitize for network graph",
-    "trailers": {},
-    "extended_trailers": {},
-    "web_url": "https://gitlab.example.com/project/-/commit/6104942438c14ec7bd21c6cd5bd995272b3faff6"
-  }
-]
-```
-
-## Get merge request dependencies
-
-Shows information about the merge request dependencies that must be resolved before merging.
-
-```plaintext
-GET /projects/:id/merge_requests/:merge_request_iid/blocks
-```
-
-Supported attributes:
-
-| Attribute           | Type           | Required | Description |
-|---------------------|----------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
-
-Example request:
-
-```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" \
-  --url "https://gitlab.example.com/api/v4/projects/1/merge_requests/1/blocks"
-```
-
-Example response:
-
-```json
-[
-  {
-    "id": 1,
-    "blocking_merge_request": {
-      "id": 145,
-      "iid": 12,
-      "project_id": 7,
-      "title": "Interesting MR",
-      "description": "Does interesting things.",
-      "state": "opened",
-      "created_at": "2024-07-05T21:29:11.172Z",
-      "updated_at": "2024-07-05T21:29:11.172Z",
-      "merged_by": null,
-      "merge_user": null,
-      "merged_at": null,
-      "merge_after": "2018-09-07T11:16:00.000Z",
-      "closed_by": null,
-      "closed_at": null,
-      "target_branch": "master",
-      "source_branch": "v2.x",
-      "user_notes_count": 0,
-      "upvotes": 0,
-      "downvotes": 0,
-      "author": {
-        "id": 2,
-        "username": "aiguy123",
-        "name": "AI GUY",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
-        "web_url": "https://localhost/aiguy123"
-      },
-      "assignees": [
-        {
-          "id": 2,
-          "username": "aiguy123",
-          "name": "AI GUY",
-          "state": "active",
-          "locked": false,
-          "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
-          "web_url": "https://localhost/aiguy123"
-        }
-      ],
-      "assignee": {
-        "id": 2,
-        "username": "aiguy123",
-        "name": "AI GUY",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
-        "web_url": "https://localhost/aiguy123"
-      },
-      "reviewers": [
-        {
-          "id": 2,
-          "username": "aiguy123",
-          "name": "AI GUY",
-          "state": "active",
-          "locked": false,
-          "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
-          "web_url": "https://localhost/aiguy123"
-        },
-        {
-          "id": 1,
-          "username": "root",
-          "name": "Administrator",
-          "state": "active",
-          "locked": false,
-          "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
-          "web_url": "https://localhost/root"
-        }
-      ],
-      "source_project_id": 7,
-      "target_project_id": 7,
-      "labels": [],
-      "draft": false,
-      "imported": false,
-      "imported_from": "none",
-      "work_in_progress": false,
-      "milestone": null,
-      "merge_when_pipeline_succeeds": false,
-      "merge_status": "unchecked",
-      "detailed_merge_status": "unchecked",
-      "sha": "ce7e4f2d0ce13cb07479bb39dc10ee3b861c08a6",
-      "merge_commit_sha": null,
-      "squash_commit_sha": null,
-      "discussion_locked": null,
-      "should_remove_source_branch": null,
-      "force_remove_source_branch": true,
-      "prepared_at": null,
-      "reference": "!12",
-      "references": {
-        "short": "!12",
-        "relative": "!12",
-        "full": "my-group/my-project!12"
-      },
-      "web_url": "https://localhost/my-group/my-project/-/merge_requests/12",
-      "time_stats": {
-        "time_estimate": 0,
-        "total_time_spent": 0,
-        "human_time_estimate": null,
-        "human_total_time_spent": null
-      },
-      "squash": false,
-      "squash_on_merge": false,
-      "task_completion_status": {
-        "count": 0,
-        "completed_count": 0
-      },
-      "has_conflicts": false,
-      "blocking_discussions_resolved": true,
-      "approvals_before_merge": null
-    },
-    "blocked_merge_request": {
-      "id": 146,
-      "iid": 13,
-      "project_id": 7,
-      "title": "Really cool MR",
-      "description": "Adds some stuff",
-      "state": "opened",
-      "created_at": "2024-07-05T21:31:34.811Z",
-      "updated_at": "2024-07-27T02:57:08.054Z",
-      "merged_by": null,
-      "merge_user": null,
-      "merged_at": null,
-      "merge_after": "2018-09-07T11:16:00.000Z",
-      "closed_by": null,
-      "closed_at": null,
-      "target_branch": "master",
-      "source_branch": "remove-from",
-      "user_notes_count": 0,
-      "upvotes": 1,
-      "downvotes": 0,
-      "author": {
-        "id": 2,
-        "username": "aiguy123",
-        "name": "AI GUY",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
-        "web_url": "https://localhost/aiguy123"
-      },
-      "assignees": [
-        {
-          "id": 2,
-          "username": "aiguy123",
-          "name": "AI GUY",
-          "state": "active",
-          "locked": false,
-          "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
-          "web_url": "https://localhose/aiguy123"
-        }
-      ],
-      "assignee": {
-        "id": 2,
-        "username": "aiguy123",
-        "name": "AI GUY",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
-        "web_url": "https://localhost/aiguy123"
-      },
-      "reviewers": [
-        {
-          "id": 1,
-          "username": "root",
-          "name": "Administrator",
-          "state": "active",
-          "locked": false,
-          "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
-          "web_url": "https://localhost/root"
-        }
-      ],
-      "source_project_id": 7,
-      "target_project_id": 7,
-      "labels": [],
-      "draft": false,
-      "imported": false,
-      "imported_from": "none",
-      "work_in_progress": false,
-      "milestone": {
-        "id": 59,
-        "iid": 6,
-        "project_id": 7,
-        "title": "Sprint 1718897375",
-        "description": "Accusantium omnis iusto a animi.",
-        "state": "active",
-        "created_at": "2024-06-20T15:29:35.739Z",
-        "updated_at": "2024-06-20T15:29:35.739Z",
-        "due_date": null,
-        "start_date": null,
-        "expired": false,
-        "web_url": "https://localhost/my-group/my-project/-/milestones/6"
-      },
-      "merge_when_pipeline_succeeds": false,
-      "merge_status": "cannot_be_merged",
-      "detailed_merge_status": "not_approved",
-      "sha": "daa75b9b17918f51f43866ff533987fda71375ea",
-      "merge_commit_sha": null,
-      "squash_commit_sha": null,
-      "discussion_locked": null,
-      "should_remove_source_branch": null,
-      "force_remove_source_branch": true,
-      "prepared_at": "2024-07-11T18:50:46.215Z",
-      "reference": "!13",
-      "references": {
-        "short": "!13",
-        "relative": "!13",
-        "full": "my-group/my-project!12"
-      },
-      "web_url": "https://localhost/my-group/my-project/-/merge_requests/13",
-      "time_stats": {
-        "time_estimate": 0,
-        "total_time_spent": 0,
-        "human_time_estimate": null,
-        "human_total_time_spent": null
-      },
-      "squash": false,
-      "squash_on_merge": false,
-      "task_completion_status": {
-        "count": 0,
-        "completed_count": 0
-      },
-      "has_conflicts": true,
-      "blocking_discussions_resolved": true,
-      "approvals_before_merge": null
-    },
-    "project_id": 7
-  }
-]
-```
-
-## Delete a merge request dependency
-
-Delete a merge request dependency.
-
-```plaintext
-DELETE /projects/:id/merge_requests/:merge_request_iid/blocks/:block_id
-```
-
-Supported attributes:
-
-| Attribute           | Type           | Required | Description |
-|---------------------|----------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths) owned by the authenticated user. |
-| `merge_request_iid` | integer        | Yes      | The internal ID of the merge request. |
-| `block_id`          | integer        | Yes      | The internal ID of the block. |
-
-Example request:
-
-```shell
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" \
-  --url "https://gitlab.example.com/api/v4/projects/1/merge_requests/1/blocks/1"
-```
-
-Returns:
-
-- `204 No Content` if the dependency is successfully deleted.
-- `403 Forbidden` if the user lacks permissions for updating the merge request.
-- `403 Forbidden` if the user lacks permissions for reading the blocking merge request.
-
-## Create a merge request dependency
-
-Create a merge request dependency.
-
-```plaintext
-POST /projects/:id/merge_requests/:merge_request_iid/blocks
-```
-
-Supported attributes:
-
-| Attribute           | Type           | Required | Description |
-|---------------------|----------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths) owned by the authenticated user. |
-| `merge_request_iid` | integer        | Yes      | The internal ID of the merge request. |
-| `blocking_merge_request_id`          | integer        | Yes      | The internal ID of the blocking merge request. |
-
-Example request:
-
-```shell
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
-  --url "https://gitlab.example.com/api/v4/projects/1/merge_requests/1/blocks?blocking_merge_request_id=2"
-```
-
-Returns:
-
-- `201 Created` if the dependency is successfully created.
-- `400 Bad request` if the blocking merge request fails to save.
-- `403 Forbidden` if the user lacks permissions for reading the blocking merge request.
-- `404 Not found` if the blocking merge request is not found.
-- `409 Conflict` if the block already exists.
-
-Example response:
-
-```json
-[
-  {
-    "id": 1,
-    "blocking_merge_request": {
-      "id": 145,
-      "iid": 12,
-      "project_id": 7,
-      "title": "Interesting MR",
-      "description": "Does interesting things.",
-      "state": "opened",
-      "created_at": "2024-07-05T21:29:11.172Z",
-      "updated_at": "2024-07-05T21:29:11.172Z",
-      "merged_by": null,
-      "merge_user": null,
-      "merged_at": null,
-      "merge_after": "2018-09-07T11:16:00.000Z",
-      "closed_by": null,
-      "closed_at": null,
-      "target_branch": "master",
-      "source_branch": "v2.x",
-      "user_notes_count": 0,
-      "upvotes": 0,
-      "downvotes": 0,
-      "author": {
-        "id": 2,
-        "username": "aiguy123",
-        "name": "AI GUY",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
-        "web_url": "https://localhost/aiguy123"
-      },
-      "assignees": [
-        {
-          "id": 2,
-          "username": "aiguy123",
-          "name": "AI GUY",
-          "state": "active",
-          "locked": false,
-          "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
-          "web_url": "https://localhost/aiguy123"
-        }
-      ],
-      "assignee": {
-        "id": 2,
-        "username": "aiguy123",
-        "name": "AI GUY",
-        "state": "active",
-        "locked": false,
-        "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
-        "web_url": "https://localhost/aiguy123"
-      },
-      "reviewers": [
-        {
-          "id": 2,
-          "username": "aiguy123",
-          "name": "AI GUY",
-          "state": "active",
-          "locked": false,
-          "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
-          "web_url": "https://localhost/aiguy123"
-        },
-        {
-          "id": 1,
-          "username": "root",
-          "name": "Administrator",
-          "state": "active",
-          "locked": false,
-          "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
-          "web_url": "https://localhost/root"
-        }
-      ],
-      "source_project_id": 7,
-      "target_project_id": 7,
-      "labels": [],
-      "draft": false,
-      "imported": false,
-      "imported_from": "none",
-      "work_in_progress": false,
-      "milestone": null,
-      "merge_when_pipeline_succeeds": false,
-      "merge_status": "unchecked",
-      "detailed_merge_status": "unchecked",
-      "sha": "ce7e4f2d0ce13cb07479bb39dc10ee3b861c08a6",
-      "merge_commit_sha": null,
-      "squash_commit_sha": null,
-      "discussion_locked": null,
-      "should_remove_source_branch": null,
-      "force_remove_source_branch": true,
-      "prepared_at": null,
-      "reference": "!12",
-      "references": {
-        "short": "!12",
-        "relative": "!12",
-        "full": "my-group/my-project!12"
-      },
-      "web_url": "https://localhost/my-group/my-project/-/merge_requests/12",
-      "time_stats": {
-        "time_estimate": 0,
-        "total_time_spent": 0,
-        "human_time_estimate": null,
-        "human_total_time_spent": null
-      },
-      "squash": false,
-      "squash_on_merge": false,
-      "task_completion_status": {
-        "count": 0,
-        "completed_count": 0
-      },
-      "has_conflicts": false,
-      "blocking_discussions_resolved": true,
-      "approvals_before_merge": null
-    },
-    "project_id": 7
+    "message": "Sanitize for network graph"
   }
 ]
 ```
@@ -1557,7 +1063,7 @@ Supported attributes:
 
 | Attribute           | Type           | Required | Description |
 |---------------------|----------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `merge_request_iid` | integer        | Yes      | The internal ID of the merge request. |
 | `access_raw_diffs`  | boolean        | No       | Retrieve change diffs through Gitaly. |
 | `unidiff`           | boolean        | No       | Present change diffs in the [unified diff](https://www.gnu.org/software/diffutils/manual/html_node/Detailed-Unified.html) format. Default is false. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/130610) in GitLab 16.5. |
@@ -1695,13 +1201,13 @@ Supported attributes:
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `merge_request_iid` | integer           | Yes      | The internal ID of the merge request. |
 | `page`              | integer           | No       | The page of results to return. Defaults to 1. |
 | `per_page`          | integer           | No       | The number of results per page. Defaults to 20. |
 | `unidiff`           | boolean           | No       | Present diffs in the [unified diff](https://www.gnu.org/software/diffutils/manual/html_node/Detailed-Unified.html) format. Default is false. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/130610) in GitLab 16.5. |
 
-If successful, returns [`200 OK`](rest/troubleshooting.md#status-codes) and the
+If successful, returns [`200 OK`](rest/index.md#status-codes) and the
 following response attributes:
 
 | Attribute      | Type    | Description |
@@ -1768,7 +1274,7 @@ Supported attributes:
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `merge_request_iid` | integer           | Yes      | The internal ID of the merge request. |
 
 To restrict the list of merge request pipelines, use the pagination parameters `page` and
@@ -1807,7 +1313,7 @@ Supported attributes:
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `merge_request_iid` | integer           | Yes      | The internal ID of the merge request. |
 
 Example response:
@@ -1861,7 +1367,7 @@ POST /projects/:id/merge_requests
 
 | Attribute                  | Type    | Required | Description |
 | ---------                  | ----    | -------- | ----------- |
-| `id`                       | integer or string | Yes | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths) |
+| `id`                       | integer or string | Yes | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user |
 | `source_branch`            | string  | Yes      | The source branch. |
 | `target_branch`            | string  | Yes      | The target branch. |
 | `title`                    | string  | Yes      | Title of MR. |
@@ -1978,7 +1484,6 @@ Example response:
     "web_url": "https://gitlab.com/DouweM"
   },
   "merged_at": "2018-09-07T11:16:17.520Z",
-  "merge_after": "2018-09-07T11:16:00.000Z",
   "prepared_at": "2018-09-04T11:16:17.520Z",
   "closed_by": null,
   "closed_at": null,
@@ -2017,7 +1522,7 @@ PUT /projects/:id/merge_requests/:merge_request_iid
 
 | Attribute                  | Type    | Required | Description |
 | ---------                  | ----    | -------- | ----------- |
-| `id`                       | integer or string | Yes  | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                       | integer or string | Yes  | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `merge_request_iid`        | integer | Yes      | The ID of a merge request. |
 | `add_labels`               | string  | No       | Comma-separated label names to add to a merge request. If a label does not already exist, this creates a new project label and assigns it to the merge request. |
 | `allow_collaboration`      | boolean | No       | Allow commits from members who can merge to the target branch. |
@@ -2152,7 +1657,6 @@ Example response:
     "web_url": "https://gitlab.com/DouweM"
   },
   "merged_at": "2018-09-07T11:16:17.520Z",
-  "merge_after": "2018-09-07T11:16:00.000Z",
   "prepared_at": "2018-09-04T11:16:17.520Z",
   "closed_by": null,
   "closed_at": null,
@@ -2191,7 +1695,7 @@ DELETE /projects/:id/merge_requests/:merge_request_iid
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `merge_request_iid` | integer           | Yes      | The internal ID of the merge request. |
 
 ```shell
@@ -2212,7 +1716,7 @@ Supported attributes:
 
 | Attribute                      | Type           | Required | Description |
 |--------------------------------|----------------|----------|-------------|
-| `id`                           | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                           | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `merge_request_iid`            | integer        | Yes      | The internal ID of the merge request. |
 | `merge_commit_message`         | string         | No       | Custom merge commit message. |
 | `merge_when_pipeline_succeeds` | boolean        | No       | If `true`, the merge request merges when the pipeline succeeds. |
@@ -2346,7 +1850,6 @@ Example response:
     "web_url": "https://gitlab.com/DouweM"
   },
   "merged_at": "2018-09-07T11:16:17.520Z",
-  "merge_after": "2018-09-07T11:16:00.000Z",
   "prepared_at": "2018-09-04T11:16:17.520Z",
   "closed_by": null,
   "closed_at": null,
@@ -2392,7 +1895,7 @@ Supported attributes:
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `merge_request_iid` | integer           | Yes      | The internal ID of the merge request. |
 
 This API returns specific HTTP status codes:
@@ -2422,7 +1925,7 @@ Supported attributes:
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `merge_request_iid` | integer           | Yes      | The internal ID of the merge request. |
 
 This API returns specific HTTP status codes:
@@ -2548,7 +2051,6 @@ Example response:
     "web_url": "https://gitlab.com/DouweM"
   },
   "merged_at": "2018-09-07T11:16:17.520Z",
-  "merge_after": "2018-09-07T11:16:00.000Z",
   "prepared_at": "2018-09-04T11:16:17.520Z",
   "closed_by": null,
   "closed_at": null,
@@ -2586,7 +2088,7 @@ PUT /projects/:id/merge_requests/:merge_request_iid/rebase
 
 | Attribute           | Type           | Required | Description |
 |---------------------|----------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `merge_request_iid` | integer        | Yes      | The internal ID of the merge request. |
 | `skip_ci`           | boolean        | No       | Set to `true` to skip creating a CI pipeline. |
 
@@ -2658,57 +2160,10 @@ Get all the issues that would close by merging the provided merge request.
 GET /projects/:id/merge_requests/:merge_request_iid/closes_issues
 ```
 
-Supported attributes:
-
 | Attribute           | Type           | Required | Description |
 |---------------------|----------------|----------|-------------|
-| `id`                | integer or string | Yes   | ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
-| `merge_request_iid` | integer        | Yes      | Internal ID of the merge request. |
-
-If successful, returns [`200 OK`](rest/troubleshooting.md#status-codes) and the following
-response attributes when you use the GitLab issue tracker:
-
-| Attribute                   | Type     | Description                                                                                                                       |
-|-----------------------------|----------|-----------------------------------------------------------------------------------------------------------------------------------|
-| `[].assignee`               | object   | First assignee of the issue.                                                                                                      |
-| `[].assignees`              | array    | Assignees of the issue.                                                                                                           |
-| `[].author`                 | object   | User who created this issue.                                                                                                      |
-| `[].blocking_issues_count`  | integer  | Count of issues this issue is blocking.                                                                                           |
-| `[].closed_at`              | datetime | Timestamp of when the issue was closed.                                                                                           |
-| `[].closed_by`              | object   | User who closed this issue.                                                                                                       |
-| `[].confidential`           | boolean  | Indicates if the issue is confidential.                                                                                           |
-| `[].created_at`             | datetime | Timestamp of when the issue was created.                                                                                          |
-| `[].description`            | string   | Description of the issue.                                                                                                         |
-| `[].discussion_locked`      | boolean  | Indicates if comments on the issue are locked to members only.                                                                    |
-| `[].downvotes`              | integer  | Number of downvotes the issue has received.                                                                                       |
-| `[].due_date`               | datetime | Due date of the issue.                                                                                                            |
-| `[].id`                     | integer  | ID of the issue.                                                                                                                  |
-| `[].iid`                    | integer  | Internal ID of the issue.                                                                                                         |
-| `[].issue_type`             | string   | Type of the issue. Can be `issue`, `incident`, `test_case`, `requirement`, `task`.                                                |
-| `[].labels`                 | array    | Labels of the issue.                                                                                                              |
-| `[].merge_requests_count`   | integer  | Number of merge requests that close the issue on merge.                                                                           |
-| `[].milestone`              | object   | Milestone of the issue.                                                                                                           |
-| `[].project_id`             | integer  | ID of the issue project.                                                                                                          |
-| `[].state`                  | string   | State of the issue. Can be `opened` or `closed`.                                                                                  |
-| `[].task_completion_status` | object   | Includes `count` and `completed_count`.                                                                                           |
-| `[].time_stats`             | object   | Time statistics for the issue. Includes `time_estimate`, `total_time_spent`, `human_time_estimate`, and `human_total_time_spent`. |
-| `[].title`                  | string   | Title of the issue.                                                                                                               |
-| `[].type`                   | string   | Type of the issue. Same as `issue_type`, but uppercase.                                                                           |
-| `[].updated_at`             | datetime | Timestamp of when the issue was updated.                                                                                          |
-| `[].upvotes`                | integer  | Number of upvotes the issue has received.                                                                                         |
-| `[].user_notes_count`       | integer  | User notes count of the issue.                                                                                                    |
-| `[].web_url`                | string   | Web URL of the issue.                                                                                                             |
-| `[].weight`                 | integer  | Weight of the issue.                                                                                                              |
-
-If successful, returns [`200 OK`](rest/troubleshooting.md#status-codes) and the following
-response attributes when you use an external issue tracker, like Jira:
-
-| Attribute                   | Type     | Description                                                                                                                       |
-|-----------------------------|----------|-----------------------------------------------------------------------------------------------------------------------------------|
-| `[].id`                     | integer  | ID of the issue.                                                                                                                  |
-| `[].title`                  | string   | Title of the issue.                                                                                                               |
-
-Example request:
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
+| `merge_request_iid` | integer        | Yes      | The internal ID of the merge request. |
 
 ```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" \
@@ -2719,83 +2174,46 @@ Example response when you use the GitLab issue tracker:
 
 ```json
 [
-  {
-    "id": 76,
-    "iid": 6,
-    "project_id": 1,
-    "title": "Consequatur vero maxime deserunt laboriosam est voluptas dolorem.",
-    "description": "Ratione dolores corrupti mollitia soluta quia.",
-    "state": "opened",
-    "created_at": "2024-09-06T10:58:49.002Z",
-    "updated_at": "2024-09-06T11:01:40.710Z",
-    "closed_at": null,
-    "closed_by": null,
-    "labels": [
-      "label"
-    ],
-    "milestone": {
-      "project_id": 1,
-      "description": "Ducimus nam enim ex consequatur cumque ratione.",
-      "state": "closed",
-      "due_date": null,
-      "iid": 2,
-      "created_at": "2016-01-04T15:31:39.996Z",
-      "title": "v4.0",
-      "id": 17,
-      "updated_at": "2016-01-04T15:31:39.996Z"
-    },
-    "assignees": [
-      {
-        "id": 1,
-        "username": "root",
-        "name": "Administrator",
-        "state": "active",
-        "locked": false,
-        "avatar_url": null,
-        "web_url": "https://gitlab.example.com/root"
-      }
-    ],
-    "author": {
-      "id": 18,
-      "username": "eileen.lowe",
-      "name": "Alexandra Bashirian",
-      "state": "active",
-      "locked": false,
-      "avatar_url": null,
-      "web_url": "https://gitlab.example.com/eileen.lowe"
-    },
-    "type": "ISSUE",
-    "assignee": {
-      "id": 1,
-      "username": "root",
-      "name": "Administrator",
-      "state": "active",
-      "locked": false,
-      "avatar_url": null,
-      "web_url": "https://gitlab.example.com/root"
-    },
-    "user_notes_count": 1,
-    "merge_requests_count": 1,
-    "upvotes": 0,
-    "downvotes": 0,
-    "due_date": null,
-    "confidential": false,
-    "discussion_locked": null,
-    "issue_type": "issue",
-    "web_url": "https://gitlab.example.com/my-group/my-project/-/issues/6",
-    "time_stats": {
-      "time_estimate": 0,
-      "total_time_spent": 0,
-      "human_time_estimate": null,
-      "human_total_time_spent": null
-    },
-    "task_completion_status": {
-      "count": 0,
-      "completed_count": 0
-    },
-    "weight": null,
-    "blocking_issues_count": 0
- }
+   {
+      "state" : "opened",
+      "description" : "Ratione dolores corrupti mollitia soluta quia.",
+      "author" : {
+         "state" : "active",
+         "id" : 18,
+         "web_url" : "https://gitlab.example.com/eileen.lowe",
+         "name" : "Alexandra Bashirian",
+         "avatar_url" : null,
+         "username" : "eileen.lowe"
+      },
+      "milestone" : {
+         "project_id" : 1,
+         "description" : "Ducimus nam enim ex consequatur cumque ratione.",
+         "state" : "closed",
+         "due_date" : null,
+         "iid" : 2,
+         "created_at" : "2016-01-04T15:31:39.996Z",
+         "title" : "v4.0",
+         "id" : 17,
+         "updated_at" : "2016-01-04T15:31:39.996Z"
+      },
+      "project_id" : 1,
+      "assignee" : {
+         "state" : "active",
+         "id" : 1,
+         "name" : "Administrator",
+         "web_url" : "https://gitlab.example.com/root",
+         "avatar_url" : null,
+         "username" : "root"
+      },
+      "updated_at" : "2016-01-04T15:31:51.081Z",
+      "id" : 76,
+      "title" : "Consequatur vero maxime deserunt laboriosam est voluptas dolorem.",
+      "created_at" : "2016-01-04T15:31:51.081Z",
+      "iid" : 6,
+      "labels" : [],
+      "user_notes_count": 1,
+      "changes_count": "1"
+   }
 ]
 ```
 
@@ -2820,7 +2238,7 @@ GET /projects/:id/merge_requests/:merge_request_iid/related_issues
 
 | Attribute           | Type           | Required | Description |
 |---------------------|----------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `merge_request_iid` | integer        | Yes      | The internal ID of the merge request. |
 
 ```shell
@@ -2896,7 +2314,7 @@ POST /projects/:id/merge_requests/:merge_request_iid/subscribe
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `merge_request_iid` | integer           | Yes      | The internal ID of the merge request. |
 
 If the user is already subscribed to the merge request, the endpoint returns the
@@ -3021,7 +2439,6 @@ Example response:
     "web_url": "https://gitlab.com/DouweM"
   },
   "merged_at": "2018-09-07T11:16:17.520Z",
-  "merge_after": "2018-09-07T11:16:00.000Z",
   "prepared_at": "2018-09-04T11:16:17.520Z",
   "closed_by": null,
   "closed_at": null,
@@ -3061,7 +2478,7 @@ POST /projects/:id/merge_requests/:merge_request_iid/unsubscribe
 
 | Attribute           | Type           | Required | Description |
 |---------------------|----------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `merge_request_iid` | integer        | Yes      | The internal ID of the merge request. |
 
 ```shell
@@ -3186,7 +2603,6 @@ Example response:
     "web_url": "https://gitlab.com/DouweM"
   },
   "merged_at": "2018-09-07T11:16:17.520Z",
-  "merge_after": "2018-09-07T11:16:00.000Z",
   "prepared_at": "2018-09-04T11:16:17.520Z",
   "closed_by": null,
   "closed_at": null,
@@ -3227,7 +2643,7 @@ POST /projects/:id/merge_requests/:merge_request_iid/todo
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `merge_request_iid` | integer           | Yes      | The internal ID of the merge request. |
 
 ```shell
@@ -3418,7 +2834,7 @@ Supported attributes:
 | `version_id`        | integer | Yes      | ID of the merge request diff version. |
 | `unidiff`           | boolean | No       | Present diffs in the [unified diff](https://www.gnu.org/software/diffutils/manual/html_node/Detailed-Unified.html) format. Default is false. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/130610) in GitLab 16.5.      |
 
-If successful, returns [`200 OK`](rest/troubleshooting.md#status-codes) and the following
+If successful, returns [`200 OK`](rest/index.md#status-codes) and the following
 response attributes:
 
 | Attribute                     | Type         | Description |
@@ -3552,7 +2968,7 @@ POST /projects/:id/merge_requests/:merge_request_iid/time_estimate
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `merge_request_iid` | integer           | Yes      | The internal ID of the merge request. |
 | `duration`          | string            | Yes      | The duration in human format, such as `3h30m`. |
 
@@ -3583,7 +2999,7 @@ POST /projects/:id/merge_requests/:merge_request_iid/reset_time_estimate
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `merge_request_iid` | integer           | Yes      | The internal ID of a project's merge request. |
 
 ```shell
@@ -3613,7 +3029,7 @@ POST /projects/:id/merge_requests/:merge_request_iid/add_spent_time
 
 | Attribute           | Type           | Required | Description |
 |---------------------|----------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `merge_request_iid` | integer        | Yes      | The internal ID of the merge request. |
 | `duration`          | string         | Yes      | The duration in human format, such as `3h30m` |
 | `summary`           | string         | No       | A summary of how the time was spent. |
@@ -3645,7 +3061,7 @@ POST /projects/:id/merge_requests/:merge_request_iid/reset_spent_time
 
 | Attribute           | Type           | Required | Description |
 |---------------------|----------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `merge_request_iid` | integer        | Yes      | The internal ID of a project's merge request. |
 
 ```shell
@@ -3673,7 +3089,7 @@ GET /projects/:id/merge_requests/:merge_request_iid/time_stats
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `merge_request_iid` | integer           | Yes      | The internal ID of the merge request. |
 
 ```shell

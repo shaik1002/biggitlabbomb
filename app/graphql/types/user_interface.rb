@@ -31,7 +31,7 @@ module Types
       null: false,
       resolver_method: :redacted_name,
       description: 'Human-readable name of the user. ' \
-        'Returns `****` if the user is a project bot and the requester does not have permission to view the project.'
+      'Returns `****` if the user is a project bot and the requester does not have permission to view the project.'
 
     field :state,
       type: Types::UserStateEnum,
@@ -151,11 +151,6 @@ module Types
     field :gitpod_enabled, GraphQL::Types::Boolean, null: true,
       description: 'Whether Gitpod is enabled at the user level.'
 
-    field :user_preferences, ::Types::UserPreferencesType,
-      null: true,
-      description: 'Preferences for the user.',
-      method: :user_preference
-
     field :preferences_gitpod_path,
       GraphQL::Types::String,
       null: true,
@@ -169,7 +164,7 @@ module Types
       null: true,
       alpha: { milestone: '15.10' },
       description: "Achievements for the user. " \
-        "Only returns for namespaces where the `achievements` feature flag is enabled.",
+                   "Only returns for namespaces where the `achievements` feature flag is enabled.",
       extras: [:lookahead],
       resolver: ::Resolvers::Achievements::UserAchievementsForUserResolver
 
@@ -177,18 +172,6 @@ module Types
       type: ::GraphQL::Types::String,
       null: true,
       description: 'Bio of the user.'
-
-    field :active,
-      type: ::GraphQL::Types::Boolean,
-      null: true,
-      method: :active?,
-      description: 'Indicates if the user is active.'
-
-    field :human,
-      type: ::GraphQL::Types::Boolean,
-      null: true,
-      method: :human?,
-      description: 'Indicates if the user is a regular user.'
 
     field :linkedin,
       type: ::GraphQL::Types::String,

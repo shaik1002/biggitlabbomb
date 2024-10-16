@@ -48,11 +48,6 @@ export default {
       required: false,
       default: false,
     },
-    monospace: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
   computed: {
     path() {
@@ -99,7 +94,6 @@ export default {
     <component
       :is="`${widget}-widget`"
       ref="widget"
-      :monospace="monospace"
       :validate="validate"
       v-bind="$attrs"
       :data-input-target="target"

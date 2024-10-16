@@ -46,7 +46,7 @@ export default {
 <template>
   <div class="top-area">
     <gl-tabs
-      class="mobile-separator issuable-state-filters gl-m-0 gl-flex gl-grow gl-p-0"
+      class="gl-display-flex gl-flex-grow-1 gl-p-0 gl-m-0 mobile-separator issuable-state-filters"
       nav-class="gl-border-b-0"
     >
       <gl-tab
@@ -62,6 +62,7 @@ export default {
           <gl-badge
             v-if="tabCounts && isTabCountNumeric(tab)"
             variant="muted"
+            size="sm"
             class="gl-tab-counter-badge"
           >
             {{ formatNumber(tabCounts[tab.name]) }}

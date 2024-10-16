@@ -73,7 +73,7 @@ module Atlassian
 
       def store_deploy_info(project:, deployments:, **opts)
         items = deployments.map { |d| ::Atlassian::JiraConnect::Serializers::DeploymentEntity.represent(d, opts) }
-        items.select! { |d| d.associations.present? }
+        items.reject! { |d| d.issue_keys.empty? }
 
         return if items.empty?
 

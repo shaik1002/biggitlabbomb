@@ -15,7 +15,7 @@ module Resolvers
         required: false,
         alpha: { milestone: '16.4' },
         description: 'Filter jobs by runner type if ' \
-          'feature flag `:admin_jobs_filter_runner_type` is enabled.'
+                     'feature flag `:admin_jobs_filter_runner_type` is enabled.'
 
       def resolve_with_lookahead(**args)
         jobs = ::Ci::JobsFinder.new(current_user: current_user, params: params_data(args)).execute
@@ -43,8 +43,8 @@ module Resolvers
           play_path: [{ project: { namespace: [:route] } }],
           web_path: [{ project: { namespace: [:route] } }],
           tags: [:tags],
-          trace: [{ project: [:namespace] }, :job_artifacts_trace],
-          source: [:build_source]
+          ai_failure_analysis: [{ project: [:project_feature, :namespace] }],
+          trace: [{ project: [:namespace] }, :job_artifacts_trace]
         }
       end
 

@@ -62,6 +62,11 @@ export default {
       type: Boolean,
       required: true,
     },
+    ciLintPath: {
+      type: String,
+      required: false,
+      default: null,
+    },
     resetCachePath: {
       type: String,
       required: false,
@@ -86,11 +91,6 @@ export default {
       required: true,
     },
     defaultVisibilityPipelineIdType: {
-      type: String,
-      required: false,
-      default: null,
-    },
-    pipelinesAnalyticsPath: {
       type: String,
       required: false,
       default: null,
@@ -166,7 +166,9 @@ export default {
     },
 
     shouldRenderButtons() {
-      return (this.newPipelinePath || this.resetCachePath) && this.shouldRenderTabs;
+      return (
+        (this.newPipelinePath || this.resetCachePath || this.ciLintPath) && this.shouldRenderTabs
+      );
     },
 
     shouldRenderPagination() {
@@ -370,18 +372,16 @@ export default {
         v-if="shouldRenderButtons"
         :new-pipeline-path="newPipelinePath"
         :reset-cache-path="resetCachePath"
-        :pipelines-analytics-path="pipelinesAnalyticsPath"
+        :ci-lint-path="ciLintPath"
         :is-reset-cache-button-loading="isResetCacheButtonLoading"
         @resetRunnersCache="handleResetRunnersCache"
       />
     </div>
 
-    <div v-if="stateToRender !== $options.stateMap.emptyState" class="gl-flex">
-      <div
-        class="row-content-block gl-flex gl-max-w-full gl-flex-grow gl-flex-wrap gl-gap-4 gl-border-b-0 sm:gl-flex-nowrap"
-      >
+    <div v-if="stateToRender !== $options.stateMap.emptyState" class="gl-display-flex">
+      <div class="row-content-block gl-display-flex gl-flex-grow-1 gl-border-b-0">
         <pipelines-filtered-search
-          class="gl-flex gl-max-w-full gl-flex-grow"
+          class="gl-display-flex gl-flex-grow-1 gl-mr-4"
           :project-id="projectId"
           :default-branch-name="defaultBranchName"
           :params="validatedParams"
@@ -389,8 +389,6 @@ export default {
         />
         <gl-collapsible-listbox
           v-model="visibilityPipelineIdType"
-          class="gl-grow sm:gl-grow-0"
-          toggle-class="gl-grow"
           :toggle-text="selectedPipelineKeyOption.text"
           :items="$options.pipelineKeyOptions"
           @select="changeVisibilityPipelineIDType"

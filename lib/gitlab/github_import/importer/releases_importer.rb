@@ -5,7 +5,6 @@ module Gitlab
     module Importer
       class ReleasesImporter
         include BulkImporting
-        include Gitlab::Import::UsernameMentionRewriter
 
         # rubocop: disable CodeReuse/ActiveRecord
         def existing_tags
@@ -52,9 +51,7 @@ module Gitlab
         end
 
         def description_for(release)
-          description = release[:body].presence || "Release for tag #{release[:tag_name]}"
-
-          wrap_mentions_in_backticks(description)
+          release[:body].presence || "Release for tag #{release[:tag_name]}"
         end
 
         def object_type

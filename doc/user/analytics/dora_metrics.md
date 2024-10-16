@@ -42,27 +42,12 @@ Deployment frequency is the frequency of successful deployments to production ov
 Software leaders can use the deployment frequency metric to understand how often the team successfully deploys software to production, and how quickly the teams can respond to customers' requests or new market opportunities.
 High deployment frequency means you can get feedback sooner and iterate faster to deliver improvements and features.
 
-### Deployment frequency forecasting
-
-DETAILS:
-**Tier:** Ultimate
-**Offering:** GitLab.com, Self-managed, GitLab Dedicated
-**Status:** Experiment
-
-Deployment frequency forecasting (formerly named Value stream forecasting) uses a statistical forecasting model to predict productivity metrics and identify anomalies across the software development lifecycle.
-This information can help you improve planning and decision-making for your product and teams.
-
-<i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
-Watch an overview of [Value stream forecasting](https://www.youtube.com/watch?v=6u8_8QQ5pEQ&list=PLFGfElNsQthYDx0A_FaNNfUm9NHsK6zED).
-
 ### How deployment frequency is calculated
 
 In GitLab, deployment frequency is measured by the average number of deployments per day to a given environment, based on the deployment's end time (its `finished_at` property).
 GitLab calculates the deployment frequency from the number of finished deployments on the given day. Only successful deployments (`Deployment.statuses = success`) are counted.
 
 The calculation takes into account the production `environment tier` or the environments named `production/prod`. The environment must be part of the production deployment tier for its deployment information to appear on the graphs.
-
-You can configure DORA metrics for different environments by specifying `other` under the `environment_tiers` parameter in the [`.gitlab/insights.yml` file](../project/insights/index.md#insights-configuration-file).
 
 ### How to improve deployment frequency
 
@@ -248,7 +233,7 @@ and use it to automatically:
 
 ## DORA metrics availability
 
-The table below provides an overview of the DORA metrics' availability in projects and groups:
+The table below provides an overview of the DORA metrics' availability at project and group level:
 
 | Metric                    | Level             | Comments |
 |---------------------------|-------------------|----------|

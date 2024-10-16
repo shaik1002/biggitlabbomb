@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::GithubImport::Importer::Events::ChangedLabel, feature_category: :importers do
+RSpec.describe Gitlab::GithubImport::Importer::Events::ChangedLabel do
   subject(:importer) { described_class.new(project, client) }
 
   let_it_be(:project) { create(:project, :repository) }
@@ -30,8 +30,7 @@ RSpec.describe Gitlab::GithubImport::Importer::Events::ChangedLabel, feature_cat
     {
       user_id: user.id,
       label_id: label_id,
-      created_at: issue_event.created_at,
-      imported_from: 'github'
+      created_at: issue_event.created_at
     }.stringify_keys
   end
 

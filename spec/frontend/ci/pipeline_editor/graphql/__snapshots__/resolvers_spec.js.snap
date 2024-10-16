@@ -1,73 +1,73 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`~/ci/pipeline_editor/graphql/resolvers Mutation lintCI lint data is as expected 1`] = `
-{
+Object {
   "__typename": "CiLintContent",
-  "errors": [],
-  "jobs": [
-    {
+  "errors": Array [],
+  "jobs": Array [
+    Object {
       "__typename": "CiLintJob",
-      "afterScript": [
+      "afterScript": Array [
         "echo 'after script 1",
       ],
       "allowFailure": false,
-      "beforeScript": [
+      "beforeScript": Array [
         "echo 'before script 1'",
       ],
       "environment": "prd",
-      "except": {
-        "refs": [
+      "except": Object {
+        "refs": Array [
           "main@gitlab-org/gitlab",
           "/^release/.*$/@gitlab-org/gitlab",
         ],
       },
       "name": "job_1",
       "only": null,
-      "script": [
+      "script": Array [
         "echo 'script 1'",
       ],
       "stage": "test",
-      "tags": [
+      "tags": Array [
         "tag 1",
       ],
       "when": "on_success",
     },
-    {
+    Object {
       "__typename": "CiLintJob",
-      "afterScript": [
+      "afterScript": Array [
         "echo 'after script 2",
       ],
       "allowFailure": true,
-      "beforeScript": [
+      "beforeScript": Array [
         "echo 'before script 2'",
       ],
       "environment": "stg",
-      "except": {
-        "refs": [
+      "except": Object {
+        "refs": Array [
           "main@gitlab-org/gitlab",
           "/^release/.*$/@gitlab-org/gitlab",
         ],
       },
       "name": "job_2",
-      "only": {
+      "only": Object {
         "__typename": "CiLintJobOnlyPolicy",
-        "refs": [
+        "refs": Array [
           "web",
           "chat",
           "pushes",
         ],
       },
-      "script": [
+      "script": Array [
         "echo 'script 2'",
       ],
       "stage": "test",
-      "tags": [
+      "tags": Array [
         "tag 2",
       ],
       "when": "on_success",
     },
   ],
   "valid": true,
-  "warnings": [],
+  "warnings": Array [],
 }
 `;

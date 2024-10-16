@@ -89,6 +89,14 @@ RSpec.describe WorkItems::CreateService, feature_category: :team_planning do
         it 'returns validation errors' do
           expect(service_result.errors).to contain_exactly("Title can't be blank")
         end
+
+        it 'does not execute after-create transaction widgets' do
+          expect(service).to receive(:create).and_call_original
+          expect(service).not_to receive(:execute_widgets)
+                                   .with(callback: :after_create_in_transaction, widget_params: widget_params)
+
+          service_result
+        end
       end
 
       context 'checking spam' do
@@ -136,8 +144,9 @@ RSpec.describe WorkItems::CreateService, feature_category: :team_planning do
         let(:supported_widgets) do
           [
             {
-              klass: WorkItems::Callbacks::Hierarchy,
-              callback: :after_create
+              klass: WorkItems::Widgets::HierarchyService::CreateService,
+              callback: :after_create_in_transaction,
+              params: { parent: parent }
             }
           ]
         end
@@ -147,7 +156,7 @@ RSpec.describe WorkItems::CreateService, feature_category: :team_planning do
         let(:widget_params) { { hierarchy_widget: { parent: parent } } }
 
         context 'when user can admin parent link' do
-          let(:current_user) { guest }
+          let(:current_user) { reporter }
 
           context 'when parent is valid work item' do
             let(:opts) do
@@ -171,14 +180,13 @@ RSpec.describe WorkItems::CreateService, feature_category: :team_planning do
             let_it_be(:parent) { create(:work_item, :task, **container_args) }
 
             it_behaves_like 'fails creating work item and returns errors' do
-              let(:error_message) { "it's not allowed to add this type of parent item" }
+              let(:error_message) { 'is not allowed to add this type of parent' }
             end
           end
         end
 
         context 'when user cannot admin parent link' do
           let(:current_user) { guest }
-          let_it_be(:parent) { create(:work_item, :confidential, **container_args) }
 
           let(:opts) do
             {
@@ -207,4 +215,5 @@ RSpec.describe WorkItems::CreateService, feature_category: :team_planning do
 
   it_behaves_like 'creates work item in container', :project
   it_behaves_like 'creates work item in container', :project_namespace
+  it_behaves_like 'creates work item in container', :group
 end

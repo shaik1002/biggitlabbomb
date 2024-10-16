@@ -151,14 +151,6 @@ RSpec.describe Integration, feature_category: :integrations do
       it 'returns the right group integration' do
         expect(described_class.for_group(group)).to contain_exactly(jira_group_integration)
       end
-
-      context 'when there is an instance specific integration' do
-        let!(:beyond_identity_integration) { create(:beyond_identity_integration, instance: false, group: group) }
-
-        it 'includes the instance specific integration' do
-          expect(described_class.for_group(group)).to include(jira_group_integration, beyond_identity_integration)
-        end
-      end
     end
 
     shared_examples 'hook scope' do |hook_type|
@@ -1271,65 +1263,37 @@ RSpec.describe Integration, feature_category: :integrations do
   describe '.available_integration_names' do
     subject { described_class.available_integration_names }
 
-    it { is_expected.not_to include('jira_cloud_app') }
-
-    context 'when instance is configured for Jira Cloud app' do
-      before do
-        stub_application_setting(jira_connect_application_key: 'mock_app_oauth_key')
-      end
-
-      it { is_expected.to include('jira_cloud_app') }
-    end
-  end
-
-  describe '.available_integration_names (stubbed)' do
-    subject { described_class.available_integration_names }
-
     before do
       allow(described_class).to receive_messages(
         integration_names: %w[foo disabled],
-        project_specific_integration_names: ['project'],
-        project_and_group_specific_integration_names: ['project-and-group'],
-        dev_integration_names: ['dev'],
-        instance_specific_integration_names: ['instance'],
+        project_specific_integration_names: ['bar'],
+        dev_integration_names: ['baz'],
+        instance_specific_integration_names: ['instance-specific'],
         disabled_integration_names: ['disabled']
       )
     end
 
-    it { is_expected.to include('foo', 'project', 'project-and-group', 'instance', 'dev') }
-    it { is_expected.not_to include('disabled') }
+    it { is_expected.to include('foo', 'bar', 'baz') }
 
     context 'when `include_project_specific` is false' do
       subject { described_class.available_integration_names(include_project_specific: false) }
 
-      it { is_expected.to include('foo', 'dev', 'project-and-group', 'instance') }
-      it { is_expected.not_to include('project', 'disabled') }
+      it { is_expected.to include('foo', 'baz', 'instance-specific') }
+      it { is_expected.not_to include('bar', 'disabled') }
     end
 
     context 'when `include_dev` is false' do
       subject { described_class.available_integration_names(include_dev: false) }
 
-      it { is_expected.to include('foo', 'project', 'project-and-group', 'instance') }
-      it { is_expected.not_to include('dev', 'disabled') }
+      it { is_expected.to include('foo', 'bar', 'instance-specific') }
+      it { is_expected.not_to include('baz', 'disabled') }
     end
 
     context 'when `include_instance_specific` is false' do
       subject { described_class.available_integration_names(include_instance_specific: false) }
 
-      it { is_expected.to include('foo', 'dev', 'project', 'project-and-group') }
-      it { is_expected.not_to include('instance', 'disabled') }
-    end
-
-    context 'when `include_project_specific` and `include_group_specific` are false' do
-      subject do
-        described_class.available_integration_names(
-          include_project_specific: false,
-          include_group_specific: false
-        )
-      end
-
-      it { is_expected.to include('foo', 'dev', 'instance') }
-      it { is_expected.not_to include('project', 'project-and-group', 'disabled') }
+      it { is_expected.to include('foo', 'baz', 'bar') }
+      it { is_expected.not_to include('instance-specific', 'disabled') }
     end
 
     context 'when `include_disabled` is true' do
@@ -1342,7 +1306,7 @@ RSpec.describe Integration, feature_category: :integrations do
   describe '.integration_names' do
     subject { described_class.integration_names }
 
-    it { is_expected.to include(*described_class::INTEGRATION_NAMES - ['jira_cloud_app']) }
+    it { is_expected.to include(*described_class::INTEGRATION_NAMES) }
     it { is_expected.to include('gitlab_slack_application') }
 
     context 'when Rails.env is not test' do
@@ -1373,7 +1337,7 @@ RSpec.describe Integration, feature_category: :integrations do
   describe '.project_specific_integration_names' do
     subject { described_class.project_specific_integration_names }
 
-    it { is_expected.to include(*described_class::PROJECT_LEVEL_ONLY_INTEGRATION_NAMES) }
+    it { is_expected.to include(*described_class::PROJECT_SPECIFIC_INTEGRATION_NAMES) }
     it { is_expected.not_to include('gitlab_slack_application') }
 
     context 'when feature flag is disabled' do
@@ -1702,7 +1666,7 @@ RSpec.describe Integration, feature_category: :integrations do
   end
 
   describe '#async_execute' do
-    let(:integration) { build(:jenkins_integration, id: 123) }
+    let(:integration) { described_class.new(id: 123) }
     let(:data) { { object_kind: 'build' } }
     let(:serialized_data) { data.deep_stringify_keys }
     let(:supported_events) { %w[push build] }
@@ -1724,18 +1688,6 @@ RSpec.describe Integration, feature_category: :integrations do
 
       it 'does not queue a worker' do
         expect(Integrations::ExecuteWorker).not_to receive(:perform_async)
-
-        async_execute
-      end
-
-      it 'writes a log' do
-        expect(Gitlab::IntegrationsLogger).to receive(:info).with(
-          hash_including(
-            message: 'async_execute did nothing due to event not being supported',
-            integration_class: 'Integrations::Jenkins',
-            event: 'build'
-          )
-        ).and_call_original
 
         async_execute
       end

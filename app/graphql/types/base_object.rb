@@ -36,10 +36,7 @@ module Types
     end
 
     def self.authorized?(object, context)
-      authorization.ok?(object, context[:current_user],
-        scope_validator: context[:scope_validator],
-        skip_abilities: context[:skip_type_authorization]
-      )
+      authorization.ok?(object, context[:current_user], scope_validator: context[:scope_validator])
     end
 
     def current_user

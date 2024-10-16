@@ -26,7 +26,7 @@ RSpec.describe BulkImports::Projects::Pipelines::DesignBundlePipeline, feature_c
   end
 
   after do
-    FileUtils.rm_rf(tmpdir)
+    FileUtils.remove_entry(tmpdir) if Dir.exist?(tmpdir)
   end
 
   describe '#run' do

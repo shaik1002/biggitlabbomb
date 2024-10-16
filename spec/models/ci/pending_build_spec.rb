@@ -3,8 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Ci::PendingBuild, feature_category: :continuous_integration do
-  let_it_be_with_refind(:project) { create(:project) }
-  let_it_be_with_refind(:pipeline) { create(:ci_pipeline, project: project) }
+  let_it_be(:project) { create(:project) }
+  let_it_be(:pipeline) { create(:ci_pipeline, project: project) }
 
   let(:build) { create(:ci_build, :created, pipeline: pipeline) }
 
@@ -101,7 +101,7 @@ RSpec.describe Ci::PendingBuild, feature_category: :continuous_integration do
 
     context 'when project does not have shared runners enabled' do
       before do
-        project.update!(shared_runners_enabled: false)
+        project.shared_runners_enabled = false
       end
 
       it 'sets instance_runners_enabled to false' do
@@ -115,7 +115,7 @@ RSpec.describe Ci::PendingBuild, feature_category: :continuous_integration do
       let_it_be(:runner) { create(:ci_runner, :instance) }
 
       before do
-        project.update!(shared_runners_enabled: true)
+        project.shared_runners_enabled = true
       end
 
       it 'sets instance_runners_enabled to true' do
@@ -126,7 +126,7 @@ RSpec.describe Ci::PendingBuild, feature_category: :continuous_integration do
 
       context 'when project is about to be deleted' do
         before do
-          project.update!(pending_delete: true)
+          build.project.update!(pending_delete: true)
         end
 
         it 'sets instance_runners_enabled to false' do
@@ -138,7 +138,7 @@ RSpec.describe Ci::PendingBuild, feature_category: :continuous_integration do
 
       context 'when builds are disabled' do
         before do
-          project.project_feature.update!(builds_access_level: false)
+          build.project.project_feature.update!(builds_access_level: false)
         end
 
         it 'sets instance_runners_enabled to false' do
@@ -162,36 +162,35 @@ RSpec.describe Ci::PendingBuild, feature_category: :continuous_integration do
     end
 
     context 'when a build project is nested in a subgroup' do
-      let_it_be(:group) { create(:group, :with_hierarchy, depth: 2, children: 1) }
-      let_it_be_with_refind(:project) { create(:project, namespace: group.descendants.first) }
-      let_it_be_with_refind(:pipeline) { create(:ci_pipeline, project: project) }
-
+      let(:group) { create(:group, :with_hierarchy, depth: 2, children: 1) }
+      let(:project) { create(:project, namespace: group.descendants.first) }
+      let(:pipeline) { create(:ci_pipeline, project: project) }
       let(:build) { create(:ci_build, :created, pipeline: pipeline) }
 
-      subject(:latest_pending_build) { described_class.last }
+      subject { described_class.last }
 
       context 'when build can be picked by a group runner' do
         before do
-          project.update!(group_runners_enabled: true)
+          project.group_runners_enabled = true
         end
 
         it 'denormalizes namespace traversal ids' do
           described_class.upsert_from_build!(build)
 
-          expect(latest_pending_build.namespace_traversal_ids).not_to be_empty
-          expect(latest_pending_build.namespace_traversal_ids).to eq [group.id, project.namespace.id]
+          expect(subject.namespace_traversal_ids).not_to be_empty
+          expect(subject.namespace_traversal_ids).to eq [group.id, project.namespace.id]
         end
       end
 
       context 'when build can not be picked by a group runner' do
         before do
-          project.update!(group_runners_enabled: false)
+          project.group_runners_enabled = false
         end
 
         it 'creates an empty namespace traversal ids array' do
           described_class.upsert_from_build!(build)
 
-          expect(latest_pending_build.namespace_traversal_ids).to be_empty
+          expect(subject.namespace_traversal_ids).to be_empty
         end
       end
     end
@@ -216,24 +215,24 @@ RSpec.describe Ci::PendingBuild, feature_category: :continuous_integration do
     end
   end
 
-  describe 'partitioning' do
+  describe 'partitioning', :ci_partitionable do
     include Ci::PartitioningHelpers
 
     before do
-      stub_current_partition_id(ci_testing_partition_id)
+      stub_current_partition_id(ci_testing_partition_id_for_check_constraints)
     end
 
     let(:new_pipeline ) { create(:ci_pipeline, project: pipeline.project) }
     let(:new_build) { create(:ci_build, pipeline: new_pipeline) }
 
     it 'assigns the same partition id as the one that build has', :aggregate_failures do
-      expect(new_build.partition_id).to eq ci_testing_partition_id
+      expect(new_build.partition_id).to eq ci_testing_partition_id_for_check_constraints
 
       described_class.upsert_from_build!(build)
       described_class.upsert_from_build!(new_build)
 
       expect(build.reload.queuing_entry.partition_id).to eq pipeline.partition_id
-      expect(new_build.reload.queuing_entry.partition_id).to eq ci_testing_partition_id
+      expect(new_build.reload.queuing_entry.partition_id).to eq ci_testing_partition_id_for_check_constraints
     end
   end
 

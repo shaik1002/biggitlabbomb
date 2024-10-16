@@ -3,13 +3,13 @@
 module Banzai
   module Filter
     class CustomEmojiFilter < HTML::Pipeline::Filter
-      prepend Concerns::TimeoutFilterHandler
+      include Concerns::TimeoutFilterHandler
       prepend Concerns::PipelineTimingCheck
       include Gitlab::Utils::StrongMemoize
 
       IGNORED_ANCESTOR_TAGS = %w[pre code tt].to_set
 
-      def call
+      def call_with_timeout
         return doc unless resource_parent
 
         doc.xpath('descendant-or-self::text()').each do |node|

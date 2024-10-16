@@ -59,7 +59,6 @@ When using spring and guard together, use `SPRING=1 bundle exec guard` instead t
 - Try to follow the [Four-Phase Test](https://thoughtbot.com/blog/four-phase-test) pattern, using newlines
   to separate phases.
 - Use `Gitlab.config.gitlab.host` rather than hard coding `'localhost'`.
-- For literal URLs in tests, use `example.com`, `gitlab.example.com`. This will ensure that we do not utilize any real URLs.
 - Don't assert against the absolute value of a sequence-generated attribute (see
   [Gotchas](../gotchas.md#do-not-assert-against-the-absolute-value-of-a-sequence-generated-attribute)).
 - Avoid using `expect_any_instance_of` or `allow_any_instance_of` (see
@@ -132,11 +131,7 @@ If the specs pass the check the script removes them from
 
 If the specs fail the check they must be fixed before than can run in random order.
 
-### Test flakiness
-
-[Consult the Unhealthy tests page for more information about processes that are in place to avoid flaky tests](unhealthy_tests.md#flaky-tests).
-
-### Test slowness
+### Test speed
 
 GitLab has a massive test suite that, without [parallelization](../pipelines/index.md#test-suite-parallelization), can take hours
 to run. It's important that we make an effort to write tests that are accurate
@@ -146,8 +141,6 @@ Test performance is important to maintaining quality and velocity, and has a
 direct impact on CI build times and thus fixed costs. We want thorough, correct,
 and fast tests. Here you can find some information about tools and techniques
 available to you to achieve that.
-
-[Consult the Unhealthy tests page for more information about processes that are in place to avoid slow tests](unhealthy_tests.md#slow-tests).
 
 #### Don't request capabilities you don't need
 
@@ -485,6 +478,22 @@ a place to start. The most expensive examples here are in
 shared examples; any reductions generally have a larger impact as
 they are called in multiple places.
 
+#### Top slow tests
+
+We collect information about tests duration in [`rspec_profiling_stats`](https://gitlab.com/gitlab-org/rspec_profiling_stats) project. The data is showed using GitLab Pages in this
+[UI](https://gitlab-org.gitlab.io/rspec_profiling_stats/)
+
+With [issue](https://gitlab.com/gitlab-org/gitlab/-/issues/375983) we defined thresholds for tests duration that can act a guide.
+
+For tests that are not meeting the thresholds, we create [issues](https://gitlab.com/gitlab-org/gitlab/-/issues/?sort=created_date&state=opened&label_name%5B%5D=rspec%3Aslow%20test&first_page_size=100) automatically in order to improve them.
+
+For tests that are slow for a legitimate reason and to skip issue creation, add `allowed_to_be_slow: true`.
+
+| Date | Feature tests | Controllers and Requests tests | Unit | Other | Method |
+| :-: | :-: | :-: | :-: | :-: | :-: |
+| 2023-02-15 | 67.42 seconds | 44.66 seconds | - | 76.86 seconds | Top slow test eliminating the maximum |
+| 2023-06-15 | 50.13 seconds | 19.20 seconds | 27.12 | 45.40 seconds | Avg for top 100 slow tests|
+
 #### Avoid repeating expensive actions
 
 While isolated examples are very clear, and help serve the purpose of specs as
@@ -664,7 +673,7 @@ find_field _('Checkbox label'), checked: true
 find_field _('Checkbox label'), unchecked: true
 
 # acceptable when finding a element that is not a button, link, or field
-find_by_testid('element')
+find('[data-testid="element"]')
 ```
 
 ##### Matchers
@@ -844,9 +853,6 @@ really fast because:
 - GitLab Shell and Gitaly setup are skipped
 - Test repositories setup are skipped
 
-It takes around one second to load tests that are using `fast_spec_helper`
-instead of 30+ seconds in case of a regular `spec_helper`.
-
 `fast_spec_helper` also support autoloading classes that are located inside the
 `lib/` directory. If your class or module is using only
 code from the `lib/` directory, you don't need to explicitly load any
@@ -864,27 +870,15 @@ should either:
 - Add `require_dependency 're2'` to files in your library that need `re2` gem,
   to make this requirement explicit. This approach is preferred.
 - Add it to the spec itself.
+- Use `rubocop_spec_helper` for RuboCop related specs.
 
-Alternately, if it is a dependency which is required by many different `fast_spec_helper`
-specs in your domain, and you don't want to have to manually add the dependency many
-times, you can add it to be called directly from `fast_spec_helper` itself. To do
-this, you can create a `spec/support/fast_spec/YOUR_DOMAIN/fast_spec_helper_support.rb`
-file, and require it from `fast_spec_helper`. There are existing examples of this
-you can follow.
-
-Use `rubocop_spec_helper` for RuboCop related specs.
+It takes around one second to load tests that are using `fast_spec_helper`
+instead of 30+ seconds in case of a regular `spec_helper`.
 
 WARNING:
 To verify that code and its specs are well-isolated from Rails, run the spec
 individually via `bin/rspec`. Don't use `bin/spring rspec` as it loads
 `spec_helper` automatically.
-
-#### Maintaining fast_spec_helper specs
-
-There is a utility script `scripts/run-fast-specs.sh` which can be used to run
-all specs which use `fast_spec_helper`, in various ways. This script is useful
-to help identify `fast_spec_helper` specs which have problems, such as not
-running successfully in isolation. See the script for more details.
 
 ### `subject` and `let` variables
 
@@ -1101,7 +1095,7 @@ following tests. This should be avoided at all costs! Fortunately, the existing
 test framework handles most cases already.
 
 When the test environment does get polluted, a common outcome is
-[flaky tests](unhealthy_tests.md#flaky-tests). Pollution often manifests as an order
+[flaky tests](flaky_tests.md). Pollution often manifests as an order
 dependency: running spec A followed by spec B reliably fails, but running
 spec B followed by spec A reliably succeeds. In these cases, you can use
 `rspec --bisect` (or a manual pairwise bisect of spec files) to determine which
@@ -1468,14 +1462,14 @@ NoMethodError:
 
 That indicates that you need to include the line `using RSpec::Parameterized::TableSyntax` in the spec file.
 
-<!-- vale gitlab_base.Spelling = NO -->
+<!-- vale gitlab.Spelling = NO -->
 
 WARNING:
 Only use simple values as input in the `where` block. Using procs, stateful
 objects, FactoryBot-created objects, and similar items can lead to
 [unexpected results](https://github.com/tomykaira/rspec-parameterized/issues/8).
 
-<!-- vale gitlab_base.Spelling = YES -->
+<!-- vale gitlab.Spelling = YES -->
 
 ### Prometheus tests
 

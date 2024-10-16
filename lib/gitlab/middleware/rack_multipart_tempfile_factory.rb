@@ -5,7 +5,7 @@ module Gitlab
     class RackMultipartTempfileFactory
       # Immediately unlink the created temporary file so we don't have to rely
       # on Rack::TempfileReaper catching this after the fact.
-      FACTORY = ->(filename, content_type) do
+      FACTORY = lambda do |filename, content_type|
         Rack::Multipart::Parser::TEMPFILE_FACTORY.call(filename, content_type).tap(&:unlink)
       end
 

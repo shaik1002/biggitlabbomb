@@ -334,9 +334,11 @@ export default {
 
 <template>
   <div
-    class="design-detail js-design-detail fixed-top gl-flex gl-w-full gl-flex-col gl-justify-center gl-bg-gray-10 lg:gl-flex-row"
+    class="design-detail js-design-detail fixed-top gl-w-full gl-display-flex gl-justify-content-center gl-flex-direction-column gl-lg-flex-direction-row gl-bg-gray-10"
   >
-    <div class="gl-relative gl-flex gl-grow gl-flex-col gl-overflow-hidden">
+    <div
+      class="gl-display-flex gl-overflow-hidden gl-flex-grow-1 gl-flex-direction-column gl-relative"
+    >
       <design-destroyer
         :filenames="/* eslint-disable @gitlab/vue-no-new-non-primitive-in-template */ [
           design.filename,
@@ -361,8 +363,12 @@ export default {
         </template>
       </design-destroyer>
 
-      <div class="gl-relative gl-flex gl-grow gl-flex-col gl-overflow-hidden lg:gl-flex-row">
-        <div class="gl-relative gl-flex gl-grow-2 gl-flex-col gl-overflow-hidden">
+      <div
+        class="gl-display-flex gl-overflow-hidden gl-flex-direction-column gl-lg-flex-direction-row gl-flex-grow-1 gl-relative"
+      >
+        <div
+          class="gl-display-flex gl-overflow-hidden gl-flex-grow-2 gl-flex-direction-column gl-relative"
+        >
           <div v-if="errorMessage" class="gl-p-5">
             <gl-alert variant="danger" @dismiss="errorMessage = null">
               {{ errorMessage }}
@@ -384,7 +390,7 @@ export default {
           />
 
           <div
-            class="design-scaler-wrapper gl-absolute gl-mb-6 gl-flex gl-items-center gl-justify-center"
+            class="design-scaler-wrapper gl-absolute gl-mb-6 gl-display-flex gl-justify-content-center gl-align-items-center"
           >
             <design-scaler :max-scale="maxScale" @scale="scale = $event" />
           </div>

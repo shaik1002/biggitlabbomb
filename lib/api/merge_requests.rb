@@ -2,17 +2,12 @@
 
 module API
   class MergeRequests < ::API::Base
-    include APIGuard
     include PaginationParams
     include Helpers::Unidiff
 
     CONTEXT_COMMITS_POST_LIMIT = 20
 
     before { authenticate_non_get! }
-
-    allow_access_with_scope :ai_workflows, if: ->(request) do
-      request.get? || request.head? || request.put?
-    end
 
     rescue_from ActiveRecord::QueryCanceled do |_e|
       render_api_error!({ error: 'Request timed out' }, 408)
@@ -81,7 +76,7 @@ module API
         args[:scope] = args[:scope].underscore if args[:scope]
 
         merge_requests = MergeRequestsFinder.new(current_user, args).execute
-        merge_requests = order_merge_requests(merge_requests)
+                           .reorder(order_options_with_tie_breaker(override_created_at: false))
         merge_requests = paginate(merge_requests)
                            .preload(:source_project, :target_project)
 
@@ -92,35 +87,14 @@ module API
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
-      def render_merge_requests(merge_requests, options, skip_cache: false)
-        return present merge_requests, options if skip_cache
-
-        cache_context = ->(mr) do
-          [
-            current_user&.cache_key,
-            mr.merge_status,
-            mr.labels.map(&:cache_key),
-            mr.merge_request_assignees.map(&:cache_key),
-            mr.merge_request_reviewers.map(&:cache_key)
-          ].join(":")
-        end
-
-        present_cached merge_requests,
-          expires_in: 8.hours,
-          cache_context: cache_context,
-          **options
-      end
-
       def merge_request_pipelines_with_access
         mr = find_merge_request_with_access(params[:merge_request_iid])
         ::Ci::PipelinesForMergeRequestFinder.new(mr, current_user).execute
       end
 
       def automatically_mergeable?(merge_when_pipeline_succeeds, merge_request)
-        available_strategies = AutoMergeService.new(merge_request.project,
-          current_user).available_strategies(merge_request)
-
-        merge_when_pipeline_succeeds && available_strategies.include?(merge_request.default_auto_merge_strategy)
+        pipeline_active = merge_request.head_pipeline_active? || merge_request.diff_head_pipeline_active?
+        merge_when_pipeline_succeeds && merge_request.mergeable_state?(skip_ci_check: true) && pipeline_active
       end
 
       def immediately_mergeable?(merge_when_pipeline_succeeds, merge_request)
@@ -160,21 +134,6 @@ module API
       def batch_process_mergeability_checks(merge_requests)
         ::MergeRequests::MergeabilityCheckBatchService.new(merge_requests, current_user).execute
       end
-
-      # rubocop: disable CodeReuse/ActiveRecord
-      def order_merge_requests(merge_requests)
-        if params[:order_by] == 'merged_at'
-          case params[:sort]
-          when 'desc'
-            return merge_requests.reorder_by_metric('merged_at', 'DESC')
-          else
-            return merge_requests.reorder_by_metric('merged_at', 'ASC')
-          end
-        end
-
-        merge_requests.reorder(order_options_with_tie_breaker(override_created_at: false))
-      end
-      # rubocop: enable CodeReuse/ActiveRecord
 
       params :merge_requests_params do
         use :merge_requests_base_params
@@ -245,7 +204,6 @@ module API
     params do
       requires :id, types: [String, Integer], desc: 'The ID or URL-encoded path of the project.'
     end
-
     resource :projects, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
       include TimeTrackingEndpoints
 
@@ -316,11 +274,18 @@ module API
 
         recheck_mergeability_of(merge_requests: merge_requests) unless options[:skip_merge_status_recheck]
 
-        skip_cache = [
-          declared_params[:with_labels_details] == true
-        ].any?
-
-        render_merge_requests(merge_requests, options, skip_cache: skip_cache)
+        present_cached merge_requests,
+          expires_in: 8.hours,
+          cache_context: ->(mr) do
+            [
+              current_user&.cache_key,
+              mr.merge_status,
+              mr.labels.map(&:cache_key),
+              mr.merge_request_assignees.map(&:cache_key),
+              mr.merge_request_reviewers.map(&:cache_key)
+            ].join(":")
+          end,
+          **options
       end
 
       desc 'Create merge request' do
@@ -608,29 +573,13 @@ module API
         ]
         tags %w[merge_requests]
       end
-      params do
-        optional :async, type: Boolean, default: false,
-          desc: 'Indicates if the merge request pipeline creation should be performed asynchronously. If set to `true`, the pipeline will be created outside of the API request and the endpoint will return an empty response with a `202` status code. When the response is `202`, the creation can still fail outside of this request.'
-      end
       post ':id/merge_requests/:merge_request_iid/pipelines', urgency: :low, feature_category: :pipeline_composition do
-        pipeline = nil
-        merge_request = find_merge_request_with_access(params[:merge_request_iid])
+        pipeline = ::MergeRequests::CreatePipelineService
+          .new(project: user_project, current_user: current_user, params: { allow_duplicate: true })
+          .execute(find_merge_request_with_access(params[:merge_request_iid]))
+          .payload
 
-        merge_request_params = { allow_duplicate: true }
-
-        if params[:async]
-          ::MergeRequests::CreatePipelineWorker # rubocop:disable CodeReuse/Worker -- Worker wraps service and another service wrapping that is pointless
-            .perform_async(user_project.id, current_user.id, merge_request.id, merge_request_params)
-        else
-          pipeline = ::MergeRequests::CreatePipelineService
-            .new(project: user_project, current_user: current_user, params: merge_request_params)
-            .execute(merge_request)
-            .payload
-        end
-
-        if params[:async]
-          status :accepted
-        elsif pipeline.nil?
+        if pipeline.nil?
           not_allowed!
         elsif pipeline.persisted?
           status :ok
@@ -723,7 +672,7 @@ module API
 
         not_allowed! if !immediately_mergeable && !automatically_mergeable
 
-        render_api_error!('Branch cannot be merged', 422) unless automatically_mergeable || merge_request.mergeable?(skip_ci_check: automatically_mergeable)
+        render_api_error!('Branch cannot be merged', 422) unless merge_request.mergeable?(skip_ci_check: automatically_mergeable)
 
         check_sha_param!(params, merge_request)
 
@@ -742,7 +691,7 @@ module API
             .execute(merge_request)
         elsif automatically_mergeable
           AutoMergeService.new(merge_request.target_project, current_user, merge_params)
-            .execute(merge_request, merge_request.default_auto_merge_strategy)
+            .execute(merge_request, AutoMergeService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS)
         end
 
         if immediately_mergeable && !merge_request.merged?

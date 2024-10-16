@@ -3,7 +3,7 @@
 FactoryBot.define do
   factory :event do
     project
-    author(factory: [:user, :with_namespace]) { project.creator }
+    author(factory: :user) { project.creator }
     action { :joined }
 
     trait(:created)   { action { :created } }
@@ -85,7 +85,7 @@ FactoryBot.define do
     end
 
     factory :project_imported_event do
-      association :project, :with_import_url
+      project factory: [:project, :with_import_url]
       action { :created }
     end
   end

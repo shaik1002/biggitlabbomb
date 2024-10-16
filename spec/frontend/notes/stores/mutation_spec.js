@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import { DISCUSSION_NOTE, ASC, DESC } from '~/notes/constants';
 import mutations from '~/notes/stores/mutations';
 import {
@@ -597,15 +598,13 @@ describe('Notes Store mutations', () => {
     });
 
     it('keeps reactivity of discussion', () => {
-      const state = {
-        discussions: [
-          {
-            id: 1,
-            expanded: false,
-          },
-        ],
-      };
-
+      const state = {};
+      Vue.set(state, 'discussions', [
+        {
+          id: 1,
+          expanded: false,
+        },
+      ]);
       const discussion = state.discussions[0];
 
       mutations.SET_DISCUSSION_DIFF_LINES(state, {

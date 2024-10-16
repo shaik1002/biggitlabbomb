@@ -84,6 +84,7 @@ describe('IntegrationStatus', () => {
       expect(findBadge().props()).toMatchObject({
         icon: 'license',
         variant: 'tier',
+        size: 'md',
       });
       expect(findBadge().text()).toBe(wrapper.vm.$options.i18n.premiumTitle);
     });

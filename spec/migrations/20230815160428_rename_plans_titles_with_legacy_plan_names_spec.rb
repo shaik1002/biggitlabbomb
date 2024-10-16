@@ -3,7 +3,7 @@
 require 'spec_helper'
 require_migration!
 
-RSpec.describe RenamePlansTitlesWithLegacyPlanNames, feature_category: :subscription_management, allowed_to_be_slow: true do
+RSpec.describe RenamePlansTitlesWithLegacyPlanNames, feature_category: :subscription_management do
   let(:plans) { table(:plans) }
 
   let!(:premium_plan) { plans.create!(name: 'premium', title: 'Premium (Formerly Silver)') }

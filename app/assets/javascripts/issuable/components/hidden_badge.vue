@@ -1,11 +1,12 @@
 <script>
-import { GlBadge, GlTooltipDirective } from '@gitlab/ui';
+import { GlBadge, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { issuableTypeText } from '~/issues/constants';
 import { __, sprintf } from '~/locale';
 
 export default {
   components: {
     GlBadge,
+    GlIcon,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -28,12 +29,8 @@ export default {
 </script>
 
 <template>
-  <gl-badge
-    v-gl-tooltip
-    icon="spam"
-    :title="title"
-    :aria-label="__('Hidden')"
-    variant="warning"
-    class="gl-shrink-0"
-  />
+  <gl-badge v-gl-tooltip :title="title" variant="warning">
+    <gl-icon name="spam" />
+    <span class="gl-sr-only">{{ __('Hidden') }}</span>
+  </gl-badge>
 </template>

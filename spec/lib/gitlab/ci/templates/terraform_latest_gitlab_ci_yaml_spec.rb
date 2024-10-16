@@ -3,8 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe 'Terraform.latest.gitlab-ci.yml', feature_category: :continuous_integration do
-  include Ci::PipelineMessageHelpers
-
   before do
     allow(Gitlab::Template::GitlabCiYmlTemplate).to receive(:excluded_patterns).and_return([])
   end
@@ -81,7 +79,10 @@ RSpec.describe 'Terraform.latest.gitlab-ci.yml', feature_category: :continuous_i
       it 'does not create a branch pipeline', :aggregate_failures do
         expect(branch_build_names).to be_empty
         expect(branch_pipeline.errors.full_messages).to match_array(
-          [sanitize_message(Ci::Pipeline.rules_failure_message)]
+          [
+            'Pipeline will not run for the selected trigger. ' \
+            'The rules configuration prevented any jobs from being added to the pipeline.'
+          ]
         )
       end
     end

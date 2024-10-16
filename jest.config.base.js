@@ -20,8 +20,6 @@ module.exports = (path, options = {}) => {
     roots: extRoots = [],
     rootsEE: extRootsEE = [],
     rootsJH: extRootsJH = [],
-    isEE = IS_EE,
-    isJH = IS_JH,
   } = options;
 
   const reporters = ['default'];
@@ -82,11 +80,11 @@ module.exports = (path, options = {}) => {
 
   const glob = `${path}/**/*@([._])spec.js`;
   let testMatch = [`<rootDir>/${glob}`];
-  if (isEE) {
+  if (IS_EE) {
     testMatch.push(`<rootDir>/ee/${glob}`);
   }
 
-  if (isJH) {
+  if (IS_JH) {
     testMatch.push(`<rootDir>/jh/${glob}`);
   }
   // workaround for eslint-import-resolver-jest only resolving in test files
@@ -132,7 +130,7 @@ module.exports = (path, options = {}) => {
 
   const collectCoverageFrom = ['<rootDir>/app/assets/javascripts/**/*.{js,vue}'];
 
-  if (isEE) {
+  if (IS_EE) {
     const rootDirEE = '<rootDir>/ee/app/assets/javascripts$1';
     const specDirEE = '<rootDir>/ee/spec/frontend/$1';
     Object.assign(moduleNameMapper, {
@@ -150,7 +148,7 @@ module.exports = (path, options = {}) => {
     collectCoverageFrom.push(rootDirEE.replace('$1', '/**/*.{js,vue}'));
   }
 
-  if (isJH) {
+  if (IS_JH) {
     // DO NOT add additional path to Jihu side, it might break things.
     const rootDirJH = '<rootDir>/jh/app/assets/javascripts$1';
     const specDirJH = '<rootDir>/jh/spec/frontend/$1';
@@ -207,7 +205,6 @@ module.exports = (path, options = {}) => {
     '@gitlab/favicon-overlay',
     '@gitlab/cluster-client',
     '@gitlab/web-ide',
-    '@gitlab/query-language',
     'bootstrap-vue',
     'gridstack',
     'three',
@@ -269,12 +266,11 @@ module.exports = (path, options = {}) => {
     },
     testEnvironment: '<rootDir>/spec/frontend/environment.js',
     testEnvironmentOptions: {
-      IS_EE: isEE,
-      IS_JH: isJH,
+      IS_EE,
+      IS_JH,
       url: TEST_HOST,
     },
     testRunner: 'jest-jasmine2',
-    prettierPath: undefined,
     snapshotSerializers: [
       '<rootDir>/spec/frontend/__helpers__/html_string_serializer.js',
       '<rootDir>/spec/frontend/__helpers__/clean_html_element_serializer.js',
@@ -282,8 +278,8 @@ module.exports = (path, options = {}) => {
     roots: [
       '<rootDir>/app/assets/javascripts/',
       ...extRoots,
-      ...(isEE ? ['<rootDir>/ee/app/assets/javascripts/', ...extRootsEE] : []),
-      ...(isJH ? ['<rootDir>/jh/app/assets/javascripts/', ...extRootsJH] : []),
+      ...(IS_EE ? ['<rootDir>/ee/app/assets/javascripts/', ...extRootsEE] : []),
+      ...(IS_JH ? ['<rootDir>/jh/app/assets/javascripts/', ...extRootsJH] : []),
     ],
     /*
     Reduce the amount of max workers in development mode.

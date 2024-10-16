@@ -8,7 +8,6 @@ const {
 } = require('./__helpers__/fake_date/fake_date');
 const { TEST_HOST } = require('./__helpers__/test_constants');
 const { createGon } = require('./__helpers__/gon_helper');
-const { setupConsoleWatcher } = require('./__helpers__/console_watcher');
 
 class CustomEnvironment extends TestEnvironment {
   constructor({ globalConfig, projectConfig }, context) {
@@ -19,20 +18,32 @@ class CustomEnvironment extends TestEnvironment {
     // https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39496#note_503084332
     setGlobalDateToFakeDate();
 
-    this.jestConsoleWatcher = setupConsoleWatcher(this, context.console, {
-      ignores: [
-        /The updateQuery callback for fetchMore is deprecated/,
-        // TODO: Remove this and replace with localized calls to `ignoreVueConsoleWarnings`
-        // https://gitlab.com/gitlab-org/gitlab/-/issues/396779#note_1788506238
-        /^\[Vue warn\]: Missing required prop/,
-        /^\[Vue warn\]: Invalid prop/,
-        // TODO: Implement robust vue-demi switching logic.
-        // https://gitlab.com/groups/gitlab-org/-/epics/15340
-        /^\[Vue warn\]: \(deprecation GLOBAL_PRIVATE_UTIL\)/,
-      ],
-      // TODO: Remove this and replace with localized calls to `useConsoleWatcherThrowsImmediately`
-      // https://gitlab.com/gitlab-org/gitlab/-/issues/396779#note_1788506238
-      shouldThrowImmediately: true,
+    const { error: originalErrorFn } = context.console;
+    Object.assign(context.console, {
+      error(...args) {
+        if (
+          args?.[0]?.includes('[Vue warn]: Missing required prop') ||
+          args?.[0]?.includes('[Vue warn]: Invalid prop')
+        ) {
+          originalErrorFn.apply(context.console, args);
+          return;
+        }
+
+        throw new ErrorWithStack(
+          `Unexpected call of console.error() with:\n\n${args.join(', ')}`,
+          this.error,
+        );
+      },
+
+      warn(...args) {
+        if (args?.[0]?.includes('The updateQuery callback for fetchMore is deprecated')) {
+          return;
+        }
+        throw new ErrorWithStack(
+          `Unexpected call of console.warn() with:\n\n${args.join(', ')}`,
+          this.warn,
+        );
+      },
     });
 
     const { IS_EE } = projectConfig.testEnvironmentOptions;
@@ -103,17 +114,11 @@ class CustomEnvironment extends TestEnvironment {
       }
       this.global[observer] = NoopObserver;
     });
-
-    // This is used internally by Sentry
-    // https://github.com/getsentry/sentry-javascript/blob/8.26.0/packages/browser/src/tracing/browserTracingIntegration.ts#L221
-    this.global.PerformanceObserver.supportedEntryTypes = ['noop'];
   }
 
   async teardown() {
     // Reset `Date` so that Jest can report timing accurately *roll eyes*...
     setGlobalDateToRealDate();
-
-    this.jestConsoleWatcher.dispose();
 
     // eslint-disable-next-line no-restricted-syntax
     await new Promise(setImmediate);

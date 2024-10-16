@@ -77,7 +77,7 @@ module Gitlab
       # rubocop: disable Metrics/ParameterLists
       # The `remote` parameter is going away soonish anyway, at which point the
       # Rubocop warning can be enabled again.
-      def fetch_remote(url, refmap:, ssh_auth:, forced:, no_tags:, timeout:, prune: true, check_tags_changed: false, check_repo_changed: false, http_authorization_header: "", resolved_address: "", lfs_sync_before_branch_updates: false)
+      def fetch_remote(url, refmap:, ssh_auth:, forced:, no_tags:, timeout:, prune: true, check_tags_changed: false, http_authorization_header: "", resolved_address: "")
         request = Gitaly::FetchRemoteRequest.new(
           repository: @gitaly_repo,
           force: forced,
@@ -92,8 +92,6 @@ module Gitlab
             resolved_address: resolved_address
           )
         )
-
-        request.check_repo_changed = check_repo_changed if lfs_sync_before_branch_updates && request.respond_to?(:check_repo_changed)
 
         if ssh_auth&.ssh_mirror_url?
           if ssh_auth.ssh_key_auth? && ssh_auth.ssh_private_key.present?
@@ -208,12 +206,30 @@ module Gitlab
         )
       end
 
+      def backup_custom_hooks(save_path)
+        gitaly_fetch_stream_to_file(
+          save_path,
+          :backup_custom_hooks,
+          Gitaly::BackupCustomHooksRequest,
+          GitalyClient.default_timeout
+        )
+      end
+
       def create_from_bundle(bundle_path)
         gitaly_repo_stream_request(
           bundle_path,
           :create_repository_from_bundle,
           Gitaly::CreateRepositoryFromBundleRequest,
           GitalyClient.long_timeout
+        )
+      end
+
+      def restore_custom_hooks(custom_hooks_path)
+        gitaly_repo_stream_request(
+          custom_hooks_path,
+          :restore_custom_hooks,
+          Gitaly::RestoreCustomHooksRequest,
+          GitalyClient.default_timeout
         )
       end
 

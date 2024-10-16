@@ -30,8 +30,7 @@ module MergeRequests
         @conflicts ||=
           Gitlab::Conflict::FileCollection.new(
             merge_request,
-            allow_tree_conflicts: params[:allow_tree_conflicts],
-            skip_content: params[:skip_content]
+            allow_tree_conflicts: params[:allow_tree_conflicts]
           )
       end
     end

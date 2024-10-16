@@ -9,8 +9,7 @@ import SearchableList from '~/ml/model_registry/components/searchable_list.vue';
 import ModelVersionRow from '~/ml/model_registry/components/model_version_row.vue';
 import getModelVersionsQuery from '~/ml/model_registry/graphql/queries/get_model_versions.query.graphql';
 import EmptyState from '~/ml/model_registry/components/model_list_empty_state.vue';
-import { describeSkipVue3, SkipReason } from 'helpers/vue3_conditional';
-
+import { MODEL_VERSION_CREATION_MODAL_ID } from '~/ml/model_registry/constants';
 import {
   emptyModelVersionsQuery,
   modelVersionsQuery,
@@ -19,13 +18,7 @@ import {
 
 Vue.use(VueApollo);
 
-const skipReason = new SkipReason({
-  name: 'ModelVersionList',
-  reason: 'OOM on the worker',
-  issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/458413',
-});
-
-describeSkipVue3(skipReason, () => {
+describe('ModelVersionList', () => {
   let wrapper;
   let apolloProvider;
 
@@ -48,7 +41,6 @@ describeSkipVue3(skipReason, () => {
       },
       provide: {
         mlflowTrackingUrl: 'path/to/mlflow',
-        createModelVersionPath: 'versions/new',
       },
     });
   };
@@ -66,10 +58,11 @@ describeSkipVue3(skipReason, () => {
 
     it('shows empty state', () => {
       expect(findEmptyState().props()).toMatchObject({
-        title: 'Manage versions of your machine learning model',
+        title:
+          'Manage versions of your machine learning modelManage versions of your machine learning model',
         description: 'Use versions to track performance, parameters, and metadata',
         primaryText: 'Create model version',
-        primaryLink: 'versions/new',
+        modalId: MODEL_VERSION_CREATION_MODAL_ID,
       });
     });
   });

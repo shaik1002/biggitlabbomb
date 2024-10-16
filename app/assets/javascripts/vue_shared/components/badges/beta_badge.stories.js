@@ -6,8 +6,8 @@ export default {
 };
 
 const template = `
-    <div style="height:600px;" class="gl-flex gl-justify-center gl-items-center">
-      <beta-badge />
+    <div style="height:600px;" class="gl-display-flex gl-justify-content-center gl-align-items-center">
+      <beta-badge :size="size" />
     </div>
   `;
 

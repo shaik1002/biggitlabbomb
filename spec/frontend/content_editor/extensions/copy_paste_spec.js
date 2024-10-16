@@ -1,4 +1,3 @@
-import { builders } from 'prosemirror-test-builder';
 import CopyPaste from '~/content_editor/extensions/copy_paste';
 import CodeBlockHighlight from '~/content_editor/extensions/code_block_highlight';
 import Loading, { findAllLoaders } from '~/content_editor/extensions/loading';
@@ -19,7 +18,7 @@ import eventHubFactory from '~/helpers/event_hub_factory';
 import { ALERT_EVENT } from '~/content_editor/constants';
 import waitForPromises from 'helpers/wait_for_promises';
 import MarkdownSerializer from '~/content_editor/services/markdown_serializer';
-import { createTestEditor, waitUntilNextDocTransaction } from '../test_utils';
+import { createTestEditor, createDocBuilder, waitUntilNextDocTransaction } from '../test_utils';
 
 const PARAGRAPH_HTML =
   '<p dir="auto">Some text with <strong>bold</strong> and <em>italic</em> text.</p>';
@@ -46,7 +45,7 @@ describe('content_editor/extensions/copy_paste', () => {
       () =>
         new Promise((resolve) => {
           resolveRenderMarkdownPromiseAndWait = (data) =>
-            waitUntilNextDocTransaction({ tiptapEditor, action: () => resolve({ body: data }) });
+            waitUntilNextDocTransaction({ tiptapEditor, action: () => resolve(data) });
         }),
     );
 
@@ -73,15 +72,20 @@ describe('content_editor/extensions/copy_paste', () => {
     });
 
     ({
-      doc,
-      paragraph: p,
-      bold,
-      italic,
-      heading,
-      codeBlock,
-      bulletList,
-      listItem,
-    } = builders(tiptapEditor.schema));
+      builders: { doc, p, bold, italic, heading, codeBlock, bulletList, listItem },
+    } = createDocBuilder({
+      tiptapEditor,
+      names: {
+        bold: { markType: Bold.name },
+        italic: { markType: Italic.name },
+        heading: { nodeType: Heading.name },
+        bulletList: { nodeType: BulletList.name },
+        listItem: { nodeType: ListItem.name },
+        codeBlock: { nodeType: CodeBlockHighlight.name },
+        diagram: { nodeType: Diagram.name },
+        frontmatter: { nodeType: Frontmatter.name },
+      },
+    }));
   });
 
   const buildClipboardEvent = ({ eventName = 'paste', data = {}, types = ['text/plain'] } = {}) => {

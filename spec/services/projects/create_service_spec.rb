@@ -278,41 +278,19 @@ RSpec.describe Projects::CreateService, '#execute', feature_category: :groups_an
     it_behaves_like 'has sync-ed traversal_ids'
 
     context 'when project is an import' do
-      let(:group) do
-        create(:group).tap do |group|
-          group.add_developer(user)
-        end
-      end
-
-      context 'and import is from a built-in template' do
-        let(:project_template) { Gitlab::ProjectTemplate.find(:rails) }
-
-        it 'does create the project' do
-          project = create_project(user, opts.merge!(template_name: project_template.name))
-
-          expect(project).to be_persisted
-          expect(project.errors).to be_blank
-        end
-      end
-
-      context 'and import is from a sample template' do
-        let(:sample_template) { Gitlab::SampleDataTemplate.find(:sample) }
-
-        it 'does create the project' do
-          project = create_project(user, opts.merge!(template_name: sample_template.name))
-
-          expect(project).to be_persisted
-          expect(project.errors).to be_blank
-        end
+      before do
+        stub_application_setting(import_sources: ['gitlab_project'])
       end
 
       context 'when user is not allowed to import projects' do
-        before do
-          stub_application_setting(import_sources: ['gitlab_project_migration'])
+        let(:group) do
+          create(:group).tap do |group|
+            group.add_developer(user)
+          end
         end
 
         it 'does not create the project' do
-          project = create_project(user, opts.merge!(namespace_id: group.id, import_type: 'gitlab_project_migration'))
+          project = create_project(user, opts.merge!(namespace_id: group.id, import_type: 'gitlab_project'))
 
           expect(project).not_to be_persisted
           expect(project.errors.messages[:user].first).to eq('is not allowed to import projects')
@@ -1292,17 +1270,6 @@ RSpec.describe Projects::CreateService, '#execute', feature_category: :groups_an
           expect(project.project_namespace).to be_in_sync_with_project(project)
         end
       end
-    end
-  end
-
-  context 'with group_runners_enabled' do
-    subject(:project) { create_project(user, opts) }
-
-    let(:opts) { super().merge(group_runners_enabled: true) }
-
-    it 'creates ci_cd_settings relation' do
-      expect(project.ci_cd_settings).to be_present
-      expect(project.ci_cd_settings.group_runners_enabled).to be_truthy
     end
   end
 

@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
-RSpec.describe JSONWebToken::RSAToken, feature_category: :shared do
+RSpec.describe JSONWebToken::RSAToken do
   let_it_be(:rsa_key) do
     OpenSSL::PKey::RSA.new <<-EOS.strip_heredoc
       -----BEGIN RSA PRIVATE KEY-----
@@ -52,18 +50,6 @@ RSpec.describe JSONWebToken::RSAToken, feature_category: :shared do
     end
   end
 
-  describe '.encode' do
-    let(:payload) { { key: 'value' } }
-    let(:kid) { rsa_key.public_key.to_jwk[:kid] }
-    let(:headers) { { kid: kid, typ: 'JWT' } }
-
-    it 'generates the JWT' do
-      expect(JWT).to receive(:encode).with(payload, rsa_key, described_class::ALGORITHM, headers).and_call_original
-
-      expect(described_class.encode(payload, rsa_key, kid)).to be_a(String)
-    end
-  end
-
   describe '.decode' do
     let(:decoded_token) { described_class.decode(rsa_encoded, rsa_key) }
 
@@ -88,14 +74,8 @@ RSpec.describe JSONWebToken::RSAToken, feature_category: :shared do
         let_it_be(:rsa_key_2) { OpenSSL::PKey::RSA.new 2048 }
 
         before do
-          # rsa_key is used for encoding, and rsa_key_2 for decoding
-          allow(JWT)
-            .to receive(:decode)
-            .with(rsa_encoded, rsa_key, true, { algorithm: described_class::ALGORITHM })
-            .and_wrap_original do |original_method, *args|
-            args[1] = rsa_key_2
-            original_method.call(*args)
-          end
+          # rsa_key is returned for encoding, and rsa_key_2 for decoding
+          allow_any_instance_of(described_class).to receive(:key).and_return(rsa_key, rsa_key_2)
         end
 
         it "raises exception saying 'Signature verification failed" do

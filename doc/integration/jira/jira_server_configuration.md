@@ -1,10 +1,14 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
 # Tutorial: Create Jira credentials
+
+DETAILS:
+**Tier:** Free, Premium, Ultimate
+**Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
 This tutorial shows you how to create Jira credentials. You can use your new Jira credentials to
 configure the [Jira issue integration](configure.md) in GitLab for Jira Data Center or Jira Server.
@@ -46,9 +50,9 @@ To create a Jira group for the user:
    `gitlab-developers`), then select **Add group**.
 1. To add the `gitlab` user to the new `gitlab-developers` group, select **Edit members**.
    The `gitlab-developers` group appears as a selected group.
-<!-- vale gitlab_base.BadPlurals = NO -->
+<!-- vale gitlab.BadPlurals = NO -->
 1. In the **Add members to selected group(s)** section, enter `gitlab`.
-<!-- vale gitlab_base.BadPlurals = YES -->
+<!-- vale gitlab.BadPlurals = YES -->
 1. Select **Add selected users**.
    The `gitlab` user appears as a group member.
 

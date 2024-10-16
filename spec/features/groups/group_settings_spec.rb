@@ -164,7 +164,7 @@ RSpec.describe 'Edit group settings', feature_category: :groups_and_projects do
         click_button s_('GroupSettings|Transfer group')
 
         page.within(confirm_modal) do
-          expect(page).to have_text "You are about to transfer #{selected_group.full_path} to another namespace. This action changes the group's path and can lead to data loss."
+          expect(page).to have_text "You are about to transfer #{selected_group.full_path} to another namespace. This action changes the project's path and can lead to data loss."
 
           fill_in 'confirm_name_input', with: selected_group.full_path
           click_button 'Transfer group'
@@ -380,20 +380,20 @@ RSpec.describe 'Edit group settings', feature_category: :groups_and_projects do
   def update_path(new_group_path)
     visit edit_group_path(group)
 
-    within_testid('advanced-settings-content') do
+    page.within('.gs-advanced') do
       fill_in 'group_path', with: new_group_path
       click_button 'Change group URL'
     end
   end
 
   def save_general_group
-    within_testid('general-settings') do
+    page.within('.gs-general') do
       click_button 'Save changes'
     end
   end
 
   def save_permissions_group
-    within_testid('permissions-settings') do
+    page.within('.gs-permissions') do
       click_button 'Save changes'
     end
   end

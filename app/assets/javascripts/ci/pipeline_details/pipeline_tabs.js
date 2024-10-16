@@ -43,13 +43,12 @@ export const createAppOptions = (selector, apolloProvider, router) => {
     suiteEndpoint,
     blobPath,
     hasTestReport,
+    emptyDagSvgPath,
     emptyStateImagePath,
     artifactsExpiredImagePath,
     isFullCodequalityReportAvailable,
     securityPoliciesPath,
     testsCount,
-    manualVariablesCount,
-    canReadVariables,
   } = dataset;
 
   const defaultTabValue = getPipelineDefaultTab(window.location.href);
@@ -94,18 +93,17 @@ export const createAppOptions = (selector, apolloProvider, router) => {
       suiteEndpoint,
       blobPath,
       hasTestReport,
+      emptyDagSvgPath,
       emptyStateImagePath,
       artifactsExpiredImagePath,
       securityPoliciesPath,
       testsCount,
-      manualVariablesCount: Number.parseInt(manualVariablesCount, 10),
-      canReadVariables: parseBoolean(canReadVariables),
     },
     errorCaptured(err, _vm, info) {
       reportToSentry('pipeline_tabs', `error: ${err}, info: ${info}`);
     },
-    render(createElement, props = {}) {
-      return createElement(PipelineTabs, { props });
+    render(createElement) {
+      return createElement(PipelineTabs);
     },
   };
 };

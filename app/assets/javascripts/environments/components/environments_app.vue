@@ -1,7 +1,7 @@
 <script>
 import { GlBadge, GlPagination, GlSearchBoxByType, GlTab, GlTabs } from '@gitlab/ui';
 import { debounce } from 'lodash';
-import { s__, __ } from '~/locale';
+import { s__, __, sprintf } from '~/locale';
 import { updateHistory, setUrlParams, queryToObject } from '~/lib/utils/url_utility';
 import { DEFAULT_DEBOUNCE_AND_THROTTLE_MS } from '~/lib/utils/constants';
 import pageInfoQuery from '~/graphql_shared/client/page_info.query.graphql';
@@ -85,6 +85,11 @@ export default {
     cleanUpEnvsButtonLabel: s__('Environments|Clean up environments'),
     active: __('Active'),
     stopped: __('Stopped'),
+    prevPage: __('Go to previous page'),
+    nextPage: __('Go to next page'),
+    next: __('Next'),
+    prev: __('Prev'),
+    goto: (page) => sprintf(__('Go to page %{page}'), { page }),
     searchPlaceholder: s__('Environments|Search by environment name'),
   },
   modalId: 'enable-review-app-info',
@@ -92,7 +97,6 @@ export default {
   data() {
     const { page = '1', search = '', scope } = queryToObject(window.location.search);
     return {
-      environmentApp: null,
       interval: undefined,
       isReviewAppModalVisible: false,
       isStopStaleEnvModalVisible: false,
@@ -207,7 +211,7 @@ export default {
     window.addEventListener('popstate', this.syncPageFromQueryParams);
     window.addEventListener('popstate', this.syncSearchFromQueryParams);
   },
-  beforeDestroy() {
+  destroyed() {
     window.removeEventListener('popstate', this.syncPageFromQueryParams);
     window.removeEventListener('popstate', this.syncSearchFromQueryParams);
     this.$apollo.queries.environmentApp.stopPolling();
@@ -286,7 +290,7 @@ export default {
         >
           <template #title>
             <span>{{ $options.i18n.active }}</span>
-            <gl-badge class="gl-tab-counter-badge">
+            <gl-badge size="sm" class="gl-tab-counter-badge">
               {{ activeCount }}
             </gl-badge>
           </template>
@@ -297,7 +301,7 @@ export default {
         >
           <template #title>
             <span>{{ $options.i18n.stopped }}</span>
-            <gl-badge class="gl-tab-counter-badge">
+            <gl-badge size="sm" class="gl-tab-counter-badge">
               {{ stoppedCount }}
             </gl-badge>
           </template>
@@ -320,7 +324,7 @@ export default {
       <environment-item
         v-for="environment in environments"
         :key="environment.name"
-        class="gl-mb-3 gl-border-1 gl-border-gray-100 gl-border-b-solid"
+        class="gl-mb-3 gl-border-gray-100 gl-border-1 gl-border-b-solid"
         :environment="environment.latest"
         @change="refetchEnvironments"
       />
@@ -336,6 +340,11 @@ export default {
       :total-items="totalItems"
       :per-page="itemsPerPage"
       :value="page"
+      :next="$options.i18n.next"
+      :prev="$options.i18n.prev"
+      :label-previous-page="$options.prevPage"
+      :label-next-page="$options.nextPage"
+      :label-page="$options.goto"
       @next="movePage('next')"
       @previous="movePage('previous')"
       @input="moveToPage"

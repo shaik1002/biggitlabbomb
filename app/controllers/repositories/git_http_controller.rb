@@ -20,6 +20,7 @@ module Repositories
     # GET /foo/bar.git/info/refs?service=git-receive-pack (git push)
     def info_refs
       log_user_activity if upload_pack?
+      log_user_activity if receive_pack? && Feature.enabled?(:log_user_git_push_activity)
 
       render_ok
     end
@@ -41,11 +42,6 @@ module Repositories
       render plain: "Not found", status: :not_found
     end
 
-    # POST /foo/bar.git/ssh-receive-pack" (git push via SSH)
-    def ssh_receive_pack
-      render plain: "Not found", status: :not_found
-    end
-
     private
 
     def deny_head_requests
@@ -60,14 +56,15 @@ module Repositories
       git_command == 'git-upload-pack'
     end
 
+    def receive_pack?
+      git_command == 'git-receive-pack'
+    end
+
     def git_command
-      case action_name
-      when 'info_refs'
+      if action_name == 'info_refs'
         params[:service]
-      when 'ssh_upload_pack'
+      elsif action_name == 'ssh_upload_pack'
         'git-upload-pack'
-      when 'ssh_receive_pack'
-        'git-receive-pack'
       else
         action_name.dasherize
       end
@@ -98,6 +95,9 @@ module Repositories
       return unless project
       return if Gitlab::Database.read_only?
       return unless repo_type.project?
+
+      Onboarding::ProgressService.async(project.namespace_id).execute(action: :git_pull)
+
       return if Feature.enabled?(:disable_git_http_fetch_writes)
 
       Projects::FetchStatisticsIncrementService.new(project).execute
@@ -129,15 +129,6 @@ module Repositories
 
     def log_user_activity
       Users::ActivityService.new(author: user, project: project, namespace: project&.namespace).execute
-
-      return unless project && user
-
-      Gitlab::EventStore.publish(
-        Users::ActivityEvent.new(data: {
-          user_id: user.id,
-          namespace_id: project.root_ancestor.id
-        })
-      )
     end
 
     def append_info_to_payload(payload)

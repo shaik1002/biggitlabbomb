@@ -10,6 +10,7 @@ module Ci
       ].freeze
 
       def execute
+        return unless Feature.enabled?(:ci_partitioning_first_records, :instance)
         return if Ci::Partition.current
 
         setup_default_partitions
@@ -30,9 +31,7 @@ module Ci
       end
 
       def setup_current_partition
-        Ci::Partition
-          .find(Ci::Pipeline.current_partition_value)
-          .update!(status: Ci::Partition.statuses[:current])
+        Ci::Partition.find(Ci::Pipeline.current_partition_value).update!(status: Ci::Partition.statuses[:current])
       end
     end
   end

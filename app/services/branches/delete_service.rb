@@ -18,9 +18,7 @@ module Branches
           http_status: 404)
       end
 
-      target_sha = branch.dereferenced_target.id
-
-      if repository.rm_branch(current_user, branch_name, target_sha: target_sha)
+      if repository.rm_branch(current_user, branch_name)
         unlock_artifacts(branch_name)
         ServiceResponse.success(message: 'Branch was deleted')
       else

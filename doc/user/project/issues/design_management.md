@@ -21,7 +21,7 @@ viewed and addressed.
 For a video overview, see [Design Management](https://www.youtube.com/watch?v=CCMtCqdK_aM).
 <!-- Video published on 2019-07-11 -->
 
-## Prerequisites
+## Requirements
 
 - [Git Large File Storage (LFS)](../../../topics/git/lfs/index.md) must be enabled:
   - On GitLab.com, LFS is already enabled.
@@ -36,7 +36,9 @@ For a video overview, see [Design Management](https://www.youtube.com/watch?v=CC
   Image thumbnails are stored as other uploads, and are not associated with a project but rather
   with a specific design model.
 
-  A GitLab administrator can verify the relative path of a hashed-stored project by going to **Admin area > Projects**
+  Newly created projects use hashed storage by default.
+
+  A GitLab administrator can verify the relative path of a hashed-stored project by going to **Admin Area > Projects**
   and then selecting the project in question. The **Relative path** field contains `@hashed` in its value.
 
 If the requirements are not met, you are notified in the **Designs** section.
@@ -55,6 +57,14 @@ You can upload files of the following types as designs:
 - WEBP
 
 Support for PDF files is tracked in [issue 32811](https://gitlab.com/gitlab-org/gitlab/-/issues/32811).
+
+## Known issues
+
+- Design Management data isn't deleted when:
+  - [A project is destroyed](https://gitlab.com/gitlab-org/gitlab/-/issues/13429).
+  - [An issue is deleted](https://gitlab.com/gitlab-org/gitlab/-/issues/13427).
+- Design Management data [can be replicated](../../../administration/geo/replication/datatypes.md#limitations-on-replicationverification)
+  and in GitLab 16.1 and later it can be [verified by Geo as well](https://gitlab.com/gitlab-org/gitlab/-/issues/355660).
 
 ## View a design
 
@@ -114,10 +124,10 @@ To add a design to an issue:
 1. Either:
    - Select **Upload designs** and then select images from your file browser. You can select up to
      10 files at once.
-   <!-- vale gitlab_base.SubstitutionWarning = NO -->
+   <!-- vale gitlab.SubstitutionWarning = NO -->
    - Select **click to upload** and then select images from your file browser. You can select up to
      10 files at once.
-   <!-- vale gitlab_base.SubstitutionWarning = YES -->
+   <!-- vale gitlab.SubstitutionWarning = YES -->
 
    - Drag a file from your file browser and drop it in the drop zone in the **Designs** section.
 
@@ -184,17 +194,6 @@ To archive multiple designs at once:
 1. Select the checkboxes on the designs you want to archive.
 1. Select **Archive selected**.
 
-## Design management data persistence
-
-- Design Management data is not deleted when:
-  - [A project is destroyed](https://gitlab.com/gitlab-org/gitlab/-/issues/13429).
-  - [An issue is deleted](https://gitlab.com/gitlab-org/gitlab/-/issues/13427).
-
-### Replicate design management data
-
-Design Management data [can be replicated](../../../administration/geo/replication/datatypes.md#replicated-data-types)
-and in GitLab 16.1 and later it can be [verified by Geo as well](https://gitlab.com/gitlab-org/gitlab/-/issues/355660).
-
 ## Markdown and rich text editors for descriptions
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/388449) in GitLab 16.1 [with a flag](../../../administration/feature_flags.md) named `content_editor_on_issues`. Disabled by default.
@@ -214,10 +213,10 @@ You can start [discussions](../../discussions/index.md) on uploaded designs. To 
 
 1. Go to an issue.
 1. Select the design.
-<!-- vale gitlab_base.SubstitutionWarning = NO -->
+<!-- vale gitlab.SubstitutionWarning = NO -->
 <!-- Disable Vale so it doesn't catch "click" -->
 1. Click or tap the image. A pin is created in that spot, identifying the discussion's location.
-<!-- vale gitlab_base.SubstitutionWarning = YES -->
+<!-- vale gitlab.SubstitutionWarning = YES -->
 1. Enter your message.
 1. Select **Comment**.
 

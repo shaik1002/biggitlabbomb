@@ -21,7 +21,7 @@ module API
           optional :type, type: String, values: ::Ci::Runner::AVAILABLE_TYPES, desc: 'The type of runners to return'
           optional :paused, type: Boolean,
             desc: 'Whether to include only runners that are accepting or ignoring new jobs'
-          optional :status, type: String, values: ::Ci::Runner::AVAILABLE_STATUSES_INCL_DEPRECATED,
+          optional :status, type: String, values: ::Ci::Runner::AVAILABLE_STATUSES,
             desc: 'The status of runners to return'
           optional :tag_list, type: Array[String], coerce_with: ::API::Validations::Types::CommaSeparatedToArray.coerce,
             desc: 'A list of runner tags', documentation: { example: "['macos', 'shell']" }
@@ -48,7 +48,7 @@ module API
 
         def apply_filter(runners, params)
           runners = filter_runners(runners, params[:type], allowed_scopes: ::Ci::Runner::AVAILABLE_TYPES)
-          runners = filter_runners(runners, params[:status], allowed_scopes: ::Ci::Runner::AVAILABLE_STATUSES_INCL_DEPRECATED)
+          runners = filter_runners(runners, params[:status], allowed_scopes: ::Ci::Runner::AVAILABLE_STATUSES)
           runners = filter_runners(runners, params[:paused] ? 'paused' : 'active', allowed_scopes: %w[paused active]) if params.include?(:paused)
           runners = runners.with_version_prefix(params[:version_prefix]) if params[:version_prefix]
           runners = runners.tagged_with(params[:tag_list]) if params[:tag_list]
@@ -122,7 +122,7 @@ module API
         end
         get do
           runners = current_user.ci_owned_runners
-          runners = filter_runners(runners, params[:scope], allowed_scopes: ::Ci::Runner::AVAILABLE_STATUSES_INCL_DEPRECATED)
+          runners = filter_runners(runners, params[:scope], allowed_scopes: ::Ci::Runner::AVAILABLE_STATUSES)
           runners = apply_filter(runners, params)
 
           present paginate(runners), with: Entities::Ci::Runner
@@ -166,20 +166,6 @@ module API
           present runner, with: Entities::Ci::RunnerDetails, current_user: current_user
         end
 
-        desc "Get a list of all runner's managers" do
-          success Entities::Ci::RunnerManager
-          failure [[403, 'Forbidden']]
-        end
-        params do
-          requires :id, type: Integer, desc: 'The ID of a runner'
-        end
-        get ':id/managers' do
-          runner = get_runner(params[:id])
-          authenticate_show_runner!(runner)
-
-          present runner.runner_managers, with: Entities::Ci::RunnerManager
-        end
-
         desc "Update runner's details" do
           summary "Update details of a runner"
           success Entities::Ci::RunnerDetails
@@ -197,9 +183,10 @@ module API
           optional :access_level, type: String, values: ::Ci::Runner.access_levels.keys,
             desc: 'The access level of the runner'
           optional :maximum_timeout, type: Integer,
-            desc: 'Maximum timeout that limits the amount of time (in seconds) that runners can run jobs'
+            desc: 'Maximum timeout that limits the amount of time (in seconds) ' \
+                  'that runners can run jobs'
           optional :maintenance_note, type: String,
-            desc: 'Free-form maintenance notes for the runner (1024 characters)'
+            desc: %q(Free-form maintenance notes for the runner (1024 characters))
           at_least_one_of :description, :active, :paused, :tag_list, :run_untagged, :locked, :access_level, :maximum_timeout, :maintenance_note
           mutually_exclusive :active, :paused
         end
@@ -333,11 +320,10 @@ module API
           runner = get_runner(params[:runner_id])
           authenticate_enable_runner!(runner)
 
-          result = ::Ci::Runners::AssignRunnerService.new(runner, user_project, current_user).execute
-          if result.success?
+          if ::Ci::Runners::AssignRunnerService.new(runner, user_project, current_user).execute.success?
             present runner, with: Entities::Ci::Runner
           else
-            render_api_error_with_reason!(:bad_request, result.message, result.reason)
+            render_validation_error!(runner)
           end
         end
 

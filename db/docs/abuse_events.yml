@@ -1,7 +1,7 @@
 ---
 table_name: abuse_events
 classes:
-- AntiAbuse::Event
+- Abuse::Event
 feature_categories:
 - insider_threat
 description: Captures events of potential abuse

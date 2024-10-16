@@ -2,12 +2,9 @@
 
 module Types
   module Ci
-    # rubocop: disable Graphql/AuthorizeTypes -- this type is authorized by the resolver
+    # rubocop: disable Graphql/AuthorizeTypes
     class AnalyticsType < BaseObject
       graphql_name 'PipelineAnalytics'
-
-      field :aggregate, Types::Ci::AnalyticsPeriodType, null: true,
-        description: 'Pipeline analytics for the specified filter.', alpha: { milestone: '17.5' }
 
       field :month_pipelines_labels, [GraphQL::Types::String], null: true,
         description: 'Labels for the monthly pipeline count.'
@@ -32,6 +29,5 @@ module Types
       field :year_pipelines_totals, [GraphQL::Types::Int], null: true,
         description: 'Total yearly pipeline count.'
     end
-    # rubocop: enable Graphql/AuthorizeTypes
   end
 end

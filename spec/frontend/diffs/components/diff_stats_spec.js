@@ -28,15 +28,15 @@ describe('diff_stats', () => {
   describe('diff stats group', () => {
     const findDiffStatsGroup = () => wrapper.findAll('.diff-stats-group');
 
-    it('is not rendered if diffsCount is empty', () => {
+    it('is not rendered if diffFilesCountText is empty', () => {
       createComponent();
 
       expect(findDiffStatsGroup().length).toBe(2);
     });
 
-    it('is not rendered if diffsCount is not a number', () => {
+    it('is not rendered if diffFilesCountText is not a number', () => {
       createComponent({
-        diffsCount: null,
+        diffFilesCountText: null,
       });
 
       expect(findDiffStatsGroup().length).toBe(2);
@@ -95,7 +95,7 @@ describe('diff_stats', () => {
       const oneFileChanged = '0';
 
       createComponent({
-        diffsCount: oneFileChanged,
+        diffFilesCountText: oneFileChanged,
       });
 
       expect(findIcon('doc-code').textContent.trim()).toBe(`${oneFileChanged} files`);
@@ -105,7 +105,7 @@ describe('diff_stats', () => {
       const oneFileChanged = '1';
 
       createComponent({
-        diffsCount: oneFileChanged,
+        diffFilesCountText: oneFileChanged,
       });
 
       expect(findIcon('doc-code').textContent.trim()).toBe(`${oneFileChanged} file`);
@@ -113,7 +113,7 @@ describe('diff_stats', () => {
 
     it('shows amount of files change with plural "files" when multiple files are changed', () => {
       createComponent({
-        diffsCount: DIFF_FILES_COUNT,
+        diffFilesCountText: DIFF_FILES_COUNT,
       });
 
       expect(findIcon('doc-code').textContent.trim()).toContain(`${DIFF_FILES_COUNT} files`);
@@ -121,7 +121,7 @@ describe('diff_stats', () => {
 
     it('shows amount of files change with plural "files" when files changed is truncated', () => {
       createComponent({
-        diffsCount: DIFF_FILES_COUNT_TRUNCATED,
+        diffFilesCountText: DIFF_FILES_COUNT_TRUNCATED,
       });
 
       expect(findIcon('doc-code').textContent.trim()).toContain(

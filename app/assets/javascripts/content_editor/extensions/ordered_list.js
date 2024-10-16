@@ -17,7 +17,7 @@ export default OrderedList.extend({
 
       parens: {
         default: false,
-        parseHTML: (element) => /^[0-9]+\)/.test(getMarkdownSource(element)?.trim()),
+        parseHTML: (element) => /^[0-9]+\)/.test(getMarkdownSource(element)),
       },
     };
   },

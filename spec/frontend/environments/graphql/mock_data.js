@@ -806,7 +806,6 @@ export const agent = {
   name: 'agent-name',
   webPath: 'path/to/agent-page',
   tokens: { nodes: [] },
-  project: { id: '1', fullPath: 'path/to/agent/project' },
 };
 
 export const kubernetesNamespace = 'agent-namespace';
@@ -817,38 +816,19 @@ export const k8sNamespacesMock = [
 ];
 
 const fluxResourceStatusMock = [{ status: 'True', type: 'Ready', message: '', reason: '' }];
-const fluxResourceMetadataMock = {
-  name: 'custom-resource',
-  namespace: 'custom-namespace',
-  annotations: {},
-  labels: {},
-};
 export const fluxKustomizationMock = {
   kind: 'Kustomization',
-  metadata: fluxResourceMetadataMock,
+  metadata: { name: 'custom-resource', namespace: 'custom-namespace' },
   status: { conditions: fluxResourceStatusMock, inventory: { entries: [{ id: 'test_resource' }] } },
-};
-export const fluxHelmReleaseMock = {
-  kind: 'HelmRelease',
-  metadata: fluxResourceMetadataMock,
-  status: { conditions: fluxResourceStatusMock },
 };
 export const fluxKustomizationMapped = {
   kind: 'Kustomization',
-  metadata: fluxResourceMetadataMock,
-  spec: {},
-  status: fluxKustomizationMock.status,
+  metadata: { name: 'custom-resource' },
   conditions: fluxResourceStatusMock,
   inventory: [{ id: 'test_resource' }],
-  __typename: 'LocalWorkloadItem',
 };
 export const fluxHelmReleaseMapped = {
-  kind: 'HelmRelease',
-  metadata: fluxResourceMetadataMock,
-  spec: {},
-  status: { conditions: fluxResourceStatusMock },
   conditions: fluxResourceStatusMock,
-  __typename: 'LocalWorkloadItem',
 };
 
 export const fluxResourcePathMock = 'kustomize.toolkit.fluxcd.io/v1/path/to/flux/resource';

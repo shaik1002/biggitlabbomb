@@ -9,17 +9,16 @@ module Banzai
   module Filter
     # HTML Filter to highlight fenced code blocks
     #
-    class SyntaxHighlightFilter < HTML::Pipeline::Filter
-      prepend Concerns::TimeoutFilterHandler
+    class SyntaxHighlightFilter < TimeoutHtmlPipelineFilter
       prepend Concerns::PipelineTimingCheck
-      include Concerns::OutputSafety
+      include OutputSafety
 
       CSS_CLASSES = 'code highlight js-syntax-highlight'
 
       CSS   = 'pre:not([data-kroki-style]) > code:only-child'
       XPATH = Gitlab::Utils::Nokogiri.css_to_xpath(CSS).freeze
 
-      def call
+      def call_with_timeout
         doc.xpath(XPATH).each do |node|
           highlight_node(node)
         end
@@ -70,9 +69,8 @@ module Banzai
         pre_node.add_class("language-#{language}") if language
         pre_node.set_attribute('v-pre', 'true')
         copy_code_btn = "<copy-code></copy-code>" unless language == 'suggestion'
-        insert_code_snippet_btn = "<insert-code-snippet></insert-code-snippet>" unless language == 'suggestion'
 
-        highlighted = %(<div class="gl-relative markdown-code-block js-markdown-code">#{pre_node.to_html}#{copy_code_btn}#{insert_code_snippet_btn}</div>)
+        highlighted = %(<div class="gl-relative markdown-code-block js-markdown-code">#{pre_node.to_html}#{copy_code_btn}</div>)
 
         # Extracted to a method to measure it
         replace_pre_element(pre_node, highlighted)

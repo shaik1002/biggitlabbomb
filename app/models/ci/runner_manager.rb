@@ -12,7 +12,6 @@ module Ci
     self.table_name = 'ci_runner_machines'
 
     AVAILABLE_STATUSES = %w[online offline never_contacted stale].freeze
-    AVAILABLE_STATUSES_INCL_DEPRECATED = AVAILABLE_STATUSES
 
     # The `UPDATE_CONTACT_COLUMN_EVERY` defines how often the Runner Machine DB entry can be updated
     UPDATE_CONTACT_COLUMN_EVERY = (40.minutes)..(55.minutes)
@@ -43,8 +42,6 @@ module Ci
       finished: 100
     }, _suffix: true
 
-    enum runner_type: Runner.runner_types
-
     has_many :runner_manager_builds, inverse_of: :runner_manager, foreign_key: :runner_machine_id,
       class_name: 'Ci::RunnerManagerBuild'
     has_many :builds, through: :runner_manager_builds, class_name: 'Ci::Build'
@@ -52,19 +49,13 @@ module Ci
       class_name: 'Ci::RunnerVersion'
 
     validates :runner, presence: true
-    validates :runner_type, presence: true, on: :create
     validates :system_xid, presence: true, length: { maximum: 64 }
-    validates :sharding_key_id, presence: true, on: :create, unless: :instance_type?
     validates :version, length: { maximum: 2048 }
     validates :revision, length: { maximum: 255 }
     validates :platform, length: { maximum: 255 }
     validates :architecture, length: { maximum: 255 }
     validates :ip_address, length: { maximum: 1024 }
     validates :config, json_schema: { filename: 'ci_runner_config' }
-
-    validate :no_sharding_key_id, if: :instance_type?
-
-    before_validation :copy_runner_fields
 
     cached_attr_reader :version, :revision, :platform, :architecture, :ip_address, :contacted_at, :executor_type
 
@@ -93,13 +84,14 @@ module Ci
       where(system_xid: system_xid)
     end
 
-    scope :with_executing_builds, -> do
-      where_exists(
-        Ci::Build
+    scope :with_running_builds, -> do
+      where('EXISTS(?)',
+        Ci::Build.select(1)
           .joins(:runner_manager_build)
-          .executing
+          .running
           .where("#{::Ci::Build.quoted_table_name}.runner_id = #{quoted_table_name}.runner_id")
           .where("#{::Ci::RunnerManagerBuild.quoted_table_name}.runner_machine_id = #{quoted_table_name}.id")
+          .limit(1)
       )
     end
 
@@ -135,10 +127,6 @@ module Ci
         .transform_values { |s| Ci::RunnerVersion.statuses.key(s).to_sym }
     end
 
-    def uncached_contacted_at
-      read_attribute(:contacted_at)
-    end
-
     def heartbeat(values, update_contacted_at: true)
       ##
       # We can safely ignore writes performed by a runner heartbeat. We do
@@ -170,7 +158,7 @@ module Ci
       # Use a random threshold to prevent beating DB updates.
       contacted_at_max_age = Random.rand(UPDATE_CONTACT_COLUMN_EVERY)
 
-      real_contacted_at = uncached_contacted_at
+      real_contacted_at = read_attribute(:contacted_at)
       real_contacted_at.nil? ||
         (Time.current - real_contacted_at) >= contacted_at_max_age
     end
@@ -179,20 +167,6 @@ module Ci
       return unless new_version && Gitlab::Ci::RunnerReleases.instance.enabled?
 
       Ci::Runners::ProcessRunnerVersionUpdateWorker.perform_async(new_version)
-    end
-
-    def copy_runner_fields
-      return if runner_type && sharding_key_id
-      return unless runner
-
-      self.runner_type = runner.runner_type
-      self.sharding_key_id = runner.sharding_key_id
-    end
-
-    def no_sharding_key_id
-      return if sharding_key_id.nil?
-
-      errors.add(:runner_manager, 'cannot have sharding_key_id assigned')
     end
 
     def self.version_regex_expression_for_version(version)

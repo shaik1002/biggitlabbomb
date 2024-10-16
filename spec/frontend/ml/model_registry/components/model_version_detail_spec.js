@@ -45,19 +45,13 @@ const findPackageFiles = () => wrapper.findComponent(PackageFiles);
 const findCandidateDetail = () => wrapper.findComponent(CandidateDetail);
 const findImportArtifactZone = () => wrapper.findComponent(ImportArtifactZone);
 const artifactLabel = () => wrapper.findByTestId('uploadHeader');
-const findDescription = () => wrapper.findByTestId('description');
-const findEmptyDescriptionState = () => wrapper.findByTestId('emptyDescriptionState');
 
 describe('ml/model_registry/components/model_version_detail.vue', () => {
   describe('base behaviour', () => {
     beforeEach(() => createWrapper());
 
     it('shows the description', () => {
-      expect(findDescription().props('issuable')).toMatchObject({
-        descriptionHtml: 'A model version description',
-        titleHtml: undefined,
-      });
-      expect(findEmptyDescriptionState().exists()).toBe(false);
+      expect(wrapper.text()).toContain('A model version description');
     });
 
     it('shows the candidate', () => {
@@ -88,6 +82,10 @@ describe('ml/model_registry/components/model_version_detail.vue', () => {
       expect(findImportArtifactZone().props()).toEqual({
         path: 'path/to/import',
         submitOnSelect: true,
+        value: {
+          file: null,
+          subfolder: '',
+        },
       });
     });
 
@@ -129,14 +127,10 @@ describe('ml/model_registry/components/model_version_detail.vue', () => {
   });
 
   describe('if model version does not have description', () => {
-    beforeEach(() =>
-      createWrapper(makeGraphqlModelVersion({ description: null, descriptionHtml: null })),
-    );
+    beforeEach(() => createWrapper(makeGraphqlModelVersion({ description: null })));
 
     it('renders no description provided label', () => {
-      expect(findDescription().exists()).toBe(false);
-      expect(findEmptyDescriptionState().exists()).toBe(true);
-      expect(findEmptyDescriptionState().text()).toContain('No description provided');
+      expect(wrapper.text()).toContain('No description provided');
     });
   });
 });

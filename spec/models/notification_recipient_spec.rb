@@ -3,8 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe NotificationRecipient, feature_category: :team_planning do
-  include ExternalAuthorizationServiceHelpers
-
   let(:user) { create(:user) }
   let(:project) { create(:project, namespace: user.namespace) }
   let(:target) { create(:issue, project: project) }
@@ -76,25 +74,9 @@ RSpec.describe NotificationRecipient, feature_category: :team_planning do
       allow(user).to receive(:can?).and_call_original
     end
 
-    context 'when external authorization service denies access' do
-      let(:target) { project }
-
-      before do
-        enable_external_authorization_service_check
-        external_service_deny_access(user, project)
-      end
-
+    context 'user cannot read cross project' do
       it 'returns false' do
-        expect(recipient.has_access?).to eq false
-      end
-    end
-
-    context 'user cannot read project' do
-      let(:target) { project }
-
-      it 'returns false' do
-        expect(user).to receive(:can?).with(:read_project, project).and_return(false)
-        expect(user).not_to receive(:can?).with(:read_cross_project)
+        expect(user).to receive(:can?).with(:read_cross_project).and_return(false)
         expect(recipient.has_access?).to eq false
       end
     end

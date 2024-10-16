@@ -12,7 +12,6 @@ query getPipelineMiniGraph($fullPath: ID!, $iid: ID!) {
             id
             icon
             label
-            tooltip
           }
         }
       }
@@ -32,20 +31,16 @@ query getPipelineMiniGraph($fullPath: ID!, $iid: ID!) {
       downstream {
         nodes {
           id
-          detailedStatus {
-            id
-            detailsPath
-            icon
-            label
-          }
           path
           project {
             id
             name
           }
-          sourceJob {
+          detailedStatus {
             id
-            retried
+            detailsPath
+            icon
+            label
           }
         }
       }

@@ -8,8 +8,7 @@ module ProtectedRefDeployKeyAccess
 
     protected_ref_fk = "#{module_parent.model_name.singular}_id"
     validates :deploy_key_id, uniqueness: { scope: protected_ref_fk, allow_nil: true }
-    validates :deploy_key, presence: true, if: :deploy_key_id
-    validate :validate_deploy_key_membership, if: :deploy_key
+    validate :validate_deploy_key_membership
   end
 
   class_methods do
@@ -19,20 +18,20 @@ module ProtectedRefDeployKeyAccess
   end
 
   def type
-    return :deploy_key if deploy_key_id.present? || deploy_key.present?
+    return :deploy_key if deploy_key.present?
 
     super
   end
 
   def humanize
-    return humanize_deploy_key if deploy_key?
+    return deploy_key.title if deploy_key?
 
     super
   end
 
   def check_access(current_user, current_project = project)
     super do
-      break deploy_key_access_allowed?(current_user) if deploy_key?
+      break enabled_deploy_key_for_user?(current_user) if deploy_key?
 
       yield if block_given?
     end
@@ -40,38 +39,20 @@ module ProtectedRefDeployKeyAccess
 
   private
 
-  def humanize_deploy_key
-    return deploy_key.title if deploy_key.present?
-
-    'Deploy key'
-  end
-
   def deploy_key?
     type == :deploy_key
   end
 
   def validate_deploy_key_membership
-    return if deploy_key_has_write_access_to_project?
+    return if deploy_key.nil? || deploy_key_has_write_access_to_project?
 
     errors.add(:deploy_key, 'is not enabled for this project')
   end
 
-  def deploy_key_access_allowed?(current_user)
-    deploy_key_owned_by?(current_user) && valid_deploy_key_status?
-  end
-
-  def deploy_key_owned_by?(current_user)
-    deploy_key.user_id == current_user.id
-  end
-
-  def valid_deploy_key_status?
-    deploy_key.user.can?(:read_project, project) &&
-      deploy_key_owner_project_member? &&
+  def enabled_deploy_key_for_user?(current_user)
+    current_user.can?(:read_project, project) &&
+      deploy_key.user_id == current_user.id &&
       deploy_key_has_write_access_to_project?
-  end
-
-  def deploy_key_owner_project_member?
-    project.member?(deploy_key.user)
   end
 
   def deploy_key_has_write_access_to_project?

@@ -30,7 +30,6 @@ export const i18n = {
     'PipelineEditor|Configuration content has changed. Re-run validation for updated results.',
   ),
   cta: s__('PipelineEditor|Validate pipeline'),
-  lint: s__('PipelineEditor|Lint CI/CD sample'),
   ctaDisabledTooltip: s__('PipelineEditor|Waiting for CI content to load...'),
   errorAlertTitle: s__('PipelineEditor|Pipeline simulation completed with errors'),
   help: __('Help'),
@@ -51,7 +50,12 @@ export const i18n = {
 export const VALIDATE_TAB_INIT = 'VALIDATE_TAB_INIT';
 export const VALIDATE_TAB_RESULTS = 'VALIDATE_TAB_RESULTS';
 export const VALIDATE_TAB_LOADING = 'VALIDATE_TAB_LOADING';
-const BASE_CLASSES = ['gl-flex', 'gl-flex-col', 'gl-items-center', 'gl-mt-11'];
+const BASE_CLASSES = [
+  'gl-display-flex',
+  'gl-flex-direction-column',
+  'gl-align-items-center',
+  'gl-mt-11',
+];
 
 export default {
   name: 'CiValidateTab',
@@ -80,7 +84,6 @@ export default {
     },
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     initialBlobContent: {
       query: getBlobContent,
       variables() {
@@ -94,7 +97,6 @@ export default {
         return data?.project?.repository?.blobs?.nodes[0]?.rawBlob;
       },
     },
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     currentBranch: {
       query: getCurrentBranch,
       update(data) {
@@ -194,7 +196,7 @@ export default {
 
 <template>
   <div>
-    <div class="gl-mt-3 gl-flex gl-justify-between">
+    <div class="gl-display-flex gl-justify-content-space-between gl-mt-3">
       <div>
         <label>{{ $options.i18n.pipelineSource }}</label>
         <gl-disclosure-dropdown
@@ -210,7 +212,7 @@ export default {
           name="question-o"
           class="gl-ml-1 gl-fill-blue-500"
           category="secondary"
-          variant="link"
+          variant="confirm"
           :aria-label="$options.i18n.help"
         />
       </div>
@@ -220,7 +222,7 @@ export default {
         </span>
         <gl-button
           variant="confirm"
-          class="gl-mb-2 gl-ml-2"
+          class="gl-ml-2 gl-mb-2"
           data-testid="resimulate-pipeline-button"
           @click="validateYaml"
         >
@@ -256,14 +258,6 @@ export default {
             {{ $options.i18n.cta }}
           </gl-button>
         </div>
-        <gl-button
-          v-if="ciLintPath"
-          class="gl-ml-3 gl-mt-3"
-          :href="ciLintPath"
-          data-testid="lint-button"
-        >
-          {{ $options.i18n.lint }}
-        </gl-button>
         <gl-tooltip
           v-if="isInitialCiContentLoading"
           :target="() => $refs.simulatePipelineButton"
@@ -274,7 +268,7 @@ export default {
     </gl-empty-state>
     <div v-else-if="isSimulationLoading" :class="$options.BASE_CLASSES">
       <gl-loading-icon size="lg" class="gl-m-3" />
-      <h1 class="gl-mb-6 gl-text-size-h1">{{ $options.i18n.loading }}</h1>
+      <h1 class="gl-font-size-h1 gl-mb-6">{{ $options.i18n.loading }}</h1>
       <div>
         <gl-button class="gl-mt-3" data-testid="cancel-simulation" @click="cancelSimulation">
           {{ $options.i18n.cancelBtn }}

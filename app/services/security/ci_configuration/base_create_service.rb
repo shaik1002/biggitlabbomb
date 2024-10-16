@@ -82,10 +82,7 @@ module Security
       end
 
       def remove_branch_on_exception
-        return unless project.repository.branch_exists?(branch_name)
-
-        target_sha = project.repository.commit(branch_name).sha
-        project.repository.rm_branch(current_user, branch_name, target_sha: target_sha)
+        project.repository.rm_branch(current_user, branch_name) if project.repository.branch_exists?(branch_name)
       end
 
       def track_event(attributes_for_commit)

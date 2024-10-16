@@ -96,7 +96,6 @@ export default {
     };
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     activeBoardCard: {
       query: activeBoardItemQuery,
       variables: {
@@ -165,7 +164,7 @@ export default {
       return referencePath.slice(0, referencePath.indexOf('#'));
     },
     showWorkItemEpics() {
-      return this.glFeatures.workItemEpics;
+      return this.glFeatures.displayWorkItemEpicIssueSidebar;
     },
     showEpicSidebarDropdownWidget() {
       return this.epicFeatureAvailable && !this.isIncidentSidebar && this.activeBoardIssuable.id;
@@ -270,7 +269,7 @@ export default {
       @close="handleClose"
     >
       <template #title>
-        <h2 class="gl-my-0 gl-text-size-h2 gl-leading-24">{{ sidebarTitle }}</h2>
+        <h2 class="gl-my-0 gl-font-size-h2 gl-leading-24">{{ sidebarTitle }}</h2>
       </template>
       <template #header>
         <sidebar-todo-widget

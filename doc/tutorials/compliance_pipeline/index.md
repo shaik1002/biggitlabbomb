@@ -79,9 +79,9 @@ The compliance framework is configured in the [new group](#create-a-new-group).
 To configure the compliance framework:
 
 1. On the left sidebar, select **Search or go to** and find the `Tutorial group` group.
-1. Select **Secure > Compliance center**.
-1. On the page, select the **Frameworks** tab.
-1. Select **New framework**.
+1. Select **Settings > General**.
+1. Expand **Compliance frameworks**.
+1. Select **Add framework**.
 1. In the **Name** field, enter `Tutorial compliance framework`.
 1. In the **Description** field, enter `Compliance framework for tutorial`.
 1. In the **Compliance pipeline configuration (optional)** field, enter
@@ -92,11 +92,10 @@ To configure the compliance framework:
 For convenience, make the new compliance framework the default for all new projects in the group:
 
 1. On the left sidebar, select **Search or go to** and find the `Tutorial group` group.
-1. Select **Secure > Compliance center**.
-1. On the page, select the **Frameworks** tab.
-1. Select `Tutorial compliance framework` then, select **Edit framework**.
-1. Select **Set as default**.
-1. Select **Save changes**.
+1. Select **Settings > General**.
+1. Expand **Compliance frameworks**.
+1. In the row for `Tutorial compliance framework`, select **Options** (**{ellipsis_v}**).
+1. Select **Set default**.
 
 ## Create a new project and apply the compliance framework
 
@@ -121,8 +120,8 @@ To run the compliance pipeline configuration in `Tutorial project`:
 
 1. On the left sidebar, select **Search or go to** and find the `Tutorial project` project.
 1. Select **Build > Pipelines**.
-1. Select **New pipeline**.
-1. On the **New pipeline** page, select **Run pipeline**.
+1. Select **Run pipeline**.
+1. On the **Run pipeline** page, select **Run pipeline**.
 
 Notice the pipeline runs a job called `compliance-job` in a **test** stage. Nice work, you've run your first compliance
 job!
@@ -169,8 +168,8 @@ To confirm the regular pipeline configuration is combined with the compliance pi
 
 1. On the left sidebar, select **Search or go to** and find the `Tutorial project` project.
 1. Select **Build > Pipelines**.
-1. Select **New pipeline**.
-1. On the **New pipeline** page, select **Run pipeline**.
+1. Select **Run pipeline**.
+1. On the **Run pipeline** page, select **Run pipeline**.
 
 Notice the pipeline runs two jobs in a **test** stage:
 

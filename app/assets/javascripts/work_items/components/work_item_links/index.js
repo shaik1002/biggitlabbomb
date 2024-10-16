@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import { GlToast } from '@gitlab/ui';
+import { parseBoolean } from '~/lib/utils/common_utils';
 import { apolloProvider } from '~/graphql_shared/issuable_client';
 import WorkItemLinks from './work_item_links.vue';
 
@@ -14,16 +15,13 @@ export default function initWorkItemLinks() {
 
   const {
     fullPath,
-    registerPath,
-    signInPath,
-    wiCanAdminLabel,
-    wiGroupPath,
     wiHasIssueWeightsFeature,
     wiHasIterationsFeature,
     wiHasIssuableHealthStatusFeature,
-    wiIssuesListPath,
-    wiLabelsManagePath,
+    registerPath,
+    signInPath,
     wiReportAbusePath,
+    isGroup,
   } = workItemLinksRoot.dataset;
 
   return new Vue({
@@ -32,17 +30,13 @@ export default function initWorkItemLinks() {
     apolloProvider,
     provide: {
       fullPath,
-      registerPath,
-      signInPath,
-      // for work item modal
-      canAdminLabel: wiCanAdminLabel,
-      groupPath: wiGroupPath,
       hasIssueWeightsFeature: wiHasIssueWeightsFeature,
       hasIterationsFeature: wiHasIterationsFeature,
       hasIssuableHealthStatusFeature: wiHasIssuableHealthStatusFeature,
-      issuesListPath: wiIssuesListPath,
-      labelsManagePath: wiLabelsManagePath,
+      registerPath,
+      signInPath,
       reportAbusePath: wiReportAbusePath,
+      isGroup: parseBoolean(isGroup),
     },
     render: (createElement) =>
       createElement(WorkItemLinks, {

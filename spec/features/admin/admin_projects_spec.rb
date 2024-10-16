@@ -7,7 +7,6 @@ RSpec.describe "Admin::Projects", feature_category: :groups_and_projects do
   include Features::InviteMembersModalHelpers
   include Spec::Support::Helpers::ModalHelpers
   include ListboxHelpers
-  include MobileHelpers
 
   let_it_be_with_reload(:user) { create :user }
   let_it_be_with_reload(:project) { create(:project, :with_namespace_settings) }
@@ -63,7 +62,7 @@ RSpec.describe "Admin::Projects", feature_category: :groups_and_projects do
 
       expect(page).to have_content(project.name)
       expect(page).to have_content(archived_project.name)
-      expect(page).to have_xpath("//span[@class='gl-badge badge badge-pill badge-info gl-mr-3']", text: 'Archived')
+      expect(page).to have_xpath("//span[@class='gl-badge badge badge-pill badge-info md gl-mr-3']", text: 'Archived')
     end
 
     it 'renders only archived projects', :js do
@@ -176,25 +175,7 @@ RSpec.describe "Admin::Projects", feature_category: :groups_and_projects do
     end
   end
 
-  describe 'project edit', :js do
-    before do
-      resize_window(1920, 1080)
-    end
-
-    after do
-      restore_window_size
-    end
-
-    it 'shows all breadcrumbs' do
-      project_params = { id: project.to_param, namespace_id: project.namespace.to_param }
-      visit edit_admin_namespace_project_path(project_params)
-
-      expect(page_breadcrumbs).to include({ text: 'Admin area', href: admin_root_path },
-        { text: 'Projects', href: admin_projects_path },
-        { text: project.full_name, href: admin_namespace_project_path(project_params) },
-        { text: 'Edit', href: edit_admin_namespace_project_path(project_params) })
-    end
-
+  describe 'project edit' do
     it 'updates project details' do
       project = create(:project, :private, name: 'Garfield', description: 'Funny Cat')
 

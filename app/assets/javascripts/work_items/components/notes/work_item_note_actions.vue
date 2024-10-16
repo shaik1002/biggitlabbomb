@@ -4,7 +4,6 @@ import {
   GlTooltipDirective,
   GlDisclosureDropdown,
   GlDisclosureDropdownItem,
-  GlDisclosureDropdownGroup,
 } from '@gitlab/ui';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import { __, sprintf } from '~/locale';
@@ -22,20 +21,19 @@ export default {
     assignUserText: __('Assign to commenting user'),
     unassignUserText: __('Unassign from commenting user'),
     reportAbuseText: __('Report abuse'),
-    resolveThreadTitle: __('Resolve thread'),
   },
   components: {
     EmojiPicker: () => import('~/emoji/components/picker.vue'),
     GlButton,
     GlDisclosureDropdown,
     GlDisclosureDropdownItem,
-    GlDisclosureDropdownGroup,
     ReplyButton,
     UserAccessRoleBadge,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  inject: ['isGroup'],
   props: {
     fullPath: {
       type: String,
@@ -110,31 +108,6 @@ export default {
       required: false,
       default: '',
     },
-    canResolve: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    resolvable: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    isResolved: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    isResolving: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    resolvedBy: {
-      type: Object,
-      required: false,
-      default: () => ({}),
-    },
   },
   computed: {
     assignUserActionText() {
@@ -158,18 +131,8 @@ export default {
         name: this.projectName,
       });
     },
-    resolveIcon() {
-      if (!this.isResolving) {
-        return this.isResolved ? 'check-circle-filled' : 'check-circle';
-      }
-      return null;
-    },
-    resolveThreadTitle() {
-      return this.isResolved
-        ? __('Resolved by ') + this.resolvedBy.name
-        : this.$options.i18n.resolveThreadTitle;
-    },
   },
+
   methods: {
     async setAwardEmoji(name) {
       const { mutation, mutationName, errorMessage } = getMutation({ note: this.note, name });
@@ -190,6 +153,7 @@ export default {
             note: this.note,
             name,
             fullPath: this.fullPath,
+            isGroup: this.isGroup,
             workItemIid: this.workItemIid,
           }),
         });
@@ -235,20 +199,6 @@ export default {
     >
       {{ __('Contributor') }}
     </user-access-role-badge>
-    <gl-button
-      v-if="canResolve"
-      ref="resolveButton"
-      v-gl-tooltip.hover
-      data-testid="resolve-line-button"
-      category="tertiary"
-      class="note-action-button"
-      :class="{ '!gl-text-success': isResolved }"
-      :title="resolveThreadTitle"
-      :aria-label="resolveThreadTitle"
-      :icon="resolveIcon"
-      :loading="isResolving"
-      @click="$emit('resolve')"
-    />
     <emoji-picker
       v-if="showAwardEmoji"
       toggle-class="add-reaction-button btn-default-tertiary"
@@ -273,12 +223,21 @@ export default {
       v-gl-tooltip
       icon="ellipsis_v"
       text-sr-only
-      placement="bottom-end"
+      placement="right"
       :toggle-text="$options.i18n.moreActionsText"
       :title="$options.i18n.moreActionsText"
       category="tertiary"
       no-caret
     >
+      <gl-disclosure-dropdown-item
+        v-if="canReportAbuse"
+        data-testid="abuse-note-action"
+        @action="emitEvent('reportAbuse')"
+      >
+        <template #list-item>
+          {{ $options.i18n.reportAbuseText }}
+        </template>
+      </gl-disclosure-dropdown-item>
       <gl-disclosure-dropdown-item
         data-testid="copy-link-action"
         :data-clipboard-text="noteUrl"
@@ -297,26 +256,15 @@ export default {
           {{ assignUserActionText }}
         </template>
       </gl-disclosure-dropdown-item>
-      <gl-disclosure-dropdown-group v-if="canReportAbuse || showEdit" bordered>
-        <gl-disclosure-dropdown-item
-          v-if="canReportAbuse"
-          data-testid="abuse-note-action"
-          @action="emitEvent('reportAbuse')"
-        >
-          <template #list-item>
-            {{ $options.i18n.reportAbuseText }}
-          </template>
-        </gl-disclosure-dropdown-item>
-        <gl-disclosure-dropdown-item
-          v-if="showEdit"
-          data-testid="delete-note-action"
-          @action="emitEvent('deleteNote')"
-        >
-          <template #list-item>
-            <span class="gl-text-red-500">{{ $options.i18n.deleteNoteText }}</span>
-          </template>
-        </gl-disclosure-dropdown-item>
-      </gl-disclosure-dropdown-group>
+      <gl-disclosure-dropdown-item
+        v-if="showEdit"
+        data-testid="delete-note-action"
+        @action="emitEvent('deleteNote')"
+      >
+        <template #list-item>
+          <span class="gl-text-red-500">{{ $options.i18n.deleteNoteText }}</span>
+        </template>
+      </gl-disclosure-dropdown-item>
     </gl-disclosure-dropdown>
   </div>
 </template>

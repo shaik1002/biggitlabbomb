@@ -3,7 +3,6 @@
 class Environment < ApplicationRecord
   include Gitlab::Utils::StrongMemoize
   include ReactiveCaching
-  include CacheMarkdownField
   include FastDestroyAll::Helpers
   include Presentable
   include NullifyIfBlank
@@ -16,19 +15,18 @@ class Environment < ApplicationRecord
   self.reactive_cache_hard_limit = 10.megabytes
   self.reactive_cache_work_type = :external_dependency
 
-  cache_markdown_field :description
-
   belongs_to :project, optional: false
   belongs_to :merge_request, optional: true
   belongs_to :cluster_agent, class_name: 'Clusters::Agent', optional: true, inverse_of: :environments
 
   use_fast_destroy :all_deployments
-  nullify_if_blank :external_url, :kubernetes_namespace, :flux_resource_path, :description
+  nullify_if_blank :external_url, :kubernetes_namespace, :flux_resource_path
 
   has_many :all_deployments, class_name: 'Deployment'
   has_many :deployments, -> { visible }
   has_many :successful_deployments, -> { success }, class_name: 'Deployment'
   has_many :active_deployments, -> { active }, class_name: 'Deployment'
+  has_many :prometheus_alerts, inverse_of: :environment
   has_many :alert_management_alerts, class_name: 'AlertManagement::Alert', inverse_of: :environment
 
   # NOTE: If you preload multiple last deployments of environments, use Preloaders::Environments::DeploymentPreloader.
@@ -47,7 +45,7 @@ class Environment < ApplicationRecord
       class_name: 'Deployment', inverse_of: :environment
   end
 
-  has_one :latest_opened_most_severe_alert, -> { open_order_by_severity }, class_name: 'AlertManagement::Alert', inverse_of: :environment
+  has_one :latest_opened_most_severe_alert, -> { order_severity_with_open_prometheus_alert }, class_name: 'AlertManagement::Alert', inverse_of: :environment
 
   before_validation :generate_slug, if: ->(env) { env.slug.blank? }
   before_validation :ensure_environment_tier
@@ -73,31 +71,17 @@ class Environment < ApplicationRecord
     length: { maximum: 255 },
     allow_nil: true
 
-  validates :description,
-    length: { maximum: 10000 },
-    allow_nil: true,
-    if: :description_changed?
-
-  validates :description_html,
-    length: { maximum: 50000 },
-    allow_nil: true,
-    if: :description_html_changed?
-
   validates :kubernetes_namespace,
     allow_nil: true,
     length: 1..63,
     format: {
       with: Gitlab::Regex.kubernetes_namespace_regex,
       message: Gitlab::Regex.kubernetes_namespace_regex_message
-    },
-    absence: { unless: :cluster_agent, message: 'cannot be set without a cluster agent' },
-    if: -> { cluster_agent_changed? || kubernetes_namespace_changed? }
+    }
 
   validates :flux_resource_path,
     length: { maximum: 255 },
-    allow_nil: true,
-    absence: { unless: :kubernetes_namespace, message: 'cannot be set without a kubernetes namespace' },
-    if: -> { kubernetes_namespace_changed? || flux_resource_path_changed? }
+    allow_nil: true
 
   validates :tier, presence: true
 
@@ -377,23 +361,15 @@ class Environment < ApplicationRecord
     actions = []
 
     stop_actions.each do |stop_action|
-      play_job = ->(job) do
+      Gitlab::OptimisticLocking.retry_lock(
+        stop_action,
+        name: 'environment_stop_with_actions'
+      ) do |job|
         actions << job.play(job.user)
       rescue StateMachines::InvalidTransition
-        # Ci::PlayBuildService rescues an error of StateMachines::InvalidTransition and fall back to retry.
-        # However, Ci::PlayBridgeService doesn't rescue it, so we're ignoring the error if it's not playable.
+        # Ci::PlayBuildService rescues an error of StateMachines::InvalidTransition and fall back to retry. However,
+        # Ci::PlayBridgeService doesn't rescue it, so we're ignoring the error if it's not playable.
         # We should fix this inconsistency in https://gitlab.com/gitlab-org/gitlab/-/issues/420855.
-      end
-
-      if Feature.enabled?(:no_locking_for_stop_actions, stop_action.project)
-        play_job.call(stop_action)
-      else
-        Gitlab::OptimisticLocking.retry_lock(
-          stop_action,
-          name: 'environment_stop_with_actions'
-        ) do |job|
-          play_job.call(job)
-        end
       end
     end
 

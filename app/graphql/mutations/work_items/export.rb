@@ -6,8 +6,8 @@ module Mutations
       graphql_name 'WorkItemExport'
 
       include FindsProject
-      include ::SearchArguments
       include ::WorkItems::SharedFilterArguments
+      include ::SearchArguments
 
       authorize :export_work_items
 
@@ -32,7 +32,7 @@ module Mutations
         check_export_available_for!(project)
 
         # rubocop:disable CodeReuse/Worker
-        IssuableExportCsvWorker.perform_async(:work_item, current_user.id, project.id, prepare_finder_params(args))
+        IssuableExportCsvWorker.perform_async(:work_item, current_user.id, project.id, args)
         # rubocop:enable CodeReuse/Worker
 
         {

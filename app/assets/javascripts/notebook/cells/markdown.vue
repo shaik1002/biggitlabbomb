@@ -46,7 +46,7 @@ function deHTMLify(t) {
 }
 function renderKatex(t) {
   let text = t;
-  let numInline = 0; // number of successful converted math formulas
+  let numInline = 0; // number of successfull converted math formulas
 
   if (typeof katex !== 'undefined') {
     const katexString = text
@@ -160,13 +160,7 @@ export default {
       renderer.attachments = this.cell.attachments;
       renderer.relativeRawPath = this.relativeRawPath;
 
-      let { source } = this.cell;
-
-      if (Array.isArray(source)) {
-        source = source.join('');
-      }
-
-      return marked(source.replace(/\\/g, '\\\\'));
+      return marked(this.cell.source.join('').replace(/\\/g, '\\\\'));
     },
   },
   markdownConfig,

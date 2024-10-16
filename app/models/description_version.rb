@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class DescriptionVersion < ApplicationRecord
-  include FromUnion
-
   belongs_to :issue
   belongs_to :merge_request
 

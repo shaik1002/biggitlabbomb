@@ -65,10 +65,6 @@ export default {
         isApprovalActionAvailable: false,
       }),
     },
-    deploymentWebPath: {
-      type: String,
-      required: true,
-    },
   },
   computed: {
     isRollbackAvailable() {
@@ -118,8 +114,8 @@ export default {
     />
     <environment-approval
       v-if="approvalEnvironment.isApprovalActionAvailable"
-      :required-approval-count="environment.requiredApprovalCount"
-      :deployment-web-path="deploymentWebPath"
+      :environment="environment"
+      :deployment-iid="deploymentIid"
       :show-text="false"
     />
   </div>

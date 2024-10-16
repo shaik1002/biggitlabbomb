@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::TreeSummary, feature_category: :source_code_management do
+RSpec.describe Gitlab::TreeSummary do
   include RepoHelpers
   using RSpec::Parameterized::TableSyntax
 
@@ -93,12 +93,6 @@ RSpec.describe Gitlab::TreeSummary, feature_category: :source_code_management do
             entries
 
             is_expected.to include('long.txt' => a_hash_including(message: expected_message))
-          end
-
-          it 'does not corrupt the rendered commit message' do
-            entries
-
-            expect(commit.description_html).to eq(message)
           end
         end
       end

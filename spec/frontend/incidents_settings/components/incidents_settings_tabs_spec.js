@@ -1,7 +1,6 @@
 import { GlTab } from '@gitlab/ui';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import IncidentsSettingTabs from '~/incidents_settings/components/incidents_settings_tabs.vue';
-import SettingsBlock from '~/vue_shared/components/settings/settings_block.vue';
 import { INTEGRATION_TABS_CONFIG } from '~/incidents_settings/constants';
 
 describe('IncidentsSettingTabs', () => {
@@ -13,14 +12,11 @@ describe('IncidentsSettingTabs', () => {
         service: {},
         serviceLevelAgreementSettings: {},
       },
-      stubs: {
-        SettingsBlock,
-      },
     });
   });
 
-  const findToggleButton = () => wrapper.findByTestId('settings-block-toggle');
-  const findSectionHeader = () => wrapper.findByTestId('settings-block-title');
+  const findToggleButton = () => wrapper.findComponent({ ref: 'toggleBtn' });
+  const findSectionHeader = () => wrapper.findComponent({ ref: 'sectionHeader' });
   const findIntegrationTabs = () => wrapper.findAllComponents(GlTab);
   const findIntegrationTabAt = (index) => findIntegrationTabs().at(index);
   const findTabComponent = (tab) => wrapper.findByTestId(`${tab.component}-tab`);
@@ -31,7 +27,7 @@ describe('IncidentsSettingTabs', () => {
 
   describe('expand/collapse button', () => {
     it('renders as an expand button by default', () => {
-      expect(findToggleButton().attributes('aria-label')).toContain('Expand');
+      expect(findToggleButton().text()).toBe('Expand');
     });
   });
 

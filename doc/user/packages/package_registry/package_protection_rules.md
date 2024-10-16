@@ -25,11 +25,10 @@ which users can make changes to your packages.
 
 When a package is protected, the default behavior enforces these restrictions on the package:
 
-| Action                                   | Who can do it                                                                     |
-|:-----------------------------------------|:----------------------------------------------------------------------------------|
-| Protect a package                        | At least the Maintainer role.                                                     |
-| Push a new package                       | At least the role set in [**Minimum access level for push**](#protect-a-package). |
-| Push a new package with a deploy token   | Any valid deploy token, only if the pushed package is not matched by a protection rule. Protected packages cannot be pushed with a deploy token. |
+| Action                   | Who can do it                                                                     |
+|:-------------------------|:----------------------------------------------------------------------------------|
+| Protect a package        | At least the Maintainer role.                                                     |
+| Push a new package       | At least the role set in [**Minimum access level for push**](#protect-a-package). |
 
 ## Protect a package
 

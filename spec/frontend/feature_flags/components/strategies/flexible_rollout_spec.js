@@ -1,5 +1,5 @@
 import { GlFormInput, GlFormSelect } from '@gitlab/ui';
-import { shallowMount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import FlexibleRollout from '~/feature_flags/components/strategies/flexible_rollout.vue';
 import ParameterFormGroup from '~/feature_flags/components/strategies/parameter_form_group.vue';
@@ -18,7 +18,7 @@ describe('feature_flags/components/strategies/flexible_rollout.vue', () => {
   let stickinessSelect;
 
   const factory = (props = {}) =>
-    shallowMount(FlexibleRollout, { propsData: { ...DEFAULT_PROPS, ...props } });
+    mount(FlexibleRollout, { propsData: { ...DEFAULT_PROPS, ...props } });
 
   describe('with valid percentage', () => {
     beforeEach(() => {
@@ -35,18 +35,15 @@ describe('feature_flags/components/strategies/flexible_rollout.vue', () => {
     });
 
     it('displays the current percentage value', () => {
-      expect(percentageInput.attributes('value')).toBe(flexibleRolloutStrategy.parameters.rollout);
+      expect(percentageInput.element.value).toBe(flexibleRolloutStrategy.parameters.rollout);
     });
 
     it('displays the current stickiness value', () => {
-      expect(stickinessSelect.attributes('value')).toBe(
-        flexibleRolloutStrategy.parameters.stickiness,
-      );
+      expect(stickinessSelect.element.value).toBe(flexibleRolloutStrategy.parameters.stickiness);
     });
 
     it('emits a change when the percentage value changes', async () => {
-      percentageInput.vm.$emit('input', '75');
-
+      percentageInput.setValue('75');
       await nextTick();
       expect(wrapper.emitted('change')).toEqual([
         [
@@ -62,8 +59,7 @@ describe('feature_flags/components/strategies/flexible_rollout.vue', () => {
     });
 
     it('emits a change when the stickiness value changes', async () => {
-      stickinessSelect.vm.$emit('change', 'userId');
-      await nextTick();
+      await stickinessSelect.setValue('userId');
       expect(wrapper.emitted('change')).toEqual([
         [
           {

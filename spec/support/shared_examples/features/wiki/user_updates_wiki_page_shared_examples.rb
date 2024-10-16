@@ -79,14 +79,14 @@ RSpec.shared_examples 'User updates wiki page' do
       expect(page).to have_content('My awesome wiki!')
     end
 
-    it 'updates entry in redirects.yml file on changing page path' do
+    it 'updates entry in redirects.yml file on rename' do
       wiki.repository.update_file(
         user, '.gitlab/redirects.yml',
         "home2: home\nfoo: bar",
         message: 'Add redirect', branch_name: 'master'
       )
 
-      fill_in(:wiki_path, with: 'home2')
+      fill_in(:wiki_title, with: 'home2')
       fill_in(:wiki_content, with: 'My awesome wiki!')
       click_button('Save changes')
 
@@ -94,6 +94,29 @@ RSpec.shared_examples 'User updates wiki page' do
       expect(page).to have_content('My awesome wiki!')
 
       expect(wiki.repository.blob_at('master', '.gitlab/redirects.yml').data).to eq("---\nfoo: bar\nhome: home2\n")
+    end
+
+    context 'when wiki_redirection feature flag is disabled' do
+      before do
+        stub_feature_flags(wiki_redirection: false)
+      end
+
+      it 'does not modify the redirects.yml file' do
+        wiki.repository.update_file(
+          user, '.gitlab/redirects.yml',
+          "home2: home\nfoo: bar",
+          message: 'Add redirect', branch_name: 'master'
+        )
+
+        fill_in(:wiki_title, with: 'home2')
+        fill_in(:wiki_content, with: 'My awesome wiki!')
+        click_button('Save changes')
+
+        expect(page).to have_content('Home')
+        expect(page).to have_content('My awesome wiki!')
+
+        expect(wiki.repository.blob_at('master', '.gitlab/redirects.yml').data).to eq("home2: home\nfoo: bar")
+      end
     end
 
     it 'saves page content in local storage if the user navigates away', :js do
@@ -187,76 +210,58 @@ RSpec.shared_examples 'User updates wiki page' do
       visit wiki_page_path(wiki, wiki_page, action: :edit)
     end
 
-    it 'does not move the page to root folder on changing the title' do
+    it 'moves the page to the root folder', :js do
       fill_in(:wiki_title, with: "/#{page_name}")
-
-      click_button('Save changes')
-
-      expect(page).to have_current_path(wiki_page_path(wiki, page_dir), ignore_query: true)
-    end
-
-    it 'moves the page to the root folder on changing the path', :js do
-      fill_in(:wiki_path, with: "/#{page_name}")
 
       click_button('Save changes')
 
       expect(page).to have_current_path(wiki_page_path(wiki, page_name), ignore_query: true)
     end
 
-    it 'moves the page to other dir on changing the path', :js do
-      new_page_dir = "foo1/bar1/#{page_name}"
-
-      fill_in(:wiki_path, with: new_page_dir)
-
-      click_button('Save changes')
-
-      expect(page).to have_current_path(wiki_page_path(wiki, new_page_dir), ignore_query: true)
-    end
-
-    it 'does not move the page to other dir on changing the title' do
+    it 'moves the page to other dir', :js do
       new_page_dir = "foo1/bar1/#{page_name}"
 
       fill_in(:wiki_title, with: new_page_dir)
 
       click_button('Save changes')
 
-      expect(page).to have_current_path(wiki_page_path(wiki, page_dir), ignore_query: true)
+      expect(page).to have_current_path(wiki_page_path(wiki, new_page_dir), ignore_query: true)
     end
 
-    it 'remains in the same place if path has not changed', :js do
+    it 'remains in the same place if title has not changed', :js do
       original_path = wiki_page_path(wiki, wiki_page)
 
-      fill_in(:wiki_path, with: page_name)
+      fill_in(:wiki_title, with: page_name)
 
       click_button('Save changes')
 
       expect(page).to have_current_path(original_path, ignore_query: true)
     end
 
-    it 'can be moved to a different dir with a different name by changing the path', :js do
+    it 'can be moved to a different dir with a different name', :js do
       new_page_dir = "foo1/bar1/new_page_name"
 
-      fill_in(:wiki_path, with: new_page_dir)
+      fill_in(:wiki_title, with: new_page_dir)
 
       click_button('Save changes')
 
       expect(page).to have_current_path(wiki_page_path(wiki, new_page_dir), ignore_query: true)
     end
 
-    it 'can be renamed and moved to the root folder by changing the path', :js do
+    it 'can be renamed and moved to the root folder', :js do
       new_name = 'new_page_name'
 
-      fill_in(:wiki_path, with: "/#{new_name}")
+      fill_in(:wiki_title, with: "/#{new_name}")
 
       click_button('Save changes')
 
       expect(page).to have_current_path(wiki_page_path(wiki, new_name), ignore_query: true)
     end
 
-    it 'squishes the path before creating the page', :js do
+    it 'squishes the title before creating the page', :js do
       new_page_dir = "  foo1 /  bar1  /  #{page_name}  "
 
-      fill_in(:wiki_path, with: new_page_dir)
+      fill_in(:wiki_title, with: new_page_dir)
 
       click_button('Save changes')
 
@@ -275,8 +280,8 @@ RSpec.shared_examples 'User updates wiki page' do
       visit wiki_page_path(wiki_page.wiki, wiki_page, action: :edit)
     end
 
-    it 'allows changing the path if the content does not change', :js do
-      fill_in :wiki_path, with: 'new-path'
+    it 'allows changing the title if the content does not change', :js do
+      fill_in 'Title', with: 'new title'
       click_on 'Save changes'
 
       expect(page).to have_content('Wiki page was successfully updated.')

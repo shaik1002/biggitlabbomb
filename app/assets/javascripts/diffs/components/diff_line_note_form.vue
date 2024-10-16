@@ -191,29 +191,30 @@ export default {
       'saveDiffDiscussion',
       'setSuggestPopoverDismissed',
     ]),
-    handleCancelCommentForm: ignoreWhilePending(
-      async function handleCancelCommentForm(shouldConfirm, isDirty) {
-        if (shouldConfirm && isDirty) {
-          const msg = s__('Notes|Are you sure you want to cancel creating this comment?');
+    handleCancelCommentForm: ignoreWhilePending(async function handleCancelCommentForm(
+      shouldConfirm,
+      isDirty,
+    ) {
+      if (shouldConfirm && isDirty) {
+        const msg = s__('Notes|Are you sure you want to cancel creating this comment?');
 
-          const confirmed = await confirmAction(msg, {
-            primaryBtnText: __('Discard changes'),
-            cancelBtnText: __('Continue editing'),
-          });
+        const confirmed = await confirmAction(msg, {
+          primaryBtnText: __('Discard changes'),
+          cancelBtnText: __('Continue editing'),
+        });
 
-          if (!confirmed) {
-            return;
-          }
+        if (!confirmed) {
+          return;
         }
-        this.cancelCommentForm({
-          lineCode: this.line.line_code,
-          fileHash: this.diffFileHash,
-        });
-        nextTick(() => {
-          clearDraft(this.autosaveKey);
-        });
-      },
-    ),
+      }
+      this.cancelCommentForm({
+        lineCode: this.line.line_code,
+        fileHash: this.diffFileHash,
+      });
+      nextTick(() => {
+        clearDraft(this.autosaveKey);
+      });
+    }),
     handleSaveNote(note, parentElement, errorCallback) {
       return this.saveDiffDiscussion({ note, formData: this.formData })
         .then(() => this.handleCancelCommentForm())
@@ -241,7 +242,7 @@ export default {
 
 <template>
   <div class="content discussion-form discussion-form-container discussion-notes">
-    <div class="gl-mb-3 gl-pb-3 gl-text-gray-500">
+    <div class="gl-mb-3 gl-text-gray-500 gl-pb-3">
       <multiline-comment-form
         :line="line"
         :line-range="lines"

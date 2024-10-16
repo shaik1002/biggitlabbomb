@@ -7,9 +7,7 @@ import {
   STATUS_SUCCEEDED,
   STATUS_FAILED,
   STATUS_LABELS,
-  PODS_TABLE_FIELDS,
 } from '~/kubernetes_dashboard/constants';
-import { DELETE_POD_ACTION } from '~/environments/constants';
 import { getAge } from '~/kubernetes_dashboard/helpers/k8s_integration_helper';
 import WorkloadStats from '~/kubernetes_dashboard/components/workload_stats.vue';
 import WorkloadTable from '~/kubernetes_dashboard/components/workload_table.vue';
@@ -45,8 +43,6 @@ export default {
               kind: s__('KubernetesDashboard|Pod'),
               spec: pod.spec,
               fullStatus: pod.status,
-              containers: pod.spec.containers,
-              actions: [DELETE_POD_ACTION],
             };
           }) || []
         );
@@ -74,7 +70,6 @@ export default {
     return {
       error: '',
       filterOption: '',
-      k8sPods: [],
     };
   },
   computed: {
@@ -123,27 +118,26 @@ export default {
       return filteredPods.length;
     },
     onItemSelect(item) {
-      this.$emit('select-item', item);
+      this.$emit('show-resource-details', item);
+    },
+    onRemoveSelection() {
+      this.$emit('remove-selection');
     },
     filterPods(status) {
       this.filterOption = status;
-    },
-    onDeletePod(pod) {
-      this.$emit('delete-pod', pod);
     },
   },
   i18n: {
     podsTitle: s__('Environment|Pods'),
   },
   PAGE_SIZE: 10,
-  PODS_TABLE_FIELDS,
 };
 </script>
 <template>
   <gl-tab>
     <template #title>
       {{ $options.i18n.podsTitle }}
-      <gl-badge class="gl-tab-counter-badge">{{ podsCount }}</gl-badge>
+      <gl-badge size="sm" class="gl-tab-counter-badge">{{ podsCount }}</gl-badge>
     </template>
 
     <gl-loading-icon v-if="loading" />
@@ -154,10 +148,9 @@ export default {
         v-if="k8sPods"
         :items="filteredPods"
         :page-size="$options.PAGE_SIZE"
-        :fields="$options.PODS_TABLE_FIELDS"
         class="gl-mt-8"
         @select-item="onItemSelect"
-        @delete-pod="onDeletePod"
+        @remove-selection="onRemoveSelection"
       />
     </template>
   </gl-tab>

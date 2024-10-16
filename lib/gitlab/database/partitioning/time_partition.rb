@@ -37,8 +37,8 @@ module Gitlab
         end
 
         def to_sql
-          from_sql = from ? conn.quote(from.to_date.iso8601) : 'MINVALUE'
-          to_sql = conn.quote(to.to_date.iso8601)
+          from_sql = from ? conn.quote(from.strftime('%Y-%m-%d')) : 'MINVALUE'
+          to_sql = conn.quote(to.strftime('%Y-%m-%d'))
 
           <<~SQL
             CREATE TABLE IF NOT EXISTS #{fully_qualified_partition}

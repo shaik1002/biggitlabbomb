@@ -41,7 +41,7 @@ describe('ListActions', () => {
       {
         text: 'Delete',
         extraAttrs: {
-          class: '!gl-text-red-500',
+          class: 'gl-text-red-500!',
         },
         action: expect.any(Function),
       },
@@ -76,7 +76,7 @@ describe('ListActions', () => {
       {
         text: 'Delete',
         extraAttrs: {
-          class: '!gl-text-red-500',
+          class: 'gl-text-red-500!',
         },
         action: expect.any(Function),
       },
@@ -109,7 +109,7 @@ describe('ListActions', () => {
       {
         text: 'Delete',
         extraAttrs: {
-          class: '!gl-text-red-500',
+          class: 'gl-text-red-500!',
         },
         action: expect.any(Function),
       },
@@ -128,7 +128,7 @@ describe('ListActions', () => {
       noCaret: true,
       toggleText: 'Actions',
       textSrOnly: true,
-      placement: 'bottom-end',
+      placement: 'right',
       category: 'tertiary',
     });
   });

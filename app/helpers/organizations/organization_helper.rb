@@ -10,7 +10,7 @@ module Organizations
 
     def organization_show_app_data(organization)
       {
-        organization: organization.slice(:id, :name, :description_html, :visibility)
+        organization: organization.slice(:id, :name, :description_html)
           .merge({ avatar_url: organization.avatar_url(size: 128) }),
         groups_and_projects_organization_path: groups_and_projects_organization_path(organization),
         users_organization_path: users_organization_path(organization),
@@ -24,16 +24,13 @@ module Organizations
 
     def organization_settings_general_app_data(organization)
       {
-        organization: organization.slice(:id, :name, :path, :description, :visibility_level)
+        organization: organization.slice(:id, :name, :path, :description)
           .merge({ avatar: organization.avatar_url(size: 192) })
       }.merge(shared_new_settings_general_app_data).to_json
     end
 
     def organization_groups_and_projects_app_data(organization)
-      {
-        user_preference_sort: current_user&.user_preference&.organization_groups_projects_sort,
-        user_preference_display: current_user&.user_preference&.organization_groups_projects_display
-      }.merge(shared_groups_and_projects_app_data(organization)).to_json
+      shared_groups_and_projects_app_data(organization).to_json
     end
 
     def organization_index_app_data
@@ -90,13 +87,12 @@ module Organizations
     def shared_groups_and_projects_app_data(organization)
       {
         organization_gid: organization.to_global_id,
+        projects_empty_state_svg_path: image_path('illustrations/empty-state/empty-projects-md.svg'),
+        groups_empty_state_svg_path: image_path('illustrations/empty-state/empty-groups-md.svg'),
         new_group_path: new_groups_organization_path(organization),
-        groups_path: groups_organization_path(organization),
         new_project_path: new_project_path,
         can_create_group: can?(current_user, :create_group, organization),
         can_create_project: current_user&.can_create_project?,
-        organization_groups_projects_sort: current_user&.organization_groups_projects_sort,
-        organization_groups_projects_display: current_user&.organization_groups_projects_display,
         has_groups: has_groups?(organization)
       }
     end
@@ -111,7 +107,8 @@ module Organizations
 
     def shared_organization_index_app_data
       {
-        new_organization_url: new_organization_path
+        new_organization_url: new_organization_path,
+        organizations_empty_state_svg_path: image_path('illustrations/empty-state/empty-organizations-md.svg')
       }
     end
 

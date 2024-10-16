@@ -11,6 +11,11 @@ export default {
   },
   mixins: [Tracking.mixin()],
   props: {
+    size: {
+      type: String,
+      required: false,
+      default: 'md',
+    },
     actionable: {
       type: Boolean,
       required: false,
@@ -64,6 +69,7 @@ export default {
     :href="badgeUrl"
     class="gl-align-middle"
     :variant="status"
+    :size="size"
     data-testid="check-version-badge"
     @click.native="onClick"
     >{{ title }}</gl-badge

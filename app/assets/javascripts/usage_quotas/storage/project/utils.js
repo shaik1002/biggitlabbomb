@@ -12,7 +12,6 @@ export const getStorageTypesFromProjectStatistics = (
   projectStatistics,
   statisticsDetailsPaths = {},
   helpLinks = {},
-  // eslint-disable-next-line max-params
 ) =>
   selectedStorageTypes.reduce((types, currentType) => {
     const helpPath = helpLinks[currentType.id];

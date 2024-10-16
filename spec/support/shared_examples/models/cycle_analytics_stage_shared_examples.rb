@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'value stream analytics stage' do
-  let_it_be(:group) { create(:group, :with_organization) }
-  let_it_be(:other_group) { create(:group, :with_organization) }
-
   let(:valid_params) do
     {
       name: 'My Stage',
@@ -142,8 +139,8 @@ RSpec.shared_examples 'value stream analytics stage' do
 
   describe '#hash_code' do
     it 'does not differ when the same object is built with the same params' do
-      stage_1 = build(factory, namespace: group)
-      stage_2 = build(factory, namespace: group)
+      stage_1 = build(factory)
+      stage_2 = build(factory)
 
       expect(stage_1.events_hash_code).to eq(stage_2.events_hash_code)
     end
@@ -159,25 +156,16 @@ RSpec.shared_examples 'value stream analytics stage' do
   # rubocop: disable Rails/SaveBang
   describe '#event_hash' do
     it 'associates the same stage event hash record' do
-      first = create(factory, namespace: group)
-      second = create(factory, namespace: group)
+      first = create(factory)
+      second = create(factory)
 
       expect(first.stage_event_hash_id).to eq(second.stage_event_hash_id)
     end
 
-    context 'when the group exist in a different organization' do
-      it 'creates a new stage event hash record' do
-        first = create(factory, namespace: group)
-        second = create(factory, namespace: other_group)
-
-        expect(first.stage_event_hash_id).not_to eq(second.stage_event_hash_id)
-      end
-    end
-
     it 'does not introduce duplicated stage event hash records' do
       expect do
-        create(factory, namespace: group)
-        create(factory, namespace: group)
+        create(factory)
+        create(factory)
       end.to change { Analytics::CycleAnalytics::StageEventHash.count }.from(0).to(1)
     end
 

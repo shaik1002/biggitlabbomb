@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Users
-  class Callout < ApplicationRecord
+  class Callout < MainClusterwide::ApplicationRecord
     include Users::Calloutable
 
     self.table_name = 'user_callouts'
@@ -33,7 +33,7 @@ module Users
       pipeline_needs_hover_tip: 30,
       web_ide_ci_environments_guidance: 31,
       security_configuration_upgrade_banner: 32,
-      # 33 removed in https://gitlab.com/gitlab-org/gitlab/-/merge_requests/159243
+      cloud_licensing_subscription_activation_banner: 33, # EE-only
       trial_status_reminder_d14: 34,             # EE-only
       trial_status_reminder_d3: 35,              # EE-only
       security_configuration_devops_alert: 36,   # EE-only
@@ -77,7 +77,7 @@ module Users
       vsd_feedback_banner: 75, # EE-only
       security_policy_protected_branch_modification: 76, # EE-only
       vulnerability_report_grouping: 77, # EE-only
-      # 78 removed in https://gitlab.com/gitlab-org/gitlab/-/merge_requests/161010,
+      new_nav_for_everyone_callout: 78,
       # 79 removed in https://gitlab.com/gitlab-org/gitlab/-/merge_requests/143862
       duo_chat_callout: 80, # EE-only
       # 81 removed in https://gitlab.com/gitlab-org/gitlab/-/merge_requests/146322
@@ -91,10 +91,7 @@ module Users
       # 89 removed in https://gitlab.com/gitlab-org/gitlab/-/merge_requests/152981
       deployment_approvals_empty_state: 90,
       period_in_terraform_state_name_alert: 91,
-      work_item_epic_feedback: 92, # EE-only
-      branch_rules_tip_callout: 93,
-      openssl_callout: 94,
-      duo_free_access_ending_banner: 95 # EE-only
+      openssl_callout: 94
     }
 
     validates :feature_name,

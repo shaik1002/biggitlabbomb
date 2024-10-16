@@ -77,20 +77,3 @@ export const fluxSyncStatus = (fluxConditions) => {
   }
   return { status: 'unknown' };
 };
-
-export const buildKubernetesErrors = (errors = []) => ({
-  errors,
-  __typename: 'LocalKubernetesErrors',
-});
-
-export const updateFluxRequested = ({
-  path = '/metadata/annotations/reconcile.fluxcd.io~1requestedAt',
-  value = new Date(),
-} = {}) =>
-  JSON.stringify([
-    {
-      op: 'replace',
-      path,
-      value,
-    },
-  ]);

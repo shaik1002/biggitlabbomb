@@ -2,6 +2,7 @@
 import {
   GlAlert,
   GlButton,
+  GlCard,
   GlFormSelect,
   GlKeysetPagination,
   GlLoadingIcon,
@@ -11,9 +12,8 @@ import {
   GlTable,
   GlSprintf,
 } from '@gitlab/ui';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
 import protectionRulesQuery from '~/packages_and_registries/settings/project/graphql/queries/get_container_protection_rules.query.graphql';
-import SettingsSection from '~/vue_shared/components/settings/settings_section.vue';
+import SettingsBlock from '~/packages_and_registries/shared/components/settings_block.vue';
 import ContainerProtectionRuleForm from '~/packages_and_registries/settings/project/components/container_protection_rule_form.vue';
 import deleteContainerProtectionRuleMutation from '~/packages_and_registries/settings/project/graphql/mutations/delete_container_protection_rule.mutation.graphql';
 import updateContainerRegistryProtectionRuleMutation from '~/packages_and_registries/settings/project/graphql/mutations/update_container_registry_protection_rule.mutation.graphql';
@@ -28,16 +28,16 @@ const I18N_MINIMUM_ACCESS_LEVEL_FOR_DELETE = s__(
 
 export default {
   components: {
-    CrudComponent,
     ContainerProtectionRuleForm,
     GlAlert,
     GlButton,
+    GlCard,
     GlFormSelect,
     GlKeysetPagination,
     GlLoadingIcon,
     GlModal,
     GlTable,
-    SettingsSection,
+    SettingsBlock,
     GlSprintf,
   },
   directives: {
@@ -82,6 +82,7 @@ export default {
   data() {
     return {
       protectionRules: [],
+      protectionRuleFormVisibility: false,
       protectionRulesQueryPayload: { nodes: [], pageInfo: {} },
       protectionRulesQueryPaginationParams: { first: PAGINATION_DEFAULT_PER_PAGE },
       protectionRuleMutationInProgress: false,
@@ -115,6 +116,9 @@ export default {
         this.protectionRulesQueryPageInfo.hasNextPage
       );
     },
+    isAddProtectionRuleButtonDisabled() {
+      return this.protectionRuleFormVisibility;
+    },
     modalActionPrimary() {
       return {
         text: s__('ContainerRegistry|Delete container protection rule'),
@@ -130,7 +134,6 @@ export default {
     },
     minimumAccessLevelOptions() {
       return [
-        { value: undefined, text: __('Developer (default)') },
         { value: 'MAINTAINER', text: __('Maintainer') },
         { value: 'OWNER', text: __('Owner') },
         { value: 'ADMIN', text: __('Admin') },
@@ -139,10 +142,10 @@ export default {
   },
   methods: {
     showProtectionRuleForm() {
-      this.$refs.containerProtectionCrud.showForm();
+      this.protectionRuleFormVisibility = true;
     },
     hideProtectionRuleForm() {
-      this.$refs.containerProtectionCrud.hideForm();
+      this.protectionRuleFormVisibility = false;
     },
     refetchProtectionRules() {
       this.$apollo.queries.protectionRulesQueryPayload.refetch();
@@ -267,7 +270,7 @@ export default {
     {
       key: 'rowActions',
       label: __('Actions'),
-      thAlignRight: true,
+      thClass: 'gl-text-right',
       tdClass: '!gl-align-middle gl-text-right',
     },
   ],
@@ -276,91 +279,110 @@ export default {
 </script>
 
 <template>
-  <settings-section
-    :heading="$options.i18n.settingBlockTitle"
-    :description="$options.i18n.settingBlockDescription"
-  >
+  <settings-block>
+    <template #title>{{ $options.i18n.settingBlockTitle }}</template>
+
+    <template #description>
+      {{ $options.i18n.settingBlockDescription }}
+    </template>
+
     <template #default>
-      <crud-component
-        ref="containerProtectionCrud"
-        :title="$options.i18n.settingBlockTitle"
-        :toggle-text="s__('ContainerRegistry|Add protection rule')"
+      <gl-card
+        class="gl-new-card"
+        header-class="gl-new-card-header"
+        body-class="gl-new-card-body gl-px-0"
       >
-        <template #form>
+        <template #header>
+          <div class="gl-new-card-title-wrapper gl-justify-content-space-between">
+            <h3 class="gl-new-card-title">{{ $options.i18n.settingBlockTitle }}</h3>
+            <div class="gl-new-card-actions">
+              <gl-button
+                size="small"
+                :disabled="isAddProtectionRuleButtonDisabled"
+                @click="showProtectionRuleForm"
+              >
+                {{ s__('ContainerRegistry|Add protection rule') }}
+              </gl-button>
+            </div>
+          </div>
+        </template>
+
+        <template #default>
           <container-protection-rule-form
+            v-if="protectionRuleFormVisibility"
             @cancel="hideProtectionRuleForm"
             @submit="refetchProtectionRules"
           />
+
+          <gl-alert
+            v-if="alertErrorMessage"
+            class="gl-mb-5"
+            variant="danger"
+            @dismiss="clearAlertMessage"
+          >
+            {{ alertErrorMessage }}
+          </gl-alert>
+
+          <gl-table
+            :items="tableItems"
+            :fields="$options.fields"
+            show-empty
+            stacked="md"
+            :aria-label="$options.i18n.settingBlockTitle"
+            :busy="isLoadingprotectionRules"
+          >
+            <template #table-busy>
+              <gl-loading-icon size="sm" class="gl-my-5" />
+            </template>
+
+            <template #cell(minimumAccessLevelForPush)="{ item }">
+              <gl-form-select
+                v-model="item.minimumAccessLevelForPush"
+                class="gl-max-w-34"
+                required
+                :aria-label="$options.i18n.minimumAccessLevelForPush"
+                :options="minimumAccessLevelOptions"
+                :disabled="isProtectionRuleMinimumAccessLevelForPushFormSelectDisabled(item)"
+                @change="updateProtectionRuleMinimumAccessLevelForPush(item)"
+              />
+            </template>
+
+            <template #cell(minimumAccessLevelForDelete)="{ item }">
+              <gl-form-select
+                v-model="item.minimumAccessLevelForDelete"
+                class="gl-max-w-34"
+                required
+                :aria-label="$options.i18n.minimumAccessLevelForDelete"
+                :options="minimumAccessLevelOptions"
+                :disabled="isProtectionRuleMinimumAccessLevelForPushFormSelectDisabled(item)"
+                @change="updateProtectionRuleMinimumAccessLevelForDelete(item)"
+              />
+            </template>
+
+            <template #cell(rowActions)="{ item }">
+              <gl-button
+                v-gl-tooltip
+                v-gl-modal="$options.modal.id"
+                category="tertiary"
+                icon="remove"
+                :title="__('Delete')"
+                :aria-label="__('Delete')"
+                :disabled="isProtectionRuleDeleteButtonDisabled(item)"
+                @click="showProtectionRuleDeletionConfirmModal(item)"
+              />
+            </template>
+          </gl-table>
+
+          <div v-if="shouldShowPagination" class="gl-display-flex gl-justify-content-center">
+            <gl-keyset-pagination
+              v-bind="protectionRulesQueryPageInfo"
+              class="gl-mb-3"
+              @prev="onPrevPage"
+              @next="onNextPage"
+            />
+          </div>
         </template>
-
-        <gl-alert
-          v-if="alertErrorMessage"
-          class="gl-mb-5"
-          variant="danger"
-          @dismiss="clearAlertMessage"
-        >
-          {{ alertErrorMessage }}
-        </gl-alert>
-
-        <gl-table
-          :items="tableItems"
-          :fields="$options.fields"
-          show-empty
-          stacked="md"
-          :aria-label="$options.i18n.settingBlockTitle"
-          :busy="isLoadingprotectionRules"
-        >
-          <template #table-busy>
-            <gl-loading-icon size="sm" class="gl-my-5" />
-          </template>
-
-          <template #cell(minimumAccessLevelForPush)="{ item }">
-            <gl-form-select
-              v-model="item.minimumAccessLevelForPush"
-              class="gl-max-w-34"
-              required
-              :aria-label="$options.i18n.minimumAccessLevelForPush"
-              :options="minimumAccessLevelOptions"
-              :disabled="isProtectionRuleMinimumAccessLevelForPushFormSelectDisabled(item)"
-              @change="updateProtectionRuleMinimumAccessLevelForPush(item)"
-            />
-          </template>
-
-          <template #cell(minimumAccessLevelForDelete)="{ item }">
-            <gl-form-select
-              v-model="item.minimumAccessLevelForDelete"
-              class="gl-max-w-34"
-              required
-              :aria-label="$options.i18n.minimumAccessLevelForDelete"
-              :options="minimumAccessLevelOptions"
-              :disabled="isProtectionRuleMinimumAccessLevelForPushFormSelectDisabled(item)"
-              @change="updateProtectionRuleMinimumAccessLevelForDelete(item)"
-            />
-          </template>
-
-          <template #cell(rowActions)="{ item }">
-            <gl-button
-              v-gl-tooltip
-              v-gl-modal="$options.modal.id"
-              category="tertiary"
-              icon="remove"
-              :title="__('Delete')"
-              :aria-label="__('Delete')"
-              :disabled="isProtectionRuleDeleteButtonDisabled(item)"
-              @click="showProtectionRuleDeletionConfirmModal(item)"
-            />
-          </template>
-        </gl-table>
-
-        <template v-if="shouldShowPagination" #pagination>
-          <gl-keyset-pagination
-            v-bind="protectionRulesQueryPageInfo"
-            class="gl-mb-3"
-            @prev="onPrevPage"
-            @next="onNextPage"
-          />
-        </template>
-      </crud-component>
+      </gl-card>
 
       <gl-modal
         v-if="protectionRuleMutationItem"
@@ -383,5 +405,5 @@ export default {
         <p>{{ $options.i18n.protectionRuleDeletionConfirmModal.descriptionConsequence }}</p>
       </gl-modal>
     </template>
-  </settings-section>
+  </settings-block>
 </template>

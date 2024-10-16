@@ -1,17 +1,15 @@
 <script>
 import { GlTabs, GlTab } from '@gitlab/ui';
+import API from '~/api';
 import { mergeUrlParams, updateHistory, getParameterValues } from '~/lib/utils/url_utility';
 import { InternalEvents } from '~/tracking';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import PipelineCharts from './pipeline_charts.vue';
-import PipelineChartsNew from './pipeline_charts_new.vue';
 
 export default {
   components: {
     GlTabs,
     GlTab,
     PipelineCharts,
-    PipelineChartsNew,
     DeploymentFrequencyCharts: () =>
       import('ee_component/dora/components/deployment_frequency_charts.vue'),
     LeadTimeCharts: () => import('ee_component/dora/components/lead_time_charts.vue'),
@@ -24,9 +22,9 @@ export default {
   piplelinesTabEvent: 'p_analytics_ci_cd_pipelines',
   deploymentFrequencyTabEvent: 'p_analytics_ci_cd_deployment_frequency',
   leadTimeTabEvent: 'p_analytics_ci_cd_lead_time',
-  timeToRestoreServiceTabEvent: 'visit_ci_cd_time_to_restore_service_tab',
-  changeFailureRateTabEvent: 'visit_ci_cd_failure_rate_tab',
-  mixins: [InternalEvents.mixin(), glFeatureFlagsMixin()],
+  timeToRestoreServiceTabEvent: 'p_analytics_ci_cd_time_to_restore_service',
+  changeFailureRateTabEvent: 'p_analytics_ci_cd_change_failure_rate',
+  mixins: [InternalEvents.mixin()],
   inject: {
     shouldRenderDoraCharts: {
       type: Boolean,
@@ -61,12 +59,6 @@ export default {
 
       return chartsToShow;
     },
-    pipelineChartsComponent() {
-      if (this.glFeatures?.ciImprovedProjectPipelineAnalytics) {
-        return PipelineChartsNew;
-      }
-      return PipelineCharts;
-    },
   },
   created() {
     this.selectTab();
@@ -85,6 +77,13 @@ export default {
         updateHistory({ url: path, title: window.title });
       }
     },
+    trackTabClick(event, trackWithInternalEvents = false) {
+      if (trackWithInternalEvents) {
+        this.trackEvent(event);
+        return;
+      }
+      API.trackRedisHllUserEvent(event);
+    },
   },
 };
 </script>
@@ -94,36 +93,36 @@ export default {
       <gl-tab
         :title="__('Pipelines')"
         data-testid="pipelines-tab"
-        @click="trackEvent($options.piplelinesTabEvent)"
+        @click="trackTabClick($options.piplelinesTabEvent, true)"
       >
-        <component :is="pipelineChartsComponent" />
+        <pipeline-charts />
       </gl-tab>
       <template v-if="shouldRenderDoraCharts">
         <gl-tab
           :title="__('Deployment frequency')"
           data-testid="deployment-frequency-tab"
-          @click="trackEvent($options.deploymentFrequencyTabEvent)"
+          @click="trackTabClick($options.deploymentFrequencyTabEvent, true)"
         >
           <deployment-frequency-charts />
         </gl-tab>
         <gl-tab
           :title="__('Lead time')"
           data-testid="lead-time-tab"
-          @click="trackEvent($options.leadTimeTabEvent)"
+          @click="trackTabClick($options.leadTimeTabEvent, true)"
         >
           <lead-time-charts />
         </gl-tab>
         <gl-tab
           :title="s__('DORA4Metrics|Time to restore service')"
           data-testid="time-to-restore-service-tab"
-          @click="trackEvent($options.timeToRestoreServiceTabEvent)"
+          @click="trackTabClick($options.timeToRestoreServiceTabEvent)"
         >
           <time-to-restore-service-charts />
         </gl-tab>
         <gl-tab
           :title="s__('DORA4Metrics|Change failure rate')"
           data-testid="change-failure-rate-tab"
-          @click="trackEvent($options.changeFailureRateTabEvent)"
+          @click="trackTabClick($options.changeFailureRateTabEvent)"
         >
           <change-failure-rate-charts />
         </gl-tab>
@@ -132,6 +131,6 @@ export default {
         <project-quality-summary />
       </gl-tab>
     </gl-tabs>
-    <component :is="pipelineChartsComponent" v-else />
+    <pipeline-charts v-else />
   </div>
 </template>

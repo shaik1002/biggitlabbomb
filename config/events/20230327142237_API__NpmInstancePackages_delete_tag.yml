@@ -2,6 +2,9 @@
 description: Delete NPM instance packages tag
 category: API::NpmInstancePackages
 action: delete_tag
+label_description:
+property_description:
+value_description:
 extra_properties:
 identifiers:
 - project

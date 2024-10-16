@@ -13,6 +13,11 @@ export default {
       type: String,
       required: true,
     },
+    size: {
+      type: String,
+      required: false,
+      default: 'md',
+    },
   },
   methods: {
     target() {
@@ -32,7 +37,7 @@ export default {
 
 <template>
   <div>
-    <gl-badge ref="badge" href="#" variant="neutral" class="gl-cursor-pointer">{{
+    <gl-badge ref="badge" href="#" :size="size" variant="neutral" class="gl-cursor-pointer">{{
       label
     }}</gl-badge>
     <gl-popover

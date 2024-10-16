@@ -11,7 +11,7 @@ Workhorse and GitLab Shell.
 
 ## Deep Dive
 
-<!-- vale gitlab_base.Spelling = NO -->
+<!-- vale gitlab.Spelling = NO -->
 
 In May 2019, Bob Van Landuyt
 hosted a Deep Dive (GitLab team members only: `https://gitlab.com/gitlab-org/create-stage/-/issues/1`)
@@ -19,7 +19,7 @@ on the [Gitaly project](https://gitlab.com/gitlab-org/gitaly). It included how t
 Ruby developer, and shared domain-specific knowledge with anyone who may work in this part of the
 codebase in the future.
 
-<!-- vale gitlab_base.Spelling = YES -->
+<!-- vale gitlab.Spelling = YES -->
 
 You can find the <i class="fa fa-youtube-play youtube" aria-hidden="true"></i> [recording on YouTube](https://www.youtube.com/watch?v=BmlEWFS8ORo), and the slides
 on [Google Slides](https://docs.google.com/presentation/d/1VgRbiYih9ODhcPnL8dS0W98EwFYpJ7GXMPpX-1TM6YE/edit)
@@ -79,7 +79,7 @@ Raise an issue in the GitLab CE or EE repositories to report the issue. Include 
 
 Isolate the source of the n+1 problem. This is usually a loop that results in Gitaly being called for each
 element in an array. If you are unable to isolate the problem, contact a member
-of the [Gitaly Team](https://gitlab.com/groups/gl-gitaly/-/group_members) for assistance.
+of the [Gitaly Team](https://gitlab.com/groups/gl-gitaly/group_members) for assistance.
 
 After the source has been found, wrap it in an `allow_n_plus_1_calls` block, as follows:
 
@@ -144,7 +144,7 @@ tests. Otherwise, Gitaly fails to boot.
 If you make changes to your local Gitaly in between test runs you need
 to manually run `make` again.
 
-CI tests do not use your locally modified version of
+Note that CI tests do not use your locally modified version of
 Gitaly. To use a custom Gitaly version in CI, you must update
 `GITALY_SERVER_VERSION` as described at the beginning of this section.
 

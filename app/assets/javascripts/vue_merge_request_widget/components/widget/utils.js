@@ -32,7 +32,7 @@ const textStyleTags = {
   [getStartTag('critical')]: '<span class="gl-font-bold gl-text-red-800">',
   [getStartTag('same')]: '<span class="gl-font-bold gl-text-gray-700">',
   [getStartTag('strong')]: '<span class="gl-font-bold">',
-  [getStartTag('small')]: '<span class="gl-text-sm gl-text-gray-700">',
+  [getStartTag('small')]: '<span class="gl-font-sm gl-text-gray-700">',
 };
 
 const escapeText = (text) =>
@@ -68,9 +68,9 @@ export const generateText = (text) => {
   }
   if (typeof text === 'object' && typeof text.text === 'string' && typeof text.href === 'string') {
     return createText(
-      `${text.prependText ? `${escapeText(text.prependText)} ` : ''}<a class="gl-underline" href="${
-        text.href
-      }">${escapeText(text.text)}</a>`,
+      `${
+        text.prependText ? `${escapeText(text.prependText)} ` : ''
+      }<a class="gl-text-decoration-underline" href="${text.href}">${escapeText(text.text)}</a>`,
     );
   }
 

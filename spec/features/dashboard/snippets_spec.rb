@@ -30,10 +30,6 @@ RSpec.describe 'Dashboard snippets', :js, feature_category: :source_code_managem
       parent_element = find_by_testid('page-heading-actions')
       expect(parent_element).to have_link('New snippet')
     end
-
-    it 'passes axe automated accessibility testing' do
-      expect(page).to be_axe_clean.within('#content-body')
-    end
   end
 
   context 'when there are no project snippets' do
@@ -45,25 +41,21 @@ RSpec.describe 'Dashboard snippets', :js, feature_category: :source_code_managem
     end
 
     it 'shows the empty state when there are no snippets' do
-      element = page.find('.gl-empty-state')
+      element = page.find('.row.empty-state')
 
       expect(element).to have_content("Code snippets")
-      expect(element.find('img')['src'])
+      expect(element.find('.svg-content img.js-lazy-loaded')['src'])
         .to have_content('illustrations/empty-state/empty-snippets-md')
     end
 
     it 'shows new snippet button in main content area' do
-      parent_element = page.find('.gl-empty-state')
+      parent_element = page.find('.row.empty-state')
       expect(parent_element).to have_link('New snippet')
     end
 
     it 'shows documentation button in main comment area' do
-      parent_element = page.find('.gl-empty-state')
-      expect(parent_element).to have_link('Learn more', href: help_page_path('user/snippets.md'))
-    end
-
-    it 'passes axe automated accessibility testing' do
-      expect(page).to be_axe_clean.within('#content-body')
+      parent_element = page.find('.row.empty-state')
+      expect(parent_element).to have_link('Documentation', href: help_page_path('user/snippets'))
     end
   end
 

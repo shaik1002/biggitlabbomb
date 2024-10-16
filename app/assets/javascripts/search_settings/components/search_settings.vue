@@ -1,7 +1,7 @@
 <script>
-import { GlSearchBoxByType } from '@gitlab/ui';
+import { GlEmptyState, GlSearchBoxByType } from '@gitlab/ui';
+import EmptyStateSvg from '@gitlab/svgs/dist/illustrations/empty-state/empty-search-md.svg';
 import { escapeRegExp } from 'lodash';
-import EmptyResult from '~/vue_shared/components/empty_result.vue';
 import {
   EXCLUDED_NODES,
   HIDE_CLASS,
@@ -129,7 +129,7 @@ const search = (root, searchTerm) => {
 
 export default {
   components: {
-    EmptyResult,
+    GlEmptyState,
     GlSearchBoxByType,
   },
   props: {
@@ -196,6 +196,7 @@ export default {
     },
   },
   TYPING_DELAY,
+  EmptyStateSvg,
 };
 </script>
 <template>
@@ -207,6 +208,11 @@ export default {
       @input="search"
     />
 
-    <empty-result v-if="!hasMatches" />
+    <gl-empty-state
+      v-if="!hasMatches"
+      :title="__('No results found')"
+      :description="__('Edit your search and try again')"
+      :svg-path="$options.EmptyStateSvg"
+    />
   </div>
 </template>

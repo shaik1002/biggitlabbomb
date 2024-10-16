@@ -41,8 +41,6 @@ You can use advanced search in:
 
 ## Syntax
 
-<!-- Remember to also update the tables in `doc/drawers/advanced_search_syntax.md` -->
-
 > - Refining user search [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/388409) in GitLab 15.10.
 
 Advanced search uses [`simple_query_string`](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html),
@@ -91,7 +89,7 @@ You can refine user search with `simple_query_string`.
 - You can only search files smaller than 1 MB.
   For more information, see [issue 195764](https://gitlab.com/gitlab-org/gitlab/-/issues/195764).
   For self-managed GitLab instances, an administrator can
-  [configure the **Maximum file size indexed** setting](../../integration/advanced_search/elasticsearch.md#advanced-search-configuration).
+  [configure this setting](../../integration/advanced_search/elasticsearch.md#advanced-search-configuration).
 - You can use advanced search on the default branch of a project only.
   For more information, see [issue 229966](https://gitlab.com/gitlab-org/gitlab/-/issues/229966).
 - The search query must not contain any of the following characters:

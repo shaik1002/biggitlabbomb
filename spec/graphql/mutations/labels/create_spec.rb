@@ -2,9 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Mutations::Labels::Create, feature_category: :api do
-  include GraphqlHelpers
-
+RSpec.describe Mutations::Labels::Create do
   let_it_be(:user) { create(:user) }
 
   let(:attributes) do
@@ -14,9 +12,7 @@ RSpec.describe Mutations::Labels::Create, feature_category: :api do
     }
   end
 
-  let(:query) { GraphQL::Query.new(empty_schema, document: nil, context: {}, variables: {}) }
-  let(:context) { GraphQL::Query::Context.new(query: query, values: { current_user: user }) }
-  let(:mutation) { described_class.new(object: nil, context: context, field: nil) }
+  let(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
   let(:mutated_label) { subject[:label] }
 
   shared_examples 'create labels mutation' do

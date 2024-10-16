@@ -158,18 +158,5 @@ RSpec.describe Packages::Nuget::PackageFinder, feature_category: :package_regist
 
       it { is_expected.to be_empty }
     end
-
-    context 'with public package registry in private group' do
-      let(:target) { group }
-
-      before_all do
-        [subgroup, group, project].each do |entity|
-          entity.update!(visibility_level: Gitlab::VisibilityLevel.const_get(:PRIVATE, false))
-        end
-        project.project_feature.update!(package_registry_access_level: ::ProjectFeature::PUBLIC)
-      end
-
-      it { is_expected.to match_array([package1, package2]) }
-    end
   end
 end

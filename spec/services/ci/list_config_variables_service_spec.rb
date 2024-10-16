@@ -113,108 +113,6 @@ RSpec.describe Ci::ListConfigVariablesService,
     end
   end
 
-  context 'when config has $CI_COMMIT_REF_NAME' do
-    let(:include_one_config) do
-      {
-        variables: {
-          VAR1: { description: 'VAR1 from include_one yaml file', value: 'VAR1' },
-          COMMON_VAR: { description: 'Common variable', value: 'include_one' }
-        },
-        test: {
-          stage: 'test',
-          script: 'echo'
-        }
-      }
-    end
-
-    let(:include_two_config) do
-      {
-        variables: {
-          VAR2: { description: 'VAR2 from include_two yaml file', value: 'VAR2' },
-          COMMON_VAR: { description: 'Common variable', value: 'include_two' }
-        },
-        test: {
-          stage: 'test',
-          script: 'echo'
-        }
-      }
-    end
-
-    let(:ci_config) do
-      {
-        include: [
-          {
-            local: 'include_one.yml',
-            rules: [
-              { if: "$CI_COMMIT_REF_NAME =~ /master/" }
-            ]
-          },
-          {
-            local: 'include_two.yml',
-            rules: [
-              { if: "$CI_COMMIT_REF_NAME !~ /master/" }
-            ]
-          }
-        ]
-      }
-    end
-
-    let(:files) do
-      { '.gitlab-ci.yml' => YAML.dump(ci_config), 'include_one.yml' => YAML.dump(include_one_config),
-        'include_two.yml' => YAML.dump(include_two_config) }
-    end
-
-    before do
-      synchronous_reactive_cache(service)
-    end
-
-    context 'when it matches with input branch name' do
-      it 'passes the ref name to YamlProcessor' do
-        expect(Gitlab::Ci::YamlProcessor)
-          .to receive(:new)
-          .with(anything, a_hash_including(ref: project.default_branch))
-          .and_call_original
-
-        result
-      end
-
-      it 'returns variable list from include_one yaml' do
-        expect(result['VAR1']).to eq({ value: 'VAR1', description: 'VAR1 from include_one yaml file' })
-        expect(result['COMMON_VAR']).to eq({ value: 'include_one', description: 'Common variable' })
-      end
-    end
-
-    context 'when it does not match with input branch name' do
-      let(:other_branch) { 'some_other_branch' }
-      let(:ref) { other_branch }
-
-      before do
-        project.repository.add_branch(project.creator, other_branch, project.default_branch)
-        project.repository.create_file(
-          project.creator,
-          'new_file.txt',
-          'New file content',
-          message: 'Add new file',
-          branch_name: other_branch
-        )
-      end
-
-      it 'passes the ref name to YamlProcessor' do
-        expect(Gitlab::Ci::YamlProcessor)
-          .to receive(:new)
-          .with(anything, a_hash_including(ref: other_branch))
-          .and_call_original
-
-        result
-      end
-
-      it 'returns variable list from include_two yaml' do
-        expect(result['VAR2']).to eq({ value: 'VAR2', description: 'VAR2 from include_two yaml file' })
-        expect(result['COMMON_VAR']).to eq({ value: 'include_two', description: 'Common variable' })
-      end
-    end
-  end
-
   context 'when project CI config is external' do
     let(:other_project_ci_config) do
       {
@@ -284,7 +182,7 @@ RSpec.describe Ci::ListConfigVariablesService,
   end
 
   context 'when reading from cache' do
-    let(:reactive_cache_params) { [sha, ref] }
+    let(:reactive_cache_params) { [sha] }
     let(:return_value) { { 'KEY1' => { value: 'val 1', description: 'description 1' } } }
 
     before do
@@ -297,7 +195,7 @@ RSpec.describe Ci::ListConfigVariablesService,
   end
 
   context 'when the cache is empty' do
-    let(:reactive_cache_params) { [sha, ref] }
+    let(:reactive_cache_params) { [sha] }
 
     it 'returns nil and enquques the worker to fill cache' do
       expect(ExternalServiceReactiveCachingWorker)

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Verify', :runner, product_group: :pipeline_execution do
+  RSpec.describe 'Verify', :runner, product_group: :pipeline_security do
     describe 'Pipeline configuration access keyword' do
       let(:executor) { "qa-runner-#{Faker::Alphanumeric.alphanumeric(number: 8)}" }
       let(:project) { create(:project, name: 'project-with-artifacts', initialize_with_readme: true) }
@@ -72,17 +72,17 @@ module QA
         end
       end
 
-      context 'when access is set to none', :blocking do
+      context 'when access is set to none' do
         it_behaves_like 'artifact access', 'none', false, false,
           'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/465991', 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/465697'
       end
 
-      context 'when access is set to developer', :blocking do
+      context 'when access is set to developer' do
         it_behaves_like 'artifact access', 'developer', true, false,
           'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/465994', 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/465995'
       end
 
-      context 'when access is set to all', :blocking do
+      context 'when access is set to all' do
         it_behaves_like 'artifact access', 'all', true, true,
           'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/465992', 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/465993'
       end

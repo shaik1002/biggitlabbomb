@@ -2,14 +2,12 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Changelog::Config, feature_category: :source_code_management do
+RSpec.describe Gitlab::Changelog::Config do
   include ProjectForksHelper
 
   let(:project) { build_stubbed(:project) }
 
   describe '.from_git' do
-    let(:changelog_config_file) { 'specified_changelog_config.yml' }
-
     it 'retrieves the configuration from Git' do
       allow(project.repository)
         .to receive(:changelog_config)
@@ -24,14 +22,14 @@ RSpec.describe Gitlab::Changelog::Config, feature_category: :source_code_managem
 
     it "retrieves the specified configuration from git" do
       allow(project.repository)
-        .to receive(:changelog_config).with('HEAD', changelog_config_file)
+        .to receive(:changelog_config).with('HEAD', 'specified_changelog_config.yml')
         .and_return("---\ndate_format: '%Y'")
 
       expect(described_class)
         .to receive(:from_hash)
         .with(project, { 'date_format' => '%Y' }, nil)
 
-      described_class.from_git(project, nil, changelog_config_file)
+      described_class.from_git(project, nil, 'specified_changelog_config.yml')
     end
 
     it 'returns the default configuration when no YAML file exists in Git' do
@@ -46,45 +44,17 @@ RSpec.describe Gitlab::Changelog::Config, feature_category: :source_code_managem
       described_class.from_git(project)
     end
 
-    context 'when the specified configuration yml is invalid' do
-      it 'raises an error' do
+    context 'when changelog is empty' do
+      it 'returns the default configuration' do
         allow(project.repository)
-          .to receive(:changelog_config).with('HEAD', changelog_config_file)
-          .and_return("invalid: :yaml")
+          .to receive(:changelog_config)
+          .and_return("")
 
-        expect { described_class.from_git(project, nil, changelog_config_file) }
-          .to raise_error(Gitlab::Changelog::Error, "#{changelog_config_file} does not contain valid YAML")
-      end
-    end
+        expect(described_class)
+          .to receive(:new)
+          .with(project)
 
-    context 'when changelog config is empty' do
-      subject(:from_git) { described_class.from_git(project) }
-
-      shared_examples 'all attributes match the default config' do
-        let(:default_config) { described_class.new(project) }
-        let(:attributes) { %i[date_format categories template tag_regex always_credit_user_ids] }
-
-        it 'does not modify any attributes from the default config' do
-          attributes.each do |attribute|
-            expect(from_git.public_send(attribute)).to eql(default_config.public_send(attribute))
-          end
-        end
-      end
-
-      before do
-        allow(project.repository).to receive(:changelog_config).and_return(changelog_config_content)
-      end
-
-      context 'when changelog config does not contain a header' do
-        let(:changelog_config_content) { "" }
-
-        it_behaves_like 'all attributes match the default config'
-      end
-
-      context 'when changelog config contains a header' do
-        let(:changelog_config_content) { "---\n\n" }
-
-        it_behaves_like 'all attributes match the default config'
+        described_class.from_git(project)
       end
     end
   end

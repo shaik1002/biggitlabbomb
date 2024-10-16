@@ -95,8 +95,7 @@ production: &base
 
     ## Date & Time settings
     # Uncomment and customize if you want to change the default time zone of GitLab application.
-    # To see all available time zones in a valid format, run `timedatectl list-timezones`
-    # on a Linux host, or 'TZInfo::Timezone.all_identifiers' in a Rails console.
+    # To see all available zones, run `bundle exec rake time:zones:all RAILS_ENV=production`
     # time_zone: 'UTC'
 
     ## Email settings
@@ -592,6 +591,10 @@ production: &base
     schedule_migrate_external_diffs_worker:
       cron: "15 * * * *"
 
+    # Update CI Platform Metrics daily
+    ci_platform_metrics_update_cron_worker:
+      cron: "47 9 * * *"
+
     # Periodically update ci_runner_versions table with up-to-date versions and status.
     ci_runner_versions_reconciliation_worker:
       cron: "@daily"
@@ -599,10 +602,6 @@ production: &base
     # Periodically clean up stale runner machines.
     ci_runners_stale_machines_cleanup_worker:
       cron: "36 * * * *"
-
-    # Periodically queue syncing of finished pipelines from p_ci_finished_pipeline_ch_sync_events to ClickHouse
-    ci_click_house_finished_pipelines_sync_worker:
-      cron: "*/4 * * * *"
 
   # GitLab EE only jobs. These jobs are automatically enabled for an EE
   # installation, and ignored for a CE installation.
@@ -1428,10 +1427,6 @@ production: &base
       # Ban an IP for one hour (3600s) after too many auth attempts
       # bantime: 3600
 
-  ## OpenBao settings
-  openbao:
-    proxy_address: http://127.0.0.1:8100
-
 development:
   <<: *base
 
@@ -1452,8 +1447,6 @@ development:
 
 test:
   <<: *base
-  openbao:
-    proxy_address: http://www.example.com
   object_store:
     enabled: false
   gravatar:

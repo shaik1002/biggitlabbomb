@@ -13,5 +13,3 @@ module API
     end
   end
 end
-
-API::Entities::Clusters::Agent.prepend_mod

@@ -5,11 +5,13 @@ require 'spec_helper'
 RSpec.describe WorkItems::ParentLinks::CreateService, feature_category: :portfolio_management do
   describe '#execute' do
     let_it_be(:user) { create(:user) }
+    let_it_be(:guest) { create(:user) }
     let_it_be(:project) { create(:project) }
     let_it_be(:work_item) { create(:work_item, project: project) }
     let_it_be(:task) { create(:work_item, :task, project: project) }
     let_it_be_with_reload(:task1) { create(:work_item, :task, project: project) }
     let_it_be_with_reload(:task2) { create(:work_item, :task, project: project) }
+    let_it_be(:guest_task) { create(:work_item, :task) }
     let_it_be(:invalid_task) { build_stubbed(:work_item, :task, id: non_existing_record_id) }
     let_it_be(:another_project) { (create :project) }
     let_it_be(:other_project_task) { create(:work_item, :task, iid: 100, project: another_project) }
@@ -20,7 +22,9 @@ RSpec.describe WorkItems::ParentLinks::CreateService, feature_category: :portfol
     let(:params) { {} }
 
     before do
-      project.add_guest(user)
+      project.add_reporter(user)
+      project.add_guest(guest)
+      guest_task.project.add_guest(user)
       another_project.add_reporter(user)
     end
 
@@ -51,9 +55,7 @@ RSpec.describe WorkItems::ParentLinks::CreateService, feature_category: :portfol
     end
 
     context 'when user has no permission to link work items' do
-      let(:work_item) { create(:work_item, project: project, confidential: true) }
-      let(:task) { create(:work_item, :task, project: project, confidential: true) }
-      let(:params) { { issuable_references: [task] } }
+      let(:params) { { issuable_references: [guest_task] } }
 
       it_behaves_like 'returns not found error'
     end
@@ -83,9 +85,9 @@ RSpec.describe WorkItems::ParentLinks::CreateService, feature_category: :portfol
       subject { described_class.new(parent_item, user, { target_issuable: current_item }).execute }
 
       where(:adjacent_position, :expected_order) do
-        -100 | lazy { [current_item, adjacent] }
-        0    | lazy { [current_item, adjacent] }
-        100  | lazy { [current_item, adjacent] }
+        -100 | lazy { [adjacent, current_item] }
+        0    | lazy { [adjacent, current_item] }
+        100  | lazy { [adjacent, current_item] }
       end
 
       with_them do
@@ -217,8 +219,8 @@ RSpec.describe WorkItems::ParentLinks::CreateService, feature_category: :portfol
           expect { subject }.to change { parent_link_class.count }.by(2)
         end
 
-        it 'returns error status' do
-          error = "#{issue.to_reference} cannot be added: it's not allowed to add this type of parent item. " \
+        it 'does not return error status' do
+          error = "#{issue.to_reference} cannot be added: is not allowed to add this type of parent. " \
             "#{other_project_task.to_reference} cannot be added: parent must be in the same project or group as child."
 
           is_expected.not_to eq(service_error(error, http_status: 422))
@@ -240,7 +242,7 @@ RSpec.describe WorkItems::ParentLinks::CreateService, feature_category: :portfol
         let(:params) { { target_issuable: task1 } }
 
         it 'returns error status' do
-          error = "#{task1.to_reference} cannot be added: it's not allowed to add this type of parent item"
+          error = "#{task1.to_reference} cannot be added: is not allowed to add this type of parent"
 
           is_expected.to eq(service_error(error, http_status: 422))
         end
@@ -261,16 +263,25 @@ RSpec.describe WorkItems::ParentLinks::CreateService, feature_category: :portfol
       end
 
       context 'when params include invalid ids' do
-        let(:invalid_task) { create(:work_item, :task, project: project, confidential: true) }
-        let(:params) { { issuable_references: [task1, invalid_task] } }
+        let(:params) { { issuable_references: [task1, guest_task] } }
 
         it 'creates links only for valid IDs' do
           expect { subject }.to change(parent_link_class, :count).by(1)
         end
       end
 
-      context 'when user has no access' do
-        let(:work_item) { create(:work_item, project: project, confidential: true) }
+      context 'when user is a guest' do
+        let(:user) { guest }
+
+        it_behaves_like 'returns not found error'
+      end
+
+      context 'when user is a guest assigned to the work item' do
+        let(:user) { guest }
+
+        before do
+          work_item.assignees = [guest]
+        end
 
         it_behaves_like 'returns not found error'
       end

@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -26,7 +26,7 @@ repositories like the Android Open Source Project (AOSP).
   must be enabled. If not enabled, ask your GitLab administrator to enable it. The Manifest import source is enabled
   by default on GitLab.com.
 - GitLab must use PostgreSQL for its database, because [subgroups](../../group/subgroups/index.md) are needed for the manifest import
-  to work. Read more about the [database requirements](../../../install/requirements.md#postgresql).
+  to work. Read more about the [database requirements](../../../install/requirements.md#database).
 - At least the Maintainer role on the destination group to import to.
 
 ## Manifest format

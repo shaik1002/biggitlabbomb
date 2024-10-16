@@ -23,7 +23,7 @@ export const TAGS_LIST_TITLE = s__('ContainerRegistry|Image tags');
 export const DIGEST_LABEL = s__('ContainerRegistry|Digest: %{imageId}');
 export const CREATED_AT_LABEL = s__('ContainerRegistry|Published %{timeInfo}');
 export const PUBLISHED_DETAILS_ROW_TEXT = s__(
-  'ContainerRegistry|Published to the %{repositoryPath} image repository on %{dateTime}',
+  'ContainerRegistry|Published to the %{repositoryPath} image repository at %{time} on %{date}',
 );
 export const MANIFEST_DETAILS_ROW_TEST = s__('ContainerRegistry|Manifest digest: %{digest}');
 export const CONFIGURATION_DETAILS_ROW_TEST = s__(
@@ -63,10 +63,6 @@ export const ADMIN_GARBAGE_COLLECTION_TIP = s__(
 
 export const MISSING_MANIFEST_WARNING_TOOLTIP = s__(
   'ContainerRegistry|Invalid tag: missing manifest digest',
-);
-
-export const MANIFEST_MEDIA_TYPE_ROW_TEXT = s__(
-  'ContainerRegistry|Manifest media type: %{mediaType}',
 );
 
 export const CREATED_AT = s__('ContainerRegistry|Created %{time}');
@@ -172,8 +168,8 @@ export const IMAGE_STATUS_ALERT_TYPE = {
 };
 
 export const PACKAGE_DELETE_HELP_PAGE_PATH = helpPagePath(
-  'user/packages/container_registry/delete_container_registry_images',
+  'user/packages/container_registry/index',
+  {
+    anchor: 'delete-images',
+  },
 );
-
-export const DOCKER_MEDIA_TYPE = 'application/vnd.docker.distribution.manifest.list.v2+json';
-export const OCI_MEDIA_TYPE = 'application/vnd.oci.image.index.v1+json';

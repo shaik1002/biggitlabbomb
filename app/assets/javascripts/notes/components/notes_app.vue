@@ -5,20 +5,15 @@ import { v4 as uuidv4 } from 'uuid';
 import { InternalEvents } from '~/tracking';
 import { getDraft, getAutoSaveKeyFromDiscussion } from '~/lib/utils/autosave';
 import highlightCurrentUser from '~/behaviors/markdown/highlight_current_user';
-import { scrollToTargetOnResize } from '~/lib/utils/resize_observer';
 import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
 import OrderedLayout from '~/vue_shared/components/ordered_layout.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import DraftNote from '~/batch_comments/components/draft_note.vue';
 import { getLocationHash } from '~/lib/utils/url_utility';
-import NotePreview from '~/notes/components/note_preview.vue';
 import PlaceholderNote from '~/vue_shared/components/notes/placeholder_note.vue';
 import PlaceholderSystemNote from '~/vue_shared/components/notes/placeholder_system_note.vue';
 import SkeletonLoadingContainer from '~/vue_shared/components/notes/skeleton_note.vue';
 import SystemNote from '~/vue_shared/components/notes/system_note.vue';
-import { Mousetrap } from '~/lib/mousetrap';
-import { ISSUABLE_COMMENT_OR_REPLY, keysFor } from '~/behaviors/shortcuts/keybindings';
-import { CopyAsGFM } from '~/behaviors/markdown/copy_as_gfm';
 import * as constants from '../constants';
 import eventHub from '../event_hub';
 import CommentForm from './comment_form.vue';
@@ -31,7 +26,6 @@ import NotesActivityHeader from './notes_activity_header.vue';
 export default {
   name: 'NotesApp',
   components: {
-    NotePreview,
     NotesActivityHeader,
     NoteableNote,
     NoteableDiscussion,
@@ -103,17 +97,12 @@ export default {
       'userCanReply',
       'sortDirection',
       'timelineEnabled',
-      'targetNoteHash',
     ]),
     sortDirDesc() {
       return this.sortDirection === constants.DESC;
     },
     noteableType() {
       return this.noteableData.noteableType;
-    },
-    previewNoteId() {
-      if (!this.isLoading || !this.targetNoteHash) return null;
-      return this.targetNoteHash.replace('note_', '');
     },
     allDiscussions() {
       let skeletonNotes = [];
@@ -124,17 +113,6 @@ export default {
         skeletonNotes = new Array(prerenderedNotesCount).fill({
           isSkeletonNote: true,
         });
-
-        if (
-          this.previewNoteId &&
-          !this.discussions.find((d) => d.notes[0].id === this.previewNoteId)
-        ) {
-          const previewNote = {
-            id: this.previewNoteId,
-            isPreviewNote: true,
-          };
-          skeletonNotes.splice(prerenderedNotesCount / 2, 0, previewNote);
-        }
       }
 
       if (this.sortDirDesc) {
@@ -194,12 +172,7 @@ export default {
 
     window.addEventListener('hashchange', this.handleHashChanged);
 
-    if (this.targetNoteHash && this.targetNoteHash.startsWith('note_')) {
-      scrollToTargetOnResize();
-    }
-
     eventHub.$on('notesApp.updateIssuableConfidentiality', this.setConfidentiality);
-    Mousetrap.bind(keysFor(ISSUABLE_COMMENT_OR_REPLY), this.quoteReply);
   },
   updated() {
     this.$nextTick(() => {
@@ -211,7 +184,6 @@ export default {
     eventHub.$off('notesApp.updateIssuableConfidentiality', this.setConfidentiality);
     eventHub.$off('noteFormStartReview', this.handleReviewTracking);
     eventHub.$off('noteFormAddToReview', this.handleReviewTracking);
-    Mousetrap.unbind(keysFor(ISSUABLE_COMMENT_OR_REPLY), this.quoteReply);
   },
   methods: {
     ...mapActions([
@@ -225,30 +197,6 @@ export default {
       'setConfidentiality',
       'fetchNotes',
     ]),
-    getDiscussionInSelection() {
-      const selection = window.getSelection();
-      if (selection.rangeCount <= 0) return null;
-
-      const el = selection.getRangeAt(0).startContainer;
-      const node = el.nodeType === Node.TEXT_NODE ? el.parentNode : el;
-      return node.closest('.js-noteable-discussion');
-    },
-    async quoteReply() {
-      const discussionEl = this.getDiscussionInSelection();
-      const text = await CopyAsGFM.selectionToGfm();
-      if (!discussionEl) {
-        this.replyInMainEditor(text);
-      } else {
-        const instance = this.$refs.discussions.find(({ $el }) => $el === discussionEl);
-        // prevent hotkey input from going into the form
-        requestAnimationFrame(() => {
-          instance.showReplyForm(text);
-        });
-      }
-    },
-    replyInMainEditor(text) {
-      this.$refs.commentForm.append(text);
-    },
     discussionIsIndividualNoteAndNotConverted(discussion) {
       return (
         discussion.individual_note &&
@@ -265,7 +213,7 @@ export default {
     },
     checkLocationHash() {
       const hash = getLocationHash();
-      const noteId = (hash && hash.startsWith('note_') && hash.replace(/^note_/, '')) ?? null;
+      const noteId = hash && hash.replace(/^note_/, '');
 
       if (noteId) {
         const discussion = this.discussions.find((d) => d.notes.some(({ id }) => id === noteId));
@@ -318,7 +266,6 @@ export default {
       <template #form>
         <comment-form
           v-if="!(commentsDisabled || timelineEnabled)"
-          ref="commentForm"
           class="js-comment-form"
           :noteable-type="noteableType"
         />
@@ -331,13 +278,6 @@ export default {
               :key="discussion.id"
               class="note-skeleton"
             />
-            <timeline-entry-item
-              v-else-if="discussion.isPreviewNote"
-              :key="discussion.id"
-              class="target note note-wrapper note-comment"
-            >
-              <note-preview :note-id="previewNoteId" />
-            </timeline-entry-item>
             <timeline-entry-item v-else-if="discussion.isDraft" :key="discussion.id">
               <draft-note :draft="discussion" />
             </timeline-entry-item>
@@ -365,9 +305,7 @@ export default {
             </template>
             <noteable-discussion
               v-else
-              ref="discussions"
               :key="discussion.id"
-              class="js-noteable-discussion"
               :discussion="discussion"
               :render-diff-file="true"
               is-overview-tab

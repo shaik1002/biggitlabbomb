@@ -96,7 +96,7 @@ export default {
     v-else-if="isManualJob"
     icon="retry"
     category="primary"
-    placement="bottom-end"
+    placement="right"
     positioning-strategy="fixed"
     variant="confirm"
     :items="dropdownItems"

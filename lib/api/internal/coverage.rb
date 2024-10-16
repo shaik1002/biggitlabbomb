@@ -22,18 +22,12 @@ module API
           end
 
           get do
-            # Fetch only runtime coverage data which is tracked during E2E spec execution
-            # skip hash check due to hash mismatch on some environments which results in empty coverage data
-            ::Coverband.configuration.store.coverage(::Coverband::RUNTIME_TYPE, skip_hash_check: true).keys
+            coverage = ::Coverband.configuration.store.coverage
+            coverage&.keys
           end
 
           delete do
             ::Coverband.configuration.store.clear!
-
-            status 200
-            {
-              message: "Cleared source code paths coverage mapping"
-            }
           end
         end
       end

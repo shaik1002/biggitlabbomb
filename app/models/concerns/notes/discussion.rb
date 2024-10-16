@@ -6,12 +6,14 @@ module Notes
     include Gitlab::Utils::StrongMemoize
 
     included do
+      validate :ensure_confidentiality_discussion_compliance
+
       scope :with_discussion_ids, ->(discussion_ids) { where(discussion_id: discussion_ids) }
     end
 
     class_methods do
       def discussions(context_noteable = nil)
-        ::Discussion.build_collection(all.includes(parent_object_field).fresh, context_noteable)
+        ::Discussion.build_collection(all.includes(:noteable).fresh, context_noteable)
       end
 
       def find_discussion(discussion_id)
@@ -64,15 +66,11 @@ module Notes
       !to_discussion.individual_note?
     end
 
-    def discussion_class(other_noteable = nil)
-      return IndividualNoteDiscussion unless other_noteable
-
-      sync_object = other_noteable.try(:sync_object)
-
+    def discussion_class(noteable = nil)
       # When commit notes are rendered on an MR's Discussion page, they are
       # displayed in one discussion instead of individually.
       # See also `#discussion_id` and `Discussion.override_discussion_id`.
-      if !sync_object.present? && !current_noteable?(other_noteable)
+      if noteable && noteable != self.noteable
         OutOfContextDiscussion
       else
         IndividualNoteDiscussion
@@ -81,25 +79,19 @@ module Notes
 
     def in_reply_to?(other)
       case other
-      when Note, AntiAbuse::Reports::Note
+      when Note
         if part_of_discussion?
           in_reply_to?(other.noteable) && in_reply_to?(other.to_discussion)
         else
           in_reply_to?(other.noteable)
         end
-      when ::Discussion, AntiAbuse::Reports::Discussion
+      when ::Discussion
         discussion_id == other.id
       when Noteable
         noteable == other
       else
         false
       end
-    end
-
-    private
-
-    def current_noteable?(other_noteable)
-      other_noteable.id == noteable&.id && other_noteable.base_class_name == noteable&.base_class_name
     end
   end
 end

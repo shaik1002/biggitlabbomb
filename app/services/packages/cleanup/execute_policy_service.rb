@@ -10,8 +10,6 @@ module Packages
       DUPLICATED_FILES_BATCH_SIZE = 10_000
       MARK_PACKAGE_FILES_FOR_DESTRUCTION_SERVICE_BATCH_SIZE = 200
 
-      delegate :project, to: :@policy, private: true
-
       def initialize(policy)
         @policy = policy
         @counts = {
@@ -36,12 +34,6 @@ module Packages
         response_success(timeout: result == :timeout)
       end
 
-      def installable_package_files
-        ::Packages::PackageFile
-          .installable
-          .for_package_ids(project.packages.installable)
-      end
-
       def cleanup_duplicated_files_on(package_files)
         unique_package_id_and_file_name_from(package_files).each do |package_id, file_name|
           result = remove_duplicated_files_for(package_id: package_id, file_name: file_name)
@@ -53,10 +45,11 @@ module Packages
       end
 
       def unique_package_id_and_file_name_from(package_files)
-        # rubocop: disable CodeReuse/ActiveRecord -- This is a highly custom query for this service, that's why it's not in the model.
+        # This is a highly custom query for this service, that's why it's not in the model.
+        # rubocop: disable CodeReuse/ActiveRecord
         package_files.group(:package_id, :file_name)
           .having("COUNT(*) > #{@policy.keep_n_duplicated_package_files}")
-          .pluck(:package_id, :file_name) # rubocop:disable Database/AvoidUsingPluckWithoutLimit -- package_files is already in batches
+          .pluck(:package_id, :file_name)
         # rubocop: enable CodeReuse/ActiveRecord
       end
 
@@ -68,16 +61,21 @@ module Packages
                         .limit(@policy.keep_n_duplicated_package_files)
                         .pluck_primary_key
 
-        keep_conan_manifest_file(base, ids_to_keep) if file_name == ::Packages::Conan::FileMetadatum::CONAN_MANIFEST
-
         duplicated_package_files = base.id_not_in(ids_to_keep)
         ::Packages::MarkPackageFilesForDestructionService.new(duplicated_package_files)
           .execute(batch_deadline: batch_deadline, batch_size: MARK_PACKAGE_FILES_FOR_DESTRUCTION_SERVICE_BATCH_SIZE)
       end
 
-      def keep_conan_manifest_file(base, ids)
-        recipe_manifest_id = base.with_conan_file_type(:recipe_file).recent.limit(1).pluck_primary_key
-        ids.concat(recipe_manifest_id)
+      def project
+        @policy.project
+      end
+
+      def installable_package_files
+        ::Packages::PackageFile.installable
+          .for_package_ids(
+            ::Packages::Package.installable
+              .for_projects(project.id)
+          )
       end
 
       def batch_deadline

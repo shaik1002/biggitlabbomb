@@ -2,7 +2,7 @@
 data_category: optional
 key_path: counts.projects_inheriting_prometheus_active
 description: Count of active projects inheriting integrations for Prometheus
-product_group: platform_insights
+product_group: respond
 value_type: number
 status: active
 time_frame: all
@@ -16,4 +16,3 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

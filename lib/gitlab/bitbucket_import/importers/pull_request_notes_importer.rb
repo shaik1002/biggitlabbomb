@@ -124,8 +124,7 @@ module Gitlab
             author_id: user_finder.gitlab_user_id(project, comment.author),
             note: comment_note(comment),
             created_at: comment.created_at,
-            updated_at: comment.updated_at,
-            imported_from: ::Import::SOURCE_BITBUCKET
+            updated_at: comment.updated_at
           }
         end
 

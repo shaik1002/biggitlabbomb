@@ -64,7 +64,7 @@ RSpec.describe Gitlab::QueryLimiting::Transaction, feature_category: :database d
     context 'when the query threshold is exceeded' do
       let(:transaction) do
         trans = described_class.new
-        trans.count = described_class.default_threshold + 1
+        trans.count = described_class.threshold + 1
 
         trans
       end
@@ -72,36 +72,6 @@ RSpec.describe Gitlab::QueryLimiting::Transaction, feature_category: :database d
       it 'raises an error when this is enabled' do
         expect { transaction.act_upon_results }
           .to raise_error(described_class::ThresholdExceededError)
-      end
-    end
-
-    context 'when there is a different threshold', :request_store do
-      before do
-        Gitlab::SafeRequestStore[:query_limiting_override_threshold] = 200
-      end
-
-      context 'when the query threshold is not exceeded' do
-        it 'does nothing' do
-          trans = described_class.new
-
-          expect(trans).not_to receive(:raise)
-
-          trans.act_upon_results
-        end
-      end
-
-      context 'when the query threshold is exceeded' do
-        let(:transaction) do
-          trans = described_class.new
-          trans.count = 201
-
-          trans
-        end
-
-        it 'raises an error when this is enabled' do
-          expect { transaction.act_upon_results }
-            .to raise_error(described_class::ThresholdExceededError)
-        end
       end
     end
   end
@@ -131,8 +101,6 @@ RSpec.describe Gitlab::QueryLimiting::Transaction, feature_category: :database d
         transaction.increment('SELECT x.foo, a.attname FROM some_table x JOIN pg_attribute a')
         transaction.increment('SAVEPOINT active_record_2')
         transaction.increment('RELEASE SAVEPOINT active_record_2')
-        transaction.increment('SET LOCK_TIMEOUT = 500')
-        transaction.increment('SHOW LOCK_TIMEOUT')
         transaction.increment(<<-SQL)
         SELECT a.attname, a.other_column
           FROM pg_attribute a
@@ -169,7 +137,7 @@ RSpec.describe Gitlab::QueryLimiting::Transaction, feature_category: :database d
 
     it 'returns true when the threshold is exceeded' do
       transaction = described_class.new
-      transaction.count = described_class.default_threshold + 1
+      transaction.count = described_class.threshold + 1
 
       expect(transaction.threshold_exceeded?).to eq(true)
     end
@@ -178,7 +146,7 @@ RSpec.describe Gitlab::QueryLimiting::Transaction, feature_category: :database d
   describe '#error_message' do
     it 'returns the error message to display when the threshold is exceeded' do
       transaction = described_class.new
-      transaction.count = max = described_class.default_threshold
+      transaction.count = max = described_class.threshold
 
       expect(transaction.error_message).to eq(
         "Too many SQL queries were executed: a maximum of #{max} " \
@@ -188,7 +156,7 @@ RSpec.describe Gitlab::QueryLimiting::Transaction, feature_category: :database d
 
     it 'includes a list of executed queries' do
       transaction = described_class.new
-      transaction.count = max = described_class.default_threshold
+      transaction.count = max = described_class.threshold
       %w[foo bar baz].each { |sql| transaction.executed_sql(sql) }
 
       message = transaction.error_message
@@ -203,7 +171,7 @@ RSpec.describe Gitlab::QueryLimiting::Transaction, feature_category: :database d
 
     it 'indicates if the log is truncated' do
       transaction = described_class.new
-      transaction.count = described_class.default_threshold * 2
+      transaction.count = described_class.threshold * 2
 
       message = transaction.error_message
 
@@ -212,7 +180,7 @@ RSpec.describe Gitlab::QueryLimiting::Transaction, feature_category: :database d
 
     it 'includes the action name in the error message when present' do
       transaction = described_class.new
-      transaction.count = max = described_class.default_threshold
+      transaction.count = max = described_class.threshold
       transaction.action = 'UsersController#show'
 
       expect(transaction.error_message).to eq(

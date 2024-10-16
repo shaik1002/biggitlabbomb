@@ -10,7 +10,6 @@ import {
 } from '~/environments/graphql/resolvers/kubernetes/constants';
 import {
   fluxKustomizationMock,
-  fluxHelmReleaseMock,
   fluxKustomizationMapped,
   fluxHelmReleaseMapped,
 } from '../mock_data';
@@ -145,7 +144,7 @@ describe('~/frontend/environments/graphql/resolvers', () => {
     });
   });
 
-  describe('fluxHelmRelease', () => {
+  describe('fluxHelmReleaseStatus', () => {
     const client = { writeQuery: jest.fn() };
     const fluxResourcePath =
       'helm.toolkit.fluxcd.io/v2beta1/namespaces/my-namespace/helmreleases/app';
@@ -157,7 +156,7 @@ describe('~/frontend/environments/graphql/resolvers', () => {
     });
     const mockOnDataFn = jest.fn().mockImplementation((eventName, callback) => {
       if (eventName === 'data') {
-        callback([fluxHelmReleaseMock]);
+        callback([fluxKustomizationMock]);
       }
     });
     const resourceName = 'custom-resource';
@@ -175,11 +174,11 @@ describe('~/frontend/environments/graphql/resolvers', () => {
           .onGet(endpoint, { withCredentials: true, headers: configuration.baseOptions.headers })
           .reply(HTTP_STATUS_OK, {
             apiVersion,
-            ...fluxHelmReleaseMock,
+            ...fluxKustomizationMock,
           });
       });
       it('should watch HelmRelease by the metadata name from the cluster_client library when the data is present', async () => {
-        await mockResolvers.Query.fluxHelmRelease(
+        await mockResolvers.Query.fluxHelmReleaseStatus(
           null,
           {
             configuration,
@@ -198,7 +197,7 @@ describe('~/frontend/environments/graphql/resolvers', () => {
       });
 
       it('should return data when received from the library', async () => {
-        const fluxHelmRelease = await mockResolvers.Query.fluxHelmRelease(
+        const fluxHelmReleaseStatus = await mockResolvers.Query.fluxHelmReleaseStatus(
           null,
           {
             configuration,
@@ -207,7 +206,7 @@ describe('~/frontend/environments/graphql/resolvers', () => {
           { client },
         );
 
-        expect(fluxHelmRelease).toEqual(fluxHelmReleaseMapped);
+        expect(fluxHelmReleaseStatus).toEqual(fluxHelmReleaseMapped);
       });
     });
 
@@ -216,7 +215,7 @@ describe('~/frontend/environments/graphql/resolvers', () => {
         .onGet(endpoint, { withCredentials: true, headers: configuration.baseOptions.headers })
         .reply(HTTP_STATUS_OK, {});
 
-      await mockResolvers.Query.fluxHelmRelease(
+      await mockResolvers.Query.fluxHelmReleaseStatus(
         null,
         {
           configuration,
@@ -234,7 +233,7 @@ describe('~/frontend/environments/graphql/resolvers', () => {
         .onGet(endpoint, { withCredentials: true, headers: configuration.base })
         .reply(HTTP_STATUS_UNAUTHORIZED, { message: apiError });
 
-      const fluxHelmReleasesError = mockResolvers.Query.fluxHelmRelease(
+      const fluxHelmReleasesError = mockResolvers.Query.fluxHelmReleaseStatus(
         null,
         {
           configuration,
@@ -244,50 +243,6 @@ describe('~/frontend/environments/graphql/resolvers', () => {
       );
 
       await expect(fluxHelmReleasesError).rejects.toThrow(apiError);
-    });
-  });
-
-  describe('updateFluxResource', () => {
-    const fluxResourcePath =
-      'kustomize.toolkit.fluxcd.io/v1/namespaces/my-namespace/kustomizations/app';
-    const endpoint = `${configuration.basePath}/apis/${fluxResourcePath}`;
-
-    const body = JSON.stringify([
-      {
-        op: 'replace',
-        path: '/metadata/annotations/reconcile.fluxcd.io~1requestedAt',
-        value: new Date(),
-      },
-    ]);
-
-    it('should request update flux resource API', async () => {
-      mock.onPatch(endpoint).reply(HTTP_STATUS_OK);
-
-      const result = await mockResolvers.Mutation.updateFluxResource(null, {
-        configuration,
-        fluxResourcePath,
-        data: body,
-      });
-
-      expect(result).toEqual({
-        __typename: 'LocalKubernetesErrors',
-        errors: [],
-      });
-    });
-
-    it('should return errors array if the API call fails', async () => {
-      mock.onPatch(endpoint).reply(HTTP_STATUS_UNAUTHORIZED, { message: 'not authorized' });
-
-      const result = await mockResolvers.Mutation.updateFluxResource(null, {
-        configuration,
-        fluxResourcePath,
-        data: body,
-      });
-
-      expect(result).toEqual({
-        __typename: 'LocalKubernetesErrors',
-        errors: ['not authorized'],
-      });
     });
   });
 });

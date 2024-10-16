@@ -6,6 +6,10 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Tutorial: Create, register, and run your own project runner
 
+DETAILS:
+**Tier:** Free, Premium, Ultimate
+**Offering:** GitLab.com, Self-managed, GitLab Dedicated
+
 This tutorial shows you how to configure and run your first runner in GitLab.
 
 A runner is an agent in the GitLab Runner application that runs jobs in a GitLab CI/CD pipeline.
@@ -132,7 +136,7 @@ Next, trigger a pipeline in your project so you can view your runner execute a j
 
 1. On the left sidebar, select **Search or go to** and find your project.
 1. Select **Build > Pipelines**.
-1. Select **New pipeline**.
+1. Select **Run pipeline**.
 1. Select a job to view the job log. The output should look similar to this example, which shows
    your runner successfully executing the job:
 

@@ -11,6 +11,7 @@ We strive to run GitLab using the latest Rails releases to benefit from performa
 ## Rails upgrade approach
 
 1. [Prepare an MR for GitLab](#prepare-an-mr-for-gitlab).
+1. [Prepare an MR for Gitaly](#prepare-an-mr-for-gitaly).
 1. [Create patch releases and backports for security patches](#create-patch-releases-and-backports-for-security-patches).
 
 ### Prepare an MR for GitLab
@@ -33,7 +34,11 @@ We strive to run GitLab using the latest Rails releases to benefit from performa
 
 ### Prepare an MR for Gitaly
 
-No longer necessary as Gitaly no longer has Ruby code.
+1. Update the `activesupport` gem version in [Gitaly Ruby's Gemfile](https://gitlab.com/gitlab-org/gitaly/-/blob/master/ruby/Gemfile).
+1. Run `bundle update --conservative activesupport`.
+1. Create an MR against the Gitaly project with these changes.
+1. Make this MR dependent on the MR created in the GitLab project.
+1. Merged this MR only **after** merging the GitLab project's MR.
 
 ### Create patch releases and backports for security patches
 

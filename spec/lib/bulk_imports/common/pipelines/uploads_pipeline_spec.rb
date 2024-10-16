@@ -24,7 +24,7 @@ RSpec.describe BulkImports::Common::Pipelines::UploadsPipeline, feature_category
   end
 
   after do
-    FileUtils.rm_rf(tmpdir)
+    FileUtils.remove_entry(tmpdir) if Dir.exist?(tmpdir)
   end
 
   shared_examples 'uploads import' do

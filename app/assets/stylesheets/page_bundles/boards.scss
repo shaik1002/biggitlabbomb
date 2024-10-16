@@ -11,7 +11,7 @@
   flex-direction: column;
 
   @include media-breakpoint-up(sm) {
-    @apply gl-transition-width;
+    transition: width $gl-transition-duration-medium;
     width: 100%;
 
     &.is-compact {
@@ -23,7 +23,6 @@
 .board-swimlanes-headers {
   background-color: $white;
 
-  // stylelint-disable-next-line gitlab/no-gl-class
   .gl-dark & {
     background-color: var(--gray-10);
   }
@@ -107,14 +106,23 @@
 
 .board-card {
   background: var(--gl-background-color-default);
+  box-shadow: 0 1px 2px rgba(var(--black, $black), 0.1);
 
   &:last-child {
     margin-bottom: 0;
   }
 
-  @include media-breakpoint-up(md) {
-    &:not(:hover, :focus, :focus-within, :active) .move-to-position {
-      visibility: hidden;
+  .move-to-position {
+    visibility: hidden;
+  }
+
+  &:hover .move-to-position {
+    visibility: visible;
+  }
+
+  @include media-breakpoint-down(sm) {
+    .move-to-position {
+      visibility: visible;
     }
   }
 }
@@ -170,7 +178,9 @@
 }
 
 .board-card-info {
-  @apply gl-whitespace-nowrap;
+  &.board-card-weight:hover {
+    color: initial;
+  }
 
   .board-card-info-icon {
     vertical-align: text-top;

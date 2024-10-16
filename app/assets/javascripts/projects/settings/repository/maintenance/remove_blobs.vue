@@ -1,7 +1,5 @@
 <script>
 import { GlButton, GlDrawer, GlLink, GlFormTextarea, GlModal, GlFormInput } from '@gitlab/ui';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { InternalEvents } from '~/tracking';
 import { visitUrl } from '~/lib/utils/url_utility';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import { DRAWER_Z_INDEX } from '~/lib/utils/constants';
@@ -9,8 +7,6 @@ import { getContentWrapperHeight } from '~/lib/utils/dom_utils';
 import { s__ } from '~/locale';
 import { createAlert, VARIANT_WARNING } from '~/alert';
 import removeBlobsMutation from './graphql/mutations/remove_blobs.mutation.graphql';
-
-const trackingMixin = InternalEvents.mixin();
 
 export const BLOB_OID_LENGTH = 40;
 
@@ -30,12 +26,8 @@ const i18n = {
   modalConfirm: s__('ProjectMaintenance|Enter the following to confirm:'),
   removeBlobsError: s__('ProjectMaintenance|Something went wrong while removing blobs.'),
   successAlertTitle: s__('ProjectMaintenance|Blobs removed'),
-  scheduledRemovalSuccessAlertTitle: s__('ProjectMaintenance|Blobs removal is scheduled.'),
   successAlertContent: s__(
     'ProjectMaintenance|Run housekeeping to remove old versions from repository.',
-  ),
-  scheduledSuccessAlertContent: s__(
-    'ProjectMaintenance|You will receive an email notification when the process is complete. Run housekeeping to remove old versions from repository.',
   ),
   successAlertButtonText: s__('ProjectMaintenance|Go to housekeeping'),
 };
@@ -43,12 +35,11 @@ const i18n = {
 export default {
   i18n,
   DRAWER_Z_INDEX,
-  removeBlobsHelpLink: helpPagePath('/user/project/repository/repository_size', {
+  removeBlobsHelpLink: helpPagePath('/user/project/repository/reducing_the_repo_size_using_git', {
     anchor: 'get-a-list-of-object-ids',
   }),
   modalCancel: { text: i18n.modalCancelText },
   components: { GlButton, GlDrawer, GlLink, GlFormTextarea, GlModal, GlFormInput },
-  mixins: [trackingMixin, glFeatureFlagsMixin()],
   inject: { projectPath: { default: '' }, housekeepingPath: { default: '' } },
   data() {
     return {
@@ -78,16 +69,6 @@ export default {
     isConfirmEnabled() {
       return this.confirmInput === this.projectPath;
     },
-    alertTitle() {
-      return this.glFeatures.asyncRewriteHistory
-        ? this.$options.i18n.scheduledRemovalSuccessAlertTitle
-        : this.$options.i18n.successAlertTitle;
-    },
-    alertBody() {
-      return this.glFeatures.asyncRewriteHistory
-        ? this.$options.i18n.scheduledSuccessAlertContent
-        : this.$options.i18n.successAlertContent;
-    },
   },
   methods: {
     openDrawer() {
@@ -105,7 +86,6 @@ export default {
     },
     removeBlobsConfirm() {
       this.isLoading = true;
-      this.trackEvent('click_remove_blob_button_repository_settings');
       this.$apollo
         .mutate({
           mutation: removeBlobsMutation,
@@ -132,8 +112,8 @@ export default {
     },
     generateSuccessAlert() {
       createAlert({
-        title: this.alertTitle,
-        message: this.alertBody,
+        title: i18n.successAlertTitle,
+        message: i18n.successAlertContent,
         variant: VARIANT_WARNING,
         primaryButton: {
           text: i18n.successAlertButtonText,
@@ -183,7 +163,7 @@ export default {
         <gl-form-textarea
           id="blobs"
           v-model.trim="blobIDs"
-          class="gl-mb-3 !gl-font-monospace"
+          class="!gl-font-monospace gl-mb-3"
           :disabled="isLoading"
           autofocus
         />

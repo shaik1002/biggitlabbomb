@@ -76,7 +76,7 @@ export default {
 </script>
 
 <template>
-  <ul class="gl-contents">
+  <ul class="gl-display-contents">
     <gl-disclosure-dropdown-item
       v-if="showExportButton"
       v-gl-modal="exportModalId"
@@ -87,12 +87,18 @@ export default {
       v-if="showImportButton"
       v-gl-modal="importModalId"
       data-testid="import-from-csv-button"
+      :data-track-action="trackImportClick && 'click_import_csv_project_issues_empty_list_page'"
+      :data-track-label="trackImportClick && 'import_csv_project_issues_empty_list'"
+      :data-track-experiment="trackImportClick && 'issues_mrs_empty_state'"
       :item="dropdownItems.importCSV"
     />
     <gl-disclosure-dropdown-item
       v-if="showImportButton && canEdit"
       data-testid="import-from-jira-link"
       :item="dropdownItems.importFromJIRA"
+      :data-track-action="trackImportClick && 'click_import_jira_project_issues_empty_list_page'"
+      :data-track-label="trackImportClick && 'import_jira_project_issues_empty_list'"
+      :data-track-experiment="trackImportClick && 'issues_mrs_empty_state'"
     />
 
     <csv-export-modal

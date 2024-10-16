@@ -53,7 +53,7 @@ Get started:
 - [Run multiple Agile teams](https://www.youtube.com/watch?v=VR2r1TJCDew).
 - [Sync group memberships by using LDAP](../administration/auth/ldap/ldap_synchronization.md#group-sync).
 - Manage user access with inherited permissions. Use up to 20 levels of subgroups to organize both teams and projects.
-  - [Inherited membership](../user/project/members/index.md#membership-types).
+  - [Inherited membership](../user/project/members/index.md#inherited-membership).
   - [Example](../user/group/subgroups/index.md).
 
 ## Import projects
@@ -148,13 +148,7 @@ You can restore a backup only to **the exact same version and type** (Community 
 
 ### Back up GitLab SaaS
 
-Backups of our production databases are taken hourly through
-[disk snapshots](https://cloud.google.com/compute/docs/disks/snapshots) and every
-24 hours through [wal-g base backups](https://github.com/wal-g/wal-g), with
-[continuous archiving or WAL transaction log files](https://www.postgresql.org/docs/current/continuous-archiving.html)
-streamed into GCS for point-in-time recovery.
-
-All backups are encrypted. After 90 days, backups are deleted.
+Backups of GitLab databases and file systems are taken every 24 hours, and are kept for two weeks on a rolling schedule. All backups are encrypted.
 
 - GitLab SaaS creates backups to ensure your data is secure, but you can't use these methods to export or back up your data yourself.
 - Issues are stored in the database. They can't be stored in Git itself.
@@ -203,7 +197,7 @@ While GitLab Geo helps remote teams work more efficiently by using a local GitLa
 Learn more about using [Geo as a disaster recovery solution](../administration/geo/disaster_recovery/index.md).
 
 Geo replicates your database, your Git repositories, and a few other assets.
-Learn more about the [data types Geo replicates](../administration/geo/replication/datatypes.md#replicated-data-types).
+Learn more about [replication limitations](../administration/geo/replication/datatypes.md#limitations-on-replicationverification).
 
 ## Support for GitLab self-managed
 
@@ -249,7 +243,7 @@ Rate limits also improve the security of your application.
 
 ### Configure rate limits for self-managed GitLab
 
-You can make changes to your default rate limits from the **Admin** area. For more information about configuration, see the [**Admin** area page](../security/rate_limits.md#configurable-limits).
+You can make changes to your default rate limits from the Admin Area. For more information about configuration, see the [Admin Area page](../security/rate_limits.md#configurable-limits).
 
 - Define [issues rate limits](settings/rate_limit_on_issues_creation.md) to set a maximum number of issue creation requests per minute, per user.
 - Enforce [user and IP rate limits](settings/user_and_ip_rate_limits.md) for unauthenticated web requests.
@@ -267,7 +261,7 @@ Rate limits also improve the security of your application.
 
 ### Configure rate limits for GitLab SaaS
 
-You can make changes to your default rate limits from the **Admin** area. For more information about configuration, see the [**Admin** area page](../security/rate_limits.md#configurable-limits).
+You can make changes to your default rate limits from the Admin Area. For more information about configuration, see the [Admin Area page](../security/rate_limits.md#configurable-limits).
 
 - Review the rate limit page.
 - Read our [API page](../api/rest/index.md) for more information about API and rate limiting.

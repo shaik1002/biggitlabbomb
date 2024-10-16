@@ -8,5 +8,3 @@ class PersonalAccessTokenPolicy < BasePolicy
     enable :revoke_token
   end
 end
-
-PersonalAccessTokenPolicy.prepend_mod

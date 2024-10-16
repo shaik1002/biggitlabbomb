@@ -1,0 +1,6 @@
+---
+# Cop supports --autocorrect.
+GraphQL/FieldMethod:
+  Exclude:
+    - 'app/graphql/types/packages/package_details_type.rb'
+    - 'app/graphql/types/projects/service_type.rb'

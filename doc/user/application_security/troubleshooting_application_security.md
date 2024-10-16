@@ -198,7 +198,7 @@ Instructions are available in the [legacy template project](https://gitlab.com/g
 
 In these circumstances, that the job succeeds is the default behavior. The job's status indicates
 success or failure of the analyzer itself. Analyzer results are displayed in the
-[job logs](../../ci/yaml/script.md#expand-and-collapse-job-log-sections),
+[job logs](../../ci/jobs/index.md#expand-and-collapse-job-log-sections),
 [merge request widget](index.md#merge-request), or
 [security dashboard](security_dashboard/index.md).
 
@@ -216,12 +216,12 @@ There [is an issue open to improve extendability](https://gitlab.com/gitlab-org/
 You can upvote the issue to help with prioritization, and
 [contributions are welcomed](https://about.gitlab.com/community/contribute/).
 
-## Empty Vulnerability Report, Dependency List pages
+## Empty Vulnerability Report, Dependency List, License list pages
 
 If the pipeline has manual steps with a job that has the `allow_failure: false` option, and this job is not finished,
 GitLab can't populate listed pages with the data from security reports.
-In this case, [the Vulnerability Report](vulnerability_report/index.md) and [the Dependency List](dependency_list/index.md)
-pages are empty.
+In this case, [the Vulnerability Report](vulnerability_report/index.md), [the Dependency List](dependency_list/index.md),
+and [the License list](../compliance/license_list.md) pages are empty.
 These security pages can be populated by running the jobs from the manual step of the pipeline.
 
 There is [an issue open to handle this scenario](https://gitlab.com/gitlab-org/gitlab/-/issues/346843).

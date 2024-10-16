@@ -53,9 +53,6 @@ export default {
     return {
       errors: { ...generateDataKeys(this.queries, '') },
       ...generateDataKeys(this.queries, []),
-      loadingStates: {
-        ...generateDataKeys(this.queries, true),
-      },
     };
   },
   computed: {
@@ -63,7 +60,7 @@ export default {
       return Object.values(this.errors);
     },
     isLoading() {
-      return Object.values(this.loadingStates).some(Boolean);
+      return some(this.$apollo.queries, (query) => query?.loading);
     },
     allQueriesFailed() {
       return every(this.errorMessages, (message) => message.length);
@@ -118,13 +115,8 @@ export default {
   },
   created() {
     this.queries.forEach(({ query, identifier, loadError }) => {
-      this.loadingStates[identifier] = true;
-
       this.$apollo.addSmartQuery(identifier, {
         query,
-        context: {
-          batchKey: 'UsageTrendsCountChart',
-        },
         variables() {
           return {
             identifier,
@@ -148,8 +140,6 @@ export default {
               pageInfo,
               identifier,
             });
-          } else {
-            this.loadingStates[identifier] = false;
           }
         },
         error(error) {
@@ -169,7 +159,7 @@ export default {
         : 0;
     },
     handleError({ identifier, error, message }) {
-      this.loadingStates[identifier] = false;
+      this.loadingError = true;
       this.errors = { ...this.errors, [identifier]: message };
       Sentry.captureException(error);
     },
@@ -197,24 +187,12 @@ export default {
 <template>
   <div>
     <h3>{{ chartTitle }}</h3>
-    <chart-skeleton-loader v-if="isLoading" />
-    <gl-alert
-      v-else-if="hasLoadingErrors"
-      data-testid="usage-trends-count-error-alert"
-      variant="danger"
-      :dismissible="false"
-      class="gl-mt-3"
-    >
+    <gl-alert v-if="hasLoadingErrors" variant="danger" :dismissible="false" class="gl-mt-3">
       {{ errorMessage }}
     </gl-alert>
-    <div v-else>
-      <gl-alert
-        v-if="hasEmptyDataSet"
-        data-testid="usage-trends-count-info-alert"
-        variant="info"
-        :dismissible="false"
-        class="gl-mt-3"
-      >
+    <div v-if="!allQueriesFailed">
+      <chart-skeleton-loader v-if="isLoading" />
+      <gl-alert v-else-if="hasEmptyDataSet" variant="info" :dismissible="false" class="gl-mt-3">
         {{ noDataMessage }}
       </gl-alert>
       <gl-line-chart

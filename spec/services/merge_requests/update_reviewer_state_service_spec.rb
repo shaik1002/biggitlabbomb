@@ -3,8 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe MergeRequests::UpdateReviewerStateService, feature_category: :code_review_workflow do
-  using RSpec::Parameterized::TableSyntax
-
   let_it_be(:current_user) { create(:user) }
   let_it_be(:merge_request) { create(:merge_request, reviewers: [current_user]) }
   let(:reviewer) { merge_request.merge_request_reviewers.find_by(user_id: current_user.id) }
@@ -39,26 +37,9 @@ RSpec.describe MergeRequests::UpdateReviewerStateService, feature_category: :cod
         expect(result[:status]).to eq :success
       end
 
-      context 'when updating reviewer state' do
-        where(:initial_state, :new_state) do
-          'unreviewed'        | 'requested_changes'
-          'unreviewed'        | 'reviewed'
-          'unreviewed'        | 'approved'
-          'unreviewed'        | 'unapproved'
-          'unreviewed'        | 'review_started'
-          'requested_changes' | 'unreviewed'
-        end
-
-        with_them do
-          it do
-            reviewer.update!(state: initial_state)
-
-            result = service.execute(merge_request, new_state)
-
-            expect(result[:status]).to eq :success
-            expect(reviewer.reload.state).to eq new_state
-          end
-        end
+      it 'updates reviewers state' do
+        expect(result[:status]).to eq :success
+        expect(reviewer.state).to eq 'requested_changes'
       end
 
       it 'calls SystemNoteService.requested_changes' do

@@ -1,9 +1,8 @@
 - return unless custom_attributes.present?
 
-= render ::Layouts::CrudComponent.new(_('Custom attributes')) do |c|
-  - c.with_actions do
-    = render Pajamas::ButtonComponent.new(href: help_page_path('api/custom_attributes.md'), size: :small, category: :tertiary, variant: :confirm) do
-      = _('Learn more')
+= render Pajamas::CardComponent.new(body_options: { class: 'gl-py-0' }) do |c|
+  - c.with_header do
+    = link_to(_('Custom Attributes'), help_page_path('api/custom_attributes'))
   - c.with_body do
     %ul.content-list
       - custom_attributes.each do |custom_attribute|

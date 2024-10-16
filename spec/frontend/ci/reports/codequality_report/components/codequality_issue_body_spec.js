@@ -11,7 +11,8 @@ describe('code quality issue body issue body', () => {
   const findGlIcon = () => wrapper.findComponent(GlIcon);
 
   const codequalityIssue = {
-    name: 'rubygem-rest-client: session fixation vulnerability via Set-Cookie headers in 30x redirection responses',
+    name:
+      'rubygem-rest-client: session fixation vulnerability via Set-Cookie headers in 30x redirection responses',
     path: 'Gemfile.lock',
     severity: 'normal',
     type: 'Issue',

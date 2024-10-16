@@ -71,7 +71,7 @@ window.addEventListener(
 
 gl.lazyLoader = new LazyLoader({
   scrollContainer: window,
-  observerNode: 'body',
+  observerNode: '#content-body',
 });
 
 initRails();

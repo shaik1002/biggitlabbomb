@@ -4,6 +4,7 @@ class Notify < ApplicationMailer
   include ActionDispatch::Routing::PolymorphicRoutes
   include GitlabRoutingHelper
   include EmailsHelper
+  include ReminderEmailsHelper
   include IssuablesHelper
 
   mattr_accessor :override_layout_lookup_table, default: {}
@@ -33,10 +34,12 @@ class Notify < ApplicationMailer
   helper DiffHelper
   helper BlobHelper
   helper EmailsHelper
+  helper ReminderEmailsHelper
   helper MembersHelper
   helper AvatarsHelper
   helper GitlabRoutingHelper
   helper IssuablesHelper
+  helper InProductMarketingHelper
   helper RegistrationsHelper
 
   layout :determine_layout
@@ -117,7 +120,6 @@ class Notify < ApplicationMailer
 
     subject << @project.name if @project
     subject << @group.name if @group
-    subject << @namespace.name if @namespace && !@project
     subject.concat(extra) if extra.present?
 
     subject_with_suffix(subject)
@@ -155,9 +157,8 @@ class Notify < ApplicationMailer
     mail_with_locale(headers)
   end
 
-  def reply_display_name(model)
-    return model.namespace.full_name if model.is_a?(Issue)
-
+  # `model` is used on EE code
+  def reply_display_name(_model)
     @project.full_name
   end
 
@@ -230,18 +231,13 @@ class Notify < ApplicationMailer
   def add_unsubscription_headers_and_links
     return unless !@labels_url && @sent_notification && @sent_notification.unsubscribable?
 
-    @unsubscribe_url = unsubscribe_sent_notification_url(@sent_notification)
-
-    list_unsubscribe_methods = [@unsubscribe_url]
+    list_unsubscribe_methods = [unsubscribe_sent_notification_url(@sent_notification, force: true)]
     if Gitlab::Email::IncomingEmail.enabled? && Gitlab::Email::IncomingEmail.supports_wildcard?
       list_unsubscribe_methods << "mailto:#{Gitlab::Email::IncomingEmail.unsubscribe_address(reply_key)}"
     end
 
     headers['List-Unsubscribe'] = list_unsubscribe_methods.map { |e| "<#{e}>" }.join(',')
-    # Based on RFC 8058 one-click unsubscribe functionality should
-    # be signalled with using the List-Unsubscribe-Post header
-    # See https://datatracker.ietf.org/doc/html/rfc8058
-    headers['List-Unsubscribe-Post'] = 'List-Unsubscribe=One-Click'
+    @unsubscribe_url = unsubscribe_sent_notification_url(@sent_notification)
   end
 
   def email_with_layout(to:, subject:, layout: 'mailer')
@@ -254,11 +250,12 @@ class Notify < ApplicationMailer
   def check_rate_limit
     return if rate_limit_scope.nil? || @recipient.nil?
 
+    enforce_rate_limit = Feature.enabled?(:rate_limit_notification_emails, rate_limit_scope)
     already_notified = throttled?(peek: true)
 
     return unless throttled?
 
-    message.perform_deliveries = false
+    message.perform_deliveries = false if enforce_rate_limit
 
     return if already_notified
 
@@ -268,6 +265,8 @@ class Notify < ApplicationMailer
       project_id: @project&.id,
       group_id: @group&.id
     )
+
+    return unless enforce_rate_limit
 
     Namespaces::RateLimiterMailer.project_or_group_emails(
       rate_limit_scope,

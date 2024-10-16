@@ -1,13 +1,8 @@
-/**
-* Transition classes are built dynamically, please read about vue-transitions
-* here before removing https://vuejs.org/guide/built-ins/transition
-**/
-
 .fade-enter-active,
 .fade-leave-active,
 .fade-in-enter-active,
 .fade-out-leave-active {
-  @apply gl-transition-opacity;
+  transition: opacity $gl-transition-duration-medium $general-hover-transition-curve;
 }
 
 .fade-enter,

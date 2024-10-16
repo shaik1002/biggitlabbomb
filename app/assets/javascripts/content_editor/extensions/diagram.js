@@ -1,6 +1,5 @@
 import { lowlight } from 'lowlight/lib/core';
 import { textblockTypeInputRule } from '@tiptap/core';
-import { Fragment } from '@tiptap/pm/model';
 import { base64DecodeUnicode } from '~/lib/utils/text_utility';
 import { PARSE_HTML_PRIORITY_HIGHEST } from '../constants';
 import languageLoader from '../services/code_block_language_loader';
@@ -50,7 +49,8 @@ export default CodeBlockHighlight.extend({
           const source = base64DecodeUnicode(
             element.dataset.diagramSrc.replace('data:text/plain;base64,', ''),
           );
-          return Fragment.from(schema.text(source));
+          const node = schema.node('paragraph', {}, [schema.text(source)]);
+          return node.content;
         },
       },
     ];

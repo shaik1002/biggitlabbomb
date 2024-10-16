@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
-require 'fast_spec_helper'
-require 'oj'
-require_relative '../../../../app/models/concerns/checksummable'
+# TODO Replace with require 'fast_spec_helper'; require 'oj' once parse_ci_job_timestamps FF is removed
+require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Ansi2html, feature_category: :continuous_integration do
   subject { described_class }
@@ -153,10 +152,6 @@ RSpec.describe Gitlab::Ci::Ansi2html, feature_category: :continuous_integration 
 
     it "groups carriage returns with newlines" do
       expect(convert_html("#{line_prefix}\r\n#{line_prefix}")).to eq('<span><br/></span>')
-    end
-
-    it "replaces consecutive linefeeds with line break tag" do
-      expect(convert_html("#{line_prefix}\r\r\n#{line_prefix}")).to eq('<span><br/></span>')
     end
 
     it 'replaces invalid UTF-8 data' do
@@ -312,6 +307,14 @@ RSpec.describe Gitlab::Ci::Ansi2html, feature_category: :continuous_integration 
 
   it_behaves_like 'a working Ansi2html service'
   it_behaves_like 'a working Ansi2html service', line_prefix: '2024-05-14T11:19:19.899359Z 00O '
+
+  context 'with parse_ci_job_timestamps FF disabled' do
+    before do
+      stub_feature_flags(parse_ci_job_timestamps: false)
+    end
+
+    it_behaves_like 'a working Ansi2html service'
+  end
 
   context 'with timestamps' do
     let(:timestamp) { '2024-05-14T11:19:19.899359Z 00O ' }

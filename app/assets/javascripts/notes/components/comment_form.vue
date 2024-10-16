@@ -5,7 +5,7 @@ import $ from 'jquery';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import { createAlert } from '~/alert';
 import { STATUS_CLOSED, STATUS_MERGED, STATUS_OPEN, STATUS_REOPENED } from '~/issues/constants';
-import { detectAndConfirmSensitiveTokens } from '~/lib/utils/secret_detection';
+import { containsSensitiveToken, confirmSensitiveAction } from '~/lib/utils/secret_detection';
 import {
   capitalizeFirstCharacter,
   convertToCamelCase,
@@ -245,9 +245,11 @@ export default {
           noteData.data.note.type = constants.DISCUSSION_NOTE;
         }
 
-        const confirmSubmit = await detectAndConfirmSensitiveTokens({ content: this.note });
-        if (!confirmSubmit) {
-          return;
+        if (containsSensitiveToken(this.note)) {
+          const confirmed = await confirmSensitiveAction();
+          if (!confirmed) {
+            return;
+          }
         }
 
         this.note = ''; // Empty textarea while being requested. Repopulate in catch
@@ -339,9 +341,6 @@ export default {
     onInput(value) {
       this.note = value;
     },
-    append(value) {
-      this.$refs.markdownEditor.append(value);
-    },
   },
 };
 </script>
@@ -362,12 +361,7 @@ export default {
           {{ error }}
         </gl-alert>
         <div class="timeline-content timeline-content-form">
-          <form
-            ref="commentForm"
-            class="new-note common-note-form gfm-form js-main-target-form"
-            data-testid="comment-form"
-            @submit.stop.prevent
-          >
+          <form ref="commentForm" class="new-note common-note-form gfm-form js-main-target-form">
             <comment-field-layout
               :with-alert-container="true"
               :noteable-data="getNoteableData"
@@ -398,7 +392,7 @@ export default {
               <gl-form-checkbox
                 v-if="canSetInternalNote"
                 v-model="noteIsInternal"
-                class="gl-mb-2 gl-basis-full"
+                class="gl-mb-2 gl-flex-basis-full"
                 data-testid="internal-note-checkbox"
               >
                 {{ $options.i18n.internal }}

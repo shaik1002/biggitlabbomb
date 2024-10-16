@@ -2,6 +2,9 @@
 description: An issue was marked as related to another issue
 internal_events: true
 action: g_project_management_issue_related
+label_description:
+property_description:
+value_description:
 extra_properties:
 identifiers:
 - project

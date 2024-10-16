@@ -2,13 +2,7 @@ import Vue from 'vue';
 
 export const staticBreadcrumbs = Vue.observable({});
 
-export const injectVueAppBreadcrumbs = (
-  router,
-  BreadcrumbsComponent,
-  apolloProvider = null,
-  provide = {},
-  // eslint-disable-next-line max-params
-) => {
+export const injectVueAppBreadcrumbs = (router, BreadcrumbsComponent, apolloProvider = null) => {
   const injectBreadcrumbEl = document.querySelector('#js-injected-page-breadcrumbs');
 
   if (!injectBreadcrumbEl) {
@@ -24,7 +18,6 @@ export const injectVueAppBreadcrumbs = (
     el: injectBreadcrumbEl,
     router,
     apolloProvider,
-    provide,
     render(createElement) {
       return createElement(BreadcrumbsComponent, {
         class: injectBreadcrumbEl.className,

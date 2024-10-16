@@ -4,8 +4,6 @@ class BasePolicy < DeclarativePolicy::Base
   desc "User is an instance admin"
   with_options scope: :user, score: 0
   condition(:admin) do
-    next false if ::Feature.enabled?(:prevent_job_token_admin_permissions, @user) && @user&.from_ci_job_token?
-
     if Gitlab::CurrentSettings.admin_mode
       Gitlab::Auth::CurrentUserMode.new(@user).admin_mode?
     else
@@ -53,10 +51,6 @@ class BasePolicy < DeclarativePolicy::Base
   with_options scope: :user, score: 0
   condition(:placeholder_user) { @user.try(:placeholder?) || false }
 
-  desc "Import user"
-  with_options scope: :user, score: 0
-  condition(:import_user) { @user.try(:import_user?) || false }
-
   desc "User email is unconfirmed or user account is locked"
   with_options scope: :user, score: 0
   condition(:inactive) { @user&.confirmation_required_on_sign_in? || @user&.access_locked? }
@@ -97,7 +91,6 @@ class BasePolicy < DeclarativePolicy::Base
   condition(:is_gitlab_com, score: 0, scope: :global) { ::Gitlab.com? }
 
   rule { placeholder_user }.prevent_all
-  rule { import_user }.prevent_all
 
   private
 

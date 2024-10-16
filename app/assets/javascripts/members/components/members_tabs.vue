@@ -96,11 +96,10 @@ export default {
       :key="tab.namespace"
       :title-link-attributes="tab.attrs"
       :query-param-value="tab.queryParamValue"
-      :lazy="tab.lazy"
     >
       <template #title>
         <span>{{ tab.title }}</span>
-        <gl-badge class="gl-tab-counter-badge">{{ getTabCount(tab) }}</gl-badge>
+        <gl-badge size="sm" class="gl-tab-counter-badge">{{ getTabCount(tab) }}</gl-badge>
       </template>
       <component
         :is="tab.component"
@@ -113,8 +112,7 @@ export default {
     <template #tabs-end>
       <gl-button
         v-if="shouldShowExportButton"
-        data-event-tracking="click_export_group_members_as_csv"
-        class="gl-ml-auto gl-self-center"
+        class="gl-align-self-center gl-ml-auto"
         icon="export"
         :href="exportCsvPath"
       >

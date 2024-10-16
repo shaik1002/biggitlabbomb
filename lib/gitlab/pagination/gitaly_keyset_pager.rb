@@ -70,18 +70,16 @@ module Gitlab
         finder.execute(gitaly_pagination: true).tap do |records|
           total = finder.total
           per_page = params[:per_page].presence || Kaminari.config.default_per_page
-          total_pages = (total / per_page.to_f).ceil
-          next_page = total_pages > 1 ? 2 : nil
 
           Gitlab::Pagination::OffsetHeaderBuilder.new(
-            request_context: request_context, per_page: per_page, page: 1, next_page: next_page,
-            total: total, total_pages: total_pages
+            request_context: request_context, per_page: per_page, page: 1, next_page: 2,
+            total: total, total_pages: (total / per_page) + 1
           ).execute
         end
       end
 
       def apply_headers(records, next_cursor)
-        if records.count == params[:per_page] && next_cursor.present?
+        if records.count == params[:per_page]
           Gitlab::Pagination::Keyset::HeaderBuilder
             .new(request_context)
             .add_next_page_header(

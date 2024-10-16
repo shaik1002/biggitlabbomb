@@ -1,7 +1,7 @@
 <script>
 import { GlAlert, GlLink, GlSprintf } from '@gitlab/ui';
 import { sortBy } from 'lodash';
-import { localeDateFormat } from '~/lib/utils/datetime/locale_dateformat';
+import { formatDate } from '~/lib/utils/datetime/date_format_utility';
 import { helpPagePath } from '~/helpers/help_page_helper';
 import { s__ } from '~/locale';
 import deployFreezesQuery from '../graphql/queries/deploy_freezes.query.graphql';
@@ -46,10 +46,10 @@ export default {
       return this.deployFreezes[0];
     },
     deployFreezeStartTime() {
-      return localeDateFormat.asDateTimeFull.format(this.nextDeployFreeze.startTime);
+      return formatDate(this.nextDeployFreeze.startTime);
     },
     deployFreezeEndTime() {
-      return localeDateFormat.asDateTimeFull.format(this.nextDeployFreeze.endTime);
+      return formatDate(this.nextDeployFreeze.endTime);
     },
   },
   i18n: {

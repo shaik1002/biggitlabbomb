@@ -1,7 +1,6 @@
 <script>
 import { GlDisclosureDropdownGroup, GlDisclosureDropdownItem, GlIcon } from '@gitlab/ui';
 import { truncateNamespace } from '~/lib/utils/text_utility';
-import { joinPaths } from '~/lib/utils/url_utility';
 import { TRACKING_UNKNOWN_PANEL } from '~/super_sidebar/constants';
 import { TRACKING_CLICK_COMMAND_PALETTE_ITEM, OVERLAY_GOTO } from '../command_palette/constants';
 import FrequentItem from './frequent_item.vue';
@@ -66,7 +65,7 @@ export default {
           // The text field satsifies GlDisclosureDropdownItem's prop
           // validator, and the href field ensures it renders a link.
           text: item.name,
-          href: joinPaths(gon.relative_url_root || '/', item.fullPath),
+          href: item.webUrl,
           extraAttrs: {
             'data-track-action': TRACKING_CLICK_COMMAND_PALETTE_ITEM,
             'data-track-label': item.id,
@@ -115,7 +114,7 @@ export default {
     </template>
 
     <gl-disclosure-dropdown-item v-if="showEmptyState" class="gl-cursor-text">
-      <span class="gl-mx-3 gl-my-3 gl-text-sm gl-text-gray-500">{{ emptyStateText }}</span>
+      <span class="gl-text-gray-500 gl-font-sm gl-my-3 gl-mx-3">{{ emptyStateText }}</span>
     </gl-disclosure-dropdown-item>
 
     <gl-disclosure-dropdown-item key="all" :item="viewAllItem" class="show-hover-layover">

@@ -23,7 +23,9 @@ module Sidebars
 
         override :render?
         def render?
-          context.group.crm_group?
+          return false unless context.group.root?
+
+          can_read_contact?
         end
 
         override :serialize_as_menu_item_args

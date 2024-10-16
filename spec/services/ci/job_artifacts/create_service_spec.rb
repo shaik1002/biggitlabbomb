@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::JobArtifacts::CreateService, :clean_gitlab_redis_shared_state, feature_category: :job_artifacts do
+RSpec.describe Ci::JobArtifacts::CreateService, :clean_gitlab_redis_shared_state, feature_category: :build_artifacts do
   include WorkhorseHelpers
   include Gitlab::Utils::Gzip
 
@@ -467,8 +467,8 @@ RSpec.describe Ci::JobArtifacts::CreateService, :clean_gitlab_redis_shared_state
     end
 
     shared_examples_for 'handling partitioning' do
-      context 'with job partitioned' do
-        let(:partition_id) { ci_testing_partition_id }
+      context 'with job partitioned', :ci_partitionable do
+        let(:partition_id) { ci_testing_partition_id_for_check_constraints }
         let(:pipeline) { create(:ci_pipeline, project: project, partition_id: partition_id) }
         let(:job) { create(:ci_build, pipeline: pipeline) }
 

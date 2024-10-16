@@ -4,8 +4,9 @@ import { GlTooltipDirective, GlFormCheckbox } from '@gitlab/ui';
 import { createNamespacedHelpers } from 'vuex';
 import { s__ } from '~/locale';
 
-const { mapActions: mapCommitActions, mapGetters: mapCommitGetters } =
-  createNamespacedHelpers('commit');
+const { mapActions: mapCommitActions, mapGetters: mapCommitGetters } = createNamespacedHelpers(
+  'commit',
+);
 
 export default {
   components: { GlFormCheckbox },
@@ -38,7 +39,7 @@ export default {
     class="js-ide-commit-new-mr"
     :class="{ 'is-disabled': shouldDisableNewMrOption }"
   >
-    <hr class="gl-mb-4 gl-mt-3" />
+    <hr class="gl-mt-3 gl-mb-4" />
 
     <gl-form-checkbox
       :disabled="shouldDisableNewMrOption"

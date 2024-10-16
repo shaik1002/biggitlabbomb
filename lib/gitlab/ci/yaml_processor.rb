@@ -24,7 +24,7 @@ module Gitlab
 
         verify_project_sha! if verify_project_sha?
 
-        @ci_config = Gitlab::Ci::Config.new(@config_content, **ci_config_opts)
+        @ci_config = Gitlab::Ci::Config.new(@config_content, **@opts)
 
         unless @ci_config.valid?
           return Result.new(ci_config: @ci_config, errors: @ci_config.errors, warnings: @ci_config.warnings)
@@ -40,12 +40,6 @@ module Gitlab
       end
 
       private
-
-      attr_reader :opts
-
-      def ci_config_opts
-        @opts
-      end
 
       def project
         @opts[:project]
@@ -84,7 +78,7 @@ module Gitlab
         return unless job[:stage]
 
         unless job[:stage].is_a?(String) && job[:stage].in?(@stages)
-          error!("#{name} job: chosen stage #{job[:stage]} does not exist; available stages are #{@stages.join(", ")}")
+          error!("#{name} job: chosen stage does not exist; available stages are #{@stages.join(", ")}")
         end
       end
 

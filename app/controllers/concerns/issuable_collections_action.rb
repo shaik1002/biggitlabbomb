@@ -6,7 +6,7 @@ module IssuableCollectionsAction
   include IssuesCalendar
 
   included do
-    before_action :check_search_rate_limit!, only: [:issues, :merge_requests, :search_merge_requests], if: -> {
+    before_action :check_search_rate_limit!, only: [:issues, :merge_requests], if: -> {
       params[:search].present?
     }
   end
@@ -24,11 +24,17 @@ module IssuableCollectionsAction
       format.atom { render layout: 'xml' }
     end
   end
-  # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
   def merge_requests
-    render_merge_requests
+    @merge_requests = issuables_collection.page(params[:page])
+
+    @issuable_meta_data = Gitlab::IssuableMetadata.new(current_user, @merge_requests).data
+  rescue ActiveRecord::QueryCanceled => exception # rubocop:disable Database/RescueQueryCanceled
+    log_exception(exception)
+
+    @search_timeout_occurred = true
   end
+  # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
   def issues_calendar
     render_issues_calendar(issuables_collection)
@@ -40,7 +46,7 @@ module IssuableCollectionsAction
     case action_name
     when 'issues'
       Issue::SORTING_PREFERENCE_FIELD
-    when 'merge_requests', 'search_merge_requests'
+    when 'merge_requests'
       MergeRequest::SORTING_PREFERENCE_FIELD
     end
   end
@@ -49,7 +55,7 @@ module IssuableCollectionsAction
     case action_name
     when 'issues', 'issues_calendar'
       IssuesFinder
-    when 'merge_requests', 'search_merge_requests'
+    when 'merge_requests'
       MergeRequestsFinder
     end
   end
@@ -62,16 +68,4 @@ module IssuableCollectionsAction
       issue_types: issue_types
     )
   end
-
-  # rubocop:disable Gitlab/ModuleWithInstanceVariables
-  def render_merge_requests
-    @merge_requests = issuables_collection.page(params[:page])
-
-    @issuable_meta_data = Gitlab::IssuableMetadata.new(current_user, @merge_requests).data
-  rescue ActiveRecord::QueryCanceled => exception # rubocop:disable Database/RescueQueryCanceled
-    log_exception(exception)
-
-    @search_timeout_occurred = true
-  end
-  # rubocop:enable Gitlab/ModuleWithInstanceVariables
 end

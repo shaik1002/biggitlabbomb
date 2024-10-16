@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: Any user with at least the Maintainer role can merge updates to this content. For details, see https://docs.gitlab.com/ee/development/development_processes.html#development-guidelines-review.
 ---
@@ -11,7 +11,7 @@ are very appreciative of the work done by translators and proofreaders!
 
 ## Proofreaders
 
-<!-- vale gitlab_base.Spelling = NO -->
+<!-- vale gitlab.Spelling = NO -->
 
 - Albanian
   - Proofreaders needed.
@@ -92,7 +92,6 @@ are very appreciative of the work done by translators and proofreaders!
 - Romanian
   - Proofreaders needed.
 - Russian
-  - Dmitry Fedoroff - [GitLab](https://gitlab.com/DmitryFedoroff), [Crowdin](https://crowdin.com/profile/DmitryFedoroff)
   - Mark Minakou - [GitLab](https://gitlab.com/sandzhaj), [Crowdin](https://crowdin.com/profile/sandzhaj)
   - Andrey Komarov - [GitLab](https://gitlab.com/elkamarado), [Crowdin](https://crowdin.com/profile/kamarado)
 - Serbian (Latin and Cyrillic)
@@ -104,7 +103,6 @@ are very appreciative of the work done by translators and proofreaders!
 - Spanish
   - David Elizondo - [GitLab](https://gitlab.com/daelmo), [Crowdin](https://crowdin.com/profile/daelmo)
   - Pablo Reyes - [GitLab](https://gitlab.com/pabloryst9n), [Crowdin](https://crowdin.com/profile/pabloryst9n)
-  - Gustavo Román - [GitLab](https://gitlab.com/GustavoStark), [Crowdin](https://crowdin.com/profile/gustavonewton)
 - Swedish
   - Johannes Nilsson - [GitLab](https://gitlab.com/nlssn), [Crowdin](https://crowdin.com/profile/nlssn)
 - Turkish
@@ -113,7 +111,7 @@ are very appreciative of the work done by translators and proofreaders!
   - Andrew Vityuk - [GitLab](https://gitlab.com/3_1_3_u), [Crowdin](https://crowdin.com/profile/andruwa13)
 - Welsh
   - Proofreaders needed.
-<!-- vale gitlab_base.Spelling = YES -->
+<!-- vale gitlab.Spelling = YES -->
 
 ## Become a proofreader
 
@@ -142,8 +140,7 @@ translations to the GitLab project.
    In the merge request description, include links to any projects you have previously translated.
 
 1. [GitLab team members](https://about.gitlab.com/company/team/),
-   [core team members](https://about.gitlab.com/community/core-team/),
-   [globalization and localization team members](https://handbook.gitlab.com/handbook/marketing/localization/),
+   [Core team members](https://about.gitlab.com/community/core-team/),
    or current proofreaders fluent in the language consider your request to become a proofreader
    based on the merits of your previous translations.
 

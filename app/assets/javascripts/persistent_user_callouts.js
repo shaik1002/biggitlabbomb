@@ -23,13 +23,11 @@ const PERSISTENT_USER_CALLOUTS = [
   '.js-geo-migrate-hashed-storage-callout',
   '.js-unlimited-members-during-trial-alert',
   '.js-branch-rules-info-callout',
-  '.js-branch-rules-tip-callout',
+  '.js-new-nav-for-everyone-callout',
   '.js-namespace-over-storage-users-combined-alert',
   '.js-joining-a-project-alert',
   '.js-all-seats-used',
   '.js-period-in-terraform-state-name-alert',
-  '.js-duo-free-access-ending-banner',
-  '.js-expired-trial-widget',
 ];
 
 const initCallouts = () => {

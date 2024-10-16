@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Banzai::Filter::References::IssueReferenceFilter, feature_category: :markdown do
+RSpec.describe Banzai::Filter::References::IssueReferenceFilter, feature_category: :team_planning do
   include FilterSpecHelper
   include DesignManagementTestHelpers
 
@@ -10,8 +10,8 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter, feature_categor
     IssuesHelper
   end
 
-  let_it_be(:project) { create(:project, :public) }
-  let_it_be_with_reload(:issue) { create(:issue, project: project) }
+  let(:project) { create(:project, :public) }
+  let(:issue) { create(:issue, project: project) }
   let(:issue_path) { "/#{issue.project.namespace.path}/#{issue.project.path}/-/issues/#{issue.iid}" }
   let(:issue_url) { "http://#{Gitlab.config.gitlab.host}#{issue_path}" }
 
@@ -100,14 +100,6 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter, feature_categor
 
       expect(link).to have_attribute('data-project')
       expect(link.attr('data-project')).to eq project.id.to_s
-    end
-
-    it 'includes a data-namespace-path attribute' do
-      doc = reference_filter("Issue #{written_reference}")
-      link = doc.css('a').first
-
-      expect(link).to have_attribute('data-namespace-path')
-      expect(link.attr('data-namespace-path')).to eq(project.full_path)
     end
 
     it 'includes a data-issue attribute' do
@@ -603,20 +595,6 @@ RSpec.describe Banzai::Filter::References::IssueReferenceFilter, feature_categor
           expect(extras).not_to include('designs')
         end
       end
-    end
-  end
-
-  context 'checking N+1' do
-    let_it_be(:issue1) { create(:issue, project: project) }
-    let_it_be(:issue2) { create(:issue, project: project) }
-
-    it 'does not have N+1 per multiple references per project' do
-      single_reference = "Issue #{issue1.to_reference}"
-      multiple_references = "Issues #{issue1.to_reference} and #{issue2.to_reference}"
-
-      control = ActiveRecord::QueryRecorder.new { reference_filter(single_reference).to_html }
-
-      expect { reference_filter(multiple_references).to_html }.not_to exceed_query_limit(control)
     end
   end
 end

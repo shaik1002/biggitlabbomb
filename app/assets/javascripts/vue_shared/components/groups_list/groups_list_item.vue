@@ -15,7 +15,6 @@ import {
   TIMESTAMP_TYPE_CREATED_AT,
   TIMESTAMP_TYPE_UPDATED_AT,
 } from '~/vue_shared/components/resource_lists/constants';
-import GroupListItemPreventDeleteModal from './group_list_item_prevent_delete_modal.vue';
 
 export default {
   i18n: {
@@ -27,14 +26,13 @@ export default {
     [TIMESTAMP_TYPE_CREATED_AT]: __('Created'),
     [TIMESTAMP_TYPE_UPDATED_AT]: __('Updated'),
   },
-  truncateTextToggleButtonProps: { class: '!gl-text-sm' },
+  truncateTextToggleButtonProps: { class: 'gl-font-sm!' },
   components: {
     GlAvatarLabeled,
     GlIcon,
     GlTruncateText,
     GlBadge,
     ListActions,
-    GroupListItemPreventDeleteModal,
     GroupListItemDeleteModal,
     TimeAgoTooltip,
     GroupListItemInactiveBadge: () =>
@@ -133,18 +131,18 @@ export default {
     onActionDelete() {
       this.isDeleteModalVisible = true;
     },
-    onModalChange(isVisible) {
-      this.isDeleteModalVisible = isVisible;
-    },
   },
 };
 </script>
 
 <template>
-  <li class="groups-list-item gl-border-b gl-flex gl-py-5">
-    <div class="gl-grow md:gl-flex">
+  <li class="groups-list-item gl-py-5 gl-border-b gl-display-flex">
+    <div class="md:gl-flex gl-flex-grow-1">
       <div class="gl-flex gl-grow gl-items-start">
-        <div v-if="showGroupIcon" class="gl-mr-3 gl-flex gl-h-9 gl-shrink-0 gl-items-center">
+        <div
+          v-if="showGroupIcon"
+          class="gl-display-flex gl-align-items-center gl-flex-shrink-0 gl-h-9 gl-mr-3"
+        >
           <gl-icon class="gl-text-secondary" :name="groupIconName" />
         </div>
         <gl-avatar-labeled
@@ -152,13 +150,12 @@ export default {
           :entity-name="group.fullName"
           :label="group.fullName"
           :label-link="group.webUrl"
-          :src="group.avatarUrl"
           shape="rect"
           :size="48"
         >
           <template #meta>
             <div class="gl-px-2">
-              <div class="-gl-mx-2 gl-flex gl-flex-wrap gl-items-center">
+              <div class="-gl-mx-2 gl-display-flex gl-align-items-center gl-flex-wrap">
                 <div class="gl-px-2">
                   <gl-icon
                     v-if="visibility"
@@ -170,6 +167,7 @@ export default {
                 <div class="gl-px-2">
                   <gl-badge
                     v-if="shouldShowAccessLevel"
+                    size="sm"
                     class="gl-block"
                     data-testid="access-level-badge"
                     >{{ accessLevelLabel }}</gl-badge
@@ -189,14 +187,14 @@ export default {
           >
             <div
               v-safe-html="group.descriptionHtml"
-              class="md gl-text-sm gl-text-secondary"
+              class="gl-font-sm gl-text-secondary md"
               data-testid="group-description"
             ></div>
           </gl-truncate-text>
         </gl-avatar-labeled>
       </div>
       <div
-        class="gl-mt-3 gl-shrink-0 gl-flex-col gl-items-end md:gl-mt-0 md:gl-flex md:gl-pl-0"
+        class="md:gl-flex gl-flex-col gl-items-end gl-shrink-0 gl-mt-3 md:gl-pl-0 md:gl-mt-0"
         :class="statsPadding"
       >
         <div class="gl-flex gl-items-center gl-gap-x-3 md:gl-h-9">
@@ -231,14 +229,14 @@ export default {
         </div>
         <div
           v-if="timestamp"
-          class="gl-mt-3 gl-whitespace-nowrap gl-text-sm gl-text-secondary md:-gl-mt-2"
+          class="gl-text-sm gl-whitespace-nowrap gl-text-secondary gl-mt-3 md:-gl-mt-2"
         >
           <span>{{ timestampText }}</span>
           <time-ago-tooltip :time="timestamp" />
         </div>
       </div>
     </div>
-    <div class="gl-ml-3 gl-flex gl-h-9 gl-items-center">
+    <div class="gl-display-flex gl-align-items-center gl-h-9 gl-ml-3">
       <list-actions
         v-if="hasActions"
         :actions="actions"
@@ -246,24 +244,15 @@ export default {
       />
     </div>
 
-    <template v-if="hasActionDelete">
-      <group-list-item-prevent-delete-modal
-        v-if="group.isLinkedToSubscription"
-        :visible="isDeleteModalVisible"
-        :modal-id="modalId"
-        :group="group"
-        @change="onModalChange"
-      />
-      <group-list-item-delete-modal
-        v-else
-        :visible="isDeleteModalVisible"
-        :modal-id="modalId"
-        :phrase="group.fullName"
-        :confirm-loading="isActionDeleteLoading"
-        :group="group"
-        @confirm.prevent="$emit('delete', group)"
-        @change="onModalChange"
-      />
-    </template>
+    <group-list-item-delete-modal
+      v-if="hasActionDelete"
+      :visible="isDeleteModalVisible"
+      :modal-id="modalId"
+      :phrase="group.fullName"
+      :confirm-loading="isActionDeleteLoading"
+      :group="group"
+      @confirm.prevent="$emit('delete', group)"
+      @change="isDeleteModalVisible = arguments[0]"
+    />
   </li>
 </template>

@@ -115,7 +115,7 @@ Check the [currently supported languages](#currently-supported-languages).
 Auto Test uses tests you already have in your application. If there are no
 tests, it's up to you to add them.
 
-<!-- vale gitlab_base.Spelling = NO -->
+<!-- vale gitlab.Spelling = NO -->
 
 NOTE:
 Not all buildpacks supported by [Auto Build](#auto-build) are supported by Auto Test.
@@ -123,7 +123,7 @@ Auto Test uses [Herokuish](https://gitlab.com/gitlab-org/gitlab/-/issues/212689)
 Cloud Native Buildpacks, and only buildpacks that implement the
 [Testpack API](https://devcenter.heroku.com/articles/testpack-api) are supported.
 
-<!-- vale gitlab_base.Spelling = YES -->
+<!-- vale gitlab.Spelling = YES -->
 
 ### Currently supported languages
 
@@ -285,7 +285,7 @@ To use a custom target instead of the auto-deployed review apps,
 set a `DAST_WEBSITE` CI/CD variable to the URL for DAST to scan.
 
 WARNING:
-If [DAST Full Scan](../../user/application_security/dast/browser/index.md) is
+If [DAST Full Scan](../../user/application_security/dast/proxy-based.md#full-scan) is
 enabled, GitLab strongly advises **not**
 to set `DAST_WEBSITE` to any staging or production environment. DAST Full Scan
 actively attacks the target, which can take down your application and lead to

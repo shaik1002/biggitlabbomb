@@ -1,4 +1,4 @@
-import { GlBadge } from '@gitlab/ui';
+import { GlBadge, GlIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 import LockedBadge from '~/issuable/components/locked_badge.vue';
@@ -18,20 +18,19 @@ describe('LockedBadge component', () => {
   };
 
   const findBadge = () => wrapper.findComponent(GlBadge);
+  const findIcon = () => wrapper.findComponent(GlIcon);
 
   beforeEach(() => {
     mountComponent();
   });
 
   it('renders warning badge', () => {
-    expect(findBadge().attributes('aria-label')).toBe(
-      'The discussion in this issue is locked. Only project members can comment.',
-    );
+    expect(findBadge().text()).toBe('Locked');
     expect(findBadge().props('variant')).toEqual('warning');
   });
 
   it('renders lock icon', () => {
-    expect(findBadge().props('icon')).toBe('lock');
+    expect(findIcon().props('name')).toBe('lock');
   });
 
   it('has tooltip', () => {

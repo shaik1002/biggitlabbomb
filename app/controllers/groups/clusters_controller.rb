@@ -17,4 +17,12 @@ class Groups::ClustersController < ::Clusters::ClustersController
   def group
     @group ||= find_routable!(Group, params[:group_id] || params[:id], request.fullpath)
   end
+
+  def metrics_dashboard_params
+    {
+      cluster: cluster,
+      cluster_type: :group,
+      group: group
+    }
+  end
 end

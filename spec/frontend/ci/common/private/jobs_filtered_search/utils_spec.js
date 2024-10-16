@@ -12,7 +12,6 @@ describe('Filtered search utils', () => {
       ${{ wrong: 'SUCCESS' }}                                  | ${null}
       ${{ statuses: 'wrong' }}                                 | ${null}
       ${{ wrong: 'wrong' }}                                    | ${null}
-      ${{ name: 'rspec' }}                                     | ${{ name: 'rspec' }}
     `(
       'when provided $queryStringObject, the expected result is $expected',
       ({ queryStringObject, expected }) => {

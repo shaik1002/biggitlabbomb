@@ -11,7 +11,6 @@ import {
   UNAVAILABLE_ADMIN_FEATURE_TEXT,
 } from '~/packages_and_registries/settings/project/constants';
 import expirationPolicyQuery from '~/packages_and_registries/settings/project/graphql/queries/get_expiration_policy.query.graphql';
-import SettingsSection from '~/vue_shared/components/settings/settings_section.vue';
 
 import ContainerExpirationPolicyForm from './container_expiration_policy_form.vue';
 
@@ -21,7 +20,6 @@ export default {
     GlSprintf,
     GlLink,
     ContainerExpirationPolicyForm,
-    SettingsSection,
   },
   inject: ['projectPath', 'isAdmin', 'adminSettingsPath', 'enableHistoricEntries', 'helpPagePath'],
   i18n: {
@@ -32,16 +30,16 @@ export default {
     FETCH_SETTINGS_ERROR_MESSAGE,
   },
   apollo: {
-    containerTagsExpirationPolicy: {
+    containerExpirationPolicy: {
       query: expirationPolicyQuery,
       variables() {
         return {
           projectPath: this.projectPath,
         };
       },
-      update: (data) => data.project?.containerTagsExpirationPolicy,
+      update: (data) => data.project?.containerExpirationPolicy,
       result({ data }) {
-        this.workingCopy = { ...get(data, 'project.containerTagsExpirationPolicy', {}) };
+        this.workingCopy = { ...get(data, 'project.containerExpirationPolicy', {}) };
       },
       error(e) {
         this.fetchSettingsError = e;
@@ -51,16 +49,16 @@ export default {
   data() {
     return {
       fetchSettingsError: false,
-      containerTagsExpirationPolicy: null,
+      containerExpirationPolicy: null,
       workingCopy: {},
     };
   },
   computed: {
     isEnabled() {
-      return this.containerTagsExpirationPolicy || this.enableHistoricEntries;
+      return this.containerExpirationPolicy || this.enableHistoricEntries;
     },
     isLoading() {
-      return this.$apollo.queries.containerTagsExpirationPolicy.loading;
+      return this.$apollo.queries.containerExpirationPolicy.loading;
     },
     showDisabledFormMessage() {
       return !this.isEnabled && !this.fetchSettingsError;
@@ -69,28 +67,27 @@ export default {
       return this.isAdmin ? UNAVAILABLE_ADMIN_FEATURE_TEXT : UNAVAILABLE_USER_FEATURE_TEXT;
     },
     isEdited() {
-      if (isEmpty(this.containerTagsExpirationPolicy) && isEmpty(this.workingCopy)) {
+      if (isEmpty(this.containerExpirationPolicy) && isEmpty(this.workingCopy)) {
         return false;
       }
-      return !isEqual(this.containerTagsExpirationPolicy, this.workingCopy);
+      return !isEqual(this.containerExpirationPolicy, this.workingCopy);
     },
   },
 };
 </script>
 
 <template>
-  <settings-section
-    :heading="$options.i18n.CONTAINER_CLEANUP_POLICY_TITLE"
-    data-testid="container-expiration-policy-project-settings"
-    class="!gl-pt-5"
-  >
-    <template #description>
+  <div data-testid="container-expiration-policy-project-settings">
+    <h3 data-testid="title" class="gl-heading-3 gl-mt-3!">
+      {{ $options.i18n.CONTAINER_CLEANUP_POLICY_TITLE }}
+    </h3>
+    <p data-testid="description">
       <gl-sprintf :message="$options.i18n.CONTAINER_CLEANUP_POLICY_DESCRIPTION">
         <template #link="{ content }">
           <gl-link :href="helpPagePath">{{ content }}</gl-link>
         </template>
       </gl-sprintf>
-    </template>
+    </p>
     <container-expiration-policy-form
       v-if="isEnabled"
       v-model="workingCopy"
@@ -116,5 +113,5 @@ export default {
         <gl-sprintf :message="$options.i18n.FETCH_SETTINGS_ERROR_MESSAGE" />
       </gl-alert>
     </template>
-  </settings-section>
+  </div>
 </template>

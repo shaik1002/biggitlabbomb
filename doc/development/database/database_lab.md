@@ -143,13 +143,13 @@ To access the database lab instances, you must:
 Host lb-bastion.db-lab.gitlab.com
   User ${USER}
   IdentitiesOnly yes
-  IdentityFile ~/.ssh/id_ed25519
+  IdentityFile ~/.ssh/ed25519
 
 Host *.gitlab-db-lab.internal
   User ${USER}
   PreferredAuthentications publickey
   IdentitiesOnly yes
-  IdentityFile ~/.ssh/id_ed25519
+  IdentityFile ~/.ssh/ed25519
   ProxyCommand ssh lb-bastion.db-lab.gitlab.com -W %h:%p
 ```
 
@@ -174,5 +174,8 @@ After you connect, use clone like you would any `psql` console in production, bu
 the added benefit and safety of an isolated writeable environment.
 
 #### Simplified access through `pgai` Ruby gem
+
+WARNING:
+The `pgai` gem has not yet been updated to use the new database lab instances so you will only be able to access the legacy instance using this tool.
 
 For instructions on using the `pgai` Ruby gem, see: [Database Lab access using the pgai Ruby gem](database_lab_pgai.md).

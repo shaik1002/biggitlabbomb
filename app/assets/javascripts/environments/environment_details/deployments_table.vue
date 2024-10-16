@@ -67,7 +67,6 @@ export default {
         :actions="item.actions"
         :rollback="item.rollback"
         :approval-environment="item.deploymentApproval"
-        :deployment-web-path="item.webPath"
       />
     </template>
   </gl-table-lite>

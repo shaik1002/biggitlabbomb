@@ -3,12 +3,10 @@ import { GlLoadingIcon, GlIntersectionObserver, GlButton, GlLink } from '@gitlab
 import LockedBadge from '~/issuable/components/locked_badge.vue';
 import { WORKSPACE_PROJECT } from '~/issues/constants';
 import ConfidentialityBadge from '~/vue_shared/components/confidentiality_badge.vue';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { isNotesWidget } from '../utils';
 import WorkItemActions from './work_item_actions.vue';
-import TodosToggle from './shared/todos_toggle.vue';
+import WorkItemTodos from './work_item_todos.vue';
 import WorkItemStateBadge from './work_item_state_badge.vue';
-import WorkItemNotificationsWidget from './work_item_notifications_widget.vue';
 
 export default {
   components: {
@@ -16,14 +14,12 @@ export default {
     GlIntersectionObserver,
     GlLoadingIcon,
     WorkItemActions,
-    TodosToggle,
+    WorkItemTodos,
     ConfidentialityBadge,
     WorkItemStateBadge,
-    WorkItemNotificationsWidget,
     GlButton,
     GlLink,
   },
-  mixins: [glFeatureFlagMixin()],
   props: {
     workItem: {
       type: Object,
@@ -66,11 +62,6 @@ export default {
       required: false,
       default: () => [],
     },
-    workItemAuthorId: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
   },
   computed: {
     canUpdate() {
@@ -94,9 +85,6 @@ export default {
     workItemState() {
       return this.workItem.state;
     },
-    newTodoAndNotificationsEnabled() {
-      return this.glFeatures.notificationsTodosButtons;
-    },
   },
   WORKSPACE_PROJECT,
 };
@@ -110,11 +98,11 @@ export default {
     <transition name="issuable-header-slide">
       <div
         v-if="isStickyHeaderShowing"
-        class="issue-sticky-header gl-border-b gl-fixed gl-z-3 gl-bg-default gl-py-2"
+        class="issue-sticky-header gl-fixed gl-bg-white gl-border-b gl-z-3 gl-py-2"
         data-testid="work-item-sticky-header"
       >
         <div
-          class="work-item-sticky-header-text gl-mx-auto gl-flex gl-items-center gl-gap-3 gl-px-5 xl:gl-px-6"
+          class="work-item-sticky-header-text gl-items-center gl-mx-auto gl-px-5 xl:gl-px-6 gl-flex gl-gap-3"
         >
           <work-item-state-badge v-if="workItemState" :work-item-state="workItemState" />
           <gl-loading-icon v-if="updateInProgress" />
@@ -126,7 +114,7 @@ export default {
           />
           <locked-badge v-if="isDiscussionLocked" :issuable-type="workItemType" />
           <gl-link
-            class="gl-mr-auto gl-block gl-truncate gl-pr-3 gl-font-bold gl-text-black"
+            class="gl-truncate gl-block gl-font-bold gl-pr-3 gl-mr-auto gl-text-black"
             href="#top"
             :title="workItem.title"
           >
@@ -141,27 +129,18 @@ export default {
           >
             {{ __('Edit') }}
           </gl-button>
-          <todos-toggle
+          <work-item-todos
             v-if="showWorkItemCurrentUserTodos"
-            :item-id="workItem.id"
-            :current-user-todos="currentUserTodos"
-            todos-button-type="secondary"
-            @todosUpdated="$emit('todosUpdated', $event)"
-            @error="updateError = $event"
-          />
-          <work-item-notifications-widget
-            v-if="newTodoAndNotificationsEnabled"
-            :full-path="fullPath"
             :work-item-id="workItem.id"
-            :subscribed-to-notifications="workItemNotificationsSubscribed"
-            :can-update="canUpdate"
+            :work-item-iid="workItem.iid"
+            :work-item-fullpath="projectFullPath"
+            :current-user-todos="currentUserTodos"
             @error="$emit('error')"
           />
           <work-item-actions
             :full-path="fullPath"
             :work-item-id="workItem.id"
             :work-item-iid="workItem.iid"
-            :hide-subscribe="newTodoAndNotificationsEnabled"
             :subscribed-to-notifications="workItemNotificationsSubscribed"
             :work-item-type="workItemType"
             :work-item-type-id="workItemTypeId"
@@ -174,15 +153,12 @@ export default {
             :work-item-create-note-email="workItem.createNoteEmail"
             :work-item-state="workItem.state"
             :is-modal="isModal"
-            :work-item-author-id="workItemAuthorId"
             @deleteWorkItem="$emit('deleteWorkItem')"
             @toggleWorkItemConfidentiality="
               $emit('toggleWorkItemConfidentiality', !workItem.confidential)
             "
             @error="$emit('error')"
             @promotedToObjective="$emit('promotedToObjective')"
-            @workItemStateUpdated="$emit('workItemStateUpdated')"
-            @toggleReportAbuseModal="$emit('toggleReportAbuseModal', true)"
           />
         </div>
       </div>

@@ -1,7 +1,8 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import createDefaultClient from '~/lib/graphql';
-import { parseBoolean, convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+
+import { parseBoolean } from '~/lib/utils/common_utils';
 import settingsPanel from './components/settings_panel.vue';
 
 Vue.use(VueApollo);
@@ -19,25 +20,14 @@ export default function initProjectPermissionsSettings() {
   const componentProps = JSON.parse(componentPropsEl.innerHTML);
 
   const {
-    additionalInformation,
-    cascadingSettingsData,
-    confirmButtonText,
-    confirmDangerMessage,
-    htmlConfirmationMessage,
-    showVisibilityConfirmModal,
     targetFormId,
+    additionalInformation,
+    confirmDangerMessage,
+    confirmButtonText,
+    showVisibilityConfirmModal,
+    htmlConfirmationMessage,
     phrase: confirmationPhrase,
   } = mountPoint.dataset;
-
-  let cascadingSettingsDataParsed;
-
-  try {
-    cascadingSettingsDataParsed = convertObjectPropsToCamelCase(JSON.parse(cascadingSettingsData), {
-      deep: true,
-    });
-  } catch {
-    cascadingSettingsDataParsed = null;
-  }
 
   return new Vue({
     el: mountPoint,
@@ -45,7 +35,6 @@ export default function initProjectPermissionsSettings() {
     apolloProvider,
     provide: {
       additionalInformation,
-      cascadingSettingsData: cascadingSettingsDataParsed,
       confirmDangerMessage,
       confirmButtonText,
       htmlConfirmationMessage: parseBoolean(htmlConfirmationMessage),

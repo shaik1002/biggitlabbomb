@@ -1,5 +1,5 @@
 ---
-stage: Govern
+stage: Verify
 group: Pipeline Security
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -10,7 +10,7 @@ DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/350748) and feature flag `ci_secure_files` removed in GitLab 15.7.
+> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/350748) in GitLab 15.7. Feature flag `ci_secure_files` removed.
 
 This feature is part of [Mobile DevOps](../mobile_devops.md) developed by [GitLab Incubation Engineering](https://handbook.gitlab.com/handbook/engineering/development/incubation/).
 The feature is still in development, but you can:
@@ -74,7 +74,7 @@ of the file when downloaded.
 
 A [unique encryption key](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/models/ci/secure_file.rb#L27)
 is generated for each file when it is created and persisted in the database. The encrypted uploaded files
-are stored in either local storage or object storage depending on the [GitLab instance configuration](../../administration/cicd/secure_files.md).
+are stored in either local storage or object storage depending on the [GitLab instance configuration](../../administration/secure_files.md).
 
 Individual files can be retrieved with the [secure files download API](../../api/secure_files.md#download-secure-file).
 Metadata can be retrieved with the [list](../../api/secure_files.md#list-project-secure-files)
@@ -83,6 +83,6 @@ with the [`download-secure-files`](https://gitlab.com/gitlab-org/incubation-engi
 tool. This tool automatically verifies the checksum of each file as it is downloaded.
 
 Any project member with at least the Developer role can access Project-level secure files.
-Interactions with Project-level secure files are not included in audit events, but
+Interactions with Project-level secure files are not included in Audit Events, but
 [issue 117](https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/readme/-/issues/117)
 proposes adding this functionality.

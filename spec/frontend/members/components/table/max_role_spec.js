@@ -120,6 +120,7 @@ describe('MaxRole', () => {
         expect(actions.updateMemberRole).toHaveBeenCalledWith(expect.any(Object), {
           memberId: member.id,
           accessLevel: 30,
+          memberRoleId: null,
         });
       });
 
@@ -196,7 +197,7 @@ describe('MaxRole', () => {
 
     await nextTick();
 
-    expect(findListbox().props('placement')).toBe('bottom-end');
+    expect(findListbox().props('placement')).toBe('right');
   });
 
   it('sets the dropdown alignment to left on desktop', async () => {
@@ -205,6 +206,6 @@ describe('MaxRole', () => {
 
     await nextTick();
 
-    expect(findListbox().props('placement')).toBe('bottom-start');
+    expect(findListbox().props('placement')).toBe('left');
   });
 });

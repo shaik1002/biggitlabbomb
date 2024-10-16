@@ -176,14 +176,6 @@ for local checkout from the merge request `head` ref anymore. The merge request
 can still be re-opened. If the merge request's branch
 exists, you can still check out the branch, as it isn't affected.
 
-### Check out locally using `glab`
-
-```plaintext
-glab mr checkout <merge_request_iid>
-```
-
-More information on the [GitLab terminal client](../../../editor_extensions/gitlab_cli/index.md).
-
 ### Check out locally by adding a Git alias
 
 Add the following alias to your `~/.gitconfig`:
@@ -248,45 +240,10 @@ From https://gitlab.com/gitlab-org/gitlab-foss.git
 ...
 ```
 
-To check out a particular merge request:
+And to check out a particular merge request:
 
 ```shell
 git checkout origin/merge-requests/1
 ```
 
 All the above can be done with the [`git-mr`](https://gitlab.com/glensc/git-mr) script.
-
-## Error: "source branch `<branch_name>` does not exist." when the branch exists
-
-This error can happen if the GitLab cache does not reflect the actual state of the
-Git repository. This can happen if the Git data folder is mounted with `noexec` flag.
-
-Prerequisite:
-
-- You must be an administrator.
-
-To force a cache update:
-
-1. Open the GitLab Rails console with this command:
-
-   ```shell
-   sudo gitlab-rails console
-   ```
-
-1. In the Rails console, run this script:
-
-   ```ruby
-   # Get the project
-   project = Project.find_by_full_path('affected/project/path')
-
-   # Check if the affected branch exists in cache (it may return `false`)
-   project.repository.branch_names.include?('affected_branch_name')
-
-   # Expire the branches cache
-   project.repository.expire_branches_cache
-
-   # Check again if the affected branch exists in cache (this time it should return `true`)
-   project.repository.branch_names.include?('affected_branch_name')
-   ```
-
-1. Reload the merge request.

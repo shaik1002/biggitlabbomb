@@ -9,7 +9,6 @@ RSpec.describe Resolvers::ProjectMergeRequestsResolver do
   let_it_be(:current_user) { create(:user, developer_of: project) }
   let_it_be(:other_user) { create(:user) }
   let_it_be(:reviewer) { create(:user) }
-  let_it_be(:label) { create(:label, project: project) }
 
   let_it_be(:merge_request) do
     create(
@@ -20,8 +19,7 @@ RSpec.describe Resolvers::ProjectMergeRequestsResolver do
       author: other_user,
       assignee: other_user,
       milestone: create(:milestone, project: project),
-      reviewers: [reviewer],
-      labels: [label]
+      reviewers: [reviewer]
     )
   end
 
@@ -136,32 +134,6 @@ RSpec.describe Resolvers::ProjectMergeRequestsResolver do
       expect_graphql_error_to_be_created(GraphQL::Schema::Validator::ValidationFailedError,
         'Only one of [milestoneTitle, milestoneWildcardId] arguments is allowed at the same time.') do
         resolve_mr(project, milestone_title: 'test', milestone_wildcard_id: 'ANY')
-      end
-    end
-  end
-
-  context 'with label name param' do
-    it 'filters merge requests by label name' do
-      result = resolve_mr(project, label_name: [label.name])
-
-      expect(result).to contain_exactly(merge_request)
-    end
-  end
-
-  context 'with negated params' do
-    context 'with negated assignee username' do
-      it do
-        result = resolve_mr(project, not: { assignee_usernames: [other_user.username] })
-
-        expect(result).to contain_exactly(merge_request2)
-      end
-    end
-
-    context 'with negated reviewer username' do
-      it do
-        result = resolve_mr(project, not: { reviewer_username: reviewer.username })
-
-        expect(result).to contain_exactly(merge_request2)
       end
     end
   end

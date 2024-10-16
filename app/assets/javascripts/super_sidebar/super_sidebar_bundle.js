@@ -12,7 +12,6 @@ import {
 } from './super_sidebar_collapsed_state_manager';
 import SuperSidebar from './components/super_sidebar.vue';
 import SuperSidebarToggle from './components/super_sidebar_toggle.vue';
-import AdvancedSearchModal from './components/global_search/components/global_search_header_app.vue';
 
 Vue.use(GlToast);
 Vue.use(VueApollo);
@@ -20,6 +19,7 @@ Vue.use(VueApollo);
 const getTrialStatusWidgetData = (sidebarData) => {
   if (sidebarData.trial_status_widget_data_attrs && sidebarData.trial_status_popover_data_attrs) {
     const {
+      containerId,
       trialDaysUsed,
       trialDuration,
       navIconImagePath,
@@ -35,7 +35,8 @@ const getTrialStatusWidgetData = (sidebarData) => {
 
     return {
       showTrialStatusWidget: true,
-      showTrialWidget: false,
+      showDuoProTrialStatusWidget: false,
+      containerId,
       trialDaysUsed: Number(trialDaysUsed),
       trialDuration: Number(trialDuration),
       navIconImagePath,
@@ -43,113 +44,81 @@ const getTrialStatusWidgetData = (sidebarData) => {
       planName,
       plansHref,
       daysRemaining,
+      targetId: containerId,
       trialEndDate: new Date(trialEndDate),
       trialDiscoverPagePath,
     };
   }
 
-  if (sidebarData.trial_widget_data_attrs) {
+  if (
+    sidebarData.duo_pro_trial_status_widget_data_attrs &&
+    sidebarData.duo_pro_trial_status_popover_data_attrs
+  ) {
     const {
-      trialType,
-      daysRemaining,
+      containerId,
+      trialDaysUsed,
+      trialDuration,
       percentageComplete,
-      groupId,
-      trialDiscoverPagePath,
-      purchaseNowUrl,
-      featureId,
-      dismissEndpoint,
-    } = convertObjectPropsToCamelCase(sidebarData.trial_widget_data_attrs);
+      widgetUrl,
+    } = convertObjectPropsToCamelCase(sidebarData.duo_pro_trial_status_widget_data_attrs);
+
+    const { daysRemaining, trialEndDate, purchaseNowUrl } = convertObjectPropsToCamelCase(
+      sidebarData.duo_pro_trial_status_popover_data_attrs,
+    );
 
     return {
-      showTrialWidget: true,
+      showDuoProTrialStatusWidget: true,
       showTrialStatusWidget: false,
-      trialType,
-      daysRemaining: Number(daysRemaining),
+      containerId,
+      trialDaysUsed: Number(trialDaysUsed),
+      trialDuration: Number(trialDuration),
       percentageComplete: Number(percentageComplete),
-      groupId,
-      trialDiscoverPagePath,
+      widgetUrl,
+      daysRemaining,
+      targetId: containerId,
+      trialEndDate: new Date(trialEndDate),
       purchaseNowUrl,
-      featureId,
-      dismissEndpoint,
+      learnAboutButtonUrl: widgetUrl,
     };
   }
 
-  return {
-    showTrialWidget: false,
-    showTrialStatusWidget: false,
-  };
+  return { showTrialStatusWidget: false, showDuoProTrialStatusWidget: false };
 };
 
-export const getSuperSidebarData = () => {
+export const initSuperSidebar = () => {
   const el = document.querySelector('.js-super-sidebar');
+
   if (!el) return false;
 
-  const { rootPath, sidebar, forceDesktopExpandedSidebar, commandPalette, isSaas } = el.dataset;
+  const { rootPath, sidebar, forceDesktopExpandedSidebar, commandPalette } = el.dataset;
+
+  bindSuperSidebarCollapsedEvents(forceDesktopExpandedSidebar);
+  initSuperSidebarCollapsedState(parseBoolean(forceDesktopExpandedSidebar));
+
   const sidebarData = JSON.parse(sidebar);
   const searchData = convertObjectPropsToCamelCase(sidebarData.search);
-  const { searchPath, issuesPath, mrPath, autocompletePath, settingsPath, searchContext } =
-    searchData;
+
   const projectsPath = sidebarData.projects_path;
   const groupsPath = sidebarData.groups_path;
+
   const commandPaletteData = JSON.parse(commandPalette);
   const projectFilesPath = commandPaletteData.project_files_url;
   const projectBlobPath = commandPaletteData.project_blob_url;
   const commandPaletteCommands = sidebarData.create_new_menu_groups || [];
   const commandPaletteLinks = convertObjectPropsToCamelCase(sidebarData.current_menu_items || []);
   const contextSwitcherLinks = sidebarData.context_switcher_links;
-  const isImpersonating = parseBoolean(sidebarData.is_impersonating);
-  const isGroup = Boolean(sidebarData.current_context?.namespace === CONTEXT_NAMESPACE_GROUPS);
 
-  return {
-    el,
-    rootPath,
-    forceDesktopExpandedSidebar,
-    isSaas,
-    sidebarData,
+  const {
     searchPath,
     issuesPath,
     mrPath,
     autocompletePath,
     settingsPath,
     searchContext,
-    projectsPath,
-    groupsPath,
-    projectFilesPath,
-    projectBlobPath,
-    commandPaletteCommands,
-    commandPaletteLinks,
-    contextSwitcherLinks,
-    isImpersonating,
-    isGroup,
-  };
-};
+  } = searchData;
+  const isImpersonating = parseBoolean(sidebarData.is_impersonating);
 
-export const initSuperSidebar = ({
-  el,
-  rootPath,
-  forceDesktopExpandedSidebar,
-  isSaas,
-  sidebarData,
-  searchPath,
-  issuesPath,
-  mrPath,
-  autocompletePath,
-  settingsPath,
-  searchContext,
-  projectsPath,
-  groupsPath,
-  projectFilesPath,
-  projectBlobPath,
-  commandPaletteCommands,
-  commandPaletteLinks,
-  contextSwitcherLinks,
-  isImpersonating,
-  isGroup,
-}) => {
-  if (!el) return false;
-
-  bindSuperSidebarCollapsedEvents(forceDesktopExpandedSidebar);
-  initSuperSidebarCollapsedState(parseBoolean(forceDesktopExpandedSidebar));
+  const isGroup = Boolean(sidebarData.current_context?.namespace === CONTEXT_NAMESPACE_GROUPS);
 
   return new Vue({
     el,
@@ -171,11 +140,7 @@ export const initSuperSidebar = ({
       groupsPath,
       fullPath: sidebarData.work_items?.full_path,
       hasIssuableHealthStatusFeature: sidebarData.work_items?.has_issuable_health_status_feature,
-      issuesListPath: sidebarData.work_items?.issues_list_path,
-      canAdminLabel: parseBoolean(sidebarData.work_items?.can_admin_label),
-      labelsManagePath: sidebarData.work_items?.labels_manage_path,
       isGroup,
-      isSaas: parseBoolean(isSaas),
     },
     store: createStore({
       searchPath,
@@ -232,61 +197,6 @@ export function initPageBreadcrumbs() {
       return h(GlBreadcrumb, {
         props: staticBreadcrumbs,
       });
-    },
-  });
-}
-
-export function initAdvancedSearchModal({
-  rootPath,
-  isSaas,
-  sidebarData,
-  searchPath,
-  issuesPath,
-  mrPath,
-  autocompletePath,
-  searchContext,
-  projectsPath,
-  groupsPath,
-  projectFilesPath,
-  projectBlobPath,
-  commandPaletteCommands,
-  commandPaletteLinks,
-  contextSwitcherLinks,
-  isGroup,
-}) {
-  const el = document.querySelector('#js-advanced-search-modal');
-
-  if (!el) return false;
-
-  return new Vue({
-    el,
-    name: 'SuperSidebarRoot',
-    apolloProvider,
-    provide: {
-      rootPath,
-      commandPaletteCommands,
-      commandPaletteLinks,
-      contextSwitcherLinks,
-      autocompletePath,
-      searchContext,
-      projectFilesPath,
-      projectBlobPath,
-      projectsPath,
-      groupsPath,
-      fullPath: sidebarData.work_items?.full_path,
-      isGroup,
-      isSaas: parseBoolean(isSaas),
-    },
-    store: createStore({
-      searchPath,
-      issuesPath,
-      mrPath,
-      autocompletePath,
-      searchContext,
-      search: '',
-    }),
-    render(h) {
-      return h(AdvancedSearchModal);
     },
   });
 }

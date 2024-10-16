@@ -11,38 +11,6 @@ module Gitlab
 
           log_info(import_stage: 'import_issues', message: 'importing issues')
 
-          bitbucket_import_resumable_worker =
-            project.import_data&.data&.dig('bitbucket_import_resumable_worker')
-
-          if bitbucket_import_resumable_worker
-            resumable_execute
-          else
-            non_resumable_execute
-          end
-        end
-
-        private
-
-        def resumable_execute
-          labels = build_labels_hash
-
-          is_first = true
-          each_object_to_import do |object|
-            job_delay = calculate_job_delay(job_waiter.jobs_remaining)
-
-            if is_first
-              allocate_issues_internal_id!
-              is_first = false
-            end
-
-            issue_hash = object.to_hash.merge({ issue_type_id: default_issue_type_id, label_id: labels[object[:kind]] })
-            sidekiq_worker_class.perform_in(job_delay, project.id, issue_hash, job_waiter.key)
-          end
-
-          job_waiter
-        end
-
-        def non_resumable_execute
           issues = client.issues(project.import_source)
 
           labels = build_labels_hash
@@ -68,6 +36,8 @@ module Gitlab
           job_waiter
         end
 
+        private
+
         def sidekiq_worker_class
           ImportIssueWorker
         end
@@ -76,22 +46,8 @@ module Gitlab
           :issues
         end
 
-        def collection_options
-          { raw: true }
-        end
-
-        def representation_type
-          :issue
-        end
-
         def id_for_already_enqueued_cache(object)
-          if object.is_a?(Hash)
-            # used for `resumable_execute`
-            object[:iid]
-          else
-            # used for `non_resumable_execute`
-            object.iid
-          end
+          object.iid
         end
 
         def default_issue_type_id

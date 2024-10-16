@@ -1,4 +1,5 @@
 #import "~/packages_and_registries/package_registry/graphql/fragments/package_data.fragment.graphql"
+#import "~/packages_and_registries/package_registry/graphql/fragments/package_group_settings.fragment.graphql"
 #import "~/graphql_shared/fragments/page_info.fragment.graphql"
 
 query getPackages(
@@ -36,6 +37,9 @@ query getPackages(
         ...PageInfo
       }
     }
+    group {
+      ...GroupPackageSettings
+    }
   }
   group(fullPath: $fullPath) @include(if: $isGroupPage) {
     id
@@ -63,5 +67,6 @@ query getPackages(
         ...PageInfo
       }
     }
+    ...GroupPackageSettings
   }
 }

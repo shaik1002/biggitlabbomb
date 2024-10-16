@@ -23,7 +23,7 @@ RSpec.describe 'Group Dependency Proxy for containers', :js, feature_category: :
   end
 
   let_it_be(:external_server) do
-    handler = ->(env) do
+    handler = lambda do |env|
       if env['REQUEST_PATH'] == '/token'
         [200, {}, [{ token: 'token' }.to_json]]
       else

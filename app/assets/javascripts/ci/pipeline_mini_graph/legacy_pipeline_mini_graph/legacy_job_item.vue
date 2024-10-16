@@ -172,15 +172,16 @@ export default {
     :class="[
       cssClassJobName,
       {
-        'gl-text-gray-900 hover:gl-no-underline focus:gl-no-underline active:gl-no-underline':
-          hasDetails,
+        'gl-text-gray-900 gl-active-text-decoration-none gl-focus-text-decoration-none gl-hover-text-decoration-none': hasDetails,
         'js-job-component-tooltip non-details-job-component': !hasDetails,
       },
     ]"
     :data-testid="testid"
   >
     <template #list-item>
-      <div class="-gl-my-2 -gl-ml-2 gl-flex gl-items-center gl-justify-between">
+      <div
+        class="gl-display-flex gl-align-items-center gl-justify-content-space-between -gl-mt-2 -gl-mb-2 -gl-ml-2"
+      >
         <job-name-component
           v-gl-tooltip.viewport.left
           :title="tooltipText"
@@ -196,6 +197,7 @@ export default {
           :action-icon="status.action.icon"
           :should-trigger-click="shouldTriggerActionClick"
           :with-confirmation-modal="withConfirmationModal"
+          class="-gl-mt-2 -gl-mr-2"
           @showActionConfirmationModal="showActionConfirmationModal"
         />
         <gl-modal

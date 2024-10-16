@@ -71,11 +71,6 @@ export default {
       required: false,
       default: false,
     },
-    monospace: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
   data() {
     return {
@@ -109,9 +104,6 @@ export default {
       return this.needsAnyValue
         ? this.$options.i18n.errors.needsAnyValueError
         : this.invalidFeedback;
-    },
-    inputClass() {
-      return this.monospace ? '!gl-font-monospace' : '';
     },
   },
   async created() {
@@ -174,7 +166,6 @@ export default {
         :placeholder="i === 0 ? placeholder : undefined"
         :state="inputFieldStates[i]"
         class="gl-mb-2"
-        :input-class="inputClass"
         type="text"
         @blur="onTouch"
         @input="onValueUpdate"

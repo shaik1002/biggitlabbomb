@@ -19,9 +19,8 @@ class Group < Namespace
   include BulkUsersByEmailLoad
   include ChronicDurationAttribute
   include RunnerTokenExpirationInterval
+  include Todoable
   include Importable
-  include IdInOrdered
-  include Members::Enumerable
 
   extend ::Gitlab::Utils::Override
 
@@ -41,11 +40,6 @@ class Group < Namespace
   has_many :all_owner_members, -> { non_request.all_owners }, as: :source, class_name: 'GroupMember'
   has_many :group_members, -> { non_request.non_minimal_access }, dependent: :destroy, as: :source # rubocop:disable Cop/ActiveRecordDependent
   has_many :non_invite_group_members, -> { non_request.non_minimal_access.non_invite }, class_name: 'GroupMember', as: :source
-  has_many :non_invite_owner_members, -> { non_request.non_invite.all_owners }, class_name: 'GroupMember', as: :source
-  has_many :request_group_members, -> do
-    request.non_minimal_access
-  end, inverse_of: :group, class_name: 'GroupMember', as: :source
-
   has_many :namespace_members, -> { non_request.non_minimal_access.unscope(where: %i[source_id source_type]) },
     foreign_key: :member_namespace_id, inverse_of: :group, class_name: 'GroupMember'
   alias_method :members, :group_members
@@ -106,9 +100,6 @@ class Group < Namespace
   # AR defaults to nullify when trying to delete via has_many associations unless we set dependent: :delete_all
   has_many :crm_organizations, class_name: 'CustomerRelations::Organization', inverse_of: :group, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
   has_many :contacts, class_name: 'CustomerRelations::Contact', inverse_of: :group, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
-  has_one :crm_settings, class_name: 'Group::CrmSettings', inverse_of: :group
-  # Groups for which this is the source of CRM contacts/organizations
-  has_many :crm_targets, class_name: 'Group::CrmSettings', inverse_of: :source_group
 
   has_many :cluster_groups, class_name: 'Clusters::Group'
   has_many :clusters, through: :cluster_groups, class_name: 'Clusters::Cluster'
@@ -148,10 +139,12 @@ class Group < Namespace
 
   has_one :group_feature, inverse_of: :group, class_name: 'Groups::FeatureSetting'
 
-  delegate :prevent_sharing_groups_outside_hierarchy, :new_user_signups_cap, :setup_for_company, :jobs_to_be_done, :seat_control, to: :namespace_settings
+  delegate :prevent_sharing_groups_outside_hierarchy, :new_user_signups_cap, :setup_for_company, :jobs_to_be_done, to: :namespace_settings
   delegate :runner_token_expiration_interval, :runner_token_expiration_interval=, :runner_token_expiration_interval_human_readable, :runner_token_expiration_interval_human_readable=, to: :namespace_settings, allow_nil: true
   delegate :subgroup_runner_token_expiration_interval, :subgroup_runner_token_expiration_interval=, :subgroup_runner_token_expiration_interval_human_readable, :subgroup_runner_token_expiration_interval_human_readable=, to: :namespace_settings, allow_nil: true
   delegate :project_runner_token_expiration_interval, :project_runner_token_expiration_interval=, :project_runner_token_expiration_interval_human_readable, :project_runner_token_expiration_interval_human_readable=, to: :namespace_settings, allow_nil: true
+
+  has_one :crm_settings, class_name: 'Group::CrmSettings', inverse_of: :group
 
   accepts_nested_attributes_for :variables, allow_destroy: true
   accepts_nested_attributes_for :group_feature, update_only: true
@@ -187,10 +180,11 @@ class Group < Namespace
 
   scope :with_users, -> { includes(:users) }
 
+  scope :with_onboarding_progress, -> { joins(:onboarding_progress) }
+
   scope :with_non_archived_projects, -> { includes(:non_archived_projects) }
 
   scope :with_non_invite_group_members, -> { includes(:non_invite_group_members) }
-  scope :with_request_group_members, -> { includes(:request_group_members) }
 
   scope :by_id, ->(groups) { where(id: groups) }
 
@@ -228,21 +222,7 @@ class Group < Namespace
   end
 
   scope :excluding_restricted_visibility_levels_for_user, ->(user) do
-    return all if user.can_admin_all_resources?
-
-    levels = Array.wrap(Gitlab::CurrentSettings.restricted_visibility_levels).sort
-
-    case levels
-    when [Gitlab::VisibilityLevel::PRIVATE, Gitlab::VisibilityLevel::PUBLIC],
-         [Gitlab::VisibilityLevel::PRIVATE]
-      where.not(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
-    when [Gitlab::VisibilityLevel::PRIVATE, Gitlab::VisibilityLevel::INTERNAL]
-      where.not(visibility_level: [Gitlab::VisibilityLevel::PRIVATE, Gitlab::VisibilityLevel::INTERNAL])
-    when Gitlab::VisibilityLevel.values
-      none
-    else
-      all
-    end
+    user.can_admin_all_resources? ? all : where.not(visibility_level: Gitlab::CurrentSettings.restricted_visibility_levels)
   end
 
   scope :project_creation_allowed, ->(user) do
@@ -309,7 +289,6 @@ class Group < Namespace
   scope :order_path_asc, -> { reorder(self.arel_table['path'].asc) }
   scope :order_path_desc, -> { reorder(self.arel_table['path'].desc) }
   scope :in_organization, ->(organization) { where(organization: organization) }
-  scope :by_min_access_level, ->(user, access_level) { joins(:group_members).where(members: { user: user }).where('members.access_level >= ?', access_level) }
 
   class << self
     def sort_by_attribute(method)
@@ -465,6 +444,10 @@ class Group < Namespace
     notification_settings.find { |n| n.notification_email.present? }&.notification_email
   end
 
+  def web_url(only_path: nil)
+    Gitlab::UrlBuilder.build(self, only_path: only_path)
+  end
+
   def dependency_proxy_image_prefix
     # The namespace path can include uppercase letters, which
     # Docker doesn't allow. The proxy expects it to be downcased.
@@ -508,7 +491,7 @@ class Group < Namespace
   def owned_by?(user)
     return false unless user
 
-    non_invite_owner_members.exists?(user: user)
+    all_owner_members.non_invite.exists?(user: user)
   end
 
   def add_members(users, access_level, current_user: nil, expires_at: nil)
@@ -952,17 +935,8 @@ class Group < Namespace
     feature_flag_enabled_for_self_or_ancestor?(:work_items_alpha)
   end
 
-  def glql_integration_feature_flag_enabled?
-    feature_flag_enabled_for_self_or_ancestor?(:glql_integration)
-  end
-
-  # Note: this method is overridden in EE to check the work_item_epics feature flag  which also enables this feature
-  def namespace_work_items_enabled?
-    ::Feature.enabled?(:namespace_level_work_items, self, type: :development)
-  end
-
-  def create_group_level_work_items_feature_flag_enabled?
-    ::Feature.enabled?(:create_group_level_work_items, self, type: :wip)
+  def work_items_rolledup_dates_feature_flag_enabled?
+    feature_flag_enabled_for_self_or_ancestor?(:work_items_rolledup_dates)
   end
 
   def supports_lock_on_merge?
@@ -981,9 +955,6 @@ class Group < Namespace
   # NOTE: We still want to keep this after removing `Namespace#feature_available?`.
   override :feature_available?
   def feature_available?(feature, user = nil)
-    # when we check the :issues feature at group level we need to check the `epics` license feature instead
-    feature = feature == :issues ? :epics : feature
-
     if ::Groups::FeatureSetting.available_features.include?(feature)
       group_feature.feature_available?(feature, user) # rubocop:disable Gitlab/FeatureAvailableUsage
     else
@@ -1014,38 +985,10 @@ class Group < Namespace
   end
   strong_memoize_attr :readme_project
 
-  def notification_group
-    self
-  end
-
   def group_readme
     readme_project&.repository&.readme
   end
   strong_memoize_attr :group_readme
-
-  def hook_attrs
-    {
-      group_name: name,
-      group_path: path,
-      group_id: id,
-      full_path: full_path
-    }
-  end
-
-  def crm_group
-    Group.id_in_ordered(traversal_ids.reverse)
-      .joins(:crm_settings)
-      .where.not(crm_settings: { source_group_id: nil })
-      .first&.crm_settings&.source_group || root_ancestor
-  end
-  strong_memoize_attr :crm_group
-
-  def crm_group?
-    return true if root? && crm_settings&.source_group_id.nil?
-
-    crm_targets.present?
-  end
-  strong_memoize_attr :crm_group?
 
   private
 

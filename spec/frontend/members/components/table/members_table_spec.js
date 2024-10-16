@@ -1,8 +1,8 @@
-import { GlTable, GlButton } from '@gitlab/ui';
+import { GlTable, GlButton, GlBadge } from '@gitlab/ui';
 import Vue, { nextTick } from 'vue';
 // eslint-disable-next-line no-restricted-imports
 import Vuex from 'vuex';
-import EmptyResult from '~/vue_shared/components/empty_result.vue';
+import { cloneDeep } from 'lodash';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
 import CreatedAt from '~/members/components/table/created_at.vue';
 import ExpirationDatepicker from '~/members/components/table/expiration_datepicker.vue';
@@ -13,7 +13,7 @@ import MemberActivity from '~/members/components/table/member_activity.vue';
 import MembersTable from '~/members/components/table/members_table.vue';
 import MembersPagination from '~/members/components/table/members_pagination.vue';
 import MaxRole from '~/members/components/table/max_role.vue';
-import RoleDetailsDrawer from '~/members/components/table/drawer/role_details_drawer.vue';
+import RoleDetailsDrawer from '~/members/components/table/role_details_drawer.vue';
 import {
   MEMBERS_TAB_TYPES,
   MEMBER_STATE_CREATED,
@@ -27,7 +27,6 @@ import {
 import {
   member as memberMock,
   directMember,
-  updateableMember,
   invite,
   accessRequest,
   privateGroup,
@@ -43,11 +42,11 @@ describe('MembersTable', () => {
   const createStore = (state = {}) => {
     return new Vuex.Store({
       modules: {
-        [MEMBERS_TAB_TYPES.user]: {
+        [MEMBERS_TAB_TYPES.invite]: {
           namespaced: true,
           state: {
             members: [],
-            memberPath: 'user/path/:id',
+            memberPath: 'invite/path/:id',
             tableFields: [],
             tableAttrs: {
               tr: { 'data-testid': 'member-row' },
@@ -70,7 +69,7 @@ describe('MembersTable', () => {
         sourceId: 1,
         currentUserId: 1,
         canManageMembers: true,
-        namespace: MEMBERS_TAB_TYPES.user,
+        namespace: MEMBERS_TAB_TYPES.invite,
         namespaceReachedLimit: false,
         namespaceUserLimit: 1,
         glFeatures: { showRoleDetailsInDrawer },
@@ -88,6 +87,7 @@ describe('MembersTable', () => {
   const findTable = () => wrapper.findComponent(GlTable);
   const findRoleDetailsDrawer = () => wrapper.findComponent(RoleDetailsDrawer);
   const findRoleButton = () => wrapper.findComponent(GlButton);
+  const findCustomRoleBadge = () => wrapper.findByTestId('max-role').findComponent(GlBadge);
   const findTableCellByMemberId = (tableCellLabel, memberId) =>
     wrapper
       .findByTestId(`members-table-row-${memberId}`)
@@ -105,7 +105,7 @@ describe('MembersTable', () => {
       ${'source'}     | ${'Source'}     | ${memberMock}      | ${MemberSource}
       ${'invited'}    | ${'Invited'}    | ${invite}          | ${CreatedAt}
       ${'requested'}  | ${'Requested'}  | ${accessRequest}   | ${CreatedAt}
-      ${'maxRole'}    | ${'Role'}       | ${memberCanUpdate} | ${MaxRole}
+      ${'maxRole'}    | ${'Max role'}   | ${memberCanUpdate} | ${MaxRole}
       ${'expiration'} | ${'Expiration'} | ${memberMock}      | ${ExpirationDatepicker}
       ${'activity'}   | ${'Activity'}   | ${memberMock}      | ${MemberActivity}
     `('$label field', ({ field, label, member, expectedComponent }) => {
@@ -125,7 +125,7 @@ describe('MembersTable', () => {
       });
     });
 
-    describe('Role column', () => {
+    describe('Max role column', () => {
       const createMaxRoleComponent = (member = memberMock) => {
         createComponent({ members: [member], tableFields: ['maxRole'] });
       };
@@ -134,6 +134,37 @@ describe('MembersTable', () => {
         createMaxRoleComponent();
 
         expect(findRoleButton().text()).toBe('Owner');
+      });
+
+      describe('custom role badge', () => {
+        it('shows the badge for a custom role', () => {
+          const member = cloneDeep(memberMock);
+          member.accessLevel.memberRoleId = 1;
+          createMaxRoleComponent(member);
+
+          expect(findCustomRoleBadge().props('size')).toBe('sm');
+          expect(findCustomRoleBadge().text()).toBe('Custom role');
+        });
+
+        it('does not show badge for a standard role', () => {
+          createMaxRoleComponent();
+
+          expect(findCustomRoleBadge().exists()).toBe(false);
+        });
+      });
+
+      describe('disabled state', () => {
+        it.each`
+          phrase        | busy
+          ${'disables'} | ${true}
+          ${'enables'}  | ${false}
+        `('$phrase the button when the drawer busy state is $busy', async ({ busy }) => {
+          createMaxRoleComponent();
+          findRoleDetailsDrawer().vm.$emit('busy', busy);
+          await nextTick();
+
+          expect(findRoleButton().props('disabled')).toBe(busy);
+        });
       });
     });
 
@@ -263,17 +294,20 @@ describe('MembersTable', () => {
 
       it('passes correct props to `MemberSource` component', () => {
         expect(wrapper.findComponent(MemberSource).props()).toMatchObject({
-          member: privateGroup,
+          memberSource: {},
+          isDirectMember: true,
+          isSharedWithGroupPrivate: true,
+          createdBy: null,
         });
       });
     });
   });
 
   describe('when `members` is an empty array', () => {
-    it('displays a "No results found" message', () => {
+    it('displays a "No members found" message', () => {
       createComponent();
 
-      expect(wrapper.findComponent(EmptyResult).exists()).toBe(true);
+      expect(wrapper.findByText('No members found').exists()).toBe(true);
     });
   });
 
@@ -292,12 +326,12 @@ describe('MembersTable', () => {
 
     describe('with member selected', () => {
       beforeEach(() => {
-        createComponent({ members: [updateableMember], tableFields: ['maxRole'] });
+        createComponent({ members: [memberMock], tableFields: ['maxRole'] });
         return findRoleButton().trigger('click');
       });
 
       it('passes member to drawer', () => {
-        expect(findRoleDetailsDrawer().props('member')).toEqual(updateableMember);
+        expect(findRoleDetailsDrawer().props('member')).toBe(memberMock);
       });
 
       it('clears member when drawer is closed', async () => {
@@ -307,28 +341,19 @@ describe('MembersTable', () => {
         expect(findRoleDetailsDrawer().props('member')).toBe(null);
       });
 
-      it.each([true, false])(
-        'enables/disables role button when drawer busy state is %s',
-        async (busy) => {
-          findRoleDetailsDrawer().vm.$emit('busy', busy);
-          await nextTick();
+      it('disables role button when drawer is busy', async () => {
+        findRoleDetailsDrawer().vm.$emit('busy', true);
+        await nextTick();
 
-          expect(findRoleButton().props('disabled')).toBe(busy);
-        },
-      );
+        expect(findRoleButton().props('disabled')).toBe(true);
+      });
     });
   });
 
-  describe('QA testid', () => {
-    const createMaxRoleComponent = (member = memberMock) => {
-      createComponent({ members: [member], tableFields: ['maxRole'] });
-    };
+  it('adds QA testid to table row', () => {
+    createComponent();
 
-    it('adds testid to table row', () => {
-      createMaxRoleComponent();
-
-      expect(findTable().find('tbody tr').attributes('data-testid')).toContain('members-table-row');
-    });
+    expect(findTable().find('tbody tr').attributes('data-testid')).toBe('member-row');
   });
 
   it('renders `members-pagination` component with correct props', () => {

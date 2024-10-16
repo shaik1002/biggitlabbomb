@@ -25,12 +25,15 @@ class JsonSchemaValidator < ActiveModel::EachValidator
   end
 
   def validate_each(record, attribute, value)
-    value = Gitlab::Json.parse(Gitlab::Json.dump(value)) if options[:hash_conversion] == true
+    value = value.to_h.deep_stringify_keys if options[:hash_conversion] == true
     value = Gitlab::Json.parse(value.to_s) if options[:parse_json] == true && !value.nil?
 
     if options[:detail_errors]
       validator.validate(value).each do |error|
-        message = format_error_message(error)
+        message = format(
+          _("'%{data_pointer}' must be a valid '%{type}'"),
+          data_pointer: error['data_pointer'], type: error['type']
+        )
         record.errors.add(attribute, message)
       end
     else
@@ -41,32 +44,6 @@ class JsonSchemaValidator < ActiveModel::EachValidator
   private
 
   attr_reader :base_directory
-
-  def format_error_message(error)
-    case error['type']
-    when 'oneOf'
-      format_one_of_error(error)
-    else
-      error['error']
-    end
-  end
-
-  def format_one_of_error(error)
-    schema_options = error['schema']['oneOf']
-    required_props = schema_options.flat_map { |option| option['required'] }.uniq
-
-    message = if error['root_schema']['type'] == 'array'
-                _("value at %{data_pointer} should use only one of: %{requirements}")
-              else
-                _("should use only one of: %{requirements}")
-              end
-
-    format(
-      message,
-      requirements: required_props.join(', '),
-      data_pointer: error['data_pointer']
-    )
-  end
 
   def valid_schema?(value)
     validator.valid?(value)

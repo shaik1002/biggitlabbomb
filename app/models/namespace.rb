@@ -20,7 +20,6 @@ class Namespace < ApplicationRecord
   include CrossDatabaseIgnoredTables
   include IgnorableColumns
   include UseSqlFunctionForPrimaryKeyLookups
-  include Todoable
 
   ignore_column :unlock_membership_to_ldap, remove_with: '16.7', remove_after: '2023-11-16'
 
@@ -77,6 +76,7 @@ class Namespace < ApplicationRecord
   has_many :runner_namespaces, inverse_of: :namespace, class_name: 'Ci::RunnerNamespace'
   has_many :runners, through: :runner_namespaces, source: :runner, class_name: 'Ci::Runner'
   has_many :pending_builds, class_name: 'Ci::PendingBuild'
+  has_one :onboarding_progress, class_name: 'Onboarding::Progress'
 
   # This should _not_ be `inverse_of: :namespace`, because that would also set
   # `user.namespace` when this user creates a group with themselves as `owner`.
@@ -110,12 +110,7 @@ class Namespace < ApplicationRecord
 
   has_many :jira_connect_subscriptions, class_name: 'JiraConnectSubscription', foreign_key: :namespace_id, inverse_of: :namespace
 
-  has_many :import_source_users, class_name: 'Import::SourceUser', foreign_key: :namespace_id, inverse_of: :namespace
-  has_one :namespace_import_user, class_name: 'Import::NamespaceImportUser', foreign_key: :namespace_id, inverse_of: :namespace
-  has_one :import_user, class_name: 'User', through: :namespace_import_user, foreign_key: :user_id
-
   validates :owner, presence: true, if: ->(n) { n.owner_required? }
-  validates :organization, presence: true, if: :require_organization?
   validates :name,
     presence: true,
     length: { maximum: 255 }
@@ -156,13 +151,6 @@ class Namespace < ApplicationRecord
   validate :nesting_level_allowed, unless: -> { project_namespace? }
   validate :changing_shared_runners_enabled_is_allowed, unless: -> { project_namespace? }
   validate :changing_allow_descendants_override_disabled_shared_runners_is_allowed, unless: -> { project_namespace? }
-  validate :parent_organization_match, if: :require_organization?
-
-  attribute :organization_id, :integer, default: -> do
-    return 1 if Feature.enabled?(:namespace_model_default_org)
-
-    columns_hash['organization_id'].default
-  end
 
   delegate :name, to: :owner, allow_nil: true, prefix: true
   delegate :avatar_url, to: :owner, allow_nil: true
@@ -188,8 +176,7 @@ class Namespace < ApplicationRecord
   delegate :math_rendering_limits_enabled?,
     :lock_math_rendering_limits_enabled?,
     to: :namespace_settings
-  delegate :add_creator, :pending_delete, :pending_delete=,
-    to: :namespace_details
+  delegate :add_creator, to: :namespace_details
 
   before_create :sync_share_with_group_lock_with_parent
   before_update :sync_share_with_group_lock_with_parent, if: :parent_changed?
@@ -207,7 +194,6 @@ class Namespace < ApplicationRecord
       saved_change_to_name?) || saved_change_to_path? || saved_change_to_parent_id?
   }
 
-  scope :without_deleted, -> { joins(:namespace_details).where(namespace_details: { pending_delete: false }) }
   scope :user_namespaces, -> { where(type: Namespaces::UserNamespace.sti_name) }
   scope :group_namespaces, -> { where(type: Group.sti_name) }
   scope :without_project_namespaces, -> { where(Namespace.arel_table[:type].not_eq(Namespaces::ProjectNamespace.sti_name)) }
@@ -215,7 +201,6 @@ class Namespace < ApplicationRecord
   scope :include_route, -> { includes(:route) }
   scope :by_parent, ->(parent) { where(parent_id: parent) }
   scope :by_root_id, ->(root_id) { where('traversal_ids[1] IN (?)', root_id) }
-  scope :by_not_in_root_id, ->(root_id) { where('namespaces.traversal_ids[1] NOT IN (?)', root_id) }
   scope :filter_by_path, ->(query) { where('lower(path) = :query', query: query.downcase) }
   scope :in_organization, ->(organization) { where(organization: organization) }
   scope :by_name, ->(name) { where('name LIKE ?', "#{sanitize_sql_like(name)}%") }
@@ -313,13 +298,8 @@ class Namespace < ApplicationRecord
     # https://gitlab.com/gitlab-org/gitlab/-/blob/5d34e3488faa3982d30d7207773991c1e0b6368a/app/assets/javascripts/gfm_auto_complete.js#L68 and
     # https://gitlab.com/gitlab-org/gitlab/-/blob/5d34e3488faa3982d30d7207773991c1e0b6368a/app/assets/javascripts/gfm_auto_complete.js#L1053
     def gfm_autocomplete_search(query)
-      namespaces_cte = Gitlab::SQL::CTE.new(table_name, without_order)
-
-      # This scope does not work with `ProjectNamespace` records because they don't have a corresponding `route` association.
-      # We do not chain the `without_project_namespaces` scope because it results in an expensive query plan in certain cases
-      unscoped
-        .with(namespaces_cte.to_arel)
-        .from(namespaces_cte.table)
+      without_project_namespaces
+        .allow_cross_joins_across_databases(url: "https://gitlab.com/gitlab-org/gitlab/-/issues/420046")
         .joins(:route)
         .where(
           "REPLACE(routes.name, ' ', '') ILIKE :pattern OR routes.path ILIKE :pattern",
@@ -363,10 +343,6 @@ class Namespace < ApplicationRecord
 
       coalesce = Arel::Nodes::NamedFunction.new('COALESCE', [sum, 0])
       coalesce.as(column.to_s)
-    end
-
-    def username_reserved?(username)
-      without_project_namespaces.where(parent_id: nil).find_by_path_or_name(username).present?
     end
   end
 
@@ -627,7 +603,7 @@ class Namespace < ApplicationRecord
     root? && actual_plan.paid?
   end
 
-  def linked_to_subscription?
+  def prevent_delete?
     paid?
   end
 
@@ -729,23 +705,7 @@ class Namespace < ApplicationRecord
       :active_pages_deployments)
   end
 
-  def web_url(only_path: nil)
-    Gitlab::UrlBuilder.build(self, only_path: only_path)
-  end
-
-  # there is no service desk feature for group level items
-  def service_desk_alias_address
-    nil
-  end
-
   private
-
-  def parent_organization_match
-    return unless parent
-    return if parent.organization_id == organization_id
-
-    errors.add(:organization_id, _("must match the parent organization's ID"))
-  end
 
   def cross_namespace_reference?(from)
     return false if from == self
@@ -758,7 +718,7 @@ class Namespace < ApplicationRecord
     when Namespaces::ProjectNamespace
       from.parent_id != comparable_namespace_id
     when Namespace
-      is_a?(Group) ? from.id != id : parent != from
+      parent != from
     when User
       true
     end
@@ -805,7 +765,7 @@ class Namespace < ApplicationRecord
   end
 
   def refresh_access_of_projects_invited_groups
-    if Feature.enabled?(:specialized_worker_for_group_lock_update_auth_recalculation, self)
+    if Feature.enabled?(:specialized_worker_for_group_lock_update_auth_recalculation)
       Project
         .where(namespace_id: id)
         .joins(:project_group_links)

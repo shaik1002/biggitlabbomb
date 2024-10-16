@@ -20,8 +20,6 @@
 #     sort: string
 #     my_reaction_emoji: string
 #     due_date: date or '0', '', 'overdue', 'week', or 'month'
-#     due_after: datetime
-#     due_before: datetime
 #     created_after: datetime
 #     created_before: datetime
 #     updated_after: datetime
@@ -49,7 +47,6 @@ class IssuesFinder < IssuableFinder
   def filter_items(items)
     issues = super
     issues = by_due_date(issues)
-    issues = by_due_after_or_before(issues)
     issues = by_confidential(issues)
     by_issue_types(issues)
   end
@@ -77,13 +74,6 @@ class IssuesFinder < IssuableFinder
       parent: params.parent,
       assignee_filter: assignee_filter
     ).filter(items)
-  end
-
-  def by_due_after_or_before(items)
-    items = items.due_after(params[:due_after]) if params[:due_after].present?
-    items = items.due_before(params[:due_before]) if params[:due_before].present?
-
-    items
   end
 
   def by_due_date(items)

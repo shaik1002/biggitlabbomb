@@ -40,7 +40,7 @@ Parameters:
 
 | Attribute          | Type    | Required | Description |
 |--------------------|---------|----------|-------------|
-| `current_file`     | hash    | yes      | Attributes of file that suggestions are being generated for. See [File attributes](#file-attributes) for a list of strings this attribute accepts. |
+| `current_file`     | hash    | yes      | Attributes of file for which Code Suggestions are being generated. See [File attributes](#file-attributes) for a list of strings this attribute accepts. |
 | `intent`           | string  | no       | The intent of the completion request. This can be either `completion` or `generation`. |
 | `stream`           | boolean | no       | Whether to stream the response as smaller chunks as they are ready (if applicable). Default: `false`. |
 | `project_path`     | string  | no       | The path of the project. |
@@ -122,10 +122,10 @@ Supported attributes:
 
 If successful, returns:
 
-- [`200`](rest/troubleshooting.md#status-codes) if the feature is enabled.
-- [`403`](rest/troubleshooting.md#status-codes) if the feature is disabled.
+- [`200`](rest/index.md#status-codes) if the feature is enabled.
+- [`403`](rest/index.md#status-codes) if the feature is disabled.
 
-Additionally, returns a [`404`](rest/troubleshooting.md#status-codes) if the path is empty or the project does not exist.
+Additionally, returns a [`404`](rest/index.md#status-codes) if the path is empty or the project does not exist.
 
 Example request:
 
@@ -142,8 +142,15 @@ curl --request POST \
 
 ## Fetch direct connection information
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/452044) in GitLab 17.0 [with a flag](../administration/feature_flags.md) named `code_suggestions_direct_completions`. Disabled by default.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/456443) in GitLab 17.2. Feature flag `code_suggestions_direct_completions` removed.
+DETAILS:
+**Status:** Experiment
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/452044) in GitLab 17.0 [with a flag](../administration/feature_flags.md) named `code_suggestions_direct_completions`. Disabled by default. This feature is an experiment.
+
+FLAG:
+On self-managed GitLab, by default this feature is not available. To make it available, an administrator can [enable the feature flag](../administration/feature_flags.md) named `code_suggestions_direct_completions`.
+On GitLab.com and GitLab Dedicated, this feature is not available.
+This feature is not ready for production use.
 
 ```plaintext
 POST /code_suggestions/direct_access

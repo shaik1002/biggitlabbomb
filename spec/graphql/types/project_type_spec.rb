@@ -13,8 +13,6 @@ RSpec.describe GitlabSchema.types['Project'], feature_category: :groups_and_proj
 
   specify { expect(described_class).to require_graphql_authorizations(:read_project) }
 
-  specify { expect(described_class.interfaces).to include(Types::TodoableInterface) }
-
   it 'has the expected fields' do
     expected_fields = %w[
       user_permissions id full_path path name_with_namespace
@@ -45,7 +43,7 @@ RSpec.describe GitlabSchema.types['Project'], feature_category: :groups_and_proj
       incident_management_timeline_event_tags visible_forks inherited_ci_variables autocomplete_users
       ci_cd_settings detailed_import_status value_streams ml_models
       allows_multiple_merge_request_assignees allows_multiple_merge_request_reviewers is_forked
-      protectable_branches available_deploy_keys ci_pipeline_creation
+      protectable_branches available_deploy_keys
     ]
 
     expect(described_class).to include_graphql_fields(*expected_fields)
@@ -335,7 +333,7 @@ RSpec.describe GitlabSchema.types['Project'], feature_category: :groups_and_proj
     it { is_expected.to have_graphql_resolver(Resolvers::ProjectMergeRequestsResolver) }
 
     it do
-      is_expected.to include_graphql_arguments(
+      is_expected.to have_graphql_arguments(
         :iids,
         :source_branches,
         :target_branches,
@@ -343,7 +341,6 @@ RSpec.describe GitlabSchema.types['Project'], feature_category: :groups_and_proj
         :draft,
         :approved,
         :labels,
-        :label_name,
         :before,
         :after,
         :first,
@@ -358,10 +355,6 @@ RSpec.describe GitlabSchema.types['Project'], feature_category: :groups_and_proj
         :updated_after,
         :updated_before,
         :author_username,
-        :approved_by,
-        :my_reaction_emoji,
-        :merged_by,
-        :release_tag,
         :assignee_username,
         :assignee_wildcard_id,
         :reviewer_username,
@@ -371,8 +364,7 @@ RSpec.describe GitlabSchema.types['Project'], feature_category: :groups_and_proj
         :milestone_title,
         :milestone_wildcard_id,
         :not,
-        :sort,
-        :subscribed
+        :sort
       )
     end
   end
@@ -451,13 +443,6 @@ RSpec.describe GitlabSchema.types['Project'], feature_category: :groups_and_proj
     it { is_expected.to have_graphql_resolver(Resolvers::ReleasesResolver) }
   end
 
-  describe 'container tags expiration policy field' do
-    subject { described_class.fields['containerTagsExpirationPolicy'] }
-
-    it { is_expected.to have_graphql_type(Types::ContainerRegistry::ContainerTagsExpirationPolicyType) }
-    it { expect(subject.instance_variable_get(:@authorize)).to include(:read_container_image) }
-  end
-
   describe 'container expiration policy field' do
     subject { described_class.fields['containerExpirationPolicy'] }
 
@@ -494,7 +479,7 @@ RSpec.describe GitlabSchema.types['Project'], feature_category: :groups_and_proj
   end
 
   it_behaves_like 'a GraphQL type with labels' do
-    let(:labels_resolver_arguments) { [:search_term, :includeAncestorGroups, :searchIn, :title] }
+    let(:labels_resolver_arguments) { [:search_term, :includeAncestorGroups, :searchIn] }
   end
 
   describe 'jira_imports' do
@@ -527,7 +512,7 @@ RSpec.describe GitlabSchema.types['Project'], feature_category: :groups_and_proj
     subject { described_class.fields['pipelineAnalytics'] }
 
     it { is_expected.to have_graphql_type(Types::Ci::AnalyticsType) }
-    it { is_expected.to have_graphql_resolver(Resolvers::Ci::ProjectPipelineAnalyticsResolver) }
+    it { is_expected.to have_graphql_resolver(Resolvers::ProjectPipelineStatisticsResolver) }
   end
 
   describe 'jobs field' do
@@ -1168,7 +1153,6 @@ RSpec.describe GitlabSchema.types['Project'], feature_category: :groups_and_proj
     subject { GitlabSchema.execute(query, context: { current_user: current_user }).as_json }
 
     let_it_be(:current_user) { create(:user) }
-    let_it_be(:project) { create(:project, :empty_repo) }
 
     let(:query) do
       %(
@@ -1185,12 +1169,18 @@ RSpec.describe GitlabSchema.types['Project'], feature_category: :groups_and_proj
       subject.dig('data', 'project', 'protectableBranches')
     end
 
+    let_it_be(:project) { create(:project, :empty_repo) }
+
     before_all do
       project.add_maintainer(current_user)
     end
 
     describe 'an empty repository' do
-      let(:project) { create(:project, :empty_repo, maintainers: current_user) }
+      before_all do
+        project.repository.branch_names.each do |branch_name|
+          project.repository.delete_branch(branch_name)
+        end
+      end
 
       it 'returns an empty array' do
         expect(protectable_branches).to be_empty
@@ -1317,6 +1307,14 @@ RSpec.describe GitlabSchema.types['Project'], feature_category: :groups_and_proj
         expect(organization_edit_path).to eq(
           "/-/organizations/#{organization.path}/projects/#{project.path_with_namespace}/edit"
         )
+      end
+    end
+
+    context 'when project does not have an organization associated with it' do
+      let_it_be(:project) { create(:project, :public, organization: nil) }
+
+      it 'returns nil' do
+        expect(organization_edit_path).to be_nil
       end
     end
   end

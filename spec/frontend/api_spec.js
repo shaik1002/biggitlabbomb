@@ -909,6 +909,26 @@ describe('Api', () => {
     });
   });
 
+  describe('pipelineJobs', () => {
+    it.each([undefined, {}, { foo: true }])(
+      'fetches the jobs for a given pipeline given %p params',
+      async (params) => {
+        const projectId = 123;
+        const pipelineId = 456;
+        const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/${projectId}/pipelines/${pipelineId}/jobs`;
+        const payload = [
+          {
+            name: 'test',
+          },
+        ];
+        mock.onGet(expectedUrl, { params }).reply(HTTP_STATUS_OK, payload);
+
+        const { data } = await Api.pipelineJobs(projectId, pipelineId, params);
+        expect(data).toEqual(payload);
+      },
+    );
+  });
+
   describe('createBranch', () => {
     it('creates new branch', () => {
       const ref = 'main';
@@ -927,31 +947,6 @@ describe('Api', () => {
       return Api.createBranch(dummyProjectPath, { ref, branch }).then(({ data }) => {
         expect(data.name).toBe(branch);
         expect(axios.post).toHaveBeenCalledWith(expectedUrl, { ref, branch });
-      });
-    });
-  });
-
-  describe('postMergeRequestPipeline', () => {
-    const dummyProjectId = 5;
-    const dummyMergeRequestIid = 123;
-    const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/projects/5/merge_requests/123/pipelines`;
-
-    beforeEach(() => {
-      mock = new MockAdapter(axios);
-    });
-
-    it('creates a merge request pipeline async', () => {
-      jest.spyOn(axios, 'post');
-
-      mock.onPost(expectedUrl).replyOnce(HTTP_STATUS_OK, {
-        id: 456,
-      });
-
-      return Api.postMergeRequestPipeline(dummyProjectId, {
-        mergeRequestId: dummyMergeRequestIid,
-      }).then(({ data }) => {
-        expect(data.id).toBe(456);
-        expect(axios.post).toHaveBeenCalledWith(expectedUrl, { async: true });
       });
     });
   });
@@ -1569,6 +1564,15 @@ describe('Api', () => {
           });
         });
       });
+
+      describe('when internal event is called with unallowed additionalProperties', () => {
+        it('throws an error', () => {
+          expect(() => {
+            const unallowedProperties = { new_key: 'unallowed' };
+            Api.trackInternalEvent(event, unallowedProperties);
+          }).toThrow(/Disallowed additional properties were provided:/);
+        });
+      });
     });
   });
 
@@ -1580,7 +1584,8 @@ describe('Api', () => {
           title: 'My title 1',
           created_at: '2021-10-29T16:59:55.229Z',
           expires_at: null,
-          key: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQDLvQzRX960N7dxPdge9o5a96+M4GEGQ7rxT2D3wAQDtQFjQV5ZcKb5wfeLtYLe3kRVI4lCO10PXeQppb1XBaYmVO31IaRkcgmMEPVyfp76Dp4CJZz6aMEbbcqfaHkDre0Fa8kzTXnBJVh2NeDbBfGMjFM5NRQLhKykodNsepO6dQ== dummy@gitlab.com',
+          key:
+            'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQDLvQzRX960N7dxPdge9o5a96+M4GEGQ7rxT2D3wAQDtQFjQV5ZcKb5wfeLtYLe3kRVI4lCO10PXeQppb1XBaYmVO31IaRkcgmMEPVyfp76Dp4CJZz6aMEbbcqfaHkDre0Fa8kzTXnBJVh2NeDbBfGMjFM5NRQLhKykodNsepO6dQ== dummy@gitlab.com',
           fingerprint: '81:93:63:b9:1e:24:a2:aa:e0:87:d3:3f:42:81:f2:c2',
           projects_with_write_access: [
             {

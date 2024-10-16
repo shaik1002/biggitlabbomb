@@ -140,40 +140,22 @@ RSpec.describe Oauth::AuthorizationsController do
             )
           end
 
-          context 'when on GitLab.com' do
-            before do
-              allow(Gitlab).to receive(:com?).and_return(true)
-            end
-
-            it 'displays the provided application message' do
-              subject
-              expect(response.body).to have_css('p.gl-text-green-500', text: 'This application is provided by GitLab.')
-              expect(response.body).to have_css('[data-testid="tanuki-verified-icon"]')
-            end
-
-            context 'when redirect uri has www pattern' do
-              before do
-                application.redirect_uri = "http://www.examplewww.com"
-                application.save!
-              end
-
-              it 'substitutes pattern correctly on display' do
-                subject
-                expect(response.body).to have_css('p', text: "You will be redirected to examplewww.com")
-              end
-            end
+          it 'displays the warning message' do
+            subject
+            expect(response.body).to have_css(
+              'p.gl-text-orange-500', text: "Make sure you trust #{application.name} before authorizing.")
+            expect(response.body).to have_css('[data-testid="warning-solid-icon"]')
           end
 
-          context 'when not on GitLab.com' do
+          context 'when redirect uri has www pattern' do
             before do
-              allow(Gitlab).to receive(:com?).and_return(false)
+              application.redirect_uri = "http://www.examplewww.com"
+              application.save!
             end
 
-            it 'displays the warning message' do
+            it 'substitutes pattern correctly on display' do
               subject
-              expect(response.body).to have_css(
-                'p.gl-text-orange-500', text: "Make sure you trust #{application.name} before authorizing.")
-              expect(response.body).to have_css('[data-testid="warning-solid-icon"]')
+              expect(response.body).to have_css('p', text: "You will be redirected to examplewww.com")
             end
           end
         end

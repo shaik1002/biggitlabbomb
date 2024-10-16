@@ -18,49 +18,26 @@ module Mutations
 
         argument :project_ids,
           [::Types::GlobalIDType[::Project]],
-          required: false,
+          required: true,
           description: 'IDs of excluded projects.'
-
-        argument :group_ids,
-          [::Types::GlobalIDType[::Group]],
-          required: false,
-          description: 'IDs of excluded groups.'
 
         authorize :admin_all_resources
 
-        def resolve(integration_name:, project_ids: [], group_ids: [])
+        def resolve(integration_name:, project_ids:)
           authorize!(:global)
+
+          projects = Project.id_in(resolve_ids(project_ids))
 
           result = ::Integrations::Exclusions::DestroyService.new(
             current_user: current_user,
-            projects: projects(project_ids),
-            groups: groups(group_ids),
+            projects: projects,
             integration_name: integration_name
           ).execute
 
-          exclusions = result.payload
-
-          # Integrations::Exclusions::DestroyService calls destroy_all in some circumstances which returns a frozen
-          # array.  We call dup here to allow entries to be redacted by field extensions.
-          exclusions = exclusions.dup if exclusions.frozen?
           {
-            exclusions: exclusions,
+            exclusions: result.payload,
             errors: result.errors
           }
-        end
-
-        private
-
-        def projects(project_ids)
-          return [] unless project_ids.present?
-
-          Project.id_in(resolve_ids(project_ids))
-        end
-
-        def groups(group_ids)
-          return [] unless group_ids.present?
-
-          Group.id_in(resolve_ids(group_ids))
         end
       end
     end

@@ -9,6 +9,7 @@ import { isLoggedIn } from '~/lib/utils/common_utils';
 import AwardList from '~/vue_shared/components/awards_list.vue';
 import WorkItemAwardEmoji from '~/work_items/components/work_item_award_emoji.vue';
 import updateAwardEmojiMutation from '~/work_items/graphql/update_award_emoji.mutation.graphql';
+import groupWorkItemAwardEmojiQuery from '~/work_items/graphql/group_award_emoji.query.graphql';
 import projectWorkItemAwardEmojiQuery from '~/work_items/graphql/award_emoji.query.graphql';
 import {
   EMOJI_THUMBSUP,
@@ -42,6 +43,7 @@ describe('WorkItemAwardEmoji component', () => {
   const workItemQueryResponse = workItemByIidResponseFactory();
   const mockWorkItem = workItemQueryResponse.data.workspace.workItem;
 
+  const groupAwardEmojiQuerySuccessHandler = jest.fn().mockResolvedValue(workItemQueryResponse);
   const awardEmojiQuerySuccessHandler = jest.fn().mockResolvedValue(workItemQueryResponse);
   const awardEmojiQueryEmptyHandler = jest.fn().mockResolvedValue(
     workItemByIidResponseFactory({
@@ -83,10 +85,12 @@ describe('WorkItemAwardEmoji component', () => {
     awardEmojiQueryHandler = awardEmojiQuerySuccessHandler,
     awardEmojiMutationHandler = awardEmojiAddSuccessHandler,
     workItemIid = '1',
+    isGroup = false,
   } = {}) => {
     mockApolloProvider = createMockApollo(
       [
         [projectWorkItemAwardEmojiQuery, awardEmojiQueryHandler],
+        [groupWorkItemAwardEmojiQuery, groupAwardEmojiQuerySuccessHandler],
         [updateAwardEmojiMutation, awardEmojiMutationHandler],
       ],
       {},
@@ -108,6 +112,9 @@ describe('WorkItemAwardEmoji component', () => {
     wrapper = shallowMount(WorkItemAwardEmoji, {
       isLoggedIn: isLoggedIn(),
       apolloProvider: mockApolloProvider,
+      provide: {
+        isGroup,
+      },
       propsData: {
         workItemId: 'gid://gitlab/WorkItem/1',
         workItemFullpath: 'test-project-path',
@@ -342,6 +349,20 @@ describe('WorkItemAwardEmoji component', () => {
         });
         expect(awardEmojisQueryMoreThanDefaultHandler).toHaveBeenCalledTimes(2);
       });
+    });
+  });
+
+  describe('group award emoji query', () => {
+    it('is not called in a project context', () => {
+      createComponent();
+
+      expect(groupAwardEmojiQuerySuccessHandler).not.toHaveBeenCalled();
+    });
+
+    it('is called in a group context', () => {
+      createComponent({ isGroup: true });
+
+      expect(groupAwardEmojiQuerySuccessHandler).toHaveBeenCalled();
     });
   });
 });

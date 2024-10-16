@@ -29,7 +29,7 @@ There are two tokens to take into account when connecting a runner with GitLab.
 | Token | Description |
 | ----- | ----------- |
 | Registration token | Token used to [register the runner](https://docs.gitlab.com/runner/register/). It can be [obtained through GitLab](../ci/runners/index.md). |
-| Authentication token | Token used to authenticate the runner with the GitLab instance. The token is obtained automatically when you [register a runner](https://docs.gitlab.com/runner/register/) or by the Runners API when you manually [register a runner](#create-a-runner) or [reset the authentication token](#reset-runners-authentication-token-by-using-the-runner-id). You can also obtain the token by using the [`POST /user/runners`](users.md#create-a-runner-linked-to-a-user) endpoint. |
+| Authentication token | Token used to authenticate the runner with the GitLab instance. It is obtained automatically when you [register a runner](https://docs.gitlab.com/runner/register/) or by the Runner API when you manually [register a runner](#create-an-instance-runner) or [reset the authentication token](#reset-runners-authentication-token-by-using-the-runner-id). You can also obtain the authentication token using [Create a runner](users.md#create-a-runner-linked-to-a-user) API method. |
 
 Here's an example of how the two tokens are used in runner registration:
 
@@ -51,7 +51,7 @@ Get a list of runners available to the user.
 
 Prerequisites:
 
-- You must be an administrator of or have the Owner role for the target namespace or project.
+- You must be an administrator of or have the Owner role in the target namespace or project.
 - For `instance_type`, you must be an administrator of the GitLab instance.
 
 ```plaintext
@@ -67,7 +67,7 @@ GET /runners?tag_list=tag1,tag2
 |------------------|--------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `scope`          | string       | no       | Deprecated: Use `type` or `status` instead. The scope of runners to return, one of: `active`, `paused`, `online` and `offline`; showing all runners if none provided                                                 |
 | `type`           | string       | no       | The type of runners to return, one of: `instance_type`, `group_type`, `project_type`                                                                                                                                 |
-| `status`         | string       | no       | The status of runners to return, one of: `online`, `offline`, `stale`, or `never_contacted`.<br/>Other possible values are the deprecated `active` and `paused`.<br/>Requesting `offline` runners might also return `stale` runners because `stale` is included in `offline`. |
+| `status`         | string       | no       | The status of runners to return, one of: `online`, `offline`, `stale`, and `never_contacted`. `active` and `paused` are also possible values which were deprecated and will be removed in a future version of the REST API |
 | `paused`         | boolean      | no       | Whether to include only runners that are accepting or ignoring new jobs                                                                                                                                              |
 | `tag_list`       | string array | no       | A list of runner tags                                                                                                                                                                                                |
 | `version_prefix` | string       | no       | The prefix of the version of the runners to return. For example, `15.0`, `14`, `16.1.241`                                                                                                                            |
@@ -134,7 +134,7 @@ is restricted to users with administrator access.
 
 Prerequisites:
 
-- You must be an administrator of or have the Owner role for the target namespace or project.
+- You must be an administrator of or have the Owner role in the target namespace or project.
 - For `instance_type`, you must be an administrator of the GitLab instance.
 
 ```plaintext
@@ -150,7 +150,7 @@ GET /runners/all?tag_list=tag1,tag2
 |------------------|--------------|----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `scope`          | string       | no       | Deprecated: Use `type` or `status` instead. The scope of runners to return, one of: `specific`, `shared`, `active`, `paused`, `online` and `offline`; showing all runners if none provided                              |
 | `type`           | string       | no       | The type of runners to return, one of: `instance_type`, `group_type`, `project_type`                                                                                                                                    |
-| `status`         | string       | no       | The status of runners to return, one of: `online`, `offline`, `stale`, or `never_contacted`.<br/>Other possible values are the deprecated `active` and `paused`.<br/>Requesting `offline` runners might also return `stale` runners because `stale` is included in `offline`. |
+| `status`         | string       | no       | The status of runners to return, one of: `online`, `offline`, `stale`, and `never_contacted`. `active` and `paused` are also possible values which were deprecated and will be removed in a future version of the REST API    |
 | `paused`         | boolean      | no       | Whether to include only runners that are accepting or ignoring new jobs                                                                                                                                                 |
 | `tag_list`       | string array | no       | A list of runner tags                                                                                                                                                                                                   |
 | `version_prefix` | string       | no       | The prefix of the version of the runners to return. For example, `15.0`, `16.1.241`                                                                                                                               |
@@ -240,7 +240,7 @@ Instance-level runner details via this endpoint are available to all authenticat
 
 Prerequisites:
 
-- You must have at least the Developer role for the target namespace or project.
+- You must at least the Developer role in the target namespace or project.
 - An access token with the `manage_runner` scope and the appropriate role.
 
 ```plaintext
@@ -328,8 +328,8 @@ PUT /runners/:id
 Prerequisites:
 
 - For `instance_type`, you must be an administrator of the GitLab instance.
-- For `group_type`, you must have the Owner role for the target namespace.
-- For `project_type`, you must have at least the Maintainer role for the target project.
+- For `group_type`, you must have the Owner role in the target namespace.
+- For `project_type`, you must have at least the Maintainer role in the target project.
 - An access token with the `manage_runner` scope and the appropriate role.
 
 | Attribute          | Type    | Required | Description                                                                                     |
@@ -412,8 +412,8 @@ Pause a runner.
 Prerequisites:
 
 - For `instance_type`, you must be an administrator of the GitLab instance.
-- For `group_type`, you must have the Owner role for the target namespace.
-- For `project_type`, you must have at least the Maintainer role for the target project.
+- For `group_type`, you must have the Owner role in the target namespace.
+- For `project_type`, you must have at least the Maintainer role in the target project.
 - An access token with the `manage_runner` scope and the appropriate role.
 
 ```plaintext
@@ -537,61 +537,13 @@ Example response:
 ]
 ```
 
-## List runner's managers
-
-List all the managers of a runner.
-
-```plaintext
-GET /runners/:id/managers
-```
-
-| Attribute | Type    | Required | Description         |
-|-----------|---------|----------|---------------------|
-| `id`      | integer | yes      | The ID of a runner  |
-
-```shell
-curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/runners/1/managers"
-```
-
-Example response:
-
-```json
-[
-    {
-      "id": 1,
-      "system_id": "s_89e5e9956577",
-      "version": "16.11.1",
-      "revision": "535ced5f",
-      "platform": "linux",
-      "architecture": "amd64",
-      "created_at": "2024-06-09T11:12:02.507Z",
-      "contacted_at": "2024-06-09T06:30:09.355Z",
-      "ip_address": "127.0.0.1",
-      "status": "offline"
-    },
-    {
-        "id": 2,
-        "system_id": "runner-2",
-        "version": "16.11.0",
-        "revision": "91a27b2a",
-        "platform": "linux",
-        "architecture": "amd64",
-        "created_at": "2024-06-09T09:12:02.507Z",
-      "contacted_at": "2024-06-09T06:30:09.355Z",
-        "ip_address": "127.0.0.1",
-        "status": "offline",
-
-    }
-]
-```
-
 ## List project's runners
 
 List all runners available in the project, including from ancestor groups and [any allowed shared runners](../ci/runners/runners_scope.md#enable-instance-runners-for-a-project).
 
 Prerequisites:
 
-- You must be an administrator of or have at least the Maintainer role for the target project.
+- You must be an administrator of or have at least the Maintainer role in the target project.
 
 ```plaintext
 GET /projects/:id/runners
@@ -604,10 +556,10 @@ GET /projects/:id/runners?tag_list=tag1,tag2
 
 | Attribute        | Type           | Required | Description                                                                                                                                                                                                          |
 |------------------|----------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `id`             | integer/string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths)                                                                                                  |
+| `id`             | integer/string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user                                                                                                  |
 | `scope`          | string         | no       | Deprecated: Use `type` or `status` instead. The scope of runners to return, one of: `active`, `paused`, `online` and `offline`; showing all runners if none provided                                                 |
 | `type`           | string         | no       | The type of runners to return, one of: `instance_type`, `group_type`, `project_type`                                                                                                                                 |
-| `status`         | string         | no       | The status of runners to return, one of: `online`, `offline`, `stale`, or `never_contacted`.<br/>Other possible values are the deprecated `active` and `paused`.<br/>Requesting `offline` runners might also return `stale` runners because `stale` is included in `offline`. |
+| `status`         | string       | no       | The status of runners to return, one of: `online`, `offline`, `stale`, and `never_contacted`. `active` and `paused` are also possible values which were deprecated and will be removed in a future version of the REST API    |
 | `paused`         | boolean        | no       | Whether to include only runners that are accepting or ignoring new jobs                                                                                                                                              |
 | `tag_list`       | string array   | no       | A list of runner tags                                                                                                                                                                                                |
 | `version_prefix` | string         | no       | The prefix of the version of the runners to return. For example, `15.0`, `14`, `16.1.241`                                                                                                                            |
@@ -670,8 +622,8 @@ Enable an available project runner in the project.
 Prerequisites:
 
 - For `instance_type`, you must be an administrator of the GitLab instance.
-- For `group_type`, you must have the Owner role for the target namespace.
-- For `project_type`, you must have at least the Maintainer role for the target project.
+- For `group_type`, you must have the Owner role in the target namespace.
+- For `project_type`, you must have at least the Maintainer role in the target project.
 
 ```plaintext
 POST /projects/:id/runners
@@ -679,7 +631,7 @@ POST /projects/:id/runners
 
 | Attribute   | Type    | Required | Description         |
 |-------------|---------|----------|---------------------|
-| `id`        | integer/string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths) |
+| `id`        | integer/string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user |
 | `runner_id` | integer | yes      | The ID of a runner  |
 
 ```shell
@@ -720,8 +672,8 @@ returned. Use the call to [delete a runner](#delete-a-runner) instead.
 Prerequisites:
 
 - For `instance_type`, you must be an administrator of the GitLab instance.
-- For `group_type`, you must have the Owner role for the target namespace.
-- For `project_type`, you must have at least the Maintainer role for the target project.
+- For `group_type`, you must have the Owner role in the target namespace.
+- For `project_type`, you must have at least the Maintainer role in the target project.
 
 ```plaintext
 DELETE /projects/:id/runners/:runner_id
@@ -729,7 +681,7 @@ DELETE /projects/:id/runners/:runner_id
 
 | Attribute   | Type    | Required | Description         |
 |-------------|---------|----------|---------------------|
-| `id`        | integer/string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths) |
+| `id`        | integer/string | yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user |
 | `runner_id` | integer | yes      | The ID of a runner  |
 
 ```shell
@@ -754,9 +706,9 @@ GET /groups/:id/runners?tag_list=tag1,tag2
 
 | Attribute        | Type           | Required | Description                                                                                                                                                                                                             |
 |------------------|----------------|----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `id`             | integer        | yes      | The ID of the group                                                                                                                                                                     |
+| `id`             | integer        | yes      | The ID of the group owned by the authenticated user                                                                                                                                                                     |
 | `type`           | string         | no       | The type of runners to return, one of: `instance_type`, `group_type`, `project_type`. The `project_type` value is [deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/351466) and will be removed in GitLab 15.0 |
-| `status`         | string         | no       | The status of runners to return, one of: `online`, `offline`, `stale`, or `never_contacted`.<br/>Other possible values are the deprecated `active` and `paused`.<br/>Requesting `offline` runners might also return `stale` runners because `stale` is included in `offline`. |
+| `status`         | string         | no       | The status of runners to return, one of: `online`, `offline`, `stale`, and `never_contacted`. `active` and `paused` are also possible values which were deprecated and will be removed in a future version of the REST API    |
 | `paused`         | boolean        | no       | Whether to include only runners that are accepting or ignoring new jobs                                                                                                                                                 |
 | `tag_list`       | string array   | no       | A list of runner tags                                                                                                                                                                                                   |
 | `version_prefix` | string         | no       | The prefix of the version of the runners to return. For example, `15.0`, `14`, `16.1.241`                                                                                                                               |
@@ -824,15 +776,9 @@ Example response:
 ]
 ```
 
-## Create a runner
+## Create an instance runner
 
-WARNING:
-This endpoint returns an `HTTP 410 Gone` status code if registration with runner registration tokens
-is disabled in the project or group settings. If registration with runner registration tokens
-is disabled, use the [`POST /user/runners`](users.md#create-a-runner-linked-to-a-user) endpoint
-to create and register runners instead.
-
-Create a runner with a runner registration token.
+Create a runner for the instance.
 
 ```plaintext
 POST /runners
@@ -842,7 +788,7 @@ POST /runners
 |--------------------|--------------|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `token`            | string       | yes      | [Registration token](#registration-and-authentication-tokens)                                                                                                                                  |
 | `description`      | string       | no       | Description of the runner                                                                                                                                                                      |
-| `info`             | hash         | no       | Runner's metadata. You can include `name`, `version`, `revision`, `platform`, and `architecture`, but only `version`, `platform`, and `architecture` are displayed in the **Admin** area of the UI |
+| `info`             | hash         | no       | Runner's metadata. You can include `name`, `version`, `revision`, `platform`, and `architecture`, but only `version`, `platform`, and `architecture` are displayed in the Admin Area of the UI |
 | `active`           | boolean      | no       | Deprecated: Use `paused` instead. Specifies if the runner is allowed to receive new jobs                                                                                                       |
 | `paused`           | boolean      | no       | Specifies if the runner should ignore new jobs                                                                                                                                                 |
 | `locked`           | boolean      | no       | Specifies if the runner should be locked for the current project                                                                                                                               |
@@ -891,8 +837,8 @@ To delete the runner by ID, use your access token with the runner's ID:
 Prerequisites:
 
 - For `instance_type`, you must be an administrator of the GitLab instance.
-- For `group_type`, you must have the Owner role for the target namespace.
-- For `project_type`, you must have at least the Maintainer role for the target project.
+- For `group_type`, you must have the Owner role in the target namespace.
+- For `project_type`, you must have at least the Maintainer role in the target project.
 - An access token with the `manage_runner` scope and the appropriate role.
 
 ```plaintext
@@ -913,7 +859,7 @@ To delete the runner by using its authentication token:
 
 Prerequisites:
 
-- You must be an administrator of or have the Owner role for the target namespace or project.
+- You must be an administrator of or have the Owner role in the target namespace or project.
 - For `instance_type`, you must be an administrator of the GitLab instance.
 
 ```plaintext
@@ -1025,8 +971,8 @@ Reset the runner's authentication token by using its runner ID.
 Prerequisites:
 
 - For `instance_type`, you must be an administrator of the GitLab instance.
-- For `group_type`, you must have the Owner role for the target namespace.
-- For `project_type`, you must have at least the Maintainer role for the target project.
+- For `group_type`, you must have the Owner role in the target namespace.
+- For `project_type`, you must have at least the Maintainer role in the target project.
 - An access token with the `manage_runner` scope and the appropriate role.
 
 ```plaintext
@@ -1054,6 +1000,11 @@ Example response:
 ## Reset runner's authentication token by using the current token
 
 Reset the runner's authentication token by using the current token's value as an input.
+
+Prerequisites:
+
+- You must be an administrator of or have the Owner role in the target namespace or project.
+- For `instance_type`, you must be an administrator of the GitLab instance.
 
 ```plaintext
 POST /runners/reset_authentication_token

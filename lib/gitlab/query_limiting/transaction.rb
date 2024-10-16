@@ -14,13 +14,12 @@ module Gitlab
       # The maximum number of SQL queries that can be executed in a request. For
       # the sake of keeping things simple we hardcode this value here, it's not
       # supposed to be changed very often anyway.
-      def self.default_threshold
+      def self.threshold
         100
       end
 
-      # Deprecated, use default_threshold
-      def self.threshold
-        default_threshold
+      def self.log_threshold
+        threshold * 1.5
       end
 
       # Error that is raised whenever exceeding the maximum number of queries.
@@ -73,8 +72,6 @@ module Gitlab
       LICENSES_LOAD = 'SELECT "licenses".* FROM "licenses" ORDER BY "licenses"."id"'
       SCHEMA_INTROSPECTION = %r{SELECT.*(FROM|JOIN) (pg_attribute|pg_class)}m
       SAVEPOINT = %r{(RELEASE )?SAVEPOINT}m
-      SET = %r{^SET\s}m
-      SHOW = %r{^SHOW\s}m
 
       # queries can be safely ignored if they are amoritized in regular usage
       # (i.e. only requested occasionally and otherwise cached).
@@ -83,14 +80,12 @@ module Gitlab
         return true if sql&.include?(LICENSES_LOAD)
         return true if SCHEMA_INTROSPECTION.match?(sql)
         return true if SAVEPOINT.match?(sql)
-        return true if SET.match?(sql)
-        return true if SHOW.match?(sql)
 
         false
       end
 
       def executed_sql(sql)
-        return if @count > log_threshold || ignorable?(sql)
+        return if @count > self.class.log_threshold || ignorable?(sql)
 
         @sql_executed << sql
       end
@@ -99,24 +94,16 @@ module Gitlab
         Rails.env.test?
       end
 
-      def threshold
-        ::Gitlab::QueryLimiting.threshold || self.class.threshold
-      end
-
-      def log_threshold
-        threshold * 1.5
-      end
-
       def threshold_exceeded?
-        count > threshold
+        count > self.class.threshold
       end
 
       def error_message
         header = 'Too many SQL queries were executed'
         header = "#{header} in #{action}" if action
-        msg = "a maximum of #{threshold} is allowed but #{count} SQL queries were executed"
+        msg = "a maximum of #{self.class.threshold} is allowed but #{count} SQL queries were executed"
         log = @sql_executed.each_with_index.map { |sql, i| "#{i}: #{sql}" }.join("\n").presence
-        ellipsis = '...' if @count > log_threshold
+        ellipsis = '...' if @count > self.class.log_threshold
 
         ["#{header}: #{msg}", log, ellipsis].compact.join("\n")
       end

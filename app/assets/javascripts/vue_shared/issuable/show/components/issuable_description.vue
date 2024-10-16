@@ -42,7 +42,7 @@ export default {
       ref="textarea"
       :value="issuable.description"
       :data-update-url="taskListUpdatePath"
-      class="js-task-list-field gl-hidden"
+      class="gl-display-none js-task-list-field"
       dir="auto"
     >
     </textarea>

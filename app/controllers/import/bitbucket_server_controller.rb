@@ -25,7 +25,8 @@ class Import::BitbucketServerController < Import::BaseController
   VALID_BITBUCKET_PROJECT_CHARS = /\A~?[\w\-\.\s]+\z/
   VALID_BITBUCKET_CHARS = /\A[\w\-\.\s]+\z/
 
-  def new; end
+  def new
+  end
 
   def create
     repo = client.repo(@project_key, @repo_slug)
@@ -34,7 +35,7 @@ class Import::BitbucketServerController < Import::BaseController
       return render json: { errors: _("Project %{project_repo} could not be found") % { project_repo: "#{@project_key}/#{@repo_slug}" } }, status: :unprocessable_entity
     end
 
-    result = Import::BitbucketServerService.new(client, current_user, params.merge({ organization_id: Current.organization_id })).execute(credentials)
+    result = Import::BitbucketServerService.new(client, current_user, params).execute(credentials)
 
     if result[:status] == :success
       render json: ProjectSerializer.new.represent(result[:project], serializer: :import)

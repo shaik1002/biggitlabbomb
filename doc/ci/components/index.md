@@ -36,9 +36,6 @@ that have the functionality you need in the [CI/CD Catalog](#cicd-catalog).
 For an introduction and hands-on examples, see [Efficient DevSecOps workflows with reusable CI/CD components](https://www.youtube.com/watch?v=-yvfSFKAgbA).
 <!-- Video published on 2024-01-22. DRI: Developer Relations, https://gitlab.com/groups/gitlab-com/marketing/developer-relations/-/epics/399 -->
 
-For common questions and additional support, see the [FAQ: GitLab CI/CD Catalog](https://about.gitlab.com/blog/2024/08/01/faq-gitlab-ci-cd-catalog/)
-blog post.
-
 ## Component project
 
 > - The maximum number of components per project [changed](https://gitlab.com/gitlab-org/gitlab/-/issues/436565) from 10 to 30 in GitLab 16.9.
@@ -170,7 +167,7 @@ In order of highest priority first, the component version can be:
 
 - A commit SHA, for example `e3262fdd0914fa823210cdb79a8c421e2cef79d8`.
 - A tag, for example: `1.0.0`. If a tag and commit SHA exist with the same name,
-  the commit SHA takes precedence over the tag. Components released to the CI/CD Catalog
+  the commit SHA takes precedence over the tag. Components released to the CI/CD
   should be tagged with a [semantic version](#semantic-versioning).
 - A branch name, for example `main`. If a branch and tag exist with the same name,
   the tag takes precedence over the branch.
@@ -347,15 +344,6 @@ These [predefined variables](../variables/predefined_variables.md)
 ensure that your component also works when used on another instance, for example when using
 [a GitLab.com component in a self-managed instance](#use-a-gitlabcom-component-in-a-self-managed-instance).
 
-### Do not assume API resources are always public
-
-Ensure that the component and its testing pipeline work also [in a self-managed instance](#use-a-gitlabcom-component-in-a-self-managed-instance).
-While some API resources of public projects on GitLab.com could be accessed via unauthenticated requests
-on self-managed a component project could be mirrored as private or internal project.
-
-It's important that an access token can optionally be provided via inputs or variables to
-authenticate requests on self-managed instances.
-
 ### Avoid using global keywords
 
 Avoid using [global keywords](../yaml/index.md#global-keywords) in a component.
@@ -459,38 +447,6 @@ For example, to create a component with `stage` configuration that can be define
         stage: verify
   ```
 
-#### Define job names with inputs
-
-Similar to the values for the `stage` keyword, you should avoid hard-coding job names
-in CI/CD components. When your component's users can customize job names, they can prevent conflicts
-with the existing names in their pipelines. Users could also include a component
-multiple times with different input options by using different names.
-
-Use `inputs` to allow your component's users to define a specific job name, or a prefix for the
-job name. For example:
-
-```yaml
-spec:
-  inputs:
-    job-prefix:
-      description: "Define a prefix for the job name"
-    job-name:
-      description: "Alternatively, define the job's name"
-    job-stage:
-      default: test
----
-
-"$[[ inputs.job-prefix ]]-scan-website":
-  stage: $[[ inputs.job-stage ]]
-  script:
-    - scan-website-1
-
-"$[[ inputs.job-name ]]":
-  stage: $[[ inputs.job-stage ]]
-  script:
-    - scan-website-2
-```
-
 ### Replace custom CI/CD variables with inputs
 
 When using CI/CD variables in a component, evaluate if the `inputs` keyword
@@ -558,12 +514,12 @@ To access the CI/CD Catalog and view the published components that are available
 1. Select **CI/CD Catalog**.
 
 Alternatively, if you are already in the [pipeline editor](../pipeline_editor/index.md)
-in your project, you can select **CI/CD Catalog**.
+in your project, you can select **Browse CI/CD Catalog**.
 
 Visibility of components in the CI/CD catalog follows the component source project's
 [visibility setting](../../user/public_access.md). Components with source projects set to:
 
-- Private are visible only to users assigned at least the Guest role for the source component project.
+- Private are visible only to users assigned at least the Guest role in the source component project.
 - Internal are visible only to users logged into the GitLab instance.
 - Public are visible to anyone with access to the GitLab instance.
 
@@ -581,7 +537,7 @@ you must set the project as a catalog project.
 
 Prerequisites:
 
-- You must have the Owner role for the project.
+- You must have the Owner role in the project.
 
 To set the project as a catalog project:
 
@@ -603,7 +559,6 @@ However, publishing a component's releases in the catalog makes it discoverable 
 
 Prerequisites:
 
-- You must have at least the Maintainer role for the project.
 - The project must:
   - Be set as a [catalog project](#set-a-component-project-as-a-catalog-project).
   - Have a [project description](../../user/project/working_with_projects.md#edit-project-name-description-and-avatar) defined.
@@ -669,12 +624,6 @@ and is maintained by users verified by GitLab:
 - GitLab Partner (**{partner-verified}**): Components that are independently created
   and maintained by a GitLab-verified partner.
 
-  GitLab partners can contact a member of the GitLab Partner Alliance to have their
-  namespace flagged as GitLab-verified. Then any CI/CD components located in the
-  namespace are badged as GitLab Partner components. The Partner Alliance member
-  creates an internal request issue on behalf of the verified partner:
-  `https://gitlab.com/gitlab-com/support/internal-requests/-/issues/new?issuable_template=CI%20Catalog%20Badge%20Request`.
-
   DISCLAIMER:
   GitLab Partner-created components are provided **as-is**, without warranty of any kind.
   An end user's use of a GitLab Partner-created component is at their own risk and
@@ -731,7 +680,7 @@ You might receive an error message similar to the following when using the `~lat
 version qualifier to reference a component hosted by a [catalog project](#set-a-component-project-as-a-catalog-project):
 
 ```plaintext
-This GitLab CI configuration is invalid: Component 'gitlab.com/my-namespace/my-project/my-component@~latest' - content not found
+This GitLab CI configuration is invalid: component 'gitlab.com/my-namespace/my-project/my-component@~latest' - content not found
 ```
 
 The `~latest` behavior [was updated](https://gitlab.com/gitlab-org/gitlab/-/issues/442238)

@@ -9,6 +9,7 @@ import PipelinesMixin from '~/ci/pipeline_details/mixins/pipelines_mixin';
 import PipelinesService from '~/ci/pipelines_page/services/pipelines_service';
 import PipelineStore from '~/ci/pipeline_details/stores/pipelines_store';
 import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
+import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { s__, __ } from '~/locale';
 
 export default {
@@ -22,13 +23,8 @@ export default {
     PipelinesTable,
     TablePagination,
   },
-  mixins: [PipelinesMixin],
+  mixins: [PipelinesMixin, glFeatureFlagMixin()],
   props: {
-    canCreatePipelineInTargetProject: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     endpoint: {
       type: String,
       required: true,
@@ -41,20 +37,15 @@ export default {
       type: String,
       required: true,
     },
-    isMergeRequestTable: {
+    viewType: {
+      type: String,
+      required: false,
+      default: 'root',
+    },
+    canCreatePipelineInTargetProject: {
       type: Boolean,
       required: false,
       default: false,
-    },
-    mergeRequestId: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
-    projectId: {
-      type: String,
-      required: false,
-      default: '',
     },
     sourceProjectFullPath: {
       type: String,
@@ -66,10 +57,15 @@ export default {
       required: false,
       default: '',
     },
-    viewType: {
+    projectId: {
       type: String,
       required: false,
-      default: 'root',
+      default: '',
+    },
+    mergeRequestId: {
+      type: Number,
+      required: false,
+      default: 0,
     },
   },
 
@@ -146,7 +142,7 @@ export default {
       const pipelines = resp.data.pipelines || resp.data;
 
       this.store.storePagination(resp.headers);
-      this.setCommonData(pipelines, this.isMergeRequestTable);
+      this.setCommonData(pipelines);
 
       if (resp.headers?.['x-total']) {
         const updatePipelinesEvent = new CustomEvent('update-pipelines-count', {
@@ -173,7 +169,6 @@ export default {
       eventHub.$emit('runMergeRequestPipeline', {
         projectId: this.projectId,
         mergeRequestId: this.mergeRequestId,
-        isAsync: this.isMergeRequestTable,
       });
     },
     tryRunPipeline() {
@@ -212,7 +207,7 @@ export default {
     anchor: 'prerequisites',
   }),
   userPermissionsDocsPath: helpPagePath('user/permissions.md', {
-    anchor: 'cicd',
+    anchor: 'gitlab-cicd-permissions',
   }),
   runPipelinesInTheParentProjectHelpPath: helpPagePath(
     '/ci/pipelines/merge_request_pipelines.html',
@@ -287,7 +282,7 @@ export default {
       <gl-button
         v-if="canRenderPipelineButton"
         block
-        class="gl-mb-3 gl-mt-3 lg:gl-hidden"
+        class="gl-mt-3 gl-mb-3 lg:gl-hidden"
         variant="confirm"
         data-testid="run_pipeline_button_mobile"
         :loading="state.isRunningMergeRequestPipeline"
@@ -297,11 +292,10 @@ export default {
       </gl-button>
 
       <pipelines-table
-        :is-creating-pipeline="state.isRunningMergeRequestPipeline"
-        :pipeline-id-type="$options.pipelineIdKey"
         :pipelines="state.pipelines"
         :update-graph-dropdown="updateGraphDropdown"
         :view-type="viewType"
+        :pipeline-id-type="$options.pipelineIdKey"
         @cancel-pipeline="onCancelPipeline"
         @refresh-pipelines-table="onRefreshPipelinesTable"
         @retry-pipeline="onRetryPipeline"

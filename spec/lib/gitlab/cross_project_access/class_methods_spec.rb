@@ -9,7 +9,7 @@ RSpec.describe Gitlab::CrossProjectAccess::ClassMethods do
     end
   end
 
-  let(:dummy_proc) { -> { false } }
+  let(:dummy_proc) { lambda { false } }
 
   describe '#requires_cross_project_access' do
     it 'creates a correct check when a hash is passed' do

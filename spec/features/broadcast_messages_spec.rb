@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Broadcast Messages', feature_category: :notifications do
+RSpec.describe 'Broadcast Messages', feature_category: :onboarding do
   include Spec::Support::Helpers::ModalHelpers
 
   let_it_be(:user) { create(:user) }
@@ -31,9 +31,7 @@ RSpec.describe 'Broadcast Messages', feature_category: :notifications do
 
       expect_to_be_on_explore_projects_page
 
-      within('body.page-initialised') do
-        find(".js-dismiss-current-broadcast-notification[data-id='#{broadcast_message.id}']").click
-      end
+      find('body.page-initialised .js-dismiss-current-broadcast-notification').click
 
       expect_message_dismissed
     end
@@ -43,33 +41,9 @@ RSpec.describe 'Broadcast Messages', feature_category: :notifications do
 
       expect_to_be_on_explore_projects_page
 
-      within('body.page-initialised') do
-        find(".js-dismiss-current-broadcast-notification[data-id='#{broadcast_message.id}']").click
-      end
+      find('body.page-initialised .js-dismiss-current-broadcast-notification').click
 
       expect_message_dismissed
-
-      visit path
-
-      expect_message_dismissed
-    end
-
-    it 'broadcast message is still hidden after logout and log back in', :js do
-      gitlab_sign_in(user)
-
-      visit path
-
-      expect_to_be_on_explore_projects_page
-
-      within('body.page-initialised') do
-        find(".js-dismiss-current-broadcast-notification[data-id='#{broadcast_message.id}']").click
-      end
-
-      expect_message_dismissed
-
-      gitlab_sign_out
-
-      gitlab_sign_in(user)
 
       visit path
 
@@ -85,7 +59,7 @@ RSpec.describe 'Broadcast Messages', feature_category: :notifications do
     it 'is not dismissible' do
       visit path
 
-      expect(page).not_to have_selector(".js-dismiss-current-broadcast-notification[data-id=#{broadcast_message.id}]")
+      expect(page).not_to have_selector('.js-dismiss-current-broadcast-notification')
     end
 
     it 'does not replace placeholders' do
@@ -133,7 +107,7 @@ RSpec.describe 'Broadcast Messages', feature_category: :notifications do
 
       visit path
 
-      expect_broadcast_message(message.id, text)
+      expect_broadcast_message(text)
 
       # seed the other cache
       original_strategy_value = Gitlab::Cache::JsonCache::STRATEGY_KEY_COMPONENTS
@@ -141,7 +115,7 @@ RSpec.describe 'Broadcast Messages', feature_category: :notifications do
 
       page.refresh
 
-      expect_broadcast_message(message.id, text)
+      expect_broadcast_message(text)
 
       # delete on original cache
       stub_const('Gitlab::Cache::JsonCaches::JsonKeyed::STRATEGY_KEY_COMPONENTS', original_strategy_value)
@@ -159,27 +133,27 @@ RSpec.describe 'Broadcast Messages', feature_category: :notifications do
 
       visit path
 
-      expect_no_broadcast_message(message.id)
+      expect_no_broadcast_message
 
       # other revision of GitLab does gets cache destroyed
       stub_const('Gitlab::Cache::JsonCaches::JsonKeyed::STRATEGY_KEY_COMPONENTS', new_strategy_value)
 
       page.refresh
 
-      expect_no_broadcast_message(message.id)
+      expect_no_broadcast_message
     end
   end
 
-  def expect_broadcast_message(id, text)
-    within(".js-broadcast-notification-#{id}") do
+  def expect_broadcast_message(text)
+    within_testid('banner-broadcast-message') do
       expect(page).to have_content text
     end
   end
 
-  def expect_no_broadcast_message(id)
+  def expect_no_broadcast_message
     expect_to_be_on_explore_projects_page
 
-    expect(page).not_to have_selector(".js-broadcast-notification-#{id}")
+    expect(page).not_to have_selector('[data-testid="banner-broadcast-message"]')
   end
 
   def expect_to_be_on_explore_projects_page

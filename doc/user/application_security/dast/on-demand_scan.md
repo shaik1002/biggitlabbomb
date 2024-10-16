@@ -4,7 +4,7 @@ group: Dynamic Analysis
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
-# DAST on-demand scan
+# DAST On Demand Scan
 
 DETAILS:
 **Tier:** Ultimate
@@ -18,7 +18,7 @@ Only run DAST scans against a test server.
 ## On-demand scans
 
 > - Runner tags selection [enabled on GitLab.com and self-managed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/111499) in GitLab 16.3.
-> - Browser based on-demand DAST scans available from GitLab 17.0 since [proxy-based DAST was removed in the same version](../../../update/deprecations.md#proxy-based-dast-deprecated).
+> - Browser based on-demand DAST scans [deployed behind the feature flag `dast_ods_browser_based_scanner`](https://gitlab.com/gitlab-org/gitlab/-/issues/430212) in GitLab 16.8.
 
 An on-demand DAST scan runs outside the DevOps life cycle. Changes in your repository don't trigger
 the scan. You must either start it manually, or schedule it to run. For on-demand DAST scans,
@@ -195,7 +195,7 @@ The site profile is saved, for use in an on-demand scan.
 
 NOTE:
 If a site profile is linked to a security policy, you cannot edit the profile from this page. See
-[Scan execution policies](../policies/scan_execution_policies.md) for more information.
+[Scan execution policies](../policies/scan-execution-policies.md) for more information.
 
 NOTE:
 If a site profile's Target URL or Authenticated URL is updated, the request headers and password fields associated with that profile are cleared.
@@ -216,7 +216,7 @@ To edit a site profile:
 
 NOTE:
 If a site profile is linked to a security policy, a user cannot delete the profile from this page.
-See [Scan execution policies](../policies/scan_execution_policies.md) for more information.
+See [Scan execution policies](../policies/scan-execution-policies.md) for more information.
 
 To delete a site profile:
 
@@ -338,8 +338,8 @@ app.get('/dast-website-target', function(req, res) {
 
 ## Scanner profile
 
-> - Deprecated AJAX Spider option with the introduction of Browser based on-demand DAST scans in GitLab 17.0.
-> - Renamed spider timeout to crawl timeout with the introduction of Browser based on-demand DAST scans in GitLab 17.0.
+> - Deprecated AJAX Spider option with the [introduction of Browser based on-demand DAST scans behind feature flag `dast_ods_browser_based_scanner`](https://gitlab.com/gitlab-org/gitlab/-/issues/430210).
+> - Renamed spider timeout to crawl timeout with the [introduction of Browser based on-demand DAST scans behind feature flag `dast_ods_browser_based_scanner`](https://gitlab.com/gitlab-org/gitlab/-/issues/430210).
 
 A scanner profile defines the configuration details of a security scanner. A scanner profile can be
 referenced in `.gitlab-ci.yml` and on-demand scans.
@@ -369,7 +369,7 @@ To create a scanner profile:
 
 NOTE:
 If a scanner profile is linked to a security policy, you cannot edit the profile from this page.
-For more information, see [Scan execution policies](../policies/scan_execution_policies.md).
+For more information, see [Scan execution policies](../policies/scan-execution-policies.md).
 
 To edit a scanner profile:
 
@@ -385,7 +385,7 @@ To edit a scanner profile:
 
 NOTE:
 If a scanner profile is linked to a security policy, a user cannot delete the profile from this
-page. For more information, see [Scan execution policies](../policies/scan_execution_policies.md).
+page. For more information, see [Scan execution policies](../policies/scan-execution-policies.md).
 
 To delete a scanner profile:
 

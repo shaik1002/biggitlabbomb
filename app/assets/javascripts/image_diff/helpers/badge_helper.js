@@ -15,10 +15,10 @@ export function createImageBadge(noteId, { x, y }, classNames = []) {
 
 export function addImageBadge(containerEl, { coordinate, badgeText, noteId }) {
   const buttonEl = createImageBadge(noteId, coordinate, [
-    'gl-flex',
-    'gl-items-center',
-    'gl-justify-center',
-    'gl-text-sm',
+    'gl-display-flex',
+    'gl-align-items-center',
+    'gl-justify-content-center',
+    'gl-font-sm',
     'design-note-pin',
     'on-image',
     'gl-absolute',

@@ -52,28 +52,13 @@ export default {
     label() {
       return sprintf(this.$options.i18n.label, { accessTokenType: this.accessTokenType });
     },
-    isNameOrScopesSet() {
-      const urlParams = new URLSearchParams(window.location.search);
-
-      return urlParams.has('name') || urlParams.has('scopes');
-    },
   },
   mounted() {
     /** @type {HTMLFormElement} */
     this.form = document.querySelector(FORM_SELECTOR);
 
     /** @type {HTMLButtonElement} */
-    this.submitButton = this.form.querySelector(
-      'button[type=submit][data-testid=create-token-button]',
-    );
-
-    // If param is set, open form on page load.
-    if (this.isNameOrScopesSet) {
-      document.querySelectorAll('.js-token-card').forEach((el) => {
-        el.querySelector('.js-add-new-token-form').style.display = 'block';
-        el.querySelector('.js-toggle-button').style.display = 'none';
-      });
-    }
+    this.submitButton = this.form.querySelector('[type=submit]');
   },
   methods: {
     beforeDisplayResults() {
@@ -83,17 +68,14 @@ export default {
       this.errors = null;
       this.newToken = null;
     },
-    enableSubmitButton() {
-      this.submitButton.classList.remove('disabled');
-      this.submitButton.removeAttribute('disabled');
-    },
     onError(event) {
       this.beforeDisplayResults();
 
       const [{ errors }] = convertEventDetail(event);
       this.errors = errors;
 
-      this.enableSubmitButton();
+      this.submitButton.classList.remove('disabled');
+      this.submitButton.removeAttribute('disabled');
     },
     onSuccess(event) {
       this.beforeDisplayResults();
@@ -111,7 +93,6 @@ export default {
       this.form.querySelectorAll('input[type=checkbox]').forEach((el) => {
         el.checked = false;
       });
-      this.enableSubmitButton();
       document.querySelectorAll('.js-token-card').forEach((el) => {
         el.querySelector('.js-add-new-token-form').style.display = '';
         el.querySelector('.js-toggle-button').style.display = 'block';
@@ -134,7 +115,6 @@ export default {
         v-if="newToken"
         variant="success"
         data-testid="success-message"
-        class="gl-mb-5"
         @dismiss="newToken = null"
       >
         <input-copy-toggle-visibility

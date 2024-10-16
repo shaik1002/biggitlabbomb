@@ -8,7 +8,6 @@ class Upload < ApplicationRecord
   CHECKSUM_THRESHOLD = 100.megabytes
 
   belongs_to :model, polymorphic: true # rubocop:disable Cop/PolymorphicAssociations
-  belongs_to :uploaded_by_user, class_name: 'User', optional: true
 
   validates :size, presence: true
   validates :path, presence: true
@@ -18,9 +17,6 @@ class Upload < ApplicationRecord
   scope :with_files_stored_locally, -> { where(store: ObjectStorage::Store::LOCAL) }
   scope :with_files_stored_remotely, -> { where(store: ObjectStorage::Store::REMOTE) }
   scope :for_model_type_and_id, ->(type, id) { where(model_type: type, model_id: id) }
-  scope :for_uploader, ->(uploader_class) { where(uploader: uploader_class.to_s) }
-  scope :order_by_created_at_desc, -> { reorder(created_at: :desc) }
-  scope :preload_uploaded_by_user, -> { preload(:uploaded_by_user) }
 
   before_save :calculate_checksum!, if: :foreground_checksummable?
   # as the FileUploader is not mounted, the default CarrierWave ActiveRecord
@@ -99,7 +95,7 @@ class Upload < ApplicationRecord
   # @return [GitlabUploader] one of the subclasses, defined at the model's uploader attribute
   def retrieve_uploader(mounted_as = nil)
     build_uploader(mounted_as).tap do |uploader|
-      uploader.retrieve_from_store!(filename)
+      uploader.retrieve_from_store!(identifier)
     end
   end
 
@@ -125,9 +121,8 @@ class Upload < ApplicationRecord
 
   def uploader_context
     {
-      identifier: filename,
-      secret: secret,
-      uploaded_by_user_id: uploaded_by_user_id
+      identifier: identifier,
+      secret: secret
     }.compact
   end
 
@@ -143,10 +138,6 @@ class Upload < ApplicationRecord
   # @return [Boolean] whether generating a checksum is needed
   def needs_checksum?
     checksum.nil? && local? && exist?
-  end
-
-  def filename
-    File.basename(path)
   end
 
   private
@@ -169,6 +160,10 @@ class Upload < ApplicationRecord
 
   def uploader_class
     Object.const_get(uploader, false)
+  end
+
+  def identifier
+    File.basename(path)
   end
 
   def mount_point

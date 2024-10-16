@@ -103,7 +103,7 @@ export const truncate = (string, maxLength) => {
  * @param  {String} options.chars string of chars to use as a basis for calculating average width
  * @return {Number}
  */
-const getAverageCharWidth = memoize((options = {}) => {
+const getAverageCharWidth = memoize(function getAverageCharWidth(options = {}) {
   const {
     fontSize = 12,
     fontFamily = 'sans-serif',
@@ -140,8 +140,10 @@ const getAverageCharWidth = memoize((options = {}) => {
  * @return {String} either the original string or a truncated version
  */
 export const truncateWidth = (string, options = {}) => {
-  const { maxWidth = TRUNCATE_WIDTH_DEFAULT_WIDTH, fontSize = TRUNCATE_WIDTH_DEFAULT_FONT_SIZE } =
-    options;
+  const {
+    maxWidth = TRUNCATE_WIDTH_DEFAULT_WIDTH,
+    fontSize = TRUNCATE_WIDTH_DEFAULT_FONT_SIZE,
+  } = options;
   const { truncateIndex } = string.split('').reduce(
     (memo, char, index) => {
       let newIndex = index;
@@ -539,63 +541,3 @@ export const humanizeBranchValidationErrors = (invalidChars = []) => {
  * @returns {String} String without any enclosure
  */
 export const stripQuotes = (value) => value.replace(/^('|")(.*)('|")$/, '$2');
-
-/**
- * Converts a sentence to title case inspite of it being in any case
- * e.g. Hello world => Hello World
- * e.g HELLO WORLD => Hello World
- * e.g. hello World => Hello World
- * e.g. Hello world => Hello World
- * e.g. Hello World => Hello World
- *
- * @param {String} string
- * @returns {String}
- */
-
-export const convertEachWordToTitleCase = (str) => {
-  return str
-    .toLowerCase()
-    .split(' ')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-};
-
-/**
- * Creates a unique string in the context of an array of other strings.
- *
- * @param {String} originalStr String to make unique
- * @param {Array} otherStrings to compare to
- * @param {String} modifier to recursively apply to make the string unique
- *
- * @returns {String} Unique string in the context of the array.
- */
-export const uniquifyString = (originalStr, otherStrings, modifier) =>
-  otherStrings.reduce((acc, uniqueString) => {
-    return uniqueString === acc ? acc + modifier : acc;
-  }, originalStr);
-
-/**
- * Checks if a string contains a search string (with optional wildcards)
- *
- * @param {String} str String to search within
- * @param {String} pattern String to look for (with * representing wildcards)
- *
- * @returns {Boolean} Whether the string matches the search pattern
- */
-export const wildcardMatch = (str, pattern) => {
-  const lowerPattern = pattern.toLowerCase();
-  const lowerStr = str.toLowerCase();
-
-  if (!pattern.includes('*')) return lowerPattern === lowerStr;
-
-  const escapedPattern = lowerPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const regex = new RegExp(`^${escapedPattern.replace(/\\\*/g, '.*')}$`);
-  return regex.test(lowerStr);
-};
-
-export const sha256 = async (str) => {
-  const data = new TextEncoder().encode(str);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
-};

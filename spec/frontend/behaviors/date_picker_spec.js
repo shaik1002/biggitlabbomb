@@ -12,7 +12,7 @@ describe('date_picker behavior', () => {
 
   beforeEach(() => {
     pikadayMock = jest.spyOn(Pikaday, 'default');
-    parseMock = jest.spyOn(utils, 'newDate');
+    parseMock = jest.spyOn(utils, 'parsePikadayDate');
     setHTMLFixture(`
       <div>
         <input class="datepicker" value="2020-10-01" />

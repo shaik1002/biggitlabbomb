@@ -6,7 +6,6 @@ import toast from '~/vue_shared/plugins/global_toast';
 import { __ } from '~/locale';
 import Tracking from '~/tracking';
 import { updateDraft, clearDraft } from '~/lib/utils/autosave';
-import { scrollToTargetOnResize } from '~/lib/utils/resize_observer';
 import { renderMarkdown } from '~/notes/utils';
 import { getLocationHash } from '~/lib/utils/url_utility';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
@@ -14,6 +13,7 @@ import EditedAt from '~/issues/show/components/edited.vue';
 import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';
 import NoteHeader from '~/notes/components/note_header.vue';
 import { i18n, TRACKING_CATEGORY_SHOW } from '../../constants';
+import groupWorkItemByIidQuery from '../../graphql/group_work_item_by_iid.query.graphql';
 import updateWorkItemMutation from '../../graphql/update_work_item.mutation.graphql';
 import updateWorkItemNoteMutation from '../../graphql/notes/update_work_item_note.mutation.graphql';
 import workItemByIidQuery from '../../graphql/work_item_by_iid.query.graphql';
@@ -37,6 +37,7 @@ export default {
     EditedAt,
   },
   mixins: [Tracking.mixin()],
+  inject: ['isGroup'],
   props: {
     fullPath: {
       type: String,
@@ -92,21 +93,6 @@ export default {
       required: false,
       default: false,
     },
-    isDiscussionResolved: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    isDiscussionResolvable: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    isResolving: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
   data() {
     return {
@@ -142,9 +128,6 @@ export default {
     showReply() {
       return this.note.userPermissions.createNote && this.isFirstNote;
     },
-    canResolve() {
-      return this.note.userPermissions.resolveNote && this.isFirstNote && this.hasReplies;
-    },
     noteHeaderClass() {
       return {
         'note-header': true,
@@ -170,10 +153,6 @@ export default {
       return getLocationHash();
     },
     noteUrl() {
-      const routeParamType = this.$route?.params?.type;
-      if (routeParamType && !this.note.url.includes(routeParamType)) {
-        return this.note.url.replace('work_items', routeParamType);
-      }
       return this.note.url;
     },
     hasAwardEmojiPermission() {
@@ -197,18 +176,12 @@ export default {
     isWorkItemConfidential() {
       return this.workItem.confidential;
     },
-    discussionResolvedBy() {
-      return this.note.discussion.resolvedBy;
-    },
-  },
-  mounted() {
-    if (this.isTarget) {
-      scrollToTargetOnResize();
-    }
   },
   apollo: {
     workItem: {
-      query: workItemByIidQuery,
+      query() {
+        return this.isGroup ? groupWorkItemByIidQuery : workItemByIidQuery;
+      },
       variables() {
         return {
           fullPath: this.fullPath,
@@ -357,13 +330,8 @@ export default {
         :work-item-id="workItemId"
         :autofocus="isEditing"
         :is-work-item-confidential="isWorkItemConfidential"
-        :is-discussion-resolved="isDiscussionResolved"
-        :is-discussion-resolvable="isDiscussionResolvable"
-        :has-replies="hasReplies"
-        :full-path="fullPath"
-        class="gl-mt-3 gl-pl-3"
+        class="gl-pl-3 gl-mt-3"
         @cancelEditing="isEditing = false"
-        @toggleResolveDiscussion="$emit('resolve')"
         @submitForm="updateNote"
       />
       <div v-else data-testid="note-wrapper">
@@ -372,12 +340,12 @@ export default {
             :author="author"
             :created-at="note.createdAt"
             :note-id="note.id"
-            :note-url="noteUrl"
+            :note-url="note.url"
             :is-internal-note="note.internal"
           >
             <span v-if="note.createdAt" class="gl-hidden sm:gl-inline">&middot;</span>
           </note-header>
-          <div class="gl-inline-flex">
+          <div class="gl-display-inline-flex">
             <note-actions
               :full-path="fullPath"
               :show-award-emoji="hasAwardEmojiPermission"
@@ -395,14 +363,8 @@ export default {
               :is-author-contributor="note.authorIsContributor"
               :max-access-level-of-author="note.maxAccessLevelOfAuthor"
               :project-name="projectName"
-              :can-resolve="canResolve"
-              :resolvable="isDiscussionResolvable"
-              :is-resolved="isDiscussionResolved"
-              :is-resolving="isResolving"
-              :resolved-by="discussionResolvedBy"
               @startReplying="showReplyForm"
               @startEditing="startEditing"
-              @resolve="$emit('resolve')"
               @error="($event) => $emit('error', $event)"
               @notifyCopyDone="notifyCopyDone"
               @deleteNote="$emit('deleteNote')"

@@ -35,8 +35,7 @@ module Gitlab
       def create_group_with_parents(full_path)
         params = {
           group_path: full_path,
-          visibility_level: destination.visibility_level,
-          organization_id: destination.organization_id
+          visibility_level: destination.visibility_level
         }
 
         Groups::NestedCreateService.new(current_user, params).execute

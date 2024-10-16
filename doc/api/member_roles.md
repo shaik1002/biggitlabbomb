@@ -77,7 +77,6 @@ Example response:
     "manage_project_access_tokens": false,
     "manage_security_policy_link": false,
     "read_code": true,
-    "read_runners": false,
     "read_dependency": false,
     "read_vulnerability": false,
     "remove_group": false,
@@ -116,7 +115,6 @@ Supported attributes:
 | `manage_project_access_tokens` | boolean | no       | Permission to manage project access tokens. |
 | `manage_security_policy_link` | boolean | no       | Permission to link security policy projects. |
 | `read_code`           | boolean | no       | Permission to read project code. |
-| `read_runners`     | boolean | no       | Permission to view project runners. |
 | `read_dependency`     | boolean | no       | Permission to read project dependencies. |
 | `read_vulnerability`  | boolean | no       | Permission to read project vulnerabilities. |
 | `remove_group` | boolean | no       | Permission to delete or restore a group. |
@@ -154,7 +152,6 @@ Example response:
   "manage_project_access_tokens": false,
   "manage_security_policy_link": false,
   "read_code": true,
-  "read_runners": false,
   "read_dependency": false,
   "read_vulnerability": false,
   "remove_group": false,
@@ -176,7 +173,7 @@ Supported attributes:
 |:----------|:--------|:---------|:-------------------------------------|
 | `member_role_id` | integer | yes   | The ID of the member role. |
 
-If successful, returns [`204`](rest/troubleshooting.md#status-codes) and an empty response.
+If successful, returns [`204`](rest/index.md#status-codes) and an empty response.
 
 Example request:
 
@@ -192,7 +189,7 @@ DETAILS:
 
 Prerequisites:
 
-- You must have the Owner role for the group.
+- You must have the Owner role in the group.
 
 Use this API to manage group specific member roles. You can only create member roles at the root level of the group.
 
@@ -206,7 +203,7 @@ Supported attributes:
 
 | Attribute | Type | Required | Description |
 |:----------|:--------|:---------|:-------------------------------------|
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths) of the group |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) of the group |
 
 Example request:
 
@@ -239,7 +236,6 @@ Example response:
     "manage_project_access_tokens": false,
     "manage_security_policy_link": false,
     "read_code": true,
-    "read_runners": false,
     "read_dependency": false,
     "read_vulnerability": false,
     "remove_group": false,
@@ -266,7 +262,6 @@ Example response:
     "manage_project_access_tokens": false,
     "manage_security_policy_link": false,
     "read_code": true,
-    "read_runners": false,
     "read_dependency": true,
     "read_vulnerability": true,
     "remove_group": false,
@@ -289,7 +284,7 @@ Parameters:
 
 | Attribute | Type                | Required | Description |
 |:----------|:--------|:---------|:-------------------------------------|
-| `id`      | integer/string      | yes      | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths) of the group. |
+| `id`      | integer/string      | yes      | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) of the group. |
 | `admin_cicd_variables` | boolean | no       | Permission to create, read, update, and delete CI/CD variables. |
 | `admin_compliance_framework` | boolean | no       | Permission to administer compliance frameworks. |
 | `admin_group_member` | boolean | no       | Permission to add, remove and assign members in a group. |
@@ -305,7 +300,6 @@ Parameters:
 | `manage_project_access_tokens` | boolean | no       | Permission to manage project access tokens. |
 | `manage_security_policy_link` | boolean | no       | Permission to link security policy projects. |
 | `read_code`           | boolean | no       | Permission to read project code. |
-| `read_runners`     | boolean | no       | Permission to view project runners. |
 | `read_dependency`     | boolean | no       | Permission to read project dependencies. |
 | `read_vulnerability`  | boolean | no       | Permission to read project vulnerabilities. |
 | `remove_group` | boolean | no       | Permission to delete or restore a group. |
@@ -341,7 +335,6 @@ Example response:
   "manage_project_access_tokens": false,
   "manage_security_policy_link": false,
   "read_code": true,
-  "read_runners": false,
   "read_dependency": false,
   "read_vulnerability": false,
   "remove_group": false,
@@ -365,10 +358,10 @@ DELETE /groups/:id/member_roles/:member_role_id
 
 | Attribute | Type | Required | Description |
 |:----------|:--------|:---------|:-------------------------------------|
-| `id`      | integer/string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths) of the group. |
+| `id`      | integer/string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) of the group. |
 | `member_role_id` | integer | yes   | The ID of the member role. |
 
-If successful, returns [`204`](rest/troubleshooting.md#status-codes) and an empty response.
+If successful, returns [`204`](rest/index.md#status-codes) and an empty response.
 
 Example request:
 

@@ -1,7 +1,6 @@
 import fs from 'fs';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import { builders } from 'prosemirror-test-builder';
 import Attachment from '~/content_editor/extensions/attachment';
 import DrawioDiagram from '~/content_editor/extensions/drawio_diagram';
 import Image from '~/content_editor/extensions/image';
@@ -11,7 +10,7 @@ import Link from '~/content_editor/extensions/link';
 import { VARIANT_DANGER } from '~/alert';
 import { HTTP_STATUS_INTERNAL_SERVER_ERROR, HTTP_STATUS_OK } from '~/lib/utils/http_status';
 import eventHubFactory from '~/helpers/event_hub_factory';
-import { createTestEditor, expectDocumentAfterTransaction } from '../test_utils';
+import { createTestEditor, createDocBuilder, expectDocumentAfterTransaction } from '../test_utils';
 import {
   PROJECT_WIKI_ATTACHMENT_IMAGE_HTML,
   PROJECT_WIKI_ATTACHMENT_IMAGE_SVG_HTML,
@@ -82,14 +81,17 @@ describe('content_editor/extensions/attachment', () => {
     });
 
     ({
-      doc,
-      paragraph: p,
-      image,
-      audio,
-      video,
-      link,
-      drawioDiagram,
-    } = builders(tiptapEditor.schema));
+      builders: { doc, p, image, audio, video, link, drawioDiagram },
+    } = createDocBuilder({
+      tiptapEditor,
+      names: {
+        image: { nodeType: Image.name },
+        link: { nodeType: Link.name },
+        audio: { nodeType: Audio.name },
+        video: { nodeType: Video.name },
+        drawioDiagram: { nodeType: DrawioDiagram.name },
+      },
+    }));
 
     mock = new MockAdapter(axios);
   });
@@ -110,7 +112,7 @@ describe('content_editor/extensions/attachment', () => {
       },
     });
 
-    renderMarkdown.mockResolvedValue({ body: PROJECT_WIKI_ATTACHMENT_IMAGE_HTML });
+    renderMarkdown.mockResolvedValue(PROJECT_WIKI_ATTACHMENT_IMAGE_HTML);
 
     const event = Object.assign(new Event(eventType), eventData);
     const handled = tiptapEditor.view.someProp(propName, (eventHandler) => {
@@ -136,7 +138,7 @@ describe('content_editor/extensions/attachment', () => {
       ${'drawioDiagram'} | ${PROJECT_WIKI_ATTACHMENT_DRAWIO_DIAGRAM_HTML} | ${drawioDiagramFile} | ${(attrs) => drawioDiagram(attrs)}
     `('when the file is $nodeType', ({ nodeType, html, file, mediaType }) => {
       beforeEach(() => {
-        renderMarkdown.mockResolvedValue({ body: html });
+        renderMarkdown.mockResolvedValue(html);
       });
 
       describe('when uploading succeeds', () => {
@@ -241,7 +243,7 @@ describe('content_editor/extensions/attachment', () => {
 
     describe('when the file is a retina image', () => {
       beforeEach(() => {
-        renderMarkdown.mockResolvedValue({ body: PROJECT_WIKI_ATTACHMENT_IMAGE_HTML });
+        renderMarkdown.mockResolvedValue(PROJECT_WIKI_ATTACHMENT_IMAGE_HTML);
       });
 
       describe('when uploading succeeds', () => {
@@ -280,7 +282,7 @@ describe('content_editor/extensions/attachment', () => {
 
     describe('when the file has a zip (or any other attachment) mime type', () => {
       beforeEach(() => {
-        renderMarkdown.mockResolvedValue({ body: markdownApiResult[attachmentFile.name] });
+        renderMarkdown.mockResolvedValue(markdownApiResult[attachmentFile.name]);
       });
 
       describe('when uploading succeeds', () => {
@@ -375,7 +377,7 @@ describe('content_editor/extensions/attachment', () => {
 
         for (const file of files) {
           renderMarkdown.mockImplementation((markdown) =>
-            Promise.resolve({ body: markdownApiResult[markdown.match(/\((.+?)\)$/)[1]] }),
+            Promise.resolve(markdownApiResult[markdown.match(/\((.+?)\)$/)[1]]),
           );
 
           mock

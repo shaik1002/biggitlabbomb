@@ -29,12 +29,17 @@ describe('CiResourcesListItem', () => {
     resource,
   };
 
-  const createComponent = ({ props = {} } = {}) => {
+  const createComponent = ({ props = {}, withCatalogPopularity = false } = {}) => {
     wrapper = shallowMountExtended(CiResourcesListItem, {
       router,
       propsData: {
         ...defaultProps,
         ...props,
+      },
+      provide: {
+        glFeatures: {
+          ciCatalogPopularity: withCatalogPopularity,
+        },
       },
       stubs: {
         GlSprintf,
@@ -285,37 +290,51 @@ describe('CiResourcesListItem', () => {
       it('has the correct styling', () => {
         expect(findFavorites().classes()).toEqual(['!gl-text-inherit']);
       });
+    });
 
-      describe('when there are no statistics', () => {
-        it('render favorites and usage as 0', () => {
-          createComponent({
-            props: {
-              resource: {
-                ...resource,
-                starCount: 0,
-              },
-            },
-          });
-
-          expect(findFavorites().exists()).toBe(true);
-          expect(findFavorites().text()).toBe('0');
-        });
+    describe('with FF `ci_catalog_popularity` turned on', () => {
+      beforeEach(() => {
+        createComponent({ withCatalogPopularity: true });
       });
 
-      describe('where there are statistics', () => {
-        beforeEach(() => {
-          createComponent();
+      it('renders the statistics', () => {
+        expect(findUsage().exists()).toBe(true);
+        expect(findUsage().text()).toBe('4');
+      });
+    });
+
+    describe('with FF `ci_catalog_popularity` disabled', () => {
+      beforeEach(() => {
+        createComponent();
+      });
+
+      it('renders the statistics', () => {
+        expect(findUsage().exists()).toBe(false);
+      });
+    });
+
+    describe('when there are no statistics', () => {
+      it('render favorites and usage as 0', () => {
+        createComponent({
+          props: {
+            resource: {
+              ...resource,
+              starCount: 0,
+            },
+          },
         });
 
-        it('render favorites', () => {
-          expect(findFavorites().exists()).toBe(true);
-          expect(findFavorites().text()).toBe(String(defaultProps.resource.starCount));
-        });
+        expect(findFavorites().exists()).toBe(true);
+        expect(findFavorites().text()).toBe('0');
+      });
+    });
 
-        it('render usage data', () => {
-          expect(findUsage().exists()).toBe(true);
-          expect(findUsage().text()).toBe('4');
-        });
+    describe('where there are statistics', () => {
+      it('render favorites', () => {
+        createComponent();
+
+        expect(findFavorites().exists()).toBe(true);
+        expect(findFavorites().text()).toBe(String(defaultProps.resource.starCount));
       });
     });
   });

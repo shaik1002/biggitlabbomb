@@ -1,6 +1,5 @@
 <script>
 import {
-  GlBadge,
   GlDisclosureDropdown,
   GlDisclosureDropdownItem,
   GlTooltipDirective,
@@ -21,7 +20,6 @@ import JobItem from './job_item.vue';
 export default {
   components: {
     JobItem,
-    GlBadge,
     GlDisclosureDropdown,
     GlDisclosureDropdownItem,
   },
@@ -73,7 +71,7 @@ export default {
       // This is not an ideal solution, but rather a temporary solution
       // until we find a better solution in
       // https://gitlab.com/gitlab-org/gitlab-ui/-/issues/2615
-      return this.isMobile ? 'bottom-start' : 'right-start';
+      return this.isMobile ? 'left' : 'right-start';
     },
     moreActionsTooltip() {
       return !this.showTooltip ? this.jobStatusText : '';
@@ -132,16 +130,17 @@ export default {
   >
     <template #toggle>
       <button type="button" :class="cssClassJobName" class="gl-w-full gl-bg-transparent gl-pr-4">
-        <div class="gl-flex gl-items-stretch gl-justify-between">
+        <div class="gl-display-flex gl-align-items-stretch gl-justify-content-space-between">
           <job-item
             :type="$options.jobItemTypes.jobDropdown"
             :job="group"
             :stage-name="stageName"
             hide-tooltip
           />
-          <gl-badge variant="muted" class="-gl-ml-5 -gl-mr-2 gl-self-center">
+
+          <div class="gl-font-size-lg -gl-ml-4 gl-align-self-center">
             {{ group.size }}
-          </gl-badge>
+          </div>
         </div>
       </button>
     </template>

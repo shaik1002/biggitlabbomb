@@ -41,7 +41,7 @@ There are multiple ways to enable Silent Mode:
 
 - **Web UI**
 
-  1. On the left sidebar, at the bottom, select **Admin**..
+  1. On the left sidebar, at the bottom, select **Admin Area**..
   1. On the left sidebar, select **Settings > General**.
   1. Expand **Silent Mode**, and toggle **Enable Silent Mode**.
   1. Changes are saved immediately.
@@ -70,7 +70,7 @@ There are multiple ways to disable Silent Mode:
 
 - **Web UI**
 
-  1. On the left sidebar, at the bottom, select **Admin**.
+  1. On the left sidebar, at the bottom, select **Admin Area**.
   1. On the left sidebar, select **Settings > General**.
   1. Expand **Silent Mode**, and toggle **Enable Silent Mode**.
   1. Changes are saved immediately.
@@ -101,13 +101,12 @@ Outbound communications from the following features are silenced by Silent Mode.
 
 | Feature                                                                   | Notes                                                                                                                                                                                                                                                   |
 | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [GitLab Duo](../../user/gitlab_duo_chat/index.md)                         | GitLab Duo features cannot contact external language model providers. |
 | [Project and group webhooks](../../user/project/integrations/webhooks.md) | Triggering webhook tests via the UI results in HTTP status 500 responses.                                                                                                                                                                               |
 | [System hooks](../system_hooks.md)                                        |                                                                                                                                                                                                                                                         |
 | [Remote mirrors](../../user/project/repository/mirror/index.md)           | Pushes to remote mirrors are skipped. Pulls from remote mirrors is skipped.                                                                                                                                                                             |
 | [Executable integrations](../../user/project/integrations/index.md)       | The integrations are not executed.                                                                                                                                                                                                                      |
 | [Service Desk](../../user/project/service_desk/index.md)                  | Incoming emails still raise issues, but the users who sent the emails to Service Desk are not notified of issue creation or comments on their issues.                                                                                                   |
-| Outbound emails                                                           | At the moment when an email should be sent by GitLab, it is instead dropped. It is not queued anywhere.                                                                                                                                                 |
+| Outbound emails                                                           |                                                                                                                                                                                                                                                         |
 | Outbound HTTP requests                                                    | Many HTTP requests are blocked where features are not blocked or skipped explicitly. These may produce errors. If a particular error is problematic for testing during Silent Mode, consult [GitLab Support](https://about.gitlab.com/support/). |
 
 ### Outbound communications that are not silenced
@@ -120,6 +119,6 @@ Outbound communications from the following features are not silenced by Silent M
 | [File hooks](../file_hooks.md)                                                                              |                                                                                                                                                                                                                                                 |
 | [Server hooks](../server_hooks.md)                                                                          |                                                                                                                                                                                                                                                 |
 | [Advanced search](../../integration/advanced_search/elasticsearch.md)                                       | If two GitLab instances are using the same Advanced Search instance, then they can both modify Search data. This is a split-brain scenario which can occur for example after promoting a secondary Geo site while the primary Geo site is live. |
-| [Snowplow](../../operations/product_analytics/index.md)                                                           | There is [a proposal to silence these requests](https://gitlab.com/gitlab-org/gitlab/-/issues/409661).                                                                                                                                          |
+| [Snowplow](../../user/product_analytics/index.md)                                                           | There is [a proposal to silence these requests](https://gitlab.com/gitlab-org/gitlab/-/issues/409661).                                                                                                                                          |
 | [Deprecated Kubernetes Connections](../../user/clusters/agent/index.md)                                     | There is [a proposal to silence these requests](https://gitlab.com/gitlab-org/gitlab/-/issues/396470).                                                                                                                                          |
 | [Container registry webhooks](../packages/container_registry.md#configure-container-registry-notifications) | There is [a proposal to silence these requests](https://gitlab.com/gitlab-org/gitlab/-/issues/409682).                                                                                                                                          |

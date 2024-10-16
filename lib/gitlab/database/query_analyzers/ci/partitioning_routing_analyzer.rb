@@ -23,9 +23,6 @@ module Gitlab
             end
 
             def analyze(parsed)
-              # This analyzer requires the PgQuery parsed query to be present
-              return unless parsed.pg
-
               analyze_legacy_tables_usage(parsed)
             end
 

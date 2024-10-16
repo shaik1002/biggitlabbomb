@@ -14,19 +14,17 @@ class Admin::ImpersonationTokensController < Admin::ApplicationController
 
   def create
     @impersonation_token = finder.build(impersonation_token_params)
-    @impersonation_token.organization = Current.organization
 
     if @impersonation_token.save
-      active_access_tokens = active_impersonation_tokens
       render json: { new_token: @impersonation_token.token,
-                     active_access_tokens: active_access_tokens, total: active_access_tokens.length }, status: :ok
+                     active_access_tokens: active_impersonation_tokens }, status: :ok
     else
       render json: { errors: @impersonation_token.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   def revoke
-    @impersonation_token = finder.find(params.permit(:id)[:id])
+    @impersonation_token = finder.find(params[:id])
 
     if @impersonation_token.revoke!
       flash[:notice] = format(_("Revoked impersonation token %{token_name}!"), token_name: @impersonation_token.name)
@@ -41,16 +39,16 @@ class Admin::ImpersonationTokensController < Admin::ApplicationController
 
   # rubocop: disable CodeReuse/ActiveRecord
   def user
-    @user ||= User.find_by!(username: params.permit(:user_id)[:user_id])
+    @user ||= User.find_by!(username: params[:user_id])
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
   def verify_impersonation_enabled!
-    access_denied! unless helpers.impersonation_tokens_enabled?
+    access_denied! unless helpers.impersonation_enabled?
   end
 
   def finder(options = {})
-    PersonalAccessTokensFinder.new({ user: user, impersonation: true, organization: Current.organization }.merge(options))
+    PersonalAccessTokensFinder.new({ user: user, impersonation: true }.merge(options))
   end
 
   def active_impersonation_tokens

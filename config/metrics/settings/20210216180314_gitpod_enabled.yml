@@ -2,7 +2,7 @@
 data_category: optional
 key_path: gitpod_enabled
 description: Whether Gitpod is enabled in the instance
-product_group: remote_development
+product_group: ide
 value_type: boolean
 status: active
 time_frame: none
@@ -19,4 +19,3 @@ tier:
 - ultimate
 performance_indicator_type: []
 milestone: "<13.9"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/54332

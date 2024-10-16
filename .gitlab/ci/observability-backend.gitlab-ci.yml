@@ -4,6 +4,8 @@
 .e2e-observability-backend-base:
   stage: test
   needs: []
+  extends:
+    - .observability-backend:rules
   inherit:
     variables: false
   variables:
@@ -18,9 +20,7 @@
 # is a different codebase, we match branch names without
 # commit SHA.
 e2e:observability-backend:
-  extends:
-    - .e2e-observability-backend-base
-    - .observability-backend-current-branch:rules
+  extends: .e2e-observability-backend-base
   trigger:
     project: gitlab-org/opstrace/opstrace
     branch: $CI_COMMIT_REF_NAME
@@ -33,9 +33,7 @@ e2e:observability-backend:
 # and this manual job increases dev velocity
 # and testing reliablity.
 e2e:observability-backend-main-branch:
-  extends:
-    - .e2e-observability-backend-base
-    - .observability-backend-main-branch:rules
+  extends: .e2e-observability-backend-base
   trigger:
     project: gitlab-org/opstrace/opstrace
     branch: main

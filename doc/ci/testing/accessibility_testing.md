@@ -21,7 +21,8 @@ The `a11y` job analyzes a defined set of web pages and reports
 accessibility violations, warnings, and notices in a file named
 `accessibility`.
 
-Pa11y uses [WCAG 2.1 rules](https://www.w3.org/TR/WCAG21/#new-features-in-wcag-2-1).
+As of [GitLab 14.5](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/73309), Pa11y uses
+[WCAG 2.1 rules](https://www.w3.org/TR/WCAG21/#new-features-in-wcag-2-1).
 
 ## Accessibility merge request widget
 
@@ -57,8 +58,9 @@ To define the `a11y` job:
 The `a11y` job in your CI/CD pipeline generates these files:
 
 - One HTML report per URL listed in the `a11y_urls` variable.
-- One file containing the collected report data. This
-  file is named `gl-accessibility.json`.
+- One file containing the collected report data. In GitLab versions 12.11 and later, this
+  file is named `gl-accessibility.json`. In GitLab versions 12.10 and earlier, this file
+  is named [`accessibility.json`](https://gitlab.com/gitlab-org/ci-cd/accessibility/-/merge_requests/9).
 
 You can [view job artifacts in your browser](../jobs/job_artifacts.md#download-job-artifacts).
 

@@ -1,18 +1,9 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script>
-import { GlLoadingIcon, GlKeysetPagination } from '@gitlab/ui';
+import { GlCard, GlLoadingIcon, GlIcon, GlButton } from '@gitlab/ui';
 import { fetchPolicies } from '~/lib/graphql';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
 import CreateForm from '../components/form.vue';
-import ListItem from '../components/list_item.vue';
-
-const ENTRIES_PER_PAGE = 10;
-const DEFAULT_PAGINATION = {
-  first: ENTRIES_PER_PAGE,
-  after: null,
-  last: null,
-  before: null,
-};
+import List from '../components/list.vue';
 
 export default {
   apollo: {
@@ -40,11 +31,12 @@ export default {
     },
   },
   components: {
+    GlCard,
+    GlButton,
     GlLoadingIcon,
-    GlKeysetPagination,
-    CrudComponent,
+    GlIcon,
     CreateForm,
-    ListItem,
+    List,
   },
   inject: {
     path: { default: '' },
@@ -55,74 +47,59 @@ export default {
       savedReplies: [],
       count: 0,
       pageInfo: {},
-      pagination: DEFAULT_PAGINATION,
+      pagination: {},
+      showForm: false,
     };
-  },
-  computed: {
-    isLoading() {
-      return this.$apollo.queries.savedReplies.loading;
-    },
   },
   methods: {
     refetchSavedReplies() {
-      this.pagination = DEFAULT_PAGINATION;
+      this.pagination = {};
       this.$apollo.queries.savedReplies.refetch();
-      this.hideForm();
+      this.toggleShowForm();
     },
-    hideForm() {
-      this.$refs.commentCrud.hideForm();
+    changePage(pageInfo) {
+      this.pagination = pageInfo;
     },
-    nextPage(item) {
-      this.pagination = {
-        first: ENTRIES_PER_PAGE,
-        after: item,
-        last: null,
-        before: null,
-      };
-    },
-    prevPage(item) {
-      this.pagination = {
-        first: null,
-        after: null,
-        last: ENTRIES_PER_PAGE,
-        before: item,
-      };
+    toggleShowForm() {
+      this.showForm = !this.showForm;
     },
   },
 };
 </script>
 
 <template>
-  <crud-component
-    ref="commentCrud"
-    :title="__('Comment templates')"
-    icon="comment-lines"
-    :count="count"
-    :toggle-text="__('Add new')"
+  <gl-card
+    class="gl-new-card"
+    header-class="gl-new-card-header"
+    body-class="gl-new-card-body gl-px-0"
   >
-    <template #form>
-      <h4 class="gl-mt-0">{{ __('Add new comment template') }}</h4>
-      <create-form @saved="refetchSavedReplies" @cancel="hideForm" />
-    </template>
-
-    <template #default>
-      <gl-loading-icon v-if="isLoading" size="sm" class="gl-my-5" />
-      <ul v-else-if="savedReplies && savedReplies.length" class="content-list">
-        <list-item v-for="template in savedReplies" :key="template.id" :template="template" />
-      </ul>
-
-      <div v-else class="gl-text-subtle">
-        {{ __('You have no comment templates yet.') }}
+    <template #header>
+      <div class="gl-new-card-title-wrapper" data-testid="title">
+        <h3 class="gl-new-card-title">
+          {{ __('Comment templates') }}
+        </h3>
+        <div class="gl-new-card-count">
+          <gl-icon name="comment-lines" class="gl-mr-2" />
+          {{ count }}
+        </div>
       </div>
+      <gl-button v-if="!showForm" size="small" class="gl-ml-3" @click="toggleShowForm">
+        {{ __('Add new') }}
+      </gl-button>
     </template>
-
-    <template v-if="!isLoading && pageInfo" #pagination>
-      <gl-keyset-pagination
-        v-if="pageInfo.hasPreviousPage || pageInfo.hasNextPage"
-        v-bind="pageInfo"
-        @prev="prevPage"
-        @next="nextPage"
-      />
-    </template>
-  </crud-component>
+    <div v-if="showForm" class="gl-new-card-add-form gl-m-3 gl-mb-4">
+      <h4 class="gl-mt-0">{{ __('Add new comment template') }}</h4>
+      <create-form @saved="refetchSavedReplies" @cancel="toggleShowForm" />
+    </div>
+    <gl-loading-icon v-if="$apollo.queries.savedReplies.loading" size="sm" class="gl-my-5" />
+    <list
+      v-else-if="savedReplies && savedReplies.length"
+      :saved-replies="savedReplies"
+      :page-info="pageInfo"
+      @input="changePage"
+    />
+    <div v-else class="gl-new-card-empty gl-px-5 gl-py-4">
+      {{ __('You have no comment templates yet.') }}
+    </div>
+  </gl-card>
 </template>

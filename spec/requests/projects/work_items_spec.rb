@@ -36,43 +36,14 @@ RSpec.describe 'Work Items', feature_category: :team_planning do
   end
 
   describe 'GET /:namespace/:project/work_items/:id' do
-    context 'when authenticated' do
-      before do
-        sign_in(current_user)
-      end
-
-      it 'renders show' do
-        get project_work_item_url(work_item.project, work_item.iid)
-
-        expect(response).to have_gitlab_http_status(:ok)
-      end
-
-      it 'has correct metadata' do
-        get project_work_item_url(work_item.project, work_item.iid)
-
-        expect(response.body).to include("#{work_item.title} (#{work_item.to_reference})")
-        expect(response.body).to include(work_item.work_item_type.name.pluralize)
-      end
+    before do
+      sign_in(current_user)
     end
 
-    context 'when user cannot read the project' do
-      before do
-        sign_in(current_user)
-        work_item.project.team.truncate
-      end
+    it 'renders show' do
+      get project_work_item_url(work_item.project, work_item.iid)
 
-      it 'renders not found' do
-        get project_work_item_url(work_item.project, work_item.iid)
-
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
-
-      it 'does not include sensitive metadata' do
-        get project_work_item_url(work_item.project, work_item.iid)
-
-        expect(response.body).not_to include("#{work_item.title} (#{work_item.to_reference})")
-        expect(response.body).not_to include(work_item.work_item_type.name.pluralize)
-      end
+      expect(response).to have_gitlab_http_status(:ok)
     end
   end
 

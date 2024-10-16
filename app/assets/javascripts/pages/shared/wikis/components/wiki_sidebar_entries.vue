@@ -4,6 +4,8 @@ import axios from '~/lib/utils/axios_utils';
 import { sidebarEntriesToTree } from '../utils';
 import WikiSidebarEntry from './wiki_sidebar_entry.vue';
 
+const SIDEBAR_LIMIT = 15;
+
 export default {
   components: {
     WikiSidebarEntry,
@@ -24,12 +26,18 @@ export default {
     };
   },
 
+  computed: {
+    countExceedsSidebarLimit() {
+      return this.totalCount > this.$options.SIDEBAR_LIMIT && !this.searchTerm;
+    },
+  },
+
   watch: {
     async searchTerm() {
       this.entries = sidebarEntriesToTree(
-        this.allEntries.filter((entry) =>
-          entry.title.toLowerCase().includes(this.searchTerm.toLowerCase()),
-        ),
+        this.allEntries
+          .filter((entry) => entry.title.toLowerCase().includes(this.searchTerm.toLowerCase()))
+          .slice(0, SIDEBAR_LIMIT),
       );
     },
   },
@@ -41,10 +49,11 @@ export default {
 
     entries = entries.filter((entry) => entry.slug !== '_sidebar');
 
-    this.entries = sidebarEntriesToTree(entries);
+    this.entries = sidebarEntriesToTree(entries.slice(0, SIDEBAR_LIMIT));
     this.totalCount = entries.length;
     this.allEntries = entries;
   },
+  SIDEBAR_LIMIT,
 };
 </script>
 <template>
@@ -64,14 +73,21 @@ export default {
       :page="entry"
       :search-term="searchTerm"
     />
+    <div v-if="countExceedsSidebarLimit" class="gl-text-secondary gl-mt-3 gl-ml-3 gl-inline-block">
+      {{ sprintf(s__('Wiki|+ %{count} more'), { count: totalCount - $options.SIDEBAR_LIMIT }) }}
+      <span class="gl-px-2">&middot;</span>
+    </div>
     <gl-button
       v-if="totalCount"
       category="tertiary"
       size="small"
       variant="link"
       data-testid="view-all-pages-button"
-      class="gl-ml-3 gl-mt-3"
       :href="viewAllPagesPath"
+      :class="{
+        'gl-ml-3 gl-mt-3': !countExceedsSidebarLimit,
+        'gl-mt-n1 gl-inline-block': countExceedsSidebarLimit,
+      }"
     >
       {{ s__('Wiki|View all pages') }}
     </gl-button>

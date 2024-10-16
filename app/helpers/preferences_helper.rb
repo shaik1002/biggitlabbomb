@@ -27,14 +27,8 @@ module PreferencesHelper
 
   # Maps `dashboard` values to more user-friendly option text
   def localized_dashboard_choices
-    projects = if Feature.enabled?(:your_work_projects_vue, current_user)
-                 _("Your Contributed Projects (default)")
-               else
-                 _("Your Projects (default)")
-               end
-
     {
-      projects: projects,
+      projects: _("Your Projects (default)"),
       stars: _("Starred Projects"),
       your_activity: _("Your Activity"),
       project_activity: _("Your Projects' Activity"),
@@ -136,9 +130,9 @@ module PreferencesHelper
 
   def integration_views
     [].tap do |views|
-      views << { name: 'gitpod', message: gitpod_enable_description, message_url: gitpod_url_placeholder, help_link: help_page_path('integration/gitpod.md') } if Gitlab::CurrentSettings.gitpod_enabled
-      views << { name: 'sourcegraph', message: sourcegraph_url_message, message_url: Gitlab::CurrentSettings.sourcegraph_url, help_link: help_page_path('user/profile/preferences.md', anchor: 'sourcegraph') } if Gitlab::Sourcegraph.feature_available? && Gitlab::CurrentSettings.sourcegraph_enabled
-      views << extensions_marketplace_view if WebIde::ExtensionsMarketplace.feature_enabled?(user: current_user)
+      views << { name: 'gitpod', message: gitpod_enable_description, message_url: gitpod_url_placeholder, help_link: help_page_path('integration/gitpod') } if Gitlab::CurrentSettings.gitpod_enabled
+      views << { name: 'sourcegraph', message: sourcegraph_url_message, message_url: Gitlab::CurrentSettings.sourcegraph_url, help_link: help_page_path('user/profile/preferences', anchor: 'sourcegraph') } if Gitlab::Sourcegraph.feature_available? && Gitlab::CurrentSettings.sourcegraph_enabled
+      views << extensions_marketplace_view if Gitlab::WebIde::ExtensionsMarketplace.feature_enabled?(user: current_user)
     end
   end
 
@@ -146,14 +140,14 @@ module PreferencesHelper
 
   def extensions_marketplace_view
     # We handle the linkStart / linkEnd inside of a Vue sprintf
-    extensions_marketplace_home = "%{linkStart}#{::WebIde::ExtensionsMarketplace.marketplace_home_url}%{linkEnd}"
+    extensions_marketplace_home = "%{linkStart}#{::Gitlab::WebIde::ExtensionsMarketplace.marketplace_home_url}%{linkEnd}"
     message = format(s_('PreferencesIntegrations|Uses %{extensions_marketplace_home} as the extension marketplace for the Web IDE.'), extensions_marketplace_home: extensions_marketplace_home)
 
     {
       name: 'extensions_marketplace',
       message: message,
-      message_url: WebIde::ExtensionsMarketplace.marketplace_home_url,
-      help_link: WebIde::ExtensionsMarketplace.help_preferences_url
+      message_url: Gitlab::WebIde::ExtensionsMarketplace.marketplace_home_url,
+      help_link: Gitlab::WebIde::ExtensionsMarketplace.help_preferences_url
     }
   end
 

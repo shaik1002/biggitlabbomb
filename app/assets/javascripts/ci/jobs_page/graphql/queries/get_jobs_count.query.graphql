@@ -1,7 +1,7 @@
-query getJobsCount($fullPath: ID!, $statuses: [CiJobStatus!], $name: String) {
+query getJobsCount($fullPath: ID!, $statuses: [CiJobStatus!]) {
   project(fullPath: $fullPath) {
     id
-    jobs(statuses: $statuses, name: $name) {
+    jobs(statuses: $statuses) {
       count
     }
   }

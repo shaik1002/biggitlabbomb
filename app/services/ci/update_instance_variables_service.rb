@@ -7,8 +7,7 @@ module Ci
   class UpdateInstanceVariablesService
     UNASSIGNABLE_KEYS = %w[id _destroy].freeze
 
-    def initialize(params, current_user)
-      @current_user = current_user
+    def initialize(params)
       @params = params[:variables_attributes]
     end
 
@@ -23,7 +22,7 @@ module Ci
 
     private
 
-    attr_reader :params, :current_user
+    attr_reader :params
 
     def existing_records_by_id
       @existing_records_by_id ||= Ci::InstanceVariable
@@ -50,29 +49,20 @@ module Ci
       end
     end
 
-    # overridden in EE
-    def audit_change(instance_variable); end
-
     def persist_records
-      changes = []
-      success = false
-
       Ci::InstanceVariable.transaction do
-        changes = @records.map do |record|
+        success = @records.map do |record|
           if record.marked_for_destruction?
-            { action: record.destroy, record: record }
+            record.destroy
           else
-            { action: record.save, record: record }
+            record.save
           end
-        end
-        success = changes.all? { |change| change[:action] }
+        end.all?
 
         raise ActiveRecord::Rollback unless success
+
+        success
       end
-
-      changes.each { |change| audit_change change[:record] }
-
-      success
     end
 
     def has_destroy_flag?(hash)
@@ -80,4 +70,3 @@ module Ci
     end
   end
 end
-Ci::UpdateInstanceVariablesService.prepend_mod

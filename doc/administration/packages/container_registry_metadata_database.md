@@ -9,9 +9,15 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** Self-managed
+**Status:** Beta
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/423459) in GitLab 16.4 as a [beta feature](../../policy/experiment-beta-support.md) for self-managed GitLab instances.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/423459) in GitLab 17.3.
+
+WARNING:
+The metadata database is a [beta feature](../../policy/experiment-beta-support.md#beta).
+Carefully review the documentation before enabling the registry database in production!
+If you encounter a problem with either the import or operation of the
+registry, please add a comment in the [feedback issue](https://gitlab.com/gitlab-org/gitlab/-/issues/423459).
 
 The metadata database enables many new registry features, including
 online garbage collection, and increases the efficiency of many registry operations.
@@ -27,9 +33,6 @@ which removes old data automatically with zero downtime.
 
 This database works in conjunction with the object storage already used by the registry, but does not replace object storage.
 You must continue to maintain an object storage solution even after migrating to a metadata database.
-
-For Helm Charts installations, see [Manage the container registry metadata database](https://docs.gitlab.com/charts/charts/registry/metadata_database.html#create-the-database)
-in the Helm Charts documentation.
 
 ## Known Limitations
 
@@ -50,7 +53,7 @@ for the status of features related to the container registry database.
 
 Prerequisites:
 
-- GitLab 17.3 or later.
+- GitLab 16.7 or later.
 - PostgreSQL database version 12 or later. It must be accessible from the registry node.
 
 Follow the instructions that match your situation:
@@ -126,14 +129,6 @@ A few factors affect the duration of the migration:
 - The specifications of your PostgresSQL instance.
 - The number of registry instances running.
 - Network latency between the registry, PostgresSQL and your configured Object Storage.
-
-NOTE:
-The migration only targets tagged images. Untagged and unreferenced manifests, and the layers
-exclusively referenced by them, are left behind and become inaccessible. Untagged images
-were never visible through the GitLab UI or API, but they can become "dangling" and
-left behind in the backend. After migration to the new registry, all images are subject
-to continuous online garbage collection, by default deleting any untagged and unreferenced manifests
-and layers that remain for longer than 24 hours.
 
 Choose the one or three step method according to your registry installation.
 
@@ -360,14 +355,6 @@ sudo gitlab-ctl registry-database import --step-three
 
 After that command exists successfully, the registry is now fully migrated to the database!
 
-#### Post Migration
-
-It may take approximately 48 hours post migration to see your registry storage
-decrease. This is a normal and expected part of online garbage collection, as this
-delay ensures that online garbage collection does not interfere with image pushes.
-Check out the [monitor online garbage collection](#online-garbage-collection-monitoring) section
-to see how to monitor the progress and health of the online garbage collector.
-
 ## Manage schema migrations
 
 Use the following commands to run the schema migrations for the Container registry metadata database.
@@ -422,8 +409,6 @@ pay special attention to logs filtered by `component=registry.gc.*`.
 Use monitoring tools like Prometheus and Grafana to visualize and track garbage collection metrics,
 focusing on metrics with a prefix of `registry_gc_*`. These include the number of objects
 marked for deletion, objects successfully deleted, run intervals, and durations.
-See [enable the registry debug server](container_registry_troubleshooting.md#enable-the-registry-debug-server)
-for how to enable Prometheus.
 
 ### Queue monitoring
 
@@ -492,21 +477,9 @@ because it only deletes untagged images.
 Implement cleanup policies to remove unneeded tags, which eventually causes images
 to be removed through garbage collection and storage space being recovered.
 
-## Backup with metadata database
-
-When the metadata database is enabled, backups must capture both the object storage
-used by the registry, as before, but also the database. Backups of object storage
-and the database should be coordinated to capture the state of the registry as close as possible
-to each other. To restore the registry, you must apply both backups together.
-
-## Downgrade a registry
-
-To downgrade the registry to a previous version after the migration is complete,
-you must restore to a backup of the desired version in order to downgrade.
-
 ## Troubleshooting
 
-### Error: `there are pending database migrations`
+### `there are pending database migrations` error
 
 If the registry has been updated and there are pending schema migrations,
 the registry fails to start with the following error message:
@@ -517,7 +490,7 @@ FATA[0000] configuring application: there are pending database migrations, use t
 
 To fix this issue, follow the steps to [apply schema migrations](#apply-schema-migrations).
 
-### Error: `offline garbage collection is no longer possible`
+### `offline garbage collection is no longer possible` error
 
 If the registry uses the metadata database and you try to run
 [offline garbage collection](container_registry.md#container-registry-garbage-collection),
@@ -532,139 +505,3 @@ You must either:
 - Stop using offline garbage collection.
 - If you no longer use the metadata database, delete the indicated lock file at the `lock_path` shown in the error message.
   For example, remove the `/docker/registry/lockfiles/database-in-use` file.
-
-### Error: `cannot execute <STATEMENT> in a read-only transaction`
-
-The registry could fail to [apply schema migrations](#apply-schema-migrations)
-with the following error message:
-
-```shell
-err="ERROR: cannot execute CREATE TABLE in a read-only transaction (SQLSTATE 25006)"
-```
-
-Also, the registry could fail with the following error message if you try to run
-[online garbage collection](container_registry.md#performing-garbage-collection-without-downtime):
-
-```shell
-error="processing task: fetching next GC blob task: scanning GC blob task: ERROR: cannot execute SELECT FOR UPDATE in a read-only transaction (SQLSTATE 25006)"
-```
-
-You must verify that read-only transactions are disabled by checking the values of
-`default_transaction_read_only` and `transaction_read_only` in the PostgreSQL console.
-For example:
-
-```sql
-# SHOW default_transaction_read_only;
- default_transaction_read_only
- -------------------------------
- on
-(1 row)
-
-# SHOW transaction_read_only;
- transaction_read_only
- -----------------------
- on
-(1 row)
-```
-
-If either of these values is set to `on`, you must disable it:
-
-1. Edit your `postgresql.conf` and set the following value:
-
-   ```shell
-   default_transaction_read_only=off
-   ```
-
-1. Restart your Postgres server to apply these settings.
-1. Try to [apply schema migrations](#apply-schema-migrations) again, if applicable.
-1. Restart the registry `sudo gitlab-ctl restart registry`.
-
-### Error: `cannot import all repositories while the tags table has entries`
-
-If you try to [migrate existing registries](#existing-registries) and encounter the following error:
-
-```shell
-ERRO[0000] cannot import all repositories while the tags table has entries, you must truncate the table manually before retrying,
-see https://docs.gitlab.com/ee/administration/packages/container_registry_metadata_database.html#troubleshooting
-common_blobs=true dry_run=false error="tags table is not empty"
-```
-
-This error happens when there are existing entries in the `tags` table of the registry database,
-which can happen if you:
-
-- Attempted the [one step migration](#one-step-migration) and encountered errors.
-- Attempted the [three-step migration](#three-step-migration) process and encountered errors.
-- Stopped the migration process on purpose.
-- Tried to run the migration again after any of the above.
-- Ran the migration against the wrong configuration file.
-
-To resolve this issue, you must delete the existing entries in the tags table.
-You must truncate the table manually on your PostgreSQL instance:
-
-1. Edit `/etc/gitlab/gitlab.rb` and ensure the metadata database is **disabled**:
-
-   ```ruby
-   registry['database'] = {
-     'enabled' => false,
-     'host' => 'localhost',
-     'port' => 5432,
-     'user' => 'registry-database-user',
-     'password' => 'registry-database-password',
-     'dbname' => 'registry-database-name',
-     'sslmode' => 'require', # See the PostgreSQL documentation for additional information https://www.postgresql.org/docs/current/libpq-ssl.html.
-     'sslcert' => '/path/to/cert.pem',
-     'sslkey' => '/path/to/private.key',
-     'sslrootcert' => '/path/to/ca.pem'
-   }
-   ```
-
-1. Connect to your registry database using a PostgreSQL client.
-1. Truncate the `tags` table to remove all existing entries:
-
-   ```sql
-   TRUNCATE TABLE tags RESTART IDENTITY CASCADE;
-   ```
-
-1. After truncating the `tags` table, try running the migration process again.
-
-### Error: `database-in-use lockfile exists`
-
-If you try to [migrate existing registries](#existing-registries) and encounter the following error:
-
-```shell
-|  [0s] step two: import tags failed to import metadata: importing all repositories: 1 error occurred:
-    * could not restore lockfiles: database-in-use lockfile exists
-```
-
-This error means that you have previously imported the registry and completed importing all
-repository data (step two) and the `database-in-use` exists in the registry file system.
-You should not run the importer again if you encounter this issue.
-
-If you must proceed, you must delete the `database-in-use` lock file manually from the file system.
-The file is located at `/path/to/rootdirectory/docker/registry/lockfiles/database-in-use`.
-
-### Registry fails to start due to metadata management issues
-
-The registry could fail to start with of the following errors:
-
-#### Error: `registry filesystem metadata in use, please import data before enabling the database`
-
-This error happens when the database is enabled in your configuration `registry['database'] = { 'enabled' => true}`
-but you have not [migrated existing data](#existing-registries) to the metadata database yet.
-
-#### Error: `registry metadata database in use, please enable the database`
-
-This error happens when you have completed [migrating existing data](#existing-registries) to the metadata database, 
-but you have not enabled the database in your configuration.
-
-#### Problems checking or creating the lock files
-
-If you encounter any of the following errors:
-
-- `could not check if filesystem metadata is locked`
-- `could not check if database metadata is locked`
-- `failed to mark filesystem for database only usage`
-- `failed to mark filesystem only usage`
-
-The registry cannot access the configured `rootdirectory`. This error is unlikely to happen if you
-had a working registry previously. Review the error logs for any misconfiguration issues.

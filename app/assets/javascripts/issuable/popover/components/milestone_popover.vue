@@ -8,7 +8,8 @@ import {
   GlBadge,
 } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
-import { humanTimeframe, localeDateFormat, newDate } from '~/lib/utils/datetime_utility';
+import { humanTimeframe, dateInWords } from '~/lib/utils/datetime/date_format_utility';
+import { parsePikadayDate } from '~/lib/utils/datetime/pikaday_utility';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import {
   TYPE_MILESTONE,
@@ -119,18 +120,26 @@ export default {
       const today = new Date();
       let timeframe = '';
       if (startDate && dueDate) {
-        timeframe = humanTimeframe(newDate(startDate), newDate(dueDate));
+        timeframe = humanTimeframe(startDate, dueDate);
       } else if (startDate && !dueDate) {
-        const parsedStartDate = newDate(startDate);
-        const startDateInWords = localeDateFormat.asDate.format(parsedStartDate);
+        const parsedStartDate = parsePikadayDate(startDate);
+        const startDateInWords = dateInWords(
+          parsedStartDate,
+          true,
+          parsedStartDate.getFullYear === today.getFullYear(),
+        );
         if (parsedStartDate.getTime() > today.getTime()) {
           timeframe = sprintf(__('Starts %{startDate}'), { startDate: startDateInWords });
         } else {
           timeframe = sprintf(__('Started %{startDate}'), { startDate: startDateInWords });
         }
       } else if (!startDate && dueDate) {
-        const parsedDueDate = newDate(dueDate);
-        const dueDateInWords = localeDateFormat.asDate.format(parsedDueDate);
+        const parsedDueDate = parsePikadayDate(dueDate);
+        const dueDateInWords = dateInWords(
+          parsedDueDate,
+          true,
+          parsedDueDate.getFullYear === today.getFullYear(),
+        );
         if (parsedDueDate.getTime() > today.getTime()) {
           timeframe = sprintf(__('Ends %{dueDate}'), { dueDate: dueDateInWords });
         } else {
@@ -162,11 +171,11 @@ export default {
     :css-classes="['gl-min-w-fit']"
     show
   >
-    <div class="gl-flex gl-items-center gl-gap-2">
+    <div class="gl-display-flex gl-align-items-center gl-gap-2">
       <gl-badge v-if="!loading && showDetails" :variant="status.variant">{{
         status.text
       }}</gl-badge>
-      <span class="gl-flex gl-text-secondary" data-testid="milestone-label">
+      <span class="gl-text-secondary gl-display-flex" data-testid="milestone-label">
         <gl-icon name="milestone" class="gl-mr-1" /> {{ __('Milestone') }}
       </span>
       <span v-if="showTimeframe" class="gl-text-secondary" data-testid="milestone-timeframe"
@@ -179,15 +188,15 @@ export default {
     <h5 class="gl-my-3 gl-max-w-30">{{ title }}</h5>
     <div
       v-if="!loading && showProgress"
-      class="gl-mt-2 gl-flex gl-items-center gl-gap-2"
+      class="gl-display-flex gl-align-items-center gl-gap-2 gl-mt-2"
       data-testid="milestone-progress"
     >
-      <gl-progress-bar :value="progress" variant="primary" class="gl-h-3 gl-grow" />
+      <gl-progress-bar :value="progress" variant="primary" class="gl-flex-grow-1 gl-h-3" />
       <span>{{ percentageComplete }}</span>
     </div>
     <div
       v-if="showDetails"
-      class="gl-mt-2 gl-flex gl-items-center gl-gap-2"
+      class="gl-display-flex gl-align-items-center gl-gap-2 gl-mt-2"
       data-testid="milestone-path"
     >
       <gl-icon :name="milestoneParentIcon" class="gl-mr-1" />

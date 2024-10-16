@@ -11,23 +11,16 @@ module Users
     def execute
       credit_card = Users::CreditCardValidation.find_or_initialize_by_user(user_id)
 
-      credit_card_attributes = {
+      credit_card_params = {
         credit_card_validated_at: credit_card_validated_at,
         last_digits: last_digits,
         holder_name: holder_name,
         network: network,
         expiration_date: expiration_date,
-        zuora_payment_method_xid: zuora_payment_method_xid,
-        stripe_setup_intent_xid: stripe_setup_intent_xid,
-        stripe_payment_method_xid: stripe_payment_method_xid,
-        stripe_card_fingerprint: stripe_card_fingerprint
+        zuora_payment_method_xid: zuora_payment_method_xid
       }
 
-      credit_card.assign_attributes(credit_card_attributes)
-
-      return blocked if credit_card.exceeded_daily_verification_limit?
-
-      credit_card.save!
+      credit_card.update!(credit_card_params)
 
       success
     rescue ActiveRecord::InvalidForeignKey, ActiveRecord::NotNullViolation, ActiveRecord::RecordInvalid
@@ -63,18 +56,6 @@ module Users
       params[:zuora_payment_method_xid]
     end
 
-    def stripe_setup_intent_xid
-      params[:stripe_setup_intent_xid]
-    end
-
-    def stripe_payment_method_xid
-      params[:stripe_payment_method_xid]
-    end
-
-    def stripe_card_fingerprint
-      params[:stripe_card_fingerprint]
-    end
-
     def expiration_date
       year = params.fetch(:credit_card_expiration_year)
       month = params.fetch(:credit_card_expiration_month)
@@ -88,10 +69,6 @@ module Users
 
     def error
       ServiceResponse.error(message: _('Error saving credit card validation record'))
-    end
-
-    def blocked
-      ServiceResponse.error(message: 'Credit card verification limit exceeded', reason: :rate_limited)
     end
   end
 end

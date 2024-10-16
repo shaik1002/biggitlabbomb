@@ -23,9 +23,9 @@ the tiers are no longer mentioned in GitLab documentation:
   - [Setting a default template for merge requests and issues](../user/project/description_templates.md#set-a-default-template-for-merge-requests-and-issues)
 - [Email from GitLab](../administration/email_from_gitlab.md)
 - Groups:
-  - [Creating group memberships with a CN](../user/group/access_and_permissions.md#create-group-links-with-a-cn)
+  - [Creating group memberships via CN](../user/group/access_and_permissions.md#create-group-links-via-cn)
   - [Group push rules](../user/group/access_and_permissions.md#group-push-rules)
-  - [Managing group memberships with LDAP](../user/group/access_and_permissions.md#manage-group-memberships-with-ldap)
+  - [Managing group memberships via LDAP](../user/group/access_and_permissions.md#manage-group-memberships-via-ldap)
   - [Member locking](../user/group/access_and_permissions.md#prevent-members-from-being-added-to-projects-in-a-group)
   - [Overriding user permissions](../user/group/access_and_permissions.md#override-user-permissions)
   - [User contribution analytics](../user/group/contribution_analytics/index.md)
@@ -65,17 +65,17 @@ the tiers are no longer mentioned in GitLab documentation:
 - Merge requests:
   - [Full code quality reports in the code quality tab](../ci/testing/code_quality.md#pipeline-details-view)
   - [Merge request approvals](../user/project/merge_requests/approvals/index.md)
-  - [Multiple assignees](../user/project/merge_requests/index.md#assign-a-user-to-a-merge-request)
+  - [Multiple assignees](../user/project/merge_requests/index.md#assign-multiple-users)
   - [Approval rule information for reviewers](../user/project/merge_requests/reviews/index.md#see-how-reviewers-map-to-approval-rules)
   - [Required Approvals](../user/project/merge_requests/approvals/index.md#required-approvals)
   - [Code Owners as eligible approvers](../user/project/merge_requests/approvals/rules.md#code-owners-as-eligible-approvers)
   - [Approval rules](../user/project/merge_requests/approvals/rules.md) features
-  - [Restricting push and merge access to certain users](../user/project/repository/branches/protected.md)
+  - [Restricting push and merge access to certain users](../user/project/protected_branches.md)
 - Metrics and analytics:
   - [Contribution Analytics](../user/group/contribution_analytics/index.md)
   - [Merge Request Analytics](../user/analytics/merge_request_analytics.md)
   - [Code Review Analytics](../user/analytics/code_review_analytics.md)
-  - [Audit events](../administration/audit_event_reports.md)
+  - [Audit Events](../administration/audit_event_reports.md)
 - Rake tasks:
   - [Displaying GitLab license information](../administration/raketasks/maintenance.md#show-gitlab-license-information)
 - Reference Architecture information:
@@ -105,7 +105,7 @@ the tiers are no longer mentioned in GitLab documentation:
   - [Filtering merge requests](../user/project/merge_requests/index.md#filter-the-list-of-merge-requests) by "approved by"
   - [Advanced search (Elasticsearch)](../user/search/advanced_search.md)
 - [Service Desk](../user/project/service_desk/index.md)
-- [Storage usage statistics](../user/storage_usage_quotas.md)
+- [Storage usage statistics](../user/usage_quotas.md)
 
 The following developer features continue to be available to Starter and
 Bronze-level subscribers:
@@ -114,8 +114,8 @@ Bronze-level subscribers:
   - LDAP synchronization:
     - Certain fields in the [group details API](../api/groups.md#details-of-a-group)
     - [syncing groups](../api/groups.md#sync-group-with-ldap)
-    - Listing, adding, and deleting [group links](../api/group_ldap_links.md)
-    - [Push rules](../api/group_push_rules.md)
+    - Listing, adding, and deleting [group links](../api/groups.md#list-ldap-group-links)
+    - [Push rules](../api/groups.md#push-rules)
     - [Audit events](../api/audit_events.md), including
       [group audit events](../api/groups.md#group-audit-events) and
       [project audit events](../api/audit_events.md#project-audit-events)

@@ -1,64 +1,150 @@
+import $ from 'jquery';
+import htmlSnippetsShow from 'test_fixtures/snippets/show.html';
 import { setHTMLFixture, resetHTMLFixture } from 'helpers/fixtures';
-import { initQuickSubmit } from '~/behaviors/quick_submit';
-import { ENTER_KEY } from '~/lib/utils/keys';
+import '~/behaviors/quick_submit';
 
 describe('Quick Submit behavior', () => {
-  let buttonSpy;
+  let testContext;
 
-  const findButton = () => document.querySelector('button');
-  const findForm = () => document.querySelector('form');
+  const keydownEvent = (options = { keyCode: 13, metaKey: true }) => $.Event('keydown', options);
 
   beforeEach(() => {
-    setHTMLFixture(`
-      <form action="/foo" class="js-quick-submit">
-        <input type="text" />
-        <textarea></textarea>
-        <button type="submit" value="Submit" />
-      </form>
-    `);
-    initQuickSubmit();
-    buttonSpy = jest.spyOn(findButton(), 'click').mockImplementation(() => {});
+    setHTMLFixture(htmlSnippetsShow);
+
+    testContext = {};
+
+    testContext.spies = {
+      submit: jest.fn(),
+    };
+
+    $('form').submit((e) => {
+      // Prevent a form submit from moving us off the testing page
+      e.preventDefault();
+      // Explicitly call the spie to know this function get's not called
+      testContext.spies.submit();
+    });
+    testContext.textarea = $('.js-quick-submit textarea').first();
   });
 
   afterEach(() => {
     resetHTMLFixture();
   });
 
-  it('submits form with Ctrl+Enter', () => {
-    findForm().dispatchEvent(new KeyboardEvent('keydown', { code: ENTER_KEY, ctrlKey: true }));
+  it('does not respond to other keyCodes', () => {
+    testContext.textarea.trigger(
+      keydownEvent({
+        keyCode: 32,
+      }),
+    );
 
-    expect(buttonSpy).toHaveBeenCalled();
+    expect(testContext.spies.submit).not.toHaveBeenCalled();
   });
 
-  it('submits form with Cmd+Enter', () => {
-    findForm().dispatchEvent(new KeyboardEvent('keydown', { code: ENTER_KEY, metaKey: true }));
+  it('does not respond to Enter alone', () => {
+    testContext.textarea.trigger(
+      keydownEvent({
+        ctrlKey: false,
+        metaKey: false,
+      }),
+    );
 
-    expect(buttonSpy).toHaveBeenCalled();
+    expect(testContext.spies.submit).not.toHaveBeenCalled();
   });
 
-  it('does not submit form with Alt+Enter', () => {
-    findForm().dispatchEvent(new KeyboardEvent('keydown', { code: ENTER_KEY, altKey: true }));
+  it('does not respond to repeated events', () => {
+    testContext.textarea.trigger(
+      keydownEvent({
+        repeat: true,
+      }),
+    );
 
-    expect(buttonSpy).not.toHaveBeenCalled();
+    expect(testContext.spies.submit).not.toHaveBeenCalled();
   });
 
-  it('does not submit form with Shift+Enter', () => {
-    findForm().dispatchEvent(new KeyboardEvent('keydown', { code: ENTER_KEY, shiftKey: true }));
+  it('disables submit', () => {
+    const submitButton = $('.js-quick-submit [type=submit]');
+    testContext.textarea.trigger(keydownEvent());
 
-    expect(buttonSpy).not.toHaveBeenCalled();
+    expect(submitButton).toBeDisabled();
   });
 
-  it('does not submit form with only Enter', () => {
-    findForm().dispatchEvent(new KeyboardEvent('keydown', { code: ENTER_KEY }));
+  it('only clicks one submit', () => {
+    const existingSubmit = $('.js-quick-submit [type=submit]');
+    // Add an extra submit button
+    const newSubmit = $('<button type="submit">Submit it</button>');
+    newSubmit.insertAfter(testContext.textarea);
 
-    expect(buttonSpy).not.toHaveBeenCalled();
+    const spies = {
+      oldClickSpy: jest.fn(),
+      newClickSpy: jest.fn(),
+    };
+    existingSubmit.on('click', () => {
+      spies.oldClickSpy();
+    });
+    newSubmit.on('click', () => {
+      spies.newClickSpy();
+    });
+
+    testContext.textarea.trigger(keydownEvent());
+
+    expect(spies.oldClickSpy).not.toHaveBeenCalled();
+    expect(spies.newClickSpy).toHaveBeenCalled();
   });
+  // We cannot stub `navigator.userAgent` for CI's `rake karma` task, so we'll
+  // only run the tests that apply to the current platform
+  if (navigator.userAgent.match(/Macintosh/)) {
+    describe('In Macintosh', () => {
+      it('responds to Meta+Enter', () => {
+        testContext.textarea.trigger(keydownEvent());
 
-  it('disables button after form submission', () => {
-    expect(findButton().disabled).toBe(false);
+        expect(testContext.spies.submit).toHaveBeenCalled();
+      });
 
-    findForm().dispatchEvent(new KeyboardEvent('keydown', { code: ENTER_KEY, metaKey: true }));
+      it('excludes other modifier keys', () => {
+        testContext.textarea.trigger(
+          keydownEvent({
+            altKey: true,
+          }),
+        );
+        testContext.textarea.trigger(
+          keydownEvent({
+            ctrlKey: true,
+          }),
+        );
+        testContext.textarea.trigger(
+          keydownEvent({
+            shiftKey: true,
+          }),
+        );
 
-    expect(findButton().disabled).toBe(true);
-  });
+        expect(testContext.spies.submit).not.toHaveBeenCalled();
+      });
+    });
+  } else {
+    it('responds to Ctrl+Enter', () => {
+      testContext.textarea.trigger(keydownEvent());
+
+      expect(testContext.spies.submit).toHaveBeenCalled();
+    });
+
+    it('excludes other modifier keys', () => {
+      testContext.textarea.trigger(
+        keydownEvent({
+          altKey: true,
+        }),
+      );
+      testContext.textarea.trigger(
+        keydownEvent({
+          metaKey: true,
+        }),
+      );
+      testContext.textarea.trigger(
+        keydownEvent({
+          shiftKey: true,
+        }),
+      );
+
+      expect(testContext.spies.submit).not.toHaveBeenCalled();
+    });
+  }
 });

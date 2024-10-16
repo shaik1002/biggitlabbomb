@@ -2,9 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Mutations::AlertManagement::UpdateAlertStatus, feature_category: :api do
-  include GraphqlHelpers
-
+RSpec.describe Mutations::AlertManagement::UpdateAlertStatus do
   let_it_be(:current_user) { create(:user) }
   let_it_be(:alert) { create(:alert_management_alert, :triggered) }
   let_it_be(:project) { alert.project }
@@ -82,7 +80,7 @@ RSpec.describe Mutations::AlertManagement::UpdateAlertStatus, feature_category: 
 
   private
 
-  def mutation_for(project, _user)
-    described_class.new(object: project, context: query_context, field: nil)
+  def mutation_for(project, user)
+    described_class.new(object: project, context: { current_user: user }, field: nil)
   end
 end

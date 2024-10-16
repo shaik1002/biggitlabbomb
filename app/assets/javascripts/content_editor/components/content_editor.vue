@@ -1,8 +1,6 @@
 <script>
 import { GlButton, GlTooltipDirective } from '@gitlab/ui';
 import { EditorContent as TiptapEditorContent } from '@tiptap/vue-2';
-import { isEqual } from 'lodash';
-import { markRaw } from '~/lib/utils/vue3compat/mark_raw';
 import { __ } from '~/locale';
 import { VARIANT_DANGER } from '~/alert';
 import EditorModeSwitcher from '~/vue_shared/components/markdown/editor_mode_switcher.vue';
@@ -127,11 +125,6 @@ export default {
     },
   },
   watch: {
-    autocompleteDataSources(newDataSources, oldDataSources) {
-      if (!isEqual(newDataSources, oldDataSources)) {
-        this.contentEditor.updateAutocompleteDataSources(newDataSources);
-      }
-    },
     markdown(markdown) {
       if (markdown !== this.latestMarkdown) {
         this.setSerializedContent(markdown);
@@ -156,23 +149,21 @@ export default {
     } = this;
 
     // This is a non-reactive attribute intentionally since this is a complex object.
-    this.contentEditor = markRaw(
-      createContentEditor({
-        renderMarkdown,
-        uploadsPath,
-        extensions,
-        serializerConfig,
-        drawioEnabled,
-        enableAutocomplete,
-        autocompleteDataSources,
-        codeSuggestionsConfig,
-        sidebarMediator: SidebarMediator.singleton,
-        tiptapOptions: {
-          autofocus,
-          editable,
-        },
-      }),
-    );
+    this.contentEditor = createContentEditor({
+      renderMarkdown,
+      uploadsPath,
+      extensions,
+      serializerConfig,
+      drawioEnabled,
+      enableAutocomplete,
+      autocompleteDataSources,
+      codeSuggestionsConfig,
+      sidebarMediator: SidebarMediator.singleton,
+      tiptapOptions: {
+        autofocus,
+        editable,
+      },
+    });
   },
   async mounted() {
     this.$emit('initialized');
@@ -264,7 +255,7 @@ export default {
           :hide-attachment-button="disableAttachments"
           @enableMarkdownEditor="$emit('enableMarkdownEditor')"
         />
-        <div v-if="showPlaceholder" class="gl-absolute gl-px-5 gl-pt-4 gl-text-gray-400">
+        <div v-if="showPlaceholder" class="gl-absolute gl-text-gray-400 gl-px-5 gl-pt-4">
           {{ placeholder }}
         </div>
         <tiptap-editor-content
@@ -280,7 +271,7 @@ export default {
         <reference-bubble-menu />
       </div>
       <div
-        class="gl-border-t gl-flex gl-flex-row gl-items-center gl-justify-between gl-rounded-bl-base gl-rounded-br-base gl-border-gray-100 gl-px-2 gl-text-secondary"
+        class="gl-display-flex gl-display-flex gl-flex-direction-row gl-justify-content-space-between gl-align-items-center gl-rounded-bottom-left-base gl-rounded-bottom-right-base gl-px-2 gl-border-t gl-border-gray-100 gl-text-secondary"
       >
         <editor-mode-switcher size="small" value="richText" @switch="handleEditorModeChanged" />
         <gl-button
@@ -292,7 +283,7 @@ export default {
           size="small"
           :title="__('Markdown is supported')"
           :aria-label="__('Markdown is supported')"
-          class="!gl-px-3"
+          class="gl-px-3!"
         />
       </div>
     </div>

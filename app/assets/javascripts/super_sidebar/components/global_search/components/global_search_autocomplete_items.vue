@@ -51,7 +51,7 @@ export default {
     ISSUES_GROUP_TITLE,
     PAGES_GROUP_TITLE,
     GROUPS_GROUP_TITLE,
-    MERGE_REQUESTS_GROUP_TITLE: s__('GlobalSearch|Merge requests'),
+    MERGE_REQUESTS_GROUP_TITLE: s__('GlobalSearch|Merge Requests'),
     RECENT_ISSUES_GROUP_TITLE: s__('GlobalSearch|Recent issues'),
     RECENT_EPICS_GROUP_TITLE: s__('GlobalSearch|Recent epics'),
     RECENT_MERGE_REQUESTS_GROUP_TITLE: s__('GlobalSearch|Recent merge requests'),
@@ -79,7 +79,8 @@ export default {
             return {
               ...item,
               extraAttrs: {
-                class: 'show-hover-layover gl-flex gl-items-center gl-justify-between',
+                class:
+                  'show-hover-layover gl-display-flex gl-align-items-center gl-justify-content-space-between',
               },
             };
           }),
@@ -162,18 +163,18 @@ export default {
   <div>
     <gl-alert
       v-if="autocompleteError"
-      class="gl-mt-2 gl-text-primary"
+      class="gl-text-body gl-mt-2"
       :dismissible="false"
       variant="danger"
     >
       {{ $options.i18n.AUTOCOMPLETE_ERROR_MESSAGE }}
     </gl-alert>
 
-    <ul v-if="!loading && hasResults" class="gl-m-0 gl-list-none gl-p-0">
+    <ul v-if="!loading && hasResults" class="gl-m-0 gl-p-0 gl-list-none">
       <gl-disclosure-dropdown-group
         v-for="(group, index) in groups"
         :key="group.name"
-        :class="{ '!gl-mt-0': index === 0 }"
+        :class="{ 'gl-mt-0!': index === 0 }"
         :group="group"
         bordered
         @action="trackingTypes"
@@ -189,16 +190,16 @@ export default {
               :shape="$options.AVATAR_SHAPE_OPTION_RECT"
               aria-hidden="true"
             />
-            <span class="gl-flex gl-min-w-0 gl-grow gl-flex-col">
+            <span class="gl-display-flex gl-flex-direction-column gl-flex-grow-1 gl-min-w-0">
               <span
                 v-safe-html="highlightedName(item.text)"
-                class="gl-truncate gl-text-gray-900"
+                class="gl-text-gray-900 gl-text-truncate"
                 data-testid="autocomplete-item-name"
               ></span>
               <span
                 v-if="item.value"
                 v-safe-html="item.namespace"
-                class="gl-truncate gl-text-sm gl-text-gray-500"
+                class="gl-font-sm gl-text-gray-500 gl-text-truncate"
                 data-testid="autocomplete-item-namespace"
               ></span>
             </span>

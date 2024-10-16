@@ -53,7 +53,7 @@ module QA
         def fetch_kubeconfig
           retry_until do
             config = `k3d get-kubeconfig --name #{cluster_name}`.chomp
-            config if /kubeconfig.yaml/.match?(config)
+            config if config =~ /kubeconfig.yaml/
           end
         end
 

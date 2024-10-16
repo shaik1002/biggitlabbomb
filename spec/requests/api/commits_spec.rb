@@ -316,12 +316,6 @@ RSpec.describe API::Commits, feature_category: :source_code_management do
               expect(response.headers['Link']).to match(/page=2&per_page=5/)
             end
 
-            it 'does not include the last page link' do
-              request
-
-              expect(response.headers['Link']).not_to include("rel=\"last\"")
-            end
-
             context 'viewing the first page' do
               it 'returns the first 5 commits' do
                 request

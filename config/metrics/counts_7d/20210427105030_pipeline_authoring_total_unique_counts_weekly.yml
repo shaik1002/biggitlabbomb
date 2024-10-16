@@ -6,12 +6,12 @@ product_group: pipeline_authoring
 value_type: number
 status: active
 milestone: "13.12"
-introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/51201
+introduced_by_url:
 time_frame: 7d
 data_source: redis_hll
 instrumentation_class: RedisHLLMetric
 events:
-- name: commit_change_to_ciconfigfile
+- name: o_pipeline_authoring_unique_users_committing_ciconfigfile
   unique: user.id
 - name: o_pipeline_authoring_unique_users_pushing_mr_ciconfigfile
   unique: user.id

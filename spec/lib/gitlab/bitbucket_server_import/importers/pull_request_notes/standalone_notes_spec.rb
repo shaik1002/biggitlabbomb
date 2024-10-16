@@ -53,8 +53,7 @@ RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotes::Stand
         note: end_with(pr_comment[:note]),
         author: note_author,
         created_at: pr_comment[:created_at],
-        updated_at: pr_comment[:created_at],
-        imported_from: 'bitbucket_server'
+        updated_at: pr_comment[:created_at]
       )
     end
 
@@ -68,8 +67,7 @@ RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotes::Stand
           comments: [],
           created_at: now,
           updated_at: now,
-          parent_comment_note: nil,
-          imported_from: 'bitbucket_server'
+          parent_comment_note: nil
         }
       end
 
@@ -82,8 +80,7 @@ RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotes::Stand
           comments: [pr_comment_extra],
           created_at: now,
           updated_at: now,
-          parent_comment_note: nil,
-          imported_from: 'bitbucket_server'
+          parent_comment_note: nil
         }
       end
 
@@ -97,15 +94,13 @@ RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotes::Stand
           note: end_with(pr_comment[:note]),
           author: note_author,
           created_at: pr_comment[:created_at],
-          updated_at: pr_comment[:created_at],
-          imported_from: 'bitbucket_server'
+          updated_at: pr_comment[:created_at]
         )
         expect(merge_request.notes.last).to have_attributes(
           note: end_with(pr_comment_extra[:note]),
           author: note_author,
           created_at: pr_comment_extra[:created_at],
-          updated_at: pr_comment_extra[:created_at],
-          imported_from: 'bitbucket_server'
+          updated_at: pr_comment_extra[:created_at]
         )
       end
     end
@@ -134,8 +129,7 @@ RSpec.describe Gitlab::BitbucketServerImport::Importers::PullRequestNotes::Stand
           comments: [],
           created_at: now,
           updated_at: now,
-          parent_comment_note: 'Parent note',
-          imported_from: 'bitbucket_server'
+          parent_comment_note: 'Parent note'
         }
       end
 

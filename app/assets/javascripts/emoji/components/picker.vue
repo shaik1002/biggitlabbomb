@@ -70,7 +70,7 @@ export default {
       }));
     },
     placement() {
-      return this.right ? 'bottom-end' : 'bottom-start';
+      return this.right ? 'right' : 'left';
     },
     newCustomEmoji() {
       return {
@@ -101,10 +101,8 @@ export default {
       }
     },
     onSearchInput() {
-      if (this.$refs.virtualScoller) {
-        this.$refs.virtualScoller.setScrollTop(0);
-        this.$refs.virtualScoller.forceRender();
-      }
+      this.$refs.virtualScoller.setScrollTop(0);
+      this.$refs.virtualScoller.forceRender();
     },
     async onScroll(event, { offset }) {
       const categories = await getEmojiCategories();
@@ -113,6 +111,8 @@ export default {
     },
     onShow() {
       this.isVisible = true;
+      this.$refs.searchValue.focusInput();
+
       this.$emit('shown');
     },
     onHide() {
@@ -143,7 +143,7 @@ export default {
           v-gl-tooltip
           :title="$options.i18n.addReaction"
           :class="[toggleClass, { 'is-active': isVisible }]"
-          class="add-reaction-button btn-icon gl-relative gl-h-full"
+          class="gl-relative gl-h-full add-reaction-button btn-icon"
           data-testid="add-reaction-button"
         >
           <slot name="button-content">
@@ -166,11 +166,11 @@ export default {
         </gl-button>
       </template>
 
-      <template v-if="isVisible" #header>
+      <template #header>
         <gl-search-box-by-type
           ref="searchValue"
           v-model="searchValue"
-          class="add-reaction-search gl-border-b-1 gl-border-b-dropdown gl-border-b-solid"
+          class="add-reaction-search gl-border-b-1 gl-border-b-solid gl-border-b-gray-200"
           borderless
           autofocus
           debounce="500"
@@ -180,16 +180,15 @@ export default {
       </template>
 
       <div
-        v-if="isVisible"
         v-show="!searchValue"
-        class="award-list gl-flex gl-border-b-1 gl-border-gray-100 gl-border-b-solid"
+        class="award-list gl-display-flex gl-border-b-solid gl-border-gray-100 gl-border-b-1"
       >
         <gl-button
           v-for="(category, index) in categoryNames"
           :key="category.name"
           category="tertiary"
           :class="{ 'emoji-picker-category-active': index === currentCategory }"
-          class="emoji-picker-category-tab gl-grow !gl-rounded-none !gl-border-b-2 !gl-px-3 !gl-border-b-solid"
+          class="gl-px-3! gl-rounded-0! gl-border-b-2! gl-border-b-solid! gl-flex-grow-1 emoji-picker-category-tab"
           :icon="category.icon"
           :aria-label="category.name"
           @click="scrollToCategory(category.name)"
@@ -219,14 +218,14 @@ export default {
 
       <template v-if="newCustomEmojiPath" #footer>
         <div
-          class="gl-flex gl-flex-col gl-border-t-1 gl-border-t-dropdown !gl-p-2 !gl-pt-0 gl-border-t-solid"
+          class="gl-border-t-solid gl-border-t-1 gl-border-t-gray-200 gl-display-flex gl-flex-direction-column gl-p-2! gl-pt-0!"
         >
           <gl-button
             :href="newCustomEmojiPath"
             category="tertiary"
             block
             data-testid="create-new-emoji"
-            class="!gl-mt-2 !gl-justify-start"
+            class="gl-justify-content-start! gl-mt-2!"
           >
             {{ $options.i18n.createEmoji }}
           </gl-button>

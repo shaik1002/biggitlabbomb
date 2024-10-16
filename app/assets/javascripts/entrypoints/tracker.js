@@ -42,10 +42,7 @@ window.snowplowPlugins = [
   LinkClickTrackingPlugin(),
   FormTrackingPlugin(),
   TimezonePlugin(),
-  GaCookiesPlugin({
-    ga4: true,
-    ga4MeasurementId: window.gl?.ga4MeasurementId,
-  }),
+  GaCookiesPlugin(),
   PerformanceTimingPlugin(),
   ClientHintsPlugin(),
 ];

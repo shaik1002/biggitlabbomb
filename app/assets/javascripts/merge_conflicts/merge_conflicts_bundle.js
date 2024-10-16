@@ -6,8 +6,12 @@ import { createStore } from './store';
 export default function initMergeConflicts() {
   const conflictsEl = document.querySelector('#conflicts');
 
-  const { sourceBranchPath, mergeRequestPath, conflictsPath, resolveConflictsPath } =
-    conflictsEl.dataset;
+  const {
+    sourceBranchPath,
+    mergeRequestPath,
+    conflictsPath,
+    resolveConflictsPath,
+  } = conflictsEl.dataset;
 
   initIssuableSidebar();
 

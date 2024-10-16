@@ -6,7 +6,7 @@ module Metrics
 
     idempotent!
     data_consistency :sticky
-    feature_category :observability
+    feature_category :metrics
 
     include ExclusiveLeaseGuard
     # rubocop:disable Scalability/CronWorkerContext

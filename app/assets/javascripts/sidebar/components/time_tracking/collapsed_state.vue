@@ -56,8 +56,14 @@ export default {
       return '';
     },
     spanClass() {
+      if (this.showComparisonState) {
+        return '';
+      }
+      if (this.showEstimateOnlyState || this.showSpentOnlyState) {
+        return 'bold';
+      }
       if (this.showNoTimeTrackingState) {
-        return 'no-value collapse-truncated-title gl-pt-2 gl-px-3 gl-text-sm';
+        return 'no-value collapse-truncated-title gl-pt-2 gl-px-3 gl-font-sm';
       }
 
       return '';
@@ -102,12 +108,12 @@ export default {
     v-gl-tooltip:body.viewport.left
     :title="tooltipText"
     data-testid="collapsedState"
-    class="sidebar-collapsed-icon py-1 !gl-h-auto"
+    class="sidebar-collapsed-icon"
   >
     <gl-icon name="timer" />
     <div class="time-tracking-collapsed-summary">
-      <div class="gl-px-4" :class="divClass">
-        <span class="gl-text-sm" :class="spanClass"> {{ text }} </span>
+      <div :class="divClass">
+        <span :class="spanClass"> {{ text }} </span>
       </div>
     </div>
   </div>

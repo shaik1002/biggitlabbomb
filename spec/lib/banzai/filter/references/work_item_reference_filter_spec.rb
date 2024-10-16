@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Banzai::Filter::References::WorkItemReferenceFilter, feature_category: :markdown do
+RSpec.describe Banzai::Filter::References::WorkItemReferenceFilter, feature_category: :team_planning do
   include FilterSpecHelper
 
   let_it_be(:group)           { create(:group) }
@@ -183,7 +183,6 @@ RSpec.describe Banzai::Filter::References::WorkItemReferenceFilter, feature_cate
       link = doc.css('a').first
 
       expect(link.attr('data-project-path')).to eq cross_project.full_path
-      expect(link.attr('data-namespace-path')).to eq cross_project.full_path
       expect(link.attr('data-iid')).to eq work_item.iid.to_s
     end
   end
@@ -211,7 +210,7 @@ RSpec.describe Banzai::Filter::References::WorkItemReferenceFilter, feature_cate
       expect(doc.to_html).to match(%r{\(<a.+>#{Regexp.escape(work_item.to_reference(project))}</a>\.\)})
     end
 
-    it 'links with adjacent text', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/478370' do
+    it 'links with adjacent text' do
       doc = reference_filter("Fixed (#{reference}.)")
 
       expect(doc.to_html).to match(%r{\(<a.+>#{Regexp.escape(work_item.to_reference(project))} \(comment 123\)</a>\.\)})
@@ -243,7 +242,6 @@ RSpec.describe Banzai::Filter::References::WorkItemReferenceFilter, feature_cate
       link = doc.css('a').first
 
       expect(link.attr('data-project-path')).to eq cross_project.full_path
-      expect(link.attr('data-namespace-path')).to eq cross_project.full_path
       expect(link.attr('data-iid')).to eq work_item.iid.to_s
     end
   end
@@ -254,14 +252,6 @@ RSpec.describe Banzai::Filter::References::WorkItemReferenceFilter, feature_cate
 
     context 'when work item exists at the group level' do
       let_it_be(:work_item) { create(:work_item, :group_level, namespace: group) }
-
-      it 'includes data attributes for issuable popover' do
-        doc = reference_filter("See #{work_item_url}", context)
-        link = doc.css('a').first
-
-        expect(link.attr('data-namespace-path')).to eq(group.full_path)
-        expect(link.attr('data-iid')).to eq(work_item.iid.to_s)
-      end
 
       it 'links to a valid group level work item by URL' do
         doc = reference_filter("See #{work_item_url}", context)

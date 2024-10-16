@@ -1,19 +1,17 @@
 <script>
 import {
+  GlCard,
   GlTable,
   GlButton,
   GlPagination,
+  GlIcon,
   GlLoadingIcon,
   GlEmptyState,
   GlModal,
-  GlTooltipDirective,
 } from '@gitlab/ui';
 
-import { VIEW_ADMIN_DEPLOY_KEYS_PAGELOAD } from '~/admin/deploy_keys/constants';
 import { __ } from '~/locale';
 import Api, { DEFAULT_PER_PAGE } from '~/api';
-import { InternalEvents } from '~/tracking';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import { cleanLeadingSeparator } from '~/lib/utils/url_utility';
 import { createAlert } from '~/alert';
@@ -30,6 +28,10 @@ export default {
     ),
     delete: __('Delete deploy key'),
     edit: __('Edit deploy key'),
+    pagination: {
+      next: __('Next'),
+      prev: __('Prev'),
+    },
     modal: {
       title: __('Are you sure?'),
       body: __('Are you sure you want to delete this deploy key?'),
@@ -44,12 +46,12 @@ export default {
     {
       key: 'fingerprint_sha256',
       label: __('Fingerprint (SHA256)'),
-      tdClass: 'md:gl-max-w-26',
+      tdClass: 'gl-md-max-w-26',
     },
     {
       key: 'fingerprint',
       label: __('Fingerprint (MD5)'),
-      tdClass: 'md:gl-max-w-26',
+      tdClass: 'gl-md-max-w-26',
     },
     {
       key: 'projects',
@@ -62,8 +64,8 @@ export default {
     {
       key: 'actions',
       label: __('Actions'),
-      tdClass: 'lg:gl-w-px gl-whitespace-nowrap',
-      thClass: 'lg:gl-w-px gl-whitespace-nowrap',
+      tdClass: 'gl-lg-w-1px gl-whitespace-nowrap',
+      thClass: 'gl-lg-w-1px gl-whitespace-nowrap',
     },
   ],
   modal: {
@@ -84,19 +86,16 @@ export default {
   csrf,
   DEFAULT_PER_PAGE,
   components: {
-    CrudComponent,
+    GlCard,
     GlTable,
     GlButton,
     GlPagination,
     TimeAgoTooltip,
+    GlIcon,
     GlLoadingIcon,
     GlEmptyState,
     GlModal,
   },
-  directives: {
-    GlTooltip: GlTooltipDirective,
-  },
-  mixins: [InternalEvents.mixin()],
   inject: ['editPath', 'deletePath', 'createPath', 'emptyStateSvgPath'],
   data() {
     return {
@@ -126,7 +125,6 @@ export default {
     },
   },
   mounted() {
-    this.trackEvent(VIEW_ADMIN_DEPLOY_KEYS_PAGELOAD);
     this.fetchDeployKeys();
   },
   methods: {
@@ -192,16 +190,24 @@ export default {
 </script>
 
 <template>
-  <crud-component
-    :title="$options.i18n.pageTitle"
-    :count="totalItems.toString()"
-    icon="key"
-    class="gl-mt-5"
+  <gl-card
+    class="gl-new-card"
+    header-class="gl-new-card-header"
+    body-class="gl-new-card-body gl-px-0"
   >
-    <template #actions>
-      <gl-button size="small" :href="createPath" data-testid="new-deploy-key-button">{{
-        $options.i18n.newDeployKeyButtonText
-      }}</gl-button>
+    <template #header>
+      <div class="gl-new-card-title-wrapper">
+        <h3 class="gl-new-card-title">{{ $options.i18n.pageTitle }}</h3>
+        <span class="gl-new-card-count">
+          <gl-icon name="key" class="gl-mr-2" />
+          {{ totalItems }}
+        </span>
+      </div>
+      <div class="gl-new-card-actions">
+        <gl-button size="small" :href="createPath" data-testid="new-deploy-key-button">{{
+          $options.i18n.newDeployKeyButtonText
+        }}</gl-button>
+      </div>
     </template>
 
     <gl-table
@@ -211,7 +217,7 @@ export default {
       :fields="$options.fields"
       stacked="md"
       data-testid="deploy-keys-list"
-      class="-gl-mb-2 -gl-mt-1"
+      class="-gl-mt-1 -gl-mb-2"
     >
       <template #table-busy>
         <gl-loading-icon size="sm" class="gl-my-5" />
@@ -229,7 +235,7 @@ export default {
       <template #cell(fingerprint_sha256)="{ item: { fingerprint_sha256 } }">
         <div
           v-if="fingerprint_sha256"
-          class="gl-truncate gl-font-monospace"
+          class="gl-font-monospace gl-text-truncate"
           :title="fingerprint_sha256"
         >
           {{ fingerprint_sha256 }}
@@ -237,7 +243,7 @@ export default {
       </template>
 
       <template #cell(fingerprint)="{ item: { fingerprint } }">
-        <div v-if="fingerprint" class="gl-truncate gl-font-monospace" :title="fingerprint">
+        <div v-if="fingerprint" class="gl-font-monospace gl-text-truncate" :title="fingerprint">
           {{ fingerprint }}
         </div>
       </template>
@@ -251,24 +257,21 @@ export default {
       </template>
 
       <template #cell(actions)="{ item: { id } }">
-        <div class="-gl-my-3 gl-flex gl-gap-2">
-          <gl-button
-            v-gl-tooltip
-            :title="$options.i18n.edit"
-            category="tertiary"
-            icon="pencil"
-            :aria-label="$options.i18n.edit"
-            :href="editHref(id)"
-          />
-          <gl-button
-            v-gl-tooltip
-            :title="$options.i18n.delete"
-            category="tertiary"
-            icon="remove"
-            :aria-label="$options.i18n.delete"
-            @click="handleDeleteClick(id)"
-          />
-        </div>
+        <gl-button
+          icon="pencil"
+          size="small"
+          :aria-label="$options.i18n.edit"
+          :href="editHref(id)"
+          class="gl-mr-2"
+        />
+        <gl-button
+          variant="danger"
+          category="secondary"
+          icon="remove"
+          size="small"
+          :aria-label="$options.i18n.delete"
+          @click="handleDeleteClick(id)"
+        />
       </template>
     </gl-table>
     <gl-empty-state
@@ -283,6 +286,8 @@ export default {
       v-model="page"
       :per-page="$options.DEFAULT_PER_PAGE"
       :total-items="totalItems"
+      :next-text="$options.i18n.pagination.next"
+      :prev-text="$options.i18n.pagination.prev"
       align="center"
       class="gl-mt-5"
     />
@@ -302,5 +307,5 @@ export default {
       </form>
       {{ $options.i18n.modal.body }}
     </gl-modal>
-  </crud-component>
+  </gl-card>
 </template>

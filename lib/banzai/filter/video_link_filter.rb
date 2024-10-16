@@ -19,6 +19,7 @@ module Banzai
 
         attrs[:height] = element[:height] if element[:height]
         attrs[:width] = element[:width] if element[:width]
+        attrs[:width] = '400' unless attrs[:width] || attrs[:height]
 
         attrs
       end

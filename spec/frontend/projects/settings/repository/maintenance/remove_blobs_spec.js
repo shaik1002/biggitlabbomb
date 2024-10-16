@@ -5,7 +5,6 @@ import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import { getContentWrapperHeight } from '~/lib/utils/dom_utils';
-import { useMockInternalEventsTracking } from 'helpers/tracking_internal_events_helper';
 import { DRAWER_Z_INDEX } from '~/lib/utils/constants';
 import { createAlert, VARIANT_WARNING } from '~/alert';
 import RemoveBlobs from '~/projects/settings/repository/maintenance/remove_blobs.vue';
@@ -26,25 +25,18 @@ jest.mock('~/alert');
 describe('Remove blobs', () => {
   let wrapper;
   let mutationMock;
-  const { bindInternalEventDocument } = useMockInternalEventsTracking();
 
   const createMockApolloProvider = (resolverMock) => {
     return createMockApollo([[removeBlobsMutation, resolverMock]]);
   };
 
-  const createComponent = (
-    mutationResponse = REMOVE_MUTATION_SUCCESS,
-    features = { asyncRewriteHistory: true },
-  ) => {
+  const createComponent = (mutationResponse = REMOVE_MUTATION_SUCCESS) => {
     mutationMock = jest.fn().mockResolvedValue(mutationResponse);
     getContentWrapperHeight.mockReturnValue(TEST_HEADER_HEIGHT);
     wrapper = shallowMountExtended(RemoveBlobs, {
       apolloProvider: createMockApolloProvider(mutationMock),
       provide: {
         projectPath: TEST_PROJECT_PATH,
-        glFeatures: {
-          ...features,
-        },
       },
     });
   };
@@ -135,7 +127,7 @@ describe('Remove blobs', () => {
           });
 
           it('disables user input while loading', () => {
-            expect(findTextarea().attributes().disabled).toBe('true');
+            expect(findTextarea().attributes('disabled')).toBe('true');
             expect(removeBlobsButton().props('loading')).toBe(true);
           });
 
@@ -144,15 +136,6 @@ describe('Remove blobs', () => {
               blobOids: [TEST_BLOB_ID],
               projectPath: TEST_PROJECT_PATH,
             });
-          });
-
-          it('tracks click_remove_blob_button_repository_settings', () => {
-            const { trackEventSpy } = bindInternalEventDocument(wrapper.element);
-            expect(trackEventSpy).toHaveBeenCalledWith(
-              'click_remove_blob_button_repository_settings',
-              {},
-              undefined,
-            );
           });
 
           it('closes the drawer when removal is confirmed', async () => {
@@ -172,10 +155,9 @@ describe('Remove blobs', () => {
             await waitForPromises();
 
             expect(createAlert).toHaveBeenCalledWith({
-              message:
-                'You will receive an email notification when the process is complete. Run housekeeping to remove old versions from repository.',
+              message: 'Run housekeeping to remove old versions from repository.',
               primaryButton: { clickHandler: expect.any(Function), text: 'Go to housekeeping' },
-              title: 'Blobs removal is scheduled.',
+              title: 'Blobs removed',
               variant: VARIANT_WARNING,
             });
           });
@@ -201,21 +183,6 @@ describe('Remove blobs', () => {
             });
           });
         });
-      });
-    });
-  });
-
-  describe('when async_rewrite_history is off', () => {
-    it('generates a housekeeping alert', async () => {
-      createComponent(REMOVE_MUTATION_SUCCESS, { features: { asyncRewriteHistory: false } });
-      findModal().vm.$emit('primary');
-      await waitForPromises();
-
-      expect(createAlert).toHaveBeenCalledWith({
-        message: 'Run housekeeping to remove old versions from repository.',
-        primaryButton: { clickHandler: expect.any(Function), text: 'Go to housekeeping' },
-        title: 'Blobs removed',
-        variant: VARIANT_WARNING,
       });
     });
   });

@@ -8,7 +8,6 @@ module WikiActions
   include ProductAnalyticsTracking
   include SafeFormatHelper
   extend ActiveSupport::Concern
-  include StrongPaginationParams
 
   RESCUE_GIT_TIMEOUTS_IN = %w[show raw edit history diff pages templates].freeze
 
@@ -33,8 +32,7 @@ module WikiActions
     before_action :load_sidebar, except: [:pages]
 
     before_action do
-      push_frontend_feature_flag(:preserve_markdown, container)
-      push_force_frontend_feature_flag(:glql_integration, container&.glql_integration_feature_flag_enabled?)
+      push_frontend_feature_flag(:preserve_unchanged_markdown, @group)
     end
 
     before_action only: [:show, :edit, :update] do
@@ -85,7 +83,7 @@ module WikiActions
         wiki
           .list_pages(direction: params[:direction])
           .reject { |page| page.slug.start_with?('templates/') }
-      ).page(pagination_params[:page])
+      ).page(params[:page])
     end
   end
 
@@ -96,7 +94,7 @@ module WikiActions
         wiki
           .list_pages(direction: params[:direction])
           .select { |page| page.slug.start_with?('templates/') }
-      ).page(pagination_params[:page])
+      ).page(params[:page])
     end
   end
 
@@ -237,8 +235,8 @@ module WikiActions
   def history
     if page
       @commits_count = page.count_versions
-      @commits = Kaminari.paginate_array(page.versions(page: pagination_params[:page].to_i), total_count: page.count_versions)
-        .page(pagination_params[:page])
+      @commits = Kaminari.paginate_array(page.versions(page: params[:page].to_i), total_count: page.count_versions)
+        .page(params[:page])
 
       render 'shared/wikis/history'
     else
@@ -423,6 +421,8 @@ module WikiActions
   end
 
   def find_redirection(path, redirect_limit = 50)
+    return unless Feature.enabled?(:wiki_redirection, container)
+
     seen = Set[]
     current_path = path
 

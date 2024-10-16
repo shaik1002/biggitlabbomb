@@ -9,15 +9,12 @@ module Gitlab
         TAGGINGS_BATCH_SIZE = 1000
         TAGS_BATCH_SIZE = 500
 
-        attr_reader :config
-
-        def self.bulk_insert_tags!(taggables, config: nil)
-          Gitlab::Ci::Tags::BulkInsert.new(taggables, config: config).insert!
+        def self.bulk_insert_tags!(taggables)
+          Gitlab::Ci::Tags::BulkInsert.new(taggables).insert!
         end
 
-        def initialize(taggables, config: nil)
+        def initialize(taggables)
           @taggables = taggables
-          @config = config || ConfigurationFactory.new(taggables.first).build
         end
 
         def insert!
@@ -29,8 +26,6 @@ module Gitlab
         private
 
         attr_reader :taggables
-
-        delegate :join_model, to: :config
 
         def tag_list_by_taggable
           strong_memoize(:tag_list_by_taggable) do
@@ -46,23 +41,12 @@ module Gitlab
         def persist_build_tags!
           all_tags = tag_list_by_taggable.values.flatten.uniq.reject(&:blank?)
           tag_records_by_name = create_tags(all_tags).index_by(&:name)
-          taggings, monomorphic_taggings = build_taggings_attributes(tag_records_by_name)
-            .values_at(:taggings, :monomorphic_taggings)
+          taggings = build_taggings_attributes(tag_records_by_name)
 
-          if taggings.any?
-            taggings.each_slice(TAGGINGS_BATCH_SIZE) do |taggings_slice|
-              ::Ci::Tagging.insert_all!(taggings_slice)
-            end
-          end
+          return false if taggings.empty?
 
-          if monomorphic_taggings.any?
-            join_model.bulk_insert!(
-              monomorphic_taggings,
-              validate: false,
-              unique_by: config.unique_by,
-              batch_size: TAGGINGS_BATCH_SIZE,
-              returns: :id
-            )
+          taggings.each_slice(TAGGINGS_BATCH_SIZE) do |taggings_slice|
+            ActsAsTaggableOn::Tagging.insert_all!(taggings_slice)
           end
 
           true
@@ -70,55 +54,43 @@ module Gitlab
 
         # rubocop: disable CodeReuse/ActiveRecord
         def create_tags(tags)
-          existing_tag_records = ::Ci::Tag.where(name: tags).to_a
+          existing_tag_records = ActsAsTaggableOn::Tag.where(name: tags).to_a
           missing_tags = detect_missing_tags(tags, existing_tag_records)
           return existing_tag_records if missing_tags.empty?
 
           missing_tags
             .map { |tag| { name: tag } }
             .each_slice(TAGS_BATCH_SIZE) do |tags_attributes|
-              ::Ci::Tag.insert_all!(tags_attributes)
+              ActsAsTaggableOn::Tag.insert_all!(tags_attributes)
             end
 
-          ::Ci::Tag.where(name: tags).to_a
+          ActsAsTaggableOn::Tag.where(name: tags).to_a
         end
         # rubocop: enable CodeReuse/ActiveRecord
 
         def build_taggings_attributes(tag_records_by_name)
-          accumulator = { taggings: [], monomorphic_taggings: [] }
-
-          taggables.each do |taggable|
+          taggings = taggables.flat_map do |taggable|
             tag_list = tag_list_by_taggable[taggable]
             next unless tag_list
 
             tags = tag_records_by_name.values_at(*tag_list)
-            tags.each do |tag|
-              accumulator[:taggings] << tagging_attributes(tag, taggable) if polymorphic_taggings_available?
-
-              if monomorphic_taggings_available?
-                accumulator[:monomorphic_taggings] << monomorphic_taggings_record(tag, taggable)
-              end
-            end
+            taggings_for(tags, taggable)
           end
 
-          accumulator
+          taggings.compact!
+          taggings
         end
 
-        def tagging_attributes(tag, taggable)
-          {
-            tag_id: tag.id,
-            taggable_type: taggable.class.base_class.name,
-            taggable_id: taggable.id,
-            created_at: Time.current,
-            context: 'tags'
-          }
-        end
-
-        def monomorphic_taggings_record(tag, taggable)
-          attributes = { tag_id: tag.id }
-          attributes.merge!(config.attributes_map(taggable))
-
-          join_model.new(attributes)
+        def taggings_for(tags, taggable)
+          tags.map do |tag|
+            {
+              tag_id: tag.id,
+              taggable_type: taggable.class.base_class.name,
+              taggable_id: taggable.id,
+              created_at: Time.current,
+              context: 'tags'
+            }
+          end
         end
 
         def detect_missing_tags(tags, tag_records)
@@ -127,14 +99,6 @@ module Gitlab
           else
             []
           end
-        end
-
-        def monomorphic_taggings_available?
-          config.monomorphic_taggings?
-        end
-
-        def polymorphic_taggings_available?
-          config.polymorphic_taggings?
         end
       end
     end

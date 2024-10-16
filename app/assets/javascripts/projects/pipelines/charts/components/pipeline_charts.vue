@@ -1,8 +1,10 @@
 <script>
 import { GlAlert, GlSkeletonLoader } from '@gitlab/ui';
 import { GlColumnChart, GlChartSeriesLabel } from '@gitlab/ui/dist/charts';
-import { getDateInPast, localeDateFormat } from '~/lib/utils/datetime_utility';
-import { __, s__ } from '~/locale';
+import dateFormat from '~/lib/dateformat';
+import { getDateInPast } from '~/lib/utils/datetime_utility';
+import { __, s__, sprintf } from '~/locale';
+import { dateFormats } from '~/analytics/shared/constants';
 import CiCdAnalyticsCharts from '~/vue_shared/components/ci_cd_analytics/ci_cd_analytics_charts.vue';
 import {
   DEFAULT,
@@ -156,26 +158,21 @@ export default {
       };
     },
     successRatio() {
-      const { successfulPipelines, totalPipelines } = this.counts;
+      const { successfulPipelines, failedPipelines } = this.counts;
       const successfulCount = successfulPipelines?.count;
-      const totalCount = totalPipelines?.count || 0;
-
-      return totalCount === 0 ? 100 : (successfulCount / totalCount) * 100;
-    },
-    failureRatio() {
-      const { failedPipelines, totalPipelines } = this.counts;
       const failedCount = failedPipelines?.count;
-      const totalCount = totalPipelines?.count || 0;
+      const ratio = (successfulCount / (successfulCount + failedCount)) * 100;
 
-      return totalCount === 0 ? 0 : (failedCount / totalCount) * 100;
+      return failedCount === 0 ? 100 : ratio;
     },
     formattedCounts() {
-      const { totalPipelines } = this.counts;
+      const { totalPipelines, successfulPipelines, failedPipelines } = this.counts;
 
       return {
         total: totalPipelines?.count,
+        success: successfulPipelines?.count,
+        failed: failedPipelines?.count,
         successRatio: this.successRatio,
-        failureRatio: this.failureRatio,
       };
     },
     areaCharts() {
@@ -301,12 +298,22 @@ export default {
     lastYear: __('Last year'),
   },
   get chartRanges() {
-    const today = new Date();
-    const pastDate = (timeScale) => getDateInPast(today, timeScale);
+    const today = dateFormat(new Date(), dateFormats.defaultDate);
+    const pastDate = (timeScale) =>
+      dateFormat(getDateInPast(new Date(), timeScale), dateFormats.defaultDate);
     return {
-      lastWeekRange: localeDateFormat.asDate.formatRange(pastDate(ONE_WEEK_AGO_DAYS), today),
-      lastMonthRange: localeDateFormat.asDate.formatRange(pastDate(ONE_MONTH_AGO_DAYS), today),
-      lastYearRange: localeDateFormat.asDate.formatRange(pastDate(ONE_YEAR_AGO_DAYS), today),
+      lastWeekRange: sprintf(__('%{oneWeekAgo} - %{today}'), {
+        oneWeekAgo: pastDate(ONE_WEEK_AGO_DAYS),
+        today,
+      }),
+      lastMonthRange: sprintf(__('%{oneMonthAgo} - %{today}'), {
+        oneMonthAgo: pastDate(ONE_MONTH_AGO_DAYS),
+        today,
+      }),
+      lastYearRange: sprintf(__('%{oneYearAgo} - %{today}'), {
+        oneYearAgo: pastDate(ONE_YEAR_AGO_DAYS),
+        today,
+      }),
     };
   },
 };
@@ -332,9 +339,9 @@ export default {
         <div
           v-for="{ key, name, color, value } in tooltipContent"
           :key="key"
-          class="gl-flex gl-justify-between"
+          class="gl-display-flex gl-justify-content-space-between"
         >
-          <gl-chart-series-label class="gl-mr-7 gl-text-sm" :color="color">
+          <gl-chart-series-label class="gl-font-sm gl-mr-7" :color="color">
             {{ name }}
           </gl-chart-series-label>
           <div class="gl-font-bold">{{ value }}</div>

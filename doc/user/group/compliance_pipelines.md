@@ -10,11 +10,6 @@ DETAILS:
 **Tier:** Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
-WARNING:
-This feature was [deprecated](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/159841) in GitLab 17.3
-and is planned for removal in 18.0. Use [pipeline execution policy type](../application_security/policies/pipeline_execution_policies.md) instead.
-This change is a breaking change. For more information, see the [migration guide](#pipeline-execution-policies-migration).
-
 Group owners can configure a compliance pipeline in a project separate to other projects. By default, the compliance
 pipeline configuration (for example, `.compliance-gitlab-ci.yml`) is run instead of the pipeline configuration (for example, `.gitlab-ci.yml`) of labeled
 projects.
@@ -36,35 +31,6 @@ For more information, see:
   labeled project pipeline configuration.
 - The [Create a compliance pipeline](../../tutorials/compliance_pipeline/index.md) tutorial.
 
-## Pipeline execution policies migration
-
-To consolidate and simplify scan and pipeline enforcement, we have introduced pipeline execution policies. We deprecated
-compliance pipelines in GitLab 17.3 and will remove compliance pipelines in GitLab 18.0.
-
-Pipeline execution policies extend a project's `.gitlab-ci.yml` file with the configuration provided in separate YAML file
-(for example, `pipeline-execution.yml`) linked in the pipeline execution policy.
-
-By default, when creating a new compliance framework, you are directed to use the pipeline execution policy type instead
-of compliance pipelines.
-
-Existing compliance pipelines must be migrated. Customers should migrate from compliance pipelines to the new
-[pipeline execution policy type](../application_security/policies/pipeline_execution_policies.md) as soon as possible.
-
-### Migrate an existing compliance framework
-
-To migrate an existing compliance framework to use the pipeline execution policy type:
-
-1. On the left sidebar, select **Search or go to** and find your group.
-1. Select **Secure > Compliance center**.
-1. [Edit](compliance_frameworks.md#create-edit-or-delete-a-compliance-framework) the existing compliance framework.
-1. In the banner than appears, select **Migrate pipeline to a policy** to create a new policy in the security policies.
-1. Edit the compliance framework again to remove the compliance pipeline.
-
-For more information, see [Security policy project](../application_security/policies/index.md#security-policy-project).
-
-If you receive a `Pipeline execution policy error: Job names must be unique` error during the migration, see the
-[relevant troubleshooting information](#error-job-names-must-be-unique).
-
 ## Effect on labeled projects
 
 Users have no way of knowing that a compliance pipeline has been configured and might be confused why their own
@@ -75,17 +41,6 @@ The only marker at the project level is the compliance framework label itself, b
 framework has a compliance pipeline configured or not.
 
 Therefore, communicate with project users about compliance pipeline configuration to reduce uncertainty and confusion.
-
-### Multiple compliance frameworks
-
-You can [apply to a single project](compliance_frameworks.md#apply-a-compliance-framework-to-a-project) multiple compliance frameworks with compliance pipelines configured.
-In this case, only the first compliance framework applied to a project has its compliance pipeline included in the project pipeline.
-
-To ensure that the correct compliance pipeline is included in a project:
-
-1. Remove all compliance frameworks from the project.
-1. Apply the compliance framework with the correct compliance pipeline to the project.
-1. Apply additional compliance frameworks to the project.
 
 ## Configure a compliance pipeline
 
@@ -109,7 +64,7 @@ framework label, the compliance pipeline configuration is run instead of the lab
 The user running the pipeline in the labeled project must at least have the Reporter role on the compliance project.
 
 When used to enforce scan execution, this feature has some overlap with
-[scan execution policies](../application_security/policies/scan_execution_policies.md). We have not
+[scan execution policies](../application_security/policies/scan-execution-policies.md). We have not
 [unified the user experience for these two features](https://gitlab.com/groups/gitlab-org/-/epics/7312). For details on
 the similarities and differences between these features, see [Enforce scan execution](../application_security/index.md#enforce-scan-execution).
 
@@ -193,11 +148,7 @@ You can leave it out if your compliance pipeline only ever runs in labeled proje
 #### Compliance pipelines and custom pipeline configuration hosted externally
 
 The example above assumes that all projects host their pipeline configuration in the same project.
-If any projects use [configuration hosted externally](../../ci/pipelines/settings.md#specify-a-custom-cicd-configuration-file),
-the example configuration does not work. See [issue 393960](https://gitlab.com/gitlab-org/gitlab/-/issues/393960)
-for more details.
-
-With projects that use externally hosted configuration, you can try the this workaround:
+If any projects use [configuration hosted externally to the project](../../ci/pipelines/settings.md#specify-a-custom-cicd-configuration-file):
 
 - The `include` section in the example compliance pipeline configuration must be adjusted.
   For example, using [`include:rules`](../../ci/yaml/includes.md#use-rules-with-include):
@@ -280,7 +231,8 @@ include:  # Execute individual project's configuration
 In this example, a configuration file is only included if it exists for the given `ref`
 in the project in `exists:project: $CI_PROJECT_PATH'`.
 
-If `exists:project` is not specified in the compliance pipeline configuration, it searches for files in the project
+You cannot use [`rules:exists` with `include`](../../ci/yaml/includes.md#include-with-rulesexists)
+to solve this problem because `include:rules:exists` searches for files in the project
 in which the `include` is defined. In compliance pipelines, the `include` from the example above
 is defined in the project hosting the compliance pipeline configuration file, not the project
 running the pipeline.
@@ -387,14 +339,3 @@ include:
     file: '$CI_CONFIG_PATH'
     ref: '$CI_COMMIT_SHA'
 ```
-
-### Error: `Job names must be unique`
-
-To configure a compliance pipeline, the [example configuration](#example-configuration) recommends including the
-individual project configuration with `include.project`.
-
-The configuration can lead to an error when running the projects pipeline: `Pipeline execution policy error: Job names must be unique`.
-This error occurs because the pipeline execution policy includes the project's `.gitlab-ci.yml` and tries to insert the
-jobs when the jobs have already been declared in the pipeline.
-
-To resolve this error, remove `include.project` from the separate YAML file linked in the pipeline execution policy.

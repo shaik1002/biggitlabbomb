@@ -265,27 +265,27 @@ describe('GfmAutoComplete', () => {
       describe('data is not in cache', () => {
         beforeEach(() => {
           const context = {
-            isLoadingData: { '/': false },
-            dataSources: { commands: 'commands_autocomplete_url' },
+            isLoadingData: { '#': false },
+            dataSources: { issues: 'issues_autocomplete_url' },
             cachedData: {},
           };
-          fetchData.call(context, {}, '/', 'query');
+          fetchData.call(context, {}, '#', 'query');
         });
 
         it('should call AjaxCache', () => {
-          expect(AjaxCache.retrieve).toHaveBeenCalledWith('commands_autocomplete_url', true);
+          expect(AjaxCache.retrieve).toHaveBeenCalledWith('issues_autocomplete_url', true);
         });
       });
 
       describe('data is in cache', () => {
         beforeEach(() => {
           const context = {
-            isLoadingData: { '/': false },
-            dataSources: { issues: 'commands_autocomplete_url' },
-            cachedData: { '/': [{}] },
+            isLoadingData: { '#': false },
+            dataSources: { issues: 'issues_autocomplete_url' },
+            cachedData: { '#': [{}] },
             loadData: () => {},
           };
-          fetchData.call(context, {}, '/', 'query');
+          fetchData.call(context, {}, '#', 'query');
         });
 
         it('should not call AjaxCache', () => {
@@ -586,7 +586,8 @@ describe('GfmAutoComplete', () => {
             '<img src="./group.jpg" alt="my-group" class="avatar rect-avatar avatar-inline s24 gl-mr-2"/>',
           title: 'My Group',
           search: 'MyGroup my-group',
-          icon: '<svg class="s16 vertical-align-middle gl-ml-2"><use xlink:href="/icons.svg#notifications-off" /></svg>',
+          icon:
+            '<svg class="s16 vertical-align-middle gl-ml-2"><use xlink:href="/icons.svg#notifications-off" /></svg>',
         },
       ]);
     });
@@ -1168,51 +1169,6 @@ describe('GfmAutoComplete', () => {
             return { key: e, namespace: events[e][0].namespace };
           }),
       ).toStrictEqual([]);
-    });
-  });
-
-  describe('updateDataSources', () => {
-    const dataSources = {
-      labels: `${TEST_HOST}/autocomplete_sources/labels`,
-      members: `${TEST_HOST}/autocomplete_sources/members`,
-      commands: `${TEST_HOST}/autocomplete_sources/commands`,
-      issues: `${TEST_HOST}/autocomplete_sources/issues`,
-      mergeRequests: `${TEST_HOST}/autocomplete_sources/merge_requests`,
-      epics: `${TEST_HOST}/autocomplete_sources/epics`,
-    };
-
-    let autocomplete;
-    let $textarea;
-
-    beforeEach(() => {
-      setHTMLFixture('<textarea></textarea>');
-      autocomplete = new GfmAutoComplete(dataSources);
-      $textarea = $('textarea');
-      autocomplete.setup($textarea, {
-        labels: true,
-        members: true,
-        commands: true,
-        issues: true,
-        mergeRequests: true,
-        epics: true,
-      });
-    });
-
-    afterEach(() => {
-      autocomplete.destroy();
-      resetHTMLFixture();
-    });
-
-    it('should update dataSources correctly', () => {
-      const newDataSources = {
-        ...dataSources,
-        labels: `${TEST_HOST}/autocomplete_sources/labels?type=WorkItem&work_item_type_id=6`,
-        members: `${TEST_HOST}/autocomplete_sources/members?type=WorkItem&work_item_type_id=6`,
-      };
-
-      autocomplete.updateDataSources(newDataSources);
-
-      expect(autocomplete.dataSources).toEqual(newDataSources);
     });
   });
 });

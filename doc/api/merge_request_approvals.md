@@ -47,7 +47,7 @@ Supported attributes:
 
 | Attribute | Type              | Required | Description |
 |-----------|-------------------|----------|-------------|
-| `id`      | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-paths). |
+| `id`      | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-path-encoding). |
 
 Example request:
 
@@ -65,7 +65,6 @@ Example response:
     "id": 2,
     "name": "rule1",
     "rule_type": "any_approver",
-    "report_type": null,
     "eligible_approvers": [],
     "approvals_required": 3,
     "users": [],
@@ -78,20 +77,6 @@ Example response:
     "id": 3,
     "name": "rule2",
     "rule_type": "code_owner",
-    "report_type": null,
-    "eligible_approvers": [],
-    "approvals_required": 2,
-    "users": [],
-    "groups": [],
-    "contains_hidden_groups": false,
-    "protected_branches": [],
-    "applies_to_all_protected_branches": true
-  },
-  {
-    "id": 4,
-    "name": "rule2",
-    "rule_type": "report_approver",
-    "report_type": "code_coverage",
     "eligible_approvers": [],
     "approvals_required": 2,
     "users": [],
@@ -116,11 +101,11 @@ Supported attributes:
 
 | Attribute            | Type              | Required | Description |
 |----------------------|-------------------|----------|-------------|
-| `id`                 | integer or string | Yes      | The ID or [URL-encoded path of a group](rest/index.md#namespaced-paths). |
+| `id`                 | integer or string | Yes      | The ID or [URL-encoded path of a group](rest/index.md#namespaced-path-encoding). |
 | `approvals_required` | integer           | Yes      | The number of required approvals for this rule. |
 | `name`               | string            | Yes      | The name of the approval rule. |
 | `group_ids`          | array             | No       | The IDs of groups as approvers. |
-| `rule_type`          | string            | No       | The rule type. `any_approver` is a pre-configured default rule with `approvals_required` at `0`. Other rules are `regular` (used for regular [merge request approval rules](../user/project/merge_requests/approvals/rules.md)) and `report_approver`. Don't use this field to build approval rules from the API. The `report_approver` field is used when GitLab creates an approval rule from configured and enabled [merge request approval policies](../user/application_security/policies/merge_request_approval_policies.md). |
+| `rule_type`          | string            | No       | The rule type. `any_approver` is a pre-configured default rule with `approvals_required` at `0`. Other rules are `regular` (used for regular [merge request approval rules](../user/project/merge_requests/approvals/rules.md)) and `report_approver`. Don't use this field to build approval rules from the API. The `report_approver` field is used when GitLab creates an approval rule from configured and enabled [merge request approval policies](../user/application_security/policies/scan-result-policies.md). |
 | `user_ids`           | array             | No       | The IDs of users as approvers. |
 
 Example request:
@@ -191,11 +176,11 @@ Supported attributes:
 | Attribute            | Type              | Required | Description |
 |----------------------|-------------------|----------|-------------|
 | `approval_rule_id`.  | integer           | Yes      | The ID of the approval rule. |
-| `id`                 | integer or string | Yes      | The ID or [URL-encoded path of a group](rest/index.md#namespaced-paths). |
+| `id`                 | integer or string | Yes      | The ID or [URL-encoded path of a group](rest/index.md#namespaced-path-encoding). |
 | `approvals_required` | string            | No       | The number of required approvals for this rule. |
 | `group_ids`          | integer           | No       | The IDs of users as approvers. |
 | `name`               | string            | No       | The name of the approval rule. |
-| `rule_type`          | array             | No       | The rule type. `any_approver` is a pre-configured default rule with `approvals_required` at `0`. Other rules are `regular` (used for regular [merge request approval rules](../user/project/merge_requests/approvals/rules.md)) and `report_approver`. Don't use this field to build approval rules from the API. The `report_approver` field is used when GitLab creates an approval rule from configured and enabled [merge request approval policies](../user/application_security/policies/merge_request_approval_policies.md). |
+| `rule_type`          | array             | No       | The rule type. `any_approver` is a pre-configured default rule with `approvals_required` at `0`. Other rules are `regular` (used for regular [merge request approval rules](../user/project/merge_requests/approvals/rules.md)) and `report_approver`. Don't use this field to build approval rules from the API. The `report_approver` field is used when GitLab creates an approval rule from configured and enabled [merge request approval policies](../user/application_security/policies/scan-result-policies.md). |
 | `user_ids`           | array             | No       | The IDs of groups as approvers. |
 
 Example request:
@@ -266,7 +251,7 @@ Supported attributes:
 
 | Attribute | Type              | Required | Description |
 |-----------|-------------------|----------|-------------|
-| `id`      | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-paths). |
+| `id`      | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-path-encoding). |
 
 ```json
 {
@@ -295,7 +280,7 @@ Supported attributes:
 
 | Attribute                                        | Type              | Required | Description |
 |--------------------------------------------------|-------------------|----------|-------------|
-| `id`                                             | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-paths). |
+| `id`                                             | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-path-encoding). |
 | `approvals_before_merge` (deprecated)            | integer           | No       | Number of required approvals before a merge request can merge. [Deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/11132) in GitLab 12.3. Use [Approval Rules](#create-project-level-rule) instead. |
 | `disable_overriding_approvers_per_merge_request` | boolean           | No       | Allow or prevent overriding approvers per merge request. |
 | `merge_requests_author_approval`                 | boolean           | No       | Allow or prevent authors from self approving merge requests; `true` means authors can self approve. |
@@ -337,7 +322,7 @@ Supported attributes:
 
 | Attribute | Type              | Required | Description |
 |-----------|-------------------|----------|-------------|
-| `id`      | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-paths). |
+| `id`      | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-path-encoding). |
 
 ```json
 [
@@ -345,7 +330,6 @@ Supported attributes:
     "id": 1,
     "name": "security",
     "rule_type": "regular",
-    "report_type": null,
     "eligible_approvers": [
       {
         "id": 5,
@@ -419,87 +403,7 @@ Supported attributes:
         "code_owner_approval_required": "false"
       }
     ],
-    "contains_hidden_groups": false,
-  },
-  {
-    "id": 2,
-    "name": "Coverage-Check",
-    "rule_type": "report_approver",
-    "report_type": "code_coverage",
-    "eligible_approvers": [
-      {
-        "id": 5,
-        "name": "John Doe",
-        "username": "jdoe",
-        "state": "active",
-        "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
-        "web_url": "http://localhost/jdoe"
-      },
-      {
-        "id": 50,
-        "name": "Group Member 1",
-        "username": "group_member_1",
-        "state": "active",
-        "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
-        "web_url": "http://localhost/group_member_1"
-      }
-    ],
-    "approvals_required": 3,
-    "users": [
-      {
-        "id": 5,
-        "name": "John Doe",
-        "username": "jdoe",
-        "state": "active",
-        "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
-        "web_url": "http://localhost/jdoe"
-      }
-    ],
-    "groups": [
-      {
-        "id": 5,
-        "name": "group1",
-        "path": "group1",
-        "description": "",
-        "visibility": "public",
-        "lfs_enabled": false,
-        "avatar_url": null,
-        "web_url": "http://localhost/groups/group1",
-        "request_access_enabled": false,
-        "full_name": "group1",
-        "full_path": "group1",
-        "parent_id": null,
-        "ldap_cn": null,
-        "ldap_access": null
-      }
-    ],
-    "applies_to_all_protected_branches": false,
-    "protected_branches": [
-      {
-        "id": 1,
-        "name": "main",
-        "push_access_levels": [
-          {
-            "access_level": 30,
-            "access_level_description": "Developers + Maintainers"
-          }
-        ],
-        "merge_access_levels": [
-          {
-            "access_level": 30,
-            "access_level_description": "Developers + Maintainers"
-          }
-        ],
-        "unprotect_access_levels": [
-          {
-            "access_level": 40,
-            "access_level_description": "Maintainers"
-          }
-        ],
-        "code_owner_approval_required": "false"
-      }
-    ],
-    "contains_hidden_groups": false,
+    "contains_hidden_groups": false
   }
 ]
 ```
@@ -519,7 +423,7 @@ Supported attributes:
 
 | Attribute          | Type              | Required | Description |
 |--------------------|-------------------|----------|-------------|
-| `id`               | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-paths). |
+| `id`               | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-path-encoding). |
 | `approval_rule_id` | integer           | Yes      | The ID of a approval rule. |
 
 ```json
@@ -527,7 +431,6 @@ Supported attributes:
   "id": 1,
   "name": "security",
   "rule_type": "regular",
-  "report_type": null,
   "eligible_approvers": [
     {
       "id": 5,
@@ -621,14 +524,14 @@ Supported attributes:
 
 | Attribute                           | Type              | Required | Description |
 |-------------------------------------|-------------------|----------|-------------|
-| `id`                                | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-paths). |
+| `id`                                | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-path-encoding). |
 | `approvals_required`                | integer           | Yes      | The number of required approvals for this rule. |
 | `name`                              | string            | Yes      | The name of the approval rule. |
 | `applies_to_all_protected_branches` | boolean           | No       | Whether to apply the rule to all protected branches. If set to `true`, ignores the value of `protected_branch_ids`. Default is `false`. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/335316) in GitLab 15.3. |
 | `group_ids`                         | Array             | No       | The IDs of groups as approvers. |
 | `protected_branch_ids`              | Array             | No       | The IDs of protected branches to scope the rule by. To identify the ID, [use the API](protected_branches.md#list-protected-branches). |
 | `report_type`                       | string            | No       | The report type required when the rule type is `report_approver`. The supported report types are `license_scanning` [(Deprecated in GitLab 15.9)](../update/deprecations.md#license-check-and-the-policies-tab-on-the-license-compliance-page) and `code_coverage`. |
-| `rule_type`                         | string            | No       | The rule type. `any_approver` is a pre-configured default rule with `approvals_required` at `0`. Other rules are `regular` (used for regular [merge request approval rules](../user/project/merge_requests/approvals/rules.md)) and `report_approver`. Don't use this field to build approval rules from the API. The `report_approver` field is used when GitLab creates an approval rule from configured and enabled [merge request approval policies](../user/application_security/policies/merge_request_approval_policies.md). |
+| `rule_type`                         | string            | No       | The rule type. `any_approver` is a pre-configured default rule with `approvals_required` at `0`. Other rules are `regular` (used for regular [merge request approval rules](../user/project/merge_requests/approvals/rules.md)) and `report_approver`. Don't use this field to build approval rules from the API. The `report_approver` field is used when GitLab creates an approval rule from configured and enabled [merge request approval policies](../user/application_security/policies/scan-result-policies.md). |
 | `user_ids`                          | Array             | No       | The IDs of users as approvers. If you provide both `user_ids` and `usernames`, it adds both lists of users. |
 | `usernames`                         | string array      | No       | The usernames of approvers for this rule (same as `user_ids` but requires a list of usernames). If you provide both `user_ids` and `usernames`, it adds both lists of users. |
 
@@ -756,7 +659,7 @@ Supported attributes:
 
 | Attribute                           | Type              | Required | Description |
 |-------------------------------------|-------------------|----------|-------------|
-| `id`                                | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-paths). |
+| `id`                                | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-path-encoding). |
 | `approvals_required`                | integer           | Yes      | The number of required approvals for this rule. |
 | `approval_rule_id`                  | integer           | Yes      | The ID of a approval rule. |
 | `name`                              | string            | Yes      | The name of the approval rule. |
@@ -861,7 +764,7 @@ Supported attributes:
 
 | Attribute          | Type              | Required | Description |
 |--------------------|-------------------|----------|-------------|
-| `id`               | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-paths). |
+| `id`               | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-path-encoding). |
 | `approval_rule_id` | integer           | Yes      | The ID of a approval rule. |
 
 ## Merge request-level MR approvals
@@ -879,7 +782,7 @@ Supported attributes:
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer           | Yes      | The IID of the merge request. |
 
 ```json
@@ -928,7 +831,7 @@ Supported attributes:
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer           | Yes      | The IID of the merge request. |
 
 ```json
@@ -997,7 +900,7 @@ Supported attributes:
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer           | Yes      | The IID of the merge request. |
 
 ```json
@@ -1006,63 +909,6 @@ Supported attributes:
     "id": 1,
     "name": "security",
     "rule_type": "regular",
-    "report_type": null,
-    "eligible_approvers": [
-      {
-        "id": 5,
-        "name": "John Doe",
-        "username": "jdoe",
-        "state": "active",
-        "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
-        "web_url": "http://localhost/jdoe"
-      },
-      {
-        "id": 50,
-        "name": "Group Member 1",
-        "username": "group_member_1",
-        "state": "active",
-        "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
-        "web_url": "http://localhost/group_member_1"
-      }
-    ],
-    "approvals_required": 3,
-    "source_rule": null,
-    "users": [
-      {
-        "id": 5,
-        "name": "John Doe",
-        "username": "jdoe",
-        "state": "active",
-        "avatar_url": "https://www.gravatar.com/avatar/0?s=80&d=identicon",
-        "web_url": "http://localhost/jdoe"
-      }
-    ],
-    "groups": [
-      {
-        "id": 5,
-        "name": "group1",
-        "path": "group1",
-        "description": "",
-        "visibility": "public",
-        "lfs_enabled": false,
-        "avatar_url": null,
-        "web_url": "http://localhost/groups/group1",
-        "request_access_enabled": false,
-        "full_name": "group1",
-        "full_path": "group1",
-        "parent_id": null,
-        "ldap_cn": null,
-        "ldap_access": null
-      }
-    ],
-    "contains_hidden_groups": false,
-    "overridden": false
-  },
-  {
-    "id": 2,
-    "name": "Coverage-Check",
-    "rule_type": "report_approver",
-    "report_type": "code_coverage",
     "eligible_approvers": [
       {
         "id": 5,
@@ -1129,7 +975,7 @@ Supported attributes:
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-path-encoding). |
 | `approval_rule_id`  | integer           | Yes      | The ID of an approval rule. |
 | `merge_request_iid` | integer           | Yes      | The IID of a merge request. |
 
@@ -1138,7 +984,6 @@ Supported attributes:
   "id": 1,
   "name": "security",
   "rule_type": "regular",
-  "report_type": null,
   "eligible_approvers": [
     {
       "id": 5,
@@ -1204,7 +1049,7 @@ Supported attributes:
 
 | Attribute                  | Type              | Required               | Description                                                                  |
 |----------------------------|-------------------|------------------------|------------------------------------------------------------------------------|
-| `id`                       | integer or string | Yes | The ID or [URL-encoded path of a project](rest/index.md#namespaced-paths) |
+| `id`                       | integer or string | Yes | The ID or [URL-encoded path of a project](rest/index.md#namespaced-path-encoding) |
 | `approvals_required`       | integer           | Yes | The number of required approvals for this rule.                              |
 | `merge_request_iid`        | integer           | Yes | The IID of the merge request.                                                |
 | `name`                     | string            | Yes | The name of the approval rule.                                               |
@@ -1291,7 +1136,7 @@ Supported attributes:
 
 | Attribute              | Type              | Required | Description |
 |------------------------|-------------------|----------|-------------|
-| `id`                   | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-paths). |
+| `id`                   | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-path-encoding). |
 | `approval_rule_id`     | integer           | Yes      | The ID of an approval rule. |
 | `merge_request_iid`    | integer           | Yes      | The IID of a merge request. |
 | `approvals_required`   | integer           | No       | The number of required approvals for this rule. |
@@ -1373,7 +1218,7 @@ Supported attributes:
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-path-encoding). |
 | `approval_rule_id`  | integer           | Yes      | The ID of an approval rule. |
 | `merge_request_iid` | integer           | Yes      | The IID of the merge request. |
 
@@ -1389,7 +1234,7 @@ Supported attributes:
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-path-encoding). |
 | `approval_password` | string            | No       | Current user's password. Required if [**Require user re-authentication to approve**](../user/project/merge_requests/approvals/settings.md#require-user-re-authentication-to-approve) is enabled in the project settings. Always fails if the group or self-managed instance is configured to force SAML authentication. |
 | `merge_request_iid` | integer           | Yes      | The IID of the merge request. |
 | `sha`               | string            | No       | The `HEAD` of the merge request. |
@@ -1450,7 +1295,7 @@ Supported attributes:
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of a project](rest/index.md#namespaced-path-encoding). |
 | `merge_request_iid` | integer           | Yes      | The IID of a merge request. |
 
 ## Reset approvals of a merge request
@@ -1466,7 +1311,7 @@ PUT /projects/:id/merge_requests/:merge_request_iid/reset_approvals
 
 | Attribute           | Type              | Required | Description |
 |---------------------|-------------------|----------|-------------|
-| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id`                | integer or string | Yes      | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `merge_request_iid` | integer           | Yes      | The internal ID of the merge request. |
 
 ```shell

@@ -13,8 +13,8 @@ module Integrations::Actions
     before_action :integration, only: [:edit, :update, :overrides, :test]
     # rubocop:enable Rails/LexicallyScopedActionFilter
 
-    before_action :render_404, only: [:edit, :update, :overrides, :test], if: -> do
-      integration.is_a?(::Integrations::Prometheus) && Feature.enabled?(:remove_monitor_metrics)
+    before_action :render_404, only: :edit, if: -> do
+      integration.to_param == 'prometheus' && Feature.enabled?(:remove_monitor_metrics)
     end
 
     urgency :low, [:test]
@@ -54,15 +54,11 @@ module Integrations::Actions
   end
 
   def reset
-    if integration.manual_activation?
-      integration.destroy!
+    integration.destroy!
 
-      flash[:notice] = s_('Integrations|This integration, and inheriting projects were reset.')
+    flash[:notice] = s_('Integrations|This integration, and inheriting projects were reset.')
 
-      render json: {}, status: :ok
-    else
-      render json: { message: s_('Integrations|Integration cannot be reset.') }, status: :unprocessable_entity
-    end
+    render json: {}, status: :ok
   end
 
   private

@@ -22,7 +22,6 @@ module RuboCop
     CUSTOM_CATEGORIES = %w[
       tooling
       shared
-      test_platform
     ].to_set.freeze
 
     def self.available

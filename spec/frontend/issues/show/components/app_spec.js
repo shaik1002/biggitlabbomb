@@ -15,7 +15,6 @@ import PinnedLinks from '~/issues/show/components/pinned_links.vue';
 import eventHub from '~/issues/show/event_hub';
 import axios from '~/lib/utils/axios_utils';
 import { HTTP_STATUS_OK, HTTP_STATUS_UNAUTHORIZED } from '~/lib/utils/http_status';
-import { confirmAction } from '~/lib/utils/confirm_via_gl_modal/confirm_via_gl_modal';
 import { visitUrl } from '~/lib/utils/url_utility';
 import {
   appProps,
@@ -29,15 +28,12 @@ import {
 jest.mock('~/alert');
 jest.mock('~/lib/utils/url_utility');
 jest.mock('~/behaviors/markdown/render_gfm');
-jest.mock('~/lib/utils/confirm_via_gl_modal/confirm_via_gl_modal');
-confirmAction.mockResolvedValueOnce(false);
 
 const REALTIME_REQUEST_STACK = [initialRequest, secondRequest];
 
 describe('Issuable output', () => {
   let axiosMock;
   let wrapper;
-  const endpoint = '/gitlab-org/gitlab-shell/-/issues/9/realtime_changes/realtime_changes';
 
   const findStickyHeader = () => wrapper.findComponent(StickyHeader);
   const findTitle = () => wrapper.findComponent(TitleComponent);
@@ -87,6 +83,7 @@ describe('Issuable output', () => {
     jest.spyOn(eventHub, '$emit');
 
     axiosMock = new MockAdapter(axios);
+    const endpoint = '/gitlab-org/gitlab-shell/-/issues/9/realtime_changes/realtime_changes';
 
     axiosMock.onGet(endpoint).replyOnce(HTTP_STATUS_OK, REALTIME_REQUEST_STACK[0], {
       'POLL-INTERVAL': '1',
@@ -102,9 +99,11 @@ describe('Issuable output', () => {
   });
 
   describe('update', () => {
-    it('should render a title/description/edited and update title/description/edited on update', async () => {
+    beforeEach(async () => {
       await createComponent();
+    });
 
+    it('should render a title/description/edited and update title/description/edited on update', async () => {
       expect(findTitle().props('titleText')).toContain(initialRequest.title_text);
       expect(findDescription().props('descriptionText')).toContain('this is a description');
 
@@ -122,36 +121,6 @@ describe('Issuable output', () => {
       expect(findEdited().props('updatedByName')).toBe('Other User');
       expect(findEdited().props('updatedByPath')).toMatch(/\/other_user$/);
       expect(findEdited().props('updatedAt')).toBe(secondRequest.updated_at);
-    });
-
-    it('does not update description if only a details tag is opened/closed', async () => {
-      axiosMock.reset();
-      axiosMock.onGet(endpoint).replyOnce(
-        HTTP_STATUS_OK,
-        {
-          ...initialRequest,
-          description: '<details><summary>Details</summary>Some details</details>',
-          description_text: 'Some details',
-        },
-        { 'POLL-INTERVAL': '1' },
-      );
-
-      axiosMock.onGet(endpoint).replyOnce(
-        HTTP_STATUS_OK,
-        {
-          ...secondRequest,
-          description: '<details open><summary>Details</summary>Some details</details>',
-          description_text: 'Some details',
-        },
-        { 'POLL-INTERVAL': '-1' },
-      );
-
-      await createComponent();
-      await advanceToNextPoll();
-
-      expect(findDescription().props('descriptionHtml')).toBe(
-        '<details><summary>Details</summary>Some details</details>',
-      );
     });
   });
 
@@ -523,21 +492,6 @@ describe('Issuable output', () => {
       await waitForPromises();
 
       expect(axiosMock.history.put[0].data).toContain(description);
-    });
-
-    it('blocks sensitive content', async () => {
-      const description = 'token: glpat-cgyKc1k_AsnEpmP-5fRL!';
-      findDescription().vm.$emit('saveDescription', description);
-
-      await waitForPromises();
-
-      expect(axiosMock.history.put).toHaveLength(0);
-      expect(confirmAction).toHaveBeenCalledWith(
-        '',
-        expect.objectContaining({
-          title: 'Warning: Potential secret detected',
-        }),
-      );
     });
   });
 });

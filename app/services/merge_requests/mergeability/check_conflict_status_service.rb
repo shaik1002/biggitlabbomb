@@ -15,7 +15,7 @@ module MergeRequests
       end
 
       def skip?
-        params[:skip_conflict_check].present?
+        false
       end
 
       def cacheable?

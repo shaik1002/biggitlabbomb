@@ -68,10 +68,7 @@ RSpec.describe 'Querying an Abuse Report', feature_category: :insider_threat do
   end
 
   describe 'notes' do
-    let_it_be(:abuse_report) { create(:abuse_report) }
-    let_it_be(:note_1) { create(:abuse_report_note, abuse_report: abuse_report) }
-    let_it_be(:note_2) { create(:abuse_report_note, abuse_report: abuse_report) }
-    let_it_be(:reply) { create(:abuse_report_note, in_reply_to: note_1) }
+    let_it_be(:note) { create(:note, noteable: abuse_report, author: current_user) }
 
     let(:notes_response) do
       graphql_data_at(:abuse_report, :notes, :nodes)
@@ -81,17 +78,41 @@ RSpec.describe 'Querying an Abuse Report', feature_category: :insider_threat do
       <<~GRAPHQL
         notes {
           nodes {
-            id
-            body
-            bodyHtml
+            #{all_graphql_fields_for('Note', max_depth: 2)}
           }
         }
       GRAPHQL
     end
 
     it 'returns notes' do
-      expect(notes_response).to match_array(
-        [a_graphql_entity_for(note_1), a_graphql_entity_for(note_2), a_graphql_entity_for(reply)]
+      expect(notes_response).to contain_exactly(
+        a_graphql_entity_for(note)
+      )
+    end
+  end
+
+  describe 'discussions' do
+    let_it_be(:discussion) do
+      create(:discussion_note_on_abuse_report, noteable: abuse_report, author: current_user).to_discussion
+    end
+
+    let(:discussions_response) do
+      graphql_data_at(:abuse_report, :discussions, :nodes)
+    end
+
+    let(:abuse_report_fields) do
+      <<~GRAPHQL
+        discussions {
+          nodes {
+            #{all_graphql_fields_for('Discussion', max_depth: 2)}
+          }
+        }
+      GRAPHQL
+    end
+
+    it 'returns discussions' do
+      expect(discussions_response).to contain_exactly(
+        a_graphql_entity_for(discussion)
       )
     end
   end

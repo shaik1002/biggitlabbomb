@@ -18,7 +18,7 @@ module Gitlab
       alias_method :term, :query_string
 
       def initialize(params, detect_abuse: true)
-        @raw_params      = process_params(params)
+        @raw_params      = convert_all_boolean_params(params)
         @query_string    = strip_surrounding_whitespace(@raw_params[:search] || @raw_params[:term])
         @detect_abuse    = detect_abuse
         @abuse_detection = AbuseDetection.new(self) if @detect_abuse
@@ -59,7 +59,9 @@ module Gitlab
       end
 
       def validate
-        abuse_detection.validate if detect_abuse?
+        if detect_abuse?
+          abuse_detection.validate
+        end
 
         super
       end
@@ -83,29 +85,13 @@ module Gitlab
       end
 
       def not_too_many_terms
-        return unless search_terms.count > SEARCH_TERM_LIMIT
-
-        errors.add :query_string, "has too many search terms (maximum is #{SEARCH_TERM_LIMIT})"
+        if search_terms.count > SEARCH_TERM_LIMIT
+          errors.add :query_string, "has too many search terms (maximum is #{SEARCH_TERM_LIMIT})"
+        end
       end
 
       def strip_surrounding_whitespace(obj)
         obj.to_s.strip
-      end
-
-      def process_params(params)
-        processed_params = convert_all_boolean_params(params)
-        convert_not_params(processed_params)
-      end
-
-      def convert_not_params(params)
-        not_params = params.delete(:not)
-        return params unless not_params&.respond_to?(:to_h)
-
-        not_params.each do |key, value|
-          params[:"not_#{key}"] = value
-        end
-
-        params
       end
 
       def convert_all_boolean_params(params)

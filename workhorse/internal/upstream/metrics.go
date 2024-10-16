@@ -23,26 +23,16 @@ var (
 			Name:      "geo_proxied_requests_total",
 			Help:      "A counter for Geo proxied requests through workhorse.",
 		},
-		[]string{"code", "method", "route", "route_id", "backend_id"},
+		[]string{"code", "method", "route"},
 	)
 
-	buildHandler = metrics.NewHandlerFactory(
-		metrics.WithNamespace(namespace),
-		metrics.WithLabels("route", "route_id", "backend_id"))
+	buildHandler = metrics.NewHandlerFactory(metrics.WithNamespace(namespace), metrics.WithLabels("route"))
 )
 
-func instrumentRoute(next http.Handler, _ string, metadata routeMetadata) http.Handler {
-	return buildHandler(next, metrics.WithLabelValues(
-		map[string]string{
-			"route":      metadata.regexpStr,
-			"route_id":   metadata.routeID,
-			"backend_id": string(metadata.backendID)}))
+func instrumentRoute(next http.Handler, _ string, regexpStr string) http.Handler {
+	return buildHandler(next, metrics.WithLabelValues(map[string]string{"route": regexpStr}))
 }
 
-func instrumentGeoProxyRoute(next http.Handler, _ string, metadata routeMetadata) http.Handler {
-	return promhttp.InstrumentHandlerCounter(httpGeoProxiedRequestsTotal.MustCurryWith(map[string]string{
-		"route":      metadata.regexpStr,
-		"route_id":   metadata.routeID,
-		"backend_id": string(metadata.backendID)}),
-		next)
+func instrumentGeoProxyRoute(next http.Handler, _ string, regexpStr string) http.Handler {
+	return promhttp.InstrumentHandlerCounter(httpGeoProxiedRequestsTotal.MustCurryWith(map[string]string{"route": regexpStr}), next)
 }

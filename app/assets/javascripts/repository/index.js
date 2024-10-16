@@ -175,8 +175,13 @@ export default function setupVueRepositoryList() {
 
     if (!codeDropdownEl) return false;
 
-    const { sshUrl, httpUrl, kerberosUrl, xcodeUrl, directoryDownloadLinks } =
-      codeDropdownEl.dataset;
+    const {
+      sshUrl,
+      httpUrl,
+      kerberosUrl,
+      xcodeUrl,
+      directoryDownloadLinks,
+    } = codeDropdownEl.dataset;
 
     return new Vue({
       el: codeDropdownEl,

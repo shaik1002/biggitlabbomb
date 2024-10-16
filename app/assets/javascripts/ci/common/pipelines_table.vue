@@ -1,6 +1,5 @@
 <script>
-import { GlSkeletonLoader, GlTableLite, GlTooltipDirective } from '@gitlab/ui';
-import { GlBreakpointInstance } from '@gitlab/ui/dist/utils';
+import { GlTableLite, GlTooltipDirective } from '@gitlab/ui';
 import { cleanLeadingSeparator } from '~/lib/utils/url_utility';
 import { s__, __ } from '~/locale';
 import Tracking from '~/tracking';
@@ -33,10 +32,7 @@ const HIDE_TD_ON_MOBILE = '!gl-hidden lg:!gl-table-cell';
  */
 
 export default {
-  name: 'PipelinesTable',
-  cellHeight: 50,
   components: {
-    GlSkeletonLoader,
     GlTableLite,
     LegacyPipelineMiniGraph,
     PipelineFailedJobsWidget,
@@ -55,14 +51,14 @@ export default {
     },
   },
   props: {
-    isCreatingPipeline: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     pipelines: {
       type: Array,
       required: true,
+    },
+    updateGraphDropdown: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
     pipelineIdType: {
       type: String,
@@ -72,16 +68,8 @@ export default {
         return value === PIPELINE_IID_KEY || value === PIPELINE_ID_KEY;
       },
     },
-    updateGraphDropdown: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
   computed: {
-    isMobile() {
-      return ['md', 'sm', 'xs'].includes(GlBreakpointInstance.getBreakpointSize());
-    },
     tableFields() {
       return [
         {
@@ -121,34 +109,19 @@ export default {
       ];
     },
     tdClasses() {
-      return '!gl-border-none';
+      return this.useFailedJobsWidget ? 'gl-pb-0! gl-border-none!' : 'pl-p-5!';
     },
     pipelinesWithDetails() {
-      let { pipelines } = this;
-
-      if (this.isCreatingPipeline) {
-        pipelines = [{ isLoading: true }, ...this.pipelines];
-      }
-
       if (this.useFailedJobsWidget) {
-        pipelines = pipelines.map((p) => {
-          return p.failed_builds_count > 0 ? { ...p, _showDetails: true } : p;
+        return this.pipelines.map((p) => {
+          return { ...p, _showDetails: true };
         });
       }
 
-      return pipelines;
+      return this.pipelines;
     },
   },
   methods: {
-    cellWidth(ref) {
-      return this.$refs[ref]?.offsetWidth;
-    },
-    displayFailedJobsWidget(item) {
-      return !item.isLoading && this.useFailedJobsWidget;
-    },
-    failedJobsCount(pipeline) {
-      return pipeline?.failed_builds_count || 0;
-    },
     getDownstreamPipelines(pipeline) {
       const downstream = pipeline.triggered;
       return keepLatestDownstreamPipelines(downstream);
@@ -159,26 +132,19 @@ export default {
     getStages(item) {
       return item?.details?.stages || [];
     },
-    onCancelPipeline(pipeline) {
-      this.$emit('cancel-pipeline', pipeline);
+    failedJobsCount(pipeline) {
+      return pipeline?.failed_builds_count || 0;
     },
     onRefreshPipelinesTable() {
       this.$emit('refresh-pipelines-table');
     },
     onRetryPipeline(pipeline) {
+      // This emit is only used by the `legacy_pipelines_table_wrapper`.
       this.$emit('retry-pipeline', pipeline);
     },
-    rowClass(item) {
-      return this.displayFailedJobsWidget(item) && this.failedJobsCount(item) > 0
-        ? ''
-        : '!gl-border-b';
-    },
-    setLoaderPosition(ref) {
-      if (this.isMobile) {
-        return this.cellWidth(ref) / 2;
-      }
-
-      return 0;
+    onCancelPipeline(pipeline) {
+      // This emit is only used by the `legacy_pipelines_table_wrapper`.
+      this.$emit('cancel-pipeline', pipeline);
     },
     trackPipelineMiniGraph() {
       this.track('click_minigraph', { label: TRACKING_CATEGORIES.table });
@@ -195,8 +161,6 @@ export default {
       :fields="tableFields"
       :items="pipelinesWithDetails"
       :tbody-tr-attr="$options.TBODY_TR_ATTR"
-      :tbody-tr-class="rowClass"
-      details-td-class="!gl-pt-2"
       stacked="lg"
       fixed
     >
@@ -210,53 +174,23 @@ export default {
       </template>
 
       <template #cell(status)="{ item }">
-        <div v-if="item.isLoading" ref="status">
-          <gl-skeleton-loader :height="$options.cellHeight" :width="cellWidth('status')">
-            <rect height="30" rx="4" ry="4" :width="cellWidth('status')" />
-          </gl-skeleton-loader>
-        </div>
-        <pipeline-status-badge v-else :pipeline="item" />
+        <pipeline-status-badge :pipeline="item" />
       </template>
 
       <template #cell(pipeline)="{ item }">
-        <div v-if="item.isLoading" ref="pipeline">
-          <gl-skeleton-loader :height="$options.cellHeight" :width="cellWidth('pipeline')">
-            <rect height="14" rx="4" ry="4" :width="cellWidth('pipeline')" />
-            <rect
-              height="10"
-              rx="4"
-              ry="4"
-              :width="cellWidth('pipeline') / 2"
-              :x="setLoaderPosition('pipeline')"
-              y="20"
-            />
-          </gl-skeleton-loader>
-        </div>
         <pipeline-url
-          v-else
           :pipeline="item"
           :pipeline-id-type="pipelineIdType"
-          ref-color="gl-text-default"
+          ref-color="gl-text-black-normal"
         />
       </template>
 
       <template #cell(triggerer)="{ item }">
-        <div v-if="item.isLoading" ref="triggerer" class="gl-ml-3">
-          <gl-skeleton-loader :height="$options.cellHeight" :width="cellWidth('triggerer')">
-            <rect :height="34" rx="50" ry="50" :width="34" />
-          </gl-skeleton-loader>
-        </div>
-        <pipeline-triggerer v-else :pipeline="item" />
+        <pipeline-triggerer :pipeline="item" />
       </template>
 
       <template #cell(stages)="{ item }">
-        <div v-if="item.isLoading" ref="stages">
-          <gl-skeleton-loader :height="$options.cellHeight" :width="cellWidth('stages')">
-            <rect height="20" rx="10" ry="10" :width="cellWidth('stages')" />
-          </gl-skeleton-loader>
-        </div>
         <legacy-pipeline-mini-graph
-          v-else
           :downstream-pipelines="getDownstreamPipelines(item)"
           :pipeline-path="item.path"
           :stages="getStages(item)"
@@ -267,13 +201,7 @@ export default {
       </template>
 
       <template #cell(actions)="{ item }">
-        <div v-if="item.isLoading" ref="actions">
-          <gl-skeleton-loader :height="$options.cellHeight" :width="cellWidth('actions')">
-            <rect height="20" rx="4" ry="4" :width="cellWidth('actions')" />
-          </gl-skeleton-loader>
-        </div>
         <pipeline-operations
-          v-else
           :pipeline="item"
           @cancel-pipeline="onCancelPipeline"
           @refresh-pipelines-table="onRefreshPipelinesTable"
@@ -283,13 +211,13 @@ export default {
 
       <template #row-details="{ item }">
         <pipeline-failed-jobs-widget
-          v-if="displayFailedJobsWidget(item)"
+          v-if="useFailedJobsWidget"
           :failed-jobs-count="failedJobsCount(item)"
           :is-pipeline-active="item.active"
           :pipeline-iid="item.iid"
           :pipeline-path="item.path"
           :project-path="getProjectPath(item)"
-          class="-gl-mb-1 -gl-ml-4 -gl-mt-3"
+          class="-gl-ml-4 -gl-mt-3 -gl-mb-1"
         />
       </template>
     </gl-table-lite>

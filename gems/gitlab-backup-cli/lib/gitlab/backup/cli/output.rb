@@ -46,11 +46,11 @@ module Gitlab
             output =
               case status
               when :success
-                Rainbow("[DONE]\n").green
+                "[DONE]\n".color(:green)
               when :failure
-                Rainbow("[FAILED]\n").red
+                "[FAILED]\n".color(:red)
               when :skipped
-                Rainbow("[SKIPPED]\n").yellow
+                "[SKIPPED]\n".color(:yellow)
               else
                 raise ArgumentError, "State must be one of the following: #{STATES.join(', ')}"
               end

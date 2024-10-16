@@ -57,27 +57,13 @@ module ShardingKeySpecHelpers
     result.count > 0
   end
 
-  def referenced_foreign_keys(to_table_name)
-    ::Gitlab::Database::PostgresForeignKey.by_referenced_table_name(to_table_name)
-  end
-
-  def referenced_loose_foreign_keys(to_table_name)
-    ::Gitlab::Database::LooseForeignKeys.definitions.select do |d|
-      d.to_table == to_table_name
-    end
-  end
-
-  def has_foreign_key?(from_table_name, column_name, to_table_name: nil, foreign_key_name: nil)
+  def has_foreign_key?(from_table_name, column_name, to_table_name: nil)
     where_clause = {
       constrained_table_name: from_table_name,
       constrained_columns: [column_name]
     }
 
     where_clause[:referenced_table_name] = to_table_name if to_table_name
-    if foreign_key_name
-      where_clause[:name] = foreign_key_name
-      where_clause.delete(:constrained_columns)
-    end
 
     fk = ::Gitlab::Database::PostgresForeignKey.where(where_clause).first
 

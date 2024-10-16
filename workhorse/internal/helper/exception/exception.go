@@ -7,12 +7,11 @@ import (
 
 	raven "github.com/getsentry/raven-go"
 
-	"gitlab.com/gitlab-org/labkit/correlation"
+	//lint:ignore SA1019 this was recently deprecated. Update workhorse to use labkit errortracking package.
+	correlation "gitlab.com/gitlab-org/labkit/correlation/raven"
 
 	"gitlab.com/gitlab-org/labkit/log"
 )
-
-const ravenSentryExtraKey = "gitlab.CorrelationID"
 
 var ravenHeaderBlacklist = []string{
 	"Authorization",
@@ -33,9 +32,8 @@ func Track(r *http.Request, err error, fields log.Fields) {
 		CleanHeaders(r)
 		interfaces = append(interfaces, raven.NewHttp(r))
 
-		if correlationID := correlation.ExtractFromContext(r.Context()); correlationID != "" {
-			extra[ravenSentryExtraKey] = correlationID
-		}
+		//lint:ignore SA1019 this was recently deprecated. Update workhorse to use labkit errortracking package.
+		extra = correlation.SetExtra(r.Context(), extra)
 	}
 
 	exception := &raven.Exception{

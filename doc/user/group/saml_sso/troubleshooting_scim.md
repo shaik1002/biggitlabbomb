@@ -53,7 +53,7 @@ The following are possible solutions for problems where users cannot sign in:
 
 To check if a user's SAML `NameId` matches their SCIM `externalId`:
 
-- Administrators can use the **Admin** area to [list SCIM identities for a user](../../../administration/admin_area.md#user-identities).
+- Administrators can use the Admin Area to [list SCIM identities for a user](../../../administration/admin_area.md#user-identities).
 - Group owners can see the list of users and the identifier stored for each user in the group SAML SSO Settings page.
 - You can use the [SCIM API](../../../api/scim.md) to manually retrieve the `extern_uid` GitLab has stored for users and compare the value for each user from the [SAML API](../../../api/saml.md) .
 - Have the user use a [SAML Tracer](troubleshooting.md#saml-debugging-tools) and compare the `extern_uid` to
@@ -63,12 +63,12 @@ To check if a user's SAML `NameId` matches their SCIM `externalId`:
 
 Whether the value was changed or you need to map to a different field, the following must map to the same field:
 
-- `extern_Id`
+- `externalId`
 - `NameId`
 
-If the SCIM `extern_uid` does not match the SAML `NameId`, you must update the SCIM `extern_uid` to enable the user to sign in.
+If the GitLab `extern_uid` does not match the SAML `NameId`, you must update the GitLab `extern_uid` to enable the user to sign in.
 
-Be cautious if you revise the fields used by your SCIM identity provider, typically `extern_Id`.
+Be cautious if you revise the fields used by your SCIM identity provider, typically `externalId`.
 Your identity provider should be configured to do this update.
 In some cases the identity provider cannot do the update, for example when a user lookup fails.
 
@@ -194,14 +194,14 @@ this:
 
 1. Optional. If you did not save your SCIM token when you first configured SCIM, [generate a new token](scim_setup.md#configure-gitlab). If you generate a new SCIM token, you **must** update the token in your identity provider's SCIM configuration, or SCIM will stop working.
 1. Locate your SCIM token.
-1. Use the API to [get a single SCIM provisioned user](../../../development/internal_api/index.md#get-a-single-scim-provisioned-user).
+1. Use the API to [get a single SCIM provisioned user](/ee/development/internal_api/index.md#get-a-single-scim-provisioned-user).
 1. Check the returned information to make sure that:
 
    - The user's identifier (`id`) and email match what your identity provider is sending.
    - `active` is set to `false`.
 
    If any of this information does not match, [contact GitLab Support](https://support.gitlab.com/).
-1. Use the API to [update the SCIM provisioned user's `active` value to `true`](../../../development/internal_api/index.md#update-a-single-scim-provisioned-user).
+1. Use the API to [update the SCIM provisioned user's `active` value to `true`](/ee/development/internal_api/index.md#update-a-single-scim-provisioned-user).
 1. If the update returns a status code `204`, have the user attempt to sign in
    using SAML SSO.
 
@@ -252,7 +252,7 @@ invalid JSON primitives (such as `.`). Removing or URL encoding these characters
 
 ### `(Field) can't be blank` sync error
 
-When checking the audit events for the provisioning, you sometimes see a
+When checking the Audit Events for the provisioning, you sometimes see a
 `Namespace can't be blank, Name can't be blank, and User can't be blank.` error.
 
 This error can occur because not all required fields (such as first name and last name) are present for all users

@@ -102,7 +102,7 @@ Doorkeeper.configure do
   # "password"           => Resource Owner Password Credentials Grant Flow
   # "client_credentials" => Client Credentials Grant Flow
   #
-  grant_flows %w[authorization_code password client_credentials device_code]
+  grant_flows %w[authorization_code password client_credentials]
 
   # Under some circumstances you might want to have applications auto-approved,
   # so that the user skips the authorization step.
@@ -129,6 +129,4 @@ Doorkeeper.configure do
   # Use a custom class for generating the application secret.
   # https://doorkeeper.gitbook.io/guides/configuration/other-configurations#custom-application-secret-generator
   application_secret_generator 'Gitlab::DoorkeeperSecretStoring::Token::UniqueApplicationToken'
-
-  custom_access_token_attributes [:organization_id]
 end

@@ -42,8 +42,7 @@ RSpec.describe Gitlab::GithubImport::Importer::Events::CrossReferenced, :clean_g
       project_id: project.id,
       author_id: user.id,
       note: expected_note_body,
-      created_at: issue_event.created_at,
-      imported_from: 'github'
+      created_at: issue_event.created_at
     }.stringify_keys
   end
 

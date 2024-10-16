@@ -55,24 +55,11 @@ func TestNewDiffClient(t *testing.T) {
 	testOutgoingMetadata(ctx, t)
 }
 
-func TestNewConnection(t *testing.T) {
-	conn, err := NewConnection(serverFixture())
+func TestNewConnectionWithSidechannel(t *testing.T) {
+	conn, sidechannel, err := NewConnectionWithSidechannel(serverFixture())
 	require.NotNil(t, conn)
-	require.NoError(t, err)
-}
-
-func TestSidechannel(t *testing.T) {
-	sidechannel, err := Sidechannel()
 	require.Equal(t, sidechannelRegistry, sidechannel)
 	require.NoError(t, err)
-}
-
-func TestSidechannelNotInitialized(t *testing.T) {
-	sidechannelRegistry = nil
-
-	sidechannel, err := Sidechannel()
-	require.Nil(t, sidechannel)
-	require.ErrorContains(t, err, "sidechannel is not initialized")
 }
 
 func testOutgoingMetadata(ctx context.Context, t *testing.T) {

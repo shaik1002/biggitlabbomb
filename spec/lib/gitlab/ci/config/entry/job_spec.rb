@@ -58,15 +58,6 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job, feature_category: :pipeline_compo
       it { is_expected.to be_truthy }
     end
 
-    context 'when config is a regular job with run keyword' do
-      let(:name) { :rspec }
-      let(:config) do
-        { run: [{ name: 'step1', step: 'some reference' }] }
-      end
-
-      it { is_expected.to be_truthy }
-    end
-
     context 'when config is a bridge job' do
       let(:name) { :rspec }
       let(:config) do
@@ -244,101 +235,12 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job, feature_category: :pipeline_compo
         end
       end
 
-      context 'when script and run are used together' do
-        let(:config) { { script: 'rspec', run: [{ name: 'step1', step: 'some reference' }] } }
-
-        it 'returns error about using script and run' do
-          expect(entry).not_to be_valid
-          expect(entry.errors).to include 'job config these keys cannot be used together: script, run'
-        end
-      end
-
-      context 'when run value is invalid' do
-        using RSpec::Parameterized::TableSyntax
-
-        where(:case_name, :config, :error) do
-          'when only step is used without name' | {
-            stage: 'build',
-            run: [{ step: 'some reference' }]
-          } | 'job run object at `/0` is missing required properties: name'
-
-          'when only script is used without name' | {
-            stage: 'build',
-            run: [{ script: 'echo' }]
-          } | 'job run object at `/0` is missing required properties: name'
-
-          'when step and script are used together' | {
-            stage: 'build',
-            run: [{
-              name: 'step1',
-              step: 'some reference',
-              script: 'echo'
-            }]
-          } | 'job run value at /0 should use only one of: step, script'
-
-          'when a required subkey is missing' | {
-            stage: 'build',
-            run: [{ name: 'step1' }]
-          } | 'job run object at `/0` is missing required properties: step'
-
-          'when a subkey is invalid' | {
-            stage: 'build',
-            run: [{ name: 'step1', step: 'some step', invalid_key: 'some value' }]
-          } | 'job run object property at `/0/invalid_key` is a disallowed additional property'
-        end
-
-        with_them do
-          it 'returns error about invalid run' do
-            expect(entry).not_to be_valid
-            expect(entry.errors).to include(error)
-          end
-        end
-
-        context 'when run value is not an array' do
-          let(:config) { { stage: 'build', run: 'invalid' } }
-
-          it 'returns error about invalid run' do
-            expect(entry).not_to be_valid
-            expect(entry.errors).to include 'job run value at root is not an array'
-          end
-        end
-
-        context 'with invalid env value type' do
-          let(:config) do
-            {
-              stage: 'build',
-              run: [
-                {
-                  name: 'step1',
-                  script: 'echo $MY_VAR',
-                  env: { MY_VAR: 123 }
-                }
-              ]
-            }
-          end
-
-          it 'returns error about invalid env' do
-            expect(entry).not_to be_valid
-            expect(entry.errors).to include 'job run value at `/0/env/my_var` is not a string'
-          end
-        end
-
-        context 'when run value does not match steps schema' do
-          let(:config) { { stage: 'build', run: [{ name: 'step1' }] } }
-
-          it 'returns error about invalid run' do
-            expect(entry).not_to be_valid
-            expect(entry.errors).to include 'job run object at `/0` is missing required properties: step'
-          end
-        end
-      end
-
       context 'when script is not provided' do
         let(:config) { { stage: 'test' } }
 
         it 'returns error about missing script entry' do
           expect(entry).not_to be_valid
-          expect(entry.errors).to include 'job script can\'t be blank'
+          expect(entry.errors).to include "job script can't be blank"
         end
       end
 
@@ -347,7 +249,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job, feature_category: :pipeline_compo
 
         it 'returns error about wrong value type' do
           expect(entry).not_to be_valid
-          expect(entry.errors).to include 'job extends should be an array of strings or a string'
+          expect(entry.errors).to include "job extends should be an array of strings or a string"
         end
       end
 
@@ -707,9 +609,18 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job, feature_category: :pipeline_compo
           expect(entry.errors).to include(/job publish can only be used within a `pages` job/)
         end
       end
+
+      context 'if the config contains a pages entry' do
+        let(:entry) { described_class.new({ script: 'echo', pages: { path_prefix: 'foo' } }, name: name) }
+
+        it 'is invalid' do
+          expect(entry).not_to be_valid
+          expect(entry.errors).to include(/job pages can only be used within a `pages` job/)
+        end
+      end
     end
 
-    context 'when job is a job named pages', feature_category: :pages do
+    context 'when job is a pages job', feature_category: :pages do
       let(:name) { :pages }
 
       context 'when it does not have a publish entry' do
@@ -736,93 +647,19 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job, feature_category: :pipeline_compo
         end
       end
     end
-
-    context 'when job is a pages job with a custom name', feature_category: :pages do
-      before do
-        stub_feature_flags(customizable_pages_job_name: true)
-      end
-
-      let(:name) { :rspec }
-
-      context 'when pages entry is a boolean' do
-        let(:entry) { described_class.new({ script: 'echo', pages: true }, name: name) }
-
-        it 'is valid' do
-          expect(entry).to be_valid
-        end
-      end
-
-      context 'when pages entry is a hash' do
-        let(:entry) { described_class.new({ script: 'echo', pages: { path_prefix: 'foo' } }, name: name) }
-
-        it 'is valid' do
-          expect(entry).to be_valid
-        end
-      end
-
-      context 'when it has a publish entry' do
-        let(:entry) { described_class.new({ script: 'echo', pages: true, publish: 'foo' }, name: name) }
-
-        it 'is valid' do
-          expect(entry).to be_valid
-        end
-      end
-    end
   end
 
   describe '#pages_job?', :aggregate_failures, feature_category: :pages do
-    context 'with customizable_pages_job_name feature flag disabled' do
-      before do
-        stub_feature_flags(customizable_pages_job_name: false)
-      end
-
-      where(:name, :config, :result) do
-        :pages | {} | true
-        :pages | { pages: false } | true
-        :pages | { pages: true } | true
-        :pages | { pages: nil } | true
-        :pages | { pages: { path_prefix: 'foo' } } | true
-        :'pages:staging' | {} | false
-        :'something:pages:else' | {} | false
-        :'something-else' | {} | false
-        :'something-else' | { pages: true } | false
-        :'something-else' | { pages: { path_prefix: 'foo' } } | false
-        :'something-else' | { pages: false } | false
-        :'something-else' | { pages: nil } | false
-      end
-
-      with_them do
-        subject { described_class.new(config, name: name).pages_job? }
-
-        it { is_expected.to eq(result) }
-      end
+    where(:name, :result) do
+      :pages | true
+      :'pages:staging' | false
+      :'something:pages:else' | false
     end
 
-    context 'with customizable_pages_job_name feature flag enabled' do
-      before do
-        stub_feature_flags(customizable_pages_job_name: true)
-      end
+    with_them do
+      subject { described_class.new({}, name: name).pages_job? }
 
-      where(:name, :config, :result) do
-        :pages | {} | true
-        :pages | { pages: false } | false
-        :pages | { pages: true } | true
-        :pages | { pages: nil } | true
-        :pages | { pages: { path_prefix: 'foo' } } | true
-        :'pages:staging' | {} | false
-        :'something:pages:else' | {} | false
-        :'something-else' | {} | false
-        :'something-else' | { pages: true } | true
-        :'something-else' | { pages: { path_prefix: 'foo' } } | true
-        :'something-else' | { pages: false } | false
-        :'something-else' | { pages: nil } | false
-      end
-
-      with_them do
-        subject { described_class.new(config, name: name).pages_job? }
-
-        it { is_expected.to eq(result) }
-      end
+      it { is_expected.to eq(result) }
     end
   end
 
@@ -967,59 +804,6 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job, feature_category: :pipeline_compo
             scheduling_type: :stage,
             id_tokens: { TEST_ID_TOKEN: { aud: 'https://gitlab.com' } }
           )
-        end
-      end
-
-      context 'when run keyword is used' do
-        let(:run_value) do
-          [
-            { name: 'step1', step: 'some reference' },
-            { name: 'step2', script: 'echo' }
-          ]
-        end
-
-        let(:config) { { run: run_value } }
-
-        it 'returns the run value' do
-          expect(entry.value).to include({ run: run_value })
-        end
-
-        context 'with valid inputs' do
-          let(:config) do
-            {
-              stage: 'build',
-              run: [
-                {
-                  name: 'step1',
-                  script: 'echo $MY_INPUT',
-                  inputs: { MY_INPUT: 'some value' }
-                }
-              ]
-            }
-          end
-
-          it 'is valid' do
-            expect(entry).to be_valid
-          end
-
-          context 'with valid env key' do
-            let(:config) do
-              {
-                stage: 'build',
-                run: [
-                  {
-                    name: 'step1',
-                    script: 'echo $MY_VAR',
-                    env: { MY_VAR: 'some value' }
-                  }
-                ]
-              }
-            end
-
-            it 'is valid' do
-              expect(entry).to be_valid
-            end
-          end
         end
       end
 

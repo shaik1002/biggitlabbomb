@@ -46,18 +46,10 @@ func handleGetInfoRefs(rw http.ResponseWriter, r *http.Request, a *api.Response)
 		status := grpcstatus.Convert(err)
 		err = fmt.Errorf("handleGetInfoRefs: %v", err)
 
-		if status == nil {
-			fail.Request(responseWriter, r, err)
-			return
-		}
-		switch status.Code() {
-		case grpccodes.Unavailable:
+		if status != nil && status.Code() == grpccodes.Unavailable {
 			fail.Request(responseWriter, r, err, fail.WithStatus(http.StatusServiceUnavailable),
 				fail.WithBody("The git server, Gitaly, is not available at this time. Please contact your administrator."))
-		case grpccodes.NotFound:
-			fail.Request(responseWriter, r, err, fail.WithStatus(http.StatusNotFound),
-				fail.WithBody("Not Found."))
-		default:
+		} else {
 			fail.Request(responseWriter, r, err)
 		}
 	}

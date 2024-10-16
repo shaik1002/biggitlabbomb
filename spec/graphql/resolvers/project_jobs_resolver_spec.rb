@@ -13,15 +13,18 @@ RSpec.describe Resolvers::ProjectJobsResolver, feature_category: :continuous_int
   let_it_be(:successful_build_two) { create(:ci_build, :with_build_name, :success, name: 'Build Two', pipeline: pipeline) }
   let_it_be(:failed_build) { create(:ci_build, :failed, :with_build_name, name: 'Build Three', pipeline: pipeline) }
   let_it_be(:pending_build) { create(:ci_build, :pending, :with_build_name, name: 'Build Three', pipeline: pipeline) }
-  let_it_be(:irrelevant_build) { create(:ci_build, name: 'Irrelevant Build', pipeline: irrelevant_pipeline) }
+
+  let(:irrelevant_build) { create(:ci_build, name: 'Irrelevant Build', pipeline: irrelevant_pipeline) }
+  let(:args) { {} }
+  let(:current_user) { create(:user) }
+
+  subject { resolve_jobs(args) }
 
   describe '#resolve' do
-    let(:args) { {} }
-
-    subject { resolve_jobs(args) }
-
     context 'with authorized user' do
-      let_it_be(:current_user) { create(:user, developer_of: project) }
+      before do
+        project.add_developer(current_user)
+      end
 
       context 'with statuses argument' do
         let(:args) { { statuses: [Types::Ci::JobStatusEnum.coerce_isolated_input('SUCCESS')] } }

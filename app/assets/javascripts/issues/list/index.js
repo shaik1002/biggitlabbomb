@@ -7,8 +7,6 @@ import createDefaultClient, { createApolloClientWithCaching } from '~/lib/graphq
 import { addShortcutsExtension } from '~/behaviors/shortcuts';
 import ShortcutsWorkItems from '~/behaviors/shortcuts/shortcuts_work_items';
 import { parseBoolean } from '~/lib/utils/common_utils';
-import DesignDetail from '~/work_items/components/design_management/design_preview/design_details.vue';
-import { ROUTES } from '~/work_items/constants';
 import JiraIssuesImportStatusApp from './components/jira_issues_import_status_app.vue';
 import { gqlClient } from './graphql';
 
@@ -84,18 +82,17 @@ export async function mountIssuesListApp() {
     emailsHelpPagePath,
     exportCsvPath,
     fullPath,
-    groupId,
     groupPath,
     hasAnyIssues,
     hasAnyProjects,
     hasBlockedIssuesFeature,
+    hasEpicsFeature,
     hasIssuableHealthStatusFeature,
     hasIssueDateFilterFeature,
     hasIssueWeightsFeature,
     hasIterationsFeature,
-    hasOkrsFeature,
-    hasQualityManagementFeature,
     hasScopedLabelsFeature,
+    hasOkrsFeature,
     importCsvIssuesPath,
     initialEmail,
     initialSort,
@@ -114,10 +111,10 @@ export async function mountIssuesListApp() {
     rssPath,
     showNewIssueLink,
     signInPath,
-    wiCanAdminLabel,
-    wiIssuesListPath,
-    wiLabelsManagePath,
-    wiReportAbusePath,
+    groupId = '',
+    reportAbusePath,
+    registerPath,
+    issuesListPath,
   } = el.dataset;
 
   return new Vue({
@@ -129,23 +126,7 @@ export async function mountIssuesListApp() {
     router: new VueRouter({
       base: window.location.pathname,
       mode: 'history',
-      routes: [
-        {
-          name: 'root',
-          path: '/',
-        },
-        {
-          name: ROUTES.design,
-          path: '/:iid/designs/:id',
-          component: DesignDetail,
-          beforeEnter({ params: { id } }, _, next) {
-            if (typeof id === 'string') {
-              next();
-            }
-          },
-          props: ({ params: { id, iid } }) => ({ id, iid }),
-        },
-      ],
+      routes: [{ path: '/' }],
     }),
     provide: {
       autocompleteAwardEmojisPath,
@@ -156,18 +137,20 @@ export async function mountIssuesListApp() {
       canReadCrmContact: parseBoolean(canReadCrmContact),
       canReadCrmOrganization: parseBoolean(canReadCrmOrganization),
       fullPath,
-      groupId,
+      projectPath: fullPath,
       groupPath,
+      reportAbusePath,
+      registerPath,
       hasAnyIssues: parseBoolean(hasAnyIssues),
       hasAnyProjects: parseBoolean(hasAnyProjects),
       hasBlockedIssuesFeature: parseBoolean(hasBlockedIssuesFeature),
+      hasEpicsFeature: parseBoolean(hasEpicsFeature),
       hasIssuableHealthStatusFeature: parseBoolean(hasIssuableHealthStatusFeature),
       hasIssueDateFilterFeature: parseBoolean(hasIssueDateFilterFeature),
       hasIssueWeightsFeature: parseBoolean(hasIssueWeightsFeature),
       hasIterationsFeature: parseBoolean(hasIterationsFeature),
-      hasOkrsFeature: parseBoolean(hasOkrsFeature),
-      hasQualityManagementFeature: parseBoolean(hasQualityManagementFeature),
       hasScopedLabelsFeature: parseBoolean(hasScopedLabelsFeature),
+      hasOkrsFeature: parseBoolean(hasOkrsFeature),
       initialSort,
       isIssueRepositioningDisabled: parseBoolean(isIssueRepositioningDisabled),
       isGroup: !parseBoolean(isProject),
@@ -196,12 +179,8 @@ export async function mountIssuesListApp() {
       markdownHelpPath,
       quickActionsHelpPath,
       resetPath,
-      // For work item modal
-      canAdminLabel: wiCanAdminLabel,
-      issuesListPath: wiIssuesListPath,
-      labelsManagePath: wiLabelsManagePath,
-      reportAbusePath: wiReportAbusePath,
-      hasSubepicsFeature: false,
+      groupId,
+      issuesListPath,
     },
     render: (createComponent) => createComponent(IssuesListApp),
   });

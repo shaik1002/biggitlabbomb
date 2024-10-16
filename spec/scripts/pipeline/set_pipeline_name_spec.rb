@@ -116,13 +116,13 @@ RSpec.describe SetPipelineName, feature_category: :tooling do
         end
       end
 
-      context 'when the merge request has the `pipeline:foo-bar` and `pipeline:bar-baz` label' do
-        let(:merge_request_labels) { ['pipeline:foo-bar', 'pipeline:bar-baz'] }
+      context 'when the merge request has the `pipeline:expedite` label' do
+        let(:merge_request_labels) { ['pipeline:expedite'] }
 
         it 'adds the expedited pipeline type' do
           instance.execute
 
-          expect(WebMock).to have_requested(:put, put_url).with { |req| req.body.include?('opts:foo-bar,bar-baz') }
+          expect(WebMock).to have_requested(:put, put_url).with { |req| req.body.include?('types:expedited') }
         end
       end
     end

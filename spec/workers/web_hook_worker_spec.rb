@@ -12,8 +12,7 @@ RSpec.describe WebHookWorker, feature_category: :integrations do
 
   describe '#perform' do
     it 'delegates to WebHookService' do
-      expect_next(WebHookService, project_hook, data.with_indifferent_access, hook_name, anything,
-        idempotency_key: anything)
+      expect_next(WebHookService, project_hook, data.with_indifferent_access, hook_name, anything)
         .to receive(:execute).and_return(response)
       expect(subject).to receive(:log_extra_metadata_on_done).with(:response_status, response.status)
       expect(subject).to receive(:log_extra_metadata_on_done).with(:http_status, response[:http_status])
@@ -29,8 +28,7 @@ RSpec.describe WebHookWorker, feature_category: :integrations do
       uuid = SecureRandom.uuid
       params = { recursion_detection_request_uuid: uuid }
 
-      expect_next(WebHookService, project_hook, data.with_indifferent_access, hook_name, anything,
-        idempotency_key: anything)
+      expect_next(WebHookService, project_hook, data.with_indifferent_access, hook_name, anything)
         .to receive(:execute).and_return(response)
       expect(subject).to receive(:log_extra_metadata_on_done).with(:response_status, response.status)
       expect(subject).to receive(:log_extra_metadata_on_done).with(:http_status, response[:http_status])
@@ -68,8 +66,7 @@ RSpec.describe WebHookWorker, feature_category: :integrations do
 
         expect(ProjectWiki).to receive(:find_by_id).with(container.id).and_return(wiki)
         expect(wiki).to receive(:find_page).with(slug, version_id).and_return(wiki_page)
-        expect_next(WebHookService, project_hook, expected_data.with_indifferent_access, hook_name, anything,
-          idempotency_key: anything)
+        expect_next(WebHookService, project_hook, expected_data.with_indifferent_access, hook_name, anything)
           .to receive(:execute).and_return(response)
         expect(subject).to receive(:log_extra_metadata_on_done).with(:response_status, response.status)
         expect(subject).to receive(:log_extra_metadata_on_done).with(:http_status, response[:http_status])
@@ -83,8 +80,7 @@ RSpec.describe WebHookWorker, feature_category: :integrations do
         it 'uses existing data' do
           expected_data = args
 
-          expect_next(WebHookService, project_hook, expected_data.with_indifferent_access, hook_name, anything,
-            idempotency_key: anything)
+          expect_next(WebHookService, project_hook, expected_data.with_indifferent_access, hook_name, anything)
             .to receive(:execute).and_return(response)
           expect(subject).to receive(:log_extra_metadata_on_done).with(:response_status, response.status)
           expect(subject).to receive(:log_extra_metadata_on_done).with(:http_status, response[:http_status])
@@ -99,8 +95,7 @@ RSpec.describe WebHookWorker, feature_category: :integrations do
         it 'uses existing data' do
           expected_data = args
 
-          expect_next(WebHookService, project_hook, expected_data.with_indifferent_access, hook_name, anything,
-            idempotency_key: anything)
+          expect_next(WebHookService, project_hook, expected_data.with_indifferent_access, hook_name, anything)
             .to receive(:execute).and_return(response)
           expect(subject).to receive(:log_extra_metadata_on_done).with(:response_status, response.status)
           expect(subject).to receive(:log_extra_metadata_on_done).with(:http_status, response[:http_status])
@@ -114,8 +109,7 @@ RSpec.describe WebHookWorker, feature_category: :integrations do
           expected_data = args
 
           expect(ProjectWiki).to receive(:find_by_id).with(container.id).and_return(nil)
-          expect_next(WebHookService, project_hook, expected_data.with_indifferent_access, hook_name, anything,
-            idempotency_key: anything)
+          expect_next(WebHookService, project_hook, expected_data.with_indifferent_access, hook_name, anything)
             .to receive(:execute).and_return(response)
           expect(subject).to receive(:log_extra_metadata_on_done).with(:response_status, response.status)
           expect(subject).to receive(:log_extra_metadata_on_done).with(:http_status, response[:http_status])
@@ -130,8 +124,7 @@ RSpec.describe WebHookWorker, feature_category: :integrations do
 
           expect(ProjectWiki).to receive(:find_by_id).with(container.id).and_return(wiki)
           expect(wiki).to receive(:find_page).with(slug, version_id).and_return(nil)
-          expect_next(WebHookService, project_hook, expected_data.with_indifferent_access, hook_name, anything,
-            idempotency_key: anything)
+          expect_next(WebHookService, project_hook, expected_data.with_indifferent_access, hook_name, anything)
             .to receive(:execute).and_return(response)
           expect(subject).to receive(:log_extra_metadata_on_done).with(:response_status, response.status)
           expect(subject).to receive(:log_extra_metadata_on_done).with(:http_status, response[:http_status])

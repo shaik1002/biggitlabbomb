@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: Platform Insights
+group: Observability
 info: Any user with at least the Maintainer role can merge updates to this content. For details, see https://docs.gitlab.com/ee/development/development_processes.html#development-guidelines-review.
 ---
 
@@ -59,8 +59,8 @@ Once you have a project identified to use:
 - [Metrics](../../operations/metrics.md)
 - [Logs](../../operations/logs.md)
 
-## Related design documents
+## Related blueprints
 
-- [GitLab Observability in GitLab.com and Self-Managed GitLab Instances](https://handbook.gitlab.com/handbook/engineering/architecture/design-documents/observability_for_self_managed/)
-- [GitLab Observability - Metrics](https://handbook.gitlab.com/handbook/engineering/architecture/design-documents/observability_metrics/)
-- [GitLab Observability - Logging](https://handbook.gitlab.com/handbook/engineering/architecture/design-documents/observability_logging/)
+- [GitLab Observability in GitLab.com and Self-Managed GitLab Instances](../../architecture/blueprints/observability_for_self_managed/index.md)
+- [GitLab Observability - Metrics](../../architecture/blueprints/observability_metrics/index.md)
+- [GitLab Observability - Logging](../../architecture/blueprints/observability_logging/index.md)

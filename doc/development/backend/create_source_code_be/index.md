@@ -29,9 +29,9 @@ Source Code Management shares ownership of Code Owners with the Code Review grou
 
 - [Approval Rules](../../merge_request_concepts/approval_rules.md)
 
-### Push rules
+### Push Rules
 
-- [Push rules development guidelines](../../push_rules/index.md)
+- [Push Rules development guidelines](../../push_rules/index.md)
 
 ### Protected Branches
 

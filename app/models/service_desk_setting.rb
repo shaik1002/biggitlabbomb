@@ -86,13 +86,6 @@ class ServiceDeskSetting < ApplicationRecord
     end
   end
 
-  def tickets_confidential_by_default?
-    # Tickets in public projects should always be confidential by default
-    return true if project.public?
-
-    self[:tickets_confidential_by_default]
-  end
-
   private
 
   def source_template_project

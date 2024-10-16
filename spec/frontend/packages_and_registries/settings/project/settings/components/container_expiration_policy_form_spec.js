@@ -1,11 +1,10 @@
-import { GlAlert, GlSprintf } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import VueApollo from 'vue-apollo';
 import Vue, { nextTick } from 'vue';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { useMockLocationHelper } from 'helpers/mock_window_location_helper';
 import waitForPromises from 'helpers/wait_for_promises';
-import { GlLoadingIcon } from 'jest/packages_and_registries/shared/stubs';
+import { GlCard, GlLoadingIcon } from 'jest/packages_and_registries/shared/stubs';
 import component from '~/packages_and_registries/settings/project/components/container_expiration_policy_form.vue';
 import { UPDATE_SETTINGS_ERROR_MESSAGE } from '~/packages_and_registries/settings/project/constants';
 import updateContainerExpirationPolicyMutation from '~/packages_and_registries/settings/project/graphql/mutations/update_container_expiration_policy.mutation.graphql';
@@ -24,12 +23,12 @@ describe('Container Expiration Policy Settings Form', () => {
 
   const {
     data: {
-      project: { containerTagsExpirationPolicy },
+      project: { containerExpirationPolicy },
     },
   } = expirationPolicyPayload();
 
   const defaultProps = {
-    value: { ...containerTagsExpirationPolicy },
+    value: { ...containerExpirationPolicy },
   };
 
   const trackingPayload = {
@@ -47,8 +46,6 @@ describe('Container Expiration Policy Settings Form', () => {
   const findOlderThanDropdown = () => wrapper.find('[data-testid="older-than-dropdown"]');
   const findRemoveRegexInput = () => wrapper.find('[data-testid="remove-regex-input"]');
 
-  const findAlert = () => wrapper.findComponent(GlAlert);
-
   const submitForm = () => {
     findForm().trigger('submit');
     return waitForPromises();
@@ -62,8 +59,8 @@ describe('Container Expiration Policy Settings Form', () => {
   } = {}) => {
     wrapper = shallowMount(component, {
       stubs: {
+        GlCard,
         GlLoadingIcon,
-        GlSprintf,
       },
       propsData: { ...props },
       provide,
@@ -107,7 +104,7 @@ describe('Container Expiration Policy Settings Form', () => {
     // we keep in sync what prop we pass to the component with the cache
     const {
       data: {
-        project: { containerTagsExpirationPolicy: value },
+        project: { containerExpirationPolicy: value },
       },
     } = queryPayload;
 
@@ -122,22 +119,6 @@ describe('Container Expiration Policy Settings Form', () => {
       },
     });
   };
-
-  describe('alert', () => {
-    beforeEach(() => {
-      mountComponent();
-    });
-
-    it('is not dismissible', () => {
-      expect(findAlert().props('dismissible')).toBe(false);
-    });
-
-    it('contains right text', () => {
-      expect(findAlert().text()).toMatchInterpolatedText(
-        'Both keep and remove regex patterns are automatically surrounded with %{codeStart}\\A%{codeEnd} and %{codeStart}\\Z%{codeEnd} anchors, so you do not need to include them. However, make sure to take this into account when choosing and testing your regex patterns.',
-      );
-    });
-  });
 
   describe.each`
     model              | finder                   | fieldName         | type          | defaultValue

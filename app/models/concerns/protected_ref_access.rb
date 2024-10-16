@@ -39,10 +39,14 @@ module ProtectedRefAccess
   included do
     scope :maintainer, -> { where(access_level: Gitlab::Access::MAINTAINER) }
     scope :developer, -> { where(access_level: Gitlab::Access::DEVELOPER) }
-    # If there aren't any `non_role_types`, `all` will be returned. If any
-    # `non_role_types` are present we add them to the query i.e.
-    # => all.where("#{'user'}_id": nil).where("#{'group'}_id": nil)
-    scope :for_role, -> { non_role_types.inject(all) { |scope, type| scope.where("#{type}_id": nil) } }
+    scope :for_role, -> {
+      if non_role_types.present?
+        where.missing(*non_role_types)
+          .allow_cross_joins_across_databases(url: "https://gitlab.com/gitlab-org/gitlab/-/issues/417457")
+      else
+        all
+      end
+    }
 
     protected_ref_fk = "#{module_parent.model_name.singular}_id"
     validates :access_level,
@@ -67,6 +71,9 @@ module ProtectedRefAccess
   def check_access(current_user, current_project = project)
     return false if current_user.nil? || no_access?
     return current_user.admin? if admin_access?
+
+    return false if Feature.enabled?(:check_membership_in_protected_ref_access) &&
+      (current_project && !current_project.member?(current_user))
 
     yield if block_given?
 

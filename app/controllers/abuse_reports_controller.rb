@@ -41,21 +41,19 @@ class AbuseReportsController < ApplicationController
     elsif report_params[:user_id].present?
       render :new
     else
-      redirect_to root_path,
-        alert: _("Cannot create the abuse report. The reported user was invalid. Please try again or contact support.")
+      redirect_to root_path, alert: _("Cannot create the abuse report. The reported user was invalid. Please try again or contact support.")
     end
   end
 
   private
 
   def report_params
-    params.require(:abuse_report).permit(:message, :user_id, :category, :reported_from_url, :screenshot,
-      links_to_spam: [])
+    params.require(:abuse_report).permit(:message, :user_id, :category, :reported_from_url, :screenshot, links_to_spam: [])
   end
 
   # rubocop: disable CodeReuse/ActiveRecord
   def set_user
-    @user = User.find_by(id: params.permit(:user_id)[:user_id])
+    @user = User.find_by(id: params[:user_id])
 
     if @user.nil?
       redirect_to root_path, alert: _("Cannot create the abuse report. The user has been deleted.")

@@ -161,7 +161,6 @@ export default {
       this.processAllReferences(event.pendingReferences);
 
       if (this.state.pendingReferences.length > 0) {
-        this.hasError = false;
         this.isSubmitting = true;
         this.service
           .addRelatedIssues(this.state.pendingReferences, event.linkedIssueType)
@@ -179,7 +178,6 @@ export default {
             if (response && response.data && response.data.message) {
               this.errorMessage = response.data.message;
             }
-            this.isFormVisible = true;
           })
           .finally(() => {
             this.isSubmitting = false;
@@ -187,7 +185,6 @@ export default {
       }
     },
     onPendingFormCancel() {
-      this.hasError = false;
       this.isFormVisible = false;
       this.store.setPendingReferences([]);
       this.inputValue = '';
@@ -256,7 +253,6 @@ export default {
 
 <template>
   <related-issues-block
-    ref="relatedIssuesBlock"
     :class="cssClass"
     :help-path="helpPath"
     :is-fetching="isFetching"
@@ -283,7 +279,5 @@ export default {
     @addIssuableFormCancel="onPendingFormCancel"
     @pendingIssuableRemoveRequest="onPendingIssueRemoveRequest"
     @relatedIssueRemoveRequest="onRelatedIssueRemoveRequest"
-    @showForm="isFormVisible = true"
-    @hideForm="isFormVisible = false"
   />
 </template>

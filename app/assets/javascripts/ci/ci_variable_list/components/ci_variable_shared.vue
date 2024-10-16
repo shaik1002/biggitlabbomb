@@ -11,10 +11,10 @@ import {
 import {
   ADD_MUTATION_ACTION,
   DELETE_MUTATION_ACTION,
-  genericMutationErrorText,
-  mapMutationActionToToast,
   SORT_DIRECTIONS,
   UPDATE_MUTATION_ACTION,
+  mapMutationActionToToast,
+  genericMutationErrorText,
   variableFetchErrorText,
 } from '../constants';
 import CiVariableSettings from './ci_variable_settings.vue';
@@ -158,7 +158,6 @@ export default {
         }
       },
     },
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     environments: {
       query() {
         return this.queryData?.environments?.query || {};
@@ -184,10 +183,6 @@ export default {
   computed: {
     areEnvironmentsLoading() {
       return this.$apollo.queries.environments.loading;
-    },
-    areHiddenVariablesAvailable() {
-      // group and project variables can be hidden, instance variables cannot
-      return Boolean(this.entity);
     },
     hasEnvScopeQuery() {
       return Boolean(this.queryData?.environments?.query);
@@ -314,7 +309,6 @@ export default {
 <template>
   <ci-variable-settings
     :are-environments-loading="areEnvironmentsLoading"
-    :are-hidden-variables-available="areHiddenVariablesAvailable"
     :are-scoped-variables-available="areScopedVariablesAvailable"
     :entity="entity"
     :environments="environments"

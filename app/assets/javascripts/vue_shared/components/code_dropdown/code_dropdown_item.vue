@@ -56,7 +56,7 @@ export default {
       :label="label"
       :label-class="labelClass"
       :label-for="inputId"
-      class="gl-mb-3 gl-px-3 gl-text-left"
+      class="gl-px-3 gl-mb-3 gl-text-left"
     >
       <gl-form-input-group
         :id="inputId"
@@ -75,7 +75,7 @@ export default {
             :data-clipboard-text="link"
             :data-testid="testId"
             icon="copy-to-clipboard"
-            class="gl-inline-flex"
+            class="gl-display-inline-flex"
           />
         </template>
       </gl-form-input-group>

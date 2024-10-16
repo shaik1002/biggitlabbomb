@@ -13,9 +13,8 @@ RSpec.describe WebHooks::LogExecutionService, feature_category: :webhooks do
 
     let_it_be_with_reload(:project_hook) { create(:project_hook, :token) }
 
-    let(:idempotency_key) { SecureRandom.uuid }
     let(:response_category) { :ok }
-    let(:request_headers) { { 'Header' => 'header value', 'Idempotency-Key' => idempotency_key } }
+    let(:request_headers) { { 'Header' => 'header value' } }
     let(:data) do
       {
         trigger: 'trigger_name',

@@ -65,7 +65,7 @@ export default {
 <template>
   <div>
     <gl-disclosure-dropdown
-      placement="bottom-end"
+      placement="right"
       category="tertiary"
       :aria-label="__('More actions')"
       icon="ellipsis_v"

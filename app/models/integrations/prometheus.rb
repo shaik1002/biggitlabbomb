@@ -47,8 +47,7 @@ module Integrations
 
     scope :preload_project, -> { preload(:project) }
 
-    override :manual_activation?
-    def manual_activation?
+    def show_active_box?
       false
     end
 

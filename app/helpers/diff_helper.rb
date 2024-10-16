@@ -45,12 +45,6 @@ module DiffHelper
     options
   end
 
-  def rapid_diffs?
-    return false unless defined? current_user
-
-    ::Feature.enabled?(:rapid_diffs, current_user, type: :wip)
-  end
-
   def diff_match_line(old_pos, new_pos, text: '', view: :inline, bottom: false)
     content_line_class = %w[line_content match]
     content_line_class << 'parallel' if view == :parallel
@@ -60,28 +54,13 @@ module DiffHelper
 
     html = []
 
-    expand_data = {}
-    if bottom
-      expand_data[:expand_next_line] = true
-    else
-      expand_data[:expand_prev_line] = true
-    end
-
-    if rapid_diffs?
-      expand_button = content_tag(:button, '...', class: 'gl-bg-transparent gl-border-0 gl-p-0', data: { visible_when_loading: false, **expand_data })
-      spinner = render(Pajamas::SpinnerComponent.new(size: :sm, class: 'gl-hidden gl-text-align-right', data: { visible_when_loading: true }))
-      expand_html = content_tag(:div, [expand_button, spinner].join.html_safe, data: { expand_wrapper: true })
-    else
-      expand_html = '...'
-    end
-
     if old_pos
-      html << content_tag(:td, expand_html, class: [*line_num_class, 'old_line'], data: { linenumber: old_pos })
+      html << content_tag(:td, '...', class: [*line_num_class, 'old_line'], data: { linenumber: old_pos })
       html << content_tag(:td, text, class: [*content_line_class, 'left-side']) if view == :parallel
     end
 
     if new_pos
-      html << content_tag(:td, expand_html, class: [*line_num_class, 'new_line'], data: { linenumber: new_pos })
+      html << content_tag(:td, '...', class: [*line_num_class, 'new_line'], data: { linenumber: new_pos })
       html << content_tag(:td, text, class: [*content_line_class, ('right-side' if view == :parallel)])
     end
 
@@ -266,12 +245,7 @@ module DiffHelper
     return unless merge_request.cannot_be_merged? && merge_request.source_branch_exists? && merge_request.target_branch_exists?
 
     cached_conflicts_with_types do
-      # We set skip_content to true since we don't really need the content to list the conflicts and their types
-      conflicts_service = MergeRequests::Conflicts::ListService.new( # rubocop:disable CodeReuse/ServiceClass
-        merge_request,
-        allow_tree_conflicts: true,
-        skip_content: true
-      )
+      conflicts_service = MergeRequests::Conflicts::ListService.new(merge_request, allow_tree_conflicts: true) # rubocop:disable CodeReuse/ServiceClass
 
       {}.tap do |h|
         conflicts_service.conflicts.files.each do |file|

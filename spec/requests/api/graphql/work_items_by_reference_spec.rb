@@ -13,8 +13,6 @@ RSpec.describe 'find work items by reference', feature_category: :portfolio_mana
   let_it_be(:work_item) { create(:work_item, :task, project: project2) }
   let_it_be(:private_work_item) { create(:work_item, :task, project: private_project2) }
 
-  let(:path) { project.full_path }
-
   let(:references) { [work_item.to_reference(full: true), private_work_item.to_reference(full: true)] }
 
   shared_examples 'response with matching work items' do
@@ -96,13 +94,12 @@ RSpec.describe 'find work items by reference', feature_category: :portfolio_mana
   end
 
   context 'when the context is a group' do
-    let_it_be(:task) { create(:work_item, :task, project: project2) }
+    it 'returns empty result' do
+      group2.add_guest(current_user)
+      post_graphql(query(namespace_path: group2.full_path), current_user: current_user)
 
-    let(:references) { [work_item.to_reference(full: true), Gitlab::UrlBuilder.build(task)] }
-    let(:path) { group2.path }
-
-    it_behaves_like 'response with matching work items' do
-      let(:items) { [task, work_item] }
+      expect_graphql_errors_to_be_empty
+      expect(graphql_data_at('workItemsByReference', 'nodes')).to be_empty
     end
   end
 
@@ -121,7 +118,7 @@ RSpec.describe 'find work items by reference', feature_category: :portfolio_mana
     end
   end
 
-  def query(namespace_path: path, refs: references)
+  def query(namespace_path: project.full_path, refs: references)
     fields = <<~GRAPHQL
       nodes {
         #{all_graphql_fields_for('WorkItem', max_depth: 2)}

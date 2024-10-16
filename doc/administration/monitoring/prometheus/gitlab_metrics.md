@@ -12,8 +12,8 @@ DETAILS:
 
 To enable the GitLab Prometheus metrics:
 
-1. Sign in to GitLab as a user with administrator access.
-1. On the left sidebar, at the bottom, select **Admin**.
+1. Log in to GitLab as a user with administrator access.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Settings > Metrics and profiling**.
 1. Find the **Metrics - Prometheus** section, and select **Enable GitLab Prometheus metrics endpoint**.
 1. [Restart GitLab](../../restart_gitlab.md#reconfigure-a-linux-package-installation) for the changes to take effect.
@@ -44,7 +44,6 @@ The following metrics are available:
 | `gitlab_cache_operation_duration_seconds`                        | Histogram   | 10.2    | Cache access time                                                                                                     | `operation`, `store`, `endpoint_id`                                      |
 | `gitlab_cache_operations_total`                                  | Counter     | 12.2    | Cache operations by controller or action                                                                              | `controller`, `action`, `operation`, `store`, `endpoint_id`              |
 | `gitlab_cache_read_multikey_count`                               | Histogram   | 15.7    | Count of keys in multi-key cache read operations                                                                      | `controller`, `action`, `store`, `endpoint_id`                   |
-| `gitlab_ci_job_token_inbound_access`                             | Counter     | 17.2   | Count of inbound accesses via CI job token | |
 | `gitlab_ci_pipeline_builder_scoped_variables_duration`           | Histogram   | 14.5   | Time in seconds it takes to create the scoped variables for a CI/CD job | |
 | `gitlab_ci_pipeline_creation_duration_seconds`                   | Histogram   | 13.0    | Time in seconds it takes to create a CI/CD pipeline                                                                   | `gitlab`                                                  |
 | `gitlab_ci_pipeline_size_builds`                                 | Histogram   | 13.1    | Total number of builds within a pipeline grouped by a pipeline source                                                 | `source`                                                  |
@@ -131,8 +130,8 @@ The following metrics are available:
 | `action_cable_subscription_confirmations_total`                  | Counter     | 13.10   | The number of ActionCable subscriptions from clients confirmed                                                        | `server_mode`                                             |
 | `action_cable_subscription_rejections_total`                     | Counter     | 13.10   | The number of ActionCable subscriptions from clients rejected                                                         | `server_mode`                                             |
 | `action_cable_transmitted_bytes_total`                           | Counter     | 16.0    |  Total number of bytes transmitted over ActionCable                                                                   | `operation`, `channel`                                    |
-| `gitlab_issuable_fast_count_by_state_total`                      | Counter     | 13.5    | Total number of row count operations on the **Issue** and **Merge request** pages                                                |                                                           |
-| `gitlab_issuable_fast_count_by_state_failures_total`             | Counter     | 13.5    | Number of soft-failed row count operations on the **Issue** and **Merge request** pages                                          |                                                           |
+| `gitlab_issuable_fast_count_by_state_total`                      | Counter     | 13.5    | Total number of row count operations on issue/merge request list pages                                                |                                                           |
+| `gitlab_issuable_fast_count_by_state_failures_total`             | Counter     | 13.5    | Number of soft-failed row count operations on issue/merge request list pages                                          |                                                           |
 | `gitlab_ci_trace_finalize_duration_seconds`                      | Histogram   | 13.6    | Duration of build trace chunks migration to object storage                                                            |                                                           |
 | `gitlab_vulnerability_report_branch_comparison_real_duration_seconds`  | Histogram   | 15.11    | Execution duration of vulnerability report present on default branch SQL query                                                            |                                                           |
 | `gitlab_vulnerability_report_branch_comparison_cpu_duration_seconds`  | Histogram   | 15.11    | Execution duration of vulnerability report present on default branch SQL query                                                            |                                                           |
@@ -181,14 +180,10 @@ The following metrics are available:
 | `gitlab_connection_pool_size` | Gauge | 16.7 | Size of connection pool | |
 | `gitlab_connection_pool_available_count` | Gauge | 16.7 | Number of available connections in the pool | |
 | `gitlab_security_policies_scan_result_process_duration_seconds` | Histogram | 16.7 | The amount of time to process merge request approval policies | |
-| `gitlab_security_policies_scan_execution_configuration_rendering_seconds` | Histogram | 17.3 | The amount of time to render scan execution policy CI configurations | |
 | `gitlab_highlight_usage` | Counter | 16.8 | The number of times `Gitlab::Highlight` is used | `used_on` |
 | `dependency_linker_usage` | Counter | 16.8 | The number of times dependency linker is used | `used_on` |
 | `gitlab_keeparound_refs_requested_total` | Counter | 16.10 | Counts the number of keep-around refs requested to be created | `source` |
 | `gitlab_keeparound_refs_created_total` | Counter | 16.10 | Counts the number of keep-around refs actually created | `source` |
-| `search_advanced_index_repair_total` | Counter | 17.3 | Counts the number of index repair operations | `document_type` |
-| `search_advanced_boolean_settings` | Gauge | 17.3 | Current state of Advanced search boolean settings | `name` |
-| `gitlab_http_router_rule_total` | Counter | 17.4 | Counts occurrences of HTTP Router rule's `rule_action` and `rule_type` | `rule_action`, `rule_type` |
 
 ## Metrics controlled by a feature flag
 
@@ -236,11 +231,8 @@ configuration option in `gitlab.yml`. These metrics are served from the
 | `sidekiq_running_jobs`                         | Gauge     | 12.2 | Number of Sidekiq jobs running                                                                      | `queue`, `boundary`, `external_dependencies`, `feature_category`, `urgency` |
 | `sidekiq_concurrency`                          | Gauge     | 12.5 | Maximum number of Sidekiq jobs                                                                      |                                                                   |
 | `sidekiq_mem_total_bytes`                      | Gauge     | 15.3 | Number of bytes allocated for both objects consuming an object slot and objects that required a malloc'|                                                                   |
-| `sidekiq_concurrency_limit_queue_jobs`         | Gauge     | 17.3 | Number of Sidekiq jobs waiting in the concurrency limit queue|  `worker`                                                             |
-| `sidekiq_concurrency_limit_max_concurrent_jobs` | Gauge     | 17.3 | Max number of concurrent running Sidekiq jobs |   `worker`                                                           |
-| `sidekiq_concurrency_limit_deferred_jobs_total` | Counter     | 17.3 | Total number of deferred Sidekiq jobs |   `worker`                                                           |
 | `geo_db_replication_lag_seconds`               | Gauge   | 10.2  | Database replication lag (seconds) | `url` |
-| `geo_repositories`                             | Gauge   | 10.2  | Deprecated for removal in 18.0. Replaced by `geo_project_repositories`. Total number of repositories available on primary | `url` |
+| `geo_repositories`                             | Gauge   | 10.2  | Total number of repositories available on primary | `url` |
 | `geo_lfs_objects`                              | Gauge   | 10.2  | Number of LFS objects on primary | `url` |
 | `geo_lfs_objects_checksummed`                  | Gauge   | 14.6  | Number of LFS objects checksummed successfully on primary | `url` |
 | `geo_lfs_objects_checksum_failed`              | Gauge   | 14.6  | Number of LFS objects failed to calculate the checksum on primary | `url` |

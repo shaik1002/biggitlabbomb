@@ -2,7 +2,7 @@
 
 module Users
   class BroadcastMessageDismissalsController < ApplicationController
-    feature_category :notifications
+    feature_category :onboarding
     urgency :low
 
     def create

@@ -39,5 +39,3 @@ module Types
     end
   end
 end
-
-Types::WorkItems::Widgets::AwardEmojiType.prepend_mod

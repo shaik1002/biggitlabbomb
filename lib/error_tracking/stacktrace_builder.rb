@@ -27,20 +27,16 @@ module ErrorTracking
     end
 
     def raw_stacktrace_from_payload(payload)
-      stack_trace_entry = \
-        raw_stacktrace_from(payload['exception']) ||
-        raw_stacktrace_from(payload['threads'])
-
-      stack_trace_entry&.dig('stacktrace', 'frames')
-    end
-
-    def raw_stacktrace_from(entry)
-      return unless entry
+      exception_entry = payload['exception']
+      return unless exception_entry
 
       # Some SDK send exception payload as Array. For exmple Go lang SDK.
       # We need to convert it to hash format we expect.
-      values = entry.is_a?(Array) ? entry : entry['values']
-      values&.find { |h| h['stacktrace'].present? }
+      exception_entry = { 'values' => exception_entry } if exception_entry.is_a?(Array)
+
+      exception_values = exception_entry['values']
+      stack_trace_entry = exception_values&.detect { |h| h['stacktrace'].present? }
+      stack_trace_entry&.dig('stacktrace', 'frames')
     end
 
     def build_stacktrace_context(entry)

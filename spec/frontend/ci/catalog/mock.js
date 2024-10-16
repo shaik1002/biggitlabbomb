@@ -6,15 +6,7 @@ const componentsDetailsMockData = {
       name: 'Ruby gal',
       description: 'This is a pretty amazing component that does EVERYTHING ruby.',
       includePath: 'gitlab.com/gitlab-org/ruby-gal@~latest',
-      inputs: [
-        {
-          name: 'version',
-          default: '1.0.0',
-          description: 'here is a test description',
-          required: true,
-          type: 'STRING',
-        },
-      ],
+      inputs: [{ name: 'version', default: '1.0.0', required: true }],
     },
     {
       id: 'gid://gitlab/Ci::Component/2',
@@ -22,27 +14,8 @@ const componentsDetailsMockData = {
       description: 'Adds some spice to your life.',
       includePath: 'gitlab.com/gitlab-org/javascript-madness@~latest',
       inputs: [
-        {
-          name: 'isFun',
-          default: 'true',
-          description: 'this is a boolean',
-          required: true,
-          type: 'BOOLEAN',
-        },
-        {
-          name: 'RandomNumber',
-          default: '10',
-          description: 'a number',
-          required: false,
-          type: 'NUMBER',
-        },
-        {
-          name: 'RandomNumber',
-          default: '10',
-          description: 'another number',
-          required: false,
-          type: 'NUMBER',
-        },
+        { name: 'isFun', default: 'true', required: true },
+        { name: 'RandomNumber', default: '10', required: false },
       ],
     },
     {
@@ -50,15 +23,7 @@ const componentsDetailsMockData = {
       name: 'Go go go',
       description: 'When you write Go, you gotta go go go.',
       includePath: 'gitlab.com/gitlab-org/go-go-go@~latest',
-      inputs: [
-        {
-          name: 'version',
-          default: '1.0.0',
-          description: 'a version',
-          required: true,
-          type: 'STRING',
-        },
-      ],
+      inputs: [{ name: 'version', default: '1.0.0', required: true }],
     },
   ],
 };

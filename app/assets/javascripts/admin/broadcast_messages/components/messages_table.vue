@@ -2,9 +2,9 @@
 import { GlBroadcastMessage, GlButton, GlTableLite, GlModal, GlModalDirective } from '@gitlab/ui';
 import SafeHtml from '~/vue_shared/directives/safe_html';
 import { __, s__ } from '~/locale';
-import { localeDateFormat } from '~/lib/utils/datetime/locale_dateformat';
+import { formatDate } from '~/lib/utils/datetime/date_format_utility';
 
-const DEFAULT_TD_CLASSES = '!gl-align-baseline';
+const DEFAULT_TD_CLASSES = '!gl-align-middle';
 
 export default {
   name: 'MessagesTable',
@@ -89,7 +89,7 @@ export default {
   ],
   methods: {
     formatDate(dateString) {
-      return localeDateFormat.asDateTimeFull.format(new Date(dateString));
+      return formatDate(new Date(dateString));
     },
   },
 };
@@ -99,7 +99,7 @@ export default {
     :items="messages"
     :fields="$options.fields"
     :tbody-tr-attr="{ 'data-testid': 'message-row' }"
-    class="-gl-mb-2 -gl-mt-1"
+    class="-gl-mt-1 -gl-mb-2"
     stacked="md"
   >
     <template #cell(preview)="{ item: { message, theme, broadcast_type, dismissable } }">
@@ -117,24 +117,21 @@ export default {
     </template>
 
     <template #cell(buttons)="{ item: { id, edit_path, disable_delete } }">
-      <div class="gl-flex gl-gap-2">
-        <gl-button
-          category="tertiary"
-          icon="pencil"
-          :aria-label="$options.i18n.edit"
-          :href="edit_path"
-          data-testid="edit-message"
-        />
-        <gl-button
-          v-gl-modal="`delete-message-${id}`"
-          category="tertiary"
-          icon="remove"
-          :aria-label="$options.i18n.delete"
-          rel="nofollow"
-          :disabled="disable_delete"
-          :data-testid="`delete-message-${id}`"
-        />
-      </div>
+      <gl-button
+        icon="pencil"
+        :aria-label="$options.i18n.edit"
+        :href="edit_path"
+        data-testid="edit-message"
+      />
+      <gl-button
+        v-gl-modal="`delete-message-${id}`"
+        class="gl-ml-3"
+        icon="remove"
+        :aria-label="$options.i18n.delete"
+        rel="nofollow"
+        :disabled="disable_delete"
+        :data-testid="`delete-message-${id}`"
+      />
       <gl-modal
         :title="$options.i18n.title"
         :action-primary="$options.modal.actionPrimary"

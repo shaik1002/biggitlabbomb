@@ -31,10 +31,6 @@ module Gitlab
         @excluded_attributes[klass_name.to_sym]&.map(&:to_s) || []
       end
 
-      def find_included_keys(klass_name)
-        @included_attributes[klass_name.to_sym]&.map(&:to_s) || []
-      end
-
       private
 
       def find(model_key, model_tree)

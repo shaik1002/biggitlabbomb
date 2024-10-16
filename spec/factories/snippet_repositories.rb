@@ -2,7 +2,7 @@
 
 FactoryBot.define do
   factory :snippet_repository do
-    snippet factory: :project_snippet
+    snippet
 
     after(:build) do |snippet_repository, _|
       snippet_repository.shard_name = snippet_repository.snippet.repository_storage

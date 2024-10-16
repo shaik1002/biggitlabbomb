@@ -1,6 +1,6 @@
 <script>
-import { GlButton, GlIcon, GlAvatar, GlTooltipDirective } from '@gitlab/ui';
-import { sprintf, s__ } from '~/locale';
+import { GlButton, GlIcon, GlAvatar } from '@gitlab/ui';
+import { __ } from '~/locale';
 
 export default {
   name: 'ExclusionsListItem',
@@ -9,28 +9,19 @@ export default {
     GlAvatar,
     GlIcon,
   },
-  directives: {
-    GlTooltip: GlTooltipDirective,
-  },
   props: {
     exclusion: {
       type: Object,
       required: true,
     },
   },
-  computed: {
-    deleteButtonLabel() {
-      return sprintf(s__('Integrations|Remove exclusion for %{name}'), {
-        name: this.exclusion.name,
-      });
-    },
-  },
+  i18n: { remove: __('Remove') },
 };
 </script>
 
 <template>
   <div
-    class="gl-border-b gl-flex gl-items-center gl-justify-between gl-gap-3 gl-p-4 gl-py-3 gl-pl-7"
+    class="gl-display-flex gl-justify-content-space-between gl-p-4 gl-py-3 gl-pl-7 gl-border-b gl-align-items-center gl-gap-3"
   >
     <gl-icon :name="exclusion.icon" class="gl-text-secondary" />
     <gl-avatar
@@ -41,14 +32,13 @@ export default {
       shape="rect"
       fallback-on-error
     />
-    <span class="gl-flex gl-grow gl-flex-col">
+    <span class="gl-display-flex gl-flex-direction-column gl-flex-grow-1">
       <span class="gl-font-bold">{{ exclusion.name }}</span>
     </span>
 
     <gl-button
-      v-gl-tooltip="s__('Integrations|Remove exclusion')"
       icon="remove"
-      :aria-label="deleteButtonLabel"
+      :aria-label="$options.i18n.remove"
       category="tertiary"
       @click="() => $emit('remove')"
     />

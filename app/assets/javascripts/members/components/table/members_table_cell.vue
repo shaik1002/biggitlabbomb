@@ -2,6 +2,7 @@
 import { MEMBERS_TAB_TYPES } from 'ee_else_ce/members/constants';
 import {
   isGroup,
+  isDirectMember,
   isCurrentUser,
   canRemove,
   canRemoveBlockedByLastOwner,
@@ -41,6 +42,9 @@ export default {
 
       return MEMBERS_TAB_TYPES.user;
     },
+    isDirectMember() {
+      return isDirectMember(this.member);
+    },
     isCurrentUser() {
       return isCurrentUser(this.member, this.currentUserId);
     },
@@ -60,6 +64,7 @@ export default {
   render() {
     return this.$scopedSlots.default({
       memberType: this.memberType,
+      isDirectMember: this.isDirectMember,
       isCurrentUser: this.isCurrentUser,
       permissions: {
         canRemove: this.canRemove,

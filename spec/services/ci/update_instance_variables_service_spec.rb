@@ -4,9 +4,8 @@ require 'spec_helper'
 
 RSpec.describe Ci::UpdateInstanceVariablesService, feature_category: :secrets_management do
   let(:params) { { variables_attributes: variables_attributes } }
-  let(:current_user) { build :user }
 
-  subject(:service) { described_class.new(params, current_user) }
+  subject(:service) { described_class.new(params) }
 
   describe '#execute' do
     context 'without variables' do

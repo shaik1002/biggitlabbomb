@@ -33,7 +33,7 @@ export default {
         :resource="resource"
       />
     </ul>
-    <div class="gl-flex gl-justify-center">
+    <div class="gl-display-flex gl-justify-content-center">
       <gl-keyset-pagination
         v-bind="pageInfo"
         @prev="$emit('onPrevPage')"

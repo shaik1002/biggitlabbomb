@@ -65,7 +65,7 @@ export default {
 </script>
 
 <template>
-  <div class="ide-file-icon-holder gl-float-right">
+  <div class="gl-float-right ide-file-icon-holder">
     <mr-file-icon v-if="file.mrChange" />
     <span v-if="showTreeChangesCount" class="ide-tree-changes">
       {{ changesCount }}
@@ -76,7 +76,7 @@ export default {
         data-container="body"
         data-placement="right"
         name="file-modified"
-        class="ide-file-modified gl-ml-2"
+        class="gl-ml-2 ide-file-modified"
       />
     </span>
     <changed-file-icon

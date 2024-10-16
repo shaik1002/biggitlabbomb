@@ -1,11 +1,8 @@
 # frozen_string_literal: true
-
 module Packages
   # rubocop: disable Gitlab/BulkInsert
   class CreateDependencyService < BaseService
     attr_reader :package, :dependencies
-
-    delegate :project_id, to: :package, private: true
 
     def initialize(package, dependencies)
       @package = package
@@ -34,16 +31,11 @@ module Packages
       ApplicationRecord.transaction do
         inserted_ids = bulk_insert_package_dependencies(dependencies_to_insert)
         bulk_insert_package_dependency_links(type, (existing_ids + inserted_ids))
-        # TODO: remove the update operation when all packages dependencies have a `project_id`.
-        # https://gitlab.com/gitlab-org/gitlab/-/issues/481541
-        if Packages::Dependency.id_in(existing_ids).without_project.any?
-          bulk_update_project_id_package_dependencies(existing_ids)
-        end
       end
     end
 
     def find_existing_ids_and_names(names_and_version_patterns)
-      ids_and_names = Packages::Dependency.for_package_project_id_names_and_version_patterns(project_id, names_and_version_patterns)
+      ids_and_names = Packages::Dependency.for_package_names_and_version_patterns(names_and_version_patterns)
                                           .pluck_ids_and_names
       ids = ids_and_names.map(&:first) || []
       names = ids_and_names.map(&:second) || []
@@ -56,8 +48,7 @@ module Packages
       rows = names_and_version_patterns.map do |name, version_pattern|
         {
           name: name,
-          version_pattern: version_pattern,
-          project_id: project_id
+          version_pattern: version_pattern
         }
       end
 
@@ -69,7 +60,7 @@ module Packages
         # sure that the results are fresh from the database and not from a stalled
         # and potentially wrong cache, this query has to be done with the query
         # cache disabled.
-        Packages::Dependency.ids_for_package_project_id_names_and_version_patterns(project_id, names_and_version_patterns)
+        Packages::Dependency.ids_for_package_names_and_version_patterns(names_and_version_patterns)
       end
     end
 
@@ -83,10 +74,6 @@ module Packages
       end
 
       ApplicationRecord.legacy_bulk_insert(Packages::DependencyLink.table_name, rows)
-    end
-
-    def bulk_update_project_id_package_dependencies(ids)
-      Packages::Dependency.id_in(ids).without_project.update_all(project_id: project_id)
     end
   end
   # rubocop: enable Gitlab/BulkInsert

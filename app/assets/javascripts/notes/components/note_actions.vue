@@ -4,7 +4,6 @@ import {
   GlButton,
   GlDisclosureDropdown,
   GlDisclosureDropdownItem,
-  GlDisclosureDropdownGroup,
 } from '@gitlab/ui';
 // eslint-disable-next-line no-restricted-imports
 import { mapActions, mapGetters, mapState } from 'vuex';
@@ -13,6 +12,7 @@ import resolvedStatusMixin from '~/batch_comments/mixins/resolved_status';
 import { createAlert } from '~/alert';
 import { TYPE_ISSUE } from '~/issues/constants';
 import { __, sprintf } from '~/locale';
+import eventHub from '~/sidebar/event_hub';
 import UserAccessRoleBadge from '~/vue_shared/components/user_access_role_badge.vue';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { splitCamelCase } from '~/lib/utils/text_utility';
@@ -34,7 +34,6 @@ export default {
     GlButton,
     GlDisclosureDropdown,
     GlDisclosureDropdownItem,
-    GlDisclosureDropdownGroup,
     ReplyButton,
     TimelineEventButton,
     UserAccessRoleBadge,
@@ -92,18 +91,15 @@ export default {
     },
     canEdit: {
       type: Boolean,
-      required: false,
-      default: false,
+      required: true,
     },
     canAwardEmoji: {
       type: Boolean,
-      required: false,
-      default: false,
+      required: true,
     },
     canDelete: {
       type: Boolean,
-      required: false,
-      default: false,
+      required: true,
     },
     canResolve: {
       type: Boolean,
@@ -155,6 +151,9 @@ export default {
     showDeleteAction() {
       return this.canDelete && !this.canReportAsAbuse && !this.noteUrl;
     },
+    isAuthoredByCurrentUser() {
+      return this.authorId === this.currentUserId;
+    },
     currentUserId() {
       return this.getUserDataByProp('id');
     },
@@ -165,6 +164,9 @@ export default {
       return this.isUserAssigned
         ? __('Unassign from commenting user')
         : __('Assign to commenting user');
+    },
+    sidebarAction() {
+      return this.isUserAssigned ? 'sidebar.addAssignee' : 'sidebar.removeAssignee';
     },
     targetType() {
       return this.getNoteableData.targetType;
@@ -203,6 +205,9 @@ export default {
       }
       return null;
     },
+    resolveVariant() {
+      return this.isResolved ? 'success' : 'default';
+    },
   },
   methods: {
     ...mapActions(['toggleAwardRequest', 'promoteCommentToTimelineEvent']),
@@ -223,6 +228,8 @@ export default {
     },
     handleAssigneeUpdate(assignees) {
       this.$emit('updateAssignees', assignees);
+      eventHub.$emit(this.sidebarAction, this.author);
+      eventHub.$emit('sidebar.saveAssignees');
     },
     assignUser() {
       let { assignees } = this;
@@ -291,14 +298,14 @@ export default {
       v-if="canResolve"
       ref="resolveButton"
       v-gl-tooltip
-      data-testid="resolve-line-button"
       category="tertiary"
-      class="note-action-button"
-      :class="{ '!gl-text-success': isResolved }"
+      :variant="resolveVariant"
+      :class="{ 'is-disabled': !resolvable, 'is-active': isResolved }"
       :title="resolveButtonTitle"
       :aria-label="resolveButtonTitle"
       :icon="resolveIcon"
       :loading="isResolving"
+      class="line-resolve-btn note-action-button"
       @click="onResolve"
     />
     <timeline-event-button
@@ -348,10 +355,19 @@ export default {
         text-sr-only
         icon="ellipsis_v"
         category="tertiary"
-        placement="bottom-end"
+        placement="right"
         class="note-action-button more-actions-toggle"
         no-caret
       >
+        <gl-disclosure-dropdown-item
+          v-if="canReportAsAbuse"
+          data-testid="report-abuse-button"
+          @action="onAbuse"
+        >
+          <template #list-item>
+            {{ $options.i18n.reportAbuse }}
+          </template>
+        </gl-disclosure-dropdown-item>
         <gl-disclosure-dropdown-item
           v-if="noteUrl"
           class="js-btn-copy-note-link"
@@ -371,22 +387,11 @@ export default {
             {{ displayAssignUserText }}
           </template>
         </gl-disclosure-dropdown-item>
-        <gl-disclosure-dropdown-group v-if="canReportAsAbuse || canEdit" bordered>
-          <gl-disclosure-dropdown-item
-            v-if="canReportAsAbuse"
-            data-testid="report-abuse-button"
-            @action="onAbuse"
-          >
-            <template #list-item>
-              {{ $options.i18n.reportAbuse }}
-            </template>
-          </gl-disclosure-dropdown-item>
-          <gl-disclosure-dropdown-item v-if="canEdit" class="js-note-delete" @action="onDelete">
-            <template #list-item>
-              <span class="gl-text-danger">{{ __('Delete comment') }}</span>
-            </template>
-          </gl-disclosure-dropdown-item>
-        </gl-disclosure-dropdown-group>
+        <gl-disclosure-dropdown-item v-if="canEdit" class="js-note-delete" @action="onDelete">
+          <template #list-item>
+            <span class="text-danger">{{ __('Delete comment') }}</span>
+          </template>
+        </gl-disclosure-dropdown-item>
       </gl-disclosure-dropdown>
     </div>
     <!-- IMPORTANT: show this component lazily because it causes layout thrashing -->

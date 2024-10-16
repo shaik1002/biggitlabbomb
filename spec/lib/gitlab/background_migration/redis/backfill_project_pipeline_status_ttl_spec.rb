@@ -11,7 +11,6 @@ RSpec.describe Gitlab::BackgroundMigration::Redis::BackfillProjectPipelineStatus
   subject { described_class.new }
 
   before do
-    subject.redis.ping # initialise RedisClient::Cluster's @router
     (keys + invalid_keys).each { |key| redis.set(key, 1) }
   end
 

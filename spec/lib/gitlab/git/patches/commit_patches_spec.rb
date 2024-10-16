@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-RSpec.describe Gitlab::Git::Patches::CommitPatches, feature_category: :source_code_management do
+RSpec.describe Gitlab::Git::Patches::CommitPatches do
   describe '#commit' do
     let(:patches) do
       patches_folder = Rails.root.join('spec/fixtures/patchfiles')
@@ -14,10 +14,9 @@ RSpec.describe Gitlab::Git::Patches::CommitPatches, feature_category: :source_co
     let(:user) { build(:user) }
     let(:branch_name) { 'branch-with-patches' }
     let(:repository) { create(:project, :repository).repository }
-    let(:target_sha) { repository.commit(branch_name)&.sha }
 
     subject(:commit_patches) do
-      described_class.new(user, repository, branch_name, patches, target_sha)
+      described_class.new(user, repository, branch_name, patches)
     end
 
     it 'applies the patches' do

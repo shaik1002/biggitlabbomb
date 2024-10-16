@@ -17,10 +17,10 @@ All newly-introduced feature flags should be [disabled by default](https://handb
 WARNING:
 All newly-introduced feature flags should be [used with an actor](controls.md#percentage-based-actor-selection).
 
-Design documents:
+Blueprints:
 
-- (Latest) [Feature Flags usage in GitLab development and operations](https://handbook.gitlab.com/handbook/engineering/architecture/design-documents/feature_flags_usage_in_dev_and_ops/)
-- [Development Feature Flags Architecture](https://handbook.gitlab.com/handbook/engineering/architecture/design-documents/feature_flags_development/)
+- (Latest) [Feature Flags usage in GitLab development and operations](../../architecture/blueprints/feature_flags_usage_in_dev_and_ops/index.md)
+- [Development Feature Flags Architecture](../../architecture/blueprints/feature_flags_development/index.md)
 
 This document is the subject of continued work as part of an epic to [improve internal usage of feature flags](https://gitlab.com/groups/gitlab-org/-/epics/3551). Raise any suggestions as new issues and attach them to the epic.
 
@@ -413,8 +413,8 @@ command. For example:
 
 ## Toggle a feature flag
 
-See [rolling out changes](controls.md#rolling-out-changes) for more information
-about toggling feature flags.
+See [rolling out changes](controls.md#rolling-out-changes) for more information about toggling
+feature flags.
 
 ## Delete a feature flag
 
@@ -557,17 +557,29 @@ Actors also provide an easy way to do a percentage rollout of a feature in a sti
 If a 1% rollout enabled a feature for a specific actor, that actor will continue to have the feature enabled at
 10%, 50%, and 100%.
 
-GitLab supports the following feature flag actors:
+GitLab currently supports the following feature flag actors:
 
 - `User` model
 - `Project` model
 - `Group` model
 - Current request
 
-The actor is a second parameter of the `Feature.enabled?` call. For example:
+The actor is a second parameter of the `Feature.enabled?` call. The
+same actor type must be used consistently for all invocations of `Feature.enabled?`.
 
 ```ruby
+# Bad
 Feature.enabled?(:feature_flag, project)
+Feature.enabled?(:feature_flag, group)
+Feature.enabled?(:feature_flag, user)
+
+# Good
+Feature.enabled?(:feature_flag, group_a)
+Feature.enabled?(:feature_flag, group_b)
+
+# Also good - using separate flags for each actor type
+Feature.enabled?(:feature_flag_group, group)
+Feature.enabled?(:feature_flag_user, user)
 ```
 
 Models which `include FeatureGate` have an `.actor_from_id` class method.
@@ -588,55 +600,8 @@ return unless Feature.enabled?(:feature_flag, project)
 project.update!(column: value)
 ```
 
-See [Use ChatOps to enable and disable feature flags](controls.md#process) for details on how to use ChatOps
+See [Feature flags in the development of GitLab](controls.md#process) for details on how to use ChatOps
 to selectively enable or disable feature flags in GitLab-provided environments, like staging and production.
-
-Flag state is not inherited from a group by its subgroups or projects.
-If you need a flag state to be consistent for an entire group hierarchy,
-consider using the top-level group as the actor.
-This group can be found by calling `#root_ancestor` on any group or project.
-
-```ruby
-Feature.enabled?(:feature_flag, group.root_ancestor)
-```
-
-#### Mixing actor types
-
-Generally you should use only one type of actor in all invocations of `Feature.enabled?`
-for a particular feature flag, and not mix different actor types.
-
-Mixing actor types can lead to a feature being enabled or disabled inconsistently in ways
-that can cause bugs. For example, if at the controller level a flag is checked using a
-group actor and at the service level it is checked using a user actor, the feature may be
-both enabled, and disabled at different points in the same request.
-
-In some situations it is safe to mix actor types if you know that it won't lead to
-inconsistent results. For example, a webhook can be associated with either a group or a
-project, and so a feature flag for a webhook might leverage this to rollout a feature for
-group and project webhooks using the same feature flag.
-
-If you need to use different actor types and cannot safely mix them in your situation you
-should use separate flags for each actor type instead. For example:
-
-```ruby
-Feature.enabled?(:feature_flag_group, group)
-Feature.enabled?(:feature_flag_user, user)
-```
-
-#### Instance actor
-
-WARNING:
-Instance-wide feature flags should only be used when a feature is tied in to an entire instance. Always prioritize other actors first.
-
-In some cases, you may want a feature flag to be enabled for an entire instance and not based on an actor. A great example are the Admin settings, where it would be impossible to enable the Feature Flag based on a group or a project since they are both `undefined`.
-
-The user actor would cause confusion since a Feature Flag might be enabled for a user who is not an admin, but disabled for a user who is.
-
-Instead, it is possible to use the `:instance` symbol as the second argument to `Feature.enabled?`, which will be sanitized as a GitLab instance.
-
-```ruby
-Feature.enabled?(:feature_flag, :instance)
-```
 
 #### Current request actor
 
@@ -797,19 +762,20 @@ We want to avoid introducing a changelog when features are not accessible by an 
 
   ```mermaid
   flowchart LR
-    FDOFF(Flag is currently<br>'default: off')
-    FDON(Flag is currently<br>'default: on')
-    CDO{Change to<br>'default: on'}
+    FDOFF(Flag is currently\n`default: off`)
+    FDON(Flag is currently\n`default: on`)
+    CDO{Change to\n`default: on`}
     ACF(added / changed / fixed / '...')
     RF{Remove flag}
     RF2{Remove flag}
+    NC(No changelog)
     RC(removed / changed)
     OTHER(other)
 
     FDOFF -->CDO-->ACF
     FDOFF -->RF
     RF-->|Keep new code?| ACF
-    RF-->|Keep old code?| OTHER
+    RF-->|Keep old code?| NC
 
     FDON -->RF2
     RF2-->|Keep old code?| RC
@@ -970,6 +936,14 @@ Feature.enabled?(:ci_live_trace) # => false
 Feature.enabled?(:ci_live_trace, gate) # => true
 ```
 
+You can also disable a feature flag for a specific actor:
+
+```ruby
+gate = stub_feature_flag_gate('CustomActor')
+
+stub_feature_flags(ci_live_trace: false, thing: gate)
+```
+
 ### Controlling feature flags engine in tests
 
 Our Flipper engine in the test environment works in a memory mode `Flipper::Adapters::Memory`.
@@ -1002,7 +976,7 @@ This means that end-to-end tests will run with feature flags in the default stat
 code, or with the feature flag in its current state on the GitLab instance under test, unless the
 test is written to enable/disable a feature flag explicitly.
 
-When a feature flag is changed on Staging or on GitLab.com, a Slack message will be posted to the `#e2e-run-staging` or `#e2e-run-production` channels to inform
+When a feature flag is changed on Staging or on GitLab.com, a Slack message will be posted to the `#qa-staging` or `#qa-production` channels to inform
 the pipeline triage DRI so that they can more easily determine if any failures are related to a feature flag change. However, if you are working on a change you can
 help to avoid unexpected failures by [confirming that the end-to-end tests pass with a feature flag enabled.](../testing_guide/end_to_end/feature_flags.md#confirming-that-end-to-end-tests-pass-with-a-feature-flag-enabled)
 

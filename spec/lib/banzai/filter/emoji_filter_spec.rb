@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Banzai::Filter::EmojiFilter, feature_category: :markdown do
+RSpec.describe Banzai::Filter::EmojiFilter, feature_category: :team_planning do
   include FilterSpecHelper
 
   it_behaves_like 'emoji filter' do
@@ -99,24 +99,6 @@ RSpec.describe Banzai::Filter::EmojiFilter, feature_category: :markdown do
     expect(doc.to_html).to match(/^This deserves a <gl-emoji.+>, big time\.\z/)
   end
 
-  it 'ignores backref emoji in footnote references' do
-    footnote = <<~HTML
-      <p>↩ Test<sup data-sourcepos="1:9-1:12" class="footnote-ref"><a href="#fn-1" id="fnref-1" data-footnote-ref>1</a></sup></p>
-      <section class="footnotes" data-footnotes>
-      <ol>
-      <li id="fn-1">
-      <p>footnote <a href="#fnref-1" class="footnote-backref" data-footnote-backref data-footnote-backref-idx="1" aria-label="Back to reference 1">↩</a></p>
-      </li>
-      </ol>
-      </section>
-    HTML
-
-    doc = filter(footnote)
-
-    expect(doc.to_html).to start_with('<p><gl-emoji')
-    expect(doc.to_html).to include('>↩</a>')
-  end
-
   context 'when unicode emojis' do
     it_behaves_like 'limits the number of filtered items' do
       let(:text) { '⏯' * 3 }
@@ -141,11 +123,11 @@ RSpec.describe Banzai::Filter::EmojiFilter, feature_category: :markdown do
   context 'and protects against pathological number of emojis' do
     it 'limit keeps it from timing out' do
       expect do
-        Timeout.timeout(BANZAI_FILTER_TIMEOUT_MAX) { filter('⏯ :play_pause: ' * 500000) }
+        Timeout.timeout(1.second) { filter('⏯ :play_pause: ' * 500000) }
       end.not_to raise_error
 
       expect do
-        Timeout.timeout(BANZAI_FILTER_TIMEOUT_MAX) { filter('*' * 10000000) }
+        Timeout.timeout(1.second) { filter('*' * 10000000) }
       end.not_to raise_error
     end
   end

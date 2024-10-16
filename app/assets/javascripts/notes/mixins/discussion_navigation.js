@@ -38,8 +38,9 @@ function getNextDiscussion() {
   if (hasReachedPageEnd()) {
     return firstDiscussion;
   }
-  const [nextClosestDiscussion, index, isActive] =
-    findNextClosestVisibleDiscussion(discussionElements);
+  const [nextClosestDiscussion, index, isActive] = findNextClosestVisibleDiscussion(
+    discussionElements,
+  );
   if (nextClosestDiscussion && !isActive) {
     return nextClosestDiscussion;
   }
@@ -61,7 +62,6 @@ function getPreviousDiscussion() {
   return lastDiscussion;
 }
 
-// eslint-disable-next-line max-params
 function handleJumpForBothPages(getDiscussion, ctx, fn, scrollOptions) {
   const discussion = getDiscussion();
 

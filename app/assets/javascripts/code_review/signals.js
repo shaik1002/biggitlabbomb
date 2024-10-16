@@ -13,11 +13,7 @@ function required(name) {
 }
 
 async function observeMergeRequestFinishingPreparation({ apollo, signaler }) {
-  const {
-    namespace,
-    project,
-    id: iid,
-  } = getDerivedMergeRequestInformation({
+  const { namespace, project, id: iid } = getDerivedMergeRequestInformation({
     endpoint: document.location.pathname,
   });
   const projectPath = `${namespace}/${project}`;

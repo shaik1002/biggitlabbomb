@@ -380,8 +380,6 @@ module API
               desc: 'Enable comments inside Jira issues on each GitLab event (commit / merge request)'
             }
           ],
-          'jira-cloud-app' => ::Integrations::JiraCloudApp.api_arguments,
-          'matrix' => ::Integrations::Matrix.api_arguments,
           'mattermost-slash-commands' => ::Integrations::MattermostSlashCommands.api_arguments,
           'slack-slash-commands' => [
             {
@@ -643,8 +641,6 @@ module API
           ::Integrations::Irker,
           ::Integrations::Jenkins,
           ::Integrations::Jira,
-          ::Integrations::JiraCloudApp,
-          ::Integrations::Matrix,
           ::Integrations::Mattermost,
           ::Integrations::MattermostSlashCommands,
           ::Integrations::MicrosoftTeams,
@@ -673,15 +669,6 @@ module API
           ::Integrations::MockCi,
           ::Integrations::MockMonitoring
         ]
-      end
-
-      def self.inheritance_field
-        {
-          required: false,
-          name: :use_inherited_settings,
-          type: ::Grape::API::Boolean,
-          desc: 'Indicates whether or not to inherit default settings. Defaults to `false`.'
-        }
       end
     end
   end

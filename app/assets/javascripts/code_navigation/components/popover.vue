@@ -103,14 +103,14 @@ export default {
               ref="code-output"
               :class="$options.colorScheme"
               class="border-0 bg-transparent m-0 code highlight text-wrap"
-            ><doc-line v-for="(tokens, tokenIndex) in hover.tokens" :key="tokenIndex" :language="hover.language" :tokens="tokens" /></pre>
+            ><doc-line v-for="(tokens, tokenIndex) in hover.tokens" :key="tokenIndex" :language="hover.language" :tokens="tokens"/></pre>
             <p v-else ref="doc-output" class="p-3 m-0">
               {{ hover.value }}
             </p>
           </div>
         </div>
         <div v-if="definitionPath || isCurrentDefinition" class="popover-body border-top">
-          <span v-if="isCurrentDefinition" class="gl-text-base gl-font-bold">
+          <span v-if="isCurrentDefinition" class="gl-font-bold gl-font-base">
             {{ s__('CodeIntelligence|This is the definition') }}
           </span>
           <gl-button
@@ -128,7 +128,7 @@ export default {
       <gl-tab data-testid="references-tab" class="py-2">
         <template #title>
           {{ __('References') }}
-          <gl-badge class="gl-tab-counter-badge">{{ references.length }}</gl-badge>
+          <gl-badge size="sm" class="gl-tab-counter-badge">{{ references.length }}</gl-badge>
         </template>
         <template v-if="references.length">
           <div v-for="(reference, index) in references" :key="index" class="gl-dropdown-item">

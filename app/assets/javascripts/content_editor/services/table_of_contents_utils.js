@@ -2,17 +2,16 @@ class TOCHeading {
   parent = null;
   subHeadings = [];
 
-  constructor(text, href) {
+  constructor(text) {
     this.text = text;
-    this.href = href;
   }
 
   get level() {
     return this.parent ? this.parent.level + 1 : 0;
   }
 
-  addSubHeading(text, href) {
-    const heading = new TOCHeading(text, href);
+  addSubHeading(text) {
+    const heading = new TOCHeading(text);
     heading.parent = this;
     this.subHeadings.push(heading);
     return heading;
@@ -47,7 +46,6 @@ class TOCHeading {
   toJSON() {
     return {
       text: this.text,
-      href: this.href,
       level: this.level,
       subHeadings: this.subHeadings.map((subHeading) => subHeading.toJSON()),
     };
@@ -78,7 +76,7 @@ export function toTree(headings) {
     if (heading.level <= currentHeading.level) {
       currentHeading = currentHeading.parentAt(heading.level - 1);
     }
-    currentHeading = (currentHeading || tree).addSubHeading(heading.text, heading.href);
+    currentHeading = (currentHeading || tree).addSubHeading(heading.text);
   }
 
   return tree.flattenIfEmpty().toJSON();
@@ -99,18 +97,4 @@ export function getHeadings(editor) {
   });
 
   return toTree(headings).subHeadings;
-}
-
-export function getHeadingsFromDOM(containerElement) {
-  if (!containerElement) return [];
-
-  const headingSelectors = 'h1, h2, h3, h4, h5, h6';
-
-  return toTree(
-    [...containerElement.querySelectorAll(headingSelectors)].map((heading) => ({
-      level: parseInt(heading.tagName[1], 10),
-      text: heading.textContent.trim(),
-      href: heading.querySelector('a').getAttribute('href'),
-    })),
-  ).subHeadings;
 }

@@ -4,7 +4,7 @@ import { differenceBy } from 'lodash';
 import { s__, __, sprintf } from '~/locale';
 import { createAlert } from '~/alert';
 import { fetchPolicies } from '~/lib/graphql';
-import { TYPENAME_PROJECT, TYPENAME_GROUP } from '~/graphql_shared/constants';
+import { TYPENAME_PROJECT } from '~/graphql_shared/constants';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
 import globalToast from '~/vue_shared/plugins/global_toast';
@@ -90,7 +90,6 @@ export default {
         variables: {
           input: {
             projectIds: this.extractProjectIds(uniqueList),
-            groupIds: this.extractGroupIds(uniqueList),
             integrationName: BEYOND_IDENTITY_INTEGRATION_NAME,
           },
         },
@@ -113,11 +112,6 @@ export default {
       return exclusions
         .filter((exclusion) => exclusion.type === PROJECT_TYPE)
         .map((exclusion) => convertToGraphQLId(TYPENAME_PROJECT, exclusion.id));
-    },
-    extractGroupIds(exclusions) {
-      return exclusions
-        .filter((exclusion) => exclusion.type === GROUP_TYPE)
-        .map((exclusion) => convertToGraphQLId(TYPENAME_GROUP, exclusion.id));
     },
     nextPage(item) {
       this.cursor = { after: item, last: null, before: null };
@@ -145,8 +139,7 @@ export default {
         mutation: deleteExclusion,
         variables: {
           input: {
-            projectIds: this.extractProjectIds([exclusionToRemove]),
-            groupIds: this.extractGroupIds([exclusionToRemove]),
+            projectIds: [exclusionToRemove.id],
             integrationName: BEYOND_IDENTITY_INTEGRATION_NAME,
           },
         },
@@ -198,7 +191,7 @@ export default {
     <exclusions-tabs />
 
     <div
-      class="gl-border-b gl-flex gl-items-center gl-justify-between gl-bg-gray-10 gl-p-4 gl-py-5"
+      class="gl-display-flex gl-justify-content-space-between gl-bg-gray-10 gl-p-4 gl-py-5 gl-border-b gl-align-items-center"
     >
       <span>{{ $options.i18n.helpText }}</span>
       <gl-button variant="confirm" @click="isDrawerOpen = true">{{
@@ -218,7 +211,7 @@ export default {
 
     <gl-loading-icon v-if="isLoading" size="lg" class="gl-my-5" />
 
-    <div v-else class="gl-mt-5 gl-flex gl-justify-center">
+    <div v-else class="gl-mt-5 gl-display-flex gl-justify-content-center">
       <gl-keyset-pagination
         v-if="showPagination"
         v-bind="pageInfo"

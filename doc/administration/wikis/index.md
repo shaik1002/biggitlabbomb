@@ -27,7 +27,7 @@ is edited again and the content changes.
 
 ### Wiki page content size limit configuration
 
-This setting is not available through the [**Admin** area settings](../settings/index.md).
+This setting is not available through the [Admin Area settings](../settings/index.md).
 To configure this setting, use either the Rails console
 or the [Application settings API](../../api/settings.md).
 
@@ -81,7 +81,7 @@ The wiki counts as part of the [namespace storage size](../settings/account_and_
 so you should keep your wiki repositories as compact as possible.
 
 For more information about tools to compact repositories,
-read the documentation on [reducing repository size](../../user/project/repository/repository_size.md#reduce-repository-size).
+read the documentation on [reducing repository size](../../user/project/repository/reducing_the_repo_size_using_git.md).
 
 ## Allow URI includes for AsciiDoc
 

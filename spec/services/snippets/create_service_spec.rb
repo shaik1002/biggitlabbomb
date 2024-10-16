@@ -118,14 +118,6 @@ RSpec.describe Snippets::CreateService, feature_category: :source_code_managemen
         expect(blob.data).to eq base_opts[:content]
       end
 
-      it 'passes along correct commit attributes' do
-        expect_next_instance_of(Repository) do |repository|
-          expect(repository).to receive(:commit_files).with(anything, a_hash_including(skip_target_sha: true))
-        end
-
-        subject
-      end
-
       context 'when repository creation action fails' do
         before do
           allow_next_instance_of(Snippet) do |instance|
@@ -338,20 +330,6 @@ RSpec.describe Snippets::CreateService, feature_category: :source_code_managemen
           subject
         end
       end
-
-      context 'when Current.organization is set', :with_current_organization do
-        let(:extra_opts) { { organization_id: Current.organization_id } }
-
-        it 'sets the organization_id to nil' do
-          expect(snippet.organization_id).to be_nil
-        end
-      end
-
-      context 'when Current.organization is not set' do
-        it 'sets the organization_id to nil' do
-          expect(snippet.organization_id).to be_nil
-        end
-      end
     end
 
     context 'when PersonalSnippet' do
@@ -366,26 +344,6 @@ RSpec.describe Snippets::CreateService, feature_category: :source_code_managemen
       it_behaves_like 'after_save callback to store_mentions', PersonalSnippet
       it_behaves_like 'when snippet_actions param is present'
       it_behaves_like 'invalid params error response'
-
-      context 'when Current.organization is set', :with_current_organization do
-        let(:extra_opts) { { organization_id: Current.organization_id } }
-
-        it 'sets the organization_id to the current organization' do
-          expect(snippet.organization_id).to eq(Current.organization_id)
-        end
-
-        it 'does not set organization_id to the default organization' do
-          expect(snippet.organization_id)
-            .not_to eq(Organizations::Organization::DEFAULT_ORGANIZATION_ID)
-        end
-      end
-
-      context 'when Current.organization is not set' do
-        it 'still uses the default organization_id' do
-          expect(snippet.organization_id)
-            .to eq(Organizations::Organization::DEFAULT_ORGANIZATION_ID)
-        end
-      end
 
       context 'when the snippet description contains files' do
         include FileMoverHelpers

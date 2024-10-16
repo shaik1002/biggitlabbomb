@@ -301,7 +301,7 @@ Geo requires an EE license. To visit the Geo sites in your browser, you need a r
 
 - You can find the full image address from a pipeline by [following these instructions](https://handbook.gitlab.com/handbook/engineering/infrastructure/test-platform/tips-and-tricks/#running-gitlab-qa-pipeline-against-a-specific-gitlab-release). You might be prompted to set the `GITLAB_QA_ACCESS_TOKEN` variable if you specify the full image address.
 - You can increase the wait time for replication by setting `GEO_MAX_FILE_REPLICATION_TIME` and `GEO_MAX_DB_REPLICATION_TIME`. The default is 120 seconds.
-- To save time during tests, create a personal access token with API access on the Geo primary node, and pass that value in as `GITLAB_QA_ACCESS_TOKEN` and `GITLAB_QA_ADMIN_ACCESS_TOKEN`.
+- To save time during tests, create a Personal Access Token with API access on the Geo primary node, and pass that value in as `GITLAB_QA_ACCESS_TOKEN` and `GITLAB_QA_ADMIN_ACCESS_TOKEN`.
 
 ## Group SAML Tests
 
@@ -591,16 +591,3 @@ Once Product Analytics services are running and are connected to your GDK, the t
 ```shell
 bundle exec rspec qa/specs/features/ee/browser_ui/8_monitor/product_analytics/onboarding_spec.rb
 ```
-
-## Tests that require a global server hook
-
-The [`tag_revision_trigger_prereceive_hook_spec`](https://gitlab.com/gitlab-org/gitlab/-/blob/c3342dac0c6c8e9e11ec049b910eac832600b0bf/qa/qa/specs/features/api/3_create/repository/tag_revision_trigger_prereceive_hook_spec.rb) requires a global server hook to be pre-configured in the target test environment. When running this tests against a local GDK, the server hook will need to be configured with:
-
-```shell
-# From the gdk directory
-mkdir -p gitaly-custom-hooks/pre-receive.d
-cp gitlab/qa/gdk/pre-receive gitaly-custom-hooks/pre-receive.d
-chmod +x gitaly-custom-hooks/pre-receive.d/pre-receive
-```
-
-More information on global server hooks can be found in the [server hooks documentation](../../../administration/server_hooks.md#create-the-global-server-hook)

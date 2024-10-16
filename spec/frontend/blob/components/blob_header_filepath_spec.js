@@ -1,5 +1,5 @@
 import { GlBadge } from '@gitlab/ui';
-import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
+import { shallowMount } from '@vue/test-utils';
 import BlobHeaderFilepath from '~/blob/components/blob_header_filepath.vue';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
@@ -12,17 +12,15 @@ jest.mock('~/lib/utils/number_utils', () => ({
 describe('Blob Header Filepath', () => {
   let wrapper;
 
-  function createComponent(blobProps = {}, options = {}, propsData = {}) {
-    wrapper = shallowMountExtended(BlobHeaderFilepath, {
+  function createComponent(blobProps = {}, options = {}) {
+    wrapper = shallowMount(BlobHeaderFilepath, {
       propsData: {
         blob: { ...MockBlob, ...blobProps },
-        ...propsData,
       },
       ...options,
     });
   }
 
-  const getById = (id) => wrapper.findByTestId(id);
   const findBadge = () => wrapper.findComponent(GlBadge);
 
   describe('rendering', () => {
@@ -53,18 +51,6 @@ describe('Blob Header Filepath', () => {
       createComponent();
       expect(numberToHumanSize).toHaveBeenCalled();
       expect(wrapper.vm.blobSize).toBe('a lot');
-    });
-
-    it('should not show blob size', () => {
-      createComponent({}, {}, { showBlobSize: false });
-      expect(wrapper.find('small').exists()).toBe(false);
-    });
-
-    it('should have classes', () => {
-      createComponent();
-      expect(getById('file-title-content').attributes('class')).toEqual(
-        'file-title-name mr-1 js-blob-header-filepath gl-break-all !gl-no-underline',
-      );
     });
 
     it('renders LFS badge if LFS if enabled', () => {

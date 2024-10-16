@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -209,19 +209,8 @@ Payload example:
 
 ## Issue events
 
-> - `type` attribute in `object_attributes` [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/467415) in GitLab 17.2.
-
-Issue events are triggered when an issue or work item is created, updated, closed, or reopened.
-The supported work item types are:
-
-- [Tasks](../../tasks.md)
-- [Incidents](../../../operations/incident_management/incidents.md)
-- [Test cases](../../../ci/test_cases/index.md)
-- [Requirements](../requirements/index.md)
-- [Objectives and key results (OKRs)](../../okrs.md)
-
-For issues and [Service Desk](../service_desk/index.md) issues, the `object_kind` is `issue`, and the `type` is `Issue`.
-For all other work items, the `object_kind` field is `work_item`, and the `type` is the work item type.
+Issue events are triggered when a new issue is created or
+an existing issue is updated, closed, or reopened.
 
 The available values for `object_attributes.action` in the payload are:
 
@@ -303,7 +292,6 @@ Payload example:
     "human_time_change": null,
     "weight": null,
     "health_status": "at_risk",
-    "type": "Issue",
     "iid": 23,
     "url": "http://example.com/diaspora/issues/23",
     "state": "opened",
@@ -1558,7 +1546,7 @@ Deployment events are triggered when a deployment:
 - Starts
 - Succeeds
 - Fails
-- Is canceled
+- Is cancelled
 
 The `deployable_id` and `deployable_url` in the payload represent a CI/CD job that executed the deployment.
 When the deployment event occurs by [API](../../../ci/environments/external_deployment_tools.md) or [`trigger` jobs](../../../ci/pipelines/downstream_pipelines.md), `deployable_url` is `null`.
@@ -1619,8 +1607,7 @@ Payload example:
 
 DETAILS:
 **Tier:** Premium, Ultimate
-
-> - Access request events [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/163094) in GitLab 17.4.
+**Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
 These events are triggered for [group webhooks](webhooks.md#group-webhooks) only.
 
@@ -1630,8 +1617,6 @@ Member events are triggered when:
 - The access level of a user changes.
 - The expiration date for user access is updated.
 - A user is removed from the group.
-- A user requests access to the group.
-- An access request is denied.
 
 ### Add member to group
 
@@ -1717,72 +1702,11 @@ Payload example:
 }
 ```
 
-### A user requests access
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/163094) in GitLab 17.4 [with a flag](../../../administration/feature_flags.md) named `group_access_request_webhooks`. Disabled by default.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/479877) in GitLab 17.5. Feature flag `group_access_request_webhooks` removed.
-
-Request header:
-
-```plaintext
-X-Gitlab-Event: Member Hook
-```
-
-Payload example:
-
-```json
-{
-  "created_at": "2020-12-11T04:57:22Z",
-  "updated_at": "2020-12-12T08:52:34Z",
-  "group_name": "webhook-test",
-  "group_path": "webhook-test",
-  "group_id": 100,
-  "user_username": "test_user",
-  "user_name": "Test User",
-  "user_email": "testuser@webhooktest.com",
-  "user_id": 64,
-  "group_access": "Guest",
-  "group_plan": null,
-  "expires_at": "2020-12-14T00:00:00Z",
-  "event_name": "user_access_request_to_group"
-}
-```
-
-### An access request is denied
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/163094) in GitLab 17.4 [with a flag](../../../administration/feature_flags.md) named `group_access_request_webhooks`. Disabled by default.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/479877) in GitLab 17.5. Feature flag `group_access_request_webhooks` removed.
-
-Request header:
-
-```plaintext
-X-Gitlab-Event: Member Hook
-```
-
-Payload example:
-
-```json
-{
-  "created_at": "2020-12-11T04:57:22Z",
-  "updated_at": "2020-12-12T08:52:34Z",
-  "group_name": "webhook-test",
-  "group_path": "webhook-test",
-  "group_id": 100,
-  "user_username": "test_user",
-  "user_name": "Test User",
-  "user_email": "testuser@webhooktest.com",
-  "user_id": 64,
-  "group_access": "Guest",
-  "group_plan": null,
-  "expires_at": "2020-12-14T00:00:00Z",
-  "event_name": "user_access_request_denied_for_group"
-}
-```
-
 ## Subgroup events
 
 DETAILS:
 **Tier:** Premium, Ultimate
+**Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
 These events are triggered for [group webhooks](webhooks.md#group-webhooks) only.
 
@@ -1997,7 +1921,6 @@ Payload example:
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/123952) in GitLab 16.2 [with a flag](../../../administration/feature_flags.md) named `emoji_webhooks`. Disabled by default.
 > - [Enabled on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/417288) in GitLab 16.3.
 > - [Enabled by default](https://gitlab.com/gitlab-org/gitlab/-/issues/417288) in GitLab 16.4.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/417288) in GitLab 17.5. Feature flag `emoji_webhooks` removed.
 
 FLAG:
 On self-managed GitLab, by default this feature is available. To hide the feature, an administrator can
@@ -2145,16 +2068,12 @@ Payload example:
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/141907) in GitLab 16.10 [with a flag](../../../administration/feature_flags.md) named `access_token_webhooks`. Disabled by default.
 > - [Enabled on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/439379) in GitLab 16.11.
 > - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/454642) in GitLab 16.11. Feature flag `access_token_webhooks` removed.
-> - `full_path` attribute [added](https://gitlab.com/gitlab-org/gitlab/-/issues/465421) in GitLab 17.4.
 
-Two access token expiration events are generated:
-
-- Seven days before a [project or group access token](../../../security/token_overview.md) expires.
-- One day before the token expires.
+An access token event is triggered when a [project or group access token](../../../security/token_overview.md) will expire in seven days or less.
 
 The available values for `event_name` in the payload are:
 
-- `expiring_access_token`
+- `expiring`
 
 Request header:
 
@@ -2204,8 +2123,7 @@ Payload example for group:
   "group": {
     "group_name": "Twitter",
     "group_path": "twitter",
-    "group_id": 35,
-    "full_path": "twitter"
+    "group_id": 35
   },
   "object_attributes": {
     "user_id": 90,

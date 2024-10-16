@@ -41,7 +41,6 @@ info: Any user with at least the Maintainer role can merge updates to this conte
 - [Swapping tables](swapping_tables.md)
 - [Testing Rails migrations](../testing_guide/testing_migrations_guide.md) guide
 - [When and how to write Rails migrations tests](../testing_guide/testing_migrations_guide.md)
-- [Deduplicate database records](deduplicate_database_records.md)
 
 ## Partitioning tables
 
@@ -80,7 +79,6 @@ info: Any user with at least the Maintainer role can merge updates to this conte
 - [Ordering table columns](ordering_table_columns.md)
 - [Pagination guidelines](pagination_guidelines.md)
   - [Pagination performance guidelines](pagination_performance_guidelines.md)
-  - [Offset pagination optimization](offset_pagination_optimization.md)
 - [Polymorphic associations](polymorphic_associations.md)
 - [Query count limits](query_count_limits.md)
 - [Query performance guidelines](query_performance.md)
@@ -131,4 +129,3 @@ including the major methods:
 - [Maintenance operations](maintenance_operations.md)
 - [Update multiple database objects](setting_multiple_values.md)
 - [Batch iteration in a tree hierarchy proof of concept](poc_tree_iterator.md)
-- [Scalability Patterns](scalability/patterns/index.md)

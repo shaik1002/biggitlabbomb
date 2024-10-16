@@ -3,7 +3,7 @@
 class Projects::ErrorTracking::BaseController < Projects::ApplicationController
   POLLING_INTERVAL = 1_000
 
-  feature_category :observability
+  feature_category :error_tracking
   urgency :low
 
   def set_polling_interval

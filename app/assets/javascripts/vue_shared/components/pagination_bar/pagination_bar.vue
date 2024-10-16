@@ -79,7 +79,7 @@ export default {
 </script>
 
 <template>
-  <div class="gl-flex gl-items-center">
+  <div class="gl-display-flex gl-align-items-center">
     <local-storage-sync
       v-if="storageKey"
       :storage-key="storageKey"

@@ -20,7 +20,6 @@ import { InternalEvents } from '~/tracking';
 import { FIND_FILE_BUTTON_CLICK } from '~/tracking/constants';
 import { updateElementsVisibility } from '../utils/dom';
 import blobControlsQuery from '../queries/blob_controls.query.graphql';
-import { getRefType } from '../utils/ref_type';
 
 export default {
   i18n: {
@@ -31,7 +30,7 @@ export default {
     permalinkTooltip: __('Go to permalink'),
     errorMessage: __('An error occurred while loading the blob controls.'),
   },
-  buttonClassList: 'sm:gl-w-auto gl-w-full sm:gl-mt-0 gl-mt-3',
+  buttonClassList: 'gl-sm-w-auto gl-w-full gl-sm-mt-0 gl-mt-3',
   components: {
     GlButton,
   },
@@ -47,7 +46,7 @@ export default {
           projectPath: this.projectPath,
           filePath: this.filePath,
           ref: this.ref,
-          refType: getRefType(this.refType),
+          refType: this.refType?.toUpperCase(),
         };
       },
       skip() {
@@ -157,7 +156,7 @@ export default {
 </script>
 
 <template>
-  <div v-if="showBlobControls" class="gl-flex gl-items-baseline gl-gap-3">
+  <div v-if="showBlobControls" class="gl-display-flex gl-gap-3 gl-align-items-baseline">
     <gl-button
       v-gl-tooltip.html="findFileTooltip"
       :aria-keyshortcuts="findFileShortcutKey"

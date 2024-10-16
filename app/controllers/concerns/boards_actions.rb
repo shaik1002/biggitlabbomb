@@ -36,7 +36,8 @@ module BoardsActions
   end
 
   # Noop on FOSS
-  def push_licensed_features; end
+  def push_licensed_features
+  end
 
   def board
     strong_memoize(:board) do

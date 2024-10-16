@@ -1,9 +1,6 @@
-import { builders } from 'prosemirror-test-builder';
 import Bold from '~/content_editor/extensions/bold';
 import Code from '~/content_editor/extensions/code';
-import { createTestEditor } from '../test_utils';
-
-const CODE_HTML = `<p dir="auto" data-sourcepos="1:1-1:31"><code data-sourcepos="1:2-1:30">     code with leading spaces</code></p>`;
+import { createTestEditor, createDocBuilder } from '../test_utils';
 
 describe('content_editor/extensions/code', () => {
   let tiptapEditor;
@@ -15,7 +12,15 @@ describe('content_editor/extensions/code', () => {
   beforeEach(() => {
     tiptapEditor = createTestEditor({ extensions: [Bold, Code] });
 
-    ({ doc, paragraph: p, bold, code } = builders(tiptapEditor.schema));
+    ({
+      builders: { doc, p, bold, code },
+    } = createDocBuilder({
+      tiptapEditor,
+      names: {
+        bold: { markType: Bold.name },
+        code: { markType: Code.name },
+      },
+    }));
   });
 
   it.each`
@@ -31,18 +36,6 @@ describe('content_editor/extensions/code', () => {
     markOrder.forEach((mark) => tiptapEditor.commands.toggleMark(mark));
 
     expect(tiptapEditor.getJSON()).toEqual(expectedDoc.toJSON());
-  });
-
-  describe('when parsing HTML', () => {
-    beforeEach(() => {
-      tiptapEditor.commands.setContent(CODE_HTML);
-    });
-
-    it('parses HTML correctly into an inline code block, preserving leading spaces', () => {
-      expect(tiptapEditor.getJSON()).toEqual(
-        doc(p(code('     code with leading spaces'))).toJSON(),
-      );
-    });
   });
 
   describe('shortcut: RightArrow', () => {

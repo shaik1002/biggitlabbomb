@@ -212,19 +212,18 @@ RSpec.describe Ci::ResourceGroups::AssignResourceFromResourceGroupService, featu
       end
 
       it 'does not re-spawn the new worker for assigning a resource' do
-        expect(Ci::ResourceGroups::AssignResourceFromResourceGroupWorker).not_to receive(:perform_in)
+        expect(Ci::ResourceGroups::AssignResourceFromResourceGroupWorkerV2).not_to receive(:perform_in)
 
         subject
       end
 
-      context 'when `assign_resource_worker_deduplicate_until_executing` FF is enabled and override is disabled' do
+      context 'when `assign_resource_worker_deduplicate_until_executing` FF is disabled' do
         before do
-          stub_feature_flags(assign_resource_worker_deduplicate_until_executing: true)
-          stub_feature_flags(assign_resource_worker_deduplicate_until_executing_override: false)
+          stub_feature_flags(assign_resource_worker_deduplicate_until_executing: false)
         end
 
         it 'does not re-spawn the old worker for assigning a resource' do
-          expect(Ci::ResourceGroups::AssignResourceFromResourceGroupWorkerV2).not_to receive(:perform_in)
+          expect(Ci::ResourceGroups::AssignResourceFromResourceGroupWorker).not_to receive(:perform_in)
 
           subject
         end

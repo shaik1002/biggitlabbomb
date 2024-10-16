@@ -4,7 +4,9 @@ module Banzai
   module Pipeline
     class CommitDescriptionPipeline < SingleLinePipeline
       def self.filters
-        @filters ||= super.insert_after(Filter::ExternalLinkFilter, Filter::CommitTrailersFilter)
+        @filters ||= super.concat FilterArray[
+          Filter::CommitTrailersFilter,
+        ]
       end
     end
   end

@@ -80,6 +80,10 @@
       flex-wrap: wrap;
     }
   }
+
+  &.section-align-top {
+    align-self: flex-start;
+  }
 }
 
 .table-button-footer {
@@ -149,6 +153,10 @@
     @include flex-max-width(60);
     text-align: right;
   }
+}
+
+.flex-truncate-parent {
+  display: flex;
 }
 
 .flex-truncate-child {

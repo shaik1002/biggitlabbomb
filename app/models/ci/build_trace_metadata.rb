@@ -27,18 +27,8 @@ module Ci
       record = find_by(build_id: build_id, partition_id: partition_id)
       return record if record
 
-      upsert({ build_id: build_id, partition_id: partition_id }, unique_by: unique_by_columns_for_upsert)
+      upsert({ build_id: build_id, partition_id: partition_id }, unique_by: :build_id)
       find_by!(build_id: build_id, partition_id: partition_id)
-    end
-
-    # Temporary fix to correctly identify an unique index for upsert
-    # should be replaced with `%w[build_id partition_id]` in %17.5
-    def self.unique_by_columns_for_upsert
-      unique_indexes = connection.schema_cache.indexes(table_name).select(&:unique)
-      columns = %w[partition_id build_id]
-      return columns if unique_indexes.any? { |index| index.columns == columns }
-
-      columns.reverse
     end
 
     # The job is retried around 5 times during the 7 days retention period for

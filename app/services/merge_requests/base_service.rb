@@ -17,8 +17,8 @@ module MergeRequests
     end
 
     def hook_data(merge_request, action, old_rev: nil, old_associations: {})
-      hook_data = merge_request.to_hook_data(current_user, old_associations: old_associations, action: action)
-
+      hook_data = merge_request.to_hook_data(current_user, old_associations: old_associations)
+      hook_data[:object_attributes][:action] = action
       if old_rev && !Gitlab::Git.blank_ref?(old_rev)
         hook_data[:object_attributes][:oldrev] = old_rev
       end
@@ -81,14 +81,13 @@ module MergeRequests
       notification_service.async.changed_reviewer_of_merge_request(merge_request, current_user, old_reviewers)
       todo_service.reassigned_reviewable(merge_request, current_user, old_reviewers)
       invalidate_cache_counts(merge_request, users: affected_reviewers.compact)
-      invalidate_cache_counts(merge_request, users: merge_request.assignees)
 
       new_reviewers = merge_request.reviewers - old_reviewers
       merge_request_activity_counter.track_users_review_requested(users: new_reviewers)
       merge_request_activity_counter.track_reviewers_changed_action(user: current_user)
       trigger_merge_request_reviewers_updated(merge_request)
 
-      set_first_reviewer_assigned_at_metrics(merge_request) if new_reviewers.any?
+      capture_suggested_reviewers_accepted(merge_request)
     end
 
     def cleanup_environments(merge_request)
@@ -275,15 +274,8 @@ module MergeRequests
       GraphqlTriggers.merge_request_approval_state_updated(merge_request)
     end
 
-    def set_first_reviewer_assigned_at_metrics(merge_request)
-      metrics = merge_request.metrics
-      return unless metrics
-
-      current_time = Time.current
-
-      return if metrics.reviewer_first_assigned_at && metrics.reviewer_first_assigned_at <= current_time
-
-      metrics.update(reviewer_first_assigned_at: current_time)
+    def capture_suggested_reviewers_accepted(merge_request)
+      # Implemented in EE
     end
 
     def remove_approval(merge_request, user)

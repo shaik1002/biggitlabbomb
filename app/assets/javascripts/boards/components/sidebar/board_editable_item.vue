@@ -85,7 +85,10 @@ export default {
 
 <template>
   <div>
-    <header v-show="showHeader" class="gl-mb-2 gl-flex gl-items-center gl-justify-between">
+    <header
+      v-show="showHeader"
+      class="gl-display-flex gl-justify-content-space-between gl-align-items-center gl-mb-2"
+    >
       <span class="gl-align-middle">
         <slot name="title">
           <span data-testid="title">{{ title }}</span>
@@ -96,14 +99,14 @@ export default {
         v-if="canUpdate"
         category="tertiary"
         size="small"
-        class="js-sidebar-dropdown-toggle edit-link gl-ml-5"
+        class="gl-text-gray-900! gl-ml-5 js-sidebar-dropdown-toggle edit-link"
         data-testid="edit-button"
         @click="toggle"
       >
         {{ __('Edit') }}
       </gl-button>
     </header>
-    <div v-show="!edit" class="value gl-text-gray-500" data-testid="collapsed-content">
+    <div v-show="!edit" class="gl-text-gray-500 value" data-testid="collapsed-content">
       <slot name="collapsed">{{ __('None') }}</slot>
     </div>
     <div v-show="edit" data-testid="expanded-content">

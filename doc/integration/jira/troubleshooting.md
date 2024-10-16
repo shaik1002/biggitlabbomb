@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -68,31 +68,6 @@ curl --verbose --user "$USER:$API_TOKEN" "https://$ATLASSIAN_SUBDOMAIN.atlassian
 
 If the user can access the issue, Jira responds with a `200 OK` and the returned JSON includes the Jira issue details.
 
-### Verify GitLab can post a comment to a Jira issue
-
-WARNING:
-Commands that change data can cause damage if not run correctly or under the right conditions. Always run commands in a test environment first and have a backup instance ready to restore.
-
-To help troubleshoot your Jira integration, you can check whether
-GitLab can post a comment to a Jira issue using the project's Jira
-integration settings.
-
-To do so:
-
-- From a [Rails console](../../administration/operations/rails_console.md#starting-a-rails-console-session),
-  run the following:
-
-  ```ruby
-  jira_issue_id = "ALPHA-1" # Change to your Jira issue ID
-  project = Project.find_by_full_path("group/project") # Change to your project's path
-
-  integration = project.integrations.find_by(type: "Integrations::Jira")
-  jira_issue = integration.client.Issue.find(jira_issue_id)
-  jira_issue.comments.build.save!(body: 'This is a test comment from GitLab via the Rails console')
-  ```
-
-If the command is successful, a comment is added to the Jira issue.
-
 ## GitLab cannot create a Jira issue
 
 When you try to create a Jira issue from a vulnerability, you might see a "field is required" error. For example, `Components is required` because a field called
@@ -130,9 +105,9 @@ For more information, see [issue 341571](https://gitlab.com/gitlab-org/gitlab/-/
 
 To resolve this issue, disable and then re-enable the integration.
 
-## Error: `certificate verify failed`
+## `certificate verify failed` when testing the integration settings
 
-When you test the Jira issue integration settings, you might get the following error:
+When testing the Jira issue integration settings, you might get the following error:
 
 ```plaintext
 Connection failed. Check your integration settings. SSL_connect returned=1 errno=0 peeraddr=<jira.example.com> state=error: certificate verify failed (unable to get local issuer certificate)
@@ -253,9 +228,9 @@ end
 
 When [viewing Jira issues](configure.md#view-jira-issues) in GitLab, you might encounter the following issues.
 
-### Error: `500 We're sorry`
+### `500 We're sorry` when accessing a Jira issue in GitLab
 
-When you access a Jira issue in GitLab, you might get a `500 We're sorry. Something went wrong on our end` error.
+When accessing a Jira issue in GitLab, you might get a `500 We're sorry. Something went wrong on our end` error.
 Check [`production.log`](../../administration/logs/index.md#productionlog) to see if the file contains the following exception:
 
 ```plaintext
@@ -264,7 +239,7 @@ Check [`production.log`](../../administration/logs/index.md#productionlog) to se
 
 If that's the case, ensure the [**Due date** field is visible for issues](https://confluence.atlassian.com/jirakb/due-date-field-is-missing-189431917.html) in the integrated Jira project.
 
-### Error: `An error occurred while requesting data from Jira`
+### Error when requesting data from Jira
 
 When you try to view the Jira issue list or create a Jira issue in GitLab, you might get one of the following errors:
 
@@ -289,17 +264,9 @@ Your Jira project key must not have [restricted words and characters](https://co
 
 When you try to view the Jira issue list in GitLab, you might see one of the following errors.
 
-#### Error: `The value '<project>' does not exist for the field 'project'`
+#### `An error occurred while requesting data from Jira: The value '<project>' does not exist for the field 'project'. Check your Jira integration configuration and try again.`
 
-If you use the wrong authentication credentials for your Jira installation, you might see this error:
-
-```plaintext
-An error occurred while requesting data from Jira:
-The value '<project>' does not exist for the field 'project'.
-Check your Jira integration configuration and try again.
-```
-
-Authentication credentials depend on your type of Jira installation:
+This error occurs when you use the wrong authentication credentials for your Jira installation:
 
 - **For Jira Cloud**, you must have a Jira Cloud API token
   and the email address you used to create the token.
@@ -310,15 +277,10 @@ For more information, see [Jira issue integration](configure.md).
 
 To resolve this issue, update the authentication credentials to match your Jira installation.
 
-#### Error: `The credentials for accessing Jira are not allowed to access the data`
+#### `The credentials for accessing Jira are not allowed to access the data. Check your Jira integration credentials and try again.`
 
-If your Jira credentials cannot access the Jira project key you specified in the
-[Jira issue integration](configure.md#configure-the-integration), you might see this error:
-
-```plaintext
-The credentials for accessing Jira are not allowed to access the data.
-Check your Jira integration credentials and try again.
-```
+This error occurs when the Jira credentials cannot access the Jira project key you specified in the
+[Jira issue integration](configure.md#configure-the-integration).
 
 To resolve this issue, ensure the Jira user you configured in the Jira issue integration has permission to view issues
 associated with the specified Jira project key.

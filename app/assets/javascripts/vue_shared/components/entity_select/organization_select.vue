@@ -13,7 +13,6 @@ import {
   FETCH_ORGANIZATION_ERROR,
 } from './constants';
 import EntitySelect from './entity_select.vue';
-import { initialSelectionPropValidator } from './utils';
 
 export default {
   name: 'OrganizationSelect',
@@ -46,10 +45,9 @@ export default {
       required: true,
     },
     initialSelection: {
-      type: [String, Number, Object],
+      type: [String, Number],
       required: false,
       default: null,
-      validator: initialSelectionPropValidator,
     },
     clearable: {
       type: Boolean,
@@ -149,10 +147,6 @@ export default {
     :toggle-class="toggleClass"
     v-on="$listeners"
   >
-    <template #label>
-      <slot name="label"></slot>
-    </template>
-
     <template #error>
       <gl-alert v-if="errorMessage" class="gl-mb-3" variant="danger" @dismiss="dismissError">{{
         errorMessage

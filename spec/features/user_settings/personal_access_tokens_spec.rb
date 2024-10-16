@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'User Settings > Personal access tokens', :js, feature_category: :system_access do
+RSpec.describe 'User Settings > Personal Access Tokens', :js, feature_category: :system_access do
   include Spec::Support::Helpers::ModalHelpers
   include Features::AccessTokenHelpers
 
@@ -19,7 +19,6 @@ RSpec.describe 'User Settings > Personal access tokens', :js, feature_category: 
   describe "token creation" do
     it "allows creation of a personal access token" do
       name = 'My PAT'
-      create(:organization, :default)
 
       visit user_settings_personal_access_tokens_path
 
@@ -90,7 +89,7 @@ RSpec.describe 'User Settings > Personal access tokens', :js, feature_category: 
   describe "inactive tokens" do
     let!(:personal_access_token) { create(:personal_access_token, user: user) }
 
-    it "allows revocation of an active token" do
+    it "allows revocation of an active token", quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/435388' do
       visit user_settings_personal_access_tokens_path
       accept_gl_confirm(button_text: 'Revoke') { click_on "Revoke" }
 
@@ -105,7 +104,7 @@ RSpec.describe 'User Settings > Personal access tokens', :js, feature_category: 
     end
 
     context "when revocation fails" do
-      it "displays an error message" do
+      it "displays an error message", quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/451668' do
         allow_next_instance_of(PersonalAccessTokens::RevokeService) do |instance|
           allow(instance).to receive(:revocation_permitted?).and_return(false)
         end
@@ -154,6 +153,7 @@ RSpec.describe 'User Settings > Personal access tokens', :js, feature_category: 
 
     visit user_settings_personal_access_tokens_path({ name: name, scopes: scopes })
 
+    click_button 'Add new token'
     expect(page).to have_field("Token name", with: name)
     expect(find("#personal_access_token_scopes_api")).to be_checked
     expect(find("#personal_access_token_scopes_read_user")).to be_checked

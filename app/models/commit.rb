@@ -15,7 +15,6 @@ class Commit
   include ::Gitlab::Utils::StrongMemoize
   include ActsAsPaginatedDiff
   include CacheMarkdownField
-  include GlobalID::Identification
 
   participant :author
   participant :committer
@@ -301,7 +300,7 @@ class Commit
   end
 
   def lazy_author
-    BatchLoader.for(author_email&.downcase).batch do |emails, loader|
+    BatchLoader.for(author_email.downcase).batch do |emails, loader|
       users = User.by_any_email(emails, confirmed: true).includes(:emails)
 
       emails.each do |email|
@@ -317,15 +316,14 @@ class Commit
       lazy_author&.itself
     end
   end
-  request_cache(:author) { author_email&.downcase }
+  request_cache(:author) { author_email.downcase }
 
   def committer(confirmed: true)
     @committer ||= User.find_by_any_email(committer_email, confirmed: confirmed)
   end
 
   def parents
-    # Usage of `reject` is intentional. `compact` doesn't work here, because of BatchLoader specifics
-    @parents ||= parent_ids.map { |oid| Commit.lazy(container, oid) }.reject(&:nil?)
+    @parents ||= parent_ids.map { |oid| Commit.lazy(container, oid) }
   end
 
   def parent
@@ -515,7 +513,6 @@ class Commit
   def diffs(diff_options = {})
     Gitlab::Diff::FileCollection::Commit.new(self, diff_options: diff_options)
   end
-  alias_method :diffs_for_streaming, :diffs
 
   def persisted?
     true
@@ -601,10 +598,6 @@ class Commit
     raw_diffs.any?(&:encoded_file_path)
   end
 
-  def valid_full_sha
-    id.match(Gitlab::Git::Commit::FULL_SHA_PATTERN).to_s
-  end
-
   private
 
   def tipping_refs(ref_prefix, limit: 0)
@@ -650,5 +643,3 @@ class Commit
     MergeRequestsFinder.new(user, project_id: project_id).find_by(squash_commit_sha: id)
   end
 end
-
-Commit.prepend_mod_with('Projects::Commit')

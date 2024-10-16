@@ -1,5 +1,4 @@
 <script>
-import Vue from 'vue';
 import { GlSkeletonLoader, GlAlert } from '@gitlab/ui';
 import { createAlert } from '~/alert';
 import axios from '~/lib/utils/axios_utils';
@@ -7,10 +6,6 @@ import { handleLocationHash } from '~/lib/utils/common_utils';
 import { renderGFM } from '~/behaviors/markdown/render_gfm';
 import SafeHtml from '~/vue_shared/directives/safe_html';
 import { __ } from '~/locale';
-import { getHeadingsFromDOM } from '~/content_editor/services/table_of_contents_utils';
-import TableOfContents from './table_of_contents.vue';
-
-const TableOfContentsComponent = Vue.extend(TableOfContents);
 
 export default {
   components: {
@@ -27,24 +22,12 @@ export default {
       content: '',
       isLoadingContent: false,
       loadingContentFailed: false,
-      headings: [],
     };
   },
   mounted() {
     this.loadWikiContent();
   },
   methods: {
-    async renderHeadingsInSidebar() {
-      const headings = getHeadingsFromDOM(this.$refs.content);
-      if (!headings.length) return;
-
-      const tocComponent = new TableOfContentsComponent({ propsData: { headings } }).$mount();
-      const tocContainer = document.querySelector('.js-wiki-toc');
-
-      tocContainer.innerHTML = '';
-      tocContainer.appendChild(tocComponent.$el);
-    },
-
     async loadWikiContent() {
       this.loadingContentFailed = false;
       this.isLoadingContent = true;
@@ -59,14 +42,12 @@ export default {
           .then(() => {
             renderGFM(this.$refs.content);
             handleLocationHash();
-
-            this.renderHeadingsInSidebar();
           })
-          .catch(() => {
+          .catch(() =>
             createAlert({
               message: this.$options.i18n.renderingContentFailed,
-            });
-          });
+            }),
+          );
       } catch (e) {
         this.loadingContentFailed = true;
       } finally {

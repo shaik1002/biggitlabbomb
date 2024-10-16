@@ -206,11 +206,17 @@ export default {
         [STATUS_ALL]: allIssues?.count,
       };
     },
-    showPaginationControls() {
-      return !this.isLoading && (this.pageInfo.hasNextPage || this.pageInfo.hasPreviousPage);
+    currentTabCount() {
+      return this.tabCounts[this.state] ?? 0;
     },
-    showPageSizeSelector() {
-      return this.serviceDeskIssues.length > 0;
+    showPaginationControls() {
+      return (
+        this.serviceDeskIssues.length > 0 &&
+        (this.pageInfo.hasNextPage || this.pageInfo.hasPreviousPage)
+      );
+    },
+    showPageSizeControls() {
+      return this.currentTabCount > DEFAULT_PAGE_SIZE;
     },
     isLoading() {
       return this.$apollo.loading;
@@ -336,7 +342,6 @@ export default {
     this.cache = {};
   },
   methods: {
-    // eslint-disable-next-line max-params
     fetchWithCache(path, cacheName, searchKey, search) {
       if (this.cache[cacheName]) {
         const data = search
@@ -432,9 +437,10 @@ export default {
 
       this.$router.push({ query: this.urlParams });
     },
-    handlePageSizeChange(pageSize) {
-      this.pageSize = pageSize;
-      this.pageParams = getInitialPageParams(pageSize);
+    handlePageSizeChange(newPageSize) {
+      const pageParam = getParameterByName(PARAM_LAST_PAGE_SIZE) ? 'lastPageSize' : 'firstPageSize';
+      this.pageParams[pageParam] = newPageSize;
+      this.pageSize = newPageSize;
       scrollUp();
 
       this.$router.push({ query: this.urlParams });
@@ -564,7 +570,7 @@ export default {
       :issuables-loading="isLoading"
       :initial-filter-value="filterTokens"
       :show-pagination-controls="showPaginationControls"
-      :show-page-size-selector="showPageSizeSelector"
+      :show-page-size-change-controls="showPageSizeControls"
       :sort-options="sortOptions"
       :initial-sort-by="sortKey"
       :is-manual-ordering="isManualOrdering"

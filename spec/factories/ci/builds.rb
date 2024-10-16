@@ -32,8 +32,6 @@ FactoryBot.define do
 
     runner_manager { nil }
 
-    execution_config { nil }
-
     after(:build) do |build, evaluator|
       if evaluator.runner_manager
         build.runner = evaluator.runner_manager.runner
@@ -60,7 +58,6 @@ FactoryBot.define do
     trait :degenerated do
       options { nil }
       yaml_variables { nil }
-      execution_config { nil }
     end
 
     trait :unique_name do

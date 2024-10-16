@@ -87,16 +87,9 @@ component can have two indicators:
 
 The calculation of the ratio happens as follows:
 
-![error budget calculation](img/error_budget_calculation_v17_2.png)
-
-<!--
-To update this calculation, paste the following math block in a GitLab comment, update it,
-and take a screenshot:
-
 ```math
 \frac {operations\_meeting\_apdex + (total\_operations - operations\_with\_errors)} {total\_apdex\_measurements + total\_operations}
 ```
--->
 
 ## Check where budget is being spent
 
@@ -110,7 +103,7 @@ The row below the error budget row is collapsed by default. Expanding
 it shows which component and violation type had the most offending
 operations in the past 28 days.
 
-![Error attribution](img/stage_group_dashboards_error_attribution_v14_1.png)
+![Error attribution](img/stage_group_dashboards_error_attribution.png)
 
 The first panel on the left shows a table with the number of errors per
 component. Digging into the first row in that table has
@@ -140,7 +133,7 @@ component means.
 
 For example, see the `server` component of the `web-pages` service:
 
-![web-pages-server-component SLI](img/stage_group_dashboards_service_sli_detail_v14_1.png)
+![web-pages-server-component SLI](img/stage_group_dashboards_service_sli_detail.png)
 
 To add more SLIs tailored to specific features, you can use an [Application SLI](../application_slis/index.md).
 

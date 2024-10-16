@@ -2,7 +2,7 @@
 
 module API
   module Entities
-    class Project < ProjectDetails
+    class Project < BasicProjectDetails
       include ::API::Helpers::RelatedResourcesHelpers
 
       expose :container_registry_url, as: :container_registry_image_prefix, documentation: { type: 'string', example: 'registry.gitlab.example.com/gitlab/gitlab-client' }, if: ->(_, _) { Gitlab.config.registry.enabled }
@@ -94,6 +94,9 @@ module API
       expose :shared_runners_enabled, documentation: { type: 'boolean' }
       expose :lfs_enabled?, as: :lfs_enabled, documentation: { type: 'boolean' }
       expose :creator_id, documentation: { type: 'integer', example: 1 }
+      expose :forked_from_project, using: Entities::BasicProjectDetails, if: ->(project, options) do
+        project.forked? && Ability.allowed?(options[:current_user], :read_project, project.forked_from_project)
+      end
       expose :mr_default_target_self, if: ->(project) { project.forked? }, documentation: { type: 'boolean' }
 
       expose :import_url, documentation: { type: 'string', example: 'https://gitlab.com/gitlab/gitlab.git' }, if: ->(project, options) { Ability.allowed?(options[:current_user], :admin_project, project) } do |project|
@@ -101,10 +104,10 @@ module API
       end
       expose :import_type, documentation: { type: 'string', example: 'git' }, if: ->(project, options) { Ability.allowed?(options[:current_user], :admin_project, project) }
       expose :import_status, documentation: { type: 'string', example: 'none' }
-      expose :import_error, documentation: { type: 'string', example: 'Import error' }, if: ->(_project, options) { options[:user_can_admin_project] } do |project|
+      expose :import_error, documentation: { type: 'string', example: 'Import error' }, if: lambda { |_project, options| options[:user_can_admin_project] } do |project|
         project.import_state&.last_error
       end
-      expose :open_issues_count, documentation: { type: 'integer', example: 1 }, if: ->(project, options) { project.feature_available?(:issues, options[:current_user]) }
+      expose :open_issues_count, documentation: { type: 'integer', example: 1 }, if: lambda { |project, options| project.feature_available?(:issues, options[:current_user]) }
       expose :description_html, documentation: { type: 'string' }
       expose :updated_at, documentation: { type: 'dateTime', example: '2020-05-07T04:27:17.016Z' }
 
@@ -116,7 +119,6 @@ module API
         expose(:ci_job_token_scope_enabled, documentation: { type: 'boolean' }) { |p, _| p.ci_outbound_job_token_scope_enabled? }
         expose :ci_separated_caches, documentation: { type: 'boolean' }
         expose :ci_allow_fork_pipelines_to_run_in_parent_project, documentation: { type: 'boolean' }
-        expose :ci_id_token_sub_claim_components, documentation: { is_array: true, type: 'string' }
         expose :build_git_strategy, documentation: { type: 'string', example: 'fetch' } do |project, options|
           project.build_allow_git_fetch ? 'fetch' : 'clone'
         end
@@ -132,7 +134,6 @@ module API
         expose :auto_devops_deploy_strategy, documentation: { type: 'string', example: 'continuous' } do |project, options|
           project.auto_devops.nil? ? 'continuous' : project.auto_devops.deploy_strategy
         end
-        expose :ci_push_repository_for_job_token_allowed, documentation: { type: 'boolean' }
       end
 
       expose :ci_config_path, documentation: { type: 'string', example: '' }, if: ->(project, options) { Ability.allowed?(options[:current_user], :read_code, project) }
@@ -183,7 +184,8 @@ module API
                                 .preload(:service_desk_setting)
                                 .preload(project_group_links: { group: :route },
                                   fork_network: :root_project,
-                                  fork_network_member: :forked_from_project)
+                                  fork_network_member: :forked_from_project,
+                                  forked_from_project: [:route, :topics, :group, :project_feature, { namespace: [:route, :owner] }])
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
@@ -191,8 +193,13 @@ module API
         # Call the count methods on every project, so the BatchLoader would load them all at
         # once when the entities are rendered
         projects_relation.each(&:open_issues_count)
+        projects_relation.map(&:forked_from_project).compact.each(&:forks_count)
 
         super
+      end
+
+      def self.repositories_for_preload(projects_relation)
+        super + projects_relation.map(&:forked_from_project).compact.map(&:repository)
       end
     end
   end

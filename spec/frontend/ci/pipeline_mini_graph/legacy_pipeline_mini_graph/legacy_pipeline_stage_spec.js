@@ -55,9 +55,9 @@ describe('Pipelines stage component', () => {
   const findCiIcon = () => wrapper.findComponent(CiIcon);
   const findDropdown = () => wrapper.findComponent(GlDisclosureDropdown);
   const findDropdownToggle = () =>
-    wrapper.find('[data-testid="pipeline-mini-graph-dropdown-toggle"]');
+    wrapper.find('[data-testid="mini-pipeline-graph-dropdown-toggle"]');
   const findDropdownMenu = () =>
-    wrapper.find('[data-testid="pipeline-mini-graph-dropdown-menu-list"]');
+    wrapper.find('[data-testid="mini-pipeline-graph-dropdown-menu-list"]');
   const findDropdownMenuTitle = () =>
     wrapper.find('[data-testid="pipeline-stage-dropdown-menu-title"]');
   const findMergeTrainWarning = () => wrapper.find('[data-testid="warning-message-merge-trains"]');
@@ -74,17 +74,21 @@ describe('Pipelines stage component', () => {
       createComponent({ updateDropdown: true });
 
       mock.onGet(dropdownPath).reply(HTTP_STATUS_OK, legacyStageReply);
-      await findDropdownToggle().trigger('click');
+
+      await openStageDropdown();
     });
 
-    it('displays loading state while jobs are being fetched', () => {
+    it('displays loading state while jobs are being fetched', async () => {
+      // eslint-disable-next-line no-restricted-syntax
+      wrapper.setData({ isLoading: true });
+      await waitForPromises();
+
       expect(findLoadingState().exists()).toBe(true);
       expect(findLoadingState().text()).toBe(LegacyPipelineStage.i18n.loadingText);
     });
 
     it('does not display loading state after jobs have been fetched', async () => {
       await waitForPromises();
-      await nextTick();
 
       expect(findLoadingState().exists()).toBe(false);
     });

@@ -16,17 +16,8 @@ FactoryBot.define do
     has_external_wiki { false }
 
     # Associations
-    namespace do
-      next group if group
-
-      if @overrides[:organization]
-        association(:namespace, organization: @overrides[:organization])
-      else
-        association(:namespace)
-      end
-    end
-
     organization { namespace&.organization }
+    namespace
     creator { group ? association(:user) : namespace&.owner }
 
     transient do
@@ -232,7 +223,7 @@ FactoryBot.define do
     end
 
     trait :with_namespace_settings do
-      association :namespace, :with_namespace_settings
+      namespace factory: [:namespace, :with_namespace_settings]
     end
 
     trait :with_avatar do
@@ -635,7 +626,7 @@ FactoryBot.define do
   end
 
   trait :in_group do
-    namespace factory: :group
+    namespace factory: [:group]
   end
 
   trait :in_subgroup do

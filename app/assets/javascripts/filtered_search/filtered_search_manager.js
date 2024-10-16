@@ -62,8 +62,11 @@ export default class FilteredSearchManager {
     this.placeholder = placeholder;
     this.anchor = anchor;
 
-    const { multipleAssignees, epicsEndpoint, iterationsEndpoint } =
-      this.filteredSearchInput.dataset;
+    const {
+      multipleAssignees,
+      epicsEndpoint,
+      iterationsEndpoint,
+    } = this.filteredSearchInput.dataset;
 
     if (multipleAssignees && this.filteredSearchTokenKeys.enableMultipleAssignees) {
       this.filteredSearchTokenKeys.enableMultipleAssignees();
@@ -543,8 +546,7 @@ export default class FilteredSearchManager {
       }
     } else {
       // Keep listening to token until we determine that the user is done typing the token value
-      const valueCompletedRegex =
-        /([~%@]{0,1}".+")|([~%@]{0,1}'.+')|^((?![~%@]')(?![~%@]")(?!')(?!")).*/g;
+      const valueCompletedRegex = /([~%@]{0,1}".+")|([~%@]{0,1}'.+')|^((?![~%@]')(?![~%@]")(?!')(?!")).*/g;
 
       if (searchToken.match(valueCompletedRegex) && input.value[input.value.length - 1] === ' ') {
         const tokenKey = FilteredSearchVisualTokens.getLastTokenPartial();

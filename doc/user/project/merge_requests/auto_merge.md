@@ -15,7 +15,11 @@ DETAILS:
 > - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/120922) in GitLab 16.0. Feature flag `auto_merge_labels_mr_widget` removed.
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/10874) in GitLab 16.5 [with two flags](../../../administration/feature_flags.md) named `merge_when_checks_pass` and `additional_merge_when_checks_ready`. Disabled by default.
 > - [Enabled](https://gitlab.com/gitlab-org/gitlab/-/issues/412995) the flags `merge_when_checks_pass` and `additional_merge_when_checks_ready` on GitLab.com in GitLab 17.0.
-> - [Enabled](https://gitlab.com/gitlab-org/gitlab/-/issues/412995) the flags `merge_when_checks_pass` by default in GitLab 17.4.
+
+FLAG:
+The availability of this feature is controlled by a feature flag.
+For more information, see the history.
+This feature is available for testing, but not ready for production use.
 
 When you enable the `merge_when_checks_pass` feature flag, if the content of a merge request is ready to merge,
 you can select **Set to auto-merge**. The merge request auto-merges when all required checks complete successfully, and you don't need to remember to manually merge the merge request.
@@ -44,7 +48,7 @@ For a full list of checks and their API equivalents, see
 
 Prerequisites:
 
-- You must have at least the Developer role for the project.
+- You must have at least the Developer role in the project.
 - If your project configuration requires it, all threads in the
   merge request [must be resolved](index.md#resolve-a-thread).
 - The merge request must have received all required approvals.
@@ -62,33 +66,11 @@ To do this from the GitLab user interface:
 1. Scroll to the merge request reports section.
 1. Optional. Select your desired merge options, such as **Delete source branch**,
    **Squash commits**, or **Edit commit message**.
-1. Review the contents of the merge request widget. If it contains an
-   [issue closing pattern](../issues/managing_issues.md#closing-issues-automatically), confirm
-   that the issue should close when this work merges:
-   ![This merge request closes issue #2754.](img/closing_pattern_v17_4.png)
 1. Select **Auto-merge**.
 
 Commenting on a merge request after you select **Auto-merge**,
 but before the pipeline completes, blocks the merge until you
 resolve all existing threads.
-
-### Auto-merge when using merge trains
-
-> - Auto-merge for merge trains [introduced](https://gitlab.com/groups/gitlab-org/-/epics/10874) in GitLab 17.2 [with a flag](../../../administration/feature_flags.md) named `merge_when_checks_pass_merge_train`. Disabled by default.
-> - Auto-merge for merge trains [enabled](https://gitlab.com/gitlab-org/gitlab/-/issues/470667) on GitLab.com in GitLab 17.2.
-
-FLAG:
-The availability of this feature is controlled by a feature flag.
-For more information, see the history.
-
-If your project uses [merge trains](../../../ci/pipelines/merge_trains.md), you can
-use the auto-merge feature after you enable these two feature flags:
-
-- `merge_when_checks_pass`
-- `merge_when_checks_pass_merge_train`
-
-After you enable both feature flags, selecting **Set to auto-merge** on a merge request
-adds it to the merge train after all checks pass.
 
 ## Pipeline success for auto-merge
 
@@ -139,7 +121,7 @@ CI providers with it.
 Prerequisites:
 
 - Ensure your project's CI/CD configuration runs a pipeline for every merge request.
-- You must have at least the Maintainer role for the project.
+- You must have at least the Maintainer role in the project.
 
 To enable this setting:
 
@@ -163,7 +145,7 @@ merge requests from merging.
 
 Prerequisites:
 
-- You must have at least the Maintainer role for the project.
+- You must have at least the Maintainer role in the project.
 
 To change this behavior:
 

@@ -10,7 +10,7 @@ RSpec.shared_examples 'manage applications' do
 
     expect(page).to have_content 'Add new application'
 
-    click_button 'Add new application' if page.has_css?('[data-testid="crud-action-toggle"]')
+    click_button 'Add new application' if page.has_css?('.gl-new-card-header')
 
     fill_in :doorkeeper_application_name, with: application_name
     fill_in :doorkeeper_application_redirect_uri, with: application_redirect_uri
@@ -37,7 +37,7 @@ RSpec.shared_examples 'manage applications' do
 
     visit_applications_path
 
-    within_testid('oauth-applications') do
+    page.within('[data-testid="oauth-applications"]') do
       click_on 'Destroy'
     end
     expect(page.find('[data-testid="oauth-applications"]')).not_to have_content 'test_changed'

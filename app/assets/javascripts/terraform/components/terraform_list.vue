@@ -1,6 +1,5 @@
 <script>
-import { GlAlert, GlKeysetPagination, GlLoadingIcon } from '@gitlab/ui';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
+import { GlAlert, GlCard, GlIcon, GlKeysetPagination, GlLoadingIcon } from '@gitlab/ui';
 import { MAX_LIST_COUNT } from '../constants';
 import getStatesQuery from '../graphql/queries/get_states.query.graphql';
 import EmptyState from './empty_state.vue';
@@ -8,7 +7,6 @@ import StatesTable from './states_table.vue';
 
 export default {
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     states: {
       query: getStatesQuery,
       variables() {
@@ -26,10 +24,11 @@ export default {
   components: {
     EmptyState,
     GlAlert,
+    GlCard,
+    GlIcon,
     GlKeysetPagination,
     GlLoadingIcon,
     StatesTable,
-    CrudComponent,
   },
   inject: ['projectPath'],
   props: {
@@ -93,25 +92,35 @@ export default {
 
 <template>
   <section>
-    <crud-component
-      :title="s__('Terraform|Terraform states')"
-      icon="terraform"
-      :count="statesCount"
-      class="gl-mt-5"
+    <gl-card
+      class="gl-new-card"
+      header-class="gl-new-card-header"
+      body-class="gl-new-card-body gl-px-0"
     >
-      <gl-loading-icon v-if="isLoading" size="md" />
+      <template #header>
+        <div class="gl-new-card-title-wrapper">
+          <h5 class="gl-new-card-title">{{ s__('Terraform|Terraform states') }}</h5>
+          <span class="gl-new-card-count">
+            <gl-icon name="terraform" class="gl-mr-2" />
+            {{ statesCount }}
+          </span>
+        </div>
+      </template>
+      <gl-loading-icon v-if="isLoading" size="lg" class="gl-mt-3" />
       <div v-else-if="statesList">
         <div v-if="statesCount">
           <states-table :states="statesList" :terraform-admin="terraformAdmin" />
+
+          <div v-if="showPagination" class="gl-display-flex gl-justify-content-center gl-mt-5">
+            <gl-keyset-pagination v-bind="pageInfo" @prev="prevPage" @next="nextPage" />
+          </div>
         </div>
+
         <empty-state v-else :image="emptyStateImage" />
       </div>
       <gl-alert v-else variant="danger" :dismissible="false">
         {{ s__('Terraform|An error occurred while loading your Terraform States') }}
       </gl-alert>
-      <template v-if="showPagination" #pagination>
-        <gl-keyset-pagination v-bind="pageInfo" @prev="prevPage" @next="nextPage" />
-      </template>
-    </crud-component>
+    </gl-card>
   </section>
 </template>

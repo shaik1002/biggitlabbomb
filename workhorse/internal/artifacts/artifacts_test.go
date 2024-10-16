@@ -2,6 +2,7 @@
 package artifacts
 
 import (
+	"os"
 	"testing"
 
 	"gitlab.com/gitlab-org/labkit/log"
@@ -14,5 +15,5 @@ func TestMain(m *testing.M) {
 		log.WithError(err).Fatal()
 	}
 
-	testhelper.VerifyNoGoroutines(m)
+	os.Exit(m.Run())
 }

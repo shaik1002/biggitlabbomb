@@ -28,7 +28,7 @@ export default {
     :awards="awards"
     :can-award-emoji="canAwardEmoji"
     :current-user-id="currentUserId"
-    class="gl-mt-5 gl-px-2"
+    class="gl-px-2 gl-mt-5"
     @award="$emit('award', $event)"
   />
 </template>

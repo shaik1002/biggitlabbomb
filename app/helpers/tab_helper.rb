@@ -70,6 +70,7 @@ module TabHelper
   def gl_tab_counter_badge(count, html_options = {})
     gl_badge_tag(
       count,
+      { size: :sm },
       html_options.merge(
         class: ['gl-tab-counter-badge', *html_options[:class]]
       )

@@ -43,7 +43,7 @@ module SidebarsHelper
   end
 
   def super_sidebar_logged_out_context(panel:, panel_type:) # rubocop:disable Metrics/AbcSize
-    super_sidebar_instance_version_data.merge(super_sidebar_whats_new_data).merge({
+    {
       is_logged_in: false,
       context_switcher_links: context_switcher_links,
       current_menu_items: panel.super_sidebar_menu_items,
@@ -51,12 +51,15 @@ module SidebarsHelper
       support_path: support_url,
       docs_path: help_docs_path,
       display_whats_new: display_whats_new?,
+      whats_new_most_recent_release_items_count: whats_new_most_recent_release_items_count,
+      whats_new_version_digest: whats_new_version_digest,
       show_version_check: show_version_check?,
+      gitlab_version: Gitlab.version_info,
+      gitlab_version_check: gitlab_version_check,
       search: search_data,
       panel_type: panel_type,
-      shortcut_links: shortcut_links,
-      terms: terms_link
-    })
+      shortcut_links: shortcut_links
+    }
   end
 
   def super_sidebar_logged_in_context(user, group:, project:, panel:, panel_type:) # rubocop:disable Metrics/AbcSize
@@ -97,13 +100,7 @@ module SidebarsHelper
       sign_out_link: destroy_user_session_path,
       issues_dashboard_path: issues_dashboard_path(assignee_username: user.username),
       merge_request_dashboard_path: user.merge_request_dashboard_enabled? ? merge_requests_dashboard_path : nil,
-
-      todos_dashboard_path: if Feature.enabled?(:todos_vue_application, user)
-                              vue_dashboard_todos_path
-                            else
-                              dashboard_todos_path
-                            end,
-
+      todos_dashboard_path: dashboard_todos_path,
       create_new_menu_groups: create_new_menu_groups(group: group, project: project),
       merge_request_menu: create_merge_request_menu(user),
       projects_path: dashboard_projects_path,
@@ -122,33 +119,12 @@ module SidebarsHelper
     })
   end
 
-  def super_sidebar_instance_version_data
-    return {} unless show_version_check?
-
-    {
-      gitlab_version: Gitlab.version_info,
-      gitlab_version_check: gitlab_version_check
-    }
-  end
-
-  def super_sidebar_whats_new_data
-    return {} unless display_whats_new?
-
-    {
-      whats_new_most_recent_release_items_count: whats_new_most_recent_release_items_count,
-      whats_new_version_digest: whats_new_version_digest
-    }
-  end
-
   def work_items_modal_data(group)
-    return unless group && group.id
+    return unless group
 
     {
       full_path: group.full_path,
-      has_issuable_health_status_feature: group.licensed_feature_available?(:issuable_health_status).to_s,
-      issues_list_path: issues_group_path(group),
-      labels_manage_path: group_labels_path(group),
-      can_admin_label: can?(current_user, :admin_label, group).to_s
+      has_issuable_health_status_feature: group.licensed_feature_available?(:issuable_health_status).to_s
     }
   end
 
@@ -404,7 +380,7 @@ module SidebarsHelper
 
     if current_user&.can_admin_all_resources?
       links.append(
-        { title: s_('Navigation|Admin area'), link: admin_root_path, icon: 'admin' }
+        { title: s_('Navigation|Admin Area'), link: admin_root_path, icon: 'admin' }
       )
     end
 
@@ -486,10 +462,6 @@ module SidebarsHelper
     else
       []
     end
-  end
-
-  def terms_link
-    Gitlab::CurrentSettings.terms ? '/-/users/terms' : nil
   end
 end
 

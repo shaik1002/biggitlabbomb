@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'spec_helper'
+
 RSpec.describe Gitlab::Backup::Cli::Utils::Tar do
   subject(:tar) { described_class.new }
 

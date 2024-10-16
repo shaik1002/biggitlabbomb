@@ -61,8 +61,13 @@ describe('New Deploy Token', () => {
     readPackageRegistryValue = true,
     writePackageRegistryValue = true,
   } = {}) => {
-    const [readRepo, readRegistry, writeRegistry, readPackageRegistry, writePackageRegistry] =
-      findAllCheckboxes().wrappers;
+    const [
+      readRepo,
+      readRegistry,
+      writeRegistry,
+      readPackageRegistry,
+      writePackageRegistry,
+    ] = findAllCheckboxes().wrappers;
 
     readRepo.vm.$emit('input', readRepoValue);
     readRegistry.vm.$emit('input', readRegistryValue);

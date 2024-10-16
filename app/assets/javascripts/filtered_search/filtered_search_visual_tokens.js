@@ -1,7 +1,6 @@
 import { spriteIcon } from '~/lib/utils/common_utils';
 import { objectToQuery } from '~/lib/utils/url_utility';
 import { FILTERED_SEARCH_TERM } from '~/vue_shared/components/filtered_search_bar/constants';
-import { __ } from '~/locale';
 import FilteredSearchContainer from './container';
 import VisualTokenValue from './visual_token_value';
 
@@ -86,7 +85,7 @@ export default class FilteredSearchVisualTokens {
         ${hasOperator ? '<div class="operator"></div>' : ''}
         <div class="value-container">
           <div class="${capitalizeTokenValue ? 'text-capitalize' : ''} value"></div>
-          <div class="remove-token" role="button" aria-label="${__('Remove search filter')}">
+          <div class="remove-token" role="button">
             ${spriteIcon('close', 's16 close-icon')}
           </div>
         </div>
@@ -94,7 +93,6 @@ export default class FilteredSearchVisualTokens {
     `;
   }
 
-  // eslint-disable-next-line max-params
   static renderVisualTokenValue(parentElement, tokenName, tokenValue, tokenOperator) {
     const tokenType = tokenName.toLowerCase();
     const tokenValueContainer = parentElement.querySelector('.value-container');
@@ -157,8 +155,10 @@ export default class FilteredSearchVisualTokens {
   }
 
   static addValueToPreviousVisualTokenElement(value) {
-    const { lastVisualToken, isLastVisualTokenValid } =
-      FilteredSearchVisualTokens.getLastVisualTokenBeforeInput();
+    const {
+      lastVisualToken,
+      isLastVisualTokenValid,
+    } = FilteredSearchVisualTokens.getLastVisualTokenBeforeInput();
 
     if (!isLastVisualTokenValid && lastVisualToken.classList.contains('filtered-search-token')) {
       const name = FilteredSearchVisualTokens.getLastTokenPartial();
@@ -174,15 +174,16 @@ export default class FilteredSearchVisualTokens {
     }
   }
 
-  // eslint-disable-next-line max-params
   static addFilterVisualToken(
     tokenName,
     tokenOperator,
     tokenValue,
     { canEdit, uppercaseTokenName = false, capitalizeTokenValue = false } = {},
   ) {
-    const { lastVisualToken, isLastVisualTokenValid } =
-      FilteredSearchVisualTokens.getLastVisualTokenBeforeInput();
+    const {
+      lastVisualToken,
+      isLastVisualTokenValid,
+    } = FilteredSearchVisualTokens.getLastVisualTokenBeforeInput();
     const { addVisualTokenElement } = FilteredSearchVisualTokens;
 
     if (isLastVisualTokenValid) {

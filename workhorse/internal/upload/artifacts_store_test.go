@@ -15,7 +15,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"gitlab.com/gitlab-org/gitlab/workhorse/internal/api"
@@ -74,11 +73,11 @@ func TestUploadHandlerSendingToExternalStorage(t *testing.T) {
 	storeServerCalled := 0
 	storeServerMux := http.NewServeMux()
 	storeServerMux.HandleFunc(putURL, func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, "PUT", r.Method)
+		require.Equal(t, "PUT", r.Method)
 
 		receivedData, err := io.ReadAll(r.Body)
-		assert.NoError(t, err)
-		assert.Equal(t, archiveData, receivedData)
+		require.NoError(t, err)
+		require.Equal(t, archiveData, receivedData)
 
 		storeServerCalled++
 		w.Header().Set("ETag", md5)
@@ -90,8 +89,8 @@ func TestUploadHandlerSendingToExternalStorage(t *testing.T) {
 
 	responseProcessorCalled := 0
 	responseProcessor := func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, "store-id", r.FormValue("file.remote_id"))
-		assert.NotEmpty(t, r.FormValue("file.remote_url"))
+		require.Equal(t, "store-id", r.FormValue("file.remote_id"))
+		require.NotEmpty(t, r.FormValue("file.remote_url"))
 		w.WriteHeader(200)
 		responseProcessorCalled++
 	}
@@ -138,7 +137,7 @@ func TestUploadHandlerSendingToExternalStorage(t *testing.T) {
 func TestUploadHandlerSendingToExternalStorageAndStorageServerUnreachable(t *testing.T) {
 	tempPath := t.TempDir()
 
-	responseProcessor := func(_ http.ResponseWriter, _ *http.Request) {
+	responseProcessor := func(w http.ResponseWriter, r *http.Request) {
 		t.Fatal("it should not be called")
 	}
 
@@ -160,7 +159,7 @@ func TestUploadHandlerSendingToExternalStorageAndStorageServerUnreachable(t *tes
 func TestUploadHandlerSendingToExternalStorageAndInvalidURLIsUsed(t *testing.T) {
 	tempPath := t.TempDir()
 
-	responseProcessor := func(_ http.ResponseWriter, _ *http.Request) {
+	responseProcessor := func(w http.ResponseWriter, r *http.Request) {
 		t.Fatal("it should not be called")
 	}
 
@@ -185,11 +184,11 @@ func TestUploadHandlerSendingToExternalStorageAndItReturnsAnError(t *testing.T) 
 	storeServerMux := http.NewServeMux()
 	storeServerMux.HandleFunc(putURL, func(w http.ResponseWriter, r *http.Request) {
 		putCalledTimes++
-		assert.Equal(t, "PUT", r.Method)
+		require.Equal(t, "PUT", r.Method)
 		w.WriteHeader(510)
 	})
 
-	responseProcessor := func(_ http.ResponseWriter, _ *http.Request) {
+	responseProcessor := func(w http.ResponseWriter, r *http.Request) {
 		t.Fatal("it should not be called")
 	}
 
@@ -214,11 +213,11 @@ func TestUploadHandlerSendingToExternalStorageAndItReturnsAnError(t *testing.T) 
 func TestUploadHandlerSendingToExternalStorageAndSupportRequestTimeout(t *testing.T) {
 	shutdown := make(chan struct{})
 	storeServerMux := http.NewServeMux()
-	storeServerMux.HandleFunc(putURL, func(_ http.ResponseWriter, _ *http.Request) {
+	storeServerMux.HandleFunc(putURL, func(w http.ResponseWriter, r *http.Request) {
 		<-shutdown
 	})
 
-	responseProcessor := func(_ http.ResponseWriter, _ *http.Request) {
+	responseProcessor := func(w http.ResponseWriter, r *http.Request) {
 		t.Fatal("it should not be called")
 	}
 
@@ -266,7 +265,7 @@ func TestUploadHandlerMultipartUploadSizeLimit(t *testing.T) {
 		},
 	}
 
-	responseProcessor := func(_ http.ResponseWriter, _ *http.Request) {
+	responseProcessor := func(w http.ResponseWriter, r *http.Request) {
 		t.Fatal("it should not be called")
 	}
 
@@ -306,7 +305,7 @@ func TestUploadHandlerMultipartUploadMaximumSizeFromApi(t *testing.T) {
 		},
 	}
 
-	responseProcessor := func(_ http.ResponseWriter, _ *http.Request) {
+	responseProcessor := func(w http.ResponseWriter, r *http.Request) {
 		t.Fatal("it should not be called")
 	}
 

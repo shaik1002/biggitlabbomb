@@ -121,24 +121,26 @@ RSpec.describe Git::BranchHooksService, :clean_gitlab_redis_shared_state, featur
 
         let!(:commit_author) { create(:user, email: sample_commit.author_email) }
 
+        let(:tracking_params) do
+          ['o_pipeline_authoring_unique_users_committing_ciconfigfile', { values: commit_author.id }]
+        end
+
         it 'tracks the event' do
-          expect { subject }
-          .to trigger_internal_events('commit_change_to_ciconfigfile')
-          .with(category: 'Git::BranchHooksService', user: commit_author, project: project)
-          .and increment_usage_metrics(
-            'redis_hll_counters.pipeline_authoring.o_pipeline_authoring_unique_users_committing_ciconfigfile_weekly',
-            'redis_hll_counters.pipeline_authoring.o_pipeline_authoring_unique_users_committing_ciconfigfile_monthly',
-            'redis_hll_counters.pipeline_authoring.pipeline_authoring_total_unique_counts_weekly',
-            'redis_hll_counters.pipeline_authoring.pipeline_authoring_total_unique_counts_monthly'
-          )
+          time = Time.zone.now
+
+          execute_service
+
+          expect(Gitlab::UsageDataCounters::HLLRedisCounter.unique_events(event_names: 'o_pipeline_authoring_unique_users_committing_ciconfigfile', start_date: time, end_date: time + 7.days)).to eq(1)
         end
 
         context 'when the branch is not the main branch' do
           let(:branch) { 'feature' }
 
           it 'does not track the event' do
-            expect { subject }
-            .not_to trigger_internal_events('commit_change_to_ciconfigfile')
+            expect(Gitlab::UsageDataCounters::HLLRedisCounter)
+              .not_to receive(:track_event).with(*tracking_params)
+
+            execute_service
           end
         end
 
@@ -148,8 +150,10 @@ RSpec.describe Git::BranchHooksService, :clean_gitlab_redis_shared_state, featur
           end
 
           it 'does not track the event' do
-            expect { subject }
-            .not_to trigger_internal_events('commit_change_to_ciconfigfile')
+            expect(Gitlab::UsageDataCounters::HLLRedisCounter)
+              .not_to receive(:track_event).with(*tracking_params)
+
+            execute_service
           end
         end
       end
@@ -170,12 +174,6 @@ RSpec.describe Git::BranchHooksService, :clean_gitlab_redis_shared_state, featur
         expect(event.push_event_payload.commit_title).to eq('Change some files')
         expect(event.push_event_payload.ref).to eq('master')
         expect(event.push_event_payload.commit_count).to be > 1
-      end
-
-      it 'correctly marks branch as protected' do
-        execute_service
-
-        expect(ProtectedBranch.protected?(project, branch)).to eq(true)
       end
     end
 
@@ -565,16 +563,8 @@ RSpec.describe Git::BranchHooksService, :clean_gitlab_redis_shared_state, featur
 
   describe '#enqueue_jira_connect_remove_branches' do
     let(:newrev) { Gitlab::Git::SHA1_BLANK_SHA }
-    let(:extracted_keys) { ['JIRA-1'] }
 
-    before do
-      allow(Atlassian::JiraIssueKeyExtractors::Branch)
-        .to receive(:has_keys?)
-        .with(project, branch)
-        .and_return(extracted_keys)
-    end
-
-    context 'when there is no jira subscription' do
+    context 'when the feature flag is not enabled' do
       it 'does not call JiraConnect' do
         expect(Integrations::JiraConnect::RemoveBranchWorker).not_to receive(:perform_async)
 
@@ -582,25 +572,53 @@ RSpec.describe Git::BranchHooksService, :clean_gitlab_redis_shared_state, featur
       end
     end
 
-    context 'when there is a jira subscription' do
+    context 'when the feature flag is enabled' do
       before do
-        allow(project).to receive(:jira_subscription_exists?).and_return(true)
+        stub_feature_flags(jira_connect_remove_branches: true)
       end
 
-      it 'calls JiraConnect' do
-        expect(Integrations::JiraConnect::RemoveBranchWorker)
-          .to receive(:perform_async)
-
-        service.execute
-      end
-
-      context 'when the branch has no Jira keys in its name' do
-        let(:extracted_keys) { nil }
-
+      context 'when there is no jira subscription' do
         it 'does not call JiraConnect' do
           expect(Integrations::JiraConnect::RemoveBranchWorker).not_to receive(:perform_async)
 
           service.execute
+        end
+      end
+
+      context 'when there is a jira subscription' do
+        context 'when the branch does not exist on jira' do
+          before do
+            allow(Atlassian::JiraIssueKeyExtractors::Branch)
+                .to receive(:has_keys?)
+                .with(project, branch)
+                .and_return(nil)
+
+            allow(project).to receive(:jira_subscription_exists?).and_return(true)
+          end
+
+          it 'does not call JiraConnect' do
+            expect(Integrations::JiraConnect::RemoveBranchWorker).not_to receive(:perform_async)
+
+            service.execute
+          end
+        end
+
+        context 'when the branch does exist on jira' do
+          before do
+            allow(Atlassian::JiraIssueKeyExtractors::Branch)
+                .to receive(:has_keys?)
+                .with(project, branch)
+                .and_return(branch)
+
+            allow(project).to receive(:jira_subscription_exists?).and_return(true)
+          end
+
+          it 'calls JiraConnect' do
+            expect(Integrations::JiraConnect::RemoveBranchWorker)
+              .to receive(:perform_async)
+
+            service.execute
+          end
         end
       end
     end

@@ -8,14 +8,12 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strconv"
 	"strings"
 	"sync"
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"gitlab.com/gitlab-org/gitlab/workhorse/internal/api"
@@ -26,12 +24,10 @@ import (
 )
 
 type fakeUploadHandler struct {
-	request              *http.Request
-	body                 []byte
-	skipBody             bool
-	handler              func(w http.ResponseWriter, r *http.Request)
-	serveHTTPUsed        bool
-	serveHTTPWithAPIUsed bool
+	request  *http.Request
+	body     []byte
+	skipBody bool
+	handler  func(w http.ResponseWriter, r *http.Request)
 }
 
 const (
@@ -46,18 +42,6 @@ func (f *fakeUploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		f.body, _ = io.ReadAll(r.Body)
 	}
 
-	f.serveHTTPUsed = true
-	f.handler(w, r)
-}
-
-func (f *fakeUploadHandler) ServeHTTPWithAPIResponse(w http.ResponseWriter, r *http.Request, _ *api.Response) {
-	f.request = r
-
-	if !f.skipBody {
-		f.body, _ = io.ReadAll(r.Body)
-	}
-
-	f.serveHTTPWithAPIUsed = true
 	f.handler(w, r)
 }
 
@@ -115,7 +99,7 @@ func TestInject(t *testing.T) {
 	testhelper.ConfigureSecret()
 
 	for _, tc := range testCases {
-		originResourceServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		originResourceServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Length", strconv.Itoa(tc.contentLength))
 			w.Write([]byte(content))
 		}))
@@ -124,7 +108,7 @@ func TestInject(t *testing.T) {
 		// RequestBody expects http.Handler as its second param, we can create a stub function and verify that
 		// it's only called for successful requests
 		handlerIsCalled := false
-		handlerFunc := http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) { handlerIsCalled = true })
+		handlerFunc := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { handlerIsCalled = true })
 
 		bodyUploader := upload.RequestBody(&fakePreAuthHandler{}, handlerFunc, &upload.DefaultPreparer{})
 
@@ -146,7 +130,7 @@ func TestSuccessfullRequest(t *testing.T) {
 	contentType := "foo"
 	dockerContentDigest := "sha256:asdf1234"
 	overriddenHeader := "originResourceServer"
-	originResourceServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	originResourceServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Length", contentLength)
 		w.Header().Set("Content-Type", contentType)
 		w.Header().Set("Docker-Content-Digest", dockerContentDigest)
@@ -158,7 +142,7 @@ func TestSuccessfullRequest(t *testing.T) {
 	defer originResourceServer.Close()
 
 	uploadHandler := &fakeUploadHandler{
-		handler: func(w http.ResponseWriter, _ *http.Request) {
+		handler: func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(200)
 		},
 	}
@@ -198,11 +182,9 @@ func TestValidUploadConfiguration(t *testing.T) {
 	defer originResourceServer.Close()
 
 	testCases := []struct {
-		desc                 string
-		uploadConfig         *uploadConfig
-		expectedConfig       uploadConfig
-		serveHTTPUsed        bool
-		serveHTTPWithAPIUsed bool
+		desc           string
+		uploadConfig   *uploadConfig
+		expectedConfig uploadConfig
 	}{
 		{
 			desc: "with the default values",
@@ -210,7 +192,6 @@ func TestValidUploadConfiguration(t *testing.T) {
 				Method: http.MethodPost,
 				URL:    "/target/upload",
 			},
-			serveHTTPUsed: true,
 		}, {
 			desc: "with overridden method",
 			uploadConfig: &uploadConfig{
@@ -220,7 +201,6 @@ func TestValidUploadConfiguration(t *testing.T) {
 				Method: http.MethodPut,
 				URL:    "/target/upload",
 			},
-			serveHTTPUsed: true,
 		}, {
 			desc: "with overridden url",
 			uploadConfig: &uploadConfig{
@@ -230,7 +210,6 @@ func TestValidUploadConfiguration(t *testing.T) {
 				Method: http.MethodPost,
 				URL:    "http://test.org/overriden/upload",
 			},
-			serveHTTPUsed: true,
 		}, {
 			desc: "with overridden headers",
 			uploadConfig: &uploadConfig{
@@ -241,17 +220,6 @@ func TestValidUploadConfiguration(t *testing.T) {
 				Method:  http.MethodPost,
 				URL:     "/target/upload",
 			},
-			serveHTTPUsed: true,
-		}, {
-			desc: "with authorized upload response",
-			uploadConfig: &uploadConfig{
-				AuthorizedUploadResponse: authorizeUploadResponse{TempPath: os.TempDir()},
-			},
-			expectedConfig: uploadConfig{
-				Method: http.MethodPost,
-				URL:    "/target/upload",
-			},
-			serveHTTPWithAPIUsed: true,
 		},
 	}
 
@@ -259,12 +227,12 @@ func TestValidUploadConfiguration(t *testing.T) {
 		t.Run(tc.desc, func(t *testing.T) {
 			uploadHandler := &fakeUploadHandler{
 				handler: func(w http.ResponseWriter, r *http.Request) {
-					assert.Equal(t, tc.expectedConfig.URL, r.URL.String())
-					assert.Equal(t, tc.expectedConfig.Method, r.Method)
+					require.Equal(t, tc.expectedConfig.URL, r.URL.String())
+					require.Equal(t, tc.expectedConfig.Method, r.Method)
 
 					if tc.expectedConfig.Headers != nil {
 						for k, v := range tc.expectedConfig.Headers {
-							assert.Equal(t, v, r.Header[k])
+							require.Equal(t, v, r.Header[k])
 						}
 					}
 
@@ -289,14 +257,11 @@ func TestValidUploadConfiguration(t *testing.T) {
 
 			response := makeRequest(injector, string(sendDataJSONString))
 
-			// check the response
+			// checking the response
 			require.Equal(t, 200, response.Code)
 			require.Equal(t, string(content), response.Body.String())
-			// check remote file request
+			// checking remote file request
 			require.Equal(t, "/remote/file", response.Header().Get(testHeader))
-			// check upload handler
-			require.Equal(t, tc.serveHTTPUsed, uploadHandler.serveHTTPUsed)
-			require.Equal(t, tc.serveHTTPWithAPIUsed, uploadHandler.serveHTTPWithAPIUsed)
 		})
 	}
 }
@@ -350,7 +315,7 @@ func TestInvalidUploadConfiguration(t *testing.T) {
 }
 
 func TestTimeoutConfiguration(t *testing.T) {
-	originResourceServer := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+	originResourceServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(20 * time.Millisecond)
 	}))
 	defer originResourceServer.Close()
@@ -448,14 +413,14 @@ func TestIncorrectSendDataUrl(t *testing.T) {
 }
 
 func TestFailedOriginServer(t *testing.T) {
-	originResourceServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	originResourceServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(404)
 		w.Write([]byte("Not found"))
 	}))
 
 	uploadHandler := &fakeUploadHandler{
-		handler: func(_ http.ResponseWriter, _ *http.Request) {
-			t.Error("the error response must not be uploaded")
+		handler: func(w http.ResponseWriter, r *http.Request) {
+			require.FailNow(t, "the error response must not be uploaded")
 		},
 	}
 
@@ -475,15 +440,15 @@ func TestLongUploadRequest(t *testing.T) {
 	contentLength := strconv.Itoa(len(content))
 
 	// the server holding the upstream resource
-	originResourceServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+	originResourceServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Length", contentLength)
 		w.Write(content)
 	}))
 	defer originResourceServer.Close()
 
 	// the server receiving the upload request
-	// it makes the upload request artificially long with a sleep
-	uploadServer := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+	// it makes the upload request artifically long with a sleep
+	uploadServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		time.Sleep(40 * time.Millisecond)
 	}))
 	defer uploadServer.Close()
@@ -496,10 +461,8 @@ func TestLongUploadRequest(t *testing.T) {
 		rt := badgateway.NewRoundTripper(false, http.DefaultTransport)
 		res, err := rt.RoundTrip(r)
 
-		assert.NoError(t, err, "RoundTripper should not receive an error")
-		defer res.Body.Close()
-
-		assert.Equal(t, http.StatusOK, res.StatusCode, "RoundTripper should receive a 200 status code")
+		require.NoError(t, err, "RoundTripper should not receive an error")
+		require.Equal(t, http.StatusOK, res.StatusCode, "RoundTripper should receive a 200 status code")
 		w.WriteHeader(res.StatusCode)
 	}
 

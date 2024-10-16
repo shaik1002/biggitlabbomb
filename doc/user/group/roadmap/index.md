@@ -32,7 +32,7 @@ To view the roadmap in a group:
 1. On the left sidebar, select **Search or go to** and find your group.
 1. Select **Plan > Roadmap**.
 
-The roadmap shows the epics and milestones in a
+The Roadmap page shows the epics and milestones in a
 group, one of its subgroups, or a project in one of the groups.
 
 On the epic bars, you can see each epic's title, progress, and completed weight percentage.
@@ -50,9 +50,7 @@ heading to toggle the list of the milestone bars.
 
 ![roadmap view](img/roadmap_view_v14_3.png)
 
-From an epic, you can also [view the roadmap filtered to this epic's descendants](../epics/index.md#roadmap-in-epics).
-
-## Sort and filter the roadmap
+## Sort and filter the Roadmap
 
 > - Filtering by group was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/385191) in GitLab 15.9.
 > - Sorting by title, created date, and last updated date [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/460492) in GitLab 17.0.
@@ -63,7 +61,7 @@ Filtering roadmaps by milestone might not be available to you. Be sure to review
 When you want to explore a roadmap, there are several ways to make it easier by sorting epics or
 filtering them by what's important for you.
 
-In the Roadmap view, you can sort epics by:
+You can sort epics in the Roadmap view by:
 
 - Start date
 - Due date
@@ -72,10 +70,10 @@ In the Roadmap view, you can sort epics by:
 - Last updated date
 
 Each option contains a button that toggles the sort order between **ascending**
-and **descending**. The sort option and order persist when browsing epics, including
+and **descending**. The sort option and order persist when browsing Epics, including
 the [epics list view](../epics/index.md).
 
-In the Roadmap view, you can also filter by the epics':
+You can also filter epics in the Roadmap view by the epics':
 
 - Author
 - Label
@@ -87,19 +85,7 @@ In the Roadmap view, you can also filter by the epics':
 
 ![roadmap date range in weeks](img/roadmap_filters_v13_11.png)
 
-From an epic, you can also [view the roadmap filtered to this epic's descendants](../epics/index.md#roadmap-in-epics).
-
-### Improve the performance of the roadmap
-
-If your group contains a lot of epics, using filters can reduce the time your roadmap takes to load.
-Filtering the roadmap reduces the amount of data the roadmap contains. Reducing
-the data in the roadmap can also make it easier for you to find the information you're looking for.
-
-In particular, filtering based on labels can result in a significant performance improvement.
-
-After you set the filters you want to apply, you can save the URL as bookmark in your
-browser.
-In the future, you can quickly load the filtered roadmap using the bookmark.
+You can also [visualize roadmaps inside of an epic](../epics/index.md#roadmap-in-epics).
 
 ### Roadmap settings
 
@@ -114,10 +100,10 @@ You can configure the following:
   project milestones.
 - Show all, open, or closed epics.
 - Turn progress tracking for child issues on or off and select whether
-  to use issue weights or counts to calculate progress.
+  to use issue weights or counts.
 - Turn labels on or off.
 
-The roadmap configuration settings aren't saved in user preferences, but are saved or
+The progress tracking setting isn't saved in user preferences, but is saved or
 shared using URL parameters.
 
 ## Timeline duration
@@ -135,7 +121,7 @@ Roadmap provides these date range options, each with a predetermined timeline du
 
 ### Layout presets
 
-Depending on selected [date range preset](#date-range-presets), the roadmap supports
+Depending on selected [date range preset](#date-range-presets), Roadmap supports
 these layout presets:
 
 - **Quarters**: Available only when the **Within 3 years** date range is selected.
@@ -186,7 +172,7 @@ DETAILS:
 
 If an epic is [blocked by another epic](../epics/linked_epics.md#blocking-epics), an icon appears next to its title to indicate its blocked status.
 
-When you hover over the blocked icon (**{entity-blocked}**), a detailed information popover is displayed.
+When you hover over the blocked icon (**{issue-block}**), a detailed information popover is displayed.
 
 ![Blocked epics](img/roadmap_blocked_icon_v15_5.png)
 

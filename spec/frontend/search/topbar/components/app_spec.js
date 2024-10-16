@@ -44,6 +44,11 @@ describe('GlobalSearchTopbar', () => {
       store,
       propsData: { defaultBranchName },
       stubs,
+      provide: {
+        glFeatures: {
+          zoektExactSearch: true,
+        },
+      },
     });
   };
 

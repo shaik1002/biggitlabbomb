@@ -108,11 +108,8 @@ class NotificationRecipient
       break false unless user.can?(:receive_notifications)
       break true if @skip_read_ability
 
-      if @project
-        break false unless user.can?(:read_project, @project)
-      else
-        break false unless user.can?(:read_cross_project)
-      end
+      break false if @target && !user.can?(:read_cross_project)
+      break false if @project && !user.can?(:read_project, @project)
 
       break true unless read_ability
       break true unless DeclarativePolicy.has_policy?(@target)

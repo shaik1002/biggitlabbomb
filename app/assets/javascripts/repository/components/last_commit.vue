@@ -7,7 +7,6 @@ import CiIcon from '~/vue_shared/components/ci_icon/ci_icon.vue';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import SignatureBadge from '~/commit/components/signature_badge.vue';
 import getRefMixin from '../mixins/get_ref';
-import { getRefType } from '../utils/ref_type';
 import projectPathQuery from '../queries/project_path.query.graphql';
 import eventHub from '../event_hub';
 import { FORK_UPDATED_EVENT } from '../constants';
@@ -38,7 +37,7 @@ export default {
         return {
           projectPath: this.projectPath,
           ref: this.ref,
-          refType: getRefType(this.refType),
+          refType: this.refType?.toUpperCase(),
           path: this.currentPath.replace(/^\//, ''),
         };
       },
@@ -109,7 +108,9 @@ export default {
 <template>
   <gl-loading-icon v-if="isLoading" size="md" color="dark" class="m-auto gl-min-h-8 gl-py-6" />
   <commit-info v-else-if="commit" :commit="commit">
-    <div class="commit-actions gl-flex-align gl-flex gl-flex-row gl-items-center">
+    <div
+      class="commit-actions gl-display-flex gl-flex-align gl-align-items-center gl-flex-direction-row"
+    >
       <signature-badge v-if="commit.signature" :signature="commit.signature" />
       <div v-if="commit.pipeline" class="gl-ml-5">
         <ci-icon
@@ -118,7 +119,7 @@ export default {
           class="js-commit-pipeline"
         />
       </div>
-      <gl-button-group class="js-commit-sha-group gl-ml-4">
+      <gl-button-group class="gl-ml-4 js-commit-sha-group">
         <gl-button label class="gl-font-monospace" data-testid="last-commit-id-label">{{
           showCommitId
         }}</gl-button>

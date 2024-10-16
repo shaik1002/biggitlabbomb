@@ -50,7 +50,7 @@ export default {
     :label="user.name"
     :sub-label="`@${user.username}`"
     :src="user.avatarUrl || user.avatar || user.avatar_url"
-    class="sidebar-participant gl-relative gl-items-center"
+    class="gl-align-items-center gl-relative sidebar-participant"
   >
     <template #meta>
       <gl-icon
@@ -61,7 +61,7 @@ export default {
         :class="{ '!gl-left-6': selected }"
         :size="12"
       />
-      <gl-badge v-if="isBusy" variant="warning" class="gl-ml-2">
+      <gl-badge v-if="isBusy" size="sm" variant="warning" class="gl-ml-2">
         {{ $options.i18n.busy }}
       </gl-badge>
     </template>

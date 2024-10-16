@@ -3,7 +3,7 @@ extends:
   - plugin:@gitlab/i18n
   - plugin:no-jquery/slim
   - plugin:no-jquery/deprecated-3.4
-  - plugin:no-unsanitized/recommended-legacy
+  - plugin:no-unsanitized/DOM
   - ./tooling/eslint-config/conditionally_ignore.js
 globals:
   __webpack_public_path__: true
@@ -13,7 +13,6 @@ globals:
   IS_EE: false
 plugins:
   - no-jquery
-  - local-rules
 settings:
   import/resolver:
     webpack:
@@ -51,9 +50,6 @@ rules:
         - '^$'
         - '^variables$'
         - 'attrs?$'
-  '@gitlab/vue-no-undef-apollo-properties': error
-  '@gitlab/tailwind': error
-  '@gitlab/vue-tailwind': error
   no-param-reassign:
     - error
     - props: true
@@ -129,30 +125,6 @@ rules:
       message: 'No hard coded url, use `PROMO_URL` in `jh_else_ce/lib/utils/url_utility`'
     - selector: TemplateLiteral[expressions.0.name=DOCS_URL] > TemplateElement[value.cooked=/\u002Fjh|\u002Fee/]
       message: '`/ee` or `/jh` path found in docs url, use `DOCS_URL_IN_EE_DIR` in `jh_else_ce/lib/utils/url_utility`'
-    # This can be removed once GitLab is on Vue 3
-    - selector: MemberExpression[object.type='ThisExpression'][property.name=/(\$delete|\$set)/]
-      message: "Vue 2's set/delete methods are not available in Vue 3. Create/assign new objects with the desired properties instead."
-  no-restricted-properties:
-    - error
-    - object: window
-      property: open
-      message: 'Use `visitUrl` in `jh_else_ce/lib/utils/url_utility` to avoid cross-site leaks.'
-    # This can be removed once GitLab is on Vue 3
-    - object: vm
-      property: $delete
-      message: "Vue 2's set/delete methods are not available in Vue 3. Create/assign new objects with the desired properties instead."
-    # This can be removed once GitLab is on Vue 3
-    - object: Vue
-      property: delete
-      message: "Vue 2's set/delete methods are not available in Vue 3. Create/assign new objects with the desired properties instead."
-    # This can be removed once GitLab is on Vue 3
-    - object: vm
-      property: $set
-      message: "Vue 2's set/delete methods are not available in Vue 3. Create/assign new objects with the desired properties instead."
-    # This can be removed once GitLab is on Vue 3
-    - object: Vue
-      property: set
-      message: "Vue 2's set/delete methods are not available in Vue 3. Create/assign new objects with the desired properties instead."
   no-restricted-imports:
     - error
     - paths:
@@ -162,19 +134,16 @@ rules:
           message: 'See our documentation on "Migrating from VueX" for tips on how to avoid adding new VueX stores.'
         - name: '@sentry/browser'
           message: Use "import * as Sentry from '~/sentry/sentry_browser_wrapper';" instead
-      patterns:
-        - group: ['react', 'react-dom/*']
-          message: We do not allow usage of React in our codebase except for the graphql_explorer
   unicorn/prefer-dom-node-dataset:
     - error
   no-unsanitized/method:
     - error
     - escape:
-        methods: ['sanitize']
+        methods: 'sanitize'
   no-unsanitized/property:
     - error
     - escape:
-        methods: ['sanitize']
+        methods: 'sanitize'
   # This rule will be enabled later.
   unicorn/no-array-callback-reference: off
   vue/no-undef-components:
@@ -183,16 +152,12 @@ rules:
         - '^router-link$'
         - '^router-view$'
         - '^gl-emoji$'
-  local-rules/require-valid-help-page-path: 'error'
-  local-rules/vue-require-valid-help-page-link-component: 'error'
 overrides:
   - files:
       - '{,ee/,jh/}spec/frontend*/**/*'
     rules:
       '@gitlab/require-i18n-strings': off
       '@gitlab/no-runtime-template-compiler': off
-      '@gitlab/tailwind': off
-      '@gitlab/vue-tailwind': off
       'require-await': error
       'import/no-dynamic-require': off
       'no-import-assign': off
@@ -224,37 +189,8 @@ overrides:
           message: 'No hard coded url, use `PROMO_URL` in `jh_else_ce/lib/utils/url_utility`'
         - selector: TemplateLiteral[expressions.0.name=DOCS_URL] > TemplateElement[value.cooked=/\u002Fjh|\u002Fee/]
           message: '`/ee` or `/jh` path found in docs url, use `DOCS_URL_IN_EE_DIR` in `jh_else_ce/lib/utils/url_utility`'
-        # This can be removed once GitLab is on Vue 3
-        - selector: CallExpression[callee.property.name=/(\$delete|\$set)/]
-          message: "Vue 2's set/delete methods are not available in Vue 3. Create/assign new objects with the desired properties instead."
-      no-restricted-properties:
-        - error
-        # This can be removed once GitLab is on Vue 3
-        - object: Vue
-          property: delete
-          message: "Vue 2's set/delete methods are not available in Vue 3. Create/assign new objects with the desired properties instead."
-        # This can be removed once GitLab is on Vue 3
-        - object: Vue
-          property: set
-          message: "Vue 2's set/delete methods are not available in Vue 3. Create/assign new objects with the desired properties instead."
       no-unsanitized/method: off
       no-unsanitized/property: off
-      local-rules/require-valid-help-page-path: off
-      local-rules/vue-require-valid-help-page-link-component: off
-      no-restricted-imports:
-        - error
-        - paths:
-            - name: mousetrap
-              message: 'Import { Mousetrap } from ~/lib/mousetrap instead.'
-            - name: vuex
-              message: 'See our documentation on "Migrating from VueX" for tips on how to avoid adding new VueX stores.'
-            - name: '@sentry/browser'
-              message: Use "import * as Sentry from '~/sentry/sentry_browser_wrapper';" instead
-            - name: ~/locale
-              importNames:
-                - __
-                - s__
-              message: 'Do not externalize strings in specs: https://docs.gitlab.com/ee/development/i18n/externalization.html#test-files-jest'
   - files:
       - 'config/**/*'
       - 'scripts/**/*'
@@ -308,11 +244,3 @@ overrides:
       - 'ee/app/assets/javascripts/projects/settings/repository/branch_rules/graphql/queries/branch_rules.query.graphql'
     rules:
       '@graphql-eslint/require-id-when-available': off
-  - files:
-      - '{,spec/}tooling/**/*'
-    rules:
-      'no-undef': off
-      'import/no-commonjs': off
-      'import/no-extraneous-dependencies': off
-      'no-restricted-syntax': off
-      '@gitlab/require-i18n-strings': off

@@ -60,7 +60,7 @@ RSpec.describe 'Dashboard Groups page', :js, feature_category: :groups_and_proje
     end
 
     it 'expands when filtering groups' do
-      search(nested_group.name)
+      fill_in 'filter', with: nested_group.name
       wait_for_requests
 
       expect(page).not_to have_content(group.name)
@@ -70,21 +70,20 @@ RSpec.describe 'Dashboard Groups page', :js, feature_category: :groups_and_proje
     end
 
     it 'resets search when user cleans the input' do
-      search(group.name)
+      fill_in 'filter', with: group.name
       wait_for_requests
 
       expect(page).to have_content(group.name)
       expect(page).not_to have_content(nested_group.parent.name)
 
-      find_by_testid('filtered-search-clear-button').click
+      fill_in 'filter', with: ''
+      page.find('[name="filter"]').send_keys(:enter)
       wait_for_requests
 
       expect(page).to have_content(group.name)
       expect(page).to have_content(nested_group.parent.name)
       expect(page).not_to have_content(another_group.name)
-      within find_by_testid('groups-list-tree-container') do
-        expect(find_all('li').length).to eq 2
-      end
+      expect(page.all('.js-groups-list-holder .groups-list li').length).to eq 2
     end
   end
 
@@ -195,8 +194,7 @@ RSpec.describe 'Dashboard Groups page', :js, feature_category: :groups_and_proje
     end
 
     it 'loads results for next page' do
-      expect(page).to have_selector('[data-testid="gl-pagination-item"]', count: 2)
-      expect(page).to have_selector('[data-testid="gl-pagination-next"]')
+      expect(page).to have_selector('.gl-pagination .page-item a.page-link', count: 3)
 
       # Check first page
       expect(page).to have_content(group2.full_name)
@@ -205,7 +203,7 @@ RSpec.describe 'Dashboard Groups page', :js, feature_category: :groups_and_proje
       expect(page).not_to have_selector("#group-#{group.id}")
 
       # Go to next page
-      find_by_testid('gl-pagination-next').click
+      find('.gl-pagination .page-item:last-of-type a.page-link').click
 
       wait_for_requests
 
@@ -249,12 +247,5 @@ RSpec.describe 'Dashboard Groups page', :js, feature_category: :groups_and_proje
     it 'shows empty state' do
       expect(page).to have_content(s_('GroupsEmptyState|A group is a collection of several projects'))
     end
-  end
-
-  def search(term)
-    filter_input = find_by_testid('filtered-search-term-input')
-    filter_input.click
-    filter_input.set(term)
-    click_button 'Search'
   end
 end

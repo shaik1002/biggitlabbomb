@@ -136,8 +136,6 @@ module API
 
           bad_request!(s_('MlModelRegistry|Artifact file creation failed')) unless package_file
 
-          track_package_event('push_package', :ml_model, project: project, namespace: project.namespace)
-
           created!
         rescue ObjectStorage::RemoteStoreError => e
           Gitlab::ErrorTracking.track_exception(e, extra: { file_name: params[:file_name], project_id: project.id })
@@ -158,8 +156,6 @@ module API
           file_name = URI.encode_uri_component([params[:path], params[:file_name]].compact.join('/'))
 
           package_file = ::Packages::PackageFileFinder.new(package, file_name).execute!
-
-          track_package_event('pull_package', :ml_model, project: project, namespace: project.namespace)
 
           present_package_file!(package_file)
         end

@@ -3,15 +3,11 @@
 exports[`Beta badge component renders the badge 1`] = `
 <div>
   <a
-    class="badge badge-neutral badge-pill gl-badge gl-cursor-pointer"
+    class="badge badge-neutral badge-pill gl-badge gl-cursor-pointer md"
     href="#"
     target="_self"
   >
-    <span
-      class="gl-badge-content"
-    >
-      Beta
-    </span>
+    Beta
   </a>
   <div
     class="gl-popover"

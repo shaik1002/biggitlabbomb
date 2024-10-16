@@ -8,7 +8,9 @@ class PwaController < ApplicationController # rubocop:disable Gitlab/NamespacedC
 
   skip_before_action :authenticate_user!
 
-  def manifest; end
+  def manifest
+  end
 
-  def offline; end
+  def offline
+  end
 end

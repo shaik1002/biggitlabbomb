@@ -5,7 +5,6 @@ import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import { getContentWrapperHeight } from '~/lib/utils/dom_utils';
-import { useMockInternalEventsTracking } from 'helpers/tracking_internal_events_helper';
 import { DRAWER_Z_INDEX } from '~/lib/utils/constants';
 import { createAlert, VARIANT_WARNING } from '~/alert';
 import RedactText from '~/projects/settings/repository/maintenance/redact_text.vue';
@@ -26,25 +25,18 @@ jest.mock('~/alert');
 describe('Redact text', () => {
   let wrapper;
   let mutationMock;
-  const { bindInternalEventDocument } = useMockInternalEventsTracking();
 
   const createMockApolloProvider = (resolverMock) => {
     return createMockApollo([[replaceTextMutation, resolverMock]]);
   };
 
-  const createComponent = (
-    mutationResponse = REPLACE_MUTATION_SUCCESS,
-    features = { asyncRewriteHistory: true },
-  ) => {
+  const createComponent = (mutationResponse = REPLACE_MUTATION_SUCCESS) => {
     mutationMock = jest.fn().mockResolvedValue(mutationResponse);
     getContentWrapperHeight.mockReturnValue(TEST_HEADER_HEIGHT);
     wrapper = shallowMountExtended(RedactText, {
       apolloProvider: createMockApolloProvider(mutationMock),
       provide: {
         projectPath: TEST_PROJECT_PATH,
-        glFeatures: {
-          ...features,
-        },
       },
     });
   };
@@ -128,7 +120,7 @@ describe('Redact text', () => {
           });
 
           it('disables user input while loading', () => {
-            expect(findTextarea().attributes().disabled).toBe('true');
+            expect(findTextarea().attributes('disabled')).toBe('true');
             expect(redactTextButton().props('loading')).toBe(true);
           });
 
@@ -137,15 +129,6 @@ describe('Redact text', () => {
               replacements: [TEST_TEXT],
               projectPath: TEST_PROJECT_PATH,
             });
-          });
-
-          it('tracks click_redact_text_button_repository_settings', () => {
-            const { trackEventSpy } = bindInternalEventDocument(wrapper.element);
-            expect(trackEventSpy).toHaveBeenCalledWith(
-              'click_redact_text_button_repository_settings',
-              {},
-              undefined,
-            );
           });
 
           it('closes the drawer when removal is confirmed', async () => {
@@ -165,10 +148,9 @@ describe('Redact text', () => {
             await waitForPromises();
 
             expect(createAlert).toHaveBeenCalledWith({
-              message:
-                'You will receive an email notification when the process is complete. To remove old versions from the repository, run housekeeping.',
+              message: 'To remove old versions from the repository, run housekeeping.',
               primaryButton: { clickHandler: expect.any(Function), text: 'Go to housekeeping' },
-              title: 'Text redaction removal is scheduled.',
+              title: 'Text redacted',
               variant: VARIANT_WARNING,
             });
           });
@@ -194,21 +176,6 @@ describe('Redact text', () => {
             });
           });
         });
-      });
-    });
-  });
-
-  describe('when async_rewrite_history is off', () => {
-    it('generates a housekeeping alert', async () => {
-      createComponent(REPLACE_MUTATION_SUCCESS, { features: { asyncRewriteHistory: false } });
-      findModal().vm.$emit('primary');
-      await waitForPromises();
-
-      expect(createAlert).toHaveBeenCalledWith({
-        message: 'To remove old versions from the repository, run housekeeping.',
-        primaryButton: { clickHandler: expect.any(Function), text: 'Go to housekeeping' },
-        title: 'Text redacted',
-        variant: VARIANT_WARNING,
       });
     });
   });

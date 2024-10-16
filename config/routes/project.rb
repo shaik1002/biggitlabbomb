@@ -459,6 +459,8 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           end
         end
 
+        get :planning_hierarchy
+
         resources :badges, only: [] do
           collection do
             constraints format: /svg/ do
@@ -479,10 +481,8 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           resources :experiments, only: [:index, :show, :destroy], controller: 'experiments', param: :iid
           resources :candidates, only: [:show, :destroy], controller: 'candidates', param: :iid
           resources :models, only: [:index, :show, :destroy, :new], controller: 'models', param: :model_id do
-            resources :versions, only: [:new], controller: 'model_versions'
             resources :versions, only: [:show], controller: 'model_versions', param: :model_version_id
           end
-          post :preview_markdown
         end
 
         namespace :service_desk do
@@ -670,6 +670,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         post :unarchive
         post :housekeeping
         post :toggle_star
+        post :preview_markdown, as: :preview_markdown_deprecated
         post :export
         post :remove_export
         post :generate_new_export

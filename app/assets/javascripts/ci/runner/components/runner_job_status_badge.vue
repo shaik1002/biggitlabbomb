@@ -1,9 +1,9 @@
 <script>
 import { GlBadge, GlTooltipDirective } from '@gitlab/ui';
 import {
-  I18N_JOB_STATUS_ACTIVE,
+  I18N_JOB_STATUS_RUNNING,
   I18N_JOB_STATUS_IDLE,
-  JOB_STATUS_ACTIVE,
+  JOB_STATUS_RUNNING,
   JOB_STATUS_IDLE,
 } from '../constants';
 
@@ -24,14 +24,14 @@ export default {
   computed: {
     badge() {
       switch (this.jobStatus) {
-        case JOB_STATUS_ACTIVE:
+        case JOB_STATUS_RUNNING:
           return {
-            classes: '!gl-text-blue-600 gl-shadow-inner-1-gray-400 !gl-border-blue-600',
-            label: I18N_JOB_STATUS_ACTIVE,
+            classes: 'gl-text-blue-600! gl-shadow-inner-1-gray-400 gl-border-blue-600!',
+            label: I18N_JOB_STATUS_RUNNING,
           };
         case JOB_STATUS_IDLE:
           return {
-            classes: '!gl-text-gray-700 gl-shadow-inner-1-gray-400 !gl-border-gray-500',
+            classes: 'gl-text-gray-700! gl-shadow-inner-1-gray-400 gl-border-gray-500!',
             label: I18N_JOB_STATUS_IDLE,
           };
         default:
@@ -45,12 +45,10 @@ export default {
   <gl-badge
     v-if="badge"
     v-bind="$attrs"
-    class="!gl-bg-transparent"
+    class="gl-max-w-full gl-text-truncate gl-bg-transparent!"
     variant="muted"
     :class="badge.classes"
   >
-    <span class="gl-truncate">
-      {{ badge.label }}
-    </span>
+    {{ badge.label }}
   </gl-badge>
 </template>

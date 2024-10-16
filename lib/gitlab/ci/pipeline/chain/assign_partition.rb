@@ -18,9 +18,7 @@ module Gitlab
           private
 
           def find_partition_id
-            if @command.partition_id
-              @command.partition_id
-            elsif @command.creates_child_pipeline?
+            if @command.creates_child_pipeline?
               @command.parent_pipeline_partition_id
             else
               ::Ci::Pipeline.current_partition_value(project)

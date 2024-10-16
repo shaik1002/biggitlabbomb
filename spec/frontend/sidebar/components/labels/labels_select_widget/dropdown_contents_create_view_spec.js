@@ -1,4 +1,4 @@
-import { GlAlert, GlFormInput, GlLoadingIcon } from '@gitlab/ui';
+import { GlAlert, GlLoadingIcon } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import Vue, { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
@@ -7,7 +7,7 @@ import waitForPromises from 'helpers/wait_for_promises';
 import { createAlert } from '~/alert';
 import { workspaceLabelsQueries, workspaceCreateLabelMutation } from '~/sidebar/queries/constants';
 import DropdownContentsCreateView from '~/sidebar/components/labels/labels_select_widget/dropdown_contents_create_view.vue';
-import SidebarColorPicker from '~/sidebar/components/sidebar_color_picker.vue';
+import SibebarColorPicker from '~/sidebar/components/sidebar_color_picker.vue';
 import { DEFAULT_LABEL_COLOR } from '~/sidebar/components/labels/labels_select_widget/constants';
 import {
   mockCreateLabelResponse as createAbuseReportLabelSuccessfulResponse,
@@ -50,16 +50,16 @@ const createLabelErrorHandler = jest.fn().mockRejectedValue('Houston, we have a 
 describe('DropdownContentsCreateView', () => {
   let wrapper;
 
-  const findSidebarColorPicker = () => wrapper.findComponent(SidebarColorPicker);
+  const findSibebarColorPicker = () => wrapper.findComponent(SibebarColorPicker);
   const findCreateButton = () => wrapper.find('[data-testid="create-button"]');
   const findCancelButton = () => wrapper.find('[data-testid="cancel-button"]');
-  const findLabelTitleInput = () => wrapper.findComponent(GlFormInput);
+  const findLabelTitleInput = () => wrapper.find('[data-testid="label-title-input"]');
 
   const findLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
 
   const fillLabelAttributes = () => {
     findLabelTitleInput().vm.$emit('input', 'Test title');
-    findSidebarColorPicker().vm.$emit('input', '#009966');
+    findSibebarColorPicker().vm.$emit('input', '#009966');
   };
 
   const createComponent = ({
@@ -97,7 +97,7 @@ describe('DropdownContentsCreateView', () => {
 
   it('disables a Create button if label title is not set', async () => {
     createComponent();
-    findSidebarColorPicker().vm.$emit('input', '#fff');
+    findSibebarColorPicker().vm.$emit('input', '#fff');
     await nextTick();
 
     expect(findCreateButton().props('disabled')).toBe(true);
@@ -106,7 +106,7 @@ describe('DropdownContentsCreateView', () => {
   it('disables a Create button if color is not set', async () => {
     createComponent();
     findLabelTitleInput().vm.$emit('input', 'Test title');
-    findSidebarColorPicker().vm.$emit('input', '');
+    findSibebarColorPicker().vm.$emit('input', '');
     await nextTick();
 
     expect(findCreateButton().props('disabled')).toBe(true);
@@ -144,17 +144,17 @@ describe('DropdownContentsCreateView', () => {
       findCreateButton().vm.$emit('click');
       await nextTick();
 
-      expect(findCreateButton().props('loading')).toBe(true);
+      expect(findLoadingIcon().exists()).toBe(true);
     });
 
     it('does not loader spinner after mutation is resolved', async () => {
       findCreateButton().vm.$emit('click');
       await nextTick();
 
-      expect(findCreateButton().props('loading')).toBe(true);
+      expect(findLoadingIcon().exists()).toBe(true);
       await waitForPromises();
 
-      expect(findCreateButton().props('loading')).toBe(false);
+      expect(findLoadingIcon().exists()).toBe(false);
     });
   });
 

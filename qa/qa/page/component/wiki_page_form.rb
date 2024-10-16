@@ -11,7 +11,6 @@ module QA
 
           base.view 'app/assets/javascripts/pages/shared/wikis/components/wiki_form.vue' do
             element 'wiki-title-textbox'
-            element 'wiki-path-textbox'
             element 'wiki-message-textbox'
             element 'wiki-submit-button'
           end
@@ -26,14 +25,6 @@ module QA
 
           base.view 'app/assets/javascripts/pages/shared/wikis/components/delete_wiki_modal.vue' do
             element 'delete-button'
-          end
-        end
-
-        def set_path(path)
-          if has_element?('wiki-path-textbox', wait: 0)
-            fill_element('wiki-path-textbox', path)
-          else
-            set_title(path)
           end
         end
 
@@ -72,9 +63,6 @@ module QA
           wait_until(reload: false) do
             has_element?('content-editor')
           end
-
-          # Remove once tabindex error is fixed: https://gitlab.com/gitlab-org/gitlab/-/issues/493891
-          sleep 2
         end
       end
     end

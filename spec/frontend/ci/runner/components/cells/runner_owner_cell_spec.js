@@ -1,5 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 import { GlLink } from '@gitlab/ui';
+import { s__ } from '~/locale';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
 
 import RunnerOwnerCell from '~/ci/runner/components/cells/runner_owner_cell.vue';
@@ -34,7 +35,7 @@ describe('RunnerOwnerCell', () => {
 
     it('shows an administrator label', () => {
       expect(findLink().exists()).toBe(false);
-      expect(wrapper.text()).toBe('Administrator');
+      expect(wrapper.text()).toBe(s__('Runners|Administrator'));
     });
   });
 

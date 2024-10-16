@@ -11,8 +11,6 @@ export const member = {
   canOverride: false,
   isOverridden: false,
   isDirectMember: false,
-  isInheritedMember: true,
-  isSharedMember: false,
   accessLevel: { integerValue: 50, stringValue: 'Owner' },
   source: {
     id: 178,
@@ -46,19 +44,14 @@ export const member = {
   groupManagedAccount: false,
   enterpriseUserOfThisGroup: false,
   validRoles: {
-    'Minimal Access': 5,
     Guest: 10,
     Reporter: 20,
     Developer: 30,
     Maintainer: 40,
     Owner: 50,
+    'Minimal access': 5,
   },
   customRoles: [],
-  createdBy: {
-    id: 102,
-    name: 'John Smith',
-    webUrl: 'https://gitlab.com/john_smith',
-  },
 };
 
 export const group = {
@@ -120,15 +113,9 @@ export const accessRequest = {
 
 export const members = [member];
 
-export const directMember = { ...member, isDirectMember: true, isInheritedMember: false };
-export const inheritedMember = member;
-export const sharedMember = { ...member, isSharedMember: true, isInheritedMember: false };
-export const updateableMember = {
-  ...directMember,
-  canUpdate: true,
-  memberPath: 'user/path/238',
-  namespace: 'user',
-};
+export const directMember = { ...member, isDirectMember: true };
+export const inheritedMember = { ...member, isDirectMember: false };
+export const updateableMember = { ...directMember, canUpdate: true };
 
 export const member2faEnabled = { ...member, user: { ...member.user, twoFactorEnabled: true } };
 

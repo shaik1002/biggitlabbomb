@@ -1,6 +1,0 @@
-query isExpandedHierarchyTreeChild($id: WorkItemID!) {
-  isExpandedHierarchyTreeChild(id: $id) @client {
-    id
-    isExpanded
-  }
-}

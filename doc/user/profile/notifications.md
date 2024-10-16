@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Personal Productivity
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -21,7 +21,8 @@ You can receive updates about activity in issues, merge requests, epics, and des
 For the tool that GitLab administrators can use to send messages to users, read
 [Email from GitLab](../../administration/email_from_gitlab.md).
 
-In GitLab 17.2 and later, [notifications are rate limited](../../security/rate_limits.md#notification-emails)
+In GitLab 17.1 and later, administrators can turn on a
+[rate limit for notifications](../../security/rate_limits.md#notification-emails)
 per 24 hours per project or group per user.
 
 ## Who receives notifications
@@ -35,7 +36,7 @@ You might receive notifications for one of the following reasons:
   or edit, or someone mentions <sup>1</sup> you.
 - You've [enabled notifications in an issue, merge request, or epic](#notifications-on-issues-merge-requests-and-epics).
 - You've configured notifications for the [project](#change-level-of-project-notifications) or [group](#group-notifications).
-- You're subscribed to group or project pipeline notifications through the pipeline emails [integration](../project/integrations/index.md).
+- You're subscribed to group or project pipeline notifications via the pipeline emails [integration](../project/integrations/index.md).
 
 1. GitLab doesn't send a notification when
    [a comment is edited to include a user mention](../discussions/index.md#edit-a-comment-to-add-a-mention).
@@ -172,8 +173,8 @@ Users are notified of the following events:
 | Personal access tokens have been created | User            | Security email, always sent.                                                                                                            |
 | Personal access tokens have expired      | User            | Security email, always sent.                                                                                                            |
 | Personal access token has been revoked   | User            | Security email, always sent.  [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/98911) in GitLab 15.5.                 |
-| Group access tokens expiring soon        | Direct Group Owners | Security email, always sent.  [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/367705) in GitLab 16.4.                 |
-| Project access tokens expiring soon      | Direct Project Owners and Maintainers | Security email, always sent.  [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/367706) in GitLab 16.4.                 |
+| Group access tokens expiring soon        | Group owners, maintainers, and administrators | Security email, always sent.  [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/367705) in GitLab 16.4.                 |
+| Project access tokens expiring soon      | Group owners, maintainers, and administrators | Security email, always sent.  [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/367705) in GitLab 16.4.                 |
 | Project access level changed             | User            | Sent when user project access level is changed.                                                                                         |
 | SSH key has expired                      | User            | Security email, always sent.                                                                                                            |
 | Two-factor authentication disabled       | User            | Security email, always sent.                                                                                                            |
@@ -265,7 +266,6 @@ To always receive notifications on your own issues, merge requests, and so on, t
 ## Notifications for unknown sign-ins
 
 > - Listing the full name and username of the signed-in user [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/225183) in GitLab 15.10.
-> - Geographic location [added](https://gitlab.com/gitlab-org/gitlab/-/issues/296128) in GitLab 17.5.
 
 NOTE:
 This feature is enabled by default for self-managed instances. Administrators may disable this feature
@@ -279,7 +279,6 @@ malicious or unauthorized sign-ins. This notification email includes the:
 - Hostname.
 - User's name and username.
 - IP address.
-- Geographic location.
 - Date and time of sign-in.
 
 GitLab uses several methods to identify a known sign-in. All methods must fail for a notification email to be sent.
@@ -426,25 +425,3 @@ recipients.each { |notify| puts notify.user.username }
 If you receive notifications (through email or Slack) regarding a failed pipeline that no longer
 exists, double-check to see if you have any duplicate GitLab instances that could have triggered the
 message.
-
-### Email notifications are enabled, but not received
-
-If you've enabled email notifications in GitLab, but users aren't receiving notifications as expected, ensure that
-your email provider isn't blocking emails from your GitLab instance. Many email providers (like Outlook) block emails
-coming from lesser-known self-managed mail server IP addresses. To verify, attempt to send an email
-directly from the SMTP server for your instance. For example, a test email from Sendmail might look something like:
-
-```plaintext
-# (echo subject: test; echo) | $(which sendmail) -v -Am -i <valid email address>
-```
-
-If your email provider is blocking the message, you might get output like the following (depending on your email provider and SMTP server):
-
-```plaintext
-Diagnostic-Code: smtp; 550 5.7.1 Unfortunately, messages from [xx.xx.xx.xx]
-weren't sent. For more information, please go to
-http://go.microsoft.com/fwlink/?LinkID=526655 (http://go.microsoft.com/fwlink/?LinkID=526655) AS(900)
-```
-
-Usually this issue can be resolved by adding the IP address of your SMTP server to your
-mail provider's allowlist. Check your mail provider's documentation for instructions.

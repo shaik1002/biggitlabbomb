@@ -20,9 +20,9 @@ class Snippet < ApplicationRecord
   include CreatedAtFilterable
   include EachBatch
   include Import::HasImportSource
-  include SafelyChangeColumnDefault
+  include IgnorableColumns
 
-  columns_changing_default :organization_id
+  ignore_column :imported, remove_with: '17.2', remove_after: '2024-07-22'
 
   MAX_FILE_COUNT = 10
 
@@ -47,7 +47,6 @@ class Snippet < ApplicationRecord
 
   belongs_to :author, class_name: 'User'
   belongs_to :project
-  belongs_to :organization, class_name: 'Organizations::Organization'
   alias_method :resource_parent, :project
 
   has_many :notes, as: :noteable, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent

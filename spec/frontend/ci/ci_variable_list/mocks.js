@@ -27,7 +27,6 @@ export const devName = 'dev';
 export const prodName = 'prod';
 
 export const mockVariables = (kind) => {
-  const withHidden = kind !== instanceString;
   return [
     {
       __typename: `Ci${kind}Variable`,
@@ -35,7 +34,6 @@ export const mockVariables = (kind) => {
       key: 'my-var',
       description: 'This variable has a description.',
       masked: false,
-      ...(withHidden && { hidden: false }),
       protected: true,
       raw: false,
       value: 'variable_value',
@@ -47,22 +45,9 @@ export const mockVariables = (kind) => {
       key: 'secret',
       description: null,
       masked: true,
-      ...(withHidden && { hidden: false }),
       protected: false,
       raw: true,
       value: 'another_value',
-      variableType: variableTypes.fileType,
-    },
-    {
-      __typename: `Ci${kind}Variable`,
-      id: 3,
-      key: 'hidden',
-      description: null,
-      masked: true,
-      ...(withHidden && { hidden: true }),
-      protected: false,
-      raw: true,
-      value: 'a_third_value',
       variableType: variableTypes.fileType,
     },
   ];
@@ -76,7 +61,6 @@ export const mockInheritedVariables = [
     description: null,
     environmentScope: '*',
     masked: true,
-    hidden: false,
     protected: true,
     raw: false,
     groupName: 'group-name',
@@ -90,7 +74,6 @@ export const mockInheritedVariables = [
     description: 'This inherited variable has a description.',
     environmentScope: 'staging',
     masked: false,
-    hidden: false,
     protected: false,
     raw: true,
     groupName: 'subgroup-name',
@@ -104,21 +87,6 @@ export const mockInheritedVariables = [
     description: null,
     environmentScope: 'production',
     masked: false,
-    hidden: false,
-    protected: true,
-    raw: true,
-    groupName: 'subgroup-name',
-    groupCiCdSettingsPath: '/groups/group-name/subgroup-name/-/settings/ci_cd',
-    __typename: 'InheritedCiVariable',
-  },
-  {
-    id: 'gid://gitlab/Ci::GroupVariable/123',
-    key: 'INHERITED_VAR_4',
-    variableType: 'ENV_VAR',
-    description: null,
-    environmentScope: 'production',
-    masked: true,
-    hidden: true,
     protected: true,
     raw: true,
     groupName: 'subgroup-name',

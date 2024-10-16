@@ -140,7 +140,7 @@ export default {
     :toggle-text="$options.i18n.defaultLabel"
     category="primary"
     variant="confirm"
-    placement="bottom-end"
+    placement="right"
     class="code-dropdown gl-text-left"
     fluid-width
     data-testid="code-dropdown"
@@ -149,7 +149,7 @@ export default {
     <gl-disclosure-dropdown-group v-if="sshUrl">
       <code-dropdown-item
         :label="$options.i18n.cloneWithSsh"
-        label-class="!gl-text-sm !gl-pt-2"
+        label-class="gl-font-sm! gl-pt-2!"
         :link="sshUrl"
         name="ssh_project_clone"
         input-id="copy-ssh-url-input"
@@ -159,7 +159,7 @@ export default {
     <gl-disclosure-dropdown-group v-if="httpUrl">
       <code-dropdown-item
         :label="httpLabel"
-        label-class="!gl-text-sm !gl-pt-2"
+        label-class="gl-font-sm! gl-pt-2!"
         :link="httpUrl"
         name="http_project_clone"
         input-id="copy-http-url-input"
@@ -169,7 +169,7 @@ export default {
     <gl-disclosure-dropdown-group v-if="kerberosUrl">
       <code-dropdown-item
         :label="$options.i18n.cloneWithKerberos"
-        label-class="!gl-text-sm !gl-pt-2"
+        label-class="gl-font-sm! gl-pt-2!"
         :link="kerberosUrl"
         name="kerberos_project_clone"
         input-id="copy-http-url-input"

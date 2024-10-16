@@ -27,7 +27,7 @@ RSpec.describe SearchController, feature_category: :global_search do
     end
 
     shared_examples_for 'metadata is set' do |action|
-      it 'sets the metadata' do
+      it 'renders a 408 when a timeout occurs' do
         expect(controller).to receive(:append_info_to_payload).and_wrap_original do |method, payload|
           method.call(payload)
 
@@ -41,12 +41,12 @@ RSpec.describe SearchController, feature_category: :global_search do
           expect(payload[:metadata]['meta.search.project_ids']).to eq(%w[456 789])
           expect(payload[:metadata]['meta.search.type']).to eq('basic')
           expect(payload[:metadata]['meta.search.level']).to eq('global')
-          expect(payload[:metadata]['meta.search.filters.language']).to eq(['ruby'])
+          expect(payload[:metadata]['meta.search.filters.language']).to eq('ruby')
           expect(payload[:metadata]['meta.search.page']).to eq('2')
           expect(payload[:metadata][:global_search_duration_s]).to be_a_kind_of(Numeric)
         end
         params = {
-          scope: 'issues', search: 'hello world', group_id: '123', page: '2', project_id: '456', language: ['ruby'],
+          scope: 'issues', search: 'hello world', group_id: '123', page: '2', project_id: '456', language: 'ruby',
           project_ids: %w[456 789], confidential: true, include_archived: true, state: true, force_search_results: true
         }
         get action, params: params
@@ -88,14 +88,6 @@ RSpec.describe SearchController, feature_category: :global_search do
       it_behaves_like 'with external authorization service enabled', :show, { search: 'hello' }
       it_behaves_like 'support for active record query timeouts', :show, { search: 'hello' }, :search_objects, :html
       it_behaves_like 'metadata is set', :show
-
-      it 'verifies search type' do
-        expect_next_instance_of(SearchService) do |service|
-          expect(service).to receive(:search_type_errors).once
-        end
-
-        get :show, params: { search: 'hello', scope: 'blobs' }
-      end
 
       describe 'rate limit scope' do
         it 'uses current_user and search scope' do
@@ -243,7 +235,7 @@ RSpec.describe SearchController, feature_category: :global_search do
             it 'succeeds but does NOT do anything' do
               get :show, params: { scope: 'projects', search: '*', repository_ref: '-1%20OR%203%2B640-640-1=0%2B0%2B0%2B1' }
               expect(response).to have_gitlab_http_status(:ok)
-              expect(assigns(:search_results)).to be_a ::Search::EmptySearchResults
+              expect(assigns(:search_results)).to be_a Gitlab::EmptySearchResults
             end
           end
         end
@@ -691,7 +683,7 @@ RSpec.describe SearchController, feature_category: :global_search do
           expect(payload[:metadata]['meta.search.project_ids']).to eq(%w[456 789])
           expect(payload[:metadata]['meta.search.type']).to eq('basic')
           expect(payload[:metadata]['meta.search.level']).to eq('global')
-          expect(payload[:metadata]['meta.search.filters.language']).to eq(['ruby'])
+          expect(payload[:metadata]['meta.search.filters.language']).to eq('ruby')
           expect(payload[:metadata]['meta.search.page']).to eq('2')
         end
 
@@ -706,7 +698,7 @@ RSpec.describe SearchController, feature_category: :global_search do
           include_archived: true,
           state: true,
           force_search_results: true,
-          language: ['ruby']
+          language: 'ruby'
         }
       end
 
@@ -742,7 +734,7 @@ RSpec.describe SearchController, feature_category: :global_search do
       end
 
       it 'returns EmptySearchResults' do
-        expect(::Search::EmptySearchResults).to receive(:new).and_call_original
+        expect(Gitlab::EmptySearchResults).to receive(:new).and_call_original
         make_abusive_request
         expect(response).to have_gitlab_http_status(:ok)
       end

@@ -8,28 +8,26 @@
 module Gitlab
   class ConanToken
     HMAC_KEY = 'gitlab-conan-packages'
-    MAX_CONAN_TOKEN_EXPIRE_TIME = 3.months.freeze
+    CONAN_TOKEN_EXPIRE_TIME = 1.day.freeze
 
-    attr_reader :access_token_id, :user_id, :expire_at
+    attr_reader :access_token_id, :user_id
 
     class << self
-      def from_personal_access_token(token_id, personal_token)
-        return unless personal_token&.active?
-
-        new(access_token_id: token_id, user_id: personal_token.user_id,
-          expire_at: personal_token.expires_at&.at_beginning_of_day)
+      def from_personal_access_token(user_id, token)
+        new(access_token_id: token, user_id: user_id)
       end
 
       def from_job(job)
-        new(access_token_id: job.token, user_id: job.user.id, expire_at: job.project.build_timeout.seconds.from_now)
+        new(access_token_id: job.token, user_id: job.user.id)
       end
 
       def from_deploy_token(deploy_token)
-        new(access_token_id: deploy_token.token, user_id: deploy_token.username, expire_at: deploy_token.expires_at)
+        new(access_token_id: deploy_token.token, user_id: deploy_token.username)
       end
 
       def decode(jwt)
         payload = JSONWebToken::HMACToken.decode(jwt, secret).first
+
         new(access_token_id: payload['access_token'], user_id: payload['user_id'])
       rescue JWT::DecodeError, JWT::ExpiredSignature, JWT::ImmatureSignature
         # we return on expired and errored tokens because the Conan client
@@ -45,10 +43,9 @@ module Gitlab
       end
     end
 
-    def initialize(access_token_id:, user_id:, expire_at: nil)
+    def initialize(access_token_id:, user_id:)
       @access_token_id = access_token_id
       @user_id = user_id
-      @expire_at = [expire_at, MAX_CONAN_TOKEN_EXPIRE_TIME.from_now].select(&:present?).min
     end
 
     def to_jwt
@@ -61,7 +58,7 @@ module Gitlab
       JSONWebToken::HMACToken.new(self.class.secret).tap do |token|
         token['access_token'] = access_token_id
         token['user_id'] = user_id
-        token.expire_time = expire_at
+        token.expire_time = token.issued_at + CONAN_TOKEN_EXPIRE_TIME
       end
     end
   end

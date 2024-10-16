@@ -68,13 +68,17 @@ export default {
     <p class="gl-mb-0" :data-testid="stuckData.dataTestId">
       <gl-sprintf :message="stuckData.text">
         <template #link="{ content }">
-          <a class="gl-inline-block" :href="protectedBranchSettingsDocsLink" target="_blank">
+          <a
+            class="gl-display-inline-block"
+            :href="protectedBranchSettingsDocsLink"
+            target="_blank"
+          >
             {{ content }}
           </a>
         </template>
       </gl-sprintf>
       <template v-if="stuckData.showTags">
-        <gl-badge v-for="tag in tags" :key="tag" variant="info">
+        <gl-badge v-for="tag in tags" :key="tag" size="sm" variant="info">
           {{ tag }}
         </gl-badge>
       </template>

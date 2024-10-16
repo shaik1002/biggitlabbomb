@@ -51,13 +51,7 @@ module QA
           end
         end
 
-        context(
-          'with released at',
-          quarantine: {
-            type: :stale,
-            issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/468679'
-          }
-        ) do
+        context 'with released at' do
           it_behaves_like 'descending order by default',
             'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/441478'
 
@@ -65,7 +59,7 @@ module QA
             'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/441477'
         end
 
-        context 'with created at', :blocking do
+        context 'with created at' do
           before do
             Page::Explore::CiCdCatalog.perform(&:sort_by_created_at)
           end

@@ -2,7 +2,6 @@
 
 module Git
   class BranchHooksService < ::Git::BaseHooksService
-    include Gitlab::InternalEventsTracking
     extend ::Gitlab::Utils::Override
 
     JIRA_SYNC_BATCH_SIZE = 20
@@ -108,7 +107,9 @@ module Git
       return unless default_branch?
 
       commits_changing_ci_config.each do |commit|
-        track_internal_event('commit_change_to_ciconfigfile', user: commit.author, project: commit.project)
+        Gitlab::UsageDataCounters::HLLRedisCounter.track_event(
+          'o_pipeline_authoring_unique_users_committing_ciconfigfile', values: commit.author&.id
+        )
       end
     end
 
@@ -169,6 +170,7 @@ module Git
     end
 
     def enqueue_jira_connect_remove_branches
+      return unless Feature.enabled?(:jira_connect_remove_branches, project)
       return unless project.jira_subscription_exists?
 
       return unless Atlassian::JiraIssueKeyExtractors::Branch.has_keys?(project, branch_name)

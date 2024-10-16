@@ -3,13 +3,5 @@ fragment WorkItemTypeFragment on WorkItemType {
   name
   widgetDefinitions {
     type
-    ... on WorkItemWidgetDefinitionHierarchy {
-      allowedChildTypes {
-        nodes {
-          id
-          name
-        }
-      }
-    }
   }
 }

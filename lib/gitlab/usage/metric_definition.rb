@@ -98,7 +98,6 @@ module Gitlab
             Error type: #{error['type']}
             Data: #{error['data']}
             Path: #{error['data_pointer']}
-            Details: #{error['details']}
           ERROR_MSG
         end
       end

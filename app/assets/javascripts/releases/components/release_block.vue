@@ -1,30 +1,27 @@
 <script>
-import { GlButton } from '@gitlab/ui';
+import { GlCard } from '@gitlab/ui';
 import { isEmpty } from 'lodash';
 import SafeHtml from '~/vue_shared/directives/safe_html';
 import { scrollToElement } from '~/lib/utils/common_utils';
 import { slugify } from '~/lib/utils/text_utility';
-import { getLocationHash, setUrlParams } from '~/lib/utils/url_utility';
-import { BACK_URL_PARAM, CREATED_ASC } from '~/releases/constants';
+import { getLocationHash } from '~/lib/utils/url_utility';
+import { CREATED_ASC } from '~/releases/constants';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { renderGFM } from '~/behaviors/markdown/render_gfm';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
-import { __ } from '~/locale';
 import EvidenceBlock from './evidence_block.vue';
 import ReleaseBlockAssets from './release_block_assets.vue';
 import ReleaseBlockFooter from './release_block_footer.vue';
-import ReleaseBlockTitle from './release_block_title.vue';
+import ReleaseBlockHeader from './release_block_header.vue';
 import ReleaseBlockMilestoneInfo from './release_block_milestone_info.vue';
 
 export default {
   name: 'ReleaseBlock',
   components: {
-    GlButton,
-    CrudComponent,
+    GlCard,
     EvidenceBlock,
     ReleaseBlockAssets,
     ReleaseBlockFooter,
-    ReleaseBlockTitle,
+    ReleaseBlockHeader,
     ReleaseBlockMilestoneInfo,
   },
   directives: {
@@ -73,17 +70,6 @@ export default {
     shouldRenderMilestoneInfo() {
       return Boolean(!isEmpty(this.release.milestones));
     },
-    editLink() {
-      if (this.release._links?.editUrl) {
-        const queryParams = {
-          [BACK_URL_PARAM]: window.location.href,
-        };
-
-        return setUrlParams(queryParams, this.release._links.editUrl);
-      }
-
-      return undefined;
-    },
   },
 
   mounted() {
@@ -105,41 +91,26 @@ export default {
     },
   },
   safeHtmlConfig: { ADD_TAGS: ['gl-emoji'] },
-  i18n: {
-    editButton: __('Edit release'),
-  },
 };
 </script>
 <template>
-  <crud-component
+  <gl-card
     :id="htmlId"
-    v-bind="$attrs"
-    class="gl-mt-5"
-    :is-highlighted="isHighlighted"
     :class="{ 'bg-line-target-blue': isHighlighted }"
+    class="gl-new-card"
+    header-class="gl-new-card-header"
+    body-class="gl-new-card-body gl-px-5 gl-py-4"
+    footer-class="gl-bg-white"
     data-testid="release-block"
   >
-    <template #title>
-      <release-block-title :release="release" />
+    <template #header>
+      <release-block-header :release="release" />
     </template>
 
-    <template #actions>
-      <gl-button
-        v-if="editLink"
-        category="primary"
-        size="small"
-        variant="default"
-        class="js-edit-button"
-        :href="editLink"
-      >
-        {{ $options.i18n.editButton }}
-      </gl-button>
-    </template>
-
-    <div class="gl-flex gl-flex-col gl-gap-5">
+    <div class="gl-display-flex gl-flex-direction-column gl-gap-5">
       <div
         v-if="shouldRenderMilestoneInfo"
-        class="gl-border-b-1 gl-border-gray-100 gl-border-b-solid"
+        class="gl-border-b-solid gl-border-b-1 gl-border-gray-100"
       >
         <!-- TODO: Switch open* links to opened* once fields have been updated in GraphQL -->
         <release-block-milestone-info
@@ -156,14 +127,14 @@ export default {
         v-if="shouldRenderAssets"
         :assets="assets"
         :class="{
-          'gl-border-b-1 gl-border-gray-100 gl-pb-5 gl-border-b-solid':
+          'gl-pb-5 gl-border-b-solid gl-border-b-1 gl-border-gray-100':
             hasEvidence || release.descriptionHtml,
         }"
       />
       <evidence-block v-if="hasEvidence" :release="release" />
 
       <div v-if="release.descriptionHtml" ref="gfm-content">
-        <h3 class="gl-heading-5 !gl-mb-2">{{ __('Release notes') }}</h3>
+        <h3 class="gl-heading-5 gl-mb-2!">{{ __('Release notes') }}</h3>
         <div v-safe-html:[$options.safeHtmlConfig]="release.descriptionHtml" class="md"></div>
       </div>
     </div>
@@ -180,5 +151,5 @@ export default {
         :sort="sort"
       />
     </template>
-  </crud-component>
+  </gl-card>
 </template>

@@ -3,11 +3,8 @@
 module Layouts
   class PageHeadingComponent < ViewComponent::Base
     # @param [String] heading
-    # @param [Hash] options
-    def initialize(heading, description: nil, options: {})
+    def initialize(heading)
       @heading = heading
-      @description = description
-      @options = options
     end
 
     renders_one :heading

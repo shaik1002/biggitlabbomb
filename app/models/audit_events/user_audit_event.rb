@@ -3,12 +3,9 @@
 module AuditEvents
   class UserAuditEvent < ApplicationRecord
     self.table_name = "user_audit_events"
+    include PartitionedTable
 
-    include AuditEvents::CommonModel
-
-    validates :user_id, presence: true
-
-    scope :by_user, ->(user_id) { where(user_id: user_id) }
-    scope :by_username, ->(username) { where(user_id: find_user_id(username)) }
+    self.primary_key = :id
+    partitioned_by :created_at, strategy: :monthly
   end
 end

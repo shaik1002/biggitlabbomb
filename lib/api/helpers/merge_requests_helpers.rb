@@ -145,7 +145,6 @@ module API
           priority
           title
           updated_at
-          merged_at
         ]
       end
 

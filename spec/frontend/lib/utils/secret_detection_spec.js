@@ -1,7 +1,5 @@
-import { detectAndConfirmSensitiveTokens } from '~/lib/utils/secret_detection';
+import { containsSensitiveToken, confirmSensitiveAction, i18n } from '~/lib/utils/secret_detection';
 import { confirmAction } from '~/lib/utils/confirm_via_gl_modal/confirm_via_gl_modal';
-import { InternalEvents } from '~/tracking';
-import { sensitiveMessages, nonSensitiveMessages, secretDetectionFindings } from './mock_data';
 
 jest.mock('~/lib/utils/confirm_via_gl_modal/confirm_via_gl_modal');
 
@@ -9,80 +7,47 @@ const mockConfirmAction = ({ confirmed }) => {
   confirmAction.mockResolvedValueOnce(confirmed);
 };
 
-const trackingEventName = 'show_client_side_secret_detection_warning';
-const trackingEventPayload = {
-  label: 'comment',
-  property: 'GitLab personal access token',
-  value: 0,
-};
+describe('containsSensitiveToken', () => {
+  describe('when message does not contain sensitive tokens', () => {
+    const nonSensitiveMessages = [
+      'This is a normal message',
+      '1234567890',
+      '!@#$%^&*()_+',
+      'https://example.com',
+      'Some tokens are prefixed with glpat-, glcbt- or glrt- for example.',
+      'glpat-FAKE',
+    ];
 
-describe('detectAndConfirmSensitiveTokens', () => {
-  beforeEach(() => {
-    jest.spyOn(InternalEvents, 'trackEvent');
-  });
-  afterEach(() => {
-    jest.resetAllMocks();
-  });
-
-  describe('content without sensitive tokens', () => {
-    it.each(nonSensitiveMessages)(
-      'returns true and does not show warning for message: %s',
-      async (message) => {
-        const result = await detectAndConfirmSensitiveTokens({ content: message });
-        expect(result).toBe(true);
-        expect(confirmAction).not.toHaveBeenCalled();
-      },
-    );
-    it('does not trigger event tracking', () => {
-      const message = 'This is a test message';
-      detectAndConfirmSensitiveTokens({ content: message });
-      expect(InternalEvents.trackEvent).not.toHaveBeenCalled();
+    it.each(nonSensitiveMessages)('returns false for message: %s', (message) => {
+      expect(containsSensitiveToken(message)).toBe(false);
     });
   });
 
-  describe('content with sensitive tokens', () => {
-    describe.each(sensitiveMessages)('for message: %s', (message) => {
-      it('should show warning', async () => {
-        await detectAndConfirmSensitiveTokens({ content: message });
-        expect(confirmAction).toHaveBeenCalled();
-      });
+  describe('when message contains sensitive tokens', () => {
+    const sensitiveMessages = [
+      'token: glpat-cgyKc1k_AsnEpmP-5fRL',
+      'token: GlPat-abcdefghijklmnopqrstuvwxyz',
+      'token: feed_token=ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+      'token: feed_token=glft-ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+      'glft-ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+      'token: feed_token=glft-a8cc74ccb0de004d09a968705ba49099229b288b3de43f26c473a9d8d7fb7693-1234',
+      'glft-a8cc74ccb0de004d09a968705ba49099229b288b3de43f26c473a9d8d7fb7693-1234',
+      'token: gloas-a8cc74ccb0de004d09a968705ba49099229b288b3de43f26c473a9d8d7fb7693',
+      'https://example.com/feed?feed_token=123456789_abcdefghij',
+      'glpat-1234567890 and feed_token=ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+      'token: gldt-cgyKc1k_AsnEpmP-5fRL',
+      'curl "https://gitlab.example.com/api/v4/groups/33/scim/identities" --header "PRIVATE-TOKEN: glsoat-cgyKc1k_AsnEpmP-5fRL',
+      'CI_JOB_TOKEN=glcbt-FFFF_cgyKc1k_AsnEpmP-5fRL',
+      'Use this secret job token: glcbt-1_cgyKc1k_AsnEpmP-5fRL',
+      'token: glffct-cgyKc1k_AsnEpmP-5fRL',
+      'Here is the runner token for this job:glrt-abc123_x-yzABCDEF01234',
+      'token: glimt-abde52f19d2e53e987d14c8ea',
+      'token: glagent-3ed828e723deff468979daf3bf007f9f528c959911bdeea90f',
+      'token: glptt-dfc184477c9d3987c7b837e541063577f2ad6426',
+    ];
 
-      it('should return true when confirmed is true', async () => {
-        mockConfirmAction({ confirmed: true });
-
-        const result = await detectAndConfirmSensitiveTokens({ content: message });
-        expect(result).toBe(true);
-      });
-
-      it('should return false when confirmed is false', async () => {
-        mockConfirmAction({ confirmed: false });
-
-        const result = await detectAndConfirmSensitiveTokens({ content: message });
-        expect(result).toBe(false);
-      });
-    });
-
-    describe('event tracking', () => {
-      const [message] = sensitiveMessages;
-
-      it('should track correct event when warning is dismissed', async () => {
-        mockConfirmAction({ confirmed: false });
-
-        await detectAndConfirmSensitiveTokens({ content: message });
-        expect(InternalEvents.trackEvent).toHaveBeenCalledWith(trackingEventName, {
-          ...trackingEventPayload,
-          value: 0,
-        });
-      });
-      it('should track correct event when warning is accepted', async () => {
-        mockConfirmAction({ confirmed: true });
-
-        await detectAndConfirmSensitiveTokens({ content: message });
-        expect(InternalEvents.trackEvent).toHaveBeenCalledWith(trackingEventName, {
-          ...trackingEventPayload,
-          value: 1,
-        });
-      });
+    it.each(sensitiveMessages)('returns true for message: %s', (message) => {
+      expect(containsSensitiveToken(message)).toBe(true);
     });
   });
 
@@ -91,81 +56,46 @@ describe('detectAndConfirmSensitiveTokens', () => {
       gon.pat_prefix = 'specpat-';
     });
 
-    const validTokenMessage = 'token: specpat-mGYFaXBmNLvLmrEb7xdf';
-    const invalidTokenMessage = 'token: glpat-mGYFaXBmNLvLmrEb7xdf';
+    const sensitiveMessages = [
+      'token: specpat-mGYFaXBmNLvLmrEb7xdf',
+      'token: feed_token=ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+      'https://example.com/feed?feed_token=123456789_abcdefghij',
+      'glpat-1234567890 and feed_token=ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+    ];
 
-    it('should detect the valid token', async () => {
-      await detectAndConfirmSensitiveTokens({ content: validTokenMessage });
-      expect(confirmAction).toHaveBeenCalled();
-    });
-
-    it('should not detect the invalid token', async () => {
-      await detectAndConfirmSensitiveTokens({ content: invalidTokenMessage });
-      expect(confirmAction).not.toHaveBeenCalled();
+    it.each(sensitiveMessages)('returns true for message: %s', (message) => {
+      expect(containsSensitiveToken(message)).toBe(true);
     });
   });
+});
 
-  describe('warning modal', () => {
-    const findings = secretDetectionFindings;
-    const baseConfirmActionParams = {
+describe('confirmSensitiveAction', () => {
+  afterEach(() => {
+    confirmAction.mockReset();
+  });
+
+  it('should call confirmAction with correct parameters', async () => {
+    const prompt = 'Are you sure you want to delete this item?';
+    const expectedParams = {
       primaryBtnVariant: 'danger',
-      primaryBtnText: 'Add comment',
-      secondaryBtnText: 'Edit comment',
-      hideCancel: true,
-      modalHtmlMessage: expect.any(String),
+      primaryBtnText: i18n.primaryBtnText,
     };
+    await confirmSensitiveAction(prompt);
 
-    describe('with single findings', () => {
-      const [{ message, type, redactedString }] = findings;
-      it('should call confirmAction with correct parameters', async () => {
-        await detectAndConfirmSensitiveTokens({ content: message });
+    expect(confirmAction).toHaveBeenCalledWith(prompt, expectedParams);
+  });
 
-        const confirmActionArgs = confirmAction.mock.calls[0][1];
-        expect(confirmActionArgs).toMatchObject(baseConfirmActionParams);
-        expect(confirmActionArgs.title).toBe('Warning: Potential secret detected');
-        expect(confirmActionArgs.modalHtmlMessage).toContain(`${type}: ${redactedString}`);
-      });
-    });
+  it('should return true when confirmed is true', async () => {
+    mockConfirmAction({ confirmed: true });
 
-    describe('with multiple findings', () => {
-      const combinedMessage = findings.map(({ message }) => message).join(' ');
+    const result = await confirmSensitiveAction();
+    expect(result).toBe(true);
+  });
 
-      it('should call confirmAction with correct parameters', async () => {
-        await detectAndConfirmSensitiveTokens({ content: combinedMessage });
+  it('should return false when confirmed is false', async () => {
+    mockConfirmAction({ confirmed: false });
 
-        const confirmActionArgs = confirmAction.mock.calls[0][1];
-        expect(confirmActionArgs).toMatchObject(baseConfirmActionParams);
-        expect(confirmActionArgs.title).toBe('Warning: Potential secrets detected');
-
-        findings.forEach(({ type, redactedString }) => {
-          expect(confirmActionArgs.modalHtmlMessage).toContain(`${type}: ${redactedString}`);
-        });
-      });
-    });
-
-    describe('with different content type', () => {
-      const testCases = [
-        [
-          'comment',
-          'This comment appears to have the following secret in it. Are you sure you want to add this comment?',
-        ],
-        [
-          'description',
-          'This description appears to have the following secret in it. Are you sure you want to add this description?',
-        ],
-      ];
-
-      it.each(testCases)('content type: %s', async (contentType, expectedMessage) => {
-        const [{ message }] = findings;
-        await detectAndConfirmSensitiveTokens({ content: message, contentType });
-
-        const confirmActionArgs = confirmAction.mock.calls[0][1];
-        expect(confirmActionArgs.modalHtmlMessage).toContain(expectedMessage);
-        expect(InternalEvents.trackEvent).toHaveBeenCalledWith(trackingEventName, {
-          ...trackingEventPayload,
-          label: contentType,
-        });
-      });
-    });
+    const result = await confirmSensitiveAction();
+    expect(result).toBe(false);
   });
 });

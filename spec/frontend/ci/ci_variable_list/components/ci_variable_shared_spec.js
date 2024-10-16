@@ -503,7 +503,7 @@ describe('Ci Variable Shared Component', () => {
             provide: { ...provide, ...pagesFeatureFlagProvide },
           });
 
-          expect(findCiSettings().props()).toMatchObject({
+          expect(findCiSettings().props()).toEqual({
             areEnvironmentsLoading: false,
             areScopedVariablesAvailable: wrapper.props().areScopedVariablesAvailable,
             entity: props.entity,

@@ -33,7 +33,7 @@ describe('~/environments/environment_details/pagniation.vue', () => {
     });
 
     it('should not render pagination component', () => {
-      expect(wrapper.find('*').exists()).toBe(false);
+      expect(wrapper.html()).toBe('');
     });
   });
 

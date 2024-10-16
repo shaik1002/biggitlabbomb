@@ -1,12 +1,12 @@
 <script>
 import { GlLoadingIcon, GlAlert, GlEmptyState, GlSprintf, GlIcon } from '@gitlab/ui';
-import EmptyStateSvg from '@gitlab/svgs/dist/illustrations/status/status-nothing-md.svg';
+import EmptyStateSvg from '@gitlab/svgs/dist/illustrations/Dependency-list-empty-state.svg?url';
 import k8sLogsQuery from '~/environments/graphql/queries/k8s_logs.query.graphql';
 import environmentClusterAgentQuery from '~/environments/graphql/queries/environment_cluster_agent.query.graphql';
 import { createK8sAccessConfiguration } from '~/environments/helpers/k8s_integration_helper';
 import LogsViewer from '~/vue_shared/components/logs_viewer/logs_viewer.vue';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import { s__, __ } from '~/locale';
+import { s__ } from '~/locale';
 
 export default {
   components: {
@@ -48,7 +48,6 @@ export default {
     };
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     k8sLogs: {
       query: k8sLogsQuery,
       variables() {
@@ -63,7 +62,6 @@ export default {
         return Boolean(!this.gitlabAgentId);
       },
     },
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     environment: {
       query: environmentClusterAgentQuery,
       variables() {
@@ -114,11 +112,6 @@ export default {
     },
     headerData() {
       const data = [
-        {
-          icon: 'kubernetes-agent',
-          label: this.$options.i18n.agent,
-          value: this.gitlabAgentId,
-        },
         { icon: 'namespace', label: this.$options.i18n.namespace, value: this.namespace },
         { icon: 'pod', label: this.$options.i18n.pod, value: this.podName },
       ];
@@ -136,25 +129,21 @@ export default {
     emptyStateTitleForContainer: s__(
       'KubernetesLogs|No logs available for container %{containerName} of pod %{podName}',
     ),
-    agent: s__('KubernetesLogs|Agent ID'),
     pod: s__('KubernetesLogs|Pod'),
     container: s__('KubernetesLogs|Container'),
     namespace: s__('KubernetesLogs|Namespace'),
-    error: __('Error'),
   },
   EmptyStateSvg,
 };
 </script>
 <template>
   <div>
-    <gl-alert v-if="error" variant="danger" :dismissible="false"
-      >{{ $options.i18n.error }}: {{ error }}</gl-alert
-    >
+    <gl-alert v-if="error" variant="danger" :dismissible="false">{{ error }}</gl-alert>
     <gl-loading-icon v-if="isLoading" />
 
     <logs-viewer v-else-if="logLines" :log-lines="logLines" :highlighted-line="highlightedLineHash"
       ><template #header-details
-        ><div class="gl-ml-auto gl-p-3">
+        ><div class="gl-p-3 gl-ml-auto">
           <span v-for="(item, index) of headerData" :key="index" class="gl-mr-4">
             <gl-icon :name="item.icon" class="gl-mr-2" />{{ item.label }}: {{ item.value }}</span
           >

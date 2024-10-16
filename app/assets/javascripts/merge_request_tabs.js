@@ -119,7 +119,6 @@ function mountPipelines() {
           targetProjectFullPath: mrWidgetData?.target_project_full_path || '',
           projectId: pipelineTableViewEl.dataset.projectId,
           mergeRequestId: mrWidgetData ? mrWidgetData.iid : null,
-          isMergeRequestTable: true,
         },
       });
     },
@@ -173,7 +172,7 @@ export function toggleLoader(state) {
 }
 
 export function getActionFromHref(pathName) {
-  let action = pathName.match(/\/(\d+)\/(commits|diffs|pipelines|reports).*$/);
+  let action = pathName.match(/\/(\d+)\/(commits|diffs|pipelines).*$/);
 
   if (action) {
     action = action.at(-1).replace(/(^\/|\.html)/g, '');
@@ -187,7 +186,6 @@ export function getActionFromHref(pathName) {
 export const pageBundles = {
   show: () => import(/* webpackPrefetch: true */ '~/mr_notes/mount_app'),
   diffs: () => import(/* webpackPrefetch: true */ '~/diffs'),
-  reports: () => import('ee_else_ce/merge_requests/reports'),
 };
 
 export default class MergeRequestTabs {
@@ -210,7 +208,7 @@ export default class MergeRequestTabs {
     this.pageLayout = document.querySelector('.layout-page');
     this.expandSidebar = document.querySelectorAll('.js-expand-sidebar, .js-sidebar-toggle');
     this.paddingTop = 16;
-    this.actionRegex = /\/(commits|diffs|pipelines|reports)(\.html)?\/?$/;
+    this.actionRegex = /\/(commits|diffs|pipelines)(\.html)?\/?$/;
 
     this.scrollPositions = {};
 
@@ -367,8 +365,6 @@ export default class MergeRequestTabs {
         // this.hideSidebar();
         this.resetViewContainer();
         this.mountPipelinesView();
-      } else if (action === 'reports') {
-        this.resetViewContainer();
       } else {
         const notesTab = this.mergeRequestTabs.querySelector('.notes-tab');
         const notesPane = this.mergeRequestTabPanes.querySelector('#notes');
@@ -437,20 +433,18 @@ export default class MergeRequestTabs {
   setCurrentAction(action) {
     this.currentAction = action;
 
-    const pathname = location.pathname.replace(/\/*$/, '');
-
     // Remove a trailing '/commits' '/diffs' '/pipelines'
-    let newStatePathname = pathname.replace(this.actionRegex, '');
+    let newState = location.pathname.replace(this.actionRegex, '');
 
     // Append the new action if we're on a tab other than 'notes'
     if (this.currentAction !== 'show' && this.currentAction !== 'new') {
-      newStatePathname += `/${this.currentAction}`;
+      newState += `/${this.currentAction}`;
     }
 
     // Ensure parameters and hash come along for the ride
-    const newState = newStatePathname + location.search + location.hash;
+    newState += location.search + location.hash;
 
-    if (pathname !== newStatePathname) {
+    if (window.location.pathname !== newState) {
       window.history.pushState(
         {
           url: newState,

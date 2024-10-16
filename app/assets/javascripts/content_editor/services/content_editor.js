@@ -1,5 +1,3 @@
-import { DocAttrStep } from '@tiptap/pm/transform';
-
 /* eslint-disable no-underscore-dangle */
 export class ContentEditor {
   constructor({
@@ -10,7 +8,6 @@ export class ContentEditor {
     eventHub,
     drawioEnabled,
     codeSuggestionsConfig,
-    autocompleteHelper,
   }) {
     this._tiptapEditor = tiptapEditor;
     this._serializer = serializer;
@@ -18,7 +15,6 @@ export class ContentEditor {
     this._eventHub = eventHub;
     this._assetResolver = assetResolver;
     this._pristineDoc = null;
-    this._autocompleteHelper = autocompleteHelper;
 
     this.codeSuggestionsConfig = codeSuggestionsConfig;
     this.drawioEnabled = drawioEnabled;
@@ -33,10 +29,6 @@ export class ContentEditor {
 
   get eventHub() {
     return this._eventHub;
-  }
-
-  get serializer() {
-    return this._serializer;
   }
 
   get changed() {
@@ -84,33 +76,22 @@ export class ContentEditor {
     return this._assetResolver.renderDiagram(code, language);
   }
 
-  explainQuickAction(text) {
-    return this._assetResolver.explainQuickAction(text);
-  }
-
   setEditable(editable = true) {
     this._tiptapEditor.setOptions({
       editable,
     });
   }
 
-  updateAutocompleteDataSources(dataSources) {
-    this._autocompleteHelper.updateDataSources(dataSources);
-  }
-
   async setSerializedContent(serializedContent) {
     const { _tiptapEditor: editor } = this;
 
     const { document } = await this.deserialize(serializedContent);
-    const { doc } = editor.state;
+    const { doc, tr } = editor.state;
 
     if (document) {
       this._pristineDoc = document;
-      let tr = editor.state.tr.replaceWith(0, doc.content.size, document);
-      for (const [key, value] of Object.entries(document.attrs)) {
-        tr = tr.step(new DocAttrStep(key, value));
-      }
-      editor.view.dispatch(tr.setMeta('preventUpdate', true));
+      tr.replaceWith(0, doc.content.size, document).setMeta('preventUpdate', true);
+      editor.view.dispatch(tr);
     }
   }
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Users::BroadcastMessageDismissal, feature_category: :notifications do
+RSpec.describe Users::BroadcastMessageDismissal, feature_category: :onboarding do
   let_it_be(:user) { create(:user) }
   let_it_be(:message_1) { create(:broadcast_message, :future) }
   let_it_be(:message_2) { create(:broadcast_message, :future) }
@@ -40,16 +40,20 @@ RSpec.describe Users::BroadcastMessageDismissal, feature_category: :notification
       end
     end
 
-    describe '.for_user' do
+    describe '.for_user_and_broadcast_message' do
       let_it_be(:user_2) { create(:user) }
       let_it_be(:other_dismissal) do
         create(:broadcast_message_dismissal, :future, user: user_2, broadcast_message: message_1)
       end
 
-      it 'only returns dismissals for the correct user' do
-        expect(described_class.for_user(user)).to match_array [expired_dismissal, valid_dismissal_1, valid_dismissal_2]
+      it 'only returns correct dismissals' do
+        user_message_ids = [message_3.id]
+        user_2_message_ids = [message_1.id, message_2.id]
 
-        expect(described_class.for_user(user_2)).to match_array other_dismissal
+        expect(described_class.for_user_and_broadcast_message(user, user_message_ids)).to match_array valid_dismissal_2
+
+        expect(described_class.for_user_and_broadcast_message(user_2,
+          user_2_message_ids)).to match_array other_dismissal
       end
     end
   end

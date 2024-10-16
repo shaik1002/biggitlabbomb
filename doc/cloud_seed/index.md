@@ -2,7 +2,6 @@
 stage: none
 group: unassigned
 info: This is a GitLab Incubation Engineering program. No technical writer assigned to this group.
-ignore_in_report: true
 ---
 
 # Cloud Seed

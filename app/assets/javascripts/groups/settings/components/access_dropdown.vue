@@ -1,22 +1,14 @@
 <script>
-import {
-  GlDropdown,
-  GlDropdownItem,
-  GlDropdownSectionHeader,
-  GlDropdownDivider,
-  GlSearchBoxByType,
-} from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem, GlDropdownSectionHeader, GlSearchBoxByType } from '@gitlab/ui';
 import { debounce, intersectionWith, groupBy, differenceBy, intersectionBy } from 'lodash';
 import { createAlert } from '~/alert';
 import { __, s__, n__ } from '~/locale';
-import { getSubGroups, getUsers } from '../api/access_dropdown_api';
+import { getSubGroups } from '../api/access_dropdown_api';
 import { LEVEL_TYPES } from '../constants';
 
 export const i18n = {
   selectUsers: s__('ProtectedEnvironment|Select groups'),
-  rolesSectionHeader: s__('AccessDropdown|Roles'),
   groupsSectionHeader: s__('AccessDropdown|Groups'),
-  usersSectionHeader: s__('AccessDropdown|Users'),
 };
 
 export default {
@@ -25,15 +17,9 @@ export default {
     GlDropdown,
     GlDropdownItem,
     GlDropdownSectionHeader,
-    GlDropdownDivider,
     GlSearchBoxByType,
   },
   props: {
-    accessLevelsData: {
-      type: Array,
-      required: false,
-      default: () => [],
-    },
     hasLicense: {
       required: false,
       type: Boolean,
@@ -54,29 +40,15 @@ export default {
       required: false,
       default: () => [],
     },
-    items: {
-      type: Array,
-      required: false,
-      default: () => [],
-    },
-    showUsers: {
-      required: false,
-      type: Boolean,
-      default: false,
-    },
   },
   data() {
     return {
       loading: false,
       initialLoading: false,
       query: '',
-      roles: [],
       groups: [],
-      users: [],
       selected: {
-        [LEVEL_TYPES.ROLE]: [],
         [LEVEL_TYPES.GROUP]: [],
-        [LEVEL_TYPES.USER]: [],
       },
     };
   },
@@ -89,73 +61,30 @@ export default {
         Object.entries(this.selected).map(([key, value]) => [key, value.length]),
       );
 
-      const isOnlyRoleSelected =
-        counts[LEVEL_TYPES.ROLE] === 1 &&
-        [counts[LEVEL_TYPES.GROUP], counts[LEVEL_TYPES.USER]].every((count) => count === 0);
-
-      if (isOnlyRoleSelected) {
-        return this.selected[LEVEL_TYPES.ROLE][0].text;
-      }
-
       const labelPieces = [];
-
-      if (counts[LEVEL_TYPES.ROLE] > 0) {
-        labelPieces.push(n__('1 role', '%d roles', counts[LEVEL_TYPES.ROLE]));
-      }
 
       if (counts[LEVEL_TYPES.GROUP] > 0) {
         labelPieces.push(n__('1 group', '%d groups', counts[LEVEL_TYPES.GROUP]));
       }
 
-      if (counts[LEVEL_TYPES.USER] > 0) {
-        labelPieces.push(n__('1 user', '%d users', counts[LEVEL_TYPES.USER]));
-      }
-
       return labelPieces.join(', ') || this.label;
     },
     toggleClass() {
-      return this.toggleLabel === this.label ? '!gl-text-gray-500' : '';
+      return this.toggleLabel === this.label ? 'gl-text-gray-500!' : '';
     },
     selection() {
-      return [
-        ...this.getDataForSave(LEVEL_TYPES.ROLE, 'access_level'),
-        ...this.getDataForSave(LEVEL_TYPES.GROUP, 'group_id'),
-        ...this.getDataForSave(LEVEL_TYPES.USER, 'user_id'),
-      ];
+      return [...this.getDataForSave(LEVEL_TYPES.GROUP, 'group_id')];
     },
   },
   watch: {
     query: debounce(function debouncedSearch() {
       return this.getData();
     }, 500),
-    items(items) {
-      this.setDataForSave(items);
-    },
   },
   created() {
     this.getData({ initial: true });
   },
   methods: {
-    setDataForSave(items) {
-      this.selected = items.reduce(
-        (selected, item) => {
-          if (item.group_id) {
-            selected[LEVEL_TYPES.GROUP].push({ id: item.group_id, ...item });
-          } else if (item.user_id) {
-            selected[LEVEL_TYPES.USER].push({ id: item.user_id, ...item });
-          } else if (item.access_level) {
-            const level = this.accessLevelsData.find(({ id }) => item.access_level === id);
-            selected[LEVEL_TYPES.ROLE].push(level);
-          }
-          return selected;
-        },
-        {
-          [LEVEL_TYPES.GROUP]: [],
-          [LEVEL_TYPES.USER]: [],
-          [LEVEL_TYPES.ROLE]: [],
-        },
-      );
-    },
     focusInput() {
       this.$refs.search.focusInput();
     },
@@ -170,44 +99,25 @@ export default {
             includeParentSharedGroups: true,
             search: this.query,
           }),
-          this.showUsers ? getUsers(this.query) : Promise.resolve({ data: this.users }),
         ])
-          .then(([groupsResponse, usersResponse]) => {
-            this.consolidateData(groupsResponse.data, usersResponse.data);
+          .then(([groupsResponse]) => {
+            this.consolidateData(groupsResponse.data);
             this.setSelected({ initial });
           })
-          .catch(() => createAlert({ message: __('Failed to load groups and users.') }))
+          .catch(() => createAlert({ message: __('Failed to load groups.') }))
           .finally(() => {
             this.initialLoading = false;
             this.loading = false;
           });
       }
     },
-    consolidateData(groupsResponse = [], usersResponse = []) {
-      this.roles = this.accessLevelsData.map((role) => ({ ...role, type: LEVEL_TYPES.ROLE }));
-
+    consolidateData(groupsResponse = []) {
       if (this.hasLicense) {
         this.groups = groupsResponse.map((group) => ({ ...group, type: LEVEL_TYPES.GROUP }));
-        this.users = usersResponse.map(({ id, name, username, avatar_url }) => ({
-          id,
-          name,
-          username,
-          avatar_url,
-          type: LEVEL_TYPES.USER,
-        }));
       }
     },
     setSelected({ initial } = {}) {
       if (initial) {
-        const selectedRoles = intersectionWith(
-          this.roles,
-          this.preselectedItems,
-          (role, selected) => {
-            return selected.type === LEVEL_TYPES.ROLE && role.id === selected.access_level;
-          },
-        );
-        this.selected[LEVEL_TYPES.ROLE] = selectedRoles;
-
         const selectedGroups = intersectionWith(
           this.groups,
           this.preselectedItems,
@@ -216,23 +126,6 @@ export default {
           },
         );
         this.selected[LEVEL_TYPES.GROUP] = selectedGroups;
-
-        const selectedUsers = this.preselectedItems
-          .filter(({ type }) => type === LEVEL_TYPES.USER)
-          .map(({ user_id: id, name, username, avatar_url, type }) => ({
-            id,
-            name,
-            username,
-            avatar_url,
-            type,
-          }));
-
-        this.selected[LEVEL_TYPES.USER] = selectedUsers;
-
-        this.users = this.users.filter(
-          (user) => !this.selected[LEVEL_TYPES.USER].some((selected) => selected.id === user.id),
-        );
-        this.users.unshift(...this.selected[LEVEL_TYPES.USER]);
       }
     },
     getDataForSave(accessType, key) {
@@ -251,16 +144,14 @@ export default {
       return [...added, ...removed, ...preserved];
     },
     onItemClick(item) {
-      this.toggleSelection(item);
+      this.toggleSelection(this.selected[item.type], item);
       this.emitUpdate();
     },
-    toggleSelection(item) {
-      const itemSelected = this.isSelected(item);
-      if (itemSelected) {
-        this.selected[item.type] = this.selected[item.type].filter(({ id }) => id !== item.id);
-        return;
-      }
-      this.selected[item.type].push(item);
+    toggleSelection(arr, item) {
+      const itemIndex = arr.findIndex(({ id }) => id === item.id);
+      if (itemIndex > -1) {
+        arr.splice(itemIndex, 1);
+      } else arr.push(item);
     },
     isSelected(item) {
       return this.selected[item.type].some((selected) => selected.id === item.id);
@@ -289,23 +180,6 @@ export default {
       <gl-search-box-by-type ref="search" v-model.trim="query" :is-loading="loading" />
     </template>
     <div>
-      <template v-if="roles.length">
-        <gl-dropdown-section-header>{{
-          $options.i18n.rolesSectionHeader
-        }}</gl-dropdown-section-header>
-        <gl-dropdown-item
-          v-for="role in roles"
-          :key="`${role.id}${role.text}`"
-          data-testid="role-dropdown-item"
-          is-check-item
-          :is-checked="isSelected(role)"
-          @click.capture.native.stop="onItemClick(role)"
-        >
-          {{ role.text }}
-        </gl-dropdown-item>
-        <gl-dropdown-divider v-if="groups.length || users.length" />
-      </template>
-
       <template v-if="groups.length">
         <gl-dropdown-section-header>{{
           $options.i18n.groupsSectionHeader
@@ -316,28 +190,9 @@ export default {
           :avatar-url="group.avatar_url"
           is-check-item
           :is-checked="isSelected(group)"
-          @click.capture.native.stop="onItemClick(group)"
+          @click.native.capture.stop="onItemClick(group)"
         >
           {{ group.name }}
-        </gl-dropdown-item>
-        <gl-dropdown-divider v-if="users.length" />
-      </template>
-
-      <template v-if="users.length">
-        <gl-dropdown-section-header>{{
-          $options.i18n.usersSectionHeader
-        }}</gl-dropdown-section-header>
-        <gl-dropdown-item
-          v-for="user in users"
-          :key="`${user.id}${user.username}`"
-          data-testid="user-dropdown-item"
-          :avatar-url="user.avatar_url"
-          :secondary-text="user.username"
-          is-check-item
-          :is-checked="isSelected(user)"
-          @click.capture.native.stop="onItemClick(user)"
-        >
-          {{ user.name }}
         </gl-dropdown-item>
       </template>
     </div>

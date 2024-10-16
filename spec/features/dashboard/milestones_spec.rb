@@ -32,8 +32,7 @@ RSpec.describe 'Dashboard > Milestones', :js, feature_category: :team_planning d
       expect(page).to have_current_path dashboard_milestones_path, ignore_query: true
       expect(page).to have_content(milestone.title)
       expect(page).to have_content(group.name)
-      expect(first('.milestone').text).to match(%r{\d/\d complete})
-      expect(first('.milestone').text).to match(%r{\d%})
+      expect(first('.milestone')).to have_content('Merge requests')
     end
 
     describe 'new milestones dropdown' do

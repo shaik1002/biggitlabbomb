@@ -7,7 +7,6 @@ module ThrottledTouch
   TOUCH_INTERVAL = 1.minute
 
   def touch(*args, **kwargs)
-    last_updated_at = updated_at_previously_was || updated_at
-    super if (Time.zone.now - last_updated_at) > TOUCH_INTERVAL
+    super if (Time.zone.now - updated_at) > TOUCH_INTERVAL
   end
 end

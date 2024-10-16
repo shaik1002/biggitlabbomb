@@ -86,7 +86,7 @@ export default {
     :note="draft"
     :line="line"
     :discussion-root="true"
-    class="draft-note !gl-mb-0"
+    class="draft-note-component draft-note gl-mb-0!"
     @handleEdit="handleEditing"
     @cancelForm="handleNotEditing"
     @updateSuccess="handleNotEditing"
@@ -100,6 +100,7 @@ export default {
       <gl-badge
         v-gl-tooltip
         variant="warning"
+        size="sm"
         class="gl-mr-2"
         :title="__('Pending comments are hidden until you submit your review.')"
       >
@@ -110,7 +111,7 @@ export default {
       <div
         v-if="draftCommands"
         v-safe-html:[$options.safeHtmlConfig]="draftCommands"
-        class="draft-note-referenced-commands gl-mb-2 gl-ml-3 gl-text-sm gl-text-subtle"
+        class="referenced-commands draft-note-commands"
       ></div>
     </template>
   </noteable-note>

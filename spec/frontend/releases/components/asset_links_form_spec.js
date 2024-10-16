@@ -1,4 +1,4 @@
-import { mount, shallowMount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 import Vue from 'vue';
 // eslint-disable-next-line no-restricted-imports
 import Vuex from 'vuex';
@@ -17,7 +17,7 @@ describe('Release edit component', () => {
   let getters;
   let state;
 
-  const factory = ({ mountFn = mount, release: overriddenRelease, linkErrors } = {}) => {
+  const factory = ({ release: overriddenRelease, linkErrors } = {}) => {
     state = {
       release: overriddenRelease || release,
       releaseAssetsDocsPath: 'path/to/release/assets/docs',
@@ -52,7 +52,7 @@ describe('Release edit component', () => {
       },
     });
 
-    wrapper = mountFn(AssetLinksForm, {
+    wrapper = mount(AssetLinksForm, {
       store,
     });
   };
@@ -217,13 +217,13 @@ describe('Release edit component', () => {
       beforeEach(() => {
         delete release.assets.links[0].linkType;
 
-        factory({ mountFn: shallowMount, release });
+        factory({ release });
       });
 
       it('selects the default asset type', () => {
-        expect(wrapper.findComponent({ ref: 'typeSelect' }).attributes('value')).toBe(
-          DEFAULT_ASSET_LINK_TYPE,
-        );
+        const selected = wrapper.findComponent({ ref: 'typeSelect' }).element.value;
+
+        expect(selected).toBe(DEFAULT_ASSET_LINK_TYPE);
       });
     });
   });

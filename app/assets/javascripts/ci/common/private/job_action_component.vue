@@ -98,7 +98,6 @@ export default {
         .post(`${this.link}.json`)
         .then(() => {
           this.isLoading = false;
-          this.isDisabled = false;
 
           this.$emit('pipelineActionRequestComplete');
         })
@@ -125,20 +124,20 @@ export default {
     :class="cssClass"
     :disabled="isDisabled"
     size="small"
-    class="js-ci-action gl-ci-action-icon-container ci-action-icon-container ci-action-icon-wrapper gl-flex gl-items-center gl-justify-center"
+    class="js-ci-action gl-ci-action-icon-container ci-action-icon-container ci-action-icon-wrapper gl-display-flex gl-align-items-center gl-justify-content-center"
     data-testid="ci-action-button"
     @click.stop="onClickAction"
   >
-    <div class="gl-flex gl-h-full gl-items-center gl-justify-center">
+    <div class="gl-display-flex gl-align-items-center gl-justify-content-center gl-h-full">
       <gl-loading-icon
         v-if="isLoading"
         size="sm"
-        class="gl-button-icon js-action-icon-loading gl-m-2"
+        class="gl-button-icon gl-m-2 js-action-icon-loading"
       />
       <gl-icon
         v-else
         :name="actionIcon"
-        class="gl-button-icon !gl-mr-0 gl-p-1"
+        class="gl-button-icon gl-p-1 gl-mr-0!"
         :aria-label="actionIcon"
       />
     </div>

@@ -5,9 +5,6 @@ module UploadsActions
   include Gitlab::Utils::StrongMemoize
   include SendFileUpload
 
-  # Starting with version 2, Markdown upload URLs use project / group IDs instead of paths
-  ID_BASED_UPLOAD_PATH_VERSION = 2
-
   UPLOAD_MOUNTS = %w[avatar attachment file logo pwa_icon header_logo favicon screenshot].freeze
 
   included do
@@ -20,7 +17,7 @@ module UploadsActions
   end
 
   def create
-    uploader = UploadService.new(model, params[:file], uploader_class, uploaded_by_user_id: current_user&.id).execute
+    uploader = UploadService.new(model, params[:file], uploader_class).execute
 
     respond_to do |format|
       if uploader
@@ -146,12 +143,6 @@ module UploadsActions
     return false if target_project && !target_project.public? && target_project.enforce_auth_checks_on_uploads?
 
     action_name == 'show' && embeddable?
-  end
-
-  def upload_version_at_least?(version)
-    return unless uploader && uploader.upload
-
-    uploader.upload.version >= version
   end
 
   def target_project

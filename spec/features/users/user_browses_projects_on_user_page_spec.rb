@@ -77,7 +77,7 @@ RSpec.describe 'Users > User browses projects on user page', :js, feature_catego
       visit user_path(user)
       click_nav_link('Personal projects')
 
-      expect(page).to have_css('.user-profile-content #js-legacy-tabs-container')
+      expect(page).to have_css('.tab-content #projects.active')
       expect(title).to start_with(user.name)
 
       expect(page).to have_content(public_project.name)
@@ -142,7 +142,7 @@ RSpec.describe 'Users > User browses projects on user page', :js, feature_catego
 
           click_nav_link('Contributed projects')
 
-          page.within '#js-legacy-tabs-container' do
+          page.within '#contributed' do
             expect(page).to have_content(contributed_project.name)
           end
         end

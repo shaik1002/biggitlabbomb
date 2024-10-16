@@ -26,7 +26,6 @@ class ProjectAutoDevops < ApplicationRecord
   def create_gitlab_deploy_token
     project.deploy_tokens.create!(
       name: DeployToken::GITLAB_DEPLOY_TOKEN_NAME,
-      project_id: project_id,
       read_registry: true
     )
   end

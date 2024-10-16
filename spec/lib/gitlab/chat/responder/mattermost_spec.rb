@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Chat::Responder::Mattermost, feature_category: :integrations do
+RSpec.describe Gitlab::Chat::Responder::Mattermost do
   let(:chat_name) { create(:chat_name, chat_id: 'U123') }
 
   let(:pipeline) do
@@ -10,7 +10,6 @@ RSpec.describe Gitlab::Chat::Responder::Mattermost, feature_category: :integrati
 
     pipeline.create_chat_data!(
       response_url: 'http://example.com',
-      project_id: pipeline.project_id,
       chat_name_id: chat_name.id
     )
 

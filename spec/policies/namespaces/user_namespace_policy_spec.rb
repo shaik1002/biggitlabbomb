@@ -58,7 +58,7 @@ RSpec.describe Namespaces::UserNamespacePolicy, feature_category: :groups_and_pr
     end
   end
 
-  describe 'create_jira_connect_subscription', feature_category: :integrations do
+  describe 'create_jira_connect_subscription' do
     context 'admin' do
       let(:current_user) { build_stubbed(:admin) }
 
@@ -106,7 +106,7 @@ RSpec.describe Namespaces::UserNamespacePolicy, feature_category: :groups_and_pr
     end
   end
 
-  describe 'import projects', feature_category: :importers do
+  describe 'import projects' do
     context 'when user can import projects' do
       let(:current_user) { owner }
 

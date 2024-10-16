@@ -24,9 +24,9 @@ module EntityDateHelper
     mins = (diff / 60).floor
     seconds = diff % 60
     hours = (mins / 60).floor
-    mins %= 60
+    mins = mins % 60
     days = (hours / 24).floor
-    hours %= 24
+    hours = hours % 24
 
     duration_hash = {}
 

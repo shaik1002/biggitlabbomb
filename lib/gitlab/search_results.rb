@@ -113,20 +113,20 @@ module Gitlab
     end
 
     # highlighting is only performed by Elasticsearch backed results
-    def highlight_map(*)
+    def highlight_map(_scope)
       {}
     end
 
     # aggregations are only performed by Elasticsearch backed results
-    def aggregations(*)
+    def aggregations(_scope)
       []
     end
 
-    def failed?(*)
+    def failed?
       false
     end
 
-    def error(*)
+    def error
       nil
     end
 

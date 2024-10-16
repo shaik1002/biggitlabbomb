@@ -205,7 +205,7 @@ RSpec.describe 'New project', :js, feature_category: :groups_and_projects do
           visit new_project_path
           click_link 'Create blank project'
           page.within('#blank-project-pane') do
-            expect(page).to have_field(key, checked: true)
+            expect(find_field("project_visibility_level_#{level}")).to be_checked
           end
         end
 
@@ -216,7 +216,7 @@ RSpec.describe 'New project', :js, feature_category: :groups_and_projects do
           choose(key)
           click_button('Create project')
           page.within('#blank-project-pane') do
-            expect(page).to have_field(key, checked: true)
+            expect(find_field("project_visibility_level_#{level}")).to be_checked
           end
         end
       end
@@ -234,7 +234,7 @@ RSpec.describe 'New project', :js, feature_category: :groups_and_projects do
             click_link 'Create blank project'
 
             page.within('#blank-project-pane') do
-              expect(page).to have_field('Private', checked: true)
+              expect(find_field("project_visibility_level_#{Gitlab::VisibilityLevel::PRIVATE}")).to be_checked
             end
           end
         end
@@ -243,7 +243,7 @@ RSpec.describe 'New project', :js, feature_category: :groups_and_projects do
           it 'is not allowed' do
             visit new_project_path(namespace_id: group.id)
 
-            expect(page).to have_content('Page not found')
+            expect(page).to have_content('Not Found')
           end
         end
       end
@@ -261,7 +261,7 @@ RSpec.describe 'New project', :js, feature_category: :groups_and_projects do
             click_link 'Create blank project'
 
             page.within('#blank-project-pane') do
-              expect(page).to have_field('Private', checked: true)
+              expect(find_field("project_visibility_level_#{Gitlab::VisibilityLevel::PRIVATE}")).to be_checked
             end
           end
         end
@@ -270,7 +270,7 @@ RSpec.describe 'New project', :js, feature_category: :groups_and_projects do
           it 'is not allowed' do
             visit new_project_path(namespace_id: group.id, project: { visibility_level: Gitlab::VisibilityLevel::PRIVATE })
 
-            expect(page).to have_content('Page not found')
+            expect(page).to have_content('Not Found')
           end
         end
       end
@@ -367,30 +367,30 @@ RSpec.describe 'New project', :js, feature_category: :groups_and_projects do
           click_button public_group.full_path
           select_listbox_item user.username
 
-          expect(page).to have_field("Private", disabled: false)
-          expect(page).to have_field("Internal", disabled: false)
-          expect(page).to have_field("Public", disabled: false)
+          expect(find("#project_visibility_level_#{Gitlab::VisibilityLevel::PRIVATE}")).not_to be_disabled
+          expect(find("#project_visibility_level_#{Gitlab::VisibilityLevel::INTERNAL}")).not_to be_disabled
+          expect(find("#project_visibility_level_#{Gitlab::VisibilityLevel::PUBLIC}")).not_to be_disabled
 
           click_button user.username
           select_listbox_item public_group.full_path
 
-          expect(page).to have_field("Private", disabled: false)
-          expect(page).to have_field("Internal", disabled: false)
-          expect(page).to have_field("Public", disabled: false)
+          expect(find("#project_visibility_level_#{Gitlab::VisibilityLevel::PRIVATE}")).not_to be_disabled
+          expect(find("#project_visibility_level_#{Gitlab::VisibilityLevel::INTERNAL}")).not_to be_disabled
+          expect(find("#project_visibility_level_#{Gitlab::VisibilityLevel::PUBLIC}")).not_to be_disabled
 
           click_button public_group.full_path
           select_listbox_item internal_group.full_path
 
-          expect(page).to have_field("Private", disabled: false)
-          expect(page).to have_field("Internal", disabled: false)
-          expect(page).to have_field("Public", disabled: true)
+          expect(find("#project_visibility_level_#{Gitlab::VisibilityLevel::PRIVATE}")).not_to be_disabled
+          expect(find("#project_visibility_level_#{Gitlab::VisibilityLevel::INTERNAL}")).not_to be_disabled
+          expect(find("#project_visibility_level_#{Gitlab::VisibilityLevel::PUBLIC}")).to be_disabled
 
           click_button internal_group.full_path
           select_listbox_item private_group.full_path
 
-          expect(page).to have_field("Private", disabled: false)
-          expect(page).to have_field("Internal", disabled: true)
-          expect(page).to have_field("Public", disabled: true)
+          expect(find("#project_visibility_level_#{Gitlab::VisibilityLevel::PRIVATE}")).not_to be_disabled
+          expect(find("#project_visibility_level_#{Gitlab::VisibilityLevel::INTERNAL}")).to be_disabled
+          expect(find("#project_visibility_level_#{Gitlab::VisibilityLevel::PUBLIC}")).to be_disabled
         end
       end
     end

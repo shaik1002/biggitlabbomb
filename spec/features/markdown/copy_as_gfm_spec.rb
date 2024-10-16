@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Copy as GFM', :js, feature_category: :markdown do
+RSpec.describe 'Copy as GFM', :js, feature_category: :team_planning do
   include MarkupHelper
   include RepoHelpers
   include ActionView::Helpers::JavaScriptHelper
@@ -453,7 +453,7 @@ RSpec.describe 'Copy as GFM', :js, feature_category: :markdown do
               <div class="js-suggestion-diff-header font-weight-bold">
                 Suggested change
                 <a href="/gitlab/help/user/discussions/index.md#suggest-changes" aria-label="Help" class="js-help-btn">
-                  <svg aria-hidden="true" class="s16 ic-question-o">
+                  <svg aria-hidden="true" class="s16 ic-question-o link-highlight">
                     <use xlink:href="/gitlab/assets/icons.svg#question-o"></use>
                   </svg>
                 </a>
@@ -694,7 +694,7 @@ RSpec.describe 'Copy as GFM', :js, feature_category: :markdown do
           it 'copies as inline code' do
             verify(
               '[id="2f6fcd96b88b36ce98c38da085c795a27d92a3dd_10_9"]',
-              '`      raise RuntimeError, "System commands must be given as an array of strings"`',
+              '`raise RuntimeError, "System commands must be given as an array of strings"`',
               target: '[id="2f6fcd96b88b36ce98c38da085c795a27d92a3dd_10_9"]'
             )
           end
@@ -773,11 +773,11 @@ RSpec.describe 'Copy as GFM', :js, feature_category: :markdown do
         wait_for_requests
       end
 
-      context 'selecting one line of text with a single word in it' do
+      context 'selecting one word of text' do
         it 'copies as inline code' do
           verify(
             '.line[id="LC10"]',
-            '`    end`'
+            '`end`'
           )
         end
       end
@@ -786,7 +786,7 @@ RSpec.describe 'Copy as GFM', :js, feature_category: :markdown do
         it 'copies as inline code' do
           verify(
             '.line[id="LC9"]',
-            '`      raise RuntimeError, "System commands must be given as an array of strings"`'
+            '`raise RuntimeError, "System commands must be given as an array of strings"`'
           )
         end
       end
@@ -825,7 +825,7 @@ RSpec.describe 'Copy as GFM', :js, feature_category: :markdown do
         it 'copies as inline code' do
           verify(
             '.line[id="LC27"]',
-            '`    "bio": null,`'
+            '`"bio": null,`'
           )
         end
       end

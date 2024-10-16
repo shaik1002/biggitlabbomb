@@ -1,11 +1,19 @@
 ---
 stage: Create
-group: Remote Development
+group: IDE
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 description: "Create a GitLab workspaces proxy to authenticate and authorize workspaces in your cluster."
 ---
 
 # Tutorial: Set up the GitLab workspaces proxy
+
+DETAILS:
+**Tier:** Premium, Ultimate
+**Offering:** GitLab.com, Self-managed, GitLab Dedicated
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/112397) in GitLab 15.11 [with a flag](../../administration/feature_flags.md) named `remote_development_feature_flag`. Disabled by default.
+> - [Enabled on GitLab.com and self-managed](https://gitlab.com/gitlab-org/gitlab/-/issues/391543) in GitLab 16.0.
+> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/136744) in GitLab 16.7. Feature flag `remote_development_feature_flag` removed.
 
 In this tutorial, you'll learn how to set up the GitLab workspaces proxy
 to authenticate and authorize [workspaces](index.md) in your cluster.
@@ -17,7 +25,6 @@ To set up `gitlab-workspaces-proxy`, you're going to:
 1. [Generate an SSH host key](#generate-an-ssh-host-key).
 1. [Export the GitLab URL](#export-the-gitlab-url).
 1. [Create a configuration secret](#create-a-configuration-secret).
-1. [Install the Helm chart for the proxy](#install-the-helm-chart-for-the-proxy).
 1. [Verify the Kubernetes resources](#verify-the-kubernetes-resources).
 1. [Update your DNS records](#update-your-dns-records).
 
@@ -70,22 +77,22 @@ To generate TLS certificates:
 
 1. Update the following environment variables with the certificate directories from the output:
 
-   ```shell
-   export WORKSPACES_DOMAIN_CERT="${HOME}/.certbot/config/live/${GITLAB_WORKSPACES_PROXY_DOMAIN}/fullchain.pem"
-   export WORKSPACES_DOMAIN_KEY="${HOME}/.certbot/config/live/${GITLAB_WORKSPACES_PROXY_DOMAIN}/privkey.pem"
-   export WILDCARD_DOMAIN_CERT="${HOME}/.certbot/config/live/${GITLAB_WORKSPACES_WILDCARD_DOMAIN}/fullchain.pem"
-   export WILDCARD_DOMAIN_KEY="${HOME}/.certbot/config/live/${GITLAB_WORKSPACES_WILDCARD_DOMAIN}/privkey.pem"
-   ```
+    ```shell
+    export WORKSPACES_DOMAIN_CERT="${HOME}/.certbot/config/live/${GITLAB_WORKSPACES_PROXY_DOMAIN}/fullchain.pem"
+    export WORKSPACES_DOMAIN_KEY="${HOME}/.certbot/config/live/${GITLAB_WORKSPACES_PROXY_DOMAIN}/privkey.pem"
+    export WILDCARD_DOMAIN_CERT="${HOME}/.certbot/config/live/${GITLAB_WORKSPACES_WILDCARD_DOMAIN}/fullchain.pem"
+    export WILDCARD_DOMAIN_KEY="${HOME}/.certbot/config/live/${GITLAB_WORKSPACES_WILDCARD_DOMAIN}/privkey.pem"
+    ```
 
-   The `certbot` command might create a different path for the wildcard domain
-   by using the proxy domain and a `-0001` prefix:
+    The `certbot` command might create a different path for the wildcard domain
+    by using the proxy domain and a `-0001` prefix:
 
-   ```shell
-   export WORKSPACES_DOMAIN_CERT="${HOME}/.certbot/config/live/${GITLAB_WORKSPACES_PROXY_DOMAIN}/fullchain.pem"
-   export WORKSPACES_DOMAIN_KEY="${HOME}/.certbot/config/live/${GITLAB_WORKSPACES_PROXY_DOMAIN}/privkey.pem"
-   export WILDCARD_DOMAIN_CERT="${HOME}/.certbot/config/live/${GITLAB_WORKSPACES_PROXY_DOMAIN}-0001/fullchain.pem"
-   export WILDCARD_DOMAIN_KEY="${HOME}/.certbot/config/live/${GITLAB_WORKSPACES_PROXY_DOMAIN}-0001/privkey.pem"
-   ```
+    ```shell
+    export WORKSPACES_DOMAIN_CERT="${HOME}/.certbot/config/live/${GITLAB_WORKSPACES_PROXY_DOMAIN}/fullchain.pem"
+    export WORKSPACES_DOMAIN_KEY="${HOME}/.certbot/config/live/${GITLAB_WORKSPACES_PROXY_DOMAIN}/privkey.pem"
+    export WILDCARD_DOMAIN_CERT="${HOME}/.certbot/config/live/${GITLAB_WORKSPACES_PROXY_DOMAIN}-0001/fullchain.pem"
+    export WILDCARD_DOMAIN_KEY="${HOME}/.certbot/config/live/${GITLAB_WORKSPACES_PROXY_DOMAIN}-0001/privkey.pem"
+    ```
 
 Now that you've generated the certificates, it's time to register an app on your GitLab instance.
 
@@ -95,7 +102,6 @@ To register an app on your GitLab instance:
 
 1. [Configure GitLab as an OAuth 2.0 identity provider](../../integration/oauth_provider.md).
 1. Set the redirect URI to `https://${GITLAB_WORKSPACES_PROXY_DOMAIN}/auth/callback`.
-1. Select the **Trusted** checkbox.
 1. Set the scopes to `api`, `read_user`, `openid`, and `profile`.
 1. Export your `CLIENT_ID`, `CLIENT_SECRET`, and `REDIRECT_URI`:
 
@@ -141,15 +147,11 @@ To create a configuration secret for the proxy:
    export SIGNING_KEY="make_up_a_random_key_consisting_of_letters_numbers_and_special_chars"
    ```
 
-## Install the Helm chart for the proxy
-
-To install the Helm chart for the proxy:
-
 1. Add the `helm` repository:
 
    ```shell
    helm repo add gitlab-workspaces-proxy \
-     https://gitlab.com/api/v4/projects/gitlab-org%2fworkspaces%2fgitlab-workspaces-proxy/packages/helm/devel
+     https://gitlab.com/api/v4/projects/gitlab-org%2fremote-development%2fgitlab-workspaces-proxy/packages/helm/devel
    ```
 
 1. Modify the `ingress.className` parameter if you're using a different Ingress class:
@@ -159,7 +161,7 @@ To install the Helm chart for the proxy:
 
    helm upgrade --install gitlab-workspaces-proxy \
      gitlab-workspaces-proxy/gitlab-workspaces-proxy \
-     --version 0.1.15 \
+     --version 0.1.12 \
      --namespace=gitlab-workspaces \
      --create-namespace \
      --set="auth.client_id=${CLIENT_ID}" \
@@ -200,7 +202,7 @@ Let's now verify the Kubernetes resources.
      kubectl -n gitlab-workspaces get ingress
      ```
 
-     If you deploy the Helm chart for the proxy to any namespace other than `gitlab-workspaces`,
+     If you deploy the GitLab Helm chart to any namespace other than `gitlab-workspaces`,
      update the namespace in the [GitLab agent configuration](gitlab_agent_configuration.md):
 
      ```yaml

@@ -1,43 +1,29 @@
-import { GlTable, GlModal } from '@gitlab/ui';
+import { GlCard, GlTable } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import Vue from 'vue';
 // eslint-disable-next-line no-restricted-imports
 import Vuex from 'vuex';
-import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
 import BadgeSettings from '~/badges/components/badge_settings.vue';
 import BadgeList from '~/badges/components/badge_list.vue';
 import BadgeForm from '~/badges/components/badge_form.vue';
-import createState from '~/badges/store/state';
-import actions from '~/badges/store/actions';
-import { INITIAL_PAGE } from '~/badges/constants';
+import store from '~/badges/store';
 import { createDummyBadge } from '../dummy_badge';
-import { MOCK_PAGINATION } from '../mock_data';
 
 Vue.use(Vuex);
 
 describe('BadgeSettings component', () => {
   let wrapper;
-  let mockedActions;
   const badge = createDummyBadge();
 
   const createComponent = (isEditing = false) => {
-    mockedActions = Object.fromEntries(Object.keys(actions).map((name) => [name, jest.fn()]));
+    store.state.badges = [badge];
+    store.state.kind = 'project';
+    store.state.isEditing = isEditing;
 
-    const store = new Vuex.Store({
-      state: {
-        ...createState(),
-        badges: [badge],
-        pagination: MOCK_PAGINATION,
-        kind: 'project',
-        isEditing,
-      },
-      actions: mockedActions,
-    });
-
-    wrapper = shallowMountExtended(BadgeSettings, {
+    wrapper = shallowMount(BadgeSettings, {
       store,
       stubs: {
-        CrudComponent,
+        GlCard,
         GlTable,
         'badge-list': BadgeList,
         'badge-form': BadgeForm,
@@ -49,23 +35,14 @@ describe('BadgeSettings component', () => {
     createComponent();
   });
 
-  const findModal = () => wrapper.findComponent(GlModal);
-
-  it('calls loadBadges when the component is created', () => {
-    createComponent();
-
-    expect(mockedActions.loadBadges).toHaveBeenCalledWith(expect.any(Object), {
-      page: INITIAL_PAGE,
-    });
-  });
-
   it('renders a header with the badge count', () => {
     createComponent();
-    const cardTitle = wrapper.findByTestId('crud-title');
-    const cardCount = wrapper.findByTestId('crud-count');
+
+    const cardTitle = wrapper.find('.gl-new-card-title');
+    const cardCount = wrapper.find('.gl-new-card-count');
 
     expect(cardTitle.text()).toContain('Your badges');
-    expect(cardCount.text()).toContain(MOCK_PAGINATION.total.toString());
+    expect(cardCount.text()).toContain('1');
   });
 
   it('displays a table', () => {
@@ -82,29 +59,11 @@ describe('BadgeSettings component', () => {
 
   describe('when editing', () => {
     beforeEach(() => {
-      createComponent(true);
+      createComponent({ isEditing: true });
     });
 
-    it('sets `GlModal` `visible` prop to `true`', () => {
-      expect(wrapper.findComponent(GlModal).props('visible')).toBe(true);
-    });
-
-    it('renders `BadgeForm` in modal', () => {
-      expect(findModal().findComponent(BadgeForm).props('isEditing')).toBe(true);
-    });
-
-    describe('when modal primary event is fired', () => {
-      it('emits submit event on form', () => {
-        const dispatchEventSpy = jest.spyOn(
-          findModal().findComponent(BadgeForm).element,
-          'dispatchEvent',
-        );
-        findModal().vm.$emit('primary', { preventDefault: jest.fn() });
-
-        expect(dispatchEventSpy).toHaveBeenCalledWith(
-          new CustomEvent('submit', { cancelable: true }),
-        );
-      });
+    it('displays a form to edit a badge', () => {
+      expect(wrapper.find('[data-testid="edit-badge"]').isVisible()).toBe(true);
     });
   });
 });

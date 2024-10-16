@@ -5,9 +5,8 @@ module Packages
     class CheckManifestCoherenceService
       MismatchError = Class.new(StandardError)
 
-      PKG_TYPE = 'npm'
-      MANIFEST_NOT_COHERENT_ERROR = 'Package manifest is not coherent'
-      VERSION_NOT_COMPLIANT_ERROR = 'Version in package.json is not SemVer compliant'
+      delegate :npm_metadatum, to: :package, private: true
+      delegate :package_json_scripts, to: :npm_metadatum, private: true, allow_nil: true
 
       def initialize(package, package_json_entry)
         @package = package
@@ -17,7 +16,7 @@ module Packages
       def execute
         parsed_package_json = Gitlab::Json.parse(package_json_entry.read)
 
-        raise MismatchError, MANIFEST_NOT_COHERENT_ERROR unless coherent?(parsed_package_json)
+        raise MismatchError, 'Package manifest is not coherent' unless coherent?(parsed_package_json)
 
         ServiceResponse.success
       end
@@ -28,16 +27,8 @@ module Packages
 
       def coherent?(package_json)
         package_json['name'] == package.name &&
-          same_version?(package_json['version'], package.version)
-      end
-
-      def same_version?(version1, version2)
-        v1 = SemverDialects.parse_version(PKG_TYPE, version1)
-        v2 = SemverDialects.parse_version(PKG_TYPE, version2)
-
-        v1 == v2
-      rescue SemverDialects::InvalidVersionError
-        raise MismatchError, VERSION_NOT_COMPLIANT_ERROR
+          package_json['version'] == package.version &&
+          (package_json['scripts'] || {}) == (package_json_scripts || {})
       end
     end
   end

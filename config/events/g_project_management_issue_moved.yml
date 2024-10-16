@@ -2,6 +2,9 @@
 description: An issue was moved to another project
 internal_events: true
 action: g_project_management_issue_moved
+label_description:
+property_description:
+value_description:
 extra_properties:
 identifiers:
 - project

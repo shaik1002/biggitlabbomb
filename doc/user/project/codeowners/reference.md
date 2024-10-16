@@ -36,7 +36,7 @@ Sections are groups of entries. A section begins with a section heading in squar
 #### Section headings
 
 Section headings must always have a name. They can also be made optional, or
-require a specific number of approvals. A list of default owners can be added to the section heading line.
+require a number of approvals. A list of default owners can be added to the section heading line.
 
 ```plaintext
 # Required section
@@ -231,7 +231,7 @@ If a section heading cannot be parsed, the section is:
 1. Added to the previous section.
 1. If no previous section exists, the section is added to the default section.
 
-#### After the default section
+For example, this file is missing a square closing bracket:
 
 ```plaintext
 * @group
@@ -247,20 +247,21 @@ GitLab recognizes the heading `[Section name` as an entry. The default section i
   - `[Section` owned by `name`
   - `docs/` owned by `@docs_group`
 
-#### After a named section
+This file contains an unescaped space between the words `Section` and `name`.
+GitLab recognizes the intended heading as an entry:
 
 ```plaintext
 [Docs]
 docs/**/* @group
 
-[Section name
+[Section name]{2} @group
 docs/ @docs_group
 ```
 
-GitLab recognizes the heading `[Section name` as an entry. The `[Docs]` section includes 3 rules:
+The `[Docs]` section then includes 3 rules:
 
 - `docs/**/*` owned by `@group`
-- `[Section` owned by `name`
+- `[Section` owned by `name]{2} @group`
 - `docs/` owned by `@docs_group`
 
 ### Malformed owners

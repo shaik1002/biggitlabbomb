@@ -1,5 +1,5 @@
-export const containerTagsExpirationPolicyData = () => ({
-  __typename: 'ContainerTagsExpirationPolicy',
+export const containerExpirationPolicyData = () => ({
+  __typename: 'ContainerExpirationPolicy',
   cadence: 'EVERY_DAY',
   enabled: true,
   keepN: 'TEN_TAGS',
@@ -13,8 +13,8 @@ export const expirationPolicyPayload = (override) => ({
   data: {
     project: {
       id: '1',
-      containerTagsExpirationPolicy: {
-        ...containerTagsExpirationPolicyData(),
+      containerExpirationPolicy: {
+        ...containerExpirationPolicyData(),
         ...override,
       },
     },
@@ -24,7 +24,7 @@ export const expirationPolicyPayload = (override) => ({
 export const emptyExpirationPolicyPayload = () => ({
   data: {
     project: {
-      containerTagsExpirationPolicy: {},
+      containerExpirationPolicy: {},
     },
   },
 });
@@ -33,7 +33,7 @@ export const nullExpirationPolicyPayload = () => ({
   data: {
     project: {
       id: '1',
-      containerTagsExpirationPolicy: null,
+      containerExpirationPolicy: null,
     },
   },
 });
@@ -41,8 +41,8 @@ export const nullExpirationPolicyPayload = () => ({
 export const expirationPolicyMutationPayload = ({ override, errors = [] } = {}) => ({
   data: {
     updateContainerExpirationPolicy: {
-      containerTagsExpirationPolicy: {
-        ...containerTagsExpirationPolicyData(),
+      containerExpirationPolicy: {
+        ...containerExpirationPolicyData(),
         ...override,
       },
       errors,
@@ -222,8 +222,7 @@ export const createContainerProtectionRuleMutationInput = {
 };
 
 export const createContainerProtectionRuleMutationPayloadErrors = [
-  'Repository path pattern should be a valid container repository path with optional wildcard characters.',
-  "Repository path pattern should start with the project's full path",
+  'Repository path pattern has already been taken',
 ];
 
 export const deleteContainerProtectionRuleMutationPayload = ({

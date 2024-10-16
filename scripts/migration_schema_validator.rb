@@ -11,16 +11,9 @@ class MigrationSchemaValidator
 
   VERSION_DIGITS = 14
 
-  SKIP_VALIDATION_LABEL = 'pipeline:skip-check-migrations'
-
   def validate!
     if committed_migrations.empty?
       puts "\e[32m No migrations found, skipping schema validation\e[0m"
-      return
-    end
-
-    if skip_validation?
-      puts "\e[32m Label #{SKIP_VALIDATION_LABEL} is present, skipping schema validation\e[0m"
       return
     end
 
@@ -31,10 +24,6 @@ class MigrationSchemaValidator
 
   private
 
-  def skip_validation?
-    ENV.fetch('CI_MERGE_REQUEST_LABELS', '').split(',').include?(SKIP_VALIDATION_LABEL)
-  end
-
   def validate_schema_on_rollback!
     committed_migrations.reverse_each do |filename|
       version = find_migration_version(filename)
@@ -44,10 +33,7 @@ class MigrationSchemaValidator
     end
 
     git_command = "git diff #{diff_target} -- #{FILENAME}"
-    base_message = "rollback of added migrations does not revert #{FILENAME} to previous state, " \
-      "please investigate. Apply the '#{SKIP_VALIDATION_LABEL}' label to skip this check if needed." \
-      "If you are unsure why this job is failing for your MR, then please refer to this page: " \
-      "https://docs.gitlab.com/ee/development/database/dbcheck-migrations-job.html#false-positives"
+    base_message = "rollback of added migrations does not revert #{FILENAME} to previous state"
 
     validate_clean_output!(git_command, base_message)
   end

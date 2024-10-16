@@ -89,9 +89,8 @@ namespace :import do
     post :upload
   end
 
-  resources :source_users, param: :reassignment_token, only: [] do
+  resources :source_users, only: [] do
     member do
-      get :show
       post :accept
       post :decline
     end

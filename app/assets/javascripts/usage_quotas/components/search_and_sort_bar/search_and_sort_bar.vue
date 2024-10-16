@@ -67,7 +67,7 @@ export default {
     :search-input-placeholder="searchInputPlaceholder"
     :sort-options="sortOptions"
     :initial-sort-by="initialSortBy"
-    class="gl-grow"
+    class="gl-flex-grow-1"
     @onFilter="onFilter"
     @onSort="onSort"
   />

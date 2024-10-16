@@ -43,8 +43,18 @@ RSpec.describe Gitlab::Git::ObjectPool, feature_category: :source_code_managemen
       subject.create # rubocop:disable Rails/SaveBang
     end
 
-    it 'creates the pool' do
-      expect(subject.exists?).to be(true)
+    context "when the pool doesn't exist yet" do
+      it 'creates the pool' do
+        expect(subject.exists?).to be(true)
+      end
+    end
+
+    context 'when the pool already exists' do
+      it 'raises an FailedPrecondition' do
+        expect do
+          subject.create # rubocop:disable Rails/SaveBang
+        end.to raise_error(GRPC::FailedPrecondition)
+      end
     end
   end
 

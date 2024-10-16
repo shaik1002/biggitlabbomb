@@ -1,6 +1,5 @@
-import { builders } from 'prosemirror-test-builder';
 import HardBreak from '~/content_editor/extensions/hard_break';
-import { createTestEditor } from '../test_utils';
+import { createTestEditor, createDocBuilder } from '../test_utils';
 
 describe('content_editor/extensions/hard_break', () => {
   let tiptapEditor;
@@ -11,7 +10,12 @@ describe('content_editor/extensions/hard_break', () => {
   beforeEach(() => {
     tiptapEditor = createTestEditor({ extensions: [HardBreak] });
 
-    ({ doc, paragraph: p } = builders(tiptapEditor.schema));
+    ({
+      builders: { doc, p },
+    } = createDocBuilder({
+      tiptapEditor,
+      names: { hardBreak: { nodeType: HardBreak.name } },
+    }));
   });
 
   describe('Mod-Enter shortcut', () => {

@@ -6,8 +6,11 @@ RSpec.shared_context 'with current_organization setting', shared_context: :metad
   let_it_be(:current_organization, reload: true) { create(:organization, name: 'Current Organization') }
 
   before do
-    allow(Current).to receive(:organization).and_return(current_organization)
-    allow(Current).to receive(:organization_id).and_return(current_organization.id)
+    Current.organization = current_organization
+  end
+
+  after do
+    Current.reset
   end
 end
 

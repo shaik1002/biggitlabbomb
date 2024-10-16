@@ -1,20 +1,23 @@
 <script>
-import { GlLink, GlExperimentBadge } from '@gitlab/ui';
+import { GlLink } from '@gitlab/ui';
+import ExperimentBadge from '~/vue_shared/components/badges/experiment_badge.vue';
 
 export default {
-  name: 'LogViewerTopBar',
+  name: 'LogViewerFeedbackPopover',
   components: {
     GlLink,
-    GlExperimentBadge,
+    ExperimentBadge,
   },
 };
 </script>
 <template>
-  <div class="job-log-viewer-top-bar gl-flex gl-items-center gl-justify-between">
-    <div>{{ s__('Job|Full log viewer') }}<gl-experiment-badge /></div>
+  <div
+    class="job-log-viewer-top-bar gl-display-flex gl-align-items-center gl-justify-content-space-between"
+  >
+    <div>{{ s__('Job|Full log viewer') }} <experiment-badge class="gl-display-inline" /></div>
     <div>
       <gl-link href="https://gitlab.com/gitlab-org/gitlab/-/issues/454817" target="_blank">{{
-        s__('Job|Give feedback')
+        s__('Job|Feedback issue')
       }}</gl-link>
     </div>
   </div>

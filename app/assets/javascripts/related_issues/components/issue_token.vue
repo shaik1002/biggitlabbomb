@@ -48,9 +48,8 @@ export default {
 <template>
   <div
     :class="{
-      'issue-token gl-inline-flex gl-max-w-full gl-items-stretch gl-whitespace-nowrap gl-leading-24':
-        isCondensed,
-      'issuable-info-container flex-row': !isCondensed,
+      'issue-token gl-display-inline-flex gl-align-items-stretch gl-max-w-full gl-leading-24 gl-whitespace-nowrap': isCondensed,
+      'flex-row issuable-info-container': !isCondensed,
     }"
   >
     <component
@@ -58,7 +57,7 @@ export default {
       ref="link"
       v-gl-tooltip
       :class="{
-        'issue-token-link gl-inline-flex gl-min-w-0 gl-text-gray-500': isCondensed,
+        'issue-token-link gl-display-inline-flex gl-min-w-0 gl-text-gray-500': isCondensed,
         'issuable-main-info': !isCondensed,
       }"
       :href="computedPath"
@@ -70,21 +69,19 @@ export default {
         v-if="hasTitle"
         ref="title"
         :class="{
-          'issue-token-title issue-token-end gl-flex gl-items-baseline gl-overflow-hidden gl-pl-3 gl-text-gray-500':
-            isCondensed,
+          'issue-token-title issue-token-end gl-overflow-hidden gl-display-flex gl-align-items-baseline gl-text-gray-500 gl-pl-3': isCondensed,
           'issue-title block-truncated': !isCondensed,
-          'gl-rounded-br-small gl-rounded-tr-small gl-pr-3': !canRemove,
+          'gl-rounded-top-right-small gl-rounded-bottom-right-small gl-pr-3': !canRemove,
         }"
         class="js-issue-token-title"
       >
-        <span class="gl-truncate">{{ title }}</span>
+        <span class="gl-text-truncate">{{ title }}</span>
       </component>
       <component
         :is="innerComponentType"
         ref="reference"
         :class="{
-          'issue-token-reference gl-flex gl-items-center gl-rounded-bl-small gl-rounded-tl-small gl-px-3':
-            isCondensed,
+          'issue-token-reference gl-display-flex gl-align-items-center gl-rounded-top-left-small gl-rounded-bottom-left-small gl-px-3': isCondensed,
           'issuable-info': !isCondensed,
         }"
       >
@@ -106,8 +103,7 @@ export default {
       ref="removeButton"
       v-gl-tooltip
       :class="{
-        'issue-token-remove-button gl-flex gl-items-center gl-rounded-br-small gl-rounded-tr-small gl-border-0 gl-px-3 gl-text-gray-500':
-          isCondensed,
+        'issue-token-remove-button gl-display-flex gl-align-items-center gl-px-3 gl-border-0 gl-rounded-top-right-small gl-rounded-bottom-right-small gl-text-gray-500': isCondensed,
         'btn btn-default': !isCondensed,
       }"
       :title="removeButtonLabel"

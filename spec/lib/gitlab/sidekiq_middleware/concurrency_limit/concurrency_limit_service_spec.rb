@@ -45,15 +45,6 @@ RSpec.describe Gitlab::SidekiqMiddleware::ConcurrencyLimit::ConcurrencyLimitServ
 
       add_to_queue!
     end
-
-    it 'reports prometheus metrics' do
-      deferred_job_count_double = instance_double(Prometheus::Client::Counter)
-      expect(Gitlab::Metrics).to receive(:counter).with(:sidekiq_concurrency_limit_deferred_jobs_total, anything)
-        .and_return(deferred_job_count_double)
-      expect(deferred_job_count_double).to receive(:increment).with({ worker: worker_class_name })
-
-      add_to_queue!
-    end
   end
 
   describe '.has_jobs_in_queue?' do
@@ -127,17 +118,16 @@ RSpec.describe Gitlab::SidekiqMiddleware::ConcurrencyLimit::ConcurrencyLimitServ
 
   describe '#resume_processing!' do
     let(:jobs) { [[1], [2], [3]] }
-    let(:setter) { instance_double('Sidekiq::Job::Setter') }
+    let(:expected_context) { stored_context.merge(related_class: described_class.name) }
 
     it 'puts jobs back into the queue and respects order' do
       jobs.each do |j|
         service.add_to_queue!(j, worker_context)
       end
 
-      expect(worker_class).to receive(:concurrency_limit_resume).twice.and_return(setter)
-      expect(setter).to receive(:perform_async).with(1).ordered
-      expect(setter).to receive(:perform_async).with(2).ordered
-      expect(setter).not_to receive(:perform_async).with(3).ordered
+      expect(worker_class).to receive(:perform_async).with(1).ordered
+      expect(worker_class).to receive(:perform_async).with(2).ordered
+      expect(worker_class).not_to receive(:perform_async).with(3).ordered
 
       expect(Gitlab::SidekiqLogging::ConcurrencyLimitLogger.instance)
         .to receive(:resumed_log)
@@ -155,10 +145,9 @@ RSpec.describe Gitlab::SidekiqMiddleware::ConcurrencyLimit::ConcurrencyLimitServ
       end
 
       expect(Gitlab::ApplicationContext).to receive(:with_raw_context)
-        .with(stored_context)
+        .with(expected_context)
         .exactly(jobs.count).times.and_call_original
-      expect(worker_class).to receive(:concurrency_limit_resume).exactly(3).times.and_return(setter)
-      expect(setter).to receive(:perform_async).exactly(jobs.count).times
+      expect(worker_class).to receive(:perform_async).exactly(jobs.count).times
 
       expect { service.resume_processing!(limit: jobs.count) }
         .to change { service.has_jobs_in_queue? }.from(true).to(false)

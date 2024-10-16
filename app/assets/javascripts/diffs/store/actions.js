@@ -10,16 +10,11 @@ import axios from '~/lib/utils/axios_utils';
 
 import { HTTP_STATUS_NOT_FOUND, HTTP_STATUS_OK } from '~/lib/utils/http_status';
 import Poll from '~/lib/utils/poll';
-import {
-  mergeUrlParams,
-  getLocationHash,
-  getParameterValues,
-  removeParams,
-} from '~/lib/utils/url_utility';
+import { mergeUrlParams, getLocationHash, getParameterValues } from '~/lib/utils/url_utility';
 import notesEventHub from '~/notes/event_hub';
 import { generateTreeList } from '~/diffs/utils/tree_worker_utils';
 import { sortTree } from '~/ide/stores/utils';
-import { detectAndConfirmSensitiveTokens } from '~/lib/utils/secret_detection';
+import { containsSensitiveToken, confirmSensitiveAction } from '~/lib/utils/secret_detection';
 import { isCollapsed } from '~/diffs/utils/diff_file';
 import {
   INLINE_DIFF_VIEW_TYPE,
@@ -74,6 +69,7 @@ import {
   getNoteFormData,
   convertExpandLines,
   idleCallback,
+  allDiscussionWrappersExpanded,
   prepareLineForRenamedFile,
   parseUrlHashAsFileHash,
   isUrlHashNoteLink,
@@ -221,7 +217,7 @@ export const fetchFileByFile = async ({ state, getters, commit }) => {
   }
 };
 
-export const fetchDiffFilesBatch = ({ commit, state, dispatch }, linkedFileLoading = false) => {
+export const fetchDiffFilesBatch = ({ commit, state, dispatch }, pinnedFileLoading = false) => {
   let perPage = state.viewDiffsFileByFile ? 1 : state.perPage;
   let increaseAmount = 1.4;
   const startPage = 0;
@@ -235,7 +231,7 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }, linkedFileLoadi
   let totalLoaded = 0;
   let scrolledVirtualScroller = hash === '';
 
-  if (!linkedFileLoading) {
+  if (!pinnedFileLoading) {
     commit(types.SET_BATCH_LOADING_STATE, 'loading');
     commit(types.SET_RETRIEVING_BATCHES, true);
   }
@@ -250,7 +246,7 @@ export const fetchDiffFilesBatch = ({ commit, state, dispatch }, linkedFileLoadi
         commit(types.SET_DIFF_DATA_BATCH, { diff_files: diffFiles });
         commit(types.SET_BATCH_LOADING_STATE, 'loaded');
 
-        if (!scrolledVirtualScroller && !linkedFileLoading) {
+        if (!scrolledVirtualScroller && !pinnedFileLoading) {
           const index = state.diffFiles.findIndex(
             (f) =>
               f.file_hash === hash || f[INLINE_DIFF_LINES_KEY].find((l) => l.line_code === hash),
@@ -409,7 +405,7 @@ export const fetchCoverageFiles = ({ commit, state }) => {
 export const setHighlightedRow = ({ commit }, { lineCode, event }) => {
   if (event && event.target.href) {
     event.preventDefault();
-    window.history.replaceState(null, undefined, removeParams(['file'], event.target.href));
+    window.history.replaceState(null, undefined, event.target.href);
   }
   const fileHash = lineCode.split('_')[0];
   commit(types.SET_HIGHLIGHTED_ROW, lineCode);
@@ -598,11 +594,11 @@ export const loadCollapsedDiff = ({ commit, getters, state }, { file, params = {
  * @param {Object} discussion
  */
 export const toggleFileDiscussion = ({ commit }, discussion) => {
-  commit(types.TOGGLE_FILE_DISCUSSION_EXPAND, { discussion });
+  commit(types.TOGGLE_FILE_DISCUSSION_EXPAND, discussion);
 };
 
-export const toggleFileDiscussionWrappers = ({ commit, getters }, diff) => {
-  const discussionWrappersExpanded = getters.diffHasExpandedDiscussions(diff);
+export const toggleFileDiscussionWrappers = ({ commit }, diff) => {
+  const discussionWrappersExpanded = allDiscussionWrappersExpanded(diff);
   const lineCodesWithDiscussions = new Set();
   const lineHasDiscussion = (line) => Boolean(line?.discussions.length);
   const registerDiscussionLine = (line) => lineCodesWithDiscussions.add(line.line_code);
@@ -618,17 +614,6 @@ export const toggleFileDiscussionWrappers = ({ commit, getters }, diff) => {
       });
     });
   }
-
-  if (diff.discussions.length) {
-    diff.discussions.forEach((discussion) => {
-      if (discussion.position?.position_type === FILE_DIFF_POSITION_TYPE) {
-        commit(types.TOGGLE_FILE_DISCUSSION_EXPAND, {
-          discussion,
-          expandedOnDiff: !discussionWrappersExpanded,
-        });
-      }
-    });
-  }
 };
 
 export const saveDiffDiscussion = async ({ state, dispatch }, { note, formData }) => {
@@ -639,9 +624,11 @@ export const saveDiffDiscussion = async ({ state, dispatch }, { note, formData }
     ...formData,
   });
 
-  const confirmSubmit = await detectAndConfirmSensitiveTokens({ content: note });
-  if (!confirmSubmit) {
-    return null;
+  if (containsSensitiveToken(note)) {
+    const confirmed = await confirmSensitiveAction();
+    if (!confirmed) {
+      return null;
+    }
   }
 
   return dispatch('saveNote', postData, { root: true })
@@ -670,7 +657,7 @@ export const goToFile = ({ state, commit, dispatch, getters }, { path }) => {
   } else {
     if (!state.treeEntries[path]) return;
 
-    dispatch('unlinkFile');
+    dispatch('unpinFile');
 
     const { fileHash } = state.treeEntries[path];
 
@@ -1002,7 +989,7 @@ export const setCurrentDiffFileIdFromNote = ({ commit, getters, rootGetters }, n
 };
 
 export const navigateToDiffFileIndex = ({ state, getters, commit, dispatch }, index) => {
-  dispatch('unlinkFile');
+  dispatch('unpinFile');
 
   const { fileHash } = getters.flatBlobsList[index];
   document.location.hash = fileHash;
@@ -1065,22 +1052,22 @@ export const toggleFileCommentForm = ({ state, commit }, filePath) => {
 export const addDraftToFile = ({ commit }, { filePath, draft }) =>
   commit(types.ADD_DRAFT_TO_FILE, { filePath, draft });
 
-export const fetchLinkedFile = ({ state, commit }, linkedFileUrl) => {
+export const fetchPinnedFile = ({ state, commit }, pinnedFileUrl) => {
   const isNoteLink = isUrlHashNoteLink(window?.location?.hash);
 
   commit(types.SET_BATCH_LOADING_STATE, 'loading');
   commit(types.SET_RETRIEVING_BATCHES, true);
 
   return axios
-    .get(linkedFileUrl)
+    .get(pinnedFileUrl)
     .then(({ data: diffData }) => {
       const [{ file_hash }] = diffData.diff_files;
 
-      // we must store linked file in the `diffs`, otherwise collapsing and commenting on a file won't work
+      // we must store pinned file in the `diffs`, otherwise collapsing and commenting on a file won't work
       // once the same file arrives in a file batch we must only update its' position
       // we also must not update file's position since it's loaded out of order
       commit(types.SET_DIFF_DATA_BATCH, { diff_files: diffData.diff_files, updatePosition: false });
-      commit(types.SET_LINKED_FILE_HASH, file_hash);
+      commit(types.SET_PINNED_FILE_HASH, file_hash);
 
       if (!isNoteLink && !state.currentDiffFileId) {
         commit(types.SET_CURRENT_DIFF_FILE, file_hash);
@@ -1103,23 +1090,15 @@ export const fetchLinkedFile = ({ state, commit }, linkedFileUrl) => {
     });
 };
 
-export const unlinkFile = ({ getters, commit }) => {
-  if (!getters.linkedFile) return;
-  commit(types.SET_LINKED_FILE_HASH, null);
+export const unpinFile = ({ getters, commit }) => {
+  if (!getters.pinnedFile) return;
+  commit(types.SET_PINNED_FILE_HASH, null);
   const newUrl = new URL(window.location);
-  newUrl.searchParams.delete('file');
+  newUrl.searchParams.delete('pin');
   newUrl.hash = '';
   window.history.replaceState(null, undefined, newUrl);
 };
 
 export const toggleAllDiffDiscussions = ({ commit, getters }) => {
   commit(types.SET_EXPAND_ALL_DIFF_DISCUSSIONS, !getters.allDiffDiscussionsExpanded);
-};
-
-export const expandAllFiles = ({ commit }) => {
-  commit(types.SET_COLLAPSED_STATE_FOR_ALL_FILES, { collapsed: false });
-};
-
-export const collapseAllFiles = ({ commit }) => {
-  commit(types.SET_COLLAPSED_STATE_FOR_ALL_FILES, { collapsed: true });
 };

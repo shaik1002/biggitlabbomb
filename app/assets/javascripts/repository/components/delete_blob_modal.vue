@@ -217,9 +217,7 @@ export default {
       this.$refs.form.$el.submit();
     },
   },
-  deleteLfsHelpPath: helpPagePath('topics/git/lfs', {
-    anchor: 'delete-a-git-lfs-file-from-repository-history',
-  }),
+  deleteLfsHelpPath: helpPagePath('topics/git/lfs/index', { anchor: 'removing-objects-from-lfs' }),
 };
 </script>
 

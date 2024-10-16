@@ -16,7 +16,6 @@ $item-remove-button-space: 42px;
 
 .related-items-tree {
   .card-header {
-    // stylelint-disable-next-line gitlab/no-gl-class
     .gl-label {
       line-height: $gl-line-height;
     }
@@ -40,8 +39,8 @@ $item-remove-button-space: 42px;
 
   &:hover,
   &:focus-within {
-    background-color: var(--gl-background-color-default);
-    border-color: var(--gl-border-color-default);
+    background-color: $white;
+    border-color: $gray-50;
   }
 
   .merge-request-status.closed {

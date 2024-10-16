@@ -112,14 +112,10 @@ module GitalySetup
       FileUtils.mkdir_p(GitalySetup.second_storage_path)
     end
 
-    if gitaly_with_transactions? && !toml
-      # The configuration file with transactions is pre-generated. Here we check
+    if ENV['CI'] && gitaly_with_transactions?
+      # The configuration file with transactions is pre-generated in the CI. Here we check
       # whether this job should actually run with transactions and choose the pre-generated
       # configuration with transactions enabled if so.
-      #
-      # Workhorse provides its own configuration through 'toml'. If a configuration is
-      # explicitly provided, we don't override it. Workhorse test setup has its own logic
-      # to choose the configuration with transactions enabled.
       toml = "#{config_path(service)}.transactions"
     end
 
@@ -152,7 +148,6 @@ module GitalySetup
     begin
       try_connect!(service, toml)
     rescue StandardError
-      process_details(pid)
       Process.kill('TERM', pid)
       raise
     end
@@ -199,7 +194,7 @@ module GitalySetup
 
   def try_connect!(service, toml)
     LOGGER.debug "Trying to connect to #{service}: "
-    timeout = 40
+    timeout = 20
     delay = 0.1
     connect = connect_proc(toml)
 
@@ -252,7 +247,7 @@ module GitalySetup
           runtime_dir: runtime_dir,
           prometheus_listen_addr: 'localhost:9236',
           config_filename: config_name(:gitaly),
-          transactions_enabled: false
+          transactions_enabled: gitaly_with_transactions?
         }
       },
       {
@@ -261,7 +256,7 @@ module GitalySetup
           runtime_dir: runtime_dir,
           gitaly_socket: "gitaly2.socket",
           config_filename: config_name(:gitaly2),
-          transactions_enabled: false
+          transactions_enabled: gitaly_with_transactions?
         }
       }
     ].each do |params|
@@ -277,10 +272,12 @@ module GitalySetup
       # without transactions enabled.
       #
       # Similarly to the Praefect configuration, generate variant of the configuration file with
-      # transactions enabled. Later when the rspec job runs, we decide whether to run Gitaly
+      # transactions enabled in CI. Later when the rspec job runs, we decide whether to run Gitaly
       # using the configuration with transactions enabled or not.
       #
       # These configuration files are only used in the CI.
+      next unless ENV['CI']
+
       params[:options][:config_filename] = "#{params[:options][:config_filename]}.transactions"
       params[:options][:transactions_enabled] = true
 
@@ -379,9 +376,7 @@ module GitalySetup
     message += "- The `praefect` binary does not exist: #{praefect_binary}\n" unless File.exist?(praefect_binary)
     message += "- No `git` binaries exist\n" if git_binaries.empty?
 
-    message += read_log_file('log/gitaly-test.log')
-    message += read_log_file('log/gitaly2-test.log')
-    message += read_log_file('log/praefect-test.log')
+    message += "\nCheck log/gitaly-test.log & log/praefect-test.log for errors.\n"
 
     unless ENV['CI']
       message += "\nIf binaries are missing, try running `make -C tmp/tests/gitaly all WITH_BUNDLED_GIT=YesPlease`.\n"
@@ -389,15 +384,6 @@ module GitalySetup
     end
 
     message
-  end
-
-  def read_log_file(logs_path)
-    return '' unless File.exist?(logs_path)
-
-    <<~LOGS
-      \n#{logs_path}:\n
-      #{File.read(logs_path)}
-    LOGS
   end
 
   def git_binaries
@@ -418,13 +404,5 @@ module GitalySetup
 
   def gitaly_with_transactions?
     Gitlab::Utils.to_boolean(ENV['GITALY_TRANSACTIONS_ENABLED'], default: false)
-  end
-
-  private
-
-  # Logs the details of the process with the given pid.
-  def process_details(pid)
-    output = `ps -p #{pid} -o pid,ppid,state,%cpu,%mem,etime,args`
-    LOGGER.debug output
   end
 end

@@ -10,10 +10,13 @@ description: 'Writing styles, markup, formatting, and other standards for GitLab
 This document defines the standards for GitLab documentation, including grammar, formatting, and more.
 For guidelines on specific words, see [the word list](word_list.md).
 
+For style questions, mention `@tw-style` in an issue or merge request. If you have access to the GitLab Slack workspace,
+use the `#docs-processes` channel.
+
 ## The GitLab voice
 
 The GitLab brand guidelines define the
-[voice used by the larger organization](https://design.gitlab.com/brand-overview/brand-voice).
+[voice used by the larger organization](https://design.gitlab.com/brand/overview/#tone-of-voice).
 
 Building on that guidance, the voice in the GitLab documentation strives to be concise,
 direct, and precise. The goal is to provide information that's easy to search and scan.
@@ -39,7 +42,7 @@ Topic types help users digest information more quickly. They also help address t
 - **Content is hard to find.** The GitLab docs are comprehensive and include a large amount of
   useful information. Topic types create repeatable patterns that make the content easier
   to scan and parse.
-- **Content is often written from the contributor's point of view.** The GitLab docs
+- **Content is often written from the contributor's point of view.**  The GitLab docs
   are written by a variety of contributors. Topic types (tasks, specifically) help put
   information into a format that is geared toward helping others, rather than
   documenting how a feature was implemented.
@@ -134,7 +137,15 @@ the page is rendered to HTML. There can be only **one** level 1 heading per page
 - Do not skip a level. For example: `##` > `####`.
 - Leave one blank line before and after the topic title.
 - If you use code in topic titles, ensure the code is in backticks.
-- Do not use bold text in topic titles.
+
+### Backticks in Markdown
+
+Use backticks for:
+
+- [Code blocks](#code-blocks).
+- Error messages.
+- Commands, parameters, and filenames.
+- Values. For example: "In the **Name** text box, type `test`."
 
 ## Language
 
@@ -205,8 +216,8 @@ Use sentence case for topic titles. For example:
 
 #### UI text
 
-When referring to specific user interface text, like a button label, page, tab,
-or menu item, use the same capitalization that's displayed in the user interface.
+When referring to specific user interface text, like a button label or menu
+item, use the same capitalization that's displayed in the user interface.
 
 If you think the user interface text contains style mistakes,
 create an issue or an MR to propose a change to the user interface text.
@@ -289,7 +300,7 @@ especially in tutorials, instructional documentation, and
 
 Some contractions, however, should be avoided:
 
-<!-- vale gitlab_base.Possessive = NO -->
+<!-- vale gitlab.Possessive = NO -->
 
 | Do not use a contraction      | Example                                          | Use instead                                                      |
 |-------------------------------|--------------------------------------------------|------------------------------------------------------------------|
@@ -298,7 +309,7 @@ Some contractions, however, should be avoided:
 | In reference documentation    | **Don't** set a limit.                           | **Do not** set a limit.                                          |
 | In error messages             | Requests to localhost **aren't** allowed.        | Requests to localhost **are not** allowed.                       |
 
-<!-- vale gitlab_base.Possessive = YES -->
+<!-- vale gitlab.Possessive = YES -->
 
 ### Possessives
 
@@ -368,16 +379,30 @@ when published. Example:
 <!-- This is a comment that is not rendered -->
 ```
 
+### Emphasis
+
+<!-- vale gitlab.Spelling = NO -->
+
+Use **bold** rather than italic to provide emphasis. GitLab uses a sans-serif font and italic text does not stand out as much as it would in a serif font. For details, see [Butterick's Practical Typography guide on bold or italic](https://practicaltypography.com/bold-or-italic.html).
+
+<!-- vale gitlab.Spelling = YES -->
+
+You can use italics when you are introducing a term for the first time. Otherwise, use bold.
+
+- Use double asterisks (`**`) to mark a word or text in bold (`**bold**`).
+- Use underscore (`_`) for text in italics (`_italic_`).
+- Use greater than (`>`) for blockquotes.
+
 ### Punctuation
 
 Follow these guidelines for punctuation.
 
-<!-- vale gitlab_base.Repetition = NO -->
+<!-- vale gitlab.Repetition = NO -->
 
 - End full sentences with a period, including full sentences in tables.
 - Use serial (Oxford) commas before the final **and** or **or** in a list of three or more items. (Tested in [`OxfordComma.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/OxfordComma.yml).)
 
-<!-- vale gitlab_base.Repetition = YES -->
+<!-- vale gitlab.Repetition = YES -->
 
 When spacing content:
 
@@ -385,11 +410,15 @@ When spacing content:
 - Do not use non-breaking spaces. Use standard spaces instead. (Tested in [`lint-doc.sh`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/scripts/lint-doc.sh).)
 - Do not use tabs for indentation. Use spaces instead. You can configure your code editor to output spaces instead of tabs when pressing the <kbd>Tab</kbd> key.
 
+<!-- vale gitlab.NonStandardQuotes = NO -->
+
 Do not use these punctuation characters:
 
 - `;` (semicolon): Use two sentences instead.
 - `–` (en dash) or `—` (em dash): Use separate sentences, or commas, instead.
 - `“` `”` `‘` `’`: Double or single typographer's ("curly") quotation marks. Use straight quotes instead. (Tested in [`NonStandardQuotes.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/NonStandardQuotes.yml).)
+
+<!-- vale gitlab.NonStandardQuotes = YES -->
 
 ### Placeholder text
 
@@ -412,114 +441,6 @@ in a single backtick. For example:
 Select **Grant admin consent for `<application_name>`**.
 ```
 
-### Quotation marks
-
-Only use quotation marks when quoting direct text, and use double quotes (`"`).
-For guidance about writing UI elements and in-line code, see [Text formatting](#text-formatting).
-
-Do not put punctuation inside quotation marks, unless it is part of the quoted text.
-
-## Text formatting
-
-When formatting text, use:
-
-- [Bold](#bold) for UI elements and pages.
-- [Inline code style](#inline-code) for inputs, outputs, code, and similar.
-- [Code blocks](#code-blocks) for command line examples, and multi-line inputs, outputs, code, and similar.
-- [`<kbd>`](#keyboard-commands) for keyboard commands.
-
-### Bold
-
-Use bold for:
-
-- UI elements with a visible label. Match the text and capitalization of the label.
-- Navigation paths.
-
-UI elements include:
-
-- Buttons
-- Checkboxes
-- Settings
-- Menus
-- Pages
-- Tabs
-
-For example:
-
-- Select **Cancel**.
-- On the **Issues** page...
-- On the **Pipelines** tab...
-
-To make text bold, wrap it with double asterisks (`**`). For example:
-
-```markdown
-1. Select **Cancel**.
-```
-
-When using bold format for UI elements or keywords, place any punctuation outside the bold tag.
-This rule includes periods, commas, colons, and right-angle brackets (`>`).
-
-The punctuation is part of the sentence structure rather than the UI element or keyword that you're emphasizing.
-
-Include punctuation in the bold tag when it's part of the UI element or keyword itself.
-
-For example:
-
-- `**Option**: This an option description.`
-- `Select **Overview** > **Users**.`
-
-### Inline code
-
-Use inline code for:
-
-- Text a user enters in the UI.
-- Short inputs and outputs like `true`, `false`, `Job succeeded`, and similar.
-- Filenames, configuration parameters, keywords, and code. For example:
-  `.gitlab-ci.yml`, `--version`, or `rules:`.
-- Short error messages.
-- API and HTTP methods (`POST`).
-- HTTP status codes. Full (`404 File Not Found`) and abbreviated (`404`).
-
-For example:
-
-- In the **Name** text box, enter `test`.
-- Use the `rules:` CI/CD keyword to control when to add jobs to a pipeline.
-- Send a `DELETE` request to delete the runner. Send a `POST` request to create one.
-- The job log displays `Job succeeded` when complete.
-
-To use inline code, wrap the text in single backticks (`` ` ``). For example:
-
-```markdown
-In the **Name** text box, enter `test`.
-```
-
-### Code blocks
-
-Code blocks separate code text from regular text, and can be copy-pasted by users.
-
-Use code blocks for:
-
-- CLI and [cURL commands](../restful_api_styleguide.md#curl-commands).
-- Multi-line inputs, outputs, and code samples that are too large for [inline code](#inline-code).
-
-To add a code block, add triple backticks (```` ``` ````) above and below the text,
-with a syntax name at the top for proper syntax highlighting. For example:
-
-````markdown
-```markdown
-This is a code block using Markdown to demonstrate **bold** and `backticks`.
-```
-````
-
-When using code blocks:
-
-- Add a blank line above and below code blocks.
-- Use one of the [supported syntax names](https://github.com/rouge-ruby/rouge/wiki/List-of-supported-languages-and-lexers).
-  Use `plaintext` if no better option is available.
-- Use quadruple backticks (````` ```` `````) when the code block contains another (nested) code block
-  which has triple backticks already. The example above uses quadruple backticks internally
-  to illustrate the code block format.
-
 ### Keyboard commands
 
 Use the HTML `<kbd>` tag when referring to keystroke presses. For example:
@@ -528,29 +449,79 @@ Use the HTML `<kbd>` tag when referring to keystroke presses. For example:
 To stop the command, press <kbd>Control</kbd>+<kbd>C</kbd>.
 ```
 
-This example renders as:
+When the docs are generated, the output is:
 
 To stop the command, press <kbd>Control</kbd>+<kbd>C</kbd>.
 
-### Italics and emphasis
+### Buttons in the UI
 
-Avoid using [italics for emphasis](../../../user/markdown.md#emphasis) in product documentation.
-Instead, write content that is clear enough that emphasis is not needed. GitLab and
-<https://docs.gitlab.com> use a sans-serif font, but italic text [does not stand out in a page using sans-serif](https://practicaltypography.com/bold-or-italic.html).
+For elements with a visible label, use the label in bold with matching case.
+
+For example: `Select **Cancel**.`
+
+### Text entered in the UI
+
+If you want the user to type something in the UI, use backticks. For example:
+
+```plaintext
+In the **Commit message** text box, type `This is my merge request`.
+```
+
+Backticks are more precise than quotes. For example, in this string:
+
+- In the **Commit message** text box, type "This is my merge request."
+
+It's not clear whether the user should include the period in the string.
+
+### Inline code
+
+Inline code style is applied inline with regular text. Use inline code style:
+
+- For filenames or fragments of configuration files. For example, `.gitlab-ci.yml`, `CODEOWNERS`, and `only: [main]`.
+- For HTTP methods (`HTTP POST`) and HTTP status codes, both full (`404 File Not Found`) and abbreviated (`404`).
+  For example: Send a `DELETE` request to delete the runner. Send a `POST` request to create one.
+
+To apply inline code style, wrap the text in a single backtick (`` ` ``). For example, `this is inline code style`.
+
+### Code blocks
+
+Code block style separates code text from regular text. Use code block style for commands run in the command-line
+interface. Code block style is easier to copy and paste in a user's terminal window.
+
+To apply code block style, wrap the text in triple backticks (three `` ` ``) and add a syntax highlighting hint. For
+example:
+
+````plaintext
+```plaintext
+This is codeblock style
+```
+````
+
+When using code block style:
+
+- Use quadruple backticks (four `` ` ``) to apply code block style when the code block you are styling has triple
+  backticks in it. For example, when illustrating code block style.
+- Add a blank line above and below code blocks.
+- Syntax highlight hints are required for code blocks. See the
+  [list of supported languages and lexers](https://github.com/rouge-ruby/rouge/wiki/List-of-supported-languages-and-lexers)
+  for available syntax highlighters. Use `plaintext` if no better hint is available.
+
+#### cURL commands in code blocks
+
+See [cURL commands](../restful_api_styleguide.md#curl-commands) for information
+about styling cURL commands.
 
 ## Lists
 
 Use lists to present information in a format that is easier to scan.
 
 - Make all items in the list parallel.
-  For example, do not start some items with nouns and others with verbs.
-- Start all items with a capital letter.
+  For example, do not start some bullets with nouns and others with verbs.
+- Do not use a period if the phrase is not a full sentence.
+- Use a period after every sentence. Do not use semicolons or commas.
 - Give all items the same punctuation.
-- Do not use a period if the item is not a full sentence.
-- Use a period after every full sentence.
-  Do not use semicolons or commas.
-- Add a colon (`:`) after the introductory phrase.
-  For example:
+- Start list items with a capital letter.
+- Separate the introductory phrase from explanatory text with a colon (`:`). For example:
 
   ```markdown
   You can:
@@ -807,6 +778,19 @@ If you use consecutive numbers, you must disable Markdown rule `029`:
 <!-- markdownlint-enable MD029 -->
 ```
 
+## Quotes
+
+Valid for Markdown content only, not for front matter entries:
+
+- Standard quotes: double quotes (`"`). Example: "This is wrapped in double
+  quotes".
+- Quote inside a quote: double quotes (`"`) wrap single quotes (`'`). Example:
+  "This sentence 'quotes' something in a quote".
+
+For other punctuation rules, refer to the
+[Pajamas Design System Punctuation section](https://design.gitlab.com/content/punctuation/).
+This is overridden by the [documentation-specific punctuation rules](#punctuation).
+
 ## Links
 
 Links help the docs adhere to the
@@ -815,31 +799,27 @@ Links help the docs adhere to the
 However, you should avoid putting too many links on any page. Too many links can hinder readability.
 
 - Do not duplicate links on the same page. For example, on **Page A**, do not link to **Page B** multiple times.
-- Do not use links in headings. Subheadings are rendered as links, and subheadings that contain links cause errors.
 - Avoid multiple links in a single paragraph.
 - Avoid multiple links in a single task.
 - On any one page, try not to use more than 15 links to other pages.
 - Consider using [Related topics](../topic_types/index.md#related-topics) to reduce links that interrupt the flow of a task.
 - Try to avoid anchor links to sections on the same page. Let users rely on the right navigation instead.
 
-### Links in the same repository
+### Links within the same repository
 
-To link to another documentation (`.md`) file in the same repository:
+To link to another page in the same repository,
+use a relative file path. For example, `../user/gitlab_com/index.md`.
 
-- Use an inline link with a relative file path. For example, `[GitLab.com settings](../user/gitlab_com/index.md)`.
-- Put the entire link on a single line, even if the link is very long. ([Vale](../testing/vale.md) rule: [`SubstitutionWarning.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab/MultiLineLinks.yml)).
+Use inline link Markdown markup `[Text](https://example.com)`,
+rather than reference-style links, like `[Text][identifier]`.
 
-To link to a file outside of the documentation files, for example to link from development
-documentation to a specific code file, you can:
-
-- Use a full URL. For example: ``[`app/views/help/show.html.haml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/views/help/show.html.haml)``
-- (Optional) Use a full URL with a specific ref. For example: ``[`app/views/help/show.html.haml`](https://gitlab.com/gitlab-org/gitlab/-/blob/6d01aa9f1cfcbdfa88edf9d003bd073f1a6fff1d/app/views/help/show.html.haml)``
+Put the entire link on a single line so that [linters](../testing/index.md) can find it.
 
 ### Links in separate repositories
 
-To link to a page in a different repository, use a full URL.
+To link to a page in a different repository, use an absolute URL.
 For example, to link from a page in the GitLab repository to the Charts repository,
-use a URL like `[GitLab Charts documentation](https://docs.gitlab.com/charts/)`.
+use a URL like `https://docs.gitlab.com/charts/`.
 
 ### Anchor links
 
@@ -867,7 +847,7 @@ any related links, search these directories:
 - `ee/app/views/*`
 
 If you do not fix these links, the [`ui-docs-lint` job](../testing/index.md#tests-in-ui-docs-links-lint)
-in your merge request might fail.
+in your merge request fails.
 
 ### Text for links
 
@@ -1005,9 +985,8 @@ elements:
 
 ### Names for UI elements
 
-All UI elements [should be **bold**](#bold).
-
-Guidance for individual UI elements is in [the word list](word_list.md).
+UI elements, like button and checkbox names, should be **bold**.
+Guidance for each individual UI element is in [the word list](word_list.md).
 
 ### How to write navigation task steps
 
@@ -1051,10 +1030,10 @@ To create a group:
 1. On the left sidebar, at the top, select **Create new** (**{plus}**) and **New group**.
 ```
 
-To open the **Admin** area:
+To open the Admin Area:
 
 ```markdown
-1. On the left sidebar, at the bottom, select **Admin**.
+1. On the left sidebar, at the bottom, select **Admin Area**.
 1. Select **Settings > CI/CD**.
 ```
 
@@ -1144,31 +1123,25 @@ To describe multiple fields, use unordered list items:
 
 ## Illustrations
 
-GitLab documentation uses two illustration types:
-
-- Screenshots, used to show a portion of the GitLab user interface.
-- Diagrams, used to illustrate processes or relationships between entities.
-
 Illustrations can help the reader understand a concept, where they are in a complicated process,
-or how they should interact with the application. Use illustrations sparingly because:
+or how they should interact with the application.
 
-- They become outdated.
+Use illustrations sparingly because:
+
+- They tend to become out-of-date.
 - They are difficult and expensive to localize.
-- They cannot be read by screen readers.
+- Their content cannot be read by screen readers.
 
-If you must use illustrations in documentation, they should:
+Types of illustrations used in GitLab documentation are:
 
-- Supplement the text, not replace it.
-  The reader should not have to rely only on the illustration to get the needed information.
-- Have an introductory sentence in the preceding text.
-  For example, `The following diagram illustrates the product analytics flow:`.
-- Be accessible. For more information, see the guidelines specific to screenshots and diagrams.
-- Exclude personally identifying information.
+- Screenshot. Use a screenshot when you need to show a portion of the GitLab user interface.
+- Diagram. Use a diagram to illustrate a process or the relationship between entities, for example.
 
-### Screenshots
+Use illustrations only to supplement text, not replace it.
 
-Use screenshots to show a portion of the GitLab user interface, if some relevant information
-can't be conveyed in text.
+### Screenshot
+
+Use a screenshot when you need to show a portion of the GitLab user interface.
 
 #### Capture the screenshot
 
@@ -1201,14 +1174,12 @@ If you need to emphasize an area in a screenshot, use an arrow.
 
 ![callout example](img/callouts.png)
 
-#### Image requirements
+#### Save the image
 
-- Resize any wide or tall screenshots.
-  - Width should be 1000 pixels or less.
-  - Height should be 500 pixels or less.
-  - Make sure the screenshot is still clear after being resized and compressed.
-- All images **must** be [compressed](#compress-images) to 100 KB or less.
-  In many cases, 25-50 KB or less is often possible without reducing image quality.
+- Resize any wide or tall screenshots if needed, but make sure the screenshot is
+  still clear after being resized and compressed.
+- All images **must** be [compressed](#compress-images) to 100KB or less.
+  In many cases, 25-50KB or less is often possible without reducing image quality.
 - Save the image with a lowercase filename that's descriptive of the feature
   or concept in the image:
   - If the image is of the GitLab interface, append the GitLab version to the filename,
@@ -1221,8 +1192,7 @@ If you need to emphasize an area in a screenshot, use an arrow.
   the `.md` document that you're working on is located.
 - Consider using PNG images instead of JPEG.
 - Compress GIFs with <https://ezgif.com/optimize> or similar tool.
-
-See also how to link and embed [videos](#videos) to illustrate the documentation.
+- See also how to link and embed [videos](#videos) to illustrate the documentation.
 
 #### Compress images
 
@@ -1279,42 +1249,11 @@ include a visual representation to help readers understand it, you can:
 The Markdown code for including an image in a document is:
 `![Image description, used for alt tag](img/document_image_title_vX_Y.png)`
 
-#### Alternative text
+The image description is the alt text for the rendered image on the
+documentation site. For accessibility and SEO, use [descriptions](https://webaim.org/techniques/alttext/)
+that are accurate, succinct, and unique.
 
-Alt text provides an accessible experience.
-Screen readers use alt text to describe the image, and alt text displays
-if an image fails to download.
-
-Alt text should describe the context of the image, not the content. Add context that
-relates to the topic of the page or section. Consider what you would say about the image
-if you were helping someone read and interact with the page and they couldn't see it.
-
-Do:
-
-`![A runner sending a request to the Docker API](img/document_image_title_vX_Y.png)`
-
-Do not:
-
-`![Runner and Docker architecture](img/document_image_title_vX_Y.png)`
-
-When writing alt text:
-
-- Write short, descriptive alt text in 155 characters or fewer.
-  Screen readers typically stop reading after this many characters.
-- If the image has complex information like a workflow diagram, use short alt text
-  to identify the image and include detailed information in the text.
-- Use punctuation.
-- Do not use a period if the text is not a full sentence.
-- Use a period after every full sentence.
-- Use sentence case and avoid using all caps.
-  Some screen readers read capitals as individual letters.
-- Do not use phrases like **Image of** or **Graphic of**.
-- Do not use a string of keywords.
-  Include keywords in the text to enhance context.
-- Introduce the image in the topic, not the alt text.
-- Try to avoid repeating text you've already used in the topic.
-- Do not use inline styling like bold, italics, or backticks.
-  Screen readers read `**text**` as `star star text star star`.
+Don't use **image of** or **graphic of** to describe the image.
 
 #### Automatic screenshot generator
 
@@ -1370,67 +1309,41 @@ You can take a screenshot of a single element.
 
 Use `spec/docs_screenshots/container_registry_docs.rb` as a guide to create your own scripts.
 
-### Diagrams
+### Diagram
 
-Use a diagram to illustrate a process or the relationship between entities, if the information is too
-complex to be understood from text only.
+Use a diagram to illustrate a process or the relationship between entities, for example.
 
-To create a diagram, use [Mermaid](https://mermaid.js.org/#/), which has the following advantages:
+Use [Mermaid](https://mermaid.js.org/#/) to create a diagram. This method has several advantages
+over a static image format (screenshot):
 
-- The Mermaid format is easier to maintain because the:
-  - Diagram definition is stored as a code block in the documentation's Markdown source.
-  - Diagram is rendered dynamically at runtime.
-  - Text content in the diagram (such as feature names) can be found with text search
+- The Mermaid format is easier to maintain because:
+  - Their definition is stored as a code block in the documentation's Markdown source.
+  - The diagram is rendered dynamically at runtime.
+  - Text content that may change over time, such as feature names, can be found using text search
     tools and edited.
-- The diagram is rendered as a scalable image, better suited to various output devices and sizes.
-
-To learn how to create diagrams with the [Mermaid syntax](https://mermaid.js.org/intro/syntax-reference.html),
-see the Mermaid [Mermaid user guide](https://mermaid.js.org/intro/getting-started.html)
-and the examples on the Mermaid site.
-
-#### Guidelines
-
-To create accessible and easily maintainable diagrams, follow these guidelines:
-
-- Keep diagrams simple and focused. Include only essential elements and information.
-- Use different but consistent visual cues (such as shape, color, and font) to distinguish between categories:
-
-  - Rectangles for processes or steps.
-  - Diamonds for decision points.
-  - Solid lines for direct relationships between elements.
-  - Dotted lines for indirect relationship between elements.
-  - Arrows for flow or direction in a process.
-  - GitLab Sans font.
-
-- Add clear labels and brief descriptions to diagram elements.
-- Include a title and brief description for the diagram.
-- For complex processes, consider creating multiple simple diagrams instead of one large diagram.
-- Validate diagrams work well when viewed on different devices and screen sizes.
-- Update diagrams along with documentation or code when processes change to maintain accuracy.
+- The diagram is rendered as an scalable image, better suited to various output devices and sizes.
 
 #### Create a diagram
 
-To create a diagram for GitLab documentation:
+To create a diagram:
 
-1. In the [Mermaid Live Editor](https://mermaid.live/), create the diagram.
-1. Copy the content of the **Code** pane and paste it in the Markdown file, wrapped in a `mermaid` code block. For more
-   details, see [GitLab Flavored Markdown for Mermaid](../../../user/markdown.md#mermaid).
-1. To add GitLab font styling to your diagram, between the Mermaid code block declaration
-and the type of diagram, add the following line:
+1. Use the [Mermaid Live Editor](https://mermaid.live/) to create the diagram.
+1. Copy the content of the **Code** pane into a `mermaid` code block in the Markdown file. For more
+   details, see [Mermaid](../../../user/markdown.md#mermaid).
+1. Optional. To add GitLab font styling to your diagram, add this line between the Mermaid
+   code block declaration and the type of diagram:
 
    ```plaintext
    %%{init: { "fontFamily": "GitLab Sans" }}%%
    ```
 
-1. On the next line after declaring the type of diagram
-  (like `flowchart` or `sequenceDiagram`), add the following lines for accessibility:
+1. To improve accessibility of diagrams, add a title and description. Add these lines on the next
+   line after declaring the type of diagram, like `flowchart` or `sequenceDiagram`:
 
    ```yaml
    accTitle: your diagram title here
    accDescr: describe what your diagram does in a single sentence, with no line breaks.
    ```
-
-   Make sure the title and description follow the [alternative text guidelines](#alternative-text).
 
 For example, this flowchart contains both accessibility and font information:
 
@@ -1444,6 +1357,10 @@ flowchart TD
     A[Start here] -->|action| B[next step]
 ```
 ````
+
+The Mermaid diagram syntax can be difficult to learn. To make this a little easier, see the Mermaid
+[Beginner's Guide](https://mermaid.js.org/intro/getting-started.html) and the examples on the
+Mermaid site.
 
 ## Emoji
 
@@ -1585,6 +1502,7 @@ Alert boxes are generated when one of these words is followed by a line break:
 - `FLAG:`
 - `NOTE:`
 - `WARNING:`
+- `INFO:` (Marketing only)
 - `DISCLAIMER:`
 - `DETAILS:`
 
@@ -1643,33 +1561,57 @@ It renders on the GitLab documentation site as:
 WARNING:
 This is something to be warned about.
 
-### Disclaimer
+### Info
 
-If you **must** write about features we have not yet delivered, put this exact disclaimer about forward-looking statements near the content it applies to.
+The Marketing team uses the `INFO` alert to add information relating
+to sales and marketing efforts.
+
+The text in an `INFO:` alert always renders in a floating text box to the right of the text around it.
+To view the rendered GitLab docs site, check the review app in the MR. You might need to move the text up or down
+in the surrounding text, depending on where you'd like to floating box to appear.
+
+For example, if your page has text like this:
 
 ```markdown
-DISCLAIMER:
-This page contains information related to upcoming products, features, and functionality.
-It is important to note that the information presented is for informational purposes only.
-Please do not rely on this information for purchasing or planning purposes.
-The development, release, and timing of any products, features, or functionality may be subject to change or delay and remain at the
-sole discretion of GitLab Inc.
+This is an introductory paragraph. GitLab uses the SSH protocol to securely communicate with Git.
+When you use SSH keys to authenticate to the GitLab remote server,
+you don't need to supply your username and password each time.
+
+INFO:
+Here is some information. This information is an important addition to how you
+work with GitLab and you might want to consider it.
+
+And here is another paragraph. GitLab uses the SSH protocol to securely communicate with Git.
+When you use SSH keys to authenticate to the GitLab remote server,
+you don't need to supply your username and password each time.
+
+And here is another paragraph. GitLab uses the SSH protocol to securely communicate with Git.
+When you use SSH keys to authenticate to the GitLab remote server,
+you don't need to supply your username and password each time.
 ```
 
 It renders on the GitLab documentation site as:
 
-DISCLAIMER:
-This page contains information related to upcoming products, features, and functionality.
-It is important to note that the information presented is for informational purposes only.
-Please do not rely on this information for purchasing or planning purposes.
-The development, release, and timing of any products, features, or functionality may be subject to change or delay and remain at the
-sole discretion of GitLab Inc.
+This is an introductory paragraph. GitLab uses the SSH protocol to securely communicate with Git.
+When you use SSH keys to authenticate to the GitLab remote server,
+you don't need to supply your username and password each time.
 
-If all of the content on the page is not available, use the disclaimer about forward-looking statements once at the top of the page.
+INFO:
+Here is some information. This information is an important addition to how you
+work with GitLab and you might want to consider it.
 
-If the content in a topic is not ready, use the disclaimer in the topic.
+And here is another paragraph. GitLab uses the SSH protocol to securely communicate with Git.
+When you use SSH keys to authenticate to the GitLab remote server,
+you don't need to supply your username and password each time.
 
-For more information, see [Promising features in future versions](#promising-features-in-future-versions).
+And here is another paragraph. GitLab uses the SSH protocol to securely communicate with Git.
+When you use SSH keys to authenticate to the GitLab remote server,
+you don't need to supply your username and password each time.
+
+### Disclaimer
+
+Use to describe future functionality only.
+For more information, see [Legal disclaimer for future features](../versions.md#legal-disclaimer-for-future-features).
 
 ### Details
 
@@ -1762,22 +1704,6 @@ details on tabs.
 Do not copy and paste content from other sources unless it is a limited
 quotation with the source cited. Typically it is better to rephrase
 relevant information in your own words or link out to the other source.
-
-## Promising features in future versions
-
-Do not promise to deliver features in a future release. For example, avoid phrases like,
-"Support for this feature is planned."
-
-We cannot guarantee future feature work, and promises
-like these can raise legal issues. Instead, say that an issue exists.
-For example:
-
-- Support for improvements is proposed in `[issue <issue_number>](https://link-to-issue)`.
-- You cannot do this thing, but `[issue 12345](https://link-to-issue)` proposes to change this behavior.
-
-You can say that we plan to remove a feature.
-
-If you must document a future feature, use the [disclaimer](#disclaimer).
 
 ## Products and features
 
@@ -2035,3 +1961,52 @@ It renders as:
    ```
 
 ::EndTabs
+
+### Changes for a version upgrade
+
+To document upgrade notes and changes, create a new page for each major version of GitLab.
+For an example, see [GitLab 16 changes](../../../update/versions/gitlab_16_changes.md).
+Use the following template to add information to the page.
+
+```markdown
+# GitLab X changes
+
+DETAILS:
+**Tier:** Free, Premium, Ultimate
+**Offering:** GitLab.com, Self-managed, GitLab Dedicated
+
+This page contains upgrade information for minor and patch versions of GitLab X. Review these instructions for:
+
+- Your installation type.
+- All versions between your current version and your target version.
+
+For more information about upgrading GitLab Helm Chart, see [the release notes for X.0](https://docs.gitlab.com/charts/releases/X_0.html).
+
+## X.Y.1 (add the latest version at the top of the page)
+
+- General upgrade notes and issues.
+- ...
+
+### Linux package installations
+
+- Information specific to Linux package installations.
+- ...
+
+### Self-compiled installations
+
+- Information specific to self-compiled installations.
+- ...
+
+### Geo installations
+
+DETAILS:
+**Tier:** Premium, Ultimate
+**Offering:** Self-managed
+
+- Information specific to Geo.
+- ...
+
+## X.Y.0
+
+ ...
+```

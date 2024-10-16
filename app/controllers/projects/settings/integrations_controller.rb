@@ -13,10 +13,6 @@ module Projects
       before_action :web_hook_logs, only: [:edit, :update]
       before_action -> { check_test_rate_limit! }, only: :test
 
-      before_action :render_404, only: [:edit, :update, :test], if: -> do
-        integration.is_a?(::Integrations::Prometheus) && Feature.enabled?(:remove_monitor_metrics)
-      end
-
       respond_to :html
 
       layout "project_settings"
@@ -28,7 +24,9 @@ module Projects
         @integrations = @project.find_or_initialize_integrations
       end
 
-      def edit; end
+      def edit
+        render_404 if integration.to_param == 'prometheus' && Feature.enabled?(:remove_monitor_metrics)
+      end
 
       def update
         attributes = integration_params[:integration]

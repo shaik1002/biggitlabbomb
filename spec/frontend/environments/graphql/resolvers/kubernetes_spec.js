@@ -13,7 +13,6 @@ import { CLUSTER_AGENT_ERROR_MESSAGES } from '~/environments/constants';
 import k8sPodsQuery from '~/environments/graphql/queries/k8s_pods.query.graphql';
 import k8sServicesQuery from '~/environments/graphql/queries/k8s_services.query.graphql';
 import k8sDeploymentsQuery from '~/environments/graphql/queries/k8s_deployments.query.graphql';
-import k8sEventsQuery from '~/environments/graphql/queries/k8s_events.query.graphql';
 import { updateConnectionStatus } from '~/environments/graphql/resolvers/kubernetes/k8s_connection_status';
 import {
   connectionStatus,
@@ -23,7 +22,6 @@ import {
   k8sPodsMock,
   k8sServicesMock,
   k8sDeploymentsMock,
-  k8sEventsMock,
 } from 'jest/kubernetes_dashboard/graphql/mock_data';
 import { k8sNamespacesMock } from '../mock_data';
 import { bootstrapWatcherMock } from '../watcher_mock_helper';
@@ -373,123 +371,5 @@ describe('~/frontend/environments/graphql/resolvers', () => {
         );
       },
     );
-  });
-
-  describe('k8sEvents', () => {
-    const client = { writeQuery: jest.fn() };
-
-    const involvedObjectName = 'my-pod';
-    const mockEventsListFn = jest.fn().mockImplementation(() => {
-      return Promise.resolve({
-        items: k8sEventsMock,
-      });
-    });
-
-    const mockWatcher = WatchApi.prototype;
-    const mockEventsListWatcherFn = jest.fn().mockImplementation(() => {
-      return Promise.resolve(mockWatcher);
-    });
-
-    const mockOnDataFn = jest.fn().mockImplementation((eventName, callback) => callback([]));
-
-    describe('when the API request is successful', () => {
-      beforeEach(() => {
-        jest
-          .spyOn(CoreV1Api.prototype, 'listCoreV1NamespacedEvent')
-          .mockImplementation(mockEventsListFn);
-        jest.spyOn(mockWatcher, 'subscribeToStream').mockImplementation(mockEventsListWatcherFn);
-        jest.spyOn(mockWatcher, 'on').mockImplementation(mockOnDataFn);
-      });
-
-      it('should request namespaced events with the field selector from the cluster_client library if namespace is specified', async () => {
-        const events = await mockResolvers.Query.k8sEvents(
-          null,
-          {
-            configuration,
-            namespace,
-            involvedObjectName,
-          },
-          { client },
-        );
-
-        expect(mockEventsListFn).toHaveBeenCalledWith({
-          namespace,
-          fieldSelector: `involvedObject.name=${involvedObjectName}`,
-        });
-        expect(events).toEqual(k8sEventsMock);
-      });
-
-      it('should update cache with the new data when received from the library', async () => {
-        await mockResolvers.Query.k8sEvents(
-          null,
-          {
-            configuration,
-            namespace,
-            involvedObjectName,
-          },
-          { client },
-        );
-
-        expect(client.writeQuery).toHaveBeenCalledWith({
-          query: k8sEventsQuery,
-          variables: { configuration, namespace, involvedObjectName },
-          data: { k8sEvents: [] },
-        });
-      });
-    });
-
-    it('should throw an error if the API call fails', async () => {
-      jest
-        .spyOn(CoreV1Api.prototype, 'listCoreV1NamespacedEvent')
-        .mockRejectedValue(new Error('API error'));
-
-      await expect(
-        mockResolvers.Query.k8sEvents(
-          null,
-          { configuration, namespace, involvedObjectName },
-          { client },
-        ),
-      ).rejects.toThrow('API error');
-    });
-  });
-
-  describe('deleteKubernetesPod', () => {
-    const mockPodsDeleteFn = jest.fn().mockResolvedValue({ errors: [] });
-    const podToDelete = 'my-pod';
-
-    it('should request delete pod API from the cluster_client library', async () => {
-      jest
-        .spyOn(CoreV1Api.prototype, 'deleteCoreV1NamespacedPod')
-        .mockImplementation(mockPodsDeleteFn);
-
-      const result = await mockResolvers.Mutation.deleteKubernetesPod(null, {
-        configuration,
-        namespace,
-        podName: podToDelete,
-      });
-
-      expect(mockPodsDeleteFn).toHaveBeenCalledWith({ name: podToDelete, namespace });
-      expect(result).toEqual({
-        __typename: 'LocalKubernetesErrors',
-        errors: [],
-      });
-    });
-
-    it('should return errors array if the API call fails', async () => {
-      jest
-        .spyOn(CoreV1Api.prototype, 'deleteCoreV1NamespacedPod')
-        .mockRejectedValue({ message: CLUSTER_AGENT_ERROR_MESSAGES['not found'] });
-
-      const result = await mockResolvers.Mutation.deleteKubernetesPod(null, {
-        configuration,
-        namespace,
-        podName: podToDelete,
-      });
-
-      expect(result).toEqual({
-        __typename: 'LocalKubernetesErrors',
-        errors: [CLUSTER_AGENT_ERROR_MESSAGES['not found']],
-      });
-    });
   });
 });

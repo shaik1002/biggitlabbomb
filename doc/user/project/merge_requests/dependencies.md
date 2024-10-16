@@ -153,7 +153,7 @@ You can edit a dependent merge request and remove a dependency.
 
 Prerequisites:
 
-- You must have a role for the project that allows you to edit merge requests.
+- You must have a role in the project that allows you to edit merge requests.
 
 1. On the left sidebar, select **Search or go to** and find your project.
 1. Select **Code > Merge requests** and identify your merge request.
@@ -167,6 +167,11 @@ Prerequisites:
 1. Select **Save changes**.
 
 ## Troubleshooting
+
+### API support for managing merge request dependencies
+
+No API support exists for managing dependencies. For more information, read
+[issue #12551](https://gitlab.com/gitlab-org/gitlab/-/issues/12551).
 
 ### Preserving dependencies on project import or export
 

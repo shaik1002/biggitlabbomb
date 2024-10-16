@@ -32,8 +32,6 @@ Value stream analytics helps businesses:
 
 Value stream analytics is available for projects and groups.
 
-For a click-through demo, see [the Value Stream Management product tour](https://gitlab.navattic.com/vsm).
-
 ## Feature availability
 
 Value stream analytics offers different features at the project and group level for FOSS and licensed versions.
@@ -79,8 +77,6 @@ Value streams are container objects for the stages. You can have multiple value 
 
 ### Value stream stage events
 
-> - Merge request first reviewer assigned event [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/466383) in GitLab 17.2. Reviewer assignment events in merge requests created or updated prior to GitLab 17.2 are not available for reporting.
-
 Events are the smallest building blocks of the value stream analytics feature. A stage consists of a start event and an end event.
 
 The following stage events are available:
@@ -99,7 +95,6 @@ The following stage events are available:
 - MR created
 - MR first commit time
 - MR first assigned
-- MR first reviewer assigned
 - MR first deployed
 - MR label added
 - MR label removed
@@ -287,7 +282,7 @@ You can change the name of a project environment in your GitLab CI/CD configurat
 Prerequisites:
 
 - You must have at least the Reporter role.
-- You must create a [custom value stream](#create-a-value-stream). Value stream analytics only shows custom value streams created for your group or project.
+- You must create a [custom value stream](#create-a-value-stream-with-gitlab-default-stages). Value stream analytics only shows custom value streams created for your group or project.
 
 To view value stream analytics for your group or project:
 
@@ -315,9 +310,6 @@ The table shows a list of related workflow items for the selected stage. Based o
 
 - Issues
 - Merge requests
-
-NOTE:
-The end date for each predefined date range is the current day, and is included in the number of days selected. For example, the start date for `Last 30 days` is 29 days prior to the current day for a total of 30 days.
 
 ### Data filters
 
@@ -737,41 +729,6 @@ group(fullPath: "your-group-path") {
 - For periodic reporting, you can create a script and use the [scheduled pipelines](../../../ci/pipelines/schedules.md) feature to export the data in a timely manner.
 - When invoking the API, you get the current data from the database. Over time, the same metrics might change due to changes in the underlying data in the database. For example, moving or removing a project from the group might affect group-level metrics.
 - Re-requesting the metrics for previous periods and comparing them to the previously collected metrics can show skews in the data, which can help in discovering and explaining changing trends.
-
-## Forecast deployment frequency with Value Stream Forecasting
-
-DETAILS:
-**Tier: GitLab.com and Self-managed:** For a limited time, Ultimate. On October 17, 2024, Ultimate with [GitLab Duo Enterprise](https://about.gitlab.com/gitlab-duo/#pricing). **GitLab Dedicated:** GitLab Duo Enterprise.
-**Offering:** GitLab.com, Self-managed, GitLab Dedicated
-**Status:** Experiment
-
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/10228) in GitLab 16.2 as an [experiment](../../../policy/experiment-beta-support.md#experiment).
-
-Improve your planning and decision-making by predicting productivity metrics and
-identifying anomalies across your software development lifecycle.
-
-Prerequisites:
-
-- You must belong to at least one group with the [experiment and beta features setting](../../gitlab_duo/turn_on_off.md#turn-on-beta-and-experimental-features) enabled.
-- You must have permission to view the CI/CD analytics.
-
-To view a forecast of deployment frequency in CI/CD Analytics:
-
-1. On the left sidebar, select **Search or go to** and find your project.
-1. Select **Analyze > CI/CD analytics**.
-1. Select the **Deployment frequency** tab.
-1. Turn on the **Show forecast** toggle.
-1. On the confirmation dialog, select **Accept testing terms**.
-
-The forecast is displayed as a dotted line on the chart. Data is forecasted for
-a duration that is half of the selected date range.
-
-For example, if you select a 30-day range, a forecast for the following 15 days
-is displayed.
-
-![Forecast deployment frequency](img/forecast_deployment_frequency.png)
-
-Provide feedback on this experimental feature in [issue 416833](https://gitlab.com/gitlab-org/gitlab/-/issues/416833).
 
 ## Troubleshooting
 

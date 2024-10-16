@@ -39,8 +39,7 @@ RSpec.describe Gitlab::GithubImport::Importer::Events::Commented, feature_catego
       expect(issuable.notes.last).to have_attributes(
         note: 'This is my note',
         author_id: user.id,
-        noteable_type: issuable.class.name.to_s,
-        imported_from: 'github'
+        noteable_type: issuable.class.name.to_s
       )
     end
   end

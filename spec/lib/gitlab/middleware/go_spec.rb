@@ -32,72 +32,21 @@ RSpec.describe Gitlab::Middleware::Go, feature_category: :source_code_management
 
       shared_examples 'go-get=1' do |enabled_protocol:|
         context 'with simple 2-segment project path' do
-          let!(:project) { create(:project, :public, :repository) }
+          let!(:project) { create(:project, :private, :repository) }
 
           context 'with subpackages' do
             let(:path) { "#{project.full_path}/subpackage" }
 
-            it 'returns the full project path', :unlimited_max_formatted_output_length do
-              expect_response_with_path(go, enabled_protocol, project.full_path)
+            it 'returns the full project path' do
+              expect_response_with_path(go, enabled_protocol, project.full_path, project.default_branch)
             end
           end
 
           context 'without subpackages' do
             let(:path) { project.full_path }
 
-            context 'when the project is public' do
-              it 'returns the full project path' do
-                expect_response_with_path(go, enabled_protocol, project.full_path)
-              end
-            end
-
-            context 'when the project is private' do
-              before do
-                project.update_attribute(:visibility_level, Project::PRIVATE)
-              end
-
-              context 'when authorization header is not present' do
-                it 'returns the 2-segment path' do
-                  expect_response_with_path(go, enabled_protocol, project.full_path)
-                end
-
-                context 'when instance does not allow password authentication for Git over HTTP(S)' do
-                  before do
-                    stub_application_setting(password_authentication_enabled_for_git: false)
-                  end
-
-                  it 'returns the 2-segment path' do
-                    expect_response_with_path(go, enabled_protocol, project.full_path)
-                  end
-                end
-              end
-
-              context 'when authorization header is present but invalid' do
-                before do
-                  env['HTTP_AUTHORIZATION'] = ActionController::HttpAuthentication::Basic.encode_credentials('invalid', 'invalid')
-                end
-
-                it 'returns 404' do
-                  expect_404_response(go)
-                end
-              end
-
-              context 'when authenticated' do
-                let(:current_user) { project.creator }
-                let(:personal_access_token) { create(:personal_access_token, user: current_user) }
-
-                before do
-                  env['HTTP_AUTHORIZATION'] = ActionController::HttpAuthentication::Basic.encode_credentials(current_user.username, personal_access_token.token)
-                end
-
-                context 'when the project accessed by a redirect' do
-                  let!(:redirect_route) { create(:redirect_route, source: project, path: 'redirect/project') }
-
-                  it 'returns the full project path' do
-                    expect_response_with_path(go, enabled_protocol, project.full_path)
-                  end
-                end
-              end
+            it 'returns the full project path' do
+              expect_response_with_path(go, enabled_protocol, project.full_path, project.default_branch)
             end
           end
         end
@@ -109,7 +58,7 @@ RSpec.describe Gitlab::Middleware::Go, feature_category: :source_code_management
           shared_examples 'a nested project' do
             context 'when the project is public' do
               it 'returns the full project path' do
-                expect_response_with_path(go, enabled_protocol, project.full_path)
+                expect_response_with_path(go, enabled_protocol, project.full_path, project.default_branch)
               end
             end
 
@@ -118,52 +67,51 @@ RSpec.describe Gitlab::Middleware::Go, feature_category: :source_code_management
                 project.update_attribute(:visibility_level, Project::PRIVATE)
               end
 
-              shared_examples 'when no authentication header' do
+              shared_examples 'unauthorized' do
                 it 'returns the 2-segment group path' do
-                  expect_response_with_path(go, enabled_protocol, group.full_path)
+                  expect_response_with_path(go, enabled_protocol, group.full_path, project.default_branch)
                 end
               end
 
-              context 'when invalid authentication header exists' do
-                before do
-                  env['HTTP_AUTHORIZATION'] = ActionController::HttpAuthentication::Basic.encode_credentials('invalid', 'invalid')
-                end
-
-                it 'returns 404' do
-                  expect_404_response(go)
-                end
+              context 'when not authenticated' do
+                it_behaves_like 'unauthorized'
               end
 
-              shared_examples 'when authenticated' do
+              context 'when authenticated' do
                 let(:current_user) { project.creator }
 
                 before do
                   project.team.add_maintainer(current_user)
                 end
 
-                context 'with access to the project' do
-                  it 'returns the full project path' do
-                    expect_response_with_path(go, enabled_protocol, project.full_path)
-                  end
-                end
+                shared_examples 'authenticated' do
+                  context 'with access to the project' do
+                    it 'returns the full project path' do
+                      expect_response_with_path(go, enabled_protocol, project.full_path, project.default_branch)
+                    end
 
-                context 'without access to the project', :sidekiq_inline do
-                  before do
-                    project.team.find_member(current_user).destroy!
-                  end
-
-                  it 'returns 404' do
-                    expect_404_response(go)
-                  end
-                end
-
-                context 'with user is blocked' do
-                  before do
-                    current_user.block
+                    context 'with an empty ssh_user' do
+                      it 'returns the full project path' do
+                        allow(Gitlab.config.gitlab_shell).to receive(:ssh_user).and_return('')
+                        expect_response_with_path(go, enabled_protocol, project.full_path, project.default_branch)
+                      end
+                    end
                   end
 
-                  it 'returns 404' do
-                    expect_404_response(go)
+                  context 'without access to the project', :sidekiq_inline do
+                    before do
+                      project.team.find_member(current_user).destroy!
+                    end
+
+                    it_behaves_like 'unauthorized'
+                  end
+
+                  context 'with user is blocked' do
+                    before do
+                      current_user.block
+                    end
+
+                    it_behaves_like 'unauthorized'
                   end
                 end
 
@@ -177,7 +125,7 @@ RSpec.describe Gitlab::Middleware::Go, feature_category: :source_code_management
                     end
 
                     context 'with api scope' do
-                      it_behaves_like 'when authenticated'
+                      it_behaves_like 'authenticated'
                     end
 
                     context 'with read_user scope' do
@@ -185,7 +133,7 @@ RSpec.describe Gitlab::Middleware::Go, feature_category: :source_code_management
                         personal_access_token.update_attribute(:scopes, [:read_user])
                       end
 
-                      it_behaves_like 'when invalid authentication header exists'
+                      it_behaves_like 'unauthorized'
                     end
 
                     context 'with a denylisted ip' do
@@ -242,8 +190,10 @@ RSpec.describe Gitlab::Middleware::Go, feature_category: :source_code_management
         context 'with a bogus path' do
           let(:path) { "http:;url=http:&sol;&sol;www.example.com'http-equiv='refresh'x='?go-get=1" }
 
-          it 'returns 404' do
-            expect_404_response(go)
+          it 'skips go-import generation' do
+            expect(app).to receive(:call).and_return('no-go')
+
+            go
           end
         end
 
@@ -252,7 +202,29 @@ RSpec.describe Gitlab::Middleware::Go, feature_category: :source_code_management
           let(:path) { project.full_path }
 
           it 'returns 404' do
-            expect_404_response(go)
+            response = go
+
+            expect(response[0]).to eq(404)
+            expect(response[1]['Content-Type']).to eq('text/html')
+            expected_body = %(<html><body>go get #{Gitlab.config.gitlab.url}/#{project.full_path}</body></html>)
+            expect(response[2]).to eq([expected_body])
+          end
+        end
+
+        context 'with a non-standard head' do
+          let(:user) { create(:user) }
+          let!(:project) { create(:project, :public, :repository) }
+          let(:path) { project.full_path }
+          let(:default_branch) { 'default_branch' }
+
+          before do
+            project.add_maintainer(user)
+            project.repository.add_branch(user, default_branch, 'master')
+            project.change_head(default_branch)
+          end
+
+          it 'returns the full project path' do
+            expect_response_with_path(go, enabled_protocol, project.full_path, default_branch)
           end
         end
       end
@@ -294,25 +266,19 @@ RSpec.describe Gitlab::Middleware::Go, feature_category: :source_code_management
       middleware.call(env)
     end
 
-    def expect_404_response(response)
-      expect(response[2]).to start_with([/Go package not found or access denied/])
-      expect(response[1]['Content-Type']).to eq('text/plain')
-      expect(response[0]).to eq(404)
-    end
-
-    def expect_response_with_path(response, protocol, path, source_branch = nil)
+    def expect_response_with_path(response, protocol, path, branch)
       repository_url = case protocol
                        when :ssh
                          shell = Gitlab.config.gitlab_shell
-                         "ssh://#{shell.ssh_user}@#{shell.ssh_host}/#{path}.git"
-                       else
+                         user = "#{shell.ssh_user}@" unless shell.ssh_user.empty?
+                         "ssh://#{user}#{shell.ssh_host}/#{path}.git"
+                       when :http, nil
                          "http://#{Gitlab.config.gitlab.host}/#{path}.git"
                        end
       project_url = "http://#{Gitlab.config.gitlab.host}/#{path}"
       expect(response[0]).to eq(200)
       expect(response[1]['Content-Type']).to eq('text/html')
-      go_source = source_branch ? %(<meta name="go-source" content="#{Gitlab.config.gitlab.host}/#{path} #{project_url} #{project_url}/-/tree/#{source_branch}{/dir} #{project_url}/-/blob/#{source_branch}{/dir}/{file}#L{line}">) : ''
-      expected_body = %(<html><head><meta name="go-import" content="#{Gitlab.config.gitlab.host}/#{path} git #{repository_url}">#{go_source}</head><body>go get #{Gitlab.config.gitlab.host}/#{path}</body></html>)
+      expected_body = %(<html><head><meta name="go-import" content="#{Gitlab.config.gitlab.host}/#{path} git #{repository_url}"><meta name="go-source" content="#{Gitlab.config.gitlab.host}/#{path} #{project_url} #{project_url}/-/tree/#{branch}{/dir} #{project_url}/-/blob/#{branch}{/dir}/{file}#L{line}"></head><body>go get #{Gitlab.config.gitlab.url}/#{path}</body></html>)
       expect(response[2]).to eq([expected_body])
     end
   end

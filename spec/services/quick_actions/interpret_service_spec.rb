@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe QuickActions::InterpretService, feature_category: :text_editors do
+RSpec.describe QuickActions::InterpretService, feature_category: :team_planning do
   include AfterNextHelpers
 
   let_it_be(:group) { create(:group) }
@@ -572,7 +572,11 @@ RSpec.describe QuickActions::InterpretService, feature_category: :text_editors d
 
         expect(updates).to eq(merge: merge_request.diff_head_sha)
 
-        expect(message).to eq(_('Scheduled to merge this merge request (Merge when checks pass).'))
+        if Gitlab.ee?
+          expect(message).to eq(_('Scheduled to merge this merge request (Merge when checks pass).'))
+        else
+          expect(message).to eq(_('Scheduled to merge this merge request (Merge when pipeline succeeds).'))
+        end
       end
     end
 
@@ -1200,26 +1204,6 @@ RSpec.describe QuickActions::InterpretService, feature_category: :text_editors d
         it_behaves_like 'failed command', 'Could not apply unassign_reviewer command.'
       end
 
-      context 'with a not-yet-persisted merge request and a preceding assign_reviewer command' do
-        let(:content) do
-          <<-QUICKACTION
-/assign_reviewer #{developer.to_reference}
-/unassign_reviewer #{developer.to_reference}
-          QUICKACTION
-        end
-
-        let(:issuable) { build(:merge_request) }
-
-        it 'adds and then removes a single reviewer in a single step' do
-          _, updates, message = service.execute(content, issuable)
-          translated_string = _("Assigned %{developer_to_reference} as reviewer. Removed reviewer %{developer_to_reference}.")
-          formatted_message = format(translated_string, developer_to_reference: developer.to_reference.to_s)
-
-          expect(updates).to eq(reviewer_ids: [])
-          expect(message).to eq(formatted_message)
-        end
-      end
-
       context 'with anything after the command' do
         let(:content) { '/unassign_reviewer supercalifragilisticexpialidocious' }
 
@@ -1780,6 +1764,33 @@ RSpec.describe QuickActions::InterpretService, feature_category: :text_editors d
       end
     end
 
+    context '/label command' do
+      context 'when target is a group level work item' do
+        let_it_be(:new_group) { create(:group, developers: developer) }
+        let_it_be(:group_level_work_item) { create(:work_item, :group_level, namespace: new_group) }
+        # this label should not be show on the list as belongs to another group
+        let_it_be(:invalid_label) { create(:group_label, title: 'not_from_group', group: group) }
+        let(:container) { new_group }
+
+        # This spec was introduced just to validate that the label finder scopes que query to a single group.
+        # The command checks that labels are available as part of the condition.
+        # Query was timing out in .com https://gitlab.com/gitlab-org/gitlab/-/issues/441123
+        it 'is not available when there are no labels associated with the group' do
+          expect(service.available_commands(group_level_work_item)).not_to include(a_hash_including(name: :label))
+        end
+
+        context 'when a label exists at the group level' do
+          before do
+            create(:group_label, group: new_group)
+          end
+
+          it 'is available' do
+            expect(service.available_commands(group_level_work_item)).to include(a_hash_including(name: :label))
+          end
+        end
+      end
+    end
+
     context '/copy_metadata command' do
       let(:todo_label) { create(:label, project: project, title: 'To Do') }
       let(:inreview_label) { create(:label, project: project, title: 'In Review') }
@@ -2297,24 +2308,12 @@ RSpec.describe QuickActions::InterpretService, feature_category: :text_editors d
             expect_next_instance_of(
               MergeRequests::ApprovalService, project: merge_request.project, current_user: current_user
             ) do |service|
-              expect(service).to receive(:execute).with(merge_request).and_return(true)
+              expect(service).to receive(:execute).with(merge_request)
             end
 
             _, _, message = service.execute('/submit_review approve', merge_request)
 
-            expect(message).to eq(_('Submitted the current review. Approved the current merge request.'))
-          end
-
-          it 'adds error message when approval service fails' do
-            expect_next_instance_of(
-              MergeRequests::ApprovalService, project: merge_request.project, current_user: current_user
-            ) do |service|
-              expect(service).to receive(:execute).with(merge_request).and_return(false)
-            end
-
-            _, _, message = service.execute('/submit_review approve', merge_request)
-
-            expect(message).to eq(_('Submitted the current review. Failed to approve the current merge request.'))
+            expect(message).to eq(_('Submitted the current review.'))
           end
         end
 
@@ -2424,48 +2423,6 @@ RSpec.describe QuickActions::InterpretService, feature_category: :text_editors d
 
       context 'when provided issue is not linked' do
         it_behaves_like 'command with failure'
-      end
-    end
-
-    shared_examples 'only available when issue_or_work_item_feature_flag_enabled' do |command|
-      context 'when issue' do
-        it 'is available' do
-          _, explanations = service.explain(command, issue)
-
-          expect(explanations).not_to be_empty
-        end
-      end
-
-      context 'when project work item' do
-        let_it_be(:work_item) { create(:work_item, project: project) }
-
-        it 'is available' do
-          _, explanations = service.explain(command, work_item)
-
-          expect(explanations).not_to be_empty
-        end
-
-        context 'when feature flag disabled' do
-          before do
-            stub_feature_flags(work_items_alpha: false)
-          end
-
-          it 'is not available' do
-            _, explanations = service.explain(command, work_item)
-
-            expect(explanations).to be_empty
-          end
-        end
-      end
-
-      context 'when group work item' do
-        let_it_be(:work_item) { create(:work_item, :group_level) }
-
-        it 'is not available' do
-          _, explanations = service.explain(command, work_item)
-
-          expect(explanations).to be_empty
-        end
       end
     end
 
@@ -2597,8 +2554,6 @@ RSpec.describe QuickActions::InterpretService, feature_category: :text_editors d
           expect(service.available_commands(issuable)).not_to include(a_hash_including(name: :add_email))
         end
       end
-
-      it_behaves_like 'only available when issue_or_work_item_feature_flag_enabled', '/add_email'
     end
 
     describe 'remove_email command' do
@@ -2711,19 +2666,6 @@ RSpec.describe QuickActions::InterpretService, feature_category: :text_editors d
         end
       end
 
-      shared_examples 'a successful command execution' do
-        it 'converts issue to Service Desk issue' do
-          _, _, message = convert_to_ticket
-
-          expect(message).to eq(s_('ServiceDesk|Converted issue to Service Desk ticket.'))
-          expect(issuable).to have_attributes(
-            confidential: expected_confidentiality,
-            author_id: Users::Internal.support_bot.id,
-            service_desk_reply_to: 'user@example.com'
-          )
-        end
-      end
-
       let_it_be_with_reload(:issuable) { issue }
       let_it_be(:original_author) { issue.author }
 
@@ -2748,46 +2690,16 @@ RSpec.describe QuickActions::InterpretService, feature_category: :text_editors d
 
       context 'when parameter is an email' do
         let(:content) { '/convert_to_ticket user@example.com' }
-        let(:expected_confidentiality) { true }
 
-        it_behaves_like 'a successful command execution'
+        it 'converts issue to Service Desk issue' do
+          _, _, message = convert_to_ticket
 
-        context 'when tickets should not be confidential by default' do
-          let_it_be(:service_desk_settings) do
-            create(:service_desk_setting, project: project, tickets_confidential_by_default: false)
-          end
-
-          context 'when issuable is in a public project' do
-            it_behaves_like 'a successful command execution'
-
-            context 'when issuable is already confidential' do
-              before do
-                issuable.update!(confidential: true)
-              end
-
-              it_behaves_like 'a successful command execution'
-            end
-          end
-
-          context 'when issuable is in a private project' do
-            let(:expected_confidentiality) { false }
-
-            before do
-              project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
-            end
-
-            it_behaves_like 'a successful command execution'
-          end
-
-          context 'when issuable is already confidential' do
-            let(:expected_confidentiality) { true }
-
-            before do
-              issuable.update!(confidential: true)
-            end
-
-            it_behaves_like 'a successful command execution'
-          end
+          expect(message).to eq(s_('ServiceDesk|Converted issue to Service Desk ticket.'))
+          expect(issuable).to have_attributes(
+            confidential: true,
+            author_id: Users::Internal.support_bot.id,
+            service_desk_reply_to: 'user@example.com'
+          )
         end
       end
 
@@ -2961,7 +2873,6 @@ RSpec.describe QuickActions::InterpretService, feature_category: :text_editors d
 
     context 'crm_contact commands' do
       let_it_be(:new_contact) { create(:contact, group: group) }
-      let_it_be(:another_contact) { create(:contact, group: group) }
       let_it_be(:existing_contact) { create(:contact, group: group) }
 
       let(:add_command) { service.execute("/add_contacts #{new_contact.email}", issue) }
@@ -2972,62 +2883,18 @@ RSpec.describe QuickActions::InterpretService, feature_category: :text_editors d
         create(:issue_customer_relations_contact, issue: issue, contact: existing_contact)
       end
 
-      describe 'add_contacts command' do
-        it 'adds a contact' do
-          _, updates, message = add_command
+      it 'add_contacts command adds the contact' do
+        _, updates, message = add_command
 
-          expect(updates).to eq(add_contacts: [new_contact.email])
-          expect(message).to eq(_('One or more contacts were successfully added.'))
-        end
-
-        context 'with multiple contacts in the same command' do
-          it 'adds both contacts' do
-            _, updates, message = service.execute("/add_contacts #{new_contact.email} #{another_contact.email}", issue)
-
-            expect(updates).to eq(add_contacts: [new_contact.email, another_contact.email])
-            expect(message).to eq(_('One or more contacts were successfully added.'))
-          end
-        end
-
-        context 'with multiple commands' do
-          it 'adds both contacts' do
-            _, updates, message = service.execute("/add_contacts #{new_contact.email}\n/add_contacts #{another_contact.email}", issue)
-
-            expect(updates).to eq(add_contacts: [new_contact.email, another_contact.email])
-            expect(message).to eq(_('One or more contacts were successfully added. One or more contacts were successfully added.'))
-          end
-        end
+        expect(updates).to eq(add_contacts: [new_contact.email])
+        expect(message).to eq(_('One or more contacts were successfully added.'))
       end
 
-      describe 'remove_contacts command' do
-        before do
-          create(:issue_customer_relations_contact, issue: issue, contact: another_contact)
-        end
+      it 'remove_contacts command removes the contact' do
+        _, updates, message = remove_command
 
-        it 'removes the contact' do
-          _, updates, message = remove_command
-
-          expect(updates).to eq(remove_contacts: [existing_contact.email])
-          expect(message).to eq(_('One or more contacts were successfully removed.'))
-        end
-
-        context 'with multiple contacts in the same command' do
-          it 'removes the contact' do
-            _, updates, message = service.execute("/remove_contacts #{existing_contact.email} #{another_contact.email}", issue)
-
-            expect(updates).to eq(remove_contacts: [existing_contact.email, another_contact.email])
-            expect(message).to eq(_('One or more contacts were successfully removed.'))
-          end
-        end
-
-        context 'with multiple commands' do
-          it 'removes the contact' do
-            _, updates, message = service.execute("/remove_contacts #{existing_contact.email}\n/remove_contacts #{another_contact.email}", issue)
-
-            expect(updates).to eq(remove_contacts: [existing_contact.email, another_contact.email])
-            expect(message).to eq(_('One or more contacts were successfully removed. One or more contacts were successfully removed.'))
-          end
-        end
+        expect(updates).to eq(remove_contacts: [existing_contact.email])
+        expect(message).to eq(_('One or more contacts were successfully removed.'))
       end
     end
 

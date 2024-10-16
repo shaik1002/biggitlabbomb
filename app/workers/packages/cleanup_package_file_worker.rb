@@ -21,9 +21,6 @@ module Packages
 
     def after_destroy
       pkg = artifact.package
-      # Ml::ModelVersion need the package to be able to upload files later
-      # Issue https://gitlab.com/gitlab-org/gitlab/-/issues/461322
-      return if pkg.ml_model?
 
       pkg.transaction do
         pkg.destroy if model.for_package_ids(pkg.id).empty?

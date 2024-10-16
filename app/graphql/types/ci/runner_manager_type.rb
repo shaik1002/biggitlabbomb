@@ -15,11 +15,13 @@ module Types
         description: 'Architecture provided by the runner manager.',
         method: :architecture
       field :contacted_at, Types::TimeType, null: true,
-        description: 'Timestamp of last contact from the runner manager.'
+        description: 'Timestamp of last contact from the runner manager.',
+        method: :contacted_at
       field :created_at, Types::TimeType, null: true,
         description: 'Timestamp of creation of the runner manager.'
       field :executor_name, GraphQL::Types::String, null: true,
-        description: 'Executor last advertised by the runner.'
+        description: 'Executor last advertised by the runner.',
+        method: :executor_name
       field :id, ::Types::GlobalIDType[::Ci::RunnerManager], null: false,
         description: 'ID of the runner manager.'
       field :ip_address, GraphQL::Types::String, null: true,
@@ -50,10 +52,10 @@ module Types
 
       def job_execution_status
         BatchLoader::GraphQL.for(runner_manager.id).batch(key: :running_builds_exist) do |runner_manager_ids, loader|
-          statuses = ::Ci::RunnerManager.id_in(runner_manager_ids).with_executing_builds.index_by(&:id)
+          statuses = ::Ci::RunnerManager.id_in(runner_manager_ids).with_running_builds.index_by(&:id)
 
           runner_manager_ids.each do |runner_manager_id|
-            loader.call(runner_manager_id, statuses[runner_manager_id] ? :active : :idle)
+            loader.call(runner_manager_id, statuses[runner_manager_id] ? :running : :idle)
           end
         end
       end

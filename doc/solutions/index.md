@@ -16,6 +16,4 @@ While information in this section gives valuable and qualified guidance on ways 
 
 ## Solutions categories
 
-- [Cloud Solutions](cloud/index.md)
-- [Coding Languages and Frameworks](languages/index.md)
-- [Integrations](integrations/index.md)
+[Cloud Solutions](cloud/index.md)

@@ -18,8 +18,8 @@
 }
 
 .upload-dropzone-card {
-  @apply gl-transition-[background,border];
-
+  transition: background $gl-transition-duration-medium $general-hover-transition-curve,
+    border $gl-transition-duration-medium $general-hover-transition-curve;
   color: $gl-text-color;
 
   &:hover,
@@ -51,13 +51,9 @@
   opacity: 1;
 }
 
-// These are composite classes for use with Vue Transition
-// https://vuejs.org/guide/built-ins/transition
 .upload-dropzone-fade-enter-active,
 .upload-dropzone-fade-leave-active {
-  @apply gl-transition-opacity;
-  @apply gl-duration-fast;
-  @apply gl-ease-linear;
+  transition: opacity $general-hover-transition-duration $general-hover-transition-curve;
 }
 
 .upload-dropzone-fade-enter,

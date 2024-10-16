@@ -64,11 +64,6 @@ export default {
       required: false,
       default: () => [],
     },
-    fluxNamespace: {
-      type: String,
-      required: false,
-      default: '',
-    },
     fluxApiError: {
       type: String,
       required: false,
@@ -134,10 +129,10 @@ export default {
       return `${this.environmentName}-flux-sync-badge`;
     },
     syncStatusBadge() {
-      if (!this.fluxResourcePresent && this.fluxApiError) {
+      if (!this.fluxResourceStatus.length && this.fluxApiError) {
         return { ...SYNC_STATUS_BADGES.unavailable, popoverText: this.fluxApiError };
       }
-      if (!this.fluxResourcePresent) {
+      if (!this.fluxResourceStatus.length) {
         return SYNC_STATUS_BADGES.unavailable;
       }
 
@@ -170,21 +165,10 @@ export default {
     isFluxConnectionStatus() {
       return Boolean(this.fluxConnectionParams.resourceType);
     },
-    fluxResourcePresent() {
-      return Boolean(this.fluxResourceStatus?.length);
-    },
-    fluxBadgeHref() {
-      return this.fluxResourcePresent ? '#' : null;
-    },
   },
   methods: {
     handleError(error) {
       this.$emit('error', error);
-    },
-    toggleFluxResource() {
-      if (!this.fluxResourcePresent) return;
-
-      this.$emit('show-flux-resource-details');
     },
   },
   i18n: {
@@ -215,7 +199,7 @@ export default {
       data-testid="flux-connection-status"
       :class="$options.badgeContainerClasses"
       :configuration="configuration"
-      :namespace="fluxNamespace"
+      :namespace="namespace"
       :resource-type-param="fluxConnectionParams"
     >
       <span class="gl-mr-3">{{ $options.i18n.syncStatusLabel }}</span>
@@ -236,14 +220,12 @@ export default {
           :variant="syncStatusBadge.variant"
           data-testid="sync-badge"
           tabindex="0"
-          :href="fluxBadgeHref"
-          @click.native="toggleFluxResource"
           >{{ syncStatusBadge.text }}
         </gl-badge>
         <gl-popover :target="fluxBadgeId" :title="syncStatusBadge.popoverTitle">
           <gl-sprintf :message="syncStatusBadge.popoverText">
             <template #link="{ content }">
-              <gl-link :href="syncStatusBadge.popoverLink" class="gl-text-sm">{{
+              <gl-link :href="syncStatusBadge.popoverLink" class="gl-font-sm">{{
                 content
               }}</gl-link></template
             >

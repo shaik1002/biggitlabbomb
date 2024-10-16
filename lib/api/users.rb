@@ -110,19 +110,16 @@ module API
         optional :provider, type: String, desc: 'The external provider'
         optional :search, type: String, desc: 'Search for a username'
         optional :active, type: Boolean, default: false, desc: 'Filters only active users'
-        optional :humans, type: Boolean, default: false, desc: 'Filters only human users'
         optional :external, type: Boolean, default: false, desc: 'Filters only external users'
+        optional :exclude_external, as: :non_external, type: Boolean, default: false, desc: 'Filters only non external users'
         optional :blocked, type: Boolean, default: false, desc: 'Filters only blocked users'
         optional :created_after, type: DateTime, desc: 'Return users created after the specified time'
         optional :created_before, type: DateTime, desc: 'Return users created before the specified time'
         optional :without_projects, type: Boolean, default: false, desc: 'Filters only users without projects'
+        optional :exclude_internal, as: :non_internal, type: Boolean, default: false, desc: 'Filters only non internal users'
         optional :without_project_bots, type: Boolean, default: false, desc: 'Filters users without project bots'
         optional :admins, type: Boolean, default: false, desc: 'Filters only admin users'
         optional :two_factor, type: String, desc: 'Filter users by Two-factor authentication.'
-        optional :exclude_active, as: :without_active, type: Boolean, default: false, desc: 'Filters only non active users'
-        optional :exclude_external, as: :non_external, type: Boolean, default: false, desc: 'Filters only non external users'
-        optional :exclude_humans, as: :without_humans, type: Boolean, default: false, desc: 'Filters only non human users'
-        optional :exclude_internal, as: :non_internal, type: Boolean, default: false, desc: 'Filters only non internal users'
         all_or_none_of :extern_uid, :provider
 
         use :sort_params_no_defaults
@@ -1027,7 +1024,6 @@ module API
           end
           post feature_category: :system_access do
             impersonation_token = finder.build(declared_params(include_missing: false))
-            impersonation_token.organization = Current.organization
 
             if impersonation_token.save
               present impersonation_token, with: Entities::ImpersonationTokenWithToken
@@ -1083,7 +1079,7 @@ module API
           end
           post feature_category: :system_access do
             response = ::PersonalAccessTokens::CreateService.new(
-              current_user: current_user, target_user: target_user, organization_id: Current.organization_id, params: declared_params(include_missing: false)
+              current_user: current_user, target_user: target_user, params: declared_params(include_missing: false)
             ).execute
 
             if response.success?
@@ -1305,9 +1301,6 @@ module API
         requires :credit_card_type, type: String, desc: 'The credit card network name'
 
         optional :zuora_payment_method_xid, type: String, desc: 'The Zuora payment method ID'
-        optional :stripe_setup_intent_xid, type: String, desc: 'The Stripe setup intent ID'
-        optional :stripe_payment_method_xid, type: String, desc: 'The Stripe payment method ID'
-        optional :stripe_card_fingerprint, type: String, desc: 'The Stripe credit card fingerprint'
       end
       put ":user_id/credit_card_validation", urgency: :low, feature_category: :subscription_management do
         authenticated_as_admin!
@@ -1321,10 +1314,8 @@ module API
 
         if service.success?
           present user.credit_card_validation, with: Entities::UserCreditCardValidations
-        elsif service.reason == :rate_limited
-          render_api_error!(service.message, 400)
         else
-          bad_request!
+          render_api_error!('400 Bad Request', 400)
         end
       end
 
@@ -1345,13 +1336,13 @@ module API
 
         attrs = declared_params(include_missing: false)
 
-        bad_request! unless attrs
+        render_api_error!('400 Bad Request', 400) unless attrs
 
         service = ::UserPreferences::UpdateService.new(current_user, attrs).execute
         if service.success?
           present preferences, with: Entities::UserPreferences
         else
-          bad_request!
+          render_api_error!('400 Bad Request', 400)
         end
       end
 
@@ -1498,7 +1489,7 @@ module API
         end
         post feature_category: :system_access do
           response = ::PersonalAccessTokens::CreateService.new(
-            current_user: current_user, target_user: current_user, params: declared_params(include_missing: false), organization_id: Current.organization_id
+            current_user: current_user, target_user: current_user, params: declared_params(include_missing: false)
           ).execute
 
           if response.success?

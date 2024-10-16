@@ -46,8 +46,7 @@ module Gitlab
               note: missing_author_note,
               author_id: project.creator_id,
               project: project,
-              created_at: pull_request.merged_at,
-              imported_from: ::Import::SOURCE_GITHUB
+              created_at: pull_request.merged_at
             )
           end
 

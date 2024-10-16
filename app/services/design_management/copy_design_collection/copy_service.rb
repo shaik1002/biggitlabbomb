@@ -47,8 +47,6 @@ module DesignManagement
         end
 
         ServiceResponse.success
-      rescue Gitlab::Git::CommandError => ex
-        error(message: ex.message)
       rescue StandardError => error
         log_exception(error)
 
@@ -120,9 +118,7 @@ module DesignManagement
       def remove_temporary_branch!
         return unless target_repository.branch_exists?(temporary_branch)
 
-        target_sha = target_repository.commit(temporary_branch).id
-
-        target_repository.rm_branch(git_user, temporary_branch, target_sha: target_sha)
+        target_repository.rm_branch(git_user, temporary_branch)
       end
 
       # Merge the temporary branch containing the commits to default branch
@@ -272,11 +268,7 @@ module DesignManagement
         oids = blobs.values.flat_map(&:values).map(&:lfs_oid)
         repository_type = LfsObjectsProject.repository_types[:design]
 
-        lfs_objects = oids.each_slice(1000).flat_map do |oids_batch|
-          LfsObject.for_oids(oids_batch).not_linked_to_project(target_project, repository_type: repository_type)
-        end
-
-        new_rows = lfs_objects.compact.map do |lfs_object|
+        new_rows = LfsObject.where(oid: oids).find_each(batch_size: 1000).map do |lfs_object|
           {
             project_id: target_project.id,
             lfs_object_id: lfs_object.id,

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::GithubImport::Importer::Events::Reopened, :aggregate_failures, feature_category: :importers do
+RSpec.describe Gitlab::GithubImport::Importer::Events::Reopened, :aggregate_failures do
   subject(:importer) { described_class.new(project, client) }
 
   let_it_be(:project) { create(:project, :repository) }
@@ -31,8 +31,7 @@ RSpec.describe Gitlab::GithubImport::Importer::Events::Reopened, :aggregate_fail
       target_type: issuable.class.name,
       action: 'reopened',
       created_at: issue_event.created_at,
-      updated_at: issue_event.created_at,
-      imported_from: 'github'
+      updated_at: issue_event.created_at
     }.stringify_keys
   end
 
@@ -65,8 +64,7 @@ RSpec.describe Gitlab::GithubImport::Importer::Events::Reopened, :aggregate_fail
         user_id: user.id,
         issue_id: issuable.id,
         state: 'reopened',
-        created_at: issue_event.created_at,
-        imported_from: 'github'
+        created_at: issue_event.created_at
       }.stringify_keys
     end
 
@@ -80,8 +78,7 @@ RSpec.describe Gitlab::GithubImport::Importer::Events::Reopened, :aggregate_fail
         user_id: user.id,
         merge_request_id: issuable.id,
         state: 'reopened',
-        created_at: issue_event.created_at,
-        imported_from: 'github'
+        created_at: issue_event.created_at
       }.stringify_keys
     end
 

@@ -20,7 +20,7 @@ module Mutations
       def resolve(id:)
         container_repository = authorized_find!(id: id)
 
-        container_repository.delete_scheduled! && audit_event(container_repository)
+        container_repository.delete_scheduled!
 
         track_event(:delete_repository, :container)
 
@@ -29,14 +29,6 @@ module Mutations
           errors: []
         }
       end
-
-      private
-
-      def audit_event(repository)
-        # defined in EE
-      end
     end
   end
 end
-
-Mutations::ContainerRepositories::Destroy.prepend_mod

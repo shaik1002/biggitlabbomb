@@ -3,7 +3,6 @@ set -o pipefail
 
 COLOR_RED="\e[31m"
 COLOR_GREEN="\e[32m"
-COLOR_YELLOW="\e[33m"
 COLOR_RESET="\e[39m"
 
 cd "$(dirname "$0")/.." || exit 1
@@ -145,25 +144,12 @@ then
   ((ERRORCODE++))
 fi
 
-FIND_ALL_DOCS_DIRECTORIES=$(find doc -type d)
-# shellcheck disable=2059
-printf "${COLOR_GREEN}INFO: Checking for documentation path clashes...${COLOR_RESET}\n"
-for directory in $FIND_ALL_DOCS_DIRECTORIES; do
-  # Markdown files should not have the same path as a directory with an index.md file in it
-  if [[ -f "${directory}.md" ]] && [[ -f "${directory}/index.md" ]]; then
-    # shellcheck disable=2059
-    printf "${COLOR_YELLOW}WARNING: File ${directory}.md clashes with file ${directory}/index.md!${COLOR_RESET} "
-    printf "For more information, see https://gitlab.com/gitlab-org/gitlab-docs/-/issues/1792.\n"
-  fi
-done
-
 # Run Vale and Markdownlint only on changed files. Only works on merged results
 # pipelines, so first checks if a merged results CI variable is present. If not present,
 # runs test on all files.
 if [ -n "$1" ]
 then
   MD_DOC_PATH="$@"
-  MD_DOC_PATH_VALE="$@"
   # shellcheck disable=2059
   printf "${COLOR_GREEN}INFO: List of files specified on command line. Running Markdownlint and Vale for only those files...${COLOR_RESET}\n"
 elif [ -n "${CI_MERGE_REQUEST_IID}" ]
@@ -178,12 +164,10 @@ then
   if grep -E "\.vale|\.markdownlint|lint-doc\.sh|docs\.gitlab-ci\.yml" < $DOC_CHANGES_FILE
   then
     MD_DOC_PATH=${MD_DOC_PATH:-'doc/{*,**/*}.md'}
-    MD_DOC_PATH_VALE=${MD_DOC_PATH_VALE:-'doc/'}
     # shellcheck disable=2059
     printf "${COLOR_GREEN}INFO: Vale, Markdownlint, lint-doc.sh, or pipeline configuration changed. Testing all files.${COLOR_RESET}\n"
   else
     MD_DOC_PATH=$(cat $DOC_CHANGES_FILE)
-    MD_DOC_PATH_VALE=$(cat $DOC_CHANGES_FILE)
     if [ -n "${MD_DOC_PATH}" ]
     then
       # shellcheck disable=2059
@@ -193,7 +177,6 @@ then
   rm $DOC_CHANGES_FILE
 else
   MD_DOC_PATH=${MD_DOC_PATH:-'doc/{*,**/*}.md'}
-  MD_DOC_PATH_VALE=${MD_DOC_PATH_VALE:-'doc/'}
   # shellcheck disable=2059
   printf "${COLOR_GREEN}INFO: No merge request pipeline detected. Running Markdownlint and Vale on all files...${COLOR_RESET}\n"
 fi
@@ -202,7 +185,7 @@ function run_locally_or_in_container() {
   local cmd=$1
   local args=$2
   local files=$3
-  local registry_url="registry.gitlab.com/gitlab-org/gitlab-docs/lint-markdown:alpine-3.20-vale-3.7.1-markdownlint2-0.14.0-lychee-0.15.1"
+  local registry_url="registry.gitlab.com/gitlab-org/gitlab-docs/lint-markdown:alpine-3.20-vale-3.4.2-markdownlint2-0.13.0-lychee-0.15.1"
 
   if hash "${cmd}" 2>/dev/null
   then
@@ -252,7 +235,7 @@ fi
 
 # shellcheck disable=2059
 printf "${COLOR_GREEN}INFO: Looking for Vale to lint prose, either installed locally or available in documentation linting image...${COLOR_RESET}\n"
-run_locally_or_in_container 'vale' "--minAlertLevel error --output=doc/.vale/vale.tmpl" "${MD_DOC_PATH_VALE}"
+run_locally_or_in_container 'vale' "--minAlertLevel error --output=doc/.vale/vale.tmpl" "${MD_DOC_PATH}"
 
 if [ "$ERRORCODE" -ne 0 ]
 then

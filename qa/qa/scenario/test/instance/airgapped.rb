@@ -7,7 +7,6 @@ module QA
         class Airgapped < Template
           include Bootable
           include SharedAttributes
-
           def perform(address, *rspec_options)
             Runtime::Scenario.define(:network, 'airgapped')
 

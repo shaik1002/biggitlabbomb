@@ -1,6 +1,5 @@
-import { builders } from 'prosemirror-test-builder';
 import HTMLNodes from '~/content_editor/extensions/html_nodes';
-import { createTestEditor } from '../test_utils';
+import { createTestEditor, createDocBuilder } from '../test_utils';
 
 describe('content_editor/extensions/html_nodes', () => {
   let tiptapEditor;
@@ -12,7 +11,20 @@ describe('content_editor/extensions/html_nodes', () => {
   beforeEach(() => {
     tiptapEditor = createTestEditor({ extensions: [...HTMLNodes] });
 
-    ({ doc, paragraph: p, pre, div } = builders(tiptapEditor.schema));
+    ({
+      builders: { doc, p, pre, div },
+    } = createDocBuilder({
+      tiptapEditor,
+      names: {
+        ...HTMLNodes.reduce(
+          (builders, htmlNode) => ({
+            ...builders,
+            [htmlNode.name]: { nodeType: htmlNode.name },
+          }),
+          {},
+        ),
+      },
+    }));
   });
 
   it.each`

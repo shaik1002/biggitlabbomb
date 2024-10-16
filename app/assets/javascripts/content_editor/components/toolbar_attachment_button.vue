@@ -39,7 +39,7 @@ export default {
 };
 </script>
 <template>
-  <span class="gl-inline-flex">
+  <span class="gl-display-inline-flex">
     <gl-button
       v-gl-tooltip
       :aria-label="$options.i18n.inputLabel"
@@ -56,7 +56,7 @@ export default {
       type="file"
       multiple
       name="content_editor_image"
-      class="gl-hidden"
+      class="gl-display-none"
       :aria-label="$options.i18n.inputLabel"
       data-testid="file-upload-field"
       @change="onFileSelect"

@@ -22,6 +22,7 @@ module GroupsHelper
   end
 
   def can_set_group_diff_preview_in_email?(group)
+    return false unless Feature.enabled?(:diff_preview_in_email, group)
     return false if group.parent&.show_diff_preview_in_email?.equal?(false)
 
     can?(current_user, :set_show_diff_preview_in_email, group)
@@ -97,20 +98,8 @@ module GroupsHelper
     end
   end
 
-  def group_confirm_modal_data(group:, remove_form_id: nil, permanently_remove: false, button_text: nil)
-    {
-      remove_form_id: remove_form_id,
-      button_text: button_text.nil? ? _('Delete group') : button_text,
-      button_testid: 'remove-group-button',
-      disabled: group.linked_to_subscription?.to_s,
-      confirm_danger_message: remove_group_message(group, permanently_remove),
-      phrase: group.full_path,
-      html_confirmation_message: 'true'
-    }
-  end
-
   # Overridden in EE
-  def remove_group_message(group, permanently_remove)
+  def remove_group_message(group)
     content_tag :div do
       content = ''.html_safe
       content << content_tag(:span, _("You are about to delete the group %{group_name}.") % { group_name: group.name })
@@ -213,8 +202,11 @@ module GroupsHelper
       show_schema_markup: 'true',
       new_subgroup_path: new_group_path(parent_id: group.id, anchor: 'create-group-pane'),
       new_project_path: new_project_path(namespace_id: group.id),
+      new_subgroup_illustration: image_path('illustrations/subgroup-create-new-sm.svg'),
+      new_project_illustration: image_path('illustrations/project-create-new-sm.svg'),
       empty_projects_illustration: image_path('illustrations/empty-state/empty-projects-md.svg'),
-      empty_subgroup_illustration: image_path('illustrations/empty-state/empty-projects-md.svg'),
+      empty_subgroup_illustration: image_path('illustrations/empty-state/empty-subgroup-md.svg'),
+      empty_search_illustration: image_path('illustrations/empty-state/empty-search-md.svg'),
       render_empty_state: 'true',
       can_create_subgroups: can?(current_user, :create_subgroup, group).to_s,
       can_create_projects: can?(current_user, :create_projects, group).to_s
@@ -261,9 +253,9 @@ module GroupsHelper
     new_group_custom_emoji_path(group)
   end
 
-  def access_level_roles_user_can_assign(group, roles)
+  def access_level_roles_user_can_assign(group)
     max_access_level = group.max_member_access_for_user(current_user)
-    roles.select do |_name, access_level|
+    group.access_level_roles.select do |_name, access_level|
       access_level <= max_access_level
     end
   end
@@ -301,9 +293,11 @@ module GroupsHelper
     dropdown_data
   end
 
-  def groups_list_with_filtered_search_app_data(endpoint)
+  def groups_explore_app_data
     {
-      endpoint: endpoint,
+      endpoint: explore_groups_path(format: :json),
+      empty_search_illustration: image_path('illustrations/empty-state/empty-search-md.svg'),
+      groups_empty_state_illustration: image_path('illustrations/empty-state/empty-groups-md.svg'),
       initial_sort: project_list_sort_by
     }.to_json
   end

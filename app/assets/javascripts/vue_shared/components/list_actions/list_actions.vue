@@ -46,7 +46,7 @@ export default {
     no-caret
     :toggle-text="$options.i18n.actions"
     text-sr-only
-    placement="bottom-end"
+    placement="right"
     category="tertiary"
   />
 </template>

@@ -25,7 +25,6 @@ export default function InitMoreActionsDropdown() {
       groupName,
       issueCount,
       mergeRequestCount,
-      size,
     } = el.dataset;
 
     return new Vue({
@@ -46,7 +45,6 @@ export default function InitMoreActionsDropdown() {
         groupName,
         issueCount: Number(issueCount),
         mergeRequestCount: Number(mergeRequestCount),
-        size: size || 'medium',
       },
       render: (createElement) => createElement(MoreActionsDropdown),
     });

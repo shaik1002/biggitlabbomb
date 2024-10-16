@@ -4,7 +4,7 @@
 
 .top-bar-fixed {
   @apply gl-shadow-inner-b-1-gray-100;
-  @apply gl-bg-default;
+  background-color: $body-bg;
   position: fixed;
   left: var(--application-bar-left);
   right: var(--application-bar-right);
@@ -17,6 +17,8 @@
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    @apply gl-transition-[width,left,right];
+    transition: left $gl-transition-duration-medium,
+                right $gl-transition-duration-medium,
+                width $gl-transition-duration-medium;
   }
 }

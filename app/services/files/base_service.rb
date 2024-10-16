@@ -18,10 +18,7 @@ module Files
       @previous_path = params[:previous_path]
 
       @file_content = params[:file_content]
-
-      if params[:file_content_encoding] == 'base64' && @file_content.present?
-        @file_content = Base64.decode64(@file_content)
-      end
+      @file_content = Base64.decode64(@file_content) if params[:file_content_encoding] == 'base64'
 
       @execute_filemode = params[:execute_filemode]
     end

@@ -62,60 +62,6 @@ module ValueStreamsDashboardHelpers
     end
   end
 
-  def expected_usage_overview_metrics(is_project: false)
-    supported_project_usage_metrics = [
-      ['issues', _('Issues'), '1,500'],
-      ['merge_requests', _('Merge requests'), '1,000'],
-      ['pipelines', _('Pipelines'), '2,000']
-    ]
-
-    if is_project
-      supported_project_usage_metrics
-    else
-      [
-        ['groups', _('Groups'), '5'],
-        ['projects', _('Projects'), '10'],
-        ['users', _('Users'), '100']
-      ].concat(supported_project_usage_metrics)
-    end
-  end
-
-  def expected_usage_overview_metrics_zero_values(is_project: false)
-    supported_project_usage_metrics = [
-      ['issues', _('Issues'), '0'],
-      ['merge_requests', _('Merge requests'), '0'],
-      ['pipelines', _('Pipelines'), '0']
-    ]
-
-    if is_project
-      supported_project_usage_metrics
-    else
-      [
-        ['groups', _('Groups'), '0'],
-        ['projects', _('Projects'), '0'],
-        ['users', _('Users'), '0']
-      ].concat(supported_project_usage_metrics)
-    end
-  end
-
-  def expected_usage_overview_metrics_empty_values(is_project: false)
-    supported_project_usage_metrics = [
-      ['issues', _('Issues'), '-'],
-      ['merge_requests', _('Merge requests'), '-'],
-      ['pipelines', _('Pipelines'), '-']
-    ]
-
-    if is_project
-      supported_project_usage_metrics
-    else
-      [
-        ['groups', _('Groups'), '-'],
-        ['projects', _('Projects'), '-'],
-        ['users', _('Users'), '-']
-      ].concat(supported_project_usage_metrics)
-    end
-  end
-
   def create_mock_dora_performers_score_metrics(group)
     [
       [nil, 'high', 'high', 'high'],
@@ -172,9 +118,9 @@ module ValueStreamsDashboardHelpers
 
   def create_mock_flow_metrics(project)
     [
-      [n_months_ago(1).beginning_of_month + 2.days, 2, 2],
-      [n_months_ago(2).beginning_of_month + 2.days, 4, 1],
-      [n_months_ago(3).beginning_of_month + 2.days, 3, 3]
+      [n_months_ago(1).beginning_of_month + 2.days, 2, 10],
+      [n_months_ago(2).beginning_of_month + 2.days, 4, 20],
+      [n_months_ago(3).beginning_of_month + 2.days, 3, 15]
     ].each do |created_at, lead_time, count|
       count.times do
         create(
@@ -191,14 +137,13 @@ module ValueStreamsDashboardHelpers
 
   def create_mock_merge_request_metrics(project)
     [
-      [n_months_ago(1), 3],
-      [n_months_ago(2), 1],
-      [n_months_ago(3), 2]
+      [n_months_ago(1), 5],
+      [n_months_ago(2), 7],
+      [n_months_ago(3), 6]
     ].each do |merged_at, count|
       count.times do
         create(
           :merge_request,
-          :skip_diff_creation,
           :merged,
           created_at: 1.year.ago,
           project: project

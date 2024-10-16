@@ -66,13 +66,12 @@ class IssuableFinder
         author_username
         crm_contact_id
         crm_organization_id
-        in
         label_name
         milestone_title
         release_tag
         my_reaction_emoji
         search
-        subscribed
+        in
       ]
     end
 
@@ -146,7 +145,6 @@ class IssuableFinder
     items = by_label(items)
     items = by_my_reaction_emoji(items)
     items = by_crm_contact(items)
-    items = by_subscribed(items)
     by_crm_organization(items)
   end
 
@@ -330,7 +328,7 @@ class IssuableFinder
   # rubocop: disable CodeReuse/ActiveRecord
   def by_search(items)
     return items unless search
-    return items if items.null_relation?
+    return items if items.is_a?(ActiveRecord::NullRelation)
 
     return filter_by_full_text_search(items) if use_full_text_search?
 
@@ -461,27 +459,18 @@ class IssuableFinder
     return items unless params[:my_reaction_emoji] && current_user
 
     if params.filter_by_no_reaction?
-      items.not_awarded(current_user, reaction_emoji_filter_params)
+      items.not_awarded(current_user)
     elsif params.filter_by_any_reaction?
-      items.awarded(current_user, reaction_emoji_filter_params)
+      items.awarded(current_user)
     else
-      items.awarded(current_user, reaction_emoji_filter_params.merge(name: params[:my_reaction_emoji]))
+      items.awarded(current_user, params[:my_reaction_emoji])
     end
-  end
-
-  # Overriden on EE::WorKItemsFinder and EE::EpicsFinder.
-  #
-  # Used to check if epic_and_work_item_associations_unification
-  # feature flag is enabled for the group and apply filtering over award emoji
-  # unified association. Should be removed with the feature flag.
-  def reaction_emoji_filter_params
-    {}
   end
 
   def by_negated_my_reaction_emoji(items)
     return items unless not_params[:my_reaction_emoji] && current_user
 
-    items.not_awarded(current_user, reaction_emoji_filter_params.merge(name: not_params[:my_reaction_emoji]))
+    items.not_awarded(current_user, not_params[:my_reaction_emoji])
   end
 
   def by_non_archived(items)
@@ -498,20 +487,6 @@ class IssuableFinder
     return items unless can_filter_by_crm_organization?
 
     Issuables::CrmOrganizationFilter.new(params: original_params).filter(items)
-  end
-
-  def by_subscribed(items)
-    return items unless current_user
-    return items unless Feature.enabled?(:filter_subscriptions, current_user)
-
-    case params[:subscribed]
-    when :explicitly_subscribed
-      items.explicitly_subscribed(current_user)
-    when :explicitly_unsubscribed
-      items.explicitly_unsubscribed(current_user)
-    else
-      items
-    end
   end
 
   def can_filter_by_crm_contact?

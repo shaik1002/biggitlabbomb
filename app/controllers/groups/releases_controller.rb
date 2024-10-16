@@ -19,7 +19,7 @@ module Groups
       Releases::GroupReleasesFinder
         .new(@group, current_user)
         .execute(preload: false)
-        .page(pagination_params[:page])
+        .page(params[:page])
         .per(30)
     end
   end

@@ -21,7 +21,7 @@ export default {
 </script>
 <template>
   <gl-empty-state
-    class="gl-mx-auto gl-max-w-limited"
+    class="gl-max-w-limited gl-mx-auto"
     :title="$options.i18n.emptyStateTitle"
     :description="$options.i18n.emptyStateText"
     :svg-path="illustrationPath"

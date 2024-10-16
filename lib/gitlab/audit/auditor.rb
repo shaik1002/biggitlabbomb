@@ -5,8 +5,6 @@ module Gitlab
     class Auditor
       attr_reader :scope, :name
 
-      include ::Gitlab::Audit::Logging
-
       PERMITTED_TARGET_CLASSES = [
         ::Operations::FeatureFlag
       ].freeze
@@ -52,13 +50,11 @@ module Gitlab
       def self.audit(context, &block)
         auditor = new(context)
 
-        if block
-          return yield unless auditor.audit_enabled?
+        return unless auditor.audit_enabled?
 
+        if block
           auditor.multiple_audit(&block)
         else
-          return unless auditor.audit_enabled?
-
           auditor.single_audit
         end
       end
@@ -106,7 +102,6 @@ module Gitlab
       def log_events_and_stream(events)
         log_authentication_event
         saved_events = log_to_database(events)
-        log_to_new_tables(saved_events, @name)
 
         # we only want to override events with saved_events when it successfully saves into database.
         # we are doing so to ensure events in memory reflects events saved in database and have id column.

@@ -9,7 +9,6 @@ RSpec.describe Gitlab::GithubImport::Importer::NoteImporter, feature_category: :
   let(:created_at) { Time.new(2017, 1, 1, 12, 00) }
   let(:updated_at) { Time.new(2017, 1, 1, 12, 15) }
   let(:note_body) { 'This is my note' }
-  let_it_be(:imported_from) { ::Import::HasImportSource::IMPORT_SOURCES[:github] }
 
   let(:github_note) do
     Gitlab::GithubImport::Representation::Note.new(
@@ -57,8 +56,7 @@ RSpec.describe Gitlab::GithubImport::Importer::NoteImporter, feature_category: :
                   discussion_id: match(/\A[0-9a-f]{40}\z/),
                   system: false,
                   created_at: created_at,
-                  updated_at: updated_at,
-                  imported_from: imported_from
+                  updated_at: updated_at
                 }
               ]
             )
@@ -90,8 +88,7 @@ RSpec.describe Gitlab::GithubImport::Importer::NoteImporter, feature_category: :
                   discussion_id: match(/\A[0-9a-f]{40}\z/),
                   system: false,
                   created_at: created_at,
-                  updated_at: updated_at,
-                  imported_from: imported_from
+                  updated_at: updated_at
                 }
               ]
             )
@@ -163,27 +160,6 @@ RSpec.describe Gitlab::GithubImport::Importer::NoteImporter, feature_category: :
       importer.execute
 
       expect(project.notes.take).to be_valid
-    end
-
-    context 'when the description has user mentions' do
-      let(:note_body) { 'You can ask @knejad by emailing xyz@gitlab.com' }
-
-      it 'adds backticks to the username' do
-        issue_row = create(:issue, project: project, iid: 1)
-
-        allow(importer)
-          .to receive(:find_noteable_id)
-          .and_return(issue_row.id)
-
-        allow(importer.user_finder)
-          .to receive(:author_id_for)
-          .with(github_note)
-          .and_return([user.id, true])
-
-        importer.execute
-
-        expect(project.notes.last.note).to eq("You can ask `@knejad` by emailing xyz@gitlab.com")
-      end
     end
   end
 

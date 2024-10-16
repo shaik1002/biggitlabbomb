@@ -1,13 +1,16 @@
 description: "Click navigation menu item"
 category: default
 action: click_menu_item
+label_description: ""
+property_description: ""
+value_description: ""
 extra_properties:
   sidebar_display:
     type: string
   menu_display:
     type: string
 identifiers:
-product_group: remote_development
+product_group: ide
 milestone: "14.0"
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/62030
 distributions:

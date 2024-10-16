@@ -4,28 +4,14 @@ module Groups
   class AutocompleteService < Groups::BaseService
     include LabelsAsHash
 
-    SEARCH_LIMIT = 5
-
     # rubocop: disable CodeReuse/ActiveRecord
     def issues(confidential_only: false, issue_types: nil)
-      finder_params = { group_id: group.id, state: 'opened' }
+      finder_params = { group_id: group.id, include_subgroups: true, state: 'opened' }
       finder_params[:confidential] = true if confidential_only.present?
       finder_params[:issue_types] = issue_types if issue_types.present?
 
-      finder_class =
-        if group.namespace_work_items_enabled?
-          finder_params[:include_descendants] = true
-          WorkItems::WorkItemsFinder
-        else
-          finder_params[:include_subgroups] = true
-          IssuesFinder
-        end
-
-      relation = finder_class.new(current_user, finder_params).execute
-
-      relation = relation.gfm_autocomplete_search(params[:search]).limit(SEARCH_LIMIT) if params[:search]
-
-      relation
+      IssuesFinder.new(current_user, finder_params)
+        .execute
         .preload(project: :namespace)
         .with_work_item_type
         .select(:iid, :title, :project_id, :namespace_id, 'work_item_types.icon_name')

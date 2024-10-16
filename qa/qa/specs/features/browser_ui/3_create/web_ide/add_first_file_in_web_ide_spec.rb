@@ -1,19 +1,21 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Create', :skip_live_env, product_group: :remote_development do
+  RSpec.describe 'Create', :skip_live_env, product_group: :ide do
     describe 'Add first file in Web IDE' do
-      include_context 'Web IDE test prep'
       let(:project) { create(:project, :with_readme, name: 'webide-create-file-project') }
 
       before do
-        load_web_ide
+        Flow::Login.sign_in
+        project.visit!
+        Page::Project::Show.perform(&:open_web_ide!)
+        Page::Project::WebIDE::VSCode.perform(&:wait_for_ide_to_load)
       end
 
       context 'when a file with the same name already exists' do
         let(:file_name) { 'README.md' }
 
-        it 'throws an error', :blocking, testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/432899' do
+        it 'throws an error', testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/432899' do
           Page::Project::WebIDE::VSCode.perform do |ide|
             ide.create_new_file(file_name)
 
@@ -33,12 +35,7 @@ module QA
             ide.commit_and_push_to_existing_branch(file_name)
           end
 
-          # We retry on exception as there can be an unexpected alert present if we try to
-          # navigate away from the web ide too quickly after commit_and_push_to_existing_branch
-          Support::Retrier.retry_until(retry_on_exception: true, sleep_interval: 3,
-            message: 'Retry visiting project') do
-            project.visit!
-          end
+          project.visit!
 
           Page::Project::Show.perform do |project|
             expect(project).to have_file(file_name)

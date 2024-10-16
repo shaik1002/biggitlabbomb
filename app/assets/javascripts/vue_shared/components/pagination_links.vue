@@ -1,5 +1,13 @@
 <script>
 import { GlPagination } from '@gitlab/ui';
+import {
+  PREV,
+  NEXT,
+  LABEL_FIRST_PAGE,
+  LABEL_PREV_PAGE,
+  LABEL_NEXT_PAGE,
+  LABEL_LAST_PAGE,
+} from '~/vue_shared/components/pagination/constants';
 
 export default {
   components: {
@@ -20,6 +28,12 @@ export default {
       const baseProps = {
         ...this.$attrs,
         value: this.pageInfo.page,
+        prevText: PREV,
+        nextText: NEXT,
+        labelFirstPage: LABEL_FIRST_PAGE,
+        labelPrevPage: LABEL_PREV_PAGE,
+        labelNextPage: LABEL_NEXT_PAGE,
+        labelLastPage: LABEL_LAST_PAGE,
       };
 
       if (this.pageInfo.total) {

@@ -1,7 +1,7 @@
 <script>
 import { GlBadge, GlTooltipDirective } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
-import { getTimeago, newDate } from '~/lib/utils/datetime_utility';
+import { getTimeago } from '~/lib/utils/datetime_utility';
 import { duration } from '~/lib/utils/datetime/timeago_utility';
 import {
   I18N_STATUS_ONLINE,
@@ -59,7 +59,7 @@ export default {
     },
     contactedAtTimeAgo() {
       if (this.contactedAt) {
-        return getTimeago().format(newDate(this.contactedAt));
+        return getTimeago().format(this.contactedAt);
       }
       // Prevent "just now" from being rendered, in case data is missing.
       return __('never');
@@ -122,8 +122,6 @@ export default {
     :icon="badge.icon"
     v-bind="$attrs"
   >
-    <span class="gl-truncate">
-      {{ badge.label }}
-    </span>
+    {{ badge.label }}
   </gl-badge>
 </template>

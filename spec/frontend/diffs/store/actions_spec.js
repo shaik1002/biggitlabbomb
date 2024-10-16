@@ -36,13 +36,14 @@ import eventHub from '~/notes/event_hub';
 import diffsEventHub from '~/diffs/event_hub';
 import { handleLocationHash, historyPushState, scrollToElement } from '~/lib/utils/common_utils';
 import setWindowLocation from 'helpers/set_window_location_helper';
-import { confirmAction } from '~/lib/utils/confirm_via_gl_modal/confirm_via_gl_modal';
 import { diffMetadata } from '../mock_data/diff_metadata';
 
 jest.mock('~/alert');
 
-jest.mock('~/lib/utils/confirm_via_gl_modal/confirm_via_gl_modal');
-confirmAction.mockResolvedValueOnce(false);
+jest.mock('~/lib/utils/secret_detection', () => ({
+  confirmSensitiveAction: jest.fn(() => Promise.resolve(false)),
+  containsSensitiveToken: jest.requireActual('~/lib/utils/secret_detection').containsSensitiveToken,
+}));
 
 const endpointDiffForPath = '/diffs/set/endpoint/path';
 
@@ -745,27 +746,6 @@ describe('DiffsStoreActions', () => {
         { type: types.SET_CURRENT_DIFF_FILE, payload: 'ABC' },
       ]);
     });
-
-    it('should prevent default event', () => {
-      const preventDefault = jest.fn();
-      const target = { href: TEST_HOST };
-      const event = { target, preventDefault };
-      testAction(diffActions.setHighlightedRow, { lineCode: 'ABC_123', event }, {}, [
-        { type: types.SET_HIGHLIGHTED_ROW, payload: 'ABC_123' },
-        { type: types.SET_CURRENT_DIFF_FILE, payload: 'ABC' },
-      ]);
-      expect(preventDefault).toHaveBeenCalled();
-    });
-
-    it('should filter out linked file param', () => {
-      const target = { href: `${TEST_HOST}/diffs?file=foo#abc_11` };
-      const event = { target, preventDefault: jest.fn() };
-      testAction(diffActions.setHighlightedRow, { lineCode: 'ABC_123', event }, {}, [
-        { type: types.SET_HIGHLIGHTED_ROW, payload: 'ABC_123' },
-        { type: types.SET_CURRENT_DIFF_FILE, payload: 'ABC' },
-      ]);
-      expect(window.location.href).toBe(`${TEST_HOST}/diffs#abc_11`);
-    });
   });
 
   describe('assignDiscussionsToDiff', () => {
@@ -1239,7 +1219,7 @@ describe('DiffsStoreActions', () => {
       diffFile: getDiffFileMock(),
       noteableData: {},
     };
-    const note = '';
+    const note = {};
     const state = {
       commit: {
         id: commitId,
@@ -1261,7 +1241,7 @@ describe('DiffsStoreActions', () => {
       });
     });
 
-    it('should not allow adding note with sensitive token', async () => {
+    it('should not add note with sensitive token', async () => {
       const sensitiveMessage = 'token: glpat-1234567890abcdefghij';
 
       await diffActions.saveDiffDiscussion(
@@ -1269,12 +1249,6 @@ describe('DiffsStoreActions', () => {
         { note: sensitiveMessage, formData },
       );
       expect(dispatch).not.toHaveBeenCalled();
-      expect(confirmAction).toHaveBeenCalledWith(
-        '',
-        expect.objectContaining({
-          title: 'Warning: Potential secret detected',
-        }),
-      );
     });
   });
 
@@ -1362,9 +1336,9 @@ describe('DiffsStoreActions', () => {
           expect(dispatch).toHaveBeenCalledWith('fetchFileByFile');
         });
 
-        it('unlink the file', () => {
+        it('unpins the file', () => {
           diffActions.goToFile({ state, commit, getters, dispatch }, file);
-          expect(dispatch).toHaveBeenCalledWith('unlinkFile');
+          expect(dispatch).toHaveBeenCalledWith('unpinFile');
         });
       });
     });
@@ -1987,7 +1961,7 @@ describe('DiffsStoreActions', () => {
         0,
         { flatBlobsList: [{ fileHash: '123' }] },
         [{ type: types.SET_CURRENT_DIFF_FILE, payload: '123' }],
-        [{ type: 'unlinkFile' }],
+        [{ type: 'unpinFile' }],
       );
     });
 
@@ -1997,7 +1971,7 @@ describe('DiffsStoreActions', () => {
         0,
         { viewDiffsFileByFile: true, flatBlobsList: [{ fileHash: '123' }] },
         [{ type: types.SET_CURRENT_DIFF_FILE, payload: '123' }],
-        [{ type: 'unlinkFile' }, { type: 'fetchFileByFile' }],
+        [{ type: 'unpinFile' }, { type: 'fetchFileByFile' }],
       );
     });
   });
@@ -2139,17 +2113,17 @@ describe('DiffsStoreActions', () => {
     });
   });
 
-  describe('fetchLinkedFile', () => {
-    it('fetches linked file', async () => {
-      const linkedFileHref = `${TEST_HOST}/linked-file`;
-      const linkedFile = getDiffFileMock();
-      const diffFiles = [linkedFile];
+  describe('fetchPinnedFile', () => {
+    it('fetches pinned file', async () => {
+      const pinnedFileHref = `${TEST_HOST}/pinned-file`;
+      const pinnedFile = getDiffFileMock();
+      const diffFiles = [pinnedFile];
       const hubSpy = jest.spyOn(diffsEventHub, '$emit');
-      mock.onGet(new RegExp(linkedFileHref)).reply(HTTP_STATUS_OK, { diff_files: diffFiles });
+      mock.onGet(new RegExp(pinnedFileHref)).reply(HTTP_STATUS_OK, { diff_files: diffFiles });
 
       await testAction(
-        diffActions.fetchLinkedFile,
-        linkedFileHref,
+        diffActions.fetchPinnedFile,
+        pinnedFileHref,
         {},
         [
           { type: types.SET_BATCH_LOADING_STATE, payload: 'loading' },
@@ -2158,8 +2132,8 @@ describe('DiffsStoreActions', () => {
             type: types.SET_DIFF_DATA_BATCH,
             payload: { diff_files: diffFiles, updatePosition: false },
           },
-          { type: types.SET_LINKED_FILE_HASH, payload: linkedFile.file_hash },
-          { type: types.SET_CURRENT_DIFF_FILE, payload: linkedFile.file_hash },
+          { type: types.SET_PINNED_FILE_HASH, payload: pinnedFile.file_hash },
+          { type: types.SET_CURRENT_DIFF_FILE, payload: pinnedFile.file_hash },
           { type: types.SET_BATCH_LOADING_STATE, payload: 'loaded' },
           { type: types.SET_RETRIEVING_BATCHES, payload: false },
         ],
@@ -2172,14 +2146,14 @@ describe('DiffsStoreActions', () => {
     });
 
     it('handles load error', async () => {
-      const linkedFileHref = `${TEST_HOST}/linked-file`;
+      const pinnedFileHref = `${TEST_HOST}/pinned-file`;
       const hubSpy = jest.spyOn(diffsEventHub, '$emit');
-      mock.onGet(new RegExp(linkedFileHref)).reply(HTTP_STATUS_INTERNAL_SERVER_ERROR);
+      mock.onGet(new RegExp(pinnedFileHref)).reply(HTTP_STATUS_INTERNAL_SERVER_ERROR);
 
       try {
         await testAction(
-          diffActions.fetchLinkedFile,
-          linkedFileHref,
+          diffActions.fetchPinnedFile,
+          pinnedFileHref,
           {},
           [
             { type: types.SET_BATCH_LOADING_STATE, payload: 'loading' },
@@ -2199,57 +2173,23 @@ describe('DiffsStoreActions', () => {
     });
   });
 
-  describe('unlinkFile', () => {
-    it('unlinks linked file', () => {
-      const linkedFile = getDiffFileMock();
-      setWindowLocation(`${TEST_HOST}/?file=${linkedFile.file_hash}#${linkedFile.file_hash}_10_10`);
+  describe('unpinFile', () => {
+    it('unpins pinned file', () => {
+      const pinnedFile = getDiffFileMock();
+      setWindowLocation(`${TEST_HOST}/?pin=${pinnedFile.file_hash}#${pinnedFile.file_hash}_10_10`);
       testAction(
-        diffActions.unlinkFile,
+        diffActions.unpinFile,
         undefined,
-        { linkedFile },
-        [{ type: types.SET_LINKED_FILE_HASH, payload: null }],
+        { pinnedFile },
+        [{ type: types.SET_PINNED_FILE_HASH, payload: null }],
         [],
       );
       expect(window.location.hash).toBe('');
       expect(window.location.search).toBe('');
     });
 
-    it('does nothing when no linked file present', () => {
-      testAction(diffActions.unlinkFile, undefined, {}, [], []);
-    });
-  });
-
-  describe('expandAllFiles', () => {
-    it('triggers mutation', () => {
-      testAction(
-        diffActions.expandAllFiles,
-        undefined,
-        {},
-        [
-          {
-            type: types.SET_COLLAPSED_STATE_FOR_ALL_FILES,
-            payload: { collapsed: false },
-          },
-        ],
-        [],
-      );
-    });
-  });
-
-  describe('collapseAllFiles', () => {
-    it('triggers mutation', () => {
-      testAction(
-        diffActions.collapseAllFiles,
-        undefined,
-        {},
-        [
-          {
-            type: types.SET_COLLAPSED_STATE_FOR_ALL_FILES,
-            payload: { collapsed: true },
-          },
-        ],
-        [],
-      );
+    it('does nothing when no pinned file present', () => {
+      testAction(diffActions.unpinFile, undefined, {}, [], []);
     });
   });
 });

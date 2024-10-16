@@ -12,8 +12,7 @@ const INDENT_LENGTH = 2;
 // a bullet point character (*+-) and an optional checkbox ([ ] [x])
 // OR a number with a . after it and an optional checkbox ([ ] [x])
 // followed by one or more whitespace characters
-const LIST_LINE_HEAD_PATTERN =
-  /^(?<indent>\s*)(?<leader>((?<isUl>[*+-])|(?<isOl>\d+\.))( \[([xX~\s])\])?\s)(?<content>.)?/;
+const LIST_LINE_HEAD_PATTERN = /^(?<indent>\s*)(?<leader>((?<isUl>[*+-])|(?<isOl>\d+\.))( \[([xX~\s])\])?\s)(?<content>.)?/;
 
 // detect a horizontal rule that might be mistaken for a list item (not full pattern for an <hr>)
 const HR_PATTERN = /^((\s{0,3}-+\s*-+\s*-+\s*[\s-]*)|(\s{0,3}\*+\s*\*+\s*\*+\s*[\s*]*))$/;
@@ -106,7 +105,6 @@ function linesFromSelection(textArea) {
  * @param {Number} firstLineChange - number of characters changed on first line
  * @param {Number} totalChanged - total number of characters changed
  */
-// eslint-disable-next-line max-params
 function setNewSelectionRange(
   textArea,
   selectionStart,
@@ -144,7 +142,6 @@ function getEditorSelectionRange(editor) {
   return convertMonacoSelectionToAceFormat(editor.getSelection());
 }
 
-// eslint-disable-next-line max-params
 function editorBlockTagText(text, blockTag, selected, editor) {
   const lines = text.split('\n');
   const selectionRange = getEditorSelectionRange(editor);
@@ -168,7 +165,6 @@ function editorBlockTagText(text, blockTag, selected, editor) {
   return addBlockTags(blockTag, selected);
 }
 
-// eslint-disable-next-line max-params
 function blockTagText(text, textArea, blockTag, selected) {
   const shouldRemoveBlock =
     lineBeforeSelection(text, textArea) === blockTag &&

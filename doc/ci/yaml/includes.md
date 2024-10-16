@@ -14,24 +14,14 @@ You can use [`include`](index.md#include) to include external YAML files in your
 
 ## Include a single configuration file
 
-To include a single configuration file, use `include` by itself with a single file
-with either of these syntax options:
+To include a single configuration file, use either of these syntax options:
 
-- On the same line:
-
-  ```yaml
-  include: 'my-config.yml'
-  ```
-
-- As a single item in an array:
+- `include` by itself with a single file. If this is a local file, it is the same as [`include:local`](index.md#includelocal).
+  If this is a remote file, it is the same as [`include:remote`](index.md#includeremote).
 
   ```yaml
-  include:
-    - 'my-config.yml'
+  include: '/templates/.after-script-template.yml'
   ```
-
-If the file is a local file, the behavior is the same as [`include:local`](index.md#includelocal).
-If the file is a remote file, it is the same as [`include:remote`](index.md#includeremote).
 
 ## Include an array of configuration files
 
@@ -43,7 +33,7 @@ You can include an array of configuration files:
   ```yaml
   include:
     - 'https://gitlab.com/awesome-project/raw/main/.before-script-template.yml'
-    - 'templates/.after-script-template.yml'
+    - '/templates/.after-script-template.yml'
   ```
 
 - You can define a single item array:
@@ -58,7 +48,7 @@ You can include an array of configuration files:
   ```yaml
   include:
     - remote: 'https://gitlab.com/awesome-project/raw/main/.before-script-template.yml'
-    - local: 'templates/.after-script-template.yml'
+    - local: '/templates/.after-script-template.yml'
     - template: Auto-DevOps.gitlab-ci.yml
   ```
 
@@ -67,11 +57,11 @@ You can include an array of configuration files:
   ```yaml
   include:
     - 'https://gitlab.com/awesome-project/raw/main/.before-script-template.yml'
-    - 'templates/.after-script-template.yml'
+    - '/templates/.after-script-template.yml'
     - template: Auto-DevOps.gitlab-ci.yml
     - project: 'my-group/my-project'
       ref: main
-      file: 'templates/.gitlab-ci-template.yml'
+      file: '/templates/.gitlab-ci-template.yml'
   ```
 
 ## Use `default` configuration from an included configuration file
@@ -95,7 +85,7 @@ default:
 Content of `.gitlab-ci.yml`:
 
 ```yaml
-include: 'templates/.before-script-template.yml'
+include: '/templates/.before-script-template.yml'
 
 rspec1:
   script:
@@ -310,94 +300,66 @@ default:
     - echo "Job complete."
 ```
 
-### Use nested includes with duplicate `include` entries
+### Use nested includes with duplicate `includes` entries
 
-You can include the same configuration file multiple times in the main configuration file and
-in nested includes.
+Nested includes can include the same configuration file. The duplicate configuration
+file is included multiple times, but the effect is the same as if it was only
+included once.
 
-If any file changes the included configuration using [overrides](#override-included-configuration-values),
-then the order of the `include` entries might affect the final configuration. The last time
-the configuration is included overrides any previous times the file was included.
-For example:
+For example, with the following nested includes, where `defaults.gitlab-ci.yml`
+is included multiple times:
 
-- Contents of a `defaults.gitlab-ci.yml` file:
+- Contents of the `.gitlab-ci.yml` file:
+
+  ```yaml
+  include:
+    - template: defaults.gitlab-ci.yml
+    - local: unit-tests.gitlab-ci.yml
+    - local: smoke-tests.gitlab-ci.yml
+  ```
+
+- Contents of the `defaults.gitlab-ci.yml` file:
 
   ```yaml
   default:
-    before_script: echo "Default before script"
+    before_script: default-before-script.sh
+    retry: 2
   ```
 
-- Contents of a `unit-tests.gitlab-ci.yml` file:
+- Contents of the `unit-tests.gitlab-ci.yml` file:
 
   ```yaml
   include:
     - template: defaults.gitlab-ci.yml
-
-  default:  # Override the included default
-    before_script: echo "Unit test default override"
 
   unit-test-job:
     script: unit-test.sh
+    retry: 0
   ```
 
-- Contents of a `smoke-tests.gitlab-ci.yml` file:
+- Contents of the `smoke-tests.gitlab-ci.yml` file:
 
   ```yaml
   include:
     - template: defaults.gitlab-ci.yml
-
-  default:  # Override the included default
-    before_script: echo "Smoke test default override"
 
   smoke-test-job:
     script: smoke-test.sh
   ```
 
-With these three files, the order they are included changes the final configuration.
-With:
+The final configuration would be:
 
-- `unit-tests` included first, the contents of the `.gitlab-ci.yml` file is:
+```yaml
+unit-test-job:
+  before_script: default-before-script.sh
+  script: unit-test.sh
+  retry: 0
 
-  ```yaml
-  include:
-    - local: unit-tests.gitlab-ci.yml
-    - local: smoke-tests.gitlab-ci.yml
-  ```
-
-  The final configuration would be:
-
-  ```yaml
-  unit-test-job:
-   before_script: echo "Smoke test default override"
-   script: unit-test.sh
-
-  smoke-test-job:
-   before_script: echo "Smoke test default override"
-   script: smoke-test.sh
-  ```
-
-- `unit-tests` included last, the contents of the `.gitlab-ci.yml` file is:
-
-  ```yaml
-  include:
-    - local: smoke-tests.gitlab-ci.yml
-    - local: unit-tests.gitlab-ci.yml
-  ```
-
-- The final configuration would be:
-
-  ```yaml
-  unit-test-job:
-   before_script: echo "Unit test default override"
-   script: unit-test.sh
-
-  smoke-test-job:
-   before_script: echo "Unit test default override"
-   script: smoke-test.sh
-  ```
-
-If no file overrides the included configuration, the order of the `include` entries
-does not affect the final configuration
+smoke-test-job:
+  before_script: default-before-script.sh
+  script: smoke-test.sh
+  retry: 2
+```
 
 ## Use variables with `include`
 
@@ -427,10 +389,6 @@ so these variables cannot be used with `include`.
 
 For an example of how you can include predefined variables, and the variables' impact on CI/CD jobs,
 see this [CI/CD variable demo](https://youtu.be/4XR8gw3Pkos).
-
-You cannot use CI/CD variables in an `include` section in a dynamic child pipeline's configuration.
-[Issue 378717](https://gitlab.com/gitlab-org/gitlab/-/issues/378717) proposes fixing
-this issue.
 
 ## Use `rules` with `include`
 
@@ -507,7 +465,7 @@ test:
 
 In this example, GitLab checks for the existence of `file.md` in the current project.
 
-Review your configuration carefully if you use `include` with `rules:exists` in an include file
+There is a known issue if you configure `include` with `rules:exists` in an include file
 from a different project. GitLab checks for the existence of the file in the _other_ project.
 For example:
 

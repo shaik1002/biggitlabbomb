@@ -1,5 +1,5 @@
 ---
-stage: Foundations
+stage: Manage
 group: Import and Integrate
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -13,14 +13,11 @@ DETAILS:
 > - Ability to re-import projects [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/23905) in GitLab 15.9.
 > - Ability to import reviewers [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/416611) in GitLab 16.3.
 > - Support for pull request approval imports [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/135256) in GitLab 16.7.
-> - An **Imported** badge on some imported items [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/461211) in GitLab 17.2.
 
 Import your projects from Bitbucket Server to GitLab.
 
-WARNING:
-Importing from Bitbucket Server to GitLab.com is [currently unavailable](https://status.gitlab.com). We don't have an
-estimated time for resolution. For more information, please [contact support](https://about.gitlab.com/support/).
-This unavailability doesn't affect [importing from Bitbucket Cloud](bitbucket.md).
+NOTE:
+This process is different than [importing from Bitbucket Cloud](bitbucket.md).
 
 ## Prerequisites
 
@@ -41,7 +38,7 @@ To import your Bitbucket repositories:
 1. On the left sidebar, at the top, select **Create new** (**{plus}**) and **New project/repository**.
 1. Select **Import project**.
 1. Select **Bitbucket Server**.
-1. Sign in to Bitbucket and grant GitLab access to your Bitbucket account.
+1. Log in to Bitbucket and grant GitLab access to your Bitbucket account.
 1. Select the projects to import, or import all projects. You can filter projects by name and select
    the namespace for which to import each project.
 1. To import a project:
@@ -52,14 +49,12 @@ To import your Bitbucket repositories:
 
 - Repository description
 - Git repository data
-- Pull requests, including comments, user mentions, reviewers, and merge events
+- Pull requests
+- Pull request comments, user mentions, reviewers, approvals, and merge events
 - LFS objects
 
-When importing:
-
-- Repository public access is retained. If a repository is private in Bitbucket, it's created as private in GitLab as
-  well.
-- Imported merge requests and comments have an **Imported** badge in GitLab.
+When importing, repository public access is retained. If a repository is private in Bitbucket, it's
+created as private in GitLab as well.
 
 When closed or merged pull requests are imported, commit SHAs that do not exist in the repository are fetched from the Bitbucket server
 to make sure pull requests have commits tied to them:
@@ -76,8 +71,6 @@ The following items aren't imported:
 - Attachments in Markdown
 - Task lists
 - Emoji reactions
-- Pull request approvals
-- Approval rules for pull requests
 
 ## Items that are imported but changed
 

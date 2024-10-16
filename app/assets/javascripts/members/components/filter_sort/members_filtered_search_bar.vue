@@ -1,12 +1,12 @@
 <script>
 // eslint-disable-next-line no-restricted-imports
 import { mapState } from 'vuex';
+import { __ } from '~/locale';
 import { getParameterByName, setUrlParams, queryToObject, visitUrl } from '~/lib/utils/url_utility';
 import {
   SORT_QUERY_PARAM_NAME,
   ACTIVE_TAB_QUERY_PARAM_NAME,
   AVAILABLE_FILTERED_SEARCH_TOKENS,
-  FILTERED_SEARCH_MAX_ROLE,
 } from 'ee_else_ce/members/constants';
 import { FILTERED_SEARCH_TERM } from '~/vue_shared/components/filtered_search_bar/constants';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
@@ -21,7 +21,6 @@ export default {
     sourceId: {},
     canManageMembers: {},
     canFilterByEnterprise: { default: false },
-    availableRoles: {},
   },
   data() {
     return {
@@ -36,11 +35,6 @@ export default {
     }),
     tokens() {
       return this.$options.availableTokens.filter((token) => {
-        if (token.type === FILTERED_SEARCH_MAX_ROLE.type) {
-          const maxRoleToken = token;
-          maxRoleToken.options = this.availableRoles;
-        }
-
         if (
           Object.prototype.hasOwnProperty.call(token, 'requiredPermissions') &&
           !this[token.requiredPermissions]
@@ -100,6 +94,14 @@ export default {
             };
           }
         } else {
+          // Remove this block after this issue is closed: https://gitlab.com/gitlab-org/gitlab-ui/-/issues/2159
+          if (value.data === __('Service account')) {
+            return {
+              ...accumulator,
+              [type]: 'service_account',
+            };
+          }
+
           return {
             ...accumulator,
             [type]: value.data,
@@ -131,7 +133,6 @@ export default {
 <template>
   <filtered-search-bar
     :namespace="sourceId.toString()"
-    terms-as-tokens
     :tokens="tokens"
     :recent-searches-storage-key="filteredSearchBar.recentSearchesStorageKey"
     :search-input-placeholder="filteredSearchBar.placeholder"

@@ -18,16 +18,14 @@ import (
 func TestSavedFileTracking(t *testing.T) {
 	testhelper.ConfigureSecret()
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	r, err := http.NewRequestWithContext(ctx, "PUT", "/url/path", nil)
+	r, err := http.NewRequest("PUT", "/url/path", nil)
 	require.NoError(t, err)
 
 	tracker := SavedFileTracker{Request: r}
 	require.Equal(t, "accelerate", tracker.Name())
 
 	file := &destination.FileHandler{}
+	ctx := context.Background()
 	tracker.ProcessFile(ctx, "test", file, nil, config.NewDefaultConfig())
 	require.Equal(t, 1, tracker.Count())
 

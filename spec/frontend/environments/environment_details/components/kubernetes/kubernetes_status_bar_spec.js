@@ -27,7 +27,6 @@ const configuration = {
 const environmentName = 'environment_name';
 const kustomizationResourcePath =
   'kustomize.toolkit.fluxcd.io/v1/namespaces/my-namespace/kustomizations/app';
-const fluxNamespace = 'flux-namespace';
 
 describe('~/environments/environment_details/components/kubernetes/kubernetes_status_bar.vue', () => {
   let wrapper;
@@ -58,7 +57,6 @@ describe('~/environments/environment_details/components/kubernetes/kubernetes_st
         namespace,
         resourceType,
         fluxResourceStatus,
-        fluxNamespace,
         fluxApiError,
       },
       stubs: {
@@ -99,7 +97,7 @@ describe('~/environments/environment_details/components/kubernetes/kubernetes_st
 
         const fluxConnectionStatus = findFluxConnectionStatus();
         expect(fluxConnectionStatus.props('configuration')).toBe(configuration);
-        expect(fluxConnectionStatus.props('namespace')).toBe(fluxNamespace);
+        expect(fluxConnectionStatus.props('namespace')).toBe(kubernetesNamespace);
         expect(fluxConnectionStatus.props('resourceTypeParam')).toEqual({
           resourceType: k8sResourceType.fluxKustomizations,
           connectionParams: {
@@ -148,7 +146,6 @@ describe('~/environments/environment_details/components/kubernetes/kubernetes_st
       [CLUSTER_HEALTH_ERROR, 'danger', 'status-alert', CLUSTER_STATUS_UNHEALTHY_TEXT],
     ])(
       'when clusterHealthStatus is %s shows health badge with variant %s, icon %s and text %s',
-      // eslint-disable-next-line max-params
       (status, variant, icon, text) => {
         createWrapper({ clusterHealthStatus: status });
 
@@ -167,10 +164,6 @@ describe('~/environments/environment_details/components/kubernetes/kubernetes_st
 
       it('renders sync status as Unavailable', () => {
         expect(findSyncBadge().text()).toBe('Unavailable');
-      });
-
-      it('renders a non-clickable badge', () => {
-        expect(findSyncBadge().attributes('href')).toBeUndefined();
       });
     });
 
@@ -204,44 +197,27 @@ describe('~/environments/environment_details/components/kubernetes/kubernetes_st
         },
       );
 
-      it('renders a clickable badge', () => {
-        createWrapper({
-          fluxResourceStatus: [{ status: 'True', type: 'Ready' }],
+      describe('when Flux API errored', () => {
+        const fluxApiError = 'Error from the cluster_client API';
+
+        beforeEach(() => {
+          createWrapper({ fluxApiError });
         });
 
-        expect(findSyncBadge().attributes('href')).toBe('#');
-      });
+        it('renders sync badge as unavailable', () => {
+          const badge = SYNC_STATUS_BADGES.unavailable;
 
-      it('emits `show-flux-resource-details` event when badge is clicked', () => {
-        createWrapper({
-          fluxResourceStatus: [{ status: 'True', type: 'Ready' }],
+          expect(findSyncBadge().text()).toBe(badge.text);
+          expect(findSyncBadge().props()).toMatchObject({
+            icon: badge.icon,
+            variant: badge.variant,
+          });
         });
 
-        findSyncBadge().trigger('click');
-        expect(wrapper.emitted('show-flux-resource-details')).toBeDefined();
-      });
-    });
-
-    describe('when Flux API errored', () => {
-      const fluxApiError = 'Error from the cluster_client API';
-
-      beforeEach(() => {
-        createWrapper({ fluxApiError });
-      });
-
-      it('renders sync badge as unavailable', () => {
-        const badge = SYNC_STATUS_BADGES.unavailable;
-
-        expect(findSyncBadge().text()).toBe(badge.text);
-        expect(findSyncBadge().props()).toMatchObject({
-          icon: badge.icon,
-          variant: badge.variant,
+        it('renders popover with an API error message', () => {
+          expect(findPopover().text()).toBe(fluxApiError);
+          expect(findPopover().props('title')).toBe('Flux sync status is unavailable');
         });
-      });
-
-      it('renders popover with an API error message', () => {
-        expect(findPopover().text()).toBe(fluxApiError);
-        expect(findPopover().props('title')).toBe('Flux sync status is unavailable');
       });
     });
   });

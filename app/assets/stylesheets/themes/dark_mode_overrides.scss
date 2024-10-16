@@ -1,4 +1,5 @@
 @import './themes/dark';
+@import '@gitlab/ui/src/tokens/build/css/tokens.dark';
 @import 'page_bundles/mixins_and_variables_and_functions';
 
 :root {
@@ -10,6 +11,9 @@
   --dark-icon-color-orange-1: #665349;
   --dark-icon-color-orange-2: #b37a5d;
 
+  --gl-text-color: #{$gray-900};
+  --border-color: #{$border-color};
+
   --svg-status-bg: #{$white};
 }
 
@@ -17,11 +21,52 @@
   // redefine some colors and values to prevent sourcegraph conflicts
   color-scheme: dark;
   --gray-10: #{$gray-10};
+  --border-color: #{$border-color};
   --white: #{$white};
   --black: #{$black};
 }
 
 .gl-dark {
+  .gl-button.gl-button,
+  .gl-button.gl-button.btn-block {
+    &.btn-default,
+    &.btn-dashed,
+    &.btn-info,
+    &.btn-success,
+    &.btn-danger,
+    &.btn-confirm {
+      &-tertiary {
+        mix-blend-mode: screen;
+      }
+    }
+  }
+
+  .gl-datepicker-theme {
+    .pika-prev,
+    .pika-next {
+      filter: invert(0.9);
+    }
+
+    .is-selected > .pika-button {
+      color: $gray-900;
+    }
+
+    :not(.is-selected) > .pika-button:hover {
+      background-color: $gray-200;
+    }
+  }
+
+  .gl-new-dropdown-item {
+    &:active,
+    &:hover,
+    &:focus,
+    &:focus:active {
+      .gl-new-dropdown-item-content {
+        background-color: $gray-10;
+      }
+    }
+  }
+
   .gl-dark-invert-keep-hue {
     filter: invert(0.8) hue-rotate(180deg);
   }
@@ -31,12 +76,81 @@
   }
 }
 
-// Decrease brightness and increase contrast for GlLabel in dark mode
+// Some hacks and overrides for things that don't properly support dark mode
 .gl-label {
   filter: brightness(0.9) contrast(1.1);
+
+  // This applies to the gl-label markups
+  // rendered and cached in the backend (labels_helper.rb)
+  &.gl-label-scoped {
+    .gl-label-text-scoped,
+    .gl-label-close.gl-button .gl-icon {
+      color: $gray-900;
+    }
+  }
+}
+
+// white-ish text for light labels
+.gl-label-text-light.gl-label-text-light {
+  &,
+  .gl-label-close .gl-icon {
+    color: $gray-900;
+  }
+}
+
+.gl-label-text-light .gl-label-close.gl-button:hover {
+  background-color: $gray-900;
+}
+
+.gl-label-text-dark.gl-label-text-dark {
+  &,
+  .gl-label-close .gl-icon {
+    color: $gray-10;
+  }
+}
+
+// This applies to "gl-labels" from "gitlab-ui"
+.gl-label.gl-label-scoped.gl-label-text-dark,
+.gl-label.gl-label-scoped.gl-label-text-light {
+  .gl-label-text-scoped,
+  .gl-label-close.gl-button .gl-icon {
+    color: $gray-900;
+  }
+}
+
+.gl-label-text-dark .gl-label-close.gl-button:hover {
+  background-color: $gray-10;
+}
+
+// duplicated class as the original .atwho-view style is added later
+.atwho-view.atwho-view {
+  background-color: $white;
+  color: $gray-900;
+  border-color: $gray-800;
+}
+
+.gl-avatar:not(.gl-avatar-identicon),
+.avatar-container,
+.avatar {
+  background: rgba($gray-950, 0.04);
+}
+
+.gl-avatar {
+  border-style: none;
+  box-shadow: inset 0 0 0 1px rgba($gray-950, $gl-avatar-border-opacity);
+}
+
+aside.right-sidebar:not(.right-sidebar-merge-requests) {
+  background-color: $gray-10;
 }
 
 :root.gl-dark {
+  .terms {
+    .logo-text {
+      fill: var(--black);
+    }
+  }
+
   .md :not(pre.code) > code {
     background-color: $gray-200;
   }
@@ -46,4 +160,45 @@
 .timeline-entry.draft-note:not(.note-form) .timeline-content {
   // soften on darkmode
   background-color: mix($gray-50, $orange-50, 75%) !important;
+}
+
+.gl-dark .issue-sticky-header-text .badge-muted {
+  background-color: var(--gray-100);
+  color: var(--gray-700);
+}
+
+.gl-dark  {
+  .gl-filtered-search-token-type,
+  .gl-filtered-search-token-operator,
+  .gl-filtered-search-token-data,
+  .gl-filtered-search-suggestion-active {
+    background-color: $gray-100;
+  }
+
+  .gl-dropdown-item.gl-filtered-search-suggestion,
+  .gl-filtered-search-suggestion-active {
+    .dropdown-item:hover {
+      background-color: $gray-200;
+    }
+  }
+
+  .filtered-search-token {
+    .name, .operator, .value-container {
+      background-color: $gray-100;
+    }
+
+    &:hover {
+      .operator, .value-container {
+        background-color: $gray-200;
+      }
+    }
+  }
+
+  .filtered-search-wrapper li.droplab-item-active button {
+    background-color: $gray-100;
+
+    &:hover {
+     background-color: $gray-200;
+    }
+  }
 }

@@ -6,17 +6,17 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Create a Google GKE cluster
 
-Learn how to create a new cluster on Google Kubernetes Engine (GKE) through
-[Infrastructure as Code (IaC)](../../index.md). This process uses the Google
-and Kubernetes Terraform providers create GKE clusters. You connect the clusters to GitLab
-by using the GitLab agent for Kubernetes.
-
-NOTE:
+INFO:
 Every new Google Cloud Platform (GCP) account receives [$300 in credit](https://console.cloud.google.com/freetrial),
 and in partnership with Google, GitLab is able to offer an additional $200 for new
 GCP accounts to get started with the GitLab integration with Google Kubernetes Engine.
 [Follow this link](https://cloud.google.com/partners?pcn_code=0014M00001h35gDQAQ&hl=en#contact-form)
 and apply for credit.
+
+Learn how to create a new cluster on Google Kubernetes Engine (GKE) through
+[Infrastructure as Code (IaC)](../../index.md). This process uses the Google
+and Kubernetes Terraform providers create GKE clusters. You connect the clusters to GitLab
+by using the GitLab agent for Kubernetes.
 
 **Prerequisites:**
 
@@ -134,7 +134,7 @@ From the Google Cloud console, enable the [Kubernetes Engine API](https://consol
 After configuring your project, manually trigger the provisioning of your cluster. In GitLab:
 
 1. On the left sidebar, select **Build > Pipelines**.
-1. Select **New pipeline**.
+1. Select **Run pipeline**.
 1. Next to **Play** (**{play}**), select the dropdown list icon (**{chevron-lg-down}**).
 1. Select **Deploy** to manually trigger the deployment job.
 

@@ -122,10 +122,9 @@ GitLab cannot display the combined results of multiple `browser_performance` rep
 
 ## `artifacts:reports:coverage_report`
 
-Use `coverage_report:` to collect [coverage report](../testing/index.md) in Cobertura or JaCoCo formats.
+Use `coverage_report` to collect coverage report in Cobertura format.
 
-The `coverage_format:` Can be either [`cobertura`](../testing/test_coverage_visualization/cobertura.md) or
-[`jacoco`](../testing/test_coverage_visualization/jacoco.md).
+The `cobertura` report collects [Cobertura coverage XML files](../testing/test_coverage_visualization.md).
 
 Cobertura was originally developed for Java, but there are many third-party ports for other languages such as
 JavaScript, Python, and Ruby.
@@ -138,14 +137,11 @@ artifacts:
       path: coverage/cobertura-coverage.xml
 ```
 
-The collected coverage report is uploaded to GitLab as an artifact.
-
-You can generate multiple JaCoCo or Cobertura reports within a job and include them in the final
-job artifact using [wildcards](../jobs/job_artifacts.md#with-wildcards).
-The results of the reports are aggregated in the final coverage report.
+The collected coverage report is uploaded to GitLab as an artifact. You can use
+only one report per job.
 
 GitLab can display the results of coverage report in the merge request
-[diff annotations](../testing/test_coverage_visualization/index.md).
+[diff annotations](../testing/test_coverage_visualization.md).
 
 ## `artifacts:reports:codequality`
 
@@ -254,7 +250,7 @@ GitLab can display the results of one or more reports in:
 
 The `dotenv` report collects a set of environment variables as artifacts.
 
-The collected variables are registered as runtime-created variables of the job,
+The collected variables are registered as runtime-created variables of the job, 
 which you can [use in subsequent job scripts](../variables/index.md#pass-an-environment-variable-to-another-job)
 or to [set dynamic environment URLs after a job finishes](../environments/index.md#set-a-dynamic-environment-url).
 
@@ -356,9 +352,11 @@ DETAILS:
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/432235) in GitLab 16.7.
 
-The `repository_xray` report collects information about your repository for use by GitLab Duo Code Suggestions.
+The `repository_xray` report collects information about your repository for use by AI in code suggestions.
 
 ## `artifacts:reports:sast`
+
+> - [Moved](https://gitlab.com/groups/gitlab-org/-/epics/2098) from GitLab Ultimate to GitLab Free in 13.3.
 
 The `sast` report collects [SAST vulnerabilities](../../user/application_security/sast/index.md).
 The collected SAST report uploads to GitLab as an artifact.

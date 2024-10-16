@@ -6,30 +6,11 @@ import WorkItemDevelopmentRelationshipList from '~/work_items/components/work_it
 describe('WorkItemDevelopmentRelationshipList', () => {
   let wrapper;
 
-  const devWidgetWithTwoItems = {
+  const devWidgetWithLessNumberOfItems = {
     ...workItemDevelopmentFragmentResponse(),
     closingMergeRequests: {
       nodes: [workItemDevelopmentFragmentResponse().closingMergeRequests.nodes[0]],
       __typename: 'WorkItemClosingMergeRequestConnection',
-    },
-    featureFlags: {
-      nodes: [workItemDevelopmentFragmentResponse().featureFlags.nodes[0]],
-      __typename: 'FeatureFlagConnection',
-    },
-  };
-
-  const devWidgetWithThreeItems = {
-    ...workItemDevelopmentFragmentResponse(),
-    closingMergeRequests: {
-      nodes: [workItemDevelopmentFragmentResponse().closingMergeRequests.nodes[0]],
-      __typename: 'WorkItemClosingMergeRequestConnection',
-    },
-    featureFlags: {
-      nodes: [
-        workItemDevelopmentFragmentResponse().featureFlags.nodes[0],
-        workItemDevelopmentFragmentResponse().featureFlags.nodes[1],
-      ],
-      __typename: 'FeatureFlagConnection',
     },
   };
 
@@ -55,13 +36,8 @@ describe('WorkItemDevelopmentRelationshipList', () => {
       expect(findShowMoreButton().exists()).toBe(true);
     });
 
-    it('should not render the more button when the number of items are exactly 3', () => {
-      createComponent({ workItemDevWidget: devWidgetWithThreeItems });
-      expect(findShowMoreButton().exists()).toBe(false);
-    });
-
-    it('should not render the more button when the number of items are less than 3', () => {
-      createComponent({ workItemDevWidget: devWidgetWithTwoItems });
+    it('should not render the more button when the number of items are more than 3', () => {
+      createComponent({ workItemDevWidget: devWidgetWithLessNumberOfItems });
       expect(findShowMoreButton().exists()).toBe(false);
     });
   });

@@ -246,18 +246,6 @@ RSpec.describe MergeRequests::RefreshService, feature_category: :code_review_wor
           expect(@another_merge_request.has_commits?).to be_falsy
         end
 
-        context 'when push is a branch removal' do
-          before do
-            # If @newrev is a blank SHA, it means the ref has been removed
-            @newrev = Gitlab::Git::SHA1_BLANK_SHA
-          end
-
-          it 'does not create detached merge request pipeline' do
-            expect { subject }
-              .not_to change { @merge_request.pipelines_for_merge_request.count }
-          end
-        end
-
         context 'when "push_options: nil" is passed' do
           let(:service_instance) { service.new(project: project, current_user: @user, params: { push_options: nil }) }
 
@@ -987,12 +975,6 @@ RSpec.describe MergeRequests::RefreshService, feature_category: :code_review_wor
   end
 
   describe '#abort_ff_merge_requests_with_auto_merges' do
-    context 'when the auto megre strategy is MWCP' do
-      it_behaves_like 'abort ff merge requests with auto merges' do
-        let(:auto_merge_strategy) { AutoMergeService::STRATEGY_MERGE_WHEN_CHECKS_PASS }
-      end
-    end
-
     context 'when auto merge strategy is MWPS' do
       it_behaves_like 'abort ff merge requests with auto merges' do
         let(:auto_merge_strategy) { AutoMergeService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS }

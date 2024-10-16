@@ -44,7 +44,6 @@ export default (
   stateArg,
   expectedMutationsArg = [],
   expectedActionsArg = [],
-  // eslint-disable-next-line max-params
 ) => {
   let action = actionArg;
   let payload = payloadArg;

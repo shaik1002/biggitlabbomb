@@ -7,11 +7,6 @@ import { __ } from '~/locale';
 export default {
   components: { GlButton, GlCollapse },
   props: {
-    title: {
-      type: String,
-      required: false,
-      default: null,
-    },
     id: {
       type: String,
       required: false,
@@ -35,12 +30,6 @@ export default {
     toggleButtonText() {
       return this.expanded ? this.$options.i18n.collapseText : this.$options.i18n.expandText;
     },
-    toggleButtonAriaLabel() {
-      return `${this.toggleButtonText} ${this.$scopedSlots.title || this.title}`;
-    },
-    expandedClass() {
-      return this.expanded ? 'expanded' : '';
-    },
     collapseId() {
       return this.id || uniqueId('settings-block-');
     },
@@ -60,41 +49,40 @@ export default {
 </script>
 
 <template>
-  <section :id="id" class="vue-settings-block settings no-animate" :class="expandedClass">
-    <div class="gl-flex gl-items-start gl-justify-between gl-gap-x-3">
-      <div class="-gl-mr-3 gl-shrink-0 gl-px-2 gl-py-0 sm:gl-mr-0 sm:gl-p-2">
-        <gl-button
-          category="tertiary"
-          size="small"
-          class="settings-toggle gl-shrink-0 !gl-pl-2 !gl-pr-0"
-          icon="chevron-lg-right"
-          button-text-classes="gl-sr-only"
-          :aria-label="toggleButtonAriaLabel"
-          :aria-expanded="ariaExpanded"
-          :aria-controls="collapseId"
-          data-testid="settings-block-toggle"
-          @click="toggleExpanded"
-        >
-          {{ toggleButtonText }}
-        </gl-button>
-      </div>
-      <div class="gl-grow">
-        <h2
+  <section class="vue-settings-block">
+    <div class="gl-display-flex gl-justify-content-space-between gl-align-items-flex-start">
+      <div class="gl-flex-grow-1">
+        <h4
           role="button"
           tabindex="-1"
-          class="gl-heading-2 !gl-mb-2 gl-cursor-pointer"
+          class="gl-cursor-pointer gl-mt-0 gl-mb-3"
           :aria-expanded="ariaExpanded"
           :aria-controls="collapseId"
-          data-testid="settings-block-title"
           @click="toggleExpanded"
         >
-          {{ title }}
-        </h2>
-        <p class="gl-m-0 gl-text-subtle"><slot name="description"></slot></p>
+          <slot name="title"></slot>
+        </h4>
+        <p class="gl-text-secondary gl-m-0"><slot name="description"></slot></p>
+      </div>
+      <div class="gl-flex-shrink-0 gl-px-3">
+        <gl-button
+          class="gl-min-w-12"
+          :aria-expanded="ariaExpanded"
+          :aria-controls="collapseId"
+          @click="toggleExpanded"
+        >
+          <span aria-hidden="true">
+            {{ toggleButtonText }}
+          </span>
+          <span class="gl-sr-only">
+            {{ toggleButtonText }}
+            <slot name="title"></slot>
+          </span>
+        </gl-button>
       </div>
     </div>
-    <gl-collapse :id="collapseId" v-model="expanded" data-testid="settings-block-content">
-      <div class="gl-pl-7 gl-pt-5 sm:gl-pl-8">
+    <gl-collapse :id="collapseId" v-model="expanded">
+      <div class="gl-pt-5">
         <slot></slot>
       </div>
     </gl-collapse>

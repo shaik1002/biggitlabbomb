@@ -79,9 +79,5 @@ module BulkImports
       upload.remove_export_file!
       upload.save!
     end
-
-    def relation_has_user_contributions?
-      config.relation_has_user_contributions?(relation)
-    end
   end
 end

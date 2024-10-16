@@ -1,3 +1,4 @@
+- [ ] Please check this box if this contribution uses AI-generated content as outlined in the [GitLab DCO & CLA](https://about.gitlab.com/community/contribute/dco-cla/).
 
 ## What does this MR do?
 
@@ -46,8 +47,5 @@ If you aren't sure which tech writer to ask, use [roulette](https://gitlab-org.g
     - If the content still needs to be edited for topic types, you can create a follow-up issue with the ~"docs-technical-debt" label.
 - [ ] Review by assigned maintainer, who can always request/require the reviews above. Maintainer's review can occur before or after a technical writer review.
 
-/label ~documentation
-/label ~"docs-only"
-
-/label ~"type::maintenance" ~"maintenance::refactor"
+/label ~documentation ~"type::maintenance" ~"docs::improvement" ~"maintenance::refactor" ~"docs-only"
 /assign me

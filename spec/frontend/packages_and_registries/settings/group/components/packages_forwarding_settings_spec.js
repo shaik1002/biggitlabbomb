@@ -4,6 +4,7 @@ import VueApollo from 'vue-apollo';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
+import { s__ } from '~/locale';
 import component from '~/packages_and_registries/settings/group/components/packages_forwarding_settings.vue';
 import {
   REQUEST_FORWARDING_HELP_PAGE_PATH,
@@ -12,7 +13,7 @@ import {
 
 import updateNamespacePackageSettings from '~/packages_and_registries/settings/group/graphql/mutations/update_group_packages_settings.mutation.graphql';
 import getGroupPackagesSettingsQuery from '~/packages_and_registries/settings/group/graphql/queries/get_group_packages_settings.query.graphql';
-import SettingsSection from '~/vue_shared/components/settings/settings_section.vue';
+import SettingsBlock from '~/packages_and_registries/shared/components/settings_block.vue';
 import { updateGroupPackagesSettingsOptimisticResponse } from '~/packages_and_registries/settings/group/graphql/utils/optimistic_responses';
 import {
   packageSettings,
@@ -61,12 +62,12 @@ describe('Packages Forwarding Settings', () => {
       },
       stubs: {
         GlSprintf,
-        SettingsSection,
+        SettingsBlock,
       },
     });
   };
 
-  const findSettingsBlock = () => wrapper.findComponent(SettingsSection);
+  const findSettingsBlock = () => wrapper.findComponent(SettingsBlock);
   const findForm = () => wrapper.find('form');
   const findSubmitButton = () => findForm().findComponent(GlButton);
   const findDescription = () => wrapper.findByTestId('description');
@@ -114,7 +115,9 @@ describe('Packages Forwarding Settings', () => {
     mountComponent();
 
     expect(findDescription().text()).toBe(
-      'Forward package requests to a public registry if the packages are not found in the GitLab package registry.',
+      s__(
+        'PackageRegistry|Forward package requests to a public registry if the packages are not found in the GitLab package registry.',
+      ),
     );
   });
 

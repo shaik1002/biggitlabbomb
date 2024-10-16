@@ -7,7 +7,6 @@ module Mutations
 
       include Mutations::SpamProtection
       include FindsNamespace
-      include Mutations::WorkItems::SharedArguments
       include Mutations::WorkItems::Widgetable
 
       description "Creates a work item."
@@ -15,49 +14,46 @@ module Mutations
       authorize :create_work_item
 
       MUTUALLY_EXCLUSIVE_ARGUMENTS_ERROR = 'Please provide either projectPath or namespacePath argument, but not both.'
-      DISABLED_FF_ERROR = 'create_group_level_work_items feature flag is disabled. Only project paths allowed.'
+      DISABLED_FF_ERROR = 'namespace_level_work_items feature flag is disabled. Only project paths allowed.'
 
-      argument :crm_contacts_widget,
-        ::Types::WorkItems::Widgets::CrmContactsCreateInputType,
-        required: false,
-        description: 'Input for CRM contacts widget.'
-      argument :description,
-        GraphQL::Types::String,
-        required: false,
-        description: copy_field_description(Types::WorkItemType, :description),
-        deprecated: { milestone: '16.9', reason: 'use description widget instead' }
-      argument :hierarchy_widget,
-        ::Types::WorkItems::Widgets::HierarchyCreateInputType,
-        required: false,
-        description: 'Input for hierarchy widget.'
-      argument :labels_widget,
-        ::Types::WorkItems::Widgets::LabelsCreateInputType,
-        required: false,
-        description: 'Input for labels widget.'
-      argument :linked_items_widget,
-        ::Types::WorkItems::Widgets::LinkedItemsCreateInputType,
-        required: false,
-        description: 'Input for linked items widget.'
-      argument :namespace_path,
-        GraphQL::Types::ID,
-        required: false,
-        description: 'Full path of the namespace(project or group) the work item is created in.'
-      argument :project_path,
-        GraphQL::Types::ID,
-        required: false,
-        description: 'Full path of the project the work item is associated with.',
-        deprecated: {
-          reason: 'Please use namespacePath instead. That will cover for both projects and groups',
-          milestone: '15.10'
-        }
-      argument :title,
-        GraphQL::Types::String,
-        required: true,
-        description: copy_field_description(Types::WorkItemType, :title)
-      argument :work_item_type_id,
-        ::Types::GlobalIDType[::WorkItems::Type],
-        required: true,
-        description: 'Global ID of a work item type.'
+      argument :assignees_widget, ::Types::WorkItems::Widgets::AssigneesInputType,
+               required: false,
+               description: 'Input for assignees widget.'
+      argument :confidential, GraphQL::Types::Boolean,
+               required: false,
+               description: 'Sets the work item confidentiality.'
+      argument :description, GraphQL::Types::String,
+               required: false,
+               description: copy_field_description(Types::WorkItemType, :description),
+               deprecated: { milestone: '16.9', reason: 'use description widget instead' }
+      argument :description_widget, ::Types::WorkItems::Widgets::DescriptionInputType,
+               required: false,
+               description: 'Input for description widget.'
+      argument :hierarchy_widget, ::Types::WorkItems::Widgets::HierarchyCreateInputType,
+               required: false,
+               description: 'Input for hierarchy widget.'
+      argument :labels_widget, ::Types::WorkItems::Widgets::LabelsCreateInputType,
+               required: false,
+               description: 'Input for labels widget.'
+      argument :milestone_widget, ::Types::WorkItems::Widgets::MilestoneInputType,
+               required: false,
+               description: 'Input for milestone widget.'
+      argument :namespace_path, GraphQL::Types::ID,
+               required: false,
+               description: 'Full path of the namespace(project or group) the work item is created in.'
+      argument :project_path, GraphQL::Types::ID,
+               required: false,
+               description: 'Full path of the project the work item is associated with.',
+               deprecated: {
+                 reason: 'Please use namespace_path instead. That will cover for both projects and groups',
+                 milestone: '15.10'
+               }
+      argument :title, GraphQL::Types::String,
+               required: true,
+               description: copy_field_description(Types::WorkItemType, :title)
+      argument :work_item_type_id, ::Types::GlobalIDType[::WorkItems::Type],
+               required: true,
+               description: 'Global ID of a work item type.'
 
       field :work_item, Types::WorkItemType,
             null: true,
@@ -74,10 +70,10 @@ module Mutations
       def resolve(project_path: nil, namespace_path: nil, **attributes)
         container_path = project_path || namespace_path
         container = authorized_find!(container_path)
+        check_feature_available!(container)
+
         params = global_id_compatibility_params(attributes).merge(author_id: current_user.id)
         type = ::WorkItems::Type.find(attributes[:work_item_type_id])
-
-        check_feature_available!(container, type)
         widget_params = extract_widget_params!(type, params, container)
 
         create_result = ::WorkItems::CreateService.new(
@@ -97,22 +93,16 @@ module Mutations
 
       private
 
-      def check_feature_available!(container, type)
-        return unless container.is_a?(::Group)
-        return if ::WorkItems::Type.allowed_group_level_types(container).include?(type.base_type)
+      def check_feature_available!(container)
+        return unless container.is_a?(::Group) && Feature.disabled?(:namespace_level_work_items, container)
 
-        raise_feature_not_available_error!(type)
+        raise Gitlab::Graphql::Errors::ArgumentError, DISABLED_FF_ERROR
       end
 
       def global_id_compatibility_params(params)
         params[:work_item_type_id] = params[:work_item_type_id]&.model_id
 
         params
-      end
-
-      # type is used in overridden EE method
-      def raise_feature_not_available_error!(_type)
-        raise Gitlab::Graphql::Errors::ArgumentError, DISABLED_FF_ERROR
       end
     end
   end

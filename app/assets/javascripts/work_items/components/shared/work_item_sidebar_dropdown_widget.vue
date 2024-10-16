@@ -98,11 +98,6 @@ export default {
       required: false,
       default: true,
     },
-    createdLabelId: {
-      type: String,
-      required: false,
-      default: undefined,
-    },
   },
   data() {
     return {
@@ -135,10 +130,6 @@ export default {
           this.isDirty = false;
         }
       },
-    },
-    createdLabelId(id) {
-      this.localSelectedItem.push(id);
-      this.isDirty = true;
     },
   },
   created() {
@@ -185,9 +176,9 @@ export default {
 
 <template>
   <div>
-    <div class="gl-flex gl-items-center gl-gap-3">
+    <div class="gl-display-flex gl-align-items-center gl-gap-3">
       <!-- hide header when editing, since we then have a form label. Keep it reachable for screenreader nav  -->
-      <h3 :class="{ 'gl-sr-only': isEditing }" class="gl-heading-5 !gl-mb-0">
+      <h3 :class="{ 'gl-sr-only': isEditing }" class="gl-mb-0! gl-heading-5">
         {{ dropdownLabel }}
       </h3>
       <gl-loading-icon v-if="updateInProgress" />
@@ -196,15 +187,15 @@ export default {
         data-testid="edit-button"
         category="tertiary"
         size="small"
-        class="shortcut-sidebar-dropdown-toggle gl-ml-auto"
+        class="gl-ml-auto shortcut-sidebar-dropdown-toggle"
         :disabled="updateInProgress"
         @click="isEditing = true"
         >{{ $options.i18n.editButtonLabel }}</gl-button
       >
     </div>
     <gl-form v-if="isEditing">
-      <div class="gl-flex gl-items-center gl-justify-between">
-        <label :for="inputId" class="gl-heading-5 !gl-mb-0">{{ dropdownLabel }}</label>
+      <div class="gl-display-flex gl-justify-content-space-between gl-align-items-center">
+        <label :for="inputId" class="gl-mb-0! gl-heading-5">{{ dropdownLabel }}</label>
         <gl-button
           data-testid="apply-button"
           category="tertiary"
@@ -214,42 +205,41 @@ export default {
           >{{ $options.i18n.applyButtonLabel }}</gl-button
         >
       </div>
-      <slot name="body">
-        <gl-collapsible-listbox
-          :id="inputId"
-          ref="listbox"
-          class="work-item-sidebar-dropdown"
-          :multiple="multiSelect"
-          :searchable="searchable"
-          start-opened
-          block
-          is-check-centered
-          :infinite-scroll="infiniteScroll"
-          :searching="loading"
-          :header-text="headerText"
-          :toggle-text="toggleText"
-          :no-results-text="$options.i18n.noMatchingResults"
-          :items="listItems"
-          :selected="localSelectedItem"
-          :reset-button-label="resetButton"
-          :infinite-scroll-loading="infiniteScrollLoading"
-          @reset="unassignValue"
-          @search="debouncedSearchKeyUpdate"
-          @select="handleItemClick"
-          @shown="onListboxShown"
-          @hidden="onListboxHide"
-          @bottom-reached="$emit('bottomReached')"
-        >
-          <template #list-item="{ item }">
-            <slot name="list-item" :item="item">{{ item.text }}</slot>
-          </template>
-          <template v-if="showFooter" #footer>
-            <div class="gl-border-t-1 gl-border-t-dropdown !gl-p-2 gl-border-t-solid">
-              <slot name="footer"></slot>
-            </div>
-          </template>
-        </gl-collapsible-listbox>
-      </slot>
+      <gl-collapsible-listbox
+        :id="inputId"
+        ref="listbox"
+        :multiple="multiSelect"
+        :searchable="searchable"
+        start-opened
+        block
+        is-check-centered
+        :infinite-scroll="infiniteScroll"
+        :searching="loading"
+        :header-text="headerText"
+        :toggle-text="toggleText"
+        :no-results-text="$options.i18n.noMatchingResults"
+        positioning-strategy="fixed"
+        :items="listItems"
+        :selected="localSelectedItem"
+        :reset-button-label="resetButton"
+        :infinite-scroll-loading="infiniteScrollLoading"
+        toggle-class="work-item-sidebar-dropdown-toggle"
+        @reset="unassignValue"
+        @search="debouncedSearchKeyUpdate"
+        @select="handleItemClick"
+        @shown="onListboxShown"
+        @hidden="onListboxHide"
+        @bottom-reached="$emit('bottomReached')"
+      >
+        <template #list-item="{ item }">
+          <slot name="list-item" :item="item">{{ item.text }}</slot>
+        </template>
+        <template v-if="showFooter" #footer>
+          <div class="gl-border-t-solid gl-border-t-1 gl-border-t-gray-200 gl-p-2!">
+            <slot name="footer"></slot>
+          </div>
+        </template>
+      </gl-collapsible-listbox>
     </gl-form>
     <slot v-else-if="hasValue" name="readonly"></slot>
     <slot v-else name="none">

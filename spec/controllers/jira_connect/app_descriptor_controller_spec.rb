@@ -38,7 +38,7 @@ RSpec.describe JiraConnect::AppDescriptorController, feature_category: :integrat
             url: 'https://gitlab.com'
           },
           links: {
-            documentation: 'http://test.host/help/integration/jira_development_panel.md#gitlabcom-1'
+            documentation: 'http://test.host/help/integration/jira_development_panel#gitlabcom-1'
           },
           authentication: {
             type: 'jwt'
@@ -64,7 +64,7 @@ RSpec.describe JiraConnect::AppDescriptorController, feature_category: :integrat
           jiraDevelopmentTool: {
             actions: {
               createBranch: {
-                templateUrl: "http://test.host/-/jira_connect/branches/route?issue_key={issue.key}&issue_summary={issue.summary}&jwt={jwt}&addonkey=#{Atlassian::JiraConnect.app_key}"
+                templateUrl: 'http://test.host/-/jira_connect/branches/new?issue_key={issue.key}&issue_summary={issue.summary}'
               },
               searchConnectedWorkspaces: {
                 templateUrl: 'http://test.host/-/jira_connect/workspaces/search'

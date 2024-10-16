@@ -1,8 +1,9 @@
-import Vue, { nextTick } from 'vue';
+import Vue from 'vue';
 import VueApollo from 'vue-apollo';
+import { GlModal } from '@gitlab/ui';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
-import { visitUrlWithAlerts } from '~/lib/utils/url_utility';
+import { visitUrl } from '~/lib/utils/url_utility';
 import ModelCreate from '~/ml/model_registry/components/model_create.vue';
 import ImportArtifactZone from '~/ml/model_registry/components/import_artifact_zone.vue';
 import UploadDropzone from '~/vue_shared/components/upload_dropzone/upload_dropzone.vue';
@@ -12,18 +13,19 @@ import createModelVersionMutation from '~/ml/model_registry/graphql/mutations/cr
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 
-import MarkdownEditor from '~/vue_shared/components/markdown/markdown_editor.vue';
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
+import { MODEL_CREATION_MODAL_ID } from '~/ml/model_registry/constants';
 import { createModelResponses, createModelVersionResponses } from '../graphql_mock_data';
 
 Vue.use(VueApollo);
 
 jest.mock('~/lib/utils/url_utility', () => ({
   ...jest.requireActual('~/lib/utils/url_utility'),
-  visitUrlWithAlerts: jest.fn(),
+  visitUrl: jest.fn(),
 }));
 
 jest.mock('~/ml/model_registry/services/upload_model', () => ({
-  uploadModel: jest.fn(() => Promise.resolve()),
+  uploadModel: jest.fn(),
 }));
 
 describe('ModelCreate', () => {
@@ -31,8 +33,6 @@ describe('ModelCreate', () => {
   let apolloProvider;
 
   const file = { name: 'file.txt', size: 1024 };
-  const anotherFile = { name: 'another file.txt', size: 10 };
-  const files = [file, anotherFile];
 
   beforeEach(() => {
     jest.spyOn(Sentry, 'captureException').mockImplementation();
@@ -60,7 +60,9 @@ describe('ModelCreate', () => {
       provide: {
         projectPath: 'some/project',
         maxAllowedFileSize: 99999,
-        markdownPreviewPath: '/markdown-preview',
+      },
+      directives: {
+        GlModal: createMockDirective('gl-modal'),
       },
       apolloProvider,
       stubs: {
@@ -69,47 +71,40 @@ describe('ModelCreate', () => {
     });
   };
 
-  const findPrimaryButton = () => wrapper.findByTestId('primary-button');
-  const findSecondaryButton = () => wrapper.findByTestId('secondary-button');
+  const findModalButton = () => wrapper.findByText('Create model');
   const findNameInput = () => wrapper.findByTestId('nameId');
   const findVersionInput = () => wrapper.findByTestId('versionId');
-  const findVersionGroup = () => wrapper.findByTestId('versionGroupId');
-  const findVersionDescriptionGroup = () => wrapper.findByTestId('versionDescriptionGroupId');
-  const findDescriptionGroup = () => wrapper.findByTestId('descriptionGroupId');
   const findDescriptionInput = () => wrapper.findByTestId('descriptionId');
   const findVersionDescriptionInput = () => wrapper.findByTestId('versionDescriptionId');
   const findImportArtifactZone = () => wrapper.findComponent(ImportArtifactZone);
   const zone = () => wrapper.findComponent(UploadDropzone);
-  const findGlAlert = () => wrapper.findByTestId('create-alert');
+  const findGlModal = () => wrapper.findComponent(GlModal);
+  const findGlAlert = () => wrapper.findByTestId('modal-create-alert');
   const submitForm = async () => {
-    findPrimaryButton().vm.$emit('click');
+    findGlModal().vm.$emit('primary', new Event('primary'));
     await waitForPromises();
   };
   const findArtifactZoneLabel = () => wrapper.findByTestId('importArtifactZoneLabel');
-  const findMarkdownEditor = () => wrapper.findComponent(MarkdownEditor);
-  const findModelNameGroup = () => wrapper.findByTestId('nameGroupId');
 
   describe('Initial state', () => {
-    describe('Markdown editor', () => {
-      it('should show markdown editor', () => {
+    describe('Modal closed', () => {
+      beforeEach(() => {
         createWrapper();
+      });
 
-        expect(findMarkdownEditor().props()).toMatchObject({
-          enableContentEditor: true,
-          formFieldProps: {
-            id: 'model-description',
-            name: 'model-description',
-            placeholder: 'Enter a model description',
-          },
-          markdownDocsPath: '/help/user/markdown',
-          renderMarkdownPath: '/markdown-preview',
-          uploadsPath: '',
-          restrictedToolBarItems: ['full-screen'],
-        });
+      it('does not show modal', () => {
+        expect(findGlModal().props('visible')).toBe(false);
+      });
+
+      it('renders the modal button', () => {
+        expect(findModalButton().text()).toBe('Create model');
+        expect(getBinding(findModalButton().element, 'gl-modal').value).toBe(
+          MODEL_CREATION_MODAL_ID,
+        );
       });
     });
 
-    describe('Form', () => {
+    describe('Modal open', () => {
       beforeEach(() => {
         createWrapper(
           jest.fn().mockResolvedValue(createModelResponses.success),
@@ -122,61 +117,12 @@ describe('ModelCreate', () => {
         expect(findNameInput().exists()).toBe(true);
       });
 
-      it('renders the model name group description', () => {
-        expect(findModelNameGroup().attributes('description')).toBe(
-          ModelCreate.i18n.nameDescription,
-        );
-      });
-
-      it('renders the name label', () => {
-        expect(findModelNameGroup().attributes('label')).toBe(ModelCreate.i18n.modelName);
-      });
-
       it('renders the version input', () => {
         expect(findVersionInput().exists()).toBe(true);
       });
 
-      it('renders the version label', () => {
-        expect(findVersionGroup().attributes('label')).toBe('Version');
-      });
-
-      it('renders the version placeholder', () => {
-        expect(findVersionInput().attributes('placeholder')).toBe(
-          ModelCreate.i18n.versionPlaceholder,
-        );
-      });
-
-      it('renders the version group', () => {
-        expect(findVersionGroup().attributes()).toMatchObject({
-          description: 'Example: 1.0.0',
-          optional: 'true',
-          optionaltext: '(Optional)',
-          label: 'Version',
-        });
-      });
-
-      it('renders the version description group', () => {
-        expect(findVersionDescriptionGroup().attributes()).toMatchObject({
-          optional: 'true',
-          optionaltext: '(Optional)',
-          label: 'Version description',
-        });
-      });
-
-      it('renders the description group', () => {
-        expect(findDescriptionGroup().attributes()).toMatchObject({
-          optionaltext: '(Optional)',
-          optional: 'true',
-          label: 'Model description',
-        });
-      });
-
       it('renders the description input', () => {
         expect(findDescriptionInput().exists()).toBe(true);
-      });
-
-      it('renders the description input text', () => {
-        expect(findVersionGroup().attributes('valid-feedback')).toBe(ModelCreate.i18n.validVersion);
       });
 
       it('renders the version description input', () => {
@@ -206,20 +152,28 @@ describe('ModelCreate', () => {
         expect(findImportArtifactZone().props()).toEqual({
           path: null,
           submitOnSelect: false,
+          value: { file: null, subfolder: '' },
         });
       });
 
-      it('renders the create button', () => {
-        expect(findPrimaryButton().props()).toMatchObject({
-          variant: 'confirm',
-          disabled: true,
+      it('renders the import modal', () => {
+        expect(findGlModal().props()).toMatchObject({
+          modalId: 'create-model-modal',
+          title: 'Create model, version & import artifacts',
+          size: 'sm',
         });
       });
 
-      it('renders the cancel button', () => {
-        expect(findSecondaryButton().props()).toMatchObject({
-          variant: 'default',
-          disabled: false,
+      it('renders the create button in the modal', () => {
+        expect(findGlModal().props('actionPrimary')).toEqual({
+          attributes: { variant: 'confirm' },
+          text: 'Create',
+        });
+      });
+
+      it('renders the cancel button in the modal', () => {
+        expect(findGlModal().props('actionSecondary')).toEqual({
+          text: 'Cancel',
         });
       });
 
@@ -228,87 +182,12 @@ describe('ModelCreate', () => {
       });
     });
 
-    describe('It reacts to semantic version input', () => {
-      beforeEach(() => {
-        createWrapper();
-      });
-      it('renders the version input label for initial state', () => {
-        expect(findVersionGroup().attributes('state')).toBe('true');
-        expect(findPrimaryButton().props()).toMatchObject({
-          variant: 'confirm',
-          disabled: true,
-        });
-      });
-      it.each(['1.0', '1', 'abc', '1.abc', '1.0.0.0'])(
-        'renders the version input label for invalid state',
-        async (version) => {
-          findVersionInput().vm.$emit('input', version);
-          await nextTick();
-          expect(findVersionGroup().attributes()).not.toContain('state');
-          expect(findVersionGroup().attributes('invalid-feedback')).toBe(
-            ModelCreate.i18n.versionInvalid,
-          );
-          expect(findVersionGroup().attributes('description')).toBe('');
-          expect(findPrimaryButton().props()).toMatchObject({
-            variant: 'confirm',
-            disabled: true,
-          });
-        },
-      );
-      it.each(['1.0.0', '0.0.0-b', '24.99.99-b99'])(
-        'renders the version input label for valid state',
-        async (version) => {
-          findVersionInput().vm.$emit('input', version);
-          await nextTick();
-          expect(findVersionGroup().attributes('state')).toBe('true');
-          expect(findVersionGroup().attributes('valid-feedback')).toBe(
-            ModelCreate.i18n.versionValid,
-          );
-          expect(findVersionGroup().attributes('description')).toBe('');
-          expect(findPrimaryButton().props()).toMatchObject({
-            variant: 'confirm',
-            disabled: true,
-          });
-        },
-      );
-      it.each(['1.0.0', '0.0.0-b', '24.99.99-b99'])(
-        'renders the version input label for valid state',
-        async (version) => {
-          findNameInput().vm.$emit('input', 'gpt-alice-1');
-          findVersionInput().vm.$emit('input', version);
-          await nextTick();
-          expect(findVersionGroup().attributes('state')).toBe('true');
-          expect(findPrimaryButton().props()).toMatchObject({
-            variant: 'confirm',
-            disabled: false,
-          });
-        },
-      );
-
-      it.each(['model name', ' modelname', 'modelname ', ' ', ''])(
-        'renders the modelnames as invalid',
-        async (name) => {
-          findNameInput().vm.$emit('input', name);
-          await nextTick();
-          expect(findModelNameGroup().attributes()).not.toContain('state');
-        },
-      );
-      it.each(['modelname', 'model-name', 'MODELname', 'model_name'])(
-        'renders the modelnames as invalid',
-        async (name) => {
-          findNameInput().vm.$emit('input', name);
-          await nextTick();
-          expect(findModelNameGroup().attributes('state')).toBe('true');
-        },
-      );
-    });
-
     it('clicking on secondary button clears the form', async () => {
       createWrapper();
 
       await findNameInput().vm.$emit('input', 'my_model');
 
-      await findSecondaryButton().vm.$emit('click');
+      await findGlModal().vm.$emit('secondary');
 
       expect(findVersionInput().attributes('value')).toBe(undefined);
     });
@@ -318,11 +197,11 @@ describe('ModelCreate', () => {
     beforeEach(async () => {
       createWrapper();
       findNameInput().vm.$emit('input', 'gpt-alice-1');
-      findMarkdownEditor().vm.$emit('input', 'My model description');
       findVersionInput().vm.$emit('input', '1.0.0');
+      findDescriptionInput().vm.$emit('input', 'My model description');
       findVersionDescriptionInput().vm.$emit('input', 'My version description');
       await Vue.nextTick();
-      zone().vm.$emit('change', files);
+      zone().vm.$emit('change', file);
       jest.spyOn(apolloProvider.defaultClient, 'mutate');
 
       await submitForm();
@@ -355,25 +234,20 @@ describe('ModelCreate', () => {
       );
     });
 
-    it('Uploads a files mutation upon confirm', () => {
+    it('Uploads a file mutation upon confirm', () => {
       expect(uploadModel).toHaveBeenCalledWith({
         file,
         importPath: '/api/v4/projects/1/packages/ml_models/1/files/',
         subfolder: '',
         maxAllowedFileSize: 99999,
         onUploadProgress: expect.any(Function),
-        cancelToken: expect.any(Object),
       });
     });
 
-    it('Visits the model versions page upon successful create mutation', () => {
-      expect(visitUrlWithAlerts).toHaveBeenCalledWith('/some/project/-/ml/models/1/versions/1', [
-        {
-          id: 'import-artifact-alert',
-          message: 'Artifacts uploaded successfully.',
-          variant: 'info',
-        },
-      ]);
+    it('Visits the model versions page upon successful create mutation', async () => {
+      createWrapper();
+      await submitForm();
+      expect(visitUrl).toHaveBeenCalledWith('/some/project/-/ml/models/1/versions/1');
     });
   });
 
@@ -387,14 +261,10 @@ describe('ModelCreate', () => {
       await submitForm();
     });
 
-    it('Visits the model page upon successful create mutation without a version', () => {
-      expect(visitUrlWithAlerts).toHaveBeenCalledWith('/some/project/-/ml/models/1', [
-        {
-          id: 'import-artifact-alert',
-          message: 'Artifacts uploaded successfully.',
-          variant: 'info',
-        },
-      ]);
+    it('Visits the model page upon successful create mutation without a version', async () => {
+      createWrapper();
+      await submitForm();
+      expect(visitUrl).toHaveBeenCalledWith('/some/project/-/ml/models/1');
     });
   });
 
@@ -410,7 +280,7 @@ describe('ModelCreate', () => {
       findVersionInput().vm.$emit('input', '1.0.0');
       findVersionDescriptionInput().vm.$emit('input', 'My version description');
       await Vue.nextTick();
-      zone().vm.$emit('change', files);
+      zone().vm.$emit('change', file);
       await submitForm();
     });
 
@@ -460,20 +330,15 @@ describe('ModelCreate', () => {
       findDescriptionInput().vm.$emit('input', 'My model description');
       findVersionDescriptionInput().vm.$emit('input', 'My version description');
       await Vue.nextTick();
-      zone().vm.$emit('change', files);
+      zone().vm.$emit('change', file);
       uploadModel.mockRejectedValueOnce('Artifact import error.');
       await submitForm();
     });
 
     it('Visits the model versions page upon successful create mutation', async () => {
+      expect(findGlAlert().text()).toBe('Artifact import error.');
       await submitForm(); // retry submit
-      expect(visitUrlWithAlerts).toHaveBeenCalledWith('/some/project/-/ml/models/1/versions/1', [
-        {
-          id: 'import-artifact-alert',
-          message: 'Artifact uploads completed with errors. file.txt: Artifact import error.',
-          variant: 'danger',
-        },
-      ]);
+      expect(visitUrl).toHaveBeenCalledWith('/some/project/-/ml/models/1/versions/1');
     });
 
     it('Uploads a file mutation upon confirm', async () => {
@@ -484,7 +349,6 @@ describe('ModelCreate', () => {
         subfolder: '',
         maxAllowedFileSize: 99999,
         onUploadProgress: expect.any(Function),
-        cancelToken: expect.any(Object),
       });
     });
   });

@@ -42,17 +42,6 @@ RSpec.describe API::Helpers::PackagesHelpers, feature_category: :package_registr
         expect(subject).to eq nil
       end
     end
-
-    context 'with read_public_package_registry permission' do
-      subject { helper.authorize_packages_access!(group, :read_package_within_public_registries) }
-
-      it 'authorizes packages access' do
-        expect(helper).to receive(:require_packages_enabled!)
-        expect(helper).to receive(:authorize!).with(:read_package_within_public_registries, instance_of(::Packages::Policies::Group))
-
-        expect(subject).to eq nil
-      end
-    end
   end
 
   describe 'authorize_read_package!' do
@@ -114,25 +103,17 @@ RSpec.describe API::Helpers::PackagesHelpers, feature_category: :package_registr
   end
 
   describe '#authorize_workhorse!' do
-    let_it_be(:headers) { { 'HTTP_GITLAB_WORKHORSE' => 1 } }
+    let_it_be(:headers) { {} }
     let_it_be(:params) { { subject: project } }
-
-    let(:env) { headers }
-    let(:request) { ActionDispatch::Request.new(env) }
 
     subject { helper.authorize_workhorse!(**params) }
 
     shared_examples 'workhorse authorize' do
-      before do
-        allow(helper).to receive(:request).and_return(request)
-        allow(helper).to receive(:env).and_return(env)
-      end
-
       it 'authorizes workhorse' do
-        expect(helper).to receive(:authorize_create_package!).with(project)
+        expect(helper).to receive(:authorize_upload!).with(project)
         expect(helper).to receive(:status).with(200)
         expect(helper).to receive(:content_type).with(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
-        expect(Gitlab::Workhorse).to receive(:verify_api_request!).with(request.headers)
+        expect(Gitlab::Workhorse).to receive(:verify_api_request!).with(headers)
         expect(::Packages::PackageFileUploader).to receive(:workhorse_authorize).with(workhorse_authorize_params)
 
         expect(subject).to eq nil
@@ -314,28 +295,6 @@ RSpec.describe API::Helpers::PackagesHelpers, feature_category: :package_registr
       end
     end
 
-    context 'with internal event event' do
-      let(:user) { project.creator }
-      let(:category) { described_class.name }
-      let(:namespace) { project.namespace }
-
-      it 'calls internal events' do
-        expect(Gitlab::InternalEvents).to receive(:track_event)
-          .with('pull_package_from_registry',
-            additional_properties: {
-              label: 'terraform_module',
-              property: 'user'
-            },
-            user: user,
-            project: project,
-            namespace: namespace
-          )
-
-        args = { category: category, user: user, project: project, namespace: namespace }
-        helper.track_package_event('pull_package', :terraform_module, **args)
-      end
-    end
-
     context 'when using deploy token and action is push package' do
       let(:user) { create(:deploy_token, write_registry: true, projects: [project]) }
       let(:scope) { :rubygems }
@@ -344,7 +303,7 @@ RSpec.describe API::Helpers::PackagesHelpers, feature_category: :package_registr
       let(:label) { 'counts.package_events_i_package_push_package_by_deploy_token' }
       let(:property) { 'i_package_push_package_by_deploy_token' }
       let(:service_ping_context) do
-        [Gitlab::Tracking::ServicePingContext.new(data_source: :redis, event: 'package_pushed_using_deploy_token').to_h]
+        [Gitlab::Usage::MetricDefinition.context_for('counts.package_events_i_package_push_package_by_deploy_token').to_h]
       end
 
       it 'logs a snowplow event' do
@@ -372,7 +331,7 @@ RSpec.describe API::Helpers::PackagesHelpers, feature_category: :package_registr
       let(:label) { 'counts.package_events_i_package_pull_package_by_guest' }
       let(:property) { 'i_package_pull_package_by_guest' }
       let(:service_ping_context) do
-        [Gitlab::Tracking::ServicePingContext.new(data_source: :redis, event: 'package_pulled_by_guest').to_h]
+        [Gitlab::Usage::MetricDefinition.context_for('counts.package_events_i_package_pull_package_by_guest').to_h]
       end
 
       it 'logs a snowplow event' do

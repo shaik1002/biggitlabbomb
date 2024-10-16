@@ -19,7 +19,7 @@
 
 .detail-page-header a.link,
 .detail-page-header .title a {
-  color: var(--gl-text-color-link);
+  color: $blue-600;
 }
 
 .detail-page-header-body {
@@ -37,6 +37,10 @@
 
 .detail-page-header-actions {
   flex: 0 0 auto;
+}
+
+.detail-page-header-meta {
+  flex-basis: 100%;
 }
 
 .detail-page-description {

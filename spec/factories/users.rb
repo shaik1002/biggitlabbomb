@@ -21,8 +21,7 @@ FactoryBot.define do
                     true
                   end
 
-      # TODO: Remove usage of default organization https://gitlab.com/gitlab-org/gitlab/-/issues/446293
-      user.assign_personal_namespace(create(:organization, :default)) if assign_ns
+      user.assign_personal_namespace(create(:organization)) if assign_ns
     end
 
     trait :without_default_org do
@@ -31,8 +30,7 @@ FactoryBot.define do
 
     trait :with_namespace do
       # rubocop: disable RSpec/FactoryBot/InlineAssociation -- We need to pass an Organization to this method
-      # TODO: Remove usage of default organization https://gitlab.com/gitlab-org/gitlab/-/issues/446293
-      namespace { assign_personal_namespace(create(:organization, :default)) }
+      namespace { assign_personal_namespace(create(:organization)) }
       # rubocop: enable RSpec/FactoryBot/InlineAssociation
     end
 
@@ -127,16 +125,8 @@ FactoryBot.define do
       user_type { :llm_bot }
     end
 
-    trait :duo_code_review_bot do
-      user_type { :duo_code_review_bot }
-    end
-
     trait :placeholder do
       user_type { :placeholder }
-    end
-
-    trait :import_user do
-      user_type { :import_user }
     end
 
     trait :external do
