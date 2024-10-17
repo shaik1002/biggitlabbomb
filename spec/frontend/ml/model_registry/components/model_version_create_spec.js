@@ -1,6 +1,6 @@
 import Vue, { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
-import { GlAlert } from '@gitlab/ui';
+import { GlAlert, GlModal } from '@gitlab/ui';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import { visitUrlWithAlerts } from '~/lib/utils/url_utility';
@@ -12,6 +12,8 @@ import createModelVersionMutation from '~/ml/model_registry/graphql/mutations/cr
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 
+import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
+import { MODEL_VERSION_CREATION_MODAL_ID } from '~/ml/model_registry/constants';
 import MarkdownEditor from '~/vue_shared/components/markdown/markdown_editor.vue';
 import { createModelVersionResponses } from '../graphql_mock_data';
 
@@ -50,15 +52,18 @@ describe('ModelVersionCreate', () => {
     apolloProvider = createMockApollo(requestHandlers);
 
     wrapper = shallowMountExtended(ModelVersionCreate, {
-      propsData: {
-        projectPath: 'some/project',
-        markdownPreviewPath: '/markdown-preview',
-      },
       provide: {
+        projectPath: 'some/project',
         maxAllowedFileSize: 99999,
         latestVersion: null,
-        modelGid: 'gid://gitlab/Ml::Model/1',
+        markdownPreviewPath: '/markdown-preview',
         ...provide,
+      },
+      directives: {
+        GlModal: createMockDirective('gl-modal'),
+      },
+      propsData: {
+        modelGid: 'gid://gitlab/Ml::Model/1',
       },
       apolloProvider,
       stubs: {
@@ -67,15 +72,15 @@ describe('ModelVersionCreate', () => {
     });
   };
 
-  const findPrimaryButton = () => wrapper.findByTestId('primary-button');
-  const findSecondaryButton = () => wrapper.findByTestId('secondary-button');
+  const findModalButton = () => wrapper.findByText('Create model version');
   const findVersionInput = () => wrapper.findByTestId('versionId');
   const findDescriptionInput = () => wrapper.findByTestId('descriptionId');
   const findImportArtifactZone = () => wrapper.findComponent(ImportArtifactZone);
   const zone = () => wrapper.findComponent(UploadDropzone);
+  const findGlModal = () => wrapper.findComponent(GlModal);
   const findGlAlert = () => wrapper.findComponent(GlAlert);
   const submitForm = async () => {
-    findPrimaryButton().vm.$emit('click');
+    findGlModal().vm.$emit('primary', new Event('primary'));
     await waitForPromises();
   };
   const artifactZoneLabel = () => wrapper.findByTestId('uploadArtifactsHeader');
@@ -86,7 +91,19 @@ describe('ModelVersionCreate', () => {
       createWrapper();
     });
 
-    describe('Form', () => {
+    it('renders the modal button', () => {
+      expect(findModalButton().text()).toBe('Create model version');
+      expect(findModalButton().attributes('variant')).toBe('confirm');
+      expect(findModalButton().attributes('category')).toBe('primary');
+      expect(getBinding(findModalButton().element, 'gl-modal').value).toBe(
+        MODEL_VERSION_CREATION_MODAL_ID,
+      );
+      expect(findModalButton().attributes('disabled')).toBeUndefined();
+      expect(findModalButton().attributes('category')).toBe('primary');
+      expect(findModalButton().attributes('variant')).toBe('confirm');
+    });
+
+    describe('Modal open', () => {
       it('renders the version input', () => {
         expect(findVersionInput().exists()).toBe(true);
       });
@@ -112,24 +129,25 @@ describe('ModelVersionCreate', () => {
         });
       });
 
-      it('renders the create button', () => {
-        expect(findPrimaryButton().props()).toMatchObject({
-          variant: 'confirm',
-          disabled: true,
-        });
-      });
-
-      it('renders the cancel button', () => {
-        expect(findSecondaryButton().props()).toMatchObject({
-          variant: 'default',
-          disabled: false,
+      it('renders the import modal', () => {
+        expect(findGlModal().props()).toMatchObject({
+          modalId: 'create-model-version-modal',
+          title: 'Create model version & import artifacts',
+          size: 'lg',
         });
       });
 
       it('disables the create button in the modal when semver is incorrect', () => {
-        expect(findPrimaryButton().props()).toMatchObject({
-          variant: 'confirm',
-          disabled: true,
+        expect(findGlModal().props('actionPrimary')).toEqual({
+          attributes: { variant: 'confirm', disabled: true },
+          text: 'Create & import',
+        });
+      });
+
+      it('renders the cancel button in the modal', () => {
+        expect(findGlModal().props('actionSecondary')).toEqual({
+          text: 'Cancel',
+          attributes: { variant: 'default' },
         });
       });
 
@@ -169,9 +187,9 @@ describe('ModelVersionCreate', () => {
     });
     it('renders the version input label for initial state', () => {
       expect(wrapper.findByTestId('versionDescriptionId').attributes('invalid-feedback')).toBe('');
-      expect(findPrimaryButton().props()).toMatchObject({
-        variant: 'confirm',
-        disabled: true,
+      expect(findGlModal().props('actionPrimary')).toEqual({
+        attributes: { variant: 'confirm', disabled: true },
+        text: 'Create & import',
       });
     });
     it.each(['1.0', '1', 'abc', '1.abc', '1.0.0.0'])(
@@ -182,9 +200,9 @@ describe('ModelVersionCreate', () => {
         expect(wrapper.findByTestId('versionDescriptionId').attributes('invalid-feedback')).toBe(
           'Version is not a valid semantic version.',
         );
-        expect(findPrimaryButton().props()).toMatchObject({
-          variant: 'confirm',
-          disabled: true,
+        expect(findGlModal().props('actionPrimary')).toEqual({
+          attributes: { variant: 'confirm', disabled: true },
+          text: 'Create & import',
         });
       },
     );
@@ -196,9 +214,9 @@ describe('ModelVersionCreate', () => {
         expect(wrapper.findByTestId('versionDescriptionId').attributes('valid-feedback')).toBe(
           'Version is valid semantic version.',
         );
-        expect(findPrimaryButton().props()).toMatchObject({
-          variant: 'confirm',
-          disabled: false,
+        expect(findGlModal().props('actionPrimary')).toEqual({
+          attributes: { variant: 'confirm', disabled: false },
+          text: 'Create & import',
         });
       },
     );
@@ -271,7 +289,7 @@ describe('ModelVersionCreate', () => {
 
       await findVersionInput().vm.$emit('input', '1.0.0');
 
-      await findSecondaryButton().vm.$emit('click');
+      await findGlModal().vm.$emit('secondary');
 
       expect(findVersionInput().attributes('value')).toBe(undefined);
     });

@@ -10,7 +10,7 @@ module Banzai
     before_action :verify_upload_model_class!
     before_action :authorize_access!
 
-    feature_category :markdown
+    feature_category :team_planning
 
     MODEL_CLASSES = {
       'project' => Project,

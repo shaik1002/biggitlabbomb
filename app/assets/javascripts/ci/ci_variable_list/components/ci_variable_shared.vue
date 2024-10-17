@@ -186,8 +186,7 @@ export default {
       return this.$apollo.queries.environments.loading;
     },
     areHiddenVariablesAvailable() {
-      // group and project variables can be hidden, instance variables cannot
-      return Boolean(this.entity);
+      return Boolean(this.entity && this.glFeatures?.ciHiddenVariables);
     },
     hasEnvScopeQuery() {
       return Boolean(this.queryData?.environments?.query);

@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlExperimentBadge } from '@gitlab/ui';
+import { GlExperimentBadge } from '@gitlab/ui';
 import MetadataItem from '~/vue_shared/components/registry/metadata_item.vue';
 import TitleArea from '~/vue_shared/components/registry/title_area.vue';
 import { helpPagePath } from '~/helpers/help_page_helper';
@@ -7,8 +7,9 @@ import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import { s__ } from '~/locale';
 import EmptyState from '../components/model_list_empty_state.vue';
 import * as i18n from '../translations';
-import { BASE_SORT_FIELDS } from '../constants';
+import { BASE_SORT_FIELDS, MODEL_CREATION_MODAL_ID } from '../constants';
 import ModelRow from '../components/model_row.vue';
+import ModelCreate from '../components/model_create.vue';
 import ActionsDropdown from '../components/actions_dropdown.vue';
 import getModelsQuery from '../graphql/queries/get_models.query.graphql';
 import { makeLoadModelErrorMessage } from '../translations';
@@ -18,9 +19,9 @@ export default {
   name: 'IndexMlModels',
   components: {
     ModelRow,
+    ModelCreate,
     MetadataItem,
     TitleArea,
-    GlButton,
     GlExperimentBadge,
     EmptyState,
     ActionsDropdown,
@@ -51,10 +52,6 @@ export default {
     },
     maxAllowedFileSize: {
       type: Number,
-      required: true,
-    },
-    createModelPath: {
-      type: String,
       required: true,
     },
     markdownPreviewPath: {
@@ -130,6 +127,7 @@ export default {
       'MlModelRegistry|Create your machine learning using GitLab directly or using the MLflow client',
     ),
     primaryText: s__('MlModelRegistry|Create model'),
+    modalId: MODEL_CREATION_MODAL_ID,
   },
 };
 </script>
@@ -147,13 +145,7 @@ export default {
         <metadata-item icon="machine-learning" :text="$options.i18n.modelsCountLabel(count)" />
       </template>
       <template #right-actions>
-        <gl-button
-          v-if="canWriteModelRegistry"
-          data-testid="create-model-button"
-          variant="confirm"
-          :href="createModelPath"
-          >{{ $options.i18n.CREATE_MODEL_LINK_TITLE }}</gl-button
-        >
+        <model-create v-if="canWriteModelRegistry" />
 
         <actions-dropdown />
       </template>
@@ -172,7 +164,7 @@ export default {
           :title="$options.emptyState.title"
           :description="$options.emptyState.description"
           :primary-text="$options.emptyState.primaryText"
-          :primary-link="createModelPath"
+          :modal-id="$options.emptyState.modalId"
         />
       </template>
 

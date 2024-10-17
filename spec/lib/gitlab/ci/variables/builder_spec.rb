@@ -585,8 +585,7 @@ RSpec.describe Gitlab::Ci::Variables::Builder, :clean_gitlab_redis_cache, featur
     end
   end
 
-  # Move this to `describe` when the FF ci_variables_optimize_kubernetes_variables is removed
-  shared_examples 'kubernetes variables' do
+  describe '#kubernetes_variables' do
     let(:service) { double(execute: template) }
     let(:template) { double(to_yaml: 'example-kubeconfig', valid?: template_valid) }
     let(:template_valid) { true }
@@ -595,8 +594,8 @@ RSpec.describe Gitlab::Ci::Variables::Builder, :clean_gitlab_redis_cache, featur
     subject(:kubernetes_variables) do
       builder.kubernetes_variables(
         environment: environment,
-        token: job.token,
-        kubernetes_namespace: job.expanded_kubernetes_namespace
+        token: -> { job.token },
+        kubernetes_namespace: -> { job.expanded_kubernetes_namespace }
       )
     end
 
@@ -644,25 +643,13 @@ RSpec.describe Gitlab::Ci::Variables::Builder, :clean_gitlab_redis_cache, featur
     end
   end
 
-  describe '#kubernetes_variables' do
-    it_behaves_like 'kubernetes variables'
-
-    context 'when the FF ci_variables_optimize_kubernetes_variables is disabled' do
-      before do
-        stub_feature_flags(ci_variables_optimize_kubernetes_variables: false)
-      end
-
-      it_behaves_like 'kubernetes variables'
-    end
-  end
-
   describe '#deployment_variables' do
     let(:environment) { 'production' }
     let(:kubernetes_namespace) { 'namespace' }
     let(:project_deployment_variables) { double }
 
     subject(:deployment_variables) do
-      builder.deployment_variables(environment, kubernetes_namespace)
+      builder.deployment_variables(environment: environment, kubernetes_namespace: -> { kubernetes_namespace })
     end
 
     before do

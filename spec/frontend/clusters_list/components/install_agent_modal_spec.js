@@ -8,6 +8,7 @@ import AvailableAgentsDropdown from '~/clusters_list/components/available_agents
 import InstallAgentModal from '~/clusters_list/components/install_agent_modal.vue';
 import AgentToken from '~/clusters_list/components/agent_token.vue';
 import {
+  I18N_AGENT_MODAL,
   MAX_LIST_COUNT,
   EVENT_LABEL_MODAL,
   EVENT_ACTIONS_OPEN,
@@ -20,8 +21,6 @@ import getAgentsQuery from '~/clusters_list/graphql/queries/get_agents.query.gra
 import getAgentConfigurations from '~/clusters_list/graphql/queries/agent_configurations.query.graphql';
 import createAgentMutation from '~/clusters_list/graphql/mutations/create_agent.mutation.graphql';
 import createAgentTokenMutation from '~/clusters_list/graphql/mutations/create_agent_token.mutation.graphql';
-import ModalCopyButton from '~/vue_shared/components/modal_copy_button.vue';
-import CodeBlockHighlighted from '~/vue_shared/components/code_block_highlighted.vue';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import {
@@ -41,13 +40,13 @@ const kasAddress = 'kas.example.com';
 const emptyStateImage = 'path/to/image';
 const defaultBranchName = 'default';
 const maxAgents = MAX_LIST_COUNT;
+const i18n = I18N_AGENT_MODAL;
 
 describe('InstallAgentModal', () => {
   let wrapper;
   let apolloProvider;
   let trackingSpy;
 
-  const glabCommand = 'glab cluster agent bootstrap <agent-name>';
   const configurations = [{ agentName: 'agent-name' }];
   const apolloQueryResponse = (configurationsNodes = configurations) => ({
     data: {
@@ -82,8 +81,6 @@ describe('InstallAgentModal', () => {
   const findActionButton = () => findButtonByVariant('confirm');
   const findCancelButton = () => findButtonByVariant('default');
   const findPrimaryButton = () => wrapper.findByTestId('agent-primary-button');
-  const findModalCopyButton = () => wrapper.findComponent(ModalCopyButton);
-  const findCodeBlock = () => wrapper.findComponent(CodeBlockHighlighted);
 
   const expectDisabledAttribute = (element, disabled) => {
     if (disabled) {
@@ -147,50 +144,6 @@ describe('InstallAgentModal', () => {
         createWrapper();
       });
 
-      it('renders a title for bootstrap with Flux block', () => {
-        expect(findModal().text()).toContain('Bootstrap the agent with Flux');
-      });
-
-      it('renders a description for bootstrap with Flux block', () => {
-        expect(findModal().text()).toContain(
-          'If Flux is installed in the cluster, you can install and register the agent from the command line:',
-        );
-      });
-
-      it('renders a code block with a bootstrap with Flux CLI command', () => {
-        expect(findCodeBlock().props('language')).toBe('shell');
-        expect(findCodeBlock().props('code')).toBe(glabCommand);
-      });
-
-      it('renders a button to copy a bootstrap with Flux CLI command', () => {
-        expect(findModalCopyButton().props()).toMatchObject({
-          text: glabCommand,
-          modalId: INSTALL_AGENT_MODAL_ID,
-        });
-      });
-
-      it('renders a command to list available bootstrap with Flux options', () => {
-        expect(findModal().text()).toContain(
-          sprintf('You can view a list of options with %{codeStart}--help%{codeEnd}.', {
-            codeStart: '',
-            codeEnd: '',
-          }),
-        );
-      });
-
-      it('renders a link to the bootstrap agent with Flux help page', () => {
-        expect(findModal().text()).toContain(
-          sprintf("If you're bootstrapping the agent with Flux, you can close this dialog.", {
-            linkStart: '',
-            linkEnd: '',
-          }),
-        );
-      });
-
-      it('renders a title for bootstrap with the UI block', () => {
-        expect(findModal().text()).toContain('Register agent with the UI');
-      });
-
       it('renders the dropdown for available agents', () => {
         expect(findAgentDropdown().isVisible()).toBe(true);
       });
@@ -207,7 +160,7 @@ describe('InstallAgentModal', () => {
 
       it('renders a disabled next button', () => {
         expect(findActionButton().isVisible()).toBe(true);
-        expect(findActionButton().text()).toBe('Register');
+        expect(findActionButton().text()).toBe(i18n.registerAgentButton);
         expectDisabledAttribute(findActionButton(), true);
       });
 
@@ -298,7 +251,7 @@ describe('InstallAgentModal', () => {
 
       it('renders a close button', () => {
         expect(findActionButton().isVisible()).toBe(true);
-        expect(findActionButton().text()).toBe('Close');
+        expect(findActionButton().text()).toBe(i18n.close);
         expectDisabledAttribute(findActionButton(), false);
       });
 
@@ -359,16 +312,13 @@ describe('InstallAgentModal', () => {
 
     it('renders an instruction to enable the KAS', () => {
       expect(findModal().text()).toContain(
-        sprintf(
-          "Your instance doesn't have the %{linkStart}GitLab Agent Server (KAS)%{linkEnd} set up. Ask a GitLab Administrator to install it.",
-          { linkStart: '', linkEnd: '' },
-        ),
+        sprintf(i18n.enableKasText, { linkStart: '', linkEnd: '' }),
       );
     });
 
     it('renders a cancel button', () => {
       expect(findCancelButton().isVisible()).toBe(true);
-      expect(findCancelButton().text()).toBe('Close');
+      expect(findCancelButton().text()).toBe(i18n.close);
     });
 
     it("doesn't render a secondary button", () => {

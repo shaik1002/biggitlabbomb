@@ -13,7 +13,7 @@ For guidelines on specific words, see [the word list](word_list.md).
 ## The GitLab voice
 
 The GitLab brand guidelines define the
-[voice used by the larger organization](https://design.gitlab.com/brand-overview/introduction/#brand-personality).
+[voice used by the larger organization](https://design.gitlab.com/brand-overview/brand-voice).
 
 Building on that guidance, the voice in the GitLab documentation strives to be concise,
 direct, and precise. The goal is to provide information that's easy to search and scan.
@@ -455,18 +455,6 @@ To make text bold, wrap it with double asterisks (`**`). For example:
 ```markdown
 1. Select **Cancel**.
 ```
-
-When using bold format for UI elements or keywords, place any punctuation outside the bold tag.
-This rule includes periods, commas, colons, and right-angle brackets (`>`).
-
-The punctuation is part of the sentence structure rather than the UI element or keyword that you're emphasizing.
-
-Include punctuation in the bold tag when it's part of the UI element or keyword itself.
-
-For example:
-
-- `**Option**: This an option description.`
-- `Select **Overview** > **Users**.`
 
 ### Inline code
 

@@ -45,12 +45,6 @@ module Ci
         :update_pipeline,
         :update_release
       ].freeze
-
-      class << self
-        def all_values
-          (FIXED + ALLOWED).map(&:to_s)
-        end
-      end
     end
   end
 end

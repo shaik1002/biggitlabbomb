@@ -5,7 +5,6 @@ import { mapState, mapActions } from 'vuex';
 import { createAlert, VARIANT_INFO } from '~/alert';
 import { __, s__ } from '~/locale';
 import CrudComponent from '~/vue_shared/components/crud_component.vue';
-import { INITIAL_PAGE } from '../constants';
 import Badge from './badge.vue';
 import BadgeForm from './badge_form.vue';
 import BadgeList from './badge_list.vue';
@@ -29,7 +28,7 @@ export default {
     ),
   },
   computed: {
-    ...mapState(['pagination', 'badgeInModal', 'isEditing', 'isSaving']),
+    ...mapState(['badges', 'badgeInModal', 'isEditing', 'isSaving']),
     saveProps() {
       return {
         text: __('Save changes'),
@@ -48,11 +47,8 @@ export default {
       };
     },
   },
-  created() {
-    this.loadBadges({ page: INITIAL_PAGE });
-  },
   methods: {
-    ...mapActions(['loadBadges', 'deleteBadge', 'stopEditing']),
+    ...mapActions(['deleteBadge', 'stopEditing']),
     closeAddForm() {
       this.$refs.badgesCrud.hideForm();
     },
@@ -83,7 +79,7 @@ export default {
     ref="badgesCrud"
     :title="$options.i18n.title"
     icon="labels"
-    :count="pagination.total"
+    :count="badges.length"
     :toggle-text="$options.i18n.addFormTitle"
     data-testid="badge-settings"
   >

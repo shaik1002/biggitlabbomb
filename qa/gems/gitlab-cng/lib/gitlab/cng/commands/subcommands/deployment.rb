@@ -54,7 +54,7 @@ module Gitlab
                 default: 0,
                 type: :numeric
 
-              super
+              super(name)
             end
           end
 

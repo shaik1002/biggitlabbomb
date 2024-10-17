@@ -17,9 +17,6 @@ module Ci
       REQUEST_CACHE_KEY = :job_token_authorizations
       CAPTURE_DELAY = 5.minutes
 
-      scope :for_project, ->(accessed_project) { where(accessed_project: accessed_project) }
-      scope :preload_origin_project, -> { includes(origin_project: :route) }
-
       # Record in SafeRequestStore a cross-project access attempt
       def self.capture(origin_project:, accessed_project:)
         # Skip self-referential accesses as they are always allowed and don't need

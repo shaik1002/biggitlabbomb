@@ -80,12 +80,10 @@ export default {
     'gl-p-3',
     'gl-border-0',
     '!gl-rounded-base',
-    'hover:gl-bg-gray-50',
-    'dark:hover:gl-bg-gray-200',
-    'focus:gl-bg-gray-50',
-    'dark:focus:gl-bg-gray-200',
-    'hover:gl-text-strong',
-    'focus:gl-text-strong',
+    'hover:gl-bg-strong',
+    'focus:gl-bg-strong',
+    'hover:gl-text-gray-900',
+    'focus:gl-text-gray-900',
   ],
   data() {
     return {

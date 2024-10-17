@@ -7,32 +7,19 @@ import CrudComponent from '~/vue_shared/components/crud_component.vue';
 import BadgeSettings from '~/badges/components/badge_settings.vue';
 import BadgeList from '~/badges/components/badge_list.vue';
 import BadgeForm from '~/badges/components/badge_form.vue';
-import createState from '~/badges/store/state';
-import actions from '~/badges/store/actions';
-import { INITIAL_PAGE } from '~/badges/constants';
+import store from '~/badges/store';
 import { createDummyBadge } from '../dummy_badge';
-import { MOCK_PAGINATION } from '../mock_data';
 
 Vue.use(Vuex);
 
 describe('BadgeSettings component', () => {
   let wrapper;
-  let mockedActions;
   const badge = createDummyBadge();
 
   const createComponent = (isEditing = false) => {
-    mockedActions = Object.fromEntries(Object.keys(actions).map((name) => [name, jest.fn()]));
-
-    const store = new Vuex.Store({
-      state: {
-        ...createState(),
-        badges: [badge],
-        pagination: MOCK_PAGINATION,
-        kind: 'project',
-        isEditing,
-      },
-      actions: mockedActions,
-    });
+    store.state.badges = [badge];
+    store.state.kind = 'project';
+    store.state.isEditing = isEditing;
 
     wrapper = shallowMountExtended(BadgeSettings, {
       store,
@@ -51,21 +38,13 @@ describe('BadgeSettings component', () => {
 
   const findModal = () => wrapper.findComponent(GlModal);
 
-  it('calls loadBadges when the component is created', () => {
-    createComponent();
-
-    expect(mockedActions.loadBadges).toHaveBeenCalledWith(expect.any(Object), {
-      page: INITIAL_PAGE,
-    });
-  });
-
   it('renders a header with the badge count', () => {
     createComponent();
     const cardTitle = wrapper.findByTestId('crud-title');
     const cardCount = wrapper.findByTestId('crud-count');
 
     expect(cardTitle.text()).toContain('Your badges');
-    expect(cardCount.text()).toContain(MOCK_PAGINATION.total.toString());
+    expect(cardCount.text()).toContain('1');
   });
 
   it('displays a table', () => {
