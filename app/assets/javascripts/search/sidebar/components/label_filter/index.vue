@@ -59,7 +59,6 @@ export default {
     ...mapState(['searchLabelString', 'query', 'urlQuery', 'aggregations']),
     ...mapGetters([
       'filteredLabels',
-      'labelAggregationBuckets',
       'filteredUnselectedLabels',
       'filteredAppliedSelectedLabels',
       'appliedSelectedLabels',
@@ -84,12 +83,9 @@ export default {
       return this.$refs.searchLabelInputBox?.$el.querySelector('[role=searchbox]');
     },
     combinedSelectedFilters() {
-      const appliedSelectedLabelKeys = this.appliedSelectedLabels.map((label) => label.title);
+      const appliedSelectedLabelKeys = this.appliedSelectedLabels.map((label) => label.key);
       const { labels = [] } = this.query;
-
-      const uniqueResults = uniq([...appliedSelectedLabelKeys, ...labels]);
-
-      return uniqueResults;
+      return uniq([...appliedSelectedLabelKeys, ...labels]);
     },
     searchLabels: {
       get() {
@@ -101,7 +97,7 @@ export default {
     },
     selectedLabels: {
       get() {
-        return this.convertLabelNamesToIds(this.combinedSelectedLabels);
+        return this.combinedSelectedLabels;
       },
       set(value) {
         const labelName = this.getLabelNameById(value);
@@ -163,20 +159,12 @@ export default {
     },
     getLabelNameById(labelIds) {
       const labelNames = labelIds.map((id) => {
-        const label = this.labelAggregationBuckets.find((filteredLabel) => {
+        const label = this.filteredLabels.find((filteredLabel) => {
           return filteredLabel.key === String(id);
         });
         return label?.title;
       });
       return labelNames;
-    },
-    convertLabelNamesToIds(labelNames) {
-      const labels = labelNames.map((labelName) =>
-        this.labelAggregationBuckets.find((label) => {
-          return label.title === labelName;
-        }),
-      );
-      return labels.map((label) => label.key);
     },
   },
   FIRST_DROPDOWN_INDEX,
@@ -271,7 +259,6 @@ export default {
               <label-dropdown-items
                 v-if="hasSelectedLabels"
                 :labels="filteredAppliedSelectedLabels"
-                data-testid="selected-labels-checkboxes"
               />
               <gl-dropdown-divider v-if="hasSelectedLabels && hasUnselectedLabels" />
               <label-dropdown-items v-if="hasUnselectedLabels" :labels="filteredUnselectedLabels" />

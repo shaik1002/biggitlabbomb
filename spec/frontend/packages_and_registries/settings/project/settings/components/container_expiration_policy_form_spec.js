@@ -24,12 +24,12 @@ describe('Container Expiration Policy Settings Form', () => {
 
   const {
     data: {
-      project: { containerTagsExpirationPolicy },
+      project: { containerExpirationPolicy },
     },
   } = expirationPolicyPayload();
 
   const defaultProps = {
-    value: { ...containerTagsExpirationPolicy },
+    value: { ...containerExpirationPolicy },
   };
 
   const trackingPayload = {
@@ -107,7 +107,7 @@ describe('Container Expiration Policy Settings Form', () => {
     // we keep in sync what prop we pass to the component with the cache
     const {
       data: {
-        project: { containerTagsExpirationPolicy: value },
+        project: { containerExpirationPolicy: value },
       },
     } = queryPayload;
 

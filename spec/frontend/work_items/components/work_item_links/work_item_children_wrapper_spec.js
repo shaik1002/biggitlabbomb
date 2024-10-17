@@ -171,13 +171,10 @@ describe('WorkItemChildrenWrapper', () => {
 
   describe('drag & drop', () => {
     let dragParams;
-    let draggedItem;
 
     beforeEach(() => {
       isLoggedIn.mockReturnValue(true);
       createComponent({ canUpdate: true, children: childrenWorkItemsObjectives });
-
-      draggedItem = findFirstWorkItemLinkChildItem().element;
 
       dragParams = {
         oldIndex: 1,
@@ -187,16 +184,14 @@ describe('WorkItemChildrenWrapper', () => {
       };
     });
 
-    it('emits drag event with child type and adds a class `is-dragging` to document body when dragging', async () => {
+    it('adds a class `is-dragging` to document body when dragging', async () => {
       expect(document.body.classList.contains('is-dragging')).toBe(false);
 
-      wrapper.findComponent(Draggable).vm.$emit('start', { item: draggedItem });
+      wrapper.findComponent(Draggable).vm.$emit('start');
 
-      expect(wrapper.emitted('drag')).toEqual([[draggedItem.dataset.childType]]);
       expect(document.body.classList.contains('is-dragging')).toBe(true);
 
       wrapper.findComponent(Draggable).vm.$emit('end', dragParams);
-      expect(wrapper.emitted('drop').length).toBe(1);
       await nextTick();
 
       expect(document.body.classList.contains('is-dragging')).toBe(false);
@@ -204,7 +199,7 @@ describe('WorkItemChildrenWrapper', () => {
 
     it('dispatches `mouseup` event and cancels drag when Escape key is pressed', async () => {
       jest.spyOn(document, 'dispatchEvent');
-      wrapper.findComponent(Draggable).vm.$emit('start', { item: draggedItem });
+      wrapper.findComponent(Draggable).vm.$emit('start');
 
       const event = new Event('keyup');
       event.code = ESC_KEY;

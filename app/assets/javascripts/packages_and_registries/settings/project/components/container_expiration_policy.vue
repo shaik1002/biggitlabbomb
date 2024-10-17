@@ -43,14 +43,14 @@ export default {
     FETCH_SETTINGS_ERROR_MESSAGE,
   },
   apollo: {
-    containerTagsExpirationPolicy: {
+    containerExpirationPolicy: {
       query: expirationPolicyQuery,
       variables() {
         return {
           projectPath: this.projectPath,
         };
       },
-      update: (data) => data.project?.containerTagsExpirationPolicy,
+      update: (data) => data.project?.containerExpirationPolicy,
       error(e) {
         this.fetchSettingsError = e;
       },
@@ -59,15 +59,15 @@ export default {
   data() {
     return {
       fetchSettingsError: false,
-      containerTagsExpirationPolicy: null,
+      containerExpirationPolicy: null,
     };
   },
   computed: {
     isCleanupEnabled() {
-      return this.containerTagsExpirationPolicy?.enabled ?? false;
+      return this.containerExpirationPolicy?.enabled ?? false;
     },
     isEnabled() {
-      return this.containerTagsExpirationPolicy || this.enableHistoricEntries;
+      return this.containerExpirationPolicy || this.enableHistoricEntries;
     },
     showDisabledFormMessage() {
       return !this.isEnabled && !this.fetchSettingsError;
@@ -112,7 +112,7 @@ export default {
         {{ cleanupRulesButtonText }}
       </gl-button>
     </gl-card>
-    <template v-if="!$apollo.queries.containerTagsExpirationPolicy.loading">
+    <template v-if="!$apollo.queries.containerExpirationPolicy.loading">
       <gl-alert
         v-if="showDisabledFormMessage"
         :dismissible="false"

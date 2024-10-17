@@ -7,6 +7,7 @@ const taskItem = preserveUnchanged((state, node) => {
 
   state.write(`[${symbol}] `);
 
+  if (!node.textContent) state.write('&nbsp;');
   state.renderContent(node);
 });
 

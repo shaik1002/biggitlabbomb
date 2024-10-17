@@ -78,17 +78,14 @@ module Gitlab
         end
 
         def send_to_processing_queue(job)
-          context = job['context'] || {}
+          context = (job['context'] || {}).merge(related_class: self.class.name)
 
           Gitlab::ApplicationContext.with_raw_context(context) do
             args = job['args']
 
             Gitlab::SidekiqLogging::ConcurrencyLimitLogger.instance.resumed_log(worker_name, args)
 
-            worker_klass = worker_name.safe_constantize
-            next if worker_klass.nil?
-
-            worker_klass.concurrency_limit_resume.perform_async(*args)
+            worker_name.safe_constantize&.perform_async(*args)
           end
         end
 

@@ -179,7 +179,7 @@ export default {
       </div>
       <gl-sprintf
         v-else-if="!commit && hasSourceVersions"
-        class="gl-flex gl-min-w-0 gl-items-center"
+        class="compare-versions-container gl-flex gl-items-center"
         :message="s__('MergeRequest|Compare %{target} and %{source}')"
       >
         <template #target>

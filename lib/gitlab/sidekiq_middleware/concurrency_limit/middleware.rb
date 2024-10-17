@@ -58,7 +58,7 @@ module Gitlab
         end
 
         def resumed?
-          job['concurrency_limit_resume'] == true
+          current_context['meta.related_class'] == concurrency_service.name
         end
 
         def has_jobs_in_queue?

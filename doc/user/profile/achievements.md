@@ -16,6 +16,7 @@ DETAILS:
 FLAG:
 On self-managed GitLab, by default this feature is not available. To make it available,
 an administrator can [enable the feature flag](../../administration/feature_flags.md) named `achievements`.
+This feature is not ready for production use.
 
 Achievements are a way to reward users for their activity on GitLab.
 As a namespace maintainer or owner, you can create custom achievements for specific contributions. You can award these

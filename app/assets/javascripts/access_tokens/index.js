@@ -1,6 +1,6 @@
 import Vue from 'vue';
 
-import { convertObjectPropsToCamelCase, parseBoolean } from '~/lib/utils/common_utils';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { parseRailsFormFields } from '~/lib/utils/forms';
 import { __, sprintf } from '~/locale';
 import Translate from '~/vue_shared/translate';
@@ -23,7 +23,6 @@ export const initAccessTokenTableApp = () => {
   const {
     accessTokenType,
     accessTokenTypePlural,
-    backendPagination,
     initialActiveAccessTokens: initialActiveAccessTokensJson,
     noActiveTokensMessage: noTokensMessage,
   } = el.dataset;
@@ -42,7 +41,6 @@ export const initAccessTokenTableApp = () => {
     provide: {
       accessTokenType,
       accessTokenTypePlural,
-      backendPagination: parseBoolean(backendPagination),
       initialActiveAccessTokens,
       noActiveTokensMessage,
       showRole,
