@@ -74,14 +74,18 @@ validate-gem:
     - $CI_PROJECT_DIR/scripts/validate-monorepo-gem "$[[inputs.gem_name]]"
 
 rubocop:
-  extends: .ruby_matrix
+  extends:
+    - .ruby_matrix
+    - .version:ruby-next-version-identical-rules
   rules:
     - exists: ["$[[inputs.gem_path_prefix]]$[[inputs.gem_name]]/.rubocop.yml"]
   script:
     - bundle exec rubocop
 
 rspec:
-  extends: .ruby_on_rails_matrix
+  extends:
+    - .ruby_on_rails_matrix
+    - .version:ruby-next-version-identical-rules
   script:
     - RAILS_ENV=test bundle exec rspec
   coverage: '/LOC \((\d+\.\d+%)\) covered.$/'

@@ -63,6 +63,7 @@ ruby_syntax:
   extends:
     - .preflight-job-base
     - .preflight:rules:ruby_syntax
+    - .version:ruby-next-version-identical-rules
   before_script:
     - source scripts/utils.sh
   image: ${GITLAB_DEPENDENCY_PROXY_ADDRESS}ruby:${RUBY_VERSION}

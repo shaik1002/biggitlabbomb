@@ -19,3 +19,9 @@ variables:
   RUST_VERSION: "1.73"
   UBI_VERSION: "8.6"
   YARN_VERSION: "1.22"
+
+# Skip the job if the current Ruby version is identical to the current and next Ruby version.
+.version:ruby-next-version-identical-rules:
+  rules:
+    - if: '$RUBY_VERSION && $RUBY_VERSION_DEFAULT && $RUBY_VERSION_NEXT && $RUBY_VERSION_DEFAULT == $RUBY_VERSION_NEXT && $RUBY_VERSION == $RUBY_VERSION_NEXT'
+      when: never

@@ -6,10 +6,12 @@ include:
 
 rspec:
   extends:
+    - .version:ruby-next-version-identical-rules
+  extends:
     - .with_redis
   parallel:
     matrix:
-      - RUBY_VERSION: ["${RUBY_VERSION_DEFAULT}"] # 3.2 isn't supported yet
+      - RUBY_VERSION: ["${RUBY_VERSION_DEFAULT}", "${RUBY_VERSION_NEXT}"]
 
 .with_redis:
   services:

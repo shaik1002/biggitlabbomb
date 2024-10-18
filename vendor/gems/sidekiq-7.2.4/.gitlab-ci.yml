@@ -5,10 +5,11 @@ include:
       gem_path_prefix: "vendor/gems/"
 
 rspec:
-  script:
-    - bundle exec rake test
   extends:
     - .with_redis
+    - .version:ruby-next-version-identical-rules
+  script:
+    - bundle exec rake test
   parallel:
     matrix:
       - RUBY_VERSION: ["${RUBY_VERSION_DEFAULT}", "${RUBY_VERSION_NEXT}"]

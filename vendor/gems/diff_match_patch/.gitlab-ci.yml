@@ -5,6 +5,8 @@ include:
       gem_path_prefix: "vendor/gems/"
 
 rspec:
+  extends:
+    - .version:ruby-next-version-identical-rules
   script:
     - rake test
   parallel:
