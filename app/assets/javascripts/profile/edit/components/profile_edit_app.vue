@@ -186,7 +186,7 @@ export default {
       <gl-button
         variant="confirm"
         type="submit"
-        class="js-password-prompt-btn gl-mr-3"
+        class="gl-mr-3 js-password-prompt-btn"
         :disabled="uploadingProfile"
       >
         {{ $options.i18n.updateProfileSettings }}

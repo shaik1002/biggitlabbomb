@@ -27,7 +27,7 @@ be used for different scenarios.
 The following is a simplified diagram of the CI architecture. Some details are left out to focus on
 the main components.
 
-![CI software architecture](img/ci_architecture_v13_0.png)
+![CI software architecture](img/ci_architecture.png)
 <!-- Editable diagram available at https://app.diagrams.net/#G1LFl-KW4fgpBPzz8VIH9rsOlAH4t0xwKj -->
 
 On the left side we have the events that can trigger a pipeline based on various events (triggered by a user or automation):
@@ -165,14 +165,14 @@ As we increase the number of runners in the pool we also increase the chances of
 There are two ways of marking builds as "stuck" and drop them.
 
 1. When a build is created, [`Ci::PipelineCreation::DropNotRunnableBuildsService`](https://gitlab.com/gitlab-org/gitlab/-/blob/v16.0.4-ee/ee/app/services/ci/pipeline_creation/drop_not_runnable_builds_service.rb) checks for upfront known conditions that would make jobs not executable:
-   - If there is not enough [CI/CD Minutes](#compute-quota) to run the build, then the build is immediately dropped with `ci_quota_exceeded`.
-   - [In the future](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/121761), if the project is not on the plan that available runners for the build require via `allowed_plans`, then the build is immediately dropped with `no_matching_runner`.
+    - If there is not enough [CI/CD Minutes](#compute-quota) to run the build, then the build is immediately dropped with `ci_quota_exceeded`.
+    - [In the future](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/121761), if the project is not on the plan that available runners for the build require via `allowed_plans`, then the build is immediately dropped with `no_matching_runner`.
 1. If there is no available Runner to pick up a build, it is dropped after 1 hour by [`Ci::StuckBuilds::DropPendingService`](https://gitlab.com/gitlab-org/gitlab/-/blob/v16.0.4-ee/app/services/ci/stuck_builds/drop_pending_service.rb).
-   - If a job is not picked up by a runner in 24 hours it is automatically removed from
-     the processing queue after that time.
-   - If a pending job is **stuck**, when there is no
-     runner available that can process it, it is removed from the queue after 1 hour.
-   - In both cases the job's status is changed to `failed` with an appropriate failure reason.
+    - If a job is not picked up by a runner in 24 hours it is automatically removed from
+      the processing queue after that time.
+    - If a pending job is **stuck**, when there is no
+      runner available that can process it, it is removed from the queue after 1 hour.
+    - In both cases the job's status is changed to `failed` with an appropriate failure reason.
 
 #### The reason behind this difference
 
@@ -230,7 +230,7 @@ See [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/16111) for the fu
 This diagram shows how the [Compute quota](../../ci/pipelines/compute_minutes.md)
 feature and its components work.
 
-![compute quota architecture](img/ci_minutes_v13_9.png)
+![compute quota architecture](img/ci_minutes.png)
 <!-- Editable diagram available at https://app.diagrams.net/?libs=general;flowchart#G1XjLPvJXbzMofrC3eKRyDEk95clV6ypOb -->
 
 Watch a walkthrough of this feature in details in the video below.

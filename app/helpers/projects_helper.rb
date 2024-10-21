@@ -110,11 +110,11 @@ module ProjectsHelper
   end
 
   def link_to_namespace_change_doc
-    link_to _('project\'s path'), help_page_path('user/group/manage.md', anchor: 'change-a-groups-path'), target: '_blank', rel: 'noopener'
+    link_to _('project\'s path'), help_page_path('user/group/manage.html', anchor: 'change-a-groups-path'), target: '_blank', rel: 'noopener'
   end
 
   def link_to_data_loss_doc
-    link_to _('data loss'), help_page_path('user/project/repository/index.md', anchor: 'what-happens-when-a-repository-path-changes'), target: '_blank', rel: 'noopener'
+    link_to _('data loss'), help_page_path('user/project/repository/index.html', anchor: 'what-happens-when-a-repository-path-changes'), target: '_blank', rel: 'noopener'
   end
 
   def transfer_project_message(project)
@@ -207,7 +207,7 @@ module ProjectsHelper
   end
 
   def link_to_autodeploy_doc
-    link_to _('About auto deploy'), help_page_path('topics/autodevops/stages.md', anchor: 'auto-deploy'), target: '_blank', rel: 'noopener'
+    link_to _('About auto deploy'), help_page_path('topics/autodevops/stages', anchor: 'auto-deploy'), target: '_blank', rel: 'noopener'
   end
 
   def autodeploy_flash_notice(branch_name)
@@ -236,7 +236,7 @@ module ProjectsHelper
     project.last_pipeline
   end
 
-  def show_no_ssh_key_message?(project)
+  def show_no_ssh_key_message?
     Gitlab::CurrentSettings.user_show_add_ssh_key_message? &&
       cookies[:hide_no_ssh_message].blank? &&
       !current_user.hide_no_ssh_key &&
@@ -268,17 +268,21 @@ module ProjectsHelper
   end
 
   def no_password_message
+    push_pull_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: help_page_path('topics/git/terminology', anchor: 'pull-and-push') }
+    clone_with_https_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: help_page_path('gitlab-basics/start-using-git', anchor: 'clone-with-https') }
     set_password_link_start = '<a href="%{url}">'.html_safe % { url: edit_user_settings_password_path }
     set_up_pat_link_start = '<a href="%{url}">'.html_safe % { url: user_settings_personal_access_tokens_path }
 
     message = if current_user.require_password_creation_for_git?
-                _('Your account is authenticated with SSO or SAML. To push and pull over %{protocol} with Git using this account, you must %{set_password_link_start}set a password%{link_end} or %{set_up_pat_link_start}set up a personal access token%{link_end} to use instead of a password.')
+                _('Your account is authenticated with SSO or SAML. To %{push_pull_link_start}push and pull%{link_end} over %{protocol} with Git using this account, you must %{set_password_link_start}set a password%{link_end} or %{set_up_pat_link_start}set up a personal access token%{link_end} to use instead of a password. For more information, see %{clone_with_https_link_start}Clone with HTTPS%{link_end}.')
               else
-                _('Your account is authenticated with SSO or SAML. To push and pull over %{protocol} with Git using this account, you must %{set_up_pat_link_start}set up a personal access token%{link_end} to use instead of a password.')
+                _('Your account is authenticated with SSO or SAML. To %{push_pull_link_start}push and pull%{link_end} over %{protocol} with Git using this account, you must %{set_up_pat_link_start}set up a personal access token%{link_end} to use instead of a password. For more information, see %{clone_with_https_link_start}Clone with HTTPS%{link_end}.')
               end
 
     ERB::Util.html_escape(message) % {
+      push_pull_link_start: push_pull_link_start,
       protocol: gitlab_config.protocol.upcase,
+      clone_with_https_link_start: clone_with_https_link_start,
       set_password_link_start: set_password_link_start,
       set_up_pat_link_start: set_up_pat_link_start,
       link_end: '</a>'.html_safe
@@ -399,43 +403,33 @@ module ProjectsHelper
       project.repository_languages.with_programming_language('HCL').exists? && project.terraform_states.empty?
   end
 
-  def show_lfs_misconfiguration_banner?(project)
-    return false unless Feature.enabled?(:lfs_misconfiguration_banner)
-    return false unless project.repository
-    return false unless project.lfs_enabled?
-
-    Rails.cache.fetch("show_lfs_misconfiguration_banner_#{project.id}", expires_in: 5.minutes) do
-      project.lfs_objects.any? && !project.repository.has_gitattributes?
-    end
-  end
-
   def project_permissions_panel_data(project)
     {
       packagesAvailable: ::Gitlab.config.packages.enabled,
-      packagesHelpPath: help_page_path('user/packages/index.md'),
+      packagesHelpPath: help_page_path('user/packages/index'),
       currentSettings: project_permissions_settings(project),
       canAddCatalogResource: can_add_catalog_resource?(project),
       canSetDiffPreviewInEmail: can_set_diff_preview_in_email?(project, current_user),
       canChangeVisibilityLevel: can_change_visibility_level?(project, current_user),
       canDisableEmails: can_disable_emails?(project, current_user),
       allowedVisibilityOptions: project_allowed_visibility_levels(project),
-      visibilityHelpPath: help_page_path('user/public_access.md'),
+      visibilityHelpPath: help_page_path('user/public_access'),
       registryAvailable: Gitlab.config.registry.enabled,
-      registryHelpPath: help_page_path('user/packages/container_registry/index.md'),
+      registryHelpPath: help_page_path('user/packages/container_registry/index'),
       lfsAvailable: Gitlab.config.lfs.enabled,
-      lfsHelpPath: help_page_path('topics/git/lfs/index.md'),
+      lfsHelpPath: help_page_path('topics/git/lfs/index'),
       lfsObjectsExist: project.lfs_objects.exists?,
-      lfsObjectsRemovalHelpPath: help_page_path('topics/git/lfs/index.md', anchor: 'removing-objects-from-lfs'),
+      lfsObjectsRemovalHelpPath: help_page_path('topics/git/lfs/index', anchor: 'removing-objects-from-lfs'),
       pagesAvailable: Gitlab.config.pages.enabled,
       pagesAccessControlEnabled: Gitlab.config.pages.access_control,
       pagesAccessControlForced: ::Gitlab::Pages.access_control_is_forced?,
-      pagesHelpPath: help_page_path('user/project/pages/introduction.md', anchor: 'gitlab-pages-access-control'),
-      issuesHelpPath: help_page_path('user/project/issues/index.md'),
+      pagesHelpPath: help_page_path('user/project/pages/introduction', anchor: 'gitlab-pages-access-control'),
+      issuesHelpPath: help_page_path('user/project/issues/index'),
       membersPagePath: project_project_members_path(project),
-      environmentsHelpPath: help_page_path('ci/environments/index.md'),
-      featureFlagsHelpPath: help_page_path('operations/feature_flags.md'),
-      releasesHelpPath: help_page_path('user/project/releases/index.md'),
-      infrastructureHelpPath: help_page_path('user/infrastructure/index.md')
+      environmentsHelpPath: help_page_path('ci/environments/index'),
+      featureFlagsHelpPath: help_page_path('operations/feature_flags'),
+      releasesHelpPath: help_page_path('user/project/releases/index'),
+      infrastructureHelpPath: help_page_path('user/infrastructure/index')
     }
   end
 
@@ -508,7 +502,7 @@ module ProjectsHelper
     {
       emails_disabled: project.emails_disabled?.to_s,
       notification_dropdown_items: dropdown_items,
-      notification_help_page_path: help_page_path('user/profile/notifications.md'),
+      notification_help_page_path: help_page_path('user/profile/notifications'),
       notification_level: notification_level
     }
   end
@@ -541,7 +535,7 @@ module ProjectsHelper
   end
 
   def import_from_bitbucket_message
-    configure_oauth_import_message('Bitbucket', help_page_path("integration/bitbucket.md"))
+    configure_oauth_import_message('Bitbucket', help_page_path("integration/bitbucket"))
   end
 
   def show_archived_project_banner?(project)
@@ -657,13 +651,6 @@ module ProjectsHelper
       initial_sort: project_list_sort_by,
       programming_languages: programming_languages,
       paths_to_exclude_sort_on: [starred_explore_projects_path, explore_root_path]
-    }.to_json
-  end
-
-  def dashboard_projects_app_data
-    {
-      initial_sort: project_list_sort_by,
-      programming_languages: programming_languages
     }.to_json
   end
 
@@ -918,16 +905,6 @@ module ProjectsHelper
     end
 
     ERB::Util.html_escape(message) % { strong_start: strong_start, strong_end: strong_end, project_name: project.name, group_name: project.group ? project.group.name : nil }
-  end
-
-  def project_permissions_data(project, target_form_id = nil)
-    data = visibility_confirm_modal_data(project, target_form_id)
-    cascading_settings_data = project_cascading_namespace_settings_tooltip_data(:duo_features_enabled, project, method(:edit_group_path)).to_json
-    data.merge!(
-      {
-        cascading_settings_data: cascading_settings_data
-      }
-    )
   end
 
   def visibility_confirm_modal_data(project, target_form_id = nil)

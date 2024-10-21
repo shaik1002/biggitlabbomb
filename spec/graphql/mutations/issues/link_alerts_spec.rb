@@ -11,7 +11,9 @@ RSpec.describe Mutations::Issues::LinkAlerts, feature_category: :incident_manage
   let_it_be(:alert1) { create(:alert_management_alert, project: project) }
   let_it_be(:alert2) { create(:alert_management_alert, project: project) }
 
-  let(:mutation) { described_class.new(object: nil, context: query_context, field: nil) }
+  let(:query) { GraphQL::Query.new(empty_schema, document: nil, context: {}, variables: {}) }
+  let(:context) { GraphQL::Query::Context.new(query: query, values: { current_user: user }) }
+  let(:mutation) { described_class.new(object: nil, context: context, field: nil) }
 
   specify { expect(described_class).to require_graphql_authorizations(:update_issue, :admin_issue) }
 
@@ -27,14 +29,14 @@ RSpec.describe Mutations::Issues::LinkAlerts, feature_category: :incident_manage
     end
 
     context 'when the user is a guest' do
-      let(:current_user) { guest }
+      let(:user) { guest }
 
       it 'raises an error' do
         expect { resolve }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
       end
 
       context 'when a user is also an author' do
-        let!(:issue) { create(:incident, project: project, author: current_user) }
+        let!(:issue) { create(:incident, project: project, author: user) }
 
         it 'raises an error' do
           expect { resolve }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
@@ -42,7 +44,7 @@ RSpec.describe Mutations::Issues::LinkAlerts, feature_category: :incident_manage
       end
 
       context 'when a user is also an assignee' do
-        let!(:issue) { create(:incident, project: project, assignee_ids: [current_user.id]) }
+        let!(:issue) { create(:incident, project: project, assignee_ids: [user.id]) }
 
         it 'raises an error' do
           expect { resolve }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
@@ -51,13 +53,13 @@ RSpec.describe Mutations::Issues::LinkAlerts, feature_category: :incident_manage
     end
 
     context 'when the user is a developer' do
-      let(:current_user) { developer }
+      let(:user) { developer }
 
       context 'when issue type is an incident' do
         it 'calls LinkAlerts::CreateService with correct arguments' do
           expect(::IncidentManagement::LinkAlerts::CreateService)
             .to receive(:new)
-            .with(issue, current_user, alert_references)
+            .with(issue, user, alert_references)
             .and_call_original
 
           resolve

@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
-import { GlBadge, GlAvatar } from '@gitlab/ui';
+import { GlBadge } from '@gitlab/ui';
 import getUserAchievementsEmptyResponse from 'test_fixtures/graphql/get_user_achievements_empty_response.json';
 import getUserAchievementsLongResponse from 'test_fixtures/graphql/get_user_achievements_long_response.json';
 import getUserAchievementsResponse from 'test_fixtures/graphql/get_user_achievements_with_avatar_and_description_response.json';
@@ -24,8 +24,7 @@ describe('UserAchievements', () => {
   let wrapper;
 
   const getUserAchievementsQueryHandler = jest.fn().mockResolvedValue(getUserAchievementsResponse);
-  const findUserAchievement = () => wrapper.findByTestId('user-achievement');
-  const findAvatar = () => wrapper.findComponent(GlAvatar);
+  const achievement = () => wrapper.findByTestId('user-achievement');
 
   const createComponent = ({ queryHandler = getUserAchievementsQueryHandler } = {}) => {
     const fakeApollo = createMockApollo([[getUserAchievements, queryHandler]]);
@@ -62,7 +61,7 @@ describe('UserAchievements', () => {
 
     await waitForPromises();
 
-    expect(findUserAchievement().findComponent(GlBadge).text()).toBe('2x');
+    expect(achievement().findComponent(GlBadge).text()).toBe('2x');
   });
 
   it('renders correctly if the achievement is from a private namespace', async () => {
@@ -75,8 +74,8 @@ describe('UserAchievements', () => {
     const userAchievement =
       getUserAchievementsPrivateGroupResponse.data.user.userAchievements.nodes[0];
 
-    expect(findUserAchievement().text()).toContain(userAchievement.achievement.name);
-    expect(findUserAchievement().text()).toContain(
+    expect(achievement().text()).toContain(userAchievement.achievement.name);
+    expect(achievement().text()).toContain(
       `Awarded ${getTimeago().format(
         userAchievement.createdAt,
         timeagoLanguageCode,
@@ -89,13 +88,15 @@ describe('UserAchievements', () => {
 
     await waitForPromises();
 
-    expect(findUserAchievement().text()).toContain(userAchievement1.achievement.name);
-    expect(findUserAchievement().text()).toContain(
+    expect(achievement().text()).toContain(userAchievement1.achievement.name);
+    expect(achievement().text()).toContain(
       `Awarded ${getTimeago().format(userAchievement1.createdAt, timeagoLanguageCode)} by`,
     );
-    expect(findUserAchievement().text()).toContain(userAchievement1.achievement.namespace.fullPath);
-    expect(findUserAchievement().text()).toContain(userAchievement1.achievement.description);
-    expect(findAvatar().props('src')).toBe(userAchievement1.achievement.avatarUrl);
+    expect(achievement().text()).toContain(userAchievement1.achievement.namespace.fullPath);
+    expect(achievement().text()).toContain(userAchievement1.achievement.description);
+    expect(achievement().find('img').attributes('src')).toBe(
+      userAchievement1.achievement.avatarUrl,
+    );
   });
 
   it('renders a placeholder when no avatar is present', async () => {
@@ -106,7 +107,7 @@ describe('UserAchievements', () => {
 
     await waitForPromises();
 
-    expect(findAvatar().props('src')).toBe(PLACEHOLDER_URL);
+    expect(achievement().find('img').attributes('src')).toBe(PLACEHOLDER_URL);
   });
 
   it('does not render a description when none is present', async () => {

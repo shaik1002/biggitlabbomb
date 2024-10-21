@@ -20,7 +20,7 @@ RSpec.describe 'projects/pages/_pages_settings', feature_category: :pages do
   end
 
   context 'for pages multiple versions' do
-    context 'when current user does not have access to pages parallel deployments toggle' do
+    context 'when current user does not have access to pages multiple versions toggle' do
       it 'shows the multiple versions toggle' do
         allow(view)
           .to receive(:can?)
@@ -29,7 +29,7 @@ RSpec.describe 'projects/pages/_pages_settings', feature_category: :pages do
 
         render
 
-        expect(rendered).not_to have_content('Enable parallel deployments')
+        expect(rendered).not_to have_content('Use multiple versions')
       end
     end
 
@@ -42,7 +42,7 @@ RSpec.describe 'projects/pages/_pages_settings', feature_category: :pages do
 
         render
 
-        expect(rendered).to have_content('Enable parallel deployments')
+        expect(rendered).to have_content('Use multiple deployments')
       end
     end
   end

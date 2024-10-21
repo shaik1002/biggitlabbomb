@@ -44,7 +44,6 @@ describe('PagesDeployments', () => {
                   pathPrefix: versioned ? '_stg' : '',
                   size: 1082,
                   updatedAt: '2024-05-23T11:48:34Z',
-                  expiresAt: versioned ? '2024-05-23T13:37:22Z' : null,
                   url: 'http://abc.pages.io/',
                 })),
             },
@@ -54,11 +53,11 @@ describe('PagesDeployments', () => {
     });
 
   const findAllPrimaryDeployments = () => wrapper.findAllByTestId('primary-deployment');
-  const findAllParallelDeployments = () => wrapper.findAllByTestId('parallel-deployment');
+  const findAllEnvironmentDeployments = () => wrapper.findAllByTestId('environment-deployment');
   const findPrimaryDeploymentsLoadMoreComponent = () =>
     wrapper.findByTestId('load-more-primary-deployments');
-  const findParallelDeploymentsLoadMoreComponent = () =>
-    wrapper.findByTestId('load-more-parallel-deployments');
+  const findEnvironmentDeploymentsLoadMoreComponent = () =>
+    wrapper.findByTestId('load-more-environment-deployments');
 
   const createComponent = () => {
     wrapper = shallowMountExtended(PagesDeployments, {
@@ -95,7 +94,7 @@ describe('PagesDeployments', () => {
       );
     });
 
-    it('calls the parallels deployments query', () => {
+    it('calls the environments deployments query', () => {
       expect(getProjectPagesDeploymentsQueryHandler).toHaveBeenCalledWith(
         expect.objectContaining({
           active: true,
@@ -109,8 +108,8 @@ describe('PagesDeployments', () => {
       expect(findAllPrimaryDeployments().length).toBe(10);
     });
 
-    it('renders a list for all parallel deployments', () => {
-      expect(findAllParallelDeployments().length).toBe(10);
+    it('renders a list for all environment deployments', () => {
+      expect(findAllEnvironmentDeployments().length).toBe(10);
     });
   });
 
@@ -124,8 +123,8 @@ describe('PagesDeployments', () => {
       expect(findPrimaryDeploymentsLoadMoreComponent().exists()).toBe(true);
     });
 
-    it('does include the "load more" component for parallel deployments', () => {
-      expect(findParallelDeploymentsLoadMoreComponent().exists()).toBe(true);
+    it('does include the "load more" component for environment deployments', () => {
+      expect(findEnvironmentDeploymentsLoadMoreComponent().exists()).toBe(true);
     });
 
     it('fetches more primary deployments', async () => {
@@ -144,8 +143,8 @@ describe('PagesDeployments', () => {
       expect(findPrimaryDeploymentsLoadMoreComponent().exists()).toBe(false);
     });
 
-    it('fetches more parallel deployments', async () => {
-      findParallelDeploymentsLoadMoreComponent().vm.$emit('load-more');
+    it('fetches more environment deployments', async () => {
+      findEnvironmentDeploymentsLoadMoreComponent().vm.$emit('load-more');
       await nextTick();
 
       expect(getProjectPagesDeploymentsQueryHandler).toHaveBeenCalledWith(
@@ -157,7 +156,7 @@ describe('PagesDeployments', () => {
 
       await waitForPromises();
 
-      expect(findParallelDeploymentsLoadMoreComponent().exists()).toBe(false);
+      expect(findEnvironmentDeploymentsLoadMoreComponent().exists()).toBe(false);
     });
   });
 
@@ -177,7 +176,7 @@ describe('PagesDeployments', () => {
       );
     });
 
-    it('fetches the parallelDeployments with the "active" filter set to undefined', () => {
+    it('fetches the environmentDeployments with the "active" filter set to undefined', () => {
       expect(getProjectPagesDeploymentsQueryHandler).toHaveBeenCalledWith(
         expect.objectContaining({
           versioned: true,
@@ -188,9 +187,9 @@ describe('PagesDeployments', () => {
   });
 
   describe.each`
-    type          | testid
-    ${'primary'}  | ${'primary-deployment'}
-    ${'parallel'} | ${'parallel-deployment'}
+    type             | testid
+    ${'primary'}     | ${'primary-deployment'}
+    ${'environment'} | ${'environment-deployment'}
   `('if a $type PagesDeployment child emits an error', ({ testid }) => {
     const errorMessage = 'Foo';
 

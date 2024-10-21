@@ -92,7 +92,8 @@ RSpec.describe InvitesController do
         expect_snowplow_event(
           category: described_class.name,
           action: 'join_clicked',
-          label: 'invite_email'
+          label: 'invite_email',
+          property: member.id.to_s
         )
       end
 

@@ -7,7 +7,6 @@ import Draggable from 'vuedraggable';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import { stubComponent } from 'helpers/stub_component';
 import waitForPromises from 'helpers/wait_for_promises';
-import { removeParams, updateHistory } from '~/lib/utils/url_utility';
 import EpicsSwimlanes from 'ee_component/boards/components/epics_swimlanes.vue';
 import * as cacheUpdates from '~/boards/graphql/cache_updates';
 import BoardColumn from '~/boards/components/board_column.vue';
@@ -19,7 +18,6 @@ import BoardAddNewColumnTrigger from '~/boards/components/board_add_new_column_t
 import BoardDrawerWrapper from '~/boards/components/board_drawer_wrapper.vue';
 import WorkItemDrawer from '~/work_items/components/work_item_drawer.vue';
 import { DraggableItemTypes } from 'ee_else_ce/boards/constants';
-import { DETAIL_VIEW_QUERY_PARAM_NAME } from '~/work_items/constants';
 import boardListsQuery from 'ee_else_ce/boards/graphql/board_lists.query.graphql';
 import {
   mockLists,
@@ -28,12 +26,9 @@ import {
   boardListsQueryResponse,
 } from '../mock_data';
 
-jest.mock('~/lib/utils/url_utility');
-
 Vue.use(VueApollo);
 
 describe('BoardContent', () => {
-  /** @type {import('@vue/test-utils').Wrapper} */
   let wrapper;
   let mockApollo;
 
@@ -70,7 +65,6 @@ describe('BoardContent', () => {
         boardLists: mockListsById,
         listQueryVariables,
         addColumnFormVisible: false,
-        useWorkItemDrawer: workItemDrawerEnabled,
         ...props,
       },
       provide: {
@@ -82,6 +76,9 @@ describe('BoardContent', () => {
         isGroupBoard: true,
         disabled: false,
         fullPath: 'project-path',
+        glFeatures: {
+          issuesListDrawer: workItemDrawerEnabled,
+        },
       },
       stubs: {
         BoardContentSidebar: stubComponent(BoardContentSidebar, {
@@ -256,10 +253,6 @@ describe('BoardContent', () => {
       createComponent({ workItemDrawerEnabled: true });
     });
 
-    it('does not render board sidebar', () => {
-      expect(wrapper.findComponent(BoardContentSidebar).exists()).toBe(false);
-    });
-
     it('renders board drawer wrapper', () => {
       expect(findDrawerWrapper().exists()).toBe(true);
     });
@@ -268,24 +261,6 @@ describe('BoardContent', () => {
       findWorkItemDrawer().vm.$emit('work-item-updated', { iid: '1' });
 
       expect(mockUpdateCache).toHaveBeenCalled();
-    });
-  });
-
-  describe('when all columns cannot find active item', () => {
-    beforeEach(() => {
-      createComponent({ workItemDrawerEnabled: true });
-
-      findBoardColumns().wrappers.forEach((column) => {
-        column.vm.$emit('cannot-find-active-item');
-      });
-    });
-
-    it('calls `updateHistory`', () => {
-      expect(updateHistory).toHaveBeenCalled();
-    });
-
-    it('calls `removeParams`', () => {
-      expect(removeParams).toHaveBeenCalledWith([DETAIL_VIEW_QUERY_PARAM_NAME]);
     });
   });
 });

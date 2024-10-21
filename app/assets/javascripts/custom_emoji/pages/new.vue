@@ -16,7 +16,7 @@ export default {
 
 <template>
   <div>
-    <h5 class="gl-mt-0 gl-text-lg">
+    <h5 class="gl-mt-0 gl-font-lg">
       {{ __('Add new emoji') }}
     </h5>
     <create-form @saved="redirectToIndex" />

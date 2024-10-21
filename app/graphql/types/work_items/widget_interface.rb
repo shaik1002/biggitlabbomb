@@ -31,8 +31,7 @@ module Types
         ::WorkItems::Widgets::TimeTracking => ::Types::WorkItems::Widgets::TimeTracking::TimeTrackingType,
         ::WorkItems::Widgets::Designs => ::Types::WorkItems::Widgets::DesignsType,
         ::WorkItems::Widgets::Development => ::Types::WorkItems::Widgets::DevelopmentType,
-        ::WorkItems::Widgets::CrmContacts => ::Types::WorkItems::Widgets::CrmContactsType,
-        ::WorkItems::Widgets::EmailParticipants => ::Types::WorkItems::Widgets::EmailParticipantsType
+        ::WorkItems::Widgets::CrmContacts => ::Types::WorkItems::Widgets::CrmContactsType
       }.freeze
 
       def self.type_mappings

@@ -143,7 +143,9 @@ export default {
 
 <template>
   <div>
-    <div class="gl-border-t gl-mb-3 gl-flex gl-items-center gl-justify-between gl-pt-4">
+    <div
+      class="gl-display-flex gl-justify-content-space-between gl-align-items-center gl-border-t gl-pt-4 gl-mb-3"
+    >
       <h4 class="gl-m-0" sub-header>
         <gl-sprintf
           :message="__('Code coverage statistics for %{ref} %{start_date} - %{end_date}')"
@@ -163,7 +165,7 @@ export default {
         {{ __('Download raw data (.csv)') }}
       </gl-button>
     </div>
-    <div class="gl-mb-3 gl-mt-3">
+    <div class="gl-mt-3 gl-mb-3">
       <gl-alert
         v-if="hasFetchError"
         variant="danger"

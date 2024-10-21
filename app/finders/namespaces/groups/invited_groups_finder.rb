@@ -7,7 +7,7 @@
 #   group
 #   current_user
 #   params:
-#     relation: string - groups by relation (direct or inherited)
+#     relations: string
 #     search: string
 #     min_access_level: integer
 #
@@ -17,6 +17,8 @@ module Namespaces
       include ::Groups::GroupMembersHelper
       include Namespaces::GroupsFilter
       include Gitlab::Allowable
+
+      attr_reader :group, :current_user, :params
 
       def initialize(group, current_user = nil, params = {})
         @group = group
@@ -29,16 +31,19 @@ module Namespaces
 
         group_links = group_group_links(group, include_relations)
         groups = Group.id_in(group_links.select(:shared_with_group_id)).public_or_visible_to_user(current_user)
-        groups = apply_filters(groups)
+        groups = filter_invited_groups(groups)
         sort(groups).with_route
       end
 
       private
 
-      attr_reader :group, :current_user, :params
+      def filter_invited_groups(groups)
+        by_search(groups)
+        .then { |filtered_groups| by_min_access_level(filtered_groups) }
+      end
 
       def include_relations
-        Array(params[:relation]).map(&:to_sym)
+        [params[:relation].try(:to_sym)]
       end
     end
   end

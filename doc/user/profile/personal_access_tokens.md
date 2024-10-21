@@ -43,7 +43,7 @@ Use impersonation tokens to automate authentication as a specific user.
 > - Ability to create non-expiring personal access tokens [removed](https://gitlab.com/gitlab-org/gitlab/-/issues/392855) in GitLab 16.0.
 
 WARNING:
-The ability to create personal access tokens without an expiry date was [deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/369122) in GitLab 15.4 and [removed](https://gitlab.com/gitlab-org/gitlab/-/issues/392855) in GitLab 16.0. For more information on when personal access tokens expire and expiry dates are added to existing tokens, see the documentation on [access token expiration](#access-token-expiration).
+The ability to create personal access tokens without an expiry date was [deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/369122) in GitLab 15.4 and [removed](https://gitlab.com/gitlab-org/gitlab/-/issues/392855) in GitLab 16.0. For more information, see the documentation on [when personal access tokens expire](#when-personal-access-tokens-expire).
 
 You can create as many personal access tokens as you like.
 
@@ -52,7 +52,7 @@ You can create as many personal access tokens as you like.
 1. On the left sidebar, select **Access tokens**.
 1. Select **Add new token**.
 1. Enter a name and expiry date for the token.
-   - The token expires on that date at midnight UTC.A token with the expiration date of 2024-01-01 expires at 00:00:00 UTC on 2024-01-01.
+   - The token expires on that date at midnight UTC.
    - If you do not enter an expiry date, the expiry date is automatically set to 365 days later than the current date.
    - By default, this date can be a maximum of 365 days later than the current date.
 1. Select the [desired scopes](#personal-access-token-scopes).
@@ -72,7 +72,7 @@ https://gitlab.example.com/-/user_settings/personal_access_tokens?name=Example+A
 ```
 
 WARNING:
-Personal access tokens must be treated carefully. Read our [token security considerations](../../security/tokens/index.md#security-considerations)
+Personal access tokens must be treated carefully. Read our [token security considerations](../../security/token_overview.md#security-considerations)
 for guidance on managing personal access tokens (for example, setting a short expiry and using minimal scopes).
 
 ## Revoke a personal access token
@@ -127,7 +127,7 @@ In GitLab 17.3 and later, you can use the Admin UI to disable personal access to
 
 Prerequisites:
 
-- You must have the Owner role for the group that the enterprise user belongs to.
+- You must have the Owner role in the group that the enterprise user belongs to.
 
 Disabling the personal access tokens of a group's [enterprise users](../enterprise_user/index.md):
 
@@ -184,19 +184,19 @@ A personal access token can perform actions based on the assigned scopes.
 | `read_registry`    | Grants read-only (pull) access to [container registry](../packages/container_registry/index.md) images if a project is private and authorization is required. Available only when the container registry is enabled.                                                                                               |
 | `write_registry`   | Grants read-write (push) access to [container registry](../packages/container_registry/index.md) images if a project is private and authorization is required. Available only when the container registry is enabled.  |
 | `sudo`             | Grants permission to perform API actions as any user in the system, when authenticated as an administrator.                                                                                                                                                                                                        |
-| `admin_mode`       | Grants permission to perform API actions as an administrator, when Admin Mode is enabled. ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/107875) in GitLab 15.8. Available on GitLab self-managed only.)                                                                                                                             |
+| `admin_mode`       | Grants permission to perform API actions as an administrator, when Admin Mode is enabled. ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/107875) in GitLab 15.8.)                                                                                                                             |
 | `create_runner`    | Grants permission to create runners.                                                                                                                                                                                                                                                                               |
 | `manage_runner`    | Grants permission to manage runners.                                                                    |
-| `ai_features`      | This scope:<br>- Grants permission to perform API actions for features like GitLab Duo, Code Suggestions API and Duo Chat API.<br>- Does not work for GitLab self-managed versions 16.5, 16.6, and 16.7.<br>For GitLab Duo plugin for JetBrains, this scope:<br>- Supports users with AI features enabled in the GitLab Duo plugin for JetBrains.<br>- Addresses a security vulnerability in JetBrains IDE plugins that could expose personal access tokens.<br>- Is designed to minimize potential risks for GitLab Duo plugin users by limiting the impact of compromised tokens.<br>For all other extensions, see the individual scope requirements in their documentation.                                                                                                                                |
+| `ai_features`      | Grants permission to perform API actions for GitLab Duo. This scope is designed to work with the GitLab Duo Plugin for JetBrains. For all other extensions, see scope requirements.                                                                                                                                |
 | `k8s_proxy`        | Grants permission to perform Kubernetes API calls using the agent for Kubernetes.                                                                                                                                                                                                                                  |
 | `read_service_ping`| Grant access to download Service Ping payload through the API when authenticated as an admin use. |
 
 WARNING:
 If you enabled [external authorization](../../administration/settings/external_authorization.md), personal access tokens cannot access container or package registries. If you use personal access tokens to access these registries, this measure breaks this use of these tokens. Disable external authorization to use personal access tokens with container or package registries.
 
-## Access token expiration
+## When personal access tokens expire
 
-Personal access tokens expire on the date you define, at midnight, 00:00 AM UTC. A token with the expiration date of 2024-01-01 expires at 00:00:00 UTC on 2024-01-01.
+Personal access tokens expire on the date you define, at midnight, 00:00 AM UTC.
 
 - GitLab runs a check at 01:00 AM UTC every day to identify personal access tokens that expire in the next seven days. The owners of these tokens are notified by email.
 - GitLab runs a check at 02:00 AM UTC every day to identify personal access tokens that expire on the current date. The owners of these tokens are notified by email.
@@ -245,7 +245,7 @@ You can subscribe to an iCalendar endpoint which contains events at the expiry d
 
 ### Create a service account personal access token with no expiry date
 
-You can [create a personal access token for a service account](../../api/group_service_accounts.md#create-a-personal-access-token-for-a-service-account-user) with no expiry date. These personal access tokens never expire, unlike non-service account personal access tokens.
+You can [create a personal access token for a service account](../../api/groups.md#create-personal-access-token-for-service-account-user) with no expiry date. These personal access tokens never expire, unlike non-service account personal access tokens.
 
 NOTE:
 Allowing personal access tokens for service accounts to be created with no expiry date only affects tokens created after you change this setting. It does not affect existing tokens.
@@ -254,7 +254,7 @@ Allowing personal access tokens for service accounts to be created with no expir
 
 Prerequisites:
 
-- You must have the Owner role for the top-level group.
+- You must have the Owner role in the top-level group.
 
 1. On the left sidebar, select **Search or go to** and find your group.
 1. Select **Settings > General > Permissions and group features**.

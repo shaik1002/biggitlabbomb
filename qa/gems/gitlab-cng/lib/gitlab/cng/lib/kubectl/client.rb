@@ -91,12 +91,10 @@ module Gitlab
 
         # Get events
         #
-        # @param [Boolean] json_format
         # @return [String]
-        def events(json_format: false)
-          args = ["--sort-by=lastTimestamp"]
-          args << "--output=json" if json_format
-          run_in_namespace("get", "events", args: args)
+        def events
+          log("Fetching events", :info)
+          run_in_namespace("get", "events", args: ["--sort-by=lastTimestamp"])
         end
 
         private

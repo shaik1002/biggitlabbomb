@@ -9,24 +9,16 @@
  * @param {Object} markLineInfo - highlighting info for the current line
  */
 function markLinesWithDiv(content, lineNum, markLineInfo) {
-  let stepNumberSpan = '';
-  let stepNumberSpanNone = '';
   let wrappedLine = content;
 
-  // Combines an array of step numbers into a comma-separated string
-  const stepNumbersArr = markLineInfo?.map((markLine) => markLine.stepNumber);
-  const stepNumbers = stepNumbersArr?.map(String).join(',') ?? '';
-
-  markLineInfo?.forEach((markLine) => {
-    stepNumberSpan +=
-      lineNum === markLine.startLine
-        ? `<span id="TEXT-SPAN-MARKER${markLine.stepNumber}" class="inline-item-mark">${markLine.stepNumber}</span>`
-        : '';
-    stepNumberSpanNone +=
-      lineNum !== markLine.startLine
-        ? `<span id="TEXT-SPAN-MARKER${markLine.stepNumber}" class="inline-item-mark gl-opacity-0">${markLine.stepNumber}</span>`
-        : '';
-  });
+  const stepNumberSpan =
+    lineNum === markLineInfo?.startLine
+      ? `<span class="inline-item-mark">${markLineInfo.index + 1}</span>`
+      : '';
+  const stepNumberSpanNone =
+    lineNum !== markLineInfo?.startLine && markLineInfo
+      ? `<span class="inline-item-mark gl-opacity-0">${markLineInfo.index + 1}</span>`
+      : '';
 
   if (markLineInfo) {
     const contentStartIndex = content.indexOf(content.trimStart());
@@ -34,7 +26,7 @@ function markLinesWithDiv(content, lineNum, markLineInfo) {
       0,
       contentStartIndex,
     )}${stepNumberSpanNone}<span id="TEXT-MARKER${
-      stepNumbers
+      markLineInfo.index + 1
     }-L${lineNum}" class="inline-section-marker">${stepNumberSpan}${content.slice(contentStartIndex)}</span>`;
   }
   return `<div class="line">${wrappedLine}</div>`;

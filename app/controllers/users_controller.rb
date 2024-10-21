@@ -28,7 +28,7 @@ class UsersController < ApplicationController
   before_action only: [:exists] do
     check_rate_limit!(:username_exists, scope: request.ip)
   end
-  before_action only: [:show, :activity, :groups, :projects, :contributed, :starred, :snippets, :followers, :following] do
+  before_action only: [:show] do
     push_frontend_feature_flag(:profile_tabs_vue, current_user)
   end
 
@@ -186,7 +186,7 @@ class UsersController < ApplicationController
 
   def exists
     if Gitlab::CurrentSettings.signup_enabled? || current_user
-      render json: { exists: Namespace.username_reserved?(params[:username]) }
+      render json: { exists: !!Namespace.without_project_namespaces.find_by_path_or_name(params[:username]) }
     else
       render json: { error: _('You must be authenticated to access this path.') }, status: :unauthorized
     end
@@ -229,9 +229,7 @@ class UsersController < ApplicationController
   end
 
   def contributed_projects
-    ContributedProjectsFinder.new(
-      user: user, current_user: current_user, params: { sort: 'latest_activity_desc' }
-    ).execute
+    ContributedProjectsFinder.new(user).execute(current_user, order_by: 'latest_activity_desc')
   end
 
   def starred_projects

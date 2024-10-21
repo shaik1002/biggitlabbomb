@@ -2,20 +2,13 @@ import { GlToggle } from '@gitlab/ui';
 import { createWrapper } from '@vue/test-utils';
 import waitForPromises from 'helpers/wait_for_promises';
 import { setHTMLFixture, resetHTMLFixture } from 'helpers/fixtures';
-import axios from '~/lib/utils/axios_utils';
-import toast from '~/vue_shared/plugins/global_toast';
 
 import { initAllowRunnerRegistrationTokenToggle } from '~/group_settings/allow_runner_registration_token_toggle';
-
-jest.mock('~/vue_shared/plugins/global_toast');
 
 describe('initAllowRunnerRegistrationTokenToggle', () => {
   let form;
   let wrapper;
   let requestSubmitMock;
-
-  const toastMessage = { hide: jest.fn() };
-  toast.mockImplementation(() => toastMessage);
 
   const setFormFixture = ({
     action = '/settings',
@@ -36,12 +29,7 @@ describe('initAllowRunnerRegistrationTokenToggle', () => {
     form = document.querySelector('form');
     wrapper = createWrapper(toggle);
 
-    requestSubmitMock = jest.spyOn(axios, 'post').mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          resolve({});
-        }),
-    );
+    requestSubmitMock = jest.spyOn(form, 'requestSubmit').mockImplementation(() => {});
   };
 
   const findInput = () => form.querySelector('[name="group[allow_runner_registration_token]"]');
@@ -71,15 +59,14 @@ describe('initAllowRunnerRegistrationTokenToggle', () => {
     });
 
     it('when clicked, toggles the setting', async () => {
-      await findToggle().vm.$emit('change', false);
-
-      expect(findToggle().props('isLoading')).toBe(true);
+      findToggle().vm.$emit('change', false);
 
       await waitForPromises();
 
-      expect(findToggle().props('isLoading')).toBe(false);
+      expect(findToggle().props('isLoading')).toBe(true);
       expect(findInput().value).toBe('false');
-      expect(requestSubmitMock).toHaveBeenCalledWith(form.action, new FormData(form));
+
+      expect(requestSubmitMock).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -94,76 +81,13 @@ describe('initAllowRunnerRegistrationTokenToggle', () => {
     });
 
     it('when clicked, toggles the setting', async () => {
-      await findToggle().vm.$emit('change', true);
+      findToggle().vm.$emit('change', true);
+
+      await waitForPromises();
 
       expect(findToggle().props('isLoading')).toBe(true);
-
-      await waitForPromises();
-
-      expect(findToggle().props('isLoading')).toBe(false);
       expect(findInput().value).toBe('true');
-      expect(requestSubmitMock).toHaveBeenCalledWith(form.action, new FormData(form));
-    });
-  });
-
-  describe('when update request is pending', () => {
-    beforeEach(() => {
-      setFormFixture({ hiddenInputValue: 'true', toggleIsChecked: 'true' });
-    });
-
-    it('shows a pending message', () => {
-      findToggle().vm.$emit('change', false);
-
-      expect(toast).toHaveBeenCalledWith('Saving...', {});
-    });
-  });
-
-  describe('when update request is successful', () => {
-    beforeEach(() => {
-      setFormFixture({ hiddenInputValue: 'true', toggleIsChecked: 'true' });
-    });
-
-    it('shows a success message', async () => {
-      findToggle().vm.$emit('change', false);
-
-      await waitForPromises();
-
-      expect(toastMessage.hide).toHaveBeenCalled();
-      expect(toast).toHaveBeenCalledWith('Change saved.', {
-        action: {
-          onClick: expect.any(Function),
-          text: 'Undo',
-        },
-      });
-    });
-  });
-
-  describe('when update request fails', () => {
-    beforeEach(() => {
-      setFormFixture({ hiddenInputValue: 'true', toggleIsChecked: 'true' });
-
-      requestSubmitMock = jest.spyOn(axios, 'post').mockImplementation(
-        () =>
-          new Promise((resolve, reject) => {
-            reject(new Error('Some error'));
-          }),
-      );
-    });
-
-    it('shows an error message and restores the inputs to the previous values', async () => {
-      findToggle().vm.$emit('change', false);
-
-      await waitForPromises();
-
-      expect(findToggle().props('value')).toBe(true);
-      expect(findInput().value).toBe('true');
-      expect(toastMessage.hide).toHaveBeenCalled();
-      expect(toast).toHaveBeenCalledWith('Failed to save changes.', {
-        action: {
-          onClick: expect.any(Function),
-          text: 'Retry',
-        },
-      });
+      expect(requestSubmitMock).toHaveBeenCalledTimes(1);
     });
   });
 });

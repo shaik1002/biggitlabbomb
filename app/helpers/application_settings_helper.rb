@@ -76,15 +76,15 @@ module ApplicationSettingsHelper
     restricted_visibility_levels_help_text = {
       Gitlab::VisibilityLevel::PUBLIC => s_(
         'AdminSettings|If selected, only administrators are able to create public groups, projects, ' \
-          'and snippets. Also, profiles are only visible to authenticated users.'
+        'and snippets. Also, profiles are only visible to authenticated users.'
       ),
       Gitlab::VisibilityLevel::INTERNAL => s_(
         'AdminSettings|If selected, only administrators are able to create internal groups, projects, and ' \
-          'snippets.'
+        'snippets.'
       ),
       Gitlab::VisibilityLevel::PRIVATE => s_(
         'AdminSettings|If selected, only administrators are able to create private groups, projects, and ' \
-          'snippets.'
+        'snippets.'
       )
     }
 
@@ -162,7 +162,7 @@ module ApplicationSettingsHelper
 
   def external_authorization_description
     s_("ExternalAuthorization|Access to projects is validated on an external service "\
-      "using their classification label.")
+        "using their classification label.")
   end
 
   def external_authorization_allow_token_help_text
@@ -171,7 +171,7 @@ module ApplicationSettingsHelper
 
   def external_authorization_timeout_help_text
     s_("ExternalAuthorization|Period GitLab waits for a response from the external "\
-      "service. If there is no response, access is denied. Default: 0.5 seconds.")
+        "service. If there is no response, access is denied. Default: 0.5 seconds.")
   end
 
   def external_authorization_url_help_text
@@ -182,17 +182,17 @@ module ApplicationSettingsHelper
 
   def external_authorization_client_certificate_help_text
     s_("ExternalAuthorization|Certificate used to authenticate with the external authorization service. "\
-      "If blank, the server certificate is validated when accessing over HTTPS.")
+        "If blank, the server certificate is validated when accessing over HTTPS.")
   end
 
   def external_authorization_client_key_help_text
     s_("ExternalAuthorization|Private key of client authentication certificate. "\
-      "Encrypted when stored.")
+        "Encrypted when stored.")
   end
 
   def external_authorization_client_pass_help_text
     s_("ExternalAuthorization|Passphrase required to decrypt the private key. "\
-      "Encrypted when stored.")
+        "Encrypted when stored.")
   end
 
   def external_authorization_client_url_help_text
@@ -256,7 +256,6 @@ module ApplicationSettingsHelper
       :deny_all_requests_except_allowed,
       :disable_admin_oauth_scopes,
       :disable_feed_token,
-      :disable_password_authentication_for_users_with_sso_identities,
       :disabled_oauth_sign_in_sources,
       :domain_denylist,
       :domain_denylist_enabled,
@@ -349,7 +348,6 @@ module ApplicationSettingsHelper
       :plantuml_url,
       :diagramsnet_enabled,
       :diagramsnet_url,
-      :pages_extra_deployments_default_expiry_seconds,
       :polling_interval_multiplier,
       :project_export_enabled,
       :prometheus_metrics_enabled,
@@ -504,7 +502,6 @@ module ApplicationSettingsHelper
       :bulk_import_enabled,
       :bulk_import_max_download_file_size,
       :silent_admin_exports_enabled,
-      :allow_contribution_mapping_to_admins,
       :allow_runner_registration_token,
       :user_defaults_to_private_profile,
       :deactivation_email_additional_text,
@@ -515,9 +512,7 @@ module ApplicationSettingsHelper
       :group_projects_api_limit,
       :groups_api_limit,
       :project_api_limit,
-      :project_invited_groups_api_limit,
       :projects_api_limit,
-      :create_organization_api_limit,
       :user_contributed_projects_api_limit,
       :user_projects_api_limit,
       :user_starred_projects_api_limit,
@@ -535,8 +530,7 @@ module ApplicationSettingsHelper
       :asciidoc_max_includes,
       :ai_action_api_rate_limit,
       :code_suggestions_api_rate_limit,
-      :require_personal_access_token_expiry,
-      :observability_backend_ssl_verification_enabled
+      :require_personal_access_token_expiry
     ].tap do |settings|
       unless Gitlab.com?
         settings << :deactivate_dormant_users

@@ -184,7 +184,7 @@ export default {
       <template v-else>
         <ul class="gl-mb-0 gl-list-none gl-p-0">
           <li v-for="(issuable, index) in displayedIssuables" :key="issuable.id">
-            <gl-link :href="issuable.webUrl" class="gl-text-sm !gl-text-link">{{
+            <gl-link :href="issuable.webUrl" class="gl-text-sm !gl-text-blue-500">{{
               issuable.reference
             }}</gl-link>
             <p
@@ -204,7 +204,7 @@ export default {
           <gl-link
             data-testid="view-all-issues"
             :href="`${item.webUrl}#related-issues`"
-            class="gl-text-sm !gl-text-link"
+            class="gl-text-sm !gl-text-blue-500"
             >{{ viewAllIssuablesText }}</gl-link
           >
         </div>

@@ -9,7 +9,6 @@ export const uploadModel = ({
   subfolder,
   maxAllowedFileSize,
   onUploadProgress,
-  cancelToken,
 }) => {
   if (!file) {
     return Promise.resolve();
@@ -38,5 +37,5 @@ export const uploadModel = ({
   }
 
   const importUrl = joinPaths(importPath, subfolder, encodeURIComponent(file.name));
-  return axios.put(importUrl, file, { onUploadProgress, cancelToken });
+  return axios.put(importUrl, file, { onUploadProgress });
 };

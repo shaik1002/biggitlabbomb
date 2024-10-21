@@ -70,8 +70,6 @@ RSpec.describe ApplicationSettingsHelper do
           user_contributed_projects_api_limit user_projects_api_limit user_starred_projects_api_limit
           group_shared_groups_api_limit
           group_invited_groups_api_limit
-          project_invited_groups_api_limit
-          create_organization_api_limit
         ])
     end
 
@@ -90,12 +88,6 @@ RSpec.describe ApplicationSettingsHelper do
         *%i[
           gitlab_environment_toolkit_instance
         ])
-    end
-
-    it 'contains sign_in_restrictions values' do
-      expect(visible_attributes).to include(*%i[
-        disable_password_authentication_for_users_with_sso_identities
-      ])
     end
 
     context 'when on SaaS', :saas do

@@ -11,24 +11,20 @@ class RequeueResolveVulnerabilitiesForRemovedAnalyzers < Gitlab::Database::Migra
   SUB_BATCH_SIZE = 100
 
   def up
-    Gitlab::Database::QueryAnalyzers::RestrictAllowedSchemas.with_suppressed do
-      # Clear previous background migration execution from QueueResolveVulnerabilitiesForRemovedAnalyzers
-      delete_batched_background_migration(MIGRATION, :vulnerability_reads, :id, [])
+    # Clear previous background migration execution from QueueResolveVulnerabilitiesForRemovedAnalyzers
+    delete_batched_background_migration(MIGRATION, :vulnerability_reads, :id, [])
 
-      queue_batched_background_migration(
-        MIGRATION,
-        :vulnerability_reads,
-        :id,
-        job_interval: DELAY_INTERVAL,
-        batch_size: BATCH_SIZE,
-        sub_batch_size: SUB_BATCH_SIZE
-      )
-    end
+    queue_batched_background_migration(
+      MIGRATION,
+      :vulnerability_reads,
+      :id,
+      job_interval: DELAY_INTERVAL,
+      batch_size: BATCH_SIZE,
+      sub_batch_size: SUB_BATCH_SIZE
+    )
   end
 
   def down
-    Gitlab::Database::QueryAnalyzers::RestrictAllowedSchemas.with_suppressed do
-      delete_batched_background_migration(MIGRATION, :vulnerability_reads, :id, [])
-    end
+    delete_batched_background_migration(MIGRATION, :vulnerability_reads, :id, [])
   end
 end

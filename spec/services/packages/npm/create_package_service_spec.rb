@@ -337,22 +337,6 @@ RSpec.describe Packages::Npm::CreatePackageService, feature_category: :package_r
       end
     end
 
-    described_class::INSTALL_SCRIPT_KEYS.each do |field|
-      context "with script #{field}" do
-        let(:package) { subject[:package] }
-
-        before do
-          params[:versions][version][:scripts] = { field => "echo 'script #{field}'" }
-        end
-
-        it "sets `hasInstallScript` attribute to `true` for package's metadata" do
-          execute_service
-
-          expect(package.npm_metadatum.package_json['hasInstallScript']).to eq(true)
-        end
-      end
-    end
-
     it 'obtains a lease to create a new package' do
       expect_to_obtain_exclusive_lease(lease_key, timeout: described_class::DEFAULT_LEASE_TIMEOUT)
 
@@ -507,7 +491,7 @@ RSpec.describe Packages::Npm::CreatePackageService, feature_category: :package_r
 
     subject { service.execute }
 
-    it 'only creates one package', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/448644' do
+    it 'only creates one package' do
       expect { create_packages(project, user, params) }.to change { Packages::Package.count }.by(1)
     end
 

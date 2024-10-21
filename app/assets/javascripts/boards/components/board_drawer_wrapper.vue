@@ -30,31 +30,16 @@ export default {
     };
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     activeBoardItem: {
       query: activeBoardItemQuery,
-      variables() {
-        return {
-          isIssue: this.isIssue,
-        };
+      variables: {
+        isIssue: true,
       },
     },
   },
   computed: {
     apolloClient() {
       return this.$apollo.getClient();
-    },
-    isIssue() {
-      return this.issuableType === TYPE_ISSUE;
-    },
-    typename() {
-      return this.isIssue ? 'BoardList' : 'EpicList';
-    },
-    issuableListName() {
-      return `${this.issuableType}s`;
-    },
-    metadataFieldName() {
-      return this.isIssue ? 'issuesCount' : 'metadata';
     },
   },
   methods: {
@@ -89,7 +74,7 @@ export default {
       const affectedLists = identifyAffectedLists({
         client: this.apolloClient,
         item,
-        issuableType: this.issuableType,
+        issuableType: TYPE_ISSUE,
         affectedListTypes: this.affectedListTypes,
         updatedAttributeIds: this.updatedAttributeIds,
       });
@@ -105,21 +90,21 @@ export default {
       this.refetchActiveIssuableLists(item);
 
       this.apolloClient.refetchQueries({
-        updateCache: (cache) => {
+        updateCache(cache) {
           affectedLists.forEach((listId) => {
             cache.evict({
               id: cache.identify({
-                __typename: this.typename,
+                __typename: 'BoardList',
                 id: listId,
               }),
-              fieldName: this.issuableListName,
+              fieldName: 'issues',
             });
             cache.evict({
               id: cache.identify({
-                __typename: this.typename,
+                __typename: 'BoardList',
                 id: listId,
               }),
-              fieldName: this.metadataFieldName,
+              fieldName: 'issuesCount',
             });
           });
         },

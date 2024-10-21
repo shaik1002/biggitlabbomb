@@ -24,6 +24,7 @@ const code = {
   close: generateCodeTag(closeTag),
   mixable: true,
   escape: false,
+  expelEnclosingWhitespace: true,
 };
 
 export default code;

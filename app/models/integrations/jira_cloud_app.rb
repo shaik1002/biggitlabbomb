@@ -58,8 +58,8 @@ module Integrations
 
     def self.help
       jira_doc_link_start = format('<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe,
-        url: Gitlab::Routing.url_helpers.help_page_path('integration/jira/connect-app.md',
-          anchor: 'configure-the-gitlab-for-jira-cloud-app')
+        url: Gitlab::Routing.url_helpers.help_page_path('integration/jira/connect-app',
+          anchor: 'configure-jira-service-management')
       )
 
       format(
@@ -101,8 +101,8 @@ module Integrations
       ]
     end
 
-    override :manual_activation?
-    def manual_activation?
+    override :show_active_box?
+    def show_active_box?
       false
     end
 

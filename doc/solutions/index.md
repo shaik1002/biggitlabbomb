@@ -18,4 +18,3 @@ While information in this section gives valuable and qualified guidance on ways 
 
 - [Cloud Solutions](cloud/index.md)
 - [Coding Languages and Frameworks](languages/index.md)
-- [Integrations](integrations/index.md)

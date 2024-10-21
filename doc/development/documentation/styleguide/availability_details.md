@@ -60,9 +60,19 @@ For example, `with GitLab Duo Pro`.
 The possibilities are:
 
 ```markdown
-**Tier:** Premium with GitLab Duo Pro, Ultimate with GitLab Duo Pro or Enterprise
+**Tier:** Premium with GitLab Duo Pro
+**Tier:** Premium with GitLab Duo Pro or Ultimate with GitLab Duo Pro or Enterprise
+**Tier:** Ultimate with GitLab Duo Pro
 **Tier:** Ultimate with GitLab Duo Pro or Enterprise
 **Tier:** Ultimate with GitLab Duo Enterprise
+```
+
+Do not use a period at the end of the phrase.
+
+You might have to differentiate which add-on applies for each offering (GitLab.com, Dedicated, self-managed). If you have to differentiate, use this format:
+
+```markdown
+**Tier: GitLab.com and Self-managed:** Premium with GitLab Duo Pro or Ultimate with [GitLab Duo Pro or Enterprise](../../subscriptions/subscription-add-ons.md) **GitLab Dedicated:** GitLab Duo Pro or Enterprise
 ```
 
 NOTE:

@@ -168,12 +168,12 @@ RSpec.shared_examples 'graphql issue list request spec' do
       using RSpec::Parameterized::TableSyntax
 
       where(:value, :issue_list) do
-        AwardEmoji::THUMBS_UP   | lazy { voted_issues }
-        'ANY'                   | lazy { voted_issues }
-        'any'                   | lazy { voted_issues }
-        'AnY'                   | lazy { voted_issues }
-        'NONE'                  | lazy { no_award_issues }
-        AwardEmoji::THUMBS_DOWN | lazy { [] }
+        'thumbsup'   | lazy { voted_issues }
+        'ANY'        | lazy { voted_issues }
+        'any'        | lazy { voted_issues }
+        'AnY'        | lazy { voted_issues }
+        'NONE'       | lazy { no_award_issues }
+        'thumbsdown' | lazy { [] }
       end
 
       with_them do
@@ -195,48 +195,6 @@ RSpec.shared_examples 'graphql issue list request spec' do
         let(:user) { current_user }
         let(:issuable) { title_search_issue }
         let(:ids) { issue_ids }
-      end
-    end
-
-    context 'when filtering by subscribed' do
-      context 'with no filtering' do
-        it 'returns all items' do
-          post_query
-
-          expect(issue_ids).to match_array(to_gid_list(issues))
-        end
-      end
-
-      context 'with user filters for subscribed items' do
-        let(:issue_filter_params) { { subscribed: :EXPLICITLY_SUBSCRIBED } }
-
-        it 'returns only subscribed items' do
-          post_query
-
-          expect(issue_ids).to match_array(to_gid_list(subscribed_issues))
-        end
-      end
-
-      context 'with user filters out subscribed items' do
-        let(:issue_filter_params) { { subscribed: :EXPLICITLY_UNSUBSCRIBED } }
-
-        it 'returns only unsubscribed items' do
-          post_query
-
-          expect(issue_ids).to match_array(to_gid_list(unsubscribed_issues))
-        end
-      end
-
-      context 'with feature flag disabled' do
-        let(:issue_filter_params) { { subscribed: :EXPLICITLY_SUBSCRIBED } }
-
-        it 'does not filter out subscribed issues' do
-          stub_feature_flags(filter_subscriptions: false)
-
-          post_query
-
-          expect(issue_ids).to match_array(to_gid_list(issues))
-        end
       end
     end
 
@@ -458,8 +416,8 @@ RSpec.shared_examples 'graphql issue list request spec' do
       let(:requested_fields) { 'upvotes downvotes' }
 
       before do
-        create_list(:award_emoji, 2, name: AwardEmoji::THUMBS_UP, awardable: issue_a)
-        create_list(:award_emoji, 2, name: AwardEmoji::THUMBS_DOWN, awardable: issue_b)
+        create_list(:award_emoji, 2, name: 'thumbsup', awardable: issue_a)
+        create_list(:award_emoji, 2, name: 'thumbsdown', awardable: issue_b)
       end
 
       include_examples 'N+1 query check'

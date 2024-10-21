@@ -14,6 +14,7 @@ import NoPreviewViewer from '~/vue_shared/components/diff_viewer/viewers/no_prev
 import NotDiffableViewer from '~/vue_shared/components/diff_viewer/viewers/not_diffable.vue';
 import NoteForm from '~/notes/components/note_form.vue';
 import eventHub from '~/notes/event_hub';
+import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 import { IMAGE_DIFF_POSITION_TYPE } from '../constants';
 import { SAVING_THE_COMMENT_FAILED, SOMETHING_WENT_WRONG } from '../i18n';
 import { getDiffMode } from '../store/utils';
@@ -32,6 +33,7 @@ export default {
     ImageDiffOverlay,
     NotDiffableViewer,
     NoPreviewViewer,
+    UserAvatarLink,
     DiffFileDrafts,
   },
   mixins: [diffLineNoteFormMixin, draftCommentsMixin],
@@ -176,7 +178,7 @@ export default {
       </template>
       <div
         v-else-if="isWhitespaceOnly"
-        class="gl-flex gl-h-13 gl-items-center gl-justify-center gl-bg-gray-10"
+        class="gl-bg-gray-10 gl-flex gl-justify-center gl-items-center gl-h-13"
         data-testid="diff-whitespace-only-state"
       >
         {{ __('Contains only whitespace changes.') }}
@@ -220,6 +222,14 @@ export default {
           />
         </template>
         <div v-if="showNotesContainer" class="note-container">
+          <user-avatar-link
+            v-if="diffFileCommentForm && author"
+            :link-href="author.path"
+            :img-src="author.avatar_url"
+            :img-alt="author.name"
+            :img-size="48"
+            class="!gl-hidden sm:!gl-block new-comment"
+          />
           <diff-discussions
             v-if="imageDiscussions.length"
             class="diff-file-discussions"

@@ -42,11 +42,6 @@ export default {
       return {};
     },
   },
-  watch: {
-    startSize(newVal) {
-      this.size = newVal;
-    },
-  },
   methods: {
     resetSize(e) {
       e.preventDefault();

@@ -78,26 +78,8 @@ track_internal_event(
 
 Additional properties can be passed when tracking events. They can be used to save additional data related to given event.
 
-Tracking classes already have three built-in properties:
-
-- `label` (string)
-- `property` (string)
-- `value`(numeric)
-
-The arbitrary naming and typing of the these three properties is due to constraints from the data extraction process.
-It's recommended to use these properties first, even if their name does not match with the data you want to track.
-This recommendation is particularly important if you want to leverage these attributes as
-[metric filters](metric_definition_guide.md#filters). You can further describe what is the actual data being tracked
-by using the `description` property in the YAML definition of the event. For an example, see
-[`create_ci_internal_pipeline.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/537ea367dab731e886e6040d8399c430fdb67ab7/config/events/create_ci_internal_pipeline.yml):
-
-```ruby
-additional_properties:
-  label:
-    description: The source of the pipeline, e.g. a push, a schedule or similar.
-  property:
-    description: The source of the config, e.g. the repository, auto_devops or similar.
-```
+Tracking classes have built-in properties with keys `label` (string), `property` (string) and `value`(numeric). It's recommended
+to use these properties first.
 
 Additional properties are passed by including the `additional_properties` hash in the `#track_event` call:
 
@@ -106,8 +88,8 @@ track_internal_event(
   "create_ci_build",
   user: user,
   additional_properties: {
-    label: source, # The label is tracking the source of the pipeline
-    property: config_source # The property is tracking the source of the configuration
+    label: 'scheduled',
+    value: 20
   }
 )
 ```
@@ -118,9 +100,10 @@ If you need to pass more than three additional properties, you can use the `addi
 track_internal_event(
   "code_suggestion_accepted",
   user: user,
-    label: editor_name,
-    property: suggestion_type,
-    value: suggestion_shown_duration
+  additional_properties: {
+    label: 'vsc',
+    property: 'automatic',
+    value: 200,
     lang: 'ruby',
     custom_key: 'custom_value'
   }
@@ -185,11 +168,11 @@ you can use the `internal_event_tracking` shared example.
 
 ```ruby
 it_behaves_like 'internal event tracking' do
-  let(:event) { 'update_issue_severity' }
+  let(:event) { 'create_new_issue' }
   let(:project) { issue.project }
   let(:user) { issue.author }
-  let(:additional_properties) { { label: issue.issueable_severity } }
-  subject(:service_action) { described_class.new(issue).execute }
+  let(:namespace) { group }
+  subject(:service_action) { described_class.new(issue).save }
 end
 ```
 
@@ -204,7 +187,9 @@ Optionally, the context can contain:
 - `project`
 - `namespace`. If not provided, `project.namespace` will be used (if `project` is available).
 - `category`
-- `additional_properties`
+- `label`
+- `property`
+- `value`
 - `event_attribute_overrides` - is used when its necessary to override the attributes available in parent context. For example:
 
 ```ruby
@@ -216,14 +201,6 @@ it_behaves_like 'internal event tracking' do
   subject(:service_action) { described_class.new(issue).save }
 end
 ```
-
-These legacy options are now deprecated:
-
-- `label`
-- `property`
-- `value`
-
-Prefer using `additional_properties` instead.
 
 #### Composable matchers
 
@@ -407,7 +384,6 @@ For data-event attributes:
     data-event-tracking="click_view_runners_button"
     data-event-label="group_runner_form"
     :data-event-property=dynamicPropertyVar
-    data-event-additional='{"key1": "value1", "key2": "value2"}'
   >
    Click Me
   </gl-button>
@@ -416,7 +392,7 @@ For data-event attributes:
 For Haml:
 
 ```haml
-= render Pajamas::ButtonComponent.new(button_options: { class: 'js-settings-toggle',  data: { event_tracking: 'action', event_label: 'group_runner_form', event_property: dynamic_property_var, event_value: 2, event_additional: '{"key1": "value1", "key2": "value2"}' }}) do
+= render Pajamas::ButtonComponent.new(button_options: { class: 'js-settings-toggle',  data: { event_tracking: 'action', event_label: 'group_runner_form', event_property: dynamic_property_var, event_value: 2 }}) do
 ```
 
 #### Frontend testing
@@ -563,15 +539,3 @@ describe('DeleteApplication', () => {
   });
 });
 ```
-
-### Using Internal Events API
-
-You can also use our API to track events from other systems connected to a GitLab instance.
-See the [Usage Data API documentation](../../../api/usage_data.md#events-tracking-api) for more information.
-
-### Internal Events on other systems
-
-Apart from the GitLab codebase, we are using Internal Events for the systems listed below.
-
-1. [AI Gateway](https://gitlab.com/gitlab-org/modelops/applied-ml/code-suggestions/ai-assist/-/blob/main/docs/internal_events.md?ref_type=heads)
-1. [Switchboard](https://gitlab.com/gitlab-com/gl-infra/gitlab-dedicated/switchboard/-/blob/main/docs/internal_events.md)

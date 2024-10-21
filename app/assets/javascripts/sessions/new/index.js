@@ -9,21 +9,19 @@ export default () => {
     return null;
   }
 
-  const { username, obfuscatedEmail, verifyPath, resendPath, offerEmailReset, updateEmailPath } =
-    el.dataset;
+  const { obfuscatedEmail, verifyPath, resendPath, offerEmailReset, updateEmailPath } = el.dataset;
 
   return new Vue({
     el,
     name: 'EmailVerificationRoot',
-    provide: { updateEmailPath },
     render(createElement) {
       return createElement(EmailVerification, {
         props: {
-          username,
           obfuscatedEmail,
           verifyPath,
           resendPath,
           isOfferEmailReset: parseBoolean(offerEmailReset),
+          updateEmailPath,
         },
       });
     },

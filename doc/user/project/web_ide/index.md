@@ -25,8 +25,7 @@ For a more basic implementation, see [Web Editor](../repository/web_editor.md).
 
 To pair the Web IDE with a remote development environment, see [Remote development](../remote_development/index.md).
 
-Support for [GitLab Flavored Markdown](../../markdown.md) preview in the Web IDE is proposed in
-[issue 645](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/645).
+Support for improvements to Markdown preview when using GitLab Flavored Markdown in the Web IDE is proposed in [issue 645](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/issues/645).
 
 ## Open the Web IDE
 
@@ -199,24 +198,6 @@ To change the color theme in the Web IDE:
 
 The active color theme is stored in the [user settings](#edit-settings).
 
-## Configure sync settings
-
-To configure sync settings in the Web IDE:
-
-1. Press <kbd>Shift</kbd>+<kbd>Command</kbd>+<kbd>P</kbd>.
-1. In the search box, enter `Settings Sync: Configure`.
-1. Select or clear the checkbox for:
-   - **Settings**
-   - **Keyboard shortcuts**
-   - **User snippets**
-   - **User tasks**
-   - **UI state**
-   - **Extensions**
-   - **Profiles**
-
-These settings are synced automatically across multiple Web IDE instances.
-You cannot sync user profiles or go back to an earlier version of synced settings.
-
 ## View missed notifications
 
 When you perform actions in the Web IDE, notifications appear in the lower right.
@@ -243,22 +224,18 @@ For more information, see [Remote development](../remote_development/index.md).
 ## Extension marketplace
 
 DETAILS:
-**Offering:** GitLab.com
+**Status**: Beta
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/151352) as a [beta](../../../policy/experiment-beta-support.md#beta) in GitLab 17.0 [with flags](../../../administration/feature_flags.md) named `web_ide_oauth` and `web_ide_extensions_marketplace`. Disabled by default.
-> - Feature flag `web_ide_oauth` [enabled on GitLab.com, self-managed, and GitLab Dedicated](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/163181) and feature flag `web_ide_extensions_marketplace` [enabled on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/459028) in GitLab 17.4.
-> - Feature flag `web_ide_oauth` [removed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/167464) in GitLab 17.5.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/151352) in GitLab 17.0 [with flags](../../../administration/feature_flags.md) named `web_ide_oauth` and `web_ide_extensions_marketplace`. Disabled by default.
+> - [Enabled on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/459028) in GitLab 17.0.
 
 FLAG:
-The availability of this feature is controlled by a feature flag.
+The availability of this feature is controlled by feature flags.
 For more information, see the history.
 
 Prerequisites:
 
-- In user preferences, you must
-  [enable the extension marketplace](../../profile/preferences.md#integrate-with-the-extension-marketplace).
-- In group settings, users with the Owner role must
-  [enable the extension marketplace](../../enterprise_user/index.md#enable-the-extension-marketplace-for-the-web-ide-and-workspaces) for enterprise users.
+- You must [enable the extension marketplace](../../profile/preferences.md#integrate-with-the-extension-marketplace) in user preferences.
 
 You can use the extension marketplace to download and run VS Code extensions in the Web IDE.
 
@@ -305,32 +282,6 @@ As a workaround:
    or modify the `"editor.fontFamily"` setting.
 
 For more information, see [VS Code issue 80170](https://github.com/microsoft/vscode/issues/80170).
-
-### Update the OAuth callback URL
-
-DETAILS:
-**Offering:** Self-managed
-
-Prerequisites:
-
-- You must have administrator access to the instance.
-
-The Web IDE uses an [instance-wide OAuth application](../../../integration/oauth_provider.md#create-an-instance-wide-application) for authentication.
-If the OAuth callback URL is misconfigured, you might encounter a `Cannot open Web IDE` error page with the following message:
-
-```plaintext
-The URL you're using to access the Web IDE and the configured OAuth callback URL do not match. This issue often occurs when you're using a proxy.
-```
-
-To resolve this issue, you must update the OAuth callback URL to match the URL used to access the GitLab instance.
-
-To update the OAuth callback URL:
-
-1. On the left sidebar, at the bottom, select **Admin**.
-1. Select **Applications**.
-1. For **GitLab Web IDE**, select **Edit**.
-1. Enter the OAuth callback URL.
-   You can enter multiple URLs separated by newlines.
 
 ### Report a problem
 

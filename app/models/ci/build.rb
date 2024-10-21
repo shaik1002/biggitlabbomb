@@ -96,18 +96,6 @@ module Ci
 
     has_many :pages_deployments, foreign_key: :ci_build_id, inverse_of: :ci_build
 
-    has_many :tag_links,
-      ->(build) { in_partition(build) },
-      class_name: 'Ci::BuildTag',
-      foreign_key: :build_id,
-      partition_foreign_key: :partition_id,
-      inverse_of: :build
-
-    has_many :simple_tags,
-      class_name: 'Ci::Tag',
-      through: :tag_links,
-      source: :tag
-
     Ci::JobArtifact.file_types.each_key do |key|
       has_one :"job_artifacts_#{key}", ->(build) { in_partition(build).with_file_types([key]) },
         class_name: 'Ci::JobArtifact',
@@ -203,9 +191,9 @@ module Ci
     # See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/123131
     scope :with_runner_type, ->(runner_type) { joins(:runner).where(runner: { runner_type: runner_type }) }
 
-    scope :belonging_to_runner_manager, ->(runner_machine_id) do
+    scope :belonging_to_runner_manager, ->(runner_machine_id) {
       joins(:runner_manager_build).where(p_ci_runner_machine_builds: { runner_machine_id: runner_machine_id })
-    end
+    }
 
     scope :with_secure_reports_from_config_options, ->(job_types) do
       joins(:metadata).where("#{Ci::BuildMetadata.quoted_table_name}.config_options -> 'artifacts' -> 'reports' ?| array[:job_types]", job_types: job_types)
@@ -231,11 +219,6 @@ module Ci
       .or(with_job_artifacts.where(job_artifacts: { file_type: 'dotenv', accessibility: 'public' }))
       .or(with_job_artifacts.where(project_id: project_id, job_artifacts: { file_type: 'dotenv' })).distinct
     end
-
-    scope :with_pipeline_source_type, ->(pipeline_source_type) { joins(:pipeline).where(pipeline: { source: pipeline_source_type }) }
-    scope :created_after, ->(time) { where(arel_table[:created_at].gt(time)) }
-    scope :updated_after, ->(time) { where(arel_table[:updated_at].gt(time)) }
-    scope :for_project_ids, ->(project_ids) { where(project_id: project_ids) }
 
     add_authentication_token_field :token,
       encrypted: :required,
@@ -391,15 +374,13 @@ module Ci
       after_transition any => [:failed] do |build|
         next unless build.project
 
-        build.run_after_commit do
-          if build.auto_retry_allowed?
-            begin
-              # rubocop: disable CodeReuse/ServiceClass -- https://gitlab.com/gitlab-org/gitlab/-/issues/494865
-              Ci::RetryJobService.new(build.project, build.user).execute(build)
-              # rubocop: enable CodeReuse/ServiceClass
-            rescue Gitlab::Access::AccessDeniedError => e
-              Gitlab::AppLogger.error "Unable to auto-retry job #{build.id}: #{e}"
-            end
+        if build.auto_retry_allowed?
+          begin
+            # rubocop: disable CodeReuse/ServiceClass
+            Ci::RetryJobService.new(build.project, build.user).execute(build)
+            # rubocop: enable CodeReuse/ServiceClass
+          rescue Gitlab::Access::AccessDeniedError => e
+            Gitlab::AppLogger.error "Unable to auto-retry job #{build.id}: #{e}"
           end
         end
       end
@@ -408,7 +389,7 @@ module Ci
     def self.build_matchers(project)
       unique_params = [
         :protected,
-        Arel.sql("(#{arel_tag_names_array(project: project).to_sql})")
+        Arel.sql("(#{arel_tag_names_array.to_sql})")
       ]
 
       group(*unique_params).pluck('array_agg(id)', *unique_params).map do |values|
@@ -423,24 +404,6 @@ module Ci
 
     def self.ids_in_merge_request(merge_request_id)
       in_merge_request(merge_request_id).pluck(:id)
-    end
-
-    def self.arel_tag_names_array(context = :tags, project: nil)
-      return super(context) if Feature.disabled?(:use_new_queue_tags, project)
-
-      ::Ci::BuildTag
-        .joins(:tag)
-        .where(::Ci::BuildTag.arel_table[:build_id].eq(arel_table[:id]))
-        .where(::Ci::BuildTag.arel_table[:partition_id].eq(arel_table[:partition_id]))
-        .select('COALESCE(array_agg(tags.name ORDER BY name), ARRAY[]::text[])')
-    end
-
-    def tags_ids_relation
-      if Feature.enabled?(:use_new_queue_tags, project)
-        simple_tags
-      else
-        tags
-      end
     end
 
     # A Ci::Bridge may transition to `canceling` as a result of strategy: :depend
@@ -483,10 +446,8 @@ module Ci
     end
 
     def pages_generator?
-      return false unless Gitlab.config.pages.enabled
-      return true if options[:pages].is_a?(Hash) || options[:pages] == true
-
-      options[:pages] != false && name == 'pages' # Legacy behaviour
+      Gitlab.config.pages.enabled &&
+        name == 'pages'
     end
 
     # Overriden on EE
@@ -526,7 +487,7 @@ module Ci
     end
 
     def action?
-      ACTIONABLE_WHEN.include?(self.when)
+      %w[manual delayed].include?(self.when)
     end
 
     def can_auto_cancel_pipeline_on_job_failure?
@@ -985,7 +946,7 @@ module Ci
     end
 
     def multi_build_steps?
-      options[:release]&.any?
+      options.dig(:release)&.any?
     end
 
     def hide_secrets(data, metrics = ::Gitlab::Ci::Trace::Metrics.new)
@@ -1332,30 +1293,6 @@ module Ci
 
     def prefix_and_partition_for_token
       TOKEN_PREFIX + partition_id_prefix_in_16_bit_encode
-    end
-
-    override :save_tags
-    def save_tags
-      super do |new_tags, old_tags|
-        if old_tags.present?
-          tag_links
-            .where(tag_id: old_tags)
-            .delete_all
-        end
-
-        ci_builds_tags = new_tags.map do |tag|
-          Ci::BuildTag.new(
-            build_id: id, partition_id: partition_id,
-            tag_id: tag.id, project_id: project_id)
-        end
-
-        ::Ci::BuildTag.bulk_insert!(
-          ci_builds_tags,
-          validate: false,
-          unique_by: [:tag_id, :build_id, :partition_id],
-          returns: :id
-        )
-      end
     end
   end
 end

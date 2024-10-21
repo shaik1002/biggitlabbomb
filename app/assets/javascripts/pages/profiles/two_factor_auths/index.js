@@ -1,6 +1,6 @@
 import { mount2faRegistration } from '~/authentication/mount_2fa';
 import { initWebAuthnRegistration } from '~/authentication/webauthn/registration';
-import { initRecoveryCodes, initTwoFactorConfirm } from '~/authentication/two_factor_auth';
+import { initRecoveryCodes, initManageTwoFactorForm } from '~/authentication/two_factor_auth';
 import { parseBoolean } from '~/lib/utils/common_utils';
 
 const twoFactorNode = document.querySelector('.js-two-factor-auth');
@@ -20,4 +20,4 @@ if (skippable) {
 mount2faRegistration();
 initWebAuthnRegistration();
 initRecoveryCodes();
-initTwoFactorConfirm();
+initManageTwoFactorForm();

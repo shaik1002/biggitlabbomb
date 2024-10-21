@@ -28,7 +28,6 @@ export const getSinglePolicySchema = async ({ namespacePath, namespaceType, poli
       schemaForMultiplePolicies.properties[policyType]?.items?.properties ||
       schemaForMultiplePolicies.$defs[policyType]?.items?.properties ||
       {};
-
     return {
       title: schemaForMultiplePolicies.title,
       description: schemaForMultiplePolicies.description,
@@ -42,7 +41,6 @@ export const getSinglePolicySchema = async ({ namespacePath, namespaceType, poli
         },
         ...properties,
       },
-      $defs: schemaForMultiplePolicies.$defs,
     };
   } catch {
     return {};

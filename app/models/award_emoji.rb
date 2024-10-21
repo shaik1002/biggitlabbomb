@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
 class AwardEmoji < ApplicationRecord
-  THUMBS_UP     = 'thumbsup'
-  THUMBS_DOWN   = 'thumbsdown'
-  UPVOTE_NAME   = THUMBS_UP
-  DOWNVOTE_NAME = THUMBS_DOWN
+  DOWNVOTE_NAME = "thumbsdown"
+  UPVOTE_NAME   = "thumbsup"
 
   include Participable
   include GhostUser

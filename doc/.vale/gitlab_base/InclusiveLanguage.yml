@@ -1,5 +1,5 @@
 ---
-# Warning: gitlab_base.InclusiveLanguage
+# Warning: gitlab.InclusiveLanguage
 # Suggests alternatives for non-inclusive language.
 #
 # For a list of all options, see https://vale.sh/docs/topics/styles/
@@ -16,7 +16,7 @@ swap:
   his: their
   mankind: humanity, people
   manpower: GitLab team members
-  master: primary, main, controller, active, parent, hub
+  master: primary, main
   sanity (?:check|test): check for completeness
-  slave: secondary, agent, standby, child, spoke 
+  slave: secondary
   whitelist(?:ed|ing|s)?: allowlist

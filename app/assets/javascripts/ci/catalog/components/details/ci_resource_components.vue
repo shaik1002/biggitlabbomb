@@ -1,22 +1,15 @@
 <script>
-import { GlEmptyState, GlIcon, GlLink, GlLoadingIcon, GlTableLite, GlTruncate } from '@gitlab/ui';
+import { GlEmptyState, GlLoadingIcon, GlTableLite } from '@gitlab/ui';
 import { createAlert } from '~/alert';
 import { __, s__ } from '~/locale';
-import { helpPagePath } from '~/helpers/help_page_helper';
 import getCiCatalogResourceComponents from '../../graphql/queries/get_ci_catalog_resource_components.query.graphql';
 
 export default {
   components: {
     GlEmptyState,
-    GlIcon,
-    GlLink,
     GlLoadingIcon,
     GlTableLite,
-    GlTruncate,
   },
-  inputHelpLink: helpPagePath('ci/yaml/inputs', {
-    anchor: 'define-input-parameters-with-specinputs',
-  }),
   props: {
     resourcePath: {
       type: String,
@@ -59,11 +52,22 @@ export default {
       return `include:
   - component: ${componentPath}`;
     },
+    humanizeBoolean(bool) {
+      return bool ? __('Yes') : __('No');
+    },
   },
   fields: [
     {
       key: 'name',
-      label: s__('CiCatalogComponent|Name'),
+      label: s__('CiCatalogComponent|Parameters'),
+    },
+    {
+      key: 'description',
+      label: s__('CiCatalogComponent|Description'),
+    },
+    {
+      key: 'default',
+      label: s__('CiCatalogComponent|Default value'),
     },
     {
       key: 'required',
@@ -73,23 +77,14 @@ export default {
       key: 'type',
       label: s__('CiCatalogComponent|Type'),
     },
-    {
-      key: 'description',
-      label: s__('CiCatalogComponent|Description'),
-    },
-    {
-      key: 'default',
-      label: s__('CiCatalogComponent|Default'),
-    },
   ],
   i18n: {
     emptyStateTitle: s__('CiCatalogComponent|Component details not available'),
     emptyStateDesc: s__(
       'CiCatalogComponent|This tab displays auto-collected information about the components in the repository, but no information was found.',
     ),
-    fetchError: s__("CiCatalogComponent|There was an error fetching this resource's components"),
     inputTitle: s__('CiCatalogComponent|Inputs'),
-    learnMore: __('Learn more'),
+    fetchError: s__("CiCatalogComponent|There was an error fetching this resource's components"),
   },
 };
 </script>
@@ -109,9 +104,7 @@ export default {
         class="gl-mb-8"
         data-testid="component-section"
       >
-        <h3 class="gl-mt-0 gl-text-size-h2" data-testid="component-name">
-          {{ component.name }}
-        </h3>
+        <h3 class="gl-font-size-h2 gl-mt-0" data-testid="component-name">{{ component.name }}</h3>
         <pre
           data-testid="copy-to-clipboard"
           class="code highlight js-syntax-highlight language-yaml"
@@ -120,27 +113,10 @@ export default {
           generateSnippet(component.includePath)
         }}</code></pre>
         <div class="gl-mt-5">
-          <div class="gl-mb-4 gl-flex gl-gap-2">
-            <b> {{ $options.i18n.inputTitle }}</b>
-            <gl-link
-              :title="$options.i18n.learnMore"
-              :href="$options.inputHelpLink"
-              target="_blank"
-            >
-              <gl-icon name="question-o" :size="14" />
-            </gl-link>
-          </div>
+          <b class="gl-block gl-mb-4"> {{ $options.i18n.inputTitle }}</b>
           <gl-table-lite :items="component.inputs" :fields="$options.fields">
-            <template #cell(name)="{ item }">
-              <code v-if="item.name">{{ item.name }}</code>
-            </template>
-            <template #cell(type)="{ item }">
-              {{ item.type.toLowerCase() }}
-            </template>
-            <template #cell(default)="{ item }">
-              <code v-if="item.default">
-                <gl-truncate :text="item.default" position="end" class="gl-max-w-34" with-tooltip />
-              </code>
+            <template #cell(required)="{ item }">
+              {{ humanizeBoolean(item.required) }}
             </template>
           </gl-table-lite>
         </div>

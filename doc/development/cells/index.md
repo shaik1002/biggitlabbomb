@@ -12,15 +12,10 @@ For background of GitLab Cells, refer to the [design document](https://handbook.
 
 Depending on the use case, your feature may be [cell-local or clusterwide](https://handbook.gitlab.com/handbook/engineering/architecture/design-documents/cells/#how-do-i-decide-whether-to-move-my-feature-to-the-cluster-cell-or-organization-level) and hence the tables used for the feature should also use the appropriate schema.
 
-When you choose the appropriate [schema](../database/multiple_databases.md#gitlab-schema) for tables, consider the following guidelines as part of the [Cells](https://handbook.gitlab.com/handbook/engineering/architecture/design-documents/cells/) architecture:
+When you choose the appropriate schema for tables, consider the following guidelines as part of the [Cells](https://handbook.gitlab.com/handbook/engineering/architecture/design-documents/cells/) architecture:
 
 - Default to `gitlab_main_cell`: We expect most tables to be assigned to the `gitlab_main_cell` schema by default. Choose this schema if the data in the table is related to `projects` or `namespaces`.
 - Consult with the Tenant Scale group: If you believe that the `gitlab_main_clusterwide` schema is more suitable for a table, seek approval from the Tenant Scale group. This is crucial because it has scaling implications and may require reconsideration of the schema choice.
-
-Tables with `gitlab_main_clusterwide` schema will need additional work to be replicated to other / all cells.
-The replication strategy will likely be different for each case, but will involve internal APIs.
-The application may also need to be modified to restrict writes to prevent conflicts.
-We may also ask teams to update tables from `gitlab_main_clusterwide` to `gitlab_main_cell` as required, which also might require adding sharding keys to these tables.
 
 To understand how existing tables are classified, you can use [this dashboard](https://manojmj.gitlab.io/tenant-scale-schema-progress/).
 
@@ -61,39 +56,39 @@ The following are examples of valid sharding keys:
 
 - The table entries belong to a project only:
 
-  ```yaml
-  sharding_key:
-    project_id: projects
-  ```
+   ```yaml
+   sharding_key:
+     project_id: projects
+   ```
 
 - The table entries belong to a project and the foreign key is `target_project_id`:
 
-  ```yaml
-  sharding_key:
-    target_project_id: projects
-  ```
+   ```yaml
+   sharding_key:
+     target_project_id: projects
+   ```
 
 - The table entries belong to a namespace/group only:
 
-  ```yaml
-  sharding_key:
-    namespace_id: namespaces
-  ```
+   ```yaml
+   sharding_key:
+     namespace_id: namespaces
+   ```
 
 - The table entries belong to a namespace/group only and the foreign key is `group_id`:
 
-  ```yaml
-  sharding_key:
-    group_id: namespaces
-  ```
+   ```yaml
+   sharding_key:
+     group_id: namespaces
+   ```
 
 - The table entries belong to a namespace or a project:
 
-  ```yaml
-  sharding_key:
-    project_id: projects
-    namespace_id: namespaces
-  ```
+   ```yaml
+   sharding_key:
+     project_id: projects
+     namespace_id: namespaces
+   ```
 
 ### The sharding key must be immutable
 
@@ -169,7 +164,6 @@ desired_sharding_key:
       parent:
         foreign_key: scanner_id
         table: vulnerability_scanners
-        table_primary_key: id # Optional. Defaults to 'id'
         sharding_key: project_id
         belongs_to: scanner
 ```
@@ -198,7 +192,6 @@ desired_sharding_key:
       parent:
         foreign_key: package_file_id
         table: packages_package_files
-        table_primary_key: id # Optional. Defaults to 'id'
         sharding_key: project_id
         belongs_to: package_file
     awaiting_backfill_on_parent: true

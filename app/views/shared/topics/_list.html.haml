@@ -1,9 +1,9 @@
 - remote = local_assigns.fetch(:remote, false)
-- search = params[:search]
-- show_empty_search = @topics.empty? && search
 
-- if show_empty_search
-  = render ::Layouts::EmptyResultComponent.new(type: :search)
+- if @topics.empty?
+  = render 'shared/empty_states/topics'
 - else
-  = render partial: 'shared/topics/topic', collection: @topics
+  .row.gl-mt-3
+    = render partial: 'shared/topics/topic', collection: @topics
+
   = paginate_collection @topics, remote: remote

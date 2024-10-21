@@ -9,8 +9,10 @@ RSpec.describe Mutations::Issues::SetSeverity, feature_category: :api do
   let_it_be(:guest) { create(:user, guest_of: project) }
   let_it_be(:reporter) { create(:user, reporter_of: project) }
   let_it_be(:issue) { create(:incident, project: project) }
+  let(:query) { GraphQL::Query.new(empty_schema, document: nil, context: {}, variables: {}) }
+  let(:context) { GraphQL::Query::Context.new(query: query, values: { current_user: user }) }
 
-  let(:mutation) { described_class.new(object: nil, context: query_context, field: nil) }
+  let(:mutation) { described_class.new(object: nil, context: context, field: nil) }
 
   specify { expect(described_class).to require_graphql_authorizations(:update_issue, :admin_issue) }
 
@@ -26,14 +28,14 @@ RSpec.describe Mutations::Issues::SetSeverity, feature_category: :api do
     end
 
     context 'as guest' do
-      let(:current_user) { guest }
+      let(:user) { guest }
 
       it 'raises an error' do
         expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
       end
 
       context 'and also author' do
-        let!(:issue) { create(:incident, project: project, author: current_user) }
+        let!(:issue) { create(:incident, project: project, author: user) }
 
         it 'raises an error' do
           expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
@@ -41,7 +43,7 @@ RSpec.describe Mutations::Issues::SetSeverity, feature_category: :api do
       end
 
       context 'and also assignee' do
-        let!(:issue) { create(:incident, project: project, assignee_ids: [current_user.id]) }
+        let!(:issue) { create(:incident, project: project, assignee_ids: [user.id]) }
 
         it 'raises an error' do
           expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
@@ -50,7 +52,7 @@ RSpec.describe Mutations::Issues::SetSeverity, feature_category: :api do
     end
 
     context 'as reporter' do
-      let(:current_user) { reporter }
+      let(:user) { reporter }
 
       context 'when issue type is incident' do
         context 'when severity has a correct value' do

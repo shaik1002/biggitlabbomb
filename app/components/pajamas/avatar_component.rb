@@ -9,8 +9,6 @@ module Pajamas
   class AvatarComponent < Pajamas::Component
     include Gitlab::Utils::StrongMemoize
 
-    SIZE_OPTIONS = [16, 24, 32, 48, 64, 96].freeze
-
     # @param item [User, Project, Group, AvatarEmail, String]
     # @param alt [String] text for the alt attribute
     # @param class [String] custom CSS class(es)
@@ -24,6 +22,8 @@ module Pajamas
       @avatar_options = avatar_options
     end
 
+    SIZE_OPTIONS = [16, 24, 32, 48, 64, 96].freeze
+
     private
 
     def avatar_classes
@@ -31,7 +31,7 @@ module Pajamas
       if @item.is_a?(User) || @item.is_a?(AvatarEmail)
         classes.push("gl-avatar-circle")
       else
-        classes.push("!gl-rounded-base")
+        classes.push("gl-rounded-base!")
       end
 
       unless src

@@ -9,20 +9,14 @@ RSpec.describe Gitlab::BackgroundMigration::BackfillOrDropCiPipelineOnProjectId,
   let(:project_id_for_merge_request) { 140 }
   let(:project_id_for_unaffected_pipeline) { 1 }
 
-  let!(:pipeline_with_nothing) do
-    table(:ci_pipelines, primary_key: :id, database: :ci).create!(id: 1, partition_id: 100)
-  end
-
-  let!(:pipeline_with_builds) do
-    table(:ci_pipelines, primary_key: :id, database: :ci).create!(id: 2, partition_id: 100)
-  end
-
+  let!(:pipeline_with_nothing) { table(:ci_pipelines, database: :ci).create!(id: 1, partition_id: 100) }
+  let!(:pipeline_with_builds) { table(:ci_pipelines, database: :ci).create!(id: 2, partition_id: 100) }
   let!(:pipeline_with_merge_request) do
-    table(:ci_pipelines, primary_key: :id, database: :ci).create!(id: 3, partition_id: 100, merge_request_id: 1)
+    table(:ci_pipelines, database: :ci).create!(id: 3, partition_id: 100, merge_request_id: 1)
   end
 
   let!(:untouched_pipeline) do
-    table(:ci_pipelines, primary_key: :id, database: :ci)
+    table(:ci_pipelines, database: :ci)
       .create!(id: 4, partition_id: 100, project_id: project_id_for_unaffected_pipeline)
   end
 
@@ -77,26 +71,8 @@ RSpec.describe Gitlab::BackgroundMigration::BackfillOrDropCiPipelineOnProjectId,
       end
     end
 
-    context 'when backfill will create an invalid record' do
-      before do
-        table(:ci_pipelines, primary_key: :id, database: :ci)
-          .create!(id: 100, iid: 100, partition_id: 100, project_id: 137)
-
-        pipeline_with_builds.update!(iid: 100)
-      end
-
-      it 'deletes the pipeline instead' do
-        migration.perform
-
-        expect { pipeline_with_builds.reload }.to raise_error(ActiveRecord::RecordNotFound)
-      end
-    end
-
     context 'when associations are invalid as well' do
-      let!(:pipeline_with_bad_build) do
-        table(:ci_pipelines, primary_key: :id, database: :ci).create!(id: 5, partition_id: 100)
-      end
-
+      let!(:pipeline_with_bad_build) { table(:ci_pipelines, database: :ci).create!(id: 5, partition_id: 100) }
       let!(:bad_build) { table(:p_ci_builds, database: :ci).create!(partition_id: 100, commit_id: 5) }
 
       it 'deletes pipeline if associations do not have project_id' do

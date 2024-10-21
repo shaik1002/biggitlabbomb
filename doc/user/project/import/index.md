@@ -83,52 +83,34 @@ difficult, but several tools exist including:
 ## User contribution and membership mapping
 
 DETAILS:
-**Tier:** Free, Premium, Ultimate
-**Offering:** GitLab.com, Self-managed
+**Status:** Experiment
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/443557) to direct transfer migrations for self-managed instances in GitLab 17.4 [with flags](../../../administration/feature_flags.md) named `importer_user_mapping` and `bulk_import_importer_user_mapping`. Disabled by default.
+> - [Introduced to migration by using direct transfer](https://gitlab.com/gitlab-org/gitlab/-/issues/443557) in GitLab 17.3 [with a flag](../../../administration/feature_flags.md) named `importer_user_mapping`. Disabled by default. This feature is an [experiment](../../../policy/experiment-beta-support.md).
 
 FLAG:
-The availability of this feature is controlled by feature flags.
+The availability of this feature is controlled by a feature flag.
 For more information, see the history.
+This feature is available for internal testing only, it is not ready for production use.
 
-This method of user contributions and membership mapping is available for
-[direct transfer migrations](../../group/import/index.md) on:
+Migrating data usually requires careful configuration of both the source and destination instances beforehand. For
+example, for [direct transfer migration](../../group/import/direct_transfer_migrations.md#user-accounts).
 
-- GitLab.com
-- GitLab self-managed when two feature flags are enabled
+With user contribution and membership mapping you can assign imported contributions to users on the destination after migration. This
+approach requires less preparation and allows for users to have different email addresses in different systems.
 
-For information on the other method available for GitLab self-managed without enabled feature flags,
-see [User contributions and membership mapping](../../group/import/direct_transfer_migrations.md#user-contributions-and-membership-mapping).
+When using user contribution and membership mapping, each [user must explicitly accept](#accept-contribution-reassignment) assignments of contributions and
+can reject the assignment.
 
-With user contribution and membership mapping, you can assign imported contributions and memberships to users on the
-destination instance after import has completed. Unlike the previous method of user contribution and membership mapping,
-no preparation is needed before the import.
-
-The process doesn't rely on email addresses, so you can map contributions for users who have different emails on source
-and destination instances.
-
-Each user on the destination instance that is assigned a mapping can:
-
-- [Explicitly accept](#accept-contribution-reassignment) the assignment before any imported contributions are
-  attributed to them.
-- Reject the assignment.
-
-### Requirements
-
-- You must be able to create enough users, subject to [user limits](#placeholder-user-limits).
-- If importing to GitLab.com, you must set up your paid namespace before the import.
+This feature is an [experiment](../../../policy/experiment-beta-support.md). If you find a bug, open an issue in
+[epic](https://gitlab.com/groups/gitlab-org/-/epics/12378).
 
 ### Placeholder users
 
-Instead of immediately assigning contributions and memberships to users on the destination instance, a
-placeholder user is created for any user whose contributions or memberships were imported.
+Instead of immediately attempting to assign contributions to users on the destination instance, supported importers
+create a placeholder user for each imported member, and for any user whose contributions were imported.
 
 Both contributions and memberships are first assigned to these placeholder users and can be reassigned after import
-to existing users on the destination instance.
-
-Until they are reassigned, contributions display as associated with the placeholder. Placeholder memberships
-do not display in member lists.
+to existing users on destination instance.
 
 #### Placeholder user attributes
 
@@ -154,12 +136,8 @@ To preserve historical context, the placeholder user name and username are deriv
 
 #### View placeholder users
 
-Prerequisites:
-
-- You must have the Owner role for the group.
-
-Placeholder users are created on the destination instance while a group or project is imported.
-To view placeholder users created during imports to a top-level group and its subgroups:
+Placeholder users are created in the top-level group on the destination instance where a group or project are imported
+to. After the import, to view placeholder users for a group:
 
 1. On the left sidebar, select **Search or go to** and find your group.
 1. Select **Manage > Members**.
@@ -174,54 +152,50 @@ Placeholder users are created per [import source](#supported-import-sources) and
 - If you import the same project twice, but to a different top-level group on the destination instance, the second import
   creates new placeholder users under that top-level group.
 
+WARNING:
+You must set up your paid namespace before the import.
+
 If importing to GitLab.com, placeholder users are limited per top-level group on the destination instance. The limits
-differ depending on your plan and seat count. Placeholder users do not count towards license limits.
+differ depending on your product tier and seat count. Placeholder users do not count towards license limits.
 
-| GitLab.com plan          | Number of seats | Placeholder user limit on top-level group |
-|:-------------------------|:----------------|:------------------------------------------|
-| Free and any trial       | Any amount      | 200                                       |
-| Premium                  | < 100           | 500                                       |
-| Premium                  | 101-500         | 2000                                      |
-| Premium                  | 501 - 1000      | 4000                                      |
-| Premium                  | > 1000          | 6000                                      |
-| Ultimate and open source | < 100           | 1000                                      |
-| Ultimate and open source | 101-500         | 4000                                      |
-| Ultimate and open source | 501 - 1000      | 6000                                      |
-| Ultimate and open source | > 1000          | 8000                                      |
-
-Customers on legacy Bronze, Silver, or Gold plans have the corresponding Free, Premium, or Ultimate limits.
-For Premium customers trying out Ultimate (Ultimate trial paid customer plan), Premium limits apply.
+| GitLab.com plan | Number of seats | Placeholder user limit on top-level group |
+|:----------------|:----------------|:------------------------------------------|
+| Free and Trial  | Any amount      | 200                                       |
+| Premium         | < 100           | 500                                       |
+| Premium         | 101-500         | 2000                                      |
+| Premium         | 501 - 1000      | 4000                                      |
+| Premium         | > 1000          | 6000                                      |
+| Ultimate        | < 100           | 1000                                      |
+| Ultimate        | 101-500         | 4000                                      |
+| Ultimate        | 501 - 1000      | 6000                                      |
+| Ultimate        | > 1000          | 8000                                      |
 
 If these limits are not sufficient for your import, [contact GitLab Support](https://about.gitlab.com/support/).
 
-The above limits are for GitLab.com. Self-managed GitLab has no placeholder limits by default. A self-managed instance administrator can [set a placeholder limit](../../../administration/instance_limits.md#import-placeholder-user-limits) for their installation.
+The default limit for a GitLab instance is "unlimited". Above limits are set for GitLab.com. Admins can adjust the
+default limit for self-managed and Dedicated instances.
 
 ### Reassign contributions and memberships
 
 Reassignment of contributions and memberships from placeholder users to existing active (non-bot) users occurs on
-the destination instance. On the destination instance, you can:
+the destination instance.
 
-- Request users to accept reassignment of contributions and membership [in the UI](#request-reassignment-in-ui).
-  The reassignment process starts only after the selected user [accepts the reassignment request](#accept-contribution-reassignment),
-  which is sent to them by email.
-- Choose not to reassign contributions and memberships, and [keep them with placeholder users](#keep-as-placeholder).
+You can request users to accept reassignment of contributions and membership by using:
 
-All the contributions initially assigned to a single placeholder user can only be reassigned to a single active regular
-user on the destination instance. The contributions assigned to a single placeholder user cannot be split among multiple
-active regular users.
+- [The UI](#request-reassignment-in-ui).
+- [A CSV file](#request-reassignment-by-using-a-csv-file), which is recommended for large numbers of placeholder users.
 
-Bot user contributions and memberships on the source instance cannot be reassigned to bot users on the destination instance.
-You might choose to keep source bot user contributions [assigned to a placeholder user](#keep-as-placeholder).
+You can also choose not to reassign contributions and memberships, and [keep them with placeholder users](#keep-as-placeholder).
 
-Users that receive a reassignment request can:
+Contributions and memberships cannot be reassigned to bot users on the destination instance, even if the original
+contributions were done by bots users. They can only be reassigned to active non-bot users. You might choose to keep
+source bot user contributions [assigned to placeholder users](#keep-as-placeholder).
 
-- [Accept the request](#accept-contribution-reassignment). All contributions and membership previously attributed to the placeholder user are re-attributed
-  to the accepting user. This process can take a few minutes, depending on the number of contributions.
-- [Reject the request](#reject-contribution-reassignment) or report it as spam. This option is available in the reassignment
-  request email.
+The reassignment process starts only after the selected user accepts the reassignment request, which is sent to them by
+email. After the user accepts the request, all contributions and membership previously attributed to the placeholder
+user are re-attributed to the accepting user. This process can take a few minutes, depending on the number of contributions.
 
-In subsequent imports, contributions and memberships that belong to the same source user are automatically mapped to the
-user who previously accepted reassignments for that source user.
+The user selected for reassignment can also reject the request and report it as spam.
 
 The reassignment process must be fully completed before you:
 
@@ -230,7 +204,7 @@ The reassignment process must be fully completed before you:
 - Duplicate an imported issue.
 - Promote an imported issue to an epic.
 
-If the process isn't complete, contributions still assigned to placeholder users cannot be reassigned to real users and
+If the process isn't complete, contributions still assigned to placeholder users cannot be reassigned real users and
 they stay associated with placeholder users.
 
 #### Security considerations
@@ -240,24 +214,6 @@ starting.
 
 Reassigning contributions and membership to an incorrect user poses a security threat, because the user becomes a member
 of your group. They can, therefore, view information they should not be able to see.
-
-Reassigning contributions to users with administrator access is disabled by default, but you can
-[enable](../../../administration/settings/import_and_export_settings.md#allow-contribution-mapping-to-administrators) it.
-
-##### Membership security considerations
-
-Because of the GitLab permissions model, when a group or project is imported into an existing parent group, members of
-the parent group are granted [inherited membership](../members/index.md#membership-types) of the imported group or project.
-
-Selecting a user for contribution and membership reassignment who already has an
-existing inherited membership of the imported group or project can affect how memberships
-are reassigned to them.
-
-GitLab does not allow a membership in a child project or group to have a lower role
-than an inherited membership. If an imported membership for an assigned user has a lower role
-than their existing inherited membership, the imported membership is not reassigned to the user.
-
-This results in their membership for the imported group or project being higher than it was on the source.
 
 #### Request reassignment in UI
 
@@ -275,21 +231,53 @@ To request a user accept reassignment of contributions and memberships:
 1. In the **Reassign placeholder to** column, select the a user from the dropdown list.
 1. Select **Reassign**.
 
-Contributions of only one placeholder user can be reassigned to an active non-bot user on destination instance.
+#### Request reassignment by using a CSV file
 
-Before a user accepts the reassignment, you can [cancel the request](#cancel-reassignment-request).
+Prerequisites:
+
+- You must have the Owner role of the group.
+
+Reassigning by using a CSV file is recommended, especially for a large number of placeholder users.
+You can download a pre-filled CSV template to streamline the process. This template is pre-filled with
+information about the import and users on source instance:
+
+- `Source host`
+- `Import type`
+- `Source user identifier`
+- `Source user name`
+- `Source username`
+
+Don't update the `Source host`, `Import type`, or `Source user identifier` data, because this information is used to
+find the corresponding record in the database after completed CSV file is uploaded.
+
+The data `Source user name` and `Source username` is used to help you identify the source user and isn't used after the
+CSV upload.
+
+To request reassignment of contributions and memberships by using a CSV file:
+
+1. On the left sidebar, select **Search or go to** and find your group.
+1. Select **Manage > Members**.
+1. Select the **Placeholders** tab.
+1. Select **Reassign with CSV**.
+1. Download the pre-filled CSV template.
+1. Fill in data for either `GitLab username` or `GitLab public email`, which is used to find the GitLab user on the
+   destination instance. You must use only public email addresses for reassignment.
+1. Upload completed and reviewed CSV file.
+1. Select **Reassign**.
+
+After you select **Reassign**, the reassignment process starts and users receive an email to review and accept the
+contributions reassigned to them.
+
+Before user accepts the reassignment, you can [cancel the request](#cancel-reassignment-request).
 
 #### Keep as placeholder
 
-You might not want to reassign contributions and memberships to users on the destination instance. For example, you
-might have former employees that contributed on the source instance, but they do not exist as users on the destination
-instance.
+Sometimes you don't want to reassign some contributions or memberships and keep the contributions and memberships
+assigned to placeholder users. For example, you might have former employees that contributed on the source instance,
+but they do not exist as users the on destination instance.
 
-In these cases, you can keep the contributions assigned to placeholder users. Placeholder users do not keep
-membership information because they [cannot be members of projects or groups](#placeholder-user-attributes).
-
-Because names and usernames of placeholder users resemble names and usernames of source users, you keep a lot of
-historical context.
+The contributions they've made can remain assigned to placeholder users. Because names and usernames of placeholder
+users resemble names and usernames of source users, you keep some historical context.
 
 Remember that if you keep remaining placeholder users as placeholders, you cannot reassign their contributions to
 actual users later. Ensure all required reassignments are completed before keeping the remaining placeholder users as
@@ -318,7 +306,7 @@ To keep placeholder users in bulk:
 
 #### Cancel reassignment request
 
-Before a user accepts a reassignment request, you can cancel the request:
+In the time between sending the reassignment request and user accepting that request, you can cancel it:
 
 1. On the left sidebar, select **Search or go to** and find your group.
 1. Select **Manage > Members**.
@@ -328,7 +316,7 @@ Before a user accepts a reassignment request, you can cancel the request:
 
 #### Notify user again about pending reassignment requests
 
-If a user is not acting on a reassignment request, you can prompt them again by sending another email:
+If user is not acting on reassignment request, you can prompt them again by sending another email:
 
 1. On the left sidebar, select **Search or go to** and find your group.
 1. Select **Manage > Members**.
@@ -386,23 +374,16 @@ listed in the email are:
 - **Reassigned to** - Your full name and username on the GitLab instance.
 - **Reassigned by** - The full name and username of your colleague or manager that performed the import.
 
-#### Reject contribution reassignment
-
-If you receive an email asking you to confirm reassignment of contributions to yourself and you don't recognize or you
-notice mistakes in this information:
-
-1. Do not proceed at all or reject the contribution reassignment.
-1. Talk to a trusted colleague or your manager.
+If you don't recognize or you notice mistakes in this information, do not proceed and turn to a trusted colleague
+or your manager.
 
 #### Security considerations
 
 You must review the reassignment details of any reassignment request very carefully. If you were not already informed
 about this process by a trusted colleague or your manager, take extra care.
 
-Rather than accept any reassignments that you have any doubts about:
-
-1. Don't act on the emails.
-1. Talk to a trusted colleague or your manager.
+Rather than accept any reassignments that you have any doubts about, talk to a trusted colleague or your manager and
+don't act on the emails.
 
 Accept reassignments only from the users that you know and trust. Reassignment of contributions is permanent and cannot
 be undone. Accepting the reassignment might cause contributions to be incorrectly attributed to you.
@@ -429,7 +410,7 @@ To view project import history:
 1. If there are any errors for a particular import, select **Details** to see them.
 
 The history also includes projects created from [built-in](../index.md#create-a-project-from-a-built-in-template)
-or [custom](../index.md#create-a-project-from-a-custom-template)
+or [custom](../index.md#create-a-project-from-a-built-in-template)
 templates. GitLab uses [import repository by URL](repo_by_url.md)
 to create a new project from a template.
 
@@ -459,55 +440,3 @@ If an imported repository does not contain all branches of the source repository
 The error occurs if you attempt to import a `tar.gz` file download of a repository's source code.
 
 Imports require a [GitLab export](../settings/import_export.md#export-a-project-and-its-data) file, not just a repository download file.
-
-### Diagnosing prolonged or failed imports
-
-If you're experiencing prolonged delays or failures with file-based imports, especially those using S3, the following may help identify the root cause of the problem:
-
-- [Check import steps](#check-import-status)
-- [Review logs](#review-logs)
-- [Identify common issues](#identify-common-issues)
-
-#### Check import status
-
-Check the import status:
-
-1. Use the GitLab API to check the [import status](../../../api/project_import_export.md#import-status) of the affected project.
-1. Review the response for any error messages or status information, especially the `status` and `import_error` values.
-1. Make note of the `correlation_id` in the response, as it's crucial for further troubleshooting.
-
-#### Review logs
-
-Search logs for relevant information:
-
-For self-managed instances:
-
-1. Check the [Sidekiq logs](../../../administration/logs/index.md#sidekiqlog) and [`exceptions_json` logs](../../../administration/logs/index.md#exceptions_jsonlog).
-1. Search for entries related to `RepositoryImportWorker` and the correlation ID from [Check import status](#check-import-status).
-1. Look for fields such as `job_status`, `interrupted_count`, and `exception`.
-
-For GitLab.com (GitLab team members only):
-
-1. Use [Kibana](https://log.gprd.gitlab.net/) to search the Sidekiq logs with queries like:
-
-   Target: `pubsub-sidekiq-inf-gprd*`
-
-   ```plaintext
-   json.class: "RepositoryImportWorker" AND json.correlation_id.keyword: "<CORRELATION_ID>"
-   ```
-   
-   or
-
-   ```plaintext
-   json.class: "RepositoryImportWorker" AND json.meta.project: "<project.full_path>"
-   ```
-
-1. Look for the same fields as mentioned for self-managed instances.
-
-#### Identify common issues
-
-Check the information gathered in [Review logs](#review-logs) against the following common issues:
-
-- **Interrupted jobs**: If you see a high `interrupted_count` or `job_status` indicating failure, the import job may have been interrupted multiple times and placed in a dead queue.
-- **S3 connectivity**: For imports using S3, check for any S3-related error messages in the logs.
-- **Large repository**: If the repository is very large, the import might time out. Consider using [Direct transfer](../../group/import/index.md) in this case.

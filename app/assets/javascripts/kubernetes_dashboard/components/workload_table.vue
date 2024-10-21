@@ -2,6 +2,7 @@
 import { GlTable, GlBadge, GlPagination, GlDisclosureDropdown, GlButton } from '@gitlab/ui';
 import { __ } from '~/locale';
 import PodLogsButton from '~/environments/environment_details/components/kubernetes/pod_logs_button.vue';
+import eventHub from '~/environments/event_hub';
 import {
   WORKLOAD_STATUS_BADGE_VARIANTS,
   PAGE_SIZE,
@@ -54,10 +55,24 @@ export default {
       this.currentPage = 1;
     },
   },
+  created() {
+    eventHub.$on('closeDetailsDrawer', this.clearSelectedItem);
+  },
+  beforeDestroy() {
+    eventHub.$off('closeDetailsDrawer', this.clearSelectedItem);
+  },
   methods: {
     selectItem(item) {
-      this.selectedItem = item;
-      this.$emit('select-item', item);
+      if (item !== this.selectedItem) {
+        this.selectedItem = item;
+        this.$emit('select-item', item);
+      } else {
+        this.clearSelectedItem();
+        this.$emit('remove-selection');
+      }
+    },
+    clearSelectedItem() {
+      this.selectedItem = null;
     },
     getActions(item) {
       const actions = item.actions || [];

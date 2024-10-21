@@ -1,5 +1,9 @@
 @import 'mixins_and_variables_and_functions';
 
+.compare-versions-container {
+  min-width: 0;
+}
+
 .diff-comment-avatar-holders {
   position: absolute;
   margin-left: -$gl-padding;
@@ -29,6 +33,7 @@
     .diff-comments-more-count {
       padding-left: 2px;
       padding-right: 2px;
+      width: auto;
     }
   }
 }
@@ -43,6 +48,7 @@
   border-color: var(--white, $white);
   cursor: pointer;
   transition: all 0.1s ease-out;
+  @include code-icon-size();
 
   @for $i from 1 through 4 {
     &:nth-child(#{$i}) {
@@ -59,6 +65,7 @@
   padding-left: 0;
   padding-right: 0;
   overflow: hidden;
+  @include code-icon-size();
 }
 
 .diff-file-changes {
@@ -137,6 +144,10 @@
   .diff-grid-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
+
+    &.diff-grid-row-full {
+      grid-template-columns: 1fr;
+    }
   }
 
   .diff-grid-left,
@@ -165,7 +176,7 @@
     grid-template-columns: 1fr 1fr;
 
     .content + .content {
-      @apply gl-border-t;
+      @include gl-border-t;
     }
 
     .notes-content {
@@ -265,8 +276,21 @@
   }
 }
 
+.tree-list-scroll {
+  max-height: 100%;
+  padding-bottom: $grid-size;
+  overflow-y: scroll;
+  overflow-x: auto;
+}
+
 .tree-list-gutter {
   height: $grid-size;
+}
+
+.tree-list-clear-icon {
+  right: 10px;
+  left: auto;
+  line-height: 0;
 }
 
 .file-row-header {
@@ -477,6 +501,10 @@
     border-radius: $gl-border-radius-base;
   }
 
+  .mr-widget-alert-container + .mr-widget-section {
+    border-top: 0;
+  }
+
   .commits-list {
     > li {
       padding: $gl-padding;
@@ -511,6 +539,13 @@
     font-size: $gl-font-size;
   }
 
+  .accept-merge-holder {
+    .accept-action {
+      display: inline-block;
+      float: left;
+    }
+  }
+
   .ci-widget {
     color: var(--gl-text-color-default);
     display: flex;
@@ -530,6 +565,10 @@
 
   .mr-widget-icon {
     font-size: 22px;
+  }
+
+  .mr-loading-icon {
+    margin: 3px 0;
   }
 
   .normal {
@@ -552,7 +591,7 @@
   }
 
   .label-branch {
-    @apply gl-font-monospace;
+    @include gl-font-monospace;
     overflow: hidden;
     word-break: break-all;
   }
@@ -603,6 +642,11 @@
       margin: 0 0 0 10px;
     }
 
+    .state-label {
+      font-weight: $gl-font-weight-bold;
+      padding-right: 10px;
+    }
+
     .danger {
       color: var(--red-500, $red-500);
     }
@@ -610,6 +654,14 @@
     .dropdown-menu {
       li a {
         padding: 5px;
+      }
+
+      .merge-opt-icon {
+        line-height: 1.5;
+      }
+
+      .merge-opt-title {
+        margin-left: 8px;
       }
     }
 
@@ -635,6 +687,29 @@
       }
     }
 
+    &.mr-widget-empty-state {
+      line-height: 20px;
+      padding: $gl-padding;
+
+      .artwork {
+
+        @include media-breakpoint-down(md) {
+          margin-bottom: $gl-padding;
+        }
+      }
+
+      .text {
+        p {
+          margin-top: $gl-padding;
+        }
+
+        .highlight {
+          margin: 0 0 $gl-padding;
+          font-weight: $gl-font-weight-bold;
+        }
+      }
+    }
+
     &.mr-pipeline-suggest {
       border-radius: $gl-border-radius-base;
       line-height: 20px;
@@ -643,6 +718,19 @@
       .circle-icon-container {
         color: var(--gray-100, $gray-100);
       }
+    }
+  }
+
+  .ci-coverage {
+    float: right;
+  }
+
+  .stop-env-container {
+    color: var(--gl-text-color-default);
+    float: right;
+
+    a {
+      color: var(--gl-text-color-default);
     }
   }
 }
@@ -1004,12 +1092,6 @@
 .diff-file-discussions-wrapper {
   width: 100%;
 
-  .timeline-entry.note-discussion {
-    > .timeline-entry-inner {
-      border-bottom: 0 !important;
-    }
-  }
-
   .diff-discussions:not(:first-child) >.notes {
     padding-top: 0;
   }
@@ -1025,10 +1107,6 @@
     border-bottom-width: 0;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
-
-    .notes {
-      @apply gl-bg-subtle;
-    }
   }
 }
 

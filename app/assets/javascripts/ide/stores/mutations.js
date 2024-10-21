@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import * as types from './mutation_types';
 import branchMutations from './mutations/branch';
 import fileMutations from './mutations/file';
@@ -221,13 +222,10 @@ export default {
             prevParentPath: oldEntry.prevParentPath || oldEntry.parentPath,
           };
 
-    state.entries = {
-      ...state.entries,
-      [newPath]: {
-        ...baseProps,
-        ...prevProps,
-      },
-    };
+    Vue.set(state.entries, newPath, {
+      ...baseProps,
+      ...prevProps,
+    });
 
     if (pathsAreEqual(oldEntry.parentPath, parentPath)) {
       swapInParentTreeWithSorting(state, oldEntry.key, newPath, parentPath);

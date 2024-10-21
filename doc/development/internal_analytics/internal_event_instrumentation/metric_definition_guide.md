@@ -32,7 +32,7 @@ A snippet from a unique metric could look like below. Notice the `unique` proper
 ```yaml
 events:
   - name: create_merge_request
-    unique: user.id
+    unique: user_id
 ```
 
 Similarly, a snippet from a total count metric can look like below. Notice how there is no `unique` property.
@@ -64,9 +64,6 @@ distribution:
 tier:
 - premium
 - ultimate
-tiers:
-- premium
-- ultimate
 performance_indicator_type: []
 milestone: "<13.9"
 ```
@@ -93,8 +90,6 @@ distribution:
   - ee
 tier:
   - ultimate
-tiers:
-  - ultimate
 time_frame: 7d
 events:
   - name: export_runner_usage_by_project_as_csv
@@ -110,7 +105,7 @@ Example: Count of distinct users who opted to filter out anonymous users on the 
 ```yaml
 key_path: count_distinct_user_id_from_exclude_anonymised_users_28d
 description: Count of distinct users who opted to filter out anonymous users on the analytics dashboard view in the last 28 days.
-product_group: platform_insights
+product_group: product_analytics
 performance_indicator_type: []
 value_type: number
 status: active
@@ -122,8 +117,6 @@ data_category: optional
 distribution:
 - ee
 tier:
-- ultimate
-tiers:
 - ultimate
 events:
 - name: exclude_anonymised_users
@@ -143,7 +136,7 @@ Each internal event based metric should have a least one event selection rule wi
 | Property           | Required | Additional information                                                                                                                                        |
 |--------------------|----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `name`             | yes      | Name of the event                                                                                                                                             |
-| `unique`           | no       | Used if the metric should count the distinct number of users, projects, namespaces, or count the unique values for additional properties present in the event. Valid values are `user.id`, `project.id` and `namespace.id`. Additionally `label`, `property`, and `value` may also be used in reference to any [additional properties](quick_start.md#additional-properties) included with the event. |
+| `unique`           | no       | Used if the metric should count the distinct number of users, projects or namespaces present in the event. Valid values are `user.id`, `project.id` and `namespace.id`. |
 | `filter`           | no       | Used when only a subset of events should be included in the metric. Only additional properties can be used for filtering.                                     |
 
 An example of a single event selection rule which updates a unique count metric when an event called `pull_package` with additional property `label` with the value `rubygems` occurs:

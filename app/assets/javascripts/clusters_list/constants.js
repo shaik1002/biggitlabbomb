@@ -86,8 +86,7 @@ export const I18N_AGENT_TABLE = {
   viewDocsText: s__('ClusterAgents|How do I update an agent?'),
   defaultConfigText: s__('ClusterAgents|Default configuration'),
   defaultConfigTooltip: s__('ClusterAgents|What is default configuration?'),
-  sharedBadgeText: s__('ClusterAgents|Shared'),
-  receptiveBadgeText: s__('ClusterAgents|Receptive'),
+  sharedBadgeText: s__('ClusterAgents|shared'),
   externalConfigText: s__('ClusterAgents|External project'),
 };
 
@@ -135,17 +134,6 @@ export const I18N_AGENT_MODAL = {
   maxAgentsSupport: s__('ClusterAgents|We only support 100 agents on the UI.'),
   useTerraformText: s__(
     'ClusterAgents|To manage more agents, %{linkStart}use Terraform%{linkEnd}.',
-  ),
-  registerWithUITitle: s__('ClusterAgents|Register agent with the UI'),
-  bootstrapWithFluxTitle: s__('ClusterAgents|Bootstrap the agent with Flux'),
-  bootstrapWithFluxDescription: s__(
-    'ClusterAgents|If Flux is installed in the cluster, you can install and register the agent from the command line:',
-  ),
-  bootstrapWithFluxOptions: s__(
-    'ClusterAgents|You can view a list of options with %{codeStart}--help%{codeEnd}.',
-  ),
-  bootstrapWithFluxDocs: s__(
-    "ClusterAgents|If you're %{linkStart}bootstrapping the agent with Flux%{linkEnd}, you can close this dialog.",
   ),
 };
 

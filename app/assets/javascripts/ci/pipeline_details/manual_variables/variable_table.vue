@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlPagination, GlTableLite, GlTruncate } from '@gitlab/ui';
+import { GlButton, GlPagination, GlTableLite } from '@gitlab/ui';
 import { __ } from '~/locale';
 
 // The number of items per page is based on the design mockup.
@@ -11,7 +11,6 @@ export default {
     GlButton,
     GlPagination,
     GlTableLite,
-    GlTruncate,
   },
   inject: ['manualVariablesCount', 'canReadVariables'],
   props: {
@@ -49,8 +48,6 @@ export default {
     {
       key: 'key',
       label: __('Key'),
-      thClass: 'gl-w-1/4 gl-whitespace-nowrap',
-      tdClass: 'gl-max-w-15',
     },
     {
       key: 'value',
@@ -65,12 +62,14 @@ export default {
   <!-- This negative margin top is a hack for the purpose to eliminate default padding of tab container -->
   <!-- For context refer to: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/159206#note_1999122459 -->
   <div class="-gl-mt-3">
-    <div v-if="canReadVariables" class="gl-bg-gray-10 gl-p-3">
+    <div v-if="canReadVariables" class="gl-p-3 gl-bg-gray-10">
       <gl-button :aria-label="buttonText" @click="toggleRevealed">{{ buttonText }}</gl-button>
     </div>
     <gl-table-lite :fields="$options.TABLE_FIELDS" :items="items">
       <template #cell(key)="{ value }">
-        <gl-truncate :text="value" class="gl-text-secondary" />
+        <span class="gl-text-secondary">
+          {{ value }}
+        </span>
       </template>
       <template #cell(value)="{ value }">
         <div class="gl-text-secondary" data-testid="manual-variable-value">

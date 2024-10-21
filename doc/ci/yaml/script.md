@@ -96,7 +96,7 @@ job2:
   after_script: []
 ```
 
-## Skip `after_script` commands if a job is canceled
+## Skip `after_script` commands if a job is cancelled
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/10158) in GitLab 17.0 [with a flag](../../administration/feature_flags.md) named `ci_canceling_status`. Enabled by default. Requires GitLab Runner version 16.11.1.
 > - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/460285) in GitLab 17.3. Feature flag `ci_canceling_status` removed.
@@ -321,7 +321,7 @@ this line should be hidden when collapsed
 
 Sample job console log:
 
-![Custom collapsible sections](img/collapsible_job_v16_10.png)
+![Custom collapsible sections](img/collapsible-job.png)
 
 #### Use a script to improve display of collapsible sections
 
@@ -498,7 +498,7 @@ Resolve this by either:
 Sometimes the formatting in the job log displays incorrectly with tools that rely
 on the `TERM` environment variable for coloring or formatting. For example, with the `mypy` command:
 
-![Example output](img/incorrect_log_rendering_v16_5.png)
+![Example output](img/incorrect_log_rendering.png)
 
 GitLab Runner runs the container's shell in non-interactive mode, so the shell's `TERM`
 environment variable is set to `dumb`. To fix the formatting for these tools, you can:

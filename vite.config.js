@@ -11,8 +11,6 @@ import {
   IS_JH,
   SOURCEGRAPH_PUBLIC_PATH,
   GITLAB_WEB_IDE_PUBLIC_PATH,
-  PDF_JS_WORKER_PUBLIC_PATH,
-  PDF_JS_CMAPS_PUBLIC_PATH,
   copyFilesPatterns,
 } from './config/webpack.constants';
 /* eslint-disable import/extensions */
@@ -23,7 +21,6 @@ import { PageEntrypointsPlugin } from './config/helpers/vite_plugin_page_entrypo
 import { FixedRubyPlugin } from './config/helpers/vite_plugin_ruby_fixed.mjs';
 import { StylePlugin } from './config/helpers/vite_plugin_style.mjs';
 import { IconsPlugin } from './config/helpers/vite_plugin_icons.mjs';
-import { ImagesPlugin } from './config/helpers/vite_plugin_images.mjs';
 /* eslint-enable import/extensions */
 
 let viteGDKConfig;
@@ -89,7 +86,6 @@ export default defineConfig({
   plugins: [
     PageEntrypointsPlugin(),
     IconsPlugin(),
-    ImagesPlugin(),
     StylePlugin({ shouldWatch: viteGDKConfig.hmr !== null }),
     viteTailwindCompilerPlugin({ shouldWatch: viteGDKConfig.hmr !== null }),
     CopyPlugin({
@@ -120,9 +116,6 @@ export default defineConfig({
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
     'process.env.SOURCEGRAPH_PUBLIC_PATH': JSON.stringify(SOURCEGRAPH_PUBLIC_PATH),
     'process.env.GITLAB_WEB_IDE_PUBLIC_PATH': JSON.stringify(GITLAB_WEB_IDE_PUBLIC_PATH),
-    'process.env.PDF_JS_WORKER_PUBLIC_PATH': JSON.stringify(PDF_JS_WORKER_PUBLIC_PATH),
-    'process.env.PDF_JS_CMAPS_PUBLIC_PATH': JSON.stringify(PDF_JS_CMAPS_PUBLIC_PATH),
-    'window.IS_VITE': JSON.stringify(true),
     'window.VUE_DEVTOOLS_CONFIG.openInEditorHost': JSON.stringify(
       viteGDKConfig.hmr
         ? `${process.env.VITE_HMR_HTTP_URL}/vite-dev/`
@@ -158,12 +151,5 @@ export default defineConfig({
   },
   worker: {
     format: 'es',
-  },
-  css: {
-    preprocessorOptions: {
-      sass: {
-        api: 'modern',
-      },
-    },
   },
 });

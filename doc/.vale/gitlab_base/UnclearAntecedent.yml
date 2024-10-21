@@ -1,5 +1,5 @@
 ---
-# Warning: gitlab_base.UnclearAntecedent
+# Warning: gitlab.UnclearAntecedent
 #
 # Checks for words that need a noun for clarity.
 #

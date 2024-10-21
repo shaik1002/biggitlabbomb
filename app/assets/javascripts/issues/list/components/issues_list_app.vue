@@ -27,7 +27,7 @@ import {
   getSortOptions,
   getTypeTokenOptions,
   groupMultiSelectFilterTokens,
-  mapWorkItemWidgetsToIssuableFields,
+  mapWorkItemWidgetsToIssueFields,
   updateUpvotesCount,
 } from 'ee_else_ce/issues/list/utils';
 import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
@@ -42,18 +42,12 @@ import {
   STATUS_OPEN,
   WORKSPACE_GROUP,
   WORKSPACE_PROJECT,
-  TYPE_ISSUE,
 } from '~/issues/constants';
 import axios from '~/lib/utils/axios_utils';
 import { fetchPolicies } from '~/lib/graphql';
 import { isPositiveInteger } from '~/lib/utils/number_utils';
 import { scrollUp } from '~/lib/utils/scroll_utils';
-import {
-  getParameterByName,
-  joinPaths,
-  removeParams,
-  updateHistory,
-} from '~/lib/utils/url_utility';
+import { getParameterByName, joinPaths } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 import {
   OPERATORS_IS,
@@ -90,12 +84,8 @@ import IssuableList from '~/vue_shared/issuable/list/components/issuable_list_ro
 import { DEFAULT_PAGE_SIZE, issuableListTabs } from '~/vue_shared/issuable/list/constants';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import NewResourceDropdown from '~/vue_shared/components/new_resource_dropdown/new_resource_dropdown.vue';
-import {
-  WORK_ITEM_TYPE_ENUM_OBJECTIVE,
-  DETAIL_VIEW_QUERY_PARAM_NAME,
-} from '~/work_items/constants';
+import { WORK_ITEM_TYPE_ENUM_OBJECTIVE } from '~/work_items/constants';
 import WorkItemDrawer from '~/work_items/components/work_item_drawer.vue';
-import { makeDrawerUrlParam } from '~/work_items/utils';
 import {
   CREATED_DESC,
   i18n,
@@ -141,7 +131,6 @@ export default {
   name: 'IssuesListAppCE',
   i18n,
   issuableListTabs,
-  issuableType: TYPE_ISSUE.toUpperCase(),
   ISSUES_VIEW_TYPE_KEY,
   ISSUES_GRID_VIEW_KEY,
   ISSUES_LIST_VIEW_KEY,
@@ -253,7 +242,6 @@ export default {
         }
         this.pageInfo = data[this.namespace]?.issues.pageInfo ?? {};
         this.exportCsvPathWithQuery = this.getExportCsvPathWithQuery();
-        this.checkDrawerParams();
       },
       error(error) {
         this.issuesError = this.$options.i18n.errorFetchingIssues;
@@ -548,10 +536,7 @@ export default {
       return this.tabCounts[this.state] ?? 0;
     },
     urlParams() {
-      const show = this.activeIssuable
-        ? makeDrawerUrlParam(this.activeIssuable, this.fullPath)
-        : undefined;
-      const base = {
+      return {
         sort: urlSortParams[this.sortKey],
         state: this.state,
         ...this.urlFilterParams,
@@ -560,10 +545,6 @@ export default {
         page_after: this.pageParams.afterCursor ?? undefined,
         page_before: this.pageParams.beforeCursor ?? undefined,
       };
-      if (show) {
-        return { ...base, show };
-      }
-      return base;
     },
     // due to the issues with cache-and-network, we need this hack to check if there is any data for the query in the cache.
     // if we have cached data, we disregard the loading state
@@ -593,11 +574,6 @@ export default {
     $route(newValue, oldValue) {
       if (newValue.fullPath !== oldValue.fullPath) {
         this.updateData(getParameterByName(PARAM_SORT));
-      }
-      if (newValue.query.show) {
-        this.checkDrawerParams();
-      } else {
-        this.activeIssuable = null;
       }
     },
   },
@@ -840,9 +816,7 @@ export default {
       this.viewType = ISSUES_LIST_VIEW_KEY;
     },
     handleSelectIssuable(issuable) {
-      this.activeIssuable = {
-        ...issuable,
-      };
+      this.activeIssuable = issuable;
     },
     updateIssuablesCache(workItem) {
       const client = this.$apollo.provider.clients.defaultClient;
@@ -851,13 +825,9 @@ export default {
         variables: this.queryVariables,
       });
 
-      const activeIssuable = issuesList[this.namespace].issues.nodes.find(
-        (issue) => getIdFromGraphQLId(issue.id) === getIdFromGraphQLId(workItem.id),
+      const activeIssuable = issuesList.project.issues.nodes.find(
+        (issue) => issue.iid === workItem.iid,
       );
-
-      if (!activeIssuable) {
-        return;
-      }
 
       // when we change issuable state, it's moved to a different tab
       // to ensure that we show 20 items of the first page, we need to refetch issuables
@@ -867,12 +837,7 @@ export default {
       }
 
       // handle all other widgets
-      const data = mapWorkItemWidgetsToIssuableFields({
-        list: issuesList,
-        workItem,
-        namespace: this.namespace,
-        type: 'issue',
-      });
+      const data = mapWorkItemWidgetsToIssueFields(issuesList, workItem);
 
       client.writeQuery({ query: getIssuesQuery, variables: this.queryVariables, data });
     },
@@ -881,7 +846,7 @@ export default {
 
       cache.updateQuery({ query: getIssuesQuery, variables: this.queryVariables }, (issuesList) =>
         produce(issuesList, (draftData) => {
-          const activeItem = draftData[this.namespace].issues.nodes.find(
+          const activeItem = draftData.project.issues.nodes.find(
             (issue) => issue.iid === workItemIid,
           );
 
@@ -904,32 +869,9 @@ export default {
         variables: this.queryVariables,
       });
 
-      const data = updateUpvotesCount({ list: issuesList, workItem, namespace: this.namespace });
+      const data = updateUpvotesCount(issuesList, workItem);
 
       client.writeQuery({ query: getIssuesQuery, variables: this.queryVariables, data });
-    },
-    checkDrawerParams() {
-      const queryParam = getParameterByName(DETAIL_VIEW_QUERY_PARAM_NAME);
-
-      if (this.activeIssuable || !queryParam) {
-        return;
-      }
-
-      const params = JSON.parse(atob(queryParam));
-      if (params.id) {
-        const issue = this.issues.find((i) => getIdFromGraphQLId(i.id) === params.id);
-        if (issue) {
-          this.activeIssuable = {
-            ...issue,
-            // we need fullPath here to prevent cache invalidation
-            fullPath: params.full_path,
-          };
-        } else {
-          updateHistory({
-            url: removeParams([DETAIL_VIEW_QUERY_PARAM_NAME]),
-          });
-        }
-      }
     },
   },
 };
@@ -941,8 +883,6 @@ export default {
       v-if="issuesDrawerEnabled"
       :open="isIssuableSelected"
       :active-item="activeIssuable"
-      :issuable-type="$options.issuableType"
-      click-outside-exclude-selector=".issuable-list"
       @close="activeIssuable = null"
       @work-item-updated="updateIssuablesCache"
       @work-item-emoji-updated="updateIssuableEmojis"
@@ -954,7 +894,6 @@ export default {
     <issuable-list
       v-if="hasAnyIssues"
       :namespace="fullPath"
-      :full-path="fullPath"
       recent-searches-storage-key="issues"
       :search-tokens="searchTokens"
       :has-scoped-labels-feature="hasScopedLabelsFeature"
@@ -995,7 +934,7 @@ export default {
       @select-issuable="handleSelectIssuable"
     >
       <template #nav-actions>
-        <div class="gl-flex gl-gap-3">
+        <div class="gl-display-flex gl-gap-3">
           <local-storage-sync
             v-if="gridViewFeatureEnabled"
             :value="viewType"
@@ -1023,7 +962,7 @@ export default {
           <gl-button
             v-if="canBulkUpdate"
             :disabled="isBulkEditButtonDisabled"
-            class="gl-grow"
+            class="gl-flex-grow-1"
             @click="handleBulkUpdateClick"
           >
             {{ __('Bulk edit') }}
@@ -1033,7 +972,7 @@ export default {
               v-if="showNewIssueLink"
               :href="newIssuePath"
               variant="confirm"
-              class="gl-grow"
+              class="gl-flex-grow-1"
             >
               {{ __('New issue') }}
             </gl-button>
@@ -1104,7 +1043,7 @@ export default {
 
     <issuable-by-email
       v-if="showIssuableByEmail"
-      class="gl-pb-7 gl-pt-5 gl-text-center"
+      class="gl-text-center gl-pt-5 gl-pb-7"
       data-track-action="click_email_issue_project_issues_empty_list_page"
       data-track-label="email_issue_project_issues_empty_list"
     />

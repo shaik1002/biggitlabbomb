@@ -10,6 +10,7 @@ RSpec.describe Gitlab::Ci::ProjectConfig, feature_category: :pipeline_compositio
   let(:bridge) { nil }
   let(:triggered_for_branch) { true }
   let(:ref) { 'master' }
+  let(:has_pipeline_execution_policies) { false }
 
   subject(:config) do
     described_class.new(
@@ -19,7 +20,8 @@ RSpec.describe Gitlab::Ci::ProjectConfig, feature_category: :pipeline_compositio
       pipeline_source: source,
       pipeline_source_bridge: bridge,
       triggered_for_branch: triggered_for_branch,
-      ref: ref
+      ref: ref,
+      has_pipeline_execution_policies: has_pipeline_execution_policies
     )
   end
 

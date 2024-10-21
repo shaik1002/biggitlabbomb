@@ -21,9 +21,6 @@ these additional scopes are available for the [advanced search](#advanced-search
 - `blobs`
 - `notes`
 
-If you want to use basic search instead, see
-[specify a search type](../user/search/index.md#specify-a-search-type).
-
 ## Advanced search API
 
 Search for a [term](../user/search/advanced_search.md#syntax) across the entire GitLab instance.
@@ -41,7 +38,6 @@ GET /search
 | `order_by`    | string   | No | Allowed values are `created_at` only. If not set, results are sorted by `created_at` in descending order for basic search, or by the most relevant documents for advanced search.|
 | `sort`    | string   | No | Allowed values are `asc` or `desc` only. If not set, results are sorted by `created_at` in descending order for basic search, or by the most relevant documents for advanced search.|
 | `state`       | string   | No | Filter by state. Supports `issues` and `merge_requests` scopes; other scopes are ignored. |
-| `fields` | array of strings | No | Array of fields you wish to search, allowed values are `title` only. Supports `issues` and `merge_requests` scopes; other scopes are ignored. Premium and Ultimate only. |
 
 ### Scope: `projects`
 
@@ -459,7 +455,7 @@ GET /groups/:id/search
 
 | Attribute | Type | Required | Description  |
 | --------- | ---- | -------- | -------------|
-| `id`                | integer or string   | Yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths). |
+| `id`                | integer or string   | Yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `scope`       | string   | Yes | The scope to search in. Values include `projects`, `issues`, `merge_requests`, `milestones`, and `users`. Additional scopes are `wiki_blobs`, `commits`, `blobs`, and `notes`. |
 | `search`      | string   | Yes | The search term. |
 | `confidential` | boolean   | No | Filter by confidentiality. Supports only `issues` scope; other scopes are ignored. |
@@ -854,7 +850,7 @@ GET /projects/:id/search
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ------------|
-| `id` | integer or string | Yes | The ID or [URL-encoded path of the project](rest/index.md#namespaced-paths). |
+| `id` | integer or string | Yes | The ID or [URL-encoded path of the project](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `scope`       | string   | Yes | The scope to search in. Values include `issues`, `merge_requests`, `milestones`, and `users`. Additional scopes are `wiki_blobs`, `commits`, `blobs`, and `notes`. |
 | `search`      | string   | Yes | The search term. |
 | `confidential` | boolean   | No | Filter by confidentiality. Supports `issues` scope; other scopes are ignored. |

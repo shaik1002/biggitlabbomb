@@ -75,7 +75,7 @@ module ResourceAccessTokens
     end
 
     def delete_failed_user(user)
-      DeleteUserWorker.perform_async(current_user.id, user.id, hard_delete: true, skip_authorization: true, reason_for_deletion: "Access token creation failed")
+      DeleteUserWorker.perform_async(current_user.id, user.id, hard_delete: true, skip_authorization: true)
     end
 
     def default_user_params
@@ -90,9 +90,8 @@ module ResourceAccessTokens
     end
 
     def create_personal_access_token(user)
-      organization_id = resource.organization_id || params[:organization_id]
       PersonalAccessTokens::CreateService.new(
-        current_user: user, target_user: user, organization_id: organization_id, params: personal_access_token_params
+        current_user: user, target_user: user, params: personal_access_token_params
       ).execute
     end
 

@@ -150,7 +150,12 @@ export default {
     },
   },
   watch: {
-    value: 'updateValue',
+    value(val) {
+      this.markdown = val;
+
+      this.saveDraft();
+      this.autosizeTextarea();
+    },
   },
   mounted() {
     this.autofocusTextarea();
@@ -173,24 +178,11 @@ export default {
       return this.markdown;
     },
     setValue(value) {
-      this.$emit('input', value);
-      this.updateValue(value);
-    },
-    updateValue(value) {
       this.markdown = value;
+      this.$emit('input', value);
+
       this.saveDraft();
       this.autosizeTextarea();
-    },
-    append(value) {
-      if (!value) {
-        this.focus();
-        return;
-      }
-      const newValue = [this.markdown.trim(), value].filter(Boolean).join('\n\n');
-      this.updateValue(`${newValue}\n\n`);
-      this.$nextTick(() => {
-        this.focus();
-      });
     },
     setTemplate(template, force = false) {
       if (!this.markdown || force) {
@@ -266,13 +258,6 @@ export default {
       if (this.autofocus && this.editingMode === EDITING_MODE_MARKDOWN_FIELD) {
         this.$refs.textarea.focus();
         this.setEditorAsAutofocused();
-      }
-    },
-    focus() {
-      if (this.editingMode === EDITING_MODE_MARKDOWN_FIELD) {
-        this.$refs.textarea.focus();
-      } else {
-        this.$refs.contentEditor.focus();
       }
     },
     setEditorAsAutofocused() {
@@ -394,13 +379,17 @@ export default {
         :editable="!disabled"
         :disable-attachments="disableAttachments"
         :code-suggestions-config="codeSuggestionsConfig"
-        :data-testid="formFieldProps['data-testid'] || 'markdown-editor-form-field'"
         @initialized="setEditorAsAutofocused"
         @change="updateMarkdownFromContentEditor"
         @keydown="onKeydown"
         @enableMarkdownEditor="onEditingModeChange('markdownField')"
       />
-      <input v-bind="formFieldProps" :value="markdown" type="hidden" />
+      <input
+        v-bind="formFieldProps"
+        :value="markdown"
+        data-testid="markdown-editor-form-field"
+        type="hidden"
+      />
     </div>
   </div>
 </template>

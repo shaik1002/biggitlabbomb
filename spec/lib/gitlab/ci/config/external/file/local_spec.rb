@@ -183,8 +183,8 @@ RSpec.describe Gitlab::Ci::Config::External::File::Local, feature_category: :pip
       Gitlab::Ci::Config::External::Mapper::Verifier.new(context).process([local_file])
     end
 
-    it 'returns an error message with the variable masked' do
-      expect(local_file.error_message).to eq("Local file `lib/gitlab/ci/templates/[MASKED]xxx.yml` does not exist!")
+    it 'returns an error message' do
+      expect(local_file.error_message).to eq("Local file `lib/gitlab/ci/templates/xxxxxxxxxxx.yml` does not exist!")
     end
   end
 

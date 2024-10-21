@@ -29,8 +29,15 @@ RSpec.describe Members::InvitedPrivateGroupAccessibilityAssigner, feature_catego
           let(:source) { create(source_type, source_visibility) }
           let(:direct_member) { source.add_developer(member_user) }
           let(:members) { [direct_member] }
-
           it_behaves_like 'sets is_source_accessible_to_current_user to true for all members'
+
+          context 'with webui_members_inherited_users feature flag disabled' do
+            before do
+              stub_feature_flags(webui_members_inherited_users: false)
+            end
+
+            it_behaves_like 'sets is_source_accessible_to_current_user to true for all members'
+          end
         end
       end
 
@@ -44,6 +51,14 @@ RSpec.describe Members::InvitedPrivateGroupAccessibilityAssigner, feature_catego
           let(:members) { [inherited_member] }
 
           it_behaves_like 'sets is_source_accessible_to_current_user to true for all members'
+
+          context 'with webui_members_inherited_users feature flag disabled' do
+            before do
+              stub_feature_flags(webui_members_inherited_users: false)
+            end
+
+            it_behaves_like 'sets is_source_accessible_to_current_user to true for all members'
+          end
         end
       end
 
@@ -62,6 +77,14 @@ RSpec.describe Members::InvitedPrivateGroupAccessibilityAssigner, feature_catego
               assigner.execute
 
               expect(members.first.is_source_accessible_to_current_user).to eq(can_see_invited_members_source?)
+            end
+
+            context 'with webui_members_inherited_users feature flag disabled' do
+              before do
+                stub_feature_flags(webui_members_inherited_users: false)
+              end
+
+              it_behaves_like 'sets is_source_accessible_to_current_user to true for all members'
             end
 
             context 'with multiple members belonging to the same source' do

@@ -53,7 +53,6 @@ const SASS_INCLUDE_PATHS = [
   'app/assets/stylesheets/_jh',
   'ee/app/assets/stylesheets',
   'ee/app/assets/stylesheets/_ee',
-  'node_modules/@gitlab/ui/src/vendor',
   'node_modules',
 ].map((p) => path.resolve(ROOT, p));
 
@@ -150,7 +149,6 @@ module.exports = function storybookWebpackConfig({ config }) {
       loaders: [
         'style-loader',
         'css-loader',
-        'postcss-loader',
         {
           loader: 'sass-loader',
           options: sassLoaderOptions,

@@ -1,5 +1,5 @@
 ---
-# Warning: gitlab_base.CurrentStatus
+# Warning: gitlab.CurrentStatus
 #
 # Checks for words that indicate a product or feature may change in the future.
 #

@@ -213,7 +213,7 @@ module QA
       end
 
       def delete_netrc
-        FileUtils.rm_f(netrc_file_path)
+        File.delete(netrc_file_path) if File.exist?(netrc_file_path)
       end
 
       def remote_branches

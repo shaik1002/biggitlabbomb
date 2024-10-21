@@ -88,9 +88,7 @@ RSpec.describe GitlabSchema.types['Group'], feature_category: :groups_and_projec
   end
 
   it_behaves_like 'a GraphQL type with labels' do
-    let(:labels_resolver_arguments) do
-      [:search_term, :includeAncestorGroups, :includeDescendantGroups, :onlyGroupLabels, :searchIn, :title]
-    end
+    let(:labels_resolver_arguments) { [:search_term, :includeAncestorGroups, :includeDescendantGroups, :onlyGroupLabels, :searchIn] }
   end
 
   describe 'milestones' do

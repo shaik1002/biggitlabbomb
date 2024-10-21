@@ -86,12 +86,6 @@ module Resolvers
                Available only when the feature flag `mr_approved_filter` is enabled.
       DESC
 
-    argument :subscribed, Types::Issuables::SubscriptionStatusEnum,
-      description: 'Merge requests the current user is subscribed to. Is ignored if ' \
-        '`filter_subscriptions` feature flag is disabled.',
-      alpha: { milestone: '17.5' },
-      required: false
-
     argument :created_after, Types::TimeType,
       required: false,
       description: 'Merge requests created after the timestamp.'
@@ -107,10 +101,6 @@ module Resolvers
     argument :deployment_id, GraphQL::Types::String,
       required: false,
       description: 'ID of the deployment.'
-    argument :environment_name, GraphQL::Types::String,
-      as: :environment,
-      required: false,
-      description: 'Environment merge requests have been deployed to.'
     argument :updated_after, Types::TimeType,
       required: false,
       description: 'Merge requests updated after the timestamp.'
@@ -195,5 +185,3 @@ module Resolvers
     end
   end
 end
-
-Resolvers::MergeRequestsResolver.prepend_mod

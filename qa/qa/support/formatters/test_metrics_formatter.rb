@@ -35,7 +35,6 @@ module QA
           :ci_job_url,
           :ci_job_name,
           :rspec_retried?,
-          :parallel_run?,
           to: QA::Runtime::Env
 
         delegate :retry_failed_specs?, to: ::Gitlab::QA::Runtime::Env
@@ -67,7 +66,7 @@ module QA
         def save_test_metrics
           return log(:info, "Saving test metrics json not enabled, skipping") unless save_metrics_json?
 
-          file = File.join('tmp', metrics_file_name(prefix: 'test', with_pipeline_id_postfix: false))
+          file = File.join('tmp', metrics_file_name(prefix: 'test'))
 
           File.write(file, execution_data.to_json) && log(:debug, "Saved test metrics to #{file}")
         rescue StandardError => e
@@ -98,12 +97,9 @@ module QA
         def push_test_metrics_to_gcs
           init_gcs_client! # init client and exit early if mandatory configuration is missing
           retry_on_exception(sleep_interval: 30, message: 'Failed to push test metrics to GCS') do
-            gcs_client.put_object(
-              gcs_bucket,
-              metrics_file_name(prefix: 'test'),
-              execution_data.to_json,
-              force: true, content_type: 'application/json'
-            )
+            gcs_client.put_object(gcs_bucket, metrics_file_name(prefix: 'test',
+              postfix: "-#{env('CI_PIPELINE_ID') || 'local'}"), execution_data.to_json,
+              force: true, content_type: 'application/json')
 
             log(:info, "Pushed #{execution_data.length} test execution entries to GCS")
           end
@@ -144,12 +140,10 @@ module QA
         def push_fabrication_metrics_gcs(data)
           init_gcs_client! # init client and exit early if mandatory configuration is missing
           retry_on_exception(sleep_interval: 30, message: 'Failed to push resource fabrication metrics to GCS') do
-            gcs_client.put_object(
-              gcs_bucket,
-              metrics_file_name(prefix: 'fabrication'),
-              data.to_json, force: true,
-              content_type: 'application/json'
-            )
+            gcs_client.put_object(gcs_bucket,
+              metrics_file_name(prefix: 'fabrication',
+                postfix: "-#{env('CI_PIPELINE_ID') || 'local'}"),
+              data.to_json, force: true, content_type: 'application/json')
 
             log(:info, "Pushed #{data.length} resource fabrication entries to GCS")
           end
@@ -185,17 +179,11 @@ module QA
 
         # Construct file name for metrics
         #
-        # @param [String] prefix
-        # @param [Boolean] with_pipeline_id_postfix
-        # @return [String]
-        def metrics_file_name(prefix:, with_pipeline_id_postfix: true)
-          name = ["#{prefix}-metrics-#{env('CI_JOB_NAME_SLUG') || 'local'}"]
-          name << "-env-#{env('TEST_ENV_NUMBER') || 1}" if parallel_run?
-          name << "-retry-#{rspec_retried?}" if retry_failed_specs?
-          name << "-#{env('CI_PIPELINE_ID') || 'local'}" if with_pipeline_id_postfix
-          name << ".json"
-
-          name.join
+        # @param [Hash] prefix of filename
+        # @return [void]
+        def metrics_file_name(prefix:, postfix: '')
+          "#{prefix}-metrics-#{env('CI_JOB_NAME_SLUG') || 'local'}" \
+            "#{retry_failed_specs? ? "-retry-#{rspec_retried?}" : ''}#{postfix}.json"
         end
 
         # Transform example to influxdb compatible metrics data

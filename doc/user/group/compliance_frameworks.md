@@ -15,17 +15,17 @@ requirements or needs additional oversight.
 
 In the Ultimate tier, the compliance framework can optionally enforce
 [compliance pipeline configuration](compliance_pipelines.md) and
-[security policies](../application_security/policies/index.md#scope) to the projects on which it is applied.
+[security policies](../application_security/policies/scan_execution_policies.md#scope-security-policies-to-projects) to the projects on which it is applied.
 
 Compliance frameworks are created on top-level groups. If a project is moved outside of its existing top-level group,
 its frameworks are removed.
 
-You can apply up to 20 compliance frameworks to each project.
+You can apply multiple compliance frameworks to a project.
 
 ## Prerequisites
 
 - To create, edit, and delete compliance frameworks, users must have either:
-  - The Owner role for the top-level group.
+  - The Owner role in the top-level group.
   - Be assigned a [custom role](../custom_roles.md) with the `admin_compliance_framework`
     [custom permission](../custom_roles/abilities.md#compliance-management).
 - To add or remove a compliance framework to or from a project, the group to which the project belongs must have a

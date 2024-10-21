@@ -37,7 +37,6 @@ You can resolve a spam log with one of the following effects:
 | **Remove log** | The spam log is removed from the list. |
 | **Trust user** | The user is trusted, and can create issues, notes, snippets, and merge requests without being blocked for spam. Spam logs are not created for trusted users. |
 
-## Related topics
-
-- [Moderate users (administration)](moderate_users.md)
-- [Review abuse reports](review_abuse_reports.md)
+NOTE:
+Users can be [blocked](../api/users.md#block-user) and
+[unblocked](../api/users.md#unblock-user) using the GitLab API.

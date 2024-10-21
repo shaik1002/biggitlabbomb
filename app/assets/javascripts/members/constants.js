@@ -61,7 +61,7 @@ export const FIELDS = [
   },
   {
     key: FIELD_KEY_MAX_ROLE,
-    label: __('Role'),
+    label: __('Max role'),
     thClass: 'col-max-role',
     tdClass: 'col-max-role !gl-align-middle',
     sort: {
@@ -139,7 +139,12 @@ export const FILTERED_SEARCH_TOKEN_WITH_INHERITED_PERMISSIONS = {
   operators: OPERATORS_IS,
   options: [
     { value: 'exclude', title: s__('Members|Direct') },
-    { value: 'only', title: s__('Members|Indirect') },
+    {
+      value: 'only',
+      title: gon.features?.webuiMembersInheritedUsers
+        ? s__('Members|Indirect')
+        : s__('Members|Inherited'),
+    },
   ],
 };
 

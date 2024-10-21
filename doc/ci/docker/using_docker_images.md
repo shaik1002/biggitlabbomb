@@ -10,12 +10,15 @@ DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
-You can run your CI/CD jobs in Docker containers hosted on dedicated CI/CD build servers or your local machine.
+You can run your CI/CD jobs in separate, isolated Docker containers.
+
+If you run Docker on your local machine, you can run tests in the container,
+rather than testing on a dedicated CI/CD server.
 
 To run CI/CD jobs in a Docker container, you need to:
 
-1. Register a runner and configure it to use the [Docker executor](https://docs.gitlab.com/runner/executors/docker.html).
-1. Specify the container image where you want to run the CI/CD jobs in the `.gitlab-ci.yml` file.
+1. Register a runner so that all jobs run in Docker containers. Do this by choosing the Docker executor during registration.
+1. Specify which container to run the jobs in. Do this by specifying an image in your `.gitlab-ci.yml` file.
 1. Optional. Run other services, like MySQL, in containers. Do this by specifying [services](../services/index.md)
    in your `.gitlab-ci.yml` file.
 
@@ -42,11 +45,11 @@ Then use this template to register the runner:
 ```shell
 sudo gitlab-runner register \
   --url "https://gitlab.example.com/" \
-  --token "$RUNNER_TOKEN" \
+  --registration-token "PROJECT_REGISTRATION_TOKEN" \
   --description "docker-ruby:2.6" \
   --executor "docker" \
   --template-config /tmp/test-config.template.toml \
-  --docker-image ruby:3.3
+  --docker-image ruby:2.6
 ```
 
 The registered runner uses the `ruby:2.6` Docker image and runs two
@@ -155,11 +158,12 @@ CI/CD jobs:
 1. The runner sends the script to the container's shell `stdin` and receives the
    output.
 
-To override the [entrypoint](https://docs.gitlab.com/runner/executors/docker.html#configure-a-docker-entrypoint) of a Docker image,
-in the `.gitlab-ci.yml` file:
+To override the entrypoint of a Docker image,
+define an empty `entrypoint` in the `.gitlab-ci.yml` file, so the runner does not start
+a useless shell layer. However, that does not work for all Docker versions.
 
-- For Docker 17.06 and later, set `entrypoint` to an empty value.
-- For Docker 17.03 and earlier, set `entrypoint` to
+- For Docker 17.06 and later, the `entrypoint` can be set to an empty value.
+- For Docker 17.03 and earlier, the `entrypoint` can be set to
   `/bin/sh -c`, `/bin/bash -c`, or an equivalent shell available in the image.
 
 The syntax of `image:entrypoint` is similar to [Dockerfile `ENTRYPOINT`](https://docs.docker.com/reference/dockerfile/#entrypoint).
@@ -198,12 +202,7 @@ image:
 
 ## Define image and services in `config.toml`
 
-In the `config.toml` file, you can define:
-
-- In the [`[runners.docker]`](https://docs.gitlab.com/runner/configuration/advanced-configuration#the-runnersdocker-section) section,
-  the container image used to run CI/CD jobs
-- In the [`[[runners.docker.services]]`](https://docs.gitlab.com/runner/configuration/advanced-configuration#the-runnersdockerservices-section) section,
-  the [services](../services/index.md) container
+Look for the `[runners.docker]` section:
 
 ```toml
 [runners.docker]
@@ -501,8 +500,8 @@ and update Docker images on Amazon ECR, without using manual credential manageme
 
    ```Dockerfile
    # Control package versions
-   ARG GITLAB_RUNNER_VERSION=v17.3.0
-   ARG AWS_CLI_VERSION=2.17.36
+   ARG GITLAB_RUNNER_VERSION=v16.4.0
+   ARG AWS_CLI_VERSION=2.2.30
 
    # AWS CLI and Amazon ECR Credential Helper
    FROM amazonlinux as aws-tools
@@ -542,8 +541,8 @@ and update Docker images on Amazon ECR, without using manual credential manageme
    variables:
      DOCKER_DRIVER: overlay2
      IMAGE_NAME: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
-     GITLAB_RUNNER_VERSION: v17.3.0
-     AWS_CLI_VERSION: 2.17.36
+     GITLAB_RUNNER_VERSION: v16.4.0
+     AWS_CLI_VERSION: 2.13.21
 
    stages:
      - build

@@ -7,6 +7,5 @@ FactoryBot.define do
     catalog_resource factory: :ci_catalog_resource
     project { catalog_resource.project }
     release { association :release, project: project }
-    published_by { release.author }
   end
 end

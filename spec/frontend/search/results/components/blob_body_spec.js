@@ -12,8 +12,6 @@ describe('BlobChunks', () => {
     wrapper = shallowMountExtended(ZoektBlobResultsChunks, {
       propsData: {
         file,
-        position: 1,
-        systemColorScheme: 'gl-light',
       },
     });
   };
@@ -35,7 +33,6 @@ describe('BlobChunks', () => {
         },
         blameLink: 'blame/test.js',
         fileUrl: 'https://gitlab.com/file/test.js',
-        position: 1,
       });
     });
 

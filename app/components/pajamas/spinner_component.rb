@@ -2,9 +2,6 @@
 
 module Pajamas
   class SpinnerComponent < Pajamas::Component
-    COLOR_OPTIONS = [:light, :dark].freeze
-    SIZE_OPTIONS = [:sm, :md, :lg, :xl].freeze
-
     # @param [Symbol] color
     # @param [Boolean] inline
     # @param [String] label
@@ -16,6 +13,9 @@ module Pajamas
       @size = filter_attribute(size.to_sym, SIZE_OPTIONS)
       @html_options = html_options
     end
+
+    COLOR_OPTIONS = [:light, :dark].freeze
+    SIZE_OPTIONS = [:sm, :md, :lg, :xl].freeze
 
     private
 

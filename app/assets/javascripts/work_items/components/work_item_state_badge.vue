@@ -12,11 +12,6 @@ export default {
       type: String,
       required: true,
     },
-    showIcon: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
   },
   computed: {
     isWorkItemOpen() {
@@ -26,10 +21,6 @@ export default {
       return this.isWorkItemOpen ? __('Open') : __('Closed');
     },
     workItemStateIcon() {
-      if (!this.showIcon) {
-        return null;
-      }
-
       return this.isWorkItemOpen ? 'issue-open-m' : 'issue-close';
     },
     workItemStateVariant() {

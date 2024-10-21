@@ -20,7 +20,6 @@ class Namespace < ApplicationRecord
   include CrossDatabaseIgnoredTables
   include IgnorableColumns
   include UseSqlFunctionForPrimaryKeyLookups
-  include Todoable
 
   ignore_column :unlock_membership_to_ldap, remove_with: '16.7', remove_after: '2023-11-16'
 
@@ -77,6 +76,7 @@ class Namespace < ApplicationRecord
   has_many :runner_namespaces, inverse_of: :namespace, class_name: 'Ci::RunnerNamespace'
   has_many :runners, through: :runner_namespaces, source: :runner, class_name: 'Ci::Runner'
   has_many :pending_builds, class_name: 'Ci::PendingBuild'
+  has_one :onboarding_progress, class_name: 'Onboarding::Progress'
 
   # This should _not_ be `inverse_of: :namespace`, because that would also set
   # `user.namespace` when this user creates a group with themselves as `owner`.
@@ -156,13 +156,6 @@ class Namespace < ApplicationRecord
   validate :nesting_level_allowed, unless: -> { project_namespace? }
   validate :changing_shared_runners_enabled_is_allowed, unless: -> { project_namespace? }
   validate :changing_allow_descendants_override_disabled_shared_runners_is_allowed, unless: -> { project_namespace? }
-  validate :parent_organization_match, if: :require_organization?
-
-  attribute :organization_id, :integer, default: -> do
-    return 1 if Feature.enabled?(:namespace_model_default_org, Feature.current_request)
-
-    columns_hash['organization_id'].default
-  end
 
   delegate :name, to: :owner, allow_nil: true, prefix: true
   delegate :avatar_url, to: :owner, allow_nil: true
@@ -313,14 +306,9 @@ class Namespace < ApplicationRecord
     # https://gitlab.com/gitlab-org/gitlab/-/blob/5d34e3488faa3982d30d7207773991c1e0b6368a/app/assets/javascripts/gfm_auto_complete.js#L68 and
     # https://gitlab.com/gitlab-org/gitlab/-/blob/5d34e3488faa3982d30d7207773991c1e0b6368a/app/assets/javascripts/gfm_auto_complete.js#L1053
     def gfm_autocomplete_search(query)
-      namespaces_cte = Gitlab::SQL::CTE.new(table_name, without_order)
-
       # This scope does not work with `ProjectNamespace` records because they don't have a corresponding `route` association.
       # We do not chain the `without_project_namespaces` scope because it results in an expensive query plan in certain cases
-      unscoped
-        .with(namespaces_cte.to_arel)
-        .from(namespaces_cte.table)
-        .joins(:route)
+      joins(:route)
         .where(
           "REPLACE(routes.name, ' ', '') ILIKE :pattern OR routes.path ILIKE :pattern",
           pattern: "%#{sanitize_sql_like(query)}%"
@@ -365,8 +353,13 @@ class Namespace < ApplicationRecord
       coalesce.as(column.to_s)
     end
 
-    def username_reserved?(username)
-      without_project_namespaces.where(parent_id: nil).find_by_path_or_name(username).present?
+    def with_disabled_organization_validation
+      current_value = Gitlab::SafeRequestStore[:require_organization]
+      Gitlab::SafeRequestStore[:require_organization] = false
+
+      yield
+    ensure
+      Gitlab::SafeRequestStore[:require_organization] = current_value
     end
   end
 
@@ -729,23 +722,7 @@ class Namespace < ApplicationRecord
       :active_pages_deployments)
   end
 
-  def web_url(only_path: nil)
-    Gitlab::UrlBuilder.build(self, only_path: only_path)
-  end
-
-  # there is no service desk feature for group level items
-  def service_desk_alias_address
-    nil
-  end
-
   private
-
-  def parent_organization_match
-    return unless parent
-    return if parent.organization_id == organization_id
-
-    errors.add(:organization_id, _("must match the parent organization's ID"))
-  end
 
   def cross_namespace_reference?(from)
     return false if from == self
@@ -758,7 +735,7 @@ class Namespace < ApplicationRecord
     when Namespaces::ProjectNamespace
       from.parent_id != comparable_namespace_id
     when Namespace
-      is_a?(Group) ? from.id != id : parent != from
+      parent != from
     when User
       true
     end
@@ -805,7 +782,7 @@ class Namespace < ApplicationRecord
   end
 
   def refresh_access_of_projects_invited_groups
-    if Feature.enabled?(:specialized_worker_for_group_lock_update_auth_recalculation, self)
+    if Feature.enabled?(:specialized_worker_for_group_lock_update_auth_recalculation)
       Project
         .where(namespace_id: id)
         .joins(:project_group_links)

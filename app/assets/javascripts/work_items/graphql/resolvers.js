@@ -1,9 +1,8 @@
-import { set, isEmpty } from 'lodash';
+import { set } from 'lodash';
 import { produce } from 'immer';
 import { findWidget } from '~/issues/list/utils';
-import { newDate, toISODateFormat } from '~/lib/utils/datetime_utility';
-import { updateDraft } from '~/lib/utils/autosave';
-import { getNewWorkItemAutoSaveKey, newWorkItemFullPath } from '../utils';
+import { pikadayToString } from '~/lib/utils/datetime_utility';
+import { newWorkItemFullPath } from '../utils';
 import {
   WIDGET_TYPE_ASSIGNEES,
   WIDGET_TYPE_COLOR,
@@ -13,27 +12,34 @@ import {
   WIDGET_TYPE_DESCRIPTION,
   WIDGET_TYPE_CRM_CONTACTS,
   NEW_WORK_ITEM_IID,
+  CLEAR_VALUE,
 } from '../constants';
 import workItemByIidQuery from './work_item_by_iid.query.graphql';
 
 // eslint-disable-next-line max-params
 const updateWidget = (draftData, widgetType, newData, nodePath) => {
-  /** set all other values other than when it is undefined including null/0 or empty array as well */
-  /** we have to make sure we do not pass values when custom types are introduced */
-  if (newData === undefined) return;
+  if (!newData) return;
 
   const widget = findWidget(widgetType, draftData.workspace.workItem);
   set(widget, nodePath, newData);
+};
+
+const updateHealthStatusWidget = (draftData, healthStatus) => {
+  if (!healthStatus) return;
+
+  const newValue = healthStatus === CLEAR_VALUE ? null : healthStatus;
+  const widget = findWidget(WIDGET_TYPE_HEALTH_STATUS, draftData.workspace.workItem);
+  set(widget, 'healthStatus', newValue);
 };
 
 const updateRolledUpDatesWidget = (draftData, rolledUpDates) => {
   if (!rolledUpDates) return;
 
   const dueDateFixed = rolledUpDates.dueDateFixed
-    ? toISODateFormat(newDate(rolledUpDates.dueDateFixed))
+    ? pikadayToString(rolledUpDates.dueDateFixed)
     : null;
   const startDateFixed = rolledUpDates.startDateFixed
-    ? toISODateFormat(newDate(rolledUpDates.startDateFixed))
+    ? pikadayToString(rolledUpDates.startDateFixed)
     : null;
 
   const widget = findWidget(WIDGET_TYPE_ROLLEDUP_DATES, draftData.workspace.workItem);
@@ -88,19 +94,14 @@ export const updateNewWorkItemCache = (input, cache) => {
           nodePath: 'color',
         },
         {
-          widgetType: WIDGET_TYPE_CRM_CONTACTS,
-          newData: crmContacts,
-          nodePath: 'contacts.nodes',
-        },
-        {
           widgetType: WIDGET_TYPE_DESCRIPTION,
           newData: description,
           nodePath: 'description',
         },
         {
-          widgetType: WIDGET_TYPE_HEALTH_STATUS,
-          newData: healthStatus,
-          nodePath: 'healthStatus',
+          widgetType: WIDGET_TYPE_CRM_CONTACTS,
+          newData: crmContacts,
+          nodePath: 'contacts.nodes',
         },
       ];
 
@@ -109,21 +110,12 @@ export const updateNewWorkItemCache = (input, cache) => {
       });
 
       updateRolledUpDatesWidget(draftData, rolledUpDates);
+      updateHealthStatusWidget(draftData, healthStatus);
 
       if (title) draftData.workspace.workItem.title = title;
       if (confidential !== undefined) draftData.workspace.workItem.confidential = confidential;
     }),
   );
-
-  const newData = cache.readQuery({ query, variables });
-
-  const autosaveKey = getNewWorkItemAutoSaveKey(fullPath, workItemType);
-
-  const isQueryDataValid = !isEmpty(newData) && newData?.workspace?.workItem;
-
-  if (isQueryDataValid && autosaveKey) {
-    updateDraft(autosaveKey, JSON.stringify(newData));
-  }
 };
 
 export const workItemBulkEdit = (input) => {

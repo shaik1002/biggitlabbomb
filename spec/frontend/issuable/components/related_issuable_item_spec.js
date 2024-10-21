@@ -3,7 +3,7 @@ import { nextTick } from 'vue';
 import { shallowMount } from '@vue/test-utils';
 import { TEST_HOST } from 'helpers/test_constants';
 import IssueDueDate from '~/boards/components/issue_due_date.vue';
-import { localeDateFormat } from '~/lib/utils/datetime_utility';
+import { formatDate } from '~/lib/utils/datetime_utility';
 import { updateHistory } from '~/lib/utils/url_utility';
 import { stubComponent } from 'helpers/stub_component';
 import CiIcon from '~/vue_shared/components/ci_icon/ci_icon.vue';
@@ -25,7 +25,7 @@ describe('RelatedIssuableItem', () => {
   let showModalSpy;
 
   const defaultProps = {
-    idKey: 10,
+    idKey: 1,
     iid: 1,
     displayReference: 'gitlab-org/gitlab-test#1',
     pathIdSeparator: '#',
@@ -111,7 +111,7 @@ describe('RelatedIssuableItem', () => {
     it('renders state title', () => {
       mountComponent({ props: { state: 'opened' } });
       const stateTitle = findIcon().attributes('title');
-      const formattedCreateDate = localeDateFormat.asDateTimeFull.format(defaultProps.createdAt);
+      const formattedCreateDate = formatDate(defaultProps.createdAt);
 
       expect(stateTitle).toContain('Created');
       expect(stateTitle).toContain(`<span class="gl-text-tertiary">${formattedCreateDate}</span>`);
@@ -243,7 +243,7 @@ describe('RelatedIssuableItem', () => {
   });
 
   describe('work item modal', () => {
-    const workItemId = 'gid://gitlab/WorkItem/10';
+    const workItemId = 'gid://gitlab/WorkItem/1';
 
     it('renders', () => {
       mountComponent();
@@ -276,7 +276,7 @@ describe('RelatedIssuableItem', () => {
 
       it('updates the url params with the work item id', () => {
         expect(updateHistory).toHaveBeenCalledWith({
-          url: `${TEST_HOST}/?show=10`,
+          url: `${TEST_HOST}/?work_item_iid=1`,
           replace: true,
         });
       });

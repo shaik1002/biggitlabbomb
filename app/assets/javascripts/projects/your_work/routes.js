@@ -4,7 +4,7 @@ import {
   DASHBOARD_ROUTE_NAME,
   PROJECTS_DASHBOARD_ROUTE_NAME,
   PROJECT_DASHBOARD_TABS,
-} from './constants';
+} from 'ee_else_ce/projects/your_work/constants';
 
 export default [
   {

@@ -1,5 +1,5 @@
 ---
-# Warning: gitlab_base.MeaningfulLinkWords
+# Warning: gitlab.MeaningfulLinkWords
 #
 # Checks for the presence of semantically unhelpful words in link text.
 #

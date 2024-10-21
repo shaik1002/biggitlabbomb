@@ -13,13 +13,13 @@ import {
   mockAwardEmojiThumbsUp,
   mockWorkItemNotesResponseWithComments,
 } from 'jest/work_items/mock_data';
-import { EMOJI_THUMBS_UP, EMOJI_THUMBS_DOWN } from '~/emoji/constants';
+import { EMOJI_THUMBSUP, EMOJI_THUMBSDOWN } from '~/work_items/constants';
 
 Vue.use(VueApollo);
 
 describe('Work Item Note Awards List', () => {
   let wrapper;
-  const { workItem } = mockWorkItemNotesResponseWithComments().data.workspace;
+  const { workItem } = mockWorkItemNotesResponseWithComments.data.workspace;
   const firstNote = workItem.widgets.find((w) => w.type === 'NOTES').discussions.nodes[0].notes
     .nodes[0];
   const fullPath = 'test-project-path';
@@ -57,7 +57,7 @@ describe('Work Item Note Awards List', () => {
     apolloProvider.clients.defaultClient.writeQuery({
       query,
       variables: { fullPath, iid: workItemIid },
-      ...mockWorkItemNotesResponseWithComments(),
+      ...mockWorkItemNotesResponseWithComments,
     });
 
     wrapper = shallowMount(WorkItemNoteAwardsList, {
@@ -93,18 +93,18 @@ describe('Work Item Note Awards List', () => {
       createComponent();
       await waitForPromises();
 
-      findAwardsList().vm.$emit('award', EMOJI_THUMBS_UP);
+      findAwardsList().vm.$emit('award', EMOJI_THUMBSUP);
 
       expect(addAwardEmojiMutationSuccessHandler).toHaveBeenCalledWith({
         awardableId: firstNote.id,
-        name: EMOJI_THUMBS_UP,
+        name: EMOJI_THUMBSUP,
       });
     });
 
     it('emits error if awarding emoji fails', async () => {
       createComponent({ addAwardEmojiMutationHandler: jest.fn().mockRejectedValue('oh no') });
 
-      findAwardsList().vm.$emit('award', EMOJI_THUMBS_UP);
+      findAwardsList().vm.$emit('award', EMOJI_THUMBSUP);
       await waitForPromises();
 
       expect(wrapper.emitted('error')).toEqual([['Failed to add emoji. Please try again']]);
@@ -114,19 +114,19 @@ describe('Work Item Note Awards List', () => {
       const removeAwardEmojiMutationHandler = removeAwardEmojiMutationSuccessHandler;
       createComponent({ removeAwardEmojiMutationHandler });
 
-      findAwardsList().vm.$emit('award', EMOJI_THUMBS_DOWN);
+      findAwardsList().vm.$emit('award', EMOJI_THUMBSDOWN);
       await waitForPromises();
 
       expect(removeAwardEmojiMutationHandler).toHaveBeenCalledWith({
         awardableId: firstNote.id,
-        name: EMOJI_THUMBS_DOWN,
+        name: EMOJI_THUMBSDOWN,
       });
     });
 
     it('restores award if remove fails', async () => {
       createComponent({ removeAwardEmojiMutationHandler: jest.fn().mockRejectedValue('oh no') });
 
-      findAwardsList().vm.$emit('award', EMOJI_THUMBS_DOWN);
+      findAwardsList().vm.$emit('award', EMOJI_THUMBSDOWN);
       await waitForPromises();
 
       expect(wrapper.emitted('error')).toEqual([['Failed to remove emoji. Please try again']]);

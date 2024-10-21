@@ -11,12 +11,8 @@ import {
   WIDGET_TYPE_NOTES,
   WIDGET_TYPE_AWARD_EMOJI,
   WIDGET_TYPE_HIERARCHY,
-  WIDGET_TYPE_DESIGNS,
 } from '~/work_items/constants';
-
-import isExpandedHierarchyTreeChildQuery from '~/work_items/graphql/client/is_expanded_hierarchy_tree_child.query.graphql';
 import activeBoardItemQuery from 'ee_else_ce/boards/graphql/client/active_board_item.query.graphql';
-import activeDiscussionQuery from '~/work_items/components/design_management/graphql/client/active_design_discussion.query.graphql';
 import { updateNewWorkItemCache, workItemBulkEdit } from '~/work_items/graphql/resolvers';
 
 export const config = {
@@ -41,8 +37,6 @@ export const config = {
           epicBoardList: {
             keyArgs: ['id'],
           },
-          isExpandedHierarchyTreeChild: (_, { variables, toReference }) =>
-            toReference({ __typename: 'LocalWorkItemChildIsExpanded', id: variables.id }),
         },
       },
       Project: {
@@ -143,11 +137,7 @@ export const config = {
                 }
 
                 // we want to concat next page of children work items within Hierarchy widget to the existing ones
-                if (
-                  incomingWidget?.type === WIDGET_TYPE_HIERARCHY &&
-                  context.variables.endCursor &&
-                  incomingWidget.children?.nodes
-                ) {
+                if (incomingWidget?.type === WIDGET_TYPE_HIERARCHY && context.variables.endCursor) {
                   // concatPagination won't work because we were placing new widget here so we have to do this manually
                   return {
                     ...incomingWidget,
@@ -156,11 +146,6 @@ export const config = {
                       nodes: [...existingWidget.children.nodes, ...incomingWidget.children.nodes],
                     },
                   };
-                }
-
-                // Prevent cache being overwritten when opening a design
-                if (incomingWidget?.type === WIDGET_TYPE_DESIGNS && context.variables.filenames) {
-                  return existingWidget;
                 }
 
                 return { ...existingWidget, ...incomingWidget };
@@ -265,32 +250,8 @@ export const resolvers = {
     updateNewWorkItem(_, { input }, { cache }) {
       updateNewWorkItemCache(input, cache);
     },
-    localWorkItemBulkUpdate(_, { input }) {
+    workItemBulkUpdate(_, { input }) {
       return workItemBulkEdit(input);
-    },
-    toggleHierarchyTreeChild(_, { id, isExpanded = false }, { cache }) {
-      cache.writeQuery({
-        query: isExpandedHierarchyTreeChildQuery,
-        variables: { id },
-        data: {
-          isExpandedHierarchyTreeChild: {
-            id,
-            isExpanded,
-            __typename: 'LocalWorkItemChildIsExpanded',
-          },
-        },
-      });
-    },
-    updateActiveDesignDiscussion: (_, { id = null, source }, { cache }) => {
-      const data = {
-        activeDesignDiscussion: {
-          __typename: 'ActiveDesignDiscussion',
-          id,
-          source,
-        },
-      };
-
-      cache.writeQuery({ query: activeDiscussionQuery, data });
     },
   },
 };

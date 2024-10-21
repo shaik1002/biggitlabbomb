@@ -10,8 +10,6 @@ DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
-> - Changed in [GitLab 17.3](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/161162) to return 404 errors for unauthorized `go get` requests.
-
 Prerequisites:
 
 - Contact your administrator to enable the [GitLab Go Proxy](../packages/go_proxy/index.md).
@@ -22,10 +20,6 @@ To use a project as a Go package, use the `go get` and `godoc.org` discovery req
 
 - [`go-import`](https://pkg.go.dev/cmd/go#hdr-Remote_import_paths)
 - [`go-source`](https://github.com/golang/gddo/wiki/Source-Code-Links)
-
-NOTE:
-If you make a `go get` request with invalid HTTP credentials, you receive a 404 error.
-You can find the HTTP credentials in `~/.netrc` (MacOS and Linux) or `~/_netrc` (Windows).
 
 ## Authenticate Go requests to private projects
 
@@ -95,7 +89,7 @@ If the Go module is located under a private subgroup like
 `gitlab.com/namespace/subgroup/go-module`, then the Git authentication doesn't work.
 It happens, because `go get` makes an unauthenticated request to discover
 the repository path.
-Without an HTTP authentication by using a `.netrc` file, GitLab responds with
+Without an HTTP authentication via `.netrc` file, GitLab responds with
 `gitlab.com/namespace/subgroup.git` to prevent a security risk of exposing
 the project's existence for unauthenticated users.
 As a result, the Go module cannot be downloaded.

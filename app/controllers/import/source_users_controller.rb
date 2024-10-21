@@ -4,34 +4,30 @@ module Import
   class SourceUsersController < ApplicationController
     prepend_before_action :check_feature_flag!
 
-    before_action :check_source_user_valid!
+    before_action :source_user
+    before_action :check_current_user_matches_invite!
+    before_action :check_source_user_status!
 
     respond_to :html
     feature_category :importers
 
     def accept
-      result = ::Import::SourceUsers::AcceptReassignmentService.new(
-        source_user, current_user: current_user, reassignment_token: params[:reassignment_token]
-      ).execute
+      result = ::Import::SourceUsers::AcceptReassignmentService.new(source_user, current_user: current_user).execute
 
-      if result.success?
+      if result.status == :success
         flash[:raw] = banner('accept_invite')
-        redirect_to(root_path)
+        redirect_to(dashboard_groups_path)
       else
-        redirect_to(root_path, alert: s_('UserMapping|The invitation could not be accepted.'))
+        redirect_to(dashboard_groups_path, alert: s_('UserMapping|The invitation could not be accepted.'))
       end
     end
 
     def decline
-      result = ::Import::SourceUsers::RejectReassignmentService.new(
-        source_user, current_user: current_user, reassignment_token: params[:reassignment_token]
-      ).execute
-
-      if result.success?
+      if source_user.reject
         flash[:raw] = banner('reject_invite')
-        redirect_to(root_path)
+        redirect_to(dashboard_groups_path)
       else
-        redirect_to(root_path, alert: s_('UserMapping|The invitation could not be declined.'))
+        redirect_to(dashboard_groups_path, alert: s_('UserMapping|The invitation could not be declined.'))
       end
     end
 
@@ -39,11 +35,17 @@ module Import
 
     private
 
-    def check_source_user_valid!
-      return if source_user&.awaiting_approval? && current_user_matches_invite?
+    def check_source_user_status!
+      return if source_user.awaiting_approval?
 
-      flash[:raw] = banner('invalid_invite')
-      redirect_to(root_path)
+      redirect_to(dashboard_groups_path, alert: s_('UserMapping|The invitation is no longer valid.'))
+    end
+
+    def check_current_user_matches_invite!
+      return if current_user_matches_invite?
+
+      flash[:raw] = banner('cancel_invite')
+      redirect_to(dashboard_groups_path)
     end
 
     def current_user_matches_invite?
@@ -51,12 +53,12 @@ module Import
     end
 
     def source_user
-      Import::SourceUser.find_by_reassignment_token(params[:reassignment_token])
+      Import::SourceUser.find(params[:id])
     end
     strong_memoize_attr :source_user
 
     def check_feature_flag!
-      not_found unless source_user.nil? || Feature.enabled?(:importer_user_mapping, source_user.reassigned_by_user)
+      not_found unless Feature.enabled?(:importer_user_mapping, current_user)
     end
 
     def banner(partial)

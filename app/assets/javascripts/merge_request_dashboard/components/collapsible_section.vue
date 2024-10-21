@@ -44,11 +44,8 @@ export default {
     },
   },
   watch: {
-    count: {
-      handler(newVal) {
-        this.open = newVal > 0;
-      },
-      immediate: true,
+    count(newVal) {
+      this.open = newVal > 0;
     },
   },
   methods: {
@@ -64,7 +61,7 @@ export default {
     <section class="gl-border gl-rounded-base">
       <header
         :class="{ 'gl-rounded-base': !open }"
-        class="gl-rounded-tl-base gl-rounded-tr-base gl-bg-gray-10 gl-px-5 gl-py-4"
+        class="gl-bg-gray-10 gl-rounded-tl-base gl-rounded-tr-base gl-px-5 gl-py-4"
       >
         <h5 class="gl-m-0">
           <gl-button
@@ -78,7 +75,7 @@ export default {
             @click="toggleOpen"
           />
           {{ title }}
-          <gl-badge v-if="!loading || count" class="gl-ml-1" variant="neutral" size="sm">{{
+          <gl-badge v-if="!loading" class="gl-ml-1" variant="neutral" size="sm">{{
             count
           }}</gl-badge>
         </h5>

@@ -7,28 +7,26 @@
  * @param {() => any} fn Function that returns the object to use for localStorage
  */
 const useLocalStorage = (fn) => {
-  let originalDescriptor;
+  const origLocalStorage = window.localStorage;
+  let currentLocalStorage = origLocalStorage;
+
+  Object.defineProperty(window, 'localStorage', {
+    get: () => currentLocalStorage,
+  });
 
   beforeEach(() => {
-    originalDescriptor = Object.getOwnPropertyDescriptor(window, 'localStorage');
-
-    const mock = fn();
-
-    Object.defineProperty(window, 'localStorage', {
-      ...originalDescriptor,
-      get: () => mock,
-    });
+    currentLocalStorage = fn();
   });
 
   afterEach(() => {
-    Object.defineProperty(window, 'localStorage', originalDescriptor);
+    currentLocalStorage = origLocalStorage;
   });
 };
 
 /**
  * Create an object with the localStorage interface but `jest.fn()` implementations.
  */
-const createLocalStorageSpy = () => {
+export const createLocalStorageSpy = () => {
   let storage = {};
 
   return {

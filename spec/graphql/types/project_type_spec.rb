@@ -13,8 +13,6 @@ RSpec.describe GitlabSchema.types['Project'], feature_category: :groups_and_proj
 
   specify { expect(described_class).to require_graphql_authorizations(:read_project) }
 
-  specify { expect(described_class.interfaces).to include(Types::TodoableInterface) }
-
   it 'has the expected fields' do
     expected_fields = %w[
       user_permissions id full_path path name_with_namespace
@@ -45,7 +43,7 @@ RSpec.describe GitlabSchema.types['Project'], feature_category: :groups_and_proj
       incident_management_timeline_event_tags visible_forks inherited_ci_variables autocomplete_users
       ci_cd_settings detailed_import_status value_streams ml_models
       allows_multiple_merge_request_assignees allows_multiple_merge_request_reviewers is_forked
-      protectable_branches available_deploy_keys ci_pipeline_creation
+      protectable_branches available_deploy_keys
     ]
 
     expect(described_class).to include_graphql_fields(*expected_fields)
@@ -335,7 +333,7 @@ RSpec.describe GitlabSchema.types['Project'], feature_category: :groups_and_proj
     it { is_expected.to have_graphql_resolver(Resolvers::ProjectMergeRequestsResolver) }
 
     it do
-      is_expected.to include_graphql_arguments(
+      is_expected.to have_graphql_arguments(
         :iids,
         :source_branches,
         :target_branches,
@@ -371,8 +369,7 @@ RSpec.describe GitlabSchema.types['Project'], feature_category: :groups_and_proj
         :milestone_title,
         :milestone_wildcard_id,
         :not,
-        :sort,
-        :subscribed
+        :sort
       )
     end
   end
@@ -451,13 +448,6 @@ RSpec.describe GitlabSchema.types['Project'], feature_category: :groups_and_proj
     it { is_expected.to have_graphql_resolver(Resolvers::ReleasesResolver) }
   end
 
-  describe 'container tags expiration policy field' do
-    subject { described_class.fields['containerTagsExpirationPolicy'] }
-
-    it { is_expected.to have_graphql_type(Types::ContainerRegistry::ContainerTagsExpirationPolicyType) }
-    it { expect(subject.instance_variable_get(:@authorize)).to include(:read_container_image) }
-  end
-
   describe 'container expiration policy field' do
     subject { described_class.fields['containerExpirationPolicy'] }
 
@@ -494,7 +484,7 @@ RSpec.describe GitlabSchema.types['Project'], feature_category: :groups_and_proj
   end
 
   it_behaves_like 'a GraphQL type with labels' do
-    let(:labels_resolver_arguments) { [:search_term, :includeAncestorGroups, :searchIn, :title] }
+    let(:labels_resolver_arguments) { [:search_term, :includeAncestorGroups, :searchIn] }
   end
 
   describe 'jira_imports' do

@@ -24,6 +24,11 @@
   .gl-card {
     min-width: 75%;
   }
+
+  // stylelint-disable-next-line gitlab/no-gl-class
+  &.gl-modal .modal-md {
+    max-width: 640px;
+  }
 }
 
 //// Copied from roadmaps.scss - adapted for on-call schedules
@@ -55,7 +60,7 @@ $column-right-gradient: linear-gradient(to right, $gradient-dark-gray 0%, $gradi
 
     &:first-of-type {
       .week-item-sublabel .sublabel-value:nth-of-type(7) {
-        @apply gl-border-r;
+        @include gl-border-r;
       }
     }
   }

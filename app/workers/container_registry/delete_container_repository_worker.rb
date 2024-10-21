@@ -28,14 +28,14 @@ module ContainerRegistry
       log_delete_tags_service_result(next_container_repository, result)
 
       if result[:status] == :error || next_container_repository.tags_count != 0
-        return update_next_container_repository_status
+        return next_container_repository.set_delete_scheduled_status
       end
 
       next_container_repository.destroy!
 
       audit_event(next_container_repository)
     rescue StandardError => exception
-      update_next_container_repository_status
+      next_container_repository&.set_delete_scheduled_status
 
       Gitlab::ErrorTracking.log_exception(exception, class: self.class.name)
     end
@@ -49,16 +49,6 @@ module ContainerRegistry
     end
 
     private
-
-    def update_next_container_repository_status
-      return unless next_container_repository
-
-      if next_container_repository.failed_deletion_count >= ContainerRepository::MAX_DELETION_FAILURES
-        next_container_repository.set_delete_failed_status
-      else
-        next_container_repository.set_delete_scheduled_status
-      end
-    end
 
     def delete_tags
       service = Projects::ContainerRepository::CleanupTagsService.new(

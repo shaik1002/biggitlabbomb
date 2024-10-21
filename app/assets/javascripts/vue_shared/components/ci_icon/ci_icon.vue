@@ -1,5 +1,5 @@
 <script>
-import { GlTooltipDirective, GlIcon } from '@gitlab/ui';
+import { GlBadge, GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import { sprintf, __ } from '~/locale';
 
 /**
@@ -19,6 +19,7 @@ import { sprintf, __ } from '~/locale';
 
 export default {
   components: {
+    GlBadge,
     GlIcon,
   },
   directives: {
@@ -50,9 +51,6 @@ export default {
     },
   },
   computed: {
-    componentType() {
-      return this.href ? 'a' : 'span';
-    },
     title() {
       if (this.showTooltip) {
         // show tooltip only when not showing text already
@@ -97,10 +95,9 @@ export default {
 };
 </script>
 <template>
-  <component
-    :is="componentType"
+  <gl-badge
     v-gl-tooltip.viewport.left
-    class="ci-icon gl-inline-flex gl-items-center gl-text-sm"
+    class="ci-icon !gl-p-2"
     :class="`ci-icon-variant-${variant}`"
     :variant="variant"
     :title="title"
@@ -110,11 +107,8 @@ export default {
     @click="$emit('ciStatusBadgeClick')"
   >
     <span class="ci-icon-gl-icon-wrapper"><gl-icon :name="icon" /></span
-    ><span
-      v-if="showStatusText"
-      class="gl-ml-2 gl-mr-3 gl-self-center gl-whitespace-nowrap gl-leading-1"
-      data-testid="ci-icon-text"
-      >{{ status.text }}</span
-    >
-  </component>
+    ><span v-if="showStatusText" class="gl-mx-2 gl-whitespace-nowrap" data-testid="ci-icon-text">{{
+      status.text
+    }}</span>
+  </gl-badge>
 </template>

@@ -19,14 +19,14 @@ export const CONFIG = {
   groups: {
     title: __('Groups'),
     icon: 'group',
-    filterKey: 'id',
+    filterKey: 'name',
     showNamespaceDropdown: true,
     component: GroupItem,
   },
   deployKeys: {
     title: __('Deploy keys'),
     icon: 'key',
-    filterKey: 'id',
+    filterKey: 'name',
     component: DeployKeyItem,
   },
   projects: {

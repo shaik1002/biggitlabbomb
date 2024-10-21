@@ -62,7 +62,7 @@ export default {
 </script>
 
 <template>
-  <div class="align-items-lg-center gl-flex">
+  <div class="gl-display-flex align-items-lg-center">
     <gl-tabs content-class="gl-py-0" class="gl-w-full">
       <gl-tab
         v-for="tab in tabs"
@@ -82,7 +82,7 @@ export default {
         </template>
       </gl-tab>
     </gl-tabs>
-    <div class="gl-grow"></div>
+    <div class="gl-flex-grow-1"></div>
     <cancel-jobs v-if="showCancelAllJobsButton" :url="url" />
   </div>
 </template>

@@ -10,10 +10,17 @@ class QueueBackfillDeployTokensShardingKey < Gitlab::Database::Migration[2.2]
   SUB_BATCH_SIZE = 100
 
   def up
-    # Replaced by RequeueBackfillDeployTokensShardingKey
+    queue_batched_background_migration(
+      MIGRATION,
+      :deploy_tokens,
+      :id,
+      job_interval: DELAY_INTERVAL,
+      batch_size: BATCH_SIZE,
+      sub_batch_size: SUB_BATCH_SIZE
+    )
   end
 
   def down
-    # Replaced by RequeueBackfillDeployTokensShardingKey
+    delete_batched_background_migration(MIGRATION, :deploy_tokens, :id, [])
   end
 end

@@ -14,7 +14,6 @@ import { __, sprintf } from '~/locale';
 import delayedJobMixin from '~/ci/mixins/delayed_job_mixin';
 import Log from '~/ci/job_details/components/log/log.vue';
 import { MANUAL_STATUS } from '~/ci/constants';
-import { reportToSentry } from '~/ci/utils';
 import EmptyState from './components/empty_state.vue';
 import EnvironmentsBlock from './components/environments_block.vue';
 import ErasedBlock from './components/erased_block.vue';
@@ -181,9 +180,6 @@ export default {
     window.removeEventListener('resize', this.onResize);
     window.removeEventListener('scroll', this.updateScroll);
   },
-  errorCaptured(err, _vm, info) {
-    reportToSentry(this.$options.name, `error: ${err}, info: ${info}`);
-  },
   methods: {
     ...mapActions([
       'fetchJobLog',
@@ -241,7 +237,7 @@ export default {
       <div class="build-page" data-testid="job-content">
         <!-- Header Section -->
         <header>
-          <div class="build-header gl-flex">
+          <div class="build-header gl-display-flex">
             <job-header
               :status="job.status"
               :time="headerTime"
@@ -298,8 +294,8 @@ export default {
 
         <div
           v-if="job.archived"
-          class="archived-job gl-z-1 gl-m-auto gl-mt-3 gl-items-center gl-px-3 gl-py-2"
-          :class="{ 'sticky-top gl-border-b-0': hasJobLog }"
+          class="gl-mt-3 gl-py-2 gl-px-3 gl-align-items-center gl-z-1 gl-m-auto archived-job"
+          :class="{ 'sticky-top gl-border-bottom-0': hasJobLog }"
           data-testid="archived-job"
         >
           <gl-icon name="lock" class="gl-align-bottom" />

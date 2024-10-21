@@ -60,6 +60,14 @@ RSpec.describe Gitlab::Ci::Build::Rules::Rule::Clause::Exists, feature_category:
           it { is_expected.to be_truthy }
         end
 
+        context 'when the variable matches and rules_exist_expand_globs_early is disabled' do
+          before do
+            stub_feature_flags(rules_exist_expand_globs_early: false)
+          end
+
+          it { is_expected.to be_falsey }
+        end
+
         context 'when the variable does not match' do
           let(:globs) { ['$FULL_PATH_INVALID'] }
 
@@ -143,7 +151,7 @@ RSpec.describe Gitlab::Ci::Build::Rules::Rule::Clause::Exists, feature_category:
               it 'raises an error with the variable masked' do
                 expect { satisfied_by? }.to raise_error(
                   Gitlab::Ci::Build::Rules::Rule::Clause::ParseError,
-                  "rules:exists:project `invalid/path/[MASKED]xxxx` is not a valid project path"
+                  "rules:exists:project `invalid/path/xxxxxxxxxxxx` is not a valid project path"
                 )
               end
             end
@@ -192,10 +200,10 @@ RSpec.describe Gitlab::Ci::Build::Rules::Rule::Clause::Exists, feature_category:
               context 'when the ref contains a masked variable' do
                 let(:ref) { 'invalid/ref/$MASKED_VAR' }
 
-                it 'raises an error with the variable masked' do
+                it 'raises an error' do
                   expect { satisfied_by? }.to raise_error(
                     Gitlab::Ci::Build::Rules::Rule::Clause::ParseError,
-                    "rules:exists:ref `invalid/ref/[MASKED]xxxx` is not a valid ref " \
+                    "rules:exists:ref `invalid/ref/xxxxxxxxxxxx` is not a valid ref " \
                     "in project `#{other_project.full_path}`"
                   )
                 end

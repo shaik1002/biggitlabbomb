@@ -47,7 +47,7 @@ module Gitlab
 
       attr_reader :storage, :gl_repository, :gl_project_path, :container
 
-      delegate :list_oversized_blobs, :list_all_blobs, :list_blobs, to: :gitaly_blob_client
+      delegate :list_all_blobs, :list_blobs, to: :gitaly_blob_client
 
       # This remote name has to be stable for all types of repositories that
       # can join an object pool. If it's structure ever changes, a migration
@@ -536,13 +536,13 @@ module Gitlab
         empty_diff_stats
       end
 
-      def find_changed_paths(treeish_objects, merge_commit_diff_mode: nil, find_renames: false)
+      def find_changed_paths(treeish_objects, merge_commit_diff_mode: nil)
         processed_objects = treeish_objects.compact
 
         return [] if processed_objects.empty?
 
         wrapped_gitaly_errors do
-          gitaly_commit_client.find_changed_paths(processed_objects, merge_commit_diff_mode: merge_commit_diff_mode, find_renames: find_renames)
+          gitaly_commit_client.find_changed_paths(processed_objects, merge_commit_diff_mode: merge_commit_diff_mode)
         end
       rescue CommandError, TypeError, NoRepository
         []
@@ -876,9 +876,9 @@ module Gitlab
       end
 
       # peel_tags slows down the request by a factor of 3-4
-      def list_refs(...)
+      def list_refs(patterns = [Gitlab::Git::BRANCH_REF_PREFIX], pointing_at_oids: [], peel_tags: false)
         wrapped_gitaly_errors do
-          gitaly_ref_client.list_refs(...)
+          gitaly_ref_client.list_refs(patterns, pointing_at_oids: pointing_at_oids, peel_tags: peel_tags)
         end
       end
 
@@ -901,13 +901,11 @@ module Gitlab
       # no_tags - should we use --no-tags flag?
       # prune - should we use --prune flag?
       # check_tags_changed - should we ask gitaly to calculate whether any tags changed?
-      # check_repo_changed - should we ask gitaly to calculate if the repo has changed?
       # resolved_address - resolved IP address for provided URL
-      # lfs_sync_before_branch_updates - passed in lfs_sync_before_branch_updates FF
       def fetch_remote( # rubocop:disable Metrics/ParameterLists
         url,
         refmap: nil, ssh_auth: nil, forced: false, no_tags: false, prune: true,
-        check_tags_changed: false, check_repo_changed: false, http_authorization_header: "", resolved_address: "", lfs_sync_before_branch_updates: false)
+        check_tags_changed: false, http_authorization_header: "", resolved_address: "")
         wrapped_gitaly_errors do
           gitaly_repository_client.fetch_remote(
             url,
@@ -917,8 +915,6 @@ module Gitlab
             no_tags: no_tags,
             prune: prune,
             check_tags_changed: check_tags_changed,
-            lfs_sync_before_branch_updates: lfs_sync_before_branch_updates,
-            check_repo_changed: check_repo_changed,
             timeout: GITLAB_PROJECTS_TIMEOUT,
             http_authorization_header: http_authorization_header,
             resolved_address: resolved_address
@@ -1018,7 +1014,6 @@ module Gitlab
       # @param [String] start_sha: The sha to be used as the parent of the commit.
       # @param [Gitlab::Git::Repository] start_repository: The repository that contains the start branch or sha. Defaults to use this repository.
       # @param [Boolean] force: Force update the branch.
-      # @param [String] target_sha: The latest sha of the target branch (optional). Used to prevent races in updates between different clients.
       # @return [Gitlab::Git::OperationService::BranchUpdate]
       #
       # rubocop:disable Metrics/ParameterLists
@@ -1026,12 +1021,12 @@ module Gitlab
         user, branch_name:, message:, actions:,
         author_email: nil, author_name: nil,
         start_branch_name: nil, start_sha: nil, start_repository: nil,
-        force: false, sign: true, target_sha: nil)
+        force: false, sign: true)
 
         wrapped_gitaly_errors do
           gitaly_operation_client.user_commit_files(user, branch_name,
-            message, actions, author_email, author_name, start_branch_name,
-            start_repository, force, start_sha, sign, target_sha)
+            message, actions, author_email, author_name,
+            start_branch_name, start_repository, force, start_sha, sign)
         end
       end
       # rubocop:enable Metrics/ParameterLists
@@ -1263,51 +1258,7 @@ module Gitlab
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
-      def diffs_by_changed_paths(diff_refs, offset, batch_size = 30)
-        changed_paths = find_changed_paths(
-          [Gitlab::Git::DiffTree.new(diff_refs.base_sha, diff_refs.head_sha)],
-          find_renames: true
-        )
-
-        changed_paths.drop(offset).each_slice(batch_size) do |batched_changed_paths|
-          blob_pairs = batched_changed_paths.map do |changed_path|
-            Gitaly::DiffBlobsRequest::BlobPair.new(
-              left_blob: changed_path.old_blob_id,
-              right_blob: changed_path.new_blob_id
-            )
-          end
-
-          yield diff_files_by_blob_pairs(blob_pairs, batched_changed_paths, diff_refs)
-        end
-      end
-
       private
-
-      def diff_files_by_blob_pairs(blob_pairs, changed_paths, diff_refs)
-        diff_blobs = diff_blobs(blob_pairs, patch_bytes_limit: Gitlab::Git::Diff.patch_hard_limit_bytes)
-
-        changed_diff_blobs = diff_blobs.zip(changed_paths)
-
-        changed_diff_blobs.map do |diff_blob, changed_path|
-          diff = Gitlab::Git::Diff.new({
-            diff: diff_blob.patch,
-            too_large: diff_blob.over_patch_bytes_limit,
-            new_path: changed_path.path,
-            old_path: changed_path.old_path,
-            a_mode: changed_path.old_mode,
-            b_mode: changed_path.new_mode,
-            new_file: changed_path.status == :ADDED,
-            renamed_file: changed_path.status == :RENAMED,
-            deleted_file: changed_path.status == :DELETED
-          })
-
-          Gitlab::Diff::File.new(
-            diff,
-            repository: container.repository,
-            diff_refs: diff_refs
-          )
-        end
-      end
 
       def check_blobs_generated(base, head, changed_paths)
         wrapped_gitaly_errors do

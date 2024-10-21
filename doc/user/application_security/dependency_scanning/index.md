@@ -4,8 +4,6 @@ group: Composition Analysis
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
-# Dependency Scanning
-
 <style>
 table.ds-table tr:nth-child(even) {
     background-color: transparent;
@@ -42,6 +40,8 @@ table.no-vertical-table-lines tr {
     border-top: none;
 }
 </style>
+
+# Dependency Scanning
 
 DETAILS:
 **Tier:** Ultimate
@@ -237,7 +237,7 @@ The following languages and dependency managers are supported by Dependency Scan
       <td>N</td>
     </tr>
     <tr>
-      <td>Cocoapods<sup><b><a href="#notes-regarding-supported-languages-and-package-managers-9">9</a></b></sup></td>
+      <td>Cocoapods</td>
       <td>All versions</td>
       <td><a href="https://cocoapods.org/">CocoaPods</a></td>
       <td><code>Podfile.lock</code></td>
@@ -296,12 +296,6 @@ The following languages and dependency managers are supported by Dependency Scan
     <a id="notes-regarding-supported-languages-and-package-managers-8"></a>
     <p>
       Excludes both <code>pip</code> and <code>setuptools</code> from the report as they are required by the installer.
-    </p>
-  </li>
-  <li>
-    <a id="notes-regarding-supported-languages-and-package-managers-9"></a>
-    <p>
-      Only SBOM, without advisories. See <a href="https://gitlab.com/gitlab-org/gitlab/-/issues/468764">spike on CocoaPods advisories research</a>.
     </p>
   </li>
 </ol>
@@ -664,12 +658,12 @@ The following analyzers are executed, each of which have different behavior when
 
 - [Gemnasium](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium)
 
-  Supports multiple lockfiles
+   Supports multiple lockfiles
 
 - [Retire.js](https://retirejs.github.io/retire.js/)
 
-  Does not support multiple lockfiles. When multiple lockfiles exist, `Retire.js`
-  analyzes the first lockfile discovered while traversing the directory tree in alphabetical order.
+   Does not support multiple lockfiles. When multiple lockfiles exist, `Retire.js`
+   analyzes the first lockfile discovered while traversing the directory tree in alphabetical order.
 
 The `gemnasium` analyzer scans supports JavaScript projects for vendored libraries
 (that is, those checked into the project but not managed by the package manager).
@@ -677,7 +671,7 @@ The `gemnasium` analyzer scans supports JavaScript projects for vendored librari
 #### Go
 
 Multiple files are supported. When a `go.mod` file is detected, the analyzer attempts to generate a [build list](https://go.dev/ref/mod#glos-build-list) using
-[Minimal Version Selection](https://go.dev/ref/mod#glos-minimal-version-selection). If this fails, the analyzer instead attempts to parse the dependencies within the `go.mod` file.
+[Minimal Version Selection](https://go.dev/ref/mod#glos-minimal-version-selection).
 
 As a requirement, the `go.mod` file should be cleaned up using the command `go mod tidy` to ensure proper management of dependencies. The process is repeated for every detected `go.mod` file.
 
@@ -715,7 +709,7 @@ To enable the analyzer, either:
 - Create a [scan execution policy](../policies/scan_execution_policies.md) that enforces dependency
   scanning.
 - Edit the `.gitlab-ci.yml` file manually.
-- [Use CI/CD components](#use-cicd-components)
+- [Use CI/CD components](#use-cicd-components) (Android projects only)
 
 #### Use a preconfigured merge request
 
@@ -777,9 +771,9 @@ Pipelines now include a Dependency Scanning job.
 Use [CI/CD components](../../../ci/components/index.md) to perform Dependency Scanning of your
 application. For instructions, see the respective component's README file.
 
-##### Available CI/CD components
+##### Available CI/CD components per language and package manager
 
-See <https://gitlab.com/explore/catalog/components/dependency-scanning>
+- [Android applications](https://gitlab.com/explore/catalog/components/android-dependency-scanning)
 
 ### Running jobs in merge request pipelines
 
@@ -832,7 +826,7 @@ The following variables allow configuration of global dependency scanning settin
 | ----------------------------|------------ |
 | `ADDITIONAL_CA_CERT_BUNDLE` | Bundle of CA certificates to trust. The bundle of certificates provided here is also used by other tools during the scanning process, such as `git`, `yarn`, or `npm`. For more details, see [Custom TLS certificate authority](#custom-tls-certificate-authority). |
 | `DS_EXCLUDED_ANALYZERS`     | Specify the analyzers (by name) to exclude from Dependency Scanning. For more information, see [Analyzers](#analyzers). |
-| `DS_EXCLUDED_PATHS`         | Exclude files and directories from the scan based on the paths. A comma-separated list of patterns. Patterns can be globs (see [`doublestar.Match`](https://pkg.go.dev/github.com/bmatcuk/doublestar/v4@v4.0.2#Match) for supported patterns), or file or folder paths (for example, `doc,spec`). Parent directories also match patterns. This is a pre-filter which is applied _before_ the scan is executed. Default: `"spec, test, tests, tmp"`. |
+| `DS_EXCLUDED_PATHS`         | Exclude files and directories from the scan based on the paths. A comma-separated list of patterns. Patterns can be globs (see [`doublestar.Match`](https://pkg.go.dev/github.com/bmatcuk/doublestar/v4@v4.0.2#Match) for supported patterns), or file or folder paths (for example, `doc,spec`). Parent directories also match patterns. Default: `"spec, test, tests, tmp"`. |
 | `DS_IMAGE_SUFFIX`           | Suffix added to the image name. (GitLab team members can view more information in this confidential issue: `https://gitlab.com/gitlab-org/gitlab/-/issues/354796`). Automatically set to `"-fips"` when FIPS mode is enabled. |
 | `DS_MAX_DEPTH`              | Defines how many directory levels deep that the analyzer should search for supported files to scan. A value of `-1` scans all directories regardless of depth. Default: `2`. |
 | `SECURE_ANALYZERS_PREFIX`   | Override the name of the Docker registry providing the official default images (proxy). |
@@ -859,7 +853,6 @@ The following variables configure the behavior of specific dependency scanning a
 | `MAVEN_CLI_OPTS`                     | `gemnasium-maven`  | `"-DskipTests --batch-mode"` | List of command line arguments that are passed to `maven` by the analyzer. See an example for [using private repositories](../index.md#using-private-maven-repositories). |
 | `GRADLE_CLI_OPTS`                    | `gemnasium-maven`  |                              | List of command line arguments that are passed to `gradle` by the analyzer. |
 | `GRADLE_PLUGIN_INIT_PATH`            | `gemnasium-maven`  | `"gemnasium-init.gradle"`    | Specifies the path to the Gradle initialization script. The init script must include `allprojects { apply plugin: 'project-report' }` to ensure compatibility. |
-| `DS_GRADLE_RESOLUTION_POLICY`        | `gemnasium-maven`  | `"failed"`                   | Controls Gradle dependency resolution strictness. Accepts `"none"` to allow partial results, or `"failed"` to fail the scan when any dependencies fail to resolve. |
 | `SBT_CLI_OPTS`                       | `gemnasium-maven`  |                              | List of command-line arguments that the analyzer passes to `sbt`. |
 | `PIP_INDEX_URL`                      | `gemnasium-python` | `https://pypi.org/simple`    | Base URL of Python Package Index. |
 | `PIP_EXTRA_INDEX_URL`                | `gemnasium-python` |                              | Array of [extra URLs](https://pip.pypa.io/en/stable/reference/pip_install/#cmdoption-extra-index-url) of package indexes to use in addition to `PIP_INDEX_URL`. Comma-separated. **Warning:** Read [the following security consideration](#python-projects) when using this environment variable. |
@@ -945,10 +938,6 @@ scanning jobs automatically use the FIPS-enabled images. To manually switch to F
 set the variable `DS_IMAGE_SUFFIX` to `"-fips"`.
 
 Dependency scanning for Gradle projects and auto-remediation for Yarn projects are not supported in FIPS mode.
-
-FIPS-enabled images are based on RedHat's UBI micro.
-They don't have package managers such as `dnf` or `microdnf`
-so it's not possible to install system packages at runtime.
 
 ## Output
 
@@ -1179,11 +1168,11 @@ variables:
 
 Maven does not read the `HTTP(S)_PROXY` environment variables.
 
-To make the Maven dependency scanner use a proxy, you can configure it using a `settings.xml` file (see [Maven documentation](https://maven.apache.org/guides/mini/guide-proxies.html)) and instruct Maven to use this configuration by using the `MAVEN_CLI_OPTS` CI/CD variable:
+To make the Maven dependency scanner use a proxy, you can specify the options using the `MAVEN_CLI_OPTS` CI/CD variable:
 
 ```yaml
 variables:
-  MAVEN_CLI_OPTS: "--settings mysettings.xml"
+  MAVEN_CLI_OPTS: "-DproxySet=true -Dhttps.proxyHost=squid-proxy -Dhttps.proxyPort=3128 -Dhttp.proxyHost=squid-proxy -Dhttp.proxyPort=3218"
 ```
 
 ## Specific settings for languages and package managers
@@ -1248,44 +1237,6 @@ We recommend that you use the most recent version of all containers, and the mos
 ### Gradle projects
 
 Do not override the `reports.html.destination` or `reports.html.outputLocation` properties when generating an HTML dependency report for Gradle projects. Doing so prevents Dependency Scanning from functioning correctly.
-
-### Maven Projects
-
-In isolated networks, if the central repository is a private registry (explicitly set with the `<mirror>` directive), Maven builds may fail to find the `gemnasium-maven-plugin` dependency. This issue occurs because Maven doesn't search the local repository (`/root/.m2`) by default and attempts to fetch from the central repository. The result is an error about the missing dependency.
-
-#### Workaround
-
-To resolve this issue, add a `<pluginRepositories>` section to your `settings.xml` file. This allows Maven to find plugins in the local repository.
-
-Before you begin, consider the following:
-
-- This workaround is only for environments where the default Maven central repository is mirrored to a private registry.
-- After applying this workaround, Maven searches the local repository for plugins, which may have security implications in some environments. Make sure this aligns with your organization's security policies.
-
-Follow these steps to modify the `settings.xml` file:
-
-1. Locate your Maven `settings.xml` file. This file is typically found in one of these locations:
-
-   - `/root/.m2/settings.xml` for the root user.
-   - `~/.m2/settings.xml` for a regular user.
-   - `${maven.home}/conf/settings.xml` global settings.
-
-1. Check if there's an existing `<pluginRepositories>` section in the file.
-
-1. If a `<pluginRepositories>` section already exists, add only the following `<pluginRepository>` element inside it.
-Otherwise, add the entire `<pluginRepositories>` section:
-
-      ```xml
-        <pluginRepositories>
-          <pluginRepository>
-              <id>local2</id>
-              <name>local repository</name>
-              <url>file:///root/.m2/repository/</url>
-          </pluginRepository>
-        </pluginRepositories>
-      ```
-
-1. Run your Maven build or dependency scanning process again.
 
 ### Python projects
 

@@ -13,7 +13,7 @@ RSpec.describe ::Packages::Pypi::SimplePackageVersionsPresenter, :aggregate_fail
 
   let(:file) { package.package_files.first }
   let(:filename) { file.file_name }
-  let(:packages) { Packages::Pypi::Package.for_projects(project) }
+  let(:packages) { project.packages }
 
   describe '#body' do
     subject(:presenter) { described_class.new(packages, project_or_group).body }
@@ -42,8 +42,7 @@ RSpec.describe ::Packages::Pypi::SimplePackageVersionsPresenter, :aggregate_fail
 
         create(:pypi_package, project: project, name: package_name)
 
-        expect { described_class.new(Packages::Pypi::Package.for_projects(project), project_or_group).body }
-          .not_to exceed_query_limit(control)
+        expect { described_class.new(project.packages, project_or_group).body }.not_to exceed_query_limit(control)
       end
     end
 

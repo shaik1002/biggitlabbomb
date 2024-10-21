@@ -89,7 +89,7 @@ module API
 
         paginated_tags =
           if params[:pagination] == 'keyset'
-            not_allowed! unless repository.gitlab_api_client.supports_gitlab_api?
+            not_allowed! unless repository.migrated?
 
             per_page_param = params[:per_page] || DEFAULT_PAGE_COUNT
             sort_param = params[:sort] == 'desc' ? '-name' : 'name'

@@ -106,7 +106,7 @@ RSpec.describe Gitlab::Ci::Config::External::File::Base, feature_category: :pipe
       it 'is not a valid file' do
         expect(valid?).to be_falsy
         expect(file.error_message)
-          .to eq('`some/file/[MASKED]xxxxxxxx.yml`: Invalid configuration format')
+          .to eq('`some/file/xxxxxxxxxxxxxxxx.yml`: Invalid configuration format')
       end
     end
 

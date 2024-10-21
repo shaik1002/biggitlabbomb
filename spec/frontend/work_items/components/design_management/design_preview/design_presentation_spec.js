@@ -2,7 +2,6 @@ import { shallowMount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import DesignPresentation from '~/work_items/components/design_management/design_preview/design_presentation.vue';
 import DesignImage from '~/work_items/components/design_management/design_preview/image.vue';
-import DesignOverlay from '~/work_items/components/design_management/design_preview/design_overlay.vue';
 
 const mockOverlayDimensions = {
   width: 100,
@@ -13,9 +12,6 @@ describe('DesignPresentation', () => {
   let wrapper;
 
   const findDesignImage = () => wrapper.findComponent(DesignImage);
-  const findDesignOverlay = () => wrapper.findComponent(DesignOverlay);
-  const findPresentationViewport = () =>
-    wrapper.find('[data-testid="presentation-viewport"]').element;
 
   function createComponent(props = {}, initialOverlayDimensions = mockOverlayDimensions, options) {
     wrapper = shallowMount(DesignPresentation, {
@@ -204,7 +200,7 @@ describe('DesignPresentation', () => {
       jest.spyOn(wrapper.vm, 'shiftZoomFocalPoint');
       jest.spyOn(wrapper.vm, 'scaleZoomFocalPoint');
       jest.spyOn(wrapper.vm, 'scrollToFocalPoint');
-      findDesignImage().vm.$emit('resize', { width: 10, height: 10 });
+      wrapper.vm.onImageResize({ width: 10, height: 10 });
       await nextTick();
     });
 
@@ -213,60 +209,11 @@ describe('DesignPresentation', () => {
       expect(wrapper.vm.initialLoad).toBe(false);
     });
 
-    it('scrolls to focal point after initial load', async () => {
-      const scrollToSpy = jest.spyOn(findPresentationViewport(), 'scrollTo');
-
-      findDesignImage().vm.$emit('resize', { width: 10, height: 10 });
+    it('calls scaleZoomFocalPoint and scrollToFocalPoint after initial load', async () => {
+      wrapper.vm.onImageResize({ width: 10, height: 10 });
       await nextTick();
-      expect(scrollToSpy).toHaveBeenCalledWith(0, 0);
-    });
-  });
-
-  describe('setOverlayPosition', () => {
-    beforeEach(() => {
-      createComponent({
-        image: 'test.jpg',
-        imageName: 'test',
-      });
-    });
-
-    it('sets overlay position correctly when overlay is smaller than viewport', async () => {
-      Object.defineProperty(findPresentationViewport(), 'offsetWidth', { value: 200 });
-      Object.defineProperty(findPresentationViewport(), 'offsetHeight', { value: 200 });
-
-      findDesignImage().vm.$emit('resize', { width: 100, height: 100 });
-
-      await nextTick();
-      expect(findDesignOverlay().props('position')).toEqual({
-        left: `calc(50% - ${mockOverlayDimensions.width / 2}px)`,
-        top: `calc(50% - ${mockOverlayDimensions.height / 2}px)`,
-      });
-    });
-
-    it('sets overlay position correctly when overlay width is larger than viewports', async () => {
-      Object.defineProperty(findPresentationViewport(), 'offsetWidth', { value: 50 });
-      Object.defineProperty(findPresentationViewport(), 'offsetHeight', { value: 200 });
-
-      findDesignImage().vm.$emit('resize', { width: 100, height: 100 });
-
-      await nextTick();
-      expect(findDesignOverlay().props('position')).toEqual({
-        left: `0`,
-        top: `calc(50% - ${mockOverlayDimensions.height / 2}px)`,
-      });
-    });
-
-    it('sets overlay position correctly when overlay height is larger than viewports', async () => {
-      Object.defineProperty(findPresentationViewport(), 'offsetWidth', { value: 200 });
-      Object.defineProperty(findPresentationViewport(), 'offsetHeight', { value: 50 });
-
-      findDesignImage().vm.$emit('resize', { width: 100, height: 100 });
-
-      await nextTick();
-      expect(findDesignOverlay().props('position')).toEqual({
-        left: `calc(50% - ${mockOverlayDimensions.width / 2}px)`,
-        top: '0',
-      });
+      expect(wrapper.vm.scaleZoomFocalPoint).toHaveBeenCalled();
+      expect(wrapper.vm.scrollToFocalPoint).toHaveBeenCalled();
     });
   });
 });

@@ -6,7 +6,6 @@ import { DEFAULT_DEBOUNCE_AND_THROTTLE_MS } from '~/lib/utils/constants';
 import { TYPENAME_MERGE_REQUEST } from '~/graphql_shared/constants';
 import { convertToGraphQLId } from '~/graphql_shared/utils';
 import userAutocompleteWithMRPermissionsQuery from '~/graphql_shared/queries/project_autocomplete_users_with_mr_permissions.query.graphql';
-import InviteMembersTrigger from '~/invite_members/components/invite_members_trigger.vue';
 import UpdateReviewers from './update_reviewers.vue';
 import userPermissionsQuery from './queries/user_permissions.query.graphql';
 
@@ -28,9 +27,8 @@ export default {
     GlAvatar,
     GlIcon,
     UpdateReviewers,
-    InviteMembersTrigger,
   },
-  inject: ['projectPath', 'issuableId', 'issuableIid', 'directlyInviteMembers'],
+  inject: ['projectPath', 'issuableId', 'issuableIid'],
   props: {
     users: {
       type: Array,
@@ -49,7 +47,6 @@ export default {
       searching: false,
       fetchedUsers: [],
       currentSelectedReviewers: this.selectedReviewers.map((r) => r.username),
-      userPermissions: {},
     };
   },
   computed: {
@@ -128,29 +125,22 @@ export default {
       this.fetchedUsers = users;
       this.searching = false;
     },
-    removeAllReviewers() {
-      this.currentSelectedReviewers = [];
-    },
-  },
-  i18n: {
-    selectReviewer: __('Select reviewer'),
-    unassign: __('Unassign'),
   },
 };
 </script>
 
 <template>
   <update-reviewers
-    v-if="userPermissions.adminMergeRequest"
+    v-if="userPermissions && userPermissions.adminMergeRequest"
     :selected-reviewers="currentSelectedReviewers"
   >
     <template #default="{ loading, updateReviewers }">
       <gl-collapsible-listbox
         v-model="currentSelectedReviewers"
-        :toggle-text="__('Edit')"
-        toggle-class="!gl-text-primary"
-        :header-text="$options.i18n.selectReviewer"
-        :reset-button-label="$options.i18n.unassign"
+        icon="plus"
+        :toggle-text="__('Select reviewer')"
+        :header-text="__('Select reviewer')"
+        text-sr-only
         category="tertiary"
         no-caret
         size="small"
@@ -158,17 +148,15 @@ export default {
         multiple
         placement="bottom-end"
         is-check-centered
-        class="reviewers-dropdown"
         :items="mappedUsers"
         :loading="loading"
         :searching="searching"
         @search="debouncedFetchAutocompleteUsers"
         @shown="shownDropdown"
         @hidden="updateReviewers"
-        @reset="removeAllReviewers"
       >
         <template #list-item="{ item }">
-          <span class="gl-flex gl-items-center">
+          <span class="gl-display-flex gl-align-items-center">
             <div class="gl-relative gl-mr-3">
               <gl-avatar :size="32" :src="item.avatarUrl" :entity-name="item.value" />
               <gl-icon
@@ -178,26 +166,11 @@ export default {
                 class="reviewer-merge-icon"
               />
             </div>
-            <span class="gl-flex gl-flex-col">
-              <span class="gl-whitespace-nowrap gl-font-bold">{{ item.text }}</span>
-              <span class="gl-text-subtle"> {{ item.secondaryText }}</span>
+            <span class="gl-display-flex gl-flex-direction-column">
+              <span class="gl-font-bold gl-white-space-nowrap">{{ item.text }}</span>
+              <span class="gl-text-gray-400"> {{ item.secondaryText }}</span>
             </span>
           </span>
-        </template>
-
-        <template v-if="directlyInviteMembers" #footer>
-          <div
-            class="gl-flex gl-flex-col gl-border-t-1 gl-border-t-dropdown !gl-p-2 !gl-pt-0 gl-border-t-solid"
-          >
-            <invite-members-trigger
-              trigger-element="button"
-              :display-text="__('Invite members')"
-              trigger-source="merge_request_reviewers_dropdown"
-              category="tertiary"
-              block
-              class="!gl-mt-2 !gl-justify-start"
-            />
-          </div>
         </template>
       </gl-collapsible-listbox>
     </template>

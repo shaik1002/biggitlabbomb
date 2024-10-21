@@ -5,7 +5,7 @@ module Ci
     include Ci::Partitionable
 
     MAX_ATTEMPTS = 5
-    self.table_name = :p_ci_build_trace_metadata
+    self.table_name = 'ci_build_trace_metadata'
     self.primary_key = :build_id
 
     belongs_to :build,
@@ -13,13 +13,12 @@ module Ci
       class_name: 'Ci::Build',
       partition_foreign_key: :partition_id,
       inverse_of: :trace_metadata
-
     belongs_to :trace_artifact, # rubocop:disable Rails/InverseOf -- No clear relation to be used
       ->(metadata) { in_partition(metadata) },
       class_name: 'Ci::JobArtifact',
       partition_foreign_key: :partition_id
 
-    partitionable scope: :build, partitioned: true
+    partitionable scope: :build
 
     validates :build, presence: true
     validates :archival_attempts, presence: true
@@ -28,7 +27,7 @@ module Ci
       record = find_by(build_id: build_id, partition_id: partition_id)
       return record if record
 
-      upsert({ build_id: build_id, partition_id: partition_id }, unique_by: %w[build_id partition_id])
+      upsert({ build_id: build_id, partition_id: partition_id }, unique_by: :build_id)
       find_by!(build_id: build_id, partition_id: partition_id)
     end
 

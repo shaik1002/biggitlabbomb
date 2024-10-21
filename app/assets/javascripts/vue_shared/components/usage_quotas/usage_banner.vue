@@ -14,7 +14,7 @@ export default {
       default: false,
     },
   },
-  storageUsageQuotaHelpPage: helpPagePath('user/storage_usage_quotas'),
+  storageUsageQuotaHelpPage: helpPagePath('user/usage_quotas'),
 };
 </script>
 <template>

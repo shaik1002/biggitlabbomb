@@ -2,7 +2,7 @@
 
 RSpec.configure do |config|
   def builds_path
-    Rails.root.join('tmp/tests/builds').to_s
+    Rails.root.join('tmp/tests/builds')
   end
 
   config.before(:suite) do

@@ -14,8 +14,7 @@ module Projects
           branches_path: project_branches_path(project),
           show_status_checks: 'false',
           show_approvers: 'false',
-          show_code_owners: 'false',
-          can_admin_protected_branches: can?(current_user, :admin_protected_branch, project).to_s
+          show_code_owners: 'false'
         }
       end
     end

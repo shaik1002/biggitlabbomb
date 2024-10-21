@@ -30,10 +30,10 @@ have a high degree of confidence in being able to perform them accurately.
 
 ## Not all data is automatically replicated
 
-If you are using any GitLab features that Geo doesn't support,
+If you are using any GitLab features that Geo [doesn't support](../replication/datatypes.md#limitations-on-replicationverification),
 you must make separate provisions to ensure that the **secondary** site has an
 up-to-date copy of any data associated with that feature. This may extend the
-required scheduled maintenance period significantly. A list of features supported by Geo can be found in the [replicated data types table](../replication/datatypes.md#replicated-data-types).
+required scheduled maintenance period significantly.
 
 A common strategy for keeping this period as short as possible for data stored
 in files is to use `rsync` to transfer the data. An initial `rsync` can be
@@ -158,11 +158,14 @@ On the **secondary** site:
    objects aren't yet replicated (shown in gray), consider giving the site more
    time to complete
 
-   ![Geo admin dashboard showing the synchronization status of a secondary site](../replication/img/geo_dashboard_v14_0.png)
+   ![Replication status](../replication/img/geo_dashboard_v14_0.png)
 
 If any objects are failing to replicate, this should be investigated before
 scheduling the maintenance window. Following a planned failover, anything that
 failed to replicate is **lost**.
+
+You can use the [Geo status API](../../../api/geo_nodes.md#retrieve-project-sync-or-verification-failures-that-occurred-on-the-current-node) to review failed objects and
+the reasons for failure.
 
 A common cause of replication failures is the data being missing on the
 **primary** site - you can resolve these failures by restoring the data from backup,

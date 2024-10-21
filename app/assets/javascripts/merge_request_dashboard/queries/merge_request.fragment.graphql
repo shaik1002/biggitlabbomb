@@ -5,8 +5,8 @@
 
 fragment MergeRequestDashboardFragment on MergeRequest {
   id
-  reference(full: true)
-  title
+  reference
+  titleHtml
   webUrl
   author {
     ...User
@@ -38,7 +38,7 @@ fragment MergeRequestDashboardFragment on MergeRequest {
       ...CiIcon
     }
   }
-  userNotesCount
+  userDiscussionsCount
   createdAt
   updatedAt
   ...MergeRequestApprovalFragment

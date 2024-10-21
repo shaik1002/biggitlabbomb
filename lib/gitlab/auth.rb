@@ -285,8 +285,7 @@ module Gitlab
           read_repository: %i[download_code],
           write_repository: %i[download_code push_code],
           create_runner: %i[create_instance_runner create_runner],
-          manage_runner: %i[assign_runner update_runner delete_runner],
-          ai_workflows: %i[push_code download_code]
+          manage_runner: %i[assign_runner update_runner delete_runner]
         }
 
         scopes.flat_map do |scope|
@@ -471,8 +470,7 @@ module Gitlab
       end
 
       def find_build_by_token(token)
-        ::Gitlab::Database::LoadBalancing::SessionMap
-          .with_sessions([::ApplicationRecord, ::Ci::ApplicationRecord]).use_primary do
+        ::Gitlab::Database::LoadBalancing::Session.current.use_primary do
           ::Ci::AuthJobFinder.new(token: token).execute
         end
       end

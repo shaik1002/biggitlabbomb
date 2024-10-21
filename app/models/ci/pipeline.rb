@@ -19,9 +19,6 @@ module Ci
     include EachBatch
     include FastDestroyAll::Helpers
 
-    self.primary_key = :id
-    self.sequence_name = :ci_pipelines_id_seq
-
     MAX_OPEN_MERGE_REQUESTS_REFS = 4
 
     PROJECT_ROUTE_AND_NAMESPACE_ROUTE = {
@@ -169,7 +166,7 @@ module Ci
     validates :status, presence: { unless: :importing? }
     validate :valid_commit_sha, unless: :importing?
     validates :source, exclusion: { in: %w[unknown], unless: :importing? }, on: :create
-    validates :project, presence: true
+    validates :project, presence: true, on: :create
 
     after_create :keep_around_commits, unless: :importing?
     after_commit :track_ci_pipeline_created_event, on: :create, if: :internal_pipeline?
@@ -324,7 +321,9 @@ module Ci
 
       after_transition any => ::Ci::Pipeline.completed_statuses do |pipeline|
         pipeline.run_after_commit do
-          pipeline.all_merge_requests.with_auto_merge_enabled.each do |merge_request|
+          pipeline.all_merge_requests.each do |merge_request|
+            next unless merge_request.auto_merge_enabled?
+
             AutoMergeProcessWorker.perform_async(merge_request.id)
           end
 
@@ -467,7 +466,6 @@ module Ci
       )
     end
 
-    scope :order_id_asc, -> { order(id: :asc) }
     scope :order_id_desc, -> { order(id: :desc) }
 
     # Returns the pipelines in descending order (= newest first), optionally
@@ -1148,11 +1146,11 @@ module Ci
     end
 
     def complete_or_manual_and_has_reports?(reports_scope)
-      if Feature.enabled?(:mr_show_reports_immediately, project, type: :development)
-        latest_report_builds(reports_scope).exists?
-      else
-        complete_or_manual? && has_reports?(reports_scope)
-      end
+      return complete_and_has_reports?(reports_scope) unless include_manual_to_pipeline_completion_enabled?
+
+      return latest_report_builds(reports_scope).exists? if Feature.enabled?(:mr_show_reports_immediately, project, type: :development)
+
+      complete_or_manual? && has_reports?(reports_scope)
     end
 
     def has_coverage_reports?
@@ -1415,6 +1413,12 @@ module Ci
       pipeline_metadata&.auto_cancel_on_new_commit || 'conservative'
     end
 
+    def include_manual_to_pipeline_completion_enabled?
+      strong_memoize(:include_manual_to_pipeline_completion_enabled) do
+        ::Feature.enabled?(:include_manual_to_pipeline_completion, self.project, type: :beta)
+      end
+    end
+
     def cancel_async_on_job_failure
       case auto_cancel_on_job_failure
       when 'none'
@@ -1430,7 +1434,7 @@ module Ci
     private
 
     def add_message(severity, content)
-      messages.build(severity: severity, content: content, project_id: project_id)
+      messages.build(severity: severity, content: content)
     end
 
     def merge_request_diff_sha
@@ -1498,15 +1502,7 @@ module Ci
     end
 
     def track_ci_pipeline_created_event
-      Gitlab::InternalEvents.track_event(
-        'create_ci_internal_pipeline',
-        project: project,
-        user: user,
-        additional_properties: {
-          label: source,
-          property: config_source
-        }
-      )
+      Gitlab::InternalEvents.track_event('create_ci_internal_pipeline', project: project, user: user)
     end
   end
 end

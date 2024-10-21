@@ -13,10 +13,10 @@ DETAILS:
 
 > - Maximum regular expression length for push rules [changed](https://gitlab.com/gitlab-org/gitlab/-/issues/411901) from 255 to 511 characters in GitLab 16.3.
 
-Push rules are [`pre-receive` Git hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks#:~:text=pre%2Dreceive,with%20the%20push.) you
+Push rules are [pre-receive Git hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) you
 can enable in a user-friendly interface. Push rules give you more control over what
 can and can't be pushed to your repository. While GitLab offers
-[protected branches](../repository/branches/protected.md), you may need more specific rules, such as:
+[protected branches](../protected_branches.md), you may need more specific rules, such as:
 
 - Evaluating the contents of a commit.
 - Confirming commit messages match expected formats.
@@ -33,7 +33,7 @@ For custom push rules use [server hooks](../../../administration/server_hooks.md
 ## Enable global push rules
 
 You can create push rules for all new projects to inherit, but they can be overridden
-in a project or [group](../../group/access_and_permissions.md#group-push-rules).
+at the project level or the [group level](../../group/access_and_permissions.md#group-push-rules).
 All projects created after you configure global push rules inherit this
 configuration. However, each existing project must be updated manually, using the
 process described in [Override global push rules per project](#override-global-push-rules-per-project).
@@ -66,12 +66,9 @@ for an existing project to match new global push rules:
 
 Use these rules to validate users who make commits.
 
-NOTE:
-These push rules apply only to commits and not [tags](tags/index.md).
-
 - **Reject unverified users**: Users must have a [confirmed email address](../../../security/user_email_confirmation.md).
 - **Check whether the commit author is a GitLab user**: The commit author and committer must have an email address that's been verified by GitLab.
-- **Commit author's email**: Both the author and committer email addresses must match the regular expression.
+- **Commit author's email**: Both the author's and committer's email addresses must match the regular expression.
   To allow any email address, leave empty.
 
 ## Validate commit messages
@@ -104,7 +101,7 @@ Use these rules for your commit messages.
   the expression. To allow any commit message, leave empty.
   Uses multiline mode, which can be disabled by using `(?-m)`.
 
-## Reject commits that aren't signed-off
+## Reject commits that aren't DCO certified
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/98810) in GitLab 15.5.
 
@@ -293,8 +290,8 @@ to use them as standard characters in a match condition.
 - [Signing commits with GPG](signed_commits/gpg.md)
 - [Signing commits with SSH](signed_commits/ssh.md)
 - [Signing commits with X.509](signed_commits/x509.md)
-- [Protected branches](../repository/branches/protected.md)
-- [Secret detection](../../application_security/secret_detection/index.md)
+- [Protected branches](../protected_branches.md)
+- [Client-side secret detection](../../application_security/secret_detection/client/index.md)
 
 ## Troubleshooting
 
@@ -322,8 +319,8 @@ read [issue #19185](https://gitlab.com/gitlab-org/gitlab/-/issues/19185).
 ### Bulk update push rules for _all_ projects
 
 To update the push rules to be the same for all projects,
-use the [Rails console](../../../administration/operations/rails_console.md#starting-a-rails-console-session),
-or write a script to update each project using the [push rules API endpoint](../../../api/project_push_rules.md).
+you need to use [the rails console](../../../administration/operations/rails_console.md#starting-a-rails-console-session),
+or write a script to update each project using the [push rules API endpoint](../../../api/projects.md#push-rules).
 
 For example, to enable **Check whether the commit author is a GitLab user** and **Do not allow users to remove Git tags with `git push`** checkboxes,
 and create a filter for allowing commits from a specific email domain only through rails console:

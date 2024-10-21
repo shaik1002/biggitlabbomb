@@ -58,7 +58,8 @@ module CrossDatabaseModification
       false
     end
 
-    def before_committed!; end
+    def before_committed!
+    end
 
     def rolledback!(force_restore_state: false, should_run_callbacks: true)
       done!
@@ -99,8 +100,6 @@ module CrossDatabaseModification
       case self.name
       when 'ActiveRecord::Base', 'ApplicationRecord'
         :gitlab_main
-      when 'Gitlab::Database::SecApplicationRecord'
-        :gitlab_sec
       when 'Ci::ApplicationRecord'
         :gitlab_ci
       when 'PackageMetadata::ApplicationRecord'

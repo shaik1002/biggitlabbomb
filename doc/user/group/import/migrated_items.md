@@ -59,7 +59,7 @@ Group items that are migrated to the destination GitLab instance include:
    metadata [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/63551) in GitLab 14.0.
 1. Group Labels cannot retain any associated Label Priorities during import. These labels will need to be re-prioritized manually
    once the relevant Project is migrated to the destination instance.
-1. See [User contributions and membership mapping](direct_transfer_migrations.md#user-contributions-and-membership-mapping).
+1. See [Memberships](index.md#memberships).
 
 <!-- vale gitlab_base.OutdatedVersions = YES -->
 
@@ -139,9 +139,9 @@ Project items that are migrated to the destination GitLab instance include:
 
 **Footnotes:**
 
-1. Imported branches respect the [default branch protection settings](../../project/repository/branches/protected.md)
+1. Imported branches respect the [default branch protection settings](../../project/protected_branches.md)
    of the destination group, which could cause an unprotected branch to be imported as protected.
-1. See [User contributions and membership mapping](direct_transfer_migrations.md#user-contributions-and-membership-mapping).
+1. See [Memberships](index.md#memberships).
 
 ### Issue-related items
 

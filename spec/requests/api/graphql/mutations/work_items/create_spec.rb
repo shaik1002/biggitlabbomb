@@ -24,8 +24,9 @@ RSpec.describe 'Create a work item', feature_category: :team_planning do
 
   RSpec.shared_examples 'creates work item' do
     it 'creates the work item' do
-      expect { post_graphql_mutation(mutation, current_user: current_user) }
-        .to change { WorkItem.count }.by(1)
+      expect do
+        post_graphql_mutation(mutation, current_user: current_user)
+      end.to change(WorkItem, :count).by(1)
 
       created_work_item = WorkItem.last
       expect(response).to have_gitlab_http_status(:success)
@@ -53,49 +54,6 @@ RSpec.describe 'Create a work item', feature_category: :team_planning do
 
     it_behaves_like 'has spam protection' do
       let(:mutation_class) { ::Mutations::WorkItems::Create }
-    end
-
-    context 'with description widget input' do
-      let(:input) do
-        {
-          title: 'title',
-          workItemTypeId: WorkItems::Type.default_by_type(:task).to_gid.to_s,
-          descriptionWidget: { description: 'some description' }
-        }
-      end
-
-      let(:widgets_response) { mutation_response['workItem']['widgets'] }
-      let(:fields) do
-        <<~FIELDS
-        workItem {
-          widgets {
-            type
-            ... on WorkItemWidgetDescription {
-              description
-              lastEditedAt
-              lastEditedBy {
-                id
-              }
-            }
-          }
-        }
-        errors
-        FIELDS
-      end
-
-      it 'sets the description but does not set last_edited_at and last_edited_by' do
-        post_graphql_mutation(mutation, current_user: current_user)
-
-        expect(response).to have_gitlab_http_status(:success)
-        expect(widgets_response).to include(
-          {
-            'type' => 'DESCRIPTION',
-            'description' => 'some description',
-            'lastEditedAt' => nil,
-            'lastEditedBy' => nil
-          }
-        )
-      end
     end
 
     context 'with hierarchy widget input' do
@@ -187,8 +145,9 @@ RSpec.describe 'Create a work item', feature_category: :team_planning do
           end
 
           it 'creates work item and sets the relative position to be BEFORE adjacent' do
-            expect { post_graphql_mutation(mutation, current_user: current_user) }
-              .to change { WorkItem.count }.by(1)
+            expect do
+              post_graphql_mutation(mutation, current_user: current_user)
+            end.to change(WorkItem, :count).by(1)
 
             expect(response).to have_gitlab_http_status(:success)
             expect(widgets_response).to include(
@@ -250,8 +209,9 @@ RSpec.describe 'Create a work item', feature_category: :team_planning do
 
         shared_examples "work item's milestone is set" do
           it "sets the work item's milestone" do
-            expect { post_graphql_mutation(mutation, current_user: current_user) }
-              .to change { WorkItem.count }.by(1)
+            expect do
+              post_graphql_mutation(mutation, current_user: current_user)
+            end.to change(WorkItem, :count).by(1)
 
             expect(response).to have_gitlab_http_status(:success)
             expect(widgets_response).to include(
@@ -315,8 +275,9 @@ RSpec.describe 'Create a work item', feature_category: :team_planning do
         end
 
         it "sets the work item's assignee" do
-          expect { post_graphql_mutation(mutation, current_user: current_user) }
-            .to change { WorkItem.count }.by(1)
+          expect do
+            post_graphql_mutation(mutation, current_user: current_user)
+          end.to change(WorkItem, :count).by(1)
 
           expect(response).to have_gitlab_http_status(:success)
           expect(widgets_response).to include(
@@ -361,150 +322,21 @@ RSpec.describe 'Create a work item', feature_category: :team_planning do
         end
 
         it "sets the work item's labels" do
-          expect { post_graphql_mutation(mutation, current_user: current_user) }
-            .to change { WorkItem.count }.by(1)
+          expect do
+            post_graphql_mutation(mutation, current_user: current_user)
+          end.to change(WorkItem, :count).by(1)
 
           expect(response).to have_gitlab_http_status(:success)
           expect(mutation_response['workItem']['widgets']).to include(
-            'labels' => {
-              'nodes' => containing_exactly(
-                hash_including('id' => label_ids.first.to_s),
-                hash_including('id' => label_ids.second.to_s)
-              )
-            },
+            'labels' => { 'nodes' => label_ids.map { |l| { 'id' => l } } },
             'type' => 'LABELS'
           )
         end
       end
     end
-
-    context 'with linked items widget input' do
-      let_it_be(:item1_global_id) { create(:work_item, :task, project: project).to_global_id.to_s }
-      let_it_be(:item2_global_id) { create(:work_item, :task, project: project).to_global_id.to_s }
-
-      let(:widgets_response) { mutation_response['workItem']['widgets'] }
-
-      let(:fields) do
-        <<~FIELDS
-        workItem {
-          widgets {
-            type
-            ... on WorkItemWidgetLinkedItems {
-              linkedItems {
-                nodes {
-                  linkType
-                  workItem { id }
-                }
-              }
-            }
-          }
-        }
-        errors
-        FIELDS
-      end
-
-      let(:input) do
-        {
-          title: 'item1',
-          workItemTypeId: WorkItems::Type.default_by_type(:task).to_gid.to_s,
-          linkedItemsWidget: { 'workItemsIds' => [item1_global_id, item2_global_id], 'linkType' => 'RELATED' }
-        }
-      end
-
-      it 'creates work item with related items' do
-        expect { post_graphql_mutation(mutation, current_user: current_user) }
-          .to change { WorkItem.count }.by(1)
-          .and change { WorkItems::RelatedWorkItemLink.count }.by(2)
-
-        expect(response).to have_gitlab_http_status(:success)
-        expect(widgets_response).to include(
-          {
-            'linkedItems' => { 'nodes' => [
-              { 'linkType' => 'relates_to', "workItem" => { "id" => item2_global_id } },
-              { 'linkType' => 'relates_to', "workItem" => { "id" => item1_global_id } }
-            ] },
-            'type' => 'LINKED_ITEMS'
-          }
-        )
-      end
-
-      context 'when number of items exceeds maximum allowed' do
-        before do
-          stub_const('Types::WorkItems::Widgets::LinkedItemsCreateInputType::MAX_WORK_ITEMS', 1)
-        end
-
-        it_behaves_like 'a mutation that returns top-level errors',
-          errors: [Types::WorkItems::Widgets::LinkedItemsCreateInputType::ERROR_MESSAGE]
-      end
-
-      context 'with invalid items' do
-        let_it_be(:private_project) { create(:project, :private) }
-        let_it_be(:item1_global_id) { create(:work_item, :task, project: private_project).to_global_id.to_s }
-        let_it_be(:item2_global_id) { create(:work_item, :task, project: private_project).to_global_id.to_s }
-
-        it 'creates the work item without linking items' do
-          expect { post_graphql_mutation(mutation, current_user: current_user) }
-            .to change { WorkItem.count }.by(1)
-            .and not_change { WorkItems::RelatedWorkItemLink.count }
-
-          expect(mutation_response['errors']).to contain_exactly(
-            'No matching work item found. Make sure you are adding a valid ID and you have access to the item.'
-          )
-        end
-      end
-    end
-
-    context 'with due and start date widget input', :freeze_time do
-      let(:start_date) { Date.today }
-      let(:due_date) { 1.week.from_now.to_date }
-      let(:fields) do
-        <<~FIELDS
-          workItem {
-            widgets {
-              type
-              ... on WorkItemWidgetStartAndDueDate {
-                startDate
-                dueDate
-              }
-              ... on WorkItemWidgetDescription {
-                description
-              }
-            }
-          }
-          errors
-        FIELDS
-      end
-
-      let(:input) do
-        {
-          'title' => 'new title',
-          'description' => 'new description',
-          'confidential' => true,
-          'workItemTypeId' => WorkItems::Type.default_by_type(:task).to_gid.to_s,
-          'startAndDueDateWidget' => {
-            'startDate' => start_date.to_s,
-            'dueDate' => due_date.to_s
-          }
-        }
-      end
-
-      it 'updates start and due date' do
-        expect { post_graphql_mutation(mutation, current_user: current_user) }
-          .to change { WorkItem.count }.by(1)
-
-        expect(response).to have_gitlab_http_status(:success)
-        expect(mutation_response['workItem']['widgets']).to include(
-          {
-            'startDate' => start_date.to_s,
-            'dueDate' => due_date.to_s,
-            'type' => 'START_AND_DUE_DATE'
-          }
-        )
-      end
-    end
   end
 
-  context 'when the user is not allowed to create a work item' do
+  context 'the user is not allowed to create a work item' do
     let(:current_user) { create(:user) }
     let(:mutation) { graphql_mutation(:workItemCreate, input.merge('projectPath' => project.full_path), fields) }
 
@@ -540,15 +372,17 @@ RSpec.describe 'Create a work item', feature_category: :team_planning do
       let_it_be(:container_params) { { namespace: group } }
       let(:mutation) { graphql_mutation(:workItemCreate, input.merge(namespacePath: group.full_path), fields) }
 
-      it 'does not create the work item' do
-        expect { post_graphql_mutation(mutation, current_user: current_user) }
-          .not_to change { WorkItem.count }
-      end
+      it_behaves_like 'creates work item'
 
-      it_behaves_like 'a mutation that returns top-level errors', errors: [
-        "The resource that you are attempting to access does not exist or you don't have " \
-          "permission to perform this action"
-      ]
+      context 'when the create_group_level_work_items feature flag is disabled' do
+        before do
+          stub_feature_flags(create_group_level_work_items: false)
+        end
+
+        it_behaves_like 'a mutation that returns top-level errors', errors: [
+          Mutations::WorkItems::Create::DISABLED_FF_ERROR
+        ]
+      end
     end
 
     context 'when both projectPath and namespacePath are passed' do
@@ -585,8 +419,9 @@ RSpec.describe 'Create a work item', feature_category: :team_planning do
   context 'with time tracking widget input' do
     shared_examples 'mutation creating work item with time tracking data' do
       it 'creates work item with time tracking data' do
-        expect { post_graphql_mutation(mutation, current_user: current_user) }
-          .to change { WorkItem.count }.by(1)
+        expect do
+          post_graphql_mutation(mutation, current_user: current_user)
+        end.to change(WorkItem, :count).by(1)
 
         expect(mutation_response['workItem']['widgets']).to include(
           'timeEstimate' => 12.hours.to_i,
@@ -675,8 +510,9 @@ RSpec.describe 'Create a work item', feature_category: :team_planning do
       end
 
       it 'ignores the quick action' do
-        expect { post_graphql_mutation(mutation, current_user: current_user) }
-          .to change { WorkItem.count }.by(1)
+        expect do
+          post_graphql_mutation(mutation, current_user: current_user)
+        end.to change(WorkItem, :count).by(1)
 
         expect(mutation_response['workItem']['widgets']).not_to include('type' => 'TIME_TRACKING')
         expect(mutation_response['workItem']['widgets']).to include(
@@ -712,8 +548,9 @@ RSpec.describe 'Create a work item', feature_category: :team_planning do
 
     shared_examples 'mutation setting work item contacts' do
       it 'creates work item with contact data' do
-        expect { post_graphql_mutation(mutation, current_user: current_user) }
-          .to change { WorkItem.count }.by(1)
+        expect do
+          post_graphql_mutation(mutation, current_user: current_user)
+        end.to change(WorkItem, :count).by(1)
 
         expect(mutation_response['workItem']['widgets']).to include(
           'contacts' => {

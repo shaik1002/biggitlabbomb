@@ -34,7 +34,7 @@ RSpec.describe 'Work item linked items', :js, feature_category: :team_planning d
     end
 
     it 'are not displayed when issue does not have work item links', :aggregate_failures do
-      within_testid('work-item-relationships') do
+      page.within('.work-item-relationships') do
         expect(page).to have_selector('[data-testid="link-item-add-button"]')
         expect(page).not_to have_selector('[data-testid="link-work-item-form"]')
         expect(page).not_to have_selector('[data-testid="work-item-linked-items-list"]')
@@ -42,21 +42,21 @@ RSpec.describe 'Work item linked items', :js, feature_category: :team_planning d
     end
 
     it 'toggles widget body', :aggregate_failures do
-      within_testid('work-item-relationships') do
-        expect(page).to have_selector('[data-testid="crud-empty"]')
+      page.within('.work-item-relationships') do
+        expect(page).to have_selector('[data-testid="widget-body"]')
 
         click_button 'Collapse'
 
-        expect(page).not_to have_selector('[data-testid="crud-empty"]')
+        expect(page).not_to have_selector('[data-testid="widget-body"]')
 
         click_button 'Expand'
 
-        expect(page).to have_selector('[data-testid="crud-empty"]')
+        expect(page).to have_selector('[data-testid="widget-body"]')
       end
     end
 
     it 'toggles form', :aggregate_failures do
-      within_testid('work-item-relationships') do
+      page.within('.work-item-relationships') do
         expect(page).not_to have_selector('[data-testid="link-work-item-form"]')
 
         click_button 'Add'
@@ -95,7 +95,7 @@ RSpec.describe 'Work item linked items', :js, feature_category: :team_planning d
     end
 
     it 'removes a linked item', :aggregate_failures do
-      within_testid('work-item-relationships') do
+      page.within('.work-item-relationships') do
         click_button 'Add'
 
         within_testid('link-work-item-form') do
@@ -123,18 +123,17 @@ RSpec.describe 'Work item linked items', :js, feature_category: :team_planning d
     end
 
     it 'passes axe automated accessibility testing for linked items empty state' do
-      selector = '[data-testid="work-item-relationships"]'
-      expect(page).to be_axe_clean.within(selector).skipping :'link-in-text-block'
+      expect(page).to be_axe_clean.within('.work-item-relationships').skipping :'link-in-text-block'
     end
 
     it 'passes axe automated accessibility testing for linked items' do
-      within_testid('work-item-relationships') do
+      page.within('.work-item-relationships') do
         click_button 'Add'
 
         find_by_testid('work-item-token-select-input').set(objective.title)
         wait_for_all_requests
 
-        form_selector = '[data-testid="work-item-relationships"]'
+        form_selector = '.work-item-relationships'
         expect(page).to be_axe_clean.within(form_selector).skipping :'aria-input-field-name',
           :'aria-required-children'
 
@@ -152,7 +151,7 @@ RSpec.describe 'Work item linked items', :js, feature_category: :team_planning d
   end
 
   def verify_linked_item_added(input)
-    within_testid('work-item-relationships') do
+    page.within('.work-item-relationships') do
       click_button 'Add'
 
       within_testid('link-work-item-form') do

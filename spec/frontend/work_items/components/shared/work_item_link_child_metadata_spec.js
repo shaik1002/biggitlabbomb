@@ -2,7 +2,6 @@ import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 
 import ItemMilestone from '~/issuable/components/issue_milestone.vue';
 import WorkItemLinkChildMetadata from '~/work_items/components/shared/work_item_link_child_metadata.vue';
-import WorkItemRolledUpCount from '~/work_items/components/work_item_links/work_item_rolled_up_count.vue';
 
 import { workItemObjectiveMetadataWidgets } from '../../mock_data';
 
@@ -11,8 +10,6 @@ describe('WorkItemLinkChildMetadata', () => {
   const mockMilestone = MILESTONE.milestone;
 
   let wrapper;
-
-  const findRolledUpCount = () => wrapper.findComponent(WorkItemRolledUpCount);
 
   const createComponent = ({ metadataWidgets = workItemObjectiveMetadataWidgets } = {}) => {
     wrapper = shallowMountExtended(WorkItemLinkChildMetadata, {
@@ -42,41 +39,5 @@ describe('WorkItemLinkChildMetadata', () => {
 
     expect(milestoneLink.exists()).toBe(true);
     expect(milestoneLink.props('milestone')).toEqual(mockMilestone);
-  });
-
-  it('does not render rolled up count if there are no rolled up items', () => {
-    expect(findRolledUpCount().exists()).toBe(false);
-  });
-
-  it('renders rolled up count if there are rolled up items', () => {
-    createComponent({
-      metadataWidgets: {
-        ...workItemObjectiveMetadataWidgets,
-        HIERARCHY: {
-          type: 'HIERARCHY',
-          hasChildren: false,
-          rolledUpCountsByType: [
-            {
-              countsByState: {
-                all: 4,
-                closed: 0,
-                __typename: 'WorkItemStateCountsType',
-              },
-              workItemType: {
-                id: 'gid://gitlab/WorkItems::Type/8',
-                name: 'Epic',
-                iconName: 'issue-type-epic',
-                __typename: 'WorkItemType',
-              },
-              __typename: 'WorkItemTypeCountsByState',
-            },
-          ],
-          __typename: 'WorkItemWidgetHierarchy',
-        },
-      },
-    });
-
-    expect(findRolledUpCount().exists()).toBe(true);
-    expect(findRolledUpCount().props('hideCountWhenZero')).toBe(true);
   });
 });

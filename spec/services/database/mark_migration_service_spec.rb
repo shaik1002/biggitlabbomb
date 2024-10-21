@@ -27,11 +27,14 @@ RSpec.describe Database::MarkMigrationService, feature_category: :database do
     subject(:execute) { service.execute }
 
     def versions
-      if ::Gitlab.next_rails?
-        connection.schema_migration.versions.count { |v| v == version.to_s }
-      else
-        ActiveRecord::SchemaMigration.where(version: version).count
-      end
+      schema_table =
+        if ::Gitlab.next_rails?
+          connection.schema_migration
+        else
+          ActiveRecord::SchemaMigration
+        end
+
+      schema_table.where(version: version).count
     end
 
     it 'marks the migration as successful' do

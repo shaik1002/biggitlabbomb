@@ -1,9 +1,10 @@
 <script>
 import { GlButton, GlDatepicker, GlFormGroup, GlOutsideDirective as Outside } from '@gitlab/ui';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
+import { getDateWithUTC, newDateAsLocaleTime } from '~/lib/utils/datetime/date_calculation_utility';
 import { s__ } from '~/locale';
 import Tracking from '~/tracking';
-import { formatDate, newDate, toISODateFormat } from '~/lib/utils/datetime_utility';
+import { formatDate, pikadayToString } from '~/lib/utils/datetime_utility';
 import { Mousetrap } from '~/lib/mousetrap';
 import { keysFor, SIDEBAR_CLOSE_WIDGET } from '~/behaviors/shortcuts/keybindings';
 import {
@@ -74,8 +75,8 @@ export default {
     datesUnchanged() {
       const dirtyDueDate = this.dirtyDueDate || nullObjectDate;
       const dirtyStartDate = this.dirtyStartDate || nullObjectDate;
-      const dueDate = this.dueDate ? newDate(this.dueDate) : nullObjectDate;
-      const startDate = this.startDate ? newDate(this.startDate) : nullObjectDate;
+      const dueDate = this.dueDate ? newDateAsLocaleTime(this.dueDate) : nullObjectDate;
+      const startDate = this.startDate ? newDateAsLocaleTime(this.startDate) : nullObjectDate;
       return (
         dirtyDueDate.getTime() === dueDate.getTime() &&
         dirtyStartDate.getTime() === startDate.getTime()
@@ -124,8 +125,8 @@ export default {
               ),
               {
                 ...workItemDatesWidget,
-                dueDate: this.dirtyDueDate ? toISODateFormat(this.dirtyDueDate) : null,
-                startDate: this.dirtyStartDate ? toISODateFormat(this.dirtyStartDate) : null,
+                dueDate: this.dirtyDueDate ? pikadayToString(this.dirtyDueDate) : null,
+                startDate: this.dirtyStartDate ? pikadayToString(this.dirtyStartDate) : null,
               },
             ],
           },
@@ -136,13 +137,13 @@ export default {
   watch: {
     dueDate: {
       handler(newDueDate) {
-        this.dirtyDueDate = newDate(newDueDate);
+        this.dirtyDueDate = newDateAsLocaleTime(newDueDate);
       },
       immediate: true,
     },
     startDate: {
       handler(newStartDate) {
-        this.dirtyStartDate = newDate(newStartDate);
+        this.dirtyStartDate = newDateAsLocaleTime(newStartDate);
       },
       immediate: true,
     },
@@ -181,8 +182,8 @@ export default {
             input: {
               id: this.workItemId,
               startAndDueDateWidget: {
-                dueDate: this.dirtyDueDate ? toISODateFormat(this.dirtyDueDate) : null,
-                startDate: this.dirtyStartDate ? toISODateFormat(this.dirtyStartDate) : null,
+                dueDate: getDateWithUTC(this.dirtyDueDate),
+                startDate: getDateWithUTC(this.dirtyStartDate),
               },
             },
           },
@@ -202,16 +203,12 @@ export default {
           this.isUpdating = false;
         });
     },
-    expandWidget() {
+    async expandWidget() {
       this.isEditing = true;
+      await this.$nextTick();
+      this.$refs.startDatePicker.show();
     },
-    collapseWidget(event = {}) {
-      // This prevents outside directive from treating
-      // a click on a select element within datepicker as an outside click,
-      // therefore allowing user to select a month and a year without
-      // triggering the mutation and immediately closing the dropdown
-      if (event.target?.classList.contains('pika-select', 'pika-select-month', 'pika-select-year'))
-        return;
+    collapseWidget() {
       this.isEditing = false;
       this.updateDates();
     },
@@ -220,9 +217,9 @@ export default {
 </script>
 
 <template>
-  <section data-testid="work-item-start-due-dates">
-    <div class="gl-flex gl-items-center gl-gap-3">
-      <h3 :class="{ 'gl-sr-only': isEditing }" class="gl-heading-5 !gl-mb-0">
+  <section class="gl-pb-4" data-testid="work-item-start-due-dates">
+    <div class="gl-display-flex gl-align-items-center gl-gap-3">
+      <h3 :class="{ 'gl-sr-only': isEditing }" class="gl-mb-0! gl-heading-5">
         {{ $options.i18n.dates }}
       </h3>
       <gl-button
@@ -237,8 +234,8 @@ export default {
       >
     </div>
     <fieldset v-if="isEditing" data-testid="datepicker-wrapper">
-      <div class="gl-flex gl-items-center gl-justify-between">
-        <legend class="gl-mb-0 gl-border-b-0 gl-text-base gl-font-bold">
+      <div class="gl-display-flex gl-justify-content-space-between gl-align-items-center">
+        <legend class="gl-mb-0 gl-border-b-0 gl-font-bold gl-font-base">
           {{ $options.i18n.dates }}
         </legend>
         <gl-button
@@ -250,15 +247,12 @@ export default {
           >{{ __('Apply') }}</gl-button
         >
       </div>
-      <div
-        v-outside="collapseWidget"
-        class="gl-flex gl-flex-col gl-flex-wrap gl-gap-x-5 gl-gap-y-3 gl-pt-2 sm:gl-flex-row md:gl-flex-col"
-      >
+      <div v-outside="collapseWidget" class="gl-display-flex gl-pt-2">
         <gl-form-group
-          class="gl-m-0 gl-flex gl-items-center gl-gap-3"
+          class="gl-m-0"
           :label="$options.i18n.startDate"
           :label-for="$options.startDateInputId"
-          label-class="!gl-font-normal !gl-pb-0 gl-min-w-7 sm:gl-min-w-fit md:gl-min-w-7 gl-break-words"
+          label-class="!gl-font-normal gl-pb-2!"
         >
           <gl-datepicker
             ref="startDatePicker"
@@ -268,17 +262,17 @@ export default {
             :input-id="$options.startDateInputId"
             :target="null"
             show-clear-button
-            class="work-item-date-picker gl-max-w-20"
+            class="work-item-date-picker"
             @clear="clearStartDatePicker"
             @close="handleStartDateInput"
             @keydown.esc.native="collapseWidget"
           />
         </gl-form-group>
         <gl-form-group
-          class="gl-m-0 gl-flex gl-items-center gl-gap-3"
+          class="gl-m-0 gl-pl-3 gl-pr-2"
           :label="$options.i18n.dueDate"
           :label-for="$options.dueDateInputId"
-          label-class="!gl-font-normal !gl-pb-0 gl-min-w-7 sm:gl-min-w-fit md:gl-min-w-7 gl-break-words"
+          label-class="!gl-font-normal gl-pb-2!"
         >
           <gl-datepicker
             v-model="dirtyDueDate"
@@ -288,7 +282,7 @@ export default {
             :min-date="dirtyStartDate"
             :target="null"
             show-clear-button
-            class="work-item-date-picker gl-max-w-20"
+            class="work-item-date-picker"
             data-testid="due-date-picker"
             @clear="clearDueDatePicker"
             @keydown.esc.native="collapseWidget"
@@ -298,13 +292,13 @@ export default {
     </fieldset>
     <template v-else>
       <p class="gl-m-0 gl-pb-1">
-        <span class="gl-inline-block gl-min-w-8">{{ $options.i18n.startDate }}:</span>
+        {{ $options.i18n.startDate }}:
         <span data-testid="start-date-value" :class="{ 'gl-text-secondary': !startDate }">
           {{ startDateValue }}
         </span>
       </p>
-      <p class="gl-m-0 gl-pt-1">
-        <span class="gl-inline-block gl-min-w-8">{{ $options.i18n.dueDate }}:</span>
+      <p class="gl-m-0 gl-pt-1 gl-pb-3">
+        {{ $options.i18n.dueDate }}:
         <span data-testid="due-date-value" :class="{ 'gl-text-secondary': !dueDate }">
           {{ dueDateValue }}
         </span>

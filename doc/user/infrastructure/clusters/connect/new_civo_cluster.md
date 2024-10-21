@@ -91,8 +91,8 @@ Refer to the [Civo Terraform provider](https://registry.terraform.io/providers/c
 
 After configuring your project, manually trigger the provisioning of your cluster. In GitLab:
 
+1. On the left sidebar, go to **Build > Pipelines**.
 1. On the left sidebar, select **Build > Pipelines**.
-1. Select **New pipeline**.
 1. Select **Run pipeline**, and then select the newly created pipeline from the list.
 1. Next to the **deploy** job, select **Manual action** (**{status_manual}**).
 
@@ -101,7 +101,7 @@ When the pipeline finishes successfully, you can see your new cluster:
 - In Civo dashboard: on your Kubernetes tab.
 - In GitLab: from your project's sidebar, select **Operate > Kubernetes clusters**.
 
-If you didn't set the `TF_VAR_civo_region` variable, the cluster will be created in the 'lon1' region.
+If you didn't set the `TF_VAR_civo_region` variable, the cluster will be created in the 'lon1' region. 
 
 ## Use your cluster
 

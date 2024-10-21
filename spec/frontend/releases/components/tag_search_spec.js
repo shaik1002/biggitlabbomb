@@ -10,7 +10,6 @@ import TagSearch from '~/releases/components/tag_search.vue';
 import createStore from '~/releases/stores';
 import createEditNewModule from '~/releases/stores/modules/edit_new';
 import { createRefModule } from '~/ref/stores';
-import { HTTP_STATUS_OK } from '~/lib/utils/http_status';
 
 const TEST_TAG_NAME = 'test-tag-name';
 const TEST_PROJECT_ID = '1234';
@@ -54,7 +53,7 @@ describe('releases/components/tag_search', () => {
     beforeEach(async () => {
       mock
         .onGet(`/api/v4/projects/${TEST_PROJECT_ID}/repository/tags`)
-        .reply(HTTP_STATUS_OK, TAGS, { 'x-total': TAGS.length });
+        .reply(200, TAGS, { 'x-total': TAGS.length });
 
       createWrapper();
 
@@ -84,7 +83,7 @@ describe('releases/components/tag_search', () => {
           .onGet(`/api/v4/projects/${TEST_PROJECT_ID}/repository/tags`, {
             params: { search: query, per_page: DEFAULT_PER_PAGE },
           })
-          .reply(HTTP_STATUS_OK, [], { 'x-total': 0 });
+          .reply(200, [], { 'x-total': 0 });
 
         findSearch().vm.$emit('input', query);
 
@@ -114,7 +113,7 @@ describe('releases/components/tag_search', () => {
         .onGet(`/api/v4/projects/${TEST_PROJECT_ID}/repository/tags`, {
           params: { search: query, per_page: DEFAULT_PER_PAGE },
         })
-        .reply(HTTP_STATUS_OK, TAGS, { 'x-total': TAGS.length });
+        .reply(200, TAGS, { 'x-total': TAGS.length });
 
       createWrapper({ query });
 

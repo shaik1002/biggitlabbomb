@@ -16,7 +16,8 @@ export default {
 </script>
 
 <template>
-  <settings-block id="organization-settings-advanced" :title="$options.i18n.settingsBlock.title">
+  <settings-block id="organization-settings-advanced">
+    <template #title>{{ $options.i18n.settingsBlock.title }}</template>
     <template #description>{{ $options.i18n.settingsBlock.description }}</template>
     <template #default>
       <change-url />

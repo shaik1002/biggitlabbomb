@@ -135,7 +135,7 @@ describe('Abuse Report Add Note', () => {
 
       expect(mutationSuccessHandler).toHaveBeenCalledWith({
         input: {
-          abuseReportId: mockAbuseReportId,
+          noteableId: mockAbuseReportId,
           body: noteText,
           discussionId: null,
         },

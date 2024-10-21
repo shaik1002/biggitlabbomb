@@ -24,10 +24,6 @@ requests and are triggered on the following events:
 - `project_transfer`
 - `project_update`
 - `repository_update`
-- `user_access_request_revoked_for_group`
-- `user_access_request_revoked_for_project`
-- `user_access_request_to_group`
-- `user_access_request_to_project`
 - `user_add_to_group`
 - `user_add_to_team`
 - `user_create`
@@ -198,82 +194,6 @@ Refer to `group_rename` and `user_rename` for that case.
 }
 ```
 
-**Access request for group removed:**
-
-```json
-{
-    "created_at": "2012-07-21T07:30:56Z",
-    "updated_at": "2012-07-21T07:38:22Z",
-    "event_name": "user_access_request_revoked_for_group",
-  "group_access": "Maintainer",
-      "group_id": 78,
-    "group_name": "StoreCloud",
-    "group_path": "storecloud",
-    "user_email": "johnsmith@example.com",
-     "user_name": "John Smith",
- "user_username": "johnsmith",
-       "user_id": 41
-}
-```
-
-**Access request for project removed:**
-
-```json
-{
-                  "created_at": "2012-07-21T07:30:56Z",
-                  "updated_at": "2012-07-21T07:38:22Z",
-                  "event_name": "user_access_request_revoked_for_project",
-                "access_level": "Maintainer",
-                  "project_id": 74,
-                "project_name": "StoreCloud",
-                "project_path": "storecloud",
- "project_path_with_namespace": "jsmith/storecloud",
-                  "user_email": "johnsmith@example.com",
-                   "user_name": "John Smith",
-               "user_username": "johnsmith",
-                     "user_id": 41,
-          "project_visibility": "private"
-}
-```
-
-**Access request for group created:**
-
-```json
-{
-    "created_at": "2012-07-21T07:30:56Z",
-    "updated_at": "2012-07-21T07:38:22Z",
-    "event_name": "user_access_request_to_group",
-  "group_access": "Maintainer",
-      "group_id": 78,
-    "group_name": "StoreCloud",
-    "group_path": "storecloud",
-    "user_email": "johnsmith@example.com",
-     "user_name": "John Smith",
- "user_username": "johnsmith",
-       "user_id": 41
-}
-```
-
-**Access request for project created:**
-
-```json
-{
-                  "created_at": "2012-07-21T07:30:56Z",
-                  "updated_at": "2012-07-21T07:38:22Z",
-                  "event_name": "user_access_request_to_project",
-                "access_level": "Maintainer",
-                  "project_id": 74,
-                "project_name": "StoreCloud",
-                "project_path": "storecloud",
- "project_path_with_namespace": "jsmith/storecloud",
-                  "user_email": "johnsmith@example.com",
-                   "user_name": "John Smith",
-               "user_username": "johnsmith",
-                     "user_id": 41,
-          "project_visibility": "private"
-}
-```
-
 **New Team Member:**
 
 ```json
@@ -377,7 +297,7 @@ Refer to `group_rename` and `user_rename` for that case.
 }
 ```
 
-If the user is blocked through LDAP, `state` is `ldap_blocked`.
+If the user is blocked via LDAP, `state` is `ldap_blocked`.
 
 **User renamed:**
 

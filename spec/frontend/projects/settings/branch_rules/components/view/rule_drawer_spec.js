@@ -23,11 +23,10 @@ describe('Edit Rule Drawer', () => {
   const findHeader = () => wrapper.find('h2');
   const findSaveButton = () => wrapper.findByTestId('save-allowed-to-merge');
   const findCheckboxes = () => wrapper.findAllComponents(GlFormCheckbox);
-  const findAdministratorsCheckbox = () => wrapper.findByTestId('admins-role-checkbox');
-  const findMaintainersCheckbox = () => wrapper.findByTestId('maintainers-role-checkbox');
-  const findDevelopersAndMaintainersCheckbox = () =>
-    wrapper.findByTestId('developers-role-checkbox');
-  const findNoOneCheckbox = () => wrapper.findByTestId('no-one-role-checkbox');
+  const findAdministratorsCheckbox = () => findCheckboxes().at(0);
+  const findMaintainersCheckbox = () => findCheckboxes().at(1);
+  const findDevelopersAndMaintainersCheckbox = () => findCheckboxes().at(2);
+  const findNoOneCheckbox = () => findCheckboxes().at(3);
 
   const createComponent = (props = allowedToMergeDrawerProps) => {
     wrapper = shallowMountExtended(RuleDrawer, {
@@ -38,7 +37,6 @@ describe('Edit Rule Drawer', () => {
   };
 
   beforeEach(() => {
-    window.gon.dot_com = false;
     getContentWrapperHeight.mockReturnValue(TEST_HEADER_HEIGHT);
     createComponent();
   });
@@ -128,18 +126,5 @@ describe('Edit Rule Drawer', () => {
 
     findSaveButton().vm.$emit('click');
     expect(wrapper.emitted('editRule')[0][0]).toEqual(editRuleDataNoAccessLevels);
-  });
-
-  describe('for dot_com', () => {
-    beforeEach(() => {
-      gon.dot_com = true;
-      getContentWrapperHeight.mockReturnValue(TEST_HEADER_HEIGHT);
-      createComponent();
-    });
-
-    it('does not render a checkbox for Administrators', () => {
-      expect(findCheckboxes().length).toBe(3);
-      expect(findAdministratorsCheckbox().exists()).toBe(false);
-    });
   });
 });

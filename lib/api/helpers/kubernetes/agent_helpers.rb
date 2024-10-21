@@ -98,14 +98,7 @@ module API
             next if incr == 0
 
             event = COUNTERS_EVENTS_MAPPING[counter]
-
-            if Feature.enabled?(:batched_redis_updates_for_kubernetes_agent_events, :instance)
-              Gitlab::InternalEvents.with_batched_redis_writes do
-                incr.times { Gitlab::InternalEvents.track_event(event) }
-              end
-            else
-              incr.times { Gitlab::InternalEvents.track_event(event) }
-            end
+            incr.times { Gitlab::InternalEvents.track_event(event) }
           end
         end
 
@@ -128,9 +121,7 @@ module API
           unauthorized!('Invalid session') unless session
 
           # CSRF check
-          unless ::Gitlab::Kas::UserAccess.valid_authenticity_token?(
-            request, session.symbolize_keys, params[:csrf_token]
-          )
+          unless ::Gitlab::Kas::UserAccess.valid_authenticity_token?(session.symbolize_keys, params[:csrf_token])
             unauthorized!('CSRF token does not match')
           end
 

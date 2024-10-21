@@ -18,29 +18,22 @@ RSpec.describe Gitlab::SidekiqMiddleware::ConcurrencyLimit::WorkersConcurrency, 
   end
 
   let(:current_concurrency) { 10 }
-  let(:work) do
-    instance_double(Sidekiq::Work, payload: { 'class' => 'TestConcurrencyLimitWorker' }.to_json, queue: 'default')
-  end
-
   let(:sidekiq_worker) do
     [
       'process_id',
       'thread_id',
-      work
+      {
+        'queue' => 'default',
+        'payload' => {
+          'class' => 'TestConcurrencyLimitWorker'
+        }.to_json
+      }
     ]
-  end
-
-  let(:concurrency_tracking_hash_content) do
-    (1..current_concurrency).flat_map { |i| [i, i] }
   end
 
   before do
     stub_const('TestConcurrencyLimitWorker', worker_class)
     allow(described_class).to receive(:sidekiq_workers).and_return([sidekiq_worker] * current_concurrency)
-    Gitlab::Redis::QueuesMetadata.with do |c|
-      prefix = Gitlab::SidekiqMiddleware::ConcurrencyLimit::ConcurrencyLimitService::REDIS_KEY_PREFIX
-      c.hset("#{prefix}:{#{worker_class.name.underscore}}:executing", *concurrency_tracking_hash_content)
-    end
   end
 
   describe '.current_for' do
@@ -49,46 +42,24 @@ RSpec.describe Gitlab::SidekiqMiddleware::ConcurrencyLimit::WorkersConcurrency, 
     context 'without cache' do
       let(:skip_cache) { true }
 
-      it 'looks up current concurrency from hash' do
-        expect(described_class).not_to receive(:workers_uncached)
+      it 'returns the current concurrency', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/451677' do
+        expect(described_class).to receive(:workers_uncached).and_call_original
         expect(current_for).to eq(current_concurrency)
-      end
-
-      context 'when sidekiq_concurrency_limit_optimized_count feature flag is disabled' do
-        before do
-          stub_feature_flags(sidekiq_concurrency_limit_optimized_count: false)
-        end
-
-        it 'returns the current concurrency', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/451677' do
-          expect(described_class).to receive(:workers_uncached).and_call_original
-          expect(current_for).to eq(current_concurrency)
-        end
       end
     end
 
-    context 'with cache', :clean_gitlab_redis_cache do
+    context 'with cache' do
       let(:skip_cache) { false }
       let(:cached_value) { { "TestConcurrencyLimitWorker" => 20 } }
 
       before do
-        cache_setup!(tally: cached_value, lease: true)
+        allow(Rails.cache).to receive(:fetch).and_return(cached_value)
       end
 
-      it 'looks up current concurrency from hash' do
-        expect(described_class).not_to receive(:workers)
-        expect(current_for).to eq(current_concurrency)
-      end
+      it 'returns cached current_for' do
+        expect(described_class).not_to receive(:workers_uncached)
 
-      context 'when sidekiq_concurrency_limit_optimized_count feature flag is disabled' do
-        before do
-          stub_feature_flags(sidekiq_concurrency_limit_optimized_count: false)
-        end
-
-        it 'returns cached current_for' do
-          expect(described_class).not_to receive(:workers_uncached)
-
-          expect(current_for).to eq(20)
-        end
+        expect(current_for).to eq(20)
       end
     end
   end
@@ -117,60 +88,18 @@ RSpec.describe Gitlab::SidekiqMiddleware::ConcurrencyLimit::WorkersConcurrency, 
       end
     end
 
-    context 'with cache', :clean_gitlab_redis_cache do
+    context 'with cache' do
       let(:skip_cache) { false }
       let(:cached_value) { { "TestConcurrencyLimitWorker" => 20 } }
-      let(:actual_tally) { { "TestConcurrencyLimitWorker" => 15 } }
 
       before do
-        cache_setup!(tally: cached_value, lease: lease)
+        allow(Rails.cache).to receive(:fetch).and_return(cached_value)
       end
 
-      context 'when lease is not held by another process' do
-        let(:lease) { false }
+      it 'returns cached workers' do
+        expect(described_class).not_to receive(:workers_uncached)
 
-        it 'returns the current concurrency' do
-          expect(described_class).to receive(:workers_uncached).and_return(actual_tally)
-
-          expect(workers).to eq(actual_tally)
-        end
-      end
-
-      context 'when lease is held by another process' do
-        let(:lease) { true }
-
-        it 'returns cached workers' do
-          expect(described_class).not_to receive(:workers_uncached)
-
-          expect(workers).to eq(cached_value)
-        end
-      end
-
-      context 'when lease is held by another process but the cache is empty' do
-        let(:lease) { true }
-        let(:cached_value) { nil }
-
-        it 'returns the current concurrency' do
-          expect(described_class).to receive(:workers_uncached).and_return(actual_tally)
-
-          expect(workers).to eq(actual_tally)
-        end
-      end
-    end
-  end
-
-  def cache_setup!(tally:, lease:)
-    Gitlab::Redis::Cache.with do |redis|
-      if tally
-        redis.set(described_class::CACHE_KEY, tally.to_json)
-      else
-        redis.del(described_class::CACHE_KEY)
-      end
-
-      if lease
-        redis.set(described_class::LEASE_KEY, 1)
-      else
-        redis.del(described_class::LEASE_KEY)
+        expect(workers).to eq(cached_value)
       end
     end
   end

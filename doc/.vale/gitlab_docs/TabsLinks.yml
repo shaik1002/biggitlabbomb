@@ -1,5 +1,5 @@
 ---
-# Error: gitlab_docs.TabsLinks
+# Error: gitlab.TabsLinks
 #
 # Checks for the presence of links to individual GitLab UI tabs.
 #

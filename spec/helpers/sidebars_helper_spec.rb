@@ -135,16 +135,6 @@ RSpec.describe SidebarsHelper, feature_category: :navigation do
     it_behaves_like 'shared super sidebar context'
     it { is_expected.to include({ is_logged_in: true }) }
 
-    it 'returns terms if defined' do
-      stub_application_setting(terms: "My custom Terms of Use")
-
-      is_expected.to include({ terms: "/-/users/terms" })
-    end
-
-    it 'does not return terms if not set' do
-      is_expected.to include({ terms: nil })
-    end
-
     it 'returns sidebar values from user', :use_clean_rails_memory_store_caching do
       expect(subject).to include({
         is_logged_in: true,
@@ -187,7 +177,7 @@ RSpec.describe SidebarsHelper, feature_category: :navigation do
         can_sign_out: helper.current_user_menu?(:sign_out),
         sign_out_link: destroy_user_session_path,
         issues_dashboard_path: issues_dashboard_path(assignee_username: user.username),
-        todos_dashboard_path: vue_dashboard_todos_path,
+        todos_dashboard_path: dashboard_todos_path,
         projects_path: dashboard_projects_path,
         groups_path: dashboard_groups_path,
         gitlab_com_but_not_canary: Gitlab.com_but_not_canary?,
@@ -199,16 +189,6 @@ RSpec.describe SidebarsHelper, feature_category: :navigation do
         track_visits_path: track_namespace_visits_path,
         work_items: nil
       })
-    end
-
-    context 'when todos_vue_application is disabled' do
-      it 'returns the legacy todo dashboard path' do
-        stub_feature_flags(todos_vue_application: false)
-
-        expect(subject).to include({
-          todos_dashboard_path: dashboard_todos_path
-        })
-      end
     end
 
     it 'returns sidebar values for work item context with group id', :use_clean_rails_memory_store_caching do

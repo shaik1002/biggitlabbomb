@@ -8,7 +8,6 @@ import { TYPE_ISSUE } from '~/issues/constants';
 import {
   formatDate,
   localeDateFormat,
-  newDate,
   parseSeconds,
   stringifyTime,
 } from '~/lib/utils/datetime_utility';
@@ -90,7 +89,6 @@ export default {
         return Boolean(this.timelogs);
       },
     },
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     workItem: {
       query: workItemByIidQuery,
       variables() {
@@ -129,7 +127,7 @@ export default {
       return formatDate(date, TIME_DATE_FORMAT);
     },
     formatShortDate(date) {
-      return localeDateFormat.asDate.format(newDate(date));
+      return localeDateFormat.asDate.format(date);
     },
     getSummary(summary, note) {
       return summary ?? note?.body;

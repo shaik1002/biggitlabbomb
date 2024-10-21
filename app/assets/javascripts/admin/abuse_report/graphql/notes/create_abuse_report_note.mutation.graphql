@@ -1,7 +1,7 @@
 #import "./abuse_report_note.fragment.graphql"
 
-mutation createAbuseReportNote($input: CreateAbuseReportNoteInput!) {
-  createAbuseReportNote(input: $input) {
+mutation createAbuseReportNote($input: CreateNoteInput!) {
+  createNote(input: $input) {
     note {
       id
       discussion {

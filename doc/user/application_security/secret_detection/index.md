@@ -39,7 +39,5 @@ replace exposed secrets as soon as possible.
 
 ## Related topics
 
-- [Secret detection exclusions](exclusions.md)
 - [Vulnerability Report](../vulnerability_report/index.md)
 - [Automatic response to leaked secrets](automatic_response.md)
-- [Push rules](../../project/repository/push_rules.md)

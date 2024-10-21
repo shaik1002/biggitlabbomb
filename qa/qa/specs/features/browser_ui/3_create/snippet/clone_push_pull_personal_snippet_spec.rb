@@ -7,7 +7,7 @@ module QA
       let(:changed_content) { 'changes' }
       let(:commit_message) { 'Changes to snippets' }
       let(:added_content) { 'updated ' }
-      let(:snippet) { create(:project_snippet, file_name: new_file) }
+      let(:snippet) { create(:snippet, file_name: new_file) }
       let(:ssh_key) { create(:ssh_key, title: "my key title #{Time.now.to_f}") }
       let(:repository_uri_http) do
         snippet.visit!
@@ -51,7 +51,7 @@ module QA
           repository.init_repository
           repository.pull(repository_uri_http, push.branch_name)
 
-          expect(repository.commits.size).to eq(3), "Expected 3 commits, got: #{repository.commits.size}"
+          expect(repository.commits.size).to eq(3)
           expect(repository.commits.first).to include('Update snippet')
           expect(repository.file_content(new_file)).to include("#{added_content}#{changed_content}")
         end

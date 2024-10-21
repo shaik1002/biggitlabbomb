@@ -11,8 +11,7 @@ FactoryBot.define do
 
     owner { association(:user, strategy: :build, namespace: instance, username: path) }
 
-    # TODO: Remove usage of default organization https://gitlab.com/gitlab-org/gitlab/-/issues/446293
-    organization { parent ? parent.organization : association(:organization, :default) }
+    association :organization
 
     after(:create) do |namespace, evaluator|
       # simulating ::Namespaces::ProcessSyncEventsWorker because most tests don't run Sidekiq inline

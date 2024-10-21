@@ -52,12 +52,7 @@ module PersonalAccessTokens
 
             deliver_user_notifications(user, token_names)
 
-            # we are in the process of deprecating expire_notification_delivered column
-            # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/166683
-            expiring_user_tokens.update_all(
-              expire_notification_delivered: true,
-              seven_days_notification_sent_at: Time.current
-            )
+            expiring_user_tokens.update_all(expire_notification_delivered: true)
           end
         end
       end
@@ -107,13 +102,7 @@ module PersonalAccessTokens
         tokens_with_delivered_notifications =
           tokens
             .where.not(user_id: project_bot_ids_without_resource | project_bot_ids_with_failed_delivery)
-
-        # we are in the process of deprecating expire_notification_delivered column
-        # https://gitlab.com/gitlab-org/gitlab/-/merge_requests/166683
-        tokens_with_delivered_notifications.update_all(
-          expire_notification_delivered: true,
-          seven_days_notification_sent_at: Time.current
-        )
+        tokens_with_delivered_notifications.update_all(expire_notification_delivered: true)
 
         notifications_delivered += tokens_with_delivered_notifications.count
       end

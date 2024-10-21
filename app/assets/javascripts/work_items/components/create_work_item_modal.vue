@@ -22,41 +22,6 @@ export default {
   },
   inject: ['fullPath'],
   props: {
-    description: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    hideButton: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    isGroup: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    parentId: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    showProjectSelector: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    title: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    visible: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     workItemTypeName: {
       type: String,
       required: false,
@@ -67,16 +32,10 @@ export default {
       required: false,
       default: false,
     },
-    relatedItem: {
-      type: Object,
-      required: false,
-      validator: (i) => i.id && i.type && i.reference,
-      default: null,
-    },
   },
   data() {
     return {
-      isVisible: false,
+      visible: false,
       workItemTypes: [],
     };
   },
@@ -129,40 +88,9 @@ export default {
       };
     },
   },
-  watch: {
-    visible: {
-      immediate: true,
-      handler(visible) {
-        this.isVisible = visible;
-      },
-    },
-  },
   methods: {
     hideModal() {
-      this.$emit('hideModal');
-      this.isVisible = false;
-    },
-    showModal() {
-      this.isVisible = true;
-    },
-    handleCreated(workItem) {
-      this.$toast.show(this.workItemCreatedText, {
-        action: {
-          text: __('View details'),
-          onClick: () => {
-            if (
-              !this.asDropdownItem &&
-              this.$router &&
-              this.$router.options.routes.some((route) => route.name === 'workItem')
-            ) {
-              this.$router.push({ name: 'workItem', params: { iid: workItem.iid } });
-            } else {
-              visitUrl(workItem.webUrl);
-            }
-          },
-        },
-      });
-      this.$emit('workItemCreated', workItem);
+      this.visible = false;
       if (this.workItemTypes && this.workItemTypes[0]) {
         setNewWorkItemCache(
           this.fullPath,
@@ -171,6 +99,20 @@ export default {
           this.workItemTypes[0]?.id,
         );
       }
+    },
+    showModal() {
+      this.visible = true;
+    },
+    handleCreated(workItem) {
+      this.$toast.show(this.workItemCreatedText, {
+        action: {
+          text: __('View details'),
+          onClick: () => {
+            visitUrl(workItem.webUrl);
+          },
+        },
+      });
+      this.$emit('workItemCreated', workItem);
       this.hideModal();
     },
   },
@@ -179,35 +121,27 @@ export default {
 
 <template>
   <div>
-    <template v-if="!hideButton">
-      <gl-disclosure-dropdown-item v-if="asDropdownItem" :item="dropdownItem" />
-      <gl-button
-        v-else
-        category="primary"
-        variant="confirm"
-        data-testid="new-epic-button"
-        @click="showModal"
-        >{{ newWorkItemText }}
-      </gl-button>
-    </template>
+    <gl-disclosure-dropdown-item v-if="asDropdownItem" :item="dropdownItem" />
+    <gl-button
+      v-else
+      category="primary"
+      variant="confirm"
+      data-testid="new-epic-button"
+      @click="showModal"
+      >{{ newWorkItemText }}
+    </gl-button>
     <gl-modal
       modal-id="create-work-item-modal"
-      modal-class="create-work-item-modal"
-      :visible="isVisible"
+      :visible="visible"
       :title="newWorkItemText"
       size="lg"
       hide-footer
+      no-focus-on-show
       @hide="hideModal"
     >
       <create-work-item
-        :description="description"
-        hide-form-title
-        :is-group="isGroup"
-        :parent-id="parentId"
-        :show-project-selector="showProjectSelector"
-        :title="title"
         :work-item-type-name="workItemTypeName"
-        :related-item="relatedItem"
+        hide-form-title
         @cancel="hideModal"
         @workItemCreated="handleCreated"
       />

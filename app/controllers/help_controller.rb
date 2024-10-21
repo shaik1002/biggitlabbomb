@@ -55,7 +55,8 @@ class HelpController < ApplicationController
     redirect_to documentation_base_url || Gitlab::Saas.doc_url
   end
 
-  def shortcuts; end
+  def shortcuts
+  end
 
   def instance_configuration
     @instance_configuration = InstanceConfiguration.new

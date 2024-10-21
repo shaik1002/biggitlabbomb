@@ -113,6 +113,13 @@ RSpec.describe ApplicationController, feature_category: :shared do
       let(:format) { :html }
 
       it_behaves_like 'setting gon variables'
+
+      it 'provides the organization_http_header_name' do
+        get :index, format: format
+
+        expect(json_response.to_h)
+          .to include('organization_http_header_name' => ::Organizations::ORGANIZATION_HTTP_HEADER)
+      end
     end
 
     context 'with json format' do
@@ -938,6 +945,12 @@ RSpec.describe ApplicationController, feature_category: :shared do
       expect(json_response['meta.project']).to eq(project.full_path)
     end
 
+    it 'sets the caller_id as controller#action' do
+      get :index, format: :json
+
+      expect(json_response['meta.caller_id']).to eq('AnonymousController#index')
+    end
+
     it 'sets the feature_category as defined in the controller' do
       get :index, format: :json
 
@@ -1106,37 +1119,6 @@ RSpec.describe ApplicationController, feature_category: :shared do
         "Upstream Gitaly has been exhausted: maximum time in concurrency queue reached. Try again later"
       )
       expect(response.headers['Retry-After']).to eq(50)
-    end
-  end
-
-  context 'When Regexp::TimeoutError is raised' do
-    before do
-      sign_in user
-    end
-
-    controller(described_class) do
-      def index
-        raise Regexp::TimeoutError
-      end
-    end
-
-    it 'returns a plaintext error response with 503 status' do
-      get :index
-
-      expect(response).to have_gitlab_http_status(:service_unavailable)
-    end
-  end
-
-  describe 'cross-site request forgery protection handling' do
-    describe '#handle_unverified_request' do
-      it 'increments counter of invalid CSRF tokens detected' do
-        stub_authentication_activity_metrics do |metrics|
-          expect(metrics).to increment(:user_csrf_token_invalid_counter)
-        end
-
-        expect { described_class.new.handle_unverified_request }
-          .to raise_error(ActionController::InvalidAuthenticityToken)
-      end
     end
   end
 end

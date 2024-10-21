@@ -7,13 +7,13 @@ RSpec.describe AwardEmojis::CollectUserEmojiService, feature_category: :team_pla
     it 'returns an Array containing the awarded emoji names' do
       user = create(:user)
 
-      create(:award_emoji, user: user, name: AwardEmoji::THUMBS_UP)
-      create(:award_emoji, user: user, name: AwardEmoji::THUMBS_UP)
-      create(:award_emoji, user: user, name: AwardEmoji::THUMBS_DOWN)
+      create(:award_emoji, user: user, name: 'thumbsup')
+      create(:award_emoji, user: user, name: 'thumbsup')
+      create(:award_emoji, user: user, name: 'thumbsdown')
 
       awarded = described_class.new(user).execute
 
-      expect(awarded).to eq([{ name: AwardEmoji::THUMBS_UP }, { name: AwardEmoji::THUMBS_DOWN }])
+      expect(awarded).to eq([{ name: 'thumbsup' }, { name: 'thumbsdown' }])
     end
 
     it 'returns an empty Array when no user is given' do

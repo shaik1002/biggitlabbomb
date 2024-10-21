@@ -44,7 +44,7 @@ To locate a relevant request and view its correlation ID:
 
 See the following example:
 
-![Firefox Network Monitor showing an request ID header](img/network_monitor_xid_v13_6.png)
+![Firefox's network monitor showing an request ID header](img/network_monitor_xid.png)
 
 ### Getting the correlation ID from your logs
 

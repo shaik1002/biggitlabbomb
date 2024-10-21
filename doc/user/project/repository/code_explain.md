@@ -1,17 +1,17 @@
 ---
 stage: Create
-group: Code Creation
+group: Code Review
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
 # Explain code in a file
 
 DETAILS:
-**Tier:** Premium with GitLab Duo Pro, Ultimate with GitLab Duo Pro or Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
-**Offering:** GitLab.com, Self-managed, GitLab Dedicated
+**Tier:** For a limited time, Premium and Ultimate. In the future, [GitLab Duo Pro or Enterprise](../../../subscriptions/subscription-add-ons.md).
+**Offering:** GitLab.com
+**Status:** Experiment
 
 > - Introduced in GitLab 15.11 as an [experiment](../../../policy/experiment-beta-support.md#experiment) on GitLab.com.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/429915) in GitLab 16.8.
 
 If you spend a lot of time trying to understand code that others have created, or
 you struggle to understand code written in a language you are not familiar with,
@@ -42,4 +42,4 @@ We cannot guarantee that the large language model produces results that are corr
 You can also explain code in:
 
 - A [merge request](../../../user/project/merge_requests/changes.md#explain-code-in-a-merge-request).
-- The [IDE](../../../user/gitlab_duo_chat/examples.md#explain-selected-code).
+- The [IDE](../../../user/gitlab_duo_chat/examples.md#explain-code-in-the-ide).

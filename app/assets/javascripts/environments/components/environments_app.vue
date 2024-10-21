@@ -92,7 +92,6 @@ export default {
   data() {
     const { page = '1', search = '', scope } = queryToObject(window.location.search);
     return {
-      environmentApp: null,
       interval: undefined,
       isReviewAppModalVisible: false,
       isStopStaleEnvModalVisible: false,
@@ -207,7 +206,7 @@ export default {
     window.addEventListener('popstate', this.syncPageFromQueryParams);
     window.addEventListener('popstate', this.syncSearchFromQueryParams);
   },
-  beforeDestroy() {
+  destroyed() {
     window.removeEventListener('popstate', this.syncPageFromQueryParams);
     window.removeEventListener('popstate', this.syncSearchFromQueryParams);
     this.$apollo.queries.environmentApp.stopPolling();
@@ -320,7 +319,7 @@ export default {
       <environment-item
         v-for="environment in environments"
         :key="environment.name"
-        class="gl-mb-3 gl-border-1 gl-border-gray-100 gl-border-b-solid"
+        class="gl-mb-3 gl-border-gray-100 gl-border-1 gl-border-b-solid"
         :environment="environment.latest"
         @change="refetchEnvironments"
       />

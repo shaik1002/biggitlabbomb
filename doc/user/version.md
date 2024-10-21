@@ -7,28 +7,18 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # Find the GitLab version
 
-DETAILS:
-**Tier:** Free, Premium, Ultimate
-**Offering:** GitLab.com, Self-managed, GitLab Dedicated
-
 Find the version of GitLab you're running.
 
-## For self-managed GitLab and GitLab Dedicated
+## For self-managed GitLab
 
-Prerequisites:
+- On the left sidebar, at the bottom, select **Help**.
 
-- You must be an authenticated user.
-
-To find the version of GitLab:
-
-- On the left sidebar, at the bottom, select **Help > Help**.
-
-The version is displayed at the top of the page.
+The version is displayed at the top of the dialog.
 
 ## For GitLab.com
 
 - Go to <https://gitlab.com/help>.
 
 The version is displayed at the top of the page. For example,
-`GitLab Enterprise Edition 17.3.0-pre 1e04d6b7fa9` indicates a pre-release
-version of GitLab 17.3.
+`GitLab Enterprise Edition 16.3.0-pre 1e04d6b7fa9` indicates a pre-release
+version of GitLab 16.3.

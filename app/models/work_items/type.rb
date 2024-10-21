@@ -6,12 +6,13 @@
 # 3. an emoji, with the format of `:smile:`
 module WorkItems
   class Type < ApplicationRecord
-    include Gitlab::Utils::StrongMemoize
-    include SafelyChangeColumnDefault
+    include IgnorableColumns
 
     DEFAULT_TYPES_NOT_SEEDED = Class.new(StandardError)
 
     self.table_name = 'work_item_types'
+
+    ignore_column :namespace_id, remove_with: '17.5', remove_after: '2024-09-19'
 
     include CacheMarkdownField
     include ReactiveCaching
@@ -38,23 +39,21 @@ module WorkItems
     # This constant is used by the DB seeder
     # TODO - where to add new icon names created?
     BASE_TYPES = {
-      issue: { name: TYPE_NAMES[:issue], icon_name: 'issue-type-issue', enum_value: 0, id: 1 },
-      incident: { name: TYPE_NAMES[:incident], icon_name: 'issue-type-incident', enum_value: 1, id: 2 },
-      test_case: { name: TYPE_NAMES[:test_case], icon_name: 'issue-type-test-case', enum_value: 2, id: 3 }, ## EE-only
-      requirement: { name: TYPE_NAMES[:requirement], icon_name: 'issue-type-requirements', enum_value: 3, id: 4 }, ## EE-only # rubocop:disable Layout/LineLength -- Only comment exceeds length
-      task: { name: TYPE_NAMES[:task], icon_name: 'issue-type-task', enum_value: 4, id: 5 },
-      objective: { name: TYPE_NAMES[:objective], icon_name: 'issue-type-objective', enum_value: 5, id: 6 }, ## EE-only
-      key_result: { name: TYPE_NAMES[:key_result], icon_name: 'issue-type-keyresult', enum_value: 6, id: 7 }, ## EE-only
-      epic: { name: TYPE_NAMES[:epic], icon_name: 'issue-type-epic', enum_value: 7, id: 8 }, ## EE-only
-      ticket: { name: TYPE_NAMES[:ticket], icon_name: 'issue-type-issue', enum_value: 8, id: 9 }
+      issue: { name: TYPE_NAMES[:issue], icon_name: 'issue-type-issue', enum_value: 0 },
+      incident: { name: TYPE_NAMES[:incident], icon_name: 'issue-type-incident', enum_value: 1 },
+      test_case: { name: TYPE_NAMES[:test_case], icon_name: 'issue-type-test-case', enum_value: 2 }, ## EE-only
+      requirement: { name: TYPE_NAMES[:requirement], icon_name: 'issue-type-requirements', enum_value: 3 }, ## EE-only
+      task: { name: TYPE_NAMES[:task], icon_name: 'issue-type-task', enum_value: 4 },
+      objective: { name: TYPE_NAMES[:objective], icon_name: 'issue-type-objective', enum_value: 5 }, ## EE-only
+      key_result: { name: TYPE_NAMES[:key_result], icon_name: 'issue-type-keyresult', enum_value: 6 }, ## EE-only
+      epic: { name: TYPE_NAMES[:epic], icon_name: 'issue-type-epic', enum_value: 7 }, ## EE-only
+      ticket: { name: TYPE_NAMES[:ticket], icon_name: 'issue-type-issue', enum_value: 8 }
     }.freeze
 
     # A list of types user can change between - both original and new
     # type must be included in this list. This is needed for legacy issues
     # where it's possible to switch between issue and incident.
     CHANGEABLE_BASE_TYPES = %w[issue incident test_case].freeze
-
-    columns_changing_default :id
 
     cache_markdown_field :description, pipeline: :single_line
 
@@ -92,16 +91,23 @@ module WorkItems
       found_type = find_by(base_type: type)
       return found_type if found_type || !WorkItems::Type.base_types.key?(type.to_s)
 
-      error_message = <<~STRING
-        Default work item types have not been created yet. Make sure the DB has been seeded successfully.
-        See related documentation in
-        https://docs.gitlab.com/omnibus/settings/database.html#seed-the-database-fresh-installs-only
+      if Feature.enabled?(:rely_on_work_item_type_seeder, type: :beta) # rubocop:disable Gitlab/FeatureFlagWithoutActor -- Default types exist instance wide
+        error_message = <<~STRING
+          Default work item types have not been created yet. Make sure the DB has been seeded successfully.
+          See related documentation in
+          https://docs.gitlab.com/omnibus/settings/database.html#seed-the-database-fresh-installs-only
 
-        If you have additional questions, you can ask in
-        https://gitlab.com/gitlab-org/gitlab/-/issues/423483
-      STRING
+          If you have additional questions, you can ask in
+          https://gitlab.com/gitlab-org/gitlab/-/issues/423483
+        STRING
 
-      raise DEFAULT_TYPES_NOT_SEEDED, error_message
+        raise DEFAULT_TYPES_NOT_SEEDED, error_message
+      end
+
+      Gitlab::DatabaseImporters::WorkItems::BaseTypeImporter.upsert_types
+      Gitlab::DatabaseImporters::WorkItems::HierarchyRestrictionsImporter.upsert_restrictions
+      Gitlab::DatabaseImporters::WorkItems::RelatedLinksRestrictionsImporter.upsert_restrictions
+      find_by(base_type: type)
     end
 
     def self.default_issue_type
@@ -160,25 +166,6 @@ module WorkItems
 
       cached_data || allowed_parent_types_by_name
     end
-
-    def descendant_types
-      descendant_types = []
-      next_level_child_types = allowed_child_types(cache: true)
-
-      loop do
-        descendant_types += next_level_child_types
-
-        # We remove types that we've already seen to avoid circular dependencies
-        next_level_child_types = next_level_child_types.flat_map do |type|
-          type.allowed_child_types(cache: true)
-        end - descendant_types
-
-        break if next_level_child_types.empty?
-      end
-
-      descendant_types
-    end
-    strong_memoize_attr :descendant_types
 
     private
 

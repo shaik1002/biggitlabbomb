@@ -49,7 +49,7 @@ describe('FilterSortContainer', () => {
         tableSortableFields: [],
       });
 
-      expect(wrapper.find('*').exists()).toBe(false);
+      expect(wrapper.html()).toBe('');
     });
   });
 

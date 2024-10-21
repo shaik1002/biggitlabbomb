@@ -144,6 +144,7 @@ To write a story for a component that requires access to a Vuex store, use the `
 the Story context.
 
 ```javascript
+import Vue from 'vue';
 import { withVuexStore } from 'storybook_addons/vuex_store';
 import DurationChart from './duration-chart.vue';
 

@@ -31,7 +31,7 @@ you have removed any orphaned rows. The method `add_concurrent_foreign_key`
 does not take care of this so you must do so manually. See
 [adding foreign key constraint to an existing column](add_foreign_key_to_existing_column.md).
 
-## Use `bigint` for foreign keys
+## Use bigint for foreign keys
 
 When adding a new foreign key, you should define it as `bigint`.
 Even if the referenced table has an `integer` primary key type,
@@ -103,7 +103,10 @@ ever losing foreign key protection on a column.
 
 To replace a foreign key:
 
-1. Add the new foreign key:
+1. [Add the new foreign key without validation](add_foreign_key_to_existing_column.md#prevent-invalid-records)
+
+   The name of the foreign key constraint must be changed to add a new
+   foreign key before removing the old one.
 
    ```ruby
    class ReplaceFkOnPackagesPackagesProjectId < Gitlab::Database::Migration[2.1]
@@ -112,13 +115,30 @@ To replace a foreign key:
      NEW_CONSTRAINT_NAME = 'fk_new'
 
      def up
-       add_concurrent_foreign_key(:packages_packages, :projects, column: :project_id, on_delete: :nullify, name: NEW_CONSTRAINT_NAME)
+       add_concurrent_foreign_key(:packages_packages, :projects, column: :project_id, on_delete: :nullify, validate: false, name: NEW_CONSTRAINT_NAME)
      end
 
      def down
        with_lock_retries do
          remove_foreign_key_if_exists(:packages_packages, column: :project_id, on_delete: :nullify, name: NEW_CONSTRAINT_NAME)
        end
+     end
+   end
+   ```
+
+1. [Validate the new foreign key](add_foreign_key_to_existing_column.md#validate-the-foreign-key)
+
+   ```ruby
+   class ValidateFkNew < Gitlab::Database::Migration[2.1]
+     NEW_CONSTRAINT_NAME = 'fk_new'
+
+     # foreign key added in <link to MR or path to migration adding new FK>
+     def up
+       validate_foreign_key(:packages_packages, :project_id, name: NEW_CONSTRAINT_NAME)
+     end
+
+     def down
+       # no-op
      end
    end
    ```
@@ -131,6 +151,8 @@ To replace a foreign key:
 
      OLD_CONSTRAINT_NAME = 'fk_old'
 
+     # new foreign key added in <link to MR or path to migration adding new FK>
+     # and validated in <link to MR or path to migration validating new FK>
      def up
        with_lock_retries do
          remove_foreign_key_if_exists(:packages_packages, column: :project_id, on_delete: :cascade, name: OLD_CONSTRAINT_NAME)
@@ -138,7 +160,8 @@ To replace a foreign key:
      end
 
      def down
-       add_concurrent_foreign_key(:packages_packages, :projects, column: :project_id, on_delete: :cascade, name: OLD_CONSTRAINT_NAME)
+       # Validation is skipped here, so if rolled back, this will need to be revalidated in a separate migration
+       add_concurrent_foreign_key(:packages_packages, :projects, column: :project_id, on_delete: :cascade, validate: false, name: OLD_CONSTRAINT_NAME)
      end
    end
    ```

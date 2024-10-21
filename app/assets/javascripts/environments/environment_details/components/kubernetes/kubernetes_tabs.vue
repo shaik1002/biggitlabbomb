@@ -74,7 +74,8 @@ export default {
         @loading="$emit('loading', $event)"
         @update-failed-state="$emit('update-failed-state', $event)"
         @cluster-error="$emit('cluster-error', $event)"
-        @select-item="$emit('select-item', $event)"
+        @show-resource-details="$emit('show-resource-details', $event)"
+        @remove-selection="$emit('remove-selection')"
         @delete-pod="$emit('delete-pod', $event)"
       />
 
@@ -82,7 +83,8 @@ export default {
         :namespace="namespace"
         :configuration="configuration"
         @cluster-error="$emit('cluster-error', $event)"
-        @select-item="$emit('select-item', $event)"
+        @show-resource-details="$emit('show-resource-details', $event)"
+        @remove-selection="$emit('remove-selection')"
       />
     </gl-tabs>
   </div>

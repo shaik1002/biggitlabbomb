@@ -4,7 +4,6 @@ module Clusters
   class Agent < ApplicationRecord
     include FromUnion
     include Gitlab::Utils::StrongMemoize
-    include IgnorableColumns
 
     self.table_name = 'cluster_agents'
 
@@ -37,7 +36,10 @@ module Clusters
     scope :with_name, ->(name) { where(name: name) }
     scope :has_vulnerabilities, ->(value = true) { where(has_vulnerabilities: value) }
 
-    ignore_column :connection_mode, remove_with: '17.6', remove_after: '2024-11-01'
+    enum connection_mode: {
+      outgoing: 0, # agentk -> kas
+      incoming: 1  # kas -> agentk
+    }, _prefix: true
 
     validates :name,
       presence: true,
@@ -91,7 +93,7 @@ module Clusters
       self.class.from_union(
         user_access_project_authorizations.select('config').limit(1),
         user_access_group_authorizations.select('config').limit(1)
-      ).select('config').compact.first
+      ).compact.first
     end
 
     private

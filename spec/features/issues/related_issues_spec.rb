@@ -27,19 +27,19 @@ RSpec.describe 'Related issues', :js, feature_category: :team_planning do
       it 'does not show widget when internal project' do
         visit project_issue_path(internal_project, internal_issue)
 
-        expect(page).not_to have_css('[data-testid="related-issues-block"]')
+        expect(page).not_to have_css('.related-issues-block')
       end
 
       it 'does not show widget when private project' do
         visit project_issue_path(private_project, private_issue)
 
-        expect(page).not_to have_css('[data-testid="related-issues-block"]')
+        expect(page).not_to have_css('.related-issues-block')
       end
 
       it 'shows widget when public project' do
         visit project_issue_path(public_project, public_issue)
 
-        expect(page).to have_css('[data-testid="related-issues-block"]')
+        expect(page).to have_css('.related-issues-block')
         expect(page).not_to have_button 'Add a related issue'
       end
     end
@@ -52,20 +52,20 @@ RSpec.describe 'Related issues', :js, feature_category: :team_planning do
       it 'shows widget when internal project' do
         visit project_issue_path(internal_project, internal_issue)
 
-        expect(page).to have_css('[data-testid="related-issues-block"]')
+        expect(page).to have_css('.related-issues-block')
         expect(page).not_to have_button 'Add a related issue'
       end
 
       it 'does not show widget when private project' do
         visit project_issue_path(private_project, private_issue)
 
-        expect(page).not_to have_css('[data-testid="related-issues-block"]')
+        expect(page).not_to have_css('.related-issues-block')
       end
 
       it 'shows widget when public project' do
         visit project_issue_path(public_project, public_issue)
 
-        expect(page).to have_css('[data-testid="related-issues-block"]')
+        expect(page).to have_css('.related-issues-block')
         expect(page).not_to have_button 'Add a related issue'
       end
 
@@ -74,7 +74,7 @@ RSpec.describe 'Related issues', :js, feature_category: :team_planning do
 
         visit project_issue_path(public_project, issue)
 
-        expect(page).to have_css('[data-testid="related-issues-block"]')
+        expect(page).to have_css('.related-issues-block')
         expect(page).not_to have_button 'Add a related issue'
       end
     end
@@ -89,7 +89,7 @@ RSpec.describe 'Related issues', :js, feature_category: :team_planning do
 
         visit project_issue_path(internal_project, internal_issue)
 
-        expect(page).to have_css('[data-testid="related-issues-block"]')
+        expect(page).to have_css('.related-issues-block')
         expect(page).to have_button 'Add a related issue'
       end
 
@@ -98,7 +98,7 @@ RSpec.describe 'Related issues', :js, feature_category: :team_planning do
 
         visit project_issue_path(private_project, private_issue)
 
-        expect(page).to have_css('[data-testid="related-issues-block"]')
+        expect(page).to have_css('.related-issues-block')
         expect(page).to have_button 'Add a related issue'
       end
 
@@ -107,7 +107,7 @@ RSpec.describe 'Related issues', :js, feature_category: :team_planning do
 
         visit project_issue_path(public_project, public_issue)
 
-        expect(page).to have_css('[data-testid="related-issues-block"]')
+        expect(page).to have_css('.related-issues-block')
         expect(page).to have_button 'Add a related issue'
       end
 
@@ -117,7 +117,7 @@ RSpec.describe 'Related issues', :js, feature_category: :team_planning do
 
         visit project_issue_path(public_project, issue)
 
-        expect(page).to have_css('[data-testid="related-issues-block"]')
+        expect(page).to have_css('.related-issues-block')
         expect(page).to have_button 'Add a related issue'
       end
     end
@@ -142,9 +142,7 @@ RSpec.describe 'Related issues', :js, feature_category: :team_planning do
       end
 
       it 'shows related issues count' do
-        within_testid('related-issues-block') do
-          expect(find_by_testid('crud-count')).to have_content('2')
-        end
+        expect(find('.js-related-issues-header-issue-count')).to have_content('2')
       end
     end
 
@@ -155,9 +153,7 @@ RSpec.describe 'Related issues', :js, feature_category: :team_planning do
       end
 
       it 'shows related issues count' do
-        within_testid('related-issues-block') do
-          expect(find_by_testid('crud-count')).to have_content('1')
-        end
+        expect(find('.js-related-issues-header-issue-count')).to have_content('1')
       end
     end
   end
@@ -179,15 +175,13 @@ RSpec.describe 'Related issues', :js, feature_category: :team_planning do
       end
 
       it 'shows related issues count' do
-        within_testid('related-issues-block') do
-          expect(find_by_testid('crud-count')).to have_content('0')
-        end
+        expect(find('.js-related-issues-header-issue-count')).to have_content('0')
       end
 
       it 'add related issue' do
         click_button 'Add a related issue'
         fill_in 'Enter issue URL', with: "#{issue_b.to_reference(project)} "
-        within_testid('crud-form') do
+        page.within('.linked-issues-card-body') do
           click_button 'Add'
         end
 
@@ -196,19 +190,17 @@ RSpec.describe 'Related issues', :js, feature_category: :team_planning do
         items = all('.item-title a')
 
         # Form gets hidden after submission
-        expect(page).not_to have_selector('[data-testid="crud-form"]')
+        expect(page).not_to have_selector('.js-add-related-issues-form-area')
         # Check if related issues are present
         expect(items.count).to eq(1)
         expect(items[0].text).to eq(issue_b.title)
-        within_testid('related-issues-block') do
-          expect(find_by_testid('crud-count')).to have_content('1')
-        end
+        expect(find('.js-related-issues-header-issue-count')).to have_content('1')
       end
 
       it 'add cross-project related issue' do
         click_button 'Add a related issue'
         fill_in 'Enter issue URL', with: "#{issue_project_b_a.to_reference(project)} "
-        within_testid('crud-form') do
+        page.within('.linked-issues-card-body') do
           click_button 'Add'
         end
 
@@ -218,10 +210,7 @@ RSpec.describe 'Related issues', :js, feature_category: :team_planning do
 
         expect(items.count).to eq(1)
         expect(items[0].text).to eq(issue_project_b_a.title)
-
-        within_testid('related-issues-block') do
-          expect(find_by_testid('crud-count')).to have_content('1')
-        end
+        expect(find('.js-related-issues-header-issue-count')).to have_content('1')
       end
 
       it 'pressing enter should submit the form' do
@@ -235,10 +224,7 @@ RSpec.describe 'Related issues', :js, feature_category: :team_planning do
 
         expect(items.count).to eq(1)
         expect(items[0].text).to eq(issue_project_b_a.title)
-
-        within_testid('related-issues-block') do
-          expect(find_by_testid('crud-count')).to have_content('1')
-        end
+        expect(find('.js-related-issues-header-issue-count')).to have_content('1')
       end
 
       it 'disallows duplicate entries' do
@@ -250,9 +236,7 @@ RSpec.describe 'Related issues', :js, feature_category: :team_planning do
         expect(items[0].text).to eq('duplicate')
 
         # Pending issues aren't counted towards the related issue count
-        within_testid('related-issues-block') do
-          expect(find_by_testid('crud-count')).to have_content('0')
-        end
+        expect(find('.js-related-issues-header-issue-count')).to have_content('0')
       end
 
       it 'allows us to remove pending issues' do
@@ -300,9 +284,7 @@ RSpec.describe 'Related issues', :js, feature_category: :team_planning do
       end
 
       it 'shows related issues count' do
-        within_testid('related-issues-block') do
-          expect(find_by_testid('crud-count')).to have_content('2')
-        end
+        expect(find('.js-related-issues-header-issue-count')).to have_content('2')
       end
 
       it 'shows related issues' do
@@ -330,7 +312,7 @@ RSpec.describe 'Related issues', :js, feature_category: :team_planning do
       it 'add related issue' do
         click_button 'Add a related issue'
         fill_in 'Enter issue URL', with: "##{issue_d.iid} "
-        within_testid('crud-form') do
+        page.within('.linked-issues-card-body') do
           click_button 'Add'
         end
 
@@ -342,16 +324,13 @@ RSpec.describe 'Related issues', :js, feature_category: :team_planning do
         expect(items[0].text).to eq(issue_b.title)
         expect(items[1].text).to eq(issue_c.title)
         expect(items[2].text).to eq(issue_d.title)
-
-        within_testid('related-issues-block') do
-          expect(find_by_testid('crud-count')).to have_content('3')
-        end
+        expect(find('.js-related-issues-header-issue-count')).to have_content('3')
       end
 
       it 'add invalid related issue' do
         click_button 'Add a related issue'
         fill_in 'Enter issue URL', with: '#9999999 '
-        within_testid('crud-form') do
+        page.within('.linked-issues-card-body') do
           click_button 'Add'
         end
 
@@ -362,16 +341,13 @@ RSpec.describe 'Related issues', :js, feature_category: :team_planning do
         expect(items.count).to eq(2)
         expect(items[0].text).to eq(issue_b.title)
         expect(items[1].text).to eq(issue_c.title)
-
-        within_testid('related-issues-block') do
-          expect(find_by_testid('crud-count')).to have_content('2')
-        end
+        expect(find('.js-related-issues-header-issue-count')).to have_content('2')
       end
 
       it 'add unauthorized related issue' do
         click_button 'Add a related issue'
         fill_in 'Enter issue URL', with: "#{issue_project_unauthorized_a.to_reference(project)} "
-        within_testid('crud-form') do
+        page.within('.linked-issues-card-body') do
           click_button 'Add'
         end
 
@@ -382,10 +358,7 @@ RSpec.describe 'Related issues', :js, feature_category: :team_planning do
         expect(items.count).to eq(2)
         expect(items[0].text).to eq(issue_b.title)
         expect(items[1].text).to eq(issue_c.title)
-
-        within_testid('related-issues-block') do
-          expect(find_by_testid('crud-count')).to have_content('2')
-        end
+        expect(find('.js-related-issues-header-issue-count')).to have_content('2')
       end
     end
   end

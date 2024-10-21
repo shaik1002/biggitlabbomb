@@ -248,11 +248,6 @@ module SearchHelper
     end
   end
 
-  def should_show_work_items_as_epics_in_results?
-    ::Feature.enabled?(:search_epics_uses_work_items_index, current_user) &&
-      ::Elastic::DataMigrationService.migration_has_finished?(:backfill_work_items)
-  end
-
   def should_show_zoekt_results?(_scope, _search_type)
     false
   end
@@ -278,14 +273,14 @@ module SearchHelper
   # Autocomplete results for internal help pages
   def help_autocomplete
     [
-      { category: "Help", label: _("API Help"),                     url: help_page_path("api/index.md") },
-      { category: "Help", label: _("Markdown Help"),                url: help_page_path("user/markdown.md") },
-      { category: "Help", label: _("Permissions Help"),             url: help_page_path("user/permissions.md") },
-      { category: "Help", label: _("Public Access Help"),           url: help_page_path("user/public_access.md") },
-      { category: "Help", label: _("Rake Tasks Help"),              url: help_page_path("raketasks/index.md") },
-      { category: "Help", label: _("SSH Keys Help"),                url: help_page_path("user/ssh.md") },
-      { category: "Help", label: s_("Webhooks|System hooks help"),  url: help_page_path("administration/system_hooks.md") },
-      { category: "Help", label: _("Webhooks Help"),                url: help_page_path("user/project/integrations/webhooks.md") }
+      { category: "Help", label: _("API Help"),                     url: help_page_path("api/index") },
+      { category: "Help", label: _("Markdown Help"),                url: help_page_path("user/markdown") },
+      { category: "Help", label: _("Permissions Help"),             url: help_page_path("user/permissions") },
+      { category: "Help", label: _("Public Access Help"),           url: help_page_path("user/public_access") },
+      { category: "Help", label: _("Rake Tasks Help"),              url: help_page_path("raketasks/index") },
+      { category: "Help", label: _("SSH Keys Help"),                url: help_page_path("user/ssh") },
+      { category: "Help", label: s_("Webhooks|System hooks help"),  url: help_page_path("administration/system_hooks") },
+      { category: "Help", label: _("Webhooks Help"),                url: help_page_path("user/project/integrations/webhooks") }
     ]
   end
 
@@ -365,14 +360,8 @@ module SearchHelper
 
   # Autocomplete results for the current user's projects
   def projects_autocomplete(term, limit = 5)
-    projects = if Feature.enabled?(:autocomplete_projects_use_search_service, current_user)
-                 search_using_search_service(current_user, 'projects', term, limit)
-               else
-                 current_user.authorized_projects.order_id_desc.search(term, include_namespace: true, use_minimum_char_limit: false)
-                   .sorted_by_stars_desc.non_archived.limit(limit)
-               end
-
-    projects.map do |p|
+    current_user.authorized_projects.order_id_desc.search(term, include_namespace: true, use_minimum_char_limit: false)
+      .sorted_by_stars_desc.non_archived.limit(limit).map do |p|
       {
         category: "Projects",
         id: p.id,
@@ -391,7 +380,10 @@ module SearchHelper
       return []
     end
 
-    search_using_search_service(current_user, 'users', term, limit).map do |user|
+    ::SearchService
+      .new(current_user, { scope: 'users', per_page: limit, search: term })
+      .search_objects
+      .map do |user|
       {
         category: "Users",
         id: user.id,
@@ -605,14 +597,6 @@ module SearchHelper
 
   def wiki_blob_link(wiki_blob)
     project_wiki_path(wiki_blob.project, wiki_blob.basename)
-  end
-
-  def search_using_search_service(user, scope, term, limit, additional_params = {})
-    params = { scope: scope, search: term }.merge(additional_params)
-    ::SearchService
-      .new(user, params)
-      .search_objects
-      .first(limit)
   end
 end
 

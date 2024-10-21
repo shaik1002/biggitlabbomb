@@ -142,22 +142,14 @@ RSpec.describe UserSettings::ProfilesController, :request_store, feature_categor
       expect(response).to have_gitlab_http_status(:found)
     end
 
-    it 'allows updating user specified mastodon usernames with varying top level domains', :aggregate_failures do
-      possible_mastodon_usernames = [
-        '@robin@example.com',
-        '@robin@mastadon.com',
-        '@john@mastadon.social',
-        '@drew@social.vivaldi.net',
-        '@adil@c.im'
-      ]
+    it 'allows updating user specified mastodon username', :aggregate_failures do
+      mastodon_username = '@robin@example.com'
       sign_in(user)
 
-      possible_mastodon_usernames.each do |mastodon_username|
-        put :update, params: { user: { mastodon: mastodon_username } }
+      put :update, params: { user: { mastodon: mastodon_username } }
 
-        expect(user.reload.mastodon).to eq(mastodon_username)
-        expect(response).to have_gitlab_http_status(:found)
-      end
+      expect(user.reload.mastodon).to eq(mastodon_username)
+      expect(response).to have_gitlab_http_status(:found)
     end
   end
 end

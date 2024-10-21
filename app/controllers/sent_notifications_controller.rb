@@ -2,10 +2,6 @@
 
 class SentNotificationsController < ApplicationController
   skip_before_action :authenticate_user!
-  # Automatic unsubscribe by an email client should happen via a POST request.
-  # See https://datatracker.ietf.org/doc/html/rfc8058
-  # This allows POST requests without CSRF token.
-  skip_before_action :verify_authenticity_token, only: [:unsubscribe]
 
   feature_category :team_planning
   urgency :low
@@ -15,7 +11,7 @@ class SentNotificationsController < ApplicationController
 
     return render_404 unless unsubscribe_prerequisites_met?
 
-    unsubscribe_and_redirect if current_user || params[:force] || request.post?
+    unsubscribe_and_redirect if current_user || params[:force]
   end
 
   private

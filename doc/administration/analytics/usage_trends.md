@@ -40,4 +40,4 @@ in the categories shown in [Total counts](#total-counts).
 
 These charts help you visualize how rapidly these records are being created on your instance.
 
-![A graph of pipeline usage trends over one year.](img/instance_activity_pipelines_chart_v13_6_a.png)
+![Instance Activity Pipelines chart](img/instance_activity_pipelines_chart_v13_6_a.png)

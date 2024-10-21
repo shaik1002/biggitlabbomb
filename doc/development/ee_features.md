@@ -188,10 +188,10 @@ Use the following questions to guide you:
    - Based on the plan you choose to use the feature in, add the feature identifier to `PREMIUM_FEATURES`
      or `ULTIMATE_FEATURES`.
 1. Will this feature be available globally (system-wide for the GitLab instance)?
-   - Features such as [Geo](../administration/geo/index.md) and
-     [Database Load Balancing](../administration/postgresql/database_load_balancing.md) are used by the entire instance
-     and cannot be restricted to individual user namespaces. These features are defined in the instance license.
-     Add these features to `GLOBAL_FEATURES`.
+    - Features such as [Geo](../administration/geo/index.md) and
+      [Database Load Balancing](../administration/postgresql/database_load_balancing.md) are used by the entire instance
+      and cannot be restricted to individual user namespaces. These features are defined in the instance license.
+      Add these features to `GLOBAL_FEATURES`.
 
 ### Guard your EE feature
 
@@ -321,8 +321,8 @@ is applied not only to models. Here's a list of other examples:
 - `ee/app/views/foo.html.haml`
 - `ee/app/views/foo/_bar.html.haml`
 
-This works because for every path in the CE `eager-load/auto-load`
-path, we add the same `ee/`-prepended path in [`config/application.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/925d3d4ebc7a2c72964ce97623ae41b8af12538d/config/application.rb#L42-52).
+This works because for every path that is present in CE's eager-load/auto-load
+paths, we add the same `ee/`-prepended path in [`config/application.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/925d3d4ebc7a2c72964ce97623ae41b8af12538d/config/application.rb#L42-52).
 This also applies to views.
 
 #### Testing EE-only backend features
@@ -856,7 +856,8 @@ module EE
 end
 ```
 
-We need to use the full qualifier for some constants due to namespace differences.
+Note that due to namespace differences, we need to use the full qualifier for some
+constants.
 
 #### EE parameters
 
@@ -1004,7 +1005,7 @@ end
 API::MergeRequests.prepend_mod_with('API::MergeRequests')
 ```
 
-`update_merge_request_ee` doesn't do anything in CE, but
+Note that `update_merge_request_ee` doesn't do anything in CE, but
 then we could override it in EE:
 
 ```ruby
@@ -1187,7 +1188,7 @@ Instead place EE specs in the `ee/spec` folder.
 
 Use `FactoryBot.modify` to extend factories already defined in CE.
 
-You cannot define new factories (even nested ones) inside the `FactoryBot.modify` block. You can do so in a
+Note that you cannot define new factories (even nested ones) inside the `FactoryBot.modify` block. You can do so in a
 separate `FactoryBot.define` block as shown in the example below:
 
 ```ruby

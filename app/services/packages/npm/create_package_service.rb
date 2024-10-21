@@ -6,7 +6,6 @@ module Packages
       include Gitlab::Utils::StrongMemoize
       include ExclusiveLeaseGuard
 
-      INSTALL_SCRIPT_KEYS = %w[preinstall install postinstall].freeze
       PACKAGE_JSON_NOT_ALLOWED_FIELDS = %w[readme readmeFilename licenseText contributors exports].freeze
       DEFAULT_LEASE_TIMEOUT = 1.hour.to_i
 
@@ -104,10 +103,6 @@ module Packages
       end
 
       def package_json
-        if version_data['scripts'] && (version_data['scripts'].keys & INSTALL_SCRIPT_KEYS).any?
-          version_data['hasInstallScript'] = true
-        end
-
         version_data.except(*PACKAGE_JSON_NOT_ALLOWED_FIELDS)
       end
 

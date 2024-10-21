@@ -73,7 +73,7 @@ export default {
   },
   data() {
     return {
-      retryingJob: false,
+      retryBtnDisabled: false,
       cancelBtnDisabled: false,
       playManualBtnDisabled: false,
       unscheduleBtnDisabled: false,
@@ -168,23 +168,22 @@ export default {
       this.postJobAction(this.$options.jobCancel, cancelJobMutation);
     },
     async retryJob() {
-      if (this.job?.detailedStatus?.action?.confirmationMessage) {
+      if (this.job.detailedStatus.action.confirmationMessage !== null) {
         const confirmed = await confirmJobConfirmationMessage(
           this.job.name,
           this.job.detailedStatus.action.confirmationMessage,
         );
-
         if (!confirmed) {
           return;
         }
       }
 
-      this.retryingJob = true;
+      this.retryBtnDisabled = true;
 
       this.postJobAction(this.$options.jobRetry, retryJobMutation, true);
     },
     async playJob() {
-      if (this.job?.detailedStatus?.action?.confirmationMessage) {
+      if (this.job.detailedStatus.action.confirmationMessage !== null) {
         const confirmed = await confirmJobConfirmationMessage(
           this.job.name,
           this.job.detailedStatus.action.confirmationMessage,
@@ -271,7 +270,7 @@ export default {
           :title="retryButtonTitle"
           :aria-label="retryButtonTitle"
           :method="currentJobMethod"
-          :loading="retryingJob"
+          :disabled="retryBtnDisabled"
           data-testid="retry"
           @click="retryJob()"
         />

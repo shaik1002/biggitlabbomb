@@ -14,7 +14,7 @@ exports[`ConanInstallation renders all the messages 1`] = `
     trackinglabel="code_instruction"
   />
   <h3
-    class="gl-text-lg"
+    class="gl-font-lg"
   >
     Registry setup
   </h3>

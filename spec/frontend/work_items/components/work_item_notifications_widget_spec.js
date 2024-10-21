@@ -64,9 +64,13 @@ describe('WorkItemActions component', () => {
         workItemType,
         workItemReference,
       },
+      provide: {
+        glFeatures: { workItemsBeta: true, workItemsAlpha: true },
+      },
       mocks: {
         $toast,
       },
+      stubs: {},
     });
   };
 

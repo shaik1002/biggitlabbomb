@@ -4,7 +4,6 @@ FactoryBot.define do
   factory :container_repository do
     sequence(:name) { |n| "test_image_#{n}" }
     project
-    next_delete_attempt_at { nil }
 
     transient do
       tags { [] }

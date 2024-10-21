@@ -8,7 +8,7 @@ FactoryBot.define do
     sequence(:name) { |n| "agent-#{n}" }
 
     trait :in_group do
-      association :project, :in_group
+      project factory: [:project, :in_group]
     end
   end
 end

@@ -7,7 +7,7 @@ export const MOCK_QUERY = {
   confidential: null,
   group_id: 1,
   language: ['C', 'JavaScript'],
-  label_name: ['Aftersync', 'Brist'],
+  labels: ['60', '37'],
   search: '*',
 };
 
@@ -906,19 +906,6 @@ export const defaultProvide = {
   },
 };
 
-export const mockGetBlobSearchQueryEmpty = {
-  data: {
-    blobSearch: {
-      fileCount: 0,
-      files: [],
-      matchCount: 0,
-      perPage: 0,
-      searchLevel: 'PROJECT',
-      searchType: 'ZOEKT',
-    },
-  },
-};
-
 export const mockGetBlobSearchQuery = {
   data: {
     blobSearch: {
@@ -1680,18 +1667,3 @@ export const mockDataForBlobBody = {
   projectPath: 'Testjs/Test',
   __typename: 'SearchBlobFileType',
 };
-
-export const mockSourceBranches = [
-  {
-    text: 'master',
-    value: 'master',
-  },
-  {
-    text: 'feature',
-    value: 'feature',
-  },
-  {
-    text: 'develop',
-    value: 'develop',
-  },
-];

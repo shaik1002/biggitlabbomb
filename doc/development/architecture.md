@@ -102,45 +102,12 @@ understand the GitLab architecture.
 A complete architecture diagram is available in our
 [component diagram](#component-diagram) below.
 
-```mermaid
-%%{init: {"flowchart": { "useMaxWidth": false } }}%%
-graph TB
-  %% Component declarations and formatting
-  HTTP((HTTP/HTTPS))
-  SSH((SSH))
-  GitLabPages(GitLab Pages)
-  GitLabWorkhorse(GitLab Workhorse)
-  GitLabShell(GitLab Shell)
-  Gitaly(Gitaly)
-  Puma("Puma (Gitlab Rails)")
-  Sidekiq("Sidekiq (GitLab Rails)")
-  PostgreSQL(PostgreSQL)
-  Redis(Redis)
+![Simplified Component Overview](img/architecture_simplified_v14_9.png)
 
-  HTTP -- TCP 80,443 --> NGINX
-  SSH -- TCP 22 --> GitLabShell
-
-  NGINX -- TCP 8090 --> GitLabPages
-  NGINX --> GitLabWorkhorse
-
-  GitLabShell --> Gitaly
-  GitLabShell --> GitLabWorkhorse
-
-  GitLabWorkhorse --> Gitaly
-  GitLabWorkhorse --> Puma
-  GitLabWorkhorse --> Redis
-
-  Sidekiq --> PostgreSQL
-  Sidekiq --> Redis
-
-  Puma --> PostgreSQL
-  Puma --> Redis
-  Puma --> Gitaly
-
-  Gitaly --> GitLabWorkhorse
-```
-
-All connections use Unix sockets unless noted otherwise.
+<!--
+To update this diagram, use and update this source file:
+https://miro.com/app/board/uXjVOH3lzXo=/
+ -->
 
 ### Component diagram
 
@@ -261,14 +228,12 @@ graph LR
 
     subgraph Storage
         %% ObjectStorage and inbound traffic
-        ObjectStorage["Object storage"]
+        ObjectStorage["Object Storage"]
         Puma -- TCP 443 --> ObjectStorage
         Sidekiq -- TCP 443 --> ObjectStorage
         GitLabWorkhorse -- TCP 443 --> ObjectStorage
         Registry -- TCP 443 --> ObjectStorage
         GitLabPages -- TCP 443 --> ObjectStorage
-        %% Gitaly can perform repository backups to object storage.
-        Gitaly --> ObjectStorage
     end
 
     subgraph Monitoring
@@ -312,10 +277,6 @@ graph LR
         Elasticsearch
         Puma -- TCP 9200 --> Elasticsearch
         Sidekiq -- TCP 9200 --> Elasticsearch
-        Elasticsearch --> Praefect
-
-        %% Zoekt
-        Zoekt --> Praefect
     end
     subgraph External Monitoring
         %% Sentry
@@ -410,7 +371,7 @@ Component statuses are linked to configuration documentation for each component.
 | [PgBouncer](#pgbouncer)                               | Database connection pooling, failover                                |       ⚙       |       ✅        |      ❌       |        ❌         |     ✅      |   ❌    |  ❌  | EE Only |
 | [PostgreSQL Exporter](#postgresql-exporter)           | Prometheus endpoint with PostgreSQL metrics                          |       ✅       |       ✅        |      ✅       |        ✅         |     ✅      |   ❌    |  ❌  | CE & EE |
 | [PostgreSQL](#postgresql)                             | Database                                                             |       ✅       |       ✅        |      ✅       |        ✅         |     ✅      |   ⤓    |  ✅  | CE & EE |
-| [Praefect](#praefect)                                 | A transparent proxy between any Git client and Gitaly storage nodes. |       ✅       |       ✅        |      ⚙       |        ❌         |     ❌      |   ⚙    |  ✅  | CE & EE |
+| [Praefect](#praefect)                                 | A transparent proxy between any Git client and Gitaly storage nodes. |       ✅       |       ✅        |      ⚙       |        ❌         |     ✅      |   ⚙    |  ✅  | CE & EE |
 | [Puma (GitLab Rails)](#puma)                          | Handles requests for the web interface and API                       |       ✅       |       ✅        |      ✅       |        ✅         |     ✅      |   ⚙    |  ✅  | CE & EE |
 | [Redis Exporter](#redis-exporter)                     | Prometheus endpoint with Redis metrics                               |       ✅       |       ✅        |      ✅       |        ✅         |     ✅      |   ❌    |  ❌  | CE & EE |
 | [Redis](#redis)                                       | Caching service                                                      |       ✅       |       ✅        |      ✅       |        ✅         |     ✅      |   ⤓    |  ✅  | CE & EE |
@@ -723,7 +684,7 @@ Prometheus exporter for PgBouncer. Exports metrics at 9127/metrics.
 
 #### PostgreSQL
 
-- [Project page](https://github.com/postgres/postgres/)
+- [Project page](https://github.com/postgres/postgres/blob/master/README)
 - Configuration:
   - [Omnibus](https://docs.gitlab.com/omnibus/settings/database.html)
   - [Charts](https://docs.gitlab.com/charts/installation/deployment.html#postgresql)
@@ -915,8 +876,8 @@ Git operations over HTTP use the stateless "smart" protocol described in the
 [Git documentation](https://git-scm.com/docs/http-protocol), but responsibility
 for handling these operations is split across several GitLab components.
 
-Here is a sequence diagram for `git fetch`. All requests pass through
-NGINX and any other HTTP load balancers, but are not transformed in any
+Here is a sequence diagram for `git fetch`. Note that all requests pass through
+NGINX as well as any other HTTP load balancers, but are not transformed in any
 way by them. All paths are presented relative to a `/namespace/project.git` URL.
 
 ```mermaid
@@ -966,7 +927,7 @@ To the SSH server, all connections are authenticated as the `git` user; GitLab
 users are differentiated by the SSH key presented by the client.
 
 Here is a sequence diagram for `git fetch`, assuming [Fast SSH key lookup](../administration/operations/fast_ssh_key_lookup.md)
-is enabled. `AuthorizedKeysCommand` is an executable provided by
+is enabled. Note that `AuthorizedKeysCommand` is an executable provided by
 [GitLab Shell](#gitlab-shell):
 
 ```mermaid

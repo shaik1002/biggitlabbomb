@@ -8,7 +8,8 @@ class Projects::Ci::LintsController < Projects::ApplicationController
   respond_to :json, only: [:create]
   urgency :low, [:create]
 
-  def show; end
+  def show
+  end
 
   def create
     content = params[:content]

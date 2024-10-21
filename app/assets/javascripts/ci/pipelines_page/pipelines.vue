@@ -90,11 +90,6 @@ export default {
       required: false,
       default: null,
     },
-    pipelinesAnalyticsPath: {
-      type: String,
-      required: false,
-      default: null,
-    },
   },
   data() {
     return {
@@ -370,7 +365,6 @@ export default {
         v-if="shouldRenderButtons"
         :new-pipeline-path="newPipelinePath"
         :reset-cache-path="resetCachePath"
-        :pipelines-analytics-path="pipelinesAnalyticsPath"
         :is-reset-cache-button-loading="isResetCacheButtonLoading"
         @resetRunnersCache="handleResetRunnersCache"
       />
@@ -378,10 +372,10 @@ export default {
 
     <div v-if="stateToRender !== $options.stateMap.emptyState" class="gl-flex">
       <div
-        class="row-content-block gl-flex gl-max-w-full gl-flex-grow gl-flex-wrap gl-gap-4 gl-border-b-0 sm:gl-flex-nowrap"
+        class="row-content-block gl-max-w-full gl-flex gl-flex-wrap sm:gl-flex-nowrap gl-gap-4 gl-flex-grow gl-border-b-0"
       >
         <pipelines-filtered-search
-          class="gl-flex gl-max-w-full gl-flex-grow"
+          class="gl-flex gl-flex-grow gl-max-w-full"
           :project-id="projectId"
           :default-branch-name="defaultBranchName"
           :params="validatedParams"

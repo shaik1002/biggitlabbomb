@@ -1,12 +1,5 @@
 <script>
-import {
-  GlAvatarsInline,
-  GlAvatar,
-  GlAvatarLink,
-  GlTooltipDirective,
-  GlBadge,
-  GlIcon,
-} from '@gitlab/ui';
+import { GlAvatarsInline, GlAvatar, GlAvatarLink, GlTooltipDirective, GlBadge } from '@gitlab/ui';
 import { n__, __ } from '~/locale';
 import { accessLevelsConfig } from './constants';
 
@@ -23,7 +16,7 @@ export default {
   MAX_VISIBLE_AVATARS,
   AVATAR_SIZE,
   accessLevelsConfig,
-  components: { GlAvatarsInline, GlAvatar, GlAvatarLink, GlBadge, GlIcon },
+  components: { GlAvatarsInline, GlAvatar, GlAvatarLink, GlBadge },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
@@ -49,11 +42,6 @@ export default {
       default: () => [],
     },
     groups: {
-      type: Array,
-      required: false,
-      default: () => [],
-    },
-    deployKeys: {
       type: Array,
       required: false,
       default: () => [],
@@ -128,26 +116,15 @@ export default {
         $options.i18n.sharedSecret
       }}</gl-badge>
 
-      <div v-if="accessLevels.length" class="gl-flex gl-flex-1 gl-flex-wrap gl-gap-2">
-        <gl-badge
-          v-for="(item, index) in accessLevels"
-          :key="index"
-          data-testid="access-level"
-          :data-qa-role="$options.accessLevelsConfig[item].accessLevelLabel"
-        >
-          {{ $options.accessLevelsConfig[item].accessLevelLabel }}
-        </gl-badge>
-      </div>
-
-      <div
-        v-if="deployKeys.length"
-        class="gl-mr-2 gl-flex gl-min-w-0 gl-flex-1 gl-flex-wrap gl-gap-2"
+      <gl-badge
+        v-for="(item, index) in accessLevels"
+        :key="index"
+        class="gl-mr-2"
+        data-testid="access-level"
+        :data-qa-role="$options.accessLevelsConfig[item].accessLevelLabel"
       >
-        <gl-badge v-for="deployKey in deployKeys" :key="deployKey.id" data-testid="deploy-key"
-          ><gl-icon name="key" class="gl-mr-2 gl-min-w-5" />
-          <span class="gl-truncate">{{ deployKey.title }}</span>
-        </gl-badge>
-      </div>
+        {{ $options.accessLevelsConfig[item].accessLevelLabel }}
+      </gl-badge>
     </div>
   </div>
 </template>

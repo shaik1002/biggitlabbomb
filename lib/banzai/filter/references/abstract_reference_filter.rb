@@ -10,6 +10,8 @@ module Banzai
         prepend Concerns::TimeoutFilterHandler
         prepend Concerns::PipelineTimingCheck
 
+        RENDER_TIMEOUT = 2.seconds
+
         def initialize(doc, context = nil, result = nil)
           super
 
@@ -157,7 +159,7 @@ module Banzai
                   next
                 end
 
-                if link_pattern_anchor.match?(link)
+                if link =~ link_pattern_anchor
                   replace_link_node_with_href(node, index, link) do
                     object_link_filter(link, link_pattern_anchor, link_content: inner_html, link_reference: true)
                   end

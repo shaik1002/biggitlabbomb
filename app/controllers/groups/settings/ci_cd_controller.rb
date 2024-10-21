@@ -16,6 +16,7 @@ module Groups
 
       before_action do
         push_frontend_feature_flag(:ci_variables_pages, current_user)
+        push_frontend_feature_flag(:ci_hidden_variables, group)
       end
 
       urgency :low
@@ -94,10 +95,12 @@ module Groups
       end
 
       # Overridden in EE
-      def push_licensed_features; end
+      def push_licensed_features
+      end
 
       # Overridden in EE
-      def assign_variables_to_gon; end
+      def assign_variables_to_gon
+      end
     end
   end
 end

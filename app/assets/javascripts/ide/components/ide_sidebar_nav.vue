@@ -6,7 +6,7 @@ import { otherSide } from '../utils';
 
 export default {
   directives: {
-    GlTooltip: GlTooltipDirective,
+    tooltip: GlTooltipDirective,
   },
   components: {
     GlIcon,
@@ -67,11 +67,11 @@ export default {
     <ul class="list-unstyled">
       <li v-for="tab of tabs" :key="tab.title">
         <button
-          v-gl-tooltip="{ container: 'body', placement: otherSide }"
+          v-tooltip="{ container: 'body', placement: otherSide }"
           :title="tab.title"
           :aria-label="tab.title"
-          class="ide-sidebar-link"
           :class="buttonClasses(tab)"
+          class="ide-sidebar-link"
           type="button"
           @click="clickTab($event, tab)"
         >

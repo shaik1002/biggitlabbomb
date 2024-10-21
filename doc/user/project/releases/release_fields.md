@@ -51,7 +51,7 @@ A release contains the following types of assets:
 
 GitLab automatically generates `zip`, `tar.gz`, `tar.bz2`, and `tar`
 archived source code from the given Git tag. These assets are read-only,
-and [can be downloaded](../repository/index.md#download-repository-source-code).
+and [can be downloaded](../repository/index.md#download-the-code-in-a-repository).
 
 ### Links
 
@@ -65,7 +65,7 @@ Each link as an asset has the following attributes:
 | `name`      | The name of the link.                                                                                        | Yes      |
 | `url`       | The URL to download a file.                                                                                  | Yes      |
 | `filepath`  | The redirect link to the `url`. Must start with a slash (`/`). See [this section](#permanent-links-to-release-assets) for more information. | No       |
-| `link_type` | The content kind of what users can download with `url`. See [this section](#link-types) for more information. | No       |
+| `link_type` | The content kind of what users can download via `url`. See [this section](#link-types) for more information. | No       |
 
 #### Permanent links to release assets
 

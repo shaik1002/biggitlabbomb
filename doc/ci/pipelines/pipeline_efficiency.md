@@ -1,7 +1,7 @@
 ---
 stage: Verify
 group: Pipeline Execution
-info: This page is maintained by Developer Relations, author @dnsmichi, see https://handbook.gitlab.com/handbook/marketing/developer-relations/developer-advocacy/content/#maintained-documentation
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
 # Pipeline efficiency
@@ -114,7 +114,7 @@ be embedded into incidents making problem resolving easier. Additionally, it can
 
 If you use the GitLab CI Pipelines Exporter, you should start with the [example configuration](https://github.com/mvisonneau/gitlab-ci-pipelines-exporter/blob/main/docs/configuration_syntax.md).
 
-![Grafana Dashboard for GitLab CI Pipelines Prometheus Exporter](img/ci_efficiency_pipeline_health_grafana_dashboard_v13_7.png)
+![Grafana Dashboard for GitLab CI Pipelines Prometheus Exporter](img/ci_efficiency_pipeline_health_grafana_dashboard.png)
 
 Alternatively, you can use a monitoring tool that can execute scripts, like
 [`check_gitlab`](https://gitlab.com/6uellerBpanda/check_gitlab) for example.
@@ -169,7 +169,6 @@ to stop them from running:
 - Use [`rules`](../yaml/index.md#rules) to skip tests that aren't needed. For example,
   skip backend tests when only the frontend code is changed.
 - Run non-essential [scheduled pipelines](schedules.md) less frequently.
-- Distribute [`cron` schedules](schedules.md#view-and-optimize-pipeline-schedules) evenly across time.
 
 ### Fail fast
 
@@ -188,7 +187,7 @@ shouldn't run, saving pipeline resources.
 
 In a basic configuration, jobs always wait for all other jobs in earlier stages to complete
 before running. This is the simplest configuration, but it's also the slowest in most
-cases. [Pipelines with the `needs` keyword](../yaml/needs.md) and
+cases. [Pipelines with the `needs` keyword](../directed_acyclic_graph/index.md) and
 [parent/child pipelines](downstream_pipelines.md#parent-child-pipelines) are more flexible and can
 be more efficient, but can also make pipelines harder to understand and analyze.
 

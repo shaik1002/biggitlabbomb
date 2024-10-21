@@ -42,8 +42,12 @@ module API
         project_or_group_without_auth.package_settings.nuget_symbol_server_enabled
       end
 
+      def require_authenticated!
+        unauthorized! unless current_user
+      end
+
       def snowplow_gitlab_standard_context
-        { namespace: project_or_group }
+        { namespace: find_authorized_group! }
       end
 
       def snowplow_gitlab_standard_context_without_auth
@@ -51,7 +55,16 @@ module API
       end
 
       def required_permission
-        :read_package_within_public_registries
+        if allow_anyone_to_pull_public_packages?
+          :read_package_within_public_registries
+        else
+          :read_group
+        end
+      end
+
+      def allow_anyone_to_pull_public_packages?
+        options[:path].first.in?(%w[index *package_version]) &&
+          ::Feature.enabled?(:allow_anyone_to_pull_public_nuget_packages_on_group_level, project_or_group_without_auth)
       end
     end
 
@@ -73,7 +86,7 @@ module API
         namespace '/nuget' do
           after_validation do
             # This API can't be accessed anonymously
-            authenticate!
+            require_authenticated!
           end
 
           include ::API::Concerns::Packages::Nuget::PrivateEndpoints

@@ -471,7 +471,7 @@ RSpec.describe ApplicationHelper do
 
     context 'when @snippet is set' do
       it 'returns the passed path' do
-        snippet = create(:project_snippet)
+        snippet = create(:snippet)
         assign(:snippet, snippet)
 
         expect(helper.external_storage_url_or_path('/foo/bar', project)).to eq('/foo/bar')
@@ -691,27 +691,10 @@ RSpec.describe ApplicationHelper do
         expect(mastodon).to eq('')
       end
 
-      context 'when verify_mastodon_user FF is enabled' do
-        before do
-          stub_feature_flags(verify_mastodon_user: true)
-        end
+      it 'returns mastodon url when mastodon username is set' do
+        user.mastodon = '@robin@example.com'
 
-        it 'returns mastodon url with relme when user handle is set' do
-          user.mastodon = '@robin@example.com'
-
-          expect(mastodon).to eq(external_redirect_path(url: 'https://example.com/@robin', rel: 'me'))
-        end
-      end
-
-      context 'when verify_mastodon_user FF is disabled' do
-        before do
-          stub_feature_flags(verify_mastodon_user: false)
-        end
-
-        it 'returns mastodon url when user handle is set' do
-          user.mastodon = '@robin@example.com'
-          expect(mastodon).to eq(external_redirect_path(url: 'https://example.com/@robin'))
-        end
+        expect(mastodon).to eq(external_redirect_path(url: 'https://example.com/@robin'))
       end
     end
   end
@@ -954,7 +937,7 @@ RSpec.describe ApplicationHelper do
 
     shared_examples 'returns icon with tooltip' do
       before do
-        allow(helper).to receive(:sprite_icon).with('spam', css_class: 'gl-align-text-bottom').and_return(mock_svg)
+        allow(helper).to receive(:sprite_icon).with('spam', css_class: 'gl-vertical-align-text-bottom').and_return(mock_svg)
       end
 
       it 'returns icon with tooltip' do
@@ -988,7 +971,7 @@ RSpec.describe ApplicationHelper do
       let_it_be(:resource) { build(:issue) }
 
       it 'passes the value to sprite_icon' do
-        expect(helper).to receive(:sprite_icon).with('spam', css_class: 'gl-align-text-bottom extra-class').and_return(mock_svg)
+        expect(helper).to receive(:sprite_icon).with('spam', css_class: 'gl-vertical-align-text-bottom extra-class').and_return(mock_svg)
 
         helper.hidden_resource_icon(resource, css_class: 'extra-class')
       end

@@ -6,7 +6,6 @@ import originalOneReleaseQueryResponse from 'test_fixtures/graphql/releases/grap
 import { convertOneReleaseGraphQLResponse } from '~/releases/util';
 import { RELEASED_AT_ASC, RELEASED_AT_DESC, CREATED_ASC, CREATED_DESC } from '~/releases/constants';
 import { trimText } from 'helpers/text_helper';
-import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 import ReleaseBlockFooter from '~/releases/components/release_block_footer.vue';
 
 // TODO: Encapsulate date helpers https://gitlab.com/gitlab-org/gitlab/-/issues/320883
@@ -39,7 +38,6 @@ describe('Release block footer', () => {
   const tagInfoSection = () => wrapper.find('.js-tag-info');
   const tagInfoSectionLink = () => tagInfoSection().findComponent(GlLink);
   const authorDateInfoSection = () => wrapper.find('.js-author-date-info');
-  const findUserAvatar = () => wrapper.findComponent(UserAvatarLink);
 
   describe.each`
     sortFlag            | expectedInfoString
@@ -90,10 +88,10 @@ describe('Release block footer', () => {
             });
             if (authorFlag) {
               it("renders the author's avatar image", () => {
-                const avatarImg = findUserAvatar();
+                const avatarImg = authorDateInfoSection().find('img');
 
                 expect(avatarImg.exists()).toBe(true);
-                expect(avatarImg.props('imgSrc')).toBe(release.author.avatarUrl);
+                expect(avatarImg.attributes('src')).toBe(release.author.avatarUrl);
               });
 
               it("renders a link to the author's profile", () => {

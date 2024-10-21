@@ -10,22 +10,11 @@ import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import Api from '~/api';
 import { createAlert } from '~/alert';
-import {
-  HTTP_STATUS_OK,
-  HTTP_STATUS_INTERNAL_SERVER_ERROR,
-  HTTP_STATUS_UNAUTHORIZED,
-} from '~/lib/utils/http_status';
+import { HTTP_STATUS_OK } from '~/lib/utils/http_status';
 import MRWidgetPipelineComponent from '~/vue_merge_request_widget/components/mr_widget_pipeline.vue';
 import LegacyPipelineMiniGraph from '~/ci/pipeline_mini_graph/legacy_pipeline_mini_graph/legacy_pipeline_mini_graph.vue';
 import PipelineMiniGraph from '~/ci/pipeline_mini_graph/pipeline_mini_graph.vue';
-import HelpPopover from '~/vue_shared/components/help_popover.vue';
-import {
-  SUCCESS,
-  PIPELINE_EVENT_TYPE_MERGE_TRAIN,
-  PIPELINE_EVENT_TYPE_MERGED_RESULT,
-  PIPELINE_EVENT_TYPE_MERGE_REQUEST,
-  PIPELINE_EVENT_TYPE_MAP,
-} from '~/vue_merge_request_widget/constants';
+import { SUCCESS } from '~/vue_merge_request_widget/constants';
 import { localeDateFormat } from '~/lib/utils/datetime/locale_dateformat';
 import mergeRequestEventTypeQuery from '~/vue_merge_request_widget/queries/merge_request_event_type.query.graphql';
 import mockData from '../mock_data';
@@ -42,10 +31,7 @@ describe('MRWidgetPipeline', () => {
   const defaultProps = {
     pipeline: mockData.pipeline,
     pipelineEtag: '/api/graphql:pipelines/sha/a3cf305c10be3fafdd89b12cb1c389e6bde45875',
-    pipelineMiniGraphVariables: {
-      iid: '12',
-      fullPath: 'project/path',
-    },
+    pipelineIid: '12',
     ciStatus: SUCCESS,
     hasCi: true,
     mrTroubleshootingDocsPath: 'help',
@@ -77,7 +63,6 @@ describe('MRWidgetPipeline', () => {
   const findLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
   const findRetargetedMessage = () => wrapper.findByTestId('retargeted-message');
   const findRunPipelineButton = () => wrapper.findByTestId('run-pipeline-button');
-  const findHelpPopover = () => wrapper.findComponent(HelpPopover);
 
   const mockArtifactsRequest = () => new MockAdapter(axios).onGet().reply(HTTP_STATUS_OK, []);
 
@@ -219,21 +204,9 @@ describe('MRWidgetPipeline', () => {
     });
 
     describe('feature flag behavior', () => {
-      beforeEach(() => {
+      it('should render the graphql pipeline mini graph', () => {
         createWrapper({}, shallowMount, true);
-      });
-
-      it('should render the correct pipeline mini graph component', () => {
-        expect(findLegacyPipelineMiniGraph().exists()).toBe(false);
         expect(findPipelineMiniGraph().exists()).toBe(true);
-      });
-
-      it('sends the correct props', () => {
-        expect(findPipelineMiniGraph().props()).toMatchObject({
-          fullPath: defaultProps.pipelineMiniGraphVariables.fullPath,
-          iid: defaultProps.pipelineMiniGraphVariables.iid,
-          pipelineEtag: defaultProps.pipelineEtag,
-        });
       });
     });
   });
@@ -386,40 +359,6 @@ describe('MRWidgetPipeline', () => {
         expect(actual).toBe(expected);
       });
     });
-
-    describe('rendering help popover for a specific event types', () => {
-      it.each([
-        {
-          eventType: PIPELINE_EVENT_TYPE_MERGE_TRAIN,
-          expectedOptions: PIPELINE_EVENT_TYPE_MAP[PIPELINE_EVENT_TYPE_MERGE_TRAIN],
-        },
-        {
-          eventType: PIPELINE_EVENT_TYPE_MERGED_RESULT,
-          expectedOptions: PIPELINE_EVENT_TYPE_MAP[PIPELINE_EVENT_TYPE_MERGED_RESULT],
-        },
-        {
-          eventType: PIPELINE_EVENT_TYPE_MERGE_REQUEST,
-          expectedOptions: PIPELINE_EVENT_TYPE_MAP[PIPELINE_EVENT_TYPE_MERGE_REQUEST],
-        },
-      ])(
-        'renders help popover with options relevant to "$eventType" event type',
-        ({ eventType, expectedOptions }) => {
-          pipeline.details.event_type_name = eventType;
-
-          factory();
-
-          expect(findHelpPopover().props().options).toMatchObject(expectedOptions);
-        },
-      );
-
-      it('does not render a help popover for unknown event type', () => {
-        pipeline.details.event_type_name = 'unknown';
-
-        factory();
-
-        expect(findHelpPopover().exists()).toBe(false);
-      });
-    });
   });
 
   describe('when merge request is retargeted', () => {
@@ -467,7 +406,7 @@ describe('MRWidgetPipeline', () => {
         describe('when user has permission to create a pipeline', () => {
           beforeEach(() => {
             Api.postMergeRequestPipeline.mockRejectedValue({
-              response: { status: HTTP_STATUS_INTERNAL_SERVER_ERROR },
+              response: { status: 500 },
             });
           });
 
@@ -498,7 +437,7 @@ describe('MRWidgetPipeline', () => {
         describe('when user does not have permission to create a pipeline', () => {
           beforeEach(() => {
             Api.postMergeRequestPipeline.mockRejectedValue({
-              response: { status: HTTP_STATUS_UNAUTHORIZED },
+              response: { status: 401 },
             });
           });
 

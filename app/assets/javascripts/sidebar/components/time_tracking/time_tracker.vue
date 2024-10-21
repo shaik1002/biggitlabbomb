@@ -110,7 +110,6 @@ export default {
     };
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     issuableTimeTracking: {
       query() {
         return timeTrackingQueries[this.issuableType].query;
@@ -233,10 +232,12 @@ export default {
       :time-spent-human-readable="humanTotalTimeSpent"
       :time-estimate-human-readable="humanTimeEstimate"
     />
-    <div class="hide-collapsed gl-flex gl-items-center gl-font-bold gl-leading-20 gl-text-gray-900">
+    <div
+      class="hide-collapsed gl-leading-20 gl-text-gray-900 gl-display-flex gl-align-items-center gl-font-bold"
+    >
       {{ __('Time tracking') }}
       <gl-loading-icon v-if="isTimeTrackingInfoLoading" size="sm" class="gl-ml-2" inline />
-      <div v-if="canSetTimeEstimate || canAddTimeEntries" class="gl-ml-auto gl-flex">
+      <div v-if="canSetTimeEstimate || canAddTimeEntries" class="gl-ml-auto gl-display-flex">
         <gl-button
           v-if="canSetTimeEstimate"
           v-gl-modal="$options.setTimeEstimateModalId"
@@ -262,7 +263,7 @@ export default {
     </div>
     <div v-if="!isTimeTrackingInfoLoading" class="hide-collapsed">
       <div v-if="showEstimateOnlyState" data-testid="estimateOnlyPane">
-        {{ $options.i18n.estimatedOnlyText }} {{ humanTimeEstimate }}
+        <span>{{ $options.i18n.estimatedOnlyText }} </span>{{ humanTimeEstimate }}
       </div>
       <time-tracking-spent-only-pane
         v-if="showSpentOnlyState"
@@ -283,7 +284,7 @@ export default {
         <gl-link
           v-if="hasTotalTimeSpent"
           v-gl-modal="'time-tracking-report'"
-          class="gl-text-default"
+          class="gl-text-black-normal"
           data-testid="reportLink"
           href="#"
         >

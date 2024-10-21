@@ -15,6 +15,8 @@ module Banzai
       include Gitlab::Utils::StrongMemoize
       extend Gitlab::Utils::SanitizeNodeLink
 
+      RENDER_TIMEOUT = 5.seconds
+
       UNSAFE_PROTOCOLS = %w[data javascript vbscript].freeze
 
       def call
@@ -55,8 +57,9 @@ module Banzai
           allowlist[:attributes]['img'].push('data-diagram-src')
 
           # Allow any protocol in `a` elements
-          # and then remove links with unsafe protocols in SanitizeLinkFilter
+          # and then remove links with unsafe protocols
           allowlist[:protocols].delete('a')
+          allowlist[:transformers].push(self.class.method(:sanitize_unsafe_links))
 
           # Remove `rel` attribute from `a` elements
           allowlist[:transformers].push(self.class.remove_rel)

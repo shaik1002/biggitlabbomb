@@ -5,7 +5,7 @@ class PostReceive
 
   idempotent!
   deduplicate :none
-  data_consistency :sticky
+  data_consistency :always
 
   sidekiq_options retry: 3
   include Gitlab::Experiment::Dsl

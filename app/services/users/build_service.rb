@@ -19,6 +19,7 @@ module Users
       build_user
       build_identity
       build_user_detail
+      update_canonical_email
 
       user
     end
@@ -144,6 +145,10 @@ module Users
     def build_user_detail
       # This will ensure we either load an existing record or create it.
       user.user_detail
+    end
+
+    def update_canonical_email
+      Users::UpdateCanonicalEmailService.new(user: user).execute
     end
 
     # Allowed params for creating a user (admins only)

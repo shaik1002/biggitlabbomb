@@ -2,12 +2,8 @@
 
 require 'spec_helper'
 
-RSpec.describe ::Types::WorkItems::Widgets::StartAndDueDateUpdateInputType, feature_category: :team_planning do
-  specify do
-    expect(described_class.graphql_name).to eq('WorkItemWidgetStartAndDueDateUpdateInput')
-  end
+RSpec.describe ::Types::WorkItems::Widgets::StartAndDueDateUpdateInputType do
+  it { expect(described_class.graphql_name).to eq('WorkItemWidgetStartAndDueDateUpdateInput') }
 
-  context 'when on FOSS', unless: Gitlab.ee? do
-    specify { expect(described_class.arguments.keys).to contain_exactly('startDate', 'dueDate') }
-  end
+  it { expect(described_class.arguments.keys).to contain_exactly('startDate', 'dueDate') }
 end

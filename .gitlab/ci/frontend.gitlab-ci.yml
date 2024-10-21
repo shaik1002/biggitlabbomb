@@ -33,7 +33,7 @@
         if ! gitlab_assets_archive_doesnt_exist; then
           # We remove all assets from the native cache as they could pollute the fresh assets from the package
           rm -rf public/assets/ app/assets/javascripts/locale/**/app.js
-          run_timed_command "retry download_and_extract_gitlab_assets"
+          run_timed_command "download_and_extract_gitlab_assets"
         fi
       fi
     - assets_compile_script
@@ -48,8 +48,6 @@ compile-production-assets:
     - .compile-assets-base
     - .production
     - .frontend:rules:compile-production-assets
-  tags:
-    - $GITLAB_LARGE_RUNNER_OPTIONAL
   artifacts:
     name: webpack-report
     expire_in: 31d
@@ -66,7 +64,7 @@ compile-production-assets as-if-foss:
   extends:
     - compile-production-assets
     - .as-if-foss
-    - .qa:rules:test-on-omnibus-ce:follow-up
+    - .qa:rules:package-and-test-ce:follow-up
 
 follow-up:compile-production-assets:
   extends:
@@ -216,7 +214,7 @@ graphql-schema-dump:
     - .default-retry
     - .ruby-cache
     - .default-before_script
-    - .frontend:rules:default-frontend-jobs
+    - .frontend:rules:default-frontend-jobs-with-docs-changes
   stage: fixtures
   needs: []
   script:
@@ -227,21 +225,6 @@ graphql-schema-dump:
     paths:
       - tmp/tests/graphql/gitlab_schema.graphql
       - tmp/tests/graphql/gitlab_schema.json
-
-upload-graphql-schema-dump:
-  stage: fixtures
-  variables:
-    SETUP_DB: "false"
-  extends:
-    - .default-retry
-    - .ruby-cache
-    - .default-before_script
-    - .frontend:rules:upload-graphql-schema-dump
-    - .with-graphql-schema-dump-needs
-  script:
-    - source scripts/gitlab_component_helpers.sh
-    - create_and_upload_graphql_schema_package
-
 
 .frontend-test-base:
   extends:
@@ -286,18 +269,16 @@ jest-build-cache:
     NODE_OPTIONS: --max-old-space-size=7680
   allow_failure: true
 
-.with-jest-build-cache-vue3-ensure-compilable-sfcs-needs:
+.with-jest-build-cache-vue3-needs:
   needs:
-    - job: jest-build-cache-vue3-ensure-compilable-sfcs
+    - job: jest-build-cache-vue3
       optional: true
 
-jest-build-cache-vue3-ensure-compilable-sfcs:
+jest-build-cache-vue3:
   extends:
-    - .vue3
-    # Make sure allow_failure is set by jest-build-cache rather than .vue3.
-    # Failures should not be allowed in merge requests.
     - jest-build-cache
-    - .frontend:rules:jest
+    - .frontend:rules:jest-vue3
+    - .vue3
 
 jest:
   extends:
@@ -337,58 +318,21 @@ jest-with-fixtures:
 jest vue3:
   extends:
     - jest
-    - .frontend:rules:jest-vue3-nightly
+    - .frontend:rules:jest-vue3
     - .vue3
   needs:
-    - !reference [.with-jest-build-cache-vue3-ensure-compilable-sfcs-needs, needs]
+    - !reference [.with-jest-build-cache-vue3-needs, needs]
 
 jest-with-fixtures vue3:
   extends:
     - jest-with-fixtures
-    - .frontend:rules:jest-vue3-nightly
+    - .frontend:rules:jest-vue3
     - .vue3
   needs:
     - !reference ["jest vue3", needs]
     # it's ok to wait for the repo artifact as we're waiting for the fixtures (which wait for the repo artifact) anyway
     - !reference [.repo-from-artifacts, needs]
     - !reference [.with-fixtures-needs, needs]
-
-jest vue3 mr:
-  extends:
-    - .frontend-test-base
-    - .frontend:rules:jest
-    - .vue3
-  needs:
-    - !reference [.with-jest-build-cache-vue3-ensure-compilable-sfcs-needs, needs]
-  artifacts:
-    name: vue3-mr-junit
-    expire_in: 31d
-    when: always
-    paths:
-      - junit_jest.xml
-  parallel: 6
-  script:
-    - run_timed_command "yarn jest:ci:vue3-mr:without-fixtures"
-  allow_failure: false
-
-jest-with-fixtures vue3 mr:
-  extends:
-    - jest vue3 mr
-    - .repo-from-artifacts
-  needs:
-    - !reference [.with-jest-build-cache-vue3-ensure-compilable-sfcs-needs, needs]
-    # it's ok to wait for the repo artifact as we're waiting for the fixtures (which wait for the repo artifact) anyway
-    - !reference [.repo-from-artifacts, needs]
-    - !reference [.with-fixtures-needs, needs]
-  artifacts:
-    name: vue3-mr-junit
-    expire_in: 31d
-    when: always
-    paths:
-      - junit_jest.xml
-  parallel: 1
-  script:
-    - run_timed_command "yarn jest:ci:vue3-mr:with-fixtures"
 
 jest predictive:
   extends:
@@ -399,7 +343,6 @@ jest predictive:
     - "detect-tests"
   script:
     - if [[ -s "$RSPEC_CHANGED_FILES_PATH" ]] || [[ -s "$RSPEC_MATCHING_JS_FILES_PATH" ]]; then run_timed_command "yarn jest:ci:predictive-without-fixtures"; fi
-  parallel: 4
 
 jest-with-fixtures predictive:
   extends:
@@ -410,27 +353,6 @@ jest-with-fixtures predictive:
     - "detect-tests"
   script:
     - if [[ -s "$RSPEC_CHANGED_FILES_PATH" ]] || [[ -s "$RSPEC_MATCHING_JS_FILES_PATH" ]]; then run_timed_command "yarn jest:ci:predictive-with-fixtures"; fi
-
-jest vue3 predictive:
-  extends:
-    - jest vue3 mr
-    - .frontend:rules:jest:predictive
-  needs:
-    - !reference [jest vue3 mr, needs]
-    - "detect-tests"
-  script:
-    - if [[ -s "$RSPEC_CHANGED_FILES_PATH" ]] || [[ -s "$RSPEC_MATCHING_JS_FILES_PATH" ]]; then run_timed_command "yarn jest:ci:vue3-mr:predictive-without-fixtures"; fi
-
-jest-with-fixtures vue3 predictive:
-  extends:
-    - jest-with-fixtures vue3 mr
-    - .frontend:rules:jest:predictive
-  needs:
-    - !reference [jest-with-fixtures vue3 mr, needs]
-    - "detect-tests"
-  script:
-    - if [[ -s "$RSPEC_CHANGED_FILES_PATH" ]] || [[ -s "$RSPEC_MATCHING_JS_FILES_PATH" ]]; then run_timed_command "yarn jest:ci:vue3-mr:predictive-with-fixtures"; fi
-  allow_failure: false
 
 jest-integration:
   extends:

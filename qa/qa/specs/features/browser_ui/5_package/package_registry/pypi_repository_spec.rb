@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Package', :object_storage, product_group: :package_registry do
+  RSpec.describe 'Package', :object_storage, product_group: :package_registry, quarantine: {
+    type: :waiting_on,
+    issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/469067'
+  } do
     describe 'PyPI Repository', :external_api_calls do
       include Runtime::Fixtures
       include Support::Helpers::MaskToken
@@ -11,7 +14,7 @@ module QA
 
       let!(:runner) do
         create(:project_runner,
-          name: "qa-runner-#{SecureRandom.hex(6)}",
+          name: "qa-runner-#{Time.now.to_i}",
           tags: ["runner-for-#{project.name}"],
           executor: :docker,
           project: project)
@@ -29,29 +32,50 @@ module QA
       before do
         Flow::Login.sign_in
 
-        pypi_yaml = ERB.new(read_fixture('package_managers/pypi',
-          'pypi_upload_install_package.yaml.erb')).result(binding)
-        pypi_setup_file = ERB.new(read_fixture('package_managers/pypi', 'setup.py.erb')).result(binding)
+        Support::Retrier.retry_on_exception(max_attempts: 3, sleep_interval: 2) do
+          pypi_yaml = ERB.new(read_fixture('package_managers/pypi', 'pypi_upload_install_package.yaml.erb')).result(binding)
+          pypi_setup_file = ERB.new(read_fixture('package_managers/pypi', 'setup.py.erb')).result(binding)
 
-        create(:commit, project: project, actions: [
-          {
-            action: 'create',
-            file_path: '.gitlab-ci.yml',
-            content: pypi_yaml
-          },
-          {
-            action: 'create',
-            file_path: 'setup.py',
-            content: pypi_setup_file
-          }
-        ])
+          create(:commit, project: project, actions: [
+            {
+              action: 'create',
+              file_path: '.gitlab-ci.yml',
+              content: pypi_yaml
+            },
+            {
+              action: 'create',
+              file_path: 'setup.py',
+              content: pypi_setup_file
+            }
+          ])
+        end
 
         project.visit!
-        Flow::Pipeline.wait_for_pipeline_creation_via_api(project: project)
+        Flow::Pipeline.visit_latest_pipeline
+
+        Page::Project::Pipeline::Show.perform do |pipeline|
+          pipeline.click_job('run')
+        end
+
+        Page::Project::Job::Show.perform do |job|
+          expect(job).to be_successful(timeout: 800)
+        end
+
+        Flow::Pipeline.visit_latest_pipeline
+
+        Page::Project::Pipeline::Show.perform do |pipeline|
+          pipeline.click_job('install')
+        end
+
+        Page::Project::Job::Show.perform do |job|
+          expect(job).to be_successful(timeout: 800)
+        end
       end
 
       after do
         runner.remove_via_api!
+        package.remove_via_api!
+        project&.remove_via_api!
       end
 
       context 'when at the project level' do
@@ -75,10 +99,8 @@ module QA
         end
       end
 
-      context 'with Geo', :orchestrated, :geo do
-        it 'a published pypi package is accessible on a secondary Geo site',
-          testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/348090',
-          quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/325556', type: :investigating } do
+      context 'Geo', :orchestrated, :geo do
+        it 'a published pypi package is accessible on a secondary Geo site', testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/348090', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/325556', type: :investigating } do
           QA::Runtime::Logger.debug('Visiting the secondary Geo site')
 
           QA::Flow::Login.while_signed_in(address: :geo_secondary) do

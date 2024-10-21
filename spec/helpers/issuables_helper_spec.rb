@@ -254,7 +254,7 @@ RSpec.describe IssuablesHelper, feature_category: :team_planning do
           issuableRef: "##{issue.iid}",
           imported: issue.imported?,
           markdownPreviewPath: "/#{@project.full_path}/-/preview_markdown?target_id=#{issue.iid}&target_type=Issue",
-          markdownDocsPath: '/help/user/markdown.md',
+          markdownDocsPath: '/help/user/markdown',
           lockVersion: issue.lock_version,
           issuableTemplateNamesPath: template_names_path(@project, issue),
           initialTitleHtml: issue.title,

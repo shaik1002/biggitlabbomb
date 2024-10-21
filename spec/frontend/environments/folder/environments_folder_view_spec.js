@@ -103,7 +103,7 @@ describe('Environments Folder View', () => {
     });
   });
 
-  describe('unsuccessful request', () => {
+  describe('unsuccessfull request', () => {
     beforeEach(() => {
       mock.onGet(mockData.endpoint).reply(HTTP_STATUS_INTERNAL_SERVER_ERROR, { environments: [] });
       createWrapper();

@@ -12,20 +12,10 @@ module Environments
         )
       end
 
-      unsafe_execute!(environment)
-    end
-
-    ##
-    # Stops the environment without checking user permissions. This
-    # should only be used if initiated by a system action and a user
-    # cannot be specified.
-    def unsafe_execute!(environment)
       if params[:force]
-        actions = []
-
         environment.stop_complete!
       else
-        actions = environment.stop_with_actions!
+        environment.stop_with_actions!
       end
 
       unless environment.saved_change_to_attribute?(:state)
@@ -35,7 +25,7 @@ module Environments
         )
       end
 
-      ServiceResponse.success(payload: { environment: environment, actions: actions })
+      ServiceResponse.success(payload: { environment: environment })
     end
 
     def execute_for_branch(branch_name)

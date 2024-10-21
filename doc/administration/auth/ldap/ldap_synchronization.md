@@ -17,24 +17,6 @@ LDAP synchronization updates user and group information for existing GitLab user
 
 You can change when synchronization occurs.
 
-## LDAP servers with rate limits
-
-Some LDAP servers have rate limits configured.
-
-GitLab queries the LDAP server once for every:
-
-- User during the scheduled [user sync](#user-sync) process.
-- Group during the scheduled [group sync](#group-sync) process.
-
-In some cases, more queries to the LDAP server may be triggered. For example, when a [group sync query returns a `memberuid` attribute](#queries).
-
-If the LDAP server has a rate limit configured and that limit is reached during the:
-
-- User sync process, the LDAP server responds with an error code and GitLab blocks that user.
-- Group sync process, the LDAP server responds with an error code and GitLab removes that user's group memberships.
-
-You must consider your LDAP server's rate limits when configuring LDAP synchronization to prevent unwanted user blocks and group membership removals.
-
 ## User sync
 
 > - Preventing LDAP user's profile name synchronization [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/11336) in GitLab 15.11.
@@ -66,9 +48,6 @@ The process also updates the following user information:
 - Email address.
 - SSH public keys if `sync_ssh_keys` is set.
 - Kerberos identity if Kerberos is enabled.
-
-NOTE:
-If your LDAP server has a rate limit, that limit might be reached during the user sync process. Check the [rate limit documentation](#ldap-servers-with-rate-limits) for more information.
 
 ### Synchronize LDAP user's profile name
 
@@ -205,9 +184,6 @@ be available to GitLab. For example, `group_base` could be
 `ou=groups,dc=example,dc=com`. In the configuration file, it looks like the
 following.
 
-NOTE:
-If your LDAP server has a rate limit, that limit might be reached during the group sync process. Check the [rate limit documentation](#ldap-servers-with-rate-limits) for more information.
-
 ::Tabs
 
 :::TabTitle Linux package (Omnibus)
@@ -301,7 +277,7 @@ If your LDAP server has a rate limit, that limit might be reached during the gro
 ::EndTabs
 
 To take advantage of group sync, group Owners or users with the [Maintainer role](../../../user/permissions.md) must
-[create one or more LDAP group links](../../../user/group/access_and_permissions.md#manage-group-memberships-with-ldap).
+[create one or more LDAP group links](../../../user/group/access_and_permissions.md#manage-group-memberships-via-ldap).
 
 NOTE:
 If you frequently experience connection issues between your LDAP server and GitLab instance, try reducing the frequency with which GitLab performs an LDAP group sync by
@@ -310,7 +286,7 @@ If you frequently experience connection issues between your LDAP server and GitL
 ### Add group links
 
 For information on adding group links by using CNs and filters, refer to the
-[GitLab groups documentation](../../../user/group/access_and_permissions.md#manage-group-memberships-with-ldap).
+[GitLab groups documentation](../../../user/group/access_and_permissions.md#manage-group-memberships-via-ldap).
 
 ### Administrator sync
 
@@ -445,7 +421,7 @@ To enable global group memberships lock:
 
 ### Change LDAP group synchronization settings management
 
-By default, group members with the Owner role can manage [LDAP group synchronization settings](../../../user/group/access_and_permissions.md#manage-group-memberships-with-ldap).
+By default, group members with the Owner role can manage [LDAP group synchronization settings](../../../user/group/access_and_permissions.md#manage-group-memberships-via-ldap).
 
 GitLab administrators can remove this permission from group Owners:
 

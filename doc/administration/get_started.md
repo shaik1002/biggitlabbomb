@@ -53,7 +53,7 @@ Get started:
 - [Run multiple Agile teams](https://www.youtube.com/watch?v=VR2r1TJCDew).
 - [Sync group memberships by using LDAP](../administration/auth/ldap/ldap_synchronization.md#group-sync).
 - Manage user access with inherited permissions. Use up to 20 levels of subgroups to organize both teams and projects.
-  - [Inherited membership](../user/project/members/index.md#membership-types).
+  - [Inherited membership](../user/project/members/index.md#inherited-membership).
   - [Example](../user/group/subgroups/index.md).
 
 ## Import projects
@@ -203,7 +203,7 @@ While GitLab Geo helps remote teams work more efficiently by using a local GitLa
 Learn more about using [Geo as a disaster recovery solution](../administration/geo/disaster_recovery/index.md).
 
 Geo replicates your database, your Git repositories, and a few other assets.
-Learn more about the [data types Geo replicates](../administration/geo/replication/datatypes.md#replicated-data-types).
+Learn more about [replication limitations](../administration/geo/replication/datatypes.md#limitations-on-replicationverification).
 
 ## Support for GitLab self-managed
 

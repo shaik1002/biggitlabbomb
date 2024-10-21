@@ -53,7 +53,7 @@ export const JIRA_USER_REQUIREMENTS_DOC_LINK = helpPagePath(
 export const FAILED_TO_UPDATE_DOC_LINK = helpPagePath(
   'administration/settings/jira_cloud_app_troubleshooting',
   {
-    anchor: 'error-failed-to-update-the-gitlab-instance',
+    anchor: 'failed-to-update-the-gitlab-instance',
   },
 );
 

@@ -11,8 +11,6 @@ import {
   OPERATOR_OR,
   OPERATOR_AFTER,
   OPERATOR_BEFORE,
-  TOKEN_TYPE_APPROVED_BY,
-  TOKEN_TYPE_APPROVER,
   TOKEN_TYPE_ASSIGNEE,
   TOKEN_TYPE_REVIEWER,
   TOKEN_TYPE_AUTHOR,
@@ -24,7 +22,6 @@ import {
   TOKEN_TYPE_HEALTH,
   TOKEN_TYPE_ITERATION,
   TOKEN_TYPE_LABEL,
-  TOKEN_TYPE_MERGE_USER,
   TOKEN_TYPE_MILESTONE,
   TOKEN_TYPE_MY_REACTION,
   TOKEN_TYPE_ORGANIZATION,
@@ -36,9 +33,6 @@ import {
   TOKEN_TYPE_SEARCH_WITHIN,
   TOKEN_TYPE_CREATED,
   TOKEN_TYPE_CLOSED,
-  TOKEN_TYPE_DEPLOYED_BEFORE,
-  TOKEN_TYPE_DEPLOYED_AFTER,
-  TOKEN_TYPE_ENVIRONMENT,
 } from '~/vue_shared/components/filtered_search_bar/constants';
 
 export const ISSUE_REFERENCE = /^#\d+$/;
@@ -155,29 +149,6 @@ export const filtersMap = {
       },
     },
   },
-  [TOKEN_TYPE_APPROVED_BY]: {
-    [API_PARAM]: {
-      [NORMAL_FILTER]: 'approvedBy',
-    },
-    [URL_PARAM]: {
-      [OPERATOR_IS]: {
-        [NORMAL_FILTER]: 'approved_by_usernames[]',
-      },
-      [OPERATOR_NOT]: {
-        [NORMAL_FILTER]: 'not[approved_by_usernames][]',
-      },
-    },
-  },
-  [TOKEN_TYPE_APPROVER]: {
-    [API_PARAM]: {
-      [NORMAL_FILTER]: 'approver',
-    },
-    [URL_PARAM]: {
-      [OPERATOR_IS]: {
-        [NORMAL_FILTER]: 'approver[]',
-      },
-    },
-  },
   [TOKEN_TYPE_AUTHOR]: {
     [API_PARAM]: {
       [NORMAL_FILTER]: 'authorUsername',
@@ -250,16 +221,6 @@ export const filtersMap = {
       },
       [OPERATOR_NOT]: {
         [NORMAL_FILTER]: 'not[reviewer_username]',
-      },
-    },
-  },
-  [TOKEN_TYPE_MERGE_USER]: {
-    [API_PARAM]: {
-      [NORMAL_FILTER]: 'mergeUser',
-    },
-    [URL_PARAM]: {
-      [OPERATOR_IS]: {
-        [NORMAL_FILTER]: 'merge_user',
       },
     },
   },
@@ -490,36 +451,6 @@ export const filtersMap = {
       },
       [OPERATOR_BEFORE]: {
         [NORMAL_FILTER]: 'closed_before',
-      },
-    },
-  },
-  [TOKEN_TYPE_ENVIRONMENT]: {
-    [API_PARAM]: {
-      [NORMAL_FILTER]: 'environmentName',
-    },
-    [URL_PARAM]: {
-      [OPERATOR_IS]: {
-        [NORMAL_FILTER]: 'environment',
-      },
-    },
-  },
-  [TOKEN_TYPE_DEPLOYED_BEFORE]: {
-    [API_PARAM]: {
-      [NORMAL_FILTER]: 'deployedBefore',
-    },
-    [URL_PARAM]: {
-      [OPERATOR_IS]: {
-        [NORMAL_FILTER]: 'deployed_before',
-      },
-    },
-  },
-  [TOKEN_TYPE_DEPLOYED_AFTER]: {
-    [API_PARAM]: {
-      [NORMAL_FILTER]: 'deployedAfter',
-    },
-    [URL_PARAM]: {
-      [OPERATOR_IS]: {
-        [NORMAL_FILTER]: 'deployed_after',
       },
     },
   },

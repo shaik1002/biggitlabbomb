@@ -18,14 +18,8 @@ export function isExpanded(sectionArg) {
 
 export function expandSection(sectionArg) {
   const $section = $(sectionArg);
-  const title = $section.find('.js-settings-toggle-trigger-only').text();
 
-  $section
-    .find('.js-settings-toggle:not(.js-settings-toggle-trigger-only) .gl-button-text')
-    .text(__('Collapse'));
-  $section
-    .find('.js-settings-toggle:not(.js-settings-toggle-trigger-only)')
-    .attr('aria-label', `${__('Collapse')} ${title}`);
+  $section.find('.js-settings-toggle:not(.js-settings-toggle-trigger-only)').text(__('Collapse'));
   $section.addClass('expanded');
   if (!$section.hasClass('no-animate')) {
     $section
@@ -40,15 +34,8 @@ export function expandSection(sectionArg) {
 
 export function closeSection(sectionArg) {
   const $section = $(sectionArg);
-  const title = $section.find('.js-settings-toggle-trigger-only').text();
 
-  $section
-    .find('.js-settings-toggle:not(.js-settings-toggle-trigger-only) .gl-button-text')
-    .text(__('Expand'));
-  $section
-    .find('.js-settings-toggle:not(.js-settings-toggle-trigger-only)')
-    .attr('aria-label', `${__('Expand')} ${title}`);
-
+  $section.find('.js-settings-toggle:not(.js-settings-toggle-trigger-only)').text(__('Expand'));
   $section.removeClass('expanded');
   if (!$section.hasClass('no-animate')) {
     $section

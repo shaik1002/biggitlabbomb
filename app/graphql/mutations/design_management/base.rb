@@ -9,7 +9,7 @@ module Mutations
         required: true,
         description: "Project where the issue is to upload designs for."
 
-      argument :iid, GraphQL::Types::ID, # rubocop:disable Graphql/IDType -- Legacy argument using ID type kept for backwards compatibility
+      argument :iid, GraphQL::Types::ID,
         required: true,
         description: "IID of the issue to modify designs for."
 

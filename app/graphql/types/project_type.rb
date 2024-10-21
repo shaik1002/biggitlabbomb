@@ -10,8 +10,6 @@ module Types
 
     expose_permissions Types::PermissionTypes::Project
 
-    implements Types::TodoableInterface
-
     field :id, GraphQL::Types::ID,
       null: false,
       description: 'ID of the project.'
@@ -29,14 +27,6 @@ module Types
       argument :ref, GraphQL::Types::String,
         required: true,
         description: 'Ref.'
-    end
-
-    field :ci_pipeline_creation, ::Types::Ci::PipelineCreation,
-      null: true, authorize: :read_pipeline,
-      alpha: { milestone: '17.4' },
-      description: 'Information about a pipeline creation.' do
-      argument :id, type: ::GraphQL::Types::String,
-        required: true, description: 'Unique ID associated with the pipeline creation.'
     end
 
     field :full_path, GraphQL::Types::ID,
@@ -136,7 +126,7 @@ module Types
     field :merge_requests_ff_only_enabled, GraphQL::Types::Boolean,
       null: true,
       description: 'Indicates if no merge commits should be created and all merges should instead be ' \
-        'fast-forwarded, which means that merging is only allowed if the branch could be fast-forwarded.'
+                   'fast-forwarded, which means that merging is only allowed if the branch could be fast-forwarded.'
 
     field :shared_runners_enabled, GraphQL::Types::Boolean,
       null: true,
@@ -167,7 +157,7 @@ module Types
     field :public_jobs, GraphQL::Types::Boolean,
       null: true,
       description: 'Indicates if there is public access to pipelines and job details of the project, ' \
-        'including output logs and artifacts.',
+                   'including output logs and artifacts.',
       method: :public_builds
 
     field :open_issues_count, GraphQL::Types::Int,
@@ -181,12 +171,12 @@ module Types
     field :allow_merge_on_skipped_pipeline, GraphQL::Types::Boolean,
       null: true,
       description: 'If `only_allow_merge_if_pipeline_succeeds` is true, indicates if merge requests of ' \
-        'the project can also be merged with skipped jobs.'
+                   'the project can also be merged with skipped jobs.'
 
     field :autoclose_referenced_issues, GraphQL::Types::Boolean,
       null: true,
       description: 'Indicates if issues referenced by merge requests and commits within the default branch ' \
-        'are closed automatically.'
+                   'are closed automatically.'
 
     field :import_status, GraphQL::Types::String,
       null: true,
@@ -207,12 +197,12 @@ module Types
     field :printing_merge_request_link_enabled, GraphQL::Types::Boolean,
       null: true,
       description: 'Indicates if a link to create or view a merge request should display after a push to Git ' \
-        'repositories of the project from the command line.'
+                   'repositories of the project from the command line.'
 
     field :remove_source_branch_after_merge, GraphQL::Types::Boolean,
       null: true,
       description: 'Indicates if `Delete source branch` option should be enabled by default for all ' \
-        'new merge requests of the project.'
+                   'new merge requests of the project.'
 
     field :request_access_enabled, GraphQL::Types::Boolean,
       null: true,
@@ -303,7 +293,7 @@ module Types
       Types::EnvironmentType.connection_type,
       null: true,
       description: 'Environments of the project. ' \
-        'This field can only be resolved for one project in any single request.',
+                   'This field can only be resolved for one project in any single request.',
       resolver: Resolvers::EnvironmentsResolver do
       extension ::Gitlab::Graphql::Limit::FieldCallCount, limit: 1
     end
@@ -319,7 +309,7 @@ module Types
       null: true,
       calls_gitaly: true,
       description: 'Environments for this project with nested folders, ' \
-        'can only be resolved for one project in any single request',
+                   'can only be resolved for one project in any single request',
       resolver: Resolvers::Environments::NestedEnvironmentsResolver do
       extension ::Gitlab::Graphql::Limit::FieldCallCount, limit: 1
     end
@@ -513,15 +503,8 @@ module Types
       resolver: Resolvers::ReleasesResolver.single,
       authorize: :read_release
 
-    field :container_tags_expiration_policy, Types::ContainerRegistry::ContainerTagsExpirationPolicyType,
-      null: true,
-      description: 'Container tags expiration policy of the project.',
-      method: :container_expiration_policy,
-      authorize: :read_container_image
-
     field :container_expiration_policy, Types::ContainerExpirationPolicyType,
       null: true,
-      deprecated: { reason: 'Use `container_tags_expiration_policy`', milestone: '17.5' },
       description: 'Container expiration policy of the project.'
 
     field :container_registry_protection_rules,
@@ -773,7 +756,7 @@ module Types
 
     {
       issues: "Issues are",
-      merge_requests: "Merge requests are",
+      merge_requests: "Merge Requests are",
       wiki: 'Wikis are',
       snippets: 'Snippets are',
       container_registry: 'Container Registry is'
@@ -849,10 +832,6 @@ module Types
       result.map do |var_key, var_config|
         { key: var_key, **var_config }
       end
-    end
-
-    def ci_pipeline_creation(id:)
-      ::Ci::PipelineCreationMetadata.find(project: project, id: id)
     end
 
     def job(id:)

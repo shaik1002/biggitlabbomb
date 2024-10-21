@@ -222,14 +222,16 @@ export default {
 
 <template>
   <div>
-    <div class="diff-td diff-line-num gl-flex !gl-w-full gl-flex-col !gl-p-0 !gl-text-center">
+    <div
+      class="diff-td diff-line-num gl-text-center! gl-p-0! !gl-w-full gl-display-flex gl-flex-direction-column"
+    >
       <button
         v-if="showExpandDown"
         :title="s__('Diffs|Next 20 lines')"
         :aria-label="s__('Diffs|Next 20 lines')"
         :disabled="loading.down"
         type="button"
-        class="js-unfold-down diff-line-expand-button gl-rounded-none gl-border-0"
+        class="js-unfold-down gl-rounded-0 gl-border-0 diff-line-expand-button"
         @click="handleExpandLines($options.EXPAND_DOWN)"
       >
         <gl-loading-icon v-if="loading.down" size="sm" color="dark" inline />
@@ -241,7 +243,7 @@ export default {
         :aria-label="$options.i18n.expandAllLines"
         :disabled="loading.all"
         type="button"
-        class="js-unfold-all diff-line-expand-button gl-rounded-none gl-border-0"
+        class="js-unfold-all gl-rounded-0 gl-border-0 diff-line-expand-button"
         @click="handleExpandLines()"
       >
         <gl-loading-icon v-if="loading.all" size="sm" color="dark" inline />
@@ -253,7 +255,7 @@ export default {
         :aria-label="s__('Diffs|Previous 20 lines')"
         :disabled="loading.up"
         type="button"
-        class="js-unfold diff-line-expand-button gl-rounded-none gl-border-0"
+        class="js-unfold gl-rounded-0 gl-border-0 diff-line-expand-button"
         @click="handleExpandLines($options.EXPAND_UP)"
       >
         <gl-loading-icon v-if="loading.up" size="sm" color="dark" inline />
@@ -262,7 +264,7 @@ export default {
     </div>
     <div
       v-safe-html="line.rich_text"
-      class="diff-td line_content left-side gl-whitespace-normal! !gl-flex gl-flex-col gl-justify-center"
+      class="gl-display-flex! gl-flex-direction-column gl-justify-content-center diff-td line_content left-side gl-whitespace-normal!"
     ></div>
   </div>
 </template>

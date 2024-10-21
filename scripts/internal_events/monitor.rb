@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 # frozen_string_literal: true
 
 # Internal Events Tracking Monitor
@@ -19,20 +18,6 @@
 #   - To exit the script, press Ctrl+C.
 #
 
-unless defined?(Rails)
-  puts <<~TEXT
-
-    Error! The Internal Events Tracking Monitor could not access the Rails context!
-
-      Ensure GDK is running, then run:
-
-      bin/rails runner scripts/internal_events/monitor.rb #{ARGV.join(' ')}
-
-  TEXT
-
-  exit! 1
-end
-
 require 'terminal-table'
 require 'net/http'
 
@@ -52,10 +37,6 @@ def red(text)
   @pastel ||= Pastel.new
 
   @pastel.red(text)
-end
-
-def current_timestamp
-  (Time.now.to_f * 1000).to_i
 end
 
 def snowplow_data
@@ -84,8 +65,6 @@ end
 
 def generate_snowplow_table
   events = snowplow_data.select { |d| ARGV.include?(d["event"]["se_action"]) }
-            .filter { |e| e['rawEvent']['parameters']['dtm'].to_i > @min_timestamp }
-
   @initial_max_timestamp ||= events.map { |e| e['rawEvent']['parameters']['dtm'].to_i }.max || 0
 
   rows = []
@@ -185,12 +164,10 @@ def render_screen(paused)
 
   puts
   puts "Press \"p\" to toggle refresh. (It makes it easier to select and copy the tables)"
-  puts "Press \"r\" to reset without exiting the monitor"
   puts "Press \"q\" to quit"
 end
 
 server = nil
-@min_timestamp = current_timestamp
 
 begin
   snowplow_data
@@ -208,9 +185,6 @@ begin
     when 'p'
       paused = !paused
       render_screen(paused)
-    when 'r'
-      @min_timestamp = current_timestamp
-      @initial_values = {}
     when 'q'
       server&.exit
       break

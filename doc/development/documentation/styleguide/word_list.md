@@ -52,26 +52,6 @@ thereafter. If the first word in a sentence, do not capitalize `factor` or `auth
 
 - Two-factor authentication (2FA) helps secure your account. Set up 2FA when you first sign in.
 
-## ability, able
-
-Avoid using **ability** because it focuses more on the user's
-capabilities rather than the product's features or functions,
-which makes it vague and ambiguous.
-
-Do not use **ability** or **able** to refer to permissions or rights that a user needs to perform a task.
-
-Use:
-
-- You do not have the rights to change this setting.
-- You must have permission to change this setting.
-
-Instead of:
-
-- You're not able to change this setting.
-- You must have the ability to change this setting.
-
-See also [**enable**](#enable).
-
 ## above
 
 Try to avoid using **above** when referring to an example or table in a documentation page. If required, use **previous** instead. For example:
@@ -113,16 +93,12 @@ Do not use **Add new**.
 
 ## Admin area
 
-Use:
+To describe this area of the UI, use **Admin** area. The UI button is **Admin**.
 
-- **Admin** area, to describe this area of the UI.
-- **Admin** for the UI button.
-
-Instead of:
+Do not use:
 
 - **Admin area** (with both words as bold)
 - **Admin Area** (with **Area** capitalized)
-- **Admin** Area (with Area capitalized)
 - **administrator area**
 - or other variants
 
@@ -134,7 +110,7 @@ Use title case for **Admin Mode**. The UI uses title case.
 
 Use **administrator access** instead of **admin** when talking about a user's access level.
 
-![admin access level](img/admin_access_level_v15_9.png)
+![admin access level](img/admin_access_level.png)
 
 An **administrator** is not a [role](#roles) or [permission](#permissions).
 
@@ -178,13 +154,6 @@ Instead of **agnostic**, use **platform-independent** or **vendor-neutral**.
 ## AI, artificial intelligence
 
 Use **AI**. Do not spell out **artificial intelligence**.
-
-## AI Impact Dashboard
-
-Use title case for **AI Impact Dashboard**.
-
-On first mention on a page, use **GitLab Duo AI Impact Dashboard**.
-Thereafter, use **AI Impact Dashboard** by itself.
 
 ## AI-powered DevSecOps platform
 
@@ -436,7 +405,7 @@ For example:
 
 - Your instance must be able to synchronize your subscription data with GitLab.
 
-## cloud-native
+## cloud native
 
 When you're talking about using a Kubernetes cluster to host GitLab, you're talking about a **cloud-native version of GitLab**.
 This version is different than the larger, more monolithic **Linux package** that is used to deploy GitLab.
@@ -459,14 +428,14 @@ Example:
 
 - Use code completion to populate the file.
 
-## Code Explanation
+## Code explanation
 
-Use title case for **Code Explanation**.
+Use sentence case for **Code explanation**.
 
-On first mention on a page, use **GitLab Duo Code Explanation**.
-Thereafter, use **Code Explanation** by itself.
+On first mention on a page, use **GitLab Duo Code explanation**.
+Thereafter, use **Code explanation** by itself.
 
-## code generation
+## Code Generation
 
 Code Suggestions has evolved to include two primary features:
 
@@ -483,33 +452,28 @@ Examples:
 - Use code generation to create code based on your comments.
 - Adjust your code generation results by adding code comments to your file.
 
-## Code Review Summary
+## Code review summary
 
-Use title case for **Code Review Summary**.
+Use sentence case for **Code review summary**.
 
-On first mention on a page, use **GitLab Duo Code Review Summary**.
-Thereafter, use **Code Review Summary** by itself.
+On first mention on a page, use **GitLab Duo Code review summary**.
+Thereafter, use **Code review summary** by itself.
 
 ## Code Suggestions
-
-Use title case for **Code Suggestions**. On first mention on a page, use **GitLab Duo Code Suggestions**.
-
-**Code Suggestions**, the feature, should always end in an `s`. However, write like it
-is singular. For example:
-
-- Code Suggestions is turned on for the instance.
-
-When generically referring to the suggestions that the feature outputs, use lowercase.
-
-Examples:
-
-- Use Code Suggestions to display suggestions as you type. (This phrase describes the feature.)
-- As you type, suggestions are displayed. (This phrase is generic.)
 
 **Code Suggestions** has evolved to include two primary features:
 
 - [**code completion**](#code-completion)
 - [**code generation**](#code-generation)
+
+Use title case for **Code Suggestions**. On first mention on a page, use **GitLab Duo Code Suggestions**.
+
+**Code Suggestions** should always be plural, and is capitalized even if it's generic.
+
+Examples:
+
+- Use Code Suggestions to display suggestions as you type. (This phrase describes the feature.)
+- As you type, Code Suggestions are displayed. (This phrase is generic but still uses capital letters.)
 
 ## collapse
 
@@ -685,9 +649,6 @@ Use **dialog** rather than any of these alternatives:
 
 See also [**confirmation dialog**](#confirmation-dialog). For more information, see the [Microsoft Style Guide](https://learn.microsoft.com/en-us/style-guide/a-z-word-list-term-collections/d/dialog-box-dialog-dialogue).
 
-Before using this term, confirm whether **dialog** or [**drawer**](#drawer) is
-the correct term for your use case.
-
 When the dialog is the location of an action, use **on** as a preposition. For example:
 
 - On the **Grant permission** dialog, select **Group**.
@@ -696,24 +657,19 @@ See also [**on**](#on).
 
 ## disable
 
-Do not use **disable** to describe making a setting or feature unavailable. Use alternatives like **turn off**, **hide**,
-**make unavailable**, or **remove** instead.
-
-To describe a state, use **off**, **inactive**, or **unavailable**.
-
-This guidance is based on the
-[Microsoft Style Guide](https://learn.microsoft.com/en-us/style-guide/a-z-word-list-term-collections/d/disable-disabled).
+See the [Microsoft Style Guide](https://learn.microsoft.com/en-us/style-guide/a-z-word-list-term-collections/d/disable-disabled) for guidance on **disable**.
+Use **inactive** or **off** instead.
 
 ## disallow
 
 Use **prevent** instead of **disallow**. ([Vale](../testing/vale.md) rule: [`Substitutions.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab_base/Substitutions.yml))
 
-## Discussion Summary
+## Discussion summary
 
-Use title case for **Discussion Summary**.
+Use sentence case for **Discussion summary**.
 
-On first mention on a page, use **GitLab Duo Discussion Summary**.
-Thereafter, use **Discussion Summary** by itself.
+On first mention on a page, use **GitLab Duo Discussion summary**.
+Thereafter, use **Discussion summary** by itself.
 
 ## Docker-in-Docker, `dind`
 
@@ -734,22 +690,6 @@ Use **download** to describe saving data to a user's device. For details, see
 [the Microsoft style guide](https://learn.microsoft.com/en-us/style-guide/a-z-word-list-term-collections/d/download).
 
 Do not confuse download with [export](#export).
-
-## drawer
-
-Use **drawer** to describe a [drawer UI component](../drawers.md) that:
-
-- Appears from the right side of the screen.
-- Displays context-specific information or actions without the user having to
-  leave the current page.
-
-To see examples of drawers:
-
-- Go to the [Technical Writing Pipeline Editor](https://gitlab.com/gitlab-org/technical-writing/-/ci/editor?branch_name=main) and select **Help** (**{information-o}**).
-- Open GitLab Duo Chat.
-
-Before using this term, confirm whether **drawer** or [**dialog**](#dialog) is
-the correct term for your use case.
 
 ## dropdown list
 
@@ -808,12 +748,8 @@ Use **emoji** to refer to the plural form of **emoji**.
 
 ## enable
 
-Do not use **enable** to describe making a setting or feature available. Use **turn on** instead.
-
-To describe a state, use **on** or **active**.
-
-This guidance is based on the
-[Microsoft Style Guide](https://learn.microsoft.com/en-us/style-guide/a-z-word-list-term-collections/d/disable-disabled).
+See the [Microsoft Style Guide](https://learn.microsoft.com/en-us/style-guide/a-z-word-list-term-collections/e/enable-enables) for guidance on **enable**.
+Use **active** or **on** instead.
 
 ## enter
 
@@ -995,22 +931,6 @@ You can use **GA** to indicate general availability if you spell it out on first
 
 Do not make **GitLab** possessive (GitLab's). This guidance follows [GitLab Trademark Guidelines](https://handbook.gitlab.com/handbook/marketing/brand-and-product-marketing/brand/brand-activation/trademark-guidelines/).
 
-Do not put **GitLab** next to the name of another third-party tool or brand.
-For example, do not use:
-
-- GitLab Chrome extension
-- GitLab Kubernetes agent
-
-Instead, use:
-
-- GitLab extension for Chrome
-- GitLab agent for Kubernetes
-
-Putting the brand names next to each other can imply ownership or partnership, which we don't want to do,
-unless we've gone through a legal review and have been told to promote the partnership.
-
-This guidance follows the [Use of Third-party Trademarks](https://handbook.gitlab.com/handbook/legal/policies/product-third-party-trademarks-guidelines/#dos--donts-for-use-of-third-party-trademarks-in-gitlab).
-
 ## GitLab Dedicated
 
 Use **GitLab Dedicated** to refer to the product offering. It refers to a GitLab instance that's hosted and managed by GitLab for customers.
@@ -1023,35 +943,24 @@ Do not use **Dedicated** by itself. Always use **GitLab Dedicated**.
 
 Do not use **Duo** by itself. Always use **GitLab Duo**.
 
-On first use on a page, use **GitLab Duo `<featurename>`**. As of Aug, 2024,
+On first use on a page, use **GitLab Duo `<featurename>`**. As of Dec, 2023,
 the following are the names of GitLab Duo features:
 
-- GitLab Duo AI Impact Dashboard
 - GitLab Duo Chat
-- GitLab Duo Code Explanation
-- GitLab Duo Code Review
-- GitLab Duo Code Review Summary
 - GitLab Duo Code Suggestions
+- GitLab Duo Value stream forecasting
+- GitLab Duo Discussion summary
+- GitLab Duo Merge request summary
+- GitLab Duo Code review summary
+- GitLab Duo Code explanation
+- GitLab Duo Vulnerability explanation
+- GitLab Duo Vulnerability resolution
+- GitLab Duo Test generation
 - GitLab Duo for the CLI
-- GitLab Duo Issue Description Generation
-- GitLab Duo Issue Discussion Summary
-- GitLab Duo Merge Commit Message Generation
-- GitLab Duo Merge Request Summary
-- GitLab Duo Product Analytics
-- GitLab Duo Root Cause Analysis
-- GitLab Duo Self-Hosted Models
-- GitLab Duo Test Generation
-- GitLab Duo Vulnerability Explanation
-- GitLab Duo Vulnerability Resolution
+- GitLab Duo Root cause analysis
+- GitLab Duo Issue description generation
 
 After the first use, use the feature name without **GitLab Duo**.
-
-## GitLab Duo Enterprise
-
-Always use **GitLab Duo Enterprise** for the add-on. Do not use **Duo Enterprise** unless approved by legal.
-
-You can use **the GitLab Duo Enterprise add-on** (with this capitalization) but you do not need to use **add-on**
-and should leave it off when you can.
 
 ## GitLab Duo Pro
 
@@ -1059,12 +968,6 @@ Always use **GitLab Duo Pro** for the add-on. Do not use **Duo Pro** unless appr
 
 You can use **the GitLab Duo Pro add-on** (with this capitalization) but you do not need to use **add-on**
 and should leave it off when you can.
-
-## GitLab Duo Workflow
-
-Use **GitLab Duo Workflow**. After first use, use **Duo Workflow**.
-
-Do not use **Workflow** by itself.
 
 ## GitLab Flavored Markdown
 
@@ -1238,19 +1141,12 @@ Use lowercase for **issue**.
 
 Use lowercase for **issue board**.
 
-## Issue Description Generation
+## Issue description generation
 
-Use title case for **Issue Description Generation**.
+Use sentence case for **Issue description generation**.
 
-On first mention on a page, use **GitLab Duo Issue Description Generation**.
-Thereafter, use **Issue Description Generation** by itself.
-
-## Issue Discussion Summary
-
-Use title case for **Issue Discussion Summary**.
-
-On first mention on a page, use **GitLab Duo Issue Discussion Summary**.
-Thereafter, use **Issue Discussion Summary** by itself.
+On first mention on a page, use **GitLab Duo Issue description generation**.
+Thereafter, use **Issue description generation** by itself.
 
 ## issue weights
 
@@ -1461,13 +1357,6 @@ For **MB** and **GB**, follow the [Microsoft guidance](https://learn.microsoft.c
 When you add a [user account](#user-account) to a group or project,
 the user account becomes a **member**.
 
-## Merge Commit Message Generation
-
-Use title case for **Merge Commit Message Generation**.
-
-On first mention on a page, use **GitLab Duo Merge Commit Message Generation**.
-Thereafter, use **Merge Commit Message Generation** by itself.
-
 ## merge request branch
 
 Do not use **merge request branch**. See [branch](#branch).
@@ -1476,12 +1365,12 @@ Do not use **merge request branch**. See [branch](#branch).
 
 Use lowercase for **merge requests**. If you use **MR** as the acronym, spell it out on first use.
 
-## Merge Request Summary
+## Merge request summary
 
-Use title case for **Merge Request Summary**.
+Use sentence case for **Merge request summary**.
 
-On first mention on a page, use **GitLab Duo Merge Request Summary**.
-Thereafter, use **Merge Request Summary** by itself.
+On first mention on a page, use **GitLab Duo Merge request summary**.
+Thereafter, use **Merge request summary** by itself.
 
 ## milestones
 
@@ -1651,16 +1540,14 @@ Instead of:
 
 Put the word **only** next to the word it modifies.
 
-In the following example, **only** modifies the noun **projects**.
-The meaning is that you can create one type of project--a private project.
-
 - You can create only private projects.
 
-In the following example, **only** modifies the verb **create**.
-The meaning is that you can't perform other actions,
-like deleting private projects, or adding users to them.
+In this example, **only** modifies the noun **projects**. The sentence means you can create one type of project--a private project.
 
 - You can only create private projects.
+
+In this example, **only** modifies the verb **create**. This sentence means that you can't perform other actions,
+like deleting private projects, or adding users to them.
 
 ## override
 
@@ -1702,8 +1589,8 @@ Use:
 
 If you write a phrase like, "On the **Issues** page," ensure steps for how to get to the page are nearby. Otherwise, people might not know what the **Issues** page is.
 
-The page name should be visible in the UI at the top of the page,
-or included in the breadcrumb.
+The page name should be visible in the UI at the top of the page.
+If it is not, you should be able to get the name from the breadcrumb.
 
 The docs should match the case in the UI, and the page name should be bold. For example:
 
@@ -1794,10 +1681,6 @@ For example, you might write something like:
 ## push rules
 
 Use lowercase for **push rules**.
-
-## quite
-
-Do not use **quite** because it's wordy.
 
 ## `README` file
 
@@ -1896,28 +1779,18 @@ Use lowercase for **review app**.
 
 ## roles
 
-A user has a role **for** a project or group.
-
-Use:
-
-- You must have the Owner role for the group.
-
-Instead of:
-
-- You must have the Owner role for the group.
-
 Do not use **roles** and [**permissions**](#permissions) interchangeably. Each user is assigned a role. Each role includes a set of permissions.
 
 There are two types of roles: [custom](#custom-role) and [default](#default-role).
 
 Roles are not the same as [**access levels**](#access-level).
 
-## Root Cause Analysis
+## Root cause analysis
 
-Use title case for **Root Cause Analysis**.
+Use sentence case for **Root cause analysis**.
 
-On first mention on a page, use **GitLab Duo Root Cause Analysis**.
-Thereafter, use **Root Cause Analysis** by itself.
+On first mention on a page, use **GitLab Duo Root cause analysis**.
+Thereafter, use **Root cause analysis** by itself.
 
 ## roll back
 
@@ -2034,16 +1907,6 @@ However, you can make an exception for **right-click** and **click-through demo*
 Use **self-hosted model** (lowercase) to refer to a language model that's hosted by a customer, rather than GitLab.
 
 The language model might be an LLM (large language model), but it might not be.
-
-## Self-Hosted Models
-
-Use title case for the **GitLab Duo Self-Hosted Models** feature.
-
-On first mention on a page, use **GitLab Duo Self-Hosted Models**.
-Thereafter, use **Self-Hosted Models** by itself.
-
-This phrase applies when specifically referring to the feature name only.
-If you're writing about [self-hosted models](#self-hosted-model), no need to use title case.
 
 ## self-managed
 
@@ -2203,12 +2066,12 @@ talking about non-specific modules. For example:
 
 - You can publish a Terraform module to your project's Terraform Module Registry.
 
-## Test Generation
+## Test generation
 
-Use title case for **Test Generation**.
+Use sentence case for **Test generation**.
 
-On first mention on a page, use **GitLab Duo Test Generation**.
-Thereafter, use **Test Generation** by itself.
+On first mention on a page, use **GitLab Duo Test generation**.
+Thereafter, use **Test generation** by itself.
 
 ## text box
 
@@ -2365,6 +2228,12 @@ For example:
 Do not use **utilize**. Use **use** instead. It's more succinct and easier for non-native English speakers to understand.
 ([Vale](../testing/vale.md) rule: [`SubstitutionWarning.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab_base/SubstitutionWarning.yml))
 
+## Value stream forecasting
+
+Use sentence case for **Value stream forecasting**. On first mention on a page, use **GitLab Duo Value stream forecasting**.
+
+Thereafter, use **Value stream forecasting** by itself.
+
 ## version, v
 
 To describe versions of GitLab, use **GitLab `<version number>`**. For example:
@@ -2384,19 +2253,19 @@ Pay attention to spacing by the letter **v**. In semantic versioning, no space e
 
 Do not use Latin abbreviations. Use **with**, **through**, or **by using** instead. ([Vale](../testing/vale.md) rule: [`LatinTerms.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/doc/.vale/gitlab_base/LatinTerms.yml))
 
-## Vulnerability Explanation
+## Vulnerability resolution
 
-Use title case for **Vulnerability Explanation**.
+Use sentence case for **Vulnerability resolution**.
 
-On first mention on a page, use **GitLab Duo Vulnerability Explanation**.
-Thereafter, use **Vulnerability Explanation** by itself.
+On first mention on a page, use **GitLab Duo Vulnerability resolution**.
+Thereafter, use **Vulnerability resolution** by itself.
 
-## Vulnerability Resolution
+## Vulnerability explanation
 
-Use title case for **Vulnerability Resolution**.
+Use sentence case for **Vulnerability explanation**.
 
-On first mention on a page, use **GitLab Duo Vulnerability Resolution**.
-Thereafter, use **Vulnerability Resolution** by itself.
+On first mention on a page, use **GitLab Duo Vulnerability explanation**.
+Thereafter, use **Vulnerability explanation** by itself.
 
 ## we
 

@@ -18,7 +18,7 @@ describe('Merge request dashboard merge request component', () => {
       propsData: {
         mergeRequest: {
           reference: '!123456',
-          title: 'Merge request title',
+          titleHtml: 'Merge request title',
           author: {
             name: 'John Smith',
             webUrl: 'https://gitlab.com/root',
@@ -58,7 +58,7 @@ describe('Merge request dashboard merge request component', () => {
               },
             ],
           },
-          userNotesCount: 5,
+          userDiscussionsCount: 5,
           createdAt: '2024-04-22T10:13:09Z',
           updatedAt: '2024-04-19T14:34:42Z',
           diffStatsSummary: {

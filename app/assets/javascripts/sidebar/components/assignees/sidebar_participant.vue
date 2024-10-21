@@ -50,7 +50,7 @@ export default {
     :label="user.name"
     :sub-label="`@${user.username}`"
     :src="user.avatarUrl || user.avatar || user.avatar_url"
-    class="sidebar-participant gl-relative gl-items-center"
+    class="gl-align-items-center gl-relative sidebar-participant"
   >
     <template #meta>
       <gl-icon

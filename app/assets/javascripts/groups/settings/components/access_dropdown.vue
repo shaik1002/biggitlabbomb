@@ -114,7 +114,7 @@ export default {
       return labelPieces.join(', ') || this.label;
     },
     toggleClass() {
-      return this.toggleLabel === this.label ? '!gl-text-gray-500' : '';
+      return this.toggleLabel === this.label ? 'gl-text-gray-500!' : '';
     },
     selection() {
       return [
@@ -299,7 +299,7 @@ export default {
           data-testid="role-dropdown-item"
           is-check-item
           :is-checked="isSelected(role)"
-          @click.capture.native.stop="onItemClick(role)"
+          @click.native.capture.stop="onItemClick(role)"
         >
           {{ role.text }}
         </gl-dropdown-item>
@@ -316,7 +316,7 @@ export default {
           :avatar-url="group.avatar_url"
           is-check-item
           :is-checked="isSelected(group)"
-          @click.capture.native.stop="onItemClick(group)"
+          @click.native.capture.stop="onItemClick(group)"
         >
           {{ group.name }}
         </gl-dropdown-item>
@@ -335,7 +335,7 @@ export default {
           :secondary-text="user.username"
           is-check-item
           :is-checked="isSelected(user)"
-          @click.capture.native.stop="onItemClick(user)"
+          @click.native.capture.stop="onItemClick(user)"
         >
           {{ user.name }}
         </gl-dropdown-item>

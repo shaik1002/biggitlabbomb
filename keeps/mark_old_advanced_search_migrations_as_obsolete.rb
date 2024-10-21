@@ -16,9 +16,7 @@ module Keeps
   #   -k Keeps::MarkOldAdvancedSearchMigrationsAsObsolete
   # ```
   class MarkOldAdvancedSearchMigrationsAsObsolete < ::Gitlab::Housekeeper::Keep
-    # Only obsolete migrations added before this
-    # milestones are stored in config/upgrade_path.yml
-    CUTOFF_MILESTONE = '17.3'
+    CUTOFF_MILESTONE = '16.11' # Only obsolete migrations added before this
 
     MIGRATIONS_PATH = 'ee/elastic/migrate'
     MIGRATION_REGEXP = /\A([0-9]+)_([_a-z0-9]*)\.rb\z/

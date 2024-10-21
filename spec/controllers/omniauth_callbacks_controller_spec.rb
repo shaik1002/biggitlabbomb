@@ -92,7 +92,7 @@ RSpec.describe OmniauthCallbacksController, type: :controller, feature_category:
     end
   end
 
-  describe 'omniauth', :with_current_organization do
+  describe 'omniauth' do
     let(:user) { create(:omniauth_user, extern_uid: extern_uid, provider: provider) }
     let(:omniauth_email) { user.email }
     let(:additional_info) { {} }
@@ -467,6 +467,19 @@ RSpec.describe OmniauthCallbacksController, type: :controller, feature_category:
             expect(request.env['warden']).to be_authenticated
           end
 
+          it 'sets the username and caller_id in the context' do
+            expect(controller).to receive(:atlassian_oauth2).and_wrap_original do |m, *args|
+              m.call(*args)
+
+              expect(Gitlab::ApplicationContext.current).to include(
+                'meta.user' => user.username,
+                'meta.caller_id' => 'OmniauthCallbacksController#atlassian_oauth2'
+              )
+            end
+
+            post :atlassian_oauth2
+          end
+
           context 'when a user has 2FA enabled' do
             let(:user) { create(:atlassian_user, :two_factor, extern_uid: extern_uid) }
 
@@ -476,15 +489,9 @@ RSpec.describe OmniauthCallbacksController, type: :controller, feature_category:
 
         context 'for a new user' do
           before do
-            @original_url = Settings.gitlab.url
-            Settings.gitlab.url = 'https://www.example.com:43/gitlab'
             stub_omniauth_setting(enabled: true, auto_link_user: true, allow_single_sign_on: ['atlassian_oauth2'])
 
             user.destroy!
-          end
-
-          after do
-            Settings.gitlab.url = @original_url
           end
 
           it 'denies sign-in if sign-up is enabled, but block_auto_created_users is set' do
@@ -506,7 +513,7 @@ RSpec.describe OmniauthCallbacksController, type: :controller, feature_category:
 
             post :atlassian_oauth2
 
-            expect(flash[:alert]).to eq('Signing in using your Atlassian account without a pre-existing account in example.com:43/gitlab is not allowed. Create an account in example.com:43/gitlab first, and then <a href="/help/user/profile/index.md#sign-in-services">connect it to your Atlassian account</a>.')
+            expect(flash[:alert]).to start_with 'Signing in using your Atlassian account without a pre-existing GitLab account is not allowed.'
           end
         end
       end
@@ -654,7 +661,7 @@ RSpec.describe OmniauthCallbacksController, type: :controller, feature_category:
       let(:post_action) { post :saml, params: { SAMLResponse: mock_saml_response } }
     end
 
-    context 'for sign up', :with_current_organization do
+    context 'for sign up' do
       before do
         user.destroy!
       end
@@ -672,34 +679,12 @@ RSpec.describe OmniauthCallbacksController, type: :controller, feature_category:
         expect(request.env['warden']).to be_authenticated
       end
 
-      describe 'when registering a new account is allowed' do
-        before do
-          allow(Gitlab::CurrentSettings).to receive(:allow_signup?).and_return(true)
-        end
+      it 'denies login if sign up is not enabled' do
+        stub_omniauth_setting(allow_single_sign_on: false, block_auto_created_users: false)
 
-        it 'denies login if sign up is not enabled' do
-          stub_omniauth_setting(allow_single_sign_on: false, block_auto_created_users: false)
+        post :saml, params: { SAMLResponse: mock_saml_response }
 
-          post :saml, params: { SAMLResponse: mock_saml_response }
-
-          expect(flash[:alert]).to eq('Signing in using your SAML account without a pre-existing account in localhost is not allowed. Create an account in localhost first, and then <a href="/help/user/profile/index.md#sign-in-services">connect it to your SAML account</a>.')
-          expect(response).to redirect_to(new_user_registration_path)
-        end
-      end
-
-      describe 'when registering a new account is not allowed' do
-        before do
-          allow(Gitlab::CurrentSettings).to receive(:allow_signup?).and_return(false)
-        end
-
-        it 'denies login if sign up is not enabled' do
-          stub_omniauth_setting(allow_single_sign_on: false, block_auto_created_users: false)
-
-          post :saml, params: { SAMLResponse: mock_saml_response }
-
-          expect(flash[:alert]).to eq('Signing in using your SAML account without a pre-existing account in localhost is not allowed.')
-          expect(response).to redirect_to(new_user_session_path)
-        end
+        expect(flash[:alert]).to start_with 'Signing in using your saml account without a pre-existing GitLab account is not allowed.'
       end
 
       it 'logs saml_response for debugging' do
@@ -755,6 +740,19 @@ RSpec.describe OmniauthCallbacksController, type: :controller, feature_category:
 
       it 'doesn\'t link a new identity to the user' do
         expect { post :saml, params: { SAMLResponse: mock_saml_response } }.not_to change { user.identities.count }
+      end
+
+      it 'sets the username and caller_id in the context' do
+        expect(controller).to receive(:saml).and_wrap_original do |m, *args|
+          m.call(*args)
+
+          expect(Gitlab::ApplicationContext.current).to include(
+            'meta.user' => user.username,
+            'meta.caller_id' => 'OmniauthCallbacksController#saml'
+          )
+        end
+
+        post :saml, params: { SAMLResponse: mock_saml_response }
       end
 
       context 'with IDP bypass two factor request' do

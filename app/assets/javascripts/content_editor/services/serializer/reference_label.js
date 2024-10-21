@@ -1,7 +1,8 @@
-import { renderTextInline } from '../serialization_helpers';
+import { ensureSpace } from '../serialization_helpers';
 
 const referenceLabel = (state, node) => {
-  renderTextInline(node.attrs.originalText || `~${state.quote(node.attrs.text)}`, state, node);
+  ensureSpace(state);
+  state.write(node.attrs.originalText || `~${state.quote(node.attrs.text)}`);
 };
 
 export default referenceLabel;

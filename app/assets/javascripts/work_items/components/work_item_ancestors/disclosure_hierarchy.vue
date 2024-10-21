@@ -86,9 +86,11 @@ export default {
 <template>
   <div
     v-gl-resize-observer="handleResize"
-    class="disclosure-hierarchy gl-relative gl-flex gl-min-w-0 gl-grow-2"
+    class="disclosure-hierarchy gl-relative gl-display-flex gl-flex-grow-2 gl-min-w-0"
   >
-    <ul class="gl-relative gl-m-0 gl-inline-flex gl-max-w-full gl-list-none gl-flex-row gl-p-0">
+    <ul
+      class="gl-p-0 gl-m-0 gl-relative gl-list-none gl-inline-flex gl-flex-direction-row gl-max-w-full"
+    >
       <template v-if="withEllipsis || isMobile">
         <disclosure-hierarchy-item v-if="!isMobile" :item="firstItem" :item-id="itemId(0)">
           <slot :item="firstItem" :item-id="itemId(0)"></slot>
@@ -101,15 +103,15 @@ export default {
                 class="disclosure-hierarchy-button"
                 :aria-label="ellipsisTooltipLabel"
               >
-                <gl-icon name="ellipsis_h" class="gl-z-200 gl-ml-3 gl-text-gray-600" />
+                <gl-icon name="ellipsis_h" class="gl-ml-3 gl-text-gray-600 gl-z-200" />
               </button>
             </template>
             <template #list-item="{ item }">
-              <span class="gl-flex">
+              <span class="gl-display-flex">
                 <gl-icon
                   v-if="item.icon"
                   :name="item.icon"
-                  class="gl-mr-3 gl-shrink-0 gl-align-middle gl-text-gray-600"
+                  class="gl-mr-3 gl-align-middle gl-text-gray-600 gl-flex-shrink-0"
                 />
                 {{ item.title }}
               </span>

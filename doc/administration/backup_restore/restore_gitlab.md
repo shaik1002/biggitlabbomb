@@ -187,7 +187,7 @@ The GitLab Helm chart uses the process documented in
 
 ### Restore for Docker image installations
 
-If you're using [Docker Swarm](../../install/docker/installation.md#install-gitlab-by-using-docker-swarm-mode),
+If you're using [Docker Swarm](../../install/docker.md#install-gitlab-using-docker-swarm-mode),
 the container might restart during the restore process because Puma is shut down,
 and so the container health check fails. To work around this problem,
 temporarily disable the health check mechanism.
@@ -318,7 +318,7 @@ options.
 
 ### Specify backup to restore when there are more than one
 
-Backup files use a naming scheme [starting with a backup ID](backup_archive_process.md#backup-id). When more than one backup exists, you must specify which
+Backup files use a naming scheme [starting with a backup ID](index.md#backup-id). When more than one backup exists, you must specify which
 `<backup-id>_gitlab_backup.tar` file to restore by setting the environment variable `BACKUP=<backup-id>`.
 
 ### Disable prompts during restore
@@ -414,13 +414,7 @@ repositories that have been forked and use GitLab [object pools](../repository_s
 You can restore specific repositories using the `REPOSITORIES_PATHS` and the `SKIP_REPOSITORIES_PATHS` options.
 Both options accept a comma-separated list of project and group paths. If you
 specify a group path, all repositories in all projects in the group and
-descendent groups are included or skipped, depending on which option you used.
-Both the groups and projects must exist in the specified backup or on the target instance.
-
-NOTE:
-The `REPOSITORIES_PATHS` and `SKIP_REPOSITORIES_PATHS` options apply only to Git repositories.
-They do not apply to project or group database entries. If you created a repositories backup
-with `SKIP=db`, by itself it cannot be used to restore specific repositories to a new instance.
+descendent groups are included or skipped, depending on which option you used. The project and group repositories must exist within the specified backup.
 
 For example, to restore all repositories for all projects in **Group A** (`group-a`), the repository for **Project C** in **Group B** (`group-b/project-c`),
 and skip the **Project D** in **Group A** (`group-a/project-d`):
@@ -510,4 +504,4 @@ To resolve this, you can update the Git [server hooks](../server_hooks.md) for G
 ### Successful restore with repositories showing as empty when using `fapolicyd`
 
 When using `fapolicyd` for increased security, GitLab can report that a restore was successful but repositories show as empty. For more troubleshooting help, see
-[Gitaly Troubleshooting documentation](../gitaly/troubleshooting.md#repositories-are-shown-as-empty-after-a-gitlab-restore).
+[Gitaly Troubleshooting documentation](../../administration/gitaly/troubleshooting.md#repositories-are-shown-as-empty-after-a-gitlab-restore).

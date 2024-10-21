@@ -61,10 +61,7 @@ export default {
       <number-to-human-size :value="containerRegistrySize" data-testid="total-size-section" />
       <storage-type-warning v-if="containerRegistrySizeIsEstimated">
         {{ $options.i18n.estimatedWarningTooltip }}
-        <help-page-link
-          href="user/packages/container_registry/reduce_container_registry_storage"
-          anchor="delayed-refresh"
-        >
+        <help-page-link href="user/usage_quotas#delayed-refresh">
           {{ __('Learn more.') }}
         </help-page-link>
       </storage-type-warning>

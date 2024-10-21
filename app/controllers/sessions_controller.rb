@@ -80,7 +80,9 @@ class SessionsController < Devise::SessionsController
 
       accept_pending_invitations
 
-      synchronize_broadcast_message_dismissals
+      if Feature.enabled?(:new_broadcast_message_dismissal, current_user, type: :gitlab_com_derisk)
+        synchronize_broadcast_message_dismissals
+      end
 
       log_audit_event(current_user, resource, with: authentication_method)
       log_user_activity(current_user)

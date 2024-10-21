@@ -47,8 +47,6 @@ describe('Registry Search', () => {
       expect(findFilteredSearch().props()).toMatchObject({
         value: [],
         placeholder: 'Filter results',
-        termsAsTokens: true,
-        searchTextOptionLabel: 'Search for this text',
         availableTokens: defaultProps.tokens,
       });
     });

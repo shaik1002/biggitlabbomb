@@ -1,5 +1,5 @@
 ---
-# Error: gitlab_base.SentenceSpacing
+# Error: gitlab.SentenceSpacing
 #
 # Checks for incorrect spacing (no spaces, or more than one space) around punctuation.
 #

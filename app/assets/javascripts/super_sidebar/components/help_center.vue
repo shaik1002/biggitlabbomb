@@ -2,7 +2,7 @@
 import { GlBadge, GlButton, GlDisclosureDropdown, GlDisclosureDropdownGroup } from '@gitlab/ui';
 import GitlabVersionCheckBadge from '~/gitlab_version_check/components/gitlab_version_check_badge.vue';
 import { helpPagePath } from '~/helpers/help_page_helper';
-import { FORUM_URL, PROMO_URL } from '~/constants';
+import { FORUM_URL, PROMO_URL } from 'jh_else_ce/lib/utils/url_utility';
 import { __ } from '~/locale';
 import { STORAGE_KEY } from '~/whats_new/utils/notification';
 import Tracking from '~/tracking';
@@ -29,10 +29,7 @@ export default {
     shortcuts: __('Keyboard shortcuts'),
     version: __('Your GitLab version'),
     whatsnew: __("What's new"),
-    terms: __('Terms and privacy'),
-    privacy: __('Privacy statement'),
   },
-  inject: ['isSaas'],
   props: {
     sidebarData: {
       type: Object,
@@ -53,6 +50,7 @@ export default {
           items: [
             {
               text: this.$options.i18n.help,
+              // eslint-disable-next-line local-rules/require-valid-help-page-path
               href: helpPagePath(),
               extraAttrs: {
                 ...this.trackingAttrs('help'),
@@ -100,21 +98,6 @@ export default {
                 ...this.trackingAttrs('submit_feedback'),
               },
             },
-            this.isSaas && {
-              text: this.$options.i18n.privacy,
-              href: `${PROMO_URL}/privacy`,
-              extraAttrs: {
-                ...this.trackingAttrs('privacy'),
-              },
-            },
-            this.sidebarData.terms &&
-              !this.isSaas && {
-                text: this.$options.i18n.terms,
-                href: this.sidebarData.terms,
-                extraAttrs: {
-                  ...this.trackingAttrs('terms'),
-                },
-              },
           ].filter(Boolean),
         },
         helpActions: {
@@ -151,7 +134,7 @@ export default {
           items: [
             {
               text: this.$options.i18n.version,
-              href: helpPagePath('update/index.md'),
+              href: helpPagePath('update/index'),
               version: `${this.sidebarData.gitlab_version.major}.${this.sidebarData.gitlab_version.minor}`,
               extraAttrs: {
                 ...this.trackingAttrs('version_help_dropdown'),
@@ -236,8 +219,8 @@ export default {
       :group="itemGroups.versionCheck"
     >
       <template #list-item="{ item }">
-        <span class="gl-flex gl-flex-col gl-leading-24">
-          <span class="gl-text-sm gl-font-bold">
+        <span class="gl-display-flex gl-flex-direction-column gl-leading-24">
+          <span class="gl-font-sm gl-font-bold">
             {{ item.text }}
             <gl-emoji data-name="rocket" />
           </span>
@@ -256,7 +239,9 @@ export default {
 
     <gl-disclosure-dropdown-group :group="itemGroups.helpActions" bordered>
       <template #list-item="{ item }">
-        <span class="-gl-my-1 gl-flex gl-items-center gl-justify-between">
+        <span
+          class="gl-display-flex gl-justify-content-space-between gl-align-items-center -gl-my-1"
+        >
           {{ item.text }}
           <gl-badge v-if="item.count" pill variant="info">{{ item.count }}</gl-badge>
           <kbd v-else-if="item.shortcut" class="flat">?</kbd>

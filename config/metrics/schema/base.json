@@ -11,8 +11,7 @@
     "distribution",
     "tier",
     "data_category",
-    "milestone",
-    "introduced_by_url"
+    "milestone"
   ],
   "additionalProperties": false,
   "properties": {
@@ -58,7 +57,8 @@
     },
     "introduced_by_url": {
       "type": [
-        "string"
+        "string",
+        "null"
       ],
       "format": "uri"
     },
@@ -144,18 +144,10 @@
           "free",
           "starter",
           "premium",
-          "ultimate"
-        ]
-      }
-    },
-    "tiers": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "enum": [
-          "free",
-          "premium",
-          "ultimate"
+          "ultimate",
+          "bronze",
+          "silver",
+          "gold"
         ]
       }
     },

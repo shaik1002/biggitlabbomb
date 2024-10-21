@@ -49,10 +49,6 @@ RSpec.describe 'Work items list filters', :js, feature_category: :team_planning 
     before do
       sign_in(user1)
       visit group_work_items_path(group)
-
-      within_testid('work-item-feedback-popover') do
-        find_by_testid('close-button').click
-      end
     end
 
     describe 'assignee' do
@@ -235,14 +231,14 @@ RSpec.describe 'Work items list filters', :js, feature_category: :team_planning 
 
     describe 'my-reaction' do
       it 'filters', :aggregate_failures do
-        select_tokens 'My-Reaction', '=', AwardEmoji::THUMBS_UP, submit: true
+        select_tokens 'My-Reaction', '=', 'thumbsup', submit: true
 
         expect(page).to have_css('.issue', count: 1)
         expect(page).to have_link(issue.title)
 
         click_button 'Clear'
 
-        select_tokens 'My-Reaction', '!=', AwardEmoji::THUMBS_UP, submit: true
+        select_tokens 'My-Reaction', '!=', 'thumbsup', submit: true
 
         expect(page).to have_css('.issue', count: 2)
         expect(page).to have_link(incident.title)

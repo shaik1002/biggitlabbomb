@@ -25,7 +25,7 @@ RSpec.describe 'User views diffs file-by-file', :js, feature_category: :code_rev
       expect(page).to have_selector('.file-holder', count: 1)
       expect(page).to have_selector('.diff-file .file-title', text: 'files/ruby/popen.rb')
 
-      find_by_testid('gl-pagination-next').click
+      find('.page-link.next-page-item').click
 
       expect(page).to have_selector('.file-holder', count: 1)
       expect(page).to have_selector('.diff-file .file-title', text: 'files/ruby/regex.rb')

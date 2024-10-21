@@ -30,7 +30,7 @@ const createComponent = (propsData = issuableTitleProps) =>
 describe('IssuableTitle', () => {
   let wrapper;
 
-  const findStickyHeader = () => wrapper.find('[data-testid="header"]');
+  const findStickyHeader = () => wrapper.findComponent('[data-testid="header"]');
 
   beforeEach(() => {
     wrapper = createComponent();
@@ -58,13 +58,11 @@ describe('IssuableTitle', () => {
 
   describe('template', () => {
     it('renders issuable title', async () => {
-      const titleHtml = '<b>Sample</b> title';
-
       const wrapperWithTitle = createComponent({
         ...mockIssuableShowProps,
         issuable: {
           ...mockIssuable,
-          titleHtml,
+          titleHtml: '<b>Sample</b> title',
         },
       });
 
@@ -72,7 +70,9 @@ describe('IssuableTitle', () => {
       const titleEl = wrapperWithTitle.find('[data-testid="issuable-title"]');
 
       expect(titleEl.exists()).toBe(true);
-      expect(titleEl.element.innerHTML).toBe('<b>Sample</b> title');
+      expect(titleEl.html()).toBe(
+        '<h1 dir="auto" data-testid="issuable-title" class="title gl-text-size-h-display"><b>Sample</b> title</h1>',
+      );
 
       wrapperWithTitle.destroy();
     });

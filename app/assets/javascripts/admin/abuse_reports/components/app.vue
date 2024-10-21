@@ -1,6 +1,5 @@
 <script>
-import { GlPagination } from '@gitlab/ui';
-import EmptyResult from '~/vue_shared/components/empty_result.vue';
+import { GlEmptyState, GlPagination } from '@gitlab/ui';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
 import FilteredSearchBar from './abuse_reports_filtered_search_bar.vue';
 import AbuseReportRow from './abuse_report_row.vue';
@@ -10,7 +9,7 @@ export default {
   components: {
     AbuseReportRow,
     FilteredSearchBar,
-    EmptyResult,
+    GlEmptyState,
     GlPagination,
   },
   props: {
@@ -39,7 +38,7 @@ export default {
   <div>
     <filtered-search-bar />
 
-    <empty-result v-if="abuseReports.length == 0" />
+    <gl-empty-state v-if="abuseReports.length == 0" :title="s__('AbuseReports|No reports found')" />
     <ul v-else class="gl-pl-0">
       <li v-for="(report, index) in abuseReports" :key="index" class="gl-list-none">
         <abuse-report-row :report="report" />

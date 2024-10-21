@@ -504,9 +504,8 @@ A namespace:
   area, rather than arbitrary ones.
 - Gives a linguistic context to help the translator.
 
-Some languages are more contextual than English.
-For example, `cancel` can be translated in different ways depending on how it's used.
-To define the context of use, always add a namespace to UI text in English.
+In some cases, namespaces don't make sense. For example, for ubiquitous UI words and phrases such as
+"Cancel" or phrases like "Save changes," a namespace could be counterproductive.
 
 Namespaces should be PascalCase.
 
@@ -568,11 +567,11 @@ instead:
 
 - In Ruby/HAML:
 
-  ```ruby
-  safe_format(_('In &lt; 1 hour'))
+   ```ruby
+   safe_format(_('In &lt; 1 hour'))
 
-  # => 'In < 1 hour'
-  ```
+   # => 'In < 1 hour'
+   ```
 
 - In JavaScript:
 

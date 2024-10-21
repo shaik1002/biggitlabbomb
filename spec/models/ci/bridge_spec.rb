@@ -1165,11 +1165,8 @@ RSpec.describe Ci::Bridge, feature_category: :continuous_integration do
     end
   end
 
-  describe 'metadata partitioning' do
-    let(:pipeline) do
-      create(:ci_pipeline, project: project, partition_id: ci_testing_partition_id)
-    end
-
+  describe 'metadata partitioning', :ci_partitionable do
+    let(:pipeline) { create(:ci_pipeline, project: project, partition_id: ci_testing_partition_id) }
     let(:ci_stage) { create(:ci_stage, pipeline: pipeline) }
 
     let(:bridge) do

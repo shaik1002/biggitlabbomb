@@ -64,7 +64,7 @@ export default {
       :class="{
         'border-bottom-0': stage.isCollapsed,
       }"
-      class="card-header gl-flex gl-cursor-pointer gl-items-center"
+      class="card-header gl-align-items-center gl-cursor-pointer gl-display-flex"
       data-testid="card-header"
       @click="toggleCollapsed"
     >
@@ -73,12 +73,12 @@ export default {
         v-gl-tooltip="showTooltip"
         :title="showTooltip ? stage.name : null"
         data-container="body"
-        class="gl-truncate"
+        class="gl-text-truncate"
         data-testid="stage-title"
       >
         {{ stageTitle }}
       </strong>
-      <div v-if="!stage.isLoading || stage.jobs.length" class="gl-ml-2 gl-mr-3">
+      <div v-if="!stage.isLoading || stage.jobs.length" class="gl-mr-3 gl-ml-2">
         <gl-badge>{{ jobsCount }}</gl-badge>
       </div>
       <gl-icon :name="collapseIcon" class="gl-absolute gl-right-5" />

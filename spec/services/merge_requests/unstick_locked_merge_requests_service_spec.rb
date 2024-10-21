@@ -152,8 +152,7 @@ RSpec.describe MergeRequests::UnstickLockedMergeRequestsService, :clean_gitlab_r
         expect(Gitlab::MergeRequests::LockedSet.all).to be_empty
       end
 
-      it 'logs updated stuck merge job ids and errored MRs',
-        quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/477967' do
+      it 'logs updated stuck merge job ids and errored MRs' do
         mr_1 = create(
           :merge_request,
           :locked,

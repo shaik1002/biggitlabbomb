@@ -152,7 +152,8 @@ class SearchController < ApplicationController
     render json: Gitlab::Json.dump(search_autocomplete_opts(term, filter: @filter, scope: @scope))
   end
 
-  def opensearch; end
+  def opensearch
+  end
 
   private
 

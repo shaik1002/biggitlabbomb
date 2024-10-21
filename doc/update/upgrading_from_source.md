@@ -65,7 +65,7 @@ sudo service gitlab stop
 
 ### 3. Update Ruby
 
-In GitLab 17.5 and later, we only support Ruby 3.2.x and have dropped support for Ruby 3.1. Be sure to upgrade if necessary.
+From GitLab 16.7, we only support Ruby 3.1.x and dropped support for Ruby 3.0. Be sure to upgrade if necessary.
 You can check which version you are running with `ruby -v`.
 
 [Install Ruby](https://www.ruby-lang.org/en/documentation/installation/).
@@ -141,7 +141,7 @@ GitLab 17.0 requires at least PostgreSQL 14.
 The latest version of GitLab might depend on a more recent PostgreSQL version
 than what you are running. You may also have to enable some
 extensions. For more information, see the
-[PostgreSQL requirements](../install/requirements.md#postgresql)
+[PostgreSQL requirements](../install/requirements.md#postgresql-requirements)
 
 To upgrade PostgreSQL, refer to its [documentation](https://www.postgresql.org/docs/11/upgrading.html).
 
@@ -283,7 +283,7 @@ sudo systemctl daemon-reload
 ### 10. Install libraries, migrations, etc
 
 Make sure you have the required
-[PostgreSQL extensions](../install/requirements.md#postgresql),
+[PostgreSQL extensions](../install/requirements.md#postgresql-requirements),
 then proceed to install the needed libraries:
 
 ```shell
@@ -335,12 +335,7 @@ If Gitaly is located on its own server, or you use Gitaly Cluster, see [Zero-dow
 
 #### Compile Gitaly
 
-During the build process, Gitaly [compiles and embeds Git binaries](https://gitlab.com/gitlab-org/gitaly/-/issues/6089), which requires additional dependencies.
-
 ```shell
-# Install dependencies
-sudo apt-get install -y libcurl4-openssl-dev libexpat1-dev gettext libz-dev libssl-dev libpcre2-dev build-essential
-
 # Fetch Gitaly source with Git and compile with Go
 cd /home/git/gitlab
 sudo -u git -H bundle exec rake "gitlab:gitaly:install[/home/git/gitaly,/home/git/repositories]" RAILS_ENV=production
@@ -397,11 +392,10 @@ If all items are green, then congratulations, the upgrade is complete!
 
 ## Version specific changes
 
-Upgrading versions might need some manual intervention. For more information, see:
-
-- [GitLab 17 changes](versions/gitlab_17_changes.md)
-- [GitLab 16 changes](versions/gitlab_16_changes.md)
-- [GitLab 15 changes](versions/gitlab_15_changes.md)
+Upgrading versions might need some manual intervention. For more information,
+[check the version you are upgrading to](index.md#version-specific-upgrading-instructions)
+for additional steps required for all GitLab installations, and for
+steps that apply to self-compiled installations.
 
 ## Troubleshooting
 

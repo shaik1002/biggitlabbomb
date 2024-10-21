@@ -101,11 +101,7 @@ export default {
     // So we don't show empty state when results are empty on a filtered search
     showEmptyState() {
       return (
-        this.jobs.list.length === 0 &&
-        !this.scope &&
-        !this.loading &&
-        !this.filterSearchTriggered &&
-        !this.validatedQueryString
+        this.jobs.list.length === 0 && !this.scope && !this.loading && !this.filterSearchTriggered
       );
     },
     hasNextPage() {

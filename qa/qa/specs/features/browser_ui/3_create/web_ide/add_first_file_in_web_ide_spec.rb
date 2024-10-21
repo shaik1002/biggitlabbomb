@@ -3,11 +3,15 @@
 module QA
   RSpec.describe 'Create', :skip_live_env, product_group: :remote_development do
     describe 'Add first file in Web IDE' do
-      include_context 'Web IDE test prep'
       let(:project) { create(:project, :with_readme, name: 'webide-create-file-project') }
 
       before do
-        load_web_ide
+        Flow::Login.sign_in
+        project.visit!
+        Page::Project::Show.perform(&:open_web_ide!)
+        Page::Project::WebIDE::VSCode.perform do |ide|
+          ide.wait_for_ide_to_load('README.md')
+        end
       end
 
       context 'when a file with the same name already exists' do
@@ -26,7 +30,7 @@ module QA
       context 'when user adds a new file' do
         let(:file_name) { 'first_file.txt' }
 
-        it 'shows successfully added and visible in project', :blocking,
+        it 'shows successfully added and visible in project',
           testcase: 'https://gitlab.com/gitlab-org/gitlab/-/quality/test_cases/432898' do
           Page::Project::WebIDE::VSCode.perform do |ide|
             ide.create_new_file(file_name)

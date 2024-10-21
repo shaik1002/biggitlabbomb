@@ -4,7 +4,7 @@ FactoryBot.define do
   factory :import_source_user, class: 'Import::SourceUser' do
     namespace
     source_user_identifier { SecureRandom.uuid }
-    source_hostname { 'https://github.com' }
+    source_hostname { 'github.com' }
     source_name { generate(:name) }
     source_username { generate(:username) }
     import_type { 'github' }
@@ -23,8 +23,6 @@ FactoryBot.define do
     end
 
     trait :awaiting_approval do
-      with_reassign_to_user
-      reassignment_token { SecureRandom.hex }
       status { 1 }
     end
 

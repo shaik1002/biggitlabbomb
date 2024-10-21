@@ -1,5 +1,5 @@
 ---
-# Error: gitlab_docs.RelativeLinks
+# Error: gitlab.RelativeLinks
 #
 # Checks for the presence of absolute hyperlinks that should be relative.
 #

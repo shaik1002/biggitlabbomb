@@ -1,5 +1,5 @@
 ---
-# Warning: gitlab_base.GitLabFlavoredMarkdown
+# Warning: gitlab.GitLabFlavoredMarkdown
 #
 # Checks for unclear use of GLFM or GLM instead of GitLab/GitHub Flavored Markdown
 #

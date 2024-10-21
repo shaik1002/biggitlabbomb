@@ -7,8 +7,6 @@ query getMergeRequests(
   $fullPath: ID!
   $sort: MergeRequestSort
   $state: MergeRequestState
-  $approvedBy: [String!]
-  $approver: [String!]
   $assigneeUsernames: String
   $assigneeWildcardId: AssigneeWildcardId
   $reviewerUsername: String
@@ -16,16 +14,10 @@ query getMergeRequests(
   $authorUsername: String
   $draft: Boolean
   $labelName: [String!]
-  $releaseTag: String
-  $mergeUser: String
   $milestoneTitle: String
   $milestoneWildcardId: MilestoneWildcardId
-  $myReactionEmoji: String
   $sourceBranches: [String!]
   $targetBranches: [String!]
-  $deployedBefore: Time
-  $deployedAfter: Time
-  $environmentName: String
   $not: MergeRequestsResolverNegatedParams
   $beforeCursor: String
   $afterCursor: String
@@ -37,8 +29,6 @@ query getMergeRequests(
     mergeRequests(
       sort: $sort
       state: $state
-      approvedBy: $approvedBy
-      approver: $approver
       assigneeUsername: $assigneeUsernames
       assigneeWildcardId: $assigneeWildcardId
       reviewerUsername: $reviewerUsername
@@ -46,16 +36,10 @@ query getMergeRequests(
       authorUsername: $authorUsername
       draft: $draft
       labelName: $labelName
-      releaseTag: $releaseTag
-      mergedBy: $mergeUser
       milestoneTitle: $milestoneTitle
       milestoneWildcardId: $milestoneWildcardId
-      myReactionEmoji: $myReactionEmoji
       sourceBranches: $sourceBranches
       targetBranches: $targetBranches
-      deployedBefore: $deployedBefore
-      deployedAfter: $deployedAfter
-      environmentName: $environmentName
       not: $not
       before: $beforeCursor
       after: $afterCursor

@@ -2,7 +2,7 @@
 
 module Users
   class ResetFeedTokenService < BaseService
-    VALID_SOURCES = %i[self group_token_revocation_service].freeze
+    VALID_SOURCES = %i[self].freeze
 
     def initialize(current_user = nil, user: nil, source: nil)
       @current_user = current_user
@@ -43,8 +43,6 @@ module Users
       case source
       when :self
         Ability.allowed?(current_user, :update_user, user)
-      when :group_token_revocation_service
-        true
       end
     end
 

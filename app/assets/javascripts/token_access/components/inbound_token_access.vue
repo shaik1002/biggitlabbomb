@@ -26,7 +26,6 @@ import GroupsAndProjectsListbox from './groups_and_projects_listbox.vue';
 import TokenAccessTable from './token_access_table.vue';
 
 export default {
-  CI_JOB_TOKEN_ALLOWLIST: 'ci-job-token-allowlist',
   i18n: {
     radioGroupTitle: s__('CICD|Authorized groups and projects'),
     radioGroupDescription: s__(
@@ -128,6 +127,7 @@ export default {
       projectCount: 0,
       projectName: '',
       groupCount: 0,
+      isAddFormVisible: false,
     };
   },
   computed: {
@@ -261,12 +261,14 @@ export default {
     },
     clearGroupOrProjectPath() {
       this.groupOrProjectPath = '';
+      this.isAddFormVisible = false;
       this.$refs.jobTokenCrud.hideForm();
     },
     getGroupsAndProjects() {
       this.$apollo.queries.groupsAndProjectsWithAccess.refetch();
     },
     showAddForm() {
+      this.isAddFormVisible = true;
       this.$refs.jobTokenCrud.showForm();
     },
   },
@@ -347,30 +349,28 @@ export default {
             </span>
           </template>
 
-          <template #actions>
+          <template v-if="!isAddFormVisible" #actions>
             <gl-button size="small" data-testid="toggle-form-btn" @click="showAddForm">{{
               $options.i18n.addGroupOrProject
             }}</gl-button>
           </template>
 
-          <template #form>
+          <template v-if="isAddFormVisible" #form>
+            <strong>{{ $options.i18n.addGroupOrProject }}</strong>
             <gl-form @submit.prevent="addGroupOrProject">
               <gl-form-group
-                :label-for="$options.CI_JOB_TOKEN_ALLOWLIST"
-                :label="$options.i18n.addGroupOrProject"
                 :state="!isGroupOrProjectPathInScope"
                 :invalid-feedback="$options.projectInScopeError"
                 data-testid="group-or-project-form-group"
               >
                 <groups-and-projects-listbox
-                  :id="$options.CI_JOB_TOKEN_ALLOWLIST"
                   :placeholder="$options.i18n.addProjectPlaceholder"
                   :is-valid="!isGroupOrProjectPathInScope"
                   :value="groupOrProjectPath"
                   @select="setGroupOrProjectPath"
                 />
               </gl-form-group>
-              <div class="gl-mt-5 gl-flex gl-gap-3">
+              <div class="gl-flex gl-gap-3 gl-mt-5">
                 <gl-button
                   variant="confirm"
                   :disabled="isGroupOrProjectPathEmpty || isGroupOrProjectPathInScope"

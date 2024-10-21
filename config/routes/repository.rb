@@ -6,8 +6,7 @@
 # Don't use format parameter as file extension (old 3.0.x behavior)
 # See http://guides.rubyonrails.org/routing.html#route-globbing-and-wildcard-segments
 scope format: false do
-  get '/compare/:from...:to/', to: 'compare#show', as: 'compare', constraints: { from: /.+/, to: /.+/ }
-  get '/compare/:from..:to/', to: 'compare#show', as: 'compare_with_two_dots', constraints: { from: /.+/, to: /.+/ }, defaults: { straight: "true" }
+  get '/compare/:from...:to', to: 'compare#show', as: 'compare', constraints: { from: /.+/, to: /.+/ }
 
   resources :compare, only: [:index, :create] do
     collection do
@@ -97,7 +96,6 @@ resources :commit, only: [:show], constraints: { id: Gitlab::Git::Commit::SHA_PA
   member do
     get :show, to: 'commit#rapid_diffs',
       constraints: ->(params) { params[:rapid_diffs] == 'true' }
-    get :diffs_stream, to: 'commit_diffs_stream#diffs'
     get :branches
     get :pipelines
     post :revert

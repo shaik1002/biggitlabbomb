@@ -11,17 +11,12 @@ module ExternalRedirect
         redirect_to url_param
       else
         render layout: 'fullscreen', locals: {
-          url: url_param,
-          rel: relme_keywords
+          url: url_param
         }
       end
     end
 
     private
-
-    def relme_keywords
-      params['rel']&.strip
-    end
 
     def url_param
       params['url']&.strip

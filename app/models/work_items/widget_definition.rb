@@ -2,7 +2,11 @@
 
 module WorkItems
   class WidgetDefinition < ApplicationRecord
+    include IgnorableColumns
+
     self.table_name = 'work_item_widget_definitions'
+
+    ignore_column :namespace_id, remove_with: '17.5', remove_after: '2024-09-19'
 
     belongs_to :work_item_type, class_name: 'WorkItems::Type', inverse_of: :widget_definitions
 
@@ -41,8 +45,7 @@ module WorkItems
       time_tracking: 21,
       designs: 22,
       development: 23,
-      crm_contacts: 24,
-      email_participants: 25
+      crm_contacts: 24
     }
 
     attribute :widget_options, :ind_jsonb

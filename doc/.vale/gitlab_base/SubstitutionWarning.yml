@@ -1,5 +1,5 @@
 ---
-# Warning: gitlab_base.SubstitutionWarning
+# Warning: gitlab.SubstitutionWarning
 #
 # Checks for misused terms or common shorthand that should not be used at GitLab, but can't be flagged as errors.
 # Substitutions.yml also exists.
@@ -53,7 +53,6 @@ swap:
   OAuth2: "OAuth 2.0"
   omnibus gitlab: "Linux package"
   'omnibus(?!\))': "Linux package"
-  once a: "after a"
   once that: "after that"
   once the: "after the"
   once you: "after you"

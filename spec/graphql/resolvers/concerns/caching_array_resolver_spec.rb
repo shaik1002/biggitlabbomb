@@ -6,8 +6,7 @@ RSpec.describe ::CachingArrayResolver do
   include GraphqlHelpers
 
   let_it_be(:admins) { create_list(:user, 4, admin: true) }
-  let(:current_user) { admins.first }
-  let(:context) { { current_user: current_user } }
+  let(:query_context) { { current_user: admins.first } }
   let(:max_page_size) { 10 }
   let(:schema) do
     Class.new(GitlabSchema) do
@@ -143,7 +142,7 @@ RSpec.describe ::CachingArrayResolver do
 
     context 'the resolver overrides item_found' do
       let_it_be(:non_admins) { create_list(:user, 2, admin: false) }
-      let(:context) do
+      let(:query_context) do
         {
           found: { true => [], false => [], nil => [] }
         }
@@ -163,7 +162,7 @@ RSpec.describe ::CachingArrayResolver do
 
         [found_admins, found_all].each(&method(:force))
 
-        expect(context[:found]).to match({
+        expect(query_context[:found]).to match({
           true => match_array(admins),
           false => be_empty,
           nil => match_array(admins + non_admins)
@@ -196,7 +195,7 @@ RSpec.describe ::CachingArrayResolver do
     end
 
     specify 'force . resolve === to_a . query_for . query_input' do
-      r = resolver_instance(caching_resolver, ctx: query_context)
+      r = resolver_instance(caching_resolver)
       args = { is_admin: false }
 
       naive = r.query_for(r.query_input(**args)).to_a
@@ -209,6 +208,6 @@ RSpec.describe ::CachingArrayResolver do
     args = { is_admin: admin }
     allow(resolver).to receive(:has_max_page_size?).and_return(true)
     allow(resolver).to receive(:max_page_size).and_return(max_page_size)
-    resolve(resolver, args: args, ctx: context, schema: schema, arg_style: :internal)
+    resolve(resolver, args: args, ctx: query_context, schema: schema, arg_style: :internal)
   end
 end

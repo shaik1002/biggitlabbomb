@@ -7,8 +7,6 @@ import {
   InternalEventHandler,
   createInternalEventPayload,
   validateAdditionalProperties,
-  getCustomAdditionalProperties,
-  getBaseAdditionalProperties,
 } from '~/tracking/utils';
 import { TRACKING_CONTEXT_SCHEMA } from '~/experimentation/constants';
 import { REFERRER_TTL, URLS_CACHE_STORAGE_KEY } from '~/tracking/constants';
@@ -122,42 +120,6 @@ describe('~/tracking/utils', () => {
           event: 'click',
         });
       });
-
-      it('should return event and parse eventAdditional JSON into additionalProperties', () => {
-        const mockEl = {
-          dataset: {
-            eventTracking: 'click',
-            eventAdditional: '{"key": "value"}',
-          },
-        };
-        const result = createInternalEventPayload(mockEl);
-        expect(result).toEqual({
-          event: 'click',
-          additionalProperties: { key: 'value' },
-        });
-      });
-
-      it('should handle invalid JSON in eventAdditional gracefully', () => {
-        const mockEl = {
-          dataset: {
-            eventTracking: 'click',
-            eventAdditional: '{invalidJson}',
-          },
-        };
-        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-
-        const result = createInternalEventPayload(mockEl);
-        expect(result).toEqual({
-          event: 'click',
-          additionalProperties: {},
-        });
-        expect(consoleErrorSpy).toHaveBeenCalledWith(
-          'Failed to parse eventAdditional attribute:',
-          '{invalidJson}',
-        );
-
-        consoleErrorSpy.mockRestore();
-      });
     });
 
     describe('InternalEventHandler', () => {
@@ -199,63 +161,29 @@ describe('~/tracking/utils', () => {
       expect(validateAdditionalProperties(additionalProperties)).toBe(undefined);
     });
 
-    it('throws an error if base property has incorrect type', () => {
+    it('throws an error if unallowed additional properties are passed', () => {
       const additionalProperties = {
-        label: 'value',
-        property: 'property',
-        value: 'invalidType',
+        role: 'admin',
       };
 
       expect(() => {
         validateAdditionalProperties(additionalProperties);
-      }).toThrow('value should be of type: number. Provided type is: string.');
+      }).toThrow(
+        'Allowed additional properties are label, property, value for InternalEvents tracking.\nDisallowed additional properties were provided: role.',
+      );
     });
 
-    it('does not throw an error for custom properties', () => {
+    it('throws an error and lists all disallowed additional properties if multiple are passed', () => {
       const additionalProperties = {
-        key: 'value',
+        node: 'admin',
+        lang: 'golang',
       };
 
-      expect(validateAdditionalProperties(additionalProperties)).toBe(undefined);
-    });
-  });
-
-  describe('getCustomAdditionalProperties', () => {
-    it('returns only custom properties', () => {
-      const additionalProperties = {
-        label: 'value',
-        property: 'property',
-        value: 123,
-        key1: 'value1',
-        key2: 2,
-      };
-
-      const customProperties = getCustomAdditionalProperties(additionalProperties);
-
-      expect(customProperties).toEqual({
-        key1: 'value1',
-        key2: 2,
-      });
-    });
-  });
-
-  describe('getBaseAdditionalProperties', () => {
-    it('returns only base properties', () => {
-      const additionalProperties = {
-        label: 'value',
-        property: 'property',
-        value: 123,
-        key1: 'value1',
-        key2: 2,
-      };
-
-      const baseProperties = getBaseAdditionalProperties(additionalProperties);
-
-      expect(baseProperties).toEqual({
-        label: 'value',
-        property: 'property',
-        value: 123,
-      });
+      expect(() => {
+        validateAdditionalProperties(additionalProperties);
+      }).toThrow(
+        'Allowed additional properties are label, property, value for InternalEvents tracking.\nDisallowed additional properties were provided: node, lang.',
+      );
     });
   });
 });

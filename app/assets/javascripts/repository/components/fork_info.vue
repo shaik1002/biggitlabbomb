@@ -287,10 +287,12 @@ export default {
 </script>
 
 <template>
-  <div class="info-well gl-flex-col sm:gl-flex">
-    <div class="well-segment gl-flex gl-w-full gl-p-5">
-      <gl-icon name="fork" :size="16" class="gl-m-4 gl-block gl-text-center" />
-      <div class="gl-flex gl-grow gl-items-center gl-justify-between">
+  <div class="info-well sm:gl-flex gl-flex-direction-column">
+    <div class="well-segment gl-p-5 gl-w-full gl-display-flex">
+      <gl-icon name="fork" :size="16" class="gl-block gl-m-4 gl-text-center" />
+      <div
+        class="gl-display-flex gl-justify-content-space-between gl-align-items-center gl-flex-grow-1"
+      >
         <div v-if="sourceName">
           {{ $options.i18n.forkedFrom }}
           <gl-link data-testid="forked-from-link" :href="sourcePath">{{ sourceName }}</gl-link>
@@ -306,7 +308,11 @@ export default {
             </gl-sprintf>
           </div>
         </div>
-        <div v-else data-testid="inaccessible-project" class="gl-flex gl-items-center">
+        <div
+          v-else
+          data-testid="inaccessible-project"
+          class="gl-align-items-center gl-display-flex"
+        >
           {{ $options.i18n.inaccessibleProject }}
         </div>
         <div class="gl-hidden sm:gl-flex">

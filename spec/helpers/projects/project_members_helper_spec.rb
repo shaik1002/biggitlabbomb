@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Projects::ProjectMembersHelper, feature_category: :groups_and_projects do
+RSpec.describe Projects::ProjectMembersHelper do
   include MembersPresentation
 
   let_it_be(:current_user) { create(:user) }
@@ -32,7 +32,7 @@ RSpec.describe Projects::ProjectMembersHelper, feature_category: :groups_and_pro
             access_requests: present_members(access_requests),
             include_relations: [:inherited, :direct],
             search: nil,
-            pending_members_count: []
+            pending_members: []
           )
         )
       end
@@ -142,7 +142,7 @@ RSpec.describe Projects::ProjectMembersHelper, feature_category: :groups_and_pro
                 access_requests: present_members(access_requests),
                 include_relations: include_relations,
                 search: nil,
-                pending_members_count: []
+                pending_members: []
               )
             )
           end

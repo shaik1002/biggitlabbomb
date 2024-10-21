@@ -34,7 +34,7 @@ require 'rspec-parameterized'
 require 'shoulda/matchers'
 require 'test_prof/recipes/rspec/let_it_be'
 require 'test_prof/factory_default'
-require 'test_prof/factory_prof/nate_heckler'
+require 'test_prof/factory_prof/nate_heckler' if ENV.fetch('ENABLE_FACTORY_PROF', 'true') == 'true'
 require 'parslet/rig/rspec'
 require 'axe-rspec'
 
@@ -145,16 +145,13 @@ RSpec.configure do |config|
     # Admin controller specs get auto admin mode enabled since they are
     # protected by the 'EnforcesAdminAuthentication' concern
     metadata[:enable_admin_mode] = true if %r{(ee)?/spec/controllers/admin/}.match?(location)
-
-    # The worker specs get Sidekiq context
-    metadata[:with_sidekiq_context] = true if %r{(ee)?/spec/workers/}.match?(location)
   end
 
   config.define_derived_metadata(file_path: %r{(ee)?/spec/.+_docs\.rb\z}) do |metadata|
     metadata[:type] = :feature
   end
 
-  config.define_derived_metadata(file_path: %r{spec/dot_gitlab_ci/ci_configuration_validation/}) do |metadata|
+  config.define_derived_metadata(file_path: %r{spec/dot_gitlab_ci/job_dependency_spec.rb}) do |metadata|
     metadata[:ci_config_validation] = true
   end
 
@@ -181,8 +178,6 @@ RSpec.configure do |config|
   config.include WaitHelpers, type: :feature
   config.include WaitForRequests, type: :feature
   config.include Features::DomHelpers, type: :feature
-  config.include TestidHelpers, type: :feature
-  config.include TestidHelpers, type: :component
   config.include Features::HighlightContentHelper, type: :feature
   config.include EmailHelpers, :mailer, type: :mailer
   config.include Warden::Test::Helpers, type: :request
@@ -217,6 +212,7 @@ RSpec.configure do |config|
   config.include UserWithNamespaceShim
   config.include OrphanFinalArtifactsCleanupHelpers, :orphan_final_artifacts_cleanup
   config.include ClickHouseHelpers, :click_house
+  config.include DisableNamespaceOrganizationValidationHelper
 
   config.include_context 'when rendered has no HTML escapes', type: :view
 
@@ -278,8 +274,6 @@ RSpec.configure do |config|
   end
 
   config.before do |example|
-    stub_feature_flags(log_sql_function_namespace_lookups: false)
-
     if example.metadata.fetch(:stub_feature_flags, true)
       # The following can be removed when we remove the staged rollout strategy
       # and we can just enable it using instance wide settings
@@ -300,7 +294,6 @@ RSpec.configure do |config|
       # These feature flag are by default disabled and used in disaster recovery mode
       stub_feature_flags(ci_queueing_disaster_recovery_disable_fair_scheduling: false)
       stub_feature_flags(ci_queueing_disaster_recovery_disable_quota: false)
-      stub_feature_flags(ci_queuing_disaster_recovery_disable_allowed_plans: false)
 
       # It's disabled in specs because we don't support certain features which
       # cause spec failures.
@@ -351,19 +344,12 @@ RSpec.configure do |config|
       # See https://gitlab.com/gitlab-org/gitlab/-/issues/457283
       stub_feature_flags(duo_chat_requires_licensed_seat_sm: false)
 
-      # This flag is for [Selectively disable by actor](https://docs.gitlab.com/ee/development/feature_flags/controls.html#selectively-disable-by-actor).
-      # Hence, it should not enable by default in test.
-      stub_feature_flags(v2_chat_agent_integration_override: false) if Gitlab.ee?
-
       # Experimental merge request dashboard
       stub_feature_flags(merge_request_dashboard: false)
 
       # Since we are very early in the Vue migration, there isn't much value in testing when the feature flag is enabled
       # Please see https://gitlab.com/gitlab-org/gitlab/-/issues/466081 for tracking revisiting this.
       stub_feature_flags(your_work_projects_vue: false)
-
-      # This feature flag allows enabling self-hosted features on Staging Ref: https://gitlab.com/gitlab-org/gitlab/-/issues/497784
-      stub_feature_flags(allow_self_hosted_features_for_com: false)
     else
       unstub_all_feature_flags
     end

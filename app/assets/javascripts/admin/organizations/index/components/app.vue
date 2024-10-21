@@ -4,7 +4,7 @@ import { __, s__ } from '~/locale';
 import OrganizationsView from '~/organizations/shared/components/organizations_view.vue';
 import { DEFAULT_PER_PAGE } from '~/api';
 import { createAlert } from '~/alert';
-import organizationsQuery from '~/organizations/shared/graphql/queries/organizations.query.graphql';
+import organizationsQuery from '../graphql/queries/organizations.query.graphql';
 
 export default {
   name: 'AdminOrganizationsIndexApp',
@@ -76,8 +76,11 @@ export default {
 
 <template>
   <div class="gl-py-6">
-    <div v-if="showHeader" class="gl-mb-5 gl-flex gl-items-center gl-justify-between">
-      <h1 class="gl-m-0 gl-text-size-h-display">{{ $options.i18n.pageTitle }}</h1>
+    <div
+      v-if="showHeader"
+      class="gl-display-flex gl-align-items-center gl-justify-content-space-between gl-mb-5"
+    >
+      <h1 class="gl-m-0 gl-font-size-h-display">{{ $options.i18n.pageTitle }}</h1>
       <gl-button v-if="showNewOrganizationButton" :href="newOrganizationUrl" variant="confirm">{{
         $options.i18n.newOrganization
       }}</gl-button>

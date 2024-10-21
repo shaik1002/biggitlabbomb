@@ -3,7 +3,7 @@
 class Profiles::TwoFactorAuthsController < Profiles::ApplicationController
   skip_before_action :check_two_factor_requirement
   before_action :ensure_verified_primary_email, only: [:show, :create]
-  before_action :validate_current_password, only: [:create, :codes, :destroy, :destroy_otp, :destroy_webauthn, :create_webauthn], if: :current_password_required?
+  before_action :validate_current_password, only: [:create, :codes, :destroy, :create_webauthn], if: :current_password_required?
   before_action :update_current_user_otp!, only: [:show]
 
   helper_method :current_password_required?
@@ -19,7 +19,7 @@ class Profiles::TwoFactorAuthsController < Profiles::ApplicationController
       ::Users::ValidateManualOtpService.new(current_user).execute(params[:pin_code])
     validated = (otp_validation_result[:status] == :success)
 
-    if validated && current_user.otp_backup_codes?
+    if validated && current_user.otp_backup_codes? && Feature.enabled?(:webauthn_without_totp)
       ActiveSession.destroy_all_but_current(current_user, session)
       Users::UpdateService.new(current_user, user: current_user, otp_required_for_login: true).execute!
       redirect_to profile_two_factor_auth_path, notice: _("Your Time-based OTP device was registered!")
@@ -50,16 +50,21 @@ class Profiles::TwoFactorAuthsController < Profiles::ApplicationController
     if @webauthn_registration.persisted?
       session.delete(:challenge)
 
-      if current_user.otp_backup_codes?
-        redirect_to profile_two_factor_auth_path, notice: notice
-      else
+      if Feature.enabled?(:webauthn_without_totp)
 
-        Users::UpdateService.new(current_user, user: current_user).execute! do |user|
-          @codes = current_user.generate_otp_backup_codes!
+        if current_user.otp_backup_codes?
+          redirect_to profile_two_factor_auth_path, notice: notice
+        else
+
+          Users::UpdateService.new(current_user, user: current_user).execute! do |user|
+            @codes = current_user.generate_otp_backup_codes!
+          end
+          helpers.dismiss_two_factor_auth_recovery_settings_check
+          flash[:notice] = notice
+          render 'create'
         end
-        helpers.dismiss_two_factor_auth_recovery_settings_check
-        flash[:notice] = notice
-        render 'create'
+      else
+        redirect_to profile_two_factor_auth_path, notice: notice
       end
     else
       @qr_code = build_qr_code
@@ -82,26 +87,10 @@ class Profiles::TwoFactorAuthsController < Profiles::ApplicationController
     result = TwoFactor::DestroyService.new(current_user, user: current_user).execute
 
     if result[:status] == :success
-      redirect_to profile_account_path, status: :found, notice: _('Two-factor authentication has been disabled successfully!')
+      redirect_to profile_account_path, status: :found, notice: s_('Two-factor authentication has been disabled successfully!')
     else
       redirect_to profile_account_path, status: :found, alert: result[:message]
     end
-  end
-
-  def destroy_otp
-    result = TwoFactor::DestroyOtpService.new(current_user, user: current_user).execute
-
-    if result[:status] == :success
-      redirect_to profile_two_factor_auth_path, status: :found, notice: _('One-time password authenticator has been deleted!')
-    else
-      redirect_to profile_two_factor_auth_path, status: :found, alert: result[:message]
-    end
-  end
-
-  def destroy_webauthn
-    Webauthn::DestroyService.new(current_user, current_user, params[:id]).execute
-
-    redirect_to profile_two_factor_auth_path, status: :found, notice: _("Successfully deleted WebAuthn device.")
   end
 
   def skip
@@ -126,6 +115,7 @@ class Profiles::TwoFactorAuthsController < Profiles::ApplicationController
   end
 
   def validate_current_password
+    return if Feature.disabled?(:webauthn_without_totp) && params[:action] == 'create_webauthn'
     return if current_user.valid_password?(params[:current_password])
 
     current_user.increment_failed_attempts!
@@ -133,8 +123,6 @@ class Profiles::TwoFactorAuthsController < Profiles::ApplicationController
     error_message = { message: _('You must provide a valid current password.') }
     if params[:action] == 'create_webauthn'
       @webauthn_error = error_message
-    elsif params[:action] == 'create'
-      @otp_error = error_message
     else
       @error = error_message
     end
@@ -185,7 +173,7 @@ class Profiles::TwoFactorAuthsController < Profiles::ApplicationController
       {
         name: webauthn_registration.name,
         created_at: webauthn_registration.created_at,
-        delete_path: destroy_webauthn_profile_two_factor_auth_path(webauthn_registration)
+        delete_path: profile_webauthn_registration_path(webauthn_registration)
       }
     end
   end

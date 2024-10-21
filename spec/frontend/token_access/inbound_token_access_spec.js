@@ -489,7 +489,6 @@ describe('TokenAccess component', () => {
       expect(findGroupOrProjectFormGroup().attributes('aria-invalid')).toBe('true');
       expect(findGroupsAndProjectsListbox().props('isValid')).toBe(false);
       expect(findAddProjectBtn().props('disabled')).toBe(true);
-      expect(findGroupOrProjectFormGroup().find('label').text()).toBe('Add group or project');
     });
   });
 

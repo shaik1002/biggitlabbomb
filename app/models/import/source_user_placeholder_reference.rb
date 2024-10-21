@@ -10,13 +10,12 @@ module Import
     belongs_to :source_user, class_name: 'Import::SourceUser'
     belongs_to :namespace
 
-    validates :model, :namespace_id, :source_user_id, :user_reference_column, :alias_version, presence: true
+    validates :model, :namespace_id, :source_user_id, :user_reference_column, presence: true
     validates :numeric_key, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
     validates :composite_key,
       json_schema: { filename: 'import_source_user_placeholder_reference_composite_key' },
       allow_nil: true
     validate :validate_numeric_or_composite_key_present
-    validate :validate_model_is_not_member
 
     attribute :composite_key, :ind_jsonb
 
@@ -38,22 +37,21 @@ module Import
       numeric_key
       source_user_id
       user_reference_column
-      alias_version
     ].freeze
 
     SerializationError = Class.new(StandardError)
 
     def aliased_model
-      PlaceholderReferences::AliasResolver.aliased_model(model, version: alias_version)
+      Import::PlaceholderReferenceAliasResolver.aliased_model(model)
     end
 
     def aliased_user_reference_column
-      PlaceholderReferences::AliasResolver.aliased_column(model, user_reference_column, version: alias_version)
+      Import::PlaceholderReferenceAliasResolver.aliased_column(model, user_reference_column)
     end
 
     def aliased_composite_key
       composite_key.transform_keys do |key|
-        PlaceholderReferences::AliasResolver.aliased_column(model, key, version: alias_version)
+        Import::PlaceholderReferenceAliasResolver.aliased_column(model, key)
       end
     end
 
@@ -101,11 +99,6 @@ module Import
             model_relation = model.where(
               "#{composite_key_columns(composite_keys)} IN #{composite_key_values(composite_keys)}"
             )
-          elsif primary_key.is_a?(Array)
-            composite_keys = placeholder_reference_batch.pluck(:composite_key)
-            key = composite_keys.first.keys
-            values = composite_keys.map(&:values)
-            model_relation = model.where({ key => values })
           else
             model_relation = model.primary_key_in(placeholder_reference_batch.pluck(:numeric_key))
           end
@@ -139,16 +132,7 @@ module Import
     def validate_numeric_or_composite_key_present
       return if numeric_key.present? ^ composite_key.present?
 
-      errors.add(:base, :blank, message: 'one of numeric_key or composite_key must be present')
-    end
-
-    # Membership data is handled in `Import::Placeholders::Membership` records instead.
-    # Use `Import::PlaceholderMemberships::CreateService` to save the membership data.
-    def validate_model_is_not_member
-      model_class = model&.safe_constantize
-      return unless model_class.present? && model_class.new.is_a?(Member)
-
-      errors.add(:model, :invalid, message: 'cannot be a Member')
+      errors.add(:base, :blank, message: 'numeric_key or composite_key must be present')
     end
   end
 end

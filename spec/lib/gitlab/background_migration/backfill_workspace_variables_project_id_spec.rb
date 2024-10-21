@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::BackgroundMigration::BackfillWorkspaceVariablesProjectId,
-  feature_category: :workspaces,
+  feature_category: :remote_development,
   schema: 20240419035356 do
   include_examples 'desired sharding key backfill job' do
     let(:batch_table) { :workspace_variables }

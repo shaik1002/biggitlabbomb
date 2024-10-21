@@ -133,11 +133,7 @@ export default {
           {{ historyItem.text }}
         </template>
       </gl-disclosure-dropdown-item>
-      <gl-disclosure-dropdown-item
-        v-if="showPrintItem"
-        :item="printItem"
-        data-event-tracking="click_print_as_pdf_in_wiki_page"
-      >
+      <gl-disclosure-dropdown-item v-if="showPrintItem" :item="printItem">
         <template #list-item>
           <gl-icon name="document" class="gl-mr-2 gl-text-secondary" />
           {{ printItem.text }}

@@ -2,7 +2,7 @@ export function createMockMergeRequest(mergeRequest = {}) {
   return {
     id: 1,
     reference: '!1',
-    title: 'Title',
+    titleHtml: 'Title',
     webUrl: '/',
     author: {
       id: 1,
@@ -25,7 +25,7 @@ export function createMockMergeRequest(mergeRequest = {}) {
       nodes: [],
     },
     headPipeline: null,
-    userNotesCount: 0,
+    userDiscussionsCount: 0,
     createdAt: '',
     updatedAt: '',
     approved: false,

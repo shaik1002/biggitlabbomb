@@ -5,13 +5,7 @@ import {
   isReference,
   getWorkItemIcon,
   workItemRoadmapPath,
-  saveShowLabelsToLocalStorage,
-  getShowLabelsFromLocalStorage,
-  makeDrawerUrlParam,
-  makeDrawerItemFullPath,
 } from '~/work_items/utils';
-import { useLocalStorageSpy } from 'helpers/local_storage_helper';
-import { TYPE_EPIC } from '~/issues/constants';
 
 describe('autocompleteDataSources', () => {
   beforeEach(() => {
@@ -143,105 +137,6 @@ describe('isReference', () => {
 describe('workItemRoadmapPath', () => {
   it('constructs a path to the roadmap page', () => {
     const path = workItemRoadmapPath('project/group', '2');
-    expect(path).toBe(
-      '/groups/project/group/-/roadmap?epic_iid=2&layout=MONTHS&timeframe_range_type=CURRENT_YEAR',
-    );
-  });
-});
-
-describe('utils for remembering user showLabel preferences', () => {
-  useLocalStorageSpy();
-
-  afterEach(() => {
-    localStorage.clear();
-  });
-
-  describe('saveShowLabelsToLocalStorage', () => {
-    it('saves the value to localStorage', () => {
-      const TEST_KEY = `test-key-${new Date().getTime}`;
-
-      expect(localStorage.getItem(TEST_KEY)).toBe(null);
-
-      saveShowLabelsToLocalStorage(TEST_KEY, true);
-      expect(localStorage.setItem).toHaveBeenCalled();
-      expect(localStorage.getItem(TEST_KEY)).toBe(true);
-    });
-  });
-
-  describe('getShowLabelsFromLocalStorage', () => {
-    it('defaults to true when there is no value from localStorage and no default value is passed', () => {
-      const TEST_KEY = `test-key-${new Date().getTime}`;
-
-      expect(localStorage.getItem(TEST_KEY)).toBe(null);
-
-      const result = getShowLabelsFromLocalStorage(TEST_KEY);
-      expect(localStorage.getItem).toHaveBeenCalled();
-      expect(result).toBe(true);
-    });
-
-    it('returns the default boolean value passed when there is no value from localStorage', () => {
-      const TEST_KEY = `test-key-${new Date().getTime}`;
-      const DEFAULT_VALUE = false;
-
-      expect(localStorage.getItem(TEST_KEY)).toBe(null);
-
-      const result = getShowLabelsFromLocalStorage(TEST_KEY, DEFAULT_VALUE);
-      expect(localStorage.getItem).toHaveBeenCalled();
-      expect(result).toBe(false);
-    });
-
-    it('returns the boolean value from localStorage if it exists', () => {
-      const TEST_KEY = `test-key-${new Date().getTime}`;
-      const DEFAULT_VALUE = true;
-
-      localStorage.setItem(TEST_KEY, 'false');
-
-      const newResult = getShowLabelsFromLocalStorage(TEST_KEY, DEFAULT_VALUE);
-      expect(localStorage.getItem).toHaveBeenCalled();
-      expect(newResult).toBe(false);
-    });
-  });
-});
-
-describe('`makeDrawerItemFullPath`', () => {
-  it('returns the items `fullPath` if present', () => {
-    const result = makeDrawerItemFullPath(
-      { fullPath: 'this/should/be/returned' },
-      'this/should/not',
-    );
-    expect(result).toBe('this/should/be/returned');
-  });
-  it('returns the fallback `fullPath` if `activeItem` does not have a `referencePath`', () => {
-    const result = makeDrawerItemFullPath({}, 'this/should/be/returned');
-    expect(result).toBe('this/should/be/returned');
-  });
-  describe('when `activeItem` has a `referencePath`', () => {
-    it('handles the default `issuableType` of `ISSUE`', () => {
-      const result = makeDrawerItemFullPath(
-        { referencePath: 'this/should/be/returned#100' },
-        'this/should/not',
-      );
-      expect(result).toBe('this/should/be/returned');
-    });
-    it('handles case where `issuableType` is an `EPIC`', () => {
-      const result = makeDrawerItemFullPath(
-        { referencePath: 'this/should/be/returned&100' },
-        'this/should/not',
-        TYPE_EPIC,
-      );
-      expect(result).toBe('this/should/be/returned');
-    });
-  });
-});
-
-describe('`makeDrawerUrlParam`', () => {
-  it('returns iid, full_path, and id', () => {
-    const result = makeDrawerUrlParam(
-      { id: 'gid://gitlab/Issue/1', iid: '123', fullPath: 'gitlab-org/gitlab' },
-      'gitlab-org/gitlab',
-    );
-    expect(result).toEqual(
-      btoa(JSON.stringify({ iid: '123', full_path: 'gitlab-org/gitlab', id: 1 })),
-    );
+    expect(path).toBe('/groups/project/group/-/roadmap?epic_iid=2');
   });
 });

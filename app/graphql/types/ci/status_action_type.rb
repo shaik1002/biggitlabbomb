@@ -6,7 +6,7 @@ module Types
       graphql_name 'StatusAction'
 
       field :button_title, GraphQL::Types::String, null: true,
-        description: 'Title for the button, for example: Retry the job.'
+        description: 'Title for the button, for example: Retry this job.'
       field :confirmation_message, GraphQL::Types::String, null: true,
         description: 'Custom confirmation message for a manual job.',
         alpha: { milestone: '17.0' }

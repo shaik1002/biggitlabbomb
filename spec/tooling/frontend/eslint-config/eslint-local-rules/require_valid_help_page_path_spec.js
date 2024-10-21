@@ -31,7 +31,6 @@ const ruleTester = new RuleTester({
 
 ruleTester.run('require-valid-help-page-path', rule, {
   valid: [
-    `helpPagePath();`,
     `helpPagePath('${VALID_PATH}');`,
     `helpPagePath('${VALID_PATH_MD}');`,
     `helpPagePath('${VALID_PATH_HTML}');`,

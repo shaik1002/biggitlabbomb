@@ -2,7 +2,7 @@
 <script>
 import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import $ from 'jquery';
-import { debounce, isEqual, unescape } from 'lodash';
+import { debounce, unescape } from 'lodash';
 import { createAlert } from '~/alert';
 import GLForm from '~/gl_form';
 import SafeHtml from '~/vue_shared/directives/safe_html';
@@ -149,7 +149,6 @@ export default {
   },
   data() {
     return {
-      glForm: null,
       markdownPreview: '',
       referencedCommands: '',
       referencedUsers: [],
@@ -259,17 +258,11 @@ export default {
         }
       },
     },
-    autocompleteDataSources: {
-      immediate: true,
-      handler(newDataSources, oldDataSources) {
-        if (!isEqual(newDataSources, oldDataSources) && this.glForm) {
-          this.glForm.updateAutocompleteDataSources(newDataSources);
-        }
-      },
-    },
   },
   mounted() {
-    this.glForm = new GLForm(
+    // GLForm class handles all the toolbar buttons
+    // eslint-disable-next-line no-new
+    new GLForm(
       $(this.$refs['gl-form']),
       {
         emojis: this.enableAutocomplete,
@@ -290,8 +283,9 @@ export default {
     markdownEditorEventHub.$emit(MARKDOWN_EDITOR_READY_EVENT);
   },
   beforeDestroy() {
-    if (this.glForm) {
-      this.glForm.destroy();
+    const glForm = $(this.$refs['gl-form']).data('glForm');
+    if (glForm) {
+      glForm.destroy();
     }
   },
   methods: {
@@ -315,7 +309,6 @@ export default {
         this.renderMarkdown();
       }
     },
-
     hidePreview() {
       this.markdownPreview = '';
       this.previewMarkdown = false;
@@ -351,7 +344,7 @@ export default {
       }
 
       this.markdownPreviewLoading = false;
-      this.markdownPreview = data.body || data.html || __('Nothing to preview.');
+      this.markdownPreview = data.body || __('Nothing to preview.');
 
       this.$nextTick()
         .then(() => {
@@ -397,13 +390,12 @@ export default {
       <div class="zen-backdrop">
         <slot name="textarea"></slot>
         <a
-          v-gl-tooltip.placement.left
-          class="zen-control zen-control-leave js-zen-leave gl-button btn-default-tertiary btn-icon btn-sm"
+          class="zen-control zen-control-leave js-zen-leave gl-text-gray-500"
           href="#"
-          :title="__('Exit full screen')"
-          :aria-label="__('Exit full screen')"
-          ><gl-icon variant="subtle" :size="24" name="minimize"
-        /></a>
+          :aria-label="__('Leave zen mode')"
+        >
+          <gl-icon :size="16" name="minimize" />
+        </a>
         <markdown-toolbar
           :markdown-docs-path="markdownDocsPath"
           :can-attach-file="canAttachFile"

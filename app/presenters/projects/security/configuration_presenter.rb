@@ -11,11 +11,11 @@ module Projects
       def to_h
         {
           auto_devops_enabled: auto_devops_source?,
-          auto_devops_help_page_path: help_page_path('topics/autodevops/index.md'),
+          auto_devops_help_page_path: help_page_path('topics/autodevops/index'),
           auto_devops_path: auto_devops_settings_path(project),
           can_enable_auto_devops: can_enable_auto_devops?,
           features: features,
-          help_page_path: help_page_path('user/application_security/index.md'),
+          help_page_path: help_page_path('user/application_security/index'),
           latest_pipeline_path: latest_pipeline_path,
           gitlab_ci_present: project.has_ci_config_file?,
           gitlab_ci_history_path: gitlab_ci_history_path,
@@ -24,8 +24,7 @@ module Projects
           pre_receive_secret_detection_available:
             Gitlab::CurrentSettings.current_application_settings.pre_receive_secret_detection_enabled,
           pre_receive_secret_detection_enabled: pre_receive_secret_detection_enabled,
-          user_is_project_admin: user_is_project_admin?,
-          secret_detection_configuration_path: secret_detection_configuration_path
+          user_is_project_admin: user_is_project_admin?
         }
       end
 
@@ -74,7 +73,7 @@ module Projects
       end
 
       def latest_pipeline_path
-        return help_page_path('ci/pipelines/index.md') unless latest_default_branch_pipeline
+        return help_page_path('ci/pipelines/index') unless latest_default_branch_pipeline
 
         project_pipeline_path(self, latest_default_branch_pipeline)
       end
@@ -103,8 +102,10 @@ module Projects
       end
 
       def pre_receive_secret_detection_feature_flag_enabled?
-        project.licensed_feature_available?(:pre_receive_secret_detection) &&
-          Feature.enabled?(:pre_receive_secret_detection_push_check, project)
+        return false unless project.licensed_feature_available?(:pre_receive_secret_detection)
+
+        Feature.enabled?(:pre_receive_secret_detection_beta_release) && Feature.enabled?(
+          :pre_receive_secret_detection_push_check, project)
       end
 
       def project_settings
@@ -113,7 +114,6 @@ module Projects
 
       def container_scanning_for_registry_enabled; end
       def pre_receive_secret_detection_enabled; end
-      def secret_detection_configuration_path; end
     end
   end
 end

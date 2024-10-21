@@ -2,13 +2,13 @@
 
 FactoryBot.define do
   factory :award_emoji do
-    name { AwardEmoji::THUMBS_UP }
+    name { "thumbsup" }
     user
     awardable factory: :issue
 
     trait :upvote
     trait :downvote do
-      name { AwardEmoji::THUMBS_DOWN }
+      name { "thumbsdown" }
     end
   end
 end

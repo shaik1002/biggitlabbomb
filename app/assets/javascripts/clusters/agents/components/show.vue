@@ -32,7 +32,6 @@ export default {
   },
   connectModalId: CONNECT_MODAL_ID,
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     clusterAgent: {
       query: getClusterAgentQuery,
       variables() {
@@ -122,7 +121,7 @@ export default {
 
 <template>
   <section>
-    <header class="gl-flex gl-flex-wrap gl-items-center gl-justify-between">
+    <header class="gl-flex gl-flex-wrap gl-justify-between gl-items-center">
       <h1>{{ agentName }}</h1>
       <gl-button
         v-gl-modal-directive="$options.connectModalId"
@@ -153,13 +152,13 @@ export default {
 
       <integration-status
         :tokens="tokens"
-        class="gl-border-t-1 gl-border-t-gray-100 gl-py-5 gl-border-t-solid"
+        class="gl-py-5 gl-border-t-1 gl-border-t-solid gl-border-t-gray-100"
       />
 
       <gl-tabs
         sync-active-tab-with-query-params
         lazy
-        class="gl-border-t-1 gl-border-t-gray-100 gl-border-t-solid"
+        class="gl-border-t-1 gl-border-t-solid gl-border-t-gray-100"
       >
         <gl-tab :title="$options.i18n.activity" query-param-value="activity">
           <activity-events :agent-name="agentName" :project-path="projectPath" />
@@ -181,7 +180,7 @@ export default {
           <div v-else>
             <token-table :tokens="tokens" :cluster-agent-id="clusterAgent.id" :cursor="cursor" />
 
-            <div v-if="showPagination" class="gl-mt-5 gl-flex gl-justify-center">
+            <div v-if="showPagination" class="gl-display-flex gl-justify-content-center gl-mt-5">
               <gl-keyset-pagination v-bind="tokenPageInfo" @prev="prevPage" @next="nextPage" />
             </div>
           </div>

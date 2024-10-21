@@ -102,14 +102,6 @@ RSpec.shared_examples 'work items comments' do |type|
     expect(page).to have_field _('Add a reply'), with: ''
   end
 
-  it 'successfully posts comments using shortcut only once' do
-    expected_matches = find('ul.main-notes-list').all('li').size + 1
-    set_comment
-    send_keys([modifier_key, :enter], [modifier_key, :enter], [modifier_key, :enter])
-    wait_for_requests
-    expect(find('ul.main-notes-list')).to have_selector('li', count: expected_matches)
-  end
-
   context 'when using quick actions' do
     it 'autocompletes quick actions common to all work item types', :aggregate_failures do
       click_reply_and_enter_slash
@@ -208,26 +200,20 @@ RSpec.shared_examples 'work items assignees' do
 end
 
 RSpec.shared_examples 'work items labels' do
-  it 'shows a label with a link pointing to filtered work items list' do
-    within_testid('work-item-labels') do
-      expect(page).to have_link(label.title, href: "#{project_issues_path(project)}?label_name[]=#{label.title}")
-    end
-  end
-
   it 'adds and removes a label' do
     within_testid 'work-item-labels' do
-      expect(page).not_to have_css '.gl-label', text: label2.title
+      expect(page).not_to have_css '.gl-label', text: label.title
 
       click_button 'Edit'
-      select_listbox_item(label2.title)
+      select_listbox_item(label.title)
       click_button 'Apply'
 
-      expect(page).to have_css '.gl-label', text: label2.title
+      expect(page).to have_css '.gl-label', text: label.title
 
       click_button 'Edit'
       click_button 'Clear'
 
-      expect(page).not_to have_css '.gl-label', text: label2.title
+      expect(page).not_to have_css '.gl-label', text: label.title
     end
   end
 
@@ -235,21 +221,21 @@ RSpec.shared_examples 'work items labels' do
     using_session :other_session do
       visit work_items_path
 
-      expect(page).not_to have_css '.gl-label', text: label2.title
+      expect(page).not_to have_css '.gl-label', text: label.title
     end
 
     within_testid 'work-item-labels' do
       click_button 'Edit'
-      select_listbox_item(label2.title)
+      select_listbox_item(label.title)
       click_button 'Apply'
 
-      expect(page).to have_css '.gl-label', text: label2.title
+      expect(page).to have_css '.gl-label', text: label.title
     end
 
-    expect(page).to have_css '.gl-label', text: label2.title
+    expect(page).to have_css '.gl-label', text: label.title
 
     using_session :other_session do
-      expect(page).to have_css '.gl-label', text: label2.title
+      expect(page).to have_css '.gl-label', text: label.title
     end
   end
 
@@ -479,17 +465,17 @@ RSpec.shared_examples 'work items award emoji' do
     within(award_section_selector) do
       expect(page).to have_selector(selected_award_button_selector)
 
-      # As the user2 has already awarded the `:thumbs_up:` emoji, the emoji count will be 2
+      # As the user2 has already awarded the `:thumbsup:` emoji, the emoji count will be 2
       expect(first(award_button_selector)).to have_content '2'
     end
-    expect(page.find(tooltip_selector)).to have_content("John and you reacted with :#{AwardEmoji::THUMBS_UP}:")
+    expect(page.find(tooltip_selector)).to have_content("John and you reacted with :thumbsup:")
   end
 
   it 'removes award from work item for current user' do
     select_emoji
 
     page.within(award_section_selector) do
-      # As the user2 has already awarded the `:thumbs_up:` emoji, the emoji count will be 2
+      # As the user2 has already awarded the `:thumbsup:` emoji, the emoji count will be 2
       expect(first(award_button_selector)).to have_content '2'
     end
 
@@ -722,7 +708,7 @@ RSpec.shared_examples 'work items crm contacts' do
       wait_for_requests
 
       select_listbox_item(contact_name)
-      send_keys(:escape)
+      click_button 'Apply'
 
       expect(page).to have_css '.gl-link', text: contact_name
 
@@ -736,7 +722,6 @@ RSpec.shared_examples 'work items crm contacts' do
   it 'passes axe automated accessibility testing' do
     within_testid 'work-item-crm-contacts' do
       click_button _('Edit')
-      find('.gl-listbox-search-input').click
 
       wait_for_requests
 

@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { uploadModel } from '~/ml/model_registry/services/upload_model';
-import { HTTP_STATUS_OK } from '~/lib/utils/http_status';
 
 describe('uploadModel', () => {
   const importPath = 'some/path';
@@ -12,7 +11,7 @@ describe('uploadModel', () => {
   let axiosMock;
   beforeEach(() => {
     axiosMock = jest.spyOn(axios, 'put');
-    axiosMock.mockImplementation(() => Promise.resolve({ status: HTTP_STATUS_OK }));
+    axiosMock.mockImplementation(() => Promise.resolve({ status: 200 }));
   });
 
   afterEach(() => {
@@ -63,18 +62,5 @@ describe('uploadModel', () => {
     await uploadModel({ importPath, file, maxAllowedFileSize, onUploadProgress });
 
     expect(axiosMock).toHaveBeenCalledWith(baseFilePath, file, { onUploadProgress });
-  });
-
-  it('accepts cancellation token and passes over to axios', async () => {
-    const cancelToken = jest.fn();
-    await uploadModel({
-      importPath,
-      file,
-      maxAllowedFileSize,
-      onUploadProgress: undefined,
-      cancelToken,
-    });
-
-    expect(axiosMock).toHaveBeenCalledWith(baseFilePath, file, { undefined, cancelToken });
   });
 });

@@ -158,11 +158,13 @@ module API
       route_setting :authentication, job_token_allowed: true, deploy_token_allowed: true, basic_auth_personal_access_token: true
       get ':id/-/packages/maven/*path/:file_name', requirements: MAVEN_ENDPOINT_REQUIREMENTS do
         # return a similar failure to group = find_group(params[:id])
-        group = find_authorized_group!(action: :read_package_within_public_registries)
+        group = find_authorized_group!
 
         if Feature.disabled?(:maven_central_request_forwarding, group&.root_ancestor)
           not_found!('Group') unless path_exists?(params[:path])
         end
+
+        not_found!('Group') unless can?(current_user, :read_group, group)
 
         file_name, format = extract_format(params[:file_name])
         package = fetch_package(file_name: file_name, group: group)
@@ -266,8 +268,7 @@ module API
         # so we need to skip the second FIPS check here.
         file_name, format = extract_format(params[:file_name], skip_fips_check: true)
 
-        lb = ::ApplicationRecord.load_balancer
-        ::Gitlab::Database::LoadBalancing::SessionMap.current(lb).use_primary do
+        ::Gitlab::Database::LoadBalancing::Session.current.use_primary do
           result = ::Packages::Maven::FindOrCreatePackageService
                      .new(user_project, current_user, params.merge(build: current_authenticated_job)).execute
 

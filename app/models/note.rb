@@ -84,10 +84,6 @@ class Note < ApplicationRecord
   has_one :note_diff_file, inverse_of: :diff_note, foreign_key: :diff_note_id
   has_many :diff_note_positions
 
-  # rubocop:disable Cop/ActiveRecordDependent -- polymorphic association
-  has_many :events, as: :target, dependent: :delete_all
-  # rubocop:enable Cop/ActiveRecordDependent
-
   delegate :gfm_reference, :local_reference, to: :noteable
   delegate :name, to: :project, prefix: true
   delegate :title, to: :noteable, allow_nil: true
@@ -234,10 +230,6 @@ class Note < ApplicationRecord
       ActiveModel::Name.new(self, nil, 'note')
     end
 
-    def parent_object_field
-      :noteable
-    end
-
     # Group diff discussions by line code or file path.
     # It is not needed to group by line code when comment is
     # on an image.
@@ -359,10 +351,6 @@ class Note < ApplicationRecord
 
   def for_personal_snippet?
     noteable.is_a?(PersonalSnippet)
-  end
-
-  def for_wiki_page?
-    noteable_type == "WikiPage::Meta"
   end
 
   def for_project_noteable?
@@ -543,8 +531,7 @@ class Note < ApplicationRecord
   # touch the data so we can SELECT only the columns we need.
   def touch_noteable
     # Commits are not stored in the DB so we can't touch them.
-    # Vulnerabilities should not be touched as they are tracked in the same manner as other issuable types
-    return if for_vulnerability? || for_commit?
+    return if for_commit?
 
     assoc = association(:noteable)
 

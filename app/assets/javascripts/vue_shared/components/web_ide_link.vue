@@ -44,11 +44,6 @@ export default {
       required: false,
       default: false,
     },
-    needsToForkWithWebIde: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     gitpodEnabled: {
       type: Boolean,
       required: false,
@@ -202,7 +197,7 @@ export default {
     webIdeAction() {
       if (!this.showWebIdeButton) return null;
 
-      const handleOptions = this.needsToForkWithWebIde
+      const handleOptions = this.needsToFork
         ? {
             handle: () => {
               if (this.disableForkModal) {

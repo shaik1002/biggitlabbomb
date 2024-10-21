@@ -63,7 +63,8 @@ class Projects::DeployKeysController < Projects::ApplicationController
     redirect_to_repository
   end
 
-  def edit; end
+  def edit
+  end
 
   def update
     access_denied! unless deploy_key

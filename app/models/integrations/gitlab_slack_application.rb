@@ -34,8 +34,8 @@ module Integrations
       'gitlab_slack_application'
     end
 
-    override :manual_activation?
-    def manual_activation?
+    override :show_active_box?
+    def show_active_box?
       false
     end
 

@@ -3,7 +3,6 @@
 module API
   class Search < ::API::Base
     include PaginationParams
-    include APIGuard
 
     before do
       authenticate!
@@ -11,8 +10,6 @@ module API
       check_rate_limit!(:search_rate_limit, scope: [current_user],
         users_allowlist: Gitlab::CurrentSettings.current_application_settings.search_rate_limit_allowlist)
     end
-
-    allow_access_with_scope :ai_workflows, if: ->(request) { request.get? || request.head? }
 
     feature_category :global_search
     urgency :low
@@ -47,25 +44,24 @@ module API
 
       def search_service(additional_params = {})
         strong_memoize_with(:search_service, additional_params) do
-          SearchService.new(current_user, search_params.merge(additional_params))
-        end
-      end
+          search_params = {
+            scope: params[:scope],
+            search: params[:search],
+            state: params[:state],
+            confidential: params[:confidential],
+            snippets: snippets?,
+            basic_search: params[:basic_search],
+            num_context_lines: params[:num_context_lines],
+            search_type: params[:search_type],
+            page: params[:page],
+            per_page: params[:per_page],
+            order_by: params[:order_by],
+            sort: params[:sort],
+            source: 'api'
+          }.merge(additional_params)
 
-      def search_params
-        {
-          scope: params[:scope],
-          search: params[:search],
-          state: params[:state],
-          confidential: params[:confidential],
-          snippets: snippets?,
-          num_context_lines: params[:num_context_lines],
-          search_type: params[:search_type],
-          page: params[:page],
-          per_page: params[:per_page],
-          order_by: params[:order_by],
-          sort: params[:sort],
-          source: 'api'
-        }
+          SearchService.new(current_user, search_params)
+        end
       end
 
       def search(additional_params = {})
@@ -156,15 +152,7 @@ module API
           header[key] = value
         end
       end
-
-      params :search_params_ee do
-        # Overriden in EE
-      end
     end
-
-    # rubocop: disable Cop/InjectEnterpriseEditionModule -- params helper needs to be included before the endpoints
-    ::API::Search.prepend_mod_with('API::Search')
-    # rubocop: enable Cop/InjectEnterpriseEditionModule
 
     resource :search do
       desc 'Search on GitLab' do
@@ -178,7 +166,6 @@ module API
           values: Helpers::SearchHelpers.global_search_scopes
         optional :state, type: String, desc: 'Filter results by state', values: Helpers::SearchHelpers.search_states
         optional :confidential, type: Boolean, desc: 'Filter results by confidentiality'
-        use :search_params_ee
         use :pagination
       end
       get do
@@ -203,7 +190,6 @@ module API
           values: Helpers::SearchHelpers.group_search_scopes
         optional :state, type: String, desc: 'Filter results by state', values: Helpers::SearchHelpers.search_states
         optional :confidential, type: Boolean, desc: 'Filter results by confidentiality'
-        use :search_params_ee
         use :pagination
       end
       get ':id/(-/)search' do
@@ -230,7 +216,6 @@ module API
           desc: 'The name of a repository branch or tag. If not given, the default branch is used'
         optional :state, type: String, desc: 'Filter results by state', values: Helpers::SearchHelpers.search_states
         optional :confidential, type: Boolean, desc: 'Filter results by confidentiality'
-        use :search_params_ee
         use :pagination
       end
       get ':id/(-/)search' do
@@ -242,3 +227,5 @@ module API
     end
   end
 end
+
+API::Search.prepend_mod_with('API::Search')

@@ -166,7 +166,7 @@ describe('vue_shared/components/web_ide_link', () => {
       expectedActions: [ACTION_WEB_IDE_EDIT_FORK, ACTION_EDIT],
     },
     {
-      props: { needsToFork: true, needsToForkWithWebIde: true },
+      props: { needsToFork: true },
       expectedActions: [ACTION_WEB_IDE_CONFIRM_FORK, ACTION_EDIT_CONFIRM_FORK],
     },
     {
@@ -321,12 +321,7 @@ describe('vue_shared/components/web_ide_link', () => {
     it.each(testActions)(
       'emits the correct event when an action handler is called',
       ({ props, expectedEventPayload }) => {
-        createComponent({
-          ...props,
-          needsToFork: true,
-          needsToForkWithWebIde: true,
-          disableForkModal: true,
-        });
+        createComponent({ ...props, needsToFork: true, disableForkModal: true });
 
         findDisclosureDropdownItems().at(0).props().item.handle();
 
@@ -335,7 +330,7 @@ describe('vue_shared/components/web_ide_link', () => {
     );
 
     it.each(testActions)('renders the fork confirmation modal', ({ props }) => {
-      createComponent({ ...props, needsToFork: true, needsToForkWithWebIde: true });
+      createComponent({ ...props, needsToFork: true });
 
       expect(findForkConfirmModal().exists()).toBe(true);
       expect(findForkConfirmModal().props()).toEqual({
@@ -346,10 +341,7 @@ describe('vue_shared/components/web_ide_link', () => {
     });
 
     it.each(testActions)('opens the modal when the button is clicked', async ({ props }) => {
-      createComponent(
-        { ...props, needsToFork: true, needsToForkWithWebIde: true },
-        { mountFn: mountExtended },
-      );
+      createComponent({ ...props, needsToFork: true }, { mountFn: mountExtended });
 
       findDisclosureDropdownItems().at(0).props().item.handle();
 

@@ -16,9 +16,6 @@ When this option is enabled, new and existing users must accept the terms.
 When enabled, you can view the Terms of Service at the `-/users/terms` page on the instance,
 for example `https://gitlab.example.com/-/users/terms`.
 
-The link `Terms and privacy` will become visible in the help menu if any
-terms are defined.
-
 ## Enforce a Terms of Service and Privacy Policy
 
 To enforce acceptance of a Terms of Service and Privacy Policy:
@@ -39,7 +36,7 @@ If an authenticated user declines the terms, they are signed out.
 
 When enabled, it adds a mandatory checkbox to the sign up page for new users:
 
-![Sign up form](img/sign_up_terms_v11_0.png)
+![Sign up form](img/sign_up_terms.png)
 
 <!-- ## Troubleshooting
 

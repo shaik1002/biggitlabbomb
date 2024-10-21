@@ -13,12 +13,18 @@ class QueueDeduplicateLfsObjectsProjects < Gitlab::Database::Migration[2.2]
 
   restrict_gitlab_migration gitlab_schema: :gitlab_main
 
-  # To be re-enqueued by db/post_migrate/20240827204855_reenqueue_deduplicate_lfs_objects_projects.rb
   def up
-    # no-op
+    queue_batched_background_migration(
+      MIGRATION,
+      :lfs_objects_projects,
+      :id,
+      job_interval: DELAY_INTERVAL,
+      batch_size: BATCH_SIZE,
+      sub_batch_size: SUB_BATCH_SIZE
+    )
   end
 
   def down
-    # no-op
+    delete_batched_background_migration(MIGRATION, :lfs_objects_projects, :id, [])
   end
 end

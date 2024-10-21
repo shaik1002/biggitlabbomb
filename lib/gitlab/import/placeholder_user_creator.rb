@@ -3,19 +3,12 @@
 module Gitlab
   module Import
     class PlaceholderUserCreator
-      LAMBDA_FOR_UNIQUE_USERNAME = ->(username) { User.username_exists?(username) }.freeze
-      LAMBDA_FOR_UNIQUE_EMAIL = ->(email) { User.find_by_email(email) || ::Email.find_by_email(email) }.freeze
-
-      delegate :import_type, :namespace, :source_user_identifier, :source_name, :source_username, to: :source_user,
-        private: true
-
-      def self.placeholder_email_pattern
-        import_type_matcher = ::Import::HasImportSource::IMPORT_SOURCES.except(:none).keys.join('|')
-        ::Gitlab::UntrustedRegexp.new("(#{import_type_matcher})(_[0-9A-Fa-f]+_[0-9]+@#{Settings.gitlab.host})")
-      end
-
-      def initialize(source_user)
-        @source_user = source_user
+      def initialize(import_type:, source_hostname:, source_name:, source_username:, organization:)
+        @import_type = import_type
+        @source_hostname = source_hostname
+        @source_name = source_name
+        @source_username = source_username
+        @organization = organization
       end
 
       def execute
@@ -26,12 +19,15 @@ module Gitlab
           email: placeholder_email
         )
 
-        user.skip_confirmation_notification!
-        user.assign_personal_namespace(namespace.organization)
+        user.assign_personal_namespace(organization)
         user.save!
 
         user
       end
+
+      private
+
+      attr_reader :import_type, :source_hostname, :source_name, :source_username, :organization
 
       def placeholder_name
         # Some APIs don't expose users' names, so set a default if it's nil
@@ -42,37 +38,28 @@ module Gitlab
 
       def placeholder_username
         # Some APIs don't expose users' usernames, so set a default if it's nil
-        username_pattern = "#{valid_username_segment}_placeholder_user_%s"
-
-        uniquify_string(username_pattern, LAMBDA_FOR_UNIQUE_USERNAME)
+        username_pattern = "#{valid_source_username}_placeholder_user_%s"
+        lambda_for_unique_username = ->(username) { User.username_exists?(username) }
+        uniquify_string(username_pattern, lambda_for_unique_username)
       end
-
-      private
-
-      attr_reader :source_user
 
       def placeholder_email
-        email_pattern = "#{fallback_username_segment}_%s@#{Settings.gitlab.host}"
-
-        uniquify_string(email_pattern, LAMBDA_FOR_UNIQUE_EMAIL)
+        email_pattern = "#{valid_source_username}_placeholder_user_%s@#{Settings.gitlab.host}"
+        lambda_for_unique_email = ->(email) { User.find_by_email(email) || ::Email.find_by_email(email) }
+        uniquify_string(email_pattern, lambda_for_unique_email)
       end
 
-      def valid_username_segment
-        return fallback_username_segment unless source_username
+      def valid_source_username
+        return fallback_username unless source_username
 
         sanitized_source_username = source_username.gsub(/[^A-Za-z0-9]/, '')
-        return fallback_username_segment if sanitized_source_username.empty?
+        return fallback_username if sanitized_source_username.empty?
 
         sanitized_source_username.slice(0, User::MAX_USERNAME_LENGTH - 55)
       end
 
-      # Returns a string based on the import type, and digest of namespace path and source user identifier.
-      # Example: "gitlab_migration_64c4f07e"
-      def fallback_username_segment
-        @fallback_username_segment ||= [
-          import_type,
-          Zlib.crc32([namespace.path, source_user_identifier].join).to_s(16)
-        ].join('_')
+      def fallback_username
+        "#{import_type}_source_username"
       end
 
       def uniquify_string(base_pattern, lambda_for_uniqueness)

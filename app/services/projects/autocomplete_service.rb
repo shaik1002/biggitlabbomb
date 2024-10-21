@@ -5,14 +5,9 @@ module Projects
     include LabelsAsHash
     include Routing::WikiHelper
 
-    SEARCH_LIMIT = 5
-
     def issues
-      relation = IssuesFinder.new(current_user, project_id: project.id, state: 'opened').execute
-
-      relation = relation.gfm_autocomplete_search(params[:search]).limit(SEARCH_LIMIT) if params[:search]
-
-      relation
+      IssuesFinder.new(current_user, project_id: project.id, state: 'opened')
+        .execute
         .with_work_item_type
         .select([:iid, :title, 'work_item_types.icon_name'])
     end

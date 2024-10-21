@@ -1,5 +1,5 @@
 ---
-# Error: gitlab_base.CommandStringsQuoted
+# Error: gitlab.CommandStringsQuoted
 #
 # Ensures all code blocks wrap URL strings in quotation marks.
 #

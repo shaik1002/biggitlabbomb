@@ -8,7 +8,7 @@ import {
   GlBadge,
   GlLink,
 } from '@gitlab/ui';
-import { localeDateFormat, newDate } from '~/lib/utils/datetime_utility';
+import { localeDateFormat } from '~/lib/utils/datetime_utility';
 import { numberToHumanSize } from '~/lib/utils/number_utils';
 import { n__ } from '~/locale';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
@@ -21,7 +21,6 @@ import {
   CREATED_AT_LABEL,
   PUBLISHED_DETAILS_ROW_TEXT,
   MANIFEST_DETAILS_ROW_TEST,
-  MANIFEST_MEDIA_TYPE_ROW_TEXT,
   CONFIGURATION_DETAILS_ROW_TEST,
   MISSING_MANIFEST_WARNING_TOOLTIP,
   NOT_AVAILABLE_TEXT,
@@ -31,6 +30,8 @@ import {
   SIGNATURE_BADGE_TOOLTIP,
   DOCKER_MEDIA_TYPE,
   OCI_MEDIA_TYPE,
+  DOCKER_MANIFEST_LIST_TOOLTIP,
+  OCI_INDEX_TOOLTIP,
 } from '../../constants/index';
 import SignatureDetailsModal from './signature_details_modal.vue';
 
@@ -78,12 +79,13 @@ export default {
     CREATED_AT_LABEL,
     PUBLISHED_DETAILS_ROW_TEXT,
     MANIFEST_DETAILS_ROW_TEST,
-    MANIFEST_MEDIA_TYPE_ROW_TEXT,
     CONFIGURATION_DETAILS_ROW_TEST,
     MISSING_MANIFEST_WARNING_TOOLTIP,
     MORE_ACTIONS_TEXT,
     COPY_IMAGE_PATH_TITLE,
     SIGNATURE_BADGE_TOOLTIP,
+    DOCKER_MANIFEST_LIST_TOOLTIP,
+    OCI_INDEX_TOOLTIP,
   },
   data() {
     return {
@@ -96,7 +98,7 @@ export default {
         {
           text: this.$options.i18n.REMOVE_TAG_BUTTON_TITLE,
           extraAttrs: {
-            class: '!gl-text-red-500',
+            class: 'gl-text-red-500!',
             'data-testid': 'single-delete-button',
           },
           action: () => {
@@ -114,7 +116,7 @@ export default {
       return this.tag.layers ? n__('%d layer', '%d layers', this.tag.layers) : '';
     },
     mobileClasses() {
-      return this.isMobile ? 'gl-max-w-20' : '';
+      return this.isMobile ? 'mw-s' : '';
     },
     shortDigest() {
       // remove sha256: from the string, and show only the first 7 char
@@ -124,7 +126,7 @@ export default {
       return this.tag.publishedAt || this.tag.createdAt;
     },
     publishedDateTime() {
-      return localeDateFormat.asDateTimeFull.format(newDate(this.publishDateTime));
+      return localeDateFormat.asDateTimeFull.format(this.publishDateTime);
     },
     formattedRevision() {
       // to be removed when API response is adjusted
@@ -144,9 +146,6 @@ export default {
     showConfigDigest() {
       return !this.isInvalidTag && !this.isEmptyRevision;
     },
-    showManifestMediaType() {
-      return !this.isInvalidTag && this.tag.mediaType;
-    },
     signatures() {
       const referrers = this.tag.referrers || [];
       // All referrers should be signatures, but we'll filter by signature artifact types as a sanity check.
@@ -154,8 +153,13 @@ export default {
         ({ artifactType }) => artifactType === 'application/vnd.dev.cosign.artifact.sig.v1+json',
       );
     },
-    isDockerOrOciMediaType() {
+    shouldDisplayLabelsIcon() {
       return this.tag.mediaType === DOCKER_MEDIA_TYPE || this.tag.mediaType === OCI_MEDIA_TYPE;
+    },
+    labelsIconTooltipText() {
+      return this.tag.mediaType === DOCKER_MEDIA_TYPE
+        ? this.$options.i18n.DOCKER_MANIFEST_LIST_TOOLTIP
+        : this.$options.i18n.OCI_INDEX_TOOLTIP;
     },
   },
 };
@@ -173,11 +177,11 @@ export default {
       />
     </template>
     <template #left-primary>
-      <div class="gl-flex gl-items-center">
+      <div class="gl-display-flex gl-align-items-center">
         <div
           v-gl-tooltip="tag.name"
           data-testid="name"
-          class="gl-overflow-hidden gl-text-ellipsis gl-whitespace-nowrap"
+          class="gl-text-overflow-ellipsis gl-overflow-hidden gl-whitespace-nowrap"
           :class="mobileClasses"
         >
           {{ tag.name }}
@@ -197,7 +201,15 @@ export default {
           v-if="isInvalidTag"
           v-gl-tooltip.d0="$options.i18n.MISSING_MANIFEST_WARNING_TOOLTIP"
           name="warning"
-          class="gl-mr-2 gl-text-orange-500"
+          class="gl-text-orange-500 gl-mr-2"
+        />
+
+        <gl-icon
+          v-if="shouldDisplayLabelsIcon"
+          v-gl-tooltip.d0="labelsIconTooltipText"
+          name="labels"
+          class="gl-mr-2"
+          data-testid="labels-icon"
         />
       </div>
     </template>
@@ -209,11 +221,7 @@ export default {
     </template>
 
     <template #left-secondary>
-      <gl-badge v-if="isDockerOrOciMediaType" data-testid="index-badge">
-        {{ s__('ContainerRegistry|index') }}
-      </gl-badge>
-
-      <span v-else data-testid="size">
+      <span data-testid="size">
         {{ formattedSize }}
         <template v-if="formattedSize && layers">&middot;</template>
         {{ layers }}
@@ -244,7 +252,7 @@ export default {
         category="tertiary"
         no-caret
         placement="bottom-end"
-        :class="{ 'gl-pointer-events-none gl-opacity-0': disabled }"
+        :class="{ 'gl-opacity-0 gl-pointer-events-none': disabled }"
         data-testid="additional-actions"
         :items="items"
       />
@@ -279,15 +287,6 @@ export default {
         />
       </details-row>
     </template>
-    <template v-if="showManifestMediaType" #details-manifest-media-type>
-      <details-row icon="media" data-testid="manifest-media-type">
-        <gl-sprintf :message="$options.i18n.MANIFEST_MEDIA_TYPE_ROW_TEXT">
-          <template #mediaType>
-            {{ tag.mediaType }}
-          </template>
-        </gl-sprintf>
-      </details-row>
-    </template>
     <template v-if="showConfigDigest" #details-configuration-digest>
       <details-row icon="cloud-gear" data-testid="configuration-detail">
         <gl-sprintf :message="$options.i18n.CONFIGURATION_DETAILS_ROW_TEST">
@@ -313,8 +312,8 @@ export default {
         icon="pencil"
         data-testid="signatures-detail"
       >
-        <div class="gl-flex">
-          <span class="gl-mr-3 gl-grow gl-basis-0 gl-truncate">
+        <div class="gl-display-flex">
+          <span class="gl-text-truncate gl-mr-3 gl-flex-basis-0 gl-flex-grow-1">
             <gl-sprintf :message="s__('ContainerRegistry|Signature digest: %{digest}')">
               <template #digest>{{ digest }}</template>
             </gl-sprintf>

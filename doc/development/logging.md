@@ -1,6 +1,6 @@
 ---
 stage: Monitor
-group: Platform Insights
+group: Respond
 info: Any user with at least the Maintainer role can merge updates to this content. For details, see https://docs.gitlab.com/ee/development/development_processes.html#development-guidelines-review.
 ---
 
@@ -41,7 +41,7 @@ These logs suffer from a number of problems:
    forwarders, such as Logstash or Fluentd. This also makes them hard to
    search.
 
-Currently on GitLab.com, any messages in `production.log` aren't
+Note that currently on GitLab.com, any messages in `production.log` aren't
 indexed by Elasticsearch due to the sheer volume and noise. They
 do end up in Google Stackdriver, but it is still harder to search for
 logs there. See the [GitLab.com logging documentation](https://gitlab.com/gitlab-com/runbooks/-/tree/master/docs/logging)
@@ -87,7 +87,7 @@ importer progresses. Here's what to do:
       end
       ```
 
-      By default, `Gitlab::JsonLogger` will include application context metadata in the log entry. If your
+      Note that by default, `Gitlab::JsonLogger` will include application context metadata in the log entry. If your
       logger is expected to be called outside of an application request (for example, in a `rake` task) or by low-level
       code that may be involved in building the application context (for example, database connection code), you should
       call the class method `exclude_context!` for your logger class, like so:
@@ -119,8 +119,8 @@ importer progresses. Here's what to do:
       end
       ```
 
-      It is useful to memoize the logger because creating a new logger
-      each time you log opens a file adds unnecessary overhead.
+      Note that it's useful to memoize this because creating a new logger
+      each time you log opens a file, adding unnecessary overhead.
 
 1. Now insert log messages into your code. When adding logs,
    make sure to include all the context as key-value pairs:

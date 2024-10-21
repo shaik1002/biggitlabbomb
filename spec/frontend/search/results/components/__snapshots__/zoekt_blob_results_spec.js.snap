@@ -11,13 +11,12 @@ exports[`ZoektBlobResults when component loads normally renders component proper
       class="file-holder file-result-holder gl-card gl-my-5"
     >
       <div
-        class="file-title gl-card-header"
+        class="file-title gl-card-header gl-new-card-header"
       >
         <blob-header-stub
           filepath="test/test-main.js"
           fileurl="http://127.0.0.1:3000/flightjs/Flight/-/blob/master/test/test-main.js"
           projectpath="flightjs/Flight"
-          systemcolorscheme="gl-light"
         />
       </div>
       <div
@@ -25,8 +24,6 @@ exports[`ZoektBlobResults when component loads normally renders component proper
       >
         <blob-body-stub
           file="[object Object]"
-          position="1"
-          systemcolorscheme="gl-light"
         />
       </div>
     </div>
@@ -34,13 +31,12 @@ exports[`ZoektBlobResults when component loads normally renders component proper
       class="file-holder file-result-holder gl-card gl-my-5"
     >
       <div
-        class="file-title gl-card-header"
+        class="file-title gl-card-header gl-new-card-header"
       >
         <blob-header-stub
           filepath="test/spec/fn_spec.js"
           fileurl="http://127.0.0.1:3000/flightjs/Flight/-/blob/master/test/spec/fn_spec.js"
           projectpath="flightjs/Flight"
-          systemcolorscheme="gl-light"
         />
       </div>
       <div
@@ -48,16 +44,13 @@ exports[`ZoektBlobResults when component loads normally renders component proper
       >
         <blob-body-stub
           file="[object Object]"
-          position="2"
-          systemcolorscheme="gl-light"
         />
       </div>
       <div
-        class="gl-card-footer"
+        class="gl-card-footer gl-new-card-footer"
       >
         <blob-footer-stub
           file="[object Object]"
-          position="2"
         />
       </div>
     </div>
@@ -65,14 +58,12 @@ exports[`ZoektBlobResults when component loads normally renders component proper
       class="file-holder file-result-holder gl-card gl-my-5"
     >
       <div
-        class="!gl-border-b-0 file-title gl-card-header"
+        class="file-title gl-border-b-0! gl-card-header gl-new-card-header"
       >
         <blob-header-stub
           filepath="test/spec/test_utils_spec.js"
           fileurl="http://127.0.0.1:3000/flightjs/Flight/-/blob/master/test/spec/utils_spec.js"
-          isheaderonly="true"
           projectpath="flightjs/Flight"
-          systemcolorscheme="gl-light"
         />
       </div>
       <div
@@ -86,7 +77,6 @@ exports[`ZoektBlobResults when component loads normally renders component proper
     ellipsistext="…"
     labelfirstpage="Go to first page"
     labellastpage="Go to last page"
-    labelnav="Pagination"
     labelnextpage="Go to next page"
     labelpage="Go to page %{page}"
     labelprevpage="Go to previous page"

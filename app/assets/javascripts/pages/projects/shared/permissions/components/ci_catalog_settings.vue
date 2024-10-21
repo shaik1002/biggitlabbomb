@@ -152,7 +152,7 @@ export default {
   <div>
     <gl-loading-icon v-if="isLoading" />
     <div v-else data-testid="ci-catalog-settings">
-      <div class="gl-flex">
+      <div class="gl-display-flex">
         <label class="gl-mb-1 gl-mr-3">
           {{ $options.i18n.ciCatalogLabel }}
         </label>

@@ -58,7 +58,6 @@ describe('GroupsListItem', () => {
     expect(avatarLabeled.attributes()).toMatchObject({
       'entity-id': group.id.toString(),
       'entity-name': group.fullName,
-      src: group.avatarUrl,
       shape: 'rect',
     });
   });

@@ -28,9 +28,6 @@ which removes old data automatically with zero downtime.
 This database works in conjunction with the object storage already used by the registry, but does not replace object storage.
 You must continue to maintain an object storage solution even after migrating to a metadata database.
 
-For Helm Charts installations, see [Manage the container registry metadata database](https://docs.gitlab.com/charts/charts/registry/metadata_database.html#create-the-database)
-in the Helm Charts documentation.
-
 ## Known Limitations
 
 - No support for online migrations.
@@ -422,7 +419,7 @@ pay special attention to logs filtered by `component=registry.gc.*`.
 Use monitoring tools like Prometheus and Grafana to visualize and track garbage collection metrics,
 focusing on metrics with a prefix of `registry_gc_*`. These include the number of objects
 marked for deletion, objects successfully deleted, run intervals, and durations.
-See [enable the registry debug server](container_registry_troubleshooting.md#enable-the-registry-debug-server)
+See [enable the registry debug server](container_registry.md#enable-the-registry-debug-server)
 for how to enable Prometheus.
 
 ### Queue monitoring
@@ -506,7 +503,7 @@ you must restore to a backup of the desired version in order to downgrade.
 
 ## Troubleshooting
 
-### Error: `there are pending database migrations`
+### `there are pending database migrations` error
 
 If the registry has been updated and there are pending schema migrations,
 the registry fails to start with the following error message:
@@ -517,7 +514,7 @@ FATA[0000] configuring application: there are pending database migrations, use t
 
 To fix this issue, follow the steps to [apply schema migrations](#apply-schema-migrations).
 
-### Error: `offline garbage collection is no longer possible`
+### `offline garbage collection is no longer possible` error
 
 If the registry uses the metadata database and you try to run
 [offline garbage collection](container_registry.md#container-registry-garbage-collection),
@@ -626,45 +623,3 @@ You must truncate the table manually on your PostgreSQL instance:
    ```
 
 1. After truncating the `tags` table, try running the migration process again.
-
-### Error: `database-in-use lockfile exists`
-
-If you try to [migrate existing registries](#existing-registries) and encounter the following error:
-
-```shell
-|  [0s] step two: import tags failed to import metadata: importing all repositories: 1 error occurred:
-    * could not restore lockfiles: database-in-use lockfile exists
-```
-
-This error means that you have previously imported the registry and completed importing all
-repository data (step two) and the `database-in-use` exists in the registry file system.
-You should not run the importer again if you encounter this issue.
-
-If you must proceed, you must delete the `database-in-use` lock file manually from the file system.
-The file is located at `/path/to/rootdirectory/docker/registry/lockfiles/database-in-use`.
-
-### Registry fails to start due to metadata management issues
-
-The registry could fail to start with of the following errors:
-
-#### Error: `registry filesystem metadata in use, please import data before enabling the database`
-
-This error happens when the database is enabled in your configuration `registry['database'] = { 'enabled' => true}`
-but you have not [migrated existing data](#existing-registries) to the metadata database yet.
-
-#### Error: `registry metadata database in use, please enable the database`
-
-This error happens when you have completed [migrating existing data](#existing-registries) to the metadata database, 
-but you have not enabled the database in your configuration.
-
-#### Problems checking or creating the lock files
-
-If you encounter any of the following errors:
-
-- `could not check if filesystem metadata is locked`
-- `could not check if database metadata is locked`
-- `failed to mark filesystem for database only usage`
-- `failed to mark filesystem only usage`
-
-The registry cannot access the configured `rootdirectory`. This error is unlikely to happen if you
-had a working registry previously. Review the error logs for any misconfiguration issues.

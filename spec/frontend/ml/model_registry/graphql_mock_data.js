@@ -107,7 +107,6 @@ export const modelVersionWithCandidate = {
   version: '1.0.4999',
   packageId: 'gid://gitlab/Packages::Package/12',
   description: 'A model version description',
-  descriptionHtml: 'A model version description',
   candidate,
   _links: {
     showPath: '/root/test-project/-/ml/models/1/versions/5000',
@@ -212,54 +211,6 @@ export const createModelResponses = {
   },
 };
 
-export const editModelResponses = {
-  success: {
-    data: {
-      mlModelEdit: {
-        model: {
-          id: 'gid://gitlab/Ml::Model/1',
-          _links: {
-            showPath: '/some/project/-/ml/models/1',
-          },
-        },
-        errors: [],
-      },
-    },
-  },
-  validationFailure: {
-    data: {
-      mlModelEdit: {
-        model: null,
-        errors: ['Unable to update model'],
-      },
-    },
-  },
-};
-
-export const editModelVersionResponses = {
-  success: {
-    data: {
-      mlModelVersionEdit: {
-        modelVersion: {
-          id: 'gid://gitlab/Ml::ModelVersion/1',
-          _links: {
-            showPath: '/some/project/-/ml/models/1',
-          },
-        },
-        errors: [],
-      },
-    },
-  },
-  validationFailure: {
-    data: {
-      mlModelVersionEdit: {
-        modelVersion: null,
-        errors: ['Unable to update model version'],
-      },
-    },
-  },
-};
-
 export const destroyModelResponses = {
   success: {
     data: {
@@ -336,11 +287,6 @@ export const modelDetailQuery = {
   data: {
     mlModel: model,
   },
-};
-
-export const modelWithVersion = {
-  ...model,
-  version: modelVersionWithCandidate,
 };
 
 export const modelsQuery = (

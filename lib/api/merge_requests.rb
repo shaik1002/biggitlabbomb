@@ -2,17 +2,12 @@
 
 module API
   class MergeRequests < ::API::Base
-    include APIGuard
     include PaginationParams
     include Helpers::Unidiff
 
     CONTEXT_COMMITS_POST_LIMIT = 20
 
     before { authenticate_non_get! }
-
-    allow_access_with_scope :ai_workflows, if: ->(request) do
-      request.get? || request.head? || request.put?
-    end
 
     rescue_from ActiveRecord::QueryCanceled do |_e|
       render_api_error!({ error: 'Request timed out' }, 408)
@@ -92,35 +87,14 @@ module API
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
-      def render_merge_requests(merge_requests, options, skip_cache: false)
-        return present merge_requests, options if skip_cache
-
-        cache_context = ->(mr) do
-          [
-            current_user&.cache_key,
-            mr.merge_status,
-            mr.labels.map(&:cache_key),
-            mr.merge_request_assignees.map(&:cache_key),
-            mr.merge_request_reviewers.map(&:cache_key)
-          ].join(":")
-        end
-
-        present_cached merge_requests,
-          expires_in: 8.hours,
-          cache_context: cache_context,
-          **options
-      end
-
       def merge_request_pipelines_with_access
         mr = find_merge_request_with_access(params[:merge_request_iid])
         ::Ci::PipelinesForMergeRequestFinder.new(mr, current_user).execute
       end
 
       def automatically_mergeable?(merge_when_pipeline_succeeds, merge_request)
-        available_strategies = AutoMergeService.new(merge_request.project,
-          current_user).available_strategies(merge_request)
-
-        merge_when_pipeline_succeeds && available_strategies.include?(merge_request.default_auto_merge_strategy)
+        pipeline_active = merge_request.head_pipeline_active? || merge_request.diff_head_pipeline_active?
+        merge_when_pipeline_succeeds && merge_request.mergeable_state?(skip_ci_check: true) && pipeline_active
       end
 
       def immediately_mergeable?(merge_when_pipeline_succeeds, merge_request)
@@ -245,7 +219,6 @@ module API
     params do
       requires :id, types: [String, Integer], desc: 'The ID or URL-encoded path of the project.'
     end
-
     resource :projects, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
       include TimeTrackingEndpoints
 
@@ -316,11 +289,18 @@ module API
 
         recheck_mergeability_of(merge_requests: merge_requests) unless options[:skip_merge_status_recheck]
 
-        skip_cache = [
-          declared_params[:with_labels_details] == true
-        ].any?
-
-        render_merge_requests(merge_requests, options, skip_cache: skip_cache)
+        present_cached merge_requests,
+          expires_in: 8.hours,
+          cache_context: ->(mr) do
+            [
+              current_user&.cache_key,
+              mr.merge_status,
+              mr.labels.map(&:cache_key),
+              mr.merge_request_assignees.map(&:cache_key),
+              mr.merge_request_reviewers.map(&:cache_key)
+            ].join(":")
+          end,
+          **options
       end
 
       desc 'Create merge request' do
@@ -723,7 +703,7 @@ module API
 
         not_allowed! if !immediately_mergeable && !automatically_mergeable
 
-        render_api_error!('Branch cannot be merged', 422) unless automatically_mergeable || merge_request.mergeable?(skip_ci_check: automatically_mergeable)
+        render_api_error!('Branch cannot be merged', 422) unless merge_request.mergeable?(skip_ci_check: automatically_mergeable)
 
         check_sha_param!(params, merge_request)
 

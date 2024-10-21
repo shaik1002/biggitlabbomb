@@ -78,7 +78,7 @@ module InternalEventsMatchHelpers
 
   def check_if_events_exist!(event_names)
     event_names.each do |event_name|
-      next if Gitlab::Tracking::EventDefinition.internal_event_exists?(event_name)
+      next if Gitlab::InternalEvents::EventDefinitions.known_event?(event_name)
 
       raise ArgumentError, "Unknown event '#{event_name}'! #{name} matcher accepts only existing events"
     end
@@ -220,8 +220,7 @@ RSpec::Matchers.define :trigger_internal_events do |*event_names|
           user_id: id_for(:user),
           project_id: id_for(:project),
           namespace_id: id_for(:namespace),
-          feature_enabled_by_namespace_ids: @properties[:feature_enabled_by_namespace_ids],
-          **{ extra: @additional_properties.except(:label, :property, :value) || {} }
+          feature_enabled_by_namespace_ids: @properties[:feature_enabled_by_namespace_ids]
         )
       )
     )

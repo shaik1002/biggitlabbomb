@@ -46,7 +46,6 @@ export const initPipelinesIndex = (selector = '#pipelines-list-vue') => {
     showJenkinsCiPrompt,
     identityVerificationPath,
     identityVerificationRequired,
-    pipelinesAnalyticsPath,
   } = el.dataset;
 
   return new Vue({
@@ -63,6 +62,7 @@ export const initPipelinesIndex = (selector = '#pipelines-list-vue') => {
       identityVerificationRequired: parseBoolean(identityVerificationRequired),
       suggestedCiTemplates: JSON.parse(suggestedCiTemplates),
       showJenkinsCiPrompt: parseBoolean(showJenkinsCiPrompt),
+      targetProjectFullPath: fullPath,
     },
     data() {
       return {
@@ -88,7 +88,6 @@ export const initPipelinesIndex = (selector = '#pipelines-list-vue') => {
           projectId,
           resetCachePath,
           store: this.store,
-          pipelinesAnalyticsPath,
         },
       });
     },

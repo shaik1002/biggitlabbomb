@@ -2,14 +2,10 @@ import { select } from 'd3-selection';
 import $ from 'jquery';
 import { last } from 'lodash';
 import { createAlert } from '~/alert';
+import dateFormat from '~/lib/dateformat';
 import axios from '~/lib/utils/axios_utils';
-import {
-  getDayName,
-  getDayDifference,
-  localeDateFormat,
-  toISODateFormat,
-  newDate,
-} from '~/lib/utils/datetime_utility';
+import { getDayName, getDayDifference } from '~/lib/utils/datetime_utility';
+import { localeDateFormat } from '~/lib/utils/datetime/locale_dateformat';
 import { n__, s__, __ } from '~/locale';
 import { loadingIconForLegacyJS } from '~/loading_icon_for_legacy_js';
 
@@ -38,8 +34,9 @@ function getSystemDate(systemUtcOffsetSeconds) {
 }
 
 function formatTooltipText({ date, count }) {
-  const dateDayName = getDayName(date);
-  const dateText = localeDateFormat.asDate.format(date);
+  const dateObject = new Date(date);
+  const dateDayName = getDayName(dateObject);
+  const dateText = dateFormat(dateObject, 'mmm d, yyyy');
 
   let contribText = __('No contributions');
   if (count > 0) {
@@ -117,7 +114,7 @@ export default class ActivityCalendar {
       date.setDate(date.getDate() + i);
 
       const day = date.getDay();
-      const count = timestamps[toISODateFormat(date)] || 0;
+      const count = timestamps[dateFormat(date, 'yyyy-mm-dd')] || 0;
 
       // Create a new group array if this is the first day of the week
       // or if is first object
@@ -296,10 +293,7 @@ export default class ActivityCalendar {
             .querySelector(this.activitiesContainer)
             .querySelectorAll('.js-localtime')
             .forEach((el) => {
-              el.setAttribute(
-                'title',
-                localeDateFormat.asDateTimeFull.format(newDate(el.dataset.datetime)),
-              );
+              el.setAttribute('title', localeDateFormat.asDateTimeFull.format(el.dataset.datetime));
             });
         })
         .catch(() =>

@@ -11,20 +11,11 @@
     "GroupAuditEventStreamingDestination",
     "InstanceAuditEventStreamingDestination"
   ],
-  "BaseDiscussionInterface": [
-    "AbuseReportDiscussion",
-    "Discussion"
-  ],
   "BaseHeaderInterface": [
     "AuditEventStreamingHeader",
     "AuditEventsStreamingInstanceHeader"
   ],
-  "BaseNoteInterface": [
-    "AbuseReportNote",
-    "Note"
-  ],
   "CiRunnerCloudProvisioning": [
-    "CiRunnerGkeProvisioning",
     "CiRunnerGoogleCloudProvisioning"
   ],
   "CiVariable": [
@@ -88,17 +79,13 @@
     "CiBuildNeed",
     "CiJob"
   ],
-  "LabelInterface": [
-    "AbuseReportLabel",
-    "Label"
-  ],
   "MemberInterface": [
     "GroupMember",
     "PendingGroupMember",
-    "PendingProjectMember",
     "ProjectMember"
   ],
   "NoteableInterface": [
+    "AbuseReport",
     "AlertManagementAlert",
     "BoardEpic",
     "Design",
@@ -118,8 +105,7 @@
     "ApprovalPolicy",
     "PipelineExecutionPolicy",
     "ScanExecutionPolicy",
-    "ScanResultPolicy",
-    "VulnerabilityManagementPolicy"
+    "ScanResultPolicy"
   ],
   "PackageFileMetadata": [
     "ConanFileMetadata",
@@ -132,10 +118,6 @@
     "NugetMetadata",
     "PypiMetadata",
     "TerraformModuleMetadata"
-  ],
-  "PendingMemberInterface": [
-    "PendingGroupMember",
-    "PendingProjectMember"
   ],
   "Registrable": [
     "CiSecureFileRegistry",
@@ -156,8 +138,6 @@
     "UploadRegistry"
   ],
   "ResolvableInterface": [
-    "AbuseReportDiscussion",
-    "AbuseReportNote",
     "Discussion",
     "Note"
   ],
@@ -185,13 +165,8 @@
     "Design",
     "Epic",
     "EpicIssue",
-    "Group",
     "Issue",
-    "Key",
     "MergeRequest",
-    "Namespace",
-    "Project",
-    "Vulnerability",
     "WorkItem"
   ],
   "User": [
@@ -208,7 +183,6 @@
     "VulnerabilityDetailBase",
     "VulnerabilityDetailBoolean",
     "VulnerabilityDetailCode",
-    "VulnerabilityDetailCodeFlows",
     "VulnerabilityDetailCommit",
     "VulnerabilityDetailDiff",
     "VulnerabilityDetailFileLocation",
@@ -240,7 +214,6 @@
     "WorkItemWidgetDescription",
     "WorkItemWidgetDesigns",
     "WorkItemWidgetDevelopment",
-    "WorkItemWidgetEmailParticipants",
     "WorkItemWidgetHealthStatus",
     "WorkItemWidgetHierarchy",
     "WorkItemWidgetIteration",
@@ -262,6 +235,7 @@
   "WorkItemWidgetDefinition": [
     "WorkItemWidgetDefinitionAssignees",
     "WorkItemWidgetDefinitionGeneric",
+    "WorkItemWidgetDefinitionHealthStatus",
     "WorkItemWidgetDefinitionHierarchy",
     "WorkItemWidgetDefinitionLabels",
     "WorkItemWidgetDefinitionWeight"

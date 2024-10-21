@@ -44,5 +44,9 @@ fragment WorkItemNote on Note {
   }
   systemNoteMetadata {
     id
+    descriptionVersion {
+      id
+      description
+    }
   }
 }

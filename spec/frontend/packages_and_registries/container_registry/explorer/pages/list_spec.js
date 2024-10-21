@@ -105,7 +105,6 @@ describe('List Page', () => {
         TitleArea,
         DeleteImage,
         MetadataContainerScanning: true,
-        ContainerScanningCounts: true,
       },
       mocks: {
         $toast,

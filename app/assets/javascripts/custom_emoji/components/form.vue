@@ -131,7 +131,7 @@ export default {
     </gl-form-group>
     <gl-button
       variant="confirm"
-      class="js-no-auto-disable gl-mr-3"
+      class="gl-mr-3 js-no-auto-disable"
       type="submit"
       :loading="saving"
       data-testid="custom-emoji-form-submit-btn"

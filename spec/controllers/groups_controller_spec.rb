@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-RSpec.describe GroupsController, :with_current_organization, factory_default: :keep, feature_category: :code_review_workflow do
+RSpec.describe GroupsController, factory_default: :keep, feature_category: :code_review_workflow do
   include ExternalAuthorizationServiceHelpers
   include AdminModeHelper
 
-  let_it_be(:group_organization) { current_organization }
+  let_it_be(:group_organization) { create(:organization) }
   let_it_be_with_refind(:group) { create_default(:group, :public, organization: group_organization) }
   let_it_be_with_refind(:project) { create(:project, namespace: group) }
   let_it_be(:user) { create(:user) }
@@ -17,10 +17,6 @@ RSpec.describe GroupsController, :with_current_organization, factory_default: :k
   let_it_be(:maintainer) { group.add_maintainer(create(:user)).user }
   let_it_be(:developer) { group.add_developer(create(:user)).user }
   let_it_be(:guest) { group.add_guest(create(:user)).user }
-
-  before_all do
-    group_organization.users = User.all
-  end
 
   before do
     enable_admin_mode!(admin_with_admin_mode)
@@ -244,7 +240,7 @@ RSpec.describe GroupsController, :with_current_organization, factory_default: :k
 
     context 'authorization' do
       it 'allows an admin to create a group' do
-        sign_in(admin_without_admin_mode)
+        sign_in(create(:admin))
 
         expect do
           post :create, params: { group: { name: 'new_group', path: 'new_group' } }
@@ -305,9 +301,10 @@ RSpec.describe GroupsController, :with_current_organization, factory_default: :k
       end
     end
 
-    context 'when creating a top level group' do
+    context 'when creating a top level group', :with_current_organization do
       before do
         sign_in(developer)
+        Current.organization.users << developer
       end
 
       context 'and can_create_group is enabled' do

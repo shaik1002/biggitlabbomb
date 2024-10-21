@@ -53,6 +53,11 @@ module Atlassian
         end
 
         def description
+          unless Feature.enabled?(:enable_jira_connect_configuration) # rubocop:disable Gitlab/FeatureFlagWithoutActor -- flag must be global
+            return "Deployment #{deployment.iid} of #{project.name} at #{short_sha} (#{build&.name}) to
+             #{environment.name}"
+          end
+
           "Deployment #{deployment.iid} (deployment-#{deployment.id}) of #{project.name} (project-#{project.id})
           at #{short_sha} (#{build&.name}) to #{environment.name}"
         end
@@ -129,6 +134,7 @@ module Atlassian
         end
 
         def service_ids_from_integration_configuration
+          return [] unless Feature.enabled?(:enable_jira_connect_configuration) # rubocop:disable Gitlab/FeatureFlagWithoutActor -- flag must be global
           return [] unless project.jira_cloud_app_integration&.active
           return [] if project.jira_cloud_app_integration&.jira_cloud_app_service_ids.blank?
 

@@ -74,7 +74,8 @@ module AutoMerge
     end
 
     # Overridden in child classes
-    def notify(merge_request); end
+    def notify(merge_request)
+    end
 
     def strategy
       strong_memoize(:strategy) do

@@ -336,33 +336,12 @@ webhooks that would be triggered by the series.
 
 Blocked recursive webhook calls are logged in `auth.log` with the message `"Recursive webhook blocked from executing"`.
 
-## Import placeholder user limits
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/455903) in GitLab 17.4.
-
-The number of [placeholder users](../user/project/import/index.md#placeholder-users) created during an import can be limited per top-level namespace.
-
-The default limit for [GitLab self-managed](../subscriptions/self_managed/index.md) is `0` (unlimited).
-
-To change this limit for a self-managed installation, run the following in the [GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
-
-```ruby
-# If limits don't exist for the default plan, you can create one with:
-# Plan.default.create_limits!
-
-Plan.default.actual_limits.update!(import_placeholder_user_limit_tier_1: 200)
-```
-
-Set the limit to `0` to disable it.
-
-## Pull mirroring interval
+## Pull Mirroring Interval
 
 The [minimum wait time between pull refreshes](../user/project/repository/mirror/index.md)
 defaults to 300 seconds (5 minutes). For example, a pull refresh only runs once in a given 300 second period, regardless of how many times you trigger it.
 
-This setting applies in the context of pull refreshes invoked by using the [projects API](../api/project_pull_mirroring.md#start-the-pull-mirroring-process-for-a-project),
-or when forcing an update by selecting **Update now** (**{retry}**) in **Settings > Repository > Mirroring repositories**.
-This setting has no effect on the automatic 30 minute interval schedule used by Sidekiq for [pull mirroring](../user/project/repository/mirror/pull.md).
+This setting applies in the context of pull refreshes invoked via the [projects API](../api/projects.md#start-the-pull-mirroring-process-for-a-project), or when forcing an update by selecting **Update now** (**{retry}**) in **Settings > Repository > Mirroring repositories**. This setting has no effect on the automatic 30 minute interval schedule used by Sidekiq for [pull mirroring](../user/project/repository/mirror/pull.md).
 
 To change this limit for a self-managed installation, run the following in the
 [GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session):
@@ -688,10 +667,10 @@ The default limit for [GitLab self-managed](../subscriptions/self_managed/index.
 To set a limit on your self-managed instance, use the
 [**Admin** area](pages/index.md#set-maximum-number-of-gitlab-pages-custom-domains-for-a-project).
 
-### Number of parallel Pages deployments
+### Number of extra Pages deployments when using multiple deployments
 
-When using [parallel Pages deployments](../user/project/pages/index.md#parallel-deployments), the total number
-of parallel Pages deployments permitted for a top-level namespace is 1000.
+When using [multiple Pages deployments](../user/project/pages/index.md#create-multiple-deployments), the total number
+of extra Pages deployments permitted for a top-level namespace is 1000.
 
 ### Number of registered runners per scope
 
@@ -752,7 +731,7 @@ Plan.default.actual_limits.update!(dast_profile_schedules: 50)
 
 The default maximum size of the CI artifacts archive is 5 megabytes.
 
-You can change this limit by using the [GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session).
+You can change this limit via the [GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session).
 To update the maximum size of the CI artifacts archive,
 update `max_artifacts_content_include_size` with the new value. For example, to set it to 20 MB:
 
@@ -794,7 +773,7 @@ by multiplying [`max_yaml_size_bytes` (default 1 MB)](#maximum-size-and-depth-of
 with [`ci_max_includes` (default 150)](../api/settings.md#list-of-settings-that-can-be-accessed-via-api-calls).
 If both limits are unmodified, the default is set to 1 MB x 150 = `157286400` bytes (150 MB).
 
-You can change this limit by using the [GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session).
+You can change this limit via the [GitLab Rails console](operations/rails_console.md#starting-a-rails-console-session).
 To update the maximum memory that can be allocated for the CI/CD configuration,
 update `ci_max_total_yaml_size_bytes` with the new value. For example, to set it to 20 MB:
 

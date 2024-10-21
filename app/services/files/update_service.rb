@@ -3,18 +3,10 @@
 module Files
   class UpdateService < Files::BaseService
     def create_commit!
-      transformer = Lfs::FileTransformer.new(project, repository, @branch_name, start_branch_name: @start_branch)
-
-      result = transformer.new_file(@file_path, @file_content)
-
-      create_transformed_commit(result.content)
-    end
-
-    def create_transformed_commit(content_or_lfs_pointer)
       repository.update_file(
         current_user,
         @file_path,
-        content_or_lfs_pointer,
+        @file_content,
         message: @commit_message,
         branch_name: @branch_name,
         previous_path: @previous_path,

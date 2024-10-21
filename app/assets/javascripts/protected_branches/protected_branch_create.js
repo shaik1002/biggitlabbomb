@@ -125,31 +125,21 @@ export default class ProtectedBranchCreate {
   }
 
   createSuccessAlert() {
-    if (!gon.features.editBranchRules) {
-      this.alert = createAlert({
-        variant: VARIANT_SUCCESS,
-        containerSelector: '.js-alert-protected-branch-created-container',
-        title: s__('ProtectedBranch|View protected branches as branch rules'),
-        message: s__(
-          'ProtectedBranch|Manage branch related settings in one area with branch rules.',
-        ),
-        primaryButton: {
-          text: s__('ProtectedBranch|View branch rule'),
-          clickHandler: () => this.expandAndScroll(BRANCH_RULES_ANCHOR),
-        },
-        secondaryButton: {
-          text: __('Dismiss'),
-          clickHandler: () => this.alert.dismiss(),
-        },
-      });
-    }
-  }
-
-  createLimitedSuccessAlert() {
     this.alert = createAlert({
       variant: VARIANT_SUCCESS,
       containerSelector: '.js-alert-protected-branch-created-container',
-      message: s__('ProtectedBranch|Protected branch was successfully created'),
+      title: s__('ProtectedBranch|View protected branches as branch rules'),
+      message: s__('ProtectedBranch|Manage branch related settings in one area with branch rules.'),
+      primaryButton: {
+        text: s__('ProtectedBranch|View branch rule'),
+        clickHandler: () => {
+          this.expandAndScroll(BRANCH_RULES_ANCHOR);
+        },
+      },
+      secondaryButton: {
+        text: __('Dismiss'),
+        clickHandler: () => this.alert.dismiss(),
+      },
     });
   }
 
@@ -159,12 +149,7 @@ export default class ProtectedBranchCreate {
     }
     this.expandAndScroll(PROTECTED_BRANCHES_ANCHOR);
 
-    if (gon.abilities.adminProject || gon.abilities.adminGroup) {
-      this.createSuccessAlert();
-    } else {
-      this.createLimitedSuccessAlert();
-    }
-
+    this.createSuccessAlert();
     localStorage.removeItem(IS_PROTECTED_BRANCH_CREATED);
   }
 

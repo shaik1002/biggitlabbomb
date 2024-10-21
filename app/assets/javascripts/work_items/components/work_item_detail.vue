@@ -6,13 +6,11 @@ import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import { s__ } from '~/locale';
 import { getParameterByName, updateHistory, setUrlParams } from '~/lib/utils/url_utility';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import { convertToGraphQLId, getIdFromGraphQLId } from '~/graphql_shared/utils';
-import { TYPENAME_GROUP, TYPENAME_WORK_ITEM } from '~/graphql_shared/constants';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { isLoggedIn } from '~/lib/utils/common_utils';
 import { WORKSPACE_PROJECT } from '~/issues/constants';
 import {
   i18n,
-  DETAIL_VIEW_QUERY_PARAM_NAME,
   WIDGET_TYPE_ASSIGNEES,
   WIDGET_TYPE_NOTIFICATIONS,
   WIDGET_TYPE_CURRENT_USER_TODOS,
@@ -32,27 +30,13 @@ import {
 
 import workItemUpdatedSubscription from '../graphql/work_item_updated.subscription.graphql';
 import updateWorkItemMutation from '../graphql/update_work_item.mutation.graphql';
-import workItemByIdQuery from '../graphql/work_item_by_id.query.graphql';
 import workItemByIidQuery from '../graphql/work_item_by_iid.query.graphql';
 import getAllowedWorkItemChildTypes from '../graphql/work_item_allowed_children.query.graphql';
-import workspacePermissionsQuery from '../graphql/workspace_permissions.query.graphql';
 import { findHierarchyWidgetDefinition } from '../utils';
-import { updateWorkItemCurrentTodosWidget } from '../graphql/cache_utils';
-
-import getWorkItemDesignListQuery from './design_management/graphql/design_collection.query.graphql';
-import uploadDesignMutation from './design_management/graphql/upload_design.mutation.graphql';
-import { designUploadOptimisticResponse } from './design_management/utils';
-import { updateStoreAfterUploadDesign } from './design_management/cache_updates';
-import {
-  MAXIMUM_FILE_UPLOAD_LIMIT,
-  MAXIMUM_FILE_UPLOAD_LIMIT_REACHED,
-  designUploadSkippedWarning,
-  UPLOAD_DESIGN_ERROR_MESSAGE,
-} from './design_management/constants';
 
 import WorkItemTree from './work_item_links/work_item_tree.vue';
 import WorkItemActions from './work_item_actions.vue';
-import TodosToggle from './shared/todos_toggle.vue';
+import WorkItemTodos from './work_item_todos.vue';
 import WorkItemNotificationsWidget from './work_item_notifications_widget.vue';
 import WorkItemAttributesWrapper from './work_item_attributes_wrapper.vue';
 import WorkItemCreatedUpdated from './work_item_created_updated.vue';
@@ -67,11 +51,6 @@ import WorkItemTitle from './work_item_title.vue';
 import WorkItemLoading from './work_item_loading.vue';
 import WorkItemAbuseModal from './work_item_abuse_modal.vue';
 import DesignWidget from './design_management/design_management_widget.vue';
-import DesignUploadButton from './design_management/upload_button.vue';
-
-const defaultWorkspacePermissions = {
-  createDesign: false,
-};
 
 export default {
   name: 'WorkItemDetail',
@@ -82,12 +61,11 @@ export default {
   isLoggedIn: isLoggedIn(),
   components: {
     DesignWidget,
-    DesignUploadButton,
     GlAlert,
     GlButton,
     GlEmptyState,
     WorkItemActions,
-    TodosToggle,
+    WorkItemTodos,
     WorkItemNotificationsWidget,
     WorkItemCreatedUpdated,
     WorkItemDescription,
@@ -111,11 +89,6 @@ export default {
       required: false,
       default: false,
     },
-    workItemId: {
-      type: String,
-      required: false,
-      default: null,
-    },
     workItemIid: {
       type: String,
       required: false,
@@ -126,11 +99,6 @@ export default {
       required: false,
       default: '',
     },
-    modalIsGroup: {
-      type: Boolean,
-      required: false,
-      default: null,
-    },
     isDrawer: {
       type: Boolean,
       required: false,
@@ -138,18 +106,12 @@ export default {
     },
   },
   data() {
-    let modalWorkItemId = getParameterByName(DETAIL_VIEW_QUERY_PARAM_NAME);
-
-    if (modalWorkItemId) {
-      modalWorkItemId = convertToGraphQLId(TYPENAME_WORK_ITEM, modalWorkItemId);
-    }
-
     return {
       error: undefined,
       updateError: undefined,
       workItem: {},
       updateInProgress: false,
-      modalWorkItemId,
+      modalWorkItemId: undefined,
       modalWorkItemIid: getParameterByName('work_item_iid'),
       modalWorkItemNamespaceFullPath: '',
       isReportModalOpen: false,
@@ -159,38 +121,21 @@ export default {
       editMode: false,
       draftData: {},
       hasChildren: false,
-      filesToBeSaved: [],
-      allowedChildTypes: [],
-      designUploadError: null,
-      workspacePermissions: defaultWorkspacePermissions,
     };
   },
   apollo: {
     workItem: {
-      query() {
-        if (this.workItemId) {
-          return workItemByIdQuery;
-        }
-        return workItemByIidQuery;
-      },
+      query: workItemByIidQuery,
       variables() {
-        if (this.workItemId) {
-          return {
-            id: this.workItemId,
-          };
-        }
         return {
           fullPath: this.workItemFullPath,
           iid: this.workItemIid,
         };
       },
       skip() {
-        return !this.workItemIid && !this.workItemId;
+        return !this.workItemIid;
       },
       update(data) {
-        if (this.workItemId) {
-          return data.workItem ?? {};
-        }
         return data.workspace.workItem ?? {};
       },
       error() {
@@ -205,7 +150,7 @@ export default {
         if (isEmpty(this.workItem)) {
           this.setEmptyState();
         }
-        if (!(this.isModal || this.isDrawer) && this.workItem.namespace) {
+        if (!this.isModal && this.workItem.namespace) {
           const path = this.workItem.namespace.fullPath
             ? ` · ${this.workItem.namespace.fullPath}`
             : '';
@@ -236,21 +181,10 @@ export default {
         return !this.workItem?.id;
       },
       update(data) {
-        return findHierarchyWidgetDefinition(data.workItem)?.allowedChildTypes?.nodes || [];
-      },
-    },
-    workspacePermissions: {
-      query: workspacePermissionsQuery,
-      variables() {
-        return {
-          fullPath: this.workItemFullPath,
-        };
-      },
-      skip() {
-        return this.isGroupWorkItem || this.workItemLoading;
-      },
-      update(data) {
-        return data.workspace?.userPermissions ?? defaultWorkspacePermissions;
+        return (
+          findHierarchyWidgetDefinition(data.workItem.workItemType.widgetDefinitions)
+            ?.allowedChildTypes?.nodes || []
+        );
       },
     },
   },
@@ -282,9 +216,6 @@ export default {
     canSetWorkItemMetadata() {
       return this.workItem.userPermissions?.setWorkItemMetadata;
     },
-    canAdminWorkItemLink() {
-      return this.workItem.userPermissions?.adminWorkItemLink;
-    },
     canAssignUnassignUser() {
       return this.workItemAssignees && this.canSetWorkItemMetadata;
     },
@@ -301,7 +232,13 @@ export default {
       return this.isWidgetPresent(WIDGET_TYPE_HIERARCHY)?.parent;
     },
     hasParent() {
-      const { workItemType, parentWorkItem, hasSubepicsFeature } = this;
+      // TODO: This is a temporary check till the issue work item migration is completed
+      // Issue: https://gitlab.com/gitlab-org/gitlab/-/issues/468114
+      const { workItemType, glFeatures, parentWorkItem, hasSubepicsFeature } = this;
+
+      if (workItemType === WORK_ITEM_TYPE_VALUE_TASK) {
+        return glFeatures.namespaceLevelWorkItems && parentWorkItem;
+      }
 
       if (workItemType === WORK_ITEM_TYPE_VALUE_EPIC) {
         return hasSubepicsFeature && parentWorkItem;
@@ -310,15 +247,6 @@ export default {
       return Boolean(parentWorkItem);
     },
     shouldShowAncestors() {
-      // TODO: This is a temporary check till the issue work item migration is completed
-      // Issue: https://gitlab.com/gitlab-org/gitlab/-/issues/468114
-      if (
-        this.workItemType === WORK_ITEM_TYPE_VALUE_TASK &&
-        !this.glFeatures.namespaceLevelWorkItems
-      ) {
-        return false;
-      }
-
       // Checks whether current work item has parent
       // or it is in hierarchy but there is no permission to view the parent
       return this.hasParent || this.workItemHierarchy?.hasParent;
@@ -334,9 +262,6 @@ export default {
     },
     hasDesignWidget() {
       return this.isWidgetPresent(WIDGET_TYPE_DESIGNS) && this.$router;
-    },
-    showUploadDesign() {
-      return this.hasDesignWidget && this.workspacePermissions.createDesign;
     },
     workItemNotificationsSubscribed() {
       return Boolean(this.isWidgetPresent(WIDGET_TYPE_NOTIFICATIONS)?.subscribed);
@@ -364,6 +289,12 @@ export default {
     },
     workItemWeight() {
       return this.isWidgetPresent(WIDGET_TYPE_WEIGHT);
+    },
+    showRolledUpWeight() {
+      return this.workItemWeight?.widgetDefinition?.rollUp;
+    },
+    rolledUpWeight() {
+      return this.workItemWeight?.rolledUpWeight;
     },
     workItemBodyClass() {
       return {
@@ -406,24 +337,12 @@ export default {
     workItemPresent() {
       return !isEmpty(this.workItem);
     },
-    isGroupWorkItem() {
-      return Boolean(this.modalIsGroup ?? this.workItem.namespace?.id.includes(TYPENAME_GROUP));
-    },
-    isSaving() {
-      return this.filesToBeSaved.length > 0;
-    },
-    designCollectionQueryBody() {
-      return {
-        query: getWorkItemDesignListQuery,
-        variables: { id: this.workItem.id, atVersion: null },
-      };
-    },
   },
   mounted() {
-    if (this.modalWorkItemId) {
+    if (this.modalWorkItemIid) {
       this.openInModal({
         event: undefined,
-        modalWorkItem: { id: this.modalWorkItemId },
+        modalWorkItem: { iid: this.modalWorkItemIid },
       });
     }
   },
@@ -473,16 +392,17 @@ export default {
       this.error = this.$options.i18n.fetchError;
       document.title = s__('404|Not found');
     },
+    updateHasNotes() {
+      this.$emit('has-notes');
+    },
     updateUrl(modalWorkItem) {
       updateHistory({
-        url: setUrlParams({
-          [DETAIL_VIEW_QUERY_PARAM_NAME]: getIdFromGraphQLId(modalWorkItem?.id),
-        }),
+        url: setUrlParams({ work_item_iid: modalWorkItem?.iid }),
         replace: true,
       });
     },
     openInModal({ event, modalWorkItem, context }) {
-      if (!this.workItemsAlphaEnabled || context === LINKED_ITEMS_ANCHOR || this.isDrawer) {
+      if (!this.workItemsAlphaEnabled || context === LINKED_ITEMS_ANCHOR) {
         return;
       }
 
@@ -526,7 +446,7 @@ export default {
     updateDraft(type, value) {
       this.draftData[type] = value;
     },
-    async updateWorkItem({ clearDraft } = {}) {
+    async updateWorkItem() {
       this.updateInProgress = true;
       try {
         const {
@@ -551,10 +471,6 @@ export default {
           throw new Error(this.updateError);
         }
 
-        if (clearDraft) {
-          clearDraft();
-        }
-
         this.editMode = false;
       } catch (error) {
         Sentry.captureException(error);
@@ -565,77 +481,6 @@ export default {
     cancelEditing() {
       this.draftData = {};
       this.editMode = false;
-    },
-    isValidDesignUpload(files) {
-      if (!this.workspacePermissions.createDesign) return false;
-
-      if (files.length > MAXIMUM_FILE_UPLOAD_LIMIT) {
-        this.designUploadError = MAXIMUM_FILE_UPLOAD_LIMIT_REACHED;
-
-        return false;
-      }
-      return true;
-    },
-    onUploadDesign(files) {
-      // Redirect to latest version before uploading to avoid cache reading errors
-      if (this.$route?.query?.version) {
-        this.$router.push({
-          path: this.$route.path,
-          query: {},
-        });
-      }
-
-      // convert to Array so that we have Array methods (.map, .some, etc.)
-      this.filesToBeSaved = Array.from(files);
-      if (!this.isValidDesignUpload(this.filesToBeSaved)) return null;
-
-      const mutationPayload = {
-        optimisticResponse: designUploadOptimisticResponse(this.filesToBeSaved),
-        variables: {
-          files: this.filesToBeSaved,
-          projectPath: this.fullPath,
-          iid: this.workItemIid,
-        },
-        context: {
-          hasUpload: true,
-        },
-        mutation: uploadDesignMutation,
-        update: this.afterUploadDesign,
-      };
-
-      return this.$apollo
-        .mutate(mutationPayload)
-        .then((res) => this.onUploadDesignDone(res))
-        .catch(() => this.onUploadDesignError());
-    },
-    afterUploadDesign(store, { data: { designManagementUpload } }) {
-      updateStoreAfterUploadDesign(store, designManagementUpload, this.designCollectionQueryBody);
-    },
-    resetFilesToBeSaved() {
-      this.filesToBeSaved = [];
-    },
-    onUploadDesignDone(res) {
-      // display any warnings, if necessary
-      const skippedFiles = res?.data?.designManagementUpload?.skippedDesigns || [];
-      const skippedWarningMessage = designUploadSkippedWarning(this.filesToBeSaved, skippedFiles);
-      if (skippedWarningMessage) {
-        this.designUploadError = skippedWarningMessage;
-      }
-
-      // reset state
-      this.resetFilesToBeSaved();
-    },
-    onUploadDesignError() {
-      this.resetFilesToBeSaved();
-      this.designUploadError = UPLOAD_DESIGN_ERROR_MESSAGE;
-    },
-    updateWorkItemCurrentTodosWidgetCache({ cache, todos }) {
-      updateWorkItemCurrentTodosWidget({
-        cache,
-        todos,
-        fullPath: this.workItemFullPath,
-        iid: this.workItemIid,
-      });
     },
   },
   WORK_ITEM_TYPE_VALUE_OBJECTIVE,
@@ -667,7 +512,6 @@ export default {
       @toggleEditMode="enableEditMode"
       @workItemStateUpdated="$emit('workItemStateUpdated')"
       @toggleReportAbuseModal="toggleReportAbuseModal"
-      @todosUpdated="updateWorkItemCurrentTodosWidgetCache"
     />
     <section class="work-item-view">
       <section v-if="updateError" class="flash-container flash-container-page sticky">
@@ -695,7 +539,7 @@ export default {
           :svg-path="$options.noAccessSvg"
         />
         <div v-else data-testid="detail-wrapper">
-          <div class="gl-block gl-flex-row gl-items-start gl-gap-3 sm:!gl-flex">
+          <div class="gl-block sm:!gl-flex gl-items-start gl-flex-row gl-gap-3">
             <work-item-ancestors v-if="shouldShowAncestors" :work-item="workItem" class="gl-mb-1" />
             <div v-if="!error" :class="titleClassHeader" data-testid="work-item-type">
               <work-item-title
@@ -708,7 +552,7 @@ export default {
                 @error="updateError = $event"
               />
             </div>
-            <div class="gl-ml-auto gl-mt-1 gl-flex gl-gap-3 gl-self-start">
+            <div class="gl-flex gl-self-start gl-ml-auto gl-gap-3 gl-mt-1">
               <gl-button
                 v-if="shouldShowEditButton"
                 category="secondary"
@@ -718,12 +562,12 @@ export default {
               >
                 {{ __('Edit') }}
               </gl-button>
-              <todos-toggle
+              <work-item-todos
                 v-if="showWorkItemCurrentUserTodos"
-                :item-id="workItem.id"
+                :work-item-id="workItem.id"
+                :work-item-iid="workItemIid"
+                :work-item-fullpath="workItemFullPath"
                 :current-user-todos="currentUserTodos"
-                todos-button-type="secondary"
-                @todosUpdated="updateWorkItemCurrentTodosWidgetCache"
                 @error="updateError = $event"
               />
               <work-item-notifications-widget
@@ -754,7 +598,6 @@ export default {
                 :work-item-state="workItem.state"
                 :has-children="hasChildren"
                 :work-item-author-id="workItemAuthorId"
-                :can-create-related-item="workItemLinkedItems !== undefined"
                 @deleteWorkItem="$emit('deleteWorkItem', { workItemType, workItemId: workItem.id })"
                 @toggleWorkItemConfidentiality="toggleConfidentiality"
                 @error="updateError = $event"
@@ -800,29 +643,20 @@ export default {
                 :work-item-id="workItem.id"
                 :work-item-iid="workItem.iid"
                 :update-in-progress="updateInProgress"
-                :without-heading-anchors="isDrawer"
                 @updateWorkItem="updateWorkItem"
                 @updateDraft="updateDraft('description', $event)"
                 @cancelEditing="cancelEditing"
                 @error="updateError = $event"
               />
-              <div class="gl-flex gl-flex-col gl-flex-wrap sm:gl-flex-row sm:gl-gap-5">
-                <work-item-award-emoji
-                  v-if="workItemAwardEmoji"
-                  :work-item-id="workItem.id"
-                  :work-item-fullpath="workItemFullPath"
-                  :award-emoji="workItemAwardEmoji.awardEmoji"
-                  :work-item-iid="workItemIid"
-                  @error="updateError = $event"
-                  @emoji-updated="$emit('work-item-emoji-updated', $event)"
-                />
-                <design-upload-button
-                  v-if="showUploadDesign"
-                  :is-saving="isSaving"
-                  data-testid="design-upload-button"
-                  @upload="onUploadDesign"
-                />
-              </div>
+              <work-item-award-emoji
+                v-if="workItemAwardEmoji"
+                :work-item-id="workItem.id"
+                :work-item-fullpath="workItemFullPath"
+                :award-emoji="workItemAwardEmoji.awardEmoji"
+                :work-item-iid="workItemIid"
+                @error="updateError = $event"
+                @emoji-updated="$emit('work-item-emoji-updated', $event)"
+              />
             </section>
             <aside
               data-testid="work-item-overview-right-sidebar"
@@ -830,11 +664,10 @@ export default {
               :class="{ 'is-modal': isModal }"
             >
               <work-item-attributes-wrapper
-                :class="{ 'gl-top-11': isDrawer }"
+                :class="{ 'gl-top-3': isDrawer }"
                 :full-path="workItemFullPath"
                 :work-item="workItem"
                 :group-path="groupPath"
-                :is-group="isGroupWorkItem"
                 @error="updateError = $event"
                 @attributesUpdated="$emit('attributesUpdated', $event)"
               />
@@ -845,20 +678,19 @@ export default {
               :class="{ 'gl-mt-0': isDrawer }"
               :work-item-id="workItem.id"
               :work-item-iid="workItemIid"
-              :upload-error="designUploadError"
-              @dismissError="designUploadError = null"
             />
 
             <work-item-tree
               v-if="showWorkItemTree"
               :full-path="workItemFullPath"
-              :is-group="isGroupWorkItem"
               :work-item-type="workItemType"
               :parent-work-item-type="workItem.workItemType.name"
               :work-item-id="workItem.id"
               :work-item-iid="workItemIid"
               :can-update="canUpdate"
               :can-update-children="canUpdateChildren"
+              :rolled-up-weight="rolledUpWeight"
+              :show-rolled-up-weight="showRolledUpWeight"
               :confidential="workItem.confidential"
               :allowed-child-types="allowedChildTypes"
               @show-modal="openInModal"
@@ -867,12 +699,10 @@ export default {
             />
             <work-item-relationships
               v-if="workItemLinkedItems"
-              :is-group="isGroupWorkItem"
               :work-item-id="workItem.id"
               :work-item-iid="workItemIid"
               :work-item-full-path="workItemFullPath"
               :work-item-type="workItem.workItemType.name"
-              :can-admin-work-item-link="canAdminWorkItemLink"
               @showModal="openInModal"
             />
             <work-item-notes
@@ -890,6 +720,7 @@ export default {
               class="gl-pt-5"
               :use-h2="!isModal"
               @error="updateError = $event"
+              @has-notes="updateHasNotes"
               @openReportAbuse="openReportAbuseModal"
             />
           </div>
@@ -897,9 +728,8 @@ export default {
       </section>
     </section>
     <work-item-detail-modal
-      v-if="!isModal && !isDrawer"
+      v-if="!isModal"
       ref="modal"
-      :parent-id="workItem.id"
       :work-item-id="modalWorkItemId"
       :work-item-iid="modalWorkItemIid"
       :work-item-full-path="modalWorkItemNamespaceFullPath"

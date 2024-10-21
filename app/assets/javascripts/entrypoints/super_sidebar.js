@@ -4,13 +4,8 @@ import {
   initSuperSidebar,
   initSuperSidebarToggle,
   initPageBreadcrumbs,
-  getSuperSidebarData,
-  initAdvancedSearchModal,
 } from '~/super_sidebar/super_sidebar_bundle';
 
-const superSidebarData = getSuperSidebarData();
-
-initSuperSidebar(superSidebarData);
+initSuperSidebar();
 initSuperSidebarToggle();
 initPageBreadcrumbs();
-initAdvancedSearchModal(superSidebarData);

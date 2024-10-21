@@ -38,14 +38,16 @@ export default {
 
       return uniqBy(authors, 'username');
     },
+    liClasses() {
+      return this.collapsed
+        ? 'gl-text-gray-500 gl-rounded-bottom-left-base! gl-rounded-bottom-right-base!'
+        : 'gl-border-b';
+    },
     buttonIcon() {
       return this.collapsed ? 'chevron-right' : 'chevron-down';
     },
     buttonLabel() {
       return this.collapsed ? this.$options.i18n.expandReplies : this.$options.i18n.collapseReplies;
-    },
-    ariaState() {
-      return String(!this.collapsed);
     },
   },
   methods: {
@@ -59,18 +61,15 @@ export default {
 
 <template>
   <li
-    :class="{ '!gl-rounded-b-base gl-text-subtle': collapsed }"
-    class="toggle-replies-widget gl-border-r gl-border-l !gl-flex gl-flex-wrap gl-items-center gl-bg-subtle gl-px-5 gl-py-3"
-    :aria-expanded="ariaState"
+    :class="liClasses"
+    class="toggle-replies-widget gl-display-flex! gl-align-items-center gl-flex-wrap gl-bg-gray-10 gl-py-3 gl-px-5 gl-border"
   >
     <gl-button
       ref="toggle"
-      class="gl-my-2 gl-mr-3 !gl-p-0"
-      :class="{ '!gl-text-link': !collapsed }"
+      class="gl-my-2 gl-mr-3 gl-p-0!"
       category="tertiary"
       :icon="buttonIcon"
       :aria-label="buttonLabel"
-      data-testid="replies-toggle"
       @click="toggle"
     />
     <template v-if="collapsed">
@@ -93,19 +92,14 @@ export default {
           </gl-avatar-link>
         </template>
       </gl-avatars-inline>
-      <gl-button
-        class="gl-mr-2 gl-self-center"
-        variant="link"
-        data-testid="expand-replies-button"
-        @click="toggle"
-      >
+      <gl-button class="gl-mr-2" variant="link" data-testid="expand-replies-button" @click="toggle">
         {{ n__('%d reply', '%d replies', replies.length) }}
       </gl-button>
       <gl-sprintf :message="$options.i18n.lastReplyBy">
         <template #name>
           <gl-link
             :href="lastReply.author.path || lastReply.author.webUrl"
-            class="gl-mx-2 !gl-text-primary !gl-no-underline"
+            class="gl-text-body! gl-text-decoration-none! gl-mx-2"
           >
             {{ lastReply.author.name }}
           </gl-link>
@@ -118,7 +112,7 @@ export default {
     </template>
     <gl-button
       v-else
-      class="!gl-no-underline"
+      class="gl-text-body! gl-text-decoration-none!"
       variant="link"
       data-testid="collapse-replies-button"
       @click="toggle"

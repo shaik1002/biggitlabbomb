@@ -10,12 +10,13 @@ DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** GitLab.com, Self-managed
 
-## Error: `HTTP Basic: Access denied. If a password was provided for Git authentication ...`
+## Error: "HTTP Basic: Access denied. The provided password or token ..."
 
 When making a request, you can receive the following error:
 
 ```plaintext
-HTTP Basic: Access denied. If a password was provided for Git authentication, the password was incorrect or you're required to use a token instead of a password. If a token was provided, it was either incorrect, expired, or improperly scoped.
+HTTP Basic: Access denied. The provided password or token is incorrect or your account has 2FA enabled and you must use a personal
+access token instead of a password.
 ```
 
 This error occurs in the following scenarios:
@@ -123,7 +124,7 @@ If you forget to save your recovery codes when enabling 2FA, and you added an SS
    ```
 
 1. Go to the GitLab sign-in page and enter your username or email, and password. When prompted for a
-   two-factor code, enter one of the recovery codes obtained from the command-line output.
+  two-factor code, enter one of the recovery codes obtained from the command-line output.
 
 After signing in, immediately set up 2FA with a new device.
 

@@ -5,7 +5,6 @@ import { mapState, mapActions } from 'vuex';
 import { createAlert, VARIANT_INFO } from '~/alert';
 import { __, s__ } from '~/locale';
 import CrudComponent from '~/vue_shared/components/crud_component.vue';
-import { INITIAL_PAGE } from '../constants';
 import Badge from './badge.vue';
 import BadgeForm from './badge_form.vue';
 import BadgeList from './badge_list.vue';
@@ -29,11 +28,11 @@ export default {
     ),
   },
   computed: {
-    ...mapState(['pagination', 'badgeInModal', 'isEditing', 'isSaving']),
+    ...mapState(['badges', 'badgeInModal', 'isEditing']),
     saveProps() {
       return {
         text: __('Save changes'),
-        attributes: { category: 'primary', variant: 'confirm', loading: this.isSaving },
+        attributes: { category: 'primary', variant: 'confirm' },
       };
     },
     deleteProps() {
@@ -48,16 +47,13 @@ export default {
       };
     },
   },
-  created() {
-    this.loadBadges({ page: INITIAL_PAGE });
-  },
   methods: {
-    ...mapActions(['loadBadges', 'deleteBadge', 'stopEditing']),
+    ...mapActions(['deleteBadge']),
     closeAddForm() {
       this.$refs.badgesCrud.hideForm();
     },
     onSubmitEditModal() {
-      this.$refs.editForm.$el.dispatchEvent(new CustomEvent('submit', { cancelable: true }));
+      this.$refs.editForm.onSubmit();
     },
     onSubmitDeleteModal() {
       this.deleteBadge(this.badgeInModal)
@@ -83,7 +79,7 @@ export default {
     ref="badgesCrud"
     :title="$options.i18n.title"
     icon="labels"
-    :count="pagination.total"
+    :count="badges.length"
     :toggle-text="$options.i18n.addFormTitle"
     data-testid="badge-settings"
   >
@@ -96,14 +92,12 @@ export default {
 
     <gl-modal
       modal-id="edit-badge-modal"
-      :visible="isEditing"
       :title="s__('Badges|Edit badge')"
       :action-primary="saveProps"
       :action-cancel="cancelProps"
-      @primary.prevent="onSubmitEditModal"
-      @hidden="stopEditing"
+      @primary="onSubmitEditModal"
     >
-      <badge-form ref="editForm" :is-editing="true" data-testid="edit-badge" />
+      <badge-form ref="editForm" :is-editing="true" :in-modal="true" data-testid="edit-badge" />
     </gl-modal>
 
     <gl-modal

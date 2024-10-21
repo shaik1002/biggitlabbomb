@@ -5,8 +5,7 @@ require 'spec_helper'
 RSpec.describe Gitlab::Auth::Ldap::User do
   include LdapHelpers
 
-  let_it_be(:organization) { create(:organization) }
-  let(:ldap_user) { described_class.new(auth_hash, organization_id: organization.id) }
+  let(:ldap_user) { described_class.new(auth_hash) }
   let(:gl_user) { ldap_user.gl_user }
   let(:info) do
     {
@@ -52,7 +51,7 @@ RSpec.describe Gitlab::Auth::Ldap::User do
 
   describe '#valid_sign_in?' do
     before do
-      gl_user.save!
+      Namespace.with_disabled_organization_validation { gl_user.save! }
     end
 
     it 'returns true' do

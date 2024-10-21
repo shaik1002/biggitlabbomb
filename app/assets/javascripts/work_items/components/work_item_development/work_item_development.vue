@@ -37,7 +37,6 @@ export default {
     },
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     workItem: {
       query: workItemByIidQuery,
       variables() {
@@ -85,9 +84,6 @@ export default {
     linkedMergeRequests() {
       return this.workItemDevelopment?.closingMergeRequests?.nodes || [];
     },
-    featureFlags() {
-      return this.workItemDevelopment?.featureFlags?.nodes || [];
-    },
     shouldShowEmptyState() {
       return this.isRelatedDevelopmentListEmpty ? this.workItemsAlphaEnabled : true;
     },
@@ -95,7 +91,7 @@ export default {
       return this.workItemDevelopment && this.shouldShowEmptyState;
     },
     isRelatedDevelopmentListEmpty() {
-      return !this.error && this.linkedMergeRequests.length === 0 && this.featureFlags.length === 0;
+      return !this.error && this.linkedMergeRequests.length === 0;
     },
     showAutoCloseInformation() {
       return (
@@ -142,52 +138,51 @@ export default {
 };
 </script>
 <template>
-  <gl-loading-icon v-if="isLoading" class="gl-my-2" />
-  <div v-else-if="shouldShowDevWidget" class="work-item-attributes-item">
-    <div class="gl-flex gl-items-center gl-justify-between gl-gap-3">
-      <h3
-        class="gl-heading-5 !gl-mb-0 gl-flex gl-items-center gl-gap-2"
-        data-testid="dev-widget-label"
-      >
-        {{ $options.i18n.development }}
-        <gl-button
-          v-if="showAutoCloseInformation"
-          v-gl-tooltip
-          class="!gl-p-0 hover:!gl-bg-transparent"
-          category="tertiary"
-          :title="tooltipText"
-          :aria-label="tooltipText"
-          data-testid="more-information"
+  <div>
+    <gl-loading-icon v-if="isLoading" class="gl-my-2" />
+    <div v-if="shouldShowDevWidget" class="gl-border-t gl-border-gray-50 gl-mb-5 gl-pt-5">
+      <div class="gl-flex gl-items-center gl-gap-3 gl-justify-between">
+        <h3
+          class="!gl-mb-0 gl-heading-5 gl-flex gl-items-center gl-gap-2"
+          data-testid="dev-widget-label"
         >
-          <gl-icon name="information-o" class="!gl-text-blue-500" />
-        </gl-button>
-      </h3>
-      <gl-button
-        v-if="showAddButton"
-        v-gl-modal="$options.createMRModalId"
-        v-gl-tooltip.top
-        category="tertiary"
-        icon="plus"
-        size="small"
-        data-testid="add-item"
-        :title="__('Add branch or merge request')"
-        :aria-label="__('Add branch or merge request')"
-      />
-    </div>
-    <work-item-development-relationship-list
-      v-if="!isRelatedDevelopmentListEmpty"
-      :work-item-dev-widget="workItemDevelopment"
-    />
-    <template v-else>
-      <span v-if="!canUpdate" class="gl-text-secondary">{{ __('None') }}</span>
-      <template v-else>
-        <gl-button category="secondary" size="small" data-testid="create-mr-button">{{
-          $options.i18n.createMergeRequest
-        }}</gl-button>
-        <gl-button category="tertiary" size="small" data-testid="create-branch-button">{{
-          $options.i18n.createBranch
-        }}</gl-button>
+          {{ $options.i18n.development }}
+          <gl-button
+            v-if="showAutoCloseInformation"
+            v-gl-tooltip
+            class="hover:!gl-bg-transparent !gl-p-0"
+            category="tertiary"
+            :title="tooltipText"
+            :aria-label="tooltipText"
+            data-testid="more-information"
+          >
+            <gl-icon name="information-o" class="!gl-text-blue-500" />
+          </gl-button>
+        </h3>
+        <gl-button
+          v-if="showAddButton"
+          v-gl-modal="$options.createMRModalId"
+          v-gl-tooltip.top
+          category="tertiary"
+          icon="plus"
+          size="small"
+          data-testid="add-item"
+          :title="__('Add branch or merge request')"
+          :aria-label="__('Add branch or merge request')"
+        />
+      </div>
+      <template v-if="isRelatedDevelopmentListEmpty">
+        <span v-if="!canUpdate" class="gl-text-secondary">{{ __('None') }}</span>
+        <template v-else>
+          <gl-button category="secondary" size="small" data-testid="create-mr-button">{{
+            $options.i18n.createMergeRequest
+          }}</gl-button>
+          <gl-button category="tertiary" size="small" data-testid="create-branch-button">{{
+            $options.i18n.createBranch
+          }}</gl-button>
+        </template>
       </template>
-    </template>
+      <work-item-development-relationship-list v-else :work-item-dev-widget="workItemDevelopment" />
+    </div>
   </div>
 </template>

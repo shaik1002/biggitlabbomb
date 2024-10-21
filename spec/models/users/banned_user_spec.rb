@@ -3,15 +3,10 @@
 require 'spec_helper'
 
 RSpec.describe Users::BannedUser, feature_category: :user_management do
-  let_it_be(:user) { create(:user, :banned, email: 'user+1@example.org') }
+  let_it_be(:user) { create(:user, :banned) }
 
   describe 'relationships' do
     it { is_expected.to belong_to(:user) }
-
-    it do
-      is_expected.to have_many(:emails).with_primary_key('user_id').with_foreign_key('user_id')
-        .inverse_of(:banned_user)
-    end
   end
 
   describe 'validations' do
@@ -23,27 +18,14 @@ RSpec.describe Users::BannedUser, feature_category: :user_management do
   end
 
   describe 'scopes' do
-    describe '.by_detumbled_email' do
-      let_it_be(:other_user) { create(:user, :banned, email: 'other_user+1@example.org') }
-      let_it_be(:other_user_unconfirmed_email) { create(:email, user: other_user, email: 'user+3@example.org') }
+    describe '.by_canonical_email' do
+      let_it_be(:user_canonical_email) { create(:user_canonical_email, user: user) }
+      let_it_be(:other_user) { create(:user, :banned) }
+      let_it_be(:other_user_canonical_email) { create(:user_canonical_email, user: other_user) }
 
-      it 'returns banned user records with confirmed email matching the given email' do
-        results = described_class.by_detumbled_email('USER+2@EXAMPLE.ORG')
+      it 'returns banned user records matching the given email in lowercase' do
+        results = described_class.by_canonical_email(user.email.upcase)
         expect(results).to contain_exactly(user.banned_user)
-      end
-
-      context 'when passed email is nil' do
-        it 'returns nothing' do
-          results = described_class.by_detumbled_email(nil)
-          expect(results).to be_empty
-        end
-      end
-
-      context 'when passed email is an empty string' do
-        it 'returns nothing' do
-          results = described_class.by_detumbled_email(' ')
-          expect(results).to be_empty
-        end
       end
     end
   end

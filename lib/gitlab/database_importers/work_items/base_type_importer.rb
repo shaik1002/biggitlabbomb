@@ -29,8 +29,7 @@ module Gitlab
           time_tracking: 'Time tracking',
           designs: 'Designs',
           development: 'Development',
-          crm_contacts: 'CRM contacts',
-          email_participants: 'Email participants'
+          crm_contacts: 'CRM contacts'
         }.freeze
 
         WIDGETS_FOR_TYPE = {
@@ -42,7 +41,6 @@ module Gitlab
             :description,
             :designs,
             :development,
-            :email_participants,
             :health_status,
             :hierarchy,
             :iteration,
@@ -63,7 +61,6 @@ module Gitlab
             :current_user_todos,
             :description,
             :development,
-            :email_participants,
             :hierarchy,
             :linked_items,
             :notes,
@@ -169,7 +166,6 @@ module Gitlab
             :crm_contacts,
             :current_user_todos,
             :description,
-            :email_participants,
             :health_status,
             :hierarchy,
             :iteration,
@@ -189,15 +185,13 @@ module Gitlab
           current_time = Time.current
 
           base_types = ::WorkItems::Type::BASE_TYPES.map do |type, attributes|
-            attributes
-              .slice(:name, :icon_name, :id)
-              .merge(created_at: current_time, updated_at: current_time, base_type: type, correct_id: attributes[:id])
+            attributes.slice(:name, :icon_name)
+                      .merge(created_at: current_time, updated_at: current_time, base_type: type)
           end
 
           ::WorkItems::Type.upsert_all(
             base_types,
-            unique_by: :index_work_item_types_on_name_unique,
-            update_only: %i[name icon_name base_type]
+            unique_by: :idx_work_item_types_on_namespace_id_and_name_null_namespace
           )
 
           upsert_widgets
@@ -223,7 +217,7 @@ module Gitlab
 
           ::WorkItems::WidgetDefinition.upsert_all(
             widgets,
-            unique_by: :index_work_item_widget_definitions_on_type_id_and_name
+            unique_by: :index_work_item_widget_definitions_on_default_witype_and_name
           )
         end
       end

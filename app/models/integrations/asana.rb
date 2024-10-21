@@ -32,7 +32,7 @@ module Integrations
     end
 
     def self.help
-      build_help_page_url('user/project/integrations/asana.md', s_('Add commit messages as comments to Asana tasks.'))
+      build_help_page_url('user/project/integrations/asana', s_('Add commit messages as comments to Asana tasks.'))
     end
 
     def self.to_param
@@ -68,7 +68,7 @@ module Integrations
       # - close/s/d
       # - closing
       issue_finder = %r{(?:https://app\.asana\.com/\d+/\w+/(\w+)|#(\w+))}i
-      proceded_keyword_finder = %r{(fix\w*|clos[ei]\w*)\s*\z}i
+      proceded_keyword_finder = %r{(fix\w*|clos[ei]\w*+)}i
 
       message.split(issue_finder).each_slice(2) do |prepended_text, task_id|
         next unless task_id

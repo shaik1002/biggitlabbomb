@@ -14,7 +14,6 @@ export default {
   mixins: [timeagoMixin],
   inject: ['rootUrl', 'userId'],
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     userAchievements: {
       query: getUserAchievements,
       variables() {
@@ -79,10 +78,10 @@ export default {
 
 <template>
   <div v-if="hasUserAchievements">
-    <h2 class="gl-mb-2 gl-mt-4 gl-text-base">
+    <h2 class="gl-font-base gl-mb-2 gl-mt-4">
       {{ $options.i18n.achievementsLabel }}
     </h2>
-    <div class="gl-flex gl-flex-wrap gl-gap-3">
+    <div class="gl-flex gl-gap-3 gl-flex-wrap">
       <div
         v-for="userAchievement in userAchievements"
         :key="userAchievement.id"

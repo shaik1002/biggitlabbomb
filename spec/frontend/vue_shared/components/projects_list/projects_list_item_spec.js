@@ -1,4 +1,3 @@
-import { nextTick } from 'vue';
 import { GlAvatarLabeled, GlBadge, GlIcon, GlPopover } from '@gitlab/ui';
 import uniqueId from 'lodash/uniqueId';
 import projects from 'test_fixtures/api/users/projects/get.json';
@@ -9,7 +8,6 @@ import ListActions from '~/vue_shared/components/list_actions/list_actions.vue';
 import { ACTION_EDIT, ACTION_DELETE } from '~/vue_shared/components/list_actions/constants';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
-import waitForPromises from 'helpers/wait_for_promises';
 import {
   VISIBILITY_TYPE_ICON,
   VISIBILITY_LEVEL_PRIVATE_STRING,
@@ -23,25 +21,8 @@ import {
   TIMESTAMP_TYPE_CREATED_AT,
   TIMESTAMP_TYPE_UPDATED_AT,
 } from '~/vue_shared/components/resource_lists/constants';
-import {
-  renderDeleteSuccessToast,
-  deleteParams,
-} from 'ee_else_ce/vue_shared/components/resource_lists/utils';
-import { deleteProject } from '~/api/projects_api';
-import { createAlert } from '~/alert';
-
-const MOCK_DELETE_PARAMS = {
-  testParam: true,
-};
 
 jest.mock('lodash/uniqueId');
-jest.mock('ee_else_ce/vue_shared/components/resource_lists/utils', () => ({
-  ...jest.requireActual('ee_else_ce/vue_shared/components/resource_lists/utils'),
-  renderDeleteSuccessToast: jest.fn(),
-  deleteParams: jest.fn(() => MOCK_DELETE_PARAMS),
-}));
-jest.mock('~/alert');
-jest.mock('~/api/projects_api');
 
 describe('ProjectsListItem', () => {
   let wrapper;
@@ -54,7 +35,6 @@ describe('ProjectsListItem', () => {
       accessLevel: {
         integerValue: permissions.projectAccess.accessLevel,
       },
-      avatarUrl: 'avatar.jpg',
     },
   };
 
@@ -80,11 +60,6 @@ describe('ProjectsListItem', () => {
   const findAccessLevelBadge = () => wrapper.findByTestId('access-level-badge');
   const findInactiveBadge = () => wrapper.findComponent(ProjectListItemInactiveBadge);
   const findTimeAgoTooltip = () => wrapper.findComponent(TimeAgoTooltip);
-  const findDeleteModal = () => wrapper.findComponent(DeleteModal);
-  const deleteModalFirePrimaryEvent = async () => {
-    findDeleteModal().vm.$emit('primary');
-    await nextTick();
-  };
 
   beforeEach(() => {
     uniqueId.mockImplementation(jest.requireActual('lodash/uniqueId'));
@@ -103,7 +78,6 @@ describe('ProjectsListItem', () => {
     expect(avatarLabeled.attributes()).toMatchObject({
       'entity-id': project.id.toString(),
       'entity-name': project.name,
-      src: defaultPropsData.project.avatarUrl,
       shape: 'rect',
     });
   });
@@ -431,17 +405,16 @@ describe('ProjectsListItem', () => {
   describe('when project has actions', () => {
     const editPath = '/foo/bar/edit';
 
-    const projectWithActions = {
-      ...project,
-      availableActions: [ACTION_EDIT, ACTION_DELETE],
-      isForked: true,
-      editPath,
-    };
-
     beforeEach(() => {
       createComponent({
         propsData: {
-          project: projectWithActions,
+          project: {
+            ...project,
+            availableActions: [ACTION_EDIT, ACTION_DELETE],
+            actionLoadingStates: { [ACTION_DELETE]: false },
+            isForked: true,
+            editPath,
+          },
         },
       });
     });
@@ -478,48 +451,12 @@ describe('ProjectsListItem', () => {
       });
 
       describe('when deletion is confirmed', () => {
-        describe('when API call is successful', () => {
-          it('calls deleteProject, properly sets loading state, and emits delete-complete event', async () => {
-            deleteProject.mockResolvedValueOnce();
-
-            await deleteModalFirePrimaryEvent();
-            expect(deleteParams).toHaveBeenCalledWith(projectWithActions);
-            expect(deleteProject).toHaveBeenCalledWith(projectWithActions.id, MOCK_DELETE_PARAMS);
-            expect(findDeleteModal().props('confirmLoading')).toBe(true);
-
-            await waitForPromises();
-
-            expect(findDeleteModal().props('confirmLoading')).toBe(false);
-            expect(wrapper.emitted('delete-complete')).toEqual([[]]);
-            expect(renderDeleteSuccessToast).toHaveBeenCalledWith(projectWithActions, 'Project');
-            expect(createAlert).not.toHaveBeenCalled();
-          });
+        beforeEach(() => {
+          wrapper.findComponent(DeleteModal).vm.$emit('primary');
         });
 
-        describe('when API call is not successful', () => {
-          const error = new Error();
-
-          it('calls deleteProject, properly sets loading state, and shows error alert', async () => {
-            deleteProject.mockRejectedValue(error);
-            await deleteModalFirePrimaryEvent();
-
-            expect(deleteParams).toHaveBeenCalledWith(projectWithActions);
-            expect(deleteProject).toHaveBeenCalledWith(projectWithActions.id, MOCK_DELETE_PARAMS);
-            expect(findDeleteModal().props('confirmLoading')).toBe(true);
-
-            await waitForPromises();
-
-            expect(findDeleteModal().props('confirmLoading')).toBe(false);
-
-            expect(wrapper.emitted('delete-complete')).toBeUndefined();
-            expect(createAlert).toHaveBeenCalledWith({
-              message:
-                'An error occurred deleting the project. Please refresh the page to try again.',
-              error,
-              captureError: true,
-            });
-            expect(renderDeleteSuccessToast).not.toHaveBeenCalled();
-          });
+        it('emits `delete` event', () => {
+          expect(wrapper.emitted('delete')).toMatchObject([[project]]);
         });
       });
     });

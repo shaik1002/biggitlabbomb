@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Banzai::Filter::MarkdownFilter, feature_category: :markdown do
+RSpec.describe Banzai::Filter::MarkdownFilter, feature_category: :team_planning do
   using RSpec::Parameterized::TableSyntax
   include FilterSpecHelper
 

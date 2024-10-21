@@ -16,7 +16,6 @@ RSpec.describe DiffDiscussion do
       attributes = subject.reply_attributes
       expect(attributes[:position]).to eq(Gitlab::Json.dump(diff_note.position.to_h))
       expect(attributes[:original_position]).to eq(Gitlab::Json.dump(diff_note.original_position.to_h))
-      expect(attributes[:line_code]).to eq(subject.line_code)
     end
   end
 

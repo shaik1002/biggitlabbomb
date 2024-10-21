@@ -1,5 +1,5 @@
 ---
-# Error: gitlab_base.HeadingLink
+# Error: gitlab.HeadingLink
 #
 # Do not include links in a heading.
 # Headings already have self-referencing anchor links,

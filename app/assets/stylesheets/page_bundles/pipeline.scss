@@ -228,11 +228,10 @@
 }
 
 .ci-job-item-failed {
-  @apply gl-bg-red-50;
+  background-color: var(--red-50, $red-50);
 
-  // stylelint-disable-next-line gitlab/no-gl-class
   .gl-dark & {
-    background: var(--gl-action-danger-background-color-active);
+    background-color: var(--gray-200, $gray-200);
   }
 }
 
@@ -307,6 +306,13 @@
   &,
   .gl-new-dropdown-custom-toggle {
     width: 100%;
+
+    // stylelint-disable-next-line gitlab/no-gl-class
+    .gl-badge.badge-muted {
+      .gl-dark & {
+        @apply gl-bg-gray-100;
+      }
+    }
   }
 
   // Reset padding, as inner element will

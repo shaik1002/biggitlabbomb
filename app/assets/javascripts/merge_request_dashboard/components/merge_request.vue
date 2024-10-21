@@ -1,6 +1,6 @@
 <script>
 import { GlLink, GlSprintf, GlIcon, GlTooltipDirective } from '@gitlab/ui';
-import ApprovalCount from 'ee_else_ce/merge_requests/components/approval_count.vue';
+import ApprovalCount from 'ee_else_ce/merge_request_dashboard/components/approval_count.vue';
 import { __, n__, sprintf } from '~/locale';
 import SafeHtml from '~/vue_shared/directives/safe_html';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
@@ -33,7 +33,7 @@ export default {
   },
   computed: {
     statsAriaLabel() {
-      const comments = n__('%d comment', '%d comments', this.mergeRequest.userNotesCount);
+      const comments = n__('%d comment', '%d comments', this.mergeRequest.userDiscussionsCount);
       const fileAdditions = n__(
         '%d file addition',
         '%d file additions',
@@ -66,16 +66,18 @@ export default {
       />
       <gl-icon v-else name="dash" />
     </td>
-    <td class="gl-px-3 gl-py-4 gl-align-top">
+    <td class="gl-py-4 gl-px-3 gl-align-top">
       <approval-count :merge-request="mergeRequest" />
     </td>
-    <td class="gl-px-3 gl-py-4 gl-align-top">
+    <td class="gl-py-4 gl-px-3 gl-align-top">
       <h4 class="gl-mb-0 gl-mt-0 gl-text-base">
-        <gl-link :href="mergeRequest.webUrl" class="gl-text-primary hover:gl-text-gray-900">
-          {{ mergeRequest.title }}
-        </gl-link>
+        <gl-link
+          v-safe-html="mergeRequest.titleHtml"
+          :href="mergeRequest.webUrl"
+          class="gl-text-primary hover:gl-text-gray-900"
+        />
       </h4>
-      <div class="gl-mb-2 gl-mt-2 gl-text-sm gl-text-secondary">
+      <div class="gl-text-sm gl-mt-2 gl-mb-2 gl-text-secondary">
         <gl-sprintf
           :message="__('%{reference} %{divider} created %{createdAt} by %{author} %{milestone}')"
         >
@@ -97,31 +99,27 @@ export default {
         </gl-sprintf>
       </div>
     </td>
-    <td class="gl-px-3 gl-py-4 gl-align-top">
+    <td class="gl-py-4 gl-px-3 gl-align-top">
       <assigned-users :users="mergeRequest.assignees.nodes" type="ASSIGNEES" />
     </td>
-    <td class="gl-px-3 gl-py-4 gl-align-top">
+    <td class="gl-py-4 gl-px-3 gl-align-top">
       <assigned-users :users="mergeRequest.reviewers.nodes" type="REVIEWERS" />
     </td>
-    <td class="gl-py-4 gl-pl-3 gl-pr-5 gl-align-top">
-      <div
-        class="gl-flex gl-justify-end gl-gap-3"
-        :aria-label="statsAriaLabel"
-        :title="statsAriaLabel"
-      >
+    <td class="gl-py-4 gl-pr-5 gl-pl-3 gl-align-top">
+      <div class="gl-flex gl-justify-end" :aria-label="statsAriaLabel">
         <div class="gl-whitespace-nowrap">
           <gl-icon name="comments" class="!gl-align-middle" />
-          {{ mergeRequest.userNotesCount }}
+          {{ mergeRequest.userDiscussionsCount }}
         </div>
-        <div class="gl-whitespace-nowrap">
+        <div class="gl-ml-5 gl-whitespace-nowrap">
           <gl-icon name="doc-code" />
           <span>{{ mergeRequest.diffStatsSummary.fileCount }}</span>
         </div>
-        <div class="gl-flex gl-items-center gl-font-bold gl-text-green-600">
+        <div class="gl-ml-3 gl-text-green-600 gl-font-bold gl-flex gl-items-center">
           <span>+</span>
           <span>{{ mergeRequest.diffStatsSummary.additions }}</span>
         </div>
-        <div class="gl-flex gl-items-center gl-font-bold gl-text-red-500">
+        <div class="gl-ml-3 gl-text-red-500 gl-font-bold gl-flex gl-items-center">
           <span>−</span>
           <span>{{ mergeRequest.diffStatsSummary.deletions }}</span>
         </div>

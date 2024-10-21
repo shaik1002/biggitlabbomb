@@ -107,7 +107,7 @@ $white-gc-bg: #eaf2f5;
   .line-numbers,
   .diff-line-num,
   .code-search-line {
-    background-color: $white;
+    background-color: $gray-10;
 
     &.conflict_marker,
     &.conflict_our {
@@ -434,6 +434,7 @@ $white-gc-bg: #eaf2f5;
   .hljs-number { color: $white-mi; }
   .mo { color: $white-mo; }
 
+  .hljs-code,
   .sb { color: $white-sb; }
   .sc { color: $white-sc; }
   .sd { color: $white-sd; }
@@ -457,4 +458,8 @@ $white-gc-bg: #eaf2f5;
 
   .gc { color: $white-gc-color;
   background-color: $white-gc-bg; }
+
+  .hljs-strong { font-weight: bold; }
+
+  .hljs-emphasis { font-style: italic; }
 }

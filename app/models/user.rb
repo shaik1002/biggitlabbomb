@@ -95,13 +95,13 @@ class User < ApplicationRecord
   attribute :color_mode_id, default: -> { Gitlab::ColorModes::APPLICATION_DEFAULT }
 
   attr_encrypted :otp_secret,
-    key: Gitlab::Application.credentials.otp_key_base,
+    key: Gitlab::Application.secrets.otp_key_base,
     mode: :per_attribute_iv_and_salt,
     insecure_mode: true,
     algorithm: 'aes-256-cbc'
 
   devise :two_factor_authenticatable,
-    otp_secret_encryption_key: Gitlab::Application.credentials.otp_key_base
+    otp_secret_encryption_key: Gitlab::Application.secrets.otp_key_base
 
   devise :two_factor_backupable, otp_number_of_backup_codes: 10
   devise :two_factor_backupable_pbkdf2
@@ -289,6 +289,7 @@ class User < ApplicationRecord
   has_one :user_preference
   has_one :user_detail
   has_one :user_highest_role
+  has_one :user_canonical_email
   has_one :credit_card_validation, class_name: '::Users::CreditCardValidation'
   has_one :phone_number_validation, class_name: '::Users::PhoneNumberValidation'
   has_one :atlassian_identity, class_name: 'Atlassian::Identity'
@@ -340,11 +341,10 @@ class User < ApplicationRecord
   validate :namespace_move_dir_allowed, if: :username_changed?, unless: :new_record?
 
   validate :unique_email, if: :email_changed?
-  validates_with AntiAbuse::UniqueDetumbledEmailValidator, if: :email_changed?
   validate :notification_email_verified, if: :notification_email_changed?
   validate :public_email_verified, if: :public_email_changed?
   validate :commit_email_verified, if: :commit_email_changed?
-  validate :email_allowed_by_restrictions, if: ->(user) { user.new_record? ? !user.created_by_id : user.email_changed? }
+  validate :email_allowed_by_restrictions?, if: ->(user) { user.new_record? ? !user.created_by_id : user.email_changed? }
   validate :check_username_format, if: :username_changed?
 
   validates :theme_id, allow_nil: true, inclusion: { in: Gitlab::Themes.valid_ids,
@@ -390,6 +390,7 @@ class User < ApplicationRecord
   end
 
   after_create_commit :create_default_organization_user
+  after_update_commit :update_default_organization_user, if: -> { saved_change_to_admin }
 
   # User's Layout preference
   enum layout: { fixed: 0, fluid: 1 }
@@ -415,6 +416,7 @@ class User < ApplicationRecord
     :tab_width, :tab_width=,
     :sourcegraph_enabled, :sourcegraph_enabled=,
     :gitpod_enabled, :gitpod_enabled=,
+    :use_web_ide_extension_marketplace, :use_web_ide_extension_marketplace=,
     :extensions_marketplace_opt_in_status, :extensions_marketplace_opt_in_status=,
     :organization_groups_projects_sort, :organization_groups_projects_sort=,
     :organization_groups_projects_display, :organization_groups_projects_display=,
@@ -432,8 +434,6 @@ class User < ApplicationRecord
     :achievements_enabled, :achievements_enabled=,
     :enabled_following, :enabled_following=,
     :home_organization, :home_organization_id, :home_organization_id=,
-    :dpop_enabled, :dpop_enabled=,
-    :use_work_items_view, :use_work_items_view=,
     to: :user_preference
 
   delegate :path, to: :namespace, allow_nil: true, prefix: true
@@ -613,9 +613,6 @@ class User < ApplicationRecord
   end
   scope :by_user_email, ->(emails) { iwhere(email: Array(emails)) }
   scope :by_emails, ->(emails) { joins(:emails).where(emails: { email: Array(emails).map(&:downcase) }) }
-  scope :by_detumbled_emails, ->(detumbled_emails) do
-    joins(:emails).where(emails: { detumbled_email: Array(detumbled_emails) })
-  end
   scope :for_todos, ->(todos) { where(id: todos.select(:user_id).distinct) }
   scope :with_emails, -> { preload(:emails) }
   scope :with_dashboard, ->(dashboard) { where(dashboard: dashboard) }
@@ -808,8 +805,6 @@ class User < ApplicationRecord
     # @param emails [String, Array<String>] email addresses to check
     # @param confirmed [Boolean] Only return users where the primary email is confirmed
     def by_any_email(emails, confirmed: false)
-      return none if Array(emails).all?(&:nil?)
-
       from_users = by_user_email(emails)
       from_users = from_users.confirmed if confirmed
 
@@ -1106,7 +1101,7 @@ class User < ApplicationRecord
   def valid_password?(password)
     return false unless password_allowed?(password)
     return false if password_automatically_set?
-    return false unless allow_password_authentication_for_web?
+    return false unless allow_password_authentication?
 
     super
   end
@@ -1173,7 +1168,7 @@ class User < ApplicationRecord
   end
 
   def disable_two_factor_otp!
-    update!(
+    update(
       otp_required_for_login: false,
       encrypted_otp_secret: nil,
       encrypted_otp_secret_iv: nil,
@@ -1207,7 +1202,7 @@ class User < ApplicationRecord
   end
 
   def needs_new_otp_secret?
-    !two_factor_otp_enabled? && otp_secret_expired?
+    !two_factor_enabled? && otp_secret_expired?
   end
 
   def otp_secret_expired?
@@ -1237,7 +1232,7 @@ class User < ApplicationRecord
   def unique_email
     email_taken = errors.added?(:email, _('has already been taken'))
 
-    if !email_taken && Email.where.not(user: self).where(email: email).exists?
+    if !email_taken && !emails.exists?(email: email) && Email.exists?(email: email)
       errors.add(:email, _('has already been taken'))
       email_taken = true
     end
@@ -1247,7 +1242,7 @@ class User < ApplicationRecord
         User.find_by_any_email(email)&.deleted_own_account?
 
       help_page_url = Rails.application.routes.url_helpers.help_page_url(
-        'user/profile/account/delete_account.md',
+        'user/profile/account/delete_account',
         anchor: 'delete-your-own-account'
       )
 
@@ -1288,21 +1283,13 @@ class User < ApplicationRecord
       direct_groups_cte = Gitlab::SQL::CTE.new(:direct_groups, groups)
       direct_groups_cte_alias = direct_groups_cte.table.alias(Group.table_name)
 
-      groups_from_authorized_projects = Group.id_in(authorized_projects.select(:namespace_id))
-      groups_from_shares = Group.joins(:shared_with_group_links)
-                             .where(group_group_links: { shared_with_group_id: Group.from(direct_groups_cte_alias) })
-
-      if Feature.enabled?(:fix_user_authorized_groups, self)
-        groups_from_authorized_projects = groups_from_authorized_projects.self_and_ancestors
-        groups_from_shares = groups_from_shares.self_and_descendants
-      end
-
       Group
         .with(direct_groups_cte.to_arel)
         .from_union([
           Group.from(direct_groups_cte_alias).self_and_descendants,
-          groups_from_authorized_projects,
-          groups_from_shares
+          Group.id_in(authorized_projects.select(:namespace_id)),
+          Group.joins(:shared_with_group_links)
+            .where(group_group_links: { shared_with_group_id: Group.from(direct_groups_cte_alias) })
         ])
     end
   end
@@ -1442,17 +1429,16 @@ class User < ApplicationRecord
   end
 
   def allow_password_authentication_for_web?
-    return false if ldap_user?
-    return false if disable_password_authentication_for_sso_users?
-
-    Gitlab::CurrentSettings.password_authentication_enabled_for_web?
+    Gitlab::CurrentSettings.password_authentication_enabled_for_web? && !ldap_user?
   end
 
   def allow_password_authentication_for_git?
-    return false if password_based_omniauth_user?
-    return false if disable_password_authentication_for_sso_users?
+    Gitlab::CurrentSettings.password_authentication_enabled_for_git? && !password_based_omniauth_user?
+  end
 
-    Gitlab::CurrentSettings.password_authentication_enabled_for_git?
+  # method overriden in EE
+  def password_based_login_forbidden?
+    false
   end
 
   def can_change_username?
@@ -1465,7 +1451,6 @@ class User < ApplicationRecord
 
   def allow_user_to_create_group_and_project?
     return true if Gitlab::CurrentSettings.allow_project_creation_for_guest_and_below
-    return true if can_admin_all_resources?
 
     highest_role > Gitlab::Access::GUEST
   end
@@ -1737,10 +1722,6 @@ class User < ApplicationRecord
     verified_emails << private_commit_email if include_private_email
     verified_emails.concat(emails.confirmed.pluck(:email))
     verified_emails.uniq
-  end
-
-  def verified_detumbled_emails
-    emails.distinct.confirmed.pluck(:detumbled_email).compact
   end
 
   def public_verified_emails
@@ -2060,20 +2041,21 @@ class User < ApplicationRecord
 
   def assigned_open_merge_requests_count(force: false)
     Rails.cache.fetch(['users', id, 'assigned_open_merge_requests_count', merge_request_dashboard_enabled?], force: force, expires_in: COUNT_CACHE_VALIDITY_PERIOD) do
-      params = { assignee_id: id, state: 'opened', non_archived: true }
-      params[:reviewer_id] = 'none' if merge_request_dashboard_enabled?
+      review_states = if merge_request_dashboard_enabled?
+                        %w[requested_changes reviewed]
+                      end
 
-      MergeRequestsFinder.new(self, params).execute.count
+      MergeRequestsFinder.new(self, assignee_id: self.id, review_states: review_states, state: 'opened', non_archived: true).execute.count
     end
   end
 
   def review_requested_open_merge_requests_count(force: false)
     Rails.cache.fetch(['users', id, 'review_requested_open_merge_requests_count', merge_request_dashboard_enabled?], force: force, expires_in: COUNT_CACHE_VALIDITY_PERIOD) do
-      if merge_request_dashboard_enabled?
-        MergeRequestsFinder.new(self, assigned_user_id: id, reviewer_review_states: %w[unreviewed unapproved review_started], assigned_review_states: %w[requested_changes reviewed], state: 'opened', non_archived: true).execute.count
-      else
-        MergeRequestsFinder.new(self, reviewer_id: id, state: 'opened', non_archived: true).execute.count
-      end
+      review_state = if merge_request_dashboard_enabled?
+                       'unreviewed'
+                     end
+
+      MergeRequestsFinder.new(self, reviewer_id: id, review_state: review_state, state: 'opened', non_archived: true).execute.count
     end
   end
 
@@ -2520,14 +2502,6 @@ class User < ApplicationRecord
 
   private
 
-  def disable_password_authentication_for_sso_users?
-    ::Gitlab::CurrentSettings.disable_password_authentication_for_users_with_sso_identities? && omniauth_user?
-  end
-
-  def omniauth_user?
-    identities.any?
-  end
-
   def optional_namespace?
     Feature.enabled?(:optional_personal_namespace, self)
   end
@@ -2565,8 +2539,6 @@ class User < ApplicationRecord
   end
 
   def should_delay_delete?(deleted_by)
-    return false if placeholder?
-
     is_deleting_own_record = deleted_by.id == id
 
     is_deleting_own_record &&
@@ -2649,9 +2621,7 @@ class User < ApplicationRecord
     end
   end
 
-  def email_allowed_by_restrictions
-    return if placeholder? || import_user?
-
+  def email_allowed_by_restrictions?
     error = validate_admin_signup_restrictions(email)
 
     errors.add(:email, error) if error
@@ -2764,6 +2734,10 @@ class User < ApplicationRecord
 
   def create_default_organization_user
     Organizations::OrganizationUser.create_default_organization_record_for(id, user_is_admin: admin?)
+  end
+
+  def update_default_organization_user
+    Organizations::OrganizationUser.update_default_organization_record_for(id, user_is_admin: admin?)
   end
 
   # method overridden in EE

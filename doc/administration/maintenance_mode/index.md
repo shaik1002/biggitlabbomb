@@ -35,6 +35,13 @@ Enable Maintenance Mode as an administrator in one of these ways:
   curl --request PUT --header "PRIVATE-TOKEN:$ADMIN_TOKEN" "<gitlab-url>/api/v4/application/settings?maintenance_mode=true"
   ```
 
+- [**Rails console**](../operations/rails_console.md#starting-a-rails-console-session):
+
+  ```ruby
+  ::Gitlab::CurrentSettings.update!(maintenance_mode: true)
+  ::Gitlab::CurrentSettings.update!(maintenance_mode_message: "New message")
+  ```
+
 ## Disable Maintenance Mode
 
 Disable Maintenance Mode in one of three ways:
@@ -52,6 +59,12 @@ Disable Maintenance Mode in one of three ways:
   curl --request PUT --header "PRIVATE-TOKEN:$ADMIN_TOKEN" "<gitlab-url>/api/v4/application/settings?maintenance_mode=false"
   ```
 
+- [**Rails console**](../operations/rails_console.md#starting-a-rails-console-session):
+
+  ```ruby
+  ::Gitlab::CurrentSettings.update!(maintenance_mode: false)
+  ```
+
 ## Behavior of GitLab features in Maintenance Mode
 
 When Maintenance Mode is enabled, a banner is displayed at the top of the page.
@@ -59,7 +72,7 @@ The banner can be customized with a specific message.
 
 An error is displayed when a user tries to perform a write operation that isn't allowed.
 
-![Maintenance Mode banner and error message](img/maintenance_mode_error_message_v17.6.png)
+![Maintenance Mode banner and error message](img/maintenance_mode_error_message.png)
 
 NOTE:
 In some cases, the visual feedback from an action could be misleading. For example, when starring a project, the **Star** button changes to show the **Unstar** action. However, this is only the frontend update, and it doesn't take into account the failed status of the POST request. These visual bugs are to be fixed [in follow-up iterations](https://gitlab.com/gitlab-org/gitlab/-/issues/295197).

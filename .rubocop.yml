@@ -154,7 +154,7 @@ Style/SignalException:
     - '**/*/Dangerfile'
     - 'tooling/danger/**/*.rb'
 
-RSpec/SpecFilePathFormat:
+RSpec/FilePath:
   Exclude:
     - 'qa/**/*'
     - 'spec/frontend/fixtures/*'
@@ -163,14 +163,6 @@ RSpec/SpecFilePathFormat:
     - 'spec/fixtures/**/*'
   CustomTransform:
     HTTPartyBasicAuth: httparty_basic_auth
-
-RSpec/SpecFilePathSuffix:
-  Exclude:
-    - 'qa/**/*'
-    - 'spec/frontend/fixtures/*'
-    - 'ee/spec/frontend/fixtures/*'
-    - 'spec/requests/api/v3/*'
-    - 'spec/fixtures/**/*'
 
 # Configuration parameters: AllowSubject.
 RSpec/MultipleMemoizedHelpers:
@@ -527,7 +519,6 @@ Gitlab/AvoidCurrentOrganization:
     - 'ee/lib/api/**/*'
     - 'app/graphql/**/*'
     - 'ee/app/graphql/**/*'
-    - 'lib/gitlab/current_settings.rb'
     - 'lib/gitlab/middleware/organizations/current.rb'
     - 'spec/**/*'
     - 'ee/spec/**/*'
@@ -540,19 +531,13 @@ Gitlab/AvoidGitlabInstanceChecks:
     - 'db/post_migrate/*.rb'
     - 'ee/db/fixtures/**/*'
 
-Gitlab/EeOnlyClass:
-  Enabled: true
-  Include:
-    - 'ee/**/ee/**/*.rb'
-
 # See https://gitlab.com/gitlab-org/gitlab/-/issues/373194
 Gitlab/RSpec/AvoidSetup:
   Enabled: true
   Include:
     - 'ee/spec/features/registrations/saas/**/*'
-    - 'ee/spec/features/gitlab_subscriptions/trials/creation_*'
+    - 'ee/spec/features/trials/saas/**/*'
     - 'ee/spec/features/gitlab_subscriptions/trials/duo_pro/**/*'
-    - 'ee/spec/features/gitlab_subscriptions/trials/duo_enterprise/**/*'
 
 RSpec/DuplicateSpecLocation:
   Enabled: true

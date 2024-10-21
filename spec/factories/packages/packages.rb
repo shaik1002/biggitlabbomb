@@ -43,6 +43,22 @@ FactoryBot.define do
       end
     end
 
+    factory :helm_package do
+      sequence(:name) { |n| "package-#{n}" }
+      sequence(:version) { |n| "v1.0.#{n}" }
+      package_type { :helm }
+
+      transient do
+        without_package_files { false }
+      end
+
+      after :create do |package, evaluator|
+        unless evaluator.without_package_files
+          create :helm_package_file, package: package
+        end
+      end
+    end
+
     factory :npm_package do
       sequence(:name) { |n| "@#{project.root_namespace.path}/package-#{n}" }
       sequence(:version) { |n| "1.0.#{n}" }
@@ -62,9 +78,7 @@ FactoryBot.define do
       end
     end
 
-    # TODO: Remove with the rollout of the FF terraform_extract_terraform_package_model
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/490007
-    factory :terraform_module_package_legacy do
+    factory :terraform_module_package do
       sequence(:name) { |n| "module-#{n}/system" }
       version { '1.0.0' }
       package_type { :terraform_module }
@@ -119,6 +133,36 @@ FactoryBot.define do
       trait :with_build do
         after :create do |package|
           create(:package_build_info, package: package)
+        end
+      end
+    end
+
+    factory :pypi_package do
+      sequence(:name) { |n| "pypi-package-#{n}" }
+      sequence(:version) { |n| "1.0.#{n}" }
+      package_type { :pypi }
+
+      transient do
+        without_loaded_metadatum { false }
+      end
+
+      after :create do |package, evaluator|
+        create :package_file, :pypi, package: package, file_name: "#{package.name}-#{package.version}.tar.gz"
+
+        unless evaluator.without_loaded_metadatum
+          create :pypi_metadatum, package: package
+        end
+      end
+    end
+
+    factory :generic_package do
+      sequence(:name) { |n| "generic-package-#{n}" }
+      version { '1.0.0' }
+      package_type { :generic }
+
+      trait(:with_zip_file) do
+        after :create do |package|
+          create :package_file, :generic_zip, package: package
         end
       end
     end

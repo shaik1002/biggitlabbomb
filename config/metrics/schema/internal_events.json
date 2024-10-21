@@ -25,10 +25,7 @@
               "enum": [
                 "user.id",
                 "project.id",
-                "namespace.id",
-                "label",
-                "property",
-                "value"
+                "namespace.id"
               ]
             },
             "filter": {

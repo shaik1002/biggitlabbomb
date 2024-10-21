@@ -44,16 +44,6 @@ module Feature
     end
   end
 
-  # Generates the same flipper_id for a given kubernetes pod,
-  # or for the entire gitlab application if deployed on a single host.
-  class FlipperPod
-    attr_reader :flipper_id
-
-    def initialize
-      @flipper_id = "FlipperPod:#{Socket.gethostname}".freeze
-    end
-  end
-
   # Generates a unique flipper_id for the current GitLab instance.
   class FlipperGitlabInstance
     attr_reader :flipper_id
@@ -75,15 +65,6 @@ module Feature
 
     def all
       flipper.features.to_a
-    end
-
-    # Preload the features with the given names.
-    #
-    # names - An Array of String or Symbol names of the features.
-    #
-    # https://github.com/flippercloud/flipper/blob/bf6a13f34fc7f45a597c3d66ec291f3e5855e830/lib/flipper/dsl.rb#L229
-    def preload(names)
-      flipper.preload(names) # rubocop:disable CodeReuse/ActiveRecord -- This cop is not relevant in the Flipper context
     end
 
     RecursionError = Class.new(RuntimeError)
@@ -263,10 +244,6 @@ module Feature
       end
     end
 
-    def current_pod
-      @flipper_pod ||= FlipperPod.new
-    end
-
     def gitlab_instance
       @flipper_gitlab_instance ||= FlipperGitlabInstance.new
     end
@@ -304,8 +281,6 @@ module Feature
         gitlab_instance
       when :request, :current_request
         current_request
-      when :pod, :current_pod
-        current_pod
       else
         thing
       end

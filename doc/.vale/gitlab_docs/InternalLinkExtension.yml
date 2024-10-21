@@ -1,5 +1,5 @@
 ---
-# Error: gitlab_docs.InternalLinkExtension
+# Error: gitlab.InternalLinkExtension
 #
 # Checks that internal links have .md extenstion and not .html extension.
 #

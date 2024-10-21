@@ -64,7 +64,7 @@
         text-wrap: balance;
     }
 
-    &-controls:not(:empty) {
+    &-controls {
         margin-top: $gl-spacing-scale-4;
     }
 }

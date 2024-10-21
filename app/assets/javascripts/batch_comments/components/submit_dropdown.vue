@@ -227,7 +227,7 @@ export default {
         data-testid="submit-gl-form"
         @submit.prevent="submitReview"
       >
-        <div class="gl-mb-4 gl-flex gl-items-center">
+        <div class="gl-display-flex gl-mb-4 gl-align-items-center">
           <label for="review-note-body" class="gl-mb-0">
             {{ __('Summary comment (optional)') }}
           </label>
@@ -272,7 +272,7 @@ export default {
           class="gl-mt-3"
           data-testid="approve_password"
         />
-        <div class="gl-mt-4 gl-flex gl-justify-start">
+        <div class="gl-display-flex gl-justify-content-start gl-mt-4">
           <gl-button
             :loading="isSubmitting"
             variant="confirm"

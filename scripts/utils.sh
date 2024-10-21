@@ -142,8 +142,13 @@ function assets_compile_script() {
 
 function setup_database_yml() {
   if [ "$DECOMPOSED_DB" == "true" ]; then
-    echo "Using decomposed database config (config/database.yml.decomposed-postgresql)"
-    cp config/database.yml.decomposed-postgresql config/database.yml
+    if [ "$CLUSTERWIDE_DB" == "true" ]; then
+      echo "Using decomposed database config, containing clusterwide connection (config/database.yml.decomposed-clusterwide-postgresql)"
+      cp config/database.yml.decomposed-clusterwide-postgresql config/database.yml
+    else
+      echo "Using decomposed database config (config/database.yml.decomposed-postgresql)"
+      cp config/database.yml.decomposed-postgresql config/database.yml
+    fi
   else
     echo "Using two connections, single database config (config/database.yml.postgresql)"
     cp config/database.yml.postgresql config/database.yml
@@ -348,7 +353,7 @@ function fail_pipeline_early() {
   fi
 }
 
-# We're inlining this function in `.gitlab/ci/test-on-omnibus/main.gitlab-ci.yml` so make sure to reflect any changes there
+# We're inlining this function in `.gitlab/ci/package-and-test/main.gitlab-ci.yml` so make sure to reflect any changes there
 function assets_image_tag() {
   local cache_assets_hash_file="cached-assets-hash.txt"
 
@@ -476,43 +481,5 @@ function define_trigger_branch_in_build_env() {
 
   if [ -f "$BUILD_ENV" ]; then
     echo "TRIGGER_BRANCH=${TRIGGER_BRANCH}" >> $BUILD_ENV
-  fi
-}
-
-function log_disk_usage() {
-  local exit_on_low_space="${1:-false}"
-  local space_threshold_gb=2 # 2GB
-
-  available_space=$(df -h | awk 'NR==2 {print $4}') # value at the 2nd row 4th column of the df -h output
-
-  echo "*******************************************************"
-  echo "This runner currently has ${available_space} free disk space."
-  echo "*******************************************************"
-
-  section_start "log_disk_usage" "Disk usage detail" "true"
-  echo -e "df -h"
-  df -h
-
-  echo -e "du -h -d 1"
-  du -h -d 1
-  section_end "log_disk_usage"
-
-  if [[ "$exit_on_low_space" = "true" ]]; then
-
-    if [[ $OSTYPE == 'darwin'* ]]; then
-      available_space_gb=$(df -g | awk 'NR==2 {print $4}')
-    else
-      available_space_gb=$(df -BG | awk 'NR==2 {print $4}' | sed 's/G//')
-    fi
-
-    if (( $(echo "$available_space_gb < $space_threshold_gb") )); then
-      echo "********************************************************************"
-      echo "This job requires ${space_threshold_gb}G free disk space, but the runner only has ${available_space}."
-      echo "Exiting now in anticipation of a 'no space left on device' error."
-      echo "If this problem persists, please contact #g_hosted_runners team."
-      echo "NOTE: This job will be retried automatically."
-      echo "********************************************************************"
-      exit 111
-    fi
   fi
 }

@@ -5,7 +5,6 @@ import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { ACCESS_LEVEL_REPORTER_INTEGER } from '~/access_level/constants';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import groupsAutocompleteQuery from '~/graphql_shared/queries/groups_autocomplete.query.graphql';
-import getAvailableDeployKeys from '~/vue_shared/components/list_selector/queries/available_deploy_keys.query.graphql';
 import { buildUrl, GROUPS_PATH } from '~/projects/settings/api/access_dropdown_api';
 
 export const fetchProjectGroups = (projectPath, search) => {
@@ -16,7 +15,7 @@ export const fetchProjectGroups = (projectPath, search) => {
   }).then((data) =>
     data?.map((group) => ({
       text: group.full_name,
-      value: group.id,
+      value: group.name,
       ...convertObjectPropsToCamelCase(group),
     })),
   );
@@ -29,17 +28,13 @@ export const fetchAllGroups = async (apollo, search) => {
       variables: { search },
     })
     .then(({ data }) =>
-      data?.groups.nodes.map((group) => {
-        const groupId = getIdFromGraphQLId(group.id);
-
-        return {
-          text: group.fullName,
-          value: groupId,
-          ...group,
-          id: groupId,
-          type: 'group',
-        };
-      }),
+      data?.groups.nodes.map((group) => ({
+        text: group.fullName,
+        value: group.name,
+        ...group,
+        id: getIdFromGraphQLId(group.id),
+        type: 'group',
+      })),
     );
 };
 
@@ -55,7 +50,7 @@ export const fetchGroupsWithProjectAccess = (projectId, search) => {
     .then(({ data }) =>
       data.map((group) => ({
         text: group.name,
-        value: group.id,
+        value: group.name,
         ...convertObjectPropsToCamelCase(group),
       })),
     );
@@ -81,24 +76,4 @@ export const fetchUsers = async (projectPath, search, usersQueryOptions) => {
     value: user.username,
     ...convertObjectPropsToCamelCase(user),
   }));
-};
-
-export const fetchAvailableDeployKeys = async (apollo, projectPath, search) => {
-  return apollo
-    .query({
-      query: getAvailableDeployKeys,
-      variables: {
-        projectPath,
-        titleQuery: search,
-      },
-    })
-    .then(({ data }) =>
-      data?.project?.availableDeployKeys?.nodes.map((deployKey) => ({
-        text: deployKey.title,
-        value: getIdFromGraphQLId(deployKey.id),
-        type: 'deployKeys',
-        ...deployKey,
-        id: getIdFromGraphQLId(deployKey.id),
-      })),
-    );
 };

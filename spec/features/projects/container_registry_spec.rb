@@ -16,7 +16,7 @@ RSpec.describe 'Container Registry', :js, feature_category: :container_registry 
     create(:container_repository, name: '')
   end
 
-  let(:help_page_href) { help_page_path('administration/packages/container_registry_metadata_database.md') }
+  let(:help_page_href) { help_page_path('administration/packages/container_registry_metadata_database') }
 
   before do
     sign_in(user)
@@ -24,19 +24,6 @@ RSpec.describe 'Container Registry', :js, feature_category: :container_registry 
     stub_container_registry_config(enabled: true)
     stub_container_registry_info
     stub_container_registry_tags(repository: :any, tags: [])
-  end
-
-  shared_examples 'pagination and state preservation' do
-    it 'navigates through pages and preserves pagination state', :aggregate_failures do
-      expect(page).to have_css '.gl-keyset-pagination'
-      visit_next_page
-
-      expect(page).to have_content 'my/image'
-      click_link 'my/image'
-      page.go_back
-
-      expect(page).to have_content 'my/image'
-    end
   end
 
   context 'with metadatabase enabled' do
@@ -206,7 +193,21 @@ RSpec.describe 'Container Registry', :js, feature_category: :container_registry 
         visit_container_registry
       end
 
-      it_behaves_like 'pagination and state preservation'
+      it 'shows pagination' do
+        expect(page).to have_css '.gl-keyset-pagination'
+      end
+
+      it 'pagination goes to second page' do
+        visit_next_page
+        expect(page).to have_content 'my/image'
+      end
+
+      it 'pagination is preserved after navigating back from details' do
+        visit_next_page
+        click_link 'my/image'
+        page.go_back
+        expect(page).to have_content 'my/image'
+      end
     end
   end
 
@@ -223,7 +224,23 @@ RSpec.describe 'Container Registry', :js, feature_category: :container_registry 
         visit_container_registry
       end
 
-      it_behaves_like 'pagination and state preservation'
+      it 'shows pagination' do
+        expect(page).to have_css '.gl-keyset-pagination'
+      end
+
+      it 'pagination goes to second page' do
+        visit_next_page
+
+        expect(page).to have_content 'my/image'
+      end
+
+      it 'pagination is preserved after navigating back from details' do
+        visit_next_page
+        click_link 'my/image'
+        page.go_back
+
+        expect(page).to have_content 'my/image'
+      end
     end
   end
 

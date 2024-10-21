@@ -37,7 +37,7 @@ GitLab supports two different modes of file locking:
 ## Permissions
 
 Locks can be created by any person who has at least
-Developer role for the repository.
+Developer role in the repository.
 
 Only the user who locked the file or directory can edit locked files. Other
 users are prevented from modifying locked files by pushing, merging,
@@ -172,7 +172,7 @@ and the files' IDs.
 On the repository file tree, GitLab displays an LFS badge for files
 tracked by Git LFS plus a padlock icon on exclusively-locked files:
 
-![LFS-Locked files](img/lfs_locked_files_v17_4.png)
+![LFS-Locked files](img/lfs_locked_files_v13_2.png)
 
 You can also [view and remove existing locks](#view-and-remove-existing-locks) from the GitLab UI.
 

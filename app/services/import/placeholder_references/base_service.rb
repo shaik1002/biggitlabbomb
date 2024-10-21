@@ -12,10 +12,14 @@ module Import
 
       private
 
-      attr_reader :import_source, :import_uid
+      attr_reader :import_source, :import_uid, :reference
 
-      def store
-        @store ||= PlaceholderReferences::Store.new(import_source: import_source, import_uid: import_uid)
+      def cache
+        Gitlab::Cache::Import::Caching
+      end
+
+      def cache_key
+        @cache_key ||= [:'placeholder-reference', import_source, import_uid].join(':')
       end
 
       def logger

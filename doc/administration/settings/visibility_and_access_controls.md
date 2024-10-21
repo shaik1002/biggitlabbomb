@@ -65,11 +65,6 @@ To restrict project deletion to only administrators:
    - (GitLab 15.0 and earlier) **Default project deletion protection**, and select **Only admins can delete project**.
 1. Select **Save changes**.
 
-To disable the restriction:
-
-1. Select **Owners and administrators**.
-1. Select **Save changes**.
-
 ## Deletion protection
 
 DETAILS:
@@ -253,8 +248,7 @@ Prerequisites:
 1. Select **Save changes**.
 
 NOTE:
-You cannot restrict a visibility level that is set as the default for new projects or groups.
-Conversely, you cannot set a restricted visibility level as the default for new projects or groups.
+You cannot select the restricted default visibility level for new projects and groups.
 
 ## Configure enabled Git access protocols
 

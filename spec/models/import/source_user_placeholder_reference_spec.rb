@@ -10,7 +10,6 @@ RSpec.describe Import::SourceUserPlaceholderReference, feature_category: :import
   describe 'validations' do
     it { is_expected.to validate_presence_of(:user_reference_column) }
     it { is_expected.to validate_presence_of(:model) }
-    it { is_expected.to validate_presence_of(:alias_version) }
     it { is_expected.to validate_presence_of(:namespace_id) }
     it { is_expected.to validate_presence_of(:source_user_id) }
     it { is_expected.to validate_numericality_of(:numeric_key).only_integer.is_greater_than(0) }
@@ -21,7 +20,6 @@ RSpec.describe Import::SourceUserPlaceholderReference, feature_category: :import
     it { is_expected.not_to allow_value({}).for(:composite_key) }
     it { is_expected.not_to allow_value({ id: 'foo' }).for(:composite_key) }
     it { is_expected.not_to allow_value(1).for(:composite_key) }
-    it { is_expected.not_to allow_values('Member', 'GroupMember', 'ProjectMember').for(:model) }
 
     describe '#validate_numeric_or_composite_key_present' do
       def validation_errors(...)
@@ -110,7 +108,6 @@ RSpec.describe Import::SourceUserPlaceholderReference, feature_category: :import
         numeric_key
         source_user_id
         user_reference_column
-        alias_version
       ]
 
       failure_message = <<-MSG
@@ -139,7 +136,7 @@ RSpec.describe Import::SourceUserPlaceholderReference, feature_category: :import
       end
 
       before do
-        allow(Import::PlaceholderReferences::AliasResolver).to receive(:aliased_model).and_return(Note)
+        allow(Import::PlaceholderReferenceAliasResolver).to receive(:aliased_model).and_return(Note)
       end
 
       it "uses the new model" do
@@ -150,10 +147,7 @@ RSpec.describe Import::SourceUserPlaceholderReference, feature_category: :import
 
   describe "#aliased_user_reference_column" do
     let(:source_user_placeholder_reference) do
-      build(
-        :import_source_user_placeholder_reference, model: "Note", user_reference_column: "author_id",
-        alias_version: 1
-      )
+      build(:import_source_user_placeholder_reference, model: "Note", user_reference_column: "author_id")
     end
 
     subject(:aliased_user_reference_column) { source_user_placeholder_reference.aliased_user_reference_column }
@@ -164,7 +158,7 @@ RSpec.describe Import::SourceUserPlaceholderReference, feature_category: :import
 
     context "when the column name has changed" do
       before do
-        allow(Import::PlaceholderReferences::AliasResolver).to receive(:aliased_column).and_return("user_id")
+        allow(Import::PlaceholderReferenceAliasResolver).to receive(:aliased_column).and_return("user_id")
       end
 
       it "uses the new column" do
@@ -178,15 +172,14 @@ RSpec.describe Import::SourceUserPlaceholderReference, feature_category: :import
       build(
         :import_source_user_placeholder_reference,
         model: "Note",
-        alias_version: 1,
         composite_key: { "author_id" => 1, "old_id" => 2 }
       )
     end
 
     before do
-      allow(Import::PlaceholderReferences::AliasResolver).to receive(:aliased_column).and_call_original
-      allow(Import::PlaceholderReferences::AliasResolver).to receive(:aliased_column)
-        .with("Note", "old_id", version: 1).and_return("new_id")
+      allow(Import::PlaceholderReferenceAliasResolver).to receive(:aliased_column).and_call_original
+      allow(Import::PlaceholderReferenceAliasResolver).to receive(:aliased_column)
+        .with("Note", "old_id").and_return("new_id")
     end
 
     subject(:aliased_composite_key) { source_user_placeholder_reference.aliased_composite_key }
@@ -204,32 +197,30 @@ RSpec.describe Import::SourceUserPlaceholderReference, feature_category: :import
         source_user_id: 3,
         user_reference_column: 'foo',
         model: 'Model',
-        alias_version: 4,
         composite_key: { key: 1 }
       )
     end
 
     subject(:serialized) { reference.to_serialized }
 
-    it { is_expected.to eq('[{"key":1},"Model",2,1,3,"foo",4]') }
+    it { is_expected.to eq('[{"key":1},"Model",2,1,3,"foo"]') }
   end
 
   describe '.from_serialized' do
     subject(:from_serialized) { described_class.from_serialized(serialized) }
 
     context 'when serialized reference is valid' do
-      let(:serialized) { '[{"key":1},"Issue",2,null,3,"foo",4]' }
+      let(:serialized) { '[{"key":1},"Model",2,null,3,"foo"]' }
 
       it 'returns a valid SourceUserPlaceholderReference' do
         expect(from_serialized).to be_a(described_class)
           .and(be_valid)
           .and(have_attributes(
             composite_key: { key: 1 },
-            model: 'Issue',
+            model: 'Model',
             numeric_key: nil,
             namespace_id: 2,
             source_user_id: 3,
-            alias_version: 4,
             user_reference_column: 'foo'
           ))
       end
@@ -240,7 +231,7 @@ RSpec.describe Import::SourceUserPlaceholderReference, feature_category: :import
     end
 
     context 'when serialized reference has different number of elements than expected' do
-      let(:serialized) { '[{"key":1},"Issue",2,null,3]' }
+      let(:serialized) { '[{"key":1},"Model",2,null,3]' }
 
       it 'raises an exception' do
         expect { from_serialized }.to raise_error(described_class::SerializationError)

@@ -3,7 +3,6 @@ import { shallowMount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import Category from '~/emoji/components/category.vue';
 import EmojiGroup from '~/emoji/components/emoji_group.vue';
-import { EMOJI_THUMBS_UP, EMOJI_THUMBS_DOWN } from '~/emoji/constants';
 
 let wrapper;
 function factory(propsData = {}) {
@@ -19,7 +18,7 @@ describe('Emoji category component', () => {
   beforeEach(() => {
     factory({
       category: 'Activity',
-      emojis: [[EMOJI_THUMBS_UP], [EMOJI_THUMBS_DOWN]],
+      emojis: [['thumbsup'], ['thumbsdown']],
     });
   });
 

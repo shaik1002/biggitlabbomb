@@ -17,26 +17,23 @@ module RapidDiffs
       project = @diff_file.repository.project
       params = tree_join(@diff_file.content_sha, @diff_file.file_path)
       {
-        viewer: viewer_component.viewer_name,
         blob_diff_path: project_blob_diff_path(project, params)
       }
     end
 
-    def viewer_component
-      # return Viewers::CollapsedComponent if collapsed?
-      # return Viewers::NotDiffableComponent unless diffable?
+    def web_component_context
+      viewer_name = viewer.partial_name
+      if viewer_name == 'text'
+        viewer_name = @parallel_view ? 'text_parallel' : 'text_inline'
+      end
 
-      is_text = @diff_file.text_diff?
-      return Viewers::Text::ParallelViewComponent if is_text && @parallel_view
-      return Viewers::Text::InlineViewComponent if is_text
-      return Viewers::NoPreviewComponent if @diff_file.content_changed?
+      {
+        viewer: viewer_name
+      }
+    end
 
-      # return Viewers::AddedComponent if new_file?
-      # return Viewers::DeletedComponent if deleted_file?
-      # return Viewers::RenamedComponent if renamed_file?
-      # return Viewers::ModeChangedComponent if mode_changed?
-
-      Viewers::NoPreviewComponent
+    def viewer
+      @diff_file.view_component_viewer
     end
   end
 end

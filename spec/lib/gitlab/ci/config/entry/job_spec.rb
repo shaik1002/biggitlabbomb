@@ -65,6 +65,19 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job, feature_category: :pipeline_compo
       end
 
       it { is_expected.to be_truthy }
+
+      context 'when pipeline_run_keyword feature flag is disabled' do
+        before do
+          stub_feature_flags(pipeline_run_keyword: false)
+        end
+
+        context 'when config has run key' do
+          let(:name) { :rspec }
+          let(:config) { { run: [{ name: 'step1', step: 'some reference' }] } }
+
+          it { is_expected.to be_falsey }
+        end
+      end
     end
 
     context 'when config is a bridge job' do
@@ -257,34 +270,14 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job, feature_category: :pipeline_compo
         using RSpec::Parameterized::TableSyntax
 
         where(:case_name, :config, :error) do
-          'when only step is used without name' | {
-            stage: 'build',
-            run: [{ step: 'some reference' }]
-          } | 'job run object at `/0` is missing required properties: name'
-
-          'when only script is used without name' | {
-            stage: 'build',
-            run: [{ script: 'echo' }]
-          } | 'job run object at `/0` is missing required properties: name'
-
-          'when step and script are used together' | {
-            stage: 'build',
-            run: [{
-              name: 'step1',
-              step: 'some reference',
-              script: 'echo'
-            }]
-          } | 'job run value at /0 should use only one of: step, script'
-
-          'when a required subkey is missing' | {
-            stage: 'build',
-            run: [{ name: 'step1' }]
-          } | 'job run object at `/0` is missing required properties: step'
-
-          'when a subkey is invalid' | {
-            stage: 'build',
-            run: [{ name: 'step1', step: 'some step', invalid_key: 'some value' }]
-          } | 'job run object property at `/0/invalid_key` is a disallowed additional property'
+          'when only step is used without name'   | { stage: 'build',
+run: [{ step: 'some reference' }] } | 'job run \'/0\' must be a valid \'required\''
+          'when only script is used without name' | { stage: 'build',
+run: [{ script: 'echo' }] } | 'job run \'/0\' must be a valid \'required\''
+          'when step and script are used together' | { stage: 'build',
+run: [{ name: 'step1', step: 'some reference', script: 'echo' }] } | 'job run \'/0\' must be a valid \'oneof\''
+          'when a subkey does not exist' | { stage: 'build',
+run: [{ name: 'step1', invalid_key: 'some value' }] } | 'job run \'/0\' must be a valid \'required\''
         end
 
         with_them do
@@ -299,7 +292,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job, feature_category: :pipeline_compo
 
           it 'returns error about invalid run' do
             expect(entry).not_to be_valid
-            expect(entry.errors).to include 'job run value at root is not an array'
+            expect(entry.errors).to include 'job run \'\' must be a valid \'array\''
           end
         end
 
@@ -319,7 +312,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job, feature_category: :pipeline_compo
 
           it 'returns error about invalid env' do
             expect(entry).not_to be_valid
-            expect(entry.errors).to include 'job run value at `/0/env/my_var` is not a string'
+            expect(entry.errors).to include 'job run \'/0/env/my_var\' must be a valid \'string\''
           end
         end
 
@@ -328,7 +321,7 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job, feature_category: :pipeline_compo
 
           it 'returns error about invalid run' do
             expect(entry).not_to be_valid
-            expect(entry.errors).to include 'job run object at `/0` is missing required properties: step'
+            expect(entry.errors).to include 'job run \'/0\' must be a valid \'required\''
           end
         end
       end
@@ -707,9 +700,18 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job, feature_category: :pipeline_compo
           expect(entry.errors).to include(/job publish can only be used within a `pages` job/)
         end
       end
+
+      context 'if the config contains a pages entry' do
+        let(:entry) { described_class.new({ script: 'echo', pages: { path_prefix: 'foo' } }, name: name) }
+
+        it 'is invalid' do
+          expect(entry).not_to be_valid
+          expect(entry.errors).to include(/job pages can only be used within a `pages` job/)
+        end
+      end
     end
 
-    context 'when job is a job named pages', feature_category: :pages do
+    context 'when job is a pages job', feature_category: :pages do
       let(:name) { :pages }
 
       context 'when it does not have a publish entry' do
@@ -736,54 +738,17 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job, feature_category: :pipeline_compo
         end
       end
     end
-
-    context 'when job is a pages job with a custom name', feature_category: :pages do
-      let(:name) { :rspec }
-
-      context 'when pages entry is a boolean' do
-        let(:entry) { described_class.new({ script: 'echo', pages: true }, name: name) }
-
-        it 'is valid' do
-          expect(entry).to be_valid
-        end
-      end
-
-      context 'when pages entry is a hash' do
-        let(:entry) { described_class.new({ script: 'echo', pages: { path_prefix: 'foo' } }, name: name) }
-
-        it 'is valid' do
-          expect(entry).to be_valid
-        end
-      end
-
-      context 'when it has a publish entry' do
-        let(:entry) { described_class.new({ script: 'echo', pages: true, publish: 'foo' }, name: name) }
-
-        it 'is valid' do
-          expect(entry).to be_valid
-        end
-      end
-    end
   end
 
   describe '#pages_job?', :aggregate_failures, feature_category: :pages do
-    where(:name, :config, :result) do
-      :pages | {} | true
-      :pages | { pages: false } | false
-      :pages | { pages: true } | true
-      :pages | { pages: nil } | true
-      :pages | { pages: { path_prefix: 'foo' } } | true
-      :'pages:staging' | {} | false
-      :'something:pages:else' | {} | false
-      :'something-else' | {} | false
-      :'something-else' | { pages: true } | true
-      :'something-else' | { pages: { path_prefix: 'foo' } } | true
-      :'something-else' | { pages: false } | false
-      :'something-else' | { pages: nil } | false
+    where(:name, :result) do
+      :pages | true
+      :'pages:staging' | false
+      :'something:pages:else' | false
     end
 
     with_them do
-      subject { described_class.new(config, name: name).pages_job? }
+      subject { described_class.new({}, name: name).pages_job? }
 
       it { is_expected.to eq(result) }
     end
@@ -982,6 +947,16 @@ RSpec.describe Gitlab::Ci::Config::Entry::Job, feature_category: :pipeline_compo
             it 'is valid' do
               expect(entry).to be_valid
             end
+          end
+        end
+
+        context 'when feature flag is disabled' do
+          before do
+            stub_feature_flags(pipeline_run_keyword: false)
+          end
+
+          it 'return nil for run value' do
+            expect(entry.value[:run]).to be_nil
           end
         end
       end

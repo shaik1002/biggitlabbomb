@@ -2,43 +2,37 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Dashboard shortcuts', :js, feature_category: :navigation do
+RSpec.describe 'Dashboard shortcuts', :js, feature_category: :shared do
   context 'logged in' do
-    let_it_be(:group) { create(:group, :private) }
-    let_it_be(:project) { create(:project, group: group) }
-    let_it_be(:user) { create(:user) }
-    let_it_be(:issue) { create(:issue, title: 'Issue 1', project: project) }
-    let_it_be(:todo) { create(:todo, target: issue, user: user) }
-
-    before_all do
-      group.add_developer(user)
-    end
+    let(:user) { create(:user) }
+    let(:project) { create(:project) }
 
     before do
+      project.add_developer(user)
       sign_in(user)
       visit root_dashboard_path
     end
 
-    it 'navigates to pages' do
+    it 'navigate to tabs' do
       find('body').send_keys([:shift, 'I'])
 
-      check_page_title('Issues')
+      check_page_title('Assigned issues')
 
       find('body').send_keys([:shift, 'M'])
 
-      check_page_title('Merge requests')
+      check_page_title('Assigned merge requests')
 
       find('body').send_keys([:shift, 'R'])
 
-      check_page_title('Merge requests')
+      check_page_title('Review requests')
 
       find('body').send_keys([:shift, 'T'])
 
-      check_page_title('To-Do List')
+      expect(page).to have_selector('.js-todos-all')
 
       find('body').send_keys([:shift, 'G'])
 
-      check_page_title('Groups')
+      expect(page).to have_selector('[data-testid="groups-page"]')
 
       find('body').send_keys([:shift, 'P'])
 
@@ -59,7 +53,7 @@ RSpec.describe 'Dashboard shortcuts', :js, feature_category: :navigation do
       visit explore_root_path
     end
 
-    it 'navigates to pages' do
+    it 'navigate to tabs' do
       find('body').send_keys([:shift, 'G'])
 
       expect(page).to have_content('No public or internal groups')
@@ -77,8 +71,5 @@ RSpec.describe 'Dashboard shortcuts', :js, feature_category: :navigation do
 
   def check_page_title(title)
     expect(find_by_testid('page-heading')).to have_content(title)
-
-    # Ensure pages are loaded before doing the next check
-    wait_for_requests
   end
 end

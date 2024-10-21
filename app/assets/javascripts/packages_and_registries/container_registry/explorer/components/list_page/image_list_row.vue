@@ -1,6 +1,5 @@
 <script>
-import { GlButton, GlTooltipDirective, GlSprintf, GlSkeletonLoader } from '@gitlab/ui';
-import ProtectedBadge from '~/vue_shared/components/badges/protected_badge.vue';
+import { GlButton, GlTooltipDirective, GlSprintf, GlSkeletonLoader, GlBadge } from '@gitlab/ui';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { n__, s__ } from '~/locale';
 import Tracking from '~/tracking';
@@ -35,8 +34,7 @@ export default {
     GlSkeletonLoader,
     CleanupStatus,
     PublishMessage,
-
-    ProtectedBadge,
+    GlBadge,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -154,7 +152,7 @@ export default {
       <router-link
         v-else
         ref="imageName"
-        class="gl-font-bold gl-text-primary"
+        class="gl-text-body gl-font-bold"
         data-testid="details-link"
         :to="{ name: 'details', params: { id } }"
       >
@@ -174,7 +172,7 @@ export default {
       <template v-if="!metadataLoading">
         <span v-if="deleting">{{ $options.i18n.ROW_SCHEDULED_FOR_DELETION }}</span>
         <template v-else>
-          <span class="gl-flex gl-items-center" data-testid="tags-count">
+          <span class="gl-display-flex gl-align-items-center" data-testid="tags-count">
             <gl-sprintf :message="tagsCountText">
               <template #count>
                 {{ item.tagsCount }}
@@ -184,14 +182,21 @@ export default {
 
           <cleanup-status
             v-if="item.expirationPolicyCleanupStatus"
+            class="gl-ml-2"
             :status="item.expirationPolicyCleanupStatus"
             :expiration-policy="expirationPolicy"
           />
 
-          <protected-badge
+          <gl-badge
             v-if="showBadgeProtected"
-            :tooltip-text="$options.i18n.badgeProtectedTooltipText"
-          />
+            v-gl-tooltip
+            :title="$options.i18n.badgeProtectedTooltipText"
+            class="gl-ml-3"
+            size="sm"
+            variant="neutral"
+          >
+            {{ __('protected') }}
+          </gl-badge>
         </template>
       </template>
 

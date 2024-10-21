@@ -2231,6 +2231,18 @@ RSpec.describe API::Groups, feature_category: :groups_and_projects do
       end
     end
 
+    context 'when rate_limit_groups_and_projects_api feature flag is disabled' do
+      before do
+        stub_feature_flags(rate_limit_groups_and_projects_api: false)
+      end
+
+      it_behaves_like 'unthrottled endpoint'
+
+      def request
+        get api(path)
+      end
+    end
+
     context 'when authenticated as user' do
       it 'returns the invited groups in the group', :aggregate_failures do
         expect_log_keys(caller_id: "GET /api/:version/groups/:id/invited_groups",
@@ -2342,7 +2354,7 @@ RSpec.describe API::Groups, feature_category: :groups_and_projects do
       end
 
       it 'filters the invited groups in the group based on relation params', :aggregate_failures do
-        get api("/groups/#{relation_main_group.id}/invited_groups", user1), params: { relation: ['direct'] }
+        get api("/groups/#{relation_main_group.id}/invited_groups", user1), params: { relation: 'direct' }
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(response).to include_pagination_headers
@@ -2351,7 +2363,7 @@ RSpec.describe API::Groups, feature_category: :groups_and_projects do
       end
 
       it 'returns error message when include relation is invalid' do
-        get api("/groups/#{relation_main_group.id}/invited_groups", user1), params: { relation: ['some random'] }
+        get api("/groups/#{relation_main_group.id}/invited_groups", user1), params: { relation: 'some random' }
 
         expect(response).to have_gitlab_http_status(:bad_request)
         expect(json_response['error']).to eq("relation does not have a valid value")
@@ -2873,30 +2885,6 @@ RSpec.describe API::Groups, feature_category: :groups_and_projects do
 
           expect(response).to have_gitlab_http_status(:created)
           expect(json_response['default_branch']).to eq('main')
-        end
-      end
-
-      context 'when creating a nested group with `default_branch_protection_defaults` attribute' do
-        let_it_be(:parent) { create(:group) }
-        let_it_be(:params) do
-          attributes_for_group_api(
-            default_branch_protection_defaults: {
-              "allowed_to_push" => [{ "access_level" => Gitlab::Access::DEVELOPER }]
-            },
-            parent_id: parent.id
-          )
-        end
-
-        subject { post api("/groups", user3), params: params }
-
-        before do
-          parent.add_owner(user3)
-        end
-
-        it 'creates group' do
-          subject
-
-          expect(response).to have_gitlab_http_status(:created)
         end
       end
 
@@ -3493,9 +3481,8 @@ RSpec.describe API::Groups, feature_category: :groups_and_projects do
             ServiceResponse.success(
               message: 'PersonalAccessToken is revoked',
               payload: {
-                revocable: token,
-                type: 'PersonalAccessToken',
-                api_entity: 'PersonalAccessToken'
+                token: token,
+                type: 'PersonalAccessToken'
               }
             )
           end

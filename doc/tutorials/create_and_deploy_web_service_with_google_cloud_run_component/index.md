@@ -18,8 +18,8 @@ Learn how to use the [Google Cloud Run component](https://gitlab.com/google-gitl
 
 1. To run the commands on this page, set up the `gcloud` CLI in one of the following development environments:
 
-   - [Cloud Shell](https://cloud.google.com/shell/docs/using-cloud-shell)
-   - [Local shell](https://cloud.google.com/sdk/docs/install)
+    - [Cloud Shell](https://cloud.google.com/shell/docs/using-cloud-shell)
+    - [Local shell](https://cloud.google.com/sdk/docs/install)
 
 1. Set your default Google Cloud project by running the following command:
 
@@ -31,9 +31,9 @@ Learn how to use the [Google Cloud Run component](https://gitlab.com/google-gitl
 
 1. Enable the Compute Engine and Cloud Run APIs:
 
-   ```shell
-   gcloud services enable compute.googleapis.com artifactregistry.googleapis.com run.googleapis.com
-   ```
+    ```shell
+    gcloud services enable compute.googleapis.com artifactregistry.googleapis.com run.googleapis.com
+    ```
 
 1. Grant the following roles to your workload identity pool:
 
@@ -170,7 +170,7 @@ Google Cloud infrastructure.
        - docker:24.0.5-dind
      image: docker:git
      before_script:
-       - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+      - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
      script:
        - docker build -t $CI_REGISTRY_IMAGE:$IMAGE_TAG --build-arg="name=Cloud Run" .
        - docker push $CI_REGISTRY_IMAGE:$IMAGE_TAG
@@ -182,13 +182,13 @@ Google Cloud infrastructure.
          source: $CI_REGISTRY_IMAGE:$IMAGE_TAG
          target: $AR_IMAGE:$IMAGE_TAG
 
-     - component: gitlab.com/google-gitlab-components/cloud-run/deploy-cloud-run@0.1.0
-       inputs:
-         stage: deploy
-         image: $AR_IMAGE:$IMAGE_TAG
-         project_id: PROJECT
-         region: LOCATION
-         service: python-service
+   - component: gitlab.com/google-gitlab-components/cloud-run/deploy-cloud-run@0.1.0
+     inputs:
+       stage: deploy
+       image: $AR_IMAGE:$IMAGE_TAG
+       project_id: PROJECT
+       region: LOCATION
+       service: python-service
 
    ```
 
@@ -271,10 +271,10 @@ Replace the following:
 **Caution**: Deleting a project has the following effects:
 
 - **Everything in the project is deleted.** If you used an existing project for the tasks in this document, when
-  you delete it, you also delete any other work you've done in the project.
+   you delete it, you also delete any other work you've done in the project.
 - **Custom project IDs are lost.** When you created this project, you might have created a custom project ID that
-  you want to use in the future. To preserve the URLs that use the project ID, such as an appspot.com URL, delete selected
-  resources inside the project instead of deleting the whole project.
+   you want to use in the future. To preserve the URLs that use the project ID, such as an appspot.com URL, delete selected
+   resources inside the project instead of deleting the whole project.
 
 If you plan to explore multiple architectures, tutorials, or quick start tutorials on Google Cloud, reusing projects can help you
 avoid exceeding project quota limits.

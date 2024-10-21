@@ -30,6 +30,7 @@ export default {
     'isActive',
     'showDelete',
     'isDetailPage',
+    'canReadMilestone',
     'milestoneUrl',
     'editUrl',
     'closeUrl',
@@ -38,7 +39,6 @@ export default {
     'groupName',
     'issueCount',
     'mergeRequestCount',
-    'size',
   ],
   data() {
     return {
@@ -49,9 +49,6 @@ export default {
     };
   },
   computed: {
-    widthClasses() {
-      return this.size === 'small' ? 'gl-min-w-6' : 'gl-min-w-7';
-    },
     hasUrl() {
       return this.editUrl || this.closeUrl || this.reopenUrl || this.promoteUrl;
     },
@@ -103,7 +100,7 @@ export default {
       return {
         text: this.$options.i18n.delete,
         extraAttrs: {
-          class: '!gl-text-red-500',
+          class: 'gl-text-red-500!',
           'data-testid': 'milestone-delete-item',
         },
       };
@@ -125,9 +122,6 @@ export default {
     },
     showTestIdIfNotDetailPage() {
       return !this.isDetailPage ? 'milestone-more-actions-dropdown-toggle' : false;
-    },
-    hasEditOptions() {
-      return Boolean(this.closeUrl || this.reopenUrl || this.editUrl || this.promoteUrl);
     },
   },
   methods: {
@@ -175,9 +169,7 @@ export default {
     no-caret
     :toggle-text="$options.i18n.actionsLabel"
     text-sr-only
-    class="gl-relative gl-w-full sm:gl-w-auto"
-    :class="widthClasses"
-    :size="size"
+    class="gl-relative gl-w-full gl-sm-w-auto gl-min-w-7"
     :data-testid="showTestIdIfNotDetailPage"
     @shown="showDropdown"
     @hidden="hideDropdown"
@@ -185,7 +177,7 @@ export default {
     <template v-if="isDetailPage" #toggle>
       <div class="gl-min-h-7">
         <gl-button
-          class="gl-new-dropdown-toggle gl-absolute gl-left-0 gl-top-0 gl-w-full sm:gl-w-auto md:!gl-hidden"
+          class="md:!gl-hidden gl-new-dropdown-toggle gl-absolute gl-top-0 gl-left-0 gl-w-full gl-sm-w-auto"
           button-text-classes="gl-w-full"
           category="secondary"
           :aria-label="$options.i18n.actionsLabel"
@@ -195,7 +187,7 @@ export default {
           <gl-icon class="dropdown-chevron" name="chevron-down" />
         </gl-button>
         <gl-button
-          class="gl-new-dropdown-toggle gl-new-dropdown-icon-only gl-new-dropdown-toggle-no-caret gl-hidden md:!gl-flex"
+          class="gl-hidden md:!gl-flex gl-new-dropdown-toggle gl-new-dropdown-icon-only gl-new-dropdown-toggle-no-caret"
           category="tertiary"
           icon="ellipsis_v"
           :aria-label="$options.i18n.actionsLabel"
@@ -205,8 +197,8 @@ export default {
       </div>
     </template>
 
-    <gl-disclosure-dropdown-item v-if="isActive && closeUrl" :item="closeItem" />
-    <gl-disclosure-dropdown-item v-else-if="reopenUrl" :item="reopenItem" />
+    <gl-disclosure-dropdown-item v-if="isActive" :item="closeItem" />
+    <gl-disclosure-dropdown-item v-else :item="reopenItem" />
 
     <gl-disclosure-dropdown-item v-if="editUrl" :item="editItem" />
 
@@ -216,14 +208,11 @@ export default {
       @action="setPromoteModalVisibility(true)"
     />
 
-    <gl-disclosure-dropdown-group
-      :bordered="hasEditOptions"
-      :class="{ '!gl-border-t-dropdown': hasEditOptions }"
-    >
+    <gl-disclosure-dropdown-group v-if="canReadMilestone" bordered class="gl-border-t-gray-200!">
       <gl-disclosure-dropdown-item :item="copyIdItem" :data-clipboard-text="id" />
     </gl-disclosure-dropdown-group>
 
-    <gl-disclosure-dropdown-group v-if="showDelete" bordered class="!gl-border-t-dropdown">
+    <gl-disclosure-dropdown-group v-if="showDelete" bordered class="gl-border-t-gray-200!">
       <gl-disclosure-dropdown-item :item="deleteItem" @action="setDeleteModalVisibility(true)" />
     </gl-disclosure-dropdown-group>
 

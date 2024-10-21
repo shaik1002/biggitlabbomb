@@ -60,18 +60,6 @@ class Issue < ApplicationRecord
   # prevent caching this column by rails, as we want to easily remove it after the backfilling
   ignore_column :tmp_epic_id, remove_with: '16.11', remove_after: '2024-03-31'
 
-  # Interim columns to convert integer IDs to bigint
-  ignore_column :author_id_convert_to_bigint, remove_with: '17.7', remove_after: '2024-11-17'
-  ignore_column :closed_by_id_convert_to_bigint, remove_with: '17.7', remove_after: '2024-11-17'
-  ignore_column :duplicated_to_id_convert_to_bigint, remove_with: '17.7', remove_after: '2024-11-17'
-  ignore_column :id_convert_to_bigint, remove_with: '17.7', remove_after: '2024-11-17'
-  ignore_column :last_edited_by_id_convert_to_bigint, remove_with: '17.7', remove_after: '2024-11-17'
-  ignore_column :milestone_id_convert_to_bigint, remove_with: '17.7', remove_after: '2024-11-17'
-  ignore_column :moved_to_id_convert_to_bigint, remove_with: '17.7', remove_after: '2024-11-17'
-  ignore_column :project_id_convert_to_bigint, remove_with: '17.7', remove_after: '2024-11-17'
-  ignore_column :promoted_to_epic_id_convert_to_bigint, remove_with: '17.7', remove_after: '2024-11-17'
-  ignore_column :updated_by_id_convert_to_bigint, remove_with: '17.7', remove_after: '2024-11-17'
-
   belongs_to :project
   belongs_to :namespace, inverse_of: :issues
 
@@ -110,7 +98,9 @@ class Issue < ApplicationRecord
   has_one :sentry_issue
   has_one :alert_management_alert, class_name: 'AlertManagement::Alert'
   has_one :incident_management_issuable_escalation_status, class_name: 'IncidentManagement::IssuableEscalationStatus'
+  has_and_belongs_to_many :prometheus_alert_events, join_table: :issues_prometheus_alert_events # rubocop: disable Rails/HasAndBelongsToMany
   has_many :alert_management_alerts, class_name: 'AlertManagement::Alert', inverse_of: :issue, validate: false
+  has_many :prometheus_alerts, through: :prometheus_alert_events
   has_many :issue_customer_relations_contacts, class_name: 'CustomerRelations::IssueContact', inverse_of: :issue
   has_many :customer_relations_contacts, through: :issue_customer_relations_contacts, source: :contact, class_name: 'CustomerRelations::Contact', inverse_of: :issues
   has_many :incident_management_timeline_events, class_name: 'IncidentManagement::TimelineEvent', foreign_key: :issue_id, inverse_of: :incident
@@ -190,6 +180,7 @@ class Issue < ApplicationRecord
   scope :preload_routables, -> { preload(project: [:route, { namespace: :route }]) }
 
   scope :with_alert_management_alerts, -> { joins(:alert_management_alert) }
+  scope :with_prometheus_alert_events, -> { joins(:issues_prometheus_alert_events) }
   scope :with_api_entity_associations, -> {
     preload(:work_item_type, :timelogs, :closed_by, :assignees, :author, :labels, :issuable_severity,
       namespace: [{ parent: :route }, :route], milestone: { project: [:route, { namespace: :route }] },
@@ -531,12 +522,13 @@ class Issue < ApplicationRecord
     self.duplicated_to_id = nil
   end
 
-  def can_move?(user, to_namespace = nil)
-    if to_namespace
-      return false unless user.can?(:admin_issue, to_namespace)
+  def can_move?(user, to_project = nil)
+    if to_project
+      return false unless user.can?(:admin_issue, to_project)
     end
 
-    !moved? && persisted? && user.can?(:admin_issue, self)
+    !moved? && persisted? &&
+      user.can?(:admin_issue, self.project)
   end
   alias_method :can_clone?, :can_move?
 

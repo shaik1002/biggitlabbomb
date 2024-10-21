@@ -25,7 +25,9 @@ class UpdateFinishStatusForBbmMigrations < Gitlab::Database::Migration[2.2]
     BackfillEpicDatesToWorkItemDatesSources
     BackfillEpicIssuesIntoWorkItemParentLinks
     BackfillFindingIdInVulnerabilities
+    BackfillFindingInitialPipelineId
     BackfillHasIssuesForExternalIssueLinks
+    BackfillHasMergeRequestOfVulnerabilityReads
     BackfillHasRemediationsOfVulnerabilityReads
     BackfillIssueSearchDataNamespaceId
     BackfillMergeRequestDiffsProjectId
@@ -35,6 +37,7 @@ class UpdateFinishStatusForBbmMigrations < Gitlab::Database::Migration[2.2]
     BackfillNugetNormalizedVersion
     BackfillOnboardingStatusStepUrl
     BackfillOrDropCiPipelineOnProjectId
+    BackfillOwaspTopTenOfVulnerabilityReads
     BackfillPackagesTagsProjectId
     BackfillPartitionIdCiPipelineArtifact
     BackfillPartitionIdCiPipelineChatData

@@ -42,14 +42,12 @@ class Project < ApplicationRecord
   include BlocksUnsafeSerialization
   include Subquery
   include IssueParent
-  include WorkItems::Parent
   include UpdatedAtFilterable
   include IgnorableColumns
   include CrossDatabaseIgnoredTables
   include UseSqlFunctionForPrimaryKeyLookups
   include Importable
   include SafelyChangeColumnDefault
-  include Todoable
 
   columns_changing_default :organization_id
 
@@ -189,7 +187,6 @@ class Project < ApplicationRecord
   belongs_to :creator, class_name: 'User'
   belongs_to :organization, class_name: 'Organizations::Organization'
   belongs_to :group, -> { where(type: Group.sti_name) }, foreign_key: 'namespace_id'
-  alias_method :notification_group, :group
   belongs_to :namespace
   # Sync deletion via DB Trigger to ensure we do not have
   # a project without a project_namespace (or vice-versa)
@@ -423,6 +420,10 @@ class Project < ApplicationRecord
   has_many :cluster_agents, class_name: 'Clusters::Agent'
   has_many :ci_access_project_authorizations, class_name: 'Clusters::Agents::Authorizations::CiAccess::ProjectAuthorization'
 
+  has_many :prometheus_metrics
+  has_many :prometheus_alerts, inverse_of: :project
+  has_many :prometheus_alert_events, inverse_of: :project
+
   has_many :alert_management_alerts, class_name: 'AlertManagement::Alert', inverse_of: :project
   has_many :alert_management_http_integrations, class_name: 'AlertManagement::HttpIntegration', inverse_of: :project
 
@@ -631,8 +632,9 @@ class Project < ApplicationRecord
   validate :visibility_level_allowed_as_fork, if: :should_validate_visibility_level?
   validate :validate_pages_https_only, if: -> { changes.has_key?(:pages_https_only) }
   validate :changing_shared_runners_enabled_is_allowed
-  validate :parent_organization_match, if: :require_organization?
-  validates :repository_storage, presence: true, inclusion: { in: ->(_) { Gitlab.config.repositories.storages.keys } }
+  validates :repository_storage,
+    presence: true,
+    inclusion: { in: ->(_object) { Gitlab.config.repositories.storages.keys } }
   validates :variables, nested_attributes_duplicates: { scope: :environment_scope }
   validates :bfg_object_map, file_size: { maximum: :max_attachment_size }
   validates :max_artifacts_size, numericality: { only_integer: true, greater_than: 0, allow_nil: true }
@@ -730,7 +732,6 @@ class Project < ApplicationRecord
   scope :with_jira_dvcs_server, -> { joins(:feature_usage).merge(ProjectFeatureUsage.with_jira_dvcs_integration_enabled(cloud: false)) }
   scope :by_name, ->(name) { where('projects.name LIKE ?', "#{sanitize_sql_like(name)}%") }
   scope :inc_routes, -> { includes(:route, namespace: :route) }
-  scope :include_fork_networks, -> { includes(:fork_network) }
   scope :with_statistics, -> { includes(:statistics) }
   scope :with_namespace, -> { includes(:namespace) }
   scope :joins_namespace, -> { joins(:namespace) }
@@ -848,9 +849,6 @@ class Project < ApplicationRecord
 
   scope :in_organization, ->(organization) { where(organization: organization) }
   scope :by_project_namespace, ->(project_namespace) { where(project_namespace_id: project_namespace) }
-  scope :by_any_overlap_with_traversal_ids, ->(traversal_ids) {
-    joins_namespace.where('namespaces.traversal_ids::bigint[] && ARRAY[?]::bigint[]', traversal_ids)
-  }
 
   scope :not_a_fork, -> {
     left_outer_joins(:fork_network_member).where(fork_network_member: { forked_from_project_id: nil })
@@ -1492,8 +1490,7 @@ class Project < ApplicationRecord
     job_type = type.to_s.capitalize
 
     if job_id
-      use_primary = ::Gitlab::Database::LoadBalancing::SessionMap.current(load_balancer).use_primary?
-      Gitlab::AppLogger.info("#{job_type} job scheduled for #{full_path} with job ID #{job_id} (primary: #{use_primary}).")
+      Gitlab::AppLogger.info("#{job_type} job scheduled for #{full_path} with job ID #{job_id} (primary: #{::Gitlab::Database::LoadBalancing::Session.current.use_primary?}).")
     else
       Gitlab::AppLogger.error("#{job_type} job failed to create for #{full_path}.")
     end
@@ -1700,13 +1697,6 @@ class Project < ApplicationRecord
     if shared_runners_setting_conflicting_with_group?
       errors.add(:shared_runners_enabled, _('cannot be enabled because parent group does not allow it'))
     end
-  end
-
-  def parent_organization_match
-    return unless parent
-    return if parent.organization_id == organization_id
-
-    errors.add(:organization_id, _("must match the parent organization's ID"))
   end
 
   def shared_runners_setting_conflicting_with_group?
@@ -2410,8 +2400,13 @@ class Project < ApplicationRecord
 
     params[:exported_by_admin] = current_user.can_admin_all_resources?
 
-    job_id = Projects::ImportExport::CreateRelationExportsWorker
+    job_id = if Feature.enabled?(:parallel_project_export, current_user)
+               Projects::ImportExport::CreateRelationExportsWorker
                  .perform_async(current_user.id, self.id, after_export_strategy, params)
+             else
+               ProjectExportWorker
+                 .perform_async(current_user.id, self.id, after_export_strategy, params)
+             end
 
     if job_id
       Gitlab::AppLogger.info "Export job started for project ID #{self.id} with job ID #{job_id}"
@@ -3010,17 +3005,6 @@ class Project < ApplicationRecord
     environments.where("name LIKE (#{::Gitlab::SQL::Glob.to_like(quoted_scope)})") # rubocop:disable GitlabSecurity/SqlInjection
   end
 
-  def batch_loaded_environment_by_name(name)
-    # This code path has caused N+1s in the past, since environments are only indirectly
-    # associated to builds and pipelines; see https://gitlab.com/gitlab-org/gitlab/-/issues/326445
-    # We therefore batch-load them to prevent dormant N+1s until we found a proper solution.
-    BatchLoader.for(name).batch(key: id) do |names, loader, args|
-      Environment.where(name: names, project: args[:key]).find_each do |environment|
-        loader.call(environment.name, environment)
-      end
-    end
-  end
-
   def latest_jira_import
     jira_imports.last
   end
@@ -3045,7 +3029,7 @@ class Project < ApplicationRecord
     config = Gitlab.config.incoming_email
     wildcard = Gitlab::Email::Common::WILDCARD_PLACEHOLDER
 
-    config.address&.gsub(wildcard, default_service_desk_subaddress_part)
+    config.address&.gsub(wildcard, "#{full_path_slug}-#{default_service_desk_suffix}")
   end
 
   def service_desk_alias_address
@@ -3060,10 +3044,6 @@ class Project < ApplicationRecord
     return unless service_desk_setting&.custom_email_enabled?
 
     service_desk_setting.custom_email
-  end
-
-  def default_service_desk_subaddress_part
-    "#{full_path_slug}-#{default_service_desk_suffix}"
   end
 
   def default_service_desk_suffix
@@ -3171,8 +3151,6 @@ class Project < ApplicationRecord
 
   def ci_inbound_job_token_scope_enabled?
     return true unless ci_cd_settings
-
-    return true if ::Gitlab::CurrentSettings.enforce_ci_inbound_job_token_scope_enabled?
 
     ci_cd_settings.inbound_job_token_scope_enabled?
   end
@@ -3352,12 +3330,6 @@ class Project < ApplicationRecord
     group.crm_enabled?
   end
 
-  def crm_group
-    return unless group
-
-    group.crm_group
-  end
-
   def supports_lock_on_merge?
     group&.supports_lock_on_merge? || ::Feature.enabled?(:enforce_locked_labels_on_merge, self, type: :ops)
   end
@@ -3458,7 +3430,6 @@ class Project < ApplicationRecord
       self.topics.delete_all
       self.topics = @topic_list.map do |topic_name|
         Projects::Topic
-          .for_organization(organization_id)
           .where('lower(name) = ?', topic_name.downcase)
           .order(total_projects_count: :desc)
           .first_or_create(name: topic_name, title: topic_name, slug: Gitlab::Slug::Path.new(topic_name).generate)

@@ -1,5 +1,4 @@
 import { Mark } from '@tiptap/core';
-import { Fragment } from '@tiptap/pm/model';
 import Code from '@tiptap/extension-code';
 import { EXTENSION_PRIORITY_LOWER } from '../constants';
 
@@ -12,18 +11,6 @@ export default Code.extend({
    * are rendered first.
    */
   priority: EXTENSION_PRIORITY_LOWER,
-
-  parseHTML() {
-    return [
-      {
-        tag: 'code',
-        preserveWhitespace: true,
-        getContent(element, schema) {
-          return Fragment.from(schema.text(element.textContent));
-        },
-      },
-    ];
-  },
 
   addKeyboardShortcuts() {
     return {

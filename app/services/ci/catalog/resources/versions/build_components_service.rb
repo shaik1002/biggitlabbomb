@@ -9,21 +9,17 @@ module Ci
         class BuildComponentsService
           MAX_COMPONENTS = Ci::Catalog::ComponentsProject::COMPONENTS_LIMIT
 
-          def initialize(release, version, components_data)
+          def initialize(release, version)
             @release = release
             @version = version
-            @components_data = components_data
+
             @project = release.project
             @components_project = Ci::Catalog::ComponentsProject.new(project)
             @errors = []
           end
 
           def execute
-            components = if components_data
-                           build_components_from_passed_data
-                         else
-                           build_components_from_fetched_data
-                         end
+            components = build_components_from_fetched_data
 
             if errors.empty?
               ServiceResponse.success(payload: components)
@@ -34,16 +30,7 @@ module Ci
 
           private
 
-          attr_reader :release, :version, :project, :components_project, :components_data, :errors
-
-          def build_components_from_passed_data
-            check_number_of_components(components_data.size)
-            return if errors.present?
-
-            components_data.map do |component_data|
-              build_catalog_resource_component(component_data)
-            end
-          end
+          attr_reader :release, :version, :project, :components_project, :errors
 
           def build_components_from_fetched_data
             component_paths = components_project.fetch_component_paths(release.sha, limit: MAX_COMPONENTS + 1)
@@ -71,8 +58,7 @@ module Ci
 
             {
               name: component_name,
-              spec: components_project.extract_spec(blob.data),
-              component_type: 'template'
+              spec: components_project.extract_spec(blob.data)
             }
           end
 
@@ -89,7 +75,6 @@ module Ci
               name: metadata[:name],
               project: version.project,
               spec: metadata[:spec],
-              component_type: metadata[:component_type],
               version: version,
               catalog_resource: version.catalog_resource,
               created_at: Time.current
@@ -98,10 +83,6 @@ module Ci
             return component if component.valid?
 
             error("Build component error: #{component.errors.full_messages.join(', ')}")
-          rescue ArgumentError => e
-            # In Rails 7.1, we'll have a better way to handle this error; https://github.com/rails/rails/pull/49100
-            # Ci::Catalog::Resources::Component: `enum resource_type: { template: 1 }, validate: true`
-            error(e.message)
           end
 
           def error(message)

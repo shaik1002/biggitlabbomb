@@ -1,5 +1,10 @@
-mutation updateAbuseReportNote($input: UpdateAbuseReportNoteInput!) {
-  updateAbuseReportNote(input: $input) {
+#import "./abuse_report_note.fragment.graphql"
+
+mutation updateAbuseReportNote($input: UpdateNoteInput!) {
+  updateNote(input: $input) {
+    note {
+      ...AbuseReportNote
+    }
     errors
   }
 }

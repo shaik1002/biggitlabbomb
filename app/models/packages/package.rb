@@ -35,6 +35,8 @@ class Packages::Package < ApplicationRecord
   belongs_to :project
   belongs_to :creator, class_name: 'User'
 
+  after_create_commit :publish_creation_event, if: :generic?
+
   # package_files must be destroyed by ruby code in order to properly remove carrierwave uploads and update project statistics
   has_many :package_files, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
   # TODO: put the installable default scope on the :package_files association once the dependent: :destroy is removed
@@ -43,16 +45,12 @@ class Packages::Package < ApplicationRecord
   has_many :installable_nuget_package_files, -> { installable.with_nuget_format }, class_name: 'Packages::PackageFile', inverse_of: :package
   has_many :dependency_links, inverse_of: :package, class_name: 'Packages::DependencyLink'
   has_many :tags, inverse_of: :package, class_name: 'Packages::Tag'
-
+  has_one :pypi_metadatum, inverse_of: :package, class_name: 'Packages::Pypi::Metadatum'
   has_one :maven_metadatum, inverse_of: :package, class_name: 'Packages::Maven::Metadatum'
   has_one :nuget_metadatum, inverse_of: :package, class_name: 'Packages::Nuget::Metadatum'
   has_many :nuget_symbols, inverse_of: :package, class_name: 'Packages::Nuget::Symbol'
   has_one :npm_metadatum, inverse_of: :package, class_name: 'Packages::Npm::Metadatum'
-
-  # TODO: Remove with the rollout of the FF terraform_extract_terraform_package_model
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/490007
   has_one :terraform_module_metadatum, inverse_of: :package, class_name: 'Packages::TerraformModule::Metadatum'
-
   has_many :build_infos, inverse_of: :package
   has_many :pipelines, through: :build_infos, disable_joins: true
   has_many :matching_package_protection_rules, ->(package) { where(package_type: package.package_type).for_package_name(package.name) }, through: :project, source: :package_protection_rules
@@ -73,24 +71,34 @@ class Packages::Package < ApplicationRecord
 
   validate :npm_package_already_taken, if: :npm?
 
+  validates :name, format: { with: Gitlab::Regex.generic_package_name_regex }, if: :generic?
+  validates :name, format: { with: Gitlab::Regex.helm_package_regex }, if: :helm?
   validates :name, format: { with: Gitlab::Regex.npm_package_name_regex, message: Gitlab::Regex.npm_package_name_regex_message }, if: :npm?
   validates :name, format: { with: Gitlab::Regex.nuget_package_name_regex }, if: :nuget?
-
-  # TODO: Remove with the rollout of the FF terraform_extract_terraform_package_model
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/490007
   validates :name, format: { with: Gitlab::Regex.terraform_module_package_name_regex }, if: :terraform_module?
-
   validates :version, format: { with: Gitlab::Regex.nuget_version_regex }, if: :nuget?
   validates :version, format: { with: Gitlab::Regex.maven_version_regex }, if: -> { version? && maven? }
-
-  # TODO: Remove `terraform_module?` condition with the rollout of the FF terraform_extract_terraform_package_model
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/490007
+  validates :version, format: { with: Gitlab::Regex.pypi_version_regex }, if: :pypi?
+  validates :version, format: { with: Gitlab::Regex.helm_version_regex }, if: :helm?
   validates :version, format: { with: Gitlab::Regex.semver_regex, message: Gitlab::Regex.semver_regex_message },
     if: -> { npm? || terraform_module? }
+
+  validates :version,
+    presence: true,
+    format: { with: Gitlab::Regex.generic_package_version_regex },
+    if: :generic?
 
   scope :for_projects, ->(project_ids) { where(project_id: project_ids) }
   scope :with_name, ->(name) { where(name: name) }
   scope :with_name_like, ->(name) { where(arel_table[:name].matches(name)) }
+
+  scope :with_normalized_pypi_name, ->(name) do
+    where(
+      "LOWER(regexp_replace(name, ?, '-', 'g')) = ?",
+      Gitlab::Regex::Packages::PYPI_NORMALIZED_NAME_REGEX_STRING,
+      name.downcase
+    )
+  end
 
   scope :with_case_insensitive_version, ->(version) do
     where('LOWER(version) = ?', version.downcase)
@@ -126,6 +134,7 @@ class Packages::Package < ApplicationRecord
 
   scope :preload_npm_metadatum, -> { preload(:npm_metadatum) }
   scope :preload_nuget_metadatum, -> { preload(:nuget_metadatum) }
+  scope :preload_pypi_metadatum, -> { preload(:pypi_metadatum) }
 
   scope :with_npm_scope, ->(scope) do
     npm.where("position('/' in packages_packages.name) > 0 AND split_part(packages_packages.name, '/', 1) = :package_scope", package_scope: "@#{sanitize_sql_like(scope)}")
@@ -176,26 +185,15 @@ class Packages::Package < ApplicationRecord
 
   def self.inheritance_column = 'package_type'
 
-  def self.inheritance_column_to_class_map
-    hash = {
-      ml_model: 'Packages::MlModel::Package',
-      golang: 'Packages::Go::Package',
-      rubygems: 'Packages::Rubygems::Package',
-      conan: 'Packages::Conan::Package',
-      rpm: 'Packages::Rpm::Package',
-      debian: 'Packages::Debian::Package',
-      composer: 'Packages::Composer::Package',
-      helm: 'Packages::Helm::Package',
-      generic: 'Packages::Generic::Package',
-      pypi: 'Packages::Pypi::Package'
-    }
-
-    if Feature.enabled?(:terraform_extract_terraform_package_model, Feature.current_request)
-      hash[:terraform_module] = 'Packages::TerraformModule::Package'
-    end
-
-    hash
-  end
+  def self.inheritance_column_to_class_map = {
+    ml_model: 'Packages::MlModel::Package',
+    golang: 'Packages::Go::Package',
+    rubygems: 'Packages::Rubygems::Package',
+    conan: 'Packages::Conan::Package',
+    rpm: 'Packages::Rpm::Package',
+    debian: 'Packages::Debian::Package',
+    composer: 'Packages::Composer::Package'
+  }.freeze
 
   def self.only_maven_packages_with_path(path, use_cte: false)
     if use_cte
@@ -284,6 +282,10 @@ class Packages::Package < ApplicationRecord
     tags.pluck(:name)
   end
 
+  def infrastructure_package?
+    terraform_module?
+  end
+
   def package_settings
     project.namespace.package_settings
   end
@@ -312,6 +314,13 @@ class Packages::Package < ApplicationRecord
     return unless pending_destruction?
 
     ::Packages::MarkPackageFilesForDestructionWorker.perform_async(id)
+  end
+
+  # As defined in PEP 503 https://peps.python.org/pep-0503/#normalized-names
+  def normalized_pypi_name
+    return name unless pypi?
+
+    name.gsub(/#{Gitlab::Regex::Packages::PYPI_NORMALIZED_NAME_REGEX_STRING}/o, '-').downcase
   end
 
   def normalized_nuget_version

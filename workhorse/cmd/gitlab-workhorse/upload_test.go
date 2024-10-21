@@ -149,8 +149,6 @@ func TestAcceleratedUpload(t *testing.T) {
 		{"POST", `/api/graphql`, false},
 		{"POST", `/api/v4/topics`, false},
 		{"PUT", `/api/v4/topics`, false},
-		{"POST", `/api/v4/organizations`, false},
-		{"PUT", `/api/v4/organizations/1`, false},
 		{"POST", `/api/v4/groups`, false},
 		{"PUT", `/api/v4/groups/5`, false},
 		{"PUT", `/api/v4/groups/group%2Fsubgroup`, false},
@@ -371,12 +369,12 @@ func TestBlockingRewrittenFieldsHeader(t *testing.T) {
 			ws := startWorkhorseServer(t, ts.URL)
 
 			req, err := http.NewRequest("POST", ws.URL+"/something", tc.body)
-			require.NoError(t, err)
+			assert.NoError(t, err)
 
 			req.Header.Set("Content-Type", tc.contentType)
 			req.Header.Set(upload.RewrittenFieldsHeader, canary)
 			resp, err := http.DefaultClient.Do(req)
-			require.NoError(t, err)
+			assert.NoError(t, err)
 			defer resp.Body.Close()
 
 			assert.Equal(t, 200, resp.StatusCode, "status code")

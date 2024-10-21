@@ -139,6 +139,12 @@ function rspec_simple_job_with_retry () {
   handle_retry_rspec_in_new_process $rspec_run_status
 }
 
+function rspec_db_library_code() {
+  local db_files="spec/lib/gitlab/database/"
+
+  rspec_simple_job_with_retry "--tag ~click_house -- ${db_files}"
+}
+
 # Below is the list of options (https://linuxcommand.org/lc3_man_pages/seth.html)
 #
 #   allexport    same as -a
@@ -238,7 +244,7 @@ function rspec_parallelized_job() {
   read -ra job_name <<< "${CI_JOB_NAME}"
   local test_tool="${job_name[0]}"
   local test_level="${job_name[1]}"
-  # e.g. 'rspec unit pg14 1/24 278964' would become 'rspec_unit_pg14_1_24_278964'
+  # e.g. 'rspec unit pg13 1/24 278964' would become 'rspec_unit_pg13_1_24_278964'
   local report_name=$(echo "${CI_JOB_NAME} ${CI_PROJECT_ID}" | sed -E 's|[/ ]|_|g')
   local rspec_opts="${1:-}"
   local rspec_tests_mapping_enabled="${RSPEC_TESTS_MAPPING_ENABLED:-}"
@@ -298,23 +304,21 @@ function rspec_parallelized_job() {
   handle_retry_rspec_in_new_process $rspec_run_status
 }
 
-# this function must be executed from 'qa' directory
 function run_e2e_specs() {
   local url=$1
   local tests=$2
   local tags=$3
 
-  export QA_COMMAND="bundle exec bin/qa ${QA_SCENARIO:=Test::Instance::All} $url -- $tests $tags --order random --force-color --format documentation"
+  export QA_COMMAND="bundle exec bin/qa ${QA_SCENARIO:=Test::Instance::All} $url -- $tests $tags --order random --force-color --format documentation --format QA::Support::JsonFormatter --out tmp/rspec-${CI_JOB_ID}-\${QA_RSPEC_RETRIED:-false}.json"
   echo "Running e2e specs via command: '$QA_COMMAND'"
 
-  if eval "$QA_COMMAND"; then
+  if eval "$QA_COMMAND --format RspecJunitFormatter --out tmp/rspec-${CI_JOB_ID}.xml"; then
     echo "Test run finished successfully"
   else
     retry_failed_e2e_rspec_examples
   fi
 }
 
-# this function must be executed from 'qa' directory
 function retry_failed_e2e_rspec_examples() {
   local rspec_run_status=0
 
@@ -331,38 +335,22 @@ function retry_failed_e2e_rspec_examples() {
     exit 1
   fi
 
+  local junit_retry_file="tmp/retried-rspec-${CI_JOB_ID}.xml"
+
   export QA_RSPEC_RETRIED="true"
   export NO_KNAPSACK="true"
 
   echoinfo "Initial test run failed, retrying tests in new process" "yes"
 
-  if eval "$QA_COMMAND --only-failures"; then
+  if eval "$QA_COMMAND --format RspecJunitFormatter --out ${junit_retry_file} --only-failures"; then
     echosuccess "Retry run finished successfully" "yes"
   else
     rspec_run_status=$?
     echoerr "Retry run did not finish successfully, job will be failed!" "yes"
   fi
 
-  # default junit file pattern is set in 'qa/qa/specs/runner.rb'
-  local junit_retry_file=$(ls tmp/rspec-*-retried-true.xml)
-
   echoinfo "Merging junit reports" "yes"
-  if [[ ! -f "${junit_retry_file}" ]]; then
-    echoerr "Junit retry file not found '${junit_retry_file}', skipping report merge"
-    return 0
-  fi
-
-  if [[ "$QA_RUN_IN_PARALLEL" == "true" ]]; then
-    echoinfo "Parallel run detected, merging with parallel reports"
-    bundle exec junit_merge tmp/rspec-*-retried-false*.xml
-    mv "$(ls tmp/rspec-*-retried-false*.xml | tail -n 1)" "tmp/rspec-${CI_JOB_ID}.xml"
-    rm tmp/rspec-*-retried-false*.xml
-
-    bundle exec junit_merge --update-only $junit_retry_file "tmp/rspec-${CI_JOB_ID}.xml"
-  else
-    bundle exec junit_merge --update-only $junit_retry_file tmp/rspec-*-retried-false.xml
-  fi
-  rm $junit_retry_file
+  bundle exec junit_merge ${junit_retry_file} tmp/rspec-${CI_JOB_ID}.xml --update-only
   echosuccess " junit results merged successfully!"
 
   exit $rspec_run_status

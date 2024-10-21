@@ -1,185 +1,167 @@
 ---
 stage: AI-powered
-group: Duo Workflow
+group: AI Framework
 info: Any user with at least the Maintainer role can merge updates to this content. For details, see https://docs.gitlab.com/ee/development/development_processes.html#development-guidelines-review.
 ---
 
 # Setting up local development for Duo Workflow
 
-Alternative to this detailed setup you can also [set up Duo Workflow directly with GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/main/doc/howto/duo_workflow.md?ref_type=heads).
-
 ## Prerequisites
 
-- Vertex API access
-  - You need access to the `ai-enablement-dev-69497ba7` project in
-    GCP. This should by available to all engineers at GitLab.
 - Docker
-  - See which Docker tooling is approved for GitLab team members in the [handbook](https://handbook.gitlab.com/handbook/tools-and-tips/mac/#docker-desktop).
+  - NOTE: We aren't allowed to use [Docker Desktop](https://handbook.gitlab.com/handbook/tools-and-tips/mac/#docker-desktop).
+- [AI Gateway](../ai_features/index.md)
 
-## Set up your local GitLab instance
+## Setting up Duo Workflow
 
-1. Configure the Duo Workflow Service URL in your local GitLab instance by updating the `config/gitlab.yml` file:
+### Set up Duo Workflow Service
 
-   ```dotenv
-   development:
-     duo_workflow:
-       service_url: 0.0.0.0:50052
-       secure: false
-   ```
+1. Clone the [Duo Workflow Service](https://gitlab.com/gitlab-org/duo-workflow/duo-workflow-service)
 
-1. Restart the GitLab instance.
+  ```shell
+    git clone git@gitlab.com:gitlab-org/duo-workflow/duo-workflow-service.git
+  ```
 
-   ```shell
-   gdk restart rails
-   ```
+1. Navigate to the Duo Workflow Service directory
 
-1. In your local GitLab instance, enable the `duo_workflow` feature flag from the Rails console:
+1. Install dependencies
 
-   ```ruby
-   Feature.enable(:duo_workflow)
-   ```
+  ```shell
+  poetry install
+  ```
 
-1. Set up [GitLab Runner with GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/main/doc/howto/runner.md) so you can create CI jobs locally to test Workflow.
-1. Create a [personal access token](../../user/profile/personal_access_tokens.md) in your local GitLab instance with the `api` scope. Save this value and use it in the next step.
-1. Run GDK with an Ultimate license.
-1. Manually create a Workflow using the following `curl` request; the output will be a workflow ID that is referred to as `$WORKFLOW_ID` throughout the rest of these docs:
+1. Copy the example env file in the Service repo. Enter your Anthropic API key.
 
-   ```shell
-   curl POST --verbose \
-     --header "Authorization: Bearer $YOUR_GITLAB_PAT" \
-     --header 'Content-Type: application/json' \
-     --data '{
-        "project_id": "$PROJECT_ID_FOR_RUNNING_WORKFLOW_AGAINST"
-     }' \
-     $YOUR_GDK_ROOT_URL/api/v4/ai/duo_workflows/workflows
-   ```
+  ```shell
+  cp .env.example .env
+  ```
 
-## Set up the Duo Workflow Service
+  ```dotenv
+  ANTHROPIC_API_KEY=<YOUR_API_KEY>
+  ```
 
-1. Clone the [Duo Workflow Service repository](https://gitlab.com/gitlab-org/duo-workflow/duo-workflow-service).
+  You can disable auth for local development by setting DUO_WORKFLOW_AUTH__ENABLED=false in `.env`
 
-   ```shell
-     git clone git@gitlab.com:gitlab-org/duo-workflow/duo-workflow-service.git
-   ```
+1. Run Duo Workflow Service
 
-1. Navigate to the Duo Workflow Service directory.
+  ```shell
+  poetry run python -m duo_workflow_service.server
+  ```
 
-   ```shell
-   cd duo-workflow-service
-   ```
+1. In your local GitLab instance enable the `duo_workflow` feature flag from the rails console:
 
-1. Install dependencies with [poetry](https://python-poetry.org/docs/#installing-with-pipx).
+  ```ruby
+  Feature.enable(:duo_workflow)
+  ```
 
-   ```shell
-   poetry install
-   ```
+1. Create a [personal access token](../../user/profile/personal_access_tokens.md) in your local GitLab instance with `api` scope
 
-1. Copy the example env file in the Service repo.
+1. Generate a workflow ID. Replace `$GITLAB_TOKEN` with a PAT from your local GitLab instance.
 
-   ```shell
-   cp .env.example .env
-   ```
+  ```shell
+  curl POST --verbose \
+    --header "Authorization: Bearer $GITLAB_TOKEN" \
+    --header 'Content-Type: application/json' \
+    --data '{
+        "project_id": "7"
+    }' \
+    http://<GDK_HOST>:3000/api/v4/ai/duo_workflows/workflows
+  ```
 
-1. Add your `ANTHROPIC_API_KEY` in the `.env` file.
+### Set up the Duo Workflow Executor
 
-1. Setup [`gcloud`](https://cloud.google.com/sdk/docs/install) on your system.
-1. Login using your GitLab Google account by running:
-
-   ```shell
-   gcloud auth login
-   ```
-
-1. Set the `ai-enablement-dev-69497ba7` as active project by running:
-
-   ```shell
-   gcloud config set project ai-enablement-dev-69497ba7
-   ```
-
-1. Create the credentials for the application to use
-
-   ```shell
-   gcloud auth application-default login --disable-quota-project
-   ```
-
-1. Optional: You can disable auth for local development in the `.env` file. This disables authentication or the gRPC connection between the Duo Workflow Service and Duo Workflow Executor but a token will still be required for requests to your local GitLab instance.
-
-   ```dotenv
-   DUO_WORKFLOW_AUTH__ENABLED=false
-   ```
-
-1. Run the Duo Workflow Service server
-
-   ```shell
-   poetry run python -m duo_workflow_service.server
-   ```
-
-1. If you can correctly connect to Claude, you should see something
-   like this in the output
-
-   ```shell
-   2024-09-06 17:16:54 [info     ] Connected to model: claude-3-sonnet-20240229: You're talking to Claude, an AI assistant created by Anthropic.
-   2024-09-06 17:16:54 [info     ] Starting server on port 50052
-   2024-09-06 17:16:54 [info     ] Started server
-   ```
-
-## Set up the Duo Workflow Executor
-
-1. Clone the [Duo Workflow Executor repository](https://gitlab.com/gitlab-org/duo-workflow/duo-workflow-executor)
-
-   ```shell
-     git clone git@gitlab.com:gitlab-org/duo-workflow/duo-workflow-executor.git
-   ```
+1. Clone the [Duo Workflow Executor](https://gitlab.com/gitlab-org/duo-workflow/duo-workflow-executor)
 
 1. Navigate to the Duo Workflow Executor directory
 
-   ```shell
-   cd duo-workflow-executor
-   ```
+1. Create a Dockerfile
 
-1. Create a Dockerfile in the Duo Workflow Executor root directory with the following contents:
+  ```Dockerfile
+  FROM alpine
 
-   ```Dockerfile
-   FROM alpine
+  RUN apk add go busybox-extras git bash
+  ```
 
-   RUN apk add go busybox-extras git bash
-   ```
+1. Run the executor with your GitLab token and workflow ID. Below is an example prompt goal
 
-1. Build a development image to use:
+  ```shell
+  make && \
+  ./bin/duo-workflow-executor \
+      --goal='Can you fix the pipeline for the Merge request: 1 in the project 60003631.
+  You will have to clone the repository if you need to fix files. You can use the `run_command` tool to do so."
+  Please also checkout the right branch before making the changes.
+  You can fetch the repository name from the `get_project` tool.
 
-   ```shell
-   docker build -t alpine-dev-workflow .
-   ```
+  Once you have fixed the pipeline please push the code to the same branch.' \
+      --workflow-id=$WORKFLOW_ID \
+      --token=$GITLAB_TOKEN \
+      --base-url="http://<GDK_HOST>:3000" \
+      --realm="saas" \
+      --userID="777"
+  ```
 
-1. Run the executor with your GitLab token and workflow ID
-
-   ```shell
-   make && \
-   ./bin/duo-workflow-executor \
-       --goal='Fix the pipeline for the Merge request 62 in the project 19.' \
-       --insecure --debug \
-       --workflow-id=$WORKFLOW_ID \
-       --token=$YOUR_GITLAB_PAT \
-       --base-url="$GDK_GITLAB_URL" \
-       --user-id="1"
-   ```
+  You can also find more instructions to [run the executor locally in a Docker container](https://gitlab.com/gitlab-org/duo-workflow/duo-workflow-executor/-/blob/9dbe47ce3c61e1274af184f595ae5af1417d7a39/README.md).
 
 1. Verify that the checkpoints for workflow have been created
 
-   ```shell
-   curl --verbose \
-     --header "Authorization: Bearer $YOUR_GITLAB_PAT" \
-     $GDK_GITLAB_URL/api/v4/ai/duo_workflows/workflows/$WORKFLOW_ID/checkpoints
-   ```
+  ```shell
+  curl --verbose \
+    --header "Authorization: Bearer $GITLAB_TOKEN" \
+    http://<GDK_HOST>/api/v4/ai/duo_workflows/workflows/<workflow_id>/checkpoints
+  ```
 
-## Configure the GitLab Duo Workflow extension for VS Code
+## Optional: Testing the Auth flow via GitLab
 
-The above steps show how to start a workflow directly from the Duo Workflow
-Executor.
+Please note that this work is in progress and only half-implemented. These instructions are left here in case they are useful for testing purposes.
 
-If you would like to start Duo Workflow with the VS Code extension instead,
-follow [these steps](../../user/duo_workflow/index.md#prerequisites).
+1. Generate a Cloud Connector token and grab your GitLab instance ID from the rails console
 
-If you are debugging or making changes to the VSCode extension and need to run the extension in development mode, you can do that following [these instructions](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/CONTRIBUTING.md#configuring-development-environment).
+  ```shell
+  cd <GDK-root>
+  gdk start
+  gdk rails console
+  ```
+
+  To grab your Cloud Connector token:
+
+  ```ruby
+  ::Gitlab::CloudConnector::SelfIssuedToken.new(
+  audience: "gitlab-duo-workflow-service",
+  subject: Gitlab::CurrentSettings.uuid,
+  scopes: ["duo_workflow_generate_token"]).encoded
+  ```
+
+  To grab your GitLab instance ID:
+
+  <!-- markdownlint-disable MD044 -->
+  ```ruby
+  Gitlab::CurrentSettings.uuid
+  ```
+  <!-- markdownlint-enable MD044 -->
+
+1. Navigate to the [client.py file](https://gitlab.com/gitlab-org/duo-workflow/duo-workflow-service/-/blob/83b62846cad3cfb633c31c0c9aa02e4535f44941/duo_workflow_service/client.py#L32-38) and replace the values in this file with the token and instance ID from the previous step.
+
+  ```python
+  token = "<set-your-local-gdk-token>"
+
+  # To get your gitlab_instance_id, run in gdk rails console:
+  # ```
+  # puts Gitlab::CurrentSettings.uuid
+  # ```
+  gitlab_instance_id = "<set-your-local-gdk-instance-id>"
+  ```
+
+1. Update the metadata in the [client.py file](https://gitlab.com/gitlab-org/duo-workflow/duo-workflow-service/-/blob/83b62846cad3cfb633c31c0c9aa02e4535f44941/duo_workflow_service/client.py#L40-46) to the following:
+
+  ```python
+  metadata = [
+      ("authorization", f"Bearer {token}"),
+      ("x-gitlab-authentication-type", "oidc"),
+      ("x-gitlab-realm", "saas"),
+      ("x-gitlab-instance-id", gitlab_instance_id),
+      ("x-gitlab-global-user-id", "777"),
+  ]
+  ```
 
 ## Troubleshooting
 

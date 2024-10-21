@@ -64,11 +64,6 @@ export default {
       required: false,
       default: () => [],
     },
-    fluxNamespace: {
-      type: String,
-      required: false,
-      default: '',
-    },
     fluxApiError: {
       type: String,
       required: false,
@@ -215,7 +210,7 @@ export default {
       data-testid="flux-connection-status"
       :class="$options.badgeContainerClasses"
       :configuration="configuration"
-      :namespace="fluxNamespace"
+      :namespace="namespace"
       :resource-type-param="fluxConnectionParams"
     >
       <span class="gl-mr-3">{{ $options.i18n.syncStatusLabel }}</span>
@@ -243,7 +238,7 @@ export default {
         <gl-popover :target="fluxBadgeId" :title="syncStatusBadge.popoverTitle">
           <gl-sprintf :message="syncStatusBadge.popoverText">
             <template #link="{ content }">
-              <gl-link :href="syncStatusBadge.popoverLink" class="gl-text-sm">{{
+              <gl-link :href="syncStatusBadge.popoverLink" class="gl-font-sm">{{
                 content
               }}</gl-link></template
             >

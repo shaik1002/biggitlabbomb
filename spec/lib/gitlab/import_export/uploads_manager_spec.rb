@@ -52,7 +52,7 @@ RSpec.describe Gitlab::ImportExport::UploadsManager do
         end
 
         after do
-          FileUtils.rm_f(orphan_path)
+          File.delete(orphan_path) if File.exist?(orphan_path)
         end
 
         it 'excludes orphaned upload files' do

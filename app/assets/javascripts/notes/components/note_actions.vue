@@ -4,7 +4,6 @@ import {
   GlButton,
   GlDisclosureDropdown,
   GlDisclosureDropdownItem,
-  GlDisclosureDropdownGroup,
 } from '@gitlab/ui';
 // eslint-disable-next-line no-restricted-imports
 import { mapActions, mapGetters, mapState } from 'vuex';
@@ -34,7 +33,6 @@ export default {
     GlButton,
     GlDisclosureDropdown,
     GlDisclosureDropdownItem,
-    GlDisclosureDropdownGroup,
     ReplyButton,
     TimelineEventButton,
     UserAccessRoleBadge,
@@ -92,18 +90,15 @@ export default {
     },
     canEdit: {
       type: Boolean,
-      required: false,
-      default: false,
+      required: true,
     },
     canAwardEmoji: {
       type: Boolean,
-      required: false,
-      default: false,
+      required: true,
     },
     canDelete: {
       type: Boolean,
-      required: false,
-      default: false,
+      required: true,
     },
     canResolve: {
       type: Boolean,
@@ -353,6 +348,15 @@ export default {
         no-caret
       >
         <gl-disclosure-dropdown-item
+          v-if="canReportAsAbuse"
+          data-testid="report-abuse-button"
+          @action="onAbuse"
+        >
+          <template #list-item>
+            {{ $options.i18n.reportAbuse }}
+          </template>
+        </gl-disclosure-dropdown-item>
+        <gl-disclosure-dropdown-item
           v-if="noteUrl"
           class="js-btn-copy-note-link"
           :data-clipboard-text="noteUrl"
@@ -371,22 +375,11 @@ export default {
             {{ displayAssignUserText }}
           </template>
         </gl-disclosure-dropdown-item>
-        <gl-disclosure-dropdown-group v-if="canReportAsAbuse || canEdit" bordered>
-          <gl-disclosure-dropdown-item
-            v-if="canReportAsAbuse"
-            data-testid="report-abuse-button"
-            @action="onAbuse"
-          >
-            <template #list-item>
-              {{ $options.i18n.reportAbuse }}
-            </template>
-          </gl-disclosure-dropdown-item>
-          <gl-disclosure-dropdown-item v-if="canEdit" class="js-note-delete" @action="onDelete">
-            <template #list-item>
-              <span class="gl-text-danger">{{ __('Delete comment') }}</span>
-            </template>
-          </gl-disclosure-dropdown-item>
-        </gl-disclosure-dropdown-group>
+        <gl-disclosure-dropdown-item v-if="canEdit" class="js-note-delete" @action="onDelete">
+          <template #list-item>
+            <span class="gl-text-danger">{{ __('Delete comment') }}</span>
+          </template>
+        </gl-disclosure-dropdown-item>
       </gl-disclosure-dropdown>
     </div>
     <!-- IMPORTANT: show this component lazily because it causes layout thrashing -->

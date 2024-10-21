@@ -3,13 +3,12 @@
 - disable_target_branch = local_assigns.fetch(:disable_target_branch, false)
 - disable_releases = local_assigns.fetch(:disable_releases, false)
 - disable_environments = local_assigns.fetch(:disable_environments, false)
-- filtered_search_class = local_assigns.fetch(:filtered_search_class, '')
 - placeholder = local_assigns[:placeholder] || _('Search or filter results…')
 - block_css_class = type != :productivity_analytics ? 'row-content-block second-block' : ''
 
 .issues-filters
-  .issues-details-filters.filtered-search-block.gl-flex.gl-flex-col.lg:gl-flex-row.gl-gap-3{ class: [block_css_class, filtered_search_class] }
-    .gl-flex.gl-flex-col.md:gl-flex-row.gl-grow.gl-w-full
+  .issues-details-filters.filtered-search-block.gl-flex.gl-flex-direction-column.gl-lg-flex-direction-row.gl-gap-3{ class: block_css_class }
+    .gl-flex.gl-flex-direction-column.gl-md-flex-direction-row.gl-flex-grow-1.gl-w-full
       = form_tag page_filter_path, method: :get, class: 'filter-form js-filter-form gl-w-full' do
         - if params[:search].present?
           = hidden_field_tag :search, params[:search]
@@ -19,7 +18,7 @@
               - c.with_label do
                 %span.gl-sr-only
                   = _('Select all')
-        .issues-other-filters.filtered-search-wrapper.gl-flex.gl-flex-col.md:gl-flex-row
+        .issues-other-filters.filtered-search-wrapper.gl-flex.gl-flex-direction-column.gl-md-flex-direction-row
           .filtered-search-box
             - if type != :boards
               - text = tag.span(sprite_icon('history')) + tag.span(_('Recent searches'), class: "gl-sr-only")
@@ -60,18 +59,17 @@
                     user: User.new(username: '{{username}}', name: '{{name}}'),
                     avatar: { lazy: true, url: '{{avatar_url}}' }
               #js-dropdown-assignee.gl-filtered-search-suggestion-list.dropdown-menu
-                - if type != :issues_analytics
-                  %ul{ data: { dropdown: true } }
-                    %li.filter-dropdown-item{ data: { value: 'None' } }
-                      = render Pajamas::ButtonComponent.new(variant: :link) do
-                        = _('None')
-                    %li.filter-dropdown-item{ data: { value: 'Any' } }
-                      = render Pajamas::ButtonComponent.new(variant: :link) do
-                        = _('Any')
-                    %li.divider.droplab-item-ignore
-                    - if current_user
-                      = render 'shared/issuable/user_dropdown_item',
-                        user: current_user
+                %ul{ data: { dropdown: true } }
+                  %li.filter-dropdown-item{ data: { value: 'None' } }
+                    = render Pajamas::ButtonComponent.new(variant: :link) do
+                      = _('None')
+                  %li.filter-dropdown-item{ data: { value: 'Any' } }
+                    = render Pajamas::ButtonComponent.new(variant: :link) do
+                      = _('Any')
+                  %li.divider.droplab-item-ignore
+                  - if current_user
+                    = render 'shared/issuable/user_dropdown_item',
+                      user: current_user
                 %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
                   = render 'shared/issuable/user_dropdown_item',
                     user: User.new(username: '{{username}}', name: '{{name}}'),
@@ -98,21 +96,20 @@
               = render_if_exists 'shared/issuable/merge_user_dropdown'
 
               #js-dropdown-milestone.gl-filtered-search-suggestion-list.dropdown-menu
-                - if type != :issues_analytics
-                  %ul{ data: { dropdown: true } }
-                    %li.filter-dropdown-item{ data: { value: 'None' } }
-                      = render Pajamas::ButtonComponent.new(variant: :link) do
-                        = _('None')
-                    %li.filter-dropdown-item{ data: { value: 'Any' } }
-                      = render Pajamas::ButtonComponent.new(variant: :link) do
-                        = _('Any')
-                    %li.filter-dropdown-item{ data: { value: 'Upcoming' } }
-                      = render Pajamas::ButtonComponent.new(variant: :link) do
-                        = _('Upcoming')
-                    %li.filter-dropdown-item{ data: { value: 'Started' } }
-                      = render Pajamas::ButtonComponent.new(variant: :link) do
-                        = _('Started')
-                    %li.divider.droplab-item-ignore
+                %ul{ data: { dropdown: true } }
+                  %li.filter-dropdown-item{ data: { value: 'None' } }
+                    = render Pajamas::ButtonComponent.new(variant: :link) do
+                      = _('None')
+                  %li.filter-dropdown-item{ data: { value: 'Any' } }
+                    = render Pajamas::ButtonComponent.new(variant: :link) do
+                      = _('Any')
+                  %li.filter-dropdown-item{ data: { value: 'Upcoming' } }
+                    = render Pajamas::ButtonComponent.new(variant: :link) do
+                      = _('Upcoming')
+                  %li.filter-dropdown-item{ data: { value: 'Started' } }
+                    = render Pajamas::ButtonComponent.new(variant: :link) do
+                      = _('Started')
+                  %li.divider.droplab-item-ignore
                 %ul.filter-dropdown{ data: { dynamic: true, dropdown: true } }
                   %li.filter-dropdown-item
                     = render Pajamas::ButtonComponent.new(variant: :link, button_options: { class: 'js-data-value' }) do
@@ -208,7 +205,7 @@
               = render_if_exists 'shared/issuable/filter_weight', type: type
               = render_if_exists 'shared/issuable/filter_epic', type: type
 
-            = render Pajamas::ButtonComponent.new(category: :tertiary, size: :small, icon: 'clear', icon_classes: "clear-search-icon", button_options: { class: 'clear-search hidden gl-self-center gl-mr-1 has-tooltip', title: _('Clear') })
-    .filter-dropdown-container.gl-flex.gl-flex-col.md:gl-flex-row.gl-items-start
+            = render Pajamas::ButtonComponent.new(category: :tertiary, size: :small, icon: 'clear', icon_classes: "clear-search-icon", button_options: { class: 'clear-search hidden gl-align-self-center gl-mr-1 has-tooltip', title: _('Clear') })
+    .filter-dropdown-container.gl-flex.gl-flex-direction-column.gl-md-flex-direction-row.gl-align-items-flex-start
       - if type != :productivity_analytics && show_sorting_dropdown
         = render 'shared/issuable/sort_dropdown'

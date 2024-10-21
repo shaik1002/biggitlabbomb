@@ -17,12 +17,6 @@ FLAG:
 On self-managed GitLab, by default this feature is not available. To make it available, an administrator can [enable the feature flag](../administration/feature_flags.md) named `allow_protected_branches_for_group`.
 On GitLab.com and GitLab Dedicated, this feature is not available.
 
-Use the Group-level protected branches API to manage protected branch rules.
-It provides endpoints to list, create, update, and delete protected branch rules that apply to projects within a group.
-
-WARNING:
-Group-level protected branch settings are restricted to top-level groups only.
-
 ## Valid access levels
 
 The access levels are defined in the `ProtectedRefAccess.allowed_access_levels` method.
@@ -46,7 +40,7 @@ GET /groups/:id/protected_branches
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer or string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths). |
+| `id` | integer or string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `search` | string | no | Name or part of the name of protected branches to be searched for. |
 
 ```shell
@@ -120,7 +114,7 @@ GET /groups/:id/protected_branches/:name
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer or string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths). |
+| `id` | integer or string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `name` | string | yes | The name of the branch or wildcard. |
 
 ```shell
@@ -172,7 +166,7 @@ curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
 
 | Attribute                                    | Type | Required | Description |
 | -------------------------------------------- | ---- | -------- | ----------- |
-| `id`                                         | integer or string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths). |
+| `id`                                         | integer or string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `name`                                       | string         | yes | The name of the branch or wildcard. |
 | `allow_force_push`                           | boolean        | no  | Allow all users with push access to force push. Default: `false`. |
 | `allowed_to_merge`                           | array          | no  | Array of access levels allowed to merge, with each described by a hash of the form `{user_id: integer}`, `{group_id: integer}`, or `{access_level: integer}`. |
@@ -226,8 +220,8 @@ Example response:
 Elements in the `allowed_to_push` / `allowed_to_merge` / `allowed_to_unprotect` array should take the
 form `{user_id: integer}`, `{group_id: integer}`, or `{access_level: integer}`. Each user must have
 access to the project and each group must
-[have this project shared](../user/project/members/sharing_projects_groups.md). These access levels
-allow [more granular control over protected branch access](../user/project/repository/branches/protected.md).
+[have this project shared](../user/project/members/share_project_with_groups.md). These access levels
+allow [more granular control over protected branch access](../user/project/protected_branches.md).
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" \
@@ -352,7 +346,7 @@ curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" \
 
 | Attribute | Type | Required | Description |
 | --------- | ---- | -------- | ----------- |
-| `id` | integer or string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths). |
+| `id` | integer or string | yes | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) owned by the authenticated user. |
 | `name` | string | yes | The name of the branch. |
 
 Example response:
@@ -387,7 +381,7 @@ curl --request PATCH --header "PRIVATE-TOKEN: <your_access_token>" \
 
 | Attribute                                    | Type           | Required | Description                                                                                                                          |
 | -------------------------------------------- | ---- | -------- | ----------- |
-| `id`                                         | integer or string | yes      | The ID or [URL-encoded path of the group](rest/index.md#namespaced-paths).                       |
+| `id`                                         | integer or string | yes      | The ID or [URL-encoded path of the group](rest/index.md#namespaced-path-encoding) owned by the authenticated user.                       |
 | `name`                                       | string         | yes      | The name of the branch.                                                                                                               |
 | `allow_force_push`                           | boolean        | no       | When enabled, members who can push to this branch can also force push.                                                               |
 | `allowed_to_push`                            | array          | no       | Array of push access levels, with each described by a hash.                                                                          |
@@ -404,7 +398,7 @@ To update:
 
 - `user_id`: Ensure the updated user has access to the project. You must also pass the
   `id` of the `access_level` in the respective hash.
-- `group_id`: Ensure the updated group [has this project shared](../user/project/members/sharing_projects_groups.md).
+- `group_id`: Ensure the updated group [has this project shared](../user/project/members/share_project_with_groups.md).
   You must also pass the `id` of the `access_level` in the respective hash.
 
 To delete:

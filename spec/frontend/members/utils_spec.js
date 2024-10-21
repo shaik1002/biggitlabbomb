@@ -10,6 +10,7 @@ import {
 import {
   generateBadges,
   isGroup,
+  isDirectMember,
   isCurrentUser,
   canRemove,
   canRemoveBlockedByLastOwner,
@@ -103,6 +104,16 @@ describe('Members Utils', () => {
       ${memberMock} | ${false}
     `('returns $expected', ({ member, expected }) => {
       expect(isGroup(member)).toBe(expected);
+    });
+  });
+
+  describe('isDirectMember', () => {
+    it.each`
+      member             | expected
+      ${directMember}    | ${true}
+      ${inheritedMember} | ${false}
+    `('returns $expected', ({ member, expected }) => {
+      expect(isDirectMember(member)).toBe(expected);
     });
   });
 

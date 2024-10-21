@@ -2,7 +2,7 @@
 import { GlIcon, GlDatepicker, GlTooltipDirective, GlLink, GlPopover } from '@gitlab/ui';
 import { createAlert } from '~/alert';
 import { TYPE_ISSUE } from '~/issues/constants';
-import { formatDate, localeDateFormat, newDate } from '~/lib/utils/datetime_utility';
+import { dateInWords, formatDate, parsePikadayDate } from '~/lib/utils/datetime_utility';
 import { __, sprintf } from '~/locale';
 import { dateFields, dateTypes, Tracking } from '../../constants';
 import { dueDateQueries, startDateQueries } from '../../queries/constants';
@@ -159,14 +159,14 @@ export default {
         return null;
       }
 
-      return newDate(this.dateValue);
+      return parsePikadayDate(this.dateValue);
     },
     formattedDate() {
       if (!this.hasDate) {
         return this.$options.i18n.noDate;
       }
 
-      return localeDateFormat.asDate.format(this.parsedDate);
+      return dateInWords(this.parsedDate, true);
     },
     workspacePath() {
       return this.issuableType === TYPE_ISSUE
@@ -286,7 +286,7 @@ export default {
       <gl-icon
         ref="epicDatePopover"
         name="question-o"
-        class="hide-collapsed gl-ml-3 gl-cursor-pointer gl-text-blue-600"
+        class="gl-ml-3 gl-cursor-pointer gl-text-blue-600 hide-collapsed"
         tabindex="0"
         :aria-label="$options.i18n.help"
         data-testid="inherit-date-popover"
@@ -301,7 +301,7 @@ export default {
     <template #collapsed>
       <div v-gl-tooltip.viewport.left :title="dateLabel" class="sidebar-collapsed-icon">
         <gl-icon :size="16" name="calendar" />
-        <span class="gl-px-3 gl-pt-2 gl-text-sm">{{ formattedDate }}</span>
+        <span class="gl-pt-2 gl-px-3 gl-font-sm">{{ formattedDate }}</span>
       </div>
       <sidebar-inherit-date
         v-if="canInherit && !initialLoading"

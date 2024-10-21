@@ -471,47 +471,17 @@ RSpec.describe IssuePolicy, feature_category: :team_planning do
     end
   end
 
-  # rubocop:disable RSpec/MultipleMemoizedHelpers -- Need helpers for testing multiple scenarios
-  context 'with group level issues' do
-    let_it_be(:private_group) { create(:group, :private) }
-    let_it_be(:public_group) { create(:group, :public) }
-    let_it_be(:private_project) { create(:project, :private, group: private_group) }
-    let_it_be(:public_project) { create(:project, :public, group: public_group) }
+  context 'when issue belongs to a group' do
+    let_it_be_with_reload(:issue) { create(:issue, :group_level, namespace: group) }
 
-    let_it_be(:admin) { create(:user, :admin) }
-    let_it_be(:non_member_user) { create(:user) }
-
-    let_it_be(:guest) { create(:user, guest_of: [private_project, public_project]) }
-    let_it_be(:guest_author) { create(:user, guest_of: [private_project, public_project]) }
-    let_it_be(:reporter) { create(:user, reporter_of: [private_project, public_project]) }
-
-    let_it_be(:group_guest) { create(:user, guest_of: [private_group, public_group]) }
-    let_it_be(:group_guest_author) { create(:user, guest_of: [private_group, public_group]) }
-    let_it_be(:group_reporter) { create(:user, reporter_of: [private_group, public_group]) }
-
-    context 'with public group' do
-      let(:work_item) { create(:issue, :group_level, namespace: public_group) }
-      let(:confidential_work_item) { create(:issue, :group_level, confidential: true, namespace: public_group) }
-      let(:authored_work_item) { create(:issue, :group_level, namespace: public_group, author: group_guest_author) }
-      let(:authored_confidential_work_item) { create(:issue, :group_level, confidential: true, namespace: public_group, author: group_guest_author) }
-      let(:not_persisted_work_item) { build(:issue, :group_level, namespace: public_group) }
-
-      # only checking abilities without group level work items license, because in FOSS there is no license available
-      it_behaves_like 'abilities without group level work items license'
+    before_all do
+      group.add_guest(guest)
     end
 
-    context 'with private group' do
-      let(:work_item) { create(:issue, :group_level, namespace: private_group) }
-      let(:confidential_work_item) { create(:issue, :group_level, confidential: true, namespace: private_group) }
-      let(:authored_work_item) { create(:issue, :group_level, namespace: private_group, author: group_guest_author) }
-      let(:authored_confidential_work_item) { create(:issue, :group_level, confidential: true, namespace: private_group, author: group_guest_author) }
-      let(:not_persisted_work_item) { build(:issue, :group_level, namespace: private_group) }
-
-      # only checking abilities without group level work items license, because in FOSS there is no license available
-      it_behaves_like 'abilities without group level work items license'
+    it 'allows guests to award emoji' do
+      expect(permissions(guest, issue)).to be_allowed(:award_emoji)
     end
   end
-  # rubocop:enable RSpec/MultipleMemoizedHelpers
 
   context 'with external authorization enabled' do
     let(:user) { create(:user) }
@@ -583,32 +553,6 @@ RSpec.describe IssuePolicy, feature_category: :team_planning do
 
         expect(policies).to be_disallowed(:read_crm_contacts)
         expect(policies).to be_disallowed(:set_issue_crm_contacts)
-      end
-    end
-
-    context 'when custom crm_group configured' do
-      let_it_be(:crm_settings) { create(:crm_settings, source_group: create(:group)) }
-      let_it_be(:subgroup) { create(:group, parent: create(:group), crm_settings: crm_settings) }
-      let_it_be(:project) { create(:project, group: subgroup) }
-
-      context 'when custom crm_group guest' do
-        it 'is disallowed' do
-          subgroup.parent.add_reporter(user)
-          crm_settings.source_group.add_guest(user)
-
-          expect(policies).to be_disallowed(:read_crm_contacts)
-          expect(policies).to be_disallowed(:set_issue_crm_contacts)
-        end
-      end
-
-      context 'when custom crm_group reporter' do
-        it 'is allowed' do
-          subgroup.parent.add_reporter(user)
-          crm_settings.source_group.add_reporter(user)
-
-          expect(policies).to be_allowed(:read_crm_contacts)
-          expect(policies).to be_allowed(:set_issue_crm_contacts)
-        end
       end
     end
   end

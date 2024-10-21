@@ -78,7 +78,7 @@ For more information, see [Get your SSH public key](#get-your-ssh-public-key).
 ### Mirror only protected branches
 
 You can choose to mirror only the
-[protected branches](../branches/protected.md) in the mirroring project,
+[protected branches](../../protected_branches.md) in the mirroring project,
 either from or to your remote repository. For [pull mirroring](pull.md),
 non-protected branches in the mirroring project are not mirrored and can diverge.
 
@@ -129,7 +129,7 @@ Prerequisites:
 1. Expand **Mirroring repositories**.
 1. Scroll to **Mirrored repositories** and identify the mirror to update.
 1. Select **Update now** (**{retry}**):
-   ![Repository mirroring force update user interface](img/repository_mirroring_force_update_v11_5.png)
+   ![Repository mirroring force update user interface](img/repository_mirroring_force_update.png)
 
 ## Authentication methods for mirrors
 

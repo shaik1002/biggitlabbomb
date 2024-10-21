@@ -57,7 +57,7 @@ There are four ways to resolve an abuse report, with a button for each method:
 
 The following is an example of the **Abuse reports** page:
 
-![A list of example abuse reports submitted for various users, with resolution actions available for each.](img/abuse_reports_page_v13_11.png)
+![abuse-reports-page-image](img/abuse_reports_page_v13_11.png)
 
 ### Blocking users
 
@@ -83,9 +83,20 @@ After blocking, you can still either:
 The following is an example of a blocked user listed on the **Abuse reports**
 page:
 
-![The block user action is unavailable for an abuse report because the user is already blocked.](img/abuse_report_blocked_user_v11_7.png)
+![abuse-report-blocked-user-image](img/abuse_report_blocked_user.png)
 
-## Related topics
+NOTE:
+Users can be [blocked](../api/users.md#block-user) and
+[unblocked](../api/users.md#unblock-user) using the GitLab API.
 
-- [Moderate users (administration)](moderate_users.md)
-- [Review spam logs](review_spam_logs.md)
+<!-- ## Troubleshooting
+
+Include any troubleshooting steps that you can foresee. If you know beforehand what issues
+one might have when setting this up, or when something is changed, or on upgrading, it's
+important to describe those, too. Think of things that may go wrong and include them here.
+This is important to minimize requests for support, and to avoid doc comments with
+questions that you know someone might ask.
+
+Each scenario can be a third-level heading, for example `### Getting error message X`.
+If you have none to add when creating a doc, leave this section in place
+but commented out to help encourage others to add to it in the future. -->

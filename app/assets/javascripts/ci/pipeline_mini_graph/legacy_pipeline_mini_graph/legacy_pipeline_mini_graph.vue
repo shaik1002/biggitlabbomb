@@ -1,24 +1,17 @@
 <script>
-import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
-import { convertToGraphQLId } from '~/graphql_shared/utils';
-import { TYPENAME_CI_PIPELINE } from '~/graphql_shared/constants';
-import CiIcon from '~/vue_shared/components/ci_icon/ci_icon.vue';
-import DownstreamPipelines from '../downstream_pipelines.vue';
+import { GlIcon } from '@gitlab/ui';
+import LegacyLinkedPipelinesMiniList from './legacy_linked_pipelines_mini_list.vue';
 import LegacyPipelineStages from './legacy_pipeline_stages.vue';
 /**
  * Renders the REST instance of the pipeline mini graph.
  */
 export default {
   components: {
-    CiIcon,
-    DownstreamPipelines,
     GlIcon,
+    LegacyLinkedPipelinesMiniList,
     LegacyPipelineStages,
   },
-  arrowStyles: ['arrow-icon gl-inline-block gl-mx-1 gl-text-gray-500 !gl-align-middle'],
-  directives: {
-    GlTooltip: GlTooltipDirective,
-  },
+  arrowStyles: ['arrow-icon gl-display-inline-block gl-mx-1 gl-text-gray-500 !gl-align-middle'],
   props: {
     downstreamPipelines: {
       type: Array,
@@ -52,43 +45,19 @@ export default {
     },
   },
   computed: {
-    formattedDownstreamPipelines() {
-      /** Reformatting to match GraphQL structure.
-       * We do not want to change the GraphQL files since
-       * the REST version will soon be changed to GraphQL,
-       * so we are keeping this logic in the legacy file.
-       */
-      return this.downstreamPipelines.map((p) => {
-        return {
-          detailedStatus: p.details.status,
-          id: convertToGraphQLId(TYPENAME_CI_PIPELINE, p.id),
-          path: p.path,
-          project: {
-            fullPath: p.project.full_path,
-            name: p.project.name,
-          },
-        };
-      });
-    },
     hasDownstreamPipelines() {
       return Boolean(this.downstreamPipelines.length);
-    },
-    upstreamTooltipText() {
-      return `${this.upstreamPipeline?.project?.name} - ${this.upstreamPipeline?.details?.status?.label}`;
     },
   },
 };
 </script>
 <template>
   <div data-testid="pipeline-mini-graph">
-    <ci-icon
+    <legacy-linked-pipelines-mini-list
       v-if="upstreamPipeline"
-      v-gl-tooltip.hover
-      :title="upstreamTooltipText"
-      :aria-label="upstreamTooltipText"
-      :status="upstreamPipeline.details.status"
-      :show-tooltip="false"
-      class="gl-align-middle"
+      :triggered-by="/* eslint-disable @gitlab/vue-no-new-non-primitive-in-template */ [
+        upstreamPipeline,
+      ] /* eslint-enable @gitlab/vue-no-new-non-primitive-in-template */"
       data-testid="pipeline-mini-graph-upstream"
     />
     <gl-icon
@@ -109,9 +78,9 @@ export default {
       name="arrow-right"
       data-testid="downstream-arrow-icon"
     />
-    <downstream-pipelines
+    <legacy-linked-pipelines-mini-list
       v-if="hasDownstreamPipelines"
-      :pipelines="formattedDownstreamPipelines"
+      :triggered="downstreamPipelines"
       :pipeline-path="pipelinePath"
       data-testid="pipeline-mini-graph-downstream"
     />

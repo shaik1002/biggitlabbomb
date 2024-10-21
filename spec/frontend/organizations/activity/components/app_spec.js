@@ -14,7 +14,6 @@ import { OPERATORS_IS } from '~/vue_shared/components/filtered_search_bar/consta
 import FilteredSearch from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import ContributionEvents from '~/contribution_events/components/contribution_events.vue';
 import { createAlert } from '~/alert';
-import { HTTP_STATUS_OK } from '~/lib/utils/http_status';
 import waitForPromises from 'helpers/wait_for_promises';
 import {
   MOCK_ALL_EVENT,
@@ -77,7 +76,7 @@ describe('OrganizationsActivityApp', () => {
     beforeEach(async () => {
       axiosMock
         .onGet(defaultProps.organizationActivityPath)
-        .reply(HTTP_STATUS_OK, { events, has_next_page: true });
+        .reply(200, { events, has_next_page: true });
       jest.spyOn(axios, 'get');
 
       createComponent();
@@ -157,7 +156,7 @@ describe('OrganizationsActivityApp', () => {
     beforeEach(() => {
       axiosMock
         .onGet(defaultProps.organizationActivityPath)
-        .reply(HTTP_STATUS_OK, { events, has_next_page: false });
+        .reply(200, { events, has_next_page: false });
 
       createComponent();
     });
@@ -183,7 +182,7 @@ describe('OrganizationsActivityApp', () => {
     beforeEach(async () => {
       axiosMock
         .onGet(defaultProps.organizationActivityPath)
-        .reply(HTTP_STATUS_OK, { events: [], has_next_page: false });
+        .reply(200, { events: [], has_next_page: false });
 
       createComponent();
       await waitForPromises();
@@ -210,7 +209,7 @@ describe('OrganizationsActivityApp', () => {
     beforeEach(async () => {
       axiosMock
         .onGet(defaultProps.organizationActivityPath)
-        .reply(HTTP_STATUS_OK, { events, has_next_page: false });
+        .reply(200, { events, has_next_page: false });
 
       createComponent();
       await waitForPromises();

@@ -1,6 +1,5 @@
 <script>
-import { GlLink } from '@gitlab/ui';
-import CrudComponent from '~/vue_shared/components/crud_component.vue';
+import { GlLink, GlIcon, GlLoadingIcon, GlButton, GlCard } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 import {
   issuableIconMap,
@@ -17,7 +16,10 @@ export default {
   name: 'RelatedIssuesBlock',
   components: {
     GlLink,
-    CrudComponent,
+    GlIcon,
+    GlLoadingIcon,
+    GlButton,
+    GlCard,
     AddIssuableForm,
     RelatedIssuesList,
   },
@@ -105,16 +107,11 @@ export default {
       required: false,
       default: '',
     },
-    headerText: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    addButtonText: {
-      type: String,
-      required: false,
-      default: '',
-    },
+  },
+  data() {
+    return {
+      isOpen: true,
+    };
   },
   computed: {
     hasRelatedIssues() {
@@ -130,25 +127,13 @@ export default {
           .filter((obj) => obj.issues.length > 0);
       }
 
-      if (this.relatedIssues.length > 0) {
-        return [{ issues: this.relatedIssues }];
-      }
-
-      return [];
+      return [{ issues: this.relatedIssues }];
     },
     shouldShowTokenBody() {
       return this.hasRelatedIssues || this.isFetching;
     },
-    headerTextDisplay() {
-      return this.headerText ? this.headerText : issuablesBlockHeaderTextMap[this.issuableType];
-    },
-    addButtonTextDisplay() {
-      if (!this.canAdmin) {
-        return;
-      }
-
-      // eslint-disable-next-line consistent-return
-      return this.addButtonText ? this.addButtonText : __('Add');
+    headerText() {
+      return issuablesBlockHeaderTextMap[this.issuableType];
     },
     helpLinkText() {
       return issuablesBlockHelpTextMap[this.issuableType];
@@ -165,33 +150,25 @@ export default {
     issuableTypeIcon() {
       return issuableIconMap[this.issuableType];
     },
+    toggleIcon() {
+      return this.isOpen ? 'chevron-lg-up' : 'chevron-lg-down';
+    },
+    toggleLabel() {
+      return this.isOpen ? __('Collapse') : __('Expand');
+    },
     emptyStateMessage() {
       return this.showCategorizedIssues
         ? sprintf(this.$options.i18n.emptyItemsPremium, { issuableType: this.issuableType })
         : sprintf(this.$options.i18n.emptyItemsFree, { issuableType: this.issuableType });
     },
   },
-  watch: {
-    isFormVisible(newVal) {
-      if (newVal === true) {
-        this.$refs.relatedIssuesWidget.showForm();
-      } else {
-        this.$refs.relatedIssuesWidget.hideForm();
-      }
-    },
-  },
-  mounted() {
-    if (this.isFormVisible) {
-      this.$refs.relatedIssuesWidget.showForm();
-    }
-  },
   methods: {
-    handleFormSubmit(event) {
-      this.$emit('addIssuableFormSubmit', event);
+    handleToggle() {
+      this.isOpen = !this.isOpen;
     },
-    handleFormCancel(event) {
-      this.$emit('addIssuableFormCancel', event);
-      this.$refs.relatedIssuesWidget.hideForm();
+    addButtonClick(event) {
+      this.isOpen = true;
+      this.$emit('toggleAddRelatedIssuesForm', event);
     },
   },
   linkedIssueTypesTextMap,
@@ -201,82 +178,122 @@ export default {
       "Link %{issuableType}s together to show that they're related or that one is blocking others.",
     ),
   },
+  ariaControlsId: 'related-issues-card',
 };
 </script>
 
 <template>
-  <crud-component
-    ref="relatedIssuesWidget"
-    is-collapsible
-    :is-loading="isFetching"
-    :title="headerTextDisplay"
-    :icon="issuableTypeIcon"
-    :count="badgeLabel"
-    :toggle-text="addButtonTextDisplay"
-    :toggle-aria-label="addIssuableButtonText"
-    :help-path="helpPath"
-    :help-link-text="helpLinkText"
-    anchor-id="related-issues"
-    data-testid="related-issues-block"
-    @showForm="$emit('showForm')"
-    @hideForm="$emit('hideForm')"
-  >
-    <template #actions>
-      <slot name="header-actions"></slot>
-    </template>
-
-    <template #form>
-      <add-issuable-form
-        :show-categorized-issues="showCategorizedIssues"
-        :is-submitting="isSubmitting"
-        :issuable-type="issuableType"
-        :input-value="inputValue"
-        :pending-references="pendingReferences"
-        :auto-complete-sources="autoCompleteSources"
-        :auto-complete-epics="autoCompleteEpics"
-        :auto-complete-issues="autoCompleteIssues"
-        :path-id-separator="pathIdSeparator"
-        :has-error="hasError"
-        :item-add-failure-message="itemAddFailureMessage"
-        @pendingIssuableRemoveRequest="$emit('pendingIssuableRemoveRequest', $event)"
-        @addIssuableFormInput="$emit('addIssuableFormInput', $event)"
-        @addIssuableFormBlur="$emit('addIssuableFormBlur', $event)"
-        @addIssuableFormSubmit="handleFormSubmit"
-        @addIssuableFormCancel="handleFormCancel"
-      />
-    </template>
-
-    <template v-if="!shouldShowTokenBody" #empty>
-      <slot name="empty-state-message">{{ emptyStateMessage }}</slot>
-      <gl-link
-        v-if="hasHelpPath"
-        :href="helpPath"
-        data-testid="help-link"
-        :aria-label="helpLinkText"
+  <div id="related-issues" class="related-issues-block">
+    <gl-card
+      :id="$options.ariaControlsId"
+      class="gl-new-card"
+      :class="{ 'is-collapsed': !isOpen }"
+      header-class="gl-new-card-header"
+      body-class="gl-new-card-body"
+    >
+      <template #header>
+        <div class="gl-new-card-title-wrapper">
+          <h3 class="gl-new-card-title" data-testid="card-title">
+            <gl-link
+              id="user-content-related-issues"
+              class="anchor position-absolute gl-text-decoration-none"
+              href="#related-issues"
+              aria-hidden="true"
+            />
+            <slot name="header-text">{{ headerText }}</slot>
+          </h3>
+          <div class="gl-new-card-count js-related-issues-header-issue-count">
+            <gl-icon :name="issuableTypeIcon" class="gl-mr-2" />
+            {{ badgeLabel }}
+          </div>
+        </div>
+        <slot name="header-actions"></slot>
+        <gl-button
+          v-if="canAdmin"
+          size="small"
+          data-testid="related-issues-plus-button"
+          :aria-label="addIssuableButtonText"
+          class="gl-ml-3"
+          @click="addButtonClick"
+        >
+          <slot name="add-button-text">{{ __('Add') }}</slot>
+        </gl-button>
+        <div class="gl-new-card-toggle">
+          <gl-button
+            category="tertiary"
+            size="small"
+            :icon="toggleIcon"
+            :aria-label="toggleLabel"
+            :aria-expanded="isOpen.toString()"
+            :aria-controls="$options.ariaControlsId"
+            data-testid="toggle-links"
+            @click="handleToggle"
+          />
+        </div>
+      </template>
+      <div
+        v-if="isOpen"
+        class="linked-issues-card-body gl-new-card-content"
+        data-testid="related-issues-body"
       >
-        {{ __('Learn more.') }}
-      </gl-link>
-    </template>
-
-    <template #default>
-      <related-issues-list
-        v-for="(category, index) in categorisedIssues"
-        :key="category.linkType"
-        :list-link-type="category.linkType"
-        :heading="$options.linkedIssueTypesTextMap[category.linkType]"
-        :can-admin="canAdmin"
-        :can-reorder="canReorder"
-        :is-fetching="isFetching"
-        :issuable-type="issuableType"
-        :path-id-separator="pathIdSeparator"
-        :related-issues="category.issues"
-        :class="{
-          'gl-mb-5 gl-border-b-1 gl-border-b-default gl-border-b-solid':
-            index !== categorisedIssues.length - 1,
-        }"
-        @relatedIssueRemoveRequest="$emit('relatedIssueRemoveRequest', $event)"
-        @saveReorder="$emit('saveReorder', $event)"
-      />
-    </template>
-  </crud-component>
+        <div
+          v-if="isFormVisible"
+          class="js-add-related-issues-form-area gl-new-card-add-form"
+          :class="{ 'gl-mb-5': shouldShowTokenBody, 'gl-show-field-errors': hasError }"
+          data-testid="add-item-form"
+        >
+          <add-issuable-form
+            :show-categorized-issues="showCategorizedIssues"
+            :is-submitting="isSubmitting"
+            :issuable-type="issuableType"
+            :input-value="inputValue"
+            :pending-references="pendingReferences"
+            :auto-complete-sources="autoCompleteSources"
+            :auto-complete-epics="autoCompleteEpics"
+            :auto-complete-issues="autoCompleteIssues"
+            :path-id-separator="pathIdSeparator"
+            :has-error="hasError"
+            :item-add-failure-message="itemAddFailureMessage"
+            @pendingIssuableRemoveRequest="$emit('pendingIssuableRemoveRequest', $event)"
+            @addIssuableFormInput="$emit('addIssuableFormInput', $event)"
+            @addIssuableFormBlur="$emit('addIssuableFormBlur', $event)"
+            @addIssuableFormSubmit="$emit('addIssuableFormSubmit', $event)"
+            @addIssuableFormCancel="$emit('addIssuableFormCancel', $event)"
+          />
+        </div>
+        <template v-if="shouldShowTokenBody">
+          <gl-loading-icon v-if="isFetching" size="sm" class="gl-py-2" />
+          <related-issues-list
+            v-for="(category, index) in categorisedIssues"
+            :key="category.linkType"
+            :list-link-type="category.linkType"
+            :heading="$options.linkedIssueTypesTextMap[category.linkType]"
+            :can-admin="canAdmin"
+            :can-reorder="canReorder"
+            :is-fetching="isFetching"
+            :issuable-type="issuableType"
+            :path-id-separator="pathIdSeparator"
+            :related-issues="category.issues"
+            :class="{
+              'gl-pb-3 gl-mb-5 gl-border-b-1 gl-border-b-solid gl-border-b-gray-100':
+                index !== categorisedIssues.length - 1,
+            }"
+            @relatedIssueRemoveRequest="$emit('relatedIssueRemoveRequest', $event)"
+            @saveReorder="$emit('saveReorder', $event)"
+          />
+        </template>
+        <p v-if="!shouldShowTokenBody && !isFormVisible" class="gl-new-card-empty">
+          {{ emptyStateMessage }}
+          <gl-link
+            v-if="hasHelpPath"
+            :href="helpPath"
+            data-testid="help-link"
+            :aria-label="helpLinkText"
+          >
+            {{ __('Learn more.') }}
+          </gl-link>
+        </p>
+      </div>
+    </gl-card>
+  </div>
 </template>

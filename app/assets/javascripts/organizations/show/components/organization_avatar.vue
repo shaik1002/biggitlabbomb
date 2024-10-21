@@ -3,7 +3,11 @@ import { GlAvatar, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import { AVATAR_SHAPE_OPTION_RECT } from '~/vue_shared/constants';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
-import { VISIBILITY_TYPE_ICON, ORGANIZATION_VISIBILITY_TYPE } from '~/visibility_level/constants';
+import {
+  VISIBILITY_TYPE_ICON,
+  ORGANIZATION_VISIBILITY_TYPE,
+  VISIBILITY_LEVEL_PUBLIC_STRING,
+} from '~/visibility_level/constants';
 
 export default {
   name: 'OrganizationAvatar',
@@ -24,10 +28,10 @@ export default {
   },
   computed: {
     visibilityIcon() {
-      return VISIBILITY_TYPE_ICON[this.organization.visibility];
+      return VISIBILITY_TYPE_ICON[VISIBILITY_LEVEL_PUBLIC_STRING];
     },
     visibilityTooltip() {
-      return ORGANIZATION_VISIBILITY_TYPE[this.organization.visibility];
+      return ORGANIZATION_VISIBILITY_TYPE[VISIBILITY_LEVEL_PUBLIC_STRING];
     },
   },
 };

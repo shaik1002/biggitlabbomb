@@ -64,7 +64,6 @@ export default {
     },
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     workItem: {
       query: workItemByIidQuery,
       variables() {
@@ -86,7 +85,7 @@ export default {
 </script>
 
 <template>
-  <div class="gl-mb-3 gl-mt-3 gl-text-gray-700">
+  <div class="gl-mb-3 gl-text-gray-700 gl-mt-3">
     <work-item-state-badge v-if="workItemState" :work-item-state="workItemState" />
     <gl-loading-icon v-if="updateInProgress" inline />
     <confidentiality-badge
@@ -110,7 +109,7 @@ export default {
         </template>
         <template #author>
           <gl-avatar-link
-            class="js-user-link gl-font-bold gl-text-primary"
+            class="js-user-link gl-text-body gl-font-bold"
             :title="author.name"
             :data-user-id="authorId"
             :href="author.webUrl"

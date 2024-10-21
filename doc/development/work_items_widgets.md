@@ -131,12 +131,12 @@ Refer to [merge request #159720](https://gitlab.com/gitlab-org/gitlab/-/merge_re
 1. Create the component `app/assets/javascripts/work_items/components/work_item_<widget_name>.vue` or `ee/app/assets/javascripts/work_items/components/work_item_<widget_name>.vue`.
    - The component should not receive any props which are available from `workItemByIidQuery`- see [issue #461761](https://gitlab.com/gitlab-org/gitlab/-/issues/461761).
 1. Add the component to the view/edit work item screen `app/assets/javascripts/work_items/components/work_item_attributes_wrapper.vue`.
-1. If the widget is available when creating new work items:
+1. If the widget is avaiable when creating new work items:
    1. Add the component to the create work item screen `app/assets/javascripts/work_items/components/create_work_item.vue`.
    1. Define a local input type `app/assets/javascripts/work_items/graphql/typedefs.graphql`.
    1. Stub the new work item state GraphQL data for the widget in `app/assets/javascripts/work_items/graphql/cache_utils.js`.
    1. Define how GraphQL updates the GraphQL data in `app/assets/javascripts/work_items/graphql/resolvers.js`.
-      - A special `CLEAR_VALUE` constant is required for single value widgets, because we cannot differentiate when a value is `null` because we cleared it, or `null` because we did not
+      - A special `CLEAR_VALUE` constant is required for single value widgets, because we cannot differentiate when a value is `null` because we cleared it, or `null` because we did not 
         set it.
         For example `ee/app/assets/javascripts/work_items/components/work_item_health_status.vue`.
         This is not required for most widgets which support multiple values, where we can differentiate between `[]` and `null`.
@@ -157,7 +157,7 @@ Now you can update tests for existing files and write tests for the new files:
 1. `spec/features/projects/work_items/work_item_spec.rb` or `ee/spec/features/projects/work_items/work_item_spec.rb`.
 
 NOTE:
-You may find some feature specs failing because of excessive SQL queries.
+You may find some feature specs failing because of excissive SQL queries.
 To resolve this, update the mocked `Gitlab::QueryLimiting::Transaction.threshold` in `spec/support/shared_examples/features/work_items/rolledup_dates_shared_examples.rb`.
 
 ## Steps to implement a new work item widget on frontend in the create view
@@ -332,13 +332,9 @@ This is typically a trigger to remove associated records which are no longer rel
   within the create database transaction.
 - `before_update` is called before the work item is saved by the `UpdateService`. This callback runs
   within the update database transaction.
-- `after_create` is called after the work item is saved by the `CreateService`. This callback runs
-  within the create database transaction.
-- `after_update` is called after the work item is saved by the `UpdateService`. This callback runs
-  within the update database transaction.
+- `after_update_commit` is called after the DB update transaction is committed by the `UpdateService`.
 - `after_save` is called before the creation or DB update transaction is committed by the
   `CreateService` or `UpdateService`.
-- `after_update_commit` is called after the DB update transaction is committed by the `UpdateService`.
 - `after_save_commit` is called after the creation or DB update transaction is committed by the
   `CreateService` or `UpdateService`.
 
@@ -365,7 +361,6 @@ Refer to [merge request #158688](https://gitlab.com/gitlab-org/gitlab/-/merge_re
 1. Assign the widget to the appropriate work item types, by:
    - Adding it to the `WIDGETS_FOR_TYPE` hash in `lib/gitlab/database_importers/work_items/base_type_importer.rb`.
    - Creating a migration in `db/migrate/<version>_add_<widget_name>_widget_to_work_item_types.rb`.
-     Refer to `db/migrate/20240812081354_add_email_participants_widget_to_work_item_types.rb` for the latest best practice.
      There is no need to use a post-migration, see [discussion on merge request 148119](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/148119#note_1837432680).
 1. Update the GraphQL docs: `bundle exec rake gitlab:graphql:compile_docs`.
 1. Update translations: `tooling/bin/gettext_extractor locale/gitlab.pot`.
@@ -376,7 +371,6 @@ Now you can update tests for existing files and write tests for the new files:
 
 1. `spec/graphql/types/work_items/widget_interface_spec.rb` or `ee/spec/graphql/types/work_items/widget_interface_spec.rb`.
 1. `spec/models/work_items/widget_definition_spec.rb` or `ee/spec/models/ee/work_items/widget_definition_spec.rb`.
-1. `spec/models/work_items/widgets/<widget_name>_spec.rb` or `ee/spec/models/work_items/widgets/<widget_name>_spec.rb`.
 1. Request:
    - CE: `spec/requests/api/graphql/mutations/work_items/update_spec.rb` and/or `spec/requests/api/graphql/mutations/work_items/create_spec.rb`.
    - EE: `ee/spec/requests/api/graphql/mutations/work_items/update_spec.rb` and/or `ee/spec/requests/api/graphql/mutations/work_items/create_spec.rb`.

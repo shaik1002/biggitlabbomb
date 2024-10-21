@@ -382,7 +382,11 @@ describe('GroupItemComponent', () => {
 
               expect(
                 popover.findByRole('link', { name: GroupItem.i18n.learnMore }).attributes('href'),
-              ).toBe(helpPagePath('user/project/members/sharing_projects_groups'));
+              ).toBe(
+                helpPagePath('user/project/members/share_project_with_groups', {
+                  anchor: 'sharing-projects-with-groups-of-a-higher-restrictive-visibility-level',
+                }),
+              );
             });
           } else {
             itDoesNotRenderVisibilityWarningPopover();

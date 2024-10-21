@@ -47,6 +47,16 @@ RSpec.describe Ci::CreatePipelineService, :ci_config_feature_flag_correctness,
         }
       ])
     end
+
+    context 'when feature flag is disabled' do
+      before do
+        stub_feature_flags(pipeline_run_keyword: false)
+      end
+
+      it 'does not create a pipeline' do
+        expect(pipeline).not_to be_created_successfully
+      end
+    end
   end
 
   context 'when job has multiple run steps with different configurations' do
@@ -127,7 +137,7 @@ RSpec.describe Ci::CreatePipelineService, :ci_config_feature_flag_correctness,
     it 'returns errors for invalid configuration' do
       expect(pipeline).not_to be_created_successfully
       expect(pipeline.errors.full_messages).to include(
-        "jobs:job run object at `/0` is missing required properties: name"
+        "jobs:job run '/0' must be a valid 'required'"
       )
     end
   end

@@ -38,16 +38,12 @@ import {
   I18N_WORK_ITEM_ERROR_COPY_EMAIL,
   TEST_ID_LOCK_ACTION,
   TEST_ID_REPORT_ABUSE,
-  TEST_ID_NEW_RELATED_WORK_ITEM,
-  WORK_ITEM_TYPE_VALUE_EPIC,
-  WORK_ITEM_TYPE_ENUM_EPIC,
 } from '../constants';
 import updateWorkItemMutation from '../graphql/update_work_item.mutation.graphql';
 import updateWorkItemNotificationsMutation from '../graphql/update_work_item_notifications.mutation.graphql';
 import convertWorkItemMutation from '../graphql/work_item_convert.mutation.graphql';
 import namespaceWorkItemTypesQuery from '../graphql/namespace_work_item_types.query.graphql';
 import WorkItemStateToggle from './work_item_state_toggle.vue';
-import CreateWorkItemModal from './create_work_item_modal.vue';
 
 export default {
   i18n: {
@@ -62,7 +58,6 @@ export default {
     moreActions: __('More actions'),
     reportAbuse: __('Report abuse'),
   },
-  WORK_ITEM_TYPE_ENUM_EPIC,
   components: {
     GlDisclosureDropdown,
     GlDisclosureDropdownItem,
@@ -71,7 +66,6 @@ export default {
     GlModal,
     GlToggle,
     WorkItemStateToggle,
-    CreateWorkItemModal,
   },
   directives: {
     GlModal: GlModalDirective,
@@ -88,7 +82,6 @@ export default {
   lockDiscussionTestId: TEST_ID_LOCK_ACTION,
   stateToggleTestId: TEST_ID_TOGGLE_ACTION,
   reportAbuseActionTestId: TEST_ID_REPORT_ABUSE,
-  newRelatedItemTestId: TEST_ID_NEW_RELATED_WORK_ITEM,
   props: {
     fullPath: {
       type: String,
@@ -179,21 +172,14 @@ export default {
       required: false,
       default: 0,
     },
-    canCreateRelatedItem: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
   data() {
     return {
       isLockDiscussionUpdating: false,
       isDropdownVisible: false,
-      isCreateWorkItemModalVisible: false,
     };
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     workItemTypes: {
       query: namespaceWorkItemTypesQuery,
       variables() {
@@ -231,7 +217,7 @@ export default {
         : sprintfWorkItem(I18N_WORK_ITEM_ARE_YOU_SURE_DELETE, this.workItemType);
     },
     canLockWorkItem() {
-      return this.canUpdate;
+      return this.canUpdate && this.glFeatures.workItemsBeta;
     },
     canPromoteToObjective() {
       return this.canUpdate && this.workItemType === WORK_ITEM_TYPE_VALUE_KEY_RESULT;
@@ -252,16 +238,6 @@ export default {
     },
     isAuthor() {
       return this.workItemAuthorId === window.gon.current_user_id;
-    },
-    relatedItemData() {
-      return {
-        id: this.workItemId,
-        type: this.workItemType,
-        reference: this.workItemReference,
-      };
-    },
-    isEpic() {
-      return this.workItemType === WORK_ITEM_TYPE_VALUE_EPIC;
     },
   },
   methods: {
@@ -417,15 +393,15 @@ export default {
     >
       <template v-if="$options.isLoggedIn && !hideSubscribe">
         <gl-disclosure-dropdown-item
-          class="gl-flex gl-w-full gl-justify-end"
+          class="gl-display-flex gl-justify-content-end gl-w-full"
           :data-testid="$options.notificationsToggleFormTestId"
         >
           <template #list-item>
             <gl-toggle
               :value="subscribedToNotifications"
               :label="$options.i18n.notifications"
+              class="work-item-notification-toggle"
               label-position="left"
-              class="work-item-dropdown-toggle gl-justify-between"
               @change="toggleNotifications($event)"
             />
           </template>
@@ -445,14 +421,6 @@ export default {
         @error="emitStateToggleError"
         @workItemStateUpdated="$emit('workItemStateUpdated')"
       />
-
-      <gl-disclosure-dropdown-item
-        v-if="canCreateRelatedItem && canUpdate && isEpic"
-        :data-testid="$options.newRelatedItemTestId"
-        @action="isCreateWorkItemModalVisible = true"
-      >
-        <template #list-item>{{ __('New related Epic') }}</template>
-      </gl-disclosure-dropdown-item>
 
       <gl-disclosure-dropdown-item
         v-if="canPromoteToObjective"
@@ -515,7 +483,7 @@ export default {
           @action="handleDelete"
         >
           <template #list-item>
-            <span class="gl-text-danger">{{ i18n.deleteWorkItem }}</span>
+            <span class="gl-text-danger gl-font-bold">{{ i18n.deleteWorkItem }}</span>
           </template>
         </gl-disclosure-dropdown-item>
       </template>
@@ -532,13 +500,5 @@ export default {
     >
       {{ areYouSureDeleteMessage }}
     </gl-modal>
-
-    <create-work-item-modal
-      :visible="isCreateWorkItemModalVisible"
-      :related-item="relatedItemData"
-      :work-item-type-name="$options.WORK_ITEM_TYPE_ENUM_EPIC"
-      hide-button
-      @hideModal="isCreateWorkItemModalVisible = false"
-    />
   </div>
 </template>

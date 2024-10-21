@@ -6,7 +6,7 @@
 
 = render ::Layouts::SettingsSectionComponent.new(page_title, options: { class: 'js-search-settings-section' }) do |c|
   - c.with_description do
-    - help_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: help_page_path('user/group/settings/group_access_tokens.md') }
+    - help_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: help_page_path('user/group/settings/group_access_tokens') }
     - if current_user.can?(:create_resource_access_tokens, @group)
       = _('Generate group access tokens scoped to this group for your applications that need access to the GitLab API.')
       = html_escape(_('You can also use group access tokens with Git to authenticate over HTTP(S). %{link_start}Learn more.%{link_end}')) % { link_start: help_link_start, link_end: '</a>'.html_safe }
@@ -24,7 +24,7 @@
 
     = render ::Layouts::CrudComponent.new(_('Active group access tokens'),
       icon: 'token',
-      count: @active_access_tokens_size,
+      count: @active_access_tokens.size,
       count_options: { class: 'js-token-count' },
       form_options: { class: 'gl-hidden js-toggle-content js-add-new-token-form' },
       options: { class: 'js-toggle-container js-token-card' }) do |c|
@@ -46,16 +46,15 @@
             default_access_level: Gitlab::Access::GUEST,
             prefix: :resource_access_token,
             description_prefix: :group_access_token,
-            help_path: help_page_path('user/group/settings/group_access_tokens.md', anchor: 'scopes-for-a-group-access-token')
+            help_path: help_page_path('user/group/settings/group_access_tokens', anchor: 'scopes-for-a-group-access-token')
 
       - c.with_body do
-        #js-access-token-table-app{ data: { access_token_type: type, access_token_type_plural: type_plural, backend_pagination: Feature.enabled?(:access_token_pagination, @group.root_ancestor).to_s, initial_active_access_tokens: @active_access_tokens.to_json, no_active_tokens_message: _('This group has no active access tokens.'), show_role: true } }
+        #js-access-token-table-app{ data: { access_token_type: type, access_token_type_plural: type_plural, initial_active_access_tokens: @active_access_tokens.to_json, no_active_tokens_message: _('This group has no active access tokens.'), show_role: true } }
 
     - if Feature.enabled?(:retain_resource_access_token_user_after_revoke, @group.root_ancestor)
-      .gl-mt-5
-        = render ::Layouts::CrudComponent.new(_('Inactive group access tokens'),
-          icon: 'token',
-          count: @inactive_access_tokens.size,
-          count_options: { class: 'js-token-count' }) do |c|
-          - c.with_body do
-            #js-inactive-access-token-table-app{ data: { access_token_type: type, access_token_type_plural: type_plural, initial_inactive_access_tokens: @inactive_access_tokens.to_json, no_inactive_tokens_message: _('This group has no inactive access tokens.')} }
+      = render ::Layouts::CrudComponent.new(_('Inactive group access tokens'),
+        icon: 'token',
+        count: @inactive_access_tokens.size,
+        count_options: { class: 'js-token-count' }) do |c|
+        - c.with_body do
+          #js-inactive-access-token-table-app{ data: { access_token_type: type, access_token_type_plural: type_plural, initial_inactive_access_tokens: @inactive_access_tokens.to_json, no_inactive_tokens_message: _('This group has no inactive access tokens.')} }

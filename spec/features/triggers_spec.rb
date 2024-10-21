@@ -99,7 +99,7 @@ RSpec.describe 'Triggers', :js, feature_category: :continuous_integration do
         find('button[title="Edit"]').send_keys(:return)
         page.within('[id="edit-trigger-modal"]') do
           fill_in 'edit_trigger_description', with: new_trigger_title
-          click_button 'Update'
+          click_button 'OK'
         end
 
         aggregate_failures 'display update notice and trigger is updated' do

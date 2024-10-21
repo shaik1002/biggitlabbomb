@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'rubocop-rspec'
-require 'rubocop-factory_bot'
 
 module RuboCop
   module Cop

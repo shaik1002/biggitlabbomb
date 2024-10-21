@@ -73,10 +73,10 @@ export default {
         </template>
       </gl-sprintf>
     </div>
-    <div class="gl-flex">
-      <gl-form-group class="gl-mr-3 gl-grow gl-basis-1/2" :label="$options.i18n.WHEN">
+    <div class="gl-display-flex">
+      <gl-form-group class="gl-flex-grow-1 gl-flex-basis-half gl-mr-3" :label="$options.i18n.WHEN">
         <gl-form-select
-          class="gl-mr-3 gl-grow gl-basis-1/2"
+          class="gl-flex-grow-1 gl-flex-basis-half gl-mr-3"
           :options="$options.whenOptions"
           data-testid="rules-when-select"
           :value="job.rules[0].when"
@@ -84,14 +84,14 @@ export default {
         />
       </gl-form-group>
       <gl-form-group
-        class="gl-grow gl-basis-1/2"
+        class="gl-flex-grow-1 gl-flex-basis-half"
         :invalid-feedback="$options.i18n.INVALID_START_IN"
         :state="isStartValid"
       >
-        <div class="gl-mt-5 gl-flex">
+        <div class="gl-display-flex gl-mt-5">
           <gl-form-input
             v-model="startInNumber"
-            class="gl-mr-3 gl-grow gl-basis-1/2"
+            class="gl-flex-grow-1 gl-flex-basis-half gl-mr-3"
             data-testid="rules-start-in-number-input"
             type="number"
             :state="isStartValid"
@@ -101,7 +101,7 @@ export default {
           />
           <gl-form-select
             v-model="startInUnit"
-            class="gl-grow gl-basis-1/2"
+            class="gl-flex-grow-1 gl-flex-basis-half"
             data-testid="rules-start-in-unit-select"
             :state="isStartValid"
             :class="{ 'gl-invisible': !isDelayed }"

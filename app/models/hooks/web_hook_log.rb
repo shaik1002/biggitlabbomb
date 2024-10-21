@@ -13,7 +13,7 @@ class WebHookLog < ApplicationRecord
 
   self.primary_key = :id
 
-  partitioned_by :created_at, strategy: :monthly, retain_for: 1.month
+  partitioned_by :created_at, strategy: :monthly, retain_for: 3.months
 
   belongs_to :web_hook
 
@@ -63,10 +63,6 @@ class WebHookLog < ApplicationRecord
     super if self[:request_headers]['X-Gitlab-Token'] == _('[REDACTED]')
 
     self[:request_headers].merge('X-Gitlab-Token' => _('[REDACTED]'))
-  end
-
-  def idempotency_key
-    self[:request_headers]['Idempotency-Key']
   end
 
   def url_current?

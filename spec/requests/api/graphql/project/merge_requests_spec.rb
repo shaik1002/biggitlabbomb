@@ -300,25 +300,13 @@ RSpec.describe 'getting merge request listings nested in a project', feature_cat
 
     context 'when requesting `merged_at`' do
       let(:requested_fields) { [:merged_at] }
-      let(:merge_request_ids) { [merge_request_a.id, merge_request_b.id, merge_request_c.id] }
 
       before do
         # make the MRs "merged"
-        ::MergeRequest.where(id: merge_request_ids).update_all(state_id: MergeRequest.available_states[:merged])
-        ::MergeRequest::Metrics.where(merge_request_id: merge_request_ids).update_all(merged_at: Time.now)
-      end
-
-      include_examples 'N+1 query check'
-    end
-
-    context 'when requesting `closed_at`' do
-      let(:requested_fields) { [:closed_at] }
-      let(:merge_request_ids) { [merge_request_a.id, merge_request_b.id, merge_request_c.id] }
-
-      before do
-        # make the MRs "closed"
-        ::MergeRequest.where(id: merge_request_ids).update_all(state_id: MergeRequest.available_states[:closed])
-        ::MergeRequest::Metrics.where(merge_request_id: merge_request_ids).update_all(latest_closed_at: Time.now)
+        [merge_request_a, merge_request_b, merge_request_c].each do |mr|
+          mr.update!(state_id: MergeRequest.available_states[:merged])
+          mr.metrics.update!(merged_at: Time.now)
+        end
       end
 
       include_examples 'N+1 query check'
@@ -371,8 +359,8 @@ RSpec.describe 'getting merge request listings nested in a project', feature_cat
       let(:requested_fields) { 'upvotes downvotes awardEmoji { nodes { name } }' }
 
       before do
-        create_list(:award_emoji, 2, name: AwardEmoji::THUMBS_UP, awardable: merge_request_a)
-        create_list(:award_emoji, 2, name: AwardEmoji::THUMBS_DOWN, awardable: merge_request_b)
+        create_list(:award_emoji, 2, name: 'thumbsup', awardable: merge_request_a)
+        create_list(:award_emoji, 2, name: 'thumbsdown', awardable: merge_request_b)
       end
 
       include_examples 'N+1 query check'

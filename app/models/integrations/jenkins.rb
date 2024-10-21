@@ -79,7 +79,7 @@ module Integrations
 
     def self.help
       build_help_page_url(
-        'integration/jenkins.md',
+        'integration/jenkins',
         s_("Run CI/CD pipelines with Jenkins when you push to a repository, or when a merge request is created, updated, or merged.")
       )
     end

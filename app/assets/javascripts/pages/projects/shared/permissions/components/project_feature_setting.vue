@@ -82,7 +82,10 @@ export default {
 </script>
 
 <template>
-  <div :data-for="name" class="project-feature-controls gl-mx-0 gl-my-3 gl-flex gl-items-center">
+  <div
+    :data-for="name"
+    class="project-feature-controls gl-display-flex gl-align-items-center gl-my-3 gl-mx-0"
+  >
     <input v-if="name" :name="name" :value="value" type="hidden" />
     <gl-toggle
       v-if="showToggle"
@@ -93,7 +96,7 @@ export default {
       label-position="hidden"
       @change="toggleFeature"
     />
-    <div class="select-wrapper gl-grow">
+    <div class="select-wrapper gl-flex-grow-1">
       <select
         v-model="internalValue"
         :disabled="displaySelectInput"
@@ -107,7 +110,7 @@ export default {
           {{ optionName }}
         </option>
       </select>
-      <gl-icon name="chevron-down" class="gl-absolute gl-right-3 gl-top-3 gl-text-gray-500" />
+      <gl-icon name="chevron-down" class="gl-absolute gl-top-3 gl-right-3 gl-text-gray-500" />
     </div>
   </div>
 </template>

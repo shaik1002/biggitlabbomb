@@ -26,7 +26,7 @@ module Gitlab
             namespace_id: namespace&.id,
             plan_name: namespace&.actual_plan_name,
             project_id: project_id,
-            user: user,
+            user_id: user&.id,
             **extra).to_context, *context
         ]
 

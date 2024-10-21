@@ -58,13 +58,13 @@ export default {
           key: 'active',
           label: '',
           thClass: 'gl-w-7',
-          tdClass: '!gl-border-b-0 !gl-align-middle',
+          tdClass: 'gl-border-bottom-0! !gl-align-middle',
         },
         {
           key: 'title',
           label: __('Integration'),
           thClass: 'd-sm-table-cell',
-          tdClass: '!gl-border-b-0',
+          tdClass: 'gl-border-bottom-0!',
         },
       );
 
@@ -72,9 +72,8 @@ export default {
         fields.push({
           key: 'updated_at',
           label: this.showUpdatedAt ? __('Last updated') : '',
-          thAlignRight: true,
-          thClass: 'gl-hidden d-sm-table-cell',
-          tdClass: '!gl-border-b-0 gl-text-right gl-hidden d-sm-table-cell !gl-align-middle',
+          thClass: 'gl-hidden d-sm-table-cell gl-text-right',
+          tdClass: 'gl-border-bottom-0! gl-text-right gl-hidden d-sm-table-cell !gl-align-middle',
         });
       }
 
@@ -82,7 +81,7 @@ export default {
         key: 'edit_path',
         label: '',
         thClass: 'gl-w-15',
-        tdClass: '!gl-border-b-0',
+        tdClass: 'gl-border-bottom-0!',
       });
 
       return fields;

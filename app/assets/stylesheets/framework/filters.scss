@@ -1,6 +1,10 @@
 .filter-item {
   vertical-align: top;
 
+  &.reset-filters {
+    padding: 7px;
+  }
+
   &.update-issues-btn {
     float: right;
     margin-right: 0;
@@ -8,6 +12,12 @@
     @include media-breakpoint-down(sm) {
       float: none;
     }
+  }
+}
+
+.filters-section {
+  @include media-breakpoint-down(sm) {
+    display: inline-block;
   }
 }
 
@@ -95,7 +105,7 @@
   .name,
   .operator,
   .value-container {
-    color: var(--gl-token-foreground-color);
+    color: $gl-text-color;
   }
 
   .name,
@@ -109,21 +119,21 @@
   }
 
   .name {
-    background-color: var(--gl-filtered-search-token-type-background-color-default);
+    background-color: $gray-50;
     border-radius: 2px 0 0 2px;
     margin-right: 1px;
     text-transform: capitalize;
   }
 
   .operator {
-    background-color: var(--gl-filtered-search-token-operator-background-color-default);
+    background-color: $gray-50;
     margin-right: 1px;
   }
 
   .value-container {
     display: flex;
     align-items: center;
-    background-color: var(--gl-filtered-search-token-data-background-color-default);
+    background-color: $gray-50;
     border-radius: 0 2px 2px 0;
     margin-right: 4px;
     padding-right: 4px;
@@ -140,21 +150,20 @@
     padding-right: 0;
 
     .close-icon {
-      color: var(--gl-icon-color-subtle);
+      color: $gl-text-color-secondary;
     }
 
     &:hover .close-icon {
-      color: var(--gl-icon-color-default);
+      color: $gl-text-color;
     }
 
     &.inverted {
       .close-icon {
-        color: var(--gl-color-neutral-0);
-        opacity: 0.85;
+        color: $gl-text-color-secondary-inverted;
       }
 
       &:hover .close-icon {
-        color: var(--gl-color-neutral-0);
+        color: $gl-text-color-inverted;
       }
     }
   }
@@ -164,22 +173,22 @@
 .filtered-search-token .selected,
 .filtered-search-term .selected {
   .name {
-    background-color: var(--gl-filtered-search-token-type-background-color-hover);
+    background-color: $gray-100;
   }
 
   .operator {
-    background-color: var(--gl-filtered-search-token-operator-background-color-hover);
+    box-shadow: inset 0 0 0 100px $filtered-search-term-shadow-color;
   }
 
   .value-container {
-    background-color: var(--gl-filtered-search-token-data-background-color-hover);
+    box-shadow: inset 0 0 0 100px $filtered-search-term-shadow-color;
   }
 }
 
 .filtered-search-term {
   .name {
     background-color: inherit;
-    color: var(--gl-token-foreground-color);
+    color: $black;
     text-transform: none;
   }
 
@@ -201,8 +210,8 @@
   display: flex;
   width: 100%;
   min-width: 0;
-  border: 1px solid var(--gl-control-border-color-default);
-  @apply gl-bg-default;
+  border: 1px solid $gray-400;
+  background-color: $white;
   border-radius: $gl-border-radius-base;
 
   &.focus,
@@ -228,7 +237,6 @@
     padding-right: 25px;
     padding-left: 0;
     height: #{$input-height - 2px};
-    background-color: transparent;
     line-height: inherit;
 
     &,
@@ -246,7 +254,7 @@
   position: relative;
   min-width: 0;
   height: #{$input-height - 2px};
-  background-color: var(--gl-control-background-color-default);
+  background-color: $input-bg;
   border-radius: $gl-border-radius-base;
 }
 
@@ -274,14 +282,14 @@
   border-radius: $gl-border-radius-base-inner 0 0 $gl-border-radius-base-inner;
   color: $gl-text-color-secondary;
   margin: -1px 0 -1px -1px;
-  box-shadow: inset 0 0 0 1px var(--gl-control-border-color-default);
+  box-shadow: inset 0 0 0 1px $gray-400;
   flex: 1;
   transition: color 0.1s linear;
   width: auto;
 
   &:hover,
   &:focus {
-    @apply gl-text-default;
+    color: $gl-text-color;
   }
 }
 
@@ -322,7 +330,7 @@
   .epics-details-filters {
     padding-top: $gl-padding-8;
     padding-bottom: $gl-padding-8;
-    @apply gl-bg-default;
+    background-color: $white;
   }
 
   .filter-dropdown-container {
@@ -350,7 +358,7 @@
     }
 
     .dropdown-label-box {
-      border-color: var(--gl-background-color-default);
+      border-color: $white;
       border-style: solid;
       border-width: 1px;
       width: 17px;
@@ -363,6 +371,12 @@
 .filter-dropdown-loading {
   padding: 8px 16px;
   text-align: center;
+}
+
+.search-token-target-branch {
+  .value {
+    @include gl-font-monospace;
+  }
 }
 
 .vue-filtered-search-bar-container {
@@ -379,7 +393,7 @@
     // around sort dropdown match with filter
     // input field.
     .gl-button {
-      box-shadow: inset 0 0 0 1px var(--gl-control-border-color-default);
+      box-shadow: inset 0 0 0 1px $gray-400;
     }
   }
 

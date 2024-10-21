@@ -29,26 +29,21 @@ module Ci
 
       attribute :tag_list, Gitlab::Database::Type::TagListType.new
 
-      scope :tagged_with, ->(tags, like_search_enabled: false) do
+      scope :tagged_with, ->(tags) do
         Gitlab::Ci::Tags::Parser
           .new(tags)
           .parse
-          .map { |tag| with_tag(tag, like_search_enabled: like_search_enabled) }
+          .map { |tag| with_tag(tag) }
           .reduce(:and)
       end
 
-      scope :with_tag, ->(name, like_search_enabled: false) do
-        query = Tagging
-                  .merge(unscoped.scoped_tagging)
-                  .where(context: :tags)
-
-        if like_search_enabled
-          query = query.where(tag_id: Tag.where("name LIKE ?", "%#{sanitize_sql_like(name)}%")) # rubocop:disable GitlabSecurity/SqlInjection -- we are sanitizing
-        else
-          query = query.where(tag_id: Tag.where(name: name))
-        end
-
-        where_exists(query)
+      scope :with_tag, ->(name) do
+        where_exists(
+          Tagging
+            .merge(unscoped.scoped_tagging)
+            .where(context: :tags)
+            .where(tag_id: Tag.where(name: name))
+        )
       end
 
       scope :scoped_tagging, -> do
@@ -85,7 +80,7 @@ module Ci
     end
 
     def tag_list_cache_set?
-      strong_memoized?(:tag_list)
+      strong_memoized?(:tag_list) && tag_list.any?
     end
 
     def save_tags
@@ -101,8 +96,6 @@ module Ci
       new_tags.each do |tag|
         taggings.create!(tag_id: tag.id, context: 'tags', taggable: self)
       end
-
-      yield(new_tags, old_tags) if block_given?
 
       true
     end

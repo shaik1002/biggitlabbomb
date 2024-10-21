@@ -11,7 +11,7 @@ RSpec.describe Oauth::TokensController, feature_category: :system_access do
         post '/oauth/token', params: { grant_type: 'password', username: user.username, password: with_password }
       end
 
-      context 'when user does not have two factor enabled', :with_default_organization do
+      context 'when user does not have two factor enabled' do
         let_it_be(:user) { create(:user, password: password) }
 
         it 'authenticates successfully' do
@@ -110,11 +110,8 @@ RSpec.describe Oauth::TokensController, feature_category: :system_access do
       it 'allows cross-origin requests' do
         expect(response.headers['Access-Control-Allow-Origin']).to eq '*'
         expect(response.headers['Access-Control-Allow-Methods']).to eq allowed_methods
+        expect(response.headers['Access-Control-Allow-Headers']).to eq authorization_methods
         expect(response.headers['Access-Control-Allow-Credentials']).to be_nil
-
-        expect(
-          Array.wrap(response.headers['Access-Control-Allow-Headers']).join("\n")
-        ).to eq authorization_methods.join("\n")
       end
     end
 

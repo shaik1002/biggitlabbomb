@@ -162,7 +162,9 @@ module Gitlab
       end
 
       def each_gitaly_patch
-        @iterator.each_with_index do |raw, iterator_index|
+        i = @array.length
+
+        @iterator.each do |raw|
           @empty = false
 
           options = { expanded: expand_diff? }
@@ -180,10 +182,8 @@ module Gitlab
             end
           end
 
-          if iterator_index >= @offset_index
-            @array << diff
-            yield diff
-          end
+          yield @array[i] = diff
+          i += 1
         end
       end
 

@@ -49,7 +49,7 @@ export default {
       <template #link="{ content }">
         <help-page-link
           href="subscriptions/gitlab_com/index"
-          anchor="link-subscription-to-a-group"
+          anchor="change-the-linked-namespace"
           >{{ content }}</help-page-link
         >
       </template>

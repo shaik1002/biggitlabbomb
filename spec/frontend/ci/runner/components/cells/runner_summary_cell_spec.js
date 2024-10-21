@@ -22,7 +22,8 @@ describe('RunnerTypeCell', () => {
   const findLockIcon = () => wrapper.findByTestId('lock-icon');
   const findRunnerTags = () => wrapper.findComponent(RunnerTags);
   const findRunnerSummaryField = (icon) =>
-    wrapper.findAllComponents(RunnerSummaryField).wrappers.find((w) => w.props('icon') === icon);
+    wrapper.findAllComponents(RunnerSummaryField).filter((w) => w.props('icon') === icon)
+      .wrappers[0];
 
   const createComponent = ({ runner, mountFn = shallowMountExtended, ...options } = {}) => {
     wrapper = mountFn(RunnerSummaryCell, {
@@ -57,7 +58,7 @@ describe('RunnerTypeCell', () => {
       mountFn: mountExtended,
     });
 
-    expect(findRunnerManagersBadge().find('*').exists()).toBe(false);
+    expect(findRunnerManagersBadge().html()).toBe('');
   });
 
   it('Displays runner manager count', () => {

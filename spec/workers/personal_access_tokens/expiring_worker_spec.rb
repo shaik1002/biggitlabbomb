@@ -41,10 +41,6 @@ RSpec.describe PersonalAccessTokens::ExpiringWorker, type: :worker, feature_cate
         expect { worker.perform }.to change { expiring_token.reload.expire_notification_delivered }.from(false).to(true)
       end
 
-      it 'marks the notification as delivered with new column', :freeze_time do
-        expect { worker.perform }.to change { expiring_token.reload.seven_days_notification_sent_at }.from(nil).to(Time.current)
-      end
-
       it 'avoids N+1 queries', :use_sql_query_cache do
         control = ActiveRecord::QueryRecorder.new(skip_cached: false) { worker.perform }
 
@@ -114,13 +110,7 @@ RSpec.describe PersonalAccessTokens::ExpiringWorker, type: :worker, feature_cate
         expect(fake_wh_service).to receive(:async_execute).once
 
         expect(WebHookService)
-          .to receive(:new)
-          .with(
-            project_hook,
-            {},
-            'resource_access_token_hooks',
-            idempotency_key: anything
-          ) { fake_wh_service }
+        .to receive(:new).with(project_hook, {}, 'resource_access_token_hooks') { fake_wh_service }
 
         worker.perform
       end

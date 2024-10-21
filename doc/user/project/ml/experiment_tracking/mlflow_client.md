@@ -65,20 +65,20 @@ If your training code is being run from a CI/CD job, GitLab can use that informa
 candidate metadata. To associate a candidate to a CI/CD job:
 
 1. In the [Project CI variables](../../../../ci/variables/index.md), include the following variables:
-   - `MLFLOW_TRACKING_URI`: `"<your gitlab endpoint>/api/v4/projects/<your project id>/ml/mlflow"`
-   - `MLFLOW_TRACKING_TOKEN`: `<your_access_token>`
+    - `MLFLOW_TRACKING_URI`: `"<your gitlab endpoint>/api/v4/projects/<your project id>/ml/mlflow"`
+    - `MLFLOW_TRACKING_TOKEN`: `<your_access_token>`
 
 1. In your training code within the run execution context, add the following code snippet:
 
-   ```python
-   with mlflow.start_run(run_name=f"Candidate {index}"):
-     # Your training code
+    ```python
+    with mlflow.start_run(run_name=f"Candidate {index}"):
+      # Your training code
 
-     # Start of snippet to be included
-     if os.getenv('GITLAB_CI'):
-       mlflow.set_tag('gitlab.CI_JOB_ID', os.getenv('CI_JOB_ID'))
-     # End of snippet to be included
-   ```
+      # Start of snippet to be included
+      if os.getenv('GITLAB_CI'):
+        mlflow.set_tag('gitlab.CI_JOB_ID', os.getenv('CI_JOB_ID'))
+      # End of snippet to be included
+    ```
 
 ## Model registry
 
@@ -199,23 +199,7 @@ client.get_latest_versions(model_name)
 **Notes**
 
 - Argument `stages` is ignored.
-- Versions are ordered by highest semantic version.
-
-#### Loading a model version
-
-```python
-client = MlflowClient()
-model_name = '<your_model_name>'
-version = '<your_version'  # e.g. '1.0.0'
-
-# Alternatively search the version
-version = mlflow.search_registered_models(filter_string="name='{model_name}'")[0].latest_versions[0].version
-
-model = mlflow.pyfunc.load_model(f"models:/{model_name}/{latest_version}")
-
-# Or load the latest version
-model = mlflow.pyfunc.load_model(f"models:/{model_name}/latest")
-```
+- Versions are ordered by last created.
 
 #### Logging metrics and parameters to a model version
 
@@ -281,34 +265,31 @@ GitLab supports these methods from the MLflow client. Other methods might be sup
 tested. More information can be found in the [MLflow Documentation](https://www.mlflow.org/docs/1.28.0/python_api/mlflow.html). The MlflowClient counterparts
 of the methods below are also supported with the same caveats.
 
-| Method                   | Supported       | Version Added | Comments                                                                                     |
-|--------------------------|-----------------|---------------|----------------------------------------------------------------------------------------------|
-| `get_experiment`         | Yes             | 15.11         |                                                                                              |
-| `get_experiment_by_name` | Yes             | 15.11         |                                                                                              |
-| `delete_experiment`      | Yes             | 17.5          |                                                                                              |
-| `set_experiment`         | Yes             | 15.11         |                                                                                              |
-| `get_run`                | Yes             | 15.11         |                                                                                              |
-| `delete_run`             | Yes             | 17.5          |                                                                                              |
-| `start_run`              | Yes             | 15.11         | (16.3) If a name is not provided, the candidate receives a random nickname.                  |
-| `search_runs`            | Yes             | 15.11         | (16.4) `experiment_ids` supports only a single experiment ID with order by column or metric. |
-| `log_artifact`           | Yes with caveat | 15.11         | (15.11) `artifact_path` must be empty. Does not support directories.                         |
-| `log_artifacts`          | Yes with caveat | 15.11         | (15.11) `artifact_path` must be empty. Does not support directories.                         |
-| `log_batch`              | Yes             | 15.11         |                                                                                              |
-| `log_metric`             | Yes             | 15.11         |                                                                                              |
-| `log_metrics`            | Yes             | 15.11         |                                                                                              |
-| `log_param`              | Yes             | 15.11         |                                                                                              |
-| `log_params`             | Yes             | 15.11         |                                                                                              |
-| `log_figure`             | Yes             | 15.11         |                                                                                              |
-| `log_image`              | Yes             | 15.11         |                                                                                              |
-| `log_text`               | Yes with caveat | 15.11         | (15.11) Does not support directories.                                                        |
-| `log_dict`               | Yes with caveat | 15.11         | (15.11) Does not support directories.                                                        |
-| `set_tag`                | Yes             | 15.11         |                                                                                              |
-| `set_tags`               | Yes             | 15.11         |                                                                                              |
-| `set_terminated`         | Yes             | 15.11         |                                                                                              |
-| `end_run`                | Yes             | 15.11         |                                                                                              |
-| `update_run`             | Yes             | 15.11         |                                                                                              |
-| `log_model`              | Partial         | 15.11         | (15.11) Saves the artifacts, but not the model data. `artifact_path` must be empty.          |
-| `load_model`             | Yes             | 17.5          |                                                                                              |
+| Method                   | Supported        | Version Added  | Comments                                                                            |
+|--------------------------|------------------|----------------|-------------------------------------------------------------------------------------|
+| `get_experiment`         | Yes              | 15.11          |                                                                                     |
+| `get_experiment_by_name` | Yes              | 15.11          |                                                                                     |
+| `set_experiment`         | Yes              | 15.11          |                                                                                     |
+| `get_run`                | Yes              | 15.11          |                                                                                     |
+| `start_run`              | Yes              | 15.11          | (16.3) If a name is not provided, the candidate receives a random nickname.         |
+| `search_runs`            | Yes              | 15.11          | (16.4) `experiment_ids` supports only a single experiment ID with order by column or metric. |
+| `log_artifact`           | Yes with caveat  | 15.11          | (15.11) `artifact_path` must be empty. Does not support directories.                |
+| `log_artifacts`          | Yes with caveat  | 15.11          | (15.11) `artifact_path` must be empty. Does not support directories.                |
+| `log_batch`              | Yes              | 15.11          |                                                                                     |
+| `log_metric`             | Yes              | 15.11          |                                                                                     |
+| `log_metrics`            | Yes              | 15.11          |                                                                                     |
+| `log_param`              | Yes              | 15.11          |                                                                                     |
+| `log_params`             | Yes              | 15.11          |                                                                                     |
+| `log_figure`             | Yes              | 15.11          |                                                                                     |
+| `log_image`              | Yes              | 15.11          |                                                                                     |
+| `log_text`               | Yes with caveat  | 15.11          | (15.11) Does not support directories.                                               |
+| `log_dict`               | Yes with caveat  | 15.11          | (15.11) Does not support directories.                                               |
+| `set_tag`                | Yes              | 15.11          |                                                                                     |
+| `set_tags`               | Yes              | 15.11          |                                                                                     |
+| `set_terminated`         | Yes              | 15.11          |                                                                                     |
+| `end_run`                | Yes              | 15.11          |                                                                                     |
+| `update_run`             | Yes              | 15.11          |                                                                                     |
+| `log_model`              | Partial          | 15.11          | (15.11) Saves the artifacts, but not the model data. `artifact_path` must be empty. |
 
 Other MLflowClient methods:
 

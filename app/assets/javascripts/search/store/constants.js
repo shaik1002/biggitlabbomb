@@ -1,14 +1,10 @@
 import { statusFilterData } from '~/search/sidebar/components/status_filter/data';
 import { confidentialFilterData } from '~/search/sidebar/components/confidentiality_filter/data';
 import { languageFilterData } from '~/search/sidebar/components/language_filter/data';
-import { LABEL_FILTER_PARAM } from '~/search/sidebar/components/label_filter/data';
+import { labelFilterData } from '~/search/sidebar/components/label_filter/data';
 import { archivedFilterData } from '~/search/sidebar/components/archived_filter/data';
 import { INCLUDE_FORKED_FILTER_PARAM } from '~/search/sidebar/components/forks_filter/index.vue';
 import { s__ } from '~/locale';
-import {
-  SOURCE_BRANCH_PARAM,
-  NOT_SOURCE_BRANCH_PARAM,
-} from '~/search/sidebar/components/source_branch_filter/index.vue';
 
 export const MAX_FREQUENT_ITEMS = 5;
 
@@ -22,11 +18,9 @@ export const SIDEBAR_PARAMS = [
   statusFilterData.filterParam,
   confidentialFilterData.filterParam,
   languageFilterData.filterParam,
-  LABEL_FILTER_PARAM,
+  labelFilterData.filterParam,
   archivedFilterData.filterParam,
   INCLUDE_FORKED_FILTER_PARAM,
-  SOURCE_BRANCH_PARAM,
-  NOT_SOURCE_BRANCH_PARAM,
 ];
 
 export const REGEX_PARAM = 'regex';

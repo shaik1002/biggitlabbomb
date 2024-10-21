@@ -11,7 +11,7 @@ DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
-`glab` is an open source GitLab CLI tool. It brings GitLab to your terminal:
+GLab is an open source GitLab CLI tool. It brings GitLab to your terminal:
 next to where you are already working with Git and your code, without
 switching between windows and browser tabs.
 
@@ -73,16 +73,16 @@ glab mr merge
 ## GitLab Duo for the CLI
 
 DETAILS:
-**Tier:** Ultimate with GitLab Duo Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
+**Tier:** For a limited time, Ultimate. In the future, Ultimate with [GitLab Duo Enterprise](../../subscriptions/subscription-add-ons.md).
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
 The GitLab CLI includes features powered by [GitLab Duo](../../user/ai_features.md). These include:
 
-- [`glab duo ask`](https://gitlab.com/gitlab-org/cli/-/blob/main/docs/source/duo/ask.md)
+- [`glab duo ask`](https://gitlab.com/gitlab-org/cli/-/tree/main/docs/source/duo/ask)
 
 To ask questions about `git` commands while you work, type:
 
-- [`glab duo ask`](https://gitlab.com/gitlab-org/cli/-/blob/main/docs/source/duo/ask.md)
+- [`glab duo ask`](https://gitlab.com/gitlab-org/cli/-/tree/main/docs/source/duo/ask)
 
 The `glab duo ask` command can help you remember a `git` command you forgot,
 or provide suggestions on how to run `git` commands to perform other tasks.

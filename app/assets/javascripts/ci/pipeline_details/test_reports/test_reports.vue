@@ -107,13 +107,13 @@ export default {
       @before-enter="beforeEnterTransition"
       @after-leave="afterLeaveTransition"
     >
-      <div v-if="showSuite" key="detail" class="slide-enter-to-element gl-w-full">
+      <div v-if="showSuite" key="detail" class="gl-w-full slide-enter-to-element">
         <test-summary :report="getSelectedSuite" show-back @on-back-click="summaryBackClick" />
 
         <test-suite-table />
       </div>
 
-      <div v-else key="summary" class="slide-enter-from-element gl-w-full">
+      <div v-else key="summary" class="gl-w-full slide-enter-from-element">
         <test-summary :report="testReports" />
 
         <test-summary-table @row-click="summaryTableRowClick" />

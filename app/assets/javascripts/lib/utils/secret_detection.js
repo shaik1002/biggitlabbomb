@@ -40,7 +40,7 @@ const redactString = (inputString) => {
 
   const prefix = inputString.substring(0, 5); // Keep the first 5 characters
   const suffix = inputString.substring(inputString.length - 4); // Keep the last 4 characters
-  const redactLength = Math.min(inputString.length - prefix.length - suffix.length, 22);
+  const redactLength = inputString.length - prefix.length - suffix.length;
 
   return `${prefix}${'*'.repeat(redactLength)}${suffix}`;
 };

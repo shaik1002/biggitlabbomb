@@ -11,7 +11,6 @@ module RuboCop
         BASE_CLASSES = %i[
           BatchedMigrationJob
           BackfillDesiredShardingKeyJob
-          BackfillDesiredShardingKeyPartitionJob
         ].to_set.freeze
 
         def_node_search :top_level_module?, <<~PATTERN

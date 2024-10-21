@@ -127,9 +127,7 @@ RSpec.shared_examples 'work item drawer' do
       before do
         issue.timelogs.create!(time_spent: 3600, user: user)
 
-        page.refresh
-
-        wait_for_requests
+        refresh_and_click_first_card
       end
 
       it 'shows the total time spent only' do
@@ -144,9 +142,7 @@ RSpec.shared_examples 'work item drawer' do
       before do
         issue.update!(time_estimate: 3600)
 
-        page.refresh
-
-        wait_for_requests
+        refresh_and_click_first_card
       end
 
       it 'shows the estimated time only', :aggregate_failures do
@@ -162,14 +158,12 @@ RSpec.shared_examples 'work item drawer' do
         issue.timelogs.create!(time_spent: 1800, user: user)
         issue.update!(time_estimate: 3600)
 
-        page.refresh
-
-        wait_for_requests
+        refresh_and_click_first_card
       end
 
       it 'shows time tracking progress bar' do
         within_testid('work-item-time-tracking') do
-          expect(page).to have_selector('.gl-progress')
+          expect(page).to have_selector('.progress-bar')
         end
       end
 

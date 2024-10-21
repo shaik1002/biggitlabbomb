@@ -94,8 +94,8 @@ RSpec.describe 'Pipelines', :js, feature_category: :continuous_integration do
           wait_for_requests
         end
 
-        it 'renders "New pipeline" link' do
-          expect(page).to have_link('New pipeline')
+        it 'renders "Run pipeline" link' do
+          expect(page).to have_link('Run pipeline')
         end
       end
 
@@ -105,7 +105,6 @@ RSpec.describe 'Pipelines', :js, feature_category: :continuous_integration do
         end
 
         before do
-          stub_const("::Projects::PipelinesController::POLLING_INTERVAL", 1)
           job.run
           visit_project_pipelines
         end
@@ -117,43 +116,15 @@ RSpec.describe 'Pipelines', :js, feature_category: :continuous_integration do
           end
 
           context 'when canceling' do
-            it 'indicates that pipelines was canceled', :sidekiq_inline do
+            before do
               find('.js-pipelines-cancel-button').click
               click_button 'Stop pipeline'
-
               wait_for_requests
-
-              expect(page).not_to have_selector('.js-pipelines-cancel-button')
-              expect(page).to have_selector('[data-testid="ci-icon"]', text: 'Canceled')
             end
 
-            it 'targets the pipeline the cancel action was invoked on' do
-              allow_next_instance_of(Gitlab::EtagCaching::Store) do |instance|
-                allow(instance).to receive(:get).and_return(nil)
-              end
-
-              expect(page).to have_selector('[data-testid="pipeline-table-row"]', count: 1)
-
-              find('.js-pipelines-cancel-button').click
-
-              within_testid 'pipeline-stop-modal' do
-                expect(page).to have_content("Stop pipeline ##{pipeline.id}?")
-              end
-
-              create(
-                :ci_pipeline,
-                :running,
-                project: project,
-                source: Enums::Ci::Pipeline.sources[:push],
-                ref: 'master',
-                sha: 'sha'
-              )
-
-              expect(page).to have_selector('[data-testid="pipeline-table-row"]', count: 2)
-
-              within_testid 'pipeline-stop-modal' do
-                expect(page).to have_content("Stop pipeline ##{pipeline.id}?")
-              end
+            it 'indicates that pipelines was canceled', :sidekiq_inline do
+              expect(page).not_to have_selector('.js-pipelines-cancel-button')
+              expect(page).to have_selector('[data-testid="ci-icon"]', text: 'Canceled')
             end
           end
         end
@@ -665,16 +636,15 @@ RSpec.describe 'Pipelines', :js, feature_category: :continuous_integration do
           visit project_pipelines_path(project, page: '2')
           wait_for_requests
 
-          expect(page).to have_selector('[data-testid="gl-pagination-li"]', count: 4)
+          expect(page).to have_selector('.gl-pagination .page-link', count: 4)
         end
 
         it 'shows updated content' do
           visit project_pipelines_path(project)
           wait_for_requests
+          page.find('.page-link.next-page-item').click
 
-          find_by_testid('gl-pagination-next').click
-
-          expect(page).to have_selector('[data-testid="gl-pagination-li"]', count: 4)
+          expect(page).to have_selector('.gl-pagination .page-link', count: 4)
         end
       end
 

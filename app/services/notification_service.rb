@@ -137,10 +137,10 @@ class NotificationService
 
   # Notify a user when a previously unknown IP or device is used to
   # sign in to their account
-  def unknown_sign_in(user, ip, time, request_info)
+  def unknown_sign_in(user, ip, time)
     return unless user.can?(:receive_notifications)
 
-    mailer.unknown_sign_in_email(user, ip, time, country: request_info.country, city: request_info.city).deliver_later
+    mailer.unknown_sign_in_email(user, ip, time).deliver_later
   end
 
   # Notify a user when a wrong 2FA OTP has been entered to
@@ -512,6 +512,12 @@ class NotificationService
     recipients.each { |recipient| deliver_access_request_email(recipient, member) }
   end
 
+  def decline_access_request(member)
+    return true unless member.notifiable?(:subscription)
+
+    mailer.member_access_denied_email(member.real_source_type, member.source_id, member.user_id).deliver_later
+  end
+
   def decline_invite(member)
     # Must always send, regardless of project/namespace configuration since it's a
     # response to the user's action.
@@ -560,6 +566,10 @@ class NotificationService
     return true unless member.notifiable?(:mention)
 
     mailer.member_about_to_expire_email(member.real_source_type, member.id).deliver_later
+  end
+
+  def invite_member_reminder(group_member, token, reminder_index)
+    mailer.member_invited_reminder_email(group_member.real_source_type, group_member.id, token, reminder_index).deliver_later
   end
 
   def project_was_moved(project, old_path_with_namespace)
@@ -692,18 +702,6 @@ class NotificationService
     return if project.emails_disabled?
 
     mailer.send(:repository_cleanup_failure_email, project, user, error).deliver_later
-  end
-
-  def repository_rewrite_history_success(project, user)
-    return if project.emails_disabled?
-
-    mailer.repository_rewrite_history_success_email(project, user).deliver_later
-  end
-
-  def repository_rewrite_history_failure(project, user, error)
-    return if project.emails_disabled?
-
-    mailer.repository_rewrite_history_failure_email(project, user, error).deliver_later
   end
 
   def remote_mirror_update_failed(remote_mirror)

@@ -12,7 +12,6 @@ import axios from '~/lib/utils/axios_utils';
 import ContributionEvents from '~/contribution_events/components/contribution_events.vue';
 import { createAlert } from '~/alert';
 import waitForPromises from 'helpers/wait_for_promises';
-import { HTTP_STATUS_OK } from '~/lib/utils/http_status';
 
 jest.mock('~/alert');
 
@@ -93,7 +92,7 @@ describe('OverviewTab', () => {
 
   describe('when activity API request is loading', () => {
     beforeEach(() => {
-      axiosMock.onGet(defaultProvide.userActivityPath).reply(HTTP_STATUS_OK, events);
+      axiosMock.onGet(defaultProvide.userActivityPath).reply(200, events);
 
       createComponent();
     });
@@ -107,7 +106,7 @@ describe('OverviewTab', () => {
 
   describe('when activity API request is successful', () => {
     beforeEach(() => {
-      axiosMock.onGet(defaultProvide.userActivityPath).reply(HTTP_STATUS_OK, events);
+      axiosMock.onGet(defaultProvide.userActivityPath).reply(200, events);
 
       createComponent();
     });

@@ -2,7 +2,6 @@
 import { GlTable, GlBadge, GlButton } from '@gitlab/ui';
 // eslint-disable-next-line no-restricted-imports
 import { mapState } from 'vuex';
-import EmptyResult from '~/vue_shared/components/empty_result.vue';
 import MembersTableCell from 'ee_else_ce/members/components/table/members_table_cell.vue';
 import {
   canDisableTwoFactor,
@@ -41,7 +40,6 @@ export default {
     GlTable,
     GlBadge,
     GlButton,
-    EmptyResult,
     MemberAvatar,
     CreatedAt,
     MembersTableCell,
@@ -240,7 +238,6 @@ export default {
   <div>
     <user-limit-reached-alert v-if="onAccessRequestTab" />
     <gl-table
-      v-if="members.length > 0"
       v-bind="tableAttrs.table"
       class="members-table"
       data-testid="members-table"
@@ -248,6 +245,8 @@ export default {
       :fields="filteredAndModifiedFields"
       :items="members"
       primary-key="id"
+      :empty-text="__('No members found')"
+      show-empty
       :tbody-tr-attr="tbodyTrAttr"
     >
       <template #cell(account)="{ item: member }">
@@ -261,7 +260,14 @@ export default {
       </template>
 
       <template #cell(source)="{ item: member }">
-        <member-source :member="member" />
+        <members-table-cell #default="{ isDirectMember }" :member="member">
+          <member-source
+            :is-direct-member="isDirectMember"
+            :member-source="member.source"
+            :created-by="member.createdBy"
+            :is-shared-with-group-private="member.isSharedWithGroupPrivate"
+          />
+        </members-table-cell>
       </template>
 
       <template #cell(granted)="{ item: { createdAt, createdBy } }">
@@ -270,7 +276,7 @@ export default {
 
       <template #cell(invited)="{ item: { createdAt, createdBy, invite, state } }">
         <div
-          class="gl-flex gl-flex-wrap gl-items-center gl-justify-end gl-gap-3 lg:gl-justify-start"
+          class="gl-display-flex gl-align-items-center gl-justify-content-end gl-lg-justify-content-start gl-flex-wrap gl-gap-3"
         >
           <created-at :date="createdAt" :created-by="createdBy" />
           <gl-badge v-if="inviteBadge(invite, state)" data-testid="invited-badge"
@@ -325,7 +331,6 @@ export default {
         <span data-testid="col-actions" class="gl-sr-only">{{ label }}</span>
       </template>
     </gl-table>
-    <empty-result v-else />
     <members-pagination :pagination="pagination" :tab-query-param-value="tabQueryParamValue" />
     <disable-two-factor-modal />
     <remove-group-link-modal />

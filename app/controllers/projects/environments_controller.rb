@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 class Projects::EnvironmentsController < Projects::ApplicationController
-  include ProductAnalyticsTracking
-  include KasCookie
-
   MIN_SEARCH_LENGTH = 3
   ACTIVE_STATES = %i[available stopping].freeze
   SCOPES_TO_STATES = { "active" => ACTIVE_STATES, "stopped" => %i[stopped] }.freeze
+
+  include ProductAnalyticsTracking
+  include KasCookie
 
   layout 'project'
 
@@ -16,7 +16,6 @@ class Projects::EnvironmentsController < Projects::ApplicationController
 
   before_action only: [:show] do
     push_frontend_feature_flag(:k8s_tree_view, project)
-    push_frontend_feature_flag(:use_websocket_for_k8s_watch, project)
   end
 
   before_action :authorize_read_environment!
@@ -85,13 +84,15 @@ class Projects::EnvironmentsController < Projects::ApplicationController
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
-  def show; end
+  def show
+  end
 
   def new
     @environment = project.environments.new
   end
 
-  def edit; end
+  def edit
+  end
 
   def k8s
     render action: :show
@@ -118,10 +119,8 @@ class Projects::EnvironmentsController < Projects::ApplicationController
   def stop
     return render_404 unless @environment.available?
 
-    service_response = Environments::StopService.new(project, current_user).execute(@environment)
-    return render_403 unless service_response.success?
-
-    job = service_response[:actions].first if service_response[:actions]&.count == 1
+    stop_actions = @environment.stop_with_actions!
+    job = stop_actions.first if stop_actions&.count == 1
 
     action_or_env_url =
       if job

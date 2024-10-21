@@ -107,8 +107,8 @@ export default {
 
 <template>
   <div data-testid="work-item-time-tracking">
-    <div class="gl-flex gl-items-center gl-justify-between">
-      <h3 class="gl-heading-5 !gl-mb-2">
+    <div class="gl-display-flex gl-align-items-center gl-justify-content-space-between">
+      <h3 class="gl-heading-5 gl-mb-2!">
         {{ __('Time tracking') }}
       </h3>
       <gl-button
@@ -118,21 +118,23 @@ export default {
         category="tertiary"
         icon="plus"
         size="small"
-        data-testid="add-time-entry-button"
         :title="__('Add time entry')"
         :aria-label="__('Add time entry')"
       />
     </div>
 
-    <div class="gl-flex gl-items-center gl-gap-2 gl-text-sm" data-testid="time-tracking-body">
+    <div
+      class="gl-display-flex gl-align-items-center gl-gap-2 gl-font-sm"
+      data-testid="time-tracking-body"
+    >
       <template v-if="totalTimeSpent || timeEstimate">
-        <span class="gl-text-subtle">{{ s__('TimeTracking|Spent') }}</span>
+        <span class="gl-text-secondary">{{ s__('TimeTracking|Spent') }}</span>
         <gl-button
           v-if="canUpdate"
           v-gl-modal="'time-tracking-report'"
           v-gl-tooltip="s__('TimeTracking|View time tracking report')"
+          class="gl-font-sm!"
           variant="link"
-          data-testid="view-time-spent-button"
         >
           {{ humanTotalTimeSpent }}
         </gl-button>
@@ -142,17 +144,17 @@ export default {
         <template v-if="timeEstimate">
           <gl-progress-bar
             v-gl-tooltip="progressBarTooltipText"
-            class="gl-mx-2 gl-grow"
+            class="gl-flex-grow-1 gl-mx-2"
             :value="timeRemainingPercent"
             :variant="progressBarVariant"
           />
-          <span class="gl-text-subtle">{{ s__('TimeTracking|Estimate') }}</span>
+          <span class="gl-text-secondary">{{ s__('TimeTracking|Estimate') }}</span>
           <gl-button
             v-if="canUpdate"
             v-gl-modal="$options.setTimeEstimateModalId"
             v-gl-tooltip="s__('TimeTracking|Set estimate')"
+            class="gl-font-sm!"
             variant="link"
-            data-testid="set-estimate-button"
           >
             {{ humanTimeEstimate }}
           </gl-button>
@@ -163,21 +165,19 @@ export default {
         <gl-button
           v-else-if="canUpdate"
           v-gl-modal="$options.setTimeEstimateModalId"
-          class="gl-ml-auto"
+          class="gl-font-sm! gl-ml-auto"
           variant="link"
-          data-testid="add-estimate-button"
         >
           {{ s__('TimeTracking|Add estimate') }}
         </gl-button>
       </template>
-      <span v-else-if="canUpdate" class="gl-text-subtle">
+      <span v-else-if="canUpdate" class="gl-text-secondary">
         <gl-sprintf :message="$options.i18n.addTimeTrackingMessage">
           <template #estimate="{ content }">
             <gl-button
               v-gl-modal="$options.setTimeEstimateModalId"
-              class="gl-align-baseline !gl-text-sm"
+              class="gl-font-sm! gl-align-baseline"
               variant="link"
-              data-testid="add-estimate-button"
             >
               {{ content }}
             </gl-button>
@@ -185,16 +185,15 @@ export default {
           <template #timeSpent="{ content }">
             <gl-button
               v-gl-modal="$options.createTimelogModalId"
-              class="gl-align-baseline !gl-text-sm"
+              class="gl-font-sm! gl-align-baseline"
               variant="link"
-              data-testid="add-time-spent-button"
             >
               {{ content }}
             </gl-button>
           </template>
         </gl-sprintf>
       </span>
-      <span v-else class="gl-text-subtle">
+      <span v-else class="gl-text-secondary">
         {{ __('No estimate or time spent') }}
       </span>
     </div>

@@ -84,18 +84,18 @@ export default Extension.create({
            */
           sourceMarkdown: {
             default: null,
-            parseHTML: (element) => (preserveMarkdown() ? getMarkdownSource(element) : null),
+            parseHTML: (element) => preserveMarkdown() && getMarkdownSource(element),
             renderHTML: () => '',
           },
           sourceMapKey: {
             default: null,
-            parseHTML: (element) => (preserveMarkdown() ? element.dataset.sourcepos : null),
+            parseHTML: (element) => preserveMarkdown() && element.dataset.sourcepos,
             renderHTML: () => '',
           },
           sourceTagName: {
             default: null,
             parseHTML: (element) =>
-              preserveMarkdown() && docHasSourceMap(element) ? element.tagName.toLowerCase() : null,
+              preserveMarkdown() && docHasSourceMap(element) && element.tagName.toLowerCase(),
             renderHTML: () => '',
           },
         },

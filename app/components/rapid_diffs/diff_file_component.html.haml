@@ -1,8 +1,9 @@
 -# TODO: add fork suggestion (commits only)
 
-%diff-file{ id: id, data: server_data }
-  .rd-diff-file
+%diff-file{ data: web_component_context }
+  .rd-diff-file{ id: id, data: server_data }
     = render RapidDiffs::DiffFileHeaderComponent.new(diff_file: @diff_file)
     .rd-diff-file-body
-      = render viewer_component.new(diff_file: @diff_file)
+      -# TODO: replace with ViewComponents for each viewer
+      = render 'projects/diffs/viewer', viewer: viewer
   %diff-file-mounted

@@ -2,15 +2,11 @@
 // NOTE! For the first iteration, we are simply copying the implementation of Assignees
 // It will soon be overhauled in Issue https://gitlab.com/gitlab-org/gitlab/-/issues/233736
 import Vue from 'vue';
-import { MountingPortal } from 'portal-vue';
-import { GlButton } from '@gitlab/ui';
 import { createAlert } from '~/alert';
 import { TYPE_ISSUE } from '~/issues/constants';
 import { __ } from '~/locale';
-import { isGid, getIdFromGraphQLId } from '~/graphql_shared/utils';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { fetchUserCounts } from '~/super_sidebar/user_counts_fetch';
-import ReviewerDrawer from '~/merge_requests/components/reviewers/reviewer_drawer.vue';
 import eventHub from '../../event_hub';
 import getMergeRequestReviewersQuery from '../../queries/get_merge_request_reviewers.query.graphql';
 import mergeRequestReviewersUpdatedSubscription from '../../queries/merge_request_reviewers.subscription.graphql';
@@ -22,21 +18,14 @@ export const state = Vue.observable({
   issuable: {},
   loading: false,
   initialLoading: true,
-  drawerOpen: false,
 });
 
 export default {
   name: 'SidebarReviewers',
   components: {
-    MountingPortal,
-    GlButton,
     ReviewerTitle,
     Reviewers,
-    ReviewerDrawer,
-    ApprovalSummary: () =>
-      import('ee_component/merge_requests/components/reviewers/approval_summary.vue'),
   },
-  mixins: [glFeatureFlagsMixin()],
   props: {
     mediator: {
       type: Object,
@@ -61,7 +50,6 @@ export default {
     },
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     issuable: {
       query: getMergeRequestReviewersQuery,
       variables() {
@@ -143,14 +131,12 @@ export default {
     eventHub.$on('sidebar.addReviewer', this.addReviewer);
     eventHub.$on('sidebar.removeAllReviewers', this.removeAllReviewers);
     eventHub.$on('sidebar.saveReviewers', this.saveReviewers);
-    eventHub.$on('sidebar.toggleReviewerDrawer', this.toggleDrawerOpen);
   },
   beforeDestroy() {
     eventHub.$off('sidebar.removeReviewer', this.removeReviewer);
     eventHub.$off('sidebar.addReviewer', this.addReviewer);
     eventHub.$off('sidebar.removeAllReviewers', this.removeAllReviewers);
     eventHub.$off('sidebar.saveReviewers', this.saveReviewers);
-    eventHub.$off('sidebar.toggleReviewerDrawer', this.toggleDrawerOpen);
   },
   methods: {
     reviewBySelf() {
@@ -180,22 +166,6 @@ export default {
     requestReview(data) {
       this.mediator.requestReview(data);
     },
-    async removeReviewerById(event) {
-      const userId = isGid(event.userId) ? getIdFromGraphQLId(event.userId) : event.userId;
-      this.store.reviewers = this.store.reviewers.filter((user) => user.id !== userId);
-      try {
-        await this.saveReviewers();
-      } catch (error) {
-        createAlert(__('Unable to remove a reviewer at the moment, try again later'), { error });
-      } finally {
-        event.done();
-      }
-    },
-    toggleDrawerOpen(drawerOpen = !this.drawerOpen) {
-      if (!this.glFeatures.reviewerAssignDrawer) return;
-
-      this.drawerOpen = drawerOpen;
-    },
   },
 };
 </script>
@@ -203,24 +173,11 @@ export default {
 <template>
   <div>
     <reviewer-title
-      :reviewers="reviewers"
       :number-of-reviewers="reviewers.length"
       :loading="isLoading"
       :editable="canUpdate"
       @request-review="requestReview"
-      @remove-reviewer="removeReviewerById"
     />
-    <approval-summary v-if="glFeatures.reviewerAssignDrawer" short-text class="gl-mb-2">
-      <gl-button
-        size="small"
-        category="tertiary"
-        variant="confirm"
-        class="gl-ml-2 !gl-text-sm"
-        @click="toggleDrawerOpen()"
-      >
-        {{ __('Assign') }}
-      </gl-button>
-    </approval-summary>
     <reviewers
       v-if="!initialLoading"
       :root-path="relativeUrlRoot"
@@ -230,15 +187,6 @@ export default {
       class="gl-pt-2"
       @request-review="requestReview"
       @assign-self="reviewBySelf"
-      @remove-reviewer="removeReviewerById"
     />
-    <mounting-portal v-if="glFeatures.reviewerAssignDrawer" mount-to="#js-reviewer-drawer-portal">
-      <reviewer-drawer
-        :open="drawerOpen"
-        @request-review="requestReview"
-        @remove-reviewer="removeReviewerById"
-        @close="toggleDrawerOpen(false)"
-      />
-    </mounting-portal>
   </div>
 </template>

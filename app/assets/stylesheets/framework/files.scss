@@ -3,15 +3,21 @@
  *
  */
 .file-holder {
-  @apply gl-border gl-rounded-base;
+  border: 1px solid $border-color;
+  border-radius: $gl-border-radius-base;
 
   &.file-holder-top-border {
-    @apply gl-border;
+    border-top: 1px solid $border-color;
 
     .file-title {
       // Prevents the top border getting clipped by the background
-      @apply gl-rounded-t-base;
+      border-top-left-radius: $gl-border-radius-base;
+      border-top-right-radius: $gl-border-radius-base;
     }
+  }
+
+  &.file-holder-no-border {
+    border: 0;
   }
 
   &.readme-holder {
@@ -20,11 +26,22 @@
 
   .file-title {
     position: relative;
-    @apply gl-bg-subtle gl-border-b;
+    background-color: var(--gray-10, $gray-10);
+    border-bottom: 1px solid  var(--gl-border-color-default);
     margin: 0;
     text-align: left;
     padding: 10px $gl-padding;
     word-wrap: break-word;
+
+    &.file-title-clear {
+      padding-left: 0;
+      padding-right: 0;
+      background-color: transparent;
+
+      .file-actions {
+        right: 0;
+      }
+    }
 
     .file-actions {
       .btn:not(.btn-icon) {
@@ -35,14 +52,19 @@
     }
 
     a:not(.btn) {
-      @apply gl-text-primary;
+      color: $gl-text-color;
+    }
+
+    .left-options {
+      margin-top: -3px;
     }
   }
 
   .file-blame-legend {
+    background-color: $gray-10;
     text-align: right;
     padding: 8px $gl-padding;
-    @apply gl-bg-subtle gl-border-b;
+    border-bottom: 1px solid $border-color;
 
     @include media-breakpoint-down(xs) {
       text-align: left;
@@ -80,7 +102,7 @@
     &.image_file,
     &.audio,
     &.video {
-      @apply gl-bg-strong;
+      background: $gray-50;
       text-align: center;
       padding: 30px;
 
@@ -100,21 +122,22 @@
     }
 
     &.blob-no-preview {
-      @apply gl-bg-strong;
+      background: $gray-50;
       text-shadow: 0 1px 2px $white;
       padding: 100px 0;
     }
 
     &.logs {
-      @apply gl-bg-strong;
+      background: $gray-50;
       max-height: 700px;
       overflow-y: auto;
 
       ol {
         margin-left: 40px;
         padding: 10px 0;
+        border-left: 1px solid $border-color;
         margin-bottom: 0;
-        @apply gl-bg-default gl-border-l;
+        background: $white;
 
         li {
           color: $logs-li-color;
@@ -143,6 +166,10 @@
       .preview {
         padding: $gl-padding;
       }
+    }
+
+    .content-visibility-auto {
+      content-visibility: auto;
     }
   }
 }
@@ -177,9 +204,21 @@ span.idiff {
     }
   }
 
+  .renamed-file {
+    a {
+      color: $orange-500;
+    }
+  }
+
   .deleted-file {
     a {
       color: $red-500;
+    }
+  }
+
+  .edit-file {
+    a {
+      color: $gl-text-color;
     }
   }
 
@@ -203,7 +242,8 @@ span.idiff {
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    @apply gl-bg-subtle gl-border-b;
+    background-color: var(--gl-background-color-subtle);
+    border-bottom: 1px solid $border-color;
     padding: $gl-padding-8 $gl-padding;
     margin: 0;
     min-height: px-to-rem($file-header-height);
@@ -219,7 +259,7 @@ span.idiff {
   }
 
   a {
-    @apply gl-text-primary;
+    color: $gl-text-color;
   }
 }
 
@@ -241,7 +281,8 @@ span.idiff {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  @apply gl-bg-subtle gl-border-b;
+  background-color: $gray-10;
+  border-bottom: 1px solid $border-color;
   padding: 5px $gl-padding;
 }
 
@@ -250,8 +291,10 @@ span.idiff {
 }
 
 .preview-container {
+  overflow: auto;
+
   .file-container {
-    @apply gl-bg-strong;
+    background-color: $gray-50;
     display: flex;
     height: 100%;
     align-items: center;
@@ -267,6 +310,19 @@ span.idiff {
       img {
         max-width: 90%;
         max-height: 70vh;
+      }
+
+      .is-zoomable {
+        cursor: pointer;
+        cursor: zoom-in;
+
+        &.is-zoomed {
+          cursor: pointer;
+          cursor: zoom-out;
+          max-width: none;
+          max-height: none;
+          margin-right: $gl-padding;
+        }
       }
     }
 
@@ -286,7 +342,7 @@ span.idiff {
     padding-bottom: $gl-padding;
 
     .discussion-reply-holder {
-      @apply gl-border-b gl-border-b-subtle;
+      border-bottom: 1px solid $gray-50;
       border-radius: 0;
     }
   }
@@ -449,7 +505,7 @@ span.idiff {
 
   .tr {
     display: flex;
-    @apply gl-border-b gl-border-b-subtle;
+    border-bottom: 1px solid $gray-50;
 
     &.last-row {
       border-bottom: 0;
@@ -503,7 +559,7 @@ span.idiff {
 
 .blame.file-content .td.line-numbers {
   float: none;
-  @apply gl-border-l;
+  border-left: 1px solid $gray-100;
   border-radius: 0;
 
   .file-line-num {
@@ -513,11 +569,11 @@ span.idiff {
 
 .code {
   padding: 0;
-  @apply gl-rounded-t-none gl-rounded-b-base;
+  border-radius: 0 0 $gl-border-radius-base $gl-border-radius-base;
 }
 
 .blame-stream-container {
-  @apply gl-border-t;
+  border-top: 1px solid $border-color;
 }
 
 .blame-stream-loading {

@@ -15,8 +15,7 @@ RSpec.describe Import::PlaceholderReferences::LoadService, feature_category: :im
         model: 'Foo',
         namespace_id: source_user.namespace_id,
         source_user_id: source_user.id,
-        user_reference_column: 'user_id',
-        alias_version: 1
+        user_reference_column: 'user_id'
       }
     end
 
@@ -121,7 +120,7 @@ RSpec.describe Import::PlaceholderReferences::LoadService, feature_category: :im
         push(valid_reference_2)
         # We can't use `#push` because that validates,
         # so push directly to the set.
-        store.add(invalid_reference.values.to_json)
+        Gitlab::Cache::Import::Caching.set_add(cache_key, invalid_reference.values.to_json)
         push(valid_reference_3)
       end
 
@@ -256,8 +255,7 @@ RSpec.describe Import::PlaceholderReferences::LoadService, feature_category: :im
 
     def push(reference)
       serialized = Import::SourceUserPlaceholderReference.new(reference).to_serialized
-
-      store.add(serialized)
+      Gitlab::Cache::Import::Caching.set_add(cache_key, serialized)
     end
 
     def expect_log_message(type, **params)
@@ -267,14 +265,16 @@ RSpec.describe Import::PlaceholderReferences::LoadService, feature_category: :im
     end
 
     def set_members_count
-      store.count
+      Gitlab::Cache::Import::Caching.with_redis do |redis|
+        redis.scard(Gitlab::Cache::Import::Caching.cache_key_for(cache_key))
+      end
     end
 
-    def store
-      Import::PlaceholderReferences::Store.new(
+    def cache_key
+      Import::PlaceholderReferences::BaseService.new(
         import_source: import_source,
         import_uid: import_uid
-      )
+      ).send(:cache_key)
     end
   end
 end

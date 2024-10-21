@@ -166,7 +166,7 @@ export default {
         :aria-disabled="deleteButtonDisabled"
         category="tertiary"
         variant="danger"
-        class="!gl-justify-start !gl-px-3 focus:!gl-shadow-inner-2-blue-400"
+        class="focus:!gl-shadow-inner-2-blue-400 !gl-justify-start !gl-px-3"
         block
       >
         {{ $options.i18n.deleteButton }}

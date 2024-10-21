@@ -172,15 +172,6 @@ RSpec.describe TodosHelper do
         expect(path).to eq(access_request_path)
       end
     end
-
-    context 'when a SSH expired' do
-      subject { helper.todo_target_path(todo) }
-
-      let(:key) { create(:key, user: user) }
-      let(:todo) { build(:todo, target: key, project: nil, user: user) }
-
-      it { is_expected.to eq user_settings_ssh_key_path(key) }
-    end
   end
 
   describe '#todo_target_aria_label' do
@@ -367,8 +358,6 @@ RSpec.describe TodosHelper do
       Todo::UNMERGEABLE         | true  | s_('Todos|Could not merge')
       Todo::MERGE_TRAIN_REMOVED | true  | s_("Todos|Removed from Merge Train")
       Todo::REVIEW_SUBMITTED    | false | s_('Todos|reviewed your merge request')
-      Todo::SSH_KEY_EXPIRED     | true  | s_('Todos|Your SSH key has expired')
-      Todo::SSH_KEY_EXPIRING_SOON | true | s_('Todos|Your SSH key is expiring soon')
     end
 
     with_them do
@@ -458,14 +447,6 @@ RSpec.describe TodosHelper do
     end
 
     context 'when todo resource parent is not a group' do
-      context 'when todo belongs to no project either' do
-        let(:todo) { build(:todo, group: nil, project: nil, user: user) }
-
-        subject(:result) { helper.todo_parent_path(todo) }
-
-        it { expect(result).to eq(nil) }
-      end
-
       it 'returns project title with namespace' do
         result = helper.todo_parent_path(project_access_request_todo)
 

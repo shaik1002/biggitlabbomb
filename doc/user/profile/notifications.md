@@ -35,7 +35,7 @@ You might receive notifications for one of the following reasons:
   or edit, or someone mentions <sup>1</sup> you.
 - You've [enabled notifications in an issue, merge request, or epic](#notifications-on-issues-merge-requests-and-epics).
 - You've configured notifications for the [project](#change-level-of-project-notifications) or [group](#group-notifications).
-- You're subscribed to group or project pipeline notifications through the pipeline emails [integration](../project/integrations/index.md).
+- You're subscribed to group or project pipeline notifications via the pipeline emails [integration](../project/integrations/index.md).
 
 1. GitLab doesn't send a notification when
    [a comment is edited to include a user mention](../discussions/index.md#edit-a-comment-to-add-a-mention).
@@ -265,7 +265,6 @@ To always receive notifications on your own issues, merge requests, and so on, t
 ## Notifications for unknown sign-ins
 
 > - Listing the full name and username of the signed-in user [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/225183) in GitLab 15.10.
-> - Geographic location [added](https://gitlab.com/gitlab-org/gitlab/-/issues/296128) in GitLab 17.5.
 
 NOTE:
 This feature is enabled by default for self-managed instances. Administrators may disable this feature
@@ -279,7 +278,6 @@ malicious or unauthorized sign-ins. This notification email includes the:
 - Hostname.
 - User's name and username.
 - IP address.
-- Geographic location.
 - Date and time of sign-in.
 
 GitLab uses several methods to identify a known sign-in. All methods must fail for a notification email to be sent.

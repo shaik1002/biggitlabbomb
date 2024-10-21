@@ -1,5 +1,3 @@
-// Mocks for child components
-
 export const usersMock = [
   {
     id: '123',
@@ -38,21 +36,17 @@ export const usersMock = [
   },
 ];
 
-const groupsMock = [{ name: 'test_group_1' }, { name: 'test_group_2' }];
-
-export const deployKeysMock = [
-  {
-    id: '123123',
-    title: 'Deploy key 1',
-    user: {
-      name: 'User 1',
-    },
-  },
-];
-
 const accessLevelsMock = [30, 40];
 
+export const protectionMockProps = {
+  headerLinkHref: 'protected/branches',
+  headerLinkTitle: 'Manage in protected branches',
+  roles: accessLevelsMock,
+};
+
 const approvalsRequired = 3;
+
+const groupsMock = [{ name: 'test_group_1' }, { name: 'test_group_2' }];
 
 export const statusChecksRulesMock = [
   { __typename: 'StatusCheckRule', id: '123', name: 'test', externalUrl: 'https://test.test' },
@@ -61,8 +55,8 @@ export const statusChecksRulesMock = [
 
 export const protectionPropsMock = {
   header: 'Test protection',
-  headerLinkTitle: 'Manage in protected branches',
-  headerLinkHref: 'protected/branches',
+  headerLinkTitle: 'Test link title',
+  headerLinkHref: 'Test link href',
   roles: accessLevelsMock,
   users: usersMock,
   groups: groupsMock,
@@ -84,51 +78,30 @@ export const protectionRowPropsMock = {
   statusCheckUrl: statusChecksRulesMock[0].externalUrl,
 };
 
-// Mocks for getBranchRulesDetails
+export const accessLevelsMockResponse = [
+  {
+    __typename: 'PushAccessLevelEdge',
+    node: {
+      __typename: 'PushAccessLevel',
+      accessLevel: 30,
+      accessLevelDescription: 'Maintainers',
+    },
+  },
+  {
+    __typename: 'PushAccessLevelEdge',
+    node: {
+      __typename: 'PushAccessLevel',
+      accessLevel: 40,
+      accessLevelDescription: 'Maintainers + Developers',
+    },
+  },
+];
 
-const maintainersAccessLevel = {
-  accessLevel: 40,
+export const mergeAccessLevelsMockResponse = {
+  __typename: 'MergeAccessLevel',
+  accessLevel: 30,
   accessLevelDescription: 'Maintainers',
 };
-
-const maintainersAndDevelopersAccessLevel = {
-  accessLevel: 30,
-  accessLevelDescription: 'Maintainers + Developers',
-};
-
-const pushAccessLevelEdges = [
-  {
-    __typename: 'PushAccessLevelEdge',
-    node: {
-      __typename: 'PushAccessLevel',
-      ...maintainersAndDevelopersAccessLevel,
-    },
-  },
-  {
-    __typename: 'PushAccessLevelEdge',
-    node: {
-      __typename: 'PushAccessLevel',
-      ...maintainersAccessLevel,
-    },
-  },
-];
-
-const mergeAccessLevelEdges = [
-  {
-    __typename: 'MergeAccessLevelEdge',
-    node: {
-      __typename: 'MergeAccessLevel',
-      ...maintainersAndDevelopersAccessLevel,
-    },
-  },
-  {
-    __typename: 'MergeAccessLevelEdge',
-    node: {
-      __typename: 'MergeAccessLevel',
-      ...maintainersAccessLevel,
-    },
-  },
-];
 
 export const matchingBranchesCount = 3;
 
@@ -155,11 +128,11 @@ export const branchProtectionsMockResponse = {
               allowForcePush: true,
               mergeAccessLevels: {
                 __typename: 'MergeAccessLevelConnection',
-                edges: mergeAccessLevelEdges,
+                edges: accessLevelsMockResponse,
               },
               pushAccessLevels: {
                 __typename: 'PushAccessLevelConnection',
-                edges: pushAccessLevelEdges,
+                edges: accessLevelsMockResponse,
               },
             },
           },
@@ -174,11 +147,11 @@ export const branchProtectionsMockResponse = {
               allowForcePush: true,
               mergeAccessLevels: {
                 __typename: 'MergeAccessLevelConnection',
-                edges: mergeAccessLevelEdges,
+                edges: accessLevelsMockResponse,
               },
               pushAccessLevels: {
                 __typename: 'PushAccessLevelConnection',
-                edges: pushAccessLevelEdges,
+                edges: accessLevelsMockResponse,
               },
             },
           },
@@ -207,7 +180,7 @@ export const branchProtectionsNoPushAccessMockResponse = {
               allowForcePush: false,
               mergeAccessLevels: {
                 __typename: 'MergeAccessLevelConnection',
-                edges: mergeAccessLevelEdges,
+                edges: accessLevelsMockResponse,
               },
               pushAccessLevels: {
                 __typename: 'PushAccessLevelConnection',
@@ -255,8 +228,6 @@ export const predefinedBranchRulesMockResponse = {
   },
 };
 
-// Mocks for branchRuleDelete mutation
-
 export const deleteBranchRuleMockResponse = {
   data: {
     branchRuleDelete: {
@@ -264,19 +235,6 @@ export const deleteBranchRuleMockResponse = {
       __typename: 'BranchRuleDeletePayload',
     },
   },
-};
-
-// Mocks for editBrachRule mutation
-
-export const mergeAccessLevelsEditResponse = {
-  __typename: 'MergeAccessLevelConnection',
-  nodes: [
-    {
-      __typename: 'MergeAccessLevel',
-      accessLevel: 30,
-      accessLevelDescription: 'Maintainers',
-    },
-  ],
 };
 
 export const editBranchRuleMockResponse = {
@@ -293,7 +251,10 @@ export const editBranchRuleMockResponse = {
         branchProtection: {
           __typename: 'BranchProtection',
           allowForcePush: true,
-          mergeAccessLevels: mergeAccessLevelsEditResponse,
+          mergeAccessLevels: {
+            __typename: 'MergeAccessLevelConnection',
+            nodes: [mergeAccessLevelsMockResponse],
+          },
           pushAccessLevels: {
             __typename: 'PushAccessLevelConnection',
             nodes: [],
@@ -303,14 +264,6 @@ export const editBranchRuleMockResponse = {
     },
   },
 };
-
-export const editRuleData = [{ accessLevel: 60 }, { accessLevel: 40 }, { accessLevel: 30 }];
-
-export const editRuleDataNoAccessLevels = [];
-
-export const editRuleDataNoOne = [{ accessLevel: 0 }];
-
-// Mocks for getBranches query
 
 export const protectableBranches = ['make-release-umd-bundle', 'main', 'v2.x'];
 
@@ -324,11 +277,15 @@ export const protectableBranchesMockResponse = {
   },
 };
 
-// Mocks for drawer component
-
 export const allowedToMergeDrawerProps = {
   isLoading: false,
   isOpen: false,
   title: 'Edit allowed to merge',
   roles: accessLevelsMock,
 };
+
+export const editRuleData = [{ accessLevel: 60 }, { accessLevel: 40 }, { accessLevel: 30 }];
+
+export const editRuleDataNoAccessLevels = [];
+
+export const editRuleDataNoOne = [{ accessLevel: 0 }];

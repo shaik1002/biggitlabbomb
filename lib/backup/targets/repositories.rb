@@ -48,10 +48,6 @@ module Backup
         restore_object_pools
       end
 
-      def asynchronous?
-        false
-      end
-
       private
 
       attr_reader :strategy, :storages, :paths, :skip_paths, :logger

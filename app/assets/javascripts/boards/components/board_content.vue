@@ -5,11 +5,11 @@ import produce from 'immer';
 import Draggable from 'vuedraggable';
 import BoardAddNewColumn from 'ee_else_ce/boards/components/board_add_new_column.vue';
 import BoardAddNewColumnTrigger from '~/boards/components/board_add_new_column_trigger.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import WorkItemDrawer from '~/work_items/components/work_item_drawer.vue';
 import { s__ } from '~/locale';
-import { removeParams, updateHistory } from '~/lib/utils/url_utility';
 import { defaultSortableOptions, DRAG_DELAY } from '~/sortable/constants';
-import { mapWorkItemWidgetsToIssuableFields } from '~/issues/list/utils';
+import { mapWorkItemWidgetsToIssueFields } from '~/issues/list/utils';
 import {
   DraggableItemTypes,
   flashAnimationDuration,
@@ -18,9 +18,7 @@ import {
   ListType,
   listIssuablesQueries,
   DEFAULT_BOARD_LIST_ITEMS_SIZE,
-  BoardType,
 } from 'ee_else_ce/boards/constants';
-import { DETAIL_VIEW_QUERY_PARAM_NAME } from '~/work_items/constants';
 import { calculateNewPosition } from 'ee_else_ce/boards/boards_util';
 import { setError } from '../graphql/cache_updates';
 import BoardColumn from './board_column.vue';
@@ -40,6 +38,7 @@ export default {
     GlAlert,
     WorkItemDrawer,
   },
+  mixins: [glFeatureFlagsMixin()],
   inject: [
     'boardType',
     'canAdminList',
@@ -81,16 +80,11 @@ export default {
       type: Boolean,
       required: true,
     },
-    useWorkItemDrawer: {
-      type: Boolean,
-      required: true,
-    },
   },
   data() {
     return {
       boardHeight: null,
       highlightedLists: [],
-      columnsThatCannotFindActiveItem: 0,
     };
   },
   computed: {
@@ -132,8 +126,8 @@ export default {
       const closedList = this.boardListsToUse.find((list) => list.listType === ListType.closed);
       return closedList?.id || '';
     },
-    namespace() {
-      return this.isGroupBoard ? BoardType.group : BoardType.project;
+    issuesDrawerEnabled() {
+      return this.glFeatures.issuesListDrawer;
     },
   },
   methods: {
@@ -235,33 +229,19 @@ export default {
 
       cache.updateQuery(
         { query: listIssuablesQueries[this.issuableType].query, variables },
-        (boardList) =>
-          mapWorkItemWidgetsToIssuableFields({
-            list: boardList,
-            workItem,
-            isBoard: true,
-            namespace: this.namespace,
-            type: this.issuableType,
-          }),
+        (boardList) => mapWorkItemWidgetsToIssueFields(boardList, workItem, true),
       );
-    },
-    isLastList(index) {
-      return this.boardListsToUse.length - 1 === index;
-    },
-    handleCannotFindActiveItem() {
-      this.columnsThatCannotFindActiveItem += 1;
-      if (this.columnsThatCannotFindActiveItem === this.boardListsToUse.length) {
-        updateHistory({
-          url: removeParams([DETAIL_VIEW_QUERY_PARAM_NAME]),
-        });
-      }
     },
   },
 };
 </script>
 
 <template>
-  <div v-cloak data-testid="boards-list" class="gl-flex gl-min-h-0 gl-grow gl-flex-col">
+  <div
+    v-cloak
+    data-testid="boards-list"
+    class="gl-flex-grow-1 gl-display-flex gl-flex-direction-column gl-min-h-0"
+  >
     <gl-alert v-if="error" variant="danger" :dismissible="true" @dismiss="dismissError">
       {{ error }}
     </gl-alert>
@@ -270,41 +250,31 @@ export default {
       v-if="!isSwimlanesOn"
       ref="list"
       v-bind="draggableOptions"
-      class="boards-list gl-w-full gl-overflow-x-auto gl-whitespace-nowrap gl-py-5 gl-pl-0 gl-pr-5 xl:gl-pl-3 xl:gl-pr-6"
+      class="boards-list gl-w-full gl-py-5 gl-pl-0 gl-pr-5 xl:gl-pl-3 xl:gl-pr-6 gl-whitespace-nowrap gl-overflow-x-auto"
       @end="updateListPosition"
     >
       <board-column
         v-for="(list, index) in boardListsToUse"
         :key="index"
         ref="board"
-        :column-index="index"
         :board-id="boardId"
         :list="list"
         :filters="filterParams"
         :highlighted-lists="highlightedLists"
         :data-draggable-item-type="$options.draggableItemTypes.list"
         :class="{ '!gl-hidden sm:!gl-inline-block': addColumnFormVisible }"
-        :last="isLastList(index)"
-        :list-query-variables="listQueryVariables"
-        :lists="boardListsById"
-        :can-admin-list="canAdminList"
-        @highlight-list="highlightList"
         @setActiveList="$emit('setActiveList', $event)"
         @setFilters="$emit('setFilters', $event)"
-        @addNewListAfter="$emit('setAddColumnFormVisibility', $event)"
-        @cannot-find-active-item="handleCannotFindActiveItem"
       />
 
       <transition mode="out-in" name="slide" @after-enter="afterFormEnters">
-        <div v-if="!addColumnFormVisible && canAdminList" class="gl-inline-block gl-pl-2">
+        <div v-if="!addColumnFormVisible" class="gl-display-inline-block gl-pl-2">
           <board-add-new-column-trigger
+            v-if="canAdminList"
             :is-new-list-showing="addColumnFormVisible"
             @setAddColumnFormVisibility="$emit('setAddColumnFormVisibility', $event)"
           />
         </div>
-      </transition>
-
-      <transition mode="out-in" name="slide" @after-enter="afterFormEnters">
         <board-add-new-column
           v-if="addColumnFormVisible"
           :board-id="boardId"
@@ -331,7 +301,7 @@ export default {
       <template #create-list-button>
         <div
           v-if="!addColumnFormVisible"
-          class="gl-sticky gl-top-5 gl-mt-5 gl-inline-block gl-pl-3"
+          class="gl-mt-5 gl-display-inline-block gl-pl-3 gl-sticky gl-top-5"
         >
           <board-add-new-column-trigger
             v-if="canAdminList"
@@ -353,7 +323,7 @@ export default {
       </div>
     </epics-swimlanes>
     <board-drawer-wrapper
-      v-if="useWorkItemDrawer"
+      v-if="issuesDrawerEnabled"
       :backlog-list-id="backlogListId"
       :closed-list-id="closedListId"
     >
@@ -369,8 +339,6 @@ export default {
         <work-item-drawer
           :open="Boolean(activeIssuable && activeIssuable.iid)"
           :active-item="activeIssuable"
-          :issuable-type="issuableType"
-          click-outside-exclude-selector=".board-card"
           @close="onDrawerClosed"
           @work-item-updated="updateBoardCard($event, activeIssuable)"
           @workItemDeleted="onIssuableDeleted(activeIssuable)"
@@ -380,19 +348,18 @@ export default {
       </template>
     </board-drawer-wrapper>
 
-    <template v-else>
-      <board-content-sidebar
-        v-if="isIssueBoard"
-        :backlog-list-id="backlogListId"
-        :closed-list-id="closedListId"
-        data-testid="issue-boards-sidebar"
-      />
-      <epic-board-content-sidebar
-        v-else-if="isEpicBoard"
-        :backlog-list-id="backlogListId"
-        :closed-list-id="closedListId"
-        data-testid="epic-boards-sidebar"
-      />
-    </template>
+    <board-content-sidebar
+      v-if="isIssueBoard && !issuesDrawerEnabled"
+      :backlog-list-id="backlogListId"
+      :closed-list-id="closedListId"
+      data-testid="issue-boards-sidebar"
+    />
+
+    <epic-board-content-sidebar
+      v-else-if="isEpicBoard"
+      :backlog-list-id="backlogListId"
+      :closed-list-id="closedListId"
+      data-testid="epic-boards-sidebar"
+    />
   </div>
 </template>

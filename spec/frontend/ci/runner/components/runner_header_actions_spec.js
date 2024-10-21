@@ -140,7 +140,7 @@ describe('RunnerHeaderActions', () => {
     });
 
     it('does not render actions', () => {
-      expect(wrapper.find('*').exists()).toBe(false);
+      expect(wrapper.html()).toBe('');
     });
   });
 });

@@ -10,8 +10,6 @@ module VirtualRegistries
 
     before :cache, :set_content_type
 
-    delegate :filename, to: :model
-
     def store_dir
       dynamic_segment
     end

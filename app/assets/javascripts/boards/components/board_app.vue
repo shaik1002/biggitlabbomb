@@ -1,6 +1,5 @@
 <script>
 import { omit } from 'lodash';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import AccessorUtilities from '~/lib/utils/accessor';
 import { historyPushState, parseBoolean } from '~/lib/utils/common_utils';
 import {
@@ -30,7 +29,6 @@ export default {
     BoardSettingsSidebar,
     BoardTopBar,
   },
-  mixins: [glFeatureFlagsMixin()],
   inject: [
     'fullPath',
     'initialBoardId',
@@ -52,7 +50,6 @@ export default {
     };
   },
   apollo: {
-    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     activeBoardItem: {
       query: activeBoardItemQuery,
       variables() {
@@ -91,9 +88,6 @@ export default {
   },
 
   computed: {
-    issuesDrawerEnabled() {
-      return Boolean(this.glFeatures.issuesListDrawer);
-    },
     listQueryVariables() {
       return {
         ...(this.isIssueBoard && {
@@ -206,10 +200,7 @@ export default {
 </script>
 
 <template>
-  <div
-    class="boards-app gl-relative"
-    :class="{ 'is-compact': isAnySidebarOpen && !issuesDrawerEnabled }"
-  >
+  <div class="boards-app gl-relative" :class="{ 'is-compact': isAnySidebarOpen }">
     <board-top-bar
       :board-id="boardId"
       :is-swimlanes-on="isSwimlanesOn"
@@ -221,10 +212,6 @@ export default {
       @updateBoard="refetchLists"
     />
     <board-content
-      :class="{
-        'lg:gl-w-[calc(100%-480px)] xl:gl-w-[calc(100%-768px)] min-[1440px]:gl-w-[calc(100%-912px)]':
-          isAnySidebarOpen && issuesDrawerEnabled,
-      }"
       :board-id="boardId"
       :add-column-form-visible="addColumnFormVisible"
       :is-swimlanes-on="isSwimlanesOn"
@@ -232,7 +219,6 @@ export default {
       :board-lists="boardLists"
       :error="error"
       :list-query-variables="listQueryVariables"
-      :use-work-item-drawer="issuesDrawerEnabled"
       @setActiveList="setActiveId"
       @setAddColumnFormVisibility="addColumnFormVisible = $event"
       @setFilters="setFilters"
