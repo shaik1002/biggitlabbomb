@@ -121,11 +121,6 @@ class ApplicationController < BaseActionController
     render plain: e.message, status: :service_unavailable
   end
 
-  rescue_from Regexp::TimeoutError do |e|
-    log_exception(e)
-    head :service_unavailable
-  end
-
   def redirect_back_or_default(default: root_path, options: {})
     redirect_back(fallback_location: default, **options)
   end
@@ -142,14 +137,6 @@ class ApplicationController < BaseActionController
 
       redirect_to new_user_session_path, alert: I18n.t('devise.failure.unauthenticated')
     end
-  end
-
-  def handle_unverified_request
-    Gitlab::Auth::Activity
-      .new(controller: self)
-      .user_csrf_token_mismatch!
-
-    super
   end
 
   def render(*args)

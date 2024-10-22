@@ -263,6 +263,7 @@ RSpec.describe Projects::ProtectDefaultBranchService, feature_category: :source_
     context 'when feature flag `group_protected_branches` disabled' do
       before do
         stub_feature_flags(group_protected_branches: false)
+        stub_feature_flags(allow_protected_branches_for_group: false)
       end
 
       it 'return false' do
@@ -273,6 +274,7 @@ RSpec.describe Projects::ProtectDefaultBranchService, feature_category: :source_
     context 'when feature flag `group_protected_branches` enabled' do
       before do
         stub_feature_flags(group_protected_branches: true)
+        stub_feature_flags(allow_protected_branches_for_group: true)
       end
 
       it 'return true' do

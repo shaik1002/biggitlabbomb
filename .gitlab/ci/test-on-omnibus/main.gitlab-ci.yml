@@ -73,8 +73,7 @@ instance:
     - .qa
   variables:
     QA_SCENARIO: Test::Instance::Image
-    QA_RUN_IN_PARALLEL: true
-    QA_PARALLEL_PROCESSES: 6
+    QA_RUN_IN_PARALLEL: false
   rules:
     - !reference [.rules:test:smoke-for-omnibus-mr, rules]
     - !reference [.rules:test:feature-flags-set, rules]  # always run instance to validate ff change
@@ -579,7 +578,6 @@ e2e-test-report:
 upload-knapsack-report:
   extends:
     - .upload-knapsack-report
-    - .rules:report:upload-knapsack-report
 
 export-test-metrics:
   extends:

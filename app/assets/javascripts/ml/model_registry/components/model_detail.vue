@@ -2,6 +2,7 @@
 import { GlLink } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import IssuableDescription from '~/vue_shared/issuable/show/components/issuable_description.vue';
+import { MODEL_VERSION_CREATION_MODAL_ID } from '../constants';
 import EmptyState from './model_list_empty_state.vue';
 
 export default {
@@ -16,7 +17,6 @@ export default {
       importPath: '',
     };
   },
-  inject: ['createModelVersionPath'],
   props: {
     model: {
       type: Object,
@@ -56,11 +56,9 @@ export default {
   },
   emptyState: {
     title: s__('MlModelRegistry|Manage versions of your machine learning model'),
-    modelCardDescription: s__(
-      'MlModelRegistry|No description available. To add a description, click "Edit model" above.',
-    ),
     description: s__('MlModelRegistry|Use versions to track performance, parameters, and metadata'),
     primaryText: s__('MlModelRegistry|Create model version'),
+    modalId: MODEL_VERSION_CREATION_MODAL_ID,
   },
 };
 </script>
@@ -88,16 +86,12 @@ export default {
         :task-list-update-path="taskListUpdatePath"
       />
     </div>
-    <div v-else class="gl-text-secondary" data-testid="empty-description-state">
-      {{ $options.emptyState.modelCardDescription }}
-    </div>
-
     <empty-state
-      v-if="!model.latestVersion"
+      v-else
       :title="$options.emptyState.title"
       :description="$options.emptyState.description"
       :primary-text="$options.emptyState.primaryText"
-      :primary-link="createModelVersionPath"
+      :modal-id="$options.emptyState.modalId"
     />
   </div>
 </template>

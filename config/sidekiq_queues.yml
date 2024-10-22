@@ -23,6 +23,12 @@
 #     chance = (queue weight / total weight of all queues) * 100
 ---
 :queues:
+- - abuse_new_abuse_report
+  - 1
+- - abuse_spam_abuse_events
+  - 1
+- - abuse_trust_score
+  - 1
 - - activity_pub
   - 1
 - - adjourned_project_deletion
@@ -821,8 +827,6 @@
   - 1
 - - security_sync_policy_violation_comment
   - 1
-- - security_sync_project_policies
-  - 1
 - - security_sync_project_policy
   - 1
 - - security_sync_scan_policies
@@ -873,13 +877,11 @@
   - 1
 - - users_experimental_communication_opt_in
   - 1
+- - users_record_last_activity
+  - 1
 - - users_track_namespace_visits
   - 1
 - - vulnerabilities_mark_dropped_as_resolved
-  - 1
-- - vulnerabilities_namespace_historical_statistics_process_transfer_events
-  - 1
-- - vulnerabilities_namespace_historical_statistics_update_traversal_ids
   - 1
 - - vulnerabilities_process_archived_events
   - 1

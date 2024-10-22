@@ -564,7 +564,7 @@ export const createAbuseReportNoteResponse = {
 
 export const editAbuseReportNoteResponse = {
   data: {
-    updateAbuseReportNote: {
+    updateNote: {
       errors: [],
       note: {
         id: 'gid://gitlab/Note/1',

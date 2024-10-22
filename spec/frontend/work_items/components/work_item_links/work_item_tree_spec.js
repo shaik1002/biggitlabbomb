@@ -13,7 +13,6 @@ import WorkItemActionsSplitButton from '~/work_items/components/work_item_links/
 import WorkItemMoreActions from '~/work_items/components/shared/work_item_more_actions.vue';
 import WorkItemRolledUpData from '~/work_items/components/work_item_links/work_item_rolled_up_data.vue';
 import getWorkItemTreeQuery from '~/work_items/graphql/work_item_tree.query.graphql';
-import namespaceWorkItemTypesQuery from '~/work_items/graphql/namespace_work_item_types.query.graphql';
 import {
   FORM_TYPES,
   WORK_ITEM_TYPE_ENUM_OBJECTIVE,
@@ -32,7 +31,6 @@ import {
   workItemHierarchyTreeEmptyResponse,
   workItemHierarchyNoUpdatePermissionResponse,
   mockRolledUpCountsByType,
-  namespaceWorkItemTypesQueryResponse,
 } from '../../mock_data';
 
 jest.mock('~/alert');
@@ -45,9 +43,6 @@ describe('WorkItemTree', () => {
   const workItemHierarchyTreeResponseHandler = jest
     .fn()
     .mockResolvedValue(workItemHierarchyTreeResponse);
-  const namespaceWorkItemTypesQueryHandler = jest
-    .fn()
-    .mockResolvedValue(namespaceWorkItemTypesQueryResponse);
 
   const findEmptyState = () => wrapper.findByTestId('crud-empty');
   const findLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
@@ -81,10 +76,7 @@ describe('WorkItemTree', () => {
         canUpdate,
         canUpdateChildren,
       },
-      apolloProvider: createMockApollo([
-        [getWorkItemTreeQuery, workItemHierarchyTreeHandler],
-        [namespaceWorkItemTypesQuery, namespaceWorkItemTypesQueryHandler],
-      ]),
+      apolloProvider: createMockApollo([[getWorkItemTreeQuery, workItemHierarchyTreeHandler]]),
       provide: {
         hasSubepicsFeature,
       },
@@ -371,17 +363,6 @@ describe('WorkItemTree', () => {
       workItemType: 'Objective',
       rolledUpCountsByType: mockRolledUpCountsByType,
       fullPath: 'test/project',
-    });
-  });
-
-  it('fetches widget definitions and passes formatted allowed children by type to children wrapper', async () => {
-    await createComponent();
-
-    expect(namespaceWorkItemTypesQueryHandler).toHaveBeenCalled();
-    await nextTick();
-
-    expect(findWorkItemLinkChildrenWrapper().props('allowedChildrenByType')).toEqual({
-      Issue: ['Task'],
     });
   });
 });

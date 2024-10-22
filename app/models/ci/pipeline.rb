@@ -77,7 +77,7 @@ module Ci
 
     #
     # In https://gitlab.com/groups/gitlab-org/-/epics/9991, we aim to convert all CommitStatus related models to
-    # Ci::Job models. With that epic, we aim to replace `statuses` with `jobs`.
+    # Ci:Job models. With that epic, we aim to replace `statuses` with `jobs`.
     #
     # DEPRECATED:
     has_many :statuses, ->(pipeline) { in_partition(pipeline) }, class_name: 'CommitStatus', foreign_key: :commit_id, inverse_of: :pipeline, partition_foreign_key: :partition_id
@@ -1430,7 +1430,7 @@ module Ci
     private
 
     def add_message(severity, content)
-      messages.build(severity: severity, content: content, project_id: project_id)
+      messages.build(severity: severity, content: content)
     end
 
     def merge_request_diff_sha

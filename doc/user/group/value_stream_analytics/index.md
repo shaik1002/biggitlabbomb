@@ -508,7 +508,7 @@ To learn more about the implementation, see the blog post [Applying GitLab Label
 
 #### Example for custom value stream configuration
 
-![Example configuration](img/object_hierarchy_v14_10.png "Example custom value stream configuration")
+![Example configuration](img/object_hierarchy_example_V14_10.png "Example custom value stream configuration")
 
 In the example above, two independent value streams are set up for two teams that are using different development workflows in the **Test Group** (top-level namespace).
 
@@ -741,7 +741,7 @@ group(fullPath: "your-group-path") {
 ## Forecast deployment frequency with Value Stream Forecasting
 
 DETAILS:
-**Tier:** Ultimate with GitLab Duo Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
+**Tier: GitLab.com and Self-managed:** For a limited time, Ultimate. On October 17, 2024, Ultimate with [GitLab Duo Enterprise](https://about.gitlab.com/gitlab-duo/#pricing). **GitLab Dedicated:** GitLab Duo Enterprise.
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 **Status:** Experiment
 
@@ -769,7 +769,7 @@ a duration that is half of the selected date range.
 For example, if you select a 30-day range, a forecast for the following 15 days
 is displayed.
 
-![Forecast deployment frequency](img/forecast_deployment_frequency_v16_5.png)
+![Forecast deployment frequency](img/forecast_deployment_frequency.png)
 
 Provide feedback on this experimental feature in [issue 416833](https://gitlab.com/gitlab-org/gitlab/-/issues/416833).
 

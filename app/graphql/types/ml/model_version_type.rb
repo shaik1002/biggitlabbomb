@@ -6,7 +6,6 @@ module Types
     class ModelVersionType < ::Types::BaseObject
       graphql_name 'MlModelVersion'
       description 'Version of a machine learning model'
-      present_using ::Ml::ModelVersionPresenter
 
       connection_type_class Types::LimitedCountableConnectionType
 
@@ -15,8 +14,6 @@ module Types
       field :id, ::Types::GlobalIDType[::Ml::ModelVersion], null: false, description: 'ID of the model version.'
 
       field :created_at, Types::TimeType, null: false, description: 'Date of creation.'
-
-      field :author, ::Types::UserType, null: false, description: 'User that created the model version.'
 
       field :description, ::GraphQL::Types::String,
         null: true,

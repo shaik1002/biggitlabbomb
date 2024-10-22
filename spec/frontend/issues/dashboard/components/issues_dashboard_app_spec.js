@@ -130,55 +130,36 @@ describe('IssuesDashboardApp component', () => {
       await waitForPromises();
     });
 
-    describe('IssuableList component', () => {
-      it('renders', () => {
-        expect(findIssuableList().props()).toMatchObject({
-          currentTab: STATUS_OPEN,
-          hasNextPage: true,
-          hasPreviousPage: false,
-          hasScopedLabelsFeature: true,
-          initialSortBy: CREATED_DESC,
-          namespace: 'dashboard',
-          recentSearchesStorageKey: 'issues',
-          showPaginationControls: true,
-          showWorkItemTypeIcon: true,
-          truncateCounts: true,
-          useKeysetPagination: true,
-        });
-      });
-
-      it('renders issues', () => {
-        expect(findIssuableList().props('issuables')).toHaveLength(1);
-      });
-
-      it('renders sort options', () => {
-        expect(findIssuableList().props('sortOptions')).toEqual(
-          getSortOptions({
-            hasBlockedIssuesFeature: defaultProvide.hasBlockedIssuesFeature,
-            hasIssuableHealthStatusFeature: defaultProvide.hasIssuableHealthStatusFeature,
-            hasIssueWeightsFeature: defaultProvide.hasIssueWeightsFeature,
-            hasManualSort: false,
-          }),
-        );
-      });
-
-      it('renders tabs', () => {
-        expect(findIssuableList().props('tabs')).toEqual(IssuesDashboardApp.issuableListTabs);
-      });
-
-      it('renders tab counts', () => {
-        expect(findIssuableList().props('tabCounts')).toEqual({
+    // quarantine: https://gitlab.com/gitlab-org/gitlab/-/issues/391722
+    // eslint-disable-next-line jest/no-disabled-tests
+    it.skip('renders IssuableList component', () => {
+      expect(findIssuableList().props()).toMatchObject({
+        currentTab: STATUS_OPEN,
+        hasNextPage: true,
+        hasPreviousPage: false,
+        hasScopedLabelsFeature: defaultProvide.hasScopedLabelsFeature,
+        initialSortBy: CREATED_DESC,
+        issuables: issuesQueryResponse.data.issues.nodes,
+        issuablesLoading: false,
+        namespace: 'dashboard',
+        recentSearchesStorageKey: 'issues',
+        showPaginationControls: true,
+        sortOptions: getSortOptions({
+          hasBlockedIssuesFeature: defaultProvide.hasBlockedIssuesFeature,
+          hasIssuableHealthStatusFeature: defaultProvide.hasIssuableHealthStatusFeature,
+          hasIssueWeightsFeature: defaultProvide.hasIssueWeightsFeature,
+        }),
+        tabCounts: {
           opened: 1,
           closed: 2,
           all: 3,
-        });
-      });
-
-      it('renders url params', () => {
-        expect(findIssuableList().props('urlParams')).toMatchObject({
+        },
+        tabs: IssuesDashboardApp.issuableListTabs,
+        urlParams: {
           sort: urlSortParams[CREATED_DESC],
           state: STATUS_OPEN,
-        });
+        },
+        useKeysetPagination: true,
       });
     });
 

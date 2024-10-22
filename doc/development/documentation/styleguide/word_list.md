@@ -52,26 +52,6 @@ thereafter. If the first word in a sentence, do not capitalize `factor` or `auth
 
 - Two-factor authentication (2FA) helps secure your account. Set up 2FA when you first sign in.
 
-## ability, able
-
-Avoid using **ability** because it focuses more on the user's
-capabilities rather than the product's features or functions,
-which makes it vague and ambiguous.
-
-Do not use **ability** or **able** to refer to permissions or rights that a user needs to perform a task.
-
-Use:
-
-- You do not have the rights to change this setting.
-- You must have permission to change this setting.
-
-Instead of:
-
-- You're not able to change this setting.
-- You must have the ability to change this setting.
-
-See also [**enable**](#enable).
-
 ## above
 
 Try to avoid using **above** when referring to an example or table in a documentation page. If required, use **previous** instead. For example:
@@ -134,7 +114,7 @@ Use title case for **Admin Mode**. The UI uses title case.
 
 Use **administrator access** instead of **admin** when talking about a user's access level.
 
-![admin access level](img/admin_access_level_v15_9.png)
+![admin access level](img/admin_access_level.png)
 
 An **administrator** is not a [role](#roles) or [permission](#permissions).
 
@@ -436,7 +416,7 @@ For example:
 
 - Your instance must be able to synchronize your subscription data with GitLab.
 
-## cloud-native
+## cloud native
 
 When you're talking about using a Kubernetes cluster to host GitLab, you're talking about a **cloud-native version of GitLab**.
 This version is different than the larger, more monolithic **Linux package** that is used to deploy GitLab.
@@ -1029,7 +1009,6 @@ the following are the names of GitLab Duo features:
 - GitLab Duo AI Impact Dashboard
 - GitLab Duo Chat
 - GitLab Duo Code Explanation
-- GitLab Duo Code Review
 - GitLab Duo Code Review Summary
 - GitLab Duo Code Suggestions
 - GitLab Duo for the CLI
@@ -1702,8 +1681,8 @@ Use:
 
 If you write a phrase like, "On the **Issues** page," ensure steps for how to get to the page are nearby. Otherwise, people might not know what the **Issues** page is.
 
-The page name should be visible in the UI at the top of the page,
-or included in the breadcrumb.
+The page name should be visible in the UI at the top of the page.
+If it is not, you should be able to get the name from the breadcrumb.
 
 The docs should match the case in the UI, and the page name should be bold. For example:
 
@@ -1728,18 +1707,6 @@ Examples:
 - parent pipeline
 
 See also: [child](#child), and [subgroup](#subgroup).
-
-## per
-
-Do not use **per** because it can have several different meanings.
-
-Use the specific prepositional phrase instead:
-
-- for each
-- through
-- by
-- every
-- according to
 
 ## permissions
 

@@ -74,8 +74,13 @@
 .dropdown-menu-close {
   &:active,
   &:focus {
-    @apply gl-focus;
+    @include gl-focus;
   }
+}
+
+// Get search dropdown to line up with other nav dropdowns
+.search-input-container .dropdown-menu {
+  margin-top: 11px;
 }
 
 .dropdown-toggle,
@@ -632,7 +637,7 @@
   outline: 0;
 
   &:focus {
-    @apply gl-focus;
+    @include gl-focus;
   }
 
   &:hover {

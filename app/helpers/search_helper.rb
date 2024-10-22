@@ -249,7 +249,8 @@ module SearchHelper
   end
 
   def should_show_work_items_as_epics_in_results?
-    ::Elastic::DataMigrationService.migration_has_finished?(:backfill_work_items)
+    ::Feature.enabled?(:search_epics_uses_work_items_index, current_user) &&
+      ::Elastic::DataMigrationService.migration_has_finished?(:backfill_work_items)
   end
 
   def should_show_zoekt_results?(_scope, _search_type)
@@ -364,14 +365,8 @@ module SearchHelper
 
   # Autocomplete results for the current user's projects
   def projects_autocomplete(term, limit = 5)
-    projects = if Feature.enabled?(:autocomplete_projects_use_search_service, current_user)
-                 search_using_search_service(current_user, 'projects', term, limit)
-               else
-                 current_user.authorized_projects.order_id_desc.search(term, include_namespace: true, use_minimum_char_limit: false)
-                   .sorted_by_stars_desc.non_archived.limit(limit)
-               end
-
-    projects.map do |p|
+    current_user.authorized_projects.order_id_desc.search(term, include_namespace: true, use_minimum_char_limit: false)
+      .sorted_by_stars_desc.non_archived.limit(limit).map do |p|
       {
         category: "Projects",
         id: p.id,
@@ -390,7 +385,10 @@ module SearchHelper
       return []
     end
 
-    search_using_search_service(current_user, 'users', term, limit).map do |user|
+    ::SearchService
+      .new(current_user, { scope: 'users', per_page: limit, search: term })
+      .search_objects
+      .map do |user|
       {
         category: "Users",
         id: user.id,
@@ -604,14 +602,6 @@ module SearchHelper
 
   def wiki_blob_link(wiki_blob)
     project_wiki_path(wiki_blob.project, wiki_blob.basename)
-  end
-
-  def search_using_search_service(user, scope, term, limit, additional_params = {})
-    params = { scope: scope, search: term }.merge(additional_params)
-    ::SearchService
-      .new(user, params)
-      .search_objects
-      .first(limit)
   end
 end
 

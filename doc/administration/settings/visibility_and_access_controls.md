@@ -253,8 +253,7 @@ Prerequisites:
 1. Select **Save changes**.
 
 NOTE:
-You cannot restrict a visibility level that is set as the default for new projects or groups.
-Conversely, you cannot set a restricted visibility level as the default for new projects or groups.
+You cannot select the restricted default visibility level for new projects and groups.
 
 ## Configure enabled Git access protocols
 

@@ -272,7 +272,7 @@ and the section below.
 
 ### Running tests that require special setup
 
-Learn how to perform [tests that require special setup or consideration to run on your local environment](running_tests/running_tests_that_require_special_setup.md).
+Learn how to perform [tests that require special setup or consideration to run on your local environment](running_tests_that_require_special_setup.md).
 
 ## How do you write tests?
 
@@ -292,13 +292,13 @@ We should follow these best practices for end-to-end tests:
 
 Continued reading:
 
-- [Beginner's Guide](beginners_guide/index.md)
+- [Beginner's Guide](beginners_guide.md)
 - [Style Guide](style_guide.md)
-- [Best Practices](best_practices/index.md)
-- [Testing with feature flags](best_practices/feature_flags.md)
-- [Flows](beginners_guide/flows.md)
-- [RSpec metadata/tags](best_practices/rspec_metadata_tests.md)
-- [Execution context selection](best_practices/execution_context_selection.md)
+- [Best Practices](best_practices.md)
+- [Testing with feature flags](feature_flags.md)
+- [Flows](flows.md)
+- [RSpec metadata/tags](rspec_metadata_tests.md)
+- [Execution context selection](execution_context_selection.md)
 - [Troubleshooting](troubleshooting.md)
 
 ## Where can you ask for help?

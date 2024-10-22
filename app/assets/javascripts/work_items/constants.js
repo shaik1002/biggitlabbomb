@@ -277,6 +277,9 @@ export const TODO_DONE_ICON = 'todo-done';
 export const TODO_DONE_STATE = 'done';
 export const TODO_PENDING_STATE = 'pending';
 
+export const EMOJI_THUMBSUP = 'thumbsup';
+export const EMOJI_THUMBSDOWN = 'thumbsdown';
+
 export const WORK_ITEM_TO_ISSUABLE_MAP = {
   [WIDGET_TYPE_ASSIGNEES]: 'assignees',
   [WIDGET_TYPE_LABELS]: 'labels',
@@ -350,6 +353,8 @@ export const NEW_WORK_ITEM_GID = 'gid://gitlab/WorkItem/new';
 
 export const NEW_EPIC_FEEDBACK_PROMPT_EXPIRY = '2024-12-31';
 export const FEATURE_NAME = 'work_item_epic_feedback';
+
+export const CLEAR_VALUE = 'CLEAR_VALUE';
 
 export const DETAIL_VIEW_QUERY_PARAM_NAME = 'show';
 export const ROUTES = {

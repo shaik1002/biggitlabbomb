@@ -8,7 +8,7 @@ module Users
 
     sidekiq_options retry: false
     feature_category :user_profile
-    data_consistency :sticky
+    data_consistency :always
     idempotent!
 
     def perform

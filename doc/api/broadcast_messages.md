@@ -12,7 +12,6 @@ DETAILS:
 
 > - `target_access_levels` [introduced](https://gitlab.com/gitlab-org/growth/team-tasks/-/issues/461) in GitLab 14.8 [with a flag](../administration/feature_flags.md) named `role_targeted_broadcast_messages`. Disabled by default.
 > - `color` parameter [removed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/95829) in GitLab 15.6.
-> - `theme` [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/498900) in GitLab 17.6.
 
 Broadcast messages API operates on [broadcast messages](../administration/broadcast_messages.md).
 
@@ -53,8 +52,7 @@ Example response:
         "target_access_levels": [10,30],
         "target_path": "*/welcome",
         "broadcast_type": "banner",
-        "dismissable": false,
-        "theme": "indigo"
+        "dismissable": false
     }
 ]
 ```
@@ -96,8 +94,7 @@ Example response:
     "target_access_levels": [10,30],
     "target_path": "*/welcome",
     "broadcast_type": "banner",
-    "dismissable": false,
-    "theme": "indigo"
+    "dismissable": false
 }
 ```
 
@@ -121,7 +118,6 @@ Parameters:
 | `target_path`          | string            | no       | Target path of the broadcast message.                 |
 | `broadcast_type`       | string            | no       | Appearance type (defaults to banner)                  |
 | `dismissable`          | boolean           | no       | Can the user dismiss the message?                     |
-| `theme`                | string            | no       | Color theme for the broadcast message (banners only). |
 
 The `target_access_levels` are defined in the `Gitlab::Access` module. The
 following levels are valid:
@@ -132,23 +128,10 @@ following levels are valid:
 - Maintainer (`40`)
 - Owner (`50`)
 
-The `theme` options are defined in the `System::BroadcastMessage` class. The following themes are valid:
-
-- indigo (default)
-- light-indigo
-- blue
-- light-blue
-- green
-- light-green
-- red
-- light-red
-- dark
-- light
-
 Example request:
 
 ```shell
-curl --data "message=Deploy in progress&target_access_levels[]=10&target_access_levels[]=30&theme=red" \
+curl --data "message=Deploy in progress&target_access_levels[]=10&target_access_levels[]=30" \
      --header "PRIVATE-TOKEN: <your_access_token>" \
      "https://gitlab.example.com/api/v4/broadcast_messages"
 ```
@@ -166,8 +149,7 @@ Example response:
     "target_access_levels": [10,30],
     "target_path": "*/welcome",
     "broadcast_type": "notification",
-    "dismissable": false,
-    "theme": "red"
+    "dismissable": false
 }
 ```
 
@@ -192,7 +174,6 @@ Parameters:
 | `target_path`          | string            | no       | Target path of the broadcast message.                 |
 | `broadcast_type`       | string            | no       | Appearance type (defaults to banner)                  |
 | `dismissable`          | boolean           | no       | Can the user dismiss the message?                     |
-| `theme`                | string            | no       | Color theme for the broadcast message (banners only). |
 
 The `target_access_levels` are defined in the `Gitlab::Access` module. The
 following levels are valid:
@@ -202,19 +183,6 @@ following levels are valid:
 - Developer (`30`)
 - Maintainer (`40`)
 - Owner (`50`)
-
-The `theme` options are defined in the `System::BroadcastMessage` class. The following themes are valid:
-
-- indigo (default)
-- light-indigo
-- blue
-- light-blue
-- green
-- light-green
-- red
-- light-red
-- dark
-- light
 
 Example request:
 
@@ -236,8 +204,7 @@ Example response:
     "target_access_levels": [10,30],
     "target_path": "*/welcome",
     "broadcast_type": "notification",
-    "dismissable": false,
-    "theme": "indigo"
+    "dismissable": false
 }
 ```
 

@@ -6,7 +6,6 @@ import { __ } from '~/locale';
 import { EDITOR_APP_DRAWER_NONE } from '~/ci/pipeline_editor/constants';
 import FirstPipelineCard from './cards/first_pipeline_card.vue';
 import GettingStartedCard from './cards/getting_started_card.vue';
-import GitlabUniversityCard from './cards/gitlab_university_card.vue';
 import PipelineConfigReferenceCard from './cards/pipeline_config_reference_card.vue';
 import VisualizeAndLintCard from './cards/visualize_and_lint_card.vue';
 
@@ -20,7 +19,6 @@ export default {
   components: {
     FirstPipelineCard,
     GettingStartedCard,
-    GitlabUniversityCard,
     GlDrawer,
     PipelineConfigReferenceCard,
     VisualizeAndLintCard,
@@ -59,12 +57,9 @@ export default {
     <template #title>
       <h2 class="gl-m-0 gl-text-lg">{{ $options.i18n.title }}</h2>
     </template>
-    <div class="gl-mb-5">
-      <getting-started-card :class="$options.DRAWER_CARD_STYLES" />
-      <first-pipeline-card :class="$options.DRAWER_CARD_STYLES" />
-      <visualize-and-lint-card :class="$options.DRAWER_CARD_STYLES" />
-      <pipeline-config-reference-card :class="$options.DRAWER_CARD_STYLES" />
-      <gitlab-university-card :class="$options.DRAWER_CARD_STYLES" />
-    </div>
+    <getting-started-card :class="$options.DRAWER_CARD_STYLES" />
+    <first-pipeline-card :class="$options.DRAWER_CARD_STYLES" />
+    <visualize-and-lint-card :class="$options.DRAWER_CARD_STYLES" />
+    <pipeline-config-reference-card :class="$options.DRAWER_CARD_STYLES" />
   </gl-drawer>
 </template>

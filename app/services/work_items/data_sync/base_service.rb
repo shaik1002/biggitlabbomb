@@ -3,9 +3,7 @@
 module WorkItems
   module DataSync
     class BaseService < ::BaseContainerService
-      include ::Services::ReturnServiceResponses
-
-      attr_reader :work_item, :service_response, :target_namespace
+      attr_reader :work_item, :new_work_item, :target_namespace
 
       # work_item - original work item
       # target_namespace - ProjectNamespace(not Project) or Group
@@ -18,15 +16,13 @@ module WorkItems
       end
 
       def execute
-        verification_response = verify_work_item_action_permission
-
-        return verification_response if verification_response.error?
+        verify_work_item_action_permission!
 
         ::ApplicationRecord.transaction do
-          @service_response = data_sync_action
+          @new_work_item = data_sync_action
         end
 
-        service_response
+        new_work_item
       end
 
       private

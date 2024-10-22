@@ -88,8 +88,8 @@ export default {
     };
   },
   computed: {
-    hasTimestamps() {
-      return Boolean(this.jobLog[0]?.time);
+    hasJobLogTimestampsEnabled() {
+      return this.jobLog.length > 0 && this.jobLog[0].time;
     },
     jobLogSize() {
       return sprintf(s__('Job|Showing last %{size} of log.'), {
@@ -213,7 +213,7 @@ export default {
         </template>
       </span>
       <!-- eo truncated log information -->
-      <span v-if="hasTimestamps">
+      <span v-if="hasJobLogTimestampsEnabled">
         {{ s__('Job|Log timestamps in UTC.') }}
       </span>
     </div>

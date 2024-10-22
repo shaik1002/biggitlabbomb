@@ -53,7 +53,8 @@ module ContainerRegistry
     def update_next_container_repository_status
       return unless next_container_repository
 
-      if next_container_repository.failed_deletion_count >= ContainerRepository::MAX_DELETION_FAILURES
+      if next_container_repository.failed_deletion_count >= ContainerRepository::MAX_DELETION_FAILURES &&
+          Feature.enabled?(:set_delete_failed_container_repository, next_container_repository.project)
         next_container_repository.set_delete_failed_status
       else
         next_container_repository.set_delete_scheduled_status

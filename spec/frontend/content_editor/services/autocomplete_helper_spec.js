@@ -6,7 +6,6 @@ import AutocompleteHelper, {
   createDataSource,
 } from '~/content_editor/services/autocomplete_helper';
 import { HTTP_STATUS_OK, HTTP_STATUS_INTERNAL_SERVER_ERROR } from '~/lib/utils/http_status';
-import { EMOJI_THUMBS_UP } from '~/emoji/constants';
 import {
   MOCK_MEMBERS,
   MOCK_COMMANDS,
@@ -254,7 +253,7 @@ describe('AutocompleteHelper', () => {
     const dataSource = autocompleteHelper.getDataSource('emoji');
     const results = await dataSource.search('');
 
-    expect(results).toEqual([{ emoji: { name: EMOJI_THUMBS_UP }, fieldValue: EMOJI_THUMBS_UP }]);
+    expect(results).toEqual([{ emoji: { name: 'thumbsup' }, fieldValue: 'thumbsup' }]);
   });
 
   it('updates dataSourcesUrl correctly', () => {

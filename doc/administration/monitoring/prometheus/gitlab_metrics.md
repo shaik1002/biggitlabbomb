@@ -181,12 +181,7 @@ The following metrics are available:
 | `gitlab_connection_pool_size` | Gauge | 16.7 | Size of connection pool | |
 | `gitlab_connection_pool_available_count` | Gauge | 16.7 | Number of available connections in the pool | |
 | `gitlab_security_policies_scan_result_process_duration_seconds` | Histogram | 16.7 | The amount of time to process merge request approval policies | |
-| `gitlab_security_policies_policy_sync_duration_seconds` | Histogram | 17.6 | The amount of time to sync policy changes for a policy configuration | |
-| `gitlab_security_policies_policy_deletion_duration_seconds` | Histogram | 17.6 | The amount of time to delete policy-related configuration | |
-| `gitlab_security_policies_policy_creation_duration_seconds` | Histogram | 17.6 | The amount of time to create policy-related configuration | |
-| `gitlab_security_policies_sync_opened_merge_requests_duration_seconds` | Histogram | 17.6 | The amount of time to sync opened merge requests after policy changes | |
 | `gitlab_security_policies_scan_execution_configuration_rendering_seconds` | Histogram | 17.3 | The amount of time to render scan execution policy CI configurations | |
-| `gitlab_security_policies_update_configuration_duration_seconds` | Histogram | 17.6 | The amount of time to schedule sync for a policy configuration change | |
 | `gitlab_highlight_usage` | Counter | 16.8 | The number of times `Gitlab::Highlight` is used | `used_on` |
 | `dependency_linker_usage` | Counter | 16.8 | The number of times dependency linker is used | `used_on` |
 | `gitlab_keeparound_refs_requested_total` | Counter | 16.10 | Counts the number of keep-around refs requested to be created | `source` |
@@ -244,8 +239,6 @@ configuration option in `gitlab.yml`. These metrics are served from the
 | `sidekiq_concurrency_limit_queue_jobs`         | Gauge     | 17.3 | Number of Sidekiq jobs waiting in the concurrency limit queue|  `worker`                                                             |
 | `sidekiq_concurrency_limit_max_concurrent_jobs` | Gauge     | 17.3 | Max number of concurrent running Sidekiq jobs |   `worker`                                                           |
 | `sidekiq_concurrency_limit_deferred_jobs_total` | Counter     | 17.3 | Total number of deferred Sidekiq jobs |   `worker`                                                           |
-| `sidekiq_concurrency_limit_queue_jobs_total`    | Counter | 17.6 | Proxy to calculate the number of jobs in the waiting queue due to concurrency limit. It must be interpreted as `max(idelta(sidekiq_concurrency_limit_queue_jobs_total[1m))` in order to see the total queue size. Unlike other counters, the overall `rate` for this counter is meaningless.  |  `worker`                                                             |
-| `sidekiq_concurrency_limit_current_concurrent_jobs_total`    | Counter | 17.6 | Proxy to calculate the number of concurrently running jobs. It must be interpreted as `max(idelta(sidekiq_concurrency_limit_current_concurrent_jobs_total[1m))` in order to see the number of concurrent jobs. Unlike other counters, the overall `rate` for this counter is meaningless. |  `worker`                                                             |
 | `geo_db_replication_lag_seconds`               | Gauge   | 10.2  | Database replication lag (seconds) | `url` |
 | `geo_repositories`                             | Gauge   | 10.2  | Deprecated for removal in 18.0. Replaced by `geo_project_repositories`. Total number of repositories available on primary | `url` |
 | `geo_lfs_objects`                              | Gauge   | 10.2  | Number of LFS objects on primary | `url` |

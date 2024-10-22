@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::CreatePipelineService, # rubocop: disable RSpec/SpecFilePathForm
+RSpec.describe Ci::CreatePipelineService, # rubocop: disable RSpec/FilePath
   :ci_config_feature_flag_correctness,
   feature_category: :continuous_integration do
   describe 'pipeline logger' do

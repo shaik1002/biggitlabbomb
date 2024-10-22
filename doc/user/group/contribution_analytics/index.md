@@ -36,7 +36,7 @@ You can view the number of events associated with a specific group member.
 
 To do this, hover over the bar with the member's name.
 
-![Contribution analytics bar graphs](img/group_stats_graph_v15_9.png)
+![Contribution analytics bar graphs](img/group_stats_graph.png)
 
 ### Zoom in on a chart
 

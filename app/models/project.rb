@@ -730,7 +730,6 @@ class Project < ApplicationRecord
   scope :with_jira_dvcs_server, -> { joins(:feature_usage).merge(ProjectFeatureUsage.with_jira_dvcs_integration_enabled(cloud: false)) }
   scope :by_name, ->(name) { where('projects.name LIKE ?', "#{sanitize_sql_like(name)}%") }
   scope :inc_routes, -> { includes(:route, namespace: :route) }
-  scope :include_fork_networks, -> { includes(:fork_network) }
   scope :with_statistics, -> { includes(:statistics) }
   scope :with_namespace, -> { includes(:namespace) }
   scope :joins_namespace, -> { joins(:namespace) }
@@ -1492,8 +1491,7 @@ class Project < ApplicationRecord
     job_type = type.to_s.capitalize
 
     if job_id
-      use_primary = ::Gitlab::Database::LoadBalancing::SessionMap.current(load_balancer).use_primary?
-      Gitlab::AppLogger.info("#{job_type} job scheduled for #{full_path} with job ID #{job_id} (primary: #{use_primary}).")
+      Gitlab::AppLogger.info("#{job_type} job scheduled for #{full_path} with job ID #{job_id} (primary: #{::Gitlab::Database::LoadBalancing::Session.current.use_primary?}).")
     else
       Gitlab::AppLogger.error("#{job_type} job failed to create for #{full_path}.")
     end
@@ -2981,7 +2979,7 @@ class Project < ApplicationRecord
   end
 
   def allow_protected_branches_for_group?
-    Feature.enabled?(:group_protected_branches, group)
+    Feature.enabled?(:group_protected_branches, group) || Feature.enabled?(:allow_protected_branches_for_group, group)
   end
 
   def deploy_token_create_url(opts = {})

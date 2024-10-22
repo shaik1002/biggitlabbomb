@@ -1,12 +1,10 @@
 ---
 stage: AI-powered
-group: Duo Workflow
+group: AI Framework
 info: Any user with at least the Maintainer role can merge updates to this content. For details, see https://docs.gitlab.com/ee/development/development_processes.html#development-guidelines-review.
 ---
 
 # Setting up local development for Duo Workflow
-
-Alternative to this detailed setup you can also [set up Duo Workflow directly with GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/main/doc/howto/duo_workflow.md?ref_type=heads).
 
 ## Prerequisites
 
@@ -56,7 +54,7 @@ Alternative to this detailed setup you can also [set up Duo Workflow directly wi
 
 ## Set up the Duo Workflow Service
 
-1. Clone the [Duo Workflow Service repository](https://gitlab.com/gitlab-org/duo-workflow/duo-workflow-service).
++1. Clone the [Duo Workflow Service repository](https://gitlab.com/gitlab-org/duo-workflow/duo-workflow-service).
 
    ```shell
      git clone git@gitlab.com:gitlab-org/duo-workflow/duo-workflow-service.git

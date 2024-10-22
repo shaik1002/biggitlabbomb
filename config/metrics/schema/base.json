@@ -144,18 +144,10 @@
           "free",
           "starter",
           "premium",
-          "ultimate"
-        ]
-      }
-    },
-    "tiers": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "enum": [
-          "free",
-          "premium",
-          "ultimate"
+          "ultimate",
+          "bronze",
+          "silver",
+          "gold"
         ]
       }
     },

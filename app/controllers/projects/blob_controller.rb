@@ -28,10 +28,10 @@ class Projects::BlobController < Projects::ApplicationController
 
   before_action :authorize_edit_tree!, only: [:new, :create, :update, :destroy]
 
-  before_action :require_commit, except: [:new, :create]
+  before_action :commit, except: [:new, :create]
   before_action :set_is_ambiguous_ref, only: [:show]
   before_action :check_for_ambiguous_ref, only: [:show]
-  before_action :require_blob, except: [:new, :create]
+  before_action :blob, except: [:new, :create]
   before_action :require_branch_head, only: [:edit, :update]
   before_action :editor_variables, except: [:show, :preview, :diff]
   before_action :validate_diff_params, only: :diff
@@ -62,7 +62,7 @@ class Projects::BlobController < Projects::ApplicationController
   end
 
   def show
-    conditionally_expand_blob(blob)
+    conditionally_expand_blob(@blob)
 
     respond_to do |format|
       format.html do
@@ -70,8 +70,8 @@ class Projects::BlobController < Projects::ApplicationController
       end
 
       format.json do
-        page_title blob.path, @ref, @project.full_name
-        set_last_commit_sha
+        page_title @blob.path, @ref, @project.full_name
+
         show_json
       end
     end
@@ -102,8 +102,8 @@ class Projects::BlobController < Projects::ApplicationController
 
   def preview
     @content = params[:content]
-    blob.load_all_data!
-    diffy = Diffy::Diff.new(blob.data, @content, diff: '-U 3', include_diff_info: true)
+    @blob.load_all_data!
+    diffy = Diffy::Diff.new(@blob.data, @content, diff: '-U 3', include_diff_info: true)
     diff_lines = diffy.diff.scan(/.*\n/)[2..]
     diff_lines = Gitlab::Diff::Parser.new.parse(diff_lines).to_a
     @diff_lines = Gitlab::Diff::Highlight.new(diff_lines, repository: @repository).highlight
@@ -139,22 +139,17 @@ class Projects::BlobController < Projects::ApplicationController
   attr_reader :branch_name
 
   def blob
-    return unless commit
+    @blob ||= @repository.blob_at(@commit.id, @path)
 
-    @blob = @repository.blob_at(commit.id, @path)
-  end
-  strong_memoize_attr :blob
+    if @blob
+      @blob
+    else
+      if tree = @repository.tree(@commit.id, @path)
+        return redirect_to project_tree_path(@project, File.join(@ref, @path)) if tree.entries.any?
+      end
 
-  def require_blob
-    redirect_to_project_tree_path unless blob
-  end
-
-  def redirect_to_project_tree_path
-    if @repository.tree(commit.id, @path).entries.any?
-      return redirect_to(project_tree_path(@project, File.join(@ref, @path)))
+      redirect_to_tree_root_for_missing_path(@project, @ref, @path)
     end
-
-    redirect_to_tree_root_for_missing_path(@project, @ref, @path)
   end
 
   def check_for_ambiguous_ref
@@ -162,12 +157,9 @@ class Projects::BlobController < Projects::ApplicationController
   end
 
   def commit
-    @commit = @repository.commit(@ref)
-  end
-  strong_memoize_attr :commit
+    @commit ||= @repository.commit(@ref)
 
-  def require_commit
-    render_404 unless commit
+    render_404 unless @commit
   end
 
   def redirect_renamed_default_branch?
@@ -249,18 +241,20 @@ class Projects::BlobController < Projects::ApplicationController
   end
 
   def show_html
-    environment_params = @repository.branch_exists?(@ref) ? { ref: @ref } : { commit: commit }
+    environment_params = @repository.branch_exists?(@ref) ? { ref: @ref } : { commit: @commit }
     environment_params[:find_latest] = true
     @environment = ::Environments::EnvironmentsByDeploymentsFinder.new(@project, current_user, environment_params).execute.last
-    @last_commit = @repository.last_commit_for_path(commit.id, blob.path, literal_pathspec: true)
-    @code_navigation_path = Gitlab::CodeNavigationPath.new(@project, blob.commit_id).full_json_path_for(blob.path)
+    @last_commit = @repository.last_commit_for_path(@commit.id, @blob.path, literal_pathspec: true)
+    @code_navigation_path = Gitlab::CodeNavigationPath.new(@project, @blob.commit_id).full_json_path_for(@blob.path)
 
     render 'show'
   end
 
   def show_json
-    json = blob_viewer_json(blob).merge(
-      id: blob.id,
+    set_last_commit_sha
+
+    json = {
+      id: @blob.id,
       last_commit_sha: @last_commit_sha,
       path: blob.path,
       name: blob.name,
@@ -276,8 +270,10 @@ class Projects::BlobController < Projects::ApplicationController
       blame_path: project_blame_path(project, @id),
       commits_path: project_commits_path(project, @id),
       tree_path: project_tree_path(project, File.join(@ref, tree_path)),
-      permalink: project_blob_path(project, File.join(commit.id, @path))
-    )
+      permalink: project_blob_path(project, File.join(@commit.id, @path))
+    }
+
+    json.merge!(blob_json(@blob) || {}) unless params[:viewer] == 'none'
 
     render json: json
   end

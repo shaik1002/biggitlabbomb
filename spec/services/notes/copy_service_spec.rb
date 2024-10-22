@@ -68,13 +68,13 @@ RSpec.describe Notes::CopyService, feature_category: :team_planning do
         end
 
         it 'copies the award emojis' do
-          create(:award_emoji, awardable: notes.first, name: AwardEmoji::THUMBS_UP)
+          create(:award_emoji, awardable: notes.first, name: 'thumbsup')
 
           execute_service
 
           new_award_emoji = to_noteable.notes.first.award_emoji.first
 
-          expect(new_award_emoji.name).to eq(AwardEmoji::THUMBS_UP)
+          expect(new_award_emoji.name).to eq('thumbsup')
         end
 
         it 'copies system_note_metadata for system note' do

@@ -18,7 +18,6 @@ import {
   TODO_ACTION_TYPE_REVIEW_SUBMITTED,
   TODO_ACTION_TYPE_UNMERGEABLE,
   TODO_ACTION_TYPE_SSH_KEY_EXPIRED,
-  TODO_ACTION_TYPE_SSH_KEY_EXPIRING_SOON,
 } from '../constants';
 
 export default {
@@ -52,8 +51,7 @@ export default {
         this.todo.action !== TODO_ACTION_TYPE_BUILD_FAILED &&
         this.todo.action !== TODO_ACTION_TYPE_MERGE_TRAIN_REMOVED &&
         this.todo.action !== TODO_ACTION_TYPE_UNMERGEABLE &&
-        this.todo.action !== TODO_ACTION_TYPE_SSH_KEY_EXPIRED &&
-        this.todo.action !== TODO_ACTION_TYPE_SSH_KEY_EXPIRING_SOON
+        this.todo.action !== TODO_ACTION_TYPE_SSH_KEY_EXPIRED
       );
     },
     userIsAuthor() {
@@ -133,10 +131,6 @@ export default {
 
       if (this.todo.action === TODO_ACTION_TYPE_SSH_KEY_EXPIRED) {
         name = s__('Todos|Your SSH key has expired');
-      }
-
-      if (this.todo.action === TODO_ACTION_TYPE_SSH_KEY_EXPIRING_SOON) {
-        name = s__('Todos|Your SSH key is expiring soon');
       }
 
       if (!name) {

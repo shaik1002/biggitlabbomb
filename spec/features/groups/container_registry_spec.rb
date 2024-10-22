@@ -11,7 +11,7 @@ RSpec.describe 'Container Registry', :js, feature_category: :container_registry 
     create(:container_repository, name: 'my/image')
   end
 
-  let(:help_page_href) { help_page_path('administration/packages/container_registry_metadata_database.md') }
+  let(:help_page_href) { help_page_path('administration/packages/container_registry_metadata_database') }
 
   before do
     group.add_owner(user)

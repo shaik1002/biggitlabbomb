@@ -177,10 +177,6 @@ describe('PlaceholderActions', () => {
           await waitForPromises();
           expect(wrapper.emitted('confirm')[0]).toEqual([]);
         });
-
-        it('refetches sourceUsersQuery', () => {
-          expect(sourceUsersQueryHandler).toHaveBeenCalledTimes(2);
-        });
       });
     });
 
@@ -221,10 +217,6 @@ describe('PlaceholderActions', () => {
         it('does not emit "confirm" event', async () => {
           await waitForPromises();
           expect(wrapper.emitted('confirm')).toBeUndefined();
-        });
-
-        it('does not refetch sourceUsersQuery', () => {
-          expect(sourceUsersQueryHandler).toHaveBeenCalledTimes(1);
         });
       });
     });

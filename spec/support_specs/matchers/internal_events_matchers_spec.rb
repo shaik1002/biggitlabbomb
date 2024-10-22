@@ -53,21 +53,22 @@ RSpec.describe 'Internal Events matchers', :clean_gitlab_redis_shared_state, fea
     it 'bubbles up failure messages' do
       expect do
         expect { nil }.to trigger_internal_events('g_edit_by_sfe')
-      end.to raise_expectation_error_with <<~TEXT
-        (Gitlab::InternalEvents).track_event("g_edit_by_sfe", *(any args))
-            expected: 1 time with arguments: ("g_edit_by_sfe", *(any args))
-            received: 0 times
-      TEXT
+      end.to raise_error RSpec::Expectations::ExpectationNotMetError,
+        "(Gitlab::InternalEvents).track_event(\"g_edit_by_sfe\", *(any args))\n    " \
+          "expected: 1 time with arguments: (\"g_edit_by_sfe\", *(any args))\n    " \
+          "received: 0 times"
     end
 
-    it 'bubbles up failure messages for negated matcher' do
+    it 'bubbles up failure messages for negated matcher',
+      quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/463147' do
       expect do
         expect { track_event }.not_to trigger_internal_events('g_edit_by_sfe')
-      end.to raise_expectation_error_with <<~TEXT
-        (Gitlab::InternalEvents).track_event("g_edit_by_sfe", {:namespace=>#<Group id:#{group_1.id} @#{group_1.name}>, :user=>#<User id:#{user_1.id} @#{user_1.username}>})
-            expected: 0 times with arguments: ("g_edit_by_sfe", anything)
-            received: 1 time with arguments: ("g_edit_by_sfe", {:namespace=>#<Group id:#{group_1.id} @#{group_1.name}>, :user=>#<User id:#{user_1.id} @#{user_1.username}>})
-      TEXT
+      end.to raise_error RSpec::Expectations::ExpectationNotMetError,
+        "(Gitlab::InternalEvents).track_event(\"g_edit_by_sfe\", " \
+          "{:namespace=>#<Group id:#{group_1.id} @group1>, :user=>#<User id:#{user_1.id} @user1>})\n    " \
+          "expected: 0 times with arguments: (\"g_edit_by_sfe\", anything)\n    " \
+          "received: 1 time with arguments: (\"g_edit_by_sfe\", " \
+          "{:namespace=>#<Group id:#{group_1.id} @group1>, :user=>#<User id:#{user_1.id} @user1>})"
     end
 
     it 'handles events that should not be triggered' do
@@ -175,10 +176,9 @@ RSpec.describe 'Internal Events matchers', :clean_gitlab_redis_shared_state, fea
         end
 
         it 'returns a meaningful failure message for :increment_usage_metrics' do
-          expect { assertion }.to raise_expectation_error_with <<~TEXT
-            expected metric redis_hll_counters.ide_edit.g_edit_by_sfe_weekly to be incremented by 1
-              ->  value went from 0 to 0
-          TEXT
+          expect { assertion }.to raise_error RSpec::Expectations::ExpectationNotMetError,
+            "expected metric redis_hll_counters.ide_edit.g_edit_by_sfe_weekly to be incremented by 1\n  " \
+              "->  value went from 0 to 0"
         end
       end
 
@@ -191,12 +191,11 @@ RSpec.describe 'Internal Events matchers', :clean_gitlab_redis_shared_state, fea
         end
 
         it 'returns a meaningful failure message for :increment_usage_metrics' do
-          expect { assertion }.to raise_expectation_error_with <<~TEXT
-            expected metric redis_hll_counters.ide_edit.g_edit_by_sfe_weekly to be incremented by 1
-              ->  value went from 0 to 0
-            expected metric redis_hll_counters.ide_edit.g_edit_by_sfe_monthly to be incremented by 1
-              ->  value went from 0 to 0
-          TEXT
+          expect { assertion }.to raise_error RSpec::Expectations::ExpectationNotMetError,
+            "expected metric redis_hll_counters.ide_edit.g_edit_by_sfe_weekly to be incremented by 1\n  " \
+              "->  value went from 0 to 0\n" \
+              "expected metric redis_hll_counters.ide_edit.g_edit_by_sfe_monthly to be incremented by 1\n  " \
+              "->  value went from 0 to 0"
         end
       end
 
@@ -208,15 +207,12 @@ RSpec.describe 'Internal Events matchers', :clean_gitlab_redis_shared_state, fea
         end
 
         it 'returns a meaningful failure message for :increment_usage_metrics' do
-          expect { assertion }.to raise_expectation_error_with <<~TEXT
-             expected metric redis_hll_counters.ide_edit.g_edit_by_sfe_weekly to be incremented by 1
-               ->  value went from 0 to 0
-
-          ...and:
-
-             expected metric redis_hll_counters.ide_edit.g_edit_by_sfe_monthly to be incremented by 1
-               ->  value went from 0 to 0
-          TEXT
+          expect { assertion }.to raise_error RSpec::Expectations::ExpectationNotMetError,
+            "   expected metric redis_hll_counters.ide_edit.g_edit_by_sfe_weekly " \
+              "to be incremented by 1\n     ->  value went from 0 to 0\n\n" \
+              "...and:\n\n   " \
+              "expected metric redis_hll_counters.ide_edit.g_edit_by_sfe_monthly " \
+              "to be incremented by 1\n     ->  value went from 0 to 0"
         end
       end
     end
@@ -229,10 +225,9 @@ RSpec.describe 'Internal Events matchers', :clean_gitlab_redis_shared_state, fea
         end
 
         it 'returns a meaningful failure message for :increment_usage_metrics' do
-          expect { assertion }.to raise_expectation_error_with <<~TEXT
-            expected metric redis_hll_counters.ide_edit.g_edit_by_sfe_weekly not to be incremented
-              ->  value went from 0 to 1
-          TEXT
+          expect { assertion }.to raise_error RSpec::Expectations::ExpectationNotMetError,
+            "expected metric redis_hll_counters.ide_edit.g_edit_by_sfe_weekly not to be incremented\n  " \
+              "->  value went from 0 to 1"
         end
       end
 
@@ -245,12 +240,11 @@ RSpec.describe 'Internal Events matchers', :clean_gitlab_redis_shared_state, fea
         end
 
         it 'returns a meaningful failure message for :increment_usage_metrics' do
-          expect { assertion }.to raise_expectation_error_with <<~TEXT
-            expected metric redis_hll_counters.ide_edit.g_edit_by_sfe_weekly not to be incremented
-              ->  value went from 0 to 1
-            expected metric redis_hll_counters.ide_edit.g_edit_by_sfe_monthly not to be incremented
-              ->  value went from 0 to 1
-          TEXT
+          expect { assertion }.to raise_error RSpec::Expectations::ExpectationNotMetError,
+            "expected metric redis_hll_counters.ide_edit.g_edit_by_sfe_weekly not to be incremented\n  " \
+              "->  value went from 0 to 1\n" \
+              "expected metric redis_hll_counters.ide_edit.g_edit_by_sfe_monthly not to be incremented\n  " \
+              "->  value went from 0 to 1"
         end
       end
 
@@ -262,15 +256,12 @@ RSpec.describe 'Internal Events matchers', :clean_gitlab_redis_shared_state, fea
         end
 
         it 'returns a meaningful failure message for :increment_usage_metrics' do
-          expect { assertion }.to raise_expectation_error_with <<~TEXT
-             expected metric redis_hll_counters.ide_edit.g_edit_by_sfe_weekly not to be incremented
-               ->  value went from 0 to 1
-
-          ...and:
-
-             expected metric redis_hll_counters.ide_edit.g_edit_by_sfe_monthly not to be incremented
-               ->  value went from 0 to 1
-          TEXT
+          expect { assertion }.to raise_error RSpec::Expectations::ExpectationNotMetError,
+            "   expected metric redis_hll_counters.ide_edit.g_edit_by_sfe_weekly " \
+              "not to be incremented\n     ->  value went from 0 to 1\n\n" \
+              "...and:\n\n   " \
+              "expected metric redis_hll_counters.ide_edit.g_edit_by_sfe_monthly " \
+              "not to be incremented\n     ->  value went from 0 to 1"
         end
       end
     end
@@ -397,15 +388,5 @@ RSpec.describe 'Internal Events matchers', :clean_gitlab_redis_shared_state, fea
         let(:event_attribute_overrides) { { label: 'Awesome label value' } }
       end
     end
-  end
-
-  private
-
-  def raise_expectation_error_with(error_message)
-    error_matcher = an_object_satisfying do |actual_message|
-      expect(actual_message).to eq error_message.chomp
-    end
-
-    raise_error RSpec::Expectations::ExpectationNotMetError, error_matcher
   end
 end

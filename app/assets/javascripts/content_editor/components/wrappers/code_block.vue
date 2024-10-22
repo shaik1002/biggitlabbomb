@@ -278,7 +278,6 @@ export default {
         ref="nodeViewContent"
         as="code"
         class="gl-relative gl-z-1 !gl-break-words"
-        data-testid="suggestion-field"
       />
     </node-view-wrapper>
   </editor-state-observer>

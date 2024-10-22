@@ -18,7 +18,8 @@ class ProtectedBranch::CacheKey # rubocop:disable Style/ClassAndModuleChildren -
   attr_reader :entity
 
   def need_to_scope?
-    Feature.enabled?(:group_protected_branches, group)
+    Feature.enabled?(:group_protected_branches, group) ||
+      Feature.enabled?(:allow_protected_branches_for_group, group)
   end
 
   def scoped_key

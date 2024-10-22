@@ -95,6 +95,11 @@ Cop/StaticTranslationDefinition:
     - 'spec/**/*'
     - 'ee/spec/**/*'
 
+# Disable old cop, needs to be removed when gitlab-styles 13.0.0 is merged
+# see: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/164582
+Cop/WithoutReactiveCache:
+  Enabled: false
+
 InternalAffairs/DeprecateCopHelper:
   Enabled: true
   Include:
@@ -154,7 +159,7 @@ Style/SignalException:
     - '**/*/Dangerfile'
     - 'tooling/danger/**/*.rb'
 
-RSpec/SpecFilePathFormat:
+RSpec/FilePath:
   Exclude:
     - 'qa/**/*'
     - 'spec/frontend/fixtures/*'
@@ -163,14 +168,6 @@ RSpec/SpecFilePathFormat:
     - 'spec/fixtures/**/*'
   CustomTransform:
     HTTPartyBasicAuth: httparty_basic_auth
-
-RSpec/SpecFilePathSuffix:
-  Exclude:
-    - 'qa/**/*'
-    - 'spec/frontend/fixtures/*'
-    - 'ee/spec/frontend/fixtures/*'
-    - 'spec/requests/api/v3/*'
-    - 'spec/fixtures/**/*'
 
 # Configuration parameters: AllowSubject.
 RSpec/MultipleMemoizedHelpers:

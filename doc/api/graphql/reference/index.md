@@ -1745,10 +1745,10 @@ Input type: `AiFeatureSettingUpdateInput`
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="mutationaifeaturesettingupdateaiselfhostedmodelid"></a>`aiSelfHostedModelId` | [`AiSelfHostedModelID`](#aiselfhostedmodelid) | Global ID of the self-hosted model provide the AI setting. |
 | <a id="mutationaifeaturesettingupdateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
 | <a id="mutationaifeaturesettingupdatefeature"></a>`feature` | [`AiFeatures!`](#aifeatures) | AI feature being configured. |
 | <a id="mutationaifeaturesettingupdateprovider"></a>`provider` | [`AiFeatureProviders!`](#aifeatureproviders) | Provider for AI setting. |
+| <a id="mutationaifeaturesettingupdateselfhostedmodelid"></a>`selfHostedModelId` | [`AiSelfHostedModelID`](#aiselfhostedmodelid) | Global ID of the self-hosted model provide the AI setting. |
 
 #### Fields
 
@@ -2997,7 +2997,6 @@ Input type: `CiJobTokenScopeAddGroupOrProjectInput`
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="mutationcijobtokenscopeaddgrouporprojectclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationcijobtokenscopeaddgrouporprojectjobtokenpolicies"></a>`jobTokenPolicies` **{warning-solid}** | [`[CiJobTokenScopePolicies!]`](#cijobtokenscopepolicies) | **Deprecated:** **Status**: Experiment. Introduced in GitLab 17.5. |
 | <a id="mutationcijobtokenscopeaddgrouporprojectprojectpath"></a>`projectPath` | [`ID!`](#id) | Project that the CI job token scope belongs to. |
 | <a id="mutationcijobtokenscopeaddgrouporprojecttargetpath"></a>`targetPath` | [`ID!`](#id) | Group or project to be added to the CI job token scope. |
 
@@ -8368,45 +8367,6 @@ Input type: `ProjectSyncForkInput`
 | <a id="mutationprojectsyncforkdetails"></a>`details` | [`ForkDetails`](#forkdetails) | Updated fork details. |
 | <a id="mutationprojectsyncforkerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
 
-### `Mutation.projectTargetBranchRuleCreate`
-
-Input type: `ProjectTargetBranchRuleCreateInput`
-
-#### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationprojecttargetbranchrulecreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationprojecttargetbranchrulecreatename"></a>`name` | [`String!`](#string) | Name for the target branch rule. |
-| <a id="mutationprojecttargetbranchrulecreateprojectid"></a>`projectId` | [`ProjectID!`](#projectid) | Project ID for the target branch rule. |
-| <a id="mutationprojecttargetbranchrulecreatetargetbranch"></a>`targetBranch` | [`String!`](#string) | Target branch for the target branch rule. |
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationprojecttargetbranchrulecreateclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationprojecttargetbranchrulecreateerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
-| <a id="mutationprojecttargetbranchrulecreatetargetbranchrule"></a>`targetBranchRule` | [`ProjectTargetBranchRule`](#projecttargetbranchrule) | Target branch rule after mutation. |
-
-### `Mutation.projectTargetBranchRuleDestroy`
-
-Input type: `ProjectTargetBranchRuleDestroyInput`
-
-#### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationprojecttargetbranchruledestroyclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationprojecttargetbranchruledestroyid"></a>`id` | [`ProjectsTargetBranchRuleID!`](#projectstargetbranchruleid) | ID for the target branch rule. |
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="mutationprojecttargetbranchruledestroyclientmutationid"></a>`clientMutationId` | [`String`](#string) | A unique identifier for the client performing the mutation. |
-| <a id="mutationprojecttargetbranchruledestroyerrors"></a>`errors` | [`[String!]!`](#string) | Errors encountered during execution of the mutation. |
-
 ### `Mutation.projectTextReplace`
 
 DETAILS:
@@ -10882,7 +10842,6 @@ Input type: `WorkItemCreateInput`
 | <a id="mutationworkitemcreatenamespacepath"></a>`namespacePath` | [`ID`](#id) | Full path of the namespace(project or group) the work item is created in. |
 | <a id="mutationworkitemcreateprojectpath"></a>`projectPath` **{warning-solid}** | [`ID`](#id) | **Deprecated:** Please use namespacePath instead. That will cover for both projects and groups. Deprecated in GitLab 15.10. |
 | <a id="mutationworkitemcreaterolledupdateswidget"></a>`rolledupDatesWidget` **{warning-solid}** | [`WorkItemWidgetRolledupDatesInput`](#workitemwidgetrolledupdatesinput) | **Deprecated:** **Status**: Experiment. Introduced in GitLab 16.9. |
-| <a id="mutationworkitemcreatestartandduedatewidget"></a>`startAndDueDateWidget` | [`WorkItemWidgetStartAndDueDateUpdateInput`](#workitemwidgetstartandduedateupdateinput) | Input for start and due date widget. |
 | <a id="mutationworkitemcreatetitle"></a>`title` | [`String!`](#string) | Title of the work item. |
 | <a id="mutationworkitemcreateweightwidget"></a>`weightWidget` | [`WorkItemWidgetWeightInput`](#workitemwidgetweightinput) | Input for weight widget. |
 | <a id="mutationworkitemcreateworkitemtypeid"></a>`workItemTypeId` | [`WorkItemsTypeID!`](#workitemstypeid) | Global ID of a work item type. |
@@ -15788,30 +15747,6 @@ The edge type for [`ProjectSecurityExclusion`](#projectsecurityexclusion).
 | <a id="projectsecurityexclusionedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
 | <a id="projectsecurityexclusionedgenode"></a>`node` | [`ProjectSecurityExclusion`](#projectsecurityexclusion) | The item at the end of the edge. |
 
-#### `ProjectTargetBranchRuleConnection`
-
-The connection type for [`ProjectTargetBranchRule`](#projecttargetbranchrule).
-
-##### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="projecttargetbranchruleconnectioncount"></a>`count` | [`Int!`](#int) | Total count of collection. |
-| <a id="projecttargetbranchruleconnectionedges"></a>`edges` | [`[ProjectTargetBranchRuleEdge]`](#projecttargetbranchruleedge) | A list of edges. |
-| <a id="projecttargetbranchruleconnectionnodes"></a>`nodes` | [`[ProjectTargetBranchRule]`](#projecttargetbranchrule) | A list of nodes. |
-| <a id="projecttargetbranchruleconnectionpageinfo"></a>`pageInfo` | [`PageInfo!`](#pageinfo) | Information to aid in pagination. |
-
-#### `ProjectTargetBranchRuleEdge`
-
-The edge type for [`ProjectTargetBranchRule`](#projecttargetbranchrule).
-
-##### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="projecttargetbranchruleedgecursor"></a>`cursor` | [`String!`](#string) | A cursor for use in pagination. |
-| <a id="projecttargetbranchruleedgenode"></a>`node` | [`ProjectTargetBranchRule`](#projecttargetbranchrule) | The item at the end of the edge. |
-
 #### `ProjectWikiRepositoryRegistryConnection`
 
 The connection type for [`ProjectWikiRepositoryRegistry`](#projectwikirepositoryregistry).
@@ -18036,10 +17971,8 @@ Extra metadata for AI message.
 | <a id="aimetricscodesuggestionsacceptedcount"></a>`codeSuggestionsAcceptedCount` | [`Int`](#int) | Total count of code suggestions accepted by code contributors. |
 | <a id="aimetricscodesuggestionscontributorscount"></a>`codeSuggestionsContributorsCount` | [`Int`](#int) | Number of code contributors who used GitLab Duo Code Suggestions features. |
 | <a id="aimetricscodesuggestionsshowncount"></a>`codeSuggestionsShownCount` | [`Int`](#int) | Total count of code suggestions shown to code contributors. |
-| <a id="aimetricsduoassigneduserscount"></a>`duoAssignedUsersCount` | [`Int`](#int) | Total assigned Duo Pro and Enterprise seats. Ignores time period filter. Returns current data. |
 | <a id="aimetricsduochatcontributorscount"></a>`duoChatContributorsCount` | [`Int`](#int) | Number of contributors who used GitLab Duo Chat features. |
-| <a id="aimetricsduoproassigneduserscount"></a>`duoProAssignedUsersCount` **{warning-solid}** | [`Int`](#int) | **Deprecated** in GitLab 17.6. use duoAssignedUsersCount for the same behavior. |
-| <a id="aimetricsduousedcount"></a>`duoUsedCount` | [`Int`](#int) | Number of contributors who used any GitLab Duo feature. |
+| <a id="aimetricsduoproassigneduserscount"></a>`duoProAssignedUsersCount` | [`Int`](#int) | Number of assigned Duo Pro seats. Ignores time period filter and always returns current data. |
 
 ### `AiSelfHostedModel`
 
@@ -19328,7 +19261,6 @@ Check user's permission for the car.
 | <a id="cicatalogresourcestarcount"></a>`starCount` | [`Int!`](#int) | Number of times the catalog resource has been starred. |
 | <a id="cicatalogresourcestarrerspath"></a>`starrersPath` | [`String`](#string) | Relative path to the starrers page for the catalog resource project. |
 | <a id="cicatalogresourceverificationlevel"></a>`verificationLevel` | [`CiCatalogResourceVerificationLevel`](#cicatalogresourceverificationlevel) | Verification level of the catalog resource. |
-| <a id="cicatalogresourcevisibilitylevel"></a>`visibilityLevel` | [`VisibilityLevelsEnum`](#visibilitylevelsenum) | Visibility level of the catalog resource. |
 | <a id="cicatalogresourcewebpath"></a>`webPath` **{warning-solid}** | [`String`](#string) | **Introduced** in GitLab 16.1. **Status**: Experiment. Web path of the catalog resource. |
 
 #### Fields with arguments
@@ -19528,7 +19460,7 @@ Represents a deployment freeze window of a project.
 
 ### `CiGroupEnvironmentScope`
 
-CI/CD environment scope for a group.
+Ci/CD environment scope for a group.
 
 #### Fields
 
@@ -19872,45 +19804,6 @@ Step used to provision the runner to Google Cloud.
 | <a id="cirunnercloudprovisioningsteplanguageidentifier"></a>`languageIdentifier` | [`String`](#string) | Identifier of the language used for the instructions field. This identifier can be any of the identifiers specified in the [list of supported languages and lexers](https://github.com/rouge-ruby/rouge/wiki/List-of-supported-languages-and-lexers). |
 | <a id="cirunnercloudprovisioningsteptitle"></a>`title` | [`String`](#string) | Title of the step. |
 
-### `CiRunnerGkeProvisioning`
-
-Information used for GKE runner provisioning.
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="cirunnergkeprovisioningprojectsetupshellscript"></a>`projectSetupShellScript` | [`String`](#string) | Instructions for setting up a Google Cloud project. |
-
-#### Fields with arguments
-
-##### `CiRunnerGkeProvisioning.provisioningSteps`
-
-Steps used to provision a runner in GKE.
-
-Returns [`[CiRunnerGkeProvisioningStep!]`](#cirunnergkeprovisioningstep).
-
-###### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="cirunnergkeprovisioningprovisioningstepsnodepools"></a>`nodePools` | [`[GoogleCloudNodePool!]`](#googlecloudnodepool) | Configuration for the node pools of the runner. |
-| <a id="cirunnergkeprovisioningprovisioningstepsregion"></a>`region` | [`GoogleCloudRegion!`](#googlecloudregion) | Name of the region to provision the runner in. |
-| <a id="cirunnergkeprovisioningprovisioningstepsrunnertoken"></a>`runnerToken` | [`String!`](#string) | Authentication token of the runner. |
-| <a id="cirunnergkeprovisioningprovisioningstepszone"></a>`zone` | [`GoogleCloudZone!`](#googlecloudzone) | Name of the zone to provision the runner in. |
-
-### `CiRunnerGkeProvisioningStep`
-
-Step used to provision the runner to GKE.
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="cirunnergkeprovisioningstepinstructions"></a>`instructions` | [`String`](#string) | Instructions to provision the runner. |
-| <a id="cirunnergkeprovisioningsteplanguageidentifier"></a>`languageIdentifier` | [`String`](#string) | Identifier of the language used for the instructions field. This identifier can be any of the identifiers specified in the [list of supported languages and lexers](https://github.com/rouge-ruby/rouge/wiki/List-of-supported-languages-and-lexers). |
-| <a id="cirunnergkeprovisioningsteptitle"></a>`title` | [`String`](#string) | Title of the step. |
-
 ### `CiRunnerGoogleCloudProvisioning`
 
 Information used for runner Google Cloud provisioning.
@@ -20231,7 +20124,6 @@ Code Quality report for a pipeline.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="codesuggestioneventevent"></a>`event` | [`AiUsageCodeSuggestionEvent!`](#aiusagecodesuggestionevent) | Type of the event. |
-| <a id="codesuggestioneventid"></a>`id` | [`ID!`](#id) | ID of the code suggestion event. |
 | <a id="codesuggestioneventlanguage"></a>`language` | [`String`](#string) | Programming language in the context of the suggestion. |
 | <a id="codesuggestioneventsuggestionsize"></a>`suggestionSize` | [`String`](#string) | Size of the code suggestion. |
 | <a id="codesuggestioneventtimestamp"></a>`timestamp` | [`Time!`](#time) | When the event happened. |
@@ -26191,28 +26083,6 @@ Represents an SSH key.
 | <a id="keytitle"></a>`title` | [`String!`](#string) | Title of the key. |
 | <a id="keyweburl"></a>`webUrl` | [`String`](#string) | URL of this object. |
 
-### `KubernetesAnnotation`
-
-Annotation to apply to associated Kubernetes objects of a workspace.
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="kubernetesannotationkey"></a>`key` | [`String!`](#string) | Key of the annotation. |
-| <a id="kubernetesannotationvalue"></a>`value` | [`String!`](#string) | Value of the annotation. |
-
-### `KubernetesLabel`
-
-Label to apply to associated Kubernetes objects of a workspace.
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="kuberneteslabelkey"></a>`key` | [`String!`](#string) | Key of the label. |
-| <a id="kuberneteslabelvalue"></a>`value` | [`String!`](#string) | Value of the label. |
-
 ### `Label`
 
 #### Fields
@@ -28512,7 +28382,6 @@ Machine learning model in the model registry.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="mlmodel_links"></a>`_links` | [`MLModelLinks!`](#mlmodellinks) | Map of links to perform actions on the model. |
-| <a id="mlmodelauthor"></a>`author` | [`UserCore`](#usercore) | User that created the model. |
 | <a id="mlmodelcandidatecount"></a>`candidateCount` | [`Int`](#int) | Count of candidates in the model. |
 | <a id="mlmodelcandidates"></a>`candidates` | [`MlCandidateConnection`](#mlcandidateconnection) | Version candidates of the model. (see [Connections](#connections)) |
 | <a id="mlmodelcreatedat"></a>`createdAt` | [`Time!`](#time) | Date of creation. |
@@ -28564,7 +28433,6 @@ Version of a machine learning model.
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | <a id="mlmodelversion_links"></a>`_links` | [`MLModelVersionLinks!`](#mlmodelversionlinks) | Map of links to perform actions on the model version. |
-| <a id="mlmodelversionauthor"></a>`author` | [`UserCore!`](#usercore) | User that created the model version. |
 | <a id="mlmodelversioncandidate"></a>`candidate` | [`MlCandidate!`](#mlcandidate) | Metrics, params and metadata for the model version. |
 | <a id="mlmodelversioncreatedat"></a>`createdAt` | [`Time!`](#time) | Date of creation. |
 | <a id="mlmodelversiondescription"></a>`description` | [`String`](#string) | Description of the version. |
@@ -28950,7 +28818,6 @@ Describes where code is deployed for a project organized by folder.
 | <a id="notebodyhtml"></a>`bodyHtml` | [`String`](#string) | GitLab Flavored Markdown rendering of the content of the note. |
 | <a id="notecreatedat"></a>`createdAt` | [`Time!`](#time) | Timestamp of the note creation. |
 | <a id="notediscussion"></a>`discussion` | [`Discussion`](#discussion) | Discussion the note is a part of. |
-| <a id="noteexternalauthor"></a>`externalAuthor` | [`String`](#string) | Email address of non-GitLab user adding the note. For guests, the email address is obfuscated. |
 | <a id="noteid"></a>`id` | [`NoteID!`](#noteid) | ID of the note. |
 | <a id="noteimported"></a>`imported` | [`Boolean`](#boolean) | Indicates whether the note was imported. |
 | <a id="noteinternal"></a>`internal` | [`Boolean`](#boolean) | Indicates if the note is internal. |
@@ -30318,7 +30185,6 @@ Project-level settings for product analytics provider.
 | <a id="projectstatisticsdetailspaths"></a>`statisticsDetailsPaths` | [`ProjectStatisticsRedirect`](#projectstatisticsredirect) | Redirects for Statistics of the project. |
 | <a id="projectsuggestioncommitmessage"></a>`suggestionCommitMessage` | [`String`](#string) | Commit message used to apply merge request suggestions. |
 | <a id="projecttaglist"></a>`tagList` **{warning-solid}** | [`String`](#string) | **Deprecated** in GitLab 13.12. Use `topics`. |
-| <a id="projecttargetbranchrules"></a>`targetBranchRules` | [`ProjectTargetBranchRuleConnection`](#projecttargetbranchruleconnection) | Target branch rules of the project. (see [Connections](#connections)) |
 | <a id="projectterraformstates"></a>`terraformStates` | [`TerraformStateConnection`](#terraformstateconnection) | Terraform states associated with the project. (see [Connections](#connections)) |
 | <a id="projecttimelogcategories"></a>`timelogCategories` **{warning-solid}** | [`TimeTrackingTimelogCategoryConnection`](#timetrackingtimelogcategoryconnection) | **Introduced** in GitLab 15.3. **Status**: Experiment. Timelog categories for the project. |
 | <a id="projecttopics"></a>`topics` | [`[String!]`](#string) | List of project topics. |
@@ -32574,17 +32440,6 @@ Represents the source of a security policy belonging to a project.
 | <a id="projectstatisticsredirectrepository"></a>`repository` | [`String!`](#string) | Redirection Route for repository. |
 | <a id="projectstatisticsredirectsnippets"></a>`snippets` | [`String!`](#string) | Redirection Route for snippets. |
 | <a id="projectstatisticsredirectwiki"></a>`wiki` | [`String!`](#string) | Redirection Route for wiki. |
-
-### `ProjectTargetBranchRule`
-
-#### Fields
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="projecttargetbranchrulecreatedat"></a>`createdAt` | [`Time!`](#time) | Timestamp of when the target branch rule was created. |
-| <a id="projecttargetbranchruleid"></a>`id` | [`ProjectsTargetBranchRuleID!`](#projectstargetbranchruleid) | ID of the target branch rule. |
-| <a id="projecttargetbranchrulename"></a>`name` | [`String!`](#string) | Name of the target branch rule. |
-| <a id="projecttargetbranchruletargetbranch"></a>`targetBranch` | [`String!`](#string) | Target branch for the target branch rule. |
 
 ### `ProjectValueStreamAnalyticsFlowMetrics`
 
@@ -36514,22 +36369,17 @@ Represents a workspaces agent config.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| <a id="workspacesagentconfigallowprivilegeescalation"></a>`allowPrivilegeEscalation` | [`Boolean!`](#boolean) | Allow privilege escalation. |
-| <a id="workspacesagentconfigannotations"></a>`annotations` | [`[KubernetesAnnotation!]!`](#kubernetesannotation) | Annotations to apply to Kubernetes objects. |
 | <a id="workspacesagentconfigclusteragent"></a>`clusterAgent` | [`ClusterAgent!`](#clusteragent) | Cluster agent that the workspaces agent config belongs to. |
 | <a id="workspacesagentconfigcreatedat"></a>`createdAt` | [`Time!`](#time) | Timestamp of when the workspaces agent config was created. |
 | <a id="workspacesagentconfigdefaultmaxhoursbeforetermination"></a>`defaultMaxHoursBeforeTermination` | [`Int!`](#int) | Default max hours before worksapce termination of the workspaces agent config. |
-| <a id="workspacesagentconfigdefaultruntimeclass"></a>`defaultRuntimeClass` | [`String!`](#string) | Default Kubernetes RuntimeClass. |
 | <a id="workspacesagentconfigdnszone"></a>`dnsZone` | [`String!`](#string) | DNS zone where workspaces are available. |
 | <a id="workspacesagentconfigenabled"></a>`enabled` | [`Boolean!`](#boolean) | Indicates whether remote development is enabled for the GitLab agent. |
 | <a id="workspacesagentconfiggitlabworkspacesproxynamespace"></a>`gitlabWorkspacesProxyNamespace` | [`String!`](#string) | Namespace where gitlab-workspaces-proxy is installed. |
 | <a id="workspacesagentconfigid"></a>`id` | [`RemoteDevelopmentWorkspacesAgentConfigID!`](#remotedevelopmentworkspacesagentconfigid) | Global ID of the workspaces agent config. |
-| <a id="workspacesagentconfiglabels"></a>`labels` | [`[KubernetesLabel!]!`](#kuberneteslabel) | Labels to apply to Kubernetes objects. |
 | <a id="workspacesagentconfigmaxhoursbeforeterminationlimit"></a>`maxHoursBeforeTerminationLimit` | [`Int!`](#int) | Max hours before worksapce termination limit of the workspaces agent config. |
 | <a id="workspacesagentconfignetworkpolicyenabled"></a>`networkPolicyEnabled` | [`Boolean!`](#boolean) | Whether the network policy of the workspaces agent config is enabled. |
 | <a id="workspacesagentconfigprojectid"></a>`projectId` | [`ID`](#id) | ID of the project that the workspaces agent config belongs to. |
 | <a id="workspacesagentconfigupdatedat"></a>`updatedAt` | [`Time!`](#time) | Timestamp of the last update to any mutable workspaces agent config property. |
-| <a id="workspacesagentconfigusekubernetesusernamespaces"></a>`useKubernetesUserNamespaces` | [`Boolean!`](#boolean) | Indicates whether to use user namespaces in Kubernetes. |
 | <a id="workspacesagentconfigworkspacesperuserquota"></a>`workspacesPerUserQuota` | [`Int!`](#int) | Maximum number of workspaces per user. |
 | <a id="workspacesagentconfigworkspacesquota"></a>`workspacesQuota` | [`Int!`](#int) | Maximum number of workspaces for the GitLab agent. |
 
@@ -36624,7 +36474,7 @@ LLMs supported by the self-hosted model features.
 | <a id="aiacceptedselfhostedmodelscodellama"></a>`CODELLAMA` | Code-Llama Instruct: Suitable for code suggestions. |
 | <a id="aiacceptedselfhostedmodelscodestral"></a>`CODESTRAL` | Codestral: Suitable for code suggestions. |
 | <a id="aiacceptedselfhostedmodelsdeepseekcoder"></a>`DEEPSEEKCODER` | Deepseek Coder base or instruct. |
-| <a id="aiacceptedselfhostedmodelsgpt"></a>`GPT` | GPT: Suitable for code suggestions. |
+| <a id="aiacceptedselfhostedmodelsgpt"></a>`GPT` | GPT: Suitable for code generation. |
 | <a id="aiacceptedselfhostedmodelsllama3"></a>`LLAMA3` | LLaMA 3: Suitable for code suggestions and duo chat. |
 | <a id="aiacceptedselfhostedmodelsmistral"></a>`MISTRAL` | Mistral: Suitable for code suggestions and duo chat. |
 
@@ -37053,48 +36903,6 @@ Direction of access.
 | <a id="cijobtokenscopedirectioninbound"></a>`INBOUND` | Target projects in the inbound allowlist can access the scope project through their job tokens. |
 | <a id="cijobtokenscopedirectionoutbound"></a>`OUTBOUND` | Job token scope project can access target project in the outbound allowlist. |
 
-### `CiJobTokenScopePolicies`
-
-CI_JOB_TOKEN policy.
-
-| Value | Description |
-| ----- | ----------- |
-| <a id="cijobtokenscopepoliciesadmin_container_image"></a>`ADMIN_CONTAINER_IMAGE` | Admin Container Image. |
-| <a id="cijobtokenscopepoliciesadmin_secure_files"></a>`ADMIN_SECURE_FILES` | Admin Secure Files. |
-| <a id="cijobtokenscopepoliciesadmin_terraform_state"></a>`ADMIN_TERRAFORM_STATE` | Admin Terraform State. |
-| <a id="cijobtokenscopepoliciesbuild_create_container_image"></a>`BUILD_CREATE_CONTAINER_IMAGE` | Build Create Container Image. |
-| <a id="cijobtokenscopepoliciesbuild_destroy_container_image"></a>`BUILD_DESTROY_CONTAINER_IMAGE` | Build Destroy Container Image. |
-| <a id="cijobtokenscopepoliciesbuild_download_code"></a>`BUILD_DOWNLOAD_CODE` | Build Download Code. |
-| <a id="cijobtokenscopepoliciesbuild_push_code"></a>`BUILD_PUSH_CODE` | Build Push Code. |
-| <a id="cijobtokenscopepoliciesbuild_read_container_image"></a>`BUILD_READ_CONTAINER_IMAGE` | Build Read Container Image. |
-| <a id="cijobtokenscopepoliciescreate_deployment"></a>`CREATE_DEPLOYMENT` | Create Deployment. |
-| <a id="cijobtokenscopepoliciescreate_environment"></a>`CREATE_ENVIRONMENT` | Create Environment. |
-| <a id="cijobtokenscopepoliciescreate_on_demand_dast_scan"></a>`CREATE_ON_DEMAND_DAST_SCAN` | Create On Demand Dast Scan. |
-| <a id="cijobtokenscopepoliciescreate_package"></a>`CREATE_PACKAGE` | Create Package. |
-| <a id="cijobtokenscopepoliciescreate_release"></a>`CREATE_RELEASE` | Create Release. |
-| <a id="cijobtokenscopepoliciesdestroy_container_image"></a>`DESTROY_CONTAINER_IMAGE` | Destroy Container Image. |
-| <a id="cijobtokenscopepoliciesdestroy_deployment"></a>`DESTROY_DEPLOYMENT` | Destroy Deployment. |
-| <a id="cijobtokenscopepoliciesdestroy_environment"></a>`DESTROY_ENVIRONMENT` | Destroy Environment. |
-| <a id="cijobtokenscopepoliciesdestroy_package"></a>`DESTROY_PACKAGE` | Destroy Package. |
-| <a id="cijobtokenscopepoliciesdestroy_release"></a>`DESTROY_RELEASE` | Destroy Release. |
-| <a id="cijobtokenscopepoliciesread_build"></a>`READ_BUILD` | Read Build. |
-| <a id="cijobtokenscopepoliciesread_container_image"></a>`READ_CONTAINER_IMAGE` | Read Container Image. |
-| <a id="cijobtokenscopepoliciesread_deployment"></a>`READ_DEPLOYMENT` | Read Deployment. |
-| <a id="cijobtokenscopepoliciesread_environment"></a>`READ_ENVIRONMENT` | Read Environment. |
-| <a id="cijobtokenscopepoliciesread_group"></a>`READ_GROUP` | Read Group. |
-| <a id="cijobtokenscopepoliciesread_job_artifacts"></a>`READ_JOB_ARTIFACTS` | Read Job Artifacts. |
-| <a id="cijobtokenscopepoliciesread_package"></a>`READ_PACKAGE` | Read Package. |
-| <a id="cijobtokenscopepoliciesread_pipeline"></a>`READ_PIPELINE` | Read Pipeline. |
-| <a id="cijobtokenscopepoliciesread_project"></a>`READ_PROJECT` | Read Project. |
-| <a id="cijobtokenscopepoliciesread_release"></a>`READ_RELEASE` | Read Release. |
-| <a id="cijobtokenscopepoliciesread_secure_files"></a>`READ_SECURE_FILES` | Read Secure Files. |
-| <a id="cijobtokenscopepoliciesread_terraform_state"></a>`READ_TERRAFORM_STATE` | Read Terraform State. |
-| <a id="cijobtokenscopepoliciesstop_environment"></a>`STOP_ENVIRONMENT` | Stop Environment. |
-| <a id="cijobtokenscopepoliciesupdate_deployment"></a>`UPDATE_DEPLOYMENT` | Update Deployment. |
-| <a id="cijobtokenscopepoliciesupdate_environment"></a>`UPDATE_ENVIRONMENT` | Update Environment. |
-| <a id="cijobtokenscopepoliciesupdate_pipeline"></a>`UPDATE_PIPELINE` | Update Pipeline. |
-| <a id="cijobtokenscopepoliciesupdate_release"></a>`UPDATE_RELEASE` | Update Release. |
-
 ### `CiPipelineCreationStatus`
 
 | Value | Description |
@@ -37116,7 +36924,6 @@ Runner cloud provider.
 
 | Value | Description |
 | ----- | ----------- |
-| <a id="cirunnercloudprovidergke"></a>`GKE` | Google Kubernetes Engine. |
 | <a id="cirunnercloudprovidergoogle_cloud"></a>`GOOGLE_CLOUD` | Google Cloud. |
 
 ### `CiRunnerCreationMethod`
@@ -38581,11 +38388,10 @@ Representation of mergeability check identifier.
 
 ### `MergeabilityCheckStatus`
 
-Representation of whether a mergeability check passed, checking, failed or is inactive.
+Representation of whether a mergeability check passed, failed or is inactive.
 
 | Value | Description |
 | ----- | ----------- |
-| <a id="mergeabilitycheckstatuschecking"></a>`CHECKING` | Mergeability check is being checked. |
 | <a id="mergeabilitycheckstatusfailed"></a>`FAILED` | Mergeability check has failed. The merge request cannot be merged. |
 | <a id="mergeabilitycheckstatusinactive"></a>`INACTIVE` | Mergeability check is disabled via settings. |
 | <a id="mergeabilitycheckstatussuccess"></a>`SUCCESS` | Mergeability check has passed. |
@@ -39559,7 +39365,6 @@ Values for sorting timelogs.
 | <a id="todoactionenumreview_requested"></a>`review_requested` | Review was requested from the user. |
 | <a id="todoactionenumreview_submitted"></a>`review_submitted` | Merge request authored by the user received a review. |
 | <a id="todoactionenumssh_key_expired"></a>`ssh_key_expired` | SSH key of the user has expired. |
-| <a id="todoactionenumssh_key_expiring_soon"></a>`ssh_key_expiring_soon` | SSH key of the user will expire soon. |
 | <a id="todoactionenumunmergeable"></a>`unmergeable` | Merge request authored by the user could not be merged. |
 
 ### `TodoSort`
@@ -39672,6 +39477,7 @@ Name of the feature that the callout is for.
 | <a id="usercalloutfeaturenameenumsubmit_license_usage_data_banner"></a>`SUBMIT_LICENSE_USAGE_DATA_BANNER` | Callout feature name for submit_license_usage_data_banner. |
 | <a id="usercalloutfeaturenameenumsuggest_pipeline"></a>`SUGGEST_PIPELINE` | Callout feature name for suggest_pipeline. |
 | <a id="usercalloutfeaturenameenumsuggest_popover_dismissed"></a>`SUGGEST_POPOVER_DISMISSED` | Callout feature name for suggest_popover_dismissed. |
+| <a id="usercalloutfeaturenameenumsummarize_code_changes"></a>`SUMMARIZE_CODE_CHANGES` | Callout feature name for summarize_code_changes. |
 | <a id="usercalloutfeaturenameenumtabs_position_highlight"></a>`TABS_POSITION_HIGHLIGHT` | Callout feature name for tabs_position_highlight. |
 | <a id="usercalloutfeaturenameenumterraform_notification_dismissed"></a>`TERRAFORM_NOTIFICATION_DISMISSED` | Callout feature name for terraform_notification_dismissed. |
 | <a id="usercalloutfeaturenameenumthreat_monitoring_info"></a>`THREAT_MONITORING_INFO` | Callout feature name for threat_monitoring_info. |
@@ -40611,10 +40417,6 @@ An example of a global identifier is `"gid://gitlab/User/1"`.
 
 Global identifiers are encoded as strings.
 
-### `GoogleCloudImage`
-
-Represents a Google Cloud Image for GKE.
-
 ### `GoogleCloudMachineType`
 
 Represents a Google Cloud Compute machine type.
@@ -41009,12 +40811,6 @@ A `ProjectsSavedReplyID` is a global ID. It is encoded as a string.
 
 An example `ProjectsSavedReplyID` is: `"gid://gitlab/Projects::SavedReply/1"`.
 
-### `ProjectsTargetBranchRuleID`
-
-A `ProjectsTargetBranchRuleID` is a global ID. It is encoded as a string.
-
-An example `ProjectsTargetBranchRuleID` is: `"gid://gitlab/Projects::TargetBranchRule/1"`.
-
 ### `ReleaseID`
 
 A `ReleaseID` is a global ID. It is encoded as a string.
@@ -41209,7 +41005,6 @@ Information used in runner cloud provisioning.
 
 One of:
 
-- [`CiRunnerGkeProvisioning`](#cirunnergkeprovisioning)
 - [`CiRunnerGoogleCloudProvisioning`](#cirunnergooglecloudprovisioning)
 
 #### `DependencyLinkMetadata`
@@ -42739,31 +42534,6 @@ Represents an escalation rule.
 | <a id="escalationruleinputoncallscheduleiid"></a>`oncallScheduleIid` | [`ID`](#id) | On-call schedule to notify. |
 | <a id="escalationruleinputstatus"></a>`status` | [`EscalationRuleStatus!`](#escalationrulestatus) | Status required to prevent the rule from activating. |
 | <a id="escalationruleinputusername"></a>`username` | [`String`](#string) | Username of the user to notify. |
-
-### `GoogleCloudNodePool`
-
-Attributes for defining Node Pool in GKE.
-
-#### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="googlecloudnodepoolimagetype"></a>`imageType` | [`GoogleCloudImage!`](#googlecloudimage) | Image to use on the pool. |
-| <a id="googlecloudnodepoollabels"></a>`labels` | [`[GoogleCloudNodePoolLabel!]`](#googlecloudnodepoollabel) | Labels for the node pool of the runner. |
-| <a id="googlecloudnodepoolmachinetype"></a>`machineType` | [`GoogleCloudMachineType!`](#googlecloudmachinetype) | Machine type to use. |
-| <a id="googlecloudnodepoolname"></a>`name` | [`String!`](#string) | Name of the node pool. |
-| <a id="googlecloudnodepoolnodecount"></a>`nodeCount` | [`Int!`](#int) | Node count of the pool. |
-
-### `GoogleCloudNodePoolLabel`
-
-Labels for the Node Pool of a GKE cluster.
-
-#### Arguments
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| <a id="googlecloudnodepoollabelkey"></a>`key` | [`String!`](#string) | Key of the label. |
-| <a id="googlecloudnodepoollabelvalue"></a>`value` | [`String!`](#string) | Value of the label. |
 
 ### `JiraUsersMappingInputType`
 

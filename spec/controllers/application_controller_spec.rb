@@ -1108,35 +1108,4 @@ RSpec.describe ApplicationController, feature_category: :shared do
       expect(response.headers['Retry-After']).to eq(50)
     end
   end
-
-  context 'When Regexp::TimeoutError is raised' do
-    before do
-      sign_in user
-    end
-
-    controller(described_class) do
-      def index
-        raise Regexp::TimeoutError
-      end
-    end
-
-    it 'returns a plaintext error response with 503 status' do
-      get :index
-
-      expect(response).to have_gitlab_http_status(:service_unavailable)
-    end
-  end
-
-  describe 'cross-site request forgery protection handling' do
-    describe '#handle_unverified_request' do
-      it 'increments counter of invalid CSRF tokens detected' do
-        stub_authentication_activity_metrics do |metrics|
-          expect(metrics).to increment(:user_csrf_token_invalid_counter)
-        end
-
-        expect { described_class.new.handle_unverified_request }
-          .to raise_error(ActionController::InvalidAuthenticityToken)
-      end
-    end
-  end
 end

@@ -15,6 +15,7 @@ import ScrollScrim from '~/super_sidebar/components/scroll_scrim.vue';
 import { useMockInternalEventsTracking } from 'helpers/tracking_internal_events_helper';
 import { useMockLocationHelper } from 'helpers/mock_window_location_helper';
 import {
+  SEARCH_OR_COMMAND_MODE_PLACEHOLDER,
   COMMON_HANDLES,
   COMMAND_HANDLE,
   USER_HANDLE,
@@ -263,7 +264,9 @@ describe('GlobalSearchModal', () => {
         });
 
         it('should provide an alternative placeholder to the search input', () => {
-          expect(findGlobalSearchInput().attributes('placeholder')).toBe('Type to search...');
+          expect(findGlobalSearchInput().attributes('placeholder')).toBe(
+            SEARCH_OR_COMMAND_MODE_PLACEHOLDER,
+          );
         });
       });
 
