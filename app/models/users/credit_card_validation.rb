@@ -2,6 +2,8 @@
 
 module Users
   class CreditCardValidation < ApplicationRecord
+    include IgnorableColumns
+
     DAILY_VERIFICATION_LIMIT = 5
 
     self.table_name = 'user_credit_card_validations'

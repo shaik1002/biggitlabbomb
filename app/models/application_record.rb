@@ -10,7 +10,6 @@ class ApplicationRecord < ActiveRecord::Base
   include Gitlab::SensitiveSerializableHash
   include ResetOnColumnErrors
   include HasCheckConstraints
-  include IgnorableColumns
 
   self.abstract_class = true
 

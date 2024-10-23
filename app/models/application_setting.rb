@@ -5,6 +5,7 @@ class ApplicationSetting < ApplicationRecord
   include CacheMarkdownField
   include TokenAuthenticatable
   include ChronicDurationAttribute
+  include IgnorableColumns
   include Sanitizable
 
   ignore_columns %i[

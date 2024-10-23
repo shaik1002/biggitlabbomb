@@ -36,6 +36,7 @@ places. This can be done by defining the columns to ignore. For example, in rele
 
 ```ruby
 class User < ApplicationRecord
+  include IgnorableColumns
   ignore_column :updated_at, remove_with: '12.7', remove_after: '2019-12-22'
 end
 ```
@@ -183,6 +184,7 @@ This step is similar to [the first step when column is dropped](#ignoring-the-co
 
 ```ruby
 class User < ApplicationRecord
+  include IgnorableColumns
   ignore_column :updated_at, remove_with: '12.7', remove_after: '2019-12-22'
 end
 ```
@@ -461,6 +463,7 @@ Ignore the new `bigint` columns:
 # frozen_string_literal: true
 
 class MergeRequest::Metrics < ApplicationRecord
+  include IgnorableColumns
   ignore_column :id_convert_to_bigint, remove_with: '16.0', remove_after: '2023-05-22'
 end
 ```
