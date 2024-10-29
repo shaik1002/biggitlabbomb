@@ -245,6 +245,10 @@ module Gitlab
       selectedText
     ]
 
+    config.filter_parameters << ->(key, value, _) do
+      value.replace(ActiveSupport::ParameterFilter::FILTERED) if key.to_s == 'query' && value.match(/^mutation/)
+    end
+
     # Enable escaping HTML in JSON.
     config.active_support.escape_html_entities_in_json = true
 
