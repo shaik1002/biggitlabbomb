@@ -60,6 +60,8 @@ default:
 workflow:
   name: '$PIPELINE_NAME'
   rules:
+    - if: '$CI_MERGE_REQUEST_LABELS =~ /pipeline::skip-ci-validation/'
+      when: never
     - if: '$CI_PIPELINE_SOURCE == "pipeline" && $GITALY_TEST'
       variables:
         <<: *default-ruby-variables
