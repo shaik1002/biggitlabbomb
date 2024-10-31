@@ -41,14 +41,6 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
     it { is_expected.to have_many(:cycle_analytics_stages) }
     it { is_expected.to have_many(:value_streams) }
     it { is_expected.to have_many(:non_archived_projects).class_name('Project') }
-    it { is_expected.to have_many(:bot_users).through(:bot_user_details).source(:user) }
-
-    it do
-      is_expected.to have_many(:bot_user_details)
-                       .class_name('UserDetail')
-                       .with_foreign_key(:bot_namespace_id)
-                       .inverse_of(:bot_namespace)
-    end
 
     it do
       is_expected.to have_one(:ci_cd_settings).class_name('NamespaceCiCdSetting').inverse_of(:namespace).autosave(true)
@@ -545,12 +537,6 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
         expect(described_class.by_parent(namespace1.id)).to match_array([namespace1sub])
         expect(described_class.by_parent(namespace2.id)).to match_array([namespace2sub])
         expect(described_class.by_parent(nil)).to match_array([namespace, namespace1, namespace2])
-      end
-    end
-
-    describe '.top_level' do
-      it 'includes correct namespaces' do
-        expect(described_class.top_level).to match_array([namespace, namespace1, namespace2])
       end
     end
 
@@ -1472,33 +1458,26 @@ RSpec.describe Namespace, feature_category: :groups_and_projects do
     end
   end
 
-  describe '.find_by_path_or_name' do
-    let_it_be(:namespace) { create(:namespace, name: 'WoW', path: 'woW') }
+  describe '.top_most' do
+    let_it_be(:namespace) { create(:namespace) }
+    let_it_be(:group) { create(:group) }
+    let_it_be(:subgroup) { create(:group, parent: group) }
 
-    it { expect(described_class.find_by_path_or_name('wow')).to eq(namespace) }
-    it { expect(described_class.find_by_path_or_name('WOW')).to eq(namespace) }
-    it { expect(described_class.find_by_path_or_name('unknown')).to be_nil }
+    subject { described_class.top_most.ids }
+
+    it 'only contains root namespaces' do
+      is_expected.to contain_exactly(group.id, namespace.id)
+    end
   end
 
-  describe '.find_top_level' do
-    # Due to the top level scope of this spec having a create of namespace, we'll avoid possible future flakiness here.
-    let(:namespace) { nil }
-
-    subject { described_class.find_top_level }
-
-    context 'when there are top level namespaces' do
-      # Order of creation matters here as we are only taking the first result and the single
-      # threaded FIFO order of creation in specs.
-      let_it_be(:sub_group) { create(:group, :nested) }
-      let_it_be(:another_parent_namespace) { create(:group) }
-      let(:parent_namespace) { sub_group.parent }
-
-      it { is_expected.to eq(parent_namespace) }
+  describe '.find_by_path_or_name' do
+    before do
+      @namespace = create(:namespace, name: 'WoW', path: 'woW')
     end
 
-    context 'when there are no top level namespaces' do
-      it { is_expected.to be_nil }
-    end
+    it { expect(described_class.find_by_path_or_name('wow')).to eq(@namespace) }
+    it { expect(described_class.find_by_path_or_name('WOW')).to eq(@namespace) }
+    it { expect(described_class.find_by_path_or_name('unknown')).to eq(nil) }
   end
 
   describe ".clean_path" do

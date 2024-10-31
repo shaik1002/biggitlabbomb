@@ -5,7 +5,6 @@ import ProtectedTagEdit from './protected_tag_edit.vue';
 export default class ProtectedTagEditList {
   constructor(options) {
     this.hasLicense = options.hasLicense;
-    this.sectionSelector = options.sectionSelector;
     this.initEditForm();
   }
 
@@ -16,7 +15,6 @@ export default class ProtectedTagEditList {
         url: el.dataset.url,
         hasLicense: this.hasLicense,
         accessLevelsData: gon.create_access_levels.roles,
-        sectionSelector: this.sectionSelector,
       });
     });
   }

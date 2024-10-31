@@ -9,12 +9,14 @@ import {
   WORK_ITEM_TYPE_VALUE_EPIC,
   WIDGET_TYPE_HEALTH_STATUS,
 } from '../../constants';
+import WorkItemRolledUpCount from './work_item_rolled_up_count.vue';
 
 export default {
   components: {
     GlIcon,
     GlTooltip,
     GlPopover,
+    WorkItemRolledUpCount,
     WorkItemRolledUpHealthStatus: () =>
       import(
         'ee_component/work_items/components/work_item_links/work_item_rolled_up_health_status.vue'
@@ -41,6 +43,10 @@ export default {
       type: String,
       required: false,
       default: null,
+    },
+    rolledUpCountsByType: {
+      type: Array,
+      required: true,
     },
   },
   data() {
@@ -107,13 +113,17 @@ export default {
 
 <template>
   <div class="gl-flex">
+    <!-- Rolled up count -->
+    <work-item-rolled-up-count :rolled-up-counts-by-type="rolledUpCountsByType" />
+    <!-- END Rolled up count -->
+
     <!-- Rolled up weight -->
     <span
       v-if="shouldRolledUpWeightBeVisible"
       ref="weightData"
       tabindex="0"
       data-testid="work-item-rollup-weight"
-      class="gl-flex gl-cursor-help gl-items-center gl-gap-2 gl-font-normal gl-text-secondary sm:gl-ml-3"
+      class="gl-ml-3 gl-flex gl-cursor-help gl-items-center gl-gap-2 gl-font-normal gl-text-secondary"
     >
       <gl-icon name="weight" class="gl-text-secondary" />
       <span data-testid="work-item-weight-value" class="gl-text-sm">{{ rolledUpWeight }}</span>

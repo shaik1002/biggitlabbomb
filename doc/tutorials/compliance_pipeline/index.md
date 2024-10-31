@@ -4,18 +4,11 @@ group: Compliance
 info: For assistance with this tutorial, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments-to-other-projects-and-subjects.
 ---
 
-<!--- start_remove The following content will be removed on remove_date: '2025-08-15' -->
-
-# Tutorial: Create a compliance pipeline (deprecated)
+# Tutorial: Create a compliance pipeline
 
 DETAILS:
 **Tier:** Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
-
-WARNING:
-This feature was [deprecated](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/159841) in GitLab 17.3
-and is planned for removal in 18.0. Use [pipeline execution policy type](../../user/application_security/policies/pipeline_execution_policies.md) instead.
-This change is a breaking change. For more information, see the [migration guide](../../user/group/compliance_pipelines.md#pipeline-execution-policies-migration).
 
 You can use [compliance pipelines](../../user/group/compliance_pipelines.md) to ensure specific
 compliance-related jobs are run on pipelines for all projects in a group. Compliance pipelines are applied
@@ -187,5 +180,3 @@ Notice the pipeline runs two jobs in a **test** stage:
 Congratulations, you've created and configured a compliance pipeline!
 
 See more [example compliance pipeline configurations](../../user/group/compliance_pipelines.md#example-configuration).
-
-<!--- end_remove -->

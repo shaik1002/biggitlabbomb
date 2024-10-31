@@ -14,13 +14,14 @@ RSpec.describe VirtualRegistries::Packages::Maven::CachedResponse, type: :model,
   end
 
   describe 'validations' do
-    %i[group file file_sha1 relative_path content_type size].each do |attr|
+    %i[group file file_sha1 relative_path content_type downloads_count size].each do |attr|
       it { is_expected.to validate_presence_of(attr) }
     end
 
     %i[relative_path upstream_etag content_type].each do |attr|
       it { is_expected.to validate_length_of(attr).is_at_most(255) }
     end
+    it { is_expected.to validate_numericality_of(:downloads_count).only_integer.is_greater_than(0) }
     it { is_expected.to validate_length_of(:file_final_path).is_at_most(1024) }
 
     context 'with persisted cached response' do
@@ -195,6 +196,11 @@ RSpec.describe VirtualRegistries::Packages::Maven::CachedResponse, type: :model,
 
     it 'creates or update the existing record' do
       expect { create_or_update }.to change { described_class.count }.by(1)
+
+      # downloads count don't behave accurately in a race condition situation.
+      # That's an accepted tradeoff for now.
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/473152 should fix this problem.
+      expect(described_class.last.downloads_count).to be_between(2, 5).inclusive
     end
 
     context 'with invalid updates' do
@@ -281,7 +287,9 @@ RSpec.describe VirtualRegistries::Packages::Maven::CachedResponse, type: :model,
     subject(:bump) { cached_response.bump_statistics }
 
     it 'updates the correct statistics' do
-      expect { bump }.to change { cached_response.downloaded_at }.to(Time.zone.now)
+      expect { bump }
+        .to change { cached_response.downloaded_at }.to(Time.zone.now)
+        .and change { cached_response.downloads_count }.by(1)
     end
 
     context 'with include_upstream_checked_at' do
@@ -291,6 +299,7 @@ RSpec.describe VirtualRegistries::Packages::Maven::CachedResponse, type: :model,
         expect { bump }
           .to change { cached_response.reload.downloaded_at }.to(Time.zone.now)
           .and change { cached_response.upstream_checked_at }.to(Time.zone.now)
+          .and change { cached_response.downloads_count }.by(1)
       end
     end
   end

@@ -1,4 +1,4 @@
-import { GlBadge, GlButton } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 import CrudComponent from '~/vue_shared/components/crud_component.vue';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import PipelineFailedJobsWidget from '~/ci/pipelines_page/components/failure_widget/pipeline_failed_jobs_widget.vue';
@@ -38,7 +38,6 @@ describe('PipelineFailedJobsWidget component', () => {
   const findFailedJobsButton = () => wrapper.findComponent(GlButton);
   const findFailedJobsList = () => wrapper.findAllComponents(FailedJobsList);
   const findCrudComponent = () => wrapper.findComponent(CrudComponent);
-  const findCount = () => wrapper.findComponent(GlBadge);
 
   describe('when there are failed jobs', () => {
     beforeEach(() => {
@@ -47,7 +46,7 @@ describe('PipelineFailedJobsWidget component', () => {
 
     it('renders the show failed jobs button with correct count', () => {
       expect(findFailedJobsButton().exists()).toBe(true);
-      expect(findCount().text()).toBe(String(defaultProps.failedJobsCount));
+      expect(findFailedJobsButton().text()).toContain(`${defaultProps.failedJobsCount}`);
     });
 
     it('does not render the failed jobs widget', () => {
@@ -55,7 +54,7 @@ describe('PipelineFailedJobsWidget component', () => {
     });
   });
 
-  const CSS_BORDER_CLASSES = 'is-collapsed gl-border-transparent hover:gl-border-default';
+  const CSS_BORDER_CLASSES = 'is-collapsed gl-border-white hover:gl-border-gray-100';
 
   describe('when the job button is clicked', () => {
     beforeEach(async () => {
@@ -99,11 +98,11 @@ describe('PipelineFailedJobsWidget component', () => {
       it('updates the job count', async () => {
         const newJobCount = 12;
 
-        expect(findCount().text()).toBe(String(defaultProps.failedJobsCount));
+        expect(findFailedJobsButton().text()).toContain(String(defaultProps.failedJobsCount));
 
         await wrapper.setProps({ failedJobsCount: newJobCount });
 
-        expect(findCount().text()).toBe(String(newJobCount));
+        expect(findFailedJobsButton().text()).toContain(String(newJobCount));
       });
     });
 
@@ -115,11 +114,11 @@ describe('PipelineFailedJobsWidget component', () => {
       it('updates the job count', async () => {
         const newJobCount = 12;
 
-        expect(findCount().text()).toBe(String(defaultProps.failedJobsCount));
+        expect(findFailedJobsButton().text()).toContain(String(defaultProps.failedJobsCount));
 
         await findFailedJobsList().at(0).vm.$emit('failed-jobs-count', newJobCount);
 
-        expect(findCount().text()).toBe(String(newJobCount));
+        expect(findFailedJobsButton().text()).toContain(String(newJobCount));
       });
     });
   });

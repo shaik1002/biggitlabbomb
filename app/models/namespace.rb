@@ -113,9 +113,6 @@ class Namespace < ApplicationRecord
   has_one :namespace_import_user, class_name: 'Import::NamespaceImportUser', foreign_key: :namespace_id, inverse_of: :namespace
   has_one :import_user, class_name: 'User', through: :namespace_import_user, foreign_key: :user_id
 
-  has_many :bot_user_details, class_name: 'UserDetail', foreign_key: 'bot_namespace_id', inverse_of: :bot_namespace
-  has_many :bot_users, through: :bot_user_details, source: :user
-
   validates :owner, presence: true, if: ->(n) { n.owner_required? }
   validates :organization, presence: true, if: :require_organization?
   validates :name,
@@ -223,7 +220,6 @@ class Namespace < ApplicationRecord
   scope :in_organization, ->(organization) { where(organization: organization) }
   scope :by_name, ->(name) { where('name LIKE ?', "#{sanitize_sql_like(name)}%") }
   scope :ordered_by_name, -> { order(:name) }
-  scope :top_level, -> { by_parent(nil) }
 
   scope :with_statistics, -> do
     namespace_statistic_columns = STATISTICS_COLUMNS.map { |column| sum_project_statistics_column(column) }
@@ -281,10 +277,6 @@ class Namespace < ApplicationRecord
     # Case insensitive search for namespace by path or name
     def find_by_path_or_name(path)
       find_by("lower(path) = :path OR lower(name) = :path", path: path.downcase)
-    end
-
-    def find_top_level
-      top_level.take
     end
 
     # Searches for namespaces matching the given query.
@@ -354,6 +346,10 @@ class Namespace < ApplicationRecord
       value.scan(Gitlab::Regex.group_name_regex_chars).join(' ')
     end
 
+    def top_most
+      by_parent(nil)
+    end
+
     def reference_prefix
       User.reference_prefix
     end
@@ -370,7 +366,7 @@ class Namespace < ApplicationRecord
     end
 
     def username_reserved?(username)
-      without_project_namespaces.top_level.find_by_path_or_name(username).present?
+      without_project_namespaces.where(parent_id: nil).find_by_path_or_name(username).present?
     end
   end
 

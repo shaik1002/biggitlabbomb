@@ -9,7 +9,7 @@ module Namespaces
       def root_ancestor
         if persisted? && !parent_id.nil?
           strong_memoize(:root_ancestor) do
-            recursive_ancestors.reorder(nil).find_top_level
+            recursive_ancestors.reorder(nil).find_by(parent_id: nil)
           end
         elsif parent.nil?
           self

@@ -259,7 +259,7 @@ module Namespaces
           .new(Namespace.where(id: parent_ids))
           .base_and_ancestors
           .reorder(nil)
-          .top_level
+          .where(parent_id: nil)
 
         Namespace.lock.select(:id).where(id: roots).order(id: :asc).load
       end

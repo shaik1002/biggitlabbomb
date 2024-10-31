@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
 RSpec.describe Gitlab::Backup::Cli::Tasks::Task do
+  let(:options) { instance_double("::Backup::Option", backup_id: "abc123") }
   let(:context) { build_fake_context }
   let(:tmpdir) { Pathname.new(Dir.mktmpdir('task', temp_path)) }
   let(:metadata) { build(:backup_metadata) }
 
-  subject(:task) { described_class.new(context: context) }
+  subject(:task) { described_class.new(options: options, context: context) }
 
   after do
     FileUtils.rmtree(tmpdir)
@@ -36,9 +37,9 @@ RSpec.describe Gitlab::Backup::Cli::Tasks::Task do
       end
     end
 
-    describe '#local' do
+    describe '#target' do
       it 'raises an error' do
-        expect { task.send(:local) }.to raise_error(NotImplementedError)
+        expect { task.send(:target) }.to raise_error(NotImplementedError)
       end
     end
   end
@@ -48,7 +49,7 @@ RSpec.describe Gitlab::Backup::Cli::Tasks::Task do
       expect(task).to receive(:destination_path).and_return(tmpdir.join('test_task'))
       expect(task).to receive_message_chain(:target, :dump)
 
-      task.backup!(tmpdir)
+      task.backup!(tmpdir, metadata.backup_id)
     end
   end
 
@@ -58,7 +59,7 @@ RSpec.describe Gitlab::Backup::Cli::Tasks::Task do
       expect(task).to receive(:destination_path).and_return(tmpdir.join('test_task'))
       expect(task).to receive_message_chain(:target, :restore)
 
-      task.restore!(archive_directory)
+      task.restore!(archive_directory, options.backup_id)
     end
   end
 end

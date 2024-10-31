@@ -21,7 +21,7 @@ const isDropdownDisabled = (dropdown) => {
 export default class ProtectedBranchEdit {
   constructor(options) {
     this.hasLicense = options.hasLicense;
-    this.sectionSelector = options.sectionSelector;
+
     this.hasChanges = false;
     this.$wrap = options.$wrap;
 
@@ -116,7 +116,6 @@ export default class ProtectedBranchEdit {
       accessLevelsData,
       groupsWithProjectAccess: true,
       testId,
-      sectionSelector: this.sectionSelector,
     });
 
     dropdown.$on('select', (selected) => this.onSelectItems(accessLevel, selected));

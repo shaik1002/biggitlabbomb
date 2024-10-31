@@ -32,7 +32,6 @@ import WorkItemActionsSplitButton from './work_item_actions_split_button.vue';
 import WorkItemLinksForm from './work_item_links_form.vue';
 import WorkItemChildrenWrapper from './work_item_children_wrapper.vue';
 import WorkItemRolledUpData from './work_item_rolled_up_data.vue';
-import WorkItemRolledUpCount from './work_item_rolled_up_count.vue';
 
 export default {
   FORM_TYPES,
@@ -48,7 +47,6 @@ export default {
     WorkItemChildrenLoadMore,
     WorkItemMoreActions,
     WorkItemRolledUpData,
-    WorkItemRolledUpCount,
   },
   inject: ['hasSubepicsFeature'],
   provide() {
@@ -333,28 +331,12 @@ export default {
     data-testid="work-item-tree"
   >
     <template #count>
-      <work-item-rolled-up-count
+      <work-item-rolled-up-data
         v-if="!isLoadingChildren"
-        class="gl-ml-2 sm:gl-ml-0"
+        :work-item-id="workItemId"
+        :work-item-iid="workItemIid"
+        :work-item-type="workItemType"
         :rolled-up-counts-by-type="rolledUpCountsByType"
-      />
-      <work-item-rolled-up-data
-        v-if="!isLoadingChildren"
-        class="gl-hidden sm:gl-flex"
-        :work-item-id="workItemId"
-        :work-item-iid="workItemIid"
-        :work-item-type="workItemType"
-        :full-path="fullPath"
-      />
-    </template>
-
-    <template #description>
-      <work-item-rolled-up-data
-        v-if="!isLoadingChildren"
-        class="gl-mt-2 sm:gl-hidden"
-        :work-item-id="workItemId"
-        :work-item-iid="workItemIid"
-        :work-item-type="workItemType"
         :full-path="fullPath"
       />
     </template>

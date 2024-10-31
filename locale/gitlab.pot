@@ -10378,9 +10378,6 @@ msgstr ""
 msgid "By quarter"
 msgstr ""
 
-msgid "By selecting Continue or registering through a third party, I agree that GitLab can contact me by email or telephone about its product, services, or events."
-msgstr ""
-
 msgid "By using a primary email tied to an Enterprise email address, you acknowledge that this account is an Enterprise User."
 msgstr ""
 
@@ -15776,9 +15773,6 @@ msgid "Copy ID"
 msgstr ""
 
 msgid "Copy KRB5 clone URL"
-msgstr ""
-
-msgid "Copy MLflow run ID"
 msgstr ""
 
 msgid "Copy SSH clone URL"
@@ -26637,6 +26631,9 @@ msgstr ""
 msgid "GroupSelect|Select a group"
 msgstr ""
 
+msgid "GroupSettings|'%{name}' has been scheduled for removal on %{date}."
+msgstr ""
+
 msgid "GroupSettings|After the instance reaches the user cap, any user who is added or requests access must be approved by an administrator. Leave empty for an unlimited user cap. If you change the user cap to unlimited, you must re-enable %{project_sharing_docs_link_start}project sharing%{link_end} and %{group_sharing_docs_link_start}group sharing%{link_end}."
 msgstr ""
 
@@ -27638,6 +27635,9 @@ msgid "How to track time"
 msgstr ""
 
 msgid "HttpDestinationValidator validates only http external audit event destinations."
+msgstr ""
+
+msgid "I agree that by clicking continue or registering through a third party GitLab may contact me via email and telephone about its product, services and events."
 msgstr ""
 
 msgid "I forgot my password"
@@ -35066,9 +35066,6 @@ msgstr ""
 msgid "MlModelRegistry|Parameters"
 msgstr ""
 
-msgid "MlModelRegistry|Performance"
-msgstr ""
-
 msgid "MlModelRegistry|Provide a subfolder name to organize your artifacts. Entering an existing subfolder's name will place artifacts in the existing folder"
 msgstr ""
 
@@ -35417,9 +35414,6 @@ msgid "Name is already taken."
 msgstr ""
 
 msgid "Name must start with a letter, digit, emoji, or underscore."
-msgstr ""
-
-msgid "Name of the Jenkins project."
 msgstr ""
 
 msgid "Name to be used as the sender for emails from Service Desk."
@@ -39596,9 +39590,6 @@ msgstr ""
 msgid "Password confirmation"
 msgstr ""
 
-msgid "Password of the Jenkins server."
-msgstr ""
-
 msgid "Password of the user."
 msgstr ""
 
@@ -42591,6 +42582,9 @@ msgid "Project '%{project_name}' was successfully created."
 msgstr ""
 
 msgid "Project '%{project_name}' was successfully updated."
+msgstr ""
+
+msgid "Project '%{project_name}' will be deleted on %{date}"
 msgstr ""
 
 msgid "Project Badges"
@@ -53440,9 +53434,6 @@ msgstr ""
 msgid "Storage nodes for new repositories"
 msgstr ""
 
-msgid "Storage size"
-msgstr ""
-
 msgid "Storage:"
 msgstr ""
 
@@ -54932,6 +54923,9 @@ msgstr ""
 msgid "The Telegram bot token (for example, `123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11`)."
 msgstr ""
 
+msgid "The URL of the Jenkins server."
+msgstr ""
+
 msgid "The URL should start with http:// or https://"
 msgstr ""
 
@@ -55290,6 +55284,9 @@ msgstr ""
 msgid "The name of the CI/CD configuration file. A path relative to the root directory is optional (for example %{code_open}my/path/.myfile.yml%{code_close})."
 msgstr ""
 
+msgid "The name of the Jenkins project. Copy the name from the end of the URL to the project."
+msgstr ""
+
 msgid "The namespace storage size (%{current_size}) exceeds the limit of %{size_limit} by %{exceeded_size}. You won't be able to push new code to this project. Please contact your GitLab administrator for more information."
 msgstr ""
 
@@ -55312,6 +55309,9 @@ msgid "The parent epic is confidential and can only contain confidential epics a
 msgstr ""
 
 msgid "The parent group of this %{context} is pending deletion, so this %{context} will also be deleted on %{date}."
+msgstr ""
+
+msgid "The password for the Jenkins server."
 msgstr ""
 
 msgid "The password for your GitLab account on %{gitlab_url} has successfully been changed."
@@ -55480,6 +55480,9 @@ msgid "The user you are trying to approve is not pending approval"
 msgstr ""
 
 msgid "The user you are trying to deactivate has been active in the past %{minimum_inactive_days} days and cannot be deactivated"
+msgstr ""
+
+msgid "The username for the Jenkins server."
 msgstr ""
 
 msgid "The value of the provided variable exceeds the %{count} character limit"
@@ -58460,9 +58463,6 @@ msgstr ""
 msgid "URL of the Grafana instance to link to from the Metrics Dashboard menu item."
 msgstr ""
 
-msgid "URL of the Jenkins server."
-msgstr ""
-
 msgid "URL of the Mock CI integration."
 msgstr ""
 
@@ -60211,9 +60211,6 @@ msgid "Username is already taken."
 msgstr ""
 
 msgid "Username is available."
-msgstr ""
-
-msgid "Username of the Jenkins server."
 msgstr ""
 
 msgid "Username or email"
@@ -66149,9 +66146,6 @@ msgid "must not be an owner of the namespace"
 msgstr ""
 
 msgid "must not contain commonly used combinations of words and letters"
-msgstr ""
-
-msgid "must only be set for bot user types"
 msgstr ""
 
 msgid "must only contain letters, digits, forward-slash, underscore, hyphen or period"

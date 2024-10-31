@@ -17,16 +17,14 @@ module Gitlab
           ].freeze
           IGNORED_ERRORS_REGEXP = Regexp.union(IGNORED_ERRORS).freeze
 
-          def initialize
-            @errors = []
+          def initialize(options:)
+            super(options: options)
 
-            # This flag will be removed as part of https://gitlab.com/gitlab-org/gitlab/-/issues/494209
-            # This option will be reintroduced as part of
-            # https://gitlab.com/gitlab-org/gitlab/-/issues/498453
-            @force = false
+            @errors = []
+            @force = options.force?
           end
 
-          def dump(destination_dir)
+          def dump(destination_dir, _)
             FileUtils.mkdir_p(destination_dir)
 
             each_database(destination_dir) do |backup_connection|
@@ -76,7 +74,7 @@ module Gitlab
             end
           end
 
-          def restore(destination_dir)
+          def restore(destination_dir, _)
             @errors = []
 
             base_models_for_backup.each do |database_name, _|

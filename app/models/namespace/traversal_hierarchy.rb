@@ -107,7 +107,7 @@ class Namespace
         .new(Namespace.where(id: namespace))
         .base_and_ancestors
         .reorder(nil)
-        .find_top_level
+        .find_by(parent_id: nil)
     end
 
     def db_query_timeout_counter

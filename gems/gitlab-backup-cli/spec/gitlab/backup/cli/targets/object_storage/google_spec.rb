@@ -55,15 +55,17 @@ RSpec.describe Gitlab::Backup::Cli::Targets::ObjectStorage::Google do
     }
   end
 
+  let(:backup_options) { instance_double("::Backup::Options", remote_directory: 'fake_backup_bucket') }
+
   before do
     allow(Gitlab).to receive(:config).and_return(gitlab_config)
     allow(::Google::Cloud::StorageTransfer).to receive(:storage_transfer_service).and_return(client)
     allow(gitlab_config).to receive(:[]).with('fake_object').and_return(supported_config)
   end
 
-  subject(:object_storage) { described_class.new("fake_object", 'fake_backup_bucket', supported_config) }
+  subject(:object_storage) { described_class.new("fake_object", backup_options, supported_config) }
 
-  describe "#dump", :silence_output do
+  describe "#dump" do
     context "when job exists" do
       before do
         allow(client).to receive(:get_transfer_job).and_return(backup_transfer_job)
@@ -77,7 +79,7 @@ RSpec.describe Gitlab::Backup::Cli::Targets::ObjectStorage::Google do
           transfer_job: updated_spec
         )
         expect(client).to receive(:run_transfer_job).with({ job_name: "fake_transfer_job", project_id: "fake_project" })
-        object_storage.dump(12345)
+        object_storage.dump(nil, 12345)
       end
     end
 
@@ -92,12 +94,12 @@ RSpec.describe Gitlab::Backup::Cli::Targets::ObjectStorage::Google do
       it "creates a new job" do
         expect(client).to receive(:create_transfer_job)
           .with(transfer_job: new_backup_transfer_job_spec).and_return(backup_transfer_job)
-        object_storage.dump(12345)
+        object_storage.dump(nil, 12345)
       end
     end
   end
 
-  describe "#restore", :silence_output do
+  describe "#restore" do
     context "when job exists" do
       before do
         allow(client).to receive(:get_transfer_job).and_return(restore_transfer_job)
@@ -111,7 +113,7 @@ RSpec.describe Gitlab::Backup::Cli::Targets::ObjectStorage::Google do
           transfer_job: updated_spec
         )
         expect(client).to receive(:run_transfer_job).with({ job_name: "fake_transfer_job", project_id: "fake_project" })
-        object_storage.restore(12345)
+        object_storage.restore(nil, 12345)
       end
     end
 
@@ -126,7 +128,7 @@ RSpec.describe Gitlab::Backup::Cli::Targets::ObjectStorage::Google do
       it "creates a new job" do
         expect(client).to receive(:create_transfer_job)
           .with(transfer_job: new_restore_transfer_job_spec).and_return(restore_transfer_job)
-        object_storage.restore(12345)
+        object_storage.restore(nil, 12345)
       end
     end
   end
