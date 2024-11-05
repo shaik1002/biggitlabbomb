@@ -5,7 +5,7 @@ title = "gitleaks config"
 description = "GitLab Personal Access Token"
 id = "gitlab_personal_access_token"
 keywords = ["glpat"]
-regex = "\\bglpat-[0-9a-zA-Z_\\-]{20}\\b"
+regex = "\\bglpat-[0-9a-zA-Z_\\-]{20,131}\\b"
 tags = ["gitlab", "revocation_type", "gitlab_blocking"]
 [[rules]]
 description = "GitLab Pipeline Trigger Token"
