@@ -28449,6 +28449,9 @@ msgstr ""
 msgid "ImportProjects|Imported files will be kept. You can import this repository again later."
 msgstr ""
 
+msgid "ImportProjects|Importing a project into a personal namespace results in all contributions being mapped to the same bot user. To map contributions to real users, import projects into a group instead."
+msgstr ""
+
 msgid "ImportProjects|Importing the project failed"
 msgstr ""
 
@@ -36115,9 +36118,6 @@ msgstr ""
 msgid "New related %{issueType}"
 msgstr ""
 
-msgid "New related Epic"
-msgstr ""
-
 msgid "New release"
 msgstr ""
 
@@ -41327,9 +41327,6 @@ msgid "Please review the updated escalation policies for %{project}. It is recom
 msgstr ""
 
 msgid "Please select a Jira project"
-msgstr ""
-
-msgid "Please select a project."
 msgstr ""
 
 msgid "Please select a valid target branch"
@@ -62774,6 +62771,9 @@ msgid "WorkItem|New %{workItemName}"
 msgstr ""
 
 msgid "WorkItem|New %{workItemType}"
+msgstr ""
+
+msgid "WorkItem|New related %{workItemType}"
 msgstr ""
 
 msgid "WorkItem|New task"
