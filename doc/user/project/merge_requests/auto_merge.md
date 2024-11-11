@@ -40,9 +40,6 @@ For a full list of checks and their API equivalents, see
 
 ![Auto-merge is ready](img/auto_merge_ready_v16_0.png)
 
-After you set auto-merge, you can't change which issues [auto-close](../issues/managing_issues.md#closing-issues-automatically)
-when the merge request merges.
-
 ## Auto-merge a merge request
 
 Prerequisites:
@@ -51,9 +48,11 @@ Prerequisites:
 - If your project configuration requires it, all threads in the
   merge request [must be resolved](index.md#resolve-a-thread).
 - The merge request must have received all required approvals.
+- Merge trains are not supported. For more information,
+  see [issue 443395](https://gitlab.com/gitlab-org/gitlab/-/issues/443395).
 
 To do this when pushing from the command line, use the `merge_request.merge_when_pipeline_succeeds`
-[push option](../../../topics/git/commit.md#push-options).
+[push option](../push_options.md).
 
 To do this from the GitLab user interface:
 

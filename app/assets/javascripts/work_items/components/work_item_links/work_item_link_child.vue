@@ -3,7 +3,7 @@ import { GlButton, GlTooltipDirective } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
 import { createAlert } from '~/alert';
 import { STATE_OPEN, WORK_ITEM_TYPE_VALUE_TASK } from '../../constants';
-import { findHierarchyWidgets, getDefaultHierarchyChildrenCount, getItems } from '../../utils';
+import { findHierarchyWidgets, getDefaultHierarchyChildrenCount } from '../../utils';
 import toggleHierarchyTreeChildMutation from '../../graphql/client/toggle_hierarchy_tree_child.mutation.graphql';
 import isExpandedHierarchyTreeChildQuery from '../../graphql/client/is_expanded_hierarchy_tree_child.query.graphql';
 import getWorkItemTreeQuery from '../../graphql/work_item_tree.query.graphql';
@@ -49,11 +49,6 @@ export default {
       required: false,
       default: true,
     },
-    showClosed: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
     workItemFullPath: {
       type: String,
       required: false,
@@ -64,20 +59,15 @@ export default {
       required: false,
       default: false,
     },
-    draggedItemType: {
-      type: String,
+    allowedChildTypes: {
+      type: Array,
       required: false,
-      default: null,
+      default: () => [],
     },
     showTaskWeight: {
       type: Boolean,
       required: false,
       default: true,
-    },
-    allowedChildrenByType: {
-      type: Object,
-      required: false,
-      default: () => {},
     },
   },
   data() {
@@ -149,15 +139,6 @@ export default {
         this.hierarchyWidget?.hasChildren
       );
     },
-    shouldExpandChildren() {
-      const rolledUpCountsByType =
-        findHierarchyWidgets(this.childItem.widgets)?.rolledUpCountsByType || [];
-      const nrOpenChildren = rolledUpCountsByType
-        .map((i) => i.countsByState.all - i.countsByState.closed)
-        .reduce((sum, n) => sum + n, 0);
-
-      return this.hasChildren && (nrOpenChildren > 0 || this.showClosed);
-    },
     pageInfo() {
       return this.hierarchyWidget.pageInfo || {};
     },
@@ -199,18 +180,11 @@ export default {
     shouldShowWeight() {
       return this.childItemType === WORK_ITEM_TYPE_VALUE_TASK ? this.showTaskWeight : true;
     },
-    allowedChildTypes() {
-      return this.allowedChildrenByType?.[this.childItemType] || [];
-    },
-    draggedItemTypeIsAllowed() {
-      return this.allowedChildTypes.includes(this.draggedItemType);
+    allowedChildren() {
+      return this.allowedChildTypes.length > 0;
     },
     showChildrenDropzone() {
-      return !this.hasChildren && this.draggedItemTypeIsAllowed;
-    },
-    displayableChildren() {
-      const filterClosed = getItems(this.showClosed);
-      return filterClosed(this.children);
+      return !this.hasChildren && this.allowedChildren;
     },
   },
   methods: {
@@ -257,7 +231,7 @@ export default {
     <div class="gl-flex gl-items-start">
       <div v-if="hasIndirectChildren" class="gl-mr-2 gl-h-7 gl-w-5">
         <gl-button
-          v-if="shouldExpandChildren"
+          v-if="hasChildren"
           v-gl-tooltip.hover
           :title="chevronTooltip"
           :aria-label="chevronTooltip"
@@ -275,7 +249,7 @@ export default {
         class="gl-w-full"
         :class="{
           '!gl-border-x-0 !gl-border-b-1 !gl-border-t-0 !gl-border-solid gl-border-default !gl-pb-2':
-            isExpanded && shouldExpandChildren && !isLoadingChildren,
+            isExpanded && hasChildren && !isLoadingChildren,
         }"
       >
         <work-item-link-child-contents
@@ -285,7 +259,6 @@ export default {
           :parent-work-item-id="issuableGid"
           :work-item-type="workItemType"
           :show-labels="showLabels"
-          :show-closed="showClosed"
           :work-item-full-path="workItemFullPath"
           :show-weight="shouldShowWeight"
           @click="$emit('click', $event)"
@@ -300,18 +273,13 @@ export default {
         :work-item-id="issuableGid"
         :work-item-iid="childItem.iid"
         :work-item-type="workItemType"
-        :children="displayableChildren"
+        :children="children"
         :parent="childItem"
         :show-labels="showLabels"
-        :show-closed="showClosed"
         :full-path="workItemFullPath"
         :is-top-level="false"
         :show-task-weight="showTaskWeight"
         :has-indirect-children="hasIndirectChildren"
-        :dragged-item-type="draggedItemType"
-        :allowed-children-by-type="allowedChildrenByType"
-        @drag="$emit('drag', $event)"
-        @drop="$emit('drop')"
         @removeChild="$emit('removeChild', childItem)"
         @error="$emit('error', $event)"
         @click="$emit('click', $event)"

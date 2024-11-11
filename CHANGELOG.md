@@ -733,21 +733,6 @@ entry.
 - [Adjust signup page items for more clarity](https://gitlab.com/gitlab-org/gitlab/-/commit/e272c8a4c7b243758454d6f15363d0c13ca05c04) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/165202)) **GitLab Enterprise Edition**
 - [Removes Unused CSS class](https://gitlab.com/gitlab-org/gitlab/-/commit/4e17154650ee4afc8b1ae4238d27efb908855a19) by @NIKU-SINGH ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/164637))
 
-## 17.4.3 (2024-10-22)
-
-### Fixed (1 change)
-
-- [Fix Zoekt global code search](https://gitlab.com/gitlab-org/security/gitlab/-/commit/3f7555bec895f46e787c4942ad4f6feb2aa40cd7) **GitLab Enterprise Edition**
-
-### Changed (1 change)
-
-- [Backport LabKit v1.21.2 update to fix broken dependency](https://gitlab.com/gitlab-org/security/gitlab/-/commit/ac25dc56806e6426b24ed951feba202b1a694023)
-
-### Security (2 changes)
-
-- [Fixed HTML injection in Global Search bug](https://gitlab.com/gitlab-org/security/gitlab/-/commit/38e43a2bd1156111126995dee37d08cbeb607c55) ([merge request](https://gitlab.com/gitlab-org/security/gitlab/-/merge_requests/4504))
-- [Limit max size of manifest file upload](https://gitlab.com/gitlab-org/security/gitlab/-/commit/d85364ec8c87ed3ca31b3d9575906267e9d23c4d) ([merge request](https://gitlab.com/gitlab-org/security/gitlab/-/merge_requests/4532))
-
 ## 17.4.2 (2024-10-09)
 
 ### Fixed (1 change)
@@ -1634,13 +1619,6 @@ entry.
 ### EE (1 change)
 
 - [Update learn more link and docs formatting](https://gitlab.com/gitlab-org/gitlab/-/commit/6f536fdb20c2d2b96124afe693042c91483a32b2) ([merge request](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/164889))
-
-## 17.3.6 (2024-10-22)
-
-### Security (2 changes)
-
-- [Fixed HTML injection in Global Search bug](https://gitlab.com/gitlab-org/security/gitlab/-/commit/96159ab6cd9af8fc0ceadaf7568c8aaf079a8542) ([merge request](https://gitlab.com/gitlab-org/security/gitlab/-/merge_requests/4506))
-- [Limit max size of manifest file upload](https://gitlab.com/gitlab-org/security/gitlab/-/commit/85bf29446c0423ba04339bc95ba546948b91e12e) ([merge request](https://gitlab.com/gitlab-org/security/gitlab/-/merge_requests/4531))
 
 ## 17.3.5 (2024-10-09)
 

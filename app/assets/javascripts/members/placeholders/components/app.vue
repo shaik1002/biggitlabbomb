@@ -8,18 +8,12 @@ import {
   GlButton,
   GlModalDirective,
   GlFilteredSearchToken,
-  GlDisclosureDropdown,
-  GlDisclosureDropdownItem,
 } from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { s__, __, sprintf } from '~/locale';
 import { queryToObject, setUrlParams, updateHistory } from '~/lib/utils/url_utility';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
-import {
-  ACTIVE_SUBTAB_QUERY_PARAM,
-  ACTIVE_TAB_QUERY_PARAM_NAME,
-  TAB_QUERY_PARAM_VALUES,
-} from '~/members/constants';
+import { ACTIVE_TAB_QUERY_PARAM_NAME, TAB_QUERY_PARAM_VALUES } from '~/members/constants';
 
 import {
   PLACEHOLDER_USER_STATUS,
@@ -29,8 +23,6 @@ import {
   PLACEHOLDER_SORT_STATUS_ASC,
   PLACEHOLDER_SORT_SOURCE_NAME_ASC,
   PLACEHOLDER_SORT_SOURCE_NAME_DESC,
-  PLACEHOLDER_TAB_AWAITING,
-  PLACEHOLDER_TAB_REASSIGNED,
 } from '~/import_entities/import_groups/constants';
 
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
@@ -42,10 +34,8 @@ import {
 } from '~/vue_shared/components/filtered_search_bar/constants';
 import PlaceholdersTable from './placeholders_table.vue';
 import CsvUploadModal from './csv_upload_modal.vue';
-import KeepAllAsPlaceholderModal from './keep_all_as_placeholder_modal.vue';
 
 const UPLOAD_CSV_PLACEHOLDERS_MODAL_ID = 'upload-placeholders-csv-modal';
-const KEEP_ALL_AS_PLACEHOLDER_MODAL_ID = 'keep-all-as-placeholder-modal';
 
 export default {
   name: 'PlaceholdersTabApp',
@@ -54,12 +44,9 @@ export default {
     GlTab,
     GlTabs,
     GlButton,
-    GlDisclosureDropdown,
-    GlDisclosureDropdownItem,
     FilteredSearchBar,
     PlaceholdersTable,
     CsvUploadModal,
-    KeepAllAsPlaceholderModal,
   },
   directives: {
     GlModal: GlModalDirective,
@@ -105,8 +92,6 @@ export default {
     urlParams() {
       return {
         [ACTIVE_TAB_QUERY_PARAM_NAME]: TAB_QUERY_PARAM_VALUES.placeholder,
-        [ACTIVE_SUBTAB_QUERY_PARAM]:
-          this.selectedTabIndex === 0 ? PLACEHOLDER_TAB_AWAITING : PLACEHOLDER_TAB_REASSIGNED,
         status: this.filterParams.status,
         search: this.filterParams.search,
         sort: this.sort,
@@ -183,7 +168,7 @@ export default {
   },
   methods: {
     setInitialFilterAndSort() {
-      const { sort, subtab, ...queryParams } = convertObjectPropsToCamelCase(
+      const { sort, ...queryParams } = convertObjectPropsToCamelCase(
         queryToObject(window.location.search.substring(1), { gatherArrays: true }),
         {
           dropKeys: ['scope', 'utf8', 'tab'], // These keys are unsupported/unnecessary
@@ -196,17 +181,15 @@ export default {
         this.sort = sort || PLACEHOLDER_SORT_SOURCE_NAME_ASC;
       }
 
-      const reassignedStatuses = PLACEHOLDER_USER_REASSIGNED_STATUS_OPTIONS.map(
-        (status) => status.value,
-      );
-
-      if (
-        (queryParams.status && reassignedStatuses.includes(queryParams.status)) ||
-        subtab === PLACEHOLDER_TAB_REASSIGNED
-      ) {
-        // When status param is one of the reassigned statuses, or subtab param is 'reassigned', open the reassigned tab
-        this.skipResettingFilterParams = true;
-        this.selectedTabIndex = 1;
+      if (queryParams.status) {
+        const reassignedStatuses = PLACEHOLDER_USER_REASSIGNED_STATUS_OPTIONS.map(
+          (status) => status.value,
+        );
+        // When status is one of the reassigned statuses, we should open the reassigned tab
+        if (reassignedStatuses.includes(queryParams.status)) {
+          this.skipResettingFilterParams = true;
+          this.selectedTabIndex = 1;
+        }
       }
     },
     filteredSearchTokens(options = PLACEHOLDER_USER_UNASSIGNED_STATUS_OPTIONS) {
@@ -248,31 +231,20 @@ export default {
       this.filterParams = { ...filterParams };
     },
     onConfirm(item) {
-      this.updateTabCount({ item, placeholderCount: 1 });
-    },
-    onConfirmKeepAllAsPlaceholders(placeholderCount) {
-      this.updateTabCount({ placeholderCount });
-    },
-    updateTabCount({ item, placeholderCount }) {
-      const message = item
-        ? sprintf(s__('UserMapping|Placeholder %{name} (@%{username}) kept as placeholder.'), {
-            name: item.placeholderUser.name,
-            username: item.placeholderUser.username,
-          })
-        : sprintf(s__('UserMapping|%{count} placeholders were kept as placeholders.'), {
-            count: placeholderCount,
-          });
-
-      this.$toast.show(message);
-      this.reassignedCount += placeholderCount;
-      this.unassignedCount -= placeholderCount;
+      this.$toast.show(
+        sprintf(s__('UserMapping|Placeholder %{name} (@%{username}) kept as placeholder.'), {
+          name: item.placeholderUser.name,
+          username: item.placeholderUser.username,
+        }),
+      );
+      this.reassignedCount += 1;
+      this.unassignedCount -= 1;
     },
     onSort(sort) {
       this.sort = sort;
     },
   },
   uploadCsvModalId: UPLOAD_CSV_PLACEHOLDERS_MODAL_ID,
-  keepAllAsPlaceholderModalId: KEEP_ALL_AS_PLACEHOLDER_MODAL_ID,
   PLACEHOLDER_USER_REASSIGNED_STATUS_OPTIONS,
 };
 </script>
@@ -345,40 +317,16 @@ export default {
       </gl-tab>
 
       <template #tabs-end>
-        <div class="gl-ml-auto gl-flex gl-gap-2">
-          <template v-if="isCsvReassignmentEnabled">
-            <gl-button
-              v-gl-modal="$options.uploadCsvModalId"
-              variant="link"
-              icon="media"
-              data-testid="reassign-csv-button"
-            >
-              {{ s__('UserMapping|Reassign with CSV file') }}
-            </gl-button>
-            <csv-upload-modal :modal-id="$options.uploadCsvModalId" />
-          </template>
-          <gl-disclosure-dropdown
-            icon="ellipsis_v"
-            placement="bottom-end"
-            category="tertiary"
-            no-caret
-            block
-            :auto-close="false"
+        <div v-if="isCsvReassignmentEnabled" class="gl-ml-auto">
+          <gl-button
+            v-gl-modal="$options.uploadCsvModalId"
+            variant="link"
+            icon="media"
+            data-testid="reassign-csv-button"
           >
-            <gl-disclosure-dropdown-item
-              v-gl-modal="$options.keepAllAsPlaceholderModalId"
-              data-testid="keep-all-as-placeholder-button"
-            >
-              <template #list-item>
-                {{ s__('UserMapping|Keep all as placeholder') }}
-              </template>
-            </gl-disclosure-dropdown-item>
-          </gl-disclosure-dropdown>
-          <keep-all-as-placeholder-modal
-            :modal-id="$options.keepAllAsPlaceholderModalId"
-            :group-id="group.id"
-            @confirm="onConfirmKeepAllAsPlaceholders"
-          />
+            {{ s__('UserMapping|Reassign with CSV file') }}
+          </gl-button>
+          <csv-upload-modal :modal-id="$options.uploadCsvModalId" />
         </div>
       </template>
     </gl-tabs>

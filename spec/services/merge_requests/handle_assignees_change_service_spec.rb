@@ -113,12 +113,6 @@ RSpec.describe MergeRequests::HandleAssigneesChangeService, feature_category: :c
       end
     end
 
-    it 'invalidates cache counts for old assignees' do
-      expect(old_assignees).to all(receive(:invalidate_merge_request_cache_counts))
-
-      execute
-    end
-
     context 'when execute_hooks option is set to true' do
       let(:options) { { 'execute_hooks' => true } }
 

@@ -8,8 +8,6 @@ module Groups
       def execute
         @token = group.deploy_tokens.find(params[:id])
         @token.revoke!
-
-        ServiceResponse.success(message: 'Token was revoked')
       end
     end
   end

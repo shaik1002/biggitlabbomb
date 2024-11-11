@@ -2,7 +2,7 @@
 data_category: optional
 key_path: counts_monthly.projects_with_alerts_created
 description: Monthly count of unique projects with HTTP alerting enabled
-product_group: platform_insights
+product_group: respond
 value_type: number
 status: active
 time_frame: 28d
@@ -12,10 +12,6 @@ distribution:
 - ce
 - ee
 tier:
-- free
-- premium
-- ultimate
-tiers:
 - free
 - premium
 - ultimate

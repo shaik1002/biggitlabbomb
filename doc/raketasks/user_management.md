@@ -227,4 +227,4 @@ The task might raise the following error messages:
 
 ## Related topics
 
-- [Reset user passwords](../security/reset_user_password.md#use-a-rake-task)
+- [Reset a user's password](../security/reset_user_password.md#use-a-rake-task)

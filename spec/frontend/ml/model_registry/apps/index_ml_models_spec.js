@@ -1,15 +1,20 @@
-import { GlDisclosureDropdownItem } from '@gitlab/ui';
+import { GlExperimentBadge } from '@gitlab/ui';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
 import { IndexMlModels } from '~/ml/model_registry/apps';
+import ModelRow from '~/ml/model_registry/components/model_row.vue';
+import ModelCreate from '~/ml/model_registry/components/model_create.vue';
 import TitleArea from '~/vue_shared/components/registry/title_area.vue';
+import MetadataItem from '~/vue_shared/components/registry/metadata_item.vue';
 import EmptyState from '~/ml/model_registry/components/model_list_empty_state.vue';
-import SearchableTable from '~/ml/model_registry/components/searchable_table.vue';
+import ActionsDropdown from '~/ml/model_registry/components/actions_dropdown.vue';
+import SearchableList from '~/ml/model_registry/components/searchable_list.vue';
 import createMockApollo from 'helpers/mock_apollo_helper';
 import getModelsQuery from '~/ml/model_registry/graphql/queries/get_models.query.graphql';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import waitForPromises from 'helpers/wait_for_promises';
+import { MODEL_CREATION_MODAL_ID } from '~/ml/model_registry/constants';
 import { describeSkipVue3, SkipReason } from 'helpers/vue3_conditional';
 import { modelsQuery, modelWithOneVersion, modelWithoutVersion } from '../graphql_mock_data';
 
@@ -20,7 +25,6 @@ const defaultProps = {
   canWriteModelRegistry: false,
   maxAllowedFileSize: 99999,
   markdownPreviewPath: '/markdown-preview',
-  createModelPath: 'path/to/project/-/ml/models/new,',
 };
 
 const skipReason = new SkipReason({
@@ -59,12 +63,15 @@ describeSkipVue3(skipReason, () => {
 
   const emptyQueryResolver = () => jest.fn().mockResolvedValue(modelsQuery([]));
 
-  const findSearchableTable = () => wrapper.findComponent(SearchableTable);
+  const findAllRows = () => wrapper.findAllComponents(ModelRow);
+  const findRow = (index) => findAllRows().at(index);
   const findEmptyState = () => wrapper.findComponent(EmptyState);
   const findTitleArea = () => wrapper.findComponent(TitleArea);
-  const findModelCountMetadataItem = () => wrapper.findByTestId('metadata-item');
-  const findModelCreate = () => wrapper.findByTestId('create-model-button');
-  const findDropdownItems = () => findModelCreate().findAllComponents(GlDisclosureDropdownItem);
+  const findModelCountMetadataItem = () => findTitleArea().findComponent(MetadataItem);
+  const findBadge = () => wrapper.findComponent(GlExperimentBadge);
+  const findModelCreate = () => wrapper.findComponent(ModelCreate);
+  const findActionsDropdown = () => wrapper.findComponent(ActionsDropdown);
+  const findSearchableList = () => wrapper.findComponent(SearchableList);
 
   describe('header', () => {
     beforeEach(() => {
@@ -73,6 +80,17 @@ describeSkipVue3(skipReason, () => {
 
     it('displays the title', () => {
       expect(findTitleArea().text()).toContain('Model registry');
+    });
+
+    it('displays the experiment badge', () => {
+      expect(findBadge().props()).toMatchObject({
+        helpPageUrl: '/help/user/project/ml/model_registry/index.md',
+        type: 'beta',
+      });
+    });
+
+    it('renders the extra actions button', () => {
+      expect(findActionsDropdown().exists()).toBe(true);
     });
   });
 
@@ -85,6 +103,7 @@ describeSkipVue3(skipReason, () => {
         description:
           'Create your machine learning using GitLab directly or using the MLflow client',
         primaryText: 'Create model',
+        modalId: MODEL_CREATION_MODAL_ID,
       });
     });
   });
@@ -107,17 +126,6 @@ describeSkipVue3(skipReason, () => {
 
         expect(findModelCreate().exists()).toBe(true);
       });
-
-      it('has a dropdown with actions', async () => {
-        await createWrapper({
-          props: { canWriteModelRegistry: true },
-          resolver: emptyQueryResolver(),
-        });
-
-        expect(findDropdownItems()).toHaveLength(2);
-        expect(findDropdownItems().at(0).text()).toBe('Create new model');
-        expect(findDropdownItems().at(1).text()).toBe('Import model using MLflow');
-      });
     });
   });
 
@@ -129,7 +137,7 @@ describeSkipVue3(skipReason, () => {
     });
 
     it('error message is displayed', () => {
-      expect(findSearchableTable().props('errorMessage')).toBe(
+      expect(findSearchableList().props('errorMessage')).toBe(
         'Failed to load model with error: Failure!',
       );
     });
@@ -150,7 +158,7 @@ describeSkipVue3(skipReason, () => {
       it('sets model metadata item to model count', async () => {
         await createWrapper();
 
-        expect(findModelCountMetadataItem().text()).toContain('2 models');
+        expect(findModelCountMetadataItem().props('text')).toBe('2 models');
       });
     });
 
@@ -167,14 +175,76 @@ describeSkipVue3(skipReason, () => {
       });
 
       it('passes items to list', () => {
-        expect(findSearchableTable().props('models')).toEqual([
+        expect(findSearchableList().props('items')).toEqual([
           modelWithOneVersion,
           modelWithoutVersion,
         ]);
       });
 
-      it('displays model rows', () => {
-        expect(findSearchableTable().props('models')).toHaveLength(2);
+      it('displays package version rows', () => {
+        expect(findAllRows()).toHaveLength(2);
+      });
+
+      it('binds the correct props', () => {
+        expect(findRow(0).props()).toMatchObject({
+          model: expect.objectContaining(modelWithOneVersion),
+        });
+
+        expect(findRow(1).props()).toMatchObject({
+          model: expect.objectContaining(modelWithoutVersion),
+        });
+      });
+    });
+
+    describe('when query is updated', () => {
+      let resolver;
+
+      beforeEach(async () => {
+        resolver = jest.fn().mockResolvedValue(modelsQuery());
+        await createWrapper({ resolver });
+      });
+
+      it('when orderBy or sort are not present, use default value', async () => {
+        findSearchableList().vm.$emit('fetch-page', {
+          after: 'eyJpZCI6IjIifQ',
+          first: 30,
+        });
+
+        await waitForPromises();
+
+        expect(resolver).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            fullPath: 'path/to/project',
+            first: 30,
+            name: undefined,
+            orderBy: 'CREATED_AT',
+            sort: 'DESC',
+            after: 'eyJpZCI6IjIifQ',
+          }),
+        );
+      });
+
+      it('when orderBy or sort present, updates filters', async () => {
+        findSearchableList().vm.$emit('fetch-page', {
+          after: 'eyJpZCI6IjIifQ',
+          first: 30,
+          orderBy: 'name',
+          sort: 'asc',
+          name: 'something',
+        });
+
+        await waitForPromises();
+
+        expect(resolver).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            fullPath: 'path/to/project',
+            first: 30,
+            name: 'something',
+            orderBy: 'NAME',
+            sort: 'ASC',
+            after: 'eyJpZCI6IjIifQ',
+          }),
+        );
       });
     });
   });

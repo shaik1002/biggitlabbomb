@@ -115,9 +115,6 @@ regardless of the machine or platform you use.
   - Only `preStart` is supported.
 - `parent`, `projects`, and `starterProjects` are not supported.
 - For `variables`, keys must not start with `gl-`, `gl_`, `GL-`, or `GL_`.
-- For `attributes`:
-  - `pod-overrides` must not be set at the root level or in `components`.
-  - `container-overrides` must not be set in `components`.
 
 ### `container` component type
 

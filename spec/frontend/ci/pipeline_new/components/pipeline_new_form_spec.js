@@ -2,8 +2,10 @@ import Vue, { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
 import { GlForm, GlSprintf, GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import MockAdapter from 'axios-mock-adapter';
+import CreditCardValidationRequiredAlert from 'ee_component/billings/components/cc_validation_required_alert.vue';
 import createMockApollo from 'helpers/mock_apollo_helper';
-import { shallowMountExtended, mountExtended } from 'helpers/vue_test_utils_helper';
+import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
+import { TEST_HOST } from 'helpers/test_constants';
 import waitForPromises from 'helpers/wait_for_promises';
 import axios from '~/lib/utils/axios_utils';
 import {
@@ -20,6 +22,7 @@ import { resolvers } from '~/ci/pipeline_new/graphql/resolvers';
 import RefsDropdown from '~/ci/pipeline_new/components/refs_dropdown.vue';
 import VariableValuesListbox from '~/ci/pipeline_new/components/variable_values_listbox.vue';
 import {
+  mockCreditCardValidationRequiredError,
   mockCiConfigVariablesResponse,
   mockCiConfigVariablesResponseWithoutDesc,
   mockEmptyCiConfigVariablesResponse,
@@ -37,7 +40,6 @@ Vue.use(VueApollo);
 jest.mock('~/lib/utils/url_utility', () => ({
   visitUrl: jest.fn(),
   joinPaths: jest.fn(),
-  setUrlFragment: jest.fn(),
 }));
 
 const pipelinesPath = '/root/project/-/pipelines';
@@ -69,7 +71,7 @@ describe('Pipeline New Form', () => {
   const findWarningAlertSummary = () => findWarningAlert().findComponent(GlSprintf);
   const findWarnings = () => wrapper.findAllByTestId('run-pipeline-warning');
   const findLoadingIcon = () => wrapper.findComponent(GlLoadingIcon);
-  const findCiCdSettingsLink = () => wrapper.findByTestId('ci-cd-settings-link');
+  const findCCAlert = () => wrapper.findComponent(CreditCardValidationRequiredAlert);
   const getFormPostParams = () => JSON.parse(mock.history.post[0].data);
 
   const advanceToNextFetch = (milliseconds) => {
@@ -94,15 +96,11 @@ describe('Pipeline New Form', () => {
     await nextTick();
   };
 
-  const createComponentWithApollo = ({
-    props = {},
-    mountFn = shallowMountExtended,
-    stubs = {},
-  } = {}) => {
+  const createComponentWithApollo = ({ props = {} } = {}) => {
     const handlers = [[ciConfigVariablesQuery, mockCiConfigVariables]];
     mockApollo = createMockApollo(handlers, resolvers);
 
-    wrapper = mountFn(PipelineNewForm, {
+    wrapper = shallowMountExtended(PipelineNewForm, {
       apolloProvider: mockApollo,
       provide: {
         identityVerificationRequired: true,
@@ -118,17 +116,9 @@ describe('Pipeline New Form', () => {
         refParam: defaultBranch,
         settingsLink: '',
         maxWarnings: 25,
-        isMaintainer: true,
         ...props,
       },
-      stubs,
     });
-  };
-
-  const glFormGroupStub = {
-    'gl-form-group': {
-      template: '<div><slot name="description"></slot></div>',
-    },
   };
 
   beforeEach(() => {
@@ -539,6 +529,44 @@ describe('Pipeline New Form', () => {
 
         expect(findPipelineConfigButton().exists()).toBe(false);
       });
+
+      it('does not show the credit card validation required alert', () => {
+        expect(findCCAlert().exists()).toBe(false);
+      });
+
+      describe('when the error response is credit card validation required', () => {
+        beforeEach(async () => {
+          mock
+            .onPost(pipelinesPath)
+            .reply(HTTP_STATUS_BAD_REQUEST, mockCreditCardValidationRequiredError);
+
+          window.gon = {
+            subscriptions_url: TEST_HOST,
+            payment_form_url: TEST_HOST,
+          };
+
+          findForm().vm.$emit('submit', dummySubmitEvent);
+
+          await waitForPromises();
+        });
+
+        it('shows credit card validation required alert', () => {
+          expect(findErrorAlert().exists()).toBe(false);
+          expect(findCCAlert().exists()).toBe(true);
+        });
+
+        it('clears error and hides the alert on dismiss', async () => {
+          expect(findCCAlert().exists()).toBe(true);
+          expect(wrapper.vm.$data.error).toBe(mockCreditCardValidationRequiredError.errors[0]);
+
+          findCCAlert().vm.$emit('dismiss');
+
+          await nextTick();
+
+          expect(findCCAlert().exists()).toBe(false);
+          expect(wrapper.vm.$data.error).toBe(null);
+        });
+      });
     });
 
     describe('when the error response cannot be handled', () => {
@@ -552,40 +580,6 @@ describe('Pipeline New Form', () => {
 
       it('re-enables the submit button', () => {
         expect(findSubmitButton().props('disabled')).toBe(false);
-      });
-    });
-  });
-
-  describe('CI/CD settings page link', () => {
-    describe('when the user has a maintainer plus role', () => {
-      beforeEach(async () => {
-        mockCiConfigVariables.mockResolvedValue(mockCiConfigVariablesResponse);
-        createComponentWithApollo({
-          props: { isMaintainer: true, settingsLink: 'link' },
-          mountFn: mountExtended,
-          stubs: glFormGroupStub,
-        });
-        await waitForPromises();
-      });
-
-      it('displays the link', () => {
-        expect(findCiCdSettingsLink().exists()).toBe(true);
-      });
-    });
-
-    describe('when the user is not a maintainer or owner', () => {
-      beforeEach(async () => {
-        mockCiConfigVariables.mockResolvedValue(mockCiConfigVariablesResponse);
-        createComponentWithApollo({
-          props: { isMaintainer: false },
-          mountFn: mountExtended,
-          stubs: glFormGroupStub,
-        });
-        await waitForPromises();
-      });
-
-      it('does not display the link', () => {
-        expect(findCiCdSettingsLink().exists()).toBe(false);
       });
     });
   });

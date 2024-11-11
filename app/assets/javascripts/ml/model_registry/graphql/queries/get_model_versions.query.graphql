@@ -24,12 +24,6 @@ query getModelVersions(
         id
         version
         createdAt
-        author {
-          id
-          name
-          webUrl
-          avatarUrl
-        }
         _links {
           showPath
         }

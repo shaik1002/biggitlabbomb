@@ -483,7 +483,6 @@ RSpec.describe SidebarsHelper, feature_category: :navigation do
               avatarUrl: project.avatar_url,
               name: project.name,
               namespace: project.full_name,
-              fullPath: project.full_path,
               webUrl: project_path(project)
             }
           })
@@ -507,7 +506,6 @@ RSpec.describe SidebarsHelper, feature_category: :navigation do
               avatarUrl: group.avatar_url,
               name: group.name,
               namespace: group.full_name,
-              fullPath: group.full_path,
               webUrl: group_path(group)
             }
           })

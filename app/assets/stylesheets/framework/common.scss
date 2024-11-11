@@ -88,6 +88,10 @@
   background: $line-target-blue;
 }
 
+.text-break-word {
+  word-break: break-all;
+}
+
 .text-underline,
 .text-underline:hover {
   text-decoration: underline;
@@ -316,6 +320,11 @@ li.note {
   }
 }
 
+.bordered-box {
+  border: 1px solid $border-color;
+  border-radius: $gl-border-radius-base;
+}
+
 .tooltip {
   .tooltip-inner {
     word-wrap: break-word;
@@ -455,7 +464,9 @@ li.note {
 
 copy-code {
   position: absolute;
+  @apply gl-transition-all;
   opacity: 0;
+
   top: $gl-spacing-scale-3;
   right: $gl-spacing-scale-3;
 

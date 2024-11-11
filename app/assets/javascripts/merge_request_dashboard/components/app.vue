@@ -1,6 +1,5 @@
 <script>
 import { GlButton, GlIcon, GlAlert, GlTabs, GlTab, GlLink } from '@gitlab/ui';
-import TabTitle from './tab_title.vue';
 import MergeRequestsQuery from './merge_requests_query.vue';
 import CollapsibleSection from './collapsible_section.vue';
 import MergeRequest from './merge_request.vue';
@@ -13,7 +12,6 @@ export default {
     GlTabs,
     GlTab,
     GlLink,
-    TabTitle,
     MergeRequestsQuery,
     CollapsibleSection,
     MergeRequest,
@@ -35,42 +33,30 @@ export default {
       this.currentTab = key;
       this.$router.push({ path: key || '/' });
     },
-    queriesForTab(tab) {
-      return tab.lists
-        .filter((l) => !l.hideCount)
-        .map((list) => ({ query: list.query, variables: list.variables }));
-    },
   },
 };
 </script>
 
 <template>
   <div>
-    <gl-tabs no-key-nav>
+    <gl-tabs>
       <gl-tab
         v-for="tab in tabs"
         :key="tab.title"
+        :title="tab.title"
         :active="tab.key === currentTab"
         lazy
         @click="clickTab(tab)"
       >
-        <template #title>
-          <tab-title :title="tab.title" :queries="queriesForTab(tab)" :tab-key="tab.key" />
-        </template>
         <merge-requests-query
           v-for="(list, i) in tab.lists"
           :key="`list_${i}`"
           :query="list.query"
           :variables="list.variables"
-          :hide-count="list.hideCount"
           :class="{ 'gl-mb-4': i !== tab.lists.length - 1 }"
         >
           <template #default="{ mergeRequests, count, hasNextPage, loadMore, loading, error }">
-            <collapsible-section
-              :count="count"
-              :title="list.title"
-              :help-content="list.helpContent"
-            >
+            <collapsible-section :count="count" :loading="loading || error" :title="list.title">
               <div>
                 <div class="gl-overflow-x-auto">
                   <table class="gl-w-full">
@@ -86,11 +72,9 @@ export default {
                       <tr>
                         <th class="gl-pb-3 gl-pl-5 gl-pr-3" :aria-label="__('Pipeline status')">
                           <gl-icon name="pipeline" />
-                          <span class="gl-sr-only">{{ __('Pipeline status') }}</span>
                         </th>
                         <th class="gl-px-3 gl-pb-3" :aria-label="__('Approvals')">
                           <gl-icon name="approval" />
-                          <span class="gl-sr-only">{{ __('Approvals') }}</span>
                         </th>
                         <th class="gl-px-3 gl-pb-3 gl-text-sm gl-text-gray-700">
                           {{ __('Title') }}
@@ -115,7 +99,6 @@ export default {
                           :key="mergeRequest.id"
                           :merge-request="mergeRequest"
                           :is-last="index === mergeRequests.length - 1"
-                          data-testid="merge-request"
                         />
                       </template>
                       <tr v-else>
@@ -148,7 +131,7 @@ export default {
         </merge-requests-query>
       </gl-tab>
       <template #tabs-end>
-        <li role="presentation" class="nav-item">
+        <li class="nav-item">
           <gl-link
             :href="mergeRequestsSearchDashboardPath"
             class="nav-link gl-tab-nav-item !gl-no-underline"

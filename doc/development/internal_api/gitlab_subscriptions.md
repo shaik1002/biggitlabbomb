@@ -217,108 +217,6 @@ Example response:
 }
 ```
 
-#### Create a subscription
-
-Use a POST command to create a subscription.
-
-```plaintext
-POST /internal/gitlab_subscriptions/namespaces/:id/gitlab_subscription
-```
-
-| Attribute   | Type    | Required | Description |
-|:------------|:--------|:---------|:------------|
-| `start_date` | date   | yes      | Start date of subscription |
-| `end_date`  | date    | no       | End date of subscription |
-| `plan_code` | string  | no       | Subscription tier code |
-| `seats`     | integer | no       | Number of seats in subscription |
-| `max_seats_used` | integer | no  | Highest number of billable users in the current subscription term |
-| `auto_renew` | boolean | no      | Whether subscription auto-renews on end date |
-| `trial`     | boolean | no       | Whether subscription is a trial |
-| `trial_starts_on` | date | no    | Start date of trial |
-| `trial_ends_on` | date | no      | End date of trial |
-
-Example request:
-
-```shell
-curl --request POST --header "X-CUSTOMERS-DOT-INTERNAL-TOKEN: <json-web-token>" "https://gitlab.com/api/v4/internal/gitlab_subscriptions/namespaces/1234/gitlab_subscription?start_date="2020-07-15"&plan="premium"&seats=10"
-```
-
-Example response:
-
-```json
-{
-  "plan": {
-    "code":"premium",
-    "name":"premium",
-    "trial":false,
-    "auto_renew":null,
-    "upgradable":false
-  },
-  "usage": {
-    "seats_in_subscription":10,
-    "seats_in_use":1,
-    "max_seats_used":0,
-    "seats_owed":0
-  },
-  "billing": {
-    "subscription_start_date":"2020-07-15",
-    "subscription_end_date":null,
-    "trial_ends_on":null
-  }
-}
-```
-
-#### Update a subscription
-
-Use a PUT command to update an existing subscription.
-
-```plaintext
-PUT /internal/gitlab_subscriptions/namespaces/:id/gitlab_subscription
-```
-
-| Attribute   | Type    | Required | Description |
-|:------------|:--------|:---------|:------------|
-| `start_date` | date   | no       | Start date of subscription |
-| `end_date`  | date    | no       | End date of subscription |
-| `plan_code` | string  | no       | Subscription tier code |
-| `seats`     | integer | no       | Number of seats in subscription |
-| `max_seats_used` | integer | no  | Highest number of billable users in the current subscription term |
-| `auto_renew` | boolean | no      | Whether subscription auto-renews on end date |
-| `trial`     | boolean | no       | Whether subscription is a trial |
-| `trial_starts_on` | date | no    | Start date of trial. Required if trial is true. |
-| `trial_ends_on` | date | no      | End date of trial |
-
-Example request:
-
-```shell
-curl --request PUT --header "X-CUSTOMERS-DOT-INTERNAL-TOKEN: <json-web-token>" "https://gitlab.com/api/v4/internal/gitlab_subscriptions/namespaces/1234/gitlab_subscription?max_seats_used=0"
-```
-
-Example response:
-
-```json
-{
-  "plan": {
-    "code":"premium",
-    "name":"premium",
-    "trial":false,
-    "auto_renew":null,
-    "upgradable":false
-  },
-  "usage": {
-    "seats_in_subscription":80,
-    "seats_in_use":82,
-    "max_seats_used":0,
-    "seats_owed":2
-  },
-  "billing": {
-    "subscription_start_date":"2020-07-15",
-    "subscription_end_date":"2021-07-15",
-    "trial_ends_on":null
-  }
-}
-```
-
 ### Upcoming Reconciliations
 
 The `upcoming_reconciliations` endpoint is used by [CustomersDot](https://gitlab.com/gitlab-org/customers-gitlab-com) (`customers.gitlab.com`)
@@ -445,6 +343,11 @@ Example response:
 }
 ```
 
+## Migrating Endpoints
+
+These endpoints are going to be [migrated to internal endpoints](https://gitlab.com/gitlab-org/gitlab/-/issues/463741). After that, they will be
+deprecated and then [removed in a future milestone](https://gitlab.com/gitlab-org/gitlab/-/issues/473625).
+
 ### Add-On Purchases
 
 This API is used by CustomersDot to manage add-on purchases, excluding Compute Minutes
@@ -487,7 +390,7 @@ Example request for create/update:
 curl --request POST \
 --header --header "X-CUSTOMERS-DOT-INTERNAL-TOKEN: <json-web-token>" \
 --header "Content-Type: application/json" \
---data '{ "add_on_purchases": { "duo_pro": [{ "quantity": 1, "started_on": "<YYYY-MM-DD>", "expires_on": "<YYYY-MM-DD>", "purchase_xid": "C-00123456", "trial": false }] } }' \
+--data '{ "add_on_purchases": { "duo_pro": [{ "quantity": 1, "started_on": "<YYYY-MM-DD>", "expires_on": "<YYYY-MM-DD>", "purchase_xid": "A-S0000001", "trial": false }] } }' \
 "https://gitlab.com/api/v4/internal/gitlab_subscriptions/namespaces/1234/subscription_add_on_purchases"
 ```
 
@@ -514,130 +417,11 @@ Example response:
     "quantity": 1,
     "started_on": "2024-01-01",
     "expires_on": "2024-12-31",
-    "purchase_xid": "C-00123456",
+    "purchase_xid": "A-S0000001",
     "trial": false
   }
 ]
 ```
-
-#### Fetch a subscription add-on purchases
-
-Use a GET command to view an existing subscription add-on purchase.
-
-```plaintext
-GET /internal/gitlab_subscriptions/namespaces/:id/subscription_add_on_purchases/:add_on_name
-```
-
-Example request:
-
-```shell
-curl --header "X-CUSTOMERS-DOT-INTERNAL-TOKEN: <json-web-token>" "https://gitlab.com/api/v4/internal/gitlab_subscriptions/namespaces/1234/subscription_add_on_purchases/code_suggestions"
-```
-
-Example response:
-
-```json
-{
-  "namespace_id":1234,
-  "namespace_name":"A Namespace Name",
-  "add_on":"Code Suggestions",
-  "quantity":15,
-  "started_on":"2024-06-15",
-  "expires_on":"2024-07-15",
-  "purchase_xid":"C-00123456",
-  "trial":true
-}
-```
-
-### Compute Minutes provisioning
-
-The compute minutes endpoints are used by [CustomersDot](https://gitlab.com/gitlab-org/customers-gitlab-com) (`customers.gitlab.com`)
-to apply additional packs of compute minutes, for personal namespaces or top-level groups in GitLab.com.
-
-#### Create an additional pack
-
-Use a POST command to create additional packs.
-
-```plaintext
-POST /internal/gitlab_subscriptions/namespaces/:id/minutes
-```
-
-| Attribute   | Type    | Required | Description |
-|:------------|:--------|:---------|:------------|
-| `packs`     | array   | yes      | An array of purchased compute packs |
-| `packs[expires_at]` | date   | yes      | Expiry date of the purchased pack|
-| `packs[number_of_minutes]`  | integer    | yes       | Number of additional compute minutes |
-| `packs[purchase_xid]` | string  | yes       | The unique ID of the purchase |
-
-Example request:
-
-```shell
-curl --request POST \
-  --url "http://localhost:3000/api/v4/internal/gitlab_subscriptions/namespaces/123/minutes" \
-  --header 'Content-Type: application/json' \
-  --header 'X-CUSTOMERS-DOT-INTERNAL-TOKEN: <json-web-token>' \
-  --data '{
-    "packs": [
-      {
-        "number_of_minutes": 10000,
-        "expires_at": "2022-01-01",
-        "purchase_xid": "C-00123456"
-      }
-    ]
-  }'
-```
-
-Example response:
-
-```json
-[
-  {
-    "namespace_id": 123,
-    "expires_at": "2022-01-01",
-    "number_of_minutes": 10000,
-    "purchase_xid": "C-00123456"
-  }
-]
-```
-
-#### Move additional packs
-
-Use a `PATCH` command to move additional packs from one namespace to another.
-
-```plaintext
-PATCH /internal/gitlab_subscriptions/namespaces/:id/minutes/move/:target_id
-```
-
-| Attribute   | Type    | Required | Description |
-|:------------|:--------|:---------|:------------|
-| `id` | string | yes | The ID of the namespace to transfer packs from |
-| `target_id`  | string | yes | The ID of the target namespace to transfer the packs to |
-
-Example request:
-
-```shell
-curl --request PATCH \
-  --url "http://localhost:3000/api/v4/internal/gitlab_subscriptions/namespaces/123/minutes/move/321" \
-  --header "X-CUSTOMERS-DOT-INTERNAL-TOKEN: <json-web-token>"
-```
-
-Example response:
-
-```json
-{
-  "message": "202 Accepted"
-}
-```
-
-## Migrating Endpoints
-
-These endpoints are going to be [migrated to internal endpoints](https://gitlab.com/gitlab-org/gitlab/-/issues/463741). After that, they will be
-deprecated and then [removed in a future milestone](https://gitlab.com/gitlab-org/gitlab/-/issues/473625).
-
-### Add-On Purchases (being migrated)
-
-This API is used by CustomersDot to manage add-on purchases, excluding Compute Minutes
-and Storage packs.
 
 #### Create a subscription add-on purchase
 
@@ -658,7 +442,7 @@ POST /namespaces/:id/subscription_add_on_purchase/:add_on_name
 Example request:
 
 ```shell
-curl --request POST --header "X-CUSTOMERS-DOT-INTERNAL-TOKEN: <json-web-token>" "https://gitlab.com/api/v4/namespaces/1234/subscription_add_on_purchase/code_suggestions?&quantity=10&started_on="2024-06-15"&expires_on="2024-07-15"&purchase_xid="C-00123456"&trial=true"
+curl --request POST --header "X-CUSTOMERS-DOT-INTERNAL-TOKEN: <json-web-token>" "https://gitlab.com/api/v4/namespaces/1234/subscription_add_on_purchase/code_suggestions?&quantity=10&started_on="2024-06-15"&expires_on="2024-07-15"&purchase_xid="A-S12345678"&trial=true"
 ```
 
 Example response:
@@ -671,7 +455,7 @@ Example response:
   "quantity":10,
   "started_on":"2024-06-15",
   "expires_on":"2024-07-15",
-  "purchase_xid":"C-00123456",
+  "purchase_xid":"A-S12345678",
   "trial":true
 }
 ```
@@ -695,7 +479,7 @@ PUT /namespaces/:id/subscription_add_on_purchase/:add_on_name
 Example request:
 
 ```shell
-curl --request PUT --header "X-CUSTOMERS-DOT-INTERNAL-TOKEN: <json-web-token>" "https://gitlab.com/api/v4/namespaces/1234/subscription_add_on_purchase/code_suggestions?&quantity=15&started_on="2024-06-15"&expires_on="2024-07-15"&purchase_xid="C-00123456"&trial=true"
+curl --request PUT --header "X-CUSTOMERS-DOT-INTERNAL-TOKEN: <json-web-token>" "https://gitlab.com/api/v4/namespaces/1234/subscription_add_on_purchase/code_suggestions?&quantity=15&started_on="2024-06-15"&expires_on="2024-07-15"&purchase_xid="A-S12345678"&trial=true"
 ```
 
 Example response:
@@ -708,7 +492,7 @@ Example response:
   "quantity":15,
   "started_on":"2024-06-15",
   "expires_on":"2024-07-15",
-  "purchase_xid":"C-00123456",
+  "purchase_xid":"A-S12345678",
   "trial":true
 }
 ```
@@ -737,12 +521,12 @@ Example response:
   "quantity":15,
   "started_on":"2024-06-15",
   "expires_on":"2024-07-15",
-  "purchase_xid":"C-00123456",
+  "purchase_xid":"A-S12345678",
   "trial":true
 }
 ```
 
-### Compute quota provisioning (being migrated)
+### Compute quota provisioning
 
 > - [Renamed](https://gitlab.com/groups/gitlab-com/-/epics/2150) from "CI/CD minutes" to "compute quota" and "compute minutes" in GitLab 16.1.
 
@@ -776,7 +560,7 @@ curl --request POST \
       {
         "number_of_minutes": 10000,
         "expires_at": "2022-01-01",
-        "purchase_xid": "C-00123456"
+        "purchase_xid": "46952fe69bebc1a4de10b2b4ff439d0c"
       }
     ]
   }'
@@ -790,7 +574,7 @@ Example response:
     "namespace_id": 123,
     "expires_at": "2022-01-01",
     "number_of_minutes": 10000,
-    "purchase_xid": "C-00123456"
+    "purchase_xid": "46952fe69bebc1a4de10b2b4ff439d0c"
   }
 ]
 ```

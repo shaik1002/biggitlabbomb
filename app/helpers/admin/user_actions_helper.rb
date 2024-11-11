@@ -63,7 +63,9 @@ module Admin
         return
       end
 
-      @actions << 'ban' unless @user.blocked?
+      unless @user.blocked?
+        @actions << 'ban'
+      end
     end
 
     def trust_actions

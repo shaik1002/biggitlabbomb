@@ -22,7 +22,6 @@ import {
   TOKEN_TYPE_RELEASE,
   TOKEN_TYPE_SOURCE_BRANCH,
 } from '~/vue_shared/components/filtered_search_bar/constants';
-import { EMOJI_THUMBS_UP } from '~/emoji/constants';
 import UserToken from '~/vue_shared/components/filtered_search_bar/tokens/user_token.vue';
 import BranchToken from '~/vue_shared/components/filtered_search_bar/tokens/branch_token.vue';
 import EmojiToken from '~/vue_shared/components/filtered_search_bar/tokens/emoji_token.vue';
@@ -247,7 +246,7 @@ export const mockGroupCrmOrganizationsQueryResponse = {
 };
 
 export const mockEmoji1 = {
-  name: EMOJI_THUMBS_UP,
+  name: 'thumbsup',
 };
 
 export const mockEmoji2 = {

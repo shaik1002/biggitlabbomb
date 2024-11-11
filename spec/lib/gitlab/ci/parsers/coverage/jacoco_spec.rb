@@ -28,4 +28,14 @@ RSpec.describe Gitlab::Ci::Parsers::Coverage::Jacoco, feature_category: :code_te
 
     parse_report
   end
+
+  context 'when the feature flag is disabled' do
+    before do
+      stub_feature_flags(jacoco_coverage_reports: false)
+    end
+
+    it 'returns an error' do
+      expect { parse_report }.to raise_error(described_class::FeatureDisabledError)
+    end
+  end
 end

@@ -2,7 +2,7 @@
 data_category: operational
 key_path: prometheus_metrics_enabled
 description: Whether Prometheus Metrics endpoint is enabled
-product_group: platform_insights
+product_group: respond
 value_type: boolean
 status: active
 time_frame: none
@@ -12,10 +12,6 @@ distribution:
 - ce
 - ee
 tier:
-- free
-- premium
-- ultimate
-tiers:
 - free
 - premium
 - ultimate

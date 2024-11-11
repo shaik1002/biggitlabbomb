@@ -112,12 +112,14 @@ input[type='file'] {
 }
 
 .info-well {
-  @apply gl-bg-subtle gl-text-default gl-border gl-border-section gl-rounded-base;
-
+  background: $gray-10;
+  color: $gl-text-color;
+  border: 1px solid $border-color;
+  border-radius: 4px;
   margin-bottom: 16px;
 
   .ref-list {
-    border-color: var(--gl-border-color-section);
+    border-color: $gray-100;
   }
 
   .well-segment {
@@ -131,7 +133,7 @@ input[type='file'] {
     }
 
     &:not(:first-of-type) {
-      @apply gl-border-t gl-border-t-section;
+      border-top: 1px solid $gray-100;
     }
 
     p,

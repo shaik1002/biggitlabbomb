@@ -32,13 +32,19 @@ describe('Redact text', () => {
     return createMockApollo([[replaceTextMutation, resolverMock]]);
   };
 
-  const createComponent = (mutationResponse = REPLACE_MUTATION_SUCCESS) => {
+  const createComponent = (
+    mutationResponse = REPLACE_MUTATION_SUCCESS,
+    features = { asyncRewriteHistory: true },
+  ) => {
     mutationMock = jest.fn().mockResolvedValue(mutationResponse);
     getContentWrapperHeight.mockReturnValue(TEST_HEADER_HEIGHT);
     wrapper = shallowMountExtended(RedactText, {
       apolloProvider: createMockApolloProvider(mutationMock),
       provide: {
         projectPath: TEST_PROJECT_PATH,
+        glFeatures: {
+          ...features,
+        },
       },
     });
   };
@@ -188,6 +194,21 @@ describe('Redact text', () => {
             });
           });
         });
+      });
+    });
+  });
+
+  describe('when async_rewrite_history is off', () => {
+    it('generates a housekeeping alert', async () => {
+      createComponent(REPLACE_MUTATION_SUCCESS, { features: { asyncRewriteHistory: false } });
+      findModal().vm.$emit('primary');
+      await waitForPromises();
+
+      expect(createAlert).toHaveBeenCalledWith({
+        message: 'To remove old versions from the repository, run housekeeping.',
+        primaryButton: { clickHandler: expect.any(Function), text: 'Go to housekeeping' },
+        title: 'Text redacted',
+        variant: VARIANT_WARNING,
       });
     });
   });

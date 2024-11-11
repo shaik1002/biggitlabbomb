@@ -20,9 +20,6 @@ $work-item-overview-gap-width: 2rem;
   }
 }
 
-
-// stylelint-disable-next-line gitlab/no-gl-class
-.gl-modal .work-item-view,
 .work-item-drawer .work-item-view:not(:has(.design-detail)) {
   container-name: work-item-view;
   container-type: inline-size;
@@ -121,11 +118,6 @@ $work-item-overview-gap-width: 2rem;
   // stylelint-disable-next-line gitlab/no-gl-class
   .gl-toggle-label {
     font-weight: normal;
-  }
-
-  a, a:hover {
-    color: $gl-text-color;
-    text-decoration: none;
   }
 }
 
@@ -237,7 +229,7 @@ $disclosure-hierarchy-chevron-dimension: 1.2rem;
   }
 
   &[disabled] {
-    @apply gl-text-disabled;
+    color: $gl-text-color-disabled;
     cursor: not-allowed;
   }
 

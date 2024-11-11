@@ -9,8 +9,6 @@ query getEnvironmentDetails(
   $last: Int
   $after: String
   $before: String
-  $orderBy: DeploymentsOrderByInput
-  $statuses: [DeploymentStatus!]
 ) {
   project(fullPath: $projectFullPath) {
     id
@@ -28,8 +26,7 @@ query getEnvironmentDetails(
         }
       }
       deployments(
-        statuses: $statuses
-        orderBy: $orderBy
+        orderBy: { createdAt: DESC }
         first: $first
         last: $last
         after: $after

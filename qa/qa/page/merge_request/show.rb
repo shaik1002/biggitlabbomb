@@ -103,10 +103,6 @@ module QA
           element 'artifacts-dropdown'
         end
 
-        view 'app/assets/javascripts/content_editor/components/formatting_toolbar.vue' do
-          element 'code-suggestion'
-        end
-
         view 'app/assets/javascripts/vue_shared/components/markdown/apply_suggestion.vue' do
           element 'apply-suggestion-dropdown'
           element 'commit-message-field'
@@ -153,7 +149,6 @@ module QA
         end
 
         def start_review
-          has_active_element?('start-review-button', wait: 0.5)
           click_element('start-review-button')
 
           # After clicking the button, wait for it to disappear
@@ -203,7 +198,7 @@ module QA
           click_element('dismiss-suggestion-popover-button') if has_element?('dismiss-suggestion-popover-button',
             wait: 1)
 
-          fill_editor_element('reply-field', text)
+          fill_element('reply-field', text)
         end
 
         def click_discussions_tab
@@ -217,7 +212,8 @@ module QA
         end
 
         def click_diffs_tab
-          click_element('diffs-tab')
+          # Do not wait for spinner due to https://gitlab.com/gitlab-org/gitlab/-/issues/398584
+          click_element('diffs-tab', skip_finished_loading_check: true)
         end
 
         def click_pipeline_link
@@ -233,7 +229,7 @@ module QA
 
         def expand_merge_checks
           within_element('.mr-widget-section') do
-            click_element('chevron-lg-down-icon')
+            click_element('chevron-down-icon')
           end
         end
 
@@ -321,10 +317,6 @@ module QA
           click_element('merge-button', text: 'Set to auto-merge')
         end
 
-        def auto_mergeable?
-          has_element?('merge-button', text: 'Set to auto-merge', wait: 10)
-        end
-
         def merged?
           # Reloads the page at this point to avoid the problem of the merge status failing to update
           # That's the transient UX issue this test is checking for, so if the MR is merged but the UI still shows the
@@ -407,9 +399,11 @@ module QA
           end
         end
 
-        def try_to_merge!(wait_for_no_auto_merge: true)
+        def try_to_merge!
+          # Revisit after merge page re-architect is done https://gitlab.com/gitlab-org/gitlab/-/issues/300042
+          # To remove page refresh logic if possible
           wait_until_ready_to_merge
-          wait_until { !find_element('merge-button').text.include?('auto-merge') } if wait_for_no_auto_merge # rubocop:disable Rails/NegateInclude -- Wait for text auto-merge to change
+          wait_until { !find_element('merge-button').text.include?('auto-merge') } # rubocop:disable Rails/NegateInclude
 
           click_element('merge-button')
         end
@@ -451,20 +445,10 @@ module QA
         def add_suggestion_to_diff(suggestion, line)
           find("a[data-linenumber='#{line}']").hover
           click_element('left-comment-button')
-
-          if has_element?('suggestion-button', wait: 0.5)
-            click_element('suggestion-button')
-            initial_content = find_element('reply-field').value
-            fill_editor_element('reply-field', '')
-            fill_editor_element('reply-field',
-              initial_content.gsub(/(```suggestion:-0\+0\n).*(\n```)/, "\\1#{suggestion}\\2"))
-          else
-            click_element('code-suggestion')
-            suggestion_field = find_element('suggestion-field')
-            suggestion_field.set(suggestion)
-            has_active_element?('comment-now-button', wait: 0.5)
-          end
-
+          click_element('suggestion-button')
+          initial_content = find_element('reply-field').value
+          fill_element('reply-field', '')
+          fill_element('reply-field', initial_content.gsub(/(```suggestion:-0\+0\n).*(\n```)/, "\\1#{suggestion}\\2"))
           click_element('comment-now-button')
           wait_for_requests
         end

@@ -34,7 +34,7 @@
   &:focus,
   &:focus-within,
   &:active {
-    @apply gl-focus;
+    @include gl-focus;
   }
 
   &:hover {
@@ -51,8 +51,6 @@
   opacity: 1;
 }
 
-// These are composite classes for use with Vue Transition
-// https://vuejs.org/guide/built-ins/transition
 .upload-dropzone-fade-enter-active,
 .upload-dropzone-fade-leave-active {
   @apply gl-transition-opacity;

@@ -6,6 +6,7 @@ class LooseForeignKeys::DeletedRecord < Gitlab::Database::SharedModel
   PARTITION_DURATION = 1.day
 
   include PartitionedTable
+  include IgnorableColumns
 
   self.primary_key = :id
 

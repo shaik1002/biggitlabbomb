@@ -28,9 +28,7 @@ By default, they inherit permissions from the user who created them.
 You can use the personal access tokens API to programmatically take action,
 such as [rotating a personal access token](../../api/personal_access_tokens.md#rotate-a-personal-access-token).
 
-You
-[receive an email](../../user/profile/personal_access_tokens.md#personal-access-token-expiry-emails)
-when your personal access tokens are expiring soon.
+You receive an email when tokens are seven days or less from expiration.
 
 ## OAuth 2.0 tokens
 
@@ -69,9 +67,9 @@ licensed seats.
 You can use the [project access tokens API](../../api/project_access_tokens.md) to programmatically take
 action, such as [rotating a project access token](../../api/project_access_tokens.md#rotate-a-project-access-token).
 
-Direct members of a project with at least the Maintainer role
-[receive an email](../../user/project/settings/project_access_tokens.md#project-access-token-expiry-emails)
-when project access tokens are nearly expired. Inherited members do not receive an email.
+Direct members of a project with at least the Maintainer role receive
+an email when project access tokens are seven days or less from
+expiration. Inherited members do not receive an email.
 
 ## Group access tokens
 
@@ -91,9 +89,9 @@ Bot users for groups are service accounts and do not count as licensed seats.
 You can use the [group access tokens API](../../api/group_access_tokens.md) to programmatically take
 action, such as [rotating a group access token](../../api/group_access_tokens.md#rotate-a-group-access-token).
 
-Direct members of a group with the Owner role
-[receive an email](../../user/group/settings/group_access_tokens.md#group-access-token-expiry-emails)
-when group access tokens are nearly expired. Inherited members do not receive an email.
+Direct members of a group with the Owner role receive an email when
+group access tokens are seven days or less from expiration. Inherited
+members do not receive an email.
 
 ## Deploy tokens
 
@@ -176,7 +174,7 @@ the duration of a job. It gives a CI/CD job access to a limited number of API en
 API authentication uses the job token by using the authorization of the user triggering the job.
 
 The job token is secured by its short lifetime and limited scope. This token could be leaked if
-multiple jobs run on the same machine (for example, with the [shell runner](https://docs.gitlab.com/runner/security/#usage-of-shell-executor)). You can use the [project allow list](../../ci/jobs/ci_job_token.md#add-a-group-or-project-to-the-job-token-allowlist) to further limit what the job token can access.
+multiple jobs run on the same machine (for example, with the [shell runner](https://docs.gitlab.com/runner/security/#usage-of-shell-executor)).
 On Docker Machine runners, you should configure
 [`MaxBuilds=1`](https://docs.gitlab.com/runner/configuration/advanced-configuration.html#the-runnersmachine-section)
 to ensure runner machines run only one build

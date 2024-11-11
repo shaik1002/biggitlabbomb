@@ -9,8 +9,7 @@ module Gitlab
         include ::Gitlab::Database::MigrationHelpers::LooseForeignKeyHelpers
 
         ALLOWED_TABLES = %w[group_audit_events project_audit_events instance_audit_events user_audit_events
-          audit_events web_hook_logs merge_request_diff_files merge_request_diff_commits
-          ci_runners ci_runner_machines].freeze
+          audit_events web_hook_logs merge_request_diff_files merge_request_diff_commits].freeze
 
         ERROR_SCOPE = 'table partitioning'
 
@@ -221,7 +220,7 @@ module Gitlab
         #
         #   enqueue_partitioning_data_migration :audit_events
         #
-        def enqueue_partitioning_data_migration(table_name, migration = MIGRATION)
+        def enqueue_partitioning_data_migration(table_name)
           assert_table_is_allowed(table_name)
 
           assert_not_in_transaction_block(scope: ERROR_SCOPE)
@@ -230,7 +229,7 @@ module Gitlab
           primary_key = connection.primary_key(table_name)
 
           queue_batched_background_migration(
-            migration,
+            MIGRATION,
             table_name,
             primary_key,
             partitioned_table_name,
@@ -249,13 +248,13 @@ module Gitlab
         #
         #   cleanup_partitioning_data_migration :audit_events
         #
-        def cleanup_partitioning_data_migration(table_name, migration = MIGRATION)
+        def cleanup_partitioning_data_migration(table_name)
           assert_table_is_allowed(table_name)
 
           partitioned_table_name = make_partitioned_table_name(table_name)
           primary_key = connection.primary_key(table_name)
 
-          delete_batched_background_migration(migration, table_name, primary_key, [partitioned_table_name])
+          delete_batched_background_migration(MIGRATION, table_name, primary_key, [partitioned_table_name])
         end
 
         def create_hash_partitions(table_name, number_of_partitions)

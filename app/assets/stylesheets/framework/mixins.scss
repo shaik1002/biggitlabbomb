@@ -119,7 +119,7 @@
   padding: 0;
 
   &:hover {
-    @apply gl-focus;
+    @include gl-focus;
   }
 
   &.scrolling {
@@ -207,11 +207,12 @@
 
 // Used in EE for Web Terminal
 @mixin build-log-bar($height) {
-  height: auto;
+  height: $height;
   min-height: $height;
+  background: var(--white, $white);
+  border: 1px solid var(--gl-border-color-default);
+  color: var(--gl-text-color-default);
   padding: $grid-size;
-  @apply gl-bg-section gl-border gl-border-section gl-text-default;
-  box-shadow: 0 -6px 0 0 var(--gl-background-color-default);
 }
 
 @mixin job-log-top-bar {
@@ -219,7 +220,12 @@
   z-index: 2;
   position: sticky;
   top: calc(#{$calc-application-header-height} - 1px);
-  @apply gl-rounded-t-lg;
+  border-radius: $gl-border-radius-base $gl-border-radius-base 0 0;
+  box-shadow: 0 -4px 0 0 var(--white);
+
+  .gl-dark & {
+    box-shadow: 0 -4px 0 0 var(--gray-10);
+  }
 }
 
 /*
@@ -349,7 +355,7 @@
 
       // Rouge `Comment` token (quoted text in email body)
       .c {
-        color: $gl-text-color-subtle;
+        color: $gl-grayish-blue;
         font-style: italic;
       }
     }

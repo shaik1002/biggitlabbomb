@@ -65,7 +65,7 @@ module Gitlab
       end
 
       if dryrun
-        puts Shellwords.join(cmd)
+        puts Shellwords.join(cmd) # rubocop:disable Rails/Output
         return
       end
 

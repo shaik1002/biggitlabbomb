@@ -80,10 +80,14 @@ RSpec.describe Gitlab::GonHelper, feature_category: :shared do
     end
 
     context 'when ui_for_organizations feature flag is enabled' do
-      context 'when current_organization is set', :with_current_organization do
+      context 'when current_organization is set' do
+        before do
+          allow(::Current).to receive(:organization).and_return(organization)
+        end
+
         it 'exposes current_organization' do
           expect(gon).to receive(:current_organization=).with(
-            current_organization.slice(:id, :name, :web_url, :avatar_url)
+            organization.slice(:id, :name, :web_url, :avatar_url)
           )
 
           helper.add_gon_variables
@@ -99,8 +103,9 @@ RSpec.describe Gitlab::GonHelper, feature_category: :shared do
       end
     end
 
-    context 'when ui_for_organizations feature flag is disabled', :with_current_organization do
+    context 'when ui_for_organizations feature flag is disabled' do
       before do
+        allow(::Current).to receive(:organization).and_return(organization)
         stub_feature_flags(ui_for_organizations: false)
       end
 

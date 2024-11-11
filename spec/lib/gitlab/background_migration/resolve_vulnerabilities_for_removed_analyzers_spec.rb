@@ -3,7 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::BackgroundMigration::ResolveVulnerabilitiesForRemovedAnalyzers,
-  schema: 20241015185528,
   feature_category: :static_application_security_testing do
   let(:namespaces) { table(:namespaces) }
   let(:projects) { table(:projects) }
@@ -55,7 +54,7 @@ RSpec.describe Gitlab::BackgroundMigration::ResolveVulnerabilitiesForRemovedAnal
     ]
   end
 
-  shared_context 'with vulnerability data' do
+  shared_context 'with vulnerability data' do # rubocop:disable RSpec/MultipleMemoizedHelpers -- we need to satifsy foreign keys
     let!(:vulnerabilities_to_resolve) do
       removed_scanners.map do |external_id|
         create_vulnerability(project_id: project.id, external_id: external_id)

@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Pipeline Security
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -17,7 +17,7 @@ is revoked and you cannot use the token anymore.
 
 Use a CI/CD job token to authenticate with certain GitLab features from running jobs.
 The token receives the same access level as the user that triggered the pipeline,
-but has [access to fewer resources](#job-token-feature-access) than a personal access token. A user can cause a job to run
+but has access to fewer resources than a personal access token. A user can cause a job to run
 with an action like pushing a commit, triggering a manual job, or being the owner of a scheduled pipeline.
 This user must have a [role that has the required privileges](../../user/permissions.md#cicd)
 to access the resources.
@@ -29,28 +29,25 @@ If a project is public or internal, you can access some features without being o
 For example, you can fetch artifacts from the project's public pipelines.
 This access can also [be restricted](#limit-job-token-scope-for-public-or-internal-projects).
 
-## Job token feature access
-
-The CI/CD job token can only access the following features and API endpoints:
-
 | Feature                                                                                               | Additional details |
 |-------------------------------------------------------------------------------------------------------|--------------------|
 | [Container registry API](../../api/container_registry.md)                                             | The token is scoped to the container registry of the job's project only. |
-| [Container registry](../../user/packages/container_registry/build_and_push_images.md#use-gitlab-cicd) | The `$CI_REGISTRY_PASSWORD` [predefined variable](../variables/predefined_variables.md) is the CI/CD job token. Both are scoped to the container registry of the job's project only. |
+| [Container registry](../../user/packages/container_registry/build_and_push_images.md#use-gitlab-cicd) | The `$CI_REGISTRY_PASSWORD` [predefined variable](../variables/predefined_variables.md) is the CI/CD job token. |
 | [Deployments API](../../api/deployments.md)                                                           | `GET` requests are public by default. |
 | [Environments API](../../api/environments.md)                                                         | `GET` requests are public by default. |
 | [Job artifacts API](../../api/job_artifacts.md#get-job-artifacts)                                     | `GET` requests are public by default. |
-| [API endpoint to get the job of a job token](../../api/jobs.md#get-job-tokens-job)                    | To get the job token's job. |
+| [Jobs API](../../api/jobs.md#get-job-tokens-job)                                                      | To get the job token's job. |
 | [Package registry](../../user/packages/package_registry/index.md#to-build-packages)                   |         |
 | [Packages API](../../api/packages.md)                                                                 | `GET` requests are public by default. |
 | [Pipeline triggers](../../api/pipeline_triggers.md)                                                   | Used with the `token=` parameter to [trigger a multi-project pipeline](../pipelines/downstream_pipelines.md#trigger-a-multi-project-pipeline-by-using-the-api). |
-| [Update pipeline metadata API endpoint](../../api/pipelines.md#update-pipeline-metadata)              | To update pipeline metadata. |
+| [Pipelines API](../../api/pipelines.md#update-pipeline-metadata)                                      | To update pipeline metadata. |
 | [Release links API](../../api/releases/links.md)                                                      |         |
 | [Releases API](../../api/releases/index.md)                                                           | `GET` requests are public by default. |
 | [Secure files](../secure_files/index.md#use-secure-files-in-cicd-jobs)                                | The `download-secure-files` tool authenticates with a CI/CD job token by default. |
 | [Terraform plan](../../user/infrastructure/index.md)                                                  |         |
 
-Other API endpoints are not accessible using a job token. There is [a proposal](https://gitlab.com/groups/gitlab-org/-/epics/3559)
+A job token can access a project's resources without any configuration, but it might
+give extra permissions that aren't necessary. There is [a proposal](https://gitlab.com/groups/gitlab-org/-/epics/3559)
 to redesign the feature for more granular control of access permissions.
 
 ## GitLab CI/CD job token security
@@ -73,7 +70,7 @@ jobs.
 
 ## Control job token access to your project
 
-You can control which groups or projects can use a job token to authenticate and access some of your project's resources.
+You can control which groups or projects can use a job token to authenticate and access your project's resources.
 
 By default, job token access is restricted to only CI/CD jobs that run in pipelines in
 your project. To allow another group or project to authenticate with a job token from the other
@@ -85,10 +82,6 @@ project's pipeline:
 
 If your project is public or internal, some publicly accessible resources can be accessed
 with a job token from any project. These resources can also be [limited to only projects on the allowlist](#limit-job-token-scope-for-public-or-internal-projects).
-
-Self-managed instance administrators can override this setting from the **Admin** area.
-If the **Only this project and any groups and projects in the allowlist** setting is enforced,
-the CI/CD job token will always be restricted to the project's allowlist.
 
 ### Add a group or project to the job token allowlist
 
@@ -292,22 +285,6 @@ To configure the job token scope:
 1. Toggle **Limit access _from_ this project** to enabled.
 1. Optional. Add existing projects to the token's access scope. The user adding a
    project must have the Maintainer role in both projects.
-
-## Job token authentication log
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/467292/) in GitLab 17.6.
-
-You can track which other projects use a CI/CD job token to authenticate with your project
-in an authentication log. To check the log:
-
-1. On the left sidebar, select **Search or go to** and find your project.
-1. Select **Settings > CI/CD**.
-1. Expand **Job token permissions**. The **Authentication log** section displays the
-   the list of other projects that accessed your project by authenticating with a job token.
-1. Optional. Select **Download CSV** to download the full authentication log in CSV format.
-
-The authentication log displays a maximum of 100 authentication events. If the number of events
-is more than 100, download the CSV file to view the log.
 
 ## Troubleshooting
 

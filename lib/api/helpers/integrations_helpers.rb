@@ -102,7 +102,26 @@ module API
           'assembla' => ::Integrations::Assembla.api_arguments,
           'bamboo' => ::Integrations::Bamboo.api_arguments,
           'bugzilla' => ::Integrations::Bugzilla.api_arguments,
-          'buildkite' => ::Integrations::Buildkite.api_arguments,
+          'buildkite' => [
+            {
+              required: true,
+              name: :token,
+              type: String,
+              desc: 'Buildkite project GitLab token'
+            },
+            {
+              required: true,
+              name: :project_url,
+              type: String,
+              desc: 'The Buildkite pipeline URL'
+            },
+            {
+              required: false,
+              name: :enable_ssl_verification,
+              type: ::Grape::API::Boolean,
+              desc: 'DEPRECATED: This parameter has no effect since SSL verification will always be enabled'
+            }
+          ],
           'campfire' => ::Integrations::Campfire.api_arguments,
           'confluence' => ::Integrations::Confluence.api_arguments,
           'custom-issue-tracker' => ::Integrations::CustomIssueTracker.api_arguments,
@@ -255,7 +274,38 @@ module API
               desc: 'Colorize messages'
             }
           ],
-          'jenkins' => ::Integrations::Jenkins.api_arguments,
+          'jenkins' => [
+            {
+              required: true,
+              name: :jenkins_url,
+              type: String,
+              desc: 'Jenkins root URL like https://jenkins.example.com'
+            },
+            {
+              required: false,
+              name: :enable_ssl_verification,
+              type: ::Grape::API::Boolean,
+              desc: 'Enable SSL verification'
+            },
+            {
+              required: true,
+              name: :project_name,
+              type: String,
+              desc: 'The URL-friendly project name. Example: my_project_name'
+            },
+            {
+              required: false,
+              name: :username,
+              type: String,
+              desc: 'A user with access to the Jenkins server, if applicable'
+            },
+            {
+              required: false,
+              name: :password,
+              type: String,
+              desc: 'The password of the user'
+            }
+          ],
           'jira' => [
             {
               required: true,
@@ -630,7 +680,7 @@ module API
           required: false,
           name: :use_inherited_settings,
           type: ::Grape::API::Boolean,
-          desc: 'Indicates whether to inherit the default settings. Defaults to `false`.'
+          desc: 'Indicates whether or not to inherit default settings. Defaults to `false`.'
         }
       end
     end

@@ -11,18 +11,18 @@ describe('Pipelines Empty State', () => {
   const findButton = () => wrapper.find('a');
   const pipelinesCiTemplates = () => wrapper.findComponent(PipelinesCiTemplates);
 
-  const createWrapper = (provide = {}) => {
+  const createWrapper = (props = {}) => {
     wrapper = shallowMount(EmptyState, {
       provide: {
         pipelineEditorPath: '',
         suggestedCiTemplates: [],
         anyRunnersAvailable: true,
         ciRunnerSettingsPath: '',
-        canCreatePipeline: true,
-        ...provide,
       },
       propsData: {
         emptyStateSvgPath: 'foo.svg',
+        canSetCi: true,
+        ...props,
       },
       stubs: {
         GlEmptyState,
@@ -42,7 +42,7 @@ describe('Pipelines Empty State', () => {
 
   describe('when user cannot configure CI', () => {
     beforeEach(() => {
-      createWrapper({ canCreatePipeline: false });
+      createWrapper({ canSetCi: false });
     });
 
     it('should render empty state SVG', () => {

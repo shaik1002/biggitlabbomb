@@ -2,7 +2,7 @@
 data_category: optional
 key_path: usage_activity_by_stage_monthly.monitor.projects_with_tracing_enabled
 description: Projects with tracing enabled
-product_group: platform_insights
+product_group: respond
 value_type: number
 status: removed
 time_frame: 28d
@@ -11,10 +11,6 @@ distribution:
 - ce
 - ee
 tier:
-- free
-- premium
-- ultimate
-tiers:
 - free
 - premium
 - ultimate

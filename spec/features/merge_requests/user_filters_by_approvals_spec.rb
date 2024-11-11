@@ -10,11 +10,6 @@ RSpec.describe 'Merge Requests > User filters', :js, feature_category: :code_rev
   let_it_be(:group_user) { create(:user) }
   let_it_be(:first_user) { create(:user) }
 
-  before_all do
-    project.add_developer(first_user)
-    project.add_developer(group_user)
-  end
-
   before do
     sign_in(user)
     visit project_merge_requests_path(project)
@@ -40,7 +35,7 @@ RSpec.describe 'Merge Requests > User filters', :js, feature_category: :code_rev
 
     context 'filtering by approved-by:none' do
       it 'applies the filter' do
-        select_tokens 'Approved-By', '=', 'None', submit: true
+        input_filtered_search('approved-by:=none')
 
         expect(page).to have_issuable_counts(open: 1, closed: 0, all: 1)
 
@@ -52,7 +47,7 @@ RSpec.describe 'Merge Requests > User filters', :js, feature_category: :code_rev
 
     context 'filtering by approved-by:any' do
       it 'applies the filter' do
-        select_tokens 'Approved-By', '=', 'Any', submit: true
+        input_filtered_search('approved-by:=any')
 
         expect(page).to have_issuable_counts(open: 2, closed: 0, all: 2)
 
@@ -63,7 +58,7 @@ RSpec.describe 'Merge Requests > User filters', :js, feature_category: :code_rev
 
     context 'filtering by approved-by:@username' do
       it 'applies the filter' do
-        select_tokens 'Approved-By', '=', first_user.username, submit: true
+        input_filtered_search("approved-by:=@#{first_user.username}")
 
         expect(page).to have_issuable_counts(open: 1, closed: 0, all: 1)
 
@@ -74,7 +69,7 @@ RSpec.describe 'Merge Requests > User filters', :js, feature_category: :code_rev
 
     context 'filtering by an approver from a group' do
       it 'applies the filter' do
-        select_tokens 'Approved-By', '=', group_user.username, submit: true
+        input_filtered_search("approved-by:=@#{group_user.username}")
 
         expect(page).to have_issuable_counts(open: 1, closed: 0, all: 1)
 

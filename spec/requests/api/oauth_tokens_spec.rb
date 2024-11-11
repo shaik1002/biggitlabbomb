@@ -5,8 +5,6 @@ require 'spec_helper'
 RSpec.describe 'OAuth tokens', feature_category: :system_access do
   include HttpBasicAuthHelpers
 
-  let_it_be(:organization) { create(:organization, :default) }
-
   context 'Resource Owner Password Credentials' do
     def request_oauth_token(user, headers = {}, password = user.password)
       post '/oauth/token',

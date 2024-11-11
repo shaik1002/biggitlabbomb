@@ -41,13 +41,8 @@ describe('Work item add note', () => {
     mutationHandler = mutationSuccessHandler,
     canUpdate = true,
     canCreateNote = true,
-    emailParticipantsWidgetPresent = true,
     workItemIid = '1',
-    workItemResponse = workItemByIidResponseFactory({
-      canUpdate,
-      canCreateNote,
-      emailParticipantsWidgetPresent,
-    }),
+    workItemResponse = workItemByIidResponseFactory({ canUpdate, canCreateNote }),
     signedIn = true,
     isEditing = true,
     workItemType = 'Task',
@@ -308,22 +303,6 @@ describe('Work item add note', () => {
 
       expect(findWorkItemLockedComponent().exists()).toBe(true);
       expect(findCommentForm().exists()).toBe(false);
-    });
-  });
-
-  describe('email participants', () => {
-    it('sets `hasEmailParticipantsWidget` prop to `true` for comment form by default', async () => {
-      await createComponent();
-
-      expect(findCommentForm().props('hasEmailParticipantsWidget')).toEqual(true);
-    });
-
-    describe('when email participants widget is not available', () => {
-      it('sets `hasEmailParticipantsWidget` prop to `false` for comment form', async () => {
-        await createComponent({ emailParticipantsWidgetPresent: false });
-
-        expect(findCommentForm().props('hasEmailParticipantsWidget')).toEqual(false);
-      });
     });
   });
 

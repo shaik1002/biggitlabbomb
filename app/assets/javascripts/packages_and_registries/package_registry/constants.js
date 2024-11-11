@@ -162,7 +162,6 @@ export const PACKAGE_REGISTRY_TITLE = __('Package Registry');
 
 export const PACKAGE_ERROR_STATUS = 'ERROR';
 export const PACKAGE_DEFAULT_STATUS = 'DEFAULT';
-export const PACKAGE_DEPRECATED_STATUS = 'DEPRECATED';
 
 export const NPM_PACKAGE_MANAGER = 'npm';
 export const YARN_PACKAGE_MANAGER = 'yarn';

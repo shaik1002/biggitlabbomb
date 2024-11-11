@@ -22,7 +22,6 @@ class WorkItem < Issue
     foreign_key: 'issue_id',
     inverse_of: :work_item,
     autosave: true
-  has_one :weights_source, class_name: 'WorkItems::WeightsSource'
 
   has_many :child_links, class_name: '::WorkItems::ParentLink', foreign_key: :work_item_parent_id
   has_many :work_item_children, through: :child_links, class_name: 'WorkItem',
@@ -115,17 +114,6 @@ class WorkItem < Issue
     def related_link_class
       WorkItems::RelatedWorkItemLink
     end
-  end
-
-  def create_dates_source_from_current_dates
-    create_dates_source(
-      due_date: due_date,
-      start_date: start_date,
-      start_date_is_fixed: due_date.present? || start_date.present?,
-      due_date_is_fixed: due_date.present? || start_date.present?,
-      start_date_fixed: start_date,
-      due_date_fixed: due_date
-    )
   end
 
   def noteable_target_type_name

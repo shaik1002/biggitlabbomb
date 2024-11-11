@@ -7,7 +7,6 @@ import {
   buildWatchPath,
   mapWorkloadItem,
   mapEventItem,
-  subscribeToSocket,
 } from '~/kubernetes_dashboard/graphql/helpers/resolver_helpers';
 import {
   watchFluxKustomization,
@@ -22,114 +21,51 @@ import k8sServicesQuery from '../../queries/k8s_services.query.graphql';
 import k8sDeploymentsQuery from '../../queries/k8s_deployments.query.graphql';
 import k8sEventsQuery from '../../queries/k8s_events.query.graphql';
 import { k8sResourceType } from './constants';
-import { k8sLogs, k8sPodLogsWatcher, abortK8sPodLogsStream } from './k8s_logs';
+import { k8sLogs } from './k8s_logs';
 
 const watchServices = ({ configuration, namespace, client }) => {
   const query = k8sServicesQuery;
-  const queryField = k8sResourceType.k8sServices;
-
   const watchPath = buildWatchPath({ resource: 'services', namespace });
-  const watchParams = {
-    version: 'v1',
-    resource: 'services',
-    namespace,
-  };
-
-  watchWorkloadItems({
-    client,
-    query,
-    configuration,
-    namespace,
-    watchPath,
-    queryField,
-    watchParams,
-  });
+  const queryField = k8sResourceType.k8sServices;
+  watchWorkloadItems({ client, query, configuration, namespace, watchPath, queryField });
 };
 
 const watchPods = ({ configuration, namespace, client }) => {
   const query = k8sPodsQuery;
   const watchPath = buildWatchPath({ resource: 'pods', namespace });
   const queryField = k8sResourceType.k8sPods;
-
-  watchWorkloadItems({
-    client,
-    query,
-    configuration,
-    namespace,
-    watchPath,
-    queryField,
-  });
+  watchWorkloadItems({ client, query, configuration, namespace, watchPath, queryField });
 };
 
 const watchDeployments = ({ configuration, namespace, client }) => {
   const query = k8sDeploymentsQuery;
   const watchPath = buildWatchPath({ resource: 'deployments', api: 'apis/apps/v1', namespace });
   const queryField = k8sResourceType.k8sDeployments;
-  const watchParams = {
-    group: 'apps',
-    version: 'v1',
-    resource: 'deployments',
-    namespace,
-  };
 
-  watchWorkloadItems({
-    client,
-    query,
-    configuration,
-    namespace,
-    watchPath,
-    queryField,
-    watchParams,
-  });
+  watchWorkloadItems({ client, query, configuration, namespace, watchPath, queryField });
 };
 
-export const watchEvents = async ({
-  client,
-  configuration,
-  namespace,
-  involvedObjectName,
-  query,
-}) => {
+const watchEvents = ({ client, configuration, namespace, involvedObjectName, config }) => {
   const fieldSelector = `involvedObject.name=${involvedObjectName}`;
-  const queryField = 'k8sEvents';
+  const watchPath = buildWatchPath({ resource: 'events', namespace });
+  const watcherApi = new WatchApi(config);
 
-  const updateQueryCache = (data) => {
-    const result = data.map(mapEventItem);
-    client.writeQuery({
-      query,
-      variables: { configuration, namespace, involvedObjectName },
-      data: { [queryField]: result },
+  watcherApi
+    .subscribeToStream(watchPath, { fieldSelector, watch: true })
+    .then((watcher) => {
+      watcher.on(EVENT_DATA, (data) => {
+        const result = data.map(mapEventItem);
+
+        client.writeQuery({
+          query: k8sEventsQuery,
+          variables: { configuration, namespace, involvedObjectName },
+          data: { k8sEvents: result },
+        });
+      });
+    })
+    .catch((err) => {
+      handleClusterError(err);
     });
-  };
-
-  const watchFunction = async () => {
-    try {
-      const config = new Configuration(configuration);
-      const watcherApi = new WatchApi(config);
-      const watchPath = buildWatchPath({ resource: 'events', namespace });
-      const watcher = await watcherApi.subscribeToStream(watchPath, { fieldSelector, watch: true });
-
-      watcher.on(EVENT_DATA, updateQueryCache);
-    } catch (err) {
-      await handleClusterError(err);
-    }
-  };
-
-  if (gon?.features?.useWebsocketForK8sWatch) {
-    const watchId = `events-io-${involvedObjectName}`;
-    const watchParams = { version: 'v1', resource: 'events', fieldSelector, namespace };
-    const cacheParams = {
-      updateQueryCache,
-    };
-
-    try {
-      await subscribeToSocket({ watchId, watchParams, configuration, cacheParams });
-    } catch {
-      await watchFunction();
-    }
-  } else {
-    await watchFunction();
-  }
 };
 
 const handleKubernetesMutationError = async (err) => {
@@ -185,13 +121,11 @@ export const kubernetesMutations = {
         return buildKubernetesErrors([error]);
       });
   },
-  abortK8sPodLogsStream,
 };
 
 export const kubernetesQueries = {
   k8sPods(_, { configuration, namespace }, { client }) {
     const query = k8sPodsQuery;
-
     return getK8sPods({ client, query, configuration, namespace });
   },
   k8sServices(_, { configuration, namespace }, { client }) {
@@ -266,13 +200,7 @@ export const kubernetesQueries = {
       .then((res) => {
         const data = res.items?.map(mapEventItem) ?? [];
 
-        watchEvents({
-          client,
-          configuration,
-          namespace,
-          involvedObjectName,
-          query: k8sEventsQuery,
-        });
+        watchEvents({ client, configuration, namespace, involvedObjectName, config });
 
         return data;
       })
@@ -285,5 +213,4 @@ export const kubernetesQueries = {
       });
   },
   k8sLogs,
-  k8sPodLogsWatcher,
 };

@@ -73,10 +73,10 @@ import CiIcon from '~/vue_shared/components/ci_icon/ci_icon.vue';
 import MergeRequestReviewers from '~/issuable/components/merge_request_reviewers.vue';
 import setSortPreferenceMutation from '~/issues/list/queries/set_sort_preference.mutation.graphql';
 import issuableEventHub from '~/issues/list/eventhub';
-import getMergeRequestsQuery from 'ee_else_ce/merge_requests/list/queries/get_merge_requests.query.graphql';
-import getMergeRequestsCountsQuery from 'ee_else_ce/merge_requests/list/queries/get_merge_requests_counts.query.graphql';
 import { AutocompleteCache } from '../../utils/autocomplete_cache';
 import { i18n, BRANCH_LIST_REFRESH_INTERVAL } from '../constants';
+import getMergeRequestsQuery from '../queries/get_merge_requests.query.graphql';
+import getMergeRequestsCountsQuery from '../queries/get_merge_requests_counts.query.graphql';
 import searchLabelsQuery from '../queries/search_labels.query.graphql';
 import MergeRequestStatistics from './merge_request_statistics.vue';
 import MergeRequestMoreActionsDropdown from './more_actions_dropdown.vue';
@@ -225,28 +225,33 @@ export default {
       return convertToSearchQuery(this.filterTokens);
     },
     searchTokens() {
-      const preloadedUsers = [
-        window.gon?.current_user_id && {
-          id: convertToGraphQLId(TYPENAME_USER, gon.current_user_id),
-          name: gon.current_user_fullname,
-          username: gon.current_username,
-          avatar_url: gon.current_user_avatar_url,
-        },
-      ].filter(Boolean);
-
-      return [
+      const preloadedUsers = [];
+      const tokens = [
         {
-          type: TOKEN_TYPE_AUTHOR,
-          title: TOKEN_TITLE_AUTHOR,
-          icon: 'pencil',
+          type: TOKEN_TYPE_APPROVED_BY,
+          title: TOKEN_TITLE_APPROVED_BY,
+          icon: 'approval',
           token: UserToken,
           dataType: 'user',
-          defaultUsers: [],
+          operators: OPERATORS_IS_NOT,
           fullPath: this.fullPath,
           isProject: true,
-          recentSuggestionsStorageKey: `${this.fullPath}-merge-requests-recent-tokens-author`,
+          recentSuggestionsStorageKey: `${this.fullPath}-merge_requests-recent-tokens-approved_by`,
           preloadedUsers,
-          multiselect: false,
+          multiSelect: false,
+        },
+        {
+          type: TOKEN_TYPE_APPROVER,
+          title: TOKEN_TITLE_APPROVER,
+          icon: 'approval',
+          token: UserToken,
+          dataType: 'user',
+          operators: OPERATORS_IS,
+          fullPath: this.fullPath,
+          isProject: true,
+          recentSuggestionsStorageKey: `${this.fullPath}-merge_requests-recent-tokens-approvers`,
+          preloadedUsers,
+          multiSelect: false,
         },
         {
           type: TOKEN_TYPE_ASSIGNEE,
@@ -254,6 +259,7 @@ export default {
           icon: 'user',
           token: UserToken,
           dataType: 'user',
+          operators: OPERATORS_IS_NOT,
           fullPath: this.fullPath,
           isProject: true,
           recentSuggestionsStorageKey: `${this.fullPath}-merge-requests-recent-tokens-assignee`,
@@ -267,11 +273,41 @@ export default {
           icon: 'user',
           token: UserToken,
           dataType: 'user',
+          operators: OPERATORS_IS_NOT,
           fullPath: this.fullPath,
           isProject: true,
           recentSuggestionsStorageKey: `${this.fullPath}-merge-requests-recent-tokens-reviewer`,
           preloadedUsers,
           multiSelect: false,
+          unique: true,
+        },
+        {
+          type: TOKEN_TYPE_AUTHOR,
+          title: TOKEN_TITLE_AUTHOR,
+          icon: 'pencil',
+          token: UserToken,
+          dataType: 'user',
+          defaultUsers: [],
+          operators: OPERATORS_IS,
+          fullPath: this.fullPath,
+          isProject: true,
+          recentSuggestionsStorageKey: `${this.fullPath}-merge-requests-recent-tokens-author`,
+          preloadedUsers,
+          multiselect: false,
+        },
+        {
+          type: TOKEN_TYPE_DRAFT,
+          title: TOKEN_TITLE_DRAFT,
+          icon: 'pencil-square',
+          token: GlFilteredSearchToken,
+          operators: OPERATORS_IS,
+          fullPath: this.fullPath,
+          isProject: true,
+          multiselect: false,
+          options: [
+            { value: 'yes', title: this.$options.i18n.yes },
+            { value: 'no', title: this.$options.i18n.no },
+          ],
           unique: true,
         },
         {
@@ -290,35 +326,11 @@ export default {
           unique: true,
         },
         {
-          type: TOKEN_TYPE_APPROVER,
-          title: TOKEN_TITLE_APPROVER,
-          icon: 'approval',
-          token: UserToken,
-          dataType: 'user',
-          operators: OPERATORS_IS,
-          fullPath: this.fullPath,
-          isProject: true,
-          recentSuggestionsStorageKey: `${this.fullPath}-merge_requests-recent-tokens-approvers`,
-          preloadedUsers,
-          multiSelect: false,
-        },
-        {
-          type: TOKEN_TYPE_APPROVED_BY,
-          title: TOKEN_TITLE_APPROVED_BY,
-          icon: 'approval',
-          token: UserToken,
-          dataType: 'user',
-          fullPath: this.fullPath,
-          isProject: true,
-          recentSuggestionsStorageKey: `${this.fullPath}-merge_requests-recent-tokens-approved_by`,
-          preloadedUsers,
-          multiSelect: false,
-        },
-        {
           type: TOKEN_TYPE_MILESTONE,
           title: TOKEN_TITLE_MILESTONE,
           icon: 'milestone',
           token: MilestoneToken,
+          operators: OPERATORS_IS,
           recentSuggestionsStorageKey: `${this.fullPath}-merge-requests-recent-tokens-milestone`,
           shouldSkipSort: true,
           fullPath: this.fullPath,
@@ -327,10 +339,31 @@ export default {
           unique: true,
         },
         {
+          type: TOKEN_TYPE_TARGET_BRANCH,
+          title: TOKEN_TITLE_TARGET_BRANCH,
+          icon: 'arrow-right',
+          token: BranchToken,
+          operators: OPERATORS_IS,
+          fullPath: this.fullPath,
+          isProject: true,
+          fetchBranches: this.fetchTargetBranches,
+        },
+        {
+          type: TOKEN_TYPE_SOURCE_BRANCH,
+          title: TOKEN_TITLE_SOURCE_BRANCH,
+          icon: 'branch',
+          token: BranchToken,
+          operators: OPERATORS_IS,
+          fullPath: this.fullPath,
+          isProject: true,
+          fetchBranches: this.fetchSourceBranches,
+        },
+        {
           type: TOKEN_TYPE_LABEL,
           title: TOKEN_TITLE_LABEL,
           icon: 'labels',
           token: LabelToken,
+          operators: OPERATORS_IS_NOT,
           fetchLabels: this.fetchLabels,
           recentSuggestionsStorageKey: `${this.fullPath}-merge_requests-recent-tokens-label`,
         },
@@ -341,48 +374,6 @@ export default {
           token: ReleaseToken,
           operators: OPERATORS_IS_NOT,
           releasesEndpoint: this.releasesEndpoint,
-        },
-        this.isSignedIn && {
-          type: TOKEN_TYPE_MY_REACTION,
-          title: TOKEN_TITLE_MY_REACTION,
-          icon: 'thumb-up',
-          token: EmojiToken,
-          unique: true,
-          fetchEmojis: this.fetchEmojis,
-          recentSuggestionsStorageKey: `${this.fullPath}-merge_requests-recent-tokens-my_reaction`,
-        },
-        {
-          type: TOKEN_TYPE_DRAFT,
-          title: TOKEN_TITLE_DRAFT,
-          icon: 'pencil-square',
-          token: GlFilteredSearchToken,
-          operators: OPERATORS_IS,
-          fullPath: this.fullPath,
-          isProject: true,
-          multiselect: false,
-          options: [
-            { value: 'yes', title: this.$options.i18n.yes },
-            { value: 'no', title: this.$options.i18n.no },
-          ],
-          unique: true,
-        },
-        {
-          type: TOKEN_TYPE_TARGET_BRANCH,
-          title: TOKEN_TITLE_TARGET_BRANCH,
-          icon: 'arrow-right',
-          token: BranchToken,
-          fullPath: this.fullPath,
-          isProject: true,
-          fetchBranches: this.fetchTargetBranches,
-        },
-        {
-          type: TOKEN_TYPE_SOURCE_BRANCH,
-          title: TOKEN_TITLE_SOURCE_BRANCH,
-          icon: 'branch',
-          token: BranchToken,
-          fullPath: this.fullPath,
-          isProject: true,
-          fetchBranches: this.fetchSourceBranches,
         },
         {
           type: TOKEN_TYPE_ENVIRONMENT,
@@ -408,7 +399,31 @@ export default {
           token: DateToken,
           operators: OPERATORS_IS,
         },
-      ].filter(Boolean);
+      ];
+
+      if (gon.current_user_id) {
+        preloadedUsers.push({
+          id: convertToGraphQLId(TYPENAME_USER, gon.current_user_id),
+          name: gon.current_user_fullname,
+          username: gon.current_username,
+          avatar_url: gon.current_user_avatar_url,
+        });
+      }
+
+      if (this.isSignedIn) {
+        tokens.push({
+          type: TOKEN_TYPE_MY_REACTION,
+          title: TOKEN_TITLE_MY_REACTION,
+          icon: 'thumb-up',
+          token: EmojiToken,
+          operators: OPERATORS_IS_NOT,
+          unique: true,
+          fetchEmojis: this.fetchEmojis,
+          recentSuggestionsStorageKey: `${this.fullPath}-merge_requests-recent-tokens-my_reaction`,
+        });
+      }
+
+      return tokens;
     },
     showPaginationControls() {
       return (
@@ -417,7 +432,7 @@ export default {
       );
     },
     sortOptions() {
-      return getSortOptions({ hasManualSort: false, hasMergedDate: this.state === STATUS_MERGED });
+      return getSortOptions({ hasManualSort: false });
     },
     tabCounts() {
       const { openedMergeRequests, closedMergeRequests, mergedMergeRequests, allMergeRequests } =
@@ -454,16 +469,6 @@ export default {
     },
     isBulkEditButtonDisabled() {
       return this.showBulkEditSidebar || !this.mergeRequests.length;
-    },
-  },
-  watch: {
-    state: {
-      handler(val) {
-        document
-          .querySelector('.js-status-dropdown-container')
-          ?.classList.toggle('gl-hidden', val === STATUS_MERGED);
-      },
-      immediate: true,
     },
   },
   created() {
@@ -623,7 +628,7 @@ export default {
       this.$apollo
         .mutate({
           mutation: setSortPreferenceMutation,
-          variables: { input: { mergeRequestsSort: sortKey } },
+          variables: { input: { issuesSort: sortKey } },
         })
         .then(({ data }) => {
           if (data.userPreferencesUpdate.errors.length) {
@@ -800,7 +805,7 @@ export default {
     </template>
 
     <template #reviewers="{ issuable = {} }">
-      <li v-if="getReviewers(issuable).length" class="issuable-reviewers !gl-mr-0">
+      <li v-if="getReviewers(issuable).length" class="!gl-mr-0">
         <merge-request-reviewers
           :reviewers="getReviewers(issuable)"
           :icon-size="16"

@@ -65,8 +65,3 @@ export const TOKENS = [
     ],
   },
 ];
-
-export const SOLO_OWNED_ORGANIZATIONS_EMPTY = {
-  count: 0,
-  nodes: [],
-};

@@ -94,7 +94,6 @@ export default {
     {{ runnerManagersCountFormatted }}
     <gl-button
       v-if="runnerManagersCount"
-      data-testid="runner-button"
       variant="link"
       @mouseover.once="fetchManagers"
       @focus.once="fetchManagers"

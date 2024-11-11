@@ -12,7 +12,7 @@ which are part of our [main Rails project](https://gitlab.com/gitlab-org/gitlab)
 
 Also see our [direction page](https://about.gitlab.com/direction/manage/import_and_integrate/integrations/) for an overview of our strategy around integrations.
 
-This guide is a work in progress. You're welcome to ping `@gitlab-org/foundations/import-and-integrate`
+This guide is a work in progress. You're welcome to ping `@gitlab-org/manage/import-and-integrate`
 if you need clarification or spot any outdated information.
 
 ## Add a new integration
@@ -471,4 +471,4 @@ You can refer to these issues for examples of adding new integrations:
 - [Datadog](https://gitlab.com/gitlab-org/gitlab/-/issues/270123): Metrics collector, similar to the Prometheus integration.
 - [EWM/RTC](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/36662): External issue tracker.
 - [Webex Teams](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/31543): Chat notifications.
-- [ZenTao](https://gitlab.com/gitlab-org/gitlab/-/issues/338178): External issue tracker with custom issue views, similar to the Jira issues integration.
+- [ZenTao](https://gitlab.com/gitlab-org/gitlab/-/issues/338178): External issue tracker with custom issue views, similar to the Jira integration.

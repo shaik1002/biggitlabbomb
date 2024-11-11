@@ -3,15 +3,7 @@
 module ServiceDesk
   module CustomEmailVerifications
     class CreateService < BaseService
-      SMTP_HOST_ERRORS = [
-        SocketError,
-        OpenSSL::SSL::SSLError,
-        Net::SMTPServerBusy,
-        Net::SMTPSyntaxError,
-        Net::SMTPFatalError,
-        Net::SMTPUnsupportedCommand,
-        Net::SMTPUnknownError
-      ].freeze
+      attr_reader :ramp_up_error
 
       def execute
         return error_settings_missing unless settings.present?
@@ -19,10 +11,10 @@ module ServiceDesk
 
         update_settings
         notify_project_owners_and_user_about_verification_start
-        ramp_up_error = send_verification_email_and_catch_delivery_errors
+        send_verification_email_and_catch_delivery_errors
 
         if ramp_up_error
-          handle_error_case(ramp_up_error)
+          handle_error_case
         else
           log_info
           ServiceResponse.success
@@ -54,26 +46,18 @@ module ServiceDesk
       def send_verification_email_and_catch_delivery_errors
         # Send this synchronously as we need to get direct feedback on delivery errors.
         Notify.service_desk_custom_email_verification_email(settings).deliver
-
-        nil
-      rescue *SMTP_HOST_ERRORS => error
+      rescue SocketError, OpenSSL::SSL::SSLError
         # e.g. host not found or host certificate issues
-        assign_and_log_delivery_error(:smtp_host_issue, error)
-      rescue Net::SMTPAuthenticationError => error
+        @ramp_up_error = :smtp_host_issue
+      rescue Net::SMTPAuthenticationError
         # incorrect username or password
-        assign_and_log_delivery_error(:invalid_credentials, error)
-      rescue Net::ReadTimeout => error
+        @ramp_up_error = :invalid_credentials
+      rescue Net::ReadTimeout
         # Server is slow to respond
-        assign_and_log_delivery_error(:read_timeout, error)
+        @ramp_up_error = :read_timeout
       end
 
-      def assign_and_log_delivery_error(error_type, error)
-        log_warning(error_message: error.message, error_class: error.class.to_s)
-
-        error_type
-      end
-
-      def handle_error_case(ramp_up_error)
+      def handle_error_case
         notify_project_owners_and_user_about_result(user: current_user)
 
         verification.mark_as_failed!(ramp_up_error)

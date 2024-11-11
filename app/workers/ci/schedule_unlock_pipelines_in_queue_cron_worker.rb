@@ -4,7 +4,7 @@ module Ci
   class ScheduleUnlockPipelinesInQueueCronWorker
     include ApplicationWorker
 
-    data_consistency :always
+    data_consistency :always # rubocop:disable SidekiqLoadBalancing/WorkerDataConsistency
 
     # rubocop:disable Scalability/CronWorkerContext
     # This worker does not perform work scoped to a context

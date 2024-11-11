@@ -24,6 +24,7 @@ class Issue < ApplicationRecord
   include FromUnion
   include EachBatch
   include PgFullTextSearchable
+  include IgnorableColumns
   include Gitlab::DueAtFilterable
 
   extend ::Gitlab::Utils::Override
@@ -60,16 +61,16 @@ class Issue < ApplicationRecord
   ignore_column :tmp_epic_id, remove_with: '16.11', remove_after: '2024-03-31'
 
   # Interim columns to convert integer IDs to bigint
-  ignore_column :author_id_convert_to_bigint, remove_with: '17.8', remove_after: '2024-12-13'
-  ignore_column :closed_by_id_convert_to_bigint, remove_with: '17.8', remove_after: '2024-12-13'
-  ignore_column :duplicated_to_id_convert_to_bigint, remove_with: '17.8', remove_after: '2024-12-13'
-  ignore_column :id_convert_to_bigint, remove_with: '17.8', remove_after: '2024-12-13'
-  ignore_column :last_edited_by_id_convert_to_bigint, remove_with: '17.8', remove_after: '2024-12-13'
-  ignore_column :milestone_id_convert_to_bigint, remove_with: '17.8', remove_after: '2024-12-13'
-  ignore_column :moved_to_id_convert_to_bigint, remove_with: '17.8', remove_after: '2024-12-13'
-  ignore_column :project_id_convert_to_bigint, remove_with: '17.8', remove_after: '2024-12-13'
-  ignore_column :promoted_to_epic_id_convert_to_bigint, remove_with: '17.8', remove_after: '2024-12-13'
-  ignore_column :updated_by_id_convert_to_bigint, remove_with: '17.8', remove_after: '2024-12-13'
+  ignore_column :author_id_convert_to_bigint, remove_with: '17.7', remove_after: '2024-11-17'
+  ignore_column :closed_by_id_convert_to_bigint, remove_with: '17.7', remove_after: '2024-11-17'
+  ignore_column :duplicated_to_id_convert_to_bigint, remove_with: '17.7', remove_after: '2024-11-17'
+  ignore_column :id_convert_to_bigint, remove_with: '17.7', remove_after: '2024-11-17'
+  ignore_column :last_edited_by_id_convert_to_bigint, remove_with: '17.7', remove_after: '2024-11-17'
+  ignore_column :milestone_id_convert_to_bigint, remove_with: '17.7', remove_after: '2024-11-17'
+  ignore_column :moved_to_id_convert_to_bigint, remove_with: '17.7', remove_after: '2024-11-17'
+  ignore_column :project_id_convert_to_bigint, remove_with: '17.7', remove_after: '2024-11-17'
+  ignore_column :promoted_to_epic_id_convert_to_bigint, remove_with: '17.7', remove_after: '2024-11-17'
+  ignore_column :updated_by_id_convert_to_bigint, remove_with: '17.7', remove_after: '2024-11-17'
 
   belongs_to :project
   belongs_to :namespace, inverse_of: :issues
@@ -103,9 +104,6 @@ class Issue < ApplicationRecord
       ordered.first
     end
   end
-  has_many :assignees_by_name_and_id, -> { ordered_by_name_asc_id_desc },
-    class_name: "User", through: :issue_assignees,
-    source: :assignee
 
   has_one :search_data, class_name: 'Issues::SearchData'
   has_one :issuable_severity

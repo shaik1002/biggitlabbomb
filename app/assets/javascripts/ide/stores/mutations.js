@@ -107,6 +107,7 @@ export default {
       noChangesStateSvgPath,
       committedStateSvgPath,
       pipelinesEmptyStateSvgPath,
+      promotionSvgPath,
       switchEditorSvgPath,
     },
   ) {
@@ -115,6 +116,7 @@ export default {
       noChangesStateSvgPath,
       committedStateSvgPath,
       pipelinesEmptyStateSvgPath,
+      promotionSvgPath,
       switchEditorSvgPath,
     });
   },

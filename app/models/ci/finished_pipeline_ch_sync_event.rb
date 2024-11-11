@@ -4,6 +4,7 @@ module Ci
   class FinishedPipelineChSyncEvent < Ci::ApplicationRecord
     include EachBatch
     include FromUnion
+    include IgnorableColumns
     include PartitionedTable
 
     PARTITION_DURATION = 1.day

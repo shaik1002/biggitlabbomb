@@ -12,10 +12,6 @@ RSpec.shared_examples 'work item drawer' do
     expect(page).to have_selector('[data-testid="work-item-drawer"]')
   end
 
-  it 'focus on first element of the drawer when clicking issue' do
-    expect(page).to have_selector('[data-testid="work-item-drawer-ref-link"]', focused: true)
-  end
-
   it 'closes drawer when clicking issue' do
     expect(page).to have_selector('[data-testid="work-item-drawer"]')
 
@@ -173,7 +169,7 @@ RSpec.shared_examples 'work item drawer' do
 
       it 'shows time tracking progress bar' do
         within_testid('work-item-time-tracking') do
-          expect(page).to have_selector('.gl-progress')
+          expect(page).to have_selector('.progress-bar')
         end
       end
 

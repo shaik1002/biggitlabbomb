@@ -58,7 +58,7 @@ For example, if in your personal namespace `alex` you have a project `my-project
 you can access the project either at `https://gitlab.example.com/alex/my-project` or `https://gitlab.example.com/projects/123456`.
 
 NOTE:
-In GitLab 17.5 and later, you can also use `https://gitlab.example.com/-/p/<id>` for this endpoint.
+From GitLab 17.5, you can also use `https://gitlab.example.com/-/p/<id>` for this endpoint.
 
 You might also need the project ID if you want to interact with the project using the [GitLab API](../../api/index.md).
 
@@ -75,10 +75,10 @@ To view all projects for the GitLab instance:
 1. On the left sidebar, select **Search or go to**.
 1. Select **Explore**.
 
-On the left sidebar, **Projects** is selected.
-A list of all projects for the instance is displayed.
+On the left sidebar, **Projects** is selected. On the right, the list shows
+all projects for the instance.
 
-If you are not authenticated, the list shows public projects only.
+If you are not authenticated, then the list shows public projects only.
 
 ## View projects you are a member of
 
@@ -139,9 +139,9 @@ Components published in the CI/CD catalog require a project description.
 
 ## Star a project
 
-You can star projects you use frequently to make them easier to find.
+You can add a star to projects you use frequently to make them easier to find.
 
-To star a project:
+To add a star to a project:
 
 1. On the left sidebar, select **Search or go to** and find your project.
 1. In the upper-right corner of the page, select **Star**.
@@ -197,12 +197,6 @@ You can [view projects that are pending deletion](#view-projects-pending-deletio
 and use the Rails console to
 [find projects that are pending deletion](troubleshooting.md#find-projects-that-are-pending-deletion).
 
-If the user who scheduled the project deletion loses access to the project (for example, by leaving the project, having their role downgraded, or being banned from the project) before the deletion occurs,
-the deletion job will instead restore and unarchive the project, so the project will no longer be scheduled for deletion.
-
-   WARNING:
-   If the user who scheduled the project deletion regains Owner role or administrator access before the job runs, then the job removes the project permanently.
-
 ### Delete a project immediately
 
 DETAILS:
@@ -211,15 +205,15 @@ DETAILS:
 
 > - Option to delete projects immediately from the **Admin** area and as a group setting removed [on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/393622) and [on self-managed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/119606) in GitLab 16.0.
 
-If you don't want to wait for delayed deletion, you can delete a project immediately. To do this, perform the steps for [deleting a projects](#delete-a-project) again.
-
-In the first cycle of deleting a project, the project is moved to the delayed deletion queue and automatically deleted after the retention period has passed.
-If during this delayed deletion time you run a second deletion cycle, the project is deleted immediately.
-
 Prerequisites:
 
 - You must have the Owner role for the project.
 - The project must be [marked for deletion](#delete-a-project).
+
+If you don't want to wait for delayed deletion, you can delete a project immediately. To do this, perform the steps for [deleting a projects](#delete-a-project) again.
+
+In the first cycle of deleting a project, the project is moved to the delayed deletion queue and automatically deleted after the retention period has passed.
+If during this delayed deletion time you run a second deletion cycle, the project is deleted immediately.
 
 To immediately delete a project marked for deletion:
 

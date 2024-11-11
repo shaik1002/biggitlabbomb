@@ -110,6 +110,7 @@ module Gitlab
             MAPPINGS.fetch(subject_class).fetch(:serializer_class).new
           end
 
+          # rubocop: disable CodeReuse/ActiveRecord
           def preload_associations(records)
             ActiveRecord::Associations::Preloader.new(
               records: records,
@@ -118,6 +119,7 @@ module Gitlab
 
             records
           end
+          # rubocop: enable CodeReuse/ActiveRecord
         end
       end
     end

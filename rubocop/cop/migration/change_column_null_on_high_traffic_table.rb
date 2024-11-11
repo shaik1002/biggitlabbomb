@@ -5,7 +5,7 @@ require_relative '../../migration_helpers'
 module RuboCop
   module Cop
     module Migration
-      class ChangeColumnNullOnHighTrafficTable < RuboCop::Cop::Base
+      class ChangeColumnNullOnHighTrafficTable < RuboCop::Cop::Cop
         include MigrationHelpers
 
         MSG = 'Using `change_column_null` migration helper is risky for high-traffic tables. ' \

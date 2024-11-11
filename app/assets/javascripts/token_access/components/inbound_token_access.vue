@@ -75,7 +75,11 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  inject: ['enforceAllowlist', 'fullPath'],
+  inject: {
+    fullPath: {
+      default: '',
+    },
+  },
   apollo: {
     inboundJobTokenScopeEnabled: {
       query: inboundGetCIJobTokenScopeQuery,
@@ -272,26 +276,29 @@ export default {
   <div class="gl-mt-5">
     <gl-loading-icon v-if="$apollo.loading" size="md" />
     <template v-else>
-      <div class="gl-font-bold">
-        {{ $options.i18n.radioGroupTitle }}
-      </div>
-      <div class="gl-mb-3">
-        <gl-sprintf :message="$options.i18n.radioGroupDescription">
-          <template #link="{ content }">
-            <gl-link :href="ciJobTokenHelpPage" class="inline-link" target="_blank">{{
-              content
-            }}</gl-link>
-          </template>
-        </gl-sprintf>
-      </div>
       <gl-form-radio-group
-        v-if="!enforceAllowlist"
         v-model="inboundJobTokenScopeEnabled"
         :options="$options.inboundJobTokenScopeOptions"
         stacked
-      />
+      >
+        <template #first>
+          <div class="gl-mb-2 gl-font-bold">
+            {{ $options.i18n.radioGroupTitle }}
+          </div>
+          <div class="gl-mb-3">
+            <gl-sprintf :message="$options.i18n.radioGroupDescription">
+              <template #link="{ content }">
+                <gl-link :href="ciJobTokenHelpPage" class="inline-link" target="_blank">{{
+                  content
+                }}</gl-link>
+              </template>
+            </gl-sprintf>
+          </div>
+        </template>
+      </gl-form-radio-group>
+
       <gl-alert
-        v-if="!inboundJobTokenScopeEnabled && !enforceAllowlist"
+        v-if="!inboundJobTokenScopeEnabled"
         variant="warning"
         class="gl-my-3"
         :dismissible="false"
@@ -301,7 +308,6 @@ export default {
       </gl-alert>
 
       <gl-button
-        v-if="!enforceAllowlist"
         variant="confirm"
         class="gl-mt-3"
         data-testid="save-ci-job-token-scope-changes-btn"

@@ -26,7 +26,6 @@ module API
 
       before do
         authenticate_non_get!
-        set_current_organization
       end
 
       helpers Helpers::UsersHelpers

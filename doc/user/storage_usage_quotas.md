@@ -16,8 +16,6 @@ When a project's repository and LFS exceed 10 GiB, the project is set to a read-
 You cannot push changes to a read-only project. To increase storage of the project's repository and LFS to more than 10 GiB,
 you must [purchase more storage](../subscriptions/gitlab_com/index.md#purchase-more-storage).
 
-Only the project's repository and LFS are included in the storage limit. The container registry, package registry, and build artifacts are not included in the limit.
-
 ## View storage
 
 DETAILS:
@@ -127,7 +125,7 @@ To manage your storage, if you are a namespace Owner, you can [purchase more sto
 
 Depending on your role, you can also use the following methods to manage or reduce your storage:
 
-- [Reduce repository size](project/repository/repository_size.md#methods-to-reduce-repository-size).
+- [Reduce repository size](project/repository/repository_size.md#reduce-repository-size).
 
 To automate storage usage analysis and management, see [storage management automation](storage_management_automation.md).
 

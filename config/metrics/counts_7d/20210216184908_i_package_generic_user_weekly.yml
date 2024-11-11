@@ -1,7 +1,8 @@
 ---
 data_category: optional
 key_path: redis_hll_counters.user_packages.i_package_generic_user_weekly
-description: Count of distinct users that have interacted with generic packages in the package registry in the last 7 days
+description: A weekly count of users that have published a generic package to the
+  registry
 product_group: package_registry
 value_type: number
 status: active

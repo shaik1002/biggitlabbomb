@@ -4,11 +4,10 @@ module RapidDiffs
   module Viewers
     module Text
       class LineNumberComponent < ViewComponent::Base
-        def initialize(diff_file:, line:, position:, border: nil)
+        def initialize(diff_file:, line:, position:)
           @diff_file = diff_file
           @line = line
           @position = position
-          @border = border
         end
 
         def id
@@ -23,24 +22,7 @@ module RapidDiffs
           @diff_file.line_code(@line)
         end
 
-        def change_type
-          return unless @line
-
-          return 'added' if @line.added?
-
-          'removed' if @line.removed?
-        end
-
-        def border_class
-          case @border
-          when :right then 'rd-line-number-border-right'
-          when :both  then 'rd-line-number-border-both'
-          end
-        end
-
         def visible?
-          return false unless @line
-
           case @position
           when :old then !@line.added?
           when :new then !@line.removed?

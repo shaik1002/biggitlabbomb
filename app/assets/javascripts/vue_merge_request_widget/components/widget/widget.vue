@@ -373,13 +373,16 @@ export default {
             />
           </slot>
         </div>
-        <div v-if="isCollapsible && !isSummaryLoading" class="gl-border-l gl-ml-3 gl-h-6 gl-pl-3">
+        <div
+          v-if="isCollapsible && !isSummaryLoading"
+          class="gl-ml-3 gl-h-6 gl-border-l-1 gl-border-gray-100 gl-pl-3 gl-border-l-solid"
+        >
           <gl-button
             v-gl-tooltip
             :title="collapseButtonLabel"
             :aria-expanded="`${!isCollapsed}`"
             :aria-label="collapseButtonLabel"
-            :icon="isCollapsed ? 'chevron-lg-down' : 'chevron-lg-up'"
+            :icon="isCollapsed ? 'chevron-down' : 'chevron-up'"
             category="tertiary"
             data-testid="toggle-button"
             size="small"
@@ -390,7 +393,7 @@ export default {
     </div>
     <div
       v-if="!isCollapsed || contentError"
-      class="gl-border-t gl-relative gl-border-t-section gl-bg-subtle"
+      class="gl-border-t gl-relative gl-bg-gray-10"
       data-testid="widget-extension-collapsed-section"
     >
       <div v-if="isLoadingExpandedContent" class="report-block-container gl-text-center">

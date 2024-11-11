@@ -1,1 +1,1 @@
-structure.sql
+db/structure.sql

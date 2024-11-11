@@ -6,7 +6,7 @@ module Analytics
       extend ::Gitlab::Utils::Override
       include ApplicationWorker
 
-      data_consistency :sticky
+      data_consistency :always
 
       include CronjobQueue # rubocop:disable Scalability/CronWorkerContext
 

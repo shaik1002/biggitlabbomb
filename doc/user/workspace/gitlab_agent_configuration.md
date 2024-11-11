@@ -29,7 +29,7 @@ Prerequisites:
 
 With the new authorization strategy that replaces the [legacy authorization strategy](#legacy-agent-authorization-strategy), group owners and administrators can control which cluster agents can be used for hosting workspaces in a group.
 
-For example, if the path to your workspace project is `top-level-group/subgroup-1/subgroup-2/workspace-project`, you can use any configured agent for either `top-level-group`, `subgroup-1` or `subgroup-2` group.
+For example, if the path to your workspace project is `top-group/subgroup-1/subgroup-2/workspace-project`, you can use any configured agent for either `top-group`, `subgroup-1` or `subgroup-2` group.
 
 ```mermaid
 %%{init: {'theme':'neutral'}}%%
@@ -38,7 +38,7 @@ graph TD;
 
     classDef active fill:lightgreen, stroke:#green, color:green, stroke-width:1px;
 
-    topGroup[Top-Level Group, allowed Agent 1]
+    topGroup[Top Group, allowed Agent 1]
     subgroup1[Subgroup 1, allowed Agent 2]
     subgroup2[Subgroup 2, allowed Agent 3]
     wp(Workspace Project, Agent 1, 2 & 3 all available)
@@ -91,9 +91,9 @@ Running workspaces stop when they are automatically terminated or manually stopp
 
 ## Legacy agent authorization strategy
 
-In GitLab 17.1 and earlier, an agent doesn't have to be allowed to be available in a group for creating workspaces. You can use an agent present anywhere in the top-level group (or the root group) of a workspace project to create a workspace, as long as the remote development module is enabled and you have at least the Developer role for the top-level group.
-For example, if the path to your workspace project is `top-level-group/subgroup-1/subgroup-2/workspace-project`,
-you can use any configured agent in `top-level-group` and in any of its subgroups.
+In GitLab 17.1 and earlier, an agent doesn't have to be allowed to be available in a group for creating workspaces. You can use an agent present anywhere in the top-level group (or the root group) of a workspace project to create a workspace, as long as the remote development module is enabled and you have at least the Developer role for the root group.
+For example, if the path to your workspace project is `top-group/subgroup-1/subgroup-2/workspace-project`,
+you can use any configured agent in `top-group` and in any of its subgroups.
 
 ## Workspace settings
 
@@ -337,8 +337,8 @@ remote_development:
 
 Use this setting to specify whether to use the user namespaces feature in Kubernetes.
 
-[User namespaces](https://kubernetes.io/docs/concepts/workloads/pods/user-namespaces/) isolate the user
-running inside the container from the user on the host.
+User namespaces isolate the user running inside the container from the user in the host.
+In Kubernetes 1.30, this feature is in beta.
 
 The default value is `false`. Before you set the value to `true`, ensure your Kubernetes cluster supports user namespaces.
 

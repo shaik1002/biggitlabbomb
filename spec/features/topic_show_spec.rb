@@ -2,19 +2,8 @@
 
 require 'spec_helper'
 
-RSpec.describe 'Topic show page', :with_current_organization, feature_category: :groups_and_projects do
-  let_it_be(:current_organization, reload: true) { create(:organization, :public, name: 'Current Public Organization') }
-
-  let_it_be(:topic) do
-    create(
-      :topic,
-      name: 'my-topic',
-      title: 'My Topic',
-      description: 'This is **my** topic https://google.com/ :poop: ```\ncode\n```',
-      avatar: fixture_file_upload("spec/fixtures/dk.png", "image/png"),
-      organization: current_organization
-    )
-  end
+RSpec.describe 'Topic show page', feature_category: :groups_and_projects do
+  let_it_be(:topic) { create(:topic, name: 'my-topic', title: 'My Topic', description: 'This is **my** topic https://google.com/ :poop: ```\ncode\n```', avatar: fixture_file_upload("spec/fixtures/dk.png", "image/png")) }
 
   context 'when topic does not exist' do
     let(:path) { topic_explore_projects_path(topic_name: 'non-existing') }
@@ -42,7 +31,7 @@ RSpec.describe 'Topic show page', :with_current_organization, feature_category: 
     end
 
     context 'with associated projects' do
-      let_it_be(:project) { create(:project, :public, topic_list: topic.name, organization: topic.organization) }
+      let!(:project) { create(:project, :public, topic_list: topic.name, organization: topic.organization) }
 
       it 'shows project list' do
         visit topic_explore_projects_path(topic_name: topic.name)

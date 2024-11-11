@@ -2,7 +2,7 @@
 data_category: optional
 key_path: counts_monthly.aggregated_metrics.incident_management_alerts_total_unique_counts
 description: Count of unique users per month to take an action on an alert
-product_group: platform_insights
+product_group: respond
 value_type: number
 status: active
 time_frame: 28d
@@ -21,10 +21,6 @@ distribution:
 - ce
 - ee
 tier:
-- free
-- premium
-- ultimate
-tiers:
 - free
 - premium
 - ultimate

@@ -79,8 +79,8 @@ The following table lists the GitLab tiers in which each feature is available.
 Before you run a SAST analyzer in your instance, make sure you have the following:
 
 - Linux-based GitLab Runner with the [`docker`](https://docs.gitlab.com/runner/executors/docker.html) or
-  [`kubernetes`](https://docs.gitlab.com/runner/install/kubernetes.html) executor. If you're using
-  hosted runners for GitLab.com, this is enabled by default.
+  [`kubernetes`](https://docs.gitlab.com/runner/install/kubernetes.html) executor. If you're using the
+  shared runners on GitLab.com, this is enabled by default.
   - Windows Runners are not supported.
   - CPU architectures other than amd64 are not supported.
 - GitLab CI/CD configuration (`.gitlab-ci.yml`) must include the `test` stage, which is included by default. If you redefine the stages in the `.gitlab-ci.yml` file, the `test` stage is required.
@@ -459,7 +459,7 @@ it via [custom CI/CD variables](#custom-cicd-variables).
 If your private Maven repository requires login credentials,
 you can use the `MAVEN_CLI_OPTS` CI/CD variable.
 
-For more information, see [how to use private Maven repositories](../dependency_scanning/index.md#authenticate-with-a-private-maven-repository).
+Read more on [how to use private Maven repositories](../index.md#using-private-maven-repositories).
 
 ### Enabling Kubesec analyzer
 

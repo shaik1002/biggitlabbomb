@@ -234,7 +234,7 @@ export default {
       </div>
       <diff-row
         v-if="!line.isMatchLineLeft && !line.isMatchLineRight"
-        :key="line.lineCode"
+        :key="line.line_code"
         :file-hash="diffFile.file_hash"
         :file-path="diffFile.file_path"
         :line="line"
@@ -261,7 +261,7 @@ export default {
       />
       <div
         v-if="line.renderCommentRow"
-        :key="`dcr-${line.lineCode}`"
+        :key="`dcr-${line.line_code || index}`"
         :class="line.commentRowClasses"
         class="diff-grid-comments diff-tr notes_holder"
       >
@@ -297,7 +297,7 @@ export default {
       </div>
       <div
         v-if="shouldRenderParallelDraftRow(diffFile.file_hash, line)"
-        :key="`drafts-${line.lineCode}`"
+        :key="`drafts-${index}`"
         :class="line.draftRowClasses"
         class="diff-grid-drafts diff-tr notes_holder"
       >

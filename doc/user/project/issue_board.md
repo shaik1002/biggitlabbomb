@@ -11,7 +11,6 @@ DETAILS:
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
 > - Milestones and iterations shown on issue cards [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/25758) in GitLab 16.11.
-> - Ability to delete the last board in a group or project [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/499579) in GitLab 17.6.
 
 The issue board is a software project management tool used to plan,
 organize, and visualize a workflow for a feature or product release.
@@ -98,8 +97,6 @@ To delete the open issue board:
 1. Select **Delete board**.
 1. Select **Delete** to confirm.
 
-If the board you've deleted was the last one, a new `Development` board is created.
-
 ## Issue boards use cases
 
 You can tailor GitLab issue boards to your own preferred workflow.
@@ -129,7 +126,7 @@ For example, let's consider this simplified development workflow:
 If you have the labels **Backend**, **Frontend**, **Staging**, and
 **Production**, and an issue board with a list for each, you can:
 
-- Visualize the entire flow of implementations since the beginning of the development lifecycle
+- Visualize the entire flow of implementations since the beginning of the development life cycle
   until deployed to production.
 - Prioritize the issues in a list by moving them vertically.
 - Move issues between lists to organize them according to the labels you've set.
@@ -233,7 +230,7 @@ Prerequisites:
 - You must have at least the Reporter role for the project.
 
 When an issue is created, the system assigns a relative order value that is greater than the maximum value
-of that issue's project or top-level group. This means the issue is at the bottom of any issue list that
+of that issue's project or root group. This means the issue is at the bottom of any issue list that
 it appears in.
 
 When you visit a board, issues appear ordered in any list. You're able to change

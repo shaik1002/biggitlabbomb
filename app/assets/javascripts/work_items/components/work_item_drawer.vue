@@ -77,21 +77,6 @@ export default {
       handler(newValue) {
         if (newValue?.iid) {
           this.setDrawerParams();
-          // focus on header link when drawer is updated
-          this.$nextTick(() => {
-            this.focusOnHeaderLink();
-          });
-        }
-      },
-    },
-    open: {
-      immediate: true,
-      handler(newValue) {
-        if (newValue) {
-          // focus on header link when drawer is updated
-          this.$nextTick(() => {
-            this.focusOnHeaderLink();
-          });
         }
       },
     },
@@ -123,7 +108,7 @@ export default {
       const regex = new RegExp(`groups\/${escapedFullPath}\/-\/(work_items|epics)\/\\d+`);
       const isWorkItemPath = regex.test(workItem.webUrl);
 
-      if (this.$router && (isWorkItemPath || this.issueAsWorkItem)) {
+      if (isWorkItemPath || this.issueAsWorkItem) {
         this.$router.push({
           name: 'workItem',
           params: {
@@ -170,9 +155,6 @@ export default {
       }
       this.handleClose();
     },
-    focusOnHeaderLink() {
-      this.$refs?.workItemUrl?.$el?.focus();
-    },
   },
   i18n: {
     copyTooltipText: __('Copy item URL'),
@@ -187,10 +169,6 @@ export default {
     '.pika-single',
     '.atwho-container',
     '.tippy-content .gl-new-dropdown-panel',
-    '#blocked-by-issues-modal',
-    '#open-children-warning-modal',
-    '#create-work-item-modal',
-    '#work-item-confirm-delete',
   ],
 };
 </script>
@@ -208,8 +186,6 @@ export default {
     <template #title>
       <div class="gl-text gl-flex gl-w-full gl-items-center gl-gap-x-2 xl:gl-px-4">
         <gl-link
-          ref="workItemUrl"
-          data-testid="work-item-drawer-ref-link"
           :href="activeItem.webUrl"
           class="gl-text-sm gl-font-bold gl-text-default"
           @click="redirectToWorkItem"

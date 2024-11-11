@@ -24,14 +24,14 @@ module Types
     field :ci_catalog_resources,
       ::Types::Ci::Catalog::ResourceType.connection_type,
       null: true,
-      experiment: { milestone: '15.11' },
+      alpha: { milestone: '15.11' },
       description: 'All CI/CD Catalog resources under a common namespace, visible to an authorized user',
       resolver: ::Resolvers::Ci::Catalog::ResourcesResolver
 
     field :ci_catalog_resource,
       ::Types::Ci::Catalog::ResourceType,
       null: true,
-      experiment: { milestone: '16.1' },
+      alpha: { milestone: '16.1' },
       description: 'A single CI/CD Catalog resource visible to an authorized user',
       resolver: ::Resolvers::Ci::Catalog::ResourceResolver
 
@@ -79,24 +79,24 @@ module Types
     end
     field :issues,
       null: true,
-      experiment: { milestone: '15.6' },
+      alpha: { milestone: '15.6' },
       resolver: Resolvers::IssuesResolver,
       description: 'Find issues visible to the current user. ' \
-        'At least one filter must be provided.'
+                   'At least one filter must be provided.'
     field :jobs,
       ::Types::Ci::JobType.connection_type,
       null: true,
       description: 'All jobs on this GitLab instance. ' \
-        'Returns an empty result for users without administrator access.',
+                   'Returns an empty result for users without administrator access.',
       resolver: ::Resolvers::Ci::AllJobsResolver
     field :merge_request, Types::MergeRequestType,
       null: true,
       description: 'Find a merge request.' do
       argument :id, ::Types::GlobalIDType[::MergeRequest], required: true, description: 'Global ID of the merge request.'
     end
-    field :metadata, Types::AppConfig::InstanceMetadataType,
+    field :metadata, Types::MetadataType,
       null: true,
-      resolver: Resolvers::AppConfig::InstanceMetadataResolver,
+      resolver: Resolvers::MetadataResolver,
       description: 'Metadata about GitLab.'
     field :milestone, ::Types::MilestoneType,
       null: true,
@@ -112,7 +112,7 @@ module Types
       ::Types::Notes::NoteType,
       null: true,
       description: 'Find a note.',
-      experiment: { milestone: '15.9' } do
+      alpha: { milestone: '15.9' } do
       argument :id, ::Types::GlobalIDType[::Note],
         required: true,
         description: 'Global ID of the note.'
@@ -122,12 +122,12 @@ module Types
       null: true,
       resolver: Resolvers::Organizations::OrganizationResolver,
       description: "Find an organization.",
-      experiment: { milestone: '16.4' }
+      alpha: { milestone: '16.4' }
     field :organizations, Types::Organizations::OrganizationType.connection_type,
       null: true,
       resolver: Resolvers::Organizations::OrganizationsResolver,
       description: "List organizations.",
-      experiment: { milestone: '16.8' }
+      alpha: { milestone: '16.8' }
     field :package,
       description: 'Find a package. This field can only be resolved for one query in any single request. Returns `null` if a package has no `default` status.',
       resolver: Resolvers::PackageDetailsResolver
@@ -155,7 +155,7 @@ module Types
       null: true,
       resolver: Resolvers::Ci::RunnersResolver,
       description: "Get all runners in the GitLab instance (project and shared). " \
-        "Access is restricted to users with administrator access."
+                   "Access is restricted to users with administrator access."
     field :snippets,
       Types::SnippetType.connection_type,
       null: true,
@@ -166,7 +166,7 @@ module Types
       null: true,
       description: 'Find a synthetic note',
       resolver: ::Resolvers::Notes::SyntheticNoteResolver,
-      experiment: { milestone: '15.9' }
+      alpha: { milestone: '15.9' }
     field :timelogs, Types::TimelogType.connection_type,
       null: true,
       description: 'Find timelogs visible to the current user.',
@@ -192,15 +192,10 @@ module Types
       null: true,
       description: 'Find users.',
       resolver: Resolvers::UsersResolver
-    field :wiki_page, Types::Wikis::WikiPageType,
-      null: true,
-      resolver: Resolvers::Wikis::WikiPageResolver,
-      experiment: { milestone: '17.6' },
-      description: 'Find a wiki page.'
     field :work_item, Types::WorkItemType,
       null: true,
       resolver: Resolvers::WorkItemResolver,
-      experiment: { milestone: '15.1' },
+      alpha: { milestone: '15.1' },
       description: 'Find a work item.'
 
     field :audit_event_definitions,
@@ -211,30 +206,30 @@ module Types
 
     field :abuse_report, ::Types::AbuseReportType,
       null: true,
-      experiment: { milestone: '16.3' },
+      alpha: { milestone: '16.3' },
       description: 'Find an abuse report.',
       resolver: Resolvers::AbuseReportResolver
 
     field :abuse_report_labels, ::Types::LabelType.connection_type,
       null: true,
-      experiment: { milestone: '16.3' },
+      alpha: { milestone: '16.3' },
       description: 'Abuse report labels.',
       resolver: Resolvers::AbuseReportLabelsResolver
 
     field :ml_model, ::Types::Ml::ModelType,
       null: true,
-      experiment: { milestone: '16.7' },
+      alpha: { milestone: '16.7' },
       description: 'Find machine learning models.',
       resolver: Resolvers::Ml::ModelDetailResolver
 
     field :integration_exclusions, Types::Integrations::ExclusionType.connection_type,
       null: true,
-      experiment: { milestone: '17.0' },
+      alpha: { milestone: '17.0' },
       resolver: Resolvers::Integrations::ExclusionsResolver
 
     field :work_items_by_reference,
       null: true,
-      experiment: { milestone: '16.7' },
+      alpha: { milestone: '16.7' },
       description: 'Find work items by their reference.',
       extras: [:lookahead],
       resolver: Resolvers::WorkItemReferencesResolver

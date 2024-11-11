@@ -10,8 +10,11 @@ DETAILS:
 **Tier:** Ultimate
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/13266) in GitLab 17.2 [with a flag](../../../administration/feature_flags.md) named `pipeline_execution_policy_type`. Enabled by default.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/454278) in GitLab 17.3. Feature flag `pipeline_execution_policy_type` removed.
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/13266) in GitLab 17.2 [with a flag](../../../administration/feature_flags.md) named `pipeline_execution_policy_type`. Enabled by default. [Feature flag removed in GitLab 17.3](https://gitlab.com/gitlab-org/gitlab/-/issues/454278).
+
+FLAG:
+The availability of this feature is controlled by a feature flag.
+For more information, see the history.
 
 Use Pipeline execution policies to enforce CI/CD jobs for all applicable projects.
 
@@ -43,8 +46,8 @@ the following sections and tables provide an alternative.
 | `enabled` | `boolean` | true | Flag to enable (`true`) or disable (`false`) the policy. |
 | `content` | `object` of [`content`](#content-type) | true | Reference to the CI/CD configuration to inject into project pipelines. |
 | `pipeline_config_strategy` | `string` | false | Can either be `inject_ci` or `override_project_ci`. See [Pipeline strategies](#pipeline-strategies) for more information. |
-| `policy_scope` | `object` of [`policy_scope`](index.md#scope) | false | Scopes the policy based on projects, groups, or compliance framework labels you specify. |
 | `suffix` | `string` | false | Can either be `on_conflict` (default), or `never`. Defines the behavior for handling job naming conflicts. `on_conflict` applies a unique suffix to the job names for jobs that would break the uniqueness. `never` causes the pipeline to fail if the job names across the project and all applicable policies are not unique. |
+| `policy_scope` | `object` of [`policy_scope`](#policy_scope-scope-type) | false | Scopes the policy based on compliance framework labels or projects you define. |
 
 Note the following:
 
@@ -134,18 +137,51 @@ Prerequisites:
 
 - Users triggering pipelines run in those projects on which a policy containing the `content` type
   is enforced must have at minimum read-only access to the project containing the CI/CD
-- In projects that enforce pipeline execution policies, users must have at least read-only access to the project that contains the CI/CD configuration to trigger the pipeline.
+- In projects that enforce pipeline execution policies, users must have at least read-only access to the project that contains the CI/CD configuration to trigger the pipeline. 
 
   In GitLab 17.4 and later, you can grant the required read-only access for the CI/CD configuration file
   specified in a security policy project using the `content` type. To do so, enable the setting **Pipeline execution policies** in the general settings of the security policy project.
-  Enabling this setting grants the user who triggered the pipeline access to
+  Enabling this setting grants the user who triggered the pipeline access to 
   read the CI/CD configuration file enforced by the pipeline execution policy. This setting does not grant the user access to any other parts of the project where the configuration file is stored.
 
-### Policy scope schema
+### `policy_scope` scope type
 
-To customize policy enforcement, you can define a policy's scope to either include, or exclude,
-specified projects, groups, or compliance framework labels. For more details, see
-[Scope](index.md#scope).
+> - Scoping by group [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/468384) in GitLab 17.4.
+
+| Field | Type | Possible values | Description |
+|-------|------|-----------------|-------------|
+| `compliance_frameworks` | `array` |  | List of IDs of the compliance frameworks in scope of enforcement, in an array of objects with key `id`. |
+| `projects` | `object` | `including`, `excluding` | Use `excluding:` or `including:` then list the IDs of the projects you wish to include or exclude, in an array of objects with key `id`. |
+| `groups` | `object` | `including` | Use `including:` then list the IDs of the groups you wish to include, in an array of objects with key `id`. |
+
+For example:
+
+Projects with a specific compliance framework:
+
+```yaml
+ policy_scope:
+  compliance_frameworks:
+    - id: 1020076
+```
+
+Only a specific set of projects:
+
+```yaml
+policy_scope:
+  projects:
+    including:
+      - id: 61213118
+      - id: 59560885
+ ```
+
+All projects except one specific project:
+
+```yaml
+policy_scope:
+  projects:
+    excluding:
+      - id: 59560885
+```
 
 ## Pipeline strategies
 
@@ -162,11 +198,6 @@ When using this strategy, a project CI/CD configuration cannot override any beha
 For projects without a `.gitlab-ci.yml` file, this strategy will create the `.gitlab-ci.yml` file
 implicitly. That is, a pipeline containing only the jobs defined in the pipeline execution policy is
 executed.
-
-NOTE:
-When a pipeline execution policy uses workflow rules that prevent policy jobs from running, the only jobs that
-run are the project's CI/CD jobs. If the project uses workflow rules that prevent project CI/CD jobs from running,
-the only jobs that run are the pipeline execution policy jobs.
 
 ### `override_project_ci`
 
@@ -215,10 +246,6 @@ If the variable is defined in the pipeline execution policy, the group or projec
 This behavior is independent from the pipeline execution policy strategy.
 
 You can [define project or group variables in the UI](../../../ci/variables/index.md#define-a-cicd-variable-in-the-ui).
-
-## Behavior with `[skip ci]`
-
-To prevent a regular pipeline from triggering, users can push a commit to a protected branch with `[skip ci]` in the commit message. However, jobs defined with a pipeline execution policy are always triggered, as the policy ignores the `[skip ci]` directive. This prevents developers from skipping the execution of jobs defined in the policy, which ensures that critical security and compliance checks are always performed.
 
 ## Examples
 

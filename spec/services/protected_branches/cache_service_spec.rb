@@ -153,7 +153,18 @@ RSpec.describe ProtectedBranches::CacheService, :clean_gitlab_redis_cache, featu
       entity.add_owner(user)
     end
 
-    it_behaves_like 'execute with entity'
+    context 'when feature flag enabled' do
+      it_behaves_like 'execute with entity'
+    end
+
+    context 'when feature flag disabled' do
+      before do
+        stub_feature_flags(group_protected_branches: false)
+        stub_feature_flags(allow_protected_branches_for_group: false)
+      end
+
+      it_behaves_like 'execute with entity'
+    end
   end
 end
 # rubocop:enable Style/RedundantFetchBlock

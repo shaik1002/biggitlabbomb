@@ -27,9 +27,11 @@ module Gitlab
           @urls.count { |url, errors| errors.empty? }
         end
 
+        # rubocop: disable CodeReuse/ActiveRecord
         def errors_count
           @urls.sum { |url, errors| errors.size }
         end
+        # rubocop: enable CodeReuse/ActiveRecord
 
         def set_error_message(error)
           @error_message = error

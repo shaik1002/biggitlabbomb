@@ -47,13 +47,13 @@ export default {
       const start = newDate(startDate);
 
       if (dueDate && isInPast(due)) {
-        return __('past due');
+        return __('Past due');
       }
       if (dueDate && isToday(due)) {
-        return __('today');
+        return __('Today');
       }
       if (startDate && isInFuture(start)) {
-        return __('upcoming');
+        return __('Upcoming');
       }
       if (dueDate) {
         return getTimeRemainingInWords(due);

@@ -1,7 +1,7 @@
 ---
 data_category: optional
 key_path: redis_hll_counters.user_packages.i_package_conan_user_monthly
-description: Count of distinct users that have interacted with Conan packages in the package registry in the last 28 days
+description: A monthly count of users that have published a Conan package to the registry
 product_group: package_registry
 value_type: number
 status: active
@@ -15,10 +15,6 @@ distribution:
 - ee
 - ce
 tier:
-- free
-- premium
-- ultimate
-tiers:
 - free
 - premium
 - ultimate

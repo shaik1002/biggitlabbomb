@@ -49,7 +49,7 @@ class ApplicationController < BaseActionController
   # all other before filters that could have set the user.
   before_action :auth_user
 
-  around_action :set_current_context
+  prepend_around_action :set_current_context
 
   around_action :sessionless_bypass_admin_mode!, if: :sessionless_user?
   around_action :set_locale
@@ -121,11 +121,6 @@ class ApplicationController < BaseActionController
     render plain: e.message, status: :service_unavailable
   end
 
-  rescue_from Regexp::TimeoutError do |e|
-    log_exception(e)
-    head :service_unavailable
-  end
-
   def redirect_back_or_default(default: root_path, options: {})
     redirect_back(fallback_location: default, **options)
   end
@@ -142,14 +137,6 @@ class ApplicationController < BaseActionController
 
       redirect_to new_user_session_path, alert: I18n.t('devise.failure.unauthenticated')
     end
-  end
-
-  def handle_unverified_request
-    Gitlab::Auth::Activity
-      .new(controller: self)
-      .user_csrf_token_mismatch!
-
-    super
   end
 
   def render(*args)
@@ -180,13 +167,14 @@ class ApplicationController < BaseActionController
   # (e.g. tokens) to authenticate the user, whereas Devise sets current_user.
   #
   def auth_user
-    if user_signed_in?
-      current_user
-    else
-      try(:authenticated_user)
+    strong_memoize(:auth_user) do
+      if user_signed_in?
+        current_user
+      else
+        try(:authenticated_user)
+      end
     end
   end
-  strong_memoize_attr :auth_user
 
   # Devise defines current_user to be:
   #
@@ -553,7 +541,7 @@ class ApplicationController < BaseActionController
   end
 
   def set_current_organization
-    return if ::Current.organization_assigned
+    return if ::Current.lock_organization
 
     ::Current.organization = Gitlab::Current::Organization.new(
       params: params.permit(

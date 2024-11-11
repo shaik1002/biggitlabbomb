@@ -9,12 +9,11 @@ module QA
 
       MAX_NAME_LENGTH = 255
 
-      attr_accessor :avatar
+      attr_accessor :path, :avatar
 
       attributes :id,
         :runners_token,
         :name,
-        :path,
         :full_path,
         # Add visibility to enable create private group
         :visibility

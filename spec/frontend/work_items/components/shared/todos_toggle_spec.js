@@ -68,9 +68,6 @@ describe('WorkItemTodo component', () => {
         currentUserTodos,
         todosButtonType,
       },
-      stubs: {
-        GlAnimatedTodoIcon,
-      },
     });
   };
 

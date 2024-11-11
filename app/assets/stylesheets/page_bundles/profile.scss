@@ -10,6 +10,7 @@ $profile-grid-flex: 1fr;
   }
 
   @include media-breakpoint-down(sm) {
+    .input-md,
     .input-lg {
       max-width: 100%;
     }

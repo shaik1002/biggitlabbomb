@@ -6,6 +6,7 @@ import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
 import WorkItemProjectsListbox from '~/work_items/components/work_item_links/work_item_projects_listbox.vue';
 import namespaceProjectsForLinksWidgetQuery from '~/work_items/graphql/namespace_projects_for_links_widget.query.graphql';
+import { SEARCH_DEBOUNCE } from '~/work_items/constants';
 import { namespaceProjectsList, mockFrequentlyUsedProjects } from '../../mock_data';
 
 Vue.use(VueApollo);
@@ -57,6 +58,7 @@ describe('WorkItemProjectsListbox', () => {
       },
     });
 
+    jest.advanceTimersByTime(SEARCH_DEBOUNCE);
     await waitForPromises();
   };
 
@@ -137,7 +139,7 @@ describe('WorkItemProjectsListbox', () => {
 
       findDropdown().vm.$emit('search', 'project a');
 
-      await waitForPromises();
+      await nextTick();
 
       content = findRecentDropdownItems();
 
@@ -229,7 +231,7 @@ describe('WorkItemProjectsListbox', () => {
 
       findDropdown().vm.$emit('search', 'project a');
 
-      await waitForPromises();
+      await nextTick();
 
       content = findRecentDropdownItems();
 

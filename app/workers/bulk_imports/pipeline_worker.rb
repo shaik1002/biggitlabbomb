@@ -12,7 +12,7 @@ module BulkImports
 
     DEFER_ON_HEALTH_DELAY = 5.minutes
 
-    data_consistency :sticky
+    data_consistency :always
     feature_category :importers
     sidekiq_options dead: false, retry: 6
     sidekiq_options max_retries_after_interruption: 20

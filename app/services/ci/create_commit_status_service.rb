@@ -135,8 +135,6 @@ module Ci
         job.drop!(:api_failure)
       when 'canceled'
         job.cancel!
-      when 'skipped'
-        job.skip!
       else
         raise('invalid state')
       end

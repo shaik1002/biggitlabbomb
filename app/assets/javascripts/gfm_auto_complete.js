@@ -38,6 +38,8 @@ export const CONTACT_STATE_ACTIVE = 'active';
 export const CONTACTS_ADD_COMMAND = '/add_contacts';
 export const CONTACTS_REMOVE_COMMAND = '/remove_contacts';
 
+const useIssueBackendFiltering = window.gon.features?.issueAutocompleteBackendFiltering;
+
 const busyBadge = memoize(
   () =>
     renderVueComponentForLegacyJS(
@@ -498,7 +500,7 @@ class GfmAutoComplete {
       alias: ISSUES_ALIAS,
       searchKey: 'search',
       maxLen: 100,
-      delay: DEFAULT_DEBOUNCE_AND_THROTTLE_MS,
+      delay: useIssueBackendFiltering ? DEFAULT_DEBOUNCE_AND_THROTTLE_MS : null,
       displayTpl(value) {
         let tmpl = GfmAutoComplete.Loading.template;
         if (value.title != null) {
@@ -1090,7 +1092,11 @@ GfmAutoComplete.atTypeMap = {
   '[[': 'wikis',
 };
 
-GfmAutoComplete.typesWithBackendFiltering = ['vulnerabilities', 'members', 'issues'];
+GfmAutoComplete.typesWithBackendFiltering = ['vulnerabilities', 'members'];
+
+if (useIssueBackendFiltering) {
+  GfmAutoComplete.typesWithBackendFiltering.push('issues');
+}
 
 GfmAutoComplete.isTypeWithBackendFiltering = (type) =>
   GfmAutoComplete.typesWithBackendFiltering.includes(GfmAutoComplete.atTypeMap[type]);

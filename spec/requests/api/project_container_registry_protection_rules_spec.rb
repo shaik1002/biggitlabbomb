@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe API::ProjectContainerRegistryProtectionRules, :aggregate_failures, feature_category: :container_registry do
+  include ExclusiveLeaseHelpers
+
   let_it_be(:project) { create(:project, :private) }
   let_it_be(:other_project) { create(:project, :private) }
   let_it_be(:protection_rule) { create(:container_registry_protection_rule, project: project) }

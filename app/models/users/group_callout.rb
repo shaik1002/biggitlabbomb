@@ -34,8 +34,7 @@ module Users
       all_seats_used_alert: 24, # EE-only
       compliance_framework_settings_moved_callout: 25, # EE-only
       expired_duo_pro_trial_widget: 26, # EE-only
-      expired_duo_enterprise_trial_widget: 27, # EE-only
-      expired_trial_status_widget: 28 # EE-only
+      expired_duo_enterprise_trial_widget: 27 # EE-only
     }
 
     validates :group, presence: true

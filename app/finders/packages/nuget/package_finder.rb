@@ -9,7 +9,7 @@ module Packages
       FORCE_NORMALIZATION_CLIENT_VERSION = '>= 3'
 
       def execute
-        return packages_class.none unless @params[:package_name].present?
+        return ::Packages::Package.none unless @params[:package_name].present?
 
         packages.limit_recent(@params[:limit] || MAX_PACKAGES_COUNT)
       end
@@ -22,16 +22,10 @@ module Packages
       end
 
       def find_by_name
-        if Feature.enabled?(:nuget_extract_nuget_package_model, Feature.current_request)
-          base
-            .has_version
-            .with_case_insensitive_name(@params[:package_name])
-        else
-          base
-            .nuget
-            .has_version
-            .with_case_insensitive_name(@params[:package_name])
-        end
+        base
+          .nuget
+          .has_version
+          .with_case_insensitive_name(@params[:package_name])
       end
 
       def find_by_version(result)
@@ -53,15 +47,6 @@ module Packages
         return true if @params[:client_version].blank?
 
         VersionSorter.compare(FORCE_NORMALIZATION_CLIENT_VERSION, @params[:client_version]) <= 0
-      end
-
-      override :packages_class
-      def packages_class
-        if Feature.enabled?(:nuget_extract_nuget_package_model, Feature.current_request)
-          ::Packages::Nuget::Package
-        else
-          super
-        end
       end
     end
   end

@@ -31,6 +31,7 @@ module Users
       end
 
       assign_identity
+      build_canonical_email
       reset_unconfirmed_email
 
       if @user.save(validate: validate) && update_status
@@ -57,6 +58,12 @@ module Users
 
       changes = @user.changed
       ATTRS_REQUIRING_PASSWORD_CHECK.any? { |param| changes.include?(param) }
+    end
+
+    def build_canonical_email
+      return unless @user.email_changed?
+
+      Users::UpdateCanonicalEmailService.new(user: @user).execute
     end
 
     def reset_unconfirmed_email

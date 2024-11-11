@@ -72,7 +72,7 @@ Use the following CI/CD variables to configure the authentication actions requir
 |:------------------------------------|:------------------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `DAST_AUTH_COOKIE_NAMES`                 | string                                    | Set to a comma-separated list of cookie names to specify which cookies are used for authentication.                                                                                                                                                                                             |
 | `DAST_AUTH_REPORT`                  | boolean                                   | Set to `true` to generate a report detailing steps taken during the authentication process. You must also define `gl-dast-debug-auth-report.html` as a CI job artifact to be able to access the generated report. The report's content aids when debugging authentication failures.             |
-| `DAST_AUTH_TYPE`                    | string                                    | The authentication type to use. Example: `basic-digest`.                                                                                                                                                                                                                                        |
+| `DAST_AUTH_TYPE` <sup>1</sup>       | string                                    | The authentication type to use. Example: `basic-digest`.                                                                                                                                                                                                                                        |
 | `DAST_AUTH_URL`                     | URL                                       | The URL of the page containing the login form on the target website. `DAST_USERNAME` and `DAST_PASSWORD` are submitted with the login form to create an authenticated scan. Example: `https://login.example.com`.                                                                               |
 | `DAST_AUTH_SUCCESS_IF_NO_LOGIN_FORM` | boolean                                   | Verifies successful authentication by checking for the absence of a login form after the login form has been submitted. This success check is enabled by default.                                                                                                                                                         |
 | `DAST_AUTH_SUCCESS_IF_ELEMENT_FOUND`   | [selector](#finding-an-elements-selector) | A selector describing an element whose presence is used to determine if authentication has succeeded after the login form is submitted. Example: `css:.user-photo`.                                                                                                                             |
@@ -194,13 +194,6 @@ authentication using the [single-step](#configuration-for-a-single-step-login-fo
 
 DAST supports authentication processes where a user is redirected to an external Identity Provider's site to sign in.
 Check the [known limitations](#known-limitations) of DAST authentication to determine if your SSO authentication process is supported.
-
-### Handling multi-factor authentication or complex authentication flows
-
-DAST doesn't support multi-factor authentication (MFA) or complex authentication as standard. However, you can work around this
-by using a browser automation library such as Playwrite or Selenium. For a demonstration, see
-[this multi-factor-authentication project](https://gitlab.com/gitlab-org/security-products/demos/dast/multi-factor-authentication)
-that generates a one-time password (OTP) to authenticate.
 
 ### Click to go to the login form
 
@@ -408,9 +401,7 @@ dast:
 ## Known limitations
 
 - DAST cannot bypass a CAPTCHA if the authentication flow includes one. Turn these off in the testing environment for the application being scanned.
-- DAST cannot handle multi-factor authentication like one-time passwords (OTP) by using SMS, biometrics, or authenticator apps.
-  - Turn these off in the testing environment for the application being scanned.
-  - Alternatively, MFA can be worked around. See [this demo project](https://gitlab.com/gitlab-org/security-products/demos/dast/multi-factor-authentication) for more details.
+- DAST cannot handle multi-factor authentication like one-time passwords (OTP) by using SMS, biometrics, or authenticator apps. Turn these off in the testing environment for the application being scanned.
 - DAST cannot authenticate to applications that do not set an [authentication token](#authentication-tokens) during login.
 - DAST cannot authenticate to applications that require more than two inputs to be filled out. Two inputs must be supplied, username and password.
 - DAST does not carry the content of IndexedDB into the crawl stage. If your application relies on IndexedDB to maintain authenticated state, [DAST will not be able to authenticate](https://gitlab.com/gitlab-org/gitlab/-/issues/481651) to crawl your application.

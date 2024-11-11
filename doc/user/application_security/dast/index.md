@@ -26,13 +26,13 @@ other security tools cannot detect.
 DAST is completely language agnostic and examines your application from the outside in. With a
 running application in a test environment, DAST scans can be automated in a CI/CD pipeline,
 automated on a schedule, or run independently by using on-demand scans. Using DAST during the
-software development lifecycle enables teams to uncover vulnerabilities before their applications
+software development life cycle enables teams to uncover vulnerabilities before their applications
 are in production. DAST is a foundational component of software security and should be used in
 tandem with SAST, dependency and license scanning, and secret detection, to provide a comprehensive
 security assessment of your applications.
 
-GitLab browser-based DAST and API security testing are proprietary runtime tools which provide
-broad security coverage for modern-day web applications and APIs.
+GitLab’s Browser-based DAST and DAST API are proprietary runtime tools, which provide broad security
+coverage for modern-day web applications and APIs.
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For an overview, see [Dynamic Application Security Testing (DAST)](https://www.youtube.com/watch?v=nbeDUoLZJTo).
@@ -61,7 +61,7 @@ which GitLab uses to determine discovered vulnerabilities based on differences b
 > - Support for the arm64 architecture was [introduced](https://gitlab.com/groups/gitlab-org/-/epics/13757) in GitLab 17.0.
 
 - [GitLab Runner](../../../ci/runners/index.md) available, with the
-  [`docker` executor](https://docs.gitlab.com/runner/executors/docker.html) or the [Kubernetes executor](https://docs.gitlab.com/runner/executors/kubernetes/) on Linux/amd64 or Linux/arm64.
+  [`docker` executor](https://docs.gitlab.com/runner/executors/docker.html) on Linux/amd64 or Linux/arm64.
 - Target application deployed. For more details, read [Deployment options](#application-deployment-options).
 - `dast` stage added to the CI/CD pipeline definition. This should be added after the deploy step, for example:
 

@@ -18,8 +18,8 @@ You can import your GitHub projects from either GitHub.com or GitHub Enterprise.
 migrate or import any types of groups or organizations from GitHub to GitLab.
 
 WARNING:
-Importing from GitHub to GitLab.com is [unavailable](https://status.gitlab.com).
-For more information, contact [GitLab Support](https://about.gitlab.com/support/).
+Importing from GitHub to GitLab.com is [currently unavailable](https://status.gitlab.com). We don't have an
+estimated time for resolution. For more information, please [contact support](https://about.gitlab.com/support/).
 
 Imported issues, merge requests, comments, and events have an **Imported** badge in GitLab.
 
@@ -258,6 +258,7 @@ Expand **Details** to see a list of [repository entities](#imported-data) that f
 
 DETAILS:
 **Tier:** Premium, Ultimate
+**Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
 Depending on your GitLab tier, [repository mirroring](../repository/mirror/index.md) can be set up to keep
 your imported repository in sync with its GitHub copy.

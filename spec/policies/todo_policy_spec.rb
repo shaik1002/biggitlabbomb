@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe TodoPolicy, feature_category: :notifications do
+RSpec.describe TodoPolicy, feature_category: :team_planning do
   using RSpec::Parameterized::TableSyntax
 
   let_it_be(:project) { create(:project) }

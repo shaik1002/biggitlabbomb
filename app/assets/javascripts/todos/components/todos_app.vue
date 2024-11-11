@@ -1,26 +1,17 @@
 <script>
-import { computed } from 'vue';
 import { GlLoadingIcon, GlKeysetPagination, GlLink, GlBadge, GlTab, GlTabs } from '@gitlab/ui';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import { createAlert } from '~/alert';
 import { s__ } from '~/locale';
-import Tracking from '~/tracking';
-import {
-  INSTRUMENT_TAB_LABELS,
-  INSTRUMENT_TODO_FILTER_CHANGE,
-  INSTRUMENT_TODO_ITEM_CLICK,
-  STATUS_BY_TAB,
-} from '~/todos/constants';
 import getTodosQuery from './queries/get_todos.query.graphql';
-import getPendingTodosCount from './queries/get_pending_todos_count.query.graphql';
-import markAsDoneMutation from './mutations/mark_as_done.mutation.graphql';
-import markAsPendingMutation from './mutations/mark_as_pending.mutation.graphql';
+import getTodosCountQuery from './queries/get_todos_count.query.graphql';
 import TodoItem from './todo_item.vue';
 import TodosEmptyState from './todos_empty_state.vue';
 import TodosFilterBar, { SORT_OPTIONS } from './todos_filter_bar.vue';
 import TodosMarkAllDoneButton from './todos_mark_all_done_button.vue';
 
 const ENTRIES_PER_PAGE = 20;
+const STATUS_BY_TAB = [['pending'], ['done'], ['pending', 'done']];
 
 export default {
   components: {
@@ -35,12 +26,7 @@ export default {
     TodoItem,
     TodosMarkAllDoneButton,
   },
-  mixins: [Tracking.mixin()],
-  provide() {
-    return {
-      currentTab: computed(() => this.currentTab),
-    };
-  },
+
   data() {
     return {
       cursor: {
@@ -53,7 +39,11 @@ export default {
       pageInfo: {},
       todos: [],
       currentTab: 0,
-      pendingTodosCount: '-',
+      todosCount: {
+        pending: '-',
+        done: '-',
+        all: '-',
+      },
       queryFilterValues: {
         groupId: [],
         projectId: [],
@@ -63,13 +53,11 @@ export default {
         sort: `${SORT_OPTIONS[0].value}_DESC`,
       },
       alert: null,
-      showSpinnerWhileLoading: true,
     };
   },
   apollo: {
     todos: {
       query: getTodosQuery,
-      fetchPolicy: 'cache-and-network',
       variables() {
         return {
           state: this.statusByTab,
@@ -87,13 +75,23 @@ export default {
         Sentry.captureException(error);
       },
     },
-    pendingTodosCount: {
-      query: getPendingTodosCount,
+    todosCount: {
+      query: getTodosCountQuery,
       variables() {
         return this.queryFilterValues;
       },
-      update({ currentUser: { todos: { count } } = {} }) {
-        return count;
+      update({
+        currentUser: {
+          pending: { count: pending },
+          done: { count: done },
+          all: { count: all },
+        } = {},
+      }) {
+        return {
+          pending,
+          done,
+          all,
+        };
       },
     },
   },
@@ -118,6 +116,9 @@ export default {
     showMarkAllAsDone() {
       return this.currentTab === 0 && !this.showEmptyState;
     },
+    fadeDoneTodo() {
+      return this.currentTab === 0;
+    },
   },
   methods: {
     nextPage(item) {
@@ -137,9 +138,6 @@ export default {
       };
     },
     tabChanged(tabIndex) {
-      this.track(INSTRUMENT_TODO_FILTER_CHANGE, {
-        label: INSTRUMENT_TAB_LABELS[tabIndex],
-      });
       this.currentTab = tabIndex;
       this.cursor = {
         first: ENTRIES_PER_PAGE,
@@ -152,36 +150,8 @@ export default {
       this.alert?.dismiss();
       this.queryFilterValues = { ...data };
     },
-    async handleItemChanged(id, markedAsDone) {
-      await this.updateAllQueries(false);
-      this.showUndoToast(id, markedAsDone);
-    },
-    showUndoToast(todoId, markedAsDone) {
-      const message = markedAsDone ? s__('Todos|Marked as done') : s__('Todos|Marked as undone');
-      const mutation = markedAsDone ? markAsPendingMutation : markAsDoneMutation;
-
-      const { hide } = this.$toast.show(message, {
-        action: {
-          text: s__('Todos|Undo'),
-          onClick: async () => {
-            hide();
-            await this.$apollo.mutate({ mutation, variables: { todoId } });
-            this.track(INSTRUMENT_TODO_ITEM_CLICK, {
-              label: markedAsDone ? 'undo_mark_done' : 'undo_mark_pending',
-            });
-            this.updateAllQueries(false);
-          },
-        },
-      });
-    },
     updateCounts() {
-      this.$apollo.queries.pendingTodosCount.refetch();
-    },
-    async updateAllQueries(showLoading = true) {
-      this.showSpinnerWhileLoading = showLoading;
-      this.updateCounts();
-      await this.$apollo.queries.todos.refetch();
-      this.showSpinnerWhileLoading = true;
+      this.$apollo.queries.todosCount.refetch();
     },
   },
 };
@@ -194,25 +164,27 @@ export default {
         <gl-tab>
           <template #title>
             <span>{{ s__('Todos|To Do') }}</span>
-            <gl-badge pill size="sm" class="gl-tab-counter-badge" data-testid="pending-todos-count">
-              {{ pendingTodosCount }}
+            <gl-badge pill size="sm" class="gl-tab-counter-badge">
+              {{ todosCount.pending }}
             </gl-badge>
           </template>
         </gl-tab>
         <gl-tab>
           <template #title>
             <span>{{ s__('Todos|Done') }}</span>
+            <gl-badge pill size="sm" class="gl-tab-counter-badge"> {{ todosCount.done }} </gl-badge>
           </template>
         </gl-tab>
         <gl-tab>
           <template #title>
             <span>{{ s__('Todos|All') }}</span>
+            <gl-badge pill size="sm" class="gl-tab-counter-badge"> {{ todosCount.all }} </gl-badge>
           </template>
         </gl-tab>
       </gl-tabs>
 
       <div v-if="showMarkAllAsDone" class="gl-my-3 gl-mr-5 gl-flex gl-items-center gl-justify-end">
-        <todos-mark-all-done-button :filters="queryFilterValues" @change="updateCounts" />
+        <todos-mark-all-done-button @change="updateCounts" />
       </div>
     </div>
 
@@ -220,17 +192,15 @@ export default {
 
     <div>
       <div class="gl-flex gl-flex-col">
-        <gl-loading-icon v-if="isLoading && showSpinnerWhileLoading" size="lg" class="gl-mt-5" />
+        <gl-loading-icon v-if="isLoading" size="lg" class="gl-mt-5" />
         <ul v-else class="gl-m-0 gl-border-collapse gl-list-none gl-p-0">
-          <transition-group name="todos">
-            <todo-item
-              v-for="todo in todos"
-              :key="todo.id"
-              :todo="todo"
-              :current-user-id="currentUserId"
-              @change="handleItemChanged"
-            />
-          </transition-group>
+          <todo-item
+            v-for="todo in todos"
+            :key="todo.id"
+            :todo="todo"
+            :current-user-id="currentUserId"
+            :fade-done-todo="fadeDoneTodo"
+          />
         </ul>
 
         <todos-empty-state v-if="showEmptyState" :is-filtered="isFiltered" />
@@ -252,17 +222,3 @@ export default {
     </div>
   </div>
 </template>
-
-<style>
-.todos-leave-active {
-  transition: transform 0.15s ease-out;
-  position: absolute;
-}
-.todos-leave-to {
-  opacity: 0;
-  transform: translateY(-100px);
-}
-.todos-move {
-  transition: transform 0.15s ease-out;
-}
-</style>

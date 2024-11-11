@@ -16,7 +16,6 @@ describe('Merge requests query component', () => {
   let slotSpy;
   let reviewerQueryMock;
   let assigneeQueryMock;
-  let assigneeCountQueryMock;
 
   function createComponent(
     props = { query: 'reviewRequestedMergeRequests', variables: { state: 'opened' } },
@@ -55,9 +54,6 @@ describe('Merge requests query component', () => {
         },
       },
     });
-    assigneeCountQueryMock = jest
-      .fn()
-      .mockResolvedValue({ data: { currentUser: { id: 1, mergeRequests: { count: 1 } } } });
     const apolloProvider = createMockApollo(
       [
         [reviewerQuery, reviewerQueryMock],
@@ -68,7 +64,12 @@ describe('Merge requests query component', () => {
             .fn()
             .mockResolvedValue({ data: { currentUser: { id: 1, mergeRequests: { count: 1 } } } }),
         ],
-        [assigneeCountQuery, assigneeCountQueryMock],
+        [
+          assigneeCountQuery,
+          jest
+            .fn()
+            .mockResolvedValue({ data: { currentUser: { id: 1, mergeRequests: { count: 1 } } } }),
+        ],
       ],
       {},
       { typePolicies: { Query: { fields: { currentUser: { merge: false } } } } },
@@ -92,11 +93,7 @@ describe('Merge requests query component', () => {
 
     await waitForPromises();
 
-    expect(reviewerQueryMock).toHaveBeenCalledWith({
-      perPage: 20,
-      state: 'opened',
-      sort: 'UPDATED_DESC',
-    });
+    expect(reviewerQueryMock).toHaveBeenCalledWith({ perPage: 20, state: 'opened' });
   });
 
   it('calls assigneeQueryMock for assignee query', async () => {
@@ -104,23 +101,7 @@ describe('Merge requests query component', () => {
 
     await waitForPromises();
 
-    expect(assigneeQueryMock).toHaveBeenCalledWith({
-      perPage: 20,
-      state: 'opened',
-      sort: 'UPDATED_DESC',
-    });
-  });
-
-  it('does not call count query if hideCount is true', async () => {
-    createComponent({
-      query: 'assignedMergeRequests',
-      variables: { state: 'opened' },
-      hideCount: true,
-    });
-
-    await waitForPromises();
-
-    expect(assigneeCountQueryMock).not.toHaveBeenCalled();
+    expect(assigneeQueryMock).toHaveBeenCalledWith({ perPage: 20, state: 'opened' });
   });
 
   it.each([

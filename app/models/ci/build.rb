@@ -465,9 +465,7 @@ module Ci
     end
 
     def exit_code=(value)
-      return unless value
-
-      ensure_metadata.exit_code = value.to_i.clamp(0, Gitlab::Database::MAX_SMALLINT_VALUE)
+      ensure_metadata.exit_code = value
     end
 
     def auto_retry_expected?
@@ -485,6 +483,8 @@ module Ci
     end
 
     def pages_generator?
+      return Gitlab.config.pages.enabled && name == 'pages' unless ::Feature.enabled?(:customizable_pages_job_name, project)
+
       return false unless Gitlab.config.pages.enabled
       return true if options[:pages].is_a?(Hash) || options[:pages] == true
 
@@ -828,9 +828,7 @@ module Ci
       artifacts_public = options.dig(:artifacts, :public)
       artifacts_access = options.dig(:artifacts, :access)
 
-      if !artifacts_public.nil? && !artifacts_access.nil?
-        raise ArgumentError, 'artifacts:public and artifacts:access are mutually exclusive'
-      end
+      raise ArgumentError, 'artifacts:public and artifacts:access are mutually exclusive' if !artifacts_public.nil? && !artifacts_access.nil?
 
       return :public if artifacts_public == true || artifacts_access == 'all'
       return :private if artifacts_public == false || artifacts_access == 'developer'
@@ -869,7 +867,9 @@ module Ci
 
     def artifacts_expire_in=(value)
       self.artifacts_expire_at =
-        (ChronicDuration.parse(value)&.seconds&.from_now if value)
+        if value
+          ChronicDuration.parse(value)&.seconds&.from_now
+        end
     end
 
     def has_expired_locked_archive_artifacts?
@@ -997,7 +997,9 @@ module Ci
         Gitlab::Ci::MaskSecret.mask!(trace, project.runners_token) if project
         Gitlab::Ci::MaskSecret.mask!(trace, token) if token
 
-        metrics.increment_trace_operation(operation: :mutated) if trace != data
+        if trace != data
+          metrics.increment_trace_operation(operation: :mutated)
+        end
       end
     end
 

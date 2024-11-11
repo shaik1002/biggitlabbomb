@@ -3,7 +3,11 @@
 require 'spec_helper'
 
 RSpec.describe IgnorableColumns do
-  let(:record_class) { Class.new(ApplicationRecord) }
+  let(:record_class) do
+    Class.new(ApplicationRecord) do
+      include IgnorableColumns
+    end
+  end
 
   subject { record_class }
 

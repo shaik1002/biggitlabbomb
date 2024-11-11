@@ -8,7 +8,6 @@ import { mountExtended, shallowMountExtended } from 'helpers/vue_test_utils_help
 import { stubComponent, RENDER_ALL_SLOTS_TEMPLATE } from 'helpers/stub_component';
 import PlaceholdersTabApp from '~/members/placeholders/components/app.vue';
 import CsvUploadModal from '~/members/placeholders/components/csv_upload_modal.vue';
-import KeepAllAsPlaceholderModal from '~/members/placeholders/components/keep_all_as_placeholder_modal.vue';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import {
   FILTERED_SEARCH_TERM,
@@ -45,7 +44,6 @@ describe('PlaceholdersTabApp', () => {
   const mockGroup = {
     path: 'imported-group',
     name: 'Imported group',
-    id: 1,
   };
 
   const createComponent = ({
@@ -94,9 +92,6 @@ describe('PlaceholdersTabApp', () => {
   const findReassignedTable = () => wrapper.findByTestId('placeholders-table-reassigned');
   const findReassignCsvButton = () => wrapper.findByTestId('reassign-csv-button');
   const findCsvModal = () => wrapper.findComponent(CsvUploadModal);
-  const findKeepAllAsPlaceholderButton = () =>
-    wrapper.findByTestId('keep-all-as-placeholder-button');
-  const findKeepAllAsPlaceholderModal = () => wrapper.findComponent(KeepAllAsPlaceholderModal);
 
   describe('filter, search and sort', () => {
     const filterByFailedStatusToken = { type: TOKEN_TYPE_STATUS, value: { data: 'failed' } };
@@ -126,7 +121,7 @@ describe('PlaceholdersTabApp', () => {
         await nextTick();
 
         expect(findUnassignedTable().props('queryStatuses')).toEqual([PLACEHOLDER_STATUS_FAILED]);
-        expect(window.location.search).toBe(`?tab=placeholders&subtab=awaiting&status=failed`);
+        expect(window.location.search).toBe(`?tab=placeholders&status=failed`);
       });
 
       it('updates URL on search', async () => {
@@ -134,9 +129,7 @@ describe('PlaceholdersTabApp', () => {
         await nextTick();
 
         expect(findUnassignedTable().props('querySearch')).toBe(searchTerm);
-        expect(window.location.search).toBe(
-          `?tab=placeholders&subtab=awaiting&search=source+user+1`,
-        );
+        expect(window.location.search).toBe(`?tab=placeholders&search=source+user+1`);
       });
     });
 
@@ -174,7 +167,7 @@ describe('PlaceholdersTabApp', () => {
           queryStatuses: [PLACEHOLDER_STATUS_REASSIGNING],
         });
         expect(window.location.search).toBe(
-          `?tab=placeholders&subtab=awaiting&status=reassignment_in_progress&search=source+user+1&sort=STATUS_ASC`,
+          `?tab=placeholders&status=reassignment_in_progress&search=source+user+1&sort=STATUS_ASC`,
         );
       });
 
@@ -184,7 +177,7 @@ describe('PlaceholdersTabApp', () => {
 
         expect(findUnassignedTable().props('querySort')).toBe(PLACEHOLDER_SORT_SOURCE_NAME_DESC);
         expect(window.location.search).toBe(
-          `?tab=placeholders&subtab=awaiting&status=failed&search=foo&sort=SOURCE_NAME_DESC`,
+          `?tab=placeholders&status=failed&search=foo&sort=SOURCE_NAME_DESC`,
         );
         expect(findFilteredSearchBar().props('initialSortBy')).toBe('SOURCE_NAME_DESC');
       });
@@ -272,7 +265,6 @@ describe('PlaceholdersTabApp', () => {
     });
 
     it('reassigned', () => {
-      setWindowLocation(`?tab=placeholders&subtab=reassigned`);
       createComponent();
 
       const placeholdersTable = findReassignedTable();
@@ -317,48 +309,6 @@ describe('PlaceholdersTabApp', () => {
         expect(findReassignCsvButton().exists()).toBe(false);
         expect(findCsvModal().exists()).toBe(false);
       });
-    });
-  });
-
-  describe('keep all as placeholder', () => {
-    beforeEach(() => {
-      createComponent({ mountFn: mountExtended });
-    });
-
-    it('renders the button and the modal', () => {
-      expect(findKeepAllAsPlaceholderButton().exists()).toBe(true);
-      expect(findKeepAllAsPlaceholderModal().exists()).toBe(true);
-    });
-
-    it('shows the modal when the button is clicked', async () => {
-      findKeepAllAsPlaceholderButton().trigger('click');
-
-      await nextTick();
-
-      expect(findKeepAllAsPlaceholderModal().findComponent(GlModal).isVisible()).toBe(true);
-    });
-  });
-
-  describe('on keepAllAsPlaceholderModal "confirm" event', () => {
-    beforeEach(async () => {
-      const sourceUsersCount = mockSourceUsers.length;
-
-      createComponent();
-      await nextTick();
-
-      findKeepAllAsPlaceholderModal().vm.$emit('confirm', sourceUsersCount);
-      await nextTick();
-    });
-
-    it('updates tab counts', () => {
-      expect(findTabAt(0).text()).toBe(
-        `Awaiting reassignment ${pagination.awaitingReassignmentItems - 7}`,
-      );
-      expect(findTabAt(1).text()).toBe(`Reassigned ${pagination.reassignedItems + 7}`);
-    });
-
-    it('shows toast', () => {
-      expect($toast.show).toHaveBeenCalledWith('7 placeholders were kept as placeholders.');
     });
   });
 });

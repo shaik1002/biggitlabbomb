@@ -129,6 +129,9 @@ export default {
     workItemWeight() {
       return this.isWidgetPresent(WIDGET_TYPE_WEIGHT);
     },
+    isWorkItemWeightEditable() {
+      return this.workItemWeight?.widgetDefinition?.editable;
+    },
     workItemProgress() {
       return this.isWidgetPresent(WIDGET_TYPE_PROGRESS);
     },
@@ -213,12 +216,11 @@ export default {
         @labelsUpdated="$emit('attributesUpdated', { type: $options.ListType.label, ids: $event })"
       />
     </template>
-    <template v-if="workItemWeight">
+    <template v-if="isWorkItemWeightEditable">
       <work-item-weight
         class="work-item-attributes-item"
         :can-update="canUpdate"
-        :full-path="fullPath"
-        :widget="workItemWeight"
+        :weight="workItemWeight.weight"
         :work-item-id="workItem.id"
         :work-item-iid="workItem.iid"
         :work-item-type="workItemType"
@@ -244,7 +246,6 @@ export default {
     <template v-if="workItemMilestone">
       <work-item-milestone
         class="js-milestone work-item-attributes-item"
-        :is-group="isGroup"
         :full-path="fullPath"
         :work-item-id="workItem.id"
         :work-item-milestone="workItemMilestone.milestone"
@@ -260,7 +261,6 @@ export default {
       <work-item-iteration
         class="work-item-attributes-item"
         :full-path="fullPath"
-        :is-group="isGroup"
         :iteration="workItemIteration.iteration"
         :can-update="canUpdate"
         :work-item-id="workItem.id"

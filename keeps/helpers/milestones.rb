@@ -15,10 +15,6 @@ module Keeps
         milestones[current_milestone_index + milestones_ago].version
       end
 
-      def upcoming_milestones
-        milestones.select { |milestone| Date.parse(milestone.date).future? }.reverse
-      end
-
       private
 
       def current_milestone

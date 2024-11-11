@@ -5,7 +5,8 @@ import axios from '~/lib/utils/axios_utils';
 import { visitUrl, setUrlParams, getNormalizedURL, updateHistory } from '~/lib/utils/url_utility';
 import { logError } from '~/lib/logger';
 import { __ } from '~/locale';
-import { SCOPE_BLOB, SEARCH_TYPE_ZOEKT, LABEL_FILTER_PARAM } from '~/search/sidebar/constants';
+import { LABEL_FILTER_PARAM } from '~/search/sidebar/components/label_filter/data';
+import { SCOPE_BLOB, SEARCH_TYPE_ZOEKT } from '~/search/sidebar/constants';
 import {
   GROUPS_LOCAL_STORAGE_KEY,
   PROJECTS_LOCAL_STORAGE_KEY,

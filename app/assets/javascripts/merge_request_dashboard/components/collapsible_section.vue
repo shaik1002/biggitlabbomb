@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlBadge, GlTooltipDirective } from '@gitlab/ui';
+import { GlButton, GlBadge } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 
 export default {
@@ -7,23 +7,20 @@ export default {
     GlButton,
     GlBadge,
   },
-  directives: {
-    GlTooltip: GlTooltipDirective,
-  },
   props: {
     title: {
       type: String,
       required: true,
     },
-    helpContent: {
-      type: String,
-      required: false,
-      default: '',
-    },
     count: {
       type: Number,
       required: false,
       default: null,
+    },
+    loading: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   data() {
@@ -69,7 +66,7 @@ export default {
         :class="{ 'gl-rounded-base': !open }"
         class="gl-rounded-tl-base gl-rounded-tr-base gl-bg-gray-10 gl-px-5 gl-py-4"
       >
-        <h2 class="h5 gl-m-0">
+        <h5 class="gl-m-0">
           <gl-button
             :icon="toggleButtonIcon"
             size="small"
@@ -81,22 +78,10 @@ export default {
             @click="toggleOpen"
           />
           {{ title }}
-          <gl-badge
-            v-if="count !== null"
-            class="gl-ml-1"
-            variant="neutral"
-            size="sm"
-            data-testid="merge-request-list-count"
-            >{{ count }}</gl-badge
-          >
-          <gl-button
-            v-gl-tooltip
-            :title="helpContent"
-            icon="information-o"
-            variant="link"
-            class="gl-relative gl-top-2 gl-float-right gl-inline-flex"
-          />
-        </h2>
+          <gl-badge v-if="!loading || count" class="gl-ml-1" variant="neutral" size="sm">{{
+            count
+          }}</gl-badge>
+        </h5>
       </header>
       <div v-if="open" data-testid="section-content">
         <slot></slot>

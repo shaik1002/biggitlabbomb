@@ -59,13 +59,11 @@ RSpec.describe ResourceAccessTokens::CreateService, feature_category: :system_ac
         response = subject
 
         access_token = response.payload[:access_token]
-        namespace = resource.is_a?(Group) ? resource : resource.project_namespace
 
         expect(access_token.user.reload.user_type).to eq("project_bot")
         expect(access_token.user.created_by_id).to eq(user.id)
         expect(access_token.user.namespace.organization.id).to eq(resource.organization.id)
         expect(access_token.organization.id).to eq(resource.organization.id)
-        expect(access_token.user.bot_namespace).to eq(namespace)
       end
 
       context 'email confirmation status' do
@@ -424,7 +422,7 @@ RSpec.describe ResourceAccessTokens::CreateService, feature_category: :system_ac
 
     context 'when require_organization feature is disabled' do
       before_all do
-        stub_feature_flags(require_organization_on_project: false)
+        stub_feature_flags(require_organization: false)
       end
 
       context 'when resource organization is not set', :enable_admin_mode do

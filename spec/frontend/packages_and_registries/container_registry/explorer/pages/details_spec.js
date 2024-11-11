@@ -2,7 +2,6 @@ import { GlKeysetPagination, GlEmptyState, GlSkeletonLoader } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import Vue, { nextTick } from 'vue';
 import VueApollo from 'vue-apollo';
-import { helpPagePath } from '~/helpers/help_page_helper';
 
 import createMockApollo from 'helpers/mock_apollo_helper';
 import waitForPromises from 'helpers/wait_for_promises';
@@ -236,6 +235,7 @@ describe('Details Page', () => {
   describe('Delete Alert', () => {
     const config = {
       isAdmin: true,
+      garbageCollectionHelpPagePath: 'baz',
     };
     const deleteAlertType = 'success_tag';
 
@@ -258,18 +258,14 @@ describe('Details Page', () => {
 
       await waitForApolloRequestRender();
 
-      expect(findDeleteAlert().props()).toEqual({
-        ...config,
-        deleteAlertType,
-        garbageCollectionHelpPagePath: helpPagePath('administration/packages/container_registry', {
-          anchor: 'container-registry-garbage-collection',
-        }),
-      });
+      expect(findDeleteAlert().props()).toEqual({ ...config, deleteAlertType });
     });
   });
 
   describe('Partial Cleanup Alert', () => {
     const config = {
+      runCleanupPoliciesHelpPagePath: 'foo',
+      expirationPolicyHelpPagePath: 'bar',
       userCalloutsPath: 'call_out_path',
       userCalloutId: 'call_out_id',
       showUnfinishedTagCleanupCallout: true,
@@ -300,18 +296,8 @@ describe('Details Page', () => {
         await waitForApolloRequestRender();
 
         expect(findPartialCleanupAlert().props()).toEqual({
-          cleanupPoliciesHelpPagePath: helpPagePath(
-            'user/packages/container_registry/reduce_container_registry_storage',
-            {
-              anchor: 'cleanup-policy',
-            },
-          ),
-          runCleanupPoliciesHelpPagePath: helpPagePath(
-            'administration/packages/container_registry',
-            {
-              anchor: 'run-the-cleanup-policy-now',
-            },
-          ),
+          runCleanupPoliciesHelpPagePath: config.runCleanupPoliciesHelpPagePath,
+          cleanupPoliciesHelpPagePath: config.expirationPolicyHelpPagePath,
         });
       });
 

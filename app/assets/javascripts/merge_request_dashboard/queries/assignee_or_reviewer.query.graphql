@@ -8,7 +8,6 @@ query assigneeOrReviewer(
   $mergedAfter: Time
   $perPage: Int!
   $afterCursor: String
-  $sort: MergeRequestSort = UPDATED_DESC
 ) {
   currentUser {
     id
@@ -19,7 +18,7 @@ query assigneeOrReviewer(
       mergedAfter: $mergedAfter
       first: $perPage
       after: $afterCursor
-      sort: $sort
+      sort: UPDATED_DESC
     ) {
       pageInfo {
         ...PageInfo

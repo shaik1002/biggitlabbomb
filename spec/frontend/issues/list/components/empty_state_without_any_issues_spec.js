@@ -27,7 +27,6 @@ describe('EmptyStateWithoutAnyIssues component', () => {
   const findCsvImportExportButtons = () => wrapper.findComponent(CsvImportExportButtons);
   const findCsvImportExportDropdown = () => wrapper.findComponent(GlDisclosureDropdown);
   const findGlEmptyState = () => wrapper.findComponent(GlEmptyState);
-  const findCreateProjectMessage = () => wrapper.findByTestId('create-project-message');
   const findGlLink = () => wrapper.findComponent(GlLink);
   const findIssuesHelpPageLink = () =>
     wrapper.findByRole('link', { name: 'Learn more about issues.' });
@@ -74,27 +73,12 @@ describe('EmptyStateWithoutAnyIssues component', () => {
 
         describe('"create a project first" description', () => {
           describe('when can create projects', () => {
-            describe('when showNewIssueDropdown is false', () => {
-              it('renders', () => {
-                mountComponent({ provide: { canCreateProjects: true } });
+            it('renders', () => {
+              mountComponent({ provide: { canCreateProjects: true } });
 
-                expect(findCreateProjectMessage().text()).toContain(
-                  'Issues exist in projects. To create an issue, first create a project.',
-                );
-              });
-            });
-
-            describe('when showNewIssueDropdown is true', () => {
-              it('renders', () => {
-                mountComponent({
-                  props: { showNewIssueDropdown: true },
-                  provide: { canCreateProjects: true },
-                });
-
-                expect(findCreateProjectMessage().text()).toContain(
-                  'Issues exist in projects. Select a project to create an issue, or create a project.',
-                );
-              });
+              expect(findGlEmptyState().text()).toContain(
+                'Issues exist in projects, so to create an issue, first create a project.',
+              );
             });
           });
 
@@ -102,7 +86,9 @@ describe('EmptyStateWithoutAnyIssues component', () => {
             it('does not render', () => {
               mountComponent({ provide: { canCreateProjects: false } });
 
-              expect(findCreateProjectMessage().exists()).toBe(false);
+              expect(findGlEmptyState().text()).not.toContain(
+                'Issues exist in projects, so to create an issue, first create a project.',
+              );
             });
           });
         });

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::CreatePipelineService, :clean_gitlab_redis_cache, feature_category: :continuous_integration do
+RSpec.describe Ci::CreatePipelineService, :ci_config_feature_flag_correctness, :clean_gitlab_redis_cache, feature_category: :continuous_integration do
   include ProjectForksHelper
   include Ci::PipelineMessageHelpers
 
@@ -30,8 +30,7 @@ RSpec.describe Ci::CreatePipelineService, :clean_gitlab_redis_cache, feature_cat
       source_sha: nil,
       target_sha: nil,
       partition_id: nil,
-      save_on_errors: true,
-      pipeline_creation_request: nil)
+      save_on_errors: true)
       params = { ref: ref,
                  before: before,
                  after: after,
@@ -39,8 +38,7 @@ RSpec.describe Ci::CreatePipelineService, :clean_gitlab_redis_cache, feature_cat
                  push_options: push_options,
                  source_sha: source_sha,
                  target_sha: target_sha,
-                 partition_id: partition_id,
-                 pipeline_creation_request: pipeline_creation_request }
+                 partition_id: partition_id }
 
       described_class.new(project, user, params).execute(source,
         save_on_errors: save_on_errors,
@@ -157,11 +155,6 @@ RSpec.describe Ci::CreatePipelineService, :clean_gitlab_redis_cache, feature_cat
         end
 
         execute_service
-      end
-
-      it 'creates pipeline_config' do
-        expect { execute_service }
-          .to change { Ci::PipelineConfig.count }.by(1)
       end
 
       context 'when merge requests already exist for this source branch' do
@@ -992,7 +985,7 @@ RSpec.describe Ci::CreatePipelineService, :clean_gitlab_redis_cache, feature_cat
 
       context 'when trigger belongs to no one' do
         let(:user) {}
-        let(:trigger_request) { create(:ci_trigger_request, project_id: project.id) }
+        let(:trigger_request) { create(:ci_trigger_request) }
 
         it 'does not create a pipeline', :aggregate_failures do
           response = execute_service(trigger_request: trigger_request)
@@ -1005,7 +998,7 @@ RSpec.describe Ci::CreatePipelineService, :clean_gitlab_redis_cache, feature_cat
 
       context 'when trigger belongs to a developer' do
         let(:user) { create(:user) }
-        let(:trigger) { create(:ci_trigger, owner: user, project: project) }
+        let(:trigger) { create(:ci_trigger, owner: user) }
         let(:trigger_request) { create(:ci_trigger_request, trigger: trigger) }
 
         before do
@@ -1023,7 +1016,7 @@ RSpec.describe Ci::CreatePipelineService, :clean_gitlab_redis_cache, feature_cat
 
       context 'when trigger belongs to a maintainer' do
         let(:user) { create(:user) }
-        let(:trigger) { create(:ci_trigger, owner: user, project: project) }
+        let(:trigger) { create(:ci_trigger, owner: user) }
         let(:trigger_request) { create(:ci_trigger_request, trigger: trigger) }
 
         before do
@@ -2037,26 +2030,6 @@ RSpec.describe Ci::CreatePipelineService, :clean_gitlab_redis_cache, feature_cat
         it 'raises error' do
           expect { execute_service(partition_id: ci_testing_partition_id) }
             .to raise_error(ArgumentError, "Param `partition_id` is not allowed")
-        end
-      end
-    end
-
-    describe 'pipeline creation status updating' do
-      context 'when the pipeline creation succeeds' do
-        it 'updates the status with `succeeded`' do
-          expect(::Ci::PipelineCreation::Requests).to receive(:succeeded).with({ 'key' => '123', 'id' => '456' })
-
-          execute_service(pipeline_creation_request: { 'key' => '123', 'id' => '456' })
-        end
-      end
-
-      context 'when the pipeline creation fails' do
-        let_it_be_with_reload(:user) { create(:user) }
-
-        it 'updates the status with `failed`' do
-          expect(::Ci::PipelineCreation::Requests).to receive(:failed).with({ 'key' => '123', 'id' => '456' })
-
-          execute_service(pipeline_creation_request: { 'key' => '123', 'id' => '456' })
         end
       end
     end

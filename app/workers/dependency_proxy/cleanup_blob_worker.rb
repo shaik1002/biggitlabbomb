@@ -6,7 +6,9 @@ module DependencyProxy
     include ::Packages::CleanupArtifactWorker
     include Gitlab::Utils::StrongMemoize
 
-    data_consistency :sticky
+    data_consistency :always
+
+    sidekiq_options retry: 3
 
     queue_namespace :dependency_proxy_blob
     feature_category :virtual_registry

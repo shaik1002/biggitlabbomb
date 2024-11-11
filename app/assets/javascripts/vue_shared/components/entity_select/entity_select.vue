@@ -1,6 +1,6 @@
 <script>
 import { debounce, isObject } from 'lodash';
-import { GlFormGroup, GlCollapsibleListbox, GlLoadingIcon } from '@gitlab/ui';
+import { GlFormGroup, GlCollapsibleListbox } from '@gitlab/ui';
 import { __ } from '~/locale';
 import { DEFAULT_DEBOUNCE_AND_THROTTLE_MS } from '~/lib/utils/constants';
 import { RESET_LABEL, QUERY_TOO_SHORT_MESSAGE } from './constants';
@@ -12,7 +12,6 @@ export default {
   components: {
     GlFormGroup,
     GlCollapsibleListbox,
-    GlLoadingIcon,
   },
   props: {
     block: {
@@ -70,16 +69,11 @@ export default {
       required: false,
       default: '',
     },
-    searchable: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
   },
   data() {
     return {
       pristine: true,
-      loading: false,
+      searching: false,
       hasMoreItems: true,
       infiniteScrollLoading: false,
       searchString: '',
@@ -142,7 +136,7 @@ export default {
     }, DEFAULT_DEBOUNCE_AND_THROTTLE_MS),
     async fetchEntities(page = 1) {
       if (page === 1) {
-        this.loading = true;
+        this.searching = true;
         this.items = [];
         this.hasMoreItems = true;
       } else {
@@ -158,7 +152,7 @@ export default {
       }
 
       this.page = page;
-      this.loading = false;
+      this.searching = false;
       this.infiniteScrollLoading = false;
     },
     async getInitialSelection() {
@@ -173,10 +167,10 @@ export default {
         );
       }
 
-      this.loading = true;
+      this.searching = true;
       this.initialSelectedItem = await this.fetchInitialSelection(this.initialSelection);
       this.pristine = false;
-      this.loading = false;
+      this.searching = false;
     },
     onShown() {
       if (!this.searchString && !this.items.length) {
@@ -211,14 +205,14 @@ export default {
       :header-text="headerText"
       :reset-button-label="resetButtonLabel"
       :toggle-text="toggleText"
-      :loading="loading && pristine"
-      :searching="loading"
+      :loading="searching && pristine"
+      :searching="searching"
       :items="items"
       :no-results-text="noResultsText"
       :infinite-scroll="hasMoreItems"
       :infinite-scroll-loading="infiniteScrollLoading"
       :toggle-class="toggleClass"
-      :searchable="searchable"
+      searchable
       @shown="onShown"
       @search="search"
       @reset="onReset"
@@ -226,9 +220,6 @@ export default {
     >
       <template #list-item="{ item }">
         <slot name="list-item" :item="item"></slot>
-      </template>
-      <template v-if="!searchable" #footer>
-        <gl-loading-icon v-if="loading" size="md" class="gl-my-3" />
       </template>
     </gl-collapsible-listbox>
     <input :id="inputId" data-testid="input" type="hidden" :name="inputName" :value="selected" />

@@ -224,11 +224,6 @@ export default {
       required: false,
       default: false,
     },
-    issuableItemClass: {
-      type: String,
-      required: false,
-      default: '',
-    },
   },
   data() {
     return {
@@ -389,7 +384,7 @@ export default {
         <issuable-item
           v-for="issuable in issuables"
           :key="issuable.id"
-          :class="[{ 'gl-cursor-grab': isManualOrdering }, issuableItemClass]"
+          :class="{ 'gl-cursor-grab': isManualOrdering }"
           data-testid="issuable-container"
           :data-qa-issuable-title="issuable.title"
           :has-scoped-labels-feature="hasScopedLabelsFeature"

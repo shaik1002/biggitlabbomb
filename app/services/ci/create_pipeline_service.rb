@@ -39,7 +39,6 @@ module Ci
       Gitlab::Ci::Pipeline::Chain::Metrics,
       Gitlab::Ci::Pipeline::Chain::TemplateUsage,
       Gitlab::Ci::Pipeline::Chain::ComponentUsage,
-      Gitlab::Ci::Pipeline::Chain::KeywordUsage,
       Gitlab::Ci::Pipeline::Chain::Pipeline::Process].freeze
 
     # Create a new pipeline in the specified project.
@@ -112,12 +111,8 @@ module Ci
       end
 
       if error_message = pipeline.full_error_messages.presence || pipeline.failure_reason.presence
-        ::Ci::PipelineCreation::Requests.failed(params[:pipeline_creation_request])
-
         ServiceResponse.error(message: error_message, payload: pipeline)
       else
-        ::Ci::PipelineCreation::Requests.succeeded(params[:pipeline_creation_request])
-
         ServiceResponse.success(payload: pipeline)
       end
 

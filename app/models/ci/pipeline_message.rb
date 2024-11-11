@@ -8,7 +8,6 @@ module Ci
 
     belongs_to :pipeline
 
-    validates :project_id, presence: true
     validates :content, presence: true
 
     partitionable scope: :pipeline

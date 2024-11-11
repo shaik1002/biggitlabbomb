@@ -114,8 +114,6 @@ RSpec.describe API::Conan::V1::InstancePackages, feature_category: :package_regi
 
     describe "DELETE /api/v4/packages/conan/v1/conans/:package_name/package_version/:package_username" \
       "/:package_channel" do
-      let_it_be_with_reload(:package) { create(:conan_package, project: project) }
-
       subject { delete api("/packages/conan/v1/conans/#{recipe_path}"), headers: headers }
 
       it_behaves_like 'delete package endpoint'
@@ -128,8 +126,7 @@ RSpec.describe API::Conan::V1::InstancePackages, feature_category: :package_regi
     describe "GET /api/v4/packages/conan/v1/files/:package_name/package_version/:package_username/:package_channel" \
       "/:recipe_revision/export/:file_name" do
       subject do
-        get api("/packages/conan/v1/files/#{recipe_path}/#{metadata.recipe_revision_value}/export/" \
-          "#{recipe_file.file_name}"),
+        get api("/packages/conan/v1/files/#{recipe_path}/#{metadata.recipe_revision}/export/#{recipe_file.file_name}"),
           headers: headers
       end
 
@@ -140,8 +137,8 @@ RSpec.describe API::Conan::V1::InstancePackages, feature_category: :package_regi
     describe "GET /api/v4/packages/conan/v1/files/:package_name/package_version/:package_username/:package_channel" \
       "/:recipe_revision/package/:conan_package_reference/:package_revision/:file_name" do
       subject do
-        get api("/packages/conan/v1/files/#{recipe_path}/#{metadata.recipe_revision_value}/package" \
-          "/#{metadata.conan_package_reference}/#{metadata.package_revision_value}/#{package_file.file_name}"),
+        get api("/packages/conan/v1/files/#{recipe_path}/#{metadata.recipe_revision}/package" \
+          "/#{metadata.conan_package_reference}/#{metadata.package_revision}/#{package_file.file_name}"),
           headers: headers
       end
 

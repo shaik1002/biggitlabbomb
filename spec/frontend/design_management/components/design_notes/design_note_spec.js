@@ -13,7 +13,6 @@ import DesignReplyForm from '~/design_management/components/design_notes/design_
 import ImportedBadge from '~/vue_shared/components/imported_badge.vue';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import designNoteAwardEmojiToggleMutation from '~/design_management/graphql/mutations/design_note_award_emoji_toggle.mutation.graphql';
-import { EMOJI_THUMBS_UP } from '~/emoji/constants';
 import { mockAwardEmoji } from '../../mock_data/apollo_mock';
 
 const scrollIntoViewMock = jest.fn();
@@ -400,12 +399,12 @@ describe('Design note component', () => {
         },
       });
 
-      findEmojiPicker().vm.$emit('click', EMOJI_THUMBS_UP);
+      findEmojiPicker().vm.$emit('click', 'thumbsup');
 
       expect(mutate).toHaveBeenCalledWith({
         mutation: designNoteAwardEmojiToggleMutation,
         variables: {
-          name: EMOJI_THUMBS_UP,
+          name: 'thumbsup',
           awardableId: note.id,
         },
         optimisticResponse: {
@@ -432,7 +431,7 @@ describe('Design note component', () => {
         },
       });
 
-      findEmojiPicker().vm.$emit('click', EMOJI_THUMBS_UP);
+      findEmojiPicker().vm.$emit('click', 'thumbsup');
 
       expect(mutate).toHaveBeenCalled();
 

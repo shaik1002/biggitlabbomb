@@ -57,7 +57,7 @@ module RedisCacheable
   end
 
   def with_redis(&block)
-    Gitlab::Redis::Cache.with(&block)
+    Gitlab::Redis::Cache.with(&block) # rubocop:disable CodeReuse/ActiveRecord
   end
 
   def cast_value_from_cache(attribute, value)

@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 
 import { ESLint } from 'eslint';
-import pluginVue from 'eslint-plugin-vue';
-import localRules from 'eslint-plugin-local-rules';
 
 const RULE_REQUIRE_VALID_HELP_PAGE_PATH = 'local-rules/require-valid-help-page-path';
 const RULE_VUE_REQUIRE_VALID_HELP_PAGE_LINK_COMPONENT =
@@ -10,7 +8,7 @@ const RULE_VUE_REQUIRE_VALID_HELP_PAGE_LINK_COMPONENT =
 const RULES = [RULE_REQUIRE_VALID_HELP_PAGE_PATH, RULE_VUE_REQUIRE_VALID_HELP_PAGE_LINK_COMPONENT];
 
 function createESLintInstance(overrideConfig) {
-  return new ESLint({ overrideConfigFile: true, overrideConfig, fix: false });
+  return new ESLint({ useEslintrc: false, overrideConfig, fix: false });
 }
 
 function lint(eslint, filePaths) {
@@ -41,33 +39,23 @@ async function lintFiles(filePaths) {
   console.log(
     `Running ESLint with the following rules enabled:${RULES.map((rule) => `\n* ${rule}`).join('')}`,
   );
-
-  /** @type { import("eslint").Linter.Config } */
-  const overrideConfig = [
-    ...pluginVue.configs['flat/base'],
-    {
-      languageOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-      },
-      plugins: {
-        'local-rules': localRules,
-      },
+  const overrideConfig = {
+    env: {
+      browser: true,
+      es2020: true,
     },
-    {
-      files: ['**/*.vue'],
-      rules: {
-        [RULE_REQUIRE_VALID_HELP_PAGE_PATH]: 'error',
-        [RULE_VUE_REQUIRE_VALID_HELP_PAGE_LINK_COMPONENT]: 'error',
-      },
+    parserOptions: {
+      parser: 'espree',
+      ecmaVersion: 'latest',
+      sourceType: 'module',
     },
-    {
-      files: ['**/*.{js,mjs}'],
-      rules: {
-        [RULE_REQUIRE_VALID_HELP_PAGE_PATH]: 'error',
-      },
+    extends: ['plugin:vue/recommended'],
+    plugins: ['local-rules'],
+    rules: {
+      [RULE_REQUIRE_VALID_HELP_PAGE_PATH]: 'error',
+      [RULE_VUE_REQUIRE_VALID_HELP_PAGE_LINK_COMPONENT]: 'error',
     },
-  ];
+  };
 
   const eslint = createESLintInstance(overrideConfig);
   const results = await lint(eslint, filePaths);

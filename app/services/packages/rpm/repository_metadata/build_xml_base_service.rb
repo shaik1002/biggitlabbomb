@@ -8,7 +8,7 @@ module Packages
         end
 
         def execute
-          builder = Nokogiri::XML::Builder.new { |xml| yield xml }
+          builder = Nokogiri::XML::Builder.new { |xml| yield xml } # rubocop:disable Style/ExplicitBlockArgument
 
           Nokogiri::XML(builder.to_xml).at('package')
         end

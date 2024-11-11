@@ -6,7 +6,7 @@ import {
   GlFormGroup,
   GlFormInput,
   GlFormTextarea,
-  GlFormCheckbox,
+  GlToggle,
 } from '@gitlab/ui';
 import { createAlert } from '~/alert';
 import axios from '~/lib/utils/axios_utils';
@@ -33,7 +33,7 @@ export default {
     GlFormGroup,
     GlFormInput,
     GlFormTextarea,
-    GlFormCheckbox,
+    GlToggle,
   },
   i18n: {
     DIR_LABEL,
@@ -165,9 +165,12 @@ export default {
       >
         <gl-form-input v-model="target" :disabled="loading" name="branch_name" />
       </gl-form-group>
-      <gl-form-checkbox v-if="showCreateNewMrToggle" v-model="createNewMr" :disabled="loading">
-        {{ $options.i18n.TOGGLE_CREATE_MR_LABEL }}
-      </gl-form-checkbox>
+      <gl-toggle
+        v-if="showCreateNewMrToggle"
+        v-model="createNewMr"
+        :disabled="loading"
+        :label="$options.i18n.TOGGLE_CREATE_MR_LABEL"
+      />
       <gl-alert v-if="!canPushCode" variant="info" :dismissible="false" class="gl-mt-3">
         {{ $options.i18n.NEW_BRANCH_IN_FORK }}
       </gl-alert>

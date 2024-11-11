@@ -62,10 +62,18 @@ RSpec.describe Users::UpdateService, feature_category: :user_profile do
       expect(user.job_title).to eq('Backend Engineer')
     end
 
-    context 'updating email' do
+    context 'updating canonical email' do
       context 'if email was changed' do
         subject do
           update_user(user, email: 'user+extrastuff@example.com', validation_password: password)
+        end
+
+        it 'calls canonicalize_email' do
+          expect_next_instance_of(Users::UpdateCanonicalEmailService) do |service|
+            expect(service).to receive(:execute)
+          end
+
+          subject
         end
 
         context 'when race condition' do
@@ -153,6 +161,12 @@ RSpec.describe Users::UpdateService, feature_category: :user_profile do
       end
 
       context 'if email was NOT changed' do
+        it 'skips update canonicalize email service call' do
+          expect do
+            update_user(user, job_title: 'supreme leader of the universe')
+          end.not_to change { user.user_canonical_email }
+        end
+
         it 'does not reset unconfirmed email' do
           unconfirmed_email = 'unconfirmed-email@example.com'
           user.update!(email: unconfirmed_email)

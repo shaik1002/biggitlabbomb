@@ -5,34 +5,36 @@ module Gitlab
     module Cli
       module Tasks
         class Task
+          attr_reader :options, :context
           attr_writer :target
-          attr_reader :context
-
-          def initialize(context:)
-            @context = context
-          end
 
           # Identifier used as parameter in the CLI to skip from executing
           def self.id
             raise NotImplementedError
           end
 
+          def initialize(context:, options:)
+            @context = context
+            @options = options
+          end
+
           # Initiate a backup
           #
           # @param [Pathname] backup_path a path where to store the backups
-          def backup!(backup_path)
+          # @param [String] backup_id
+          def backup!(backup_path, backup_id)
             backup_output = backup_path.join(destination_path)
 
             # During test, we ensure storage exists so we can run against `RAILS_ENV=test` environment
-            FileUtils.mkdir_p(storage_path) if context&.env&.test? && respond_to?(:storage_path, true)
+            FileUtils.mkdir_p(storage_path) if context.env.test? && respond_to?(:storage_path, true)
 
-            target.dump(backup_output)
+            target.dump(backup_output, backup_id)
           end
 
-          def restore!(archive_directory)
+          def restore!(archive_directory, backup_id)
             archived_data_location = Pathname(archive_directory).join(destination_path)
 
-            target.restore(archived_data_location)
+            target.restore(archived_data_location, backup_id)
           end
 
           # Key string that identifies the task
@@ -68,10 +70,7 @@ module Gitlab
           end
 
           def config
-            return context.config(id) if context
-
-            Output.warning("No context passed to derive configuration from.")
-            nil
+            context.config(id)
           end
 
           def object_storage?

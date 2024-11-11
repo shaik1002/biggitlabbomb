@@ -142,13 +142,8 @@ function assets_compile_script() {
 
 function setup_database_yml() {
   if [ "$DECOMPOSED_DB" == "true" ]; then
-    if [ "$SEC_DECOMPOSED_DB" == "true" ]; then
-      echo "Using SEC decomposed database config (config/database.yml.decomposed-sec-postgresql)"
-      cp config/database.yml.decomposed-sec-postgresql config/database.yml
-    else
-      echo "Using decomposed database config (config/database.yml.decomposed-postgresql)"
-      cp config/database.yml.decomposed-postgresql config/database.yml
-    fi
+    echo "Using decomposed database config (config/database.yml.decomposed-postgresql)"
+    cp config/database.yml.decomposed-postgresql config/database.yml
   else
     echo "Using two connections, single database config (config/database.yml.postgresql)"
     cp config/database.yml.postgresql config/database.yml
@@ -212,7 +207,7 @@ function install_tff_gem() {
 }
 
 function install_activesupport_gem() {
-  run_timed_command "gem install activesupport --no-document --version 7.0.8.4"
+  run_timed_command "gem install activesupport --no-document --version 6.1.7.2"
 }
 
 function install_junit_merge_gem() {
@@ -515,7 +510,6 @@ function log_disk_usage() {
       echo "This job requires ${space_threshold_gb}G free disk space, but the runner only has ${available_space}."
       echo "Exiting now in anticipation of a 'no space left on device' error."
       echo "If this problem persists, please contact #g_hosted_runners team."
-      echo "NOTE: This job will be retried automatically."
       echo "********************************************************************"
       exit 111
     fi

@@ -45,10 +45,9 @@ module UserSettings
 
       @personal_access_token = result.payload[:personal_access_token]
 
-      tokens, size = active_access_tokens
       if result.success?
         render json: { new_token: @personal_access_token.token,
-                       active_access_tokens: tokens, total: size }, status: :ok
+                       active_access_tokens: active_access_tokens }, status: :ok
       else
         render json: { errors: result.errors }, status: :unprocessable_entity
       end
@@ -74,7 +73,7 @@ module UserSettings
 
     def set_index_vars
       @scopes = Gitlab::Auth.available_scopes_for(current_user)
-      @active_access_tokens, @active_access_tokens_size = active_access_tokens
+      @active_access_tokens = active_access_tokens
     end
 
     def represent(tokens)

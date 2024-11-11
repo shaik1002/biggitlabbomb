@@ -21,7 +21,6 @@
 #     author_id: integer
 #     author_username: string
 #     assignee_id: integer or 'None' or 'Any'
-#     closed_by_id: integer
 #     assignee_username: string
 #     search: string
 #     in: 'title', 'description', or a string joining them with comma
@@ -62,7 +61,6 @@ class IssuableFinder
     def scalar_params
       @scalar_params ||= %i[
         assignee_id
-        closed_by_id
         assignee_username
         author_id
         author_username
@@ -140,7 +138,6 @@ class IssuableFinder
     items = by_closed_at(items)
     items = by_state(items)
     items = by_assignee(items)
-    items = by_closed_by(items)
     items = by_author(items)
     items = by_non_archived(items)
     items = by_iids(items)
@@ -393,14 +390,6 @@ class IssuableFinder
       )
     end
   end
-
-  # rubocop: disable CodeReuse/ActiveRecord
-  def by_closed_by(items)
-    return items if params[:closed_by_id].blank?
-
-    items.where(closed_by_id: params[:closed_by_id])
-  end
-  # rubocop: enable CodeReuse/ActiveRecord
 
   def by_label(items)
     label_filter.filter(items)

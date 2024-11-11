@@ -59,7 +59,6 @@ export default {
         v-if="glFeatures.reviewerAssignDrawer"
         class="gl-ml-auto"
         :selected-reviewers="reviewers"
-        :visible-reviewers="reviewers"
       />
       <gl-button
         v-else

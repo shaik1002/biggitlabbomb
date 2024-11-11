@@ -263,7 +263,6 @@ The OpenSSL 3 upgrade has been postponed to GitLab 17.7.0.
 
   | Affected minor releases | Affected patch releases | Fixed in |
   | ----------------------- | ----------------------- | -------- |
-  | 16.11                   |  16.11.5 - 16.11.10     | None     |
   | 17.0                    |  All                    | 17.0.7   |
   | 17.1                    |  All                    | 17.1.7   |
   | 17.2                    |  All                    | 17.2.5   |
@@ -323,7 +322,6 @@ The OpenSSL 3 upgrade has been postponed to GitLab 17.7.0.
 
   | Affected minor releases | Affected patch releases | Fixed in |
   | ----------------------- | ----------------------- | -------- |
-  | 16.11                   |  16.11.5 - 16.11.10     | None     |
   | 17.0                    |  All                    | 17.0.7   |
   | 17.1                    |  All                    | 17.1.7   |
   | 17.2                    |  All                    | 17.2.5   |
@@ -361,7 +359,6 @@ The OpenSSL 3 upgrade has been postponed to GitLab 17.7.0.
 
   | Affected minor releases | Affected patch releases | Fixed in |
   | ----------------------- | ----------------------- | -------- |
-  | 16.11                   |  16.11.5 - 16.11.10     | None     |
   | 17.0                    |  All                    | 17.0.7   |
   | 17.1                    |  All                    | 17.1.7   |
   | 17.2                    |  All                    | 17.2.5   |
@@ -388,7 +385,6 @@ The OpenSSL 3 upgrade has been postponed to GitLab 17.7.0.
 
   | Affected minor releases | Affected patch releases | Fixed in |
   | ----------------------- | ----------------------- | -------- |
-  | 16.11                   |  16.11.5 - 16.11.10     | None     |
   | 17.0                    |  All                    | 17.0.7   |
   | 17.1                    |  All                    | 17.1.7   |
   | 17.2                    |  All                    | 17.2.5   |
