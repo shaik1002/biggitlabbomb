@@ -1987,6 +1987,12 @@ msgstr ""
 msgid "500|Page cannot be loaded because of an encoding error."
 msgstr ""
 
+msgid "503|503: Service unavailable"
+msgstr ""
+
+msgid "503|Please contact your GitLab administrator if you think this is a mistake."
+msgstr ""
+
 msgid ":%{startLine} to %{endLine}"
 msgstr ""
 
@@ -38567,6 +38573,16 @@ msgstr ""
 msgid "Organization|Organizations"
 msgstr ""
 
+msgid "Organization|Organizations must have at least one owner. To delete the user, first assign a new owner to %{lastLink}."
+msgid_plural "Organization|Organizations must have at least one owner. To delete the user, first assign a new owner to %{links} %{boldStart}and%{boldEnd} %{lastLink}."
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "Organization|Organizations must have at least one owner. To delete the user, first assign a new owner to %{links} %{boldStart}and%{boldEnd} %{extrasCount} %{boldStart}other Organization%{boldEnd}."
+msgid_plural "Organization|Organizations must have at least one owner. To delete the user, first assign a new owner to %{links} %{boldStart}and%{boldEnd} %{extrasCount} %{boldStart}other Organizations%{boldEnd}."
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "Organization|Perform advanced options such as deleting the organization."
 msgstr ""
 
@@ -62527,6 +62543,9 @@ msgstr ""
 msgid "WorkItem|%{workItemType} deleted"
 msgstr ""
 
+msgid "WorkItem|%{workItemType} does not support the current child item types. Remove child items to change type."
+msgstr ""
+
 msgid "WorkItem|%{workItemType} has 1 linked item"
 msgid_plural "WorkItem|%{workItemType} has %{itemCount} linked items"
 msgstr[0] ""
@@ -62599,6 +62618,12 @@ msgstr ""
 msgid "WorkItem|Are you sure you want to delete the %{workItemType}? This action cannot be reversed."
 msgstr ""
 
+msgid "WorkItem|Assignees"
+msgstr ""
+
+msgid "WorkItem|Award emoji"
+msgstr ""
+
 msgid "WorkItem|Blocked by"
 msgstr ""
 
@@ -62609,6 +62634,9 @@ msgid "WorkItem|Blue"
 msgstr ""
 
 msgid "WorkItem|Cancel"
+msgstr ""
+
+msgid "WorkItem|Change type"
 msgstr ""
 
 msgid "WorkItem|Child items"
@@ -62638,6 +62666,9 @@ msgstr ""
 msgid "WorkItem|Coffee"
 msgstr ""
 
+msgid "WorkItem|Color"
+msgstr ""
+
 msgid "WorkItem|Comment & close %{workItemType}"
 msgstr ""
 
@@ -62665,6 +62696,9 @@ msgstr ""
 msgid "WorkItem|Created %{timeago}"
 msgstr ""
 
+msgid "WorkItem|Crm contacts"
+msgstr ""
+
 msgid "WorkItem|Custom fields"
 msgstr ""
 
@@ -62683,6 +62717,12 @@ msgstr ""
 msgid "WorkItem|Delete this %{workItemType} and release all child items? This action cannot be reversed."
 msgstr ""
 
+msgid "WorkItem|Description"
+msgstr ""
+
+msgid "WorkItem|Designs"
+msgstr ""
+
 msgid "WorkItem|Development"
 msgstr ""
 
@@ -62693,6 +62733,9 @@ msgid "WorkItem|Due"
 msgstr ""
 
 msgid "WorkItem|Edit field"
+msgstr ""
+
+msgid "WorkItem|Email participants"
 msgstr ""
 
 msgid "WorkItem|Epic"
@@ -62741,6 +62784,9 @@ msgid "WorkItem|Key Result"
 msgstr ""
 
 msgid "WorkItem|Key result"
+msgstr ""
+
+msgid "WorkItem|Labels"
 msgstr ""
 
 msgid "WorkItem|Last updated %{timeago}"
@@ -62827,6 +62873,9 @@ msgstr ""
 msgid "WorkItem|None"
 msgstr ""
 
+msgid "WorkItem|Notes"
+msgstr ""
+
 msgid "WorkItem|Notifications"
 msgstr ""
 
@@ -62849,6 +62898,12 @@ msgid "WorkItem|Options:"
 msgstr ""
 
 msgid "WorkItem|Parent"
+msgstr ""
+
+msgid "WorkItem|Parent type %{parentWorkItemType} is not supported on %{workItemType}. Remove the parent to change type."
+msgstr ""
+
+msgid "WorkItem|Participants"
 msgstr ""
 
 msgid "WorkItem|Pink"
@@ -62899,6 +62954,9 @@ msgstr ""
 msgid "WorkItem|Select type"
 msgstr ""
 
+msgid "WorkItem|Select which type you would like to change this item to."
+msgstr ""
+
 msgid "WorkItem|Show all ancestors"
 msgstr ""
 
@@ -62906,6 +62964,9 @@ msgid "WorkItem|Show closed items"
 msgstr ""
 
 msgid "WorkItem|Show labels"
+msgstr ""
+
+msgid "WorkItem|Some fields are not present in %{workItemType}."
 msgstr ""
 
 msgid "WorkItem|Someone edited the description at the same time you did. If you save it will overwrite their changes. Please confirm you'd like to save your edits."
@@ -63040,6 +63101,12 @@ msgstr ""
 msgid "WorkItem|This work item is not available. It either doesn't exist or you don't have permission to view it."
 msgstr ""
 
+msgid "WorkItem|Time tracking"
+msgstr ""
+
+msgid "WorkItem|Todos"
+msgstr ""
+
 msgid "WorkItem|Toggle details"
 msgstr ""
 
@@ -63050,6 +63117,9 @@ msgid "WorkItem|Turn on confidentiality"
 msgstr ""
 
 msgid "WorkItem|Type"
+msgstr ""
+
+msgid "WorkItem|Type changed."
 msgstr ""
 
 msgid "WorkItem|Undo"
@@ -63065,6 +63135,9 @@ msgid "WorkItem|View current version"
 msgstr ""
 
 msgid "WorkItem|View on a roadmap"
+msgstr ""
+
+msgid "WorkItem|Weight"
 msgstr ""
 
 msgid "WorkItem|Work item"

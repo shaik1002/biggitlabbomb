@@ -332,6 +332,9 @@ export default {
     parentWorkItemConfidentiality() {
       return this.parentWorkItem?.confidential;
     },
+    parentWorkItemType() {
+      return this.parentWorkItem?.workItemType?.name;
+    },
     workItemIconName() {
       return this.workItem.workItemType?.iconName;
     },
@@ -651,6 +654,10 @@ export default {
         iid: this.iid,
       });
     },
+    workItemTypeChanged() {
+      this.$apollo.queries.workItem.refetch();
+      this.$emit('workItemTypeChanged', this.workItemIid);
+    },
   },
   WORK_ITEM_TYPE_VALUE_OBJECTIVE,
   WORKSPACE_PROJECT,
@@ -678,6 +685,7 @@ export default {
       @toggleWorkItemConfidentiality="toggleConfidentiality"
       @error="updateError = $event"
       @promotedToObjective="$emit('promotedToObjective', iid)"
+      @workItemTypeChanged="workItemTypeChanged"
       @toggleEditMode="enableEditMode"
       @workItemStateUpdated="$emit('workItemStateUpdated')"
       @toggleReportAbuseModal="toggleReportAbuseModal"
@@ -765,15 +773,19 @@ export default {
                 :work-item-reference="workItem.reference"
                 :work-item-create-note-email="workItem.createNoteEmail"
                 :is-modal="isModal"
+                :is-drawer="isDrawer"
                 :work-item-state="workItem.state"
                 :has-children="hasChildren"
+                :has-parent="shouldShowAncestors"
                 :work-item-author-id="workItemAuthorId"
                 :can-create-related-item="workItemLinkedItems !== undefined"
+                :work-item="workItem"
                 @deleteWorkItem="$emit('deleteWorkItem', { workItemType, workItemId: workItem.id })"
                 @toggleWorkItemConfidentiality="toggleConfidentiality"
                 @error="updateError = $event"
                 @promotedToObjective="$emit('promotedToObjective', iid)"
                 @workItemStateUpdated="$emit('workItemStateUpdated')"
+                @workItemTypeChanged="workItemTypeChanged"
                 @toggleReportAbuseModal="toggleReportAbuseModal"
                 @workItemCreated="handleWorkItemCreated"
               />

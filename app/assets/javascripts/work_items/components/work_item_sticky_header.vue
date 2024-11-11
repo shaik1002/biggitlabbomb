@@ -175,12 +175,14 @@ export default {
             :work-item-state="workItem.state"
             :is-modal="isModal"
             :work-item-author-id="workItemAuthorId"
+            :work-item="workItem"
             @deleteWorkItem="$emit('deleteWorkItem')"
             @toggleWorkItemConfidentiality="
               $emit('toggleWorkItemConfidentiality', !workItem.confidential)
             "
             @error="$emit('error')"
             @promotedToObjective="$emit('promotedToObjective')"
+            @workItemTypeChanged="$emit('workItemTypeChanged')"
             @workItemStateUpdated="$emit('workItemStateUpdated')"
             @toggleReportAbuseModal="$emit('toggleReportAbuseModal', true)"
           />

@@ -47,6 +47,7 @@ import updateWorkItemMutation from '../graphql/update_work_item.mutation.graphql
 import updateWorkItemNotificationsMutation from '../graphql/update_work_item_notifications.mutation.graphql';
 import convertWorkItemMutation from '../graphql/work_item_convert.mutation.graphql';
 import namespaceWorkItemTypesQuery from '../graphql/namespace_work_item_types.query.graphql';
+import WorkItemChangeTypeModal from './work_item_change_type_modal.vue';
 import WorkItemStateToggle from './work_item_state_toggle.vue';
 import CreateWorkItemModal from './create_work_item_modal.vue';
 
@@ -65,6 +66,7 @@ export default {
     emailAddressCopied: __('Email address copied'),
     moreActions: __('More actions'),
     reportAbuse: __('Report abuse'),
+    changeWorkItemType: s__('WorkItem|Change type'),
   },
   WORK_ITEM_TYPE_ENUM_EPIC,
   components: {
@@ -76,6 +78,7 @@ export default {
     GlToggle,
     WorkItemStateToggle,
     CreateWorkItemModal,
+    WorkItemChangeTypeModal,
   },
   directives: {
     GlModal: GlModalDirective,
@@ -168,12 +171,22 @@ export default {
       required: false,
       default: false,
     },
+    isDrawer: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     hideSubscribe: {
       type: Boolean,
       required: false,
       default: false,
     },
     hasChildren: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    hasParent: {
       type: Boolean,
       required: false,
       default: false,
@@ -187,6 +200,10 @@ export default {
       type: Boolean,
       required: false,
       default: false,
+    },
+    workItem: {
+      type: Object,
+      required: true,
     },
   },
   data() {
@@ -275,6 +292,9 @@ export default {
     },
     isEpic() {
       return this.workItemType === WORK_ITEM_TYPE_VALUE_EPIC;
+    },
+    showChangeType() {
+      return !(this.isEpic || this.isDrawer);
     },
   },
   methods: {
@@ -408,6 +428,9 @@ export default {
       this.$emit('toggleReportAbuseModal', true);
       this.closeDropdown();
     },
+    showConversionOptions() {
+      this.$refs.workItemsConversionModal.show();
+    },
   },
 };
 </script>
@@ -473,6 +496,14 @@ export default {
         @action="promoteToObjective"
       >
         <template #list-item>{{ __('Promote to objective') }}</template>
+      </gl-disclosure-dropdown-item>
+
+      <gl-disclosure-dropdown-item
+        v-if="showChangeType"
+        :data-testid="$options.promoteActionTestId"
+        @action="showConversionOptions"
+      >
+        <template #list-item>{{ $options.i18n.changeWorkItemType }}</template>
       </gl-disclosure-dropdown-item>
 
       <gl-disclosure-dropdown-item
@@ -554,6 +585,16 @@ export default {
       hide-button
       @workItemCreated="$emit('workItemCreated')"
       @hideModal="isCreateWorkItemModalVisible = false"
+    />
+    <work-item-change-type-modal
+      ref="workItemsConversionModal"
+      :work-item-id="workItemId"
+      :work-item-type="workItemType"
+      :work-item-full-path="fullPath"
+      :has-children="hasChildren"
+      :has-parent="hasParent"
+      :work-item="workItem"
+      @workItemTypeChanged="$emit('workItemTypeChanged')"
     />
   </div>
 </template>
