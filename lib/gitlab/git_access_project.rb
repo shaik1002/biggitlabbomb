@@ -34,7 +34,8 @@ module Gitlab
       raise NotFoundError, ERROR_MESSAGES[:namespace_not_found] unless namespace_path.present?
     end
 
-    def namespace
+    # Do not call this unless necessary.
+    def __namespace
       strong_memoize(:namespace) { Namespace.find_by_full_path(namespace_path) }
     end
 
@@ -53,12 +54,12 @@ module Gitlab
     def ensure_project_on_push!
       return if project || deploy_key?
       return unless receive_pack? && changes == ANY && authentication_abilities.include?(:push_code)
-      return unless user&.can?(:create_projects, namespace)
+      return unless user&.can?(:create_projects, __namespace)
 
       project_params = {
         path: project_path,
-        namespace_id: namespace.id,
-        organization_id: namespace.organization_id,
+        namespace_id: __namespace.id,
+        organization_id: __namespace.organization_id,
         visibility_level: Gitlab::VisibilityLevel::PRIVATE
       }
 

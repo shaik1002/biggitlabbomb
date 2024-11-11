@@ -282,6 +282,7 @@ RSpec.configure do |config|
 
   config.before do |example|
     stub_feature_flags(log_sql_function_namespace_lookups: false)
+    stub_feature_flags(cache_ssh_checks: false)
 
     if example.metadata.fetch(:stub_feature_flags, true)
       # The following can be removed when we remove the staged rollout strategy
