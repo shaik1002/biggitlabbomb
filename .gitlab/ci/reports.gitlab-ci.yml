@@ -19,6 +19,8 @@ code_quality:
   # Use !reference as a workaround here
   rules: !reference [".reports:rules:code_quality", rules]
   allow_failure: true
+  variables:
+    ENGINE_MEMORY_LIMIT_BYTES: 2048000000
 
 code_quality cache:
   image: busybox
