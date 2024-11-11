@@ -105,12 +105,21 @@ module TokenAuthenticatableStrategies
       end
     end
 
+    def checksum_for(token)
+      options[:checksum] ? Zlib.adler32(token).to_s(16).rjust(8, '0') : nil
+    end
+
     # If a `format_with_prefix` option is provided, it applies and returns the formatted token.
     # Otherwise, default implementation returns the token as-is
     def format_token(token_owner_record, token)
       prefix = prefix_for(token_owner_record)
 
-      prefix ? "#{prefix}#{token}" : token
+      token = prefix ? "#{prefix}#{token}" : token
+
+      return token unless Feature.enabled?(:token_with_checksum, :instance)
+
+      checksum = checksum_for(token)
+      checksum ? "#{token}#{checksum}" : token
     end
 
     def write_new_token(token_owner_record)

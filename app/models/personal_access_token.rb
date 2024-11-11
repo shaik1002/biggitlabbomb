@@ -19,14 +19,15 @@ class PersonalAccessToken < ApplicationRecord
 
   add_authentication_token_field :token,
     digest: true,
-    format_with_prefix: :prefix_from_application_current_settings
+    format_with_prefix: :prefix_from_application_current_settings,
+    checksum: :add_checksum?
 
   columns_changing_default :organization_id
 
   attribute :organization_id, default: -> { Organizations::Organization::DEFAULT_ORGANIZATION_ID }
 
-  # PATs are 20 characters + optional configurable settings prefix (0..20)
-  TOKEN_LENGTH_RANGE = (20..40)
+  # PATs are 20 characters + optional configurable settings prefix (0..20) and checksum (8)
+  TOKEN_LENGTH_RANGE = (20..48)
   MAX_PERSONAL_ACCESS_TOKEN_LIFETIME_IN_DAYS_BUFFERED = 400
   MAX_PERSONAL_ACCESS_TOKEN_LIFETIME_IN_DAYS = 365
 
@@ -144,6 +145,10 @@ class PersonalAccessToken < ApplicationRecord
 
   def prefix_from_application_current_settings
     self.class.token_prefix
+  end
+
+  def add_checksum?
+    Feature.enabled?(:token_with_checksum, :instance)
   end
 
   def allow_expires_at_to_be_empty?

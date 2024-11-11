@@ -650,5 +650,29 @@ RSpec.describe PersonalAccessToken, feature_category: :system_access do
           .not_to change { personal_access_token.token }.from(token)
       end
     end
+
+    context 'when checksum is enabled' do
+      before do
+        personal_access_token.ensure_token
+      end
+
+      let(:token) { personal_access_token.token }
+
+      it_behaves_like 'token has a valid checksum'
+    end
+
+    context 'when checksum is disabled' do
+      before do
+        stub_feature_flags(token_with_checksum: false)
+        personal_access_token.ensure_token
+      end
+
+      let(:token) { personal_access_token.token }
+
+      it 'does not add a checksum' do
+        expected_length_without_checksum = described_class::TOKEN_LENGTH_RANGE.first + described_class.token_prefix.length
+        expect(token.length).to eq(expected_length_without_checksum)
+      end
+    end
   end
 end

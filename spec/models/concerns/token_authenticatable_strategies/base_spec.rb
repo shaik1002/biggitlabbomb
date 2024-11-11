@@ -163,6 +163,48 @@ RSpec.describe TokenAuthenticatableStrategies::Base, feature_category: :system_a
       end
     end
 
+    describe ':checksum option' do
+      context 'when enabled' do
+        let(:options) { super().merge(checksum: true) }
+
+        it_behaves_like 'token has a valid checksum'
+
+        context 'with prefix' do
+          let(:token_prefix) { 'prefix-' }
+          let(:options) { super().merge(format_with_prefix: :token_prefix) }
+
+          it 'includes the prefix in the checksum' do
+            expect(Devise).to receive(:friendly_token).and_return('devise_token')
+
+            expected_checksum = "4cde07bc"
+            expect(token).to eq("#{token_prefix}devise_token#{expected_checksum}")
+          end
+        end
+
+        context 'when feature flag is disabled' do
+          before do
+            stub_feature_flags(token_with_checksum: false)
+          end
+
+          it 'does not include a checksum' do
+            expect(Devise).to receive(:friendly_token).and_return('devise_token')
+
+            expect(token).to eq('devise_token')
+          end
+        end
+      end
+
+      context 'when disabled' do
+        let(:options) { super().merge(checksum: false) }
+
+        it 'does not include a checksum' do
+          expect(Devise).to receive(:friendly_token).and_return('devise_token')
+
+          expect(token).to eq('devise_token')
+        end
+      end
+    end
+
     describe ':token_generator option' do
       context 'when set to a lambda' do
         let(:options) { super().merge(token_generator: -> { 'generated token' }) }

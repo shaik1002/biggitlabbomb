@@ -1,0 +1,9 @@
+---
+name: token_with_checksum
+feature_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/502845
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/172188
+rollout_issue_url:
+milestone: '17.7'
+group: group::secret detection
+type: beta
+default_enabled: false

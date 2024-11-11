@@ -406,6 +406,29 @@ The `username` in the `clone` command:
 
 Remember this if you set up an automation pipeline that depends on authentication.
 
+## Validate a personal access token
+
+> - Personal access tokens containing a checksum [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/502845) in GitLab 17.7 [with a flag](../feature_flags.md) named `token_with_checksum`. Disabled by default.
+
+FLAG:
+The availability of the checksum is controlled by a feature flag.
+For more information, see the history.
+
+In GitLab 17.7 and later, the last eight characters of a personal access token contain an `Adler32` checksum in Base16, left-padded with zeroes. You can use this checksum to validate the correctness of a token:
+
+1. Split the token into the original token and the eight character checksum:
+
+   ```ruby
+   token_without_checksum = token[0..-9]
+   checksum_from_token = token[-8..]
+   ```
+
+1. Generate and compare the checksum:
+
+   ```ruby
+   Zlib.adler32(token_without_checksum).to_s(16).rjust(8, '0') == checksum_from_token
+   ```
+
 ## Troubleshooting
 
 ### Unrevoke a personal access token
