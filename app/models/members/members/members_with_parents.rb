@@ -86,11 +86,11 @@ module Members
       GroupMember
         .with(cte.to_arel)
         .select(*member_columns)
-        .from([group_member_table, cte.alias_to(group_group_link_table)])
-        .where(group_member_table[:requested_at].eq(nil))
+        # group_member_table should be last in from so joins work.
+        .from([cte.alias_to(group_group_link_table), group_member_table])
         .where(group_member_table[:source_id].eq(group_group_link_table[:shared_with_group_id]))
         .where(group_member_table[:source_type].eq('Namespace'))
-        .where(group_member_table[:state].eq(::Member::STATE_ACTIVE))
+        .active_without_invites_and_requests
         .non_minimal_access
     end
 
