@@ -1,0 +1,9 @@
+query getPipelineVariablesMinimumOverrideRoleProjectSetting($fullPath: ID!) {
+  project(fullPath: $fullPath) {
+    id
+    ciCdSettings {
+      restrictUserDefinedVariables
+      ciPipelineVariablesMinimumOverrideRole
+    }
+  }
+}

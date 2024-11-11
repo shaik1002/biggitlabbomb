@@ -1,0 +1,15 @@
+mutation updatePipelineVariablesMinimumOverrideRoleProjectSetting(
+  $fullPath: ID!
+  $restrictUserDefinedVariables: Boolean!
+  $ciPipelineVariablesMinimumOverrideRole: String!
+) {
+  projectCiCdSettingsUpdate(
+    input: {
+      fullPath: $fullPath
+      restrictUserDefinedVariables: $restrictUserDefinedVariables
+      ciPipelineVariablesMinimumOverrideRole: $ciPipelineVariablesMinimumOverrideRole
+    }
+  ) {
+    errors
+  }
+}

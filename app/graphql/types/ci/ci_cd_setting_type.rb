@@ -44,6 +44,18 @@ module Types
           'repository using a job token',
         method: :push_repository_for_job_token_allowed?,
         authorize: :admin_project
+      field :restrict_user_defined_variables,
+        GraphQL::Types::Boolean,
+        null: false,
+        description: 'Whether the pipeline_variables_minimum_override_role setting is enabled',
+        method: :restrict_user_defined_variables,
+        authorize: :admin_project
+      field :ci_pipeline_variables_minimum_override_role,
+        GraphQL::Types::String,
+        null: false,
+        description: 'The minimum role required to set variables when creating a pipeline or running a job',
+        method: :pipeline_variables_minimum_override_role,
+        authorize: :admin_project
     end
   end
 end

@@ -42,18 +42,34 @@ module Mutations
         null: false,
         description: 'CI/CD settings after mutation.'
 
+      argument :restrict_user_defined_variables,
+        GraphQL::Types::Boolean,
+        required: false,
+        description: 'Whether the pipeline_variables_minimum_override_role setting is enabled'
+
+      argument :ci_pipeline_variables_minimum_override_role,
+        GraphQL::Types::String,
+        required: false,
+        description: 'The minimum role required to set variables when creating a pipeline or running a job'
+
       def resolve(full_path:, **args)
         if args[:job_token_scope_enabled]
           raise Gitlab::Graphql::Errors::ArgumentError, 'job_token_scope_enabled can only be set to false'
         end
 
-        settings = project(full_path).ci_cd_settings
-        settings.update(args)
-
-        {
-          ci_cd_settings: settings,
-          errors: errors_on_object(settings)
-        }
+        current_project = project(full_path)
+        response = ::Projects::UpdateService.new(current_project, current_user, args).execute
+        if response[:status] == :success
+          {
+            ci_cd_settings: current_project.ci_cd_settings,
+            errors: []
+          }
+        else
+          {
+            ci_cd_settings: current_project.ci_cd_settings,
+            errors: [response[:message]]
+          }
+        end
       end
 
       private
