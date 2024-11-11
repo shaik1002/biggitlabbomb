@@ -6,6 +6,7 @@ RSpec.describe Ci::JobToken::Authorization, feature_category: :secrets_managemen
   let_it_be(:origin_project) { create(:project) }
   let_it_be(:accessed_project) { create(:project) }
   let_it_be(:another_project) { create(:project) }
+  let_it_be(:ability) { :read_project }
 
   describe 'associations' do
     it { is_expected.to belong_to(:origin_project).class_name('Project') }
@@ -14,7 +15,9 @@ RSpec.describe Ci::JobToken::Authorization, feature_category: :secrets_managemen
 
   describe '.capture', :request_store do
     subject(:capture) do
-      described_class.capture(origin_project: origin_project, accessed_project: accessed_project)
+      described_class.capture(
+        origin_project: origin_project, accessed_project: accessed_project, ability: ability
+      )
     end
 
     context 'when no authorizations have been captured' do
@@ -22,7 +25,8 @@ RSpec.describe Ci::JobToken::Authorization, feature_category: :secrets_managemen
         capture
         expect(described_class.captured_authorizations).to eq(
           origin_project_id: origin_project.id,
-          accessed_project_id: accessed_project.id)
+          accessed_project_id: accessed_project.id,
+          ability: ability)
       end
 
       context 'when origin project is the same as the accessed project' do
@@ -59,7 +63,7 @@ RSpec.describe Ci::JobToken::Authorization, feature_category: :secrets_managemen
       context 'when authorization is cross project' do
         it 'schedules the log' do
           expect(::Ci::JobToken::LogAuthorizationWorker)
-            .to receive(:perform_in).with(5.minutes, accessed_project.id, origin_project.id)
+            .to receive(:perform_in).with(5.minutes, accessed_project.id, origin_project.id, nil)
 
           log_captures_async
         end
@@ -78,8 +82,14 @@ RSpec.describe Ci::JobToken::Authorization, feature_category: :secrets_managemen
   end
 
   describe '.log_captures!' do
+    let(:ability) { :read_code }
+    let(:expected_attributes) { ['read_code'] }
+
     subject(:log_captures) do
-      described_class.log_captures!(origin_project_id: origin_project.id, accessed_project_id: accessed_project.id)
+      described_class.log_captures!(
+        origin_project_id: origin_project.id,
+        accessed_project_id: accessed_project.id,
+        ability: ability)
     end
 
     context 'when authorization does not exist in the database' do
@@ -88,7 +98,8 @@ RSpec.describe Ci::JobToken::Authorization, feature_category: :secrets_managemen
 
         expect(described_class.last).to have_attributes(
           origin_project: origin_project,
-          accessed_project: accessed_project)
+          accessed_project: accessed_project,
+          abilities: expected_attributes)
       end
     end
 
@@ -97,13 +108,42 @@ RSpec.describe Ci::JobToken::Authorization, feature_category: :secrets_managemen
         create(:ci_job_token_authorization,
           origin_project: origin_project,
           accessed_project: accessed_project,
-          last_authorized_at: 1.day.ago)
+          last_authorized_at: 1.day.ago,
+          abilities: expected_attributes)
       end
 
       it 'updates the timestamp instead of creating a new record' do
         expect { log_captures }
           .to change { existing_authorization.reload.last_authorized_at }
           .and not_change { described_class.count }
+      end
+
+      context 'when a new ability authorization was executed' do
+        let(:ability) { :read_project }
+        let(:expected_attributes) { %w[read_code read_project] }
+
+        it 'adds the new ability to the abilities array' do
+          log_captures
+
+          expect(described_class.last).to have_attributes(
+            origin_project: origin_project,
+            accessed_project: accessed_project,
+            abilities: expected_attributes)
+        end
+      end
+
+      context 'when existing new ability authorization was executed' do
+        let(:ability) { :read_code }
+        let(:expected_attributes) { %w[read_code] }
+
+        it 'does not add the ability to the abilities array' do
+          log_captures
+
+          expect(described_class.last).to have_attributes(
+            origin_project: origin_project,
+            accessed_project: accessed_project,
+            abilities: expected_attributes)
+        end
       end
     end
   end

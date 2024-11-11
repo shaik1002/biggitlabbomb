@@ -21,7 +21,7 @@ module Ci
       scope :preload_origin_project, -> { includes(origin_project: :route) }
 
       # Record in SafeRequestStore a cross-project access attempt
-      def self.capture(origin_project:, accessed_project:)
+      def self.capture(origin_project:, accessed_project:, ability: nil)
         # Skip self-referential accesses as they are always allowed and don't need
         # to be logged neither added to the allowlist.
         return if origin_project == accessed_project
@@ -32,7 +32,7 @@ module Ci
         # rule about job token scope may be satisfied but a subsequent rule in
         # the Declarative Policies may block the authorization.
         Gitlab::SafeRequestStore.fetch(REQUEST_CACHE_KEY) do
-          { accessed_project_id: accessed_project.id, origin_project_id: origin_project.id }
+          { accessed_project_id: accessed_project.id, origin_project_id: origin_project.id, ability: ability }
         end
       end
 
@@ -46,17 +46,23 @@ module Ci
 
         accessed_project_id = authorizations[:accessed_project_id]
         Ci::JobToken::LogAuthorizationWorker # rubocop:disable CodeReuse/Worker -- This method is called from a middleware and it's better tested
-          .perform_in(CAPTURE_DELAY, accessed_project_id, authorizations[:origin_project_id])
+          .perform_in(
+            CAPTURE_DELAY, accessed_project_id, authorizations[:origin_project_id],
+            authorizations[:authorized_ability])
       end
 
-      def self.log_captures!(accessed_project_id:, origin_project_id:)
+      def self.log_captures!(accessed_project_id:, origin_project_id:, ability: nil)
         upsert({
           accessed_project_id: accessed_project_id,
           origin_project_id: origin_project_id,
-          last_authorized_at: Time.current
+          last_authorized_at: Time.current,
+          abilities: ability.present? ? [ability] : []
         },
           unique_by: [:accessed_project_id, :origin_project_id],
-          on_duplicate: :update)
+          on_duplicate: Arel.sql("(abilities, last_authorized_at) = (
+          ARRAY(SELECT DISTINCT UNNEST(ci_job_token_authorizations.abilities || EXCLUDED.abilities)),
+          EXCLUDED.last_authorized_at
+        )"))
       end
 
       def self.captured_authorizations

@@ -516,4 +516,79 @@ RSpec.describe Ability do
       end
     end
   end
+
+  describe '#allowed?' do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:project) { create(:project, :public) }
+
+    let(:ability) { :read_project }
+    let(:auth_subject) { project }
+
+    subject { described_class.allowed?(user, ability, auth_subject) }
+
+    context 'when an ability is allowed for user' do
+      context 'for a normal user' do
+        it 'returns true' do
+          expect(subject).to be_truthy
+        end
+
+        it 'does not capture the authorizaiton into the log' do
+          expect(Ci::JobToken::Authorization).not_to receive(:capture)
+
+          subject
+        end
+      end
+
+      context 'for a user with from ci job token' do
+        let(:job) { build_stubbed(:ci_build, project: project, user: user) }
+        let(:scope) { user.set_ci_job_token_scope!(job) }
+
+        before do
+          allow(user).to receive(:ci_job_token_scope).and_return(scope)
+        end
+
+        context 'when ci_job_token_authorizations_log FF is disabled' do
+          before do
+            stub_feature_flags(ci_job_token_authorizations_log: false)
+          end
+
+          it 'returns true' do
+            expect(subject).to be_truthy
+          end
+
+          it 'does not capture the authorizaiton into the log' do
+            expect(Ci::JobToken::Authorization).not_to receive(:capture)
+
+            subject
+          end
+        end
+
+        context 'when ci_job_token_authorizations_log FF is enabled' do
+          before do
+            stub_feature_flags(ci_job_token_authorizations_log: true)
+          end
+
+          it 'returns true' do
+            expect(subject).to be_truthy
+          end
+
+          it 'captures the authorizaiton into the log' do
+            expect(Ci::JobToken::Authorization).to receive(:capture)
+
+            subject
+          end
+
+          context "when we can't read project from the subject" do
+            let(:auth_subject) { :global }
+
+            it 'captures the authorizaiton into the log' do
+              expect(Ci::JobToken::Authorization).not_to receive(:capture)
+
+              subject
+            end
+          end
+        end
+      end
+    end
+  end
 end

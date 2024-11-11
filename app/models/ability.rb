@@ -80,14 +80,20 @@ class Ability
 
       before_check(policy, ability.to_sym, user, subject, opts)
 
-      case opts[:scope]
-      when :user
-        DeclarativePolicy.user_scope { policy.allowed?(ability) }
-      when :subject
-        DeclarativePolicy.subject_scope { policy.allowed?(ability) }
-      else
-        policy.allowed?(ability)
-      end
+      ability_allowed = case opts[:scope]
+                        when :user
+                          DeclarativePolicy.user_scope { policy.allowed?(ability) }
+                        when :subject
+                          DeclarativePolicy.subject_scope { policy.allowed?(ability) }
+                        else
+                          policy.allowed?(ability)
+                        end
+
+      return false unless ability_allowed
+
+      log_ci_tokens_authorizations(user, ability, subject)
+
+      true
     ensure
       # TODO: replace with runner invalidation:
       # See: https://gitlab.com/gitlab-org/declarative-policy/-/merge_requests/24
@@ -98,6 +104,31 @@ class Ability
     # Hook call right before ability check.
     def before_check(policy, ability, user, subject, opts)
       # See Support::AbilityCheck and Support::PermissionsCheck.
+    end
+
+    def log_ci_tokens_authorizations(user, ability, subject)
+      return unless user&.from_ci_job_token?
+
+      job_token_scope = user.ci_job_token_scope
+
+      return unless Feature.enabled?(:ci_job_token_authorizations_log, job_token_scope.current_project)
+
+      project = accessed_project(subject)
+
+      return unless project
+
+      Ci::JobToken::Authorization.capture(
+        origin_project: job_token_scope.current_project,
+        accessed_project: project,
+        ability: ability
+      )
+    end
+
+    def accessed_project(subject)
+      return subject if subject.is_a?(Project)
+      return subject.project if subject.responds_to?(:project)
+
+      nil
     end
 
     # We cache in the request store by default. This can lead to unexpected
