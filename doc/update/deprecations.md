@@ -178,6 +178,22 @@ If your pipeline relies on forwarding protected variables, update your configura
 
 </div>
 
+<div class="deprecation " data-milestone="18.0">
+
+### Block usage of ref and sha together in `GET /projects/:id/ci/lint`
+
+<div class="deprecation-notes">
+
+- Announced in GitLab <span class="milestone">16.8</span>
+- Removal in GitLab <span class="milestone">18.0</span>
+- To discuss this change or learn more, see the [deprecation issue](https://gitlab.com/gitlab-org/gitlab/-/issues/430322).
+
+</div>
+
+We've deprecated the use of `ref` and `sha` in API calls to `GET /projects/:id/ci/lint` due to their ambiguity. Make sure your API calls to this endpoint use `content_ref` and `dry_run_ref` instead of `ref` and `sha`.
+
+</div>
+
 <div class="deprecation breaking-change" data-milestone="18.0">
 
 ### CodeClimate-based Code Quality scanning will be removed
@@ -401,38 +417,6 @@ See also how to [prevent your runner registration workflow from breaking](https:
 
 </div>
 
-<div class="deprecation breaking-change" data-milestone="18.0">
-
-### GitLab chart use of NGINX controller image v1.3.1
-
-<div class="deprecation-notes">
-
-- Announced in GitLab <span class="milestone">17.6</span>
-- Removal in GitLab <span class="milestone">18.0</span> ([breaking change](https://docs.gitlab.com/ee/update/terminology.html#breaking-change))
-- To discuss this change or learn more, see the [deprecation issue](https://gitlab.com/gitlab-org/charts/gitlab/-/issues/5794).
-
-</div>
-
-In GitLab 17.6, the GitLab chart updated the default NGINX controller image to v1.11.2. This new version requires new RBAC rules that were added to our Ingress
-NGINX-bundled subchart.
-
-This change is being backported to 17.5.1, 17.4.3, and 17.3.6.
-
-Some users prefer to manage RBAC rules themselves by setting the Helm key `nginx-ingress.rbac.create` to `false`. To give time for users who manage their own RBAC rules to
-add the new required rules before they adopt the new v1.11.2 version, we've implemented a fallback mechanism to detect `nginx-ingress.rbac.create: false` and force the chart
-to keep using NGINX image v1.3.1, which does not need the new RBAC rules.
-
-If you manage your own NGINX RBAC rules, but you also want to take advantage of the new NGINX controller image v1.11.2 immediately:
-
-1. Add the new RBAC rules to your cluster [like we did](https://gitlab.com/gitlab-org/charts/gitlab/-/merge_requests/3901/diffs?commit_id=93a3cbdb5ad83db95e12fa6c2145df0800493d8b).
-1. Set `nginx-ingress.controller.image.disableFallback` to true.
-
-We plan to remove this fallback support and support for NGINX controller image v1.3.1 in GitLab 18.0.
-
-You can read more about it in the [charts release page](https://docs.gitlab.com/charts/releases/8_0.html#upgrade-to-86x-851-843-836).
-
-</div>
-
 <div class="deprecation " data-milestone="18.0">
 
 ### Group vulnerability report by OWASP top 10 2017 is deprecated
@@ -509,24 +493,6 @@ With the introduction of [GitLab CI/CD components for self-managed users](https:
 we are removing the redundant OpenTofu CI/CD templates in favor of the CI/CD components.
 
 For information about migrating from the CI/CD template to the component, see the [OpenTofu component documentation](https://gitlab.com/components/opentofu#usage-on-self-managed).
-
-</div>
-
-<div class="deprecation breaking-change" data-milestone="18.0">
-
-### Pipeline subscriptions
-
-<div class="deprecation-notes">
-
-- Announced in GitLab <span class="milestone">17.6</span>
-- Removal in GitLab <span class="milestone">18.0</span> ([breaking change](https://docs.gitlab.com/ee/update/terminology.html#breaking-change))
-- To discuss this change or learn more, see the [deprecation issue](https://gitlab.com/gitlab-org/gitlab/-/issues/501460).
-
-</div>
-
-The [pipeline subscriptions](https://docs.gitlab.com/ee/ci/pipelines/#trigger-a-pipeline-when-an-upstream-project-is-rebuilt) feature is deprecated in GitLab 17.6 and scheduled for removal in GitLab 18.0. Pipeline subscriptions are used to run downstream pipelines based on tag pipelines in upstream projects.
-
-Instead, use [CI/CD jobs with pipeline trigger tokens](https://docs.gitlab.com/ee/ci/triggers/#use-a-cicd-job) to trigger pipelines when another pipeline runs. This method is more reliable and flexible than pipeline subscriptions.
 
 </div>
 

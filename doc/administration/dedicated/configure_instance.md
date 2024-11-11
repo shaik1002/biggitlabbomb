@@ -48,7 +48,7 @@ For all other instance configurations, submit a support ticket according to the
 
 ### Apply configuration changes in Switchboard
 
-You can apply configuration changes made in Switchboard immediately or defer them until your next scheduled weekly [maintenance window](../../administration/dedicated/maintenance.md#maintenance-windows).
+You can apply configuration changes made in Switchboard immediately or defer them until your next scheduled weekly [maintenance window](../../administration/dedicated/create_instance.md#maintenance-window).
 
 When you apply changes immediately:
 
@@ -388,20 +388,20 @@ To activate SAML for your GitLab Dedicated instance:
    - SAML label
    - IdP cert fingerprint
    - IdP SSO target URL
-   - Name identifier format
-1. To configure users based on [SAML group membership](#saml-groups) or use [group sync](#group-sync), complete the following fields:
+1. Optional. To configure users based on [SAML group membership](#saml-groups) or use [group sync](#group-sync), complete the following fields:
    - SAML group attribute
    - Admin groups
    - Auditor groups
    - External groups
    - Required groups
-1. To configure [SAML request signing](#request-signing), complete the following fields:
+1. Optional. To configure [SAML request signing](#request-signing), complete the following fields:
+   - Name identifier format
    - Issuer
    - Attribute statements
    - Security
 1. Select **Save**.
 1. Scroll up to the top of the page and select whether to apply the changes immediately or during the next maintenance window.
-1. To use group sync, [configure the SAML group links](../../user/group/saml_sso/group_sync.md#configure-saml-group-links).
+1. Optional. To use group sync, [configure the SAML group links](../../user/group/saml_sso/group_sync.md#configure-saml-group-links).
 1. To verify the SAML configuration is successful:
    - Check that the SSO button description is displayed on your instance's sign-in page.
    - Go to the metadata URL of your instance (`https://INSTANCE-URL/users/auth/saml/metadata`). This page can be used to simplify much of the configuration of the identity provider, and manually validate the settings.

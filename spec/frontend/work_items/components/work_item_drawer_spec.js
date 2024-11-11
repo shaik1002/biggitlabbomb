@@ -67,7 +67,6 @@ describe('WorkItemDrawer', () => {
         reportAbusePath: '',
         groupPath: '',
         hasSubepicsFeature: false,
-        hasLinkedItemsEpicsFeature: true,
         isGroup,
         glFeatures: {
           workItemsViewPreference,

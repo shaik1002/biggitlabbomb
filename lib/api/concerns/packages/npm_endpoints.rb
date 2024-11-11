@@ -86,7 +86,7 @@ module API
 
               authorize_read_package!(project)
 
-              packages = ::Packages::Npm::PackageFinder.new(project: project, params: { package_name: package_name })
+              packages = ::Packages::Npm::PackageFinder.new(package_name, project: project)
                                                        .execute
 
               not_found!('Package') if packages.empty?
@@ -124,9 +124,8 @@ module API
 
                 authorize_create_package!(project)
 
-                package = ::Packages::Npm::PackageFinder.new(
-                  project: project, params: { package_name: package_name, package_version: version }
-                ).last
+                package = ::Packages::Npm::PackageFinder.new(package_name, project: project)
+                                                        .find_by_version(version)
                 not_found!('Package') unless package
 
                 track_package_event(:create_tag, :npm, project: project, namespace: project.namespace)

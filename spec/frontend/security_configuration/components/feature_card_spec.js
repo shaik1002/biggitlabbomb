@@ -1,4 +1,4 @@
-import { GlCard, GlIcon, GlLink, GlButton } from '@gitlab/ui';
+import { GlIcon, GlLink, GlButton } from '@gitlab/ui';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import { securityFeatures } from 'jest/security_configuration/mock_data';
 import FeatureCard from '~/security_configuration/components/feature_card.vue';
@@ -22,7 +22,6 @@ describe('FeatureCard component', () => {
       stubs: {
         ManageViaMr: true,
         FeatureCardBadge: true,
-        GlCard,
       },
     });
   };
@@ -108,7 +107,7 @@ describe('FeatureCard component', () => {
     });
 
     it('shows the help link', () => {
-      const links = findLinks({ text: 'Learn more.', href: feature.helpPath, isButton: false });
+      const links = findLinks({ text: 'Learn more', href: feature.helpPath, isButton: false });
 
       expect(links).toHaveLength(1);
     });

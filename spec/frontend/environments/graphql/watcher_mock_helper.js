@@ -4,7 +4,6 @@ const mockWatcher = WatchApi.prototype;
 const mockSubscribeFn = jest.fn().mockImplementation(() => {
   return Promise.resolve(mockWatcher);
 });
-const mockAbortStreamFn = jest.fn();
 
 const MockWatchStream = () => {
   const callbacks = {};
@@ -32,12 +31,10 @@ const MockWatchStream = () => {
 export const bootstrapWatcherMock = () => {
   const watchStream = new MockWatchStream();
   jest.spyOn(mockWatcher, 'subscribeToStream').mockImplementation(mockSubscribeFn);
-  jest.spyOn(mockWatcher, 'abortStream').mockImplementation(mockAbortStreamFn);
   jest.spyOn(mockWatcher, 'on').mockImplementation(watchStream.registerCallback);
 
   return {
     triggerEvent: watchStream.triggerEvent,
     subscribeToStreamMock: mockSubscribeFn,
-    abortStream: mockAbortStreamFn,
   };
 };

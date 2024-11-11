@@ -54,10 +54,7 @@ export default {
       return ManageViaMr.canRender(this.feature);
     },
     cardClasses() {
-      return { 'gl-bg-strong': !this.available };
-    },
-    textClasses() {
-      return { 'gl-text-subtle': !this.available };
+      return { 'gl-bg-gray-10': !this.available };
     },
     statusClasses() {
       const { enabled, hasBadge } = this;
@@ -65,8 +62,8 @@ export default {
       return {
         'gl-ml-auto': true,
         'gl-shrink-0': true,
-        'gl-text-disabled': !enabled,
-        'gl-text-success': enabled,
+        'gl-text-gray-500': !enabled,
+        'gl-text-green-500': enabled,
         'gl-w-full': hasBadge,
         'gl-justify-between': hasBadge,
         'gl-flex': hasBadge,
@@ -118,50 +115,47 @@ export default {
 
 <template>
   <gl-card :class="cardClasses">
-    <template #header>
-      <div class="gl-flex gl-items-baseline" :class="{ 'gl-flex-col-reverse': hasBadge }">
-        <h3 class="gl-m-0 gl-mr-3 gl-text-base" :class="textClasses">
-          {{ feature.name }}
-        </h3>
-        <div
-          v-if="isNotSastIACTemporaryHack"
-          :class="statusClasses"
-          data-testid="feature-status"
-          :data-qa-feature="`${feature.type}_${enabled}_status`"
-        >
-          <feature-card-badge
-            v-if="hasBadge"
-            :badge="feature.badge"
-            :badge-href="feature.badge.badgeHref"
-          />
+    <div class="gl-flex gl-items-baseline" :class="{ 'gl-flex-col-reverse': hasBadge }">
+      <h3 class="gl-m-0 gl-mr-3 gl-text-lg">{{ feature.name }}</h3>
 
-          <template v-if="hasEnabledStatus">
-            <template v-if="enabled">
-              <span>
-                <gl-icon name="check-circle-filled" />
-                <span class="gl-text-green-700">{{ $options.i18n.enabled }}</span>
-              </span>
-            </template>
+      <div
+        v-if="isNotSastIACTemporaryHack"
+        :class="statusClasses"
+        data-testid="feature-status"
+        :data-qa-feature="`${feature.type}_${enabled}_status`"
+      >
+        <feature-card-badge
+          v-if="hasBadge"
+          :badge="feature.badge"
+          :badge-href="feature.badge.badgeHref"
+        />
 
-            <template v-else-if="available">
-              <span>{{ $options.i18n.notEnabled }}</span>
-            </template>
-
-            <template v-else>
-              {{ $options.i18n.availableWith }}
-            </template>
+        <template v-if="hasEnabledStatus">
+          <template v-if="enabled">
+            <span>
+              <gl-icon name="check-circle-filled" />
+              <span class="gl-text-green-700">{{ $options.i18n.enabled }}</span>
+            </span>
           </template>
 
-          <template v-else-if="!available">
-            <span>{{ $options.i18n.availableWith }}</span>
+          <template v-else-if="available">
+            <span>{{ $options.i18n.notEnabled }}</span>
           </template>
-        </div>
+
+          <template v-else>
+            {{ $options.i18n.availableWith }}
+          </template>
+        </template>
+
+        <template v-else-if="!available">
+          <span>{{ $options.i18n.availableWith }}</span>
+        </template>
       </div>
-    </template>
+    </div>
 
-    <p class="gl-mb-0" :class="textClasses">
+    <p class="gl-mb-0 gl-mt-5">
       {{ feature.description }}
-      <gl-link :href="feature.helpPath">{{ $options.i18n.learnMore }}.</gl-link>
+      <gl-link :href="feature.helpPath">{{ $options.i18n.learnMore }}</gl-link>
     </p>
 
     <template v-if="available && isNotSastIACTemporaryHack">
@@ -197,11 +191,9 @@ export default {
     </template>
 
     <div v-if="hasSecondary" data-testid="secondary-feature">
-      <h4 class="gl-m-0 gl-mt-6 gl-text-base" :class="textClasses">
-        {{ feature.secondary.name }}
-      </h4>
+      <h4 class="gl-m-0 gl-mt-6 gl-text-base">{{ feature.secondary.name }}</h4>
 
-      <p class="gl-mb-0 gl-mt-5" :class="textClasses">{{ feature.secondary.description }}</p>
+      <p class="gl-mb-0 gl-mt-5">{{ feature.secondary.description }}</p>
 
       <gl-button
         v-if="available && feature.secondary.configurationPath"

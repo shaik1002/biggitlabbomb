@@ -1,7 +1,14 @@
 <script>
 import { GlLoadingIcon } from '@gitlab/ui';
 import StatusIcon from '../widget/status_icon.vue';
-import { FAILURE_REASONS, ICON_NAMES } from './constants';
+import { FAILURE_REASONS } from './constants';
+
+const ICON_NAMES = {
+  failed: 'failed',
+  inactive: 'neutral',
+  success: 'success',
+  warning: 'warning',
+};
 
 export default {
   name: 'MergeChecksMessage',

@@ -159,7 +159,7 @@ gem 'grape-path-helpers', '~> 2.0.1', feature_category: :api
 gem 'rack-cors', '~> 2.0.1', require: 'rack/cors' # rubocop:todo Gemfile/MissingFeatureCategory
 
 # GraphQL API
-gem 'graphql', '~> 2.4.1', feature_category: :api
+gem 'graphql', '~> 2.3.14', feature_category: :api
 gem 'graphql-docs', '~> 5.0.0', group: [:development, :test], feature_category: :api
 gem 'apollo_upload_server', '~> 2.1.6', feature_category: :api
 gem 'graphlient', '~> 0.8.0', feature_category: :importers # Used by BulkImport feature (group::import)
@@ -260,8 +260,8 @@ gem 'rouge', '~> 4.4.0', feature_category: :shared
 gem 'truncato', '~> 0.7.12', feature_category: :team_planning
 gem 'nokogiri', '~> 1.16', feature_category: :shared
 gem 'gitlab-glfm-markdown', '~> 0.0.21', feature_category: :markdown
-gem 'tanuki_emoji', '~> 0.13', feature_category: :markdown
-gem 'unicode-emoji', '~> 4.0', feature_category: :markdown
+gem 'tanuki_emoji', '~> 0.9', feature_category: :markdown
+gem 'unicode-emoji', '~> 3.6', feature_category: :markdown
 
 # Calendar rendering
 gem 'icalendar', '~> 2.10.1', feature_category: :system_access
@@ -380,6 +380,7 @@ gem 'addressable', '~> 2.8' # rubocop:todo Gemfile/MissingFeatureCategory
 gem 'gon', '~> 6.4.0' # rubocop:todo Gemfile/MissingFeatureCategory
 gem 'request_store', '~> 1.5.1' # rubocop:todo Gemfile/MissingFeatureCategory
 gem 'base32', '~> 0.3.0' # rubocop:todo Gemfile/MissingFeatureCategory
+
 gem 'gitlab-license', '~> 2.5', feature_category: :shared
 
 # Protect against bruteforcing

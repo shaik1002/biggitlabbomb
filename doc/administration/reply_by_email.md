@@ -45,7 +45,14 @@ When you reply to the notification email, your email client:
 ### GitLab receives your reply to the notification email
 
 When GitLab receives your reply, it looks for the "reply key" in the
-[list of accepted headers](incoming_email.md#accepted-headers).
+following headers, in this order:
+
+1. `To` header
+1. `References` header
+1. `Delivered-To` header
+1. `Envelope-To` header
+1. `X-Envelope-To` header
+1. `Received` header
 
 If it finds a reply key, it leaves your reply as a comment on
 the entity the notification was about (issue, merge request, commit...).

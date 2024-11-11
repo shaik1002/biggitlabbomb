@@ -132,7 +132,6 @@ export default {
           v-gl-modal="'time-tracking-report'"
           v-gl-tooltip="s__('TimeTracking|View time tracking report')"
           variant="link"
-          class="!gl-text-sm"
           data-testid="view-time-spent-button"
         >
           {{ humanTotalTimeSpent }}
@@ -153,7 +152,6 @@ export default {
             v-gl-modal="$options.setTimeEstimateModalId"
             v-gl-tooltip="s__('TimeTracking|Set estimate')"
             variant="link"
-            class="!gl-text-sm"
             data-testid="set-estimate-button"
           >
             {{ humanTimeEstimate }}
@@ -165,7 +163,7 @@ export default {
         <gl-button
           v-else-if="canUpdate"
           v-gl-modal="$options.setTimeEstimateModalId"
-          class="gl-ml-auto !gl-text-sm"
+          class="gl-ml-auto"
           variant="link"
           data-testid="add-estimate-button"
         >

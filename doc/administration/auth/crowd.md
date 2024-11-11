@@ -4,11 +4,14 @@ group: Authentication
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
 
-# Use Atlassian Crowd as an authentication provider
+# Use Atlassian Crowd as an authentication provider (deprecated)
 
 DETAILS:
 **Tier:** Free, Premium, Ultimate
 **Offering:** Self-managed
+
+WARNING:
+This feature was [deprecated](https://gitlab.com/gitlab-org/gitlab/-/issues/369117) in GitLab 15.3 and is [planned for removal in 18.0](https://gitlab.com/gitlab-org/gitlab/-/issues/457241).
 
 Authenticate to GitLab using the Atlassian Crowd OmniAuth provider. Enabling
 this provider also allows Crowd authentication for Git-over-https requests.
@@ -51,6 +54,7 @@ this provider also allows Crowd authentication for Git-over-https requests.
        gitlab_rails['omniauth_providers'] = [
          {
            name: "crowd",
+           # label: "Provider name", # optional label for login button, defaults to "Crowd"
            args: {
              crowd_server_url: "CROWD_SERVER_URL",
              application_name: "YOUR_APP_NAME",
@@ -64,6 +68,7 @@ this provider also allows Crowd authentication for Git-over-https requests.
 
      ```yaml
         - { name: 'crowd',
+            # label: 'Provider name', # optional label for login button, defaults to "Crowd"
             args: {
               crowd_server_url: 'CROWD_SERVER_URL',
               application_name: 'YOUR_APP_NAME',

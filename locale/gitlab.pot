@@ -39,6 +39,9 @@ msgstr ""
 msgid " Try to %{action} this file again."
 msgstr ""
 
+msgid " You need to do this before %{grace_period_deadline}."
+msgstr ""
+
 msgid " and "
 msgstr ""
 
@@ -3843,7 +3846,13 @@ msgstr ""
 msgid "AdminSelfHostedModels|Add a new AI model that can be used for GitLab Duo features."
 msgstr ""
 
+msgid "AdminSelfHostedModels|Add and manage models that can be used for GitLab AI features."
+msgstr ""
+
 msgid "AdminSelfHostedModels|Add self-hosted model"
+msgstr ""
+
+msgid "AdminSelfHostedModels|Add self-hosted models"
 msgstr ""
 
 msgid "AdminSelfHostedModels|An error occurred while deleting your self-hosted model. Please try again."
@@ -3876,6 +3885,9 @@ msgstr ""
 msgid "AdminSelfHostedModels|Endpoint"
 msgstr ""
 
+msgid "AdminSelfHostedModels|Get started with Self‑hosted models"
+msgstr ""
+
 msgid "AdminSelfHostedModels|Get started with self-hosted models"
 msgstr ""
 
@@ -3883,6 +3895,9 @@ msgid "AdminSelfHostedModels|If necessary, provide the model identifier in the f
 msgstr ""
 
 msgid "AdminSelfHostedModels|If required, provide the API token that grants access to your self-hosted model deployment."
+msgstr ""
+
+msgid "AdminSelfHostedModels|Manage AI models that can be used for GitLab AI features."
 msgstr ""
 
 msgid "AdminSelfHostedModels|Manage GitLab Duo by configuring and assigning self-hosted models to AI-powered features."
@@ -5026,9 +5041,6 @@ msgid "AdvancedSearch|You have pending obsolete migrations"
 msgstr ""
 
 msgid "After it is removed, the fork relationship can only be restored by using the API. This project will no longer be able to receive or send merge requests to the upstream project or other forks."
-msgstr ""
-
-msgid "After scheduled date"
 msgstr ""
 
 msgid "After the export is complete, download the data file from a notification email or from this page. You can then import the data file from the %{strong_text_start}Create new group%{strong_text_end} page of another GitLab instance."
@@ -6649,9 +6661,6 @@ msgid "Any milestone"
 msgstr ""
 
 msgid "Any user who is added or requests access in excess of the user cap must be approved by an administrator"
-msgstr ""
-
-msgid "Anytime"
 msgstr ""
 
 msgid "App ID"
@@ -10381,6 +10390,9 @@ msgstr ""
 msgid "By quarter"
 msgstr ""
 
+msgid "By selecting Continue or registering through a third party, I agree that GitLab can contact me by email or telephone about its product, services, or events."
+msgstr ""
+
 msgid "By using a primary email tied to an Enterprise email address, you acknowledge that this account is an Enterprise User."
 msgstr ""
 
@@ -10885,9 +10897,6 @@ msgid "Cannot make the epic confidential if it contains non-confidential issues"
 msgstr ""
 
 msgid "Cannot merge"
-msgstr ""
-
-msgid "Cannot merge until this date and time."
 msgstr ""
 
 msgid "Cannot modify %{profile_name} referenced in scan"
@@ -14527,15 +14536,6 @@ msgstr ""
 msgid "ComplianceStandardsAdherence|Checks"
 msgstr ""
 
-msgid "ComplianceStandardsAdherence|DAST scan"
-msgstr ""
-
-msgid "ComplianceStandardsAdherence|DAST scanner is configured in the pipeline configuration for the default branch."
-msgstr ""
-
-msgid "ComplianceStandardsAdherence|DAST scanner is not configured in the pipeline configuration for the default branch."
-msgstr ""
-
 msgid "ComplianceStandardsAdherence|Date since last status change"
 msgstr ""
 
@@ -14546,9 +14546,6 @@ msgid "ComplianceStandardsAdherence|Filter by"
 msgstr ""
 
 msgid "ComplianceStandardsAdherence|Group by"
-msgstr ""
-
-msgid "ComplianceStandardsAdherence|Have DAST scanner configured in pipeline configuration"
 msgstr ""
 
 msgid "ComplianceStandardsAdherence|Have SAST scanner configured in pipeline configuration"
@@ -14618,9 +14615,6 @@ msgid "ComplianceStandardsAdherence|Requirement"
 msgstr ""
 
 msgid "ComplianceStandardsAdherence|SAST scan"
-msgstr ""
-
-msgid "ComplianceStandardsAdherence|SAST scanner is configured in the pipeline configuration for the default branch."
 msgstr ""
 
 msgid "ComplianceStandardsAdherence|SAST scanner is not configured in the pipeline configuration for the default branch."
@@ -14792,9 +14786,6 @@ msgid "Configure custom rules for Jira issue key matching"
 msgstr ""
 
 msgid "Configure import sources and settings related to import and export features."
-msgstr ""
-
-msgid "Configure it later"
 msgstr ""
 
 msgid "Configure pipeline"
@@ -19520,6 +19511,9 @@ msgstr ""
 msgid "Development widget is not enabled for this work item type"
 msgstr ""
 
+msgid "Devfile"
+msgstr ""
+
 msgid "Device name"
 msgstr ""
 
@@ -20261,12 +20255,6 @@ msgid "Drag to reorder prioritized labels and change their relative priority."
 msgstr ""
 
 msgid "Drag your designs here or %{linkStart}click to upload%{linkEnd}."
-msgstr ""
-
-msgid "Drone CI URL (for example, `http://drone.example.com`)."
-msgstr ""
-
-msgid "Drone CI token."
 msgstr ""
 
 msgid "Drop or %{linkStart}upload%{linkEnd} an avatar."
@@ -27732,9 +27720,6 @@ msgstr ""
 msgid "HttpDestinationValidator validates only http external audit event destinations."
 msgstr ""
 
-msgid "I agree that GitLab can contact me by email or telephone about its product, services, or events."
-msgstr ""
-
 msgid "I forgot my password"
 msgstr ""
 
@@ -28462,9 +28447,6 @@ msgid "ImportProjects|Import repositories"
 msgstr ""
 
 msgid "ImportProjects|Imported files will be kept. You can import this repository again later."
-msgstr ""
-
-msgid "ImportProjects|Importing a project into a personal namespace results in all contributions being mapped to the same bot user. To map contributions to real users, import projects into a group instead."
 msgstr ""
 
 msgid "ImportProjects|Importing the project failed"
@@ -32894,9 +32876,6 @@ msgstr ""
 msgid "Manage rules"
 msgstr ""
 
-msgid "Manage secret detection behavior for all projects in your GitLab instance"
-msgstr ""
-
 msgid "Manage two-factor authentication"
 msgstr ""
 
@@ -34222,9 +34201,6 @@ msgstr ""
 msgid "MergeRequests|Mark as draft"
 msgstr ""
 
-msgid "MergeRequests|Merge can start"
-msgstr ""
-
 msgid "MergeRequests|Merge request cherry-pick failed"
 msgstr ""
 
@@ -34232,9 +34208,6 @@ msgid "MergeRequests|Merge request revert failed"
 msgstr ""
 
 msgid "MergeRequests|Reference copied"
-msgstr ""
-
-msgid "MergeRequests|Requires that merge checks pass."
 msgstr ""
 
 msgid "MergeRequests|Squashing failed: Squash the commits locally, resolve any conflicts, then push the branch."
@@ -34954,7 +34927,7 @@ msgstr ""
 msgid "MlModelRegistry|Create model version"
 msgstr ""
 
-msgid "MlModelRegistry|Create new model"
+msgid "MlModelRegistry|Create model, version & import artifacts"
 msgstr ""
 
 msgid "MlModelRegistry|Create new version"
@@ -34964,9 +34937,6 @@ msgid "MlModelRegistry|Create using MLflow"
 msgstr ""
 
 msgid "MlModelRegistry|Create your machine learning using GitLab directly or using the MLflow client"
-msgstr ""
-
-msgid "MlModelRegistry|Create/Import"
 msgstr ""
 
 msgid "MlModelRegistry|Creating a model"
@@ -34982,9 +34952,6 @@ msgid "MlModelRegistry|Creating models, model versions and candidates is also po
 msgstr ""
 
 msgid "MlModelRegistry|Delete model"
-msgstr ""
-
-msgid "MlModelRegistry|Delete model %{modelName}"
 msgstr ""
 
 msgid "MlModelRegistry|Delete version"
@@ -35005,9 +34972,6 @@ msgstr ""
 msgid "MlModelRegistry|Drop to start upload"
 msgstr ""
 
-msgid "MlModelRegistry|Edit"
-msgstr ""
-
 msgid "MlModelRegistry|Edit model"
 msgstr ""
 
@@ -35023,13 +34987,22 @@ msgstr ""
 msgid "MlModelRegistry|Enter a model version description"
 msgstr ""
 
+msgid "MlModelRegistry|Enter a semantic version"
+msgstr ""
+
 msgid "MlModelRegistry|Enter a semantic version."
 msgstr ""
 
 msgid "MlModelRegistry|Enter a subfolder name to organize your artifacts."
 msgstr ""
 
+msgid "MlModelRegistry|Enter a version description"
+msgstr ""
+
 msgid "MlModelRegistry|Enter some description"
+msgstr ""
+
+msgid "MlModelRegistry|Example: 1.0.0"
 msgstr ""
 
 msgid "MlModelRegistry|Example: my-model"
@@ -35057,9 +35030,6 @@ msgid "MlModelRegistry|For example 1.0.0"
 msgstr ""
 
 msgid "MlModelRegistry|ID"
-msgstr ""
-
-msgid "MlModelRegistry|Import model using MLflow"
 msgstr ""
 
 msgid "MlModelRegistry|Import your machine learning models"
@@ -35098,6 +35068,9 @@ msgstr ""
 msgid "MlModelRegistry|Model deleted successfully"
 msgstr ""
 
+msgid "MlModelRegistry|Model has been created but version or artifacts could not be uploaded. Try creating model version."
+msgstr ""
+
 msgid "MlModelRegistry|Model name"
 msgstr ""
 
@@ -35116,7 +35089,13 @@ msgstr ""
 msgid "MlModelRegistry|Must be a semantic version."
 msgstr ""
 
+msgid "MlModelRegistry|Must be a semantic version. Example: 1.0.0"
+msgstr ""
+
 msgid "MlModelRegistry|Must be a semantic version. Latest version is %{latestVersion}"
+msgstr ""
+
+msgid "MlModelRegistry|Must be a semantic version. Leave blank to skip version creation."
 msgstr ""
 
 msgid "MlModelRegistry|Must be unique. May not contain spaces."
@@ -35207,6 +35186,12 @@ msgid "MlModelRegistry|Version card"
 msgstr ""
 
 msgid "MlModelRegistry|Version created %{timeAgo} by %{author}"
+msgstr ""
+
+msgid "MlModelRegistry|Version description"
+msgstr ""
+
+msgid "MlModelRegistry|Version is a valid semantic version."
 msgstr ""
 
 msgid "MlModelRegistry|Version is not a valid semantic version."
@@ -48556,7 +48541,7 @@ msgstr ""
 msgid "ScanResultPolicy|Prevent %{linkStart}group branch%{linkEnd} modification %{exceptSelection}"
 msgstr ""
 
-msgid "ScanResultPolicy|Prevent %{linkStart}group branch%{linkEnd} modification %{exceptSelection} %{groupSelection}"
+msgid "ScanResultPolicy|Prevent %{linkStart}group branch%{linkEnd} modification %{exceptSelection} matching the full paths: %{groupSelection}"
 msgstr ""
 
 msgid "ScanResultPolicy|Prevent approval by commit author"
@@ -49797,13 +49782,7 @@ msgstr ""
 msgid "SecurityOrchestration|Don't show the alert anymore"
 msgstr ""
 
-msgid "SecurityOrchestration|Edge case settings"
-msgstr ""
-
 msgid "SecurityOrchestration|Edit merge request approval policy"
-msgstr ""
-
-msgid "SecurityOrchestration|Edit pipeline execution policy"
 msgstr ""
 
 msgid "SecurityOrchestration|Edit policy"
@@ -49885,9 +49864,6 @@ msgid "SecurityOrchestration|For any merge request on %{branches}%{commitType}%{
 msgstr ""
 
 msgid "SecurityOrchestration|For large groups, there may be a significant delay in applying policy changes to pre-existing merge requests. Policy changes typically apply almost immediately for newly created merge requests."
-msgstr ""
-
-msgid "SecurityOrchestration|Group ID: %{id}"
 msgstr ""
 
 msgid "SecurityOrchestration|Groups"
@@ -50247,6 +50223,12 @@ msgid "SecurityOrchestration|Source"
 msgstr ""
 
 msgid "SecurityOrchestration|Status"
+msgstr ""
+
+msgid "SecurityOrchestration|Step 1: Choose a policy type"
+msgstr ""
+
+msgid "SecurityOrchestration|Step 2: Policy details"
 msgstr ""
 
 msgid "SecurityOrchestration|Summary"
@@ -51908,9 +51890,6 @@ msgid "Setting enforced"
 msgstr ""
 
 msgid "Settings"
-msgstr ""
-
-msgid "Settings for the License Compliance feature"
 msgstr ""
 
 msgid "Settings saved successfully."
@@ -63190,9 +63169,6 @@ msgstr ""
 msgid "Workspaces|Create workspace"
 msgstr ""
 
-msgid "Workspaces|Created"
-msgstr ""
-
 msgid "Workspaces|Creating"
 msgstr ""
 
@@ -63247,9 +63223,6 @@ msgstr ""
 msgid "Workspaces|No terminated workspaces"
 msgstr ""
 
-msgid "Workspaces|Open workspace"
-msgstr ""
-
 msgid "Workspaces|Path to devfile"
 msgstr ""
 
@@ -63259,6 +63232,9 @@ msgstr ""
 msgid "Workspaces|Restart"
 msgstr ""
 
+msgid "Workspaces|Restarting"
+msgstr ""
+
 msgid "Workspaces|Running"
 msgstr ""
 
@@ -63266,9 +63242,6 @@ msgid "Workspaces|Start"
 msgstr ""
 
 msgid "Workspaces|Starting"
-msgstr ""
-
-msgid "Workspaces|Starting workspace"
 msgstr ""
 
 msgid "Workspaces|Stop"
@@ -63326,9 +63299,6 @@ msgid "Workspaces|Workspaces"
 msgstr ""
 
 msgid "Workspaces|Workspaces Settings"
-msgstr ""
-
-msgid "Workspaces|You can open the workspace only once it is ready."
 msgstr ""
 
 msgid "Workspaces|You can't create a workspace for this project"
@@ -64036,9 +64006,6 @@ msgid "You need git-lfs version %{min_git_lfs_version} (or greater) to continue.
 msgstr ""
 
 msgid "You need permission."
-msgstr ""
-
-msgid "You need to do this before %{grace_period_deadline}."
 msgstr ""
 
 msgid "You need to set terms to be enforced"
@@ -66078,9 +66045,6 @@ msgstr ""
 msgid "mrWidget|Cancel auto-merge"
 msgstr ""
 
-msgid "mrWidget|Cannot merge until %{mergeAfter}"
-msgstr ""
-
 msgid "mrWidget|Checking if merge request can be merged…"
 msgstr ""
 
@@ -66743,6 +66707,9 @@ msgid "severity|Medium"
 msgstr ""
 
 msgid "severity|Minor"
+msgstr ""
+
+msgid "severity|None"
 msgstr ""
 
 msgid "severity|Unknown"

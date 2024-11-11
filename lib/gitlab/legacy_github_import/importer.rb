@@ -349,7 +349,10 @@ module Gitlab
       def placeholder_references_loaded?
         return true unless project.import_data.user_mapping_enabled?
 
-        project.placeholder_reference_store.empty?
+        ::Import::PlaceholderReferences::Store.new(
+          import_source: project.import_type,
+          import_uid: project.import_state.id
+        ).empty?
       end
 
       def wait_for_placeholder_references

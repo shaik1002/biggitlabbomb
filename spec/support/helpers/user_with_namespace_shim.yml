@@ -230,7 +230,7 @@
 - ee/spec/requests/projects/logs_controller_spec.rb
 - ee/spec/requests/projects/security/policies_controller_spec.rb
 - ee/spec/requests/projects/tracing_controller_spec.rb
-- ee/spec/requests/gitlab_subscriptions/hand_raise_leads_spec.rb
+- ee/spec/requests/subscriptions/hand_raise_leads_spec.rb
 - ee/spec/requests/trial_registrations_controller_spec.rb
 - ee/spec/requests/users_controller_spec.rb
 - ee/spec/serializers/clusters/environment_serializer_spec.rb
@@ -560,6 +560,7 @@
 - spec/features/projects/user_uses_shortcuts_spec.rb
 - spec/features/projects/wiki/user_views_wiki_empty_spec.rb
 - spec/features/projects/wikis_spec.rb
+- spec/features/projects/work_items/work_item_spec.rb
 - spec/features/projects_spec.rb
 - spec/features/reportable_note/merge_request_spec.rb
 - spec/features/search/user_searches_for_code_spec.rb
@@ -600,7 +601,6 @@
 - spec/features/users/user_browses_projects_on_user_page_spec.rb
 - spec/features/webauthn_spec.rb
 - spec/features/whats_new_spec.rb
-- spec/features/work_items/work_item_spec.rb
 - spec/finders/admin/projects_finder_spec.rb
 - spec/finders/autocomplete/move_to_project_finder_spec.rb
 - spec/finders/autocomplete/routes_finder_spec.rb

@@ -88,19 +88,6 @@ RETURN NEW;
 END
 $$;
 
-CREATE FUNCTION assign_p_ci_pipelines_id_value() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-IF NEW."id" IS NOT NULL THEN
-  RAISE WARNING 'Manually assigning ids is not allowed, the value will be ignored';
-END IF;
-NEW."id" := nextval('ci_pipelines_id_seq'::regclass);
-RETURN NEW;
-
-END
-$$;
-
 CREATE FUNCTION assign_p_ci_stages_id_value() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
@@ -6865,6 +6852,7 @@ CREATE TABLE application_settings (
     identity_verification_settings jsonb DEFAULT '{}'::jsonb NOT NULL,
     elasticsearch_retry_on_failure integer DEFAULT 0 NOT NULL,
     integrations jsonb DEFAULT '{}'::jsonb NOT NULL,
+    user_seat_management jsonb DEFAULT '{}'::jsonb NOT NULL,
     CONSTRAINT app_settings_container_reg_cleanup_tags_max_list_size_positive CHECK ((container_registry_cleanup_tags_service_max_list_size >= 0)),
     CONSTRAINT app_settings_dep_proxy_ttl_policies_worker_capacity_positive CHECK ((dependency_proxy_ttl_group_policy_worker_capacity >= 0)),
     CONSTRAINT app_settings_ext_pipeline_validation_service_url_text_limit CHECK ((char_length(external_pipeline_validation_service_url) <= 255)),
@@ -7842,18 +7830,14 @@ CREATE TABLE batched_background_migration_jobs (
     started_at timestamp with time zone,
     finished_at timestamp with time zone,
     batched_background_migration_id bigint NOT NULL,
-    min_value bigint,
-    max_value bigint,
+    min_value bigint NOT NULL,
+    max_value bigint NOT NULL,
     batch_size integer NOT NULL,
     sub_batch_size integer NOT NULL,
     status smallint DEFAULT 0 NOT NULL,
     attempts smallint DEFAULT 0 NOT NULL,
     metrics jsonb DEFAULT '{}'::jsonb NOT NULL,
-    pause_ms integer DEFAULT 100 NOT NULL,
-    min_cursor jsonb,
-    max_cursor jsonb,
-    CONSTRAINT check_18d498ea58 CHECK (((jsonb_typeof(min_cursor) = 'array'::text) AND (jsonb_typeof(max_cursor) = 'array'::text))),
-    CONSTRAINT check_c1ce96fe3b CHECK (((num_nonnulls(min_value, max_value) = 2) OR (num_nonnulls(min_cursor, max_cursor) = 2)))
+    pause_ms integer DEFAULT 100 NOT NULL
 );
 
 CREATE SEQUENCE batched_background_migration_jobs_id_seq
@@ -7869,8 +7853,8 @@ CREATE TABLE batched_background_migrations (
     id bigint NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
-    min_value bigint DEFAULT 1,
-    max_value bigint,
+    min_value bigint DEFAULT 1 NOT NULL,
+    max_value bigint NOT NULL,
     batch_size integer NOT NULL,
     sub_batch_size integer NOT NULL,
     "interval" smallint NOT NULL,
@@ -7888,16 +7872,12 @@ CREATE TABLE batched_background_migrations (
     gitlab_schema text NOT NULL,
     finished_at timestamp with time zone,
     queued_migration_version text,
-    min_cursor jsonb,
-    max_cursor jsonb,
     CONSTRAINT check_0406d9776f CHECK ((char_length(gitlab_schema) <= 255)),
-    CONSTRAINT check_122750e705 CHECK (((jsonb_typeof(min_cursor) = 'array'::text) AND (jsonb_typeof(max_cursor) = 'array'::text))),
     CONSTRAINT check_5bb0382d6f CHECK ((char_length(column_name) <= 63)),
     CONSTRAINT check_6b6a06254a CHECK ((char_length(table_name) <= 63)),
     CONSTRAINT check_713f147aea CHECK ((char_length(queued_migration_version) <= 14)),
     CONSTRAINT check_batch_size_in_range CHECK ((batch_size >= sub_batch_size)),
     CONSTRAINT check_e6c75b1e29 CHECK ((char_length(job_class_name) <= 100)),
-    CONSTRAINT check_f5158baa12 CHECK (((num_nonnulls(min_value, max_value) = 2) OR (num_nonnulls(min_cursor, max_cursor) = 2))),
     CONSTRAINT check_fe10674721 CHECK ((char_length(batch_class_name) <= 100)),
     CONSTRAINT check_max_value_in_range CHECK ((max_value >= min_value)),
     CONSTRAINT check_positive_min_value CHECK ((min_value > 0)),
@@ -9264,6 +9244,15 @@ CREATE TABLE p_ci_pipelines (
 )
 PARTITION BY LIST (partition_id);
 
+CREATE SEQUENCE ci_pipelines_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE ci_pipelines_id_seq OWNED BY p_ci_pipelines.id;
+
 CREATE TABLE ci_pipelines (
     ref character varying,
     sha character varying,
@@ -9293,21 +9282,12 @@ CREATE TABLE ci_pipelines (
     ci_ref_id bigint,
     locked smallint DEFAULT 1 NOT NULL,
     partition_id bigint NOT NULL,
-    id bigint NOT NULL,
+    id bigint DEFAULT nextval('ci_pipelines_id_seq'::regclass) NOT NULL,
     auto_canceled_by_id bigint,
     auto_canceled_by_partition_id bigint,
     CONSTRAINT check_2ba2a044b9 CHECK ((project_id IS NOT NULL)),
     CONSTRAINT check_d7e99a025e CHECK ((lock_version IS NOT NULL))
 );
-
-CREATE SEQUENCE ci_pipelines_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE ci_pipelines_id_seq OWNED BY p_ci_pipelines.id;
 
 CREATE TABLE ci_project_mirrors (
     id bigint NOT NULL,
@@ -12504,49 +12484,6 @@ CREATE SEQUENCE group_saved_replies_id_seq
 
 ALTER SEQUENCE group_saved_replies_id_seq OWNED BY group_saved_replies.id;
 
-CREATE TABLE group_scim_auth_access_tokens (
-    id bigint NOT NULL,
-    group_id bigint NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
-    temp_source_id bigint,
-    token_encrypted bytea NOT NULL
-);
-
-COMMENT ON COLUMN group_scim_auth_access_tokens.temp_source_id IS 'Temporary column to store scim_tokens id';
-
-CREATE SEQUENCE group_scim_auth_access_tokens_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE group_scim_auth_access_tokens_id_seq OWNED BY group_scim_auth_access_tokens.id;
-
-CREATE TABLE group_scim_identities (
-    id bigint NOT NULL,
-    group_id bigint NOT NULL,
-    user_id bigint NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL,
-    temp_source_id bigint,
-    active boolean DEFAULT false,
-    extern_uid text NOT NULL,
-    CONSTRAINT check_53de3ba272 CHECK ((char_length(extern_uid) <= 255))
-);
-
-COMMENT ON COLUMN group_scim_identities.temp_source_id IS 'Temporary column to store scim_idenity id';
-
-CREATE SEQUENCE group_scim_identities_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE group_scim_identities_id_seq OWNED BY group_scim_identities.id;
-
 CREATE TABLE group_security_exclusions (
     id bigint NOT NULL,
     group_id bigint NOT NULL,
@@ -14077,24 +14014,6 @@ CREATE TABLE members (
     last_activity_on date DEFAULT now(),
     CONSTRAINT check_508774aac0 CHECK ((member_namespace_id IS NOT NULL))
 );
-
-CREATE TABLE members_deletion_schedules (
-    id bigint NOT NULL,
-    namespace_id bigint NOT NULL,
-    user_id bigint NOT NULL,
-    scheduled_by_id bigint NOT NULL,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL
-);
-
-CREATE SEQUENCE members_deletion_schedules_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE members_deletion_schedules_id_seq OWNED BY members_deletion_schedules.id;
 
 CREATE SEQUENCE members_id_seq
     START WITH 1
@@ -16922,7 +16841,6 @@ CREATE TABLE pm_cve_enrichment (
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
     cve text NOT NULL,
-    is_known_exploit boolean DEFAULT false NOT NULL,
     CONSTRAINT check_16651e3ffb CHECK ((char_length(cve) <= 24))
 );
 
@@ -17357,16 +17275,12 @@ ALTER SEQUENCE postgres_reindex_queued_actions_id_seq OWNED BY postgres_reindex_
 CREATE VIEW postgres_sequences AS
  SELECT seq_pg_class.relname AS seq_name,
     dep_pg_class.relname AS table_name,
-    pg_attribute.attname AS col_name,
-    pg_sequence.seqmax AS seq_max,
-    pg_sequence.seqmin AS seq_min,
-    pg_sequence.seqstart AS seq_start
-   FROM ((((pg_class seq_pg_class
-     JOIN pg_sequence ON ((seq_pg_class.oid = pg_sequence.seqrelid)))
-     LEFT JOIN pg_depend ON (((seq_pg_class.oid = pg_depend.objid) AND (pg_depend.classid = ('pg_class'::regclass)::oid) AND (pg_depend.refclassid = ('pg_class'::regclass)::oid))))
-     LEFT JOIN pg_class dep_pg_class ON ((pg_depend.refobjid = dep_pg_class.oid)))
-     LEFT JOIN pg_attribute ON (((dep_pg_class.oid = pg_attribute.attrelid) AND (pg_depend.refobjsubid = pg_attribute.attnum))))
-  WHERE (seq_pg_class.relkind = 'S'::"char");
+    pg_attribute.attname AS col_name
+   FROM (((pg_class seq_pg_class
+     JOIN pg_depend ON ((seq_pg_class.oid = pg_depend.objid)))
+     JOIN pg_class dep_pg_class ON ((pg_depend.refobjid = dep_pg_class.oid)))
+     JOIN pg_attribute ON (((dep_pg_class.oid = pg_attribute.attrelid) AND (pg_depend.refobjsubid = pg_attribute.attnum))))
+  WHERE ((pg_depend.classid = ('pg_class'::regclass)::oid) AND (pg_depend.refclassid = ('pg_class'::regclass)::oid) AND (seq_pg_class.relkind = 'S'::"char"));
 
 CREATE TABLE programming_languages (
     id bigint NOT NULL,
@@ -19867,35 +19781,6 @@ CREATE SEQUENCE subscription_seat_assignments_id_seq
 
 ALTER SEQUENCE subscription_seat_assignments_id_seq OWNED BY subscription_seat_assignments.id;
 
-CREATE TABLE subscription_user_add_on_assignment_versions (
-    id bigint NOT NULL,
-    organization_id bigint NOT NULL,
-    item_id bigint,
-    purchase_id bigint,
-    user_id bigint,
-    created_at timestamp with time zone,
-    item_type text NOT NULL,
-    event text NOT NULL,
-    namespace_path text,
-    add_on_name text,
-    whodunnit text,
-    object jsonb,
-    CONSTRAINT check_211bad6d65 CHECK ((char_length(item_type) <= 255)),
-    CONSTRAINT check_34ca72be24 CHECK ((char_length(event) <= 255)),
-    CONSTRAINT check_839913a25d CHECK ((char_length(namespace_path) <= 255)),
-    CONSTRAINT check_9ceaa5668c CHECK ((char_length(add_on_name) <= 255)),
-    CONSTRAINT check_e185bf0c82 CHECK ((char_length(whodunnit) <= 255))
-);
-
-CREATE SEQUENCE subscription_user_add_on_assignment_versions_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-ALTER SEQUENCE subscription_user_add_on_assignment_versions_id_seq OWNED BY subscription_user_add_on_assignment_versions.id;
-
 CREATE TABLE subscription_user_add_on_assignments (
     id bigint NOT NULL,
     add_on_purchase_id bigint NOT NULL,
@@ -21832,7 +21717,6 @@ CREATE TABLE work_item_types (
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
     correct_id bigint DEFAULT 0 NOT NULL,
-    old_id bigint,
     CONSTRAINT check_104d2410f6 CHECK ((char_length(name) <= 255)),
     CONSTRAINT check_fecb3a98d1 CHECK ((char_length(icon_name) <= 255))
 );
@@ -23125,10 +23009,6 @@ ALTER TABLE ONLY group_repository_storage_moves ALTER COLUMN id SET DEFAULT next
 
 ALTER TABLE ONLY group_saved_replies ALTER COLUMN id SET DEFAULT nextval('group_saved_replies_id_seq'::regclass);
 
-ALTER TABLE ONLY group_scim_auth_access_tokens ALTER COLUMN id SET DEFAULT nextval('group_scim_auth_access_tokens_id_seq'::regclass);
-
-ALTER TABLE ONLY group_scim_identities ALTER COLUMN id SET DEFAULT nextval('group_scim_identities_id_seq'::regclass);
-
 ALTER TABLE ONLY group_security_exclusions ALTER COLUMN id SET DEFAULT nextval('group_security_exclusions_id_seq'::regclass);
 
 ALTER TABLE ONLY group_ssh_certificates ALTER COLUMN id SET DEFAULT nextval('group_ssh_certificates_id_seq'::regclass);
@@ -23256,8 +23136,6 @@ ALTER TABLE ONLY member_approvals ALTER COLUMN id SET DEFAULT nextval('member_ap
 ALTER TABLE ONLY member_roles ALTER COLUMN id SET DEFAULT nextval('member_roles_id_seq'::regclass);
 
 ALTER TABLE ONLY members ALTER COLUMN id SET DEFAULT nextval('members_id_seq'::regclass);
-
-ALTER TABLE ONLY members_deletion_schedules ALTER COLUMN id SET DEFAULT nextval('members_deletion_schedules_id_seq'::regclass);
 
 ALTER TABLE ONLY merge_request_assignees ALTER COLUMN id SET DEFAULT nextval('merge_request_assignees_id_seq'::regclass);
 
@@ -23390,6 +23268,8 @@ ALTER TABLE ONLY p_catalog_resource_component_usages ALTER COLUMN id SET DEFAULT
 ALTER TABLE ONLY p_catalog_resource_sync_events ALTER COLUMN id SET DEFAULT nextval('p_catalog_resource_sync_events_id_seq'::regclass);
 
 ALTER TABLE ONLY p_ci_builds_metadata ALTER COLUMN id SET DEFAULT nextval('ci_builds_metadata_id_seq'::regclass);
+
+ALTER TABLE ONLY p_ci_pipelines ALTER COLUMN id SET DEFAULT nextval('ci_pipelines_id_seq'::regclass);
 
 ALTER TABLE ONLY packages_build_infos ALTER COLUMN id SET DEFAULT nextval('packages_build_infos_id_seq'::regclass);
 
@@ -23706,8 +23586,6 @@ ALTER TABLE ONLY subscription_add_on_purchases ALTER COLUMN id SET DEFAULT nextv
 ALTER TABLE ONLY subscription_add_ons ALTER COLUMN id SET DEFAULT nextval('subscription_add_ons_id_seq'::regclass);
 
 ALTER TABLE ONLY subscription_seat_assignments ALTER COLUMN id SET DEFAULT nextval('subscription_seat_assignments_id_seq'::regclass);
-
-ALTER TABLE ONLY subscription_user_add_on_assignment_versions ALTER COLUMN id SET DEFAULT nextval('subscription_user_add_on_assignment_versions_id_seq'::regclass);
 
 ALTER TABLE ONLY subscription_user_add_on_assignments ALTER COLUMN id SET DEFAULT nextval('subscription_user_add_on_assignments_id_seq'::regclass);
 
@@ -25380,12 +25258,6 @@ ALTER TABLE ONLY group_repository_storage_moves
 ALTER TABLE ONLY group_saved_replies
     ADD CONSTRAINT group_saved_replies_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY group_scim_auth_access_tokens
-    ADD CONSTRAINT group_scim_auth_access_tokens_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY group_scim_identities
-    ADD CONSTRAINT group_scim_identities_pkey PRIMARY KEY (id);
-
 ALTER TABLE ONLY group_security_exclusions
     ADD CONSTRAINT group_security_exclusions_pkey PRIMARY KEY (id);
 
@@ -25601,9 +25473,6 @@ ALTER TABLE ONLY member_approvals
 
 ALTER TABLE ONLY member_roles
     ADD CONSTRAINT member_roles_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY members_deletion_schedules
-    ADD CONSTRAINT members_deletion_schedules_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY members
     ADD CONSTRAINT members_pkey PRIMARY KEY (id);
@@ -26456,9 +26325,6 @@ ALTER TABLE ONLY subscription_add_ons
 
 ALTER TABLE ONLY subscription_seat_assignments
     ADD CONSTRAINT subscription_seat_assignments_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY subscription_user_add_on_assignment_versions
-    ADD CONSTRAINT subscription_user_add_on_assignment_versions_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY subscription_user_add_on_assignments
     ADD CONSTRAINT subscription_user_add_on_assignments_pkey PRIMARY KEY (id);
@@ -28243,8 +28109,6 @@ CREATE INDEX idx_keys_expires_at_and_before_expiry_notification_undelivered ON k
 
 CREATE INDEX idx_members_created_at_user_id_invite_token ON members USING btree (created_at) WHERE ((invite_token IS NOT NULL) AND (user_id IS NULL));
 
-CREATE UNIQUE INDEX idx_members_deletion_schedules_on_namespace_id_and_user_id ON members_deletion_schedules USING btree (namespace_id, user_id);
-
 CREATE INDEX idx_members_on_user_and_source_and_source_type_and_member_role ON members USING btree (user_id, source_id, source_type, member_role_id);
 
 CREATE INDEX idx_merge_request_metrics_on_merged_by_project_and_mr ON merge_request_metrics USING btree (merged_by_id, target_project_id, merge_request_id);
@@ -28420,10 +28284,6 @@ CREATE INDEX idx_test_reports_on_issue_id_created_at_and_id ON requirements_mana
 CREATE UNIQUE INDEX idx_uniq_analytics_dashboards_pointers_on_project_id ON analytics_dashboards_pointers USING btree (project_id);
 
 CREATE UNIQUE INDEX idx_usages_on_cmpt_used_by_project_cmpt_and_last_used_date ON catalog_resource_component_last_usages USING btree (component_id, used_by_project_id, last_used_date);
-
-CREATE INDEX idx_user_add_on_assignment_versions_on_item_id ON subscription_user_add_on_assignment_versions USING btree (item_id);
-
-CREATE INDEX idx_user_add_on_assignment_versions_on_organization_id ON subscription_user_add_on_assignment_versions USING btree (organization_id);
 
 CREATE INDEX idx_user_add_on_assignments_on_add_on_purchase_id_and_id ON subscription_user_add_on_assignments USING btree (add_on_purchase_id, id);
 
@@ -28888,8 +28748,6 @@ CREATE INDEX index_bulk_import_failures_on_correlation_id_value ON bulk_import_f
 CREATE INDEX index_bulk_imports_on_updated_at_and_id_for_stale_status ON bulk_imports USING btree (updated_at, id) WHERE (status = ANY (ARRAY[0, 1]));
 
 CREATE INDEX index_bulk_imports_on_user_id ON bulk_imports USING btree (user_id);
-
-CREATE INDEX index_ca_enabled_incomplete_aggregation_stages_on_last_run_at ON analytics_cycle_analytics_stage_aggregations USING btree (last_run_at NULLS FIRST) WHERE ((last_completed_at IS NULL) AND (enabled = true));
 
 CREATE INDEX index_catalog_resource_components_on_catalog_resource_id ON catalog_resource_components USING btree (catalog_resource_id);
 
@@ -30091,18 +29949,6 @@ CREATE INDEX index_group_repository_storage_moves_on_group_id ON group_repositor
 
 CREATE INDEX index_group_saved_replies_on_group_id ON group_saved_replies USING btree (group_id);
 
-CREATE UNIQUE INDEX index_group_scim_access_tokens_on_group_id_and_token ON group_scim_auth_access_tokens USING btree (group_id, token_encrypted);
-
-CREATE UNIQUE INDEX index_group_scim_auth_access_tokens_on_temp_source_id ON group_scim_auth_access_tokens USING btree (temp_source_id);
-
-CREATE INDEX index_group_scim_identities_on_group_id ON group_scim_identities USING btree (group_id);
-
-CREATE UNIQUE INDEX index_group_scim_identities_on_lower_extern_uid_group_id ON group_scim_identities USING btree (lower(extern_uid), group_id);
-
-CREATE UNIQUE INDEX index_group_scim_identities_on_temp_source_id ON group_scim_identities USING btree (temp_source_id);
-
-CREATE UNIQUE INDEX index_group_scim_identities_on_user_id_and_group_id ON group_scim_identities USING btree (user_id, group_id);
-
 CREATE INDEX index_group_security_exclusions_on_group_id ON group_security_exclusions USING btree (group_id);
 
 CREATE UNIQUE INDEX index_group_ssh_certificates_on_fingerprint ON group_ssh_certificates USING btree (fingerprint);
@@ -30501,10 +30347,6 @@ CREATE INDEX index_member_roles_on_occupies_seat ON member_roles USING btree (oc
 
 CREATE INDEX index_member_roles_on_permissions ON member_roles USING gin (permissions);
 
-CREATE INDEX index_members_deletion_schedules_on_scheduled_by_id ON members_deletion_schedules USING btree (scheduled_by_id);
-
-CREATE INDEX index_members_deletion_schedules_on_user_id ON members_deletion_schedules USING btree (user_id);
-
 CREATE INDEX index_members_on_access_level ON members USING btree (access_level);
 
 CREATE INDEX index_members_on_expires_at ON members USING btree (expires_at);
@@ -30522,8 +30364,6 @@ CREATE INDEX index_members_on_member_namespace_id_compound ON members USING btre
 CREATE INDEX index_members_on_member_role_id ON members USING btree (member_role_id);
 
 CREATE INDEX index_members_on_requested_at ON members USING btree (requested_at);
-
-CREATE INDEX index_members_on_source_and_access_level_and_member_role ON members USING btree (source_id, source_type, access_level) WHERE (member_role_id IS NULL);
 
 CREATE INDEX index_members_on_source_and_type_and_access_level ON members USING btree (source_id, source_type, type, access_level);
 
@@ -30688,8 +30528,6 @@ CREATE INDEX index_metrics_dashboard_annotations_on_environment_id_and_3_col ON 
 CREATE INDEX index_metrics_dashboard_annotations_on_timespan_end ON metrics_dashboard_annotations USING btree (COALESCE(ending_at, starting_at));
 
 CREATE INDEX index_metrics_users_starred_dashboards_on_project_id ON metrics_users_starred_dashboards USING btree (project_id);
-
-CREATE INDEX index_migration_jobs_on_migration_id_and_cursor_max_value ON batched_background_migration_jobs USING btree (batched_background_migration_id, max_cursor) WHERE (max_cursor IS NOT NULL);
 
 CREATE INDEX index_migration_jobs_on_migration_id_and_finished_at ON batched_background_migration_jobs USING btree (batched_background_migration_id, finished_at);
 
@@ -34753,8 +34591,6 @@ CREATE TRIGGER assign_p_ci_job_artifacts_id_trigger BEFORE INSERT ON p_ci_job_ar
 
 CREATE TRIGGER assign_p_ci_pipeline_variables_id_trigger BEFORE INSERT ON p_ci_pipeline_variables FOR EACH ROW EXECUTE FUNCTION assign_p_ci_pipeline_variables_id_value();
 
-CREATE TRIGGER assign_p_ci_pipelines_id_trigger BEFORE INSERT ON p_ci_pipelines FOR EACH ROW EXECUTE FUNCTION assign_p_ci_pipelines_id_value();
-
 CREATE TRIGGER assign_p_ci_stages_id_trigger BEFORE INSERT ON p_ci_stages FOR EACH ROW EXECUTE FUNCTION assign_p_ci_stages_id_value();
 
 CREATE TRIGGER assign_zoekt_tasks_id_trigger BEFORE INSERT ON zoekt_tasks FOR EACH ROW EXECUTE FUNCTION assign_zoekt_tasks_id_value();
@@ -36822,9 +36658,6 @@ ALTER TABLE ONLY issue_assignment_events
 ALTER TABLE ONLY security_policies
     ADD CONSTRAINT fk_rails_08722e8ac7 FOREIGN KEY (security_policy_management_project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY subscription_user_add_on_assignment_versions
-    ADD CONSTRAINT fk_rails_091e013a61 FOREIGN KEY (organization_id) REFERENCES organizations(id);
-
 ALTER TABLE ONLY trending_projects
     ADD CONSTRAINT fk_rails_09feecd872 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
@@ -37197,9 +37030,6 @@ ALTER TABLE ONLY custom_fields
 ALTER TABLE ONLY chat_teams
     ADD CONSTRAINT fk_rails_3b543909cb FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY group_scim_auth_access_tokens
-    ADD CONSTRAINT fk_rails_3caca5d6d0 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
-
 ALTER TABLE ONLY ci_build_needs
     ADD CONSTRAINT fk_rails_3cf221d4ed_p FOREIGN KEY (partition_id, build_id) REFERENCES p_ci_builds(partition_id, id) ON UPDATE CASCADE ON DELETE CASCADE;
 
@@ -37214,9 +37044,6 @@ ALTER TABLE ONLY virtual_registries_packages_maven_registry_upstreams
 
 ALTER TABLE ONLY snippet_user_mentions
     ADD CONSTRAINT fk_rails_3e00189191 FOREIGN KEY (snippet_id) REFERENCES snippets(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY group_scim_identities
-    ADD CONSTRAINT fk_rails_3e0678e2d9 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY early_access_program_tracking_events
     ADD CONSTRAINT fk_rails_3e8c32b3dd FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
@@ -37281,8 +37108,8 @@ ALTER TABLE ONLY merge_request_assignees
 ALTER TABLE ONLY packages_dependency_links
     ADD CONSTRAINT fk_rails_4437bf4070 FOREIGN KEY (dependency_id) REFERENCES packages_dependencies(id) ON DELETE CASCADE;
 
-ALTER TABLE p_ci_builds
-    ADD CONSTRAINT fk_rails_4540ead625_p FOREIGN KEY (upstream_pipeline_partition_id, upstream_pipeline_id) REFERENCES p_ci_pipelines(partition_id, id) ON UPDATE CASCADE ON DELETE CASCADE;
+ALTER TABLE ONLY ci_builds
+    ADD CONSTRAINT fk_rails_4540ead625_p FOREIGN KEY (upstream_pipeline_partition_id, upstream_pipeline_id) REFERENCES p_ci_pipelines(partition_id, id) ON UPDATE CASCADE ON DELETE CASCADE NOT VALID;
 
 ALTER TABLE ONLY project_auto_devops
     ADD CONSTRAINT fk_rails_45436b12b2 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
@@ -37674,9 +37501,6 @@ ALTER TABLE ONLY system_access_instance_microsoft_graph_access_tokens
 ALTER TABLE ONLY packages_debian_group_distribution_keys
     ADD CONSTRAINT fk_rails_779438f163 FOREIGN KEY (distribution_id) REFERENCES packages_debian_group_distributions(id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY group_scim_identities
-    ADD CONSTRAINT fk_rails_77cb698c8d FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
-
 ALTER TABLE ONLY terraform_states
     ADD CONSTRAINT fk_rails_78f54ca485 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
 
@@ -37854,9 +37678,6 @@ ALTER TABLE ONLY project_secrets_managers
 ALTER TABLE ONLY organization_details
     ADD CONSTRAINT fk_rails_8facb04bef FOREIGN KEY (organization_id) REFERENCES organizations(id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY members_deletion_schedules
-    ADD CONSTRAINT fk_rails_8fb4cda076 FOREIGN KEY (scheduled_by_id) REFERENCES users(id) ON DELETE CASCADE;
-
 ALTER TABLE p_ci_pipelines_config
     ADD CONSTRAINT fk_rails_906c9a2533_p FOREIGN KEY (partition_id, pipeline_id) REFERENCES p_ci_pipelines(partition_id, id) ON UPDATE CASCADE ON DELETE CASCADE;
 
@@ -37925,9 +37746,6 @@ ALTER TABLE ONLY pages_deployments
 
 ALTER TABLE ONLY dast_pre_scan_verification_steps
     ADD CONSTRAINT fk_rails_9990fc2adf FOREIGN KEY (dast_pre_scan_verification_id) REFERENCES dast_pre_scan_verifications(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY members_deletion_schedules
-    ADD CONSTRAINT fk_rails_9af19961f8 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY users_ops_dashboard_projects
     ADD CONSTRAINT fk_rails_9b4ebf005b FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
@@ -38297,9 +38115,6 @@ ALTER TABLE ONLY namespace_details
 
 ALTER TABLE ONLY operations_strategies_user_lists
     ADD CONSTRAINT fk_rails_ccb7e4bc0b FOREIGN KEY (user_list_id) REFERENCES operations_user_lists(id) ON DELETE CASCADE;
-
-ALTER TABLE ONLY members_deletion_schedules
-    ADD CONSTRAINT fk_rails_ce06d97eb2 FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY resource_milestone_events
     ADD CONSTRAINT fk_rails_cedf8cce4d FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
