@@ -1,7 +1,7 @@
 <script>
 import { GlAlert, GlBadge, GlLink, GlSprintf } from '@gitlab/ui';
 import { s__ } from '~/locale';
-import { DOCS_URL } from 'jh_else_ce/lib/utils/url_utility';
+import { DOCS_URL } from '~/constants';
 /**
  * Renders Stuck Runners block for job's view.
  */
@@ -31,9 +31,6 @@ export default {
     hasNoRunnersWithCorrespondingTags() {
       return this.tags.length > 0;
     },
-    protectedBranchSettingsDocsLink() {
-      return `${DOCS_URL}/runner/security/index.html#reduce-the-security-risk-of-using-privileged-containers`;
-    },
     stuckData() {
       if (this.hasNoRunnersWithCorrespondingTags) {
         return {
@@ -61,6 +58,7 @@ export default {
       };
     },
   },
+  protectedBranchSettingsDocsLink: `${DOCS_URL}/runner/security/index.html#reduce-the-security-risk-of-using-privileged-containers`,
 };
 </script>
 <template>
@@ -68,7 +66,11 @@ export default {
     <p class="gl-mb-0" :data-testid="stuckData.dataTestId">
       <gl-sprintf :message="stuckData.text">
         <template #link="{ content }">
-          <a class="gl-inline-block" :href="protectedBranchSettingsDocsLink" target="_blank">
+          <a
+            class="gl-inline-block"
+            :href="$options.protectedBranchSettingsDocsLink"
+            target="_blank"
+          >
             {{ content }}
           </a>
         </template>

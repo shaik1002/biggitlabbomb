@@ -2,7 +2,7 @@
 import { GlFormRadio, GlFormRadioGroup, GlIcon, GlLink, GlTooltipDirective } from '@gitlab/ui';
 import { getWeekdayNames } from '~/lib/utils/datetime_utility';
 import { __, s__, sprintf } from '~/locale';
-import { DOCS_URL_IN_EE_DIR } from 'jh_else_ce/lib/utils/url_utility';
+import { DOCS_URL_IN_EE_DIR } from '~/constants';
 
 const KEY_EVERY_DAY = 'everyDay';
 const KEY_EVERY_WEEK = 'everyWeek';
