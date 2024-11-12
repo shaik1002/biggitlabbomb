@@ -481,6 +481,7 @@
 .code-patterns: &code-patterns
   - ".{gitattributes,nvmrc,prettierrc,stylelintrc,yamllint}"
   - "eslint.config.mjs"
+  - ".oxlintrc.json"
   - ".browserslistrc"
   - ".stylelintrc"
   - "{,ee/,jh/}{app,bin,config,db,elastic,generator_templates,gems,haml_lint,lib,locale,public,scripts,sidekiq_cluster,storybook,symbol,vendor}/**/*"
@@ -510,6 +511,7 @@
 .code-backstage-patterns: &code-backstage-patterns
   - ".{gitattributes,nvmrc,prettierrc,stylelintrc,yamllint}"
   - "eslint.config.mjs"
+  - ".oxlintrc.json"
   - ".browserslistrc"
   - ".stylelintrc"
   - "{,ee/,jh/}{app,bin,config,db,elastic,generator_templates,gems,haml_lint,lib,locale,public,scripts,sidekiq_cluster,storybook,symbol,vendor}/**/*"
@@ -546,6 +548,7 @@
 .code-qa-patterns: &code-qa-patterns
   - ".{gitattributes,nvmrc,prettierrc,stylelintrc,yamllint}"
   - "eslint.config.mjs"
+  - ".oxlintrc.json"
   - ".browserslistrc"
   - ".stylelintrc"
   - "{,ee/,jh/}{app,bin,config,db,elastic,generator_templates,gems,haml_lint,lib,locale,public,scripts,sidekiq_cluster,storybook,symbol,vendor}/**/*"
@@ -577,6 +580,7 @@
 .code-backstage-qa-patterns: &code-backstage-qa-patterns
   - ".{gitattributes,nvmrc,prettierrc,stylelintrc,yamllint}"
   - "eslint.config.mjs"
+  - ".oxlintrc.json"
   - ".browserslistrc"
   - ".stylelintrc"
   - "{,ee/,jh/}{app,bin,config,db,elastic,generator_templates,gems,haml_lint,lib,locale,public,scripts,sidekiq_cluster,storybook,symbol,vendor}/**/*"
@@ -626,6 +630,7 @@
   - "vendor/assets/**/*"
   - ".{gitattributes,nvmrc,prettierrc,stylelintrc,yamllint}"
   - "eslint.config.mjs"
+  - ".oxlintrc.json"
   - "*_VERSION"
   - "{,jh/}Gemfile{,.lock}"
   - "{,jh/}Gemfile.next{,.lock}"

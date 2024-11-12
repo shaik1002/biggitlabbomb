@@ -1,3 +1,4 @@
+/* oxlint-disable import/no-cycle */
 import { last } from 'lodash';
 import { TOKEN_TYPE_LABEL } from '~/vue_shared/components/filtered_search_bar/constants';
 import FilteredSearchContainer from './container';

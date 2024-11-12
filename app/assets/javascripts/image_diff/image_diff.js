@@ -1,3 +1,4 @@
+/* oxlint-disable import/no-cycle */
 import $ from 'jquery';
 import { isImageLoaded } from '../lib/utils/image_utility';
 import imageDiffHelper from './helpers/index';

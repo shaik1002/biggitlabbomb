@@ -1,3 +1,4 @@
+/* oxlint-disable import/no-cycle */
 import { last } from 'lodash';
 import AvailableDropdownMappings from 'ee_else_ce/filtered_search/available_dropdown_mappings';
 import DropLab from './droplab/drop_lab_deprecated';

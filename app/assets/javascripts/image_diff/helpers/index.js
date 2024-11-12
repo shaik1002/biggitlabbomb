@@ -1,3 +1,4 @@
+/* oxlint-disable import/no-cycle */
 import * as badgeHelper from './badge_helper';
 import * as commentIndicatorHelper from './comment_indicator_helper';
 import * as domHelper from './dom_helper';

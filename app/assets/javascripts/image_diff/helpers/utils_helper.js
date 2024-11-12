@@ -1,3 +1,4 @@
+/* oxlint-disable import/no-cycle */
 import ImageBadge from '../image_badge';
 
 export function resizeCoordinatesToImageElement(imageEl, meta) {

@@ -178,6 +178,7 @@ RSpec.describe '.gitlab/ci/rules.gitlab-ci.yml', feature_category: :tooling do
         '.editorconfig',
         '.eslintcache',
         '.git-blame-ignore-revs',
+        '.git', # When using git-worktree, .git is not a folder, but a file
         '.gitlab_kas_secret',
         '.gitlab_shell_secret',
         '.gitlab_workhorse_secret',
@@ -221,7 +222,7 @@ RSpec.describe '.gitlab/ci/rules.gitlab-ci.yml', feature_category: :tooling do
       Dir.glob('.gitlab/*.toml') +
       Dir.glob('{,**/}.{DS_Store,gitignore,gitkeep,keep}', File::FNM_DOTMATCH) +
       Dir.glob('{,vendor/}gems/*/.*') +
-      Dir.glob('{.git,.lefthook,.ruby-lsp}/**/*') +
+      Dir.glob('{.git,.lefthook,.ruby-lsp,.idea}/**/*') +
       Dir.glob('{file_hooks,log}/**/*') +
       Dir.glob('{metrics_server,sidekiq_cluster}/*') +
       Dir.glob('{{,ee/}spec/fixtures,tmp}/**/*', File::FNM_DOTMATCH) +

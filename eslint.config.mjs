@@ -30,7 +30,7 @@ const extendConfigs = [
 // rewrite.
 let jhConfigs = [];
 if (existsSync(path.resolve(dirname, 'jh'))) {
-  const pathToJhConfig = path.resolve(dirname, 'jh/eslint.config.js')
+  const pathToJhConfig = path.resolve(dirname, 'jh/eslint.config.js');
   // eslint-disable-next-line import/no-dynamic-require, no-unsanitized/method
   jhConfigs = (await import(pathToJhConfig)).default;
 }
@@ -647,29 +647,11 @@ export default [
     },
   },
 
-  // Circular dependencies overrides
-  {
-    files: [
-      // https://gitlab.com/gitlab-org/gitlab/issues/37987
-      'ee/app/assets/javascripts/vue_shared/**/*.{js,vue}',
-      // https://gitlab.com/gitlab-org/gitlab/issues/28716
-      '{,ee/}app/assets/javascripts/filtered_search/**/*.js',
-      // https://gitlab.com/gitlab-org/gitlab/issues/28719
-      'app/assets/javascripts/image_diff/**/*.js',
-    ],
-
-    rules: {
-      'import/no-cycle': 'off',
-    },
-  },
-
   // Web IDE config
   {
     files: ['app/assets/javascripts/ide/**/*.{js,vue}'],
 
     rules: {
-      // https://gitlab.com/gitlab-org/gitlab/issues/28717
-      'import/no-cycle': 'off',
       // https://gitlab.com/gitlab-org/gitlab/issues/33024
       'promise/no-nesting': 'off',
     },
@@ -716,4 +698,15 @@ export default [
     },
   },
   ...jhConfigs,
+  /*
+  The following rules will be linted with oxlint,
+  making our eslint in CI and locally way faster.
+  Run them with yarn run lint:oxlint
+  */
+  {
+    files: ['**/*'],
+    rules: {
+      'import/no-cycle': 'off',
+    },
+  },
 ];

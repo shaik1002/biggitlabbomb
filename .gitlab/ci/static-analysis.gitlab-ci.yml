@@ -73,6 +73,7 @@ eslint:
     USE_BUNDLE_INSTALL: "false"
   script:
     - yarn_install_script
+    - run_timed_command "yarn run lint:oxlint"
     - run_timed_command "yarn run lint:eslint:all"
 
 eslint-docs:
