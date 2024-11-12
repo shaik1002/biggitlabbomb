@@ -196,6 +196,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  activemodel (~> 7.0.8)
   activesupport (~> 7.0.8)
   factory_bot (~> 6.4.6)
   gitlab-backup-cli!
