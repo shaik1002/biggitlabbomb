@@ -50,7 +50,8 @@ module Enums
           ondemand_dast_validation: 14,
           security_orchestration_policy: 15,
           container_registry_push: 16,
-          duo_workflow: 17
+          duo_workflow: 17,
+          pipeline_execution_schedule_policy: 18
         }
       end
 

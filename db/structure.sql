@@ -19237,6 +19237,26 @@ CREATE SEQUENCE security_orchestration_policy_rule_schedules_id_seq
 
 ALTER SEQUENCE security_orchestration_policy_rule_schedules_id_seq OWNED BY security_orchestration_policy_rule_schedules.id;
 
+CREATE TABLE security_pipeline_execution_schedules (
+    id bigint NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL,
+    security_policy_id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    cron text NOT NULL,
+    next_run_at timestamp with time zone NOT NULL,
+    CONSTRAINT check_fb4ce8963a CHECK ((char_length(cron) <= 255))
+);
+
+CREATE SEQUENCE security_pipeline_execution_schedules_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE security_pipeline_execution_schedules_id_seq OWNED BY security_pipeline_execution_schedules.id;
+
 CREATE TABLE security_policies (
     id bigint NOT NULL,
     security_orchestration_policy_configuration_id bigint NOT NULL,
@@ -23652,6 +23672,8 @@ ALTER TABLE ONLY security_orchestration_policy_configurations ALTER COLUMN id SE
 
 ALTER TABLE ONLY security_orchestration_policy_rule_schedules ALTER COLUMN id SET DEFAULT nextval('security_orchestration_policy_rule_schedules_id_seq'::regclass);
 
+ALTER TABLE ONLY security_pipeline_execution_schedules ALTER COLUMN id SET DEFAULT nextval('security_pipeline_execution_schedules_id_seq'::regclass);
+
 ALTER TABLE ONLY security_policies ALTER COLUMN id SET DEFAULT nextval('security_policies_id_seq'::regclass);
 
 ALTER TABLE ONLY security_policy_project_links ALTER COLUMN id SET DEFAULT nextval('security_policy_project_links_id_seq'::regclass);
@@ -26355,6 +26377,9 @@ ALTER TABLE ONLY security_orchestration_policy_configurations
 
 ALTER TABLE ONLY security_orchestration_policy_rule_schedules
     ADD CONSTRAINT security_orchestration_policy_rule_schedules_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY security_pipeline_execution_schedules
+    ADD CONSTRAINT security_pipeline_execution_schedules_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY security_policies
     ADD CONSTRAINT security_policies_pkey PRIMARY KEY (id);
@@ -37195,6 +37220,9 @@ ALTER TABLE ONLY approval_project_rules_groups
 ALTER TABLE ONLY custom_fields
     ADD CONSTRAINT fk_rails_39d50cbb4e FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY security_pipeline_execution_schedules
+    ADD CONSTRAINT fk_rails_39de1c09cd FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY chat_teams
     ADD CONSTRAINT fk_rails_3b543909cb FOREIGN KEY (namespace_id) REFERENCES namespaces(id) ON DELETE CASCADE;
 
@@ -37893,6 +37921,9 @@ ALTER TABLE ONLY packages_debian_project_distributions
 
 ALTER TABLE ONLY packages_rubygems_metadata
     ADD CONSTRAINT fk_rails_95a3f5ce78 FOREIGN KEY (package_id) REFERENCES packages_packages(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY security_pipeline_execution_schedules
+    ADD CONSTRAINT fk_rails_9625df5e82 FOREIGN KEY (security_policy_id) REFERENCES security_policies(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY packages_pypi_metadata
     ADD CONSTRAINT fk_rails_9698717cdd FOREIGN KEY (package_id) REFERENCES packages_packages(id) ON DELETE CASCADE;

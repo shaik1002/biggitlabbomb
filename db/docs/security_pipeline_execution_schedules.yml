@@ -1,0 +1,12 @@
+---
+table_name: security_pipeline_execution_schedules
+classes:
+- Security::PipelineExecutionPolicy::Schedule
+feature_categories:
+- security_policy_management
+description: Keeps track of pipeline execution schedule policy runs.
+introduced_by_url:
+milestone: '17.6'
+gitlab_schema: gitlab_main_cell
+sharding_key:
+  project_id: projects
