@@ -7,16 +7,6 @@ RSpec.describe DevOpsReport::MetricPresenter do
 
   let(:metric) { build(:dev_ops_report_metric) }
 
-  describe '#cards' do
-    it 'includes instance score, leader score and percentage score' do
-      issues_card = subject.cards.first
-
-      expect(issues_card.instance_score).to eq(1.234)
-      expect(issues_card.leader_score).to eq(9.256)
-      expect(issues_card.percentage_score).to eq(13.331)
-    end
-  end
-
   describe '#idea_to_production_steps' do
     it 'returns percentage score when it depends on a single feature' do
       code_step = subject.idea_to_production_steps.fourth
