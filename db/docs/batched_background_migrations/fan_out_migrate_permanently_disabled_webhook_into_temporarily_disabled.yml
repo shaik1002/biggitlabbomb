@@ -1,0 +1,9 @@
+---
+migration_job_name: FanOutMigratePermanentlyDisabledWebhookIntoTemporarilyDisabled
+description: |
+  This migration will fan out the migration of permanently disabled webhooks into temporarily disabled webhooks.
+feature_category: integrations
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/166329
+milestone: '17.7'
+queued_migration_version: 20240925134655
+finalized_by: # version of the migration that finalized this BBM

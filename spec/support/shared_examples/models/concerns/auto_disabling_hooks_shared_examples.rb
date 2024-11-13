@@ -167,6 +167,7 @@ RSpec.shared_examples 'a hook that gets automatically disabled on failure' do
   describe '#enable!' do
     it 'makes a hook executable if it was marked as failed' do
       hook.recent_failures = 1000
+      hook.disabled_until = 1.minute.from_now
 
       expect { hook.enable! }.to change { hook.executable? }.from(false).to(true)
     end
@@ -206,6 +207,7 @@ RSpec.shared_examples 'a hook that gets automatically disabled on failure' do
     include_examples 'is tolerant of invalid records' do
       def run_expectation
         hook.recent_failures = 1000
+        hook.disabled_until = 1.minute.from_now
 
         expect { hook.enable! }.to change { hook.executable? }.from(false).to(true)
       end
@@ -281,34 +283,6 @@ RSpec.shared_examples 'a hook that gets automatically disabled on failure' do
       include_examples 'is tolerant of invalid records' do
         def run_expectation
           expect { hook.backoff! }.to change { hook.backoff_count }.by(1)
-        end
-      end
-
-      context 'when the flag is disabled' do
-        before do
-          stub_feature_flags(auto_disabling_web_hooks: false)
-        end
-
-        it 'does not increment backoff count' do
-          expect { hook.failed! }.not_to change { hook.backoff_count }
-        end
-      end
-    end
-  end
-
-  describe '#failed!' do
-    include_examples 'is tolerant of invalid records' do
-      def run_expectation
-        expect { hook.failed! }.to change { hook.recent_failures }.by(1)
-      end
-
-      context 'when the flag is disabled' do
-        before do
-          stub_feature_flags(auto_disabling_web_hooks: false)
-        end
-
-        it 'does not increment recent failure count' do
-          expect { hook.failed! }.not_to change { hook.recent_failures }
         end
       end
     end

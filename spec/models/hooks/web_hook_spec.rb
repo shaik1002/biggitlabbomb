@@ -663,28 +663,4 @@ RSpec.describe WebHook, feature_category: :webhooks do
       end
     end
   end
-
-  describe '#failed!' do
-    it 'increments the failure count' do
-      expect { hook.failed! }.to change(hook, :recent_failures).by(1)
-    end
-
-    context 'when the recent failure value is the max value of a smallint' do
-      before do
-        hook.update!(recent_failures: 32767)
-      end
-
-      it 'does not change recent_failures' do
-        expect { hook.failed! }.not_to change(hook, :recent_failures)
-      end
-    end
-
-    it 'does not update the hook if the the failure count exceeds the maximum value' do
-      hook.recent_failures = WebHooks::AutoDisabling::MAX_FAILURES
-
-      sql_count = ActiveRecord::QueryRecorder.new { hook.failed! }.count
-
-      expect(sql_count).to eq(0)
-    end
-  end
 end

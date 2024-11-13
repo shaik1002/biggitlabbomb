@@ -441,6 +441,7 @@ To optimize your webhook receivers:
 > - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/329849) for project webhooks in GitLab 15.7. Feature flag `web_hooks_disable_failed` removed.
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/385902) for group webhooks in GitLab 15.10.
 > - [Disabled on self-managed](https://gitlab.com/gitlab-org/gitlab/-/issues/390157) in GitLab 15.10 [with a flag](../../../administration/feature_flags.md) named `auto_disabling_web_hooks`.
+> - Permanently disabled webhooks [removed](https://gitlab.com/gitlab-org/gitlab/-/issues/396577) in GitLab 17.7.
 
 FLAG:
 The availability of this feature is controlled by a feature flag.
@@ -453,12 +454,7 @@ To view auto-disabled webhooks:
 1. On the left sidebar, select **Search or go to** and find your project or group.
 1. Select **Settings > Webhooks**.
 
-In the webhook list, auto-disabled webhooks display as:
-
-- **Fails to connect** for [temporarily disabled](#temporarily-disabled-webhooks) webhooks
-- **Failed to connect** for [permanently disabled](#permanently-disabled-webhooks) webhooks
-
-![Badges on failing webhooks](img/failed_badges_v14_9.png)
+In the webhook list, [temporarily disabled webhooks](#temporarily-disabled-webhooks) display as **Fails to connect**.
 
 #### Temporarily disabled webhooks
 
@@ -470,19 +466,12 @@ Webhooks are temporarily disabled if they:
 
 These webhooks are initially disabled for one minute, with the duration extending on subsequent failures up to 24 hours.
 
-#### Permanently disabled webhooks
-
-Webhooks are permanently disabled if they return response codes in the `4xx` range, indicating a misconfiguration.
-
 #### Re-enable disabled webhooks
 
 > - Introduced in GitLab 15.2 [with a flag](../../../administration/feature_flags.md) named `webhooks_failed_callout`. Disabled by default.
 > - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/365535) in GitLab 15.7. Feature flag `webhooks_failed_callout` removed.
 
-To re-enable a temporarily or permanently disabled webhook:
-
-- [Send a test request](#test-a-webhook) to the webhook.
-
+To re-enable a temporarily disabled webhook, [send a test request](#test-a-webhook) to the webhook.
 The webhook is re-enabled if the test request returns a response code in the `2xx` range.
 
 ### Delivery headers

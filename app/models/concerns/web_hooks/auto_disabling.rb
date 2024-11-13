@@ -120,17 +120,6 @@ module WebHooks
       save(validate: false)
     end
 
-    def failed!
-      return unless auto_disabling_enabled?
-      return unless recent_failures < MAX_FAILURES
-
-      attrs = { disabled_until: nil, backoff_count: 0, recent_failures: next_failure_count }
-
-      assign_attributes(**attrs)
-      logger.info(hook_id: id, action: 'disable', **attrs)
-      save(validate: false)
-    end
-
     def next_backoff
       # Optimization to prevent expensive exponentiation and possible overflows
       return MAX_BACKOFF if backoff_count >= MAX_BACKOFF_COUNT
