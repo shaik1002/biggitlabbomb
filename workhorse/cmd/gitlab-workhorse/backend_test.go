@@ -21,6 +21,8 @@ func TestParseAuthBackendFailure(t *testing.T) {
 	}
 }
 
+// Changing a *.go file just to trigger a change!
+// New line of code to trigger scan
 func TestParseAuthBackend(t *testing.T) {
 	successes := []struct{ input, host, scheme string }{
 		{"http://localhost:8080", "localhost:8080", "http"},

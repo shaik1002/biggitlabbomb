@@ -3,6 +3,7 @@
 require 'gon'
 require 'fogbugz'
 
+# Changing a *.rb file to trigger a scan
 class ApplicationController < BaseActionController
   use Gitlab::Middleware::ActionControllerStaticContext
 
