@@ -68,10 +68,8 @@ export default {
           <template #default="{ mergeRequests, count, hasNextPage, loadMore, loading, error }">
             <collapsible-section
               :count="count"
-              :has-merge-requests="mergeRequests.length > 0"
               :title="list.title"
               :help-content="list.helpContent"
-              :loading="loading"
             >
               <div>
                 <div class="gl-overflow-x-auto">

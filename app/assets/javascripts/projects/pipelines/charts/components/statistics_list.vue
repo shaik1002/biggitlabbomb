@@ -2,7 +2,6 @@
 import { GlLink } from '@gitlab/ui';
 import { GlSingleStat } from '@gitlab/ui/dist/charts';
 import { SUPPORTED_FORMATS, getFormatter } from '~/lib/utils/unit_format';
-import { formatTimeSpent } from '~/lib/utils/datetime_utility';
 import { s__, formatNumber } from '~/locale';
 
 const defaultPrecision = 0;
@@ -32,7 +31,7 @@ export default {
     statistics() {
       const formatPercent = getFormatter(SUPPORTED_FORMATS.percentHundred);
 
-      const statistics = [
+      return [
         {
           label: s__('PipelineCharts|Total pipeline runs'),
           identifier: 'total-pipeline-runs',
@@ -50,16 +49,6 @@ export default {
           value: formatPercent(this.counts.successRatio, defaultPrecision),
         },
       ];
-
-      if (this.counts.meanDuration) {
-        statistics.splice(1, 0, {
-          label: s__('PipelineCharts|Mean duration'),
-          identifier: 'mean-duration',
-          value: formatTimeSpent(this.counts.meanDuration),
-        });
-      }
-
-      return statistics;
     },
   },
   methods: {

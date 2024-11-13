@@ -30,7 +30,7 @@ const REVIEW_STATE_ICONS = {
   },
   REVIEW_STARTED: {
     name: 'comment-dots',
-    class: 'gl-text-subtle',
+    class: 'gl-text-gray-500',
     title: s__('MergeRequest|Reviewer started review'),
   },
 };
@@ -156,7 +156,7 @@ export default {
     },
     showRequestReviewButton(user) {
       if (!user.mergeRequestInteraction.approved) {
-        return !['UNREVIEWED'].includes(user.mergeRequestInteraction.reviewState);
+        return !['UNREVIEWED', 'UNAPPROVED'].includes(user.mergeRequestInteraction.reviewState);
       }
 
       return true;
@@ -195,7 +195,7 @@ export default {
         :title="$options.i18n.reRequestReview"
         :aria-label="$options.i18n.reRequestReview"
         :loading="loadingStates[user.id] === $options.LOADING_STATE"
-        class="gl-float-right gl-mr-2 !gl-text-subtle"
+        class="gl-float-right gl-mr-2 !gl-text-gray-500"
         size="small"
         icon="redo"
         variant="link"

@@ -134,7 +134,7 @@ export default {
       return this.isChildItemOpen ? this.$options.i18n.created : this.$options.i18n.closed;
     },
     childItemTypeColorClass() {
-      return this.isChildItemOpen ? 'gl-text-subtle' : 'gl-text-disabled';
+      return this.isChildItemOpen ? 'gl-text-secondary' : 'gl-text-gray-300';
     },
     displayLabels() {
       return this.showLabels && this.labels.length;
@@ -212,7 +212,7 @@ export default {
           </span>
           <gl-link
             :href="childItemWebUrl"
-            :class="{ '!gl-text-subtle': !isChildItemOpen }"
+            :class="{ '!gl-text-secondary': !isChildItemOpen }"
             class="gl-hyphens-auto gl-break-words gl-font-semibold"
             @click.exact="handleTitleClick"
             @mouseover="$emit('mouseover')"

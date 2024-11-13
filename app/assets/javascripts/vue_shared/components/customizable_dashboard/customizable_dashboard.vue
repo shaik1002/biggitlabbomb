@@ -516,6 +516,7 @@ export default {
           </gridstack-wrapper>
 
           <available-visualizations-drawer
+            v-if="availableVisualizations"
             :visualizations="availableVisualizations.visualizations"
             :loading="availableVisualizations.loading"
             :has-error="availableVisualizations.hasError"
