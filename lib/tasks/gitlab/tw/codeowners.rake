@@ -82,7 +82,7 @@ namespace :tw do
       # CodeOwnerRule.new('Subscription Management', ''),
       CodeOwnerRule.new('Tenant Scale', '@lciutacu'),
       CodeOwnerRule.new('Testing', '@eread'),
-      CodeOwnerRule.new('Threat Insights', '@rdickenson'),
+      CodeOwnerRule.new('Security Insights', '@rdickenson'),
       CodeOwnerRule.new('Tutorials', '@kpaizee'),
       # CodeOwnerRule.new('US Public Sector Services', ''),
       CodeOwnerRule.new('Utilization', '@fneill')
