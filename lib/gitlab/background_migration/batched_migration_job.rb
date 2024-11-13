@@ -124,7 +124,7 @@ module Gitlab
         sub_batch_relation(batching_scope: batching_scope).each_batch(**all_batching_arguments) do |sub_batch|
           batch_metrics.instrument_operation(operation_name) do
             yield sub_batch
-          rescue *Gitlab::Database::BackgroundMigration::BatchedJob::TIMEOUT_EXCEPTIONS => exception
+          rescue *Gitlab::Database::BackgroundMigration::BatchedJob.exceptions => exception
             exception_class = sub_batch_exception || exception.class
 
             raise exception_class, exception

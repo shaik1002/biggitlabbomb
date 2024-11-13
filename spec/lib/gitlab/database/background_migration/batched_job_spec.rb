@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Database::BackgroundMigration::BatchedJob, type: :model do
+RSpec.describe Gitlab::Database::BackgroundMigration::BatchedJob, type: :model, feature_category: :database do
   it_behaves_like 'having unique enum values'
 
   it { is_expected.to be_a Gitlab::Database::SharedModel }
@@ -16,6 +16,8 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedJob, type: :model d
       ActiveRecord::QueryCanceled
     )
   end
+
+  specify { expect(described_class::SIDEKIQ_EXCEPTIONS).to contain_exactly(Sidekiq::Shutdown) }
 
   describe 'associations' do
     it { is_expected.to belong_to(:batched_migration).with_foreign_key(:batched_background_migration_id) }
@@ -315,6 +317,26 @@ RSpec.describe Gitlab::Database::BackgroundMigration::BatchedJob, type: :model d
       it 'matches expected keys and result' do
         expect(perform).to match_array(expected_result)
       end
+    end
+  end
+
+  describe '.exceptions' do
+    subject(:exceptions) { described_class.exceptions }
+
+    context 'when retry_sidekiq_shutdown_exception is enabled' do
+      let(:expected_exceptions) { described_class::TIMEOUT_EXCEPTIONS + described_class::SIDEKIQ_EXCEPTIONS }
+
+      it { expect(exceptions).to match_array(expected_exceptions) }
+    end
+
+    context 'when retry_sidekiq_shutdown_exception is disabled' do
+      let(:expected_exceptions) { described_class::TIMEOUT_EXCEPTIONS }
+
+      before do
+        stub_feature_flags(retry_sidekiq_shutdown_exception: false)
+      end
+
+      it { expect(exceptions).to match_array(expected_exceptions) }
     end
   end
 

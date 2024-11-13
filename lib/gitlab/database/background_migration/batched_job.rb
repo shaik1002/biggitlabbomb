@@ -20,6 +20,7 @@ module Gitlab
         TIMEOUT_EXCEPTIONS = [ActiveRecord::StatementTimeout, ActiveRecord::ConnectionTimeoutError,
                               ActiveRecord::AdapterTimeout, ActiveRecord::LockWaitTimeout,
                               ActiveRecord::QueryCanceled].freeze
+        SIDEKIQ_EXCEPTIONS = [Sidekiq::Shutdown].freeze
 
         belongs_to :batched_migration, foreign_key: :batched_background_migration_id
         has_many :batched_job_transition_logs, foreign_key: :batched_background_migration_job_id
@@ -111,6 +112,13 @@ module Gitlab
           from_sub_batch = error_hash[:from_sub_batch]
 
           [exception, from_sub_batch]
+        end
+
+        def self.exceptions
+          exceptions = TIMEOUT_EXCEPTIONS
+          exceptions += SIDEKIQ_EXCEPTIONS if Feature.enabled?(:retry_sidekiq_shutdown_exception, :instance)
+
+          exceptions
         end
 
         def job_attributes

@@ -1,0 +1,9 @@
+---
+name: retry_sidekiq_shutdown_exception
+feature_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/366720
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/168813
+rollout_issue_url:
+milestone: '17.6'
+group: group::database
+type: gitlab_com_derisk
+default_enabled: false
