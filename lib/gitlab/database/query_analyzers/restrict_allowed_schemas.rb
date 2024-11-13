@@ -20,7 +20,8 @@ module Gitlab
 
           # Pods specific changes
           gitlab_main_clusterwide: :gitlab_main,
-          gitlab_main_cell: :gitlab_main
+          gitlab_main_cell: :gitlab_main,
+          gitlab_main_user: :gitlab_main
         }.freeze
 
         class << self

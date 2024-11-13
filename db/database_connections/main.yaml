@@ -5,6 +5,7 @@ gitlab_schemas:
   - gitlab_shared
   - gitlab_main
   - gitlab_main_cell
+  - gitlab_main_user
   - gitlab_pm
   - gitlab_main_clusterwide
 lock_gitlab_schemas:
