@@ -19,7 +19,7 @@ module Gitlab
           end
         end
 
-        def initialize(exportable, relations_schema, json_writer, current_user:, exportable_path:, logger: Gitlab::Export::Logger)
+        def initialize(exportable, relations_schema, json_writer, current_user:, exportable_path:, logger: Gitlab::Export::Logger, cache_user_contributions: false)
           @exportable = exportable
           @current_user = current_user
           @exportable_path = exportable_path
@@ -27,6 +27,7 @@ module Gitlab
           @json_writer = json_writer
           @logger = logger
           @exported_objects_count = 0
+          @cache_user_contributions = cache_user_contributions
         end
 
         def execute
@@ -269,9 +270,7 @@ module Gitlab
         end
 
         def after_read_callback(record)
-          if Feature.enabled?(:importer_user_mapping, current_user)
-            user_contributions_export_mapper.cache_user_contributions_on_record(record)
-          end
+          user_contributions_export_mapper.cache_user_contributions_on_record(record) if @cache_user_contributions
 
           remove_cached_external_diff(record)
         end

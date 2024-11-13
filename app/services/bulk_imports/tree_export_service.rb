@@ -43,7 +43,8 @@ module BulkImports
         config.portable_tree,
         ::Gitlab::ImportExport::Json::NdjsonWriter.new(export_path),
         exportable_path: '',
-        current_user: user
+        current_user: user,
+        cache_user_contributions: true
       )
     end
     # rubocop: enable CodeReuse/Serializer
