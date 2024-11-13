@@ -27,7 +27,9 @@ import { unrestrictedPages } from './constants';
 
 const SANDBOX_FRAME_PATH = '/-/sandbox/mermaid';
 // This is an arbitrary number; Can be iterated upon when suitable.
-export const MAX_CHAR_LIMIT = 2000;
+export const MAX_SINGLE_GRAPH_CHAR_LIMIT = 5000;
+// This is an arbitrary number; Can be iterated upon when suitable.
+export const MAX_TOTAL_GRAPH_CHAR_LIMIT = 15000;
 // Max # of mermaid blocks that can be rendered in a page.
 export const MAX_MERMAID_BLOCK_LIMIT = 50;
 // Max # of `&` allowed in Chaining of links syntax
@@ -145,8 +147,8 @@ function renderMermaids(els) {
      */
     if (
       !unrestrictedPages.includes(pageName) &&
-      ((source && source.length > MAX_CHAR_LIMIT) ||
-        renderedChars > MAX_CHAR_LIMIT ||
+      ((source && source.length > MAX_SINGLE_GRAPH_CHAR_LIMIT) ||
+        renderedChars > MAX_TOTAL_GRAPH_CHAR_LIMIT ||
         renderedMermaidBlocks >= MAX_MERMAID_BLOCK_LIMIT ||
         shouldLazyLoadMermaidBlock(source))
     ) {

@@ -1,7 +1,8 @@
 import { createWrapper } from '@vue/test-utils';
 import { setHTMLFixture, resetHTMLFixture } from 'helpers/fixtures';
 import renderMermaid, {
-  MAX_CHAR_LIMIT,
+  MAX_SINGLE_GRAPH_CHAR_LIMIT,
+  MAX_TOTAL_GRAPH_CHAR_LIMIT,
   MAX_MERMAID_BLOCK_LIMIT,
   LAZY_ALERT_SHOWN_CLASS,
 } from '~/behaviors/markdown/render_sandboxed_mermaid';
@@ -57,11 +58,11 @@ describe('Mermaid diagrams renderer', () => {
   });
 
   describe('dangerous diagrams', () => {
-    describe(`when the diagram's source exceeds ${MAX_CHAR_LIMIT} characters`, () => {
+    describe(`when the diagram's source exceeds ${MAX_SINGLE_GRAPH_CHAR_LIMIT} characters`, () => {
       beforeEach(() => {
         setHTMLFixture(
           `<pre>
-            <code class="js-render-mermaid">${Array(MAX_CHAR_LIMIT + 1)
+            <code class="js-render-mermaid">${Array(MAX_SINGLE_GRAPH_CHAR_LIMIT + 1)
               .fill('a')
               .join('')}</code>
           </pre>`,
@@ -88,10 +89,10 @@ describe('Mermaid diagrams renderer', () => {
       });
     });
 
-    it(`stops rendering diagrams once the total rendered source exceeds ${MAX_CHAR_LIMIT} characters`, () => {
+    it(`stops rendering diagrams once the total rendered source exceeds ${MAX_TOTAL_GRAPH_CHAR_LIMIT} characters`, () => {
       setHTMLFixture(
         `<pre>
-          <code class="js-render-mermaid">${Array(MAX_CHAR_LIMIT - 1)
+          <code class="js-render-mermaid">${Array(MAX_TOTAL_GRAPH_CHAR_LIMIT - 1)
             .fill('a')
             .join('')}</code>
           <code class="js-render-mermaid">2</code>
