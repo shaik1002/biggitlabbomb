@@ -32,15 +32,17 @@ $type-scale: (
  */
  $size-scale: (
   's': #{20 * $grid-size},
-  'l': #{40 * $grid-size},
-  'm': #{30 * $grid-size},
-  'xl': #{70 * $grid-size}
 );
 
 @each $index, $size in $size-scale {
   #{'.mw-#{$index}'} {
     max-width: $size;
   }
+}
+
+// stylelint-disable-next-line gitlab/no-gl-class
+.gl-top-app-header {
+  top: $calc-application-header-height;
 }
 
 // This CSS Class definition will be removed in

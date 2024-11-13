@@ -92,21 +92,20 @@ X-Gitlab-Event: System Hook
 
 ```json
 {
-            "created_at": "2012-07-21T07:30:54Z",
-            "updated_at": "2012-07-21T07:38:22Z",
-            "event_name": "project_create",
-                  "name": "StoreCloud",
-           "owner_email": "johnsmith@example.com",
-            "owner_name": "John Smith",
-                "owners": [{
-                           "name": "John",
-                           "email": "user1@example.com"
-                          }],
-                  "path": "storecloud",
-   "path_with_namespace": "jsmith/storecloud",
-            "project_id": 74,
- "project_namespace_id" : 23,
-    "project_visibility": "private"
+          "created_at": "2012-07-21T07:30:54Z",
+          "updated_at": "2012-07-21T07:38:22Z",
+          "event_name": "project_create",
+                "name": "StoreCloud",
+         "owner_email": "johnsmith@example.com",
+          "owner_name": "John Smith",
+              "owners": [{
+                         "name": "John",
+                         "email": "user1@example.com"
+                        }],
+                "path": "storecloud",
+ "path_with_namespace": "jsmith/storecloud",
+          "project_id": 74,
+  "project_visibility": "private"
 }
 ```
 
@@ -114,21 +113,20 @@ X-Gitlab-Event: System Hook
 
 ```json
 {
-            "created_at": "2012-07-21T07:30:58Z",
-            "updated_at": "2012-07-21T07:38:22Z",
-            "event_name": "project_destroy",
-                  "name": "Underscore",
-           "owner_email": "johnsmith@example.com",
-            "owner_name": "John Smith",
-                "owners": [{
-                           "name": "John",
-                           "email": "user1@example.com"
-                          }],
-                  "path": "underscore",
-   "path_with_namespace": "jsmith/underscore",
-            "project_id": 73,
- "project_namespace_id" : 23,
-    "project_visibility": "internal"
+          "created_at": "2012-07-21T07:30:58Z",
+          "updated_at": "2012-07-21T07:38:22Z",
+          "event_name": "project_destroy",
+                "name": "Underscore",
+         "owner_email": "johnsmith@example.com",
+          "owner_name": "John Smith",
+              "owners": [{
+                         "name": "John",
+                         "email": "user1@example.com"
+                        }],
+                "path": "underscore",
+ "path_with_namespace": "jsmith/underscore",
+          "project_id": 73,
+  "project_visibility": "internal"
 }
 ```
 
@@ -149,7 +147,6 @@ X-Gitlab-Event: System Hook
                               "name": "John",
                               "email": "user1@example.com"
                              }],
-    "project_namespace_id" : 23,
        "project_visibility": "internal",
   "old_path_with_namespace": "jsmith/overscore"
 }
@@ -175,7 +172,6 @@ Refer to `group_rename` and `user_rename` for that case.
                               "name": "John",
                               "email": "user1@example.com"
                              }],
-    "project_namespace_id" : 23,
        "project_visibility": "internal",
   "old_path_with_namespace": "jsmith/overscore"
 }
@@ -185,21 +181,20 @@ Refer to `group_rename` and `user_rename` for that case.
 
 ```json
 {
-            "created_at": "2012-07-21T07:30:54Z",
-            "updated_at": "2012-07-21T07:38:22Z",
-            "event_name": "project_update",
-                  "name": "StoreCloud",
-           "owner_email": "johnsmith@example.com",
-            "owner_name": "John Smith",
-                "owners": [{
-                           "name": "John",
-                           "email": "user1@example.com"
-                          }],
-                  "path": "storecloud",
-   "path_with_namespace": "jsmith/storecloud",
-            "project_id": 74,
- "project_namespace_id" : 23,
-    "project_visibility": "private"
+          "created_at": "2012-07-21T07:30:54Z",
+          "updated_at": "2012-07-21T07:38:22Z",
+          "event_name": "project_update",
+                "name": "StoreCloud",
+         "owner_email": "johnsmith@example.com",
+          "owner_name": "John Smith",
+              "owners": [{
+                         "name": "John",
+                         "email": "user1@example.com"
+                        }],
+                "path": "storecloud",
+ "path_with_namespace": "jsmith/storecloud",
+          "project_id": 74,
+  "project_visibility": "private"
 }
 ```
 

@@ -257,9 +257,9 @@ export const getGroupsAndProjectsResponse = {
 
 export const inboundAddGroupOrProjectSuccessResponse = {
   data: {
-    ciJobTokenScopeAddGroupOrProject: {
+    ciJobTokenScopeAddProject: {
       errors: [],
-      __typename: 'CiJobTokenScopeAddGroupOrProjectPayload',
+      __typename: 'CiJobTokenScopeAddProjectPayload',
     },
   },
 };

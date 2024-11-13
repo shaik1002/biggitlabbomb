@@ -34,11 +34,6 @@ export default {
       required: false,
       default: '',
     },
-    description: {
-      type: String,
-      required: false,
-      default: '',
-    },
     inputName: {
       type: String,
       required: true,
@@ -131,7 +126,6 @@ export default {
 <template>
   <entity-select
     :label="label"
-    :description="description"
     :input-name="inputName"
     :input-id="inputId"
     :initial-selection="initialSelection"

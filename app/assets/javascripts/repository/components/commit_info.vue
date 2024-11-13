@@ -103,7 +103,7 @@ export default {
             :title="$options.i18n.toggleCommitDescription"
             :aria-label="$options.i18n.toggleCommitDescription"
             :selected="showDescription"
-            class="!gl-ml-0"
+            class="text-expander !gl-ml-0"
             icon="ellipsis_h"
             @click="toggleShowDescription"
           />

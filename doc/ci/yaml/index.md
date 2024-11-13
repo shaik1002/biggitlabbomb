@@ -1488,8 +1488,7 @@ job:
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/145206) in GitLab 16.11.
 
-Use `artifacts:access` to determine who can access the job artifacts from the GitLab UI
-or API. This option does not prevent you from forwarding artifacts to downstream pipelines.
+Use `artifacts:access` to determine who can access the job artifacts.
 
 You cannot use [`artifacts:public`](#artifactspublic) and `artifacts:access` in the same job.
 
