@@ -22,7 +22,7 @@ import { ISSUE_STATE_EVENT_CLOSE, ISSUE_STATE_EVENT_REOPEN } from '~/issues/show
 import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
 import { isLoggedIn } from '~/lib/utils/common_utils';
 import { visitUrl } from '~/lib/utils/url_utility';
-import { __, sprintf } from '~/locale';
+import { s__, __, sprintf } from '~/locale';
 import eventHub from '~/notes/event_hub';
 import Tracking from '~/tracking';
 import toast from '~/vue_shared/plugins/global_toast';
@@ -31,6 +31,7 @@ import SidebarSubscriptionsWidget from '~/sidebar/components/subscriptions/sideb
 import IssuableLockForm from '~/sidebar/components/lock/issuable_lock_form.vue';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import issueReferenceQuery from '~/sidebar/queries/issue_reference.query.graphql';
+import { confidentialityQueries } from '~/sidebar/queries/constants';
 import issuesEventHub from '../event_hub';
 import promoteToEpicMutation from '../queries/promote_to_epic.mutation.graphql';
 import updateIssueMutation from '../queries/update_issue.mutation.graphql';
@@ -47,6 +48,8 @@ export default {
   },
   deleteModalId: 'delete-modal-id',
   i18n: {
+    enableConfidentiality: s__('WorkItem|Turn on confidentiality'),
+    disableConfidentiality: s__('WorkItem|Turn off confidentiality'),
     edit: __('Edit'),
     editTitleAndDescription: __('Edit title and description'),
     promoteErrorMessage: __(
@@ -95,11 +98,18 @@ export default {
     'issuableEmailAddress',
     'fullPath',
   ],
+  props: {
+    issuableType: {
+      required: true,
+      type: String,
+    },
+  },
   data() {
     return {
       isReportAbuseDrawerOpen: false,
       isUserSignedIn: isLoggedIn(),
       isDesktopDropdownVisible: false,
+      confidential: false,
     };
   },
   apollo: {
@@ -118,6 +128,39 @@ export default {
       error(error) {
         createAlert({ message: this.$options.i18n.referenceFetchError });
         Sentry.captureException(error);
+      },
+    },
+    confidential: {
+      query() {
+        return confidentialityQueries[this.issuableType].query;
+      },
+      variables() {
+        return {
+          fullPath: this.fullPath,
+          iid: String(this.iid),
+        };
+      },
+      update(data) {
+        return data.workspace?.issuable?.confidential || false;
+      },
+      skip() {
+        return !this.iid;
+      },
+      result({ data }) {
+        if (!data) {
+          return;
+        }
+        this.$emit('confidentialityUpdated', data.workspace?.issuable?.confidential);
+      },
+      error() {
+        createAlert({
+          message: sprintf(
+            __('Something went wrong while setting %{issuableType} confidentiality.'),
+            {
+              issuableType: this.issuableType,
+            },
+          ),
+        });
       },
     },
   },
@@ -214,6 +257,13 @@ export default {
         extraAttrs: {
           disabled: this.isToggleStateButtonLoading,
         },
+      };
+    },
+    confidentialItem() {
+      return {
+        text: this.confidential
+          ? this.$options.i18n.disableConfidentiality
+          : this.$options.i18n.enableConfidentiality,
       };
     },
   },
@@ -327,6 +377,45 @@ export default {
     hideDesktopDropdown() {
       this.isDesktopDropdownVisible = false;
     },
+    handleToggleWorkItemConfidentiality() {
+      this.$apollo
+        .mutate({
+          mutation: confidentialityQueries[this.issuableType].mutation,
+          variables: {
+            input: {
+              ...this.workspacePath,
+              iid: String(this.iid),
+              projectPath: this.projectPath,
+              confidential: !this.confidential,
+            },
+          },
+        })
+        .then(
+          ({
+            data: {
+              issuableSetConfidential: { errors },
+            },
+          }) => {
+            if (errors.length) {
+              createAlert({
+                message: errors[0],
+              });
+            } else {
+              this.closeActionsDropdown();
+            }
+          },
+        )
+        .catch(() => {
+          createAlert({
+            message: sprintf(
+              __('Something went wrong while setting %{issuableType} confidentiality.'),
+              {
+                issuableType: this.issuableTypeText,
+              },
+            ),
+          });
+        });
+    },
   },
   TYPE_ISSUE,
 };
@@ -378,6 +467,12 @@ export default {
         <template v-if="showLockIssueOption">
           <issuable-lock-form :is-editable="false" data-testid="lock-issue-toggle" />
         </template>
+        <gl-disclosure-dropdown-item
+          v-if="canUpdateIssue"
+          :item="confidentialItem"
+          data-testid="confidentiality-toggle-action"
+          @action="handleToggleWorkItemConfidentiality"
+        />
         <gl-disclosure-dropdown-item
           :data-clipboard-text="issuableReference"
           class="js-copy-reference"
@@ -478,6 +573,12 @@ export default {
       <template v-if="showLockIssueOption">
         <issuable-lock-form :is-editable="false" data-testid="lock-issue-toggle" />
       </template>
+      <gl-disclosure-dropdown-item
+        v-if="canUpdateIssue"
+        :item="confidentialItem"
+        data-testid="confidentiality-toggle-action"
+        @action="handleToggleWorkItemConfidentiality"
+      />
       <gl-disclosure-dropdown-item
         :data-clipboard-text="issuableReference"
         class="js-copy-reference"

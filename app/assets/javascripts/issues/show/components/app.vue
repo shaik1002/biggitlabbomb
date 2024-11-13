@@ -563,7 +563,7 @@ export default {
       >
         <template #actions>
           <slot name="actions">
-            <header-actions />
+            <header-actions :issuable-type="issuableType" />
           </slot>
         </template>
       </title-component>
