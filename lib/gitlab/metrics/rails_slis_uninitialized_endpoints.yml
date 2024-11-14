@@ -491,7 +491,7 @@
 - "Snippets::NotesController#toggle_award_emoji"
 - "Subscriptions::GroupsController#edit"
 - "Subscriptions::GroupsController#update"
-- "GitlabSubscriptions::HandRaiseLeadsController#create"
+- "Subscriptions::HandRaiseLeadsController#create"
 - "UserSettings::PasswordsController#create"
 - "UserSettings::PasswordsController#new"
 - "Users::TermsController#decline"

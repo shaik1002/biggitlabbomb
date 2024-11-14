@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'set' # -- Ruby 3.1 and earlier needs this. Drop this line after Ruby 3.2+ is only supported.
+require 'set' # rubocop:disable Lint/RedundantRequireStatement -- Ruby 3.1 and earlier needs this. Drop this line after Ruby 3.2+ is only supported.
 require 'test_file_finder'
 
 # These tests run a sanity check on the mapping file `tests.yml`
@@ -255,7 +255,7 @@ tests = [
     ]
   },
   {
-    explanation: 'FOSS metric definitions map to metric validation specs',
+    explanation: 'FOSS metric defintions map to metric validation specs',
     changed_file: 'config/metrics/counts_28d/count_total_merge_request_click_start_review_on_overview_tab_monthly.yml',
     expected: %w[
       spec/config/metrics/every_metric_definition_spec.rb
@@ -338,7 +338,7 @@ tests = [
   },
   {
     explanation: 'Internal Events test cases map to internal events tooling',
-    changed_file: 'spec/fixtures/scripts/internal_events/event_definer_examples.yml',
+    changed_file: 'spec/fixtures/scripts/internal_events/new_events.yml',
     expected: %w[
       spec/scripts/internal_events/cli_spec.rb
       spec/support_specs/matchers/internal_events_matchers_spec.rb
@@ -392,10 +392,10 @@ tests = [
 
   {
     explanation: 'Map EE controllers to controller and request specs',
-    changed_file: 'ee/app/controllers/gitlab_subscriptions/subscriptions_controller.rb',
+    changed_file: 'ee/app/controllers/subscriptions_controller.rb',
     expected: %w[
-      ee/spec/controllers/gitlab_subscriptions/subscriptions_controller_spec.rb
-      ee/spec/requests/gitlab_subscriptions/subscriptions_controller_spec.rb
+      ee/spec/controllers/subscriptions_controller_spec.rb
+      ee/spec/requests/subscriptions_controller_spec.rb
     ]
   },
   {
@@ -544,63 +544,6 @@ tests = [
   },
 
   {
-    explanation: 'Spec for onboarding changes to company form items',
-    changed_file: 'ee/app/controllers/registrations/company_controller.rb',
-    expected: %w[
-      ee/spec/features/registrations/saas/invite_flow_spec.rb
-      ee/spec/features/registrations/saas/sso_signin_standard_flow_company_creating_project_spec.rb
-      ee/spec/features/registrations/saas/standard_flow_company_creating_project_spec.rb
-      ee/spec/features/registrations/saas/standard_flow_company_joining_project_spec.rb
-      ee/spec/features/registrations/saas/standard_flow_just_me_creating_project_spec.rb
-      ee/spec/features/registrations/saas/standard_flow_just_me_importing_project_spec.rb
-      ee/spec/features/registrations/saas/standard_flow_just_me_joining_project_spec.rb
-      ee/spec/features/registrations/saas/standard_flow_with_2fa_spec.rb
-      ee/spec/features/registrations/saas/subscription_flow_company_paid_plan_spec.rb
-      ee/spec/features/registrations/saas/subscription_flow_just_me_paid_plan_spec.rb
-      ee/spec/features/registrations/saas/trial_flow_company_creating_project_spec.rb
-      ee/spec/features/registrations/saas/trial_flow_company_importing_project_spec.rb
-      ee/spec/features/registrations/saas/trial_flow_just_me_creating_project_spec.rb
-      ee/spec/features/registrations/saas/trial_flow_just_me_importing_project_spec.rb
-      ee/spec/controllers/registrations/company_controller_spec.rb
-      ee/spec/features/registrations/email_opt_in_registration_spec.rb
-    ]
-  },
-
-  {
-    explanation: 'Spec for in-app ultimate trials',
-    changed_file: 'ee/app/controllers/gitlab_subscriptions/trials_controller.rb',
-    expected: %w[
-      ee/spec/features/gitlab_subscriptions/trials/creation_with_multiple_existing_namespace_flow_spec.rb
-      ee/spec/features/gitlab_subscriptions/trials/creation_with_no_existing_namespace_flow_spec.rb
-      ee/spec/features/gitlab_subscriptions/trials/creation_with_one_existing_namespace_flow_spec.rb
-      ee/spec/requests/gitlab_subscriptions/trials_controller_spec.rb
-      ee/spec/features/gitlab_subscriptions/trials/access_denied_spec.rb
-    ]
-  },
-
-  {
-    explanation: 'Spec for in-app duo pro trials',
-    changed_file: 'ee/app/controllers/gitlab_subscriptions/trials/duo_pro_controller.rb',
-    expected: %w[
-      ee/spec/features/gitlab_subscriptions/trials/duo_pro/access_denied_spec.rb
-      ee/spec/features/gitlab_subscriptions/trials/duo_pro/creation_with_multiple_existing_namespace_flow_spec.rb
-      ee/spec/features/gitlab_subscriptions/trials/duo_pro/creation_with_one_existing_namespace_flow_spec.rb
-      ee/spec/requests/gitlab_subscriptions/trials/duo_pro_controller_spec.rb
-    ]
-  },
-
-  {
-    explanation: 'Spec for in-app duo enterprise trials',
-    changed_file: 'ee/app/controllers/gitlab_subscriptions/trials/duo_enterprise_controller.rb',
-    expected: %w[
-      ee/spec/features/gitlab_subscriptions/trials/duo_enterprise/access_denied_spec.rb
-      ee/spec/features/gitlab_subscriptions/trials/duo_enterprise/creation_with_multiple_existing_namespace_flow_spec.rb
-      ee/spec/features/gitlab_subscriptions/trials/duo_enterprise/creation_with_one_existing_namespace_flow_spec.rb
-      ee/spec/requests/gitlab_subscriptions/trials/duo_enterprise_controller_spec.rb
-    ]
-  },
-
-  {
     explanation: 'https://gitlab.com/gitlab-org/gitlab/-/issues/466068#note_2138440847',
     changed_file: 'app/services/merge_requests/mergeability/check_open_status_service.rb',
     expected: %w[
@@ -684,7 +627,6 @@ tests = [
       ee/spec/lib/gitlab/database/desired_sharding_key_spec.rb
       spec/db/docs_spec.rb
       spec/lib/gitlab/database/dictionary_spec.rb
-      ee/spec/lib/gitlab/database/inclusion_of_tables_with_gitlab_sec_schema_spec.rb
       spec/lib/gitlab/database/no_new_tables_with_gitlab_main_schema_spec.rb
       spec/lib/gitlab/database/sharding_key_spec.rb
     ]

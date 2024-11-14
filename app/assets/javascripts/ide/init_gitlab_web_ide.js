@@ -79,6 +79,7 @@ export const initGitlabWebIDE = async (el) => {
         signIn: el.dataset.signInPath,
       },
       featureFlags: {
+        settingsSync: true,
         crossOriginExtensionHost: getCrossOriginExtensionHostFlagValue(extensionsGallerySettings),
       },
       editorFont,

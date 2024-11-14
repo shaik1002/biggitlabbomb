@@ -297,7 +297,6 @@ export const setNewWorkItemCache = async (
   widgetDefinitions,
   workItemType,
   workItemTypeId,
-  workItemTypeIconName,
   // eslint-disable-next-line max-params
 ) => {
   const workItemAttributesWrapperOrder = [
@@ -573,7 +572,7 @@ export const setNewWorkItemCache = async (
                 id: newWorkItemPath,
                 fullPath,
                 name: newWorkItemPath,
-                __typename: 'Namespace',
+                __typename: 'Namespace', // eslint-disable-line @gitlab/require-i18n-strings
               },
               author: {
                 id: currentUserId,
@@ -587,7 +586,7 @@ export const setNewWorkItemCache = async (
               workItemType: {
                 id: workItemTypeId || 'mock-work-item-type-id',
                 name: workItemTitleCase,
-                iconName: workItemTypeIconName,
+                iconName: 'issue-type-epic',
                 __typename: 'WorkItemType',
               },
               userPermissions: {
@@ -602,7 +601,7 @@ export const setNewWorkItemCache = async (
               widgets,
               __typename: 'WorkItem',
             },
-            __typename: 'Namespace',
+            __typename: 'Namespace', // eslint-disable-line @gitlab/require-i18n-strings
           },
         },
   });

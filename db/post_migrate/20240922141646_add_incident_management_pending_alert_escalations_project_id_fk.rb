@@ -7,12 +7,13 @@ class AddIncidentManagementPendingAlertEscalationsProjectIdFk < Gitlab::Database
   disable_ddl_transaction!
 
   def up
-    # no-op because there was a bug in the original migration, which has been
-    # fixed by https://gitlab.com/gitlab-org/gitlab/-/merge_requests/168212
+    add_concurrent_partitioned_foreign_key :incident_management_pending_alert_escalations, :projects,
+      column: :project_id, on_delete: :cascade
   end
 
   def down
-    # no-op because there was a bug in the original migration, which has been
-    # fixed by https://gitlab.com/gitlab-org/gitlab/-/merge_requests/168212
+    with_lock_retries do
+      remove_foreign_key :incident_management_pending_alert_escalations, column: :project_id
+    end
   end
 end

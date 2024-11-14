@@ -23,7 +23,7 @@
   float: left;
 
   .user {
-    @apply gl-text-default;
+    color: $gl-text-color;
     font-weight: $gl-font-weight-bold;
   }
 }

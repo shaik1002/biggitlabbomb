@@ -6,7 +6,7 @@ module Releases
     include CronjobQueue
 
     idempotent!
-    data_consistency :always
+    data_consistency :always # rubocop:disable SidekiqLoadBalancing/WorkerDataConsistency -- usual for EventStore jobs.
     feature_category :release_orchestration
 
     def perform

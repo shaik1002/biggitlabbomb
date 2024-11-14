@@ -14,8 +14,6 @@ class Key < ApplicationRecord
 
   has_many :ssh_signatures, class_name: 'CommitSignatures::SshSignature'
 
-  has_many :todos, as: :target, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent -- Polymorphic association
-
   before_validation :generate_fingerprint
 
   validates :title,

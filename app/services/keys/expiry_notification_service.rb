@@ -15,10 +15,10 @@ module Keys
       return unless allowed?
 
       if expiring_soon
-        create_expiring_soon_todos
+        create_expiring_soon_todos if Feature.enabled?(:todos_for_ssh_key_expiry, user)
         trigger_expiring_soon_notification
       else
-        create_expired_todos
+        create_expired_todos if Feature.enabled?(:todos_for_ssh_key_expiry, user)
         trigger_expired_notification
       end
     end

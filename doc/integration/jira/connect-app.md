@@ -64,8 +64,8 @@ You can now [configure the GitLab for Jira Cloud app](#configure-the-gitlab-for-
 
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 For an overview, see
-[Installing the GitLab for Jira Cloud app from the Atlassian Marketplace for GitLab.com](https://youtu.be/52rB586_rs8?list=PL05JrBw4t0Koazgli_PmMQCER2pVH7vUT).
-<!-- Video published on 2024-10-30 -->
+[Configure the GitLab for Jira Cloud app from the Atlassian Marketplace](https://youtu.be/SwR-g1s1zTo).
+<!-- Video published on 2020-02-01 -->
 
 ## Configure the GitLab for Jira Cloud app
 
@@ -117,9 +117,6 @@ After you link to a GitLab group:
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/460663) in GitLab 17.2 [with a flag](../../administration/feature_flags.md) named `enable_jira_connect_configuration`. Disabled by default.
 > - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/467117) in GitLab 17.4. Feature flag `enable_jira_connect_configuration` removed.
 
-NOTE:
-This feature was added as a community contribution and is developed and maintained by the GitLab community only.
-
 Prerequisites:
 
 - The GitLab for Jira Cloud app must be [installed](#install-the-gitlab-for-jira-cloud-app).
@@ -156,11 +153,6 @@ For more information about deployment tracking in Jira, see [Set up deployment t
 DETAILS:
 **Tier:** Premium, Ultimate
 **Offering:** GitLab.com
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/473774) in GitLab 17.6.
-
-NOTE:
-This feature was added as a community contribution and is developed and maintained by the GitLab community only.
 
 You can set up deployment gating to bring change requests from GitLab to Jira Service Management for approval.
 With deployment gating, any GitLab deployments to your selected environments are automatically sent
@@ -275,14 +267,6 @@ The event includes a [token](#gitlab-access-to-jira) to verify subsequent lifecy
 Lifecycle event requests from Jira are [verified](https://developer.atlassian.com/cloud/jira/platform/security-for-connect-apps/#validating-installation-lifecycle-requests).
 
 For self-managed instances that use the GitLab for Jira Cloud app from the Atlassian Marketplace, GitLab.com handles lifecycle events and forwards them to the self-managed instance. For more information, see [GitLab.com handling of app lifecycle events](../../administration/settings/jira_cloud_app.md#gitlabcom-handling-of-app-lifecycle-events).
-
-### Data stored by Jira
-
-[Data sent to Jira](#data-sent-from-gitlab-to-jira) is stored by Jira
-and displayed in the [Jira development panel](development_panel.md).
-
-When the GitLab for Jira Cloud app is uninstalled, Jira permanently deletes this data.
-This process happens asynchronously and might take up to several hours.
 
 ### Privacy and security details in the Atlassian Marketplace
 

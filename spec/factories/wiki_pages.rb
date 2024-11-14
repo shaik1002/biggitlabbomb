@@ -41,10 +41,10 @@ FactoryBot.define do
 
     trait :for_wiki_page do
       transient do
-        wiki_page { association(:wiki_page, container: container) }
+        wiki_page { association(:wiki_page, container: project) }
       end
 
-      container { @overrides[:wiki_page]&.container || association(:project) }
+      project { @overrides[:wiki_page]&.container || association(:project) }
       title { wiki_page.title }
 
       initialize_with do

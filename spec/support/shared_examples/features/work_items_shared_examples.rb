@@ -422,8 +422,6 @@ RSpec.shared_examples 'work items notifications' do
 
         click_button(class: 'gl-toggle')
 
-        wait_for_requests
-
         expect(page).to have_button(class: 'gl-toggle is-checked')
       end
     end
@@ -434,9 +432,9 @@ end
 
 RSpec.shared_examples 'work items todos' do
   it 'adds item to the list' do
-    expect(page).to have_button s_('WorkItem|Add a to-do item')
+    expect(page).to have_button s_('WorkItem|Add a to do')
 
-    click_button s_('WorkItem|Add a to-do item')
+    click_button s_('WorkItem|Add a to do')
 
     expect(page).to have_button s_('WorkItem|Mark as done')
 
@@ -446,10 +444,10 @@ RSpec.shared_examples 'work items todos' do
   end
 
   it 'marks a todo as done' do
-    click_button s_('WorkItem|Add a to-do item')
+    click_button s_('WorkItem|Add a to do')
     click_button s_('WorkItem|Mark as done')
 
-    expect(page).to have_button s_('WorkItem|Add a to-do item')
+    expect(page).to have_button s_('WorkItem|Add a to do')
     within_testid('todos-shortcut-button') do
       expect(page).to have_content("")
     end
@@ -481,7 +479,7 @@ RSpec.shared_examples 'work items award emoji' do
     within(award_section_selector) do
       expect(page).to have_selector(selected_award_button_selector)
 
-      # As the user2 has already awarded the `:thumbsup:` emoji, the emoji count will be 2
+      # As the user2 has already awarded the `:thumbs_up:` emoji, the emoji count will be 2
       expect(first(award_button_selector)).to have_content '2'
     end
     expect(page.find(tooltip_selector)).to have_content("John and you reacted with :#{AwardEmoji::THUMBS_UP}:")
@@ -491,7 +489,7 @@ RSpec.shared_examples 'work items award emoji' do
     select_emoji
 
     page.within(award_section_selector) do
-      # As the user2 has already awarded the `:thumbsup:` emoji, the emoji count will be 2
+      # As the user2 has already awarded the `:thumbs_up:` emoji, the emoji count will be 2
       expect(first(award_button_selector)).to have_content '2'
     end
 

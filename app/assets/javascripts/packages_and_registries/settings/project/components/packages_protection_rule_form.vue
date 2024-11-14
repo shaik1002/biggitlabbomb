@@ -11,7 +11,6 @@ import {
 import HelpPageLink from '~/vue_shared/components/help_page_link/help_page_link.vue';
 import createPackagesProtectionRuleMutation from '~/packages_and_registries/settings/project/graphql/mutations/create_packages_protection_rule.mutation.graphql';
 import { s__, __ } from '~/locale';
-import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
 const PACKAGES_PROTECTION_RULES_SAVED_SUCCESS_MESSAGE = s__('PackageRegistry|Rule saved.');
 const PACKAGES_PROTECTION_RULES_SAVED_ERROR_MESSAGE = s__(
@@ -33,13 +32,12 @@ export default {
     GlSprintf,
     HelpPageLink,
   },
-  mixins: [glFeatureFlagsMixin()],
   inject: ['projectPath'],
   i18n: {
     PACKAGES_PROTECTION_RULES_SAVED_SUCCESS_MESSAGE,
     PACKAGES_PROTECTION_RULES_SAVED_ERROR_MESSAGE,
     packageNamePatternInputHelpText: s__(
-      'PackageRegistry|%{linkStart}Wildcards%{linkEnd} such as `my-package-*` are supported.',
+      'PackageRegistry|%{linkStart}Wildcards%{linkEnd} such as `@my-scope/my-package-*` are supported.',
     ),
   },
   data() {
@@ -75,17 +73,7 @@ export default {
       };
     },
     packageTypeOptions() {
-      const packageTypeOptions = [{ value: 'NPM', text: s__('PackageRegistry|Npm') }];
-
-      if (this.glFeatures.packagesProtectedPackagesPypi) {
-        packageTypeOptions.push({ value: 'PYPI', text: s__('PackageRegistry|PyPI') });
-      }
-
-      if (this.glFeatures.packagesProtectedPackagesConan) {
-        packageTypeOptions.push({ value: 'CONAN', text: s__('PackageRegistry|Conan') });
-      }
-
-      return packageTypeOptions.sort((a, b) => a.text.localeCompare(b.text));
+      return [{ value: 'NPM', text: s__('PackageRegistry|Npm') }];
     },
     minimumAccessLevelForPushOptions() {
       return [

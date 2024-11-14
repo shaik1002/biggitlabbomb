@@ -42,7 +42,6 @@ export default {
   data() {
     return {
       isEditing: false,
-      updatedNote: this.note,
     };
   },
   computed: {
@@ -67,10 +66,6 @@ export default {
       this.isEditing = true;
     },
     cancelEditing() {
-      this.isEditing = false;
-    },
-    updateNote(note) {
-      this.updatedNote = note;
       this.isEditing = false;
     },
   },
@@ -98,9 +93,8 @@ export default {
       <abuse-report-edit-note
         v-if="isEditing"
         :abuse-report-id="abuseReportId"
-        :note="updatedNote"
+        :note="note"
         @cancelEditing="cancelEditing"
-        @updateNote="updateNote"
       />
       <div v-else data-testid="note-wrapper">
         <div class="note-header">
@@ -123,7 +117,7 @@ export default {
         </div>
 
         <div class="timeline-discussion-body">
-          <note-body ref="noteBody" :note="updatedNote" />
+          <note-body ref="noteBody" :note="note" />
         </div>
 
         <edited-at

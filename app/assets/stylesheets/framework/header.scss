@@ -95,7 +95,7 @@
 
   &:focus,
   &:active {
-    @apply gl-focus;
+    @include gl-focus;
   }
 
   &:active {
@@ -150,7 +150,7 @@
 
     &:focus,
     &:active {
-      @apply gl-focus;
+      @include gl-focus;
     }
 
     &:active {

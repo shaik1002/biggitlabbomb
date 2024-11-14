@@ -536,41 +536,6 @@ RSpec.describe SearchHelper, feature_category: :global_search do
     end
   end
 
-  describe 'groups_autocomplete' do
-    let_it_be(:user) { create(:user) }
-    let_it_be(:group_1) { create(:group, name: 'test 1') }
-    let_it_be(:group_2) { create(:group, name: 'test 2') }
-    let(:search_term) { 'test' }
-
-    before do
-      allow(self).to receive(:current_user).and_return(user)
-    end
-
-    context 'when the user does not have access to groups' do
-      it 'does not return any results' do
-        expect(groups_autocomplete(search_term)).to eq([])
-      end
-    end
-
-    context 'when the user has access to one group' do
-      before do
-        group_2.add_developer(user)
-      end
-
-      it 'returns the group' do
-        expect(groups_autocomplete(search_term).pluck(:id)).to eq([group_2.id])
-      end
-
-      context 'when the search term is Gitlab::Search::Params::MIN_TERM_LENGTH characters long' do
-        let(:search_term) { 'te' }
-
-        it 'returns the group' do
-          expect(groups_autocomplete(search_term).pluck(:id)).to eq([group_2.id])
-        end
-      end
-    end
-  end
-
   describe 'projects_autocomplete' do
     let_it_be(:user) { create(:user) }
     let_it_be(:project_1) { create(:project, name: 'test 1') }
@@ -1269,36 +1234,6 @@ RSpec.describe SearchHelper, feature_category: :global_search do
 
     it 'returns false for any scope and search type' do
       expect(should_show_zoekt_results?(:some_scope, :some_type)).to be false
-    end
-  end
-
-  describe '#formatted_count' do
-    context 'when @timeout is set' do
-      it 'returns "0"' do
-        @timeout = true
-        @scope = 'projects'
-
-        expect(formatted_count(@scope)).to eq("0")
-      end
-    end
-
-    context 'when @search_results is defined' do
-      it 'delegates formatted_count to @search_results' do
-        @scope = 'projects'
-        @search_results = double
-
-        allow(@search_results).to receive(:formatted_count).with(@scope)
-        expect(@search_results).to receive(:formatted_count).with(@scope)
-
-        formatted_count(@scope)
-      end
-    end
-
-    context 'when @search_results is not defined' do
-      it 'returns "0"' do
-        @scope = 'projects'
-        expect(formatted_count(@scope)).to eq("0")
-      end
     end
   end
 end

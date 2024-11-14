@@ -52,13 +52,13 @@ If you're installing:
 - From an instance:
 
   ```shell
-  //your_domain_name/api/v4/packages/npm/:_authToken="${NPM_TOKEN}"
+  //your_domain_name/api/v4/projects/your_project_id/packages/npm/:_authToken="${NPM_TOKEN}"
   ```
 
 - From a group:
 
   ```shell
-  //your_domain_name/api/v4/groups/your_group_id/-/packages/npm/:_authToken="${NPM_TOKEN}"
+  //your_domain_name/api/v4/projects/your_project_id/packages/npm/:_authToken="${NPM_TOKEN}"
   ```
 
 - From a project:
@@ -305,8 +305,7 @@ such as `80` for a URL starting with `http` or `443` for a URL starting with `ht
 In the GitLab project containing your `package.json`, edit or create a `.gitlab-ci.yml` file. For example:
 
 ```yaml
-default:
-  image: node:latest
+image: node:latest
 
 stages:
   - deploy
@@ -530,28 +529,6 @@ The GitLab npm repository supports the following commands for the npm CLI (`npm`
 - `npm deprecate`: Deprecate a version of a package.
 
 ## Troubleshooting
-
-### npm logs don't display correctly
-
-You might encounter an error that says:
-
-```shell
-npm ERR! A complete log of this run can be found in: .npm/_logs/<date>-debug-0
-```
-
-If the log doesn't appear in the `.npm/_logs/` directory, you can copy the
-log to your root directory and view it there:
-
-```yaml
-script:
-    - npm install --loglevel verbose
-    - cp -r /root/.npm/_logs/ .
-  artifacts:
-      paths:
-        - './_logs
-```
-
-The npm log is copied to `/root/.npm/_logs/` as an artifact.
 
 ### `404 Not Found` errors are happening on `npm install` or `yarn`
 

@@ -44,6 +44,7 @@ class Project < ApplicationRecord
   include IssueParent
   include WorkItems::Parent
   include UpdatedAtFilterable
+  include IgnorableColumns
   include CrossDatabaseIgnoredTables
   include UseSqlFunctionForPrimaryKeyLookups
   include Importable
@@ -199,7 +200,6 @@ class Project < ApplicationRecord
   has_one :catalog_resource, class_name: 'Ci::Catalog::Resource', inverse_of: :project
   has_many :ci_components, class_name: 'Ci::Catalog::Resources::Component', inverse_of: :project
   # These are usages of the ci_components owned (not used) by the project
-  has_many :ci_component_last_usages, class_name: 'Ci::Catalog::Resources::Components::LastUsage', inverse_of: :component_project
   has_many :ci_component_usages, class_name: 'Ci::Catalog::Resources::Components::Usage', inverse_of: :project
   has_many :catalog_resource_versions, class_name: 'Ci::Catalog::Resources::Version', inverse_of: :project
   has_many :catalog_resource_sync_events, class_name: 'Ci::Catalog::Resources::SyncEvent', inverse_of: :project
@@ -617,7 +617,7 @@ class Project < ApplicationRecord
 
   validates :project_feature, presence: true
   validates :namespace, presence: true
-  validates :organization, presence: true
+  validates :organization, presence: true, if: :require_organization?
   validates :project_namespace, presence: true, on: :create, if: -> { self.namespace }
   validates :project_namespace, presence: true, on: :update, if: -> { self.project_namespace_id_changed?(to: nil) }
   validates :name, uniqueness: { scope: :namespace_id }
@@ -631,7 +631,7 @@ class Project < ApplicationRecord
   validate :visibility_level_allowed_as_fork, if: :should_validate_visibility_level?
   validate :validate_pages_https_only, if: -> { changes.has_key?(:pages_https_only) }
   validate :changing_shared_runners_enabled_is_allowed
-  validate :parent_organization_match
+  validate :parent_organization_match, if: :require_organization?
   validates :repository_storage, presence: true, inclusion: { in: ->(_) { Gitlab.config.repositories.storages.keys } }
   validates :variables, nested_attributes_duplicates: { scope: :environment_scope }
   validates :bfg_object_map, file_size: { maximum: :max_attachment_size }
@@ -2573,7 +2573,7 @@ class Project < ApplicationRecord
       break unless pages_enabled?
 
       variables.append(key: 'CI_PAGES_DOMAIN', value: Gitlab.config.pages.host)
-      variables.append(key: 'CI_PAGES_URL', value: pages_url)
+      variables.append(key: 'CI_PAGES_URL', value: Gitlab::Pages::UrlBuilder.new(self).pages_url(with_unique_domain: true))
     end
   end
 
@@ -2975,9 +2975,13 @@ class Project < ApplicationRecord
   end
 
   def group_protected_branches
-    return root_namespace.protected_branches if root_namespace.is_a?(Group)
+    return root_namespace.protected_branches if allow_protected_branches_for_group? && root_namespace.is_a?(Group)
 
     ProtectedBranch.none
+  end
+
+  def allow_protected_branches_for_group?
+    Feature.enabled?(:group_protected_branches, group) || Feature.enabled?(:allow_protected_branches_for_group, group)
   end
 
   def deploy_token_create_url(opts = {})
@@ -3295,10 +3299,6 @@ class Project < ApplicationRecord
     group&.glql_integration_feature_flag_enabled? || Feature.enabled?(:glql_integration, self)
   end
 
-  def wiki_comments_feature_flag_enabled?
-    group&.wiki_comments_feature_flag_enabled? || Feature.enabled?(:wiki_comments, self, type: :wip)
-  end
-
   def enqueue_record_project_target_platforms
     return unless Gitlab.com?
 
@@ -3413,19 +3413,6 @@ class Project < ApplicationRecord
 
   def refresh_lfs_file_locks_changed_epoch
     refresh_epoch_cache(lfs_file_locks_changed_epoch_cache_key)
-  end
-
-  def placeholder_reference_store
-    return unless import_state
-
-    ::Import::PlaceholderReferences::Store.new(
-      import_source: import_type,
-      import_uid: import_state.id
-    )
-  end
-
-  def pages_url
-    Gitlab::Pages::UrlBuilder.new(self).pages_url
   end
 
   private

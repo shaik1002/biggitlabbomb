@@ -31,7 +31,7 @@ If an application is successfully deployed to an
 
 NOTE:
 When the pipeline fails in a merge request but it can still merge,
-GitLab shows **Merge** in red.
+GitLab shows the **Merge** button in red.
 
 ## Post-merge pipeline status
 

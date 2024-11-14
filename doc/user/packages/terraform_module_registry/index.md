@@ -194,18 +194,7 @@ Prerequisites:
 
 ### From a namespace
 
-You can provide authentication tokens (job tokens, personal access tokens, or deploy tokens) for `terraform` in environment variables.
-
-You should add the prefix `TF_TOKEN_` to the domain name of environment variables, with periods encoded as underscores.
-See the [Terraform CLI configuration documentation](https://developer.hashicorp.com/terraform/cli/config/config-file#environment-variable-credentials).
-
-For example, the value of a variable named `TF_TOKEN_gitlab_com` is used as a deploy token when the CLI makes service requests to the hostname `gitlab.com`:
-
-```shell
-export TF_TOKEN_gitlab_com='glpat-<deploy_token>'
-```
-
-This method is preferred for enterprise implementations. For local or temporary environments, you might want to create a `~/.terraformrc` or `%APPDATA%/terraform.rc` file:
+You can provide authentication tokens (job tokens, personal access tokens, or deploy tokens) for `terraform` in your `~/.terraformrc` or `%APPDATA%/terraform.rc` file:
 
 ```terraform
 credentials "gitlab.com" {
@@ -270,7 +259,7 @@ For projects in subgroups, GitLab checks that the module name does not already e
 
 For example, if:
 
-- The project is `gitlab.example.com/parent-group/subgroup/my-project`.
+- The project is `gitlab.example.com/parent-group/sub-group/my-project`.
 - The Terraform module is `my-infra-package`.
 
 The module name must be unique in all projects in all groups under `parent-group`.

@@ -20,7 +20,6 @@ DETAILS:
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/10401) in GitLab 16.2 as an [experiment](../../../policy/experiment-beta-support.md#experiment).
 > - [Changed](https://gitlab.com/gitlab-org/gitlab/-/issues/429882) to beta in GitLab 16.10.
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 When you create or edit a merge request, use GitLab Duo Merge Request Summary
 to create a merge request description.
@@ -48,16 +47,6 @@ DETAILS:
 FLAG:
 The availability of this feature is controlled by a feature flag.
 For more information, see the history.
-
-WARNING:
-This feature is considered [experimental](../../../policy/experiment-beta-support.md) and is not intended for customer usage outside of initial design partners. We expect major changes to this feature.
-
-DISCLAIMER:
-This page contains information related to upcoming products, features, and functionality.
-It is important to note that the information presented is for informational purposes only.
-Please do not rely on this information for purchasing or planning purposes.
-The development, release, and timing of any products, features, or functionality may be subject to change or delay and remain at the
-sole discretion of GitLab Inc.
 
 When your merge request is ready to be reviewed, use GitLab Duo Code Review to perform an initial review.
 

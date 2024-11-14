@@ -10,12 +10,10 @@ import {
   GlTooltip,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import { escapeRegExp } from 'lodash';
 import { __, s__, sprintf } from '~/locale';
 import { isScopedLabel } from '~/lib/utils/common_utils';
-import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import RichTimestampTooltip from '~/vue_shared/components/rich_timestamp_tooltip.vue';
 import WorkItemLinkChildMetadata from 'ee_else_ce/work_items/components/shared/work_item_link_child_metadata.vue';
-import RichTimestampTooltip from '../rich_timestamp_tooltip.vue';
 import WorkItemTypeIcon from '../work_item_type_icon.vue';
 import WorkItemStateBadge from '../work_item_state_badge.vue';
 import { findLinkedItemsWidget, getDisplayReference } from '../../utils';
@@ -24,7 +22,6 @@ import {
   WIDGET_TYPE_ASSIGNEES,
   WIDGET_TYPE_LABELS,
   LINKED_CATEGORIES_MAP,
-  INJECTION_LINK_CHILD_PREVENT_ROUTER_NAVIGATION,
 } from '../../constants';
 import WorkItemRelationshipIcons from './work_item_relationship_icons.vue';
 
@@ -52,14 +49,6 @@ export default {
   },
   directives: {
     GlTooltip: GlTooltipDirective,
-  },
-  mixins: [glFeatureFlagMixin()],
-  inject: {
-    preventRouterNav: {
-      from: INJECTION_LINK_CHILD_PREVENT_ROUTER_NAVIGATION,
-      default: false,
-    },
-    isGroup: {},
   },
   props: {
     childItem: {
@@ -134,7 +123,7 @@ export default {
       return this.isChildItemOpen ? this.$options.i18n.created : this.$options.i18n.closed;
     },
     childItemTypeColorClass() {
-      return this.isChildItemOpen ? 'gl-text-subtle' : 'gl-text-disabled';
+      return this.isChildItemOpen ? 'gl-text-secondary' : 'gl-text-gray-300';
     },
     displayLabels() {
       return this.showLabels && this.labels.length;
@@ -148,39 +137,10 @@ export default {
         return item.linkType !== LINKED_CATEGORIES_MAP.RELATES_TO;
       });
     },
-    issueAsWorkItem() {
-      return (
-        !this.isGroup &&
-        this.glFeatures.workItemsViewPreference &&
-        gon.current_user_use_work_items_view
-      );
-    },
   },
   methods: {
     showScopedLabel(label) {
       return isScopedLabel(label) && this.allowsScopedLabels;
-    },
-    handleTitleClick(e) {
-      const workItem = this.childItem;
-      if (e.metaKey || e.ctrlKey) {
-        return;
-      }
-      const escapedFullPath = escapeRegExp(this.workItemFullPath);
-      // eslint-disable-next-line no-useless-escape
-      const regex = new RegExp(`groups\/${escapedFullPath}\/-\/(work_items|epics)\/\\d+`);
-      const isWorkItemPath = regex.test(workItem.webUrl);
-
-      if (!(isWorkItemPath || this.issueAsWorkItem) || this.preventRouterNav) {
-        this.$emit('click', e);
-      } else {
-        e.preventDefault();
-        this.$router.push({
-          name: 'workItem',
-          params: {
-            iid: workItem.iid,
-          },
-        });
-      }
     },
   },
 };
@@ -198,8 +158,8 @@ export default {
       </gl-tooltip>
     </div>
     <div class="gl-flex gl-min-w-0 gl-grow gl-flex-col gl-flex-wrap">
-      <div class="gl-mb-2 gl-min-w-0 gl-justify-between gl-gap-3 sm:gl-flex">
-        <div class="item-title gl-mb-2 gl-min-w-0 sm:gl-mb-0">
+      <div class="gl-mb-2 gl-flex gl-min-w-0 gl-justify-between gl-gap-3">
+        <div class="item-title gl-min-w-0">
           <span v-if="childItem.confidential">
             <gl-icon
               v-gl-tooltip.top
@@ -211,19 +171,17 @@ export default {
             />
           </span>
           <gl-link
-            :href="childItemWebUrl"
-            :class="{ '!gl-text-subtle': !isChildItemOpen }"
+            :href="childItem.webUrl"
+            :class="{ '!gl-text-secondary': !isChildItemOpen }"
             class="gl-hyphens-auto gl-break-words gl-font-semibold"
-            @click.exact="handleTitleClick"
+            @click.exact="$emit('click', $event)"
             @mouseover="$emit('mouseover')"
             @mouseout="$emit('mouseout')"
           >
             {{ childItem.title }}
           </gl-link>
         </div>
-        <div
-          class="gl-flex gl-shrink-0 gl-flex-row-reverse gl-items-center gl-justify-end gl-gap-3"
-        >
+        <div class="gl-flex gl-shrink-0 gl-items-center gl-justify-end gl-gap-3">
           <gl-avatars-inline
             v-if="assignees.length"
             :avatars="assignees"
@@ -286,7 +244,7 @@ export default {
     <div v-if="canUpdate">
       <gl-button
         v-gl-tooltip
-        class="-gl-mr-2 -gl-mt-1"
+        class="-gl-mr-1 -gl-mt-1"
         category="tertiary"
         size="small"
         icon="close"

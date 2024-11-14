@@ -105,10 +105,6 @@ DETAILS:
 **Tier:** Premium, Ultimate
 **Offering:** Self-managed
 
-NOTE:
-The repository size limit includes repository files and LFS, but does not include artifacts, uploads,
-wiki, packages, containers, or snippets. The repository size limit applies to both private and public projects.
-
 Repositories in your GitLab instance can grow quickly, especially if you are
 using LFS. Their size can grow exponentially, rapidly consuming available storage.
 To prevent this from happening, you can set a hard limit for your repositories' size.
@@ -154,7 +150,11 @@ The first push of a new project, including LFS objects, is checked for size.
 If the sum of their sizes exceeds the maximum allowed repository size, the push
 is rejected.
 
-For details on manually purging files, see [reducing the repository size using Git](../../user/project/repository/repository_size.md#methods-to-reduce-repository-size).
+NOTE:
+The repository size limit includes repository files and LFS, but does not include artifacts, uploads,
+wiki, packages, or snippets. The repository size limit applies to both private and public projects.
+
+For details on manually purging files, see [reducing the repository size using Git](../../user/project/repository/repository_size.md#reduce-repository-size).
 
 ## Session duration
 
@@ -248,7 +248,6 @@ DETAILS:
 **Offering:** Self-managed
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/163726) in GitLab 17.5 [with a feature flag](../feature_flags.md) named `allow_top_level_group_owners_to_create_service_accounts` for GitLab self-managed. Disabled by default.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/125835) in GitLab 17.6. Feature flag `allow_top_level_group_owners_to_create_service_accounts` removed.
 
 FLAG:
 On GitLab self-managed, by default this feature is not available. To make it available, an administrator can [enable the feature flag](../feature_flags.md) named `allow_top_level_group_owners_to_create_service_accounts`. On GitLab.com, this feature is available.
@@ -271,12 +270,6 @@ Users can optionally specify a lifetime for
 [SSH keys](../../user/ssh.md).
 This lifetime is not a requirement, and can be set to any arbitrary number of days.
 
-> - Maximum allowable lifetime limit [extended to 400 days](https://gitlab.com/gitlab-org/gitlab/-/issues/461901) in GitLab 17.6 [with a flag](../feature_flags.md) named `buffered_token_expiration_limit`. Disabled by default.
-
-FLAG:
-The availability of the extended maximum allowable lifetime limit is controlled by a feature flag.
-For more information, see the history.
-
 SSH keys are user credentials to access GitLab.
 However, organizations with security requirements may want to enforce more protection by
 requiring the regular rotation of these keys.
@@ -296,9 +289,8 @@ To set a lifetime on how long SSH keys are valid:
 
 Once a lifetime for SSH keys is set, GitLab:
 
-- Requires users to set an expiration date that is no later than the allowed lifetime on new SSH keys. The maximum allowed lifetime is:
-  - 365 days by default.
-  - 400 days, if you enable the `buffered_token_expiration_limit` feature flag.
+- Requires users to set an expiration date that is no later than the allowed lifetime on new
+  SSH keys.
 - Applies the lifetime restriction to existing SSH keys. Keys with no expiry or a lifetime
   greater than the maximum immediately become invalid.
 
@@ -311,24 +303,10 @@ DETAILS:
 **Tier:** Ultimate
 **Offering:** Self-managed
 
-> - Maximum allowable lifetime limit [extended to 400 days](https://gitlab.com/gitlab-org/gitlab/-/issues/461901) in GitLab 17.6 [with a flag](../feature_flags.md) named `buffered_token_expiration_limit`. Disabled by default.
-
-FLAG:
-The availability of the extended maximum allowable lifetime limit is controlled by a feature flag.
-For more information, see the history.
-
 Users can optionally specify a maximum lifetime in days for
 access tokens, this includes [personal](../../user/profile/personal_access_tokens.md),
 [group](../../user/group/settings/group_access_tokens.md), and [project](../../user/project/settings/project_access_tokens.md) access tokens.
-This lifetime is not a requirement, and can be set to any value greater than 0 and less than or equal to:
-
-- 365 days by default.
-- 400 days, if you enable the `buffered_token_expiration_limit` feature flag.
-
-If this setting is left blank, the default allowable lifetime of access tokens is:
-
-- 365 days by default.
-- 400 days, if you enable the `buffered_token_expiration_limit` feature flag.
+This lifetime is not a requirement, and can be set to any value greater than 0 and less than or equal to 365. If this setting is left blank, the default allowable lifetime of access tokens is 365 days.
 
 Access tokens are the only tokens needed for programmatic access to GitLab.
 However, organizations with security requirements may want to enforce more protection by
@@ -531,4 +509,4 @@ Your push has been rejected, because this repository has exceeded its size limit
 To resolve this problem, either of these options helps in the short- to middle-term:
 
 - Increase the [repository size limit](#repository-size-limit).
-- [Reduce the repository size](../../user/project/repository/repository_size.md#methods-to-reduce-repository-size).
+- [Reduce the repository size](../../user/project/repository/repository_size.md#reduce-repository-size).

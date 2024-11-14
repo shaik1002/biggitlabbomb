@@ -4,13 +4,10 @@ import { GlButton, GlAlert } from '@gitlab/ui';
 import { mapState, mapActions, mapGetters } from 'vuex';
 import { s__, sprintf } from '~/locale';
 import { convertFiltersData } from '../../utils';
-import {
-  LANGUAGE_DEFAULT_ITEM_LENGTH,
-  LANGUAGE_MAX_ITEM_LENGTH,
-  LANGUAGE_FILTER_PARAM,
-} from '../../constants';
 import CheckboxFilter from './checkbox_filter.vue';
 import { trackShowMore, trackShowHasOverMax, TRACKING_ACTION_SELECT } from './tracking';
+
+import { DEFAULT_ITEM_LENGTH, MAX_ITEM_LENGTH, languageFilterData } from './data';
 
 export default {
   name: 'LanguageFilter',
@@ -26,11 +23,8 @@ export default {
   },
   i18n: {
     showMore: s__('GlobalSearch|Show more'),
-    showingMax: sprintf(s__('GlobalSearch|Showing top %{maxItems}'), {
-      maxItems: LANGUAGE_MAX_ITEM_LENGTH,
-    }),
+    showingMax: sprintf(s__('GlobalSearch|Showing top %{maxItems}'), { maxItems: MAX_ITEM_LENGTH }),
     loadError: s__('GlobalSearch|Aggregations load error.'),
-    headerLabel: s__('GlobalSearch|Language'),
   },
   computed: {
     ...mapState(['aggregations']),
@@ -46,15 +40,15 @@ export default {
         return this.languageAggregationBuckets;
       }
       if (this.showAll) {
-        return this.trimBuckets(LANGUAGE_MAX_ITEM_LENGTH);
+        return this.trimBuckets(MAX_ITEM_LENGTH);
       }
-      return this.trimBuckets(LANGUAGE_DEFAULT_ITEM_LENGTH);
+      return this.trimBuckets(DEFAULT_ITEM_LENGTH);
     },
     hasShowMore() {
-      return this.languageAggregationBuckets.length > LANGUAGE_DEFAULT_ITEM_LENGTH;
+      return this.languageAggregationBuckets.length > DEFAULT_ITEM_LENGTH;
     },
     hasOverMax() {
-      return this.languageAggregationBuckets.length > LANGUAGE_MAX_ITEM_LENGTH;
+      return this.languageAggregationBuckets.length > MAX_ITEM_LENGTH;
     },
   },
   async created() {
@@ -74,15 +68,15 @@ export default {
       return this.languageAggregationBuckets.slice(0, length);
     },
   },
-  LANGUAGE_FILTER_PARAM,
   TRACKING_ACTION_SELECT,
+  languageFilterData,
 };
 </script>
 
 <template>
   <div v-if="hasBuckets" class="language-filter-checkbox">
     <div class="gl-mb-2 gl-text-sm gl-font-bold">
-      {{ $options.i18n.headerLabel }}
+      {{ $options.languageFilterData.header }}
     </div>
     <div
       v-if="!aggregations.error"
@@ -92,7 +86,6 @@ export default {
       <checkbox-filter
         :filters-data="filtersData"
         :tracking-namespace="$options.TRACKING_ACTION_SELECT"
-        :query-param="$options.LANGUAGE_FILTER_PARAM"
       />
       <span v-if="showAll && hasOverMax" data-testid="has-over-max-text">{{
         $options.i18n.showingMax

@@ -62,9 +62,34 @@ FactoryBot.define do
       end
     end
 
-    # TODO: Remove with the rollout of the FF nuget_extract_nuget_package_model
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/499602
-    factory :nuget_package_legacy do
+    # TODO: Remove with the rollout of the FF terraform_extract_terraform_package_model
+    # https://gitlab.com/gitlab-org/gitlab/-/issues/490007
+    factory :terraform_module_package_legacy do
+      sequence(:name) { |n| "module-#{n}/system" }
+      version { '1.0.0' }
+      package_type { :terraform_module }
+
+      transient do
+        without_package_files { false }
+      end
+
+      after :create do |package, evaluator|
+        unless evaluator.without_package_files
+          create :package_file, :terraform_module, package: package
+        end
+      end
+
+      trait :with_build do
+        after :create do |package|
+          user = package.project.creator
+          pipeline = create(:ci_pipeline, user: user)
+          create(:ci_build, user: user, pipeline: pipeline)
+          create :package_build_info, package: package, pipeline: pipeline
+        end
+      end
+    end
+
+    factory :nuget_package do
       sequence(:name) { |n| "NugetPackage#{n}" }
       sequence(:version) { |n| "1.0.#{n}" }
       package_type { :nuget }

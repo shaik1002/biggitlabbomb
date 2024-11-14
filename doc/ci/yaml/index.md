@@ -639,18 +639,18 @@ A configuration with different pipeline names depending on the pipeline conditio
 
 ```yaml
 variables:
-  PROJECT1_PIPELINE_NAME: 'Default pipeline name'  # A default is not required
+  PROJECT1_PIPELINE_NAME: 'Default pipeline name'  # A default is not required.
 
 workflow:
   name: '$PROJECT1_PIPELINE_NAME'
   rules:
-    - if: '$CI_MERGE_REQUEST_LABELS =~ /pipeline:run-in-ruby3/'
-      variables:
-        PROJECT1_PIPELINE_NAME: 'Ruby 3 pipeline'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       variables:
         PROJECT1_PIPELINE_NAME: 'MR pipeline: $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME'
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH  # For default branch pipelines, use the default name
+    - if: '$CI_MERGE_REQUEST_LABELS =~ /pipeline:run-in-ruby3/'
+      variables:
+        PROJECT1_PIPELINE_NAME: 'Ruby 3 pipeline'
+    - when: always  # Other pipelines can run, but use the default name
 ```
 
 **Additional details**:
@@ -731,19 +731,19 @@ variables:
 
 workflow:
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
       variables:
         DEPLOY_VARIABLE: "deploy-production"  # Override globally-defined DEPLOY_VARIABLE
-    - if: $CI_COMMIT_BRANCH =~ /feature/
+    - if: $CI_COMMIT_REF_NAME =~ /feature/
       variables:
         IS_A_FEATURE: "true"                  # Define a new variable.
-    - if: $CI_COMMIT_BRANCH                   # Run the pipeline in other cases
+    - when: always                            # Run the pipeline in other cases
 
 job1:
   variables:
     DEPLOY_VARIABLE: "job1-default-deploy"
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
       variables:                                   # Override DEPLOY_VARIABLE defined
         DEPLOY_VARIABLE: "job1-deploy-production"  # at the job level.
     - when: on_success                             # Run the job in other cases
@@ -1128,7 +1128,7 @@ If a job times out, the `after_script` commands do not execute.
 - You can [ignore non-zero exit codes](script.md#ignore-non-zero-exit-codes).
 - [Use color codes with `after_script`](script.md#add-color-codes-to-script-output)
   to make job logs easier to review.
-- [Create custom collapsible sections](../jobs/job_logs.md#custom-collapsible-sections)
+- [Create custom collapsible sections](script.md#custom-collapsible-sections)
   to simplify job log output.
 
 ### `allow_failure`
@@ -1488,8 +1488,7 @@ job:
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/145206) in GitLab 16.11.
 
-Use `artifacts:access` to determine who can access the job artifacts from the GitLab UI
-or API. This option does not prevent you from forwarding artifacts to downstream pipelines.
+Use `artifacts:access` to determine who can access the job artifacts.
 
 You cannot use [`artifacts:public`](#artifactspublic) and `artifacts:access` in the same job.
 
@@ -1644,7 +1643,7 @@ job:
 - You can [ignore non-zero exit codes](script.md#ignore-non-zero-exit-codes).
 - [Use color codes with `before_script`](script.md#add-color-codes-to-script-output)
   to make job logs easier to review.
-- [Create custom collapsible sections](../jobs/job_logs.md#custom-collapsible-sections)
+- [Create custom collapsible sections](script.md#custom-collapsible-sections)
   to simplify job log output.
 
 ### `cache`
@@ -2346,10 +2345,8 @@ Every time the review app is deployed, that lifetime is also reset to `1 day`.
 
 #### `environment:kubernetes`
 
-> - `agent` keyword [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/467912) in GitLab 17.6.
-
-Use the `kubernetes` keyword to configure the [dashboard for Kubernetes](../environments/kubernetes_dashboard.md)
-for an environment.
+Use the `kubernetes` keyword to configure deployments to a
+[Kubernetes cluster](../../user/infrastructure/clusters/index.md) that is associated with your project.
 
 **Keyword type**: Job keyword. You can use it only as part of a job.
 
@@ -2362,19 +2359,21 @@ deploy:
   environment:
     name: production
     kubernetes:
-      agent: path/to/agent/project:agent-name
+      namespace: production
 ```
 
 This configuration sets up the `deploy` job to deploy to the `production`
-environment, and associates the [agent](../../user/clusters/agent/index.md)
-named `agent-name` with the environment.
+environment, using the `production`
+[Kubernetes namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/).
 
 **Additional details**:
 
-- To use the dashboard, you must
-  [install the GitLab agent for Kubernetes](../../user/clusters/agent/install/index.md) and
-  [configure `user_access`](../../user/clusters/agent/user_access.md)
-  for the environment's project or its parent group.
+- Kubernetes configuration is not supported for Kubernetes clusters
+  [managed by GitLab](../../user/project/clusters/gitlab_managed_clusters.md).
+
+**Related topics**:
+
+- [Available settings for `kubernetes`](../environments/configure_kubernetes_deployments.md).
 
 #### `environment:deployment_tier`
 
@@ -4047,7 +4046,6 @@ test:
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/430037) in GitLab 16.10 [with a flag](../../administration/feature_flags.md) named `ci_retry_on_exit_codes`. Disabled by default.
 > - [Enabled on GitLab.com and self-managed](https://gitlab.com/gitlab-org/gitlab/-/issues/430037) in GitLab 16.11.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/452412) in GitLab 17.5. Feature flag `ci_retry_on_exit_codes` removed.
 
 Use `retry:exit_codes` with `retry:max` to retry jobs for only specific failure cases.
 `retry:max` is the maximum number of retries, like [`retry`](#retry), and can be
@@ -4762,7 +4760,7 @@ job2:
 - You can [ignore non-zero exit codes](script.md#ignore-non-zero-exit-codes).
 - [Use color codes with `script`](script.md#add-color-codes-to-script-output)
   to make job logs easier to review.
-- [Create custom collapsible sections](../jobs/job_logs.md#custom-collapsible-sections)
+- [Create custom collapsible sections](script.md#custom-collapsible-sections)
   to simplify job log output.
 
 ### `secrets`
@@ -5540,7 +5538,7 @@ deploy_review_job:
 - All YAML-defined variables are also set to any linked [Docker service containers](../services/index.md).
 - YAML-defined variables are meant for non-sensitive project configuration. Store sensitive information
   in [protected variables](../variables/index.md#protect-a-cicd-variable) or [CI/CD secrets](../secrets/index.md).
-- [Manual pipeline variables](../variables/index.md#use-pipeline-variables)
+- [Manual pipeline variables](../variables/index.md#override-a-defined-cicd-variable)
   and [scheduled pipeline variables](../pipelines/schedules.md#add-a-pipeline-schedule)
   are not passed to downstream pipelines by default. Use [trigger:forward](#triggerforward)
   to forward these variables to downstream pipelines.

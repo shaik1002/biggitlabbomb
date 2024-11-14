@@ -18,8 +18,8 @@ You can import your GitHub projects from either GitHub.com or GitHub Enterprise.
 migrate or import any types of groups or organizations from GitHub to GitLab.
 
 WARNING:
-Importing from GitHub to GitLab.com is [unavailable](https://status.gitlab.com).
-For more information, contact [GitLab Support](https://about.gitlab.com/support/).
+Importing from GitHub to GitLab.com is [currently unavailable](https://status.gitlab.com). We don't have an
+estimated time for resolution. For more information, please [contact support](https://about.gitlab.com/support/).
 
 Imported issues, merge requests, comments, and events have an **Imported** badge in GitLab.
 
@@ -83,9 +83,6 @@ If the above requirements are not met, the importer can't map the particular use
 - Reviewers and approvals added on pull requests in GitHub cannot be imported. In this case, the importer creates comments
   describing that non-existent users were added as reviewers and approvers. However, the actual reviewer status and
   approval are not applied to the merge request in GitLab.
-
-[In GitLab 17.5 and later](https://gitlab.com/gitlab-org/gitlab/-/issues/477553), GitLab adds backticks to username mentions in issues, merge requests, and notes.
-These backticks prevent linking to an incorrect user with the same username on the GitLab instance.
 
 ## Known issues
 
@@ -261,6 +258,7 @@ Expand **Details** to see a list of [repository entities](#imported-data) that f
 
 DETAILS:
 **Tier:** Premium, Ultimate
+**Offering:** GitLab.com, Self-managed, GitLab Dedicated
 
 Depending on your GitLab tier, [repository mirroring](../repository/mirror/index.md) can be set up to keep
 your imported repository in sync with its GitHub copy.

@@ -3,7 +3,6 @@ import isEmpty from 'lodash/isEmpty';
 import { GlAlert, GlLink, GlSprintf } from '@gitlab/ui';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
 import { __ } from '~/locale';
-import { sanitize } from '~/lib/dompurify';
 
 export const VARIANT_SUCCESS = 'success';
 export const VARIANT_WARNING = 'warning';
@@ -77,7 +76,6 @@ export const createAlert = ({
   error = null,
   messageLinks = null,
   dismissible = true,
-  renderMessageHTML = false,
 }) => {
   if (captureError && error) Sentry.captureException(error);
 
@@ -92,19 +90,6 @@ export const createAlert = ({
   }
 
   const createMessageNodes = (h) => {
-    if (renderMessageHTML) {
-      return [
-        h('div', {
-          domProps: {
-            innerHTML: sanitize(message, {
-              ALLOWED_TAGS: ['a'],
-              ALLOWED_ATTR: ['href', 'rel', 'target'],
-            }),
-          },
-        }),
-      ];
-    }
-
     if (isEmpty(messageLinks)) {
       return message;
     }

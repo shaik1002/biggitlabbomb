@@ -28,14 +28,10 @@ module WorkItems
       # rubocop:enable Gitlab/NoCodeCoverageComment
 
       def start_date
-        return work_item&.start_date unless dates_source_present?
-
         dates_source.start_date_fixed
       end
 
       def due_date
-        return work_item&.due_date unless dates_source_present?
-
         dates_source.due_date_fixed
       end
 
@@ -43,19 +39,16 @@ module WorkItems
 
       def dates_source
         return DatesSource.new if work_item.blank?
+        return work_item.dates_source if work_item.dates_source.present?
 
-        work_item.dates_source || work_item.build_dates_source
+        work_item.build_dates_source(
+          start_date_is_fixed: true,
+          due_date_is_fixed: true,
+          start_date_fixed: work_item.start_date,
+          due_date_fixed: work_item.due_date
+        )
       end
       strong_memoize_attr :dates_source
-
-      def dates_source_present?
-        return false if work_item&.dates_source.blank?
-
-        work_item
-          .dates_source
-          .slice(:start_date, :start_date_fixed, :due_date, :due_date_fixed)
-          .any? { |_, value| value.present? }
-      end
     end
   end
 end

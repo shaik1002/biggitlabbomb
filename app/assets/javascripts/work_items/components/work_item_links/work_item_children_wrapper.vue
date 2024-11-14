@@ -11,14 +11,14 @@ import { defaultSortableOptions, DRAG_DELAY } from '~/sortable/constants';
 import { sortableStart, sortableEnd } from '~/sortable/utils';
 
 import { WORK_ITEM_TYPE_VALUE_OBJECTIVE, WORK_ITEM_TYPE_VALUE_EPIC } from '../../constants';
-import { findHierarchyWidgetChildren, getItems } from '../../utils';
+import { findHierarchyWidgetChildren } from '../../utils';
 import {
   addHierarchyChild,
   removeHierarchyChild,
   optimisticUserPermissions,
 } from '../../graphql/cache_utils';
-import moveWorkItem from '../../graphql/move_work_item.mutation.graphql';
 import toggleHierarchyTreeChildMutation from '../../graphql/client/toggle_hierarchy_tree_child.mutation.graphql';
+import moveWorkItem from '../../graphql/move_work_item.mutation.graphql';
 import updateWorkItemMutation from '../../graphql/update_work_item.mutation.graphql';
 import workItemByIidQuery from '../../graphql/work_item_by_iid.query.graphql';
 import getWorkItemTreeQuery from '../../graphql/work_item_tree.query.graphql';
@@ -57,11 +57,6 @@ export default {
       default: false,
     },
     showLabels: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    showClosed: {
       type: Boolean,
       required: false,
       default: true,
@@ -139,10 +134,6 @@ export default {
     },
     apolloClient() {
       return this.$apollo.provider.clients.defaultClient;
-    },
-    displayableChildren() {
-      const filterClosed = getItems(this.showClosed);
-      return filterClosed(this.children);
     },
   },
   mounted() {
@@ -529,7 +520,7 @@ export default {
     @end="handleDragOnEnd"
   >
     <work-item-link-child
-      v-for="child in displayableChildren"
+      v-for="child in children"
       :key="child.id"
       :can-update="canUpdate"
       :issuable-gid="child.id"
@@ -538,7 +529,6 @@ export default {
       :work-item-type="child.workItemType.name"
       :has-indirect-children="hasIndirectChildren"
       :show-labels="showLabels"
-      :show-closed="showClosed"
       :work-item-full-path="fullPath"
       :show-task-weight="showTaskWeight"
       :dragged-item-type="draggedItemType"

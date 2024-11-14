@@ -1,6 +1,5 @@
 <script>
 import { GlButton, GlIcon, GlSprintf, GlLink, GlFormCheckbox, GlToggle } from '@gitlab/ui';
-import SecretManagerSettings from 'ee_component/pages/projects/shared/permissions/components/secret_manager_settings.vue';
 import ConfirmDanger from '~/vue_shared/components/confirm_danger/confirm_danger.vue';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import settingsMixin from 'ee_else_ce/pages/projects/shared/permissions/mixins/settings_pannel_mixin';
@@ -120,7 +119,6 @@ export default {
     GlFormCheckbox,
     GlToggle,
     ConfirmDanger,
-    SecretManagerSettings,
     OtherProjectSettings: () =>
       import(
         'jh_component/pages/projects/shared/permissions/components/other_project_settings.vue'
@@ -135,11 +133,6 @@ export default {
       default: false,
     },
     canAddCatalogResource: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    canManageSecretManager: {
       type: Boolean,
       required: false,
       default: false,
@@ -717,7 +710,7 @@ export default {
       </project-setting-row>
     </div>
     <div
-      class="gl-mb-5 gl-flex gl-flex-col gl-gap-6 gl-border-1 gl-border-t-0 gl-border-solid gl-border-gray-100 gl-bg-gray-10 gl-px-5 gl-py-3"
+      class="gl-mb-5 gl-border-1 gl-border-t-0 gl-border-solid gl-border-gray-100 gl-bg-gray-10 gl-px-5 gl-py-3"
     >
       <project-setting-row
         ref="issues-settings"
@@ -737,7 +730,6 @@ export default {
         />
         <project-setting-row
           v-if="requestCveAvailable"
-          class="gl-mt-4 gl-pl-5 md:gl-pl-7"
           :help-path="cveIdRequestHelpPath"
           :help-text="$options.i18n.cve_request_toggle_label"
         >
@@ -764,7 +756,7 @@ export default {
           name="project[project_feature_attributes][repository_access_level]"
         />
       </project-setting-row>
-      <div class="project-feature-setting-group gl-flex gl-flex-col gl-gap-5 gl-pl-5 md:gl-pl-7">
+      <div class="project-feature-setting-group gl-pl-5 md:gl-pl-7">
         <project-setting-row
           ref="merge-request-settings"
           :label="$options.i18n.mergeRequestsLabel"
@@ -1178,11 +1170,6 @@ export default {
     </project-setting-row>
     <ci-catalog-settings
       v-if="canAddCatalogResource"
-      class="gl-mb-5"
-      :full-path="confirmationPhrase"
-    />
-    <secret-manager-settings
-      v-if="canManageSecretManager"
       class="gl-mb-5"
       :full-path="confirmationPhrase"
     />

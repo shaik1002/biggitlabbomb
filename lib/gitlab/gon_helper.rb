@@ -67,11 +67,7 @@ module Gitlab
         gon.current_user_avatar_url = current_user.avatar_url
         gon.time_display_relative = current_user.time_display_relative
         gon.time_display_format = current_user.time_display_format
-
-        if current_user.user_preference
-          gon.current_user_use_work_items_view = current_user.user_preference.use_work_items_view || false
-          gon.text_editor = current_user.user_preference.text_editor
-        end
+        gon.current_user_use_work_items_view = current_user.user_preference&.use_work_items_view || false
       end
 
       if current_organization && Feature.enabled?(:ui_for_organizations, current_user)
@@ -161,8 +157,6 @@ module Gitlab
     # which has similar properties.
     # rubocop:disable Gitlab/AvoidCurrentOrganization -- This method follows the spirit of the rule
     def current_organization
-      return unless ::Current.organization_assigned
-
       ::Current.organization
     end
     # rubocop:enable Gitlab/AvoidCurrentOrganization

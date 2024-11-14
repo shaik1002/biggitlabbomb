@@ -6,12 +6,17 @@ module Gitlab
       # Destroy command consisting of cleanup for cluster and deployments
       #
       class Destroy < Command
-        desc "cluster", "Destroy kind cluster created for kind type deployments"
+        desc "cluster", "Destroy kind cluster"
+        option :name,
+          desc: "Cluster name",
+          default: "gitlab",
+          type: :string,
+          aliases: "-n"
         def cluster
-          delete = TTY::Prompt.new.yes?("Are you sure you want to delete cluster #{Kind::Cluster::CLUSTER_NAME}?")
+          delete = TTY::Prompt.new.yes?("Are you sure you want to delete cluster #{options[:name]}?")
           return unless delete
 
-          Kind::Cluster.destroy
+          Kind::Cluster.destroy(options[:name])
         end
 
         desc "deployment [NAME]", "Destroy specific deployment and all it's resources, " \
@@ -30,11 +35,6 @@ module Gitlab
           desc: "Timeout for helm release uninstall",
           default: "10m",
           type: :string
-        option :with_cluster,
-          desc: "Destroy kind cluster that was created for the deployment, " \
-            "only applicable for deployment type 'kind'",
-          default: false,
-          type: :boolean
         def deployment(name = Subcommands::Deployment::DEFAULT_HELM_RELEASE_NAME)
           prompt = TTY::Prompt.new
           delete = prompt.yes?("Are you sure you want to delete deployment '#{name}'?")
@@ -52,8 +52,6 @@ module Gitlab
             cleanup_configuration: cleanup_configuration,
             timeout: options[:timeout]
           )
-
-          Kind::Cluster.destroy if options[:with_cluster]
         end
       end
     end

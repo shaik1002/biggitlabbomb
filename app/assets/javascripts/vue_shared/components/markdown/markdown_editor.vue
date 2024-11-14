@@ -3,6 +3,7 @@ import { GlAlert } from '@gitlab/ui';
 import Autosize from 'autosize';
 import { __ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
+import LocalStorageSync from '~/vue_shared/components/local_storage_sync.vue';
 import { updateDraft, clearDraft, getDraft } from '~/lib/utils/autosave';
 import { setUrlParams, joinPaths } from '~/lib/utils/url_utility';
 import {
@@ -33,6 +34,7 @@ async function waitFor(getEl, interval = 10, timeout = 2000) {
 export default {
   components: {
     GlAlert,
+    LocalStorageSync,
     MarkdownField,
     ContentEditor: () =>
       import(
@@ -125,9 +127,7 @@ export default {
   },
   data() {
     const editingMode =
-      window.gon?.text_editor === 'rich_text_editor'
-        ? EDITING_MODE_CONTENT_EDITOR
-        : EDITING_MODE_MARKDOWN_FIELD;
+      localStorage.getItem(this.$options.EDITING_MODE_KEY) || EDITING_MODE_MARKDOWN_FIELD;
     return {
       alert: null,
       markdown: this.value || (this.autosaveKey ? getDraft(this.autosaveKey) : '') || '',
@@ -242,6 +242,16 @@ export default {
       this.editingMode = editingMode;
       this.notifyEditingModeChange(editingMode);
     },
+    onEditingModeRestored(editingMode) {
+      if (editingMode === EDITING_MODE_CONTENT_EDITOR && !this.enableContentEditor) {
+        this.editingMode = EDITING_MODE_MARKDOWN_FIELD;
+        return;
+      }
+
+      this.editingMode = editingMode;
+      this.$emit(editingMode);
+      this.notifyEditingModeChange(editingMode);
+    },
     async notifyEditingModeChange(editingMode) {
       this.$emit(editingMode);
 
@@ -311,6 +321,12 @@ export default {
 </script>
 <template>
   <div class="!gl-px-0">
+    <local-storage-sync
+      :value="editingMode"
+      as-string
+      :storage-key="$options.EDITING_MODE_KEY"
+      @input="onEditingModeRestored"
+    />
     <gl-alert
       v-if="alert"
       class="gl-mb-4"

@@ -58,7 +58,7 @@ module Slack
             s_("Slack|GitLab for Slack now supports channel-based notifications. " \
                "Let your team know when new issues are created or new CI/CD jobs are run." \
                "%{startMarkup}Learn more%{endMarkup}."),
-            startMarkup: " <#{help_page_url('user/project/integrations/gitlab_slack_application.md')}|",
+            startMarkup: " <#{help_page_url('integration/slash_commands.md')}|",
             endMarkup: ">"
           )
         )
@@ -79,7 +79,7 @@ module Slack
             s_("Slack|To start using notifications, " \
                "%{startMarkup}enable the GitLab for Slack app integration%{endMarkup} in your project settings."),
             startMarkup: "<#{help_page_url('user/project/integrations/gitlab_slack_application.md',
-              anchor: 'install-the-gitlab-for-slack-app')}|",
+              anchor: 'configuration')}|",
             endMarkup: ">"
           )
         )
@@ -99,8 +99,7 @@ module Slack
           format(
             s_("Slack|Control GitLab from Slack with " \
                "%{startMarkup}slash commands%{endMarkup}. For a list of available commands, enter %{command}."),
-            startMarkup: "<#{help_page_url('user/project/integrations/gitlab_slack_application.md',
-              anchor: 'slash-commands')}|",
+            startMarkup: "<#{help_page_url('user/project/integrations/gitlab_slack_application.md', anchor: 'usage')}|",
             endMarkup: ">",
             command: "`/gitlab help`"
           )

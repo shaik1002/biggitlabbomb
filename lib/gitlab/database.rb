@@ -21,7 +21,6 @@ module Gitlab
     # https://www.postgresql.org/docs/9.2/static/datatype-numeric.html
     MAX_INT_VALUE = 2147483647
     MIN_INT_VALUE = -2147483648
-    MAX_SMALLINT_VALUE = 32767
 
     # The max value between MySQL's TIMESTAMP and PostgreSQL's timestampz:
     # https://www.postgresql.org/docs/9.1/static/datatype-datetime.html
@@ -112,16 +111,6 @@ module Gitlab
           .select { |_, db| db.uses_load_balancing? }
           .transform_values(&:connection_class)
           .compact.with_indifferent_access.freeze
-    end
-
-    # Returns the application record that created the given connection.
-    # In single database mode, this always returns ApplicationRecord.
-    def self.application_record_for_connection(connection)
-      @gitlab_base_models ||=
-        database_base_models
-          .transform_values { |v| v == ActiveRecord::Base ? ApplicationRecord : v }
-
-      @gitlab_base_models[db_config_name(connection)]
     end
 
     # This returns a list of base models with connection associated for a given gitlab_schema

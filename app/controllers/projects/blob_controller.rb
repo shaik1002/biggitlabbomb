@@ -44,7 +44,6 @@ class Projects::BlobController < Projects::ApplicationController
 
   before_action do
     push_frontend_feature_flag(:explain_code_chat, current_user)
-    push_frontend_feature_flag(:upgrade_pdfjs, current_user)
     push_licensed_feature(:file_locks) if @project.licensed_feature_available?(:file_locks)
   end
 
@@ -186,11 +185,7 @@ class Projects::BlobController < Projects::ApplicationController
 
   # rubocop: disable CodeReuse/ActiveRecord
   def after_edit_path
-    from_merge_request = MergeRequestsFinder.new(
-      current_user,
-      project_id: @project.id
-    ).find_by(iid: params[:from_merge_request_iid])
-
+    from_merge_request = MergeRequestsFinder.new(current_user, project_id: @project.id).find_by(iid: params[:from_merge_request_iid])
     if from_merge_request && @branch_name == @ref
       diffs_project_merge_request_path(from_merge_request.target_project, from_merge_request) +
         "##{hexdigest(@path)}"
@@ -256,11 +251,7 @@ class Projects::BlobController < Projects::ApplicationController
   def show_html
     environment_params = @repository.branch_exists?(@ref) ? { ref: @ref } : { commit: commit }
     environment_params[:find_latest] = true
-    @environment = ::Environments::EnvironmentsByDeploymentsFinder.new(
-      @project,
-      current_user,
-      environment_params
-    ).execute.last
+    @environment = ::Environments::EnvironmentsByDeploymentsFinder.new(@project, current_user, environment_params).execute.last
     @last_commit = @repository.last_commit_for_path(commit.id, blob.path, literal_pathspec: true)
     @code_navigation_path = Gitlab::CodeNavigationPath.new(@project, blob.commit_id).full_json_path_for(blob.path)
 

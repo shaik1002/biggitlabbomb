@@ -181,12 +181,7 @@ The following metrics are available:
 | `gitlab_connection_pool_size` | Gauge | 16.7 | Size of connection pool | |
 | `gitlab_connection_pool_available_count` | Gauge | 16.7 | Number of available connections in the pool | |
 | `gitlab_security_policies_scan_result_process_duration_seconds` | Histogram | 16.7 | The amount of time to process merge request approval policies | |
-| `gitlab_security_policies_policy_sync_duration_seconds` | Histogram | 17.6 | The amount of time to sync policy changes for a policy configuration | |
-| `gitlab_security_policies_policy_deletion_duration_seconds` | Histogram | 17.6 | The amount of time to delete policy-related configuration | |
-| `gitlab_security_policies_policy_creation_duration_seconds` | Histogram | 17.6 | The amount of time to create policy-related configuration | |
-| `gitlab_security_policies_sync_opened_merge_requests_duration_seconds` | Histogram | 17.6 | The amount of time to sync opened merge requests after policy changes | |
 | `gitlab_security_policies_scan_execution_configuration_rendering_seconds` | Histogram | 17.3 | The amount of time to render scan execution policy CI configurations | |
-| `gitlab_security_policies_update_configuration_duration_seconds` | Histogram | 17.6 | The amount of time to schedule sync for a policy configuration change | |
 | `gitlab_highlight_usage` | Counter | 16.8 | The number of times `Gitlab::Highlight` is used | `used_on` |
 | `dependency_linker_usage` | Counter | 16.8 | The number of times dependency linker is used | `used_on` |
 | `gitlab_keeparound_refs_requested_total` | Counter | 16.10 | Counts the number of keep-around refs requested to be created | `source` |
@@ -194,10 +189,6 @@ The following metrics are available:
 | `search_advanced_index_repair_total` | Counter | 17.3 | Counts the number of index repair operations | `document_type` |
 | `search_advanced_boolean_settings` | Gauge | 17.3 | Current state of Advanced search boolean settings | `name` |
 | `gitlab_http_router_rule_total` | Counter | 17.4 | Counts occurrences of HTTP Router rule's `rule_action` and `rule_type` | `rule_action`, `rule_type` |
-| `gitlab_rack_attack_events_total` | Counter | 17.6 | Counts the total number of events handled by Rack Attack. | `event_type`, `event_name` |
-| `gitlab_rack_attack_throttle_limit` | Gauge | 17.6 | Reports the maximum number of requests that a client can make before Rack Attack throttles them. | `event_name` |
-| `gitlab_rack_attack_throttle_period_seconds` | Gauge | 17.6 | Reports the duration over which requests for a client are counted before Rack Attack throttles them. | `event_name` |
-| `gitlab_application_rate_limiter_throttle_utilization_ratio` | Histogram | 17.6 | Utilization ratio of a throttle in GitLab Application Rate Limiter. | `throttle_key`, `peek`, `feature_category` |
 
 ## Metrics controlled by a feature flag
 
@@ -284,13 +275,8 @@ configuration option in `gitlab.yml`. These metrics are served from the
 | `geo_terraform_state_versions_verified`        | Gauge   | 13.12  | Number of terraform state versions successfully verified on secondary | `url` |
 | `geo_terraform_state_versions_verification_failed` | Gauge   | 13.12  | Number of terraform state versions that failed verification on secondary | `url` |
 | `geo_terraform_state_versions_verification_total` | Gauge   | 13.12  | Number of terraform state versions to attempt to verify on secondary | `url` |
-| `global_search_bulk_cron_queue_size`           | Gauge   | 12.10 | Deprecated and planned for removal in 18.0. Replaced by `search_advanced_bulk_cron_queue_size`. Number of incremental database updates waiting to be synchronized to Elasticsearch | |
-| `global_search_bulk_cron_initial_queue_size`   | Gauge   | 13.1  | Deprecated and planned for removal in 18.0. Replaced by `search_advanced_bulk_cron_initial_queue_size`. Number of initial database updates waiting to be synchronized to Elasticsearch | |
-| `global_search_awaiting_indexing_queue_size`   | Gauge   | 13.2  | Deprecated and planned for removal in 18.0. Replaced by `search_advanced_awaiting_indexing_queue_size`. Number of database updates waiting to be synchronized to Elasticsearch while indexing is paused | |
-| `search_advanced_bulk_cron_queue_size`           | Gauge   | 17.6  | Number of incremental database updates waiting to be synchronized to Elasticsearch | |
-| `search_advanced_bulk_cron_initial_queue_size`   | Gauge   | 17.6  |  Number of initial database updates waiting to be synchronized to Elasticsearch | |
-| `search_advanced_bulk_cron_embedding_queue_size` | Gauge   | 17.6  | Number of embedding updates waiting to be synchronized to Elasticsearch | |
-| `search_advanced_awaiting_indexing_queue_size`   | Gauge   | 17.6  | Number of database updates waiting to be synchronized to Elasticsearch while indexing is paused | |
+| `global_search_bulk_cron_queue_size`           | Gauge   | 12.10 | Number of database records waiting to be synchronized to Elasticsearch | |
+| `global_search_awaiting_indexing_queue_size`   | Gauge   | 13.2  | Number of database updates waiting to be synchronized to Elasticsearch while indexing is paused | |
 | `geo_merge_request_diffs`                      | Gauge   | 13.4  | Number of merge request diffs on primary | `url` |
 | `geo_merge_request_diffs_checksum_total`       | Gauge   | 13.12 | Number of merge request diffs to checksum on primary | `url` |
 | `geo_merge_request_diffs_checksummed`          | Gauge   | 13.4  | Number of merge request diffs that successfully calculated the checksum on primary | `url` |

@@ -131,9 +131,6 @@ export default {
     authorId() {
       return getIdFromGraphQLId(this.author.id);
     },
-    externalAuthor() {
-      return this.note?.externalAuthor;
-    },
     entryClass() {
       return {
         'note note-wrapper note-comment': true,
@@ -377,7 +374,6 @@ export default {
             :note-id="note.id"
             :note-url="noteUrl"
             :is-internal-note="note.internal"
-            :email-participant="externalAuthor"
           >
             <span v-if="note.createdAt" class="gl-hidden sm:gl-inline">&middot;</span>
           </note-header>

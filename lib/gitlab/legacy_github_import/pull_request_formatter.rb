@@ -78,22 +78,6 @@ module Gitlab
         state == 'opened'
       end
 
-      def project_assignee_association
-        :merge_request_assignees
-      end
-
-      def contributing_user_formatters
-        {
-          author_id: author
-        }
-      end
-
-      def contributing_assignee_formatters
-        {
-          user_id: assignee
-        }
-      end
-
       private
 
       def state

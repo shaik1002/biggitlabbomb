@@ -49,7 +49,7 @@ class ApplicationController < BaseActionController
   # all other before filters that could have set the user.
   before_action :auth_user
 
-  around_action :set_current_context
+  prepend_around_action :set_current_context
 
   around_action :sessionless_bypass_admin_mode!, if: :sessionless_user?
   around_action :set_locale
@@ -118,7 +118,7 @@ class ApplicationController < BaseActionController
 
   rescue_from Gitlab::Git::ResourceExhaustedError do |e|
     response.headers.merge!(e.headers)
-    render_503(e.message)
+    render plain: e.message, status: :service_unavailable
   end
 
   rescue_from Regexp::TimeoutError do |e|
@@ -180,13 +180,14 @@ class ApplicationController < BaseActionController
   # (e.g. tokens) to authenticate the user, whereas Devise sets current_user.
   #
   def auth_user
-    if user_signed_in?
-      current_user
-    else
-      try(:authenticated_user)
+    strong_memoize(:auth_user) do
+      if user_signed_in?
+        current_user
+      else
+        try(:authenticated_user)
+      end
     end
   end
-  strong_memoize_attr :auth_user
 
   # Devise defines current_user to be:
   #
@@ -272,13 +273,6 @@ class ApplicationController < BaseActionController
       # Prevent the Rails CSRF protector from thinking a missing .js file is a JavaScript file
       format.js { render json: '', status: :not_found, content_type: 'application/json' }
       format.any { head :not_found }
-    end
-  end
-
-  def render_503(message = nil)
-    respond_to do |format|
-      format.html { render template: "errors/service_unavailable", formats: :html, layout: "errors", status: :service_unavailable, locals: { message: message } }
-      format.any { head :service_unavailable }
     end
   end
 
@@ -560,7 +554,7 @@ class ApplicationController < BaseActionController
   end
 
   def set_current_organization
-    return if ::Current.organization_assigned
+    return if ::Current.lock_organization
 
     ::Current.organization = Gitlab::Current::Organization.new(
       params: params.permit(

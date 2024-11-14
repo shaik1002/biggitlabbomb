@@ -915,6 +915,8 @@ Use `detailed_merge_status` instead of `merge_status` to account for all potenti
   - `not_open`: The merge request must be open before merge.
   - `preparing`: Merge request diff is being created.
   - `requested_changes`: The merge request has reviewers who have requested changes.
+  - `security_policy_evaluation`: All security policies must be evaluated.
+    Requires the `policy_mergability_check` feature flag to be enabled.
   - `security_policy_violations`: All security policies must be satisfied.
     Requires the `policy_mergability_check` feature flag to be enabled.
   - `status_checks_must_pass`: All status checks must pass before merge.
@@ -1104,10 +1106,6 @@ Example response:
 ## Get merge request dependencies
 
 Shows information about the merge request dependencies that must be resolved before merging.
-
-NOTE:
-If the user does not have access to the blocking merge request, no `blocking_merge_request`
-attribute is returned.
 
 ```plaintext
 GET /projects/:id/merge_requests/:merge_request_iid/blocks

@@ -29,7 +29,7 @@ Prerequisites:
 
 With the new authorization strategy that replaces the [legacy authorization strategy](#legacy-agent-authorization-strategy), group owners and administrators can control which cluster agents can be used for hosting workspaces in a group.
 
-For example, if the path to your workspace project is `top-level-group/subgroup-1/subgroup-2/workspace-project`, you can use any configured agent for either `top-level-group`, `subgroup-1` or `subgroup-2` group.
+For example, if the path to your workspace project is `top-group/subgroup-1/subgroup-2/workspace-project`, you can use any configured agent for either `top-group`, `subgroup-1` or `subgroup-2` group.
 
 ```mermaid
 %%{init: {'theme':'neutral'}}%%
@@ -38,7 +38,7 @@ graph TD;
 
     classDef active fill:lightgreen, stroke:#green, color:green, stroke-width:1px;
 
-    topGroup[Top-Level Group, allowed Agent 1]
+    topGroup[Top Group, allowed Agent 1]
     subgroup1[Subgroup 1, allowed Agent 2]
     subgroup2[Subgroup 2, allowed Agent 3]
     wp(Workspace Project, Agent 1, 2 & 3 all available)
@@ -91,9 +91,9 @@ Running workspaces stop when they are automatically terminated or manually stopp
 
 ## Legacy agent authorization strategy
 
-In GitLab 17.1 and earlier, an agent doesn't have to be allowed to be available in a group for creating workspaces. You can use an agent present anywhere in the top-level group (or the root group) of a workspace project to create a workspace, as long as the remote development module is enabled and you have at least the Developer role for the top-level group.
-For example, if the path to your workspace project is `top-level-group/subgroup-1/subgroup-2/workspace-project`,
-you can use any configured agent in `top-level-group` and in any of its subgroups.
+In GitLab 17.1 and earlier, an agent doesn't have to be allowed to be available in a group for creating workspaces. You can use an agent present anywhere in the top-level group (or the root group) of a workspace project to create a workspace, as long as the remote development module is enabled and you have at least the Developer role for the root group.
+For example, if the path to your workspace project is `top-group/subgroup-1/subgroup-2/workspace-project`,
+you can use any configured agent in `top-group` and in any of its subgroups.
 
 ## Workspace settings
 
@@ -112,8 +112,6 @@ you can use any configured agent in `top-level-group` and in any of its subgroup
 | [`allow_privilege_escalation`](#allow_privilege_escalation)                               | No       | `false`                                 | Allow privilege escalation. |
 | [`annotations`](#annotations)                                                             | No       | `{}`                                    | Annotations to apply to Kubernetes objects. |
 | [`labels`](#labels)                                                                       | No       | `{}`                                    | Labels to apply to Kubernetes objects. |
-| [`max_active_hours_before_stop`](#max_active_hours_before_stop) | No | `36` | Maximum number of hours a workspace can be active before it is stopped. |
-| [`max_stopped_hours_before_termination`](#max_stopped_hours_before_termination) | No | `744` | Maximum number of hours a workspace can be stopped before it is terminated. |
 
 NOTE:
 If a setting has an invalid value, it's not possible to update any setting until you fix that value.
@@ -339,8 +337,8 @@ remote_development:
 
 Use this setting to specify whether to use the user namespaces feature in Kubernetes.
 
-[User namespaces](https://kubernetes.io/docs/concepts/workloads/pods/user-namespaces/) isolate the user
-running inside the container from the user on the host.
+User namespaces isolate the user running inside the container from the user in the host.
+In Kubernetes 1.30, this feature is in beta.
 
 The default value is `false`. Before you set the value to `true`, ensure your Kubernetes cluster supports user namespaces.
 
@@ -465,64 +463,6 @@ A valid label value:
 
 For more information about `labels`, see
 [Labels](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/).
-
-### `max_active_hours_before_stop`
-
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/14910) in GitLab 17.6.
-
-Use this setting to automatically stop the agent's workspaces after the specified number of hours
-have passed since the workspace last transitioned to an active state.
-An "active state" is defined as any non-stopped or non-terminated state.
-
-The timer for this setting starts when the workspace is created, and is reset every time the
-workspace is restarted.
-It also applies even if the workspace is in an error or failure state.
-
-The default value is `36`, or one and a half days. This avoids stopping the workspace during
-the user's normal working hours.
-
-**Example configuration:**
-
-```yaml
-remote_development:
-  max_active_hours_before_stop: 60
-```
-
-A valid value:
-
-- Is an integer.
-- Is greater than or equal to `1`.
-- Is less than or equal to `8760` (one year).
-- `max_active_hours_before_stop` + `max_stopped_hours_before_termination` must be less than or equal to `8760`.
-
-The automatic stop is only triggered on a full reconciliation, which happens every hour.
-This means that the workspace might be active for up to one hour longer than the configured value.
-
-### `max_stopped_hours_before_termination`
-
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/14910) in GitLab 17.6.
-
-Use this setting to automatically terminate the agent's workspaces after they have been in the stopped
-state for the specified number of hours.
-
-The default value is `722`, or approximately one month.
-
-**Example configuration:**
-
-```yaml
-remote_development:
-  max_stopped_hours_before_termination: 4332
-```
-
-A valid value:
-
-- Is an integer.
-- Is greater than or equal to `1`.
-- Is less than or equal to `8760` (one year).
-- `max_active_hours_before_stop` + `max_stopped_hours_before_termination` must be less than or equal to `8760`.
-
-The automatic termination is only triggered on a full reconciliation, which happens every hour.
-This means that the workspace might be stopped for up to one hour longer than the configured value.
 
 ## Configuring user access with remote development
 

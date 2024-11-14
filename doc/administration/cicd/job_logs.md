@@ -11,7 +11,7 @@ DETAILS:
 **Offering:** Self-managed
 
 Job logs are sent by a runner while it's processing a job. You can see
-logs in places like job pages, pipelines, and email notifications.
+logs in job pages, pipelines, email notifications, and so on.
 
 ## Data flow
 
@@ -147,12 +147,6 @@ job logs are automatically migrated to it along with the other job artifacts.
 
 See "Phase 3: uploading" in [Data flow](#data-flow) to learn about the process.
 
-## Maximum log file size
-
-The job log file size limit in GitLab is 100 megabytes by default.
-Any job that exceeds the limit is marked as failed, and dropped by the runner.
-For more details, see [Maximum file size for job logs](../../administration/instance_limits.md#maximum-file-size-for-job-logs).
-
 ## Prevent local disk usage
 
 If you want to avoid any local disk usage for job logs,
@@ -164,14 +158,11 @@ you can do so using one of the following options:
 
 ## How to remove job logs
 
-There isn't a way to automatically expire old job logs. However, it's safe to remove
+There isn't a way to automatically expire old job logs, but it's safe to remove
 them if they're taking up too much space. If you remove the logs manually, the
 job output in the UI is empty.
 
-For details on how to delete job logs by using GitLab CLI,
-see [Delete job logs](../../user/storage_management_automation.md#delete-job-logs).
-
-Alternatively, you can delete job logs with shell commands. For example, to delete all job logs older than 60 days, run the following
+For example, to delete all job logs older than 60 days, run the following
 command from a shell in your GitLab instance.
 
 NOTE:

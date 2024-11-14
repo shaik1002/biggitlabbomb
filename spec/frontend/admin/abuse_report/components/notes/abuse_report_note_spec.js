@@ -93,6 +93,7 @@ describe('Abuse Report Note', () => {
   });
 
   describe('Editing', () => {
+    // this should be changed: https://gitlab.com/gitlab-org/gitlab/-/issues/481897
     it('should show edit button', () => {
       expect(findNoteActions().props()).toMatchObject({
         showEditButton: true,
@@ -124,20 +125,6 @@ describe('Abuse Report Note', () => {
 
       expect(findNoteHeader().exists()).toBe(true);
       expect(findNoteBody().exists()).toBe(true);
-    });
-
-    it('should update note body when `updateNote` event is emitted', async () => {
-      const updatedNote = {
-        ...mockNote,
-        body: 'Updated body',
-      };
-
-      await findNoteActions().vm.$emit('startEditing');
-      await findEditNote().vm.$emit('updateNote', updatedNote);
-
-      expect(findNoteBody().props()).toMatchObject({
-        note: updatedNote,
-      });
     });
   });
 

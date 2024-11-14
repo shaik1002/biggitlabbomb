@@ -43,7 +43,6 @@ describe('WorkItemMilestone component', () => {
     milestone = mockMilestoneWidgetResponse,
     searchQueryHandler = successSearchQueryHandler,
     mutationHandler = successUpdateWorkItemMutationHandler,
-    isGroup = false,
   } = {}) => {
     wrapper = mountFn(WorkItemMilestone, {
       apolloProvider: createMockApollo([
@@ -56,7 +55,6 @@ describe('WorkItemMilestone component', () => {
         workItemMilestone: milestone,
         workItemId,
         workItemType,
-        isGroup,
       },
     });
   };

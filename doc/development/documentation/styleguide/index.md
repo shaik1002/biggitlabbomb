@@ -276,7 +276,7 @@ You can use these fake tokens as examples:
 | Application secret    | `04f294d1eaca42b8692017b426d53bbc8fe75f827734f0260710b83a556082df` |
 | CI/CD variable        | `Li8j-mLUVA3eZYjPfd_H`                                             |
 | Project runner token  | `yrnZW46BrtBFqM7xDzE7dddd`                                         |
-| Instance runner token | `6Vk7ZsosqQyfreAxXTZr`                                             |
+| Shared runner token   | `6Vk7ZsosqQyfreAxXTZr`                                             |
 | Trigger token         | `be20d8dcc028677c931e04f3871a9b`                                   |
 | Webhook secret token  | `6XhDroRcYPM5by_h-HLY`                                             |
 | Health check token    | `Tu7BgjR9qeZTEyRzGG2P`                                             |
@@ -815,7 +815,7 @@ Links help the docs adhere to the
 However, you should avoid putting too many links on any page. Too many links can hinder readability.
 
 - Do not duplicate links on the same page. For example, on **Page A**, do not link to **Page B** multiple times.
-- Do not use links in headings. Headings that contain links cause errors.
+- Do not use links in headings. Subheadings are rendered as links, and subheadings that contain links cause errors.
 - Avoid multiple links in a single paragraph.
 - Avoid multiple links in a single task.
 - On any one page, try not to use more than 15 links to other pages.
@@ -950,20 +950,18 @@ If you must use one of these links:
 
 Examples:
 
-- ```markdown
-  GitLab team members can view more information in this confidential issue:
-  `https://gitlab.com/gitlab-org/gitlab/-/issues/<issue_number>`
-  ```
+```markdown
+GitLab team members can view more information in this confidential issue:
+`https://gitlab.com/gitlab-org/gitlab/-/issues/<issue_number>`
+```
 
-- ```markdown
-  GitLab team members can view more information in this internal handbook page:
-  `https://internal.gitlab.com/handbook/<link>`
-  ```
+GitLab team members can view more information in this internal handbook page:
+`https://internal.gitlab.com/handbook/<link>`
 
-- ```markdown
-  Users with the Maintainer role for the project can use the pipeline editor:
-  `https://gitlab.com/gitlab-org/gitlab/-/ci/editor`
-  ```
+```markdown
+Users with the Maintainer role for the project can use the pipeline editor:
+`https://gitlab.com/gitlab-org/gitlab/-/ci/editor`
+```
 
 ### Link to specific lines of code
 
@@ -1118,13 +1116,6 @@ For example:
 1. Recommended. Enter a description for the job.
 ```
 
-### Documenting keyboard shortcuts and commands
-
-Write UI instructions instead of keyboard commands when both options exist.
-This guideline applies to GitLab and third-party applications, like VS Code.
-
-Keyboard commands for GitLab are documented in [GitLab keyboard shortcuts](../../../user/shortcuts.md).
-
 ### Documenting multiple fields at once
 
 If the UI text sufficiently explains the fields in a section, do not include a task step for every field.
@@ -1208,7 +1199,7 @@ If you need to emphasize an area in a screenshot, use an arrow.
 - Use the arrow style shown in the following image.
 - If you have multiple arrows, make them parallel when possible.
 
-![callout example](img/callouts_v14_6.png)
+![callout example](img/callouts.png)
 
 #### Image requirements
 
@@ -1394,7 +1385,7 @@ To create a diagram, use [Mermaid](https://mermaid.js.org/#/), which has the fol
 - The diagram is rendered as a scalable image, better suited to various output devices and sizes.
 
 To learn how to create diagrams with the [Mermaid syntax](https://mermaid.js.org/intro/syntax-reference.html),
-see the [Mermaid user guide](https://mermaid.js.org/intro/getting-started.html)
+see the Mermaid [Mermaid user guide](https://mermaid.js.org/intro/getting-started.html)
 and the examples on the Mermaid site.
 
 #### Guidelines
@@ -1415,7 +1406,6 @@ To create accessible and easily maintainable diagrams, follow these guidelines:
 - Include a title and brief description for the diagram.
 - For complex processes, consider creating multiple simple diagrams instead of one large diagram.
 - Validate diagrams work well when viewed on different devices and screen sizes.
-- Do not include links. Links embedded in diagrams with [`click` actions](https://mermaid.js.org/syntax/classDiagram.html#interaction) are not testable with our link checking tools.
 - Update diagrams along with documentation or code when processes change to maintain accuracy.
 
 #### Create a diagram

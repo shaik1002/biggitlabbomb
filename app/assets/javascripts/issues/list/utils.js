@@ -73,8 +73,6 @@ import {
   urlSortParams,
   WEIGHT_ASC,
   WEIGHT_DESC,
-  MERGED_AT_ASC,
-  MERGED_AT_DESC,
 } from './constants';
 
 /**
@@ -127,7 +125,6 @@ export const getSortOptions = ({
   hasIssuableHealthStatusFeature,
   hasIssueWeightsFeature,
   hasManualSort = true,
-  hasMergedDate = false,
 } = {}) => {
   const sortOptions = [
     {
@@ -211,17 +208,6 @@ export const getSortOptions = ({
       },
     },
   ];
-
-  if (hasMergedDate) {
-    sortOptions.push({
-      id: sortOptions.length + 1,
-      title: s__('SortOptions|Merged date'),
-      sortDirection: {
-        ascending: MERGED_AT_ASC,
-        descending: MERGED_AT_DESC,
-      },
-    });
-  }
 
   if (hasIssuableHealthStatusFeature) {
     sortOptions.push({

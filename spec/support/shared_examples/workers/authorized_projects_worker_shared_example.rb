@@ -4,52 +4,28 @@ require 'spec_helper'
 
 RSpec.shared_examples "refreshes user's project authorizations" do
   describe '#perform' do
-    let_it_be(:user) { create(:user) }
-
-    let(:service) { instance_double(Users::RefreshAuthorizedProjectsService) }
+    let(:user) { create(:user) }
 
     subject(:job) { described_class.new }
 
-    it 'calls refresh authorized projects service without redis lock' do
-      expect(service).to receive(:execute_without_lease)
-
-      expect(Users::RefreshAuthorizedProjectsService)
-        .to receive(:new)
-        .with(user, source: described_class.name)
-        .and_return(service)
+    it "refreshes user's authorized projects" do
+      expect_any_instance_of(User).to receive(:refresh_authorized_projects)
 
       job.perform(user.id)
     end
 
-    context 'when feature-flag `drop_lease_usage_authorized_projects_worker` is disabled' do
-      before do
-        stub_feature_flags(drop_lease_usage_authorized_projects_worker: false)
-      end
+    context "when the user is not found" do
+      it "does nothing" do
+        expect_any_instance_of(User).not_to receive(:refresh_authorized_projects)
 
-      it 'calls refresh authorized projects service with redis lock' do
-        expect(service).to receive(:execute)
-
-        expect(Users::RefreshAuthorizedProjectsService)
-          .to receive(:new)
-          .with(user, source: described_class.name)
-          .and_return(service)
-
-        job.perform(user.id)
+        job.perform(-1)
       end
     end
 
-    context 'when the user is not found' do
-      it 'does not call the refresh authorized projects service' do
-        expect(Users::RefreshAuthorizedProjectsService).not_to receive(:new)
-
-        job.perform(nil)
-      end
-    end
-
-    it_behaves_like 'an idempotent worker' do
+    it_behaves_like "an idempotent worker" do
       let(:job_args) { user.id }
 
-      it 'does not change authorizations when run twice' do
+      it "does not change authorizations when run twice" do
         group = create(:group)
         create(:project, namespace: group)
         group.add_developer(user)

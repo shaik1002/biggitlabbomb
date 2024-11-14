@@ -43,7 +43,7 @@ export default {
   },
   computed: {
     showProtectedPackagesSettings() {
-      return this.showPackageRegistrySettings;
+      return this.showPackageRegistrySettings && this.glFeatures.packagesProtectedPackages;
     },
     showProtectedContainersSettings() {
       return (

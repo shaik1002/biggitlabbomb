@@ -3,7 +3,6 @@
 if RUBY_PLATFORM.include?('darwin')
   require 'fiddle'
   require 'ffi'
-  require 'ethon'
 
   module CFTimeZone
     extend FFI::Library

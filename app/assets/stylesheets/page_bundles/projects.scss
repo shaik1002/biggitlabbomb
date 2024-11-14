@@ -250,11 +250,11 @@
 }
 
 .repository-language-bar-tooltip-language {
-  @apply gl-font-bold;
+  font-weight: $gl-font-weight-bold;
 }
 
 .repository-language-bar-tooltip-share {
-  @apply gl-text-gray-200 dark:gl-text-gray-600;
+  color: var(--gray-200, $gray-200);
 }
 
 /*

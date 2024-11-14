@@ -57,8 +57,7 @@ RSpec.describe ApplicationController, feature_category: :shared do
   end
 
   describe '#set_current_organization' do
-    let_it_be(:user) { create(:user) }
-    let_it_be(:current_organization) { create(:organization, users: [user]) }
+    let_it_be(:current_organization) { create(:organization, :default) }
 
     before do
       sign_in user
@@ -69,9 +68,7 @@ RSpec.describe ApplicationController, feature_category: :shared do
     end
 
     it 'sets current organization' do
-      get :index, format: :json
-
-      expect(Current.organization).to eq(current_organization)
+      expect { get :index, format: :json }.to change { Current.organization }.from(nil).to(current_organization)
     end
 
     context 'when multiple calls in one example are done' do
@@ -1101,12 +1098,14 @@ RSpec.describe ApplicationController, feature_category: :shared do
       end
     end
 
-    it 'returns a error response with 503 status' do
+    it 'returns a plaintext error response with 503 status' do
       get :index
 
       expect(response).to have_gitlab_http_status(:service_unavailable)
+      expect(response.body).to include(
+        "Upstream Gitaly has been exhausted: maximum time in concurrency queue reached. Try again later"
+      )
       expect(response.headers['Retry-After']).to eq(50)
-      expect(response).to render_template('errors/service_unavailable')
     end
   end
 

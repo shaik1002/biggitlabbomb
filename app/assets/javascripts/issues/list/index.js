@@ -118,7 +118,6 @@ export async function mountIssuesListApp() {
     wiIssuesListPath,
     wiLabelsManagePath,
     wiReportAbusePath,
-    hasLinkedItemsEpicsFeature,
   } = el.dataset;
 
   return new Vue({
@@ -203,7 +202,6 @@ export async function mountIssuesListApp() {
       labelsManagePath: wiLabelsManagePath,
       reportAbusePath: wiReportAbusePath,
       hasSubepicsFeature: false,
-      hasLinkedItemsEpicsFeature: parseBoolean(hasLinkedItemsEpicsFeature),
     },
     render: (createComponent) => createComponent(IssuesListApp),
   });

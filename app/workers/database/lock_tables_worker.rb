@@ -8,7 +8,7 @@ module Database
 
     sidekiq_options retry: false
     feature_category :cell
-    data_consistency :always
+    data_consistency :always # rubocop:disable SidekiqLoadBalancing/WorkerDataConsistency
     idempotent!
 
     version 1

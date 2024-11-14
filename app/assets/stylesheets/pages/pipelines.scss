@@ -43,7 +43,7 @@
     .sprite {
       width: 12px;
       height: 12px;
-      @apply gl-fill-icon-default;
+      fill: $gl-text-color;
     }
 
     .commit-sha {
@@ -71,6 +71,6 @@
   }
 
   .build-link a {
-    @apply gl-text-default;
+    color: $gl-text-color;
   }
 }

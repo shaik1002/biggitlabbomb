@@ -81,9 +81,6 @@ export const typePolicies = {
   ComplianceFrameworkConnection: {
     merge: true,
   },
-  OrganizationUserConnection: {
-    merge: true,
-  },
 };
 
 export const stripWhitespaceFromQuery = (url, path) => {

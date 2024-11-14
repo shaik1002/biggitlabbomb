@@ -484,8 +484,6 @@ class Note < ApplicationRecord
       'alert_management_alert'
     elsif for_vulnerability?
       'security_resource'
-    elsif for_wiki_page?
-      'wiki_page'
     else
       noteable_type.demodulize.underscore
     end
@@ -746,7 +744,7 @@ class Note < ApplicationRecord
   end
 
   def keep_around_commit
-    project.repository.keep_around(self.commit_id, source: "#{noteable_type}/#{self.class.name}")
+    project.repository.keep_around(self.commit_id, source: self.class.name)
   end
 
   def ensure_namespace_id

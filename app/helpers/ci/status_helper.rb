@@ -98,7 +98,9 @@ module Ci
     end
 
     def ci_label_for_status(status)
-      return status.label if detailed_status?(status)
+      if detailed_status?(status)
+        return status.label
+      end
 
       label = case status
               when 'success'

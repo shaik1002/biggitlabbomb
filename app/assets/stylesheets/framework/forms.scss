@@ -120,7 +120,7 @@ label {
     background: var(--gl-control-background-color-default);
     border-color: var(--gl-control-border-color-default);
     @apply gl-text-default;
-    @apply gl-focus;
+    @include gl-focus;
   }
 }
 
@@ -204,6 +204,10 @@ label {
   .gl-field-error-message {
     color: $red-500;
   }
+
+  .gl-field-hint {
+    color: $gl-text-color;
+  }
 }
 
 .show-password-complexity-errors {
@@ -260,5 +264,5 @@ label {
 
 .add-issuable-form-input-wrapper.focus,
 .issue-token-remove-button:focus {
-  @apply gl-focus;
+  @include gl-focus;
 }

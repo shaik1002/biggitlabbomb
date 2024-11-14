@@ -58,17 +58,10 @@ describe('WorkItemCreatedUpdated component', () => {
     await waitForPromises();
   };
 
-  it('calls the successHandler when the query is completed', async () => {
+  it('calls the work item query', async () => {
     await createComponent();
 
     expect(successHandler).toHaveBeenCalled();
-    expect(findLoadingIcon().exists()).toBe(false);
-  });
-
-  it('shows loading icon when the query is still loading', () => {
-    createComponent();
-
-    expect(findLoadingIcon().exists()).toBe(true);
   });
 
   it('skips calling the work item query when workItemIid is not defined', async () => {

@@ -2,10 +2,7 @@
 
 module API
   class ImportBitbucket < ::API::Base
-    before do
-      authenticate!
-      set_current_organization
-    end
+    before { authenticate! }
 
     feature_category :importers
     urgency :low

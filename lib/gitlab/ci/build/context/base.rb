@@ -23,12 +23,6 @@ module Gitlab
             end
           end
 
-          def variables_hash_expanded
-            strong_memoize(:variables_hash_expanded) do
-              variables.sort_and_expand_all.to_hash
-            end
-          end
-
           def project
             pipeline.project
           end

@@ -17,17 +17,17 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
     it { is_expected.to have_many(:dependency_links).inverse_of(:package) }
     it { is_expected.to have_many(:tags).inverse_of(:package) }
     it { is_expected.to have_many(:build_infos).inverse_of(:package) }
-    # TODO: Remove with the rollout of the FF nuget_extract_nuget_package_model
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/499602
     it { is_expected.to have_many(:installable_nuget_package_files).inverse_of(:package) }
     it { is_expected.to have_one(:maven_metadatum).inverse_of(:package) }
-    # TODO: Remove with the rollout of the FF nuget_extract_nuget_package_model
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/499602
     it { is_expected.to have_one(:nuget_metadatum).inverse_of(:package) }
     it { is_expected.to have_one(:npm_metadatum).inverse_of(:package) }
-    # TODO: Remove with the rollout of the FF nuget_extract_nuget_package_model
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/499602
+
+    # TODO: Remove with the rollout of the FF terraform_extract_terraform_package_model
+    # https://gitlab.com/gitlab-org/gitlab/-/issues/490007
+    it { is_expected.to have_one(:terraform_module_metadatum).inverse_of(:package) }
+
     it { is_expected.to have_many(:nuget_symbols).inverse_of(:package) }
+    it { is_expected.to have_many(:matching_package_protection_rules).through(:project).source(:package_protection_rules) }
   end
 
   describe '.sort_by_attribute' do
@@ -116,8 +116,6 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
       it { is_expected.to allow_value("my.app-11.07.2018").for(:name) }
       it { is_expected.not_to allow_value("my(dom$$$ain)com.my-app").for(:name) }
 
-      # TODO: Remove with the rollout of the FF nuget_extract_nuget_package_model
-      # https://gitlab.com/gitlab-org/gitlab/-/issues/499602
       context 'nuget package' do
         subject { build_stubbed(:nuget_package) }
 
@@ -143,6 +141,21 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
         it { is_expected.not_to allow_value("@scope/../../package").for(:name) }
         it { is_expected.not_to allow_value("@scope%2e%2e%fpackage").for(:name) }
         it { is_expected.not_to allow_value("@scope/sub/package").for(:name) }
+      end
+
+      # TODO: Remove with the rollout of the FF terraform_extract_terraform_package_model
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/490007
+      context 'terraform module package' do
+        subject { build_stubbed(:terraform_module_package_legacy) }
+
+        it { is_expected.to allow_value('my-module/my-system').for(:name) }
+        it { is_expected.to allow_value('my/module').for(:name) }
+        it { is_expected.not_to allow_value('my-module').for(:name) }
+        it { is_expected.not_to allow_value('My-Module').for(:name) }
+        it { is_expected.not_to allow_value('my_module').for(:name) }
+        it { is_expected.not_to allow_value('my.module').for(:name) }
+        it { is_expected.not_to allow_value('../../../my-module').for(:name) }
+        it { is_expected.not_to allow_value('%2e%2e%2fmy-module').for(:name) }
       end
     end
 
@@ -177,8 +190,10 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
 
       it_behaves_like 'validating version to be SemVer compliant for', :npm_package
 
-      # TODO: Remove with the rollout of the FF nuget_extract_nuget_package_model
-      # https://gitlab.com/gitlab-org/gitlab/-/issues/499602
+      # TODO: Remove with the rollout of the FF terraform_extract_terraform_package_model
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/490007
+      it_behaves_like 'validating version to be SemVer compliant for', :terraform_module_package_legacy
+
       context 'nuget package' do
         subject { build_stubbed(:nuget_package) }
 
@@ -494,8 +509,6 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
     it { is_expected.to contain_exactly(package1) }
   end
 
-  # TODO: Remove with the rollout of the FF nuget_extract_nuget_package_model
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/499602
   describe '.without_nuget_temporary_name' do
     let!(:package1) { create(:nuget_package) }
     let!(:package2) { create(:nuget_package, name: Packages::Nuget::TEMPORARY_PACKAGE_NAME) }
@@ -587,8 +600,6 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
       it { is_expected.to match_array([nuget_package]) }
     end
 
-    # TODO: Remove with the rollout of the FF nuget_extract_nuget_package_model
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/499602
     describe '.with_nuget_version_or_normalized_version' do
       let_it_be(:nuget_package) { create(:nuget_package, :with_metadatum, version: '1.0.7+r3456') }
 
@@ -772,6 +783,26 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
 
       it { is_expected.to contain_exactly(pipeline, pipeline2) }
     end
+  end
+
+  describe '#matching_package_protection_rules' do
+    let_it_be(:package) do
+      create(:npm_package, name: 'npm-package')
+    end
+
+    let_it_be(:package_protection_rule) do
+      create(:package_protection_rule, project: package.project, package_name_pattern: package.name, package_type: :npm,
+        minimum_access_level_for_push: :maintainer)
+    end
+
+    let_it_be(:package_protection_rule_no_match) do
+      create(:package_protection_rule, project: package.project, package_name_pattern: "other-#{package.name}", package_type: :npm,
+        minimum_access_level_for_push: :maintainer)
+    end
+
+    subject { package.matching_package_protection_rules }
+
+    it { is_expected.to eq [package_protection_rule] }
   end
 
   describe '#tag_names' do
@@ -984,8 +1015,6 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
     end
   end
 
-  # TODO: Remove with the rollout of the FF nuget_extract_nuget_package_model
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/499602
   describe '#normalized_nuget_version' do
     let_it_be(:package) { create(:nuget_package, :with_metadatum, version: '1.0') }
     let(:normalized_version) { '1.0.0' }
@@ -1050,13 +1079,13 @@ RSpec.describe Packages::Package, type: :model, feature_category: :package_regis
       end
     end
 
-    context 'when nuget_extract_nuget_package_model is disabled' do
+    context 'when terraform_extract_terraform_package_model is disabled' do
       before do
-        stub_feature_flags(nuget_extract_nuget_package_model: false)
+        stub_feature_flags(terraform_extract_terraform_package_model: false)
       end
 
-      context 'for package format nuget' do
-        let(:format) { :nuget }
+      context 'for terraform module' do
+        let(:format) { :terraform_module }
 
         it 'maps to Packages::Package' do
           is_expected.to eq(described_class)

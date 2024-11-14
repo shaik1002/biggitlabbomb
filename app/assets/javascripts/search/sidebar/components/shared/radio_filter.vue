@@ -11,16 +11,8 @@ export default {
     GlFormRadio,
   },
   props: {
-    filtersArray: {
+    filterData: {
       type: Object,
-      required: true,
-    },
-    header: {
-      type: String,
-      required: true,
-    },
-    filterParam: {
-      type: String,
       required: true,
     },
   },
@@ -28,27 +20,27 @@ export default {
     ...mapState(['query']),
     ...mapGetters(['currentScope']),
     ANY() {
-      const AnyIndex = this.filtersArray[this.currentScope].findIndex(
-        (item) => item.value === null,
-      );
-      return this.filtersArray[this.currentScope][AnyIndex];
+      return this.filterData.filters.ANY;
     },
     initialFilter() {
-      return this.query[this.filterParam];
+      return this.query[this.filterData.filterParam];
     },
     filter() {
       return this.initialFilter || this.ANY.value;
     },
+    filtersArray() {
+      return this.filterData.filterByScope[this.currentScope];
+    },
     selectedFilter: {
       get() {
-        if (this.filtersArray[this.currentScope].some(({ value }) => value === this.filter)) {
+        if (this.filtersArray.some(({ value }) => value === this.filter)) {
           return this.filter;
         }
 
         return this.ANY.value;
       },
       set(value) {
-        this.setQuery({ key: this.filterParam, value });
+        this.setQuery({ key: this.filterData.filterParam, value });
       },
     },
   },
@@ -56,7 +48,7 @@ export default {
     ...mapActions(['setQuery']),
     radioLabel(filter) {
       return filter.value === this.ANY.value
-        ? sprintf(__('Any %{header}'), { header: this.header.toLowerCase() })
+        ? sprintf(__('Any %{header}'), { header: this.filterData.header.toLowerCase() })
         : filter.label;
     },
   },
@@ -66,10 +58,10 @@ export default {
 <template>
   <div>
     <div class="gl-mb-2 gl-text-sm gl-font-bold">
-      {{ header }}
+      {{ filterData.header }}
     </div>
     <gl-form-radio-group v-model="selectedFilter">
-      <gl-form-radio v-for="f in filtersArray[currentScope]" :key="f.value" :value="f.value">
+      <gl-form-radio v-for="f in filtersArray" :key="f.value" :value="f.value">
         {{ radioLabel(f) }}
       </gl-form-radio>
     </gl-form-radio-group>

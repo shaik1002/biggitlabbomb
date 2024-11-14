@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'work items rolled up dates' do
-  include WorkItemFeedbackHelpers
-
   let(:work_item_rolledup_dates_selector) { '[data-testid="work-item-rolledup-dates"]' }
   let(:work_item_start_due_dates_selector) { '[data-testid="work-item-start-due-dates"]' }
   let(:work_item_milestone_selector) { '[data-testid="work-item-milestone"]' }
@@ -42,7 +40,10 @@ RSpec.shared_examples 'work items rolled up dates' do
       page.refresh
       wait_for_all_requests
 
-      close_work_item_feedback_popover_if_present
+      # The feedback popover was hidding the child details popover close button
+      within_testid('work-item-feedback-popover') do
+        find_by_testid('close-button').click
+      end
     end
 
     it 'passes axe automated accessibility testing in closed state' do

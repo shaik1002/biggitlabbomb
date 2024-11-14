@@ -232,7 +232,7 @@ export default {
 <template>
   <div class="ci-widget media">
     <template v-if="hasCIError">
-      <gl-icon name="status_failed" :size="24" variant="danger" />
+      <gl-icon name="status_failed" class="gl-text-red-500" :size="24" />
       <p class="gl-mb-0 gl-ml-5 gl-grow" data-testid="ci-error-message">
         <gl-sprintf :message="$options.errorText">
           <template #link="{ content }">
@@ -326,7 +326,10 @@ export default {
             </div>
 
             <div class="gl-flex gl-flex-wrap gl-items-center">
-              <p class="gl-m-0 gl-text-sm gl-text-subtle" data-testid="pipeline-details-container">
+              <p
+                class="gl-m-0 gl-text-sm gl-text-gray-500"
+                data-testid="pipeline-details-container"
+              >
                 {{ pipeline.details.event_type_name }} {{ pipeline.details.status.label }}
                 <template v-if="hasCommitInfo">
                   {{ s__('Pipeline|for') }}

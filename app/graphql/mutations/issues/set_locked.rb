@@ -13,11 +13,8 @@ module Mutations
       def resolve(project_path:, iid:, locked:)
         issue = authorized_find!(project_path: project_path, iid: iid)
 
-        ::Issues::UpdateService.new(
-          container: issue.project,
-          current_user: current_user,
-          params: { discussion_locked: locked }
-        ).execute(issue)
+        ::Issues::UpdateService.new(container: issue.project, current_user: current_user, params: { discussion_locked: locked })
+          .execute(issue)
 
         {
           issue: issue,

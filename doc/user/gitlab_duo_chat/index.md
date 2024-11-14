@@ -15,7 +15,7 @@ DETAILS:
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/11251) as a [beta](../../policy/experiment-beta-support.md#beta) for self-managed in GitLab 16.8.
 > - Changed from Ultimate to [Premium](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/142808) tier in GitLab 16.9 while in [beta](../../policy/experiment-beta-support.md#beta).
 > - Changed to [generally available](../../policy/experiment-beta-support.md#generally-available-ga) in GitLab 16.11.
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
+> - Freely available for Ultimate and Premium users for a limited time.
 
 GitLab Duo Chat is your personal AI-powered assistant for boosting productivity.
 It can assist various tasks of your daily work with the AI-generated content.
@@ -46,8 +46,6 @@ In the GitLab UI, GitLab Duo Chat knows about these areas:
 | Issues        | From the issue, ask about `this issue`, `this`, or the URL. From any UI area, ask about the URL.                 |
 | Code files    | From the single file, ask about `this code` or `this file`. From any UI area, ask about the URL.                 |
 | Merge requests | From the merge request, ask about `this merge request`, `this`, or the URL. For more information, see [Ask about a specific merge request](examples.md#ask-about-a-specific-merge-request). |
-| Commits        | From the commit, ask about `this commit` or `this`. From any UI area, ask about the URL.                        |
-| Pipeline jobs  | From the pipeline job, ask about `this pipeline job` or `this`. From any UI area, ask about the URL.            |
 
 In the IDEs, GitLab Duo Chat knows about these areas:
 

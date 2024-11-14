@@ -8,8 +8,6 @@ module Gitlab
   module ApplicationRateLimiter
     InvalidKeyError = Class.new(StandardError)
 
-    LIMIT_USAGE_BUCKET = [0.25, 0.5, 0.75, 1].freeze
-
     class << self
       # Application rate limits
       #
@@ -85,7 +83,6 @@ module Gitlab
           vertex_embeddings_api: { threshold: 450, interval: 1.minute },
           jobs_index: { threshold: -> { application_settings.project_jobs_api_rate_limit }, interval: 1.minute },
           bulk_import: { threshold: 6, interval: 1.minute },
-          fogbugz_import: { threshold: 1, interval: 1.minute },
           import_source_user_notification: { threshold: 1, interval: 8.hours },
           projects_api_rate_limit_unauthenticated: {
             threshold: -> { application_settings.projects_api_rate_limit_unauthenticated }, interval: 10.minutes
@@ -149,8 +146,6 @@ module Gitlab
                   strategy.increment(cache_key, expiry)
                 end
 
-        report_metrics(key, value, threshold_value, peek)
-
         value > threshold_value
       end
 
@@ -197,26 +192,6 @@ module Gitlab
       # @return [Boolean] Whether or not a request is currently throttled
       def peek(key, scope:, threshold: nil, interval: nil, users_allowlist: nil)
         throttled?(key, peek: true, scope: scope, threshold: threshold, interval: interval, users_allowlist: users_allowlist)
-      end
-
-      def report_metrics(key, value, threshold, peek)
-        return if threshold == 0 # guard against div-by-zero
-
-        label = {
-          throttle_key: key,
-          peek: peek,
-          feature_category: Gitlab::ApplicationContext.current_context_attribute(:feature_category)
-        }
-        application_rate_limiter_histogram.observe(label, value / threshold.to_f)
-      end
-
-      def application_rate_limiter_histogram
-        @application_rate_limiter_histogram ||= Gitlab::Metrics.histogram(
-          :gitlab_application_rate_limiter_throttle_utilization_ratio,
-          "The utilization-ratio of a throttle.",
-          { peek: nil, throttle_key: nil, feature_category: nil },
-          LIMIT_USAGE_BUCKET
-        )
       end
 
       # Logs request using provided logger

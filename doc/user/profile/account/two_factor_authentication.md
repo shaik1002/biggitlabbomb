@@ -1,5 +1,5 @@
 ---
-stage: Software Supply Chain Security
+stage: Govern
 group: Authentication
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -371,8 +371,6 @@ A message displays indicating that your device responded to the authentication r
 in.
 
 ## Disable two-factor authentication
-
-> - Ability to disable OTP authenticator and WebAuthn devices individually or simultaneously [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/393419) in GitLab 17.6.
 
 You can disable the OTP authenticator and WebAuthn devices individually or simultaneously. To disable them simultaneously:
 

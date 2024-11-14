@@ -3,6 +3,7 @@
 module PreviewMarkdown
   extend ActiveSupport::Concern
 
+  # rubocop:disable Gitlab/ModuleWithInstanceVariables
   def preview_markdown
     result = PreviewMarkdownService.new(
       container: resource_parent,
@@ -61,4 +62,6 @@ module PreviewMarkdown
       allow_comments: !browser.ie?
     )
   end
+
+  # rubocop:enable Gitlab/ModuleWithInstanceVariables
 end

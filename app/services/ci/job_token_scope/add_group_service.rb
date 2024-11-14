@@ -6,7 +6,7 @@ module Ci
       include EditScopeValidations
 
       def execute(target_group, policies: [])
-        validate_source_project_and_target_group_access!(project, target_group, current_user)
+        validate_group_add!(project, target_group, current_user)
 
         link = allowlist
           .add_group!(target_group, policies: policies, user: current_user)
@@ -14,7 +14,7 @@ module Ci
         ServiceResponse.success(payload: { group_link: link })
 
       rescue ActiveRecord::RecordNotUnique
-        ServiceResponse.error(message: 'This group is already in the job token allowlist.')
+        ServiceResponse.error(message: 'Target group is already in the job token scope')
       rescue ActiveRecord::RecordInvalid => e
         ServiceResponse.error(message: e.message)
       rescue EditScopeValidations::ValidationError => e

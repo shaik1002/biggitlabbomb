@@ -1,0 +1,9 @@
+---
+name: api_composite_identity
+feature_issue_url:
+introduced_by_url:
+rollout_issue_url:
+milestone: '17.6'
+group: group::authentication
+type: gitlab_com_derisk
+default_enabled: false

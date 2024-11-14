@@ -96,10 +96,6 @@ Specific information applies to Linux package installations:
   Prior to upgrading, you must ensure your installation is using
   [PostgreSQL 14](https://docs.gitlab.com/omnibus/settings/database.html#upgrade-packaged-postgresql-server).
 
-- Packages are no longer built for Ubuntu 18.04
-
-  Ensure that your operating system has been upgraded to Ubuntu 20.04 or later before attempting to upgrade GitLab.
-
 ### Non-expiring access tokens
 
 Access tokens that have no expiration date are valid indefinitely, which is a
@@ -267,7 +263,6 @@ The OpenSSL 3 upgrade has been postponed to GitLab 17.7.0.
 
   | Affected minor releases | Affected patch releases | Fixed in |
   | ----------------------- | ----------------------- | -------- |
-  | 16.11                   |  16.11.5 - 16.11.10     | None     |
   | 17.0                    |  All                    | 17.0.7   |
   | 17.1                    |  All                    | 17.1.7   |
   | 17.2                    |  All                    | 17.2.5   |
@@ -327,7 +322,6 @@ The OpenSSL 3 upgrade has been postponed to GitLab 17.7.0.
 
   | Affected minor releases | Affected patch releases | Fixed in |
   | ----------------------- | ----------------------- | -------- |
-  | 16.11                   |  16.11.5 - 16.11.10     | None     |
   | 17.0                    |  All                    | 17.0.7   |
   | 17.1                    |  All                    | 17.1.7   |
   | 17.2                    |  All                    | 17.2.5   |
@@ -365,7 +359,6 @@ The OpenSSL 3 upgrade has been postponed to GitLab 17.7.0.
 
   | Affected minor releases | Affected patch releases | Fixed in |
   | ----------------------- | ----------------------- | -------- |
-  | 16.11                   |  16.11.5 - 16.11.10     | None     |
   | 17.0                    |  All                    | 17.0.7   |
   | 17.1                    |  All                    | 17.1.7   |
   | 17.2                    |  All                    | 17.2.5   |
@@ -392,7 +385,6 @@ The OpenSSL 3 upgrade has been postponed to GitLab 17.7.0.
 
   | Affected minor releases | Affected patch releases | Fixed in |
   | ----------------------- | ----------------------- | -------- |
-  | 16.11                   |  16.11.5 - 16.11.10     | None     |
   | 17.0                    |  All                    | 17.0.7   |
   | 17.1                    |  All                    | 17.1.7   |
   | 17.2                    |  All                    | 17.2.5   |

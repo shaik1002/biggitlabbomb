@@ -10,7 +10,6 @@ class ApplicationRecord < ActiveRecord::Base
   include Gitlab::SensitiveSerializableHash
   include ResetOnColumnErrors
   include HasCheckConstraints
-  include IgnorableColumns
 
   self.abstract_class = true
 
@@ -136,6 +135,12 @@ class ApplicationRecord < ActiveRecord::Base
   def self.nullable_column?(column_name)
     columns.find { |column| column.name == column_name }.null &&
       !not_null_check?(column_name)
+  end
+
+  def require_organization?
+    return false unless Feature.enabled?(:require_organization, Feature.current_request)
+
+    Gitlab::SafeRequestStore.fetch(:require_organization) { true } # rubocop:disable Style/RedundantFetchBlock -- This fetch has a different interface
   end
 
   def readable_by?(user)

@@ -3,8 +3,7 @@ data_category: optional
 key_path: counts.project_clusters_enabled
 description: Total GitLab Managed clusters attached to projects
 product_group: environments
-product_categories:
-- deployment_management
+product_category: deployment_management
 value_type: number
 status: active
 time_frame: all
@@ -12,7 +11,7 @@ data_source: database
 distribution:
 - ce
 - ee
-tiers:
+tier:
 - free
 - premium
 - ultimate

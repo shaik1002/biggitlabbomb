@@ -193,7 +193,9 @@ module EventsHelper
     elsif event.commit_note?
       project_commit_url(event.project, event.note_target)
     elsif event.note?
-      event_note_target_url(event) if event.note_target
+      if event.note_target
+        event_note_target_url(event)
+      end
     elsif event.push_action?
       push_event_feed_url(event)
     elsif event.created_project_action?
@@ -270,7 +272,7 @@ module EventsHelper
   end
 
   def event_wiki_page_target_url(event)
-    project_wiki_url(event.project, event.target&.canonical_slug || Wiki::HOMEPAGE) if event.project_id.present?
+    project_wiki_url(event.project, event.target&.canonical_slug || Wiki::HOMEPAGE)
   end
 
   def event_note_title_html(event)

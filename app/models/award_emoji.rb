@@ -9,7 +9,6 @@ class AwardEmoji < ApplicationRecord
   include Participable
   include GhostUser
   include Importable
-  include EachBatch
 
   belongs_to :awardable, polymorphic: true # rubocop:disable Cop/PolymorphicAssociations
   belongs_to :user

@@ -29,7 +29,9 @@ module FromExcept
     #
     # alias_as - The alias to use for the sub query. Defaults to the name of the
     #            table of the current model.
+    # rubocop: disable Gitlab/Except
     extend FromSetOperator
     define_set_operator Gitlab::SQL::Except
+    # rubocop: enable Gitlab/Except
   end
 end

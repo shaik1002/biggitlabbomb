@@ -5368,7 +5368,7 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
 
       it 'wraps around to max size of a signed smallint' do
         expect { drop_with_exit_code }
-        .to change { build.reload.metadata&.exit_code }.from(nil).to(32767)
+        .to change { build.reload.metadata&.exit_code }.from(nil).to(2)
       end
     end
   end
@@ -5524,6 +5524,14 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
         end
 
         it { expect(matchers).to all be_protected }
+      end
+
+      context 'with use_new_queue_tags disabled' do
+        before do
+          stub_feature_flags(use_new_queue_tags: false)
+        end
+
+        it { expect(matchers.map(&:tag_list)).to match_array([[], %w[tag1 tag2]]) }
       end
     end
   end
@@ -6023,46 +6031,40 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
     end
   end
 
-  describe 'TokenAuthenticatable' do
-    it_behaves_like 'TokenAuthenticatable' do
-      let(:token_field) { :token }
-    end
+  describe 'token format for builds transiting into pending' do
+    let(:partition_id) { 100 }
+    let(:ci_build) { described_class.new(partition_id: partition_id) }
 
-    describe 'token format for builds transiting into pending' do
-      let(:partition_id) { 100 }
-      let(:ci_build) { described_class.new(partition_id: partition_id) }
+    context 'when build is initialized without a token and transits to pending' do
+      let(:partition_id_prefix_in_16_bit_encode) { partition_id.to_s(16) + '_' }
 
-      context 'when build is initialized without a token and transits to pending' do
-        let(:partition_id_prefix_in_16_bit_encode) { partition_id.to_s(16) + '_' }
-
-        it 'generates a token' do
-          expect { ci_build.enqueue }
-            .to change { ci_build.token }.from(nil).to(a_string_starting_with("glcbt-#{partition_id_prefix_in_16_bit_encode}"))
-        end
-      end
-
-      context 'when build is initialized with a token and transits to pending' do
-        let(:token) { 'an_existing_secret_token' }
-
-        before do
-          ci_build.set_token(token)
-        end
-
-        it 'does not change the existing token' do
-          expect { ci_build.enqueue }
-            .not_to change { ci_build.token }.from(token)
-        end
+      it 'generates a token' do
+        expect { ci_build.enqueue }
+          .to change { ci_build.token }.from(nil).to(a_string_starting_with("glcbt-#{partition_id_prefix_in_16_bit_encode}"))
       end
     end
 
-    describe '#prefix_and_partition_for_token' do
-      # 100.to_s(16) -> 64
-      let(:ci_build) { described_class.new(partition_id: 100) }
+    context 'when build is initialized with a token and transits to pending' do
+      let(:token) { 'an_existing_secret_token' }
 
-      it 'is prefixed with static string and partition id' do
-        ci_build.ensure_token
-        expect(ci_build.token).to match(/^glcbt-64_[\w-]{20}$/)
+      before do
+        ci_build.set_token(token)
       end
+
+      it 'does not change the existing token' do
+        expect { ci_build.enqueue }
+          .not_to change { ci_build.token }.from(token)
+      end
+    end
+  end
+
+  describe '#prefix_and_partition_for_token' do
+    # 100.to_s(16) -> 64
+    let(:ci_build) { described_class.new(partition_id: 100) }
+
+    it 'is prefixed with static string and partition id' do
+      ci_build.ensure_token
+      expect(ci_build.token).to match(/^glcbt-64_[\w-]{20}$/)
     end
   end
 
@@ -6086,5 +6088,13 @@ RSpec.describe Ci::Build, feature_category: :continuous_integration, factory_def
     end
 
     it { expect(build.tags_ids_relation.pluck(:name)).to match_array(tag_list) }
+
+    context 'with use_new_queue_tags disabled' do
+      before do
+        stub_feature_flags(use_new_queue_tags: false)
+      end
+
+      it { expect(build.tags_ids_relation.pluck(:name)).to match_array(tag_list) }
+    end
   end
 end

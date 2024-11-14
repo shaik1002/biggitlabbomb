@@ -189,7 +189,6 @@ mapping:
       - 'ee/spec/lib/gitlab/database/desired_sharding_key_spec.rb'
       - 'spec/db/docs_spec.rb'
       - 'spec/lib/gitlab/database/dictionary_spec.rb'
-      - 'ee/spec/lib/gitlab/database/inclusion_of_tables_with_gitlab_sec_schema_spec.rb'
       - 'spec/lib/gitlab/database/no_new_tables_with_gitlab_main_schema_spec.rb'
       - 'spec/lib/gitlab/database/sharding_key_spec.rb'
 
@@ -293,26 +292,3 @@ mapping:
     - '(?<prefix>ee/)?lib/api/(?<rest>.+hook.+)\.rb'
     test:
       - '{ee/,}spec/requests/api/**/*hook*_spec.rb'
-
-  # Registration/Onboarding
-  - source:
-    - 'ee/app/(controllers|services)/registrations/.*'
-    - 'ee/app/controllers/concerns/ee/onboarding/status\.rb'
-    - 'app/controllers/concerns/onboarding/status\.rb'
-    test:
-    - 'ee/spec/features/registrations/saas/*_spec.rb'
-    - ee/spec/features/registrations/email_opt_in_registration_spec.rb
-
-  # ultimate trials
-  - source: 'ee/app/controllers/gitlab_subscriptions/trials_controller\.rb'
-    test:
-    - 'ee/spec/features/gitlab_subscriptions/trials/creation_*_spec.rb'
-    - ee/spec/features/gitlab_subscriptions/trials/access_denied_spec.rb
-
-  # duo pro trials
-  - source: 'ee/app/controllers/gitlab_subscriptions/trials/duo_pro_controller\.rb'
-    test: 'ee/spec/features/gitlab_subscriptions/trials/duo_pro/*_spec.rb'
-
-  # duo enterprise trials
-  - source: 'ee/app/controllers/gitlab_subscriptions/trials/duo_enterprise_controller\.rb'
-    test: 'ee/spec/features/gitlab_subscriptions/trials/duo_enterprise/*_spec.rb'

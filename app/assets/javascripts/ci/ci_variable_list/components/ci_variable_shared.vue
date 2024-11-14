@@ -99,7 +99,6 @@ export default {
   data() {
     return {
       ciVariables: [],
-      environments: [],
       hasNextPage: false,
       isInitialLoading: true,
       isLoadingMoreItems: false,
@@ -159,6 +158,7 @@ export default {
         }
       },
     },
+    // eslint-disable-next-line @gitlab/vue-no-undef-apollo-properties
     environments: {
       query() {
         return this.queryData?.environments?.query || {};

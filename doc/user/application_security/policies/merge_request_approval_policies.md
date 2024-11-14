@@ -1,5 +1,5 @@
 ---
-stage: Security Risk Management
+stage: Govern
 group: Security Policies
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -16,13 +16,9 @@ DETAILS:
 NOTE:
 Scan result policies feature was renamed to merge request approval policies in GitLab 16.9.
 
-You can use merge request approval policies for multiple purposes, including:
-
-- Detect results from security and license scanners to enforce approval rules. For example, one type of merge request
-policy is a security approval policy that allows approval to be required based on the
+Use merge request approval policies to enforce project-level settings and approval rules based on scan results. For example, one type of scan
+result policy is a security approval policy that allows approval to be required based on the
 findings of one or more security scan jobs. Merge request approval policies are evaluated after a CI scanning job is fully executed and both vulnerability and license type policies are evaluated based on the job artifact reports that are published in the completed pipeline.
-- Enforce approval rules on all merge requests that meet certain conditions. For example, enforce that MRs are reviewed by multiple users with Developer and Maintainer roles for all MRs that target default branches.
-- Enforce settings for security and compliance on a project. For example, prevent users who have authored or committed changes to an MR from approving the MR. Or prevent users from pushing or force pushing to the default branch to ensure all changes go through an MR.
 
 NOTE:
 When a protected branch is created or deleted, the policy approval rules synchronize, with a delay of 1 minute.
@@ -143,7 +139,6 @@ the following sections and tables provide an alternative.
 | `approval_settings` | `object`           | false    |                 | Project settings that the policy overrides.              |
 | `fallback_behavior` | `object`           | false    |                 | Settings that affect invalid or unenforceable rules.     |
 | `policy_scope`      | `object` of [`policy_scope`](index.md#scope) | false |  | Defines the scope of the policy based on the projects, groups, or compliance framework labels you specify. |
-| `policy_tuning`     | `object`           | false    |                 | (Experimental) Settings that affect policy comparison logic.     |
 
 ## `scan_finding` rule type
 
@@ -257,14 +252,14 @@ the bot message is sent as long as at least one of those policies has the `send_
 > - Feature flag `scan_result_policies_block_force_push` [was removed](https://gitlab.com/gitlab-org/gitlab/-/issues/432123) in GitLab 16.8.
 
 FLAG:
-The availability of the `block_group_branch_modification` setting is controlled by a feature flag. For more information, see the history.
+On self-managed GitLab, by default the `block_branch_modification` field is available. To hide the feature, an administrator can [disable the feature flag](../../../administration/feature_flags.md) named `scan_result_policies_block_unprotecting_branches`. On GitLab.com and GitLab Dedicated, this feature is available.
 
 The settings set in the policy overwrite settings in the project.
 
 | Field                               | Type                  | Required | Possible values                                               | Applicable rule type | Description |
 |-------------------------------------|-----------------------|----------|---------------------------------------------------------------|----------------------|-------------|
 | `block_branch_modification`         | `boolean`             | false    | `true`, `false`                                               | All                  | When enabled, prevents a user from removing a branch from the protected branches list, deleting a protected branch, or changing the default branch if that branch is included in the security policy. This ensures users cannot remove protection status from a branch to merge vulnerable code. Enforced based on `branches`, `branch_type` and `policy_scope` and regardless of detected vulnerabilities. |
-| `block_group_branch_modification`   | `boolean` or `object` | false    | `true`, `false`, `{ enabled: boolean, exceptions: [{ id: Integer}] }` | All                  | When enabled, prevents a user from removing group-level protected branches on every group the policy applies to. If `block_branch_modification` is `true`, implicitly defaults to `true`. Add top-level groups that support [group-level protected branches](../../../user/project/repository/branches/protected.md#for-all-projects-in-a-group) as `exceptions` |
+| `block_group_branch_modification`   | `boolean` or `object` | false    | `true`, `false`, `{ enabled: boolean, exceptions: [string] }` | All                  | When enabled, prevents a user from removing group-level protected branches on every group the policy applies to. If `block_branch_modification` is `true`, implicitly defaults to `true`. Enforced based on `branches`, `branch_type` and `policy_scope` and regardless of detected vulnerabilities. |
 | `prevent_approval_by_author`        | `boolean`             | false    | `true`, `false`                                               | `Any merge request`  | When enabled, merge request authors cannot approve their own MRs. This ensures code authors cannot introduce vulnerabilities and approve code to merge. |
 | `prevent_approval_by_commit_author` | `boolean`             | false    | `true`, `false`                                               | `Any merge request`  | When enabled, users who have contributed code to the MR are ineligible for approval. This ensures code committers cannot introduce vulnerabilities and approve code to merge. |
 | `remove_approvals_with_new_commit`  | `boolean`             | false    | `true`, `false`                                               | `Any merge request`  | When enabled, if an MR receives all necessary approvals to merge, but then a new commit is added, new approvals are required. This ensures new commits that may include vulnerabilities cannot be introduced. |
@@ -283,62 +278,13 @@ On self-managed GitLab, by default the `fallback_behavior` field is available. T
 |--------|----------|----------|--------------------|----------------------------------------------------------------------------------------------------------------------|
 | `fail` | `string` | false    | `open` or `closed` | `closed` (default): Invalid or unenforceable rules of a policy require approval. `open`: Invalid or unenforceable rules of a policy do not require approval. |
 
-## `policy_tuning`
-
-| Field  | Type     | Required | Possible values    | Description                                                                                                          |
-|--------|----------|----------|--------------------|----------------------------------------------------------------------------------------------------------------------|
-| `unblock_rules_using_execution_policies` | `boolean` | false    | `true`, `false` | When enabled, approval rules become optional when scan artifacts are missing from the target branch and a scan is required by a scan execution policy. This option only works with an existing scan execution policy that has matching scanners. |
-
-### Example `policy.yml` in a security policy project that uses `policy_tuning`
-
-```yaml
-scan_execution_policy:
-- name: Enforce dependency scanning
-  description: ''
-  enabled: true
-  policy_scope:
-    projects:
-      excluding: []
-  rules:
-  - type: pipeline
-    branch_type: all
-  actions:
-  - scan: dependency_scanning
-approval_policy:
-- name: Dependency scanning approvals
-  description: ''
-  enabled: true
-  policy_scope:
-    projects:
-      excluding: []
-  rules:
-  - type: scan_finding
-    scanners:
-    - dependency_scanning
-    vulnerabilities_allowed: 0
-    severity_levels: []
-    vulnerability_states: []
-    branch_type: protected
-  actions:
-  - type: require_approval
-    approvals_required: 1
-    role_approvers:
-    - developer
-  - type: send_bot_message
-    enabled: true
-  fallback_behavior:
-    fail: closed
-  policy_tuning:
-    unblock_rules_using_execution_policies: true
-```
-
 ## Policy scope schema
 
 To customize policy enforcement, you can define a policy's scope to either include or exclude
 specified projects, groups, or compliance framework labels. For more details, see
 [Scope](index.md#scope).
 
-## Example `policy.yml` in a security policy project
+## Example security merge request approval policies project
 
 You can use this example in a `.gitlab/security-policies/policy.yml` file stored in a
 [security policy project](index.md#security-policy-project):
@@ -438,13 +384,13 @@ actions:
 - For the source branch, the comparison pipelines are all completed pipelines for each supported pipeline source for the latest commit in the source branch.
 - If the merge request approval policy looks only for the newly detected states (`new_needs_triage` & `new_dismissed`), the comparison is performed against all the supported pipeline sources in the common ancestor between the source and the target branch. An exception is when using Merged Results pipelines, in which case the comparison is done against the tip of the MR's target branch.
 - If the merge request approval policy looks for pre-existing states (`detected`, `confirmed`, `resolved`, `dismissed`), the comparison is always done against the tip of the default branch (for example, `main`).
-- If the merge request approval policy looks for a combination of new and pre-existing vulnerability states, the comparison is done against the common ancestor of the source and target branches.
+- If the merge request approval policy looks for a combination of new and pre-existing vulnerabilty states, the comparison is done against the common ancestor of the source and target branches.
 - Merge request approval policies considers all supported pipeline sources (based on the [`CI_PIPELINE_SOURCE` variable](../../../ci/variables/predefined_variables.md)) when comparing results from both the source and target branches when determining if a merge request requires approval. Pipelines with source `webide` are not supported.
-- In GitLab 16.11 and later, the child pipelines of each of the selected pipelines are also considered for comparison.
+- In GitLab 16.11 and later, the child pipelines of each of the selected pipelines are also considered for comparison. This is available [with a flag](../../../administration/feature_flags.md) named `approval_policy_parent_child_pipeline`.
 
 ### Accepting risk and ignoring vulnerabilities in future merge requests
 
-For merge request approval policies that are scoped to newly detected findings (`new_needs_triage` or `new_dismissed` statuses), it's important to understand the implications of this vulnerability state. A finding is considered newly detected if it exists on the merge request's branch but not on the target branch. When a merge request with a branch that contains newly detected findings is approved and merged, approvers are "accepting the risk" of those vulnerabilities. If one or more of the same vulnerabilities is detected after this time, the status would be `detected`, so it would not be out of scope of a policy aimed at `new_needs_triage` or `new_dismissed` findings. For example:
+For merge request approval policies that are scoped to newly detected findings(`new_needs_triage` or `new_dismissed` statuses), it's important to understand the implications of this vulnerability state. A finding is considered newly detected if it exists on the merge request's branch but not on the default branch. When a merge request whose branch contains newly detected findings is approved and merged, approvers are "accepting the risk" of those vulnerabilities. If one or more of the same vulnerabilities were detected after this time, their status would be `detected` and so not be out of scope of a policy aimed at `new_needs_triage` or `new_dismissed` findings. For example:
 
 - A merge request approval policy is created to block critical SAST findings. If a SAST finding for CVE-1234 is approved, future merge requests with the same violation will not require approval in the project.
 

@@ -2,6 +2,6 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::BackgroundMigration::BatchingStrategies::BackfillProjectStatisticsWithContainerRegistrySizeBatchingStrategy do
+RSpec.describe Gitlab::BackgroundMigration::BatchingStrategies::BackfillProjectStatisticsWithContainerRegistrySizeBatchingStrategy do # rubocop:disable Layout/LineLength
   it { expect(described_class).to be < Gitlab::BackgroundMigration::BatchingStrategies::PrimaryKeyBatchingStrategy }
 end

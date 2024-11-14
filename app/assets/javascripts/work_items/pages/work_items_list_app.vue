@@ -159,7 +159,10 @@ export default {
 
         if (data?.[this.namespace]) {
           if (this.isGroup) {
-            const rootBreadcrumbName = this.isEpicsList ? __('Epics') : s__('WorkItem|Work items');
+            const rootBreadcrumbName =
+              this.workItemType === WORK_ITEM_TYPE_ENUM_EPIC
+                ? __('Epics')
+                : s__('WorkItem|Work items');
             document.title = `${rootBreadcrumbName} · ${data.group.name} · GitLab`;
           } else {
             document.title = `Issues · ${data.project.name} · GitLab`;
@@ -214,10 +217,7 @@ export default {
       });
     },
     workItemDrawerEnabled() {
-      return this.isEpicsList ? this.glFeatures.epicsListDrawer : this.glFeatures.issuesListDrawer;
-    },
-    isEpicsList() {
-      return this.workItemType === WORK_ITEM_TYPE_ENUM_EPIC;
+      return this.glFeatures?.issuesListDrawer;
     },
     hasSearch() {
       return Boolean(this.searchQuery);
@@ -239,7 +239,7 @@ export default {
         search: this.searchQuery,
         ...this.apiFilterParams,
         ...this.pageParams,
-        excludeProjects: this.isEpicsList,
+        excludeProjects: this.workItemType === WORK_ITEM_TYPE_ENUM_EPIC,
         includeDescendants: !this.apiFilterParams.fullPath,
         types: this.apiFilterParams.types || this.workItemType || this.defaultWorkItemTypes,
         isGroup: this.isGroup,
@@ -408,11 +408,7 @@ export default {
       };
     },
     activeWorkItemType() {
-      const activeWorkItemTypeName =
-        typeof this.activeItem?.workItemType === 'object'
-          ? this.activeItem?.workItemType?.name
-          : this.activeItem?.workItemType;
-      return this.workItemType || activeWorkItemTypeName;
+      return this.workItemType || this.activeItem?.workItemType;
     },
   },
   watch: {

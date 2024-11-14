@@ -2,7 +2,8 @@
 - breadcrumb_title _("New milestone")
 - page_title _("Milestones"), @milestone.name, _("Milestones")
 
-= render ::Layouts::PageHeadingComponent.new(_('New milestone'))
+%h1.page-title.gl-text-size-h-display
+  = _("New Milestone")
 
 .gl-mt-3
   = render "form"

@@ -43,6 +43,7 @@ module Gitlab
 
       private
 
+      # rubocop: disable CodeReuse/ActiveRecord
       def preload_builds(pipeline, association)
         ActiveRecord::Associations::Preloader.new(
           records: [pipeline],
@@ -58,6 +59,7 @@ module Gitlab
           }
         ).call
       end
+      # rubocop: enable CodeReuse/ActiveRecord
 
       def hook_attrs(pipeline)
         {

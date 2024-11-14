@@ -14,7 +14,6 @@ module API
 
         if actor.user
           load_balancer_stick_request(::User, :user, actor.user.id)
-          set_current_organization(user: actor.user)
         end
 
         Gitlab::ApplicationContext.push(

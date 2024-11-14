@@ -22,7 +22,6 @@ DETAILS:
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/117695) for GitLab.com in GitLab 16.0.
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/451215) ability to ask doc-related questions on self-managed in GitLab 17.0 [with a flag](../../administration/feature_flags.md) named `ai_gateway_docs_search`. Enabled by default.
 > - [Generally available and feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/154876) in GitLab 17.1.
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 You can ask questions about how GitLab works. Things like:
 
@@ -45,7 +44,6 @@ DETAILS:
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/122235) for GitLab.com in GitLab 16.0.
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/122235) for self-managed and GitLab Dedicated in GitLab 16.8.
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 You can ask about a specific GitLab issue. For example:
 
@@ -70,7 +68,6 @@ DETAILS:
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/128487) for GitLab.com in GitLab 16.3.
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/128487) for self-managed and GitLab Dedicated in GitLab 16.8.
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 You can ask about a specific GitLab epic. For example:
 
@@ -90,7 +87,6 @@ DETAILS:
 **LLM:** Anthropic [Claude 3.5 Sonnet](https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-3-5-sonnet)
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/464587) in GitLab 17.5.
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 You can ask GitLab about the merge request you're viewing. You can ask about:
 
@@ -110,39 +106,6 @@ Chat is not aware of pipelines or commits. However, you can use
 [root cause analysis](#troubleshoot-failed-cicd-jobs-with-root-cause-analysis)
 to troubleshoot the jobs in your pipeline.
 
-## Ask about a specific commit
-
-DETAILS:
-**Tier:** Ultimate with GitLab Duo Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
-**Offering:** GitLab.com, Self-managed, GitLab Dedicated
-**Editors:** GitLab UI
-**LLM:** Anthropic [Claude 3.5 Sonnet](https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-3-5-sonnet)
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/468460) in GitLab 17.6.
-
-You can ask about a specific GitLab commit. For example:
-
-- `Generate a summary for the commit identified with this link: <link to your commit>`
-- `How can I improve the description of this commit?`
-- When you are viewing a commit in GitLab, you can ask `Generate a summary of the current commit.`
-
-## Ask about a specific pipeline job
-
-DETAILS:
-**Tier:** Ultimate with GitLab Duo Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
-**Offering:** GitLab.com, Self-managed, GitLab Dedicated
-**Editors:** GitLab UI
-**LLM:** Anthropic [Claude 3.5 Sonnet](https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-3-5-sonnet)
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/468461) in GitLab 17.6.
-
-You can ask about a specific GitLab pipeline job. For example:
-
-- `Generate a summary for the pipeline job identified via this link: <link to your pipeline job>`
-- `Can you suggest ways to fix this failed pipeline job?`
-- `What are the main steps executed in this pipeline job?`
-- When you are viewing a pipeline job in GitLab, you can ask `Generate a summary of the current pipeline job.`
-
 ## Explain selected code
 
 DETAILS:
@@ -153,14 +116,13 @@ DETAILS:
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/429915) for GitLab.com in GitLab 16.7.
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/429915) for self-managed and GitLab Dedicated in GitLab 16.8.
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 You can ask GitLab Duo Chat to explain selected code:
 
 1. Select some code in your IDE.
 1. In Duo Chat, type `/explain`.
 
-   ![Selecting code and asking GitLab Duo Chat to explain using the /explain slash command.](img/code_selection_duo_chat_v17_4.png)
+   ![Selecting code and asking GitLab Duo Chat to explain using the /explain slash command.](img/code_selection_duo_chat.png)
 
 You can also add additional instructions to be considered. For example:
 
@@ -190,7 +152,6 @@ DETAILS:
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/122235) for GitLab.com in GitLab 16.1.
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/122235) for self-managed and GitLab Dedicated in GitLab 16.8.
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 You can ask GitLab Duo Chat questions about code by pasting that code into
 the Duo Chat window. For example:
@@ -243,7 +204,6 @@ DETAILS:
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/429915) for GitLab.com in GitLab 16.7.
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/429915) for self-managed and GitLab Dedicated in GitLab 16.8.
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 You can ask GitLab Duo Chat to refactor selected code:
 
@@ -268,7 +228,6 @@ DETAILS:
 **LLM:** Anthropic [Claude 3.5 Sonnet](https://console.cloud.google.com/vertex-ai/publishers/anthropic/model-garden/claude-3-5-sonnet)
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/429915) for GitLab.com, self-managed and GitLab Dedicated in GitLab 17.3.
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 You can ask GitLab Duo Chat to fix selected code:
 
@@ -293,7 +252,6 @@ DETAILS:
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/429915) for GitLab.com in GitLab 16.7.
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/429915) for self-managed and GitLab Dedicated in GitLab 16.8.
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 You can ask GitLab Duo Chat to create tests for the selected code:
 
@@ -321,7 +279,6 @@ DETAILS:
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/423524) for self-managed and GitLab Dedicated in GitLab 16.8.
 > - [Updated LLM](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/149619) from Claude 2.1 to Claude 3 Sonnet in GitLab 17.2.
 > - [Updated LLM](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/157696) from Claude 3 Sonnet to Claude 3.5 Sonnet in GitLab 17.2.
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 You can ask GitLab Duo Chat to create a CI/CD configuration:
 
@@ -348,7 +305,6 @@ DETAILS:
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/123692) in GitLab 16.2 as an [experiment](../../policy/experiment-beta-support.md#experiment) on GitLab.com.
 > - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/441681) and moved to GitLab Duo Chat in GitLab 17.3.
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 You can ask GitLab Duo Chat to determine the root cause of a CI/CD job failure by analyzing the logs.
 
@@ -380,8 +336,6 @@ DETAILS:
 **Editors:** GitLab UI
 **LLM:** Anthropic [Claude 3 Haiku](https://docs.anthropic.com/en/docs/about-claude/models#claude-3-a-new-generation-of-ai)
 
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
-
 You can ask GitLab Duo Chat to explain a vulnerability when you are viewing a SAST vulnerability report.
 
 For more information, see [Explaining a vulnerability](../application_security/vulnerabilities/index.md#explaining-a-vulnerability).
@@ -399,7 +353,7 @@ To start a new conversation, but keep the previous conversations visible in the 
 In both cases, the conversation history will not be considered when you ask new questions.
 Deleting or resetting might help improve the answers when you switch contexts, because Duo Chat will not get confused by the unrelated conversations.
 
-## GitLab Duo Chat slash commands
+## Supported slash commands
 
 Duo Chat has a list of supported commands, each of which is preceded by a slash (`/`).
 Use the following commands to quickly accomplish specific tasks.

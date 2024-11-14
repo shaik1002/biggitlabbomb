@@ -41,11 +41,7 @@ import { sortOptions, urlSortParams } from '~/work_items/pages/list/constants';
 import getWorkItemStateCountsQuery from '~/work_items/graphql/list/get_work_item_state_counts.query.graphql';
 import getWorkItemsQuery from '~/work_items/graphql/list/get_work_items.query.graphql';
 import WorkItemDrawer from '~/work_items/components/work_item_drawer.vue';
-import {
-  STATE_CLOSED,
-  DETAIL_VIEW_QUERY_PARAM_NAME,
-  WORK_ITEM_TYPE_ENUM_EPIC,
-} from '~/work_items/constants';
+import { STATE_CLOSED, DETAIL_VIEW_QUERY_PARAM_NAME } from '~/work_items/constants';
 import { createRouter } from '~/work_items/router';
 import {
   groupWorkItemsQueryResponse,
@@ -465,134 +461,92 @@ describeSkipVue3(skipReason, () => {
   });
 
   describe('work item drawer', () => {
-    describe('when rendering issues list', () => {
-      describe('when issues_list_drawer feature is disabled', () => {
-        it('is not rendered when feature is disabled', async () => {
-          mountComponent({
-            provide: {
-              glFeatures: {
-                issuesListDrawer: false,
-                epicsListDrawer: true,
-              },
+    describe('when issues_list_drawer feature is disabled', () => {
+      it('is not rendered when feature is disabled', async () => {
+        mountComponent({
+          provide: {
+            glFeatures: {
+              issuesListDrawer: false,
             },
-          });
-          await waitForPromises();
-
-          expect(findDrawer().exists()).toBe(false);
+          },
         });
-      });
+        await waitForPromises();
 
-      describe('when issues_list_drawer feature is enabled', () => {
-        beforeEach(async () => {
-          mountComponent({
-            provide: {
-              glFeatures: {
-                issuesListDrawer: true,
-                epicsListDrawer: false,
-              },
-            },
-          });
-          await waitForPromises();
-        });
-
-        it('is rendered when feature is enabled', () => {
-          expect(findDrawer().exists()).toBe(true);
-        });
-
-        describe('selecting issues', () => {
-          const issue = groupWorkItemsQueryResponse.data.group.workItems.nodes[0];
-          const payload = {
-            iid: issue.iid,
-            webUrl: issue.webUrl,
-            fullPath: issue.namespace.fullPath,
-          };
-
-          beforeEach(async () => {
-            findIssuableList().vm.$emit('select-issuable', payload);
-
-            await nextTick();
-          });
-
-          it('opens drawer when work item is selected', () => {
-            expect(findDrawer().props('open')).toBe(true);
-            expect(findDrawer().props('activeItem')).toEqual(payload);
-          });
-
-          const checkThatDrawerPropsAreEmpty = () => {
-            expect(findDrawer().props('activeItem')).toBeNull();
-            expect(findDrawer().props('open')).toBe(false);
-          };
-
-          it('resets the selected item when the drawer is closed', async () => {
-            findDrawer().vm.$emit('close');
-
-            await nextTick();
-
-            checkThatDrawerPropsAreEmpty();
-          });
-
-          it('refetches and resets when work item is deleted', async () => {
-            expect(defaultQueryHandler).toHaveBeenCalledTimes(1);
-
-            findDrawer().vm.$emit('workItemDeleted');
-
-            await nextTick();
-
-            checkThatDrawerPropsAreEmpty();
-
-            expect(defaultQueryHandler).toHaveBeenCalledTimes(2);
-          });
-
-          it('refetches when the selected work item is closed', async () => {
-            expect(defaultQueryHandler).toHaveBeenCalledTimes(1);
-
-            // component displays open work items by default
-            findDrawer().vm.$emit('work-item-updated', {
-              state: STATE_CLOSED,
-            });
-
-            await nextTick();
-
-            expect(defaultQueryHandler).toHaveBeenCalledTimes(2);
-          });
-        });
+        expect(findDrawer().exists()).toBe(false);
       });
     });
 
-    describe('when rendering epics list', () => {
-      describe('when epics_list_drawer feature is disabled', () => {
-        it('is not rendered when feature is disabled', async () => {
-          mountComponent({
-            provide: {
-              glFeatures: {
-                issuesListDrawer: true,
-                epicsListDrawer: false,
-              },
-              workItemType: WORK_ITEM_TYPE_ENUM_EPIC,
+    describe('when issues_list_drawer feature is enabled', () => {
+      beforeEach(async () => {
+        mountComponent({
+          provide: {
+            glFeatures: {
+              issuesListDrawer: true,
             },
-          });
-          await waitForPromises();
-
-          expect(findDrawer().exists()).toBe(false);
+          },
         });
+        await waitForPromises();
       });
 
-      describe('when issues_list_drawer feature is enabled', () => {
+      it('is rendered when feature is enabled', () => {
+        expect(findDrawer().exists()).toBe(true);
+      });
+
+      describe('selecting issues', () => {
+        const issue = groupWorkItemsQueryResponse.data.group.workItems.nodes[0];
+        const payload = {
+          iid: issue.iid,
+          webUrl: issue.webUrl,
+          fullPath: issue.namespace.fullPath,
+        };
+
         beforeEach(async () => {
-          mountComponent({
-            provide: {
-              glFeatures: {
-                issuesListDrawer: false,
-                epicsListDrawer: true,
-              },
-              workItemType: WORK_ITEM_TYPE_ENUM_EPIC,
-            },
-          });
-          await waitForPromises();
+          findIssuableList().vm.$emit('select-issuable', payload);
+
+          await nextTick();
         });
 
-        it('is rendered when feature is enabled', () => {
-          expect(findDrawer().exists()).toBe(true);
+        it('opens drawer when work item is selected', () => {
+          expect(findDrawer().props('open')).toBe(true);
+          expect(findDrawer().props('activeItem')).toEqual(payload);
+        });
+
+        const checkThatDrawerPropsAreEmpty = () => {
+          expect(findDrawer().props('activeItem')).toBeNull();
+          expect(findDrawer().props('open')).toBe(false);
+        };
+
+        it('resets the selected item when the drawer is closed', async () => {
+          findDrawer().vm.$emit('close');
+
+          await nextTick();
+
+          checkThatDrawerPropsAreEmpty();
+        });
+
+        it('refetches and resets when work item is deleted', async () => {
+          expect(defaultQueryHandler).toHaveBeenCalledTimes(1);
+
+          findDrawer().vm.$emit('workItemDeleted');
+
+          await nextTick();
+
+          checkThatDrawerPropsAreEmpty();
+
+          expect(defaultQueryHandler).toHaveBeenCalledTimes(2);
+        });
+
+        it('refetches when the selected work item is closed', async () => {
+          expect(defaultQueryHandler).toHaveBeenCalledTimes(1);
+
+          // component displays open work items by default
+          findDrawer().vm.$emit('work-item-updated', {
+            state: STATE_CLOSED,
+          });
+
+          await nextTick();
+
+          expect(defaultQueryHandler).toHaveBeenCalledTimes(2);
         });
       });
     });

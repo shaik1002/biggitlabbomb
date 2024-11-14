@@ -42,7 +42,8 @@ $command-palette-spacing: px-to-rem(14px);
   --super-sidebar-hr-mix-blend-mode: multiply;
 
   .gl-dark & {
-    --super-sidebar-border-color: var(--gl-border-color-section);
+    --super-sidebar-bg: var(--gl-background-color-default);
+    --super-sidebar-border-color: var(--gl-color-alpha-light-8);
     --super-sidebar-user-bar-bg: var(--gl-color-alpha-light-4);
 
     --super-sidebar-user-bar-button-bg: var(--gl-background-color-default);
@@ -91,10 +92,10 @@ $command-palette-spacing: px-to-rem(14px);
 
   &.gl-dark {
     @include super-sidebar-theme(
-      $background: var(--gl-background-color-subtle),
+      $background: var(--gl-background-color-default),
       $user-bar-background: var(--gl-color-theme-blue-900),
       $user-bar-button-color: var(--gl-color-theme-blue-50),
-      $context-header: var(--gl-color-theme-blue-300),
+      $context-header: var(--gl-color-theme-blue-500),
       $accent-color: var(--gl-color-theme-blue-500),
     );
   }
@@ -111,10 +112,10 @@ $command-palette-spacing: px-to-rem(14px);
 
   &.gl-dark {
     @include super-sidebar-theme(
-      $background: var(--gl-background-color-subtle),
+      $background: var(--gl-background-color-default),
       $user-bar-background: var(--gl-color-neutral-900),
       $user-bar-button-color: var(--gl-color-neutral-50),
-      $context-header: var(--gl-color-neutral-300),
+      $context-header: var(--gl-color-neutral-500),
       $accent-color: var(--gl-color-neutral-500),
     );
   }
@@ -131,10 +132,10 @@ $command-palette-spacing: px-to-rem(14px);
 
   &.gl-dark {
     @include super-sidebar-theme(
-      $background: var(--gl-background-color-subtle),
+      $background: var(--gl-background-color-default),
       $user-bar-background: var(--gl-color-theme-green-900),
       $user-bar-button-color: var(--gl-color-theme-green-50),
-      $context-header: var(--gl-color-theme-green-300),
+      $context-header: var(--gl-color-theme-green-500),
       $accent-color: var(--gl-color-theme-green-500),
     );
   }
@@ -151,10 +152,10 @@ $command-palette-spacing: px-to-rem(14px);
 
   &.gl-dark {
     @include super-sidebar-theme(
-      $background: var(--gl-background-color-subtle),
+      $background: var(--gl-background-color-default),
       $user-bar-background: var(--gl-color-theme-indigo-900),
       $user-bar-button-color: var(--gl-color-theme-indigo-50),
-      $context-header: var(--gl-color-theme-indigo-300),
+      $context-header: var(--gl-color-theme-indigo-500),
       $accent-color: var(--gl-color-theme-indigo-500),
     );
   }
@@ -171,10 +172,10 @@ $command-palette-spacing: px-to-rem(14px);
 
   &.gl-dark {
     @include super-sidebar-theme(
-      $background: var(--gl-background-color-subtle),
+      $background: var(--gl-background-color-default),
       $user-bar-background: var(--gl-color-theme-light-blue-800),
       $user-bar-button-color: var(--gl-color-theme-light-blue-50),
-      $context-header: var(--gl-color-theme-light-blue-300),
+      $context-header: var(--gl-color-theme-light-blue-500),
       $accent-color: var(--gl-color-theme-light-blue-500),
     );
   }
@@ -191,10 +192,10 @@ $command-palette-spacing: px-to-rem(14px);
 
   &.gl-dark {
     @include super-sidebar-theme(
-      $background: var(--gl-background-color-subtle),
+      $background: var(--gl-background-color-default),
       $user-bar-background: var(--gl-color-theme-green-800),
       $user-bar-button-color: var(--gl-color-theme-green-50),
-      $context-header: var(--gl-color-theme-green-300),
+      $context-header: var(--gl-color-theme-green-500),
       $accent-color: var(--gl-color-theme-green-500),
     );
   }
@@ -211,10 +212,10 @@ $command-palette-spacing: px-to-rem(14px);
 
   &.gl-dark {
     @include super-sidebar-theme(
-      $background: var(--gl-background-color-subtle),
+      $background: var(--gl-background-color-default),
       $user-bar-background: var(--gl-color-theme-indigo-700),
       $user-bar-button-color: var(--gl-color-theme-indigo-50),
-      $context-header: var(--gl-color-theme-indigo-300),
+      $context-header: var(--gl-color-theme-indigo-500),
       $accent-color: var(--gl-color-theme-indigo-500),
     );
   }
@@ -231,10 +232,10 @@ $command-palette-spacing: px-to-rem(14px);
 
   &.gl-dark {
     @include super-sidebar-theme(
-      $background: var(--gl-background-color-subtle),
+      $background: var(--gl-background-color-default),
       $user-bar-background: var(--gl-color-theme-light-red-700),
       $user-bar-button-color: var(--gl-color-theme-light-red-50),
-      $context-header: var(--gl-color-theme-light-red-300),
+      $context-header: var(--gl-color-theme-light-red-500),
       $accent-color: var(--gl-color-theme-light-red-500),
     );
   }
@@ -251,10 +252,10 @@ $command-palette-spacing: px-to-rem(14px);
 
   &.gl-dark {
     @include super-sidebar-theme(
-      $background: var(--gl-background-color-subtle),
+      $background: var(--gl-background-color-default),
       $user-bar-background: var(--gl-color-theme-red-900),
       $user-bar-button-color: var(--gl-color-theme-red-50),
-      $context-header: var(--gl-color-theme-red-300),
+      $context-header: var(--gl-color-theme-red-500),
       $accent-color: var(--gl-color-theme-red-500),
     );
   }
@@ -333,7 +334,7 @@ $command-palette-spacing: px-to-rem(14px);
 
       &:focus,
       &:active {
-        @apply gl-focus;
+        @include gl-focus;
       }
     }
 
@@ -415,7 +416,7 @@ $command-palette-spacing: px-to-rem(14px);
 
   #trial-status-sidebar-widget:hover {
     text-decoration: none;
-    color: var(--gl-color-neutral-0);
+    @include gl-text-contrast-light;
   }
 }
 
@@ -438,7 +439,7 @@ $command-palette-spacing: px-to-rem(14px);
 
 .super-sidebar-peek,
 .super-sidebar-peek-hint {
-  @apply gl-shadow;
+  @include gl-shadow;
   border-right: 0;
 }
 
@@ -541,7 +542,7 @@ $command-palette-spacing: px-to-rem(14px);
   .show-hover-layover {
     &:hover {
       .show-hover-layover-hint {
-        @apply gl-opacity-10;
+        @include gl-opacity-10;
       }
     }
   }
@@ -570,7 +571,7 @@ $command-palette-spacing: px-to-rem(14px);
     max-height: 30rem;
 
     .gl-new-dropdown-item {
-      @apply gl-px-3;
+      @include gl-px-3;
     }
 
     // Target groups

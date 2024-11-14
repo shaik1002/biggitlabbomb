@@ -82,7 +82,7 @@ workflow:
     QA_ALLOW_LOCAL_REQUESTS: "true"
     QA_SUITE_STATUS_ENV_FILE: $CI_PROJECT_DIR/suite_status.env
     CNG_FORCE_COLOR: "true"
-    QA_RUN_IN_PARALLEL: "false" # TODO: consider re-enabling after https://gitlab.com/groups/gitlab-org/quality/quality-engineering/-/epics/99 is completed
+    QA_RUN_IN_PARALLEL: "true"
     QA_PARALLEL_PROCESSES: 4
   before_script:
     - echo "SUITE_RAN=true" > "$QA_SUITE_STATUS_ENV_FILE"
@@ -98,7 +98,6 @@ workflow:
         --admin-password "${GITLAB_ADMIN_PASSWORD}" \
         --admin-token "${GITLAB_QA_ADMIN_ACCESS_TOKEN}" \
         --chart-sha "${GITLAB_HELM_CHART_REF}" \
-        --retry 1 \
         --ci \
         ${EXTRA_DEPLOY_VALUES}
   after_script:
@@ -223,14 +222,6 @@ export-test-metrics:
     - .rules:report:process-results
   variables:
     QA_METRICS_REPORT_FILE_PATTERN: $CI_PROJECT_DIR/qa/tmp/test-metrics-*.json
-
-export-code-paths-mapping:
-  extends:
-    - .export-code-paths-mapping
-  variables:
-    QA_CODE_PATHS_MAPPING_FILE_PATTERN: $CI_PROJECT_DIR/qa/tmp/test-code-paths-mapping-*.json
-  rules:
-    - if: '$COVERBAND_ENABLED == "true"'
 
 notify-slack:
   extends:

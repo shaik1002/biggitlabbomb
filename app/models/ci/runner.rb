@@ -13,6 +13,7 @@ module Ci
     include TaggableQueries
     include Presentable
     include EachBatch
+    include IgnorableColumns
     include Ci::HasRunnerExecutor
     include Ci::HasRunnerStatus
     include Ci::Taggable
@@ -96,6 +97,7 @@ module Ci
 
     belongs_to :creator, class_name: 'User', optional: true
 
+    before_validation :ensure_sharding_key_id, on: :update # TODO: will be removed with https://gitlab.com/gitlab-org/gitlab/-/issues/493256
     before_save :ensure_token
     after_destroy :cleanup_runner_queue
 
@@ -331,18 +333,19 @@ module Ci
     end
 
     def runner_matcher
-      Gitlab::Ci::Matching::RunnerMatcher.new({
-        runner_ids: [id],
-        runner_type: runner_type,
-        public_projects_minutes_cost_factor: public_projects_minutes_cost_factor,
-        private_projects_minutes_cost_factor: private_projects_minutes_cost_factor,
-        run_untagged: run_untagged,
-        access_level: access_level,
-        tag_list: tag_list,
-        allowed_plan_ids: allowed_plan_ids
-      })
+      strong_memoize(:runner_matcher) do
+        Gitlab::Ci::Matching::RunnerMatcher.new({
+          runner_ids: [id],
+          runner_type: runner_type,
+          public_projects_minutes_cost_factor: public_projects_minutes_cost_factor,
+          private_projects_minutes_cost_factor: private_projects_minutes_cost_factor,
+          run_untagged: run_untagged,
+          access_level: access_level,
+          tag_list: tag_list,
+          allowed_plan_ids: allowed_plan_ids
+        })
+      end
     end
-    strong_memoize_attr :runner_matcher
 
     def assign_to(project, current_user = nil)
       if instance_type?
@@ -353,11 +356,7 @@ module Ci
 
       begin
         transaction do
-          if self.runner_projects.empty?
-            self.sharding_key_id = project.id
-            self.clear_memoization(:owner)
-          end
-
+          self.sharding_key_id = project.id if self.runner_projects.empty?
           self.runner_projects << ::Ci::RunnerProject.new(project: project, runner: self)
           self.save!
         end
@@ -387,20 +386,14 @@ module Ci
       end
     end
 
-    def owner
-      case runner_type
-      when 'instance_type'
-        ::User.find_by_id(creator_id)
-      when 'group_type'
-        ::Group.find_by_id(sharding_key_id)
-      when 'project_type'
-        ::Project.find_by_id(sharding_key_id)
-      end
+    def owner_project
+      return unless project_type?
+
+      runner_projects.order(:id).first&.project
     end
-    strong_memoize_attr :owner
 
     def belongs_to_one_project?
-      runner_projects.limit(2).count(:all) == 1
+      runner_projects.count == 1
     end
 
     def belongs_to_more_than_one_project?
@@ -506,9 +499,10 @@ module Ci
     end
 
     def namespace_ids
-      runner_namespaces.pluck(:namespace_id).compact
+      strong_memoize(:namespace_ids) do
+        runner_namespaces.pluck(:namespace_id).compact
+      end
     end
-    strong_memoize_attr :namespace_ids
 
     def compute_token_expiration
       case runner_type
@@ -560,6 +554,17 @@ module Ci
       Project.where(id: runner_projects.map(&:project_id)).map(&:effective_runner_token_expiration_interval).compact.min&.from_now
     end
 
+    def ensure_sharding_key_id
+      case runner_type
+      when 'group_type'
+        self.sharding_key_id ||= owner_runner_namespace.namespace_id if owner_runner_namespace
+      when 'project_type'
+        self.sharding_key_id ||= owner_project.id if owner_project
+      else
+        self.sharding_key_id = nil
+      end
+    end
+
     def cleanup_runner_queue
       ::Gitlab::Workhorse.cleanup_key(runner_queue_key)
     end
@@ -590,27 +595,39 @@ module Ci
     end
 
     def no_sharding_key_id
-      errors.add(:runner, 'cannot have sharding_key_id assigned') if sharding_key_id
+      if sharding_key_id
+        errors.add(:runner, 'cannot have sharding_key_id assigned')
+      end
     end
 
     def no_projects
-      errors.add(:runner, 'cannot have projects assigned') if runner_projects.any?
+      if runner_projects.any?
+        errors.add(:runner, 'cannot have projects assigned')
+      end
     end
 
     def no_groups
-      errors.add(:runner, 'cannot have groups assigned') if runner_namespaces.any?
+      if runner_namespaces.any?
+        errors.add(:runner, 'cannot have groups assigned')
+      end
     end
 
     def any_project
-      errors.add(:runner, 'needs to be assigned to at least one project') unless runner_projects.any?
+      unless runner_projects.any?
+        errors.add(:runner, 'needs to be assigned to at least one project')
+      end
     end
 
     def exactly_one_group
-      errors.add(:runner, 'needs to be assigned to exactly one group') unless runner_namespaces.size == 1
+      unless runner_namespaces.size == 1
+        errors.add(:runner, 'needs to be assigned to exactly one group')
+      end
     end
 
     def no_allowed_plan_ids
-      errors.add(:runner, 'cannot have allowed plans assigned') unless allowed_plan_ids.empty?
+      unless allowed_plan_ids.empty?
+        errors.add(:runner, 'cannot have allowed plans assigned')
+      end
     end
 
     def partition_id_prefix_in_16_bit_encode

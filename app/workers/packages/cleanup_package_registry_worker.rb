@@ -5,7 +5,7 @@ module Packages
     include ApplicationWorker
     include CronjobQueue # rubocop:disable Scalability/CronWorkerContext
 
-    data_consistency :sticky
+    data_consistency :always
     idempotent!
 
     feature_category :package_registry
@@ -38,16 +38,24 @@ module Packages
     end
 
     def log_counts
-      pending_destruction_package_files_count = Packages::PackageFile.pending_destruction.count
-      processing_package_files_count = Packages::PackageFile.processing.count
-      error_package_files_count = Packages::PackageFile.error.count
+      use_replica_if_available do
+        pending_destruction_package_files_count = Packages::PackageFile.pending_destruction.count
+        processing_package_files_count = Packages::PackageFile.processing.count
+        error_package_files_count = Packages::PackageFile.error.count
 
-      log_extra_metadata_on_done(:pending_destruction_package_files_count, pending_destruction_package_files_count)
-      log_extra_metadata_on_done(:processing_package_files_count, processing_package_files_count)
-      log_extra_metadata_on_done(:error_package_files_count, error_package_files_count)
+        log_extra_metadata_on_done(:pending_destruction_package_files_count, pending_destruction_package_files_count)
+        log_extra_metadata_on_done(:processing_package_files_count, processing_package_files_count)
+        log_extra_metadata_on_done(:error_package_files_count, error_package_files_count)
 
-      pending_cleanup_policies_count = Packages::Cleanup::Policy.runnable.count
-      log_extra_metadata_on_done(:pending_cleanup_policies_count, pending_cleanup_policies_count)
+        pending_cleanup_policies_count = Packages::Cleanup::Policy.runnable.count
+        log_extra_metadata_on_done(:pending_cleanup_policies_count, pending_cleanup_policies_count)
+      end
+    end
+
+    def use_replica_if_available(&block)
+      ::Gitlab::Database::LoadBalancing::SessionMap
+        .with_sessions([Packages::PackageFile, Packages::Cleanup::Policy])
+        .use_replicas_for_read_queries(&block)
     end
   end
 end

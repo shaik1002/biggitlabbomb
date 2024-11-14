@@ -20,7 +20,8 @@ export default {
     },
     canWriteModelRegistry: {
       type: Boolean,
-      required: true,
+      required: false,
+      default: false,
     },
     maxAllowedFileSize: {
       type: Number,

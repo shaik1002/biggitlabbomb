@@ -16,13 +16,11 @@ module Types
 
       field :created_at, Types::TimeType, null: false, description: 'Date of creation.'
 
-      field :author, ::Types::UserType, null: true, description: 'User that created the model version.'
+      field :author, ::Types::UserType, null: false, description: 'User that created the model version.'
 
       field :description, ::GraphQL::Types::String,
         null: true,
         description: 'Description of the version.'
-
-      field :artifacts_count, GraphQL::Types::Int, null: true, description: 'Number of files in the package.'
 
       field :version, ::GraphQL::Types::String, null: false, description: 'Name of the version.'
 

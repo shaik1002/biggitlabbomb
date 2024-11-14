@@ -1,6 +1,7 @@
 ---
 table_name: users
 classes:
+- TmpUser
 - User
 feature_categories:
 - user_profile

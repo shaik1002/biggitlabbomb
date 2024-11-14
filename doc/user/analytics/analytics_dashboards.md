@@ -44,7 +44,7 @@ When product analytics is enabled and onboarded, two built-in dashboards are ava
 
 ### Value Stream Management dashboard
 
-- **Value Streams Dashboard** displays metrics related to [DevOps performance, security exposure, and workstream optimization](../analytics/value_streams_dashboard.md#devsecops-metrics-comparison-panels).
+- **Value Streams Dashboard** displays metrics related to [DevOps performance, security exposure, and workstream optimization](../analytics/value_streams_dashboard.md#devsecops-metrics-comparison-panel).
 
 ## Custom dashboards
 
@@ -52,7 +52,7 @@ Use custom dashboards to design and create visualizations for the metrics that a
 You can create custom dashboards with the dashboard designer.
 
 - Each project can have an unlimited number of dashboards.
-  The only limitation might be the [repository size limit](../project/repository/repository_size.md#size-and-storage-limits).
+  The only limitation might be the [repository size limit](../project/repository/repository_size.md#storage-limits).
 - Each dashboard can reference one or more [visualizations](#define-a-chart-visualization).
 - Visualizations are shared across dashboards.
 
@@ -274,7 +274,6 @@ DETAILS:
 **Status:** Experiment
 
 > - Introduced in GitLab 16.11 as an [experiment](../../policy/experiment-beta-support.md#experiment) feature [with a flag](../../administration/feature_flags.md) named `generate_cube_query`. Disabled by default.
-> - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
 
 Prerequisites:
 

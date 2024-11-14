@@ -526,11 +526,6 @@ When you delete a project runner, it is permanently deleted from the GitLab inst
 no longer be used by projects. If you want to temporarily stop the runner from accepting
 jobs, you can [pause](#pause-or-resume-a-project-runner) the runner instead.
 
-When you delete a runner, its configuration still exists in the runner host's `config.toml` file.
-If the deleted runner's configuration is still present in this file, the runner host continues to contact GitLab.
-To prevent unnecessary API traffic, you must also
-[unregister the deleted runner](https://docs.gitlab.com/runner/commands/#gitlab-runner-unregister).
-
 1. On the left sidebar, select **Search or go to** and
    find the project where you want to enable the runner.
 1. Select **Settings > CI/CD**.
@@ -678,7 +673,7 @@ project.
 1. Go to the project's **Settings > CI/CD** and expand the **Runners** section.
 1. Select the runner name and find the **IP Address** row.
 
-![Project runner IP address](img/project_runner_ip_address_v10_7.png)
+![Project runner IP address](img/project_runner_ip_address.png)
 
 ## Enable use of runner registration tokens in projects and groups
 

@@ -19,7 +19,6 @@ module Ci
     include EachBatch
     include FastDestroyAll::Helpers
 
-    self.table_name = :p_ci_pipelines
     self.primary_key = :id
     self.sequence_name = :ci_pipelines_id_seq
 
@@ -41,9 +40,7 @@ module Ci
 
     sha_attribute :source_sha
     sha_attribute :target_sha
-    query_constraints :id, :partition_id
-    partitionable scope: ->(pipeline) { Ci::Pipeline.current_partition_value(pipeline.project) }, partitioned: true
-
+    partitionable scope: ->(pipeline) { Ci::Pipeline.current_partition_value(pipeline.project) }
     # Ci::CreatePipelineService returns Ci::Pipeline so this is the only place
     # where we can pass additional information from the service. This accessor
     # is used for storing the processed metadata for linting purposes.
@@ -80,7 +77,7 @@ module Ci
 
     #
     # In https://gitlab.com/groups/gitlab-org/-/epics/9991, we aim to convert all CommitStatus related models to
-    # Ci::Job models. With that epic, we aim to replace `statuses` with `jobs`.
+    # Ci:Job models. With that epic, we aim to replace `statuses` with `jobs`.
     #
     # DEPRECATED:
     has_many :statuses, ->(pipeline) { in_partition(pipeline) }, class_name: 'CommitStatus', foreign_key: :commit_id, inverse_of: :pipeline, partition_foreign_key: :partition_id
@@ -327,12 +324,8 @@ module Ci
 
       after_transition any => ::Ci::Pipeline.completed_statuses do |pipeline|
         pipeline.run_after_commit do
-          if Feature.enabled?(:auto_merge_process_worker_pipeline, pipeline.project)
-            AutoMergeProcessWorker.perform_async({ 'pipeline_id' => self.id })
-          else
-            pipeline.all_merge_requests.with_auto_merge_enabled.each do |merge_request|
-              AutoMergeProcessWorker.perform_async(merge_request.id)
-            end
+          pipeline.all_merge_requests.with_auto_merge_enabled.each do |merge_request|
+            AutoMergeProcessWorker.perform_async(merge_request.id)
           end
 
           if pipeline.auto_devops_source?
@@ -389,7 +382,7 @@ module Ci
           # user been blocked.
           unless pipeline.user&.blocked?
             PipelineNotificationWorker
-              .perform_async(pipeline.id, 'ref_status' => ref_status&.to_s)
+              .perform_async(pipeline.id, ref_status: ref_status)
           end
         end
       end
@@ -514,12 +507,11 @@ module Ci
       return Ci::Pipeline.none if refs.empty?
 
       refs_values = refs.map { |ref| "(#{connection.quote(ref)})" }.join(",")
-      query = Arel.sql(sanitize_sql_array(["refs_values.ref = #{quoted_table_name}.ref"]))
-      join_query = success.where(query).order(id: :desc).limit(1)
+      join_query = success.where("refs_values.ref = ci_pipelines.ref").order(id: :desc).limit(1)
 
       Ci::Pipeline
         .from("(VALUES #{refs_values}) refs_values (ref)")
-        .joins("INNER JOIN LATERAL (#{join_query.to_sql}) #{quoted_table_name} ON TRUE")
+        .joins("INNER JOIN LATERAL (#{join_query.to_sql}) #{Ci::Pipeline.table_name} ON TRUE")
         .index_by(&:ref)
     end
 
@@ -604,10 +596,6 @@ module Ci
       ::Gitlab::Ci::PipelineObjectHierarchy.new(relation, options: options)
     end
 
-    def self.internal_id_scope_usage
-      :ci_pipelines
-    end
-
     def uses_needs?
       processables.where(scheduling_type: :dag).any?
     end
@@ -644,7 +632,9 @@ module Ci
     end
 
     def valid_commit_sha
-      self.errors.add(:sha, "can't be 00000000 (branch removal)") if Gitlab::Git.blank_ref?(self.sha)
+      if Gitlab::Git.blank_ref?(self.sha)
+        self.errors.add(:sha, "can't be 00000000 (branch removal)")
+      end
     end
 
     def git_author_name
@@ -757,7 +747,9 @@ module Ci
 
     def coverage
       coverage_array = latest_statuses.map(&:coverage).compact
-      coverage_array.sum / coverage_array.size if coverage_array.size >= 1
+      if coverage_array.size >= 1
+        coverage_array.sum / coverage_array.size
+      end
     end
 
     def update_builds_coverage
@@ -1400,7 +1392,9 @@ module Ci
     def age_in_minutes
       return 0 unless persisted?
 
-      raise ArgumentError, 'pipeline not fully loaded' unless has_attribute?(:created_at)
+      unless has_attribute?(:created_at)
+        raise ArgumentError, 'pipeline not fully loaded'
+      end
 
       return 0 unless created_at
 

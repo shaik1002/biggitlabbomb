@@ -130,7 +130,6 @@ To change the default handling of a file or file type, create a
 ## Related topics
 
 - [Repository files API](../../../../api/repository_files.md)
-- [File management with Git](../../../../topics/git/file_management.md)
 
 ## Troubleshooting
 

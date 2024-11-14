@@ -49,11 +49,7 @@ module RoutableActions
     return unless canonical_path != routable_full_path
 
     if !request.xhr? && request.format.html? && canonical_path.casecmp(routable_full_path) != 0
-      flash[:notice] =
-        <<~HEREDOC.squish
-        #{routable.class.to_s.titleize} '#{routable_full_path}' was moved to '#{canonical_path}'.
-        Please update any links and bookmarks that may still have the old path.
-        HEREDOC
+      flash[:notice] = "#{routable.class.to_s.titleize} '#{routable_full_path}' was moved to '#{canonical_path}'. Please update any links and bookmarks that may still have the old path."
     end
 
     redirect_to build_canonical_path(routable), status: :moved_permanently

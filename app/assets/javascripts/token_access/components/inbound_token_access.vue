@@ -4,7 +4,6 @@ import {
   GlButton,
   GlForm,
   GlFormGroup,
-  GlFormInput,
   GlLink,
   GlIcon,
   GlLoadingIcon,
@@ -23,6 +22,7 @@ import inboundRemoveGroupCIJobTokenScopeMutation from '../graphql/mutations/inbo
 import inboundUpdateCIJobTokenScopeMutation from '../graphql/mutations/inbound_update_ci_job_token_scope.mutation.graphql';
 import inboundGetCIJobTokenScopeQuery from '../graphql/queries/inbound_get_ci_job_token_scope.query.graphql';
 import inboundGetGroupsAndProjectsWithCIJobTokenScopeQuery from '../graphql/queries/inbound_get_groups_and_projects_with_ci_job_token_scope.query.graphql';
+import GroupsAndProjectsListbox from './groups_and_projects_listbox.vue';
 import TokenAccessTable from './token_access_table.vue';
 
 export default {
@@ -42,11 +42,10 @@ export default {
     addGroupOrProject: __('Add group or project'),
     add: __('Add'),
     cancel: __('Cancel'),
-    addProjectPlaceholder: __(
-      'Paste group or project path. Example: %{codeStart}gitlab-org/gitlab%{codeEnd}.',
-    ),
+    addProjectPlaceholder: __('Pick a group or project'),
     projectsFetchError: __('There was a problem fetching the projects'),
     scopeFetchError: __('There was a problem fetching the job token scope value'),
+    projectInScopeError: s__('CICD|Target project is already in the job token scope.'),
     saveButtonTitle: __('Save Changes'),
   },
   inboundJobTokenScopeOptions: [
@@ -64,19 +63,23 @@ export default {
     GlButton,
     GlForm,
     GlFormGroup,
-    GlFormInput,
     GlLink,
     GlIcon,
     GlLoadingIcon,
     GlSprintf,
     CrudComponent,
+    GroupsAndProjectsListbox,
     TokenAccessTable,
     GlFormRadioGroup,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  inject: ['enforceAllowlist', 'fullPath'],
+  inject: {
+    fullPath: {
+      default: '',
+    },
+  },
   apollo: {
     inboundJobTokenScopeEnabled: {
       query: inboundGetCIJobTokenScopeQuery,
@@ -118,7 +121,6 @@ export default {
   },
   data() {
     return {
-      errorMessage: null,
       inboundJobTokenScopeEnabled: null,
       isUpdating: false,
       groupsAndProjectsWithAccess: [],
@@ -131,6 +133,11 @@ export default {
   computed: {
     isGroupOrProjectPathEmpty() {
       return this.groupOrProjectPath === '';
+    },
+    isGroupOrProjectPathInScope() {
+      return this.groupsAndProjectsWithAccess.some(
+        (item) => item.fullPath === this.groupOrProjectPath,
+      );
     },
     ciJobTokenHelpPage() {
       return helpPagePath('ci/jobs/ci_job_token#control-job-token-access-to-your-project');
@@ -201,14 +208,14 @@ export default {
           },
         });
 
-        if (errors.length > 0) {
+        if (errors.length) {
           throw new Error(errors[0]);
         }
-
+      } catch (error) {
+        createAlert({ message: error.message });
+      } finally {
         this.clearGroupOrProjectPath();
         this.getGroupsAndProjects();
-      } catch (error) {
-        this.errorMessage = error.message;
       }
     },
     async removeItem(item) {
@@ -249,8 +256,8 @@ export default {
         this.getGroupsAndProjects();
       }
     },
-    clearErrorMessage() {
-      this.errorMessage = null;
+    setGroupOrProjectPath(path) {
+      this.groupOrProjectPath = path;
     },
     clearGroupOrProjectPath() {
       this.groupOrProjectPath = '';
@@ -269,26 +276,29 @@ export default {
   <div class="gl-mt-5">
     <gl-loading-icon v-if="$apollo.loading" size="md" />
     <template v-else>
-      <div class="gl-font-bold">
-        {{ $options.i18n.radioGroupTitle }}
-      </div>
-      <div class="gl-mb-3">
-        <gl-sprintf :message="$options.i18n.radioGroupDescription">
-          <template #link="{ content }">
-            <gl-link :href="ciJobTokenHelpPage" class="inline-link" target="_blank">{{
-              content
-            }}</gl-link>
-          </template>
-        </gl-sprintf>
-      </div>
       <gl-form-radio-group
-        v-if="!enforceAllowlist"
         v-model="inboundJobTokenScopeEnabled"
         :options="$options.inboundJobTokenScopeOptions"
         stacked
-      />
+      >
+        <template #first>
+          <div class="gl-mb-2 gl-font-bold">
+            {{ $options.i18n.radioGroupTitle }}
+          </div>
+          <div class="gl-mb-3">
+            <gl-sprintf :message="$options.i18n.radioGroupDescription">
+              <template #link="{ content }">
+                <gl-link :href="ciJobTokenHelpPage" class="inline-link" target="_blank">{{
+                  content
+                }}</gl-link>
+              </template>
+            </gl-sprintf>
+          </div>
+        </template>
+      </gl-form-radio-group>
+
       <gl-alert
-        v-if="!inboundJobTokenScopeEnabled && !enforceAllowlist"
+        v-if="!inboundJobTokenScopeEnabled"
         variant="warning"
         class="gl-my-3"
         :dismissible="false"
@@ -298,7 +308,6 @@ export default {
       </gl-alert>
 
       <gl-button
-        v-if="!enforceAllowlist"
         variant="confirm"
         class="gl-mt-3"
         data-testid="save-ci-job-token-scope-changes-btn"
@@ -349,31 +358,23 @@ export default {
               <gl-form-group
                 :label-for="$options.CI_JOB_TOKEN_ALLOWLIST"
                 :label="$options.i18n.addGroupOrProject"
-                :invalid-feedback="errorMessage"
+                :state="!isGroupOrProjectPathInScope"
+                :invalid-feedback="$options.projectInScopeError"
                 data-testid="group-or-project-form-group"
               >
-                <gl-form-input
+                <groups-and-projects-listbox
                   :id="$options.CI_JOB_TOKEN_ALLOWLIST"
-                  v-model="groupOrProjectPath"
-                  autofocus
-                  :state="!errorMessage"
-                  type="text"
-                  data-testid="target-path-field"
-                  @input="clearErrorMessage"
+                  :placeholder="$options.i18n.addProjectPlaceholder"
+                  :is-valid="!isGroupOrProjectPathInScope"
+                  :value="groupOrProjectPath"
+                  @select="setGroupOrProjectPath"
                 />
-                <template #description>
-                  <gl-sprintf :message="$options.i18n.addProjectPlaceholder">
-                    <template #code="{ content }">
-                      <code>{{ content }}</code>
-                    </template>
-                  </gl-sprintf>
-                </template>
               </gl-form-group>
               <div class="gl-mt-5 gl-flex gl-gap-3">
                 <gl-button
                   variant="confirm"
-                  :disabled="isGroupOrProjectPathEmpty"
-                  data-testid="add-group-or-project-btn"
+                  :disabled="isGroupOrProjectPathEmpty || isGroupOrProjectPathInScope"
+                  data-testid="add-project-btn"
                   @click="addGroupOrProject"
                 >
                   {{ $options.i18n.add }}

@@ -13,7 +13,6 @@ module Gitlab
             ci_builds_metadata
             ci_job_artifacts
             ci_pipeline_variables
-            ci_pipelines
             ci_stages
           ].freeze
 

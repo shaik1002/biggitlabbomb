@@ -107,8 +107,7 @@
     "Issue",
     "MergeRequest",
     "Snippet",
-    "Vulnerability",
-    "WikiPage"
+    "Vulnerability"
   ],
   "NoteableType": [
     "Design",
@@ -161,10 +160,6 @@
     "AbuseReportNote",
     "Discussion",
     "Note"
-  ],
-  "RoleInterface": [
-    "MemberRole",
-    "StandardRole"
   ],
   "SecurityPolicySource": [
     "GroupSecurityPolicySource",

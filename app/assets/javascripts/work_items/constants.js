@@ -31,7 +31,6 @@ export const WIDGET_TYPE_COLOR = 'COLOR';
 export const WIDGET_TYPE_DESIGNS = 'DESIGNS';
 export const WIDGET_TYPE_DEVELOPMENT = 'DEVELOPMENT';
 export const WIDGET_TYPE_CRM_CONTACTS = 'CRM_CONTACTS';
-export const WIDGET_TYPE_EMAIL_PARTICIPANTS = 'EMAIL_PARTICIPANTS';
 
 export const WORK_ITEM_TYPE_ENUM_INCIDENT = 'INCIDENT';
 export const WORK_ITEM_TYPE_ENUM_ISSUE = 'ISSUE';
@@ -47,8 +46,8 @@ export const WORK_ITEM_TYPE_VALUE_EPIC = 'Epic';
 export const WORK_ITEM_TYPE_VALUE_INCIDENT = 'Incident';
 export const WORK_ITEM_TYPE_VALUE_ISSUE = 'Issue';
 export const WORK_ITEM_TYPE_VALUE_TASK = 'Task';
-export const WORK_ITEM_TYPE_VALUE_TEST_CASE = 'Test Case';
-export const WORK_ITEM_TYPE_VALUE_REQUIREMENTS = 'Requirement';
+export const WORK_ITEM_TYPE_VALUE_TEST_CASE = 'Test case';
+export const WORK_ITEM_TYPE_VALUE_REQUIREMENTS = 'Requirements';
 export const WORK_ITEM_TYPE_VALUE_KEY_RESULT = 'Key Result';
 export const WORK_ITEM_TYPE_VALUE_OBJECTIVE = 'Objective';
 
@@ -105,7 +104,6 @@ export const I18N_WORK_ITEM_FETCH_AWARD_EMOJI_ERROR = s__(
 
 export const I18N_NEW_WORK_ITEM_BUTTON_LABEL = s__('WorkItem|New %{workItemType}');
 export const I18N_WORK_ITEM_CREATE_BUTTON_LABEL = s__('WorkItem|Create %{workItemType}');
-export const I18N_WORK_ITEM_NEW_RELATED_ITEM = s__('WorkItem|New related %{workItemType}');
 export const I18N_WORK_ITEM_ADD_BUTTON_LABEL = s__('WorkItem|Add %{workItemType}');
 export const I18N_WORK_ITEM_ADD_MULTIPLE_BUTTON_LABEL = s__('WorkItem|Add %{workItemType}s');
 export const I18N_WORK_ITEM_SEARCH_INPUT_PLACEHOLDER = s__(
@@ -173,7 +171,6 @@ export const WORK_ITEMS_TYPE_MAP = {
     icon: `issue-type-issue`,
     name: s__('WorkItem|Issue'),
     value: WORK_ITEM_TYPE_VALUE_ISSUE,
-    routeParamName: 'issues',
   },
   [WORK_ITEM_TYPE_ENUM_TASK]: {
     icon: `issue-type-task`,
@@ -204,7 +201,6 @@ export const WORK_ITEMS_TYPE_MAP = {
     icon: `epic`,
     name: s__('WorkItem|Epic'),
     value: WORK_ITEM_TYPE_VALUE_EPIC,
-    routeParamName: 'epics',
   },
 };
 
@@ -375,10 +371,4 @@ export const WORK_ITEM_BASE_ROUTE_MAP = {
 
 export const WORKITEM_LINKS_SHOWLABELS_LOCALSTORAGEKEY = 'workItemLinks.showLabels';
 export const WORKITEM_TREE_SHOWLABELS_LOCALSTORAGEKEY = 'workItemTree.showLabels';
-export const WORKITEM_TREE_SHOWCLOSED_LOCALSTORAGEKEY = 'workItemTree.showClosed';
 export const WORKITEM_RELATIONSHIPS_SHOWLABELS_LOCALSTORAGEKEY = 'workItemRelationships.showLabels';
-export const WORKITEM_RELATIONSHIPS_SHOWCLOSED_LOCALSTORAGEKEY = 'workItemRelationships.showClosed';
-
-export const INJECTION_LINK_CHILD_PREVENT_ROUTER_NAVIGATION = Symbol(
-  'injection:prevent-router-navigation',
-);

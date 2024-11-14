@@ -135,7 +135,9 @@ module AtomicInternalId
             internal_id_scope_usage,
             value)
 
-          write_attribute(column, nil) if did_reset
+          if did_reset
+            write_attribute(column, nil)
+          end
         end
 
         read_attribute(column)

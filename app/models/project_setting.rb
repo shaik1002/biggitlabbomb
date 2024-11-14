@@ -3,6 +3,7 @@
 class ProjectSetting < ApplicationRecord
   include ::Gitlab::Utils::StrongMemoize
   include EachBatch
+  include IgnorableColumns
   include CascadingProjectSettingAttribute
 
   ALLOWED_TARGET_PLATFORMS = %w[ios osx tvos watchos android].freeze
@@ -40,6 +41,7 @@ class ProjectSetting < ApplicationRecord
   validates :issue_branch_template, length: { maximum: Issue::MAX_BRANCH_TEMPLATE }
   validates :target_platforms, inclusion: { in: ALLOWED_TARGET_PLATFORMS }
   validates :suggested_reviewers_enabled, inclusion: { in: [true, false] }
+  ignore_column :code_suggestions, remove_with: '17.0', remove_after: '2024-03-21'
 
   validates :pages_unique_domain,
     uniqueness: { if: -> { pages_unique_domain.present? } },

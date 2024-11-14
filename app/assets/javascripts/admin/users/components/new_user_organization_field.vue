@@ -7,10 +7,10 @@ import organizationsQuery from '~/organizations/shared/graphql/queries/organizat
 import OrganizationRoleField from './organization_role_field.vue';
 
 export default {
-  name: 'NewUserOrganizationField',
   AVATAR_SHAPE_OPTION_RECT,
   organizationsQuery,
-  organizationInputId: 'user_organization_id',
+  inputName: 'user[organization_id]',
+  inputId: 'user_organization_id',
   i18n: {
     organizationSelectLabel: s__('Organization|Select an organization'),
   },
@@ -23,21 +23,6 @@ export default {
     initialOrganization: {
       type: Object,
       required: true,
-    },
-    initialAccessLevel: {
-      type: String,
-      required: false,
-      default: undefined,
-    },
-    organizationInputName: {
-      type: String,
-      required: false,
-      default: 'user[organization_id]',
-    },
-    organizationRoleInputName: {
-      type: String,
-      required: false,
-      default: undefined,
     },
   },
   computed: {
@@ -59,8 +44,8 @@ export default {
       query-path="organizations"
       block
       :initial-selection="initialSelection"
-      :input-name="organizationInputName"
-      :input-id="$options.organizationInputId"
+      :input-name="$options.inputName"
+      :input-id="$options.inputId"
       toggle-class="gl-form-input-xl"
       :searchable="false"
     >
@@ -78,16 +63,7 @@ export default {
         :size="48"
         :src="initialOrganization.avatarUrl"
       />
-      <input
-        :id="$options.organizationInputId"
-        :name="organizationInputName"
-        :value="initialOrganization.id"
-        type="hidden"
-      />
     </div>
-    <organization-role-field
-      :initial-access-level="initialAccessLevel"
-      :input-name="organizationRoleInputName"
-    />
+    <organization-role-field />
   </div>
 </template>

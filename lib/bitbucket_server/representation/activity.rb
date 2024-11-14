@@ -35,14 +35,6 @@ module BitbucketServer
         commit.dig('committer', 'displayName')
       end
 
-      def committer_name
-        commit.dig('committer', 'displayName')
-      end
-
-      def committer_username
-        commit.dig('committer', 'slug')
-      end
-
       def committer_email
         commit.dig('committer', 'emailAddress')
       end
@@ -61,10 +53,6 @@ module BitbucketServer
         action == 'APPROVED'
       end
 
-      def approver_name
-        raw.dig('user', 'displayName')
-      end
-
       def approver_username
         raw.dig('user', 'slug')
       end
@@ -75,10 +63,6 @@ module BitbucketServer
 
       def declined_event?
         action == 'DECLINED'
-      end
-
-      def decliner_name
-        raw.dig('user', 'displayName')
       end
 
       def decliner_username
@@ -96,16 +80,12 @@ module BitbucketServer
       def to_hash
         {
           id: id,
-          committer_name: committer_user,
           committer_user: committer_user,
-          committer_username: committer_username,
           committer_email: committer_email,
           merge_timestamp: merge_timestamp,
           merge_commit: merge_commit,
-          approver_name: approver_name,
           approver_username: approver_username,
           approver_email: approver_email,
-          decliner_name: decliner_name,
           decliner_username: decliner_username,
           decliner_email: decliner_email,
           created_at: created_at

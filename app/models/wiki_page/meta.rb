@@ -24,6 +24,8 @@ class WikiPage
     validate :no_two_metarecords_in_same_container_can_have_same_canonical_slug
     validate :project_or_namespace_present?
 
+    alias_method :resource_parent, :project
+
     scope :with_canonical_slug, ->(slug) do
       slug_table_name = klass.reflect_on_association(:slugs).table_name
 
@@ -63,8 +65,6 @@ class WikiPage
       end
 
       def find_by_canonical_slug(canonical_slug, container)
-        return unless canonical_slug.present? && container.present?
-
         meta, conflict = with_canonical_slug(canonical_slug)
           .where(container_attrs(container))
           .limit(2)
@@ -75,10 +75,6 @@ class WikiPage
         end
 
         meta
-      end
-
-      def declarative_policy_class
-        'WikiPagePolicy'
       end
 
       private
@@ -96,7 +92,7 @@ class WikiPage
       def container_attrs(container)
         return { project_id: container.id } if container.is_a?(Project)
 
-        { namespace_id: container.id } if container.is_a?(Namespace)
+        { namespace_id: container.id } if container.is_a?(Group)
       end
     end
 
@@ -107,10 +103,6 @@ class WikiPage
     def container=(value)
       self.project = value if value.is_a?(Project)
       self.namespace = value if value.is_a?(Namespace)
-    end
-
-    def resource_parent
-      container
     end
 
     def for_group_wiki?
@@ -126,6 +118,7 @@ class WikiPage
     end
     strong_memoize_attr :canonical_slug
 
+    # rubocop:disable Gitlab/ModuleWithInstanceVariables -- Technical debt
     def canonical_slug=(slug)
       return if @canonical_slug == slug
 
@@ -141,6 +134,7 @@ class WikiPage
 
       @canonical_slug = slug
     end
+    # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
     def update_state(created, known_slugs, wiki_page, updates)
       update_wiki_page_attributes(updates)
@@ -173,7 +167,7 @@ class WikiPage
       end
       slugs.insert_all(slug_attrs) unless !is_new && slug_attrs.size == 1
 
-      @canonical_slug = canonical_slug if is_new || strings.size == 1
+      @canonical_slug = canonical_slug if is_new || strings.size == 1 # rubocop:disable Gitlab/ModuleWithInstanceVariables -- Technical debt
     end
 
     def slug_attributes(slug, canonical_slug, is_new, creation)

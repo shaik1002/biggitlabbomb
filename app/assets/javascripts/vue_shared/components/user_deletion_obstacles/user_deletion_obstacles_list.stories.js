@@ -12,7 +12,8 @@ const Template = (args, { argTypes }) => ({
   template: '<user-deletion-obstacles-list v-bind="$props" v-on="$props" />',
 });
 
-const defaultProps = {
+export const Default = Template.bind({});
+Default.args = {
   obstacles: [
     {
       type: OBSTACLE_TYPES.oncallSchedules,
@@ -31,13 +32,4 @@ const defaultProps = {
   ],
   userName: 'Thomspon Smith',
   isCurrentUser: false,
-};
-
-export const Default = Template.bind({});
-Default.args = defaultProps;
-
-export const IsCurrentUser = Template.bind({});
-IsCurrentUser.args = {
-  ...defaultProps,
-  isCurrentUser: true,
 };

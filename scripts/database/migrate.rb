@@ -29,7 +29,6 @@ require 'set'
 SCRIPT_NAME = File.basename($PROGRAM_NAME)
 MIGRATIONS_DIR = 'db/migrate'
 POST_DEPLOY_MIGRATIONS_DIR = 'db/post_migrate'
-BRANCH_NAME = 'master'
 
 def require_commands!(*commands)
   missing_commands = commands.reject { |command| system("command", "-v", command, out: File::NULL) }
@@ -59,8 +58,6 @@ def prompt(list, prompt:, multi: false, reverse: false)
   arr = list.join("\n")
 
   fzf_args = [].tap do |args|
-    args << '--layout="reverse"'
-    args << '--height=30%'
     args << '--multi' if multi
     args << '--tac' if reverse
   end
@@ -75,7 +72,9 @@ def prompt(list, prompt:, multi: false, reverse: false)
   selection.split("\n")
 end
 
-def get_changed_files(branch_name:)
+def get_changed_files
+  branch_name = `git ls-remote --symref origin HEAD | awk '/^ref: refs\\/heads\\// {print $2}' | sed 's|refs/heads/||'`
+    .strip
   set = `git diff --name-only --diff-filter=d $(git merge-base #{branch_name} HEAD)..HEAD #{MIGRATIONS_DIR}`
     .split("\n").to_set
   set += `git diff --diff-filter=d --merge-base --name-only #{branch_name} #{MIGRATIONS_DIR}`.split("\n")
@@ -88,7 +87,7 @@ def execute
   options = parse_options
   puts "Options: #{options.inspect}" if options[:debug]
 
-  files = get_changed_files(branch_name: BRANCH_NAME)
+  files = get_changed_files
   puts "Files: #{files.inspect}" if options[:debug]
 
   base_files = files.map { |path| File.basename(path) }
@@ -99,7 +98,7 @@ def execute
     exit 1
   end
 
-  selected_files = prompt(base_files, prompt: 'Select migrations (press tab to select multiple)> ', multi: true)
+  selected_files = prompt(base_files, prompt: 'Select files', multi: true)
   puts "Selected files: #{selected_files.inspect}" if options[:debug]
 
   if selected_files.empty?

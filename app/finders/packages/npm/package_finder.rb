@@ -1,34 +1,28 @@
 # frozen_string_literal: true
-
 module Packages
   module Npm
     class PackageFinder
-      include ::Packages::FinderHelper
-
+      delegate :find_by_version, to: :execute
       delegate :last, to: :execute
 
-      def initialize(project: nil, namespace: nil, params: {})
+      def initialize(package_name, project: nil, namespace: nil)
+        @package_name = package_name
         @project = project
         @namespace = namespace
-        @params = params
       end
 
       def execute
-        return ::Packages::Package.none unless params[:package_name].present?
-
-        packages = base.npm.installable
-        packages = filter_by_exact_package_name(packages)
-        filter_by_package_version(packages)
+        base.npm
+            .with_name(@package_name)
+            .installable
       end
 
       private
 
-      attr_reader :project, :namespace, :params
-
       def base
-        if project
+        if @project
           packages_for_project
-        elsif namespace
+        elsif @namespace
           packages_for_namespace
         else
           ::Packages::Package.none
@@ -36,11 +30,11 @@ module Packages
       end
 
       def packages_for_project
-        project.packages
+        @project.packages
       end
 
       def packages_for_namespace
-        ::Packages::Package.for_projects(namespace.all_projects)
+        ::Packages::Package.for_projects(@namespace.all_projects)
       end
     end
   end

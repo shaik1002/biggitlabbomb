@@ -32,7 +32,7 @@ RSpec.describe 'Projects > Files > User deletes files', :js, feature_category: :
 
       click_on('Delete')
       fill_in(:commit_message, with: 'New commit message', visible: true)
-      click_button('Commit changes')
+      click_button('Delete file')
 
       expect(page).to have_current_path(project_tree_path(project, 'master/'), ignore_query: true)
       expect(page).not_to have_content('.gitignore')
@@ -62,7 +62,7 @@ RSpec.describe 'Projects > Files > User deletes files', :js, feature_category: :
 
       click_on('Delete')
       fill_in(:commit_message, with: 'New commit message', visible: true)
-      click_button('Commit changes')
+      click_button('Delete file')
 
       fork = user.fork_of(project2.reload)
 

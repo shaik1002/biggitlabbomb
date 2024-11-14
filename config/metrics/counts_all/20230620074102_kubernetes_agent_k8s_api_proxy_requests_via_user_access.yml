@@ -15,7 +15,7 @@ events:
 distribution:
 - ce
 - ee
-tiers:
+tier:
 - free
 - premium
 - ultimate

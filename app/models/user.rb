@@ -29,7 +29,6 @@ class User < ApplicationRecord
   include RestrictedSignup
   include StripAttribute
   include EachBatch
-  include IgnorableColumns
   include CrossDatabaseIgnoredTables
   include UseSqlFunctionForPrimaryKeyLookups
 
@@ -45,8 +44,6 @@ class User < ApplicationRecord
     url: 'https://gitlab.com/gitlab-org/gitlab/-/issues/424285',
     on: :destroy
   )
-
-  ignore_column :last_access_from_pipl_country_at, remove_after: '2024-11-17', remove_with: '17.7'
 
   DEFAULT_NOTIFICATION_LEVEL = :participating
 
@@ -162,7 +159,7 @@ class User < ApplicationRecord
     dependent: :destroy, # rubocop:disable Cop/ActiveRecordDependent
     foreign_key: :owner_id,
     inverse_of: :owner,
-    autosave: true
+    autosave: true # rubocop:disable Cop/ActiveRecordDependent
 
   # Profile
   has_many :keys, -> { regular_keys }, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
@@ -185,7 +182,7 @@ class User < ApplicationRecord
 
   # Followers
   has_many :followed_users, foreign_key: :follower_id, class_name: 'Users::UserFollowUser'
-  has_many :followees, -> { active }, through: :followed_users
+  has_many :followees, through: :followed_users
 
   has_many :following_users, foreign_key: :followee_id, class_name: 'Users::UserFollowUser'
   has_many :followers, -> { active }, through: :following_users
@@ -437,7 +434,6 @@ class User < ApplicationRecord
     :home_organization, :home_organization_id, :home_organization_id=,
     :dpop_enabled, :dpop_enabled=,
     :use_work_items_view, :use_work_items_view=,
-    :text_editor, :text_editor=,
     to: :user_preference
 
   delegate :path, to: :namespace, allow_nil: true, prefix: true
@@ -458,7 +454,6 @@ class User < ApplicationRecord
   delegate :discord, :discord=, to: :user_detail, allow_nil: true
   delegate :email_reset_offered_at, :email_reset_offered_at=, to: :user_detail, allow_nil: true
   delegate :project_authorizations_recalculated_at, :project_authorizations_recalculated_at=, to: :user_detail, allow_nil: true
-  delegate :bot_namespace, :bot_namespace=, to: :user_detail, allow_nil: true
 
   accepts_nested_attributes_for :user_preference, update_only: true
   accepts_nested_attributes_for :user_detail, update_only: true
@@ -651,7 +646,6 @@ class User < ApplicationRecord
   scope :order_recent_last_activity, -> { reorder(arel_table[:last_activity_on].desc.nulls_last, arel_table[:id].asc) }
   scope :order_oldest_last_activity, -> { reorder(arel_table[:last_activity_on].asc.nulls_first, arel_table[:id].desc) }
   scope :ordered_by_id_desc, -> { reorder(arel_table[:id].desc) }
-  scope :ordered_by_name_asc_id_desc, -> { order(name: :asc, id: :desc) }
 
   scope :dormant, -> { with_state(:active).human_or_service_user.where('last_activity_on <= ?', Gitlab::CurrentSettings.deactivate_dormant_users_period.day.ago.to_date) }
   scope :with_no_activity, -> { with_state(:active).human_or_service_user.where(last_activity_on: nil).where('created_at <= ?', MINIMUM_DAYS_CREATED.day.ago.to_date) }
@@ -688,6 +682,14 @@ class User < ApplicationRecord
   end
 
   strip_attributes! :name
+
+  def ==(other)
+    if other.is_a?(::Gitlab::Auth::User)
+      return other.scope.nil? && other.user == self
+    end
+
+    super
+  end
 
   def preferred_language
     read_attribute('preferred_language').presence || Gitlab::CurrentSettings.default_preferred_language
@@ -1067,10 +1069,6 @@ class User < ApplicationRecord
     def username_exists?(username)
       exists?(username: username)
     end
-
-    def ends_with_reserved_file_extension?(username)
-      Mime::EXTENSION_LOOKUP.keys.any? { |type| username.end_with?(".#{type}") }
-    end
   end
 
   #
@@ -1085,7 +1083,7 @@ class User < ApplicationRecord
     username
   end
 
-  def to_reference(_from = nil, target_container: nil, full: nil)
+  def to_reference(_from = nil, target_project: nil, full: nil)
     "#{self.class.reference_prefix}#{username}"
   end
 
@@ -1298,10 +1296,14 @@ class User < ApplicationRecord
       direct_groups_cte = Gitlab::SQL::CTE.new(:direct_groups, groups)
       direct_groups_cte_alias = direct_groups_cte.table.alias(Group.table_name)
 
-      groups_from_authorized_projects = Group.id_in(authorized_projects.select(:namespace_id)).self_and_ancestors
+      groups_from_authorized_projects = Group.id_in(authorized_projects.select(:namespace_id))
       groups_from_shares = Group.joins(:shared_with_group_links)
                              .where(group_group_links: { shared_with_group_id: Group.from(direct_groups_cte_alias) })
-                             .self_and_descendants
+
+      if Feature.enabled?(:fix_user_authorized_groups, self)
+        groups_from_authorized_projects = groups_from_authorized_projects.self_and_ancestors
+        groups_from_shares = groups_from_shares.self_and_descendants
+      end
 
       Group
         .with(direct_groups_cte.to_arel)
@@ -1311,16 +1313,6 @@ class User < ApplicationRecord
           groups_from_shares
         ])
     end
-  end
-
-  # Used to search on the user's authorized_groups effeciently by using a CTE
-  def search_on_authorized_groups(query, use_minimum_char_limit: true)
-    authorized_groups_cte = Gitlab::SQL::CTE.new(:authorized_groups, authorized_groups)
-    authorized_groups_cte_alias = authorized_groups_cte.table.alias(Group.table_name)
-    Group
-      .with(authorized_groups_cte.to_arel)
-      .from(authorized_groups_cte_alias)
-      .search(query, use_minimum_char_limit: use_minimum_char_limit)
   end
 
   # Returns the groups a user is a member of, either directly or through a parent group
@@ -1494,9 +1486,15 @@ class User < ApplicationRecord
     several_namespaces? || admin
   end
 
+  # rubocop: disable Style/ArgumentsForwarding -- https://gitlab.com/gitlab-org/gitlab/-/issues/433045
   def can?(action, subject = :global, **opts)
-    Ability.allowed?(self, action, subject, **opts)
+    if ::Feature.enabled?(:api_composite_identity, self)
+      ::Gitlab::Auth::User.new(self).can?(action, subject, **opts)
+    else
+      Ability.allowed?(self, action, subject, **opts)
+    end
   end
+  # rubocop: enable Style/ArgumentsForwarding
 
   def confirm_deletion_with_password?
     !password_automatically_set? && allow_password_authentication?
@@ -1683,8 +1681,7 @@ class User < ApplicationRecord
 
     counts = Organizations::OrganizationUser
       .owners
-      .where('organization_users.organization_id = organizations.id')
-      .group(:organization_id)
+      .joins('INNER JOIN ownerships ON ownerships.organization_id = organization_users.organization_id')
       .having('count(organization_users.user_id) = 1')
 
     Organizations::Organization
@@ -1988,12 +1985,10 @@ class User < ApplicationRecord
   end
 
   # Returns true if the user can be removed, false otherwise.
-  # A user can be removed if they do not own any groups or organizations where they are the sole owner
+  # A user can be removed if they do not own any groups where they are the sole owner
   # Method `none?` is used to ensure faster retrieval, See https://gitlab.com/gitlab-org/gitlab/-/issues/417105
 
   def can_be_removed?
-    return solo_owned_groups.none? && solo_owned_organizations.none? if Feature.enabled?(:ui_for_organizations)
-
     solo_owned_groups.none?
   end
 
@@ -2679,7 +2674,7 @@ class User < ApplicationRecord
   end
 
   def check_username_format
-    return if username.blank? || !self.class.ends_with_reserved_file_extension?(username)
+    return if username.blank? || Mime::EXTENSION_LOOKUP.keys.none? { |type| username.end_with?(".#{type}") }
 
     errors.add(:username, _('ending with a reserved file extension is not allowed.'))
   end
@@ -2780,8 +2775,6 @@ class User < ApplicationRecord
   end
 
   def create_default_organization_user
-    return unless organizations.blank?
-
     Organizations::OrganizationUser.create_default_organization_record_for(id, user_is_admin: admin?)
   end
 

@@ -18,8 +18,6 @@ module Git
 
     private
 
-    alias_method :removing_branch?, :removing_ref?
-
     def hook_name
       :push_hooks
     end
@@ -133,8 +131,7 @@ module Git
         # that is then also pushed to forks when these get synced by users.
         next if upstream_commit_ids.include?(commit.id)
 
-        ProcessCommitWorker.perform_in(
-          process_commit_worker_delay,
+        ProcessCommitWorker.perform_async(
           project.id,
           current_user.id,
           commit.to_hash,
@@ -228,6 +225,10 @@ module Git
       !creating_branch? && !removing_branch?
     end
 
+    def removing_branch?
+      Gitlab::Git.blank_ref?(newrev)
+    end
+
     def creating_default_branch?
       creating_branch? && default_branch?
     end
@@ -270,10 +271,6 @@ module Git
           [commit, paths]
         end
       end
-    end
-
-    def process_commit_worker_delay
-      params[:process_commit_worker_pool]&.get_and_increment_delay || 0
     end
   end
 end

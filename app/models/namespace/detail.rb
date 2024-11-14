@@ -7,8 +7,6 @@ class Namespace::Detail < ApplicationRecord
   validates :namespace, presence: true
   validates :description, length: { maximum: 255 }
 
-  ignore_column :pending_delete, remove_with: '17.7', remove_after: '2024-11-22'
-
   self.primary_key = :namespace_id
 
   # This method should not be called directly. Instead, it is available on the namespace via delegation and should
@@ -19,7 +17,8 @@ class Namespace::Detail < ApplicationRecord
   # namespace details should be performed after the associated namespace is saved for the same reason.
   #
   # See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/82958/diffs#diff-content-c02244956d423e6837379548e5f9b1fa093bb289
-  def add_creator(user)
+  def add_creator(identity)
+    user = identity.is_a?(Gitlab::Auth::User) ? identity.user : identity
     update_attribute(:creator, user)
   end
 end

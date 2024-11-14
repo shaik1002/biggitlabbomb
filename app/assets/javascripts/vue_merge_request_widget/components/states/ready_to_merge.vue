@@ -560,9 +560,9 @@ export default {
 
 <template>
   <div
-    :class="{ 'gl-bg-subtle': isNeitherClosedNorMerged }"
+    :class="{ 'gl-bg-gray-10': isNeitherClosedNorMerged }"
     data-testid="ready_to_merge_state"
-    class="gl-border-t gl-border-t-section gl-bg-subtle gl-pl-7"
+    class="gl-border-t-1 gl-border-gray-100 gl-pl-7 gl-border-t-solid"
   >
     <div v-if="loading" class="mr-widget-body">
       <div class="mr-ready-to-merge-loader gl-w-full">
@@ -661,7 +661,7 @@ export default {
                   </li>
                 </ul>
               </div>
-              <div class="mr-widget-merge-details gl-mb-3 gl-w-full gl-text-subtle">
+              <div class="mr-widget-merge-details gl-mb-3 gl-w-full gl-text-gray-500">
                 <template v-if="sourceHasDivergedFromTarget">
                   <gl-sprintf :message="$options.i18n.sourceDivergedFromTargetText">
                     <template #link>
@@ -751,7 +751,10 @@ export default {
                 </gl-disclosure-dropdown>
               </gl-button-group>
               <template v-if="showAutoMergeHelperText">
-                <div class="gl-ml-4 gl-text-sm gl-text-subtle" data-testid="auto-merge-helper-text">
+                <div
+                  class="gl-ml-4 gl-text-sm gl-text-gray-500"
+                  data-testid="auto-merge-helper-text"
+                >
                   {{ autoMergeHelperText }}
                 </div>
                 <help-popover
@@ -781,7 +784,7 @@ export default {
               <p v-if="showMergeDetailsHeader" class="gl-mb-2 gl-text-gray-900">
                 {{ __('Merge details') }}
               </p>
-              <ul class="gl-mb-0 gl-ml-3 gl-pl-4 gl-text-subtle">
+              <ul class="gl-mb-0 gl-ml-3 gl-pl-4 gl-text-gray-600">
                 <li v-if="sourceHasDivergedFromTarget" class="gl-leading-normal">
                   <gl-sprintf :message="$options.i18n.sourceDivergedFromTargetText">
                     <template #link>

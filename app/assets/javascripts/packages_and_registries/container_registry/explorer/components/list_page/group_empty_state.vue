@@ -1,6 +1,5 @@
 <script>
 import { GlEmptyState, GlSprintf, GlLink } from '@gitlab/ui';
-import { helpPagePath } from '~/helpers/help_page_helper';
 
 export default {
   name: 'GroupEmptyState',
@@ -10,7 +9,6 @@ export default {
     GlLink,
   },
   inject: ['config'],
-  containerRegistryHelpUrl: helpPagePath('user/packages/container_registry/index'),
 };
 </script>
 <template>
@@ -29,9 +27,7 @@ export default {
           "
         >
           <template #docLink="{ content }">
-            <gl-link :href="$options.containerRegistryHelpUrl" target="_blank">{{
-              content
-            }}</gl-link>
+            <gl-link :href="config.helpPagePath" target="_blank">{{ content }}</gl-link>
           </template>
         </gl-sprintf>
       </p>

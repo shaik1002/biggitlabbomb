@@ -22,13 +22,11 @@ import {
 import {
   workItemTask,
   workItemObjectiveWithChild,
-  workItemObjectiveWithClosedChild,
   workItemEpic,
   workItemHierarchyTreeResponse,
   workItemHierarchyPaginatedTreeResponse,
   workItemHierarchyTreeFailureResponse,
   workItemHierarchyNoChildrenTreeResponse,
-  workItemHierarchyTreeSingleClosedItemResponse,
 } from '../../mock_data';
 
 jest.mock('~/alert');
@@ -63,7 +61,6 @@ describe('WorkItemLinkChild', () => {
     workItemTreeQueryHandler = getWorkItemTreeQueryHandler,
     isExpanded = false,
     showTaskWeight = false,
-    showClosed = true,
     props = {},
   } = {}) => {
     const mockApollo = createMockApollo([[getWorkItemTreeQuery, workItemTreeQueryHandler]], {
@@ -90,7 +87,6 @@ describe('WorkItemLinkChild', () => {
         workItemType,
         workItemFullPath,
         showTaskWeight,
-        showClosed,
         ...props,
       },
       stubs: {
@@ -175,12 +171,6 @@ describe('WorkItemLinkChild', () => {
       expect(findTreeChildren().exists()).toBe(false);
     });
 
-    it('do not displays expand button when children are all closed', () => {
-      createComponent({ showClosed: false, childItem: workItemObjectiveWithClosedChild });
-
-      expect(findExpandButton().exists()).toBe(false);
-    });
-
     it('calls createAlert when children fetch request fails on clicking expand button', async () => {
       const getWorkItemTreeQueryFailureHandler = jest
         .fn()
@@ -248,22 +238,6 @@ describe('WorkItemLinkChild', () => {
           expect(findWorkItemLinkChildContents().props('showWeight')).toEqual(showWeight);
         },
       );
-    });
-
-    it('filters closed children', async () => {
-      createComponent({
-        workItemTreeQueryHandler: jest
-          .fn()
-          .mockRejectedValue(workItemHierarchyTreeSingleClosedItemResponse),
-        workItemType: WORK_ITEM_TYPE_VALUE_OBJECTIVE,
-        isExpanded: true,
-      });
-      await findExpandButton().vm.$emit('click');
-
-      await waitForPromises();
-
-      expect(findTreeChildren().exists()).toBe(true);
-      expect(findTreeChildren().props('children')).toHaveLength(0);
     });
 
     describe('pagination', () => {

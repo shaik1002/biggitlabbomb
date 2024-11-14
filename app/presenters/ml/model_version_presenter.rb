@@ -11,7 +11,7 @@ module Ml
     end
 
     def author
-      model_version.package&.creator
+      model_version.package.creator
     end
 
     def path
@@ -36,10 +36,6 @@ module Ml
       )
 
       path.delete_suffix('(/path/)')
-    end
-
-    def artifacts_count
-      model_version.package.package_files.length
     end
   end
 end

@@ -1,3 +1,4 @@
+# rubocop:disable Naming/FileName
 # frozen_string_literal: true
 
 module Gitlab
@@ -176,4 +177,5 @@ module Gitlab
   end
 end
 
+# rubocop:enable Naming/FileName
 Gitlab::Ci::Pipeline::Chain::Command.prepend_mod

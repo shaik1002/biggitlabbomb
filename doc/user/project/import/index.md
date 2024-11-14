@@ -83,17 +83,14 @@ difficult, but several tools exist including:
 ## User contribution and membership mapping
 
 DETAILS:
+**Tier:** Free, Premium, Ultimate
 **Offering:** GitLab.com, Self-managed
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/443557) to direct transfer migrations for self-managed instances in GitLab 17.4 [with flags](../../../administration/feature_flags.md) named `importer_user_mapping` and `bulk_import_importer_user_mapping`. Disabled by default.
-> - [Introduced to Gitea project import](https://gitlab.com/gitlab-org/gitlab/-/issues/467084) in GitLab 17.6 [with flags](../../../administration/feature_flags.md) named `importer_user_mapping` and `gitea_user_mapping`. Disabled by default.
 
 FLAG:
 The availability of this feature is controlled by feature flags.
 For more information, see the history.
-
-NOTE:
-To leave feedback about this feature, add a comment to [issue 502565](https://gitlab.com/gitlab-org/gitlab/-/issues/502565).
 
 This method of user contributions and membership mapping is available for
 [direct transfer migrations](../../group/import/index.md) on:
@@ -132,15 +129,6 @@ to existing users on the destination instance.
 
 Until they are reassigned, contributions display as associated with the placeholder. Placeholder memberships
 do not display in member lists.
-
-#### Exceptions
-
-A placeholder user is created for each user on the source instance, except in the following scenarios:
-
-- You are importing a project from [Gitea](gitea.md) and the user has been deleted on Gitea before the import.
-  Contributions from these "ghost users" are mapped to the user who imported the project and not to a placeholder user.
-- You have exceeded your [placeholder user limit](#placeholder-user-limits). Contributions from any new users after exceeding your limit are
-  mapped to a single import user.
 
 #### Placeholder user attributes
 
@@ -247,7 +235,8 @@ they stay associated with placeholder users.
 
 #### Security considerations
 
-Contribution and membership reassignment cannot be undone, so check everything carefully before you start.
+Once this contribution and membership reassignment is complete, it cannot be undone so check all everything before
+starting.
 
 Reassigning contributions and membership to an incorrect user poses a security threat, because the user becomes a member
 of your group. They can, therefore, view information they should not be able to see.
@@ -274,7 +263,7 @@ This results in their membership for the imported group or project being higher 
 
 Prerequisites:
 
-- You must have the Owner role for the group.
+- You must have the Owner role of the group.
 
 To request a user accept reassignment of contributions and memberships:
 
@@ -454,73 +443,6 @@ file with a URL host (`lfs.url`) different from the repository URL host, LFS fil
 If you prefer, you can engage GitLab Professional Services to migrate groups and projects to GitLab instead of doing it
 yourself. For more information, see the [Professional Services Full Catalog](https://about.gitlab.com/services/catalog/).
 
-## Sidekiq configuration
-
-Importers rely heavily on Sidekiq jobs to handle the import and export of groups and projects.
-Some of these jobs might consume significant resources (CPU and memory) and
-take a long time to complete, which might affect the execution of other jobs.
-To resolve this issue, you should route importer jobs to a dedicated Sidekiq queue and
-assign a dedicated Sidekiq process to handle that queue.
-
-For example, you can use the following configuration:
-
-```conf
-sidekiq['concurrency'] = 20
-
-sidekiq['routing_rules'] = [
-  # Route import and export jobs to the importer queue
-  ['feature_category=importers', 'importers'],
-
-  # Route all other jobs to the default queue by using wildcard matching
-  ['*', 'default']
-]
-
-sidekiq['queue_groups'] = [
-  # Run a dedicated process for the importer queue
-  'importers',
-
-  # Run a separate process for the default and mailer queues
-  'default,mailers'
-]
-```
-
-In this setup:
-
-- A dedicated Sidekiq process handles import and export jobs through the importer queue.
-- Another Sidekiq process handles all other jobs (the default and mailer queues).
-- Both Sidekiq processes are configured to run with 20 concurrent threads by default.
-  For memory-constrained environments, you might want to reduce this number.
-
-If your instance has enough resources to support more concurrent jobs,
-you can configure additional Sidekiq processes to speed up migrations.
-For example:
-
-```conf
-sidekiq['queue_groups'] = [
-  # Run three processes for importer jobs
-  'importers',
-  'importers',
-  'importers',
-
-  # Run a separate process for the default and mailer queues
-  'default,mailers'
-]
-```
-
-With this setup, multiple Sidekiq processes handle import and export jobs concurrently,
-which speeds up migration as long as the instance has sufficient resources.
-
-For the maximum number of Sidekiq processes, keep the following in mind:
-
-- The number of processes should not exceed the number of available CPU cores.
-- Each process can use up to 2 GB of memory, so ensure the instance
-  has enough memory for any additional processes.
-- Each process adds one database connection per thread
-  as defined in `sidekiq['concurrency']`.
-
-For more information, see [running multiple Sidekiq processes](../../../administration/sidekiq/extra_sidekiq_processes.md)
-and [processing specific job classes](../../../administration/sidekiq/processing_specific_job_classes.md).
-
 ## Troubleshooting
 
 ### Imported repository is missing branches
@@ -573,7 +495,7 @@ For GitLab.com (GitLab team members only):
    ```plaintext
    json.class: "RepositoryImportWorker" AND json.correlation_id.keyword: "<CORRELATION_ID>"
    ```
-
+   
    or
 
    ```plaintext

@@ -89,7 +89,7 @@
   .value {
     display: inline-block;
     padding: 2px 7px;
-    @apply gl-text-sm;
+    @include gl-font-sm;
   }
 
   .name,
@@ -207,7 +207,7 @@
 
   &.focus,
   &.focus:hover {
-    @apply gl-focus;
+    @include gl-focus;
   }
 
   gl-emoji {

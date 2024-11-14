@@ -272,6 +272,7 @@ class IssuableBaseService < ::BaseContainerService
     GraphqlTriggers.issuable_description_updated(issuable)
   end
 
+  # rubocop:disable Metrics/AbcSize -- Method is only slightly over the limit due to decomposition method
   def update(issuable)
     ::Gitlab::Database::LoadBalancing::SessionMap.current(issuable.load_balancer).use_primary!
 
@@ -351,6 +352,7 @@ class IssuableBaseService < ::BaseContainerService
 
     issuable
   end
+  # rubocop:enable Metrics/AbcSize
 
   # Overriden in child class
   def trigger_update_subscriptions(issuable, old_associations); end

@@ -54,10 +54,7 @@ module Projects
       end
 
       def cycle_analytics
-        @cycle_analytics ||= ::Analytics::CycleAnalytics::ProjectLevel.new(
-          project: project,
-          options: options(cycle_analytics_project_params)
-        )
+        @cycle_analytics ||= ::Analytics::CycleAnalytics::ProjectLevel.new(project: project, options: options(cycle_analytics_project_params))
       end
     end
   end

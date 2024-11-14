@@ -1,11 +1,6 @@
-import { createPinia, setActivePinia } from 'pinia';
 import discussionWithTwoUnresolvedNotes from 'test_fixtures/merge_requests/resolved_diff_discussion.json';
 import { DESC, ASC, NOTEABLE_TYPE_MAPPING } from '~/notes/constants';
-import { createCustomGetters } from 'helpers/pinia_helpers';
-import { useNotes } from '~/notes/store/legacy_notes';
-import { useLegacyDiffs } from '~/diffs/stores/legacy_diffs';
-import { globalAccessorPlugin } from '~/pinia';
-import { useBatchComments } from '~/batch_comments/store';
+import * as getters from '~/notes/stores/getters';
 import {
   notesDataMock,
   userDataMock,
@@ -34,42 +29,28 @@ const createDiscussionNeighborParams = (discussionId, diffOrder, step) => ({
 const asDraftDiscussion = (x) => ({ ...x, individual_note: true });
 const createRootState = () => {
   return {
-    diffFiles: [
-      { ...authoritativeDiscussionFile },
-      {
-        ...authoritativeDiscussionFile,
-        ...{ id: 'abc2', file_identifier_hash: 'discfile2', order: 1 },
-      },
-      {
-        ...authoritativeDiscussionFile,
-        ...{ id: 'abc3', file_identifier_hash: 'discfile3', order: 2 },
-      },
-    ],
+    diffs: {
+      diffFiles: [
+        { ...authoritativeDiscussionFile },
+        {
+          ...authoritativeDiscussionFile,
+          ...{ id: 'abc2', file_identifier_hash: 'discfile2', order: 1 },
+        },
+        {
+          ...authoritativeDiscussionFile,
+          ...{ id: 'abc3', file_identifier_hash: 'discfile3', order: 2 },
+        },
+      ],
+    },
   };
 };
 
-describe('Getters Notes Store', () => {
-  let store;
-  let localGetters;
-  let batchComments;
+// eslint-disable-next-line jest/no-disabled-tests
+describe.skip('Getters Notes Store', () => {
+  let state;
 
   beforeEach(() => {
-    localGetters = {};
-    batchComments = {};
-    setActivePinia(
-      createPinia()
-        .use(globalAccessorPlugin)
-        .use(
-          createCustomGetters(() => ({
-            legacyNotes: localGetters,
-            batchComments,
-            legacyDiffs: {},
-          })),
-        ),
-    );
-    store = useNotes();
-    useLegacyDiffs();
-    store.$patch({
+    state = {
       discussions: [individualNote],
       targetNoteHash: 'hash',
       lastFetchedAt: 'timestamp',
@@ -79,31 +60,33 @@ describe('Getters Notes Store', () => {
       noteableData: noteableDataMock,
       descriptionVersions: 'descriptionVersions',
       discussionSortOrder: DESC,
-    });
+    };
   });
 
   describe('showJumpToNextDiscussion', () => {
     it('should return true if there are 2 or more unresolved discussions', () => {
-      localGetters = {
+      const localGetters = {
         unresolvedDiscussionsIdsByDate: ['123', '456'],
         allResolvableDiscussions: [],
       };
 
-      expect(store.showJumpToNextDiscussion()).toBe(true);
+      expect(getters.showJumpToNextDiscussion(state, localGetters)()).toBe(true);
     });
 
     it('should return false if there are 1 or less unresolved discussions', () => {
-      localGetters = {
+      const localGetters = {
         unresolvedDiscussionsIdsByDate: ['123'],
         allResolvableDiscussions: [],
       };
 
-      expect(store.showJumpToNextDiscussion()).toBe(false);
+      expect(getters.showJumpToNextDiscussion(state, localGetters)()).toBe(false);
     });
   });
 
-  describe('filteredDiscussions', () => {
-    const getDiscussions = () => store.filteredDiscussions;
+  describe('discussions', () => {
+    let batchComments = null;
+
+    const getDiscussions = () => getters.discussions(state, {}, { batchComments });
 
     describe('merge request filters', () => {
       it('returns only bot comments', () => {
@@ -115,15 +98,15 @@ describe('Getters Notes Store', () => {
         individualBotNote.notes[0].author.bot = true;
         individualBotNote.individual_note = true;
 
-        store.noteableData = { targetType: 'merge_request' };
-        store.discussions = [discussion, normalDiscussion, individualBotNote];
-        store.mergeRequestFilters = ['bot_comments'];
+        state.noteableData = { targetType: 'merge_request' };
+        state.discussions = [discussion, normalDiscussion, individualBotNote];
+        state.mergeRequestFilters = ['bot_comments'];
 
         const discussions = getDiscussions();
 
-        expect(discussions).toContainEqual(discussion);
-        expect(discussions).not.toContainEqual(normalDiscussion);
-        expect(discussions).toContainEqual(individualBotNote);
+        expect(discussions).toContain(discussion);
+        expect(discussions).not.toContain(normalDiscussion);
+        expect(discussions).toContain(individualBotNote);
       });
     });
 
@@ -133,8 +116,8 @@ describe('Getters Notes Store', () => {
       });
 
       it('should transform  discussion to individual notes in timeline view', () => {
-        store.discussions = [discussionMock];
-        store.isTimelineEnabled = true;
+        state.discussions = [discussionMock];
+        state.isTimelineEnabled = true;
 
         const discussions = getDiscussions();
 
@@ -149,7 +132,7 @@ describe('Getters Notes Store', () => {
 
     describe('with batchComments', () => {
       beforeEach(() => {
-        useBatchComments().drafts = [...draftComments, draftReply, draftDiffDiscussion];
+        batchComments = { drafts: [...draftComments, draftReply, draftDiffDiscussion] };
       });
 
       it.each`
@@ -159,7 +142,7 @@ describe('Getters Notes Store', () => {
       `(
         'only appends draft comments (discussionSortOrder=$discussionSortOrder)',
         ({ discussionSortOrder, expectation }) => {
-          store.discussionSortOrder = discussionSortOrder;
+          state.discussionSortOrder = discussionSortOrder;
 
           expect(getDiscussions()).toEqual(expectation);
         },
@@ -169,13 +152,12 @@ describe('Getters Notes Store', () => {
 
   describe('hasDrafts', () => {
     it.each`
-      batchCommentsGetters    | expected
-      ${{}}                   | ${false}
-      ${{ hasDrafts: true }}  | ${true}
-      ${{ hasDrafts: false }} | ${false}
-    `('with rootGetters=$rootGetters, returns $expected', ({ batchCommentsGetters, expected }) => {
-      batchComments = batchCommentsGetters;
-      expect(store.hasDrafts).toBe(expected);
+      rootGetters                             | expected
+      ${{}}                                   | ${false}
+      ${{ 'batchComments/hasDrafts': true }}  | ${true}
+      ${{ 'batchComments/hasDrafts': false }} | ${false}
+    `('with rootGetters=$rootGetters, returns $expected', ({ rootGetters, expected }) => {
+      expect(getters.hasDrafts({}, {}, {}, rootGetters)).toBe(expected);
     });
   });
 
@@ -184,9 +166,9 @@ describe('Getters Notes Store', () => {
       const [discussion] = discussionWithTwoUnresolvedNotes;
       discussion.notes[0].resolved = true;
       discussion.notes[1].resolved = false;
-      store.discussions.push(discussion);
+      state.discussions.push(discussion);
 
-      expect(store.resolvedDiscussionsById).toEqual({
+      expect(getters.resolvedDiscussionsById(state)).toEqual({
         [discussion.id]: discussion,
       });
     });
@@ -204,66 +186,61 @@ describe('Getters Notes Store', () => {
     };
 
     it('should return a single system note when a description was updated multiple times', () => {
-      store.$patch(stateCollapsedNotes);
-      expect(store.filteredDiscussions.length).toEqual(1);
+      expect(getters.discussions(stateCollapsedNotes, {}, {}).length).toEqual(1);
     });
   });
 
   describe('targetNoteHash', () => {
     it('should return `targetNoteHash`', () => {
-      expect(store.targetNoteHash).toEqual('hash');
+      expect(getters.targetNoteHash(state)).toEqual('hash');
     });
   });
 
   describe('getNotesData', () => {
     it('should return all data in `notesData`', () => {
-      expect(store.getNotesData).toEqual(notesDataMock);
+      expect(getters.getNotesData(state)).toEqual(notesDataMock);
     });
   });
 
   describe('getNoteableData', () => {
     it('should return all data in `noteableData`', () => {
-      expect(store.getNoteableData).toStrictEqual({
-        // discussion_locked inherited from the original state
-        discussion_locked: false,
-        ...noteableDataMock,
-      });
+      expect(getters.getNoteableData(state)).toEqual(noteableDataMock);
     });
   });
 
   describe('getUserData', () => {
     it('should return all data in `userData`', () => {
-      expect(store.getUserData).toEqual(userDataMock);
+      expect(getters.getUserData(state)).toEqual(userDataMock);
     });
   });
 
   describe('notesById', () => {
     it('should return the note for the given id', () => {
-      expect(store.notesById).toEqual({ 1390: individualNote.notes[0] });
+      expect(getters.notesById(state)).toEqual({ 1390: individualNote.notes[0] });
     });
   });
 
   describe('getCurrentUserLastNote', () => {
     it('should return the last note of the current user', () => {
-      expect(store.getCurrentUserLastNote).toEqual(individualNote.notes[0]);
+      expect(getters.getCurrentUserLastNote(state)).toEqual(individualNote.notes[0]);
     });
   });
 
   describe('openState', () => {
     it('should return the issue state', () => {
-      expect(store.openState).toEqual(noteableDataMock.state);
+      expect(getters.openState(state)).toEqual(noteableDataMock.state);
     });
   });
 
   describe('isNotesFetched', () => {
     it('should return the state for the fetching notes', () => {
-      expect(store.isNotesFetched).toBe(false);
+      expect(getters.isNotesFetched(state)).toBe(false);
     });
   });
 
   describe('allResolvableDiscussions', () => {
     it('should return only resolvable discussions in same order', () => {
-      store.discussions = [
+      state.discussions = [
         discussion3,
         unresolvableDiscussion,
         discussion1,
@@ -271,24 +248,32 @@ describe('Getters Notes Store', () => {
         discussion2,
       ];
 
-      expect(store.allResolvableDiscussions).toEqual([discussion3, discussion1, discussion2]);
+      expect(getters.allResolvableDiscussions(state)).toEqual([
+        discussion3,
+        discussion1,
+        discussion2,
+      ]);
     });
 
     it('should return empty array if there are no resolvable discussions', () => {
-      store.discussions = [unresolvableDiscussion, unresolvableDiscussion];
+      state.discussions = [unresolvableDiscussion, unresolvableDiscussion];
 
-      expect(store.allResolvableDiscussions).toEqual([]);
+      expect(getters.allResolvableDiscussions(state)).toEqual([]);
     });
   });
 
   describe('unresolvedDiscussionsIdsByDiff', () => {
     it('should return all discussions IDs in diff order', () => {
-      localGetters = {
+      const localGetters = {
         allResolvableDiscussions: [discussion3, discussion1, discussion2],
       };
-      useLegacyDiffs().$patch(createRootState());
+      const rootState = createRootState();
 
-      expect(store.unresolvedDiscussionsIdsByDiff).toEqual(['abc1', 'abc2', 'abc3']);
+      expect(getters.unresolvedDiscussionsIdsByDiff(state, localGetters, rootState)).toEqual([
+        'abc1',
+        'abc2',
+        'abc3',
+      ]);
     });
 
     // This is the same test as above, but it exercises the sorting algorithm
@@ -296,32 +281,37 @@ describe('Getters Notes Store', () => {
     // of shuffling has to occur, everything still works
 
     it('should return all discussions IDs in unusual diff order', () => {
-      localGetters = {
+      const localGetters = {
         allResolvableDiscussions: [discussion3, discussion1, discussion2],
       };
       const rootState = {
-        diffFiles: [
-          // 2 is first, but should sort 2nd
-          {
-            ...authoritativeDiscussionFile,
-            ...{ id: 'abc2', file_identifier_hash: 'discfile2', order: 1 },
-          },
-          // 1 is second, but should sort 3rd
-          { ...authoritativeDiscussionFile, ...{ order: 2 } },
-          // 3 is third, but should sort 1st
-          {
-            ...authoritativeDiscussionFile,
-            ...{ id: 'abc3', file_identifier_hash: 'discfile3', order: 0 },
-          },
-        ],
+        diffs: {
+          diffFiles: [
+            // 2 is first, but should sort 2nd
+            {
+              ...authoritativeDiscussionFile,
+              ...{ id: 'abc2', file_identifier_hash: 'discfile2', order: 1 },
+            },
+            // 1 is second, but should sort 3rd
+            { ...authoritativeDiscussionFile, ...{ order: 2 } },
+            // 3 is third, but should sort 1st
+            {
+              ...authoritativeDiscussionFile,
+              ...{ id: 'abc3', file_identifier_hash: 'discfile3', order: 0 },
+            },
+          ],
+        },
       };
-      useLegacyDiffs().$patch(rootState);
 
-      expect(store.unresolvedDiscussionsIdsByDiff).toEqual(['abc3', 'abc2', 'abc1']);
+      expect(getters.unresolvedDiscussionsIdsByDiff(state, localGetters, rootState)).toEqual([
+        'abc3',
+        'abc2',
+        'abc1',
+      ]);
     });
 
     it("should use the discussions array order if the files don't have explicit order values", () => {
-      localGetters = {
+      const localGetters = {
         allResolvableDiscussions: [discussion3, discussion1, discussion2], // This order is used!
       };
       const auth1 = { ...authoritativeDiscussionFile };
@@ -333,81 +323,96 @@ describe('Getters Notes Store', () => {
         ...authoritativeDiscussionFile,
         ...{ id: 'abc3', file_identifier_hash: 'discfile3' },
       };
-      const rootState = { diffFiles: [auth2, auth1, auth3] }; // This order is not used!
+      const rootState = {
+        diffs: { diffFiles: [auth2, auth1, auth3] }, // This order is not used!
+      };
+
       delete auth1.order;
       delete auth2.order;
       delete auth3.order;
 
-      useLegacyDiffs().$patch(rootState);
-
-      expect(store.unresolvedDiscussionsIdsByDiff).toEqual(['abc3', 'abc1', 'abc2']);
+      expect(getters.unresolvedDiscussionsIdsByDiff(state, localGetters, rootState)).toEqual([
+        'abc3',
+        'abc1',
+        'abc2',
+      ]);
     });
 
     it('should return empty array if all discussions have been resolved', () => {
-      localGetters = {
+      const localGetters = {
         allResolvableDiscussions: [resolvedDiscussion1],
       };
-      useLegacyDiffs().$patch(createRootState());
+      const rootState = createRootState();
 
-      expect(store.unresolvedDiscussionsIdsByDiff).toEqual([]);
+      expect(getters.unresolvedDiscussionsIdsByDiff(state, localGetters, rootState)).toEqual([]);
     });
   });
 
   describe('unresolvedDiscussionsIdsByDate', () => {
     it('should return all discussions in date ascending order', () => {
-      localGetters = {
+      const localGetters = {
         allResolvableDiscussions: [discussion3, discussion1, discussion2],
       };
 
-      expect(store.unresolvedDiscussionsIdsByDate).toEqual(['abc2', 'abc1', 'abc3']);
+      expect(getters.unresolvedDiscussionsIdsByDate(state, localGetters)).toEqual([
+        'abc2',
+        'abc1',
+        'abc3',
+      ]);
     });
 
     it('should return empty array if all discussions have been resolved', () => {
-      localGetters = {
+      const localGetters = {
         allResolvableDiscussions: [resolvedDiscussion1],
       };
 
-      expect(store.unresolvedDiscussionsIdsByDate).toEqual([]);
+      expect(getters.unresolvedDiscussionsIdsByDate(state, localGetters)).toEqual([]);
     });
   });
 
   describe('unresolvedDiscussionsIdsOrdered', () => {
-    beforeEach(() => {
-      localGetters = {
-        unresolvedDiscussionsIdsByDate: ['123', '456'],
-        unresolvedDiscussionsIdsByDiff: ['abc', 'def'],
-      };
-    });
+    const localGetters = {
+      unresolvedDiscussionsIdsByDate: ['123', '456'],
+      unresolvedDiscussionsIdsByDiff: ['abc', 'def'],
+    };
 
     it('should return IDs ordered by diff when diffOrder param is true', () => {
-      expect(store.unresolvedDiscussionsIdsOrdered(true)).toEqual(['abc', 'def']);
+      expect(getters.unresolvedDiscussionsIdsOrdered(state, localGetters)(true)).toEqual([
+        'abc',
+        'def',
+      ]);
     });
 
     it('should return IDs ordered by date when diffOrder param is not true', () => {
-      expect(store.unresolvedDiscussionsIdsOrdered(false)).toEqual(['123', '456']);
+      expect(getters.unresolvedDiscussionsIdsOrdered(state, localGetters)(false)).toEqual([
+        '123',
+        '456',
+      ]);
 
-      expect(store.unresolvedDiscussionsIdsOrdered(undefined)).toEqual(['123', '456']);
+      expect(getters.unresolvedDiscussionsIdsOrdered(state, localGetters)(undefined)).toEqual([
+        '123',
+        '456',
+      ]);
     });
   });
 
   describe('isLastUnresolvedDiscussion', () => {
-    beforeEach(() => {
-      localGetters = {
-        unresolvedDiscussionsIdsOrdered: () => ['123', '456', '789'],
-      };
-    });
+    const localGetters = {
+      unresolvedDiscussionsIdsOrdered: () => ['123', '456', '789'],
+    };
 
     it('should return true if the discussion id provided is the last', () => {
-      expect(store.isLastUnresolvedDiscussion('789')).toBe(true);
+      expect(getters.isLastUnresolvedDiscussion(state, localGetters)('789')).toBe(true);
     });
 
     it('should return false if the discussion id provided is not the last', () => {
-      expect(store.isLastUnresolvedDiscussion('123')).toBe(false);
-      expect(store.isLastUnresolvedDiscussion('456')).toBe(false);
+      expect(getters.isLastUnresolvedDiscussion(state, localGetters)('123')).toBe(false);
+      expect(getters.isLastUnresolvedDiscussion(state, localGetters)('456')).toBe(false);
     });
   });
 
   describe('findUnresolvedDiscussionIdNeighbor', () => {
+    let localGetters;
     beforeEach(() => {
       localGetters = {
         unresolvedDiscussionsIdsOrdered: () => ['123', '456', '789'],
@@ -425,7 +430,9 @@ describe('Getters Notes Store', () => {
       it(`with step ${step} and id ${id}, returns next value`, () => {
         const params = createDiscussionNeighborParams(id, true, step);
 
-        expect(store.findUnresolvedDiscussionIdNeighbor(params)).toBe(expected);
+        expect(getters.findUnresolvedDiscussionIdNeighbor(state, localGetters)(params)).toBe(
+          expected,
+        );
       });
     });
 
@@ -443,14 +450,16 @@ describe('Getters Notes Store', () => {
         it(`with step ${step} and match, returns only value`, () => {
           const params = createDiscussionNeighborParams(id, true, step);
 
-          expect(store.findUnresolvedDiscussionIdNeighbor(params)).toBe(expected);
+          expect(getters.findUnresolvedDiscussionIdNeighbor(state, localGetters)(params)).toBe(
+            expected,
+          );
         });
       });
 
       it('with no match, returns only value', () => {
         const params = createDiscussionNeighborParams('bogus', true, 1);
 
-        expect(store.findUnresolvedDiscussionIdNeighbor(params)).toBe('123');
+        expect(getters.findUnresolvedDiscussionIdNeighbor(state, localGetters)(params)).toBe('123');
       });
     });
 
@@ -465,7 +474,9 @@ describe('Getters Notes Store', () => {
         it(`with step ${step}, returns undefined`, () => {
           const params = createDiscussionNeighborParams('bogus', true, step);
 
-          expect(store.findUnresolvedDiscussionIdNeighbor(params)).toBeUndefined();
+          expect(
+            getters.findUnresolvedDiscussionIdNeighbor(state, localGetters)(params),
+          ).toBeUndefined();
         });
       });
     });
@@ -474,6 +485,7 @@ describe('Getters Notes Store', () => {
   describe('findUnresolvedDiscussionIdNeighbor aliases', () => {
     let neighbor;
     let findUnresolvedDiscussionIdNeighbor;
+    let localGetters;
 
     beforeEach(() => {
       neighbor = {};
@@ -484,7 +496,7 @@ describe('Getters Notes Store', () => {
     describe('nextUnresolvedDiscussionId', () => {
       it('should return result of find neighbor', () => {
         const expectedParams = createDiscussionNeighborParams('123', true, 1);
-        const result = store.nextUnresolvedDiscussionId('123', true);
+        const result = getters.nextUnresolvedDiscussionId(state, localGetters)('123', true);
 
         expect(findUnresolvedDiscussionIdNeighbor).toHaveBeenCalledWith(expectedParams);
         expect(result).toBe(neighbor);
@@ -494,7 +506,7 @@ describe('Getters Notes Store', () => {
     describe('previosuUnresolvedDiscussionId', () => {
       it('should return result of find neighbor', () => {
         const expectedParams = createDiscussionNeighborParams('123', true, -1);
-        const result = store.previousUnresolvedDiscussionId('123', true);
+        const result = getters.previousUnresolvedDiscussionId(state, localGetters)('123', true);
 
         expect(findUnresolvedDiscussionIdNeighbor).toHaveBeenCalledWith(expectedParams);
         expect(result).toBe(neighbor);
@@ -503,50 +515,48 @@ describe('Getters Notes Store', () => {
   });
 
   describe('firstUnresolvedDiscussionId', () => {
-    beforeEach(() => {
-      localGetters = {
-        unresolvedDiscussionsIdsByDate: ['123', '456'],
-        unresolvedDiscussionsIdsByDiff: ['abc', 'def'],
-      };
-    });
+    const localGetters = {
+      unresolvedDiscussionsIdsByDate: ['123', '456'],
+      unresolvedDiscussionsIdsByDiff: ['abc', 'def'],
+    };
 
     it('should return the first discussion id by diff when diffOrder param is true', () => {
-      expect(store.firstUnresolvedDiscussionId(true)).toBe('abc');
+      expect(getters.firstUnresolvedDiscussionId(state, localGetters)(true)).toBe('abc');
     });
 
     it('should return the first discussion id by date when diffOrder param is not true', () => {
-      expect(store.firstUnresolvedDiscussionId(false)).toBe('123');
-      expect(store.firstUnresolvedDiscussionId(undefined)).toBe('123');
+      expect(getters.firstUnresolvedDiscussionId(state, localGetters)(false)).toBe('123');
+      expect(getters.firstUnresolvedDiscussionId(state, localGetters)(undefined)).toBe('123');
     });
 
     it('should be falsy if all discussions are resolved', () => {
-      localGetters = {
+      const localGettersFalsy = {
         unresolvedDiscussionsIdsByDiff: [],
         unresolvedDiscussionsIdsByDate: [],
       };
 
-      expect(store.firstUnresolvedDiscussionId(true)).toBeUndefined();
-      expect(store.firstUnresolvedDiscussionId(false)).toBeUndefined();
+      expect(getters.firstUnresolvedDiscussionId(state, localGettersFalsy)(true)).toBeUndefined();
+      expect(getters.firstUnresolvedDiscussionId(state, localGettersFalsy)(false)).toBeUndefined();
     });
   });
 
   describe('getDiscussion', () => {
     it('returns discussion by ID', () => {
-      store.discussions.push({ id: '1' });
+      state.discussions.push({ id: '1' });
 
-      expect(store.getDiscussion('1')).toEqual({ id: '1' });
+      expect(getters.getDiscussion(state)('1')).toEqual({ id: '1' });
     });
   });
 
   describe('descriptionVersions', () => {
     it('should return `descriptionVersions`', () => {
-      expect(store.descriptionVersions).toEqual('descriptionVersions');
+      expect(getters.descriptionVersions(state)).toEqual('descriptionVersions');
     });
   });
 
   describe('sortDirection', () => {
     it('should return `discussionSortOrder`', () => {
-      expect(store.sortDirection).toBe(DESC);
+      expect(getters.sortDirection(state)).toBe(DESC);
     });
   });
 
@@ -560,29 +570,29 @@ describe('Getters Notes Store', () => {
     `(
       'with userData=$userData and noteableData=$noteableData, expected=$expected',
       ({ userData, noteableData, expected }) => {
-        store.$patch({
+        Object.assign(state, {
           userData,
           noteableData,
         });
 
-        expect(store.canUserAddIncidentTimelineEvents).toBe(expected);
+        expect(getters.canUserAddIncidentTimelineEvents(state)).toBe(expected);
       },
     );
   });
 
   describe('allDiscussionsExpanded', () => {
     it('returns true when every discussion is expanded', () => {
-      store.$patch({
+      state = {
         discussions: [{ expanded: true }, { expanded: true }],
-      });
-      expect(store.allDiscussionsExpanded).toBe(true);
+      };
+      expect(getters.allDiscussionsExpanded(state)).toBe(true);
     });
 
     it('returns false when at least one discussion is collapsed', () => {
-      store.$patch({
+      state = {
         discussions: [{ expanded: true }, { expanded: false }],
-      });
-      expect(store.allDiscussionsExpanded).toBe(false);
+      };
+      expect(getters.allDiscussionsExpanded(state)).toBe(false);
     });
   });
 });

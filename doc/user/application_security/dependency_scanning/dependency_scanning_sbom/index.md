@@ -1,5 +1,5 @@
 ---
-stage: Application Security Testing
+stage: Secure
 group: Composition Analysis
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -29,7 +29,7 @@ aspects of inspecting the items your code uses. These items typically include ap
 dependencies that are almost always imported from external sources, rather than sourced from items
 you wrote yourself.
 
-Dependency scanning can run in the development phase of your application's lifecycle. Every time a
+Dependency scanning can run in the development phase of your application's life cycle. Every time a
 pipeline produces an SBOM report, security findings are identified and compared between the source
 and target branches. Findings and their severity are listed in the merge request, enabling you to
 proactively address the risk to your application, before the code change is committed. Security
@@ -106,7 +106,7 @@ include:
 
 ### Language-specific instructions
 
-If your project doesn't have a supported lock file dependency graph committed to its
+If your project doesn't have a supported lock file dependency graph commited to its
 repository, you need to provide one.
 
 The examples below show how to create a file that is supported by the GitLab analyzer for popular

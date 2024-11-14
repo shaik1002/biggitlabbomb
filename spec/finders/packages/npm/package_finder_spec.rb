@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-
 require 'spec_helper'
 
 RSpec.describe ::Packages::Npm::PackageFinder, feature_category: :package_registry do
@@ -8,8 +7,6 @@ RSpec.describe ::Packages::Npm::PackageFinder, feature_category: :package_regist
 
   let(:project) { package.project }
   let(:package_name) { package.name }
-  let(:package_version) { package.version }
-  let(:params) { { package_name: package_name, package_version: package_version }.compact }
 
   shared_examples 'accepting a namespace for' do |example_name|
     before do
@@ -46,36 +43,10 @@ RSpec.describe ::Packages::Npm::PackageFinder, feature_category: :package_regist
     subject { finder.execute }
 
     shared_examples 'finding packages by name' do
-      let(:package_version) { nil }
-
       it { is_expected.to eq([package]) }
 
       context 'with unknown package name' do
         let(:package_name) { 'baz' }
-
-        it { is_expected.to be_empty }
-      end
-
-      context 'with an uninstallable package' do
-        before do
-          package.update_column(:status, :error)
-        end
-
-        it { is_expected.to be_empty }
-      end
-    end
-
-    shared_examples 'finding packages by name and version' do
-      it { is_expected.to eq([package]) }
-
-      context 'with unknown package name' do
-        let(:package_name) { 'baz' }
-
-        it { is_expected.to be_empty }
-      end
-
-      context 'with unknown package version' do
-        let(:package_version) { 'foobar' }
 
         it { is_expected.to be_empty }
       end
@@ -90,10 +61,9 @@ RSpec.describe ::Packages::Npm::PackageFinder, feature_category: :package_regist
     end
 
     context 'with a project' do
-      let(:finder) { described_class.new(project: project, params: params) }
+      let(:finder) { described_class.new(package_name, project: project) }
 
       it_behaves_like 'finding packages by name'
-      it_behaves_like 'finding packages by name and version'
       it_behaves_like 'avoids N+1 database queries in the package registry'
 
       context 'set to nil' do
@@ -104,10 +74,9 @@ RSpec.describe ::Packages::Npm::PackageFinder, feature_category: :package_regist
     end
 
     context 'with a namespace' do
-      let(:finder) { described_class.new(namespace: namespace, params: params) }
+      let(:finder) { described_class.new(package_name, namespace: namespace) }
 
       it_behaves_like 'accepting a namespace for', 'finding packages by name'
-      it_behaves_like 'accepting a namespace for', 'finding packages by name and version'
 
       context 'set to nil' do
         let_it_be(:namespace) { nil }
@@ -119,9 +88,35 @@ RSpec.describe ::Packages::Npm::PackageFinder, feature_category: :package_regist
     end
   end
 
-  describe '#last' do
-    let(:package_version) { nil }
+  describe '#find_by_version' do
+    let(:version) { package.version }
 
+    subject { finder.find_by_version(version) }
+
+    shared_examples 'finding packages by version' do
+      it { is_expected.to eq(package) }
+
+      context 'with unknown version' do
+        let(:version) { 'foobar' }
+
+        it { is_expected.to be_nil }
+      end
+    end
+
+    context 'with a project' do
+      let(:finder) { described_class.new(package_name, project: project) }
+
+      it_behaves_like 'finding packages by version'
+    end
+
+    context 'with a namespace' do
+      let(:finder) { described_class.new(package_name, namespace: namespace) }
+
+      it_behaves_like 'accepting a namespace for', 'finding packages by version'
+    end
+  end
+
+  describe '#last' do
     subject { finder.last }
 
     shared_examples 'finding package by last' do
@@ -129,13 +124,13 @@ RSpec.describe ::Packages::Npm::PackageFinder, feature_category: :package_regist
     end
 
     context 'with a project' do
-      let(:finder) { described_class.new(project: project, params: params) }
+      let(:finder) { described_class.new(package_name, project: project) }
 
       it_behaves_like 'finding package by last'
     end
 
     context 'with a namespace' do
-      let(:finder) { described_class.new(namespace: namespace, params: params) }
+      let(:finder) { described_class.new(package_name, namespace: namespace) }
 
       it_behaves_like 'accepting a namespace for', 'finding package by last'
 

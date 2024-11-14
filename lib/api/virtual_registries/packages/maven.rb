@@ -150,7 +150,7 @@ module API
               ).execute
 
               send_error_response_from!(service_response: service_response) if service_response.error?
-              ok_empty_response
+              status :ok
             end
           end
         end

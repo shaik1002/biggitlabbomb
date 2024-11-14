@@ -57,7 +57,7 @@ To view the rendered details:
 1. Select **Settings > CI/CD**.
 1. Expand **Runners**.
 
-![A project's runner settings shows a message about instance runner guidelines.](img/continuous_integration_instance_runner_details_v17_6.png)
+![A project's runner settings shows a message about shared runner guidelines.](img/continuous_integration_shared_runner_details_v14_10.png)
 
 ### Enable a project runner for multiple projects
 
@@ -313,7 +313,6 @@ It is also possible to specify a [custom CI/CD configuration file for a specific
 ## Set CI/CD limits
 
 > - **Maximum number of active pipelines per project** setting [removed](https://gitlab.com/gitlab-org/gitlab/-/issues/368195) in GitLab 16.0.
-> - **Maximum number of jobs in a single pipeline** setting [moved](https://gitlab.com/gitlab-org/gitlab/-/issues/287669) from GitLab Enterprise Edition to GitLab Community Edition in 17.6.
 
 You can configure some [CI/CD limits](../../administration/instance_limits.md#cicd-limits)
 from the **Admin** area:
@@ -332,19 +331,6 @@ from the **Admin** area:
    - **Maximum number of runners registered per project**
    - **Maximum number of downstream pipelines in a pipeline's hierarchy tree**
 <!-- vale gitlab_base.CurrentStatus = YES -->
-
-## Job token permissions
-
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/496647) in GitLab 17.6.
-
-You can configure the [CI/CD job token access setting](../../ci/jobs/ci_job_token.md#control-job-token-access-to-your-project)
-for all projects from the **Admin** area.
-
-1. On the left sidebar, at the bottom, select **Admin**.
-1. Select **Settings > CI/CD**.
-1. Expand the **Continuous Integration and Deployment** section.
-1. Enable **Enable and enforce job token allowlist for all projects** setting to
-   require all projects to control job token access with the allowlist.
 
 ## Disable the pipeline suggestion banner
 

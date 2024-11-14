@@ -3,15 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::BackgroundMigration::ResolveVulnerabilitiesForRemovedAnalyzers,
-  schema: 20241015185528,
   feature_category: :static_application_security_testing do
-  before(:all) do
-    # This migration will not work if a sec database is configured. It should be finalized and removed prior to
-    # sec db rollout.
-    # Consult https://gitlab.com/gitlab-org/gitlab/-/merge_requests/171707 for more info.
-    skip_if_multiple_databases_are_setup(:sec)
-  end
-
   let(:namespaces) { table(:namespaces) }
   let(:projects) { table(:projects) }
   let(:scanners) { table(:vulnerability_scanners) }
@@ -62,7 +54,7 @@ RSpec.describe Gitlab::BackgroundMigration::ResolveVulnerabilitiesForRemovedAnal
     ]
   end
 
-  shared_context 'with vulnerability data' do
+  shared_context 'with vulnerability data' do # rubocop:disable RSpec/MultipleMemoizedHelpers -- we need to satifsy foreign keys
     let!(:vulnerabilities_to_resolve) do
       removed_scanners.map do |external_id|
         create_vulnerability(project_id: project.id, external_id: external_id)

@@ -32,7 +32,6 @@ fragment WorkItemHierarchy on WorkItem {
       }
       rolledUpCountsByType {
         countsByState {
-          opened
           all
           closed
         }

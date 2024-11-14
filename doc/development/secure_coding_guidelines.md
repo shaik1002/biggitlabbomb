@@ -100,12 +100,6 @@ Some example of well implemented access controls and tests:
 
 **NB:** any input from development team is welcome, for example, about RuboCop rules.
 
-## CI/CD development
-
-When developing features that interact with or trigger pipelines, it's essential to consider the broader implications these actions have on the system's security and operational integrity.
-
-The [CI/CD development guidelines](../development/cicd/index.md) are essential reading material. No SAST or RuboCop rules enforce these guidelines.
-
 ## Regular Expressions guidelines
 
 ### Anchors / Multi line
@@ -1387,7 +1381,7 @@ Add the new prefix to:
 - [`gitlab/app/assets/javascripts/lib/utils/secret_detection.js`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/app/assets/javascripts/lib/utils/secret_detection.js)
 - The [GitLab Secret Detection gem](https://gitlab.com/gitlab-org/gitlab/-/tree/master/gems/gitlab-secret_detection)
 - GitLab [secrets SAST analyzer](https://gitlab.com/gitlab-org/security-products/analyzers/secrets)
-- [Tokinator](https://gitlab.com/gitlab-com/gl-security/appsec/tokinator/-/blob/main/CONTRIBUTING.md?ref_type=heads) (internal tool / team members only)
+- [Tokinator](https://gitlab.com/gitlab-com/gl-security/product-security/appsec/tokinator/-/blob/main/CONTRIBUTING.md?ref_type=heads) (internal tool / team members only)
 - [Token Overview](../security/token_overview.md) documentation
 
 ### Examples

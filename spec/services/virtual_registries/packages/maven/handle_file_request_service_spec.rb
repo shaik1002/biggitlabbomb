@@ -85,7 +85,9 @@ RSpec.describe VirtualRegistries::Packages::Maven::HandleFileRequestService, :ag
         it 'bumps the statistics', :freeze_time do
           stub_external_registry_request(etag: etag_returned_by_upstream)
 
-          expect { execute }.to change { cached_response.reload.downloaded_at }.to(Time.zone.now)
+          expect { execute }
+            .to change { cached_response.reload.downloads_count }.by(1)
+            .and change { cached_response.downloaded_at }.to(Time.zone.now)
         end
 
         context 'and is too old' do
@@ -102,7 +104,8 @@ RSpec.describe VirtualRegistries::Packages::Maven::HandleFileRequestService, :ag
               stub_external_registry_request(etag: etag_returned_by_upstream)
 
               expect { execute }
-                .to change { cached_response.reload.downloaded_at }.to(Time.zone.now)
+                .to change { cached_response.reload.downloads_count }.by(1)
+                .and change { cached_response.downloaded_at }.to(Time.zone.now)
                 .and change { cached_response.upstream_checked_at }.to(Time.zone.now)
             end
           end
@@ -150,14 +153,6 @@ RSpec.describe VirtualRegistries::Packages::Maven::HandleFileRequestService, :ag
           context 'in FIPS mode', :fips_mode do
             it { is_expected.to eq(described_class::ERRORS[:fips_unsupported_md5]) }
           end
-        end
-
-        context 'with upstream head raising an error' do
-          before do
-            stub_external_registry_request(raise_error: true)
-          end
-
-          it_behaves_like 'returning a service response success response', action: :download_file
         end
       end
     end

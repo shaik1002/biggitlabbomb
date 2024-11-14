@@ -57,7 +57,7 @@ $item-remove-button-space: 42px;
     cursor: help;
 
     &:focus {
-      @apply gl-focus;
+      @include gl-focus;
     }
   }
 
@@ -162,7 +162,7 @@ $item-remove-button-space: 42px;
 
   a:focus {
     border-radius: $gl-border-radius-full;
-    @apply gl-focus;
+    @include gl-focus;
   }
 }
 

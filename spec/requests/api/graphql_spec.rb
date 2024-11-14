@@ -235,10 +235,8 @@ RSpec.describe 'GraphQL', feature_category: :shared do
         stub_authentication_activity_metrics do |metrics|
           expect(metrics)
             .to increment(:user_authenticated_counter)
+            .and increment(:user_csrf_token_invalid_counter)
             .and increment(:user_session_destroyed_counter)
-
-          expect(metrics.user_csrf_token_invalid_counter)
-            .to receive(:increment).with(controller: 'GraphqlController', auth: 'session')
         end
 
         post_graphql(query, headers: { 'X-CSRF-Token' => 'invalid' })
@@ -270,14 +268,7 @@ RSpec.describe 'GraphQL', feature_category: :shared do
             .to increment(:user_authenticated_counter)
             .and increment(:user_session_override_counter)
             .and increment(:user_sessionless_authentication_counter)
-
-          ##
-          # TODO: PAT authentication should not trigger `handle_unverified_request` on CSRF token mismatch.
-          #
-          # `auth` type is 'other' here, becase we `handle_unverified_request` before we call sessionless sign in hooks.
-          #
-          expect(metrics.user_csrf_token_invalid_counter)
-            .to receive(:increment).with(controller: 'GraphqlController', auth: 'other')
+            .and increment(:user_csrf_token_invalid_counter) # TODO: is that expected?
         end
 
         post_graphql(query, headers: { 'PRIVATE-TOKEN' => token.token })

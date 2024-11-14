@@ -25,7 +25,6 @@
     "distribution_build",
     "distribution_deploy",
     "duo_chat",
-    "duo_workflow",
     "dynamic_analysis",
     "editor_extensions",
     "engineering_analytics",

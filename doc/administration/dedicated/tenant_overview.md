@@ -43,7 +43,7 @@ This section displays the:
 - Most recent emergency maintenance window (if applicable).
 - Upcoming GitLab version upgrade.
 
-For more information, see [Maintenance windows](../../administration/dedicated/maintenance.md#maintenance-windows).
+For more information, see [Maintenance windows](../../administration/dedicated/create_instance.md#maintenance-window).
 
 ## Hosted runners
 

@@ -44,7 +44,7 @@ module CommitSignature
 
   def reverified_status
     return verification_status unless Feature.enabled?(:check_for_mailmapped_commit_emails, project)
-    return verification_status unless verified_ssh? || verified_system?
+    return verification_status unless verified? && ssh?
 
     verified_emails = signed_by_user&.verified_emails
     if verified_emails&.exclude?(commit.author_email)
@@ -52,11 +52,5 @@ module CommitSignature
     else
       verification_status
     end
-  end
-
-  private
-
-  def verified_ssh?
-    verified? && ssh?
   end
 end

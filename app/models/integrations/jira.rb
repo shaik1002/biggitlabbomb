@@ -215,7 +215,7 @@ module Integrations
     end
 
     def self.title
-      'Jira issues'
+      'Jira'
     end
 
     def self.description

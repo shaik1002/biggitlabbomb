@@ -40,23 +40,22 @@ class Packages::Package < ApplicationRecord
   # TODO: put the installable default scope on the :package_files association once the dependent: :destroy is removed
   # See https://gitlab.com/gitlab-org/gitlab/-/issues/349191
   has_many :installable_package_files, -> { installable }, class_name: 'Packages::PackageFile', inverse_of: :package
-  # TODO: Remove with the rollout of the FF nuget_extract_nuget_package_model
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/499602
   has_many :installable_nuget_package_files, -> { installable.with_nuget_format }, class_name: 'Packages::PackageFile', inverse_of: :package
   has_many :dependency_links, inverse_of: :package, class_name: 'Packages::DependencyLink'
   has_many :tags, inverse_of: :package, class_name: 'Packages::Tag'
 
   has_one :maven_metadatum, inverse_of: :package, class_name: 'Packages::Maven::Metadatum'
-  # TODO: Remove with the rollout of the FF nuget_extract_nuget_package_model
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/499602
   has_one :nuget_metadatum, inverse_of: :package, class_name: 'Packages::Nuget::Metadatum'
-  # TODO: Remove with the rollout of the FF nuget_extract_nuget_package_model
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/499602
   has_many :nuget_symbols, inverse_of: :package, class_name: 'Packages::Nuget::Symbol'
   has_one :npm_metadatum, inverse_of: :package, class_name: 'Packages::Npm::Metadatum'
 
+  # TODO: Remove with the rollout of the FF terraform_extract_terraform_package_model
+  # https://gitlab.com/gitlab-org/gitlab/-/issues/490007
+  has_one :terraform_module_metadatum, inverse_of: :package, class_name: 'Packages::TerraformModule::Metadatum'
+
   has_many :build_infos, inverse_of: :package
   has_many :pipelines, through: :build_infos, disable_joins: true
+  has_many :matching_package_protection_rules, ->(package) { where(package_type: package.package_type).for_package_name(package.name) }, through: :project, source: :package_protection_rules
 
   accepts_nested_attributes_for :maven_metadatum
 
@@ -75,17 +74,19 @@ class Packages::Package < ApplicationRecord
   validate :npm_package_already_taken, if: :npm?
 
   validates :name, format: { with: Gitlab::Regex.npm_package_name_regex, message: Gitlab::Regex.npm_package_name_regex_message }, if: :npm?
-  # TODO: Remove with the rollout of the FF nuget_extract_nuget_package_model
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/499602
   validates :name, format: { with: Gitlab::Regex.nuget_package_name_regex }, if: :nuget?
 
-  # TODO: Remove with the rollout of the FF nuget_extract_nuget_package_model
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/499602
+  # TODO: Remove with the rollout of the FF terraform_extract_terraform_package_model
+  # https://gitlab.com/gitlab-org/gitlab/-/issues/490007
+  validates :name, format: { with: Gitlab::Regex.terraform_module_package_name_regex }, if: :terraform_module?
+
   validates :version, format: { with: Gitlab::Regex.nuget_version_regex }, if: :nuget?
   validates :version, format: { with: Gitlab::Regex.maven_version_regex }, if: -> { version? && maven? }
 
+  # TODO: Remove `terraform_module?` condition with the rollout of the FF terraform_extract_terraform_package_model
+  # https://gitlab.com/gitlab-org/gitlab/-/issues/490007
   validates :version, format: { with: Gitlab::Regex.semver_regex, message: Gitlab::Regex.semver_regex_message },
-    if: -> { npm? }
+    if: -> { npm? || terraform_module? }
 
   scope :for_projects, ->(project_ids) { where(project_id: project_ids) }
   scope :with_name, ->(name) { where(name: name) }
@@ -99,8 +100,6 @@ class Packages::Package < ApplicationRecord
     where(arel_table[:name].lower.eq(name.downcase))
   end
 
-  # TODO: Remove with the rollout of the FF nuget_extract_nuget_package_model
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/499602
   scope :with_nuget_version_or_normalized_version, ->(version, with_normalized: true) do
     relation = with_case_insensitive_version(version)
 
@@ -123,27 +122,19 @@ class Packages::Package < ApplicationRecord
   scope :including_project_namespace_route, -> { includes(project: { namespace: :route }) }
   scope :including_tags, -> { includes(:tags) }
   scope :including_dependency_links, -> { includes(dependency_links: :dependency) }
-  # TODO: Remove with the rollout of the FF nuget_extract_nuget_package_model
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/499602
   scope :including_dependency_links_with_nuget_metadatum, -> { includes(dependency_links: [:dependency, :nuget_metadatum]) }
 
   scope :preload_npm_metadatum, -> { preload(:npm_metadatum) }
-  # TODO: Remove with the rollout of the FF nuget_extract_nuget_package_model
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/499602
   scope :preload_nuget_metadatum, -> { preload(:nuget_metadatum) }
 
   scope :with_npm_scope, ->(scope) do
     npm.where("position('/' in packages_packages.name) > 0 AND split_part(packages_packages.name, '/', 1) = :package_scope", package_scope: "@#{sanitize_sql_like(scope)}")
   end
 
-  # TODO: Remove with the rollout of the FF nuget_extract_nuget_package_model
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/499602
   scope :without_nuget_temporary_name, -> { where.not(name: Packages::Nuget::TEMPORARY_PACKAGE_NAME) }
 
   scope :has_version, -> { where.not(version: nil) }
   scope :preload_files, -> { preload(:installable_package_files) }
-  # TODO: Remove with the rollout of the FF nuget_extract_nuget_package_model
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/499602
   scope :preload_nuget_files, -> { preload(:installable_nuget_package_files) }
   scope :preload_pipelines, -> { preload(pipelines: :user) }
   scope :preload_tags, -> { preload(:tags) }
@@ -196,12 +187,11 @@ class Packages::Package < ApplicationRecord
       composer: 'Packages::Composer::Package',
       helm: 'Packages::Helm::Package',
       generic: 'Packages::Generic::Package',
-      pypi: 'Packages::Pypi::Package',
-      terraform_module: 'Packages::TerraformModule::Package'
+      pypi: 'Packages::Pypi::Package'
     }
 
-    if Feature.enabled?(:nuget_extract_nuget_package_model, Feature.current_request)
-      hash[:nuget] = 'Packages::Nuget::Package'
+    if Feature.enabled?(:terraform_extract_terraform_package_model, Feature.current_request)
+      hash[:terraform_module] = 'Packages::TerraformModule::Package'
     end
 
     hash
@@ -324,8 +314,6 @@ class Packages::Package < ApplicationRecord
     ::Packages::MarkPackageFilesForDestructionWorker.perform_async(id)
   end
 
-  # TODO: Remove with the rollout of the FF nuget_extract_nuget_package_model
-  # https://gitlab.com/gitlab-org/gitlab/-/issues/499602
   def normalized_nuget_version
     return unless nuget?
 

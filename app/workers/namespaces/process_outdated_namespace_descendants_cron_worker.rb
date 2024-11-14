@@ -5,11 +5,8 @@ module Namespaces
     BATCH_SIZE = 50
 
     include ApplicationWorker
-    include LoopWithRuntimeLimit
 
-    MAX_RUNTIME = 45.seconds
-
-    data_consistency :always
+    data_consistency :always # rubocop: disable SidekiqLoadBalancing/WorkerDataConsistency -- The worker updates data
 
     # rubocop:disable Scalability/CronWorkerContext -- This worker does not perform work scoped to a context
     include CronjobQueue
@@ -19,10 +16,12 @@ module Namespaces
     idempotent!
 
     def perform
-      processed_namespaces = 0
+      runtime_limiter = Gitlab::Metrics::RuntimeLimiter.new(45.seconds)
 
-      loop_with_runtime_limit(MAX_RUNTIME) do |runtime_limiter|
+      processed_namespaces = 0
+      loop do
         namespace_ids = Namespaces::Descendants.load_outdated_batch(BATCH_SIZE)
+
         break if namespace_ids.empty?
 
         namespace_ids.each do |namespace_id|
@@ -33,6 +32,8 @@ module Namespaces
           processed_namespaces += 1
           break if runtime_limiter.over_time?
         end
+
+        break if runtime_limiter.over_time?
       end
 
       log_extra_metadata_on_done(:result, { processed_namespaces: processed_namespaces })

@@ -92,16 +92,13 @@ describe('Merge request merge checks conflicts component', () => {
 
       await waitForPromises();
 
-      const { length } = wrapper.findAllByTestId('extension-actions-button');
+      expect(wrapper.findAllByTestId('extension-actions-button').length).toBe(
+        rendersConflictButton ? 2 : 1,
+      );
 
-      expect(length).toBe(rendersConflictButton ? 2 : 1);
-
-      expect(
-        wrapper
-          .findAllByTestId('extension-actions-button')
-          .at(length - 1)
-          .text(),
-      ).toBe(rendersConflictButton ? 'Resolve conflicts' : 'Resolve locally');
+      expect(wrapper.findAllByTestId('extension-actions-button').at(-1).text()).toBe(
+        rendersConflictButton ? 'Resolve conflicts' : 'Resolve locally',
+      );
     },
   );
 });

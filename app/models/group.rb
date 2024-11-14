@@ -108,7 +108,7 @@ class Group < Namespace
   has_many :contacts, class_name: 'CustomerRelations::Contact', inverse_of: :group, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
   has_one :crm_settings, class_name: 'Group::CrmSettings', inverse_of: :group
   # Groups for which this is the source of CRM contacts/organizations
-  has_many :crm_targets, class_name: 'Group::CrmSettings', inverse_of: :source_group, foreign_key: 'source_group_id'
+  has_many :crm_targets, class_name: 'Group::CrmSettings', inverse_of: :source_group
 
   has_many :cluster_groups, class_name: 'Clusters::Group'
   has_many :clusters, through: :cluster_groups, class_name: 'Clusters::Cluster'
@@ -246,10 +246,22 @@ class Group < Namespace
   end
 
   scope :project_creation_allowed, ->(user) do
-    project_creation_levels_for_user = project_creation_levels_for_user(user)
+    project_creation_allowed_on_levels = [
+      ::Gitlab::Access::DEVELOPER_MAINTAINER_PROJECT_ACCESS,
+      ::Gitlab::Access::MAINTAINER_PROJECT_ACCESS,
+      nil
+    ]
 
-    with_project_creation_levels(project_creation_levels_for_user)
-      .excluding_restricted_visibility_levels_for_user(user)
+    # When the value of application_settings.default_project_creation is set to `NO_ONE_PROJECT_ACCESS`,
+    # it means that a `nil` value for `groups.project_creation_level` is telling us:
+    # do not allow project creation in such groups.
+    # ie, `nil` is a placeholder value for inheriting the value from the ApplicationSetting.
+    # So we remove `nil` from the list when the application_setting's value is `NO_ONE_PROJECT_ACCESS`
+    if ::Gitlab::CurrentSettings.default_project_creation == ::Gitlab::Access::NO_ONE_PROJECT_ACCESS
+      project_creation_allowed_on_levels.delete(nil)
+    end
+
+    with_project_creation_levels(project_creation_allowed_on_levels).excluding_restricted_visibility_levels_for_user(user)
   end
 
   scope :shared_into_ancestors, ->(group) do
@@ -400,42 +412,6 @@ class Group < Namespace
 
     def with_api_scopes
       preload(:namespace_settings, :group_feature, :parent)
-    end
-
-    # Handle project creation permissions based on application setting and group setting. The `default_project_creation`
-    # application setting is the default value and can be overridden by the `project_creation_level` group setting.
-    # `nil` value of namespaces.project_creation_level` means that allowed creation level has not been explicitly set by
-    # the group owner and is a placeholder value for inheriting the value from the ApplicationSetting.
-    def project_creation_levels_for_user(user)
-      project_creation_allowed_on_levels = [
-        ::Gitlab::Access::DEVELOPER_MAINTAINER_PROJECT_ACCESS,
-        ::Gitlab::Access::MAINTAINER_PROJECT_ACCESS,
-        nil
-      ]
-
-      if user.can_admin_all_resources?
-        project_creation_allowed_on_levels << ::Gitlab::Access::ADMINISTRATOR_PROJECT_ACCESS
-      end
-
-      default_project_creation = ::Gitlab::CurrentSettings.default_project_creation
-      prevent_project_creation_by_default = prevent_project_creation?(user, default_project_creation)
-
-      # Remove nil (i.e. inherited `default_project_creation`) when the application setting is:
-      # 1. NO_ONE_PROJECT_ACCESS
-      # 2. ADMINISTRATOR_PROJECT_ACCESS and the user is not an admin
-      #
-      # To prevent showing groups in the namespaces dropdown on the project creation page that have no explicit group
-      # setting for `project_creation_level`.
-      project_creation_allowed_on_levels.delete(nil) if prevent_project_creation_by_default
-
-      project_creation_allowed_on_levels
-    end
-
-    def prevent_project_creation?(user, project_creation_setting)
-      return true if project_creation_setting == ::Gitlab::Access::NO_ONE_PROJECT_ACCESS
-      return false if user.can_admin_all_resources?
-
-      project_creation_setting == ::Gitlab::Access::ADMINISTRATOR_PROJECT_ACCESS
     end
 
     private
@@ -908,7 +884,7 @@ class Group < Namespace
   def parent_allows_two_factor_authentication?
     return true unless has_parent?
 
-    ancestor_settings = ancestors.find_top_level.namespace_settings
+    ancestor_settings = ancestors.find_by(parent_id: nil).namespace_settings
     ancestor_settings.allow_mfa_for_subgroups
   end
 
@@ -978,10 +954,6 @@ class Group < Namespace
 
   def glql_integration_feature_flag_enabled?
     feature_flag_enabled_for_self_or_ancestor?(:glql_integration)
-  end
-
-  def wiki_comments_feature_flag_enabled?
-    feature_flag_enabled_for_self_or_ancestor?(:wiki_comments, type: :wip)
   end
 
   # Note: this method is overridden in EE to check the work_item_epics feature flag  which also enables this feature
@@ -1074,18 +1046,6 @@ class Group < Namespace
     crm_targets.present?
   end
   strong_memoize_attr :crm_group?
-
-  def has_issues_with_contacts?
-    CustomerRelations::IssueContact.joins(:issue).where(issue: { project_id: Project.where(namespace_id: self_and_descendant_ids) }).exists?
-  end
-
-  def delete_contacts
-    CustomerRelations::Contact.where(group_id: id).delete_all
-  end
-
-  def delete_organizations
-    CustomerRelations::Organization.where(group_id: id).delete_all
-  end
 
   private
 

@@ -16,7 +16,7 @@ options:
 distribution:
 - ee
 - ce
-tiers:
+tier:
 - free
 - premium
 - ultimate

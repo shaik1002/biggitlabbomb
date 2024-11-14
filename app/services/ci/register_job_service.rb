@@ -43,7 +43,7 @@ module Ci
       if !replica_caught_up && !result.build
         metrics.increment_queue_operation(:queue_replication_lag)
 
-        ::Ci::RegisterJobService::Result.new(nil, nil, nil, false)
+        ::Ci::RegisterJobService::Result.new(nil, nil, nil, false) # rubocop:disable Cop/AvoidReturnFromBlocks
       else
         result
       end

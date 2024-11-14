@@ -12,10 +12,7 @@ import {
   WIDGET_TYPE_HEALTH_STATUS,
   WIDGET_TYPE_DESCRIPTION,
   WIDGET_TYPE_CRM_CONTACTS,
-  WIDGET_TYPE_ITERATION,
-  WIDGET_TYPE_WEIGHT,
   NEW_WORK_ITEM_IID,
-  WIDGET_TYPE_MILESTONE,
 } from '../constants';
 import workItemByIidQuery from './work_item_by_iid.query.graphql';
 
@@ -25,10 +22,8 @@ const updateWidget = (draftData, widgetType, newData, nodePath) => {
   /** we have to make sure we do not pass values when custom types are introduced */
   if (newData === undefined) return;
 
-  if (draftData.workspace) {
-    const widget = findWidget(widgetType, draftData.workspace.workItem);
-    set(widget, nodePath, newData);
-  }
+  const widget = findWidget(widgetType, draftData.workspace.workItem);
+  set(widget, nodePath, newData);
 };
 
 const updateRolledUpDatesWidget = (draftData, rolledUpDates) => {
@@ -66,9 +61,6 @@ export const updateNewWorkItemCache = (input, cache) => {
     labels,
     rolledUpDates,
     crmContacts,
-    iteration,
-    weight,
-    milestone,
   } = input;
 
   const query = workItemByIidQuery;
@@ -109,21 +101,6 @@ export const updateNewWorkItemCache = (input, cache) => {
           widgetType: WIDGET_TYPE_HEALTH_STATUS,
           newData: healthStatus,
           nodePath: 'healthStatus',
-        },
-        {
-          widgetType: WIDGET_TYPE_ITERATION,
-          newData: iteration,
-          nodePath: 'iteration',
-        },
-        {
-          widgetType: WIDGET_TYPE_WEIGHT,
-          newData: weight,
-          nodePath: 'weight',
-        },
-        {
-          widgetType: WIDGET_TYPE_MILESTONE,
-          newData: milestone,
-          nodePath: 'milestone',
         },
       ];
 

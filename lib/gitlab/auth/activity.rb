@@ -63,15 +63,10 @@ module Gitlab
       end
 
       def user_csrf_token_mismatch!
-        controller = @opts[:controller]
-        controller_label = controller.class.name
-        controller_label = 'other' unless controller_label == 'GraphqlController'
+        label = @opts[:controller].class.name
+        label = 'other' unless label == 'GraphqlController'
 
-        session = controller.try(:request).try(:session)
-        user_auth_type_label = session.try(:loaded?) ? 'session' : 'other'
-
-        self.class.user_csrf_token_invalid_counter
-          .increment(controller: controller_label, auth: user_auth_type_label)
+        self.class.user_csrf_token_invalid_counter.increment(controller: label)
       end
 
       def self.each_counter

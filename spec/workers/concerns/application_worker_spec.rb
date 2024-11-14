@@ -553,12 +553,9 @@ RSpec.describe ApplicationWorker, feature_category: :shared do
     end
 
     context 'when the concurrency limited worker is marked as resume' do
-      let(:buffered_at) { 1 }
-
-      it 'sets resume and buffered_at attributes' do
-        worker.concurrency_limit_resume(buffered_at).perform_async
+      it 'sets defaults if no arguments are passed' do
+        worker.concurrency_limit_resume.perform_async
         expect(Sidekiq::Queues[worker.queue].first['concurrency_limit_resume']).to eq(true)
-        expect(Sidekiq::Queues[worker.queue].first['concurrency_limit_buffered_at']).to eq(buffered_at)
       end
     end
   end

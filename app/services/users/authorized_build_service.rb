@@ -12,7 +12,7 @@ module Users
     end
 
     def signup_params
-      super + [:skip_confirmation, :external, :bot_namespace]
+      super + [:skip_confirmation, :external]
     end
   end
 end

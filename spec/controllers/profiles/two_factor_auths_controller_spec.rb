@@ -273,11 +273,9 @@ RSpec.describe Profiles::TwoFactorAuthsController, feature_category: :system_acc
     let(:client) { WebAuthn::FakeClient.new('http://localhost', encoding: :base64) }
     let(:credential) { create_credential(client: client, rp_id: request.host) }
 
-    let(:params) { { device_registration: { name: 'touch id', device_response: device_response } } }
+    let(:params) { { device_registration: { name: 'touch id', device_response: device_response } } } # rubocop:disable Rails/SaveBang
 
-    let(:params_with_password) do
-      { device_registration: { name: 'touch id', device_response: device_response }, current_password: user.password }
-    end
+    let(:params_with_password) { { device_registration: { name: 'touch id', device_response: device_response }, current_password: user.password } } # rubocop:disable Rails/SaveBang
 
     before do
       session[:challenge] = challenge
@@ -488,32 +486,5 @@ RSpec.describe Profiles::TwoFactorAuthsController, feature_category: :system_acc
     end
 
     it_behaves_like 'user must enter a valid current password'
-  end
-
-  describe 'PATCH skip' do
-    let(:user) { create(:user, otp_grace_period_started_at: Time.zone.now) }
-
-    def request
-      patch :skip
-    end
-
-    before do
-      stub_application_setting(require_two_factor_authentication: true)
-      stub_application_setting(two_factor_grace_period: 24)
-    end
-
-    it 'redirects the user to the root url' do
-      request
-
-      expect(response).to redirect_to root_url
-    end
-
-    it 'redirects back to 2fa page if grace period expired' do
-      travel_to(27.hours.from_now) do
-        request
-
-        expect(response).to redirect_to profile_two_factor_auth_url
-      end
-    end
   end
 end

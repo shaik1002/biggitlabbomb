@@ -3,7 +3,7 @@
 require 'spec_helper'
 require_relative '../../config/initializers/01_secret_token'
 
-# rubocop:disable RSpec/SpecFilePathFormat -- The initializer name starts with `01` because we want to run it ASAP
+# rubocop:disable RSpec/FilePath -- The initializer name starts with `01` because we want to run it ASAP
 # rubocop:disable RSpec/FeatureCategory -- This is a shared responsibility
 RSpec.describe SecretsInitializer do
   let(:rails_env_name) { 'test' }
@@ -91,10 +91,7 @@ RSpec.describe SecretsInitializer do
     let(:rsa_key) { /\A-----BEGIN RSA PRIVATE KEY-----\n.+\n-----END RSA PRIVATE KEY-----\n\Z/m }
 
     around do |example|
-      # We store Rails.application.credentials as a hash so that we can revert to the original
-      # values after the example has run. Assigning Rails.application.credentials= directly doesn't work.
-      original_credentials = Rails.application.credentials.to_h
-
+      original_credentials = Rails.application.credentials
       # Ensure we clear any existing `encrypted_settings_key_base` credential
       allowed_keys.each do |key|
         Rails.application.credentials.public_send(:"#{key}=", nil)
@@ -102,9 +99,7 @@ RSpec.describe SecretsInitializer do
 
       example.run
 
-      original_credentials.each do |key, value|
-        Rails.application.credentials.public_send(:"#{key}=", value)
-      end
+      Rails.application.credentials = original_credentials
     end
 
     before do
@@ -271,4 +266,4 @@ RSpec.describe SecretsInitializer do
   end
 end
 # rubocop:enable RSpec/FeatureCategory
-# rubocop:enable RSpec/SpecFilePathFormat
+# rubocop:enable RSpec/FilePath

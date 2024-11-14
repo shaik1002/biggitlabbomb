@@ -4,7 +4,7 @@ import { uniqueId } from 'lodash';
 import { sprintf, __ } from '~/locale';
 import glFeatureFlagMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import getRefMixin from '../mixins/get_ref';
-import CommitChangesModal from './commit_changes_modal.vue';
+import DeleteBlobModal from './delete_blob_modal.vue';
 import UploadBlobModal from './upload_blob_modal.vue';
 
 const REPLACE_BLOB_MODAL_ID = 'modal-replace-blob';
@@ -19,7 +19,7 @@ export default {
     GlButtonGroup,
     GlButton,
     UploadBlobModal,
-    CommitChangesModal,
+    DeleteBlobModal,
     LockButton: () => import('ee_component/repository/components/lock_button.vue'),
   },
   mixins: [getRefMixin, glFeatureFlagMixin()],
@@ -89,7 +89,7 @@ export default {
     deleteModalId() {
       return uniqueId('delete-modal');
     },
-    deleteModalCommitMessage() {
+    deleteModalTitle() {
       return sprintf(__('Delete %{name}'), { name: this.name });
     },
     lockBtnTestId() {
@@ -141,11 +141,12 @@ export default {
       :replace-path="replacePath"
       :primary-btn-text="$options.i18n.replacePrimaryBtnText"
     />
-    <commit-changes-modal
+    <delete-blob-modal
       :ref="deleteModalId"
       :modal-id="deleteModalId"
+      :modal-title="deleteModalTitle"
       :delete-path="deletePath"
-      :commit-message="deleteModalCommitMessage"
+      :commit-message="deleteModalTitle"
       :target-branch="targetBranch || ref"
       :original-branch="originalBranch || ref"
       :can-push-code="canPushCode"

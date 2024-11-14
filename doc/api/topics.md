@@ -45,7 +45,6 @@ Example response:
     "title": "GitLab",
     "description": "GitLab is an open source end-to-end software development platform with built-in version control, issue tracking, code review, CI/CD, and more.",
     "total_projects_count": 1000,
-    "organization_id": 1,
     "avatar_url": "http://www.gravatar.com/avatar/a0d477b3ea21970ce6ffcbb817b0b435?s=80&d=identicon"
   },
   {
@@ -54,7 +53,6 @@ Example response:
     "title": "Git",
     "description": "Git is a free and open source distributed version control system designed to handle everything from small to very large projects with speed and efficiency.",
     "total_projects_count": 900,
-    "organization_id": 1,
     "avatar_url": "http://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon"
   },
   {
@@ -63,7 +61,6 @@ Example response:
     "title": "Git LFS",
     "description": null,
     "total_projects_count": 300,
-    "organization_id": 1,
     "avatar_url": null
   }
 ]
@@ -98,7 +95,6 @@ Example response:
   "title": "GitLab",
   "description": "GitLab is an open source end-to-end software development platform with built-in version control, issue tracking, code review, CI/CD, and more.",
   "total_projects_count": 1000,
-  "organization_id": 1,
   "avatar_url": "http://www.gravatar.com/avatar/a0d477b3ea21970ce6ffcbb817b0b435?s=80&d=identicon"
 }
 ```
@@ -121,13 +117,12 @@ POST /topics
 
 Supported attributes:
 
-| Attribute         | Type    | Required | Description                                                                                                                                                                                    |
-|-------------------|---------|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `name`            | string  | Yes      | Slug (name)                                                                                                                                                                                    |
-| `title`           | string  | Yes      | Title                                                                                                                                                                                          |
-| `avatar`          | file    | No       | Avatar                                                                                                                                                                                         |
-| `description`     | string  | No       | Description                                                                                                                                                                                    |
-| `organization_id` | integer | No       | The organization ID for the topic. Warning: this attribute is experimental and a subject to change in future. For more information on organizations, see [Organizations API](organizations.md) |
+| Attribute     | Type    | Required               | Description |
+| ------------- | ------- | ---------------------- | ----------- |
+| `name`        | string  | Yes | Slug (name) |
+| `title`       | string  | Yes | Title       |
+| `avatar`      | file    | No | Avatar      |
+| `description` | string  | No | Description |
 
 Example request:
 
@@ -147,7 +142,6 @@ Example response:
   "title": "Topic 1",
   "description": null,
   "total_projects_count": 0,
-  "organization_id": 1,
   "avatar_url": null
 }
 ```
@@ -162,13 +156,13 @@ PUT /topics/:id
 
 Supported attributes:
 
-| Attribute     | Type    | Required | Description         |
-|---------------|---------|----------|---------------------|
-| `id`          | integer | Yes      | ID of project topic |
-| `avatar`      | file    | No       | Avatar              |
-| `description` | string  | No       | Description         |
-| `name`        | string  | No       | Slug (name)         |
-| `title`       | string  | No       | Title               |
+| Attribute     | Type    | Required               | Description         |
+| ------------- | ------- | ---------------------- | ------------------- |
+| `id`          | integer | Yes | ID of project topic |
+| `avatar`      | file    | No | Avatar              |
+| `description` | string  | No | Description         |
+| `name`        | string  | No | Slug (name)         |
+| `title`       | string  | No | Title               |
 
 Example request:
 
@@ -188,7 +182,6 @@ Example response:
   "title": "Topic 1",
   "description": null,
   "total_projects_count": 0,
-  "organization_id": 1,
   "avatar_url": null
 }
 ```
@@ -231,9 +224,9 @@ DELETE /topics/:id
 
 Supported attributes:
 
-| Attribute | Type    | Required | Description         |
-|-----------|---------|----------|---------------------|
-| `id`      | integer | Yes      | ID of project topic |
+| Attribute     | Type    | Required               | Description         |
+| ------------- | ------- | ---------------------- | ------------------- |
+| `id`          | integer | Yes | ID of project topic |
 
 Example request:
 
@@ -256,13 +249,10 @@ POST /topics/merge
 
 Supported attributes:
 
-| Attribute         | Type    | Required | Description                |
-|-------------------|---------|----------|----------------------------|
-| `source_topic_id` | integer | Yes      | ID of source project topic |
-| `target_topic_id` | integer | Yes      | ID of target project topic |
-
-NOTE:
-The `source_topic_id` and `target_topic_id` must belong to the same organization.
+| Attribute         | Type    | Required               | Description                |
+| ----------------- | ------- | ---------------------- | -------------------------- |
+| `source_topic_id` | integer | Yes | ID of source project topic |
+| `target_topic_id` | integer | Yes | ID of target project topic |
 
 Example request:
 
@@ -282,7 +272,6 @@ Example response:
   "title": "Topic 1",
   "description": null,
   "total_projects_count": 0,
-  "organization_id": 1,
   "avatar_url": null
 }
 ```

@@ -40,6 +40,7 @@ can't link to files outside it.
 
 - Define artifacts per job.
 - Subsequent jobs in later stages of the same pipeline can use artifacts.
+- Different projects cannot share artifacts.
 - Artifacts expire after 30 days by default. You can define a custom [expiration time](../yaml/index.md#artifactsexpire_in).
 - The latest artifacts do not expire if [keep latest artifacts](../jobs/job_artifacts.md#keep-artifacts-from-most-recent-successful-jobs) is enabled.
 - Use [dependencies](../yaml/index.md#dependencies) to control which jobs fetch the artifacts.
@@ -361,7 +362,7 @@ are cached per-branch:
 
 ```yaml
 default:
-  image: php:latest
+  image: php:7.2
   cache:  # Cache libraries in between jobs
     key: $CI_COMMIT_REF_SLUG
     paths:
@@ -412,7 +413,7 @@ jobs inherit it. Gems are installed in `vendor/ruby/` and are cached per-branch:
 
 ```yaml
 default:
-  image: ruby:latest
+  image: ruby:2.6
   cache:                                            # Cache gems in between builds
     key: $CI_COMMIT_REF_SLUG
     paths:
@@ -463,7 +464,7 @@ deploy_job:
 
 ### Cache Go dependencies
 
-If your project uses [Go Modules](https://go.dev/wiki/Modules) to install
+If your project uses [Go Modules](https://github.com/golang/go/wiki/Modules) to install
 Go dependencies, the following example defines `cache` in a `go-cache` template, that
 any job can extend. Go modules are installed in `${GOPATH}/pkg/mod/` and
 are cached for all of the `go` projects:
@@ -479,7 +480,7 @@ are cached for all of the `go` projects:
       - .go/pkg/mod/
 
 test:
-  image: golang:latest
+  image: golang:1.13
   extends: .go-cache
   script:
     - go test ./... -v -short

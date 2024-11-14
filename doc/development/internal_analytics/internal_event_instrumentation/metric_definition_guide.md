@@ -64,9 +64,6 @@ distribution:
 tier:
 - premium
 - ultimate
-tiers:
-- premium
-- ultimate
 performance_indicator_type: []
 milestone: "<13.9"
 ```
@@ -92,8 +89,6 @@ data_category: optional
 distribution:
   - ee
 tier:
-  - ultimate
-tiers:
   - ultimate
 time_frame: 7d
 events:
@@ -122,8 +117,6 @@ data_category: optional
 distribution:
 - ee
 tier:
-- ultimate
-tiers:
 - ultimate
 events:
 - name: exclude_anonymised_users
@@ -174,14 +167,6 @@ Whereas, this filter is even more restricted and only includes `pull_package` ev
   filter:
     label: rubygems
     property: deploy_token
-```
-
-Filters support also [custom additional properties](quick_start.md#additional-properties):
-
-```yaml
-- name: pull_package
-  filter:
-    custom_key: custom_value
 ```
 
 Filters only support matching of exact values and not wildcards or regular expressions.

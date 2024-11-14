@@ -54,7 +54,6 @@ You might need to modify the system configuration (CPU cores and RAM) before sta
 1. In VS Code, install the **Remote - SSH** extension:
    - [VS Code](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh)
    - [VSCodium](https://open-vsx.org/extension/jeanp413/open-remote-ssh)
-1. Make sure that VS Code has access to the local network (**Privacy & Security > Local Network**).
 1. Connect VS Code to the VM:
    - Select **Remote-SSH: Connect to host** from the command palette.
    - Enter the SSH host: `debian@gdk.local`
@@ -68,7 +67,7 @@ You might need to modify the system configuration (CPU cores and RAM) before sta
    ```
 
    - Enter your name and email address when prompted.
-   - Add the displayed [SSH key to your profile](https://gitlab.com/-/user_settings/ssh_keys).
+   - Add the displayed [SSH key to your profile](https://gitlab.com/-/profile/keys).
 
    To learn more about the script, you can examine the
    [`first_time_setup` code](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/main/support/gdk-in-a-box/first_time_setup).

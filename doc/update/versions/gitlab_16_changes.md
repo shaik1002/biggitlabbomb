@@ -141,18 +141,6 @@ see [Packaged PostgreSQL deployed in an HA/Geo Cluster](https://docs.gitlab.com/
   | 17.1                    |  All                    | None     |
   | 17.2                    |  All                    | None     |
 
-- Geo replication details for secondary sites appear to be empty even if Geo replication is working. See [issue 468509](https://gitlab.com/gitlab-org/gitlab/-/issues/468509). There is no known workaround. The bug is fixed in GitLab 17.4.
-
-  **Affected releases**:
-
-  | Affected minor releases | Affected patch releases | Fixed in |
-  | ----------------------- | ----------------------- | -------- |
-  | 16.11                   |  16.11.5 - 16.11.10     | None     |
-  | 17.0                    |  All                    | 17.0.7   |
-  | 17.1                    |  All                    | 17.1.7   |
-  | 17.2                    |  All                    | 17.2.5   |
-  | 17.3                    |  All                    | 17.3.1   |
-
 ## 16.10.0
 
 You might encounter the following error while upgrading to GitLab 16.10 or later:
@@ -1769,7 +1757,7 @@ was recently created:
 | 15.11                | [15.11](#workaround-instance-created-with-1511) |
 
 Most instances should use the 15.9 procedure. Only very new instances require the
-15.10 or 15.11 procedures. If you've migrated GitLab using backup and restore,
+the 15.10 or 15.11 procedures. If you've migrated GitLab using backup and restore,
 the database schema comes from the original instance. Select the workaround based
 on the source instance.
 

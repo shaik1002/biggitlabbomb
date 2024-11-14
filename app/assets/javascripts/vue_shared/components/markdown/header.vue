@@ -32,8 +32,6 @@ export default {
     CommentTemplatesModal,
     AiActionsDropdown: () => import('ee_component/ai/components/ai_actions_dropdown.vue'),
     HeaderDivider,
-    SummarizeCodeChanges: () =>
-      import('ee_component/merge_requests/components/summarize_code_changes.vue'),
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -45,7 +43,6 @@ export default {
     },
     editorAiActions: { default: () => [] },
     mrGeneratedContent: { default: null },
-    canSummarizeChanges: { default: false },
   },
   props: {
     previewMarkdown: {
@@ -266,7 +263,7 @@ export default {
 
 <template>
   <div
-    class="md-header gl-border-b gl-z-2 gl-rounded-lg gl-rounded-b-none gl-border-default gl-px-3"
+    class="md-header gl-border-b gl-z-2 gl-rounded-lg gl-rounded-bl-none gl-rounded-br-none gl-border-gray-100 gl-bg-white gl-px-3"
     :class="{ 'md-header-preview': previewMarkdown }"
   >
     <div class="gl-flex gl-flex-wrap gl-items-center">
@@ -530,10 +527,6 @@ export default {
             :new-comment-template-paths="newCommentTemplatePaths"
             @select="insertSavedReply"
           />
-          <template v-if="canSummarizeChanges">
-            <header-divider />
-            <summarize-code-changes />
-          </template>
         </div>
         <div v-if="!previewMarkdown" class="full-screen gl-flex gl-grow gl-justify-end">
           <toolbar-button

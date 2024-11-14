@@ -133,17 +133,6 @@ RSpec.describe Resolvers::MergeRequestsResolver, feature_category: :code_review_
       end
     end
 
-    context 'with negated author argument' do
-      let_it_be(:author) { current_user }
-      let_it_be(:different_author_mr) { create(:merge_request, **common_attrs, author: create(:user)) }
-
-      it 'excludes merge requests with given author from selection' do
-        result = resolve_mr(project, not: { author_username: author.username })
-
-        expect(result).to contain_exactly(different_author_mr)
-      end
-    end
-
     context 'with source branches argument' do
       it 'takes one argument' do
         result = resolve_mr(project, source_branches: [merge_request_3.source_branch])
@@ -160,16 +149,6 @@ RSpec.describe Resolvers::MergeRequestsResolver, feature_category: :code_review_
       end
     end
 
-    context 'with negated source branches argument' do
-      it 'excludes merge requests with given source branches from selection' do
-        mrs = [merge_request_3, merge_request_4]
-        branches = mrs.map(&:source_branch)
-        result = resolve_mr(project, not: { source_branches: branches })
-
-        expect(result).not_to include(*mrs)
-      end
-    end
-
     context 'with target branches argument' do
       it 'takes one argument' do
         result = resolve_mr(project, target_branches: [merge_request_3.target_branch])
@@ -183,17 +162,6 @@ RSpec.describe Resolvers::MergeRequestsResolver, feature_category: :code_review_
         result = resolve_mr(project, target_branches: branches)
 
         expect(result).to match_array(mrs)
-      end
-    end
-
-    context 'with negated target branches argument' do
-      it 'excludes merge requests with given target branches from selection' do
-        mrs = [merge_request_3, merge_request_4]
-        branches = mrs.map(&:target_branch)
-        result = resolve_mr(project, not: { target_branches: branches })
-
-        expect(result).not_to include(merge_request_3, merge_request_4)
-        expect(result).to include(merge_request_1, merge_request_2, merge_request_5, merge_request_6)
       end
     end
 
