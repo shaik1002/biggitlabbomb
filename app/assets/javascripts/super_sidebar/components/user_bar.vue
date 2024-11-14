@@ -154,69 +154,70 @@ export default {
       />
     </div>
     <organization-switcher v-if="glFeatures.uiForOrganizations && isLoggedIn" />
-    <div v-if="sidebarData.is_logged_in" class="gl-flex gl-justify-between gl-gap-2">
-      <counter
-        v-gl-tooltip:super-sidebar.bottom="$options.i18n.issues"
-        class="dashboard-shortcuts-issues gl-basis-1/3"
-        icon="issues"
-        :count="userCounts.assigned_issues"
-        :href="sidebarData.issues_dashboard_path"
-        :label="$options.i18n.issues"
-        data-testid="issues-shortcut-button"
-        data-track-action="click_link"
-        data-track-label="issues_link"
-        data-track-property="nav_core_menu"
-      />
-      <component
-        :is="mergeRequestMenuComponent"
-        class="!gl-block gl-basis-1/3"
-        :items="sidebarData.merge_request_menu"
-        @shown="mrMenuShown = true"
-        @hidden="mrMenuShown = false"
-      >
+    <div class="gl-flex gl-flex-col gl-gap-2">
+      <div v-if="!glFeatures.searchButtonTopRight" class="gl-grow">
+        <gl-button
+          id="super-sidebar-search"
+          v-gl-tooltip.bottom.html="searchTooltip"
+          v-gl-modal="$options.SEARCH_MODAL_ID"
+          class="user-bar-button gl-block gl-w-full gl-rounded-base gl-border-none gl-bg-gray-10 gl-py-3 gl-leading-1 gl-text-gray-900"
+          data-testid="super-sidebar-search-button"
+          @click="trackEvent('click_search_button_to_activate_command_palette')"
+        >
+          <gl-icon name="search" />
+          {{ $options.i18n.searchBtnText }}
+        </gl-button>
+        <search-modal @shown="hideSearchTooltip" @hidden="showSearchTooltip" />
+      </div>
+      <div v-if="sidebarData.is_logged_in" class="gl-flex gl-justify-between gl-gap-2">
         <counter
-          v-gl-tooltip:super-sidebar.bottom="mrMenuShown ? '' : $options.i18n.mergeRequests"
-          class="gl-w-full"
-          :class="{
-            'js-merge-request-dashboard-shortcut': !sidebarData.merge_request_menu,
-          }"
-          icon="merge-request"
-          :href="sidebarData.merge_request_dashboard_path"
-          :count="mergeRequestTotalCount"
-          :label="$options.i18n.mergeRequests"
-          data-testid="merge-requests-shortcut-button"
-          data-track-action="click_dropdown"
-          data-track-label="merge_requests_menu"
+          v-gl-tooltip:super-sidebar.bottom="$options.i18n.issues"
+          class="dashboard-shortcuts-issues gl-basis-1/3"
+          icon="issues"
+          :count="userCounts.assigned_issues"
+          :href="sidebarData.issues_dashboard_path"
+          :label="$options.i18n.issues"
+          data-testid="issues-shortcut-button"
+          data-track-action="click_link"
+          data-track-label="issues_link"
           data-track-property="nav_core_menu"
         />
-      </component>
-      <counter
-        v-gl-tooltip:super-sidebar.bottom="$options.i18n.todoList"
-        class="shortcuts-todos js-todos-count gl-basis-1/3"
-        icon="todo-done"
-        :count="userCounts.todos"
-        :href="sidebarData.todos_dashboard_path"
-        :label="$options.i18n.todoList"
-        data-testid="todos-shortcut-button"
-        data-track-action="click_link"
-        data-track-label="todos_link"
-        data-track-property="nav_core_menu"
-      />
-    </div>
-
-    <div v-if="!glFeatures.searchButtonTopRight" class="gl-grow">
-      <gl-button
-        id="super-sidebar-search"
-        v-gl-tooltip.bottom.html="searchTooltip"
-        v-gl-modal="$options.SEARCH_MODAL_ID"
-        class="user-bar-button gl-block gl-w-full gl-rounded-base gl-border-none gl-bg-gray-10 gl-py-3 gl-leading-1 gl-text-gray-900"
-        data-testid="super-sidebar-search-button"
-        @click="trackEvent('click_search_button_to_activate_command_palette')"
-      >
-        <gl-icon name="search" />
-        {{ $options.i18n.searchBtnText }}
-      </gl-button>
-      <search-modal @shown="hideSearchTooltip" @hidden="showSearchTooltip" />
+        <component
+          :is="mergeRequestMenuComponent"
+          class="!gl-block gl-basis-1/3"
+          :items="sidebarData.merge_request_menu"
+          @shown="mrMenuShown = true"
+          @hidden="mrMenuShown = false"
+        >
+          <counter
+            v-gl-tooltip:super-sidebar.bottom="mrMenuShown ? '' : $options.i18n.mergeRequests"
+            class="gl-w-full"
+            :class="{
+              'js-merge-request-dashboard-shortcut': !sidebarData.merge_request_menu,
+            }"
+            icon="merge-request"
+            :href="sidebarData.merge_request_dashboard_path"
+            :count="mergeRequestTotalCount"
+            :label="$options.i18n.mergeRequests"
+            data-testid="merge-requests-shortcut-button"
+            data-track-action="click_dropdown"
+            data-track-label="merge_requests_menu"
+            data-track-property="nav_core_menu"
+          />
+        </component>
+        <counter
+          v-gl-tooltip:super-sidebar.bottom="$options.i18n.todoList"
+          class="shortcuts-todos js-todos-count gl-basis-1/3"
+          icon="todo-done"
+          :count="userCounts.todos"
+          :href="sidebarData.todos_dashboard_path"
+          :label="$options.i18n.todoList"
+          data-testid="todos-shortcut-button"
+          data-track-action="click_link"
+          data-track-label="todos_link"
+          data-track-property="nav_core_menu"
+        />
+      </div>
     </div>
   </div>
 </template>
