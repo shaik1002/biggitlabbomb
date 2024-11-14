@@ -38,15 +38,9 @@ RSpec.describe Sidebars::UserProfile::Panel, feature_category: :navigation do
     expect(menu_classes).not_to include(*legacy_menu_classes)
   end
 
-  context 'when profile_tabs_vue feature is disabled' do
-    before do
-      stub_feature_flags(profile_tabs_vue: false)
-    end
+  it 'add legacy menu items' do
+    menu_classes = subject.renderable_menus.map(&:class)
 
-    it 'add legacy menu items' do
-      menu_classes = subject.renderable_menus.map(&:class)
-
-      expect(menu_classes).to include(*legacy_menu_classes)
-    end
+    expect(menu_classes).to include(*legacy_menu_classes)
   end
 end

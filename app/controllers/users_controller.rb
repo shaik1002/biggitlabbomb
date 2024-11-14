@@ -28,9 +28,6 @@ class UsersController < ApplicationController
   before_action only: [:exists] do
     check_rate_limit!(:username_exists, scope: request.ip)
   end
-  before_action only: [:show, :activity, :groups, :projects, :contributed, :starred, :snippets, :followers, :following] do
-    push_frontend_feature_flag(:profile_tabs_vue, current_user)
-  end
 
   feature_category :user_profile, [:show, :activity, :groups, :projects, :contributed, :starred,
     :followers, :following, :calendar, :calendar_activities,
@@ -74,18 +71,7 @@ class UsersController < ApplicationController
       format.json do
         load_events
 
-        if Feature.enabled?(:profile_tabs_vue, current_user)
-          @events = if user.include_private_contributions?
-                      @events
-                    else
-                      @events.select { |event| event.visible_to_user?(current_user) }
-                    end
-
-          render json: ::Profile::EventSerializer.new(current_user: current_user, target_user: user)
-                                                 .represent(@events)
-        else
-          pager_json("events/_events", @events.count, events: @events)
-        end
+        pager_json("events/_events", @events.count, events: @events)
       end
     end
   end
