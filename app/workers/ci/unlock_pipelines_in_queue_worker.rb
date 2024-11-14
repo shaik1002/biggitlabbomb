@@ -4,7 +4,7 @@ module Ci
   class UnlockPipelinesInQueueWorker
     include ApplicationWorker
 
-    data_consistency :always
+    data_consistency :sticky
 
     include LimitedCapacity::Worker
 

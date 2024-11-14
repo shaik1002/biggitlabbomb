@@ -5,7 +5,7 @@ module Ci
     class ExpireProjectBuildArtifactsWorker
       include ApplicationWorker
 
-      data_consistency :always
+      data_consistency :sticky
 
       feature_category :job_artifacts
       idempotent!
