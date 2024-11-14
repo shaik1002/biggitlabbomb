@@ -6,7 +6,7 @@ class PipelineSerializer < BaseSerializer
 
   # rubocop: disable CodeReuse/ActiveRecord
   def represent(resource, opts = {})
-    resource = resource.preload(preloaded_relations(**opts)) if resource.is_a?(ActiveRecord::Relation)
+    resource = resource.preload(preloaded_relations(resource, **opts)) if resource.is_a?(ActiveRecord::Relation)
     resource = paginator.paginate(resource) if paginated?
     resource = Gitlab::Ci::Pipeline::Preloader.preload!(resource) if opts.delete(:preload)
 
@@ -30,7 +30,13 @@ class PipelineSerializer < BaseSerializer
 
   private
 
-  def preloaded_relations(preload_statuses: true, preload_downstream_statuses: true, **)
+  def preloaded_relations(pipelines, preload_statuses: true, preload_downstream_statuses: true, **options)
+    root_namespace = pipelines.first.project.root_ancestor
+    disable_failed_builds = options[:disable_failed_builds] &&
+      Feature.enabled?(:optimize_pipeline_serializer_preloads, root_namespace)
+    disable_manual_and_scheduled_actions = options[:disable_manual_and_scheduled_actions] &&
+      Feature.enabled?(:optimize_pipeline_serializer_preloads, root_namespace)
+
     [
       :pipeline_metadata,
       :pipeline_schedule,
@@ -40,10 +46,11 @@ class PipelineSerializer < BaseSerializer
       :trigger_requests,
       :user,
       (:latest_statuses if preload_statuses),
+      (disable_failed_builds ? :limited_failed_builds : :failed_builds),
       {
-        manual_actions: :metadata,
-        scheduled_actions: :metadata,
-        failed_builds: %i[project metadata],
+        **(disable_manual_and_scheduled_actions ? {} : { manual_actions: :metadata }),
+        **(disable_manual_and_scheduled_actions ? {} : { scheduled_actions: :metadata }),
+        **(disable_failed_builds ? {} : { failed_builds: %i[project metadata] }),
         merge_request: {
           source_project: [:route, { namespace: :route }],
           target_project: [:route, { namespace: :route }]

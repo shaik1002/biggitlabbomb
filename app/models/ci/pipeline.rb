@@ -121,6 +121,8 @@ module Ci
     has_many :pending_builds, ->(pipeline) { in_partition(pipeline).pending }, foreign_key: :commit_id, class_name: 'Ci::Build', inverse_of: :pipeline
     has_many :failed_builds, ->(pipeline) { in_partition(pipeline).latest.failed }, foreign_key: :commit_id, class_name: 'Ci::Build',
       inverse_of: :pipeline
+    has_many :limited_failed_builds, ->(pipeline) { in_partition(pipeline).latest.failed.limit(100) }, foreign_key: :commit_id, class_name: 'Ci::Build',
+      inverse_of: :pipeline
     has_many :retryable_builds, ->(pipeline) { in_partition(pipeline).latest.failed_or_canceled.includes(:project) }, foreign_key: :commit_id, class_name: 'Ci::Build', inverse_of: :pipeline
     has_many :cancelable_statuses, ->(pipeline) { in_partition(pipeline).cancelable }, foreign_key: :commit_id, class_name: 'CommitStatus',
       inverse_of: :pipeline

@@ -1,0 +1,9 @@
+---
+name: optimize_pipeline_serializer_preloads
+feature_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/504360
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/172712/diffs
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/504406
+milestone: '17.6'
+group: group::pipeline execution
+type: gitlab_com_derisk
+default_enabled: false
