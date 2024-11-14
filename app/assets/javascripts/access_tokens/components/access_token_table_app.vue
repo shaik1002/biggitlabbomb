@@ -11,6 +11,7 @@ import { __, sprintf } from '~/locale';
 import DomElementListener from '~/vue_shared/components/dom_element_listener.vue';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import UserDate from '~/vue_shared/components/user_date.vue';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { EVENT_SUCCESS, FIELDS, FORM_SELECTOR, INITIAL_PAGE, PAGE_SIZE } from './constants';
 
 /**
@@ -37,11 +38,12 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  mixins: [glFeatureFlagsMixin()],
   lastUsedHelpLink: helpPagePath('/user/profile/personal_access_tokens.md', {
-    anchor: 'view-the-last-time-a-token-was-used',
+    anchor: 'view-the-time-at-and-ips-where-a-token-was-last-used',
   }),
   i18n: {
-    emptyField: __('Never'),
+    emptyDateField: __('Never'),
     expired: __('Expired'),
     modalMessage: __(
       'Are you sure you want to revoke the %{accessTokenType} "%{tokenName}"? This action cannot be undone.',
@@ -84,6 +86,10 @@ export default {
 
       if (!this.showRole) {
         ignoredFields.push('role');
+      }
+
+      if (!this.glFeatures.patIp) {
+        ignoredFields.push('lastUsedIps');
       }
 
       const fields = FIELDS.filter(({ key }) => !ignoredFields.includes(key));
@@ -211,7 +217,18 @@ export default {
 
           <template #cell(lastUsedAt)="{ item: { lastUsedAt } }">
             <time-ago-tooltip v-if="lastUsedAt" :time="lastUsedAt" />
-            <template v-else> {{ $options.i18n.emptyField }}</template>
+            <template v-else> {{ $options.i18n.emptyDateField }}</template>
+          </template>
+
+          <template #head(lastUsedIps)="{ label }">
+            <span>{{ label }}</span>
+            <gl-link :href="$options.lastUsedHelpLink"
+              ><gl-icon name="question-o" class="gl-ml-2" /><span class="gl-sr-only">{{
+                s__(
+                  'AccessTokens|The last five distinct IP addresses from where the token was used',
+                )
+              }}</span></gl-link
+            >
           </template>
 
           <template #cell(expiresAt)="{ item: { expiresAt, expired, expiresSoon } }">
@@ -220,7 +237,7 @@ export default {
               <time-ago-tooltip v-else :class="{ 'text-warning': expiresSoon }" :time="expiresAt" />
             </template>
             <span v-else v-gl-tooltip :title="$options.i18n.tokenValidity">{{
-              $options.i18n.emptyField
+              $options.i18n.emptyDateField
             }}</span>
           </template>
 

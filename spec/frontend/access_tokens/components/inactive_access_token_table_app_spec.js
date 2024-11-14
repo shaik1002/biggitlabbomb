@@ -99,7 +99,7 @@ describe('~/access_tokens/components/inactive_access_token_table_app', () => {
     const assistiveElement = lastUsed.find('.gl-sr-only');
     expect(anchor.exists()).toBe(true);
     expect(anchor.attributes('href')).toBe(
-      '/help/user/profile/personal_access_tokens.md#view-the-last-time-a-token-was-used',
+      '/help/user/profile/personal_access_tokens.md#view-the-time-at-and-ips-where-a-token-was-last-used',
     );
     expect(assistiveElement.text()).toBe('The last time a token was used');
   });
@@ -145,8 +145,6 @@ describe('~/access_tokens/components/inactive_access_token_table_app', () => {
     const cells = findCells();
     const headers = findHeaders();
     await headers.at(4).trigger('click');
-
-    // First and second rows have swapped
     expect(cells.at(0).text()).toBe('b');
     expect(cells.at(6).text()).toBe('a');
   });
