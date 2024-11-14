@@ -5,7 +5,7 @@ module Ci
     include ApplicationWorker
 
     # lots of updates to ci_builds
-    data_consistency :always
+    data_consistency :sticky
     feature_category :continuous_integration
     idempotent!
     deduplicate :until_executed
