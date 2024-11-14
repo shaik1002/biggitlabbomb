@@ -27,16 +27,6 @@ export default {
       required: false,
       default: null,
     },
-    hasMergeRequests: {
-      type: Boolean,
-      required: false,
-      default: true,
-    },
-    loading: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
   },
   data() {
     return {
@@ -56,8 +46,10 @@ export default {
     },
   },
   watch: {
-    loading(newVal) {
-      this.open = newVal || this.hasMergeRequests;
+    count: {
+      handler(newVal) {
+        this.open = newVal > 0;
+      },
     },
   },
 };
@@ -68,11 +60,11 @@ export default {
     is-collapsible
     :collapsed="!open"
     :toggle-aria-label="toggleButtonLabel"
-    :body-class="{ '!gl-mx-0 gl-mb-0': hasMergeRequests }"
+    :body-class="{ '!gl-mx-0 gl-mb-0': count }"
   >
     <template #title>
       {{ title }}
-      <gl-badge v-if="count !== null" size="sm">{{ count }}</gl-badge>
+      <gl-badge v-if="count" size="sm">{{ count }}</gl-badge>
     </template>
 
     <template #actions>
@@ -85,7 +77,7 @@ export default {
       />
     </template>
 
-    <template v-if="!hasMergeRequests && !loading" #empty>
+    <template v-if="!count" #empty>
       {{ __('No merge requests match this list.') }}
     </template>
 

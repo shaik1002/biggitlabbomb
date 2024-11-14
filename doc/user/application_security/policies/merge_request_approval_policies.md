@@ -1,5 +1,5 @@
 ---
-stage: Security Risk Management
+stage: Govern
 group: Security Policies
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://handbook.gitlab.com/handbook/product/ux/technical-writing/#assignments
 ---
@@ -284,6 +284,11 @@ On self-managed GitLab, by default the `fallback_behavior` field is available. T
 | `fail` | `string` | false    | `open` or `closed` | `closed` (default): Invalid or unenforceable rules of a policy require approval. `open`: Invalid or unenforceable rules of a policy do not require approval. |
 
 ## `policy_tuning`
+
+> - The `policy_tuning` field was [introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/490092) in GitLab 17.6 [with a flag](../../../administration/feature_flags.md) named `unblock_rules_using_execution_policies`. Disabled by default.
+
+FLAG:
+The availability of this feature is controlled by a feature flag. For more information, see the history.
 
 | Field  | Type     | Required | Possible values    | Description                                                                                                          |
 |--------|----------|----------|--------------------|----------------------------------------------------------------------------------------------------------------------|

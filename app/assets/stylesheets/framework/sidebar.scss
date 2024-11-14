@@ -176,7 +176,7 @@
     font-weight: $gl-font-weight-bold;
 
     .gl-button {
-      @apply gl-text-default;
+      color: $gl-text-color;
     }
   }
 }
@@ -261,7 +261,7 @@
 
   &:hover {
     background-color: $border-color;
-    @apply gl-text-default;
+    color: $gl-text-color;
   }
 }
 
@@ -377,7 +377,7 @@
     height: 24px;
 
     &:hover {
-      @apply gl-text-default;
+      color: $gl-text-color;
       background: $gray-50;
     }
 
@@ -443,7 +443,7 @@
   }
 
   .title {
-    @apply gl-text-default;
+    color: $gl-text-color;
     line-height: $gl-line-height-20;
 
     .avatar {
@@ -631,10 +631,10 @@
 
       &:hover:not(.disabled),
       &:hover .todo-undone {
-        @apply gl-text-default;
+        color: $gl-text-color;
 
         > svg {
-          @apply gl-fill-icon-default;
+          fill: $gl-text-color;
         }
       }
 
@@ -816,7 +816,7 @@
     }
 
     &:hover svg {
-      @apply gl-fill-icon-default;
+      fill: $gl-text-color;
     }
   }
 

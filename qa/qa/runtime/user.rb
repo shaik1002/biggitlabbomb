@@ -2,12 +2,14 @@
 
 module QA
   module Runtime
-    # TODO: remove once all user handling logic is moved to UserStore class
     module User
       extend self
 
       def admin
-        UserStore.admin_user
+        QA::Resource::User.init do |user|
+          user.username = admin_username
+          user.password = admin_password
+        end
       end
 
       def default_username

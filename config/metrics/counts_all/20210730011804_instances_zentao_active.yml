@@ -12,7 +12,7 @@ data_category: operational
 distribution:
 - ce
 - ee
-tiers:
+tier:
 - free
 - premium
 - ultimate

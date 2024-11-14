@@ -71,7 +71,7 @@ describe('DropdownValue', () => {
           default: 'None',
         },
       );
-      const noneEl = wrapper.find('span.gl-text-subtle');
+      const noneEl = wrapper.find('span.text-secondary');
 
       expect(noneEl.exists()).toBe(true);
       expect(noneEl.text()).toBe('None');

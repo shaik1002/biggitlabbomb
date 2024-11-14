@@ -1,6 +1,6 @@
 .detail-page-header {
   padding-top: $gl-spacing-scale-4;
-  @apply gl-text-default;
+  color: $gl-text-color;
   line-height: 34px;
   display: flex;
 
@@ -14,7 +14,7 @@
 }
 
 .detail-page-header a {
-  @apply gl-text-default;
+  color: $gl-text-color;
 }
 
 .detail-page-header a.link,
@@ -42,7 +42,7 @@
 .detail-page-description {
   .title {
     margin: 0 0 $gl-spacing-scale-4;
-    @apply gl-text-heading;
+    color: $gl-text-color;
     padding: 0 0 0.3em;
   }
 
@@ -58,6 +58,6 @@
   }
 
   .author-link {
-    @apply gl-text-default;
+    color: $gl-text-color;
   }
 }

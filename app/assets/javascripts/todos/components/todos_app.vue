@@ -119,12 +119,6 @@ export default {
       return this.currentTab === 0 && !this.showEmptyState;
     },
   },
-  mounted() {
-    document.addEventListener('visibilitychange', this.handleVisibilityChanged);
-  },
-  beforeDestroy() {
-    document.removeEventListener('visibilitychange', this.handleVisibilityChanged);
-  },
   methods: {
     nextPage(item) {
       this.cursor = {
@@ -157,11 +151,6 @@ export default {
     handleFiltersChanged(data) {
       this.alert?.dismiss();
       this.queryFilterValues = { ...data };
-    },
-    handleVisibilityChanged() {
-      if (!document.hidden) {
-        this.updateAllQueries();
-      }
     },
     async handleItemChanged(id, markedAsDone) {
       await this.updateAllQueries(false);
@@ -222,11 +211,8 @@ export default {
         </gl-tab>
       </gl-tabs>
 
-      <div
-        v-show="showMarkAllAsDone"
-        class="gl-my-3 gl-mr-5 gl-flex gl-items-center gl-justify-end"
-      >
-        <todos-mark-all-done-button :filters="queryFilterValues" @change="updateAllQueries" />
+      <div v-if="showMarkAllAsDone" class="gl-my-3 gl-mr-5 gl-flex gl-items-center gl-justify-end">
+        <todos-mark-all-done-button :filters="queryFilterValues" @change="updateCounts" />
       </div>
     </div>
 

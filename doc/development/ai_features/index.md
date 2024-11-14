@@ -268,19 +268,10 @@ If you clean up the flag in GitLab-Rails repository at first, the feature flag i
 
 **IMPORTANT:** Cleaning up the feature flag in AI Gateway will immediately distribute the change to all GitLab instances, including GitLab.com, Self-managed GitLab, and Dedicated.
 
-**Technical details:**
+Technical details: When `push_feature_flag` runs on an enabled feature flag, the name of flag is cached in the current context,
+which is later attached to `x-gitlab-enabled-feature-flags` HTTP header when GitLab-Sidekiq/Rails requests to AI Gateway.
 
-- When `push_feature_flag` runs on an enabled feature flag, the name of the flag is cached in the current context,
-  which is later attached to the `x-gitlab-enabled-feature-flags` HTTP header when `GitLab-Sidekiq/Rails` sends requests to AI Gateway.
-- When frontend clients (for example, VS Code Extension or LSP) request a [User JWT](../cloud_connector/architecture.md#ai-gateway) (UJWT)
-  for direct AI Gateway communication, GitLab returns:
-
-  - Public headers (including `x-gitlab-enabled-feature-flags`).
-  - The generated UJWT (1-hour expiration).
-
-Frontend clients must regenerate UJWT upon expiration. Backend changes such as feature flag updates through [ChatOps](../feature_flags/controls.md) render the header values to become stale. These header values are refreshed at the next UJWT generation.
-
-Similarly, we also have [`push_frontend_feature_flag`](../feature_flags/index.md) to push feature flags to frontend.
+As a simialr concept, we also have [`push_frontend_feature_flag`](../feature_flags/index.md) to push feature flags to frontend.
 
 ### GraphQL API
 
@@ -915,7 +906,7 @@ Documentation of model changes is crucial for tracking the impact of migrations 
 - **Optional** - Investigate if the new model is supported within our current AI-Gateway API specification. This step can usually be skipped. However, sometimes to support a newer model, we may need to accommodate a new API format.
 - Add the new model to our [available models list](https://gitlab.com/gitlab-org/gitlab/-/blob/32fa9eaa3c8589ee7f448ae683710ec7bd82f36c/ee/lib/gitlab/llm/concerns/available_models.rb#L5-10).
 - Change the default model in our [AI-Gateway client](https://gitlab.com/gitlab-org/gitlab/-/blob/41361629b302f2c55e35701d2c0a73cff32f9013/ee/lib/gitlab/llm/chain/requests/ai_gateway.rb#L63-67). Please place the change around a feature flag. We may need to quickly rollback the change.
-- Update the model definitions in AI Gateway following the [prompt definition guidelines](#2-create-a-prompt-definition-in-the-ai-gateway)
+- Update the model definitions in AI Gateway following the [agent definition guidelines](#2-create-a-prompt-definition-in-the-ai-gateway)
 Note: While we're moving toward AI Gateway holding the prompts, feature flag implementation still requires a GitLab release.
 
 #### Migration Tasks for Vertex Models

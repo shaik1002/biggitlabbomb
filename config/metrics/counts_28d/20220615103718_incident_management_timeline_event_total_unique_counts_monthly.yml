@@ -23,7 +23,7 @@ performance_indicator_type:
 distribution:
 - ce
 - ee
-tiers:
+tier:
 - free
 - premium
 - ultimate

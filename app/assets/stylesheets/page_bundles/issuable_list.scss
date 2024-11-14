@@ -20,7 +20,7 @@
 
     .issuable-info,
     .issuable-meta {
-      @apply gl-text-sm;
+      font-size: $gl-font-size-sm;
     }
 
     .issuable-meta {
@@ -53,10 +53,10 @@
     .task-status,
     .issuable-timestamp {
       font-weight: $gl-font-weight-normal;
-      @apply gl-text-subtle;
+      color: var(--gray-500, $gl-text-color-secondary);
 
       a {
-        @apply gl-text-default;
+        color: var(--gl-text-color-default);
       }
 
       // stylelint-disable-next-line gitlab/no-gl-class

@@ -11,7 +11,7 @@ DETAILS:
 **Offering:** GitLab.com, Self-managed, GitLab Dedicated
 **Status:** Beta
 
-> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/9290) in GitLab 17.2 with several feature flags. Disabled by default. Your administrator must have [enabled the new look for epics](../../user/group/epics/epic_work_items.md#enable-and-disable-the-new-look-for-epics). This feature is an [experiment](../../policy/experiment-beta-support.md#experiment).
+> - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/9290) in GitLab 17.2 with [several feature flags](../../user/group/epics/epic_work_items.md#feature-flags). Disabled by default. This feature is an [experiment](../../policy/experiment-beta-support.md#experiment).
 > - [Enabled on GitLab.com](https://gitlab.com/gitlab-org/gitlab/-/issues/470685) in GitLab 17.6.
 
 In GitLab 17.2, we introduced [epics as work items](../../user/group/epics/epic_work_items.md).
@@ -101,7 +101,7 @@ Example response:
             "id": "gid://gitlab/Epic/2335762",
             "iid": "15595",
             "title": "Second epic"
-          }
+          },
         ]
       }
     }
@@ -113,8 +113,8 @@ Example response:
 
 ```graphql
 query EpicsAsWorkItem {
-  group(fullPath: "gitlab-org") {
-    workItems(types: [EPIC]) {
+  group(fullPath: "gitlab-org"){
+    workItems(types:[EPIC]) {
       nodes {
         id
         iid
@@ -142,7 +142,7 @@ Example response:
             "id": "gid://gitlab/WorkItem/154877868",
             "iid": "15595",
             "title": "Second epic"
-          }
+          },
         ]
       }
     }
@@ -156,13 +156,14 @@ Example response:
 
 ```graphql
 mutation CreateEpic {
-  createEpic(input: { title: "New epic", groupPath: "gitlab-org" }) {
+  createEpic(input: {title: "New epic", groupPath: "gitlab-org"}) {
     epic {
       id
       title
     }
   }
 }
+
 ```
 
 Example response:
@@ -192,7 +193,7 @@ To create an epic:
    ```graphql
    query WorkItemTypes {
      namespace(fullPath: "gitlab-org") {
-       workItemTypes(name: EPIC) {
+       workItemTypes(name:EPIC) {
          nodes {
            id
            name
@@ -226,13 +227,10 @@ To create an epic:
 
    ```graphql
    mutation CreateWorkItemEpic {
-     workItemCreate(
-       input: {
-         title: "New work item epic"
-         namespacePath: "gitlab-org"
-         workItemTypeId: "gid://gitlab/WorkItems::Type/<WorkItemTypeID>"
-       }
-     ) {
+     workItemCreate(input:{
+       title: "New work item epic", namespacePath: "gitlab-org",
+       workItemTypeId: "gid://gitlab/WorkItems::Type/<WorkItemTypeID>"
+     }) {
        workItem {
          id
          title
@@ -413,7 +411,7 @@ Example response:
         }
       }
     }
-  }
+  },
 }
 ```
 
@@ -421,12 +419,12 @@ Example response:
 
 ```graphql
 query DetailedEpicWorkItem {
-  namespace(fullPath: "gitlab-org") {
-    workItem(iid: "10") {
+  namespace(fullPath: "gitlab-org"){
+    workItem(iid: "10"){
       id
       title
       confidential
-      author {
+      author  {
         id
         name
       }
@@ -465,7 +463,7 @@ query DetailedEpicWorkItem {
           downvotes
           upvotes
           awardEmoji {
-            nodes {
+            nodes{
               unicode
             }
           }
@@ -481,6 +479,7 @@ query DetailedEpicWorkItem {
           discussions {
             nodes {
               notes {
+
                 edges {
                   node {
                     body
@@ -733,7 +732,7 @@ Example response:
         ]
       }
     }
-  }
+  },
 }
 ```
 
@@ -755,16 +754,15 @@ For example, run the query below to create an epic with:
 mutation createEpicWithWidgets {
   workItemCreate(
     input: {
-      title: "New work item epic"
-      namespacePath: "gitlab-org"
-      workItemTypeId: "gid://gitlab/WorkItems::Type/<WorkItemTypeID>"
+      title: "New work item epic",
+      namespacePath: "gitlab-org",
+      workItemTypeId: "gid://gitlab/WorkItems::Type/<WorkItemTypeID>",
       colorWidget: { color: "#e24329" }
-      descriptionWidget: { description: "My new plans ..." }
-      healthStatusWidget: { healthStatus: onTrack }
-      startAndDueDateWidget: { startDate: "2024-10-12", dueDate: "2024-12-12", isFixed: true }
-      assigneesWidget: { assigneeIds: "gid://gitlab/User/<UserID>" }
-    }
-  ) {
+      descriptionWidget: {description: "My new plans ..."},
+      healthStatusWidget: {healthStatus:onTrack},
+      startAndDueDateWidget: {startDate: "2024-10-12", dueDate: "2024-12-12", isFixed:true}
+      assigneesWidget: {assigneeIds: "gid://gitlab/User/<UserID>"},
+  }) {
     workItem {
       id
       title
@@ -776,7 +774,7 @@ mutation createEpicWithWidgets {
           __typename
         }
         ... on WorkItemWidgetAssignees {
-          assignees {
+          assignees{
             nodes {
               id
               name
@@ -784,7 +782,7 @@ mutation createEpicWithWidgets {
           }
           __typename
         }
-        ... on WorkItemWidgetHealthStatus {
+        ... on WorkItemWidgetHealthStatus{
           healthStatus
           __typename
         }
@@ -836,7 +834,7 @@ Example response:
             "dueDate": "2024-12-12",
             "isFixed": true,
             "__typename": "WorkItemWidgetStartAndDueDate"
-          }
+          },
         ]
       }
     }
@@ -857,15 +855,14 @@ for the `input`:
 mutation updateEpicWorkItemWithWidgets {
   workItemUpdate(
     input: {
-      id: "gid://gitlab/WorkItem/<WorkItemID>"
-      title: "Updated work item epic title"
-      colorWidget: { color: "#fc6d26" }
-      descriptionWidget: { description: "My other new plans ..." }
-      healthStatusWidget: { healthStatus: onTrack }
-      startAndDueDateWidget: { startDate: "2025-10-12", dueDate: "2025-12-12", isFixed: true }
-      assigneesWidget: { assigneeIds: "gid://gitlab/User/45" }
-    }
-  ) {
+      id: "gid://gitlab/WorkItem/<WorkItemID>",
+      title: "Updated work item epic title",
+      colorWidget: {color: "#fc6d26"},
+      descriptionWidget: {description: "My other new plans ..."},
+      healthStatusWidget: {healthStatus: onTrack},
+      startAndDueDateWidget: {startDate: "2025-10-12", dueDate: "2025-12-12", isFixed: true}
+      assigneesWidget: {assigneeIds: "gid://gitlab/User/45"},
+  }) {
     workItem {
       id
       title
@@ -877,7 +874,7 @@ mutation updateEpicWorkItemWithWidgets {
           __typename
         }
         ... on WorkItemWidgetAssignees {
-          assignees {
+          assignees{
             nodes {
               id
               name
@@ -885,7 +882,7 @@ mutation updateEpicWorkItemWithWidgets {
           }
           __typename
         }
-        ... on WorkItemWidgetHealthStatus {
+        ... on WorkItemWidgetHealthStatus{
           healthStatus
           __typename
         }
@@ -937,7 +934,7 @@ Example response:
             "dueDate": "2025-12-12",
             "isFixed": true,
             "__typename": "WorkItemWidgetStartAndDueDate"
-          }
+          },
         ]
       }
     }
@@ -951,7 +948,7 @@ To delete an epic work item, use the `workItemDelete` mutation:
 
 ```graphql
 mutation deleteEpicWorkItem {
-  workItemDelete(input: { id: "gid://gitlab/WorkItem/<WorkItemID>" }) {
+  workItemDelete(input: {id: "gid://gitlab/WorkItem/<WorkItemID>"}) {
     clientMutationId
     errors
     namespace {

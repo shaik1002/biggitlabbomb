@@ -10,7 +10,7 @@ describe('Merge request dashboard collapsible section', () => {
   const sectionContent = () => wrapper.findByTestId('section-content');
   const emptyState = () => wrapper.findByTestId('crud-empty');
 
-  function createComponent({ count = 3, hasMergeRequests = count > 0, loading = false } = {}) {
+  function createComponent(count = 3) {
     wrapper = shallowMountExtended(CollapsibleSection, {
       slots: {
         default: 'content',
@@ -18,8 +18,6 @@ describe('Merge request dashboard collapsible section', () => {
       propsData: {
         title: 'Approved',
         count,
-        hasMergeRequests,
-        loading,
       },
       stubs: {
         CrudComponent,
@@ -34,20 +32,20 @@ describe('Merge request dashboard collapsible section', () => {
   });
 
   it('show empty state when count is 0', () => {
-    createComponent({ count: 0 });
+    createComponent(0);
 
     expect(emptyState().exists()).toBe(true);
     expect(sectionContent().exists()).toBe(false);
   });
 
   it('hides badge when count is null', () => {
-    createComponent({ count: null });
+    createComponent(null);
 
     expect(wrapper.findByTestId('merge-request-list-count').exists()).toBe(false);
   });
 
   it('expands collapsed content', async () => {
-    createComponent({ count: 1 });
+    createComponent(1);
 
     collapseToggle().vm.$emit('click');
 
@@ -61,17 +59,5 @@ describe('Merge request dashboard collapsible section', () => {
 
     expect(sectionContent().exists()).toBe(true);
     expect(sectionContent().text()).toContain('content');
-  });
-
-  it('displays content when count is hidden', () => {
-    createComponent({ hasMergeRequests: true, count: null });
-
-    expect(sectionContent().exists()).toBe(true);
-  });
-
-  it('displays content when loading', () => {
-    createComponent({ hasMergeRequests: false, loading: true, count: null });
-
-    expect(sectionContent().exists()).toBe(true);
   });
 });

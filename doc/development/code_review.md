@@ -440,7 +440,7 @@ consistency, and readability.
 
 Because a maintainer's job only depends on their knowledge of the overall GitLab
 codebase, and not that of any specific domain, they can review, approve, and merge
-MRs from any team and in any product area.
+merge requests from any team and in any product area.
 
 Maintainers are the DRI of assuring that the acceptance criteria of a merge request are reasonably met.
 In general, [quality is everyone's responsibility](https://handbook.gitlab.com/handbook/engineering/quality/),

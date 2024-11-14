@@ -9,21 +9,10 @@
     "time_frame",
     "data_source",
     "distribution",
+    "tier",
     "data_category",
     "milestone",
     "introduced_by_url"
-  ],
-  "anyOf": [
-    {
-      "required": [
-        "tier"
-      ]
-    },
-    {
-      "required": [
-        "tiers"
-      ]
-    }
   ],
   "additionalProperties": false,
   "properties": {

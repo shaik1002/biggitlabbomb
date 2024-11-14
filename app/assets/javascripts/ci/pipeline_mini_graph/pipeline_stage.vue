@@ -6,8 +6,6 @@ import { reportToSentry } from '~/ci/utils';
 import { PIPELINE_MINI_GRAPH_POLL_INTERVAL } from '~/ci/pipeline_details/constants';
 import CiIcon from '~/vue_shared/components/ci_icon/ci_icon.vue';
 import { getQueryHeaders, toggleQueryPollingByVisibility } from '~/ci/pipeline_details/graph/utils';
-import { graphqlEtagStagePath } from '~/ci/pipeline_details/utils';
-import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import getPipelineStageJobsQuery from './graphql/queries/get_pipeline_stage_jobs.query.graphql';
 import JobItem from './job_item.vue';
 
@@ -36,6 +34,10 @@ export default {
       required: false,
       default: false,
     },
+    pipelineEtag: {
+      type: String,
+      required: true,
+    },
     pollInterval: {
       type: Number,
       required: false,
@@ -46,7 +48,6 @@ export default {
       required: true,
     },
   },
-  emits: ['miniGraphStageClick'],
   data() {
     return {
       isDropdownOpen: false,
@@ -57,7 +58,7 @@ export default {
   apollo: {
     stageJobs: {
       context() {
-        return getQueryHeaders(this.graphqlEtag);
+        return getQueryHeaders(this.pipelineEtag);
       },
       query: getPipelineStageJobsQuery,
       variables() {
@@ -87,9 +88,6 @@ export default {
     dropdownTooltipTitle() {
       return this.isDropdownOpen ? '' : `${this.stage.name}: ${this.stage.detailedStatus.tooltip}`;
     },
-    graphqlEtag() {
-      return graphqlEtagStagePath('/api/graphql', getIdFromGraphQLId(this.stage.id));
-    },
     isLoading() {
       return this.$apollo.queries.stageJobs.loading;
     },
@@ -105,9 +103,6 @@ export default {
     onShowDropdown() {
       this.isDropdownOpen = true;
       this.isPolling = true;
-
-      // used for tracking in the pipeline table
-      this.$emit('miniGraphStageClick');
     },
     stageAriaLabel(title) {
       return sprintf(this.$options.i18n.viewStageLabel, { title });

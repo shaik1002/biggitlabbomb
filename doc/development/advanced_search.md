@@ -219,11 +219,6 @@ All new indexes must have:
 
 - `project_id` and `namespace_id` fields (if available). One of the fields must be used for routing.
 - A `traversal_ids` field for efficient global and group search. Populate the field with `object.namespace.elastic_namespace_ancestry`
-- Fields for authorization:
-  - For project data - `visibility_level`
-  - For group data - `namespace_visibility_level`
-  - Any required access level fields. These correspond to project feature access levels such as `issues_access_level` or `repository_access_level`
-- A `schema_version` integer field in a `YYWW` (year/week) format. This field is used for data migrations.
 
 1. Create a `Search::Elastic::Types::` class in `ee/lib/search/elastic/types/`.
 1. Define the following class methods:
@@ -253,12 +248,10 @@ All new indexes must have:
 Create a `Search::Elastic::References::` class in `ee/lib/search/elastic/references/`.
 
 The reference is used to perform bulk operations in Elasticsearch.
-The file must inherit from `Search::Elastic::Reference` and define the following constant and methods:
+The file must inherit from `Search::Elastic::Reference` and define the following methods:
 
 ```ruby
 include Search::Elastic::Concerns::DatabaseReference # if there is a corresponding database record for every document
-
-SCHEMA_VERSION = 24_46 # integer in YYWW format
 
 override :serialize
 def self.serialize(record)

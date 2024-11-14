@@ -209,7 +209,6 @@ export default {
       stages: [
         {
           name: 'build',
-          id: 1,
           title: 'build: failed',
           status: {
             icon: 'status_failed',
@@ -225,7 +224,6 @@ export default {
         },
         {
           name: 'review',
-          id: 2,
           title: 'review: skipped',
           status: {
             icon: 'status_skipped',

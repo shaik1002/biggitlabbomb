@@ -16,19 +16,11 @@ module QA
       DEFAULT_ADMIN_PASSWORD = "5iveL!fe"
 
       class << self
-        # Default api client depending on environment setup
-        #
-        # @return [QA::Runtime::API::Client]
-        def default_api_client
-          user_api_client || admin_api_client
-        end
-
         # Global admin client
         #
         # @return [QA::Runtime::API::Client]
         def admin_api_client
-          return @admin_api_client if defined?(@admin_api_client)
-          return @admin_api_client = nil if Env.no_admin_environment?
+          return @admin_api_client if @admin_api_client
 
           info("Creating admin api client for api fabrications")
           @admin_api_client = create_api_client(
@@ -45,20 +37,20 @@ module QA
         # TODO: Implement unique user and user api client fabrication for every spec when running on non live envs
 
         # Global test user api client
-        # This api client is used as a primary one for resource fabrication that do not require admin privileges
+        # This api client is used as a primary one for resource fabrication that do not require admin priviledges
         #
         # @return [QA::Runtime::API::Client]
         def user_api_client
           return @user_api_client if defined?(@user_api_client)
 
-          info("Creating api client for test user")
-          @user_api_client = create_api_client(token: Env.personal_access_token, user_proc: -> { test_user })
+          info("Creating api client for runtime user")
+          @user_api_client = create_api_client(token: Env.personal_access_token, user_proc: -> { runtime_user })
 
-          info("Test user api client set up successfully")
+          info("Runtime user api client set up successfully")
           @user_api_client
         rescue StandardError => e
-          # consider test user api client optional and set to nil if not setup
-          warn("Failed to create test user api client: #{e.message}")
+          # consider runtime user api client optional and set to nil if not setup
+          warn("Failed to create runtime user api client: #{e.message}")
           @user_api_client = nil
         end
         alias_method :initialize_user_api_client, :user_api_client
@@ -67,8 +59,7 @@ module QA
         #
         # @return [QA::Resource::User]
         def admin_user
-          return @admin_user if defined?(@admin_user)
-          return @admin_user = nil if Env.no_admin_environment?
+          return @admin_user if @admin_user
 
           @admin_user = create_user(username: Env.admin_username, password: Env.admin_password,
             default_username: DEFAULT_ADMIN_USERNAME, default_password: DEFAULT_ADMIN_PASSWORD,
@@ -80,24 +71,17 @@ module QA
         # This user is used as a primary one for test execution
         #
         # @return [QA::Resource::User]
-        def test_user
-          return @test_user if defined?(@test_user)
+        def runtime_user
+          return @runtime_user if defined?(@runtime_user)
 
-          info("Creating test user")
-
-          if Env.user_username.blank? || Env.user_password.blank?
-            raise "Missing user_username and user_password variable values"
-          end
-
-          @test_user = create_user(username: Env.user_username, password: Env.user_password,
+          @runtime_user = create_user(username: Env.user_username, password: Env.user_password,
             api_client: @user_api_client)
         rescue StandardError => e
-          # consider test user optional and set to nil if not setup
-          # once unique user creation on non live environments is implemented, this should be removed
-          warn("Failed to create test user: #{e.message}")
-          @test_user = nil
+          # consider runtime user optional and set to nil if not setup
+          warn("Failed to create runtime user: #{e.message}")
+          @user_api_client = nil
         end
-        alias_method :initialize_test_user, :test_user
+        alias_method :initialize_runtime_user, :runtime_user
 
         private
 
@@ -119,13 +103,9 @@ module QA
             info("Api token variable is not set, using default - '#{default_token}'")
             API::Client.new(personal_access_token: default_token)
           else
-            info("Creating personal access token via UI")
             # pass user through proc so it's lazily initialized only when fabricating token via UI
             user = user_proc.call
-            raise "Failed to create personal access token, no user provided!" if user.nil?
-
             create_api_token_via_ui!(user)
-            user.api_client
           end
         end
 
@@ -190,18 +170,18 @@ module QA
         # Update user api_client to use fabricated token
         #
         # @param [QA::Resource::User] user
-        # @return [String]
+        # @return [QA::Runtime::API::Client]
         def create_api_token_via_ui!(user)
-          pat = Resource::PersonalAccessToken.fabricate_via_browser_ui! do |resource|
-            resource.username = user.username
-            resource.password = user.password
+          info("Creating personal access token via UI for user #{user.username}")
+          pat = Flow::Login.while_signed_in(as: user) do
+            Resource::PersonalAccessToken.fabricate_via_browser_ui! { |pat| pat.user = user }
           end
 
-          user.api_client = Runtime::API::Client.new(personal_access_token: pat.token)
+          api_client = Runtime::API::Client.new(personal_access_token: pat.token)
+          user.api_client = api_client
           user.reload!
-          user.add_personal_access_token(pat)
 
-          pat.token
+          api_client
         end
 
         # Validate if client belongs to an admin user
