@@ -31057,6 +31057,8 @@ CREATE INDEX index_p_catalog_resource_sync_events_on_id_where_pending ON ONLY p_
 
 CREATE INDEX index_p_ci_build_names_on_project_id_and_build_id ON ONLY p_ci_build_names USING btree (project_id, build_id);
 
+CREATE INDEX index_p_ci_build_names_on_search_columns ON ONLY p_ci_build_names USING btree (project_id, name, build_id, partition_id);
+
 CREATE INDEX index_p_ci_build_names_on_search_vector ON ONLY p_ci_build_names USING gin (search_vector);
 
 CREATE INDEX index_p_ci_build_sources_on_pipeline_source ON ONLY p_ci_build_sources USING btree (pipeline_source);

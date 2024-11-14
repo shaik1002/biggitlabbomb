@@ -38,8 +38,7 @@ module Resolvers
           name: args[:name],
           project: project,
           params: {
-            before: decode_cursor(args[:before]), after: decode_cursor(args[:after]),
-            asc: args[:last].present?, invert_ordering: true
+            cursor_id: decode_cursor(args[:after])
           }
         ).execute
       end

@@ -53,36 +53,6 @@ RSpec.describe Resolvers::ProjectJobsResolver, feature_category: :continuous_int
             is_expected.to contain_exactly(successful_build, successful_build_two, failed_build, pending_build)
           end
         end
-
-        context 'when given pagination params' do
-          let(:cursor) { Base64.strict_encode64({ id: failed_build.id.to_s }.to_json) }
-          let(:args) { { name: 'Three', last: 1, before: cursor } }
-          let(:query) do
-            job_nodes = 'nodes { id }'
-            graphql_query_for(
-              :project,
-              { full_path: project.full_path },
-              query_graphql_field('jobs', args, job_nodes)
-            )
-          end
-
-          it "returns the paginated build" do
-            graphq_response = GitlabSchema.execute(query, context: { current_user: current_user })
-            parsed_response = graphql_dig_at(graphq_response, 'data', 'project', 'jobs', 'nodes')
-            expect(parsed_response).to match_array([a_graphql_entity_for(pending_build)])
-          end
-
-          context 'with bad pagination params' do
-            let(:cursor) { "ABCDEFGH" }
-
-            it 'returns a pagination error' do
-              graphq_response = GitlabSchema.execute(query, context: { current_user: current_user })
-              parsed_response = graphql_dig_at(graphq_response, 'errors', 'message')
-
-              expect(parsed_response).to include('Please provide a valid cursor')
-            end
-          end
-        end
       end
     end
 

@@ -14,10 +14,7 @@ RSpec.describe Ci::BuildNameFinder, feature_category: :continuous_integration do
   describe "#execute" do
     let(:main_relation) { Ci::Build.all }
     let(:name) { "build" }
-    let(:before) { nil }
-    let(:after) { nil }
-    let(:asc) { nil }
-    let(:invert_ordering) { false }
+    let(:cursor_id) { nil }
 
     subject(:build_name_finder) do
       described_class.new(
@@ -25,8 +22,7 @@ RSpec.describe Ci::BuildNameFinder, feature_category: :continuous_integration do
         name: name,
         project: pipeline.project,
         params: {
-          before: before, after: after, asc: asc,
-          invert_ordering: invert_ordering
+          cursor_id: cursor_id
         }
       ).execute
     end
@@ -68,47 +64,25 @@ RSpec.describe Ci::BuildNameFinder, feature_category: :continuous_integration do
       end
     end
 
-    context 'with before param' do
-      let(:before) { middle_build.id }
-
-      it 'returns builds newer than middle build' do
-        expect(build_name_finder)
-          .to eq([new_build, middle_new_build])
-      end
-
-      context 'with asc param' do
-        let(:asc) { true }
-
-        it 'returns only the builds in asc order' do
-          expect(build_name_finder)
-            .to eq([middle_new_build, new_build])
-        end
-      end
-    end
-
-    context 'with after param' do
-      let(:after) { middle_build.id }
+    context 'with cursor_id param' do
+      let(:cursor_id) { middle_build.id }
 
       it 'returns builds older than middle build' do
         expect(build_name_finder)
           .to eq([old_middle_build, old_build])
       end
-
-      context 'with asc param' do
-        let(:asc) { true }
-
-        it 'returns build before cursor in asc order' do
-          expect(build_name_finder)
-            .to eq([old_build, old_middle_build])
-        end
-      end
     end
 
-    context 'with asc param' do
-      let(:asc) { true }
+    context 'with status and ref' do
+      let(:main_relation) { Ci::Build.pending.where(ref: 'master') }
 
-      it 'returns the records in ascending order' do
-        expect(build_name_finder).to eq([old_build, old_middle_build, middle_build, middle_new_build, new_build])
+      it 'returns the correct builds with the filtered status and ref' do
+        expect(build_name_finder.pluck(:name))
+          .to eq(%w[build5 build4 build3 build2 build1])
+        expect(build_name_finder.pluck(:ref).uniq)
+          .to eq(%w[master])
+        expect(build_name_finder.pluck(:status).uniq)
+          .to eq(%w[pending])
       end
     end
   end

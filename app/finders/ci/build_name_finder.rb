@@ -17,7 +17,7 @@ module Ci
     def execute
       return relation unless name.to_s.present?
 
-      filter_by_name(relation)
+      filter_by_name
     end
 
     private
@@ -25,48 +25,56 @@ module Ci
     attr_reader :relation, :name, :project, :params
 
     # rubocop: disable CodeReuse/ActiveRecord -- Need specialized queries for database optimizations
-    def filter_by_name(build_relation)
-      build_name_relation = generate_build_name_relation(apply_pagination_cursor(build_relation))
-
-      main_build_relation =
-        Ci::Build.where("(id, partition_id) IN (?)", build_name_relation.select(:build_id, :partition_id))
-
-      # Some callers (graphQL) will invert the ordering based on the relation and the params (asc)
-      if params[:invert_ordering]
-        main_build_relation.reorder(id: :desc)
-      else
-        apply_pagination_order(main_build_relation, :id)
-      end
+    def filter_by_name
+      relation
+        .from("(#{build_name_scope.to_sql}) p_ci_build_names, LATERAL (#{ci_builds_query.to_sql}) p_ci_builds")
+        .id_before(params[:cursor_id])
+        .limit(MAX_PER_PAGE)
     end
 
-    def generate_build_name_relation(build_subrelation)
-      build_name_relation = Ci::BuildName
+    def order
+      Gitlab::Pagination::Keyset::Order.build(
+        [
+          Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+            attribute_name: 'build_id',
+            order_expression: Ci::BuildName.arel_table[:build_id].desc
+          ),
+          Gitlab::Pagination::Keyset::ColumnOrderDefinition.new(
+            attribute_name: 'partition_id',
+            order_expression: Ci::BuildName.arel_table[:partition_id].desc
+          )
+        ]
+      )
+    end
+
+    def scope
+      Ci::BuildName.where(project_id: project.id).order(order)
+    end
+
+    def array_scope
+      Ci::BuildName
         .where(project_id: project.id)
-        .pg_full_text_search_in_model(name)
-
-      build_name_relation = apply_pagination_order(build_name_relation, :build_id)
-      build_name_relation
-        .where("(build_id, partition_id) IN (?)", build_subrelation.select(:id, :partition_id))
-        .limit(MAX_PER_PAGE + 1)
+        .loose_index_scan(column: :name)
+        .select(:name)
+        .where("LOWER(name) LIKE CONCAT('%', ?, '%')", Ci::BuildName.sanitize_sql_like(name.downcase))
     end
 
-    # Ci::Builds main ordering is ID DESC which makes ordering reversed
-    def apply_pagination_cursor(relation)
-      return relation if params[:after].blank? && params[:before].blank?
-
-      if params[:after]
-        relation.id_before(Integer(params[:after]))
-      else
-        relation.id_after(Integer(params[:before]))
-      end
+    def array_mapping_scope
+      ->(name_expression) { Ci::BuildName.where(Ci::BuildName.arel_table[:name].eq(name_expression)) }
     end
 
-    def apply_pagination_order(relation, column)
-      if params[:asc].present?
-        relation.reorder(column => :asc)
-      else
-        relation.reorder(column => :desc)
-      end
+    def build_name_scope
+      Gitlab::Pagination::Keyset::InOperatorOptimization::QueryBuilder.new(
+        scope: scope,
+        array_scope: array_scope,
+        array_mapping_scope: array_mapping_scope
+      ).execute
+    end
+
+    def ci_builds_query
+      relation
+        .where("id = p_ci_build_names.build_id and partition_id = p_ci_build_names.partition_id")
+        .limit(1)
     end
     # rubocop: enable CodeReuse/ActiveRecord
   end
