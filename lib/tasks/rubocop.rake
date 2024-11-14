@@ -2,6 +2,7 @@
 
 unless Rails.env.production?
   require 'rubocop/rake_task'
+  require 'yard' # rubocop:disable Rake/Require -- TODO
 
   RuboCop::RakeTask.new
 
@@ -72,6 +73,41 @@ unless Rails.env.production?
 
         todo_dir.delete_inspected
       end
+    end
+
+    YARD::Rake::YardocTask.new(:yard_for_generate_documentation) do |task|
+      task.files = ['rubocop/cop/**/*.rb']
+      task.options = ['--no-output']
+    end
+
+    desc 'Update documentation of all cops'
+    task docs: :yard_for_generate_documentation do
+      # Pre-load existing cops so we can exclude them
+      require 'rubocop'
+      require 'rubocop-capybara'
+      require 'rubocop-factory_bot'
+      require 'rubocop-graphql'
+      require 'rubocop-performance'
+      require 'rubocop-rails'
+      require 'rubocop-rspec'
+      require 'rubocop-rspec_rails'
+
+      existing_cops = RuboCop::Cop::Registry.global.to_a
+
+      require_relative '../../lib/gitlab/cops_documentation_generator'
+
+      Dir["rubocop/cop/**/*.rb"].each { |file| require_relative File.join("../..", file) }
+      gitlab_cops = RuboCop::Cop::Registry.global.to_a - existing_cops
+
+      deps = %w[
+        API BackgroundMigration Capybara CodeReuse Database Gemfile Gemspec Gettext Gitlab Graphql Migration
+        Performance QA Rails Rake RSpec Scalability Search SidekiqLoadBalancing Style UsageData
+      ]
+
+      Gitlab::CopsDocumentationGenerator.new(departments: deps, cops: gitlab_cops).call
+
+      FileUtils.rm_rf('doc/rubocop/')
+      FileUtils.mv('docs/modules/ROOT/pages/', 'doc/rubocop/')
     end
   end
 end

@@ -31,6 +31,7 @@ AllCops:
   TargetRubyVersion: 3.1
   TargetRailsVersion: 7.0
   Exclude:
+    - 'lib/gitlab/cops_documentation_generator.rb'
     - 'gems/**/*'
     - 'qa/gems/**/*'
     - 'vendor/**/*'
