@@ -4,12 +4,15 @@ import {
   OPERATOR_IS,
   OPERATORS_IS,
   TOKEN_TITLE_STATUS,
+  TOKEN_TITLE_SOURCE,
   TOKEN_TYPE_STATUS,
+  TOKEN_TYPE_SOURCE,
   TOKEN_TITLE_JOBS_RUNNER_TYPE,
   TOKEN_TYPE_JOBS_RUNNER_TYPE,
 } from '~/vue_shared/components/filtered_search_bar/constants';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import JobStatusToken from './tokens/job_status_token.vue';
+import JobSourceToken from './tokens/job_source_token.vue';
 import JobRunnerTypeToken from './tokens/job_runner_type_token.vue';
 
 export default {
@@ -35,6 +38,13 @@ export default {
           token: JobStatusToken,
           operators: OPERATORS_IS,
         },
+        {
+          type: TOKEN_TYPE_SOURCE,
+          title: TOKEN_TITLE_SOURCE,
+          unique: true,
+          token: JobSourceToken,
+          operators: OPERATORS_IS,
+        },
       ];
 
       if (this.glFeatures.adminJobsFilterRunnerType) {
@@ -58,6 +68,14 @@ export default {
                 ...acc,
                 {
                   type: TOKEN_TYPE_STATUS,
+                  value: { data: queryStringValue, operator: OPERATOR_IS },
+                },
+              ];
+            case 'source':
+              return [
+                ...acc,
+                {
+                  type: TOKEN_TYPE_SOURCE,
                   value: { data: queryStringValue, operator: OPERATOR_IS },
                 },
               ];

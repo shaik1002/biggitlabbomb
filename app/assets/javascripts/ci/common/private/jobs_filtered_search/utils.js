@@ -1,4 +1,4 @@
-import { jobStatusValues, jobRunnerTypeValues } from './constants';
+import { jobStatusValues, jobSourceValues, jobRunnerTypeValues } from './constants';
 
 // validates query string used for filtered search
 // on jobs table to ensure GraphQL query is called correctly
@@ -9,6 +9,11 @@ export const validateQueryString = (queryStringObj) => {
         const statusValue = queryStringValue.toUpperCase();
         const statusValueValid = jobStatusValues.includes(statusValue);
         return statusValueValid ? { ...acc, statuses: statusValue } : acc;
+      }
+      case 'sources': {
+        const sourceValue = queryStringValue.toUpperCase();
+        const sourceValueValid = jobSourceValues.includes(sourceValue);
+        return sourceValueValid ? { ...acc, sources: sourceValue } : acc;
       }
       case 'runnerTypes': {
         const runnerTypesValue = queryStringValue.toUpperCase();

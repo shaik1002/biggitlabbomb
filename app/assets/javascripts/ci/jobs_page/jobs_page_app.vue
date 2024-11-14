@@ -140,9 +140,9 @@ export default {
   methods: {
     resetRequestData() {
       if (this.glFeatures.populateAndUseBuildNamesTable) {
-        this.requestData = { statuses: null, name: null };
+        this.requestData = { statuses: null, source: null, name: null };
       } else {
-        this.requestData = { statuses: null };
+        this.requestData = { statuses: null, source: null };
       }
     },
     updateHistoryAndFetchCount() {
@@ -185,6 +185,9 @@ export default {
 
         if (filter.type === 'status') {
           this.requestData.statuses = filter.value.data;
+        }
+        if (filter.type === 'source') {
+          this.requestData.source = filter.value.data;
         }
       });
 

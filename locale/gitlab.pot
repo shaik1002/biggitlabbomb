@@ -53268,6 +53268,57 @@ msgstr ""
 msgid "SourcegraphPreferences|Uses a custom %{linkStart}Sourcegraph instance%{linkEnd}."
 msgstr ""
 
+msgid "Source|API"
+msgstr ""
+
+msgid "Source|Chat"
+msgstr ""
+
+msgid "Source|External"
+msgstr ""
+
+msgid "Source|External Pull Request Event"
+msgstr ""
+
+msgid "Source|Merge Request Event"
+msgstr ""
+
+msgid "Source|Ondemand DAST Scan"
+msgstr ""
+
+msgid "Source|Ondemand DAST Validation"
+msgstr ""
+
+msgid "Source|Parent Pipeline"
+msgstr ""
+
+msgid "Source|Pipeline"
+msgstr ""
+
+msgid "Source|Pipeline Execution Policy"
+msgstr ""
+
+msgid "Source|Push"
+msgstr ""
+
+msgid "Source|Scan Execution Policy"
+msgstr ""
+
+msgid "Source|Schedule"
+msgstr ""
+
+msgid "Source|Security Orchestration Policy"
+msgstr ""
+
+msgid "Source|Trigger"
+msgstr ""
+
+msgid "Source|Web"
+msgstr ""
+
+msgid "Source|WebIDE"
+msgstr ""
+
 msgid "Spam Check"
 msgstr ""
 
