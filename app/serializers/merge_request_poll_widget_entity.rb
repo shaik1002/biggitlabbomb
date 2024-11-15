@@ -109,11 +109,11 @@ class MergeRequestPollWidgetEntity < Grape::Entity
   end
 
   expose :squash_enabled_by_default do |merge_request|
-    presenter(merge_request).project.squash_enabled_by_default?
+    presenter(merge_request).squash_enabled_by_default?
   end
 
   expose :squash_readonly do |merge_request|
-    presenter(merge_request).project.squash_readonly?
+    presenter(merge_request).squash_readonly?
   end
 
   expose :squash_on_merge do |merge_request|

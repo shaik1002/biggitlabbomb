@@ -250,8 +250,6 @@ class MergeRequestPresenter < Gitlab::View::Presenter::Delegated
     project.jenkins_integration_active?
   end
 
-  private
-
   def cached_can_be_reverted?
     strong_memoize(:can_be_reverted) do
       can_be_reverted?(current_user)

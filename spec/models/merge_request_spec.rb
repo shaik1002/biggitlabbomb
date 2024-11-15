@@ -385,6 +385,45 @@ RSpec.describe MergeRequest, factory_default: :keep, feature_category: :code_rev
     end
   end
 
+  describe '#squash_option' do
+    let(:merge_request) { create(:merge_request, target_project: project) }
+
+    subject { merge_request.squash_option }
+
+    it { is_expected.to eq(project) }
+
+    context 'there are squash options' do
+      let!(:all_protected_branches_squash_option) do
+        create(:squash_option,
+          project: merge_request.target_project,
+          protected_branch: nil
+        )
+      end
+
+      it { is_expected.to eq(project) }
+
+      context 'when there is a protected branch' do
+        let!(:protected_branch) do
+          create(:protected_branch, project: merge_request.target_project, name: merge_request.target_branch)
+        end
+
+        it { is_expected.to eq(all_protected_branches_squash_option) }
+
+        context 'and there is a squash option for the protected branch' do
+          let!(:squash_option) do
+            create(
+              :squash_option,
+              project: merge_request.target_project,
+              protected_branch: protected_branch
+            )
+          end
+
+          it { is_expected.to eq(squash_option) }
+        end
+      end
+    end
+  end
+
   describe '#commit_to_revert' do
     subject { merge_request.commit_to_revert }
 

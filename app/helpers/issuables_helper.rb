@@ -210,7 +210,7 @@ module IssuablesHelper
     if issuable.persisted?
       issuable.squash
     else
-      project.squash_enabled_by_default?
+      issuable.squash_enabled_by_default?
     end
   end
 

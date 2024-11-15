@@ -1655,9 +1655,10 @@ class MergeRequest < ApplicationRecord
     end
   end
 
+  # TODO: Add tests
   def squash_on_merge?
-    return true if target_project.squash_always?
-    return false if target_project.squash_never?
+    return true if squash_option.squash_always?
+    return false if squash_option.squash_never?
 
     squash?
   end
@@ -2354,8 +2355,27 @@ class MergeRequest < ApplicationRecord
   end
 
   def missing_required_squash?
-    !squash && target_project.squash_always?
+    return false if squash
+
+    squash_option.squash_always?
   end
+
+  def squash_option
+    matching_branches = ProtectedBranch.matching(target_branch, protected_refs: target_project.all_protected_branches)
+    exact_match = matching_branches.find { |pb| !pb.wildcard? }
+
+    # Most specific squash option applies
+    return exact_match&.squash_option if exact_match&.squash_option.present?
+
+    if matching_branches.present?
+      return ::ProtectedBranch::SquashOption.where(project: target_project).for_all_protected_branches.take
+    end
+
+    target_project
+  end
+  strong_memoize_attr :squash_option
+
+  delegate :squash_always?, :squash_never?, :squash_enabled_by_default?, :squash_readonly?, to: :squash_option
 
   def current_patch_id_sha
     merge_request_diff.get_patch_id_sha

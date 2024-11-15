@@ -18323,6 +18323,22 @@ CREATE SEQUENCE protected_branch_push_access_levels_id_seq
 
 ALTER SEQUENCE protected_branch_push_access_levels_id_seq OWNED BY protected_branch_push_access_levels.id;
 
+CREATE TABLE protected_branch_squash_options (
+    id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    protected_branch_id bigint,
+    setting smallint DEFAULT 3 NOT NULL
+);
+
+CREATE SEQUENCE protected_branch_squash_options_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE protected_branch_squash_options_id_seq OWNED BY protected_branch_squash_options.id;
+
 CREATE TABLE protected_branch_unprotect_access_levels (
     id bigint NOT NULL,
     protected_branch_id bigint NOT NULL,
@@ -23676,6 +23692,8 @@ ALTER TABLE ONLY protected_branch_merge_access_levels ALTER COLUMN id SET DEFAUL
 
 ALTER TABLE ONLY protected_branch_push_access_levels ALTER COLUMN id SET DEFAULT nextval('protected_branch_push_access_levels_id_seq'::regclass);
 
+ALTER TABLE ONLY protected_branch_squash_options ALTER COLUMN id SET DEFAULT nextval('protected_branch_squash_options_id_seq'::regclass);
+
 ALTER TABLE ONLY protected_branch_unprotect_access_levels ALTER COLUMN id SET DEFAULT nextval('protected_branch_unprotect_access_levels_id_seq'::regclass);
 
 ALTER TABLE ONLY protected_branches ALTER COLUMN id SET DEFAULT nextval('protected_branches_id_seq'::regclass);
@@ -26339,6 +26357,9 @@ ALTER TABLE ONLY protected_branch_merge_access_levels
 
 ALTER TABLE ONLY protected_branch_push_access_levels
     ADD CONSTRAINT protected_branch_push_access_levels_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY protected_branch_squash_options
+    ADD CONSTRAINT protected_branch_squash_options_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY protected_branch_unprotect_access_levels
     ADD CONSTRAINT protected_branch_unprotect_access_levels_pkey PRIMARY KEY (id);
@@ -31756,6 +31777,8 @@ CREATE INDEX index_protected_branch_push_access_levels_on_group_id ON protected_
 
 CREATE INDEX index_protected_branch_push_access_levels_on_user_id ON protected_branch_push_access_levels USING btree (user_id);
 
+CREATE INDEX index_protected_branch_squash_options_on_project_id ON protected_branch_squash_options USING btree (project_id);
+
 CREATE INDEX index_protected_branch_unprotect_access ON protected_branch_unprotect_access_levels USING btree (protected_branch_id);
 
 CREATE INDEX index_protected_branch_unprotect_access_levels_on_group_id ON protected_branch_unprotect_access_levels USING btree (group_id);
@@ -32177,6 +32200,10 @@ CREATE INDEX index_sprints_on_group_id ON sprints USING btree (group_id);
 CREATE INDEX index_sprints_on_title ON sprints USING btree (title);
 
 CREATE INDEX index_sprints_on_title_trigram ON sprints USING gin (title gin_trgm_ops);
+
+CREATE UNIQUE INDEX index_squash_options_by_project_id ON protected_branch_squash_options USING btree (project_id) WHERE (protected_branch_id IS NULL);
+
+CREATE UNIQUE INDEX index_squash_options_by_protected_branch_id ON protected_branch_squash_options USING btree (protected_branch_id);
 
 CREATE UNIQUE INDEX index_ssh_signatures_on_commit_sha ON ssh_signatures USING btree (commit_sha);
 
@@ -38044,6 +38071,9 @@ ALTER TABLE ONLY project_pages_metadata
 ALTER TABLE ONLY work_item_progresses
     ADD CONSTRAINT fk_rails_8c584bfb37 FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY protected_branch_squash_options
+    ADD CONSTRAINT fk_rails_8c5a693b9a FOREIGN KEY (protected_branch_id) REFERENCES protected_branches(id);
+
 ALTER TABLE ONLY packages_conan_metadata
     ADD CONSTRAINT fk_rails_8c68cfec8b FOREIGN KEY (package_id) REFERENCES packages_packages(id) ON DELETE CASCADE;
 
@@ -38148,6 +38178,9 @@ ALTER TABLE ONLY error_tracking_client_keys
 
 ALTER TABLE ONLY pages_deployments
     ADD CONSTRAINT fk_rails_993b88f59a FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY protected_branch_squash_options
+    ADD CONSTRAINT fk_rails_9949b629c1 FOREIGN KEY (project_id) REFERENCES projects(id);
 
 ALTER TABLE ONLY dast_pre_scan_verification_steps
     ADD CONSTRAINT fk_rails_9990fc2adf FOREIGN KEY (dast_pre_scan_verification_id) REFERENCES dast_pre_scan_verifications(id) ON DELETE CASCADE;

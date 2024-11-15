@@ -15,11 +15,11 @@
           - c.with_label do
             = _("Delete source branch when merge request is accepted.")
 
-    - if !project.squash_never?
+    - if !issuable.squash_never?
       .form-check.gl-pl-0
-        - if project.squash_always?
+        - if issuable.squash_always?
           = hidden_field_tag 'merge_request[squash]', '1', id: nil
-          = render Pajamas::CheckboxTagComponent.new(name: 'merge_request[squash]', checked: project.squash_enabled_by_default?, value: '1', checkbox_options: { class: 'js-form-update', disabled: true }) do |c|
+          = render Pajamas::CheckboxTagComponent.new(name: 'merge_request[squash]', checked: issuable.squash_enabled_by_default?, value: '1', checkbox_options: { class: 'js-form-update', disabled: true }) do |c|
             - c.with_label do
               = _("Squash commits when merge request is accepted.")
               = link_to sprite_icon('question-o'), help_page_path('user/project/merge_requests/squash_and_merge.md'), target: '_blank', rel: 'noopener noreferrer'

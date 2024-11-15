@@ -1,0 +1,10 @@
+---
+table_name: protected_branch_squash_options
+classes:
+- ProtectedBranch::SquashOption
+feature_categories:
+  - source_code_management
+description: TODO
+introduced_by_url: TODO
+milestone: '17.5'
+gitlab_schema: gitlab_main

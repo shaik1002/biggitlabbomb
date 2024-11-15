@@ -216,6 +216,7 @@ module Types
       null: true,
       description: 'Indicates if users can request member access to the project.'
 
+    # TODO: Find where this is used on the frontend and update to query through merge_request -> squash options?
     field :squash_read_only, GraphQL::Types::Boolean,
       null: false,
       description: 'Indicates if `squashReadOnly` is enabled.',
