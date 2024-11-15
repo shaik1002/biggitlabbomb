@@ -40,10 +40,12 @@ export const WORK_ITEM_TYPE_ENUM_REQUIREMENTS = 'REQUIREMENT';
 export const WORK_ITEM_TYPE_ENUM_OBJECTIVE = 'OBJECTIVE';
 export const WORK_ITEM_TYPE_ENUM_KEY_RESULT = 'KEY_RESULT';
 export const WORK_ITEM_TYPE_ENUM_EPIC = 'EPIC';
+export const WORK_ITEM_TYPE_ENUM_TICKET = 'TICKET';
 
 export const WORK_ITEM_TYPE_VALUE_WORK_ITEM = 'Work Item';
 export const WORK_ITEM_TYPE_VALUE_EPIC = 'Epic';
 export const WORK_ITEM_TYPE_VALUE_INCIDENT = 'Incident';
+export const WORK_ITEM_TYPE_VALUE_TICKET = 'Ticket';
 export const WORK_ITEM_TYPE_VALUE_ISSUE = 'Issue';
 export const WORK_ITEM_TYPE_VALUE_TASK = 'Task';
 export const WORK_ITEM_TYPE_VALUE_TEST_CASE = 'Test Case';
@@ -204,6 +206,11 @@ export const WORK_ITEMS_TYPE_MAP = {
     name: s__('WorkItem|Epic'),
     value: WORK_ITEM_TYPE_VALUE_EPIC,
     routeParamName: 'epics',
+  },
+  [WORK_ITEM_TYPE_ENUM_TICKET]: {
+    icon: `issue-type-ticket`,
+    name: s__('WorkItem|Ticket'),
+    value: WORK_ITEM_TYPE_VALUE_TICKET,
   },
 };
 

@@ -387,6 +387,8 @@ class ProjectPolicy < BasePolicy
 
   rule { can?(:create_issue) }.enable :create_task
 
+  rule { can?(:create_issue) }.enable :create_ticket
+
   # These abilities are not allowed to admins that are not members of the project,
   # that's why they are defined separately.
   rule { guest & can?(:download_code) }.enable :build_download_code

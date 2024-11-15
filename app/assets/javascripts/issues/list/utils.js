@@ -34,6 +34,7 @@ import {
   WORK_ITEM_TYPE_ENUM_ISSUE,
   WORK_ITEM_TYPE_ENUM_INCIDENT,
   WORK_ITEM_TYPE_ENUM_TASK,
+  WORK_ITEM_TYPE_ENUM_TICKET,
 } from '~/work_items/constants';
 import { EMOJI_THUMBS_UP, EMOJI_THUMBS_DOWN } from '~/emoji/constants';
 import { BoardType } from '~/boards/constants';
@@ -87,12 +88,14 @@ export const getDefaultWorkItemTypes = () => [
   WORK_ITEM_TYPE_ENUM_ISSUE,
   WORK_ITEM_TYPE_ENUM_INCIDENT,
   WORK_ITEM_TYPE_ENUM_TASK,
+  WORK_ITEM_TYPE_ENUM_TICKET,
 ];
 
 export const getTypeTokenOptions = () => [
   { icon: 'issue-type-issue', title: s__('WorkItem|Issue'), value: 'issue' },
   { icon: 'issue-type-incident', title: s__('WorkItem|Incident'), value: 'incident' },
   { icon: 'issue-type-task', title: s__('WorkItem|Task'), value: 'task' },
+  { icon: 'issue-type-ticket', title: s__('WorkItem|Ticket'), value: 'ticket' },
 ];
 
 export const getInitialPageParams = (

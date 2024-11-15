@@ -46,7 +46,8 @@ module WorkItems
       objective: { name: TYPE_NAMES[:objective], icon_name: 'issue-type-objective', enum_value: 5, id: 6 }, ## EE-only
       key_result: { name: TYPE_NAMES[:key_result], icon_name: 'issue-type-keyresult', enum_value: 6, id: 7 }, ## EE-only
       epic: { name: TYPE_NAMES[:epic], icon_name: 'issue-type-epic', enum_value: 7, id: 8 }, ## EE-only
-      ticket: { name: TYPE_NAMES[:ticket], icon_name: 'issue-type-issue', enum_value: 8, id: 9 }
+      ticket: { name: TYPE_NAMES[:ticket], icon_name: 'issue-type-ticket', enum_value: 8, id: 9 }
+      # TODO: Add migration for the icon to appear
     }.freeze
 
     # A list of types user can change between - both original and new
@@ -108,7 +109,8 @@ module WorkItems
     end
 
     def self.allowed_types_for_issues
-      base_types.keys.excluding('objective', 'key_result', 'epic', 'ticket')
+      # TODO: Exclude ticket if feature flag is disabled?
+      base_types.keys.excluding('objective', 'key_result', 'epic')
     end
 
     # method overridden in EE to perform the corresponding checks for the Epic type
