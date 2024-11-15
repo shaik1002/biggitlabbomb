@@ -1,7 +1,15 @@
 <script>
 // eslint-disable-next-line no-restricted-imports
 import { mapActions } from 'vuex';
-import { GlSprintf, GlLink, GlLoadingIcon, GlButton, GlModal, GlModalDirective } from '@gitlab/ui';
+import {
+  GlSprintf,
+  GlLink,
+  GlLoadingIcon,
+  GlButton,
+  GlModal,
+  GlModalDirective,
+  GlTooltipDirective,
+} from '@gitlab/ui';
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import { sprintf, n__, s__ } from '~/locale';
 import {
@@ -55,6 +63,7 @@ export default {
   pushRulesHelpDocLink,
   directives: {
     GlModal: GlModalDirective,
+    GlTooltip: GlTooltipDirective,
   },
   editModalId: EDIT_RULE_MODAL_ID,
   components: {
@@ -379,15 +388,22 @@ export default {
   <div>
     <page-heading :heading="$options.i18n.pageTitle">
       <template #actions>
-        <gl-button
-          v-if="glFeatures.editBranchRules && branchRule && canAdminProtectedBranches"
-          v-gl-modal="$options.deleteModalId"
-          data-testid="delete-rule-button"
-          category="secondary"
-          variant="danger"
-          :disabled="$apollo.loading"
-          >{{ $options.i18n.deleteRule }}
-        </gl-button>
+        <span
+          v-gl-tooltip="{
+            title: $options.i18n.disabledDeleteTooltip,
+            disabled: branchProtection.allowDeletion,
+          }"
+        >
+          <gl-button
+            v-if="glFeatures.editBranchRules && branchRule && canAdminProtectedBranches"
+            v-gl-modal="$options.deleteModalId"
+            data-testid="delete-rule-button"
+            category="secondary"
+            variant="danger"
+            :disabled="$apollo.loading || !branchProtection.allowDeletion"
+            >{{ $options.i18n.deleteRule }}
+          </gl-button>
+        </span>
       </template>
     </page-heading>
 

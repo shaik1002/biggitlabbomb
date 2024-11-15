@@ -9,6 +9,10 @@ import {
 export const I18N = {
   pageTitle: s__('BranchRules|Branch rule details'),
   deleteRule: s__('BranchRules|Delete rule'),
+  disabledDeleteTooltip: s__(
+    "SecurityOrchestration|You can't unprotect this branch because its protection is enforced by one or more security policies. Learn more.",
+  ),
+  // disabledDeleteTooltip: s_("SecurityOrchestration|You can't unprotect this branch because its protection is enforced by one or more %{security_policies_link_start}security policies%{security_policies_link_end}. %{learn_more_link_start}Learn more%{learn_more_link_end}."), tag_pair(learn_more_link, :learn_more_link_start, :learn_more_link_end), tag_pair(security_policies_link, :security_policies_link_start, :security_policies_link_end),
   manageProtectionsLinkTitle: s__('BranchRules|Manage in protected branches'),
   targetBranch: s__('BranchRules|Target branch'),
   ruleTarget: s__('BranchRules|Rule target'),

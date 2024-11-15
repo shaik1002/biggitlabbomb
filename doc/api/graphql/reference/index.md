@@ -19578,6 +19578,7 @@ Branch protection details for a branch rule.
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
+| <a id="branchprotectionallowdeletion"></a>`allowDeletion` | [`Boolean!`](#boolean) | Indicates if the branch rule can be deleted. |
 | <a id="branchprotectionallowforcepush"></a>`allowForcePush` | [`Boolean!`](#boolean) | Toggle force push to the branch for users with write access. |
 | <a id="branchprotectioncodeownerapprovalrequired"></a>`codeOwnerApprovalRequired` | [`Boolean!`](#boolean) | Enforce code owner approvals before allowing a merge. |
 | <a id="branchprotectionmergeaccesslevels"></a>`mergeAccessLevels` | [`MergeAccessLevelConnection`](#mergeaccesslevelconnection) | Details about who can merge when the branch is the source branch. (see [Connections](#connections)) |
