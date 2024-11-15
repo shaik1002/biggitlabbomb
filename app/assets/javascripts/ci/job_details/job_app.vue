@@ -326,6 +326,7 @@ export default {
             :job-id="job.id"
             :job-status-group="job.status.group"
             :can-troubleshoot-job="glAbilities.troubleshootJobWithAi"
+            data-testid="rca-button"
           />
         </div>
         <!-- EO job log -->
