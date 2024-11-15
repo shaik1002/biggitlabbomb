@@ -339,12 +339,12 @@ class NotificationService
   #  * merge_request new reviewers if their notification level is not Disabled
   #  * users with custom level checked with "change reviewer merge request"
   #
-  def changed_reviewer_of_merge_request(merge_request, current_user, previous_reviewers = [])
+  def changed_reviewer_of_merge_request(merge_request, current_user, previous_reviewers = [], recipient_reviewers = [])
     recipients = NotificationRecipients::BuildService.build_recipients(
       merge_request,
       current_user,
       action: "change_reviewer",
-      previous_assignees: previous_reviewers
+      previous_assignees: recipient_reviewers
     )
 
     previous_reviewer_ids = previous_reviewers.map(&:id)
