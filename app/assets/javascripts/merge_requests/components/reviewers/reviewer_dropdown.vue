@@ -42,7 +42,7 @@ export default {
       required: false,
       default: () => [],
     },
-    visibleReviewers: {
+    eligibleReviewers: {
       type: Array,
       required: false,
       default: () => [],
@@ -62,10 +62,10 @@ export default {
       const items = [];
       let users;
 
-      if (this.selectedReviewersToShow.length && !this.search) {
+      if (this.visibleReviewers.length && !this.search) {
         items.push({
           text: __('Reviewers'),
-          options: this.selectedReviewersToShow.map((user) => this.mapUser(user)),
+          options: this.visibleReviewers.map((user) => this.mapUser(user)),
         });
       }
 
@@ -87,9 +87,9 @@ export default {
 
       return items;
     },
-    selectedReviewersToShow() {
+    visibleReviewers() {
       return this.selectedReviewers.filter((user) =>
-        this.visibleReviewers.map((gqlUser) => gqlUser.id).includes(user.id),
+        this.eligibleReviewers.map((gqlUser) => gqlUser.id).includes(user.id),
       );
     },
   },
