@@ -1240,3 +1240,10 @@ Tailwind/StringInterpolation:
   - '{,ee/,jh/}app/helpers/**/*.rb'
   - '{,ee/,jh/}app/components/**/*.{haml,rb}'
   - '{,ee/,jh/}app/views/**/*.haml'
+
+Metrics/MethodCount:
+  Include:
+    - 'app/models/**/*.rb'
+    - 'ee/app/models/**/*.rb'
+  Limit: 50
+  ExceptionsFile: <%= Dir.pwd %>/rubocop/metrics-method-count-exceptions.yml

@@ -147,3 +147,7 @@ Rails/StrongParams:
 # This cop doesn't make sense in the context of gems
 Gitlab/NoFindInWorkers:
   Enabled: false
+
+# Reduce the noise while testing the concept
+Lint/MethodCount:
+  Enabled: false

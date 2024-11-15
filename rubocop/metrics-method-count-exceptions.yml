@@ -1,0 +1,85 @@
+---
+Project:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 406
+User:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 280
+MergeRequest:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 252
+EE::Project::FilterByBranch:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 167
+Repository:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 162
+Ci::Build:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 146
+Ci::Pipeline:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 146
+Group:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 136
+EE::Group:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 130
+Namespace:
+  Reason: 'TODO: Link issue to reduce method count..'
+  Limit: 100
+Note:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 96
+EE::Namespace:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 90
+License:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 89
+Commit:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 86
+EE::User:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 86
+EE::MergeRequest:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 80
+Issuable:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 78
+Issue:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 75
+EE::Epic:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 75
+MergeRequestDiff:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 72
+ApplicationSettingImplementation:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 70
+Member:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 64
+Environment:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 61
+GeoNode:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 61
+Integrations::Jira:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 58
+Event:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 56
+Wiki:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 54
+EE::ApplicationSetting:
+  Reason: 'TODO: Link issue to reduce method count.'
+  Limit: 53
