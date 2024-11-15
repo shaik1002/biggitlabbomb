@@ -736,6 +736,9 @@ Settings.cron_jobs['database_monitor_locked_tables_cron_worker']['job_class'] = 
 Settings.cron_jobs['merge_requests_process_scheduled_merge'] ||= {}
 Settings.cron_jobs['merge_requests_process_scheduled_merge']['cron'] ||= '*/1 * * * *'
 Settings.cron_jobs['merge_requests_process_scheduled_merge']['job_class'] = 'MergeRequests::ProcessScheduledMergeWorker'
+Settings.cron_jobs['ci_schedule_old_pipelines_removal_cron_worker'] ||= {}
+Settings.cron_jobs['ci_schedule_old_pipelines_removal_cron_worker']['cron'] ||= '*/11 * * * *'
+Settings.cron_jobs['ci_schedule_old_pipelines_removal_cron_worker']['job_class'] = 'Ci::ScheduleOldPipelinesRemovalCronWorker'
 
 Gitlab.ee do
   Settings.cron_jobs['analytics_devops_adoption_create_all_snapshots_worker'] ||= {}
@@ -958,6 +961,9 @@ Gitlab.ee do
   Settings.cron_jobs['package_metadata_cve_enrichment_sync_worker'] ||= {}
   Settings.cron_jobs['package_metadata_cve_enrichment_sync_worker']['cron'] ||= "0 */1 * * *"
   Settings.cron_jobs['package_metadata_cve_enrichment_sync_worker']['job_class'] = 'PackageMetadata::CveEnrichmentSyncWorker'
+  Settings.cron_jobs['members_schedule_prune_deletions_worker'] ||= {}
+  Settings.cron_jobs['members_schedule_prune_deletions_worker']['cron'] ||= "*/5 * * * *"
+  Settings.cron_jobs['members_schedule_prune_deletions_worker']['job_class'] = 'Members::SchedulePruneDeletionsWorker'
 
   Gitlab.com do
     Settings.cron_jobs['disable_legacy_open_source_license_for_inactive_projects'] ||= {}
