@@ -5,6 +5,7 @@ import {
   GlLink,
   GlSkeletonLoader,
   GlTooltipDirective,
+  GlTruncate,
   GlLoadingIcon,
   GlIcon,
   GlHoverLoadDirective,
@@ -28,6 +29,7 @@ export default {
     GlSkeletonLoader,
     GlLoadingIcon,
     GlIcon,
+    GlTruncate,
     TimeagoTooltip,
     FileIcon,
     GlIntersectionObserver,
@@ -207,19 +209,18 @@ export default {
 
 <template>
   <tr class="tree-item">
-    <td class="tree-item-file-name cursor-default position-relative">
+    <td class="tree-item-file-name gl-flex gl-cursor-default gl-gap-2">
       <component
         :is="linkComponent"
         ref="link"
         v-gl-hover-load="handlePreload"
-        v-gl-tooltip="{ placement: 'left', boundary: 'viewport' }"
         :title="fullPath"
         :to="routerLinkTo"
         :href="url"
         :class="{
           'is-submodule': isSubmodule,
         }"
-        class="tree-item-link str-truncated"
+        class="tree-item-link gl-inline-flex gl-min-w-0"
         data-testid="file-name-link"
       >
         <file-icon
@@ -228,15 +229,21 @@ export default {
           :folder="isFolder"
           :submodule="isSubmodule"
           :loading="path === loadingPath"
-          css-classes="position-relative file-icon"
-          class="gl-relative gl-mr-2 gl-text-subtle"
-        /><span class="gl-relative">{{ fullPath }}</span>
+          css-classes="file-icon"
+          class="gl-mr-2 gl-text-secondary"
+        /><gl-truncate
+          :text="fullPath"
+          position="end"
+          class="gl-min-w-0 gl-grow hover:gl-underline"
+          with-tooltip
+        />
       </component>
       <!-- eslint-disable @gitlab/vue-require-i18n-strings -->
-      <gl-badge v-if="lfsOid" variant="muted" class="gl-ml-2" data-testid="label-lfs">LFS</gl-badge>
+      <gl-badge v-if="lfsOid" variant="muted" data-testid="label-lfs">LFS</gl-badge>
       <!-- eslint-enable @gitlab/vue-require-i18n-strings -->
       <template v-if="isSubmodule">
-        @ <gl-link :href="submoduleTreeUrl" class="commit-sha">{{ shortSha }}</gl-link>
+        @
+        <gl-link :href="submoduleTreeUrl" class="commit-sha"> {{ shortSha }}</gl-link>
       </template>
       <gl-icon
         v-if="hasLockLabel"
@@ -244,7 +251,6 @@ export default {
         :title="commitData.lockLabel"
         name="lock"
         :size="12"
-        class="gl-ml-2"
       />
     </td>
     <td class="tree-commit cursor-default gl-hidden sm:gl-table-cell">
