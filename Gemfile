@@ -285,14 +285,14 @@ gem 'state_machines-activerecord', '~> 0.8.0' # rubocop:todo Gemfile/MissingFeat
 
 # Background jobs
 gem 'sidekiq', path: 'vendor/gems/sidekiq-7.2.4', require: 'sidekiq', feature_category: :scalability
-gem 'sidekiq-cron', '~> 1.12.0', feature_category: :scalability
+gem 'sidekiq-cron', '~> 2.0.0', feature_category: :scalability
 gem 'gitlab-sidekiq-fetcher',
   path: 'vendor/gems/sidekiq-reliable-fetch',
   require: 'sidekiq-reliable-fetch',
   feature_category: :scalability
 
 # Cron Parser
-gem 'fugit', '~> 1.8.1' # rubocop:todo Gemfile/MissingFeatureCategory
+gem 'fugit', '~> 1.11.1' # rubocop:todo Gemfile/MissingFeatureCategory
 
 # HTTP requests
 gem 'httparty', '~> 0.21.0' # rubocop:todo Gemfile/MissingFeatureCategory
