@@ -18,6 +18,7 @@ import {
   optimisticUserPermissions,
 } from '../../graphql/cache_utils';
 import moveWorkItem from '../../graphql/move_work_item.mutation.graphql';
+import reorderWorkItem from '../../graphql/reorder_work_item.mutation.graphql';
 import toggleHierarchyTreeChildMutation from '../../graphql/client/toggle_hierarchy_tree_child.mutation.graphql';
 import updateWorkItemMutation from '../../graphql/update_work_item.mutation.graphql';
 import workItemByIidQuery from '../../graphql/work_item_by_iid.query.graphql';
@@ -327,6 +328,7 @@ export default {
       let hierarchyWidgetParams;
       let updatedChildren;
       let toParentHasChildren;
+      let reorder = false;
 
       this.updateInProgress = true;
       if (fromParentId === toParentId) {
@@ -338,6 +340,7 @@ export default {
         updatedChildren = cloneDeep(this.children);
         updatedChildren.splice(oldIndex, 1);
       } else {
+        reorder = true;
         hierarchyWidgetParams = await this.getMoveItemParams({ toParentId, newIndex });
         updatedChildren = cloneDeep(this.childrenWorkItems);
         toParentHasChildren = updatedChildren.length > 0;
@@ -348,7 +351,7 @@ export default {
 
       this.$apollo
         .mutate({
-          mutation: moveWorkItem,
+          mutation: reorder ? reorderWorkItem : moveWorkItem,
           variables: {
             pageSize: currentPageSize,
             endCursor: '',
@@ -358,7 +361,7 @@ export default {
             },
           },
           update: async (cache) => {
-            if (fromParentId !== toParentId) {
+            if (!reorder) {
               removeHierarchyChild({
                 cache,
                 id: fromParentId,
@@ -368,6 +371,12 @@ export default {
               if (!toParentHasChildren) {
                 this.openChild(toParentId);
               }
+            } else {
+              this.$emit('reorderWorkItems', {
+                targetWorkItem: targetItem,
+                oldIndex,
+                newIndex,
+              });
             }
           },
           optimisticResponse: {

@@ -328,6 +328,10 @@ export default {
         }
       }
     },
+    reorderWorkItem({ targetWorkItem, oldIndex, newIndex }) {
+      this.hierarchyWidget?.nodes.splice(oldIndex, 1);
+      this.hierarchyWidget?.nodes.splice(newIndex, 0, targetWorkItem);
+    },
   },
   i18n: {
     noChildItemsOpen: s__('WorkItem|No child items are currently open.'),
@@ -435,6 +439,7 @@ export default {
           @drop="draggedItemType = null"
           @error="error = $event"
           @show-modal="showModal"
+          @reorderWorkItem="reorderWorkItem"
         />
         <work-item-children-load-more
           v-if="hasNextPage"
