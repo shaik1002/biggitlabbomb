@@ -18,13 +18,7 @@ module Mutations
           required: true,
           description: 'Group to be removed from the CI job token scope.'
 
-        field :ci_job_token_scope_allowlist_entry,
-          Types::Ci::JobTokenScope::AllowlistEntryType,
-          null: true,
-          experiment: { milestone: '17.6' },
-          description: "Allowlist entry for the CI job token's access scope."
-
-        field :ci_job_token_scope, # rubocop: disable GraphQL/ExtractType -- no value for now
+        field :ci_job_token_scope,
           Types::Ci::JobTokenScopeType,
           null: true,
           description: "CI job token's access scope."
@@ -40,13 +34,11 @@ module Mutations
           if result.success?
             {
               ci_job_token_scope: ::Ci::JobToken::Scope.new(project),
-              ci_job_token_scope_allowlist_entry: result.payload,
               errors: []
             }
           else
             {
               ci_job_token_scope: nil,
-              ci_job_token_scope_allowlist_entry: nil,
               errors: [result.message]
             }
           end

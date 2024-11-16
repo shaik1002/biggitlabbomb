@@ -560,7 +560,7 @@ export default {
             :new-comment-template-paths="newCommentTemplatePaths"
             @select="insertSavedReply"
           />
-          <template v-if="!previewMarkdown && canSummarizeChanges">
+          <template v-if="canSummarizeChanges">
             <header-divider />
             <summarize-code-changes />
           </template>
@@ -594,7 +594,6 @@ export default {
         v-model="findAndReplace.find"
         :placeholder="__('Find')"
         autofocus
-        data-testid="find-btn"
         @keydown="handleKeyDown"
       />
     </div>

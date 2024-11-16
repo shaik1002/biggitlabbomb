@@ -21,19 +21,12 @@ RSpec.describe 'CiJobTokenScopeUpdatePolicies', feature_category: :continuous_in
     graphql_mutation(:ci_job_token_scope_update_policies, variables) do
       <<~QL
         errors
-        ciJobTokenScopeAllowlistEntry {
-          sourceProject {
-            fullPath
-          }
-          target {
-            ... on Project {
-              fullPath
-            }
-            ... on Group {
-              fullPath
+        ciJobTokenScope {
+          projects {
+            nodes {
+              path
             }
           }
-          jobTokenPolicies
         }
       QL
     end
@@ -45,7 +38,7 @@ RSpec.describe 'CiJobTokenScopeUpdatePolicies', feature_category: :continuous_in
     let_it_be(:target_project) { create(:project, :private) }
     let_it_be(:target_path) { target_project.full_path }
 
-    let(:policies) { %w[READ_PROJECT READ_PACKAGE] }
+    let(:policies) { %w[READ_CONTAINERS READ_PACKAGES] }
 
     context 'when user does not have permissions to admin project' do
       let_it_be(:current_user) { create(:user, guest_of: target_project) }
@@ -74,21 +67,19 @@ RSpec.describe 'CiJobTokenScopeUpdatePolicies', feature_category: :continuous_in
             :ci_job_token_project_scope_link,
             source_project: project,
             target_project: target_project,
-            job_token_policies: %w[read_project],
+            job_token_policies: %w[read_containers],
             direction: :inbound
           )
         end
 
-        it 'updates policies for target project', :aggregate_failures do
+        it 'updates policies for target project' do
           post_graphql_mutation(mutation, current_user: current_user)
 
           expect(response).to have_gitlab_http_status(:success)
 
-          expect(mutation_response.dig('ciJobTokenScopeAllowlistEntry', 'sourceProject',
-            'fullPath')).to eq(project.full_path)
-          expect(mutation_response.dig('ciJobTokenScopeAllowlistEntry', 'target',
-            'fullPath')).to eq(target_project.full_path)
-          expect(mutation_response.dig('ciJobTokenScopeAllowlistEntry', 'jobTokenPolicies')).to eq(policies)
+          # TODO: include jobTokenPolicies in response,
+          # https://gitlab.com/gitlab-org/govern/authorization/team-tasks/-/issues/87
+          expect(mutation_response.dig('ciJobTokenScope', 'projects', 'nodes', 0, 'path')).to eq(project.path)
         end
 
         context 'when target path is invalid' do
@@ -123,7 +114,7 @@ RSpec.describe 'CiJobTokenScopeUpdatePolicies', feature_category: :continuous_in
     let_it_be(:target_group) { create(:group, :private) }
     let_it_be(:target_path) { target_group.full_path }
 
-    let(:policies) { %w[READ_GROUP READ_PACKAGE] }
+    let(:policies) { %w[READ_CONTAINERS READ_PACKAGES] }
 
     context 'when user does not have permissions to admin project' do
       let_it_be(:current_user) { create(:user, guest_of: target_group) }
@@ -152,20 +143,18 @@ RSpec.describe 'CiJobTokenScopeUpdatePolicies', feature_category: :continuous_in
             :ci_job_token_group_scope_link,
             source_project: project,
             target_group: target_group,
-            job_token_policies: %w[read_group]
+            job_token_policies: %w[read_containers]
           )
         end
 
-        it 'updates policies for target group', :aggregate_failures do
+        it 'updates policies for target group' do
           post_graphql_mutation(mutation, current_user: current_user)
 
           expect(response).to have_gitlab_http_status(:success)
 
-          expect(mutation_response.dig('ciJobTokenScopeAllowlistEntry', 'sourceProject',
-            'fullPath')).to eq(project.full_path)
-          expect(mutation_response.dig('ciJobTokenScopeAllowlistEntry', 'target',
-            'fullPath')).to eq(target_group.full_path)
-          expect(mutation_response.dig('ciJobTokenScopeAllowlistEntry', 'jobTokenPolicies')).to eq(policies)
+          # TODO: include jobTokenPolicies in response,
+          # https://gitlab.com/gitlab-org/govern/authorization/team-tasks/-/issues/87
+          expect(mutation_response.dig('ciJobTokenScope', 'projects', 'nodes', 0, 'path')).to eq(project.path)
         end
 
         context 'when target path is invalid' do

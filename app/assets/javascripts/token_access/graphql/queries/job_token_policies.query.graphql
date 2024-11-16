@@ -1,0 +1,11 @@
+query jobTokenPolicies {
+  jobTokenPolicies {
+    value
+    text
+    policies {
+      value
+      text
+      description
+    }
+  }
+}

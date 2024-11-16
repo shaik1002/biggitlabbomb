@@ -1,5 +1,5 @@
 <script>
-import { GlButton, GlIcon, GlLink, GlTableLite } from '@gitlab/ui';
+import { GlIcon, GlLink, GlTableLite, GlTooltipDirective } from '@gitlab/ui';
 import { TYPENAME_GROUP } from '~/graphql_shared/constants';
 import ProjectAvatar from '~/vue_shared/components/project_avatar.vue';
 import { s__, __ } from '~/locale';
@@ -9,27 +9,21 @@ export default {
     {
       key: 'fullPath',
       label: s__('CICD|Group or project'),
-      tdClass: 'gl-w-3/4',
     },
     {
       key: 'actions',
       label: __('Actions'),
-      class: 'gl-text-right',
-      tdClass: '!gl-py-0 !gl-pl-0 gl-w-0 !gl-align-middle',
+      class: 'gl-w-13 !gl-pl-0',
+      tdClass: '!gl-py-0 !gl-align-middle',
     },
   ],
   components: {
-    GlButton,
     GlIcon,
     GlLink,
     GlTableLite,
     ProjectAvatar,
   },
-  inject: {
-    fullPath: {
-      default: '',
-    },
-  },
+  directives: { GlTooltip: GlTooltipDirective },
   props: {
     isGroup: {
       type: Boolean,
@@ -75,13 +69,7 @@ export default {
     </template>
 
     <template #cell(actions)="{ item }">
-      <gl-button
-        v-if="item.fullPath !== fullPath"
-        category="primary"
-        icon="remove"
-        :aria-label="__('Remove access')"
-        @click="$emit('removeItem', item)"
-      />
+      <slot name="actions" :item="item"></slot>
     </template>
   </gl-table-lite>
 </template>

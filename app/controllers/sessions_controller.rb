@@ -80,7 +80,7 @@ class SessionsController < Devise::SessionsController
 
       accept_pending_invitations
 
-      synchronize_broadcast_message_dismissals(current_user)
+      synchronize_broadcast_message_dismissals
 
       log_audit_event(current_user, resource, with: authentication_method)
       log_user_activity(current_user)

@@ -276,7 +276,16 @@ export default {
             <gl-button size="small" disabled>{{ $options.i18n.addProject }}</gl-button>
           </template>
 
-          <token-access-table :items="projects" @removeItem="removeProject" />
+          <token-access-table :items="projects">
+            <template #actions="{ item }">
+              <gl-button
+                v-if="item.fullPath !== fullPath"
+                v-gl-tooltip.hover="__('Remove access')"
+                icon="remove"
+                @click="removeProject(item)"
+              />
+            </template>
+          </token-access-table>
         </crud-component>
       </div>
     </template>

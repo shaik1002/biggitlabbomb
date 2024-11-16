@@ -53,7 +53,6 @@ export default {
       icon="remove"
       :aria-label="deleteButtonLabel"
       category="tertiary"
-      data-testid="delete-user-btn"
       @click="$emit('delete', data.id)"
     />
   </span>

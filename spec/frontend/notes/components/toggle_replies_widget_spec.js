@@ -18,9 +18,10 @@ describe('toggle replies widget for notes', () => {
 
   const replies = [note, note, note, noteFromOtherUser, noteFromAnotherUser];
 
-  // const findCollapseToggleButton = () =>
-  //   wrapper.findComponentByRole('button', { text: ToggleRepliesWidget.i18n.collapseReplies });
-  const findToggleButton = () => wrapper.findByTestId('replies-toggle');
+  const findCollapseToggleButton = () =>
+    wrapper.findByRole('button', { text: ToggleRepliesWidget.i18n.collapseReplies });
+  const findExpandToggleButton = () =>
+    wrapper.findByRole('button', { text: ToggleRepliesWidget.i18n.expandReplies });
   const findRepliesButton = () => wrapper.findByRole('button', { text: '5 replies' });
   const findTimeAgoTooltip = () => wrapper.findComponent(TimeAgoTooltip);
   const findAvatars = () => wrapper.findComponent(GlAvatarsInline);
@@ -35,8 +36,9 @@ describe('toggle replies widget for notes', () => {
     });
 
     it('renders collapsed state elements', () => {
-      expect(findToggleButton().props('icon')).toBe('chevron-right');
-      expect(findToggleButton().attributes('aria-label')).toBe('Expand replies');
+      expect(findExpandToggleButton().exists()).toBe(true);
+      expect(findExpandToggleButton().props('icon')).toBe('chevron-right');
+      expect(findExpandToggleButton().attributes('aria-label')).toBe('Expand replies');
       expect(findAvatars().props('avatars')).toHaveLength(3);
       expect(findRepliesButton().exists()).toBe(true);
       expect(wrapper.text()).toContain('Last reply by');
@@ -45,7 +47,7 @@ describe('toggle replies widget for notes', () => {
     });
 
     it('emits "toggle" event when expand toggle button is clicked', () => {
-      findToggleButton().trigger('click');
+      findExpandToggleButton().trigger('click');
 
       expect(wrapper.emitted('toggle')).toEqual([[]]);
     });
@@ -63,12 +65,13 @@ describe('toggle replies widget for notes', () => {
     });
 
     it('renders expanded state elements', () => {
-      expect(findToggleButton().props('icon')).toBe('chevron-down');
-      expect(findToggleButton().attributes('aria-label')).toBe('Collapse replies');
+      expect(findCollapseToggleButton().exists()).toBe(true);
+      expect(findCollapseToggleButton().props('icon')).toBe('chevron-down');
+      expect(findCollapseToggleButton().attributes('aria-label')).toBe('Collapse replies');
     });
 
     it('emits "toggle" event when collapse toggle button is clicked', () => {
-      findToggleButton().trigger('click');
+      findCollapseToggleButton().trigger('click');
 
       expect(wrapper.emitted('toggle')).toEqual([[]]);
     });

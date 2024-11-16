@@ -1,5 +1,15 @@
-mutation inboundAddGroupOrProjectCIJobTokenScope($projectPath: ID!, $targetPath: ID!) {
-  ciJobTokenScopeAddGroupOrProject(input: { projectPath: $projectPath, targetPath: $targetPath }) {
+mutation inboundAddGroupOrProjectCIJobTokenScope(
+  $projectPath: ID!
+  $targetPath: ID!
+  $jobTokenPolicies: [CiJobTokenScopePolicies!]
+) {
+  ciJobTokenScopeAddGroupOrProject(
+    input: {
+      projectPath: $projectPath
+      targetPath: $targetPath
+      jobTokenPolicies: $jobTokenPolicies
+    }
+  ) {
     errors
   }
 }

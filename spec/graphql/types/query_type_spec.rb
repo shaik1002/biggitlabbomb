@@ -177,4 +177,12 @@ RSpec.describe GitlabSchema.types['Query'], feature_category: :shared do
       is_expected.to have_graphql_resolver(Resolvers::FeatureFlagResolver)
     end
   end
+
+  describe 'jobTokenPolicyCategories field' do
+    subject { described_class.fields['jobTokenPolicies'] }
+
+    it 'returns job token policies', :aggregate_failures do
+      is_expected.to have_graphql_type(::Types::Ci::JobTokenScope::JobTokenPolicyCategoryType)
+    end
+  end
 end

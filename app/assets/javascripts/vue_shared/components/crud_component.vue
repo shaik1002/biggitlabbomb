@@ -258,7 +258,7 @@ export default {
       <span v-else-if="$scopedSlots.empty" class="gl-text-subtle" data-testid="crud-empty">
         <slot name="empty"></slot>
       </span>
-      <slot v-else></slot>
+      <slot v-else :show-form="showForm"></slot>
 
       <div
         v-if="$scopedSlots.pagination"

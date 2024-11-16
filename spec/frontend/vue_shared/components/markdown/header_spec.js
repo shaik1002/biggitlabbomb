@@ -321,7 +321,7 @@ describe('Markdown field header component', () => {
       await nextTick();
     };
 
-    const findFindInput = () => wrapper.findByTestId('find-btn');
+    const findFindInput = () => wrapper.findByPlaceholderText('Find');
 
     beforeEach(() => {
       createWrapper({ attachTo: createParentForm() });

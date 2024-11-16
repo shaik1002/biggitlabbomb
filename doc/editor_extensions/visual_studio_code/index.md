@@ -8,21 +8,24 @@ description: "Use the GitLab Workflow extension for VS Code to handle common Git
 # GitLab Workflow extension for VS Code
 
 The [GitLab Workflow extension](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow)
-for Visual Studio Code integrates GitLab Duo and other GitLab features directly into your IDE. It adds a
-GitLab Workflow panel to the VS Code sidebar. You can view your issues, merge requests, and pipelines,
-and extend your view with [custom queries](custom_queries.md).
+for Visual Studio Code integrates GitLab Duo and other GitLab features directly into your IDE.
 
 This extension brings the GitLab features you use every day directly into your VS Code environment:
 
 - [View issues](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow#browse-issues-review-mrs) and merge requests.
-- Run [common commands](settings.md#command-palette-commands) from the Visual Studio Code Command Palette.
+- Run [common commands](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow#commands)
+  from the Visual Studio Code [Command Palette](https://code.visualstudio.com/docs/getstarted/userinterface#_command-palette).
 - Create and [review](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow#merge-request-reviews)
   merge requests.
-- [Test your GitLab CI/CD configuration](cicd.md#test-gitlab-cicd-configuration).
-- View [pipeline status](cicd.md) and [job outputs](cicd.md#view-cicd-job-output).
-- [Create](#create-a-snippet) and manage snippets.
-- [Browse repositories](remote_urls.md#browse-a-repository-in-read-only-mode) without cloning them.
+- [Validate your GitLab CI/CD configuration](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow#validate-gitlab-cicd-configuration).
+- View [pipeline status](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow#information-about-your-branch-pipelines-mr-closing-issue) and
+  [job outputs](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow#view-the-job-output).
+- [Create](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow#create-snippet) and manage snippets.
+- [Browse repositories](https://marketplace.visualstudio.com/items?itemName=GitLab.gitlab-workflow#browse-a-repository-without-cloning)
+  without cloning them.
 - [View security findings](https://marketplace.visualstudio.com/items?itemName=gitlab.gitlab-workflow#security-findings).
+
+For detailed information on these features, refer to the [GitLab Workflow extension documentation](https://gitlab.com/gitlab-org/gitlab-vscode-extension/-/blob/main/README.md).
 
 The GitLab Workflow extension also streamlines your VS Code workflow with AI-assisted features:
 
@@ -31,13 +34,6 @@ The GitLab Workflow extension also streamlines your VS Code workflow with AI-ass
 - [**GitLab Duo Code Suggestions**](../../user/project/repository/code_suggestions/index.md):
   Suggest completions to your current line of code, or write natural-language code comments to get
   more substantive suggestions.
-
-When you view a GitLab project in VS Code, the extension shows you information about your current branch:
-
-- The status of the branch's most recent CI/CD pipeline.
-- A link to the merge request for this branch.
-- If the merge request includes an [issue closing pattern](../../user/project/issues/managing_issues.md#closing-issues-automatically),
-  a link to the issue.
 
 ## Set up the GitLab Workflow extension
 
@@ -146,47 +142,6 @@ To insert an existing single-file or [multi-file](../../user/snippets.md#add-or-
 1. Select the project containing your snippet.
 1. Select the snippet to apply.
 1. For a multi-file snippet, select the file to apply.
-
-## View issues and merge requests
-
-To view issues and merge requests for a specific project:
-
-1. On the menu bar, select **GitLab Workflow** (**{tanuki}**) to display the extension sidebar.
-1. On the sidebar, expand **Issues and merge requests**.
-1. Select your desired project to expand it.
-1. Choose one of the following result types:
-   - Issues assigned to me
-   - Issues created by me
-   - Merge requests assigned to me
-   - Merge requests I'm reviewing
-   - Merge requests created by me
-   - All project merge requests
-   - Your [custom queries](custom_queries.md)
-
-1. Select an issue or merge request to open it in a new VS Code tab.
-1. Optional. If you select a merge request, its sidebar entry expands to show all files changed
-   in the merge request. Deleted files are marked in red. For example:
-
-   ![An alphabetical list of files changed in this merge request, including the type of changes.](../img/vscode_view_changed_file_v17_6.png)
-
-   1. Select a file to view its diff in a VS Code tab.
-
-## View security findings
-
-Prerequisites:
-
-- Your project includes [Security Risk Management](https://about.gitlab.com/features/?stage=secure) features, such as
-  Static Application Security Testing (SAST), Dynamic Application Security Testing (DAST),
-  Container Scanning, or Dependency Scanning.
-- You configured the [Security Risk Management](../../user/application_security/secure_your_application.md) features.
-
-To view security findings:
-
-1. On the left vertical menu bar, select **GitLab Workflow** (**{tanuki}**) to display the extension sidebar.
-1. On the sidebar, expand **Security scanning**.
-1. Select either **New findings** or **Fixed findings**.
-1. Select a desired severity level.
-1. Select a finding to open it in a VS Code tab.
 
 ## Search issues and merge requests
 
