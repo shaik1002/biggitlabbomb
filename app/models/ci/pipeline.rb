@@ -555,6 +555,17 @@ module Ci
       sql.index_by(&:sha)
     end
 
+    def self.latest_pipeline_union(where_clauses)
+      relations = where_clauses.map do |where_clause|
+        ::Ci::Pipeline
+          .where(where_clause)
+          .order(id: :desc)
+          .limit(1)
+      end
+
+      ::Ci::Pipeline.from_union(relations)
+    end
+
     def self.latest_successful_ids_per_project
       success.group(:project_id).select('max(id) as id')
     end

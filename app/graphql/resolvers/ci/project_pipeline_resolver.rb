@@ -5,6 +5,8 @@ module Resolvers
     class ProjectPipelineResolver < BaseResolver
       include LooksAhead
 
+      calls_gitaly!
+
       type ::Types::Ci::PipelineType, null: true
 
       alias_method :project, :object
@@ -22,14 +24,18 @@ module Resolvers
         required: false,
         description: 'SHA of the Pipeline. For example, "dyd0f15ay83993f5ab66k927w28673882x99100b".'
 
-      validates required: { one_of: [:id, :iid, :sha], message: 'Provide one of ID, IID or SHA' }
+      argument :ref, GraphQL::Types::String,
+        required: false,
+        description: 'REF of the Pipeline.'
+
+      validates required: { one_of: [:id, :iid, :sha, :ref], message: 'Provide one of ID, IID or SHA' }
 
       def self.resolver_complexity(args, child_complexity:)
         complexity = super
         complexity - 10
       end
 
-      def resolve(id: nil, iid: nil, sha: nil, **args)
+      def resolve(id: nil, iid: nil, sha: nil, ref: nil, **args)
         self.lookahead = args.delete(:lookahead)
 
         if id
@@ -44,6 +50,22 @@ module Resolvers
 
             apply_lookahead(finder.execute).each { |pipeline| loader.call(pipeline.iid.to_s, pipeline) }
           end
+        elsif ref
+          calculated_ref, tag = calculate_ref_and_tag(ref)
+          commit_sha = sha || project.commit(calculated_ref)&.sha
+
+          BatchLoader::GraphQL.for(
+            { project_id: project.id, ref: calculated_ref, sha: commit_sha, tag: tag }
+          ).batch do |where_clauses, loader|
+            pipelines = ::Ci::Pipeline.latest_pipeline_union(where_clauses)
+
+            pipelines.each do |pipeline|
+              loader.call(
+                { project_id: pipeline.project_id, ref: pipeline.ref, sha: pipeline.sha, tag: pipeline.tag },
+                pipeline
+              )
+            end
+          end
         else
           BatchLoader::GraphQL.for(sha).batch(key: project) do |shas, loader|
             finder = ::Ci::PipelinesFinder.new(project, current_user, sha: shas)
@@ -57,6 +79,20 @@ module Resolvers
         [
           { statuses: [:needs] }
         ]
+      end
+
+      private
+
+      def calculate_ref_and_tag(ref)
+        if ref == 'HEAD'
+          [project.default_branch_or_main, false]
+        elsif Gitlab::Git.branch_ref(ref)
+          [Gitlab::Git.branch_name(ref), false]
+        elsif Gitlab::Git.tag_ref(ref)
+          [Gitlab::Git.tag_name(ref), true]
+        else
+          [ref, false]
+        end
       end
     end
   end
