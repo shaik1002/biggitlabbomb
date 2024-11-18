@@ -3142,7 +3142,6 @@ Layout/LineLength:
     - 'spec/lib/gitlab/asciidoc_spec.rb'
     - 'spec/lib/gitlab/audit/ci_runner_token_author_spec.rb'
     - 'spec/lib/gitlab/audit/null_author_spec.rb'
-    - 'spec/lib/gitlab/auth/auth_finders_spec.rb'
     - 'spec/lib/gitlab/auth/ldap/config_spec.rb'
     - 'spec/lib/gitlab/auth/ldap/dn_spec.rb'
     - 'spec/lib/gitlab/auth/ldap/person_spec.rb'

@@ -1455,7 +1455,6 @@ RSpec/ContextWording:
     - 'spec/lib/gitlab/asciidoc_spec.rb'
     - 'spec/lib/gitlab/asset_proxy_spec.rb'
     - 'spec/lib/gitlab/auth/atlassian/identity_linker_spec.rb'
-    - 'spec/lib/gitlab/auth/auth_finders_spec.rb'
     - 'spec/lib/gitlab/auth/current_user_mode_spec.rb'
     - 'spec/lib/gitlab/auth/ldap/adapter_spec.rb'
     - 'spec/lib/gitlab/auth/ldap/dn_spec.rb'

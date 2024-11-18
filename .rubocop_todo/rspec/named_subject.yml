@@ -1657,7 +1657,6 @@ RSpec/NamedSubject:
     - 'spec/lib/gitlab/audit/target_spec.rb'
     - 'spec/lib/gitlab/audit/type/definition_spec.rb'
     - 'spec/lib/gitlab/auth/atlassian/identity_linker_spec.rb'
-    - 'spec/lib/gitlab/auth/auth_finders_spec.rb'
     - 'spec/lib/gitlab/auth/current_user_mode_spec.rb'
     - 'spec/lib/gitlab/auth/ip_rate_limiter_spec.rb'
     - 'spec/lib/gitlab/auth/ldap/dn_spec.rb'
