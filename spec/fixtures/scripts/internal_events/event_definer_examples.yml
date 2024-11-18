@@ -9,6 +9,7 @@
     - "\n" # Skip MR URL
     - "instrumentation" # Filters to the analytics instrumentation group
     - "\n" # Accept analytics:monitor:analytics_instrumentation
+    - " \n" # Select product category
     - "1\n" # Select: [free, premium, ultimate]
     - "y\n" # Create file
     - "\n" # Select: Create Metric --- define a new metric
@@ -38,6 +39,7 @@
     - "\n" # Skip MR URL
     - "instrumentation" # Filters to the analytics instrumentation group
     - "\n" # Accept analytics:monitor:analytics_instrumentation
+    - " \n" # Select product category
     - "1\n" # Select [free, premium, ultimate]
     - "y\n" # Create file
     - "4\n" # Exit
@@ -61,6 +63,7 @@
     - "\n" # Skip MR URL
     - "instrumentation" # Filters to the analytics instrumentation group
     - "\n" # Accept analytics:monitor:analytics_instrumentation
+    - " \n" # Select product category
     - "1\n" # Select [free, premium, ultimate]
     - "y\n" # Create file
     - "4\n" # Exit
@@ -80,6 +83,7 @@
     - "\n" # Skip MR URL
     - "instrumentation" # Filters to the analytics instrumentation group
     - "\n" # Accept analytics:monitor:analytics_instrumentation
+    - " \n" # Select product category
     - "2\n" # Select [premium, ultimate]
     - "y\n" # Create file
     - "4\n" # Exit
@@ -98,6 +102,7 @@
     - "\n" # Select (add props): None! Continue to next step!
     - "\n" # Skip MR URL
     - "\n" # Select core_platform:manage:import_and_integrate
+    - " \n" # Select product category
     - "\n" # Select [free, premium, ultimate]
     - "\n" # Create file
     - "\n" # Select: Create Metric --- define a new metric
@@ -136,6 +141,7 @@
     - "\n" # Skip MR URL
     - "instrumentation" # Filters to the analytics instrumentation group
     - "\n" # Accept analytics:monitor:analytics_instrumentation
+    - " \n" # Select product category
     - "2\n" # Select [premium, ultimate]
     - "y\n" # Create file
     - "4\n" # Exit
@@ -155,6 +161,7 @@
     - "\n" # Skip MR URL
     - "instrumentation" # Filters to the analytics instrumentation group
     - "\n" # Accept analytics:monitor:analytics_instrumentation
+    - " \n" # Select product category
     - "1\n" # Select: [free, premium, ultimate]
     - "y\n" # Create file
     - "3\n" # Select: View Usage
@@ -176,6 +183,7 @@
     - "\n" # Skip MR URL
     - "instrumentation" # Filters to the analytics instrumentation group
     - "\n" # Accept analytics:monitor:analytics_instrumentation
+    - " \n" # Select product category
     - "1\n" # Select: [free, premium, ultimate]
     - "n\n" # Create file
     - "\n" # Select: Save event & create Metric --- define a new metric
@@ -203,6 +211,7 @@
     - "https://gitlab.com/gitlab-org/gitlab/-/merge_requests/143433\n" # Submit MR URL
     - "instrumentation" # Filters to the analytics instrumentation group
     - "\n" # Accept analytics:monitor:analytics_instrumentation
+    - " \n" # Select product category
     - "1\n" # Select: [free, premium, ultimate]
     - "y\n" # Create file
     - "4\n" # Exit
@@ -229,6 +238,7 @@
     - "\n" # Skip MR URL
     - "instrumentation" # Filters to the analytics instrumentation group
     - "\n" # Accept analytics:monitor:analytics_instrumentation
+    - " \n" # Select product category
     - "1\n" # Select: [free, premium, ultimate]
     - "y\n" # Create file
     - "4\n" # Exit
@@ -248,6 +258,7 @@
     - "https://gitlab.com/gitlab-org/gitlab/-/merge_requests/143433\n" # Submit MR URL
     - "instrumentation" # Filters to the analytics instrumentation group
     - "\n" # Accept analytics:monitor:analytics_instrumentation
+    - " \n" # Select product category
     - "1\n" # Select: [free, premium, ultimate]
     - "y\n" # Create file
     - "1\n" # Create another event
@@ -258,6 +269,7 @@
     - "\n" # Skip MR URL
     - "instrumentation" # Filters to the analytics instrumentation group
     - "\n" # Accept analytics:monitor:analytics_instrumentation
+    - " \n" # Select product category
     - "2\n" # Select [premium, ultimate]
     - "y\n" # Create file
     - "4\n" # Exit
@@ -288,6 +300,7 @@
     - "\n" # Skip MR URL
     - "instrumentation" # Filters to the analytics instrumentation group
     - "\n" # Accept analytics:monitor:analytics_instrumentation
+    - " \n" # Select product category
     - "1\n" # Select: [free, premium, ultimate]
     - "y\n" # Create file
     - "4\n" # Exit
