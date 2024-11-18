@@ -159,32 +159,59 @@ describe('Sidebar Todo Widget', () => {
         mergeRequestTodoSubscription,
         subscriptionHandler,
       );
-
-      createComponent({
-        propsData: { issuableType: 'merge_request' },
-        apolloProvider,
-      });
-
-      return nextTick();
     });
 
-    it('updates todo button to have a new todo when subscription receives data', async () => {
-      mockSubscription.next({
-        data: {
-          issuableTodoUpdated: {
-            __typename: 'MergeRequest',
-            id: 'gid://gitlab/MergeRequest/1',
-            currentUserTodos: {
-              nodes: [{ id: 1 }],
-            },
+    describe('realtimeIssuableTodo feature flag is enabled', () => {
+      beforeEach(() => {
+        createComponent({
+          provide: {
+            glFeatures: { realtimeIssuableTodo: true },
           },
-        },
+          propsData: { issuableType: 'merge_request' },
+          apolloProvider,
+        });
+
+        return nextTick();
       });
 
-      await nextTick();
+      it('updates todo button to have a new todo when subscription receives data', async () => {
+        mockSubscription.next({
+          data: {
+            issuableTodoUpdated: {
+              __typename: 'MergeRequest',
+              id: 'gid://gitlab/MergeRequest/1',
+              currentUserTodos: {
+                nodes: [{ id: 1 }],
+              },
+            },
+          },
+        });
 
-      expect(subscriptionHandler).toHaveBeenCalled();
-      expect(findTodoButton().props('isTodo')).toBe(true);
+        await nextTick();
+
+        expect(subscriptionHandler).toHaveBeenCalled();
+        expect(findTodoButton().props('isTodo')).toBe(true);
+      });
+    });
+
+    describe('realtimeIssuableTodo feature flag is disabled', () => {
+      beforeEach(() => {
+        createComponent({
+          provide: {
+            glFeatures: { realtimeIssuableTodo: false },
+          },
+          propsData: { issuableType: 'merge_request' },
+          apolloProvider,
+        });
+
+        return nextTick();
+      });
+
+      it('does not subscribe to more', async () => {
+        await nextTick();
+
+        expect(subscriptionHandler).not.toHaveBeenCalled();
+      });
     });
   });
 });

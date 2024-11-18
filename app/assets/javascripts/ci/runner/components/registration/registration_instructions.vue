@@ -229,9 +229,7 @@ export default {
           "
         >
           <template #link="{ content }">
-            <gl-link data-testid="how-to-install-btn" @click="onToggleDrawer()">{{
-              content
-            }}</gl-link>
+            <gl-link @click="onToggleDrawer()">{{ content }}</gl-link>
           </template>
         </gl-sprintf>
       </p>

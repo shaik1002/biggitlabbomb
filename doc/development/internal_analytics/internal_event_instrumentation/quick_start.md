@@ -572,7 +572,7 @@ you can use the `have_internal_tracking` matcher method to assert if expected da
 For example, if we need to test the below Haml,
 
 ```haml
-%div{ data: { testid: '_testid_', event_tracking: 'render', event_label: '_tracking_label_' } }
+= link_to 'Some link', some_path, data: { event_tracking: 'some_event', event_label: 'some_label' }
 ```
 
 Below would be the test case for above haml.
@@ -583,7 +583,7 @@ Below would be the test case for above haml.
   it 'assigns the tracking items' do
     render
 
-    expect(rendered).to have_internal_tracking(event: 'render', label: '_tracking_label_', testid: '_testid_')
+    expect(rendered).to have_internal_tracking('some_event').with(additional_properties: { label: '_tracking_label_' }).on_click(some_path)
   end
 ```
 
@@ -593,7 +593,7 @@ Below would be the test case for above haml.
   it 'assigns the tracking items' do
     render_inline(component)
 
-    expect(page).to have_internal_tracking(event: 'render', label: '_tracking_label_', testid: '_testid_')
+    expect(page).to have_internal_tracking('some_event').with(additional_properties: { label: '_tracking_label_' }).on_click(some_path)
   end
 ```
 

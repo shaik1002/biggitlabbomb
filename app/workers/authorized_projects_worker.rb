@@ -3,7 +3,7 @@
 class AuthorizedProjectsWorker
   include ApplicationWorker
 
-  data_consistency :always # rubocop:disable SidekiqLoadBalancing/WorkerDataConsistency -- will change to sticky with feature-flag
+  data_consistency :sticky
 
   sidekiq_options retry: 3
 

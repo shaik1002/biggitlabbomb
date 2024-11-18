@@ -22,6 +22,7 @@ import {
   WIDGET_TYPE_HIERARCHY,
   WIDGET_TYPE_PARTICIPANTS,
   WIDGET_TYPE_PROGRESS,
+  WIDGET_TYPE_ROLLEDUP_DATES,
   WIDGET_TYPE_START_AND_DUE_DATE,
   WIDGET_TYPE_TIME_TRACKING,
   WIDGET_TYPE_LABELS,
@@ -303,6 +304,7 @@ export const setNewWorkItemCache = async (
     WIDGET_TYPE_ASSIGNEES,
     WIDGET_TYPE_LABELS,
     WIDGET_TYPE_WEIGHT,
+    WIDGET_TYPE_ROLLEDUP_DATES,
     WIDGET_TYPE_MILESTONE,
     WIDGET_TYPE_ITERATION,
     WIDGET_TYPE_START_AND_DUE_DATE,
@@ -409,6 +411,19 @@ export const setNewWorkItemCache = async (
         });
       }
 
+      if (widgetName === WIDGET_TYPE_ROLLEDUP_DATES) {
+        widgets.push({
+          type: 'ROLLEDUP_DATES',
+          dueDate: null,
+          dueDateFixed: null,
+          dueDateIsFixed: null,
+          startDate: null,
+          startDateFixed: null,
+          startDateIsFixed: null,
+          __typename: 'WorkItemWidgetRolledupDates',
+        });
+      }
+
       if (widgetName === WIDGET_TYPE_MILESTONE) {
         widgets.push({
           type: 'MILESTONE',
@@ -430,8 +445,6 @@ export const setNewWorkItemCache = async (
           type: 'START_AND_DUE_DATE',
           dueDate: null,
           startDate: null,
-          isFixed: false,
-          rollUp: false,
           __typename: 'WorkItemWidgetStartAndDueDate',
         });
       }

@@ -62,7 +62,7 @@ module Projects
     # Check https://gitlab.com/gitlab-org/gitlab-foss/issues/38418 description.
 
     def self.query(projects, public_only: true)
-      open_issues = Issue.opened.without_hidden
+      open_issues = Issue.opened
 
       if public_only
         open_issues.public_only.where(project: projects)

@@ -3,7 +3,7 @@
 .new_project,
 .edit-project,
 .import-project {
-  .form-text {
+  .form-text.text-muted {
     margin-bottom: 10px;
   }
 
@@ -286,7 +286,7 @@
     vertical-align: top;
     padding-top: $gl-spacing-scale-4;
     padding-bottom: $gl-spacing-scale-4;
-    @apply gl-border-b gl-border-b-subtle;
+    border-bottom: 1px solid var(--gray-50, $gray-50);
   }
 
   .project-row:last-of-type {
@@ -302,7 +302,7 @@
       .stats {
         float: right;
         line-height: $list-text-height;
-        @apply gl-text-subtle;
+        color: $gl-text-color-secondary;
 
         @include media-breakpoint-down(xs) {
           padding-top: $gl-padding-6;

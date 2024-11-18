@@ -14,4 +14,3 @@ allow_cross_foreign_keys:
 - gitlab_main_clusterwide
 sharding_key:
   project_id: projects
-table_size: over_limit

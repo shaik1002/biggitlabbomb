@@ -41,7 +41,9 @@ To configure your GitLab instance to access the AI gateway:
 
    ```ruby
    gitlab_rails['env'] = {
-     'AI_GATEWAY_URL' => '<path_to_your_ai_gateway>:<port>'
+   'GITLAB_LICENSE_MODE' => 'production',
+   'CUSTOMER_PORTAL_URL' => 'https://customers.gitlab.com',
+   'AI_GATEWAY_URL' => '<path_to_your_ai_gateway>:<port>'
    }
    ```
 

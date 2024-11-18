@@ -1,6 +1,7 @@
 ---
 # Cop supports --autocorrect.
 Style/SuperArguments:
+  Details: grace period
   Exclude:
     - 'app/finders/merge_requests_finder.rb'
     - 'app/finders/packages/composer/packages_finder.rb'

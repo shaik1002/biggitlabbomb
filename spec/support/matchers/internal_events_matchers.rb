@@ -14,7 +14,7 @@
 #   Example:
 #            expect { subject }
 #              .to trigger_internal_events('web_ide_viewed')
-#              .with(user: user, project: project, namespace: namepsace)
+#              .with(user: user, project: project, namespace: namespace)
 #
 # -- #increment_usage_metrics -------
 #       Use: Asserts that one or more usage metric was incremented by the right value.
@@ -96,6 +96,10 @@ end
 RSpec::Matchers.define :trigger_internal_events do |*event_names|
   include InternalEventsMatchHelpers
 
+  def supports_value_expectations?
+    true
+  end
+
   description { "trigger the internal events: #{event_names.join(', ')}" }
 
   failure_message { @failure_message }
@@ -117,13 +121,83 @@ RSpec::Matchers.define :trigger_internal_events do |*event_names|
     end
   end
 
-  match do |proc|
-    @event_names = event_names.flatten
-    @properties ||= {}
-    @chained_methods ||= [[:once]]
+  # Accepts same args as `Capybara::Node::Finders#find`
+  # See https://www.rubydoc.info/gems/capybara/Capybara/Node/Finders#find-instance_method
+  chain :on_click do |selector|
+    @on_load = false
+    @data_attribute_target = selector
+  end
 
+  chain :on_load do
+    @on_load = true
+    @data_attribute_target = nil
+  end
+
+  match do |input|
+    setup_match_context(event_names)
     check_if_params_provided!(:events, @event_names)
     check_if_events_exist!(@event_names)
+    handle_input(input)
+  end
+
+  match_when_negated do |input|
+    setup_match_context(event_names)
+    check_if_events_exist!(@event_names)
+    handle_input(input, negate: true)
+  end
+
+  private
+
+  def setup_match_context(event_names)
+    @event_names = event_names.flatten
+    @properties ||= {}
+  end
+
+  def handle_input(input, negate: false)
+    result = case input
+             when Proc
+               negate ? expect_no_events_to_fire(input) : expect_events_to_fire(input)
+             when Capybara::Node::Simple
+               expect_data_attributes(input, negate: negate)
+             when String
+               expect_data_attributes(input, matcher: :have, negate: negate)
+             else
+               raise_argument_type_error!
+             end
+
+    negate ? true : result
+  end
+
+  def expect_no_events_to_fire(proc)
+    # rubocop:disable RSpec/ExpectGitlabTracking -- Supersedes the #expect_snowplow_event helper for internal events
+    allow(Gitlab::Tracking).to receive(:event).and_call_original
+    allow(Gitlab::InternalEvents).to receive(:track_event).and_call_original
+    # rubocop:enable RSpec/ExpectGitlabTracking
+
+    collect_expectations do |event_name|
+      [
+        expect_no_snowplow_event(event_name),
+        expect_no_internal_event(event_name)
+      ]
+    end
+
+    proc.call
+
+    verify_expectations
+
+    true
+  rescue RSpec::Mocks::MockExpectationError => e
+    @failure_message = e.message
+    false
+  ensure
+    # prevent expectations from being satisfied outside of the block scope
+    unstub_expectations
+  end
+
+  def expect_events_to_fire(proc)
+    check_block_input!
+
+    @chained_methods ||= [[:once]]
 
     allow(Gitlab::InternalEvents).to receive(:track_event).and_call_original
     allow(Gitlab::Redis::HLL).to receive(:add).and_call_original
@@ -149,37 +223,76 @@ RSpec::Matchers.define :trigger_internal_events do |*event_names|
     unstub_expectations
   end
 
-  match_when_negated do |proc|
-    @event_names = event_names.flatten
+  # Keep this in sync with the constants in app/assets/javascripts/tracking/constants.js
+  def expect_data_attributes(node, matcher: :match, negate: false)
+    check_node_input!
 
-    check_if_events_exist!(@event_names)
+    element = find_target_element(node)
 
-    # rubocop:disable RSpec/ExpectGitlabTracking -- Supercedes the #expect_snowplow_event helper for internal events
-    allow(Gitlab::Tracking).to receive(:event).and_call_original
-    allow(Gitlab::InternalEvents).to receive(:track_event).and_call_original
-    # rubocop:enable RSpec/ExpectGitlabTracking
-
-    collect_expectations do |event_name|
-      [
-        expect_no_snowplow_event(event_name),
-        expect_no_internal_event(event_name)
-      ]
-    end
-
-    proc.call
-
-    verify_expectations
+    verify_tracking_attributes(element, matcher, negate: negate)
 
     true
-  rescue RSpec::Mocks::MockExpectationError => e
+  rescue StandardError => e
     @failure_message = e.message
     false
-  ensure
-    # prevent expectations from being satisfied outside of the block scope
-    unstub_expectations
   end
 
-  private
+  def find_target_element(node)
+    @data_attribute_target.present? ? node.find("[href='#{@data_attribute_target}']") : node
+  end
+
+  def expect_to_have_attribute(element, selector, matcher)
+    verify_matcher_support!(matcher)
+
+    expect(element).to send(:"#{matcher}_css", selector)
+  end
+
+  def expect_not_to_have_attribute(element, selector, matcher)
+    verify_matcher_support!(matcher)
+
+    expect(element).not_to send(:"#{matcher}_css", selector)
+  end
+
+  def verify_tracking_attributes(element, matcher, negate: false)
+    verify_load_tracking(element, matcher, negate) if @on_load
+    verify_event_tracking(element, matcher, negate)
+    verify_property_tracking(element, matcher, negate)
+  end
+
+  def verify_load_tracking(element, matcher, negate)
+    verify_attribute(element, build_tracking_selector('load', 'true'), matcher, negate)
+  end
+
+  def verify_event_tracking(element, matcher, negate)
+    @event_names.each do |event_name|
+      verify_attribute(element, build_tracking_selector('tracking', event_name), matcher, negate)
+    end
+  end
+
+  def verify_property_tracking(element, matcher, negate)
+    @additional_properties.slice(:label, :property, :value).compact.each do |(property, value)|
+      verify_attribute(element, build_tracking_selector(property, value), matcher, negate)
+    end
+  end
+
+  def build_tracking_selector(attribute, value)
+    if attribute == 'load'
+      '[data-event-tracking-load="true"]'
+    else
+      "[data-event-#{attribute}='#{value}']"
+    end
+  end
+
+  def verify_attribute(element, selector, matcher, negate)
+    method = negate ? :expect_not_to_have_attribute : :expect_to_have_attribute
+    send(method, element, selector, matcher)
+  end
+
+  def verify_matcher_support!(matcher)
+    return if %i[have match].include?(matcher)
+
+    raise ArgumentError, "Unsupported matcher: #{matcher}"
+  end
 
   def receive_expected_count_of(message)
     apply_chain_methods(receive(message), @chained_methods)
@@ -302,7 +415,28 @@ RSpec::Matchers.define :trigger_internal_events do |*event_names|
       doubled_module.expectations.pop
     end
   end
+
+  def check_block_input!
+    return unless instance_variable_defined?(:@on_load)
+
+    raise ArgumentError, "Chain methods :on_click, :on_load are only available for Capybara::Node::Simple type " \
+      "arguments"
+  end
+
+  def check_node_input!
+    return unless @chained_methods
+
+    raise ArgumentError, "Chain methods #{@chained_methods.map(&:first).join(',')} are only available for " \
+      "block arguments"
+  end
+
+  def raise_argument_type_error!
+    raise ArgumentError, "#{name} matcher must assert on either a block (in most cases) or a " \
+      "Capybara::Node::Simple (for ViewComponents and View specs)"
+  end
 end
+
+RSpec::Matchers.alias_matcher :have_internal_tracking, :trigger_internal_events
 
 RSpec::Matchers.define :increment_usage_metrics do |*key_paths|
   include InternalEventsMatchHelpers

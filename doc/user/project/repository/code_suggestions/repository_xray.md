@@ -9,7 +9,7 @@ description: "Repository X-Ray gives Code Suggestions more insight into your pro
 
 DETAILS:
 **Tier:** Premium with GitLab Duo Pro, Ultimate with GitLab Duo Pro or Enterprise - [Start a trial](https://about.gitlab.com/solutions/gitlab-duo-pro/sales/?type=free-trial)
-**Offering:** GitLab.com, Self-managed, GitLab Dedicated
+**Offering:** GitLab.com, Self-managed
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/12060) in GitLab 16.7.
 > - Changed to require GitLab Duo add-on in GitLab 17.6 and later.
@@ -40,9 +40,16 @@ When a code generation request is made, a maximum of 300 libraries from the pars
 ## Enable Repository X-Ray
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/476180) in GitLab 17.4 [with a flag](../../../feature_flags.md) named `ai_enable_internal_repository_xray_service`. Disabled by default.
-> - [Generally available](https://gitlab.com/gitlab-org/gitlab/-/issues/483928) in GitLab 17.6. Feature flag `ai_enable_internal_repository_xray_service` removed.
 
-The Repository X-Ray service is automatically enabled if your project has access to [GitLab Duo Code Suggestions](index.md).
+FLAG:
+The availability of this feature is controlled by a feature flag.
+For more information, see the history.
+This feature is available for testing, but not ready for production use.
+
+The Repository X-Ray service is automatically enabled if:
+
+- You have enabled the `ai_enable_internal_repository_xray_service` feature flag.
+- Your project has access to [GitLab Duo Code Suggestions](index.md).
 
 ## Supported languages and dependency managers
 

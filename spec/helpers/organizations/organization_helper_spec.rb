@@ -342,27 +342,27 @@ RSpec.describe Organizations::OrganizationHelper, feature_category: :cell do
           'organization_activity_path' => '/-/organizations/default/activity.json',
           'organization_activity_event_types' => array_including(
             {
-              'title' => 'Comment',
+              'title' => 'Comments',
               'value' => EventFilter::COMMENTS
             },
             {
-              'title' => 'Design',
+              'title' => 'Designs',
               'value' => EventFilter::DESIGNS
             },
             {
-              'title' => 'Issue',
+              'title' => 'Issue events',
               'value' => EventFilter::ISSUE
             },
             {
-              'title' => 'Merge',
+              'title' => 'Merge events',
               'value' => EventFilter::MERGED
             },
             {
-              'title' => 'Repository',
+              'title' => 'Push events',
               'value' => EventFilter::PUSH
             },
             {
-              'title' => 'Membership',
+              'title' => 'Team',
               'value' => EventFilter::TEAM
             },
             {

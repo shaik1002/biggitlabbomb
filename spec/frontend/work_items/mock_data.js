@@ -1168,6 +1168,7 @@ export const workItemResponseFactory = ({
   allowsMultipleAssignees = true,
   assigneesWidgetPresent = true,
   datesWidgetPresent = true,
+  rolledupDatesWidgetPresent = false,
   weightWidgetPresent = true,
   timeTrackingWidgetPresent = true,
   participantsWidgetPresent = true,
@@ -1285,8 +1286,18 @@ export const workItemResponseFactory = ({
               type: 'START_AND_DUE_DATE',
               dueDate: '2022-12-31',
               startDate: '2022-01-01',
-              isFixed: false,
-              rollUp: true,
+            }
+          : { type: 'MOCK TYPE' },
+        rolledupDatesWidgetPresent
+          ? {
+              __typename: 'WorkItemWidgetRolledupDates',
+              type: 'ROLLEDUP_DATES',
+              dueDate: null,
+              dueDateFixed: null,
+              dueDateIsFixed: false,
+              startDate: null,
+              startDateFixed: null,
+              startDateIsFixed: false,
             }
           : { type: 'MOCK TYPE' },
         weightWidgetPresent
@@ -5263,8 +5274,6 @@ export const createWorkItemQueryResponse = {
             type: 'START_AND_DUE_DATE',
             dueDate: null,
             startDate: null,
-            isFixed: null,
-            rollUp: null,
             __typename: 'WorkItemWidgetStartAndDueDate',
           },
           {
@@ -5317,6 +5326,16 @@ export const createWorkItemQueryResponse = {
             color: '#b7a0fd',
             textColor: '#1F1E24',
             __typename: 'WorkItemWidgetColor',
+          },
+          {
+            type: 'ROLLEDUP_DATES',
+            dueDate: null,
+            dueDateFixed: null,
+            dueDateIsFixed: null,
+            startDate: null,
+            startDateFixed: null,
+            startDateIsFixed: null,
+            __typename: 'WorkItemWidgetRolledupDates',
           },
           {
             type: 'PARTICIPANTS',

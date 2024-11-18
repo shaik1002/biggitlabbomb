@@ -102,8 +102,12 @@ RSpec.describe 'Internal Events matchers', :clean_gitlab_redis_shared_state, fea
     end
 
     context 'with additional properties' do
+      let(:extra_track_params) { {} }
       let(:additional_properties) { { label: 'label1', value: 123, property: 'property1' } }
-      let(:tracked_params) { { user: user_1, namespace: group_1, additional_properties: additional_properties } }
+      let(:tracked_params) do
+        { user: user_1, namespace: group_1, additional_properties: additional_properties.merge(extra_track_params) }
+      end
+
       let(:expected_params) { tracked_params }
 
       subject(:assertion) do
@@ -126,7 +130,7 @@ RSpec.describe 'Internal Events matchers', :clean_gitlab_redis_shared_state, fea
       end
 
       context 'with extra attributes' do
-        let(:tracked_params) { super().deep_merge(additional_properties: { other_property: 'other_prop' }) }
+        let(:extra_track_params) { { other_property: 'other_prop' } }
 
         it 'accepts correct extra attributes' do
           assertion

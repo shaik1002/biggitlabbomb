@@ -18,8 +18,7 @@ RSpec.describe 'getting project information', feature_category: :groups_and_proj
           'kas' => {
             'enabled' => Gitlab::Kas.enabled?,
             'version' => expected_kas_version,
-            'externalUrl' => expected_kas_external_url,
-            'externalK8sProxyUrl' => expected_kas_external_k8s_proxy_url
+            'externalUrl' => expected_kas_external_url
           },
           'enterprise' => Gitlab.ee?
         }
@@ -29,7 +28,6 @@ RSpec.describe 'getting project information', feature_category: :groups_and_proj
     context 'kas is enabled' do
       let(:expected_kas_version) { Gitlab::Kas.version }
       let(:expected_kas_external_url) { Gitlab::Kas.external_url }
-      let(:expected_kas_external_k8s_proxy_url) { Gitlab::Kas.tunnel_url }
 
       before do
         allow(Gitlab::Kas).to receive(:enabled?).and_return(true)
@@ -45,7 +43,6 @@ RSpec.describe 'getting project information', feature_category: :groups_and_proj
     context 'kas is disabled' do
       let(:expected_kas_version) { nil }
       let(:expected_kas_external_url) { nil }
-      let(:expected_kas_external_k8s_proxy_url) { nil }
 
       before do
         allow(Gitlab::Kas).to receive(:enabled?).and_return(false)

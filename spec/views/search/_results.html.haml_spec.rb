@@ -90,7 +90,8 @@ RSpec.describe 'search/_results', feature_category: :global_search do
           it 'renders the click text event tracking attributes' do
             render
 
-            expect(rendered).to have_internal_tracking(event: 'click_search_result', label: scope)
+            expect(rendered)
+              .to have_internal_tracking('click_search_result').with(additional_properties: { label: scope })
           end
         end
 
@@ -98,7 +99,7 @@ RSpec.describe 'search/_results', feature_category: :global_search do
           it 'does not render the click text event tracking attributes' do
             render
 
-            expect(rendered).not_to have_internal_tracking(event: 'click_search_result', label: scope)
+            expect(rendered).not_to have_internal_tracking('click_search_result')
           end
         end
       end
@@ -134,7 +135,8 @@ RSpec.describe 'search/_results', feature_category: :global_search do
           it 'renders the click text event tracking attributes' do
             render
 
-            expect(rendered).to have_internal_tracking(event: 'click_search_result', label: scope)
+            expect(rendered)
+              .to have_internal_tracking('click_search_result').with(additional_properties: { label: scope })
           end
         end
 
@@ -142,7 +144,7 @@ RSpec.describe 'search/_results', feature_category: :global_search do
           it 'does not render the click text event tracking attributes' do
             render
 
-            expect(rendered).not_to have_internal_tracking(event: 'click_search_result', label: scope)
+            expect(rendered).not_to have_internal_tracking('click_search_result')
           end
         end
 

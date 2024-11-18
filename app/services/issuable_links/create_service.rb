@@ -116,7 +116,7 @@ module IssuableLinks
     end
 
     def references(extractor)
-      extractor.issues + extractor.work_items
+      extractor.issues
     end
 
     def extractor_context

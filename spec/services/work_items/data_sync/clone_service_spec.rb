@@ -10,7 +10,8 @@ RSpec.describe WorkItems::DataSync::CloneService, feature_category: :team_planni
   let_it_be(:source_project_member) { create(:user, reporter_of: project) }
   let_it_be(:target_project_member) { create(:user, reporter_of: target_project) }
   let_it_be(:projects_member) { create(:user, reporter_of: [project, target_project]) }
-  let_it_be_with_reload(:target_namespace) { target_project.project_namespace }
+
+  let(:target_namespace) { target_project.project_namespace.reload }
 
   let(:service) do
     described_class.new(
@@ -58,7 +59,7 @@ RSpec.describe WorkItems::DataSync::CloneService, feature_category: :team_planni
     let(:current_user) { projects_member }
 
     context 'when cloning project level work item to a group' do
-      let_it_be_with_reload(:target_namespace) { group }
+      let(:target_namespace) { group }
 
       it 'does not raise error' do
         expect { service.execute }.not_to raise_error

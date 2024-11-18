@@ -35,10 +35,15 @@ RSpec.describe 'Work item', :js, feature_category: :team_planning do
       visit work_items_path
     end
 
-    it 'shows breadcrumb links', :aggregate_failures do
+    it 'shows project issues link in breadcrumbs' do
       within_testid('breadcrumb-links') do
         expect(page).to have_link(project.name, href: project_path(project))
         expect(page).to have_link('Issues', href: project_issues_path(project))
+      end
+    end
+
+    it 'uses IID path in breadcrumbs' do
+      within_testid('breadcrumb-links') do
         expect(find('nav:last-of-type li:last-of-type')).to have_link("##{work_item.iid}", href: work_items_path)
       end
     end
@@ -79,19 +84,19 @@ RSpec.describe 'Work item', :js, feature_category: :team_planning do
     end
 
     it_behaves_like 'work items title'
-    it_behaves_like 'work items description'
-    it_behaves_like 'work items award emoji'
-    it_behaves_like 'work items comments', :issue
     it_behaves_like 'work items toggle status button'
-
-    it_behaves_like 'work items todos'
-    it_behaves_like 'work items lock discussion'
-    it_behaves_like 'work items confidentiality'
-    it_behaves_like 'work items notifications'
-
     it_behaves_like 'work items assignees'
     it_behaves_like 'work items labels'
+    it_behaves_like 'work items comments', :issue
+    it_behaves_like 'work items description'
     it_behaves_like 'work items milestone'
+
+    context 'with quarantine context', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/486486' do
+      it_behaves_like 'work items notifications'
+    end
+
+    it_behaves_like 'work items todos'
+    it_behaves_like 'work items award emoji'
     it_behaves_like 'work items time tracking'
     it_behaves_like 'work items crm contacts'
   end
@@ -119,7 +124,9 @@ RSpec.describe 'Work item', :js, feature_category: :team_planning do
   context 'when item is a task' do
     before do
       project.add_developer(user)
+
       sign_in(user)
+
       visit project_work_item_path(project, task.iid)
     end
 

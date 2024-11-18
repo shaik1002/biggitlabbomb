@@ -30,11 +30,7 @@ To enable GitLab Language Server debug logs:
 1. Select **Apply**.
 1. Below **Enable GitLab Language Server**, select **Restart Language Server**.
 
-The debug logs are available in the `idea.log` log file. To view this file, either:
-
-- In your IDE, go to **Help > Show Log in Finder**.
-- Go to the directory `/Users/<user>/Library/Logs/JetBrains/IntelliJIdea<build_version>`, replacing
-  `<user>` and `<build_version>` with the appropriate values.
+The debug logs are available in the `idea.log` log file.
 
 ## Use an HTTP proxy
 
