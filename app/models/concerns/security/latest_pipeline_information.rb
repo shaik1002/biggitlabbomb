@@ -12,9 +12,15 @@ module Security
       strong_memoize("latest_builds_reports_#{only_successful_builds}") do
         builds = latest_security_builds
         builds = builds.select { |build| build.status == 'success' } if only_successful_builds
-        builds.flat_map do |build|
+        reports = builds.flat_map do |build|
           build.options[:artifacts][:reports].keys
         end
+
+        reports.delete(:sast)
+        reports << :sast if builds.map(&:name).any?('sast')
+        reports << :sast_iac if builds.map(&:name).any? { |n| n.include?('iac') }
+        reports << :sast_advanced if builds.map(&:name).any? { |n| n.include?('advanced-sast') }
+        reports
       end
     end
 
