@@ -605,6 +605,22 @@ describe('IssuableItem', () => {
       expect(timestampEl.text()).toBe(wrapper.vm.formattedTimestamp);
     });
 
+    it('renders issuable health status via slot', () => {
+      wrapper = createComponent({
+        issuableSymbol: '#',
+        issuable: { ...mockIssuable, healthStatus: 'onTrack' },
+        slots: {
+          'health-status': `
+            <b class="js-reference">${mockIssuable.healthStatus}</b>
+          `,
+        },
+      });
+      const referenceEl = wrapper.find('.js-reference');
+
+      expect(referenceEl.exists()).toBe(true);
+      expect(referenceEl.text()).toBe(`${mockIssuable.healthStatus}`);
+    });
+
     describe('when issuable is closed', () => {
       it('renders issuable card with a closed style', () => {
         wrapper = createComponent({
