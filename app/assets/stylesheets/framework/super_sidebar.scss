@@ -25,7 +25,7 @@ $command-palette-spacing: px-to-rem(14px);
   --super-sidebar-bg: var(--gl-background-color-subtle);
   --super-sidebar-border-color: var(--gl-color-alpha-dark-8);
   --super-sidebar-context-header-color: var(--gl-text-color-default);
-  --super-sidebar-accent-color: #{$blue-500};
+  --super-sidebar-accent-color: var(--gl-color-blue-500);
   --super-sidebar-user-bar-bg: var(--gl-color-alpha-dark-4);
 
   --super-sidebar-user-bar-button-bg: var(--gl-background-color-subtle);
@@ -39,20 +39,28 @@ $command-palette-spacing: px-to-rem(14px);
   --super-sidebar-nav-item-active-bg: var(--gl-color-alpha-dark-16);
   --super-sidebar-nav-item-current-bg: var(--gl-color-alpha-dark-8);
 
+  --super-sidebar-scrim-border-color: var(--gl-color-alpha-dark-8);
+
   --super-sidebar-hr-mix-blend-mode: multiply;
 
   .gl-dark & {
     --super-sidebar-border-color: var(--gl-border-color-section);
-    --super-sidebar-user-bar-bg: var(--gl-color-alpha-light-4);
+    --super-sidebar-user-bar-bg: var(--gl-background-color-subtle);
+    --super-sidebar-accent-color: var(--gl-color-blue-300);
 
-    --super-sidebar-user-bar-button-bg: var(--gl-background-color-default);
-    --super-sidebar-user-bar-button-border-color: var(--gl-color-alpha-light-8);
+    --super-sidebar-user-bar-button-bg: var(--gl-color-alpha-light-16);
+    --super-sidebar-user-bar-button-border-color: var(--gl-color-alpha-0);
     --super-sidebar-user-bar-button-hover-bg: var(--gl-color-alpha-light-16);
     --super-sidebar-user-bar-button-active-bg: var(--gl-color-alpha-light-24);
 
     --super-sidebar-nav-item-hover-bg: var(--gl-color-alpha-light-8);
     --super-sidebar-nav-item-active-bg: var(--gl-color-alpha-light-16);
-    --super-sidebar-nav-item-current-bg: var(--gl-color-alpha-light-8);
+    --super-sidebar-nav-item-current-bg: var(--gl-color-alpha-light-16);
+
+    --super-sidebar-badge-color: var(--gl-background-color-subtle);
+    --super-sidebar-badge-bg: var(--gl-color-neutral-400);
+
+    --super-sidebar-scrim-border-color: var(--gl-color-alpha-light-8);
 
     --super-sidebar-hr-mix-blend-mode: screen;
   }
@@ -73,10 +81,13 @@ $command-palette-spacing: px-to-rem(14px);
 
     --super-sidebar-user-bar-button-bg: var(--gl-color-alpha-light-16);
     --super-sidebar-user-bar-button-color: #{$user-bar-button-color};
-    --super-sidebar-user-bar-button-border-color: var(--gl-color-alpha-light-16);
+    --super-sidebar-user-bar-button-border-color: var(--gl-color-alpha-0);
     --super-sidebar-user-bar-button-hover-bg: var(--gl-color-alpha-light-24);
     --super-sidebar-user-bar-button-hover-color: #{$user-bar-button-color};
     --super-sidebar-user-bar-button-active-bg: var(--gl-color-alpha-light-36);
+
+    --super-sidebar-badge-color: #{$background};
+    --super-sidebar-badge-bg: var(--super-sidebar-context-header-color);
   }
 }
 
@@ -91,11 +102,11 @@ $command-palette-spacing: px-to-rem(14px);
 
   &.gl-dark {
     @include super-sidebar-theme(
-      $background: var(--gl-background-color-subtle),
+      $background: var(--gl-color-theme-blue-900),
       $user-bar-background: var(--gl-color-theme-blue-900),
       $user-bar-button-color: var(--gl-color-theme-blue-50),
       $context-header: var(--gl-color-theme-blue-300),
-      $accent-color: var(--gl-color-theme-blue-500),
+      $accent-color: var(--gl-color-theme-blue-300),
     );
   }
 }
@@ -111,11 +122,11 @@ $command-palette-spacing: px-to-rem(14px);
 
   &.gl-dark {
     @include super-sidebar-theme(
-      $background: var(--gl-background-color-subtle),
-      $user-bar-background: var(--gl-color-neutral-900),
+      $background: var(--gl-color-neutral-800),
+      $user-bar-background: var(--gl-color-neutral-800),
       $user-bar-button-color: var(--gl-color-neutral-50),
       $context-header: var(--gl-color-neutral-300),
-      $accent-color: var(--gl-color-neutral-500),
+      $accent-color: var(--gl-color-neutral-300),
     );
   }
 }
@@ -131,11 +142,11 @@ $command-palette-spacing: px-to-rem(14px);
 
   &.gl-dark {
     @include super-sidebar-theme(
-      $background: var(--gl-background-color-subtle),
+      $background: var(--gl-color-theme-green-900),
       $user-bar-background: var(--gl-color-theme-green-900),
       $user-bar-button-color: var(--gl-color-theme-green-50),
       $context-header: var(--gl-color-theme-green-300),
-      $accent-color: var(--gl-color-theme-green-500),
+      $accent-color: var(--gl-color-theme-green-300),
     );
   }
 }
@@ -151,11 +162,11 @@ $command-palette-spacing: px-to-rem(14px);
 
   &.gl-dark {
     @include super-sidebar-theme(
-      $background: var(--gl-background-color-subtle),
+      $background: var(--gl-color-theme-indigo-900),
       $user-bar-background: var(--gl-color-theme-indigo-900),
       $user-bar-button-color: var(--gl-color-theme-indigo-50),
       $context-header: var(--gl-color-theme-indigo-300),
-      $accent-color: var(--gl-color-theme-indigo-500),
+      $accent-color: var(--gl-color-theme-indigo-300),
     );
   }
 }
@@ -171,11 +182,11 @@ $command-palette-spacing: px-to-rem(14px);
 
   &.gl-dark {
     @include super-sidebar-theme(
-      $background: var(--gl-background-color-subtle),
-      $user-bar-background: var(--gl-color-theme-light-blue-800),
+      $background: var(--gl-color-theme-light-blue-950),
+      $user-bar-background: var(--gl-color-theme-light-blue-950),
       $user-bar-button-color: var(--gl-color-theme-light-blue-50),
       $context-header: var(--gl-color-theme-light-blue-300),
-      $accent-color: var(--gl-color-theme-light-blue-500),
+      $accent-color: var(--gl-color-theme-light-blue-300),
     );
   }
 }
@@ -191,11 +202,11 @@ $command-palette-spacing: px-to-rem(14px);
 
   &.gl-dark {
     @include super-sidebar-theme(
-      $background: var(--gl-background-color-subtle),
+      $background: var(--gl-color-theme-green-800),
       $user-bar-background: var(--gl-color-theme-green-800),
       $user-bar-button-color: var(--gl-color-theme-green-50),
       $context-header: var(--gl-color-theme-green-300),
-      $accent-color: var(--gl-color-theme-green-500),
+      $accent-color: var(--gl-color-theme-green-300),
     );
   }
 }
@@ -211,11 +222,11 @@ $command-palette-spacing: px-to-rem(14px);
 
   &.gl-dark {
     @include super-sidebar-theme(
-      $background: var(--gl-background-color-subtle),
-      $user-bar-background: var(--gl-color-theme-indigo-700),
+      $background: var(--gl-color-theme-indigo-800),
+      $user-bar-background: var(--gl-color-theme-indigo-800),
       $user-bar-button-color: var(--gl-color-theme-indigo-50),
       $context-header: var(--gl-color-theme-indigo-300),
-      $accent-color: var(--gl-color-theme-indigo-500),
+      $accent-color: var(--gl-color-theme-indigo-300),
     );
   }
 }
@@ -231,11 +242,11 @@ $command-palette-spacing: px-to-rem(14px);
 
   &.gl-dark {
     @include super-sidebar-theme(
-      $background: var(--gl-background-color-subtle),
-      $user-bar-background: var(--gl-color-theme-light-red-700),
+      $background: var(--gl-color-theme-light-red-900),
+      $user-bar-background: var(--gl-color-theme-light-red-900),
       $user-bar-button-color: var(--gl-color-theme-light-red-50),
       $context-header: var(--gl-color-theme-light-red-300),
-      $accent-color: var(--gl-color-theme-light-red-500),
+      $accent-color: var(--gl-color-theme-light-red-300),
     );
   }
 }
@@ -251,11 +262,11 @@ $command-palette-spacing: px-to-rem(14px);
 
   &.gl-dark {
     @include super-sidebar-theme(
-      $background: var(--gl-background-color-subtle),
+      $background: var(--gl-color-theme-red-900),
       $user-bar-background: var(--gl-color-theme-red-900),
       $user-bar-button-color: var(--gl-color-theme-red-50),
       $context-header: var(--gl-color-theme-red-300),
-      $accent-color: var(--gl-color-theme-red-500),
+      $accent-color: var(--gl-color-theme-red-300),
     );
   }
 }
@@ -288,10 +299,7 @@ $command-palette-spacing: px-to-rem(14px);
 
   .user-bar {
     background-color: var(--super-sidebar-user-bar-bg);
-
-    @media (forced-colors: active) {
-      border-bottom: 1px solid;
-    }
+    border-bottom: 1px solid var(--gl-color-alpha-light-16);
 
     .organization-switcher-button {
       &:not(:active),
@@ -365,6 +373,10 @@ $command-palette-spacing: px-to-rem(14px);
     }
   }
 
+  .gl-scroll-scrim {
+    border-color: var(--super-sidebar-scrim-border-color);
+  }
+
   .super-sidebar-nav-item {
     &:hover,
     &:focus,
@@ -416,6 +428,16 @@ $command-palette-spacing: px-to-rem(14px);
   #trial-status-sidebar-widget:hover {
     text-decoration: none;
     color: var(--gl-color-neutral-0);
+  }
+
+  /**
+   * Badges in Darkmode
+   */
+   .gl-badge {
+    .gl-dark & {
+      color: var(--super-sidebar-badge-color);
+      background-color: var(--super-sidebar-badge-bg);
+    }
   }
 }
 
