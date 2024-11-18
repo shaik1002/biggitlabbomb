@@ -56864,9 +56864,6 @@ msgstr ""
 msgid "This resource has no comments to summarize"
 msgstr ""
 
-msgid "This resource has no inactive %{accessTokenTypePlural}."
-msgstr ""
-
 msgid "This setting can be overridden in each project."
 msgstr ""
 
