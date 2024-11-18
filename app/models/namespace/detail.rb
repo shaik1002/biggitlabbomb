@@ -19,7 +19,8 @@ class Namespace::Detail < ApplicationRecord
   # namespace details should be performed after the associated namespace is saved for the same reason.
   #
   # See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/82958/diffs#diff-content-c02244956d423e6837379548e5f9b1fa093bb289
-  def add_creator(user)
+  def add_creator(identity)
+    user = identity.is_a?(Gitlab::Auth::User) ? identity.user : identity
     update_attribute(:creator, user)
   end
 end

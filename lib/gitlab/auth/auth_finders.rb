@@ -31,7 +31,7 @@ module Gitlab
       DEPLOY_TOKEN_HEADER = 'HTTP_DEPLOY_TOKEN'
       RUNNER_TOKEN_PARAM = :token
       RUNNER_JOB_TOKEN_PARAM = :token
-      PATH_DEPENDENT_FEED_TOKEN_REGEX = /\A#{User::FEED_TOKEN_PREFIX}(\h{64})-(\d+)\z/
+      PATH_DEPENDENT_FEED_TOKEN_REGEX = /\A#{::User::FEED_TOKEN_PREFIX}(\h{64})-(\d+)\z/
 
       PARAM_TOKEN_KEYS = [
         PRIVATE_TOKEN_PARAM,
@@ -46,7 +46,9 @@ module Gitlab
 
       # Check the Rails session for valid authentication details
       def find_user_from_warden
-        current_request.env['warden']&.authenticate if verified_request?
+        return unless verified_request?
+
+        build_identity(current_request.env['warden']&.authenticate)
       end
 
       def find_user_from_static_object_token(request_format)
@@ -55,7 +57,7 @@ module Gitlab
         token = current_request.params[:token].presence || current_request.headers['X-Gitlab-Static-Object-Token'].presence
         return unless token
 
-        User.find_by_static_object_token(token.to_s) || raise(UnauthorizedError)
+        build_identity(::User.find_by_static_object_token(token.to_s)) || raise(UnauthorizedError)
       end
 
       def find_user_from_feed_token(request_format)
@@ -67,7 +69,7 @@ module Gitlab
         token = current_request.params[:feed_token].presence || current_request.params[:rss_token].presence
         return unless token
 
-        find_feed_token_user(token) || raise(UnauthorizedError)
+        build_identity(find_feed_token_user(token)) || raise(UnauthorizedError)
       end
 
       def find_user_from_bearer_token
@@ -79,9 +81,12 @@ module Gitlab
         return unless route_authentication_setting[:job_token_allowed]
 
         user = find_user_from_job_token_basic_auth if can_authenticate_job_token_basic_auth?
-        return user if user
 
-        find_user_from_job_token_query_params_or_header if can_authenticate_job_token_request?
+        return build_identity(user) if user
+
+        return unless can_authenticate_job_token_request?
+
+        build_identity(find_user_from_job_token_query_params_or_header)
       end
 
       def find_user_from_basic_auth_password
@@ -90,7 +95,7 @@ module Gitlab
         login, password = user_name_and_password(current_request)
         return if ::Gitlab::Auth::CI_JOB_USER == login
 
-        Gitlab::Auth.find_with_user_password(login.to_s, password.to_s)
+        build_identity(Gitlab::Auth.find_with_user_password(login.to_s, password.to_s))
       end
 
       def find_user_from_lfs_token
@@ -99,7 +104,9 @@ module Gitlab
         login, token = user_name_and_password(current_request)
         user = User.find_by_login(login.to_s)
 
-        user if user && Gitlab::LfsToken.new(user, nil).token_valid?(token.to_s)
+        return unless user && Gitlab::LfsToken.new(user, nil).token_valid?(token.to_s)
+
+        build_identity(user)
       end
 
       def find_user_from_personal_access_token
@@ -107,7 +114,7 @@ module Gitlab
 
         validate_and_save_access_token!
 
-        access_token&.user || raise(UnauthorizedError)
+        build_identity(access_token&.user) || raise(UnauthorizedError)
       end
 
       # We allow private access tokens with `api` scope to be used by web
@@ -123,7 +130,7 @@ module Gitlab
 
         ::PersonalAccessTokens::LastUsedService.new(access_token).execute
 
-        access_token.user || raise(UnauthorizedError)
+        build_identity(access_token.user) || raise(UnauthorizedError)
       end
 
       def find_user_from_access_token
@@ -133,7 +140,7 @@ module Gitlab
 
         ::PersonalAccessTokens::LastUsedService.new(access_token).execute
 
-        access_token.user || raise(UnauthorizedError)
+        build_identity(access_token.user, access_token.scopes) || raise(UnauthorizedError)
       end
 
       # This returns a deploy token, not a user since a deploy token does not
@@ -241,7 +248,7 @@ module Gitlab
 
         @current_authenticated_job = job # rubocop:disable Gitlab/ModuleWithInstanceVariables
 
-        job.user
+        build_identity(job.user)
       end
 
       def route_authentication_setting
@@ -306,7 +313,8 @@ module Gitlab
 
       def find_feed_token_user(token)
         token = token.to_s
-        find_user_from_path_feed_token(token) || User.find_by_feed_token(token)
+        user = find_user_from_path_feed_token(token) || User.find_by_feed_token(token)
+        build_identity(user)
       end
 
       def find_user_from_path_feed_token(token)
@@ -361,7 +369,7 @@ module Gitlab
         job = find_valid_running_job_by_token!(password.to_s)
         @current_authenticated_job = job # rubocop:disable Gitlab/ModuleWithInstanceVariables
 
-        job.user
+        build_identity(job.user, job.token_scope)
       end
 
       def parsed_oauth_token
@@ -505,13 +513,24 @@ module Gitlab
         # See https://gitlab.com/gitlab-org/gitlab/-/issues/342481
         return unless user_or_deploy_token.is_a?(::User)
 
-        user_or_deploy_token
+        build_identity(user_or_deploy_token)
       rescue ActiveRecord::RecordNotFound
         nil # invalid id used return no user
       end
 
       def dependency_proxy_request?
         Gitlab::PathRegex.dependency_proxy_route_regex.match?(current_request.path)
+      end
+
+      def build_identity(user, scope = nil)
+        return unless user
+        return user if user.is_a?(::Gitlab::Auth::User)
+
+        if ::Feature.enabled?(:api_composite_identity, user)
+          ::Gitlab::Auth::User.new(user, scope)
+        else
+          user
+        end
       end
     end
   end

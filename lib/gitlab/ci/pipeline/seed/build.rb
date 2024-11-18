@@ -72,6 +72,7 @@ module Gitlab
               .deep_merge(@cache.cache_attributes)
               .deep_merge(runner_tags)
               .deep_merge(build_execution_config_attribute)
+              .deep_merge({ token_scope: @pipeline.user.scope }) # pipeline.user is an instance of Identity::User
           end
 
           def bridge?

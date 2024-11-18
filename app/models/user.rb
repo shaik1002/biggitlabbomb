@@ -689,6 +689,14 @@ class User < ApplicationRecord
 
   strip_attributes! :name
 
+  def ==(other)
+    if other.is_a?(::Gitlab::Auth::User)
+      return other.scope.nil? && other.user == self
+    end
+
+    super
+  end
+
   def preferred_language
     read_attribute('preferred_language').presence || Gitlab::CurrentSettings.default_preferred_language
   end
@@ -1495,7 +1503,11 @@ class User < ApplicationRecord
   end
 
   def can?(action, subject = :global, **opts)
-    Ability.allowed?(self, action, subject, **opts)
+    if ::Feature.enabled?(:api_composite_identity, self)
+      ::Gitlab::Auth::User.new(self).can?(action, subject, **opts)
+    else
+      Ability.allowed?(self, action, subject, **opts)
+    end
   end
 
   def confirm_deletion_with_password?

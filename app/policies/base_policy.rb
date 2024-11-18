@@ -102,7 +102,7 @@ class BasePolicy < DeclarativePolicy::Base
   private
 
   def user_is_user?
-    user.is_a?(User)
+    user.is_a?(User) || user.is_a?(::Gitlab::Auth::User)
   end
 end
 

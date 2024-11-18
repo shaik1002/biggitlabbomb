@@ -65,10 +65,29 @@ RSpec.describe Ci::AuthJobFinder, feature_category: :continuous_integration do
     end
 
     context 'when job is running', :request_store do
-      it 'sets ci_job_token_scope on the job user', :aggregate_failures do
-        expect(subject).to eq(job)
-        expect(subject.user).to be_from_ci_job_token
-        expect(subject.user.ci_job_token_scope.current_project).to eq(job.project)
+      context 'when api_composite_identity feature flag is disabled' do
+        it 'sets ci_job_token_scope on the job user', :aggregate_failures do
+          expect(subject).to eq(job)
+          expect(subject.user).to be_from_ci_job_token
+          expect(subject.user.ci_job_token_scope.current_project).to eq(job.project)
+        end
+      end
+
+      context 'when the token has a composite scope' do
+        let_it_be(:job, reload: true) do
+          create(
+            :ci_build,
+            status: :running,
+            user: user,
+            token: create(:oauth_access_token, user: user, scopes: [:api, "user:#{another_user.id}"])
+          )
+        end
+
+        it 'sets ci_job_token_scope on the scoped user', :aggregate_failures do
+          expect(subject).to eq(job)
+          expect(subject.user).to be_from_ci_job_token
+          expect(subject.user.ci_job_token_scope.current_project).to eq(job.project)
+        end
       end
 
       it 'logs context data about the job' do

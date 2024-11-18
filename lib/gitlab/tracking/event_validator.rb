@@ -33,7 +33,7 @@ module Gitlab
       attr_reader :event_name, :additional_properties, :kwargs
 
       def validate_properties!
-        validate_property!(kwargs, :user, User)
+        validate_property!(kwargs, :user, User, Gitlab::Auth::User)
         validate_property!(kwargs, :namespace, Namespaces::UserNamespace, Group)
         validate_property!(kwargs, :project, Project)
       end

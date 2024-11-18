@@ -3217,7 +3217,9 @@ CREATE TABLE p_ci_builds (
     user_id bigint,
     execution_config_id bigint,
     upstream_pipeline_partition_id bigint,
+    token_scope text,
     CONSTRAINT check_1e2fbd1b39 CHECK ((lock_version IS NOT NULL)),
+    CONSTRAINT check_317a88dd6e CHECK ((char_length(token_scope) <= 255)),
     CONSTRAINT check_9aa9432137 CHECK ((project_id IS NOT NULL))
 )
 PARTITION BY LIST (partition_id);
@@ -8715,7 +8717,9 @@ CREATE TABLE ci_builds (
     user_id bigint,
     execution_config_id bigint,
     upstream_pipeline_partition_id bigint,
+    token_scope text,
     CONSTRAINT check_1e2fbd1b39 CHECK ((lock_version IS NOT NULL)),
+    CONSTRAINT check_317a88dd6e CHECK ((char_length(token_scope) <= 255)),
     CONSTRAINT check_9aa9432137 CHECK ((project_id IS NOT NULL))
 );
 

@@ -856,6 +856,35 @@ RSpec.describe API::Ci::Pipelines, feature_category: :continuous_integration do
         expect(json_response).not_to be_an Array
       end
     end
+
+    context 'when composite token is used' do
+      let(:service_account) { create(:user) }
+      let(:user)  { create(:user) }
+      let(:token) { create(:oauth_access_token, user: service_account, scopes: ["api", "user:#{user.id}"]) }
+
+      before do
+        stub_ci_pipeline_to_return_yaml_file
+        project.add_developer(service_account)
+        project.add_developer(user)
+      end
+
+      it 'adds the composite scope to the CI builds record', :aggregate_failures do
+        expect do
+          post api("/projects/#{project.id}/pipeline", oauth_access_token: token), params: { ref: project.default_branch }
+        end.to change { project.ci_pipelines.count }.by(1)
+
+        expect(response).to have_gitlab_http_status(:created)
+
+        pipeline_id = json_response['id']
+        pipeline = Ci::Pipeline.find(pipeline_id)
+        expect(pipeline.builds.count).to eq 5
+
+        pipeline.builds.each do |pipeline|
+          expect(pipeline.user).to eq(service_account)
+          expect(pipeline.token_scope).to eq("api user:#{user.id}")
+        end
+      end
+    end
   end
 
   describe 'GET /projects/:id/pipelines/:pipeline_id' do

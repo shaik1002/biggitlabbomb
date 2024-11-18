@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module SnowplowHelpers
+  include CompositeIdentityHelpers
+
   # Asserts call for one snowplow event from `Gitlab::Tracking#event`.
   #
   # @param [Hash]
@@ -60,7 +62,9 @@ module SnowplowHelpers
       end
     end
 
-    expect(Gitlab::Tracking).to have_received(tracking_method)
+    kwargs[:user] = build_identity(kwargs[:user]) if kwargs[:user]
+
+    expect(Gitlab::Tracking).to have_received(tracking_method) # rubocop:disable RSpec/ExpectGitlabTracking -- Some reason
       .with(category, action, **kwargs).at_least(:once)
   end
 
