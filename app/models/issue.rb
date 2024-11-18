@@ -306,7 +306,7 @@ class Issue < ApplicationRecord
 
       next if args.empty?
 
-      next unless args.first.is_a?(User)
+      next unless args.first.is_a?(::Gitlab::Auth::User)
 
       issue.closed_by = args.first
     end

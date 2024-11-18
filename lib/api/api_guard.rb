@@ -83,7 +83,7 @@ module API
       private
 
       def bypass_session_for_admin_mode?(user)
-        return false unless user.is_a?(User) && Gitlab::CurrentSettings.admin_mode
+        return false unless user.is_a?(::Gitlab::Auth::User) && Gitlab::CurrentSettings.admin_mode
 
         Gitlab::Session.with_session(current_request.session) { Gitlab::Auth::CurrentUserMode.new(user).admin_mode? } ||
           Gitlab::Auth::RequestAuthenticator.new(current_request).valid_access_token?(scopes: [:admin_mode])

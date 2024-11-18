@@ -76,7 +76,7 @@ module Packages
       end
 
       def current_package_protected?
-        unless current_user.is_a?(User)
+        unless current_user.is_a?(::Gitlab::Auth::User)
           return project.package_protection_rules.for_package_type(:npm).for_package_name(name).exists?
         end
 

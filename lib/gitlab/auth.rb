@@ -117,7 +117,7 @@ module Gitlab
         return unless authenticate_using_internal_or_ldap_password?
 
         Gitlab::Auth::UniqueIpsLimiter.limit_user! do
-          user = User.find_by_login(login)
+          user = ::User.find_by_login(login)
 
           break if user && !user.can_log_in_with_non_expired_password?
 
@@ -146,7 +146,7 @@ module Gitlab
 
           user_auth_attempt!(user, success: !!authenticated_user) if increment_failed_attempts
 
-          authenticated_user
+          ::Gitlab::Auth::User.fabricate(authenticated_user)
         end
       end
 
@@ -185,7 +185,7 @@ module Gitlab
       end
 
       def look_to_limit_user(actor)
-        Gitlab::Auth::UniqueIpsLimiter.limit_user!(actor) if actor.is_a?(User)
+        Gitlab::Auth::UniqueIpsLimiter.limit_user!(actor) if actor.is_a?(::Gitlab::Auth::User)
       end
 
       def authenticate_using_internal_or_ldap_password?
@@ -229,7 +229,7 @@ module Gitlab
           token = Doorkeeper::AccessToken.by_token(password)
 
           if valid_oauth_token?(token)
-            user = User.id_in(token.resource_owner_id).first
+            user = ::Gitlab::Auth::User.fabricate(::User.id_in(token.resource_owner_id).first)
             return unless user && user.can_log_in_with_non_expired_password?
 
             Gitlab::Auth::Result.new(user, nil, :oauth, abilities_for_scopes(token.scopes))
@@ -323,7 +323,7 @@ module Gitlab
           if deploy_key_matches
             DeployKey.find(deploy_key_matches[1])
           else
-            User.find_by_login(login)
+            ::User.find_by_login(login)
           end
 
         return unless actor
@@ -435,7 +435,7 @@ module Gitlab
 
       def available_scopes_for_resource(resource)
         case resource
-        when User
+        when ::Gitlab::Auth::User
           scopes = non_admin_available_scopes
 
           if resource.admin? # rubocop: disable Cop/UserAdmin

@@ -63,7 +63,7 @@ module Gitlab
     end
 
     def allowed_actor?
-      actor.is_a?(User) || actor.instance_of?(Key)
+      actor.is_a?(::Gitlab::Auth::User) || actor.instance_of?(Key)
     end
 
     override :check_push_access!

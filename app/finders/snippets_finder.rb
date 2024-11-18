@@ -221,7 +221,7 @@ class SnippetsFinder < UnionFinder
     strong_memoize(:author) do
       next unless params[:author].present?
 
-      params[:author].is_a?(User) ? params[:author] : User.find_by_id(params[:author])
+      params[:author].is_a?(::Gitlab::Auth::User) ? params[:author] : User.find_by_id(params[:author])
     end
   end
 

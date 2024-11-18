@@ -17,7 +17,7 @@ module Packages
 
       return unless INTERNAL_EVENTS_NAMES.key?(event_name)
 
-      user = current_user if current_user.is_a?(User)
+      user = current_user if current_user.is_a?(::Gitlab::Auth::User)
 
       Gitlab::InternalEvents.track_event(
         INTERNAL_EVENTS_NAMES[event_name],
@@ -33,7 +33,7 @@ module Packages
 
     def originator_type
       case current_user
-      when User
+      when ::Gitlab::Auth::User
         :user
       when DeployToken
         :deploy_token

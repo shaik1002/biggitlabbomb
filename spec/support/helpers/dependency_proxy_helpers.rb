@@ -37,7 +37,7 @@ module DependencyProxyHelpers
       if block_given?
         yield(jwt)
       else
-        jwt['user_id'] = user_or_token.id if user_or_token.is_a?(User)
+        jwt['user_id'] = user_or_token.id if user_or_token.is_a?(::Gitlab::Auth::User)
         jwt['personal_access_token'] = user_or_token.token if user_or_token.is_a?(PersonalAccessToken)
         jwt['deploy_token'] = user_or_token.token if user_or_token.is_a?(DeployToken)
         jwt.expire_time = expire_time || (jwt.issued_at + 1.minute)

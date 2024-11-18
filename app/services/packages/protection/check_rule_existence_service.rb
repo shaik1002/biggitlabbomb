@@ -14,7 +14,7 @@ module Packages
         return ERROR_RESPONSE_INVALID_PACKAGE_TYPE unless package_type_allowed?
         return ERROR_RESPONSE_UNAUTHORIZED unless current_user_can_create_package?
 
-        return service_response_for(check_rule_exists_for_user) if current_user.is_a?(User)
+        return service_response_for(check_rule_exists_for_user) if current_user.is_a?(::Gitlab::Auth::User)
         return service_response_for(check_rule_exists_for_deploy_token) if current_user.is_a?(DeployToken)
 
         raise ArgumentError, "Invalid user"

@@ -6,7 +6,7 @@ module Gitlab
       attr_reader :actor, :project, :type, :authentication_abilities
 
       def initialize(actor, project, type, authentication_abilities)
-        @actor = actor
+        @actor = ::Gitlab::Auth::User.fabricate(actor)
         @project = project
         @type = type
         @authentication_abilities = authentication_abilities
@@ -34,7 +34,7 @@ module Gitlab
       end
 
       def auth_user
-        actor.is_a?(User) ? actor : nil
+        actor if actor.is_a?(::Gitlab::Auth::User)
       end
       alias_method :user, :auth_user
 

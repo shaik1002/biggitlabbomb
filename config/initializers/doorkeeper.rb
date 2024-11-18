@@ -29,7 +29,9 @@ Doorkeeper.configure do
     next if user.password_automatically_set? && !user.password_based_omniauth_user?
     next if user.two_factor_enabled? || Gitlab::Auth::TwoFactorAuthVerifier.new(user).two_factor_authentication_enforced?
 
-    Gitlab::Auth.find_with_user_password(params[:username], params[:password], increment_failed_attempts: true)
+    ::Gitlab::Auth::User.fabricate(
+      Gitlab::Auth.find_with_user_password(params[:username], params[:password], increment_failed_attempts: true)
+    )
   end
 
   # If you want to restrict access to the web interface for adding oauth authorized applications, you need to declare the block below.

@@ -78,7 +78,7 @@ RSpec.shared_examples Repositories::GitHttpController do
           get :info_refs, params: params
 
           user_log_data = { 'username' => user.username, 'user_id' => user.id }
-          user_log_data['meta.user'] = user.username if user.is_a?(User)
+          user_log_data['meta.user'] = user.username if user.is_a?(::Gitlab::Auth::User)
 
           expect(log_data).to include(user_log_data)
         end

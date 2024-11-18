@@ -52,7 +52,7 @@ module AuditEvents
     def base_details_payload
       @additional_details.merge({
         author_name: @author.name,
-        author_class: @author.class.name,
+        author_class: author_class.name,
         target_id: @target.id,
         target_type: @target.type,
         target_details: @target_details || @target.details,
@@ -65,6 +65,14 @@ module AuditEvents
       author.id = -3 if author.instance_of? DeployKey
 
       author
+    end
+
+    def author_class
+      if @author.is_a?(::Gitlab::Auth::User)
+        @author.identity_type
+      else
+        @author.class
+      end
     end
 
     def build_target(target)

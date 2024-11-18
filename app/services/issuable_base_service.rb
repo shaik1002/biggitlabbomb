@@ -304,7 +304,7 @@ class IssuableBaseService < ::BaseContainerService
         # this method at this point to capture all possible changes.
         should_touch = update_timestamp?(issuable)
 
-        issuable.updated_by = current_user if should_touch
+        issuable.updated_by = current_user.to_user if should_touch
 
         transaction_update(issuable, { save_with_touch: should_touch })
       end

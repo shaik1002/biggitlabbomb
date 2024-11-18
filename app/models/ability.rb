@@ -71,6 +71,10 @@ class Ability
     end
 
     def allowed?(user, ability, subject = :global, **opts)
+      if user.is_a?(::Gitlab::Auth::Identity) ## TODO fix it
+        user = user.identity
+      end
+
       if subject.is_a?(Hash)
         opts = subject
         subject = :global

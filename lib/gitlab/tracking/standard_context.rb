@@ -12,7 +12,7 @@ module Gitlab
         check_argument_type(:namespace_id, namespace_id, [Integer])
         check_argument_type(:plan_name, plan_name, [String])
         check_argument_type(:project_id, project_id, [Integer])
-        check_argument_type(:user, user, [User, DeployToken])
+        check_argument_type(:user, user, [::Gitlab::Auth::User, DeployToken])
 
         @namespace_id = namespace_id
         @plan_name = plan_name
@@ -76,7 +76,7 @@ module Gitlab
       end
 
       def global_user_id
-        return unless user.is_a? User
+        return unless user.is_a?(::Gitlab::Auth::User)
 
         Gitlab::GlobalAnonymousId.user_id(user)
       end

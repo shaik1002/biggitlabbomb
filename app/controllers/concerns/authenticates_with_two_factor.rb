@@ -54,7 +54,7 @@ module AuthenticatesWithTwoFactor
   rescue ActiveRecord::RecordInvalid => e
     # We expect User to always be valid.
     # Otherwise, raise internal server error instead of unprocessable entity to improve observability/alerting
-    if e.record.is_a?(User)
+    if e.record.is_a?(::Gitlab::Auth::User)
       raise e.message
     else
       raise e

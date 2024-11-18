@@ -162,7 +162,7 @@ module Gitlab
       end
 
       def author_if_user
-        @author if @author.is_a?(User)
+        @author if @author.is_a?(::Gitlab::Auth::User)
       end
 
       def send_to_stream(events)

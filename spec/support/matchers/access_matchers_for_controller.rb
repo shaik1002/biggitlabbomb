@@ -23,7 +23,7 @@ module AccessMatchersForController
       sign_in(user)
     when :visitor
       user = nil
-    when User
+    when ::Gitlab::Auth::User
       user = role
       sign_in(user)
     when *Gitlab::Access.sym_options_with_owner.keys # owner, maintainer, developer, reporter, guest

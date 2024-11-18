@@ -1,1 +1,1 @@
-<%= render partial: "confirmation_instructions_#{@resource.is_a?(User) ? 'account' : 'secondary'}" %>
+<%= render partial: "confirmation_instructions_#{@resource.is_a?(::Gitlab::Auth::User) ? 'account' : 'secondary'}" %>

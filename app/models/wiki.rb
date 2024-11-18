@@ -143,7 +143,7 @@ class Wiki
   end
 
   def initialize(container, user = nil)
-    raise ArgumentError, "user must be a User, got #{user.class}" if user && !user.is_a?(User)
+    raise ArgumentError, "user must be a User, got #{user.class}" if user && !user.is_a?(::Gitlab::Auth::User)
 
     @container = container
     @user = user

@@ -22,7 +22,7 @@ module Groups
           user_or_token = ::DependencyProxy::AuthTokenService.user_or_token_from_jwt(token)
 
           case user_or_token
-          when User
+          when ::Gitlab::Auth::User
             set_auth_result(user_or_token, :user)
             sign_in(user_or_token) if can_sign_in?(user_or_token)
           when PersonalAccessToken

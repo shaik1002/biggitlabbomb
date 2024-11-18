@@ -12,7 +12,7 @@ module DependencyProxy
     private
 
     def auth_user_or_token
-      if defined?(personal_access_token) && personal_access_token && auth_user.is_a?(::User) &&
+      if defined?(personal_access_token) && personal_access_token && auth_user.is_a?(::Gitlab::Auth::User) &&
           (
             (auth_user.project_bot? && auth_user.resource_bot_resource.is_a?(::Group)) ||
             auth_user.human? ||

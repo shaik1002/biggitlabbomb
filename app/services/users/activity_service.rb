@@ -11,7 +11,7 @@ module Users
                 author.user
               end
 
-      @user = nil unless user.is_a?(User)
+      @user = nil unless user.is_a?(::Gitlab::Auth::User)
       @namespace = namespace
       @project = project
     end

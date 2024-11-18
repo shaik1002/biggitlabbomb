@@ -46,7 +46,7 @@ module Packages
     end
 
     def package_creator
-      current_user if current_user.is_a?(User)
+      current_user if current_user.is_a?(::Gitlab::Auth::User)
     end
 
     def add_build_info(package)

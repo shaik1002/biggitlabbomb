@@ -57,7 +57,7 @@ module EmailHelpers
   end
 
   def find_email_for(user_or_email)
-    to = user_or_email.is_a?(User) ? user_or_email.notification_email_or_default : user_or_email
+    to = user_or_email.is_a?(::Gitlab::Auth::User) ? user_or_email.notification_email_or_default : user_or_email
     ActionMailer::Base.deliveries.find { |d| d.to.include?(to) }
   end
 

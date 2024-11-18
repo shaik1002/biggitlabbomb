@@ -38,7 +38,7 @@ module LoginHelpers
   #   gitlab_sign_in(user)
   def gitlab_sign_in(user_or_role, **kwargs)
     user =
-      if user_or_role.is_a?(User)
+      if user_or_role.is_a?(::Gitlab::Auth::User)
         user_or_role
       else
         create(user_or_role) # rubocop:disable Rails/SaveBang

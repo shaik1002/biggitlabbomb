@@ -10,7 +10,7 @@ module BulkImports
     end
 
     def cache_user_contributions_on_record(record)
-      return if !record || record.is_a?(User)
+      return if !record || record.is_a?(::Gitlab::Auth::User)
 
       user_references = record.attribute_names & ::Gitlab::ImportExport::Base::RelationFactory::USER_REFERENCES
       return if user_references.empty?

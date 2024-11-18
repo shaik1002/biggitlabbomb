@@ -315,7 +315,7 @@ module Gitlab
       def scoped_user_in_allowlist?(scope, users_allowlist)
         return unless users_allowlist.present?
 
-        scoped_user = [scope].flatten.find { |s| s.is_a?(User) }
+        scoped_user = [scope].flatten.find { |s| s.is_a?(::Gitlab::Auth::User) }
         return unless scoped_user
 
         scoped_user.username.downcase.in?(users_allowlist)

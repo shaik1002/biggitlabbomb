@@ -17,7 +17,7 @@ module AccessMatchers
       login_as(create(:user, user_type_or_trait))
     when :visitor
       logout
-    when User
+    when ::Gitlab::Auth::User
       login_as(user_type_or_trait)
     when *Gitlab::Access.sym_options_with_owner.keys
       raise ArgumentError, "cannot emulate #{user_type_or_trait} without membership parent" unless membership
@@ -39,7 +39,7 @@ module AccessMatchers
   end
 
   def description_for(user, type)
-    if user.is_a?(User)
+    if user.is_a?(::Gitlab::Auth::User)
       # User#inspect displays too much information for RSpec's descriptions
       "be #{type} for the specified user"
     else

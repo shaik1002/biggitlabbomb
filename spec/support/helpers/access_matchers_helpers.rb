@@ -17,7 +17,7 @@ module AccessMatchersHelpers
       create(:user, :external)
     when :visitor, :anonymous
       nil
-    when User
+    when ::Gitlab::Auth::User
       role
     when *Gitlab::Access.sym_options_with_owner.keys # owner, maintainer, developer, reporter, guest
       raise ArgumentError, "cannot provide #{role} when membership reference is blank" unless membership

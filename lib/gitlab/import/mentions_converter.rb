@@ -32,7 +32,7 @@ module Gitlab
         mentions.each do |mention|
           user = user_from_cache(mention)
           replacement_mention =
-            if user.is_a?(User)
+            if user.is_a?(::Gitlab::Auth::User)
               "#{MENTION_PLACEHOLDER}#{user.username}"
             elsif user
               "`#{MENTION_PLACEHOLDER}#{user}`"

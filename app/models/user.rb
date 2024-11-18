@@ -24,6 +24,7 @@ class User < ApplicationRecord
   include BatchNullifyDependentAssociations
   include UpdateHighestRole
   include HasUserType
+  include Gitlab::Auth::User
   include Gitlab::Auth::Otp::Fortinet
   include Gitlab::Auth::Otp::DuoAuth
   include RestrictedSignup
@@ -688,6 +689,17 @@ class User < ApplicationRecord
   end
 
   strip_attributes! :name
+
+  ##
+  # TODO improve this
+  #
+  def ==(other)
+    if other.is_a?(::Gitlab::Auth::Identity)
+      self == other.user && other.scope.nil?
+    else
+      super
+    end
+  end
 
   def preferred_language
     read_attribute('preferred_language').presence || Gitlab::CurrentSettings.default_preferred_language
@@ -1495,7 +1507,8 @@ class User < ApplicationRecord
   end
 
   def can?(action, subject = :global, **opts)
-    Ability.allowed?(self, action, subject, **opts)
+    ::Gitlab::Auth::Identity.new(self) # TODO
+      .can?(action, subject, **opts)
   end
 
   def confirm_deletion_with_password?

@@ -10,7 +10,7 @@ module Gitlab
       user_id = user&.id
 
       return UNKNOWN_ID unless user_id
-      raise ArgumentError, 'must pass a user instance' unless user.is_a?(User)
+      raise ArgumentError, 'must pass a user instance' unless user.is_a?(::Gitlab::Auth::User)
 
       Gitlab::CryptoHelper.sha256("#{instance_id}#{user_id}")
     end

@@ -98,7 +98,7 @@ class EventsFinder
   # rubocop: enable CodeReuse/ActiveRecord
 
   def cannot_access_private_profile?
-    source.is_a?(User) && !Ability.allowed?(current_user, :read_user_profile, source)
+    source.is_a?(::Gitlab::Auth::User) && !Ability.allowed?(current_user, :read_user_profile, source)
   end
 
   def sort(events)

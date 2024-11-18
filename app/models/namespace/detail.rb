@@ -20,7 +20,7 @@ class Namespace::Detail < ApplicationRecord
   #
   # See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/82958/diffs#diff-content-c02244956d423e6837379548e5f9b1fa093bb289
   def add_creator(user)
-    update_attribute(:creator, user)
+    update_attribute(:creator, user.identity)
   end
 end
 # rubocop:enable Gitlab/BoundedContexts

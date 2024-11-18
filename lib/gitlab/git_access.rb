@@ -469,7 +469,7 @@ module Gitlab
     def user
       strong_memoize(:user) do
         case actor
-        when User
+        when ::Gitlab::Auth::User
           actor
         when DeployKey
           nil

@@ -40,7 +40,7 @@ class AwardEmojisFinder
     return unless params[:awarded_by]
 
     # awarded_by can be a `User`, or an ID
-    unless params[:awarded_by].is_a?(User) || params[:awarded_by].to_s.match(/\A\d+\Z/)
+    unless params[:awarded_by].is_a?(::Gitlab::Auth::User) || params[:awarded_by].to_s.match(/\A\d+\Z/)
       raise ArgumentError, 'Invalid awarded_by param'
     end
   end

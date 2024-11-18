@@ -298,7 +298,7 @@ module SidebarsHelper
       sidebar_project_attributes
     when Group
       sidebar_group_attributes
-    when User
+    when ::Gitlab::Auth::User
       sidebar_user_attributes
     else
       {}

@@ -50,7 +50,7 @@ class UploadsController < ApplicationController
       can?(current_user, :read_project, model.project)
     when Snippet, ProjectSnippet
       can?(current_user, :read_snippet, model)
-    when User
+    when ::Gitlab::Auth::User
       # We validate the current user has enough (writing)
       # access to itself when a secret is given.
       # For instance, user avatars are readable by anyone,

@@ -67,12 +67,12 @@ RSpec.describe Gitlab::Auth::Result do
 
   describe '#can?' do
     it 'returns if actor can do perform given action on given project' do
-      expect(actor).to receive(:can?).with(:push_code).and_return(true)
+      expect(subject.actor).to receive(:can?).with(:push_code).and_return(true)
       expect(subject.can?(:push_code)).to be_truthy
     end
 
     it 'returns if actor cannot do perform given action on given project' do
-      expect(actor).to receive(:can?).with(:push_code).and_return(false)
+      expect(subject.actor).to receive(:can?).with(:push_code).and_return(false)
       expect(subject.can?(:push_code)).to be_falsey
     end
   end

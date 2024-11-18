@@ -4,7 +4,7 @@ module Gitlab
   class LfsToken
     module LfsTokenHelper
       def user?
-        actor.is_a?(User)
+        actor.is_a?(::Gitlab::Auth::User)
       end
 
       def actor_name
@@ -25,7 +25,7 @@ module Gitlab
     def initialize(actor, container)
       @actor =
         case actor
-        when DeployKey, User
+        when ::Gitlab::Auth::User, DeployKey
           actor
         when Key
           actor.user
@@ -116,7 +116,7 @@ module Gitlab
         when DeployKey, Key
           # Since fingerprint is based on the public key, let's take more bytes from attr_encrypted_db_key_base
           actor.fingerprint_sha256.first(16) + Settings.attr_encrypted_db_key_base_32
-        when User
+        when ::Gitlab::Auth::User
           # Take the last 16 characters as they're more unique than the first 16
           actor.id.to_s + actor.encrypted_password.last(16) + Settings.attr_encrypted_db_key_base.first(16)
         end
