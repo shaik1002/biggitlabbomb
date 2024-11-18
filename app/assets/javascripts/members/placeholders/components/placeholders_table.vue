@@ -193,7 +193,13 @@ export default {
 
 <template>
   <div>
-    <gl-table :items="nodes" :fields="fields" :busy="isLoading" show-empty>
+    <gl-table
+      :items="nodes"
+      :fields="fields"
+      :busy="isLoading"
+      show-empty
+      :tbody-tr-attr="(item) => ({ 'data-testid': item.placeholderUser.username })"
+    >
       <template #table-busy>
         <gl-loading-icon size="lg" class="gl-my-5" />
       </template>
@@ -229,6 +235,7 @@ export default {
           v-if="statusBadge(item)"
           v-gl-tooltip="statusBadge(item).tooltip"
           :variant="statusBadge(item).variant"
+          :data-testid="placeholder-status"
           tabindex="0"
           >{{ statusBadge(item).text }}</gl-badge
         >
@@ -242,6 +249,7 @@ export default {
             :src="reassignedUser(item).avatarUrl"
             :label="reassignedUser(item).name"
             :sub-label="`@${reassignedUser(item).username}`"
+            :data-testid="placeholder-reassigned"
           />
         </template>
         <placeholder-actions v-else :key="item.id" :source-user="item" @confirm="onConfirm(item)" />

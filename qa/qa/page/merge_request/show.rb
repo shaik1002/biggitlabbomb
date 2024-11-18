@@ -286,6 +286,12 @@ module QA
           has_element?('title-content', text: title)
         end
 
+        def has_author?(author_username)
+          within_element('author-link') do
+            has_text?(author_username)
+          end
+        end
+
         def has_description?(description)
           has_element?('description-content', text: description)
         end
