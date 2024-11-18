@@ -76,4 +76,21 @@ RSpec.describe Gitlab::I18n, feature_category: :internationalization do
       expect(described_class.trimmed_language_name('_invalid_code_')).to be_nil
     end
   end
+
+  describe '.percentage_translated_for' do
+    context 'when content is read from the external translations data file' do
+      it 'reads the information file and processes it correctly', :aggregate_failures do
+        stub_const("#{described_class.name}::TRANSLATION_INFO_FILE_PATH", 'spec/fixtures/i18n/translation_info.yml')
+
+        # these have values in the file
+        expect(described_class.percentage_translated_for('en')).to eq(100)
+        expect(described_class.percentage_translated_for('es')).to eq(15)
+        expect(described_class.percentage_translated_for('pt_BR')).to eq(70)
+
+        # these do not have values in the file
+        expect(described_class.percentage_translated_for('a_non_existing_language')).to eq(0)
+        expect(described_class.percentage_translated_for('another_non_existing_language')).to eq(0)
+      end
+    end
+  end
 end

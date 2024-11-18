@@ -1,0 +1,54 @@
+# Currently monthly updated manually by ~group::import PM.
+# https://gitlab.com/gitlab-org/gitlab/-/issues/18923
+bg:
+  translation_level: 0
+cs_CZ:
+  translation_level: 0
+da_DK:
+  translation_level: 21
+de:
+  translation_level: 95
+en:
+  translation_level: 100
+eo:
+  translation_level: 0
+es:
+  translation_level: 33
+fil_PH:
+  translation_level: 0
+fr:
+  translation_level: 95
+gl_ES:
+  translation_level: 0
+id_ID:
+  translation_level: 0
+it:
+  translation_level: 83
+ja:
+  translation_level: 92
+ko:
+  translation_level: 20
+nb_NO:
+  translation_level: 15
+nl_NL:
+  translation_level: 0
+pl_PL:
+  translation_level: 2
+pt_BR:
+  translation_level: 90
+ro_RO:
+  translation_level: 53
+ru:
+  translation_level: 16
+si_LK:
+  translation_level: 10
+tr_TR:
+  translation_level: 6
+uk:
+  translation_level: 40
+zh_CN:
+  translation_level: 94
+zh_HK:
+  translation_level: 1
+zh_TW:
+  translation_level: 89

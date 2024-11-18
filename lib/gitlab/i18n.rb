@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
+require 'yaml'
+
 module Gitlab
   module I18n
+    include Gitlab::Utils::StrongMemoize
     extend self
 
     AVAILABLE_LANGUAGES = {
@@ -39,37 +42,11 @@ module Gitlab
     # https://gitlab.com/gitlab-org/gitlab/-/issues/221012
     MINIMUM_TRANSLATION_LEVEL = 2
 
-    # Currently monthly updated manually by ~group::import PM.
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/18923
-    TRANSLATION_LEVELS = {
-      'bg' => 0,
-      'cs_CZ' => 0,
-      'da_DK' => 21,
-      'de' => 95,
-      'en' => 100,
-      'eo' => 0,
-      'es' => 33,
-      'fil_PH' => 0,
-      'fr' => 95,
-      'gl_ES' => 0,
-      'id_ID' => 0,
-      'it' => 83,
-      'ja' => 92,
-      'ko' => 20,
-      'nb_NO' => 15,
-      'nl_NL' => 0,
-      'pl_PL' => 2,
-      'pt_BR' => 90,
-      'ro_RO' => 53,
-      'ru' => 16,
-      'si_LK' => 10,
-      'tr_TR' => 6,
-      'uk' => 40,
-      'zh_CN' => 94,
-      'zh_HK' => 1,
-      'zh_TW' => 89
-    }.freeze
-    private_constant :TRANSLATION_LEVELS
+    TRANSLATION_INFO_FILE_PATH = Rails.root.join('data/i18n/translation_info.yml')
+    private_constant :TRANSLATION_INFO_FILE_PATH
+
+    TRANSLATION_LEVEL_FIELD_NAME = 'translation_level'
+    private_constant :TRANSLATION_LEVEL_FIELD_NAME
 
     def selectable_locales(minimum_translation_level = MINIMUM_TRANSLATION_LEVEL)
       AVAILABLE_LANGUAGES.reject do |code, _name|
@@ -78,7 +55,7 @@ module Gitlab
     end
 
     def percentage_translated_for(code)
-      TRANSLATION_LEVELS.fetch(code, 0)
+      translation_levels.fetch(code, { TRANSLATION_LEVEL_FIELD_NAME => 0 })[TRANSLATION_LEVEL_FIELD_NAME]
     end
 
     def trimmed_language_name(code)
@@ -166,5 +143,10 @@ module Gitlab
       FastGettext.default_available_locales = available_locales
       ::I18n.available_locales = available_locales
     end
+
+    def translation_levels
+      YAML.load_file(TRANSLATION_INFO_FILE_PATH)
+    end
+    strong_memoize_attr :translation_levels
   end
 end
