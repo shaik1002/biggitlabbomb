@@ -181,6 +181,26 @@ RSpec.describe Ci::RunnersFinder, feature_category: :fleet_visibility do
             end
           end
 
+          context 'by owner' do
+            let_it_be(:admin_runner) { create(:ci_runner, :instance, creator: admin) }
+            let_it_be(:group) { create(:group) }
+            let_it_be(:group2) { create(:group) }
+            let_it_be(:group_runner) { create(:ci_runner, :group, groups: [group]) }
+            let_it_be(:group_runner2) { create(:ci_runner, :group, groups: [group2]) }
+
+            it 'calls corresponding scope and finds admin runner' do
+              expect(Ci::Runner).to receive(:created_by_admins).and_call_original
+              result = described_class.new(current_user: admin, params: { owner: { wildcard: :administrators } }).execute
+              expect(result).to contain_exactly admin_runner
+            end
+
+            it 'calls corresponding scope and finds group/project' do
+              expect(Ci::Runner).to receive(:belonging_to_group).and_call_original
+              result = described_class.new(current_user: admin, params: { owner: { full_path: group.name } }).execute
+              expect(result).to contain_exactly group_runner
+            end
+          end
+
           context 'by version' do
             it 'calls the corresponding scope on Ci::Runner' do
               expect(Ci::Runner).to receive(:with_version_prefix).with('15.').and_call_original

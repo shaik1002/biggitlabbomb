@@ -137,6 +137,10 @@ module Ci
       joins(:runner_namespaces).where(ci_runner_namespaces: { namespace_id: group_id })
     }
 
+    scope :created_by_admins, -> {
+      instance_type.with_creator_id(User.admins.ids).distinct
+    }
+
     scope :with_creator_id, ->(value) { where(creator_id: value) }
 
     scope :belonging_to_group_or_project_descendants, ->(group_id) {
